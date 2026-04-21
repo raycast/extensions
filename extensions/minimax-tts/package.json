@@ -1,0 +1,259 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "minimax-tts",
+  "title": "MiniMax TTS",
+  "description": "Read selected text aloud using MiniMax Speech 2.8 with Chinese, English, and cloned voices",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-read",
+      "title": "Quick Read Selected Text",
+      "subtitle": "MiniMax TTS",
+      "description": "Read selected text, or clipboard text if no selection is available. Trigger again to stop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "resume-reading",
+      "title": "Resume Last Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Resume the previous reading from the next unfinished chunk",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart-reading",
+      "title": "Restart Last Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Restart the previous reading from the beginning",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-with-voice",
+      "title": "Read with Voice Selection",
+      "subtitle": "MiniMax TTS",
+      "description": "Browse MiniMax voices and read selected text aloud",
+      "mode": "view"
+    },
+    {
+      "name": "select-voice",
+      "title": "Select Quick Read Voice",
+      "subtitle": "MiniMax TTS",
+      "description": "Choose and preview the voice used by Quick Read",
+      "mode": "view"
+    },
+    {
+      "name": "stop-reading",
+      "title": "Stop Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Stop the current TTS playback",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "MiniMax Token Plan or API key",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "required": false,
+      "title": "Region",
+      "description": "MiniMax API region",
+      "default": "cn",
+      "data": [
+        {
+          "title": "China (api.minimaxi.com)",
+          "value": "cn"
+        },
+        {
+          "title": "Global (api.minimax.io)",
+          "value": "global"
+        }
+      ]
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": false,
+      "title": "Model",
+      "description": "MiniMax speech model",
+      "default": "speech-2.8-hd",
+      "data": [
+        {
+          "title": "Speech 2.8 HD (Recommended)",
+          "value": "speech-2.8-hd"
+        },
+        {
+          "title": "Speech 2.8 Turbo",
+          "value": "speech-2.8-turbo"
+        },
+        {
+          "title": "Speech 2.6 HD",
+          "value": "speech-2.6-hd"
+        },
+        {
+          "title": "Speech 2.6 Turbo",
+          "value": "speech-2.6-turbo"
+        },
+        {
+          "title": "Speech 02 HD",
+          "value": "speech-02-hd"
+        },
+        {
+          "title": "Speech 02 Turbo",
+          "value": "speech-02-turbo"
+        }
+      ]
+    },
+    {
+      "name": "defaultVoice",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Voice",
+      "description": "Voice used for Quick Read command",
+      "default": "Chinese (Mandarin)_News_Anchor",
+      "data": [
+        {
+          "title": "News Anchor (Chinese Female)",
+          "value": "Chinese (Mandarin)_News_Anchor"
+        },
+        {
+          "title": "Warm Bestie (Chinese Female)",
+          "value": "Chinese (Mandarin)_Warm_Bestie"
+        },
+        {
+          "title": "Reliable Executive (Chinese Male)",
+          "value": "Chinese (Mandarin)_Reliable_Executive"
+        },
+        {
+          "title": "Male Announcer (Chinese Male)",
+          "value": "Chinese (Mandarin)_Male_Announcer"
+        },
+        {
+          "title": "Gentleman (Chinese Male)",
+          "value": "Chinese (Mandarin)_Gentleman"
+        },
+        {
+          "title": "Expressive Narrator (English)",
+          "value": "English_expressive_narrator"
+        },
+        {
+          "title": "Magnetic-voiced Man (English)",
+          "value": "English_magnetic_voiced_man"
+        },
+        {
+          "title": "Graceful Lady (English)",
+          "value": "English_Graceful_Lady"
+        }
+      ]
+    },
+    {
+      "name": "customDefaultVoice",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Default Voice ID",
+      "description": "Optional cloned or generated voice ID; overrides Default Voice",
+      "placeholder": "voice_id from MiniMax"
+    },
+    {
+      "name": "languageBoost",
+      "type": "dropdown",
+      "required": false,
+      "title": "Language Boost",
+      "description": "Language hint for speech synthesis",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "Cantonese",
+          "value": "Chinese,Yue"
+        },
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        }
+      ]
+    },
+    {
+      "name": "speechRate",
+      "type": "dropdown",
+      "required": false,
+      "title": "Speech Rate",
+      "description": "Playback speed for speech synthesis",
+      "default": "1",
+      "data": [
+        {
+          "title": "0.5x (Slow)",
+          "value": "0.5"
+        },
+        {
+          "title": "0.75x",
+          "value": "0.75"
+        },
+        {
+          "title": "1.0x (Normal)",
+          "value": "1"
+        },
+        {
+          "title": "1.25x",
+          "value": "1.25"
+        },
+        {
+          "title": "1.5x",
+          "value": "1.5"
+        },
+        {
+          "title": "2.0x (Fast)",
+          "value": "2"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
