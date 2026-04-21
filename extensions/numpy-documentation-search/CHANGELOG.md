@@ -10,7 +10,7 @@
 - Fall back to local documentation when remote inventory loading fails
 - Load inline documentation previews from a configured local docs directory when network access is unavailable
 
-## [1.2.3] - {PR_MERGE_DATE}
+## [1.2.3] - 2025-10-08
 
 ### Changed
 - Refresh README to focus on a concise Raycast user overview with key in-app features
