@@ -2,12 +2,7 @@ import { LaunchProps, Toast, getSelectedFinderItems, popToRoot, showToast } from
 
 import { importImage, parseKeywords } from "./lib/quickpic";
 
-type AddSelectedImageArguments = {
-  keywords: string;
-  title?: string;
-};
-
-export default async function Command(props: LaunchProps<{ arguments: AddSelectedImageArguments }>) {
+export default async function Command(props: LaunchProps<{ arguments: Arguments.AddSelectedImage }>) {
   const [selectedItem] = await getSelectedFinderItems();
 
   if (!selectedItem) {

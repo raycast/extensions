@@ -1,4 +1,6 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "include": ["src/**/*", "raycast-env.d.ts"],
   "compilerOptions": {
     "target": "ES2022",
     "module": "CommonJS",
@@ -9,6 +11,5 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
     "types": ["node"]
-  },
-  "include": ["src"]
+  }
 }

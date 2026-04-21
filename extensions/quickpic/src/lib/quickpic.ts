@@ -88,13 +88,18 @@ export async function importImage(input: ImportImageInput): Promise<QuickPicReso
     createdAt: new Date().toISOString(),
   };
 
-  const items = await readLibrary();
-  items.unshift({
-    ...item,
-    filePath: targetPath,
-  });
+  try {
+    const items = await readLibrary();
+    items.unshift({
+      ...item,
+      filePath: targetPath,
+    });
 
-  await writeLibrary(items);
+    await writeLibrary(items);
+  } catch (error) {
+    await fs.rm(targetPath, { force: true });
+    throw error;
+  }
 
   return {
     ...item,
