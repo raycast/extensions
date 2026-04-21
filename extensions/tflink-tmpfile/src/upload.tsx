@@ -1,20 +1,19 @@
-import { Clipboard, Detail, ActionPanel, Action, showToast, Toast, Icon } from "@raycast/api";
-import { useEffect, useState, useCallback, useRef } from "react";
-import fs from "fs";
+import { Action, ActionPanel, Clipboard, Detail, Icon, showToast, Toast } from "@raycast/api";
+import { useCallback, useEffect, useRef, useState } from "react";
+import fs from "fs/promises";
 import path from "path";
 import QRCode from "qrcode";
 
 const MAX_UPLOAD_SIZE_BYTES = 100 * 1024 * 1024;
 
-// Helper to sanitize filename
 const sanitizeFileName = (name: string): string => {
   return name
-    .replace(/[×x]/g, "x") // Replace multiplication sign with x
-    .replace(/[()[\]{}]/g, "") // Remove brackets
-    .replace(/\s+/g, "_") // Replace spaces with underscores
-    .replace(/[^a-zA-Z0-9._-]/g, "") // Remove unsafe characters
-    .replace(/_+/g, "_") // Collapse multiple underscores
-    .replace(/^_|_$/g, ""); // Trim underscores
+    .replace(/[×x]/g, "x")
+    .replace(/[()[\]{}]/g, "")
+    .replace(/\s+/g, "_")
+    .replace(/[^a-zA-Z0-9._-]/g, "")
+    .replace(/_+/g, "_")
+    .replace(/^_|_$/g, "");
 };
 
 export default function Command() {
@@ -27,10 +26,9 @@ export default function Command() {
   const [statusText, setStatusText] = useState("Initializing...");
   const [qrCodeData, setQrCodeData] = useState<string | null>(null);
 
-  // Timer ref
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const uploadControllerRef = useRef<AbortController | null>(null);
 
-  // Format bytes to human readable string
   const formatBytes = (bytes: number, decimals = 2) => {
     if (!+bytes) return "0 Bytes";
     const k = 1024;
@@ -56,7 +54,9 @@ export default function Command() {
   };
 
   const retryUpload = () => {
+    uploadControllerRef.current?.abort();
     const controller = new AbortController();
+    uploadControllerRef.current = controller;
     void uploadFromClipboard(controller.signal);
   };
 
@@ -79,45 +79,50 @@ export default function Command() {
       let sizeDisplay = "";
 
       if (clipboardContents.file) {
-        const filePath = decodeURIComponent(clipboardContents.file.replace("file://", ""));
-        if (fs.existsSync(filePath)) {
-          const stats = fs.statSync(filePath);
-          if (stats.isDirectory()) throw new Error("Directory upload not supported. Please zip it first.");
-          if (stats.size > MAX_UPLOAD_SIZE_BYTES) throw new Error("File exceeds 100MB limit.");
+        let filePath: string;
 
-          const originalName = path.basename(filePath);
-          let finalName = originalName;
-
-          // Read file buffer first to check magic bytes if needed
-          const fileBuffer = fs.readFileSync(filePath);
-
-          // Check if it's a temp image from clipboard (often has no extension or looks like "Image (UxV)")
-          const ext = path.extname(originalName);
-          const isTempImage = !ext || (originalName.startsWith("Image") && originalName.includes("("));
-
-          if (isTempImage && fileBuffer.length > 4) {
-            // Magic bytes check
-            if (fileBuffer[0] === 0x89 && fileBuffer[1] === 0x50 && fileBuffer[2] === 0x4e && fileBuffer[3] === 0x47) {
-              if (!finalName.toLowerCase().endsWith(".png")) finalName += ".png";
-            } else if (fileBuffer[0] === 0xff && fileBuffer[1] === 0xd8 && fileBuffer[2] === 0xff) {
-              if (!finalName.toLowerCase().endsWith(".jpg") && !finalName.toLowerCase().endsWith(".jpeg"))
-                finalName += ".jpg";
-            } else if (!ext) {
-              // Fallback for extensionless files that look like images
-              finalName += ".png";
-            }
-          }
-
-          finalName = sanitizeFileName(finalName);
-          name = finalName; // Update the name variable used for state
-
-          setFileName(name);
-          sizeDisplay = formatBytes(stats.size);
-          setFileSize(sizeDisplay);
-          setStatusText(`Uploading "${name}"...`); // Revert status text to normal to avoid confusion if it works
-
-          formData.append("file", new Blob([new Uint8Array(fileBuffer)]), name);
+        try {
+          filePath = decodeURIComponent(new URL(clipboardContents.file).pathname);
+        } catch {
+          filePath = clipboardContents.file;
         }
+
+        try {
+          await fs.access(filePath);
+        } catch {
+          throw new Error("The clipboard file no longer exists.");
+        }
+
+        const stats = await fs.stat(filePath);
+        if (stats.isDirectory()) throw new Error("Directory upload not supported. Please zip it first.");
+        if (stats.size > MAX_UPLOAD_SIZE_BYTES) throw new Error("File exceeds 100MB limit.");
+
+        const originalName = path.basename(filePath);
+        let finalName = originalName;
+        const fileBuffer = await fs.readFile(filePath);
+        const ext = path.extname(originalName);
+        const isTempImage = !ext || (originalName.startsWith("Image") && originalName.includes("("));
+
+        if (isTempImage && fileBuffer.length > 4) {
+          if (fileBuffer[0] === 0x89 && fileBuffer[1] === 0x50 && fileBuffer[2] === 0x4e && fileBuffer[3] === 0x47) {
+            if (!finalName.toLowerCase().endsWith(".png")) finalName += ".png";
+          } else if (fileBuffer[0] === 0xff && fileBuffer[1] === 0xd8 && fileBuffer[2] === 0xff) {
+            if (!finalName.toLowerCase().endsWith(".jpg") && !finalName.toLowerCase().endsWith(".jpeg")) {
+              finalName += ".jpg";
+            }
+          } else if (!ext) {
+            finalName += ".png";
+          }
+        }
+
+        name = sanitizeFileName(finalName) || "file";
+
+        setFileName(name);
+        sizeDisplay = formatBytes(stats.size);
+        setFileSize(sizeDisplay);
+        setStatusText(`Uploading "${name}"...`);
+
+        formData.append("file", new Blob([new Uint8Array(fileBuffer)]), name);
       } else if (clipboardContents.text && clipboardContents.text.trim() !== "") {
         name = `snippet_${new Date().getTime()}.txt`;
         setFileName(name);
@@ -134,7 +139,7 @@ export default function Command() {
       const response = await fetch("https://tmpfile.link/api/upload", {
         method: "POST",
         body: formData,
-        signal: signal, // Pass the abort signal to fetch
+        signal,
       });
 
       if (!response.ok) {
@@ -147,15 +152,13 @@ export default function Command() {
         downloadLinkEncoded?: string;
       };
 
-      if (signal?.aborted) return; // Last check before updating state
+      if (signal?.aborted) return;
 
-      // Use the server-provided encoded link if available, otherwise fallback to the raw link
       const finalLink = result.downloadLinkEncoded || result.downloadLink;
 
       setDownloadLink(finalLink);
       await Clipboard.copy(finalLink);
 
-      // Generate QR Code locally
       try {
         const qrDataUrl = await QRCode.toDataURL(finalLink, {
           width: 180,
@@ -173,13 +176,12 @@ export default function Command() {
       setStatusText("Successfully Uploaded!");
     } catch (err) {
       if (signal?.aborted || (err instanceof Error && err.name === "AbortError")) {
-        // Ignore abort errors
         return;
       }
       const msg = err instanceof Error ? err.message : String(err);
       setError(msg);
       setStatusText("Failed");
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Upload Failed",
         message: msg,
@@ -194,15 +196,16 @@ export default function Command() {
 
   useEffect(() => {
     const controller = new AbortController();
+    uploadControllerRef.current = controller;
     uploadFromClipboard(controller.signal);
 
     return () => {
       controller.abort();
-      stopTimer(); // Also ensure timer is stopped on unmount
+      uploadControllerRef.current = null;
+      stopTimer();
     };
   }, [uploadFromClipboard]);
 
-  // -- Markdown Generation --
   const getMarkdown = () => {
     if (error) {
       return `

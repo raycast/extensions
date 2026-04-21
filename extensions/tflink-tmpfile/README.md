@@ -1,4 +1,4 @@
-# Tflink Tmpfile for Raycast
+# Tflink Tmpfile
 
 Upload content from your clipboard to [tmpfile.link](https://tmpfile.link) anonymously and instantly.
 
