@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-21
 
 - Initial release of Tflink Tmpfile extension.
 - Added `upload` command to upload clipboard content (files/text) to tmpfile.link.
