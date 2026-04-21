@@ -1,5 +1,11 @@
 # Raindrop.io Extension Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Focus the Collection field first in the bookmark form.
+- Close the Add Bookmark command after a successful save while keeping the window open on errors.
+- Unify last used collection storage and migrate the legacy key.
+
 ## [Fixes] - 2026-03-31
 
 - Fix loading collections in the Save Browser Tab form by building the dropdown options directly from the collections API response.

@@ -1,8 +1,7 @@
+import { LocalStorage } from "@raycast/api";
+
 export const LAST_USED_COLLECTION_KEY = "last-used-collection";
 const LEGACY_LAST_USED_COLLECTION_KEY = "lastUsedCollection";
-
-
-import { LocalStorage } from "@raycast/api";
 
 export function useLastUsedCollection() {
   const getLastUsedCollection = async () => {
