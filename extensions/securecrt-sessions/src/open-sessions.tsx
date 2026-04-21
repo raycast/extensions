@@ -14,12 +14,6 @@ import { useCallback, useEffect, useState } from "react";
 import { openSession } from "./securecrt";
 import { loadSessions, readSessionMetadata, type Session } from "./sessions";
 
-type Preferences = {
-    securecrtConfigPath?: string;
-    securecrtExecutablePath?: string;
-    showHostnames?: boolean;
-};
-
 export default function Command() {
     const preferences = getPreferenceValues<Preferences>();
     const showMetadata = preferences.showHostnames ?? true;
