@@ -1,6 +1,6 @@
 # WinGet Changelog
 
-## [Reliability & Details Improvements] - {PR_MERGE_DATE}
+## [Reliability & Details Improvements] - 2026-04-21
 
 - Improve install and upgrade reliability by respecting winget exit codes (no false success toasts)
 - Show clear feedback for no-op installs (already installed / no newer version available)
