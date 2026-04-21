@@ -368,7 +368,7 @@ function AddDeckForm({ onAdd }: { onAdd: (deck: SavedDeck) => void }) {
         const parsed = parseDeckUrl(trimmed);
         if (!parsed) {
           toast.hide();
-          setUrlError("Enter a valid Archidekt URL (archidekt.com/decks/…)");
+          setUrlError("Enter a valid Archidekt or Moxfield URL (archidekt.com/decks/… or moxfield.com/decks/…)");
           return;
         }
         const fetcher = parsed.source === "moxfield" ? fetchMoxfieldDeck : fetchArchidektDeck;
@@ -427,14 +427,14 @@ function AddDeckForm({ onAdd }: { onAdd: (deck: SavedDeck) => void }) {
       }
     >
       <Form.Dropdown id="mode" title="Import From" value={mode} onChange={(v) => setMode(v as ImportMode)}>
-        <Form.Dropdown.Item value="url" title="Deck URL (Archidekt)" icon={Icon.Globe} />
+        <Form.Dropdown.Item value="url" title="Deck URL (Archidekt or Moxfield)" icon={Icon.Globe} />
         <Form.Dropdown.Item value="text" title="Paste Deck List (Moxfield / any)" icon={Icon.Paragraph} />
       </Form.Dropdown>
       {mode === "url" && (
         <Form.TextField
           id="url"
           title="Deck URL"
-          placeholder="https://archidekt.com/decks/…"
+          placeholder="https://archidekt.com/decks/… or moxfield.com/decks/…"
           error={urlError}
           onChange={() => setUrlError(undefined)}
         />
