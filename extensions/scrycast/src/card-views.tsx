@@ -1,6 +1,6 @@
 import { List, Detail, Grid, ActionPanel, Action, showToast, Toast, Color, Icon } from "@raycast/api";
 import { usePromise, useFetch, useLocalStorage } from "@raycast/utils";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, type ReactElement } from "react";
 import {
   Card,
   FEEDBACK_URL,
@@ -101,7 +101,7 @@ function tagScryfallSearchUrl(type: string, name: string): string {
 export interface CardTagsViewProps {
   card: Card;
   // When provided, "Search This Tag" pushes in-app; otherwise opens Scryfall in browser.
-  searchTagTarget?: (query: string) => ReactNode;
+  searchTagTarget?: (query: string) => ReactElement;
 }
 
 function tagSearchQuery(type: string, name: string): string {
@@ -145,11 +145,7 @@ export function CardTagsView({ card, searchTagTarget }: CardTagsViewProps) {
           <ActionPanel>
             {searchTagTarget ? (
               <>
-                <Action.Push
-                  title="Search This Tag"
-                  icon={Icon.MagnifyingGlass}
-                  target={searchTagTarget(query) as ReactNode}
-                />
+                <Action.Push title="Search This Tag" icon={Icon.MagnifyingGlass} target={searchTagTarget(query)} />
                 <Action.OpenInBrowser
                   title="Search This Tag on Scryfall"
                   icon={{ source: Icon.Globe, tintColor: Color.Blue }}
@@ -204,7 +200,7 @@ export function CardTagsView({ card, searchTagTarget }: CardTagsViewProps) {
 
 export interface PrintsViewProps {
   card: Card;
-  searchTagTarget?: (query: string) => ReactNode;
+  searchTagTarget?: (query: string) => ReactElement;
 }
 
 export function PrintsView({ card, searchTagTarget }: PrintsViewProps) {
@@ -341,7 +337,7 @@ export function PrintsView({ card, searchTagTarget }: PrintsViewProps) {
 
 export interface CardDetailViewProps {
   card: Card;
-  searchTagTarget?: (query: string) => ReactNode;
+  searchTagTarget?: (query: string) => ReactElement;
 }
 
 export function CardDetailView({ card, searchTagTarget }: CardDetailViewProps) {
