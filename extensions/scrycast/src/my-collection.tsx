@@ -68,7 +68,7 @@ interface ScryfallSearchResponse {
 function getCardImageUri(card: Card, size: keyof ImageUris = "png"): string {
   if (card.image_uris?.[size]) return card.image_uris[size];
   if (card.card_faces?.[0]?.image_uris?.[size]) return card.card_faces[0].image_uris[size];
-  return card.image_uris?.normal ?? card.card_faces?.[0]?.image_uris?.normal ?? "";
+  return card.image_uris?.png ?? card.card_faces?.[0]?.image_uris?.png ?? "";
 }
 
 async function copyCardImage(imageUri: string): Promise<void> {
@@ -177,6 +177,8 @@ function CollectionGrid({
   const [searchText, setSearchText] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const collectionIdSet = useMemo(() => new Set(collectionIds), [collectionIds]);
+  const { value: savedCards } = useLocalStorage<{ id: string }[]>("savedCards", []);
+  const savedCardIds = useMemo(() => new Set((savedCards ?? []).map((c) => c.id)), [savedCards]);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(searchText), 200);
@@ -261,7 +263,7 @@ function CollectionGrid({
           actions={
             <ActionPanel>
               <Action
-                title="Import New CSV"
+                title="Import New Csv"
                 icon={Icon.Download}
                 onAction={() => push(<ImportCSVView onImport={onImport} existingStats={stats} />)}
               />
@@ -285,11 +287,12 @@ function CollectionGrid({
         >
           {cards.map((card) => {
             const imageUri = getCardImageUri(card);
+            const isSaved = savedCardIds.has(card.id);
             return (
               <Grid.Item
                 key={card.id}
                 content={{ source: imageUri }}
-                title={card.name}
+                title={`${isSaved ? "🔖 " : ""}${card.name}`}
                 subtitle={card.set_name}
                 actions={
                   <ActionPanel>
@@ -301,7 +304,7 @@ function CollectionGrid({
                         shortcut={{ modifiers: ["cmd"], key: "return" }}
                       />
                       <Action.OpenInBrowser
-                        title="Open in EDHRec"
+                        title="Open in Edhrec" // eslint-disable-line @raycast/prefer-title-case
                         url={getEdhrecUrl(card.name)}
                         icon={{ source: Icon.Person, tintColor: Color.Green }}
                         shortcut={{ modifiers: ["cmd", "ctrl"], key: "return" }}
@@ -332,7 +335,7 @@ function CollectionGrid({
                     </ActionPanel.Section>
                     <ActionPanel.Section title="Collection">
                       <Action
-                        title="Import New CSV"
+                        title="Import New Csv"
                         icon={Icon.Download}
                         shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
                         onAction={() => push(<ImportCSVView onImport={onImport} existingStats={stats} />)}

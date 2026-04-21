@@ -60,7 +60,7 @@ export const SAVED_CARDS_KEY = "savedCards";
 export function getCardImageUri(card: Card, size: keyof ImageUris = "png"): string {
   if (card.image_uris?.[size]) return card.image_uris[size];
   if (card.card_faces?.[0]?.image_uris?.[size]) return card.card_faces[0].image_uris[size];
-  const fallback = card.image_uris?.normal ?? card.card_faces?.[0]?.image_uris?.normal ?? "";
+  const fallback = card.image_uris?.png ?? card.card_faces?.[0]?.image_uris?.png ?? "";
   if (fallback) {
     console.warn(`[Scrycast] ${size} unavailable for "${card.name}" (${card.id}), falling back to normal`);
   } else {
@@ -94,8 +94,8 @@ export function sortCards(cards: Card[], order: SortOrder): Card[] {
       const rb = b.edhrec_rank ?? Infinity;
       return ra - rb;
     }
-    const pa = parseFloat(a.prices?.usd ?? "-1");
-    const pb = parseFloat(b.prices?.usd ?? "-1");
+    const pa = Math.max(parseFloat(a.prices?.usd ?? "0"), parseFloat(a.prices?.usd_foil ?? "0"));
+    const pb = Math.max(parseFloat(b.prices?.usd ?? "0"), parseFloat(b.prices?.usd_foil ?? "0"));
     return pb - pa;
   });
 }

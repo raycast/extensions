@@ -31,6 +31,20 @@
       "subtitle": "Import and search your personal collection",
       "description": "Import and browse your ManaBox card collection",
       "mode": "view"
+    },
+    {
+      "name": "browse-sets",
+      "title": "Browse by Set",
+      "subtitle": "Browse cards organized by set",
+      "description": "Browse Magic sets and explore the top EDHRec card from each set",
+      "mode": "view"
+    },
+    {
+      "name": "browse-decks",
+      "title": "Browse Decks",
+      "subtitle": "Browse your saved decks",
+      "description": "Browse preconstructed decks from Moxfield or Archidekt",
+      "mode": "view"
     }
   ],
   "dependencies": {

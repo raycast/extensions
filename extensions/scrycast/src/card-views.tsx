@@ -1,6 +1,6 @@
 import { List, Detail, Grid, ActionPanel, Action, showToast, Toast, Color, Icon } from "@raycast/api";
 import { usePromise, useFetch, useLocalStorage } from "@raycast/utils";
-import { useMemo, type ReactNode } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import {
   Card,
   FEEDBACK_URL,
@@ -11,6 +11,7 @@ import {
   getEdhrecUrl,
   copyCardImage,
 } from "./shared";
+import { COLLECTION_IDS_KEY, COLLECTION_NAMES_KEY } from "./collection";
 
 // ─── Tagger API ───────────────────────────────────────────────────────────────
 
@@ -110,7 +111,7 @@ function tagSearchQuery(type: string, name: string): string {
 }
 
 export function CardTagsView({ card, searchTagTarget }: CardTagsViewProps) {
-  const imageUri = getCardImageUri(card, "normal");
+  const imageUri = getCardImageUri(card, "png");
 
   const {
     isLoading,
@@ -144,7 +145,11 @@ export function CardTagsView({ card, searchTagTarget }: CardTagsViewProps) {
           <ActionPanel>
             {searchTagTarget ? (
               <>
-                <Action.Push title="Search This Tag" icon={Icon.MagnifyingGlass} target={searchTagTarget(query)} />
+                <Action.Push
+                  title="Search This Tag"
+                  icon={Icon.MagnifyingGlass}
+                  target={searchTagTarget(query) as ReactNode}
+                />
                 <Action.OpenInBrowser
                   title="Search This Tag on Scryfall"
                   icon={{ source: Icon.Globe, tintColor: Color.Blue }}
@@ -215,6 +220,10 @@ export function PrintsView({ card, searchTagTarget }: PrintsViewProps) {
 
   const { value: savedCards, setValue: setSavedCards } = useLocalStorage<Card[]>(SAVED_CARDS_KEY, []);
   const savedCardIds = useMemo(() => new Set((savedCards ?? []).map((c) => c.id)), [savedCards]);
+  const { value: collectionIds } = useLocalStorage<string[]>(COLLECTION_IDS_KEY, []);
+  const { value: collectionNames } = useLocalStorage<string[]>(COLLECTION_NAMES_KEY, []);
+  const collectionIdSet = useMemo(() => new Set(collectionIds ?? []), [collectionIds]);
+  const collectionNameSet = useMemo(() => new Set(collectionNames ?? []), [collectionNames]);
 
   function toggleSave(print: Card) {
     if (savedCardIds.has(print.id)) {
@@ -244,11 +253,13 @@ export function PrintsView({ card, searchTagTarget }: PrintsViewProps) {
           {prints.map((print) => {
             const imageUri = getCardImageUri(print);
             const isSaved = savedCardIds.has(print.id);
+            const exactMatch = collectionIdSet.has(print.id);
+            const nameMatch = !exactMatch && collectionNameSet.has(print.name);
             return (
               <Grid.Item
                 key={print.id}
                 content={{ source: imageUri }}
-                title={print.set_name ?? print.set.toUpperCase()}
+                title={`${isSaved ? "🔖 " : ""}${exactMatch ? "✅ " : nameMatch ? "☑️ " : ""}${print.set_name ?? print.set.toUpperCase()}`}
                 subtitle={`#${print.collector_number}`}
                 actions={
                   <ActionPanel>
@@ -265,7 +276,7 @@ export function PrintsView({ card, searchTagTarget }: PrintsViewProps) {
                         shortcut={{ modifiers: ["cmd"], key: "return" }}
                       />
                       <Action.OpenInBrowser
-                        title="Open in EDHRec"
+                        title="Open in Edhrec" // eslint-disable-line @raycast/prefer-title-case
                         url={getEdhrecUrl(print.name)}
                         icon={{ source: Icon.Person, tintColor: Color.Green }}
                         shortcut={{ modifiers: ["cmd", "ctrl"], key: "return" }}
@@ -334,42 +345,28 @@ export interface CardDetailViewProps {
 }
 
 export function CardDetailView({ card, searchTagTarget }: CardDetailViewProps) {
-  const imageUri = getCardImageUri(card, "large");
+  const isDFC = (card.card_faces?.length ?? 0) >= 2;
+  const [faceIndex, setFaceIndex] = useState(0);
 
-  const oracleText =
-    card.oracle_text ?? card.card_faces?.map((f) => `<strong>${f.name}</strong>\n${f.oracle_text ?? ""}`).join("\n");
-  const flavorText =
-    card.flavor_text ??
-    card.card_faces
-      ?.map((f) => f.flavor_text)
-      .filter(Boolean)
-      .join(" // ");
-  const manaCost =
-    card.mana_cost ??
-    card.card_faces
-      ?.map((f) => f.mana_cost)
-      .filter(Boolean)
-      .join(" // ");
+  const activeFace = isDFC ? card.card_faces![faceIndex] : null;
+
+  const imageUri = activeFace?.image_uris?.png ?? getCardImageUri(card, "png");
+  const oracleText = activeFace?.oracle_text ?? card.oracle_text;
+  const flavorText = activeFace?.flavor_text ?? card.flavor_text;
+  const manaCost = activeFace?.mana_cost ?? card.mana_cost;
+  const displayName = activeFace ? `${card.name} (${activeFace.name})` : card.name;
 
   const markdown = `<img src="${imageUri}" width="504" />`;
-  const oracleLines = oracleText?.split("\n").filter(Boolean) ?? [];
-
   return (
     <Detail
-      navigationTitle={card.name}
+      navigationTitle={displayName}
       markdown={markdown}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label title="Name" text={card.name} />
+          <Detail.Metadata.Label title="Name" text={displayName} />
           {card.type_line && <Detail.Metadata.Label title="Type" text={card.type_line} />}
           {manaCost && <Detail.Metadata.Label title="Mana Cost" text={manaCost} />}
-          {oracleLines.length > 0 && (
-            <>
-              {oracleLines.map((line, i) => (
-                <Detail.Metadata.Label key={i} title={i === 0 ? "Oracle Text" : ""} text={line} />
-              ))}
-            </>
-          )}
+          {oracleText && <Detail.Metadata.Label title="Oracle Text" text={oracleText} />}
           {flavorText && <Detail.Metadata.Label title="Flavor Text" text={flavorText} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link title="Scryfall" target={card.scryfall_uri} text="View on Scryfall" />
@@ -378,6 +375,14 @@ export function CardDetailView({ card, searchTagTarget }: CardDetailViewProps) {
       }
       actions={
         <ActionPanel>
+          {isDFC && (
+            <Action
+              title={`Flip to ${card.card_faces![faceIndex === 0 ? 1 : 0].name}`}
+              icon={Icon.ArrowClockwise}
+              shortcut={{ modifiers: ["cmd"], key: "f" }}
+              onAction={() => setFaceIndex((i) => (i === 0 ? 1 : 0))}
+            />
+          )}
           <Action.OpenInBrowser
             title="Open in Scryfall"
             url={card.scryfall_uri}
@@ -385,7 +390,7 @@ export function CardDetailView({ card, searchTagTarget }: CardDetailViewProps) {
             shortcut={{ modifiers: ["cmd"], key: "return" }}
           />
           <Action.OpenInBrowser
-            title="Open in EDHRec"
+            title="Open in Edhrec" // eslint-disable-line @raycast/prefer-title-case
             url={getEdhrecUrl(card.name)}
             icon={{ source: Icon.Person, tintColor: Color.Green }}
             shortcut={{ modifiers: ["cmd", "ctrl"], key: "return" }}
