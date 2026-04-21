@@ -117,8 +117,10 @@ export function InstalledActionPanel({ pkg, onRefresh, onClearSearch, onUninstal
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={async () => {
               const success = await wingetUninstall(pkg.id);
-              if (success) onUninstalled?.(pkg.id);
-              onClearSearch?.();
+              if (success) {
+                onUninstalled?.(pkg.id);
+                onClearSearch?.();
+              }
               await refreshWithFeedback(onRefresh);
             }}
           />
@@ -130,8 +132,10 @@ export function InstalledActionPanel({ pkg, onRefresh, onClearSearch, onUninstal
             style={Action.Style.Destructive}
             onAction={async () => {
               const success = await wingetUninstall(pkg.id);
-              if (success) onUninstalled?.(pkg.id);
-              onClearSearch?.();
+              if (success) {
+                onUninstalled?.(pkg.id);
+                onClearSearch?.();
+              }
               await refreshWithFeedback(onRefresh);
             }}
           />

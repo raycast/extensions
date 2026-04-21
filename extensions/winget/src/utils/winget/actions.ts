@@ -149,12 +149,7 @@ export async function wingetUpgrade(id?: string): Promise<boolean> {
           await showHUD(`✅ Upgraded ${id}`);
           return true;
         } else {
-          const lines = output
-            .replace(/\r/g, "\n")
-            .split("\n")
-            .map((l) => l.trim())
-            .filter((l) => l.length > 0 && !/^[-\\\/|]+$/.test(l));
-          const msg = lines.at(-1) ?? "Upgrade failed";
+          const msg = parseWingetMessage(output, "Upgrade failed");
           await showHUD(`❌ ${msg}`);
           return false;
         }
@@ -183,13 +178,8 @@ export async function wingetUpgrade(id?: string): Promise<boolean> {
         await showToast({ style: Toast.Style.Success, title: "Upgraded", message: id });
         return true;
       } else {
-        const lines = output
-          .replace(/\r/g, "\n")
-          .split("\n")
-          .map((l) => l.trim())
-          .filter((l) => l.length > 0 && !/^[-\\\/|]+$/.test(l));
-        const errorLine = lines.at(-1) ?? id!;
-        await showToast({ style: Toast.Style.Failure, title: "Upgrade failed", message: errorLine });
+        const msg = parseWingetMessage(output, id!);
+        await showToast({ style: Toast.Style.Failure, title: "Upgrade failed", message: msg });
         return false;
       }
     }
