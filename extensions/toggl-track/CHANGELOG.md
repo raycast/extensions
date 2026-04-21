@@ -1,5 +1,9 @@
 # Toggl Track Changelog
 
+## [Fix] - 2026-04-17
+
+- Clarified Low Data Mode documentation in README — activation takes effect on next command launch, and framed sync behavior as a user contract (up to 1 hour delay) rather than implementation details
+
 ## [New Feature] - 2026-04-16
 
 - Add Low Data Mode for free-tier users: serves reads from local cache with hourly auto-sync (3 requests/hour), leaving 27 requests/hour for active use

@@ -162,11 +162,19 @@ interface SkillListItemProps {
   skill: Skill;
   rank?: number;
   isSelected: boolean;
+  isInstalled?: boolean;
   isShowingDetail: boolean;
   onToggleDetail: () => void;
 }
 
-export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onToggleDetail }: SkillListItemProps) {
+export function SkillListItem({
+  skill,
+  rank,
+  isSelected,
+  isInstalled,
+  isShowingDetail,
+  onToggleDetail,
+}: SkillListItemProps) {
   const title = rank !== undefined && rank !== null ? `#${rank} ${skill.name}` : skill.name;
   const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
   const { stats } = useRepoStats(skill, isSelected);
@@ -178,6 +186,10 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
     rank !== undefined && rank !== null
       ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
       : { source: Icon.Hammer };
+
+  const accessories: List.Item.Accessory[] = [];
+  if (isInstalled) accessories.push({ tag: { value: "Installed", color: Color.Green } });
+  if (!isShowingDetail) accessories.push({ text: formatInstalls(skill.installs), icon: Icon.Download });
 
   const shownErrorTimestampRef = useRef<string | undefined>(undefined);
 
@@ -205,7 +217,7 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
       subtitle={isShowingDetail ? undefined : (frontmatter.description ?? skill.source)}
       keywords={[skill.name, skill.source, skill.id]}
       icon={icon}
-      accessories={isShowingDetail ? [] : [{ text: formatInstalls(skill.installs), icon: Icon.Download }]}
+      accessories={accessories}
       id={skill.id}
       detail={
         <InlineDetail

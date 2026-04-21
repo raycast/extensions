@@ -30,8 +30,10 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
     if (password.length === 0) return;
 
     try {
-      setLoading(true);
-      setUnlockError(undefined);
+      if (!args?.retryInvalidSessionToken) {
+        setLoading(true);
+        setUnlockError(undefined);
+      }
 
       await pendingAction;
 
@@ -60,8 +62,9 @@ const UnlockForm = ({ pendingAction = Promise.resolve() }: UnlockFormProps) => {
       toast.title = "Unlocking vault...";
       const { error: unlockError } = await bitwarden.unlock(password);
       if (unlockError) {
-        if (unlockError instanceof InvalidSessionTokenError) {
-          return onSubmit({ retryInvalidSessionToken: true });
+        if (unlockError instanceof InvalidSessionTokenError && !args?.retryInvalidSessionToken) {
+          await bitwarden.logout({ reason: "Invalid session token" });
+          return await onSubmit({ retryInvalidSessionToken: true });
         }
         return handleUnlockError(unlockError, {
           title: "Failed to unlock vault",

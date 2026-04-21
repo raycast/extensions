@@ -1,9 +1,13 @@
-# Changelog
+# Skills Changelog
 
 ## [Fix Silent Auto-Update on Load] - {PR_MERGE_DATE}
 
 - Stop silently auto-updating outdated skills when opening Manage Skills
 - Fix the orange "Update available" highlight that stopped appearing for outdated skills
+
+## [Show Installed Badge in Search Results] - 2026-04-20
+
+- Show a green "Installed" tag on search results for skills that are already installed locally
 
 ## [Update Individual Skills] - 2026-04-17
 
