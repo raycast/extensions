@@ -9,6 +9,7 @@ import { CONTRIBUTE_URL, getIcon, raycastProtocol, wrapInCodeBlock } from "./hel
 type Props = LaunchProps<{ launchContext: string[] }>;
 
 export default function ExplorePrompts(props: Props) {
+  console.log("environment 1", environment);
   const { data: rawCategories, isLoading } = useFetch<PromptCategory[]>(`https://ray.so/api/prompts`);
   const { data: promptUpvotes, isLoading: isLoadingpromptUpvotes, mutate } = useCachedPromise(() => getPromptUpvotes());
 
@@ -68,6 +69,7 @@ export default function ExplorePrompts(props: Props) {
       await mutate();
       await showToast({ style: Toast.Style.Success, title: "Remove upvote" });
     } catch (error) {
+      console.log("Error: failed to remove upvote", error);
       await showToast({ style: Toast.Style.Failure, title: "Failed to remove upvote" });
     }
   }
