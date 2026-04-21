@@ -74,9 +74,10 @@ export function parseKeyValue(output: string): Record<string, string> {
   const lines = output.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
   const result: Record<string, string> = {};
 
-  // First non-empty line: "Found <Name> [<Id>]"
-  const firstLine = lines.find((l) => l.trim().length > 0) ?? "";
-  const foundMatch = firstLine.match(/^Found (.+?) \[(.+?)\]/);
+  // Scan all lines for "Found <Name> [<Id>]" — it may not be the first line
+  // due to spinner/progress output preceding it.
+  const foundLine = lines.find((l) => /^Found .+ \[.+\]/.test(l.trim())) ?? "";
+  const foundMatch = foundLine.trim().match(/^Found (.+?) \[(.+?)\]/);
   if (foundMatch) {
     result["_name"] = foundMatch[1].trim();
     result["_id"] = foundMatch[2].trim();

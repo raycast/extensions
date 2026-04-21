@@ -17,9 +17,9 @@ export default function UpgradeCommand() {
         <List.EmptyView title="All packages are up to date" description="No upgrades available" />
       ) : (
         <List.Section title={sectionTitle}>
-          {pkgList.map((pkg) => (
+          {pkgList.map((pkg, index) => (
             <List.Item
-              key={pkg.id}
+              key={index}
               title={pkg.name}
               subtitle={pkg.id}
               accessories={[
