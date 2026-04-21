@@ -47,10 +47,26 @@
     {
       "name": "apiKey",
       "type": "password",
-      "required": true,
+      "required": false,
       "title": "API Key",
-      "description": "Volcengine Doubao Speech API Key (X-Api-Key)",
+      "description": "Volcengine Doubao Speech API Key (preferred, X-Api-Key)",
       "placeholder": "Enter your API Key"
+    },
+    {
+      "name": "appId",
+      "type": "textfield",
+      "required": false,
+      "title": "App ID",
+      "description": "Legacy Volcengine TTS App ID (used only when API Key is empty)",
+      "placeholder": "Enter your App ID"
+    },
+    {
+      "name": "accessKey",
+      "type": "password",
+      "required": false,
+      "title": "Access Key",
+      "description": "Legacy Volcengine TTS Access Key (used only when API Key is empty)",
+      "placeholder": "Enter your Access Key"
     },
     {
       "name": "resourceId",

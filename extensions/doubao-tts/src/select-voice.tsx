@@ -84,7 +84,7 @@ export default function SelectVoice() {
     try {
       const text = await getPreviewText(PREVIEW_FALLBACK_TEXT, PREVIEW_CHAR_LIMIT);
       if (player.isStopped()) return;
-      const audio = await synthesizeSpeech(text, buildOptionsFromPrefs(voice.id));
+      const audio = await synthesizeSpeech(text, buildOptionsFromPrefs(voice.id), player.signal);
       if (player.isStopped()) return;
       await player.playAudio(audio);
     } catch (error) {

@@ -9,6 +9,8 @@ const API_SUCCESS_CODE = 20000000;
 const REQUEST_TIMEOUT_MS = 60_000;
 const DEFAULT_AUDIO_FORMAT = "mp3";
 const DEFAULT_SAMPLE_RATE = 24000;
+// Volcengine's documented MP3 bitrate for this extension's playback profile.
+const DEFAULT_BIT_RATE = 128000;
 const DEFAULT_SPEAKER = "zh_female_vv_uranus_bigtts";
 const WS_HEADER = Buffer.from([0x11, 0x14, 0x10, 0x00]);
 const SERVER_FULL_RESPONSE = 0x9;
@@ -16,7 +18,8 @@ const SERVER_AUDIO_ONLY_RESPONSE = 0xb;
 const SERVER_ERROR_RESPONSE = 0xf;
 const MESSAGE_FLAG_WITH_EVENT = 0x4;
 
-type TTSAuthHeaders = Record<"X-Api-Key" | "X-Api-Resource-Id" | "X-Api-Connect-Id", string>;
+type TTSAuthHeaders = Record<"X-Api-Resource-Id" | "X-Api-Connect-Id", string> &
+  Partial<Record<"X-Api-Key" | "X-Api-App-Id" | "X-Api-Access-Key", string>>;
 
 enum TTSWsEvent {
   StartConnection = 1,
@@ -48,7 +51,7 @@ interface ParsedWsMessage {
  * text chunk, but the API transport itself now uses the latest V3 WebSocket
  * flow and accumulates audio frames as they arrive.
  */
-export async function synthesizeSpeech(text: string, options: TTSOptions): Promise<string> {
+export async function synthesizeSpeech(text: string, options: TTSOptions, signal?: AbortSignal): Promise<string> {
   const prefs = getPreferenceValues<Preferences>();
   const resourceId = prefs.resourceId || "seed-tts-2.0";
   const connectId = randomUUID();
@@ -59,24 +62,42 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
     throw new Error("Text cannot be empty");
   }
 
-  return synthesizeWithWebSocket(trimmedText, options, headers);
+  if (signal?.aborted) {
+    throw new TTSApiError("TTS synthesis cancelled", -7);
+  }
+
+  return synthesizeWithWebSocket(trimmedText, options, headers, signal);
 }
 
 function buildAuthHeaders(prefs: Preferences, resourceId: string, connectId: string): TTSAuthHeaders {
   const apiKey = prefs.apiKey?.trim();
-
-  if (!apiKey) {
-    throw new TTSApiError("API Key is required. Configure API Key in extension preferences.", -1);
-  }
-
-  return {
-    "X-Api-Key": apiKey,
+  const appId = prefs.appId?.trim();
+  const accessKey = prefs.accessKey?.trim();
+  const headers: TTSAuthHeaders = {
     "X-Api-Resource-Id": resourceId,
     "X-Api-Connect-Id": connectId,
   };
+
+  if (apiKey) {
+    return { ...headers, "X-Api-Key": apiKey };
+  }
+
+  if (appId && accessKey) {
+    return { ...headers, "X-Api-App-Id": appId, "X-Api-Access-Key": accessKey };
+  }
+
+  throw new TTSApiError(
+    "API Key is required. Configure API Key, or provide legacy App ID and Access Key in extension preferences.",
+    -1,
+  );
 }
 
-function synthesizeWithWebSocket(text: string, options: TTSOptions, headers: TTSAuthHeaders): Promise<string> {
+function synthesizeWithWebSocket(
+  text: string,
+  options: TTSOptions,
+  headers: TTSAuthHeaders,
+  signal?: AbortSignal,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(WS_API_URL, { headers });
     const sessionId = randomUUID();
@@ -88,9 +109,13 @@ function synthesizeWithWebSocket(text: string, options: TTSOptions, headers: TTS
     const timeoutId = setTimeout(() => {
       fail(new TTSApiError(`Request timeout after ${REQUEST_TIMEOUT_MS / 1000} seconds`, -2));
     }, REQUEST_TIMEOUT_MS);
+    const abortHandler = () => fail(new TTSApiError("TTS synthesis cancelled", -7));
+
+    signal?.addEventListener("abort", abortHandler, { once: true });
 
     function cleanup() {
       clearTimeout(timeoutId);
+      signal?.removeEventListener("abort", abortHandler);
       if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
         ws.close();
       }
@@ -217,7 +242,7 @@ function buildStartSessionPayload(options: TTSOptions, userId: string): Record<s
         format: options.format,
         sample_rate: options.sampleRate,
         speech_rate: options.speechRate,
-        bit_rate: 128000,
+        bit_rate: DEFAULT_BIT_RATE,
       },
     },
   };
@@ -235,7 +260,7 @@ function buildTaskPayload(text: string, options: TTSOptions, userId: string): Re
         format: options.format,
         sample_rate: options.sampleRate,
         speech_rate: options.speechRate,
-        bit_rate: 128000,
+        bit_rate: DEFAULT_BIT_RATE,
       },
     },
   };

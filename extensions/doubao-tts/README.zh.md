@@ -15,12 +15,11 @@
 - **一键朗读**：选中文字后快速朗读，无需打开视图。
 - **音色选择**：浏览 160+ 个中英文音色，包含官方豆包语音合成模型 2.0 音色列表。
 - **Quick Read 音色选择**：选择并试听 Quick Read 默认音色。
-- **设为 Quick Read 音色**：在音色列表中直接把某个音色设为默认朗读音色。
 - **停止播放**：随时停止播放，也可以再次触发 Quick Read 来停止。
 - **智能分片**：按句子和标点拆分长文本。
 - **流水线播放**：当前分片播放时，后台预合成下一分片。
 - **模型切换**：支持豆包 TTS 2.0、TTS 1.0 和声音复刻资源 ID。
-- **API Key 鉴权**：使用当前火山引擎 `X-Api-Key` 鉴权方式。
+- **灵活鉴权**：优先使用当前火山引擎 `X-Api-Key` 鉴权方式，并保留旧版 App ID / Access Key 兼容。
 
 ## 截图
 
@@ -28,11 +27,13 @@
 
 ## 配置
 
-首次使用前，请打开扩展偏好设置，并填写当前控制台中的 **API Key**。
+首次使用前，请打开扩展偏好设置。新用户建议填写当前控制台中的 **API Key**；已有用户也可以继续使用旧版 **App ID** 和 **Access Key**。
 
 | 配置项 | 说明 | 必填 |
 | --- | --- | :---: |
-| API Key | 豆包语音 API Key。 | 必填 |
+| API Key | 豆包语音 API Key，新用户推荐使用。 | 可选 |
+| App ID | 旧版豆包 TTS App ID，仅在 API Key 为空时使用。 | 可选 |
+| Access Key | 旧版豆包 TTS Access Key，仅在 API Key 为空时使用。 | 可选 |
 | Model Version | 语音合成模型，默认 TTS 2.0。 | 可选 |
 | Default Voice | Quick Read 默认音色。 | 可选 |
 | Speech Rate | 语速，0.5x 到 2.0x。 | 可选 |
@@ -57,12 +58,11 @@
 1. 选中文字。
 2. 运行 **Read with Voice Selection**。
 3. 选择音色并按回车朗读。
-4. 在 action panel 中使用 **Use as Quick Read Voice** 可设为默认朗读音色。
 
 ## 技术细节
 
 - **API**：火山引擎豆包 TTS V3 WebSocket 双向流式接口
-- **鉴权**：`X-Api-Key` + `X-Api-Resource-Id` + 每次连接唯一的 `X-Api-Connect-Id`
+- **鉴权**：`X-Api-Key` 或旧版 `X-Api-App-Id` + `X-Api-Access-Key`，并附带 `X-Api-Resource-Id` 和每次连接唯一的 `X-Api-Connect-Id`
 - **响应**：V3 WebSocket 二进制帧，音频 payload 为流式 MP3 数据
 - **音频**：MP3，24000 Hz
 - **分片**：按标点智能拆分，每片不超过 4096 UTF-8 字节

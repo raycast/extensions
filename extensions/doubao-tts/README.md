@@ -19,12 +19,11 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 - **Quick Read**: select text and read it aloud instantly without opening a view.
 - **Voice Selection**: browse 160+ voices organized by category, including the official Doubao TTS 2.0 voice catalog.
 - **Select Quick Read Voice**: choose and preview the voice used by Quick Read.
-- **Set Quick Read Voice**: set any listed voice as the Quick Read default from the action panel.
 - **Stop Reading**: stop playback anytime, or trigger Quick Read again to toggle playback off.
 - **Smart Chunking**: split long text by sentence and punctuation.
 - **Pipelined Playback**: synthesize the next text chunk while the current chunk is playing.
 - **Model Switching**: supports Doubao TTS 2.0, TTS 1.0, and voice clone resource IDs.
-- **API Key Auth**: uses the current Volcengine `X-Api-Key` authentication flow.
+- **Flexible Auth**: uses the current Volcengine `X-Api-Key` flow, with legacy App ID and Access Key fallback.
 
 ## Screenshots
 
@@ -41,14 +40,16 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 
 1. Install **Doubao TTS** from the Raycast Store.
 2. Open the extension preferences.
-3. Fill **API Key** from the current Volcengine Doubao Speech console.
+3. Fill **API Key** from the current Volcengine Doubao Speech console, or keep using your existing App ID and Access Key.
 4. Bind a hotkey to **Quick Read Selected Text** for the fastest workflow.
 
 ## Configuration
 
 | Setting | Description | Required |
 | --- | --- | :---: |
-| API Key | Volcengine Doubao Speech API Key. | Required |
+| API Key | Volcengine Doubao Speech API Key. Preferred for new users. | Optional |
+| App ID | Legacy Volcengine TTS App ID, used only when API Key is empty. | Optional |
+| Access Key | Legacy Volcengine TTS Access Key, used only when API Key is empty. | Optional |
 | Model Version | TTS model/resource ID. Defaults to Doubao TTS 2.0. | Optional |
 | Default Voice | Voice used by Quick Read when no override is selected. | Optional |
 | Speech Rate | Playback speed from 0.5x to 2.0x. | Optional |
@@ -73,12 +74,11 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 1. Select text.
 2. Run **Read with Voice Selection**.
 3. Pick a voice and press Enter to read.
-4. Use **Use as Quick Read Voice** from the action panel to make that voice the Quick Read default.
 
 ## Technical Details
 
 - **API**: Volcengine Doubao TTS V3 WebSocket bidirectional streaming
-- **Auth**: `X-Api-Key` + `X-Api-Resource-Id` + per-connection `X-Api-Connect-Id`
+- **Auth**: `X-Api-Key` or legacy `X-Api-App-Id` + `X-Api-Access-Key`, plus `X-Api-Resource-Id` and per-connection `X-Api-Connect-Id`
 - **Response**: binary V3 WebSocket frames with streamed MP3 audio payloads
 - **Audio**: MP3, 24000 Hz
 - **Chunking**: smart split by punctuation, up to 4096 UTF-8 bytes per chunk
