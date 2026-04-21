@@ -15,7 +15,7 @@ import { openSession } from "./securecrt";
 import { loadSessions, readSessionMetadata, type Session } from "./sessions";
 
 export default function Command() {
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences.OpenSessions>();
     const showMetadata = preferences.showHostnames ?? true;
     const [sessions, setSessions] = useState<Session[]>([]);
     const [isLoading, setIsLoading] = useState(true);
