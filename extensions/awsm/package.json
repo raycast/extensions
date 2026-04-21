@@ -4,7 +4,7 @@
   "title": "awsm",
   "description": "Raycast integration for awsm (AWS Manager), a tool to switch AWS profiles and open the AWS Console.",
   "icon": "extension-icon.png",
-  "author": "cj69vddqxq",
+  "author": "xthehacker2000x",
   "platforms": [
     "macOS",
     "Windows"

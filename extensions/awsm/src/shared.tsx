@@ -37,8 +37,9 @@ export function getDefaultBrowserBundleId(): string | undefined {
     const launchServicesPath = `${process.env.HOME}/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist`;
     const result = execSync(`/usr/bin/plutil -extract LSHandlers json -o - "${launchServicesPath}"`);
     const handlers = JSON.parse(result.toString()) as Array<Record<string, string>>;
-    const handler = handlers.find((entry) => entry.LSHandlerURLScheme === "https")
-      || handlers.find((entry) => entry.LSHandlerURLScheme === "http");
+    const handler =
+      handlers.find((entry) => entry.LSHandlerURLScheme === "https") ||
+      handlers.find((entry) => entry.LSHandlerURLScheme === "http");
 
     return handler?.LSHandlerRoleAll;
   } catch (err) {

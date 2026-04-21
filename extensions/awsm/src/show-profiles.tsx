@@ -14,7 +14,15 @@ interface Profile {
   is_active: boolean;
 }
 
-function MfaForm({ profile, actionTitle, onSubmit }: { profile: Profile; actionTitle: string; onSubmit: (token: string) => void }) {
+function MfaForm({
+  profile,
+  actionTitle,
+  onSubmit,
+}: {
+  profile: Profile;
+  actionTitle: string;
+  onSubmit: (token: string) => void;
+}) {
   const { pop } = useNavigation();
   const [tokenError, setTokenError] = useState<string | undefined>(undefined);
 
@@ -94,7 +102,11 @@ export default function Command() {
     }
   }, [error]);
 
-  const performSetProfile = async (profile: Profile, mfaToken?: string, afterSuccess?: () => Promise<void>): Promise<boolean> => {
+  const performSetProfile = async (
+    profile: Profile,
+    mfaToken?: string,
+    afterSuccess?: () => Promise<void>,
+  ): Promise<boolean> => {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Setting profile...",
@@ -130,7 +142,13 @@ export default function Command() {
         return true;
       } catch {
         // Session not cached or expired—prompt for MFA
-        push(<MfaForm profile={profile} actionTitle="Set Profile" onSubmit={(token) => performSetProfile(profile, token)} />);
+        push(
+          <MfaForm
+            profile={profile}
+            actionTitle="Set Profile"
+            onSubmit={(token) => performSetProfile(profile, token)}
+          />,
+        );
         return false;
       }
     }
@@ -160,7 +178,13 @@ export default function Command() {
       // If MFA is required, show the form
       if (profile.mfa_serial) {
         toast.hide();
-        push(<MfaForm profile={profile} actionTitle="Open Console" onSubmit={(token) => performSetProfile(profile, token, () => openConsole(profile))} />);
+        push(
+          <MfaForm
+            profile={profile}
+            actionTitle="Open Console"
+            onSubmit={(token) => performSetProfile(profile, token, () => openConsole(profile))}
+          />,
+        );
         return;
       }
       toast.style = Toast.Style.Failure;
@@ -202,7 +226,13 @@ export default function Command() {
       // If MFA is required, show the form
       if (profile.mfa_serial) {
         toast.hide();
-        push(<MfaForm profile={profile} actionTitle="Open in Firefox Container" onSubmit={(token) => performSetProfile(profile, token, () => openInFirefoxContainer(profile))} />);
+        push(
+          <MfaForm
+            profile={profile}
+            actionTitle="Open in Firefox Container"
+            onSubmit={(token) => performSetProfile(profile, token, () => openInFirefoxContainer(profile))}
+          />,
+        );
         return;
       }
       toast.style = Toast.Style.Failure;
@@ -246,65 +276,67 @@ export default function Command() {
       {sortedGroupEntries &&
         sortedGroupEntries.map(([session, sessionProfiles]) => (
           <List.Section key={session} title={session}>
-            {[...sessionProfiles].sort((a, b) => (a.is_active ? -1 : b.is_active ? 1 : 0)).map((profile) => (
-              <List.Item
-                key={profile.name}
-                icon={
-                  profile.is_active
-                    ? {
-                        source: {
-                          light: "connected_light.png",
-                          dark: "connected_dark.png",
-                        },
-                        mask: Image.Mask.Circle,
-                      }
-                    : {
-                        source: {
-                          light: "lastseen_light.png",
-                          dark: "lastseen_dark.png",
-                        },
-                        mask: Image.Mask.Circle,
-                      }
-                }
-                title={profile.name}
-                subtitle={profile.sso_session}
-                accessories={[{ icon: Icon.Globe, text: profile.region }]}
-                actions={
-                  <ActionPanel>
-                    <Action title="Set Profile" icon={Icon.Checkmark} onAction={() => setProfile(profile)} />
-                    <Action
-                      title="Set Profile and Open Console"
-                      icon={Icon.Bolt}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                      onAction={() => setProfileAndOpenConsole(profile)}
-                    />
-                    <Action
-                      title="Open Console"
-                      icon={Icon.Globe}
-                      shortcut={{ modifiers: ["cmd"], key: "o" }}
-                      onAction={() => openConsole(profile)}
-                    />
-                    <Action
-                      title="Set Profile and Open Console in Firefox"
-                      icon={Icon.Bird}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "f" }}
-                      onAction={() => setProfileAndOpenConsoleInFirefox(profile)}
-                    />
-                    <Action
-                      title="Open in Firefox Container"
-                      icon={Icon.Bird}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-                      onAction={() => openInFirefoxContainer(profile)}
-                    />
-                    <Action.CopyToClipboard
-                      title="Copy Account ID"
-                      icon={Icon.Clipboard}
-                      content={profile.account_id}
-                    />
-                  </ActionPanel>
-                }
-              />
-            ))}
+            {[...sessionProfiles]
+              .sort((a, b) => (a.is_active ? -1 : b.is_active ? 1 : 0))
+              .map((profile) => (
+                <List.Item
+                  key={profile.name}
+                  icon={
+                    profile.is_active
+                      ? {
+                          source: {
+                            light: "connected_light.png",
+                            dark: "connected_dark.png",
+                          },
+                          mask: Image.Mask.Circle,
+                        }
+                      : {
+                          source: {
+                            light: "lastseen_light.png",
+                            dark: "lastseen_dark.png",
+                          },
+                          mask: Image.Mask.Circle,
+                        }
+                  }
+                  title={profile.name}
+                  subtitle={profile.sso_session}
+                  accessories={[{ icon: Icon.Globe, text: profile.region }]}
+                  actions={
+                    <ActionPanel>
+                      <Action title="Set Profile" icon={Icon.Checkmark} onAction={() => setProfile(profile)} />
+                      <Action
+                        title="Set Profile and Open Console"
+                        icon={Icon.Bolt}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                        onAction={() => setProfileAndOpenConsole(profile)}
+                      />
+                      <Action
+                        title="Open Console"
+                        icon={Icon.Globe}
+                        shortcut={{ modifiers: ["cmd"], key: "o" }}
+                        onAction={() => openConsole(profile)}
+                      />
+                      <Action
+                        title="Set Profile and Open Console in Firefox"
+                        icon={Icon.Bird}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "f" }}
+                        onAction={() => setProfileAndOpenConsoleInFirefox(profile)}
+                      />
+                      <Action
+                        title="Open in Firefox Container"
+                        icon={Icon.Bird}
+                        shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+                        onAction={() => openInFirefoxContainer(profile)}
+                      />
+                      <Action.CopyToClipboard
+                        title="Copy Account ID"
+                        icon={Icon.Clipboard}
+                        content={profile.account_id}
+                      />
+                    </ActionPanel>
+                  }
+                />
+              ))}
           </List.Section>
         ))}
     </List>
