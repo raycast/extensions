@@ -1,26 +1,71 @@
-import { getPreferenceValues } from "@raycast/api";
-import { execSync } from "child_process";
+import { getPreferenceValues, trash } from "@raycast/api";
+import { execFileSync } from "child_process";
 import fse from "fs-extra";
-import { DEFAULT_EXPORT_DIR_PATH, EXPORT_FILE_PATH } from "../constants/ente";
+import { DEFAULT_EXPORT_DIR_PATH, getExportFilePath } from "../constants/ente";
 
-const DEFAULT_CLI_PATH = getPreferenceValues().cliPath || "/usr/local/bin/ente";
+const normalizeConfiguredPath = (configuredPath: string): string => {
+	const trimmedPath = configuredPath.trim().replace(/^(['"])(.*)\1$/, "$2");
+	return trimmedPath.startsWith("~/")
+		? trimmedPath.replace("~", process.env.HOME || process.env.USERPROFILE || "~")
+		: trimmedPath;
+};
 
-export const checkEnteExportDirValue = (): boolean => {
-	const accountList = execSync(`${DEFAULT_CLI_PATH} account list`).toString();
-	const exportDirMatch = accountList.match(/^ExportDir:\s*(.*)$/m);
+const getCliPath = (): string =>
+	normalizeConfiguredPath(getPreferenceValues<Preferences>().cliPath || "/usr/local/bin/ente");
 
-	if (!exportDirMatch) {
-		throw new Error("ExportDir not found in account list output.");
+const runEnteCommand = (...args: string[]): string =>
+	execFileSync(getCliPath(), args, {
+		encoding: "utf8",
+		windowsHide: true,
+	});
+
+type EnteAccount = {
+	email?: string;
+	app?: string;
+	exportDir?: string;
+};
+
+const parseEnteAccounts = (accountList: string): EnteAccount[] => {
+	const accounts: EnteAccount[] = [];
+	let currentAccount: EnteAccount = {};
+
+	for (const line of accountList.split(/\r?\n/)) {
+		const trimmedLine = line.trim();
+
+		if (!trimmedLine || trimmedLine.startsWith("Configured accounts:")) {
+			continue;
+		}
+
+		if (/^=+$/.test(trimmedLine)) {
+			if (currentAccount.exportDir || currentAccount.app) {
+				accounts.push(currentAccount);
+				currentAccount = {};
+			}
+			continue;
+		}
+
+		const match = trimmedLine.match(/^([A-Za-z]+):\s*(.*)$/);
+		if (!match) {
+			continue;
+		}
+
+		const [, key, value] = match;
+		if (key === "Email") {
+			currentAccount.email = value.trim();
+		}
+		if (key === "App") {
+			currentAccount.app = value.trim().toLowerCase();
+		}
+		if (key === "ExportDir") {
+			currentAccount.exportDir = value.trim();
+		}
 	}
 
-	const enteExportDir = exportDirMatch[1].trim();
-	const expectedExportDir = DEFAULT_EXPORT_DIR_PATH().trim();
-
-	if (enteExportDir !== expectedExportDir) {
-		throw new Error(`Export path mismatch.\nExpected: ${expectedExportDir}\nFound:    ${enteExportDir}`);
+	if (currentAccount.exportDir || currentAccount.app) {
+		accounts.push(currentAccount);
 	}
 
-	return true;
+	return accounts;
 };
 
 export const createEntePath = (path: string): string => {
@@ -36,7 +81,7 @@ export const createEntePath = (path: string): string => {
 
 export const checkEnteBinary = (): boolean => {
 	try {
-		execSync(`${DEFAULT_CLI_PATH} version`);
+		runEnteCommand("version");
 		return true;
 	} catch (error) {
 		console.error("Ente binary not found. Please install it.", error);
@@ -44,26 +89,58 @@ export const checkEnteBinary = (): boolean => {
 	return false;
 };
 
-export const exportEnteAuthSecrets = (): boolean => {
-	try {
-		fse.removeSync(EXPORT_FILE_PATH);
-		console.log("Export file removed");
-	} catch (error) {
-		console.error("Error during removal:", error);
+const normalizeDirectoryPath = (directoryPath: string): string => {
+	const normalizedPath = normalizeConfiguredPath(directoryPath);
+	return process.platform === "win32" ? normalizedPath.toLowerCase() : normalizedPath;
+};
+
+export const syncEnteExportDirValue = (expectedExportDir: string = DEFAULT_EXPORT_DIR_PATH()): string => {
+	const accountList = runEnteCommand("account", "list");
+	const accounts = parseEnteAccounts(accountList);
+	const authAccount = accounts.find((account) => account.app === "auth");
+
+	if (!authAccount?.email) {
+		throw new Error(
+			"Auth account not found in Ente CLI. Please run `ente account add` and choose the auth app."
+		);
 	}
 
+	if (
+		authAccount.exportDir &&
+		normalizeDirectoryPath(authAccount.exportDir) === normalizeDirectoryPath(expectedExportDir)
+	) {
+		return expectedExportDir;
+	}
+
+	runEnteCommand(
+		"account",
+		"update",
+		"--app",
+		"auth",
+		"--email",
+		authAccount.email,
+		"--dir",
+		expectedExportDir
+	);
+	return expectedExportDir;
+};
+
+export const exportEnteAuthSecrets = (exportDirPath: string = DEFAULT_EXPORT_DIR_PATH()): boolean => {
 	try {
-		execSync(`${DEFAULT_CLI_PATH} export`);
-		console.log("Export to", EXPORT_FILE_PATH);
+		syncEnteExportDirValue(exportDirPath);
+		runEnteCommand("export");
+		console.log("Export to", getExportFilePath(exportDirPath));
 	} catch {
 		throw new Error("Export failed. Please check if the command is correct.");
 	}
 	return true;
 };
 
-export const deleteEnteExport = (): boolean => {
+export const deleteEnteExport = async (
+	exportFilePath: string = getExportFilePath(DEFAULT_EXPORT_DIR_PATH())
+): Promise<boolean> => {
 	try {
-		fse.removeSync(EXPORT_FILE_PATH);
+		await trash(exportFilePath);
 	} catch (error) {
 		console.error("Error during removal:", error);
 		return false;

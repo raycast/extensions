@@ -1,6 +1,6 @@
 # Diccionario RAE Changelog
 
-## Update - 2025-09-03
+## [Update] - 2026-03-30
 
 - Updated API integration
 - Improved UI components

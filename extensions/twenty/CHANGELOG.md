@@ -1,5 +1,10 @@
 # Twenty Changelog
 
+## [Fix Bug] - 2025-11-27
+
+- Fixed issue when adding API Key, it would not work
+- Added Windows platform support
+
 ## [Field Improvements] - 2025-06-12
 
 - Required fields simplified: Only the primary field is required

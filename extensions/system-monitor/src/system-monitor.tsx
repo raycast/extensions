@@ -5,11 +5,11 @@ import MemoryMonitor from "./Memory/MemoryMonitor";
 import NetworkMonitor from "./Network/NetworkMonitor";
 import PowerMonitor from "./Power/PowerMonitor";
 
-const defaultView = getPreferenceValues<ExtensionPreferences>().defaultView;
+const { defaultView } = getPreferenceValues<ExtensionPreferences>();
 
 export default function SystemMonitor() {
   return (
-    <List isShowingDetail selectedItemId={defaultView}>
+    <List isShowingDetail selectedItemId={defaultView} searchBarPlaceholder={`Search:`}>
       <SystemInfo />
       <CpuMonitor />
       <MemoryMonitor />

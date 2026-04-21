@@ -121,12 +121,12 @@ function IpMetadata({ data }: { data: IPResponse }) {
           <Detail.Metadata.Label title="Country Code" text={data.location.country_code} />
           <Detail.Metadata.Label title="State" text={data.location.state} />
           <Detail.Metadata.Label title="City" text={data.location.city} />
-          <Detail.Metadata.Label title="Latitude" text={data.location.latitude.toString()} />
-          <Detail.Metadata.Label title="Longitude" text={data.location.longitude.toString()} />
+          <Detail.Metadata.Label title="Latitude" text={`${data.location.latitude || "N/A"}`} />
+          <Detail.Metadata.Label title="Longitude" text={`${data.location.longitude || "N/A"}`} />
           <Detail.Metadata.Label title="ZIP" text={data.location.zip} />
           <Detail.Metadata.Label title="Timezone" text={data.location.timezone} />
           <Detail.Metadata.Label title="Local Time" text={data.location.local_time} />
-          <Detail.Metadata.Label title="Local Time (UNIX)" text={data.location.local_time_unix.toString()} />
+          <Detail.Metadata.Label title="Local Time (UNIX)" text={`${data.location.local_time_unix || "N/A"}`} />
           <Detail.Metadata.Label title="Daylight Saving Time" icon={data.location.is_dst ? Icon.Check : Icon.Xmark} />
           {data.location.other?.length && (
             <Detail.Metadata.TagList title="Other">
@@ -142,7 +142,7 @@ function IpMetadata({ data }: { data: IPResponse }) {
       {data.vpn && (
         <>
           <Detail.Metadata.Label title="Region" text={data.vpn.region} />
-          <Detail.Metadata.Label title="Last Seen" text={data.vpn.last_seen.toString()} />
+          <Detail.Metadata.Label title="Last Seen" text={`${data.vpn.last_seen || "N/A"}`} />
           <Detail.Metadata.Label title="Type" text={data.vpn.type} />
           <Detail.Metadata.Label title="Service" text={data.vpn.service} />
           <Detail.Metadata.Link title="URL" text={data.vpn.url} target={data.vpn.url} />

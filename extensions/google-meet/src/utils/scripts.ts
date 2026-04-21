@@ -65,7 +65,15 @@ export function getOpenedUrlForFirefox(browserName: string) {
   `;
 }
 
-const supportedBrowsers = [
+export function getSwitchToPreviousAppScript(): string {
+  return `
+    tell application "System Events"
+      keystroke tab using {command down}
+    end tell
+  `;
+}
+
+export const supportedBrowsers = [
   "Arc",
   "Brave",
   "Firefox",
@@ -79,6 +87,8 @@ const supportedBrowsers = [
   "Sogou Explorer",
   "Vivaldi",
   "Yandex",
+  "Zen",
+  "Dia",
 ] as const;
 
 // Easy way to access the focused window when the meet link opens

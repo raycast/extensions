@@ -41,4 +41,4 @@ Yes! Templates for pull requests and issues are supported as long as they are in
 
 ### Why can't I see my GitHub organization?
 
-Double-check that you have enabled the correct settings for your organizations on the [GitHub Oauth page](https://github.com/settings/connections/applications/7235fe8d42157f1f38c0) to ensure that Raycast is able to show you the data from those repos.
+Double-check that you have enabled the correct settings for your organizations on the [GitHub Oauth page](https://github.com/settings/connections/applications/7235fe8d42157f1f38c0) to ensure that Raycast is able to show you the data from those repositories.

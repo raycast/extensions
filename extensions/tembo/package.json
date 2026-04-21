@@ -29,7 +29,8 @@
       "title": "Tembo in Menubar",
       "subtitle": "Tembo",
       "description": "Show your tasks in the menubar for quick access",
-      "mode": "menu-bar"
+      "mode": "menu-bar",
+      "interval": "10m"
     }
   ],
   "dependencies": {

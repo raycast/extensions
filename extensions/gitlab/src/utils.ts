@@ -308,3 +308,19 @@ export function showErrorToast(message: string, title?: string): Promise<Toast> 
     },
   });
 }
+
+export const isWindows = process.platform === "win32";
+
+export function shortify(text: string, maxLength: number): string {
+  if (text.length <= maxLength) {
+    return text;
+  }
+  if (maxLength <= 3) {
+    return text.slice(0, maxLength);
+  }
+  return text.slice(0, maxLength - 3) + "...";
+}
+
+export function isNumber(value?: unknown): value is number {
+  return typeof value === "number" && !isNaN(value);
+}

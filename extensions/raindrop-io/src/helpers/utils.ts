@@ -52,6 +52,7 @@ export async function createBookmark({
       items: values.link.split(/[ ,;]/).map((link) => ({
         link: link.trim(),
         title: values.title,
+        note: values.note,
         collectionId,
         tags: values.tags,
         pleaseParse: {},

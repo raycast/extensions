@@ -27,7 +27,7 @@ export type ProjectFile = {
   name: string;
   revn: number;
   isShared: boolean;
-  thumbnailId: string;
+  thumbnailId?: string;
 };
 
 export type PenpotPreferences = {

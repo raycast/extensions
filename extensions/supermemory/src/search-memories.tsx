@@ -6,11 +6,19 @@ import {
   Icon,
   showToast,
   Toast,
-  Clipboard,
-  openExtensionPreferences,
+  Keyboard,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
-import { searchMemories, checkApiConnection, type SearchResult } from "./api";
+import { useState } from "react";
+import {
+  fetchProjects,
+  removeMemory,
+  searchMemories,
+  type SearchResult,
+} from "./api";
+import { useCachedPromise, usePromise } from "@raycast/utils";
+import { withSupermemory } from "./withSupermemory";
 
 const extractContent = (memory: SearchResult) => {
   if (memory.chunks && memory.chunks.length > 0) {
@@ -46,66 +54,38 @@ const extractUrl = (memory: SearchResult) => {
   return null;
 };
 
-export default function Command() {
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+export default withSupermemory(Command);
+function Command() {
   const [searchText, setSearchText] = useState("");
-  const [hasSearched, setHasSearched] = useState(false);
-  const [isConnected, setIsConnected] = useState<boolean | null>(null);
+  const [filter, setFilter] = useState("");
 
-  useEffect(() => {
-    async function checkConnection() {
-      const connected = await checkApiConnection();
-      setIsConnected(connected);
-    }
-    checkConnection();
-  }, []);
+  const { isLoading: isLoadingProjects, data: projects } =
+    useCachedPromise(fetchProjects);
+  const {
+    isLoading,
+    data: searchResults = [],
+    mutate,
+  } = usePromise(
+    async (query: string, containerTag: string) => {
+      const q = query.trim();
+      if (!q) return [];
 
-  const performSearch = useCallback(
-    async (query: string) => {
-      if (!query.trim() || !isConnected) return;
-
-      try {
-        setIsLoading(true);
-        setHasSearched(true);
-
-        const results = await searchMemories({
-          q: query.trim(),
-          limit: 50,
+      const results = await searchMemories({
+        q,
+        limit: 50,
+        containerTags: containerTag ? [containerTag] : undefined,
+      });
+      if (!results.length) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Search Complete",
+          message: "No memories found for your query",
         });
-
-        setSearchResults(results);
-
-        if (results.length === 0) {
-          await showToast({
-            style: Toast.Style.Success,
-            title: "Search Complete",
-            message: "No memories found for your query",
-          });
-        }
-      } catch (error) {
-        console.error("Search failed:", error);
-        setSearchResults([]);
-      } finally {
-        setIsLoading(false);
       }
+      return results;
     },
-    [isConnected],
+    [searchText, filter],
   );
-
-  useEffect(() => {
-    if (!searchText.trim()) {
-      setSearchResults([]);
-      setHasSearched(false);
-      return;
-    }
-
-    const debounceTimer = setTimeout(() => {
-      performSearch(searchText);
-    }, 500);
-
-    return () => clearTimeout(debounceTimer);
-  }, [searchText, performSearch]);
 
   const formatDate = (dateString: string) => {
     try {
@@ -126,45 +106,70 @@ export default function Command() {
     return `${content.substring(0, maxLength)}...`;
   };
 
-  if (isConnected === false) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="API Key Required"
-          description="Please configure your Supermemory API key to search memories"
-          actions={
-            <ActionPanel>
-              <Action
-                title="Open Extension Preferences"
-                onAction={() => openExtensionPreferences()}
-                icon={Icon.Gear}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
+  const confirmAndRemoveMemory = async (memory: SearchResult) => {
+    const options: Alert.Options = {
+      icon: Icon.Trash,
+      title: "Remove Memory",
+      message: "Are you sure you want to remove this memory?",
+      primaryAction: {
+        style: Alert.ActionStyle.Destructive,
+        title: "Remove",
+      },
+    };
 
+    if (await confirmAlert(options)) {
+      try {
+        await mutate(removeMemory({ id: memory.documentId }), {
+          optimisticUpdate(data) {
+            return (data || []).filter(
+              (m) => m.documentId !== memory.documentId,
+            );
+          },
+          shouldRevalidateAfter: false,
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
+
+  const hasSearched = !isLoading && !searchResults.length;
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingProjects}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search your memories..."
       throttle
+      searchBarAccessory={
+        <List.Dropdown tooltip="Filter" onChange={setFilter}>
+          <List.Dropdown.Item icon="extension-icon.png" title="All" value="" />
+          {projects?.map((project) => (
+            <List.Dropdown.Item
+              key={project.id}
+              icon="extension-icon.png"
+              title={project.name}
+              value={project.containerTag}
+            />
+          ))}
+        </List.Dropdown>
+      }
     >
-      {!hasSearched && !searchText.trim() ? (
+      {hasSearched && !searchText.trim() ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="Search Your Memories"
           description="Type to search through your Supermemory collection"
         />
-      ) : hasSearched && searchResults.length === 0 ? (
+      ) : hasSearched ? (
         <List.EmptyView
           icon={Icon.Document}
           title="No Memories Found"
           description={`No memories found for "${searchText}"`}
+        />
+      ) : isLoading && searchText.trim() ? (
+        <List.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="Searching Your Memories"
         />
       ) : (
         searchResults.map((memory) => {
@@ -175,7 +180,7 @@ export default function Command() {
               key={memory.documentId}
               icon={url ? Icon.Link : Icon.Document}
               title={memory.title || "Untitled Memory"}
-              subtitle={truncateContent(content)}
+              subtitle={{ value: truncateContent(content), tooltip: content }}
               accessories={[
                 { text: formatDate(memory.createdAt) },
                 ...(memory.score
@@ -189,19 +194,28 @@ export default function Command() {
                     target={<MemoryDetail memory={memory} />}
                     icon={Icon.Eye}
                   />
-                  <Action
+                  <Action.CopyToClipboard
                     title="Copy Content"
-                    onAction={() => Clipboard.copy(content)}
-                    icon={Icon.Clipboard}
-                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd"], key: "c" },
+                      Windows: { modifiers: ["ctrl"], key: "c" },
+                    }}
+                    content={content}
                   />
                   {url && (
                     <Action.OpenInBrowser
                       title="Open URL"
                       url={url}
-                      shortcut={{ modifiers: ["cmd"], key: "o" }}
+                      shortcut={Keyboard.Shortcut.Common.Open}
                     />
                   )}
+                  <Action
+                    icon={Icon.Trash}
+                    title="Remove Memory"
+                    onAction={() => confirmAndRemoveMemory(memory)}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                    style={Action.Style.Destructive}
+                  />
                 </ActionPanel>
               }
             />
@@ -233,17 +247,19 @@ ${memory.score ? `**Relevance:** ${Math.round(memory.score * 100)}%` : ""}
       markdown={markdown}
       actions={
         <ActionPanel>
-          <Action
+          <Action.CopyToClipboard
             title="Copy Content"
-            onAction={() => Clipboard.copy(content)}
-            icon={Icon.Clipboard}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "c" },
+              Windows: { modifiers: ["ctrl"], key: "c" },
+            }}
+            content={content}
           />
           {url && (
             <Action.OpenInBrowser
               title="Open URL"
               url={url}
-              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              shortcut={Keyboard.Shortcut.Common.Open}
             />
           )}
         </ActionPanel>

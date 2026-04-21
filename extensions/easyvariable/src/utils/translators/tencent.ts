@@ -1,5 +1,5 @@
-import { getPreferenceValues } from "@raycast/api";
 import { tmt } from "tencentcloud-sdk-nodejs-tmt";
+import { getPreferenceValues } from "@raycast/api";
 
 const preferences = getPreferenceValues<ExtensionPreferences>();
 

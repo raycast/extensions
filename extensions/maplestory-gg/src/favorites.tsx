@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Action, ActionPanel, Grid, Icon, launchCommand, LaunchType, useNavigation } from "@raycast/api";
 import { CharacterDetail, RemoveFromFavoritesAction } from "./components.js";
 import { getFavoriteCharacters, sortCharacters } from "./utils.js";
@@ -11,22 +11,22 @@ export default function Favorites() {
   const [favoriteCharacters, setFavoriteCharacters] = useState<CharacterData[]>();
   const { push } = useNavigation();
 
-  const loadFavorites = async () => {
+  const loadFavorites = useCallback(async () => {
     const favoriteCharacters = await getFavoriteCharacters();
     setFavoriteCharacters(sortCharacters(favoriteCharacters, "Level"));
     setIsLoading(false);
-  };
+  }, []);
 
   useEffect(() => {
     loadFavorites();
-  }, []);
+  }, [loadFavorites]);
 
   useEffect(() => {
     if (favoriteCharacters) {
       const sortedCharacters = sortCharacters(favoriteCharacters, sortCharactersBy);
       setFavoriteCharacters(sortedCharacters);
     }
-  }, [sortCharactersBy]);
+  }, [favoriteCharacters, sortCharactersBy]);
 
   return (
     <Grid

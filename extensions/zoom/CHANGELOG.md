@@ -1,5 +1,13 @@
 # Zoom Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Windows Support] - 2026-01-05
+
+- Added Windows support for starting, joining, and scheduling Zoom meetings.
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 - Added AI tools for creating and editing meetings.

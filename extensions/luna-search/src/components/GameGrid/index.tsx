@@ -1,4 +1,6 @@
 import { Grid } from "@raycast/api";
+import { JSX } from "react";
+
 import { DISPLAY_VALUES } from "../../constants";
 import { EmptyGameGrid } from "./EmptyGameGrid";
 import { GameSummary } from "../../models";

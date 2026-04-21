@@ -33,11 +33,60 @@ Use the `@nuxt` agent inside Raycast AI Chat:
 - Explore modules and their capabilities
 - Solve common Nuxt development challenges
 
+### 📊 Nuxt Dev Server Monitor (Menu Bar)
+Stay connected to your development environment:
+- **Real-time Detection**: Automatically detects running Nuxt servers on ports 3000-3010
+- **Project Information**: View project name, version, memory, and CPU usage
+- **Quick Actions**:
+  - Open in browser
+  - Open GitHub repository
+  - Stop server
+  - **Create files instantly** (Component, Page, API Route, Composable)
+- **Direct Shortcuts**: Access Nuxt docs, components, and modules search
+- **Smart Indicator**: Shows server count with Nuxt logo in menu bar
+- Auto-refreshes every 30 seconds
+
+### ⚡ Quick Create Command
+Boost your productivity with instant file generation:
+- **Standalone Command**: Access from Raycast or from the menu bar
+- **Smart Templates**: Pre-configured for Nuxt best practices
+  - Components
+  - Pages
+  - API Routes
+  - Composables
+  - Layouts
+- **Custom Templates Registry**: Create and use your own templates
+  - Configure a templates directory in preferences
+  - Add multiple templates per file type (e.g., `ColorMode.vue`, `Button.vue`)
+  - Selecting a custom template auto-fills the file name
+  - Override default templates with your own `default.vue`/`default.ts`
+- **Naming Conventions**: Automatic PascalCase/kebab-case conversion
+- **File Picker**: Easy project directory selection
+- **Context-Aware**: Pre-fills path when launched from menu bar
+
+#### Custom Templates Structure
+```
+~/my-nuxt-templates/
+├── components/
+│   ├── default.vue      # Replaces the default component template
+│   ├── ColorMode.vue    # Custom "ColorMode" template
+│   └── Button.vue       # Custom "Button" template
+├── pages/
+│   └── default.vue
+├── api/
+│   └── default.ts
+├── layouts/
+│   └── default.vue
+└── composables/
+    └── default.ts
+```
+
 ### 📚 Nuxt Documentation Browser
-- Command: “Nuxt Documentation” (view)
+- Command: "Nuxt Documentation" (view)
 - Browse official docs by section (Get Started, Guide, API, Examples, Community)
 - Search titles and paths, including deep entries (e.g., WASM, JSX)
-- Opens pages using your versioned base (e.g., `https://nuxt.com/docs/4.x`)
+- **Copy Markdown**: Right-click to copy raw markdown source (Cmd+.)
+- Opens pages using Nuxt 4.x documentation
 
 ### 🧩 Nuxt Modules Explorer
 Discover and learn about the vast Nuxt ecosystem:
@@ -50,14 +99,16 @@ Discover and learn about the vast Nuxt ecosystem:
 Access Nuxt UI documentation and tools instantly:
 - `Search Component Theme`: Jump directly to any component's theme section
 - `Search Components`: Browse all components and open their docs/theme
+- **Copy Markdown**: Right-click to copy component documentation source (Cmd+.)
 - Preview components and their variations
+- Pre-configured for Nuxt UI v4
 
 ### ⚙️ Smart Configuration
 Customize to match your workflow (Preferences in Raycast):
 - `Prefix` for component names (default: `U`)
-- `Docs URL` for Nuxt UI (default: `https://ui.nuxt.com`)
-- `Nuxt Docs Url` for framework docs (default: `https://nuxt.com/docs/4.x`)
-- `UI Branch` for fetching themes from GitHub (default: `main`)
+- `Custom Templates Directory` for Quick Create custom templates
+
+The extension is pre-configured to work with Nuxt UI v4 and Nuxt 4.x documentation.
 
 ## 🎬 See It In Action
 
@@ -67,11 +118,15 @@ I recommend setting up a shortcut like `✦ + N` or `⌘ + N` for quick access.
 
 ## 🔥 Real-World Use Cases
 
+- **Quick File Generation**: Create a new page with SEO metadata in seconds from the menu bar
+- **Server Monitoring**: Track your dev server's memory and CPU usage in real-time
+- **Rapid Prototyping**: Generate components, pages, and API routes with pre-configured templates
 - **Component Development**: "Create a responsive navigation bar with dropdown menus"
 - **Module Discovery**: "Find the best SEO modules for my Nuxt project"
 - **Troubleshooting**: "Why isn't my Nuxt data fetching working?"
 - **Learning**: "Show me examples of using Nuxt composables"
 - **Theme Customization**: "Open the theme for `button` and show variants"
+- **Documentation Access**: Copy markdown sources to include in your own docs
 
 ## 👥 Contributing
 

@@ -34,9 +34,20 @@ export const {
   enableAiSearch,
   githubToken,
   releaseVersion,
+  shuffleOnStart,
+  usePasteInsteadOfCopy,
 } = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);
+
+export const copyOrPaste = async (content: string | number | Clipboard.Content) => {
+  if (usePasteInsteadOfCopy) {
+    Clipboard.paste(content);
+  } else {
+    Clipboard.copy(content);
+    await showHUD("Copied to Clipboard");
+  }
+};
 
 export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
   if (!launchContext) return "";
@@ -158,8 +169,7 @@ export const copySvg = async ({ version, icon, pathOnly }: { version: string; ic
   });
   if (pathOnly) svg = svg.replace(/^.+ d="([^"]+)".+$/, "$1");
   toast.style = Toast.Style.Success;
-  Clipboard.copy(svg);
-  await showHUD("Copied to Clipboard");
+  copyOrPaste(svg);
 };
 
 export const cleanAssetPack = async () => {
@@ -236,7 +246,7 @@ export const useSearch = ({ icons }: { icons: IconData[] }) => {
     "(icon slugs only, split with comma, up to 500 items, no markdown format, don't change data structure, no addition text, no spaces, do not return non-exist slugs)",
   ].join("\n");
   const execute = enableAiSearch && Boolean(searchString) && hasAccessToAi && filteredIcons.length === 0;
-  const { data, isLoading: aiIsLoading } = useAI(searchPrompt, { execute, model: AI.Model["OpenAI_GPT4o-mini"] });
+  const { data, isLoading: aiIsLoading } = useAI(searchPrompt, { execute });
   const searchResult = execute ? icons.filter((icon) => data.split(",").includes(icon.slug)) : filteredIcons;
   return { aiIsLoading, searchResult, setSearchString };
 };

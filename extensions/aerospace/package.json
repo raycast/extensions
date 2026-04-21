@@ -10,7 +10,8 @@
     "thewinger",
     "LightQuantum",
     "Mmehdi06",
-    "abhiy13"
+    "abhiy13",
+    "kim-raaschou-nielsen"
   ],
   "categories": [
     "Productivity",
@@ -29,6 +30,12 @@
       "name": "showConfig",
       "title": "Show Aerospace Config",
       "description": "Show config of the aerospace",
+      "mode": "view"
+    },
+    {
+      "name": "goToWorkspace",
+      "title": "Go to Workspace",
+      "description": "Switch to an Aerospace workspace",
       "mode": "view"
     },
     {

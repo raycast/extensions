@@ -20,6 +20,7 @@ import {
   getNumberFieldValidations,
   isEmoji,
 } from "../../utils";
+import { ObjectPropertyDropdown } from "../ObjectPropertyDropdown";
 
 export interface CreateObjectFormValues {
   spaceId?: string;
@@ -55,7 +56,6 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
     types,
     templates,
     lists,
-    objects,
     selectedSpaceId,
     setSelectedSpaceId,
     selectedTypeId,
@@ -66,12 +66,10 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
     setSelectedListId,
     listSearchText,
     setListSearchText,
-    objectSearchText,
-    setObjectSearchText,
-    isLoading,
+    isLoadingData,
   } = useCreateObjectData(draftValues);
 
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [typeKeysForLists, setTypeKeysForLists] = useState<string[]>([]);
 
   const selectedTypeDef = types.find((type) => type.id === selectedTypeId);
@@ -101,7 +99,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
   const { handleSubmit, itemProps } = useForm<CreateObjectFormValues>({
     initialValues: draftValues,
     onSubmit: async (values) => {
-      setLoading(true);
+      setIsLoading(true);
       try {
         await showToast({ style: Toast.Style.Animated, title: "Creating object..." });
         const propertiesEntries: PropertyLinkWithValue[] = [];
@@ -200,7 +198,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
       } catch (error) {
         await showFailureToast(error, { title: "Failed to create object" });
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     },
     validation: {
@@ -228,15 +226,16 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
   function getQuicklink(): { name: string; link: string } {
     const url = "raycast://extensions/any/anytype/create-object";
 
-    const defaults: Record<string, unknown> = {
-      space: selectedSpaceId,
-      type: selectedTypeId,
-      list: selectedListId,
-      name: itemProps.name.value,
-      icon: itemProps.icon.value,
-      description: itemProps.description.value,
-      body: itemProps.body.value,
-      source: itemProps.source.value,
+    const defaults: Record<string, PropertyFieldValue> = {
+      [itemProps.spaceId.id]: selectedSpaceId,
+      [itemProps.typeId.id]: selectedTypeId,
+      [itemProps.templateId.id]: selectedTemplateId,
+      [itemProps.listId.id]: selectedListId,
+      [itemProps.name.id]: itemProps.name.value,
+      [itemProps.icon.id]: itemProps.icon.value,
+      [itemProps.description.id]: itemProps.description.value,
+      [itemProps.body.id]: itemProps.body.value,
+      [itemProps.source.id]: itemProps.source.value,
     };
 
     properties.forEach((prop) => {
@@ -264,7 +263,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
   return (
     <Form
       navigationTitle="Create Object"
-      isLoading={loading || isLoading}
+      isLoading={isLoading || isLoadingData}
       enableDrafts={enableDrafts}
       actions={
         <ActionPanel>
@@ -280,7 +279,7 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
     >
       <Form.Dropdown
         id="spaceId"
-        title="Space"
+        title="Channel"
         value={selectedSpaceId}
         onChange={(v) => {
           setSelectedSpaceId(v);
@@ -288,13 +287,12 @@ export function CreateObjectForm({ draftValues, enableDrafts }: CreateObjectForm
           setSelectedTemplateId("");
           setSelectedListId("");
           setListSearchText("");
-          setObjectSearchText("");
         }}
         storeValue={true}
-        placeholder="Search spaces..."
-        info="Select the space where the object will be created"
+        placeholder="Search channels..."
+        info="Select the channel where the object will be created"
       >
-        {spaces?.map((space) => (
+        {spaces.map((space) => (
           <Form.Dropdown.Item key={space.id} value={space.id} title={space.name} icon={space.icon} />
         ))}
       </Form.Dropdown>
@@ -506,28 +504,15 @@ It supports:
                 );
               case PropertyFormat.Objects:
                 return (
-                  // TODO: TagPicker would be the more appropriate component, but it does not support onSearchTextChange
-                  <Form.Dropdown
-                    {...restItemProps}
+                  <ObjectPropertyDropdown
                     key={property.id}
+                    propertyKey={property.key}
                     title={title}
                     value={String(value ?? "")}
-                    onSearchTextChange={setObjectSearchText}
-                    throttle={true}
-                    placeholder={`Search objects in '${spaces.find((space) => space.id === selectedSpaceId)?.name}'...`}
-                  >
-                    {!objectSearchText && (
-                      <Form.Dropdown.Item
-                        key="none"
-                        value=""
-                        title="No Object"
-                        icon={{ source: "icons/type/document.svg", tintColor: defaultTintColor }}
-                      />
-                    )}
-                    {objects.map((object) => (
-                      <Form.Dropdown.Item key={object.id} value={object.id} title={object.name} icon={object.icon} />
-                    ))}
-                  </Form.Dropdown>
+                    spaceId={selectedSpaceId}
+                    spaceName={spaces.find((space) => space.id === selectedSpaceId)?.name || ""}
+                    restItemProps={restItemProps}
+                  />
                 );
               default:
                 console.warn(`Unsupported property format: ${property.format}`);

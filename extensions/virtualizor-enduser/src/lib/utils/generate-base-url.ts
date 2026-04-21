@@ -2,9 +2,9 @@ import { showFailureToast } from "@raycast/utils";
 import { VIRTUALIZOR_URL } from "../config";
 import { openExtensionPreferences } from "@raycast/api";
 
-export default function generateBaseUrl() {
+export default function generateBaseUrl(url?: string) {
   try {
-    const BASE_URL = new URL(VIRTUALIZOR_URL);
+    const BASE_URL = new URL(url || VIRTUALIZOR_URL);
     return BASE_URL;
   } catch (error) {
     showFailureToast(error, {

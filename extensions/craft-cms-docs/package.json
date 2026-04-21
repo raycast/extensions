@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "craft-cms-docs",
+  "title": "Craft CMS",
+  "description": "Search the official Craft CMS documentation, knowledge base, glossary, and plugin store.",
+  "icon": "extension-icon.png",
+  "author": "bensomething",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-docs",
+      "title": "Search Documentation",
+      "description": "Search the official Craft CMS documentation",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "term",
+          "type": "text",
+          "required": false,
+          "placeholder": "Search term"
+        }
+      ],
+      "preferences": [
+        {
+          "name": "cmsVersion",
+          "title": "Craft CMS Version",
+          "description": "Craft CMS docs version",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "5.x",
+              "value": "5.x"
+            },
+            {
+              "title": "4.x",
+              "value": "4.x"
+            },
+            {
+              "title": "3.x",
+              "value": "3.x"
+            },
+            {
+              "title": "2.x",
+              "value": "2.x"
+            },
+            {
+              "title": "1.x",
+              "value": "1.x"
+            }
+          ]
+        },
+        {
+          "name": "commerceVersion",
+          "title": "Craft Commerce Version",
+          "description": "Craft Commerce docs version",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "5.x",
+              "value": "5.x"
+            },
+            {
+              "title": "4.x",
+              "value": "4.x"
+            },
+            {
+              "title": "3.x",
+              "value": "3.x"
+            },
+            {
+              "title": "2.x",
+              "value": "2.x"
+            },
+            {
+              "title": "1.x",
+              "value": "1.x"
+            }
+          ]
+        },
+        {
+          "name": "viewMode",
+          "title": "View Mode",
+          "description": "Choose how search results are displayed",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Expanded",
+              "value": "rich"
+            },
+            {
+              "title": "Compact",
+              "value": "compact"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "search-plugins",
+      "title": "Search Plugins",
+      "description": "Search the Craft CMS plugin store",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "term",
+          "type": "text",
+          "required": false,
+          "placeholder": "Search term"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

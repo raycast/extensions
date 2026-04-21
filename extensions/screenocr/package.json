@@ -7,12 +7,17 @@
   "author": "huzef44",
   "contributors": [
     "anwarulislam",
-    "xilopaint"
+    "xilopaint",
+    "pernielsentikaer",
+    "chrismessina"
   ],
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
   "preferences": [
     {
       "name": "primaryLanguage",
@@ -122,6 +127,22 @@
       "default": true
     },
     {
+      "name": "playSound",
+      "description": "Play camera shutter sound when capturing screenshots",
+      "type": "checkbox",
+      "required": false,
+      "label": "Play sounds",
+      "default": true
+    },
+    {
+      "name": "showToast",
+      "description": "Show toast notifications for command results",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show toast messages",
+      "default": true
+    },
+    {
       "name": "ignoreLineBreaks",
       "description": "Ignores Line Breaks",
       "type": "checkbox",
@@ -175,15 +196,15 @@
   "dependencies": {
     "@raycast/api": "^1.100.3",
     "@raycast/utils": "^2.2.0",
-    "use-immer": "^0.11.0"
+    "raycast-cross-extension": "^0.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "24.0.13",
-    "@types/react": "19.1.8",
-    "eslint": "^8.57.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -191,8 +212,5 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  },
-  "platforms": [
-    "macOS"
-  ]
+  }
 }

@@ -21,8 +21,8 @@ interface FormData {
   visibility: keyof typeof VISIBILITY;
 }
 
-export default function SendMemoFormCommand(): JSX.Element {
-  const [nameError, setNameError] = useState<string>();
+export default function SendMemoFormCommand() {
+  const [nameError, setNameError] = useState<string | undefined>();
   const [files, setFiles] = useState<string[]>([]);
   const [createdMarkdown, setCreatedMarkdown] = useState<string>();
   const [createdUrl, setCreatedUrl] = useState<string>();
@@ -170,7 +170,7 @@ export default function SendMemoFormCommand(): JSX.Element {
         id="content"
         title="Content"
         placeholder="Enter Content"
-        error={nameError}
+        error={nameError ?? ""}
         onChange={dropNameErrorIfNeeded}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {

@@ -1,5 +1,12 @@
 # DuckDuckGo Image Search Changelog
 
+## [Windows Support] - 2025-10-13
+
+- Added platform-specific shortcuts for macOS and Windows.
+- Extended supported platforms to include Windows.
+- Introduced a fallback for the download directory and added validation.
+- Standardized naming to "DuckDuckGo" in metadata and documentation.
+
 ## [Save image] - 2025-10-09
 
 - Added functionality to save images.

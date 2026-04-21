@@ -1,5 +1,18 @@
 # Changelog
 
+## [Feature] - 2026-03-09
+
+- Feature: Added a per-model `Reasoning` toggle with an `Effort` selector (`none`, `low`, `medium`, `high`) in the model form.
+- Feature: Added support for passing `reasoning_effort` in Chat Completions requests only when the reasoning override is enabled.
+- Fix: Added automatic one-time retry without `reasoning_effort` when OpenAI-compatible providers do not support that parameter.
+- Feature: Change all occurence of `gpt-4o-mini` and the like to `gpt-5-nano`, as the latter is cheaper, more capable and more efficient.
+
+## [Added Windows Support] - 2025-12-16
+
+## [Feature] - 2025-12-08
+
+- Windows 11 support: vision commands can read selected images from File Explorer; app icon resolution falls back to executable paths on Windows.
+
 ## [Fix] - 2025-04-14
 
 - Fix: Actions such as copy, save, and speak were unavailable in chat messages of previous conversations.

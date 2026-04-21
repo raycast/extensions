@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, Icon } from "@raycast/api";
 
 interface Preferences {
   apiKey: string;
@@ -35,6 +35,11 @@ export interface ParcelApiResponse {
   deliveries: Delivery[];
 }
 
+export interface Carrier {
+  code: string;
+  name: string;
+}
+
 // Status code descriptions
 export const STATUS_DESCRIPTIONS: Record<number, string> = {
   0: "Completed",
@@ -52,18 +57,21 @@ export function getStatusDescription(statusCode: number): string {
   return STATUS_DESCRIPTIONS[statusCode] || "Unknown Status";
 }
 
-// Map status codes to icons
-export const STATUS_ICONS: Record<number, string> = {
-  0: "✅",
-  1: "❄️",
-  2: "🚚",
-  3: "📦",
-  4: "🚚",
-  5: "❓",
-  6: "⚠️",
-  7: "⛔️",
-  8: "ℹ️",
+const STATUS_ICONS: Record<number, Icon> = {
+  0: Icon.CheckCircle,
+  1: Icon.Snowflake,
+  2: Icon.Lorry,
+  3: Icon.Box,
+  4: Icon.Lorry,
+  5: Icon.QuestionMark,
+  6: Icon.Warning,
+  7: Icon.ExclamationMark,
+  8: Icon.Dot,
 };
+
+export function getStatusIcon(statusCode: number): Icon {
+  return STATUS_ICONS[statusCode] || Icon.QuestionMark;
+}
 
 export function getApiKey(): string {
   const preferences = getPreferenceValues<Preferences>();
@@ -73,6 +81,10 @@ export function getApiKey(): string {
   }
 
   return preferences.apiKey;
+}
+
+function getSystemLanguage(): string {
+  return Intl.DateTimeFormat().resolvedOptions().locale.slice(0, 2);
 }
 
 export function getDeliveriesUrl(filterMode: FilterMode): string {
@@ -85,6 +97,10 @@ export function getAPIHeaders(): Record<string, string> {
   };
 }
 
+export function getSupportedCarriersUrl(): string {
+  return "https://api.parcel.app/external/supported_carriers.json";
+}
+
 export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[]> {
   const url = getDeliveriesUrl(filterMode);
   const response = await fetch(url, {
@@ -92,7 +108,10 @@ export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[
   });
 
   if (!response.ok) {
-    throw new Error(`API request failed with status ${response.status} (${await response.text()})`);
+    const errorText = await response.text();
+    throw new Error(
+      `Failed to fetch deliveries: ${response.status} ${response.statusText}${errorText ? ` - ${errorText}` : ""}`,
+    );
   }
 
   const data = (await response.json()) as ParcelApiResponse;
@@ -105,9 +124,59 @@ export async function fetchDeliveries(filterMode: FilterMode): Promise<Delivery[
   return data.deliveries;
 }
 
+export async function addDelivery(
+  trackingNumber: string,
+  carrierCode: string,
+  description: string,
+  confirmationNotification: boolean,
+): Promise<void> {
+  const url = "https://api.parcel.app/external/add-delivery/";
+  const response = await fetch(url, {
+    headers: {
+      ...getAPIHeaders(),
+      "Content-Type": "application/json",
+    },
+    method: "POST",
+    body: JSON.stringify({
+      tracking_number: trackingNumber,
+      carrier_code: carrierCode,
+      description: description,
+      send_push_confirmation: confirmationNotification,
+      language: getSystemLanguage(),
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    let errorMessage = `Failed to add delivery: ${response.status} ${response.statusText}`;
+
+    // Parse JSON error response for better error message
+    try {
+      const errorData = JSON.parse(errorText);
+      if (errorData.error_message) {
+        errorMessage = errorData.error_message;
+      }
+    } catch {
+      // Otherwise use the raw error text
+      if (errorText) {
+        errorMessage = errorText;
+      }
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  const data = (await response.json()) as ParcelApiResponse;
+
+  const err = getAPIError(data);
+  if (err) {
+    throw err;
+  }
+}
+
 export function getAPIError(data: ParcelApiResponse): Error | null {
   if (!data.success) {
-    return new Error(data?.error_message || "Unknown API error");
+    return new Error(data?.error_message || "API request failed. Please check your API key and try again.");
   }
 
   return null;

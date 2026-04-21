@@ -112,8 +112,11 @@ function withCQLSpace(search: string, spaceKey?: string, sort?: string): string 
 }
 
 export async function fetchSearchByText(searchOptions: SearchOptions, signal?: AbortSignal) {
-  const { site, spaceKey, text, includeAttachments = false, sort } = searchOptions;
-  const types = includeAttachments ? "blogpost,page,attachment" : "blogpost,page";
+  const { site, spaceKey, text, includeAttachments = false, includeWhiteboards = false, sort } = searchOptions;
+  const typeList: string[] = ["blogpost", "page"];
+  if (includeAttachments) typeList.push("attachment");
+  if (includeWhiteboards) typeList.push("whiteboard");
+  const types = typeList.join(",");
   const cql = withCQLSpace(`type IN (${types}) and siteSearch ~ "${escCql(text)}"`, spaceKey, sort);
   return fetchSearchByCql(site, cql, signal, SEARCH_EXPAND);
 }
@@ -234,6 +237,7 @@ export interface SearchOptions {
   site: Site;
   text: string;
   includeAttachments?: boolean;
+  includeWhiteboards?: boolean;
   spaceKey?: string;
   sort?: string;
 }

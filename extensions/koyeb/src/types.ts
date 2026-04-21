@@ -10,6 +10,7 @@ export type Activity = {
     type: string;
     metadata?: {
       app_name?: string;
+      service_type?: string;
       definition?: {
         name: string;
       };

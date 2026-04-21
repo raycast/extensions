@@ -4,17 +4,18 @@ import { useEffect, useState } from "react";
 import { EmptyViewObject, ObjectListItem, ViewType } from "..";
 import { useObjectsInList } from "../../hooks";
 import { useListViews } from "../../hooks/useListViews";
-import { Space, ViewLayout } from "../../models";
-import { isEmoji, pluralize, processObject } from "../../utils";
+import { ObjectLayout, Space, ViewLayout } from "../../models";
+import { isEmoji, objectMatchesSearch, pluralize, processObject } from "../../utils";
 import { defaultTintColor } from "../../utils/constant";
 
 type CollectionListProps = {
   space: Space;
   listId: string;
   listName: string;
+  listLayout?: ObjectLayout;
 };
 
-export function CollectionList({ space, listId, listName }: CollectionListProps) {
+export function CollectionList({ space, listId, listName, listLayout }: CollectionListProps) {
   const [searchText, setSearchText] = useState("");
   const { views, viewsError, isLoadingViews, mutateViews } = useListViews(space.id, listId);
   const [viewId, setViewId] = useState(views?.[0]?.id);
@@ -22,6 +23,7 @@ export function CollectionList({ space, listId, listName }: CollectionListProps)
     space.id,
     listId,
     viewId,
+    searchText,
   );
 
   useEffect(() => {
@@ -31,7 +33,7 @@ export function CollectionList({ space, listId, listName }: CollectionListProps)
   }, [viewsError, objectsError]);
 
   const filteredObjects = objects
-    ?.filter((object) => object.name.toLowerCase().includes(searchText.toLowerCase()))
+    .filter((object) => objectMatchesSearch(object, searchText))
     .map((object) => {
       return processObject(object, false, mutateObjects);
     });
@@ -99,6 +101,9 @@ export function CollectionList({ space, listId, listName }: CollectionListProps)
               isNoPinView={true}
               isPinned={object.isPinned}
               searchText={searchText}
+              listId={listId}
+              listName={listName}
+              listLayout={listLayout}
             />
           ))}
         </List.Section>

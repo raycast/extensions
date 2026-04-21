@@ -5,7 +5,7 @@ import { NoVaultFoundMessage } from "./components/Notifications/NoVaultFoundMess
 import { noVaultPathsToast } from "./components/Toasts";
 import { RandomNote } from "./components/RandomNote";
 import { useObsidianVaults } from "./utils/hooks";
-import { Vault } from "./api/vault/vault.types";
+import { ObsidianVault } from "@/obsidian";
 
 export default function Command() {
   const { vaults, ready } = useObsidianVaults();
@@ -15,8 +15,13 @@ export default function Command() {
   } else if (vaults.length === 0) {
     return <NoVaultFoundMessage />;
   } else if (vaults.length > 1) {
-    return <VaultSelection vaults={vaults} target={(vault: Vault) => <RandomNote vault={vault} showTitle={true} />} />;
-  } else if (vaults.length == 1) {
+    return (
+      <VaultSelection
+        vaults={vaults}
+        target={(vault: ObsidianVault) => <RandomNote vault={vault} showTitle={true} />}
+      />
+    );
+  } else if (vaults.length === 1) {
     return <RandomNote vault={vaults[0]} showTitle={false} />;
   } else {
     noVaultPathsToast();

@@ -32,12 +32,6 @@ const getChromeFilePath = (fileName: ChromeFile, profile?: string) => {
     );
   }
 
-  if (!fs.existsSync(resolvedProfilePath)) {
-    throw new Error(
-      `The profile path ${resolvedProfilePath} does not exist. Please check your Chrome profile location by visiting chrome://version -> Profile Path. Then update it in Extension Settings -> Profile Path.`,
-    );
-  }
-
   return resolvedProfilePath;
 };
 

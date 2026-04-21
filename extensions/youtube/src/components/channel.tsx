@@ -19,7 +19,7 @@ import { Channel, getChannel, useRefresher } from "../lib/youtubeapi";
 import { OpenChannelInBrowser, SearchChannelVideosAction, ShowRecentPlaylistVideosAction } from "./actions";
 import { PinChannel, PinnedChannelActions, RecentChannelActions, addRecentChannel } from "./recent_channels";
 
-export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean | undefined }): JSX.Element {
+export function ChannelItemDetail(props: { channel: Channel; isLoading?: boolean | undefined }) {
   const channel = props.channel;
   let statistics;
   let mdParts = [];
@@ -92,7 +92,7 @@ interface ChannelItemProps {
   recent?: boolean;
 }
 
-export function ChannelItem(props: ChannelItemProps): JSX.Element {
+export function ChannelItem(props: ChannelItemProps) {
   const { view, primaryaction } = getPreferenceValues<Preferences>();
   const { channel, refresh } = props;
   const channelId = channel.id;
@@ -107,7 +107,7 @@ export function ChannelItem(props: ChannelItemProps): JSX.Element {
   }
   const thumbnail = channel.thumbnails?.high?.url || "";
 
-  const Actions = (): JSX.Element => {
+  const Actions = () => {
     const showDetail = (
       <Action.Push
         title="Show Details"
@@ -174,7 +174,7 @@ export function ChannelItem(props: ChannelItemProps): JSX.Element {
   );
 }
 
-export function ChannelItemDetailFetched(props: { channelId: string }): JSX.Element | null {
+export function ChannelItemDetailFetched(props: { channelId: string }) {
   const channelId = props.channelId;
   const { data, error, isLoading } = useRefresher<Channel | undefined>(async () => {
     if (channelId) {

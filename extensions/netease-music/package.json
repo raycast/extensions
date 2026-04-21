@@ -5,7 +5,9 @@
   "description": "Control the NeteaseMusic app with your keyboard",
   "icon": "netease-music.png",
   "author": "chyroc",
-  "license": "MIT",
+  "contributors": [
+    "IceGiraffe"
+  ],
   "keywords": [
     "music",
     "NeteaseMusic",
@@ -13,6 +15,7 @@
     "player",
     "media"
   ],
+  "license": "MIT",
   "commands": [
     {
       "name": "play",
@@ -55,6 +58,34 @@
       "subtitle": "NeteaseMusic",
       "description": "Dislike currently playing track in NeteaseMusic.",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-play",
+      "title": "Toggle Play/Pause",
+      "subtitle": "NeteaseMusic",
+      "description": "Toggle play or pause in NeteaseMusic.",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-lyrics",
+      "title": "Toggle Lyrics",
+      "subtitle": "NeteaseMusic",
+      "description": "Show or hide lyrics window in NeteaseMusic.",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-up-volume",
+      "title": "Volume Up",
+      "subtitle": "NeteaseMusic",
+      "description": "Turn up volume in NeteaseMusic.",
+      "mode": "no-view"
+    },
+    {
+      "name": "turn-down-volume",
+      "title": "Volume Down",
+      "subtitle": "NeteaseMusic",
+      "description": "Turn down volume in NeteaseMusic.",
+      "mode": "no-view"
     }
   ],
   "dependencies": {
@@ -75,6 +106,10 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -3,6 +3,26 @@ import type { RegistryEntry } from "./types";
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "atono",
+    title: "Atono",
+    description:
+      "AI-powered project management for product teams. Connect your AI assistant to Atono's workflow platform to create and update stories, track bugs, manage team assignments, and document fixes—all through natural language commands.",
+    icon: {
+      source: {
+        light: "https://atono-test.directus.app/assets/feaa7f21-4bbe-4164-b725-ff2729725cbf",
+        dark: "https://atono-test.directus.app/assets/869c76cd-bb5f-459c-88d1-2315a7b8a545",
+      },
+    },
+    homepage: "https://docs.atono.io/docs/mcp-server-for-atono/",
+    configuration: {
+      command: "docker",
+      args: ["run", "-i", "--rm", "-e", "X_API_KEY", "atonoai/atono-mcp-server"],
+      env: {
+        X_API_KEY: "<YOUR_API_KEY_HERE>",
+      },
+    },
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:
@@ -37,6 +57,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         "--api-key",
         "YOUR_API_KEY_HERE",
       ],
+    },
+  },
+  {
+    name: "circleback",
+    title: "Circleback",
+    description:
+      "Circleback's Model Context Protocol (MCP) server provides AI agents access to your Circleback data. It has tools available for searching and accessing meetings, transcripts, calendar events, emails, people, companies, and more.",
+    icon: "circleback.svg",
+    homepage: "https://circleback.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.circleback.ai/api/mcp"],
     },
   },
   {
@@ -269,6 +301,24 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "razuna",
+    title: "Razuna",
+    description:
+      "AI-powered digital asset management for teams. Connect your AI assistant to Razuna's platform to search, organize, and manage your files using natural language commands.",
+    icon: {
+      source: {
+        light:
+          "https://app.razuna.com/file/remote?i=6959b8cf1e1400a2cce596fc&f=t&dl=t&c=a0f49bf3ea58a5c444af4cc489e27dcf&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiIvZmlsZS9yZW1vdGU_aT02OTU5YjhjZjFlMTQwMGEyY2NlNTk2ZmMmZj10JmRsPXQmYz1hMGY0OWJmM2VhNThhNWM0NDRhZjRjYzQ4OWUyN2RjZiIsInR5cGUiOiJkaXJlY3QifQ.usKNeusn0MmM9xu7gi2OyWBoZ9fOEVeMPiXDrP0zMwo",
+        dark: "https://app.razuna.com/file/remote?i=6959b8cf1e1400a2cce596fc&f=t&dl=t&c=a0f49bf3ea58a5c444af4cc489e27dcf&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiIvZmlsZS9yZW1vdGU_aT02OTU5YjhjZjFlMTQwMGEyY2NlNTk2ZmMmZj10JmRsPXQmYz1hMGY0OWJmM2VhNThhNWM0NDRhZjRjYzQ4OWUyN2RjZiIsInR5cGUiOiJkaXJlY3QifQ.usKNeusn0MmM9xu7gi2OyWBoZ9fOEVeMPiXDrP0zMwo",
+      },
+    },
+    homepage: "https://help.razuna.com/p/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
+    },
+  },
+  {
     name: "Rube",
     title: "Rube - by Composio",
     description:
@@ -281,6 +331,17 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         npm_config_yes: "true",
       },
+    },
+  },
+  {
+    name: "sanity",
+    title: "Sanity",
+    description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
+    icon: "sanity.svg",
+    homepage: "https://www.sanity.io/docs/ai/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sanity.io", "--transport", "http-only"],
     },
   },
   {
@@ -522,12 +583,12 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
     name: "nuxt",
     title: "Nuxt",
-    description: "Access Nuxt documentation and modules with the public Nuxt MCP server",
+    description: "Access Nuxt documentation, migration guide, modules, and blog posts with the public Nuxt MCP server",
     icon: "nuxt.svg",
-    homepage: "https://mcp.nuxt.com/",
+    homepage: "https://nuxt.com/mcp",
     configuration: {
       command: "npx",
-      args: ["mcp-remote", "https://mcp.nuxt.space/sse"],
+      args: ["mcp-remote", "https://nuxt.com/mcp"],
     },
   },
   {
@@ -577,14 +638,14 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "anytype",
     title: "Anytype",
     description:
-      "A Model Context Protocol (MCP) server for Anytype that enables AI assistants to seamlessly interact with Anytype's API through natural language. Manage spaces, objects, properties, types and more in your knowledge base.",
+      "An MCP server enabling AI assistants to interact with Anytype - your safe haven for digital collaboration - to organize channels, pages, lists, and more through natural language.",
     icon: "anytype.png",
     homepage: "https://github.com/anyproto/anytype-mcp",
     configuration: {
       command: "npx",
       args: ["-y", "@anyproto/anytype-mcp"],
       env: {
-        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-05-20"}',
+        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-11-08"}',
       },
     },
   },
@@ -610,6 +671,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     configuration: {
       command: "npx",
       args: ["-y", "mcp-remote", "https://mcp.linear.app/sse"],
+    },
+  },
+  {
+    name: "routemesh",
+    title: "RouteMesh",
+    description:
+      "Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover.",
+    icon: "https://routeme.sh/icon.png",
+    homepage: "https://github.com/routemesh/routemesh-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@routemesh/mcp"],
+      env: {
+        ROUTEMESH_API_KEY: "YOUR_API_KEY_HERE",
+      },
     },
   },
 ];

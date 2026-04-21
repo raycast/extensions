@@ -28,7 +28,7 @@ import { getOffsetHrsDisplay } from "./helpers/getOffsetHrsDisplay";
 
 const ALL_TIMEZONES = Intl.supportedValuesOf("timeZone");
 
-function CreateBuddyForm(props: { onCreate: (buddy: TimezoneBuddy) => void }): JSX.Element {
+function CreateBuddyForm(props: { onCreate: (buddy: TimezoneBuddy) => void }) {
   const { pop } = useNavigation();
   const allTimezones = useMemo(() => ALL_TIMEZONES, []);
   const [nameError, setNameError] = useState<string | undefined>();
@@ -92,7 +92,7 @@ function EditBuddyForm(props: {
   buddy: TimezoneBuddy;
   index: number;
   onUpdate: (buddy: TimezoneBuddy, index: number) => void;
-}): JSX.Element {
+}) {
   const { pop } = useNavigation();
   const allTimezones = useMemo(() => ALL_TIMEZONES, []);
   const [nameError, setNameError] = useState<string | undefined>();
@@ -166,7 +166,7 @@ function CreateBuddyAction(props: { onCreate: (buddy: TimezoneBuddy) => void }) 
     <Action.Push
       icon={Icon.AddPerson}
       title="Add Buddy"
-      shortcut={{ modifiers: ["cmd"], key: "n" }}
+      shortcut={{ macOS: { modifiers: ["cmd"], key: "n" }, Windows: { modifiers: ["ctrl"], key: "n" } }}
       target={<CreateBuddyForm onCreate={props.onCreate} />}
     />
   );
@@ -181,7 +181,7 @@ function EditBuddyAction(props: {
     <Action.Push
       icon={Icon.Pencil}
       title={'Edit "' + props.buddy.name + '"'}
-      shortcut={{ modifiers: ["cmd"], key: "e" }}
+      shortcut={{ macOS: { modifiers: ["cmd"], key: "e" }, Windows: { modifiers: ["ctrl"], key: "e" } }}
       target={<EditBuddyForm buddy={props.buddy} index={props.index} onUpdate={props.onUpdate} />}
     />
   );
@@ -193,7 +193,7 @@ function DeleteBuddyAction(props: { onDelete: () => void }) {
       icon={Icon.Trash}
       title="Delete Buddy"
       style={Action.Style.Destructive}
-      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+      shortcut={{ macOS: { modifiers: ["cmd"], key: "x" }, Windows: { modifiers: ["ctrl"], key: "d" } }}
       onAction={props.onDelete}
     />
   );
@@ -316,8 +316,6 @@ export default function Command() {
       newBuddies[index] = newBuddies[index + 1];
       newBuddies[index + 1] = buddy;
       await updateBuddies(newBuddies);
-
-      await updateBuddies(newBuddies);
     }
   }
 
@@ -372,8 +370,8 @@ export default function Command() {
                       icon={Icon.Plus}
                       title="Add 1 Hour"
                       shortcut={{
-                        modifiers: ["cmd"],
-                        key: "arrowRight",
+                        macOS: { modifiers: ["cmd"], key: "arrowRight" },
+                        Windows: { modifiers: ["ctrl"], key: "arrowRight" },
                       }}
                       onAction={() => setCurrentHrOffset((o) => o + 1)}
                     />
@@ -381,23 +379,29 @@ export default function Command() {
                       icon={Icon.Minus}
                       title="Subtract 1 Hour"
                       shortcut={{
-                        modifiers: ["cmd"],
-                        key: "arrowLeft",
+                        macOS: { modifiers: ["cmd"], key: "arrowLeft" },
+                        Windows: { modifiers: ["ctrl"], key: "arrowLeft" },
                       }}
                       onAction={() => setCurrentHrOffset((o) => o - 1)}
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
                     <Action
-                      title="Move Up"
+                      title="Move up"
                       icon={Icon.ArrowUp}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "arrowUp" },
+                        Windows: { modifiers: ["shift"], key: "arrowUp" },
+                      }}
                       onAction={() => moveUp(index)}
                     />
                     <Action
                       title="Move Down"
                       icon={Icon.ArrowDown}
-                      shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "arrowDown" },
+                        Windows: { modifiers: ["shift"], key: "arrowDown" },
+                      }}
                       onAction={() => moveDown(index)}
                     />
                   </ActionPanel.Section>

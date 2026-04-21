@@ -1,4 +1,4 @@
-import { ActionPanel, Action, List } from "@raycast/api";
+import { ActionPanel, Action, List, Icon, closeMainWindow } from "@raycast/api";
 
 import { VM, VMState, VMAction } from "./types";
 import { findVMs, openVM, runVMAction } from "./actions";
@@ -9,7 +9,7 @@ export default function Command() {
 
   return (
     <List isLoading={state.isLoading} enableFiltering={true} searchBarPlaceholder="Search virtual machines...">
-      <List.Section title="VMs" subtitle={state.vms.length + ""}>
+      <List.Section title="All Virtual Machines" subtitle={state.vms.length + ""}>
         {state.vms.map((vm) => (
           <VMItem key={vm.id} vm={vm} />
         ))}
@@ -28,20 +28,31 @@ function VMItem({ vm }: { vm: VM }) {
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            {vm.state == VMState.Running && <Action title="Open" onAction={() => openVM(vm)} />}
-            {vm.state == VMState.Suspended && (
-              <Action title="Resume" onAction={() => runVMAction(vm, VMAction.Resume)} />
-            )}
-            {vm.state == VMState.Stopped && <Action title="Start" onAction={() => runVMAction(vm, VMAction.Start)} />}
-          </ActionPanel.Section>
-          <ActionPanel.Section>
             {vm.state == VMState.Running && (
-              <Action title="Suspend" onAction={() => runVMAction(vm, VMAction.Suspend)} />
+              <>
+                <Action title="Open" icon={Icon.Window} onAction={() => openVM(vm)} />
+                <Action title="Suspend" icon={Icon.Pause} onAction={() => runVMAction(vm, VMAction.Suspend)} />
+                <Action title="Reset" icon={Icon.ArrowClockwise} onAction={() => runVMAction(vm, VMAction.Reset)} />
+                <Action title="Force Stop" icon={Icon.Power} onAction={() => runVMAction(vm, VMAction.ForceStop)} />
+              </>
             )}
             {vm.state == VMState.Suspended && (
-              <Action title="Resume" onAction={() => runVMAction(vm, VMAction.Resume)} />
+              <>
+                <Action title="Resume" icon={Icon.Play} onAction={() => runVMAction(vm, VMAction.Resume)} />
+                <Action
+                  title="Start Then Force Stop"
+                  icon={Icon.Power}
+                  onAction={() => {
+                    closeMainWindow();
+                    runVMAction(vm, VMAction.Start);
+                    setTimeout(() => runVMAction(vm, VMAction.ForceStop), 5000);
+                  }}
+                />
+              </>
             )}
-            {vm.state == VMState.Stopped && <Action title="Start" onAction={() => runVMAction(vm, VMAction.Start)} />}
+            {vm.state == VMState.Stopped && (
+              <Action title="Start" icon={Icon.Play} onAction={() => runVMAction(vm, VMAction.Start)} />
+            )}
           </ActionPanel.Section>
         </ActionPanel>
       }

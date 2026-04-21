@@ -24,6 +24,13 @@ The exact steps may vary based on your Proxmox version. In **8.4.6.**:
 8. `Copy` "Token ID" and `Paste` in **Preferences**
 9. `Copy` "Secret" and `Paste` in **Preferences**
 
+### Troubleshooting
+
+#### Empty list of VMs/LXCs
+If you have an empty list of VMs/LXCs (while your account can see them in Proxmox), check your API token permissions:
+
+> **Privilege Separation**: Unchecked
+
 ### HTTPS certificate
 You need to setup a trusted certificate to work properly. You can do this by following the instructions here:
 https://pve.proxmox.com/wiki/Certificate_Management

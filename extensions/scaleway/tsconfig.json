@@ -6,10 +6,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
-    "rootDir": ".",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
     "listFiles": true,
+    "rootDir": ".",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "target": "es2022",
     "strict": true,
     "isolatedModules": true,

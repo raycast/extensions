@@ -6,7 +6,9 @@
   "icon": "qbittorrent.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "timmevandermeer"
+    "timmevandermeer",
+    "taken",
+    "Aayush9029"
   ],
   "pastContributors": [
     "J3n5en"
@@ -61,23 +63,32 @@
       "placeholder": "0",
       "default": "0",
       "required": false
+    },
+    {
+      "name": "redirectAfterAdding",
+      "title": "Go To Current Torrents After Adding",
+      "type": "checkbox",
+      "description": "Whether to redirect to the current torrents view after adding new torrents.",
+      "default": false,
+      "required": false,
+      "label": "Go to current torrents after adding"
     }
   ],
   "dependencies": {
-    "@ctrl/qbittorrent": "^9.4.0",
-    "@raycast/api": "^1.92.1",
+    "@ctrl/qbittorrent": "^9.11.2",
+    "@raycast/api": "^1.104.11",
     "change-case": "^5.4.4",
     "filesize": "^10.1.6"
   },
   "devDependencies": {
-    "@types/node": "~22.13.5",
-    "@types/react": "18.3.3",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
-    "prettier": "^3.5.2",
-    "typescript": "^5.7.3"
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -85,5 +96,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
 }

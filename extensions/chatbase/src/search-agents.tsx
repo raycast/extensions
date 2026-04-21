@@ -37,7 +37,7 @@ export default function Agents() {
       {chatbots.map((chatbot) => (
         <List.Item
           key={chatbot.id}
-          icon={{ source: "placeholder.webp", tintColor: chatbot.styles.button_color }}
+          icon={{ source: "placeholder.webp", tintColor: chatbot.styles?.button_color }}
           title={chatbot.name}
           accessories={[
             {

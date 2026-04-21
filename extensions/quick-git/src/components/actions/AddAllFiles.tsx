@@ -1,7 +1,7 @@
 import { Action, Icon, showToast } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
 import { useRepo } from "../../hooks/useRepo.js";
-import { useCheckStatus } from "../../hooks/useCheckStatus.js";
+import { useCheckStatus } from "../../hooks/useGitStatus.js";
 
 export function AddAllFiles() {
   const repo = useRepo();
@@ -23,7 +23,10 @@ export function AddAllFiles() {
       title="Add All Files"
       icon={Icon.PlusCircle}
       onAction={revalidate}
-      shortcut={{ key: "a", modifiers: ["cmd", "shift"] }}
+      shortcut={{
+        macOS: { key: "a", modifiers: ["cmd", "shift"] },
+        Windows: { key: "a", modifiers: ["ctrl", "shift"] },
+      }}
     />
   );
 }

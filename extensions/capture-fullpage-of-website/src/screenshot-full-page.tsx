@@ -60,7 +60,15 @@ export default function Command() {
       } catch (error) {
         toast.style = Toast.Style.Failure;
         toast.title = "Failed taking screenshot of website";
-        toast.message = String(error);
+        if (
+          error instanceof Error &&
+          (error.message.includes("Failed to launch") || error.message.includes("Executable doesn't exist"))
+        ) {
+          toast.message =
+            "Chrome/Chromium is not installed. Please install Chrome or try running `npx playwright@1.44.1 install --with-deps chromium` in your terminal.";
+        } else {
+          toast.message = String(error);
+        }
       }
     }
 

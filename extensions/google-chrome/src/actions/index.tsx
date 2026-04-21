@@ -1,7 +1,8 @@
 import { runAppleScript } from "run-applescript";
-import { closeMainWindow, LocalStorage, popToRoot } from "@raycast/api";
+import { LocalStorage, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { NOT_INSTALLED_MESSAGE } from "../constants";
+import { runAppleScript as runAppleScriptRaycast, showFailureToast } from "@raycast/utils";
 
 export async function getOpenTabs(useOriginalFavicon: boolean): Promise<Tab[]> {
   const faviconFormula = useOriginalFavicon
@@ -56,10 +57,7 @@ export async function openNewTab({
   profileOriginal?: string;
   openTabInProfile: SettingsProfileOpenBehaviour;
 }): Promise<boolean | string> {
-  setTimeout(() => {
-    popToRoot({ clearSearchBar: true });
-  }, 3000);
-  await Promise.all([closeMainWindow({ clearRootSearch: true }), checkAppInstalled()]);
+  await checkAppInstalled();
 
   let script = "";
 
@@ -111,7 +109,14 @@ export async function openNewTab({
       break;
   }
 
-  return await runAppleScript(script);
+  try {
+    await runAppleScriptRaycast(script);
+    await popToRoot({ clearSearchBar: true });
+    return true;
+  } catch (error) {
+    await showFailureToast(error);
+    return false;
+  }
 }
 
 export async function setActiveTab(tab: Tab): Promise<void> {
@@ -219,4 +224,49 @@ export async function createNewIncognitoWindow(): Promise<void> {
     end tell
     return true
   `);
+}
+
+export async function createNewGuestWindow(): Promise<void> {
+  // Use `open` with --args --guest to ensure guest mode even when AppleScript doesn't support it.
+  await checkAppInstalled();
+
+  await runAppleScript(`
+    do shell script "open -na 'Google Chrome' --args --guest"
+  `);
+}
+
+export async function createNewGuestWindowToWebsite(website: string): Promise<void> {
+  await checkAppInstalled();
+  await runAppleScript(`
+    set link to quoted form of "${website}"
+    do shell script "open -na 'Google Chrome' --args --guest " & link
+  `);
+}
+
+export async function nameCurrentWindow(): Promise<void> {
+  await checkAppInstalled();
+  await runAppleScript(`
+    tell application "Google Chrome" to activate
+    tell application "System Events"
+      tell process "Google Chrome"
+        click menu item "Name Window…" of menu "Window" of menu bar 1
+      end tell
+    end tell
+  `);
+}
+
+export async function getActiveTabURL(): Promise<string> {
+  await checkAppInstalled();
+
+  const url = await runAppleScript(`
+    tell application "Google Chrome"
+      try
+        return URL of active tab of front window
+      on error
+        return ""
+      end try
+    end tell
+  `);
+
+  return url;
 }

@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
 import { MODRINTH_BASE_URL, SortingType, SortingTypes } from "../utils/constants";
 import ProjectAPIResponseType from "../models/ProjectAPIResponseType";
-import { ReactNode } from "react";
+import { ReactElement } from "react";
 import VersionsListView from "../pages/VersionsListView";
 
 export default function ProjectInteractionMenu({
@@ -12,18 +12,18 @@ export default function ProjectInteractionMenu({
 }: {
   itemData: ProjectAPIResponseType | null;
   projectType: string;
-  detailsTarget?: ReactNode;
+  detailsTarget?: ReactElement;
   setSortingType?: (sortOption: SortingType) => void;
 }) {
   return (
     <ActionPanel title={`Options for ${itemData?.title}`} key={"general"}>
       {/* Section 1: General Actions */}
       <ActionPanel.Section>
-        {detailsTarget && <Action.Push title={"View Details"} icon={Icon.Info} target={detailsTarget} />}
+        {detailsTarget && <Action.Push title={"View Details"} icon={Icon.Info} target={<>{detailsTarget}</>} />}
         <Action.OpenInBrowser url={`${MODRINTH_BASE_URL}${projectType}/${itemData?.slug}`} />
         {setSortingType && (
           <ActionPanel.Submenu
-            title={"Sort By…"}
+            title={"Sort by…"}
             icon={Icon.ArrowClockwise}
             shortcut={{ key: "s", modifiers: ["cmd"] }}
           >

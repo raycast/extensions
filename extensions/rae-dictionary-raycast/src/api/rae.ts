@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 const API_BASE_URL = "https://rae-api.com";
 
 // Definition of a word (senses)

@@ -45,8 +45,8 @@ const JwtView = () => {
             showLogo: !!showLogo,
             showDetail: true,
           }}
-        />
-      )
+        />,
+      ),
     )}"/>`;
 
     const metadata = showMetadata && (
@@ -92,7 +92,7 @@ const JwtView = () => {
             </ActionPanel.Section>
             <ActionPanel.Section title={"HEADER:DATA"}>
               {headItems.map((item) => (
-                <Action.CopyToClipboard key={item.key} title={`Copy ${item.key} value`} content={item.value} />
+                <Action.CopyToClipboard key={item.key} title={`Copy ${item.key} Value`} content={item.value} />
               ))}
             </ActionPanel.Section>
           </ActionPanel>

@@ -77,13 +77,25 @@ export function parseRawMdDefinition(output: string, text: string): MdDefinition
   }
 }
 
-export async function getMdDefinitionExplanation(text: string): Promise<MdDefinition | null> {
+export interface MdDefinitionResult {
+  definition: MdDefinition | null;
+  error: string | null;
+}
+
+export async function getMdDefinitionExplanation(text: string): Promise<MdDefinitionResult> {
   try {
     const output = await executeWordCli(["query", text, "--raw"]);
-    return parseRawMdDefinition(output, text);
+    const definition = parseRawMdDefinition(output, text);
+    if (definition) {
+      return { definition, error: null };
+    } else {
+      // Parsing failed, show the raw output as error
+      return { definition: null, error: output.trim() || "Failed to parse the response" };
+    }
   } catch (error) {
-    console.error("Error getting md definition explanation:", error);
-    return null;
+    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
+    console.error("Error getting md definition explanation:", errorMessage);
+    return { definition: null, error: errorMessage };
   }
 }
 

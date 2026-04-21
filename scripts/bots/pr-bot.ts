@@ -11,6 +11,7 @@ type API = {
 };
 
 export default async ({ github, context }: API) => {
+  /*
   const assignReadyForReviewTo = "pernielsentikaer";
 
   if (context.payload.action === "ready_for_review" && !context.payload.pull_request.draft) {
@@ -24,6 +25,22 @@ export default async ({ github, context }: API) => {
       console.log(`Successfully assigned PR to ${assignReadyForReviewTo}`);
     } catch (error) {
       console.error(`Failed to assign PR to ${assignReadyForReviewTo}:`, error);
+    }
+  }
+  */
+
+  const isDocsPR = await checkForDocsInPullRequestDiff({ github, context });
+  if (isDocsPR) {
+    try {
+      await github.rest.issues.addLabels({
+        issue_number: context.issue.number,
+        owner: context.repo.owner,
+        repo: context.repo.repo,
+        labels: ["site-documentation"],
+      });
+      console.log("Added documentation label");
+    } catch (error) {
+      console.error("Failed to add documentation label:", error);
     }
   }
 
@@ -45,8 +62,8 @@ export default async ({ github, context }: API) => {
     return;
   }
 
-  // Previous expectations: You can expect an initial review within five business days.
-  const expectations = "You can expect an initial review within five business days.";
+  // Previous expectations: Due to our current reduced availability, the initial review may take up to 10 business days.
+  const expectations = "We're currently experiencing a high volume of incoming requests. As a result, the initial review may take up to 10-15 business days.";
 
   const codeowners = await getCodeOwners({ github, context });
 
@@ -227,6 +244,8 @@ This is especially helpful since there were no maintainers for this extension :p
       });
     }
 
+    const checkoutInstructions = getCheckoutInstructions(extensionFolder, { context });
+
     await comment({
       github,
       context,
@@ -236,7 +255,11 @@ This is especially helpful since there were no maintainers for this extension :p
         .map((x) => `@${x}`)
         .join(
           " "
-        )} you might want to have a look.\n\nYou can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.\n\n${expectations}`,
+        )} you might want to have a look.
+
+You can use [this guide](https://developers.raycast.com/basics/review-pullrequest) to learn how to check out the Pull Request locally in order to test it.
+${checkoutInstructions}
+${expectations}`,
     });
 
     return;
@@ -330,6 +353,22 @@ async function checkForAiInPullRequestDiff(
   }
 
   return aiFilesOrToolsExist;
+}
+
+async function checkForDocsInPullRequestDiff(
+  { github, context }: Pick<API, "github" | "context">
+): Promise<boolean> {
+  try {
+    const { data: files } = await github.rest.pulls.listFiles({
+      owner: context.repo.owner,
+      repo: context.repo.repo,
+      pull_number: context.issue.number,
+    });
+    return files.some((file) => file.filename.startsWith("docs/"));
+  } catch (error) {
+    console.error("Failed to check for docs in PR diff:", error);
+    return false;
+  }
 }
 
 async function getPlatformsFromPullRequestDiff(
@@ -472,6 +511,44 @@ async function comment({ github, context, comment: commentText }: Pick<API, "git
       body: commentText,
     });
   }
+}
+
+function getCheckoutInstructions(
+  extensionFolder: string,
+  { context }: Pick<API, "context">
+): string {
+  const pullRequest = context.payload.pull_request;
+  
+  // head.repo can be null if the fork was deleted
+  const forkUrl = pullRequest.head.repo?.clone_url;
+  const branch = pullRequest.head.ref;
+  const repoName = pullRequest.head.repo?.name;
+
+  if (!forkUrl || !branch || !extensionFolder || !repoName) {
+    console.log("Missing data for checkout instructions:", { forkUrl, branch, extensionFolder, repoName });
+    return '';
+  }
+
+  return `
+<details>
+<summary>📋 Quick checkout commands</summary>
+
+\`\`\`bash
+BRANCH="${branch}"
+FORK_URL="${forkUrl}"
+EXTENSION_NAME="${extensionFolder}"
+REPO_NAME="${repoName}"
+
+git clone -n --depth=1 --filter=tree:0 -b $BRANCH $FORK_URL
+cd $REPO_NAME
+git sparse-checkout set --no-cone "extensions/$EXTENSION_NAME"
+git checkout
+cd "extensions/$EXTENSION_NAME"
+npm install && npm run dev
+\`\`\`
+
+</details>
+`;
 }
 
 async function extensionLabel(extensionFolder: string, api: Pick<API, "github" | "context">) {

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zodme",
+  "title": "Zodme",
+  "description": "Look up a zodiac sign from a birthday",
+  "icon": "zodme-logo.png",
+  "author": "camib0b",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert-birth-date-to-zodiac-sign",
+      "title": "Get Zodiac Sign",
+      "description": "Get the zodiac sign and a short archetype description for a date.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.3.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.0.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

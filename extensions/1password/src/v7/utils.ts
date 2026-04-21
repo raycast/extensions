@@ -1,47 +1,12 @@
 import { Cache, Icon } from "@raycast/api";
-
-import fg from "fast-glob";
-import { homedir } from "os";
+import { sync } from "fast-glob";
+import { readFileSync } from "node:fs";
+import { homedir } from "node:os";
 
 import { V7Category, V7Item } from "./types";
-import { readFileSync } from "fs";
 
 const cache = new Cache();
-
 const ITEMS_CACHE_NAME = "@items";
-
-export function getV7Items(): { [key: string]: V7Category } | undefined {
-  if (cache.has(ITEMS_CACHE_NAME)) {
-    const items = cache.get(ITEMS_CACHE_NAME);
-    return JSON.parse(items as string);
-  }
-
-  const path = `${homedir()}/Library/Containers/com.agilebits.onepassword7/Data/Library/Caches/Metadata/1Password`;
-
-  try {
-    const items: V7Item[] = fg
-      .sync(`${path}/**/*.onepassword-item-metadata`, { onlyFiles: false, deep: 2 })
-      .map((file) => JSON.parse(readFileSync(file, "utf-8").toString()))
-      .sort((a, b) => a.itemTitle.localeCompare(b.itemTitle));
-
-    const categories: { [key: string]: V7Category } = items.reduce((section: { [key: string]: V7Category }, item) => {
-      const { categoryUUID, categorySingularName } = item;
-      section[categorySingularName] = section[categorySingularName] ?? {
-        id: categoryUUID,
-        name: categorySingularName,
-        items: [],
-      };
-      section[categorySingularName]["items"].push(item);
-      return section;
-    }, {});
-
-    cache.set(ITEMS_CACHE_NAME, JSON.stringify(categories));
-
-    return categories;
-  } catch (error) {
-    console.error(error);
-  }
-}
 
 export function getV7CategoryIcon(categoryUUID: string) {
   switch (categoryUUID) {
@@ -65,7 +30,40 @@ export function getV7CategoryIcon(categoryUUID: string) {
       return Icon.Car;
     case "112":
       return Icon.Code;
+
     default:
       return Icon.Lock;
+  }
+}
+export function getV7Items(): undefined | { [key: string]: V7Category } {
+  if (cache.has(ITEMS_CACHE_NAME)) {
+    const items = cache.get(ITEMS_CACHE_NAME);
+
+    return JSON.parse(items as string);
+  }
+
+  const path = `${homedir()}/Library/Containers/com.agilebits.onepassword7/Data/Library/Caches/Metadata/1Password`;
+
+  try {
+    const items: V7Item[] = sync(`${path}/**/*.onepassword-item-metadata`, { deep: 2, onlyFiles: false })
+      .map((file) => JSON.parse(readFileSync(file, "utf-8").toString()))
+      .sort((a, b) => a.itemTitle.localeCompare(b.itemTitle));
+    const categories: { [key: string]: V7Category } = items.reduce((section: { [key: string]: V7Category }, item) => {
+      const { categorySingularName, categoryUUID } = item;
+
+      section[categorySingularName] = section[categorySingularName] ?? {
+        id: categoryUUID,
+        items: [],
+        name: categorySingularName,
+      };
+      section[categorySingularName]["items"].push(item);
+      return section;
+    }, {});
+
+    cache.set(ITEMS_CACHE_NAME, JSON.stringify(categories));
+
+    return categories;
+  } catch (error) {
+    console.error(error);
   }
 }

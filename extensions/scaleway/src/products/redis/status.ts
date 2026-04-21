@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { Redis } from '@scaleway/sdk'
+import { Redisv1 } from '@scaleway/sdk'
 
-export const CLUSTER_STATUSES = Redis.v1.CLUSTER_TRANSIENT_STATUSES.reduce(
+export const CLUSTER_STATUSES = Redisv1.CLUSTER_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -24,6 +24,6 @@ export const CLUSTER_STATUSES = Redis.v1.CLUSTER_TRANSIENT_STATUSES.reduce(
   }
 )
 
-export const getClusterStatusIcon = (cluster: Redis.v1.Cluster) => CLUSTER_STATUSES[cluster.status]
-export const isClusterTransient = (cluster?: Redis.v1.Cluster) =>
-  cluster ? Redis.v1.CLUSTER_TRANSIENT_STATUSES.includes(cluster.status) : false
+export const getClusterStatusIcon = (cluster: Redisv1.Cluster) => CLUSTER_STATUSES[cluster.status]
+export const isClusterTransient = (cluster?: Redisv1.Cluster) =>
+  cluster ? Redisv1.CLUSTER_TRANSIENT_STATUSES.includes(cluster.status) : false

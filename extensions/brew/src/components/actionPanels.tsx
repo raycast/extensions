@@ -1,16 +1,19 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import {
-  brewIsInstalled,
-  brewInstallPath,
   brewInstallCommand,
+  brewInstallPath,
+  brewIsInstalled,
   brewUninstallCommand,
   brewUpgradeCommand,
-} from "../brew";
-import { Cask, Formula, OutdatedCask, OutdatedFormula } from "../brew";
-import { FormulaInfo } from "./formulaInfo";
-import { CaskInfo } from "./caskInfo";
+  type Cask,
+  type Formula,
+  type OutdatedCask,
+  type OutdatedFormula,
+} from "../utils";
+import { useTerminalApp } from "../utils/terminal";
 import * as Actions from "./actions";
-import { useTerminalApp } from "./runInTerminal";
+import { CaskInfo } from "./caskInfo";
+import { FormulaInfo } from "./formulaInfo";
 
 const DebugSection = (props: { obj: Cask | Formula }) => (
   <ActionPanel.Section>
@@ -21,7 +24,6 @@ const DebugSection = (props: { obj: Cask | Formula }) => (
           markdown={"```json\n" + JSON.stringify(props.obj, null, 2) + "\n```"}
           actions={
             <ActionPanel>
-              {/* eslint-disable-next-line @raycast/prefer-title-case */}
               <Action.CopyToClipboard title="Copy JSON" content={JSON.stringify(props.obj, null, 2)} />
             </ActionPanel>
           }
@@ -38,7 +40,7 @@ export function CaskActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { cask } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
@@ -81,7 +83,7 @@ export function CaskActionPanel(props: {
 
         <ActionPanel.Section>
           <Action.CopyToClipboard
-            title="Copy Cask Name"
+            title="Copy Cask ID"
             content={cask.token}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
@@ -107,13 +109,12 @@ export function CaskActionPanel(props: {
           <Actions.FormulaInstallAction formula={cask} onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
-          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
-
           <Action.CopyToClipboard
-            title="Copy Cask Name"
+            title="Copy Cask ID"
             content={cask.token}
             shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
           />
+          <Action.CopyToClipboard title="Copy Tap Name" content={cask.tap} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={brewInstallCommand(cask)}
@@ -149,7 +150,7 @@ export function FormulaActionPanel(props: {
   showDetails: boolean;
   isInstalled: (name: string) => boolean;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { formula } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 
@@ -167,6 +168,7 @@ export function FormulaActionPanel(props: {
           {formula.outdated && <Actions.FormulaUpgradeAction formula={formula} onAction={props.onAction} />}
           <Action.ShowInFinder path={brewInstallPath(formula)} />
           <Actions.FormulaPinAction formula={formula} onAction={props.onAction} />
+          <Actions.FormulaShowAllInstalled onAction={props.onAction} />
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser title="Open Formula" url={`https://formulae.brew.sh/formula/${formula.name}`} />
@@ -257,7 +259,7 @@ export function FormulaActionPanel(props: {
 export function OutdatedActionPanel(props: {
   outdated: OutdatedCask | OutdatedFormula;
   onAction: (result: boolean) => void;
-}): JSX.Element {
+}) {
   const { outdated } = props;
   const { terminalName, terminalIcon, runCommandInTerminal } = useTerminalApp();
 

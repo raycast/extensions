@@ -1,46 +1,117 @@
 # Mermaid to Image Changelog
 
-## [Add selected text support] - 2025-08-05
+## [Hybrid Renderer & Raycast Preview Improvements] - 2026-03-10
+
 ### Added
-- **Selected text support**: Extension now prioritizes selected text over clipboard content when generating diagrams
-- Users can now select Mermaid code in any application and run the extension to generate diagrams
-- Added fallback mechanism: Selected text → Clipboard content
-- New "Generate from Clipboard Only" action (Cmd+Shift+V) for cases where text selection doesn't work properly
-- Enhanced debugging logs to track input source and content validation
+
+- Hybrid renderer selection with `Auto`, `Beautiful`, and `Compatible` modes
+- `beautiful-mermaid` integration for supported SVG diagram types
+- `Beautiful Theme` preference for `beautiful-mermaid`
+- `Custom beautiful-mermaid Path` preference with local-over-bundled resolution
+- `Copy SVG Code` action for SVG output
+- ASCII preview item for supported `beautiful-mermaid` syntax in the manual result screen
+- Quick Look support with `cmd+y` for wide diagrams
+- Managed browser bootstrap flow for compatible rendering, stored under Raycast support storage
+- Vitest coverage for renderer selection, fallback behavior, SVG preview, and raster strategy
+
+### Changed
+
+- `generateMermaidDiagram()` now returns structured renderer results, including the actual engine used
+- SVG preview now uses a dedicated raster pipeline for reliable Raycast rendering
+- SVG `Copy Image` now copies a high-resolution raster image that matches the preview instead of copying raw SVG markup
+- Manual command execution flow is now separated from view code via `manual-command-service`
+- `mmdc` compatible rendering is explicitly Chromium-only; Safari is unsupported
+- `beautiful-mermaid` source resolution now prefers custom path, then global npm install, then bundled dependency
+- AI tool now uses hybrid rendering, saving SVG for supported syntax and falling back to compatible PNG when needed
+- AI tool now fails with an explicit bootstrap instruction when compatible rendering is needed but no browser has been approved yet
+- Browser setup prompts now also cover SVG preview and `Copy Image` cases that require browser-backed raster fidelity
+- Manual command defaults now favor `SVG + Auto (Hybrid)`
+- Preference labels were clarified so `Compatible Theme` and `Compatible Scale` clearly map to `mmdc`-only rendering
+- Command input resolution, preview actions, and executable lookup were refactored into smaller internal services
+- Compatible rendering now prefers user-installed browsers and otherwise offers a manual `Download Browser` flow instead of requiring a separate shell command
+- Development `docs/` content is now local-only and ignored from the publish branch
+- README and extension metadata were updated to reflect the hybrid renderer workflow and managed-browser requirements
+- README, CHANGELOG, and Raycast metadata now use consistent wording for `beautiful-mermaid`, `Compatible (mmdc)`, browser-backed rasterization, and `Download Browser`
 
 ### Improved
-- Better error messages indicating both input sources (selected text and clipboard)
-- Added troubleshooting tips for applications that may not support text selection
-- Toast notifications now show which source (selected/clipboard) is being used
-- More robust input validation to handle edge cases with special characters and multi-line content
+
+- Better preview fidelity for `beautiful-mermaid` SVG output, including colored arrows and clearer supersampled previews
+- Better fidelity for `sequenceDiagram` preview and SVG image copy by routing browser-sensitive SVGs away from the macOS raster path
+- Better UX for wide diagrams by exposing Quick Look directly from the result screen
+- Better terminal-oriented inspection by exposing pure ASCII preview for supported diagrams
+- Clearer `mmdc` error messages when Chrome/Chromium is missing
+- Higher default compatible raster scale for sharper PNG output and fallback previews
+- Full preference coverage for all 15 built-in `beautiful-mermaid` themes
+- Documentation updated to note the local-only `docs/` handling and explicit browser compatibility rules
+- Added a release checklist covering clean git state, metadata/doc sync, verification commands, and Raycast smoke tests
+- Safer operational logging with Mermaid payloads removed from debug output
+- Explicit Node development guidance via `.nvmrc` and `engines`
 
 ### Fixed
-- Improved handling of complex Mermaid syntax (like sequence diagrams with special characters)
-- Better empty input detection and user feedback
 
-## [Add support for AI extension] - 2024-05-09
+- Fixed blank or raw-text SVG previews inside Raycast
+- Fixed dark or incorrect colors in rasterized SVG previews
+- Fixed SVG clipboard copies losing arrows or dropping to low resolution
+- Fixed tall or narrow `classDiagram` previews being truncated by incorrect thumbnail rasterization
+- Fixed bundled `beautiful-mermaid` labels incorrectly showing `vunknown` in ASCII preview metadata
+- Removed duplicated SVG raster configuration between image render and copy paths by reusing `renderDefaultSvgPreviewRaster`
+- Fixed flowchart `linkStyle` preview and copied image arrowheads by routing custom-marker flowcharts to browser-backed rasterization when the macOS SVG raster path drops colored arrowheads
+- Fixed `xychart-beta` preview and copied image colors so the default series line keeps the intended blue fallback
+- Fixed `xychart-beta` line preview and copied image output by routing affected line charts to browser-backed rasterization when the macOS SVG raster path drops connecting lines
+- Fixed `sequenceDiagram` preview and copied image arrowheads by using browser-backed rasterization when macOS SVG rasterization is known to fail
+
+## [AI Tool Output & Preferences Update] - 2026-01-21
+
 ### Added
-- Added a tool (`generateMermaidImageTool`) allowing users to ask Raycast AI to generate Mermaid diagrams (e.g., flowcharts, sequence diagrams) from natural language descriptions and automatically copy the resulting image to the clipboard.
-- The new AI tool receives Mermaid syntax (often generated by the AI based on user prompts), utilizes the existing diagram generation engine (`@mermaid-js/mermaid-cli`), generates the image according to user preferences (PNG/SVG, theme), and copies the final image to the clipboard.
-- Included detailed instructions and examples in `package.json` to guide Raycast AI on accurately interpreting user requests, generating Mermaid syntax, and correctly utilizing the new tool for image generation and copying.
-- Registered the AI tool as a `no-view` command, enabling it to be invoked directly by Raycast AI in the background.
-- **Added AI Evals:** Implemented evaluation test cases (`evals` in `package.json`) to verify AI interaction with the tool and provide users with example prompts for generating diagrams via AI.
+
+- Scale preference dropdown for AI-generated images
+
+### Changed
+
+- AI tool response format now returns a minimal success message with a Preview link instead of inline markdown image rendering
+- AI tool parameter schema was updated to ensure `mermaidSyntax` is passed correctly
+- AI generation uses the user-selected scale with default `2`
+
+## [AI Chat Integration Enhancement] - 2026-01-17
+
+### Added
+
+- Raycast AI tool integration for Mermaid diagram generation
+- Permanent storage for AI-generated diagrams in `~/Downloads/MermaidDiagrams/`
+- Automatic cleanup of old temporary files for manual mode
+
+### Changed
+
+- Manual mode uses Raycast support storage for temporary files
+- AI mode uses persistent files in the Downloads folder
+- AI mode renders PNG output for chat-friendly sharing
+- Error handling throws explicit errors instead of returning failure strings
+
+## [Add Selected Text Support] - 2025-08-05
+
+### Added
+
+- Selected text support with clipboard fallback
+- Input priority: selected text first, clipboard second
+- A clipboard-only generation action for apps that do not expose selected text
+
+### Improved
+
+- Better user messaging when input cannot be read
+- Better validation for multi-line Mermaid syntax
+
+## [Add Support for AI Extension] - 2024-05-09
+
+### Added
+
+- Background AI tool for Mermaid diagram generation and clipboard copying
+- Tool instructions and evals in `package.json`
+- Raycast AI integration examples
 
 ## [Initial Version] - 2025-03-14
-### Added
-- Initial release of mermaid-to-image extension
-- Automatic conversion of clipboard Mermaid code to images
-- Support for PNG and SVG output formats
-- Multiple theme options (Default, Forest, Dark, Neutral)
-- Copy image directly to clipboard functionality
-- Save image to custom directory
-- Open image in default application
-- Automatic cleanup of temporary files
-- Detailed error handling and user feedback
-- Memory optimization for complex diagrams
 
-### Technical
-- Integration with mermaid-cli for high-quality diagram rendering
-- Automatic Node.js path detection
-- Environment variable configuration for improved stability
-- High-resolution image output with 2x scaling
+### Added
+
+- Initial Raycast command for converting Mermaid syntax to images
+- PNG and SVG output support
+- Theme selection, clipboard copy, save, open-in-default-app, and temporary file cleanup

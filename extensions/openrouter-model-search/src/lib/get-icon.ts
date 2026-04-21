@@ -405,6 +405,13 @@ function normalizeProvider(provider: string): string {
   return provider.replace(/-/g, "");
 }
 
+function findProviderIcon(providerId: string): string | undefined {
+  const provider = providerId.toLowerCase();
+  const normalizedProvider = normalizeProvider(provider);
+  const providerWithoutSuffix = removeCommonSuffixes(normalizedProvider);
+  return findIcon([normalizedProvider, providerWithoutSuffix]);
+}
+
 export function getModelIcon(model: OpenRouterModel) {
   const tokenizer = model.architecture.tokenizer.toLowerCase();
   const provider = model.id.split("/")[0]?.toLowerCase();
@@ -426,11 +433,7 @@ export function getModelIcon(model: OpenRouterModel) {
 }
 
 export function getProviderIcon(providerId: string): string | undefined {
-  const provider = providerId.toLowerCase();
-  const normalizedProvider = normalizeProvider(provider);
-  const providerWithoutSuffix = removeCommonSuffixes(normalizedProvider);
-
-  const icon = findIcon([normalizedProvider, providerWithoutSuffix]);
+  const icon = findProviderIcon(providerId);
 
   if (icon) {
     return `${BASE_ICON_URL}/${icon}.svg`;

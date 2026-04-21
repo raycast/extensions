@@ -9,8 +9,10 @@ import {
   open,
   Image,
   List,
+  Keyboard,
 } from "@raycast/api";
 import { format, formatDistanceToNow } from "date-fns";
+import { JSX } from "react";
 
 import {
   DatabaseProperty,
@@ -22,7 +24,7 @@ import {
   PageProperty,
   User,
 } from "../utils/notion";
-import { handleOnOpenPage } from "../utils/openPage";
+import { handleOnOpenPage, isNotionApp } from "../utils/openPage";
 import { DatabaseView } from "../utils/types";
 
 import { DatabaseList } from "./DatabaseList";
@@ -121,31 +123,35 @@ export function PageListItem({
   const OpenInAppAction = (
     <Action title={`Open in App`} icon={"notion-logo.png"} onAction={() => handleOnOpenPage(page, setRecentPage)} />
   );
+  const { primaryAction, open_in } = getPreferenceValues<Preferences.SearchPage>();
+
   const OpenInBrowserAction = (
     <Action
       title={`Open in Browser`}
       icon={Icon.Globe}
       onAction={async () => {
         if (!page.url) return;
-        if (open_in?.name === "Notion") {
-          open(page.url);
-        } else open(page.url, open_in);
+        // When the preferred app is Notion, "Open in Browser" should still
+        // open in the default browser — not hand the HTTPS URL to the Notion
+        // app (which just activates it without navigating).
+        if (isNotionApp(open_in)) {
+          await open(page.url);
+        } else {
+          await open(page.url, open_in);
+        }
         await setRecentPage(page);
-        closeMainWindow();
+        await closeMainWindow();
       }}
     />
   );
 
-  const { primaryAction, open_in } = getPreferenceValues<Preferences.SearchPage>();
-
-  const OpenPageActions =
-    open_in?.name == "Notion" // Default app is Notion
-      ? primaryAction == "notion"
-        ? [OpenInAppAction, OpenInRaycastAction, OpenInBrowserAction]
-        : [OpenInRaycastAction, OpenInAppAction, OpenInBrowserAction]
-      : primaryAction == "notion"
-        ? [OpenInBrowserAction, OpenInRaycastAction]
-        : [OpenInRaycastAction, OpenInBrowserAction];
+  const OpenPageActions = isNotionApp(open_in) // Default app is Notion
+    ? primaryAction == "notion"
+      ? [OpenInAppAction, OpenInRaycastAction, OpenInBrowserAction]
+      : [OpenInRaycastAction, OpenInAppAction, OpenInBrowserAction]
+    : primaryAction == "notion"
+      ? [OpenInBrowserAction, OpenInRaycastAction]
+      : [OpenInRaycastAction, OpenInBrowserAction];
 
   const pageWord = page.object.charAt(0).toUpperCase() + page.object.slice(1);
 
@@ -182,14 +188,14 @@ export function PageListItem({
               <Action.Push
                 title="Append Content to Page"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<AppendToPageForm page={page} />}
               />
             ) : (
               <Action.Push
                 title="Create New Page"
                 icon={Icon.Plus}
-                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                shortcut={Keyboard.Shortcut.Common.New}
                 target={<CreatePageForm defaults={{ database: page.id }} mutate={mutate} />}
               />
             )}
@@ -200,7 +206,7 @@ export function PageListItem({
               title={`Delete ${pageWord}`}
               icon={Icon.Trash}
               style={Action.Style.Destructive}
-              shortcut={{ modifiers: ["ctrl"], key: "x" }}
+              shortcut={Keyboard.Shortcut.Common.Remove}
               onAction={async () => {
                 if (
                   await confirmAlert({
@@ -264,7 +270,7 @@ export function PageListItem({
               <Action.CopyToClipboard
                 title={`Copy ${pageWord} URL`}
                 content={page.url}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
               <Action.CopyToClipboard
                 title="Copy Formatted URL"
@@ -272,7 +278,7 @@ export function PageListItem({
                   html: `<a href="${page.url}" title="${title}">${title}</a>`,
                   text: title,
                 }}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                shortcut={Keyboard.Shortcut.Common.CopyName}
               />
               <Action.Paste
                 title={`Paste ${pageWord} URL`}
@@ -282,7 +288,7 @@ export function PageListItem({
               <Action.CopyToClipboard
                 title={`Copy ${pageWord} Title`}
                 content={title}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
+                shortcut={Keyboard.Shortcut.Common.CopyPath}
               />
             </ActionPanel.Section>
           ) : null}

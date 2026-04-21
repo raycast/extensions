@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useContext } from "react";
 import { sdk, SDKContext } from "../sdk";
+import CopyIDAction from "../common/CopyIDAction";
 
 export default function Files({ bucket }: { bucket: sdk.Models.Bucket }) {
   const { storage } = useContext(SDKContext);
@@ -31,7 +32,18 @@ export default function Files({ bucket }: { bucket: sdk.Models.Bucket }) {
           }
         />
       ) : (
-        files.map((file) => <List.Item key={file.$id} icon={Icon.Document} title={file.$id} />)
+        files.map((file) => (
+          <List.Item
+            key={file.$id}
+            icon={Icon.Document}
+            title={file.$id}
+            actions={
+              <ActionPanel>
+                <CopyIDAction item={file} />
+              </ActionPanel>
+            }
+          />
+        ))
       )}
     </List>
   );

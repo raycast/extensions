@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { List, ActionPanel, Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
 import {
   archiveMemo,
@@ -9,60 +9,52 @@ import {
   getAttachmentBinToBase64,
   restoreMemo,
 } from "./api";
-import { MemoInfoResponse, ROW_STATUS } from "./types";
+import { MemoInfoResponse, MeResponse, ROW_STATUS } from "./types";
 
-export default function MemosListCommand(): JSX.Element {
+export default function MemosListCommand() {
   const [searchText, setSearchText] = useState("");
-  const [currentUserId, setCurrentUserId] = useState<number>();
+  const [currentUserName, setCurrentUserName] = useState<string>();
   const [state, setState] = useState(ROW_STATUS.NORMAL);
-  const { isLoading, data, revalidate, pagination } = getAllMemos(currentUserId, { state });
+  const { isLoading, data, revalidate, pagination } = getAllMemos(currentUserName, { state });
   const { isLoading: isLoadingUser, data: userData } = getMe();
-  const [filterList, setFilterList] = useState<MemoInfoResponse[]>([]);
+  const [markdownByMemoName, setMarkdownByMemoName] = useState<Record<string, string>>({});
+  const loadingMarkdownMemoNames = useRef(new Set<string>());
 
   useEffect(() => {
-    const user = userData.user || {};
-    if (!isLoadingUser && user.name) {
-      const userId = +user.name.split("/")[1];
-      setCurrentUserId(userId);
+    if (!isLoadingUser && userData && "user" in userData) {
+      const user = (userData as MeResponse).user;
+      if (user && user.name) {
+        setCurrentUserName(user.name);
+      }
     }
-  }, [isLoadingUser]);
-
-  useEffect(() => {
-    if (currentUserId) {
-      revalidate();
-    }
-  }, [currentUserId]);
+  }, [isLoadingUser, userData]);
 
   useEffect(() => {
     const dataList = data || [];
+    for (const item of dataList) {
+      if (
+        item.attachments.length === 0 ||
+        markdownByMemoName[item.name] ||
+        loadingMarkdownMemoNames.current.has(item.name)
+      ) {
+        continue;
+      }
 
-    setFilterList(
-      dataList
-        .filter((item) => item.content.includes(searchText))
-        .map((item) => {
-          item.markdown = item.content;
-          if (item.attachments.length > 0) {
-            getItemMarkdown(item);
-          }
-          return item;
-        }) || [],
-    );
-  }, [searchText]);
+      loadingMarkdownMemoNames.current.add(item.name);
+      void getItemMarkdown(item).finally(() => {
+        loadingMarkdownMemoNames.current.delete(item.name);
+      });
+    }
+  }, [data, markdownByMemoName]);
 
-  useEffect(() => {
-    const dataList = data || [];
-    setFilterList(
-      dataList.map((item) => {
-        item.markdown = item.content;
-
-        if (item.attachments.length > 0) {
-          getItemMarkdown(item);
-        }
-
-        return item;
-      }),
-    );
-  }, [data]);
+  const filterList = useMemo(() => {
+    return (data || [])
+      .filter((item) => item.content.includes(searchText))
+      .map((item) => ({
+        ...item,
+        markdown: markdownByMemoName[item.name] ?? item.content,
+      }));
+  }, [data, markdownByMemoName, searchText]);
 
   function getItemUrl(item: MemoInfoResponse) {
     const url = getRequestUrl(`/${item.name}`);
@@ -83,14 +75,15 @@ export default function MemosListCommand(): JSX.Element {
 
     markdown += attachmentMarkdowns.join("");
 
-    setFilterList((prevList) => {
-      const updatedList = prevList.map((prevItem) => {
-        if (prevItem.name === item.name) {
-          return { ...prevItem, markdown };
-        }
-        return prevItem;
-      });
-      return updatedList;
+    setMarkdownByMemoName((prev) => {
+      if (prev[item.name] === markdown) {
+        return prev;
+      }
+
+      return {
+        ...prev,
+        [item.name]: markdown,
+      };
     });
   }
 
@@ -195,13 +188,13 @@ export default function MemosListCommand(): JSX.Element {
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || isLoadingUser}
       filtering={false}
       onSearchTextChange={setSearchText}
       navigationTitle="Search Memos"
       searchBarPlaceholder="Search your memo..."
       isShowingDetail
-      pagination={pagination}
+      pagination={pagination!}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Dropdown With Items"
@@ -226,7 +219,7 @@ export default function MemosListCommand(): JSX.Element {
               {(item.state === ROW_STATUS.ARCHIVED && deleteComponent(item)) || null}
             </ActionPanel>
           }
-          detail={<List.Item.Detail markdown={item.markdown} />}
+          detail={<List.Item.Detail markdown={item.markdown ?? null} />}
         />
       ))}
     </List>

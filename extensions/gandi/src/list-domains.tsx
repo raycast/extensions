@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { showFailureToast, usePromise } from "@raycast/utils";
-import { useState, useCallback, useMemo } from "react";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState, useMemo } from "react";
 import * as gandiAPI from "./api";
 import { GandiDomain } from "./types";
 import DomainDetail from "./components/DomainDetail";
@@ -13,16 +13,15 @@ export default function ListDomains() {
   const [filter, setFilter] = useState<FilterKey>("all");
   const [sort, setSort] = useState<SortKey>("days_asc");
 
-  const fetchDomains = useCallback(async () => {
-    try {
-      return await gandiAPI.getDomains();
-    } catch (error) {
-      await showFailureToast(error, { title: "Failed to fetch domains" });
-      return [];
-    }
-  }, []);
-
-  const { data: domains, isLoading, revalidate } = usePromise(fetchDomains, []);
+  const {
+    data: domains,
+    isLoading,
+    revalidate,
+  } = useCachedPromise(gandiAPI.getDomains, [], {
+    failureToastOptions: {
+      title: "Failed to fetch domains",
+    },
+  });
 
   const daysUntil = (d: GandiDomain) =>
     Math.ceil((new Date(d.dates.registry_ends_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
@@ -67,17 +66,15 @@ export default function ListDomains() {
 
   const toggleAutoRenew = async (domain: GandiDomain) => {
     try {
-      await showToast({
+      const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Updating auto-renewal...",
       });
 
       await gandiAPI.setAutoRenew(domain.fqdn, !domain.autorenew);
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Auto-renewal ${!domain.autorenew ? "enabled" : "disabled"}`,
-      });
+      toast.style = Toast.Style.Success;
+      toast.title = `Auto-renewal ${!domain.autorenew ? "enabled" : "disabled"}`;
 
       revalidate();
     } catch (error) {
@@ -128,13 +125,13 @@ export default function ListDomains() {
             <Action.CopyToClipboard
               title="Copy Domain Name"
               content={domain.fqdn}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
+              shortcut={{ macOS: { modifiers: ["cmd"], key: "c" }, Windows: { modifiers: ["ctrl"], key: "c" } }}
             />
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
               onAction={() => revalidate()}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              shortcut={Keyboard.Shortcut.Common.Refresh}
             />
           </ActionPanel>
         }

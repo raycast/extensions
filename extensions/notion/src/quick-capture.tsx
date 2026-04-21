@@ -13,7 +13,6 @@ import {
 } from "@raycast/api";
 import { useForm, withAccessToken } from "@raycast/utils";
 import { parseHTML } from "linkedom";
-import fetch from "node-fetch";
 import { useState, useEffect } from "react";
 
 import { useSearchPages } from "./hooks";
@@ -52,7 +51,8 @@ const getPageDetail = async (url: string) => {
   try {
     const response = await fetch(url);
     const data = await response.text();
-    const { document } = parseHTML(data);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { document } = parseHTML(data) as any;
     const reader = new Readability(document);
     const parsedDocument = reader.parse();
     const content = parsedDocument?.textContent;
@@ -159,7 +159,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         }
 
         await showToast({ style: Toast.Style.Success, title: "Captured content to page" });
-      } catch (error) {
+      } catch {
         await showToast({ style: Toast.Style.Failure, title: "Failed capturing content to page" });
       }
     },

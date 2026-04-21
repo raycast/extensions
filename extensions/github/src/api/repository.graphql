@@ -30,6 +30,7 @@ fragment ExtendedRepositoryFields on Repository {
   mergeCommitAllowed
   squashMergeAllowed
   rebaseMergeAllowed
+  autoMergeAllowed
   updatedAt
   pushedAt
   stargazerCount
@@ -156,6 +157,17 @@ query dataForRepository($owner: String!, $name: String!) {
       nodes {
         id
         title
+      }
+    }
+    owner {
+      ... on Organization {
+        projectsV2(first: 50) {
+          totalCount
+          nodes {
+            id
+            title
+          }
+        }
       }
     }
     pullRequestTemplates {

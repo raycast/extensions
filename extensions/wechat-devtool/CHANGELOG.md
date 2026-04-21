@@ -1,5 +1,11 @@
 # WeChat DevTool Changelog
 
+## [1.4.0] - 2025-11-14
+
+### Features
+
+- Support Windows
+
 ## [v1.3.0] - 2025-09-09
 
 ### Features
@@ -10,7 +16,7 @@
 
 ### Features
 
-Added support for displaying branches in both Git and Mercurial projects.
+- Added support for displaying branches in both Git and Mercurial projects.
 
 > ⚠️ Notice\
 > After updating to v1.2.0, please open "Configure Projects" and Save once (no changes needed) to record the repository type for each project.\

@@ -13,7 +13,7 @@ import { getIMDbUrl, getPosterUrl, getTraktUrl } from "./lib/helper";
 import { TraktShowHistoryListItem, withPagination } from "./lib/schema";
 
 export default function Command() {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | undefined>(undefined);
   const [searchText, setSearchText] = useState<string>("");
   const [actionLoading, setActionLoading] = useState(false);
   const traktClient = initTraktClient();
@@ -87,7 +87,7 @@ export default function Command() {
         episodes: [
           {
             ids: {
-              trakt: episode.show.ids.trakt,
+              trakt: episode.episode.ids.trakt,
             },
             watched_at: new Date().toISOString(),
           },

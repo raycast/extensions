@@ -51,7 +51,7 @@ export async function getChats(searchText: string = ""): Promise<Chat[]> {
   if (!rawData) return [];
 
   const uniqueChatIdentifiers = [...new Set(rawData.map((c) => c.chat_identifier))];
-  const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers);
+  const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, false);
   const contactMap = createContactMap(contacts);
 
   const chats = rawData.map((c) => {

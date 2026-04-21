@@ -1,0 +1,91 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "linkace",
+  "title": "Linkace",
+  "description": "Adds link to Linkace",
+  "icon": "extension-icon.png",
+  "author": "jaspermayone",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-link-to-linkace",
+      "title": "Add Link to Linkace",
+      "description": "Save a link to your LinkAce instance with full form",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add-link",
+      "title": "Quick Add Link to LinkAce",
+      "description": "Quickly save a link from clipboard to LinkAce",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "LinkAce Base URL",
+      "description": "Your LinkAce instance URL (e.g., https://linkace.example.com)",
+      "placeholder": "https://linkace.example.com"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "required": true,
+      "title": "API Token",
+      "description": "Your LinkAce API token"
+    },
+    {
+      "name": "defaultTags",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Tags",
+      "description": "Comma-separated tags to add by default",
+      "placeholder": "raycast, bookmarks"
+    },
+    {
+      "name": "isPrivateByDefault",
+      "type": "checkbox",
+      "required": false,
+      "title": "Private by Default",
+      "label": "Make links private by default",
+      "description": "Check this to make all new links private by default"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

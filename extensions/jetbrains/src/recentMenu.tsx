@@ -1,5 +1,5 @@
 import { Icon, MenuBarExtra, open } from "@raycast/api";
-import { JetBrainsIcon, recentEntry, toolsInstall } from "./util";
+import { JetBrainsIcon, recentEntry, toolsInstall, supportedMajorVersions } from "./util";
 import { openInApp } from "./components/OpenInJetBrainsApp";
 import { useAppHistory } from "./useAppHistory";
 import { openToolbox } from "./components/OpenJetBrainsToolbox";
@@ -25,11 +25,15 @@ export default function ProjectList(): React.JSX.Element {
         />
       </MenuBarExtra>
     );
-  } else if (!toolboxApp.isV2) {
+  } else if (!toolboxApp.isSupported) {
+    const supportedVersionsText = supportedMajorVersions.map((v) => `V${v}`).join(", ");
+
     return (
       <MenuBarExtra isLoading={isLoading} icon={menuIcon}>
-        <MenuBarExtra.Item title={"Wrong Jetbrains Toolbox version, please use V2"} />
-        <MenuBarExtra.Item title={`Current ToolBox version: ${toolboxApp.version}`} />
+        <MenuBarExtra.Item title={`Unsupported JetBrains Toolbox version detected.`} />
+        <MenuBarExtra.Item title={`Your version: ${toolboxApp.version}`} />
+        <MenuBarExtra.Item title={`Supported versions: ${supportedVersionsText}`} />
+        <MenuBarExtra.Item title={`Please use one of the supported versions.`} />
       </MenuBarExtra>
     );
   }
@@ -61,7 +65,7 @@ export default function ProjectList(): React.JSX.Element {
                   onAction={openInApp(
                     appHistory.find((history) => history.title === fav.appName) || appHistory[0],
                     fav,
-                    visitActions.visit
+                    visitActions.visit,
                   )}
                 />
               ))}
@@ -86,7 +90,7 @@ export default function ProjectList(): React.JSX.Element {
                   onAction={openInApp(
                     appHistory.find((history) => history.title === recent.appName) || appHistory[0],
                     recent,
-                    visitActions.visit
+                    visitActions.visit,
                   )}
                 />
               ))}
@@ -130,7 +134,7 @@ export default function ProjectList(): React.JSX.Element {
                                 onAction={openInApp(app, recent, visitActions.visit)}
                               />
                             )
-                          ) : null
+                          ) : null,
                         )
                     : null}
                 </MenuBarExtra.Section>

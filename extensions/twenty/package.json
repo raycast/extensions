@@ -7,7 +7,8 @@
   "author": "NabhagMotivaras",
   "contributors": [
     "chrisdadev13",
-    "xmok"
+    "xmok",
+    "0xdhrv"
   ],
   "categories": [
     "Productivity",
@@ -51,18 +52,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.68.1",
-    "@raycast/utils": "^1.12.5",
+    "@raycast/api": "^1.103.8",
+    "@raycast/utils": "^2.2.2",
     "node-fetch": "^3.3.2",
-    "zod": "^3.23.8"
+    "zod": "^4.1.13"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -70,5 +71,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

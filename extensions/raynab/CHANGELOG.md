@@ -1,5 +1,17 @@
 # Raynab Changelog
 
+## [Security: Refresh Lockfile] - 2026-03-27
+
+### 🔧 Technical Updates
+- Refreshed `package-lock.json` to update transitive `rollup` to `4.60.0` and address security advisories.
+
+## [Fixed Invalid Date Error in Transaction Form] - 2026-01-19
+
+### 🐞 Bug Fixes
+- Fixed `RangeError: Invalid time value` error that occurred when creating transactions
+- Replaced unreliable `new Date(new Date().toLocaleDateString())` pattern with `new Date()` to avoid locale-dependent date parsing issues
+- Resolves startup errors caused by invalid Date objects when calling `toISOString()`
+
 ## [Fixed Currency Format Validation in Transaction Forms] - 2025-08-04
 
 ### 🐞 Bug Fixes

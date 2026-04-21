@@ -1,19 +1,27 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { Environment, EnvironmentDetails, Project, ProjectDetails, Resource } from "./lib/types";
 import useCoolify from "./lib/use-coolify";
-import { isValidCoolifyUrl } from "./lib/utils";
+import { generateCoolifyUrl, isValidCoolifyUrl } from "./lib/utils";
 import InvalidUrl from "./lib/components/invalid-url";
 import OpenInCoolify from "./lib/components/open-in-coolify";
-import { getAvatarIcon } from "@raycast/utils";
+import { getAvatarIcon, useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import CreateProject from "./lib/components/projects/create";
 import UpdateProject from "./lib/components/projects/update";
 import EnvironmentVariables from "./lib/components/environment-variables";
+import { API_HEADERS } from "./lib/config";
+import { coolify } from "./lib/coolify";
 
 export default function Projects() {
   if (!isValidCoolifyUrl()) return <InvalidUrl />;
 
-  const { isLoading, data: projects = [], revalidate } = useCoolify<Project[]>("projects");
+  const {
+    isLoading,
+    data: projects = [],
+    mutate,
+  } = useFetch<Project[]>(generateCoolifyUrl("api/v1/projects"), {
+    headers: API_HEADERS,
+  });
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search project">
@@ -34,14 +42,49 @@ export default function Projects() {
                 <Action.Push
                   icon={Icon.Pencil}
                   title="Update Project"
-                  target={<UpdateProject project={project} onUpdated={revalidate} />}
+                  target={<UpdateProject project={project} onUpdated={mutate} />}
                   shortcut={Keyboard.Shortcut.Common.Edit}
                 />
                 <Action.Push
                   icon={Icon.Plus}
                   title="Add Project"
-                  target={<CreateProject onAdded={revalidate} />}
+                  target={<CreateProject onAdded={mutate} />}
                   shortcut={Keyboard.Shortcut.Common.New}
+                />
+                <Action
+                  icon={Icon.Trash}
+                  title="Delete Project"
+                  onAction={() =>
+                    confirmAlert({
+                      icon: { source: Icon.XMarkCircle, tintColor: Color.Red },
+                      title: "Warning",
+                      message:
+                        "This operation is permanent and cannot be undone. Please think again before proceeding!",
+                      primaryAction: {
+                        style: Alert.ActionStyle.Destructive,
+                        title: "Delete",
+                        async onAction() {
+                          const toast = await showToast(Toast.Style.Animated, "Deleting", project.name);
+                          try {
+                            await mutate(coolify.projects.delete(project.uuid), {
+                              optimisticUpdate(data) {
+                                return data?.filter((p) => p.uuid !== project.uuid);
+                              },
+                              shouldRevalidateAfter: false,
+                            });
+                            toast.style = Toast.Style.Success;
+                            toast.title = "Deleted";
+                          } catch (error) {
+                            toast.style = Toast.Style.Failure;
+                            toast.title = "Failed";
+                            toast.message = `${error}`;
+                          }
+                        },
+                      },
+                    })
+                  }
+                  shortcut={Keyboard.Shortcut.Common.Remove}
+                  style={Action.Style.Destructive}
                 />
                 <OpenInCoolify url={`project/${project.uuid}`} />
               </ActionPanel>

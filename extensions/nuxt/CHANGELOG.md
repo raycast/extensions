@@ -1,5 +1,55 @@
 # Nuxt Extension Changelog
 
+## [2.2.0] - 2025-12-13
+
+✨ New Features
+
+- **Added**: Custom Templates Registry for Quick Create
+  - Configure a custom templates directory in preferences
+  - Add your own `.vue` and `.ts` templates for components, pages, API routes, layouts, and composables
+  - Multiple templates per file type (e.g., `ColorMode.vue`, `Button.vue` for components)
+  - Custom templates take priority over defaults with automatic fallback
+  - Selecting a custom template auto-fills the file name for faster workflow
+  - Expected folder structure: `components/`, `pages/`, `api/`, `layouts/`, `composables/`
+- **Added**: Added new components: editor, editorDragHandle, editorEmojiMenu, editorMentionMenu, editorSuggestionMenu, editorToolbar, empty, scrollArea
+- **Added**: Added new action to copy the markdown link of a component (search-components) and page (search-nuxt-docs)
+
+## [2.1.1] - 2025-10-15
+
+- **Fixed**: Added Windows support
+
+## [2.1.0] - 2025-10-15
+
+✨ New Features
+
+- **Added**: Nuxt Dev Server Monitor - Menu bar indicator that detects running Nuxt development servers
+  - Real-time detection of running Nuxt/Nitro processes on ports 3000-3010
+  - Displays project name from package.json instead of port number
+  - Shows project info: version, port, memory usage, CPU usage
+  - Quick actions: Open in browser, Open GitHub repo, Stop server
+  - **Quick Create**: Create Nuxt files directly from the menu bar (Component, Page, API Route, Composable)
+  - Direct shortcuts to Nuxt documentation, components, and modules search
+  - Automatically refreshes every 30 seconds
+  - Shows server count in menu bar with Nuxt logo
+- **Added**: Quick Create Command - Create Nuxt files from templates
+  - Standalone command accessible from Raycast
+  - File picker to select project directory
+  - Pre-configured templates for common Nuxt file types:
+    - Vue Components
+    - Pages
+    - API Routes
+    - Composables
+    - Layouts
+  - Smart naming conventions (PascalCase for components, kebab-case for pages/routes)
+  - Integrated into menu bar for each detected server
+- **Added**: Copy Page Markdown action - Right-click on any documentation page to copy its raw markdown source (Cmd+.)
+- **Added**: Copy Component Markdown action - Right-click on any component to copy its documentation markdown source (Cmd+.)
+
+🚀 Improvements
+
+- **Simplified**: Removed URL configuration preferences - now uses Nuxt UI v4 and Nuxt 4.x by default
+- **Refactored**: Extracted shared markdown fetching utilities for better code maintainability
+
 ## [2.0.1] - 2025-09-29
 
 🐛 Bug Fixes

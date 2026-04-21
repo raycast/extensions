@@ -170,6 +170,29 @@ interface Member {
   role: string;
 }
 
+interface WorkerItem {
+  id: string;
+  etag: string;
+  created_on: string;
+  modified_on: string;
+  logpush?: boolean;
+  placement_mode?: string;
+  usage_model?: string;
+  has_assets?: boolean;
+  has_modules?: boolean;
+}
+
+interface Worker {
+  id: string;
+  createdOn: string;
+  modifiedOn: string;
+  logpush: boolean;
+  placementMode?: string;
+  usageModel?: string;
+  hasAssets: boolean;
+  hasModules: boolean;
+}
+
 class Service {
   client: AxiosInstance;
   cache: Cache = new Cache();
@@ -361,6 +384,13 @@ class Service {
       };
     });
   }
+
+  async listWorkers(accountId: string): Promise<Worker[]> {
+    const response = await this.client.get<Response<WorkerItem[]>>(
+      `accounts/${accountId}/workers/scripts`,
+    );
+    return response.data.result.map((item) => formatWorker(item));
+  }
 }
 
 function formatZone(item: ZoneItem): Zone {
@@ -408,6 +438,29 @@ function formatDeployment(item: DeploymentItem): Deployment {
   };
 }
 
+function formatWorker(item: WorkerItem): Worker {
+  const {
+    id,
+    created_on,
+    modified_on,
+    logpush,
+    placement_mode,
+    usage_model,
+    has_assets,
+    has_modules,
+  } = item;
+  return {
+    id,
+    createdOn: created_on,
+    modifiedOn: modified_on,
+    logpush: logpush ?? false,
+    placementMode: placement_mode,
+    usageModel: usage_model,
+    hasAssets: has_assets ?? false,
+    hasModules: has_modules ?? false,
+  };
+}
+
 export default Service;
 export type {
   Account,
@@ -420,6 +473,7 @@ export type {
   MemberStatus,
   Page,
   Source,
+  Worker,
   Zone,
   ZoneStatus,
 };
