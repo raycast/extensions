@@ -5,11 +5,11 @@ import BookmarkItem from "./components/BookmarkItem";
 import CollectionsDropdown from "./components/CollectionsDropdown";
 import { Bookmark } from "./types";
 import { useRequest } from "./hooks/useRequest";
-import { useLastUsedCollection } from "./hooks/useLastUsedCollection";
+import { LAST_USED_COLLECTION_KEY, useLastUsedCollection } from "./hooks/useLastUsedCollection";
 
 export default function LatestBookmarks() {
   const preferences: Preferences = getPreferenceValues();
-  const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>("last-used-collection", "0");
+  const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>(LAST_USED_COLLECTION_KEY, "0");
 
   const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } = useLastUsedCollection();
 
