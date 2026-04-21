@@ -1,8 +1,7 @@
-import { getPreferenceValues } from "@raycast/api";
 import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
-import { getCustomNpxPath } from "../preferences";
+import { getCustomNpxPath, preferences } from "../preferences";
 import type { InstalledSkill, Skill, SkillLockEntry } from "../shared";
 import { execAsync } from "./exec-async";
 import { getExecOptions } from "./exec-options";
@@ -226,6 +225,7 @@ export async function removeSkill(skillName: string, agentDisplayNames?: string[
 interface GitHubTreeResponse {
   sha: string;
   tree: Array<{ path: string; sha: string; type: string }>;
+  truncated?: boolean;
 }
 
 async function fetchRepoTree(source: string, token: string | undefined): Promise<GitHubTreeResponse | null> {
@@ -241,7 +241,11 @@ async function fetchRepoTree(source: string, token: string | undefined): Promise
     const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`, {
       headers,
     });
-    if (res.ok) return (await res.json()) as GitHubTreeResponse;
+    if (res.ok) {
+      const data = (await res.json()) as GitHubTreeResponse;
+      if (data.truncated) return null;
+      return data;
+    }
     if (res.status === 403 || res.status === 429) return null;
   }
   return null;
@@ -263,7 +267,7 @@ export async function checkForUpdates(): Promise<string[]> {
     byRepo.set(entry.source, list);
   }
 
-  const { githubToken } = getPreferenceValues<{ githubToken?: string }>();
+  const { githubToken } = preferences;
 
   const results = await Promise.all(
     [...byRepo.entries()].map(async ([source, skills]) => {
