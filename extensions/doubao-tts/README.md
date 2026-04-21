@@ -24,7 +24,7 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 - **Smart Chunking**: split long text by sentence and punctuation.
 - **Pipelined Playback**: synthesize the next text chunk while the current chunk is playing.
 - **Model Switching**: supports Doubao TTS 2.0, TTS 1.0, and voice clone resource IDs.
-- **New and Legacy Auth**: use the new API Key flow or keep legacy App ID / Access Key credentials.
+- **API Key Auth**: uses the current Volcengine `X-Api-Key` authentication flow.
 
 ## Screenshots
 
@@ -41,18 +41,14 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 
 1. Install **Doubao TTS** from the Raycast Store.
 2. Open the extension preferences.
-3. Configure one authentication method:
-   - Preferred: fill **API Key** from the new Volcengine Doubao Speech console.
-   - Legacy fallback: leave API Key empty and fill **App ID** + **Access Key**.
+3. Fill **API Key** from the current Volcengine Doubao Speech console.
 4. Bind a hotkey to **Quick Read Selected Text** for the fastest workflow.
 
 ## Configuration
 
 | Setting | Description | Required |
 | --- | --- | :---: |
-| API Key | New Volcengine Doubao Speech API Key. Used first when present. | Recommended |
-| App ID | Legacy Volcengine TTS App ID. Used only when API Key is empty. | Optional |
-| Access Key | Legacy Volcengine TTS Access Key. Used only when API Key is empty. | Optional |
+| API Key | Volcengine Doubao Speech API Key. | Required |
 | Model Version | TTS model/resource ID. Defaults to Doubao TTS 2.0. | Optional |
 | Default Voice | Voice used by Quick Read when no override is selected. | Optional |
 | Speech Rate | Playback speed from 0.5x to 2.0x. | Optional |
@@ -82,7 +78,7 @@ Doubao TTS is a high-quality Chinese AI speech synthesis engine with natural voi
 ## Technical Details
 
 - **API**: Volcengine Doubao TTS V3 WebSocket bidirectional streaming
-- **Auth**: `X-Api-Key` + `X-Api-Resource-Id` + per-connection `X-Api-Connect-Id`, with legacy fallback to `X-Api-App-Id` + `X-Api-Access-Key`
+- **Auth**: `X-Api-Key` + `X-Api-Resource-Id` + per-connection `X-Api-Connect-Id`
 - **Response**: binary V3 WebSocket frames with streamed MP3 audio payloads
 - **Audio**: MP3, 24000 Hz
 - **Chunking**: smart split by punctuation, up to 4096 UTF-8 bytes per chunk

@@ -5,7 +5,7 @@
 - Add Select Quick Read Voice for choosing and previewing the default Quick Read voice
 - Add action to set any listed voice as the Quick Read voice
 - Sync the TTS 2.0 voice selector with the official Volcengine Doubao voice catalog
-- Support new Volcengine X-Api-Key authentication with legacy App ID/Access Key fallback
+- Use Volcengine X-Api-Key authentication only
 - Switch synthesis transport to the V3 bidirectional WebSocket streaming API
 - Add a unique X-Api-Connect-Id header for each WebSocket connection
 - Increase the default text chunk size for fewer WebSocket sessions on medium-length articles

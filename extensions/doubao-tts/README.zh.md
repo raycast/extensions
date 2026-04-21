@@ -20,7 +20,7 @@
 - **智能分片**：按句子和标点拆分长文本。
 - **流水线播放**：当前分片播放时，后台预合成下一分片。
 - **模型切换**：支持豆包 TTS 2.0、TTS 1.0 和声音复刻资源 ID。
-- **新旧鉴权兼容**：支持新版 API Key，也保留旧版 App ID / Access Key。
+- **API Key 鉴权**：使用当前火山引擎 `X-Api-Key` 鉴权方式。
 
 ## 截图
 
@@ -28,16 +28,11 @@
 
 ## 配置
 
-首次使用前，请打开扩展偏好设置，并配置一种鉴权方式：
-
-- 推荐：填写新版控制台中的 **API Key**。
-- 兼容旧版：留空 API Key，填写 **App ID** 和 **Access Key**。
+首次使用前，请打开扩展偏好设置，并填写当前控制台中的 **API Key**。
 
 | 配置项 | 说明 | 必填 |
 | --- | --- | :---: |
-| API Key | 新版豆包语音 API Key，填写后优先使用。 | 推荐 |
-| App ID | 旧版火山引擎 TTS App ID，仅在 API Key 为空时使用。 | 可选 |
-| Access Key | 旧版火山引擎 TTS Access Key，仅在 API Key 为空时使用。 | 可选 |
+| API Key | 豆包语音 API Key。 | 必填 |
 | Model Version | 语音合成模型，默认 TTS 2.0。 | 可选 |
 | Default Voice | Quick Read 默认音色。 | 可选 |
 | Speech Rate | 语速，0.5x 到 2.0x。 | 可选 |
@@ -67,7 +62,7 @@
 ## 技术细节
 
 - **API**：火山引擎豆包 TTS V3 WebSocket 双向流式接口
-- **鉴权**：`X-Api-Key` + `X-Api-Resource-Id` + 每次连接唯一的 `X-Api-Connect-Id`，并兼容旧版 `X-Api-App-Id` + `X-Api-Access-Key`
+- **鉴权**：`X-Api-Key` + `X-Api-Resource-Id` + 每次连接唯一的 `X-Api-Connect-Id`
 - **响应**：V3 WebSocket 二进制帧，音频 payload 为流式 MP3 数据
 - **音频**：MP3，24000 Hz
 - **分片**：按标点智能拆分，每片不超过 4096 UTF-8 字节

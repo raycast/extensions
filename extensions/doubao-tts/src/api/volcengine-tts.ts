@@ -16,8 +16,7 @@ const SERVER_AUDIO_ONLY_RESPONSE = 0xb;
 const SERVER_ERROR_RESPONSE = 0xf;
 const MESSAGE_FLAG_WITH_EVENT = 0x4;
 
-type TTSAuthHeaders = Record<"X-Api-Resource-Id" | "X-Api-Connect-Id", string> &
-  Partial<Record<"X-Api-Key" | "X-Api-App-Id" | "X-Api-Access-Key", string>>;
+type TTSAuthHeaders = Record<"X-Api-Key" | "X-Api-Resource-Id" | "X-Api-Connect-Id", string>;
 
 enum TTSWsEvent {
   StartConnection = 1,
@@ -65,25 +64,16 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
 
 function buildAuthHeaders(prefs: Preferences, resourceId: string, connectId: string): TTSAuthHeaders {
   const apiKey = prefs.apiKey?.trim();
-  const appId = prefs.appId?.trim();
-  const accessKey = prefs.accessKey?.trim();
-  const headers: TTSAuthHeaders = {
+
+  if (!apiKey) {
+    throw new TTSApiError("API Key is required. Configure API Key in extension preferences.", -1);
+  }
+
+  return {
+    "X-Api-Key": apiKey,
     "X-Api-Resource-Id": resourceId,
     "X-Api-Connect-Id": connectId,
   };
-
-  if (apiKey) {
-    return { ...headers, "X-Api-Key": apiKey };
-  }
-
-  if (appId && accessKey) {
-    return { ...headers, "X-Api-App-Id": appId, "X-Api-Access-Key": accessKey };
-  }
-
-  throw new TTSApiError(
-    "API Key is required. Configure API Key, or provide legacy App ID and Access Key in extension preferences.",
-    -1,
-  );
 }
 
 function synthesizeWithWebSocket(text: string, options: TTSOptions, headers: TTSAuthHeaders): Promise<string> {
