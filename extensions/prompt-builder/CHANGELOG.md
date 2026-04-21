@@ -1,6 +1,6 @@
 # Prompt Builder Changelog
 
-## [Import & Export Templates] - {PR_MERGE_DATE}
+## [Import & Export Templates] - 2026-04-21
 
 - Export templates: save all your templates to a JSON file for backup or sharing
 - Import templates: load templates from a JSON file
