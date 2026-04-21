@@ -1,17 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, Icon, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { runBacklog } from "./backlog";
-
-interface TaskData {
-  id: string;
-  title: string;
-  status: string;
-  priority: string;
-  labels: string[];
-  assignee: string;
-  description: string;
-  notes: string;
-}
+import type { TaskData } from "./task-detail";
 
 const PRIORITIES = [
   { title: "None", value: "" },

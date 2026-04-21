@@ -1,7 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot, Icon } from "@raycast/api";
-import { execSync } from "child_process";
 import { existsSync } from "fs";
 import { useState } from "react";
+import { runBacklog } from "./backlog";
 import { useActiveProject } from "./preferences";
 
 const PRIORITIES = [
@@ -17,6 +17,7 @@ function shellArg(value: string): string {
 
 export default function Command() {
   const [titleError, setTitleError] = useState<string | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeProject, setActiveProject, config] = useActiveProject();
 
   // Dynamic list fields
@@ -25,7 +26,7 @@ export default function Command() {
   const [refItems, setRefItems] = useState<string[]>([""]);
   const [docItems, setDocItems] = useState<string[]>([""]);
 
-  function handleSubmit(values: Record<string, unknown>) {
+  async function handleSubmit(values: Record<string, unknown>) {
     const title = (values.title as string).trim();
     if (!title) {
       setTitleError("Title is required");
@@ -81,34 +82,29 @@ export default function Command() {
       args.push("--notes", shellArg(notes));
     }
 
-    // Acceptance criteria (multiple --ac flags)
-    for (const item of acItems) {
-      const val = (values[`ac-${acItems.indexOf(item)}`] as string)?.trim();
+    for (let i = 0; i < acItems.length; i++) {
+      const val = (values[`ac-${i}`] as string)?.trim();
       if (val) args.push("--ac", shellArg(val));
     }
 
-    // Definition of Done (multiple --dod flags)
     if (values.noDodDefaults) {
       args.push("--no-dod-defaults");
     }
-    for (const item of dodItems) {
-      const val = (values[`dod-${dodItems.indexOf(item)}`] as string)?.trim();
+    for (let i = 0; i < dodItems.length; i++) {
+      const val = (values[`dod-${i}`] as string)?.trim();
       if (val) args.push("--dod", shellArg(val));
     }
 
-    // References (multiple --ref flags) - from text fields
     for (let i = 0; i < refItems.length; i++) {
       const val = (values[`ref-${i}`] as string)?.trim();
       if (val) args.push("--ref", shellArg(val));
     }
 
-    // Docs (multiple --doc flags)
     for (let i = 0; i < docItems.length; i++) {
       const val = (values[`doc-${i}`] as string)?.trim();
       if (val) args.push("--doc", shellArg(val));
     }
 
-    // File attachments via FilePicker → --ref
     const attachments = ((values.attachments as string[]) || []).filter((f) => existsSync(f));
     for (const file of attachments) {
       args.push("--ref", shellArg(file));
@@ -116,18 +112,11 @@ export default function Command() {
 
     args.push("--plain");
 
-    const cmd = `${config.backlogPath} ${args.join(" ")}`;
-
     try {
+      setIsSubmitting(true);
       showToast({ style: Toast.Style.Animated, title: "Creating task..." });
 
-      const output = execSync(cmd, {
-        cwd: activeProject,
-        encoding: "utf-8",
-        timeout: 15000,
-        shell: "/bin/zsh",
-        env: { ...process.env, FORCE_COLOR: "0" },
-      });
+      const output = await runBacklog(args, activeProject);
 
       const idMatch = output.match(/(?:task|TASK)[-\s]?(\S+)/i);
       const taskId = idMatch ? idMatch[1] : undefined;
@@ -146,11 +135,14 @@ export default function Command() {
         title: "Failed to create task",
         message: message.split("\n")[0],
       });
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
   return (
     <Form
+      isLoading={isSubmitting}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Task" onSubmit={handleSubmit} />

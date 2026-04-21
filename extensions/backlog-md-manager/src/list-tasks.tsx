@@ -57,6 +57,22 @@ function parseTaskList(output: string): Record<string, Task[]> {
   return sections;
 }
 
+function getEmptyView(sections: Record<string, Task[]>, isLoading: boolean, projectCount: number) {
+  if (isLoading) return undefined;
+
+  if (projectCount === 0) {
+    return (
+      <List.EmptyView title="No project configured" description="Set a Backlog.md project directory in preferences." />
+    );
+  }
+
+  if (Object.keys(sections).length === 0) {
+    return <List.EmptyView title="No tasks found" description="This project does not have any visible tasks." />;
+  }
+
+  return undefined;
+}
+
 export default function Command() {
   const [activeProject, setActiveProject, config] = useActiveProject();
 
@@ -82,6 +98,7 @@ export default function Command() {
   );
 
   const sections = data || {};
+  const emptyView = getEmptyView(sections, isLoading, config.projects.length);
 
   return (
     <List
@@ -105,6 +122,7 @@ export default function Command() {
         ) : undefined
       }
     >
+      {emptyView}
       {Object.entries(sections).map(([status, tasks]) => (
         <List.Section key={status} title={status} subtitle={`${tasks.length}`}>
           {tasks.map((task) => {

@@ -59,6 +59,26 @@ function parseSearchResults(output: string): SearchResult[] {
   return results;
 }
 
+function getEmptyView(results: SearchResult[], isLoading: boolean, query: string, projectCount: number) {
+  if (isLoading) return undefined;
+
+  if (projectCount === 0) {
+    return (
+      <List.EmptyView title="No project configured" description="Set a Backlog.md project directory in preferences." />
+    );
+  }
+
+  if (!query) {
+    return <List.EmptyView title="Search tasks" description="Type a query to search across the selected project." />;
+  }
+
+  if (results.length === 0) {
+    return <List.EmptyView title="No matches found" description="Try a different search term." />;
+  }
+
+  return undefined;
+}
+
 export default function Command() {
   const [activeProject, setActiveProject, config] = useActiveProject();
   const [searchText, setSearchText] = useState("");
@@ -79,6 +99,7 @@ export default function Command() {
   );
 
   const results = data || [];
+  const emptyView = getEmptyView(results, isLoading, searchText, config.projects.length);
 
   return (
     <List
@@ -97,6 +118,7 @@ export default function Command() {
         ) : undefined
       }
     >
+      {emptyView}
       {results.map((result) => {
         const priorityColor = PRIORITY_TAGS[result.priority] || Color.SecondaryText;
 

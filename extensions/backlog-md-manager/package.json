@@ -46,7 +46,13 @@
       "subtitle": "Backlog.md",
       "description": "Browse tasks grouped by status with filtering by status and priority",
       "mode": "view",
-      "keywords": ["tasks", "backlog", "list", "browse", "kanban"]
+      "keywords": [
+        "tasks",
+        "backlog",
+        "list",
+        "browse",
+        "kanban"
+      ]
     },
     {
       "name": "create-task",
@@ -54,7 +60,13 @@
       "subtitle": "Backlog.md",
       "description": "Create a new task with description, priority, labels, acceptance criteria, and file attachments",
       "mode": "view",
-      "keywords": ["new", "add", "task", "create", "backlog"]
+      "keywords": [
+        "new",
+        "add",
+        "task",
+        "create",
+        "backlog"
+      ]
     },
     {
       "name": "search-tasks",
@@ -62,7 +74,12 @@
       "subtitle": "Backlog.md",
       "description": "Full-text search across all tasks in a Backlog.md project",
       "mode": "view",
-      "keywords": ["find", "search", "query", "backlog"]
+      "keywords": [
+        "find",
+        "search",
+        "query",
+        "backlog"
+      ]
     }
   ],
   "dependencies": {

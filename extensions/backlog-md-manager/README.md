@@ -20,12 +20,12 @@ On first launch, you'll be prompted to configure two preferences:
 
 Browse all tasks grouped by status (To Do, In Progress, Done, Blocked). Use the action panel to filter by status or priority. If you have multiple projects configured, switch between them with the dropdown in the search bar.
 
-| Shortcut | Action |
-| -------- | ------ |
-| `↵` | View task details |
-| `⇧⌘S` | Start task (In Progress) |
-| `⇧⌘D` | Complete task (Done) |
-| `⌘R` | Refresh list |
+| Shortcut | Action                   |
+| -------- | ------------------------ |
+| `↵`      | View task details        |
+| `⇧⌘S`    | Start task (In Progress) |
+| `⇧⌘D`    | Complete task (Done)     |
+| `⌘R`     | Refresh list             |
 
 ### Create Task
 
