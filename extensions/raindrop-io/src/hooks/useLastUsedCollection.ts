@@ -13,6 +13,7 @@ export function useLastUsedCollection() {
     const legacyCollectionId = await LocalStorage.getItem<string>(LEGACY_LAST_USED_COLLECTION_KEY);
     if (legacyCollectionId) {
       await LocalStorage.setItem(LAST_USED_COLLECTION_KEY, legacyCollectionId);
+      await LocalStorage.removeItem(LEGACY_LAST_USED_COLLECTION_KEY);
       return legacyCollectionId;
     }
 
