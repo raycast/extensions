@@ -12,7 +12,7 @@ import {
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getBaseModel, synthesizeSpeech, buildOptionsFromPrefs, TTSApiError } from "./api/volcengine-tts";
 import type { VoiceConfig } from "./api/types";
-import { VOICE_CATEGORIES, getVoicesByCategory } from "./constants/voices";
+import { VOICE_CATEGORIES, getVoiceById, getVoicesByCategory } from "./constants/voices";
 import { AudioPlayer } from "./utils/audio-player";
 import { getPreviewText } from "./utils/text-source";
 import {
@@ -83,9 +83,12 @@ export default function SelectVoice() {
 
     try {
       const text = await getPreviewText(PREVIEW_FALLBACK_TEXT, PREVIEW_CHAR_LIMIT);
+      if (player.isStopped()) return;
       const audio = await synthesizeSpeech(text, buildOptionsFromPrefs(voice.id));
+      if (player.isStopped()) return;
       await player.playAudio(audio);
     } catch (error) {
+      if (player.isStopped()) return;
       if (error instanceof TTSApiError) {
         await showToast({ style: Toast.Style.Failure, title: "Preview failed", message: error.message });
       } else {
@@ -96,7 +99,7 @@ export default function SelectVoice() {
         });
       }
     } finally {
-      setPreviewingVoiceId(null);
+      if (playerRef.current === player) setPreviewingVoiceId(null);
     }
   }, []);
 
@@ -116,7 +119,7 @@ export default function SelectVoice() {
     >
       <List.Section title="Current">
         <List.Item
-          title={activeVoiceId || "Preference default"}
+          title={activeVoiceId ? (getVoiceById(activeVoiceId)?.name ?? activeVoiceId) : "Preference default"}
           subtitle={usesOverride ? "Quick Read override" : `Preference default for ${currentModel}`}
           icon={{ source: Icon.Star, tintColor: usesOverride ? Color.Yellow : Color.SecondaryText }}
           actions={
