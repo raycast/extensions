@@ -1,0 +1,491 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cryptowallet",
+  "title": "CryptoWallet",
+  "description": "Track simulated crypto portfolios with CoinMarketCap prices.",
+  "icon": "wallet-icon.png",
+  "author": "andrea_cipriani",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "keywords": [
+    "crypto",
+    "portfolio",
+    "wallet",
+    "coinmarketcap",
+    "bitcoin"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cryptowallet",
+      "title": "CryptoWallet",
+      "description": "Manage crypto portfolios, transactions, and live performance.",
+      "mode": "view"
+    },
+    {
+      "name": "add-transaction",
+      "title": "Add Transaction",
+      "description": "Quickly add a crypto transaction to a portfolio.",
+      "mode": "view"
+    },
+    {
+      "name": "search-asset",
+      "title": "Search Asset",
+      "description": "Search CoinMarketCap assets and see live prices.",
+      "mode": "view"
+    },
+    {
+      "name": "portfolio-snapshot",
+      "title": "Portfolio Snapshot",
+      "description": "View a compact read-only snapshot of all portfolios.",
+      "mode": "view"
+    },
+    {
+      "name": "daily-report",
+      "title": "Daily Report",
+      "description": "Copy today's CryptoWallet report as Markdown.",
+      "mode": "no-view"
+    },
+    {
+      "name": "portfolio-menu-bar",
+      "title": "Portfolio Value",
+      "description": "Show total CryptoWallet value in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ask-ai",
+      "title": "Ask AI",
+      "description": "Answer free-form questions using CryptoWallet portfolio overviews, holdings, performance, and recent transactions."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "coinMarketCapApiKey",
+      "title": "CoinMarketCap API Key",
+      "description": "Used locally to fetch live cryptocurrency prices.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "baseCurrency",
+      "title": "Display Currency",
+      "description": "Currency used for prices, totals, and profit/loss.",
+      "type": "dropdown",
+      "required": true,
+      "default": "USD",
+      "data": [
+        {
+          "title": "US Dollar (USD)",
+          "value": "USD"
+        },
+        {
+          "title": "Euro (EUR)",
+          "value": "EUR"
+        },
+        {
+          "title": "British Pound (GBP)",
+          "value": "GBP"
+        },
+        {
+          "title": "Swiss Franc (CHF)",
+          "value": "CHF"
+        },
+        {
+          "title": "Japanese Yen (JPY)",
+          "value": "JPY"
+        },
+        {
+          "title": "Australian Dollar (AUD)",
+          "value": "AUD"
+        },
+        {
+          "title": "Canadian Dollar (CAD)",
+          "value": "CAD"
+        },
+        {
+          "title": "New Zealand Dollar (NZD)",
+          "value": "NZD"
+        },
+        {
+          "title": "Chinese Yuan (CNY)",
+          "value": "CNY"
+        },
+        {
+          "title": "Hong Kong Dollar (HKD)",
+          "value": "HKD"
+        },
+        {
+          "title": "Singapore Dollar (SGD)",
+          "value": "SGD"
+        },
+        {
+          "title": "South Korean Won (KRW)",
+          "value": "KRW"
+        },
+        {
+          "title": "Indian Rupee (INR)",
+          "value": "INR"
+        },
+        {
+          "title": "Brazilian Real (BRL)",
+          "value": "BRL"
+        },
+        {
+          "title": "Mexican Peso (MXN)",
+          "value": "MXN"
+        },
+        {
+          "title": "Argentine Peso (ARS)",
+          "value": "ARS"
+        },
+        {
+          "title": "Chilean Peso (CLP)",
+          "value": "CLP"
+        },
+        {
+          "title": "Colombian Peso (COP)",
+          "value": "COP"
+        },
+        {
+          "title": "Peruvian Sol (PEN)",
+          "value": "PEN"
+        },
+        {
+          "title": "Uruguayan Peso (UYU)",
+          "value": "UYU"
+        },
+        {
+          "title": "South African Rand (ZAR)",
+          "value": "ZAR"
+        },
+        {
+          "title": "Swedish Krona (SEK)",
+          "value": "SEK"
+        },
+        {
+          "title": "Norwegian Krone (NOK)",
+          "value": "NOK"
+        },
+        {
+          "title": "Danish Krone (DKK)",
+          "value": "DKK"
+        },
+        {
+          "title": "Polish Zloty (PLN)",
+          "value": "PLN"
+        },
+        {
+          "title": "Czech Koruna (CZK)",
+          "value": "CZK"
+        },
+        {
+          "title": "Hungarian Forint (HUF)",
+          "value": "HUF"
+        },
+        {
+          "title": "Romanian Leu (RON)",
+          "value": "RON"
+        },
+        {
+          "title": "Bulgarian Lev (BGN)",
+          "value": "BGN"
+        },
+        {
+          "title": "Icelandic Krona (ISK)",
+          "value": "ISK"
+        },
+        {
+          "title": "Turkish Lira (TRY)",
+          "value": "TRY"
+        },
+        {
+          "title": "Israeli New Shekel (ILS)",
+          "value": "ILS"
+        },
+        {
+          "title": "UAE Dirham (AED)",
+          "value": "AED"
+        },
+        {
+          "title": "Saudi Riyal (SAR)",
+          "value": "SAR"
+        },
+        {
+          "title": "Qatari Rial (QAR)",
+          "value": "QAR"
+        },
+        {
+          "title": "Kuwaiti Dinar (KWD)",
+          "value": "KWD"
+        },
+        {
+          "title": "Bahraini Dinar (BHD)",
+          "value": "BHD"
+        },
+        {
+          "title": "Omani Rial (OMR)",
+          "value": "OMR"
+        },
+        {
+          "title": "Egyptian Pound (EGP)",
+          "value": "EGP"
+        },
+        {
+          "title": "Nigerian Naira (NGN)",
+          "value": "NGN"
+        },
+        {
+          "title": "Kenyan Shilling (KES)",
+          "value": "KES"
+        },
+        {
+          "title": "Ghanaian Cedi (GHS)",
+          "value": "GHS"
+        },
+        {
+          "title": "Moroccan Dirham (MAD)",
+          "value": "MAD"
+        },
+        {
+          "title": "Thai Baht (THB)",
+          "value": "THB"
+        },
+        {
+          "title": "Malaysian Ringgit (MYR)",
+          "value": "MYR"
+        },
+        {
+          "title": "Indonesian Rupiah (IDR)",
+          "value": "IDR"
+        },
+        {
+          "title": "Philippine Peso (PHP)",
+          "value": "PHP"
+        },
+        {
+          "title": "Vietnamese Dong (VND)",
+          "value": "VND"
+        },
+        {
+          "title": "New Taiwan Dollar (TWD)",
+          "value": "TWD"
+        },
+        {
+          "title": "Pakistani Rupee (PKR)",
+          "value": "PKR"
+        },
+        {
+          "title": "Bangladeshi Taka (BDT)",
+          "value": "BDT"
+        },
+        {
+          "title": "Sri Lankan Rupee (LKR)",
+          "value": "LKR"
+        },
+        {
+          "title": "Russian Ruble (RUB)",
+          "value": "RUB"
+        },
+        {
+          "title": "Ukrainian Hryvnia (UAH)",
+          "value": "UAH"
+        },
+        {
+          "title": "Albanian Lek (ALL)",
+          "value": "ALL"
+        },
+        {
+          "title": "Algerian Dinar (DZD)",
+          "value": "DZD"
+        },
+        {
+          "title": "Armenian Dram (AMD)",
+          "value": "AMD"
+        },
+        {
+          "title": "Azerbaijani Manat (AZN)",
+          "value": "AZN"
+        },
+        {
+          "title": "Bahamian Dollar (BSD)",
+          "value": "BSD"
+        },
+        {
+          "title": "Barbadian Dollar (BBD)",
+          "value": "BBD"
+        },
+        {
+          "title": "Belarusian Ruble (BYN)",
+          "value": "BYN"
+        },
+        {
+          "title": "Bermudian Dollar (BMD)",
+          "value": "BMD"
+        },
+        {
+          "title": "Bolivian Boliviano (BOB)",
+          "value": "BOB"
+        },
+        {
+          "title": "Bosnia-Herzegovina Convertible Mark (BAM)",
+          "value": "BAM"
+        },
+        {
+          "title": "Cambodian Riel (KHR)",
+          "value": "KHR"
+        },
+        {
+          "title": "Central African CFA Franc (XAF)",
+          "value": "XAF"
+        },
+        {
+          "title": "Congolese Franc (CDF)",
+          "value": "CDF"
+        },
+        {
+          "title": "Costa Rican Colon (CRC)",
+          "value": "CRC"
+        },
+        {
+          "title": "Cuban Peso (CUP)",
+          "value": "CUP"
+        },
+        {
+          "title": "Dominican Peso (DOP)",
+          "value": "DOP"
+        },
+        {
+          "title": "Fijian Dollar (FJD)",
+          "value": "FJD"
+        },
+        {
+          "title": "Georgian Lari (GEL)",
+          "value": "GEL"
+        },
+        {
+          "title": "Guatemalan Quetzal (GTQ)",
+          "value": "GTQ"
+        },
+        {
+          "title": "Honduran Lempira (HNL)",
+          "value": "HNL"
+        },
+        {
+          "title": "Croatian Kuna (HRK)",
+          "value": "HRK"
+        },
+        {
+          "title": "Iraqi Dinar (IQD)",
+          "value": "IQD"
+        },
+        {
+          "title": "Jamaican Dollar (JMD)",
+          "value": "JMD"
+        },
+        {
+          "title": "Jordanian Dinar (JOD)",
+          "value": "JOD"
+        },
+        {
+          "title": "Kyrgystani Som (KGS)",
+          "value": "KGS"
+        },
+        {
+          "title": "Lebanese Pound (LBP)",
+          "value": "LBP"
+        },
+        {
+          "title": "Macedonian Denar (MKD)",
+          "value": "MKD"
+        },
+        {
+          "title": "Moldovan Leu (MDL)",
+          "value": "MDL"
+        },
+        {
+          "title": "Mongolian Tugrik (MNT)",
+          "value": "MNT"
+        },
+        {
+          "title": "Mauritian Rupee (MUR)",
+          "value": "MUR"
+        },
+        {
+          "title": "Myanmar Kyat (MMK)",
+          "value": "MMK"
+        },
+        {
+          "title": "Namibian Dollar (NAD)",
+          "value": "NAD"
+        },
+        {
+          "title": "Nepalese Rupee (NPR)",
+          "value": "NPR"
+        },
+        {
+          "title": "Nicaraguan Cordoba (NIO)",
+          "value": "NIO"
+        },
+        {
+          "title": "Panamanian Balboa (PAB)",
+          "value": "PAB"
+        },
+        {
+          "title": "Serbian Dinar (RSD)",
+          "value": "RSD"
+        },
+        {
+          "title": "Tunisian Dinar (TND)",
+          "value": "TND"
+        },
+        {
+          "title": "Trinidad and Tobago Dollar (TTD)",
+          "value": "TTD"
+        },
+        {
+          "title": "Ugandan Shilling (UGX)",
+          "value": "UGX"
+        },
+        {
+          "title": "Uzbekistani Som (UZS)",
+          "value": "UZS"
+        },
+        {
+          "title": "West African CFA Franc (XOF)",
+          "value": "XOF"
+        },
+        {
+          "title": "CFP Franc (XPF)",
+          "value": "XPF"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

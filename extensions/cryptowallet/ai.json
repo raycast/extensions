@@ -1,0 +1,70 @@
+{
+  "instructions": "CryptoWallet exposes one read-only Ask AI tool. Use it whenever the user asks about portfolio overview, holdings, performance, transactions, wallet comparisons, reports, summaries, or general questions that benefit from the user's portfolio context. The tool accepts a free-form question and returns the relevant local portfolio overview, live-price status, holdings, and recent transactions. Never claim to have modified portfolios or transactions. If the user asks for investment guidance, explain that it is not financial advice.",
+  "evals": [
+    {
+      "input": "@CryptoWallet What is my portfolio overview?",
+      "mocks": {
+        "ask-ai": {
+          "currency": "USD",
+          "priceStatus": "live",
+          "total": {
+            "currentValue": "$12,500.00",
+            "totalPnl": "$1,250.00",
+            "totalPnlPercent": "+11.11%"
+          },
+          "portfolios": []
+        }
+      },
+      "expected": [
+        {
+          "callsTool": {
+            "name": "ask-ai",
+            "arguments": {
+              "question": {
+                "includes": "portfolio overview"
+              }
+            }
+          }
+        },
+        {
+          "includes": "$12,500.00"
+        }
+      ]
+    },
+    {
+      "input": "@CryptoWallet How is my BTC position doing?",
+      "mocks": {
+        "ask-ai": {
+          "currency": "USD",
+          "priceStatus": "live",
+          "total": {
+            "currentValue": "$50,000.00",
+            "totalPnl": "$5,000.00",
+            "totalPnlPercent": "+11.11%"
+          },
+          "portfolios": [
+            {
+              "name": "Main Wallet",
+              "positions": [
+                {
+                  "symbol": "BTC",
+                  "name": "Bitcoin",
+                  "currentValue": "$50,000.00",
+                  "totalPnl": "$5,000.00"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "expected": [
+        {
+          "callsTool": "ask-ai"
+        },
+        {
+          "includes": "BTC"
+        }
+      ]
+    }
+  ]
+}
