@@ -1,0 +1,81 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "scratch",
+  "title": "Scratch",
+  "description": "Create and manage Scratch notes and tasks from Raycast",
+  "icon": "extension-icon.png",
+  "author": "jimmy-b36",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "notes",
+    "tasks",
+    "markdown",
+    "scratch"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "scratchCliPath",
+      "title": "Scratch CLI Path",
+      "description": "Optional absolute path to the scratch CLI binary if it is not available on PATH",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/scratch"
+    }
+  ],
+  "commands": [
+    {
+      "name": "new-note",
+      "title": "New Note",
+      "description": "Create a new Scratch note",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "description": "Browse and open Scratch notes",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "new-task",
+      "title": "New Task",
+      "description": "Create a new Scratch task",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Browse and update Scratch tasks",
+      "icon": "extension-icon.png",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
