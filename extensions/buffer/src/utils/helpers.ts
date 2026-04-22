@@ -40,7 +40,7 @@ export function formatDate(isoString?: string): string {
   if (!isoString) return "No date";
   const date = new Date(isoString);
   if (Number.isNaN(date.getTime())) return isoString;
-  return date.toLocaleDateString("en-US", {
+  return date.toLocaleDateString(undefined, {
     weekday: "short",
     month: "short",
     day: "numeric",

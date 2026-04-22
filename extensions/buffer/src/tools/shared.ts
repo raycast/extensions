@@ -36,7 +36,9 @@ function channelSearchTerms(channel: Channel): string[] {
     channel.displayName,
     channel.service,
     `${channel.displayName || channel.name} (${channel.service})`,
-    `${channel.displayName} ${channel.service}`,
+    channel.displayName
+      ? `${channel.displayName} ${channel.service}`
+      : undefined,
     `${channel.name} ${channel.service}`,
   ]
     .filter(isDefined)

@@ -1,8 +1,7 @@
 node_modules/
-.claude/*
-!.claude/project-memory.md
-!.claude/decisions.md
-!.claude/worklog.md
+.claude/
+.agents/
+CLAUDE.md
 dist/
 .DS_Store
 *.log

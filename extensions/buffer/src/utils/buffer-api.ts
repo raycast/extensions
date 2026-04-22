@@ -10,7 +10,6 @@ import {
   Organization,
   Post,
   PostsConnection,
-  Preferences,
 } from "./types";
 
 const GRAPHQL_ENDPOINT = "https://api.buffer.com";
@@ -146,7 +145,7 @@ async function gql<T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> {
-  const { accessToken } = getPreferenceValues<Preferences>();
+  const { accessToken } = getPreferenceValues();
 
   const response = await fetch(GRAPHQL_ENDPOINT, {
     method: "POST",

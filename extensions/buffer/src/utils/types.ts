@@ -140,10 +140,6 @@ export interface Account {
   organizations: Organization[];
 }
 
-export interface Preferences {
-  accessToken: string;
-}
-
 export interface GraphQLResponse<T> {
   data?: T;
   errors?: Array<{ message: string; extensions?: { code: string } }>;

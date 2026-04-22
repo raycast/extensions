@@ -1,6 +1,6 @@
 # Buffer Changelog
 
-## [Initial Version]
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added Buffer account overview with organization and connected app details.
 - Added channel browsing with connected and disconnected channel states.
