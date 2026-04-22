@@ -92,110 +92,101 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
 
   const searchPages = data?.pages;
 
-  const { itemProps, handleSubmit, setValue } = useForm<QuickCaptureFormValues>(
-    {
-      initialValues: {
-        captureAs: launchContext?.defaults?.captureAs,
-      },
-      async onSubmit(values) {
-        try {
-          await closeMainWindow();
+  const { itemProps, handleSubmit, setValue } = useForm<QuickCaptureFormValues>({
+    initialValues: {
+      captureAs: launchContext?.defaults?.captureAs,
+    },
+    async onSubmit(values) {
+      try {
+        await closeMainWindow();
 
-          await showToast({
-            style: Toast.Style.Animated,
-            title: "Capturing content to page",
-          });
+        await showToast({
+          style: Toast.Style.Animated,
+          title: "Capturing content to page",
+        });
 
-          const pageDetail = await getPageDetail(values.url);
-          const pageLink = pageDetail
-            ? `[${pageDetail.title}](${values.url})`
-            : values.url;
+        const pageDetail = await getPageDetail(values.url);
+        const pageLink = pageDetail ? `[${pageDetail.title}](${values.url})` : values.url;
 
-          let content: PageContent;
+        let content: PageContent;
 
-          switch (values.captureAs) {
-            case "url": {
-              content = [{ type: "bookmark", bookmark: { url: values.url } }];
-              break;
+        switch (values.captureAs) {
+          case "url": {
+            content = [{ type: "bookmark", bookmark: { url: values.url } }];
+            break;
+          }
+
+          case "full": {
+            content = pageLink;
+            if (pageDetail) content += `\n\n${pageDetail.content}`;
+            break;
+          }
+
+          case "ai": {
+            content = pageLink;
+            if (pageDetail) {
+              const summary = await AI.ask(getSummaryPrompt(pageDetail.content));
+              content += `\n\n${summary}`;
             }
-
-            case "full": {
-              content = pageLink;
-              if (pageDetail) content += `\n\n${pageDetail.content}`;
-              break;
-            }
-
-            case "ai": {
-              content = pageLink;
-              if (pageDetail) {
-                const summary = await AI.ask(
-                  getSummaryPrompt(pageDetail.content),
-                );
-                content += `\n\n${summary}`;
-              }
-              break;
-            }
-
-            default: {
-              content = pageLink;
-            }
+            break;
           }
 
-          let selectedPage: Page | undefined;
-
-          if (launchContext?.defaults?.pageId) {
-            const { pageId, objectType = "page" } = launchContext.defaults;
-            selectedPage =
-              objectType === "page"
-                ? await fetchPage(pageId)
-                : await fetchDatabase(pageId);
-          } else {
-            selectedPage = searchPages?.find((page) => page.id === values.page);
+          default: {
+            content = pageLink;
           }
+        }
 
-          if (!selectedPage) {
-            await showToast({
-              style: Toast.Style.Failure,
-              title: "Could not find page",
-            });
-            return;
-          }
+        let selectedPage: Page | undefined;
 
-          if (selectedPage.object === "page") {
-            await appendToPage(selectedPage.id, {
-              content,
-              addDateDivider: values.addDateDivider,
-            });
-          }
+        if (launchContext?.defaults?.pageId) {
+          const { pageId, objectType = "page" } = launchContext.defaults;
+          selectedPage = objectType === "page" ? await fetchPage(pageId) : await fetchDatabase(pageId);
+        } else {
+          selectedPage = searchPages?.find((page) => page.id === values.page);
+        }
 
-          if (selectedPage.object === "database") {
-            await createDatabasePage({
-              database: selectedPage.id,
-              content,
-              addDateDivider: values.addDateDivider,
-              "property::title::title": pageDetail?.title,
-            });
-          }
-
-          await showToast({
-            style: Toast.Style.Success,
-            title: "Captured content to page",
-          });
-        } catch {
+        if (!selectedPage) {
           await showToast({
             style: Toast.Style.Failure,
-            title: "Failed capturing content to page",
+            title: "Could not find page",
+          });
+          return;
+        }
+
+        if (selectedPage.object === "page") {
+          await appendToPage(selectedPage.id, {
+            content,
+            addDateDivider: values.addDateDivider,
           });
         }
-      },
-      validation: {
-        url: (input) => {
-          if (!input) return "The URL is required";
-          if (!validateUrl(input)) return "The URL is not valid";
-        },
+
+        if (selectedPage.object === "database") {
+          await createDatabasePage({
+            database: selectedPage.id,
+            content,
+            addDateDivider: values.addDateDivider,
+            "property::title::title": pageDetail?.title,
+          });
+        }
+
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Captured content to page",
+        });
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed capturing content to page",
+        });
+      }
+    },
+    validation: {
+      url: (input) => {
+        if (!input) return "The URL is required";
+        if (!validateUrl(input)) return "The URL is not valid";
       },
     },
-  );
+  });
 
   useEffect(() => {
     async function getText() {
@@ -236,10 +227,7 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
 
     return {
       name: page ? `Quick capture to ${getPageName(page)}` : "Quick capture",
-      link:
-        url +
-        "?launchContext=" +
-        encodeURIComponent(JSON.stringify(launchContext)),
+      link: url + "?launchContext=" + encodeURIComponent(JSON.stringify(launchContext)),
     };
   }
 
@@ -247,15 +235,8 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            onSubmit={handleSubmit}
-            title="Capture"
-            icon={Icon.SaveDocument}
-          />
-          <Action.CreateQuicklink
-            title="Create Quicklink"
-            quicklink={getQuicklink()}
-          />
+          <Action.SubmitForm onSubmit={handleSubmit} title="Capture" icon={Icon.SaveDocument} />
+          <Action.CreateQuicklink title="Create Quicklink" quicklink={getQuicklink()} />
         </ActionPanel>
       }
     >
@@ -267,16 +248,8 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
 
       <Form.Dropdown {...itemProps.captureAs} title="Capture As" storeValue>
         <Form.Dropdown.Item title="Bookmark" value="url" icon={Icon.Link} />
-        <Form.Dropdown.Item
-          title="Full Page"
-          value="full"
-          icon={Icon.Paragraph}
-        />
-        <Form.Dropdown.Item
-          title="Summarize Page with AI"
-          value="ai"
-          icon={Icon.Stars}
-        />
+        <Form.Dropdown.Item title="Full Page" value="full" icon={Icon.Paragraph} />
+        <Form.Dropdown.Item title="Summarize Page with AI" value="ai" icon={Icon.Stars} />
       </Form.Dropdown>
 
       <Form.Checkbox
