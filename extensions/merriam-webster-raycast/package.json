@@ -1,0 +1,60 @@
+{
+  "name": "merriam-webster-raycast",
+  "title": "Merriam-Webster Learner",
+  "description": "Search Merriam-Webster Learner's Dictionary from Raycast",
+  "icon": "icon.png",
+  "author": "LitoMore",
+  "categories": [
+    "Documentation"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-learner",
+      "title": "Search Learner Dictionary",
+      "description": "Search Merriam-Webster Learner entries as you type",
+      "mode": "view"
+    },
+    {
+      "name": "lookup-learner",
+      "title": "Lookup Learner Word",
+      "description": "Lookup an exact Merriam-Webster Learner entry",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "term",
+          "placeholder": "Word or phrase",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "learnerApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Learner API Key",
+      "description": "Your Merriam-Webster Learner's Dictionary API key"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.101.0",
+    "@raycast/utils": "^1.17.0",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/react": "^18.3.21",
+    "typescript": "^5.8.3",
+    "vitest": "^3.1.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint && node -e \"const fs=require('fs'); const manifest=require('./package.json'); const files=(manifest.commands ?? []).map((command)=>'src/' + command.name + '.tsx'); const missing=files.filter((file)=>!fs.existsSync(file)); if (missing.length) { console.error('Missing command files: ' + missing.join(', ')); process.exit(1); }\"",
+    "test": "vitest run",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
