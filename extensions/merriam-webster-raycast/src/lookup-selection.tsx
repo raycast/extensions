@@ -1,16 +1,9 @@
 import { Action, ActionPanel, Detail, getSelectedText, showToast, Toast } from "@raycast/api";
-import type { ComponentType } from "react";
 import { useEffect, useState } from "react";
 import { buildLearnerBrowseUrl, fetchLearnerResults, normalizeLookupTerm } from "./api/merriamWebster";
-import { formatEntriesMarkdown, formatEntriesPlainText } from "./lib/formatEntry";
+import { formatEntriesMarkdown } from "./lib/formatEntry";
 import { playAudioUrl } from "./lib/audio";
 import { SearchResult } from "./types";
-
-const SelectionDetail = Detail as unknown as ComponentType<any>;
-const SelectionActionPanel = ActionPanel as unknown as ComponentType<any>;
-const SelectionAction = Action as unknown as ComponentType<any>;
-const SelectionCopyToClipboardAction = Action.CopyToClipboard as unknown as ComponentType<any>;
-const SelectionOpenInBrowserAction = Action.OpenInBrowser as unknown as ComponentType<any>;
 
 export default function LookupSelectionCommand() {
   const [term, setTerm] = useState<string>();
@@ -64,16 +57,16 @@ export default function LookupSelectionCommand() {
 
   if (entries.length > 0) {
     return (
-      <SelectionDetail
+      <Detail
         isLoading={isLoading}
         markdown={formatEntriesMarkdown(entries)}
         actions={
-          <SelectionActionPanel>
+          <ActionPanel>
             {entries[0].audioUrl ? (
-              <SelectionAction title="Play Pronunciation" icon="🔊" onAction={() => playAudioUrl(entries[0].audioUrl!)} />
+              <Action title="Play Pronunciation" icon="🔊" onAction={() => playAudioUrl(entries[0].audioUrl!)} />
             ) : null}
-            <SelectionOpenInBrowserAction title="Open in Merriam-Webster" url={buildLearnerBrowseUrl(entries[0].headword)} />
-          </SelectionActionPanel>
+            <Action.OpenInBrowser title="Open in Merriam-Webster" url={buildLearnerBrowseUrl(entries[0].headword)} />
+          </ActionPanel>
         }
       />
     );
@@ -88,14 +81,14 @@ export default function LookupSelectionCommand() {
         : "## No text selected";
 
   return (
-    <SelectionDetail
+    <Detail
       isLoading={isLoading}
       markdown={markdown}
       actions={
         term ? (
-          <SelectionActionPanel>
-            <SelectionOpenInBrowserAction title="Open in Merriam-Webster" url={buildLearnerBrowseUrl(term)} />
-          </SelectionActionPanel>
+          <ActionPanel>
+            <Action.OpenInBrowser title="Open in Merriam-Webster" url={buildLearnerBrowseUrl(term)} />
+          </ActionPanel>
         ) : null
       }
     />

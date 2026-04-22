@@ -1,3 +1,4 @@
+import { getPreferenceValues } from "@raycast/api";
 import { audioSubdirectory } from "../lib/audio";
 import type { DefinitionPart, EntryResult, SearchResult, Sense, SuggestionResult } from "../types";
 
@@ -24,14 +25,7 @@ type LearnerEntry = {
   }>;
 };
 
-type Preferences = {
-  learnerApiKey: string;
-};
-
-export async function getLearnerApiKey() {
-  const { getPreferenceValues } = require("@raycast/api") as {
-    getPreferenceValues: <Values extends Preferences>() => Values;
-  };
+export function getLearnerApiKey() {
   return getPreferenceValues<Preferences>().learnerApiKey;
 }
 
@@ -170,7 +164,7 @@ export function normalizeLearnerResponse(payload: unknown): SearchResult[] {
 
   if (!payload.every((item) => isLearnerEntry(item))) return [];
 
-  return payload.map((entry) => normalizeEntry(entry));
+  return payload.slice(0, 2).map((entry) => normalizeEntry(entry));
 }
 
 export async function fetchLearnerResults(term: string): Promise<SearchResult[]> {

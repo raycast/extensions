@@ -17,6 +17,7 @@
   },
   "include": [
     "src/**/*",
+    "raycast-env.d.ts",
     "vitest.config.ts"
   ]
 }
