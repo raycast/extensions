@@ -4,6 +4,7 @@ import { type Form, showToast, Toast } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 
 import { isMarkdownPageContent, isReadableProperty } from "..";
+import { getDateMention } from "../block";
 import { handleError, isNotNullOrUndefined, pageMapper } from "../global";
 import { getNotionClient } from "../oauth";
 import { formValueToPropertyValue } from "../page/property";
@@ -14,7 +15,10 @@ import { DatabaseProperty } from "./property";
 export type { PropertyConfig } from "./property";
 export type { DatabaseProperty };
 
-async function resolveDataSourceId(notion: Client, databaseOrDataSourceId: string): Promise<string> {
+async function resolveDataSourceId(
+  notion: Client,
+  databaseOrDataSourceId: string,
+): Promise<string> {
   try {
     await notion.dataSources.retrieve({
       data_source_id: databaseOrDataSourceId,
@@ -64,7 +68,9 @@ export async function fetchDatabases() {
       filter: { property: "object", value: "data_source" },
     });
     return databases.results
-      .map((x) => (x.object === "data_source" && "last_edited_time" in x ? x : undefined))
+      .map((x) =>
+        x.object === "data_source" && "last_edited_time" in x ? x : undefined,
+      )
       .filter(isNotNullOrUndefined)
       .map(
         (x) =>
@@ -74,7 +80,8 @@ export async function fetchDatabases() {
             title: x.title[0]?.plain_text,
             icon_emoji: x.icon?.type === "emoji" ? x.icon.emoji : null,
             icon_file: x.icon?.type === "file" ? x.icon.file.url : null,
-            icon_external: x.icon?.type === "external" ? x.icon.external.url : null,
+            icon_external:
+              x.icon?.type === "external" ? x.icon.external.url : null,
           }) as Database,
       );
   } catch (err) {
@@ -86,7 +93,9 @@ export async function fetchDatabaseProperties(databaseId: string) {
   try {
     const notion = getNotionClient();
     const dataSourceId = await resolveDataSourceId(notion, databaseId);
-    const dataSource = await notion.dataSources.retrieve({ data_source_id: dataSourceId });
+    const dataSource = await notion.dataSources.retrieve({
+      data_source_id: dataSourceId,
+    });
 
     if (!("properties" in dataSource)) return [];
 
@@ -154,7 +163,10 @@ export async function queryDatabase(
 
 type CreateRequest = Parameters<Client["pages"]["create"]>[0];
 
-async function resolveParentDatabaseId(notion: Client, databaseOrDataSourceId: string): Promise<string> {
+async function resolveParentDatabaseId(
+  notion: Client,
+  databaseOrDataSourceId: string,
+): Promise<string> {
   try {
     const dataSource = await notion.dataSources.retrieve({
       data_source_id: databaseOrDataSourceId,
@@ -198,7 +210,7 @@ async function resolveParentDatabaseId(notion: Client, databaseOrDataSourceId: s
 export async function createDatabasePage(values: Form.Values) {
   try {
     const notion = getNotionClient();
-    const { database, content, ...props } = values;
+    const { database, content, addDateDivider = false, ...props } = values;
     const parentDatabaseId = await resolveParentDatabaseId(notion, database);
 
     const arg: CreateRequest = {
@@ -207,16 +219,23 @@ export async function createDatabasePage(values: Form.Values) {
     };
 
     if (content) {
-      arg.children = isMarkdownPageContent(content)
+      const children = isMarkdownPageContent(content)
         ? // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
           (markdownToBlocks(content) as BlockObjectRequest[])
         : content;
+      arg.children = addDateDivider
+        ? [{ divider: {} }, getDateMention(), ...children]
+        : children;
     }
 
     Object.keys(props).forEach((formId) => {
-      const type = formId.match(/(?<=property::).*(?=::)/g)?.[0] as DatabaseProperty["type"] | null;
+      const type = formId.match(/(?<=property::).*(?=::)/g)?.[0] as
+        | DatabaseProperty["type"]
+        | null;
       if (!type) return;
-      const propId = formId.match(new RegExp("(?<=property::" + type + "::).*", "g"))?.[0];
+      const propId = formId.match(
+        new RegExp("(?<=property::" + type + "::).*", "g"),
+      )?.[0];
       const value = values[formId];
       if (value == "_select_null_") return;
       if (!propId || !value) return;
