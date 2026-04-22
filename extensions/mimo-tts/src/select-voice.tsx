@@ -11,7 +11,7 @@ import {
   setQuickReadVoiceOverride,
 } from "./utils/voice-preferences";
 
-const PREVIEW_FALLBACK_TEXT = "这是一段 MiMo TTS 音色试听。";
+const PREVIEW_FALLBACK_TEXT = "This is a short MiMo TTS voice preview.";
 const PREVIEW_CHAR_LIMIT = 180;
 
 export default function SelectVoice() {

@@ -20,7 +20,13 @@ import {
   SPEECH_RATE_OPTIONS,
   VOICE_FEATURE_TAGS,
 } from "./constants/controls";
-import { DEFAULT_VOICE, VOICE_CATEGORIES, getVoicesByCategory, getVoicesForModel } from "./constants/voices";
+import {
+  DEFAULT_VOICE,
+  VOICE_CATEGORIES,
+  getVoiceById,
+  getVoicesByCategory,
+  getVoicesForModel,
+} from "./constants/voices";
 import { AudioPlayer } from "./utils/audio-player";
 import { chunkText } from "./utils/text-chunker";
 import { playChunksWithLookahead } from "./utils/pipelined-reading";
@@ -85,6 +91,7 @@ export default function MiMoStudio() {
     setIsLoading(true);
 
     try {
+      const voiceName = getVoiceById(values.voiceId)?.name ?? values.voiceId;
       const options = buildOptionsFromPrefs(values.voiceId, {
         speechRate: values.speechRate || "0",
         additionalStylePrompt: joinNaturalInstructions(values.performancePreset, values.directorPrompt),
@@ -101,13 +108,13 @@ export default function MiMoStudio() {
       await showToast({
         style: Toast.Style.Animated,
         title: `Synthesizing ${chunks.length} chunk${chunks.length > 1 ? "s" : ""}`,
-        message: `${values.voiceId} · ${getModelLabel(options.model)}`,
+        message: `${voiceName} · ${getModelLabel(options.model)}`,
       });
 
       await playChunksWithLookahead(chunks, options, player, {
         onFirstAudioReady: async () => {
           setIsLoading(false);
-          await showToast({ style: Toast.Style.Animated, title: "Playing with controls", message: values.voiceId });
+          await showToast({ style: Toast.Style.Animated, title: "Playing with controls", message: voiceName });
         },
       });
 
@@ -237,7 +244,7 @@ export default function MiMoStudio() {
       <Form.Separator />
       <Form.Description
         title="Opening Style"
-        text="These become a single leading style tag, such as (温柔 疲惫 气声). If 唱歌 is selected, it is forced to be the only opening tag."
+        text="These become a single leading style tag, such as gentle, tired, and breathy. If Singing is selected, it is forced to be the only opening tag."
       />
       <Form.TagPicker id="openingStyleTags" title="Overall Style" placeholder="Choose style tags" storeValue>
         {OPENING_STYLE_TAGS.map((tag) => (
@@ -247,7 +254,7 @@ export default function MiMoStudio() {
       <Form.TextField
         id="customAssistantTags"
         title="Custom Tags"
-        placeholder="e.g. 低语，播报，嘶吼"
+        placeholder="e.g. whisper, narration, roar"
         info="Comma-separated tags added to the assistant text prefix."
         storeValue
       />
@@ -255,7 +262,7 @@ export default function MiMoStudio() {
       <Form.Separator />
       <Form.Description
         title="Audio Events"
-        text="These become an audio-event prefix, such as （紧张，深呼吸，气声）."
+        text="These become an audio-event prefix, such as nervous, deep breath, and breathy voice."
       />
       <Form.TagPicker id="rhythmTags" title="Pace and Rhythm" placeholder="Breath, pause, speed, volume" storeValue>
         {RHYTHM_TAGS.map((tag) => (
@@ -282,7 +289,7 @@ export default function MiMoStudio() {
       <Form.TextArea
         id="directorPrompt"
         title="Director Prompt"
-        placeholder="角色：...\n场景：...\n指导：语速、气息、停顿、重音、共鸣位置、音色质感、情绪起伏..."
+        placeholder="Role: ...\nScene: ...\nDirection: pace, breath, pauses, stress, resonance, vocal texture, emotional arc..."
         info="Sent as natural-language control in the user message."
         enableMarkdown
         storeValue

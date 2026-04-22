@@ -21,7 +21,7 @@ export const VOICES: VoiceConfig[] = [
   },
   {
     id: "冰糖",
-    name: "冰糖",
+    name: "Bingtang",
     gender: "female",
     category: "Chinese",
     language: "Chinese",
@@ -31,7 +31,7 @@ export const VOICES: VoiceConfig[] = [
   },
   {
     id: "茉莉",
-    name: "茉莉",
+    name: "Moli",
     gender: "female",
     category: "Chinese",
     language: "Chinese",
@@ -40,7 +40,7 @@ export const VOICES: VoiceConfig[] = [
   },
   {
     id: "苏打",
-    name: "苏打",
+    name: "Soda",
     gender: "male",
     category: "Chinese",
     language: "Chinese",
@@ -49,7 +49,7 @@ export const VOICES: VoiceConfig[] = [
   },
   {
     id: "白桦",
-    name: "白桦",
+    name: "Baihua",
     gender: "male",
     category: "Chinese",
     language: "Chinese",
