@@ -1,6 +1,6 @@
 # SnippetSurfer Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-04-22
 - Add "Paste first code block" preference to copy/paste only the first code block from a snippet instead of the full content.
 - Fix nested code fence rendering in README.
 
