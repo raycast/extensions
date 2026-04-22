@@ -56,7 +56,7 @@ function SummarizeView() {
     setQuestion(content || "");
   }, [loading, content, browserError]);
 
-  const { data, isLoading: modelLoading } = useModel();
+  const { data, isLoading: modelLoading, option } = useModel();
   const [authProvider, setAuthProvider] = useState<AuthProvider>("none");
 
   useEffect(() => {
@@ -66,8 +66,8 @@ function SummarizeView() {
   }, []);
 
   const availableModels = useMemo(() => {
-    return orderModelsForSelection(filterModelsForAuth(Object.values(data), authProvider));
-  }, [data, authProvider]);
+    return orderModelsForSelection(filterModelsForAuth(Object.values(data), authProvider, option));
+  }, [data, authProvider, option]);
 
   const defaultModel = useMemo<Model>(() => {
     return availableModels.find((model) => model.id === "default") ?? availableModels[0] ?? DEFAULT_MODEL;

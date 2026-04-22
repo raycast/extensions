@@ -71,7 +71,7 @@ export function AuthRequiredView({
     setLoading(true);
     const toast = await showToast({
       style: Toast.Style.Animated,
-      title: "Opening ChatGPT sign-in...",
+      title: "Opening ChatGPT sign-in via Codex...",
     });
 
     try {

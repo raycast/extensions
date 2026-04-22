@@ -2,51 +2,43 @@ import { Model } from "../type";
 import { AuthProvider } from "./auth";
 
 export const CHATGPT_CODEX_SUPPORTED_MODELS = [
-  "gpt-5.3-codex",
-  "gpt-5.3-codex-spark",
+  "gpt-5.4",
   "gpt-5.2-codex",
-  "gpt-5.2",
   "gpt-5.1-codex-max",
-  "gpt-5.1",
-  "gpt-5.1-codex",
-  "gpt-5-codex",
-  "gpt-5-codex-mini",
-  "gpt-5",
+  "gpt-5.4-mini",
+  "gpt-5.3-codex",
+  "gpt-5.2",
+  "gpt-5.1-codex-mini",
 ] as const;
 
 export const MODEL_OPTION_LAST_IN_SELECTION = "chatgpt-4o-latest";
 
-export const DEFAULT_CHATGPT_CODEX_MODEL = "gpt-5.2";
+export const DEFAULT_CHATGPT_CODEX_MODEL = "gpt-5.4-mini";
 
-export function isChatGPTCodexModelSupported(model: string): boolean {
-  const trimmed = model.trim();
-  if (!trimmed) {
-    return false;
+export function resolveModelOptionForAuth(
+  option: string,
+  authProvider: AuthProvider,
+  availableOptions?: string[],
+): string {
+  const normalizedOptions = normalizeAvailableOptions(availableOptions);
+  if (normalizedOptions.length === 0) {
+    const trimmed = option.trim();
+    return isChatGPTCodexModelSupported(trimmed) ? trimmed : DEFAULT_CHATGPT_CODEX_MODEL;
   }
 
-  return CHATGPT_CODEX_SUPPORTED_MODELS.some((supported) => {
-    return trimmed === supported || trimmed.startsWith(`${supported}-`);
-  });
+  const trimmed = option.trim();
+  return normalizedOptions.includes(trimmed) ? trimmed : normalizedOptions[0];
 }
 
-export function resolveModelOptionForAuth(option: string, authProvider: AuthProvider): string {
-  if (authProvider !== "chatgpt") {
-    return option;
+export function filterModelsForAuth(models: Model[], authProvider: AuthProvider, availableOptions?: string[]): Model[] {
+  const normalizedOptions = normalizeAvailableOptions(availableOptions);
+  if (normalizedOptions.length === 0) {
+    return orderModelsForSelection(
+      models.filter((model) => isChatGPTCodexModelSupported(model.option) || model.id === "default"),
+    );
   }
 
-  return isChatGPTCodexModelSupported(option) ? option : DEFAULT_CHATGPT_CODEX_MODEL;
-}
-
-export function mergeModelOptionsWithCodex(options: string[]): string[] {
-  return orderModelOptionsForSelection(dedupe([...options, ...CHATGPT_CODEX_SUPPORTED_MODELS]));
-}
-
-export function filterModelsForAuth(models: Model[], authProvider: AuthProvider): Model[] {
-  if (authProvider !== "chatgpt") {
-    return models;
-  }
-
-  const supportedModels = models.filter((model) => isChatGPTCodexModelSupported(model.option));
+  const supportedModels = models.filter((model) => normalizedOptions.includes(model.option.trim()));
   const hasDefaultModel = supportedModels.some((model) => model.id === "default");
 
   if (hasDefaultModel) {
@@ -58,7 +50,7 @@ export function filterModelsForAuth(models: Model[], authProvider: AuthProvider)
     sourceDefault !== undefined
       ? {
           ...sourceDefault,
-          option: DEFAULT_CHATGPT_CODEX_MODEL,
+          option: normalizedOptions[0],
           updated_at: new Date().toISOString(),
         }
       : {
@@ -67,7 +59,7 @@ export function filterModelsForAuth(models: Model[], authProvider: AuthProvider)
           created_at: new Date().toISOString(),
           name: "Default",
           prompt: "You are a helpful assistant.",
-          option: DEFAULT_CHATGPT_CODEX_MODEL,
+          option: normalizedOptions[0],
           temperature: "1",
           enableReasoningEffortChange: false,
           reasoningEffort: "medium",
@@ -100,6 +92,14 @@ function dedupe(values: string[]): string[] {
   }
 
   return result;
+}
+
+function normalizeAvailableOptions(availableOptions?: string[]): string[] {
+  return dedupe(availableOptions ?? [...CHATGPT_CODEX_SUPPORTED_MODELS]);
+}
+
+export function isChatGPTCodexModelSupported(model: string): boolean {
+  return CHATGPT_CODEX_SUPPORTED_MODELS.includes(model.trim() as (typeof CHATGPT_CODEX_SUPPORTED_MODELS)[number]);
 }
 
 function moveLast<T>(items: T[], shouldBeLast: (item: T) => boolean): T[] {

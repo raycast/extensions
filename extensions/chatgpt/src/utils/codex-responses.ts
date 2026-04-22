@@ -1,187 +1,440 @@
-import { Agent, IncomingMessage } from "node:http";
-import * as https from "node:https";
 import { Message } from "../type";
+import { CodexAppServerClient, withCodexAppServer } from "./codex-app-server";
 
-const CODEX_RESPONSES_URL = "https://chatgpt.com/backend-api/codex/responses";
-
-interface CodexInputMessage {
-  role: "system" | "user" | "assistant";
-  content: CodexInputContent[];
-}
-
-interface CodexRequestBody {
-  model: string;
-  input: CodexInputMessage[];
-  instructions: string;
-  reasoning?: {
-    effort: "low" | "medium" | "high";
-  };
-  store: boolean;
-  stream: boolean;
-}
-
-type CodexInputContent =
-  | {
-      type: "input_text";
-      text: string;
-    }
-  | {
-      type: "input_image";
-      image_url: string;
-    };
-
-export interface CodexResponseParams {
-  accessToken: string;
-  accountId: string;
+interface CodexResponseParams {
   model: string;
   messages: Message[];
   instructions?: string;
   stream: boolean;
   signal?: AbortSignal;
-  httpAgent?: Agent;
   onDelta?: (delta: string) => void;
+  threadId?: string | null;
 }
 
-interface CodexHttpResponse {
-  statusCode: number;
-  statusText: string;
-  stream: IncomingMessage;
+interface CodexResponseResult {
+  text: string;
+  threadId: string;
 }
 
-export async function requestCodexResponse(params: CodexResponseParams): Promise<string> {
-  const instructions = resolveInstructions(params.instructions, params.messages);
-
-  const body: CodexRequestBody = {
-    model: params.model.trim() || "gpt-5.2",
-    input: mapMessagesToCodexInput(params.messages),
-    instructions,
-    store: false,
-    stream: params.stream,
+interface ThreadStartResponse {
+  thread: {
+    id: string;
   };
+}
 
-  if (supportsReasoningEffort(body.model)) {
-    body.reasoning = { effort: "medium" };
+interface TurnStartResponse {
+  turn: {
+    id: string;
+  };
+}
+
+interface AgentMessageDeltaNotification {
+  threadId: string;
+  turnId: string;
+  itemId: string;
+  delta: string;
+}
+
+interface TurnCompletedNotification {
+  threadId: string;
+  turn: {
+    id: string;
+    status: "completed" | "interrupted" | "failed" | "inProgress";
+    error?: {
+      message?: string;
+      additionalDetails?: string | null;
+    } | null;
+  };
+}
+
+interface ItemCompletedNotification {
+  threadId: string;
+  turnId: string;
+  item: {
+    type?: string;
+    text?: string;
+  };
+}
+
+type ResponsesHistoryItem = {
+  type: "message";
+  role: "user" | "assistant";
+  content: Array<
+    | {
+        type: "input_text";
+        text: string;
+      }
+    | {
+        type: "input_image";
+        image_url: string;
+      }
+    | {
+        type: "output_text";
+        text: string;
+      }
+  >;
+};
+
+type TurnInputItem =
+  | {
+      type: "text";
+      text: string;
+      text_elements: [];
+    }
+  | {
+      type: "image";
+      url: string;
+    };
+
+export async function requestCodexResponse(params: CodexResponseParams): Promise<CodexResponseResult> {
+  const instructions = resolveInstructions(params.instructions, params.messages);
+  const { historyItems, turnInput } = splitMessagesForTurn(params.messages);
+  const model = params.model.trim() || "gpt-5.4-mini";
+
+  if (turnInput.length === 0) {
+    throw new Error("No user input was available for the ChatGPT request.");
   }
 
-  const payload = JSON.stringify(body);
-  const response = await postCodexRequest({
-    payload,
-    accessToken: params.accessToken,
-    accountId: params.accountId,
-    stream: params.stream,
-    signal: params.signal,
-    httpAgent: params.httpAgent,
+  return withCodexAppServer(async (client) => {
+    return runCodexTurn({
+      client,
+      model,
+      instructions,
+      historyItems,
+      turnInput,
+      stream: params.stream,
+      signal: params.signal,
+      onDelta: params.onDelta,
+      threadId: params.threadId,
+    });
+  });
+}
+
+async function runCodexTurn(options: {
+  client: CodexAppServerClient;
+  model: string;
+  instructions: string;
+  historyItems: ResponsesHistoryItem[];
+  turnInput: TurnInputItem[];
+  stream: boolean;
+  signal?: AbortSignal;
+  onDelta?: (delta: string) => void;
+  threadId?: string | null;
+}): Promise<CodexResponseResult> {
+  let threadId = options.threadId ?? null;
+
+  try {
+    if (!threadId) {
+      threadId = await startCodexThread(options.client, options.model, options.instructions, options.historyItems);
+    }
+
+    const turn = await options.client.request<TurnStartResponse>("turn/start", {
+      threadId,
+      input: options.turnInput,
+      model: options.model,
+      ...(supportsReasoningEffort(options.model) ? { effort: "medium" } : {}),
+    });
+
+    const text = await waitForTurnCompletion({
+      client: options.client,
+      threadId,
+      turnId: turn.turn.id,
+      stream: options.stream,
+      signal: options.signal,
+      onDelta: options.onDelta,
+    });
+
+    return { text, threadId };
+  } catch (error) {
+    if (!threadId || !shouldRetryWithFreshThread(error)) {
+      throw error;
+    }
+
+    const freshThreadId = await startCodexThread(
+      options.client,
+      options.model,
+      options.instructions,
+      options.historyItems,
+    );
+    const turn = await options.client.request<TurnStartResponse>("turn/start", {
+      threadId: freshThreadId,
+      input: options.turnInput,
+      model: options.model,
+      ...(supportsReasoningEffort(options.model) ? { effort: "medium" } : {}),
+    });
+
+    const text = await waitForTurnCompletion({
+      client: options.client,
+      threadId: freshThreadId,
+      turnId: turn.turn.id,
+      stream: options.stream,
+      signal: options.signal,
+      onDelta: options.onDelta,
+    });
+
+    return { text, threadId: freshThreadId };
+  }
+}
+
+async function startCodexThread(
+  client: CodexAppServerClient,
+  model: string,
+  instructions: string,
+  historyItems: ResponsesHistoryItem[],
+): Promise<string> {
+  const thread = await client.request<ThreadStartResponse>("thread/start", {
+    model,
+    approvalPolicy: "never",
+    sandbox: "read-only",
+    developerInstructions: instructions,
+    serviceName: "raycast_chatgpt_extension",
+    ephemeral: true,
+    experimentalRawEvents: false,
+    persistExtendedHistory: false,
   });
 
-  if (!isHttpSuccess(response.statusCode)) {
-    throw new Error(await parseCodexError(response));
+  const threadId = thread.thread.id;
+  if (historyItems.length > 0) {
+    await client.request("thread/inject_items", {
+      threadId,
+      items: historyItems,
+    });
   }
 
-  if (!params.stream) {
-    const raw = await readIncomingMessageText(response.stream);
-    const parsed = parseNonStreamText(raw);
-    return parsed ?? "";
-  }
-
-  return readStreamingText(response.stream, params.onDelta);
+  return threadId;
 }
 
-export function isCodexUnauthorizedError(error: unknown): boolean {
+function shouldRetryWithFreshThread(error: unknown): boolean {
   if (!(error instanceof Error)) {
     return false;
   }
 
   const message = error.message.toLowerCase();
-  return message.includes("(401)") || message.includes("unauthorized");
+  return (
+    message.includes("thread") &&
+    (message.includes("not loaded") ||
+      message.includes("not found") ||
+      message.includes("unknown") ||
+      message.includes("closed") ||
+      message.includes("unavailable"))
+  );
 }
 
-function postCodexRequest(options: {
-  payload: string;
-  accessToken: string;
-  accountId: string;
+async function waitForTurnCompletion(options: {
+  client: CodexAppServerClient;
+  threadId: string;
+  turnId: string;
   stream: boolean;
   signal?: AbortSignal;
-  httpAgent?: Agent;
-}): Promise<CodexHttpResponse> {
-  const { payload, accessToken, accountId, stream, signal, httpAgent } = options;
+  onDelta?: (delta: string) => void;
+}): Promise<string> {
+  let answer = "";
+  let finalAgentMessage: string | null = null;
 
-  return new Promise((resolve, reject) => {
-    const request = https.request(
-      CODEX_RESPONSES_URL,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "ChatGPT-Account-ID": accountId,
-          "Content-Type": "application/json",
-          Accept: stream ? "text/event-stream" : "application/json",
-          "Accept-Encoding": "identity",
-          "Content-Length": Buffer.byteLength(payload).toString(),
-        },
-        agent: httpAgent,
-      },
-      (response) => {
-        cleanupAbortHandler();
-        resolve({
-          statusCode: response.statusCode ?? 0,
-          statusText: response.statusMessage ?? "",
-          stream: response,
-        });
-      },
-    );
-
-    const onAbort = () => {
-      request.destroy(new Error("AbortError"));
-    };
-
-    const cleanupAbortHandler = () => {
-      signal?.removeEventListener("abort", onAbort);
-    };
-
-    if (signal) {
-      if (signal.aborted) {
-        cleanupAbortHandler();
-        reject(new Error("AbortError"));
-        return;
-      }
-
-      signal.addEventListener("abort", onAbort, { once: true });
+  const removeDeltaListener = options.client.onNotification("item/agentMessage/delta", (raw) => {
+    const params = raw as AgentMessageDeltaNotification;
+    if (params.threadId !== options.threadId || params.turnId !== options.turnId || !params.delta) {
+      return;
     }
 
-    request.on("error", (error) => {
-      cleanupAbortHandler();
-      reject(error);
-    });
-
-    request.write(payload);
-    request.end();
+    answer += params.delta;
+    if (options.stream) {
+      options.onDelta?.(params.delta);
+    }
   });
+
+  const removeItemCompletedListener = options.client.onNotification("item/completed", (raw) => {
+    const params = raw as ItemCompletedNotification;
+    if (params.threadId !== options.threadId || params.turnId !== options.turnId) {
+      return;
+    }
+
+    if (params.item.type === "agentMessage" && typeof params.item.text === "string") {
+      finalAgentMessage = params.item.text;
+    }
+  });
+
+  const onAbort = async () => {
+    try {
+      await options.client.request("turn/interrupt", {
+        threadId: options.threadId,
+        turnId: options.turnId,
+      });
+    } catch {
+      // The process is about to close anyway.
+    }
+  };
+
+  if (options.signal?.aborted) {
+    await onAbort();
+    throw createAbortError();
+  }
+
+  options.signal?.addEventListener("abort", onAbort, { once: true });
+
+  try {
+    const completed = await options.client.waitForNotification<TurnCompletedNotification>(
+      "turn/completed",
+      (params) => params.threadId === options.threadId && params.turn.id === options.turnId,
+      options.signal,
+    );
+
+    if (completed.turn.status === "failed") {
+      throw new Error(formatTurnError(completed.turn.error));
+    }
+
+    if (completed.turn.status === "interrupted") {
+      throw createAbortError();
+    }
+
+    const responseText = finalAgentMessage || answer;
+    return responseText.trim();
+  } catch (error) {
+    if (isAbortError(error)) {
+      throw createAbortError();
+    }
+    throw error;
+  } finally {
+    options.signal?.removeEventListener("abort", onAbort);
+    removeDeltaListener();
+    removeItemCompletedListener();
+  }
 }
 
-function isHttpSuccess(statusCode: number): boolean {
-  return statusCode >= 200 && statusCode < 300;
+function formatTurnError(error: TurnCompletedNotification["turn"]["error"] | undefined): string {
+  if (!error) {
+    return "ChatGPT request failed in Codex app-server.";
+  }
+
+  const message = error.message?.trim() || "ChatGPT request failed in Codex app-server.";
+  const details = error.additionalDetails?.trim();
+  return details ? `${message} ${details}` : message;
 }
 
 function supportsReasoningEffort(model: string): boolean {
   return model.startsWith("gpt-5");
 }
 
-function mapMessagesToCodexInput(messages: Message[]): CodexInputMessage[] {
-  const input: CodexInputMessage[] = [];
+function splitMessagesForTurn(messages: Message[]): {
+  historyItems: ResponsesHistoryItem[];
+  turnInput: TurnInputItem[];
+} {
+  const lastUserIndex = findLastUserMessageIndex(messages);
+  if (lastUserIndex === -1) {
+    return { historyItems: [], turnInput: [] };
+  }
 
-  for (const message of messages) {
-    const content = mapMessageContent(message.content);
-    if (content.length === 0) {
+  const historyItems = messages.slice(0, lastUserIndex).flatMap((message) => {
+    const item = mapMessageToHistoryItem(message);
+    return item ? [item] : [];
+  });
+
+  return {
+    historyItems,
+    turnInput: mapMessageToTurnInput(messages[lastUserIndex]),
+  };
+}
+
+function findLastUserMessageIndex(messages: Message[]): number {
+  for (let index = messages.length - 1; index >= 0; index -= 1) {
+    if (messages[index].role === "user") {
+      return index;
+    }
+  }
+
+  return -1;
+}
+
+function mapMessageToHistoryItem(message: Message): ResponsesHistoryItem | null {
+  if (message.role !== "user" && message.role !== "assistant") {
+    return null;
+  }
+
+  const content = mapHistoryContent(message.role, message.content);
+  if (content.length === 0) {
+    return null;
+  }
+
+  return {
+    type: "message",
+    role: message.role,
+    content,
+  };
+}
+
+function mapHistoryContent(role: "user" | "assistant", content: Message["content"]): ResponsesHistoryItem["content"] {
+  if (typeof content === "string") {
+    const text = content.trim();
+    if (!text) {
+      return [];
+    }
+
+    return role === "assistant" ? [{ type: "output_text", text }] : [{ type: "input_text", text }];
+  }
+
+  if (!Array.isArray(content)) {
+    return [];
+  }
+
+  const result: ResponsesHistoryItem["content"] = [];
+  for (const part of content) {
+    if (!part || typeof part !== "object" || !("type" in part) || typeof part.type !== "string") {
       continue;
     }
 
-    input.push({
-      role: mapRole(message.role),
-      content,
-    });
+    if (part.type === "text" && "text" in part && typeof part.text === "string" && part.text.trim()) {
+      result.push(
+        role === "assistant" ? { type: "output_text", text: part.text } : { type: "input_text", text: part.text },
+      );
+      continue;
+    }
+
+    if (role === "user" && part.type === "image_url" && "image_url" in part) {
+      const imageUrl = resolveImageUrl(part.image_url);
+      if (imageUrl.trim()) {
+        result.push({ type: "input_image", image_url: imageUrl });
+      }
+    }
   }
 
-  return input;
+  return result;
+}
+
+function mapMessageToTurnInput(message: Message): TurnInputItem[] {
+  if (message.role !== "user") {
+    return [];
+  }
+
+  const content = message.content;
+  if (typeof content === "string") {
+    const text = content.trim();
+    return text ? [{ type: "text", text, text_elements: [] }] : [];
+  }
+
+  if (!Array.isArray(content)) {
+    return [];
+  }
+
+  const result: TurnInputItem[] = [];
+  for (const part of content) {
+    if (!part || typeof part !== "object" || !("type" in part) || typeof part.type !== "string") {
+      continue;
+    }
+
+    if (part.type === "text" && "text" in part && typeof part.text === "string" && part.text.trim()) {
+      result.push({ type: "text", text: part.text, text_elements: [] });
+      continue;
+    }
+
+    if (part.type === "image_url" && "image_url" in part) {
+      const imageUrl = resolveImageUrl(part.image_url);
+      if (imageUrl.trim()) {
+        result.push({ type: "image", url: imageUrl });
+      }
+    }
+  }
+
+  return result;
 }
 
 function resolveInstructions(instructions: string | undefined, messages: Message[]): string {
@@ -202,276 +455,29 @@ function resolveInstructions(instructions: string | undefined, messages: Message
   return "You are a helpful assistant.";
 }
 
-function mapRole(role: string): "system" | "user" | "assistant" {
-  if (role === "assistant") {
-    return "assistant";
+function resolveImageUrl(imageUrl: unknown): string {
+  if (typeof imageUrl === "string") {
+    return imageUrl;
   }
 
-  if (role === "system" || role === "developer") {
-    return "system";
+  if (
+    imageUrl &&
+    typeof imageUrl === "object" &&
+    "url" in imageUrl &&
+    typeof (imageUrl as { url?: unknown }).url === "string"
+  ) {
+    return (imageUrl as { url: string }).url;
   }
 
-  return "user";
+  return "";
 }
 
-function mapMessageContent(content: Message["content"]): CodexInputContent[] {
-  if (typeof content === "string") {
-    const text = content.trim();
-    return text ? [{ type: "input_text", text }] : [];
-  }
-
-  if (!Array.isArray(content)) {
-    return [];
-  }
-
-  const result: CodexInputContent[] = [];
-
-  for (const part of content) {
-    if (!part || typeof part !== "object" || !("type" in part) || typeof part.type !== "string") {
-      continue;
-    }
-
-    if (part.type === "text" && "text" in part && typeof part.text === "string" && part.text.trim()) {
-      result.push({ type: "input_text", text: part.text });
-      continue;
-    }
-
-    if (part.type === "image_url" && "image_url" in part && part.image_url) {
-      const imageURL =
-        typeof part.image_url === "string"
-          ? part.image_url
-          : "url" in part.image_url && typeof part.image_url.url === "string"
-            ? part.image_url.url
-            : "";
-
-      if (imageURL.trim()) {
-        result.push({ type: "input_image", image_url: imageURL });
-      }
-    }
-  }
-
-  return result;
+function createAbortError(): Error {
+  const error = new Error("AbortError");
+  error.name = "AbortError";
+  return error;
 }
 
-async function readStreamingText(stream: IncomingMessage, onDelta?: (delta: string) => void): Promise<string> {
-  let pending = "";
-  let deltaText = "";
-  let completedText: string | null = null;
-
-  for await (const chunk of stream) {
-    pending += toUTF8(chunk);
-    const lines = pending.split(/\r?\n/);
-    pending = lines.pop() ?? "";
-
-    for (const line of lines) {
-      const event = parseSSEDataLine(line);
-      if (!event) {
-        continue;
-      }
-
-      if (typeof event.delta === "string") {
-        deltaText += event.delta;
-        onDelta?.(event.delta);
-      }
-
-      if (event.type === "response.completed" && "response" in event) {
-        const extracted = extractResponseText(event.response);
-        if (extracted) {
-          completedText = extracted;
-        }
-      }
-    }
-  }
-
-  if (pending.trim()) {
-    const event = parseSSEDataLine(pending);
-    if (event && typeof event.delta === "string") {
-      deltaText += event.delta;
-      onDelta?.(event.delta);
-    }
-    if (event && event.type === "response.completed" && "response" in event) {
-      const extracted = extractResponseText(event.response);
-      if (extracted) {
-        completedText = extracted;
-      }
-    }
-  }
-
-  const trimmedDelta = deltaText.trim();
-  if (trimmedDelta) {
-    return trimmedDelta;
-  }
-
-  return completedText?.trim() ?? "";
-}
-
-function parseSSEDataLine(line: string): Record<string, unknown> | null {
-  const trimmed = line.trim();
-  if (!trimmed.startsWith("data:")) {
-    return null;
-  }
-
-  const payload = trimmed.slice(5).trim();
-  if (!payload || payload === "[DONE]") {
-    return null;
-  }
-
-  try {
-    return JSON.parse(payload) as Record<string, unknown>;
-  } catch {
-    return null;
-  }
-}
-
-function parseNonStreamText(raw: string): string | null {
-  const trimmed = raw.trim();
-  if (!trimmed) {
-    return "";
-  }
-
-  try {
-    const parsed = JSON.parse(trimmed) as Record<string, unknown>;
-    const extracted = extractResponseText(parsed);
-    if (extracted) {
-      return extracted;
-    }
-  } catch {
-    // ignore JSON parse errors
-  }
-
-  let deltaText = "";
-  let completedText: string | null = null;
-  for (const line of trimmed.split(/\r?\n/)) {
-    const event = parseSSEDataLine(line);
-    if (!event) {
-      continue;
-    }
-
-    if (typeof event.delta === "string") {
-      deltaText += event.delta;
-    }
-
-    if (event.type === "response.completed" && "response" in event) {
-      const extracted = extractResponseText(event.response);
-      if (extracted) {
-        completedText = extracted;
-      }
-    }
-  }
-
-  if (deltaText.trim()) {
-    return deltaText;
-  }
-
-  if (completedText?.trim()) {
-    return completedText;
-  }
-
-  return null;
-}
-
-function extractResponseText(payload: unknown): string | null {
-  if (!payload || typeof payload !== "object") {
-    return null;
-  }
-
-  const object = payload as Record<string, unknown>;
-
-  if (typeof object.output_text === "string" && object.output_text.trim()) {
-    return object.output_text.trim();
-  }
-
-  const output = object.output;
-  if (!Array.isArray(output)) {
-    return null;
-  }
-
-  const fragments: string[] = [];
-
-  for (const item of output) {
-    if (!item || typeof item !== "object") {
-      continue;
-    }
-    const content = (item as Record<string, unknown>).content;
-    if (!Array.isArray(content)) {
-      continue;
-    }
-
-    for (const contentItem of content) {
-      if (!contentItem || typeof contentItem !== "object") {
-        continue;
-      }
-      const contentRecord = contentItem as Record<string, unknown>;
-      if (contentRecord.type !== "output_text") {
-        continue;
-      }
-      const text = contentRecord.text;
-      if (typeof text === "string" && text.trim()) {
-        fragments.push(text.trim());
-      }
-    }
-  }
-
-  if (fragments.length === 0) {
-    return null;
-  }
-
-  return fragments.join("\n");
-}
-
-async function parseCodexError(response: CodexHttpResponse): Promise<string> {
-  const body = await readIncomingMessageText(response.stream);
-  const parsedMessage = parseErrorBody(body);
-  if (parsedMessage) {
-    return `Request failed (${response.statusCode}): ${parsedMessage}`;
-  }
-  return `Request failed (${response.statusCode}): ${response.statusText || "Unknown error"}`;
-}
-
-function parseErrorBody(body: string): string | null {
-  const trimmed = body.trim();
-  if (!trimmed) {
-    return null;
-  }
-
-  try {
-    const parsed = JSON.parse(trimmed) as {
-      error?: { message?: string } | string;
-      detail?: string;
-    };
-
-    if (typeof parsed.error === "string" && parsed.error.trim()) {
-      return parsed.error.trim();
-    }
-
-    if (typeof parsed.error === "object" && parsed.error?.message?.trim()) {
-      return parsed.error.message.trim();
-    }
-
-    if (parsed.detail?.trim()) {
-      return parsed.detail.trim();
-    }
-  } catch {
-    // ignore JSON parse error and fallback to plain text below
-  }
-
-  return trimmed;
-}
-
-async function readIncomingMessageText(response: IncomingMessage): Promise<string> {
-  const chunks: string[] = [];
-
-  for await (const chunk of response) {
-    chunks.push(toUTF8(chunk));
-  }
-
-  return chunks.join("");
-}
-
-function toUTF8(chunk: Buffer | Uint8Array | string): string {
-  if (typeof chunk === "string") {
-    return chunk;
-  }
-
-  return Buffer.from(chunk).toString("utf8");
+function isAbortError(error: unknown): boolean {
+  return error instanceof Error && (error.name === "AbortError" || error.message === "AbortError");
 }

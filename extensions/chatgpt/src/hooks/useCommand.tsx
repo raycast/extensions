@@ -15,7 +15,7 @@ export const DEFAULT_COMMANDS: Record<string, Command> = {
       "You are an assistant that fixes spelling, grammar and punctuation. Don't insert any " +
       "extra information; only provide the corrected text. After receiving corrections, the user can request " +
       "clarifications, and you need to answer them in detail.",
-    model: "gpt-5.2",
+    model: "gpt-5.4-mini",
     temperature: "0.7",
     contentSource: "selectedText",
     isDisplayInput: true,
@@ -37,7 +37,7 @@ Strictly follow these rules:
 - ALWAYS maintain the existing tone of voice and style, e.g. formal, casual, polite, etc.
 - NEVER surround the improved text with quotes or any additional formatting
 - If the text is already well-written and requires no improvement, don't change the given text`,
-    model: "gpt-5.2",
+    model: "gpt-5.4-mini",
     temperature: "0.7",
     contentSource: "selectedText",
     isDisplayInput: true,
@@ -47,7 +47,7 @@ Strictly follow these rules:
     name: "Summarize Webpage",
     prompt:
       "Read and summarize the main ideas and key points from this text. Summarize the information concisely and clearly.",
-    model: "gpt-5.2",
+    model: "gpt-5.4-mini",
     temperature: "1",
     contentSource: "browserTab",
     isDisplayInput: false,
@@ -83,7 +83,7 @@ export function useCommand(): CommandHook {
 
           const storedCommand = allCommands[defaultKey];
           if (storedCommand?.model === "gpt-4o-mini") {
-            allCommands[defaultKey] = { ...storedCommand, model: "gpt-5.2" };
+            allCommands[defaultKey] = { ...storedCommand, model: "gpt-5.4-mini" };
             shouldPersistHydratedCommands = true;
           }
         });

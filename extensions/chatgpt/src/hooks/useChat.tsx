@@ -4,8 +4,8 @@ import say from "say";
 import { v4 as uuidv4 } from "uuid";
 import { Chat, ChatHook, Message, Model } from "../type";
 import { buildUserMessage, chatTransformer } from "../utils";
-import { isCodexUnauthorizedError, requestCodexResponse } from "../utils/codex-responses";
-import { getCodexAuthSessionWithRefresh, refreshCodexAuthSession, resolveAuthStatus } from "../utils/auth";
+import { requestCodexResponse } from "../utils/codex-responses";
+import { resolveAuthStatus } from "../utils/auth";
 import { resolveModelOptionForAuth } from "../utils/model-support";
 import { useAutoTTS } from "./useAutoTTS";
 import { getConfiguration, useChatGPT } from "./useChatGPT";
@@ -41,6 +41,10 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   });
   const [streamData, setStreamData] = useState<Chat | undefined>();
   const abortControllerRef = useRef<AbortController | null>(null);
+  const codexThreadRef = useRef<{ threadId: string | null; instructions: string }>({
+    threadId: null,
+    instructions: "",
+  });
 
   const [isHistoryPaused] = useState<boolean>(() => {
     return getPreferenceValues<{
@@ -128,40 +132,26 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
           setStreamData({ ...chat, answer: chat.answer });
         };
 
-        const runCodexRequest = async (session: { accessToken: string; accountId: string }) => {
-          return requestCodexResponse({
-            accessToken: session.accessToken,
-            accountId: session.accountId,
-            model: modelOption,
-            messages,
-            instructions: model.prompt,
-            stream: useStream,
-            signal: abortSignal,
-            httpAgent: proxy,
-            onDelta,
-          });
+        const instructions = model.prompt;
+        const currentCodexThreadId =
+          codexThreadRef.current.instructions === instructions ? codexThreadRef.current.threadId : null;
+
+        const response = await requestCodexResponse({
+          model: modelOption,
+          messages,
+          instructions,
+          stream: useStream,
+          signal: abortSignal,
+          onDelta,
+          threadId: currentCodexThreadId,
+        });
+
+        codexThreadRef.current = {
+          threadId: response.threadId,
+          instructions,
         };
 
-        const session = await getCodexAuthSessionWithRefresh();
-        if (!session) {
-          throw new Error("You are not signed in. Add an API key in extension preferences or sign in with ChatGPT.");
-        }
-
-        let answer: string;
-
-        try {
-          answer = await runCodexRequest(session);
-        } catch (error) {
-          if (!isCodexUnauthorizedError(error)) {
-            throw error;
-          }
-
-          const refreshedSession = await refreshCodexAuthSession(session);
-          toast.message = "ChatGPT session refreshed. Retrying request...";
-          answer = await runCodexRequest(refreshedSession);
-        }
-
-        chat = { ...chat, answer };
+        chat = { ...chat, answer: response.text };
 
         if (useStream) {
           setTimeout(async () => {
@@ -301,6 +291,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
 
   const clear = useCallback(async () => {
     setData([]);
+    codexThreadRef.current = { threadId: null, instructions: "" };
   }, [setData]);
 
   return useMemo(

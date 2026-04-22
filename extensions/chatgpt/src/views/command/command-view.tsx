@@ -24,6 +24,7 @@ import Ask from "../../ask";
 import { v4 as uuidv4 } from "uuid";
 import { mapCommandToModel, useCommand } from "../../hooks/useCommand";
 import { AuthRequiredView } from "../auth-required";
+import { useModel } from "../../hooks/useModel";
 
 type CommandLaunchContext = { commandId?: string };
 export type CommandLaunchProps = LaunchProps<{ launchContext?: CommandLaunchContext }>;
@@ -60,6 +61,7 @@ export default function CommandView(props: CommandLaunchProps) {
 function AuthenticatedCommandView(props: CommandLaunchProps) {
   const navigation = useNavigation();
   const commands = useCommand();
+  const models = useModel();
   const chat = useChat([]);
   const [aiAnswer, setAiAnswer] = useState<string | null>(null);
   const [userInput, setUserInput] = useState<string | null>(null);
@@ -86,20 +88,20 @@ function AuthenticatedCommandView(props: CommandLaunchProps) {
   }, [requestedCommand]);
 
   useEffect(() => {
-    if (!userInput || !requestedCommand) {
+    if (!userInput || !requestedCommand || models.isFetching) {
       return;
     }
 
     (async () => {
       const auth = await resolveAuthStatus();
-      const modelOption = resolveModelOptionForAuth(requestedCommand.model, auth.provider);
+      const modelOption = resolveModelOptionForAuth(requestedCommand.model, auth.provider, models.option);
       const model = { ...mapCommandToModel(requestedCommand), option: modelOption };
 
       setAiAnswer(null);
       setEffectiveModel(modelOption);
       chat.ask(userInput, [], model);
     })();
-  }, [userInput, requestedCommand]);
+  }, [models.isFetching, models.option, userInput, requestedCommand]);
 
   useEffect(() => {
     if (!chat.streamData && !chat.isLoading && chat.data.length > 0) {

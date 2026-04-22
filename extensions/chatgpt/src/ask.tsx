@@ -62,8 +62,8 @@ function AskContent(props: AskProps & { authProvider: AuthProvider }) {
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
 
   const availableModels = useMemo(
-    () => orderModelsForSelection(filterModelsForAuth(Object.values(models.data), authProvider)),
-    [authProvider, models.data],
+    () => orderModelsForSelection(filterModelsForAuth(Object.values(models.data), authProvider, models.option)),
+    [authProvider, models.data, models.option],
   );
 
   const availableModelsMap = useMemo(() => {
@@ -84,7 +84,7 @@ function AskContent(props: AskProps & { authProvider: AuthProvider }) {
         created_at: new Date().toISOString(),
       };
 
-      const modelOption = resolveModelOptionForAuth(initialConversation.model.option, authProvider);
+      const modelOption = resolveModelOptionForAuth(initialConversation.model.option, authProvider, models.option);
       if (modelOption === initialConversation.model.option) {
         return initialConversation;
       }

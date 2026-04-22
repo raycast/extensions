@@ -31,7 +31,7 @@ export const PreferencesActionSection = () => {
       await signInWithCodexAuth();
       toast.style = Toast.Style.Success;
       toast.title = "Signed in with ChatGPT";
-      toast.message = "Codexauth session is now active.";
+      toast.message = "ChatGPT is now connected through Codex app-server.";
       await refreshAuthState();
     } catch (error) {
       toast.style = Toast.Style.Failure;
@@ -55,7 +55,7 @@ export const PreferencesActionSection = () => {
     await showToast({
       style: Toast.Style.Success,
       title: "Signed out of ChatGPT",
-      message: "Your codexauth session was removed from local storage.",
+      message: "Your ChatGPT session was disconnected from Codex app-server.",
     });
   }
 
