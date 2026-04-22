@@ -3,7 +3,7 @@
   "name": "mimo-tts",
   "title": "MiMo TTS",
   "description": "Expressive Xiaomi MiMo TTS for Raycast with style, rhythm, and pace controls",
-  "icon": "command-icon.png",
+  "icon": "mimo-icon.png",
   "author": "xianwei_zhang",
   "categories": [
     "Media"
@@ -19,7 +19,7 @@
       "title": "Quick Read Selected Text",
       "subtitle": "MiMo TTS",
       "description": "Read selected text with your default MiMo voice. Trigger again to stop.",
-      "icon": "command-icon.png",
+      "icon": "mimo-icon.png",
       "mode": "no-view"
     },
     {
@@ -27,7 +27,7 @@
       "title": "Read with Voice",
       "subtitle": "MiMo TTS",
       "description": "Browse MiMo voices and read selected text aloud",
-      "icon": "command-icon.png",
+      "icon": "mimo-icon.png",
       "mode": "view"
     },
     {
@@ -35,7 +35,7 @@
       "title": "Read with Controls",
       "subtitle": "MiMo TTS",
       "description": "Read text with structured MiMo style, rhythm, emotion, and voice controls",
-      "icon": "command-icon.png",
+      "icon": "mimo-icon.png",
       "mode": "view"
     },
     {
@@ -43,7 +43,7 @@
       "title": "Select Quick Read Voice",
       "subtitle": "MiMo TTS",
       "description": "Choose and preview the voice used by Quick Read",
-      "icon": "command-icon.png",
+      "icon": "mimo-icon.png",
       "mode": "view"
     },
     {
@@ -51,7 +51,7 @@
       "title": "Stop Reading",
       "subtitle": "MiMo TTS",
       "description": "Stop the current TTS playback",
-      "icon": "command-icon.png",
+      "icon": "mimo-icon.png",
       "mode": "no-view"
     }
   ],
