@@ -31,13 +31,13 @@ Xiaomi's MiMo-V2.5-TTS documentation supports two control paths, and this extens
 - **Natural-language control** is sent as a `user` message. It adjusts tone, pacing, emotion, and performance style without becoming part of the spoken text.
 - **Audio tag control** is inserted into the `assistant` message with the target text. It can guide rhythm, emotion, voice texture, laughter, breath, pauses, and other speech events.
 
-The **MiMo Studio** command turns those capabilities into a Raycast form that does not require a text selection. You can type or paste text, load the current selection, then preset speech rate, opening style tags, rhythm events, emotion states, voice features, expressive tags, and director-style prompts before synthesis starts. This is the core advantage of the extension: it treats TTS as performance direction, not just plain playback.
+The **TTS Studio** command turns those capabilities into a Raycast form that does not require a text selection. You can type or paste text, load the current selection, then preset speech rate, opening style tags, rhythm events, emotion states, voice features, expressive tags, and director-style prompts before synthesis starts. This is the core advantage of the extension: it treats TTS as performance direction, not just plain playback.
 
 ## Features
 
 - **Quick Read**: select text anywhere, run the command, and listen immediately.
 - **Read with Voice**: browse MiMo voices, inspect voice details, and read with the selected voice.
-- **MiMo Studio**: compose speech from typed, pasted, or selected text with speaking rate, style tags, rhythm events, emotion states, voice texture, expressive tags, and director prompts.
+- **TTS Studio**: compose speech from typed, pasted, or selected text with speaking rate, style tags, rhythm events, emotion states, voice texture, expressive tags, and director prompts.
 - **Natural Style Prompt**: define reusable tone and pacing guidance in preferences.
 - **Voice Preview**: audition voices before setting the default Quick Read voice.
 - **Chunked Playback**: synthesize long selections in smaller chunks and play them sequentially.
@@ -49,7 +49,7 @@ The **MiMo Studio** command turns those capabilities into a Raycast form that do
 | --- | --- |
 | Quick Read Selected Text | Read the current text selection with the default voice. Run again to stop current playback. |
 | Read with Voice | Browse voices, inspect details, and read the current selection with a chosen voice. |
-| MiMo Studio | Type, paste, or load selected text, then tune speech rate, style tags, audio events, mixed emotions, voice texture, and director-mode instructions. |
+| TTS Studio | Type, paste, or load selected text, then tune speech rate, style tags, audio events, mixed emotions, voice texture, and director-mode instructions. |
 | Select Quick Read Voice | Preview and save the voice used by Quick Read. |
 | Stop Reading | Stop the active playback process. |
 
@@ -79,7 +79,7 @@ The **MiMo Studio** command turns those capabilities into a Raycast form that do
 - The extension uses Xiaomi MiMo Token Plan credentials: `tp-...` API Key plus the Token Plan OpenAI-compatible Base URL.
 - The text to synthesize is sent as an `assistant` message, per MiMo's TTS rules.
 - Optional natural-language style direction is sent as a `user` message.
-- In **MiMo Studio**, opening style tags are injected as `(tag1 tag2)` and audio-event tags as `（tag1，tag2）` at the beginning of each synthesized chunk.
+- In **TTS Studio**, opening style tags are injected as `(tag1 tag2)` and audio-event tags as `（tag1，tag2）` at the beginning of each synthesized chunk.
 - Natural presets and director prompts are sent as `user` messages; selected audio tags are sent inside the `assistant` text.
 - If `singing` is selected, the extension forces the singing tag to be the only opening tag so it remains at the very beginning.
 - The extension requests WAV audio and plays the returned base64 data through `afplay`.

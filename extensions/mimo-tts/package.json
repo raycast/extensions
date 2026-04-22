@@ -32,7 +32,7 @@
     },
     {
       "name": "read-with-controls",
-      "title": "MiMo Studio",
+      "title": "TTS Studio",
       "subtitle": "MiMo TTS",
       "description": "Compose and play controllable MiMo speech from typed, selected, or pasted text",
       "icon": "mimo-icon.png",

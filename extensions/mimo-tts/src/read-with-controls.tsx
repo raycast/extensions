@@ -157,7 +157,7 @@ export default function MiMoStudio() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="MiMo Studio"
+      navigationTitle="TTS Studio"
       enableDrafts
       actions={
         <ActionPanel>
@@ -193,7 +193,7 @@ export default function MiMoStudio() {
       }
     >
       <Form.Description
-        title="MiMo Studio"
+        title="TTS Studio"
         text="Compose speech from typed, selected, or pasted text. Natural direction controls performance; selected tags shape the spoken text."
       />
       <Form.TextArea

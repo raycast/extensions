@@ -7,7 +7,7 @@
 - Replace the large legacy voice catalog with the official MiMo built-in voices.
 - Add Raycast detail panels for voice browsing and current selection context.
 - Add natural-language speaking style support through the MiMo `user` message.
-- Add MiMo Studio for typed, pasted, or selected text with structured speech rate, style tags, rhythm events, emotion states, and voice features.
+- Add TTS Studio for typed, pasted, or selected text with structured speech rate, style tags, rhythm events, emotion states, and voice features.
 - Inject assistant-side control tags per chunk so long-form playback keeps the selected style.
 - Request WAV audio and play returned base64 audio through the existing macOS playback pipeline.
 - Rename package metadata, commands, preferences, temp files, and documentation to MiMo TTS.
