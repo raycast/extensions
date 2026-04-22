@@ -84,7 +84,7 @@ function IconActions({ name, packageManager }: { name: string; packageManager: P
 
   const copyTsx = async () => {
     try {
-      if (!cacheRef.current) {
+      if (cacheRef.current === null) {
         await showToast({ style: Toast.Style.Animated, title: "Fetching source..." });
         cacheRef.current = await fetchTsxSource(name);
       }
@@ -102,7 +102,7 @@ function IconActions({ name, packageManager }: { name: string; packageManager: P
         <Action
           title={`Copy ${packageManager} Install Command`}
           icon={Icon.Terminal}
-          shortcut={{ modifiers: ["cmd"], key: "s" }}
+          shortcut={{ modifiers: ["cmd"], key: "i" }}
           onAction={async () => {
             await Clipboard.copy(INSTALL_COMMANDS[packageManager](name));
             await showToast({ style: Toast.Style.Success, title: `${packageManager} command copied!` });
@@ -111,8 +111,13 @@ function IconActions({ name, packageManager }: { name: string; packageManager: P
         <Action.OpenInBrowser
           title="Open in V0"
           icon={Icon.Globe}
-          shortcut={{ modifiers: ["cmd"], key: "v" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           url={`https://v0.dev/chat?q=use+the+${name}+icon+from+lucide-animated`}
+        />
+        <Action.OpenInBrowser
+          title="Open on Lucide Animated"
+          icon={Icon.Globe}
+          url={`https://lucide-animated.com/icons/${name}`}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -123,7 +128,11 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [packageManager, setPackageManager] = useState<PackageManager>("pnpm");
 
-  const { data: registry, isLoading: registryLoading } = useFetch<Registry>(REGISTRY_URL, {
+  const {
+    data: registry,
+    isLoading: registryLoading,
+    error,
+  } = useFetch<Registry>(REGISTRY_URL, {
     parseResponse: async (response) => response.json() as Promise<Registry>,
   });
 
@@ -135,7 +144,7 @@ export default function Command() {
     <Grid
       columns={8}
       inset={Grid.Inset.Large}
-      searchBarPlaceholder="search icons..."
+      searchBarPlaceholder="Search icons..."
       onSearchTextChange={setSearchText}
       isLoading={registryLoading}
       filtering={false}
@@ -162,6 +171,22 @@ export default function Command() {
           actions={<IconActions name={name} packageManager={packageManager} />}
         />
       ))}
+      {error && (
+        <Grid.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Failed to load icons"
+          description="Unable to fetch the icon registry. Please check your internet connection and try again."
+        />
+      )}
+      {!error && !registryLoading && filteredIcons.length === 0 && (
+        <Grid.EmptyView
+          icon={Icon.MagnifyingGlass}
+          title="No icons found"
+          description={
+            searchText ? `No icons match "${searchText}". Try a different search term.` : "No icons available."
+          }
+        />
+      )}
     </Grid>
   );
 }
