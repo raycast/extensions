@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "bash-commands",
   "title": "Bash Commands",
-  "description": "A quick reference for bash commands with search, categories, and quick copy.",
+  "description": "A quick reference for bash commands with search, and categories.",
   "icon": "bash-commands-icon.png",
   "author": "koala1206",
   "platforms": [

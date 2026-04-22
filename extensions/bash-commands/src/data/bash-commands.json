@@ -188,7 +188,7 @@
   },
   {
     "name": "sed replace -i",
-    "command": "sed 's/<old>/<new>/g' <file> -i",
+    "command": "sed -i 's/<old>/<new>/g' <file>",
     "type": "files",
     "description": "Replace a pattern in a file and overwrite it in place.",
     "notes": "### Expression breakdown\n\nThe expression follows the pattern `s/pattern/replacement/flags`:\n\n| Part | Meaning |\n|------|---------|\n| `s` | Substitute |\n| `pattern` | What to find (supports regex) |\n| `replacement` | What to replace it with |\n| `g` | Global — replace all occurrences, not just the first |\n| `i` | Case-insensitive match |\n\n`-i` overwrites the file in place. Without it, output is printed to the console only."
@@ -398,74 +398,74 @@
   },
   {
     "name": "grep -r",
-    "command": "grep '<pattern>' <dir> -r",
+    "command": "grep -r '<pattern>' <dir>",
     "type": "search",
     "description": "Recursively search for a pattern in a directory."
   },
   {
     "name": "grep -R",
-    "command": "grep '<pattern>' <dir> -R",
+    "command": "grep -R '<pattern>' <dir>",
     "type": "search",
     "description": "Recursively search for a pattern and follow symbolic links."
   },
   {
     "name": "grep -l",
-    "command": "grep '<pattern>' <dir> -l",
+    "command": "grep -l '<pattern>' <dir>",
     "type": "search",
     "description": "Show only files that match the pattern."
   },
   {
     "name": "grep -L",
-    "command": "grep '<pattern>' <dir> -L",
+    "command": "grep -L '<pattern>' <dir>",
     "type": "search",
     "description": "Show only files that don't match the pattern."
   },
   {
     "name": "grep -i",
-    "command": "grep '<pattern>' <dir> -i",
+    "command": "grep -i '<pattern>' <dir>",
     "type": "search",
     "description": "Case insensitive pattern search."
   },
   {
     "name": "grep -x",
-    "command": "grep '<pattern>' <dir> -x",
+    "command": "grep -x '<pattern>' <dir>",
     "type": "search",
     "description": "Match the entire line."
   },
   {
     "name": "grep -C",
-    "command": "grep '<pattern>' <dir> -C 1",
+    "command": "grep -C 1 '<pattern>' <dir>",
     "type": "search",
     "description": "Show N lines of context above and below each match."
   },
   {
     "name": "grep -v",
-    "command": "grep '<pattern>' <dir> -v",
+    "command": "grep -v '<pattern>' <dir>",
     "type": "search",
     "description": "Show only lines that don't match the pattern."
   },
   {
     "name": "grep -c",
-    "command": "grep '<pattern>' <dir> -c",
+    "command": "grep -c '<pattern>' <dir>",
     "type": "search",
     "description": "Count the number of matching lines."
   },
   {
     "name": "grep -n",
-    "command": "grep '<pattern>' <dir> -n",
+    "command": "grep -n '<pattern>' <dir>",
     "type": "search",
     "description": "Show line numbers alongside results."
   },
   {
     "name": "grep -E",
-    "command": "grep -E '<pattern>' <dir> -R",
+    "command": "grep -rE '<pattern>' <dir>",
     "type": "search",
     "description": "Search using extended regular expressions.",
     "notes": "### Extended regex with `-E`\n\n`-E` enables extended regex, allowing the use of the following operators without backslashes:\n\n| Operator | Meaning | Example |\n|----------|---------|---------|\n| `\\|` | OR — match either side | `error\\|warning` |\n| `+` | One or more of the preceding char | `fo+` matches `fo`, `foo` |\n| `?` | Zero or one of the preceding char | `https?` matches `http`, `https` |\n| `()` | Group expressions | `(foo\\|bar)` |"
   },
   {
     "name": "egrep",
-    "command": "egrep '<pattern>' <dir> -R",
+    "command": "egrep -R '<pattern>' <dir>",
     "type": "search",
     "description": "Search using extended regular expressions (alias for grep -E).",
     "notes": "### Extended regex with `-E`\n\n`-E` enables extended regex, allowing the use of the following operators without backslashes:\n\n| Operator | Meaning | Example |\n|----------|---------|---------|\n| `\\|` | OR — match either side | `error\\|warning` |\n| `+` | One or more of the preceding char | `fo+` matches `fo`, `foo` |\n| `?` | Zero or one of the preceding char | `https?` matches `http`, `https` |\n| `()` | Group expressions | `(foo\\|bar)` |"
@@ -954,7 +954,7 @@
   },
   {
     "name": "nmap -p",
-    "command": "nmap <host> -p1-65535",
+    "command": "nmap -p1-65535 <host>",
     "type": "network",
     "description": "Scan all open ports on a host."
   },
@@ -996,7 +996,7 @@
   },
   {
     "name": "ssh -p",
-    "command": "ssh <user>@<host> -p <port>",
+    "command": "ssh -p <port> <user>@<host>",
     "type": "network",
     "description": "Connect to a remote host over a custom port."
   },
