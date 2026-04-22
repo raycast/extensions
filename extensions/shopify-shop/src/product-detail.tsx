@@ -1,72 +1,22 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Detail, Toast, showToast, Icon } from "@raycast/api";
-import { usePromise, useFetch } from "@raycast/utils";
+import { usePromise, useFetch, useLocalStorage } from "@raycast/utils";
 import TurndownService from "turndown";
-import DOMPurify from "dompurify";
+import type { SingleProductRoot, Variant, ProductJsRoot, StoreMetaRoot } from "./types";
+import { buildProductJsonUrl, buildProductJsUrl, buildProductPageUrl, buildStoreOrigin } from "./services/shopify-api";
+import { formatPrice, normalizeTags, convertCentsToDollars } from "./services/product-mapper";
+import Recommendations from "./recommendations";
 
-export function sanitizeHtml(html: string, options?: Record<string, unknown>): string {
-  try {
-    const purifyCandidate: unknown = DOMPurify as unknown;
-
-    // Case: object with sanitize
-    if (
-      purifyCandidate &&
-      typeof purifyCandidate === "object" &&
-      "sanitize" in purifyCandidate &&
-      typeof (purifyCandidate as { sanitize?: unknown }).sanitize === "function"
-    ) {
-      return (purifyCandidate as { sanitize: (s: string, o?: Record<string, unknown>) => string }).sanitize(
-        html,
-        options,
-      );
-    }
-
-    // Case: default export contains sanitize
-    if (
-      purifyCandidate &&
-      typeof purifyCandidate === "object" &&
-      "default" in (purifyCandidate as Record<string, unknown>) &&
-      typeof ((purifyCandidate as Record<string, unknown>).default as { sanitize?: unknown })?.sanitize === "function"
-    ) {
-      return (
-        (purifyCandidate as Record<string, unknown>).default as {
-          sanitize: (s: string, o?: Record<string, unknown>) => string;
-        }
-      ).sanitize(html, options);
-    }
-
-    // Case: DOMPurify is a factory function (e.g., requires window)
-    if (typeof purifyCandidate === "function" && typeof globalThis !== "undefined") {
-      const factory = purifyCandidate as (win: unknown) => {
-        sanitize?: (s: string, o?: Record<string, unknown>) => string;
-      };
-      const instance = factory(globalThis);
-      if (instance && typeof instance.sanitize === "function") {
-        return (instance.sanitize as (s: string, o?: Record<string, unknown>) => string)(html, options);
-      }
-    }
-
-    // If DOMPurify isn't available, fall through to safe fallback below.
-  } catch (err) {
-    // Log the error for visibility; fall back to safe stripping below.
-    console.error("[sanitizeHtml] DOMPurify error:", err);
-  }
-
-  // Safe fallback: remove script/style blocks then strip all tags and trim whitespace.
+export function sanitizeHtml(html: string): string {
   try {
     const withoutScripts = html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, "");
     const stripped = withoutScripts.replace(/<[^>]*>/g, "");
-    // Collapse whitespace and return plain text
     return stripped.replace(/\s+/g, " ").trim();
   } catch (err) {
-    console.error("[sanitizeHtml] fallback stripping failed:", err);
+    console.error("[sanitizeHtml] stripping failed:", err);
     return "";
   }
 }
-import type { SingleProductRoot, Variant, ProductJsRoot, StoreMetaRoot } from "./types";
-import { buildProductJsonUrl, buildProductPageUrl, buildStoreOrigin } from "./services/shopify-api";
-import { formatPrice, normalizeTags, convertCentsToDollars } from "./services/product-mapper";
-import { useLocalStorage } from "@raycast/utils";
 
 type Props = {
   handle: string;
@@ -76,7 +26,8 @@ type Props = {
 export default function ProductDetail({ handle, baseUrl }: Props) {
   const [imageIndex, setImageIndex] = useState<number>(0);
   const { value: storeRoute } = useLocalStorage<string | null>("storeRoute", null);
-  const storeOrigin = buildStoreOrigin(storeRoute ?? undefined);
+  const effectiveStoreRoute = baseUrl ?? storeRoute ?? undefined;
+  const storeOrigin = buildStoreOrigin(effectiveStoreRoute);
 
   const { data: storeMeta, isLoading: isLoadingStoreMeta } = useFetch<StoreMetaRoot>(`${storeOrigin}/meta.json`, {
     parseResponse: async (response) => {
@@ -89,11 +40,11 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
   const storeCurrency = storeMeta?.currency;
 
   const { isLoading: isLoadingProduct, data: productData } = usePromise(
-    async (sc?: string) => {
+    async (sc?: string, productHandle?: string, route?: string) => {
       const usedCurrency = sc ?? "USD";
-      const baseJsonUrl = buildProductJsonUrl(baseUrl ?? null, handle);
+      const baseJsonUrl = buildProductJsonUrl(route ?? effectiveStoreRoute, productHandle ?? handle);
       const productJsonUrl = `${baseJsonUrl}?currency=${usedCurrency}`;
-      const productJsUrl = `${baseJsonUrl.replace(/\.json$/, ".js")}?currency=${usedCurrency}`;
+      const productJsUrl = `${buildProductJsUrl(route ?? effectiveStoreRoute, productHandle ?? handle)}?currency=${usedCurrency}`;
 
       const [jsonRes, jsRes] = await Promise.all([fetch(productJsonUrl), fetch(productJsUrl)]);
 
@@ -110,7 +61,7 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
 
       return { product: jsonData.product ?? null, productJs: jsData };
     },
-    [storeCurrency],
+    [storeCurrency, handle, effectiveStoreRoute],
     {
       execute: storeMeta !== undefined,
       onError: (error) => {
@@ -140,11 +91,7 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
   });
   // sanitizeHtml moved to module scope
 
-  const sanitizedHtml = product.body_html
-    ? sanitizeHtml(product.body_html, {
-        ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|\/)*/i,
-      })
-    : "";
+  const sanitizedHtml = product.body_html ? sanitizeHtml(product.body_html) : "";
   const bodyMd = sanitizedHtml ? turndown.turndown(sanitizedHtml).replace(/\\\*/g, "*") : "";
 
   const firstVariant: Variant | null = product.variants && product.variants.length > 0 ? product.variants[0] : null;
@@ -159,8 +106,8 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
     variantAvailable = jsVariant.available;
   }
 
-  const formattedPrice = formatPrice(variantPrice, "USD");
-  const productUrl = buildProductPageUrl(baseUrl ?? null, handle);
+  const formattedPrice = formatPrice(variantPrice, storeCurrency);
+  const productUrl = buildProductPageUrl(effectiveStoreRoute, handle);
 
   const topImage = product.images && product.images.length > 0 ? product.images[0].src : undefined;
   const currentImage =
@@ -197,6 +144,20 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
             content={productUrl}
             shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
           />
+          {product.id && (
+            <Action.Push
+              title="View Recommendations"
+              icon={Icon.List}
+              shortcut={{ modifiers: ["cmd"], key: "r" }}
+              target={
+                <Recommendations
+                  productId={product.id}
+                  productHandle={product.handle ?? handle}
+                  baseUrl={effectiveStoreRoute}
+                />
+              }
+            />
+          )}
           {firstVariant && (
             <>
               <Action.CopyToClipboard
@@ -295,7 +256,7 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
                     <Detail.Metadata.Label
                       key={`variant-${v.id}`}
                       title={`${v.title} — ${variantAvailability}`}
-                      text={`${formatPrice(vPrice, "USD") ?? vPrice}${variantImage ? ` • image: ${variantImage}` : ""}`}
+                      text={`${formatPrice(vPrice, storeCurrency) ?? vPrice}${variantImage ? ` • image: ${variantImage}` : ""}`}
                     />
                   );
                 })}

@@ -19,7 +19,7 @@ export default function Recommendations({ productId, productHandle, baseUrl }: P
   const storeMeta = storeMetaResp.data ?? null;
   const storeCurrency = storeMeta?.currency ?? undefined;
 
-  const { data, isLoading } = useRecommendations(effectiveStoreRoute ?? "", productId, true);
+  const { data, isLoading, error } = useRecommendations(effectiveStoreRoute ?? "", productId, true, storeCurrency);
 
   const recommendations = data?.products ?? [];
 
@@ -27,6 +27,9 @@ export default function Recommendations({ productId, productHandle, baseUrl }: P
     <List isLoading={isLoading} navigationTitle={`Recommendations for ${productHandle}`}>
       {recommendations.length === 0 && !isLoading && (
         <List.EmptyView title="No Recommendations" description="No product recommendations found." />
+      )}
+      {error && !isLoading && (
+        <List.EmptyView title="Failed to Load Recommendations" description={error.message || "Unknown error"} />
       )}
       {recommendations.map((product) => {
         const price = formatPrice(product.price, storeCurrency, true); // price is in cents

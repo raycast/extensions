@@ -105,9 +105,15 @@ export function buildRecommendationsUrl(base?: string | null, productId?: number
   return `${origin}/recommendations/products.json?product_id=${encodeURIComponent(String(id))}&currency=${curr}`;
 }
 
-export function buildSearchSuggestUrl(base?: string | null, query?: string, currency?: string) {
+export function buildSearchSuggestUrl(
+  base?: string | null,
+  query?: string,
+  currency?: string,
+  resourceTypes: string[] = ["product"],
+) {
   const q = query ?? "";
   const origin = buildStoreOrigin(base);
   const curr = encodeURIComponent(currency || "USD");
-  return `${origin}/search/suggest.json?q=${encodeURIComponent(q)}&resources[type]=product&currency=${curr}`;
+  const typeParam = encodeURIComponent(resourceTypes.join(","));
+  return `${origin}/search/suggest.json?q=${encodeURIComponent(q)}&resources[type]=${typeParam}&currency=${curr}`;
 }

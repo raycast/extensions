@@ -1,6 +1,6 @@
 import { useFetch } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
-import { buildStoreOrigin } from "./shopify-api";
+import { buildStoreOrigin, buildRecommendationsUrl, buildSearchSuggestUrl } from "./shopify-api";
 import type { SearchSuggestRoot, RecommendationsRoot, ProductJsRoot, StoreMetaRoot } from "../types";
 
 /**
@@ -15,10 +15,7 @@ export function useSearchSuggest(
   currency?: string,
 ) {
   const baseUrl = buildStoreOrigin(storeRoute);
-  const resourceParams = resourceTypes.map((type) => `resources[type]=${encodeURIComponent(type)}`).join("&");
-  const searchUrl = query.trim()
-    ? `${baseUrl}/search/suggest.json?q=${encodeURIComponent(query)}&${resourceParams}&currency=${currency || "USD"}`
-    : null;
+  const searchUrl = query.trim() ? buildSearchSuggestUrl(baseUrl, query, currency, resourceTypes) : null;
 
   return useFetch<SearchSuggestRoot>(searchUrl ?? "", {
     execute: enabled && !!searchUrl,
@@ -33,15 +30,6 @@ export function useSearchSuggest(
       }
 
       const json = raw as Partial<SearchSuggestRoot>;
-
-      try {
-        if (process.env.NODE_ENV !== "production") {
-          console.debug("[useSearchSuggest] URL:", searchUrl);
-          console.debug("[useSearchSuggest] Response shape:", json);
-        }
-      } catch (e: unknown) {
-        if (process.env.NODE_ENV !== "production") console.warn("[useSearchSuggest] debug log failed", e);
-      }
 
       try {
         const wantsCollections = resourceTypes.includes("collection");
@@ -142,9 +130,7 @@ export function useRecommendations(
   currency?: string,
 ) {
   const baseUrl = buildStoreOrigin(storeRoute);
-  const recommendationsUrl = productId
-    ? `${baseUrl}/recommendations/products.json?product_id=${productId}&currency=${currency || "USD"}`
-    : null;
+  const recommendationsUrl = productId ? buildRecommendationsUrl(baseUrl, productId, currency) : null;
 
   return useFetch<RecommendationsRoot>(recommendationsUrl ?? "", {
     execute: enabled && !!recommendationsUrl,

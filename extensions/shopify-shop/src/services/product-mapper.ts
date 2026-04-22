@@ -37,12 +37,11 @@ export function formatPrice(price?: string | number | null, currency?: string, i
   // Validate currency code (3 letters)
   if (!/^[A-Z]{3}$/.test(curr)) {
     console.warn(`Invalid currency code: ${curr}, falling back to ${CURRENCY_DEFAULT}`);
-    return new Intl.NumberFormat("en-US", { style: "currency", currency: CURRENCY_DEFAULT }).format(amount);
+    return new Intl.NumberFormat(undefined, { style: "currency", currency: CURRENCY_DEFAULT }).format(amount);
   }
 
   try {
-    // Use en-US locale to ensure consistent formatting regardless of user's system locale
-    const formatted = new Intl.NumberFormat("en-US", { style: "currency", currency: curr }).format(amount);
+    const formatted = new Intl.NumberFormat(undefined, { style: "currency", currency: curr }).format(amount);
     return formatted;
   } catch (error) {
     console.warn(`Currency formatting failed for ${curr}:`, error);

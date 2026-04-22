@@ -20,6 +20,7 @@ export default function SearchCommand() {
     searchText,
     DEFAULT_RESOURCE_TYPES,
     searchText.length >= 2,
+    storeCurrency,
   );
 
   const storeOrigin = buildStoreOrigin(storeRoute ?? undefined);

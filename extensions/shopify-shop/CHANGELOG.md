@@ -1,3 +1,3 @@
-# Shopify Shop Changelog
+# Shopify Shop
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Shopify Shop] - {PR_MERGE_DATE}

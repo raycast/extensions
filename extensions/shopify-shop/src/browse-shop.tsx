@@ -67,6 +67,12 @@ export default function Command() {
   const isLoadingFromFetch = response.isLoading || searchSuggest.isLoading || storeMetaResp.isLoading;
   const resp = response.data ?? null;
   const isLoading = isLoadingFromFetch || (resp === null && !searchSuggest.data);
+  const errorMessage =
+    response.error?.message ??
+    searchSuggest.error?.message ??
+    storeMetaResp.error?.message ??
+    collectionsResp.error?.message ??
+    null;
 
   let products: Product[] = [];
   if (searchText.length >= 2 && searchSuggest.data?.resources?.results?.products) {
@@ -207,9 +213,11 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
+      {!isLoading && errorMessage && <Grid.EmptyView title="Could Not Load Products" description={errorMessage} />}
       {!isLoading &&
-        products.map((p) => {
-          const key = p.id ?? p.handle ?? p.title ?? Math.random().toString();
+        !errorMessage &&
+        products.map((p, index) => {
+          const key = p.id ?? p.handle ?? p.title ?? `missing-${index}`;
           const firstImage = p.images && p.images.length > 0 ? p.images[0].src : undefined;
           const content = firstImage ? firstImage : { source: Icon.Box, tintColor: Color.PrimaryText };
 
