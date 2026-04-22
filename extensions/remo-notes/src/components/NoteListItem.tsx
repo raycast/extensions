@@ -87,7 +87,7 @@ export function NoteListItem({ note, onRefresh, isShowingDetail, onToggleDetail 
           />
           {note.isLocked || note.isE2E || !note.content ? null : (
             <Action.CopyToClipboard
-              content={note.content}
+              content={toMarkdown(note.content)}
               title="Copy Content"
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
             />
