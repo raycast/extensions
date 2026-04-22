@@ -49,7 +49,9 @@ export default function Command() {
     .map((name) => allCommands.find((cmd) => cmd.name === name))
     .filter((cmd): cmd is BashCommand => cmd !== undefined && !(pinnedNames ?? []).includes(cmd.name) && matches(cmd));
 
-  const all = allCommands.filter(matches);
+  const all = allCommands.filter(
+    (cmd) => matches(cmd) && !(pinnedNames ?? []).includes(cmd.name) && !(recentNames ?? []).includes(cmd.name),
+  );
 
   const handlePin = (cmd: BashCommand) => {
     if ((pinnedNames ?? []).includes(cmd.name)) {
