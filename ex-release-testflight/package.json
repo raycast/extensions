@@ -1,0 +1,36 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "extrade-release",
+  "title": "EXTrade Release",
+  "description": "EXTrade iOS TestFlight 发布(调用 scripts/release_testflight.sh,Raycast 只做 UI)",
+  "icon": "icon.png",
+  "author": "wilton",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "release-testflight",
+      "title": "Release to TestFlight",
+      "subtitle": "EXTrade iOS",
+      "description": "通过 scripts/release_testflight.sh 发布到 TestFlight;Raycast 仅负责收集参数、调用脚本、展示结果。",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "~20.8.10",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
