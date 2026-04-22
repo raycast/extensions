@@ -1,6 +1,6 @@
 # Linkwarden Changelog
 
-## [Fix Undefined Data Crash] - {PR_MERGE_DATE}
+## [Fix Undefined Data Crash] - 2026-04-22
 
 - Fixed `TypeError: Cannot read properties of undefined (reading 'map')` crash in the "Add Website to Linkwarden" command when the API returns an unexpected body shape
 - Hardened `useTags` and `useCollections` so `data` is always an array, regardless of the API response shape
