@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-04-22
 
 - Extract a Notion page ID from the focused browser tab or clipboard.
 - Save copied Notion IDs with page name, source URL, last copied date, and pin state.
