@@ -4,11 +4,6 @@ import { promisify } from "node:util";
 
 const pExecFile = promisify(execFile);
 
-type Prefs = {
-  lat?: string;
-  lon?: string;
-};
-
 export type Coords = {
   lat: number;
   lon: number;
@@ -75,7 +70,7 @@ async function tryCoreLocation(): Promise<CliResult> {
 }
 
 export async function getCoords(): Promise<Coords> {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const lat = prefs.lat ? parseFloat(prefs.lat) : NaN;
   const lon = prefs.lon ? parseFloat(prefs.lon) : NaN;
   if (Number.isFinite(lat) && Number.isFinite(lon)) {

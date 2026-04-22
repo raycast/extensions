@@ -30,9 +30,7 @@ export default function PriceSchedule({ evseId, statusOverride }: Props) {
     { keepPreviousData: true },
   );
 
-  const { priceGranularity } = getPreferenceValues<{
-    priceGranularity?: "hour" | "15min";
-  }>();
+  const { priceGranularity } = getPreferenceValues<Preferences>();
   const granularity: "hour" | "15min" = priceGranularity ?? "hour";
 
   // Tick once a minute so the "Now" / "Upcoming" split advances with the clock.

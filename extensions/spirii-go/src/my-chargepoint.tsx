@@ -9,7 +9,7 @@ import {
 import PriceSchedule from "./components/PriceSchedule";
 
 export default function Command() {
-  const { favoriteEvseId } = getPreferenceValues<{ favoriteEvseId?: string }>();
+  const { favoriteEvseId } = getPreferenceValues<Preferences.MyChargepoint>();
   const evseId = favoriteEvseId?.trim();
 
   if (!evseId) {
