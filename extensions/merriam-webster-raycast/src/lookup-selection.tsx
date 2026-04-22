@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Detail, getSelectedText, showToast, Toast } from "@raycast/api";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { buildLearnerBrowseUrl, fetchLearnerResults, normalizeLookupTerm } from "./api/merriamWebster";
 import { formatEntriesMarkdown } from "./lib/formatEntry";
 import { playAudioUrl } from "./lib/audio";
@@ -10,39 +10,21 @@ export default function LookupSelectionCommand() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
-  const fetchedTermRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    let cancelled = false;
-
     getSelectedText()
       .then((text) => {
-        if (cancelled) return;
         const normalized = normalizeLookupTerm(text);
         if (!normalized) {
-          if (!fetchedTermRef.current) {
-            showToast({ style: Toast.Style.Failure, title: "No text selected" });
-          }
+          showToast({ style: Toast.Style.Failure, title: "No text selected" });
           return;
         }
-        if (normalized !== fetchedTermRef.current) {
-          fetchedTermRef.current = normalized;
-          setResults([]);
-          setError(undefined);
-          setIsLoading(true);
-          setTerm(normalized);
-        }
+        setTerm(normalized);
       })
       .catch(() => {
-        if (!fetchedTermRef.current) {
-          showToast({ style: Toast.Style.Failure, title: "Could not read selection" });
-        }
+        showToast({ style: Toast.Style.Failure, title: "Could not read selection" });
       });
-
-    return () => {
-      cancelled = true;
-    };
-  });
+  }, []);
 
   useEffect(() => {
     if (!term) return;
