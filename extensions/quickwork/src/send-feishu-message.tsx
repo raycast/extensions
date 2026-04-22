@@ -3,13 +3,7 @@ import { useEffect, useState } from "react";
 import { FeishuAuthState, readAuthState, writeAuthState } from "./lib/auth-state";
 import { buildMessage, refreshFeishuUserAccessToken, sendFeishuTextByUser } from "./lib/feishu";
 
-interface CommandPreferences {
-  feishuAppId: string;
-  feishuAppSecret: string;
-  feishuUserRefreshToken: string;
-  feishuOAuthRedirectUri: string;
-  feishuChatId: string;
-}
+type CommandPreferences = Preferences.SendFeishuMessage;
 
 interface SendFormValues {
   body: string;
@@ -109,7 +103,6 @@ async function submitMessage(values: SendFormValues, preferences: CommandPrefere
     const message = buildMessage(body, effectivePrefix);
     let accessToken = await resolveUserAccessToken(preferences);
 
-    await closeMainWindow();
     try {
       await sendFeishuTextByUser({
         userAccessToken: accessToken,
@@ -130,6 +123,7 @@ async function submitMessage(values: SendFormValues, preferences: CommandPrefere
       });
     }
 
+    await closeMainWindow();
     await showToast({
       style: Toast.Style.Success,
       title: "Message sent",

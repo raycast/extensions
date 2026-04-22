@@ -4,11 +4,7 @@ import { createServer } from "node:http";
 import { writeAuthState } from "./lib/auth-state";
 import { exchangeFeishuAuthorizationCode } from "./lib/feishu";
 
-interface CommandPreferences {
-  feishuAppId: string;
-  feishuAppSecret: string;
-  feishuOAuthRedirectUri: string;
-}
+type CommandPreferences = Preferences.AuthorizeFeishu;
 
 const OAUTH_SCOPE = "offline_access im:chat:read im:message";
 const CALLBACK_TIMEOUT_MS = 180_000;

@@ -12,5 +12,5 @@
     "resolveJsonModule": true,
     "outDir": "dist"
   },
-  "include": ["src", "tests"]
+  "include": ["src", "tests", "raycast-env.d.ts"]
 }
