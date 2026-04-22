@@ -1,0 +1,14 @@
+# dependencies
+node_modules/
+
+# local artifacts
+.DS_Store
+*.log
+
+# Raycast/build
+.dist/
+dist/
+
+# optional local env
+.env
+.env.*
