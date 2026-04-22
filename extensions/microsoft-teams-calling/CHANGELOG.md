@@ -1,6 +1,6 @@
 # Microsoft Teams Changelog
 
-## [Fix Teams API 2.0 Permissions] - {PR_MERGE_DATE}
+## [Fix Teams API 2.0 Permissions] - 2026-04-22
 
 - Stops Teams seeking user permission every time the extension performs an action.
 
