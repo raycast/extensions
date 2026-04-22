@@ -1,0 +1,111 @@
+{
+  "name": "quick-launch",
+  "version": "0.1.0",
+  "description": "Launch grouped apps, websites, and desktop tools from a single Raycast manager.",
+  "scripts": {
+    "build": "npx ray build",
+    "dev": "npx ray develop",
+    "lint": "npx ray lint",
+    "publish": "npx ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.96.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.7.2"
+  },
+  "title": "Quick Launch",
+  "icon": "icon.png",
+  "author": "ian_lucas",
+  "license": "MIT",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity"],
+  "keywords": ["launcher", "apps", "groups", "shortcuts", "productivity"],
+  "commands": [
+    {
+      "name": "manage-app-groups",
+      "title": "Launch Manager",
+      "description": "Open grouped apps and manage them from a grid.",
+      "mode": "view"
+    },
+    {
+      "name": "open-group-slot-1",
+      "title": "Open Group Slot 1",
+      "description": "Open a configured group with a dedicated hotkey slot.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupName",
+          "type": "textfield",
+          "required": false,
+          "title": "Group Name",
+          "description": "Exact group name to open with this slot."
+        }
+      ]
+    },
+    {
+      "name": "open-group-slot-2",
+      "title": "Open Group Slot 2",
+      "description": "Open a configured group with a dedicated hotkey slot.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupName",
+          "type": "textfield",
+          "required": false,
+          "title": "Group Name",
+          "description": "Exact group name to open with this slot."
+        }
+      ]
+    },
+    {
+      "name": "open-group-slot-3",
+      "title": "Open Group Slot 3",
+      "description": "Open a configured group with a dedicated hotkey slot.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupName",
+          "type": "textfield",
+          "required": false,
+          "title": "Group Name",
+          "description": "Exact group name to open with this slot."
+        }
+      ]
+    },
+    {
+      "name": "open-group-slot-4",
+      "title": "Open Group Slot 4",
+      "description": "Open a configured group with a dedicated hotkey slot.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupName",
+          "type": "textfield",
+          "required": false,
+          "title": "Group Name",
+          "description": "Exact group name to open with this slot."
+        }
+      ]
+    },
+    {
+      "name": "open-group-slot-5",
+      "title": "Open Group Slot 5",
+      "description": "Open a configured group with a dedicated hotkey slot.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "groupName",
+          "type": "textfield",
+          "required": false,
+          "title": "Group Name",
+          "description": "Exact group name to open with this slot."
+        }
+      ]
+    }
+  ]
+}
