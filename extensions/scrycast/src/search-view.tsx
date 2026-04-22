@@ -1,56 +1,23 @@
-import { Grid, List, ActionPanel, Action, showToast, Toast, Color, Icon, Clipboard, useNavigation } from "@raycast/api";
+import { Grid, List, ActionPanel, Action, showToast, Toast, Color, Icon, useNavigation } from "@raycast/api";
 import { PrintsView, CardDetailView } from "./card-views";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useFetch, usePromise, useLocalStorage } from "@raycast/utils";
-import { writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { COLLECTION_IDS_KEY, COLLECTION_NAMES_KEY } from "./collection";
+import {
+  type Card,
+  type ScryfallSearchResponse,
+  type SortOrder,
+  getCardImageUri,
+  getTaggerUrl,
+  getEdhrecUrl,
+  sortCards,
+  copyCardImage,
+  scryfallMultiUrl,
+  FEEDBACK_URL,
+  SAVED_CARDS_KEY,
+} from "./shared";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ImageUris {
-  small: string;
-  normal: string;
-  large: string;
-  png: string;
-  art_crop: string;
-  border_crop: string;
-}
-
-interface CardFace {
-  name: string;
-  image_uris?: ImageUris;
-  mana_cost?: string;
-  oracle_text?: string;
-  flavor_text?: string;
-}
-
-interface Card {
-  id: string;
-  name: string;
-  set: string;
-  collector_number: string;
-  scryfall_uri: string;
-  prints_search_uri?: string;
-  image_uris?: ImageUris;
-  card_faces?: CardFace[];
-  type_line?: string;
-  mana_cost?: string;
-  oracle_text?: string;
-  flavor_text?: string;
-  set_name?: string;
-  edhrec_rank?: number;
-  prices?: { usd?: string; usd_foil?: string };
-}
-
-interface ScryfallSearchResponse {
-  object: string;
-  data: Card[];
-  total_cards: number;
-  has_more: boolean;
-  next_page?: string;
-}
 
 interface Tagging {
   tag: {
@@ -68,62 +35,8 @@ type SortOrder = "name" | "edhrec" | "usd";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function getCardImageUri(card: Card, size: keyof ImageUris = "png"): string {
-  if (card.image_uris?.[size]) return card.image_uris[size];
-  if (card.card_faces?.[0]?.image_uris?.[size]) return card.card_faces[0].image_uris[size];
-  const fallback = card.image_uris?.png ?? card.card_faces?.[0]?.image_uris?.png ?? "";
-  if (fallback) {
-    console.warn(`[Scrycast] ${size} unavailable for "${card.name}" (${card.id}), falling back to png`);
-  } else {
-    console.error(`[Scrycast] No image URI found for card "${card.name}" (${card.id})`, card);
-  }
-  return fallback;
-}
-
-function getTaggerUrl(card: Card): string {
-  return `https://tagger.scryfall.com/card/${card.set}/${card.collector_number}`;
-}
-
-function sortCards(cards: Card[], order: SortOrder): Card[] {
-  return [...cards].sort((a, b) => {
-    if (order === "name") return a.name.localeCompare(b.name);
-    if (order === "edhrec") {
-      const ra = a.edhrec_rank ?? Infinity;
-      const rb = b.edhrec_rank ?? Infinity;
-      return ra - rb;
-    }
-    const pa = parseFloat(a.prices?.usd ?? "-1");
-    const pb = parseFloat(b.prices?.usd ?? "-1");
-    return pb - pa;
-  });
-}
-
-async function copyCardImage(imageUri: string): Promise<void> {
-  const response = await fetch(imageUri);
-  if (!response.ok) throw new Error(`Failed to fetch image (${response.status})`);
-  const buffer = new Uint8Array(await response.arrayBuffer());
-  const tmpPath = join(tmpdir(), `scrycast-${Date.now()}.png`);
-  await writeFile(tmpPath, buffer);
-  await Clipboard.copy({ file: tmpPath });
-}
-
-function scryfallMultiUrl(cards: Card[]): string {
-  const query = cards.map((c) => `!"${c.name}"`).join(" OR ");
-  return `https://scryfall.com/search?q=${encodeURIComponent(query)}`;
-}
-
-const FEEDBACK_URL = "https://github.com/aayushpi/scrycast/issues";
-const SAVED_CARDS_KEY = "savedCards";
 const SEARCH_HISTORY_KEY = "searchHistory";
 const MAX_HISTORY = 15;
-
-function getEdhrecUrl(cardName: string): string {
-  return `https://edhrec.com/cards/${cardName
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")}`;
-}
 
 // ─── Tagger API ───────────────────────────────────────────────────────────────
 

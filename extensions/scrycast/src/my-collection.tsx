@@ -1,21 +1,6 @@
-import {
-  Grid,
-  List,
-  ActionPanel,
-  Action,
-  showToast,
-  Toast,
-  Color,
-  Icon,
-  useNavigation,
-  Form,
-  Clipboard,
-} from "@raycast/api";
+import { Grid, List, ActionPanel, Action, showToast, Toast, Color, Icon, useNavigation, Form } from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
 import { useFetch, useLocalStorage } from "@raycast/utils";
-import { writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import {
   parseCollectionCSVWithStats,
   COLLECTION_IDS_KEY,
@@ -23,78 +8,22 @@ import {
   COLLECTION_STATS_KEY,
   CollectionStats,
 } from "./collection";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-interface ImageUris {
-  small: string;
-  normal: string;
-  large: string;
-  png: string;
-  art_crop: string;
-  border_crop: string;
-}
-
-interface CardFace {
-  name: string;
-  image_uris?: ImageUris;
-}
-
-interface Card {
-  id: string;
-  name: string;
-  set: string;
-  collector_number: string;
-  scryfall_uri: string;
-  image_uris?: ImageUris;
-  card_faces?: CardFace[];
-  type_line?: string;
-  mana_cost?: string;
-  oracle_text?: string;
-  set_name?: string;
-  edhrec_rank?: number;
-  prices?: { usd?: string; usd_foil?: string };
-}
-
-interface ScryfallSearchResponse {
-  object: string;
-  data: Card[];
-  total_cards: number;
-  has_more: boolean;
-}
+import {
+  type Card,
+  type ScryfallSearchResponse,
+  getCardImageUri,
+  getEdhrecUrl,
+  copyCardImage,
+  FEEDBACK_URL,
+} from "./shared";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-
-function getCardImageUri(card: Card, size: keyof ImageUris = "png"): string {
-  if (card.image_uris?.[size]) return card.image_uris[size];
-  if (card.card_faces?.[0]?.image_uris?.[size]) return card.card_faces[0].image_uris[size];
-  return card.image_uris?.png ?? card.card_faces?.[0]?.image_uris?.png ?? "";
-}
-
-async function copyCardImage(imageUri: string): Promise<void> {
-  const response = await fetch(imageUri);
-  if (!response.ok) throw new Error(`Failed to fetch image (${response.status})`);
-  const buffer = new Uint8Array(await response.arrayBuffer());
-  const tmpPath = join(tmpdir(), `scrycast-${Date.now()}.png`);
-  await writeFile(tmpPath, buffer);
-  await Clipboard.copy({ file: tmpPath });
-}
-
-function getEdhrecUrl(cardName: string): string {
-  return `https://edhrec.com/cards/${cardName
-    .toLowerCase()
-    .replace(/[^a-z0-9 ]/g, "")
-    .trim()
-    .replace(/\s+/g, "-")}`;
-}
 
 function formatStats(stats: CollectionStats): string {
   const parts = [`${stats.totalCopies.toLocaleString()} cards`];
   if (stats.setCount > 0) parts.push(`${stats.setCount.toLocaleString()} sets`);
   return parts.join(" · ");
 }
-
-const FEEDBACK_URL = "https://github.com/aayushpi/scrycast/issues";
 
 // ─── Import CSV Form ──────────────────────────────────────────────────────────
 
