@@ -47,7 +47,7 @@ async function getLatestNativeHostRelease(): Promise<{
   version: string;
   assets: Map<string, string>;
 }> {
-  const res = await fetch(GITHUB_API, {
+  const res = await fetch(`${GITHUB_API}?per_page=100`, {
     headers: {
       Accept: "application/vnd.github.v3+json",
       "User-Agent": "raycast-firefox-setup",

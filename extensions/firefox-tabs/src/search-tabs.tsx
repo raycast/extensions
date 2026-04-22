@@ -14,7 +14,7 @@ import {
 } from "@raycast/api";
 import { MutatePromise, getAvatarIcon, usePromise } from "@raycast/utils";
 import { execFile } from "child_process";
-import { existsSync, readFileSync, watch } from "fs";
+import { existsSync, watch } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -26,6 +26,7 @@ import {
   showActionError,
 } from "./lib/errors";
 import { AMO_URL } from "./lib/constants";
+import { getPort } from "./lib/setup";
 
 // -- Types matching the native host HTTP API response --
 
@@ -59,25 +60,6 @@ interface TabsResponse {
     hasMore: boolean;
   };
   meta: { count: number; timestamp: number };
-}
-
-// -- Port discovery --
-
-/**
- * Read the HTTP server port from ~/.raycast-firefox/port.
- * Falls back to 26394 on any error (file missing, parse failure).
- */
-function getPort(): number {
-  try {
-    const content = readFileSync(PORT_PATH, "utf-8").trim();
-    const port = parseInt(content, 10);
-    if (Number.isNaN(port) || port <= 0 || port > 65535) {
-      return 26394;
-    }
-    return port;
-  } catch {
-    return 26394;
-  }
 }
 
 const PORT_PATH = join(homedir(), ".raycast-firefox", "port");
@@ -370,8 +352,8 @@ export default function SearchTabs() {
   const [classifiedError, setClassifiedError] =
     useState<ClassifiedError | null>(null);
 
-  const handleError = useCallback((error: Error) => {
-    setClassifiedError(classifyError(error));
+  const handleError = useCallback(async (error: Error) => {
+    setClassifiedError(await classifyError(error));
   }, []);
 
   const handleData = useCallback(() => {
