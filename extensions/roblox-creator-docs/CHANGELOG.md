@@ -1,6 +1,6 @@
 # Roblox Creator Docs Changelog
 
-## [1.1.0] - {PR_MERGE_DATE}
+## [1.1.0] - 2026-04-22
 
 ### Added
 - Added Windows Support
