@@ -32,9 +32,9 @@
     },
     {
       "name": "read-with-controls",
-      "title": "Read with Controls",
+      "title": "MiMo Studio",
       "subtitle": "MiMo TTS",
-      "description": "Read text with structured MiMo style, rhythm, emotion, and voice controls",
+      "description": "Compose and play controllable MiMo speech from typed, selected, or pasted text",
       "icon": "mimo-icon.png",
       "mode": "view"
     },

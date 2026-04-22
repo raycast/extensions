@@ -40,7 +40,7 @@ interface ControlFormValues extends Form.Values {
   directorPrompt?: string;
 }
 
-export default function ReadWithControls() {
+export default function MiMoStudio() {
   const currentModel = getActiveModel();
   const availableVoices = useMemo(() => getVoicesForModel(currentModel), [currentModel]);
   const [text, setText] = useState("");
@@ -127,14 +127,59 @@ export default function ReadWithControls() {
     showToast({ style: Toast.Style.Success, title: "Playback stopped" });
   }, []);
 
+  const handleUseSelectedText = useCallback(async () => {
+    const selectedText = await getSelectedText().catch(() => "");
+    if (!selectedText.trim()) {
+      await showToast({ style: Toast.Style.Failure, title: "No selected text found" });
+      return;
+    }
+
+    setText(selectedText);
+    await showToast({ style: Toast.Style.Success, title: "Selected text loaded" });
+  }, []);
+
+  const handlePasteClipboard = useCallback(async () => {
+    const clipboardText = await Clipboard.readText().catch(() => "");
+    if (!clipboardText?.trim()) {
+      await showToast({ style: Toast.Style.Failure, title: "Clipboard has no text" });
+      return;
+    }
+
+    setText(clipboardText);
+    await showToast({ style: Toast.Style.Success, title: "Clipboard text loaded" });
+  }, []);
+
+  const handleClearText = useCallback(async () => {
+    setText("");
+    await showToast({ style: Toast.Style.Success, title: "Text cleared" });
+  }, []);
+
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle="Read with Controls"
+      navigationTitle="MiMo Studio"
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm<ControlFormValues> title="Read with Controls" icon={Icon.Play} onSubmit={handleSubmit} />
+          <Action.SubmitForm<ControlFormValues> title="Generate & Play" icon={Icon.Play} onSubmit={handleSubmit} />
+          <Action
+            title="Use Selected Text"
+            icon={Icon.TextCursor}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            onAction={handleUseSelectedText}
+          />
+          <Action
+            title="Paste Clipboard"
+            icon={Icon.Clipboard}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+            onAction={handlePasteClipboard}
+          />
+          <Action
+            title="Clear Text"
+            icon={Icon.Eraser}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
+            onAction={handleClearText}
+          />
           {isLoading ? (
             <Action
               title="Stop Playback"
@@ -148,15 +193,15 @@ export default function ReadWithControls() {
       }
     >
       <Form.Description
-        title="MiMo Control"
-        text="Natural direction is sent as the user message. Selected tags are injected at the beginning of the assistant text."
+        title="MiMo Studio"
+        text="Compose speech from typed, selected, or pasted text. Natural direction controls performance; selected tags shape the spoken text."
       />
       <Form.TextArea
         id="text"
         title="Text"
         value={text}
         onChange={setText}
-        placeholder="Select text before opening this command, or paste text here."
+        placeholder="Type or paste text here. You can also load the current selection from the action menu."
         autoFocus={!text}
       />
       <Form.Dropdown id="voiceId" title="Voice" value={voiceId} onChange={setVoiceId} placeholder="Choose a voice">
@@ -249,7 +294,7 @@ export default function ReadWithControls() {
 async function loadInitialText(): Promise<string> {
   const selectedText = await getSelectedText().catch(() => "");
   if (selectedText.trim()) return selectedText;
-  return (await Clipboard.readText().catch(() => "")) || "";
+  return "";
 }
 
 function selectedTags(tags: string[] | undefined): string[] {

@@ -1,12 +1,12 @@
 # MiMo TTS — Raycast 扩展
 
-在 macOS 上选中任意文字，通过 Raycast 调用小米 MiMo TTS 朗读。
+在 macOS 上通过 Raycast 调用小米 MiMo TTS，把输入、粘贴或选中的文字生成有表现力的语音。
 
 ## 功能
 
 - **Quick Read**：选中文字后一键朗读，再次触发可停止当前播放。
 - **音色浏览**：用 Raycast detail panel 展示 MiMo-V2.5 内置中英文音色。
-- **结构化控制**：组合语速、整体风格标签、节奏事件、情绪状态、语音特征和导演模式提示。
+- **MiMo Studio**：无需先选中文字，可直接输入或粘贴文本，再组合语速、整体风格标签、节奏事件、情绪状态、语音特征和导演模式提示。
 - **试听与默认音色**：可试听音色，并设为 Quick Read 默认音色。
 - **风格提示词**：可用自然语言控制语气、情绪、节奏和朗读风格。
 - **长文本播放**：自动切分长选区，顺序合成并播放。
@@ -26,7 +26,7 @@
 | --- | --- |
 | Quick Read Selected Text | 用默认音色朗读当前选区；再次触发停止播放。 |
 | Read with Voice | 浏览音色并选择一个音色朗读当前选区。 |
-| Read with Controls | 用表单调节语速、风格标签、音频事件、复合情绪、语音质感和导演模式指令。 |
+| MiMo Studio | 输入、粘贴或加载当前选区，再用表单调节语速、风格标签、音频事件、复合情绪、语音质感和导演模式指令。 |
 | Select Quick Read Voice | 试听并保存 Quick Read 使用的音色。 |
 | Stop Reading | 停止当前播放。 |
 
@@ -36,7 +36,7 @@
 - 插件使用小米 MiMo Token Plan 凭据：`tp-...` API Key 加 Token Plan OpenAI-compatible Base URL。
 - 待合成文本按官方要求放入 `assistant` message。
 - 风格提示词放入可选的 `user` message。
-- **Read with Controls** 会把整体风格标签写成 `(标签1 标签2)`，把音频事件写成 `（标签1，标签2）`，并放到每个合成片段开头。
+- **MiMo Studio** 会把整体风格标签写成 `(标签1 标签2)`，把音频事件写成 `（标签1，标签2）`，并放到每个合成片段开头。
 - 自然语言预设和导演模式会放入 `user` message；选中的音频标签会放入 `assistant` 文本。
 - 如果选择 `唱歌`，插件会强制只使用 `(唱歌)` 作为开头标签，确保它位于文本最开头。
 - 插件请求 WAV 音频，播放返回的 base64 音频数据。
