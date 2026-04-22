@@ -46,6 +46,12 @@ export default function SearchNotes() {
       throttle={true}
       isShowingDetail={isShowingDetail}
     >
+      <List.EmptyView
+        title={searchText ? "No results found" : "No notes found"}
+        description={
+          searchText ? "Try a different search term or check your spelling." : "You haven't added any notes yet."
+        }
+      />
       {notes.map((note) => (
         <NoteListItem
           key={note._id}

@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, open, showToast, Toast, useNavigation } from
 import { useState } from "react";
 import { buildAppUrl } from "./config";
 import { remoApi } from "./utils/api";
+import { handleError } from "./utils/errors";
 
 interface CreateNoteForm {
   title: string;
@@ -32,11 +33,7 @@ export default function CreateNote() {
       await open(webUrl);
       pop();
     } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create note",
-        message: String(error),
-      });
+      handleError(error, "Failed to create note");
     } finally {
       setIsLoading(false);
     }

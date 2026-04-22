@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { buildAppUrl, buildWebUrl } from "./config";
 import type { Note } from "./types";
 import { remoApi } from "./utils/api";
+import { handleError } from "./utils/errors";
 import { stripHtml } from "./utils/stripHtml";
 
 export default function Command() {
@@ -17,7 +18,7 @@ export default function Command() {
         const pinned = result.filter((n: Note) => n.isPinned);
         setNotes(pinned);
       } catch (error) {
-        console.error(error);
+        handleError(error, "Failed to fetch pinned notes");
       } finally {
         setIsLoading(false);
       }

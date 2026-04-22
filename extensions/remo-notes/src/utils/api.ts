@@ -2,16 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import { DEFAULT_CONVEX_URL } from "../config";
 import type { AskAiResponse, Folder, Note } from "../types";
 
-type ReformulateMode =
-  | "fix"
-  | "professional"
-  | "simplify"
-  | "format"
-  | "polish"
-  | "formalize"
-  | "elaborate"
-  | "shorten";
-
 type ListNotesParams = {
   includeDeleted?: boolean;
   tags?: string[];
@@ -220,23 +210,5 @@ export const remoApi = {
       citations: data.citations ?? [],
       matches: data.matches ?? [],
     } satisfies AskAiResponse;
-  },
-
-  async generateTitle(content: string) {
-    const data = await request<{ title: string }>("/ai/generate-title", {
-      method: "POST",
-      body: JSON.stringify({ content }),
-    });
-
-    return data.title;
-  },
-
-  async reformulateText(content: string, mode: ReformulateMode) {
-    const data = await request<{ content: string }>("/ai/reformulate", {
-      method: "POST",
-      body: JSON.stringify({ content, mode }),
-    });
-
-    return data.content;
   },
 };

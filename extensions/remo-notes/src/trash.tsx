@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { buildAppUrl } from "./config";
 import type { Note } from "./types";
@@ -19,7 +19,7 @@ export default function Trash() {
         includeDeleted: true,
       });
       const deletedNotes = result.filter((n: Note) => n.deletedAt !== undefined);
-      setNotes(deletedNotes.sort((a: Note, b: Note) => b.updatedAt - a.updatedAt));
+      setNotes(deletedNotes.sort((a: Note, b: Note) => (b.deletedAt ?? b.updatedAt) - (a.deletedAt ?? a.updatedAt)));
     } catch (error) {
       handleError(error, "Failed to fetch trash");
     } finally {
@@ -42,16 +42,27 @@ export default function Trash() {
   }
 
   async function handlePermanentDelete(noteId: Note["_id"]) {
-    try {
-      await remoApi.permanentDelete(noteId);
+    if (
+      await confirmAlert({
+        title: "Permanently Delete Note",
+        message: "Are you sure you want to permanently delete this note? This action cannot be undone.",
+        primaryAction: {
+          title: "Delete",
+          style: Alert.ActionStyle.Destructive,
+        },
+      })
+    ) {
+      try {
+        await remoApi.permanentDelete(noteId);
 
-      showToast({
-        style: Toast.Style.Success,
-        title: "Note permanently deleted",
-      });
-      fetchTrash();
-    } catch (error) {
-      handleError(error, "Failed to permanently delete note");
+        showToast({
+          style: Toast.Style.Success,
+          title: "Note permanently deleted",
+        });
+        fetchTrash();
+      } catch (error) {
+        handleError(error, "Failed to permanently delete note");
+      }
     }
   }
 
@@ -71,7 +82,7 @@ export default function Trash() {
                 ? []
                 : [
                     {
-                      text: `Deleted: ${new Date(note.deletedAt ?? note.updatedAt).toLocaleDateString()}`,
+                      text: `Deleted: ${new Date(note.deletedAt ?? note.updatedAt).toLocaleDateString("en-US")}`,
                       tooltip: "Date deleted",
                     },
                   ]
@@ -85,7 +96,7 @@ export default function Trash() {
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Deleted At"
-                      text={new Date(note.deletedAt ?? note.updatedAt).toLocaleString()}
+                      text={new Date(note.deletedAt ?? note.updatedAt).toLocaleString("en-US")}
                     />
                   </List.Item.Detail.Metadata>
                 }

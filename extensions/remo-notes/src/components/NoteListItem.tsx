@@ -32,7 +32,7 @@ export function NoteListItem({ note, onRefresh, isShowingDetail, onToggleDetail 
         isShowingDetail
           ? []
           : [
-              { text: new Date(note.updatedAt).toLocaleDateString() },
+              { text: new Date(note.updatedAt).toLocaleDateString("en-US") },
               note.isPinned ? { icon: Icon.Pin } : {},
               note.isLocked ? { icon: Icon.Lock } : {},
             ]
@@ -57,7 +57,10 @@ export function NoteListItem({ note, onRefresh, isShowingDetail, onToggleDetail 
                 </List.Item.Detail.Metadata.TagList>
               )}
               <List.Item.Detail.Metadata.Separator />
-              <List.Item.Detail.Metadata.Label title="Last Updated" text={new Date(note.updatedAt).toLocaleString()} />
+              <List.Item.Detail.Metadata.Label
+                title="Last Updated"
+                text={new Date(note.updatedAt).toLocaleString("en-US")}
+              />
               <List.Item.Detail.Metadata.Label title="Source" text={note.source === "raycast" ? "Raycast" : "Web"} />
             </List.Item.Detail.Metadata>
           }
