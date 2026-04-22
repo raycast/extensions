@@ -1,0 +1,157 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "buffer",
+  "title": "Buffer",
+  "description": "Manage Buffer posts, schedule content, and view analytics directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "heycarlosluis",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "scheduled-posts",
+      "title": "Scheduled Posts",
+      "icon": "extension-icon.png",
+      "subtitle": "Buffer",
+      "description": "View and manage your scheduled Buffer posts",
+      "mode": "view"
+    },
+    {
+      "name": "sent-posts",
+      "title": "Sent Posts",
+      "icon": "extension-icon.png",
+      "subtitle": "Buffer",
+      "description": "View sent posts and engagement metrics",
+      "mode": "view"
+    },
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "icon": "extension-icon.png",
+      "subtitle": "Buffer",
+      "description": "Create a new post and add it to your Buffer queue",
+      "mode": "view"
+    },
+    {
+      "name": "channels",
+      "title": "Channels",
+      "icon": "extension-icon.png",
+      "subtitle": "Buffer",
+      "description": "View your connected Buffer channels",
+      "mode": "view"
+    },
+    {
+      "name": "draft-posts",
+      "title": "Draft Posts",
+      "icon": "extension-icon.png",
+      "subtitle": "Buffer",
+      "description": "View and manage Buffer drafts and pending approvals",
+      "mode": "view"
+    },
+    {
+      "name": "create-idea",
+      "title": "Create Idea",
+      "icon": "extension-icon.png",
+      "subtitle": "Buffer",
+      "description": "Create a new idea in Buffer",
+      "mode": "view"
+    },
+    {
+      "name": "account-overview",
+      "title": "Account Overview",
+      "icon": "extension-icon.png",
+      "subtitle": "Buffer",
+      "description": "Inspect your Buffer account, organizations, and connected apps",
+      "mode": "view"
+    },
+    {
+      "name": "organizations",
+      "title": "Organizations",
+      "icon": "extension-icon.png",
+      "subtitle": "Buffer",
+      "description": "View your Buffer organizations and limits",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-account",
+      "title": "Get Account",
+      "description": "Get the authenticated Buffer account with organizations and connected apps"
+    },
+    {
+      "name": "list-organizations",
+      "title": "List Organizations",
+      "description": "List the Buffer organizations available in the current account"
+    },
+    {
+      "name": "list-channels",
+      "title": "List Channels",
+      "description": "List the active Buffer channels available in the current account"
+    },
+    {
+      "name": "get-channel",
+      "title": "Get Channel",
+      "description": "Get details for a single Buffer channel"
+    },
+    {
+      "name": "list-posts",
+      "title": "List Posts",
+      "description": "List Buffer posts with optional status, channel, and date filtering"
+    },
+    {
+      "name": "list-scheduled-posts",
+      "title": "List Scheduled Posts",
+      "description": "List upcoming scheduled Buffer posts, optionally filtered by channel"
+    },
+    {
+      "name": "delete-post",
+      "title": "Delete Post",
+      "description": "Delete a Buffer post by its exact post ID"
+    },
+    {
+      "name": "create-post",
+      "title": "Create Post",
+      "description": "Create a new Buffer post for a specific channel, either queued automatically, scheduled, or saved as a draft. Supports text, image URLs, and video URLs."
+    },
+    {
+      "name": "create-idea",
+      "title": "Create Idea",
+      "description": "Create a new idea in the current Buffer organization"
+    }
+  ],
+  "ai": {
+    "instructions": "Use this extension to work with the user's Buffer account. If the user wants to post to a specific channel and the channel is unclear, call the channel listing tool first. Prefer active channels. When creating a post, keep the provided text exactly unless the user explicitly asks to rewrite it. If the user asks for upcoming content, use the scheduled posts or generic posts tool. Do not create posts for multiple channels unless the user explicitly asks for multiple channels, all channels, or cross-posting. If the user gives one post without naming multiple channels, ask for or choose a single channel only. Use draft mode when the user asks to save without publishing. Use the idea tool when the user asks to capture content ideas rather than schedule a post. Use the account and organization tools for workspace/account questions."
+  },
+  "preferences": [
+    {
+      "name": "accessToken",
+      "title": "Buffer Access Token",
+      "description": "Your Buffer API access token. Get it at publish.buffer.com/settings/api",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
