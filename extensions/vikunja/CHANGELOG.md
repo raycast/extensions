@@ -1,6 +1,6 @@
 # Changelog
 
-## [Create Task Quick Action & Preselect Project] - {PR_MERGE_DATE}
+## [Create Task Quick Action & Preselect Project] - 2026-04-22
 
 - Added Cmd+N / Create Task action in the `List Tasks` view and in each task's action panel to quickly create a new task.
 - When creating a task from a project context (either the currently selected project in `List Tasks` or via a task's action), the `Create Task` form is opened with that project preselected.
