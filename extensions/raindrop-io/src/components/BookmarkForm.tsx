@@ -49,7 +49,7 @@ type BookmarkFormProps = {
   isLoading?: boolean;
   defaultLink?: string;
   onWillSave?: () => void;
-  onSaved?: () => void;
+  onSaved?: () => void | Promise<void>;
   onError?: (error: Error) => void;
   mode?: "create" | "edit";
   bookmarkId?: number;
@@ -87,11 +87,13 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
               });
 
         if (response.status === 200) {
-          if (mode !== "edit") {
+          await props.onSaved?.();
+          if (mode !== "edit" && !props.onSaved) {
             reset({ link: "", collection: "-1", tags: [] });
-            focus("link");
+            setDropdownValue("-1");
+            setShowCollectionCreation(false);
+            focus("collection");
           }
-          props.onSaved?.();
         } else {
           throw new Error(response.statusText);
         }
