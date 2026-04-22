@@ -1,0 +1,209 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mimo-tts",
+  "title": "MiMo TTS",
+  "description": "Expressive Xiaomi MiMo TTS for Raycast with style, rhythm, and pace controls",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-read",
+      "title": "Quick Read Selected Text",
+      "subtitle": "MiMo TTS",
+      "description": "Read selected text with your default MiMo voice. Trigger again to stop.",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-with-voice",
+      "title": "Read with Voice",
+      "subtitle": "MiMo TTS",
+      "description": "Browse MiMo voices and read selected text aloud",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "read-with-controls",
+      "title": "Read with Controls",
+      "subtitle": "MiMo TTS",
+      "description": "Read text with structured MiMo style, rhythm, emotion, and voice controls",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "select-voice",
+      "title": "Select Quick Read Voice",
+      "subtitle": "MiMo TTS",
+      "description": "Choose and preview the voice used by Quick Read",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "stop-reading",
+      "title": "Stop Reading",
+      "subtitle": "MiMo TTS",
+      "description": "Stop the current TTS playback",
+      "icon": "command-icon.png",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "Token Plan API Key",
+      "description": "Xiaomi MiMo Token Plan API Key, usually starts with tp-",
+      "placeholder": "tp-..."
+    },
+    {
+      "name": "tokenPlanBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Token Plan Base URL",
+      "description": "OpenAI-compatible Token Plan base URL shown on your subscription page",
+      "placeholder": "https://token-plan-cn.xiaomimimo.com/v1",
+      "default": "https://token-plan-cn.xiaomimimo.com/v1"
+    },
+    {
+      "name": "modelId",
+      "type": "dropdown",
+      "required": false,
+      "title": "TTS Model",
+      "description": "MiMo speech synthesis model",
+      "default": "mimo-v2.5-tts",
+      "data": [
+        {
+          "title": "MiMo-V2.5-TTS (Recommended)",
+          "value": "mimo-v2.5-tts"
+        },
+        {
+          "title": "MiMo-V2-TTS (Legacy)",
+          "value": "mimo-v2-tts"
+        }
+      ]
+    },
+    {
+      "name": "defaultVoice",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Voice",
+      "description": "Voice used for Quick Read",
+      "default": "mimo_default",
+      "data": [
+        {
+          "title": "MiMo Default",
+          "value": "mimo_default"
+        },
+        {
+          "title": "冰糖 (Chinese, Female)",
+          "value": "冰糖"
+        },
+        {
+          "title": "茉莉 (Chinese, Female)",
+          "value": "茉莉"
+        },
+        {
+          "title": "苏打 (Chinese, Male)",
+          "value": "苏打"
+        },
+        {
+          "title": "白桦 (Chinese, Male)",
+          "value": "白桦"
+        },
+        {
+          "title": "Mia (English, Female)",
+          "value": "Mia"
+        },
+        {
+          "title": "Chloe (English, Female)",
+          "value": "Chloe"
+        },
+        {
+          "title": "Milo (English, Male)",
+          "value": "Milo"
+        },
+        {
+          "title": "Dean (English, Male)",
+          "value": "Dean"
+        },
+        {
+          "title": "MiMo Chinese Female (Legacy)",
+          "value": "default_zh"
+        },
+        {
+          "title": "MiMo English Female (Legacy)",
+          "value": "default_en"
+        }
+      ]
+    },
+    {
+      "name": "speechRate",
+      "type": "dropdown",
+      "required": false,
+      "title": "Speech Rate",
+      "description": "Natural-language speed guidance sent to MiMo",
+      "default": "0",
+      "data": [
+        {
+          "title": "0.5x (Slow)",
+          "value": "-50"
+        },
+        {
+          "title": "0.75x",
+          "value": "-25"
+        },
+        {
+          "title": "1.0x (Normal)",
+          "value": "0"
+        },
+        {
+          "title": "1.25x",
+          "value": "25"
+        },
+        {
+          "title": "1.5x",
+          "value": "50"
+        },
+        {
+          "title": "2.0x (Fast)",
+          "value": "100"
+        }
+      ]
+    },
+    {
+      "name": "stylePrompt",
+      "type": "textfield",
+      "required": false,
+      "title": "Speaking Style",
+      "description": "Optional natural-language direction, sent as the user message",
+      "placeholder": "Natural, clear, restrained, suitable for reading long text"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
