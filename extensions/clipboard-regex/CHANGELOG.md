@@ -1,4 +1,4 @@
-## [1.0.0] - 2026-04-18
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Sed-style regex substitution with live preview
 - Flexible delimiters (`s/foo/bar/`, `s|foo|bar|`, etc.)

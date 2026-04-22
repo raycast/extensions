@@ -7,70 +7,48 @@ interface ParsedSubstitution {
   replacement: string;
 }
 
+const isDelimiterChar = (c: string | undefined) => c !== undefined && !/[a-zA-Z0-9\s]/.test(c);
+
+function detectDelimiter(trimmed: string): { delimiter: string; start: number } | null {
+  if (trimmed[0] === "s" && isDelimiterChar(trimmed[1])) {
+    return { delimiter: trimmed[1], start: 2 };
+  }
+  if (isDelimiterChar(trimmed[0])) {
+    return { delimiter: trimmed[0], start: 1 };
+  }
+  return null;
+}
+
+function scanSegment(s: string, start: number, delimiter: string): { content: string; next: number; closed: boolean } {
+  let content = "";
+  let i = start;
+  while (i < s.length) {
+    if (s[i] === "\\" && i + 1 < s.length) {
+      content += s[i + 1] === delimiter ? delimiter : s.slice(i, i + 2);
+      i += 2;
+    } else if (s[i] === delimiter) {
+      return { content, next: i + 1, closed: true };
+    } else {
+      content += s[i];
+      i++;
+    }
+  }
+  return { content, next: i, closed: false };
+}
+
 function parseSubstitution(input: string): ParsedSubstitution | null {
   const trimmed = input.trim();
+  const head = detectDelimiter(trimmed);
+  if (!head) return null;
 
-  const isDelimiter = (c: string) => c !== undefined && !/[a-zA-Z0-9\s]/.test(c);
+  const patternSeg = scanSegment(trimmed, head.start, head.delimiter);
+  if (!patternSeg.closed || patternSeg.content.length === 0) return null;
 
-  let delimiter: string;
-  let i: number;
-  if (trimmed[0] === "s" && isDelimiter(trimmed[1])) {
-    delimiter = trimmed[1];
-    i = 2;
-  } else if (isDelimiter(trimmed[0])) {
-    delimiter = trimmed[0];
-    i = 1;
-  } else {
-    return null;
-  }
-  let pattern = "";
-  let foundSecondDelimiter = false;
-  while (i < trimmed.length) {
-    if (trimmed[i] === "\\" && i + 1 < trimmed.length) {
-      if (trimmed[i + 1] === delimiter) {
-        pattern += delimiter;
-        i += 2;
-      } else {
-        pattern += trimmed.slice(i, i + 2);
-        i += 2;
-      }
-    } else if (trimmed[i] === delimiter) {
-      foundSecondDelimiter = true;
-      i++;
-      break;
-    } else {
-      pattern += trimmed[i];
-      i++;
-    }
-  }
-
-  // Require the second delimiter (like vim: `s/foo/` not `s/foo`)
-  if (!foundSecondDelimiter) return null;
-
-  let replacement = "";
-  while (i < trimmed.length) {
-    if (trimmed[i] === "\\" && i + 1 < trimmed.length) {
-      if (trimmed[i + 1] === delimiter) {
-        replacement += delimiter;
-        i += 2;
-      } else {
-        replacement += trimmed.slice(i, i + 2);
-        i += 2;
-      }
-    } else if (trimmed[i] === delimiter) {
-      i++;
-      break;
-    } else {
-      replacement += trimmed[i];
-      i++;
-    }
-  }
-
-  const flags = trimmed.slice(i);
-  if (pattern.length === 0) return null;
+  const replacementSeg = scanSegment(trimmed, patternSeg.next, head.delimiter);
+  const flags = trimmed.slice(replacementSeg.next);
 
   try {
-    return { pattern: new RegExp(pattern, flags), replacement };
+    return { pattern: new RegExp(patternSeg.content, flags), replacement: replacementSeg.content };
   } catch {
     return null;
   }
