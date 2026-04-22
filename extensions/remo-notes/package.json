@@ -90,8 +90,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.3",
-    "@raycast/utils": "^1.17.0",
-    "convex": "^1.13.0",
     "turndown": "^7.2.2"
   },
   "devDependencies": {
