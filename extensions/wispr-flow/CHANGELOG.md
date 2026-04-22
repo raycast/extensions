@@ -1,6 +1,6 @@
 # Wispr Flow Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-04-22
 
 ### Voice Control
 - Added Toggle Recording command to start/stop dictation with a single hotkey
