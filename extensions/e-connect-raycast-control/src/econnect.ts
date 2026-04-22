@@ -17,7 +17,7 @@ const DEFAULT_HTTP_API_PORT = "8000";
 const DEFAULT_HTTPS_PORT = "3443";
 
 type RequestOptions = {
-  method?: "GET" | "POST";
+  method?: "GET" | "POST" | "PUT";
   body?: unknown;
 };
 
