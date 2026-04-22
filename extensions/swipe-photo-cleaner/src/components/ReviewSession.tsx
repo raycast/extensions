@@ -86,9 +86,26 @@ export function ReviewSession({ photos }: { photos: PhotoItem[] }) {
   const [thumbPath, setThumbPath] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!currentPhoto) return;
+    let cancelled = false;
+
+    if (!currentPhoto) {
+      setThumbPath(null);
+      return () => {
+        cancelled = true;
+      };
+    }
+
     setThumbPath(null);
-    getThumbnail(currentPhoto.path).then(setThumbPath);
+
+    void getThumbnail(currentPhoto.path).then((thumbPath) => {
+      if (!cancelled) {
+        setThumbPath(thumbPath);
+      }
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [currentPhoto?.path]);
 
   if (photos.length === 0) {
@@ -121,7 +138,7 @@ export function ReviewSession({ photos }: { photos: PhotoItem[] }) {
           <Detail.Metadata.Label title="Size" text={formatSize(current.size)} />
           <Detail.Metadata.Label
             title="Date"
-            text={current.createdAt.toLocaleDateString()}
+            text={current.createdAt.toLocaleDateString("en-US")}
           />
           <Detail.Metadata.Separator />
           <Detail.Metadata.Label

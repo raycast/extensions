@@ -14,26 +14,26 @@ Clean your photo library with fast swipe decisions. Review photos one by one and
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| **Review Photos** | Scan a folder and review all photos |
+| Command                     | Description                                |
+| --------------------------- | ------------------------------------------ |
+| **Review Photos**           | Scan a folder and review all photos        |
 | **Review Finder Selection** | Review images currently selected in Finder |
 
 ## Keyboard Shortcuts
 
-| Action | Shortcut |
-|---|---|
-| Keep | `Enter` or `Cmd + Right Arrow` |
-| Move to Trash | `Cmd + Left Arrow` |
-| Undo | `Cmd + Z` |
-| Quick Look | `Cmd + Y` |
-| Show in Finder | `Cmd + F` |
+| Action         | Shortcut                       |
+| -------------- | ------------------------------ |
+| Keep           | `Enter` or `Cmd + Right Arrow` |
+| Move to Trash  | `Cmd + Left Arrow`             |
+| Undo           | `Cmd + Z`                      |
+| Quick Look     | `Cmd + Y`                      |
+| Show in Finder | `Cmd + F`                      |
 
 ## Preferences
 
-| Name | Description | Required |
-|---|---|---|
-| Default Photos Directory | Folder to scan automatically when opening Review Photos | No |
+| Name                     | Description                                             | Required |
+| ------------------------ | ------------------------------------------------------- | -------- |
+| Default Photos Directory | Folder to scan automatically when opening Review Photos | No       |
 
 ## Supported Formats
 

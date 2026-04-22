@@ -17,7 +17,12 @@ export default function ReviewFinderSelectionCommand() {
   const { push } = useNavigation();
 
   useEffect(() => {
-    cleanupStagingDir().then(async (count) => {
+    let cancelled = false;
+
+    async function loadPhotos() {
+      const count = await cleanupStagingDir();
+      if (cancelled) return;
+
       if (count > 0) {
         await showToast({
           style: Toast.Style.Success,
@@ -25,14 +30,22 @@ export default function ReviewFinderSelectionCommand() {
           message: "Files were moved to Trash",
         });
       }
-    });
-    getFinderPhotos().then((p) => {
-      setPhotos(p);
-      if (p.length > 0) {
-        push(<ReviewSession photos={p} />);
+
+      const selectedPhotos = await getFinderPhotos();
+      if (cancelled) return;
+
+      setPhotos(selectedPhotos);
+      if (selectedPhotos.length > 0) {
+        push(<ReviewSession photos={selectedPhotos} />);
       }
-    });
-  }, []);
+    }
+
+    void loadPhotos();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [push]);
 
   if (photos === null) {
     return <Detail isLoading />;

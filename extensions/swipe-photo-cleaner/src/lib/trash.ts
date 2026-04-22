@@ -1,13 +1,6 @@
 import { environment, trash } from "@raycast/api";
-import {
-  rename,
-  mkdir,
-  copyFile,
-  unlink,
-  readdir,
-  stat,
-} from "node:fs/promises";
-import path from "node:path";
+import { rename, mkdir, copyFile, unlink, readdir, stat } from "fs/promises";
+import path from "path";
 
 const PENDING_TRASH_DIR = path.join(environment.supportPath, "pending-trash");
 
@@ -19,13 +12,22 @@ async function moveFile(src: string, dest: string): Promise<void> {
   try {
     await rename(src, dest);
   } catch (err: unknown) {
-    if ((err as NodeJS.ErrnoException).code === "EXDEV") {
+    if (isExdevError(err)) {
       await copyFile(src, dest);
       await unlink(src);
     } else {
       throw err;
     }
   }
+}
+
+function isExdevError(err: unknown): err is { code: string } {
+  return (
+    typeof err === "object" &&
+    err !== null &&
+    "code" in err &&
+    (err as { code?: unknown }).code === "EXDEV"
+  );
 }
 
 export async function moveToPendingTrash(filePath: string): Promise<string> {
@@ -54,8 +56,10 @@ async function fileExists(filePath: string): Promise<boolean> {
 
 export async function commitPendingTrash(
   entries: Array<{ pendingPath: string; originalPath: string }>,
-) {
-  if (entries.length === 0) return;
+): Promise<number> {
+  if (entries.length === 0) return 0;
+
+  let failedCount = 0;
 
   for (const entry of entries) {
     try {
@@ -78,9 +82,11 @@ export async function commitPendingTrash(
         }
       }
     } catch {
-      // File disappeared between check and operation — skip
+      failedCount += 1;
     }
   }
+
+  return failedCount;
 }
 
 export async function cleanupStagingDir(): Promise<number> {
@@ -88,7 +94,9 @@ export async function cleanupStagingDir(): Promise<number> {
   const entries = await readdir(PENDING_TRASH_DIR);
   if (entries.length === 0) return 0;
 
-  const paths = entries.map((e) => path.join(PENDING_TRASH_DIR, e));
+  const paths = entries.map((entry: string) =>
+    path.join(PENDING_TRASH_DIR, entry),
+  );
   await trash(paths);
   return entries.length;
 }

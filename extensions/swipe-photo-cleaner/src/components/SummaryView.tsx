@@ -3,6 +3,7 @@ import {
   Action,
   Detail,
   Icon,
+  environment,
   open,
   popToRoot,
   showToast,
@@ -18,6 +19,10 @@ interface SummaryViewProps {
 }
 
 export function SummaryView({ state }: SummaryViewProps) {
+  const homeDirectory = environment.supportPath.split(
+    "/Library/Application Support",
+  )[0];
+
   useEffect(() => {
     const trashEntries = state.actions
       .filter((a) => a.kind === "trash" && a.pendingTrashPath)
@@ -26,14 +31,36 @@ export function SummaryView({ state }: SummaryViewProps) {
         originalPath: a.photo.path,
       }));
 
-    commitPendingTrash(trashEntries).catch(async (err) => {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to move files to Trash",
-        message: String(err),
+    let cancelled = false;
+
+    void commitPendingTrash(trashEntries)
+      .then(async (failedCount) => {
+        if (cancelled || failedCount === 0) {
+          return;
+        }
+
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Failed to move ${failedCount} file(s) to Trash`,
+          message: "Some files could not be moved during final cleanup.",
+        });
+      })
+      .catch(async (err) => {
+        if (cancelled) {
+          return;
+        }
+
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to move files to Trash",
+          message: String(err),
+        });
       });
-    });
-  }, []);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [state.actions]);
 
   const markdown = `# Review Complete
 
@@ -55,7 +82,7 @@ export function SummaryView({ state }: SummaryViewProps) {
           <Action
             title="Open Trash"
             icon={Icon.Trash}
-            onAction={() => open(`${process.env.HOME}/.Trash`)}
+            onAction={() => open(`${homeDirectory}/.Trash`)}
           />
           <Action
             title="Start New Session"
