@@ -81,6 +81,23 @@ export function focusWindow(windowId: string) {
   closeMainWindow({ clearRootSearch: true });
 }
 
+export async function setWindowTiling(windowId: string) {
+  const result = spawnSync("aerospace", ["layout", "tiling", "--window-id", windowId], {
+    env: env(),
+    encoding: "utf8",
+    timeout: 15000,
+  });
+
+  if (result.status !== 0) {
+    await showToast({ style: Toast.Style.Failure, title: "Failed to set tiling layout", message: result.stderr });
+    return;
+  }
+
+  await showToast({ style: Toast.Style.Success, title: "Window set to tiling layout" });
+  popToRoot({ clearSearchBar: true });
+  closeMainWindow({ clearRootSearch: true });
+}
+
 export async function pullWindowToCurrentWorkspace(windowId: string) {
   const focused = spawnSync("aerospace", ["list-workspaces", "--focused"], {
     env: env(),
