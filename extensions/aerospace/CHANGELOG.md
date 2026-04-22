@@ -1,5 +1,9 @@
 # aerospace Changelog
 
+## [Feature] - 2026-04-22
+
+- Add "Set to Tiling" action to window switcher (Cmd+T) — converts a floating window to tiling layout via `aerospace layout tiling`
+
 ## [Feature] - 2026-04-12
 
 - Add "Go to Workspace" command with searchable workspace list and shortcut display
