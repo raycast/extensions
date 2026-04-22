@@ -3,7 +3,7 @@ import { useForm, FormValidation, usePromise } from "@raycast/utils";
 import { useCallback, useEffect } from "react";
 import { LanguageDropdown } from "./components";
 import { SAPSystem, SAPSystemFormValues } from "./types";
-import { getPassword, updateSAPSystem, validateClient, validateInstanceNumber } from "./utils";
+import { getPassword, updateSAPSystem, validateClient, validateInstanceNumber, validatePassword } from "./utils";
 
 interface EditSystemFormProps {
   system: SAPSystem;
@@ -67,7 +67,10 @@ export default function EditSystemForm({ system, onSave }: EditSystemFormProps) 
         return validateClient(value);
       },
       username: FormValidation.Required,
-      password: FormValidation.Required,
+      password: (value) => {
+        if (!value) return "Password is required";
+        return validatePassword(value);
+      },
     },
   });
 

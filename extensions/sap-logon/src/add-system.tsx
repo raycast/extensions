@@ -2,7 +2,7 @@ import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@ray
 import { useForm, FormValidation } from "@raycast/utils";
 import { LanguageDropdown } from "./components";
 import { SAPSystemFormValues } from "./types";
-import { addSAPSystem, validateClient, validateInstanceNumber } from "./utils";
+import { addSAPSystem, validateClient, validateInstanceNumber, validatePassword } from "./utils";
 
 interface AddSystemFormProps {
   onSave?: () => void;
@@ -57,7 +57,10 @@ export function AddSystemForm({ onSave }: AddSystemFormProps) {
         return validateClient(value);
       },
       username: FormValidation.Required,
-      password: FormValidation.Required,
+      password: (value) => {
+        if (!value) return "Password is required";
+        return validatePassword(value);
+      },
     },
   });
 
