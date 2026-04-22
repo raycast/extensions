@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import { getLatestQuoteById, searchAssets } from "./coinmarketcap";
 import { formatCurrency, formatPercent } from "./format";
-import { AssetSearchResult, Preferences, Quote } from "./types";
+import { AssetSearchResult, Quote } from "./types";
 
 function assetIcon(asset: AssetSearchResult): Image.ImageLike {
   return {

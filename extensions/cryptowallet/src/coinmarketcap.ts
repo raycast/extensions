@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 
-import { AssetSearchResult, CryptoTransaction, Preferences, Quote } from "./types";
+import { AssetSearchResult, CryptoTransaction, Quote } from "./types";
 
 const API_BASE_URL = "https://pro-api.coinmarketcap.com";
 let assetMapCache: AssetSearchResult[] | undefined;

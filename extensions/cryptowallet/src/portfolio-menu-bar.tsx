@@ -5,7 +5,7 @@ import { getLatestQuotesAndConvertedTransactions } from "./coinmarketcap";
 import { formatCurrency, formatPercent } from "./format";
 import { calculateSnapshot } from "./portfolio";
 import { getMenuBarPortfolioId, getPortfolios, getTransactions, setMenuBarPortfolioId } from "./storage";
-import { PortfolioSnapshot, Preferences } from "./types";
+import { PortfolioSnapshot } from "./types";
 
 type MenuBarState = {
   isLoading: boolean;

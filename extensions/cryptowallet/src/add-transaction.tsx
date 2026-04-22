@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 import { TransactionForm } from "./cryptowallet";
 import { getPortfolios } from "./storage";
-import { Portfolio, Preferences } from "./types";
+import { Portfolio } from "./types";
 
 export default function Command() {
   const { baseCurrency } = getPreferenceValues<Preferences>();

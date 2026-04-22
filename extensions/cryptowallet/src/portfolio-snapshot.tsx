@@ -1,11 +1,11 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 
 import { getLatestQuotesAndConvertedTransactions } from "./coinmarketcap";
 import { formatCurrency, formatPercent, profitIcon } from "./format";
 import { calculateSnapshot } from "./portfolio";
 import { getPortfolios, getTransactions } from "./storage";
-import { CryptoTransaction, Portfolio, PortfolioSnapshot, Preferences, Quote } from "./types";
+import { CryptoTransaction, Portfolio, PortfolioSnapshot, Quote } from "./types";
 
 type SnapshotData = {
   portfolios: Portfolio[];
@@ -20,10 +20,19 @@ export default function Command() {
 
   async function load() {
     setIsLoading(true);
-    const [portfolios, transactions] = await Promise.all([getPortfolios(), getTransactions()]);
-    const pricedData = await getLatestQuotesAndConvertedTransactions(transactions, baseCurrency);
-    setData({ portfolios, transactions: pricedData.transactions, quotes: pricedData.quotes });
-    setIsLoading(false);
+    try {
+      const [portfolios, transactions] = await Promise.all([getPortfolios(), getTransactions()]);
+      const pricedData = await getLatestQuotesAndConvertedTransactions(transactions, baseCurrency);
+      setData({ portfolios, transactions: pricedData.transactions, quotes: pricedData.quotes });
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Snapshot Failed",
+        message: error instanceof Error ? error.message : undefined,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   useEffect(() => {

@@ -77,11 +77,6 @@ export type PortfolioSnapshot = {
   totalPnlPercent: number;
 };
 
-export type Preferences = {
-  coinMarketCapApiKey: string;
-  baseCurrency: string;
-};
-
 export type WalletBackup = {
   version: 1;
   exportedAt: string;

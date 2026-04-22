@@ -4,7 +4,7 @@ import { getLatestQuotesAndConvertedTransactions } from "./coinmarketcap";
 import { formatCurrency, formatNumber, formatPercent } from "./format";
 import { calculateSnapshot } from "./portfolio";
 import { getPortfolios, getTransactions } from "./storage";
-import { AssetPosition, CryptoTransaction, Portfolio, PortfolioSnapshot, Preferences, Quote } from "./types";
+import { AssetPosition, CryptoTransaction, Portfolio, PortfolioSnapshot, Quote } from "./types";
 
 export type WalletContext = {
   currency: string;

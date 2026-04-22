@@ -53,7 +53,6 @@ import {
   CryptoTransaction,
   Portfolio,
   PortfolioSnapshot,
-  Preferences,
   Quote,
   TransactionType,
 } from "./types";

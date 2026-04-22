@@ -3,7 +3,6 @@ import { Clipboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
 import { getLatestQuotesAndConvertedTransactions } from "./coinmarketcap";
 import { generatePortfolioReport } from "./report";
 import { getPortfolios, getTransactions } from "./storage";
-import { Preferences } from "./types";
 
 export default async function Command() {
   const { baseCurrency } = getPreferenceValues<Preferences>();
