@@ -65,8 +65,8 @@ function codeBlock(text: string): string {
 }
 
 function countAllMatches(text: string, sub: ParsedSubstitution): number {
-  const globalFlags = sub.pattern.flags.includes("g") ? sub.pattern.flags : sub.pattern.flags + "g";
-  return (text.match(new RegExp(sub.pattern.source, globalFlags)) || []).length;
+  const re = sub.pattern.global ? sub.pattern : new RegExp(sub.pattern.source, sub.pattern.flags + "g");
+  return (text.match(re) || []).length;
 }
 
 export default function ClipboardRegexReplace() {
