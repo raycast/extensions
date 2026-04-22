@@ -3,6 +3,7 @@ dist/
 .DS_Store
 
 # Raycast Specific Files
+raycast-env.d.ts
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift
