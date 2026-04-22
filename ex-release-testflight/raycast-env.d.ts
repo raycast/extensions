@@ -15,10 +15,14 @@ declare type Preferences = ExtensionPreferences
 declare namespace Preferences {
   /** Preferences accessible in the `release-testflight` command */
   export type ReleaseTestflight = ExtensionPreferences & {}
+  /** Preferences accessible in the `resume-release` command */
+  export type ResumeRelease = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
   /** Arguments passed to the `release-testflight` command */
   export type ReleaseTestflight = {}
+  /** Arguments passed to the `resume-release` command */
+  export type ResumeRelease = {}
 }
 

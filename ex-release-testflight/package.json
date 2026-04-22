@@ -13,6 +13,13 @@
       "subtitle": "EXTrade iOS",
       "description": "通过 scripts/release_testflight.sh 发布到 TestFlight;Raycast 仅负责收集参数、调用脚本、展示结果。",
       "mode": "view"
+    },
+    {
+      "name": "resume-release",
+      "title": "Resume Current Release",
+      "subtitle": "EXTrade iOS",
+      "description": "查看当前或最近一次 TestFlight 发布任务的实时进度、终端输出与 result.json。",
+      "mode": "view"
     }
   ],
   "dependencies": {
