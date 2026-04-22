@@ -28,6 +28,12 @@
           "required": true
         }
       ]
+    },
+    {
+      "name": "lookup-selection",
+      "title": "Lookup Selected Word",
+      "description": "Lookup the currently selected text in Merriam-Webster Learner's Dictionary",
+      "mode": "view"
     }
   ],
   "preferences": [

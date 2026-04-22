@@ -19,8 +19,17 @@ describe("normalizeLearnerResponse", () => {
       headword: "book",
       partOfSpeech: "noun",
       pronunciation: "ˈbu̇k",
-      shortDefinitions: ["a set of printed sheets of paper that are held together inside a cover"],
-      examples: ["She borrowed a book from the library."],
+      senses: [
+        {
+          number: "1",
+          parts: [
+            {
+              text: "{bc}a set of printed sheets of paper that are held together inside a cover",
+              examples: ["She borrowed a book from the library."],
+            },
+          ],
+        },
+      ],
     });
   });
 

@@ -10,8 +10,17 @@ function makeEntry(overrides: Partial<EntryResult> = {}): EntryResult {
     partOfSpeech: "noun",
     pronunciation: "ˈbu̇k",
     audioUrl: "https://media.merriam-webster.com/audio/prons/en/us/mp3/b/book0001.mp3",
-    shortDefinitions: ["a set of printed sheets of paper that are held together inside a cover"],
-    examples: ["She borrowed a book from the library."],
+    senses: [
+      {
+        number: "1",
+        parts: [
+          {
+            text: "a set of printed sheets of paper that are held together inside a cover",
+            examples: ["She borrowed a book from the library."],
+          },
+        ],
+      },
+    ],
     ...overrides,
   };
 }
@@ -23,89 +32,91 @@ describe("formatEntryMarkdown", () => {
 
     expect(markdown).toBe(
       [
-        "# book",
-        "**Part of speech:** noun",
+        "# book — noun",
         "**Pronunciation:** ˈbu̇k",
         "",
-        "## Definitions",
         "1. a set of printed sheets of paper that are held together inside a cover",
-        "",
-        "## Examples",
-        "- She borrowed a book from the library.",
+        "   - She borrowed a book from the library.",
       ].join("\n"),
     );
   });
 
-  it("omits empty definition sections for sparse entries", () => {
+  it("omits empty sections for sparse entries", () => {
     const markdown = formatEntryMarkdown(
       makeEntry({
         partOfSpeech: undefined,
         pronunciation: undefined,
-        shortDefinitions: [],
-        examples: [],
+        audioUrl: undefined,
+        senses: [],
       }),
     );
 
     expect(markdown).toBe("# book");
-    expect(markdown).not.toContain("## Definitions");
-    expect(markdown).not.toContain("## Examples");
-    expect(markdown).not.toContain("Part of speech");
     expect(markdown).not.toContain("Pronunciation");
   });
 
-  it("formats examples without requiring definitions", () => {
+  it("renders multi-part senses with sub-definitions", () => {
     const markdown = formatEntryMarkdown(
       makeEntry({
-        shortDefinitions: [],
-        examples: ["A sample sentence."],
+        senses: [
+          {
+            number: "1",
+            parts: [
+              { text: "used to describe something", examples: ["a conditional sale"] },
+              { text: "often + on or upon", examples: ["Our agreement is conditional on your support."] },
+            ],
+          },
+          {
+            number: "2",
+            label: "grammar",
+            parts: [
+              { text: "showing or used to show something", examples: ['"If she speaks" is a conditional sentence.'] },
+            ],
+          },
+        ],
       }),
     );
 
-    expect(markdown).toBe(
-      [
-        "# book",
-        "**Part of speech:** noun",
-        "**Pronunciation:** ˈbu̇k",
-        "",
-        "## Examples",
-        "- A sample sentence.",
-      ].join("\n"),
-    );
+    expect(markdown).toContain("1. used to describe something");
+    expect(markdown).toContain("   - a conditional sale");
+    expect(markdown).toContain("   often + on or upon");
+    expect(markdown).toContain("   - Our agreement is conditional on your support.");
+    expect(markdown).toContain("2. *grammar* showing or used to show something");
+    expect(markdown).toContain('   - "If she speaks" is a conditional sentence.');
   });
 });
 
 describe("formatEntryPlainText", () => {
   it("creates copy-friendly definition text", () => {
     expect(formatEntryPlainText(makeEntry())).toBe(
-      [
-        "book (noun)",
-        "1. a set of printed sheets of paper that are held together inside a cover",
-        "Examples:",
-        "- She borrowed a book from the library.",
-      ].join("\n"),
+      ["book (noun)", "1. a set of printed sheets of paper that are held together inside a cover", "  - She borrowed a book from the library."].join("\n"),
     );
   });
 
-  it("handles missing part of speech, pronunciation, and examples", () => {
+  it("handles missing part of speech and pronunciation", () => {
     expect(
       formatEntryPlainText(
         makeEntry({
           partOfSpeech: undefined,
           pronunciation: undefined,
-          examples: [],
+          senses: [
+            {
+              number: "1",
+              parts: [{ text: "a definition", examples: [] }],
+            },
+          ],
         }),
       ),
-    ).toBe(["book", "1. a set of printed sheets of paper that are held together inside a cover"].join("\n"));
+    ).toBe(["book", "1. a definition"].join("\n"));
   });
 
-  it("handles empty short definitions without emitting blank payload sections", () => {
+  it("handles entries with no senses", () => {
     expect(
       formatEntryPlainText(
         makeEntry({
-          shortDefinitions: [],
-          examples: ["A sample sentence."],
+          senses: [],
         }),
       ),
-    ).toBe(["book (noun)", "Examples:", "- A sample sentence."].join("\n"));
+    ).toBe("book (noun)");
   });
 });

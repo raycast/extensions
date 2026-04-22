@@ -3,6 +3,17 @@ export type SuggestionResult = {
   value: string;
 };
 
+export type DefinitionPart = {
+  text: string;
+  examples: string[];
+};
+
+export type Sense = {
+  number: string;
+  label?: string;
+  parts: DefinitionPart[];
+};
+
 export type EntryResult = {
   kind: "entry";
   id: string;
@@ -10,8 +21,7 @@ export type EntryResult = {
   partOfSpeech?: string;
   pronunciation?: string;
   audioUrl?: string;
-  shortDefinitions: string[];
-  examples: string[];
+  senses: Sense[];
 };
 
 export type SearchResult = EntryResult | SuggestionResult;

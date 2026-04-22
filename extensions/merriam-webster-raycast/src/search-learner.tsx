@@ -3,6 +3,7 @@ import type { ComponentType } from "react";
 import { useEffect, useState } from "react";
 import { buildLearnerBrowseUrl, fetchLearnerResults, shouldSearchTerm } from "./api/merriamWebster";
 import { formatEntryMarkdown, formatEntryPlainText } from "./lib/formatEntry";
+import { playAudioUrl } from "./lib/audio";
 import type { SearchResult } from "./types";
 
 const SearchList = List as unknown as ComponentType<any>;
@@ -82,8 +83,9 @@ export default function SearchLearnerCommand() {
             detail={<SearchListItemDetail markdown={formatEntryMarkdown(result)} />}
             actions={
               <SearchActionPanel>
-                <SearchCopyToClipboardAction title="Copy Definition" content={formatEntryPlainText(result)} />
-                <SearchCopyToClipboardAction title="Copy Headword" content={result.headword} />
+                {result.audioUrl ? (
+                  <SearchAction title="Play Pronunciation" icon="🔊" onAction={() => playAudioUrl(result.audioUrl!)} />
+                ) : null}
                 <SearchOpenInBrowserAction title="Open in Merriam-Webster" url={buildLearnerBrowseUrl(result.headword)} />
               </SearchActionPanel>
             }

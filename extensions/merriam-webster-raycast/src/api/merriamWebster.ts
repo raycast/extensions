@@ -1,5 +1,13 @@
 import { audioSubdirectory } from "../lib/audio";
-import type { EntryResult, SearchResult, SuggestionResult } from "../types";
+import type { DefinitionPart, EntryResult, SearchResult, Sense, SuggestionResult } from "../types";
+
+type DtItem = [string, unknown];
+
+type LearnerSense = {
+  sn?: string;
+  sls?: string[];
+  dt?: DtItem[];
+};
 
 type LearnerEntry = {
   meta?: { id?: string };
@@ -11,9 +19,8 @@ type LearnerEntry = {
     }>;
   };
   fl?: string;
-  shortdef?: string[];
   def?: Array<{
-    sseq?: Array<Array<[string, { dt?: Array<[string, unknown]> }]>>;
+    sseq?: Array<Array<[string, LearnerSense]>>;
   }>;
 };
 
@@ -60,26 +67,79 @@ function isLearnerEntry(value: unknown): value is LearnerEntry {
   );
 }
 
-function extractExamples(entry: LearnerEntry) {
-  const examples: string[] = [];
+function extractVisItems(dt: DtItem[]): Array<{ t?: string }> {
+  const items: Array<{ t?: string }> = [];
+  for (const item of dt) {
+    if (item[0] === "vis" && Array.isArray(item[1])) {
+      for (const v of item[1] as Array<{ t?: string }>) {
+        if (v.t) items.push(v);
+      }
+    }
+  }
+  return items;
+}
 
-  for (const definition of entry.def ?? []) {
-    for (const senseGroup of definition.sseq ?? []) {
-      for (const sense of senseGroup) {
-        if (sense[0] !== "sense") continue;
+function extractPartsFromDt(dt: DtItem[]): DefinitionPart[] {
+  const parts: DefinitionPart[] = [];
 
-        for (const part of sense[1].dt ?? []) {
-          if (part[0] !== "vis" || !Array.isArray(part[1])) continue;
-
-          for (const visual of part[1] as Array<{ t?: string }>) {
-            if (visual.t) examples.push(visual.t);
+  for (const item of dt) {
+    if (item[0] === "uns" && Array.isArray(item[1])) {
+      for (const subGroup of item[1] as DtItem[][]) {
+        let text = "";
+        const examples: string[] = [];
+        for (const subItem of subGroup) {
+          if (subItem[0] === "text" && typeof subItem[1] === "string") {
+            text = subItem[1].trim();
           }
+          if (subItem[0] === "vis" && Array.isArray(subItem[1])) {
+            for (const v of subItem[1] as Array<{ t?: string }>) {
+              if (v.t) examples.push(v.t);
+            }
+          }
+        }
+        if (text || examples.length > 0) {
+          parts.push({ text, examples });
         }
       }
     }
   }
 
-  return examples;
+  const directText = dt
+    .filter((item) => item[0] === "text" && typeof item[1] === "string")
+    .map((item) => (item[1] as string).trim())
+    .filter((t) => t && !t.startsWith("{dx}"))
+    .join(" ");
+
+  const directExamples = extractVisItems(dt).map((v) => v.t ?? "").filter(Boolean);
+
+  if (directText || directExamples.length > 0) {
+    parts.push({ text: directText, examples: directExamples });
+  }
+
+  return parts;
+}
+
+function extractSenses(entry: LearnerEntry): Sense[] {
+  const senses: Sense[] = [];
+
+  for (const definition of entry.def ?? []) {
+    for (const senseGroup of definition.sseq ?? []) {
+      for (const [type, senseData] of senseGroup) {
+        if (type !== "sense") continue;
+
+        const parts = extractPartsFromDt(senseData.dt ?? []);
+        if (parts.length === 0) continue;
+
+        senses.push({
+          number: senseData.sn ?? "",
+          label: senseData.sls?.join(", "),
+          parts,
+        });
+      }
+    }
+  }
+
+  return senses;
 }
 
 function normalizeEntry(entry: LearnerEntry): EntryResult {
@@ -93,8 +153,7 @@ function normalizeEntry(entry: LearnerEntry): EntryResult {
     partOfSpeech: entry.fl,
     pronunciation: entry.hwi?.prs?.[0]?.mw,
     audioUrl: buildAudioUrl(audioId),
-    shortDefinitions: entry.shortdef ?? [],
-    examples: extractExamples(entry),
+    senses: extractSenses(entry),
   };
 }
 

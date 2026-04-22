@@ -2,7 +2,8 @@ import { Action, ActionPanel, Detail, LaunchProps, List } from "@raycast/api";
 import type { ComponentType } from "react";
 import { useEffect, useState } from "react";
 import { buildLearnerBrowseUrl, fetchLearnerResults, normalizeLookupTerm } from "./api/merriamWebster";
-import { formatEntryMarkdown, formatEntryPlainText } from "./lib/formatEntry";
+import { formatEntriesMarkdown, formatEntriesPlainText } from "./lib/formatEntry";
+import { playAudioUrl } from "./lib/audio";
 import { SearchResult } from "./types";
 
 type LookupLearnerArguments = {
@@ -14,6 +15,7 @@ const LookupListEmptyView = List.EmptyView as unknown as ComponentType<any>;
 const LookupListItem = List.Item as unknown as ComponentType<any>;
 const LookupDetail = Detail as unknown as ComponentType<any>;
 const LookupActionPanel = ActionPanel as unknown as ComponentType<any>;
+const LookupAction = Action as unknown as ComponentType<any>;
 const LookupCopyToClipboardAction = Action.CopyToClipboard as unknown as ComponentType<any>;
 const LookupOpenInBrowserAction = Action.OpenInBrowser as unknown as ComponentType<any>;
 
@@ -48,18 +50,19 @@ export default function LookupLearnerCommand(props: LaunchProps<{ arguments: Loo
     };
   }, [term]);
 
-  const firstEntry = results.find((result) => result.kind === "entry");
+  const entries = results.filter((result): result is SearchResult & { kind: "entry" } => result.kind === "entry");
 
-  if (firstEntry && firstEntry.kind === "entry") {
+  if (entries.length > 0) {
     return (
       <LookupDetail
         isLoading={isLoading}
-        markdown={formatEntryMarkdown(firstEntry)}
+        markdown={formatEntriesMarkdown(entries)}
         actions={
           <LookupActionPanel>
-            <LookupCopyToClipboardAction title="Copy Definition" content={formatEntryPlainText(firstEntry)} />
-            <LookupCopyToClipboardAction title="Copy Headword" content={firstEntry.headword} />
-            <LookupOpenInBrowserAction title="Open in Merriam-Webster" url={buildLearnerBrowseUrl(firstEntry.headword)} />
+            {entries[0].audioUrl ? (
+              <LookupAction title="Play Pronunciation" icon="🔊" onAction={() => playAudioUrl(entries[0].audioUrl!)} />
+            ) : null}
+            <LookupOpenInBrowserAction title="Open in Merriam-Webster" url={buildLearnerBrowseUrl(entries[0].headword)} />
           </LookupActionPanel>
         }
       />
