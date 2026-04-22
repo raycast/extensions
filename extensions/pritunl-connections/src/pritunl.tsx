@@ -148,8 +148,8 @@ export default function Command() {
     });
   }
 
-  async function loadProfiles() {
-    setIsLoading(true);
+  async function loadProfiles(initial = false) {
+    if (initial) setIsLoading(true);
     try {
       const cliPath = await getCLIPath();
       const { stdout } = await execFileAsync(cliPath, ["list", "-j"]);
@@ -218,12 +218,12 @@ export default function Command() {
         });
       }
     } finally {
-      setIsLoading(false);
+      if (initial) setIsLoading(false);
     }
   }
 
   useEffect(() => {
-    loadProfiles();
+    loadProfiles(true);
     intervalRef.current = setInterval(async () => {
       if (isPollingRef.current) return;
       isPollingRef.current = true;
