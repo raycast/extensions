@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { LocalStorage } from "@raycast/api";
-import { scanFolder } from "../lib/images";
+import { cleanupThumbnailDir, scanFolder } from "../lib/images";
 import { cleanupStagingDir } from "../lib/trash";
 import { ReviewSession } from "./ReviewSession";
 
@@ -40,7 +40,11 @@ export function FolderPicker() {
 
   useEffect(() => {
     async function init() {
-      const count = await cleanupStagingDir();
+      const [stagingCount, thumbnailCount] = await Promise.all([
+        cleanupStagingDir(),
+        cleanupThumbnailDir(),
+      ]);
+      const count = stagingCount + thumbnailCount;
       if (count > 0) {
         await showToast({
           style: Toast.Style.Success,

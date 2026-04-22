@@ -3,12 +3,12 @@ import {
   Action,
   Detail,
   Icon,
-  environment,
   open,
   popToRoot,
   showToast,
   Toast,
 } from "@raycast/api";
+import { homedir } from "node:os";
 import { useEffect } from "react";
 import { SessionState } from "../types";
 import { commitPendingTrash } from "../lib/trash";
@@ -19,9 +19,7 @@ interface SummaryViewProps {
 }
 
 export function SummaryView({ state }: SummaryViewProps) {
-  const homeDirectory = environment.supportPath.split(
-    "/Library/Application Support",
-  )[0];
+  const homeDirectory = homedir();
 
   useEffect(() => {
     const trashEntries = state.actions

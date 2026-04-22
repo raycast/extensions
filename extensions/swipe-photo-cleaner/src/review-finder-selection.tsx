@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { PhotoItem } from "./types";
 import { getFinderPhotos } from "./lib/finder";
 import { cleanupStagingDir } from "./lib/trash";
+import { cleanupThumbnailDir } from "./lib/images";
 import { ReviewSession } from "./components/ReviewSession";
 
 export default function ReviewFinderSelectionCommand() {
@@ -20,7 +21,11 @@ export default function ReviewFinderSelectionCommand() {
     let cancelled = false;
 
     async function loadPhotos() {
-      const count = await cleanupStagingDir();
+      const [stagingCount, thumbnailCount] = await Promise.all([
+        cleanupStagingDir(),
+        cleanupThumbnailDir(),
+      ]);
+      const count = stagingCount + thumbnailCount;
       if (cancelled) return;
 
       if (count > 0) {

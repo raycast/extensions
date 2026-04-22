@@ -1,8 +1,9 @@
+import crypto from "node:crypto";
 import { readdir, stat, mkdir } from "node:fs/promises";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import path from "node:path";
-import { environment } from "@raycast/api";
+import { environment, trash } from "@raycast/api";
 import { IMAGE_EXTENSIONS } from "./formats";
 import { PhotoItem } from "../types";
 
@@ -56,7 +57,11 @@ async function getImageDimensions(
 
 export async function getThumbnail(filePath: string): Promise<string> {
   await mkdir(THUMB_DIR, { recursive: true });
-  const hash = Buffer.from(filePath).toString("base64url");
+  const hash = crypto
+    .createHash("sha256")
+    .update(filePath)
+    .digest("hex")
+    .slice(0, 16);
   const ext = path.extname(filePath);
   const thumbPath = path.join(THUMB_DIR, `${hash}${ext}`);
 
@@ -87,6 +92,16 @@ export async function getThumbnail(filePath: string): Promise<string> {
   } catch {
     return filePath;
   }
+}
+
+export async function cleanupThumbnailDir(): Promise<number> {
+  await mkdir(THUMB_DIR, { recursive: true });
+  const entries = await readdir(THUMB_DIR);
+  if (entries.length === 0) return 0;
+
+  const paths = entries.map((entry) => path.join(THUMB_DIR, entry));
+  await trash(paths);
+  return entries.length;
 }
 
 export function formatSize(bytes: number): string {

@@ -31,12 +31,12 @@ export function ReviewSession({ photos }: { photos: PhotoItem[] }) {
     if (state.isComplete) {
       push(<SummaryView state={state} />);
     }
-  }, [state.isComplete]);
+  }, [push, state, state.isComplete]);
 
   const handleKeep = useCallback(() => {
     if (isBusy.current) return;
     dispatch({ type: "keep" });
-  }, []);
+  }, [dispatch]);
 
   const handleTrash = useCallback(async () => {
     if (isBusy.current) return;
@@ -54,7 +54,7 @@ export function ReviewSession({ photos }: { photos: PhotoItem[] }) {
     } finally {
       isBusy.current = false;
     }
-  }, [state.currentIndex, state.photos]);
+  }, [dispatch, state.currentIndex, state.photos]);
 
   const handleUndo = useCallback(async () => {
     if (isBusy.current) return;
@@ -78,7 +78,7 @@ export function ReviewSession({ photos }: { photos: PhotoItem[] }) {
     } finally {
       isBusy.current = false;
     }
-  }, [state.actions]);
+  }, [dispatch, state.actions]);
 
   const currentPhoto = state.isComplete
     ? null
