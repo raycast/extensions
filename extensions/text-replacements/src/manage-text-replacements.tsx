@@ -32,9 +32,7 @@ const DB_PATH = join(homedir(), "Library/KeyboardServices/TextReplacements.db");
 
 // Resolve Z_ENT dynamically so we're not fragile against CoreData schema changes
 function getZEnt(): number {
-  const result = dbQuery(
-    `SELECT Z_ENT FROM Z_PRIMARYKEY WHERE Z_NAME = 'TextReplacementEntry' LIMIT 1;`
-  ).trim();
+  const result = dbQuery(`SELECT Z_ENT FROM Z_PRIMARYKEY WHERE Z_NAME = 'TextReplacementEntry' LIMIT 1;`).trim();
   const n = parseInt(result);
   if (isNaN(n)) throw new Error("Could not resolve Z_ENT for TextReplacementEntry");
   return n;
@@ -56,7 +54,7 @@ function loadReplacements(): Replacement[] {
     `SELECT Z_PK, ZSHORTCUT, ZPHRASE FROM ZTEXTREPLACEMENTENTRY
      WHERE (ZWASDELETED = 0 OR ZWASDELETED IS NULL)
        AND ZSHORTCUT IS NOT NULL AND ZSHORTCUT != ''
-     ORDER BY ZSHORTCUT ASC;`
+     ORDER BY ZSHORTCUT ASC;`,
   );
   return output
     .split("\n")
@@ -88,17 +86,22 @@ COMMIT;`;
 }
 
 function updateReplacement(dbPK: number, phrase: string, replacement: string): void {
-  execFileSync("/usr/bin/sqlite3", [
-    DB_PATH,
-    `UPDATE ZTEXTREPLACEMENTENTRY SET ZSHORTCUT=${sqlEscape(phrase)}, ZPHRASE=${sqlEscape(replacement)}, Z_OPT=Z_OPT+1, ZNEEDSSAVETOCLOUD=1 WHERE Z_PK=${dbPK};`,
-  ], { encoding: "utf8", timeout: 5000 });
+  execFileSync(
+    "/usr/bin/sqlite3",
+    [
+      DB_PATH,
+      `UPDATE ZTEXTREPLACEMENTENTRY SET ZSHORTCUT=${sqlEscape(phrase)}, ZPHRASE=${sqlEscape(replacement)}, Z_OPT=Z_OPT+1, ZNEEDSSAVETOCLOUD=1 WHERE Z_PK=${dbPK};`,
+    ],
+    { encoding: "utf8", timeout: 5000 },
+  );
 }
 
 function deleteReplacement(dbPK: number): void {
-  execFileSync("/usr/bin/sqlite3", [
-    DB_PATH,
-    `UPDATE ZTEXTREPLACEMENTENTRY SET ZWASDELETED=1, ZNEEDSSAVETOCLOUD=1, Z_OPT=Z_OPT+1 WHERE Z_PK=${dbPK};`,
-  ], { encoding: "utf8", timeout: 5000 });
+  execFileSync(
+    "/usr/bin/sqlite3",
+    [DB_PATH, `UPDATE ZTEXTREPLACEMENTENTRY SET ZWASDELETED=1, ZNEEDSSAVETOCLOUD=1, Z_OPT=Z_OPT+1 WHERE Z_PK=${dbPK};`],
+    { encoding: "utf8", timeout: 5000 },
+  );
 }
 
 function escapeXml(s: string): string {
@@ -110,7 +113,7 @@ function notifySystem(): void {
   const itemsXml = all
     .map(
       (r) =>
-        `    <dict>\n      <key>replace</key><string>${escapeXml(r.phrase)}</string>\n      <key>with</key><string>${escapeXml(r.replacement)}</string>\n    </dict>`
+        `    <dict>\n      <key>replace</key><string>${escapeXml(r.phrase)}</string>\n      <key>with</key><string>${escapeXml(r.replacement)}</string>\n    </dict>`,
     )
     .join("\n");
 
