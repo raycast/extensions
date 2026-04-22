@@ -5,6 +5,9 @@
   "description": "Control your meeting with the keyboard, even when Microsoft Teams is in the background. Toggle microphone, camera and background blur and send reactions.",
   "icon": "teams.png",
   "author": "sven",
+  "contributors": [
+    "leec-666"
+  ],
   "categories": [
     "Applications",
     "Communication"
