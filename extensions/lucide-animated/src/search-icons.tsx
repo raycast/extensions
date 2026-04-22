@@ -75,6 +75,9 @@ const INSTALL_COMMANDS: Record<PackageManager, (name: string) => string> = {
 
 async function fetchTsxSource(name: string): Promise<string> {
   const response = await fetch(`${REGISTRY_BASE}/${name}.json`);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch source for ${name}: ${response.status} ${response.statusText}`);
+  }
   const data = (await response.json()) as RegistryItem;
   return data?.files?.[0]?.content ?? "";
 }
@@ -162,15 +165,6 @@ export default function Command() {
         </Grid.Dropdown>
       }
     >
-      {filteredIcons.map((name) => (
-        <Grid.Item
-          key={name}
-          title={name}
-          content={{ source: getIconSource(name), tintColor: Color.PrimaryText }}
-          keywords={[name]}
-          actions={<IconActions name={name} packageManager={packageManager} />}
-        />
-      ))}
       {error && (
         <Grid.EmptyView
           icon={Icon.ExclamationMark}
@@ -187,6 +181,15 @@ export default function Command() {
           }
         />
       )}
+      {filteredIcons.map((name) => (
+        <Grid.Item
+          key={name}
+          title={name}
+          content={{ source: getIconSource(name), tintColor: Color.PrimaryText }}
+          keywords={[name]}
+          actions={<IconActions name={name} packageManager={packageManager} />}
+        />
+      ))}
     </Grid>
   );
 }
