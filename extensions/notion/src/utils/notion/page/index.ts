@@ -1,4 +1,7 @@
-import { BlockObjectRequest, UpdatePageParameters } from "@notionhq/client/build/src/api-endpoints";
+import {
+  BlockObjectRequest,
+  UpdatePageParameters,
+} from "@notionhq/client/build/src/api-endpoints";
 import { showToast, Toast, Image, Icon } from "@raycast/api";
 import { markdownToBlocks } from "@tryfabric/martian";
 import { NotionToMarkdown } from "notion-to-md";
@@ -48,7 +51,10 @@ export async function deletePage(pageId: string) {
   }
 }
 
-export async function patchPage(pageId: string, properties: UpdatePageParameters["properties"]) {
+export async function patchPage(
+  pageId: string,
+  properties: UpdatePageParameters["properties"],
+) {
   try {
     const notion = getNotionClient();
     const page = await notion.pages.update({
@@ -62,7 +68,11 @@ export async function patchPage(pageId: string, properties: UpdatePageParameters
   }
 }
 
-export async function search(query?: string, nextCursor?: string, pageSize: number = 25) {
+export async function search(
+  query?: string,
+  nextCursor?: string,
+  pageSize: number = 25,
+) {
   const notion = getNotionClient();
   const database = await notion.search({
     sort: {
@@ -74,7 +84,11 @@ export async function search(query?: string, nextCursor?: string, pageSize: numb
     ...(nextCursor && { start_cursor: nextCursor }),
   });
 
-  return { pages: database.results.map(pageMapper), hasMore: database.has_more, nextCursor: database.next_cursor };
+  return {
+    pages: database.results.map(pageMapper),
+    hasMore: database.has_more,
+    nextCursor: database.next_cursor,
+  };
 }
 
 export async function fetchPageContent(pageId: string) {
@@ -88,7 +102,9 @@ export async function fetchPageContent(pageId: string) {
 
     return {
       markdown:
-        results.length === 0 ? "*Page is empty*" : n2m.toMarkdownString(await n2m.blocksToMarkdown(results)).parent,
+        results.length === 0
+          ? "*Page is empty*"
+          : n2m.toMarkdownString(await n2m.blocksToMarkdown(results)).parent,
     };
   } catch (err) {
     return handleError(err, "Failed to fetch page content", undefined);
@@ -114,6 +130,10 @@ type AppendBlockToPageParams = {
   addDateDivider?: boolean;
 };
 
+function prependDateDivider(children: BlockObjectRequest[]) {
+  return [{ divider: {} }, getDateMention(), ...children];
+}
+
 export async function appendBlockToPage({
   pageId,
   children,
@@ -123,8 +143,12 @@ export async function appendBlockToPage({
   try {
     const notion = getNotionClient();
 
-    const childrenToInsert = addDateDivider ? [{ divider: {} }, getDateMention(), ...children] : children;
-    const insertAfter = prepend ? await fetchPageFirstBlockId(pageId) : undefined;
+    const childrenToInsert = addDateDivider
+      ? prependDateDivider(children)
+      : children;
+    const insertAfter = prepend
+      ? await fetchPageFirstBlockId(pageId)
+      : undefined;
 
     const { results } = await notion.blocks.children.append({
       block_id: pageId,
@@ -138,26 +162,36 @@ export async function appendBlockToPage({
   }
 }
 
-export async function appendToPage(pageId: string, params: { content: PageContent }) {
+export async function appendToPage(
+  pageId: string,
+  params: { content: PageContent; addDateDivider?: boolean },
+) {
   try {
     const notion = getNotionClient();
-    const { content } = params;
+    const { content, addDateDivider = false } = params;
+
+    const children = isMarkdownPageContent(content)
+      ? // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
+        (markdownToBlocks(content) as BlockObjectRequest[])
+      : content;
 
     const { results } = await notion.blocks.children.append({
       block_id: pageId,
-      children: isMarkdownPageContent(content)
-        ? // casting because converting from the `Block` type in martian to the `BlockObjectRequest` type in notion
-          (markdownToBlocks(content) as BlockObjectRequest[])
-        : content,
+      children: addDateDivider ? prependDateDivider(children) : children,
     });
 
     const n2m = new NotionToMarkdown({ notionClient: notion });
 
     return {
-      markdown: results.length === 0 ? "" : "\n\n" + n2m.toMarkdownString(await n2m.blocksToMarkdown(results)),
+      markdown:
+        results.length === 0
+          ? ""
+          : "\n\n" + n2m.toMarkdownString(await n2m.blocksToMarkdown(results)),
     };
   } catch (err) {
-    return handleError(err, "Failed to add content to the page", { markdown: "" });
+    return handleError(err, "Failed to add content to the page", {
+      markdown: "",
+    });
   }
 }
 
@@ -174,7 +208,10 @@ export function getPageIcon(page: Page): Image.ImageLike {
 }
 
 export function getPageName(page: Page): string {
-  return (page.icon_emoji ? page.icon_emoji + " " : "") + (page.title ? page.title : "Untitled");
+  return (
+    (page.icon_emoji ? page.icon_emoji + " " : "") +
+    (page.title ? page.title : "Untitled")
+  );
 }
 export interface Page {
   object: "page" | "database";
