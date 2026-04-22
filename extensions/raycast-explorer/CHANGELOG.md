@@ -1,6 +1,6 @@
 # Prompt Explorer Extension Changelog
 
-## [Windows support] - {PR_MERGE_DATE}
+## [Windows support] - 2026-04-22
 
 - Add Windows support for the extension
 
