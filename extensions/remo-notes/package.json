@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "raycast",
+  "name": "remo-notes",
   "title": "Remo",
   "description": "Simple, fast, and portable note-taking. Capture ideas instantly, stay organized, and turn notes into action with AI-powered workflows.",
   "icon": "extension-icon.png",
