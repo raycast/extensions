@@ -12,11 +12,11 @@ import {
   Form,
   useNavigation,
 } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import { useEffect, useRef, useState } from "react";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
 
 interface PendingConnection {
   protocol: "ovpn" | "wg";
@@ -45,9 +45,11 @@ class InvalidCLIPathError extends Error {}
 
 async function resolveLnkTarget(lnkPath: string): Promise<string> {
   const escaped = lnkPath.replace(/'/g, "''");
-  const { stdout } = await execAsync(
-    `powershell -NoProfile -Command "$sh = New-Object -ComObject WScript.Shell; $sh.CreateShortcut('${escaped}').TargetPath"`,
-  );
+  const { stdout } = await execFileAsync("powershell", [
+    "-NoProfile",
+    "-Command",
+    `$sh = New-Object -ComObject WScript.Shell; $sh.CreateShortcut('${escaped}').TargetPath`,
+  ]);
   return stdout.trim();
 }
 
@@ -150,7 +152,7 @@ export default function Command() {
     setIsLoading(true);
     try {
       const cliPath = await getCLIPath();
-      const { stdout } = await execAsync(`"${cliPath}" list -j`);
+      const { stdout } = await execFileAsync(cliPath, ["list", "-j"]);
       setInvalidCLI(false);
       const freshProfiles: Profile[] = JSON.parse(stdout);
       freshProfiles.sort((a, b) => a.name.localeCompare(b.name));
@@ -183,7 +185,7 @@ export default function Command() {
           const elapsed = Date.now() / 1000 - pending.startedAt;
           if (elapsed > CONNECT_TIMEOUT_SECS) {
             try {
-              await execAsync(`"${cliPath}" stop ${profileId}`);
+              await execFileAsync(cliPath, ["stop", profileId]);
             } catch {
               /* ignore */
             }
@@ -245,7 +247,7 @@ export default function Command() {
     });
     try {
       const cliPath = await getCLIPath();
-      await execAsync(`"${cliPath}" ${willEnable ? "enable" : "disable"} ${profile.id}`);
+      await execFileAsync(cliPath, [willEnable ? "enable" : "disable", profile.id]);
       toast.style = Toast.Style.Success;
       toast.title = willEnable ? "Autostart enabled" : "Autostart disabled";
       toast.message = profile.name;
@@ -271,17 +273,17 @@ export default function Command() {
     try {
       const cliPath = await getCLIPath();
       if (!isActive) {
-        const startCmd = totp
-          ? `"${cliPath}" start ${profile.id} -m ${effectiveProtocol} -p ${totp}`
-          : `"${cliPath}" start ${profile.id} -m ${effectiveProtocol}`;
-        await execAsync(startCmd);
+        const startArgs = totp
+          ? ["start", profile.id, "-m", effectiveProtocol, "-p", totp]
+          : ["start", profile.id, "-m", effectiveProtocol];
+        await execFileAsync(cliPath, startArgs);
         pendingRef.current.set(profile.id, {
           protocol: effectiveProtocol,
           toast,
           startedAt: Date.now() / 1000,
         });
       } else {
-        await execAsync(`"${cliPath}" stop ${profile.id}`);
+        await execFileAsync(cliPath, ["stop", profile.id]);
         pendingRef.current.delete(profile.id);
         toast.style = Toast.Style.Success;
         toast.title = "Disconnected";
@@ -339,13 +341,15 @@ export default function Command() {
           ? emptyView
           : profiles.map((profile) => {
               const isActive = profile.run_state === "Active";
+              const isConnecting =
+                !profile.connected && (profile.status === "Connecting" || profile.status.endsWith("secs"));
               const uptime = formatUptime(profile.uptime);
               return (
                 <List.Item
                   key={profile.id}
                   icon={{
-                    source: isActive ? Icon.CheckCircle : Icon.Circle,
-                    tintColor: isActive ? Color.Green : Color.SecondaryText,
+                    source: isConnecting ? Icon.CircleProgress75 : profile.connected ? Icon.CheckCircle : Icon.Circle,
+                    tintColor: isConnecting ? Color.Blue : profile.connected ? Color.Green : Color.SecondaryText,
                   }}
                   title={profile.name}
                   subtitle={
