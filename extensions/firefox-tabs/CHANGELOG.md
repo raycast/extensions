@@ -1,13 +1,13 @@
 # firefox-tabs Changelog
 
-## [Added Setup Command and Native Host Bundling] - {PR_MERGE_DATE}
+## [Added Setup Command and Native Host Bundling] - 2026-04-22
 
 - One-command setup: run "Setup Firefox Bridge" to install everything automatically
 - Native host bundled as single file with automatic download from GitHub Releases
 - SHA256 verification of downloaded bundles
 - 5-level Node.js discovery chain for reliable script execution
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-04-22
 
 - Search and switch open Firefox tabs by title or URL
 - Close tabs from the action panel
