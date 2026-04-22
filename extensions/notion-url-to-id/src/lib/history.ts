@@ -34,6 +34,7 @@ function isHistoryEntry(value: unknown): value is NotionIdHistoryEntry {
   return (
     typeof entry.notionId === "string" &&
     typeof entry.pageName === "string" &&
+    (typeof entry.sourceUrl === "undefined" || typeof entry.sourceUrl === "string") &&
     (typeof entry.folder === "undefined" || typeof entry.folder === "string") &&
     (typeof entry.nameLocked === "undefined" || typeof entry.nameLocked === "boolean") &&
     typeof entry.createdAt === "string" &&
@@ -94,7 +95,10 @@ export async function getHistoryEntries(): Promise<NotionIdHistoryEntry[]> {
 
     const filteredEntries = parsed.filter(isHistoryEntry);
     const entries = filteredEntries.map(normalizeHistoryEntry);
-    const didNormalize = entries.some((entry, index) => entry.pageName !== filteredEntries[index].pageName);
+    const didNormalize = entries.some(
+      (entry, index) =>
+        entry.pageName !== filteredEntries[index].pageName || entry.folder !== filteredEntries[index].folder,
+    );
 
     if (didNormalize) {
       await saveHistoryEntries(entries);

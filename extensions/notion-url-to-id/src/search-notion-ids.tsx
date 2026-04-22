@@ -148,7 +148,12 @@ function RenameForm(props: { entry: NotionIdHistoryEntry; onSubmit: (name: strin
         </ActionPanel>
       }
     >
-      <Form.TextField id="pageName" title="Page Name" defaultValue={props.entry.pageName} />
+      <Form.TextField
+        id="pageName"
+        title="Page Name"
+        placeholder="e.g. Project planning"
+        defaultValue={props.entry.pageName}
+      />
     </Form>
   );
 }
@@ -336,7 +341,11 @@ export default function Command() {
           accessories={entryAccessories(entry)}
           actions={
             <ActionPanel>
-              <Action title="Copy Notion ID" onAction={() => handleCopy(entry)} />
+              <Action.CopyToClipboard
+                title="Copy Notion ID"
+                content={entry.notionId}
+                onCopy={() => handleCopy(entry)}
+              />
               <Action
                 title={entry.pinned ? "Unpin Notion ID" : "Pin Notion ID"}
                 icon={entry.pinned ? Icon.StarDisabled : Icon.Star}
