@@ -30,6 +30,16 @@ interface Replacement {
 
 const DB_PATH = join(homedir(), "Library/KeyboardServices/TextReplacements.db");
 
+// Resolve Z_ENT dynamically so we're not fragile against CoreData schema changes
+function getZEnt(): number {
+  const result = dbQuery(
+    `SELECT Z_ENT FROM Z_PRIMARYKEY WHERE Z_NAME = 'TextReplacementEntry' LIMIT 1;`
+  ).trim();
+  const n = parseInt(result);
+  if (isNaN(n)) throw new Error("Could not resolve Z_ENT for TextReplacementEntry");
+  return n;
+}
+
 function sqlEscape(s: string): string {
   return `'${s.replace(/'/g, "''")}'`;
 }
@@ -58,6 +68,7 @@ function loadReplacements(): Replacement[] {
 }
 
 function insertReplacement(phrase: string, replacement: string): void {
+  const zEnt = getZEnt();
   const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   // CoreData timestamps are seconds since 2001-01-01, not Unix epoch
   const timestamp = Date.now() / 1000 - 978307200;
@@ -66,11 +77,11 @@ function insertReplacement(phrase: string, replacement: string): void {
   // avoid a TOCTOU race if another process inserts concurrently.
   const script = `
 BEGIN IMMEDIATE;
-UPDATE Z_PRIMARYKEY SET Z_MAX = MAX(Z_MAX, (SELECT MAX(Z_PK) FROM ZTEXTREPLACEMENTENTRY)) + 1 WHERE Z_ENT = 1;
+UPDATE Z_PRIMARYKEY SET Z_MAX = MAX(Z_MAX, (SELECT MAX(Z_PK) FROM ZTEXTREPLACEMENTENTRY)) + 1 WHERE Z_ENT = ${zEnt};
 INSERT INTO ZTEXTREPLACEMENTENTRY
   (Z_PK, Z_ENT, Z_OPT, ZNEEDSSAVETOCLOUD, ZWASDELETED, ZTIMESTAMP, ZPHRASE, ZSHORTCUT, ZUNIQUENAME)
-SELECT Z_MAX, 1, 1, 1, 0, ${timestamp}, ${sqlEscape(replacement)}, ${sqlEscape(phrase)}, ${sqlEscape(uniqueName)}
-FROM Z_PRIMARYKEY WHERE Z_ENT = 1;
+SELECT Z_MAX, ${zEnt}, 1, 1, 0, ${timestamp}, ${sqlEscape(replacement)}, ${sqlEscape(phrase)}, ${sqlEscape(uniqueName)}
+FROM Z_PRIMARYKEY WHERE Z_ENT = ${zEnt};
 COMMIT;`;
 
   execFileSync("/usr/bin/sqlite3", [DB_PATH], { input: script, encoding: "utf8", timeout: 5000 });
@@ -114,7 +125,8 @@ ${itemsXml}
 </dict>
 </plist>`;
 
-  const tmpFile = join(tmpdir(), "raycast_replacements.plist");
+  // Use a unique filename per call to avoid write-write races on rapid saves
+  const tmpFile = join(tmpdir(), `raycast_replacements_${Date.now()}.plist`);
   writeFileSync(tmpFile, plist, "utf8");
   execFileSync("/usr/bin/defaults", ["import", "-g", tmpFile], { timeout: 5000 });
 
@@ -212,6 +224,21 @@ export default function ManageTextReplacements() {
 
   return (
     <List searchBarPlaceholder="Search shortcuts…" isLoading={isLoading}>
+      {!isLoading && replacements.length === 0 && (
+        <List.EmptyView
+          title="No Text Replacements"
+          description="Press ⌘N to add your first shortcut"
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Add New"
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                target={<ReplacementForm onSave={refresh} />}
+              />
+            </ActionPanel>
+          }
+        />
+      )}
       <List.Section title="Replacements" subtitle={`${replacements.length}`}>
         {replacements.map((item) => (
           <List.Item
