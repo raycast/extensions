@@ -464,7 +464,7 @@ function PortfolioActions(props: {
         />
         <Action
           title="Copy All Wallets Report"
-          icon={Icon.Documents}
+          icon={Icon.Document}
           onAction={() => copyReportToClipboard(portfolios, transactions, quotes, currency)}
         />
       </ActionPanel.Section>
