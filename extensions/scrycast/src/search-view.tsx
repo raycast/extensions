@@ -31,8 +31,6 @@ interface TaggerResponse {
   errors?: Array<{ message: string }>;
 }
 
-type SortOrder = "name" | "edhrec" | "usd";
-
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const SEARCH_HISTORY_KEY = "searchHistory";
