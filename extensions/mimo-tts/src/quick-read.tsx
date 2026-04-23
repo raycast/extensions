@@ -1,7 +1,7 @@
-import { getSelectedText, showHUD, showToast, Toast, openExtensionPreferences } from "@raycast/api";
-import { TTSApiError } from "./api/mimo-tts";
+import { getSelectedText, showHUD } from "@raycast/api";
 import { chunkText } from "./utils/text-chunker";
 import { AudioPlayer, stopExternalPlayback } from "./utils/audio-player";
+import { showTTSFailure } from "./utils/feedback";
 import { buildDefaultOptionsFromPrefs } from "./utils/voice-preferences";
 import { playChunksWithLookahead } from "./utils/pipelined-reading";
 
@@ -34,21 +34,7 @@ export default async function QuickRead() {
       await showHUD("Playback complete");
     }
   } catch (error) {
-    if (error instanceof TTSApiError) {
-      if (error.code === -1 || error.code === 401 || error.code === 403) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Configuration Required",
-          message: error.message,
-          primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
-        });
-        return;
-      }
-      await showHUD(`MiMo TTS error: ${error.message}`);
-      return;
-    }
-
-    await showHUD(`Error: ${error instanceof Error ? error.message : String(error)}`);
+    await showTTSFailure(error);
   } finally {
     player.cleanup();
   }

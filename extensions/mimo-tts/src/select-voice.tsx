@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildOptionsFromPrefs, getActiveModel, getModelLabel, synthesizeSpeech, TTSApiError } from "./api/mimo-tts";
+import { buildOptionsFromPrefs, getActiveModel, getModelLabel, synthesizeSpeech } from "./api/mimo-tts";
 import type { VoiceConfig } from "./api/types";
 import { MODEL_LABELS, VOICE_CATEGORIES, getVoiceById, getVoicesByCategory } from "./constants/voices";
 import { AudioPlayer } from "./utils/audio-player";
+import { showTTSFailure } from "./utils/feedback";
 import { getPreviewText } from "./utils/text-source";
 import {
   clearQuickReadVoiceOverride,
@@ -79,7 +80,7 @@ export default function SelectVoice() {
       await player.playAudio(audio, options.format);
     } catch (error) {
       if (player.isStopped()) return;
-      await showPreviewError(error);
+      await showTTSFailure(error, "Preview failed");
     } finally {
       if (playerRef.current === player) setPreviewingVoiceId(null);
     }
@@ -218,26 +219,4 @@ function voiceIcon(voice: VoiceConfig) {
 
 function escapeMarkdown(text: string): string {
   return text.replace(/[\\`*_{}[\]()#+\-.!|>]/g, "\\$&");
-}
-
-async function showPreviewError(error: unknown): Promise<void> {
-  if (error instanceof TTSApiError) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title:
-        error.code === -1 || error.code === 401 || error.code === 403 ? "Configuration Required" : "Preview failed",
-      message: error.message,
-      primaryAction:
-        error.code === -1 || error.code === 401 || error.code === 403
-          ? { title: "Open Preferences", onAction: () => openExtensionPreferences() }
-          : undefined,
-    });
-    return;
-  }
-
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Preview failed",
-    message: error instanceof Error ? error.message : String(error),
-  });
 }

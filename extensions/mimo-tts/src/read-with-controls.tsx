@@ -10,7 +10,8 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildOptionsFromPrefs, getActiveModel, getModelLabel, TTSApiError } from "./api/mimo-tts";
+import { buildOptionsFromPrefs, getActiveModel, getModelLabel } from "./api/mimo-tts";
+import { showTTSFailure } from "./utils/feedback";
 import {
   EMOTION_TAGS,
   EXPRESSION_TAGS,
@@ -122,7 +123,7 @@ export default function MiMoStudio() {
         await showToast({ style: Toast.Style.Success, title: "Playback complete" });
       }
     } catch (error) {
-      await showPlaybackError(error);
+      await showTTSFailure(error);
     } finally {
       setIsLoading(false);
     }
@@ -324,27 +325,4 @@ function voiceIcon(gender: string) {
   if (gender === "female") return Icon.Female;
   if (gender === "male") return Icon.Male;
   return Icon.SpeakerHigh;
-}
-
-async function showPlaybackError(error: unknown): Promise<void> {
-  if (error instanceof TTSApiError) {
-    if (error.code === -1 || error.code === 401 || error.code === 403) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Configuration Required",
-        message: error.message,
-        primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
-      });
-      return;
-    }
-
-    await showToast({ style: Toast.Style.Failure, title: "MiMo TTS Error", message: error.message });
-    return;
-  }
-
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Error",
-    message: error instanceof Error ? error.message : String(error),
-  });
 }

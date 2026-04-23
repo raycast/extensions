@@ -1,23 +1,32 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
-  <rect width="512" height="512" fill="#FF6A00"/>
-  <circle cx="424" cy="88" r="116" fill="#FF9A24"/>
-  <circle cx="88" cy="424" r="130" fill="#D94A00"/>
-  <path
-    d="M126 354V178C126 151 162 141 177 164L256 286L335 164C350 141 386 151 386 178V354"
-    fill="none"
-    stroke="#FFFFFF"
-    stroke-width="64"
-    stroke-linecap="round"
-    stroke-linejoin="round"
-  />
-  <path
-    d="M186 366C222 390 290 390 326 366"
-    fill="none"
-    stroke="#FFF3DE"
-    stroke-width="24"
-    stroke-linecap="round"
-  />
-  <rect x="206" y="316" width="22" height="56" rx="11" fill="#A63200"/>
-  <rect x="245" y="292" width="22" height="80" rx="11" fill="#8E2800"/>
-  <rect x="284" y="316" width="22" height="56" rx="11" fill="#A63200"/>
+  <defs>
+    <linearGradient id="mimoBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1E1B4B"/>
+      <stop offset="100%" stop-color="#4338CA"/>
+    </linearGradient>
+    <radialGradient id="sparkGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FCD34D" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#FCD34D" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="bgClip">
+      <rect x="32" y="32" width="448" height="448" rx="112" ry="112"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#bgClip)">
+    <rect x="32" y="32" width="448" height="448" rx="112" ry="112" fill="url(#mimoBg)"/>
+    <circle cx="118" cy="112" r="6" fill="#FFFFFF" fill-opacity="0.28"/>
+    <circle cx="416" cy="248" r="5" fill="#FFFFFF" fill-opacity="0.28"/>
+    <circle cx="96"  cy="308" r="4" fill="#FFFFFF" fill-opacity="0.28"/>
+    <circle cx="392" cy="396" r="5" fill="#FFFFFF" fill-opacity="0.28"/>
+    <circle cx="266" cy="80"  r="3" fill="#FFFFFF" fill-opacity="0.28"/>
+  </g>
+
+  <rect x="138" y="212" width="56" height="152" rx="28" fill="#FFFFFF"/>
+  <rect x="228" y="162" width="56" height="228" rx="28" fill="#FFFFFF"/>
+  <rect x="318" y="212" width="56" height="152" rx="28" fill="#FFFFFF"/>
+
+  <circle cx="256" cy="128" r="72" fill="url(#sparkGlow)"/>
+  <polygon points="256,88 270,128 256,168 242,128" fill="#FCD34D"/>
+  <polygon points="216,128 256,114 296,128 256,142" fill="#FCD34D"/>
 </svg>

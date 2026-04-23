@@ -10,10 +10,11 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildOptionsFromPrefs, getActiveModel, getModelLabel, TTSApiError } from "./api/mimo-tts";
+import { buildOptionsFromPrefs, getActiveModel, getModelLabel } from "./api/mimo-tts";
 import type { VoiceConfig } from "./api/types";
 import { MODEL_LABELS, VOICE_CATEGORIES, getVoicesByCategory } from "./constants/voices";
 import { AudioPlayer } from "./utils/audio-player";
+import { showTTSFailure } from "./utils/feedback";
 import { chunkText } from "./utils/text-chunker";
 import { playChunksWithLookahead } from "./utils/pipelined-reading";
 
@@ -40,17 +41,18 @@ export default function ReadWithVoice() {
   }, [searchText, currentModel]);
 
   useEffect(() => {
+    let mounted = true;
     getSelectedText()
-      .then((text) => setSelectedText(text))
+      .then((text) => {
+        if (mounted) setSelectedText(text);
+      })
       .catch(() => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "No text selected",
-          message: "Select text first, or use Quick Read from a text selection.",
-        });
+        // No selection is a valid state — the empty preview and Read action
+        // communicate what the user needs. Avoid a noisy failure toast here.
       });
 
     return () => {
+      mounted = false;
       playerRef.current.cleanup();
     };
   }, []);
@@ -99,7 +101,7 @@ export default function ReadWithVoice() {
           await showToast({ style: Toast.Style.Success, title: "Playback complete" });
         }
       } catch (error) {
-        await showPlaybackError(error);
+        await showTTSFailure(error);
       } finally {
         setIsLoading(false);
         setPlayingVoiceId(null);
@@ -241,26 +243,4 @@ function voiceIcon(voice: VoiceConfig) {
 
 function escapeMarkdown(text: string): string {
   return text.replace(/[\\`*_{}[\]()#+\-.!|>]/g, "\\$&");
-}
-
-async function showPlaybackError(error: unknown): Promise<void> {
-  if (error instanceof TTSApiError) {
-    if (error.code === -1 || error.code === 401 || error.code === 403) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Configuration Required",
-        message: error.message,
-        primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
-      });
-      return;
-    }
-    await showToast({ style: Toast.Style.Failure, title: "MiMo TTS Error", message: error.message });
-    return;
-  }
-
-  await showToast({
-    style: Toast.Style.Failure,
-    title: "Error",
-    message: error instanceof Error ? error.message : String(error),
-  });
 }
