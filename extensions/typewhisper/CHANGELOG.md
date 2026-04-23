@@ -1,6 +1,6 @@
 # TypeWhisper Changelog
 
-## [Improved Dictation Session Tracking] - 2026-04-13
+## [Improved Dictation Session Tracking] - {PR_MERGE_DATE}
 
 - Updated Start Dictation and Show Last Transcription to use dictation session IDs for exact transcript lookup
 - Prefer session-specific transcript polling over guessing the latest history entry

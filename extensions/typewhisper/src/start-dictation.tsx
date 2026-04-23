@@ -1,11 +1,7 @@
 import { closeMainWindow, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { apiGet, apiPost, TypeWhisperError } from "./api";
-import {
-  clearActiveDictationSessionId,
-  setActiveDictationSessionId,
-  setLastDictationSessionId,
-} from "./dictation-session";
+import { setLastDictationSessionId } from "./dictation-session";
 import type {
   DictationStartResponse,
   DictationStatusResponse,
@@ -22,15 +18,11 @@ export default async function Command() {
       const response =
         await apiPost<DictationStopResponse>("/v1/dictation/stop");
       await setLastDictationSessionId(response.id);
-      await clearActiveDictationSessionId();
       await closeMainWindow();
       await showHUD("Dictation stopped");
     } else {
       await closeMainWindow();
-      const response = await apiPost<DictationStartResponse>(
-        "/v1/dictation/start",
-      );
-      await setActiveDictationSessionId(response.id);
+      await apiPost<DictationStartResponse>("/v1/dictation/start");
       await showHUD("Dictation started");
     }
   } catch (error) {
