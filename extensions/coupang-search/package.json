@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "coupang-search",
   "title": "Coupang Search",
   "description": "Open Coupang search results in your browser from Raycast.",
@@ -55,7 +56,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.13",
-    "react": "^19.2.5"
+    "@raycast/api": "^1.104.13"
   }
 }
