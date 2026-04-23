@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "petrol-price-malaysia",
+  "title": "Petrol Price Malaysia",
+  "description": "View the latest weekly petrol and diesel prices in Malaysia (RON95, RON97, Diesel) from data.gov.my",
+  "icon": "icon.png",
+  "author": "syamil_yusof",
+  "categories": [
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "View Petrol Prices",
+      "description": "View the latest weekly fuel prices in Malaysia",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.9",
+    "@types/react": "19.0.10",
+    "eslint": "^9.20.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
