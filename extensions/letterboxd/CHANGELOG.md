@@ -1,6 +1,6 @@
 # letterboxd Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-23
 
 - Fixed the issue with the rating histogram not working
 
