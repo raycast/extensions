@@ -27,7 +27,7 @@ function formatDueLocal(date: Date): string {
 }
 
 const CreateTask: FC = () => {
-  const { handleSubmit, itemProps, reset } = useForm<FormValues>({
+  const { handleSubmit, itemProps } = useForm<FormValues>({
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating task…" });
       try {
@@ -48,7 +48,6 @@ const CreateTask: FC = () => {
 
         toast.style = Toast.Style.Success;
         toast.title = "Task created in Inbox";
-        reset({ title: "", description: "", due: null, priority: "0" });
         await popToRoot({ clearSearchBar: true });
       } catch (error) {
         toast.hide();
