@@ -16,7 +16,8 @@ import path from "path";
 import { convertMedia } from "../utils/converter";
 import { runConversionBatch } from "../utils/convertBatch";
 import { parseTimeString, formatTimeString } from "../utils/time";
-import { getAllPresets, findPreset, saveUserPreset } from "../utils/presets";
+import { getAllPresets, findPreset } from "../utils/presets";
+import { PresetEditorForm } from "./PresetEditorForm";
 import { execPromise } from "../utils/exec";
 import {
   OUTPUT_VIDEO_EXTENSIONS,
@@ -360,14 +361,16 @@ export function ConverterForm({
       onAction={() => {
         if (!outputFormat || !currentQualitySetting || !selectedFileType) return;
         push(
-          <SavePresetForm
-            initialName=""
-            mediaType={getOutputCategory(outputFormat) === "gif" ? "gif" : selectedFileType}
-            outputFormat={outputFormat}
-            quality={currentQualitySetting}
-            trim={parsedTrim}
-            stripMetadata={stripMetadata}
-            outputDir={resolvedOutputDir}
+          <PresetEditorForm
+            mode="create"
+            seed={{
+              mediaType: getOutputCategory(outputFormat) === "gif" ? "gif" : selectedFileType,
+              outputFormat,
+              quality: currentQualitySetting,
+              trim: parsedTrim,
+              stripMetadata,
+              outputDir: resolvedOutputDir,
+            }}
             onSaved={async () => {
               const refreshed = await getAllPresets();
               setPresets(refreshed);
@@ -629,76 +632,6 @@ export function GifQualityControls({
         onChange={(v) => onChange({ ".gif": { ...gif, loop: v } } as QualitySettings)}
       />
     </>
-  );
-}
-
-function SavePresetForm({
-  initialName,
-  mediaType,
-  outputFormat,
-  quality,
-  trim,
-  stripMetadata,
-  outputDir,
-  onSaved,
-}: {
-  initialName: string;
-  mediaType: MediaType | "gif";
-  outputFormat: AllOutputExtension;
-  quality: QualitySettings;
-  trim?: TrimOptions;
-  stripMetadata?: boolean;
-  outputDir?: string;
-  onSaved: () => Promise<void> | void;
-}) {
-  const [name, setName] = useState(initialName);
-  const [description, setDescription] = useState("");
-  const { pop } = useNavigation();
-
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Save Preset"
-            icon={Icon.Stars}
-            onSubmit={async () => {
-              if (!name.trim()) {
-                await showToast({ style: Toast.Style.Failure, title: "Name required" });
-                return;
-              }
-              try {
-                await saveUserPreset({
-                  name: name.trim(),
-                  mediaType,
-                  outputFormat,
-                  quality,
-                  trim,
-                  stripMetadata,
-                  outputDir,
-                  description: description.trim() || undefined,
-                });
-                await onSaved();
-                await showToast({ style: Toast.Style.Success, title: "Preset saved" });
-                pop();
-              } catch (error) {
-                showFailureToast(error, { title: "Failed to save preset" });
-              }
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="name" title="Name" placeholder="e.g. My Video Compression" value={name} onChange={setName} />
-      <Form.TextArea
-        id="description"
-        title="Description"
-        placeholder="Optional notes"
-        value={description}
-        onChange={setDescription}
-      />
-      <Form.Description text={`Format: ${outputFormat}`} />
-    </Form>
   );
 }
 
@@ -1096,7 +1029,7 @@ export function QualitySettingsComponent({
             return (
               <Form.Dropdown
                 key="preset"
-                id="preset"
+                id="videoEncodingPreset"
                 title="Encoding Preset"
                 value={currentValue as VideoPreset}
                 onChange={(preset: string) =>
