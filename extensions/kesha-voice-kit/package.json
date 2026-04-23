@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kesha-voice-kit",
+  "title": "Kesha Voice Kit",
+  "description": "Offline speech-to-text and text-to-speech, powered by the Kesha Voice Kit CLI. No API keys, no cloud — runs locally on Apple Silicon.",
+  "icon": "extension-icon.png",
+  "author": "drakulavich",
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "keywords": ["voice", "transcription", "stt", "tts", "kesha", "offline", "whisper", "parakeet"],
+  "commands": [
+    {
+      "name": "transcribe-selected-file",
+      "title": "Transcribe Selected Audio",
+      "subtitle": "Kesha Voice Kit",
+      "description": "Transcribe the audio file selected in Finder. Opens a detail view with the transcript + detected language; one keystroke copies it to the clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "speak-clipboard",
+      "title": "Speak Clipboard",
+      "subtitle": "Kesha Voice Kit",
+      "description": "Synthesize speech from the current clipboard text and play it through the default output. English and Russian auto-routed; falls back to macOS system voices when AVSpeech is available.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "keshaBinPath",
+      "title": "`kesha` binary path",
+      "description": "Absolute path to the `kesha` CLI. Leave blank to use PATH (default).",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "/opt/homebrew/bin/kesha"
+    },
+    {
+      "name": "defaultVoice",
+      "title": "Default voice (Speak Clipboard)",
+      "description": "Voice id passed to `kesha say --voice`. Leave blank to let Kesha auto-route by detected language.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "en-af_heart, ru-denis, macos-com.apple.voice.compact.en-US.Samantha, ..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
