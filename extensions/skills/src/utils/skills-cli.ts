@@ -10,6 +10,9 @@ import { getExecOptions } from "./exec-options";
 const home = homedir();
 const isWindows = process.platform === "win32";
 
+let validatedCustomNpxPath: string | null = null;
+let pendingCustomNpxValidation: { path: string; promise: Promise<void> } | null = null;
+
 type ExecFailure = Error & {
   code?: string | number;
   stderr?: string;
@@ -80,6 +83,28 @@ function normalizeCliError(error: unknown, npxCommand: string): Error {
 }
 
 async function validateCustomNpxPath(customNpxPath: string): Promise<void> {
+  if (validatedCustomNpxPath === customNpxPath) {
+    return;
+  }
+
+  if (pendingCustomNpxValidation?.path === customNpxPath) {
+    return pendingCustomNpxValidation.promise;
+  }
+
+  const validationPromise = assertValidCustomNpxPath(customNpxPath);
+  pendingCustomNpxValidation = { path: customNpxPath, promise: validationPromise };
+
+  try {
+    await validationPromise;
+    validatedCustomNpxPath = customNpxPath;
+  } finally {
+    if (pendingCustomNpxValidation?.path === customNpxPath) {
+      pendingCustomNpxValidation = null;
+    }
+  }
+}
+
+async function assertValidCustomNpxPath(customNpxPath: string): Promise<void> {
   const invalidPathMessage =
     "The configured Custom npx Path is incorrect. It must point to the `npx` executable. Update the path in the extension configuration or clear it to use automatic detection.";
 
@@ -88,16 +113,13 @@ async function validateCustomNpxPath(customNpxPath: string): Promise<void> {
     throw new InvalidCustomNpxPathError(invalidPathMessage);
   }
 
+  let fileStats;
   try {
-    const fileStats = await stat(customNpxPath);
-    if (fileStats.isDirectory()) {
-      throw new InvalidCustomNpxPathError(invalidPathMessage);
-    }
-  } catch (error) {
-    if (error instanceof InvalidCustomNpxPathError) {
-      throw error;
-    }
-
+    fileStats = await stat(customNpxPath);
+  } catch {
+    throw new InvalidCustomNpxPathError(invalidPathMessage);
+  }
+  if (fileStats.isDirectory()) {
     throw new InvalidCustomNpxPathError(invalidPathMessage);
   }
 

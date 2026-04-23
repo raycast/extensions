@@ -158,9 +158,9 @@ const buildEnhancedNodePaths = async (): Promise<string> => {
   }
 
   const allPaths = [
-    ...homebrewPaths,
-    ...homebrewVersionedNodePaths,
     ...versionManagerPaths,
+    ...homebrewVersionedNodePaths,
+    ...homebrewPaths,
     ...systemPaths,
     process.env.PATH || "",
   ];
