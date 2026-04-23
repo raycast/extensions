@@ -1,6 +1,6 @@
 # OWL Changelog
 
-## [Filter Keyboards] - {PR_MERGE_DATE}
+## [Filter Keyboards] - 2026-04-23
 
 - Added filter for keyboards to show only those that match the languages.
 - Added default OWLs when initializing and actions to reload that configuration.
