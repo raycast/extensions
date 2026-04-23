@@ -93,9 +93,9 @@ async function fetchCardTags(set: string, collectorNumber: string): Promise<Tagg
 // ─── Card Tags View ───────────────────────────────────────────────────────────
 
 function tagScryfallSearchUrl(type: string, name: string): string {
-  if (type === "ORACLE_CARD_TAG") return `https://scryfall.com/search?q=oracletag%3A"${encodeURIComponent(name)}"`;
-  if (type === "ILLUSTRATION_TAG") return `https://scryfall.com/search?q=arttag%3A"${encodeURIComponent(name)}"`;
-  return `https://scryfall.com/search?q="${encodeURIComponent(name)}"`;
+  if (type === "ORACLE_CARD_TAG") return `https://scryfall.com/search?q=${encodeURIComponent(`oracletag:"${name}"`)}`;
+  if (type === "ILLUSTRATION_TAG") return `https://scryfall.com/search?q=${encodeURIComponent(`arttag:"${name}"`)}`;
+  return `https://scryfall.com/search?q=${encodeURIComponent(`"${name}"`)}`;
 }
 
 export interface CardTagsViewProps {
@@ -352,7 +352,7 @@ export function CardDetailView({ card, searchTagTarget }: CardDetailViewProps) {
   const manaCost = activeFace?.mana_cost ?? card.mana_cost;
   const displayName = activeFace ? `${card.name} (${activeFace.name})` : card.name;
 
-  const markdown = `<img src="${imageUri}" width="504" />`;
+  const markdown = `<img src="${imageUri}" height="360" />`;
   return (
     <Detail
       navigationTitle={displayName}
