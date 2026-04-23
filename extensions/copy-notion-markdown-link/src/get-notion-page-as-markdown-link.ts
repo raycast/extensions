@@ -78,7 +78,9 @@ export default async function main() {
     const linkUrl = parts[1];
 
     // Remove tracking query parameter
-    const cleanedUrl = linkUrl?.replace(/[?&]source=copy_link/, "");
+    const url = new URL(linkUrl);
+    url.searchParams.delete("source");
+    const cleanedUrl = url.toString();
 
     // URL validation
     if (!cleanedUrl || !cleanedUrl.includes("notion.so")) {
