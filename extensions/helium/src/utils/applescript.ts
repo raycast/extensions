@@ -2,6 +2,13 @@ import { runAppleScript } from "@raycast/utils";
 import { open, getPreferenceValues } from "@raycast/api";
 
 /**
+ * This function escapes tab url
+ */
+function escapeForAppleScript(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+/**
  * Switch to a specific tab in Helium browser by its URL
  *
  * WORKAROUND FOR SPACE SWITCHING:
@@ -22,15 +29,13 @@ import { open, getPreferenceValues } from "@raycast/api";
 export async function switchToHeliumTab(tabUrl: string): Promise<boolean> {
   try {
     const preferences = getPreferenceValues<Preferences>();
-    const escapedUrl = tabUrl.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
-    // Check if experimental Space switching is enabled
     if (preferences.enableSpaceSwitching) {
-      // EXPERIMENTAL WORKAROUND: Open-then-close method to force Space switching
+      const escapedUrl = escapeForAppleScript(tabUrl);
       return await switchToHeliumTabWithSpaceSwitching(escapedUrl);
     } else {
-      // DEFAULT: Simple tab switching (only works within current Space)
-      return await switchToHeliumTabSimple(escapedUrl);
+      // Pass raw URL — switchToHeliumTabSimple does its own escaping
+      return await switchToHeliumTabSimple(tabUrl);
     }
   } catch (error) {
     console.error("AppleScript error:", error);
@@ -41,38 +46,47 @@ export async function switchToHeliumTab(tabUrl: string): Promise<boolean> {
 /**
  * Simple tab switching without Space switching workaround (default behavior)
  */
-async function switchToHeliumTabSimple(escapedUrl: string): Promise<boolean> {
+export async function switchToHeliumTabSimple(url: string): Promise<boolean> {
+  const safeUrl = escapeForAppleScript(url);
+
   const script = `
-    tell application "Helium"
-      if not running then
-        return "not_running"
-      end if
+        tell application "Helium"
+            if not running then return "not_running"
 
-      set foundTab to false
-      repeat with w in windows
-        set tabIndex to 1
-        repeat with t in tabs of w
-          if URL of t is "${escapedUrl}" then
-            set active tab index of w to tabIndex
-            activate
-            set foundTab to true
-            exit repeat
-          end if
-          set tabIndex to tabIndex + 1
-        end repeat
-        if foundTab then exit repeat
-      end repeat
+            set foundTab to false
+            repeat with w in windows
+                set tabIndex to 1
+                repeat with t in tabs of w
+                    try
+                        if (URL of t as text) is "${safeUrl}" then
+                            set active tab index of w to tabIndex
+                            set index of w to 1
+                            set foundTab to true
+                            exit repeat
+                        end if
+                    end try
+                    set tabIndex to tabIndex + 1
+                end repeat
+                if foundTab then exit repeat
+            end repeat
 
-      if foundTab then
-        return "success"
-      else
-        return "not_found"
-      end if
-    end tell
-  `;
+            if foundTab then
+                activate
+                return "success"
+            else
+                return "not_found"
+            end if
+        end tell
+    `;
 
-  const result = await runAppleScript(script);
-  return result.trim() === "success";
+  try {
+    const result = await runAppleScript(script, { timeout: 5000 });
+    console.log("switchToHeliumTab result:", result);
+    return result.trim() === "success";
+  } catch (error) {
+    console.error("switchToHeliumTab error:", error);
+    return false;
+  }
 }
 
 /**

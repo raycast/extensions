@@ -25,10 +25,11 @@ export function SwitchToTabAction({ tab }: BaseActionProps) {
       title="Switch to Tab"
       icon={Icon.ArrowRight}
       onAction={async () => {
-        await closeMainWindow();
         try {
           const switched = await switchToHeliumTab(tab.url);
-          if (!switched) {
+          if (switched) {
+            await closeMainWindow();
+          } else {
             await showToast({
               style: Toast.Style.Failure,
               title: "Tab not found",

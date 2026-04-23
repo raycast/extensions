@@ -5,6 +5,9 @@
   "description": "Navigate open tabs, bookmarks, and the web in Helium browser",
   "icon": "icon.png",
   "author": "islamtayeb",
+  "contributors": [
+    "mallsjr"
+  ],
   "platforms": [
     "macOS"
   ],
