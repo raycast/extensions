@@ -48,7 +48,7 @@ export async function switchToHeliumTab(tabUrl: string): Promise<boolean> {
 /**
  * Simple tab switching without Space switching workaround (default behavior)
  */
-export async function switchToHeliumTabSimple(url: string): Promise<boolean> {
+export async function switchToHeliumTabSimple(escapedUrl: string): Promise<boolean> {
   const script = `
         tell application "Helium"
             if not running then return "not_running"
@@ -58,7 +58,7 @@ export async function switchToHeliumTabSimple(url: string): Promise<boolean> {
                 set tabIndex to 1
                 repeat with t in tabs of w
                     try
-                        if (URL of t as text) is "${url}" then
+                        if (URL of t as text) is "${escapedUrl}" then
                             set active tab index of w to tabIndex
                             set index of w to 1
                             set foundTab to true
@@ -81,7 +81,6 @@ export async function switchToHeliumTabSimple(url: string): Promise<boolean> {
 
   try {
     const result = await runAppleScript(script, { timeout: 5000 });
-    console.log("switchToHeliumTab result:", result);
     return result.trim() === "success";
   } catch (error) {
     console.error("switchToHeliumTab error:", error);
