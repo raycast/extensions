@@ -21,17 +21,19 @@ export function useInitializeOWLs(
   const { value: languages } = useLanguages();
 
   useEffect(() => {
-    if (!isInit) {
-      loadDefaultOWLs({
-        keyboards,
-        languages,
-        setOWLs,
-        showAlert,
-      }).then(() => {
-        setIsInit(true);
-      });
+    if (keyboards.length === 0 || languages.length === 0 || isInit) {
+      return;
     }
-  }, [isInit]);
+
+    loadDefaultOWLs({
+      keyboards,
+      languages,
+      setOWLs,
+      showAlert,
+    }).then(() => {
+      setIsInit(true);
+    });
+  }, [isInit, keyboards, languages]);
 
   return {
     isInitialized: isInit,

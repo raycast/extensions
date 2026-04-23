@@ -13,7 +13,7 @@ export async function loadDefaultOWLs({
   keyboards: string[];
   setOWLs: UseOWLs["setOWLs"];
   showAlert?: boolean;
-}) {
+}): Promise<boolean> {
   const defaultMapping: OWLMapping = Object.fromEntries(
     languages.map((language) => {
       return [
@@ -34,19 +34,24 @@ export async function loadDefaultOWLs({
     }),
   );
 
-  const shouldReset = showAlert
-    ? await confirmAlert({
-        title: "Are you sure?",
-        message: `Are you sure you want to reset the OWLs to the default mapping?\nThis will remove all existing OWLs
+  if (showAlert) {
+    const shouldLoadDefault = await confirmAlert({
+      title: "Are you sure?",
+      message: `Are you sure you want to reset the OWLs to the default mapping?\nThis will remove all existing OWLs
           and add all permutations of your existing languages.`,
-        primaryAction: {
-          title: "Reset",
-          style: Alert.ActionStyle.Destructive,
-        },
-      })
-    : true;
+      primaryAction: {
+        title: "Reset",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
 
-  if (shouldReset) {
-    setOWLs(defaultMapping);
+    // The user has been prompted and choose not to load defaults.
+    if (!shouldLoadDefault) {
+      return false;
+    }
   }
+
+  setOWLs(defaultMapping);
+
+  return true;
 }

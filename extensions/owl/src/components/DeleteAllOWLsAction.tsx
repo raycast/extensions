@@ -25,9 +25,9 @@ export function DeleteAllOWLsAction(props: Readonly<{ language: string }>) {
           })
         ) {
           setOWLs((previousState) => {
-            delete previousState[language];
-
-            return previousState;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { [language]: _, ...rest } = previousState;
+            return rest;
           });
         }
       }}
