@@ -6,11 +6,14 @@ Matches on folder names, not full paths, so typing `desk` goes straight to `Desk
 
 ## Requirements
 
-This extension shells out to the `zoxide` binary, so you need it installed:
+This extension shells out to the `zoxide` binary, so you need it installed. The following install locations are auto-detected:
 
-```bash
-brew install zoxide
-```
+- Homebrew (`/opt/homebrew/bin/zoxide`, `/usr/local/bin/zoxide`)
+- MacPorts (`/opt/local/bin/zoxide`)
+- Cargo (`~/.cargo/bin/zoxide`)
+- Nix (`~/.nix-profile/bin/zoxide`, `/run/current-system/sw/bin/zoxide`)
+
+If you installed zoxide elsewhere, set the absolute path in **Zoxide Binary Path** under extension preferences.
 
 If you don't already use zoxide in your shell, follow the [setup instructions](https://github.com/ajeetdsouza/zoxide#installation) to hook it into your shell — that's how zoxide learns which folders you use.
 
@@ -44,5 +47,6 @@ Configurable under Raycast → Settings → Extensions → Zoxide Plus:
 
 - **Terminal** — app used by the "Open in Terminal" action (default: Terminal.app)
 - **Editor** — app used by the "Open in Editor" action (default: Visual Studio Code)
+- **Zoxide Binary Path** — optional override for the zoxide binary location when auto-detection fails
 
-Both are native macOS app pickers, so any installed app works.
+The terminal and editor fields are native macOS app pickers, so any installed app works.

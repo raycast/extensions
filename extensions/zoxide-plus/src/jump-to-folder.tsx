@@ -5,13 +5,8 @@ import { basename } from "node:path";
 import { useState } from "react";
 import { addPath, zoxidePath } from "./lib/zoxide";
 
-interface ExtensionPreferences {
-  terminal: Application;
-  editor: Application;
-}
-
 export default function Command() {
-  const { terminal, editor } = getPreferenceValues<ExtensionPreferences>();
+  const { terminal, editor } = getPreferenceValues<Preferences.JumpToFolder>();
   const [searchText, setSearchText] = useState("");
 
   const args = ["query", "-l", "-s", ...(searchText ? [searchText] : [])];
@@ -35,7 +30,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="zoxide not found"
-          description="Install with: brew install zoxide"
+          description="Install zoxide (e.g. `brew install zoxide`), or set a custom binary path in extension preferences."
         />
       ) : (
         <List.Section title="Results" subtitle={entries.length.toString()}>

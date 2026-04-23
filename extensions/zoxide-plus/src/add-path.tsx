@@ -62,7 +62,7 @@ export default function Command() {
   if (!zoxidePath) {
     return (
       <Form>
-        <Form.Description text="zoxide not found. Install with: brew install zoxide" />
+        <Form.Description text="zoxide not found. Install zoxide (e.g. `brew install zoxide`), or set a custom binary path in extension preferences." />
       </Form>
     );
   }

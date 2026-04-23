@@ -53,6 +53,14 @@
       "type": "appPicker",
       "required": true,
       "default": "com.microsoft.VSCode"
+    },
+    {
+      "name": "zoxidePath",
+      "title": "Zoxide Binary Path",
+      "description": "Optional. Absolute path to the zoxide binary. Leave blank to auto-detect common install locations (Homebrew, MacPorts, Cargo, Nix).",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "/opt/homebrew/bin/zoxide"
     }
   ],
   "dependencies": {
