@@ -1,6 +1,13 @@
 # Coupang Search
 
-Raycast에서 입력한 검색어를 쿠팡 검색 결과 페이지로 바로 보내는 간단한 확장입니다.
+Open Coupang search results directly from Raycast.
+
+## Features
+
+- Run the `Search Coupang` command from Raycast root search.
+- Find the command with `coupang`, `쿠팡`, or `cp`.
+- Enter a product or brand name in the `query` argument.
+- Open `https://www.coupang.com/np/search?q=...` in your default browser.
 
 ## 기능
 
