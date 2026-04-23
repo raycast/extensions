@@ -1,4 +1,4 @@
-import { useCachedPromise, MutatePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { getFolders, invalidateFoldersCache, deleteFolder } from "../storage";
 import { Folder } from "../types";
 import { useCallback, useMemo } from "react";
@@ -8,44 +8,35 @@ import { getNestedFolderIds } from "../form-utils";
 import { DEFAULT_SORT, NO_SORT } from "../constants";
 
 /**
- * Shared hook for fetching folders with caching and error handling
- * Uses Raycast's built-in failureToastOptions for automatic error handling
- */
-export function useFolders() {
-  return useCachedPromise(getFolders, [], {
-    keepPreviousData: true,
-    failureToastOptions: {
-      title: "Failed to load bundles",
-    },
-  });
-}
-
-/**
  * Get folders data with common operations and computed properties
  * Uses onPop callbacks on Action.Push for data refresh instead of polling.
  */
 export function useFoldersData(): {
   folders: Folder[];
-  sortedFolders: Folder[];
-  nestedFolderIds: Set<string>;
   topLevelFolders: Folder[];
   nestedFolders: Folder[];
   isLoading: boolean;
   revalidate: () => void;
-  mutate: MutatePromise<Folder[] | undefined>;
   handleSave: () => void;
   handleDelete: (folderId: string, folderName: string) => Promise<void>;
 } {
-  const { data = [], isLoading, revalidate, mutate } = useFolders();
+  const {
+    data = [],
+    isLoading,
+    revalidate,
+    mutate,
+  } = useCachedPromise(getFolders, [], {
+    keepPreviousData: true,
+    failureToastOptions: { title: "Failed to load bundles" },
+  });
 
   // Find all folder IDs that are nested within other folders (reuse form-utils function)
   const nestedFolderIds = useMemo(() => getNestedFolderIds(data), [data]);
 
   // Sort folders and separate by nesting status
-  const { sortedFolders, topLevelFolders, nestedFolders } = useMemo(() => {
+  const { topLevelFolders, nestedFolders } = useMemo(() => {
     const sorted = sortFolders(data, DEFAULT_SORT, NO_SORT, NO_SORT);
     return {
-      sortedFolders: sorted,
       topLevelFolders: sorted.filter((f) => !nestedFolderIds.has(f.id)),
       nestedFolders: sorted.filter((f) => nestedFolderIds.has(f.id)),
     };
@@ -90,13 +81,10 @@ export function useFoldersData(): {
 
   return {
     folders: data,
-    sortedFolders,
-    nestedFolderIds,
     topLevelFolders,
     nestedFolders,
     isLoading,
     revalidate,
-    mutate,
     handleSave,
     handleDelete,
   };

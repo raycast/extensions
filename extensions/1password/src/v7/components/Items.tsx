@@ -1,14 +1,25 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import crypto from "crypto";
+import { useMemo, useState } from "react";
 
 import resetCache from "../../reset-cache";
-import { CategoryName } from "../types";
+import { CategoryName, V7Item } from "../types";
 import { getV7CategoryIcon, getV7Items } from "../utils";
 import { Categories, DEFAULT_CATEGORY } from "./Categories";
 
+function matchesSearch(item: V7Item, query: string): boolean {
+  if (!query) return true;
+  const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+  const searchable = [item.itemTitle, item.accountName, item.vaultName, ...(item.websiteURLs ?? [])]
+    .filter(Boolean)
+    .map((s) => s!.toLowerCase());
+  return tokens.every((token) => searchable.some((s) => s.includes(token)));
+}
+
 export function Items() {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
+  const [searchText, setSearchText] = useState("");
   const categoriesObj = getV7Items();
   const categories =
     categoriesObj && category === DEFAULT_CATEGORY
@@ -18,10 +29,21 @@ export function Items() {
     if (category !== newCategory) setCategory(newCategory);
   };
 
+  const filteredCategories = useMemo(() => {
+    if (!categories || !searchText) return categories;
+    return categories
+      .map((cat) => ({ ...cat, items: cat.items.filter((item) => matchesSearch(item, searchText)) }))
+      .filter((cat) => cat.items.length > 0);
+  }, [categories, searchText]);
+
   return (
-    <List searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}>
-      {categories?.length ? (
-        categories.map((category) => (
+    <List
+      filtering={false}
+      onSearchTextChange={setSearchText}
+      searchBarAccessory={<Categories onCategoryChange={onCategoryChange} />}
+    >
+      {filteredCategories?.length ? (
+        filteredCategories.map((category) => (
           <List.Section id={category.id} key={category.id} title={category.name}>
             {category.items.map((item) => (
               <List.Item
@@ -66,7 +88,6 @@ export function Items() {
                 }}
                 id={item.uuid}
                 key={item.uuid}
-                keywords={item.accountName ? [item.accountName] : []}
                 subtitle={item.accountName}
                 title={item.itemTitle}
               />

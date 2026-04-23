@@ -1,13 +1,76 @@
 import { LocalStorage } from "@raycast/api";
-import { Folder, STORAGE_KEY } from "./types";
+import { existsSync, mkdirSync } from "fs";
+import { readFile, writeFile } from "fs/promises";
+import { join } from "path";
+import { homedir } from "os";
+import { Folder } from "./types";
+
+const STORAGE_KEY = "launchpad-folders";
+
+// iCloud Drive paths
+const ICLOUD_BASE = join(homedir(), "Library", "Mobile Documents", "com~apple~CloudDocs");
+const BUNDLES_DIR = join(ICLOUD_BASE, "Raycast Bundles");
+const BUNDLES_FILE = join(BUNDLES_DIR, "bundles.json");
+
+const useICloud = existsSync(ICLOUD_BASE);
 
 // In-memory cache
 let cache: Folder[] | null = null;
 let pendingPromise: Promise<Folder[]> | null = null;
+let migrationDone = false;
+
+/**
+ * Read raw JSON from the active backend (iCloud file or LocalStorage)
+ */
+async function readFromBackend(): Promise<string | undefined> {
+  if (useICloud) {
+    if (!existsSync(BUNDLES_FILE)) return undefined;
+    try {
+      return await readFile(BUNDLES_FILE, "utf-8");
+    } catch {
+      return undefined;
+    }
+  }
+  return await LocalStorage.getItem<string>(STORAGE_KEY);
+}
+
+/**
+ * Write raw JSON to the active backend (iCloud file or LocalStorage)
+ */
+async function writeToBackend(json: string): Promise<void> {
+  if (useICloud) {
+    if (!existsSync(BUNDLES_DIR)) {
+      mkdirSync(BUNDLES_DIR, { recursive: true });
+    }
+    await writeFile(BUNDLES_FILE, json, "utf-8");
+  } else {
+    await LocalStorage.setItem(STORAGE_KEY, json);
+  }
+}
+
+/**
+ * One-time migration: copy LocalStorage data to iCloud if applicable
+ */
+async function migrateLocalStorageToICloud(): Promise<void> {
+  if (migrationDone || !useICloud) return;
+  migrationDone = true;
+
+  if (existsSync(BUNDLES_FILE)) return;
+
+  const localData = await LocalStorage.getItem<string>(STORAGE_KEY);
+  if (!localData) return;
+
+  try {
+    JSON.parse(localData);
+  } catch {
+    return;
+  }
+
+  await writeToBackend(localData);
+}
 
 /**
  * Clean up orphaned nested folder references
- * Removes items that reference folders that no longer exist
  */
 function cleanupOrphanedReferences(folders: Folder[]): Folder[] {
   const folderIds = new Set(folders.map((f) => f.id));
@@ -17,7 +80,7 @@ function cleanupOrphanedReferences(folders: Folder[]): Folder[] {
     const cleanedItems = f.items.filter((item) => {
       if (item.type === "folder" && item.folderId && !folderIds.has(item.folderId)) {
         hasChanges = true;
-        return false; // Remove orphaned reference
+        return false;
       }
       return true;
     });
@@ -37,14 +100,14 @@ export async function getFolders(): Promise<Folder[]> {
 
   pendingPromise = (async () => {
     try {
-      const stored = await LocalStorage.getItem<string>(STORAGE_KEY);
+      await migrateLocalStorageToICloud();
+
+      const stored = await readFromBackend();
       let folders = stored ? (JSON.parse(stored) as Folder[]) : [];
 
-      // Clean up any orphaned references on load
       const cleaned = cleanupOrphanedReferences(folders);
       if (cleaned !== folders) {
-        // Save the cleaned data
-        await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+        await writeToBackend(JSON.stringify(cleaned));
         folders = cleaned;
       }
 
@@ -64,9 +127,9 @@ export async function getFolders(): Promise<Folder[]> {
 /**
  * Save folders and update cache
  */
-async function saveFolders(folders: Folder[]): Promise<void> {
+export async function saveFolders(folders: Folder[]): Promise<void> {
   cache = folders;
-  await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(folders));
+  await writeToBackend(JSON.stringify(folders));
 }
 
 /**
@@ -106,12 +169,10 @@ export async function deleteFolder(folderId: string): Promise<void> {
   const folderExists = folders.some((f) => f.id === folderId);
   if (!folderExists) throw new Error(`Folder not found: ${folderId}`);
 
-  // Remove the folder and clean up references in all other folders
   const updated = folders
     .filter((f) => f.id !== folderId)
     .map((f) => ({
       ...f,
-      // Remove any nested folder items that reference the deleted folder
       items: f.items.filter((item) => !(item.type === "folder" && item.folderId === folderId)),
     }));
 

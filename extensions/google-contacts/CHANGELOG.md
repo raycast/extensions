@@ -1,5 +1,9 @@
 # Google Contacts Changelog
 
+## [1.0.1] - 2026-04-13
+
+- Fix `search` operation timing out (600s max) when the AI tool is called without a query — now returns a single page of contacts instead of paginating the entire address book
+
 ## [Initial Release] - 2026-04-03
 
 - Search Contacts with List, Detail, and Grid view modes

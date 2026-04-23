@@ -8,3 +8,6 @@ raycast-env.d.ts
 
 # misc
 .DS_Store
+
+# temporary docs (large reference files not for the repo)
+/tmp-docs

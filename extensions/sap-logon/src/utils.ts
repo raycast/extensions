@@ -219,24 +219,11 @@ function sanitizeFilename(name: string): string {
   return name.replace(/[^a-zA-Z0-9_-]/g, "_");
 }
 
-// Encode value for SAP connection string (avoid breaking on special chars)
-function encodeSAPValue(value: string): string {
-  // Encode all characters that could break the SAP connection string parsing
-  return value
-    .replace(/%/g, "%25") // Must be first to avoid double-encoding
-    .replace(/&/g, "%26")
-    .replace(/=/g, "%3D")
-    .replace(/\+/g, "%2B")
-    .replace(/#/g, "%23")
-    .replace(/\s/g, "%20");
-}
-
 export async function createAndOpenSAPCFile(system: SAPSystem): Promise<string> {
   const password = await getPassword(system.id);
 
-  // Build the connection string with encoded values
   // Format: conn=/H/{application server}/S/32{instance number}&user={username}&lang={language}&client={client}&pass={password}
-  const connectionString = `conn=/H/${encodeSAPValue(system.applicationServer)}/S/32${encodeSAPValue(system.instanceNumber)}&user=${encodeSAPValue(system.username)}&lang=${encodeSAPValue(system.language)}&clnt=${encodeSAPValue(system.client)}&pass=${encodeSAPValue(password)}`;
+  const connectionString = `conn=/H/${system.applicationServer}/S/32${system.instanceNumber}&user=${system.username}&lang=${system.language}&clnt=${system.client}&pass=${password}`;
 
   // Use Raycast's support path for temp files (more appropriate than os.tmpdir)
   const tempDir = path.join(environment.supportPath, "sapc-files");
@@ -294,4 +281,23 @@ export function validateClient(value: string): string | undefined {
     return "Client must be exactly 3 digits (e.g., 100, 800)";
   }
   return undefined;
+}
+
+export function validateNoReservedChars(value: string, fieldLabel: string): string | undefined {
+  if (/[/&]/.test(value)) {
+    return `${fieldLabel} must not contain '/' or '&'`;
+  }
+  return undefined;
+}
+
+export function validatePassword(value: string): string | undefined {
+  return validateNoReservedChars(value, "Password");
+}
+
+export function validateApplicationServer(value: string): string | undefined {
+  return validateNoReservedChars(value, "Application server");
+}
+
+export function validateUsername(value: string): string | undefined {
+  return validateNoReservedChars(value, "Username");
 }

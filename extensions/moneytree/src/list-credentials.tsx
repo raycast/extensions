@@ -1,79 +1,90 @@
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { getCredentials } from "./lib/api";
 import { getAccessToken } from "./lib/auth";
 import { CACHE_KEYS, getCached, setCached, removeCached } from "./lib/cache";
 import { CACHE_TTL } from "./lib/constants";
 import { CredentialWithAccounts } from "./lib/types";
+import { AccountsList } from "./components/AccountsList";
 import { LogoutAction } from "./components/logout-action";
+import { formatCurrency } from "./lib/format";
 
-function getStatusIcon(status: string): Icon {
-  switch (status) {
-    case "success":
-      return Icon.CheckCircle;
-    case "inactive":
-      return Icon.XMarkCircle;
-    case "manual":
-      return Icon.BankNote;
-    default:
-      if (status.includes("error") || status.includes("auth") || status.includes("intervention")) {
-        return Icon.ExclamationMark;
-      }
-      return Icon.QuestionMark;
-  }
-}
+const GROUP_ORDER = ["bank", "credit_card", "investment", "stored_value", "point", "other"] as const;
 
-function getStatusColor(status: string): Color {
-  switch (status) {
-    case "success":
-      return Color.Green;
-    case "inactive":
-      return Color.SecondaryText;
-    case "manual":
-      return Color.Blue;
-    default:
-      if (status.includes("error") || status.includes("auth") || status.includes("intervention")) {
-        return Color.Red;
-      }
-      return Color.Orange;
-  }
-}
+const GROUP_LABELS: Record<string, string> = {
+  bank: "Banks",
+  credit_card: "Credit Cards",
+  investment: "Investments",
+  stored_value: "Digital Money",
+  point: "Points",
+  other: "Others",
+};
 
-function formatDate(dateString: string | null): string {
-  if (!dateString) return "Never";
-  try {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  } catch {
-    return dateString;
-  }
-}
+const GROUP_ICONS: Record<string, Icon> = {
+  bank: Icon.Building,
+  credit_card: Icon.CreditCard,
+  investment: Icon.LineChart,
+  stored_value: Icon.Wallet,
+  point: Icon.Star,
+  other: Icon.Dot,
+};
 
-function getCredentialTitle(credential: CredentialWithAccounts): string {
-  if (credential.status === "manual") {
-    return "Cash Tracking";
-  }
-
+function getCredentialName(credential: CredentialWithAccounts): string {
+  if (credential.status === "manual") return "Cash Tracking";
   return credential.institution_name || `Credential #${credential.id}`;
+}
+
+function getCredentialTotalBalance(credential: CredentialWithAccounts): number {
+  return credential.accounts.reduce((sum, acc) => sum + acc.current_balance_in_base, 0);
+}
+
+/** Determine the primary group for a credential based on its accounts */
+function getPrimaryGroup(credential: CredentialWithAccounts): string {
+  if (credential.status === "manual") return "other";
+  const groups = new Set(credential.accounts.map((a) => a.group).filter(Boolean));
+  // Prefer non-point groups as primary
+  for (const g of GROUP_ORDER) {
+    if (g !== "point" && g !== "other" && groups.has(g)) return g;
+  }
+  if (groups.has("point")) return "point";
+  return "other";
+}
+
+function groupCredentials(credentials: CredentialWithAccounts[]): [string, CredentialWithAccounts[]][] {
+  const grouped = new Map<string, CredentialWithAccounts[]>();
+  for (const cred of credentials) {
+    const group = getPrimaryGroup(cred);
+    const list = grouped.get(group);
+    if (list) {
+      list.push(cred);
+    } else {
+      grouped.set(group, [cred]);
+    }
+  }
+  // Return in display order
+  return GROUP_ORDER.filter((g) => grouped.has(g)).map((g) => [g, grouped.get(g)!]);
+}
+
+function TypeDropdown(props: { onTypeChange: (type: string) => void }) {
+  return (
+    <List.Dropdown tooltip="Filter by Type" storeValue onChange={props.onTypeChange}>
+      <List.Dropdown.Item title="All" value="" />
+      {GROUP_ORDER.map((g) => (
+        <List.Dropdown.Item key={g} title={GROUP_LABELS[g]} value={g} icon={GROUP_ICONS[g]} />
+      ))}
+    </List.Dropdown>
+  );
 }
 
 export default function Command() {
   const [credentials, setCredentials] = useState<CredentialWithAccounts[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [typeFilter, setTypeFilter] = useState("");
   const hasFetchedRef = useRef(false);
 
   useEffect(() => {
-    // Prevent duplicate requests in React StrictMode
-    if (hasFetchedRef.current) {
-      return;
-    }
+    if (hasFetchedRef.current) return;
     hasFetchedRef.current = true;
 
     async function fetchCredentials() {
@@ -81,45 +92,33 @@ export default function Command() {
         setIsLoading(true);
         setError(null);
 
-        // Check cache first - if we have valid cached data, use it immediately
-        console.debug("[List Credentials] Checking cache...");
         const cached = getCached<CredentialWithAccounts[]>(CACHE_KEYS.dataSnapshot());
         if (cached && cached.length > 0) {
-          console.debug(`[List Credentials] Using cached data (${cached.length} credentials)`);
           setCredentials(cached);
           setIsLoading(false);
-          // Fetch fresh data in the background (silently update cache)
-          console.debug("[List Credentials] Background refresh started");
           try {
             await getAccessToken();
             const data = await getCredentials();
-            console.debug(`[List Credentials] Background refresh complete (${data.length} credentials)`);
             setCredentials(data);
             setCached(CACHE_KEYS.dataSnapshot(), data, CACHE_TTL.ACCOUNTS);
-          } catch (error) {
-            console.debug(`[List Credentials] Background refresh failed: ${error}`);
-            // If authentication fails, clear cache and show error
+          } catch (refreshError) {
             if (
-              error instanceof Error &&
-              (error.message.includes("authentication") || error.message.includes("preferences"))
+              refreshError instanceof Error &&
+              (refreshError.message.includes("authentication") || refreshError.message.includes("preferences"))
             ) {
               removeCached(CACHE_KEYS.dataSnapshot());
               setCredentials([]);
-              setError(error.message);
+              setError(refreshError.message);
               await showToast({
                 style: Toast.Style.Failure,
                 title: "Authentication required",
                 message: "Please check your credentials in extension preferences",
               });
-              return;
             }
-            // Silently fail background refresh - we have cached data to show
           }
           return;
         }
 
-        // No cache or cache expired - fetch fresh data
-        console.debug("[List Credentials] Cache miss - fetching fresh data");
         await getAccessToken();
         const data = await getCredentials();
         setCredentials(data);
@@ -127,11 +126,7 @@ export default function Command() {
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Failed to fetch credentials";
         setError(errorMessage);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: errorMessage,
-        });
+        await showToast({ style: Toast.Style.Failure, title: "Error", message: errorMessage });
       } finally {
         setIsLoading(false);
       }
@@ -148,10 +143,10 @@ export default function Command() {
     );
   }
 
-  const unsupportedCredentialTypes = ["manual"];
+  const grouped = groupCredentials(credentials).filter(([group]) => !typeFilter || group === typeFilter);
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarAccessory={<TypeDropdown onTypeChange={setTypeFilter} />}>
       {credentials.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.List}
@@ -159,77 +154,43 @@ export default function Command() {
           description="No credentials found."
           actions={
             <ActionPanel>
-              <LogoutAction onLogout={() => setCredentials([])} />
+              <LogoutAction />
             </ActionPanel>
           }
         />
       ) : (
-        credentials
-          .filter((credential) => !unsupportedCredentialTypes.includes(credential.status))
-          .sort((a, b) => getCredentialTitle(a).localeCompare(getCredentialTitle(b)))
-          .map((credential) => (
-            <List.Item
-              key={credential.id}
-              icon={{ source: getStatusIcon(credential.status), tintColor: getStatusColor(credential.status) }}
-              title={getCredentialTitle(credential)}
-              subtitle={credential.status}
-              accessories={[
-                {
-                  text: credential.last_success ? `Last success: ${formatDate(credential.last_success)}` : "N/A",
-                },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action.CopyToClipboard
-                    title="Copy Credential Details"
-                    icon={Icon.Clipboard}
-                    content={getCredentialTitle(credential)}
+        grouped.map(([group, creds]) => (
+          <List.Section key={group} title={GROUP_LABELS[group] || group}>
+            {creds
+              .sort((a, b) => getCredentialName(a).localeCompare(getCredentialName(b)))
+              .map((credential) => {
+                const balance = getCredentialTotalBalance(credential);
+                return (
+                  <List.Item
+                    key={credential.id}
+                    icon={GROUP_ICONS[group] || Icon.Dot}
+                    title={getCredentialName(credential)}
+                    accessories={[{ text: formatCurrency(balance) }]}
+                    actions={
+                      <ActionPanel>
+                        <Action.Push
+                          title="View Accounts"
+                          icon={Icon.Wallet}
+                          target={<AccountsList credentialId={String(credential.id)} />}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Credential Details"
+                          icon={Icon.Clipboard}
+                          content={`${getCredentialName(credential)}: ${formatCurrency(balance)}`}
+                        />
+                        <LogoutAction />
+                      </ActionPanel>
+                    }
                   />
-                  <LogoutAction onLogout={() => setCredentials([])} />
-                </ActionPanel>
-              }
-              detail={
-                <List.Item.Detail
-                  metadata={
-                    <List.Item.Detail.Metadata>
-                      <List.Item.Detail.Metadata.Label
-                        title="Institution"
-                        text={credential.institution_name || "N/A"}
-                      />
-                      <List.Item.Detail.Metadata.Label title="Status" text={credential.status} />
-                      <List.Item.Detail.Metadata.Label
-                        title="Institution ID"
-                        text={credential.institution_id?.toString() || "N/A"}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Auth Type"
-                        text={credential.auth_type?.toString() || "N/A"}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Last Success"
-                        text={formatDate(credential.last_success)}
-                      />
-                      <List.Item.Detail.Metadata.Label
-                        title="Status Set At"
-                        text={formatDate(credential.status_set_at)}
-                      />
-                      <List.Item.Detail.Metadata.Label title="Auto Run" text={credential.auto_run ? "Yes" : "No"} />
-                      {credential.error_info && (
-                        <>
-                          <List.Item.Detail.Metadata.Separator />
-                          <List.Item.Detail.Metadata.Label title="Error Reason" text={credential.error_info.reason} />
-                          <List.Item.Detail.Metadata.Label
-                            title="Error Message"
-                            text={credential.error_info.localized_description}
-                          />
-                        </>
-                      )}
-                    </List.Item.Detail.Metadata>
-                  }
-                />
-              }
-            />
-          ))
+                );
+              })}
+          </List.Section>
+        ))
       )}
     </List>
   );

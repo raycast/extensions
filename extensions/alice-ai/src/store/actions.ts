@@ -109,6 +109,14 @@ export const useActionsState = createStore<ActionState>({
           ...action,
           model: action.model.replace("gpt-4-turbo-preview", "gpt-4-turbo"),
         }));
+      // falls through
+      case 2:
+      // falls through
+      case 3: // Migrate from v3 to v4, remove deprecated OpenAI models
+        persistedState.actions = persistedState.actions.map((action: { model?: string } & Record<string, unknown>) => ({
+          ...action,
+          model: action.model === "gpt-3.5-turbo" || action.model === "gpt-4-turbo" ? "gpt-4o-mini" : action.model,
+        }));
     }
 
     return persistedState;

@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.3.1] - 2026-04-23
+
+### Fixed
+
+- CLI data (daily, monthly, total, session) now auto-refreshes on the configured interval instead of only updating on manual revalidation
+
 ## [v2.3.0] - 2026-03-23
 
 ### Added

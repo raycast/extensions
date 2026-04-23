@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Fix] - 2026-04-10
+
+- Fix Open in New Obsidian Tab failing on Windows due to path separator handling
+
 ## [Wikilink Actions] - 2026-04-07
 
 - New: Copy Wikilink — copies `[[Note Title]]` to clipboard (⌥W)

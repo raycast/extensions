@@ -1,8 +1,17 @@
 import { execFile, spawn } from "node:child_process";
 import { accessSync } from "node:fs";
+import { homedir, platform } from "node:os";
+import { join } from "node:path";
+
+const IS_WINDOWS = platform() === "win32";
 
 function resolveWatchkeyPath(): string | null {
-  for (const p of ["/usr/local/bin/watchkey", "/opt/homebrew/bin/watchkey"]) {
+  const localAppData = process.env.LOCALAPPDATA || (IS_WINDOWS ? join(homedir(), "AppData", "Local") : "");
+  const candidates = IS_WINDOWS
+    ? [join(localAppData, "watchkey", "watchkey.exe"), join(process.env.PROGRAMFILES || "", "watchkey", "watchkey.exe")]
+    : ["/usr/local/bin/watchkey", "/opt/homebrew/bin/watchkey"];
+
+  for (const p of candidates) {
     try {
       accessSync(p);
       return p;
@@ -99,16 +108,18 @@ export async function watchkeyList(): Promise<string[]> {
   try {
     return await listViaCli();
   } catch {
+    if (IS_WINDOWS) return [];
     return await listViaKeychain();
   }
 }
 
-const WATCHKEY_REPO = "Etheirystech/watchkey";
+const WATCHKEY_REPO = IS_WINDOWS ? "Etheirystech/watchkey-win" : "Etheirystech/watchkey";
 
 async function getInstalledVersion(): Promise<string | null> {
   try {
     const output = await execPromise(WATCHKEY_PATH!, ["--version"]);
-    return output.trim();
+    const match = output.trim().match(/[\d]+\.[\d]+\.[\d]+(?:[.\-\w]+)?/);
+    return match ? match[0] : output.trim();
   } catch {
     return null;
   }
@@ -116,7 +127,8 @@ async function getInstalledVersion(): Promise<string | null> {
 
 async function getLatestVersion(): Promise<string | null> {
   try {
-    const output = await execPromise("/usr/bin/curl", [
+    const curl = IS_WINDOWS ? "curl" : "/usr/bin/curl";
+    const output = await execPromise(curl, [
       "-s",
       "-H",
       "Accept: application/vnd.github+json",

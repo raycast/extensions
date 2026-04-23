@@ -18,7 +18,6 @@ import {
 
 import { usePromise } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
-import { runAppleScript } from "run-applescript";
 import fs from "fs-extra";
 import path from "path";
 
@@ -27,6 +26,7 @@ import { SpotlightSearchPreferences, SpotlightSearchResult, PinnedFolder } from 
 import { folderName, lastUsedSort, fixDoubleConcat } from "./common/utils";
 import { fsAsync } from "./common/fs-async";
 import { CacheManager } from "./common/cache-manager";
+import { isFinderFrontmost } from "./common/finder";
 
 interface RecentFolder extends SpotlightSearchResult {
   lastUsed: Date;
@@ -40,7 +40,6 @@ export default function Command(props: LaunchProps) {
   const [folders, setFolders] = useState<SpotlightSearchResult[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isQuerying, setIsQuerying] = useState<boolean>(false);
-  const [canExecute, setCanExecute] = useState<boolean>(false);
   const [hasCheckedPreferences, setHasCheckedPreferences] = useState<boolean>(false);
   const [currentPath, setCurrentPath] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useState<boolean>(false);
@@ -48,30 +47,10 @@ export default function Command(props: LaunchProps) {
   const [selectedItemId, setSelectedItemId] = useState<string | undefined>(undefined);
   const [selectionError, setSelectionError] = useState<string | null>(null);
 
-  const abortable = useRef<AbortController | null>(null);
+  const abortable = useRef<AbortController>(null);
   const preferences = getPreferenceValues<SpotlightSearchPreferences>();
   const maxRecentFolders = parseInt(preferences.maxRecentFolders || "10");
   const cacheManager = CacheManager.getInstance();
-
-  // Function to check if Finder is the frontmost application
-  async function isFinderFrontmost() {
-    try {
-      const result = await runAppleScript(`
-        tell application "System Events"
-          set frontApp to name of first application process whose frontmost is true
-          if frontApp is "Finder" then
-            return true
-          else
-            return false
-          end if
-        end tell
-      `);
-      return result.trim() === "true";
-    } catch (error) {
-      console.error("Error checking if Finder is frontmost:", error);
-      return false;
-    }
-  }
 
   // Function to get selected files from Finder
   async function getSelectedFinderFiles() {
@@ -245,51 +224,31 @@ export default function Command(props: LaunchProps) {
     });
   }
 
-  // Perform search
-  usePromise(
-    searchSpotlight,
-    [
-      searchText,
-      currentPath || "",
-      abortable,
-      (results: SpotlightSearchResult[]) => {
-        setFolders(results.sort(lastUsedSort));
-      },
-    ],
-    {
-      onWillExecute: () => {
-        setIsQuerying(true);
-        setCanExecute(false);
-        // Clear folders when starting a new search
-        setFolders([]);
-      },
-      onData: () => {
-        setIsQuerying(false);
-      },
-      onError: (e) => {
-        if (e.name !== "AbortError") {
-          showToast({
-            title: "Search Error",
-            message: "Something went wrong with the search. Please try again.",
-            style: Toast.Style.Failure,
-          });
-        }
-        setIsQuerying(false);
-      },
-      execute: hasCheckedPreferences && canExecute && !!searchText,
-      abortable,
-    },
-  );
-
-  // Reset search when text changes
-  useEffect(() => {
-    (async () => {
-      abortable.current?.abort();
+  // Perform search - searchSpotlight returns results via Promise, consumed via onData.
+  // do NOT put inline callbacks in the deps array - new function references each render
+  // cause usePromise to abort/restart in an infinite loop.
+  usePromise(searchSpotlight, [searchText, currentPath || "", abortable], {
+    onWillExecute: () => {
+      setIsQuerying(true);
       setFolders([]);
+    },
+    onData: (results: SpotlightSearchResult[]) => {
+      setFolders(results.sort(lastUsedSort));
       setIsQuerying(false);
-      setCanExecute(true);
-    })();
-  }, [searchText]);
+    },
+    onError: (e) => {
+      if (e.name !== "AbortError") {
+        showToast({
+          title: "Search Error",
+          message: "Something went wrong with the search. Please try again.",
+          style: Toast.Style.Failure,
+        });
+      }
+      setIsQuerying(false);
+    },
+    execute: hasCheckedPreferences && !!searchText,
+    abortable,
+  });
 
   // Add a useEffect to focus the first search result when search text changes
   useEffect(() => {
@@ -801,7 +760,7 @@ export default function Command(props: LaunchProps) {
                 icon={Icon.ArrowUp}
                 actions={
                   <ActionPanel>
-                    <Action title="Go up" onAction={navigateUp} />
+                    <Action title="Go Up" onAction={navigateUp} />
                   </ActionPanel>
                 }
               />

@@ -16,6 +16,7 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 | **Search Transcripts** | Browse and search your full voice transcription history |
 | **Add Word to Dictionary** | Teach Wispr Flow new words, names, or technical terms |
 | **Manage Dictionary** | View, edit, search, and delete dictionary entries |
+| **Toggle Recording** | Toggle voice dictation on/off with a single hotkey |
 | **Start Recording** | Begin voice dictation instantly |
 | **Stop Recording** | End voice dictation |
 | **Paste Last Transcript** | Paste your latest unarchived transcript into the active app |
@@ -51,6 +52,7 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 
 ## Voice Control
 
+- **Toggle Recording** — start or stop dictation with a single command, ideal for binding to one hotkey
 - **Start/Stop Recording** — trigger Wispr Flow dictation via Raycast with no-view commands
 - **Install detection** — commands gracefully handle Wispr Flow not being installed
 

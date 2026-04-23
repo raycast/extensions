@@ -1,14 +1,19 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import process from "node:process";
 import { confirmAlert } from "@raycast/api";
 import spawn from "nano-spawn";
 import * as api from "./api.js";
-import { defaultGitExecutableFilePath } from "./constants.js";
+import { defaultGitExecutableFilePath, upstreamRepository } from "./constants.js";
 import { catchError } from "./errors.js";
 import operation from "./operation.js";
 import { ForkedExtension } from "./types.js";
-import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath, addQuotesIfInWindows } from "./utils.js";
+import {
+  gitExecutableFilePath,
+  getRemoteUrl,
+  repositoryConfigurationPath,
+  addQuotesIfInWindows,
+  resolvePath,
+} from "./utils.js";
 
 /**
  * The path to the Git executable file.
@@ -19,18 +24,119 @@ import { gitExecutableFilePath, getRemoteUrl, repositoryConfigurationPath, addQu
 const gitFilePath = addQuotesIfInWindows(gitExecutableFilePath || defaultGitExecutableFilePath);
 
 /**
- * Resolves the path to the repository configuration.
- * @remarks If the path starts with `~/`, it will be resolved to the user's home directory.
- * @param input The input path to resolve.
- * @returns The resolved path.
+ * The configured directory from extension preferences.
  */
-const resolvePath = (input: string) =>
-  input.startsWith("~/") ? path.join(process.env.HOME || "", input.slice(2)) : input;
+export const repositoryConfigurationRootPath = resolvePath(repositoryConfigurationPath);
 
 /**
- * The path to the repository where forked extensions are managed.
+ * The default directory name used for the managed repository.
  */
-export const repositoryPath = resolvePath(repositoryConfigurationPath);
+const repositoryDirectoryName = "forked-extensions";
+
+/**
+ * The default repository path derived from the configured directory.
+ */
+const defaultRepositoryPath =
+  path.basename(repositoryConfigurationRootPath) === repositoryDirectoryName
+    ? repositoryConfigurationRootPath
+    : path.join(repositoryConfigurationRootPath, repositoryDirectoryName);
+
+/**
+ * The effective path to the repository where forked extensions are managed.
+ * @remarks This can resolve either to the configured directory itself or to its `forked-extensions` child directory.
+ */
+export let repositoryPath = defaultRepositoryPath;
+
+/**
+ * Whether the effective repository path has already been resolved.
+ */
+let repositoryPathResolved = false;
+
+/**
+ * The partial clone filter used for clone and fetch operations.
+ */
+const partialCloneFilter = "tree:0";
+
+/**
+ * The default branch used for synchronization operations.
+ */
+const mainBranch = "main";
+
+/**
+ * Executes a git command in a specific repository directory.
+ * @param args The arguments to pass to the git command.
+ * @param cwd The working directory where the git command should run.
+ * @returns The subprocess result of the git command execution.
+ */
+const gitAtPath = async (args: string[], cwd: string) => spawn(gitFilePath, args, { cwd, shell: true });
+
+/**
+ * Normalizes a GitHub remote URL into a `owner/repository` string.
+ * @param input The remote URL to normalize.
+ * @returns The normalized repository full name.
+ */
+const normalizeRepositoryRemote = (input: string) =>
+  input
+    .trim()
+    .replace(/^(https:\/\/github.com\/|git@github\.com:)/, "")
+    .replace(/\.git$/, "");
+
+/**
+ * Returns the normalized repository full name for a remote in a repository path.
+ * @param input The repository path to inspect.
+ * @param remote The remote name to inspect.
+ * @returns The normalized remote repository full name.
+ */
+const getRemoteRepositoryAtPath = async (input: string, remote: string) => {
+  const { output } = await gitAtPath(["remote", "get-url", remote], input).catch(() => ({ output: "" }));
+  return normalizeRepositoryRemote(output);
+};
+
+/**
+ * Returns whether a repository path is already a managed forked extensions repository.
+ * @param input The repository path to inspect.
+ * @param forkedRepository Optional. The expected forked repository full name.
+ * @returns Whether the path is already a managed forked extensions repository.
+ */
+const isManagedForkedRepository = async (input: string, forkedRepository?: string) => {
+  const gitExists = await fileExists(path.join(input, ".git"));
+  if (!gitExists) return false;
+
+  const originRepository = await getRemoteRepositoryAtPath(input, "origin");
+  if (!originRepository) return false;
+
+  const upstreamRemote = await getRemoteRepositoryAtPath(input, "upstream");
+  if (forkedRepository)
+    return originRepository === forkedRepository && (upstreamRemote === "" || upstreamRemote === upstreamRepository);
+  return upstreamRemote === upstreamRepository && originRepository !== upstreamRepository;
+};
+
+/**
+ * Resolves the effective repository path based on the configured directory.
+ * @param forkedRepository Optional. The expected forked repository full name.
+ * @returns The resolved repository path.
+ */
+export const resolveRepositoryPath = async (forkedRepository?: string) => {
+  if (await isManagedForkedRepository(repositoryConfigurationRootPath, forkedRepository)) {
+    repositoryPath = repositoryConfigurationRootPath;
+    repositoryPathResolved = true;
+    return repositoryPath;
+  }
+
+  if (
+    repositoryConfigurationRootPath !== defaultRepositoryPath &&
+    (await isManagedForkedRepository(defaultRepositoryPath, forkedRepository))
+  ) {
+    repositoryPath = defaultRepositoryPath;
+    repositoryPathResolved = true;
+    return repositoryPath;
+  }
+
+  if (repositoryPathResolved) return repositoryPath;
+  repositoryPath = defaultRepositoryPath;
+  repositoryPathResolved = true;
+  return repositoryPath;
+};
 
 /**
  * Checks if a file or directory exists and is readable and writable.
@@ -48,6 +154,7 @@ export const fileExists = async (input: string) =>
  * @returns A promise that resolves to an array of ForkedExtension objects.
  */
 export const getExtensionList = async () => {
+  await resolveRepositoryPath();
   const repositoryExists = await fileExists(repositoryPath);
   if (!repositoryExists) return [];
 
@@ -86,7 +193,10 @@ export const getExtensionList = async () => {
  * @param args The arguments to pass to the git command.
  * @returns The subprocess result of the git command execution.
  */
-export const git = async (args: string[]) => spawn(gitFilePath, args, { cwd: repositoryPath, shell: true });
+export const git = async (args: string[]) => {
+  await resolveRepositoryPath();
+  return gitAtPath(args, repositoryPath);
+};
 
 /**
  * Checks if Git is valid by running `git --version`.
@@ -111,6 +221,44 @@ export const getCurrentBranch = async () => {
 };
 
 /**
+ * Configures a remote to use the optimized partial clone settings.
+ * @param remote The remote name to configure.
+ * @param mainOnly Whether the remote should only track the main branch.
+ */
+const configureOptimizedRemote = async (remote: string, mainOnly?: boolean) => {
+  await git(["config", `remote.${remote}.promisor`, "true"]);
+  await git(["config", `remote.${remote}.partialclonefilter`, partialCloneFilter]);
+  await git(["config", `remote.${remote}.tagOpt`, "--no-tags"]);
+  if (mainOnly) {
+    await git([
+      "config",
+      "--replace-all",
+      `remote.${remote}.fetch`,
+      `+refs/heads/${mainBranch}:refs/remotes/${remote}/${mainBranch}`,
+    ]);
+  }
+};
+
+/**
+ * Fetches and fast-forwards the local main branch from a remote main branch.
+ * @param remote The remote name to update from.
+ */
+const updateFromRemoteMain = async (remote: string) => {
+  const currentBranch = await getCurrentBranch();
+  await git([
+    "fetch",
+    "--prune",
+    "--no-tags",
+    `--filter=${partialCloneFilter}`,
+    remote,
+    `+refs/heads/${mainBranch}:refs/remotes/${remote}/${mainBranch}`,
+  ]);
+  if (currentBranch !== mainBranch) await git(["checkout", mainBranch]);
+  await git(["merge", "--ff-only", `${remote}/${mainBranch}`]);
+  if (currentBranch !== mainBranch) await git(["checkout", currentBranch]);
+};
+
+/**
  * Gets the last full commit hash of the current branch.
  * @remarks Returns an empty string if the repository is not initialized.
  * @returns The last commit hash as a string.
@@ -125,38 +273,55 @@ export const getLastCommitHash = async () => {
  * @returns An object containing the forked repository full name and a boolean indicating if it's newly cloned.
  */
 export const getForkedRepository = async () => {
+  await resolveRepositoryPath();
   const gitExists = await fileExists(path.join(repositoryPath, ".git"));
   if (!gitExists) return "";
   const { output } = await git(["remote", "get-url", "origin"]);
-  const existingRepository = output.replace(/^(https:\/\/github.com\/|git@github\.com:)/, "").replace(/\.git$/, "");
+  const existingRepository = normalizeRepositoryRemote(output);
   return existingRepository;
+};
+
+/**
+ * Gets the forked repository full name only when the resolved repository path already points to a managed fork.
+ * @returns The forked repository full name, or an empty string if the current path is not a managed fork.
+ */
+export const getManagedForkedRepository = async () => {
+  await resolveRepositoryPath();
+  if (!(await isManagedForkedRepository(repositoryPath))) return "";
+  return getForkedRepository();
 };
 
 /**
  * Converts a full checkout to a sparse checkout with cone mode.
  */
 export const convertFullCheckoutToSparseCheckout = async () => {
-  await git(["config", "remote.origin.promisor", "true"]);
-  await git(["config", "remote.origin.partialclonefilter", "blob:none"]);
+  const { output } = await git(["remote"]);
+  const remotes = output.split("\n").map((x) => x.trim());
+  await configureOptimizedRemote("origin");
+  if (remotes.includes("upstream")) await configureOptimizedRemote("upstream", true);
   await git(["sparse-checkout", "set", "--cone"]);
-  await git(["checkout", "main"]);
+  await git(["checkout", mainBranch]);
 };
 
 /**
  * Initializes the repository by cloning it if it doesn't exist.
+ * @param forkedRepository The full name of the forked repository.
  * @returns The full name of the forked repository.
  */
-export const initRepository = async () => {
+export const initRepository = async (forkedRepository?: string) => {
+  const resolvedForkedRepository = forkedRepository ?? (await api.getForkedRepository());
+  await resolveRepositoryPath(resolvedForkedRepository);
   const localForkedRepository = await getForkedRepository();
-  if (localForkedRepository) return localForkedRepository;
-  const forkedRepository = await api.getForkedRepository();
+  if (localForkedRepository === resolvedForkedRepository) return localForkedRepository;
+  await fs.mkdir(path.dirname(repositoryPath), { recursive: true });
   await spawn(
     gitFilePath,
     [
       "clone",
-      "--filter=blob:none",
+      `--filter=${partialCloneFilter}`,
       "--no-checkout",
-      getRemoteUrl(forkedRepository),
+      "--no-tags",
+      getRemoteUrl(resolvedForkedRepository),
       addQuotesIfInWindows(repositoryPath),
     ],
     {
@@ -164,7 +329,7 @@ export const initRepository = async () => {
     },
   );
   await convertFullCheckoutToSparseCheckout();
-  return forkedRepository;
+  return resolvedForkedRepository;
 };
 
 /**
@@ -177,6 +342,8 @@ export const setUpstream = async (forkedRepository: string) => {
   const remotes = output.split("\n").map((x) => x.trim());
   await git(["remote", remotes.includes("upstream") ? "set-url" : "add", "upstream", getRemoteUrl()]);
   await git(["remote", "set-url", "origin", getRemoteUrl(forkedRepository)]);
+  await configureOptimizedRemote("origin");
+  await configureOptimizedRemote("upstream", true);
 };
 
 /**
@@ -233,12 +400,15 @@ export const getAheadBehindCommits = async () => {
  * @see {@link https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/syncing-a-fork#syncing-a-fork-branch-from-the-command-line|Syncing a fork}
  */
 export const syncFork = async () => {
-  const { output } = await git(["branch", "--show-current"]);
-  const currentBranch = output.trim();
-  await git(["fetch", "--prune", "--filter=tree:0", "upstream"]);
-  if (currentBranch !== "main") await git(["checkout", "main"]);
-  await git(["merge", "--ff-only", "upstream/main"]);
-  if (currentBranch !== "main") await git(["checkout", currentBranch]);
+  await updateFromRemoteMain("upstream");
+};
+
+/**
+ * Pulls the latest changes from the forked repository on local.
+ * @remarks This will checkout to main branch and merge the origin main branch into it.
+ */
+export const pullFork = async () => {
+  await updateFromRemoteMain("origin");
 };
 
 /**
@@ -266,6 +436,7 @@ export const sparseCheckoutAdd = async (pattern: string[]) => {
  * @param pattern The target pattern names.
  */
 export const sparseCheckoutRemove = async (pattern: string[]) => {
+  await resolveRepositoryPath();
   const sparseCheckoutInfoPath = path.join(repositoryPath, ".git", "info", "sparse-checkout");
   const sparseCheckoutInfo = await fs.readFile(sparseCheckoutInfoPath, "utf-8");
   const lines = sparseCheckoutInfo.split("\n");
