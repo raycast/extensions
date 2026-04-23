@@ -143,8 +143,10 @@ async function transcribe(
     await Clipboard.copy(parsed[0].text);
     return { status: "ok", result: parsed[0], rawJson: stdout };
   } catch (err: unknown) {
-    // AbortError (view unmounted) — silently swallow, the view is gone.
+    // AbortError (view unmounted) — dismiss the animated "Transcribing…" toast
+    // so it doesn't stay spinning forever in Raycast's launcher after cancel.
     if (err instanceof Error && err.name === "AbortError") {
+      await showToast({ style: Toast.Style.Failure, title: "Cancelled" });
       return { status: "error", message: "cancelled" };
     }
     await showToast({

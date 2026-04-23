@@ -1,7 +1,0 @@
-{
-  "tool_name": "Bash",
-  "tool_input_preview": "{\"command\":\"cd raycast && npm run lint 2>&1 | tail -10\",\"description\":\"Verify lint clean after fix\"}",
-  "error": "Exit code 1\n(eval):cd:1: no such file or directory: raycast",
-  "timestamp": "2026-04-23T07:42:33.350Z",
-  "retry_count": 1
-}

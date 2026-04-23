@@ -1,7 +1,7 @@
 import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdtempSync, rmSync } from "node:fs";
+import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -31,11 +31,13 @@ export default async function Command() {
     return;
   }
 
-  const dir = mkdtempSync(join(tmpdir(), "raycast-kesha-"));
+  // Paint the HUD first so Raycast's launcher feels responsive; the tmpdir
+  // and synthesis work happens behind the already-visible feedback.
+  await showHUD("🎙  Synthesizing…");
+  const dir = await mkdtemp(join(tmpdir(), "raycast-kesha-"));
   const wavPath = join(dir, "speak.wav");
 
   try {
-    await showHUD("🎙  Synthesizing…");
     // `--` terminates option parsing: any leading `--` in the clipboard
     // payload (e.g. a pasted code diff) won't be misread as a flag.
     const args = ["say", "--out", wavPath];
@@ -68,6 +70,6 @@ export default async function Command() {
       await showHUD("✗ Speech synthesis failed (see extension logs)");
     }
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    await rm(dir, { recursive: true, force: true });
   }
 }
