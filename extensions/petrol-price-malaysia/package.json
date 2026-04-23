@@ -8,6 +8,7 @@
   "categories": [
     "Other"
   ],
+  "type": "module",
   "license": "MIT",
   "commands": [
     {
