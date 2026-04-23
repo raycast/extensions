@@ -95,10 +95,15 @@ export function canStreamCopy(streams: StreamInfo[]): boolean {
   if (streams.length < 2) return false;
   const first = streams[0];
   for (const s of streams) {
-    if (!s.videoCodec || s.videoCodec !== first.videoCodec) return false;
-    if (!s.videoWidth || s.videoWidth !== first.videoWidth) return false;
-    if (!s.videoHeight || s.videoHeight !== first.videoHeight) return false;
-    if (!s.videoFps || Math.abs(s.videoFps - (first.videoFps ?? 0)) > 0.1) return false;
+    if (first.videoCodec) {
+      if (!s.videoCodec || s.videoCodec !== first.videoCodec) return false;
+      if (!s.videoWidth || s.videoWidth !== first.videoWidth) return false;
+      if (!s.videoHeight || s.videoHeight !== first.videoHeight) return false;
+      if (!s.videoFps || Math.abs(s.videoFps - (first.videoFps ?? 0)) > 0.1) return false;
+    } else if (s.videoCodec) {
+      // First input has no video but this one does — incompatible.
+      return false;
+    }
     if (!!s.audioCodec !== !!first.audioCodec) return false;
     if (s.audioCodec && s.audioCodec !== first.audioCodec) return false;
     if (s.audioSampleRate && s.audioSampleRate !== first.audioSampleRate) return false;
@@ -199,7 +204,9 @@ export async function mergeMedia(
   if (strategy === "stream-copy") {
     // Build a concat list file for ffmpeg's concat demuxer
     const listFile = path.join(os.tmpdir(), `media-converter-concat-${Date.now()}.txt`);
-    const listContents = inputs.map((p) => `file '${p.replace(/'/g, "'\\''")}'`).join("\n");
+    // FFmpeg concat demuxer uses `\` as the escape char inside single-quoted
+    // strings (NOT shell-style `'\''`). Escape backslashes first, then quotes.
+    const listContents = inputs.map((p) => `file '${p.replace(/\\/g, "\\\\").replace(/'/g, "\\'")}'`).join("\n");
     try {
       fs.writeFileSync(listFile, listContents);
       const cmd = `"${ffmpegPath.path}" -f concat -safe 0 -i "${listFile}" -c copy${metadataFlag} -y "${outputPath}"`;

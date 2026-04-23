@@ -108,4 +108,51 @@ describe("canStreamCopy", () => {
   it("tolerates tiny fps drift (< 0.1 fps)", () => {
     assert.equal(canStreamCopy([A, { ...A, videoFps: 30.05 }]), true);
   });
+
+  describe("audio-only inputs", () => {
+    const AUDIO: StreamInfo = {
+      audioCodec: "mp3",
+      audioSampleRate: 44100,
+      audioChannels: 2,
+    };
+
+    it("returns true for two compatible audio-only streams", () => {
+      assert.equal(canStreamCopy([AUDIO, { ...AUDIO }]), true);
+    });
+
+    it("returns false when audio-only sample rates differ", () => {
+      assert.equal(canStreamCopy([AUDIO, { ...AUDIO, audioSampleRate: 48000 }]), false);
+    });
+
+    it("returns false when audio-only codecs differ", () => {
+      assert.equal(canStreamCopy([AUDIO, { ...AUDIO, audioCodec: "aac" }]), false);
+    });
+
+    it("returns false when one input has video and the other is audio-only", () => {
+      assert.equal(canStreamCopy([A, AUDIO]), false);
+      assert.equal(canStreamCopy([AUDIO, A]), false);
+    });
+  });
+});
+
+describe("concat list path escaping", () => {
+  // Mirrors the escape logic in mergeMedia (FFmpeg concat demuxer format,
+  // not shell). Backslashes first, then single quotes — both with `\` prefix.
+  const escape = (p: string) => p.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+
+  it("escapes single quotes with backslash (concat demuxer style, not shell)", () => {
+    assert.equal(escape("/Users/alice's files/clip.mp4"), "/Users/alice\\'s files/clip.mp4");
+  });
+
+  it("escapes backslashes before quotes so the order is correct", () => {
+    assert.equal(escape("a\\'b"), "a\\\\\\'b");
+  });
+
+  it("leaves vanilla paths untouched", () => {
+    assert.equal(escape("/Users/maia/Desktop/clip.mp4"), "/Users/maia/Desktop/clip.mp4");
+  });
+
+  it("does NOT produce shell-style escape sequences", () => {
+    assert.notEqual(escape("alice's"), "alice'\\''s");
+  });
 });
