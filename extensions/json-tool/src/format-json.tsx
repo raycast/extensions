@@ -228,7 +228,6 @@ export default function Command() {
 
   return (
     <Form
-      navigationTitle="JSON Tool"
       actions={
         <WorkbenchActions
           content={content}

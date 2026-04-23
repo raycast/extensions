@@ -1,7 +1,5 @@
 # JSON Tool
 
-[简体中文](./README.zh-CN.md)
-
 JSON Tool is a one-page Raycast JSON workbench for daily JSON cleanup, inspection, conversion, and querying.
 
 ## Features
@@ -37,7 +35,7 @@ Useful shortcuts:
 
 ## JSONPath Query
 
-Open `Path 查询` from the tool list or action panel.
+Open `JSONPath Query` from the tool list or action panel.
 
 The JSONPath screen uses Raycast's native dynamic search list:
 
@@ -50,7 +48,7 @@ The path input does not require a `$` prefix.
 
 ## Clipboard History
 
-Use `JSON 剪贴板历史` in the main screen or press `⌘` `⇧` `V`.
+Use `JSON Clipboard History` in the main screen or press `⌘` `⇧` `V`.
 
 Raycast's API can read the most recent 6 clipboard history entries through offsets `0` to `5`. JSON Tool filters those entries and only shows valid JSON items.
 
@@ -68,6 +66,8 @@ npm run build
 npm run lint
 ```
 
-## Publishing Notes
+## Publishing
 
-Before publishing, replace the `author` field in `package.json` with your Raycast Store username.
+```bash
+npm run publish
+```
