@@ -14,18 +14,7 @@ import { executeSQL } from "@raycast/utils";
 import { randomUUID } from "crypto";
 import { getDbPath, dbExists, escapeSQL, writeSQL } from "./db";
 import { DictionaryEntry } from "./types";
-
-function formatDateForWispr(date: Date): string {
-  const pad = (n: number, len = 2) => n.toString().padStart(len, "0");
-  const y = date.getUTCFullYear();
-  const mo = pad(date.getUTCMonth() + 1);
-  const d = pad(date.getUTCDate());
-  const h = pad(date.getUTCHours());
-  const mi = pad(date.getUTCMinutes());
-  const s = pad(date.getUTCSeconds());
-  const ms = pad(date.getUTCMilliseconds(), 3);
-  return `${y}-${mo}-${d} ${h}:${mi}:${s}.${ms} +00:00`;
-}
+import { formatDateForWispr } from "./utils";
 
 export default function Command() {
   const dbPath = getDbPath();
