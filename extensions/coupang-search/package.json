@@ -1,0 +1,61 @@
+{
+  "name": "coupang-search",
+  "title": "Coupang Search",
+  "description": "Open Coupang search results in your browser from Raycast.",
+  "icon": "icon.png",
+  "author": "parsifal295",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "keywords": [
+    "coupang",
+    "쿠팡",
+    "cp",
+    "shopping",
+    "korea"
+  ],
+  "commands": [
+    {
+      "name": "search-coupang",
+      "title": "Search Coupang",
+      "description": "Open a Coupang search results page in the browser",
+      "mode": "no-view",
+      "keywords": [
+        "쿠팡",
+        "cp",
+        "shopping",
+        "coupang"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Product or brand name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "react": "^19.2.5"
+  }
+}
