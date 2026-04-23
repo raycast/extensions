@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [CLI update & Fix] - {PR_MERGE_DATE}
+## [CLI update & Fix] - 2026-04-23
 
 - Logout whenever there is a "Invalid session token" error
 
