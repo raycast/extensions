@@ -1,6 +1,6 @@
 # Doubao TTS Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-04-23
 
 - Add Select Quick Read Voice for choosing and previewing the default Quick Read voice
 - Keep Quick Read voice selection in the dedicated Select Quick Read Voice command
