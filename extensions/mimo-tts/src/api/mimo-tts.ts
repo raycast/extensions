@@ -11,7 +11,6 @@ import type { MimoTTSModel, TTSOptionOverrides, TTSOptions } from "./types";
 const DEFAULT_TOKEN_PLAN_BASE_URL = "https://token-plan-cn.xiaomimimo.com/v1";
 const REQUEST_TIMEOUT_MS = 90_000;
 const DEFAULT_AUDIO_FORMAT = "wav";
-const DEFAULT_SAMPLE_RATE = 24000;
 
 interface MimoTTSResponse {
   choices?: Array<{
@@ -209,7 +208,6 @@ export function buildOptionsFromPrefs(voiceOverride?: string, overrides: TTSOpti
     openingStyleTags: normalizeTags(overrides.openingStyleTags),
     audioEventTags: normalizeTags(overrides.audioEventTags),
     format: DEFAULT_AUDIO_FORMAT,
-    sampleRate: DEFAULT_SAMPLE_RATE,
   };
 }
 

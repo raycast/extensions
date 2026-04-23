@@ -5,7 +5,6 @@ export interface TTSOptions {
   openingStyleTags?: string[];
   audioEventTags?: string[];
   format: string;
-  sampleRate: number;
 }
 
 export interface TTSOptionOverrides {
