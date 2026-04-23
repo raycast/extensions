@@ -1,3 +1,4 @@
+import { CreateBookmarksResponse } from "../types";
 import { BrowserExtension, environment } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { CollectionCreationResponse, FormValues } from "../types";
@@ -32,7 +33,7 @@ export async function createBookmark({
   preferences: Preferences;
   values: FormValues;
   showCollectionCreation: boolean;
-}) {
+}): Promise<CreateBookmarksResponse> {
   let collectionId = values.collection;
 
   if (showCollectionCreation && values.newCollection) {
@@ -42,7 +43,7 @@ export async function createBookmark({
     }).then((data) => data.item._id.toString());
   }
 
-  return fetch("https://api.raindrop.io/rest/v1/raindrops", {
+  const response = await fetch("https://api.raindrop.io/rest/v1/raindrops", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -59,6 +60,18 @@ export async function createBookmark({
       })),
     }),
   });
+
+  if (!response.ok) {
+    throw new Error(`Failed to save bookmark: ${response.statusText}`);
+  }
+
+  const data = (await response.json()) as CreateBookmarksResponse;
+
+  if (!data.result || !data.items?.length) {
+    throw new Error("Failed to save bookmark");
+  }
+
+  return data;
 }
 
 /**

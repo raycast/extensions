@@ -72,30 +72,29 @@ export const BookmarkForm = (props: BookmarkFormProps) => {
       props.onWillSave?.();
 
       try {
-        const response =
+        if (
           mode === "edit" && props.bookmarkId
-            ? await updateBookmark({
+            ? !(await updateBookmark({
                 preferences,
                 values,
                 bookmarkId: props.bookmarkId,
                 showCollectionCreation,
-              })
-            : await createBookmark({
+              })).ok
+            : !(await createBookmark({
                 preferences,
                 values,
                 showCollectionCreation,
-              });
+              }))
+        ) {
+          throw new Error("Failed to save bookmark");
+        }
 
-        if (response.status === 200) {
-          await props.onSaved?.();
-          if (mode !== "edit" && !props.onSaved) {
-            reset({ link: "", collection: "-1", tags: [] });
-            setDropdownValue("-1");
-            setShowCollectionCreation(false);
-            focus("collection");
-          }
-        } else {
-          throw new Error(response.statusText);
+        await props.onSaved?.();
+        if (mode !== "edit" && !props.onSaved) {
+          reset({ link: "", collection: "-1", tags: [] });
+          setDropdownValue("-1");
+          setShowCollectionCreation(false);
+          focus("collection");
         }
       } catch (error) {
         if (error instanceof Error) {

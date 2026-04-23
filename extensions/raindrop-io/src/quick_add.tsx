@@ -25,7 +25,7 @@ export default async function QuickAddBookmark(props: LaunchProps<{ arguments: A
     const title = await getLinkTitle(url);
 
     // Create bookmark in Unsorted collection (-1)
-    const response = await createBookmark({
+    await createBookmark({
       preferences,
       values: {
         link: url,
@@ -35,10 +35,6 @@ export default async function QuickAddBookmark(props: LaunchProps<{ arguments: A
       },
       showCollectionCreation: false,
     });
-
-    if (!response.ok) {
-      throw new Error("Failed to save bookmark");
-    }
 
     toast.style = Toast.Style.Success;
     toast.title = "Bookmark saved";

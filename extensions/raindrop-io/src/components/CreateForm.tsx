@@ -27,19 +27,15 @@ export const CreateForm = (props: CreateFormProps) => {
       props.onWillCreate?.();
 
       try {
-        const response = await createBookmark({
+        await createBookmark({
           preferences,
           values,
           showCollectionCreation,
         });
 
-        if (response.status === 200) {
-          reset({ link: "", collection: "-1", tags: [] });
-          focus("link");
-          props.onCreated?.();
-        } else {
-          throw new Error(response.statusText);
-        }
+        reset({ link: "", collection: "-1", tags: [] });
+        focus("link");
+        props.onCreated?.();
       } catch (error) {
         if (error instanceof Error) {
           props.onError?.(error);
