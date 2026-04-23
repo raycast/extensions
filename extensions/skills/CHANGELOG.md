@@ -1,5 +1,15 @@
 # Skills Changelog
 
+## [Improve Installed Indicators, Source Matching & Refresh] - {PR_MERGE_DATE}
+
+- Replace the green "Installed" tag in "Search Skills" with a green check-circle indicator and green skill icon for installed skills
+- Show the skill source (`owner/repo`) as the subtitle in "Search Skills" and "Manage Skills" to better distinguish skills between them
+- Hide source subtitles while the detail panel is open so skill names use the available list width
+- Detect skills with the same `skillId` installed from different sources. Show a warning indicator and rename the "Install Skill" action to "Replace Installed Skill" for clarity on the outcome
+- Immediately refresh installed indicators in "Search Skills" after installing or replacing a skill
+- Add "Refresh Installed Skills" actions with Cmd+R in "Manage Skills"
+- Consolidate shared install, remove, and update action handling for more consistent confirmations, toasts, and error messages
+
 ## [Show Last Updated Date in Search Results] - 2026-04-30
 
 - Show the repository's last updated date in the skill detail panel, displayed as a relative time (e.g. "3 days ago")

@@ -1,8 +1,8 @@
 import { List, ActionPanel, Action, Detail, Icon } from "@raycast/api";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { SkillListItem } from "./components/SkillListItem";
-import { useInstalledSkillNames } from "./hooks/useInstalledSkillNames";
+import { useInstalledSkillMatches } from "./hooks/useInstalledSkillMatches";
 import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { useDebouncedSearch } from "./hooks/useDebouncedSearch";
 import { buildGithubIssueUrl } from "./shared";
@@ -13,10 +13,13 @@ export default function Command() {
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const toggleDetail = () => setIsShowingDetail((prev) => !prev);
 
-  const { data, isLoading, error, revalidate, searchUrl } = useDebouncedSearch(searchText);
-  const { installedNames } = useInstalledSkillNames();
-
+  const { data, isLoading, error, revalidate: revalidateSearch, searchUrl } = useDebouncedSearch(searchText);
+  const { getInstalledMatch, revalidate: revalidateInstalledSkillMatches } = useInstalledSkillMatches();
   const { owner, setOwner, ownerCounts, skills } = useOwnerFilter(data?.skills ?? []);
+
+  const refreshCurrentResults = useCallback(async () => {
+    await Promise.all([revalidateSearch(), revalidateInstalledSkillMatches()]);
+  }, [revalidateSearch, revalidateInstalledSkillMatches]);
 
   if (error && !data) {
     return (
@@ -24,7 +27,7 @@ export default function Command() {
         markdown={`# Unable to Load Search Results\n\n**Error:** ${error.message}\n\n---\n\nThe Skills API request failed, so the primary search content could not be shown.\n\nRetry the search. If the problem persists, report it on GitHub.`}
         actions={
           <ActionPanel>
-            <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
+            <Action title="Retry" onAction={revalidateSearch} icon={Icon.RotateClockwise} />
             <Action.OpenInBrowser
               title="Report Issue on GitHub"
               url={buildGithubIssueUrl({
@@ -76,7 +79,7 @@ export default function Command() {
           icon={Icon.MagnifyingGlass}
           actions={
             <ActionPanel>
-              <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
+              <Action title="Retry" onAction={revalidateSearch} icon={Icon.RotateClockwise} />
             </ActionPanel>
           }
         />
@@ -87,9 +90,10 @@ export default function Command() {
               key={skill.id}
               skill={skill}
               isSelected={selectedId === skill.id}
-              isInstalled={installedNames.has(skill.skillId)}
+              installedMatch={getInstalledMatch(skill)}
               isShowingDetail={isShowingDetail}
               onToggleDetail={toggleDetail}
+              onSkillInstalled={refreshCurrentResults}
             />
           ))}
         </List.Section>

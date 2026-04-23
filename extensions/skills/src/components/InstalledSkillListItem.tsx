@@ -82,6 +82,7 @@ interface InstalledSkillListItemProps {
   isShowingDetail: boolean;
   mutate: MutateSkills;
   onToggleDetail: () => void;
+  onRefresh: () => void;
 }
 
 export function InstalledSkillListItem({
@@ -90,6 +91,7 @@ export function InstalledSkillListItem({
   isShowingDetail,
   mutate,
   onToggleDetail,
+  onRefresh,
 }: InstalledSkillListItemProps) {
   const extraAgents = skill.agentCount - skill.agents.length;
   const agentsText = extraAgents > 0 ? `${skill.agents.join(", ")} +${extraAgents} more` : skill.agents.join(", ");
@@ -97,7 +99,7 @@ export function InstalledSkillListItem({
   return (
     <List.Item
       title={skill.name}
-      subtitle={isShowingDetail ? undefined : agentsText}
+      subtitle={isShowingDetail ? undefined : skill.source}
       icon={{ source: Icon.Hammer, tintColor: skill.hasUpdate ? Color.Orange : Color.Purple }}
       accessories={
         isShowingDetail
@@ -152,6 +154,12 @@ export function InstalledSkillListItem({
             icon={Icon.Sidebar}
             shortcut={{ modifiers: ["cmd"], key: "d" }}
             onAction={onToggleDetail}
+          />
+          <Action
+            title="Refresh Installed Skills"
+            onAction={onRefresh}
+            icon={Icon.RotateClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
         </ActionPanel>
       }

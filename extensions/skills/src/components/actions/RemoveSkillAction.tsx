@@ -1,19 +1,19 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Form,
   Icon,
   Color,
   useNavigation,
   confirmAlert,
-  Alert,
   showToast,
   Toast,
 } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import type { InstalledSkill } from "../../shared";
 import { removeSkill } from "../../utils/skills-cli";
+import { withSkillAction } from "../../utils/with-skill-action";
 import type { MutateSkills } from "../../hooks/useInstalledSkills";
 
 interface RemoveSkillActionProps {
@@ -33,11 +33,8 @@ function AgentPickerForm({ skill, mutate }: RemoveSkillActionProps) {
   function toggleAgent(agent: string, checked: boolean) {
     setSelected((prev) => {
       const next = new Set(prev);
-      if (checked) {
-        next.add(agent);
-      } else {
-        next.delete(agent);
-      }
+      if (checked) next.add(agent);
+      else next.delete(agent);
       return next;
     });
   }
@@ -51,6 +48,7 @@ function AgentPickerForm({ skill, mutate }: RemoveSkillActionProps) {
     const agents = [...selected];
     const isAll = agents.length === skill.agents.length;
     const label = isAll ? "all agents" : agents.join(", ");
+
     const confirmed = await confirmAlert({
       title: isAll ? `Remove "${skill.name}"?` : `Remove "${skill.name}" from ${label}?`,
       message: isAll
@@ -60,29 +58,34 @@ function AgentPickerForm({ skill, mutate }: RemoveSkillActionProps) {
     });
     if (!confirmed) return;
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Removing skill..." });
-    try {
-      const removedSet = new Set(agents);
-      pop();
-      await mutate(removeSkill(skill.name, isAll ? undefined : agents), {
-        optimisticUpdate: (skills) => {
-          if (!skills) return [];
-          if (isAll) return skills.filter((s) => s.name !== skill.name);
-          return skills
-            .map((s) =>
-              s.name === skill.name
-                ? { ...s, agents: s.agents.filter((a) => !removedSet.has(a)), agentCount: s.agentCount - agents.length }
-                : s,
-            )
-            .filter((s) => s.agents.length > 0);
-        },
-      });
-      toast.style = Toast.Style.Success;
-      toast.title = isAll ? "Skill removed" : `Skill removed from ${label}`;
-    } catch (error) {
-      await toast.hide();
-      await showFailureToast(error, { title: "Failed to remove skill" });
-    }
+    pop();
+
+    await withSkillAction({
+      toast: {
+        animatedTitle: "Removing skill...",
+        successTitle: isAll ? "Skill removed" : `Skill removed from ${label}`,
+        failureTitle: "Failed to remove skill",
+      },
+      operation: () =>
+        mutate(removeSkill(skill.name, isAll ? undefined : agents), {
+          optimisticUpdate: (skills) => {
+            if (!skills) return [];
+            if (isAll) return skills.filter((s) => s.name !== skill.name);
+            const removedSet = new Set(agents);
+            return skills
+              .map((s) =>
+                s.name === skill.name
+                  ? {
+                      ...s,
+                      agents: s.agents.filter((a) => !removedSet.has(a)),
+                      agentCount: s.agentCount - agents.length,
+                    }
+                  : s,
+              )
+              .filter((s) => s.agents.length > 0);
+          },
+        }),
+    });
   }
 
   return (
@@ -128,26 +131,24 @@ export function RemoveSkillAction({ skill, mutate }: RemoveSkillActionProps) {
       icon={Icon.Trash}
       style={Action.Style.Destructive}
       shortcut={{ modifiers: ["ctrl"], key: "x" }}
-      onAction={async () => {
-        const confirmed = await confirmAlert({
-          title: `Remove "${skill.name}"?`,
-          message: "This will remove the skill from all agents.",
-          primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
-        });
-        if (!confirmed) return;
-
-        const toast = await showToast({ style: Toast.Style.Animated, title: "Removing skill..." });
-        try {
-          await mutate(removeSkill(skill.name), {
-            optimisticUpdate: (skills) => (skills ? skills.filter((s) => s.name !== skill.name) : []),
-          });
-          toast.style = Toast.Style.Success;
-          toast.title = "Skill removed";
-        } catch (error) {
-          await toast.hide();
-          await showFailureToast(error, { title: "Failed to remove skill" });
-        }
-      }}
+      onAction={() =>
+        withSkillAction({
+          confirm: {
+            title: `Remove "${skill.name}"?`,
+            message: "This will remove the skill from all agents.",
+            primaryAction: { title: "Remove", style: Alert.ActionStyle.Destructive },
+          },
+          toast: {
+            animatedTitle: "Removing skill...",
+            successTitle: "Skill removed",
+            failureTitle: "Failed to remove skill",
+          },
+          operation: () =>
+            mutate(removeSkill(skill.name), {
+              optimisticUpdate: (skills) => (skills ? skills.filter((s) => s.name !== skill.name) : []),
+            }),
+        })
+      }
     />
   );
 }

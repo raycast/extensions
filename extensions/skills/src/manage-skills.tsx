@@ -84,7 +84,12 @@ export default function Command() {
           icon={Icon.Box}
           actions={
             <ActionPanel>
-              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+              <Action
+                title="Refresh"
+                onAction={revalidate}
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
             </ActionPanel>
           }
         />
@@ -95,7 +100,12 @@ export default function Command() {
           icon={Icon.Filter}
           actions={
             <ActionPanel>
-              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+              <Action
+                title="Refresh"
+                onAction={revalidate}
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
             </ActionPanel>
           }
         />
@@ -117,6 +127,12 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <UpdateSkillAction mutate={mutate} />
+                    <Action
+                      title="Refresh Installed Skills"
+                      onAction={revalidate}
+                      icon={Icon.RotateClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    />
                   </ActionPanel>
                 }
               />
@@ -131,6 +147,7 @@ export default function Command() {
                 isShowingDetail={isShowingDetail}
                 mutate={mutate}
                 onToggleDetail={toggleDetail}
+                onRefresh={revalidate}
               />
             ))}
           </List.Section>

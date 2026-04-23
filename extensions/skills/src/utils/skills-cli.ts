@@ -1,9 +1,9 @@
-import { access, readFile, stat } from "node:fs/promises";
+import { access, stat } from "node:fs/promises";
 import { constants } from "node:fs";
 import { homedir } from "node:os";
-import { basename, join } from "node:path";
-import { getCustomNpxPath, getGithubToken, shouldDisableSkillsCliTelemetry } from "../preferences";
-import type { InstalledSkill, Skill, SkillLockEntry } from "../shared";
+import { basename } from "node:path";
+import { getCustomNpxPath, shouldDisableSkillsCliTelemetry } from "../preferences";
+import type { InstalledSkill, Skill } from "../shared";
 import { execAsync } from "./exec-async";
 import { getExecOptions } from "./exec-options";
 
@@ -347,72 +347,6 @@ export async function removeSkill(skillName: string, agentDisplayNames?: string[
   await runSkillsCli(args);
 }
 
-interface GitHubTreeResponse {
-  sha: string;
-  tree: Array<{ path: string; sha: string; type: string }>;
-  truncated?: boolean;
-}
-
-async function fetchRepoTree(source: string, token: string | undefined): Promise<GitHubTreeResponse | null> {
-  const [owner, repo] = source.split("/");
-  if (!owner || !repo) return null;
-
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github+json",
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-  };
-
-  for (const branch of ["main", "master"]) {
-    const res = await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${branch}?recursive=1`, {
-      headers,
-    });
-    if (res.ok) {
-      const data = (await res.json()) as GitHubTreeResponse;
-      if (data.truncated) return null;
-      return data;
-    }
-    if (res.status === 403 || res.status === 429) return null;
-  }
-  return null;
-}
-
-/**
- * Implemented against the GitHub Trees API rather than `npx skills check` because
- * the CLI's check command reinstalls outdated skills as a side effect since v1.5.0.
- */
-export async function checkForUpdates(): Promise<string[]> {
-  const lock = await readSkillLock();
-  const entries = Object.entries(lock).filter(([, e]) => e.sourceType === "github" && e.skillFolderHash && e.skillPath);
-  if (entries.length === 0) return [];
-
-  const byRepo = new Map<string, Array<{ name: string; skillPath: string; expectedHash: string }>>();
-  for (const [name, entry] of entries) {
-    const list = byRepo.get(entry.source) ?? [];
-    list.push({ name, skillPath: entry.skillPath, expectedHash: entry.skillFolderHash });
-    byRepo.set(entry.source, list);
-  }
-
-  const githubToken = getGithubToken();
-
-  const results = await Promise.all(
-    [...byRepo.entries()].map(async ([source, skills]) => {
-      try {
-        const tree = await fetchRepoTree(source, githubToken);
-        if (!tree) return [];
-        const { sha: rootSha, tree: entries } = tree;
-        return skills.flatMap((skill) => {
-          const folder = skill.skillPath.replace(/\/?SKILL\.md$/, "");
-          const upstreamSha = folder ? entries.find((t) => t.path === folder && t.type === "tree")?.sha : rootSha;
-          return upstreamSha && upstreamSha !== skill.expectedHash ? [skill.name] : [];
-        });
-      } catch {
-        return [];
-      }
-    }),
-  );
-  return results.flat();
-}
-
 /**
  * Update all installed skills.
  */
@@ -426,26 +360,4 @@ export async function updateAllSkills(): Promise<void> {
  */
 export async function updateSkill(skillName: string): Promise<void> {
   await runSkillsCli(["update", skillName, "-y"]);
-}
-
-const LOCK_FILE = ".skill-lock.json";
-const AGENTS_DIR = ".agents";
-
-function getSkillLockPath(): string {
-  const xdgStateHome = process.env.XDG_STATE_HOME;
-  if (xdgStateHome) return join(xdgStateHome, "skills", LOCK_FILE);
-  return join(home, AGENTS_DIR, LOCK_FILE);
-}
-
-export async function readSkillLock(): Promise<Record<string, SkillLockEntry>> {
-  try {
-    const raw = await readFile(getSkillLockPath(), "utf-8");
-    const parsed = JSON.parse(raw);
-    if (parsed && typeof parsed.skills === "object" && parsed.skills !== null) {
-      return parsed.skills as Record<string, SkillLockEntry>;
-    }
-    return {};
-  } catch {
-    return {};
-  }
 }

@@ -15,6 +15,7 @@ import {
 import { useSkillContent } from "../hooks/useSkillContent";
 import { useRepoStats, type RepoStats } from "../hooks/useRepoStats";
 import { useSkillAudits } from "../hooks/useSkillAudits";
+import { type InstalledSkillMatch } from "../hooks/useInstalledSkillMatches";
 import { type SkillAuditsAvailabilityState } from "../utils/skill-audits";
 import { showSkillAuditErrorToast } from "../utils/skill-audit-error-toast";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
@@ -170,18 +171,20 @@ interface SkillListItemProps {
   skill: Skill;
   rank?: number;
   isSelected: boolean;
-  isInstalled?: boolean;
+  installedMatch: InstalledSkillMatch;
   isShowingDetail: boolean;
   onToggleDetail: () => void;
+  onSkillInstalled?: () => void | Promise<void>;
 }
 
 export function SkillListItem({
   skill,
   rank,
   isSelected,
-  isInstalled,
+  installedMatch,
   isShowingDetail,
   onToggleDetail,
+  onSkillInstalled,
 }: SkillListItemProps) {
   const title = rank !== undefined && rank !== null ? `#${rank} ${skill.name}` : skill.name;
   const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
@@ -189,14 +192,30 @@ export function SkillListItem({
   const audits = useSkillAudits(skill, {
     shouldFetch: isSelected,
   });
+  const isInstalled = installedMatch.type === "exact";
+  const hasSourceConflict = installedMatch.type === "conflict";
+  const installedSource = installedMatch.type === "conflict" ? (installedMatch.source ?? "Unknown source") : undefined;
 
   const icon =
     rank !== undefined && rank !== null
       ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
-      : { source: Icon.Hammer };
+      : {
+          source: Icon.Hammer,
+          tintColor: isInstalled ? Color.Green : hasSourceConflict ? Color.Orange : Color.SecondaryText,
+        };
 
   const accessories: List.Item.Accessory[] = [];
-  if (isInstalled) accessories.push({ tag: { value: "Installed", color: Color.Green } });
+  if (isInstalled) {
+    accessories.push({
+      icon: { source: Icon.CheckCircle, tintColor: Color.Green },
+      tooltip: "Installed",
+    });
+  } else if (hasSourceConflict) {
+    accessories.push({
+      icon: { source: Icon.Warning, tintColor: Color.Orange },
+      tooltip: `Installed from source "${installedSource}"`,
+    });
+  }
   if (!isShowingDetail) accessories.push({ text: formatInstalls(skill.installs), icon: Icon.Download });
 
   const shownErrorTimestampRef = useRef<string | undefined>(undefined);
@@ -222,7 +241,7 @@ export function SkillListItem({
   return (
     <List.Item
       title={title}
-      subtitle={isShowingDetail ? undefined : (frontmatter.description ?? skill.source)}
+      subtitle={isShowingDetail ? undefined : skill.source}
       keywords={[skill.name, skill.source, skill.id]}
       icon={icon}
       accessories={accessories}
@@ -239,7 +258,12 @@ export function SkillListItem({
       }
       actions={
         <ActionPanel>
-          <InstallSkillAction skill={skill} prefetchedAuditResult={audits.result} />
+          <InstallSkillAction
+            skill={skill}
+            installedMatch={installedMatch}
+            prefetchedAuditResult={audits.result}
+            onSkillInstalled={onSkillInstalled}
+          />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}
