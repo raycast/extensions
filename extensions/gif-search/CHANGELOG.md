@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-23
 
 - Sort Recents by most recently visited first, and move an already-recent GIF back to the top when it's visited again
 
