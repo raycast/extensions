@@ -130,5 +130,8 @@
     "publish": "ray publish",
     "test": "vitest",
     "test:run": "vitest run"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
