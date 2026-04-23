@@ -1,5 +1,9 @@
 # GIF Search Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Sort Recents by most recently visited first, and move an already-recent GIF back to the top when it's visited again
+
 ## [Add Klipy support] - 2026-02-05
 
 - Add Klipy support
