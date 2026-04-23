@@ -51,7 +51,9 @@ function getEffectiveDateRange(dateStr: string): string {
 }
 
 export default function Command() {
-  const { isLoading, data } = useFetch<FuelPrice[]>(API_URL);
+  const { isLoading, data, error } = useFetch<FuelPrice[]>(API_URL);
+
+  if (error) return <List.EmptyView title="Failed to load prices" description={error.message} />;
 
   const level = data?.find((d) => d.series_type === "level");
   const change = data?.find((d) => d.series_type === "change_weekly");
