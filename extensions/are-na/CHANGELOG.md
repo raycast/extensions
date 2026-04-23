@@ -1,6 +1,6 @@
 # Are.na Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2026-04-23
 
 - Migrated API integration to Are.na `v3` with unified pagination and error handling.
 - Added new commands:
