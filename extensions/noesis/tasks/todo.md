@@ -1,0 +1,175 @@
+# Tryambakam Noesis Raycast Plan
+
+## Checklist
+
+- [x] Re-scope the extension around Selemene docs instead of the old local-only dashboard assumptions.
+- [x] Confirm the authenticated endpoint set needed for onboarding, status, workflows, usage, and readings history.
+- [x] Add a Raycast onboarding UI that captures and validates the API key before saving it locally.
+- [x] Persist local plugin state in SQLite under Raycast `environment.supportPath` for cached profile, workflows, engines, usage, and readings history.
+- [x] Keep the API key out of SQLite and store it in Raycast local storage with environment-variable fallback support for development.
+- [x] Refactor command data loading to read cached SQLite state first, then revalidate against Selemene with stale-while-revalidate behavior.
+- [x] Expand the dashboard to show account, workflows, usage, and recent readings from the local cache.
+- [x] Update menu bar and background quick stats to use cached snapshots instead of hitting the API on every invocation.
+- [x] Add or update tests for API mapping, cache persistence, and sync behavior.
+- [x] Verify with TypeScript and focused test runs, then document results below.
+- [x] Replace the unsupported Raycast `node:sqlite` usage with a runtime-compatible SQLite backend that still writes a local `.sqlite` file.
+- [x] Rebuild the installed Raycast extension and confirm onboarding/dashboard load without runtime faults.
+- [x] Fix the sqlite3 lock contention in Raycast support storage so menu bar and dashboard reads do not fail after onboarding.
+- [x] Rebuild the installed extension and verify the Raycast log no longer reports `database is locked (5)` faults.
+- [x] Review the dashboard row actions and confirm why engine, workflow, and reading selections only refresh instead of drilling into deeper flows.
+- [x] Audit the Selemene engine, workflow, reading, profile, auth, onboarding, and admin endpoints against the current Raycast client surface.
+- [x] Write a concrete upgrade plan for mapped engine/workflow/readings/profile/admin pages, including API key lifecycle handling and invitation constraints.
+- [x] Add dedicated Raycast commands for engines, workflows, and readings so the dashboard stops being the only interaction surface.
+- [x] Rework the dashboard into a Raycast-native command center with detail panes and push navigation instead of refresh-only row actions.
+- [x] Verify the new command manifest and UI compile cleanly with TypeScript and a production Raycast build.
+- [x] Harden the upgrade plan using the local `raycast-extension` and `raycast-ui-skills` references before resuming implementation.
+- [x] Wire engine and workflow detail surfaces into live execution forms backed by `POST /api/v1/engines/{engine_id}/calculate` and `POST /api/v1/workflows/{workflow_id}/execute`.
+- [x] Add a `Noesis Profile` command and editor so birth data, timezone, and reusable preferences can be maintained once and reused by new reading flows.
+- [x] Verify the new execution/profile contract mappings with tests and a production Raycast build.
+- [x] Align execution payload enums and defaults with the actual Selemene backend contract so engine/workflow runs do not fail on request validation.
+- [x] Add a real execution failure state with inline error details plus `Edit Inputs` and `Retry` actions instead of only showing a toast.
+- [x] Clean up the Raycast command surface so legacy/internal cache warmers stop cluttering search results as primary Noesis commands.
+- [x] Replace the generic menu bar health counters with a current insight surface centered on TCM organ timing plus cached biorhythm and Vimshottari context.
+- [x] Persist dedicated menu bar insight snapshots in SQLite and refresh the personal insight cache on a slower background cadence.
+- [x] Verify the new command metadata and menu bar insight flow with TypeScript, focused tests, and a production Raycast build.
+- [x] Locate and remove the remaining external Raycast script commands that still expose legacy Noesis entries.
+- [x] Add a Pulse Mode preference so the menu bar title can switch between TCM organ, biorhythm, and Vimshottari.
+- [x] Verify the external cleanup plus Pulse preference with TypeScript, focused tests, and a production Raycast build.
+- [x] Simplify detail-mode list rows so titles remain readable without long subtitles colliding with badges and accessory text.
+- [x] Apply the compact row pattern consistently across dashboard and browser lists using tooltips, keywords, and detail panes for secondary data.
+- [x] Verify the Raycast row-density cleanup with TypeScript and a production Raycast build.
+- [x] Rework the dashboard status section into a command-center view with synthesized connection, pulse, account, and cache surfaces instead of raw data rows.
+- [x] Remove the menu bar title fallback that shows raw API health like `ok` when pulse data is missing or still syncing.
+- [x] Verify the command-center/dashboard and menu bar title polish with TypeScript and a production Raycast build.
+- [x] Give the dashboard Explore rail the same command-center tone as the new status surfaces, with stronger titles and compact signals instead of descriptive list copy.
+- [x] Tighten menu bar dropdown labels and truncation rules so long pulse titles, summaries, and error strings stay glanceable.
+- [x] Verify the Explore/menu bar polish with TypeScript, focused menu bar tests, and a production Raycast build.
+- [x] Redesign engine and workflow success screens so results read as interpreted reports instead of raw JSON dumps.
+- [x] Surface API request/output context clearly on result pages while keeping full JSON available as a secondary action.
+- [x] Verify the result-page polish with TypeScript, focused presenter tests, and a production Raycast build.
+- [x] Extend the interpreted result presenter to cached reading detail pages so historical readings match live execution results.
+- [x] Add engine-specific hero summaries for known engines like `vedic-clock`, `biorhythm`, and `vimshottari` so result pages feel less generic.
+- [x] Verify the reading-detail/hero-summary polish with TypeScript, focused presenter tests, and a production Raycast build.
+- [x] Add store submission metadata scaffolding: macOS platform restriction, changelog, gitignore, search keywords, contributor metadata, and lint configuration.
+- [x] Initialize a local git repository on `main` and capture the first publish-ready commit.
+- [x] Patch the manifest author to the verified Raycast username `mage_narayan` and confirm lint/build pass.
+- [x] Re-authenticate GitHub CLI and create the remote repository for this extension.
+- [x] Document public-safe screenshot names, placement, and capture requirements for Store metadata.
+- [x] Move manually saved screenshot drafts out of runtime `assets/` and into `docs/screenshots-drafts/` with semantic names.
+- [x] Rebrand Store-facing product copy from `Selemene Noesis` to `Tryambakam Noesis`, with `Selemene Engine` as the powered-by backend.
+- [x] Promote API key editing from hidden onboarding behavior into a screenshot-ready `API Key` command and `Edit API Key` action.
+- [x] Clear stale local identity/cache data before warming a profile from a replacement API key.
+- [x] Fix command deeplinks to derive the Raycast extension owner/name from `package.json` after the `mage_narayan` author rebrand.
+- [x] Rename the API key command slug from `onboarding` to `api-key` so Raycast actions no longer target a disabled/old command.
+- [x] Refresh Raycast's local enabled-command registry with `npm run dev` after the `api-key` command rename.
+- [x] Replace internal `raycast://` command navigation with Raycast's native `launchCommand` API to avoid blocked command launches.
+- [x] Move the latest screenshot drafts out of runtime `assets/` and into `docs/screenshots-drafts/` with stable review names.
+- [x] Capture at least three public-safe Raycast metadata screenshots for the Store listing.
+- [x] Replace screenshot drafts with `2000x1250` PNG files in top-level `metadata/`.
+- [ ] Run network-enabled lint/build checks and attempt `npm run publish` for public Raycast Store review.
+
+## Notes
+
+- Source of truth is `/Volumes/madara/2026/witnessos/Selemene-engine/docs/api/` plus API handlers in `crates/noesis-api`.
+- The onboarding flow validates against authenticated API endpoints before saving the key.
+- Local persistence preserves workflow and readings retrieval when the API is temporarily unavailable.
+- Raycast's runtime does not expose `node:sqlite` here, so the cache backend must use a different SQLite access path while still preserving a real local `.sqlite` file.
+- The Raycast support-path database is healthy; the new failure mode is lock contention between overlapping commands against the same sqlite file.
+- Engines, workflows, readings, and profile editing now have Raycast-native drill-ins; admin key lifecycle and invite flows are still plan-only.
+- Admin API key management and human-user onboarding are different flows and should stay separate in the implementation plan.
+- Raycast-native UX for this extension means instant cached first paint, list/detail hierarchy, and background cache warming from sidecar commands instead of view-level polling.
+- The menu bar should act like a glanceable “current pulse” surface, not a second dashboard for service health counters.
+- Public Store review will likely require git history, GitHub authentication, and screenshot metadata in addition to the extension code itself.
+- Raycast lint and build are clean with the verified `mage_narayan` author handle; screenshots and publish submission remain.
+- GitHub remote is `https://github.com/Sheshiyer/noesis`; local `main` tracks `origin/main`.
+- Screenshot drafts exist for visual review, but the current files are `750x474` or `862x586` and should not be submitted as Store metadata.
+- The updated screenshot drafts are now named semantically under `docs/screenshots-drafts/`; the next publish pass should regenerate only the strongest three to six scenes at `2000x1250`.
+- `metadata/` now contains three public-safe `2000x1250` PNGs generated from safe drafts: `dashboard-command-center`, `engine-console-biorhythm`, and `profile-defaults`.
+- `scripts/generate-metadata-screenshots.sh` reproduces the current metadata set with a consistent framed background treatment.
+
+## Review
+
+- Added a dedicated onboarding command and shared onboarding form that validates `X-API-Key` auth against `GET /api/v1/users/me` before saving configuration.
+- Added a local SQLite cache at Raycast `environment.supportPath/noesis-cache.sqlite` for service snapshots, profile, usage, engines, workflows, readings, and reading stats.
+- Kept the API key outside SQLite by storing it in Raycast local storage, while still honoring environment variable fallbacks for development.
+- Refactored dashboard, menu bar, and quick stats to read cache first and only refresh stale resources based on TTLs.
+- Replaced the incompatible `node:sqlite` dependency with a small wrapper around the system `sqlite3` binary so Raycast can still persist a real `.sqlite` cache file at runtime.
+- Rebuilt the installed extension bundle and verified the Raycast runtime log after launching `Noesis Onboarding` and `Noesis Dashboard`; the prior `No such built-in module: node:sqlite` fault is gone.
+- Generated three store-ready `2000x1250` metadata screenshots under `metadata/` and added a reproducible `ffmpeg`-based generator script for future refreshes.
+- Fixed the next runtime issue by making the sqlite wrapper wait on transient locks instead of failing immediately, and by removing the menu bar's extra in-process polling loop that was overlapping Raycast's own refresh scheduling.
+- Verified the rebuilt extension after clearing the Raycast log and launching `Noesis Metrics` and `Noesis Dashboard`; the fresh log stayed empty instead of reporting `database is locked (5)`.
+- Reviewed the dashboard interaction model and confirmed the current list rows all reuse the same refresh-only action panel, which is why selecting an engine does not start a new reading.
+- Audited the backend contracts for `POST /api/v1/engines/{engine_id}/calculate`, `POST /api/v1/workflows/{workflow_id}/execute`, reading detail, profile updates, admin session, admin users, admin API keys, and onboarding invites.
+- Wrote the next-pass architecture plan in `docs/plans/2026-04-22-noesis-raycast-upgrade-plan.md`, including phased delivery, endpoint mapping, cache/security rules, and the distinction between human invites and admin-issued API keys.
+- Hardened that plan against the local Raycast extension and Raycast UI skill constraints so implementation stays list/detail-first, instant-load, and sidecar-warmed rather than building a web-style shell inside Raycast.
+- Implemented the Raycast-native navigation phase with dedicated `Engines`, `Workflows`, and `Readings` commands, shared action panels, and detail-rich browser screens that open real drill-ins instead of firing a generic refresh.
+- Rebuilt `Noesis Dashboard` into a command center with `Explore`, `Status`, `Active Engines`, `Featured Workflows`, and `Recent Readings` sections, all using Raycast detail panes and push navigation.
+- Wired engine and workflow surfaces into real execution forms that post structured birth-data payloads to Selemene, sync the local cache after success, and render result details inline inside Raycast.
+- Added a dedicated `Noesis Profile` command plus dashboard entry points so shared birth data, timezone, and preferences can be edited once and reused by engine and workflow runs.
+- Promoted `Run Engine` and `Run Workflow` to the primary actions in the browser and dashboard lists so pressing Enter launches execution instead of another passive view.
+- Corrected the execution payload to use Selemene’s real precision enum casing (`Standard`, `High`, `Extreme`) rather than lowercase UI-derived strings.
+- Reworked engine and workflow run flows so failures land in a dedicated error detail view with `Edit Inputs`, `Retry Run`, and payload-copy actions instead of disappearing into a toast.
+- Cleaned the command manifest so the searchable front door is now `Dashboard`, `Engines`, `Workflows`, `Readings`, `Profile`, `Onboarding`, and `Pulse`; the old `quickstats` sidecar command is gone.
+- Rebuilt the menu bar as a current pulse surface: it now shows the active Vedic Clock organ window in the title and surfaces cached biorhythm plus Vimshottari summaries in the dropdown.
+- Added a dedicated `menu_bar_insights` SQLite table plus a migration path for existing caches so the installed extension can persist current pulse snapshots without needing a fresh database.
+- Moved background warming into the menu bar command cadence itself, with Vedic Clock refreshing at the next organ boundary and biorhythm/Vimshottari refreshing on a two-hour personal insight cadence.
+- Removed the leftover standalone Raycast script commands at `~/Library/Application Support/Raycast/script-commands/noesis-dashboard.sh` and `~/Library/Application Support/Raycast/script-commands/noesis-voice.sh`, which were the source of the duplicate legacy Noesis entries in search.
+- Added an extension-level `Pulse Title Mode` dropdown preference so the menu bar title can prioritize `TCM Organ`, `Biorhythm`, or `Vimshottari` while still caching and showing all pulse details in the dropdown.
+- Reworked dashboard and browser list rows around a compact Raycast detail-mode pattern: primary title stays visible, phase/count signals are compressed into short badges like `P0` and `36R`, and engine IDs or descriptions move into keywords, tooltips, and the right-hand detail pane instead of crowding the left rail.
+- Removed long inline subtitles from the most cramped dashboard status and active-engine rows so the selected name is no longer visually blocked by badges or metadata.
+- Replaced the dashboard’s old field-by-field `Status` list with a `Command Center` section built around current pulse, Selemene link, profile defaults, usage window, and snapshot cache modules; each row now synthesizes the relevant status cluster and exposes a stronger next action.
+- Hardened the menu bar title path so the only generic fallback is `Pulse`; when there is no cached insight yet, the title no longer has any path that can surface raw health text like `ok`.
+- Reframed the dashboard’s top rail from descriptive browse rows into a `Launchpad` with named operating surfaces: `Profile Defaults`, `Engine Console`, `Workflow Studio`, and `Reading Archive`, each carrying compact status signals instead of list-style subtitles.
+- Tightened the menu bar dropdown with a single `Label · Value` copy style plus explicit truncation for titles, summaries, combined pulse board text, and long error strings so the pulse view stays glanceable under Raycast’s one-line constraints.
+- Reworked engine and workflow success screens into report-style result pages with `Reading Brief`, `Request Context`, structured payload sections, and a truncated raw-response preview instead of leading with a full JSON dump.
+- Added a pure execution-result presenter module so payload interpretation can be tested without Raycast UI dependencies, and exposed request JSON as a copy action on successful runs.
+- Extended the same presenter to cached reading detail pages, so historical readings now render as interpreted reports instead of a `Cached Payload` code block, and added `Copy Request JSON` where the archived payload still includes request context.
+- Added engine-specific hero sections for `vedic-clock`, `biorhythm`, and `vimshottari`, using compact markdown tables so the top of a result page surfaces organ/window, energy signature, or dasha focus before the deeper field map.
+- Verification completed:
+  - `PATH=/opt/homebrew/bin:$PATH /opt/homebrew/bin/npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild && PATH=/opt/homebrew/bin:$PATH /opt/homebrew/bin/npx tsc --outDir /tmp/noesis-testbuild`
+  - `/opt/homebrew/bin/node --test /tmp/noesis-testbuild/lib/api.test.js /tmp/noesis-testbuild/lib/cache.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `open 'raycast://extensions/sheshiyer/noesis/onboarding'`
+  - `open 'raycast://extensions/sheshiyer/noesis/dashboard'`
+  - `tail -n 20 ~/.config/raycast/extensions/noesis/dev.log`
+  - `: > ~/.config/raycast/extensions/noesis/dev.log`
+  - `open 'raycast://extensions/sheshiyer/noesis/menubar'`
+  - `open 'raycast://extensions/sheshiyer/noesis/dashboard'`
+  - `tail -n 80 ~/.config/raycast/extensions/noesis/dev.log`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild-20260422-pulse && mkdir -p /tmp/noesis-testbuild-20260422-pulse && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260422-pulse`
+  - `node --test /tmp/noesis-testbuild-20260422-pulse/lib/api.test.js /tmp/noesis-testbuild-20260422-pulse/lib/cache.test.js /tmp/noesis-testbuild-20260422-pulse/lib/menu-bar-insights.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `find "$HOME/Library/Application Support/Raycast/script-commands" -maxdepth 2 \( -type f -o -type l \) 2>/dev/null | sort`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild-20260422-pulse-mode && mkdir -p /tmp/noesis-testbuild-20260422-pulse-mode && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260422-pulse-mode`
+  - `node --test /tmp/noesis-testbuild-20260422-pulse-mode/lib/api.test.js /tmp/noesis-testbuild-20260422-pulse-mode/lib/cache.test.js /tmp/noesis-testbuild-20260422-pulse-mode/lib/menu-bar-insights.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild-20260422-command-center && mkdir -p /tmp/noesis-testbuild-20260422-command-center && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260422-command-center`
+  - `node --test /tmp/noesis-testbuild-20260422-command-center/lib/menu-bar-insights.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild-20260422-launchpad && mkdir -p /tmp/noesis-testbuild-20260422-launchpad && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260422-launchpad`
+  - `node --test /tmp/noesis-testbuild-20260422-launchpad/lib/menu-bar-insights.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild-20260422-results && mkdir -p /tmp/noesis-testbuild-20260422-results && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260422-results`
+  - `node --test /tmp/noesis-testbuild-20260422-results/lib/execution-result-presenter.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild-20260422-reading-presenter && mkdir -p /tmp/noesis-testbuild-20260422-reading-presenter && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260422-reading-presenter`
+  - `node --test /tmp/noesis-testbuild-20260422-reading-presenter/lib/execution-result-presenter.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `mkdir -p /tmp/noesis-testbuild-20260422-profile && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260422-profile`
+  - `node --test /tmp/noesis-testbuild-20260422-profile/lib/api.test.js /tmp/noesis-testbuild-20260422-profile/lib/cache.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild-20260422-runflow && mkdir -p /tmp/noesis-testbuild-20260422-runflow && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260422-runflow`
+  - `node --test /tmp/noesis-testbuild-20260422-runflow/lib/api.test.js /tmp/noesis-testbuild-20260422-runflow/lib/cache.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`

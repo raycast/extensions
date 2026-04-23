@@ -1,0 +1,148 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "noesis",
+  "title": "Tryambakam Noesis",
+  "description": "Raycast command center for Tryambakam Noesis, powered by the Selemene Engine",
+  "icon": "icon.png",
+  "author": "mage_narayan",
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "tryambakam",
+    "selemene",
+    "noesis",
+    "kha-ba-la",
+    "self-consciousness",
+    "readings",
+    "engines",
+    "workflows",
+    "pulse"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "baseUrl",
+      "title": "Selemene Engine Base URL",
+      "description": "Optional fallback API URL when onboarding has not stored one yet.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://selemene.tryambakam.space"
+    },
+    {
+      "name": "pulseMode",
+      "title": "Pulse Title Mode",
+      "description": "Choose which current insight the menu bar title should prioritize.",
+      "type": "dropdown",
+      "required": false,
+      "default": "vedicClock",
+      "data": [
+        {
+          "title": "TCM Organ",
+          "value": "vedicClock"
+        },
+        {
+          "title": "Biorhythm",
+          "value": "biorhythm"
+        },
+        {
+          "title": "Vimshottari",
+          "value": "vimshottari"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "description": "Command center for Tryambakam Noesis status, navigation, and recent activity",
+      "keywords": [
+        "dashboard",
+        "overview",
+        "tryambakam",
+        "selemene",
+        "status"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "engines",
+      "title": "Engines",
+      "description": "Browse Selemene Engine lenses with phase grouping and detail previews",
+      "keywords": [
+        "engines",
+        "catalog",
+        "readings"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "workflows",
+      "title": "Workflows",
+      "description": "Browse workflow chains with composition previews and cached reading context",
+      "keywords": [
+        "workflows",
+        "flows",
+        "chains"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "readings",
+      "title": "Readings",
+      "description": "Browse cached reading history with payload previews and detail views",
+      "keywords": [
+        "readings",
+        "history",
+        "results"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "profile",
+      "title": "Profile",
+      "description": "Edit shared birth data, timezone, and reusable preferences for reading execution",
+      "keywords": [
+        "profile",
+        "birth-data",
+        "timezone"
+      ],
+      "mode": "view"
+    },
+    {
+      "name": "api-key",
+      "title": "API Key",
+      "description": "Connect, edit, or rotate the Selemene Engine API key and warm the local cache",
+      "mode": "view"
+    },
+    {
+      "name": "menubar",
+      "title": "Pulse",
+      "description": "Current TCM organ plus cached biorhythm and Vimshottari insight",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.6",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,22 @@
+# Lessons
+
+- When the user corrects the target architecture, stop and re-scope the extension before continuing implementation.
+- For this Raycast plugin, preserve local persistence for cache/history/workflow metadata instead of replacing everything with direct API calls.
+- When authentication is part of first-run UX, build an onboarding flow instead of assuming manual preference entry is sufficient.
+- Verify Node built-ins against the actual Raycast runtime before depending on them; passing `tsc` and local Node tests is not enough for extension compatibility.
+- When multiple Raycast commands share one sqlite cache, avoid write-oriented setup on every open and design for overlapping command execution to prevent lock contention.
+- Before treating a dashboard as complete, verify every row has a real drill-in or execution action; summary lists alone are not enough for engines, workflows, or readings.
+- For Raycast execution flows, errors must stay in-product with an editable recovery path; a toast alone is not sufficient when a run fails.
+- Match backend enum casing from the source contract or SDK instead of inferring lowercase UI values for request payloads.
+- Background warmers and metadata sync commands should not compete with primary user commands in Raycast search; keep internal surfaces generic or non-branded.
+- A Raycast menu bar item needs one clear current insight, not a compressed dump of service health counters that belong in the dashboard.
+- If duplicate Raycast entries persist after extension cleanup, inspect standalone script-command folders as well as the extension manifest; search clutter can come from both surfaces.
+- In Raycast detail-mode lists, avoid pairing long inline subtitles with badges or multiple accessories; keep rows to a strong title plus compact signals, and move secondary data into tooltips, keywords, and the detail pane.
+- For a pulse-oriented Raycast extension, never let low-level service health like `ok` become the menu bar title when the user expects a current symbolic reading or pulse state.
+- Execution result pages should interpret API payloads into readable sections and keep raw JSON as a secondary surface; a full JSON dump should not be the primary UX.
+- Store-facing copy should lead with `Tryambakam Noesis`; `Selemene Engine` is the powered-by backend layer, not the public product name.
+- API key rotation must clear stale identity cache before warming the new account, or screenshots can show a previous user's profile after saving a dummy key.
+- Never hardcode Raycast deeplink owner/name separately from `package.json`; Store author changes can make actions and post-submit redirects fail with "cannot load function."
+- Raycast command deeplinks must target the manifest command `name`, not the old file/title concept; after renaming `Onboarding` to `API Key`, internal actions must open `api-key`.
+- After adding or renaming Raycast commands, `npm run build` is not enough for local validation; run `npm run dev`/`ray develop` so Raycast refreshes its enabled-command registry.
+- For navigation between commands inside the same Raycast extension, use `launchCommand` with `LaunchType.UserInitiated`; `raycast://` URLs can be blocked by Raycast with "Not allowed to run command."
