@@ -1,5 +1,9 @@
 # letterboxd Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed the issue with the rating histogram not working
+
 ## [Fix] - 2026-04-06
 
 - Fixed genre tag color for better visibility in light mode
