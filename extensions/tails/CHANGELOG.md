@@ -6,4 +6,4 @@
 - Interactive variant selection with quality, size, and cost info
 - Quick Download command for zero-UI saves with clipboard fallback
 - Batch download support for carousels and albums
-- Menu bar command showing credit usage and quick actions
+- Menu bar showing credit usage at a glance
