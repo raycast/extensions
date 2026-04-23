@@ -25,7 +25,12 @@ import {
   OUTPUT_VIDEO_EXTENSIONS,
   OUTPUT_GIF_EXTENSIONS,
   getDefaultQuality,
+  getOutputCategory,
+  GifFps,
+  GifWidth,
 } from "./types/media";
+import { parseTimeString, formatTimeString } from "./utils/time";
+import { GifQualityControls, QualitySettingsComponent } from "./components/ConverterForm";
 
 export default function Command() {
   const [presets, setPresets] = useState<Preset[] | null>(null);
@@ -116,7 +121,7 @@ function PresetItem({ preset, onChange }: { preset: Preset; onChange: () => Prom
                 }
               }}
             />
-            {!preset.builtIn && <RenamePresetAction preset={preset} onChange={onChange} />}
+            {!preset.builtIn && <EditPresetAction preset={preset} onChange={onChange} />}
           </ActionPanel.Section>
           {!preset.builtIn && (
             <ActionPanel.Section>
@@ -155,120 +160,121 @@ function CreatePresetAction({ onChange }: { onChange: () => Promise<void> }) {
       title="Create New Preset…"
       icon={Icon.Plus}
       shortcut={{ modifiers: ["cmd"], key: "n" }}
-      onAction={() => push(<CreatePresetForm onSaved={onChange} />)}
+      onAction={() => push(<PresetEditorForm mode="create" onSaved={onChange} />)}
     />
   );
 }
 
-function RenamePresetAction({ preset, onChange }: { preset: Preset; onChange: () => Promise<void> }) {
+function EditPresetAction({ preset, onChange }: { preset: Preset; onChange: () => Promise<void> }) {
   const { push } = useNavigation();
   return (
     <Action
-      title="Rename"
+      title="Edit Preset…"
       icon={Icon.Pencil}
       shortcut={{ modifiers: ["cmd"], key: "e" }}
-      onAction={() => push(<RenamePresetForm preset={preset} onSaved={onChange} />)}
+      onAction={() => push(<PresetEditorForm mode="edit" preset={preset} onSaved={onChange} />)}
     />
   );
 }
 
-function RenamePresetForm({ preset, onSaved }: { preset: Preset; onSaved: () => Promise<void> }) {
-  const [name, setName] = useState(preset.name);
-  const [description, setDescription] = useState(preset.description ?? "");
-  const { pop } = useNavigation();
+type EditorMode = { mode: "create" } | { mode: "edit"; preset: Preset };
 
-  return (
-    <Form
-      actions={
-        <ActionPanel>
-          <Action.SubmitForm
-            title="Save"
-            onSubmit={async () => {
-              if (!name.trim()) {
-                await showToast({ style: Toast.Style.Failure, title: "Name required" });
-                return;
-              }
-              try {
-                await saveUserPreset({
-                  id: preset.id,
-                  name: name.trim(),
-                  mediaType: preset.mediaType,
-                  outputFormat: preset.outputFormat,
-                  quality: preset.quality,
-                  trim: preset.trim,
-                  stripMetadata: preset.stripMetadata,
-                  outputDir: preset.outputDir,
-                  description: description.trim() || undefined,
-                });
-                await onSaved();
-                pop();
-              } catch (error) {
-                showFailureToast(error, { title: "Failed to save preset" });
-              }
-            }}
-          />
-        </ActionPanel>
-      }
-    >
-      <Form.TextField id="name" title="Name" value={name} onChange={setName} />
-      <Form.TextArea id="description" title="Description" value={description} onChange={setDescription} />
-    </Form>
-  );
-}
-
-function CreatePresetForm({ onSaved }: { onSaved: () => Promise<void> }) {
+function PresetEditorForm({ onSaved, ...rest }: { onSaved: () => Promise<void> } & EditorMode) {
   const preferences = getPreferenceValues();
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [mediaType, setMediaType] = useState<MediaType | "gif">("video");
-  const [outputFormat, setOutputFormat] = useState<AllOutputExtension>(".mp4");
-  const [stripMetadata, setStripMetadata] = useState(false);
   const { pop } = useNavigation();
+  const editing = rest.mode === "edit" ? rest.preset : null;
+
+  const [name, setName] = useState(editing?.name ?? "");
+  const [description, setDescription] = useState(editing?.description ?? "");
+  const [mediaType, setMediaType] = useState<MediaType | "gif">(editing?.mediaType ?? "video");
+  const [outputFormat, setOutputFormat] = useState<AllOutputExtension>(editing?.outputFormat ?? ".mp4");
+  const [quality, setQuality] = useState<QualitySettings>(
+    editing?.quality ?? getDefaultQuality(editing?.outputFormat ?? ".mp4", preferences, "high"),
+  );
+  const [stripMetadata, setStripMetadata] = useState<boolean>(editing?.stripMetadata ?? false);
+  const [trimStart, setTrimStart] = useState(editing?.trim?.start ?? "");
+  const [trimEnd, setTrimEnd] = useState(editing?.trim?.end ?? "");
+  const [outputDir, setOutputDir] = useState(editing?.outputDir ?? "");
 
   const formats = formatsForMediaType(mediaType);
+  const outputCategory = getOutputCategory(outputFormat);
+  const supportsTrim = outputCategory === "video" || outputCategory === "audio" || outputCategory === "gif";
 
+  // When media type changes, reset the output format + quality so they stay consistent.
   useEffect(() => {
-    // Reset output format to first valid one when media type changes
     const first = formats[0];
     if (first && !formats.includes(outputFormat)) {
       setOutputFormat(first);
+      setQuality(getDefaultQuality(first, preferences, "high"));
     }
   }, [mediaType]);
 
+  // When output format changes within the same media type, reset quality to sensible defaults.
+  useEffect(() => {
+    // Only reset if the current quality doesn't have an entry for the new format.
+    const q = (quality as Record<string, unknown>)[outputFormat];
+    if (q === undefined) {
+      setQuality(getDefaultQuality(outputFormat, preferences, "high"));
+    }
+  }, [outputFormat]);
+
+  const trimStartError = trimStart && parseTimeString(trimStart) === null ? "Invalid time format" : undefined;
+  const trimEndError = trimEnd && parseTimeString(trimEnd) === null ? "Invalid time format" : undefined;
+
+  const trimPreviewText = (() => {
+    if (!supportsTrim) return undefined;
+    const s = parseTimeString(trimStart);
+    const e = parseTimeString(trimEnd);
+    if (s === null && e === null) return undefined;
+    if (s !== null && e !== null && e <= s) return "End must be after start";
+    const startLabel = s !== null ? formatTimeString(s) : "start";
+    const endLabel = e !== null ? formatTimeString(e) : "end";
+    const duration = s !== null && e !== null ? ` · ${formatTimeString(e - s)} long` : "";
+    return `Trim ${startLabel} → ${endLabel}${duration}`;
+  })();
+
+  const submit = async () => {
+    if (!name.trim()) {
+      await showToast({ style: Toast.Style.Failure, title: "Name required" });
+      return;
+    }
+    if (trimStartError || trimEndError) {
+      await showToast({ style: Toast.Style.Failure, title: "Invalid trim time" });
+      return;
+    }
+    try {
+      await saveUserPreset({
+        id: editing?.id,
+        name: name.trim(),
+        mediaType,
+        outputFormat,
+        quality,
+        stripMetadata,
+        trim: trimStart.trim() || trimEnd.trim() ? { start: trimStart.trim(), end: trimEnd.trim() } : undefined,
+        outputDir: outputDir.trim() || undefined,
+        description: description.trim() || undefined,
+      });
+      await onSaved();
+      await showToast({
+        style: Toast.Style.Success,
+        title: editing ? "Preset updated" : "Preset created",
+      });
+      pop();
+    } catch (error) {
+      showFailureToast(error, { title: "Failed to save preset" });
+    }
+  };
+
   return (
     <Form
+      navigationTitle={editing ? `Edit ${editing.name}` : "New Preset"}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Create Preset"
-            onSubmit={async () => {
-              if (!name.trim()) {
-                await showToast({ style: Toast.Style.Failure, title: "Name required" });
-                return;
-              }
-              try {
-                const quality: QualitySettings = getDefaultQuality(outputFormat, preferences, "high");
-                await saveUserPreset({
-                  name: name.trim(),
-                  mediaType,
-                  outputFormat,
-                  quality,
-                  stripMetadata,
-                  description: description.trim() || undefined,
-                });
-                await onSaved();
-                await showToast({ style: Toast.Style.Success, title: "Preset created" });
-                pop();
-              } catch (error) {
-                showFailureToast(error, { title: "Failed to create preset" });
-              }
-            }}
-          />
+          <Action.SubmitForm title={editing ? "Save Changes" : "Create Preset"} onSubmit={submit} />
         </ActionPanel>
       }
     >
-      <Form.Description text="Presets store a default output format, quality and privacy option. To save more detailed settings (advanced quality controls, trim, custom output folder), use 'Save Settings as Preset…' from the Convert Media form." />
-      <Form.TextField id="name" title="Name" value={name} onChange={setName} autoFocus={true} />
+      <Form.TextField id="name" title="Name" value={name} onChange={setName} autoFocus={!editing} />
       <Form.TextArea
         id="description"
         title="Description"
@@ -276,6 +282,9 @@ function CreatePresetForm({ onSaved }: { onSaved: () => Promise<void> }) {
         value={description}
         onChange={setDescription}
       />
+
+      <Form.Separator />
+
       <Form.Dropdown
         id="mediaType"
         title="Media Type"
@@ -287,6 +296,7 @@ function CreatePresetForm({ onSaved }: { onSaved: () => Promise<void> }) {
         <Form.Dropdown.Item value="image" title="Image" />
         <Form.Dropdown.Item value="gif" title="GIF (from video)" />
       </Form.Dropdown>
+
       <Form.Dropdown
         id="outputFormat"
         title="Output Format"
@@ -297,12 +307,57 @@ function CreatePresetForm({ onSaved }: { onSaved: () => Promise<void> }) {
           <Form.Dropdown.Item key={f} value={f} title={f} />
         ))}
       </Form.Dropdown>
+
+      <Form.Separator />
+
+      {outputCategory === "gif" ? (
+        <GifQualityControls
+          settings={quality as { ".gif": { fps: GifFps; width: GifWidth; loop: boolean } }}
+          onChange={setQuality}
+        />
+      ) : (
+        <QualitySettingsComponent outputFormat={outputFormat} currentQuality={quality} onQualityChange={setQuality} />
+      )}
+
+      <Form.Separator />
+
       <Form.Checkbox
         id="stripMetadata"
         title="Privacy"
         label="Strip metadata (EXIF, GPS, tags)"
         value={stripMetadata}
         onChange={setStripMetadata}
+      />
+
+      {supportsTrim && (
+        <>
+          <Form.TextField
+            id="trimStart"
+            title="Trim Start"
+            placeholder="0:30 or 30 or 00:00:30.000"
+            value={trimStart}
+            onChange={setTrimStart}
+            error={trimStartError}
+          />
+          <Form.TextField
+            id="trimEnd"
+            title="Trim End"
+            placeholder="1:30 or 90 or 00:01:30.000"
+            value={trimEnd}
+            onChange={setTrimEnd}
+            error={trimEndError}
+          />
+          {trimPreviewText && <Form.Description text={trimPreviewText} />}
+        </>
+      )}
+
+      <Form.TextField
+        id="outputDir"
+        title="Output Folder"
+        placeholder="Leave blank to save alongside input"
+        value={outputDir}
+        onChange={setOutputDir}
+        info="Absolute path. Applied when this preset is used."
       />
     </Form>
   );

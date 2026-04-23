@@ -589,7 +589,7 @@ function presetMatchesFileType(preset: Preset, fileType: MediaType): boolean {
   return preset.mediaType === fileType;
 }
 
-function GifQualityControls({
+export function GifQualityControls({
   settings,
   onChange,
 }: {
@@ -705,7 +705,7 @@ function SavePresetForm({
 // TODO: If the selected output setting surpasses the quality of the original file, show the input audio's bitrate/profile/sample, which file is that.
 // Just a warning, letting the user know that the output file will not be better than the input file.
 
-function QualitySettingsComponent({
+export function QualitySettingsComponent({
   outputFormat,
   currentQuality,
   onQualityChange,
