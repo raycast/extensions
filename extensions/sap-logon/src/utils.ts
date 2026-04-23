@@ -283,9 +283,21 @@ export function validateClient(value: string): string | undefined {
   return undefined;
 }
 
-export function validatePassword(value: string): string | undefined {
+export function validateNoReservedChars(value: string, fieldLabel: string): string | undefined {
   if (/[/&]/.test(value)) {
-    return "Password must not contain '/' or '&'";
+    return `${fieldLabel} must not contain '/' or '&'`;
   }
   return undefined;
+}
+
+export function validatePassword(value: string): string | undefined {
+  return validateNoReservedChars(value, "Password");
+}
+
+export function validateApplicationServer(value: string): string | undefined {
+  return validateNoReservedChars(value, "Application server");
+}
+
+export function validateUsername(value: string): string | undefined {
+  return validateNoReservedChars(value, "Username");
 }
