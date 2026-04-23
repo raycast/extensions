@@ -1,6 +1,6 @@
 # WinGet Changelog
 
-## [Fix localized upgrade parsing] - {PR_MERGE_DATE}
+## [Fix localized upgrade parsing] - 2026-04-23
 
 - Fix winget table parsing on localized outputs by mapping table columns by position
 
