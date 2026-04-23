@@ -15,7 +15,7 @@ import { showFailureToast } from "@raycast/utils";
 import { execFileSync } from "child_process";
 import { homedir, tmpdir } from "os";
 import { join } from "path";
-import { writeFileSync } from "fs";
+import { unlinkSync, writeFileSync } from "fs";
 import { useState, useEffect } from "react";
 
 // MARK: - Types
@@ -26,43 +26,49 @@ interface Replacement {
   replacement: string;
 }
 
+interface DbRow {
+  Z_PK: number;
+  ZSHORTCUT: string;
+  ZPHRASE: string;
+}
+
 // MARK: - DB helpers
 
 const DB_PATH = join(homedir(), "Library/KeyboardServices/TextReplacements.db");
 
 // Resolve Z_ENT dynamically so we're not fragile against CoreData schema changes
 function getZEnt(): number {
-  const result = dbQuery(`SELECT Z_ENT FROM Z_PRIMARYKEY WHERE Z_NAME = 'TextReplacementEntry' LIMIT 1;`).trim();
-  const n = parseInt(result);
-  if (isNaN(n)) throw new Error("Could not resolve Z_ENT for TextReplacementEntry");
-  return n;
+  const result = execFileSync(
+    "/usr/bin/sqlite3",
+    ["--json", DB_PATH, `SELECT Z_ENT FROM Z_PRIMARYKEY WHERE Z_NAME = 'TextReplacementEntry' LIMIT 1;`],
+    { encoding: "utf8", timeout: 5000 },
+  ).trim();
+  const rows = JSON.parse(result || "[]") as { Z_ENT: number }[];
+  if (!rows.length) throw new Error("Could not resolve Z_ENT for TextReplacementEntry");
+  return rows[0].Z_ENT;
 }
 
 function sqlEscape(s: string): string {
   return `'${s.replace(/'/g, "''")}'`;
 }
 
-function dbQuery(statement: string): string {
-  return execFileSync("/usr/bin/sqlite3", ["-separator", "\x1F", DB_PATH, statement], {
-    encoding: "utf8",
-    timeout: 5000,
-  });
-}
-
 function loadReplacements(): Replacement[] {
-  const output = dbQuery(
-    `SELECT Z_PK, ZSHORTCUT, ZPHRASE FROM ZTEXTREPLACEMENTENTRY
-     WHERE (ZWASDELETED = 0 OR ZWASDELETED IS NULL)
-       AND ZSHORTCUT IS NOT NULL AND ZSHORTCUT != ''
-     ORDER BY ZSHORTCUT ASC;`,
-  );
-  return output
-    .split("\n")
-    .filter((line) => line.includes("\x1F"))
-    .map((line) => {
-      const parts = line.split("\x1F");
-      return { dbPK: parseInt(parts[0]), phrase: parts[1], replacement: parts[2] ?? "" };
-    });
+  // Use --json so newlines inside ZPHRASE don't corrupt row parsing
+  const output = execFileSync(
+    "/usr/bin/sqlite3",
+    [
+      "--json",
+      DB_PATH,
+      `SELECT Z_PK, ZSHORTCUT, ZPHRASE FROM ZTEXTREPLACEMENTENTRY
+       WHERE (ZWASDELETED = 0 OR ZWASDELETED IS NULL)
+         AND ZSHORTCUT IS NOT NULL AND ZSHORTCUT != ''
+       ORDER BY ZSHORTCUT ASC;`,
+    ],
+    { encoding: "utf8", timeout: 5000 },
+  ).trim();
+
+  const rows = JSON.parse(output || "[]") as DbRow[];
+  return rows.map((r) => ({ dbPK: r.Z_PK, phrase: r.ZSHORTCUT, replacement: r.ZPHRASE ?? "" }));
 }
 
 function insertReplacement(phrase: string, replacement: string): void {
@@ -131,7 +137,16 @@ ${itemsXml}
   // Use a unique filename per call to avoid write-write races on rapid saves
   const tmpFile = join(tmpdir(), `raycast_replacements_${Date.now()}.plist`);
   writeFileSync(tmpFile, plist, "utf8");
-  execFileSync("/usr/bin/defaults", ["import", "-g", tmpFile], { timeout: 5000 });
+  try {
+    execFileSync("/usr/bin/defaults", ["import", "-g", tmpFile], { timeout: 5000 });
+  } finally {
+    // Clean up temp file regardless of success or failure
+    try {
+      unlinkSync(tmpFile);
+    } catch {
+      // non-fatal
+    }
+  }
 
   // Flush the WAL so the keyboard services daemon picks up the changes
   try {
@@ -178,7 +193,7 @@ function ReplacementForm({ initial, onSave }: { initial?: Replacement; onSave: (
       }
     >
       <Form.TextField id="phrase" title="Shortcut" placeholder="abbr" defaultValue={initial?.phrase} />
-      <Form.TextField
+      <Form.TextArea
         id="replacement"
         title="Expands To"
         placeholder="the full text"
