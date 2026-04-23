@@ -5,9 +5,6 @@ const BASE = "https://api.morgen.so/v3";
 
 export async function morgenFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const { apiKey } = getPreferenceValues<Preferences>();
-  if (!apiKey) {
-    throw new Error("Missing Morgen API key. Set it in Raycast preferences.");
-  }
 
   const res = await fetch(`${BASE}${path}`, {
     ...init,
