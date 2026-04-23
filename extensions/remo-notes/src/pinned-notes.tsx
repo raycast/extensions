@@ -14,7 +14,7 @@ export default function Command() {
     async function fetchNotes() {
       setIsLoading(true);
       try {
-        const result = await remoApi.recentNotes(100);
+        const result = await remoApi.listNotes({ limit: 50 });
         const pinned = result.filter((n: Note) => n.isPinned);
         setNotes(pinned);
       } catch (error) {
