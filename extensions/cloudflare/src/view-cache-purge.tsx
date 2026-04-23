@@ -11,7 +11,7 @@ import {
   Toast,
 } from '@raycast/api';
 import { useEffect, useState } from 'react';
-import Service, { Zone } from './service';
+import Service, { CachePurgeResult, Zone } from './service';
 import { getToken } from './utils';
 import { SiteProps } from './view-sites';
 
@@ -75,9 +75,9 @@ export function CachePurgeView(props: SiteProps) {
     (async () => {
       const lastType =
         (await LocalStorage.getItem<string>(LAST_TYPE_KEY(id))) ?? 'url';
-      const type = (['url', 'hostname', 'tag', 'prefix'] as PurgeType[]).includes(
-        lastType as PurgeType,
-      )
+      const type = (
+        ['url', 'hostname', 'tag', 'prefix'] as PurgeType[]
+      ).includes(lastType as PurgeType)
         ? (lastType as PurgeType)
         : 'url';
       const lastEntries =
@@ -99,12 +99,12 @@ export function CachePurgeView(props: SiteProps) {
   };
 
   const handleSubmit = async (values: { entries: string }) => {
-    await LocalStorage.setItem(LAST_TYPE_KEY(id), purgeType);
-    await LocalStorage.setItem(
-      LAST_ENTRIES_KEY(id, purgeType),
-      values.entries ?? '',
-    );
-    await submitPurge(id, purgeType, values.entries ?? '');
+    const rawValue = values.entries ?? '';
+    const initiated = await submitPurge(id, purgeType, rawValue);
+    if (initiated) {
+      await LocalStorage.setItem(LAST_TYPE_KEY(id), purgeType);
+      await LocalStorage.setItem(LAST_ENTRIES_KEY(id, purgeType), rawValue);
+    }
   };
 
   const handlePurgeLast = async () => {
@@ -178,7 +178,7 @@ async function submitPurge(
   zoneId: string,
   type: PurgeType,
   rawValue: string,
-) {
+): Promise<boolean> {
   const entries = parseEntries(rawValue);
   if (entries.length === 0) {
     await showToast({
@@ -186,7 +186,7 @@ async function submitPurge(
       title: 'No values provided',
       message: 'Please enter at least one value to purge.',
     });
-    return;
+    return false;
   }
   if (type === 'tag' && entries.length > 100) {
     await showToast({
@@ -194,9 +194,9 @@ async function submitPurge(
       title: 'Too many tags',
       message: 'You can purge up to 100 tags at a time.',
     });
-    return;
+    return false;
   }
-  await purgeFromCache(zoneId, type, entries);
+  return await purgeFromCache(zoneId, type, entries);
 }
 
 function CachePurgeHistory(props: SiteProps) {
@@ -205,9 +205,7 @@ function CachePurgeHistory(props: SiteProps) {
   const [state, setState] = useState<{ items: CachePurgeHistoryItem[] }>({
     items: [],
   });
-  const [sortBy, setSortBy] = useState<'latest' | 'count' | 'oldest'>(
-    'latest',
-  );
+  const [sortBy, setSortBy] = useState<'latest' | 'count' | 'oldest'>('latest');
 
   useEffect(() => {
     LocalStorage.getItem<string>(`cache-purge-sort-${id}`).then((value) => {
@@ -285,7 +283,10 @@ function CachePurgeHistory(props: SiteProps) {
                   onAction={() => {
                     const items = state.items.filter(
                       (item: CachePurgeHistoryItem) =>
-                        !(item.url === entry.url && (item.type ?? 'url') === type),
+                        !(
+                          item.url === entry.url &&
+                          (item.type ?? 'url') === type
+                        ),
                     );
                     LocalStorage.setItem(
                       `cache-purge-history-${id}`,
@@ -307,7 +308,7 @@ async function purgeFromCache(
   zoneId: string,
   type: PurgeType,
   entries: string[],
-) {
+): Promise<boolean> {
   const typeLabel = {
     url: 'URL(s)',
     hostname: 'hostname(s)',
@@ -322,7 +323,7 @@ async function purgeFromCache(
       primaryAction: { title: 'Purge', style: Alert.ActionStyle.Destructive },
     }))
   ) {
-    return;
+    return false;
   }
 
   const toast = await showToast({
@@ -330,7 +331,7 @@ async function purgeFromCache(
     title: `Purging ${typeLabel}`,
   });
 
-  let result;
+  let result: CachePurgeResult;
   switch (type) {
     case 'url':
       result = await service.purgeFilesbyURL(zoneId, entries);
@@ -344,6 +345,10 @@ async function purgeFromCache(
     case 'prefix':
       result = await service.purgeByPrefixes(zoneId, entries);
       break;
+    default: {
+      const _exhaustive: never = type;
+      throw new Error(`Unhandled purge type: ${_exhaustive}`);
+    }
   }
 
   if (result.success) {
@@ -377,7 +382,7 @@ async function purgeFromCache(
       },
     );
 
-    return;
+    return true;
   }
 
   toast.style = Toast.Style.Failure;
@@ -385,6 +390,7 @@ async function purgeFromCache(
   if (result.errors.length > 0) {
     toast.message = result.errors[0].message;
   }
+  return false;
 }
 
 export async function purgeEverything(zone: Zone) {
