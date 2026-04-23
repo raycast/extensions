@@ -1,12 +1,12 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="mimoBgDark" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#312E81"/>
-      <stop offset="100%" stop-color="#6366F1"/>
+      <stop offset="0%" stop-color="#FFA15C"/>
+      <stop offset="100%" stop-color="#E8640F"/>
     </linearGradient>
     <radialGradient id="sparkGlowDark" cx="50%" cy="50%" r="50%">
-      <stop offset="0%" stop-color="#FDE047" stop-opacity="0.6"/>
-      <stop offset="100%" stop-color="#FDE047" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#FEF9C3" stop-opacity="0.65"/>
+      <stop offset="100%" stop-color="#FEF9C3" stop-opacity="0"/>
     </radialGradient>
     <clipPath id="bgClipDark">
       <rect x="32" y="32" width="448" height="448" rx="112" ry="112"/>
@@ -15,18 +15,18 @@
 
   <g clip-path="url(#bgClipDark)">
     <rect x="32" y="32" width="448" height="448" rx="112" ry="112" fill="url(#mimoBgDark)"/>
-    <circle cx="118" cy="112" r="6" fill="#FFFFFF" fill-opacity="0.35"/>
-    <circle cx="416" cy="248" r="5" fill="#FFFFFF" fill-opacity="0.35"/>
-    <circle cx="96"  cy="308" r="4" fill="#FFFFFF" fill-opacity="0.35"/>
-    <circle cx="392" cy="396" r="5" fill="#FFFFFF" fill-opacity="0.35"/>
-    <circle cx="266" cy="80"  r="3" fill="#FFFFFF" fill-opacity="0.35"/>
+    <circle cx="118" cy="112" r="6" fill="#FFFFFF" fill-opacity="0.45"/>
+    <circle cx="416" cy="248" r="5" fill="#FFFFFF" fill-opacity="0.45"/>
+    <circle cx="96"  cy="308" r="4" fill="#FFFFFF" fill-opacity="0.45"/>
+    <circle cx="392" cy="396" r="5" fill="#FFFFFF" fill-opacity="0.45"/>
+    <circle cx="266" cy="80"  r="3" fill="#FFFFFF" fill-opacity="0.45"/>
   </g>
 
   <rect x="138" y="212" width="56" height="152" rx="28" fill="#FFFFFF"/>
   <rect x="228" y="162" width="56" height="228" rx="28" fill="#FFFFFF"/>
   <rect x="318" y="212" width="56" height="152" rx="28" fill="#FFFFFF"/>
 
-  <circle cx="256" cy="128" r="72" fill="url(#sparkGlowDark)"/>
-  <polygon points="256,88 270,128 256,168 242,128" fill="#FDE047"/>
-  <polygon points="216,128 256,114 296,128 256,142" fill="#FDE047"/>
+  <circle cx="256" cy="128" r="80" fill="url(#sparkGlowDark)"/>
+  <polygon points="256,88 270,128 256,168 242,128" fill="#FFFFFF"/>
+  <polygon points="216,128 256,114 296,128 256,142" fill="#FFFFFF"/>
 </svg>
