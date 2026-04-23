@@ -32,6 +32,12 @@ export default function Command() {
           title="zoxide not found"
           description="Install zoxide (e.g. `brew install zoxide`), or set a custom binary path in extension preferences."
         />
+      ) : !terminal || !editor ? (
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Terminal or Editor not configured"
+          description="Open Zoxide Plus preferences and pick a Terminal and Editor app."
+        />
       ) : (
         <List.Section title="Results" subtitle={entries.length.toString()}>
           {entries.map((entry) => (
