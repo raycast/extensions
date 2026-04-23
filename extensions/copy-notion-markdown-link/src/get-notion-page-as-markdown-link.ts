@@ -77,8 +77,11 @@ export default async function main() {
     const windowTitle = parts[0];
     const linkUrl = parts[1];
 
+    // Remove tracking query parameter
+    const cleanedUrl = linkUrl?.replace(/[?&]source=copy_link/, "");
+
     // URL validation
-    if (!linkUrl || !linkUrl.includes("notion.so")) {
+    if (!cleanedUrl || !cleanedUrl.includes("notion.so")) {
       await showHUD("Failed to copy Notion link. Please try again.");
       if (previousClipboard) {
         await Clipboard.copy(previousClipboard);
@@ -94,7 +97,7 @@ export default async function main() {
       cleanedTitle = windowTitle.replace(/\[/g, "\\[").replace(/\]/g, "\\]");
     }
 
-    const markdownLink = `[${cleanedTitle}](${linkUrl})`;
+    const markdownLink = `[${cleanedTitle}](${cleanedUrl})`;
 
     await Clipboard.copy(markdownLink);
 
