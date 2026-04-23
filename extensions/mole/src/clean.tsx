@@ -95,7 +95,6 @@ function useStreamingClean(molePath: string) {
       if (processRef.current !== proc) return;
       if (timerRef.current) clearTimeout(timerRef.current);
       if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
-      flushPreview();
       const final = parseCleanDryRun(buffer);
       setData(final);
       setIsLoading(false);

@@ -1,6 +1,6 @@
 # Mole Changelog
 
-## [Stability Improvements] - 2026-04-22
+## [Stability Improvements] - {PR_MERGE_DATE}
 
 - Fixed System Status crashes when Mole returns null values for optional status arrays
 - Improved Analyze Disk startup flow to avoid scanning the full home directory automatically
