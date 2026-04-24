@@ -2,7 +2,7 @@
 
 import { readdirSync, readFileSync, existsSync } from "fs";
 import { join } from "path";
-import { execSync } from "child_process";
+import { spawnSync } from "child_process";
 import { runAppleScript } from "@raycast/utils";
 import { getApfelPath } from ".";
 import { escapeForShell } from "../../utils";
@@ -44,8 +44,8 @@ function buildSnapshot(dirPath: string): string {
 
   // Git info
   try {
-    const branch = execSync(`git -C "${dirPath}" branch --show-current 2>/dev/null`, { encoding: "utf8" }).trim();
-    const lastCommit = execSync(`git -C "${dirPath}" log --oneline -1 2>/dev/null`, { encoding: "utf8" }).trim();
+    const branch = spawnSync("git", ["-C", dirPath, "branch", "--show-current"], { encoding: "utf8" }).stdout.trim();
+    const lastCommit = spawnSync("git", ["-C", dirPath, "log", "--oneline", "-1"], { encoding: "utf8" }).stdout.trim();
     if (branch || lastCommit) {
       snapshot += `\n--- git ---\nbranch: ${branch}\nlast commit: ${lastCommit}\n`;
     }

@@ -32,19 +32,25 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       return [...prev, chat];
     });
 
-    const answer = await askApfel(question, model);
+    try {
+      const answer = await askApfel(question, model);
 
-    chat.answer = answer;
+      setData((prev) => prev.map((c) => (c.id === chat.id ? { ...c, answer } : c)));
+      setSelectedChatId(chat.id);
 
-    setData([...data, chat]);
-    setSelectedChatId(chat.id);
+      history.add(chat);
 
-    history.add(chat);
+      toast.title = "Got your answer!";
+      toast.style = Toast.Style.Success;
+    } catch (err) {
+      setData((prev) => prev.filter((c) => c.id !== chat.id));
 
-    setLoading(false);
-
-    toast.title = "Got your answer!";
-    toast.style = Toast.Style.Success;
+      toast.title = "Failed to get answer";
+      toast.message = err instanceof Error ? err.message : String(err);
+      toast.style = Toast.Style.Failure;
+    } finally {
+      setLoading(false);
+    }
   }
 
   const clear = useCallback(async () => {
