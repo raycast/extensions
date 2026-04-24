@@ -1,3 +1,4 @@
+import { pathToFileURL } from "url";
 import { TileMeta } from "./tiles";
 
 export function isValidUrl(u: string | undefined): boolean {
@@ -11,7 +12,7 @@ export function isValidUrl(u: string | undefined): boolean {
 }
 
 export function encodeFileUri(p: string): string {
-  return `file://${p.split("/").map(encodeURIComponent).join("/")}`;
+  return pathToFileURL(p).href;
 }
 
 export function tileLetter(id: string): string {
