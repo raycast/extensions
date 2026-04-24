@@ -10,6 +10,7 @@ import {
   CopyBookmarkTitleAction,
   CopyBookmarkAsMarkdownAction,
   CreateQuicklinkAction,
+  DeduplicateTabsAction,
 } from "./utils/actions";
 import { Bookmark } from "./types";
 import { filterSearchable } from "./utils/search";
@@ -109,6 +110,7 @@ function BookmarkListItem({ bookmark, revalidate }: { bookmark: Bookmark; revali
                 });
               }}
             />
+            <DeduplicateTabsAction />
           </ActionPanel.Section>
         </ActionPanel>
       }

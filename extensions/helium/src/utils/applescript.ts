@@ -8,12 +8,156 @@ function escapeForAppleScript(value: string): string {
 }
 
 /**
+ * An entry returned by {@link listHeliumTabs}, mapping a tab's stable Helium
+ * AppleScript `id` (per the app's scripting dictionary) to its current URL and
+ * title. The traversal order matches AppleScript's `windows` × `tabs` order.
+ */
+export interface HeliumTabRef {
+  heliumId: string;
+  url: string;
+  title: string;
+}
+
+/**
+ * Enumerate every open tab in Helium and return its AppleScript `id` along
+ * with its URL and title. Helium's scripting dictionary exposes
+ * `tab > property id` as a unique, stable-per-session string (see `sdef
+ * /Applications/Helium.app`), so we can use it as a durable handle for
+ * subsequent switch/close operations instead of matching by URL (which breaks
+ * on duplicates).
+ *
+ * Output is one record per line in the form
+ * `heliumId<TAB>url<TAB>title`. We build the separator outside the
+ * `tell application "Helium"` block because inside that block the identifier
+ * `tab` resolves to Helium's tab class rather than the ASCII tab constant,
+ * which silently breaks the script.
+ */
+export async function listHeliumTabs(): Promise<HeliumTabRef[]> {
+  const script = `
+    set sep to character id 9
+    tell application "Helium"
+      if not running then return ""
+      set output to {}
+      repeat with w in windows
+        repeat with t in tabs of w
+          try
+            set tId to id of t as text
+            set tUrl to URL of t as text
+            set tTitle to title of t as text
+            set end of output to tId & sep & tUrl & sep & tTitle
+          end try
+        end repeat
+      end repeat
+      set AppleScript's text item delimiters to linefeed
+      set s to output as text
+      set AppleScript's text item delimiters to ""
+      return s
+    end tell
+  `;
+
+  const raw = await runAppleScript(script, { timeout: 5000 });
+  if (!raw || raw.trim() === "") return [];
+  return raw
+    .split("\n")
+    .map((line) => line.split("\t"))
+    .filter((parts) => parts.length >= 2)
+    .map(([heliumId, url, title = ""]) => ({ heliumId, url, title }));
+}
+
+/**
+ * Switch to a specific tab in Helium browser by its Helium AppleScript id.
+ *
+ * Uses the `select` AppleScript command on tabs, added upstream in
+ * imputnet/helium-macos#126. `select` is space-aware: it raises the Helium
+ * window on whichever macOS Space it currently lives on and focuses the tab.
+ *
+ * @param heliumId - The Helium AS tab id (obtained from {@link listHeliumTabs})
+ * @returns true if tab was found and switched to, false otherwise
+ */
+export async function switchToHeliumTabById(heliumId: string): Promise<boolean> {
+  const escapedId = escapeForAppleScript(heliumId);
+  const script = `
+    tell application "Helium"
+      if not running then return "not_running"
+      set foundTab to false
+      repeat with w in windows
+        repeat with t in tabs of w
+          try
+            if (id of t as text) is "${escapedId}" then
+              select t
+              set foundTab to true
+              exit repeat
+            end if
+          end try
+        end repeat
+        if foundTab then exit repeat
+      end repeat
+      if foundTab then
+        return "success"
+      else
+        return "not_found"
+      end if
+    end tell
+  `;
+
+  try {
+    const result = await runAppleScript(script, { timeout: 5000 });
+    return result.trim() === "success";
+  } catch (error) {
+    console.error("switchToHeliumTabById error:", error);
+    return false;
+  }
+}
+
+/**
+ * Close a specific tab in Helium browser by its Helium AppleScript id.
+ */
+export async function closeHeliumTabById(heliumId: string): Promise<boolean> {
+  const escapedId = escapeForAppleScript(heliumId);
+  const script = `
+    tell application "Helium"
+      if not running then return "not_running"
+      set foundTab to false
+      repeat with w in windows
+        repeat with t in tabs of w
+          try
+            if (id of t as text) is "${escapedId}" then
+              close t
+              set foundTab to true
+              exit repeat
+            end if
+          end try
+        end repeat
+        if foundTab then exit repeat
+      end repeat
+      if foundTab then
+        return "success"
+      else
+        return "not_found"
+      end if
+    end tell
+  `;
+
+  try {
+    const result = await runAppleScript(script, { timeout: 5000 });
+    return result.trim() === "success";
+  } catch (error) {
+    console.error("closeHeliumTabById error:", error);
+    return false;
+  }
+}
+
+/**
  * Switch to a specific tab in Helium browser by its URL.
  *
  * Uses the `select` AppleScript command on tabs, added upstream in
  * imputnet/helium-macos#126. Unlike `set active tab index` + `activate`,
  * `select` is space-aware: it will raise the Helium window on whichever
  * macOS Space it currently lives on and focus the matching tab.
+ *
+ * Prefer {@link switchToHeliumTabById} when you have a Helium tab id handy
+ * (via {@link listHeliumTabs}); this URL-based path cannot disambiguate
+ * between multiple tabs sharing the same URL.
  *
  * @param tabUrl - The URL of the tab to switch to
  * @returns true if tab was found and switched to, false otherwise

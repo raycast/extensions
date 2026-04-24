@@ -1,7 +1,10 @@
 import { BrowserExtension } from "@raycast/api";
 
-// Re-export the Tab type from BrowserExtension for convenience
-export type Tab = BrowserExtension.Tab;
+// Re-export the Tab type from BrowserExtension, extended with the Helium
+// AppleScript `id` bridged in at fetch time. `heliumId` is optional because a
+// tab may not resolve (e.g., if the Helium app is not running or the AS lookup
+// fails); callers should fall back to URL-based operations in that case.
+export type Tab = BrowserExtension.Tab & { heliumId?: string };
 
 // History entry from browsing history database
 export interface HistoryEntry {

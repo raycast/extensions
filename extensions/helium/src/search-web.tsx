@@ -14,6 +14,7 @@ import {
   CopyUrlAction,
   CopyAsMarkdownAction,
   CreateQuicklinkAction,
+  DeduplicateTabsAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 
@@ -150,6 +151,7 @@ function TabListItem({
           <CopyUrlAction tab={tab} />
           <CopyAsMarkdownAction tab={tab} />
           <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
+          <DeduplicateTabsAction mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
         </ActionPanel>
       }
     />
