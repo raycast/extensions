@@ -1,12 +1,6 @@
 # Jira (Self-Hosted) Changelog
 
-## [Jira 9+ API] - 2026-04-24
-
-- **Breaking:** Minimum supported Jira Server / Data Center is **9.0**. Jira 8.x is no longer supported.
-- **Create issue metadata:** Uses only granular `GET /rest/api/2/issue/createmeta/{project}/issuetypes` and `.../issuetypes/{issueTypeId}` (monolithic `createmeta` removed in Jira 9).
-- **Labels:** Suggestions from JQL autocomplete only; `GET /rest/api/2/label` is not used (unreliable on Server/DC).
-
-## [Ported parity with Jira Cloud extension] - 2026-04-24
+## [Jira 9+ API] - {PR_MERGE_DATE}
 
 - **Open Issues**: optional sections for Active Sprint, All Sprints (by sprint name), and Backlog; project filter with persisted selection when sections are enabled. Uses classic `GET /rest/api/2/search` and Greenhopper sprint field metadata (no Cloud `/search/jql`).
 - **Search Issues**: safer project filter via JQL helpers; default `created >= -30d` when no project is selected; numeric-only query matches `issuekey IN (...)` across loaded projects when no project is chosen.
