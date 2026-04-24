@@ -8,19 +8,12 @@ function escapeForAppleScript(value: string): string {
 }
 
 /**
- * Switch to a specific tab in Helium browser by its URL
+ * Switch to a specific tab in Helium browser by its URL.
  *
- * WORKAROUND FOR SPACE SWITCHING:
- * External AppleScript cannot reliably force macOS Space switching. The only method that
- * consistently works is Raycast's open() API with the bundle ID. We exploit this by:
- * 1. Opening a temporary new tab (forces Space switch via Raycast's open() API)
- * 2. Polling until the temp tab is ready (checking its URL)
- * 3. Closing that temporary tab
- * 4. Switching to the actual target tab
- *
- * This avoids race conditions by actively polling rather than using arbitrary delays.
- * Arc doesn't need this workaround because their 'select' command handles Space switching
- * internally in their application code.
+ * Uses the `select` AppleScript command on tabs, added upstream in
+ * imputnet/helium-macos#126. Unlike `set active tab index` + `activate`,
+ * `select` is space-aware: it will raise the Helium window on whichever
+ * macOS Space it currently lives on and focus the matching tab.
  *
  * @param tabUrl - The URL of the tab to switch to
  * @returns true if tab was found and switched to, false otherwise
@@ -36,7 +29,7 @@ export async function switchToHeliumTab(tabUrl: string): Promise<boolean> {
 }
 
 /**
- * Simple tab switching without Space switching workaround (default behavior)
+ * Space-aware tab switching using the `select` command (helium-macos#126).
  */
 export async function switchToTab(escapedUrl: string): Promise<boolean> {
   const script = `
@@ -45,23 +38,19 @@ export async function switchToTab(escapedUrl: string): Promise<boolean> {
 
             set foundTab to false
             repeat with w in windows
-                set tabIndex to 1
                 repeat with t in tabs of w
                     try
                         if (URL of t as text) is "${escapedUrl}" then
-                            set active tab index of w to tabIndex
-                            set index of w to 1
+                            select t
                             set foundTab to true
                             exit repeat
                         end if
                     end try
-                    set tabIndex to tabIndex + 1
                 end repeat
                 if foundTab then exit repeat
             end repeat
 
             if foundTab then
-                activate
                 return "success"
             else
                 return "not_found"
