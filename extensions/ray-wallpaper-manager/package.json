@@ -6,6 +6,12 @@
   "description": "Manages wallpapers from both Wallhaven and Local Folders.",
   "icon": "extension-icon.png",
   "author": "hermes",
+  "changelog": [
+    {
+      "version": "1.0.1",
+      "description": "Initial version of Wallpaper Manager for Windows with Wallhaven and Local Folder support."
+    }
+  ],
   "categories": [
     "System"
   ],
@@ -53,8 +59,6 @@
     "prettier": "^3.3.3",
     "typescript": "^5.4.5"
   },
-
-  
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
@@ -63,7 +67,4 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
-
-  
 }
-
