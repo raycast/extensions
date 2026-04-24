@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Form, Icon, LaunchType, Toast, launchCommand, showToast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  LaunchType,
+  Toast,
+  launchCommand,
+  openExtensionPreferences,
+  showToast,
+} from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { getErrorMessage } from "../lib/errors";
@@ -150,7 +160,7 @@ export function DispatchWorkflowForm({ initialRepository }: DispatchWorkflowForm
       <Form
         actions={
           <ActionPanel>
-            <Action.OpenExtensionPreferences />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       >

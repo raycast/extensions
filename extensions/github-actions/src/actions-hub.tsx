@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { DispatchWorkflowForm } from "./components/dispatch-workflow-form";
@@ -166,7 +166,7 @@ export default function ActionsHubCommand() {
         searchBarPlaceholder="Configure your GitHub token in Raycast preferences"
         actions={
           <ActionPanel>
-            <Action.OpenExtensionPreferences />
+            <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       >
