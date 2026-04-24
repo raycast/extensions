@@ -1,50 +1,32 @@
-import { popToRoot, showHUD, Clipboard, closeMainWindow, LaunchProps, Toast, showToast } from "@raycast/api";
+import { popToRoot, showHUD, Clipboard, closeMainWindow } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { getLatestDownloads, hasAccessToDownloadsFolder, parseQuantity } from "./utils";
+import { getLatestDownload, hasAccessToDownloadsFolder } from "./utils";
 
-export default async function main(props: LaunchProps<{ arguments: Arguments.PasteLatestDownload }>) {
+export default async function main() {
   if (!hasAccessToDownloadsFolder()) {
     await showHUD("No permission to access the downloads folder");
     return;
   }
 
-  let downloads;
+  let download;
   try {
-    const quantity = parseQuantity(props.arguments.quantity);
-
-    if (quantity === null) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid quantity",
-        message: "Quantity must be a positive integer",
-      });
-      return;
-    }
-
-    downloads = getLatestDownloads(quantity);
+    download = getLatestDownload();
   } catch (error) {
-    await showFailureToast(error, { title: "Could not get latest downloads" });
+    await showFailureToast(error, { title: "Could not get latest download" });
     return;
   }
 
-  if (downloads.length === 0) {
+  if (!download) {
     await showHUD("No downloads found");
     return;
   }
 
   try {
-    for (let i = 0; i < downloads.length; i++) {
-      await Clipboard.paste({ file: downloads[i].path });
-      // Add a small delay between pastes to ensure each one completes
-      if (i < downloads.length - 1) {
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      }
-    }
+    await Clipboard.paste({ file: download.path });
     await closeMainWindow();
-    const message = downloads.length === 1 ? "Pasted latest download" : `Pasted ${downloads.length} downloads`;
-    await showHUD(message);
+    await showHUD("Pasted latest download");
     await popToRoot();
   } catch (error) {
-    await showFailureToast(error, { title: "Could not paste downloads" });
+    await showFailureToast(error, { title: "Could not paste download" });
   }
 }

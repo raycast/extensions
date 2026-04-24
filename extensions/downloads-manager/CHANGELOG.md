@@ -1,5 +1,10 @@
 # Downloads Manager Changelog
 
+## [Upgrade Delete Latest Download Command] - {PR_MERGE_DATE}
+
+- Address [#26296](https://github.com/raycast/extensions/issues/26296) by
+upgrading Delete Latest Download Command to not focus Raycast when called via deeplink.
+
 ## [Add file preview] - 2026-02-25
 
 - Added file preview in Manage Downloads: image previews (macOS only) and metadata for downloaded files.

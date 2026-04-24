@@ -13,8 +13,6 @@
     "dead_hikikomori",
     "clins1994",
     "0xdhrv",
-    "pernielsentikaer",
-    "rmehner",
     "YourMCGeek",
     "dhaydl",
     "hugodemenez"
@@ -109,16 +107,7 @@
       "name": "paste-latest-download",
       "title": "Paste Latest Download",
       "description": "Pastes the last downloaded file or folder to the foremost active app",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "quantity",
-          "placeholder": "1",
-          "type": "text",
-          "required": false,
-          "description": "The quantity of files to paste (must be a positive integer)"
-        }
-      ]
+      "mode": "no-view"
     },
     {
       "name": "show-latest-download",
@@ -130,16 +119,7 @@
       "name": "delete-latest-download",
       "title": "Delete Latest Download",
       "description": "Delete the last downloaded file or folder",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "quantity",
-          "placeholder": "1",
-          "type": "text",
-          "required": false,
-          "description": "The quantity of files to delete (must be a positive integer)"
-        }
-      ]
+      "mode": "no-view"
     }
   ],
   "preferences": [
