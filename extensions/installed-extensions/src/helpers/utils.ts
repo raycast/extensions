@@ -1,5 +1,5 @@
 import process from "node:process";
-import { ExtensionMetadata } from "./types";
+import { ExtensionMetadata } from "../types";
 
 export const isWindows = process.platform === "win32";
 
@@ -25,4 +25,13 @@ export function formatOutput(
     prependText.replaceAll("{count}", installedExtensions.length.toString()) +
     installedExtensions.map((item) => formatItem(item, format)).join(joinChar)
   );
+}
+
+export async function mapInBatches<T, R>(items: T[], batchSize: number, fn: (item: T) => Promise<R>): Promise<R[]> {
+  const out: R[] = [];
+  for (let i = 0; i < items.length; i += batchSize) {
+    const batch = items.slice(i, i + batchSize);
+    out.push(...(await Promise.all(batch.map(fn))));
+  }
+  return out;
 }

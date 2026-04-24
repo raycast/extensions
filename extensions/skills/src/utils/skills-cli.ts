@@ -1,4 +1,5 @@
-import { readFile } from "node:fs/promises";
+import { access, readFile, stat } from "node:fs/promises";
+import { constants } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
 import { getCustomNpxPath, preferences } from "../preferences";
@@ -8,6 +9,9 @@ import { getExecOptions } from "./exec-options";
 
 const home = homedir();
 const isWindows = process.platform === "win32";
+
+let validatedCustomNpxPath: string | null = null;
+let pendingCustomNpxValidation: { path: string; promise: Promise<void> } | null = null;
 
 type ExecFailure = Error & {
   code?: string | number;
@@ -25,14 +29,31 @@ export function isNpxResolutionError(error: unknown): boolean {
   return error instanceof NpxResolutionError;
 }
 
+export class InvalidCustomNpxPathError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "InvalidCustomNpxPathError";
+  }
+}
+
+export function isInvalidCustomNpxPathError(error: unknown): boolean {
+  return error instanceof InvalidCustomNpxPathError;
+}
+
 function buildSkillsCliCommand(npxCommand: string, args: string[]): string {
   return [npxCommand, "-y", "skills@latest", ...args].map(shellEscape).join(" ");
 }
 
 async function runSkillsCli(args: string[]): Promise<string> {
-  const npxCommand = getCustomNpxPath() ?? "npx";
+  const customNpxPath = getCustomNpxPath();
+  if (customNpxPath) {
+    await validateCustomNpxPath(customNpxPath);
+  }
+
+  const npxCommand = customNpxPath ?? "npx";
   try {
-    const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), await getExecOptions());
+    const execOptions = await getExecOptions();
+    const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), execOptions);
     return stdout;
   } catch (error) {
     throw normalizeCliError(error, npxCommand);
@@ -50,7 +71,7 @@ function shellEscape(arg: string): string {
 function normalizeCliError(error: unknown, npxCommand: string): Error {
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
-      "Unable to find a working npx command. Run `which npx` in Terminal, then set that path in Extension Preferences under 'Custom npx Path'.",
+      "Unable to find a working npx command. Run `which npx` in Terminal, then set that path in the extension configuration under 'Custom npx Path'.",
     );
   }
 
@@ -59,6 +80,56 @@ function normalizeCliError(error: unknown, npxCommand: string): Error {
   }
 
   return new Error("Failed to execute the skills CLI command.");
+}
+
+async function validateCustomNpxPath(customNpxPath: string): Promise<void> {
+  if (validatedCustomNpxPath === customNpxPath) {
+    return;
+  }
+
+  if (pendingCustomNpxValidation?.path === customNpxPath) {
+    return pendingCustomNpxValidation.promise;
+  }
+
+  const validationPromise = assertValidCustomNpxPath(customNpxPath);
+  pendingCustomNpxValidation = { path: customNpxPath, promise: validationPromise };
+
+  try {
+    await validationPromise;
+    validatedCustomNpxPath = customNpxPath;
+  } finally {
+    if (pendingCustomNpxValidation?.path === customNpxPath) {
+      pendingCustomNpxValidation = null;
+    }
+  }
+}
+
+async function assertValidCustomNpxPath(customNpxPath: string): Promise<void> {
+  const invalidPathMessage =
+    "The configured Custom npx Path is incorrect. It must point to the `npx` executable. Update the path in the extension configuration or clear it to use automatic detection.";
+
+  const executableNames = isWindows ? new Set(["npx", "npx.cmd", "npx.exe"]) : new Set(["npx"]);
+  if (!executableNames.has(basename(customNpxPath).toLowerCase())) {
+    throw new InvalidCustomNpxPathError(invalidPathMessage);
+  }
+
+  let fileStats;
+  try {
+    fileStats = await stat(customNpxPath);
+  } catch {
+    throw new InvalidCustomNpxPathError(invalidPathMessage);
+  }
+  if (fileStats.isDirectory()) {
+    throw new InvalidCustomNpxPathError(invalidPathMessage);
+  }
+
+  if (!isWindows) {
+    try {
+      await access(customNpxPath, constants.X_OK);
+    } catch {
+      throw new InvalidCustomNpxPathError(invalidPathMessage);
+    }
+  }
 }
 
 function isNpxCommandResolutionFailure(error: unknown, npxCommand: string): boolean {

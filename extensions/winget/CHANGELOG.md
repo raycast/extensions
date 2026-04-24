@@ -1,5 +1,9 @@
 # WinGet Changelog
 
+## [Fix localized upgrade parsing] - 2026-04-23
+
+- Fix winget table parsing on localized outputs by mapping table columns by position
+
 ## [Reliability & Details Improvements] - 2026-04-21
 
 - Improve install and upgrade reliability by respecting winget exit codes (no false success toasts)

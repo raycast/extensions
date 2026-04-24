@@ -1,4 +1,4 @@
-import { List, showToast, Toast, Icon, getPreferenceValues, useNavigation } from "@raycast/api";
+import { List, Icon, getPreferenceValues, useNavigation } from "@raycast/api";
 import { usePromise, showFailureToast } from "@raycast/utils";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import fs from "fs";
@@ -8,7 +8,7 @@ import { groupFilesByFolder } from "./utils/groupOperations";
 import { CreateFileForm } from "./components/CreateFileForm";
 import { FileListItem } from "./components/FileListItem";
 import { PaginationSection } from "./components/PaginationSection";
-import { CommonActions, LoadMoreAction } from "./components/ActionComponents";
+import { CommonActions } from "./components/ActionComponents";
 import { MarkdownEmptyView } from "./components/MarkdownEmptyView";
 import { TagSearchList } from "./components/TagSearchList";
 import path from "path";
@@ -17,8 +17,6 @@ import { getTagTintColor } from "./utils/tagColorUtils";
 export const markdownDir = getPreferenceValues<{ markdownDir: string }>().markdownDir;
 
 const ITEMS_PER_PAGE = 20;
-const INITIAL_LOAD_LIMIT = 50;
-const LOAD_INCREMENT = 50;
 
 export default function Command() {
   const { push } = useNavigation();
@@ -27,8 +25,6 @@ export default function Command() {
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [showColorTags, setShowColorTags] = useState(true);
   const [selectedFolder, setSelectedFolder] = useState<string>("");
-  const [loadLimit, setLoadLimit] = useState<number>(INITIAL_LOAD_LIMIT);
-  const [totalFiles, setTotalFiles] = useState<number>(0);
   const [rootDirectory, setRootDirectory] = useState<string>(markdownDir);
 
   // Extracted shared function for directory validation
@@ -52,33 +48,13 @@ export default function Command() {
     }
   }, [markdownDir, isValidMarkdownDir]);
 
-  // Initialize total files count
-  useEffect(() => {
-    const getTotalFiles = async () => {
-      try {
-        if (!isValidMarkdownDir()) {
-          console.log("Skipping file count");
-          return;
-        }
-
-        const allFiles = await getMarkdownFiles();
-        setTotalFiles(allFiles.length);
-        console.log(`Total files in ${markdownDir}: ${allFiles.length}`);
-      } catch (error) {
-        console.error(`Error getting total files from ${markdownDir}:`, error);
-      }
-    };
-
-    getTotalFiles();
-  }, [markdownDir, isValidMarkdownDir]);
-
   // Define the fetch function
   const fetchMarkdownFiles = useCallback(async () => {
-    console.log(`Fetching files with limit: ${loadLimit}`);
-    const files = await getMarkdownFiles(loadLimit);
-    console.log(`Loaded ${files.length} files, limit: ${loadLimit}, total: ${totalFiles}`);
+    console.log("Fetching Markdown files");
+    const files = await getMarkdownFiles();
+    console.log(`Loaded ${files.length} files`);
     return files;
-  }, [loadLimit, totalFiles]);
+  }, []);
 
   // Get the Markdown files
   const { data, isLoading, error, revalidate } = usePromise(fetchMarkdownFiles, [], {
@@ -91,11 +67,6 @@ export default function Command() {
       showFailureToast("Loading Markdown files failed", error);
     }
   }, [error]);
-
-  // Reload files when loadLimit changes
-  useEffect(() => {
-    revalidate();
-  }, [loadLimit, revalidate]);
 
   // Filtering and paging data
   const filteredData = useMemo(() => {
@@ -112,6 +83,7 @@ export default function Command() {
   console.log("Filtered data count:", filteredData.length);
 
   const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
+  const totalFiles = data?.length ?? 0;
 
   const paginatedData = useMemo(() => {
     return filteredData.slice(currentPage * ITEMS_PER_PAGE, (currentPage + 1) * ITEMS_PER_PAGE);
@@ -164,31 +136,6 @@ export default function Command() {
     }
   }, [data, rootDirectory, markdownDir]);
 
-  // Load more files action
-  const loadMoreFiles = useCallback(() => {
-    if (loadLimit < totalFiles) {
-      setLoadLimit((prevLimit) => {
-        const newLimit = prevLimit + LOAD_INCREMENT;
-        console.log(`Increasing load limit from ${prevLimit} to ${newLimit}`);
-
-        // Display a Toast after the status is updated
-        showToast({
-          style: Toast.Style.Success,
-          title: "Loading more files",
-          message: `Increasing limit from ${prevLimit} to ${newLimit}`,
-        });
-
-        return newLimit;
-      });
-    } else {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "All files loaded",
-        message: `Already loaded all ${totalFiles} files`,
-      });
-    }
-  }, [loadLimit, totalFiles]);
-
   // Handle tag selection
   const handleTagSelect = useCallback((tag: string) => {
     setSelectedTag(tag || null);
@@ -204,8 +151,7 @@ export default function Command() {
   const commonActionsProps = useMemo(
     () => ({
       showCreateFileForm,
-      revalidate,
-      loadMoreFiles,
+      revalidate: forceRevalidate,
       showColorTags,
       setShowColorTags,
       selectedTag,
@@ -214,8 +160,7 @@ export default function Command() {
     }),
     [
       showCreateFileForm,
-      revalidate,
-      loadMoreFiles,
+      forceRevalidate,
       showColorTags,
       setShowColorTags,
       selectedTag,
@@ -226,20 +171,6 @@ export default function Command() {
 
   // Common actions for both main view and empty view
   const commonActions = <CommonActions {...commonActionsProps} />;
-
-  // Add a footer section to display load status
-  const renderFooter = useCallback(() => {
-    if (loadLimit < totalFiles) {
-      return (
-        <List.Item
-          title={`Loaded ${loadLimit} of ${totalFiles} files`}
-          icon={Icon.Plus}
-          actions={<LoadMoreAction loadMoreFiles={loadMoreFiles} />}
-        />
-      );
-    }
-    return null;
-  }, [loadLimit, totalFiles, loadMoreFiles]);
 
   const handleSearchTextChange = useCallback((text: string) => {
     setSearchText(text);
@@ -316,9 +247,8 @@ export default function Command() {
               currentPage={currentPage}
               totalPages={totalPages}
               setCurrentPage={setCurrentPage}
-              revalidate={revalidate}
+              revalidate={forceRevalidate}
               pageInfoText={pageInfoText}
-              loadMoreFiles={loadMoreFiles}
               showTagSearchList={showTagSearchList}
               selectedTag={selectedTag}
               setSelectedTag={setSelectedTag}
@@ -336,12 +266,11 @@ export default function Command() {
                   file={file}
                   showColorTags={showColorTags}
                   setShowColorTags={setShowColorTags}
-                  revalidate={revalidate}
+                  revalidate={forceRevalidate}
                   currentPage={currentPage}
                   totalPages={totalPages}
                   setCurrentPage={setCurrentPage}
                   markdownDir={rootDirectory}
-                  loadMoreFiles={loadMoreFiles}
                   showCreateFileForm={showCreateFileForm}
                   showTagSearchList={showTagSearchList}
                   selectedTag={selectedTag}
@@ -350,9 +279,6 @@ export default function Command() {
               ))}
             </List.Section>
           ))}
-
-          {/* Load more footer */}
-          {renderFooter()}
         </>
       ) : (
         <MarkdownEmptyView

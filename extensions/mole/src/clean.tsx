@@ -6,12 +6,27 @@ import { getMolePathSafe, runMole, MOLE_ENV } from "./utils/mole";
 import { parseCleanDryRun, type CleanDryRunResult } from "./utils/parsers";
 import { MoleNotInstalled } from "./components/MoleNotInstalled";
 
+const CLEAN_SCAN_TIMEOUT_MS = 180000;
+const CLEAN_PREVIEW_LINE_LIMIT = 2000;
+
+function isCleanPreviewLine(line: string): boolean {
+  return (
+    line.includes("➤") ||
+    line.includes("→") ||
+    line.includes("Potential space:") ||
+    line.includes("Items:") ||
+    line.includes("Nothing to clean") ||
+    line.includes("already clean")
+  );
+}
+
 function useStreamingClean(molePath: string) {
   const [data, setData] = useState<CleanDryRunResult>({ sections: [], totalSpace: "Scanning...", totalItems: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const processRef = useRef<ChildProcess | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scanTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const startScan = useCallback(() => {
     if (processRef.current) {
@@ -22,6 +37,10 @@ function useStreamingClean(molePath: string) {
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
+    if (scanTimeoutRef.current) {
+      clearTimeout(scanTimeoutRef.current);
+      scanTimeoutRef.current = null;
+    }
 
     setIsLoading(true);
     setData({ sections: [], totalSpace: "Scanning...", totalItems: 0 });
@@ -30,31 +49,68 @@ function useStreamingClean(molePath: string) {
     const proc = spawn(molePath, ["clean", "--dry-run"], { env: MOLE_ENV });
     processRef.current = proc;
     let buffer = "";
+    let partialLine = "";
+
+    const appendPreviewLine = (line: string) => {
+      if (!isCleanPreviewLine(line)) return;
+      buffer += `${line}\n`;
+
+      const lines = buffer.split("\n");
+      if (lines.length > CLEAN_PREVIEW_LINE_LIMIT) {
+        buffer = lines.slice(-CLEAN_PREVIEW_LINE_LIMIT).join("\n");
+      }
+    };
+
+    const flushPreview = () => {
+      if (partialLine) {
+        appendPreviewLine(partialLine);
+        partialLine = "";
+      }
+      setData(parseCleanDryRun(buffer));
+    };
+
+    scanTimeoutRef.current = setTimeout(() => {
+      if (processRef.current !== proc) return;
+      setError(new Error("Mole clean preview timed out. Try again after validating sudo or reducing the scan scope."));
+      setIsLoading(false);
+      processRef.current = null;
+      proc.kill();
+    }, CLEAN_SCAN_TIMEOUT_MS);
 
     const handleChunk = (chunk: Buffer) => {
       if (processRef.current !== proc) return;
-      buffer += chunk.toString();
+      const lines = `${partialLine}${chunk.toString()}`.split(/\r?\n/);
+      partialLine = lines.pop() ?? "";
+      lines.forEach(appendPreviewLine);
       if (timerRef.current) clearTimeout(timerRef.current);
       timerRef.current = setTimeout(() => {
-        if (processRef.current === proc) setData(parseCleanDryRun(buffer));
+        if (processRef.current === proc) flushPreview();
       }, 300);
     };
 
     proc.stdout.on("data", handleChunk);
     proc.stderr.on("data", handleChunk);
 
-    proc.on("close", () => {
+    proc.on("close", (code) => {
       if (processRef.current !== proc) return;
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
       const final = parseCleanDryRun(buffer);
       setData(final);
       setIsLoading(false);
       processRef.current = null;
+
+      if (code !== 0) {
+        setError(new Error(`Mole clean preview exited with code ${code ?? "unknown"}.`));
+        return;
+      }
+
       showToast({ style: Toast.Style.Success, title: "Scan complete", message: `${final.totalSpace} recoverable` });
     });
 
     proc.on("error", (err: Error) => {
       if (processRef.current !== proc) return;
+      if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
       setError(err);
       setIsLoading(false);
       processRef.current = null;
@@ -66,6 +122,7 @@ function useStreamingClean(molePath: string) {
     return () => {
       processRef.current?.kill();
       if (timerRef.current) clearTimeout(timerRef.current);
+      if (scanTimeoutRef.current) clearTimeout(scanTimeoutRef.current);
     };
   }, [startScan]);
 
