@@ -1,0 +1,107 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "craft-agents",
+  "title": "Craft Agents",
+  "description": "Open, resume, and navigate Craft Agents sessions straight from Raycast via craftagents:// deeplinks.",
+  "icon": "extension-icon.png",
+  "author": "CodePirate",
+  "license": "MIT",
+  "categories": ["Productivity", "Developer Tools"],
+  "keywords": ["craft-agents", "ai", "agent", "deeplink"],
+  "commands": [
+    {
+      "name": "new-session",
+      "title": "New Session",
+      "description": "Open a new Craft Agents session with optional input and permission mode.",
+      "mode": "no-view",
+      "arguments": [
+        { "name": "input", "placeholder": "Initial message (optional)", "type": "text", "required": false },
+        { "name": "mode", "placeholder": "plan | acceptEdits | bypass | default", "type": "text", "required": false }
+      ]
+    },
+    {
+      "name": "new-session-quick",
+      "title": "New Session (Quick)",
+      "description": "Open a fresh Craft Agents session with no arguments, same as clicking the app's \"New Session\" menu item.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-ask",
+      "title": "Quick Ask",
+      "description": "Start a new session and immediately send the given message.",
+      "mode": "no-view",
+      "arguments": [
+        { "name": "input", "placeholder": "What to ask", "type": "text", "required": true }
+      ]
+    },
+    {
+      "name": "resume-session",
+      "title": "Resume Session",
+      "description": "Browse and search recent Craft Agents sessions, then jump back to one.",
+      "mode": "view"
+    },
+    {
+      "name": "flagged-sessions",
+      "title": "Flagged Sessions",
+      "description": "Browse sessions flagged as important; unflag or delete inline.",
+      "mode": "view"
+    },
+    {
+      "name": "open-view",
+      "title": "Open View",
+      "description": "Jump to a Craft Agents view: Sessions, Sources, Skills, or Settings.",
+      "mode": "view"
+    },
+    {
+      "name": "open-source",
+      "title": "Open Source",
+      "description": "Browse configured data sources and jump to one (optionally trigger OAuth).",
+      "mode": "view"
+    },
+    {
+      "name": "open-skill",
+      "title": "Open Skill",
+      "description": "Browse installed skills (global + workspace) and jump to one.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workspaceRoot",
+      "title": "Workspace Root",
+      "description": "Absolute path to your Craft Agents workspace folder (contains sessions/, sources/, skills/). Supports leading ~.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "~/Documents/craft-agents-workspace"
+    },
+    {
+      "name": "globalSkillsDir",
+      "title": "Global Skills Dir",
+      "description": "Path to global skills directory (merged with workspace skills). Supports leading ~.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/.agents/skills",
+      "placeholder": "~/.agents/skills"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
