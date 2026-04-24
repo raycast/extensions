@@ -3,10 +3,11 @@ import { useExec } from "@raycast/utils";
 import { homedir } from "node:os";
 import { basename } from "node:path";
 import { useState } from "react";
-import { addPath, zoxidePath } from "./lib/zoxide";
+import { addPath, getZoxidePath } from "./lib/zoxide";
 
 export default function Command() {
   const { terminal, editor } = getPreferenceValues<Preferences.JumpToFolder>();
+  const zoxidePath = getZoxidePath();
   const [searchText, setSearchText] = useState("");
 
   const args = ["query", "-l", "-s", ...(searchText ? [searchText] : [])];

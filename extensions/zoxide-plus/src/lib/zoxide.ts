@@ -4,7 +4,7 @@ import { existsSync } from "node:fs";
 import { homedir } from "node:os";
 import { promisify } from "node:util";
 
-function findZoxidePath(): string | undefined {
+export function getZoxidePath(): string | undefined {
   const { zoxidePath: customPath } = getPreferenceValues<{ zoxidePath?: string }>();
   if (customPath && existsSync(customPath)) return customPath;
 
@@ -20,11 +20,10 @@ function findZoxidePath(): string | undefined {
   return candidates.find(existsSync);
 }
 
-export const zoxidePath = findZoxidePath();
-
 const exec = promisify(execFile);
 
 export async function addPath(path: string): Promise<void> {
+  const zoxidePath = getZoxidePath();
   if (!zoxidePath) {
     throw new Error("zoxide not found. Install with: brew install zoxide");
   }

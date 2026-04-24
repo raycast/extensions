@@ -2,11 +2,12 @@ import { Action, ActionPanel, closeMainWindow, Form, Icon, showHUD, showToast, T
 import { existsSync, lstatSync } from "node:fs";
 import { useEffect, useState } from "react";
 import { getFinderTargetPath } from "./lib/finder";
-import { addPath, zoxidePath } from "./lib/zoxide";
+import { addPath, getZoxidePath } from "./lib/zoxide";
 
 type Mode = "checking-finder" | "form" | "submitting";
 
 export default function Command() {
+  const zoxidePath = getZoxidePath();
   const [mode, setMode] = useState<Mode>("checking-finder");
 
   useEffect(() => {
