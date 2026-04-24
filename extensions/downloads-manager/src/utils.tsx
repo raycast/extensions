@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Cache,
-  confirmAlert,
-  Detail,
-  getPreferenceValues,
-  showToast,
-  Toast,
-  trash,
-} from "@raycast/api";
+import { Action, ActionPanel, Cache, Detail, getPreferenceValues, showToast, Toast, trash } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { accessSync, constants, mkdtempSync, readdirSync, readFileSync, rmSync, statSync } from "fs";
 import { rm } from "fs/promises";
@@ -173,6 +163,47 @@ export function getLatestDownload() {
   return downloads[0];
 }
 
+export function getLatestDownloads(quantity: number) {
+  const downloads = getDownloads();
+  if (downloads.length < 1) {
+    return [];
+  }
+
+  if (latestDownloadOrder === "addTime") {
+    downloads.sort((a, b) => b.addedAt.getTime() - a.addedAt.getTime());
+  } else if (latestDownloadOrder === "createTime") {
+    downloads.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  } else if (latestDownloadOrder === "modifiedTime") {
+    downloads.sort((a, b) => b.lastModifiedAt.getTime() - a.lastModifiedAt.getTime());
+  } else if (latestDownloadOrder === "birthTime") {
+    downloads.sort((a, b) => b.birthAt.getTime() - a.birthAt.getTime());
+  }
+
+  return downloads.slice(0, quantity);
+}
+
+/**
+ * Validates and parses a quantity input string to a positive integer.
+ * @param quantityInput - The input string to validate (can be undefined)
+ * @returns The parsed positive integer, or null if invalid
+ */
+export function parseQuantity(quantityInput: string | undefined): number | null {
+  const trimmedInput = quantityInput?.trim() || "1";
+
+  // Validate that input is a positive integer
+  if (!/^\d+$/.test(trimmedInput)) {
+    return null;
+  }
+
+  const quantity = parseInt(trimmedInput, 10);
+
+  if (isNaN(quantity) || quantity < 1) {
+    return null;
+  }
+
+  return quantity;
+}
+
 export function hasAccessToDownloadsFolder() {
   try {
     accessSync(downloadsFolder, constants.R_OK);
@@ -183,37 +214,37 @@ export function hasAccessToDownloadsFolder() {
   }
 }
 
-export async function deleteFileOrFolder(filePath: string) {
+export async function deleteFileOrFolder(filePath: string, options?: { skipToasts?: boolean }) {
+  const skipToasts = options?.skipToasts ?? false;
+
   if (preferences.deletionBehavior === "trash") {
     try {
       await trash(filePath);
-      await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+      if (!skipToasts) {
+        await showToast({ style: Toast.Style.Success, title: "Item Moved to Trash" });
+      }
     } catch (error) {
-      await showFailureToast(error, { title: "Move to Trash Failed" });
+      if (!skipToasts) {
+        await showFailureToast(error, { title: "Move to Trash Failed" });
+      }
+      throw error;
     }
     return;
   }
 
-  const shouldDelete = await confirmAlert({
-    title: "Delete Item?",
-    message: `Are you sure you want to permanently delete:\n${filePath}?`,
-    primaryAction: {
-      title: "Delete",
-    },
-  });
-
-  if (!shouldDelete) {
-    await showToast({ style: Toast.Style.Animated, title: "Cancelled" });
-    return;
-  }
-
+  // Permanent delete - confirmation is handled by the caller
   try {
     await rm(filePath, { recursive: true, force: true });
-    await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
-  } catch (error) {
-    if (error instanceof Error) {
-      await showFailureToast(error, { title: "Deletion Failed" });
+    if (!skipToasts) {
+      await showToast({ style: Toast.Style.Success, title: "Item Deleted" });
     }
+  } catch (error) {
+    if (!skipToasts) {
+      if (error instanceof Error) {
+        await showFailureToast(error, { title: "Deletion Failed" });
+      }
+    }
+    throw error;
   }
 }
 
