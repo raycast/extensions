@@ -1,5 +1,18 @@
 # Markdown Navigator Changelog
 
+## [Fix Markdown File Indexing] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Fixed incomplete Markdown file indexing by recursively scanning supported Markdown files instead of relying on Spotlight search results.
+- Fixed search missing files beyond the initial 50-file load by searching across the complete indexed file list.
+- Fixed refresh behavior to clear stale cached file indexes before reloading files.
+- Fixed broad folder indexing to skip macOS user Library folders and VS Code history files without excluding regular note folders named `Library`.
+
+### Changed
+
+- Removed the "Load More Files" flow; large file collections now use pagination over the complete Markdown index.
+
 ## [Maintenance] - 2025-05-16
 
 - Remove duplicate files
