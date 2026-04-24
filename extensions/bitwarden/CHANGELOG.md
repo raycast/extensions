@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Update packages] - {PR_MERGE_DATE}
+## [Update packages] - 2026-04-24
 
 - Update Raycast packages to the latest version
 
