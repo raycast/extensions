@@ -1,0 +1,67 @@
+{
+  "$schema": "https://www.raycast.com/downloads/extension.schema.json",
+  "name": "win-wallpaper-manager",
+  "version": "1.0.0",
+  "title": "Wallpaper Manager",
+  "description": "Manages wallpapers from both Wallhaven and Local Folders.",
+  "icon": "extension-icon.png",
+  "author": "hermes",
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "wallpaper-manager",
+      "title": "Wallpaper Manager",
+      "icon": "extension-icon.png",
+      "description": "Manage your Wallhaven and Local wallpapers.",
+      "mode": "view"
+    },
+    {
+      "name": "auto-switch",
+      "title": "Auto Switch",
+      "description": "Randomly selects a wallpaper based on your settings.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "localFolderPath",
+      "type": "directory",
+      "title": "Local Wallpapers Folder",
+      "description": "Folder where local wallpaper images are stored and read from.",
+      "required": true
+    },
+    {
+      "name": "downloadFolderPath",
+      "type": "directory",
+      "title": "Download Folder",
+      "description": "Folder where Wallhaven wallpapers will be saved (Leaves empty for default Downloads folder).",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.88.4",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^10.2.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "minimatch": "^9.0.8"
+  }
+}
