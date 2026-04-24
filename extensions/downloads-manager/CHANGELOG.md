@@ -2,8 +2,7 @@
 
 ## [Upgrade Delete Latest Download Command] - {PR_MERGE_DATE}
 
-- Address [#26296](https://github.com/raycast/extensions/issues/26296) by
-upgrading Delete Latest Download Command to not focus Raycast when called via deeplink.
+- Address [#26296](https://github.com/raycast/extensions/issues/26296) by upgrading Delete Latest Download Command to not focus Raycast when called via deeplink.
 
 ## [Add file preview] - 2026-02-25
 

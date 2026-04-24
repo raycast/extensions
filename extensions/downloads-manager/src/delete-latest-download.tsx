@@ -14,16 +14,16 @@ export default async function main() {
     return;
   }
 
-  // Close the main window before running the deletion so that when this
-  // command is launched via a deeplink (e.g. `open -g raycast://...`), Raycast
-  // doesn't get pulled into focus to render the success toast. With the window
-  // closed, `showToast` inside `deleteFileOrFolder` falls back to `showHUD`.
-  await closeMainWindow();
-
   try {
     await deleteFileOrFolder(latestDownload.path);
   } catch (error) {
     await showFailureToast(error, { title: "Deletion Failed" });
   }
+
+  // Close the main window after the deletion so that when this command is
+  // launched via a deeplink (e.g. `open -g raycast://...`), Raycast doesn't
+  // get pulled into focus. Placed after deletion so any confirmAlert dialog
+  // inside deleteFileOrFolder can still show while the window is open.
+  await closeMainWindow();
   await popToRoot();
 }
