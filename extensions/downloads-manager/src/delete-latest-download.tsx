@@ -1,5 +1,5 @@
 import { getLatestDownload, hasAccessToDownloadsFolder, deleteFileOrFolder } from "./utils";
-import { closeMainWindow, popToRoot, showHUD } from "@raycast/api";
+import { closeMainWindow, getPreferenceValues, popToRoot, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 export default async function main() {
@@ -14,16 +14,24 @@ export default async function main() {
     return;
   }
 
+  const { deletionBehavior } = getPreferenceValues();
+
+  // For trash, close the window immediately so Raycast never surfaces when
+  // launched via deeplink (e.g. `open -g raycast://...`). For permanent
+  // delete we must keep it open so the confirmAlert inside deleteFileOrFolder
+  // can be shown, then close afterwards.
+  if (deletionBehavior === "trash") {
+    await closeMainWindow();
+  }
+
   try {
     await deleteFileOrFolder(latestDownload.path);
   } catch (error) {
     await showFailureToast(error, { title: "Deletion Failed" });
   }
 
-  // Close the main window after the deletion so that when this command is
-  // launched via a deeplink (e.g. `open -g raycast://...`), Raycast doesn't
-  // get pulled into focus. Placed after deletion so any confirmAlert dialog
-  // inside deleteFileOrFolder can still show while the window is open.
-  await closeMainWindow();
+  if (deletionBehavior !== "trash") {
+    await closeMainWindow();
+  }
   await popToRoot();
 }
