@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Updated contributors list] - {PR_MERGE_DATE}
+## [Updated contributors list] - 2026-04-24
 
 - Added new contributor to the GitHub extension
 
