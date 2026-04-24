@@ -23,6 +23,7 @@ export interface FilleramaResponse {
   headers: Array<{ source: string; header: string }>;
 }
 
+// Using HTTP because the API does not provide HTTPS.
 const BASE_URL = "http://api.chrisvalleskey.com/fillerama/get.php";
 
 export async function fetchQuotes(show: ShowId): Promise<FilleramaResponse> {

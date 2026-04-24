@@ -36,6 +36,9 @@ export default function GenerateFiller() {
     try {
       const response = await fetchQuotes(values.show);
       const quotes = pickQuotes(response, count, "db");
+
+      if (!quotes.length) throw new Error("No quotes returned for this show.");
+
       const text = buildText(quotes);
 
       await closeMainWindow({ popToRootType: PopToRootType.Immediate });

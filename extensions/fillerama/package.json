@@ -33,7 +33,6 @@
     "@raycast/api": "^1.72.0"
   },
   "devDependencies": {
-    "@raycast/utils": "^1.16.0",
     "typescript": "^5.4.5"
   },
   "scripts": {
