@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Updated contributors list] - {PR_MERGE_DATE}
+
+- Added new contributor to the GitHub extension
+
 ## [Add My GitHub Stats Menu Bar] - 2026-04-23
 
 - Added a new `My GitHub Stats Menu Bar` command that surfaces profile stats (Followers, Following, Stars Received, Forks Received, PRs Authored/Merged/Open, Issues Authored/Open, Commits in the last year, Public Repos, Organizations) directly in the macOS menu bar
