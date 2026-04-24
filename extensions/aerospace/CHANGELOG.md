@@ -1,6 +1,6 @@
 # aerospace Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-04-24
 
 - Fix window switcher search to match on both app name and window title, enabling fuzzy finding by title keywords (e.g. searching "huddle" now finds Slack Huddle windows)
 
