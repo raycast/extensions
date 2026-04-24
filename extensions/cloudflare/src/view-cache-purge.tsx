@@ -10,7 +10,7 @@ import {
   showToast,
   Toast,
 } from '@raycast/api';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Service, { CachePurgeResult, Zone } from './service';
 import { getToken } from './utils';
 import { SiteProps } from './view-sites';
@@ -68,6 +68,7 @@ export function CachePurgeView(props: SiteProps) {
   const [purgeType, setPurgeType] = useState<PurgeType>('url');
   const [entries, setEntries] = useState<string>('');
   const [loaded, setLoaded] = useState(false);
+  const currentTypeRef = useRef<PurgeType>('url');
   const field = PURGE_FIELD_CONFIG[purgeType];
 
   // Restore last selected purge type and its last entries on mount
@@ -82,6 +83,7 @@ export function CachePurgeView(props: SiteProps) {
         : 'url';
       const lastEntries =
         (await LocalStorage.getItem<string>(LAST_ENTRIES_KEY(id, type))) ?? '';
+      currentTypeRef.current = type;
       setPurgeType(type);
       setEntries(lastEntries);
       setLoaded(true);
@@ -91,11 +93,15 @@ export function CachePurgeView(props: SiteProps) {
   // Load remembered entries whenever the type changes (after initial load)
   const handleTypeChange = async (value: string) => {
     const type = value as PurgeType;
+    currentTypeRef.current = type;
     setPurgeType(type);
     await LocalStorage.setItem(LAST_TYPE_KEY(id), type);
     const remembered =
       (await LocalStorage.getItem<string>(LAST_ENTRIES_KEY(id, type))) ?? '';
-    setEntries(remembered);
+    // Guard against stale resolution when the user switches types rapidly.
+    if (currentTypeRef.current === type) {
+      setEntries(remembered);
+    }
   };
 
   const handleSubmit = async (values: { entries: string }) => {
