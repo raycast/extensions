@@ -111,7 +111,7 @@ The extension requires a valid Markdown directory to be set in preferences:
 
 ## Performance Considerations
 
-The extension indexes all supported Markdown files in your configured directory, then displays them with pagination for easier browsing. If you have a large collection of Markdown files, you can:
+The extension asynchronously indexes all supported Markdown files in your configured directory, then displays them with pagination for easier browsing. If you have a large collection of Markdown files, you can:
 
 1. Use search and tag filtering to narrow down results
 2. Navigate through pages to browse indexed files (20 files per page)
@@ -119,7 +119,7 @@ The extension indexes all supported Markdown files in your configured directory,
 
 Supported Markdown extensions are `.md`, `.markdown`, `.mdown`, and `.mkd`. Plain text files such as `.txt` are not indexed.
 
-The indexer skips hidden folders, `node_modules`, macOS user Library folders during broad scans, and VS Code history files. Regular note folders named `Library` are still indexed.
+The indexer skips hidden folders, `node_modules`, macOS user Library folders during broad scans, and VS Code history files. Regular note folders named `Library` are still indexed. If an individual Markdown file disappears or becomes inaccessible during indexing, it is skipped while the remaining files stay available.
 
 ## Requirements
 

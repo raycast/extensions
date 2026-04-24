@@ -87,12 +87,12 @@ const isMarkdownFile = (filePath: string): boolean => {
   return MARKDOWN_EXTENSIONS.has(path.extname(filePath).toLowerCase());
 };
 
-function scanMarkdownFilePathsInDirectory(directory: string, rootDirectory: string): string[] {
+async function scanMarkdownFilePathsInDirectory(directory: string, rootDirectory: string): Promise<string[]> {
   const filePaths: string[] = [];
   let entries: fs.Dirent[];
 
   try {
-    entries = fs.readdirSync(directory, { withFileTypes: true });
+    entries = await fs.promises.readdir(directory, { withFileTypes: true });
   } catch (error) {
     console.warn(`Unable to scan directory ${directory}:`, error);
     return filePaths;
@@ -103,7 +103,7 @@ function scanMarkdownFilePathsInDirectory(directory: string, rootDirectory: stri
 
     if (entry.isDirectory()) {
       if (!shouldIgnoreScanPath(entryPath, rootDirectory)) {
-        filePaths.push(...scanMarkdownFilePathsInDirectory(entryPath, rootDirectory));
+        filePaths.push(...(await scanMarkdownFilePathsInDirectory(entryPath, rootDirectory)));
       }
       continue;
     }
@@ -116,24 +116,29 @@ function scanMarkdownFilePathsInDirectory(directory: string, rootDirectory: stri
   return filePaths;
 }
 
-export function scanMarkdownFilePaths(directory: string): string[] {
+export function scanMarkdownFilePaths(directory: string): Promise<string[]> {
   const rootDirectory = path.resolve(directory);
   return scanMarkdownFilePathsInDirectory(rootDirectory, rootDirectory);
 }
 
-function toMarkdownFile(filePath: string, rootDirectory: string): MarkdownFile {
-  const stats = fs.statSync(filePath);
-  const dirname = path.dirname(filePath);
-  const folder = path.relative(rootDirectory, dirname) || path.basename(dirname);
+async function toMarkdownFileOrNull(filePath: string, rootDirectory: string): Promise<MarkdownFile | null> {
+  try {
+    const stats = await fs.promises.stat(filePath);
+    const dirname = path.dirname(filePath);
+    const folder = path.relative(rootDirectory, dirname) || path.basename(dirname);
 
-  return {
-    path: filePath,
-    name: path.basename(filePath),
-    lastModified: stats.mtime.getTime(),
-    folder: folder,
-    tags: extractTags(filePath),
-    size: stats.size,
-  };
+    return {
+      path: filePath,
+      name: path.basename(filePath),
+      lastModified: stats.mtime.getTime(),
+      folder: folder,
+      tags: extractTags(filePath),
+      size: stats.size,
+    };
+  } catch (error) {
+    console.warn(`Skipping inaccessible Markdown file ${filePath}:`, error);
+    return null;
+  }
 }
 
 // Get Markdown files from the configured directory.
@@ -166,10 +171,16 @@ export async function getMarkdownFiles(): Promise<MarkdownFile[]> {
       }
     }
 
-    const filePaths = scanMarkdownFilePaths(markdownDir);
+    const filePaths = await scanMarkdownFilePaths(markdownDir);
     console.log(`Found ${filePaths.length} Markdown files in ${markdownDir}`);
 
-    const files = filePaths.map((filePath) => toMarkdownFile(filePath, markdownDir));
+    const files: MarkdownFile[] = [];
+    for (const filePath of filePaths) {
+      const file = await toMarkdownFileOrNull(filePath, markdownDir);
+      if (file) {
+        files.push(file);
+      }
+    }
 
     // Sort by last modified time, with the latest one first
     const sortedFiles = files.sort((a, b) => b.lastModified - a.lastModified || a.path.localeCompare(b.path, "en-US"));
