@@ -1,6 +1,6 @@
 # Markdown Navigator Changelog
 
-## [Fix Markdown File Indexing] - {PR_MERGE_DATE}
+## [Fix Markdown File Indexing] - 2026-04-24
 
 ### Fixed
 
