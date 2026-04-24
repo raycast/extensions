@@ -11,12 +11,13 @@ import {
   CopyTitleAction,
   CreateQuicklinkAction,
   DeduplicateTabsAction,
+  ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 
 export default function SearchTabs() {
   const [searchText, setSearchText] = useState("");
-  const { data: tabs, isLoading, mutate } = usePromise(getBrowserTabs);
+  const { data: tabs, isLoading, mutate, revalidate } = usePromise(getBrowserTabs);
   const deletedTabIdsRef = useRef(new Set<number>());
 
   // Filter out deleted tabs first (tabs that are being closed but might still appear in fetched data)
@@ -55,6 +56,7 @@ export default function SearchTabs() {
               <CopyUrlAction tab={tab} />
               <CopyTitleAction tab={tab} />
               <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
+              <ReloadAction subject="Tabs" revalidate={revalidate} />
               <DeduplicateTabsAction tabs={tabsWithoutDeleted} mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
             </ActionPanel>
           }

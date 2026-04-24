@@ -19,10 +19,6 @@ interface MutationActionProps extends BaseActionProps {
   deletedTabIdsRef: React.MutableRefObject<Set<number>>;
 }
 
-interface RevalidateActionProps {
-  revalidate: () => Promise<Tab[]>;
-}
-
 /**
  * Action to switch to an existing tab using AppleScript.
  *
@@ -78,25 +74,47 @@ export function OpenNewTabAction() {
   );
 }
 
+interface RevalidateActionProps {
+  /**
+   * Shown in the Action Panel and in the success toast. Keep it specific to
+   * the list being reloaded ("Tabs", "Bookmarks", …).
+   */
+  subject?: string;
+  /**
+   * The `revalidate` callback from `usePromise`. `usePromise` returns
+   * `() => Promise<T>`, but we only care about the side effect, so the type
+   * is relaxed to `unknown`.
+   */
+  revalidate: () => Promise<unknown> | void;
+}
+
 /**
- * Action to reload the tab list
+ * Generic ⌘R reload action. Works for any `usePromise`-backed list.
  */
-export function ReloadTabListAction({ revalidate }: RevalidateActionProps) {
+export function ReloadAction({ subject = "List", revalidate }: RevalidateActionProps) {
   return (
     <Action
-      title="Reload Tab List"
+      title={`Reload ${subject}`}
       icon={Icon.ArrowClockwise}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
       onAction={async () => {
         await showToast({
           style: Toast.Style.Animated,
-          title: "Reloading tabs...",
+          title: `Reloading ${subject.toLowerCase()}…`,
         });
-        await revalidate();
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Tabs reloaded",
-        });
+        try {
+          await Promise.resolve(revalidate());
+          await showToast({
+            style: Toast.Style.Success,
+            title: `${subject} reloaded`,
+          });
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `Failed to reload ${subject.toLowerCase()}`,
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
       }}
     />
   );
