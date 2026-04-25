@@ -74,14 +74,15 @@ function TaskListItem({ task, revalidate }: { task: TaskNote; revalidate: () => 
       title={task.title}
       subtitle={taskSubtitle(task)}
       icon={{ source: isDone ? Icon.CheckCircle : Icon.Circle, tintColor: isDone ? Color.Green : Color.SecondaryText }}
-      accessories={[
-        ...(task.due ? [{ tag: { value: `Due ${task.due}`, color: Color.Red } }] : []),
-        ...(task.scheduled ? [{ tag: { value: `Scheduled ${task.scheduled}`, color: Color.Blue } }] : []),
-        { text: task.vaultName },
-      ]}
+      accessories={taskAccessories(task)}
       actions={<TaskActions task={task} revalidate={revalidate} />}
     />
   );
+}
+
+function taskAccessories(task: TaskNote): List.Item.Accessory[] {
+  if (task.due) return [{ tag: { value: `Due ${task.due}`, color: Color.Red } }];
+  return [{ text: task.vaultName }];
 }
 
 function TaskActions({ task, revalidate }: { task: TaskNote; revalidate: () => void }) {
