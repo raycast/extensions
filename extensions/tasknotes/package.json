@@ -1,0 +1,187 @@
+{
+  "name": "tasknotes",
+  "title": "TaskNotes",
+  "description": "Manage TaskNotes tasks in Obsidian from Raycast.",
+  "icon": "icon.png",
+  "author": "robinradx",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "obsidian",
+    "tasks",
+    "todo",
+    "markdown"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "description": "Create a TaskNotes task from natural language.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Task, date, tags, contexts, priority...",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "vaultName",
+          "placeholder": "Vault name",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "keywords": [
+        "natural language",
+        "capture",
+        "inbox"
+      ]
+    },
+    {
+      "name": "search-tasks",
+      "title": "Search Tasks",
+      "description": "Search TaskNotes tasks in an Obsidian vault.",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Create a new TaskNotes task in an Obsidian vault.",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "create-task-note",
+      "title": "Create Task Note",
+      "description": "Create a TaskNotes Markdown task in the user's Obsidian vault. Use this when the user asks to add, capture, schedule, or create a task."
+    }
+  ],
+  "ai": {
+    "instructions": "TaskNotes stores tasks as Markdown files with YAML frontmatter in the user's Obsidian vault. Create tasks only when the user asks to add, capture, schedule, or create a task. Preserve concise task titles, map hashtags to tags, map @mentions to contexts, and use ISO 8601 dates when calling tools.",
+    "evals": [
+      {
+        "input": "@tasknotes Add follow up with Alex tomorrow morning #work @calls high priority",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-task-note",
+              "arguments": {
+                "title": {
+                  "includes": "follow up with Alex"
+                },
+                "tags": {
+                  "includes": "work"
+                },
+                "contexts": {
+                  "includes": "calls"
+                },
+                "priority": "high"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Obsidian Vault or Vaults Folder",
+      "description": "Single-vault mode: your vault folder. Multi-vault mode: the parent folder containing vault folders.",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "vaultMode",
+      "title": "Vault Mode",
+      "description": "Use one vault directly, or scan child folders as separate vaults.",
+      "type": "dropdown",
+      "required": true,
+      "default": "single",
+      "data": [
+        {
+          "title": "Single Vault",
+          "value": "single"
+        },
+        {
+          "title": "Multiple Vaults",
+          "value": "multiple"
+        }
+      ]
+    },
+    {
+      "name": "tasksFolder",
+      "title": "Tasks Folder",
+      "description": "Folder inside the vault where new tasks should be created.",
+      "type": "textfield",
+      "required": true,
+      "default": "TaskNotes/Tasks"
+    },
+    {
+      "name": "taskTag",
+      "title": "Task Tag",
+      "description": "Tag used by TaskNotes to identify task notes when using tag-based identification.",
+      "type": "textfield",
+      "required": true,
+      "default": "task"
+    },
+    {
+      "name": "taskPropertyName",
+      "title": "Task Property Name",
+      "description": "Optional frontmatter property used by TaskNotes property-based identification, for example isTask.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "taskPropertyValue",
+      "title": "Task Property Value",
+      "description": "Optional value for property-based identification, for example true or task.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "openStatus",
+      "title": "Open Status",
+      "description": "Status value for newly created and reopened tasks.",
+      "type": "textfield",
+      "required": true,
+      "default": "open"
+    },
+    {
+      "name": "doneStatus",
+      "title": "Done Status",
+      "description": "Status value that marks a task as completed.",
+      "type": "textfield",
+      "required": true,
+      "default": "done"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.101.1",
+    "@raycast/utils": "^1.17.0",
+    "chrono-node": "^2.9.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.21.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
