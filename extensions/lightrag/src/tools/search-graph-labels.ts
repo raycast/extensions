@@ -1,9 +1,16 @@
 import { getAuthToken, getServerUrl } from "../lib/auth";
 
 type Input = {
-  /** Fuzzy search string for label names. */
-  q: string;
-  /** Max results (1–100). Default 50. */
+  /**
+   * Substring to fuzzy-match graph entity label names (JSON key must be `query`, not `q`).
+   * Example: "neural rendering". The HTTP API uses query param `q`; this tool maps `query` → `q`.
+   */
+  query: string;
+  /**
+   * Deprecated legacy alias for `query`. Prefer `query` (same meaning). If both are set, `query` wins.
+   */
+  q?: string;
+  /** Max results (1–100). Example: 50. */
   limit?: number;
 };
 
@@ -12,9 +19,9 @@ type Input = {
  */
 export default async function searchGraphLabels(input: Input): Promise<string> {
   const serverUrl = getServerUrl();
-  const q = input.q?.trim() ?? "";
+  const q = (input.query ?? "").trim() || (input.q ?? "").trim();
   if (!q) {
-    return "Error: q (search query) is required.";
+    return 'Error: "query" is required (non-empty fuzzy substring for label names). Legacy alias "q" is accepted if "query" is empty.';
   }
 
   let token: string;

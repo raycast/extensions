@@ -21,12 +21,12 @@
     {
       "name": "query-lightrag",
       "title": "Query LightRAG (Answer)",
-      "description": "Ask the knowledge base in natural language and get a generated answer (RAG), with optional source references. Use for normal questions about papers and notes (e.g. explanations, comparisons). Do NOT use for raw graph dumps — use \"Query LightRAG (structured data)\" instead. Modes: mix (default), local, global, hybrid, naive, bypass."
+      "description": "Ask the knowledge base in natural language and get a generated answer (RAG), with optional source references. Tool argument must use the JSON key \"query\" (min. 3 characters), not \"q\". Use for normal questions about papers and notes (e.g. explanations, comparisons). Do NOT use for raw graph dumps — use \"Query LightRAG (structured data)\" instead. Modes: mix (default), local, global, hybrid, naive, bypass."
     },
     {
       "name": "query-lightrag-data",
       "title": "Query LightRAG (Structured Data)",
-      "description": "Retrieve structured retrieval results WITHOUT a generated prose answer: entities, relationships, text chunks, and references (JSON). Use for evidence inspection, debugging retrieval, or analyzing what would feed a RAG answer. Not for casual Q&A — use \"Query LightRAG (answer)\" for that."
+      "description": "Retrieve structured retrieval results WITHOUT a generated prose answer: entities, relationships, text chunks, and references (JSON). Same argument shape as the answer tool: JSON key \"query\" (min. 3 characters). Use for evidence inspection, debugging retrieval, or analyzing what would feed a RAG answer. Not for casual Q&A — use \"Query LightRAG (answer)\" for that."
     },
     {
       "name": "list-documents",
@@ -71,7 +71,7 @@
     {
       "name": "search-graph-labels",
       "title": "Search Graph Labels",
-      "description": "Fuzzy search for label names matching a query string. Use to find how a concept is named in the graph before opening a subgraph. Not for document content search — use \"Query LightRAG\" tools for that."
+      "description": "Fuzzy search for graph label names (substring match). Pass the search text as JSON \"query\" (the server maps it to HTTP q=). Not for document full-text — use \"Query LightRAG\" tools for that. Use before \"Knowledge Graph Subgraph\" if the exact label spelling is unknown."
     },
     {
       "name": "get-knowledge-graph",
@@ -81,7 +81,7 @@
     {
       "name": "check-entity-exists",
       "title": "Check Entity Exists",
-      "description": "Quick boolean check whether an entity name exists in the graph. Use before merge/rename-style questions or to validate a label string. Does not return relationships — use \"Knowledge Graph Subgraph\" or query-data for structure."
+      "description": "Quick boolean check whether an entity exists. Pass the exact label as JSON \"label\" (same key as \"Knowledge Graph Subgraph\"; the server uses name= in HTTP). Does not return relationships — use \"Knowledge Graph Subgraph\" or query-data for structure."
     }
   ],
   "preferences": [
@@ -122,6 +122,9 @@
     "eslint": "^8.57.1",
     "prettier": "^3.4.2",
     "typescript": "^5.7.3"
+  },
+  "overrides": {
+    "minimatch": "9.0.7"
   },
   "scripts": {
     "build": "ray build",

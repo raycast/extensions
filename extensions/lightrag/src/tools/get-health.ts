@@ -5,14 +5,13 @@ import { getAuthToken, getServerUrl } from "../lib/auth";
  * Returns information about the server status, configured LLM model,
  * embedding model, and pipeline state.
  * Use this when the user asks about server status or system health.
+ *
+ * No tool arguments; Raycast passes `{}`.
  */
-type Input = {
-  /** No input required. Pass an empty object. */
-  random?: string;
-};
+interface Input {}
 
-export default async function getHealth(input: Input): Promise<string> {
-  void input;
+export default async function getHealth(_input: Input): Promise<string> {
+  void _input;
   const serverUrl = getServerUrl();
 
   let token: string;

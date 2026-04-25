@@ -1,14 +1,14 @@
 import { getAuthToken, getServerUrl } from "../lib/auth";
 
-type Input = {
-  unused?: string;
-};
-
 /**
  * All labels in the knowledge graph (may be large).
+ *
+ * No tool arguments; Raycast passes `{}`.
  */
-export default async function listGraphLabels(input: Input): Promise<string> {
-  void input;
+interface Input {}
+
+export default async function listGraphLabels(_input: Input): Promise<string> {
+  void _input;
   const serverUrl = getServerUrl();
 
   let token: string;

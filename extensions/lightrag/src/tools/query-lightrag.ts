@@ -1,56 +1,41 @@
 import { getAuthToken, getServerUrl } from "../lib/auth";
 
-/**
- * Search the LightRAG knowledge base using a natural language query.
- * Returns relevant passages from stored documents, papers, and knowledge.
- * The knowledge base contains scientific papers managed via Zotero.
- *
- * @param input.query - The natural language search query. Must be at least
- *   3 characters long. Example: "What methods are used for bump mapping?"
- *
- * @param input.mode - The search mode to use:
- *   - "mix" (default, RECOMMENDED): Integrates knowledge graph + vector search
- *   - "hybrid": Combines local and global knowledge graph strategies
- *   - "local": Focuses on specific entities and direct relationships
- *   - "global": Analyzes broader patterns across the knowledge graph
- *   - "naive": Simple vector similarity search without knowledge graph
- *   - "bypass": Direct LLM query without knowledge retrieval
- *
- * @param input.include_references - Whether to include source document
- *   references in the response. Defaults to true.
- *
- * @param input.response_type - Desired response format. Examples:
- *   "Multiple Paragraphs", "Single Paragraph", "Bullet Points".
- *
- * @param input.top_k - Number of top items to retrieve. Higher = more context.
- */
+/** Natural-language RAG answer over stored documents (see Input fields for options). */
+const MIN_QUERY_LENGTH = 3;
+
 type Input = {
-  /** The search query, minimum 3 characters */
+  /**
+   * Natural language question (JSON key must be `query`). Min. 3 characters after trim.
+   * Example: "What methods are used for bump mapping?"
+   */
   query: string;
 
   /**
-   * Search mode. "mix" is recommended for best results.
-   * "local" for entity details, "global" for broad patterns,
-   * "hybrid" for combined, "naive" for keyword search,
-   * "bypass" for direct LLM without retrieval.
+   * Search mode. Example: "mix" (default).
+   * "mix": knowledge graph + vector (recommended); "hybrid": local+global; "local": entities/edges;
+   * "global": broad patterns; "naive": vector only; "bypass": no retrieval.
    */
   mode?: "mix" | "local" | "global" | "hybrid" | "naive" | "bypass";
 
-  /** Include source document references. Defaults to true. */
+  /** Include source references in the answer. Default true. Example: true */
   include_references?: boolean;
 
   /**
-   * Response format preference.
-   * Examples: "Multiple Paragraphs", "Single Paragraph", "Bullet Points"
+   * Answer layout. Examples: "Multiple Paragraphs", "Single Paragraph", "Bullet Points".
    */
   response_type?: string;
 
-  /** Number of top items to retrieve. Higher = more context. */
+  /** How many top items to retrieve. Example: 10 */
   top_k?: number;
 };
 
 export default async function queryLightRAG(input: Input): Promise<string> {
   const serverUrl = getServerUrl();
+
+  const q = (input.query ?? "").trim();
+  if (q.length < MIN_QUERY_LENGTH) {
+    return `Error: "query" is required and must be at least ${MIN_QUERY_LENGTH} characters after trimming (LightRAG API). Example: "What is neural rendering?"`;
+  }
 
   let token: string;
   try {
@@ -60,7 +45,7 @@ export default async function queryLightRAG(input: Input): Promise<string> {
   }
 
   const requestBody: Record<string, unknown> = {
-    query: input.query,
+    query: q,
     mode: input.mode || "mix",
     stream: false,
     include_references: input.include_references !== false,
@@ -69,7 +54,7 @@ export default async function queryLightRAG(input: Input): Promise<string> {
   if (input.response_type) {
     requestBody.response_type = input.response_type;
   }
-  if (input.top_k) {
+  if (input.top_k != null) {
     requestBody.top_k = input.top_k;
   }
 
@@ -110,7 +95,7 @@ export default async function queryLightRAG(input: Input): Promise<string> {
     return result || "No results found for this query.";
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
-      return `Connection error: Could not reach LightRAG at ${serverUrl}. Make sure your Wireguard VPN is active.`;
+      return `Connection error: Could not reach LightRAG at ${serverUrl}. Make sure the server is running and the URL is correct.`;
     }
     return `Error: ${error instanceof Error ? error.message : String(error)}`;
   }

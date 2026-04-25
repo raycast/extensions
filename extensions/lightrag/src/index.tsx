@@ -1,12 +1,6 @@
 import { Detail, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-interface Preferences {
-  serverUrl: string;
-  username: string;
-  password: string;
-}
-
 export default function LightRAGStatus() {
   const [markdown, setMarkdown] = useState<string>("# LightRAG Status\n\n⏳ Checking...");
   const { serverUrl: rawUrl, username, password } = getPreferenceValues<Preferences>();
@@ -74,7 +68,7 @@ export default function LightRAGStatus() {
       } catch {
         setMarkdown(
           `# LightRAG Status\n\n❌ **Cannot reach** ${serverUrl}\n\n` +
-            `Make sure:\n- Wireguard VPN is active\n- LightRAG is running\n- URL, username and password are correct`,
+            `Make sure:\n- LightRAG server is running\n- URL, username and password are correct`,
         );
       }
     }

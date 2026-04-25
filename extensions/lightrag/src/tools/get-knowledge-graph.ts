@@ -8,15 +8,18 @@ import {
 } from "../lib/sanitize-graph-response";
 
 type Input = {
-  /** Starting entity label (node) for the subgraph. */
+  /**
+   * Exact starting entity label (JSON key `label`, same as "Check Entity Exists").
+   * Example: "Neural Rendering". If unsure of spelling, use "Search Graph Labels" with `query` first.
+   */
   label: string;
-  /** Max graph depth from the starting node (>= 1). Default 3. */
+  /** Max hops from the start node. Example: 3 (default). */
   max_depth?: number;
-  /** Max nodes to return (>= 1). Default 64 (Raycast-friendly). */
+  /** Cap on nodes returned. Example: 64 (default, keeps output small). */
   max_nodes?: number;
   /**
-   * If true, return full property strings (may exceed Raycast message limits).
-   * Default false: long fields are truncated for display.
+   * If true, return untruncated property strings (may exceed Raycast message limits).
+   * Default false.
    */
   full_properties?: boolean;
 };
@@ -28,7 +31,7 @@ export default async function getKnowledgeGraph(input: Input): Promise<string> {
   const serverUrl = getServerUrl();
   const label = input.label?.trim() ?? "";
   if (!label) {
-    return "Error: label is required.";
+    return 'Error: "label" is required (exact graph entity string). Use "Search Graph Labels" with the "query" parameter if the spelling is unknown.';
   }
 
   let token: string;

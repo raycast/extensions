@@ -1,15 +1,14 @@
 import { getAuthToken, getServerUrl } from "../lib/auth";
 
-type Input = {
-  /** Unused; Raycast may pass an empty object. */
-  unused?: string;
-};
-
 /**
  * Current document indexing pipeline: busy flag, job name, progress, recent messages.
+ *
+ * No tool arguments; Raycast passes `{}`.
  */
-export default async function getPipelineStatus(input: Input): Promise<string> {
-  void input;
+interface Input {}
+
+export default async function getPipelineStatus(_input: Input): Promise<string> {
+  void _input;
   const serverUrl = getServerUrl();
 
   let token: string;

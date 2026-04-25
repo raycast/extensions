@@ -1,15 +1,14 @@
 import { getAuthToken, getServerUrl } from "../lib/auth";
 
-type Input = {
-  /** Unused; Raycast may pass an empty object. */
-  unused?: string;
-};
-
 /**
  * Lightweight counts of documents per processing status (no row listing).
+ *
+ * No tool arguments; Raycast passes `{}`.
  */
-export default async function getDocumentStatusCounts(input: Input): Promise<string> {
-  void input;
+interface Input {}
+
+export default async function getDocumentStatusCounts(_input: Input): Promise<string> {
+  void _input;
   const serverUrl = getServerUrl();
 
   let token: string;

@@ -1,11 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-export interface Preferences {
-  serverUrl: string;
-  username: string;
-  password: string;
-}
-
 export function getServerUrl(): string {
   const { serverUrl: rawUrl } = getPreferenceValues<Preferences>();
   return rawUrl.replace(/\/$/, "");

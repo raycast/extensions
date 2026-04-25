@@ -1,7 +1,7 @@
 import { getAuthToken, getServerUrl } from "../lib/auth";
 
 type Input = {
-  /** Max labels to return (1–1000). Default 300. */
+  /** Max hub labels to return (1–1000). Example: 300 (server default if omitted). */
   limit?: number;
 };
 

@@ -1,7 +1,10 @@
 import { getAuthToken, getServerUrl } from "../lib/auth";
 
 type Input = {
-  /** Tracking ID from insert-text, upload, or similar (e.g. upload_20250729_...). */
+  /**
+   * Batch tracking id (JSON key `track_id`). From insert-text or upload responses.
+   * Example: "upload_20250729_abc123"
+   */
   track_id: string;
 };
 
@@ -12,7 +15,7 @@ export default async function getTrackStatus(input: Input): Promise<string> {
   const serverUrl = getServerUrl();
   const id = input.track_id?.trim() ?? "";
   if (!id) {
-    return "Error: track_id is required.";
+    return 'Error: "track_id" is required (non-empty string from insert-text or upload).';
   }
 
   let token: string;

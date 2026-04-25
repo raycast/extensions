@@ -20,19 +20,21 @@ import { getAuthToken, getServerUrl } from "../lib/auth";
  *   Default is "desc" (newest first).
  */
 type Input = {
-  /** Filter by status: PROCESSED, PENDING, PROCESSING, PREPROCESSED, FAILED. Leave empty for all. */
+  /**
+   * Filter by processing status. Example: "FAILED". Omit for all documents.
+   */
   status_filter?: "PROCESSED" | "PENDING" | "PROCESSING" | "PREPROCESSED" | "FAILED";
 
-  /** Page number, starting at 1 */
+  /** 1-based page index. Example: 1 */
   page?: number;
 
-  /** Documents per page, between 10 and 200. Default 20. */
+  /** Page size (10–200). Example: 20 (default). */
   page_size?: number;
 
-  /** Sort field: "created_at", "updated_at", "id", "file_path" */
+  /** Sort column. Example: "updated_at" (default). */
   sort_field?: "created_at" | "updated_at" | "id" | "file_path";
 
-  /** Sort direction: "asc" or "desc" */
+  /** Sort order. Example: "desc" (default, newest first). */
   sort_direction?: "asc" | "desc";
 };
 
@@ -54,7 +56,8 @@ export default async function listDocuments(input: Input): Promise<string> {
   };
 
   if (input.status_filter) {
-    requestBody.status_filter = input.status_filter;
+    // API expects lowercase enum: pending, processing, preprocessed, processed, failed
+    requestBody.status_filter = input.status_filter.toLowerCase();
   }
 
   try {
@@ -121,7 +124,7 @@ export default async function listDocuments(input: Input): Promise<string> {
     return result;
   } catch (error) {
     if (error instanceof TypeError && error.message.includes("fetch")) {
-      return `Connection error: Could not reach LightRAG at ${serverUrl}. Is your Wireguard VPN active?`;
+      return `Connection error: Could not reach LightRAG at ${serverUrl}. Make sure the server is running and the URL is correct.`;
     }
     return `Error: ${error instanceof Error ? error.message : String(error)}`;
   }

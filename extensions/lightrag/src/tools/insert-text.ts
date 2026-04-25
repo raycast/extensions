@@ -4,7 +4,10 @@ import { getAuthToken, getServerUrl } from "../lib/auth";
 export const INSERT_TEXT_FILE_SOURCE = "raycast_chat_text";
 
 type Input = {
-  /** Non-empty text to index (e.g. summary or notes). */
+  /**
+   * Raw text to ingest (JSON key `text`). Non-empty after trim.
+   * Example: "Summary: key points from the meeting …"
+   */
   text: string;
 };
 
@@ -20,7 +23,7 @@ export default async function insertText(input: Input): Promise<string> {
 
   const trimmed = input.text?.trim() ?? "";
   if (!trimmed) {
-    return "Error: text must be non-empty.";
+    return 'Error: "text" is required and must be non-empty after trimming.';
   }
 
   try {

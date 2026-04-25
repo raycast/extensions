@@ -1,18 +1,25 @@
 import { getAuthToken, getServerUrl } from "../lib/auth";
 
 type Input = {
-  /** Entity name to check in the knowledge graph. */
-  name: string;
+  /**
+   * Exact entity label to check (JSON key must be `label`, same as "Knowledge Graph Subgraph").
+   * Example: "Neural Rendering". The HTTP API uses query param `name=`; this tool maps `label` → `name`.
+   */
+  label: string;
+  /**
+   * Deprecated legacy alias for `label`. Prefer `label` for consistency with the subgraph tool. If both are set, `label` wins.
+   */
+  name?: string;
 };
 
 /**
- * Whether an entity with this name exists in the graph.
+ * Whether an entity with this label exists in the graph.
  */
 export default async function checkEntityExists(input: Input): Promise<string> {
   const serverUrl = getServerUrl();
-  const name = input.name?.trim() ?? "";
-  if (!name) {
-    return "Error: name is required.";
+  const entity = (input.label ?? "").trim() || (input.name ?? "").trim();
+  if (!entity) {
+    return 'Error: "label" is required (exact entity string). Legacy alias "name" is accepted if "label" is empty.';
   }
 
   let token: string;
@@ -23,7 +30,7 @@ export default async function checkEntityExists(input: Input): Promise<string> {
   }
 
   const url = new URL(`${serverUrl}/graph/entity/exists`);
-  url.searchParams.set("name", name);
+  url.searchParams.set("name", entity);
 
   try {
     const response = await fetch(url.toString(), {

@@ -1,8 +1,17 @@
 instructions: |
   LightRAG is a self-hosted knowledge base that stores documents
   in a graph-based RAG (Retrieval Augmented Generation) system.
-  It primarily contains scientific papers and research notes
-  managed via Zotero.
+  The knowledge base may contain any type of content — documents,
+  notes, research papers, code snippets, or other text — depending
+  on what the user has indexed.
+
+  Parameter naming (use these JSON keys so tools validate):
+  - Natural-language questions and structured retrieval: always "query" (min. 3
+    characters), never "q", for "query-lightrag" and "query-lightrag-data".
+  - Fuzzy graph label search: "query" for "search-graph-labels" (the API uses
+    HTTP q= internally; you only pass "query" in the tool).
+  - Subgraph and entity check: "label" for "get-knowledge-graph" and
+    "check-entity-exists" (exact entity string).
 
   Tool usage guidelines:
   - Use "query-lightrag" when the user wants a natural-language answer
@@ -27,7 +36,7 @@ instructions: |
     state (use get-pipeline-status) or file browsing (use list-documents).
 
   Knowledge graph tools (explore entities and links, not document Q&A):
-  - Use "search-graph-labels" to find label strings by fuzzy match.
+  - Use "search-graph-labels" with "query" to find label strings by fuzzy match.
   - Use "list-graph-labels" only when a full enumeration of labels is
     needed (can be large).
   - Use "get-popular-graph-labels" for the most connected hub concepts.
@@ -36,7 +45,8 @@ instructions: |
     responses are condensed (max_depth 3, max_nodes 64, long properties
     truncated) so Raycast can show the tool result; set full_properties only
     when the user explicitly needs full text and accepts size limits.
-  - Use "check-entity-exists" for a quick existence check of an entity name.
+  - Use "check-entity-exists" with "label" for a quick existence check (same
+    label string as "get-knowledge-graph").
 
   Query mode recommendations:
   - "mix" is the best default for most queries
@@ -104,3 +114,14 @@ evals:
           arguments:
             status_filter:
               eq: "FAILED"
+
+  - input: "@lightrag Find graph labels containing neural"
+    mocks:
+      search-graph-labels: |
+        ["Neural Rendering", "Neural networks"]
+    expected:
+      - callsTool:
+          name: "search-graph-labels"
+          arguments:
+            query:
+              includes: "neural"
