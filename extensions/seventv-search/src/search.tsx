@@ -10,7 +10,7 @@ import {
   Clipboard,
   LocalStorage,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
@@ -393,7 +393,7 @@ export default function Command() {
           subtitle={item.owner?.display_name || "Community"}
           icon={{
             source: getEmoteUrl(item, "1x"),
-            mask: Image.Mask.RoundedRect,
+            mask: Image.Mask.RoundedRectangle,
           }}
           actions={renderActions(item)}
         />
