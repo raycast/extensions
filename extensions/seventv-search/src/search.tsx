@@ -297,13 +297,13 @@ export default function Command() {
               try {
                 const res = await fetch(highResUrl);
                 if (!res.ok) throw new Error("Download failed");
-                const buffer = Buffer.from(await res.arrayBuffer());
+                const data = new Uint8Array(await res.arrayBuffer());
                 const safeName = item.name
                   .replace(/[^a-z0-9]/gi, "_")
                   .toLowerCase();
                 const tempPath = join(tmpdir(), `copy_${safeName}.webp`);
-                await writeFile(tempPath, buffer);
-                await Clipboard.copy({ path: tempPath });
+                await writeFile(tempPath, data);
+                await Clipboard.copy({ file: tempPath });
                 toast.style = Toast.Style.Success;
                 toast.title = "File Copied";
                 toast.message = "Ready to paste (Cmd+V)";
