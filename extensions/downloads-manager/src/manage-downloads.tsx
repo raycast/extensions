@@ -7,6 +7,7 @@ import {
   Icon,
   Keyboard,
   List,
+  LocalStorage,
   showToast,
   Toast,
   trash,
@@ -94,6 +95,7 @@ function FilePreviewDetail({ download, isSelected }: { download: Download; isSel
 }
 
 const PAGE_SIZE = 100;
+const MOVE_TO_TRASH_CONFIRMATION_KEY = "manage-downloads-move-to-trash-confirmed";
 
 function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: string }) {
   const [downloads, setDownloads] = useState<Download[]>([]);
@@ -153,19 +155,27 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
   }
 
   async function handleMoveToTrash(paths: PathLike | PathLike[]) {
-    const shouldTrash = await confirmAlert({
-      title: "Move to Trash?",
-      message: "Are you sure you want to move the selected download item(s) to Trash?",
-      rememberUserChoice: true,
-      primaryAction: {
-        title: "Move to Trash",
-        style: Alert.ActionStyle.Destructive,
-      },
-      dismissAction: {
-        title: "Cancel",
-        style: Alert.ActionStyle.Cancel,
-      },
-    });
+    const hasConfirmedMoveToTrash = await LocalStorage.getItem<boolean>(MOVE_TO_TRASH_CONFIRMATION_KEY);
+    let shouldTrash = hasConfirmedMoveToTrash ?? false;
+
+    if (!hasConfirmedMoveToTrash) {
+      shouldTrash = await confirmAlert({
+        title: "Move to Trash?",
+        message: "Are you sure you want to move the selected download item(s) to Trash?",
+        primaryAction: {
+          title: "Move to Trash",
+          style: Alert.ActionStyle.Destructive,
+        },
+        dismissAction: {
+          title: "Cancel",
+          style: Alert.ActionStyle.Cancel,
+        },
+      });
+
+      if (shouldTrash) {
+        await LocalStorage.setItem(MOVE_TO_TRASH_CONFIRMATION_KEY, true);
+      }
+    }
 
     if (!shouldTrash) {
       return;

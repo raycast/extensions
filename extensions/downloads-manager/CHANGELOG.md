@@ -4,7 +4,7 @@
 
 - Address [#26296](https://github.com/raycast/extensions/issues/26296) by upgrading Delete Latest Download Command to support background deeplinks without focusing Raycast.
 - Added Toggle Deletion Behavior command to switch between moving downloads to Trash and permanently deleting them.
-- Added a remembered confirmation option when deleting items from Manage Downloads.
+- Added faster repeated deletion from Manage Downloads after confirming a move-to-Trash action once.
 - Documented that background permanent deletion requires foreground approval while foreground permanent deletion still prompts every time, and that canceling foreground permanent deletion disables background permanent deletion until the next approval.
 
 ## [Add file preview] - 2026-02-25
