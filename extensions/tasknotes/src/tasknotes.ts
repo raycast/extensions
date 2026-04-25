@@ -280,13 +280,13 @@ export function obsidianUrl(task: TaskNote): string {
 
 export function taskSubtitle(task: TaskNote): string | undefined {
   const parts = [
-    task.vaultName,
     task.status,
     task.priority ? `priority ${task.priority}` : undefined,
     task.contexts.length > 0 ? task.contexts.map((context) => `@${context}`).join(" ") : undefined,
   ].filter(Boolean);
 
-  return parts.length > 0 ? parts.join(" · ") : undefined;
+  const metadata = parts.length > 0 ? ` ${parts.join(" · ")}` : "";
+  return `[${task.vaultName}]${metadata}`;
 }
 
 async function readTaskNote(filePath: string, vault: VaultInfo): Promise<TaskNote | undefined> {
