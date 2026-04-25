@@ -112,6 +112,36 @@ export function canStreamCopy(streams: StreamInfo[]): boolean {
   return true;
 }
 
+export function buildReencodeConcatGraph(
+  inputCount: number,
+  outCategory: ReturnType<typeof getOutputCategory>,
+  streams: StreamInfo[] = [],
+): { filter: string; mapArgs: string } {
+  if (outCategory === "audio") {
+    const filterParts: string[] = [];
+    for (let i = 0; i < inputCount; i++) filterParts.push(`[${i}:a:0]`);
+    return {
+      filter: `${filterParts.join("")}concat=n=${inputCount}:v=0:a=1[a]`,
+      mapArgs: ` -map "[a]"`,
+    };
+  }
+
+  const includeAudio = streams.length === inputCount && streams.every((s) => Boolean(s.audioCodec));
+  const filterParts: string[] = [];
+  for (let i = 0; i < inputCount; i++) {
+    filterParts.push(includeAudio ? `[${i}:v:0][${i}:a:0]` : `[${i}:v:0]`);
+  }
+
+  return {
+    filter: `${filterParts.join("")}concat=n=${inputCount}:v=1:a=${includeAudio ? 1 : 0}${includeAudio ? "[v][a]" : "[v]"}`,
+    mapArgs: includeAudio ? ` -map "[v]" -map "[a]"` : ` -map "[v]"`,
+  };
+}
+
+function inputsMatchOutputFormat(inputs: string[], outputFormat: AllOutputExtension): boolean {
+  return inputs.every((p) => path.extname(p).toLowerCase() === outputFormat.toLowerCase());
+}
+
 function getUniqueMergePath(dir: string, baseName: string, ext: string): string {
   let candidate = path.join(dir, `${baseName}${ext}`);
   let counter = 1;
@@ -189,16 +219,15 @@ export async function mergeMedia(
 
   // Decide strategy
   let strategy: MergeStrategy = "reencode";
-  if (!opts.forceReencode) {
-    try {
-      const streams = await Promise.all(inputs.map((p) => probeStreamInfo(ffmpegPath.path, p)));
-      if (canStreamCopy(streams)) {
-        strategy = "stream-copy";
-      }
-    } catch (err) {
-      console.warn("Stream probing failed, falling back to re-encode:", err);
-      strategy = "reencode";
+  let streams: StreamInfo[] = [];
+  try {
+    streams = await Promise.all(inputs.map((p) => probeStreamInfo(ffmpegPath.path, p)));
+    if (!opts.forceReencode && inputsMatchOutputFormat(inputs, outputFormat) && canStreamCopy(streams)) {
+      strategy = "stream-copy";
     }
+  } catch (err) {
+    console.warn("Stream probing failed, falling back to re-encode:", err);
+    strategy = "reencode";
   }
 
   if (strategy === "stream-copy") {
@@ -233,19 +262,7 @@ export async function mergeMedia(
   const n = inputs.length;
   const inputsArg = inputs.map((p) => `-i "${p}"`).join(" ");
   const outCategory = getOutputCategory(outputFormat);
-  let filter: string;
-  let mapArgs: string;
-  if (outCategory === "audio") {
-    const filterParts: string[] = [];
-    for (let i = 0; i < n; i++) filterParts.push(`[${i}:a:0]`);
-    filter = `${filterParts.join("")}concat=n=${n}:v=0:a=1[a]`;
-    mapArgs = ` -map "[a]"`;
-  } else {
-    const filterParts: string[] = [];
-    for (let i = 0; i < n; i++) filterParts.push(`[${i}:v:0][${i}:a:0?]`);
-    filter = `${filterParts.join("")}concat=n=${n}:v=1:a=1[v][a]`;
-    mapArgs = ` -map "[v]" -map "[a]"`;
-  }
+  const { filter, mapArgs } = buildReencodeConcatGraph(n, outCategory, streams);
   const codecArgs = buildCodecArgs(outputFormat);
   const cmd = `"${ffmpegPath.path}" ${inputsArg} -filter_complex "${filter}"${mapArgs}${codecArgs}${metadataFlag} -y "${outputPath}"`;
   const total = await sumDurations(ffmpegPath.path, inputs);

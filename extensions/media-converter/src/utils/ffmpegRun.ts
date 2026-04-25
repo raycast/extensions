@@ -186,10 +186,9 @@ function parseFfmpegTimestamp(ts: string): number {
  */
 export async function probeDurationSec(ffmpegPath: string, filePath: string): Promise<number | null> {
   try {
-    await execPromise(`"${ffmpegPath}" -hide_banner -i "${filePath}" -f null -`);
+    await execPromise(`"${ffmpegPath}" -hide_banner -i "${filePath}"`);
   } catch (err: unknown) {
-    // `ffmpeg -f null -` will exit non-zero when used this way on some platforms;
-    // the stderr still contains the metadata we need.
+    // `ffmpeg -i` with no output exits non-zero after printing metadata.
     const stderr =
       typeof err === "object" && err !== null && "stderr" in err ? String((err as { stderr: unknown }).stderr) : "";
     const msg =

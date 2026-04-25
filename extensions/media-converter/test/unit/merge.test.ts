@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import { parseStreamInfo, canStreamCopy, type StreamInfo } from "../../src/utils/merge";
+import { parseStreamInfo, canStreamCopy, buildReencodeConcatGraph, type StreamInfo } from "../../src/utils/merge";
 
 // Note: we deliberately use a simple pix_fmt without parenthesised color info
 // (e.g. `yuv420p` instead of `yuv420p(tv, bt709)`) — the current parser
@@ -154,5 +154,34 @@ describe("concat list path escaping", () => {
 
   it("does NOT produce shell-style escape sequences", () => {
     assert.notEqual(escape("alice's"), "alice'\\''s");
+  });
+});
+
+describe("buildReencodeConcatGraph", () => {
+  it("omits audio pads for video inputs without audio streams", () => {
+    const graph = buildReencodeConcatGraph(2, "video", [{ videoCodec: "h264" }, { videoCodec: "h264" }]);
+
+    assert.equal(graph.filter, "[0:v:0][1:v:0]concat=n=2:v=1:a=0[v]");
+    assert.equal(graph.mapArgs, ` -map "[v]"`);
+  });
+
+  it("keeps audio pads when every video input has audio", () => {
+    const graph = buildReencodeConcatGraph(2, "video", [
+      { videoCodec: "h264", audioCodec: "aac" },
+      { videoCodec: "h264", audioCodec: "aac" },
+    ]);
+
+    assert.equal(graph.filter, "[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2:v=1:a=1[v][a]");
+    assert.equal(graph.mapArgs, ` -map "[v]" -map "[a]"`);
+  });
+
+  it("omits audio pads when only some video inputs have audio", () => {
+    const graph = buildReencodeConcatGraph(2, "video", [
+      { videoCodec: "h264", audioCodec: "aac" },
+      { videoCodec: "h264" },
+    ]);
+
+    assert.equal(graph.filter, "[0:v:0][1:v:0]concat=n=2:v=1:a=0[v]");
+    assert.equal(graph.mapArgs, ` -map "[v]"`);
   });
 });
