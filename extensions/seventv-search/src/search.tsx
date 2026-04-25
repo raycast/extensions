@@ -8,9 +8,9 @@ import {
   Toast,
   Image,
   Clipboard,
+  LocalStorage,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import fetch from "node-fetch";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
@@ -34,9 +34,14 @@ interface Emote {
   animated?: boolean;
 }
 
+const FAVORITES_KEY = "favorites_v1";
+const HISTORY_KEY = "history_v1";
+
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [items, setItems] = useState<Emote[]>([]);
+  const [favorites, setFavorites] = useState<Emote[]>([]);
+  const [history, setHistory] = useState<Emote[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGridView, setIsGridView] = useState(true);
 
@@ -44,9 +49,29 @@ export default function Command() {
   const [sortOrder, setSortOrder] = useState<string>("DESCENDING");
   const [category, setCategory] = useState<string>("TOP");
 
+  // Load Persistent State
+  useEffect(() => {
+    async function loadStorage() {
+      const storedFavs = await LocalStorage.getItem<string>(FAVORITES_KEY);
+      const storedHist = await LocalStorage.getItem<string>(HISTORY_KEY);
+      if (storedFavs) setFavorites(JSON.parse(storedFavs));
+      if (storedHist) setHistory(JSON.parse(storedHist));
+    }
+    loadStorage();
+  }, []);
+
   useEffect(() => {
     async function fetchEmotes() {
       const query = searchText.trim();
+      if (
+        !query &&
+        !category.startsWith("TRENDING") &&
+        !category.startsWith("TOP")
+      ) {
+        setItems([]);
+        setIsLoading(false);
+        return;
+      }
 
       setIsLoading(true);
       try {
@@ -109,6 +134,7 @@ export default function Command() {
 
         const resJson = (await response.json()) as {
           data: { emotes: { items: Emote[] } };
+          errors?: { message: string }[];
         };
         if (resJson.errors) {
           throw new Error(resJson.errors[0]?.message || "GQL Error");
@@ -138,11 +164,35 @@ export default function Command() {
     return `https:${hostUrl}/${size}.webp`;
   };
 
+  async function addToHistory(item: Emote) {
+    const newHistory = [item, ...history.filter((h) => h.id !== item.id)].slice(
+      0,
+      20,
+    );
+    setHistory(newHistory);
+    await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(newHistory));
+  }
+
+  async function toggleFavorite(item: Emote) {
+    const isFav = favorites.some((f) => f.id === item.id);
+    let newFavs;
+    if (isFav) {
+      newFavs = favorites.filter((f) => f.id !== item.id);
+      await showToast({ title: "Removed from Favorites" });
+    } else {
+      newFavs = [item, ...favorites];
+      await showToast({ title: "Added to Favorites" });
+    }
+    setFavorites(newFavs);
+    await LocalStorage.setItem(FAVORITES_KEY, JSON.stringify(newFavs));
+  }
+
   async function handleDropEmote(
     item: Emote,
     mode: "smart" | "url" | "bruteforce" = "smart",
   ) {
     const url = getEmoteUrl(item, "4x");
+    await addToHistory(item);
 
     if (mode === "url") {
       await Clipboard.paste(url);
@@ -162,12 +212,10 @@ export default function Command() {
       const arrayBuffer = await res.arrayBuffer();
       const buffer = Buffer.from(arrayBuffer);
 
-      // Sanitize name to prevent "Invalid clipboard content" errors from weird characters
       const safeName = item.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
       const tempPath = join(tmpdir(), `vault_${safeName}_${item.id}.webp`);
       await writeFile(tempPath, buffer);
 
-      // Attempt Copy/Paste
       try {
         await Clipboard.copy({
           path: tempPath,
@@ -175,7 +223,6 @@ export default function Command() {
         });
 
         if (mode === "bruteforce") {
-          // In bruteforce mode, we attempt both copy and multiple paste triggers
           await Clipboard.paste();
           await Clipboard.paste({ path: tempPath });
         } else {
@@ -199,47 +246,40 @@ export default function Command() {
     }
   }
 
-  const toggleViewAction = (
-    <Action
-      title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-      icon={isGridView ? Icon.List : Icon.Grid}
-      onAction={() => setIsGridView(!isGridView)}
-      shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-    />
-  );
-
   const renderActions = (item: Emote) => {
+    const isFav = favorites.some((f) => f.id === item.id);
     const highResUrl = getEmoteUrl(item, "4x");
     const markdown = `![${item.name}](${highResUrl})`;
 
     return (
       <ActionPanel>
         <ActionPanel.Section>
-          {/* Primary Action: Enter -> Smart Drop */}
           <Action
             title="Drop Emote"
             icon={Icon.ChevronRight}
             onAction={() => handleDropEmote(item, "smart")}
           />
-
-          {/* Bruteforce: Cmd+Shift+Enter -> Deep Drop */}
           <Action
             title="Bruteforce Drop"
             icon={Icon.Bolt}
             onAction={() => handleDropEmote(item, "bruteforce")}
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
           />
+          <Action
+            title={isFav ? "Unstar Emote" : "Star Emote"}
+            icon={isFav ? Icon.StarDisabled : Icon.Star}
+            onAction={() => toggleFavorite(item)}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+          />
+        </ActionPanel.Section>
 
-          {/* Force URL: Cmd+Enter */}
+        <ActionPanel.Section>
           <Action
             title="Force Paste URL"
             icon={Icon.Link}
             onAction={() => handleDropEmote(item, "url")}
             shortcut={{ modifiers: ["cmd"], key: "enter" }}
           />
-        </ActionPanel.Section>
-
-        <ActionPanel.Section>
           <Action.CopyToClipboard title="Copy Emote URL" content={highResUrl} />
           <Action.CopyToClipboard
             title="Copy as Markdown"
@@ -250,18 +290,28 @@ export default function Command() {
             title="Copy Emote File"
             icon={Icon.Download}
             onAction={async () => {
-              const res = await fetch(highResUrl);
-              const buffer = Buffer.from(await res.arrayBuffer());
-              const safeName = item.name
-                .replace(/[^a-z0-9]/gi, "_")
-                .toLowerCase();
-              const tempPath = join(tmpdir(), `copy_${safeName}.webp`);
-              await writeFile(tempPath, buffer);
-              await Clipboard.copy({ path: tempPath });
-              await showToast({
-                title: "File Copied",
-                message: "Ready to paste (Cmd+V)",
+              const toast = await showToast({
+                style: Toast.Style.Animated,
+                title: "Downloading Emote...",
               });
+              try {
+                const res = await fetch(highResUrl);
+                if (!res.ok) throw new Error("Download failed");
+                const buffer = Buffer.from(await res.arrayBuffer());
+                const safeName = item.name
+                  .replace(/[^a-z0-9]/gi, "_")
+                  .toLowerCase();
+                const tempPath = join(tmpdir(), `copy_${safeName}.webp`);
+                await writeFile(tempPath, buffer);
+                await Clipboard.copy({ path: tempPath });
+                toast.style = Toast.Style.Success;
+                toast.title = "File Copied";
+                toast.message = "Ready to paste (Cmd+V)";
+              } catch (e) {
+                toast.style = Toast.Style.Failure;
+                toast.title = "Copy Failed";
+                toast.message = String(e);
+              }
             }}
           />
         </ActionPanel.Section>
@@ -270,19 +320,16 @@ export default function Command() {
             title="View on 7tv"
             url={`https://7tv.app/emotes/${item.id}`}
           />
-          {toggleViewAction}
+          <Action
+            title={isGridView ? "Switch to List View" : "Switch to Grid View"}
+            icon={isGridView ? Icon.List : Icon.Grid}
+            onAction={() => setIsGridView(!isGridView)}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
+          />
           <Action.CopyToClipboard
             title="Copy Id"
             content={item.id}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
-          />
-        </ActionPanel.Section>
-        <ActionPanel.Section>
-          <Action.OpenInBrowser
-            title="Download Emote (high Res)"
-            url={highResUrl}
-            icon={Icon.Download}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
           />
         </ActionPanel.Section>
       </ActionPanel>
@@ -323,6 +370,37 @@ export default function Command() {
     </List.Dropdown>
   );
 
+  const renderGridItems = (data: Emote[], title: string) => (
+    <Grid.Section title={title}>
+      {data.map((item) => (
+        <Grid.Item
+          key={`${title}-${item.id}`}
+          title={item.name}
+          subtitle={item.owner?.display_name}
+          content={{ source: getEmoteUrl(item, "2x") }}
+          actions={renderActions(item)}
+        />
+      ))}
+    </Grid.Section>
+  );
+
+  const renderListItems = (data: Emote[], title: string) => (
+    <List.Section title={title}>
+      {data.map((item) => (
+        <List.Item
+          key={`${title}-${item.id}`}
+          title={item.name}
+          subtitle={item.owner?.display_name || "Community"}
+          icon={{
+            source: getEmoteUrl(item, "1x"),
+            mask: Image.Mask.RoundedRect,
+          }}
+          actions={renderActions(item)}
+        />
+      ))}
+    </List.Section>
+  );
+
   if (isGridView) {
     return (
       <Grid
@@ -333,17 +411,14 @@ export default function Command() {
         columns={6}
         fit={Grid.Fit.Contain}
       >
-        <Grid.Section title={`${category} Results`}>
-          {items.map((item) => (
-            <Grid.Item
-              key={item.id}
-              title={item.name}
-              subtitle={item.owner?.display_name}
-              content={{ source: getEmoteUrl(item, "2x") }}
-              actions={renderActions(item)}
-            />
-          ))}
-        </Grid.Section>
+        {!searchText &&
+          favorites.length > 0 &&
+          renderGridItems(favorites, "Starred Emotes")}
+        {!searchText &&
+          history.length > 0 &&
+          renderGridItems(history, "Recently Used")}
+        {(searchText || category.startsWith("TRENDING") || items.length > 0) &&
+          renderGridItems(items, `${category} Results`)}
       </Grid>
     );
   }
@@ -356,20 +431,14 @@ export default function Command() {
       searchBarAccessory={accessory}
       throttle
     >
-      <List.Section title={`${category} Results`}>
-        {items.map((item) => (
-          <List.Item
-            key={item.id}
-            title={item.name}
-            subtitle={item.owner?.display_name || "Community"}
-            icon={{
-              source: getEmoteUrl(item, "1x"),
-              mask: Image.Mask.RoundedRect,
-            }}
-            actions={renderActions(item)}
-          />
-        ))}
-      </List.Section>
+      {!searchText &&
+        favorites.length > 0 &&
+        renderListItems(favorites, "Starred Emotes")}
+      {!searchText &&
+        history.length > 0 &&
+        renderListItems(history, "Recently Used")}
+      {(searchText || category.startsWith("TRENDING") || items.length > 0) &&
+        renderListItems(items, `${category} Results`)}
     </List>
   );
 }

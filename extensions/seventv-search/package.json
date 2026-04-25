@@ -6,6 +6,9 @@
   "description": "High-fidelity 7TV discovery and direct drop.",
   "icon": "icon.png",
   "author": "Paranjayy",
+  "categories": [
+    "Media"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -16,8 +19,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.71.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.71.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

@@ -1,28 +1,25 @@
 # 7TV Emotes Search Pro
 
-High-fidelity 7TV emote discovery and direct orchestration for your workspace.
+High-fidelity 7TV emote discovery and direct orchestration for your workspace. Search through millions of emotes and drop them directly into your favorite communication apps.
 
 ## ✨ Features
 
-- **🚀 Instant Search**: Explore millions of 7TV emotes with ultra-low latency.
-- **🔥 Direct Drop**: Paste emotes directly into your favorite apps (Discord, Telegram, etc.) with a single keystroke.
-- **⚡ Bruteforce Mode**: Deep download and forced paste for picky applications (`Cmd+Shift+Enter`).
+- **🚀 Instant Search**: Explore the full 7TV library with ultra-low latency.
+- **🔥 Direct Drop**: Paste emotes directly into apps like Discord and Telegram with a single keystroke.
+- **⚡ Bruteforce Mode**: Deep download and forced paste for picky applications (`Cmd + Shift + Enter`).
+- **⭐ Favorites & History**: Your most-used emotes are automatically saved and surfaced when you open the extension.
 - **🎨 High-Res Previews**: View emotes in their full 4x glory before dropping.
-- **🔗 Smart Fallbacks**: Automatic URL paste if direct file drop is restricted.
+- **🔗 Smart Fallbacks**: Automatic URL paste if direct file drop is restricted by the target app.
 
 ## 🕹️ Shortcuts
 
-- `Enter`: **Smart Drop** (Sanitized File + HTML fallback).
-- `Cmd + Shift + Enter`: **Bruteforce Drop** (Deep download + forced paste signals).
-- `Cmd + Enter`: **Force Paste URL** (Pure text).
+- `Enter`: **Smart Drop** (File + HTML fallback).
+- `Cmd + S`: **Star/Unstar** (Add to Favorites).
+- `Cmd + Shift + Enter`: **Bruteforce Drop** (Forced paste).
+- `Cmd + Enter`: **Force Paste URL** (Text only).
 - `Cmd + M`: Copy as **Markdown**.
-
-## 🚀 Installation
-
-1.  **Clone the repo**: `git clone https://github.com/Paranjayy/7tv-raycast`
-2.  **Install dependencies**: `npm install`
-3.  **Run locally**: `npm run dev`
+- `Cmd + Shift + V`: Toggle between **Grid** and **List** views.
 
 ---
 
-Built with ⚡ by [Vault](https://github.com/Paranjayy).
+Built for the community by [Vault](https://github.com/Paranjayy).
