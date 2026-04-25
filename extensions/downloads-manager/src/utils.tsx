@@ -210,10 +210,11 @@ export async function deleteFileOrFolder(
     beforeFeedback?: () => Promise<void>;
     confirmationMessage?: string;
     skipConfirmation?: boolean;
+    deletionBehavior?: DeletionBehavior;
   } = {},
 ) {
   const feedback = options.feedback ?? "toast";
-  const deletionBehavior = await getDeletionBehavior();
+  const deletionBehavior = options.deletionBehavior ?? (await getDeletionBehavior());
 
   if (deletionBehavior === "trash") {
     try {
