@@ -89,7 +89,7 @@ export function LinkActions({ link, onMutated, children }: LinkActionsProps) {
         />
         <Action.CopyToClipboard
           title="Copy as Markdown"
-          content={`[${link.alias}](${link.short_url})`}
+          content={`[${link.alias ?? link.id}](${link.short_url})`}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
         />
       </ActionPanel.Section>

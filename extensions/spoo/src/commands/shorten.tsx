@@ -85,7 +85,9 @@ function ShortenForm({
         toast.hide();
         const emojiLike = /\p{Extended_Pictographic}/u.test(result.alias);
         const prefix = celebrate && emojiLike ? "🎉" : "🔗";
-        await showHUD(`${prefix} Copied ${result.short_url}`);
+        await showHUD(
+          `${prefix} ${autoCopy ? "Copied" : "Shortened"} ${result.short_url}`,
+        );
         await popToRoot();
         return;
       }

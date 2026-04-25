@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { listUrls, type ListUrlsOptions } from "@/api/urls";
-import { CACHE_KEYS } from "@/constants";
+import { CACHE_KEYS, CACHE_TTL } from "@/constants";
 import { readCached, writeCached } from "@/lib/cache";
 import type { UrlListItem, UrlListResponse } from "@/schemas/url";
 
@@ -24,7 +24,7 @@ interface UseLinksResult {
 }
 
 function getInitialData(): UrlListResponse | undefined {
-  return readCached<UrlListResponse>(CACHE_KEYS.links);
+  return readCached<UrlListResponse>(CACHE_KEYS.links, CACHE_TTL.links);
 }
 
 async function fetchLinks(options: ListUrlsOptions): Promise<UrlListResponse> {

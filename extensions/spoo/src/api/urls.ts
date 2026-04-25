@@ -66,22 +66,20 @@ export async function listUrls(
 export async function updateUrl(
   id: string,
   body: UpdateUrlRequest,
-): Promise<UrlResponse> {
-  return apiFetch(`/api/v1/urls/${encodeURIComponent(id)}`, {
+): Promise<void> {
+  await apiFetch(`/api/v1/urls/${encodeURIComponent(id)}`, {
     method: "PATCH",
     body,
-    schema: UrlResponseSchema,
   });
 }
 
 export async function setUrlStatus(
   id: string,
   status: UrlStatus,
-): Promise<UrlResponse> {
-  return apiFetch(`/api/v1/urls/${encodeURIComponent(id)}/status`, {
+): Promise<void> {
+  await apiFetch(`/api/v1/urls/${encodeURIComponent(id)}/status`, {
     method: "PATCH",
     body: { status },
-    schema: UrlResponseSchema,
   });
 }
 
@@ -97,7 +95,7 @@ function hydrate(
 ): UrlListItem {
   return {
     ...item,
-    short_url: item.alias ? `${base}/${item.alias}` : base,
+    short_url: `${base}/${encodeURIComponent(item.alias ?? item.id)}`,
   };
 }
 

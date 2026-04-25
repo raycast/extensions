@@ -21,18 +21,12 @@ export const DEBOUNCE_MS = {
   search: 250,
 } as const;
 
-interface Preferences {
-  apiBaseUrl?: string;
-  autoCopy?: boolean;
-  celebrate?: boolean;
-}
-
-export function getPreferences(): Required<Preferences> {
-  const prefs = getPreferenceValues<Preferences>();
+export function getPreferences() {
+  const prefs = getPreferenceValues<ExtensionPreferences>();
   return {
-    apiBaseUrl: (prefs.apiBaseUrl ?? DEFAULT_API_BASE_URL).replace(/\/$/, ""),
-    autoCopy: prefs.autoCopy ?? true,
-    celebrate: prefs.celebrate ?? true,
+    apiBaseUrl: (prefs.apiBaseUrl || DEFAULT_API_BASE_URL).replace(/\/$/, ""),
+    autoCopy: prefs.autoCopy,
+    celebrate: prefs.celebrate,
   };
 }
 

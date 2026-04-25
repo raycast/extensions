@@ -14,7 +14,7 @@ const EXPIRE_PRESETS = [
 
 function buildExpireOptions() {
   const now = Date.now();
-  const fmt = new Intl.DateTimeFormat("en-US", {
+  const fmt = new Intl.DateTimeFormat(undefined, {
     weekday: "short",
     month: "short",
     day: "numeric",

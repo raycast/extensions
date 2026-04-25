@@ -8,6 +8,9 @@ import {
   showToast,
 } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
+import { writeFile } from "node:fs/promises";
+import { homedir } from "node:os";
+import { join } from "node:path";
 import { useMemo } from "react";
 import { useStats } from "@/hooks/use-stats";
 import { exportStats } from "@/api/stats";
@@ -81,9 +84,14 @@ export function LinkAnalytics({ link }: { link: UrlListItem }) {
         format,
         shortCode: alias,
       });
+      const filename = `spoo-${alias}-stats.${format}`;
+      const path = join(homedir(), "Downloads", filename);
+      const buffer = Buffer.from(await blob.arrayBuffer());
+      await writeFile(path, buffer);
       const size = (blob.size / 1024).toFixed(1);
       toast.style = Toast.Style.Success;
-      toast.title = `Exported ${format.toUpperCase()} (${size} KB)`;
+      toast.title = `Saved to Downloads`;
+      toast.message = `${filename} (${size} KB)`;
     } catch (err) {
       toast.hide();
       await reportError(err);

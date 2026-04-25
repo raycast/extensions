@@ -8,7 +8,7 @@ const RELATIVE_UNITS: Array<[Intl.RelativeTimeFormatUnit, number]> = [
   ["second", 1],
 ];
 
-const RTF = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+const RTF = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 
 export type TimestampInput = string | number | Date | null | undefined;
 

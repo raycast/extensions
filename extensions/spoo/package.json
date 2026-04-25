@@ -56,7 +56,7 @@
       "type": "textfield",
       "required": false,
       "title": "API Base URL",
-      "description": "Base URL of the spoo.me server. Defaults to the local dev server; set to https://spoo.me for production.",
+      "description": "Base URL of the spoo.me server. Defaults to https://spoo.me; change this if you want to use a different server.",
       "default": "https://spoo.me",
       "placeholder": "https://spoo.me"
     },

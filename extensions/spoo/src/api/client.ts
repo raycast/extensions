@@ -89,6 +89,9 @@ async function parseResponse<T>(
   schema?: z.ZodType<T, z.ZodTypeDef, unknown>,
 ): Promise<T> {
   if (!res.ok) throw await SpooError.fromResponse(res);
+  if (res.status === 204 || res.headers.get("content-length") === "0") {
+    return undefined as T;
+  }
   const data = await res.json();
   return schema ? schema.parse(data) : (data as T);
 }

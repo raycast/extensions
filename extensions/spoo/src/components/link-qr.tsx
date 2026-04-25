@@ -17,6 +17,7 @@ import { environment } from "@raycast/api";
 import QRCode from "qrcode";
 import { QR_DARK, QR_LIGHT, markdownImage, toDataUrl } from "@/lib/qrcode";
 import { formatRelative } from "@/lib/format";
+import { getStatusMeta } from "@/lib/status";
 import { reportError } from "@/lib/errors";
 import type { UrlListItem } from "@/schemas/url";
 
@@ -108,11 +109,16 @@ export function LinkQrView({ link }: { link: UrlListItem }) {
             />
           ) : null}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Label
-            title="Status"
-            icon={{ source: Icon.CircleFilled, tintColor: Color.Green }}
-            text="Active"
-          />
+          {(() => {
+            const status = getStatusMeta(link.status);
+            return (
+              <Detail.Metadata.Label
+                title="Status"
+                icon={{ source: status.icon, tintColor: status.tintColor }}
+                text={status.label}
+              />
+            );
+          })()}
           {link.created_at ? (
             <Detail.Metadata.Label
               title="Created"

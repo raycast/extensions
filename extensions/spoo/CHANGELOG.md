@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.0 - 2026-04-26
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 
