@@ -1,25 +1,22 @@
 # 7TV Emotes Search Pro
 
-High-fidelity 7TV emote discovery and direct orchestration for your workspace. Search through millions of emotes and drop them directly into your favorite communication apps.
+Discover and use 7TV emotes directly from Raycast with a high-fidelity, iridescent interface.
 
-## ✨ Features
+## Features
 
-- **🚀 Instant Search**: Explore the full 7TV library with ultra-low latency.
-- **🔥 Direct Drop**: Paste emotes directly into apps like Discord and Telegram with a single keystroke.
-- **⚡ Bruteforce Mode**: Deep download and forced paste for picky applications (`Cmd + Shift + Enter`).
-- **⭐ Favorites & History**: Your most-used emotes are automatically saved and surfaced when you open the extension.
-- **🎨 High-Res Previews**: View emotes in their full 4x glory before dropping.
-- **🔗 Smart Fallbacks**: Automatic URL paste if direct file drop is restricted by the target app.
+- 🔍 **Universal Search**: Find any emote on 7TV with lightning speed.
+- 🌈 **Premium Branding**: Custom iridescent 7TV design optimized for dark and light modes.
+- 🔥 **Smart Filters**: Browse Popular (All Time), Trending Right Now, and Recently Created emotes.
+- 🖱️ **Direct Drop**: Use "Drop Emote" to instantly copy the emote file and paste it into Discord, Slack, or any messaging app.
+- ⭐ **Favorites & History**: Star your most-used emotes and access your recently used history instantly.
+- ⚡ **Bruteforce Drop**: A high-speed action for rapid-fire emote usage.
 
-## 🕹️ Shortcuts
+## How to Use
 
-- `Enter`: **Smart Drop** (File + HTML fallback).
-- `Cmd + S`: **Star/Unstar** (Add to Favorites).
-- `Cmd + Shift + Enter`: **Bruteforce Drop** (Forced paste).
-- `Cmd + Enter`: **Force Paste URL** (Text only).
-- `Cmd + M`: Copy as **Markdown**.
-- `Cmd + Shift + V`: Toggle between **Grid** and **List** views.
+1. Open the **Search Emotes** command.
+2. Toggle between **Grid** and **List** views using the Action Menu (`Cmd+K`).
+3. Select an emote and press `Enter` to **Drop** the file.
+4. Use `Cmd+S` to **Star** an emote for quick access later.
 
 ---
-
-Built for the community by [Vault](https://github.com/Paranjayy).
+*Vibecoded by Paranjayy*
