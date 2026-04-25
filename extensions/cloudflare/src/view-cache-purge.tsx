@@ -10,7 +10,7 @@ import {
   showToast,
   Toast,
 } from '@raycast/api';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Service, { CachePurgeResult, Zone } from './service';
 import { getToken } from './utils';
 import { SiteProps } from './view-sites';
@@ -18,6 +18,19 @@ import { SiteProps } from './view-sites';
 const service = new Service(getToken());
 
 type PurgeType = 'url' | 'hostname' | 'tag' | 'prefix';
+const PURGE_TYPES: readonly PurgeType[] = [
+  'url',
+  'hostname',
+  'tag',
+  'prefix',
+] as const;
+
+function isPurgeType(value: unknown): value is PurgeType {
+  return (
+    typeof value === 'string' &&
+    (PURGE_TYPES as readonly string[]).includes(value)
+  );
+}
 
 interface CachePurgeHistoryItem {
   url: string;
@@ -63,60 +76,86 @@ const LAST_TYPE_KEY = (zoneId: string) => `cache-purge-last-type-${zoneId}`;
 const LAST_ENTRIES_KEY = (zoneId: string, type: PurgeType) =>
   `cache-purge-last-entries-${zoneId}-${type}`;
 
+type RememberedEntries = Record<PurgeType, string>;
+
+interface InitialState {
+  type: PurgeType;
+  entriesByType: RememberedEntries;
+}
+
+async function loadInitialState(zoneId: string): Promise<InitialState> {
+  const [storedType, ...storedEntries] = await Promise.all([
+    LocalStorage.getItem<string>(LAST_TYPE_KEY(zoneId)),
+    ...PURGE_TYPES.map((type) =>
+      LocalStorage.getItem<string>(LAST_ENTRIES_KEY(zoneId, type)),
+    ),
+  ]);
+  const type = isPurgeType(storedType) ? storedType : 'url';
+  const entriesByType = PURGE_TYPES.reduce((acc, t, i) => {
+    acc[t] = storedEntries[i] ?? '';
+    return acc;
+  }, {} as RememberedEntries);
+  return { type, entriesByType };
+}
+
 export function CachePurgeView(props: SiteProps) {
   const { id } = props;
-  const [purgeType, setPurgeType] = useState<PurgeType>('url');
-  const [entries, setEntries] = useState<string>('');
-  const [loaded, setLoaded] = useState(false);
-  const currentTypeRef = useRef<PurgeType>('url');
-  const field = PURGE_FIELD_CONFIG[purgeType];
+  const [initialState, setInitialState] = useState<InitialState | null>(null);
 
-  // Restore last selected purge type and its last entries on mount
   useEffect(() => {
-    (async () => {
-      const lastType =
-        (await LocalStorage.getItem<string>(LAST_TYPE_KEY(id))) ?? 'url';
-      const type = (
-        ['url', 'hostname', 'tag', 'prefix'] as PurgeType[]
-      ).includes(lastType as PurgeType)
-        ? (lastType as PurgeType)
-        : 'url';
-      const lastEntries =
-        (await LocalStorage.getItem<string>(LAST_ENTRIES_KEY(id, type))) ?? '';
-      currentTypeRef.current = type;
-      setPurgeType(type);
-      setEntries(lastEntries);
-      setLoaded(true);
-    })();
+    let cancelled = false;
+    loadInitialState(id).then((state) => {
+      if (!cancelled) setInitialState(state);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [id]);
 
-  // Load remembered entries whenever the type changes (after initial load)
-  const handleTypeChange = async (value: string) => {
-    const type = value as PurgeType;
-    currentTypeRef.current = type;
-    setPurgeType(type);
-    await LocalStorage.setItem(LAST_TYPE_KEY(id), type);
-    const remembered =
-      (await LocalStorage.getItem<string>(LAST_ENTRIES_KEY(id, type))) ?? '';
-    // Guard against stale resolution when the user switches types rapidly.
-    if (currentTypeRef.current === type) {
-      setEntries(remembered);
-    }
+  if (!initialState) {
+    return <Form isLoading />;
+  }
+
+  return <CachePurgeForm zoneId={id} initialState={initialState} />;
+}
+
+interface CachePurgeFormProps {
+  zoneId: string;
+  initialState: InitialState;
+}
+
+function CachePurgeForm({ zoneId, initialState }: CachePurgeFormProps) {
+  const [purgeType, setPurgeType] = useState<PurgeType>(initialState.type);
+  const [entriesByType, setEntriesByType] = useState<RememberedEntries>(
+    initialState.entriesByType,
+  );
+  const field = PURGE_FIELD_CONFIG[purgeType];
+  const entries = entriesByType[purgeType];
+
+  const handleTypeChange = (value: string) => {
+    if (!isPurgeType(value) || value === purgeType) return;
+    setPurgeType(value);
+    void LocalStorage.setItem(LAST_TYPE_KEY(zoneId), value);
+  };
+
+  const handleEntriesChange = (value: string) => {
+    setEntriesByType((prev) => ({ ...prev, [purgeType]: value }));
   };
 
   const handleSubmit = async (values: { entries: string }) => {
     const rawValue = values.entries ?? '';
-    const initiated = await submitPurge(id, purgeType, rawValue);
+    const initiated = await submitPurge(zoneId, purgeType, rawValue);
     if (initiated) {
-      await LocalStorage.setItem(LAST_TYPE_KEY(id), purgeType);
-      await LocalStorage.setItem(LAST_ENTRIES_KEY(id, purgeType), rawValue);
+      await Promise.all([
+        LocalStorage.setItem(LAST_TYPE_KEY(zoneId), purgeType),
+        LocalStorage.setItem(LAST_ENTRIES_KEY(zoneId, purgeType), rawValue),
+      ]);
+      setEntriesByType((prev) => ({ ...prev, [purgeType]: rawValue }));
     }
   };
 
   const handlePurgeLast = async () => {
-    const remembered =
-      (await LocalStorage.getItem<string>(LAST_ENTRIES_KEY(id, purgeType))) ??
-      '';
+    const remembered = entriesByType[purgeType];
     if (!remembered.trim()) {
       await showToast({
         style: Toast.Style.Failure,
@@ -125,12 +164,11 @@ export function CachePurgeView(props: SiteProps) {
       });
       return;
     }
-    await submitPurge(id, purgeType, remembered);
+    await submitPurge(zoneId, purgeType, remembered);
   };
 
   return (
     <Form
-      isLoading={!loaded}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -147,7 +185,7 @@ export function CachePurgeView(props: SiteProps) {
           <Action.Push
             icon={Icon.List}
             title="Purge History"
-            target={<CachePurgeHistory id={id} accountId={''} />}
+            target={<CachePurgeHistory id={zoneId} accountId={''} />}
             shortcut={{ modifiers: ['cmd'], key: 'h' }}
           />
         </ActionPanel>
@@ -174,7 +212,7 @@ export function CachePurgeView(props: SiteProps) {
         placeholder={field.placeholder}
         info={field.info}
         value={entries}
-        onChange={setEntries}
+        onChange={handleEntriesChange}
       />
     </Form>
   );
