@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flag-lookup",
+  "title": "Flag Lookup",
+  "description": "Search country flags and view key facts like capital, population, languages, and more. Fast, offline, and keyboard-first.",
+  "icon": "extension-icon.png",
+  "author": "mathurin",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "keywords": [
+    "flags",
+    "countries",
+    "geography",
+    "world",
+    "capitals"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "flag-lookup",
+      "title": "Flag Lookup",
+      "description": "Search countries by name and view their flag, capital, population, and languages.",
+      "keywords": [
+        "country",
+        "flag",
+        "geography",
+        "capital",
+        "world"
+      ],
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "country",
+          "type": "text",
+          "placeholder": "Search country"
+        }
+      ]
+    },
+    {
+      "name": "random-flag",
+      "title": "Random Flag",
+      "description": "Show a random country with its flag and key facts.",
+      "keywords": [
+        "country",
+        "flag",
+        "geography",
+        "world"
+      ],
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo 'Not for npm publishing' && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
