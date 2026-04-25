@@ -50,7 +50,9 @@ export default function Command() {
   const { history } = useHistory();
   const [selectMode, setSelectMode] = useState<SelectMode>("single");
   // Stable reference so useColorsSelection's cleanup effect doesn't re-run every render.
-  const getItemKey = useCallback((item: HistoryItem) => getFormattedColor(item.color), []);
+  // Combine date + formattedColor so distinct history entries that format to the same color
+  // (e.g. legacy data with duplicate picks) get distinct selection keys.
+  const getItemKey = useCallback((item: HistoryItem) => `${item.date}-${getFormattedColor(item.color)}`, []);
   const { selection } = useColorsSelection<HistoryItem>(history ?? [], getItemKey);
 
   if (selectMode === "multi") {
