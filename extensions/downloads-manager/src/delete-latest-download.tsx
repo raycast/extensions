@@ -37,6 +37,8 @@ export default async function main() {
 
   try {
     await deleteFileOrFolder(latestDownload.path, {
+      confirmationMessage:
+        "Are you sure you want to permanently delete the latest download? This action cannot be undone.",
       feedback: isBackgroundLaunch ? "none" : "hud",
       skipConfirmation: isBackgroundLaunch && permanentDeleteChoice === "delete",
       beforeFeedback: isBackgroundLaunch

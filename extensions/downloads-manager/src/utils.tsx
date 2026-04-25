@@ -205,7 +205,12 @@ async function showDeleteFeedback(feedback: DeleteFeedback, title: string, style
 
 export async function deleteFileOrFolder(
   filePath: string,
-  options: { feedback?: DeleteFeedback; beforeFeedback?: () => Promise<void>; skipConfirmation?: boolean } = {},
+  options: {
+    feedback?: DeleteFeedback;
+    beforeFeedback?: () => Promise<void>;
+    confirmationMessage?: string;
+    skipConfirmation?: boolean;
+  } = {},
 ) {
   const feedback = options.feedback ?? "toast";
   const deletionBehavior = await getDeletionBehavior();
@@ -226,7 +231,9 @@ export async function deleteFileOrFolder(
   if (!options.skipConfirmation) {
     shouldDelete = await confirmAlert({
       title: "Delete Item?",
-      message: "Are you sure you want to permanently delete the latest download? This action cannot be undone.",
+      message:
+        options.confirmationMessage ??
+        `Are you sure you want to permanently delete:\n${filePath}?\nThis action cannot be undone.`,
       rememberUserChoice: true,
       primaryAction: {
         title: "Delete",
