@@ -218,11 +218,12 @@ export async function deleteFileOrFolder(
   if (deletionBehavior === "trash") {
     try {
       await trash(filePath);
-      await options.beforeFeedback?.();
-      await showDeleteFeedback(feedback, "Item Moved to Trash", Toast.Style.Success);
     } catch (error) {
       await showFailureToast(error, { title: "Move to Trash Failed" });
+      return;
     }
+    await options.beforeFeedback?.();
+    await showDeleteFeedback(feedback, "Item Moved to Trash", Toast.Style.Success);
     return;
   }
 
