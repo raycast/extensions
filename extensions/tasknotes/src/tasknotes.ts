@@ -18,6 +18,7 @@ export type Preferences = {
   taskPropertyValue?: string;
   openStatus: string;
   doneStatus: string;
+  showCompletedTasks?: boolean;
 };
 
 export type TaskNote = {
@@ -132,6 +133,7 @@ export function preferences() {
     taskTag: stripHash(values.taskTag),
     taskPropertyName: values.taskPropertyName?.trim(),
     taskPropertyValue: values.taskPropertyValue?.trim(),
+    showCompletedTasks: values.showCompletedTasks ?? true,
   };
 }
 

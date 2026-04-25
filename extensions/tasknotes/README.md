@@ -11,6 +11,7 @@ This is an unofficial Raycast extension for TaskNotes.
 3. Set the extension preferences:
    - `Vault Mode`: `Single Vault` or `Multiple Vaults`.
    - `Obsidian Vault or Vaults Folder`: in single-vault mode, your vault folder; in multiple-vault mode, the parent folder containing your vault folders.
+   - `Show Completed Tasks`: include or hide completed tasks in Search Tasks.
 
 In multiple-vault mode, run `Switch Default Vault` once to choose the vault used by inline Quick Add and preselected in Create Task.
 

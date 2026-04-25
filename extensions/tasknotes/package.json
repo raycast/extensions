@@ -197,6 +197,15 @@
       "type": "textfield",
       "required": true,
       "default": "done"
+    },
+    {
+      "name": "showCompletedTasks",
+      "title": "Show Completed Tasks",
+      "description": "Show completed tasks in Search Tasks.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Include completed tasks in search results"
     }
   ],
   "scripts": {
