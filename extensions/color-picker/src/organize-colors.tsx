@@ -14,7 +14,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { showFailureToast, usePromise } from "@raycast/utils";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import CopyAsSubmenu from "./components/CopyAsSubmenu";
 import { EditTitle } from "./components/EditTitle";
 import { useColorsSelection } from "./hooks/useColorsSelection";
@@ -49,7 +49,9 @@ const PickColorAction = () => (
 export default function Command() {
   const { history } = useHistory();
   const [selectMode, setSelectMode] = useState<SelectMode>("single");
-  const { selection } = useColorsSelection<HistoryItem>(history ?? [], (item) => getFormattedColor(item.color));
+  // Stable reference so useColorsSelection's cleanup effect doesn't re-run every render.
+  const getItemKey = useCallback((item: HistoryItem) => getFormattedColor(item.color), []);
+  const { selection } = useColorsSelection<HistoryItem>(history ?? [], getItemKey);
 
   if (selectMode === "multi") {
     return (
