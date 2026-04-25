@@ -5,6 +5,9 @@
   "description": "Create, manage, and organize color palettes with AI-powered color generation.",
   "icon": "extension-icon.png",
   "author": "elibattistoni",
+  "platforms": [
+    "macOS"
+  ],
   "categories": [
     "Design Tools",
     "Productivity"
