@@ -19,4 +19,5 @@ Discover and use 7TV emotes directly from Raycast with a high-fidelity, iridesce
 4. Use `Cmd+S` to **Star** an emote for quick access later.
 
 ---
-*Vibecoded by Paranjayy*
+
+_Vibecoded by Paranjayy_

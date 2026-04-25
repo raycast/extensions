@@ -230,7 +230,8 @@ export default function Command() {
         }
 
         toast.style = Toast.Style.Success;
-        toast.title = mode === "bruteforce" ? "Emote Bruteforced!" : "Emote Dropped!";
+        toast.title =
+          mode === "bruteforce" ? "Emote Bruteforced!" : "Emote Dropped!";
       } catch (clipError) {
         console.error("Drop failed:", clipError);
         await Clipboard.paste(url);

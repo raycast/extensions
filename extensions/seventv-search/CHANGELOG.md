@@ -3,6 +3,7 @@
 ## [1.0.0] - 2026-04-25
 
 ### Added
+
 - Initial release of 7TV Emotes Search Pro.
 - Support for searching global 7TV emotes.
 - "Popular", "Trending", and "Recently Created" filters.

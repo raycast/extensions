@@ -1,1 +1,1 @@
-{"extends": ["@raycast/eslint-config"]}
+{ "extends": ["@raycast/eslint-config"] }
