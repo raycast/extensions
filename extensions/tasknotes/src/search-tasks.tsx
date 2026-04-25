@@ -105,6 +105,15 @@ function TaskActions({ task, revalidate }: { task: TaskNote; revalidate: () => v
       <Action.Open title="Open Markdown File" target={task.path} />
       <Action.ShowInFinder path={task.path} />
       <Action.CopyToClipboard title="Copy Markdown Link" content={`[[${task.relativePath.replace(/\.md$/i, "")}]]`} />
+      <Action.Trash
+        title="Delete Task"
+        paths={task.path}
+        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+        onTrash={() => {
+          showToast({ style: Toast.Style.Success, title: "Task moved to Trash", message: task.title });
+          revalidate();
+        }}
+      />
     </ActionPanel>
   );
 }
