@@ -1,0 +1,106 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "spoo",
+  "title": "Spoo.me",
+  "description": "Shorten, manage, and analyze your spoo.me links without leaving your keyboard.",
+  "icon": "extension-icon.png",
+  "author": "zingzy",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity", "Developer Tools", "Web"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "quick-shorten",
+      "title": "Quick Shorten",
+      "subtitle": "spoo.me",
+      "description": "Shorten the active browser tab or clipboard URL in one keystroke.",
+      "mode": "no-view",
+      "keywords": ["shorten", "link", "url", "clipboard"],
+      "arguments": [
+        {
+          "name": "url",
+          "type": "text",
+          "placeholder": "URL (optional)",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "shorten",
+      "title": "Shorten Link",
+      "subtitle": "spoo.me",
+      "description": "Create a short link with custom alias, password, expiry, and more.",
+      "mode": "view",
+      "keywords": ["shorten", "create", "new", "link"]
+    },
+    {
+      "name": "my-links",
+      "title": "My Links",
+      "subtitle": "spoo.me",
+      "description": "Search, browse, and manage your links with a live analytics preview.",
+      "mode": "view",
+      "keywords": ["links", "manage", "search", "analytics"]
+    },
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "spoo.me",
+      "description": "At-a-glance overview of your links and clicks.",
+      "mode": "view",
+      "keywords": ["dashboard", "overview", "stats"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "API Base URL",
+      "description": "Base URL of the spoo.me server. Defaults to the local dev server; set to https://spoo.me for production.",
+      "default": "https://spoo.me",
+      "placeholder": "https://spoo.me"
+    },
+    {
+      "name": "autoCopy",
+      "type": "checkbox",
+      "required": false,
+      "title": "Clipboard",
+      "label": "Auto-copy short URL after creation",
+      "description": "When enabled, the shortened URL is copied to your clipboard immediately after creation.",
+      "default": true
+    },
+    {
+      "name": "celebrate",
+      "type": "checkbox",
+      "required": false,
+      "title": "Delight",
+      "label": "Show celebratory HUD for emoji aliases",
+      "description": "Show a confetti-style HUD when the generated alias contains an emoji.",
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0",
+    "qrcode": "^1.5.4",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.9.4",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.5.4",
+    "@types/qrcode": "^1.5.5",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "biome check . && ray lint",
+    "lint:fix": "biome check --write . && ray lint --fix",
+    "format": "biome format --write .",
+    "typecheck": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
