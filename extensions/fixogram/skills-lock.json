@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "raycast": {
+      "source": "adriangrantdotorg/Raycast-Skill",
+      "ref": "main",
+      "sourceType": "github",
+      "computedHash": "b32c24ecb5fdff3e91e4244474092892255c0ca18f181255732c51a99cefb0ff"
+    }
+  }
+}
