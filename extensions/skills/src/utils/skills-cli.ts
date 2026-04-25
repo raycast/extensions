@@ -2,7 +2,7 @@ import { access, readFile, stat } from "node:fs/promises";
 import { constants } from "node:fs";
 import { homedir } from "node:os";
 import { basename, join } from "node:path";
-import { getCustomNpxPath, preferences } from "../preferences";
+import { getCustomNpxPath, getGithubToken, shouldDisableSkillsCliTelemetry } from "../preferences";
 import type { InstalledSkill, Skill, SkillLockEntry } from "../shared";
 import { execAsync } from "./exec-async";
 import { getExecOptions } from "./exec-options";
@@ -44,6 +44,10 @@ function buildSkillsCliCommand(npxCommand: string, args: string[]): string {
   return [npxCommand, "-y", "skills@latest", ...args].map(shellEscape).join(" ");
 }
 
+function getSkillsCliEnvOverrides(): Record<string, string> {
+  return shouldDisableSkillsCliTelemetry() ? { DISABLE_TELEMETRY: "1" } : {};
+}
+
 async function runSkillsCli(args: string[]): Promise<string> {
   const customNpxPath = getCustomNpxPath();
   if (customNpxPath) {
@@ -53,6 +57,10 @@ async function runSkillsCli(args: string[]): Promise<string> {
   const npxCommand = customNpxPath ?? "npx";
   try {
     const execOptions = await getExecOptions();
+    execOptions.env = {
+      ...execOptions.env,
+      ...getSkillsCliEnvOverrides(),
+    };
     const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), execOptions);
     return stdout;
   } catch (error) {
@@ -338,7 +346,7 @@ export async function checkForUpdates(): Promise<string[]> {
     byRepo.set(entry.source, list);
   }
 
-  const { githubToken } = preferences;
+  const githubToken = getGithubToken();
 
   const results = await Promise.all(
     [...byRepo.entries()].map(async ([source, skills]) => {

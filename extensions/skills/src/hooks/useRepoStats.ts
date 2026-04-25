@@ -1,6 +1,6 @@
-import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
+import { getGithubToken } from "../preferences";
 import { type Skill } from "../shared";
 
 export type RepoStats = {
@@ -10,7 +10,7 @@ export type RepoStats = {
 
 async function fetchRepoStats(source: string): Promise<RepoStats | undefined> {
   try {
-    const { githubToken } = getPreferenceValues<{ githubToken?: string }>();
+    const githubToken = getGithubToken();
     const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
     if (githubToken) {
       headers["Authorization"] = `Bearer ${githubToken}`;

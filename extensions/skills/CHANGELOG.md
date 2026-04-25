@@ -1,5 +1,11 @@
 # Skills Changelog
 
+## [Add Skills CLI Telemetry Opt-Out] - {PR_MERGE_DATE}
+
+- Add an extension preference to opt out of anonymous usage telemetry collected by the underlying Skills CLI when commands are run from Raycast
+- Pass `DISABLE_TELEMETRY=1` to all Skills CLI invocations when the preference is enabled
+- Trim the optional GitHub token preference before using it for repository stats and update checks
+
 ## [Fix Homebrew `node@` Resolution and add Custom `npx` Validation] - 2026-04-23
 
 - Detect versioned Homebrew Node formula bins like `/opt/homebrew/opt/node@24/bin` so the Skills CLI can find `node` when `npx` comes from Homebrew, while still preferring Node installs from version managers first
