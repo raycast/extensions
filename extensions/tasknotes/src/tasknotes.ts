@@ -285,7 +285,7 @@ export function taskSubtitle(task: TaskNote): string | undefined {
     task.contexts.length > 0 ? task.contexts.map((context) => `@${context}`).join(" ") : undefined,
   ].filter(Boolean);
 
-  return parts.length > 0 ? parts.join(" | ") : undefined;
+  return parts.length > 0 ? parts.join(" - ") : undefined;
 }
 
 async function readTaskNote(filePath: string, vault: VaultInfo): Promise<TaskNote | undefined> {
