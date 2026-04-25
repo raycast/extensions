@@ -1,0 +1,223 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "dynatrace-connector",
+  "title": "Dynatrace Connector",
+  "description": "Monitor your Dynatrace environment directly from Raycast — search logs, track problems, inspect deployments and entities.",
+  "icon": "dynatrace-icon.png",
+  "author": "yaroslav_volenyuk",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "dynatrace",
+    "observability",
+    "logs",
+    "monitoring",
+    "apm",
+    "dql",
+    "grail"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "useMockData",
+      "title": "Use Mock Data",
+      "description": "Use fake local data instead of real Dynatrace API (for development)",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable mock mode"
+    },
+    {
+      "name": "jiraUrl",
+      "title": "Jira URL",
+      "description": "For scoped tokens: https://api.atlassian.com/ex/jira/{cloudId} | For unscoped tokens: https://yourcompany.atlassian.net",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://api.atlassian.com/ex/jira/e6f310ff-605a-4f7c-b043-5d591d075292",
+      "default": "https://api.atlassian.com/ex/jira/e6f310ff-605a-4f7c-b043-5d591d075292"
+    },
+    {
+      "name": "jiraEmail",
+      "title": "Jira Email",
+      "description": "Email address for Jira API authentication",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "your-email@company.com"
+    },
+    {
+      "name": "jiraApiToken",
+      "title": "Jira API Token",
+      "description": "API token for Jira authentication (from Jira account settings)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "jiraProjectKey",
+      "title": "Jira Project Key",
+      "description": "Default project key for creating issues (e.g., OPS, DEVOPS)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "OPS"
+    },
+    {
+      "name": "enableAlerts",
+      "title": "Background Problem Alerts",
+      "description": "Enable periodic checks for new open problems",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Enable background alerts"
+    }
+  ],
+  "commands": [
+    {
+      "name": "dt",
+      "title": "Dynatrace",
+      "subtitle": "Dynatrace",
+      "description": "All Dynatrace commands in one place — logs, problems, traces, deployments, entities and more",
+      "mode": "view",
+      "icon": "dynatrace-icon.png"
+    },
+    {
+      "name": "dt-search-logs",
+      "title": "Search Logs",
+      "subtitle": "Dynatrace",
+      "description": "Search Dynatrace Grail logs with DQL filters",
+      "mode": "view",
+      "icon": "dynatrace-icon.png",
+      "arguments": [
+        {
+          "name": "timeframeValue",
+          "placeholder": "1",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "timeframeUnit",
+          "placeholder": "h",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "query",
+          "placeholder": "error",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "dt-problems",
+      "title": "Active Problems",
+      "subtitle": "Dynatrace",
+      "description": "View active Davis AI problems",
+      "mode": "view",
+      "icon": "dynatrace-icon.png"
+    },
+    {
+      "name": "dt-deployments",
+      "title": "Recent Deployments",
+      "subtitle": "Dynatrace",
+      "description": "View recent deployment events",
+      "mode": "view",
+      "icon": "dynatrace-icon.png"
+    },
+    {
+      "name": "dt-entities",
+      "title": "Find Entity",
+      "subtitle": "Dynatrace",
+      "description": "Search services, hosts and process groups",
+      "mode": "view",
+      "icon": "dynatrace-icon.png"
+    },
+    {
+      "name": "dt-dql-runner",
+      "title": "Run DQL Query",
+      "subtitle": "Dynatrace",
+      "description": "Execute a custom DQL query",
+      "mode": "view",
+      "icon": "dynatrace-icon.png"
+    },
+    {
+      "name": "dt-saved-queries",
+      "title": "Saved DQL Queries",
+      "subtitle": "Dynatrace",
+      "description": "Manage and run saved DQL queries",
+      "mode": "view",
+      "icon": "dynatrace-icon.png"
+    },
+    {
+      "name": "dt-tenants",
+      "title": "Manage Tenants",
+      "subtitle": "Dynatrace",
+      "description": "Add, edit and switch between Dynatrace tenants",
+      "mode": "view",
+      "icon": "dynatrace-icon.png"
+    },
+    {
+      "name": "dt-menubar-problems",
+      "title": "Problems in Menu Bar",
+      "subtitle": "Dynatrace",
+      "description": "Show open problem count in macOS menu bar",
+      "mode": "menu-bar",
+      "icon": "dynatrace-icon.png",
+      "interval": "5m"
+    },
+    {
+      "name": "dt-traces",
+      "title": "Search Traces",
+      "subtitle": "Dynatrace",
+      "description": "Search distributed traces with filtering by service, status and duration",
+      "mode": "view",
+      "icon": "dynatrace-icon.png"
+    },
+    {
+      "name": "dt-alerts",
+      "title": "Background Problem Alerts",
+      "subtitle": "Dynatrace",
+      "description": "Monitor for new OPEN problems and send notifications",
+      "mode": "no-view",
+      "icon": "dynatrace-icon.png",
+      "interval": "5m"
+    },
+    {
+      "name": "dt-test-connection",
+      "title": "Test Connection",
+      "subtitle": "Dynatrace",
+      "description": "Test tenant connection and view configuration details",
+      "mode": "view",
+      "icon": "dynatrace-icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/jest": "^30.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "jest": "^30.3.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.4.9",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "NODE_NO_WARNINGS=1 ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "NODE_NO_WARNINGS=1 jest",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
