@@ -322,7 +322,7 @@ export default function Command() {
           />
           <Action
             title={isGridView ? "Switch to List View" : "Switch to Grid View"}
-            icon={isGridView ? Icon.List : Icon.Grid}
+            icon={isGridView ? Icon.List : Icon.AppWindowGrid3x3}
             onAction={() => setIsGridView(!isGridView)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           />
