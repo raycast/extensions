@@ -10,7 +10,9 @@ export type StatsScope = "anon" | "all";
 export interface StatsOptions {
   scope?: StatsScope;
   shortCode?: string;
-  groupBy?: Array<"time" | "browser" | "os" | "country" | "city" | "referrer">;
+  groupBy?: ReadonlyArray<
+    "time" | "browser" | "os" | "country" | "city" | "referrer" | "short_code"
+  >;
   metrics?: Array<"clicks" | "unique_clicks">;
   startDate?: string;
   endDate?: string;

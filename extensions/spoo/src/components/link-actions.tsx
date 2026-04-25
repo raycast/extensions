@@ -1,3 +1,4 @@
+import type React from "react";
 import {
   Action,
   ActionPanel,
@@ -17,7 +18,7 @@ import { LinkQrView } from "@/components/link-qr";
 interface LinkActionsProps {
   link: UrlListItem;
   onMutated: () => void;
-  children?: JSX.Element | JSX.Element[];
+  children?: React.ReactElement | React.ReactElement[];
 }
 
 export function LinkActions({ link, onMutated, children }: LinkActionsProps) {
@@ -56,18 +57,20 @@ export function LinkActions({ link, onMutated, children }: LinkActionsProps) {
           content={link.short_url}
         />
         <Action.OpenInBrowser title="Open Short URL" url={link.short_url} />
-        <Action.OpenInBrowser
-          title="Open Long URL"
-          url={link.long_url}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-        />
+        {link.long_url ? (
+          <Action.OpenInBrowser
+            title="Open Long URL"
+            url={link.long_url}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
+          />
+        ) : null}
       </ActionPanel.Section>
 
       <ActionPanel.Section>
         <Action
           title="View Analytics"
           icon={Icon.BarChart}
-          shortcut={{ modifiers: ["cmd"], key: "k" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
           onAction={() => push(<LinkAnalytics link={link} />)}
         />
         <Action
@@ -81,7 +84,7 @@ export function LinkActions({ link, onMutated, children }: LinkActionsProps) {
         <Action
           title="Show Qr Code"
           icon={Icon.Code}
-          shortcut={{ modifiers: ["cmd"], key: "q" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "q" }}
           onAction={() => push(<LinkQrView link={link} />)}
         />
         <Action.CopyToClipboard

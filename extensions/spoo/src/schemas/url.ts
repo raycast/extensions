@@ -41,7 +41,10 @@ export const UrlListResponseSchema = z.object({
   sortBy: z.string().optional(),
   sortOrder: z.string().optional(),
 });
-export type UrlListResponse = z.infer<typeof UrlListResponseSchema>;
+export type UrlListResponse = Omit<
+  z.infer<typeof UrlListResponseSchema>,
+  "items"
+> & { items: UrlListItem[] };
 
 export const AliasAvailabilitySchema = z.object({
   available: z.boolean(),

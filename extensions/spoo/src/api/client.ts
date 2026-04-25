@@ -9,7 +9,7 @@ export interface RequestOptions<T> {
   method?: HttpMethod;
   body?: unknown;
   query?: Record<string, string | number | boolean | undefined | null>;
-  schema?: z.ZodType<T>;
+  schema?: z.ZodType<T, z.ZodTypeDef, unknown>;
 }
 
 export async function apiFetch<T = unknown>(
@@ -86,7 +86,7 @@ async function performRequest<T>(
 
 async function parseResponse<T>(
   res: Response,
-  schema?: z.ZodType<T>,
+  schema?: z.ZodType<T, z.ZodTypeDef, unknown>,
 ): Promise<T> {
   if (!res.ok) throw await SpooError.fromResponse(res);
   const data = await res.json();

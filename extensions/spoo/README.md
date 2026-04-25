@@ -1,5 +1,5 @@
 <p align="center">
-<img src="metadata/spoo-1.png" alt="spoo.me for Raycast" width="700">
+<img src="media/banner.png" alt="spoo.me for Raycast" width="700">
 </p>
 
 <h3 align="center">spoo.me for Raycast</h3>
