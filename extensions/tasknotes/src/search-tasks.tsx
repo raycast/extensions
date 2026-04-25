@@ -12,6 +12,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import {
   assertVaultIsReadable,
+  isMultipleVaultMode,
   listTaskNotes,
   obsidianUrl,
   preferences,
@@ -31,6 +32,7 @@ export default function Command() {
   }
 
   const prefs = preferences();
+  const showVaultBadge = isMultipleVaultMode();
   const tasks = data ?? [];
   const openTasks = tasks.filter((task) => !task.completed);
   const completedTasks = prefs.showCompletedTasks ? tasks.filter((task) => task.completed) : [];
@@ -52,13 +54,13 @@ export default function Command() {
       ) : null}
       <List.Section title="Open" subtitle={String(openTasks.length)}>
         {openTasks.map((task) => (
-          <TaskListItem key={task.path} task={task} revalidate={revalidate} />
+          <TaskListItem key={task.path} task={task} revalidate={revalidate} showVaultBadge={showVaultBadge} />
         ))}
       </List.Section>
       {prefs.showCompletedTasks ? (
         <List.Section title="Completed" subtitle={String(completedTasks.length)}>
           {completedTasks.map((task) => (
-            <TaskListItem key={task.path} task={task} revalidate={revalidate} />
+            <TaskListItem key={task.path} task={task} revalidate={revalidate} showVaultBadge={showVaultBadge} />
           ))}
         </List.Section>
       ) : null}
@@ -66,7 +68,15 @@ export default function Command() {
   );
 }
 
-function TaskListItem({ task, revalidate }: { task: TaskNote; revalidate: () => void }) {
+function TaskListItem({
+  task,
+  revalidate,
+  showVaultBadge,
+}: {
+  task: TaskNote;
+  revalidate: () => void;
+  showVaultBadge: boolean;
+}) {
   const isDone = task.completed;
 
   return (
@@ -74,16 +84,16 @@ function TaskListItem({ task, revalidate }: { task: TaskNote; revalidate: () => 
       title={task.title}
       subtitle={taskSubtitle(task)}
       icon={{ source: isDone ? Icon.CheckCircle : Icon.Circle, tintColor: isDone ? Color.Green : Color.SecondaryText }}
-      accessories={taskAccessories(task)}
+      accessories={taskAccessories(task, showVaultBadge)}
       actions={<TaskActions task={task} revalidate={revalidate} />}
     />
   );
 }
 
-function taskAccessories(task: TaskNote): List.Item.Accessory[] {
+function taskAccessories(task: TaskNote, showVaultBadge: boolean): List.Item.Accessory[] {
   return [
     ...(task.due ? [{ tag: { value: `Due ${task.due}`, color: Color.Red } }] : []),
-    { tag: { value: task.vaultName, color: Color.SecondaryText } },
+    ...(showVaultBadge ? [{ tag: { value: task.vaultName, color: Color.SecondaryText } }] : []),
   ];
 }
 
