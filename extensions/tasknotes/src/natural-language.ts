@@ -5,6 +5,10 @@ export type ParsedTaskInput = NewTaskValues & {
   tags?: string;
 };
 
+type ParseOptions = {
+  defaultDateTarget?: "due" | "scheduled";
+};
+
 const priorityAliases: Record<string, string> = {
   p0: "highest",
   p1: "high",
@@ -20,8 +24,13 @@ const priorityAliases: Record<string, string> = {
   lowest: "lowest",
 };
 
-export function parseNaturalLanguageTask(input: string, referenceDate = new Date()): ParsedTaskInput {
+export function parseNaturalLanguageTask(
+  input: string,
+  referenceDate = new Date(),
+  options: ParseOptions = {},
+): ParsedTaskInput {
   let text = input.trim();
+  const defaultDateTarget = options.defaultDateTarget ?? "scheduled";
   const details = extractDetails(text);
   text = details.text;
 
@@ -35,8 +44,8 @@ export function parseNaturalLanguageTask(input: string, referenceDate = new Date
   text = priority.text;
 
   const parsedDates = chrono.parse(text, referenceDate, { forwardDate: true });
-  const due = firstDateFor(text, parsedDates, "due");
-  const scheduled = firstDateFor(text, parsedDates, "scheduled");
+  const due = firstDateFor(text, parsedDates, "due", defaultDateTarget);
+  const scheduled = firstDateFor(text, parsedDates, "scheduled", defaultDateTarget);
   text = removeDateText(text, parsedDates);
 
   const title = normalizeTitle(text);
@@ -101,15 +110,21 @@ function extractPriority(text: string) {
   };
 }
 
-function firstDateFor(text: string, dates: chrono.ParsedResult[], kind: "due" | "scheduled") {
+function firstDateFor(
+  text: string,
+  dates: chrono.ParsedResult[],
+  kind: "due" | "scheduled",
+  defaultDateTarget: "due" | "scheduled",
+) {
   const lower = text.toLowerCase();
   const result = dates.find((date) => {
     const prefix = lower.slice(Math.max(0, date.index - 16), date.index);
     const isScheduled = /\b(do|start|scheduled?|on|at)\s*$/i.test(prefix);
     const isDue = /\b(due|by|before)\s*$/i.test(prefix);
 
-    if (kind === "scheduled") return isScheduled && !isDue;
-    return isDue || (!isScheduled && kind === "due");
+    if (isDue) return kind === "due";
+    if (isScheduled) return kind === "scheduled";
+    return kind === defaultDateTarget;
   });
 
   return result?.start.date();

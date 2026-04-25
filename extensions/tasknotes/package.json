@@ -22,21 +22,7 @@
       "name": "quick-add-task",
       "title": "Quick Add Task",
       "description": "Create a TaskNotes task from natural language.",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "text",
-          "placeholder": "Task, date, tags, contexts, priority...",
-          "type": "text",
-          "required": true
-        },
-        {
-          "name": "vaultName",
-          "placeholder": "Vault name",
-          "type": "text",
-          "required": false
-        }
-      ],
+      "mode": "view",
       "keywords": [
         "natural language",
         "capture",
@@ -117,47 +103,85 @@
       ]
     },
     {
+      "name": "defaultQuickAddVault",
+      "title": "Default Quick Add Vault",
+      "description": "Optional vault name to preselect in Quick Add when using multiple-vault mode.",
+      "type": "textfield",
+      "required": false
+    },
+    {
       "name": "tasksFolder",
-      "title": "Tasks Folder",
-      "description": "Folder inside the vault where new tasks should be created.",
+      "title": "Fallback Tasks Folder",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
       "type": "textfield",
       "required": true,
       "default": "TaskNotes/Tasks"
     },
     {
+      "name": "storeTitleInFilename",
+      "title": "Fallback Store Title in Filename",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Omit the title frontmatter property for new tasks"
+    },
+    {
+      "name": "filenameFormat",
+      "title": "Fallback Filename Format",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
+      "type": "dropdown",
+      "required": true,
+      "default": "title",
+      "data": [
+        {
+          "title": "Title",
+          "value": "title"
+        },
+        {
+          "title": "Zettelkasten",
+          "value": "zettel"
+        },
+        {
+          "title": "Timestamp",
+          "value": "timestamp"
+        }
+      ]
+    },
+    {
       "name": "taskTag",
-      "title": "Task Tag",
-      "description": "Tag used by TaskNotes to identify task notes when using tag-based identification.",
+      "title": "Fallback Task Tag",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
       "type": "textfield",
       "required": true,
       "default": "task"
     },
     {
       "name": "taskPropertyName",
-      "title": "Task Property Name",
-      "description": "Optional frontmatter property used by TaskNotes property-based identification, for example isTask.",
+      "title": "Fallback Task Property Name",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "taskPropertyValue",
-      "title": "Task Property Value",
-      "description": "Optional value for property-based identification, for example true or task.",
+      "title": "Fallback Task Property Value",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
       "type": "textfield",
       "required": false
     },
     {
       "name": "openStatus",
-      "title": "Open Status",
-      "description": "Status value for newly created and reopened tasks.",
+      "title": "Fallback Open Status",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
       "type": "textfield",
       "required": true,
       "default": "open"
     },
     {
       "name": "doneStatus",
-      "title": "Done Status",
-      "description": "Status value that marks a task as completed.",
+      "title": "Fallback Done Status",
+      "description": "Used only when TaskNotes settings cannot be read from the vault.",
       "type": "textfield",
       "required": true,
       "default": "done"

@@ -14,7 +14,6 @@ import {
   assertVaultIsReadable,
   listTaskNotes,
   obsidianUrl,
-  preferences,
   setTaskStatus,
   taskSubtitle,
   type TaskNote,
@@ -31,8 +30,6 @@ export default function Command() {
   }
 
   const tasks = data ?? [];
-  const prefs = preferences();
-
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search TaskNotes tasks...">
       {!isLoading && tasks.length === 0 ? (
@@ -47,19 +44,16 @@ export default function Command() {
           }
         />
       ) : null}
-      <List.Section title="Open" subtitle={String(tasks.filter((task) => task.status !== prefs.doneStatus).length)}>
+      <List.Section title="Open" subtitle={String(tasks.filter((task) => !task.completed).length)}>
         {tasks
-          .filter((task) => task.status !== prefs.doneStatus)
+          .filter((task) => !task.completed)
           .map((task) => (
             <TaskListItem key={task.path} task={task} revalidate={revalidate} />
           ))}
       </List.Section>
-      <List.Section
-        title="Completed"
-        subtitle={String(tasks.filter((task) => task.status === prefs.doneStatus).length)}
-      >
+      <List.Section title="Completed" subtitle={String(tasks.filter((task) => task.completed).length)}>
         {tasks
-          .filter((task) => task.status === prefs.doneStatus)
+          .filter((task) => task.completed)
           .map((task) => (
             <TaskListItem key={task.path} task={task} revalidate={revalidate} />
           ))}
@@ -69,8 +63,7 @@ export default function Command() {
 }
 
 function TaskListItem({ task, revalidate }: { task: TaskNote; revalidate: () => void }) {
-  const prefs = preferences();
-  const isDone = task.status === prefs.doneStatus;
+  const isDone = task.completed;
 
   return (
     <List.Item
@@ -89,14 +82,13 @@ function TaskListItem({ task, revalidate }: { task: TaskNote; revalidate: () => 
 }
 
 function TaskActions({ task, revalidate }: { task: TaskNote; revalidate: () => void }) {
-  const prefs = preferences();
-  const isDone = task.status === prefs.doneStatus;
+  const isDone = task.completed;
 
   async function updateStatus(status: string) {
     await setTaskStatus(task, status);
     await showToast({
       style: Toast.Style.Success,
-      title: status === prefs.doneStatus ? "Task completed" : "Task reopened",
+      title: status === task.doneStatus ? "Task completed" : "Task reopened",
       message: task.title,
     });
     revalidate();
@@ -106,9 +98,9 @@ function TaskActions({ task, revalidate }: { task: TaskNote; revalidate: () => v
     <ActionPanel>
       <Action.OpenInBrowser title="Open in Obsidian" url={obsidianUrl(task)} icon={Icon.Window} />
       {isDone ? (
-        <Action title="Reopen Task" icon={Icon.RotateClockwise} onAction={() => updateStatus(prefs.openStatus)} />
+        <Action title="Reopen Task" icon={Icon.RotateClockwise} onAction={() => updateStatus(task.openStatus)} />
       ) : (
-        <Action title="Complete Task" icon={Icon.CheckCircle} onAction={() => updateStatus(prefs.doneStatus)} />
+        <Action title="Complete Task" icon={Icon.CheckCircle} onAction={() => updateStatus(task.doneStatus)} />
       )}
       <Action.Open title="Open Markdown File" target={task.path} />
       <Action.ShowInFinder path={task.path} />

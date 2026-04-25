@@ -6,6 +6,7 @@ import {
   listVaults,
   obsidianUrl,
   preferences,
+  sortVaultsForDefault,
   type NewTaskValues,
 } from "./tasknotes";
 
@@ -24,6 +25,7 @@ export default function Command() {
   const prefs = preferences();
   const multipleVaults = isMultipleVaultMode();
   const { data: vaults = [], isLoading } = useCachedPromise(listVaults);
+  const orderedVaults = sortVaultsForDefault(vaults);
 
   async function submit(values: FormValues) {
     if (!values.title.trim()) {
@@ -54,21 +56,23 @@ export default function Command() {
       isLoading={isLoading}
     >
       {multipleVaults ? (
-        <Form.Dropdown id="vaultName" title="Vault" defaultValue={vaults[0]?.name}>
-          {vaults.map((vault) => (
+        <Form.Dropdown id="vaultName" title="Vault" defaultValue={orderedVaults[0]?.name}>
+          {orderedVaults.map((vault) => (
             <Form.Dropdown.Item key={vault.path} value={vault.name} title={vault.name} />
           ))}
         </Form.Dropdown>
       ) : null}
       <Form.TextField id="title" title="Title" placeholder="Write task title" autoFocus />
       <Form.TextArea id="details" title="Details" placeholder="Optional Markdown notes" />
-      <Form.Dropdown id="status" title="Status" defaultValue={prefs.openStatus}>
+      <Form.Dropdown id="status" title="Status" defaultValue="">
+        <Form.Dropdown.Item value="" title="TaskNotes Default" />
         <Form.Dropdown.Item value={prefs.openStatus} title={capitalize(prefs.openStatus)} />
         <Form.Dropdown.Item value="in-progress" title="In Progress" />
         <Form.Dropdown.Item value={prefs.doneStatus} title={capitalize(prefs.doneStatus)} />
       </Form.Dropdown>
       <Form.Dropdown id="priority" title="Priority" defaultValue="">
         <Form.Dropdown.Item value="" title="None" />
+        <Form.Dropdown.Item value="normal" title="Normal" />
         <Form.Dropdown.Item value="highest" title="Highest" />
         <Form.Dropdown.Item value="high" title="High" />
         <Form.Dropdown.Item value="medium" title="Medium" />
