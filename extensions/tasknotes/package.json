@@ -22,10 +22,30 @@
       "name": "quick-add-task",
       "title": "Quick Add Task",
       "description": "Create a TaskNotes task from natural language.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Task, date, tags, contexts, priority...",
+          "type": "text",
+          "required": true
+        }
+      ],
+      "keywords": [
+        "natural language",
+        "capture",
+        "inbox"
+      ]
+    },
+    {
+      "name": "quick-add-task-to-vault",
+      "title": "Quick Add Task to Vault",
+      "description": "Create a TaskNotes task from natural language and choose the target vault.",
       "mode": "view",
       "keywords": [
         "natural language",
         "capture",
+        "vault",
         "inbox"
       ]
     },
@@ -105,7 +125,7 @@
     {
       "name": "defaultQuickAddVault",
       "title": "Default Quick Add Vault",
-      "description": "Optional vault name to preselect in Quick Add when using multiple-vault mode.",
+      "description": "Optional vault name used by inline Quick Add and preselected in the vault picker when using multiple-vault mode.",
       "type": "textfield",
       "required": false
     },

@@ -11,13 +11,14 @@ This is an unofficial Raycast extension for TaskNotes.
 3. Set the extension preferences:
    - `Vault Mode`: `Single Vault` or `Multiple Vaults`.
    - `Obsidian Vault or Vaults Folder`: in single-vault mode, your vault folder; in multiple-vault mode, the parent folder containing your vault folders.
-   - `Default Quick Add Vault`: optional vault name to preselect in Quick Add when using multiple-vault mode.
+   - `Default Quick Add Vault`: optional vault name used by inline Quick Add and preselected in the vault picker when using multiple-vault mode.
 
 The extension reads TaskNotes settings from each vault's `.obsidian/plugins/tasknotes/data.json` file. This includes the tasks folder, task identification method, field mapping, title-in-filename setting, filename format, default status, default priority, natural-language date target, and task creation defaults. The fallback preferences are used only when those settings cannot be read.
 
 ## Commands
 
-- `Quick Add Task`: creates a task from natural language, including dates, `#tags`, `@contexts`, and priority. In multiple-vault mode, choose the target vault from a dropdown.
+- `Quick Add Task`: creates a task inline from natural language, including dates, `#tags`, `@contexts`, and priority. In multiple-vault mode, it uses `Default Quick Add Vault`.
+- `Quick Add Task to Vault`: creates a task from natural language and lets you choose the target vault from a dropdown.
 - `Search Tasks`: scans Markdown files in the configured vault or vaults for TaskNotes frontmatter, opens tasks, and toggles completion.
 - `Create Task`: creates a Markdown file with TaskNotes-compatible YAML frontmatter. In multiple-vault mode, choose the target vault first.
 
@@ -31,7 +32,7 @@ Submit expenses by Friday #admin @office !p2
 Plan review on May 4 -- Bring project notes
 ```
 
-In multiple-vault mode, Quick Add preselects the configured default vault when it matches a discovered vault name.
+In multiple-vault mode, inline Quick Add needs `Default Quick Add Vault`. Use `Quick Add Task to Vault` when you want to choose another vault at creation time.
 
 The extension also exposes a Raycast AI tool named `Create Task Note`, so Raycast AI can create TaskNotes tasks from typed or conversational requests.
 
