@@ -82,7 +82,7 @@ export default function Command() {
 
           return (
             <List.Item
-              key={historyItem.date}
+              key={`${historyItem.date}-${formattedColor}`}
               icon={getIcon(previewColor)}
               title={`${isSelected ? "✓ " : ""}${formattedColor}${historyItem.title ? ` ${historyItem.title}` : ""}`}
               subtitle={new Date(historyItem.date).toLocaleString(undefined, {
@@ -123,7 +123,7 @@ export default function Command() {
 
         return (
           <Grid.Item
-            key={historyItem.date}
+            key={`${historyItem.date}-${formattedColor}`}
             content={historyItem.title ? { value: { color }, tooltip: historyItem.title } : { color }}
             title={`${formattedColor} ${historyItem.title ?? ""}`}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
