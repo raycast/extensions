@@ -210,28 +210,27 @@ export default function Command() {
       if (!res.ok) throw new Error("Download failed");
 
       const arrayBuffer = await res.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+      const data = new Uint8Array(arrayBuffer);
 
       const safeName = item.name.replace(/[^a-z0-9]/gi, "_").toLowerCase();
       const tempPath = join(tmpdir(), `vault_${safeName}_${item.id}.webp`);
-      await writeFile(tempPath, buffer);
+      await writeFile(tempPath, data);
 
       try {
         await Clipboard.copy({
-          path: tempPath,
+          file: tempPath,
           html: `<img src="${url}" alt="${item.name}" />`,
         });
 
         if (mode === "bruteforce") {
-          await Clipboard.paste();
-          await Clipboard.paste({ path: tempPath });
+          await Clipboard.paste({ text: url });
+          await Clipboard.paste({ file: tempPath });
         } else {
-          await Clipboard.paste();
+          await Clipboard.paste({ file: tempPath });
         }
 
         toast.style = Toast.Style.Success;
-        toast.title =
-          mode === "bruteforce" ? "Emote Bruteforced!" : "Emote Dropped!";
+        toast.title = mode === "bruteforce" ? "Emote Bruteforced!" : "Emote Dropped!";
       } catch (clipError) {
         console.error("Drop failed:", clipError);
         await Clipboard.paste(url);
