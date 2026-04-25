@@ -33,10 +33,7 @@ function getTagStyle(target: HtmlTarget): string {
  *
  * @returns Object with headingText (without tags) and tags array
  */
-function parseHeadingTags(headingText: string): {
-  text: string;
-  tags: string[];
-} {
+function parseHeadingTags(headingText: string): { text: string; tags: string[] } {
   // Match tags at the end: :tag1:tag2: (must end with colon)
   const tagMatch = headingText.match(/\s+(:[a-zA-Z0-9_@#%]+(?::[a-zA-Z0-9_@#%]+)*:)\s*$/);
   if (tagMatch) {
