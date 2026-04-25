@@ -82,8 +82,8 @@ function TaskListItem({ task, revalidate }: { task: TaskNote; revalidate: () => 
 
 function taskAccessories(task: TaskNote): List.Item.Accessory[] {
   return [
-    { tag: { value: task.vaultName, color: Color.SecondaryText } },
     ...(task.due ? [{ tag: { value: `Due ${task.due}`, color: Color.Red } }] : []),
+    { tag: { value: task.vaultName, color: Color.SecondaryText } },
   ];
 }
 
