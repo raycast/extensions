@@ -234,7 +234,6 @@ export async function deleteFileOrFolder(
       message:
         options.confirmationMessage ??
         `Are you sure you want to permanently delete:\n${filePath}?\nThis action cannot be undone.`,
-      rememberUserChoice: true,
       primaryAction: {
         title: "Delete",
         style: Alert.ActionStyle.Destructive,
