@@ -5,16 +5,30 @@ type UseSelectionReturn<T> = {
   selection: UseColorsSelectionObject<T>;
 };
 
-export function useColorsSelection<T = string | HistoryItem>(items: T[]): UseSelectionReturn<T> {
+export function useColorsSelection<T = string | HistoryItem>(
+  items: T[],
+  getKey?: (item: T) => string,
+): UseSelectionReturn<T> {
   const [selectedItems, setSelectedItems] = useState<T[]>([]);
 
+  const computeKey = (i: T): string => (getKey ? getKey(i) : (i as unknown as string));
+
   const toggleSelection = (item: T) => {
-    setSelectedItems((prev) => (prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item]));
+    setSelectedItems((prev) => {
+      const itemKey = computeKey(item);
+      return prev.some((i) => computeKey(i) === itemKey)
+        ? prev.filter((i) => computeKey(i) !== itemKey)
+        : [...prev, item];
+    });
   };
 
   const selectAll = () => setSelectedItems([...items]);
   const clearSelection = () => setSelectedItems([]);
-  const getIsItemSelected = (item: T) => selectedItems.includes(item);
+
+  const getIsItemSelected = (item: T) => {
+    const itemKey = computeKey(item);
+    return selectedItems.some((i) => computeKey(i) === itemKey);
+  };
 
   return {
     selection: {
@@ -22,7 +36,7 @@ export function useColorsSelection<T = string | HistoryItem>(items: T[]): UseSel
       selected: {
         selectedItems,
         anySelected: selectedItems.length > 0,
-        allSelected: items.length > 0 && selectedItems.length === items.length,
+        allSelected: items.length > 0 && items.every(getIsItemSelected),
         countSelected: selectedItems.length,
       },
       helpers: { getIsItemSelected },

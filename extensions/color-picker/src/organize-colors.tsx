@@ -49,7 +49,7 @@ const PickColorAction = () => (
 export default function Command() {
   const { history } = useHistory();
   const [selectMode, setSelectMode] = useState<SelectMode>("single");
-  const { selection } = useColorsSelection<HistoryItem>(history ?? []);
+  const { selection } = useColorsSelection<HistoryItem>(history ?? [], (item) => getFormattedColor(item.color));
 
   if (selectMode === "multi") {
     return (
@@ -82,7 +82,7 @@ export default function Command() {
 
           return (
             <List.Item
-              key={formattedColor}
+              key={historyItem.date}
               icon={getIcon(previewColor)}
               title={`${isSelected ? "✓ " : ""}${formattedColor}${historyItem.title ? ` ${historyItem.title}` : ""}`}
               subtitle={new Date(historyItem.date).toLocaleString(undefined, {
@@ -123,7 +123,7 @@ export default function Command() {
 
         return (
           <Grid.Item
-            key={formattedColor}
+            key={historyItem.date}
             content={historyItem.title ? { value: { color }, tooltip: historyItem.title } : { color }}
             title={`${formattedColor} ${historyItem.title ?? ""}`}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
