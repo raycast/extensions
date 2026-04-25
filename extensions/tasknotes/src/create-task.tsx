@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, Icon, Toast, open, popToRoot, showToast } fr
 import { useCachedPromise } from "@raycast/utils";
 import {
   createTaskNote,
+  defaultVaultName,
   isMultipleVaultMode,
   listVaults,
   obsidianUrl,
@@ -24,8 +25,11 @@ type FormValues = {
 export default function Command() {
   const prefs = preferences();
   const multipleVaults = isMultipleVaultMode();
-  const { data: vaults = [], isLoading } = useCachedPromise(listVaults);
-  const orderedVaults = sortVaultsForDefault(vaults);
+  const { data, isLoading } = useCachedPromise(async () => ({
+    vaults: await listVaults(),
+    defaultVaultName: await defaultVaultName(),
+  }));
+  const orderedVaults = sortVaultsForDefault(data?.vaults ?? [], data?.defaultVaultName);
 
   async function submit(values: FormValues) {
     if (!values.title.trim()) {
@@ -56,7 +60,7 @@ export default function Command() {
       isLoading={isLoading}
     >
       {multipleVaults ? (
-        <Form.Dropdown id="vaultName" title="Vault" defaultValue={orderedVaults[0]?.name}>
+        <Form.Dropdown key={orderedVaults[0]?.name} id="vaultName" title="Vault" defaultValue={orderedVaults[0]?.name}>
           {orderedVaults.map((vault) => (
             <Form.Dropdown.Item key={vault.path} value={vault.name} title={vault.name} />
           ))}

@@ -1,6 +1,12 @@
 import { LaunchProps, Toast, open, showHUD, showToast } from "@raycast/api";
 import { parseNaturalLanguageTask } from "./natural-language";
-import { createTaskNote, isMultipleVaultMode, naturalLanguageDateTarget, obsidianUrl, preferences } from "./tasknotes";
+import {
+  createTaskNote,
+  defaultVaultName,
+  isMultipleVaultMode,
+  naturalLanguageDateTarget,
+  obsidianUrl,
+} from "./tasknotes";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickAddTask }>) {
   const text = props.arguments.text.trim();
@@ -10,7 +16,7 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   }
 
   try {
-    const vaultName = inlineVaultName();
+    const vaultName = await inlineVaultName();
     const defaultDateTarget = await naturalLanguageDateTarget(vaultName);
     const task = await createTaskNote({
       ...parseNaturalLanguageTask(text, new Date(), { defaultDateTarget }),
@@ -31,12 +37,12 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
   }
 }
 
-function inlineVaultName() {
+async function inlineVaultName() {
   if (!isMultipleVaultMode()) return undefined;
 
-  const vaultName = preferences().defaultQuickAddVault;
+  const vaultName = await defaultVaultName();
   if (!vaultName) {
-    throw new Error("Set Default Quick Add Vault in preferences, or use Quick Add Task to Vault.");
+    throw new Error("Choose a default vault with Switch Default Vault before using inline Quick Add.");
   }
 
   return vaultName;

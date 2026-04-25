@@ -2,7 +2,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, readdir, rename, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { getPreferenceValues } from "@raycast/api";
+import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import YAML from "yaml";
 
 export type TaskStatus = "open" | "done" | string;
@@ -10,7 +10,6 @@ export type TaskStatus = "open" | "done" | string;
 export type Preferences = {
   vaultPath: string;
   vaultMode: "single" | "multiple";
-  defaultQuickAddVault?: string;
   tasksFolder: string;
   storeTitleInFilename?: boolean;
   filenameFormat: "title" | "zettel" | "timestamp";
@@ -60,6 +59,7 @@ export type VaultInfo = {
 
 const markdownExtension = ".md";
 const taskNotesSettingsPath = path.join(".obsidian", "plugins", "tasknotes", "data.json");
+const defaultVaultStorageKey = "default-vault-name";
 
 type FieldMapping = Record<string, string>;
 
@@ -126,7 +126,6 @@ export function preferences() {
     ...values,
     vaultPath: expandHome(values.vaultPath),
     vaultMode: values.vaultMode || "single",
-    defaultQuickAddVault: values.defaultQuickAddVault?.trim(),
     tasksFolder: trimSlashes(values.tasksFolder),
     storeTitleInFilename: values.storeTitleInFilename ?? true,
     filenameFormat: values.filenameFormat || "title",
@@ -396,8 +395,8 @@ export function isMultipleVaultMode() {
   return preferences().vaultMode === "multiple";
 }
 
-export function sortVaultsForDefault(vaults: VaultInfo[]) {
-  const defaultVault = preferences().defaultQuickAddVault?.toLowerCase();
+export function sortVaultsForDefault(vaults: VaultInfo[], defaultVaultName?: string) {
+  const defaultVault = defaultVaultName?.toLowerCase();
   return [...vaults].sort((a, b) => {
     if (defaultVault) {
       const aIsDefault = a.name.toLowerCase() === defaultVault;
@@ -407,6 +406,15 @@ export function sortVaultsForDefault(vaults: VaultInfo[]) {
 
     return a.name.localeCompare(b.name);
   });
+}
+
+export async function defaultVaultName() {
+  const value = await LocalStorage.getItem<string>(defaultVaultStorageKey);
+  return value?.trim() || undefined;
+}
+
+export async function setDefaultVaultName(vaultName: string) {
+  await LocalStorage.setItem(defaultVaultStorageKey, vaultName);
 }
 
 export async function naturalLanguageDateTarget(vaultName?: string): Promise<"due" | "scheduled"> {
