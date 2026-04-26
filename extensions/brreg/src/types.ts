@@ -3,6 +3,8 @@ import type { Image } from "@raycast/api";
 export interface Company {
   name: string;
   organizationNumber: string;
+  organizationFormCode?: string;
+  organizationFormDescription?: string;
   address?: string;
   postalCode?: string;
   city?: string;
@@ -26,6 +28,7 @@ export interface Company {
   description?: string;
   bregUrl: string;
   accountingYear?: string;
+  isAuditRequired?: boolean;
   isAudited?: boolean;
   isVatRegistered?: boolean;
   lastAccountsFromDate?: string;
@@ -45,6 +48,10 @@ export interface FinancialYear {
 export interface Enhet {
   organisasjonsnummer: string;
   navn: string;
+  organisasjonsform?: {
+    kode?: string;
+    beskrivelse?: string;
+  };
   /**
    * Raw website field from BRREG search responses.
    * Internal code should prefer `website` (normalized URL).

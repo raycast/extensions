@@ -5,13 +5,14 @@ import { showFailureToast } from "../utils/toast";
 import { getFavicon, useLocalStorage } from "@raycast/utils";
 import { Enhet } from "../types";
 import { getCompanyDetails } from "../brreg-api";
+import { STORAGE_KEYS } from "../constants";
 
 export function useFavorites() {
   const {
     value: favorites,
     setValue: setFavorites,
     isLoading: isLoadingFavorites,
-  } = useLocalStorage<Enhet[]>("favorites", []);
+  } = useLocalStorage<Enhet[]>(STORAGE_KEYS.FAVORITES, []);
 
   const [showMoveIndicators, setShowMoveIndicators] = useState(false);
 

@@ -14,6 +14,10 @@ const searchCache = new TTLCache<string, Enhet[]>(TEN_MINUTES);
 export interface BrregEntity {
   navn?: string;
   organisasjonsnummer?: string;
+  organisasjonsform?: {
+    kode?: string;
+    beskrivelse?: string;
+  };
   forretningsadresse?: {
     adresse?: string[];
     postnummer?: string;
@@ -71,6 +75,8 @@ export function createCompanyFromBrregEntity(entity: BrregEntity): Company {
   return {
     name,
     organizationNumber,
+    organizationFormCode: entity.organisasjonsform?.kode,
+    organizationFormDescription: entity.organisasjonsform?.beskrivelse,
     address,
     postalCode,
     city,
@@ -127,6 +133,7 @@ export async function getCompanyDetails(organizationNumber: string): Promise<Com
         company.ebitda = financialData.ebitda;
         company.depreciation = financialData.depreciation;
         company.accountingYear = financialData.accountingYear;
+        company.isAuditRequired = financialData.isAuditRequired;
         company.isAudited = financialData.isAudited;
       }
     } catch {
@@ -175,6 +182,7 @@ export async function getAnnualAccounts(organizationNumber: string): Promise<{
   ebitda?: string;
   depreciation?: string;
   accountingYear?: string;
+  isAuditRequired?: boolean;
   isAudited?: boolean;
   financialHistory?: FinancialYear[];
 } | null> {
@@ -214,6 +222,14 @@ export async function getAnnualAccounts(organizationNumber: string): Promise<{
       return results;
     };
 
+    const parseBoolean = (value?: string): boolean | undefined => {
+      if (value === undefined) return undefined;
+      const normalized = value.trim().toLowerCase();
+      if (normalized === "true") return true;
+      if (normalized === "false") return false;
+      return undefined;
+    };
+
     const revenue = extractValue("sumDriftsinntekter");
     const operatingResult = extractValue("driftsresultat");
     const result = extractValue("aarsresultat");
@@ -222,7 +238,10 @@ export async function getAnnualAccounts(organizationNumber: string): Promise<{
     const totalDebt = extractValue("sumGjeld");
     const fromDate = extractValue("fraDato");
     const toDate = extractValue("tilDato");
-    const isNotAudited = extractValue("ikkeRevidertAarsregnskap");
+    const isNotAudited = parseBoolean(extractValue("ikkeRevidertAarsregnskap"));
+    const hasOptedOutOfAudit = parseBoolean(
+      extractValue("fravalgRevisjon") ?? extractValue("fravalgtArsregnskap") ?? extractValue("fravalgtRevisjon"),
+    );
 
     const ebitda =
       extractValue("driftsresultatForAvskrivninger") ||
@@ -241,7 +260,9 @@ export async function getAnnualAccounts(organizationNumber: string): Promise<{
       ebitda: ebitda ? formatCurrency(ebitda) : undefined,
       depreciation: depreciation ? formatCurrency(depreciation) : undefined,
       accountingYear: fromDate ? new Date(fromDate).getFullYear().toString() : undefined,
-      isAudited: isNotAudited !== "true",
+      isAuditRequired: hasOptedOutOfAudit === undefined ? undefined : !hasOptedOutOfAudit,
+      isAudited:
+        hasOptedOutOfAudit === true || isNotAudited === true ? false : isNotAudited === false ? true : undefined,
       // pass through raw dates for layout enrichment
       ...(fromDate ? { lastAccountsFromDate: fromDate } : {}),
       ...(toDate ? { lastAccountsToDate: toDate } : {}),

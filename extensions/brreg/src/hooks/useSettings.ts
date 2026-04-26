@@ -1,4 +1,5 @@
 import { useLocalStorage } from "@raycast/utils";
+import { STORAGE_KEYS } from "../constants";
 
 interface UserSettings {
   showWelcomeMessage: boolean;
@@ -9,7 +10,7 @@ const DEFAULT_SETTINGS: UserSettings = {
 };
 
 export function useSettings() {
-  const { value: settings, isLoading } = useLocalStorage<UserSettings>("user-settings", DEFAULT_SETTINGS);
+  const { value: settings, isLoading } = useLocalStorage<UserSettings>(STORAGE_KEYS.USER_SETTINGS, DEFAULT_SETTINGS);
 
   return {
     settings: settings ?? DEFAULT_SETTINGS,

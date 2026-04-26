@@ -32,6 +32,13 @@ export function getBregUrl(organisasjonsnummer: string): string {
 }
 
 /**
+ * Generate Alle.as URL for an entity
+ */
+export function getAlleAsUrl(organisasjonsnummer: string): string {
+  return `https://alle.as/selskap/${organisasjonsnummer}`;
+}
+
+/**
  * Normalize website URL from BRREG fields for consistent usage.
  */
 export function normalizeWebsiteUrl(rawWebsite?: string): string | undefined {

@@ -24,9 +24,9 @@ const SHORTCUT_GROUPS: ShortcutGroup[] = [
       },
       { action: "View Details", shortcutText: "Enter", description: "View detailed company information" },
       {
-        action: "Open in Browser",
+        action: "Open in Brreg",
         shortcutKey: "OPEN_IN_BROWSER",
-        description: "Open company in Brønnøysundregistrene",
+        description: "Open company in Brreg",
       },
     ],
   },

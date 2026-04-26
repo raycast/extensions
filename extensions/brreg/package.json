@@ -1,14 +1,12 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "brreg",
+  "version": "1.0.1",
   "title": "The Brønnøysund Register Centre Search",
   "description": "Search and retrieve information about Norwegian companies from the Central Coordinating Register for Legal Entities in Norway (Enhetsregisteret)",
   "icon": "icon.png",
   "author": "kakaoduft",
   "access": "public",
-  "contributors": [
-    "daniel_sorenes"
-  ],
   "categories": [
     "Productivity",
     "Web"
@@ -43,11 +41,13 @@
     "type-check": "tsc --noEmit",
     "format-check": "prettier --check .",
     "format-fix": "prettier --write .",
-    "verify": "npm run type-check && npm run lint && npm run format-check && npm run build && npm run test:unit",
+    "verify": "npm run type-check && npm run lint && npm run format-check && npm run test:versioning && npm run build && npm run test:unit",
     "check": "npm install && npm run verify",
     "test": "vitest run",
     "test:unit": "vitest run",
     "test:watch": "vitest",
+    "test:versioning": "node scripts/verify-versioning.mjs",
+    "simulate:upgrade": "node scripts/simulate-upgrade.mjs",
     "test:shortcuts": "node scripts/verify-shortcuts.mjs",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"

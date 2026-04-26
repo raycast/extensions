@@ -12,6 +12,7 @@ compiled_raycast_swift
 # misc
 .npm-cache/
 .DS_Store
+RAYCAST_EXTENSION_PLATFORM_BLUEPRINT.md
 COMPONENT_STORIES.md
 DEVELOPER.md
 REFACTORING_SUMMARY.md

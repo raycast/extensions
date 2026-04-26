@@ -1,4 +1,5 @@
 import type { Keyboard } from "@raycast/api";
+import packageJson from "../../package.json";
 
 const MODIFIER_SYMBOLS: Record<string, string> = {
   cmd: "⌘",
@@ -72,6 +73,8 @@ export const EMOJI_CATEGORIES = [
 // Local Storage Keys
 export const STORAGE_KEYS = {
   FAVORITES: "favorites",
+  USER_SETTINGS: "user-settings",
+  LAST_SEEN_CHANGELOG_VERSION: "last-seen-changelog-version",
 } as const;
 
 // UI Text
@@ -85,8 +88,33 @@ export const UI_TEXT = {
 // Project Links
 export const GITHUB_REPO_URL = "https://github.com/kyndig/brreg-search" as const;
 
+// App Metadata
+export const APP_VERSION = packageJson.version;
+
 // HTTP
-export const USER_AGENT = `Raycast-Brreg-Search/1.0.0 (${GITHUB_REPO_URL})` as const;
+export const USER_AGENT = `Raycast-Brreg-Search/${APP_VERSION} (${GITHUB_REPO_URL})` as const;
+
+// Changelog
+const CHANGELOG_HIGHLIGHTS_BY_VERSION: Record<string, readonly string[]> = {
+  "1.0.0": [
+    "Favorite companies for quick access and retrieval.",
+    "Open company pages directly in Alle.as.",
+    "Use keyboard shortcuts for faster search and navigation.",
+  ],
+};
+
+const CHANGELOG_SHORTCUTS_HINT_MARKDOWN =
+  "\n\n---\n`Enter` closes this changelog. `Shift+Enter` opens Keyboard Shortcuts.";
+
+export function getChangelogMarkdown(version = APP_VERSION): string {
+  const highlights = CHANGELOG_HIGHLIGHTS_BY_VERSION[version];
+  if (!highlights) {
+    return `**Updated to version ${version}**\n\nSee the latest improvements and fixes in this release.${CHANGELOG_SHORTCUTS_HINT_MARKDOWN}`;
+  }
+
+  const lines = highlights.map((highlight) => `- ${highlight}`).join("\n");
+  return `**Updated to version ${version}**\n\nKey features include:\n${lines}${CHANGELOG_SHORTCUTS_HINT_MARKDOWN}`;
+}
 
 // Markdown Content
 export const WELCOME_MARKDOWN =

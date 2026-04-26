@@ -3,6 +3,7 @@ import {
   getEntityIcon,
   isFavorite,
   getFavoriteEntity,
+  getAlleAsUrl,
   getBregUrl,
   normalizeWebsiteUrl,
   canMoveUp,
@@ -95,6 +96,12 @@ describe("getFavoriteEntity", () => {
 describe("getBregUrl", () => {
   it("constructs correct brreg URL", () => {
     expect(getBregUrl("123456789")).toBe("https://virksomhet.brreg.no/oppslag/enheter/123456789");
+  });
+});
+
+describe("getAlleAsUrl", () => {
+  it("constructs correct Alle.as URL", () => {
+    expect(getAlleAsUrl("123456789")).toBe("https://alle.as/selskap/123456789");
   });
 });
 

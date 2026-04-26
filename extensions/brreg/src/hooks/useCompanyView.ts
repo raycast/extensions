@@ -12,6 +12,8 @@ export function useCompanyView() {
     const base: Company = {
       name: entity.navn,
       organizationNumber: entity.organisasjonsnummer,
+      organizationFormCode: entity.organisasjonsform?.kode,
+      organizationFormDescription: entity.organisasjonsform?.beskrivelse,
       address: entity.forretningsadresse?.adresse?.join(", ") || undefined,
       postalCode: entity.forretningsadresse?.postnummer || undefined,
       city: entity.forretningsadresse?.poststed || undefined,

@@ -5,12 +5,14 @@ import FavoritesList from "./components/FavoritesList";
 import SearchResults from "./components/SearchResults";
 import WelcomeView from "./components/WelcomeView";
 import KeyboardShortcutsHelp from "./components/KeyboardShortcutsHelp";
+import ChangelogView from "./components/ChangelogView";
 import { useFavorites } from "./hooks/useFavorites";
 import { useSearch } from "./hooks/useSearch";
 import { useCompanyView } from "./hooks/useCompanyView";
 import { useSettings } from "./hooks/useSettings";
 import { useSearchFavicons } from "./hooks/useSearchFavicons";
-import { UI_TEXT } from "./constants";
+import { APP_VERSION, UI_TEXT } from "./constants";
+import { useChangelogVersionGate } from "./hooks/useChangelogVersionGate";
 import type { Enhet } from "./types";
 
 export default function SearchAndCopyCommand() {
@@ -18,12 +20,14 @@ export default function SearchAndCopyCommand() {
   const searchResult = useSearch();
   const companyViewResult = useCompanyView();
   const settingsResult = useSettings();
+  const changelogGate = useChangelogVersionGate();
 
   const { entities, isLoading, setSearchText, trimmed } = searchResult;
   const { currentCompany, isLoadingDetails, isCompanyViewOpen, handleViewDetails, closeCompanyView } =
     companyViewResult;
 
   const { settings } = settingsResult;
+  const { shouldShowChangelog } = changelogGate;
 
   const {
     favorites,
@@ -58,11 +62,19 @@ export default function SearchAndCopyCommand() {
     const toEnhet = () => ({
       organisasjonsnummer: currentCompany.organizationNumber,
       navn: currentCompany.name,
+      organisasjonsform:
+        currentCompany.organizationFormCode || currentCompany.organizationFormDescription
+          ? {
+              kode: currentCompany.organizationFormCode,
+              beskrivelse: currentCompany.organizationFormDescription,
+            }
+          : undefined,
       forretningsadresse: currentCompany.address
         ? { adresse: [currentCompany.address], postnummer: currentCompany.postalCode, poststed: currentCompany.city }
         : undefined,
       website: currentCompany.website,
     });
+    const currentEntity = toEnhet();
 
     return (
       <CompanyDetailsView
@@ -70,8 +82,8 @@ export default function SearchAndCopyCommand() {
         isLoading={isLoadingDetails}
         onBack={closeCompanyView}
         isFavorite={isFav}
-        onAddFavorite={() => handleAddFavorite(toEnhet())}
-        onRemoveFavorite={() => removeFavorite(toEnhet())}
+        onAddFavorite={() => handleAddFavorite(currentEntity)}
+        onRemoveFavorite={() => removeFavorite(currentEntity)}
       />
     );
   }
@@ -83,6 +95,22 @@ export default function SearchAndCopyCommand() {
       throttle
       searchBarPlaceholder={showMoveIndicators ? UI_TEXT.MOVE_MODE_ACTIVE : UI_TEXT.SEARCH_PLACEHOLDER}
     >
+      {shouldShowChangelog && trimmed.length === 0 && !isLoading && !isLoadingFavorites && (
+        <List.Section title={`What's New in ${APP_VERSION}`}>
+          <List.Item
+            title={`Updated to version ${APP_VERSION}`}
+            subtitle="Review key release highlights"
+            icon="🆕"
+            actions={
+              <ActionPanel>
+                <Action.Push title="Open Changelog" target={<ChangelogView />} />
+                <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      )}
+
       {trimmed.length === 0 && (
         <FavoritesList
           favorites={favorites}
@@ -128,6 +156,7 @@ export default function SearchAndCopyCommand() {
               actions={
                 <ActionPanel>
                   <Action.Push title="Open" target={<WelcomeView />} />
+                  <Action.Push title="Changelog" target={<ChangelogView />} />
                   <Action.Push title="Keyboard Shortcuts" target={<KeyboardShortcutsHelp />} />
                 </ActionPanel>
               }
@@ -139,6 +168,7 @@ export default function SearchAndCopyCommand() {
               actions={
                 <ActionPanel>
                   <Action.Push title="Open" target={<KeyboardShortcutsHelp />} />
+                  <Action.Push title="Changelog" target={<ChangelogView />} />
                 </ActionPanel>
               }
             />
