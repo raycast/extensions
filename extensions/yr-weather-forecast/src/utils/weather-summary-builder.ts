@@ -94,9 +94,9 @@ function calculateIntervals(series: TimeseriesEntry[]): {
   // and it represents a meaningful change (e.g., 1h -> 6h, not 1h -> 2h)
   const hasResolutionChange = Boolean(
     secondaryInterval &&
-      secondaryInterval > primaryInterval &&
-      secondaryInterval >= 3 && // Only consider significant changes (3+ hours)
-      intervalCounts[secondaryInterval] >= 1,
+    secondaryInterval > primaryInterval &&
+    secondaryInterval >= 3 && // Only consider significant changes (3+ hours)
+    intervalCounts[secondaryInterval] >= 1,
   ); // At least one occurrence
 
   return { hasResolutionChange, primaryInterval, secondaryInterval };

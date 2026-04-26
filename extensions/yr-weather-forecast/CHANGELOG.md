@@ -17,7 +17,7 @@
 - Add resolution feedback and update timestamps to data summary
 - Major internal refactoring and 120+ unit/integration tests
 
-## [Initial Release] - 2024-09-10
+## [Initial Release] - 2025-09-10
 
 - Initial release with weather forecasts from MET
 - Location search via OpenStreetMap Nominatim
