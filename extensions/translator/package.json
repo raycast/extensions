@@ -1,0 +1,136 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "translator",
+  "description": "Translate using AI",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "translator",
+      "title": "Translator",
+      "description": "Translate text between Chinese, Japanese, and English",
+      "mode": "view",
+      "subtitle": "AI Translate",
+      "keywords": [
+        "translate",
+        "language",
+        "text",
+        "zh",
+        "ja",
+        "en"
+      ],
+      "preferences": [
+        {
+          "name": "defaultTargetLanguage",
+          "title": "Default Target Language",
+          "description": "Fallback target language before auto-detection is applied.",
+          "type": "dropdown",
+          "required": true,
+          "default": "en",
+          "data": [
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "Japanese",
+              "value": "ja"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "translate-from-clipboard",
+      "title": "Clipboard Translator",
+      "description": "Prefill from clipboard and translate",
+      "mode": "view",
+      "subtitle": "Clipboard",
+      "keywords": [
+        "clipboard",
+        "paste",
+        "translate",
+        "quick"
+      ],
+      "preferences": [
+        {
+          "name": "defaultTargetLanguage",
+          "title": "Default Target Language",
+          "description": "Fallback target language before auto-detection is applied.",
+          "type": "dropdown",
+          "required": true,
+          "default": "en",
+          "data": [
+            {
+              "title": "English",
+              "value": "en"
+            },
+            {
+              "title": "Chinese",
+              "value": "zh"
+            },
+            {
+              "title": "Japanese",
+              "value": "ja"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "manage-api-profiles",
+      "title": "Translator Profiles",
+      "description": "Create and manage API profiles for fallback",
+      "mode": "view",
+      "subtitle": "Profiles",
+      "keywords": [
+        "profile",
+        "api",
+        "model",
+        "fallback",
+        "provider"
+      ]
+    }
+  ],
+  "title": "Translator",
+  "author": "Flartiny",
+  "keywords": [
+    "translator",
+    "translation",
+    "ai",
+    "clipboard",
+    "chinese",
+    "japanese",
+    "english"
+  ],
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "Communication"
+  ]
+}
