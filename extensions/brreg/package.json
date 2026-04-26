@@ -29,7 +29,7 @@
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "eslint": "^9.39.4",
-    "prettier": "^3.3.3",
+    "prettier": "^3.8.3",
     "typescript": "^5.4.5",
     "vitest": "^4.0.18"
   },

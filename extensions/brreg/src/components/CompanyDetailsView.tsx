@@ -215,16 +215,16 @@ ${formattedAddress ? `**Address:** ${formattedAddress}\n\n` : ""}${mapImageUrl ?
     if (activeTab === "financials") {
       const hasFinancials = Boolean(
         company.accountingYear ||
-          company.revenue ||
-          company.operatingResult ||
-          company.result ||
-          company.totalAssets ||
-          company.equity ||
-          company.totalDebt ||
-          company.ebitda ||
-          company.depreciation ||
-          company.isAuditRequired !== undefined ||
-          company.isAudited !== undefined,
+        company.revenue ||
+        company.operatingResult ||
+        company.result ||
+        company.totalAssets ||
+        company.equity ||
+        company.totalDebt ||
+        company.ebitda ||
+        company.depreciation ||
+        company.isAuditRequired !== undefined ||
+        company.isAudited !== undefined,
       );
       return (
         <Detail.Metadata>
