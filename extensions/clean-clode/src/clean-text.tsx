@@ -16,7 +16,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { detectAndClean } from "./cleaner";
+import { detectAndClean, CleanOptions } from "./cleaner";
 
 interface HistoryItem {
   id: number;
@@ -126,12 +126,29 @@ function CleanedDetail({
   );
 }
 
+const COLLAPSE_SPACES_KEY = "collapse-spaces-preference";
+
 function CleanForm({ onCleaned }: { onCleaned: () => void }) {
   const [inputText, setInputText] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
-  const { push } = useNavigation();
+  const [collapseSpaces, setCollapseSpaces] = useState(false);
+  const [cleanedResult, setCleanedResult] = useState<string | null>(null);
 
-  async function handleClean(overrideText?: string) {
+  useEffect(() => {
+    LocalStorage.getItem<string>(COLLAPSE_SPACES_KEY).then((val) => {
+      if (val !== undefined) setCollapseSpaces(val === "true");
+    });
+  }, []);
+
+  async function handleCollapseSpacesChange(value: boolean) {
+    setCollapseSpaces(value);
+    await LocalStorage.setItem(COLLAPSE_SPACES_KEY, String(value));
+  }
+
+  async function handleClean(
+    overrideText?: string,
+    overrideOptions?: CleanOptions,
+  ) {
     const textToClean = overrideText ?? inputText;
     if (!textToClean.trim()) {
       await showToast({
@@ -142,14 +159,24 @@ function CleanForm({ onCleaned }: { onCleaned: () => void }) {
       return;
     }
     setIsProcessing(true);
-    const cleaned = detectAndClean(textToClean);
+    const options: CleanOptions = overrideOptions ?? { collapseSpaces };
+    const cleaned = detectAndClean(textToClean, options);
     await saveToHistory(cleaned, textToClean);
     await Clipboard.copy(cleaned);
     setIsProcessing(false);
     onCleaned();
-    push(
+    setCleanedResult(cleaned);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Cleaned",
+      message: "Copied to clipboard",
+    });
+  }
+
+  if (cleanedResult !== null) {
+    return (
       <Detail
-        markdown={`## Cleaned Output\n\n\`\`\`\n${cleaned}\n\`\`\``}
+        markdown={`## Cleaned Output\n\n\`\`\`\n${cleanedResult}\n\`\`\``}
         navigationTitle="Cleaned Text"
         actions={
           <ActionPanel>
@@ -157,13 +184,22 @@ function CleanForm({ onCleaned }: { onCleaned: () => void }) {
               title="Copy to Clipboard"
               icon={Icon.Clipboard}
               onAction={async () => {
-                await Clipboard.copy(cleaned);
+                await Clipboard.copy(cleanedResult);
                 await showHUD("✅ Copied to clipboard");
+              }}
+            />
+            <Action
+              title="Clean Another"
+              icon={Icon.Wand}
+              shortcut={{ modifiers: ["cmd"], key: "n" }}
+              onAction={() => {
+                setCleanedResult(null);
+                setInputText("");
               }}
             />
           </ActionPanel>
         }
-      />,
+      />
     );
   }
 
@@ -173,10 +209,11 @@ function CleanForm({ onCleaned }: { onCleaned: () => void }) {
       isLoading={isProcessing}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
+          <Action
             title="Clean My Clode"
             icon={Icon.Wand}
-            onSubmit={() => handleClean()}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            onAction={() => handleClean()}
           />
           <Action
             title="Paste from Clipboard & Clean"
@@ -186,7 +223,7 @@ function CleanForm({ onCleaned }: { onCleaned: () => void }) {
               const { text } = await Clipboard.read();
               if (text) {
                 setInputText(text);
-                await handleClean(text);
+                await handleClean(text, { collapseSpaces });
               }
             }}
           />
@@ -204,6 +241,13 @@ function CleanForm({ onCleaned }: { onCleaned: () => void }) {
         value={inputText}
         onChange={setInputText}
         autoFocus
+      />
+      <Form.Checkbox
+        id="collapseSpaces"
+        label="Collapse extra spaces between words"
+        info="Removes padding spaces from narrow terminal output (e.g. multiple spaces between words)"
+        value={collapseSpaces}
+        onChange={handleCollapseSpacesChange}
       />
     </Form>
   );
