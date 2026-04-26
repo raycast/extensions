@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "designlang",
+  "title": "designlang",
+  "description": "Extract design tokens from any website — colors, typography, spacing, shadows, shadcn/Tailwind/Figma outputs.",
+  "icon": "icon.png",
+  "author": "masyv",
+  "license": "MIT",
+  "categories": ["Design Tools", "Developer Tools"],
+  "keywords": ["design", "tokens", "css", "tailwind", "figma", "shadcn"],
+  "commands": [
+    {
+      "name": "extract",
+      "title": "Extract Design From URL",
+      "description": "Run designlang on a URL and open the output folder.",
+      "mode": "view"
+    },
+    {
+      "name": "score",
+      "title": "Score Website Design",
+      "description": "Rate a site's design-system quality (7 categories, A–F).",
+      "mode": "view"
+    },
+    {
+      "name": "copy-cli",
+      "title": "Copy CLI Command For URL",
+      "description": "Copy `npx designlang <url>` to your clipboard.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "outputDir",
+      "type": "textfield",
+      "title": "Output directory",
+      "description": "Where extracted files are written.",
+      "default": "~/designlang-output",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.3.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
