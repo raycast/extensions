@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "open-with-app",
   "title": "Open With App",
-  "description": "Choose an application to open the selected Finder items.",
+  "description": "Choose an application to open the items selected in your file manager.",
   "icon": "extension-icon.png",
   "categories": [
     "System",
@@ -12,15 +12,16 @@
   "contributors": [
     "omarshahine",
     "pernielsentikaer",
-    "Sheraff"
+    "Sheraff",
+    "errepuntopenco"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "index",
       "title": "Open With…",
-      "subtitle": "Finder",
-      "description": "Choose an application to open the selected Finder items.",
+      "subtitle": "File Manager",
+      "description": "Choose an application to open the items selected in your file manager.",
       "mode": "view"
     }
   ],
