@@ -23,7 +23,7 @@ import {
 import { readProfileStore } from "./services/profile-store";
 import { dispatchTranslationWithFallback } from "./services/translation-dispatcher";
 import { isSupportedLanguage, SupportedLanguage } from "./types/language";
-import { CommandPreferences, ProfileStoreData } from "./types/profile";
+import { ProfileStoreData } from "./types/profile";
 import { SubmitTranslationInput, TranslationResult } from "./types/translation";
 
 interface LoadedRuntime {
@@ -51,7 +51,7 @@ function parseDefaultTargetLanguage(value: string): SupportedLanguage {
 }
 
 async function loadRuntime(): Promise<LoadedRuntime> {
-  const preferences = getPreferenceValues<CommandPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const defaultTargetLanguage = parseDefaultTargetLanguage(
     preferences.defaultTargetLanguage,
   );

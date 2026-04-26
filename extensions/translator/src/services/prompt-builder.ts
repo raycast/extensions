@@ -13,20 +13,11 @@ const PROMPT_TEMPLATE = `You are a professional {{to}} native translator who nee
 - Return translation directly.
 - Keep normal paragraph breaks only.`;
 
-function clearNonTextPlaceholders(prompt: string): string {
-  return prompt
-    .replaceAll("{{title_prompt}}", "")
-    .replaceAll("{{summary_prompt}}", "")
-    .replaceAll("{{terms_prompt}}", "")
-    .replaceAll("{{imt_style_guide}}", "");
-}
-
 export function buildTranslatorSystemPrompt(
   targetLanguage: SupportedLanguage,
 ): string {
   const targetLanguageName = getLanguageNativeName(targetLanguage);
-  const prompt = clearNonTextPlaceholders(PROMPT_TEMPLATE);
-  return prompt.replaceAll("{{to}}", targetLanguageName).trim();
+  return PROMPT_TEMPLATE.replaceAll("{{to}}", targetLanguageName).trim();
 }
 
 export function buildTranslatorUserPrompt(

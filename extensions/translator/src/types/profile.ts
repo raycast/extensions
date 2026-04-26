@@ -14,7 +14,3 @@ export interface ProfileStoreData {
   profiles: ApiProfile[];
   defaultProfileId: string | null;
 }
-
-export interface CommandPreferences {
-  defaultTargetLanguage: string;
-}
