@@ -162,13 +162,22 @@ export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: 
             title: "Tab closed",
           });
         } catch (error) {
+          pendingCloseIdsRef.current.delete(tab.id);
+
           try {
             await Promise.resolve(revalidate());
           } catch {
-            // `getBrowserTabs` already surfaces refresh failures.
+            // Restore the tab locally if the refresh also fails.
+            await mutate(undefined, {
+              optimisticUpdate(data) {
+                if (!data) return [tab];
+                if (data.some((t) => t.id === tab.id)) return data;
+                return [tab, ...data];
+              },
+              rollbackOnError: false,
+              shouldRevalidateAfter: false,
+            });
           }
-
-          pendingCloseIdsRef.current.delete(tab.id);
 
           await showToast({
             style: Toast.Style.Failure,
@@ -313,13 +322,13 @@ export function DeduplicateTabsAction({
             }
           } finally {
             if (optimisticContext) {
+              for (const id of duplicateIds) optimisticContext.pendingCloseIdsRef.current.delete(id);
+
               try {
                 await Promise.resolve(optimisticContext.revalidate());
               } catch {
                 // `getBrowserTabs` already surfaces refresh failures.
               }
-
-              for (const id of duplicateIds) optimisticContext.pendingCloseIdsRef.current.delete(id);
             }
           }
 
