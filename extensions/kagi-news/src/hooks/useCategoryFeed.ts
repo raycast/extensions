@@ -1,3 +1,4 @@
+// useCategoryFeed.ts
 // Hook to fetch stories and events for a selected category
 
 import { useFetch } from "@raycast/utils";
@@ -7,12 +8,13 @@ import { getLatestBatch, storiesToArticles, StoryResponse } from "../utils";
 
 export function useCategoryFeed(categoryId: string, language: string, providedBatchId?: string) {
   const isOnThisDay = categoryId === "onthisday";
+  const isChaosIndex = categoryId === "chaos";
   const [batchId, setBatchId] = useState<string | null>(providedBatchId || null);
-  const [isLoadingBatch, setIsLoadingBatch] = useState(!providedBatchId);
+  const [isLoadingBatch, setIsLoadingBatch] = useState(!providedBatchId && !isChaosIndex);
   const [batchError, setBatchError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (providedBatchId) {
+    if (providedBatchId || isChaosIndex) {
       return;
     }
 
@@ -31,38 +33,90 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
     };
 
     fetchBatch();
-  }, [language, providedBatchId]);
+  }, [language, providedBatchId, isChaosIndex]);
 
   // Build the URL for content fetching - ONLY if categoryId is not empty
   const contentUrl = !categoryId
-    ? "" // Don't fetch if no category selected
-    : isOnThisDay
-      ? `https://kite.kagi.com/api/batches/latest/onthisday?lang=${encodeURIComponent(language)}`
-      : batchId
-        ? `https://kite.kagi.com/api/batches/${encodeURIComponent(batchId)}/categories/${encodeURIComponent(
-            categoryId,
-          )}/stories?lang=${encodeURIComponent(language)}&limit=50`
-        : "";
+    ? ""
+    : isChaosIndex
+      ? providedBatchId
+        ? `https://kite.kagi.com/api/batches/${encodeURIComponent(providedBatchId)}/chaos?lang=${encodeURIComponent(language)}`
+        : `https://kite.kagi.com/api/batches/latest/chaos?lang=${encodeURIComponent(language)}`
+      : isOnThisDay
+        ? providedBatchId
+          ? `https://kite.kagi.com/api/batches/${encodeURIComponent(providedBatchId)}/onthisday?lang=${encodeURIComponent(language)}`
+          : `https://kite.kagi.com/api/batches/latest/onthisday?lang=${encodeURIComponent(language)}`
+        : batchId
+          ? `https://kite.kagi.com/api/batches/${encodeURIComponent(batchId)}/categories/${encodeURIComponent(
+              categoryId,
+            )}/stories?lang=${encodeURIComponent(language)}&limit=50`
+          : "";
 
-  // Fetch stories or Today in History data
+  // Fetch stories, events, or chaos index data
   const {
     isLoading: loadingContent,
     data: contentData,
     error: contentError,
-  } = useFetch<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }>(contentUrl, {
-    parseResponse: async (response): Promise<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }> => {
+  } = useFetch<{
+    stories?: StoryResponse[];
+    events?: HistoricalEvent[];
+    score?: number;
+    description?: string;
+    timestamp?: number;
+    chaosIndex?: number;
+    chaosDescription?: string;
+    chaosLastUpdated?: string;
+  }>(contentUrl, {
+    parseResponse: async (
+      response,
+    ): Promise<{
+      stories?: StoryResponse[];
+      events?: HistoricalEvent[];
+      score?: number;
+      description?: string;
+      timestamp?: number;
+      chaosIndex?: number;
+      chaosDescription?: string;
+      chaosLastUpdated?: string;
+    }> => {
       if (!response.ok) {
         throw new Error(`Failed to fetch content: ${response.status}`);
       }
-      return response.json() as Promise<{ stories?: StoryResponse[]; events?: HistoricalEvent[] }>;
+      return response.json() as Promise<{
+        stories?: StoryResponse[];
+        events?: HistoricalEvent[];
+        score?: number;
+        description?: string;
+        timestamp?: number;
+        chaosIndex?: number;
+        chaosDescription?: string;
+        chaosLastUpdated?: string;
+      }>;
     },
     execute: contentUrl !== "",
   });
 
-  // Transform data into articles and events
-  const { articles, events } = useMemo(() => {
+  // Transform data into articles, events, or chaos index
+  const { articles, events, chaosIndex } = useMemo(() => {
     if (!contentData) {
-      return { articles: [], events: [] };
+      return { articles: [], events: [], chaosIndex: null };
+    }
+
+    if (isChaosIndex) {
+      // Check if all three chaos fields are missing/falsy
+      const hasValidChaosData = contentData.chaosIndex || contentData.chaosDescription || contentData.chaosLastUpdated;
+
+      return {
+        articles: [],
+        events: [],
+        chaosIndex: hasValidChaosData
+          ? {
+              score: contentData.chaosIndex || 0,
+              description: contentData.chaosDescription || "",
+              timestamp: contentData.chaosLastUpdated || "",
+            }
+          : null,
+      };
     }
 
     if (isOnThisDay) {
@@ -74,6 +128,7 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
       return {
         articles: [],
         events: [...eventsList, ...peopleList],
+        chaosIndex: null,
       };
     } else {
       // Stories response structure
@@ -81,15 +136,18 @@ export function useCategoryFeed(categoryId: string, language: string, providedBa
       return {
         articles: parsedArticles,
         events: [],
+        chaosIndex: null,
       };
     }
-  }, [contentData, isOnThisDay]);
+  }, [contentData, isOnThisDay, isChaosIndex]);
 
   return {
     articles,
     events,
+    chaosIndex,
     isLoading: isLoadingBatch || loadingContent,
     error: batchError || (contentError instanceof Error ? contentError.message : null),
     isOnThisDay,
+    isChaosIndex,
   };
 }

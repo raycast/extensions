@@ -3,6 +3,17 @@
   "name": "sips",
   "title": "Image Modification",
   "description": "Apply filters and transformations to various image formats, and convert between them.",
+  "icon": "command-icon.png",
+  "author": "HelloImSteven",
+  "contributors": [
+    "arronhunt",
+    "nakaakist",
+    "JUSTIVE",
+    "patomos",
+    "prince_gupta",
+    "ridemountainpig",
+    "pernielsentikaer"
+  ],
   "keywords": [
     "convert",
     "edit",
@@ -20,105 +31,12 @@
   "platforms": [
     "macOS"
   ],
-  "version": "1.11.2",
-  "icon": "command-icon.png",
-  "author": "HelloImSteven",
-  "contributors": [
-    "arronhunt",
-    "nakaakist",
-    "JUSTIVE",
-    "patomos",
-    "prince_gupta"
-  ],
   "categories": [
     "Media",
     "Productivity",
     "Design Tools"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "title": "Image Input",
-      "name": "inputMethod",
-      "description": "Where to obtain the image to modify.",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Selection In Finder",
-          "value": "Finder"
-        },
-        {
-          "title": "Selection In Path Finder",
-          "value": "Path Finder"
-        },
-        {
-          "title": "Selection in NeoFinder",
-          "value": "NeoFinder"
-        },
-        {
-          "title": "Selection in HoudahSpot",
-          "value": "HoudahSpot"
-        },
-        {
-          "title": "Selection in QSpace / QSpace Pro",
-          "value": "QSpace"
-        },
-        {
-          "title": "Clipboard",
-          "value": "Clipboard"
-        },
-         {
-          "title": "Selection in ForkLift (Experimental)",
-          "value": "ForkLift"
-        }
-      ],
-      "default": "Finder",
-      "required": false
-    },
-    {
-      "title": "Image Output",
-      "name": "imageResultHandling",
-      "description": "How to handle the result of the image modification, i.e. where to save the modified image, or whether to copy it to the clipboard.",
-      "type": "dropdown",
-      "data": [
-        {
-          "title": "Replace Original",
-          "value": "replaceOriginal"
-        },
-        {
-          "title": "Save In Containing Folder",
-          "value": "saveInContainingFolder"
-        },
-        {
-          "title": "Copy to Clipboard",
-          "value": "copyToClipboard"
-        },
-        {
-          "title": "Open in Preview",
-          "value": "openInPreview"
-        },
-        {
-          "title": "Save To Downloads",
-          "value": "saveToDownloads"
-        },
-        {
-          "title": "Save to Desktop",
-          "value": "saveToDesktop"
-        }
-      ],
-      "default": "replaceOriginal",
-      "required": false
-    },
-    {
-      "title": "Image Operation Settings",
-      "name": "useLosslessConversion",
-      "description": "Whether to use lossless conversion when performing operations on WebP and AVIF images.",
-      "label": "Lossless Conversions",
-      "type": "checkbox",
-      "default": false,
-      "required": false
-    }
-  ],
   "commands": [
     {
       "name": "flip-horizontally",
@@ -1067,6 +985,89 @@
       }
     ]
   },
+  "preferences": [
+    {
+      "title": "Image Input",
+      "name": "inputMethod",
+      "description": "Where to obtain the image to modify.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Selection In Finder",
+          "value": "Finder"
+        },
+        {
+          "title": "Selection In Path Finder",
+          "value": "Path Finder"
+        },
+        {
+          "title": "Selection in NeoFinder",
+          "value": "NeoFinder"
+        },
+        {
+          "title": "Selection in HoudahSpot",
+          "value": "HoudahSpot"
+        },
+        {
+          "title": "Selection in QSpace / QSpace Pro",
+          "value": "QSpace"
+        },
+        {
+          "title": "Clipboard",
+          "value": "Clipboard"
+        },
+        {
+          "title": "Selection in ForkLift (Experimental)",
+          "value": "ForkLift"
+        }
+      ],
+      "default": "Finder",
+      "required": false
+    },
+    {
+      "title": "Image Output",
+      "name": "imageResultHandling",
+      "description": "How to handle the result of the image modification, i.e. where to save the modified image, or whether to copy it to the clipboard.",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Replace Original",
+          "value": "replaceOriginal"
+        },
+        {
+          "title": "Save In Containing Folder",
+          "value": "saveInContainingFolder"
+        },
+        {
+          "title": "Copy to Clipboard",
+          "value": "copyToClipboard"
+        },
+        {
+          "title": "Open in Preview",
+          "value": "openInPreview"
+        },
+        {
+          "title": "Save To Downloads",
+          "value": "saveToDownloads"
+        },
+        {
+          "title": "Save to Desktop",
+          "value": "saveToDesktop"
+        }
+      ],
+      "default": "replaceOriginal",
+      "required": false
+    },
+    {
+      "title": "Image Operation Settings",
+      "name": "useLosslessConversion",
+      "description": "Whether to use lossless conversion when performing operations on WebP and AVIF images.",
+      "label": "Lossless Conversions",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.7",
     "@raycast/utils": "^2.2.2",
@@ -1083,6 +1084,7 @@
     "prettier": "^3.5.3",
     "typescript": "^5.8.2"
   },
+  "version": "1.11.2",
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",

@@ -1,23 +1,45 @@
-import { List, Icon, Detail, ActionPanel, Action, Color } from "@raycast/api";
+import { List, Detail, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
+import { isInvalidCustomNpxPathError, isNpxResolutionError } from "./utils/skills-cli";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
 import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
 
 export default function Command() {
-  const { skills, isLoading, error, revalidate } = useInstalledSkills();
+  const { skills, isLoading, error, revalidate, mutate } = useInstalledSkills();
   const [selectedAgent, setSelectedAgent] = useState<string>("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const toggleDetail = () => setIsShowingDetail((prev) => !prev);
+  const hasInvalidCustomNpxPathError = error ? isInvalidCustomNpxPathError(error) : false;
+  const hasNpxResolutionError = error ? isNpxResolutionError(error) : false;
 
   if (error && skills.length === 0) {
+    const { errorTitle, errorDetails } = hasInvalidCustomNpxPathError
+      ? {
+          errorTitle: "Invalid Custom npx Path",
+          errorDetails:
+            "The configured **Custom npx Path** does not point to a valid `npx` executable.\n\n1. Open Extension Preferences (`Cmd+Shift+,`).\n2. Fix or clear **Custom npx Path**.\n3. If unsure, run `which npx` in Terminal and use that value.",
+        }
+      : hasNpxResolutionError
+        ? {
+            errorTitle: "Unable to Load Installed Skills",
+            errorDetails:
+              "This is an `npx` resolution issue in the local CLI runtime.\n\n1. Run `which npx` in Terminal.\n2. Open Extension Preferences (`Cmd+Shift+,`).\n3. Set **Custom npx Path** to the path from step 1, then retry.",
+          }
+        : {
+            errorTitle: "Unable to Load Installed Skills",
+            errorDetails:
+              "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you use a non-standard Node.js setup.\n3. Run `npx -y skills@latest list -g` in Terminal to inspect the underlying CLI error.",
+          };
+
     return (
       <Detail
-        markdown={`# Error Loading Installed Skills\n\n**Error:** ${error.message}\n\n---\n\nMake sure you have the skills CLI available: \`npx skills list -g\``}
+        markdown={`# ${errorTitle}\n\n**Error:** ${error.message}\n\n---\n\n${errorDetails}`}
         actions={
           <ActionPanel>
             <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
+            <Action title="Open Preferences" onAction={openExtensionPreferences} icon={Icon.Gear} />
           </ActionPanel>
         }
       />
@@ -33,7 +55,8 @@ export default function Command() {
   const agents = [...agentCounts.keys()].sort();
 
   const filteredSkills = selectedAgent === "all" ? skills : skills.filter((s) => s.agents.includes(selectedAgent));
-  const updatableCount = filteredSkills.filter((s) => s.hasUpdate).length;
+  // Global count — "Update All" applies to all agents regardless of filter
+  const updatableCount = skills.filter((s) => s.hasUpdate).length;
 
   return (
     <List
@@ -57,24 +80,43 @@ export default function Command() {
       {skills.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Installed Skills"
-          description="Install skills using the search or trending commands"
+          description="Install skills from Search Skills to manage them here."
           icon={Icon.Box}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+            </ActionPanel>
+          }
+        />
+      ) : filteredSkills.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Results for Current Filter"
+          description={`No installed skills match the "${selectedAgent}" filter. Try selecting a different agent.`}
+          icon={Icon.Filter}
+          actions={
+            <ActionPanel>
+              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+            </ActionPanel>
+          }
         />
       ) : (
         <>
           {updatableCount > 0 && (
-            <List.Section title="Updates Available">
+            <List.Section
+              title="Updates Available"
+              subtitle={`${updatableCount} skill${updatableCount > 1 ? "s" : ""}`}
+            >
               <List.Item
-                title={`${updatableCount} skill${updatableCount > 1 ? "s" : ""} can be updated`}
+                title="Update All"
                 icon={{ source: Icon.ArrowClockwise, tintColor: Color.Orange }}
                 detail={
                   <List.Item.Detail
-                    markdown={`# Updates Available\n\n**${updatableCount}** skill${updatableCount > 1 ? "s have" : " has"} updates available.\n\nPress **Enter** to update all skills.`}
+                    markdown={`# Update All Skills\n\nPress **Enter** to update all **${updatableCount}** outdated skill${updatableCount > 1 ? "s" : ""} at once.`}
                   />
                 }
                 actions={
                   <ActionPanel>
-                    <UpdateSkillAction onUpdate={revalidate} />
+                    <UpdateSkillAction mutate={mutate} />
                   </ActionPanel>
                 }
               />
@@ -87,8 +129,8 @@ export default function Command() {
                 skill={skill}
                 isSelected={selectedId === skill.name}
                 isShowingDetail={isShowingDetail}
+                mutate={mutate}
                 onToggleDetail={toggleDetail}
-                onUpdate={revalidate}
               />
             ))}
           </List.Section>

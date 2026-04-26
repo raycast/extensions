@@ -2,28 +2,29 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "trello",
   "title": "Trello",
-  "description": "Raycast extension for showing, searching, and interacting with cards from Trello",
+  "description": "Manage Trello boards, lists, and cards from Raycast",
   "icon": "command-icon.png",
   "author": "ChrisChinchilla",
   "contributors": [
     "jimmy-b36",
     "brittanyjoiner15",
-    "ajaypremshankar"
+    "ajaypremshankar",
+    "nahidz3"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
-      "title": "Fetch Todos",
-      "subtitle": "Trello",
-      "description": "Fetch all assigned todos",
-      "mode": "view"
-    },
-    {
       "name": "searchTodos",
-      "title": "Search Todos",
+      "title": "Search Cards",
       "subtitle": "Trello",
-      "description": "Search all todos across all your boards",
+      "description": "Search all cards across all your boards",
       "mode": "view"
     },
     {
@@ -35,9 +36,37 @@
     },
     {
       "name": "createTodo",
-      "title": "Create a Todo",
+      "title": "Create a Card",
       "subtitle": "Trello",
-      "description": "Search all your open boards",
+      "description": "Create a card on a selected board/list",
+      "mode": "view"
+    },
+    {
+      "name": "index",
+      "title": "Fetch all Cards",
+      "subtitle": "Trello",
+      "description": "Fetch all assigned cards",
+      "mode": "view"
+    },
+    {
+      "name": "listCards",
+      "title": "Fetch Cards in a List",
+      "subtitle": "Trello",
+      "description": "View all cards in a list",
+      "mode": "view"
+    },
+    {
+      "name": "moveCard",
+      "title": "Move Card",
+      "subtitle": "Trello",
+      "description": "Move a card to another list",
+      "mode": "view"
+    },
+    {
+      "name": "deleteCard",
+      "title": "Delete Card",
+      "subtitle": "Trello",
+      "description": "Delete a card after confirmation",
       "mode": "view"
     }
   ],
@@ -99,10 +128,7 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  },
-  "platforms": [
-    "macOS",
-    "Windows"
-  ]
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
 }

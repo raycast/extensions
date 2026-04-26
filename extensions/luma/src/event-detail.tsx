@@ -1,11 +1,11 @@
 import { ActionPanel, Action, Detail, Icon, Color } from "@raycast/api";
 import { EventEntry } from "./types";
-import { formatEventTime, getEventLocation, getTicketStatus } from "./utils";
+import { formatEventTime, getEventLocation, getTicketStatus, getEventUrl, getOrganizerUrl } from "./utils";
 
 export default function EventDetail({ entry }: { entry: EventEntry }) {
   const ticketStatus = getTicketStatus(entry);
-  const eventUrl = `https://luma.com/${entry.event.url}`;
-  const organizerUrl = `https://luma.com/${entry.calendar.slug}`;
+  const eventUrl = getEventUrl(entry);
+  const organizerUrl = getOrganizerUrl(entry);
 
   const markdown = `
 # ${entry.event.name}

@@ -1,4 +1,4 @@
-import { Action, Icon, showToast } from "@raycast/api";
+import { Action, Icon, showToast, Toast } from "@raycast/api";
 import { showFailureToast, useExec } from "@raycast/utils";
 import { useRepo } from "../../hooks/useRepo.js";
 
@@ -18,7 +18,7 @@ export function DeleteWorktree({ worktreeName, worktreePath, checkBranches }: Pr
       checkBranches();
     },
     onError: (error) => {
-      showFailureToast(error, { title: `Could not delete worktree ${worktreeName}` });
+      showFailureToast(error, { title: `Could not delete worktree: ${worktreeName}` });
     },
   });
   const { revalidate: deleteWorktree } = useExec("git", ["worktree", "remove", worktreePath], {
@@ -28,13 +28,14 @@ export function DeleteWorktree({ worktreeName, worktreePath, checkBranches }: Pr
       showToast({ title: `Deleted worktree ${worktreeName}` });
       checkBranches();
     },
-    onError: (error) => {
-      showFailureToast(error, {
+    onError: () => {
+      showToast({
         title: `Could not delete ${worktreeName}`,
         primaryAction: {
           title: "Force Delete Worktree?",
           onAction: hardDeleteWorktree,
         },
+        style: Toast.Style.Failure,
       });
     },
   });

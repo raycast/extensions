@@ -1,5 +1,24 @@
 # Obsidian Changelog
 
+## [Fix] - 2026-04-10
+
+- Fix Open in New Obsidian Tab failing on Windows due to path separator handling
+
+## [Wikilink Actions] - 2026-04-07
+
+- New: Copy Wikilink — copies `[[Note Title]]` to clipboard (⌥W)
+- New: Paste Wikilink — pastes `[[Note Title]]` into the focused app (⌥⇧W)
+
+## [Silent Mode No Longer Activates Obsidian] - 2026-03-31
+
+- Fix: Append to Daily Note, Append Task, and custom actions with silent mode enabled no longer bring Obsidian to the foreground
+- Fix: Multi-vault Append Task was missing the silent flag, causing Obsidian to always activate on vault selection
+- Uses macOS `open -g` (background flag) instead of Raycast `open()` when silent mode is on
+
+## [Bugfix] - 2026-03-18
+
+- Fixes a bug where the extension was failing after initial install
+
 ## [AI Search Tool Content Search Parameter] - 2026-02-16
 
 - Add searchContent parameter to searchNote AI tool for controlling search mode

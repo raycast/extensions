@@ -1,6 +1,6 @@
 import { Cache } from "@raycast/api";
 
-import { cacheTtl } from "@/helpers/preferences";
+import { cacheTtl, liteMode } from "@/helpers/preferences";
 
 interface CacheEntry<T> {
   createdAt: number;
@@ -15,7 +15,7 @@ class CacheHelper {
   }
 
   get<T>(key: string): T | null {
-    if (cacheTtl <= 0) {
+    if (cacheTtl <= 0 && !liteMode) {
       return null;
     }
     const entryString = this.cache.get(key);
@@ -23,19 +23,32 @@ class CacheHelper {
       return null;
     }
     const entry: CacheEntry<T> = JSON.parse(entryString);
-    const isExpired = Date.now() - entry.createdAt > cacheTtl * 1000;
-    if (isExpired) {
+    const age = Date.now() - entry.createdAt;
+    const isExpired = age > cacheTtl * 1000;
+    if (age > 86_400_000) {
+      this.cache.remove(key);
+      return null;
+    }
+    if (isExpired && !liteMode) {
       this.cache.remove(key);
     }
+    // In lite mode, serve stale data (up to 24h) to avoid unnecessary API calls.
+    return isExpired && !liteMode ? null : entry.data;
+  }
 
-    return isExpired ? null : entry.data;
+  /** Read cached data ignoring TTL — returns whatever is stored, up to 24h old. */
+  getRaw<T>(key: string): T | null {
+    const entryString = this.cache.get(key);
+    if (!entryString) return null;
+    const entry: CacheEntry<T> = JSON.parse(entryString);
+    if (Date.now() - entry.createdAt > 86_400_000) {
+      this.cache.remove(key);
+      return null;
+    }
+    return entry.data;
   }
 
   set<T>(key: string, value: T): void {
-    if (cacheTtl <= 0) {
-      return;
-    }
-
     const entry: CacheEntry<T> = {
       createdAt: Date.now(),
       data: value,
@@ -58,7 +71,7 @@ class CacheHelper {
   }
 
   async upsert<T extends { id: unknown }>(key: string, updater: (currentData: T[] | null) => Promise<T>): Promise<T> {
-    const currentData = this.get<T[]>(key);
+    const currentData = this.get<T[]>(key) ?? this.getRaw<T[]>(key);
     const updatedEntry = await updater(currentData);
 
     if (currentData) {
@@ -75,7 +88,7 @@ class CacheHelper {
   }
 
   async removeItem<T extends { id: unknown }>(key: string, id: unknown): Promise<void> {
-    const currentData = this.get<T[]>(key);
+    const currentData = this.get<T[]>(key) ?? this.getRaw<T[]>(key);
     if (currentData) {
       const updatedData = currentData.filter((entry) => entry.id !== id);
       this.set<T[]>(key, updatedData);

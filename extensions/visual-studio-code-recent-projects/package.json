@@ -42,7 +42,8 @@
     "positron",
     "windsurf",
     "trae",
-    "trae-cn"
+    "trae-cn",
+    "lingma"
   ],
   "license": "MIT",
   "commands": [
@@ -110,6 +111,10 @@
           "value": "Positron"
         },
         {
+          "title": "Qoder",
+          "value": "Qoder"
+        },
+        {
           "title": "Trae",
           "value": "Trae"
         },
@@ -136,6 +141,10 @@
         {
           "title": "Windsurf",
           "value": "Windsurf"
+        },
+        {
+          "title": "Lingma",
+          "value": "Lingma"
         }
       ]
     },

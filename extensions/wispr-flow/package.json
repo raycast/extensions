@@ -5,7 +5,8 @@
   "description": "Search transcription history, manage your custom dictionary, and control voice recording with Wispr Flow",
   "icon": "icon.png",
   "author": "carterm",
-  "contributors": ["christi4nity", "mattiacolombomc"],
+  "contributors": ["christi4nity", "mattiacolombomc",
+    "traviscooksfdc"],
   "categories": [
     "Productivity",
     "Applications"
@@ -82,6 +83,13 @@
       "mode": "view"
     },
     {
+      "name": "toggle-recording",
+      "title": "Toggle Recording",
+      "subtitle": "Wispr Flow",
+      "description": "Toggle Wispr Flow voice dictation on/off",
+      "mode": "no-view"
+    },
+    {
       "name": "start-recording",
       "title": "Start Recording",
       "subtitle": "Wispr Flow",
@@ -100,6 +108,13 @@
       "title": "Open Wispr Flow",
       "subtitle": "Wispr Flow",
       "description": "Open the Wispr Flow app",
+      "mode": "no-view"
+    },
+    {
+      "name": "paste-last-transcript",
+      "title": "Paste Last Transcript",
+      "subtitle": "Wispr Flow",
+      "description": "Paste the most recent Wispr Flow transcript into the active app",
       "mode": "no-view"
     }
   ],

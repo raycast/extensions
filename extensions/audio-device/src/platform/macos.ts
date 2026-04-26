@@ -7,10 +7,29 @@ import type { PlatformAudioAPI, AudioDevice } from "./index";
 const binaryAsset = path.join(environment.assetsPath, "audio-devices");
 const binary = path.join(environment.supportPath, "audio-devices");
 
+const soundControlAsset = path.join(environment.assetsPath, "sound-control");
+const soundControlBinary = path.join(environment.supportPath, "sound-control");
+
+function needsCopy(source: string, target: string): boolean {
+  if (!fs.existsSync(target)) return true;
+  try {
+    return fs.statSync(source).size !== fs.statSync(target).size;
+  } catch {
+    return true;
+  }
+}
+
 async function ensureBinary() {
-  if (!fs.existsSync(binary)) {
+  if (needsCopy(binaryAsset, binary)) {
     fs.copyFileSync(binaryAsset, binary);
     await execa("chmod", ["+x", binary]);
+  }
+}
+
+async function ensureSoundControl() {
+  if (needsCopy(soundControlAsset, soundControlBinary)) {
+    fs.copyFileSync(soundControlAsset, soundControlBinary);
+    await execa("chmod", ["+x", soundControlBinary]);
   }
 }
 
@@ -72,14 +91,129 @@ export const macosAudioAPI: PlatformAudioAPI = {
   },
 
   async getOutputDeviceVolume(deviceId: string) {
-    await ensureBinary();
-    const { stdout, stderr } = await execa(binary, ["volume", "get", deviceId]);
-    return stderr ? undefined : parseFloat(stdout);
+    await ensureSoundControl();
+    try {
+      const { stdout } = await execa(soundControlBinary, ["get", deviceId]);
+      const val = parseFloat(stdout.trim());
+      return isNaN(val) ? undefined : val / 100;
+    } catch {
+      return undefined;
+    }
   },
 
   async setOutputDeviceVolume(deviceId: string, volume: number) {
-    await ensureBinary();
-    return throwIfStderr(await execa(binary, ["volume", "set", deviceId, `${volume}`]));
+    await ensureSoundControl();
+    const level = Math.round(Math.max(0, Math.min(1, volume)) * 100);
+    await execa(soundControlBinary, ["set", `${level}`, deviceId]);
+  },
+
+  async getOutputDeviceMute(deviceId: string) {
+    await ensureSoundControl();
+    try {
+      const { stdout } = await execa(soundControlBinary, ["mute", "get", deviceId]);
+      return stdout.trim() === "true";
+    } catch {
+      return undefined;
+    }
+  },
+
+  async setOutputDeviceMute(deviceId: string, muted: boolean) {
+    await ensureSoundControl();
+    await execa(soundControlBinary, ["mute", muted ? "on" : "off", deviceId]);
+  },
+
+  async toggleOutputDeviceMute(deviceId: string) {
+    await ensureSoundControl();
+    const { stdout } = await execa(soundControlBinary, ["mute", "toggle", deviceId]);
+    return stdout.trim() === "true";
+  },
+
+  async getInputDeviceVolume(deviceId: string) {
+    await ensureSoundControl();
+    try {
+      const { stdout } = await execa(soundControlBinary, ["get-input", deviceId]);
+      const val = parseFloat(stdout.trim());
+      return isNaN(val) ? undefined : val / 100;
+    } catch {
+      return undefined;
+    }
+  },
+
+  async setInputDeviceVolume(deviceId: string, volume: number) {
+    await ensureSoundControl();
+    const level = Math.round(Math.max(0, Math.min(1, volume)) * 100);
+    await execa(soundControlBinary, ["set-input", `${level}`, deviceId]);
+  },
+
+  async getInputDeviceMute(deviceId: string) {
+    await ensureSoundControl();
+    try {
+      const { stdout } = await execa(soundControlBinary, ["mute-input", "get", deviceId]);
+      return stdout.trim() === "true";
+    } catch {
+      return undefined;
+    }
+  },
+
+  async setInputDeviceMute(deviceId: string, muted: boolean) {
+    await ensureSoundControl();
+    await execa(soundControlBinary, ["mute-input", muted ? "on" : "off", deviceId]);
+  },
+
+  async toggleInputDeviceMute(deviceId: string) {
+    await ensureSoundControl();
+    const { stdout } = await execa(soundControlBinary, ["mute-input", "toggle", deviceId]);
+    return stdout.trim() === "true";
+  },
+
+  async getAllOutputVolumeInfo(): Promise<
+    Record<string, { name: string; volume?: number; muted?: boolean; isDefault: boolean }>
+  > {
+    await ensureSoundControl();
+    try {
+      const { stdout } = await execa(soundControlBinary, ["get-all"]);
+      const raw = JSON.parse(stdout) as Record<
+        string,
+        { name: string; volume?: number | null; muted?: boolean | null; isDefault: boolean }
+      >;
+      const result: Record<string, { name: string; volume?: number; muted?: boolean; isDefault: boolean }> = {};
+      for (const [id, info] of Object.entries(raw)) {
+        result[id] = {
+          name: info.name,
+          volume: info.volume != null ? info.volume / 100 : undefined,
+          muted: info.muted ?? undefined,
+          isDefault: info.isDefault,
+        };
+      }
+      return result;
+    } catch {
+      return {};
+    }
+  },
+
+  async getAllInputVolumeInfo(): Promise<
+    Record<string, { name: string; volume?: number; muted?: boolean; isDefault: boolean }>
+  > {
+    await ensureSoundControl();
+    try {
+      const { stdout } = await execa(soundControlBinary, ["get-all-input"]);
+      const raw = JSON.parse(stdout) as Record<
+        string,
+        { name: string; volume?: number | null; muted?: boolean | null; isDefault: boolean }
+      >;
+      const result: Record<string, { name: string; volume?: number; muted?: boolean; isDefault: boolean }> = {};
+      for (const [id, info] of Object.entries(raw)) {
+        result[id] = {
+          name: info.name,
+          volume: info.volume != null ? info.volume / 100 : undefined,
+          muted: info.muted ?? undefined,
+          isDefault: info.isDefault,
+        };
+      }
+      return result;
+    } catch {
+      return {};
+    }
   },
 
   async createAggregateDevice(

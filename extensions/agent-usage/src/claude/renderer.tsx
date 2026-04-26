@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import type { Accessory } from "../agents/types";
 import {
   formatErrorOrNoData,
+  generateAsciiBar,
   generatePieIcon,
   getLoadingAccessory,
   getNoDataAccessory,
@@ -10,7 +11,7 @@ import {
 import type { ClaudeError, ClaudeUsage } from "./types";
 
 function formatWindow(name: string, percent: number, resetsIn: string | null): string {
-  let text = `\n\n${name}: ${percent}% remaining`;
+  let text = `\n\n${name}: ${generateAsciiBar(percent)} ${percent}% remaining`;
   if (resetsIn) {
     text += `\nResets In: ${resetsIn}`;
   }
@@ -30,7 +31,7 @@ export function formatClaudeUsageText(usage: ClaudeUsage | null, error: ClaudeEr
   }
 
   if (u.sevenDayModel) {
-    text += formatWindow("Weekly Sonnet/Opus", u.sevenDayModel.percentageRemaining, u.sevenDayModel.resetsIn);
+    text += formatWindow("Weekly Sonnet", u.sevenDayModel.percentageRemaining, u.sevenDayModel.resetsIn);
   }
 
   if (u.extraUsage) {
@@ -50,13 +51,19 @@ export function renderClaudeDetail(usage: ClaudeUsage | null, error: ClaudeError
       <List.Item.Detail.Metadata.Label title="Plan" text={u.plan} />
       <List.Item.Detail.Metadata.Separator />
 
-      <List.Item.Detail.Metadata.Label title="5h Limit" text={`${u.fiveHour.percentageRemaining}% remaining`} />
+      <List.Item.Detail.Metadata.Label
+        title="5h Limit"
+        text={`${generateAsciiBar(u.fiveHour.percentageRemaining)} ${u.fiveHour.percentageRemaining}% remaining`}
+      />
       {u.fiveHour.resetsIn && <List.Item.Detail.Metadata.Label title="Resets In" text={u.fiveHour.resetsIn} />}
 
       {u.sevenDay && (
         <>
           <List.Item.Detail.Metadata.Separator />
-          <List.Item.Detail.Metadata.Label title="Weekly Limit" text={`${u.sevenDay.percentageRemaining}% remaining`} />
+          <List.Item.Detail.Metadata.Label
+            title="Weekly Limit"
+            text={`${generateAsciiBar(u.sevenDay.percentageRemaining)} ${u.sevenDay.percentageRemaining}% remaining`}
+          />
           {u.sevenDay.resetsIn && <List.Item.Detail.Metadata.Label title="Resets In" text={u.sevenDay.resetsIn} />}
         </>
       )}
@@ -65,8 +72,8 @@ export function renderClaudeDetail(usage: ClaudeUsage | null, error: ClaudeError
         <>
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
-            title="Weekly Sonnet/Opus"
-            text={`${u.sevenDayModel.percentageRemaining}% remaining`}
+            title="Weekly Sonnet"
+            text={`${generateAsciiBar(u.sevenDayModel.percentageRemaining)} ${u.sevenDayModel.percentageRemaining}% remaining`}
           />
           {u.sevenDayModel.resetsIn && (
             <List.Item.Detail.Metadata.Label title="Resets In" text={u.sevenDayModel.resetsIn} />

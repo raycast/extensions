@@ -1,16 +1,19 @@
 # Skills
 
-Browse, search, and manage AI agent skills from [Skills](https://skills.sh) directly in Raycast.
+Search and manage AI agent skills from [Skills](https://skills.sh) directly in Raycast.
 
 ## Features
 
-- Browse top skills ranked by total installs
 - Search for specific skills
+- See which search results are already installed with a green "Installed" badge
 - Filter available skills by owner
 - Install skills for all supported agents
+- View security audit status from `skills.sh` before installing
 - View, update, and remove installed skills
-- Check for skill updates with "Update available" badges
+- Check for skill updates — outdated skills are highlighted with an orange icon
 - Filter installed skills by agent
+- View skill source, install date, and update date from the lock file
+- Open installed skill repositories on GitHub
 - View skill details inline with SKILL.md content, including description, license, compatibility, and allowed tools (toggle with Cmd+D)
 - See GitHub star counts in the detail panel
 - Copy install commands
@@ -20,21 +23,14 @@ Browse, search, and manage AI agent skills from [Skills](https://skills.sh) dire
 
 ### Search Skills
 
-Search for agent skills from skills.sh with real-time results. View skill details in the inline panel.
-
-### Trending Skills
-
-View the top skills ranked by total installs. Browse skill details without leaving the list.
+Search for agent skills from skills.sh with real-time results. View skill details in the inline panel, including security audit status when available.
 
 ### Manage Skills
 
-View, update, and remove installed skills. Skills with available updates are highlighted with badges. Filter by agent to see which skills are available for each AI agent.
+View, update, and remove installed skills. Outdated skills are highlighted with an orange icon and grouped in the "Updates Available" section. Filter by agent to see which skills are available for each AI agent.
 
 ## Screenshots
 
-![Trending Skills](assets/skills-1.png)
-![Trending Skills - Actions](assets/skills-2.png)
-![Search Skills](assets/skills-3.png)
-![Search Skills - Owner Filter](assets/skills-4.png)
-![Manage Skills](assets/skills-5.png)
-![Manage Skills - Detail](assets/skills-6.png)
+![Search Skills](metadata/skills-1.png)
+![Search Skills - Owner Filter](metadata/skills-2.png)
+![Manage Skills](metadata/skills-3.png)

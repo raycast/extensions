@@ -1,11 +1,13 @@
-import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, Toast, showToast, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
 import { logger } from "@chrismessina/raycast-logger";
-
-const log = logger.child("[BookmarkEdit]");
-import { fetchUpdateBookmark } from "../apis";
+import { fetchAttachTagsToBookmark, fetchDetachTagsFromBookmark, fetchUpdateBookmark } from "../apis";
+import { useGetAllTags } from "../hooks/useGetAllTags";
+import { TAG_PICKER_NOOP_VALUE, useTagPicker } from "../hooks/useTagPicker";
 import { useTranslation } from "../hooks/useTranslation";
 import { Bookmark } from "../types";
+
+const log = logger.child("[BookmarkEdit]");
 
 interface FormValues {
   title: string;
@@ -20,6 +22,19 @@ interface BookmarkDetailProps {
 export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
   const { pop } = useNavigation();
   const { t } = useTranslation();
+  const { tags } = useGetAllTags();
+  const {
+    selectedTagIds,
+    newTagItems,
+    pendingInput,
+    onTagIdsChange,
+    onPendingInputChange,
+    commitPendingTag,
+    addedTagIds,
+    removedTagIds,
+    buildTagsToAttach,
+    buildTagsToDetach,
+  } = useTagPicker({ tags, initialTagIds: bookmark.tags.map((t) => t.id) });
 
   const getDefaultTitle = (bookmark: Bookmark): string => {
     if (bookmark.title) {
@@ -49,29 +64,22 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
     },
     async onSubmit(values) {
       log.info("Submitting bookmark update", { bookmarkId: bookmark.id });
-      const toast = await showToast({
-        title: t("bookmark.updating"),
-        style: Toast.Style.Animated,
-      });
-
+      const toast = await showToast({ title: t("bookmark.updating"), style: Toast.Style.Animated });
       try {
-        const payload = {
+        await fetchUpdateBookmark(bookmark.id, {
           title: values.title.trim(),
           note: values.note.trim(),
-        };
-
-        await fetchUpdateBookmark(bookmark.id, payload);
-
-        log.info("Bookmark updated", { bookmarkId: bookmark.id });
+        });
+        await Promise.all([
+          addedTagIds.length > 0 ? fetchAttachTagsToBookmark(bookmark.id, buildTagsToAttach()) : undefined,
+          removedTagIds.length > 0 ? fetchDetachTagsFromBookmark(bookmark.id, buildTagsToDetach()) : undefined,
+        ]);
         toast.style = Toast.Style.Success;
         toast.title = t("bookmark.updateSuccess");
-
-        if (onRefresh) {
-          await onRefresh();
-        }
+        log.info("Bookmark updated", { bookmarkId: bookmark.id });
+        await onRefresh?.();
         pop();
       } catch (error) {
-        log.error("Failed to update bookmark", { bookmarkId: bookmark.id, error });
         toast.style = Toast.Style.Failure;
         toast.title = t("bookmark.updateFailed");
         toast.message = String(error);
@@ -98,6 +106,31 @@ export function BookmarkEdit({ bookmark, onRefresh }: BookmarkDetailProps) {
         title={t("bookmark.note")}
         placeholder={t("bookmark.notePlaceholder")}
         enableMarkdown
+      />
+
+      <Form.TagPicker
+        id="tagIds"
+        title={t("bookmark.tags")}
+        placeholder={t("bookmark.tagsPlaceholder")}
+        value={selectedTagIds}
+        onChange={onTagIdsChange}
+      >
+        <Form.TagPicker.Item value={TAG_PICKER_NOOP_VALUE} title=" " />
+        {tags.map((tag) => (
+          <Form.TagPicker.Item key={tag.id} value={tag.id} title={tag.name} />
+        ))}
+        {newTagItems.map((item) => (
+          <Form.TagPicker.Item key={item.id} value={item.id} title={item.name} />
+        ))}
+      </Form.TagPicker>
+
+      <Form.TextField
+        id="pendingNewTag"
+        title={t("bookmark.newTags")}
+        placeholder={t("bookmark.newTagsPlaceholder")}
+        value={pendingInput}
+        onChange={onPendingInputChange}
+        onBlur={commitPendingTag}
       />
     </Form>
   );

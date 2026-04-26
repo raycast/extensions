@@ -1,5 +1,13 @@
 # GitLab Changelog
 
+## [Merged MR icon in todos] - 2026-04-15
+
+- Show purple merged icon for todos on merged merge requests
+
+## [Fix "Mark All as Done" error] - 2026-03-19
+
+- Fix JSON parse error when marking all todos as done (HTTP 204 No Content)
+
 ## [Bugfix merge requests] - 2026-02-18
 
 - Update merge request list to show approvals properly

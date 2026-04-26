@@ -2,8 +2,21 @@ import { getPreferenceValues, Icon, showToast, Toast } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { execFileSync, execSync } from "node:child_process";
 import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 import { Category, CategoryName, Item, User, Vault } from "./types";
+
+export const isWindows = process.platform === "win32";
+
+// Raycast on Windows may not set LOCALAPPDATA/USERPROFILE, which 1Password CLI needs to find the desktop app
+export const windowsEnv = isWindows
+  ? {
+      ...process.env,
+      LOCALAPPDATA: process.env.LOCALAPPDATA || join(homedir(), "AppData", "Local"),
+      USERPROFILE: process.env.USERPROFILE || homedir(),
+    }
+  : undefined;
 
 export type ActionID = string;
 
@@ -22,7 +35,14 @@ export class ConnectionError extends ExtensionError {}
 export class NotFoundError extends ExtensionError {}
 export class ZshMissingError extends ExtensionError {}
 export const getCliPath = () => {
-  const cliPath = [preferences.cliPath, "/usr/local/bin/op", "/opt/homebrew/bin/op"]
+  const defaultPaths = isWindows
+    ? [
+        "C:\\Program Files\\1Password CLI\\op.exe",
+        join(homedir(), "AppData", "Local", "Microsoft", "WinGet", "Links", "op.exe"),
+      ]
+    : ["/usr/local/bin/op", "/opt/homebrew/bin/op"];
+
+  const cliPath = [preferences.cliPath, ...defaultPaths]
     .filter(Boolean)
     .find((path) => (path ? existsSync(path) : false));
 
@@ -32,7 +52,7 @@ export const getCliPath = () => {
 
   return cliPath;
 };
-export const ZSH_PATH = [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
+export const ZSH_PATH = isWindows ? undefined : [preferences.zshPath, "/bin/zsh"].find((path) => existsSync(path));
 export const errorRegex = new RegExp(/\[\w+\]\s+\d{4}\/\d{2}\/\d{2}\s+\d{2}:\d{2}:\d{2}\s+(.*)$/m);
 export function actionsForItem(item: Item): ActionID[] {
   // all actions in the default order
@@ -77,7 +97,7 @@ export function op(args: string[]) {
   const cliPath = getCliPath();
 
   if (cliPath) {
-    const stdout = execFileSync(cliPath, args, { maxBuffer: 4096 * 1024 });
+    const stdout = execFileSync(cliPath, args, { maxBuffer: 4096 * 1024, ...(windowsEnv ? { env: windowsEnv } : {}) });
 
     return stdout.toString();
   }
@@ -98,17 +118,30 @@ export const handleErrors = (stderr: string) => {
   }
 };
 export const checkZsh = () => {
+  if (isWindows) return true;
   if (!ZSH_PATH) {
     return false;
   }
-
   return true;
 };
-export const signIn = (account?: string) =>
-  execSync(`${getCliPath()} signin ${account ? account : ""}`, { shell: ZSH_PATH });
+export const signIn = (account?: string) => {
+  if (isWindows) {
+    execFileSync(getCliPath(), ["signin", ...(account ? account.split(" ") : [])], {
+      stdio: "inherit",
+      timeout: 30000,
+      env: windowsEnv,
+    });
+  } else {
+    execSync(`${getCliPath()} signin ${account ? account : ""}`, { shell: ZSH_PATH });
+  }
+};
 export const getSignInStatus = () => {
   try {
-    execSync(`${getCliPath()} whoami`);
+    if (isWindows) {
+      execFileSync(getCliPath(), ["whoami"], { env: windowsEnv });
+    } else {
+      execSync(`${getCliPath()} whoami`);
+    }
     return true;
   } catch {
     return false;
@@ -116,6 +149,7 @@ export const getSignInStatus = () => {
 };
 export const useOp = <T = Buffer, U = undefined>(args: string[], callback?: (data: T) => T) => {
   return useExec<T, U>(getCliPath(), [...args, "--format=json"], {
+    env: windowsEnv,
     onError: async (e) => {
       await showToast({
         style: Toast.Style.Failure,
@@ -144,6 +178,7 @@ export const usePasswords2 = ({
     getCliPath(),
     ["--account", account, "items", "list", "--long", "--format=json", ...flags],
     {
+      env: windowsEnv,
       execute,
       onError: async (e) => {
         await showToast({
@@ -182,6 +217,7 @@ export const useCategories = () =>
 export const useAccount = () => useOp<User, ExtensionError>(["whoami"]);
 export const useAccounts = <T = User[], U = ExtensionError>(execute = true) =>
   useExec<T, U>(getCliPath(), ["account", "list", "--format=json"], {
+    env: windowsEnv,
     execute: execute,
     onError: async (e) => {
       await showToast({

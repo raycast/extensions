@@ -1,15 +1,17 @@
-import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Form, LaunchProps, useNavigation } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { logger } from "@chrismessina/raycast-logger";
 import { fetchAddBookmarkToList, fetchAttachTagsToBookmark, fetchCreateBookmark } from "./apis";
 import { useGetAllLists } from "./hooks/useGetAllLists";
 import { useGetAllTags } from "./hooks/useGetAllTags";
+import { useTagPicker, TAG_PICKER_NOOP_VALUE } from "./hooks/useTagPicker";
 import { useTranslation } from "./hooks/useTranslation";
 import { useConfig } from "./hooks/useConfig";
 import { getBrowserLink } from "./hooks/useBrowserLink";
 import { validUrl } from "./utils/url";
 import { runWithToast } from "./utils/toast";
+import CreateListView from "./createList";
 
 const log = logger.child("[CreateBookmark]");
 
@@ -18,29 +20,35 @@ interface FormValues {
   list?: string;
 }
 
-// Prefix used to distinguish user-typed new tags from existing tag IDs
-const NEW_TAG_PREFIX = "new:";
+interface DraftValues extends FormValues {
+  tagIds?: string[];
+  pendingNewTag?: string;
+}
 
-export default function CreateBookmarkView() {
-  const { pop } = useNavigation();
+export default function CreateBookmarkView(props: LaunchProps<{ draftValues: DraftValues }>) {
+  const { pop, push } = useNavigation();
   const { t } = useTranslation();
-  const { lists } = useGetAllLists();
+  const { lists, revalidate: revalidateLists } = useGetAllLists();
   const { tags } = useGetAllTags();
   const { config } = useConfig();
+  const { draftValues } = props;
   const [isLoadingTab, setIsLoadingTab] = useState(false);
+  const [createdListIdToSelect, setCreatedListIdToSelect] = useState<string | null>(null);
+  const initialSelectedTagIds = draftValues?.tagIds ?? [];
+  const {
+    selectedTagIds,
+    newTagItems,
+    pendingInput,
+    onTagIdsChange,
+    onPendingInputChange,
+    commitPendingTag,
+    buildTagsToAttach,
+  } = useTagPicker({ tags, initialTagIds: initialSelectedTagIds });
 
-  // Selected tag IDs (existing + new), managed independently from useForm
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-  // User-typed new tag names that have been committed as pills
-  const [newTagItems, setNewTagItems] = useState<Array<{ id: string; name: string }>>([]);
-  // Text the user is currently typing in the new tag field
-  const [pendingInput, setPendingInput] = useState("");
-  // Ref to avoid stale closure in onTagIdsChange
-  const selectedTagIdsRef = useRef<string[]>([]);
-
-  const { handleSubmit, itemProps, setValue } = useForm<FormValues>({
+  const { handleSubmit, itemProps, setValue, values } = useForm<FormValues>({
     initialValues: {
-      url: "",
+      url: draftValues?.url ?? "",
+      list: draftValues?.list ?? "",
     },
     validation: {
       url: (value: string | undefined) => {
@@ -68,14 +76,7 @@ export default function CreateBookmarkView() {
               await fetchAddBookmarkToList(values.list, created.id);
             }
 
-            const tagsToAttach: Array<{ tagId?: string; tagName?: string; attachedBy: "human" }> = [];
-            for (const v of selectedTagIds) {
-              if (v.startsWith(NEW_TAG_PREFIX)) {
-                tagsToAttach.push({ tagName: v.slice(NEW_TAG_PREFIX.length), attachedBy: "human" });
-              } else {
-                tagsToAttach.push({ tagId: v, attachedBy: "human" });
-              }
-            }
+            const tagsToAttach = buildTagsToAttach();
             if (tagsToAttach.length > 0) {
               await fetchAttachTagsToBookmark(created.id, tagsToAttach);
             }
@@ -94,38 +95,10 @@ export default function CreateBookmarkView() {
     },
   });
 
-  function commitNewTag(name: string) {
-    const trimmed = name.trim();
-    if (!trimmed) return;
-    if (tags.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())) return;
-    if (newTagItems.some((t) => t.name.toLowerCase() === trimmed.toLowerCase())) return;
-
-    const id = `${NEW_TAG_PREFIX}${trimmed}`;
-    setNewTagItems((prev) => [...prev, { id, name: trimmed }]);
-    const next = [...selectedTagIdsRef.current, id];
-    selectedTagIdsRef.current = next;
-    setSelectedTagIds(next);
-  }
-
-  function onPendingInputChange(text: string) {
-    if (text.includes(",")) {
-      const parts = text.split(",");
-      parts.slice(0, -1).forEach((p) => commitNewTag(p));
-      setPendingInput(parts[parts.length - 1]);
-    } else {
-      setPendingInput(text);
-    }
-  }
-
-  function onTagIdsChange(value: string[]) {
-    selectedTagIdsRef.current = value;
-    setSelectedTagIds(value);
-    setNewTagItems((prev) => prev.filter((item) => value.includes(item.id)));
-  }
-
   useEffect(() => {
     async function loadBrowserTab() {
       if (!config.prefillUrlFromBrowser) return;
+      if (values.url?.trim()) return;
 
       setIsLoadingTab(true);
       try {
@@ -143,14 +116,39 @@ export default function CreateBookmarkView() {
     }
 
     loadBrowserTab();
-  }, [config.prefillUrlFromBrowser, setValue]);
+  }, [config.prefillUrlFromBrowser, setValue, values.url]);
+
+  useEffect(() => {
+    if (!createdListIdToSelect) return;
+
+    const hasList = lists.some((list) => list.id === createdListIdToSelect);
+    if (hasList) {
+      setValue("list", createdListIdToSelect);
+      setCreatedListIdToSelect(null);
+    }
+  }, [createdListIdToSelect, lists, setValue]);
 
   return (
     <Form
       isLoading={isLoadingTab}
+      enableDrafts
       actions={
         <ActionPanel>
           <Action.SubmitForm title={t("bookmark.create")} onSubmit={handleSubmit} />
+          <Action
+            title={t("list.createList")}
+            onAction={() =>
+              push(
+                <CreateListView
+                  showSuccessHUD={false}
+                  onListCreated={async (list) => {
+                    setCreatedListIdToSelect(list.id);
+                    await revalidateLists();
+                  }}
+                />,
+              )
+            }
+          />
         </ActionPanel>
       }
     >
@@ -170,6 +168,7 @@ export default function CreateBookmarkView() {
         value={selectedTagIds}
         onChange={onTagIdsChange}
       >
+        <Form.TagPicker.Item value={TAG_PICKER_NOOP_VALUE} title=" " />
         {tags.map((tag) => (
           <Form.TagPicker.Item key={tag.id} value={tag.id} title={tag.name} />
         ))}
@@ -184,12 +183,7 @@ export default function CreateBookmarkView() {
         placeholder={t("bookmark.newTagsPlaceholder")}
         value={pendingInput}
         onChange={onPendingInputChange}
-        onBlur={() => {
-          if (pendingInput.trim()) {
-            commitNewTag(pendingInput);
-            setPendingInput("");
-          }
-        }}
+        onBlur={commitPendingTag}
       />
     </Form>
   );

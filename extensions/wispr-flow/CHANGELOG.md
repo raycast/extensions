@@ -1,5 +1,15 @@
 # Wispr Flow Changelog
 
+## [Update] - 2026-04-22
+
+### Voice Control
+- Added Toggle Recording command to start/stop dictation with a single hotkey
+
+## [Update] - 2026-03-23
+
+### Transcription History
+- Added a Paste Last Transcript command to paste the latest unarchived Wispr Flow transcript into the active app
+
 ## [Initial Release] - 2026-03-04
 
 ### Transcription History

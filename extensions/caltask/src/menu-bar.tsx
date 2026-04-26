@@ -1,7 +1,7 @@
 import { MenuBarExtra, launchCommand, LaunchType } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { getCurrentTask, stopCurrentTask } from "./storage";
-import { exportToCalendar } from "./calendar";
+import { getCurrentTask, stopCurrentTask, deleteTask } from "./storage";
+import { exportOrUpdateCalendarEvent } from "./calendar";
 import { formatDuration, getElapsedTime } from "./utils";
 import { Task } from "./types";
 
@@ -47,9 +47,11 @@ export default function MenuBar() {
   async function handleStop() {
     const stoppedTask = await stopCurrentTask();
     if (stoppedTask) {
-      // Auto-export if calendar is attached
-      if (stoppedTask.calendarName) {
-        await exportToCalendar(stoppedTask);
+      if (stoppedTask.calendarName || stoppedTask.sourceCalendarEventId) {
+        const exported = await exportOrUpdateCalendarEvent(stoppedTask);
+        if (exported) {
+          await deleteTask(stoppedTask.id);
+        }
       }
     }
     setCurrentTask(null);
@@ -81,7 +83,11 @@ export default function MenuBar() {
 
           <MenuBarExtra.Section>
             <MenuBarExtra.Item
-              title={currentTask.calendarName ? "Stop & Export to Calendar" : "Stop Timer"}
+              title={
+                currentTask.calendarName || currentTask.sourceCalendarEventId
+                  ? "Stop & Export to Calendar"
+                  : "Stop Timer"
+              }
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={handleStop}
             />
