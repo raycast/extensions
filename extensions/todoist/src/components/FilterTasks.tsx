@@ -37,8 +37,16 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   );
 
   const sections = data ?? [];
+  const tasks = sections.flatMap((section) => section.tasks);
 
-  const { viewProps } = useViewTasks(`todoist.filter${name}`, { tasks: sections.flatMap((section) => section.tasks) });
+  const {
+    sections: groupedSections,
+    sortedTasks,
+    viewProps,
+  } = useViewTasks(`todoist.filter${name}`, {
+    tasks,
+    data: cachedData,
+  });
 
   if (sections.length === 0) {
     return (
@@ -65,8 +73,15 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
     );
   }
 
+  const displayedSections = viewProps.groupBy?.value === "default" ? [{ name, tasks: sortedTasks }] : groupedSections;
+
   return (
-    <TaskListSections mode={ViewMode.project} sections={sections} viewProps={viewProps} quickLinkView={quickLinkView} />
+    <TaskListSections
+      mode={ViewMode.project}
+      sections={displayedSections}
+      viewProps={viewProps}
+      quickLinkView={quickLinkView}
+    />
   );
 }
 

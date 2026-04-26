@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Fix group and sort actions in filter views] - {PR_MERGE_DATE}
+
+- In **My Tasks**, when a custom Todoist filter is selected, **Group tasks by** and **Sort tasks by** now update the list (they were previously no-ops because the UI ignored grouped/sorted output for filters).
+
 ## [Show deadline as how many days remains] - 2026-03-31
 - The task deadlines are shown as "in X days" instead of a specific date, like the todoist app.
 
