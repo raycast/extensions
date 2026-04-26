@@ -55,6 +55,18 @@
       "mode": "view"
     },
     {
+      "name": "show-agenda",
+      "title": "Show Agenda",
+      "description": "Show open TaskNotes tasks grouped by due and scheduled dates.",
+      "mode": "view",
+      "keywords": [
+        "agenda",
+        "today",
+        "due",
+        "scheduled"
+      ]
+    },
+    {
       "name": "create-task",
       "title": "Create Task",
       "description": "Create a new TaskNotes task in an Obsidian vault.",

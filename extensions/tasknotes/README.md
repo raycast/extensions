@@ -22,6 +22,7 @@ The extension reads TaskNotes settings from each vault's `.obsidian/plugins/task
 - `Quick Add Task`: creates a task inline from natural language, including dates, `#tags`, `@contexts`, and priority. In multiple-vault mode, it uses the vault selected with `Switch Default Vault`.
 - `Switch Default Vault`: changes the default vault used by inline Quick Add and preselected in Create Task.
 - `Search Tasks`: scans Markdown files in the configured vault or vaults for TaskNotes frontmatter, opens tasks, and toggles completion.
+- `Show Agenda`: shows open tasks with due or scheduled dates, grouped by date.
 - `Create Task`: creates a Markdown file with TaskNotes-compatible YAML frontmatter. In multiple-vault mode, choose the target vault first.
 
 ## Natural Language

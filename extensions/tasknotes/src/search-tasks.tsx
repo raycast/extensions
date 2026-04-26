@@ -1,25 +1,7 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Icon,
-  List,
-  Toast,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, List, openExtensionPreferences } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import {
-  assertVaultIsReadable,
-  isMultipleVaultMode,
-  listTaskNotes,
-  obsidianUrl,
-  preferences,
-  setTaskStatus,
-  taskSubtitle,
-  type TaskNote,
-} from "./tasknotes";
+import { assertVaultIsReadable, isMultipleVaultMode, listTaskNotes, preferences } from "./tasknotes";
+import { TaskListItem } from "./task-list-item";
 
 export default function Command() {
   const { data, error, isLoading, revalidate } = useCachedPromise(async () => {
@@ -65,71 +47,5 @@ export default function Command() {
         </List.Section>
       ) : null}
     </List>
-  );
-}
-
-function TaskListItem({
-  task,
-  revalidate,
-  showVaultBadge,
-}: {
-  task: TaskNote;
-  revalidate: () => void;
-  showVaultBadge: boolean;
-}) {
-  const isDone = task.completed;
-
-  return (
-    <List.Item
-      title={task.title}
-      subtitle={taskSubtitle(task)}
-      icon={{ source: isDone ? Icon.CheckCircle : Icon.Circle, tintColor: isDone ? Color.Green : Color.SecondaryText }}
-      accessories={taskAccessories(task, showVaultBadge)}
-      actions={<TaskActions task={task} revalidate={revalidate} />}
-    />
-  );
-}
-
-function taskAccessories(task: TaskNote, showVaultBadge: boolean): List.Item.Accessory[] {
-  return [
-    ...(task.due ? [{ tag: { value: `Due ${task.due}`, color: Color.Red } }] : []),
-    ...(showVaultBadge ? [{ tag: { value: task.vaultName, color: Color.SecondaryText } }] : []),
-  ];
-}
-
-function TaskActions({ task, revalidate }: { task: TaskNote; revalidate: () => void }) {
-  const isDone = task.completed;
-
-  async function updateStatus(status: string) {
-    await setTaskStatus(task, status);
-    await showToast({
-      style: Toast.Style.Success,
-      title: status === task.doneStatus ? "Task completed" : "Task reopened",
-      message: task.title,
-    });
-    revalidate();
-  }
-
-  return (
-    <ActionPanel>
-      <Action.OpenInBrowser title="Open in Obsidian" url={obsidianUrl(task)} icon={Icon.Window} />
-      {isDone ? (
-        <Action title="Reopen Task" icon={Icon.RotateClockwise} onAction={() => updateStatus(task.openStatus)} />
-      ) : (
-        <Action title="Complete Task" icon={Icon.CheckCircle} onAction={() => updateStatus(task.doneStatus)} />
-      )}
-      <Action.Open title="Open Markdown File" target={task.path} />
-      <Action.ShowInFinder path={task.path} />
-      <Action.CopyToClipboard title="Copy Markdown Link" content={`[[${task.relativePath.replace(/\.md$/i, "")}]]`} />
-      <Action.Trash
-        title="Delete Task"
-        paths={task.path}
-        shortcut={{ modifiers: ["cmd"], key: "backspace" }}
-        onTrash={() => {
-          showToast({ style: Toast.Style.Success, title: "Task moved to Trash", message: task.title });
-          revalidate();
-        }}
-      />
-    </ActionPanel>
   );
 }
