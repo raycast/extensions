@@ -14,29 +14,47 @@ import {
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
 import { getAccounts, addAccount, removeAccount, renameAccount, Account } from "./storage";
-import { isAccountAuthorized, authorizeAccount } from "./gmail";
+import { verifyAccountAuth, authorizeAccount, AccountAuthStatus } from "./gmail";
 import { OAuthErrorView } from "./components/OAuthErrorView";
 import { Preferences } from "./types";
+
+function describeAuthStatus(status: AccountAuthStatus): {
+  label: string;
+  tooltip: string;
+  color: Color;
+  statusIcon: Icon;
+} {
+  switch (status) {
+    case "authorized":
+      return { label: "Authorized", tooltip: "Authorized", color: Color.Green, statusIcon: Icon.CheckCircle };
+    case "expired":
+      return {
+        label: "Authorization Expired",
+        tooltip: "Refresh token rejected — re-authorize this account",
+        color: Color.Orange,
+        statusIcon: Icon.ExclamationMark,
+      };
+    case "unauthorized":
+    default:
+      return { label: "Not Authorized", tooltip: "Not Authorized", color: Color.Red, statusIcon: Icon.XMarkCircle };
+  }
+}
 
 export default function ManageGoogleAccounts() {
   const preferences = getPreferenceValues<Preferences>();
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [authStatuses, setAuthStatuses] = useState<Map<string, boolean>>(new Map());
+  const [authStatuses, setAuthStatuses] = useState<Map<string, AccountAuthStatus>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
-
-  if (!preferences.gmailClientId || preferences.gmailClientId.trim() === "") {
-    return <OAuthErrorView />;
-  }
 
   const loadAccounts = useCallback(async () => {
     setIsLoading(true);
     const loadedAccounts = await getAccounts();
     setAccounts(loadedAccounts);
 
-    const statuses = new Map<string, boolean>();
+    const statuses = new Map<string, AccountAuthStatus>();
     for (const account of loadedAccounts) {
-      const isAuthed = await isAccountAuthorized(account.id, account.name);
-      statuses.set(account.id, isAuthed);
+      const status = await verifyAccountAuth(account.id, account.name);
+      statuses.set(account.id, status);
     }
     setAuthStatuses(statuses);
     setIsLoading(false);
@@ -45,6 +63,12 @@ export default function ManageGoogleAccounts() {
   useEffect(() => {
     loadAccounts();
   }, [loadAccounts]);
+
+  // Guard runs AFTER all hooks so hook order stays stable across renders
+  // (React Rules of Hooks).
+  if (!preferences.gmailClientId || preferences.gmailClientId.trim() === "") {
+    return <OAuthErrorView />;
+  }
 
   const handleAddAccount = async (name: string) => {
     try {
@@ -138,30 +162,36 @@ export default function ManageGoogleAccounts() {
     <List isLoading={isLoading} searchBarPlaceholder="Search accounts...">
       <List.Section title="Google Accounts">
         {accounts.map((account) => {
-          const isAuthorized = authStatuses.get(account.id) || false;
+          const status = authStatuses.get(account.id) ?? "unauthorized";
+          const presentation = describeAuthStatus(status);
           return (
             <List.Item
               key={account.id}
               title={account.name}
-              subtitle={isAuthorized ? "Authorized" : "Not Authorized"}
+              subtitle={presentation.label}
               icon={{
                 source: Icon.Person,
-                tintColor: isAuthorized ? Color.Green : Color.Red,
+                tintColor: presentation.color,
               }}
               accessories={[
                 {
-                  icon: isAuthorized
-                    ? { source: Icon.CheckCircle, tintColor: Color.Green }
-                    : { source: Icon.XMarkCircle, tintColor: Color.Red },
-                  tooltip: isAuthorized ? "Authorized" : "Not Authorized",
+                  icon: { source: presentation.statusIcon, tintColor: presentation.color },
+                  tooltip: presentation.tooltip,
                 },
               ]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    {!isAuthorized && (
+                    {status === "unauthorized" && (
                       <Action
                         title="Authorize Account"
+                        icon={Icon.Key}
+                        onAction={() => handleAuthorizeAccount(account)}
+                      />
+                    )}
+                    {status === "expired" && (
+                      <Action
+                        title="Re-authorize Account"
                         icon={Icon.Key}
                         onAction={() => handleAuthorizeAccount(account)}
                       />

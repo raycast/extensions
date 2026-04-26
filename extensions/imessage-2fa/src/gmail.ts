@@ -3,31 +3,16 @@
  * Provides functionality to fetch and process 2FA codes from Gmail
  */
 
-import { OAuth, getPreferenceValues, Icon } from "@raycast/api";
+import { OAuth, getPreferenceValues } from "@raycast/api";
 import { gmail as gmailClient, auth, gmail_v1 } from "@googleapis/gmail";
 import { Message, Preferences, SearchType } from "./types";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { calculateLookBackMinutes, stripHtmlTags, extractVerificationLink } from "./utils";
 import { getAccounts, Account } from "./storage";
+import { getOAuthClient } from "./oauth-clients";
 import fetch from "node-fetch";
 
-const oauthClients = new Map<string, OAuth.PKCEClient>();
-
-function getOAuthClient(accountId: string, accountName: string): OAuth.PKCEClient {
-  const existingClient = oauthClients.get(accountId);
-  if (existingClient) return existingClient;
-
-  const client = new OAuth.PKCEClient({
-    redirectMethod: OAuth.RedirectMethod.AppURI,
-    providerName: `Google (${accountName})`,
-    providerIcon: Icon.Link,
-    providerId: `google-${accountId}`,
-    description: `Connect your ${accountName} Google account to access 2FA codes`,
-  });
-
-  oauthClients.set(accountId, client);
-  return client;
-}
+export type AccountAuthStatus = "authorized" | "unauthorized" | "expired";
 
 function getClientId() {
   const prefs = getPreferenceValues<Preferences>();
@@ -393,28 +378,34 @@ export async function getGmailMessages(
   }
 }
 
-export async function checkGmailAuth(accountId: string, accountName: string): Promise<boolean> {
+/**
+ * Actively verify an account's OAuth state. Unlike a presence check, this attempts
+ * a token refresh when the access token has expired so a broken refresh token
+ * surfaces as `expired` instead of being mistaken for `authorized`.
+ */
+export async function verifyAccountAuth(accountId: string, accountName: string): Promise<AccountAuthStatus> {
+  const client = getOAuthClient(accountId, accountName);
+  let tokenSet;
   try {
-    const client = getOAuthClient(accountId, accountName);
-    const tokens = await client.getTokens();
-    if (!tokens?.accessToken) {
-      await authorize(accountId, accountName);
-      return true;
-    }
-    return true;
+    tokenSet = await client.getTokens();
   } catch {
-    return false;
+    return "unauthorized";
   }
-}
 
-export async function isAccountAuthorized(accountId: string, accountName: string): Promise<boolean> {
-  try {
-    const client = getOAuthClient(accountId, accountName);
-    const tokens = await client.getTokens();
-    return !!tokens?.accessToken;
-  } catch {
-    return false;
+  if (!tokenSet?.accessToken) return "unauthorized";
+
+  if (tokenSet.refreshToken && tokenSet.isExpired()) {
+    try {
+      await client.setTokens(await refreshTokens(tokenSet.refreshToken));
+      return "authorized";
+    } catch {
+      // Leave tokens in place so the user can retry without re-running the OAuth flow
+      // immediately; the UI will guide them to re-authorize.
+      return "expired";
+    }
   }
+
+  return "authorized";
 }
 
 export async function authorizeAccount(accountId: string, accountName: string): Promise<void> {
@@ -428,10 +419,6 @@ export function useGmail(options: { searchText?: string; searchType: SearchType;
   const [accounts, setAccounts] = useState<Account[]>([]);
   const isLoadingRef = useRef(false);
 
-  useEffect(() => {
-    getAccounts().then(setAccounts);
-  }, []);
-
   // Calculate the cutoff time based on preferences
   const getCutoffTime = useCallback(() => {
     const prefs = getPreferenceValues<Preferences>();
@@ -439,7 +426,29 @@ export function useGmail(options: { searchText?: string; searchType: SearchType;
     return new Date(Date.now() - lookbackMinutes * 60 * 1000);
   }, []);
 
+  // Always pick up account add/remove changes — even when Gmail fetching is disabled
+  // — so consumers (e.g., empty-state messaging) see fresh counts without a relaunch.
+  const refreshAccounts = useCallback(async (): Promise<Account[]> => {
+    const next = await getAccounts();
+    setAccounts((prev) => {
+      if (prev.length !== next.length) return next;
+      for (let i = 0; i < prev.length; i++) {
+        if (prev[i].id !== next[i].id || prev[i].name !== next[i].name) return next;
+      }
+      return prev;
+    });
+    return next;
+  }, []);
+
+  useEffect(() => {
+    refreshAccounts();
+  }, [refreshAccounts]);
+
   const fetchMessages = useCallback(async () => {
+    // Refresh accounts on every tick so add/remove from the Account Manager is
+    // reflected without having to relaunch the extension.
+    const currentAccounts = await refreshAccounts();
+
     if (!options.enabled || isLoadingRef.current) {
       console.log("Skipping Gmail fetch - disabled or already loading");
       return;
@@ -450,11 +459,13 @@ export function useGmail(options: { searchText?: string; searchType: SearchType;
       isLoadingRef.current = true;
       const cutoffTime = getCutoffTime();
 
-      const accountPromises = accounts.map(async (account) => {
+      const accountPromises = currentAccounts.map(async (account) => {
         try {
           return await getGmailMessages(account.id, account.name, options.searchType, cutoffTime);
-        } catch {
-          return [];
+        } catch (error) {
+          // Per-account failure surfaces in Account Manager via verifyAccountAuth on next open.
+          console.error(`Gmail fetch failed for account ${account.name}:`, error);
+          return [] as Message[];
         }
       });
 
@@ -464,16 +475,16 @@ export function useGmail(options: { searchText?: string; searchType: SearchType;
       if (mergedMessages.length > 0) {
         setData(mergedMessages);
       }
-
-      setIsInitialLoadComplete(true);
-    } catch {
-      if (!isInitialLoadComplete) {
-        setIsInitialLoadComplete(true);
-      }
+    } catch (error) {
+      console.error("Gmail fetch failed:", error);
     } finally {
+      // setState is idempotent, so calling unconditionally avoids needing
+      // isInitialLoadComplete in deps (which would otherwise rebuild the
+      // polling interval on first completion).
+      setIsInitialLoadComplete(true);
       isLoadingRef.current = false;
     }
-  }, [options.enabled, options.searchType, getCutoffTime, accounts]);
+  }, [options.enabled, options.searchType, getCutoffTime, refreshAccounts]);
 
   // Reset state when search parameters change
   useEffect(() => {
@@ -505,5 +516,6 @@ export function useGmail(options: { searchText?: string; searchType: SearchType;
     data,
     revalidate: fetchMessages,
     isLoading: !isInitialLoadComplete,
+    accountCount: accounts.length,
   };
 }
