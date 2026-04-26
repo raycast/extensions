@@ -6,7 +6,7 @@
   "icon": "extension-icon.png",
   "author": "greiner-petter",
   "platforms": ["macOS"],
-  "categories": ["Developer Tools", "Productivity", "System"],
+  "categories": ["System"],
   "license": "MIT",
   "commands": [
     {
