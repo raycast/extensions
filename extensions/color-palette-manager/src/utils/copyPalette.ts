@@ -6,7 +6,7 @@ import { CopyPaletteFormat, SavedPalette } from "../types";
 function createCSSHeader(palette: SavedPalette): string {
   const lines = [
     `/* ${palette.name} - ${palette.mode} color palette */`,
-    `/* Created: ${new Date(palette.createdAt).toLocaleDateString()} */`,
+    `/* Created: ${new Date(palette.createdAt).toISOString().slice(0, 10)} */`,
   ];
 
   if (palette.description) {
@@ -90,7 +90,7 @@ export function copyAsText(palette: SavedPalette): string {
     lines.push(`Description: ${palette.description}`);
   }
 
-  lines.push(`Mode: ${palette.mode}`, `Created: ${new Date(palette.createdAt).toLocaleDateString()}`);
+  lines.push(`Mode: ${palette.mode}`, `Created: ${new Date(palette.createdAt).toISOString().slice(0, 10)}`);
 
   if (palette.keywords.length > 0) {
     lines.push(`Keywords: ${palette.keywords.join(", ")}`);

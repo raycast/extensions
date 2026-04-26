@@ -68,7 +68,13 @@ export function useAIcolors({
     data: title,
     isLoading: isLoadingTitle,
     error: titleError,
-  } = useAI(composeTitlePrompt({ prompt, description, creativity }), modelConfig);
+  } = useAI(composeTitlePrompt({ prompt, description, creativity }), {
+    ...modelConfig,
+    // Wait for the description fetch to settle before firing the title call,
+    // otherwise composeTitlePrompt sees description = "" and we burn a credit on
+    // an initial call that's then re-issued once description resolves.
+    execute: !isLoadingDescription,
+  });
 
   // Set error state if any AI call fails
   useEffect(() => {

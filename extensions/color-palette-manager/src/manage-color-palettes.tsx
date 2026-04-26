@@ -11,7 +11,7 @@ const createMarkdown = (palette: SavedPalette) => {
 
 **Description:** ${palette.description || "No description provided"}
 
-**Created:** ${new Date(palette.createdAt).toLocaleDateString()}
+**Created:** ${new Date(palette.createdAt).toISOString().slice(0, 10)}
 
 **Colors:** ${palette.colors.length} color${palette.colors.length !== 1 ? "s" : ""}
 `;

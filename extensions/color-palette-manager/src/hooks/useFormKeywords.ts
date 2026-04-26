@@ -1,5 +1,5 @@
 import { useLocalStorage } from "@raycast/utils";
-import { PaletteFormFields, UpdateKeywordsPromiseResult, UseFormKeywordsObject } from "../types";
+import { UpdateKeywordsPromiseResult, UseFormKeywordsObject } from "../types";
 import { filterValidKeywords, isValidKeyword } from "../utils/keywordValidation";
 
 type UseFormKeywordsReturn = {
@@ -10,12 +10,12 @@ type UseFormKeywordsReturn = {
  * Manages persistent keyword storage with validation and add/remove functionality.
  * Provides global keyword list shared across all palettes.
  */
-export function useFormKeywords(initialValues?: PaletteFormFields): UseFormKeywordsReturn {
-  // Global keyword storage shared across all palettes
-  const { value: keywords, setValue: setKeywords } = useLocalStorage<string[]>(
-    "color-palettes-keywords",
-    initialValues?.keywords || [],
-  );
+export function useFormKeywords(): UseFormKeywordsReturn {
+  // Global keyword storage shared across all palettes. Always defaults to [];
+  // an editing palette's keywords are merged into the TagPicker by
+  // FormKeywordsFields and added to the global store only when the user
+  // explicitly types into the Update Keywords field.
+  const { value: keywords, setValue: setKeywords } = useLocalStorage<string[]>("color-palettes-keywords", []);
 
   /**
    * Processes keyword input and updates the global keyword list.

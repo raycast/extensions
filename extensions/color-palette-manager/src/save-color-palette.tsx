@@ -19,7 +19,7 @@ export default function SaveColorPalette(props: SavePaletteFormProps) {
 
   const { initialValues } = useFormSetup({ draftValues, launchContext });
   const { colorFields } = useFormColors(initialValues);
-  const { keywords } = useFormKeywords(initialValues);
+  const { keywords } = useFormKeywords();
   const { focus } = useFormFocus();
   const { form } = useFormPalette({ colorFields, initialValues, isEditing, onPaletteUpdated });
   const { formActions } = useFormActions({

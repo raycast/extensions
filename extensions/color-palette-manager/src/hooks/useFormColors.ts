@@ -8,7 +8,7 @@ type UseFormColorsReturn = {
 
 /**
  * Calculates initial color count from form values and manages dynamic color field state.
- * Provides functions to add/remove color fields with minimum of one field and maximum of 10 fields.
+ * Provides functions to add/remove color fields with minimum of one field and maximum of 15 fields.
  */
 export function useFormColors(initialValues: PaletteFormFields): UseFormColorsReturn {
   const initialColorCount = useMemo(() => {
