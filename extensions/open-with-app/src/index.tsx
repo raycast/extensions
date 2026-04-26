@@ -13,7 +13,7 @@ import {
 import { useCachedPromise, useFrecencySorting, usePromise, showFailureToast } from "@raycast/utils";
 import { homedir } from "node:os";
 import { useEffect, useState } from "react";
-import { resolveActiveProvider } from "./file-managers";
+import { PROVIDERS, resolveActiveProvider } from "./file-managers";
 
 /**
  * Get the extensions of the selected items.
@@ -113,7 +113,7 @@ export default function Command() {
     }
   });
   const items = selection?.items ?? [];
-  const providerName = selection?.provider.name ?? "Finder";
+  const providerName = selection?.provider.name ?? PROVIDERS[0].name;
 
   // call getApplications for each selected item and return the intersection
   const { data: apps = [], isLoading: isLoadingApplications } = usePromise(
