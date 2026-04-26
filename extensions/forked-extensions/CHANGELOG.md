@@ -1,5 +1,11 @@
 # Raycast Fork Extensions Changelog
 
+## [Improvements] - 2026-04-11
+
+- Optimize clone and fetch behavior with the "tree:0" partial clone filter, "--no-tags", and "upstream/main"-only tracking
+- Fix "Pull Changes" to update from "origin/main" instead of syncing "upstream/main"
+- Change the default repository directory to "~/Developer", reuse an existing fork repository when selected directly, and warn before initializing inside potentially cloud-synced folders
+
 ## [Chore] - 2026-02-24
 
 - Update extension instruction

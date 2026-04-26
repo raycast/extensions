@@ -1,5 +1,37 @@
 # Karakeep Changelog
 
+## [2.3.1] - 2026-04-01
+
+- Fixed an issue where typing an existing tag name in the Add New Tag picker would not add it to the Tags list
+
+## [2.3.0] - 2026-03-22
+
+### New Features
+
+- **Edit Note** — Notes now open a dedicated Edit Note form with the correct fields: Content, Custom Title, Tags, and Add New Tag. Previously, editing a note used the link bookmark form.
+- **Tag editing on bookmarks and notes** — The Edit Bookmark and Edit Note forms now include a tag picker. Existing tags are pre-selected; you can add new tags or remove existing ones and they are attached/detached on save.
+
+### Improvements
+
+- **Tag picker refactored into a shared hook** — All tag-picking logic (state, new-tag creation, comma-split input, attach/detach payload builders) lives in a single `useTagPicker` hook shared across Create Bookmark, Create Note, Edit Bookmark, and Edit Note.
+- **Edit Bookmark uses `runWithToast`** — Consistent toast handling with Edit Note; error toasts now include a "Copy Error" action.
+- **Add New Tag field changed from TextArea to TextField** — Prevents accidental newline submission; typing a comma commits a tag inline.
+
+### Fixes
+
+- **Emoji list icons with variation selector now accepted** — Fixed `isEmoji` rejecting emoji followed by `\uFE0F` (e.g. ☁️).
+- **Escaped pipe characters in Stats markdown tables** — Domain names, tag names, and asset type names containing `|` no longer break the table layout.
+- **Delete Tag now shows a confirmation prompt** with destructive styling before removing a tag.
+- **ESLint violations fixed** — `import/first` violations and `no-misleading-character-class` in emoji validation.
+
+### Chores
+
+- Moved verbose logging preference to its own section in Settings
+- Removed legacy `.eslintrc.json` (superseded by `eslint.config.mjs`)
+- Updated README screenshots and documentation
+
+---
+
 ## [2.2.0] - 2026-03-09
 
 ### New Features

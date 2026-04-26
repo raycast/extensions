@@ -21,6 +21,12 @@ Raycast AI is used to select the deadline, list, tags etc. If Raycast AI is not 
 preference, all the quickly created to-do(s) will be sent to Inbox, but the title will still be parsed for assigning deadlines
 and list name followed with '#' in title (case-insensitive).
 
+### Quick Find
+
+Searches across all areas, projects, and to-dos by reading the Things database directly.
+
+> **Note:** This command requires granting Raycast **Full Disk Access** in `System Settings > Privacy & Security > Full Disk Access`.
+
 **Examples (with AI):**
 * Book flights today in my Trips list -> Creates to-do with title "Book flights" classified in "today" and list "Trips".
 * Add milk to my groceries list for tomorrow with Errand tag -> Creates to-do with title "Milk" classified in "tomorrow" with list "groceries" and tag "Errand".

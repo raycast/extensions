@@ -6,13 +6,15 @@ import {
   getUtilizationColor,
   calculateEstimatedUsage,
   calculateAverageUsage,
+  createProgressBar,
 } from "../utils/usage-limits-formatter";
 import { ErrorMetadata } from "./ErrorMetadata";
 import { STANDARD_ACCESSORIES } from "./common/accessories";
 import { ReactNode } from "react";
 
 export function UsageLimits() {
-  const { data, isLoading, error, isStale, lastFetched, revalidate, isUsageLimitsAvailable } = useClaudeUsageLimits();
+  const { data, isLoading, error, isStale, isRateLimited, lastFetched, revalidate, isUsageLimitsAvailable } =
+    useClaudeUsageLimits();
 
   if (!isUsageLimitsAvailable) {
     return null;
@@ -24,37 +26,41 @@ export function UsageLimits() {
   const accessories: List.Item.Accessory[] =
     error && !data
       ? STANDARD_ACCESSORIES.ERROR
-      : !data
-        ? STANDARD_ACCESSORIES.LOADING
-        : isStale
-          ? [{ icon: Icon.Warning, tooltip: `Stale data (last updated ${formatRelativeTime(lastFetched)})` }]
-          : [
-              {
-                icon: Icon.Gauge,
-                text: `${fiveHourUtil.toFixed(0)}%`,
-                tooltip: "5-Hour Limit (higher priority)",
-              },
-            ];
+      : isRateLimited && !data
+        ? [{ icon: Icon.Clock, text: "Rate limited" }]
+        : !data
+          ? STANDARD_ACCESSORIES.LOADING
+          : isStale && !isLoading
+            ? [{ icon: Icon.Warning, tooltip: `Stale data (last updated ${formatRelativeTime(lastFetched)})` }]
+            : [
+                {
+                  icon: Icon.Gauge,
+                  text: `${fiveHourUtil.toFixed(0)}%`,
+                  tooltip: "5-Hour Limit (higher priority)",
+                },
+              ];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error && !data) {
       return (
         <ErrorMetadata
-          error={error}
           noDataMessage="Unable to fetch usage limits"
-          noDataSubMessage="Please ensure Claude Code is authenticated and keychain access is granted"
+          noDataSubMessage="Re-authenticate by running: claude login"
+        />
+      );
+    }
+
+    if (isRateLimited && !data) {
+      return (
+        <ErrorMetadata
+          noDataMessage="Rate limited by Anthropic API"
+          noDataSubMessage="Retrying automatically — click Refresh to try now"
         />
       );
     }
 
     if (!data) {
-      return (
-        <ErrorMetadata
-          error={undefined}
-          noDataMessage="Loading usage limits..."
-          noDataSubMessage="Fetching data from Claude API"
-        />
-      );
+      return <ErrorMetadata noDataMessage="Loading usage limits..." noDataSubMessage="Fetching data from Claude API" />;
     }
 
     const fiveHourColor = getUtilizationColor(fiveHourUtil);
@@ -90,6 +96,7 @@ export function UsageLimits() {
           text={`${fiveHourUtil.toFixed(1)}%`}
           icon={{ source: Icon.BarChart, tintColor: fiveHourColor }}
         />
+        <List.Item.Detail.Metadata.Label title="Progress" text={createProgressBar(fiveHourUtil)} />
         {fiveHourAverage !== null && (
           <List.Item.Detail.Metadata.Label
             title="Average Usage"
@@ -106,7 +113,11 @@ export function UsageLimits() {
         )}
         <List.Item.Detail.Metadata.Label
           title="Resets in"
-          text={`${formatTimeRemaining(data.five_hour.resets_at)} || ${new Date(data.five_hour.resets_at).toLocaleString("en-US", { hour12: false })}`}
+          text={
+            data.five_hour.resets_at
+              ? `${formatTimeRemaining(data.five_hour.resets_at)} || ${new Date(data.five_hour.resets_at).toLocaleString("en-US", { hour12: false })}`
+              : "N/A"
+          }
           icon={Icon.ArrowClockwise}
         />
         <List.Item.Detail.Metadata.Separator />
@@ -117,6 +128,7 @@ export function UsageLimits() {
           text={`${sevenDayUtil.toFixed(1)}%`}
           icon={{ source: Icon.BarChart, tintColor: sevenDayColor }}
         />
+        <List.Item.Detail.Metadata.Label title="Progress" text={createProgressBar(sevenDayUtil)} />
         {sevenDayAverage !== null && (
           <List.Item.Detail.Metadata.Label
             title="Average Usage"
@@ -133,11 +145,15 @@ export function UsageLimits() {
         )}
         <List.Item.Detail.Metadata.Label
           title="Resets in"
-          text={`${formatTimeRemaining(data.seven_day.resets_at)} || ${new Date(data.seven_day.resets_at).toLocaleString("en-US", { hour12: false })}`}
+          text={
+            data.seven_day.resets_at
+              ? `${formatTimeRemaining(data.seven_day.resets_at)} || ${new Date(data.seven_day.resets_at).toLocaleString("en-US", { hour12: false })}`
+              : "N/A"
+          }
           icon={Icon.ArrowClockwise}
         />
 
-        {isStale && (
+        {isStale && !isLoading && (
           <>
             <List.Item.Detail.Metadata.Separator />
             <List.Item.Detail.Metadata.Label

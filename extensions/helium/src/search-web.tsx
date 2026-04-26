@@ -14,6 +14,8 @@ import {
   CopyUrlAction,
   CopyAsMarkdownAction,
   CreateQuicklinkAction,
+  DeduplicateTabsAction,
+  ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 
@@ -26,6 +28,7 @@ export default function SearchWeb(props: LaunchProps) {
     data: tabs,
     isLoading: isLoadingTabs,
     mutate,
+    revalidate,
   } = usePromise(async () => {
     if (!hasBrowserExtension) {
       return [];
@@ -91,7 +94,13 @@ export default function SearchWeb(props: LaunchProps) {
       {hasBrowserExtension && filteredTabs.length > 0 && (
         <List.Section title="Open Tabs" subtitle={`${filteredTabs.length} tab${filteredTabs.length !== 1 ? "s" : ""}`}>
           {filteredTabs.map((tab) => (
-            <TabListItem key={tab.id} tab={tab} mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
+            <TabListItem
+              key={tab.id}
+              tab={tab}
+              mutate={mutate}
+              revalidate={revalidate}
+              deletedTabIdsRef={deletedTabIdsRef}
+            />
           ))}
         </List.Section>
       )}
@@ -126,10 +135,12 @@ export default function SearchWeb(props: LaunchProps) {
 function TabListItem({
   tab,
   mutate,
+  revalidate,
   deletedTabIdsRef,
 }: {
   tab: Tab;
   mutate: import("@raycast/utils").MutatePromise<Tab[], undefined>;
+  revalidate: () => Promise<Tab[]>;
   deletedTabIdsRef: React.MutableRefObject<Set<number>>;
 }) {
   const domain = extractDomain(tab.url);
@@ -150,6 +161,8 @@ function TabListItem({
           <CopyUrlAction tab={tab} />
           <CopyAsMarkdownAction tab={tab} />
           <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
+          <ReloadAction subject="Tabs" revalidate={revalidate} />
+          <DeduplicateTabsAction mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
         </ActionPanel>
       }
     />

@@ -3,7 +3,7 @@ import json2md from "json2md";
 import { Pokemon } from "../types";
 import PokemonMetadata from "./metadata/pokemon";
 import WeaknessMetadata from "./metadata/weakness";
-import { getPokemonImageTag } from "../utils";
+import { getLocalizedName, getPokemonImageTag } from "../utils";
 import { filterPokemonForms } from "../utils/form";
 
 export default function PokemonForms(props: {
@@ -22,8 +22,7 @@ export default function PokemonForms(props: {
       {forms.map((form, idx) => {
         const name =
           form.pokemonforms[0].pokemonformnames[0]?.pokemon_name ||
-          form.pokemonforms[0].pokemonformnames[0]?.name ||
-          props.name;
+          getLocalizedName(form.pokemonforms[0].pokemonformnames, props.name);
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { pokemonformnames, pokemonformtypes, ...rest } =

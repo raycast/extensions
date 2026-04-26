@@ -1,7 +1,7 @@
-import { List, ActionPanel, Icon, Action } from "@raycast/api";
+import { List, ActionPanel, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState, useRef } from "react";
-import { getBrowserTabs, isBrowserExtensionAvailable } from "./utils/browser";
+import { getBrowserTabs } from "./utils/browser";
 import {
   SwitchToTabAction,
   OpenNewTabAction,
@@ -10,31 +10,15 @@ import {
   CopyUrlAction,
   CopyTitleAction,
   CreateQuicklinkAction,
+  DeduplicateTabsAction,
+  ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 
 export default function SearchTabs() {
   const [searchText, setSearchText] = useState("");
-  const { data: tabs, isLoading, mutate } = usePromise(getBrowserTabs);
+  const { data: tabs, isLoading, mutate, revalidate } = usePromise(getBrowserTabs);
   const deletedTabIdsRef = useRef(new Set<number>());
-
-  // Check if Browser Extension is available
-  if (!isBrowserExtensionAvailable()) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.XMarkCircle}
-          title="Browser Extension Required"
-          description="Please install the Raycast Browser Extension to use this command"
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Install Browser Extension" url="https://www.raycast.com/browser-extension" />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
 
   // Filter out deleted tabs first (tabs that are being closed but might still appear in fetched data)
   const tabsWithoutDeleted = tabs ? tabs.filter((t) => !deletedTabIdsRef.current.has(t.id)) : [];
@@ -72,6 +56,8 @@ export default function SearchTabs() {
               <CopyUrlAction tab={tab} />
               <CopyTitleAction tab={tab} />
               <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
+              <ReloadAction subject="Tabs" revalidate={revalidate} />
+              <DeduplicateTabsAction tabs={tabsWithoutDeleted} mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
             </ActionPanel>
           }
         />

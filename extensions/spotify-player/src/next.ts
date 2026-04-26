@@ -2,7 +2,6 @@ import { showHUD } from "@raycast/api";
 import { setSpotifyClient } from "./helpers/withSpotifyClient";
 import { getCurrentlyPlaying } from "./api/getCurrentlyPlaying";
 import { skipToNext } from "./api/skipToNext";
-import { safeLaunchCommandInBackground } from "./helpers/safeCommandLauncher";
 
 export default async function Command() {
   await setSpotifyClient();
@@ -22,7 +21,6 @@ export default async function Command() {
   try {
     await skipToNext();
     await showHUD("Skipped to next");
-    await safeLaunchCommandInBackground("current-track");
   } catch (error) {
     console.error(error);
     await showHUD("Nothing is currently playing");

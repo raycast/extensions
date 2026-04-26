@@ -1,0 +1,184 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clockodo",
+  "description": "Your Clockodo entries in your Raycast",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "author": "leomelzer",
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "npm run test:format",
+    "test:format": "prettier --check ."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.10",
+    "@raycast/utils": "^2.2.3",
+    "clockodo": "^28.1.0",
+    "dayjs": "^1.11.20"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "icon": "extension-icon.png",
+  "ai": {
+    "instructions": "Always use this extension's tools to answer questions about Clockodo time entries, projects, or customers. Call get-my-entries with ISO 8601 timeSince and timeUntil when the user asks for entries in a date range. Call get-project with projectId or get-customer with customerId when the user gives a numeric id — then read the name from the tool result. Do not refuse or tell the user to use the website or API instead of calling tools. If you only have a number id for a project or customer, use get-project or get-customer; if you already have the name, you can answer directly.",
+    "evals": [
+      {
+        "input": "@clockodo List my Clockodo time entries from 2025-01-01 to 2025-01-07",
+        "mocks": {
+          "get-my-entries": {
+            "entries": [],
+            "paging": {
+              "count": 0,
+              "filterCount": 0
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-my-entries"
+          }
+        ]
+      },
+      {
+        "input": "@clockodo What is the name of Clockodo project 42?",
+        "mocks": {
+          "get-project": {
+            "id": 42,
+            "name": "Example Project",
+            "customersId": 1
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-project"
+          }
+        ]
+      },
+      {
+        "input": "@clockodo What is the name of Clockodo customer 7?",
+        "mocks": {
+          "get-customer": {
+            "id": 7,
+            "name": "Example Customer"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-customer"
+          }
+        ]
+      }
+    ]
+  },
+  "commands": [
+    {
+      "name": "start-clock",
+      "title": "Start Clock",
+      "subtitle": "Clockodo",
+      "description": "Start new tracking",
+      "mode": "view"
+    },
+    {
+      "name": "stop-clock",
+      "title": "Stop Clock",
+      "subtitle": "Clockodo",
+      "description": "Stop your current tracking",
+      "mode": "no-view"
+    },
+    {
+      "name": "get-recent-entries",
+      "title": "Get Recent Entries",
+      "subtitle": "Clockodo",
+      "description": "List your recent tracking entries",
+      "mode": "view"
+    },
+    {
+      "name": "week-overview",
+      "title": "Week Overview",
+      "subtitle": "Clockodo",
+      "description": "View your daily tracking total for the week",
+      "mode": "view"
+    },
+    {
+      "name": "open-reports",
+      "title": "Open Project Reports",
+      "subtitle": "Clockodo",
+      "description": "Open the Clockodo Project Reports in the browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-my-timetable",
+      "title": "Open My Timetable",
+      "subtitle": "Clockodo",
+      "description": "Open your Clockodo Timetable in the browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-my-report",
+      "title": "Open My Report",
+      "subtitle": "Clockodo",
+      "description": "Open your Clockodo Report in the browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "clear-caches",
+      "title": "Clear Caches",
+      "subtitle": "Clockodo",
+      "description": "Clear all cached data",
+      "mode": "no-view"
+    }
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "accountEmail",
+      "type": "textfield",
+      "title": "Account Email",
+      "placeholder": "Your Clockodo Account Email",
+      "description": "The email address associated with your Clockodo account.",
+      "required": true
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API Token",
+      "description": "You can find your API Token in your Clockodo account settings: https://my.clockodo.com/users/editself/",
+      "placeholder": "Your Clockodo API Token",
+      "required": true
+    }
+  ],
+  "title": "Clockodo",
+  "tools": [
+    {
+      "name": "get-my-entries",
+      "title": "Get My Entries",
+      "description": "Retrieves your recent tracking entries"
+    },
+    {
+      "name": "get-project",
+      "title": "Get Project",
+      "description": "Retrieves the project by its ID"
+    },
+    {
+      "name": "get-customer",
+      "title": "Get Customer",
+      "description": "Retrieves the customer by its ID"
+    }
+  ]
+}

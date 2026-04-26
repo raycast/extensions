@@ -1,4 +1,4 @@
-import { OneTimeSecretClient } from "../one-time-secret-client";
+import { createClientFromPreferences } from "../create-client";
 
 type Input = {
   /** The secret to be sent */
@@ -16,12 +16,18 @@ type Input = {
    *  value="1209600" title="14 days"
    */
   lifetime: string;
-  /** Optional. Encrypt the secret with this value. */
+  /** Optional. Encrypt the secret with this value (minimum 8 characters if provided). */
   passphrase?: string;
 };
 
 export default async function (input: Input) {
-  const oneTimeSecretClient = new OneTimeSecretClient();
-  const response = await oneTimeSecretClient.storeAnonymousSecret(input.secret, input.lifetime, input.passphrase);
-  return oneTimeSecretClient.getShareableUrl(response.secret_key);
+  const client = createClientFromPreferences();
+  const ttl = Number.parseInt(input.lifetime, 10);
+  const trimmed = input.passphrase?.trim() ?? "";
+  const passphrase = trimmed.length > 0 ? trimmed : null;
+  if (passphrase && passphrase.length < 8) {
+    throw new Error("Passphrase must be at least 8 characters.");
+  }
+  const response = await client.concealSecret(input.secret, Number.isNaN(ttl) ? 3600 : ttl, passphrase);
+  return client.getShareableUrl(response.secretIdentifier);
 }

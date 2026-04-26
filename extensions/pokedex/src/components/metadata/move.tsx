@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
 import { PokemonMove } from "../../types";
+import { getLocalizedName } from "../../utils";
 
 export default function MoveMetadata(props: { move: PokemonMove["move"] }) {
   const { move } = props;
@@ -8,7 +9,7 @@ export default function MoveMetadata(props: { move: PokemonMove["move"] }) {
     <List.Item.Detail.Metadata>
       <List.Item.Detail.Metadata.Label
         title="Type"
-        text={move.type.typenames[0].name}
+        text={getLocalizedName(move.type.typenames, move.type.name)}
         icon={`types/${move.type.name}.svg`}
       />
       <List.Item.Detail.Metadata.Label
