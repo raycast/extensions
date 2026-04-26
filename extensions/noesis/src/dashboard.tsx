@@ -38,8 +38,12 @@ import {
   getPulseModeLabel,
 } from "./lib/menu-bar-insights";
 import { openCommand } from "./lib/navigation";
+import { buildPulseBoardMarkdown } from "./lib/pulse-board-presenter";
 import { readMenuBarSnapshot } from "./lib/queries";
-import { getPulseModePreference } from "./lib/settings";
+import {
+  getExecutionRoutePreference,
+  getPulseModePreference,
+} from "./lib/settings";
 import { useDashboardSnapshot } from "./lib/use-dashboard-snapshot";
 import {
   DashboardSnapshot,
@@ -106,9 +110,19 @@ export default function Dashboard() {
     ? Math.max(...snapshot.workflows.map((workflow) => workflow.engineCount), 0)
     : 0;
   const pulseMode = getPulseModePreference();
+  const executionRoute = getExecutionRoutePreference();
+  const executionRouteLabel =
+    executionRoute === "witness" ? "Witness Gateway" : "Selemene Direct";
   const pulseModeLabel = getPulseModeLabel(pulseMode);
+  const pulseBoardSnapshot = snapshot
+    ? (menuBarSnapshot ?? {
+        dashboard: snapshot,
+        insights: {},
+        syncIssues: [],
+      })
+    : null;
   const currentPulse = getPreferredInsight(
-    menuBarSnapshot?.insights ?? {},
+    pulseBoardSnapshot?.insights ?? {},
     pulseMode,
   );
   const pulseKind = currentPulse?.kind ?? pulseMode;
@@ -405,25 +419,10 @@ export default function Dashboard() {
               ]}
               detail={
                 <List.Item.Detail
-                  markdown={[
-                    `# ${pulseTitle}`,
-                    "",
-                    currentPulse?.subtitle ?? pulseDetailSummary,
-                    "",
-                    `- Title mode: ${pulseModeLabel}`,
-                    currentPulse?.subtitle
-                      ? `- Window: ${currentPulse.subtitle}`
-                      : "- Window: Waiting for a cached pulse snapshot",
-                    `- Signal: ${pulseDetailSummary}`,
-                    currentPulse
-                      ? `- Cached: ${formatRelativeTime(currentPulse.fetchedAt)} (${formatAbsoluteTime(currentPulse.fetchedAt)})`
-                      : "- Cached: No pulse snapshot stored yet",
-                    currentPulse
-                      ? `- Refreshes in: ${formatTimeUntil(currentPulse.refreshAfter)}`
-                      : "- Refreshes in: Refresh after warming the pulse cache",
-                    "",
-                    "The menu bar title follows this row when the selected pulse mode has a cached reading.",
-                  ].join("\n")}
+                  markdown={buildPulseBoardMarkdown(
+                    pulseBoardSnapshot,
+                    pulseMode,
+                  )}
                 />
               }
               actions={
@@ -497,6 +496,7 @@ export default function Dashboard() {
                 formatHostLabel(snapshot.baseUrl),
                 snapshot.health?.status ?? "",
                 snapshot.syncError ?? "",
+                ...snapshot.syncIssues.map((issue) => issue.resource),
               ]}
               accessories={[
                 {
@@ -527,6 +527,7 @@ export default function Dashboard() {
                     "",
                     `- Base URL: \`${snapshot.baseUrl}\``,
                     `- Access: ${snapshot.hasCredentials ? "API key connected" : "Cache only"}`,
+                    `- Engine/workflow route: ${executionRouteLabel}`,
                     snapshot.health
                       ? `- Service: ${snapshot.health.status}`
                       : "- Service: No live health snapshot cached",
@@ -543,6 +544,19 @@ export default function Dashboard() {
                     snapshot.syncError
                       ? `- Sync issue: ${snapshot.syncError}`
                       : "- Sync issue: None",
+                    ...(snapshot.syncIssues.length > 0
+                      ? [
+                          "",
+                          "## Sync Issues",
+                          "",
+                          ...snapshot.syncIssues
+                            .slice(0, 4)
+                            .map(
+                              (issue) =>
+                                `- ${issue.resource} (${issue.target}): ${issue.message}`,
+                            ),
+                        ]
+                      : []),
                   ].join("\n")}
                 />
               }

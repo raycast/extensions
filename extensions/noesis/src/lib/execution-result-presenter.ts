@@ -3,10 +3,10 @@ import {
   ReadingSummary,
   WorkflowExecutionResult,
 } from "./types";
+import { WitnessEngineReading, WitnessReadingResponse } from "./witness-api";
 
 const MAX_ARRAY_ITEMS = 4;
 const MAX_OBJECT_DEPTH = 2;
-const RAW_PREVIEW_MAX_LENGTH = 2200;
 
 export function buildEngineResultMarkdown(
   title: string,
@@ -40,7 +40,7 @@ export function buildEngineResultMarkdown(
     );
   }
 
-  lines.push("", "## Result Map", "", ...buildStructuredBlock(result.result));
+  lines.push("", "## Result Map", "", ...buildEngineResultBlock(result, 3));
 
   const extraMetadata = stripPresentationMetadata(result.metadata);
   if (Object.keys(extraMetadata).length > 0) {
@@ -52,20 +52,6 @@ export function buildEngineResultMarkdown(
     );
   }
 
-  lines.push(
-    "",
-    "## Raw Response Preview",
-    "",
-    "```json",
-    safeJsonPreview(
-      result.raw,
-      options.rawPreviewMaxLength ?? RAW_PREVIEW_MAX_LENGTH,
-    ),
-    "```",
-    "",
-    "Use `Copy Result JSON` for the full payload.",
-  );
-
   return compactMarkdown(lines).join("\n");
 }
 
@@ -76,12 +62,12 @@ export function buildReadingResultMarkdown(
   const normalized = toEngineExecutionResultFromReading(reading);
 
   return buildEngineResultMarkdown(
-    truncate(reading.witnessPrompt, 60) || humanizeKey(reading.engineId),
+    truncate(reading.witnessPrompt, expanded ? 120 : 60) ||
+      humanizeKey(reading.engineId),
     normalized,
     {
       requestPayload: extractReadingRequestContext(reading.payload),
       contextLines: [formatReadingContextLine(reading)],
-      rawPreviewMaxLength: expanded ? 3200 : 1800,
     },
   );
 }
@@ -157,19 +143,51 @@ export function buildWorkflowResultMarkdown(
         lines.push(...outputBrief, "");
       }
 
-      lines.push(...buildStructuredField("Result", output.result, 2), "");
+      lines.push(...buildEngineOutputResultField(output, "Result", 2), "");
     }
   }
 
-  lines.push(
-    "## Raw Response Preview",
+  return compactMarkdown(lines).join("\n");
+}
+
+export function buildWitnessReadingMarkdown(
+  response: WitnessReadingResponse,
+): string {
+  const reading = response.reading;
+  const decoder = reading.decoder_state;
+  const primary = reading.primary_reading;
+  const lines: Array<string | null> = [
+    `# Daily Witness`,
     "",
-    "```json",
-    safeJsonPreview(result.raw, RAW_PREVIEW_MAX_LENGTH),
-    "```",
+    `${reading.date} · ${humanizeKey(reading.primary_engine)} · ${describeWitnessNarrative(decoder.consecutive_days, decoder.total_visits)}`,
     "",
-    "Use `Copy Result JSON` for the full payload.",
+    "## Decoder",
+    "",
+    `- Layer: ${reading.max_layer_unlocked}/5`,
+    `- Streak: ${decoder.consecutive_days} day${decoder.consecutive_days === 1 ? "" : "s"}`,
+    `- Visits: ${decoder.total_visits}`,
+    `- Engines called: ${reading.engines_called.join(", ")}`,
+    `- Latency: ${reading.total_latency_ms}ms`,
+    "",
+    ...buildWitnessEngineSection("Primary Reading", primary),
+  ];
+
+  const secondaryEntries = Object.entries(reading.all_readings).filter(
+    ([engineId]) => engineId !== reading.primary_engine,
   );
+
+  if (secondaryEntries.length > 0) {
+    lines.push("", "## Other Engines", "");
+
+    for (const [engineId, engineReading] of secondaryEntries) {
+      lines.push(
+        `### ${humanizeKey(engineId)}`,
+        "",
+        ...buildWitnessDataPointLines(engineReading),
+        "",
+      );
+    }
+  }
 
   return compactMarkdown(lines).join("\n");
 }
@@ -231,6 +249,7 @@ function buildEngineHighlightLines(result: EngineExecutionResult): string[] {
     typeof readNumber(payload, "overall_energy") === "number"
       ? `- Overall energy: ${Math.round(readNumber(payload, "overall_energy") ?? 0)}%`
       : null,
+    ...buildTarotHighlightLines(result.engineId, payload),
     pickSummaryLine(payload),
   ].filter(Boolean) as string[];
 
@@ -309,9 +328,57 @@ function buildEngineHeroSection(
         ],
         readString(asRecord(payload.period_enrichment), "combined_description"),
       );
+    case "tarot": {
+      const positions = getTarotPositions(payload);
+      return buildTableSection(
+        `${headingPrefix} Spread Overview`,
+        [
+          ["Spread", readNestedString(payload, ["spread", "name"])],
+          [
+            "Layout",
+            humanizeTarotSpreadType(
+              readNestedString(payload, ["spread", "type"]),
+            ),
+          ],
+          [
+            "Cards",
+            positions.length > 0 ? String(positions.length) : undefined,
+          ],
+        ],
+        readString(asRecord(payload.spread), "description"),
+      );
+    }
     default:
       return [];
   }
+}
+
+function buildEngineResultBlock(
+  result: EngineExecutionResult,
+  headingLevel: number,
+): string[] {
+  switch (result.engineId) {
+    case "tarot":
+      return buildTarotResultBlock(result.result, headingLevel);
+    default:
+      return buildStructuredBlock(result.result);
+  }
+}
+
+function buildEngineOutputResultField(
+  result: EngineExecutionResult,
+  label: string,
+  depth: number,
+): string[] {
+  if (result.engineId !== "tarot") {
+    return buildStructuredField(label, result.result, depth);
+  }
+
+  return [
+    formatHeading(label, depth + 2),
+    "",
+    ...buildTarotResultBlock(result.result, depth + 3),
+  ];
 }
 
 function buildTableSection(
@@ -487,6 +554,56 @@ function formatReadingContextLine(reading: ReadingSummary): string {
   return [reading.engineId, reading.workflowId].filter(Boolean).join(" · ");
 }
 
+function buildWitnessEngineSection(
+  title: string,
+  reading: WitnessEngineReading,
+): string[] {
+  return [
+    `## ${title}`,
+    "",
+    `### ${humanizeKey(reading.engine_id)}`,
+    "",
+    `- Headline: ${reading.headline}`,
+    `- Role: ${reading.engine_role}`,
+    `- Layer: ${reading.layer}`,
+    ...buildWitnessDataPointLines(reading),
+    ...(reading.witness_question
+      ? ["", `- Witness question: ${reading.witness_question}`]
+      : []),
+  ];
+}
+
+function buildWitnessDataPointLines(reading: WitnessEngineReading): string[] {
+  const emphasized = reading.data_points.filter((point) => point.emphasis);
+  const secondary = reading.data_points.filter((point) => !point.emphasis);
+  const lines = [
+    ...emphasized.map((point) => `- ${point.label}: ${point.value}`),
+    ...secondary.slice(0, 4).map((point) => `- ${point.label}: ${point.value}`),
+  ];
+
+  return lines.length > 0 ? lines : ["- No structured data points returned."];
+}
+
+function describeWitnessNarrative(
+  consecutiveDays: number,
+  totalVisits: number,
+): string {
+  if (consecutiveDays >= 30) {
+    return "Graduate";
+  }
+  if (consecutiveDays >= 14) {
+    return "Finder";
+  }
+  if (consecutiveDays >= 7) {
+    return "Devoted";
+  }
+  if (totalVisits > 1) {
+    return "Returning";
+  }
+
+  return "Newcomer";
+}
+
 function pickSummaryLine(payload: Record<string, unknown>): string | null {
   const candidate =
     readString(payload, "synthesis") ??
@@ -614,11 +731,188 @@ function buildStructuredArray(
   return compactMarkdown(lines);
 }
 
-function safeJsonPreview(value: unknown, maxLength: number): string {
-  const content = JSON.stringify(value, null, 2) ?? "null";
-  return content.length > maxLength
-    ? `${content.slice(0, maxLength - 1)}…`
-    : content;
+function buildTarotResultBlock(
+  payload: Record<string, unknown>,
+  headingLevel: number,
+): string[] {
+  const lines: string[] = [];
+  const spread = asRecord(payload.spread);
+  const positions = getTarotPositions(payload);
+  const question = readString(payload, "question");
+
+  if (question) {
+    lines.push(`- Question: ${truncate(question, 220)}`);
+  }
+
+  if (Object.keys(spread).length > 0 || positions.length > 0) {
+    lines.push(
+      "",
+      formatHeading("Spread", headingLevel),
+      "",
+      ...buildTarotSpreadLines(spread, positions.length),
+    );
+  }
+
+  if (positions.length > 0) {
+    lines.push("", formatHeading("Cards Drawn", headingLevel), "");
+
+    positions.forEach((position, index) => {
+      lines.push(...buildTarotPositionLines(position, index, headingLevel + 1));
+
+      if (index < positions.length - 1) {
+        lines.push("");
+      }
+    });
+  }
+
+  const extraFields = { ...payload };
+  delete extraFields.positions;
+  delete extraFields.question;
+  delete extraFields.spread;
+
+  if (Object.keys(extraFields).length > 0) {
+    lines.push(
+      "",
+      formatHeading("Additional Fields", headingLevel),
+      "",
+      ...buildStructuredObject(extraFields, Math.max(0, headingLevel - 2)),
+    );
+  }
+
+  return compactMarkdown(lines);
+}
+
+function buildTarotSpreadLines(
+  spread: Record<string, unknown>,
+  positionCount: number,
+): string[] {
+  const lines: string[] = [];
+  const spreadName = readString(spread, "name");
+  const spreadType = readString(spread, "type");
+  const description = readString(spread, "description");
+
+  if (spreadName) {
+    lines.push(`- Name: ${spreadName}`);
+  }
+
+  if (spreadType) {
+    lines.push(`- Layout: ${humanizeTarotSpreadType(spreadType)}`);
+  }
+
+  if (positionCount > 0) {
+    lines.push(`- Cards drawn: ${positionCount}`);
+  }
+
+  if (description) {
+    lines.push(`- Description: ${truncate(description, 220)}`);
+  }
+
+  return lines.length > 0 ? lines : ["- Spread metadata unavailable."];
+}
+
+function buildTarotPositionLines(
+  position: Record<string, unknown>,
+  index: number,
+  headingLevel: number,
+): string[] {
+  const card = asRecord(position.card);
+  const interpretation = asRecord(card.interpretation);
+  const keywords = readStringArray(interpretation.keywords);
+  const lines = [
+    formatHeading(
+      `${index + 1}. ${readString(position, "name") ?? `Card ${index + 1}`}`,
+      headingLevel,
+    ),
+    "",
+  ];
+  const cardName = readString(card, "name");
+  const orientation =
+    typeof card.isReversed === "boolean"
+      ? card.isReversed
+        ? "Reversed"
+        : "Upright"
+      : undefined;
+  const arcana = readString(card, "arcana");
+  const element = readString(card, "element");
+  const suit = readString(card, "suit");
+  const role = readString(position, "meaning");
+  const message = readString(interpretation, "meaning");
+
+  if (cardName) {
+    lines.push(`- Card: ${cardName}`);
+  }
+
+  if (orientation) {
+    lines.push(`- Orientation: ${orientation}`);
+  }
+
+  if (role) {
+    lines.push(`- Role: ${truncate(role, 220)}`);
+  }
+
+  if (arcana) {
+    lines.push(`- Arcana: ${humanizeKey(arcana)}`);
+  }
+
+  if (element) {
+    lines.push(`- Element: ${humanizeKey(element)}`);
+  }
+
+  if (suit) {
+    lines.push(`- Suit: ${humanizeKey(suit)}`);
+  }
+
+  if (message) {
+    lines.push(`- Message: ${truncate(message, 220)}`);
+  }
+
+  if (keywords.length > 0) {
+    lines.push(
+      `- Keywords: ${keywords.map((keyword) => humanizePhrase(keyword)).join(", ")}`,
+    );
+  }
+
+  if (lines.length === 2) {
+    lines.push("- No card details returned.");
+  }
+
+  return lines;
+}
+
+function buildTarotHighlightLines(
+  engineId: string,
+  payload: Record<string, unknown>,
+): string[] {
+  if (engineId !== "tarot") {
+    return [];
+  }
+
+  const lines: string[] = [];
+  const spreadName = readNestedString(payload, ["spread", "name"]);
+  const positions = getTarotPositions(payload);
+
+  if (spreadName) {
+    lines.push(`- Spread: ${spreadName}`);
+  }
+
+  if (positions.length > 0) {
+    lines.push(`- Cards drawn: ${positions.length}`);
+  }
+
+  return lines;
+}
+
+function getTarotPositions(
+  payload: Record<string, unknown>,
+): Array<Record<string, unknown>> {
+  const positions = payload.positions;
+  if (!Array.isArray(positions)) {
+    return [];
+  }
+
+  return positions
+    .map((entry) => asRecord(entry))
+    .filter((entry) => Object.keys(entry).length > 0);
 }
 
 function buildNestedLine(
@@ -741,12 +1035,26 @@ function formatInlineValue(value: unknown): string {
   return buildValuePreview(value);
 }
 
+function formatHeading(label: string, level: number): string {
+  return level <= 4
+    ? `${"#".repeat(Math.max(2, level))} ${label}`
+    : `**${label}**`;
+}
+
 function humanizeKey(value: string): string {
   return value
     .replace(/[_-]+/g, " ")
     .replace(/\s+/g, " ")
     .trim()
     .replace(/\b\w/g, (character) => character.toUpperCase());
+}
+
+function humanizePhrase(value: string): string {
+  return humanizeKey(value).replace(/\bOf\b/g, "of");
+}
+
+function humanizeTarotSpreadType(value?: string): string | undefined {
+  return value ? humanizeKey(value) : undefined;
 }
 
 function singularize(label: string): string {
@@ -782,10 +1090,24 @@ function asRecord(value: unknown): Record<string, unknown> {
   return isRecord(value) ? value : {};
 }
 
-function compactMarkdown(lines: string[]): string[] {
+function readStringArray(value: unknown): string[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(
+    (entry): entry is string =>
+      typeof entry === "string" && entry.trim().length > 0,
+  );
+}
+
+function compactMarkdown(lines: Array<string | null | undefined>): string[] {
   const compact: string[] = [];
 
   for (const line of lines) {
+    if (typeof line !== "string") {
+      continue;
+    }
     if (line === "" && compact[compact.length - 1] === "") {
       continue;
     }
@@ -841,5 +1163,4 @@ function formatCalculationTime(milliseconds?: number): string {
 interface EngineResultPresentationOptions {
   requestPayload?: Record<string, unknown>;
   contextLines?: string[];
-  rawPreviewMaxLength?: number;
 }

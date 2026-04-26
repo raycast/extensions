@@ -1,12 +1,30 @@
 export interface SelemenePreferences {
-  baseUrl?: string;
   apiKey?: string;
+  baseUrl?: string;
+  witnessUrl?: string;
+  executionRoute?: ExecutionRouteTarget;
+  readingHistoryLimit?: string;
+  cacheRawPayloads?: boolean;
   pulseMode?: MenuBarInsightKind;
 }
 
 export interface SelemeneClientConfig {
   baseUrl: string;
   apiKey: string;
+}
+
+export type ExecutionRouteTarget = "selemene" | "witness";
+
+export interface ExecutionRouteInfo {
+  target: ExecutionRouteTarget;
+  label: string;
+  baseUrl: string;
+}
+
+export interface SyncIssue {
+  resource: string;
+  message: string;
+  target: ExecutionRouteTarget;
 }
 
 export interface WorkflowSummary {
@@ -86,6 +104,23 @@ export interface BirthDataInput {
 
 export type PrecisionLevel = "Standard" | "High" | "Extreme";
 
+export const TAROT_SPREAD_VARIANTS = [
+  "single_card",
+  "three_card",
+  "celtic_cross",
+  "horseshoe",
+  "relationship",
+  "career",
+  "yes_no",
+] as const;
+
+export type TarotSpreadVariant = (typeof TAROT_SPREAD_VARIANTS)[number];
+
+export interface TarotExecutionOptions {
+  question?: string;
+  spread?: TarotSpreadVariant;
+}
+
 export interface EngineExecutionInput {
   birthData?: BirthDataInput;
   currentTime?: string;
@@ -100,6 +135,7 @@ export interface EngineExecutionResult {
   consciousnessLevel?: number;
   metadata: Record<string, unknown>;
   timestamp?: string;
+  route?: ExecutionRouteInfo;
   raw: Record<string, unknown>;
 }
 
@@ -109,6 +145,7 @@ export interface WorkflowExecutionResult {
   synthesis: Record<string, unknown>;
   totalTimeMs?: number;
   timestamp?: string;
+  route?: ExecutionRouteInfo;
   raw: Record<string, unknown>;
 }
 
@@ -176,6 +213,7 @@ export interface DashboardSnapshot {
   readingStats: ReadingStat[];
   rateLimit: RateLimitInfo;
   timestamps: ResourceTimestamps;
+  syncIssues: SyncIssue[];
   syncError?: string;
 }
 
@@ -189,6 +227,7 @@ export interface RemoteSnapshot {
   readings?: ReadingSummary[];
   readingStats?: ReadingStat[];
   rateLimit?: RateLimitInfo;
+  syncIssues?: SyncIssue[];
   fetchedAt: string;
 }
 
@@ -208,5 +247,6 @@ export interface MenuBarInsightSnapshot {
 export interface MenuBarSnapshot {
   dashboard: DashboardSnapshot;
   insights: Partial<Record<MenuBarInsightKind, MenuBarInsightSnapshot>>;
+  syncIssues: SyncIssue[];
   syncError?: string;
 }

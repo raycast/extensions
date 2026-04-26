@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  calculateTarot,
   calculateEngine,
   executeWorkflow,
   fetchRemoteSnapshot,
   normalizeBaseUrl,
   updateUserProfile,
   validateSelemeneCredentials,
+  withTarotExecutionOptions,
 } from "./api";
 
 test("normalizeBaseUrl strips trailing slash and api/v1 suffix", () => {
@@ -252,6 +254,19 @@ test("fetchRemoteSnapshot maps service, catalog, usage, and readings payloads", 
   assert.equal(snapshot.readings?.[0]?.witnessPrompt, "Notice the pattern.");
   assert.equal(snapshot.readingStats?.[0]?.count, 1);
   assert.equal(snapshot.rateLimit?.remaining, 199);
+  assert.deepEqual(snapshot.syncIssues, []);
+  assert.deepEqual(snapshot.readings?.[0]?.payload, {
+    engine_id: "numerology",
+    witness_prompt: "Notice the pattern.",
+    consciousness_level: 2,
+    timestamp: "2026-04-16T18:00:00Z",
+    metadata: {
+      calculation_time_ms: 18.5,
+    },
+    result: {
+      life_path: 9,
+    },
+  });
 
   const authenticatedCalls = calls.filter(
     (call) => !call.url.endsWith("/health/live"),
@@ -389,6 +404,88 @@ test("calculateEngine posts execution input and maps the engine result", async (
   assert.equal(result.result.card, "The Hermit");
   assert.equal(result.metadata.spread, "single-card");
   assert.equal(result.timestamp, "2026-04-22T13:14:15Z");
+  assert.equal(result.route?.target, "selemene");
+  assert.equal(result.route?.label, "Selemene Direct");
+});
+
+test("withTarotExecutionOptions merges and normalizes tarot options", () => {
+  const input = withTarotExecutionOptions(
+    {
+      precision: "Standard",
+      options: {
+        mode: "reflective",
+      },
+    },
+    {
+      question: "What needs awareness?",
+      spread: "yes_no",
+    },
+  );
+
+  assert.deepEqual(input.options, {
+    mode: "reflective",
+    question: "What needs awareness?",
+    spread: "yes_no",
+  });
+});
+
+test("calculateTarot posts canonical spread and question", async () => {
+  const calls: Array<{ url: string; init: RequestInit | undefined }> = [];
+
+  const fetchStub = (async (
+    input: string | URL | Request,
+    init?: RequestInit,
+  ) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input.url;
+    calls.push({ url, init });
+
+    return new Response(
+      JSON.stringify({
+        engine_id: "tarot",
+        result: { spread: "yes_no" },
+        metadata: { spread: "yes_no", calculation_time_ms: 12.2 },
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  const result = await calculateTarot(
+    {
+      baseUrl: "https://selemene.tryambakam.space",
+      apiKey: "nk_test_key",
+    },
+    {
+      precision: "High",
+      options: {
+        context: "decision",
+      },
+    },
+    {
+      question: "Should I move now?",
+      spread: "yes_no",
+    },
+    fetchStub,
+  );
+
+  assert.equal(
+    calls[0]?.url,
+    "https://selemene.tryambakam.space/api/v1/engines/tarot/calculate",
+  );
+  assert.deepEqual(JSON.parse(String(calls[0]?.init?.body)), {
+    precision: "High",
+    options: {
+      context: "decision",
+      question: "Should I move now?",
+      spread: "yes_no",
+    },
+  });
+  assert.equal(result.engineId, "tarot");
+  assert.equal(result.metadata.spread, "yes_no");
 });
 
 test("executeWorkflow posts execution input and maps workflow outputs", async () => {
@@ -424,6 +521,9 @@ test("executeWorkflow posts execution input and maps workflow outputs", async ()
         },
         synthesis: {
           summary: "A reflective and disciplined day.",
+        },
+        witness_layer: {
+          witness_question: "What quiet discipline wants expression today?",
         },
         total_time_ms: 25.4,
         timestamp: "2026-04-22T13:15:00Z",
@@ -471,7 +571,151 @@ test("executeWorkflow posts execution input and maps workflow outputs", async ()
   assert.equal(result.engineOutputs.panchanga?.engineId, "panchanga");
   assert.equal(result.engineOutputs.numerology?.consciousnessLevel, 4);
   assert.equal(result.synthesis.summary, "A reflective and disciplined day.");
+  assert.deepEqual(result.synthesis.witness_layer, {
+    witness_question: "What quiet discipline wants expression today?",
+  });
   assert.equal(result.totalTimeMs, 25.4);
+  assert.equal(result.route?.target, "selemene");
+});
+
+test("fetchRemoteSnapshot keeps partial failures as sync issues", async () => {
+  const fetchStub = (async (input: string | URL | Request) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input.url;
+
+    if (url.endsWith("/health/live")) {
+      return new Response(
+        JSON.stringify({
+          status: "ok",
+          version: "3.0.0",
+          uptime_seconds: 42,
+          engines_loaded: 16,
+          workflows_loaded: 6,
+        }),
+        { status: 200 },
+      );
+    }
+
+    if (url.endsWith("/api/v1/status")) {
+      return new Response(
+        JSON.stringify({
+          engines: [],
+          workflows: [],
+        }),
+        { status: 200 },
+      );
+    }
+
+    if (url.endsWith("/api/v1/users/me")) {
+      return new Response(JSON.stringify({ error: "Profile unavailable" }), {
+        status: 503,
+      });
+    }
+
+    throw new Error(`Unexpected URL: ${url}`);
+  }) as typeof fetch;
+
+  const snapshot = await fetchRemoteSnapshot(
+    {
+      baseUrl: "https://selemene.tryambakam.space",
+      apiKey: "nk_test_key",
+    },
+    {
+      fetchImpl: fetchStub,
+      includeService: true,
+      includeCatalog: true,
+      includeProfile: true,
+      includeUsage: false,
+      includeReadings: false,
+    },
+  );
+
+  const syncIssues = snapshot.syncIssues ?? [];
+  assert.equal(snapshot.profile, undefined);
+  assert.equal(syncIssues.length, 1);
+  assert.equal(syncIssues[0]?.resource, "profile");
+  assert.match(syncIssues[0]?.message ?? "", /Profile unavailable/);
+});
+
+test("fetchRemoteSnapshot preserves full reading payloads when explicitly enabled", async () => {
+  const fetchStub = (async (input: string | URL | Request) => {
+    const url =
+      typeof input === "string"
+        ? input
+        : input instanceof URL
+          ? input.toString()
+          : input.url;
+
+    if (url.includes("/api/v1/readings?") || url.endsWith("/api/v1/readings")) {
+      return new Response(
+        JSON.stringify({
+          readings: [
+            {
+              id: "reading-1",
+              engine_id: "numerology",
+              workflow_id: null,
+              input_hash: "hash-1",
+              witness_prompt: "Notice the pattern.",
+              consciousness_level: 2,
+              calculation_time_ms: 18.5,
+              created_at: "2026-04-16T18:00:00Z",
+              result_data: { life_path: 9 },
+              trace_id: "trace-1",
+            },
+          ],
+          total: 1,
+          limit: 25,
+          offset: 0,
+        }),
+        { status: 200 },
+      );
+    }
+
+    if (url.endsWith("/api/v1/readings/stats")) {
+      return new Response(
+        JSON.stringify({
+          total: 1,
+          stats: [{ engine_id: "numerology", count: 1 }],
+        }),
+        { status: 200 },
+      );
+    }
+
+    throw new Error(`Unexpected URL: ${url}`);
+  }) as typeof fetch;
+
+  const snapshot = await fetchRemoteSnapshot(
+    {
+      baseUrl: "https://selemene.tryambakam.space",
+      apiKey: "nk_test_key",
+    },
+    {
+      fetchImpl: fetchStub,
+      includeService: false,
+      includeCatalog: false,
+      includeProfile: false,
+      includeUsage: false,
+      includeReadings: true,
+      includeRawPayloads: true,
+    },
+  );
+
+  assert.deepEqual(snapshot.readings?.[0]?.payload, {
+    id: "reading-1",
+    engine_id: "numerology",
+    workflow_id: null,
+    input_hash: "hash-1",
+    witness_prompt: "Notice the pattern.",
+    consciousness_level: 2,
+    calculation_time_ms: 18.5,
+    created_at: "2026-04-16T18:00:00Z",
+    result_data: { life_path: 9 },
+    trace_id: "trace-1",
+  });
 });
 
 test("updateUserProfile patches reusable profile fields and maps the response", async () => {

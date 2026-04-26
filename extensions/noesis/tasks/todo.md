@@ -130,6 +130,7 @@
   - `rm -rf /tmp/noesis-testbuild && PATH=/opt/homebrew/bin:$PATH /opt/homebrew/bin/npx tsc --outDir /tmp/noesis-testbuild`
   - `/opt/homebrew/bin/node --test /tmp/noesis-testbuild/lib/api.test.js /tmp/noesis-testbuild/lib/cache.test.js`
   - `PATH=/opt/homebrew/bin:$PATH npm run build`
+
   - `open 'raycast://extensions/sheshiyer/noesis/onboarding'`
   - `open 'raycast://extensions/sheshiyer/noesis/dashboard'`
   - `tail -n 20 ~/.config/raycast/extensions/noesis/dev.log`
@@ -172,4 +173,258 @@
   - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
   - `rm -rf /tmp/noesis-testbuild-20260422-runflow && mkdir -p /tmp/noesis-testbuild-20260422-runflow && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260422-runflow`
   - `node --test /tmp/noesis-testbuild-20260422-runflow/lib/api.test.js /tmp/noesis-testbuild-20260422-runflow/lib/cache.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+
+## 2026-04-25 Tarot Result Readability
+
+### Checklist
+
+- [x] Reproduce the current tarot result markdown and confirm why Raycast detail output is unreadable.
+- [x] Add a tarot-specific presenter path that renders spread metadata and drawn cards as readable markdown sections.
+- [x] Reuse the tarot presentation in cached reading detail pages so live and historical tarot results match.
+- [x] Add focused presenter coverage for tarot payloads and verify with TypeScript plus targeted tests.
+
+### Spec
+
+- The tarot engine should not fall back to generic nested-object previews for `positions`.
+- Each drawn card should render with a clear slot title, card name, orientation, role in the spread, and concise interpretation signals.
+- Spread metadata should stay compact and glanceable in Raycast detail mode.
+- Raw JSON should remain available as a secondary surface via the existing copy/preview actions.
+
+### Review
+
+- Root cause: the generic structured presenter hit the depth and array limits for tarot `positions`, which collapsed each card into `Card: 7 field(s)` and cut the spread preview off after four cards.
+- Implemented a tarot-specific presentation path in `src/lib/execution-result-presenter.ts` that adds a spread hero section plus per-card markdown blocks with card name, orientation, role, arcana, element, suit, interpretation, and keywords.
+- Because cached reading detail pages already flow through the same presenter, the new tarot formatting now applies to both live engine runs and historical tarot readings.
+- Added a focused regression test in `src/lib/execution-result-presenter.test.ts` that proves tarot output shows real card sections and no longer emits generic `field(s)` or `more item(s) not shown` placeholders.
+- Verification completed:
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild-20260425-tarot && mkdir -p /tmp/noesis-testbuild-20260425-tarot`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260425-tarot`
+  - `node --test /tmp/noesis-testbuild-20260425-tarot/lib/execution-result-presenter.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+
+## 2026-04-26 Pulse Board In Dashboard
+
+### Checklist
+
+- [x] Confirm how the menu bar pulse snapshot is currently exposed in the dashboard and where the full content is being lost.
+- [x] Add a reusable presenter that turns cached menu bar insights into a full pulse-board markdown view for Raycast detail panes.
+- [x] Replace the dashboard pulse detail with the full pulse-board view while keeping the current menu bar behavior unchanged.
+- [x] Add focused coverage for the new pulse-board presenter and verify with TypeScript plus targeted tests/build.
+
+### Spec
+
+- The same pulse data shown in the menu bar dropdown should be visible inside the main Raycast UI without needing the user to rely on the taskbar surface alone.
+- The Raycast view should show the whole pulse board content: current title mode plus the cached TCM Organ, Biorhythm, and Vimshottari sections when available.
+- Missing personal pulse sections should explain whether Profile data or a refresh is required instead of silently disappearing.
+- The existing menu bar refresh/update behavior should remain intact; this task is about surfacing the same content in the UI, not replacing the menu bar flow.
+
+### Review
+
+- Root cause: the menu bar already had a rich cached pulse board, but the dashboard only rendered a compact `Current Pulse` summary row, so most of the Organ/Biorhythm/Vimshottari content never appeared in a normal Raycast view.
+- Added a pure `src/lib/pulse-board-presenter.ts` module that mirrors the menu bar snapshot into a full markdown board with sections for the active title, TCM Organ, Biorhythm, Vimshottari, and overall board status.
+- Wired the dashboard pulse row to use that presenter, so selecting the pulse entry in the existing detail-mode dashboard now shows the full menu bar content inside Raycast without changing the menu bar refresh/update flow.
+- Added focused coverage in `src/lib/pulse-board-presenter.test.ts`, including the happy path with all insights cached and the fallback path where personal pulse sections explain that Profile data is required.
+- Verification completed:
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `rm -rf /tmp/noesis-testbuild-20260426-pulse-board && mkdir -p /tmp/noesis-testbuild-20260426-pulse-board && PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild-20260426-pulse-board`
+  - `node --test /tmp/noesis-testbuild-20260426-pulse-board/lib/menu-bar-insights.test.js /tmp/noesis-testbuild-20260426-pulse-board/lib/pulse-board-presenter.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+
+## 2026-04-26 Agent Integration Audit
+
+### Checklist
+
+- [x] Audit the manifest, README, API client, cache/query layer, and UI for any real `agent` integration surface.
+- [x] Confirm whether agent support is merely hidden from the UI or absent end to end.
+- [x] Rebuild the current worktree and capture whether the extension still compiles cleanly.
+- [x] Write a concrete review with file references and next-step guidance instead of inferring missing architecture.
+
+### Spec
+
+- This audit should distinguish between existing engine/workflow support and any true `agent` concept.
+- If agent integration is missing, the review should say that directly and point to the exact seams where it would need to be added.
+- The build check should validate the current worktree as it exists, including the recent pulse-board and presenter changes.
+
+### Review
+
+- Finding: there is no current `agent` integration in the extension surface. The manifest only exposes `Dashboard`, `Engines`, `Workflows`, `Readings`, `Profile`, `API Key`, `Daily Witness`, and `Pulse`, with no agent command, preference, or keyword path in `package.json`.
+- Finding: the domain model and cache schema are engine/workflow/readings-specific, not agent-aware. `src/lib/types.ts` defines `EngineSummary`, `WorkflowSummary`, `ReadingSummary`, and menu bar insight types only; `src/lib/cache.ts` persists `workflows`, `engines`, `readings`, `reading_stats`, and `menu_bar_insights` tables only.
+- Finding: the API/query layer has no agent endpoint mapping. `src/lib/api.ts` fetches health, status, profile, usage, engines, workflows, readings, and workflow/engine execution only; `src/lib/queries.ts` composes snapshots from those same resources, so there is no hidden agent data waiting for a UI.
+- Build review: the current worktree rebuilds cleanly, including the recent pulse-board and presenter work.
+- If `agents` should be a real product surface, it needs end-to-end definition across four seams: manifest command/navigation, typed models, cache/query persistence, and concrete API endpoints/contracts.
+- Verification completed:
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+
+## 2026-04-26 Agent Contract Proposal
+
+### Checklist
+
+- [x] Draft a concrete proposed backend contract for agents instead of guessing in UI code.
+- [x] Define the required run states, request/response shapes, and minimal error/result semantics for Raycast.
+- [x] Map the contract to the extension seams: manifest/navigation, types, cache/query persistence, and UI.
+- [x] Write the proposal as a local plan artifact so implementation can start from a stable spec.
+
+### Spec
+
+- The proposal should treat agents as a distinct resource from engines and workflows.
+- The MVP contract must support catalog browsing, run creation, run polling, pause-for-input, cancel, and history.
+- The document should stay compatible with the current Raycast cached-first architecture and finite-state UI model.
+
+### Review
+
+- Added `docs/plans/2026-04-26-agent-contract.md` as the first concrete agent contract proposal for this codebase.
+- The proposal defines catalog endpoints, run endpoints, run states, result and error payloads, suggested TypeScript models, cache tables, Raycast commands, and delivery order.
+- This keeps the next implementation pass honest: backend contract first, then typed client/cache/UI work, instead of inventing an agent surface ad hoc inside the dashboard.
+
+## 2026-04-26 Deep Raycast Review Plan
+
+### Checklist
+
+- [x] Map the extension’s trust boundaries and data flows across Raycast preferences, LocalStorage, SQLite cache, the Selemene API, and the Daily Witness gateway.
+- [x] Produce the top five security flaws with severity, exploit path, affected files, and concrete remediation direction.
+- [x] Produce the top 10 design improvements spanning command architecture, state flow, UX consistency, and maintainability.
+- [x] Produce the top five API/call-handling issues across request routing, retries, parsing, stale-data behavior, and contract mismatches.
+- [x] Document exactly how storage works today: what lives in LocalStorage versus SQLite versus in-memory React state, plus TTL/retention and cache-clear behavior.
+- [x] Recommend a phased remediation plan that respects the current architecture constraint: robust backend stays authoritative, Raycast keeps a local SQLite cache for accessibility and readability.
+- [x] Validate the review against current code references in `package.json`, `src/lib/api.ts`, `src/lib/cache.ts`, `src/lib/queries.ts`, `src/lib/settings.ts`, `src/lib/witness-api.ts`, and the main Raycast surfaces.
+
+### Spec
+
+- This review is for the Raycast extension in `/Users/sheshnarayaniyer/raycast-extensions/noesis`, not the backend repos.
+- Use the local guidance from `/Users/sheshnarayaniyer/.claude/skills/raycast-extension/SKILL.md` and `/Users/sheshnarayaniyer/.claude/skills/raycast-ui-skills/SKILL.md` as review lenses, with emphasis on cached-first loading, Raycast-native list/detail UX, and readable surfaces.
+- Assume the backend remains the system of record for engines, workflows, profiles, and readings.
+- Treat the local SQLite cache as intentional product infrastructure, not technical debt to remove.
+- Focus on extension responsibilities:
+  - Secure handling of API keys, witness URLs, and cached personal data.
+  - Readability and accessibility of Raycast command output and detail panes.
+  - Consistency between direct Selemene calls and Daily Witness gateway calls.
+  - Operational behavior under stale cache, rate limits, partial failures, and concurrent command usage.
+- The final review output should be decision-grade:
+  - security findings prioritized by risk
+  - design improvements prioritized by user impact and implementation leverage
+  - API/call-handling issues prioritized by correctness and resilience
+  - storage model written as a clear current-state architecture note
+
+### Initial Review Focus
+
+- Security focus:
+  - API key lifecycle in `src/lib/settings.ts` and onboarding rotation flow in `src/components/onboarding-form.tsx`
+  - raw payload persistence in `src/lib/cache.ts`, especially readings/profile/menu-bar payload JSON
+  - unauthenticated witness client behavior in `src/lib/witness-api.ts`
+  - shell-based sqlite access and SQL construction in `src/lib/cache.ts`
+- Design focus:
+  - split backend surface between `src/lib/api.ts` and `src/lib/witness-api.ts`
+  - dashboard/browser/form duplication across `src/dashboard.tsx` and `src/components/*`
+  - state ownership and refresh flow in `src/lib/use-dashboard-snapshot.ts` and `src/lib/queries.ts`
+- API/call-handling focus:
+  - witness gateway used for engine execution but not workflow execution
+  - parsing and error handling in `src/lib/api.ts` and `src/lib/witness-api.ts`
+  - stale-while-revalidate and sync fan-out behavior in `src/lib/queries.ts`
+- Storage focus:
+  - LocalStorage for credentials and witness URL
+  - SQLite under `environment.supportPath/noesis-cache.sqlite`
+  - retention trim for readings, cache invalidation on key rotation, and menu bar insight persistence
+
+### Review
+
+- Security top 5:
+  - `P1` API keys are stored in plain Raycast `LocalStorage` instead of a dedicated secret boundary, so any local compromise of Raycast extension storage exposes the Selemene credential directly. Evidence: `src/lib/settings.ts:14-27`, `src/lib/settings.ts:63-75`.
+  - `P1` The extension persists high-sensitivity personal data and full backend payloads in SQLite without field minimization or encryption, including profile birth data, reading payloads, and menu bar pulse payloads. Evidence: `src/lib/cache.ts:42-46`, `src/lib/cache.ts:70-81`, `src/lib/cache.ts:89-98`, `src/lib/cache.ts:454-478`, `src/lib/cache.ts:546-574`, `src/lib/cache.ts:616-647`.
+  - `P1` Witness routing is effectively open-ended: the extension will post birth date, time, name, coordinates, and timezone to whatever `witnessUrl` is stored or configured, with no hostname allowlist or trust classification. Evidence: `package.json:57-64`, `src/lib/witness-api.ts:94-105`, `src/lib/witness-api.ts:149-156`.
+  - `P1` Engine execution silently changes trust boundary when a witness URL exists, because engine runs bypass the authenticated Selemene client and go to the witness gateway instead, while workflow runs do not. That creates inconsistent auth, logging, and data-governance behavior across commands. Evidence: `src/lib/api.ts:22-75`, `src/lib/api.ts:305-319`, `src/lib/api.ts:358-367`.
+  - `P2` The cache layer shells out to `sqlite3` and constructs SQL through string concatenation, which is operationally brittle and broadens the local attack surface compared with an in-process storage adapter. Evidence: `src/lib/cache.ts:1-23`, `src/lib/cache.ts:150-187`, `src/lib/cache.ts:710-727`.
+
+- API / call-handling top 5:
+  - `P1` No network timeout or abort is applied to Selemene or Witness fetches, so a hanging upstream can wedge the Raycast command until fetch fails at the platform level. Evidence: `src/lib/api.ts:488-533`, `src/lib/witness-api.ts:114-143`.
+  - `P1` Witness enrichment is only applied to engine execution, not workflow execution, so the user gets two incompatible runtime contracts for the same product surface. Evidence: `src/lib/api.ts:31-75`, `src/lib/api.ts:305-367`.
+  - `P1` Snapshot refresh silently swallows partial API failures through `optionalRequest`, which means missing profile, usage, workflow info, engine info, or readings can degrade to `undefined` with no surfaced provenance. Evidence: `src/lib/api.ts:238-280`, `src/lib/api.ts:869-876`.
+  - `P2` `requestJson` assumes any non-empty response body is JSON and can throw a raw parse failure before the extension can normalize the upstream error. Evidence: `src/lib/api.ts:521-529`.
+  - `P2` The menu bar sync path uses `Promise.allSettled` and returns only the first failure string, so multi-insight refresh problems are collapsed into a single opaque sync error. Evidence: `src/lib/queries.ts:140-177`.
+
+- Design top 10:
+  - Unify `src/lib/api.ts` and `src/lib/witness-api.ts` behind one transport layer with explicit per-endpoint trust policy, timeout policy, and error normalization.
+  - Make routing explicit in the UI: users should know when a run goes to Selemene directly versus through the Daily Witness gateway. Current implicit switching happens in `src/lib/api.ts:311-315`.
+  - Replace broad raw-payload caching with view-model caching plus optional raw debug snapshots gated behind a debug mode. Current cache stores entire JSON payloads almost everywhere in `src/lib/cache.ts:454-478`, `src/lib/cache.ts:546-574`, `src/lib/cache.ts:616-647`.
+  - Collapse duplicate snapshot bootstrap logic in `src/lib/use-dashboard-snapshot.ts:20-99` into one cached-read-plus-refresh flow.
+  - Fold menu bar insight loading into the main dashboard snapshot/repository layer instead of running a second detail-path read from `src/dashboard.tsx:56-83`.
+  - Convert `Profile` from raw `preferencesJson` editing into typed fields or a schema-driven advanced editor. Current freeform JSON surface is in `src/components/profile-form.tsx:164-169`, `src/components/profile-form.tsx:238-255`.
+  - Standardize result rendering so Daily Witness uses the same presenter strategy as engines, workflows, and cached readings. Current bespoke markdown path is `src/daily-witness.tsx:65-149`.
+  - Introduce structured refresh diagnostics in the dashboard and browsers so stale or partial cache states explain which resource failed, instead of only surfacing a generic message string.
+  - Promote a single repository/service abstraction that owns cache reads, stale policy, and refresh fan-out. Right now `src/lib/queries.ts`, `src/lib/use-dashboard-snapshot.ts`, and `src/dashboard.tsx` each own part of the lifecycle.
+  - Define retention and privacy controls in-product, including per-resource TTLs, cache size controls, and a “clear personal data only” path instead of one broad cache wipe.
+
+- Storage architecture:
+  - Raycast `LocalStorage` holds `noesis.apiKey`, `noesis.baseUrl`, and `noesis.witnessUrl`. Evidence: `src/lib/settings.ts:9-10`, `src/lib/settings.ts:63-75`, `src/lib/witness-api.ts:91-109`.
+  - Raycast preferences provide fallback `baseUrl`, `pulseMode`, and `witnessUrl`. Evidence: `package.json:26-64`, `src/lib/settings.ts:37-49`, `src/lib/witness-api.ts:100-105`.
+  - SQLite lives at `environment.supportPath/noesis-cache.sqlite`. Evidence: `src/lib/queries.ts:180-186`.
+  - SQLite stores health, full profile snapshot JSON, full usage snapshot JSON, workflow catalog, engine catalog, reading history with raw payload JSON, reading stats, and menu bar insight payload JSON. Evidence: `src/lib/cache.ts:24-102`.
+  - In-memory React state holds live command draft data, result views, sync error strings, and current dashboard/menu bar snapshots. Evidence: `src/lib/use-dashboard-snapshot.ts:13-18`, `src/dashboard.tsx:52-54`, `src/components/execution-forms.tsx:74-79`, `src/daily-witness.tsx:254-261`.
+  - Retention today is narrow: readings are trimmed to the latest 100 rows, most other cache records persist until overwrite or explicit `clearAll`, and onboarding rotation clears the whole cache when key/base URL changes. Evidence: `src/lib/cache.ts:577`, `src/lib/cache.ts:655-676`, `src/components/onboarding-form.tsx:81-88`, `src/components/onboarding-form.tsx:128-145`.
+
+- Phased remediation plan:
+  - Phase 1: harden transport and trust boundaries by adding timeout/abort support, normalized error handling, explicit witness-vs-Selemene routing, and surfaced partial-refresh diagnostics.
+  - Phase 2: reduce data sensitivity in storage by moving secrets to a stronger boundary if Raycast permits, minimizing cached payload fields, and adding retention/privacy controls around profile, readings, and pulse data.
+  - Phase 3: simplify product architecture by consolidating transport, repository, and presenter layers so dashboard, browsers, menu bar, engine runs, workflow runs, and Daily Witness all share the same state model.
+  - Phase 4: improve readability and operability by replacing raw JSON editing with typed controls, adding structured stale-state messaging, and preserving full raw payloads only for explicit debug actions.
+
+## 2026-04-26 Review Remediation Pass
+
+### Checklist
+
+- [x] Move request execution onto a shared HTTP transport with timeout support, normalized network/HTTP/parse errors, and one place for auth header handling.
+- [x] Make engine and workflow execution routing explicit, preference-driven, and visible in the UI instead of silently switching to Witness when a URL exists.
+- [x] Prefer Raycast secure password preferences for API keys while preserving a legacy fallback path that does not break the current onboarding flow.
+- [x] Add structured sync issues to dashboard/menu bar refresh flows so partial failures are surfaced with resource-level context.
+- [x] Minimize cached result payloads by default, keep raw JSON as a copy/debug surface only, and add retention/privacy controls for reading history and personal cache clearing.
+- [x] Replace raw profile preferences JSON editing with typed controls for the fields the extension actually uses, while preserving unknown backend preferences on update.
+- [x] Route Daily Witness detail rendering through the shared presenter layer so engines, workflows, cached readings, and witness results follow the same readability rules.
+- [x] Verify with targeted unit tests, TypeScript, and full extension build.
+
+### Spec
+
+- The Selemene backend remains authoritative for status/profile/catalog/history; this pass hardens the Raycast client, not the backend contract.
+- Witness remains a supported execution surface, but it must be an explicit operator choice rather than an implicit side effect of `witnessUrl` being set.
+- Local SQLite stays in place, but the default cached shape should hold the minimum data needed for readable Raycast history and pulse surfaces.
+- Raw JSON should be reachable through explicit copy/debug actions, not rendered by default in primary markdown views.
+- The profile form should expose typed preference controls only for known extension-facing keys today:
+  - default precision
+  - default workflow
+  - preserve unknown preference keys round-trip without exposing them as freeform JSON
+
+### Review
+
+- Added shared request transport in `src/lib/http.ts`, moved Selemene and Witness clients onto it, and normalized timeout/network/HTTP/parse failures before they hit Raycast UI flows.
+- Execution routing is now explicit and preference-driven through secure Raycast preferences, with route visibility added to dashboard, menu bar, and execution result metadata.
+- SQLite caching now defaults to minimized reading and pulse payloads, supports configurable reading-history retention, and exposes a personal-cache clear path without deleting catalog/service snapshots.
+- Daily Witness markdown now runs through the same presenter layer as engine, workflow, and cached reading output, and raw JSON is limited to explicit copy actions instead of inline preview sections.
+- Browser and pulse views now expose cache state plus structured sync issues so stale/partial refreshes are readable without dropping into logs.
+- Verification:
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --outDir .tmp-testbuild`
+  - `node --test .tmp-testbuild/lib/api.test.js .tmp-testbuild/lib/cache.test.js .tmp-testbuild/lib/execution-result-presenter.test.js .tmp-testbuild/lib/menu-bar-insights.test.js .tmp-testbuild/lib/pulse-board-presenter.test.js`
+  - `PATH=/opt/homebrew/bin:$PATH npm run build`
+
+## 2026-04-26 README And Release Copy Refresh
+
+### Checklist
+
+- [x] Scan the repo, current README, screenshots, quickstart, and store-submission docs to identify the real product story, command surface, and available assets.
+- [x] Confirm positioning choices with the user: audience, badge/screenshot preference, scope of README vs store copy, and whether to generate release-facing language alongside the README.
+- [x] Rewrite `README.md` so it reads like a strong landing page for `Tryambakam Noesis`, with updated links, command/value framing, and current architecture/runtime details.
+- [x] Update adjacent release-facing docs and descriptions where needed, including `QUICKSTART.md`, `docs/store-submission.md`, and manifest copy in `package.json`.
+- [x] Verify link targets and run a build/typecheck pass after doc and metadata updates.
+
+### Review
+
+- Rewrote `README.md` into a clearer landing-page style document with a stronger product pitch, flat-square badge bar, screenshot gallery, command table, runtime diagram, privacy/storage section, and direct links into quickstart, changelog, and store docs.
+- Updated `QUICKSTART.md` to the current command model and hardening work: secure preference-first key handling, explicit execution routing, current preferences, and the live command surface.
+- Updated `docs/store-submission.md` into a release-facing copy guide with recommended manifest/store description text, screenshot narrative, link inventory, and publish checklist.
+- Refreshed `package.json` description and keywords, and added explicit `homepage`, `repository`, and `bugs` links so package metadata matches the rewritten docs.
+- Added `.readme-gen.json` to preserve the selected README generation style (`modern`, `flat-square`) for future refreshes.
+- Verification:
+  - `git branch --show-current`
+  - `PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit`
   - `PATH=/opt/homebrew/bin:$PATH npm run build`

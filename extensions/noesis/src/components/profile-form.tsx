@@ -19,7 +19,8 @@ interface ProfileFormValues {
   latitude: string;
   longitude: string;
   timezone: string;
-  preferencesJson: string;
+  defaultPrecision: string;
+  defaultWorkflow: string;
 }
 
 export function ProfileForm({
@@ -39,8 +40,11 @@ export function ProfileForm({
   const [latitude, setLatitude] = useState(initial.latitude);
   const [longitude, setLongitude] = useState(initial.longitude);
   const [timezone, setTimezone] = useState(initial.timezone);
-  const [preferencesJson, setPreferencesJson] = useState(
-    initial.preferencesJson,
+  const [defaultPrecision, setDefaultPrecision] = useState(
+    initial.defaultPrecision,
+  );
+  const [defaultWorkflow, setDefaultWorkflow] = useState(
+    initial.defaultWorkflow,
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -61,7 +65,10 @@ export function ProfileForm({
     });
     setIsSubmitting(true);
     try {
-      const payload = toProfileUpdate(values);
+      const payload = toProfileUpdate(
+        values,
+        snapshot?.profile?.preferences ?? {},
+      );
       await updateUserProfile(config, payload);
       await syncDashboardSnapshot({ force: true });
       toast.style = Toast.Style.Success;
@@ -96,7 +103,8 @@ export function ProfileForm({
                 latitude,
                 longitude,
                 timezone,
-                preferencesJson,
+                defaultPrecision,
+                defaultWorkflow,
               })
             }
           />
@@ -161,12 +169,42 @@ export function ProfileForm({
         onChange={setTimezone}
         placeholder="Asia/Kolkata"
       />
-      <Form.TextArea
-        id="preferencesJson"
-        title="Preferences JSON"
-        value={preferencesJson}
-        onChange={setPreferencesJson}
-      />
+      <Form.Dropdown
+        id="defaultPrecision"
+        title="Default Precision"
+        value={defaultPrecision}
+        onChange={setDefaultPrecision}
+      >
+        <Form.Dropdown.Item value="" title="Default (Standard)" />
+        <Form.Dropdown.Item value="standard" title="Standard" />
+        <Form.Dropdown.Item value="high" title="High" />
+        <Form.Dropdown.Item value="extreme" title="Extreme" />
+      </Form.Dropdown>
+      {snapshot?.workflows.length ? (
+        <Form.Dropdown
+          id="defaultWorkflow"
+          title="Default Workflow"
+          value={defaultWorkflow}
+          onChange={setDefaultWorkflow}
+        >
+          <Form.Dropdown.Item value="" title="None" />
+          {snapshot.workflows.map((workflow) => (
+            <Form.Dropdown.Item
+              key={workflow.id}
+              value={workflow.id}
+              title={workflow.name}
+            />
+          ))}
+        </Form.Dropdown>
+      ) : (
+        <Form.TextField
+          id="defaultWorkflow"
+          title="Default Workflow ID"
+          value={defaultWorkflow}
+          onChange={setDefaultWorkflow}
+          placeholder="daily-practice"
+        />
+      )}
     </Form>
   );
 }
@@ -187,11 +225,18 @@ function buildInitialValues(profile?: UserProfileSnapshot): ProfileFormValues {
         ? String(profile.birthLocation.longitude)
         : "",
     timezone: profile?.timezone ?? "",
-    preferencesJson: JSON.stringify(profile?.preferences ?? {}, null, 2),
+    defaultPrecision: readProfilePreference(profile?.preferences, "precision"),
+    defaultWorkflow: readProfilePreference(
+      profile?.preferences,
+      "default_workflow",
+    ),
   };
 }
 
-function toProfileUpdate(values: ProfileFormValues): UserProfileUpdate {
+function toProfileUpdate(
+  values: ProfileFormValues,
+  existingPreferences: Record<string, unknown> = {},
+): UserProfileUpdate {
   const latitude = parseOptionalNumber(values.latitude, "Latitude", -90, 90);
   const longitude = parseOptionalNumber(
     values.longitude,
@@ -231,27 +276,37 @@ function toProfileUpdate(values: ProfileFormValues): UserProfileUpdate {
           }
         : undefined,
     timezone: values.timezone.trim() || undefined,
-    preferences: parsePreferences(values.preferencesJson),
+    preferences: buildProfilePreferences(values, existingPreferences),
   };
 }
 
-function parsePreferences(raw: string) {
-  const value = raw.trim();
-  if (!value) {
-    return {};
+function buildProfilePreferences(
+  values: ProfileFormValues,
+  existingPreferences: Record<string, unknown>,
+) {
+  const next = Object.fromEntries(
+    Object.entries(existingPreferences).filter(
+      ([key]) => key !== "precision" && key !== "default_workflow",
+    ),
+  );
+
+  if (values.defaultPrecision.trim()) {
+    next.precision = values.defaultPrecision.trim();
   }
 
-  try {
-    const parsed = JSON.parse(value) as unknown;
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-      throw new Error("Expected an object");
-    }
-    return parsed as Record<string, unknown>;
-  } catch (error) {
-    throw new Error(
-      `Preferences JSON must be a valid object. ${error instanceof Error ? error.message : ""}`.trim(),
-    );
+  if (values.defaultWorkflow.trim()) {
+    next.default_workflow = values.defaultWorkflow.trim();
   }
+
+  return next;
+}
+
+function readProfilePreference(
+  preferences: Record<string, unknown> | undefined,
+  key: "precision" | "default_workflow",
+) {
+  const value = preferences?.[key];
+  return typeof value === "string" ? value : "";
 }
 
 function parseOptionalNumber(

@@ -11,11 +11,15 @@ import {
   DashboardSnapshot,
   MenuBarSnapshot,
   SelemeneClientConfig,
+  SyncIssue,
 } from "./types";
 import {
   DEFAULT_BASE_URL,
+  getExecutionRoutePreference,
+  getReadingHistoryLimitPreference,
   getStoredBaseUrl,
   getStoredConfig,
+  shouldCacheRawPayloadsPreference,
 } from "./settings";
 
 const CACHE_TTL_MS = {
@@ -45,11 +49,16 @@ export async function readMenuBarSnapshot(): Promise<MenuBarSnapshot> {
   return {
     dashboard,
     insights: mapMenuBarInsights(repository.readMenuBarInsights()),
+    syncIssues: [],
   };
 }
 
 export function clearDashboardCache(): void {
   getCacheRepository().clearAll();
+}
+
+export function clearPersonalDataCache(): void {
+  getCacheRepository().clearPersonalData();
 }
 
 export async function syncDashboardSnapshot(
@@ -89,7 +98,10 @@ export async function syncDashboardSnapshot(
   }
 
   try {
-    const remote = await fetchRemoteSnapshot(config, refreshPlan);
+    const remote = await fetchRemoteSnapshot(config, {
+      ...refreshPlan,
+      includeRawPayloads: shouldCacheRawPayloadsPreference(),
+    });
     repository.saveRemoteSnapshot(remote);
     return decorateSnapshot(
       repository.readSnapshot(config.baseUrl, true),
@@ -101,7 +113,21 @@ export async function syncDashboardSnapshot(
         ? error.message
         : "Unable to refresh Selemene data";
     if (hasAnyData(cached)) {
-      return decorateSnapshot({ ...cached, syncError: message }, "cache");
+      return decorateSnapshot(
+        {
+          ...cached,
+          syncIssues: [
+            ...cached.syncIssues,
+            {
+              resource: "snapshot refresh",
+              target: "selemene",
+              message,
+            },
+          ],
+          syncError: message,
+        },
+        "cache",
+      );
     }
 
     throw error;
@@ -120,6 +146,7 @@ export async function syncMenuBarSnapshot(
     return {
       dashboard,
       insights: cachedInsights,
+      syncIssues: [],
     };
   }
 
@@ -134,13 +161,19 @@ export async function syncMenuBarSnapshot(
     return {
       dashboard,
       insights: cachedInsights,
+      syncIssues: [],
     };
   }
 
   const settled = await Promise.allSettled(
     plans.map(async (plan) => {
       const result = await calculateEngine(config, plan.engineId, plan.input);
-      return buildMenuBarInsight(plan.kind, result, new Date().toISOString());
+      return buildMenuBarInsight(
+        plan.kind,
+        result,
+        new Date().toISOString(),
+        shouldCacheRawPayloadsPreference(),
+      );
     }),
   );
 
@@ -153,15 +186,22 @@ export async function syncMenuBarSnapshot(
       > => entry.status === "fulfilled",
     )
     .map((entry) => entry.value);
-  const failures = settled
-    .filter(
-      (entry): entry is PromiseRejectedResult => entry.status === "rejected",
-    )
-    .map((entry) =>
-      entry.reason instanceof Error
-        ? entry.reason.message
-        : "Unable to refresh menu bar insight",
-    );
+  const routeTarget = getExecutionRoutePreference();
+  const syncIssues: SyncIssue[] = settled.flatMap((entry, index) =>
+    entry.status === "rejected"
+      ? [
+          {
+            resource: plans[index]?.kind ?? "pulse insight",
+            target: routeTarget,
+            message:
+              entry.reason instanceof Error
+                ? entry.reason.message
+                : "Unable to refresh menu bar insight",
+          },
+        ]
+      : [],
+  );
+  const failures = syncIssues.map((issue) => issue.message);
 
   if (successful.length > 0) {
     repository.saveMenuBarInsights(successful);
@@ -173,6 +213,7 @@ export async function syncMenuBarSnapshot(
       ...cachedInsights,
       ...mapMenuBarInsights(successful),
     },
+    syncIssues,
     syncError: failures[0],
   };
 }
@@ -182,7 +223,9 @@ export function getCacheDatabasePath(): string {
 }
 
 function getCacheRepository() {
-  return createNoesisCacheRepository(getCacheDatabasePath());
+  return createNoesisCacheRepository(getCacheDatabasePath(), {
+    readingHistoryLimit: getReadingHistoryLimitPreference(),
+  });
 }
 
 function decorateSnapshot(
@@ -204,6 +247,9 @@ function decorateSnapshot(
     ...snapshot,
     source: hasData ? source : "empty",
     cacheState,
+    syncIssues: snapshot.syncIssues ?? [],
+    syncError:
+      snapshot.syncError ?? snapshot.syncIssues?.[0]?.message ?? undefined,
   };
 }
 

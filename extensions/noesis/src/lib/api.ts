@@ -1,4 +1,6 @@
 import {
+  ExecutionRouteInfo,
+  ExecutionRouteTarget,
   EngineExecutionInput,
   EngineExecutionResult,
   EngineSummary,
@@ -8,6 +10,9 @@ import {
   ReadingSummary,
   RemoteSnapshot,
   SelemeneClientConfig,
+  TarotExecutionOptions,
+  TarotSpreadVariant,
+  SyncIssue,
   UsageSnapshot,
   UserProfileSnapshot,
   UserProfileUpdate,
@@ -15,6 +20,73 @@ import {
   WorkflowExecutionResult,
   WorkflowSummary,
 } from "./types";
+import { describeTarget, JsonRequestError, requestJson } from "./http";
+import { getExecutionRoutePreference } from "./settings";
+import { getWitnessUrl } from "./witness-api";
+import { normalizeBaseUrl } from "./urls";
+
+async function resolveExecutionRoute(
+  config: SelemeneClientConfig,
+): Promise<ExecutionRouteInfo> {
+  const target = getExecutionRoutePreference();
+
+  if (target === "witness") {
+    const witnessUrl = await getWitnessUrl();
+    return {
+      target,
+      label: "Witness Gateway",
+      baseUrl: witnessUrl,
+    };
+  }
+
+  return {
+    target: "selemene",
+    label: "Selemene Direct",
+    baseUrl: normalizeBaseUrl(config.baseUrl),
+  };
+}
+
+async function calculateEngineViaWitness(
+  route: ExecutionRouteInfo,
+  engineId: string,
+  input: EngineExecutionInput,
+  fetchImpl: typeof fetch = fetch,
+): Promise<EngineExecutionResult> {
+  try {
+    const response = await requestJson<Record<string, unknown>>({
+      target: "witness",
+      baseUrl: route.baseUrl,
+      path: `/api/v1/engines/${engineId}/calculate`,
+      method: "POST",
+      body: JSON.stringify(toExecutionRequest(input)),
+      fetchImpl,
+    });
+    return toEngineExecutionResult(response.payload, route);
+  } catch (error) {
+    throw normalizeExecutionError(error, "witness");
+  }
+}
+
+async function executeWorkflowViaWitness(
+  route: ExecutionRouteInfo,
+  workflowId: string,
+  input: EngineExecutionInput,
+  fetchImpl: typeof fetch = fetch,
+): Promise<WorkflowExecutionResult> {
+  try {
+    const response = await requestJson<Record<string, unknown>>({
+      target: "witness",
+      baseUrl: route.baseUrl,
+      path: `/api/v1/workflows/${workflowId}/execute`,
+      method: "POST",
+      body: JSON.stringify(toExecutionRequest(input)),
+      fetchImpl,
+    });
+    return toWorkflowExecutionResult(response.payload, route);
+  } catch (error) {
+    throw normalizeExecutionError(error, "witness");
+  }
+}
 
 interface HealthResponse {
   status: string;
@@ -130,15 +202,18 @@ export interface FetchRemoteSnapshotOptions {
   includeProfile?: boolean;
   includeUsage?: boolean;
   includeReadings?: boolean;
+  includeRawPayloads?: boolean;
   readingLimit?: number;
   usageEngineLimit?: number;
   fetchImpl?: typeof fetch;
 }
 
-export function normalizeBaseUrl(baseUrl: string): string {
-  const trimmed = baseUrl.trim().replace(/\/+$/, "");
-  return trimmed.replace(/\/api\/v1$/, "");
+interface OptionalRequestResult<T> {
+  value?: T;
+  issue?: SyncIssue;
 }
+
+export { normalizeBaseUrl } from "./urls";
 
 export async function validateSelemeneCredentials(
   config: SelemeneClientConfig,
@@ -155,12 +230,14 @@ export async function fetchRemoteSnapshot(
 ): Promise<RemoteSnapshot> {
   const client = new SelemeneApiClient(config, options.fetchImpl ?? fetch);
   const fetchedAt = new Date().toISOString();
+  const syncIssues: SyncIssue[] = [];
 
   const includeService = options.includeService ?? true;
   const includeCatalog = options.includeCatalog ?? true;
   const includeProfile = options.includeProfile ?? true;
   const includeUsage = options.includeUsage ?? true;
   const includeReadings = options.includeReadings ?? true;
+  const includeRawPayloads = options.includeRawPayloads ?? false;
   const readingLimit = options.readingLimit ?? 25;
   const usageEngineLimit = options.usageEngineLimit ?? 10;
 
@@ -179,19 +256,29 @@ export async function fetchRemoteSnapshot(
     if (includeCatalog) {
       const workflowInfos = await Promise.all(
         statusResponse.workflows.map(async (workflow) => {
-          const info = await optionalRequest(() =>
-            client.getWorkflowInfo(workflow.id),
+          const info = await optionalRequest(
+            `workflow ${workflow.id} info`,
+            "selemene",
+            () => client.getWorkflowInfo(workflow.id),
           );
-          return toWorkflowSummary(workflow, info, fetchedAt);
+          if (info.issue) {
+            syncIssues.push(info.issue);
+          }
+          return toWorkflowSummary(workflow, info.value, fetchedAt);
         }),
       );
 
       const engineInfos = await Promise.all(
         statusResponse.engines.map(async (engineId) => {
-          const info = await optionalRequest(() =>
-            client.getEngineInfo(engineId),
+          const info = await optionalRequest(
+            `engine ${engineId} info`,
+            "selemene",
+            () => client.getEngineInfo(engineId),
           );
-          return toEngineSummary(engineId, info, fetchedAt);
+          if (info.issue) {
+            syncIssues.push(info.issue);
+          }
+          return toEngineSummary(engineId, info.value, fetchedAt);
         }),
       );
 
@@ -207,39 +294,57 @@ export async function fetchRemoteSnapshot(
     readingStatsResponse,
   ] = await Promise.all([
     includeProfile
-      ? optionalRequest(() => client.getUserProfile())
-      : Promise.resolve(undefined),
+      ? optionalRequest("profile", "selemene", () => client.getUserProfile())
+      : Promise.resolve<OptionalRequestResult<UserProfileResponse>>({}),
     includeUsage
-      ? optionalRequest(() => client.getUserUsage(usageEngineLimit))
-      : Promise.resolve(undefined),
+      ? optionalRequest("usage", "selemene", () =>
+          client.getUserUsage(usageEngineLimit),
+        )
+      : Promise.resolve<OptionalRequestResult<UserUsageResponse>>({}),
     includeReadings
-      ? optionalRequest(() =>
+      ? optionalRequest("readings", "selemene", () =>
           client.getReadings({ limit: readingLimit, offset: 0 }),
         )
-      : Promise.resolve(undefined),
+      : Promise.resolve<OptionalRequestResult<ReadingsListResponse>>({}),
     includeReadings
-      ? optionalRequest(() => client.getReadingStats())
-      : Promise.resolve(undefined),
+      ? optionalRequest("reading stats", "selemene", () =>
+          client.getReadingStats(),
+        )
+      : Promise.resolve<OptionalRequestResult<ReadingsStatsResponse>>({}),
   ]);
+
+  syncIssues.push(
+    ...([
+      profileResponse.issue,
+      usageResponse.issue,
+      readingsResponse.issue,
+      readingStatsResponse.issue,
+    ].filter(Boolean) as SyncIssue[]),
+  );
 
   return {
     baseUrl: normalizeBaseUrl(config.baseUrl),
     health,
-    profile: profileResponse
-      ? toUserProfile(profileResponse, fetchedAt)
+    profile: profileResponse.value
+      ? toUserProfile(profileResponse.value, fetchedAt)
       : undefined,
-    usage: usageResponse
-      ? toUsageSnapshot(usageResponse, fetchedAt)
+    usage: usageResponse.value
+      ? toUsageSnapshot(usageResponse.value, fetchedAt)
       : undefined,
     workflows,
     engines,
-    readings: readingsResponse
-      ? toReadingSummaries(readingsResponse, fetchedAt)
+    readings: readingsResponse.value
+      ? toReadingSummaries(
+          readingsResponse.value,
+          fetchedAt,
+          includeRawPayloads,
+        )
       : undefined,
-    readingStats: readingStatsResponse
-      ? toReadingStats(readingStatsResponse, fetchedAt)
+    readingStats: readingStatsResponse.value
+      ? toReadingStats(readingStatsResponse.value, fetchedAt)
       : undefined,
     rateLimit: client.rateLimitInfo,
+    syncIssues,
     fetchedAt,
   };
 }
@@ -250,9 +355,50 @@ export async function calculateEngine(
   input: EngineExecutionInput,
   fetchImpl: typeof fetch = fetch,
 ): Promise<EngineExecutionResult> {
+  const route = await resolveExecutionRoute(config);
+  if (route.target === "witness") {
+    return calculateEngineViaWitness(route, engineId, input, fetchImpl);
+  }
+
   const client = new SelemeneApiClient(config, fetchImpl);
   const response = await client.calculateEngine(engineId, input);
-  return toEngineExecutionResult(response);
+  return toEngineExecutionResult(response, route);
+}
+
+export function withTarotExecutionOptions(
+  input: EngineExecutionInput,
+  tarot: TarotExecutionOptions,
+): EngineExecutionInput {
+  const nextOptions: Record<string, unknown> = {
+    ...(input.options ?? {}),
+  };
+
+  if (tarot.question?.trim()) {
+    nextOptions.question = tarot.question.trim();
+  }
+
+  if (tarot.spread) {
+    nextOptions.spread = normalizeTarotSpreadVariant(tarot.spread);
+  }
+
+  return {
+    ...input,
+    options: nextOptions,
+  };
+}
+
+export async function calculateTarot(
+  config: SelemeneClientConfig,
+  input: EngineExecutionInput,
+  tarot: TarotExecutionOptions,
+  fetchImpl: typeof fetch = fetch,
+): Promise<EngineExecutionResult> {
+  return calculateEngine(
+    config,
+    "tarot",
+    withTarotExecutionOptions(input, tarot),
+    fetchImpl,
+  );
 }
 
 export async function executeWorkflow(
@@ -261,9 +407,14 @@ export async function executeWorkflow(
   input: EngineExecutionInput,
   fetchImpl: typeof fetch = fetch,
 ): Promise<WorkflowExecutionResult> {
+  const route = await resolveExecutionRoute(config);
+  if (route.target === "witness") {
+    return executeWorkflowViaWitness(route, workflowId, input, fetchImpl);
+  }
+
   const client = new SelemeneApiClient(config, fetchImpl);
   const response = await client.executeWorkflow(workflowId, input);
-  return toWorkflowExecutionResult(response);
+  return toWorkflowExecutionResult(response, route);
 }
 
 export async function updateUserProfile(
@@ -390,46 +541,28 @@ class SelemeneApiClient {
     init: RequestInit = { method: "GET" },
     context: RequestContext = { auth: true },
   ): Promise<T> {
-    const headers = new Headers(init.headers ?? {});
-    headers.set("Accept", "application/json");
-
-    if (context.auth !== false) {
-      headers.set("X-API-Key", this.apiKey);
-    }
-
-    if (init.body) {
-      headers.set("Content-Type", "application/json");
-    }
-
-    let response: Response;
-
     try {
-      response = await this.fetchImpl(`${this.baseUrl}${path}`, {
-        ...init,
-        headers,
+      const response = await requestJson<T>({
+        target: "selemene",
+        baseUrl: this.baseUrl,
+        path,
+        method: init.method ?? "GET",
+        headers: init.headers,
+        body: typeof init.body === "string" ? init.body : undefined,
+        authHeader:
+          context.auth === false
+            ? undefined
+            : {
+                name: "X-API-Key",
+                value: this.apiKey,
+              },
+        fetchImpl: this.fetchImpl,
       });
+      this.captureRateLimit(response.headers);
+      return response.payload;
     } catch (error) {
-      const message =
-        error instanceof Error ? error.message : "Unknown network error";
-      throw new Error(
-        `Unable to reach Selemene at ${this.baseUrl}${path}. ${message}`,
-      );
+      throw normalizeSelemeneError(error);
     }
-
-    this.captureRateLimit(response.headers);
-
-    const text = await response.text();
-    const payload = text
-      ? (JSON.parse(text) as T | ApiErrorResponse)
-      : ({} as T);
-
-    if (!response.ok) {
-      throw new Error(
-        buildApiErrorMessage(response.status, payload as ApiErrorResponse),
-      );
-    }
-
-    return payload as T;
   }
 
   private captureRateLimit(headers: Headers): void {
@@ -443,6 +576,7 @@ class SelemeneApiClient {
 function buildApiErrorMessage(
   status: number,
   payload: ApiErrorResponse,
+  bodyText?: string,
 ): string {
   if (status === 401) {
     return "Authentication failed. Check the Selemene Engine API key.";
@@ -460,7 +594,97 @@ function buildApiErrorMessage(
     return "Selemene rate limit exceeded. Try again after the limit resets.";
   }
 
-  return payload.error ?? `Selemene request failed with status ${status}.`;
+  return (
+    payload.error ??
+    `Selemene request failed with status ${status}${bodyText ? `: ${truncateBodyText(bodyText)}` : "."}`
+  );
+}
+
+function buildWitnessErrorMessage(
+  status: number,
+  payload: ApiErrorResponse,
+  bodyText?: string,
+): string {
+  if (status === 401 || status === 403) {
+    return (
+      payload.error ??
+      "Witness gateway rejected the request. Check the selected route and gateway configuration."
+    );
+  }
+
+  if (status === 404) {
+    return payload.error ?? "Witness gateway resource was not found.";
+  }
+
+  if (status === 429) {
+    return "Witness gateway rate limit exceeded. Try again after the limit resets.";
+  }
+
+  return (
+    payload.error ??
+    `Witness gateway request failed with status ${status}${bodyText ? `: ${truncateBodyText(bodyText)}` : "."}`
+  );
+}
+
+function normalizeSelemeneError(error: unknown): Error {
+  if (!(error instanceof JsonRequestError)) {
+    return error instanceof Error ? error : new Error("Unknown Selemene error");
+  }
+
+  switch (error.kind) {
+    case "timeout":
+      return new Error("Selemene request timed out. Try again in a moment.");
+    case "network":
+      return new Error(error.message);
+    case "parse":
+      return new Error(
+        "Selemene returned an unreadable response. Check the backend or gateway for malformed JSON.",
+      );
+    case "http":
+    default:
+      return new Error(
+        buildApiErrorMessage(
+          error.status ?? 500,
+          toApiErrorResponse(error.payload),
+          error.bodyText,
+        ),
+      );
+  }
+}
+
+function normalizeExecutionError(
+  error: unknown,
+  target: ExecutionRouteTarget,
+): Error {
+  if (target === "selemene") {
+    return normalizeSelemeneError(error);
+  }
+
+  if (!(error instanceof JsonRequestError)) {
+    return error instanceof Error ? error : new Error("Unknown Witness error");
+  }
+
+  switch (error.kind) {
+    case "timeout":
+      return new Error(
+        "Witness gateway request timed out. Try again in a moment.",
+      );
+    case "network":
+      return new Error(error.message);
+    case "parse":
+      return new Error(
+        "Witness gateway returned an unreadable response. Check the gateway for malformed JSON.",
+      );
+    case "http":
+    default:
+      return new Error(
+        buildWitnessErrorMessage(
+          error.status ?? 500,
+          toApiErrorResponse(error.payload),
+          error.bodyText,
+        ),
+      );
+  }
 }
 
 function parseRateLimitInfo(headers: Headers): RateLimitInfo {
@@ -560,6 +784,7 @@ function toEngineSummary(
 function toReadingSummaries(
   response: ReadingsListResponse,
   fetchedAt: string,
+  includeRawPayloads: boolean,
 ): ReadingSummary[] {
   return response.readings.map((reading) => ({
     id: reading.id,
@@ -570,9 +795,45 @@ function toReadingSummaries(
     consciousnessLevel: reading.consciousness_level,
     calculationTimeMs: reading.calculation_time_ms ?? undefined,
     createdAt: reading.created_at,
-    payload: reading as Record<string, unknown>,
+    payload: toCachedReadingPayload(reading, includeRawPayloads),
     fetchedAt,
   }));
+}
+
+function toCachedReadingPayload(
+  reading: ReadingsListResponse["readings"][number],
+  includeRawPayloads: boolean,
+): Record<string, unknown> {
+  if (includeRawPayloads) {
+    return reading as Record<string, unknown>;
+  }
+
+  const resultData =
+    reading.result_data && typeof reading.result_data === "object"
+      ? reading.result_data
+      : reading.result_data !== undefined
+        ? { value: reading.result_data }
+        : undefined;
+  const payload: Record<string, unknown> = {
+    engine_id: reading.engine_id,
+    ...(reading.witness_prompt
+      ? { witness_prompt: reading.witness_prompt }
+      : {}),
+    ...(typeof reading.consciousness_level === "number"
+      ? { consciousness_level: reading.consciousness_level }
+      : {}),
+    ...(reading.created_at ? { timestamp: reading.created_at } : {}),
+    ...(reading.calculation_time_ms !== undefined
+      ? {
+          metadata: {
+            calculation_time_ms: reading.calculation_time_ms,
+          },
+        }
+      : {}),
+    ...(resultData ? { result: asRecord(resultData) } : {}),
+  };
+
+  return payload;
 }
 
 function toReadingStats(
@@ -588,40 +849,66 @@ function toReadingStats(
 
 function toEngineExecutionResult(
   payload: Record<string, unknown>,
+  route?: ExecutionRouteInfo,
 ): EngineExecutionResult {
+  const witnessLayer = asRecord(payload.witness_layer);
+  const witnessPrompt =
+    readString(payload, "witness_prompt") ??
+    readString(witnessLayer, "witness_question");
+
   return {
     engineId: readString(payload, "engine_id") ?? "unknown-engine",
     result: (payload.result as Record<string, unknown> | undefined) ?? {},
-    witnessPrompt: readString(payload, "witness_prompt"),
+    witnessPrompt,
     consciousnessLevel: readNumber(payload, "consciousness_level"),
     metadata: asRecord(payload.metadata),
     timestamp: readString(payload, "timestamp"),
+    route,
     raw: payload,
   };
 }
 
 function toWorkflowExecutionResult(
   payload: Record<string, unknown>,
+  route?: ExecutionRouteInfo,
 ): WorkflowExecutionResult {
-  const rawOutputs = asRecord(payload.engine_outputs);
+  const rawOutputs =
+    withEngineOutputsRecord(asRecord(payload.engine_outputs)) ??
+    withEngineOutputsRecord(asRecord(payload.engine_results)) ??
+    {};
   const engineOutputs = Object.fromEntries(
     Object.entries(rawOutputs).map(([engineId, value]) => [
       engineId,
-      toEngineExecutionResult({
-        engine_id: engineId,
-        ...(asRecord(value) ?? {}),
-      }),
+      toEngineExecutionResult(
+        {
+          engine_id: engineId,
+          ...(asRecord(value) ?? {}),
+        },
+        route,
+      ),
     ]),
   );
 
   return {
     workflowId: readString(payload, "workflow_id") ?? "unknown-workflow",
     engineOutputs,
-    synthesis: asRecord(payload.synthesis),
+    synthesis: {
+      ...asRecord(payload.synthesis),
+      ...("witness_layer" in payload
+        ? { witness_layer: asRecord(payload.witness_layer) }
+        : {}),
+    },
     totalTimeMs: readNumber(payload, "total_time_ms"),
     timestamp: readString(payload, "timestamp"),
+    route,
     raw: payload,
   };
+}
+
+function withEngineOutputsRecord(
+  value: Record<string, unknown>,
+): Record<string, unknown> | undefined {
+  return Object.keys(value).length > 0 ? value : undefined;
 }
 
 function toExecutionRequest(
@@ -664,6 +951,23 @@ function toExecutionRequest(
   }
 
   return request;
+}
+
+function normalizeTarotSpreadVariant(
+  spread: TarotSpreadVariant,
+): TarotSpreadVariant {
+  switch (spread) {
+    case "single_card":
+    case "three_card":
+    case "celtic_cross":
+    case "horseshoe":
+    case "relationship":
+    case "career":
+    case "yes_no":
+      return spread;
+    default:
+      return "three_card";
+  }
 }
 
 function toUserProfileRequest(
@@ -743,6 +1047,10 @@ function asRecord(value: unknown): Record<string, unknown> {
     : {};
 }
 
+function toApiErrorResponse(value: unknown): ApiErrorResponse {
+  return asRecord(value) as ApiErrorResponse;
+}
+
 function humanizeIdentifier(value: string): string {
   return value
     .split(/[-_]/g)
@@ -751,12 +1059,32 @@ function humanizeIdentifier(value: string): string {
     .join(" ");
 }
 
+function truncateBodyText(value?: string): string {
+  const trimmed = value?.trim();
+  if (!trimmed) {
+    return "";
+  }
+
+  return trimmed.length > 160 ? `${trimmed.slice(0, 157)}...` : trimmed;
+}
+
 async function optionalRequest<T>(
+  resource: string,
+  target: ExecutionRouteTarget,
   request: () => Promise<T>,
-): Promise<T | undefined> {
+): Promise<OptionalRequestResult<T>> {
   try {
-    return await request();
-  } catch {
-    return undefined;
+    return { value: await request() };
+  } catch (error) {
+    return {
+      issue: {
+        resource,
+        target,
+        message:
+          error instanceof Error
+            ? error.message
+            : `Unable to refresh ${resource} from ${describeTarget(target)}.`,
+      },
+    };
   }
 }

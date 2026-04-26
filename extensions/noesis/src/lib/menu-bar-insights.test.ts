@@ -46,6 +46,7 @@ function createDashboardSnapshot(): DashboardSnapshot {
     readings: [],
     readingStats: [],
     rateLimit: {},
+    syncIssues: [],
     timestamps: {
       lastSyncAt: "2026-04-22T12:00:00Z",
     },

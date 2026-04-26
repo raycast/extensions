@@ -107,16 +107,22 @@ interface SqliteDatabase {
   all<T>(sql: string): T[];
 }
 
+export interface NoesisCacheOptions {
+  readingHistoryLimit?: number;
+}
+
 export interface NoesisCacheRepository {
   readSnapshot(baseUrl: string, hasCredentials: boolean): DashboardSnapshot;
   readMenuBarInsights(): MenuBarInsightSnapshot[];
   saveRemoteSnapshot(snapshot: RemoteSnapshot): void;
   saveMenuBarInsights(insights: MenuBarInsightSnapshot[]): void;
+  clearPersonalData(): void;
   clearAll(): void;
 }
 
 export function createNoesisCacheRepository(
   databasePath: string,
+  options: NoesisCacheOptions = {},
 ): NoesisCacheRepository {
   ensureDatabaseDirectory(databasePath);
   const shouldBootstrap =
@@ -136,10 +142,13 @@ export function createNoesisCacheRepository(
       return readMenuBarInsights(database);
     },
     saveRemoteSnapshot(snapshot) {
-      saveRemoteSnapshot(database, snapshot);
+      saveRemoteSnapshot(database, snapshot, options);
     },
     saveMenuBarInsights(insights) {
       saveMenuBarInsights(database, insights);
+    },
+    clearPersonalData() {
+      clearPersonalData(database);
     },
     clearAll() {
       clearAll(database);
@@ -287,6 +296,10 @@ function readSnapshot(
 
   const timestamps = readTimestamps(database);
   const lastBaseUrl = readMetadata(database, "base_url") ?? baseUrl;
+  const syncIssues = parseOptionalJson(
+    readMetadata(database, "sync_issues_json"),
+    [],
+  ) as DashboardSnapshot["syncIssues"];
 
   const health =
     healthRow === undefined
@@ -374,6 +387,7 @@ function readSnapshot(
     readingStats: readingStatItems,
     rateLimit,
     timestamps,
+    syncIssues,
   };
 }
 
@@ -410,13 +424,22 @@ function readMenuBarInsights(
 function saveRemoteSnapshot(
   database: SqliteDatabase,
   snapshot: RemoteSnapshot,
+  options: NoesisCacheOptions,
 ): void {
   const statements = ["BEGIN IMMEDIATE;"];
   const updatedAt = snapshot.fetchedAt;
+  const readingHistoryLimit = Math.max(1, options.readingHistoryLimit ?? 50);
 
   statements.push(metadataUpsertSql("base_url", snapshot.baseUrl, updatedAt));
   statements.push(
     metadataUpsertSql("last_sync_at", snapshot.fetchedAt, updatedAt),
+  );
+  statements.push(
+    metadataUpsertSql(
+      "sync_issues_json",
+      JSON.stringify(snapshot.syncIssues ?? []),
+      updatedAt,
+    ),
   );
 
   if (snapshot.health) {
@@ -574,7 +597,7 @@ function saveRemoteSnapshot(
       `);
     }
 
-    statements.push(trimReadingsSql(100));
+    statements.push(trimReadingsSql(readingHistoryLimit));
     statements.push(
       metadataUpsertSql(
         "readings_fetched_at",
@@ -666,6 +689,22 @@ function clearAll(database: SqliteDatabase): void {
   `);
 }
 
+function clearPersonalData(database: SqliteDatabase): void {
+  database.exec(`
+    DELETE FROM profile_snapshot;
+    DELETE FROM usage_snapshot;
+    DELETE FROM readings;
+    DELETE FROM reading_stats;
+    DELETE FROM menu_bar_insights;
+    DELETE FROM metadata WHERE key IN (
+      'profile_fetched_at',
+      'usage_fetched_at',
+      'readings_fetched_at',
+      'sync_issues_json'
+    );
+  `);
+}
+
 function trimReadingsSql(maxRows: number): string {
   return `
     DELETE FROM readings
@@ -733,4 +772,16 @@ function ensureDatabaseDirectory(databasePath: string): void {
 
 function parseJson<T>(value: string): T {
   return JSON.parse(value) as T;
+}
+
+function parseOptionalJson<T>(value: string | null, fallback: T): T {
+  if (!value) {
+    return fallback;
+  }
+
+  try {
+    return parseJson<T>(value);
+  } catch {
+    return fallback;
+  }
 }

@@ -94,21 +94,22 @@ export function buildMenuBarInsight(
   kind: MenuBarInsightKind,
   result: EngineExecutionResult,
   fetchedAt: string,
+  includeRawPayloads = false,
 ): MenuBarInsightSnapshot {
   switch (kind) {
     case "vedicClock":
-      return buildVedicClockInsight(result, fetchedAt);
+      return buildVedicClockInsight(result, fetchedAt, includeRawPayloads);
     case "biorhythm":
-      return buildBiorhythmInsight(result, fetchedAt);
+      return buildBiorhythmInsight(result, fetchedAt, includeRawPayloads);
     case "vimshottari":
-      return buildVimshottariInsight(result, fetchedAt);
+      return buildVimshottariInsight(result, fetchedAt, includeRawPayloads);
     default:
       return {
         kind,
         engineId: result.engineId,
         title: result.engineId,
         summary: "Insight available",
-        payload: result.raw,
+        payload: buildInsightPayload(result, includeRawPayloads),
         fetchedAt,
         refreshAfter: addMilliseconds(fetchedAt, PERSONAL_INSIGHT_REFRESH_MS),
       };
@@ -196,6 +197,7 @@ function toBirthData(
 function buildVedicClockInsight(
   result: EngineExecutionResult,
   fetchedAt: string,
+  includeRawPayloads: boolean,
 ): MenuBarInsightSnapshot {
   const payload = asRecord(result.result);
   const currentOrgan = asRecord(payload.current_organ);
@@ -224,7 +226,7 @@ function buildVedicClockInsight(
     title,
     subtitle,
     summary,
-    payload: result.raw,
+    payload: buildInsightPayload(result, includeRawPayloads),
     fetchedAt,
     refreshAfter: computeNextOrganRefreshAt(payload, fetchedAt),
   };
@@ -233,6 +235,7 @@ function buildVedicClockInsight(
 function buildBiorhythmInsight(
   result: EngineExecutionResult,
   fetchedAt: string,
+  includeRawPayloads: boolean,
 ): MenuBarInsightSnapshot {
   const payload = asRecord(result.result);
   const physical = summarizeCycle("Physical", asRecord(payload.physical));
@@ -266,7 +269,7 @@ function buildBiorhythmInsight(
     title,
     subtitle,
     summary,
-    payload: result.raw,
+    payload: buildInsightPayload(result, includeRawPayloads),
     fetchedAt,
     refreshAfter: addMilliseconds(fetchedAt, PERSONAL_INSIGHT_REFRESH_MS),
   };
@@ -275,6 +278,7 @@ function buildBiorhythmInsight(
 function buildVimshottariInsight(
   result: EngineExecutionResult,
   fetchedAt: string,
+  includeRawPayloads: boolean,
 ): MenuBarInsightSnapshot {
   const payload = asRecord(result.result);
   const currentPeriod = asRecord(payload.current_period);
@@ -308,9 +312,25 @@ function buildVimshottariInsight(
     title,
     subtitle,
     summary: summary || "Current dasha map cached",
-    payload: result.raw,
+    payload: buildInsightPayload(result, includeRawPayloads),
     fetchedAt,
     refreshAfter: addMilliseconds(fetchedAt, PERSONAL_INSIGHT_REFRESH_MS),
+  };
+}
+
+function buildInsightPayload(
+  result: EngineExecutionResult,
+  includeRawPayloads: boolean,
+): Record<string, unknown> {
+  if (includeRawPayloads) {
+    return result.raw;
+  }
+
+  return {
+    engine_id: result.engineId,
+    result: result.result,
+    metadata: result.metadata,
+    ...(result.timestamp ? { timestamp: result.timestamp } : {}),
   };
 }
 

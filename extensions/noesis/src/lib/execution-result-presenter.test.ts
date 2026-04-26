@@ -77,7 +77,132 @@ test("buildEngineResultMarkdown turns nested engine payloads into readable secti
   assert.match(markdown, /\*\*Recommendation 1\*\*/);
   assert.match(markdown, /### Timezone/);
   assert.match(markdown, /## Response Metadata/);
-  assert.match(markdown, /## Raw Response Preview/);
+  assert.doesNotMatch(markdown, /## Raw Response Preview/);
+});
+
+test("buildEngineResultMarkdown renders tarot spreads as readable card sections", () => {
+  const result: EngineExecutionResult = {
+    engineId: "tarot",
+    witnessPrompt:
+      'How do these cards speak to your question: "the current plantery transits analysis"?',
+    consciousnessLevel: 0,
+    metadata: {
+      calculation_time_ms: 3,
+    },
+    result: {
+      question: "the current plantery transits analysis",
+      spread: {
+        name: "Celtic Cross",
+        type: "celtic_cross",
+        description:
+          "A comprehensive 10-card spread providing deep insight into a situation",
+      },
+      positions: [
+        {
+          name: "Present",
+          position: 0,
+          meaning: "The heart of the matter; your current situation",
+          card: {
+            name: "The World",
+            arcana: "major",
+            element: "earth",
+            isReversed: false,
+            interpretation: {
+              meaning: "Completion, integration, accomplishment, travel",
+              keywords: ["completion", "wholeness", "achievement"],
+            },
+          },
+        },
+        {
+          name: "Challenge",
+          position: 1,
+          meaning: "What crosses you; the immediate challenge or obstacle",
+          card: {
+            name: "Queen of Swords",
+            arcana: "minor",
+            element: "air",
+            suit: "swords",
+            isReversed: true,
+            interpretation: {
+              meaning: "Overly emotional, easily influenced, cold-hearted",
+              keywords: ["independence", "clarity"],
+            },
+          },
+        },
+        {
+          name: "Foundation",
+          position: 2,
+          meaning: "The root of the situation; what lies beneath",
+          card: {
+            name: "The Moon",
+            arcana: "major",
+            element: "water",
+            isReversed: true,
+            interpretation: {
+              meaning: "Release of fear, repressed emotion, inner confusion",
+              keywords: ["illusion", "intuition"],
+            },
+          },
+        },
+        {
+          name: "Recent Past",
+          position: 3,
+          meaning: "What is passing away; recent influences",
+          card: {
+            name: "The Emperor",
+            arcana: "major",
+            element: "fire",
+            isReversed: false,
+            interpretation: {
+              meaning: "Authority, structure, control, fatherhood, stability",
+              keywords: ["authority", "structure"],
+            },
+          },
+        },
+        {
+          name: "Near Future",
+          position: 4,
+          meaning: "What lies ahead; influences entering your life",
+          card: {
+            name: "Nine of Cups",
+            arcana: "minor",
+            element: "water",
+            suit: "cups",
+            isReversed: false,
+            interpretation: {
+              meaning: "Contentment, satisfaction, gratitude, wish come true",
+              keywords: ["contentment", "gratitude"],
+            },
+          },
+        },
+      ],
+    },
+    raw: {
+      engine_id: "tarot",
+    },
+  };
+
+  const markdown = buildEngineResultMarkdown("Tarot Result", result, {
+    requestPayload: {
+      options: {
+        question: "the current plantery transits analysis",
+        spread: "celtic_cross",
+      },
+    },
+  });
+
+  assert.match(markdown, /## Spread Overview/);
+  assert.match(markdown, /\| Spread \| Celtic Cross \|/);
+  assert.match(markdown, /- Spread: Celtic Cross/);
+  assert.match(markdown, /- Cards drawn: 5/);
+  assert.match(markdown, /### Cards Drawn/);
+  assert.match(markdown, /#### 1\. Present/);
+  assert.match(markdown, /- Card: The World/);
+  assert.match(markdown, /- Orientation: Reversed/);
+  assert.match(markdown, /#### 5\. Near Future/);
+  assert.match(markdown, /- Keywords: Completion, Wholeness, Achievement/);
+  assert.doesNotMatch(markdown, /field\(s\)/);
+  assert.doesNotMatch(markdown, /more item\(s\) not shown/);
 });
 
 test("buildWorkflowResultMarkdown organizes synthesis and per-engine outputs", () => {
@@ -136,7 +261,7 @@ test("buildWorkflowResultMarkdown organizes synthesis and per-engine outputs", (
   assert.match(markdown, /### Panchanga/);
   assert.match(markdown, /Observe the fasting current\./);
   assert.match(markdown, /### Numerology/);
-  assert.match(markdown, /## Raw Response Preview/);
+  assert.doesNotMatch(markdown, /## Raw Response Preview/);
 });
 
 test("buildReadingResultMarkdown reuses the interpreted presenter for cached readings", () => {

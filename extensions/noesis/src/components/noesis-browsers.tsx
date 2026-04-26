@@ -408,7 +408,7 @@ export function ReadingsBrowser(props: ReadingsBrowserProps) {
               detail={
                 <List.Item.Detail
                   markdown={buildReadingMarkdown(reading)}
-                  metadata={buildReadingMetadata(reading)}
+                  metadata={buildReadingMetadata(reading, snapshot)}
                 />
               }
               actions={
@@ -440,7 +440,7 @@ export function ReadingsBrowser(props: ReadingsBrowserProps) {
                     />
                   ) : null}
                   <Action.CopyToClipboard
-                    title="Copy Reading Payload"
+                    title="Copy Raw Reading JSON"
                     icon={Icon.Document}
                     shortcut={{ modifiers: ["cmd"], key: "c" }}
                     content={safeStringify(reading.payload)}
@@ -571,7 +571,7 @@ export function ReadingDetailView({
     <Detail
       navigationTitle={truncate(reading.witnessPrompt, 42) || reading.engineId}
       markdown={buildReadingMarkdown(reading, true)}
-      metadata={buildReadingMetadata(reading)}
+      metadata={buildReadingMetadata(reading, snapshot)}
       actions={
         <NoesisActionPanel>
           <Action.CopyToClipboard
@@ -593,7 +593,7 @@ export function ReadingDetailView({
             />
           ) : null}
           <Action.CopyToClipboard
-            title="Copy Reading Payload"
+            title="Copy Raw Reading JSON"
             icon={Icon.Document}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
             content={safeStringify(reading.payload)}
@@ -663,6 +663,7 @@ function buildEngineMarkdown(
     recentReading
       ? `- Most recent reading: ${formatRelativeTime(recentReading.createdAt)}`
       : "- No cached reading in the recent snapshot",
+    ...buildSnapshotStatusLines(snapshot),
     "",
     recentReading
       ? [
@@ -700,6 +701,7 @@ function buildWorkflowMarkdown(
     workflow.engineIds.length
       ? `- Engine chain: ${workflow.engineIds.join(", ")}`
       : "- Engine chain metadata is not cached yet",
+    ...buildSnapshotStatusLines(snapshot),
     "",
     expanded && workflow.engineIds.length
       ? [
@@ -751,6 +753,18 @@ function buildEngineMetadata(
         title="Catalog Synced At"
         text={formatAbsoluteTime(engine.fetchedAt)}
       />
+      {snapshot ? (
+        <List.Item.Detail.Metadata.Label
+          title="Cache State"
+          text={snapshot.cacheState.toUpperCase()}
+        />
+      ) : null}
+      {snapshot?.syncIssues[0] ? (
+        <List.Item.Detail.Metadata.Label
+          title="Snapshot Issue"
+          text={snapshot.syncIssues[0].resource}
+        />
+      ) : null}
       {recentReading ? (
         <List.Item.Detail.Metadata.Label
           title="Latest Reading"
@@ -787,6 +801,18 @@ function buildWorkflowMetadata(
         title="Catalog Synced At"
         text={formatAbsoluteTime(workflow.fetchedAt)}
       />
+      {snapshot ? (
+        <List.Item.Detail.Metadata.Label
+          title="Cache State"
+          text={snapshot.cacheState.toUpperCase()}
+        />
+      ) : null}
+      {snapshot?.syncIssues[0] ? (
+        <List.Item.Detail.Metadata.Label
+          title="Snapshot Issue"
+          text={snapshot.syncIssues[0].resource}
+        />
+      ) : null}
       {workflow.engineIds.length ? (
         <List.Item.Detail.Metadata.Label
           title="Engine IDs"
@@ -797,7 +823,10 @@ function buildWorkflowMetadata(
   );
 }
 
-function buildReadingMetadata(reading: ReadingSummary) {
+function buildReadingMetadata(
+  reading: ReadingSummary,
+  snapshot?: DashboardSnapshot | null,
+) {
   const resultKeys = getReadingStructuredKeys(reading);
 
   return (
@@ -833,12 +862,51 @@ function buildReadingMetadata(reading: ReadingSummary) {
         title="Created At"
         text={formatAbsoluteTime(reading.createdAt)}
       />
+      {snapshot ? (
+        <List.Item.Detail.Metadata.Label
+          title="Cache State"
+          text={snapshot.cacheState.toUpperCase()}
+        />
+      ) : null}
+      {snapshot?.syncIssues[0] ? (
+        <List.Item.Detail.Metadata.Label
+          title="Snapshot Issue"
+          text={snapshot.syncIssues[0].resource}
+        />
+      ) : null}
       <List.Item.Detail.Metadata.Label
         title="Input Hash"
         text={reading.inputHash}
       />
     </List.Item.Detail.Metadata>
   );
+}
+
+function buildSnapshotStatusLines(
+  snapshot: DashboardSnapshot | null,
+): string[] {
+  if (!snapshot) {
+    return [];
+  }
+
+  const lines = [
+    `- Cache state: ${snapshot.cacheState.toUpperCase()}`,
+    snapshot.timestamps.lastSyncAt
+      ? `- Last dashboard sync: ${formatRelativeTime(snapshot.timestamps.lastSyncAt)}`
+      : "- Last dashboard sync: Not synced yet",
+  ];
+
+  if (snapshot.syncIssues.length === 0) {
+    lines.push("- Sync issues: none");
+    return lines;
+  }
+
+  lines.push(`- Sync issues: ${snapshot.syncIssues.length}`);
+  snapshot.syncIssues.slice(0, 2).forEach((issue) => {
+    lines.push(`- ${issue.resource}: ${issue.message}`);
+  });
+
+  return lines;
 }
 
 function getEngineReadingCount(

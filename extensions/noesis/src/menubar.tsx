@@ -12,7 +12,10 @@ import {
 } from "./lib/menu-bar-insights";
 import { openCommand } from "./lib/navigation";
 import { readMenuBarSnapshot, syncMenuBarSnapshot } from "./lib/queries";
-import { getPulseModePreference } from "./lib/settings";
+import {
+  getExecutionRoutePreference,
+  getPulseModePreference,
+} from "./lib/settings";
 import { MenuBarSnapshot } from "./lib/types";
 
 export default function MenuBar() {
@@ -43,6 +46,7 @@ export default function MenuBar() {
   const dashboard = snapshot?.dashboard ?? null;
   const insights = snapshot?.insights ?? {};
   const pulseMode = getPulseModePreference();
+  const executionRoute = getExecutionRoutePreference();
   const title = dashboard
     ? buildMenuBarTitle(dashboard, insights, pulseMode, error)
     : "Pulse";
@@ -174,12 +178,27 @@ export default function MenuBar() {
         title={formatMenuBarLine("Mode", getPulseModeLabel(pulseMode), 36)}
         icon={Icon.Text}
       />
+      <MenuBarExtra.Item
+        title={formatMenuBarLine(
+          "Route",
+          executionRoute === "witness" ? "Witness Gateway" : "Selemene Direct",
+          44,
+        )}
+        icon={Icon.Globe}
+      />
       {dashboard?.syncError ? (
         <MenuBarExtra.Item
           title={formatMenuBarLine("Snapshot", dashboard.syncError, 72)}
           icon={Icon.ExclamationMark}
         />
       ) : null}
+      {dashboard?.syncIssues.slice(1, 3).map((issue) => (
+        <MenuBarExtra.Item
+          key={`${issue.target}-${issue.resource}`}
+          title={formatMenuBarLine(issue.resource, issue.message, 72)}
+          icon={Icon.ExclamationMark}
+        />
+      ))}
       {error ? (
         <MenuBarExtra.Item
           title={formatMenuBarLine("Pulse", error, 72)}

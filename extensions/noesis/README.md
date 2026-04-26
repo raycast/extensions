@@ -1,73 +1,98 @@
 # Tryambakam Noesis
 
-**Self-Consciousness as Technology. Body as Medium. Breath as Interface.**
+[![Raycast Extension](https://img.shields.io/badge/Raycast-Extension-FF6363?style=flat-square&logo=raycast&logoColor=white)](https://www.raycast.com/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=111827)](https://react.dev/)
+[![SQLite Cache](https://img.shields.io/badge/Cache-SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![License](https://img.shields.io/github/license/Sheshiyer/noesis?style=flat-square)](./LICENSE)
+[![Last Commit](https://img.shields.io/github/last-commit/Sheshiyer/noesis?style=flat-square)](https://github.com/Sheshiyer/noesis)
 
-Tryambakam Noesis is a Raycast command center for self-consciousness practice, powered by the Selemene Engine. It brings engine execution, workflow synthesis, cached readings, reusable profile defaults, and a pulse-oriented menu bar into Raycast without turning the interface into a web dashboard.
+**Self-consciousness as technology. Body as medium. Breath as interface.**
 
-Selemene is the computational layer underneath: the API that calculates engine outputs, executes workflows, and returns structured reading payloads. Tryambakam Noesis is the practitioner-facing surface: a compact field console for reading what is active, running the next calculation, and keeping the raw JSON available without making it the primary experience.
+Tryambakam Noesis is a native Raycast field console for running Selemene readings, workflow syntheses, Daily Witness reflections, and pulse-aware menu bar insight without turning the experience into a browser dashboard. It is designed for two audiences at once: practitioners who want fast, readable access to what is active now, and reviewers or contributors who need a clear view of routing, caching, storage, and execution behavior.
 
-## What It Does
+[Quick Start](./QUICKSTART.md) · [Store Submission Notes](./docs/store-submission.md) · [Changelog](./CHANGELOG.md) · [GitHub Repository](https://github.com/Sheshiyer/noesis)
 
-- Connects a Selemene Engine API key through a Raycast onboarding form.
-- Validates the key against `GET /api/v1/users/me` using `X-API-Key` auth.
-- Stores the API key in Raycast local storage, not in SQLite.
-- Stores cached service, profile, usage, workflow, engine, reading, and pulse data in local SQLite under Raycast `environment.supportPath`.
-- Reads cached data first, then refreshes stale resources from the Selemene Engine with stale-while-revalidate behavior.
-- Runs individual engines and workflows with reusable profile defaults.
-- Renders execution and reading results as interpreted reports, with raw JSON available as a secondary action.
+| Dashboard | Engine Console | Profile Defaults |
+| --- | --- | --- |
+| ![Dashboard command center](./metadata/dashboard-command-center.png) | ![Engine console biorhythm](./metadata/engine-console-biorhythm.png) | ![Profile defaults](./metadata/profile-defaults.png) |
 
-## Commands
+## Why This Surface Exists
 
-1. `Dashboard` - Tryambakam Noesis command center for profile defaults, engine status, pulse state, catalog health, and recent activity.
-2. `Engines` - Browse Selemene Engine lenses, inspect phase coverage, and run a new reading.
-3. `Workflows` - Browse synthesis workflows and execute multi-engine runs.
-4. `Readings` - Review cached reading history with interpreted result pages.
-5. `Profile` - Maintain shared birth data, timezone, and reusable preferences once.
-6. `API Key` - Connect, edit, or rotate the Selemene Engine API key and warm the local cache.
-7. `Pulse` - Menu bar surface for current TCM organ timing plus cached biorhythm and Vimshottari context.
+- Raycast is the operator layer. It should show the active pattern, the next action, and the readable outcome.
+- Selemene is the computational layer. It calculates engine outputs, workflows, and reading history.
+- Witness is an optional execution route, not hidden magic. The extension makes that path explicit.
+- SQLite is a local memory layer for accessibility and continuity, not the source of truth.
+
+## Highlights
+
+- Run individual engines, multi-engine workflows, and the Daily Witness flow from one native command surface.
+- Keep the current pulse in the menu bar while also mirroring the full pulse board inside Raycast detail views.
+- Read interpreted result pages first, with raw JSON available only through explicit copy and debug actions.
+- Route engine and workflow execution explicitly through `Selemene Direct` or `Witness Gateway`.
+- Store secrets in Raycast preferences and keep recent history in a local SQLite cache with minimized payloads by default.
+- Surface partial refresh failures as structured sync issues instead of silently degrading the UI.
+
+## Command Surface
+
+| Command | What It Does |
+| --- | --- |
+| `Dashboard` | Central command center for service state, profile defaults, recent readings, pulse state, and navigation. |
+| `Engines` | Browse Selemene lenses by phase, inspect recent context, and run a new engine reading. |
+| `Workflows` | Browse workflow chains, review engine composition, and execute multi-engine runs. |
+| `Readings` | Review cached reading history with interpreted result pages and explicit payload copy actions. |
+| `Profile` | Maintain shared birth data, timezone, default precision, and default workflow preferences. |
+| `API Key` | Connect or rotate the Selemene key, warm the cache, and manage local account state safely. |
+| `Daily Witness` | Open the somatic witness reading flow backed by the Daily Mirror engine. |
+| `Pulse` | Show the current organ, biorhythm, or Vimshottari pulse in the menu bar and mirrored detail view. |
+
+## Runtime Model
+
+```mermaid
+flowchart LR
+    A["Raycast Commands"] --> B["Shared Transport and Presenters"]
+    M["Menu Bar Pulse"] --> B
+    B --> C["Selemene Direct"]
+    B --> D["Witness Gateway"]
+    C --> E["Readable Result Views"]
+    D --> E
+    C --> F["Local SQLite Cache"]
+    D --> F
+    F --> G["Dashboard, Browsers, History, Pulse Board"]
+```
+
+## Privacy And Local Storage
+
+- Secrets: the preferred storage path is the Raycast secure password preference for `apiKey`. A legacy local storage fallback still exists for compatibility.
+- Cache: local snapshots live in `environment.supportPath/noesis-cache.sqlite`.
+- Payload policy: readings and pulse snapshots are minimized before caching unless `Store Raw Payloads` is explicitly enabled.
+- Retention: the reading history cache can be capped at `25`, `50`, or `100` rows.
+- Clearing: personal cache data can be removed without deleting the shared engine catalog or service metadata.
 
 ## Configuration
 
-Primary path:
+The extension exposes the following preferences:
 
-- Run `API Key`
-- Paste the Selemene Engine API key (`nk_...`)
-- Optionally override the base URL
-- Paste a new key later to rotate accounts; Tryambakam Noesis clears the old local snapshot before warming the replacement profile.
+- `apiKey` - secure Raycast password preference for Selemene access
+- `baseUrl` - optional Selemene base URL override
+- `witnessUrl` - trusted Witness gateway URL
+- `executionRoute` - `Selemene Direct` or `Witness Gateway`
+- `readingHistoryLimit` - local SQLite history cap
+- `cacheRawPayloads` - opt-in raw JSON retention
+- `pulseMode` - menu bar title priority (`TCM Organ`, `Biorhythm`, or `Vimshottari`)
 
-Fallbacks still supported for development:
-
-- `baseUrl` Raycast preference
-- `pulseMode` Raycast preference (`TCM Organ`, `Biorhythm`, or `Vimshottari`)
-- `NOESIS_API_BASE_URL` / `SELEMENE_BASE_URL`
-- `NOESIS_API_KEY` / `SELEMENE_API_KEY`
-
-Default base URL:
+Default Selemene base URL:
 
 - `https://selemene.tryambakam.space`
 
-## Local Storage Model
+## Getting Started
 
-- Secret storage: Raycast local storage
-- Cache database: `environment.supportPath/noesis-cache.sqlite`
-- Cached resources:
-  - service health and rate-limit snapshot
-  - user profile
-  - usage analytics
-  - engine catalog
-  - workflow catalog plus engine membership
-  - recent readings and reading stats
-  - menu bar pulse insights for Vedic Clock, biorhythm, and Vimshottari
+1. Open `API Key` in Raycast.
+2. Add the Selemene API key, confirm the base URL if needed, and validate the connection.
+3. Leave execution routing on `Selemene Direct` unless you intentionally want the Witness gateway path.
+4. Open `Dashboard` to warm the cache and navigate into `Engines`, `Workflows`, `Readings`, `Daily Witness`, or `Pulse`.
 
-## Brand Frame
-
-Tryambakam Noesis is a practice platform for self-consciousness. It does not sell AI as a feature and does not promise transformation timelines. The extension is built around one practical posture: surface the active pattern, keep the practitioner in authorship, and let the engine remain infrastructure.
-
-The governing product language is Kha-Ba-La:
-
-- `Kha` - observer, witness, author-drive
-- `Ba` - body, vehicle, embodiment
-- `La` - inertia, resistance, the material that gives form to practice
+More setup detail lives in [QUICKSTART.md](./QUICKSTART.md).
 
 ## Development
 
@@ -80,6 +105,15 @@ PATH=/opt/homebrew/bin:$PATH npm run dev
 
 ```bash
 PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit
-PATH=/opt/homebrew/bin:$PATH npm run lint
 PATH=/opt/homebrew/bin:$PATH npm run build
 ```
+
+## Project Frame
+
+The governing product language is Kha-Ba-La:
+
+- `Kha` - observer, witness, author-drive
+- `Ba` - body, vehicle, embodiment
+- `La` - inertia, resistance, materiality
+
+Tryambakam Noesis keeps that frame visible without asking the interface itself to become mystical. The product goal is practical: surface the pattern, preserve authorship, and keep the infrastructure legible.

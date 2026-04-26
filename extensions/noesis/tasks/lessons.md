@@ -20,3 +20,4 @@
 - Raycast command deeplinks must target the manifest command `name`, not the old file/title concept; after renaming `Onboarding` to `API Key`, internal actions must open `api-key`.
 - After adding or renaming Raycast commands, `npm run build` is not enough for local validation; run `npm run dev`/`ray develop` so Raycast refreshes its enabled-command registry.
 - For navigation between commands inside the same Raycast extension, use `launchCommand` with `LaunchType.UserInitiated`; `raycast://` URLs can be blocked by Raycast with "Not allowed to run command."
+- When the user asks for a deep review across security, design, API handling, and storage, switch from incremental implementation to a structured audit plan with explicit deliverables and repository-specific evidence.

@@ -8,6 +8,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { calculateTarot } from "../lib/api";
 import { NoesisActionPanel } from "./noesis-actions";
 import { calculateEngine, executeWorkflow } from "../lib/api";
 import {
@@ -28,6 +29,8 @@ import {
   EngineExecutionResult,
   EngineSummary,
   PrecisionLevel,
+  TAROT_SPREAD_VARIANTS,
+  TarotSpreadVariant,
   WorkflowExecutionResult,
   WorkflowSummary,
 } from "../lib/types";
@@ -43,6 +46,8 @@ interface ExecutionFormValues {
   timezone: string;
   currentTime: Date | null;
   precision: PrecisionLevel;
+  tarotQuestion: string;
+  tarotSpread: TarotSpreadVariant;
   optionsJson: string;
 }
 
@@ -102,7 +107,13 @@ export function EngineExecutionForm({
         null,
         2,
       );
-      const response = await calculateEngine(config, engine.id, requestPayload);
+      const response =
+        engine.id === "tarot"
+          ? await calculateTarot(config, requestPayload, {
+              question: values.tarotQuestion,
+              spread: values.tarotSpread,
+            })
+          : await calculateEngine(config, engine.id, requestPayload);
       await syncDashboardSnapshot({ force: true });
       setResult({ result: response, requestJson });
       toast.style = Toast.Style.Success;
@@ -162,6 +173,7 @@ export function EngineExecutionForm({
     <ExecutionForm
       title={`Run ${engine.name}`}
       description="Birth data and timezone are prefilled from your profile when available. Run is the primary action here; if the request fails, this flow keeps an editable recovery state instead of dropping you back to generic commands."
+      engineId={engine.id}
       initialValues={draft}
       submitTitle="Run Engine"
       isSubmitting={isSubmitting}
@@ -277,6 +289,7 @@ export function WorkflowExecutionForm({
     <ExecutionForm
       title={`Run ${workflow.name}`}
       description="Workflows can return partial engine outputs by design. This screen stays in a run-centric loop: submit, inspect the result, or edit and retry immediately if the request fails."
+      engineId={undefined}
       initialValues={draft}
       submitTitle="Run Workflow"
       isSubmitting={isSubmitting}
@@ -328,7 +341,7 @@ function ExecutionSuccessDetail({
             />
           ) : null}
           <Action.CopyToClipboard
-            title="Copy Result JSON"
+            title="Copy Raw Result JSON"
             icon={Icon.Clipboard}
             content={rawJson}
           />
@@ -381,6 +394,7 @@ function ExecutionFailureDetail({
 function ExecutionForm({
   title,
   description,
+  engineId,
   initialValues,
   submitTitle,
   isSubmitting,
@@ -388,6 +402,7 @@ function ExecutionForm({
 }: {
   title: string;
   description: string;
+  engineId?: string;
   initialValues: ExecutionFormValues;
   submitTitle: string;
   isSubmitting: boolean;
@@ -406,7 +421,14 @@ function ExecutionForm({
   const [precision, setPrecision] = useState<PrecisionLevel>(
     initialValues.precision,
   );
+  const [tarotQuestion, setTarotQuestion] = useState(
+    initialValues.tarotQuestion,
+  );
+  const [tarotSpread, setTarotSpread] = useState<TarotSpreadVariant>(
+    initialValues.tarotSpread,
+  );
   const [optionsJson, setOptionsJson] = useState(initialValues.optionsJson);
+  const isTarotEngine = engineId === "tarot";
 
   return (
     <Form
@@ -428,6 +450,8 @@ function ExecutionForm({
                 timezone,
                 currentTime,
                 precision,
+                tarotQuestion,
+                tarotSpread,
                 optionsJson,
               })
             }
@@ -507,12 +531,37 @@ function ExecutionForm({
         <Form.Dropdown.Item value="High" title="High" />
         <Form.Dropdown.Item value="Extreme" title="Extreme" />
       </Form.Dropdown>
+      {isTarotEngine ? (
+        <>
+          <Form.TextField
+            id="tarotQuestion"
+            title="Tarot Question"
+            value={tarotQuestion}
+            onChange={setTarotQuestion}
+            placeholder="What needs clarity right now?"
+          />
+          <Form.Dropdown
+            id="tarotSpread"
+            title="Tarot Spread"
+            value={tarotSpread}
+            onChange={(value) => setTarotSpread(value as TarotSpreadVariant)}
+          >
+            {TAROT_SPREAD_VARIANTS.map((spread) => (
+              <Form.Dropdown.Item
+                key={spread}
+                value={spread}
+                title={humanizeSpreadLabel(spread)}
+              />
+            ))}
+          </Form.Dropdown>
+        </>
+      ) : null}
       <Form.TextArea
         id="optionsJson"
         title="Options JSON"
         value={optionsJson}
         onChange={setOptionsJson}
-        placeholder='{"question":"What should I focus on?"}'
+        placeholder='{"context":"Optional extra engine options"}'
       />
     </Form>
   );
@@ -538,6 +587,8 @@ function buildInitialValues(
     timezone: profile?.timezone ?? "",
     currentTime: new Date(),
     precision: normalizePrecisionPreference(profile?.preferences.precision),
+    tarotQuestion: "",
+    tarotSpread: "three_card",
     optionsJson: "{}",
   };
 }
@@ -584,6 +635,13 @@ function toExecutionInput(values: ExecutionFormValues): EngineExecutionInput {
   };
 }
 
+function humanizeSpreadLabel(spread: TarotSpreadVariant): string {
+  return spread
+    .split("_")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
 function buildEngineResultMetadata(result: EngineExecutionResult) {
   const resultKeys = listStructuredKeys(result.result);
   const metadataKeys = listStructuredKeys(result.metadata);
@@ -602,6 +660,9 @@ function buildEngineResultMetadata(result: EngineExecutionResult) {
           title="Consciousness"
           text={String(result.consciousnessLevel)}
         />
+      ) : null}
+      {result.route ? (
+        <Detail.Metadata.Label title="Route" text={result.route.label} />
       ) : null}
       <Detail.Metadata.Label
         title="Calculation Time"
@@ -640,6 +701,9 @@ function buildWorkflowResultMetadata(result: WorkflowExecutionResult) {
         title="Total Time"
         text={formatCalculationTime(result.totalTimeMs)}
       />
+      {result.route ? (
+        <Detail.Metadata.Label title="Route" text={result.route.label} />
+      ) : null}
       {result.timestamp ? (
         <Detail.Metadata.Label
           title="Timestamp"

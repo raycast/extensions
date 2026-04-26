@@ -87,6 +87,13 @@ test("cache repository persists and reloads Selemene snapshots", () => {
       remaining: 199,
       reset: 1713268800,
     },
+    syncIssues: [
+      {
+        resource: "usage",
+        target: "selemene",
+        message: "Usage refresh timed out.",
+      },
+    ],
   });
 
   repository.saveMenuBarInsights([
@@ -119,6 +126,7 @@ test("cache repository persists and reloads Selemene snapshots", () => {
   assert.equal(snapshot.readingStats[0]?.count, 1);
   assert.equal(snapshot.timestamps.lastSyncAt, "2026-04-16T18:30:00Z");
   assert.equal(snapshot.rateLimit.remaining, 199);
+  assert.equal(snapshot.syncIssues[0]?.resource, "usage");
   assert.equal(insights[0]?.title, "Kidney · Kapha");
   assert.equal(insights[0]?.refreshAfter, "2026-04-16T19:00:00Z");
 });
@@ -166,4 +174,133 @@ test("cache repository clears account-specific snapshots before key rotation", (
   assert.equal(snapshot.profile, undefined);
   assert.equal(snapshot.readings.length, 0);
   assert.equal(snapshot.timestamps.profile, undefined);
+});
+
+test("cache repository clears personal data without removing catalog and service snapshots", () => {
+  const tempDir = fs.mkdtempSync(
+    path.join(os.tmpdir(), "noesis-cache-personal-clear-test-"),
+  );
+  const databasePath = path.join(tempDir, "cache.sqlite");
+  const repository = createNoesisCacheRepository(databasePath);
+
+  repository.saveRemoteSnapshot({
+    baseUrl: "https://selemene.tryambakam.space",
+    fetchedAt: "2026-04-23T12:00:00Z",
+    health: {
+      status: "ok",
+      version: "3.0.0",
+      uptimeSeconds: 42,
+      enginesLoaded: 16,
+      workflowsLoaded: 6,
+      fetchedAt: "2026-04-23T12:00:00Z",
+    },
+    workflows: [
+      {
+        id: "daily-practice",
+        name: "Daily Practice",
+        description: "Reflection workflow",
+        engineCount: 2,
+        engineIds: ["panchanga", "vedic-clock"],
+        fetchedAt: "2026-04-23T12:00:00Z",
+      },
+    ],
+    engines: [
+      {
+        id: "numerology",
+        name: "Numerology",
+        requiredPhase: 0,
+        fetchedAt: "2026-04-23T12:00:00Z",
+      },
+    ],
+    profile: {
+      id: "real-user",
+      email: "real@example.com",
+      fullName: "Real Profile",
+      tier: "enterprise",
+      consciousnessLevel: 3,
+      experiencePoints: 999,
+      preferences: {},
+      fetchedAt: "2026-04-23T12:00:00Z",
+    },
+    readings: [
+      {
+        id: "real-reading",
+        engineId: "biorhythm",
+        inputHash: "real-hash",
+        witnessPrompt: "Private profile prompt",
+        consciousnessLevel: 3,
+        createdAt: "2026-04-23T11:59:00Z",
+        payload: { private: true },
+        fetchedAt: "2026-04-23T12:00:00Z",
+      },
+    ],
+  });
+
+  repository.saveMenuBarInsights([
+    {
+      kind: "biorhythm",
+      engineId: "biorhythm",
+      title: "Energy 72%",
+      summary: "Physical 81%",
+      payload: { private: true },
+      fetchedAt: "2026-04-23T12:00:00Z",
+      refreshAfter: "2026-04-23T14:00:00Z",
+    },
+  ]);
+
+  repository.clearPersonalData();
+
+  const snapshot = repository.readSnapshot(
+    "https://selemene.tryambakam.space",
+    true,
+  );
+
+  assert.equal(snapshot.health?.status, "ok");
+  assert.equal(snapshot.workflows.length, 1);
+  assert.equal(snapshot.engines.length, 1);
+  assert.equal(snapshot.profile, undefined);
+  assert.equal(snapshot.readings.length, 0);
+  assert.equal(snapshot.readingStats.length, 0);
+  assert.equal(repository.readMenuBarInsights().length, 0);
+});
+
+test("cache repository enforces the configured reading history limit", () => {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "noesis-cache-limit-"));
+  const databasePath = path.join(tempDir, "cache.sqlite");
+  const repository = createNoesisCacheRepository(databasePath, {
+    readingHistoryLimit: 1,
+  });
+
+  repository.saveRemoteSnapshot({
+    baseUrl: "https://selemene.tryambakam.space",
+    fetchedAt: "2026-04-24T12:00:00Z",
+    readings: [
+      {
+        id: "reading-older",
+        engineId: "numerology",
+        inputHash: "hash-1",
+        consciousnessLevel: 1,
+        createdAt: "2026-04-24T11:00:00Z",
+        payload: { result: { life_path: 7 } },
+        fetchedAt: "2026-04-24T12:00:00Z",
+      },
+      {
+        id: "reading-newer",
+        engineId: "numerology",
+        inputHash: "hash-2",
+        consciousnessLevel: 2,
+        createdAt: "2026-04-24T11:30:00Z",
+        payload: { result: { life_path: 9 } },
+        fetchedAt: "2026-04-24T12:00:00Z",
+      },
+    ],
+  });
+
+  const snapshot = repository.readSnapshot(
+    "https://selemene.tryambakam.space",
+    true,
+  );
+
+  assert.equal(snapshot.readings.length, 1);
+  assert.equal(snapshot.readings[0]?.id, "reading-newer");
 });

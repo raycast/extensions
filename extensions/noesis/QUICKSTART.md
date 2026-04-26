@@ -1,50 +1,71 @@
-# Selemene Noesis - Quick Start
+# Tryambakam Noesis Quick Start
 
-## 1. Run Onboarding
+## 1. Connect The Extension
 
-Open the `Noesis Onboarding` command in Raycast and enter:
-- `Base URL`: usually `https://selemene.tryambakam.space`
-- `API Key`: your `nk_...` key
+Open `API Key` in Raycast and enter:
 
-The onboarding flow validates the key before saving it and warms the local cache.
+- `Selemene Engine API Key` - your `nk_...` key
+- `Selemene Engine Base URL` - usually `https://selemene.tryambakam.space`
 
-## 2. Open The Dashboard
+The command validates the account before saving configuration and warming the local cache.
 
-After onboarding, open `Noesis Dashboard`.
+## 2. Keep The Route Explicit
 
-It reads from local SQLite first, then refreshes stale data from:
-- `GET /health/live`
-- `GET /api/v1/status`
-- `GET /api/v1/users/me`
-- `GET /api/v1/users/me/usage`
-- `GET /api/v1/readings`
-- `GET /api/v1/readings/stats`
-- workflow and engine `.../info` endpoints
+In Raycast preferences, leave `Execution Route` on `Selemene Direct` unless you intentionally want the Witness gateway path.
 
-## 3. What Stays Local
+Available routing options:
 
-The extension preserves locally cached:
-- workflows
-- engines
-- usage summaries
-- recent readings
-- reading stats
-- last successful service snapshot
+- `Selemene Direct` - default path for engine and workflow execution
+- `Witness Gateway` - explicit alternative path when you want Witness-enriched execution
 
-If the API is temporarily unavailable, the dashboard and menu bar continue to show cached data.
+## 3. Open The Main Surfaces
 
-## 4. Local Verification
+Use the command set this way:
+
+- `Dashboard` - command center and first cache warm
+- `Engines` - single-engine runs
+- `Workflows` - multi-engine synthesis
+- `Readings` - local history and interpreted result pages
+- `Profile` - birth data, timezone, default precision, default workflow
+- `Daily Witness` - somatic witness reading flow
+- `Pulse` - menu bar insight plus mirrored pulse board detail
+
+## 4. Understand What Stays Local
+
+The extension keeps a local SQLite cache at Raycast `environment.supportPath` for accessibility and continuity.
+
+By default it stores:
+
+- service health and rate-limit metadata
+- engine catalog
+- workflow catalog
+- profile and usage snapshots
+- recent readings with minimized payloads
+- pulse insight snapshots
+
+Secrets are not stored in SQLite. The preferred key path is the Raycast secure password preference.
+
+## 5. Useful Preferences
+
+The most important operational preferences are:
+
+- `apiKey`
+- `baseUrl`
+- `witnessUrl`
+- `executionRoute`
+- `readingHistoryLimit`
+- `cacheRawPayloads`
+- `pulseMode`
+
+## 6. Local Verification
 
 ```bash
 PATH=/opt/homebrew/bin:$PATH npx tsc --noEmit
-rm -rf /tmp/noesis-testbuild
-PATH=/opt/homebrew/bin:$PATH npx tsc --outDir /tmp/noesis-testbuild
-node --test /tmp/noesis-testbuild/lib/api.test.js /tmp/noesis-testbuild/lib/cache.test.js
+PATH=/opt/homebrew/bin:$PATH npm run build
 ```
 
-## 5. Development Overrides
+## 7. Next References
 
-If needed, the extension still falls back to:
-- `baseUrl` Raycast preference
-- `NOESIS_API_BASE_URL` / `SELEMENE_BASE_URL`
-- `NOESIS_API_KEY` / `SELEMENE_API_KEY`
+- [README](./README.md)
+- [Store Submission Notes](./docs/store-submission.md)
+- [Changelog](./CHANGELOG.md)
