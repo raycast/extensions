@@ -1,0 +1,58 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "hot-corners",
+  "title": "Hot Corners",
+  "description": "Save presets, apply them, and toggle hot corners off and on while restoring your last layout.",
+  "icon": "extension-icon.png",
+  "author": "joaogf.dev",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "save-preset",
+      "title": "Save Hot Corners Preset",
+      "subtitle": "Hot Corners",
+      "description": "Capture the current hot corner actions and modifiers as a named preset.",
+      "mode": "view"
+    },
+    {
+      "name": "list-presets",
+      "title": "List Hot Corners Presets",
+      "subtitle": "Hot Corners",
+      "description": "Browse saved presets and apply one (updates Dock preferences and restarts the Dock).",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-hot-corners",
+      "title": "Toggle Hot Corners",
+      "subtitle": "Hot Corners",
+      "description": "Turn all hot corners off or restore the last layout. The subtitle shows Enabled or Disabled for the current state.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
