@@ -26,13 +26,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.0",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
     "@types/node": "~20.10.2",
-    "@types/react": "^18.3.3",
+    "@types/react": "^19.2.14",
     "@typescript-eslint/eslint-plugin": "^6.13.1",
     "@typescript-eslint/parser": "^6.13.1",
     "eslint": "^8.55.0",
