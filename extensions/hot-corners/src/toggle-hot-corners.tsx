@@ -65,6 +65,13 @@ export default async function ToggleHotCornersCommand() {
     await LocalStorage.removeItem(TOGGLE_DISABLED_KEY);
     await LocalStorage.removeItem(TOGGLE_BACKUP_KEY);
     await showHUD("Hot corners restored");
+  } catch (e) {
+    const message = e instanceof Error ? e.message : String(e);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Could not toggle hot corners",
+      message,
+    });
   } finally {
     await syncToggleCommandSubtitle();
   }

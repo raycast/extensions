@@ -95,7 +95,7 @@ export default function ListPresetsCommand() {
                 />
                 {index > 0 ? (
                   <Action
-                    title="Move up"
+                    title="Move Up"
                     icon={Icon.ArrowUp}
                     shortcut={Keyboard.Shortcut.Common.MoveUp}
                     onAction={() => setPresets(movePreset(preset.id, -1))}
