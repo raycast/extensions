@@ -172,8 +172,8 @@ function normalizeMonthSeries(value: Record<string, unknown> | undefined): Displ
       return numeric === undefined ? undefined : { label: month, value: formatNumber(numeric) };
     })
     .filter((row): row is DisplayRow => Boolean(row))
-    .sort((a, b) => b.label.localeCompare(a.label))
-    .slice(0, 6);
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .slice(-6);
 }
 
 function normalizeShareRecord(value: unknown): DisplayRow[] {
@@ -257,7 +257,7 @@ function formatMaybeNumber(value?: number): string {
 }
 
 function formatVisitsSummary(n: NormalizedWebsiteData): string {
-  const last3 = n.monthlyVisits.slice(0, 3);
+  const last3 = n.monthlyVisits.slice(-3);
   if (last3.length > 0) return last3.map((row) => row.value).join(" • ");
   return formatMaybeNumber(n.visits);
 }
