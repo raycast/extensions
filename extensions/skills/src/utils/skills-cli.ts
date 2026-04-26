@@ -12,11 +12,15 @@ const isWindows = process.platform === "win32";
 
 let validatedCustomNpxPath: string | null = null;
 let pendingCustomNpxValidation: { path: string; promise: Promise<void> } | null = null;
+let pendingSkillsCliRun: Promise<unknown> = Promise.resolve();
+let bunxResolutionFailed = false;
 
 type ExecFailure = Error & {
   code?: string | number;
   stderr?: string;
 };
+
+type PackageRunner = "npx" | "bunx";
 
 export class NpxResolutionError extends Error {
   constructor(message: string) {
@@ -40,23 +44,54 @@ export function isInvalidCustomNpxPathError(error: unknown): boolean {
   return error instanceof InvalidCustomNpxPathError;
 }
 
-function buildSkillsCliCommand(npxCommand: string, args: string[]): string {
-  return [npxCommand, "-y", "skills@latest", ...args].map(shellEscape).join(" ");
+function buildSkillsCliCommand(runner: PackageRunner, args: string[], executable: string = runner): string {
+  const runnerArgs = runner === "npx" ? ["-y", "skills@latest"] : ["--silent", "--no-cache", "skills@latest"];
+  return [executable, ...runnerArgs, ...args].map(shellEscape).join(" ");
 }
 
 async function runSkillsCli(args: string[]): Promise<string> {
+  return enqueueSkillsCliRun(() => runSkillsCliCommand(args));
+}
+
+async function enqueueSkillsCliRun<T>(run: () => Promise<T>): Promise<T> {
+  const runAfterPending = pendingSkillsCliRun.then(run, run);
+  pendingSkillsCliRun = runAfterPending.catch(() => undefined);
+  return runAfterPending;
+}
+
+async function runSkillsCliCommand(args: string[]): Promise<string> {
   const customNpxPath = getCustomNpxPath();
   if (customNpxPath) {
     await validateCustomNpxPath(customNpxPath);
+
+    const execOptions = await getExecOptions();
+    try {
+      const { stdout } = await execAsync(buildSkillsCliCommand("npx", args, customNpxPath), execOptions);
+      return stdout;
+    } catch (error) {
+      throw normalizeCliError(error, customNpxPath);
+    }
   }
 
-  const npxCommand = customNpxPath ?? "npx";
+  if (!bunxResolutionFailed) {
+    try {
+      const execOptions = await getExecOptions();
+      const { stdout } = await execAsync(buildSkillsCliCommand("bunx", args), execOptions);
+      return stdout;
+    } catch (error) {
+      if (!isNpxCommandResolutionFailure(error, "bunx")) {
+        throw normalizeCliError(error, "bunx");
+      }
+      bunxResolutionFailed = true;
+    }
+  }
+
   try {
     const execOptions = await getExecOptions();
-    const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), execOptions);
+    const { stdout } = await execAsync(buildSkillsCliCommand("npx", args), execOptions);
     return stdout;
-  } catch (error) {
-    throw normalizeCliError(error, npxCommand);
+  } catch (npxError) {
+    throw normalizeCliError(npxError, "npx");
   }
 }
 
@@ -71,7 +106,7 @@ function shellEscape(arg: string): string {
 function normalizeCliError(error: unknown, npxCommand: string): Error {
   if (isNpxCommandResolutionFailure(error, npxCommand)) {
     return new NpxResolutionError(
-      "Unable to find a working npx command. Run `which npx` in Terminal, then set that path in the extension configuration under 'Custom npx Path'.",
+      "Unable to find a working bunx or npx command. Install Bun, or install Node.js/npm. If you need to force a custom npx executable, set it in the extension configuration under 'Custom npx Path'.",
     );
   }
 
@@ -140,7 +175,7 @@ function isNpxCommandResolutionFailure(error: unknown, npxCommand: string): bool
     .join("\n")
     .toLowerCase();
   const normalizedNpxCommand = npxCommand.toLowerCase();
-  const commandBase = basename(normalizedNpxCommand).replace(/\.exe$/, "");
+  const commandBase = basename(normalizedNpxCommand).replace(/\.(cmd|exe)$/, "");
   const windowsCommandNotFound = `'${commandBase}' is not recognized as an internal or external command`;
 
   const mentionsCommand =
@@ -150,8 +185,14 @@ function isNpxCommandResolutionFailure(error: unknown, npxCommand: string): bool
     details.includes(`${commandBase}: command not found`) ||
     details.includes(windowsCommandNotFound);
 
+  const npxShimModuleNotFound =
+    commandBase === "npx" &&
+    details.includes("cannot find module") &&
+    (details.includes("npm-prefix.js") || details.includes("npx-cli.js"));
+
   return (
     (code === "ENOENT" && mentionsCommand) ||
+    npxShimModuleNotFound ||
     details.includes(`spawn ${normalizedNpxCommand} enoent`) ||
     details.includes(`spawn ${commandBase} enoent`) ||
     details.includes(`command not found: ${commandBase}`) ||
@@ -368,7 +409,7 @@ export async function updateAllSkills(): Promise<void> {
 
 /**
  * Update a single installed skill by name.
- * Runs `npx -y skills@latest update <skill-name> -y`.
+ * Runs `skills update <skill-name> -y` via the resolved package runner (bunx with npx fallback).
  */
 export async function updateSkill(skillName: string): Promise<void> {
   await runSkillsCli(["update", skillName, "-y"]);

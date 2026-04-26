@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Add bunx support] - {PR_MERGE_DATE}
+
+- Added initial support for `bunx`, it is only called optimally if `npx` is not found
+
 ## [Fix Homebrew `node@` Resolution and add Custom `npx` Validation] - 2026-04-23
 
 - Detect versioned Homebrew Node formula bins like `/opt/homebrew/opt/node@24/bin` so the Skills CLI can find `node` when `npx` comes from Homebrew, while still preferring Node installs from version managers first

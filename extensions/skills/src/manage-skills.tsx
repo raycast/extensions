@@ -25,12 +25,12 @@ export default function Command() {
         ? {
             errorTitle: "Unable to Load Installed Skills",
             errorDetails:
-              "This is an `npx` resolution issue in the local CLI runtime.\n\n1. Run `which npx` in Terminal.\n2. Open Extension Preferences (`Cmd+Shift+,`).\n3. Set **Custom npx Path** to the path from step 1, then retry.",
+              "This is a package runner resolution issue in the local CLI runtime.\n\n1. Install or repair Bun so `bunx` works.\n2. If you need to force Node/npm instead, run `which npx` in Terminal.\n3. Open Extension Preferences (`Cmd+Shift+,`) and set **Custom npx Path** to the path from step 2, then retry.",
           }
         : {
             errorTitle: "Unable to Load Installed Skills",
             errorDetails:
-              "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you use a non-standard Node.js setup.\n3. Run `npx -y skills@latest list -g` in Terminal to inspect the underlying CLI error.",
+              "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you force a non-standard Node.js setup.\n3. Run `bunx skills@latest list -g` in Terminal to inspect the underlying CLI error.",
           };
 
     return (
