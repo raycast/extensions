@@ -27,11 +27,14 @@ export const updateGlyphPool = (glyphs: Glyph[]) => {
 let nfFont: opentype.Font | null = null
 
 const findFont = (): string => {
-  const dir = join(homedir(), "Library/Fonts")
-  const files = readdirSync(dir)
-  for (const suffix of ["NerdFontMono-Regular.ttf", "NerdFont-Regular.ttf"]) {
-    const match = files.find((f) => f.endsWith(suffix))
-    if (match) return join(dir, match)
+  const dirs = [join(homedir(), "Library/Fonts"), "/Library/Fonts"]
+  for (const dir of dirs) {
+    if (!existsSync(dir)) continue
+    const files = readdirSync(dir)
+    for (const suffix of ["NerdFontMono-Regular.ttf", "NerdFont-Regular.ttf"]) {
+      const match = files.find((f) => f.endsWith(suffix))
+      if (match) return join(dir, match)
+    }
   }
   return ""
 }
@@ -39,7 +42,8 @@ const findFont = (): string => {
 export const getFont = (): opentype.Font => {
   if (nfFont) return nfFont
   const fontPath = findFont()
-  if (!fontPath) throw new Error("No Nerd Font found in ~/Library/Fonts")
+  if (!fontPath)
+    throw new Error("No Nerd Font found in user or system font directories")
   nfFont = opentype.loadSync(fontPath)
   return nfFont
 }
@@ -141,13 +145,3 @@ export const unicodeEscape = (codepoint: string): string => {
     ? `\\u${hex.padStart(4, "0")}`
     : `\\U${hex.padStart(8, "0")}`
 }
-
-export const useGlyphs = (forceRefresh = false) => ({
-  existsSync,
-  forceRefresh,
-  CACHE_FILE,
-  buildCache,
-  readCache,
-  getFont,
-  glyphPool,
-})

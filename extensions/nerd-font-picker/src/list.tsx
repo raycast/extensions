@@ -26,7 +26,7 @@ import {
 } from "./utils"
 
 export default function Command() {
-  const { iconColor } = getPreferenceValues<{ iconColor: string }>()
+  const { iconColor } = getPreferenceValues<Preferences.List>()
   const [results, setResults] = useState<Glyph[]>([])
   const [isLoading, setIsLoading] = useState(true)
 
