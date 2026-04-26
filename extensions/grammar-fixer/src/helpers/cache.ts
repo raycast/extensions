@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+import { createHash } from "crypto";
 
 const cache = new Cache();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
@@ -9,7 +10,7 @@ interface CacheEntry {
 }
 
 export function cacheKey(text: string, systemPrompt: string): string {
-  return `${systemPrompt}::${text}`;
+  return createHash("sha256").update(`${systemPrompt}::${text}`).digest("hex");
 }
 
 export function getCached(key: string): string | undefined {

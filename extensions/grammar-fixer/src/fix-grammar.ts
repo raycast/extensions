@@ -57,7 +57,8 @@ export default async function Command() {
     if (prefs.useRaycastAI && environment.canAccess(AI)) {
       fixed = await AI.ask(`${systemPrompt}\n\nText to fix:\n${text}`, {
         creativity: "none",
-        model: AI.Model["OpenAI_GPT-4.1_nano"],
+        model:
+          (prefs.model?.trim() as AI.Model) || AI.Model["OpenAI_GPT-4.1_nano"],
       });
     } else {
       const { text: result } = await generateText({

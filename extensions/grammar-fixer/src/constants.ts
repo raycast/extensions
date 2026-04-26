@@ -6,7 +6,7 @@ export const LOADING_MESSAGES = [
   "Untangling your sentences…",
   "Making you sound smarter…",
   "Consulting the grammar gods…",
-  "Making your english teacher proud…",
+  "Making your English teacher proud…",
   "Pretending to be Grammarly…",
   "Removing accidental Yoda speak…",
   "Adding commas you definitely forgot…",
