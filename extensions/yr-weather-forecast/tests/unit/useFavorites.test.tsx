@@ -6,8 +6,6 @@ import type { FavoriteLocation } from "../../src/storage";
 import { getFavorites } from "../../src/storage";
 import { getWeather } from "../../src/weather-client";
 import { getSunTimes } from "../../src/sunrise-client";
-import { generateAndCacheGraph } from "../../src/graph-cache";
-import { LocationUtils } from "../../src/utils/location-utils";
 
 jest.mock("../../src/storage", () => ({
   addFavorite: jest.fn(async () => true),
@@ -25,10 +23,6 @@ jest.mock("../../src/sunrise-client", () => ({
   getSunTimes: jest.fn(),
 }));
 
-jest.mock("../../src/graph-cache", () => ({
-  generateAndCacheGraph: jest.fn(async () => "graph"),
-}));
-
 beforeEach(() => {
   jest.clearAllMocks();
 });
@@ -41,7 +35,6 @@ describe("useFavorites missing entry detection", () => {
     const mockedGetFavorites = getFavorites as jest.MockedFunction<typeof getFavorites>;
     const mockedGetWeather = getWeather as jest.MockedFunction<typeof getWeather>;
     const mockedGetSunTimes = getSunTimes as jest.MockedFunction<typeof getSunTimes>;
-    const mockedGenerateAndCacheGraph = generateAndCacheGraph as jest.MockedFunction<typeof generateAndCacheGraph>;
 
     mockedGetFavorites.mockResolvedValueOnce([alpha, beta]).mockResolvedValueOnce([beta, alpha]);
 
@@ -55,7 +48,6 @@ describe("useFavorites missing entry detection", () => {
       .mockResolvedValueOnce(weatherEntry);
 
     mockedGetSunTimes.mockResolvedValue({});
-    mockedGenerateAndCacheGraph.mockResolvedValue("graph");
 
     const { result } = renderHook(() => useFavorites());
 
@@ -204,11 +196,9 @@ describe("useFavorites missing entry detection", () => {
       await result.current.refreshFavorites();
     });
 
-    const betaKey = LocationUtils.getLocationKey(beta.id, beta.lat, beta.lon);
     await waitFor(() => {
       expect(result.current.getFavoriteWeather(beta.id ?? "", beta.lat, beta.lon)).toBeUndefined();
       expect(result.current.getFavoriteSunTimes(beta.id ?? "", beta.lat, beta.lon)).toBeUndefined();
-      expect(result.current.preWarmedGraphs[betaKey]).toBeUndefined();
       expect(result.current.isFavoriteLoading(beta.id ?? "", beta.lat, beta.lon)).toBe(false);
       expect(result.current.hasFavoriteError(beta.id ?? "", beta.lat, beta.lon)).toBe(false);
     });

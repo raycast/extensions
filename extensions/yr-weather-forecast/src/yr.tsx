@@ -286,7 +286,6 @@ function CommandContent() {
                     () => setShowWelcomeMessage(true),
                     search.queryIntent.targetDate,
                     undefined, // onFavoriteChange - not needed for search results
-                    undefined, // preCachedGraph - not available for search results
                   )}
                 />
               ))}
@@ -335,7 +334,6 @@ function CommandContent() {
                               name={fav.name}
                               lat={fav.lat}
                               lon={fav.lon}
-                              preCachedGraph={favorites.preWarmedGraphs[key]}
                               onFavoriteChange={favorites.refreshFavorites}
                               onShowWelcome={() => setShowWelcomeMessage(true)}
                             />

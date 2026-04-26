@@ -27,25 +27,15 @@ export async function getWeatherWithMetadata(
   lon: number,
   options?: { signal?: AbortSignal; timeoutMs?: number },
 ): Promise<WeatherDataWithMetadata> {
-  const cacheKeySuffix = `current-meta:${coordSuffix(lat, lon)}`;
-  return weatherApiClient.request(
-    { lat, lon },
-    cacheKeySuffix,
-    (raw: unknown, response: Response) => {
-      const data = LocationForecastResponseSchema.parse(raw);
-      const first = data.properties?.timeseries?.[0];
-      if (!first) throw new Error("Unexpected response shape: missing timeseries[0]");
-      return {
-        data: first,
-        metadata: {
-          updated_at: data.meta?.updated_at,
-          last_modified: response.headers.get("Last-Modified") || undefined,
-          expires: response.headers.get("Expires") || undefined,
-        },
-      };
-    },
-    { signal: options?.signal, timeoutMs: options?.timeoutMs ?? 10000, retries: 1 },
-  );
+  const result = await getForecastWithMetadata(lat, lon, options);
+  const series = result.data as TimeseriesEntry[];
+  const first = series[0];
+  if (!first) throw new Error("Unexpected response shape: missing timeseries[0]");
+
+  return {
+    data: first,
+    metadata: result.metadata,
+  };
 }
 
 export async function getForecast(

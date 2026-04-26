@@ -118,7 +118,8 @@ export function formatTime(date: Date | string, format: keyof typeof TIME_FORMAT
   // Get the base format options
   const formatOptions = { ...TIME_FORMATS[format] };
 
-  // Override hour12 based on user preference for STANDARD and MILITARY formats
+  // Override hour12 based on user preference for user-facing time formats.
+  // HOUR_ONLY stays compact for graph axes and similar dense labels.
   if (format === "STANDARD" || format === "MILITARY") {
     (formatOptions as Intl.DateTimeFormatOptions).hour12 = clockFormat === "12h";
   }

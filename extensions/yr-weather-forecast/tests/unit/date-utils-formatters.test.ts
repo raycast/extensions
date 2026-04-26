@@ -55,7 +55,8 @@ describe("date/time formatter utilities", () => {
       expect(spy).toHaveBeenCalledWith(undefined, { ...TIME_FORMATS.MILITARY, hour12: false });
     });
 
-    it("keeps HOUR_ONLY format options", () => {
+    it("keeps HOUR_ONLY compact even with 12h clock preference", () => {
+      mockedGetClockFormat.mockReturnValue("12h");
       const spy = jest.spyOn(Date.prototype, "toLocaleTimeString").mockReturnValue("12");
 
       expect(formatTime("2026-03-08T12:00:00Z", "HOUR_ONLY")).toBe("12");

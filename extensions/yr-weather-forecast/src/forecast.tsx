@@ -21,6 +21,7 @@ import { LocationUtils } from "./utils/location-utils";
 import { clearAllCached } from "./cache";
 import { DebugLogger } from "./utils/debug-utils";
 import { LocationResult } from "./location-search";
+import { getFeatureFlags } from "./units";
 
 type ForecastLocationInput =
   | {
@@ -39,7 +40,6 @@ type ForecastLocationInput =
     };
 
 export type ForecastViewProps = ForecastLocationInput & {
-  preCachedGraph?: string;
   onShowWelcome?: () => void;
   targetDate?: string; // ISO date string for specific day view
   onFavoriteChange?: () => void; // Callback when favorites are added/removed
@@ -87,7 +87,7 @@ function resolveForecastLocation(input: ForecastLocationInput): ResolvedForecast
 }
 
 function ForecastView(props: ForecastViewProps) {
-  const { preCachedGraph, onShowWelcome, targetDate, onFavoriteChange, initialMode } = props;
+  const { onShowWelcome, targetDate, onFavoriteChange, initialMode } = props;
   const resolvedLocation = resolveForecastLocation(props);
   const canonicalKey = resolvedLocation.key;
   const originalName = resolvedLocation.displayName;
@@ -98,14 +98,8 @@ function ForecastView(props: ForecastViewProps) {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [sunByDate, setSunByDate] = useState<Record<string, SunTimes>>({});
   const [sunDataReady, setSunDataReady] = useState<boolean>(false);
-  const {
-    series: items,
-    loading,
-    showNoData,
-    preRenderedGraph,
-    metadata,
-    refresh: refreshWeatherData,
-  } = useWeatherData(lat, lon, true);
+  const featureFlags = getFeatureFlags();
+  const { series: items, loading, showNoData, metadata, refresh: refreshWeatherData } = useWeatherData(lat, lon);
 
   // Check if current location is in favorites using canonical identity.
   useEffect(() => {
@@ -310,32 +304,14 @@ function ForecastView(props: ForecastViewProps) {
 
       generateGraphs();
     }
-  }, [
-    canonicalKey,
-    items,
-    reduced,
-    originalName,
-    preCachedGraph,
-    preRenderedGraph,
-    sunByDate,
-    sunDataReady,
-    displaySeries,
-    targetDate,
-    lat,
-    lon,
-  ]);
+  }, [canonicalKey, items, reduced, originalName, sunByDate, sunDataReady, displaySeries, targetDate, lat, lon]);
 
-  // Get cached graph based on current mode, with preCachedGraph as fallback
+  // Get cached graph based on current mode.
   const graph = useMemo(() => {
     if (displaySeries.length === 0 && showNoData) return "";
 
-    // Use preCachedGraph if available and we don't have a cached version yet
-    if (preCachedGraph && !graphCache[mode]) {
-      return preCachedGraph;
-    }
-
     return mode === "detailed" ? graphCache.detailed : graphCache.summary;
-  }, [mode, graphCache, displaySeries.length, showNoData, preCachedGraph]);
+  }, [mode, graphCache, displaySeries.length, showNoData]);
 
   const listMarkdown = useMemo(() => {
     if (displaySeries.length === 0 && showNoData) {
@@ -343,8 +319,8 @@ function ForecastView(props: ForecastViewProps) {
     }
 
     // For data view, show table with filtered data (respects target date)
-    return buildWeatherTable(displaySeries, { showDirection: true, showPeriod: false });
-  }, [displaySeries, showNoData, originalName]);
+    return buildWeatherTable(displaySeries, { showDirection: featureFlags.showWindDirection, showPeriod: false });
+  }, [displaySeries, showNoData, originalName, featureFlags.showWindDirection]);
 
   // Only show content when not loading and we have data or know there's no data
   const shouldShowContent = !loading && (displaySeries.length > 0 || showNoData);
@@ -369,7 +345,13 @@ function ForecastView(props: ForecastViewProps) {
         let summaryInfo = "";
         if (mode === "detailed" || mode === "summary") {
           // Build compact weather summary using the reusable utility (includes data coverage)
-          const compactSummary = buildCompactWeatherSummary(displaySeries, sunByDate, metadata, {}, targetDate);
+          const compactSummary = buildCompactWeatherSummary(
+            displaySeries,
+            sunByDate,
+            metadata,
+            { showSunTimes: featureFlags.showSunTimes },
+            targetDate,
+          );
           if (compactSummary) {
             summaryInfo = `\n\n${compactSummary}`;
           }

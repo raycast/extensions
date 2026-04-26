@@ -133,12 +133,17 @@ export function buildWeatherTable(
 
   if (series.length === 0) return "_No data available_";
 
-  const sortedSeries = series.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  const sortedSeries = [...series].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
   // Default columns
-  const defaultColumns = showPeriod
-    ? ["Period", "Weather", "Temp", "Wind", "Dir", "Precip"]
-    : ["Time", "Weather", "Temp", "Wind", "Dir", "Precip"];
+  const defaultColumns = [
+    showPeriod ? "Period" : "Time",
+    "Weather",
+    "Temp",
+    "Wind",
+    ...(showDirection ? ["Dir"] : []),
+    "Precip",
+  ];
 
   const finalColumns = columns || defaultColumns;
   const finalHeaders = headers || finalColumns;

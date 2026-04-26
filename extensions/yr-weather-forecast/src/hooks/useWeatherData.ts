@@ -1,15 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { getForecastWithMetadata, type TimeseriesEntry, type WeatherDataWithMetadata } from "../weather-client";
 import { DebugLogger } from "../utils/debug-utils";
-import { buildGraphMarkdown } from "../graph-utils";
 
 /**
  * Custom hook for managing weather data fetching
  */
-export function useWeatherData(lat: number, lon: number, preGenerateGraph = false) {
+export function useWeatherData(lat: number, lon: number) {
   const [series, setSeries] = useState<TimeseriesEntry[]>([]);
   const [showNoData, setShowNoData] = useState(false);
-  const [preRenderedGraph, setPreRenderedGraph] = useState<string>("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [metadata, setMetadata] = useState<WeatherDataWithMetadata["metadata"] | null>(null);
 
@@ -32,15 +30,6 @@ export function useWeatherData(lat: number, lon: number, preGenerateGraph = fals
           const forecastData = Array.isArray(result.data) ? result.data : [result.data];
           setSeries(forecastData);
           setMetadata(result.metadata);
-
-          // Pre-generate graph if requested and we have data
-          if (preGenerateGraph && forecastData.length > 0) {
-            const graphMarkdown = buildGraphMarkdown("Location", forecastData, 48, {
-              title: "48h forecast",
-              smooth: true,
-            }).markdown;
-            setPreRenderedGraph(graphMarkdown);
-          }
 
           // Only show no data if we actually have no data after fetching
           if (forecastData.length === 0) {
@@ -97,7 +86,6 @@ export function useWeatherData(lat: number, lon: number, preGenerateGraph = fals
     series,
     loading,
     showNoData,
-    preRenderedGraph,
     metadata,
     refresh,
   };

@@ -3,7 +3,7 @@ import { line, curveMonotoneX } from "d3-shape";
 import { TimeseriesEntry } from "./weather-client";
 import { SunTimes } from "./sunrise-client";
 import { GRAPH_THRESHOLDS, PRECIPITATION_THRESHOLDS } from "./config/weather-config";
-import { getUnits } from "./units";
+import { getFeatureFlags, getUnits } from "./units";
 import { precipitationAmount, symbolCode } from "./utils-forecast";
 import { symbolToEmoji } from "./utils/weather-symbols";
 import { directionFromDegrees } from "./weather-utils";
@@ -40,6 +40,7 @@ export function buildGraphMarkdown(
   const innerHeight = height - margin.TOP - margin.BOTTOM;
 
   const units = getUnits();
+  const featureFlags = getFeatureFlags();
   const times = subset.map((s) => new Date(s.time).getTime());
   const tempsC = subset.map((s) => s.data?.instant?.details?.air_temperature ?? NaN);
   const tempsDisplay = tempsC.map((c) =>
@@ -134,6 +135,8 @@ export function buildGraphMarkdown(
 
   // Sunrise/Sunset lines per day from opts.sunByDate
   const sunLines = (() => {
+    if (!featureFlags.showSunTimes) return "";
+
     const map = opts?.sunByDate ?? {};
     DebugLogger.debug("graph-utils received sunByDate:", map);
     const parts: string[] = [];
@@ -173,6 +176,8 @@ export function buildGraphMarkdown(
   // Wind direction arrows at the bottom
   const windLabels = times
     .map((t, i) => {
+      if (!featureFlags.showWindDirection) return "";
+
       const d = dirs[i];
       if (typeof d !== "number") return "";
       const x = xScale(t);

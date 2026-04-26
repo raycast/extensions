@@ -104,10 +104,9 @@ describe("parseQueryIntent", () => {
       expect(localDateStr(result.targetDate!)).toBe("2026-03-09");
     });
 
-    it("'next friday' pushes one extra week (2026-03-20)", () => {
+    it("'next friday' outside the forecast window does not set a target date", () => {
       const result = parseQueryIntent("next friday", NOW);
-      expect(result.targetDate?.getDay()).toBe(5);
-      expect(localDateStr(result.targetDate!)).toBe("2026-03-20");
+      expect(result.targetDate).toBeUndefined();
     });
 
     it("abbreviated: 'fri' resolves same as 'friday'", () => {
@@ -123,10 +122,9 @@ describe("parseQueryIntent", () => {
       expect(localDateStr(result.targetDate!)).toBe("2026-03-13");
     });
 
-    it("'neste fredag' targets Friday two weeks out (2026-03-20)", () => {
+    it("'neste fredag' outside the forecast window does not set a target date", () => {
       const result = parseQueryIntent("neste fredag", NOW);
-      expect(result.targetDate?.getDay()).toBe(5);
-      expect(localDateStr(result.targetDate!)).toBe("2026-03-20");
+      expect(result.targetDate).toBeUndefined();
     });
 
     it("'mandag' resolves to Monday", () => {
@@ -156,38 +154,33 @@ describe("parseQueryIntent", () => {
   });
 
   describe("specific date — day + month", () => {
-    it("'15 april' resolves to April 15 of next occurrence", () => {
+    it("'8 march' resolves when it is within the forecast window", () => {
+      const result = parseQueryIntent("8 march", NOW);
+      expect(localDateStr(result.targetDate!)).toBe("2026-03-08");
+    });
+
+    it("'15 april' does not set a target date outside the forecast window", () => {
       const result = parseQueryIntent("15 april", NOW);
-      expect(result.targetDate?.getMonth()).toBe(3); // April = 3
-      expect(result.targetDate?.getDate()).toBe(15);
+      expect(result.targetDate).toBeUndefined();
     });
 
-    it("'3rd march' advances to next year since Mar 3 has passed", () => {
-      const result = parseQueryIntent("3rd march", NOW);
-      expect(result.targetDate?.getMonth()).toBe(2);
-      expect(result.targetDate?.getDate()).toBe(3);
-      expect(result.targetDate!.getFullYear()).toBeGreaterThan(2026);
-    });
-
-    it("combined: 'Oslo 15 april' strips date, keeps location", () => {
-      const result = parseQueryIntent("Oslo 15 april", NOW);
+    it("combined: 'Oslo 8 march' strips date, keeps location", () => {
+      const result = parseQueryIntent("Oslo 8 march", NOW);
       expect(result.locationQuery).toBe("Oslo");
-      expect(result.targetDate?.getMonth()).toBe(3);
+      expect(localDateStr(result.targetDate!)).toBe("2026-03-08");
     });
   });
 
   describe("day-of-month only", () => {
-    it("'20' (future this month) resolves to 20th of current month", () => {
-      const result = parseQueryIntent("20", NOW);
-      expect(result.targetDate?.getDate()).toBe(20);
+    it("'10' (future this month within forecast window) resolves to 10th of current month", () => {
+      const result = parseQueryIntent("10", NOW);
+      expect(result.targetDate?.getDate()).toBe(10);
       expect(result.targetDate?.getMonth()).toBe(2); // March
     });
 
-    it("'2' (past this month) advances to next month", () => {
-      const result = parseQueryIntent("2", NOW);
-      expect(result.targetDate?.getDate()).toBe(2);
-      // March 2 has passed (NOW is Mar 6), so should be April
-      expect(result.targetDate?.getMonth()).not.toBe(2);
+    it("'20' outside the forecast window does not set a target date", () => {
+      const result = parseQueryIntent("20", NOW);
+      expect(result.targetDate).toBeUndefined();
     });
   });
 });

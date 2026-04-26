@@ -24,7 +24,6 @@ export class LocationUtils {
     onShowWelcome?: () => void,
     targetDate?: Date,
     onFavoriteChange?: () => void,
-    preCachedGraph?: string,
   ) {
     const { displayName: name, lat, lon } = location;
     return (
@@ -34,7 +33,6 @@ export class LocationUtils {
           target={
             <LazyForecastView
               location={location}
-              preCachedGraph={preCachedGraph}
               onShowWelcome={onShowWelcome}
               targetDate={targetDate ? toLocalDateString(targetDate) : undefined}
               onFavoriteChange={onFavoriteChange}
@@ -51,7 +49,6 @@ export class LocationUtils {
               target={
                 <LazyForecastView
                   location={location}
-                  preCachedGraph={preCachedGraph}
                   onShowWelcome={onShowWelcome}
                   targetDate={toLocalDateString(targetDate)}
                   onFavoriteChange={onFavoriteChange}
@@ -64,7 +61,6 @@ export class LocationUtils {
               target={
                 <LazyForecastView
                   location={location}
-                  preCachedGraph={preCachedGraph}
                   onShowWelcome={onShowWelcome}
                   onFavoriteChange={onFavoriteChange}
                 />

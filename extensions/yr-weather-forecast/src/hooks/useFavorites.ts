@@ -11,8 +11,7 @@ import {
 } from "../storage";
 import { LocationUtils } from "../utils/location-utils";
 import { DebugLogger } from "../utils/debug-utils";
-import { UI_THRESHOLDS, TIMING_THRESHOLDS } from "../config/weather-config";
-import { generateAndCacheGraph } from "../graph-cache";
+import { TIMING_THRESHOLDS } from "../config/weather-config";
 import { ToastMessages } from "../utils/toast-utils";
 
 export interface UseFavoritesReturn {
@@ -25,7 +24,6 @@ export interface UseFavoritesReturn {
   favoritesLoading: Record<string, boolean>;
   weatherDataInitialized: boolean;
   isInitialLoad: boolean;
-  preWarmedGraphs: Record<string, string>;
   isBackgroundLoading: boolean; // New: indicates if background loading is in progress
 
   // Favorites actions
@@ -56,7 +54,6 @@ export function useFavorites(): UseFavoritesReturn {
   const [favoritesLoading, setFavoritesLoading] = useState<Record<string, boolean>>({});
   const [weatherDataInitialized, setWeatherDataInitialized] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [preWarmedGraphs, setPreWarmedGraphs] = useState<Record<string, string>>({});
   const [isBackgroundLoading, setIsBackgroundLoading] = useState(false);
   const favoriteWeatherRef = useRef(favoriteWeather);
   const isInitialLoadRef = useRef(isInitialLoad);
@@ -89,7 +86,6 @@ export function useFavorites(): UseFavoritesReturn {
       setSunTimes({});
       setFavoriteErrors({});
       setFavoritesLoading({});
-      setPreWarmedGraphs({});
       setWeatherDataInitialized(true); // No favorites to load, so we're "done"
       setIsInitialLoad(false);
       setIsBackgroundLoading(false);
@@ -113,7 +109,6 @@ export function useFavorites(): UseFavoritesReturn {
     setSunTimes((prev) => pruneToActiveKeys(prev));
     setFavoriteErrors((prev) => pruneToActiveKeys(prev));
     setFavoritesLoading((prev) => pruneToActiveKeys(prev));
-    setPreWarmedGraphs((prev) => pruneToActiveKeys(prev));
 
     const latestFavoriteWeather = favoriteWeatherRef.current;
     const missingEntries = favoriteEntries.filter(({ key }) => {
@@ -137,7 +132,6 @@ export function useFavorites(): UseFavoritesReturn {
 
     async function fetchMissing() {
       let toastShown = false;
-      const favoriteNameByKey = new Map(missingEntries.map(({ key, fav }) => [key, fav.name]));
 
       // Mark only missing favorites as loading and clear stale errors from prior failures.
       setFavoritesLoading((prev) => {
@@ -183,22 +177,6 @@ export function useFavorites(): UseFavoritesReturn {
           for (const [key, ts, sun] of entries) {
             if (ts) {
               setFavoriteWeather((prev) => ({ ...prev, [key]: ts }));
-
-              // Pre-warm graph for this favorite using persistent cache
-              try {
-                const favoriteName = favoriteNameByKey.get(key) || "Location";
-                const graphMarkdown = await generateAndCacheGraph(
-                  key,
-                  "detailed",
-                  [ts], // Single entry for favorites
-                  favoriteName,
-                  UI_THRESHOLDS.DEFAULT_FORECAST_HOURS,
-                );
-
-                setPreWarmedGraphs((prev) => ({ ...prev, [key]: graphMarkdown }));
-              } catch (err) {
-                DebugLogger.error("Error pre-warming graph for favorite:", err);
-              }
             }
             setSunTimes((prev) => ({ ...prev, [key]: sun }));
             // Mark this key as no longer loading.
@@ -328,7 +306,6 @@ export function useFavorites(): UseFavoritesReturn {
     favoritesLoading,
     weatherDataInitialized,
     isInitialLoad,
-    preWarmedGraphs,
     isBackgroundLoading,
 
     // Favorites actions
