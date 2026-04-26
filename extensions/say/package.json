@@ -181,12 +181,11 @@
     ]
   },
   "dependencies": {
-    "@litomore/win-say": "^0.0.1",
     "@raycast/api": "^1.104.4",
     "@raycast/utils": "^2.2.2",
     "bplist-parser": "^0.3.2",
     "lodash": "^4.17.23",
-    "mac-say": "^0.3.3"
+    "native-say": "^0.0.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

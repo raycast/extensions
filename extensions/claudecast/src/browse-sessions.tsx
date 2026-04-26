@@ -20,6 +20,7 @@ import {
   safeTruncate,
   SessionMetadata,
   SessionDetail,
+  PermissionMode,
 } from "./lib/session-parser";
 import { launchClaudeCode } from "./lib/terminal";
 import { ensureClaudeInstalled } from "./lib/claude-cli";
@@ -162,6 +163,8 @@ function SessionItem({
     await launchClaudeCode({
       projectPath: session.projectPath,
       sessionId: session.id,
+      permissionMode: session.permissionMode,
+      model: session.model,
     });
     await popToRoot();
   }
@@ -180,6 +183,8 @@ function SessionItem({
       projectPath: session.projectPath,
       sessionId: session.id,
       forkSession: true,
+      permissionMode: session.permissionMode,
+      model: session.model,
     });
     await popToRoot();
   }
@@ -232,6 +237,8 @@ function SessionItem({
                 <SessionDetailView
                   sessionId={session.id}
                   projectPath={session.projectPath}
+                  permissionMode={session.permissionMode}
+                  model={session.model}
                 />
               }
             />
@@ -268,9 +275,13 @@ function SessionItem({
 function SessionDetailView({
   sessionId,
   projectPath,
+  permissionMode,
+  model,
 }: {
   sessionId: string;
   projectPath: string;
+  permissionMode?: PermissionMode;
+  model?: string;
 }) {
   const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState<SessionDetail | null>(null);
@@ -342,6 +353,8 @@ function SessionDetailView({
               await launchClaudeCode({
                 projectPath,
                 sessionId,
+                permissionMode,
+                model,
               });
               await popToRoot();
             }}
@@ -363,6 +376,8 @@ function SessionDetailView({
                 projectPath,
                 sessionId,
                 forkSession: true,
+                permissionMode,
+                model,
               });
               await popToRoot();
             }}

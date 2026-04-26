@@ -1,5 +1,11 @@
 # Agent Usage Changelog
 
+## [Add Copilot Usage Provider] - 2026-04-14
+
+- Add Copilot usage provider with GitHub Copilot internal API support
+- Auto-detect Copilot token from `GH_TOKEN` / `GITHUB_TOKEN` with preference fallback
+- Add Copilot visibility preference and list/menu bar entries
+
 ## [Add Windows Support] - 2026-04-12
 
 - Add Windows support

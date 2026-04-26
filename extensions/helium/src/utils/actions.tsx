@@ -1,7 +1,14 @@
 import { Action, Icon, showToast, Toast, closeMainWindow, open } from "@raycast/api";
 import type { MutatePromise } from "@raycast/utils";
 import type { Tab, Bookmark } from "../types";
-import { switchToHeliumTab, closeHeliumTab, openUrlInHelium } from "./applescript";
+import {
+  switchToHeliumTab,
+  switchToHeliumTabById,
+  closeHeliumTab,
+  closeHeliumTabById,
+  openUrlInHelium,
+} from "./applescript";
+import { getBrowserTabs } from "./browser";
 
 interface BaseActionProps {
   tab: Tab;
@@ -12,12 +19,14 @@ interface MutationActionProps extends BaseActionProps {
   deletedTabIdsRef: React.MutableRefObject<Set<number>>;
 }
 
-interface RevalidateActionProps {
-  revalidate: () => Promise<Tab[]>;
-}
-
 /**
- * Action to switch to an existing tab using AppleScript
+ * Action to switch to an existing tab using AppleScript.
+ *
+ * Prefers the Helium AppleScript `id` bridged at fetch time (see
+ * {@link getBrowserTabs}). This guarantees we hit the exact tab the user
+ * picked even when several tabs share the same URL. Falls back to URL
+ * matching if the id wasn't resolved (e.g., Helium wasn't running at fetch
+ * time or the AS call failed).
  */
 export function SwitchToTabAction({ tab }: BaseActionProps) {
   return (
@@ -25,10 +34,11 @@ export function SwitchToTabAction({ tab }: BaseActionProps) {
       title="Switch to Tab"
       icon={Icon.ArrowRight}
       onAction={async () => {
-        await closeMainWindow();
         try {
-          const switched = await switchToHeliumTab(tab.url);
-          if (!switched) {
+          const switched = tab.heliumId ? await switchToHeliumTabById(tab.heliumId) : await switchToHeliumTab(tab.url);
+          if (switched) {
+            await closeMainWindow();
+          } else {
             await showToast({
               style: Toast.Style.Failure,
               title: "Tab not found",
@@ -64,25 +74,47 @@ export function OpenNewTabAction() {
   );
 }
 
+interface RevalidateActionProps {
+  /**
+   * Shown in the Action Panel and in the success toast. Keep it specific to
+   * the list being reloaded ("Tabs", "Bookmarks", …).
+   */
+  subject?: string;
+  /**
+   * The `revalidate` callback from `usePromise`. `usePromise` returns
+   * `() => Promise<T>`, but we only care about the side effect, so the type
+   * is relaxed to `unknown`.
+   */
+  revalidate: () => Promise<unknown> | void;
+}
+
 /**
- * Action to reload the tab list
+ * Generic ⌘R reload action. Works for any `usePromise`-backed list.
  */
-export function ReloadTabListAction({ revalidate }: RevalidateActionProps) {
+export function ReloadAction({ subject = "List", revalidate }: RevalidateActionProps) {
   return (
     <Action
-      title="Reload Tab List"
+      title={`Reload ${subject}`}
       icon={Icon.ArrowClockwise}
       shortcut={{ modifiers: ["cmd"], key: "r" }}
       onAction={async () => {
         await showToast({
           style: Toast.Style.Animated,
-          title: "Reloading tabs...",
+          title: `Reloading ${subject.toLowerCase()}…`,
         });
-        await revalidate();
-        await showToast({
-          style: Toast.Style.Success,
-          title: "Tabs reloaded",
-        });
+        try {
+          await Promise.resolve(revalidate());
+          await showToast({
+            style: Toast.Style.Success,
+            title: `${subject} reloaded`,
+          });
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: `Failed to reload ${subject.toLowerCase()}`,
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
       }}
     />
   );
@@ -119,8 +151,8 @@ export function CloseTabAction({ tab, mutate, deletedTabIdsRef }: MutationAction
             },
           );
 
-          // Execute the actual close in the browser
-          const success = await closeHeliumTab(tab.url);
+          // Execute the actual close in the browser (prefer id; fallback to URL)
+          const success = tab.heliumId ? await closeHeliumTabById(tab.heliumId) : await closeHeliumTab(tab.url);
 
           if (!success) {
             throw new Error("Tab not found or failed to close");
@@ -188,6 +220,93 @@ export function CopyAsMarkdownAction({ tab }: BaseActionProps) {
       title="Copy as Markdown"
       content={`[${tab.title}](${tab.url})`}
       shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+    />
+  );
+}
+
+/**
+ * Action to close duplicate tabs by exact URL match.
+ *
+ * For every URL that appears more than once among the open tabs, keeps the
+ * first occurrence (AS traversal order) and closes the rest via
+ * {@link closeHeliumTabById}. The action is self-contained: if no `tabs` are
+ * provided (e.g., invoked from search-bookmarks or search-web), it fetches
+ * the current tab list itself, so it can be safely dropped into any command.
+ *
+ * When used from a list that owns the tab cache, pass `mutate` and
+ * `deletedTabIdsRef` to apply an optimistic update so the list reflects the
+ * closures immediately.
+ */
+interface DeduplicateTabsActionProps {
+  tabs?: Tab[];
+  mutate?: MutatePromise<Tab[], undefined>;
+  deletedTabIdsRef?: React.MutableRefObject<Set<number>>;
+}
+export function DeduplicateTabsAction({ tabs, mutate, deletedTabIdsRef }: DeduplicateTabsActionProps = {}) {
+  return (
+    <Action
+      title="Deduplicate Tabs"
+      icon={Icon.Filter}
+      shortcut={{ modifiers: ["cmd", "shift", "ctrl"], key: "w" }}
+      onAction={async () => {
+        try {
+          const currentTabs = tabs ?? (await getBrowserTabs());
+
+          // Group by URL in traversal order, keep first, mark rest for close.
+          const seen = new Set<string>();
+          const duplicates: Tab[] = [];
+          for (const t of currentTabs) {
+            if (seen.has(t.url)) duplicates.push(t);
+            else seen.add(t.url);
+          }
+
+          if (duplicates.length === 0) {
+            await showToast({ style: Toast.Style.Success, title: "No duplicate tabs" });
+            return;
+          }
+
+          await showToast({
+            style: Toast.Style.Animated,
+            title: `Closing ${duplicates.length} duplicate tab${duplicates.length === 1 ? "" : "s"}`,
+          });
+
+          // Optimistic update when the caller owns the cache.
+          if (mutate && deletedTabIdsRef) {
+            for (const t of duplicates) deletedTabIdsRef.current.add(t.id);
+            await mutate(undefined, {
+              optimisticUpdate(data) {
+                if (!data) return [];
+                const ids = new Set(duplicates.map((t) => t.id));
+                return data.filter((t) => !ids.has(t.id));
+              },
+            });
+          }
+
+          // Close each duplicate. Prefer heliumId (guaranteed to hit the exact
+          // duplicate); fall back to URL only if no id was resolved.
+          let closed = 0;
+          for (const t of duplicates) {
+            try {
+              const ok = t.heliumId ? await closeHeliumTabById(t.heliumId) : await closeHeliumTab(t.url);
+              if (ok) closed += 1;
+            } catch {
+              // Ignore individual failures; surface aggregate below.
+            }
+          }
+
+          await showToast({
+            style: closed > 0 ? Toast.Style.Success : Toast.Style.Failure,
+            title:
+              closed > 0 ? `Closed ${closed} duplicate tab${closed === 1 ? "" : "s"}` : "Failed to close duplicates",
+          });
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to deduplicate tabs",
+            message: error instanceof Error ? error.message : String(error),
+          });
+        }
+      }}
     />
   );
 }

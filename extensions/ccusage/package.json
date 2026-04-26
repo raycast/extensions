@@ -13,7 +13,8 @@
     "zzyfisher",
     "garrick_zhang",
     "pernielsentikaer",
-    "raulg"
+    "raulg",
+    "ridemountainpig"
   ],
   "license": "MIT",
   "commands": [
@@ -30,6 +31,7 @@
       "subtitle": "ccusage",
       "description": "Show Claude Code usage in menu bar",
       "mode": "menu-bar",
+      "interval": "5m",
       "preferences": [
         {
           "name": "menuBarTitle",
