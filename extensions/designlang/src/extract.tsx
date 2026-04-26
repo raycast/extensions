@@ -11,8 +11,6 @@ import { execFile } from "child_process";
 import { homedir } from "os";
 import { useState } from "react";
 
-type Prefs = { outputDir?: string };
-
 function resolveOutputDir(raw?: string) {
   const v = (raw || "~/designlang-output").trim();
   return v.startsWith("~") ? v.replace(/^~/, homedir()) : v;
@@ -24,7 +22,7 @@ function normalizeUrl(u: string) {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences.Extract>();
   const [url, setUrl] = useState("");
   const [full, setFull] = useState(false);
 

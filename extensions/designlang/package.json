@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "designlang",
-  "title": "designlang",
+  "title": "Designlang",
   "description": "Extract design tokens from any website — colors, typography, spacing, shadows, shadcn/Tailwind/Figma outputs.",
   "icon": "icon.png",
   "author": "masyv",
@@ -25,7 +25,15 @@
       "name": "copy-cli",
       "title": "Copy CLI Command For URL",
       "description": "Copy `npx designlang <url>` to your clipboard.",
-      "mode": "no-view"
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://stripe.com",
+          "type": "text",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [
@@ -39,8 +47,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.80.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.80.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.0",
