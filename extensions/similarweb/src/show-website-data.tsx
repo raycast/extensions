@@ -124,14 +124,13 @@ export default function Command(props: Props) {
                   shortcut={Keyboard.Shortcut.Common.Copy}
                 />
                 <Action
-                  title="View History for Domain"
+                  title="Open Website History"
                   icon={Icon.Clock}
                   shortcut={OPEN_HISTORY_SHORTCUT}
                   onAction={() =>
                     void launchCommand({
                       name: "history",
                       type: LaunchType.UserInitiated,
-                      arguments: { domain: snapshot.domain },
                     })
                   }
                 />
