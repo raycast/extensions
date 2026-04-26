@@ -1,5 +1,5 @@
 import { List, ActionPanel, Icon } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { getFavicon, usePromise } from "@raycast/utils";
 import { useState, useRef } from "react";
 import { getBrowserTabs } from "./utils/browser";
 import {
@@ -18,13 +18,13 @@ import { filterSearchable } from "./utils/search";
 export default function SearchTabs() {
   const [searchText, setSearchText] = useState("");
   const { data: tabs, isLoading, mutate, revalidate } = usePromise(getBrowserTabs);
-  const deletedTabIdsRef = useRef(new Set<number>());
+  const pendingCloseIdsRef = useRef(new Set<string>());
 
-  // Filter out deleted tabs first (tabs that are being closed but might still appear in fetched data)
-  const tabsWithoutDeleted = tabs ? tabs.filter((t) => !deletedTabIdsRef.current.has(t.id)) : [];
+  // Keep tabs hidden while their close request is still in flight.
+  const tabsWithoutPendingClose = tabs ? tabs.filter((t) => !pendingCloseIdsRef.current.has(t.id)) : [];
 
   // Then filter by search text
-  const filteredTabs = tabsWithoutDeleted ? filterSearchable(tabsWithoutDeleted, searchText) : [];
+  const filteredTabs = tabsWithoutPendingClose ? filterSearchable(tabsWithoutPendingClose, searchText) : [];
 
   return (
     <List
@@ -42,22 +42,33 @@ export default function SearchTabs() {
       )}
       {filteredTabs.map((tab) => (
         <List.Item
+          id={tab.id}
           key={tab.id}
           title={tab.title || "Untitled"}
           subtitle={tab.url}
           keywords={[tab.url, tab.title || ""]}
-          icon={tab.favicon || Icon.Globe}
+          icon={tab.favicon || getFavicon(tab.url, { fallback: Icon.Globe })}
           actions={
             <ActionPanel>
               <SwitchToTabAction tab={tab} />
               <OpenNewTabAction />
-              <CloseTabAction tab={tab} mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
+              <CloseTabAction
+                tab={tab}
+                mutate={mutate}
+                revalidate={revalidate}
+                pendingCloseIdsRef={pendingCloseIdsRef}
+              />
               <OpenInNewTabAction tab={tab} />
               <CopyUrlAction tab={tab} />
               <CopyTitleAction tab={tab} />
               <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
               <ReloadAction subject="Tabs" revalidate={revalidate} />
-              <DeduplicateTabsAction tabs={tabsWithoutDeleted} mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
+              <DeduplicateTabsAction
+                tabs={tabsWithoutPendingClose}
+                mutate={mutate}
+                revalidate={revalidate}
+                pendingCloseIdsRef={pendingCloseIdsRef}
+              />
             </ActionPanel>
           }
         />
