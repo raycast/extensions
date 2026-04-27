@@ -70,7 +70,7 @@
       "description": "When enabled, uses Raycast's built-in AI instead of your API key if you have Raycast Pro.",
       "type": "checkbox",
       "required": false,
-      "default": true
+      "default": false
     },
     {
       "name": "userInstruction",

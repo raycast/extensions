@@ -20,7 +20,7 @@ const PROVIDER_BASE_URLS: Partial<Record<Provider, string>> = {
 
 export function buildModel(prefs: Preferences) {
   const modelId = prefs.model?.trim() || DEFAULT_MODELS[prefs.provider];
-  const customURL = prefs.customBaseURL?.trim();
+  const customURL = prefs.customBaseURL?.trim() || undefined;
 
   switch (prefs.provider) {
     case "anthropic":

@@ -65,6 +65,7 @@ export default async function Command() {
         model: buildModel(prefs),
         system: systemPrompt,
         prompt: text,
+        temperature: 0,
       });
       fixed = result;
     }
