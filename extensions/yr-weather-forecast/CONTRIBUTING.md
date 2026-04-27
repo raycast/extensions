@@ -5,7 +5,8 @@
 ```bash
 npm install
 npm run dev        # start Raycast dev server
-npm run check      # full verify: build + type-check + lint + format
+npm run check      # full local verification (Raycast requirements + format check)
+npm run fix        # auto-fix lint and formatting issues
 ```
 
 ## Raycast Extensions Monorepo Sync
