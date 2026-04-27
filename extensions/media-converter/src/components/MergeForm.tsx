@@ -1,6 +1,6 @@
 import { Form, ActionPanel, Action, Icon, showToast, Toast, showInFinder, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import fs from "fs";
 import path from "path";
 import { mergeMedia } from "../utils/merge";
@@ -15,6 +15,7 @@ import {
 
 export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
   const preferences = getPreferenceValues<Preferences>();
+  const initialFilesKey = initialFiles.join("\0");
   const [files, setFiles] = useState<string[]>(initialFiles);
   const [outputFormat, setOutputFormat] = useState<AllOutputExtension>(".mp4");
   const [outputFileName, setOutputFileName] = useState<string>("merged");
@@ -27,12 +28,31 @@ export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
   const [stripMetadata, setStripMetadata] = useState<boolean>(Boolean(preferences.defaultStripMetadata));
   const [forceReencode, setForceReencode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState(false);
+  const appliedInitialFilesKey = useRef<string | null>(null);
+  const hasUserSelectedFiles = useRef(false);
 
   const mediaType: MediaType | null = useMemo(() => {
     if (files.length === 0) return null;
     const t = getMediaType(path.extname(files[0]));
     return t === "image" ? null : t; // merging images doesn't really make sense
   }, [files]);
+
+  useEffect(() => {
+    if (initialFiles.length === 0) {
+      if (appliedInitialFilesKey.current === null) {
+        appliedInitialFilesKey.current = initialFilesKey;
+        setFiles([]);
+      }
+      return;
+    }
+
+    if (hasUserSelectedFiles.current || appliedInitialFilesKey.current === initialFilesKey) {
+      return;
+    }
+
+    appliedInitialFilesKey.current = initialFilesKey;
+    setFiles(initialFiles);
+  }, [initialFilesKey]);
 
   useEffect(() => {
     if (
@@ -173,7 +193,10 @@ export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
         title="Select files to merge"
         allowMultipleSelection={true}
         value={files}
-        onChange={setFiles}
+        onChange={(nextFiles) => {
+          hasUserSelectedFiles.current = true;
+          setFiles(nextFiles);
+        }}
       />
       {files.length > 0 && (
         <Form.Description
