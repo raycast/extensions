@@ -2,7 +2,16 @@ import { showHUD } from "@raycast/api";
 import { adjustBrightness } from "./utils/platform";
 
 export default async () => {
-  if (await adjustBrightness(-10)) {
-    await showHUD("Brightness decreased");
-  }
+  const result = await adjustBrightness(-10);
+  if (!result) return;
+
+  await showHUD(formatBrightnessHUD(result, "Brightness decreased"));
 };
+
+function formatBrightnessHUD(result: { displayName?: string; brightness?: number }, fallback: string): string {
+  if (result.displayName && result.brightness != null) {
+    return `${result.displayName}: ${result.brightness}%`;
+  }
+
+  return fallback;
+}

@@ -1,8 +1,7 @@
 import { platform } from "os";
 import { showToast, Toast } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
-import { BrightnessAction, makeScript } from "../script";
 import {
+  adjustCursorBrightness,
   ensureLunarReady,
   getDisplays,
   getCursorDisplay,
@@ -20,9 +19,15 @@ const isWindows = platform() === "win32";
 export interface SetBrightnessResult {
   displayName?: string;
   previousBrightness?: number;
+  brightness?: number;
 }
 
-export async function adjustBrightness(offset: number): Promise<boolean> {
+export interface AdjustBrightnessResult {
+  displayName?: string;
+  brightness?: number;
+}
+
+export async function adjustBrightness(offset: number): Promise<AdjustBrightnessResult | null> {
   if (isWindows) {
     try {
       const monitors = await winAdjustBrightness(offset);
@@ -32,21 +37,46 @@ export async function adjustBrightness(offset: number): Promise<boolean> {
           title: "No Brightness-Capable Monitors Found",
           message: "No WMI or DDC/CI monitors detected",
         });
-        return false;
+        return null;
       }
-      return monitors.some((m) => m.setResult === true);
+
+      const primary = monitors.find((m) => m.setResult === true) || monitors[0];
+      if (!primary.setResult) {
+        return null;
+      }
+
+      return {
+        displayName: primary.description || undefined,
+        brightness: primary.newBrightness,
+      };
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to Adjust Brightness",
         message: error instanceof Error ? error.message : "An error occurred",
       });
-      return false;
+      return null;
     }
   }
 
-  await runAppleScript(makeScript(offset > 0 ? BrightnessAction.Up : BrightnessAction.Down));
-  return true;
+  if (!(await ensureLunarReady())) {
+    return null;
+  }
+
+  try {
+    const result = await adjustCursorBrightness(offset);
+    return {
+      displayName: result.name,
+      brightness: result.brightness,
+    };
+  } catch (error) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to Adjust Brightness",
+      message: error instanceof Error ? error.message : "An error occurred",
+    });
+    return null;
+  }
 }
 
 export async function setBrightness(level: number): Promise<SetBrightnessResult | null> {
@@ -66,6 +96,7 @@ export async function setBrightness(level: number): Promise<SetBrightnessResult 
       return {
         displayName: primary.description || undefined,
         previousBrightness: primary.brightness,
+        brightness: primary.newBrightness,
       };
     } catch (error) {
       await showToast({
@@ -103,6 +134,7 @@ export async function setBrightness(level: number): Promise<SetBrightnessResult 
   return {
     displayName: targetDisplay.name,
     previousBrightness: previousBrightness ?? undefined,
+    brightness: level,
   };
 }
 

@@ -207,7 +207,7 @@ async function runBrightnessScript(action: "get" | "set" | "offset", value: numb
   try {
     const result = await execAsync(
       `powershell -ExecutionPolicy Bypass -NoProfile -NonInteractive -File "${scriptPath}" -Action ${action} -Value ${value}`,
-      { timeout: 15000, encoding: "utf8" }
+      { timeout: 15000, encoding: "utf8" },
     );
     stdout = result.stdout;
   } catch (err: unknown) {

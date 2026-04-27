@@ -27,10 +27,11 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     const result = await setBrightness(brightnessLevel);
     if (!result) return;
 
+    const currentBrightness = result.brightness ?? brightnessLevel;
     if (result.displayName && result.previousBrightness != null) {
-      await showHUD(`${result.displayName}: ${result.previousBrightness}% → ${brightnessLevel}%`);
+      await showHUD(`${result.displayName}: ${result.previousBrightness}% → ${currentBrightness}%`);
     } else {
-      await showHUD(`Brightness set to ${brightnessLevel}%`);
+      await showHUD(`Brightness set to ${currentBrightness}%`);
     }
   } catch (error) {
     console.error("Failed to set brightness:", error);

@@ -6,7 +6,9 @@ export default async function Command() {
     const result = await setBrightness(100);
     if (!result) return;
 
-    if (result.displayName) {
+    if (result.displayName && result.brightness != null) {
+      await showHUD(`🚀 ${result.displayName}: ${result.brightness}%`);
+    } else if (result.displayName) {
       await showHUD(`🚀 ${result.displayName}: Brightness to the max!`);
     } else {
       await showHUD("🚀 Brightness to the max!");
