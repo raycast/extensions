@@ -95,7 +95,10 @@ export default function Command() {
 function HistoryItem({ entry, onChange }: { entry: HistoryEntry; onChange: () => Promise<void> }) {
   const primaryOutput = entry.outputs[0];
   const title = primaryOutput ? path.basename(primaryOutput) : "Conversion";
-  const outputExists = primaryOutput ? fs.existsSync(primaryOutput) : false;
+  const [outputExists, setOutputExists] = useState(false);
+  useEffect(() => {
+    setOutputExists(primaryOutput ? fs.existsSync(primaryOutput) : false);
+  }, [primaryOutput]);
 
   const savingsText =
     entry.inputBytes > 0 && entry.outputBytes > 0

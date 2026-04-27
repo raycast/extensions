@@ -57,9 +57,23 @@ export default async function MergeMediaTool(input: Input) {
     return { type: "error", message: `Output format ${input.outputFileType} is not valid for merging.` };
   }
 
+  // Validate optional output directory to provide a clear error message early
+  let resolvedOutputDir: string | undefined;
+  if (input.outputDir) {
+    resolvedOutputDir = resolvePath(input.outputDir);
+    try {
+      const stat = fs.statSync(resolvedOutputDir);
+      if (!stat.isDirectory()) {
+        return { type: "error", message: `Output path is not a directory: ${resolvedOutputDir}` };
+      }
+    } catch {
+      return { type: "error", message: `Output directory does not exist: ${resolvedOutputDir}` };
+    }
+  }
+
   try {
     const result = await mergeMedia(absoluteInputs, input.outputFileType as AllOutputExtension, {
-      outputDir: input.outputDir ? resolvePath(input.outputDir) : undefined,
+      outputDir: resolvedOutputDir,
       outputFileName: input.outputFileName,
       stripMetadata: input.stripMetadata,
       forceReencode: input.forceReencode,
