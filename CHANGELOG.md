@@ -1,0 +1,1 @@
+- Initial version of TableXport: extract tables from clipboard to Google Sheets.
