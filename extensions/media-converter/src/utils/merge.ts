@@ -106,7 +106,7 @@ export function canStreamCopy(streams: StreamInfo[]): boolean {
     }
     if (!!s.audioCodec !== !!first.audioCodec) return false;
     if (s.audioCodec && s.audioCodec !== first.audioCodec) return false;
-    if (s.audioSampleRate && s.audioSampleRate !== first.audioSampleRate) return false;
+    if (s.audioSampleRate && first.audioSampleRate && s.audioSampleRate !== first.audioSampleRate) return false;
     if (s.audioChannels && s.audioChannels !== first.audioChannels) return false;
   }
   return true;

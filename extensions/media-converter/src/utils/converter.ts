@@ -51,10 +51,9 @@ export type ConvertOptions = {
 };
 
 /**
- * Build the `-ss <start>` / `-to <end>` flags string for FFmpeg.
- * Both flags are input-side (placed before `-i`) for speed; FFmpeg seeks to
- * the nearest keyframe which is accurate enough for most use cases.
- * Returns an empty string if no valid trim is requested.
+ * Build input-side trim flags for FFmpeg.
+ * When both start and end are present, use `-ss <start> -t <duration>` to avoid
+ * ambiguity from input-side `-to` (which is absolute in the source timeline).
  */
 function buildTrimFlags(trim: TrimOptions | undefined): string {
   if (!trim) return "";
@@ -62,8 +61,25 @@ function buildTrimFlags(trim: TrimOptions | undefined): string {
   const start = parseTimeString(trim.start ?? "");
   const end = parseTimeString(trim.end ?? "");
   if (start !== null && start > 0) parts.push(`-ss ${toFfmpegTime(start)}`);
-  if (end !== null && end > 0) parts.push(`-to ${toFfmpegTime(end)}`);
+  if (start !== null && start > 0 && end !== null && end > start) {
+    parts.push(`-t ${toFfmpegTime(end - start)}`);
+  } else if (end !== null && end > 0) {
+    parts.push(`-to ${toFfmpegTime(end)}`);
+  }
   return parts.length > 0 ? ` ${parts.join(" ")}` : "";
+}
+
+function appendMetadataBeforeOutput(cmd: string, metadataFlag: string, outputPath: string): string {
+  if (!metadataFlag || cmd.includes(metadataFlag)) return cmd;
+  const quotedOutput = `"${outputPath}"`;
+  const yOutput = `-y ${quotedOutput}`;
+  if (cmd.includes(yOutput)) {
+    return cmd.replace(yOutput, `${metadataFlag} ${yOutput}`);
+  }
+  if (cmd.includes(quotedOutput)) {
+    return cmd.replace(quotedOutput, `${metadataFlag} ${quotedOutput}`);
+  }
+  return cmd + metadataFlag;
 }
 
 export async function convertMedia<T extends AllOutputExtension>(
@@ -255,7 +271,7 @@ export async function convertMedia<T extends AllOutputExtension>(
               ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)} -still-picture 1`;
               break;
           }
-          ffmpegCmd += metadataFlag;
+          ffmpegCmd = appendMetadataBeforeOutput(ffmpegCmd, metadataFlag, finalOutputPath);
           if (currentOutputFormat !== ".png" || imageQuality[".png"] !== "png-8") {
             ffmpegCmd += ` -y "${finalOutputPath}"`;
           } else {
