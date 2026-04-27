@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tablexport",
   "title": "TableXport",
   "description": "Instantly convert tables from your clipboard to Google Sheets, Excel, or PDF. Perfect for AI-generated tables from ChatGPT, Claude, and Gemini.",
