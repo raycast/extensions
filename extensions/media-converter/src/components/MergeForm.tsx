@@ -14,7 +14,7 @@ import {
 } from "../types/media";
 
 export function MergeForm({ initialFiles = [] }: { initialFiles?: string[] }) {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const [files, setFiles] = useState<string[]>(initialFiles);
   const [outputFormat, setOutputFormat] = useState<AllOutputExtension>(".mp4");
   const [outputFileName, setOutputFileName] = useState<string>("merged");

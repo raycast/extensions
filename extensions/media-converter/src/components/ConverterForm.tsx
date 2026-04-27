@@ -88,7 +88,7 @@ export function ConverterForm({
   initialFiles?: string[];
   launchContext?: LaunchContext;
 } = {}) {
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
   const prefill = launchContext?.prefill;
 
   const [selectedFileType, setSelectedFileType] = useState<MediaType | null>(null);
