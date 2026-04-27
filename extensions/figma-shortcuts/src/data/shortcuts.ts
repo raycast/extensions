@@ -88,8 +88,24 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Tools",
     action: "Quick Actions",
     mac: "Cmd+/",
-    windows: "Ctrl+P",
+    windows: "Ctrl+/",
     keywords: ["search", "command", "palette", "menu"],
+  },
+  {
+    id: "tools-17",
+    category: "Tools",
+    action: "Section",
+    mac: "Shift+S",
+    windows: "Shift+S",
+    keywords: ["section", "organize", "canvas"],
+  },
+  {
+    id: "tools-18",
+    category: "Tools",
+    action: "Resources",
+    mac: "Shift+I",
+    windows: "Shift+I",
+    keywords: ["assets", "plugins", "widgets", "resources"],
   },
 
   // ─── View ─────────────────────────────────────────────────────────────────
@@ -122,7 +138,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "View",
     action: "Show Outlines",
     mac: "Cmd+Y",
-    windows: "Ctrl+Shift+3",
+    windows: "Shift+O",
     keywords: ["wireframe", "skeleton", "outline"],
   },
   {
@@ -138,7 +154,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "View",
     action: "Layout Grids",
     mac: "Ctrl+G",
-    windows: "Ctrl+Shift+4",
+    windows: "Shift+G",
     keywords: ["grid", "column", "layout"],
   },
   {
@@ -286,7 +302,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Arrange",
     action: "Bring to Front",
     mac: "Cmd+Alt+]",
-    windows: "Ctrl+Shift+]",
+    windows: "]",
     keywords: ["layer", "order", "top", "z-index"],
   },
   {
@@ -294,7 +310,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Arrange",
     action: "Send to Back",
     mac: "Cmd+Alt+[",
-    windows: "Ctrl+Shift+[",
+    windows: "[",
     keywords: ["layer", "order", "bottom", "z-index"],
   },
   {
@@ -350,7 +366,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Arrange",
     action: "Distribute Horizontally",
     mac: "Ctrl+Alt+H",
-    windows: "Ctrl+Alt+H",
+    windows: "Alt+Shift+H",
     keywords: ["spacing", "equal", "distribute", "horizontal"],
   },
   {
@@ -358,7 +374,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Arrange",
     action: "Distribute Vertically",
     mac: "Ctrl+Alt+V",
-    windows: "Ctrl+Alt+V",
+    windows: "Alt+Shift+V",
     keywords: ["spacing", "equal", "distribute", "vertical"],
   },
   {
@@ -366,7 +382,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Arrange",
     action: "Tidy Up",
     mac: "Ctrl+Alt+T",
-    windows: "Ctrl+Alt+T",
+    windows: "Ctrl+Alt+Shift+T",
     keywords: ["organize", "grid", "spacing", "tidy"],
   },
   {
@@ -390,7 +406,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Arrange",
     action: "Ungroup",
     mac: "Cmd+Shift+G",
-    windows: "Ctrl+Shift+G",
+    windows: "Ctrl+Delete",
     keywords: ["ungroup", "dissolve", "break"],
   },
   {
@@ -669,7 +685,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Text",
     action: "Align Left",
     mac: "Cmd+Shift+L",
-    windows: "Ctrl+Shift+L",
+    windows: "Ctrl+Alt+L",
     keywords: ["alignment", "paragraph", "left", "text"],
   },
   {
@@ -677,7 +693,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Text",
     action: "Align Center",
     mac: "Cmd+Shift+E",
-    windows: "Ctrl+Shift+E",
+    windows: "Ctrl+Alt+T",
     keywords: ["alignment", "paragraph", "center", "text"],
   },
   {
@@ -685,7 +701,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Text",
     action: "Align Right",
     mac: "Cmd+Shift+R",
-    windows: "Ctrl+Shift+R",
+    windows: "Ctrl+Alt+R",
     keywords: ["alignment", "paragraph", "right", "text"],
   },
   {
@@ -693,7 +709,7 @@ export const shortcuts: FigmaShortcut[] = [
     category: "Text",
     action: "Justify",
     mac: "Cmd+Shift+J",
-    windows: "Ctrl+Shift+J",
+    windows: "Ctrl+Alt+J",
     keywords: ["alignment", "paragraph", "justify", "text"],
   },
 
