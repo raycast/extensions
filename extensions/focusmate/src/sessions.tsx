@@ -1,6 +1,6 @@
 import { Detail } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { getSessions } from "./api";
+import { getProfile, getSessions } from "./api";
 
 function formatDuration(ms: number): string {
   const minutes = Math.round(ms / 60000);
@@ -23,7 +23,11 @@ export default function Command() {
     async () => {
       const thirtyDaysAgo = new Date();
       thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      return await getSessions(thirtyDaysAgo.toISOString(), new Date().toISOString());
+      const [profile, sessionsResponse] = await Promise.all([
+        getProfile(),
+        getSessions(thirtyDaysAgo.toISOString(), new Date().toISOString()),
+      ]);
+      return { currentUserId: profile.userId, sessions: sessionsResponse.sessions };
     },
     [],
     {
@@ -34,12 +38,13 @@ export default function Command() {
   );
 
   const sessions = data?.sessions ?? [];
+  const currentUserId = data?.currentUserId;
   const markdown = sessions.length
     ? `# Your Sessions (Last 30 days)
 
 ${sessions
   .map((s) => {
-    const partner = s.users?.[0]?.name || "Unknown";
+    const partner = s.users?.find((u) => u.userId !== currentUserId)?.name ?? "No partner";
     return `- ${formatDate(s.startTime)}: ${partner} (${formatDuration(s.duration)})`;
   })
   .join("\n")}

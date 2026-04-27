@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const FOCUSMATE_API_URL = "https://api.focusmate.com/v1";
 
-interface Preferences {
-  apiKey: string;
-}
-
 function getApiKey(): string {
   const preferences = getPreferenceValues<Preferences>();
   if (!preferences.apiKey) {
