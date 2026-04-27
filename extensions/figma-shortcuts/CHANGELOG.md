@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0] - 2024-03-20
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 
