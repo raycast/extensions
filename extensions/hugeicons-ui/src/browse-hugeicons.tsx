@@ -64,7 +64,7 @@ import {
 import { loadConfiguredHugeiconsApiKey } from "./lib/hugeicons-auth";
 import { copyPng, downloadPng, downloadSvg } from "./lib/icon-export";
 import { colorSvg, svgToDataUri, svgToJsx, svgToSvelte, svgToVue } from "./lib/icon-utils";
-import type { BookmarkFolder, HugeIcon, Preferences, QuickActionPreference } from "./lib/types";
+import type { BookmarkFolder, HugeIcon, QuickActionPreference } from "./lib/types";
 
 interface SearchErrorState {
   title: string;
@@ -278,13 +278,13 @@ function StylePreviewView({
         <ActionPanel>
           <ActionPanel.Section title="Copy">
             <Action
-              title="Copy Svg"
+              title="Copy SVG"
               icon={Icon.Clipboard}
               onAction={() => copySvgWithHUD(icon, selectedColor, styleName)}
             />
-            <Action.Paste title="Paste Svg" content={coloredSvg} />
+            <Action.Paste title="Paste SVG" content={coloredSvg} />
             <Action
-              title="Copy React (jsx)"
+              title="Copy React (Jsx)"
               icon={Icon.Code}
               onAction={() => copyJsxWithHUD(icon, selectedColor, styleName)}
             />
@@ -299,7 +299,7 @@ function StylePreviewView({
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy as Component">
             <Action.CopyToClipboard
-              title="Vue (sfc)"
+              title="Vue (Sfc)"
               icon={Icon.Code}
               content={svgToVue(icon.svg, fileName, selectedColor)}
             />
@@ -311,7 +311,7 @@ function StylePreviewView({
           </ActionPanel.Section>
           <ActionPanel.Section title="Download">
             <Action
-              title="Download Svg"
+              title="Download SVG"
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={() => downloadSvgForIcon(icon, selectedColor, styleName)}
@@ -455,13 +455,13 @@ function IconDetailView({
             </ActionPanel.Section>
             <ActionPanel.Section title="Copy">
               <Action
-                title="Copy Svg"
+                title="Copy SVG"
                 icon={Icon.Clipboard}
                 onAction={() => copySvgWithHUD(icon, selectedColor, style.name)}
               />
-              <Action.Paste title="Paste Svg" content={colorSvg(style.svg, selectedColor)} />
+              <Action.Paste title="Paste SVG" content={colorSvg(style.svg, selectedColor)} />
               <Action
-                title="Copy React (jsx)"
+                title="Copy React (Jsx)"
                 icon={Icon.Code}
                 onAction={() => copyJsxWithHUD(icon, selectedColor, style.name)}
               />
@@ -476,7 +476,7 @@ function IconDetailView({
             </ActionPanel.Section>
             <ActionPanel.Section title="Copy as Component">
               <Action.CopyToClipboard
-                title="Vue (sfc)"
+                title="Vue (Sfc)"
                 icon={Icon.Code}
                 content={svgToVue(style.svg, getFileName(iconName, style.name), selectedColor)}
               />
@@ -488,7 +488,7 @@ function IconDetailView({
             </ActionPanel.Section>
             <ActionPanel.Section title="Download">
               <Action
-                title="Download Svg"
+                title="Download SVG"
                 icon={Icon.Download}
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
                 onAction={() => downloadSvgForIcon(icon, selectedColor, style.name)}
@@ -633,19 +633,19 @@ function SearchResultActions({
   const primaryAction =
     quickAction === "copy-svg" ? (
       <Action
-        title="Copy Svg"
+        title="Copy SVG"
         icon={Icon.Clipboard}
         onAction={() => copySvgWithHUD(icon, selectedColor, styleSuffix)}
       />
     ) : quickAction === "copy-jsx" ? (
       <Action
-        title="Copy React (jsx)"
+        title="Copy React (Jsx)"
         icon={Icon.Code}
         onAction={() => copyJsxWithHUD(icon, selectedColor, styleSuffix)}
       />
     ) : quickAction === "download-svg" ? (
       <Action
-        title="Download Svg"
+        title="Download SVG"
         icon={Icon.Download}
         shortcut={{ modifiers: ["cmd"], key: "s" }}
         onAction={() => downloadSvgForIcon(icon, selectedColor, styleSuffix)}
@@ -665,15 +665,15 @@ function SearchResultActions({
       <ActionPanel.Section title="Copy">
         {quickAction !== "copy-svg" && (
           <Action
-            title="Copy Svg"
+            title="Copy SVG"
             icon={Icon.Clipboard}
             onAction={() => copySvgWithHUD(icon, selectedColor, styleSuffix)}
           />
         )}
-        <Action.Paste title="Paste Svg" content={coloredSvg} />
+        <Action.Paste title="Paste SVG" content={coloredSvg} />
         {quickAction !== "copy-jsx" && (
           <Action
-            title="Copy React (jsx)"
+            title="Copy React (Jsx)"
             icon={Icon.Code}
             onAction={() => copyJsxWithHUD(icon, selectedColor, styleSuffix)}
           />
@@ -689,7 +689,7 @@ function SearchResultActions({
       </ActionPanel.Section>
       <ActionPanel.Section title="Copy as Component">
         <Action.CopyToClipboard
-          title="Vue (sfc)"
+          title="Vue (Sfc)"
           icon={Icon.Code}
           content={svgToVue(icon.svg, fileName, selectedColor)}
         />
@@ -702,7 +702,7 @@ function SearchResultActions({
       <ActionPanel.Section title="Download">
         {quickAction !== "download-svg" && (
           <Action
-            title="Download Svg"
+            title="Download SVG"
             icon={Icon.Download}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
             onAction={() => downloadSvgForIcon(icon, selectedColor, styleSuffix)}
@@ -822,7 +822,7 @@ export default function Command() {
   const [iconMetas, setIconMetas] = useState<SearchResultMeta[]>([]);
   const [icons, setIcons] = useState<SearchResultIcon[]>([]);
   const [bookmarkFolders, setBookmarkFolders] = useState<BookmarkFolder[]>([DEFAULT_FOLDER]);
-  const [selectedColor, setSelectedColor] = useState(defaultColor || "auto");
+  const [selectedColor, setSelectedColor] = useState<string>(defaultColor || "auto");
   const [selectedPreviewStyle, setSelectedPreviewStyle] = useState<SearchStyleValue>(DEFAULT_PREVIEW_STYLE);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const [columns, setColumns] = useState(parseInt(gridSize) || 8);

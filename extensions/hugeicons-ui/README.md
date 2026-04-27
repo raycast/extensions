@@ -30,18 +30,16 @@ Add a Hugeicons API key (Universal License Token) only if you want Pro access.
 1. Go to [hugeicons.com](https://hugeicons.com) and sign in to your account
 2. Navigate to Profile > License
 3. Copy your Universal License Key
-4. Open Raycast and run `Add API Key` to save it directly inside the extension
-5. If you prefer, you can still paste the same key in the extension settings instead
+4. Open Raycast extension settings for Hugeicons UI and paste the key into `Hugeicons API Key`
 
 ## Commands
 
-| Command | Description |
-| --- | --- |
-| Browse Hugeicons | Search and preview icons from Hugeicons |
-| View Bookmarks | Browse and manage bookmarked icons |
-| Manage Preferences | Configure grid size, colors, and primary actions |
-| Create Bookmark Folder | Create a new bookmark folder |
-| Add API Key | Save, update, or remove a Hugeicons Pro key without opening extension settings |
+| Command                | Description                                                        |
+| ---------------------- | ------------------------------------------------------------------ |
+| Browse Hugeicons       | Search and preview icons from Hugeicons                            |
+| View Bookmarks         | Browse and manage bookmarked icons                                 |
+| Configure Settings     | Configure grid size, colors, primary actions, and bookmark folders |
+| Create Bookmark Folder | Create a new bookmark folder                                       |
 
 ## Raycast AI
 

@@ -28,7 +28,7 @@ import {
   getQuickActionName,
   isQuickActionPreferenceValue,
 } from "./lib/constants";
-import type { BookmarkFolder, Preferences, QuickActionPreference } from "./lib/types";
+import type { BookmarkFolder, QuickActionPreference } from "./lib/types";
 
 export default function Command() {
   const { quickAction } = getPreferenceValues<Preferences>();

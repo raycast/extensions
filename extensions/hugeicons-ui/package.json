@@ -5,43 +5,36 @@
   "description": "Search, preview, bookmark, and use Hugeicons icons across Raycast and Raycast AI.",
   "icon": "logos/icon.png",
   "author": "adnan_tresnjo",
-  "contributors": ["blcnyy"],
-  "categories": ["Design Tools"],
+  "contributors": [
+    "blcnyy"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "browse-hugeicons",
       "title": "Browse Hugeicons",
-      "subtitle": "Hugeicons UI",
       "description": "Search and preview icons from Hugeicons",
       "mode": "view"
     },
     {
       "name": "bookmarks",
       "title": "View Bookmarks",
-      "subtitle": "Hugeicons UI",
       "description": "Browse and manage your saved icons",
       "mode": "view"
     },
     {
       "name": "preferences",
-      "title": "Manage Preferences",
-      "subtitle": "Hugeicons UI",
-      "description": "Configure grid size, colors, and primary actions",
+      "title": "Configure Settings",
+      "description": "Configure grid size, colors, primary actions, and bookmark folders",
       "mode": "view"
     },
     {
       "name": "create-folder",
       "title": "Create Bookmark Folder",
-      "subtitle": "Hugeicons UI",
       "description": "Create a new folder to organize bookmarked icons",
-      "mode": "view"
-    },
-    {
-      "name": "add-api-key",
-      "title": "Add API Key",
-      "subtitle": "Hugeicons UI",
-      "description": "Save or update your Hugeicons Pro API key from inside Raycast",
       "mode": "view"
     }
   ],
@@ -78,9 +71,18 @@
       "required": false,
       "default": "8",
       "data": [
-        { "title": "Large", "value": "3" },
-        { "title": "Medium", "value": "5" },
-        { "title": "Small", "value": "8" }
+        {
+          "title": "Large",
+          "value": "3"
+        },
+        {
+          "title": "Medium",
+          "value": "5"
+        },
+        {
+          "title": "Small",
+          "value": "8"
+        }
       ]
     },
     {
@@ -91,16 +93,46 @@
       "required": false,
       "default": "auto",
       "data": [
-        { "title": "Auto (adapts to theme)", "value": "auto" },
-        { "title": "White", "value": "#FFFFFF" },
-        { "title": "Black", "value": "#000000" },
-        { "title": "Red", "value": "#FF3B30" },
-        { "title": "Orange", "value": "#FF9500" },
-        { "title": "Yellow", "value": "#FFCC00" },
-        { "title": "Green", "value": "#34C759" },
-        { "title": "Blue", "value": "#007AFF" },
-        { "title": "Purple", "value": "#AF52DE" },
-        { "title": "Magenta", "value": "#FF2D55" }
+        {
+          "title": "Auto (adapts to theme)",
+          "value": "auto"
+        },
+        {
+          "title": "White",
+          "value": "#FFFFFF"
+        },
+        {
+          "title": "Black",
+          "value": "#000000"
+        },
+        {
+          "title": "Red",
+          "value": "#FF3B30"
+        },
+        {
+          "title": "Orange",
+          "value": "#FF9500"
+        },
+        {
+          "title": "Yellow",
+          "value": "#FFCC00"
+        },
+        {
+          "title": "Green",
+          "value": "#34C759"
+        },
+        {
+          "title": "Blue",
+          "value": "#007AFF"
+        },
+        {
+          "title": "Purple",
+          "value": "#AF52DE"
+        },
+        {
+          "title": "Magenta",
+          "value": "#FF2D55"
+        }
       ]
     },
     {
@@ -111,25 +143,37 @@
       "required": false,
       "default": "view-styles",
       "data": [
-        { "title": "View All Styles", "value": "view-styles" },
-        { "title": "Copy SVG", "value": "copy-svg" },
-        { "title": "Copy React (JSX)", "value": "copy-jsx" },
-        { "title": "Download SVG", "value": "download-svg" }
+        {
+          "title": "View All Styles",
+          "value": "view-styles"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copy-svg"
+        },
+        {
+          "title": "Copy React (JSX)",
+          "value": "copy-jsx"
+        },
+        {
+          "title": "Download SVG",
+          "value": "download-svg"
+        }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1"
+    "@raycast/api": "^1.104.13"
   },
   "devDependencies": {
-    "@hugeicons/core-free-icons": "^3.3.0",
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
-    "@types/react": "^19.0.0",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "tsx": "^4.20.6",
-    "typescript": "^5.2.2"
+    "@hugeicons/core-free-icons": "^4.1.1",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -139,5 +183,7 @@
     "lint": "ray lint",
     "publish": "ray publish"
   },
-  "platforms": ["macOS"]
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -11,7 +11,6 @@ import type {
 } from "./types";
 
 export const BOOKMARKS_KEY = "hugeicons-bookmarks";
-export const API_KEY_OVERRIDE_KEY = "hugeicons-api-key-override";
 export const COLOR_KEY = "hugeicons-color";
 export const GRID_SIZE_KEY = "hugeicons-grid-size";
 export const QUICK_ACTION_KEY = "hugeicons-quick-action";

@@ -39,7 +39,7 @@ import {
 } from "./lib/constants";
 import { copyPng, downloadPng, downloadSvg } from "./lib/icon-export";
 import { colorSvg, svgToDataUri, svgToJsx, svgToSvelte, svgToVue } from "./lib/icon-utils";
-import type { BookmarkFolder, HugeIcon, Preferences } from "./lib/types";
+import type { BookmarkFolder, HugeIcon } from "./lib/types";
 
 async function copyTextWithHUD(content: string, message: string): Promise<void> {
   await Clipboard.copy(content);
@@ -171,7 +171,7 @@ function IconPreview({
         <ActionPanel>
           <ActionPanel.Section title="Download">
             <Action
-              title="Download Svg"
+              title="Download SVG"
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={() => downloadSvg(coloredSvg, icon.name)}
@@ -187,7 +187,7 @@ function IconPreview({
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
             <Action
-              title="Copy Svg"
+              title="Copy SVG"
               icon={Icon.Clipboard}
               onAction={() => copyTextWithHUD(coloredSvg, `Copied ${icon.name} as SVG`)}
             />
@@ -202,14 +202,14 @@ function IconPreview({
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy as Component">
             <Action
-              title="React (jsx)"
+              title="React (Jsx)"
               icon={Icon.Code}
               onAction={() =>
                 copyTextWithHUD(svgToJsx(icon.svg, icon.name, selectedColor), `Copied ${icon.name} as React JSX`)
               }
             />
             <Action
-              title="Vue (sfc)"
+              title="Vue (Sfc)"
               icon={Icon.Code}
               onAction={() =>
                 copyTextWithHUD(svgToVue(icon.svg, icon.name, selectedColor), `Copied ${icon.name} as Vue SFC`)
@@ -248,7 +248,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [folders, setFolders] = useState<BookmarkFolder[]>([]);
   const [selectedFolderId, setSelectedFolderId] = useState(DEFAULT_FOLDER.id);
-  const [selectedColor, setSelectedColor] = useState(defaultColor || "auto");
+  const [selectedColor, setSelectedColor] = useState<string>(defaultColor || "auto");
   const [columns, setColumns] = useState(parseInt(gridSize) || 8);
 
   const loadData = useCallback(async () => {
@@ -383,22 +383,22 @@ export default function Command() {
             </ActionPanel.Section>
             <ActionPanel.Section>
               <Action
-                title="Copy Svg"
+                title="Copy SVG"
                 icon={Icon.Clipboard}
                 onAction={() => copyTextWithHUD(coloredSvg, `Copied ${icon.name} as SVG`)}
               />
-              <Action.Paste title="Paste Svg" content={coloredSvg} />
+              <Action.Paste title="Paste SVG" content={coloredSvg} />
             </ActionPanel.Section>
             <ActionPanel.Section title="Copy as Component">
               <Action
-                title="React (jsx)"
+                title="React (Jsx)"
                 icon={Icon.Code}
                 onAction={() =>
                   copyTextWithHUD(svgToJsx(icon.svg, icon.name, selectedColor), `Copied ${icon.name} as React JSX`)
                 }
               />
               <Action
-                title="Vue (sfc)"
+                title="Vue (Sfc)"
                 icon={Icon.Code}
                 onAction={() =>
                   copyTextWithHUD(svgToVue(icon.svg, icon.name, selectedColor), `Copied ${icon.name} as Vue SFC`)
@@ -414,7 +414,7 @@ export default function Command() {
             </ActionPanel.Section>
             <ActionPanel.Section title="Download">
               <Action
-                title="Download Svg"
+                title="Download SVG"
                 icon={Icon.Download}
                 shortcut={{ modifiers: ["cmd"], key: "s" }}
                 onAction={() => downloadSvg(coloredSvg, icon.name)}
