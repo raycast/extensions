@@ -1,0 +1,50 @@
+{
+  "name": "tablexport",
+  "title": "TableXport",
+  "description": "Instantly convert tables from your clipboard to Google Sheets, Excel, or PDF. Perfect for AI-generated tables from ChatGPT, Claude, and Gemini.",
+  "icon": "icon.png",
+  "author": "artem_k",
+  "categories": [
+    "Data",
+    "Productivity",
+    "Developer Tools"
+  ],
+"keywords": [
+    "table",
+    "converter",
+    "ai",
+    "sheets",
+    "csv",
+    "clipboard",
+    "chatgpt",
+    "claude",
+    "gemini",
+    "deepseek",
+    "formatting",
+    "excel"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert Table from Clipboard",
+      "description": "Extracts table data from clipboard and opens it in TableXport for quick export.",
+      "mode": "no-view",
+      "icon": "icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.13"
+  },
+  "devDependencies": {
+    "@raycast/utils": "^1.0.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build",
+    "fix-lint": "ray lint --fix"
+  }
+}
