@@ -188,6 +188,7 @@ export function ConverterForm({
         });
         setCurrentFiles([]);
         setSelectedFileType(null);
+        setIsLoading(false);
         return;
       }
 
