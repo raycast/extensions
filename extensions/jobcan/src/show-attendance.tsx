@@ -241,6 +241,7 @@ async function submitAllAndRefresh(days: AttendanceDay[], preferences: Preferenc
     toast.style = Toast.Style.Failure;
     toast.title = "Could not submit all days";
     toast.message = error instanceof Error ? error.message : String(error);
+    onRefresh();
   }
 }
 
@@ -256,6 +257,6 @@ function getDisplayStatus(day: AttendanceDay): DisplayStatus {
   if (labels.includes("リ休")) return "refresh";
   if (labels.includes("社旅")) return "trip";
   if (labels.includes("年末")) return "newYearLeave";
-  if (!day.clockIn && !day.clockOut && day.holidayType) return "dayOff";
+  if (!day.clockIn && !day.clockOut && day.holidayType && day.status !== "absent") return "dayOff";
   return day.status;
 }
