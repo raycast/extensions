@@ -60,13 +60,19 @@ export default function Command() {
       isLoading={isLoading}
     >
       {multipleVaults ? (
-        <Form.Dropdown key={orderedVaults[0]?.name} id="vaultName" title="Vault" defaultValue={orderedVaults[0]?.name}>
+        <Form.Dropdown
+          key={orderedVaults[0]?.name}
+          id="vaultName"
+          title="Vault"
+          defaultValue={orderedVaults[0]?.name}
+          autoFocus
+        >
           {orderedVaults.map((vault) => (
             <Form.Dropdown.Item key={vault.path} value={vault.name} title={vault.name} />
           ))}
         </Form.Dropdown>
       ) : null}
-      <Form.TextField id="title" title="Title" placeholder="Write task title" autoFocus />
+      <Form.TextField id="title" title="Title" placeholder="Write task title" autoFocus={!multipleVaults} />
       <Form.TextArea id="details" title="Details" placeholder="Optional Markdown notes" />
       <Form.Dropdown id="status" title="Status" defaultValue="">
         <Form.Dropdown.Item value="" title="TaskNotes Default" />
