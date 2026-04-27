@@ -62,13 +62,15 @@ function CreateTodoForm({
   categoryId,
   categoryName,
   onCreated,
+  initialTitle,
 }: {
   categoryId: string;
   categoryName: string;
   onCreated: () => void;
+  initialTitle?: string;
 }) {
   const { pop } = useNavigation();
-  const [title, setTitle] = useState("");
+  const [title, setTitle] = useState(initialTitle ?? "");
   const [titleError, setTitleError] = useState<string | undefined>();
 
   async function handleSubmit() {
@@ -111,6 +113,7 @@ export function CategoryTodosView({ category, onUpdate }: { category: Category; 
   const { push } = useNavigation();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchText, setSearchText] = useState("");
 
   async function loadTodos() {
     setIsLoading(true);
@@ -146,12 +149,18 @@ export function CategoryTodosView({ category, onUpdate }: { category: Category; 
     }
   }
 
-  const pending = todos.filter((t) => !t.completed);
-  const done = todos.filter((t) => t.completed).sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+  const filteredTodos = todos.filter((t) => t.title.toLowerCase().includes(searchText.toLowerCase()));
+  const pending = filteredTodos.filter((t) => !t.completed);
+  const done = filteredTodos.filter((t) => t.completed).sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
   const catColor = colorFromValue(category.color);
 
   return (
-    <List isLoading={isLoading} navigationTitle={category.name} searchBarPlaceholder="Search todo…">
+    <List
+      isLoading={isLoading}
+      navigationTitle={category.name}
+      searchBarPlaceholder="Search todo…"
+      onSearchTextChange={setSearchText}
+    >
       <List.EmptyView
         icon={{ source: Icon.Folder, tintColor: catColor }}
         title={`No todos in ${category.name}`}
@@ -163,7 +172,14 @@ export function CategoryTodosView({ category, onUpdate }: { category: Category; 
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               onAction={() =>
-                push(<CreateTodoForm categoryId={category.id} categoryName={category.name} onCreated={loadTodos} />)
+                push(
+                  <CreateTodoForm
+                    categoryId={category.id}
+                    categoryName={category.name}
+                    onCreated={loadTodos}
+                    initialTitle={searchText}
+                  />,
+                )
               }
             />
           </ActionPanel>
@@ -191,6 +207,7 @@ export function CategoryTodosView({ category, onUpdate }: { category: Category; 
                             categoryId={category.id}
                             categoryName={category.name}
                             onCreated={loadTodos}
+                            initialTitle={searchText}
                           />,
                         )
                       }
@@ -239,6 +256,7 @@ export function CategoryTodosView({ category, onUpdate }: { category: Category; 
                             categoryId={category.id}
                             categoryName={category.name}
                             onCreated={loadTodos}
+                            initialTitle={searchText}
                           />,
                         )
                       }
@@ -270,7 +288,14 @@ export function CategoryTodosView({ category, onUpdate }: { category: Category; 
                 title="New Todo"
                 icon={Icon.Plus}
                 onAction={() =>
-                  push(<CreateTodoForm categoryId={category.id} categoryName={category.name} onCreated={loadTodos} />)
+                  push(
+                    <CreateTodoForm
+                      categoryId={category.id}
+                      categoryName={category.name}
+                      onCreated={loadTodos}
+                      initialTitle={searchText}
+                    />,
+                  )
                 }
               />
             </ActionPanel>
