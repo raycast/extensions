@@ -197,12 +197,7 @@ export function CategoryTodosView({ category, onUpdate }: { category: Category; 
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action
-                      title="Mark as Completed"
-                      icon={Icon.Checkmark}
-                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                      onAction={() => handleToggle(todo)}
-                    />
+                    <Action title="Mark as Completed" icon={Icon.Checkmark} onAction={() => handleToggle(todo)} />
                     <Action
                       title="New Todo"
                       icon={Icon.Plus}
@@ -251,12 +246,7 @@ export function CategoryTodosView({ category, onUpdate }: { category: Category; 
               actions={
                 <ActionPanel>
                   <ActionPanel.Section>
-                    <Action
-                      title="Mark as Pending"
-                      icon={Icon.Circle}
-                      shortcut={{ modifiers: ["cmd"], key: "enter" }}
-                      onAction={() => handleToggle(todo)}
-                    />
+                    <Action title="Mark as Pending" icon={Icon.Circle} onAction={() => handleToggle(todo)} />
                     <Action
                       title="New Todo"
                       icon={Icon.Plus}
