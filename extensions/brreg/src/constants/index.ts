@@ -95,20 +95,23 @@ export const APP_VERSION = packageJson.version;
 export const USER_AGENT = `Raycast-Brreg-Search/${APP_VERSION} (${GITHUB_REPO_URL})` as const;
 
 // Changelog
-const CHANGELOG_HIGHLIGHTS_BY_VERSION: Record<string, readonly string[]> = {
+const CHANGELOG_HIGHLIGHTS_BY_VERSION: Readonly<Record<string, readonly string[]>> = {
   "1.0.0": [
     "Favorite companies for quick access and retrieval.",
     "Open company pages directly in Alle.as.",
     "Use keyboard shortcuts for faster search and navigation.",
   ],
+  "1.0.1": [],
 };
+
+export const HAS_CHANGELOG_HIGHLIGHTS_FOR_CURRENT_VERSION = Object.hasOwn(CHANGELOG_HIGHLIGHTS_BY_VERSION, APP_VERSION);
 
 const CHANGELOG_SHORTCUTS_HINT_MARKDOWN =
   "\n\n---\n`Enter` closes this changelog. `Shift+Enter` opens Keyboard Shortcuts.";
 
 export function getChangelogMarkdown(version = APP_VERSION): string {
   const highlights = CHANGELOG_HIGHLIGHTS_BY_VERSION[version];
-  if (!highlights) {
+  if (!highlights || highlights.length === 0) {
     return `**Updated to version ${version}**\n\nSee the latest improvements and fixes in this release.${CHANGELOG_SHORTCUTS_HINT_MARKDOWN}`;
   }
 
