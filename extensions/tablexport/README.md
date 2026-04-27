@@ -1,5 +1,5 @@
 # TableXport
-![TableXport Demo](media/raycast_extension.gif)
+![TableXport Demo](media/raycast_gif.gif)
 
 TableXport is the fastest way to extract and convert tables from any source into your favorite spreadsheet format.
 
