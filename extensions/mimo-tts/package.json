@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "mimo-tts",
   "title": "MiMo TTS",
-  "description": "Expressive Xiaomi MiMo TTS for Raycast with style, rhythm, and pace controls",
+  "description": "Expressive text-to-speech powered by Xiaomi MiMo, with voice, emotion, and pacing controls.",
   "icon": "mimo-icon.png",
   "author": "xianwei_zhang",
   "categories": [
@@ -17,17 +17,17 @@
   "commands": [
     {
       "name": "quick-read",
-      "title": "Quick Read Selected Text",
+      "title": "Quick Read",
       "subtitle": "MiMo TTS",
-      "description": "Read selected text with your default MiMo voice. Trigger again to stop.",
+      "description": "Read selected or clipboard text with your default MiMo voice. Run again to stop playback.",
       "icon": "mimo-icon.png",
       "mode": "no-view"
     },
     {
       "name": "read-with-voice",
-      "title": "Read with Voice",
+      "title": "Read with Selected Voice",
       "subtitle": "MiMo TTS",
-      "description": "Browse MiMo voices and read selected text aloud",
+      "description": "Browse MiMo voices and read selected or clipboard text aloud.",
       "icon": "mimo-icon.png",
       "mode": "view"
     },
@@ -35,15 +35,15 @@
       "name": "read-with-controls",
       "title": "TTS Studio",
       "subtitle": "MiMo TTS",
-      "description": "Compose and play controllable MiMo speech from typed, selected, or pasted text",
+      "description": "Generate and play MiMo speech from typed, selected, or pasted text, with voice and style controls.",
       "icon": "mimo-icon.png",
       "mode": "view"
     },
     {
       "name": "select-voice",
-      "title": "Select Quick Read Voice",
+      "title": "Set Quick Read Voice",
       "subtitle": "MiMo TTS",
-      "description": "Choose and preview the voice used by Quick Read",
+      "description": "Choose and preview the voice used by Quick Read.",
       "icon": "mimo-icon.png",
       "mode": "view"
     },
@@ -51,23 +51,23 @@
       "name": "stop-reading",
       "title": "Stop Reading",
       "subtitle": "MiMo TTS",
-      "description": "Stop the current TTS playback",
+      "description": "Stop the current TTS playback.",
       "icon": "mimo-icon.png",
       "mode": "no-view"
     },
     {
       "name": "speed-up",
-      "title": "Speed up Reading",
+      "title": "Increase Reading Speed",
       "subtitle": "MiMo TTS",
-      "description": "Increase MiMo playback speed by 0.25x. Applies to the next read across all commands.",
+      "description": "Increase MiMo playback speed by 0.25x. Applies to the next playback in any MiMo command.",
       "icon": "mimo-icon.png",
       "mode": "no-view"
     },
     {
       "name": "speed-down",
-      "title": "Slow Down Reading",
+      "title": "Decrease Reading Speed",
       "subtitle": "MiMo TTS",
-      "description": "Decrease MiMo playback speed by 0.25x. Applies to the next read across all commands.",
+      "description": "Decrease MiMo playback speed by 0.25x. Applies to the next playback in any MiMo command.",
       "icon": "mimo-icon.png",
       "mode": "no-view"
     },
@@ -75,7 +75,7 @@
       "name": "menu-bar-status",
       "title": "MiMo TTS Status",
       "subtitle": "MiMo TTS",
-      "description": "Menu bar item showing what is currently playing, current speed, and Stop / Speed Up / Slow Down controls.",
+      "description": "Show playback status, speed, and controls in the menu bar.",
       "icon": "mimo-icon.png",
       "mode": "menu-bar",
       "interval": "1m"
@@ -87,7 +87,7 @@
       "type": "password",
       "required": false,
       "title": "Token Plan API Key",
-      "description": "Xiaomi MiMo Token Plan API Key, usually starts with tp-",
+      "description": "Your Xiaomi MiMo Token Plan API key. Starts with tp-.",
       "placeholder": "tp-..."
     },
     {
@@ -95,7 +95,7 @@
       "type": "textfield",
       "required": false,
       "title": "Token Plan Base URL",
-      "description": "OpenAI-compatible Token Plan base URL shown on your subscription page",
+      "description": "OpenAI-compatible Token Plan base URL from your subscription page.",
       "placeholder": "https://token-plan-cn.xiaomimimo.com/v1",
       "default": "https://token-plan-cn.xiaomimimo.com/v1"
     },
@@ -104,7 +104,7 @@
       "type": "dropdown",
       "required": false,
       "title": "TTS Model",
-      "description": "MiMo speech synthesis model",
+      "description": "MiMo text-to-speech model.",
       "default": "mimo-v2.5-tts",
       "data": [
         {
@@ -122,7 +122,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Default Voice",
-      "description": "Voice used for Quick Read",
+      "description": "Voice used by Quick Read.",
       "default": "mimo_default",
       "data": [
         {
@@ -162,11 +162,11 @@
           "value": "Dean"
         },
         {
-          "title": "MiMo Chinese Female (Legacy)",
+          "title": "Legacy Chinese Female",
           "value": "default_zh"
         },
         {
-          "title": "MiMo English Female (Legacy)",
+          "title": "Legacy English Female",
           "value": "default_en"
         }
       ]
@@ -176,7 +176,7 @@
       "type": "dropdown",
       "required": false,
       "title": "Speech Rate",
-      "description": "Natural-language speed guidance sent to MiMo",
+      "description": "Default speed guidance sent to MiMo. Can be overridden per playback.",
       "default": "0",
       "data": [
         {
@@ -214,8 +214,8 @@
       "type": "textfield",
       "required": false,
       "title": "Speaking Style",
-      "description": "Optional natural-language direction, sent as the user message",
-      "placeholder": "Natural, clear, restrained, suitable for reading long text"
+      "description": "Optional natural-language style guidance sent to MiMo with every request.",
+      "placeholder": "Natural, clear, and restrained; suitable for long-form reading."
     }
   ],
   "dependencies": {

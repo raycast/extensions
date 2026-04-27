@@ -4,13 +4,13 @@ export interface ControlOption {
 }
 
 export const SPEECH_RATE_OPTIONS: ControlOption[] = [
-  { value: "-50", title: "0.5x Slow" },
-  { value: "-25", title: "0.75x Relaxed" },
-  { value: "0", title: "1.0x Normal" },
-  { value: "25", title: "1.25x Brisk" },
-  { value: "50", title: "1.5x Fast" },
-  { value: "75", title: "1.75x Very Brisk" },
-  { value: "100", title: "2.0x Very Fast" },
+  { value: "-50", title: "0.5x (Slow)" },
+  { value: "-25", title: "0.75x (Relaxed)" },
+  { value: "0", title: "1.0x (Normal)" },
+  { value: "25", title: "1.25x (Brisk)" },
+  { value: "50", title: "1.5x (Fast)" },
+  { value: "75", title: "1.75x (Very Brisk)" },
+  { value: "100", title: "2.0x (Very Fast)" },
 ];
 
 export const OPENING_STYLE_TAGS: ControlOption[] = [
@@ -20,7 +20,7 @@ export const OPENING_STYLE_TAGS: ControlOption[] = [
   { value: "恐惧", title: "Fearful" },
   { value: "惊讶", title: "Surprised" },
   { value: "兴奋", title: "Excited" },
-  { value: "委屈", title: "Wronged" },
+  { value: "委屈", title: "Aggrieved" },
   { value: "平静", title: "Calm" },
   { value: "冷漠", title: "Detached" },
   { value: "怅然", title: "Melancholic" },
@@ -33,13 +33,13 @@ export const OPENING_STYLE_TAGS: ControlOption[] = [
   { value: "忐忑", title: "Uneasy" },
   { value: "动情", title: "Moved" },
   { value: "温柔", title: "Gentle" },
-  { value: "高冷", title: "Cool" },
+  { value: "高冷", title: "Aloof" },
   { value: "活泼", title: "Lively" },
   { value: "严肃", title: "Serious" },
-  { value: "慵懒", title: "Lazy" },
+  { value: "慵懒", title: "Languid" },
   { value: "俏皮", title: "Playful" },
-  { value: "深沉", title: "Deep" },
-  { value: "干练", title: "Crisp" },
+  { value: "深沉", title: "Deep-Toned" },
+  { value: "干练", title: "Polished" },
   { value: "凌厉", title: "Sharp" },
   { value: "磁性", title: "Magnetic" },
   { value: "醇厚", title: "Rich" },
@@ -70,12 +70,12 @@ export const RHYTHM_TAGS: ControlOption[] = [
   { value: "叹气", title: "Sigh" },
   { value: "长叹一口气", title: "Long Sigh" },
   { value: "喘息", title: "Panting" },
-  { value: "屏息", title: "Hold Breath" },
+  { value: "屏息", title: "Breath Hold" },
   { value: "沉默片刻", title: "Brief Silence" },
   { value: "咳嗽", title: "Cough" },
   { value: "语速加快", title: "Speed Up" },
   { value: "放慢语速", title: "Slow Down" },
-  { value: "提高音量喊话", title: "Raise Volume" },
+  { value: "提高音量喊话", title: "Louder Voice" },
   { value: "小声", title: "Soft Voice" },
 ];
 
@@ -86,21 +86,21 @@ export const EMOTION_TAGS: ControlOption[] = [
   { value: "恐惧", title: "Fearful" },
   { value: "惊讶", title: "Surprised" },
   { value: "兴奋", title: "Excited" },
-  { value: "委屈", title: "Wronged" },
+  { value: "委屈", title: "Aggrieved" },
   { value: "平静", title: "Calm" },
   { value: "冷漠", title: "Detached" },
   { value: "紧张", title: "Nervous" },
   { value: "害怕", title: "Scared" },
-  { value: "激动", title: "Agitated" },
+  { value: "激动", title: "Worked Up" },
   { value: "疲惫", title: "Tired" },
-  { value: "撒娇", title: "Coaxing" },
-  { value: "心虚", title: "Guilty-Conscious" },
+  { value: "撒娇", title: "Coy" },
+  { value: "心虚", title: "Guilty and Uneasy" },
   { value: "震惊", title: "Shocked" },
   { value: "不耐烦", title: "Impatient" },
   { value: "压抑的愤怒", title: "Suppressed Anger" },
-  { value: "带着哽咽的笑意", title: "Choked Smile" },
+  { value: "带着哽咽的笑意", title: "Tearful Smile" },
   { value: "温柔但疲惫", title: "Gentle but Tired" },
-  { value: "狂躁中的温柔", title: "Gentleness in Frenzy" },
+  { value: "狂躁中的温柔", title: "Gentleness Amid Frenzy" },
 ];
 
 export const VOICE_FEATURE_TAGS: ControlOption[] = [
@@ -122,7 +122,7 @@ export const EXPRESSION_TAGS: ControlOption[] = [
   { value: "抽泣", title: "Sobbing" },
   { value: "呜咽", title: "Whimpering" },
   { value: "哽咽", title: "Choked Up" },
-  { value: "嚎啕大哭", title: "Wailing Cry" },
+  { value: "嚎啕大哭", title: "Wailing" },
 ];
 
 export const PERFORMANCE_PRESETS: ControlOption[] = [
@@ -135,7 +135,7 @@ export const PERFORMANCE_PRESETS: ControlOption[] = [
   {
     value:
       "Report good news with a bright upward tone, slightly fast pace, contained excitement, a hint of pride, and lively energy.",
-    title: "Bright Good News",
+    title: "Upbeat Good News",
   },
   {
     value:
@@ -144,8 +144,8 @@ export const PERFORMANCE_PRESETS: ControlOption[] = [
   },
   {
     value:
-      "Use a bright and lively teenage voice with playful mischief, a quick pace, light articulation, and a slight upward lift when emphasizing the bet.",
-    title: "Playful Teenage Tease",
+      "Use a bright and lively teenage voice with playful mischief, a quick pace, light articulation, and a slight upward lift on the punchline.",
+    title: "Playful Teen Tease",
   },
   {
     value:
@@ -154,8 +154,8 @@ export const PERFORMANCE_PRESETS: ControlOption[] = [
   },
   {
     value:
-      "Perform with a choked smile: the laugh is very light, with a trembling tail and a sourness that cannot quite be hidden.",
-    title: "Choked Smile",
+      "Perform with a tearful smile: the laugh is very light, with a trembling tail and a bitterness that cannot quite be hidden.",
+    title: "Tearful Smile",
   },
   {
     value:
@@ -164,7 +164,7 @@ export const PERFORMANCE_PRESETS: ControlOption[] = [
   },
   {
     value:
-      "Perform as gentleness inside frenzy: clear emotional swings, but suddenly lower and soften the voice on key lines.",
-    title: "Gentleness in Frenzy",
+      "Perform with gentleness amid frenzy: keep the emotional swings clear, but suddenly lower and soften the voice on key lines.",
+    title: "Gentleness Amid Frenzy",
   },
 ];

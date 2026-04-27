@@ -15,9 +15,9 @@ export default async function SpeedUp() {
   const next = await adjustSpeed(SPEED_STEP, fallback);
 
   if (Math.abs(next - before) < 0.001 && next >= SPEED_MAX) {
-    await showHUD(`Already at max speed (${formatSpeed(SPEED_MAX)})`);
+    await showHUD(`Already at maximum speed (${formatSpeed(SPEED_MAX)})`);
     return;
   }
 
-  await showHUD(`Speed ${formatSpeed(next)} · applies to next read`);
+  await showHUD(`Speed ${formatSpeed(next)} · applies to the next playback`);
 }

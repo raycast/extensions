@@ -24,10 +24,10 @@
 
 | 命令 | 用途 |
 | --- | --- |
-| Quick Read Selected Text | 用默认音色朗读当前选区；再次触发停止播放。 |
-| Read with Voice | 浏览音色并选择一个音色朗读当前选区。 |
+| Quick Read | 用默认音色朗读当前选区或剪贴板文本；再次触发停止播放。 |
+| Read with Selected Voice | 浏览音色并选择一个音色朗读当前文本。 |
 | TTS Studio | 输入、粘贴或加载当前选区，再用表单调节语速、风格标签、音频事件、复合情绪、语音质感和导演模式指令。 |
-| Select Quick Read Voice | 试听并保存 Quick Read 使用的音色。 |
+| Set Quick Read Voice | 试听并保存 Quick Read 使用的音色。 |
 | Stop Reading | 停止当前播放。 |
 
 ## 实现说明

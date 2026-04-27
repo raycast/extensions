@@ -104,7 +104,7 @@ export default function SelectVoice() {
     const activeVoice = await getActiveQuickReadVoiceId();
     setActiveVoiceId(activeVoice.voiceId);
     setUsesOverride(activeVoice.isOverride);
-    await showToast({ style: Toast.Style.Success, title: "Using preference default voice" });
+    await showToast({ style: Toast.Style.Success, title: "Using the default voice from preferences" });
   }, []);
 
   const currentVoice = activeVoiceId ? getVoiceById(activeVoiceId) : undefined;
@@ -114,12 +114,14 @@ export default function SelectVoice() {
       isLoading={isLoading}
       isShowingDetail
       searchBarPlaceholder="Search MiMo voices..."
-      navigationTitle="Select Quick Read Voice"
+      navigationTitle="Set Quick Read Voice"
     >
       <List.Section title="Current">
         <List.Item
-          title={currentVoice?.name ?? activeVoiceId ?? "Preference default"}
-          subtitle={usesOverride ? "Quick Read override" : `Preference default · ${getModelLabel(currentModel)}`}
+          title={currentVoice?.name ?? activeVoiceId ?? "Default from Preferences"}
+          subtitle={
+            usesOverride ? "Custom Quick Read voice" : `Default from Preferences · ${getModelLabel(currentModel)}`
+          }
           icon={{ source: Icon.Star, tintColor: usesOverride ? Color.Yellow : Color.SecondaryText }}
           detail={
             <CurrentVoiceDetail voice={currentVoice} model={MODEL_LABELS[currentModel]} usesOverride={usesOverride} />
@@ -134,7 +136,7 @@ export default function SelectVoice() {
                 />
               )}
               {usesOverride && (
-                <Action title="Reset to Preference Default" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
+                <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
               )}
               <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
@@ -161,11 +163,7 @@ export default function SelectVoice() {
                   <Action title="Set as Quick Read Voice" icon={Icon.Star} onAction={() => handleSetVoice(voice)} />
                   <Action title="Preview Voice" icon={Icon.Play} onAction={() => handlePreviewVoice(voice)} />
                   {usesOverride && (
-                    <Action
-                      title="Reset to Preference Default"
-                      icon={Icon.RotateClockwise}
-                      onAction={handleResetVoice}
-                    />
+                    <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
                   )}
                   <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
                   <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
@@ -193,14 +191,14 @@ function CurrentVoiceDetail({
       markdown={
         voice
           ? `## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}`
-          : "## Preference default\n\nQuick Read will use the default voice configured in extension preferences."
+          : "## Default from Preferences\n\nQuick Read will use the default voice configured in extension preferences."
       }
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Model" text={model} />
           <List.Item.Detail.Metadata.Label
             title="Mode"
-            text={usesOverride ? "Quick Read override" : "Preference default"}
+            text={usesOverride ? "Custom Quick Read voice" : "Default from Preferences"}
           />
           {voice ? <List.Item.Detail.Metadata.Label title="Voice ID" text={voice.id} /> : null}
         </List.Item.Detail.Metadata>
@@ -212,7 +210,7 @@ function CurrentVoiceDetail({
 function VoiceDetail({ voice, model }: { voice: VoiceConfig; model: string }) {
   return (
     <List.Item.Detail
-      markdown={`## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}\n\nUse preview to hear this voice with your selected text or clipboard text.`}
+      markdown={`## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}\n\nUse Preview to hear this voice with your selected text or clipboard content.`}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Voice ID" text={voice.id} />

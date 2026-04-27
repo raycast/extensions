@@ -197,7 +197,7 @@ export default function MiMoStudio() {
   const handleUseSelectedText = useCallback(async () => {
     const selectedText = await getSelectedText().catch(() => "");
     if (!selectedText.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: "No selected text found" });
+      await showToast({ style: Toast.Style.Failure, title: "No text selected" });
       return;
     }
 
@@ -208,7 +208,7 @@ export default function MiMoStudio() {
   const handlePasteClipboard = useCallback(async () => {
     const clipboardText = await Clipboard.readText().catch(() => "");
     if (!clipboardText?.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: "Clipboard has no text" });
+      await showToast({ style: Toast.Style.Failure, title: "Clipboard contains no text" });
       return;
     }
 
@@ -242,7 +242,7 @@ export default function MiMoStudio() {
       enableDrafts
       actions={
         <ActionPanel>
-          <Action.SubmitForm<ControlFormValues> title="Generate & Play" icon={Icon.Play} onSubmit={handleSubmit} />
+          <Action.SubmitForm<ControlFormValues> title="Generate and Play" icon={Icon.Play} onSubmit={handleSubmit} />
           <Action
             title="Use Selected Text"
             icon={Icon.TextCursor}
@@ -250,7 +250,7 @@ export default function MiMoStudio() {
             onAction={handleUseSelectedText}
           />
           <Action
-            title="Paste Clipboard"
+            title="Paste from Clipboard"
             icon={Icon.Clipboard}
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
             onAction={handlePasteClipboard}
@@ -262,13 +262,13 @@ export default function MiMoStudio() {
             onAction={handleClearText}
           />
           <Action
-            title="Speed up (+0.25x)"
+            title="Increase Speed (+0.25x)"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd", "shift"], key: "=" }}
             onAction={handleSpeedUp}
           />
           <Action
-            title="Slow Down (-0.25x)"
+            title="Decrease Speed (-0.25x)"
             icon={Icon.Minus}
             shortcut={{ modifiers: ["cmd", "shift"], key: "-" }}
             onAction={handleSpeedDown}
@@ -287,7 +287,7 @@ export default function MiMoStudio() {
     >
       <Form.Description
         title="TTS Studio"
-        text="Compose speech from typed, selected, or pasted text. ⌘⇧= speeds up, ⌘⇧- slows down. Speed changes apply to the next play and to other MiMo commands."
+        text="Generate speech from typed, selected, or pasted text. ⌘⇧= increases speed, ⌘⇧- decreases speed. Speed changes apply to the next playback and to other MiMo commands."
       />
       <Form.TextArea
         id="text"
@@ -317,9 +317,9 @@ export default function MiMoStudio() {
       </Form.Dropdown>
       <Form.Dropdown
         id="performancePreset"
-        title="Natural Preset"
+        title="Performance Preset"
         defaultValue=""
-        info="Sent as natural-language control in the user message."
+        info="Sent to MiMo as speaking instructions."
         storeValue
       >
         {PERFORMANCE_PRESETS.map((option) => (
@@ -330,7 +330,7 @@ export default function MiMoStudio() {
       <Form.Separator />
       <Form.Description
         title="Opening Style"
-        text="These become a single leading style tag, such as gentle, tired, and breathy. If Singing is selected, it is forced to be the only opening tag."
+        text="Added as leading style tags, such as gentle, tired, or breathy. If Singing is chosen, it overrides all other opening style tags."
       />
       <Form.TagPicker id="openingStyleTags" title="Overall Style" placeholder="Choose style tags" storeValue>
         {OPENING_STYLE_TAGS.map((tag) => (
@@ -340,27 +340,27 @@ export default function MiMoStudio() {
       <Form.TextField
         id="customAssistantTags"
         title="Custom Tags"
-        placeholder="e.g. whisper, narration, roar"
-        info="Comma-separated tags added to the assistant text prefix."
+        placeholder="e.g., whisper, narration, roar"
+        info="Comma-separated tags added before the text."
         storeValue
       />
 
       <Form.Separator />
       <Form.Description
         title="Audio Events"
-        text="These become an audio-event prefix, such as nervous, deep breath, and breathy voice."
+        text="Added before the text to guide delivery, such as nervous, deep breath, or breathy voice."
       />
       <Form.TagPicker id="rhythmTags" title="Pace and Rhythm" placeholder="Breath, pause, speed, volume" storeValue>
         {RHYTHM_TAGS.map((tag) => (
           <Form.TagPicker.Item key={tag.value} value={tag.value} title={tag.title} />
         ))}
       </Form.TagPicker>
-      <Form.TagPicker id="emotionTags" title="Emotion State" placeholder="Mood and mixed emotions" storeValue>
+      <Form.TagPicker id="emotionTags" title="Emotional State" placeholder="Mood and mixed emotions" storeValue>
         {EMOTION_TAGS.map((tag) => (
           <Form.TagPicker.Item key={tag.value} value={tag.value} title={tag.title} />
         ))}
       </Form.TagPicker>
-      <Form.TagPicker id="featureTags" title="Voice Feature" placeholder="Texture and vocal effects" storeValue>
+      <Form.TagPicker id="featureTags" title="Vocal Texture" placeholder="Texture and vocal effects" storeValue>
         {VOICE_FEATURE_TAGS.map((tag) => (
           <Form.TagPicker.Item key={tag.value} value={tag.value} title={tag.title} />
         ))}
@@ -376,7 +376,7 @@ export default function MiMoStudio() {
         id="directorPrompt"
         title="Director Prompt"
         placeholder="Role: ...\nScene: ...\nDirection: pace, breath, pauses, stress, resonance, vocal texture, emotional arc..."
-        info="Sent as natural-language control in the user message."
+        info="Free-form natural-language direction sent to MiMo."
         enableMarkdown
         storeValue
       />

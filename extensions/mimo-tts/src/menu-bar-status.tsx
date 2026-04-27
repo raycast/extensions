@@ -64,7 +64,7 @@ export default function MenuBarStatus() {
   const handleSpeedUp = async () => {
     const current = (await getSpeedOverride()) ?? prefRate;
     if (current >= SPEED_MAX) {
-      await showHUD(`Already at max speed (${formatSpeed(SPEED_MAX)})`);
+      await showHUD(`Already at maximum speed (${formatSpeed(SPEED_MAX)})`);
       return;
     }
     const next = await setSpeedOverride(current + SPEED_STEP);
@@ -75,7 +75,7 @@ export default function MenuBarStatus() {
   const handleSpeedDown = async () => {
     const current = (await getSpeedOverride()) ?? prefRate;
     if (current <= SPEED_MIN) {
-      await showHUD(`Already at min speed (${formatSpeed(SPEED_MIN)})`);
+      await showHUD(`Already at minimum speed (${formatSpeed(SPEED_MIN)})`);
       return;
     }
     const next = await setSpeedOverride(current - SPEED_STEP);
@@ -86,7 +86,7 @@ export default function MenuBarStatus() {
   const handleResetSpeed = async () => {
     await clearSpeedOverride();
     setOverride(null);
-    await showHUD(`Speed reset to preference (${formatSpeed(prefRate)})`);
+    await showHUD(`Speed reset to default (${formatSpeed(prefRate)})`);
   };
 
   const launch = (name: string) => () =>
@@ -131,34 +131,34 @@ export default function MenuBarStatus() {
 
       <MenuBarExtra.Section title="Playback Speed">
         <MenuBarExtra.Item
-          title={`${formatSpeed(effectiveRate)}${override === null ? " (from preference)" : " (override)"}`}
+          title={`${formatSpeed(effectiveRate)}${override === null ? " (from preferences)" : " (override)"}`}
           icon={Icon.Gauge}
         />
         <MenuBarExtra.Item
-          title="Speed Up (+0.25x)"
+          title="Increase Speed (+0.25x)"
           icon={Icon.Plus}
           shortcut={{ modifiers: ["cmd"], key: "=" }}
           onAction={handleSpeedUp}
         />
         <MenuBarExtra.Item
-          title="Slow down (-0.25x)"
+          title="Decrease Speed (-0.25x)"
           icon={Icon.Minus}
           shortcut={{ modifiers: ["cmd"], key: "-" }}
           onAction={handleSpeedDown}
         />
         {override !== null ? (
-          <MenuBarExtra.Item
-            title="Reset to Preference Speed"
-            icon={Icon.RotateClockwise}
-            onAction={handleResetSpeed}
-          />
+          <MenuBarExtra.Item title="Reset to Default Speed" icon={Icon.RotateClockwise} onAction={handleResetSpeed} />
         ) : null}
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
         <MenuBarExtra.Item title="Open TTS Studio" icon={Icon.Microphone} onAction={launch("read-with-controls")} />
-        <MenuBarExtra.Item title="Read with Voice" icon={Icon.SpeakerHigh} onAction={launch("read-with-voice")} />
-        <MenuBarExtra.Item title="Select Quick Read Voice" icon={Icon.Star} onAction={launch("select-voice")} />
+        <MenuBarExtra.Item
+          title="Read with Selected Voice"
+          icon={Icon.SpeakerHigh}
+          onAction={launch("read-with-voice")}
+        />
+        <MenuBarExtra.Item title="Set Quick Read Voice" icon={Icon.Star} onAction={launch("select-voice")} />
         <MenuBarExtra.Item title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>

@@ -25,7 +25,7 @@ export default async function QuickRead() {
   if (wasPlaying || state?.status === "playing" || state?.status === "synthesizing") {
     await requestPlaybackStop();
     await clearNowPlaying();
-    await showHUD("Stopped — run Quick Read again to resume reading new text");
+    await showHUD("Stopped. Run Quick Read again to read new text.");
     return;
   }
   await clearPlaybackStopRequest();
@@ -105,7 +105,7 @@ export default async function QuickRead() {
     if (player.isStopped()) {
       toast.style = Toast.Style.Success;
       toast.title = "Stopped";
-      toast.message = `${voiceName} · paused at ${player.isStopped() ? "current chunk" : ""}`;
+      toast.message = `${voiceName} · stopped at current chunk`;
       await markIdle();
       await showHUD("Stopped");
     } else {

@@ -16,14 +16,14 @@ function describe(error: unknown): { message: string; code?: number } {
 function copyDetail(detail: string): () => Promise<void> {
   return async () => {
     await Clipboard.copy(detail);
-    await showToast({ style: Toast.Style.Success, title: "Error detail copied" });
+    await showToast({ style: Toast.Style.Success, title: "Error details copied" });
   };
 }
 
 /**
  * Show a consistent failure toast for any TTS error. Configuration errors
- * surface a "Open Preferences" primary action so the user can act on them.
- * Every error toast also exposes Copy Error Detail so users can report issues.
+ * surface an "Open Preferences" primary action so the user can act on them.
+ * Every error toast also exposes Copy Error Details so users can report issues.
  */
 export async function showTTSFailure(error: unknown, fallbackTitle = "MiMo TTS Error"): Promise<void> {
   const { message, code } = describe(error);
@@ -35,7 +35,7 @@ export async function showTTSFailure(error: unknown, fallbackTitle = "MiMo TTS E
       title: "Configuration Required",
       message: detail,
       primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
-      secondaryAction: { title: "Copy Error Detail", onAction: copyDetail(detail) },
+      secondaryAction: { title: "Copy Error Details", onAction: copyDetail(detail) },
     });
     return;
   }
@@ -44,7 +44,7 @@ export async function showTTSFailure(error: unknown, fallbackTitle = "MiMo TTS E
     style: Toast.Style.Failure,
     title: fallbackTitle,
     message: detail,
-    primaryAction: { title: "Copy Error Detail", onAction: copyDetail(detail) },
+    primaryAction: { title: "Copy Error Details", onAction: copyDetail(detail) },
     secondaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
   });
 }

@@ -1,8 +1,8 @@
 # MiMo TTS
 
-Create expressive speech with Xiaomi MiMo TTS, directly from Raycast.
+Create expressive speech with Xiaomi MiMo text-to-speech, directly from Raycast.
 
-MiMo TTS is built for people who want more than plain text reading. It uses Xiaomi MiMo's speech synthesis API and exposes Raycast-native controls for voice, speaking style, rhythm, emotion, speech texture, and pace. The goal is simple: type, paste, or select text, choose how it should be performed, and listen without leaving your current workflow.
+MiMo TTS is built for people who want more than plain text reading. It uses Xiaomi MiMo's speech synthesis API and exposes Raycast-native controls for voice, speaking style, rhythm, emotion, vocal texture, and pace. The goal is simple: type, paste, or select text, choose how it should be performed, and listen without leaving your current workflow.
 
 ## Why MiMo
 
@@ -31,13 +31,13 @@ Xiaomi's MiMo-V2.5-TTS documentation supports two control paths, and this extens
 - **Natural-language control** is sent as a `user` message. It adjusts tone, pacing, emotion, and performance style without becoming part of the spoken text.
 - **Audio tag control** is inserted into the `assistant` message with the target text. It can guide rhythm, emotion, voice texture, laughter, breath, pauses, and other speech events.
 
-The **TTS Studio** command turns those capabilities into a Raycast form that does not require a text selection. You can type or paste text, load the current selection, then preset speech rate, opening style tags, rhythm events, emotion states, voice features, expressive tags, and director-style prompts before synthesis starts. This is the core advantage of the extension: it treats TTS as performance direction, not just plain playback.
+The **TTS Studio** command turns those capabilities into a Raycast form that does not require a text selection. You can type or paste text, load the current selection, then set the speech rate, opening style tags, rhythm events, emotional states, vocal texture, expressive tags, and director-style prompts before synthesis starts. This is the core advantage of the extension: it treats TTS as performance direction, not just plain playback.
 
 ## Features
 
 - **Quick Read**: select text anywhere, run the command, and listen immediately.
-- **Read with Voice**: browse MiMo voices, inspect voice details, and read with the selected voice.
-- **TTS Studio**: compose speech from typed, pasted, or selected text with speaking rate, style tags, rhythm events, emotion states, voice texture, expressive tags, and director prompts.
+- **Read with Selected Voice**: browse MiMo voices, inspect voice details, and read with the chosen voice.
+- **TTS Studio**: generate speech from typed, pasted, or selected text with speech rate, style tags, rhythm events, emotional states, vocal texture, expressive tags, and director prompts.
 - **Natural Style Prompt**: define reusable tone and pacing guidance in preferences.
 - **Voice Preview**: audition voices before setting the default Quick Read voice.
 - **Chunked Playback**: synthesize long selections in smaller chunks and play them sequentially.
@@ -47,17 +47,17 @@ The **TTS Studio** command turns those capabilities into a Raycast form that doe
 
 | Command | Purpose |
 | --- | --- |
-| Quick Read Selected Text | Read the current text selection with the default voice. Run again to stop current playback. |
-| Read with Voice | Browse voices, inspect details, and read the current selection with a chosen voice. |
-| TTS Studio | Type, paste, or load selected text, then tune speech rate, style tags, audio events, mixed emotions, voice texture, and director-mode instructions. |
-| Select Quick Read Voice | Preview and save the voice used by Quick Read. |
+| Quick Read | Read the current selection or clipboard text with the default voice. Run again to stop playback. |
+| Read with Selected Voice | Browse voices, inspect details, and read the current text with a chosen voice. |
+| TTS Studio | Type, paste, or load selected text, then tune speech rate, style tags, audio events, mixed emotions, vocal texture, and director-style instructions. |
+| Set Quick Read Voice | Preview and save the voice used by Quick Read. |
 | Stop Reading | Stop the active playback process. |
 
 ## Setup
 
 1. Subscribe to Xiaomi MiMo Token Plan and open the [Subscription](https://platform.xiaomimimo.com/#/console/plan-manage) page.
 2. Open Raycast extension preferences for **MiMo TTS**.
-3. Fill **Token Plan API Key** with your `tp-...` key.
+3. Enter your `tp-...` key in **Token Plan API Key**.
 4. Keep **Token Plan Base URL** as `https://token-plan-cn.xiaomimimo.com/v1`, or replace it with the Singapore/Europe URL shown on your subscription page.
 5. Keep **MiMo-V2.5-TTS** unless you need the legacy MiMo-V2 voices.
 6. Optionally set a default voice, speech rate guidance, and speaking style.
@@ -69,14 +69,14 @@ The **TTS Studio** command turns those capabilities into a Raycast form that doe
 | Token Plan API Key | Sent as the `api-key` header. Token Plan keys start with `tp-` and cannot be mixed with pay-as-you-go `sk-` keys. |
 | Token Plan Base URL | OpenAI-compatible Token Plan base URL. Defaults to `https://token-plan-cn.xiaomimimo.com/v1`; change it if your subscription page shows another cluster. |
 | TTS Model | `mimo-v2.5-tts` by default; `mimo-v2-tts` is available for legacy voices. |
-| Default Voice | Voice used by Quick Read unless overridden in Select Quick Read Voice. |
+| Default Voice | Voice used by Quick Read unless overridden in Set Quick Read Voice. |
 | Speech Rate | Converted into a natural-language speed instruction for MiMo. |
 | Speaking Style | Optional free-form direction sent as the `user` message. |
 
 ## Implementation Notes
 
 - API transport: `POST {Token Plan Base URL}/chat/completions`.
-- The extension uses Xiaomi MiMo Token Plan credentials: `tp-...` API Key plus the Token Plan OpenAI-compatible Base URL.
+- The extension uses Xiaomi MiMo Token Plan credentials: a `tp-...` API key plus the Token Plan OpenAI-compatible Base URL.
 - The text to synthesize is sent as an `assistant` message, per MiMo's TTS rules.
 - Optional natural-language style direction is sent as a `user` message.
 - In **TTS Studio**, opening style tags are injected as `(tag1 tag2)` and audio-event tags as `（tag1，tag2）` at the beginning of each synthesized chunk.

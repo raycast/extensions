@@ -13,7 +13,7 @@ export default async function StopReading() {
   if (state && (stopped || state.status === "playing" || state.status === "synthesizing")) {
     const chunkInfo =
       state.totalChunks > 1 && state.currentChunk >= 0 ? ` · chunk ${state.currentChunk + 1}/${state.totalChunks}` : "";
-    await showHUD(`Stopped ${state.voiceName}${chunkInfo}`);
+    await showHUD(`Stopped · ${state.voiceName}${chunkInfo}`);
     return;
   }
 

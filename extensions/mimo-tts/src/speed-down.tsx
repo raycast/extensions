@@ -15,9 +15,9 @@ export default async function SpeedDown() {
   const next = await adjustSpeed(-SPEED_STEP, fallback);
 
   if (Math.abs(next - before) < 0.001 && next <= SPEED_MIN) {
-    await showHUD(`Already at min speed (${formatSpeed(SPEED_MIN)})`);
+    await showHUD(`Already at minimum speed (${formatSpeed(SPEED_MIN)})`);
     return;
   }
 
-  await showHUD(`Speed ${formatSpeed(next)} · applies to next read`);
+  await showHUD(`Speed ${formatSpeed(next)} · applies to the next playback`);
 }

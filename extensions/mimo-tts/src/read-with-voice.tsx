@@ -67,7 +67,11 @@ export default function ReadWithVoice() {
       setSelectedText(text);
       setSelectionSource("selection");
       if (!silent) {
-        await showToast({ style: Toast.Style.Success, title: "Selection refreshed", message: `${text.length} chars` });
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Selection refreshed",
+          message: `${text.length} characters`,
+        });
       }
       return;
     }
@@ -81,21 +85,19 @@ export default function ReadWithVoice() {
   }, []);
 
   useEffect(() => {
-    let mounted = true;
     refreshSelection(true).catch(() => undefined);
     refreshSpeed().catch(() => undefined);
+    const player = playerRef.current;
 
     return () => {
-      mounted = false;
-      void mounted;
-      playerRef.current.cleanup();
+      player.cleanup();
     };
   }, [refreshSelection, refreshSpeed]);
 
-  const usePastedClipboard = useCallback(async () => {
+  const loadFromClipboard = useCallback(async () => {
     const clipboard = (await Clipboard.readText().catch(() => "")) ?? "";
     if (!clipboard.trim()) {
-      await showToast({ style: Toast.Style.Failure, title: "Clipboard has no text" });
+      await showToast({ style: Toast.Style.Failure, title: "Clipboard contains no text" });
       return;
     }
     setSelectedText(clipboard);
@@ -103,7 +105,7 @@ export default function ReadWithVoice() {
     await showToast({
       style: Toast.Style.Success,
       title: "Loaded from clipboard",
-      message: `${clipboard.length} chars`,
+      message: `${clipboard.length} characters`,
     });
   }, []);
 
@@ -113,7 +115,7 @@ export default function ReadWithVoice() {
         await showToast({
           style: Toast.Style.Failure,
           title: "No text to read",
-          message: "Refresh selection or paste from clipboard",
+          message: "Refresh the selection or paste from the clipboard.",
         });
         return;
       }
@@ -199,7 +201,7 @@ export default function ReadWithVoice() {
     await showToast({
       style: Toast.Style.Success,
       title: `Speed ${formatSpeed(next)}`,
-      message: "Applies to next read",
+      message: "Applies to the next playback",
     });
   }, [prefs.speechRate]);
 
@@ -211,7 +213,7 @@ export default function ReadWithVoice() {
     await showToast({
       style: Toast.Style.Success,
       title: `Speed ${formatSpeed(next)}`,
-      message: "Applies to next read",
+      message: "Applies to the next playback",
     });
   }, [prefs.speechRate]);
 
@@ -222,7 +224,7 @@ export default function ReadWithVoice() {
     : "No text loaded";
 
   const effectiveRate = speed ?? parseRateString(prefs.speechRate);
-  const speedLabel = `${formatSpeed(effectiveRate)}${speed === null ? " (preference)" : " (override)"}`;
+  const speedLabel = `${formatSpeed(effectiveRate)}${speed === null ? " (from preferences)" : " (override)"}`;
 
   const stopAction = playingVoiceId ? (
     <Action title="Stop Playback" icon={Icon.Stop} shortcut={{ modifiers: ["cmd"], key: "." }} onAction={handleStop} />
@@ -231,13 +233,13 @@ export default function ReadWithVoice() {
   const speedActions = (
     <>
       <Action
-        title="Speed up (+0.25x)"
+        title="Increase Speed (+0.25x)"
         icon={Icon.Plus}
         shortcut={{ modifiers: ["cmd", "shift"], key: "=" }}
         onAction={handleSpeedUp}
       />
       <Action
-        title="Slow Down (-0.25x)"
+        title="Decrease Speed (-0.25x)"
         icon={Icon.Minus}
         shortcut={{ modifiers: ["cmd", "shift"], key: "-" }}
         onAction={handleSpeedDown}
@@ -251,19 +253,19 @@ export default function ReadWithVoice() {
       isShowingDetail
       searchBarPlaceholder="Search MiMo voices..."
       onSearchTextChange={setSearchText}
-      navigationTitle="Read with MiMo Voice"
+      navigationTitle="Read with Selected Voice"
     >
       <List.EmptyView
         icon={Icon.SpeakerOff}
         title="No voices found"
-        description={`Try another search term or switch model in preferences. Current model: ${MODEL_LABELS[currentModel]}`}
+        description={`Try another search term or change the model in preferences. Current model: ${MODEL_LABELS[currentModel]}`}
       />
-      <List.Section title="Selection">
+      <List.Section title="Current Text">
         <List.Item
           title={textPreview}
           subtitle={
             selectedText
-              ? `${selectedText.length} chars · ${selectionSource} · ${speedLabel}`
+              ? `${selectedText.length} characters · ${formatSource(selectionSource)} · ${speedLabel}`
               : `${MODEL_LABELS[currentModel]} · ${speedLabel}`
           }
           icon={selectionSource === "clipboard" ? Icon.Clipboard : Icon.Text}
@@ -284,10 +286,10 @@ export default function ReadWithVoice() {
                 onAction={() => refreshSelection(false)}
               />
               <Action
-                title="Use Clipboard Text"
+                title="Paste from Clipboard"
                 icon={Icon.Clipboard}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-                onAction={usePastedClipboard}
+                onAction={loadFromClipboard}
               />
               {stopAction}
               {speedActions}
@@ -330,10 +332,10 @@ export default function ReadWithVoice() {
                     onAction={() => refreshSelection(false)}
                   />
                   <Action
-                    title="Use Clipboard Text"
+                    title="Paste from Clipboard"
                     icon={Icon.Clipboard}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
-                    onAction={usePastedClipboard}
+                    onAction={loadFromClipboard}
                   />
                   <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
                   <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
@@ -360,7 +362,7 @@ function SelectionDetail({
 }) {
   const text = selectedText.trim();
   const markdown = text
-    ? `## Selected Text\n\n${escapeMarkdown(text.length > 1000 ? `${text.slice(0, 1000)}...` : text)}`
+    ? `## Current Text\n\n${escapeMarkdown(text.length > 1000 ? `${text.slice(0, 1000)}...` : text)}`
     : "## Select text on macOS, then press ⌘R to refresh — or paste from clipboard with ⌘⇧V.";
 
   return (
@@ -369,7 +371,7 @@ function SelectionDetail({
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Model" text={model} />
-          <List.Item.Detail.Metadata.Label title="Source" text={source === "none" ? "—" : source} />
+          <List.Item.Detail.Metadata.Label title="Source" text={formatSource(source)} />
           <List.Item.Detail.Metadata.Label title="Length" text={text ? `${text.length} characters` : "None"} />
           <List.Item.Detail.Metadata.Label title="Speed" text={speedLabel} />
         </List.Item.Detail.Metadata>
@@ -391,7 +393,7 @@ function VoiceDetail({
 }) {
   return (
     <List.Item.Detail
-      markdown={`## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}\n\nSelect this voice to read the current text with MiMo TTS.`}
+      markdown={`## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}\n\nChoose this voice to read the current text with MiMo TTS.`}
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Voice ID" text={voice.id} />
@@ -419,6 +421,12 @@ function voiceIcon(voice: VoiceConfig) {
   if (voice.gender === "female") return Icon.Female;
   if (voice.gender === "male") return Icon.Male;
   return Icon.SpeakerHigh;
+}
+
+function formatSource(source: SelectionSource): string {
+  if (source === "selection") return "Selection";
+  if (source === "clipboard") return "Clipboard";
+  return "None";
 }
 
 function escapeMarkdown(text: string): string {

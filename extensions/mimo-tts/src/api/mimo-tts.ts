@@ -40,10 +40,10 @@ export async function synthesizeSpeech(text: string, options: TTSOptions, signal
   const prefs = getPreferenceValues<Preferences>();
   const apiKey = prefs.apiKey?.trim();
   if (!apiKey) {
-    throw new TTSApiError("MiMo Token Plan API Key is required. Add it in extension preferences.", -1);
+    throw new TTSApiError("MiMo Token Plan API key is required. Add it in extension preferences.", -1);
   }
   if (apiKey.startsWith("sk-")) {
-    throw new TTSApiError("Use a MiMo Token Plan API Key that starts with tp-, not a pay-as-you-go sk- key.", -1);
+    throw new TTSApiError("Use a MiMo Token Plan API key that starts with tp-, not a pay-as-you-go sk- key.", -1);
   }
 
   const response = await postWithTimeout(
@@ -192,7 +192,7 @@ export function buildOptionsFromPrefs(
   const voiceConfig = getVoiceById(voice);
 
   if (!voiceConfig) {
-    throw new TTSApiError(`Unknown voice "${voice}". Pick a MiMo voice in preferences or Select Quick Read Voice.`, -1);
+    throw new TTSApiError(`Unknown voice "${voice}". Pick a MiMo voice in preferences or Set Quick Read Voice.`, -1);
   }
 
   if (!isVoiceAvailableForModel(voiceConfig, model)) {
