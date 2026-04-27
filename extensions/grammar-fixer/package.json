@@ -51,9 +51,9 @@
     {
       "name": "apiKey",
       "title": "API Key",
-      "description": "Your API key for the selected provider. Not required for Ollama (local) or Raycast Pro users — leave blank or enter any placeholder.",
+      "description": "Your API key for the selected provider. Not required for Ollama or Raycast Pro — enter any value as a placeholder.",
       "type": "password",
-      "required": false
+      "required": true
     },
     {
       "name": "model",
