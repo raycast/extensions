@@ -4,26 +4,40 @@ import {
   Action,
   showToast,
   Toast,
-  showInFinder,
   Icon,
-  openCommandPreferences,
   getPreferenceValues,
   Clipboard,
+  useNavigation,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
+import fs from "fs";
+import path from "path";
 import { convertMedia } from "../utils/converter";
+import { runConversionBatch } from "../utils/convertBatch";
+import { parseTimeString, formatTimeString } from "../utils/time";
+import { getAllPresets, findPreset } from "../utils/presets";
+import { PresetEditorForm } from "./PresetEditorForm";
+import { execPromise } from "../utils/exec";
 import {
   OUTPUT_VIDEO_EXTENSIONS,
   OUTPUT_AUDIO_EXTENSIONS,
   OUTPUT_IMAGE_EXTENSIONS,
+  OUTPUT_GIF_EXTENSIONS,
   type MediaType,
   type AllOutputExtension,
   type OutputVideoExtension,
   type OutputImageExtension,
   type OutputAudioExtension,
   type QualitySettings,
+  type Preset,
+  type TrimOptions,
+  type GifFps,
+  type GifWidth,
+  GIF_FPS,
+  GIF_WIDTH,
   getMediaType,
+  getOutputCategory,
   AUDIO_BITRATES,
   type AudioBitrate,
   AUDIO_SAMPLE_RATES,
@@ -55,27 +69,69 @@ import {
   DEFAULT_SIMPLE_QUALITY,
   getDefaultQuality,
 } from "../types/media";
-import path from "path";
-import { execPromise } from "../utils/exec";
 
-export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }) {
-  const preferences = getPreferenceValues();
+type LaunchContext = {
+  prefill?: {
+    inputs?: string[];
+    outputFormat?: AllOutputExtension;
+    quality?: QualitySettings;
+    trim?: TrimOptions;
+    stripMetadata?: boolean;
+    outputDir?: string;
+  };
+};
+
+export function ConverterForm({
+  initialFiles = [],
+  launchContext,
+}: {
+  initialFiles?: string[];
+  launchContext?: LaunchContext;
+} = {}) {
+  const preferences = getPreferenceValues<Preferences>();
+  const prefill = launchContext?.prefill;
+
   const [selectedFileType, setSelectedFileType] = useState<MediaType | null>(null);
-  const [currentFiles, setCurrentFiles] = useState<string[]>(initialFiles || []);
-  const [outputFormat, setOutputFormat] = useState<AllOutputExtension | null>(null);
-  const [currentQualitySetting, setCurrentQualitySetting] = useState<QualitySettings | null>(null);
+  const [currentFiles, setCurrentFiles] = useState<string[]>(prefill?.inputs ?? initialFiles ?? []);
+  const [outputFormat, setOutputFormat] = useState<AllOutputExtension | null>(prefill?.outputFormat ?? null);
+  const [currentQualitySetting, setCurrentQualitySetting] = useState<QualitySettings | null>(prefill?.quality ?? null);
   const [simpleQuality, setSimpleQuality] = useState<QualityLevel>(DEFAULT_SIMPLE_QUALITY);
+  const [presetId, setPresetId] = useState<string>("");
+  const [presets, setPresets] = useState<Preset[]>([]);
+  const [trimStart, setTrimStart] = useState<string>(prefill?.trim?.start ?? "");
+  const [trimEnd, setTrimEnd] = useState<string>(prefill?.trim?.end ?? "");
+  const [stripMetadata, setStripMetadata] = useState<boolean>(
+    prefill?.stripMetadata ?? Boolean(preferences.defaultStripMetadata),
+  );
+  const [outputLocationMode, setOutputLocationMode] = useState<"sameAsInput" | "customFolder" | "thisRun">(
+    prefill?.outputDir
+      ? "thisRun"
+      : ((preferences.defaultOutputLocation as "sameAsInput" | "customFolder") ?? "sameAsInput"),
+  );
+  const [customOutputFolderOverride, setCustomOutputFolderOverride] = useState<string>(prefill?.outputDir ?? "");
 
   const [isLoading, setIsLoading] = useState(true);
+  const { push } = useNavigation();
 
   useEffect(() => {
-    if (initialFiles && initialFiles.length > 0) {
-      handleFileSelect(initialFiles);
+    (async () => {
+      try {
+        const all = await getAllPresets();
+        setPresets(all);
+      } catch (err) {
+        console.warn("Failed to load presets:", err);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    if (currentFiles.length > 0) {
+      handleFileSelect(currentFiles);
     } else {
-      // TODO: fix this
       setIsLoading(false);
     }
-  }, [initialFiles]);
+    // Intentionally run only on mount to process initial files once.
+  }, []);
 
   const handleFileSelect = (files: string[]) => {
     if (files.length === 0) {
@@ -88,13 +144,12 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       let primaryFileType: MediaType | null = null;
       for (const file of files) {
         if (path.extname(file) === ".heic" && process.platform !== "darwin") {
-          continue; // Skip .heic files when not on macOS.
-          // TODO: implement SharpJS, solve this state.
+          continue;
         }
         const type = getMediaType(path.extname(file));
         if (type) {
           primaryFileType = type as MediaType;
-          break; // Found the first valid file type
+          break;
         }
       }
 
@@ -127,20 +182,19 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           style: Toast.Style.Failure,
           title: "Invalid files in selection",
           message: `Kept ${processedFiles.length} ${primaryFileType} file${processedFiles.length > 1 ? "s" : ""}. ${files.length - processedFiles.length} other file${files.length - processedFiles.length > 1 ? "s" : ""} from your selection were invalid or of a different type and have been discarded.`,
-          secondaryAction: {
-            title: "See supported formats",
-            shortcut: { modifiers: ["cmd"], key: "o" },
-            onAction: () => {
-              execPromise(
-                "open https://www.raycast.com/leandro.maia/media-converter#:~:text=supported%20input%20formats",
-              );
-            },
-          },
         });
       }
 
       setCurrentFiles(processedFiles);
       setSelectedFileType(primaryFileType);
+
+      // If a prefill provided output format, respect it and skip default reset.
+      if (prefill?.outputFormat && prefill?.quality) {
+        setOutputFormat(prefill.outputFormat);
+        setCurrentQualitySetting(prefill.quality);
+        setIsLoading(false);
+        return;
+      }
 
       const preferredImageFormat = preferences.defaultImageOutputFormat as OutputImageExtension | undefined;
       const sanitizedImageFormat =
@@ -162,7 +216,6 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           ? preferredAudioFormat
           : (".mp3" as const);
 
-      // Initialize default output format and quality based on file type
       const defaultFormat =
         primaryFileType === "image"
           ? defaultImageFormat
@@ -192,11 +245,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
       }
     } catch (error) {
       const errorMessage = String(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Error processing files",
-        message: errorMessage,
-      });
+      showToast({ style: Toast.Style.Failure, title: "Error processing files", message: errorMessage });
       console.error("Error processing files:", errorMessage);
       setCurrentFiles([]);
       setSelectedFileType(null);
@@ -205,64 +254,132 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
     setIsLoading(false);
   };
 
+  const resolvedOutputDir = useMemo<string | undefined>(() => {
+    if (outputLocationMode === "thisRun") {
+      return customOutputFolderOverride.trim() || undefined;
+    }
+    if (outputLocationMode === "customFolder") {
+      const configured = (preferences.customOutputFolder as string | undefined)?.trim();
+      return configured || undefined;
+    }
+    return undefined; // same as input
+  }, [outputLocationMode, customOutputFolderOverride, preferences.customOutputFolder]);
+
+  const parsedTrim = useMemo<TrimOptions | undefined>(() => {
+    const startSec = parseTimeString(trimStart);
+    const endSec = parseTimeString(trimEnd);
+    if (startSec === null && endSec === null) return undefined;
+    return { start: trimStart, end: trimEnd };
+  }, [trimStart, trimEnd]);
+
+  const trimValidationHint = useMemo<string>(() => {
+    if (!trimStart && !trimEnd) return "";
+    const startOk = trimStart === "" || parseTimeString(trimStart) !== null;
+    const endOk = trimEnd === "" || parseTimeString(trimEnd) !== null;
+    if (!startOk) return "Start time is not a valid HH:MM:SS or seconds value";
+    if (!endOk) return "End time is not a valid HH:MM:SS or seconds value";
+    const s = parseTimeString(trimStart);
+    const e = parseTimeString(trimEnd);
+    if (s !== null && e !== null && s >= e) return "End time must be after start time";
+    if (s !== null && e !== null) return `Will keep ${formatTimeString(e - s)} of video`;
+    if (s !== null) return `Will skip the first ${formatTimeString(s)}`;
+    if (e !== null) return `Will keep only the first ${formatTimeString(e)}`;
+    return "";
+  }, [trimStart, trimEnd]);
+
   const handleSubmit = async () => {
-    setIsLoading(true);
-    const toast = await showToast({
-      style: Toast.Style.Animated,
-      // TODO: When converting video, we could show the progress percentage. This would require to find a solution when multiple files are being converted.
-      // I don't think it is possible to show the progress of images. Unsure about audio.
-      title: `Converting ${currentFiles.length} file${currentFiles.length > 1 ? "s" : ""}...`,
-    });
+    if (!outputFormat || !currentQualitySetting) return;
 
-    for (const item of currentFiles) {
+    // Validate trim
+    const startOk = trimStart === "" || parseTimeString(trimStart) !== null;
+    const endOk = trimEnd === "" || parseTimeString(trimEnd) !== null;
+    if (!startOk || !endOk) {
+      await showToast({ style: Toast.Style.Failure, title: "Invalid trim values", message: trimValidationHint });
+      return;
+    }
+
+    // Validate output folder if custom
+    if (resolvedOutputDir) {
       try {
-        if (!outputFormat || !currentQualitySetting) {
-          throw new Error("Output format and quality settings must be configured");
-        }
-
-        const outputPath = await convertMedia(item, outputFormat, currentQualitySetting);
-
-        await toast.hide();
-        // TODO: Add proper toast success when having multiple files being converted, like "successfully converted 1 file out of 5", etc.
-        // Should also handle edge cases, such as when the user is converting a file to something, then converts it again to another:
-        // like a queue system for handling multiple files.
-        await showToast({
-          style: Toast.Style.Success,
-          title: "File converted successfully!",
-          message: "⌘O to open the file",
-          primaryAction: {
-            title: "Open File",
-            shortcut: { modifiers: ["cmd"], key: "o" },
-            onAction: () => {
-              showInFinder(outputPath);
-            },
-          },
-        });
-      } catch (error) {
-        await toast.hide();
-        const errorMessage = String(error);
-
-        // In theory, this should never happen
-        // Check if the error is related to FFmpeg not being installed
-        if (errorMessage.includes("FFmpeg is not installed or configured")) {
-          showFailureToast(new Error("FFmpeg needs to be configured to convert files"), {
-            title: "FFmpeg not found",
-            primaryAction: {
-              title: "Configure FFmpeg",
-              onAction: () => {
-                // Open command preferences to set FFmpeg path
-                openCommandPreferences();
-              },
-            },
+        const stat = fs.statSync(resolvedOutputDir);
+        if (!stat.isDirectory()) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Output folder is not a directory",
+            message: resolvedOutputDir,
           });
-        } else {
-          await showToast({ style: Toast.Style.Failure, title: "Conversion failed", message: errorMessage });
-          console.error(`Conversion failed:`, errorMessage);
+          return;
         }
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Output folder does not exist",
+          message: resolvedOutputDir,
+        });
+        return;
       }
     }
-    setIsLoading(false);
+
+    setIsLoading(true);
+    try {
+      await runConversionBatch(currentFiles, {
+        outputFormat,
+        quality: currentQualitySetting,
+        outputDir: resolvedOutputDir,
+        stripMetadata,
+        trim: parsedTrim,
+        showProgress: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const onPresetChange = async (id: string) => {
+    setPresetId(id);
+    if (!id) return;
+    const preset = await findPreset(id);
+    if (!preset) return;
+    setOutputFormat(preset.outputFormat);
+    setCurrentQualitySetting(preset.quality);
+    if (preset.trim) {
+      setTrimStart(preset.trim.start ?? "");
+      setTrimEnd(preset.trim.end ?? "");
+    }
+    if (typeof preset.stripMetadata === "boolean") setStripMetadata(preset.stripMetadata);
+    if (preset.outputDir) {
+      setOutputLocationMode("thisRun");
+      setCustomOutputFolderOverride(preset.outputDir);
+    }
+  };
+
+  const saveAsPresetAction = (
+    <Action
+      title="Save Settings as Preset…"
+      icon={Icon.Stars}
+      shortcut={{ modifiers: ["cmd"], key: "s" }}
+      onAction={() => {
+        if (!outputFormat || !currentQualitySetting || !selectedFileType) return;
+        push(
+          <PresetEditorForm
+            mode="create"
+            seed={{
+              mediaType: getOutputCategory(outputFormat) === "gif" ? "gif" : selectedFileType,
+              outputFormat,
+              quality: currentQualitySetting,
+              trim: parsedTrim,
+              stripMetadata,
+              outputDir: resolvedOutputDir,
+            }}
+            onSaved={async () => {
+              const refreshed = await getAllPresets();
+              setPresets(refreshed);
+            }}
+          />,
+        );
+      }}
+    />
+  );
 
   return (
     <Form
@@ -271,13 +388,8 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         <ActionPanel>
           {currentFiles && currentFiles.length > 0 && selectedFileType && (
             <>
-              <Action.SubmitForm
-                title="Convert"
-                onSubmit={handleSubmit}
-                icon={Icon.NewDocument}
-                // For some reason, this still shows up as cmd+return instead of just return, so no use for now
-                /* shortcut={{ modifiers: [], key: "return" }} */
-              />
+              <Action.SubmitForm title="Convert" onSubmit={handleSubmit} icon={Icon.NewDocument} />
+              {saveAsPresetAction}
               <Action
                 title="Copy FFmpeg Command"
                 icon={Icon.Clipboard}
@@ -286,16 +398,14 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
                   windows: { modifiers: ["ctrl", "shift"], key: "c" },
                 }}
                 onAction={async () => {
-                  if (!outputFormat || !currentQualitySetting) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Configuration incomplete",
-                      message: "Output format and quality settings must be configured",
-                    });
-                    return;
-                  }
+                  if (!outputFormat || !currentQualitySetting) return;
                   try {
-                    const command = await convertMedia(currentFiles[0], outputFormat, currentQualitySetting, true);
+                    const command = await convertMedia(currentFiles[0], outputFormat, currentQualitySetting, {
+                      returnCommandString: true,
+                      outputDir: resolvedOutputDir,
+                      stripMetadata,
+                      trim: parsedTrim,
+                    });
                     await Clipboard.copy(command);
                     await showToast({
                       style: Toast.Style.Success,
@@ -303,11 +413,7 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
                       message: currentFiles.length > 1 ? "Command for the first file copied" : "FFmpeg command copied",
                     });
                   } catch (error) {
-                    await showToast({
-                      style: Toast.Style.Failure,
-                      title: "Failed to generate command",
-                      message: String(error),
-                    });
+                    showFailureToast(error, { title: "Failed to generate command" });
                   }
                 }}
               />
@@ -321,10 +427,29 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
         title="Select files"
         allowMultipleSelection={true}
         value={currentFiles}
-        onChange={(newFiles) => {
-          handleFileSelect(newFiles);
-        }}
+        onChange={(newFiles) => handleFileSelect(newFiles)}
       />
+
+      {selectedFileType && presets.length > 0 && (
+        <Form.Dropdown id="preset" title="Preset" value={presetId} onChange={onPresetChange}>
+          <Form.Dropdown.Item value="" title="— None —" />
+          <Form.Dropdown.Section title="Built-in">
+            {presets
+              .filter((p) => p.builtIn && presetMatchesFileType(p, selectedFileType))
+              .map((p) => (
+                <Form.Dropdown.Item key={p.id} value={p.id} title={p.name} />
+              ))}
+          </Form.Dropdown.Section>
+          <Form.Dropdown.Section title="My Presets">
+            {presets
+              .filter((p) => !p.builtIn && presetMatchesFileType(p, selectedFileType))
+              .map((p) => (
+                <Form.Dropdown.Item key={p.id} value={p.id} title={p.name} />
+              ))}
+          </Form.Dropdown.Section>
+        </Form.Dropdown>
+      )}
+
       {selectedFileType && (
         <Form.Dropdown
           id="format"
@@ -333,24 +458,22 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           onChange={(newFormat) => {
             const format = newFormat as AllOutputExtension;
             setOutputFormat(format);
-            if (preferences.moreConversionSettings || selectedFileType === "image") {
+            if (preferences.moreConversionSettings || selectedFileType === "image" || format === ".gif") {
               setCurrentQualitySetting(getDefaultQuality(format, preferences));
             } else {
-              // Update quality settings based on current simple quality level
               setCurrentQualitySetting(getDefaultQuality(format, preferences, simpleQuality));
             }
           }}
         >
           <Form.Dropdown.Section>
             {(() => {
-              const availableExtensions =
+              const availableExtensions: readonly AllOutputExtension[] =
                 selectedFileType === "image"
                   ? OUTPUT_IMAGE_EXTENSIONS
                   : selectedFileType === "audio"
                     ? OUTPUT_AUDIO_EXTENSIONS
-                    : OUTPUT_VIDEO_EXTENSIONS;
+                    : ([...OUTPUT_VIDEO_EXTENSIONS, ...OUTPUT_GIF_EXTENSIONS] as const);
 
-              /* HEIC is only supported on macOS with SIPS, so we filter it out on other platforms. */
               return availableExtensions
                 .filter((format) => process.platform === "darwin" || format !== ".heic")
                 .map((format) => <Form.Dropdown.Item key={format} value={format} title={format} />);
@@ -358,10 +481,16 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           </Form.Dropdown.Section>
         </Form.Dropdown>
       )}
+
       {/* Quality Settings */}
       {selectedFileType && outputFormat && currentQualitySetting && (
         <>
-          {preferences.moreConversionSettings || selectedFileType === "image" ? (
+          {outputFormat === ".gif" ? (
+            <GifQualityControls
+              settings={currentQualitySetting as { ".gif": { fps: GifFps; width: GifWidth; loop: boolean } }}
+              onChange={(s) => setCurrentQualitySetting(s)}
+            />
+          ) : preferences.moreConversionSettings || selectedFileType === "image" ? (
             <QualitySettingsComponent
               outputFormat={outputFormat}
               currentQuality={currentQualitySetting}
@@ -388,14 +517,128 @@ export function ConverterForm({ initialFiles = [] }: { initialFiles?: string[] }
           )}
         </>
       )}
+
+      {/* Trim (video/audio/gif only) */}
+      {selectedFileType && (selectedFileType === "video" || selectedFileType === "audio") && (
+        <>
+          <Form.Separator />
+          <Form.Description title="Trim (optional)" text="Leave empty to keep the full duration." />
+          <Form.TextField
+            id="trimStart"
+            title="Start"
+            placeholder="e.g. 0:10 or 10.5"
+            value={trimStart}
+            onChange={setTrimStart}
+          />
+          <Form.TextField
+            id="trimEnd"
+            title="End"
+            placeholder="e.g. 1:30 or 90"
+            value={trimEnd}
+            onChange={setTrimEnd}
+          />
+          {trimValidationHint && <Form.Description text={trimValidationHint} />}
+          {currentFiles.length > 1 && parsedTrim && (
+            <Form.Description text={`Trim will be applied to all ${currentFiles.length} files.`} />
+          )}
+        </>
+      )}
+
+      {/* Output location + metadata */}
+      {selectedFileType && (
+        <>
+          <Form.Separator />
+          <Form.Dropdown
+            id="outputLocation"
+            title="Save to"
+            value={outputLocationMode}
+            onChange={(v) => setOutputLocationMode(v as typeof outputLocationMode)}
+          >
+            <Form.Dropdown.Item value="sameAsInput" title="Same folder as input" />
+            <Form.Dropdown.Item
+              value="customFolder"
+              title={
+                preferences.customOutputFolder
+                  ? `Preference folder (${preferences.customOutputFolder})`
+                  : "Preference folder (not set)"
+              }
+            />
+            <Form.Dropdown.Item value="thisRun" title="Choose for this run…" />
+          </Form.Dropdown>
+          {outputLocationMode === "thisRun" && (
+            <Form.TextField
+              id="customOutputFolderOverride"
+              title="Output folder"
+              placeholder="/absolute/path/to/folder"
+              value={customOutputFolderOverride}
+              onChange={setCustomOutputFolderOverride}
+            />
+          )}
+          <Form.Checkbox
+            id="stripMetadata"
+            title="Privacy"
+            label="Strip metadata (EXIF, GPS, tags)"
+            value={stripMetadata}
+            onChange={setStripMetadata}
+          />
+        </>
+      )}
     </Form>
+  );
+}
+
+function presetMatchesFileType(preset: Preset, fileType: MediaType): boolean {
+  if (fileType === "video") return preset.mediaType === "video" || preset.mediaType === "gif";
+  return preset.mediaType === fileType;
+}
+
+export function GifQualityControls({
+  settings,
+  onChange,
+}: {
+  settings: { ".gif": { fps: GifFps; width: GifWidth; loop: boolean } };
+  onChange: (next: QualitySettings) => void;
+}) {
+  const gif = settings[".gif"];
+  return (
+    <>
+      <Form.Dropdown
+        id="gifFps"
+        title="FPS"
+        value={gif.fps}
+        onChange={(v) => onChange({ ".gif": { ...gif, fps: v as GifFps } } as QualitySettings)}
+        info="Higher frame rates look smoother but produce larger files"
+      >
+        {GIF_FPS.map((fps) => (
+          <Form.Dropdown.Item key={fps} value={fps} title={`${fps} fps`} />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown
+        id="gifWidth"
+        title="Width"
+        value={gif.width}
+        onChange={(v) => onChange({ ".gif": { ...gif, width: v as GifWidth } } as QualitySettings)}
+        info="Smaller widths produce smaller GIFs. Height scales proportionally."
+      >
+        {GIF_WIDTH.map((w) => (
+          <Form.Dropdown.Item key={w} value={w} title={w === "original" ? "Original" : `${w}px`} />
+        ))}
+      </Form.Dropdown>
+      <Form.Checkbox
+        id="gifLoop"
+        title="Loop"
+        label="Play forever (loop)"
+        value={gif.loop}
+        onChange={(v) => onChange({ ".gif": { ...gif, loop: v } } as QualitySettings)}
+      />
+    </>
   );
 }
 
 // TODO: If the selected output setting surpasses the quality of the original file, show the input audio's bitrate/profile/sample, which file is that.
 // Just a warning, letting the user know that the output file will not be better than the input file.
 
-function QualitySettingsComponent({
+export function QualitySettingsComponent({
   outputFormat,
   currentQuality,
   onQualityChange,
@@ -428,7 +671,6 @@ function QualitySettingsComponent({
       );
     }
     case "audio": {
-      // Derive controls from the AudioQuality type structure dynamically
       const audioSettings = getCurrentSettings() as Record<string, unknown>;
       const audioControls = Object.keys(audioSettings || {});
       return (
@@ -442,7 +684,6 @@ function QualitySettingsComponent({
       );
     }
     case "video": {
-      // Derive controls from the VideoQuality type structure dynamically
       const videoSettings = getCurrentSettings() as Record<string, unknown>;
       const videoControls = Object.keys(videoSettings || {});
       return (
@@ -470,7 +711,6 @@ function QualitySettingsComponent({
     settings: unknown;
     onSettingsChange: (settings: unknown) => void;
   }) {
-    // Handle image quality settings (simpler, non-object based)
     if (mediaType === "image") {
       const handleImageChange = (value: string | number) => {
         onSettingsChange(value);
@@ -510,7 +750,6 @@ function QualitySettingsComponent({
         );
       }
 
-      // For .jpg, .heic, .avif, .webp - use percentage quality
       return (
         <Form.Dropdown
           id="qualitySetting"
@@ -539,14 +778,10 @@ function QualitySettingsComponent({
       );
     }
 
-    // Handle audio and video quality settings (object-based)
-
     const renderControl = (controlType: AllControlType) => {
-      // Type-safe access to current value
       const settingsObj = settings as Record<string, unknown>;
       const currentValue = settingsObj?.[controlType];
 
-      // Audio controls
       if (mediaType === "audio") {
         controlType = controlType as AudioControlType;
         switch (controlType) {
@@ -689,7 +924,6 @@ function QualitySettingsComponent({
         }
       }
 
-      // Video controls
       if (mediaType === "video") {
         controlType = controlType as VideoControlType;
         switch (controlType) {
@@ -703,16 +937,12 @@ function QualitySettingsComponent({
                 onChange={(mode: string) => {
                   const newMode = mode as VideoEncodingMode;
 
-                  // Reset settings based on new encoding mode and format
                   if (outputFormat === ".mov") {
-                    // MOV only has variant, no encoding mode
                     return;
                   } else if (newMode === "crf") {
-                    // Use CRF defaults from DEFAULT_QUALITIES
-                    const newSettings = DEFAULT_QUALITIES[outputFormat];
+                    const newSettings = DEFAULT_QUALITIES[outputFormat as keyof typeof DEFAULT_QUALITIES];
                     onSettingsChange(newSettings);
                   } else {
-                    // Use VBR defaults from DEFAULT_VBR_QUALITIES, but update encoding mode
                     const vbrDefault = DEFAULT_VBR_QUALITIES[outputFormat as keyof typeof DEFAULT_VBR_QUALITIES];
                     const newSettings = { ...vbrDefault, encodingMode: newMode };
                     onSettingsChange(newSettings);
@@ -786,10 +1016,8 @@ function QualitySettingsComponent({
               >
                 {VIDEO_MAX_BITRATE.filter((rate) => {
                   if (rate === "") return true;
-
                   const currentBitrate = settingsObj?.bitrate as VideoBitrate;
                   if (!currentBitrate) return true;
-
                   return parseInt(rate) >= parseInt(currentBitrate);
                 }).map((rate) => (
                   <Form.Dropdown.Item key={rate} value={rate} title={`${rate === "" ? "No limit" : rate + " kbps"}`} />
@@ -801,7 +1029,7 @@ function QualitySettingsComponent({
             return (
               <Form.Dropdown
                 key="preset"
-                id="preset"
+                id="videoEncodingPreset"
                 title="Encoding Preset"
                 value={currentValue as VideoPreset}
                 onChange={(preset: string) =>
