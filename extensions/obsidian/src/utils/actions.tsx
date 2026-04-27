@@ -18,7 +18,7 @@ import { SearchNotePreferences } from "./preferences";
 import { updateNoteInCache, deleteNoteFromCache } from "../api/cache/cache.service";
 import { Logger } from "../api/logger/logger.service";
 import { Note, NoteWithContent, Obsidian, ObsidianTargetType, ObsidianVault, Vault } from "@/obsidian";
-import { getCodeBlocks } from "./utils";
+import { getCodeBlocks, normalizeRelativePath } from "./utils";
 import { useVaultPluginCheck } from "./hooks";
 import { appendSelectedTextTo } from "@/api/append-note";
 
@@ -307,6 +307,8 @@ export function OpenPathInObsidianAction(props: { path: string }) {
 export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: ObsidianVault }) {
   const { note, vault } = props;
 
+  const relativePath = normalizeRelativePath(note.path, vault.path);
+
   return (
     <Action.Open
       title="Open in New Obsidian Tab"
@@ -314,7 +316,7 @@ export function OpenNoteInObsidianNewPaneAction(props: { note: Note; vault: Obsi
         "obsidian://advanced-uri?vault=" +
         encodeURIComponent(vault.name) +
         "&filepath=" +
-        encodeURIComponent(note.path.replace(vault.path, "")) +
+        encodeURIComponent(relativePath) +
         "&newpane=true"
       }
       icon={ObsidianIcon}

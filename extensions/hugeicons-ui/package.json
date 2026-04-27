@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "hugeicons-ui",
   "title": "Hugeicons UI",
-  "description": "Browse and copy Hugeicons icons quickly from Raycast",
+  "description": "Search, preview, bookmark, and use Hugeicons icons across Raycast and Raycast AI.",
   "icon": "logos/icon.png",
   "author": "adnan_tresnjo",
+  "contributors": [
+    "blcnyy"
+  ],
   "categories": [
     "Design Tools"
   ],
@@ -13,59 +16,172 @@
     {
       "name": "browse-hugeicons",
       "title": "Browse Hugeicons",
-      "description": "Browse and copy Hugeicons icons",
+      "description": "Search and preview icons from Hugeicons",
       "mode": "view"
+    },
+    {
+      "name": "bookmarks",
+      "title": "View Bookmarks",
+      "description": "Browse and manage your saved icons",
+      "mode": "view"
+    },
+    {
+      "name": "preferences",
+      "title": "Configure Settings",
+      "description": "Configure grid size, colors, primary actions, and bookmark folders",
+      "mode": "view"
+    },
+    {
+      "name": "create-folder",
+      "title": "Create Bookmark Folder",
+      "description": "Create a new folder to organize bookmarked icons",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-hugeicons",
+      "title": "Search Hugeicons",
+      "description": "Search Hugeicons by natural language, keyword, tag, category, or icon name."
+    },
+    {
+      "name": "get-hugeicon-details",
+      "title": "Get Hugeicon Details",
+      "description": "Inspect a specific Hugeicons icon and return its available styles and metadata."
+    },
+    {
+      "name": "get-hugeicon-code",
+      "title": "Get Hugeicon Code",
+      "description": "Return Hugeicons SVG or component code for a specific icon."
     }
   ],
   "preferences": [
     {
-      "name": "defaultAction",
-      "title": "Default Copy Action",
-      "description": "Choose what to copy when pressing Enter",
+      "name": "apiKey",
+      "title": "Hugeicons API Key",
+      "description": "Optional. Enter your Universal License Token to unlock Hugeicons Pro icons and styles",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "gridSize",
+      "title": "Grid Size",
+      "description": "Number of columns in the icon grid",
       "type": "dropdown",
       "required": false,
-      "default": "svg",
+      "default": "8",
       "data": [
         {
-          "title": "SVG",
-          "value": "svg"
+          "title": "Large",
+          "value": "3"
         },
         {
-          "title": "React Component",
-          "value": "react"
+          "title": "Medium",
+          "value": "5"
         },
         {
-          "title": "React Usage",
-          "value": "usage"
+          "title": "Small",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "name": "defaultColor",
+      "title": "Default Icon Color",
+      "description": "Default color for icons",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (adapts to theme)",
+          "value": "auto"
         },
         {
-          "title": "Icon Name",
-          "value": "name"
+          "title": "White",
+          "value": "#FFFFFF"
+        },
+        {
+          "title": "Black",
+          "value": "#000000"
+        },
+        {
+          "title": "Red",
+          "value": "#FF3B30"
+        },
+        {
+          "title": "Orange",
+          "value": "#FF9500"
+        },
+        {
+          "title": "Yellow",
+          "value": "#FFCC00"
+        },
+        {
+          "title": "Green",
+          "value": "#34C759"
+        },
+        {
+          "title": "Blue",
+          "value": "#007AFF"
+        },
+        {
+          "title": "Purple",
+          "value": "#AF52DE"
+        },
+        {
+          "title": "Magenta",
+          "value": "#FF2D55"
+        }
+      ]
+    },
+    {
+      "name": "quickAction",
+      "title": "Primary Search Action",
+      "description": "Choose what pressing Enter does in Browse Hugeicons",
+      "type": "dropdown",
+      "required": false,
+      "default": "view-styles",
+      "data": [
+        {
+          "title": "View All Styles",
+          "value": "view-styles"
+        },
+        {
+          "title": "Copy SVG",
+          "value": "copy-svg"
+        },
+        {
+          "title": "Copy React (JSX)",
+          "value": "copy-jsx"
+        },
+        {
+          "title": "Download SVG",
+          "value": "download-svg"
         }
       ]
     }
   ],
   "dependencies": {
-    "@hugeicons/core-free-icons": "^3.3.0",
-    "@hugeicons/react": "^1.1.5",
-    "@raycast/api": "^1.104.1",
-    "title-case": "^3.0.3"
+    "@raycast/api": "^1.104.13"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "18.18.4",
-    "@types/react": "^19.0.0",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@hugeicons/core-free-icons": "^4.1.1",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
+    "generate-icons": "tsx scripts/generate-hugeicons-metadata.ts",
     "lint": "ray lint",
-    "publish": "ray publish",
-    "generate-icons": "bun scripts/generate-hugeicons-metadata.ts"
+    "publish": "ray publish"
   },
   "platforms": [
     "macOS"

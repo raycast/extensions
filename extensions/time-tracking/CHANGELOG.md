@@ -1,5 +1,14 @@
 # Time Tracking Changelog
 
+## [Summary Dashboard, Full History, Enhanced Export, Long Session Detection] - 2026-04-12
+
+- Add "Time Summary" command with project summaries and daily breakdowns for configurable date ranges (today, past week, past 30 days, custom)
+- Remove 50-timer limit in "View Project Timers" so full history is accessible, organized by date sections
+- Enhance CSV export with ISO datetime columns (`start_datetime`, `end_datetime`) and decimal `duration_hours`
+- Add long session detection to "Start Timer" — prompts when switching timers if the previous one exceeded a configurable threshold (1-8 hours)
+- Add "Import Timers" command to restore timer data from a previously exported CSV file
+- Add optional text timestamp input (`yyyy-mm-dd hh:mm`) alongside the date picker in the edit form for precise time entry
+
 ## [Windows Support] - 2026-02-04
 
 - Add Windows support (ref: [#25071](https://github.com/raycast/extensions/issues/25071))

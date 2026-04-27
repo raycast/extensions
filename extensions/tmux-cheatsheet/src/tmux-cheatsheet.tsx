@@ -1,9 +1,10 @@
 import { Action, ActionPanel, Icon, List, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useMemo, useState, useEffect } from "react";
+import { usePromise } from "@raycast/utils";
 import Fuse from "fuse.js";
 import { tmuxCommands, TmuxCommand } from "./tmuxCommands";
-import { detectPrefix } from "./prefixDetector";
-import { detectKeyBindings, commandSignature } from "./keybindingDetector";
+import { readTmuxState } from "./tmuxCli";
+import { parseKeyBindings, commandSignature } from "./keybindingDetector";
 import CommandDetail from "./CommandDetail";
 import { prettifyKey } from "./formatKeys";
 
@@ -33,12 +34,13 @@ export default function Command() {
   const [categoryFilter, setCategoryFilter] = useState(ALL_CATEGORIES);
   const { push } = useNavigation();
   const prefixOverride = getPreferenceValues<Preferences>().prefix;
-  const prefix = useMemo(() => prefixOverride || detectPrefix() || "C-b", [prefixOverride]);
+  const { data: tmuxState, isLoading: isTmuxLoading } = usePromise(async () => readTmuxState());
+  const prefix = prefixOverride || tmuxState?.prefix || "C-b";
 
   const debouncedSearchText = useDebounce(searchText, 100);
 
   const enrichedCommands = useMemo(() => {
-    const keyBindings = detectKeyBindings();
+    const keyBindings = parseKeyBindings(tmuxState?.bindingsOutput);
     return tmuxCommands.map((cmd) => {
       const tmuxCmd = cmd.command.startsWith("tmux ") ? cmd.command.slice(5) : cmd.command;
       const sig = commandSignature(tmuxCmd);
@@ -48,7 +50,7 @@ export default function Command() {
       }
       return cmd;
     });
-  }, []);
+  }, [tmuxState?.bindingsOutput]);
 
   const categories = useMemo(() => {
     const seen = new Set<string>();
@@ -122,6 +124,7 @@ export default function Command() {
 
   return (
     <List
+      isLoading={isTmuxLoading}
       searchBarPlaceholder="Search tmux commands..."
       searchText={searchText}
       onSearchTextChange={setSearchText}

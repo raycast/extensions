@@ -2,7 +2,7 @@ import { useFetch, useLocalStorage } from "@raycast/utils";
 import type { DomainSearchResponse } from "./types";
 import { useMemo } from "react";
 import { randomUUID } from "node:crypto";
-import { ANONYMOUS_USER_ID_KEY, ROOT_URL, POPULAR_TLDs, ALL_TLDs } from "./config";
+import { ANONYMOUS_USER_ID_KEY, API_URL, POPULAR_TLDs, ALL_TLDs } from "./config";
 import getUserAgent from "./getUserAgent";
 import uniqueByKey from "./uniqueByKey";
 
@@ -34,7 +34,7 @@ export default function useDomainFetch(query: string) {
     });
   }, [parsedSearch.tld]);
 
-  return useFetch(`${ROOT_URL}/api/v1/domain/${parsedSearch.domain}.${parsedSearch.tld}?${searchParams.toString()}`, {
+  return useFetch(`${API_URL}/domain/${parsedSearch.domain}.${parsedSearch.tld}?${searchParams.toString()}`, {
     execute: query.length >= 2 && anonymousUserID !== undefined && !isAnonymousUserIDLoading,
     keepPreviousData: true,
     headers: {

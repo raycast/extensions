@@ -16,7 +16,6 @@ import {
   formatNumber,
   formatCurrency,
   formatPercentage,
-  formatDuration,
   formatChange,
 } from "./lib/format";
 
@@ -124,18 +123,6 @@ export default function DashboardOverview() {
           icon: Icon.ArrowCounterClockwise,
           trend: previous
             ? trendTag(current.bounce_rate, previous.bounce_rate, true)
-            : undefined,
-        },
-        {
-          id: "session",
-          label: "Session Time",
-          value: formatDuration(current.avg_session_duration),
-          icon: Icon.Clock,
-          trend: previous
-            ? trendTag(
-                current.avg_session_duration,
-                previous.avg_session_duration,
-              )
             : undefined,
         },
         {

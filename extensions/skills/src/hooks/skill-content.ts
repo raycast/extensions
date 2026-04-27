@@ -5,7 +5,7 @@ type SkillContentResult = {
   body: string;
 };
 
-export function buildSkillContentUrls(skill: Skill) {
+function buildSkillContentUrls(skill: Skill) {
   const owner = skill.source.split("/")[0];
   const ownerPrefix = owner.split("-")[0] + "-";
   const skillIdWithoutPrefix = skill.skillId.startsWith(ownerPrefix)

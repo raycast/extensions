@@ -2,10 +2,10 @@
 
 ## Git Commands
 
-### Clone a repository with `blob:none` filter
+### Clone a repository with `tree:0` filter
 
 ```shell
-git clone --filter=tree:0 --no-checkout <fork-repository-url>
+git clone --filter=tree:0 --no-checkout --no-tags <fork-repository-url>
 ```
 
 ### Convert full checkout to sparse checkout with cone mode
@@ -19,14 +19,29 @@ git checkout main
 
 ```shell
 git remote add upstream <upstream-repository-url>
+git config remote.origin.promisor true
+git config remote.origin.partialclonefilter tree:0
+git config remote.origin.tagOpt --no-tags
+git config remote.upstream.promisor true
+git config remote.upstream.partialclonefilter tree:0
+git config remote.upstream.tagOpt --no-tags
+git config --replace-all remote.upstream.fetch +refs/heads/main:refs/remotes/upstream/main
 ```
 
 ### Sync the forked repository with the upstream on local
 
 ```shell
-git fetch --prune --filter=tree:0 upstream
+git fetch --prune --no-tags --filter=tree:0 upstream +refs/heads/main:refs/remotes/upstream/main
 git checkout main
 git merge --ff-only upstream/main
+```
+
+### Pull the latest changes from your fork on local
+
+```shell
+git fetch --prune --no-tags --filter=tree:0 origin +refs/heads/main:refs/remotes/origin/main
+git checkout main
+git merge --ff-only origin/main
 ```
 
 ### Add a sparse-checkout directory

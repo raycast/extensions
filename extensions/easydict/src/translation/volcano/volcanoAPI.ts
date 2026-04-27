@@ -11,9 +11,7 @@
 import axios from "axios";
 import { requestCostTime } from "../../axiosConfig";
 import { DetectedLangModel, LanguageDetectType } from "../../detectLanguage/types";
-import { checkIfPreferredLanguagesContainChinese } from "../../detectLanguage/utils";
 import { QueryWordInfo } from "../../dictionary/youdao/types";
-import { chineseLanguageItem, englishLanguageItem } from "../../language/consts";
 import { getVolcanoLangCode, getYoudaoLangCodeFromVolcanoCode } from "../../language/languages";
 import { QueryTypeResult, RequestErrorInfo, TranslationType } from "../../types";
 import { getTypeErrorInfo } from "../../utils";
@@ -187,21 +185,4 @@ export function volcanoDetect(text: string): Promise<DetectedLangModel> {
         reject(errorInfo);
       });
   });
-}
-
-/**
- *  Get Volcano web translate url.
- *
- * eg: https://translate.volcengine.com/translate?category=&home_language=zh&source_language=detect&target_language=zh&text=good
- */
-export function getVolcanoWebTranslateURL(queryWordInfo: QueryWordInfo): string {
-  const { fromLanguage, toLanguage, word } = queryWordInfo;
-  const encodeWord = encodeURIComponent(word);
-  const from = getVolcanoLangCode(fromLanguage);
-  const to = getVolcanoLangCode(toLanguage);
-  const homeLanguage = checkIfPreferredLanguagesContainChinese()
-    ? chineseLanguageItem.volcanoLangCode
-    : englishLanguageItem.volcanoLangCode;
-
-  return `https://translate.volcengine.com/translate?category=&home_language=${homeLanguage}&source_language=${from}&target_language=${to}&text=${encodeWord}`;
 }

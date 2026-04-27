@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [New Features] - 2026-04-24
+
+- Added `Reset all tabs in current space` command to reset all tabs in the currently active space (disabled by default).
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

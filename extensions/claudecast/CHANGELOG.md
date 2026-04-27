@@ -1,5 +1,17 @@
 # ClaudeCast Changelog
 
+## [1.4.0] - 2026-04-13
+
+### Fixed
+
+- **Underscore Path Resolution**: Projects with underscores in their path (e.g. `my_project`) now resolve correctly when browsing sessions. Claude Code encodes underscores as dashes in directory names, and the filesystem walk now probes underscore variants alongside dash variants.
+- **encodeProjectPath**: Updated to replace `_` with `-` alongside `/` and `.`, matching Claude Code's actual encoding behavior.
+
+### Added
+
+- **Permission Mode Restore on Resume**: Sessions started with non-default permission modes (e.g. `bypassPermissions`, `auto`, `plan`) now resume with the same mode. The `permissionMode` is parsed from session JSONL and passed as `--permission-mode` flag to Claude Code.
+- **Model Restore on Resume**: Sessions now resume with the same model they were started with (e.g. a Haiku session won't unexpectedly resume with Opus). The model is passed as `--model` flag to Claude Code.
+
 ## [1.3.0] - 2026-04-06
 
 ### Added

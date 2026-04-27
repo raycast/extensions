@@ -34,15 +34,6 @@ export function formatPercentage(n: number | undefined | null): string {
   return `${(n ?? 0).toFixed(1)}%`;
 }
 
-export function formatDuration(value: number | undefined | null): string {
-  let secs = value ?? 0;
-  // API may return milliseconds — if value > 1 hour in seconds, assume ms
-  if (secs > 86400) secs = secs / 1000;
-  const m = Math.floor(secs / 60);
-  const s = Math.round(secs % 60);
-  return `${m}m ${s}s`;
-}
-
 export function formatCompact(n: number | undefined | null): string {
   const val = n ?? 0;
   if (val < 1000) return String(val);

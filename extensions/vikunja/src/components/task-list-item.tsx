@@ -7,6 +7,8 @@ import {
   showToast,
   Toast,
   useNavigation,
+  launchCommand,
+  LaunchType,
 } from "@raycast/api";
 import { updateTask, Project, Task } from "../api";
 import { formatDueDate, dueDateColor } from "../helpers/dates";
@@ -118,6 +120,25 @@ export function TaskActions({
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        <Action
+          title="Create Task in Project"
+          icon={Icon.Plus}
+          shortcut={{ modifiers: ["cmd"], key: "n" }}
+          onAction={async () => {
+            try {
+              await launchCommand({
+                name: "create-task",
+                type: LaunchType.UserInitiated,
+                arguments: { projectId: String(task.project_id) },
+              });
+            } catch {
+              showToast({
+                style: Toast.Style.Failure,
+                title: "Failed to launch Create Task",
+              });
+            }
+          }}
+        />
         {onShowDetail && (
           <Action
             title="View Details"

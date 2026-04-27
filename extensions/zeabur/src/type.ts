@@ -226,7 +226,7 @@ export interface ServerInfo {
     console: string;
     homepage: string;
     name: string;
-  };
+  } | null;
   ip: string;
   sshPort: number;
   sshUsername: string;

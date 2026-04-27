@@ -128,6 +128,53 @@ export function appendMatchToFile(fileContent: string, fileName: string, espanso
   return { fileName, filePath };
 }
 
+export function updateMatchInFile(
+  filePath: string,
+  originalTriggers: string[],
+  updates: { triggers: string[]; label?: string; replace: string },
+): void {
+  const raw = fse.readFileSync(filePath, "utf-8");
+  const doc = YAML.parseDocument(raw);
+  const matches = doc.get("matches");
+  if (!YAML.isSeq(matches)) throw new Error(`No 'matches' sequence found in ${filePath}`);
+
+  const target = matches.items.find((item) => {
+    if (!YAML.isMap(item)) return false;
+    const trigger = item.get("trigger");
+    const triggers = item.get("triggers");
+    if (typeof trigger === "string" && originalTriggers.length === 1 && trigger === originalTriggers[0]) return true;
+    if (YAML.isSeq(triggers)) {
+      const arr = triggers.toJSON() as unknown[];
+      return (
+        Array.isArray(arr) && arr.length === originalTriggers.length && arr.every((v, i) => v === originalTriggers[i])
+      );
+    }
+    return false;
+  });
+
+  if (!target || !YAML.isMap(target)) {
+    throw new Error(`Match with triggers [${originalTriggers.join(", ")}] not found in ${filePath}`);
+  }
+
+  target.delete("trigger");
+  target.delete("triggers");
+  if (updates.triggers.length === 1) {
+    target.set("trigger", updates.triggers[0]);
+  } else {
+    target.set("triggers", updates.triggers);
+  }
+
+  if (updates.label && updates.label.trim()) {
+    target.set("label", updates.label);
+  } else {
+    target.delete("label");
+  }
+
+  target.set("replace", updates.replace);
+
+  fse.writeFileSync(filePath, doc.toString());
+}
+
 export function getMatches(espansoMatchDir: string, options?: { packagePath: boolean }): NormalizedEspansoMatch[] {
   const finalMatches: NormalizedEspansoMatch[] = [];
   const loadedFiles = new Set<string>();
@@ -176,13 +223,13 @@ export function getMatches(espansoMatchDir: string, options?: { packagePath: boo
       ...matches.flatMap((obj: EspansoMatch) => {
         if ("trigger" in obj) {
           const { trigger, replace, image_path, form, label, vars } = obj;
-          return [{ triggers: [trigger], replace, image_path, form, label, vars, filePath, category }];
+          return [{ triggers: [trigger], replace, image_path, form, label, vars, filePath, category, isRegex: false }];
         } else if ("triggers" in obj) {
           const { triggers, replace, image_path, form, label, vars } = obj;
-          return [{ triggers, replace, image_path, form, label, vars, filePath, category }];
+          return [{ triggers, replace, image_path, form, label, vars, filePath, category, isRegex: false }];
         } else if ("regex" in obj) {
           const { regex, replace, image_path, form, label, vars } = obj;
-          return [{ triggers: [regex], replace, image_path, form, label, vars, filePath, category }];
+          return [{ triggers: [regex], replace, image_path, form, label, vars, filePath, category, isRegex: true }];
         } else {
           return [];
         }
@@ -284,7 +331,6 @@ const evaluateVar = async (v: EspansoVar): Promise<string> => {
         const interactive = shellBase === "zsh" || shellBase === "bash";
         const shellArgs = interactive ? [rawShell, "-i", "-c", v.params.cmd] : [rawShell, "-c", v.params.cmd];
         const { stdout } = await execFilePromise("/usr/bin/env", shellArgs);
-        // eslint-disable-next-line no-control-regex
         return (
           stdout
             // eslint-disable-next-line no-control-regex

@@ -195,8 +195,11 @@ export default function Main() {
                       <Action
                         icon={Icon.Play}
                         title="Start Timer"
-                        onAction={() => {
-                          addNewTimeEntry(entry.description, entry.projectId, entry.taskId, updateTimeEntries);
+                        onAction={async () => {
+                          const newEntry = await addNewTimeEntry(entry.description, entry.projectId, entry.taskId);
+                          if (newEntry) {
+                            updateTimeEntries();
+                          }
                         }}
                       />
                       <OpenWebPage />
