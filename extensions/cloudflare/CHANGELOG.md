@@ -1,6 +1,6 @@
 # Cloudflare Changelog
 
-## [Custom Cache Purge & Favorite Sites] - {PR_MERGE_DATE}
+## [Custom Cache Purge & Favorite Sites] - 2026-04-27
 
 - Added support for purging cache by Hostname, Cache-Tag, and Prefix in addition to URL
 - New "Purge By" dropdown in the cache purge form with contextual hints and input validation (up to 100 tags)
