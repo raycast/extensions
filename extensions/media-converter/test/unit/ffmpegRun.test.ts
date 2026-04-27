@@ -1,10 +1,6 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
-import {
-  parseProgressBlock,
-  parseDurationFromStderr,
-  injectGlobalFlags,
-} from "../../src/utils/ffmpegRun";
+import { parseProgressBlock, parseDurationFromStderr, injectGlobalFlags } from "../../src/utils/ffmpegRun";
 
 describe("parseProgressBlock", () => {
   const sampleBlock = [

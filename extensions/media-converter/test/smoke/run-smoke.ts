@@ -92,7 +92,8 @@ async function probeDuration(ffmpeg: string, p: string): Promise<number | null> 
   try {
     await execP(`"${ffmpeg}" -hide_banner -i "${p}"`);
   } catch (err: unknown) {
-    const stderr = typeof err === "object" && err !== null && "stderr" in err ? String((err as { stderr: unknown }).stderr) : "";
+    const stderr =
+      typeof err === "object" && err !== null && "stderr" in err ? String((err as { stderr: unknown }).stderr) : "";
     const m = stderr.match(/Duration:\s*(\d+):(\d+):(\d+(?:\.\d+)?)/);
     if (!m) return null;
     return Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3]);
@@ -129,36 +130,28 @@ async function main() {
 
   // ---- Video: mp4 -> webm ----
   await check("convert mp4 -> webm", async () => {
-    const out = await convertMedia(
-      vid1,
-      ".webm",
-      q({ ".webm": { encodingMode: "crf", crf: 50, quality: "good" } }),
-      { outputDir: TMP },
-    );
+    const out = await convertMedia(vid1, ".webm", q({ ".webm": { encodingMode: "crf", crf: 50, quality: "good" } }), {
+      outputDir: TMP,
+    });
     if (!fs.existsSync(out) || sizeOf(out) < 500) throw new Error(`output missing or too small: ${out}`);
     pass("convert mp4 -> webm", `${sizeOf(out)} bytes`);
   });
 
   // ---- Video: mp4 -> gif (palette pipeline) ----
   await check("convert mp4 -> gif", async () => {
-    const out = await convertMedia(
-      vid1,
-      ".gif",
-      q({ ".gif": { fps: "10", width: "original", loop: true } }),
-      { outputDir: TMP },
-    );
+    const out = await convertMedia(vid1, ".gif", q({ ".gif": { fps: "10", width: "original", loop: true } }), {
+      outputDir: TMP,
+    });
     if (!fs.existsSync(out) || sizeOf(out) < 500) throw new Error(`output missing or too small: ${out}`);
     pass("convert mp4 -> gif", `${sizeOf(out)} bytes`);
   });
 
   // ---- Video with trim ----
   await check("convert mp4 with trim 0:00..0:01", async () => {
-    const out = await convertMedia(
-      vid1,
-      ".mp4",
-      q({ ".mp4": { encodingMode: "crf", crf: 28, preset: "ultrafast" } }),
-      { outputDir: TMP, trim: { start: "0", end: "1" } },
-    );
+    const out = await convertMedia(vid1, ".mp4", q({ ".mp4": { encodingMode: "crf", crf: 28, preset: "ultrafast" } }), {
+      outputDir: TMP,
+      trim: { start: "0", end: "1" },
+    });
     const dur = await probeDuration(ffmpeg, out);
     if (dur === null) throw new Error("could not probe trimmed duration");
     if (dur > 1.5) throw new Error(`expected duration <=1.5s, got ${dur}`);
@@ -167,12 +160,10 @@ async function main() {
 
   // ---- Video strip metadata ----
   await check("convert mp4 with stripMetadata", async () => {
-    const out = await convertMedia(
-      vid1,
-      ".mp4",
-      q({ ".mp4": { encodingMode: "crf", crf: 28, preset: "ultrafast" } }),
-      { outputDir: TMP, stripMetadata: true },
-    );
+    const out = await convertMedia(vid1, ".mp4", q({ ".mp4": { encodingMode: "crf", crf: 28, preset: "ultrafast" } }), {
+      outputDir: TMP,
+      stripMetadata: true,
+    });
     const { stdout } = await execP(`"${ffmpeg}" -hide_banner -i "${out}" -f ffmetadata - 2>&1 || true`);
     if (/title=|artist=|comment=/i.test(stdout)) throw new Error(`metadata not stripped: ${stdout.slice(0, 200)}`);
     pass("convert mp4 with stripMetadata");
@@ -227,17 +218,12 @@ async function main() {
   // ---- Progress callback fires at least once for a video conversion ----
   await check("convert mp4 emits progress events", async () => {
     let gotProgress = false;
-    await convertMedia(
-      vid1,
-      ".mkv",
-      q({ ".mkv": { encodingMode: "crf", crf: 35, preset: "ultrafast" } }),
-      {
-        outputDir: TMP,
-        onProgress: () => {
-          gotProgress = true;
-        },
+    await convertMedia(vid1, ".mkv", q({ ".mkv": { encodingMode: "crf", crf: 35, preset: "ultrafast" } }), {
+      outputDir: TMP,
+      onProgress: () => {
+        gotProgress = true;
       },
-    );
+    });
     if (!gotProgress) throw new Error("no progress events were emitted");
     pass("convert mp4 emits progress events");
   });

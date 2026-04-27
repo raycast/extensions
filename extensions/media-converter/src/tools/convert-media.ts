@@ -269,6 +269,14 @@ export default async function ConvertMedia(input: Input) {
   if (trimEnd && parseTimeString(trimEnd) === null) {
     return { type: "error", message: `Invalid trimEnd value: ${trimEnd}` };
   }
+  // Ensure end is after start when both provided (prevents FFmpeg producing empty output)
+  if (trimStart && trimEnd) {
+    const s = parseTimeString(trimStart);
+    const e = parseTimeString(trimEnd);
+    if (s !== null && e !== null && e <= s) {
+      return { type: "error", message: "End time must be after start time" };
+    }
+  }
   const trim: TrimOptions | undefined = trimStart || trimEnd ? { start: trimStart, end: trimEnd } : undefined;
 
   // GIF output path: build GifQuality and bypass the normal quality builder.

@@ -83,7 +83,9 @@ describe("getDefaultQuality", () => {
   };
 
   it("returns a GIF quality shape for .gif", () => {
-    const q = getDefaultQuality(".gif", { ...basePrefs }, "high") as { ".gif": { fps: string; width: string; loop: boolean } };
+    const q = getDefaultQuality(".gif", { ...basePrefs }, "high") as {
+      ".gif": { fps: string; width: string; loop: boolean };
+    };
     assert.ok(q[".gif"]);
     assert.ok(["10", "15", "24", "30"].includes(q[".gif"].fps));
     assert.ok(["original", "480", "720", "1080"].includes(q[".gif"].width));
@@ -91,11 +93,9 @@ describe("getDefaultQuality", () => {
   });
 
   it("honours defaultGifFps and defaultGifWidth preferences for .gif", () => {
-    const q = getDefaultQuality(
-      ".gif",
-      { ...basePrefs, defaultGifFps: "24", defaultGifWidth: "720" },
-      "high",
-    ) as { ".gif": { fps: string; width: string } };
+    const q = getDefaultQuality(".gif", { ...basePrefs, defaultGifFps: "24", defaultGifWidth: "720" }, "high") as {
+      ".gif": { fps: string; width: string };
+    };
     assert.equal(q[".gif"].fps, "24");
     assert.equal(q[".gif"].width, "720");
   });
