@@ -18,6 +18,13 @@ async function fetchApi<T>(url: string, token: string, options?: RequestInit): P
       throw new Error("Authentication expired — please re-authorize in extension preferences.");
     }
     const errorBody = await response.text();
+    if (response.status === 403 && errorBody.includes("SERVICE_DISABLED")) {
+      throw new Error(
+        "Google People API is not enabled in your project. " +
+          "Visit console.cloud.google.com/apis/library/people.googleapis.com and click Enable. " +
+          "If you just enabled it, wait a minute and try again.",
+      );
+    }
     throw new Error(`Google API error ${response.status}: ${errorBody}`);
   }
   if (response.status === 204) return undefined as T;
