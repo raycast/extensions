@@ -1,6 +1,6 @@
 # Downloads Manager Changelog
 
-## [Upgrade Delete Latest Download Command] - {PR_MERGE_DATE}
+## [Upgrade Delete Latest Download Command] - 2026-04-27
 
 - Address [#26296](https://github.com/raycast/extensions/issues/26296) by upgrading Delete Latest Download Command to support background deeplinks without focusing Raycast.
 - Added Toggle Deletion Behavior command to switch between moving downloads to Trash and permanently deleting them.
