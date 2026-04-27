@@ -132,12 +132,14 @@ const fetchTonerLevels = async (
     return calculatePercentage(currentVb, maxVb);
   };
 
-  return {
-    blackInkLevel: await fetchLevel(selected.get("black")?.index),
-    cyanInkLevel: await fetchLevel(selected.get("cyan")?.index),
-    magentaInkLevel: await fetchLevel(selected.get("magenta")?.index),
-    yellowInkLevel: await fetchLevel(selected.get("yellow")?.index),
-  };
+  const [blackInkLevel, cyanInkLevel, magentaInkLevel, yellowInkLevel] = await Promise.all([
+    fetchLevel(selected.get("black")?.index),
+    fetchLevel(selected.get("cyan")?.index),
+    fetchLevel(selected.get("magenta")?.index),
+    fetchLevel(selected.get("yellow")?.index),
+  ]);
+
+  return { blackInkLevel, cyanInkLevel, magentaInkLevel, yellowInkLevel };
 };
 
 export async function fetchPrinterStats(
