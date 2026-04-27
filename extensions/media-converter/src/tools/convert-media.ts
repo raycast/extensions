@@ -1,15 +1,20 @@
-import { convertMedia } from "../utils/converter";
+import { convertMedia, ConvertOptions } from "../utils/converter";
 import {
   type QualitySettings,
   type QualityLevel,
   type OutputImageExtension,
   type OutputAudioExtension,
   type OutputVideoExtension,
-  /* type AllOutputExtension, */
+  type AllOutputExtension,
   type ImageQuality,
   type AudioQuality,
   type VideoQuality,
+  type GifQuality,
+  type GifFps,
+  type GifWidth,
+  type TrimOptions,
   getMediaType,
+  getOutputCategory,
   DEFAULT_QUALITIES,
   // Advanced controls & helpers
   AUDIO_BITRATES,
@@ -24,6 +29,8 @@ import {
   buildVideoQuality,
 } from "../types/media";
 import { findFFmpegPath } from "../utils/ffmpeg";
+import { findPreset } from "../utils/presets";
+import { parseTimeString } from "../utils/time";
 import type { Tool } from "@raycast/api";
 import path from "path";
 import os from "os";
@@ -71,9 +78,28 @@ type Input = {
     | ".webp"
     | ".heic"
     | ".tiff"
-    | ".avif";
+    | ".avif"
+    // GIF (from video input)
+    | ".gif";
   // Simple mode quality (optional). If omitted, sensible defaults apply.
   quality?: QualityLevel;
+
+  // --- Optional cross-cutting controls ---
+  /** Absolute path to output folder. Must exist. */
+  outputDir?: string;
+  /** Remove EXIF/GPS/tags from output. */
+  stripMetadata?: boolean;
+  /** Trim start time, e.g. "0:10" or "10.5" (seconds). */
+  trimStart?: string;
+  /** Trim end time, e.g. "1:30" or "90" (seconds). */
+  trimEnd?: string;
+  /** Preset ID to apply. If set, overrides most other params. */
+  presetId?: string;
+
+  // --- Optional GIF controls (apply when outputFileType === ".gif") ---
+  gifFps?: "10" | "15" | "24" | "30";
+  gifWidth?: "original" | "480" | "720" | "1080";
+  gifLoop?: boolean;
 
   // --- Optional advanced image controls (apply when relevant) ---
   // Generic percentage for JPG/WEBP/HEIC/AVIF (0-100)
@@ -139,10 +165,46 @@ type Input = {
 };
 
 export default async function ConvertMedia(input: Input) {
+  const installed = await findFFmpegPath();
+  if (!installed) {
+    return {
+      type: "error",
+      message: "FFmpeg is not installed. Please install FFmpeg to use this tool.",
+    };
+  }
+
+  // If a preset is specified, apply its settings on top of `input` before any processing.
+  let effectiveInput: Input = input;
+  if (input.presetId) {
+    try {
+      const preset = await findPreset(input.presetId);
+      if (!preset) {
+        return { type: "error", message: `Preset not found: ${input.presetId}` };
+      }
+      effectiveInput = {
+        ...input,
+        outputFileType: preset.outputFormat as Input["outputFileType"],
+        outputDir: input.outputDir ?? preset.outputDir,
+        stripMetadata: input.stripMetadata ?? preset.stripMetadata,
+        trimStart: input.trimStart ?? preset.trim?.start,
+        trimEnd: input.trimEnd ?? preset.trim?.end,
+      };
+    } catch (error) {
+      return { type: "error", message: `Failed to load preset: ${String(error)}` };
+    }
+  }
+
   const {
     inputPath,
     outputFileType,
     quality,
+    outputDir,
+    stripMetadata,
+    trimStart,
+    trimEnd,
+    gifFps,
+    gifWidth,
+    gifLoop,
     // image
     imageQualityPercent,
     webpLossless,
@@ -163,14 +225,7 @@ export default async function ConvertMedia(input: Input) {
     videoPreset,
     proresVariant,
     vp9Quality,
-  } = input;
-  const installed = await findFFmpegPath();
-  if (!installed) {
-    return {
-      type: "error",
-      message: "FFmpeg is not installed. Please install FFmpeg to use this tool.",
-    };
-  }
+  } = effectiveInput;
 
   let fullPath: string;
   let mediaType: "image" | "audio" | "video" | null;
@@ -192,6 +247,73 @@ export default async function ConvertMedia(input: Input) {
       message: String(error),
     };
   }
+
+  // Validate optional output directory & load preset if given.
+  let resolvedOutputDir: string | undefined;
+  if (outputDir) {
+    resolvedOutputDir = path.resolve(path.normalize(outputDir.replace(/^~/, os.homedir())));
+    try {
+      const stat = fs.statSync(resolvedOutputDir);
+      if (!stat.isDirectory()) {
+        return { type: "error", message: `Output path is not a directory: ${resolvedOutputDir}` };
+      }
+    } catch {
+      return { type: "error", message: `Output directory does not exist: ${resolvedOutputDir}` };
+    }
+  }
+
+  // Validate trim values.
+  if (trimStart && parseTimeString(trimStart) === null) {
+    return { type: "error", message: `Invalid trimStart value: ${trimStart}` };
+  }
+  if (trimEnd && parseTimeString(trimEnd) === null) {
+    return { type: "error", message: `Invalid trimEnd value: ${trimEnd}` };
+  }
+  // Ensure end is after start when both provided (prevents FFmpeg producing empty output)
+  if (trimStart && trimEnd) {
+    const s = parseTimeString(trimStart);
+    const e = parseTimeString(trimEnd);
+    if (s !== null && e !== null && e <= s) {
+      return { type: "error", message: "End time must be after start time" };
+    }
+  }
+  const trim: TrimOptions | undefined = trimStart || trimEnd ? { start: trimStart, end: trimEnd } : undefined;
+
+  // GIF output path: build GifQuality and bypass the normal quality builder.
+  if (getOutputCategory(outputFileType as AllOutputExtension) === "gif") {
+    if (mediaType !== "video") {
+      return {
+        type: "error",
+        message: `GIF output requires a video input. Got ${mediaType} file: ${fullPath}`,
+      };
+    }
+    const fpsChoice = (gifFps ?? "15") as GifFps;
+    const widthChoice = (gifWidth ?? "original") as GifWidth;
+    const loopChoice = typeof gifLoop === "boolean" ? gifLoop : true;
+    const gifQuality: GifQuality = {
+      ".gif": { fps: fpsChoice, width: widthChoice, loop: loopChoice },
+    };
+    try {
+      const outputPath = await convertMedia(fullPath, ".gif", gifQuality, {
+        outputDir: resolvedOutputDir,
+        stripMetadata,
+        trim,
+      });
+      return {
+        type: "success",
+        message: `✅ Converted video to GIF\n- Input: ${fullPath}\n- Output: ${outputPath}\n- Settings: ${fpsChoice}fps, width ${widthChoice}, loop=${loopChoice}`,
+      };
+    } catch (error) {
+      console.error(error);
+      return { type: "error", message: `❌ GIF conversion failed. Error: ${error}` };
+    }
+  }
+
+  const convertOpts: ConvertOptions = {
+    outputDir: resolvedOutputDir,
+    stripMetadata,
+    trim,
+  };
 
   try {
     let outputPath: string;
@@ -388,18 +510,21 @@ export default async function ConvertMedia(input: Input) {
         fullPath,
         outputFileType as OutputImageExtension,
         qualitySettings as ImageQuality,
+        convertOpts,
       );
     } else if (mediaType === "audio") {
       outputPath = await convertMedia(
         fullPath,
         outputFileType as OutputAudioExtension,
         qualitySettings as AudioQuality,
+        convertOpts,
       );
     } else if (mediaType === "video") {
       outputPath = await convertMedia(
         fullPath,
         outputFileType as OutputVideoExtension,
         qualitySettings as VideoQuality,
+        convertOpts,
       );
     } else {
       return {

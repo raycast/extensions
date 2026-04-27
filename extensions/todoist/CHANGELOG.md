@@ -1,5 +1,10 @@
 # Todoist Changelog
 
+## [Fix group and sort actions in filter views] - 2026-04-27
+
+- In **My Tasks**, when a custom Todoist filter is selected, **Group tasks by** and **Sort tasks by** now update the list (they were previously no-ops because the UI ignored grouped/sorted output for filters).
+- Filters whose query is comma-separated (multiple sub-queries) still show one section per sub-query when **Group tasks by** is **Default**; sort order applies within that layout.
+
 ## [Show deadline as how many days remains] - 2026-03-31
 - The task deadlines are shown as "in X days" instead of a specific date, like the todoist app.
 

@@ -59,9 +59,14 @@ export default function Command(
       {Object.entries(groupedByWorkspace).map(([workspaceName, group]) => (
         <List.Section key={workspaceName} title={`Workspace ${workspaceName} - ${group.monitor}`}>
           {group.windows
-            .filter((window) =>
-              searchText ? window["app-name"].toLowerCase().startsWith(searchText?.toLowerCase()) : true,
-            )
+            .filter((window) => {
+              if (!searchText) return true;
+              const search = searchText.toLowerCase();
+              return (
+                window["app-name"].toLowerCase().includes(search) ||
+                (window["window-title"] ?? "").toLowerCase().includes(search)
+              );
+            })
             .map((window) => (
               <List.Item
                 key={window["window-id"]}

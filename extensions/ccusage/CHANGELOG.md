@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.3.2] - 2026-04-24
+
+### Added
+
+- Menu bar command now auto-refreshes every 5 minutes in the background, so usage data stays up to date without requiring a manual click
+
 ## [v2.3.1] - 2026-04-23
 
 ### Fixed

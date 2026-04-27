@@ -1,5 +1,13 @@
 # Cloudflare Changelog
 
+## [Custom Cache Purge & Favorite Sites] - 2026-04-27
+
+- Added support for purging cache by Hostname, Cache-Tag, and Prefix in addition to URL
+- New "Purge By" dropdown in the cache purge form with contextual hints and input validation (up to 100 tags)
+- Remembers the last selected purge type and the last entered values per type and per site, with a "Purge Last Saved Values" action (`⌘⇧R`) for quick repeat purges
+- Purge history now tracks the purge type for each entry and lets you re-run previous purges
+- Added the ability to mark sites (zones) as favorites; favorites appear in a dedicated section at the top of the sites list (`⌘F` to toggle)
+
 ## [View Workers Command] - 2026-01-24
 
 - Added new "View Workers" command to list Cloudflare Workers across all accounts

@@ -1,5 +1,9 @@
 # Bitwarden Changelog
 
+## [Update packages] - 2026-04-24
+
+- Update Raycast packages to the latest version
+
 ## [CLI update & Fix] - 2026-04-23
 
 - Logout whenever there is a "Invalid session token" error
