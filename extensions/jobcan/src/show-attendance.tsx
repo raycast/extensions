@@ -15,14 +15,6 @@ import { useMemo, useState } from "react";
 import { fetchAttendanceMonth, getModifyUrl, submitAttendanceDay, submitAttendanceDays } from "./jobcan";
 import type { AttendanceDay, AttendanceStatus } from "./types";
 
-type Preferences = {
-  username: string;
-  password: string;
-  defaultStartTime: string;
-  defaultEndTime: string;
-  defaultNotice?: string;
-};
-
 const FALLBACK_NOTICE = "手続き";
 
 type DisplayStatus = AttendanceStatus | "dayOff" | "weekend" | "nationalHoliday" | "refresh" | "trip" | "newYearLeave";
@@ -32,7 +24,7 @@ const statusStyles: Record<DisplayStatus, { icon: Icon; color: Color; label: str
   partial: { icon: Icon.Clock, color: Color.Yellow, label: "Partial" },
   pending: { icon: Icon.Hourglass, color: Color.Yellow, label: "Pending" },
   absent: { icon: Icon.XMarkCircle, color: Color.Red, label: "Absent" },
-  late: { icon: Icon.ExclamationMark, color: Color.Orange, label: "Today" },
+  late: { icon: Icon.ExclamationMark, color: Color.Orange, label: "Late" },
   holiday: { icon: Icon.Calendar, color: Color.Blue, label: "Day off" },
   dayOff: { icon: Icon.Umbrella, color: Color.Blue, label: "Day off" },
   weekend: { icon: Icon.Moon, color: Color.Purple, label: "Weekend" },
@@ -128,7 +120,7 @@ function AttendanceGridItem({
 }) {
   const displayStatus = getDisplayStatus(day);
   const style = statusStyles[displayStatus];
-  const canSubmitDay = day.status === "absent" || day.status === "late";
+  const canSubmitDay = day.status === "absent";
   const absentDays = monthDays.filter((monthDay) => monthDay.status === "absent");
   return (
     <Grid.Item

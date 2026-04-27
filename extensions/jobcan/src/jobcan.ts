@@ -12,6 +12,12 @@ type Cookie = {
   path: string;
 };
 
+type AditInsertResponse = {
+  result?: boolean;
+  errors?: Record<string, string>;
+  error?: unknown;
+};
+
 class CookieJar {
   private cookies = new Map<string, Cookie>();
 
@@ -180,9 +186,16 @@ async function submitAditTime(
     jar,
   );
   const text = await response.text();
+  const result = parseAditInsertResponse(text);
 
-  if (text.includes("error") || text.includes("エラー")) {
-    throw new Error(`Jobcan rejected ${form.year}/${form.month}/${form.day} ${time}.`);
+  if (result.result !== true) {
+    const details = result.errors
+      ? Object.entries(result.errors)
+          .map(([field, code]) => `${field}: ${code}`)
+          .join(", ")
+      : String(result.error ?? "unknown error");
+
+    throw new Error(`Jobcan rejected ${form.year}/${form.month}/${form.day} ${time}: ${details}.`);
   }
 }
 
@@ -341,6 +354,17 @@ function normalizeTime(value: string): string {
 function normalizeOrderedTimes(startTime: string, endTime: string): [string, string] {
   const times = [normalizeTime(startTime), normalizeTime(endTime)].sort();
   return [times[0], times[1]];
+}
+
+function parseAditInsertResponse(text: string): AditInsertResponse {
+  try {
+    const parsed = JSON.parse(text) as unknown;
+    if (parsed && typeof parsed === "object") return parsed as AditInsertResponse;
+  } catch {
+    // Fall through to the generic unexpected-response error below.
+  }
+
+  throw new Error("Jobcan returned an unexpected submit response.");
 }
 
 function splitSetCookieHeader(header: string | null): string[] {
