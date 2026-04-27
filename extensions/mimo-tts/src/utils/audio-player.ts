@@ -23,13 +23,13 @@ export class AudioPlayer {
   /**
    * Play a single base64-encoded audio chunk.
    */
-  async playAudio(base64Audio: string, format = "wav"): Promise<void> {
+  async playAudio(base64Audio: string, format = "wav", playbackRate = 1): Promise<void> {
     if (this.stopped) return;
 
     const tempPath = this.saveTempFile(base64Audio, format);
 
     return new Promise<void>((resolve, reject) => {
-      const proc = spawn("afplay", [tempPath]);
+      const proc = spawn("afplay", buildAfplayArgs(tempPath, playbackRate));
       this.currentProcess = proc;
       const myPid = proc.pid;
 
@@ -74,14 +74,15 @@ export class AudioPlayer {
     this.markStopped();
     if (this.currentProcess) {
       const proc = this.currentProcess;
+      const myPid = proc.pid;
       this.currentProcess = null;
       try {
         proc.kill("SIGTERM");
       } catch {
         // Process may already be dead
       }
+      removePidFileIfMatch(myPid);
     }
-    removePidFile();
   }
 
   private markStopped(): void {
@@ -125,6 +126,15 @@ export class AudioPlayer {
     }
     this.tempFiles = this.tempFiles.filter((f) => f !== filePath);
   }
+}
+
+function buildAfplayArgs(filePath: string, playbackRate: number): string[] {
+  const normalizedRate = Number.isFinite(playbackRate) && playbackRate > 0 ? playbackRate : 1;
+  if (Math.abs(normalizedRate - 1) < 0.001) {
+    return [filePath];
+  }
+
+  return ["-r", normalizedRate.toFixed(2), "-q", "1", filePath];
 }
 
 // ---- PID file helpers for cross-command stop ----

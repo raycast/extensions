@@ -1,11 +1,12 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildOptionsFromPrefs, getActiveModel, getModelLabel, synthesizeSpeech } from "./api/mimo-tts";
+import { buildOptionsAsync, getActiveModel, getModelLabel, synthesizeSpeech } from "./api/mimo-tts";
 import type { VoiceConfig } from "./api/types";
 import { MODEL_LABELS, VOICE_CATEGORIES, getVoiceById, getVoicesByCategory } from "./constants/voices";
 import { AudioPlayer } from "./utils/audio-player";
 import { showTTSFailure } from "./utils/feedback";
 import { getPreviewText } from "./utils/text-source";
+import { clearPlaybackStopRequest } from "./utils/playback-state";
 import {
   clearQuickReadVoiceOverride,
   getActiveQuickReadVoiceId,
@@ -67,17 +68,29 @@ export default function SelectVoice() {
 
   const handlePreviewVoice = useCallback(async (voice: VoiceConfig) => {
     playerRef.current.stopPlayback();
+    await clearPlaybackStopRequest();
     const player = new AudioPlayer();
     playerRef.current = player;
     setPreviewingVoiceId(voice.id);
 
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: `Synthesizing preview · ${voice.name}`,
+    });
+
     try {
       const text = await getPreviewText(PREVIEW_FALLBACK_TEXT, PREVIEW_CHAR_LIMIT);
       if (player.isStopped()) return;
-      const options = buildOptionsFromPrefs(voice.id);
+      const options = await buildOptionsAsync(voice.id);
       const audio = await synthesizeSpeech(text, options, player.signal);
       if (player.isStopped()) return;
-      await player.playAudio(audio, options.format);
+      toast.style = Toast.Style.Animated;
+      toast.title = `Playing preview · ${voice.name}`;
+      await player.playAudio(audio, options.format, options.playbackRate);
+      if (!player.isStopped()) {
+        toast.style = Toast.Style.Success;
+        toast.title = `Preview complete · ${voice.name}`;
+      }
     } catch (error) {
       if (player.isStopped()) return;
       await showTTSFailure(error, "Preview failed");
@@ -113,6 +126,13 @@ export default function SelectVoice() {
           }
           actions={
             <ActionPanel>
+              {currentVoice && (
+                <Action
+                  title="Preview Current Voice"
+                  icon={Icon.Play}
+                  onAction={() => handlePreviewVoice(currentVoice)}
+                />
+              )}
               {usesOverride && (
                 <Action title="Reset to Preference Default" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
               )}

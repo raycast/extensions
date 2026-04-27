@@ -1,0 +1,23 @@
+import { getPreferenceValues, showHUD } from "@raycast/api";
+import {
+  adjustSpeed,
+  formatSpeed,
+  getSpeedOverride,
+  parseRateString,
+  SPEED_MAX,
+  SPEED_STEP,
+} from "./utils/playback-state";
+
+export default async function SpeedUp() {
+  const prefs = getPreferenceValues<Preferences>();
+  const fallback = parseRateString(prefs.speechRate);
+  const before = (await getSpeedOverride()) ?? fallback;
+  const next = await adjustSpeed(SPEED_STEP, fallback);
+
+  if (Math.abs(next - before) < 0.001 && next >= SPEED_MAX) {
+    await showHUD(`Already at max speed (${formatSpeed(SPEED_MAX)})`);
+    return;
+  }
+
+  await showHUD(`Speed ${formatSpeed(next)} · applies to next read`);
+}

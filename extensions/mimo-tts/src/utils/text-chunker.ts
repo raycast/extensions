@@ -84,7 +84,7 @@ function groupChunks(parts: string[], maxBytes: number): string[] {
       continue;
     }
 
-    const combined = current ? current + part : part;
+    const combined = appendPart(current, part);
     if (getByteLength(combined) > maxBytes) {
       chunks.push(current);
       current = part;
@@ -116,7 +116,7 @@ function groupClauseChunks(clauses: string[], maxBytes: number): string[] {
       continue;
     }
 
-    const combined = current ? current + clause : clause;
+    const combined = appendPart(current, clause);
     if (getByteLength(combined) > maxBytes) {
       chunks.push(current);
       current = clause;
@@ -130,4 +130,16 @@ function groupClauseChunks(clauses: string[], maxBytes: number): string[] {
   }
 
   return chunks;
+}
+
+function appendPart(current: string, next: string): string {
+  if (!current) return next;
+  if (!needsBoundarySpace(current, next)) return current + next;
+  return `${current} ${next}`;
+}
+
+function needsBoundarySpace(current: string, next: string): boolean {
+  if (/\s$/.test(current) || /^\s/.test(next)) return false;
+  if (/^[,.;:!?，。！？、；：]/.test(next)) return false;
+  return /[A-Za-z0-9.!?)]$/.test(current) && /^[A-Za-z0-9("']/.test(next);
 }

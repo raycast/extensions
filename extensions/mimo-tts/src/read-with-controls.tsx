@@ -5,6 +5,7 @@ import {
   Form,
   Icon,
   Toast,
+  getPreferenceValues,
   getSelectedText,
   openExtensionPreferences,
   showToast,
@@ -32,6 +33,20 @@ import { AudioPlayer } from "./utils/audio-player";
 import { chunkText } from "./utils/text-chunker";
 import { playChunksWithLookahead } from "./utils/pipelined-reading";
 import { getActiveQuickReadVoiceId } from "./utils/voice-preferences";
+import {
+  clearNowPlaying,
+  clearPlaybackStopRequest,
+  formatSpeed,
+  getSpeedOverride,
+  markError,
+  markIdle,
+  parseRateString,
+  patchNowPlaying,
+  requestPlaybackStop,
+  setNowPlaying,
+  setSpeedOverride,
+  SPEED_STEP,
+} from "./utils/playback-state";
 
 interface ControlFormValues extends Form.Values {
   text: string;
@@ -49,9 +64,11 @@ interface ControlFormValues extends Form.Values {
 
 export default function MiMoStudio() {
   const currentModel = getActiveModel();
+  const prefs = getPreferenceValues<Preferences>();
   const availableVoices = useMemo(() => getVoicesForModel(currentModel), [currentModel]);
   const [text, setText] = useState("");
   const [voiceId, setVoiceId] = useState(availableVoices[0]?.id ?? DEFAULT_VOICE);
+  const [speechRate, setSpeechRate] = useState<string>("0");
   const [isLoading, setIsLoading] = useState(false);
   const playerRef = useRef(new AudioPlayer());
 
@@ -59,9 +76,10 @@ export default function MiMoStudio() {
     let mounted = true;
 
     async function loadDefaults() {
-      const [initialText, activeVoice] = await Promise.all([
+      const [initialText, activeVoice, override] = await Promise.all([
         loadInitialText(),
         getActiveQuickReadVoiceId().catch(() => ({ voiceId: DEFAULT_VOICE, isOverride: false })),
+        getSpeedOverride(),
       ]);
 
       if (!mounted) return;
@@ -69,6 +87,8 @@ export default function MiMoStudio() {
       setVoiceId(
         availableVoices.some((voice) => voice.id === activeVoice.voiceId) ? activeVoice.voiceId : DEFAULT_VOICE,
       );
+      const initialRate = override ?? parseRateString(prefs.speechRate);
+      setSpeechRate(matchRateOptionValue(initialRate));
     }
 
     loadDefaults();
@@ -77,7 +97,7 @@ export default function MiMoStudio() {
       mounted = false;
       playerRef.current.cleanup();
     };
-  }, [availableVoices]);
+  }, [availableVoices, prefs.speechRate]);
 
   const handleSubmit = useCallback(async (values: ControlFormValues) => {
     const textToRead = values.text.trim();
@@ -87,52 +107,91 @@ export default function MiMoStudio() {
     }
 
     playerRef.current.stopPlayback();
+    await clearPlaybackStopRequest();
     const player = new AudioPlayer();
     playerRef.current = player;
     setIsLoading(true);
 
     try {
-      const voiceName = getVoiceById(values.voiceId)?.name ?? values.voiceId;
-      const options = buildOptionsFromPrefs(values.voiceId, {
-        speechRate: values.speechRate || "0",
-        additionalStylePrompt: joinNaturalInstructions(values.performancePreset, values.directorPrompt),
-        openingStyleTags: [...selectedTags(values.openingStyleTags), ...parseCustomTags(values.customAssistantTags)],
-        audioEventTags: [
-          ...selectedTags(values.rhythmTags),
-          ...selectedTags(values.emotionTags),
-          ...selectedTags(values.featureTags),
-          ...selectedTags(values.expressionTags),
-        ],
-      });
-      const chunks = chunkText(textToRead);
+      const voiceMeta = getVoiceById(values.voiceId);
+      const voiceName = voiceMeta?.name ?? values.voiceId;
+      // Studio's rate dropdown is the source of truth for THIS submission;
+      // also persist as global override so menu bar / Quick Read agree.
+      const rate = parseRateString(values.speechRate);
+      await setSpeedOverride(rate);
 
-      await showToast({
+      const options = buildOptionsFromPrefs(
+        values.voiceId,
+        {
+          additionalStylePrompt: joinNaturalInstructions(values.performancePreset, values.directorPrompt),
+          openingStyleTags: [...selectedTags(values.openingStyleTags), ...parseCustomTags(values.customAssistantTags)],
+          audioEventTags: [
+            ...selectedTags(values.rhythmTags),
+            ...selectedTags(values.emotionTags),
+            ...selectedTags(values.featureTags),
+            ...selectedTags(values.expressionTags),
+          ],
+        },
+        rate,
+      );
+      const modelLabel = getModelLabel(options.model);
+      const chunks = chunkText(textToRead);
+      const totalChunks = chunks.length;
+
+      const toast = await showToast({
         style: Toast.Style.Animated,
-        title: `Synthesizing ${chunks.length} chunk${chunks.length > 1 ? "s" : ""}`,
-        message: `${voiceName} · ${getModelLabel(options.model)}`,
+        title: `Synthesizing${totalChunks > 1 ? ` · ${totalChunks} chunks` : ""}`,
+        message: `${voiceName} · ${modelLabel} · ${formatSpeed(rate)}`,
+      });
+
+      await setNowPlaying({
+        status: "synthesizing",
+        voiceId: values.voiceId,
+        voiceName,
+        modelLabel,
+        textPreview: previewText(textToRead),
+        totalChunks,
+        currentChunk: -1,
+        startedAt: Date.now(),
+        source: "TTS Studio",
       });
 
       await playChunksWithLookahead(chunks, options, player, {
+        onChunkReady: async (index, total) => {
+          const label = total > 1 ? `Playing ${index + 1}/${total} · ${voiceName}` : `Playing · ${voiceName}`;
+          toast.title = label;
+          toast.message = `${modelLabel} · ${formatSpeed(rate)}`;
+          await patchNowPlaying({ status: "playing", currentChunk: index });
+        },
         onFirstAudioReady: async () => {
           setIsLoading(false);
-          await showToast({ style: Toast.Style.Animated, title: "Playing with controls", message: voiceName });
         },
       });
 
-      if (!player.isStopped()) {
-        await showToast({ style: Toast.Style.Success, title: "Playback complete" });
+      if (player.isStopped()) {
+        toast.style = Toast.Style.Success;
+        toast.title = "Stopped";
+        await markIdle();
+      } else {
+        toast.style = Toast.Style.Success;
+        toast.title = "Playback complete";
+        toast.message = `${voiceName} · ${totalChunks > 1 ? `${totalChunks} chunks` : "1 chunk"}`;
+        await markIdle();
       }
     } catch (error) {
+      await markError(error instanceof Error ? error.message : String(error));
       await showTTSFailure(error);
     } finally {
       setIsLoading(false);
     }
   }, []);
 
-  const handleStop = useCallback(() => {
+  const handleStop = useCallback(async () => {
     playerRef.current.stopPlayback();
+    await requestPlaybackStop();
     setIsLoading(false);
-    showToast({ style: Toast.Style.Success, title: "Playback stopped" });
+    await clearNowPlaying();
+    await showToast({ style: Toast.Style.Success, title: "Playback stopped" });
   }, []);
 
   const handleUseSelectedText = useCallback(async () => {
@@ -162,6 +221,20 @@ export default function MiMoStudio() {
     await showToast({ style: Toast.Style.Success, title: "Text cleared" });
   }, []);
 
+  const handleSpeedUp = useCallback(async () => {
+    const next = parseRateString(speechRate) + SPEED_STEP;
+    const clamped = await setSpeedOverride(next);
+    setSpeechRate(matchRateOptionValue(clamped));
+    await showToast({ style: Toast.Style.Success, title: `Speed ${formatSpeed(clamped)}` });
+  }, [speechRate]);
+
+  const handleSpeedDown = useCallback(async () => {
+    const next = parseRateString(speechRate) - SPEED_STEP;
+    const clamped = await setSpeedOverride(next);
+    setSpeechRate(matchRateOptionValue(clamped));
+    await showToast({ style: Toast.Style.Success, title: `Speed ${formatSpeed(clamped)}` });
+  }, [speechRate]);
+
   return (
     <Form
       isLoading={isLoading}
@@ -188,6 +261,18 @@ export default function MiMoStudio() {
             shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
             onAction={handleClearText}
           />
+          <Action
+            title="Speed up (+0.25x)"
+            icon={Icon.Plus}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "=" }}
+            onAction={handleSpeedUp}
+          />
+          <Action
+            title="Slow Down (-0.25x)"
+            icon={Icon.Minus}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "-" }}
+            onAction={handleSpeedDown}
+          />
           {isLoading ? (
             <Action
               title="Stop Playback"
@@ -202,7 +287,7 @@ export default function MiMoStudio() {
     >
       <Form.Description
         title="TTS Studio"
-        text="Compose speech from typed, selected, or pasted text. Natural direction controls performance; selected tags shape the spoken text."
+        text="Compose speech from typed, selected, or pasted text. ⌘⇧= speeds up, ⌘⇧- slows down. Speed changes apply to the next play and to other MiMo commands."
       />
       <Form.TextArea
         id="text"
@@ -225,7 +310,7 @@ export default function MiMoStudio() {
           );
         })}
       </Form.Dropdown>
-      <Form.Dropdown id="speechRate" title="Speech Rate" defaultValue="0" storeValue>
+      <Form.Dropdown id="speechRate" title="Speech Rate" value={speechRate} onChange={setSpeechRate}>
         {SPEECH_RATE_OPTIONS.map((option) => (
           <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
         ))}
@@ -325,4 +410,24 @@ function voiceIcon(gender: string) {
   if (gender === "female") return Icon.Female;
   if (gender === "male") return Icon.Male;
   return Icon.SpeakerHigh;
+}
+
+function previewText(text: string): string {
+  const trimmed = text.replace(/\s+/g, " ").trim();
+  return trimmed.length > 80 ? `${trimmed.slice(0, 80)}…` : trimmed;
+}
+
+/** Pick the dropdown option value (legacy or modern) closest to a given rate. */
+function matchRateOptionValue(rate: number): string {
+  let best = SPEECH_RATE_OPTIONS[0]?.value ?? "0";
+  let bestDiff = Number.POSITIVE_INFINITY;
+  for (const option of SPEECH_RATE_OPTIONS) {
+    const optionRate = parseRateString(option.value);
+    const diff = Math.abs(optionRate - rate);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = option.value;
+    }
+  }
+  return best;
 }

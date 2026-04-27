@@ -4,11 +4,12 @@ export interface ControlOption {
 }
 
 export const SPEECH_RATE_OPTIONS: ControlOption[] = [
-  { value: "0", title: "Normal" },
   { value: "-50", title: "0.5x Slow" },
   { value: "-25", title: "0.75x Relaxed" },
+  { value: "0", title: "1.0x Normal" },
   { value: "25", title: "1.25x Brisk" },
   { value: "50", title: "1.5x Fast" },
+  { value: "75", title: "1.75x Very Brisk" },
   { value: "100", title: "2.0x Very Fast" },
 ];
 

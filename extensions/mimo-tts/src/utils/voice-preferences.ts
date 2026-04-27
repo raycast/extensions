@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { buildOptionsFromPrefs } from "../api/mimo-tts";
+import { buildOptionsAsync, buildOptionsFromPrefs } from "../api/mimo-tts";
 import type { TTSOptions } from "../api/types";
 import { getVoiceById } from "../constants/voices";
 
@@ -7,7 +7,7 @@ const QUICK_READ_VOICE_KEY = "quick-read-voice-override";
 
 export async function buildDefaultOptionsFromPrefs(): Promise<TTSOptions> {
   const voiceOverride = await getQuickReadVoiceOverride();
-  return buildOptionsFromPrefs(voiceOverride || undefined);
+  return buildOptionsAsync(voiceOverride || undefined);
 }
 
 export async function getActiveQuickReadVoiceId(): Promise<{ voiceId: string; isOverride: boolean }> {

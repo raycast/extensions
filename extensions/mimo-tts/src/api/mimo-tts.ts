@@ -6,6 +6,7 @@ import {
   getVoiceById,
   isVoiceAvailableForModel,
 } from "../constants/voices";
+import { getSpeedOverride, parseRateString, rateToInstruction } from "../utils/playback-state";
 import type { MimoTTSModel, TTSOptionOverrides, TTSOptions } from "./types";
 
 const DEFAULT_TOKEN_PLAN_BASE_URL = "https://token-plan-cn.xiaomimimo.com/v1";
@@ -180,7 +181,11 @@ export function getModelLabel(model: MimoTTSModel): string {
   return MODEL_LABELS[model];
 }
 
-export function buildOptionsFromPrefs(voiceOverride?: string, overrides: TTSOptionOverrides = {}): TTSOptions {
+export function buildOptionsFromPrefs(
+  voiceOverride?: string,
+  overrides: TTSOptionOverrides = {},
+  speedOverrideRate?: number | null,
+): TTSOptions {
   const prefs = getPreferenceValues<Preferences>();
   const model = normalizeModel(prefs.modelId);
   const voice = voiceOverride || prefs.defaultVoice || DEFAULT_VOICE;
@@ -197,18 +202,43 @@ export function buildOptionsFromPrefs(voiceOverride?: string, overrides: TTSOpti
     );
   }
 
+  const rate =
+    typeof speedOverrideRate === "number"
+      ? speedOverrideRate
+      : overrides.speechRate !== undefined
+        ? parseRateString(overrides.speechRate)
+        : parseRateString(prefs.speechRate);
+
   return {
     model,
     voice,
     stylePrompt: buildStylePrompt(
       overrides.baseStylePrompt ?? prefs.stylePrompt,
-      overrides.speechRate ?? prefs.speechRate,
+      rate,
       overrides.additionalStylePrompt,
     ),
     openingStyleTags: normalizeTags(overrides.openingStyleTags),
     audioEventTags: normalizeTags(overrides.audioEventTags),
     format: DEFAULT_AUDIO_FORMAT,
+    playbackRate: rate,
   };
+}
+
+/**
+ * Build TTS options honoring the global speed override (LocalStorage).
+ * Use this whenever the user has not explicitly chosen a rate in the UI.
+ */
+export async function buildOptionsAsync(
+  voiceOverride?: string,
+  overrides: TTSOptionOverrides = {},
+): Promise<TTSOptions> {
+  const speedOverride = await getSpeedOverride();
+  return buildOptionsFromPrefs(voiceOverride, overrides, speedOverride);
+}
+
+/** Validate preferences without making any network call. */
+export function validateOptions(voiceOverride?: string): TTSOptions {
+  return buildOptionsFromPrefs(voiceOverride);
 }
 
 function normalizeModel(model: string | undefined): MimoTTSModel {
@@ -217,12 +247,10 @@ function normalizeModel(model: string | undefined): MimoTTSModel {
 
 function buildStylePrompt(
   stylePrompt: string | undefined,
-  speechRate: string | undefined,
+  rate: number,
   additionalStylePrompt?: string,
 ): string | undefined {
-  const promptParts = [stylePrompt?.trim(), additionalStylePrompt?.trim(), speechRateInstruction(speechRate)].filter(
-    Boolean,
-  );
+  const promptParts = [stylePrompt?.trim(), additionalStylePrompt?.trim(), rateToInstruction(rate)].filter(Boolean);
   return promptParts.length > 0 ? promptParts.join("\n") : undefined;
 }
 
@@ -232,23 +260,6 @@ function normalizeTags(tags: string[] | undefined): string[] {
 
 function isSingingTag(tag: string): boolean {
   return ["唱歌", "sing", "singing"].includes(tag.toLowerCase());
-}
-
-function speechRateInstruction(speechRate: string | undefined): string {
-  switch (speechRate) {
-    case "-50":
-      return "Speak slowly and calmly, with clear pauses.";
-    case "-25":
-      return "Speak at a slightly relaxed pace.";
-    case "25":
-      return "Speak at a lightly brisk pace while keeping articulation clear.";
-    case "50":
-      return "Speak quickly, but keep the rhythm natural and intelligible.";
-    case "100":
-      return "Speak very quickly while preserving clear pronunciation.";
-    default:
-      return "";
-  }
 }
 
 export class TTSApiError extends Error {

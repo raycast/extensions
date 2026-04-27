@@ -54,6 +54,31 @@
       "description": "Stop the current TTS playback",
       "icon": "mimo-icon.png",
       "mode": "no-view"
+    },
+    {
+      "name": "speed-up",
+      "title": "Speed up Reading",
+      "subtitle": "MiMo TTS",
+      "description": "Increase MiMo playback speed by 0.25x. Applies to the next read across all commands.",
+      "icon": "mimo-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "speed-down",
+      "title": "Slow Down Reading",
+      "subtitle": "MiMo TTS",
+      "description": "Decrease MiMo playback speed by 0.25x. Applies to the next read across all commands.",
+      "icon": "mimo-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar-status",
+      "title": "MiMo TTS Status",
+      "subtitle": "MiMo TTS",
+      "description": "Menu bar item showing what is currently playing, current speed, and Stop / Speed Up / Slow Down controls.",
+      "icon": "mimo-icon.png",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [
@@ -173,6 +198,10 @@
         {
           "title": "1.5x",
           "value": "50"
+        },
+        {
+          "title": "1.75x",
+          "value": "75"
         },
         {
           "title": "2.0x (Fast)",
