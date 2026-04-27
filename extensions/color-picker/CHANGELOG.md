@@ -1,6 +1,6 @@
 # Color Picker Changelog
 
-## [Multi-Color Selection] - {PR_MERGE_DATE}
+## [Multi-Color Selection] - 2026-04-27
 
 - Add a Single/Multi select mode toggle to the search bar of `Organize Colors` and `Generate Colors`
 - In multi-select mode, switch to a list view with a checkmark prefix on selected colors
