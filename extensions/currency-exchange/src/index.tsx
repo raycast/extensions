@@ -25,9 +25,14 @@ const PROVIDER_LABELS: Record<Provider, string> = {
 };
 
 function getProvider(): Provider {
-  const { provider } = getPreferenceValues<{ provider?: string }>();
+  const { provider } = getPreferenceValues<Preferences>();
   return provider === "unirate" ? "unirate" : "exchangerate-api";
 }
+
+const PROVIDER_DOC_URLS: Record<Provider, string> = {
+  "exchangerate-api": "https://www.exchangerate-api.com/docs/standard-requests",
+  unirate: "https://unirateapi.com/docs",
+};
 
 function cacheKey(provider: Provider, historyDate: Date | null): string {
   const dateSuffix = historyDate
@@ -116,9 +121,10 @@ function Exchange({
   setSearchText: (amountExpression: string) => void;
 }) {
   if (currencyResult.result !== "success") {
+    const provider = getProvider();
     const errorMessage = `
     * error code: ${currencyResult.result}.
-    * for ExchangeRate-API see https://www.exchangerate-api.com/docs/standard-requests`;
+    * for ${PROVIDER_LABELS[provider]} see ${PROVIDER_DOC_URLS[provider]}`;
     showToast({
       style: Toast.Style.Failure,
       title: "Exchange Error",
@@ -433,7 +439,7 @@ function currencyAPI(historyDate: Date | null, signal: AbortSignal): Promise<Res
 }
 
 function exchangeRateAPI(historyDate: Date | null, signal: AbortSignal): Promise<Response> {
-  const { api_key } = getPreferenceValues<{ api_key: string }>();
+  const { api_key } = getPreferenceValues<Preferences>();
 
   const url = `https://v6.exchangerate-api.com/v6/${api_key}/${historyDate ? "history" : "latest"}/USD${
     historyDate
@@ -456,7 +462,7 @@ interface UniRateRatesResponse {
 }
 
 async function uniRateAPI(historyDate: Date | null, signal: AbortSignal): Promise<Response> {
-  const { api_key } = getPreferenceValues<{ api_key: string }>();
+  const { api_key } = getPreferenceValues<Preferences>();
 
   const path = historyDate ? "historical/rates" : "rates";
   const dateParam = historyDate
