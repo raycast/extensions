@@ -403,7 +403,7 @@ export default function PullRequestActions({
 
           {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length === 1 && (
             <Action
-              title="Enable Auto-Merge"
+              title="Enable Auto-merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -414,7 +414,7 @@ export default function PullRequestActions({
 
           {canAutoMerge && !pullRequest.autoMergeRequest && allowedMergeMethods.length > 1 && (
             <ActionPanel.Submenu
-              title="Enable Auto-Merge"
+              title="Enable Auto-merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,
@@ -428,7 +428,7 @@ export default function PullRequestActions({
 
           {isOpen && pullRequest.autoMergeRequest && (
             <Action
-              title="Disable Auto-Merge"
+              title="Disable Auto-merge"
               icon={{
                 source: "pull-request-merged.svg",
                 tintColor: Color.PrimaryText,

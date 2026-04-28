@@ -1,8 +1,8 @@
 import fs from "fs";
+import { mkdir, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
 
-import { mkdirp } from "mkdirp";
 import yauzl from "yauzl";
 
 export interface ParsedUrl {
@@ -41,24 +41,6 @@ export function parseGitHubUrl(urlStr: string): ParsedUrl {
   return { owner, repo, type, ref, path: filePath };
 }
 
-async function getDefaultBranch(owner: string, repo: string, token?: string | null): Promise<string> {
-  const headers: Record<string, string> = {
-    Accept: "application/vnd.github.v3+json",
-  };
-  if (token) headers.Authorization = `token ${token}`;
-
-  try {
-    const response = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
-    if (!response.ok) {
-      return "main";
-    }
-    const data = (await response.json()) as { default_branch: string };
-    return data.default_branch || "main";
-  } catch {
-    return "main";
-  }
-}
-
 export async function downloadGitHubContent(
   url: string,
   destPath: string,
@@ -75,13 +57,7 @@ export async function downloadGitHubContent(
   };
   if (token) headers.Authorization = `token ${token}`;
 
-  // 1. Resolve Branch/Ref if missing
-  if (!ref) {
-    onProgress("Resolving default branch...");
-    ref = await getDefaultBranch(owner, repo, token);
-  }
-
-  // 2. Check if Repository is accessible / private
+  // 1. Check if Repository is accessible / private
   onProgress("Checking repository access...");
   const repoCheck = await fetch(`https://api.github.com/repos/${owner}/${repo}`, { headers });
   if (!repoCheck.ok) {
@@ -93,8 +69,11 @@ export async function downloadGitHubContent(
     }
     throw new Error(`GitHub API Error: ${repoCheck.statusText}`);
   }
+  const repoData = (await repoCheck.json()) as { default_branch: string; size: number };
+  if (!ref) ref = repoData.default_branch || "main";
+  const repoSizeKB = repoData.size; // GitHub returns size in KB
 
-  // 3. Handle Single File Download (Blob)
+  // 2. Handle Single File Download (Blob)
   if (type === "blob" && targetPath) {
     const fileName = path.basename(targetPath);
     const finalDest = path.join(destPath, fileName);
@@ -111,26 +90,21 @@ export async function downloadGitHubContent(
     }
 
     const buffer = await response.arrayBuffer();
-    fs.writeFileSync(finalDest, Buffer.from(buffer));
+    await writeFile(finalDest, Buffer.from(buffer));
 
     return finalDest;
   }
 
-  // 4. Handle Directory/Root Download (Tree) via Zip
-  let repoSizeMB = 0;
-  try {
-    const data = (await repoCheck.json()) as { size: number };
-    repoSizeMB = Math.round(data.size / 1024);
-  } catch {
-    /* ignore */
-  }
-
-  const sizeMsg = repoSizeMB > 0 ? `~${repoSizeMB} MB` : "";
+  // 3. Handle Directory/Root Download (Tree) via Zip
+  const repoSizeBytes = repoSizeKB * 1024;
+  const repoSizeMB = (repoSizeBytes / (1024 * 1024)).toFixed(1);
+  const sizeMsg = repoSizeBytes > 0 ? `~${repoSizeMB} MB` : "";
   onProgress(`Downloading archive ${sizeMsg}...`);
 
   const zipUrl = `https://api.github.com/repos/${owner}/${repo}/zipball/${ref}`;
   const tempDir = os.tmpdir();
-  const tempFile = path.join(tempDir, `${repo}-${Date.now()}.zip`);
+  const safeRepo = repo.replace(/[^a-zA-Z0-9._-]/g, "_");
+  const tempFile = path.join(tempDir, `${safeRepo}-${Date.now()}.zip`);
 
   try {
     const response = await fetch(zipUrl, { headers });
@@ -154,8 +128,8 @@ export async function downloadGitHubContent(
         const downloadedMB = (downloadedBytes / (1024 * 1024)).toFixed(1);
 
         let progressMsg = `Downloading... ${downloadedMB} MB`;
-        if (repoSizeMB > 0) {
-          const percent = Math.min(Math.round((downloadedBytes / (repoSizeMB * 1024 * 1024)) * 100), 100);
+        if (repoSizeBytes > 0) {
+          const percent = Math.min(Math.round((downloadedBytes / repoSizeBytes) * 100), 100);
           progressMsg += ` / ${repoSizeMB} MB (${percent}%)`;
         }
 
@@ -170,15 +144,13 @@ export async function downloadGitHubContent(
       fileStream.on("error", reject);
     });
 
-    // 5. Extract
+    // 4. Extract
     onProgress("Extracting files...");
 
     const folderName = targetPath ? path.basename(targetPath) : repo;
     const finalDest = path.join(destPath, folderName);
 
-    if (!fs.existsSync(finalDest)) {
-      await mkdirp(finalDest);
-    }
+    await mkdir(finalDest, { recursive: true });
 
     await new Promise<void>((resolve, reject) => {
       yauzl.open(tempFile, { lazyEntries: true }, (err, zipfile) => {
@@ -210,7 +182,7 @@ export async function downloadGitHubContent(
 
               const entryDir = path.dirname(entryDest);
 
-              mkdirp(entryDir)
+              mkdir(entryDir, { recursive: true })
                 .then(() => {
                   zipfile.openReadStream(entry, (err, readStream) => {
                     if (err) return reject(err);

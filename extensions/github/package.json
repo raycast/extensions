@@ -44,7 +44,8 @@
     "emergerrrd",
     "ryo.",
     "Undolog",
-    "wonbywondev"
+    "wonbywondev",
+    "SandeepBaskaran"
   ],
   "pastContributors": [
     "Lemon",
@@ -504,6 +505,7 @@
     {
       "name": "download-repository",
       "title": "Download Repository",
+      "subtitle": "GitHub",
       "description": "Download an entire repo or a specific directory inside a repo",
       "mode": "view"
     }
@@ -531,12 +533,12 @@
     },
     {
       "name": "enable-auto-merge",
-      "title": "Enable Auto-Merge",
+      "title": "Enable Auto-merge",
       "description": "Enable auto-merge on a pull request"
     },
     {
       "name": "disable-auto-merge",
-      "title": "Disable Auto-Merge",
+      "title": "Disable Auto-merge",
       "description": "Disable auto-merge on a pull request"
     },
     {
@@ -1046,7 +1048,6 @@
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
     "lodash": "^4.17.23",
-    "mkdirp": "^3.0.1",
     "node-fetch": "^3.3.2",
     "yauzl": "^3.2.0"
   },
@@ -1058,7 +1059,6 @@
     "@parcel/watcher": "^2.4.1",
     "@raycast/eslint-config": "^1.0.11",
     "@types/lodash": "^4.17.5",
-    "@types/mkdirp": "^1.0.2",
     "@types/node": "^22.1.0",
     "@types/react": "^18.3.3",
     "@types/yauzl": "^2.10.3",
