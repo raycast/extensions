@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Add bunx support] - {PR_MERGE_DATE}
+## [Add bunx support] - 2026-04-28
 
 - Added initial support for `bunx`, it is only called optimally if `npx` is not found
 
