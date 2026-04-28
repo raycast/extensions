@@ -96,7 +96,7 @@ async function runSkillsCliCommand(args: string[]): Promise<string> {
       ...execOptions.env,
       ...getSkillsCliEnvOverrides(),
     };
-    const { stdout } = await execAsync(buildSkillsCliCommand(npxCommand, args), execOptions);
+    const { stdout } = await execAsync(buildSkillsCliCommand("npx", args), execOptions);
     return stdout;
   } catch (npxError) {
     throw normalizeCliError(npxError, "npx");
