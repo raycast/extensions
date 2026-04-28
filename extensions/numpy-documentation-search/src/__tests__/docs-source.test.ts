@@ -51,6 +51,29 @@ describe("loadInventory", () => {
     expect(result.data.some((item) => item.id === "numpy.linspace")).toBe(true);
   });
 
+  it("follows a stable symlink file from Windows checkouts", async () => {
+    const localDocsDirectory = createLocalDocsDirectory();
+    const versionDir = path.join(localDocsDirectory, "2.3");
+    mkdirSync(versionDir, { recursive: true });
+    writeFileSync(path.join(localDocsDirectory, "stable"), "2.3\n");
+    writeFileSync(path.join(versionDir, "objects.inv"), buildInventoryFixture());
+
+    const result = await loadInventory(
+      {
+        localDocsDirectory,
+        mode: "local",
+      },
+      {
+        fetchImpl: vi.fn() as typeof fetch,
+        readBinaryFileImpl: async (filePath) => readFileSync(filePath),
+        readTextFileImpl: async (filePath) => readFileSync(filePath, "utf8"),
+      },
+    );
+
+    expect(result.source).toBe("local");
+    expect(result.data.some((item) => item.id === "numpy.linspace")).toBe(true);
+  });
+
   it("surfaces the remote error when online mode has no local docs fallback", async () => {
     await expect(
       loadInventory(
@@ -74,6 +97,27 @@ describe("loadDocDetail", () => {
     const localDocsDirectory = createLocalDocsDirectory();
     const referenceDir = path.join(localDocsDirectory, "stable/reference/generated");
     mkdirSync(referenceDir, { recursive: true });
+    writeFileSync(
+      path.join(referenceDir, "numpy.linspace.html"),
+      readFileSync(path.join(process.cwd(), "src/__tests__/fixtures/numpy.linspace.html"), "utf8"),
+    );
+
+    const result = await loadDocDetail({
+      inventorySource: "local",
+      item: linspaceItem,
+      localDocsDirectory,
+      mode: "local",
+    });
+
+    expect(result.source).toBe("local");
+    expect(result.data?.signature).toContain("numpy.linspace");
+  });
+
+  it("loads documentation detail through a stable symlink file from Windows checkouts", async () => {
+    const localDocsDirectory = createLocalDocsDirectory();
+    const referenceDir = path.join(localDocsDirectory, "2.3/reference/generated");
+    mkdirSync(referenceDir, { recursive: true });
+    writeFileSync(path.join(localDocsDirectory, "stable"), "2.3\n");
     writeFileSync(
       path.join(referenceDir, "numpy.linspace.html"),
       readFileSync(path.join(process.cwd(), "src/__tests__/fixtures/numpy.linspace.html"), "utf8"),

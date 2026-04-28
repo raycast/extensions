@@ -126,7 +126,7 @@ async function loadInventoryFromDirectory(
   localDocsDirectory: string | undefined,
   deps: LoaderDeps,
 ): Promise<InventoryItem[]> {
-  const directory = getStableDocsDirectory(localDocsDirectory);
+  const directory = await getStableDocsDirectory(localDocsDirectory, deps);
   return loadInventoryFromFile(path.join(directory, "objects.inv"), deps);
 }
 
@@ -148,13 +148,26 @@ async function loadLocalDocDetail(
   localDocsDirectory: string | undefined,
   deps: LoaderDeps,
 ): Promise<DocDetail> {
-  const directory = getStableDocsDirectory(localDocsDirectory);
+  const directory = await getStableDocsDirectory(localDocsDirectory, deps);
   const htmlPath = path.join(directory, item.docPath.split("#")[0] ?? item.docPath);
   return parseDocDetail(await deps.readTextFileImpl(htmlPath), item);
 }
 
-function getStableDocsDirectory(localDocsDirectory: string | undefined): string {
-  return path.join(requireLocalDocsDirectory(localDocsDirectory), "stable");
+async function getStableDocsDirectory(localDocsDirectory: string | undefined, deps: LoaderDeps): Promise<string> {
+  const directory = requireLocalDocsDirectory(localDocsDirectory);
+  const stablePath = path.join(directory, "stable");
+
+  try {
+    const symlinkTarget = (await deps.readTextFileImpl(stablePath)).trim();
+    if (symlinkTarget) {
+      return path.resolve(directory, symlinkTarget);
+    }
+  } catch {
+    // Most local docs downloads have a real stable directory. Windows Git checkouts
+    // can turn the stable symlink into a text file containing the target path.
+  }
+
+  return stablePath;
 }
 
 function requireLocalDocsDirectory(localDocsDirectory: string | undefined): string {
