@@ -44,8 +44,7 @@ export default function EditTask({
     }
 
     const priority = values.priority;
-    const wantsPriorityClear =
-      priority !== task.priority && !priority && Boolean(task.priority?.trim());
+    const wantsPriorityClear = priority !== task.priority && !priority && Boolean(task.priority?.trim());
     if (priority !== task.priority && priority) {
       args.push("--priority", priority);
     }
