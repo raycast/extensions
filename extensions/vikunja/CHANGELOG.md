@@ -1,6 +1,6 @@
 # Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2026-04-28
 
 - Reorder actions in TaskList
 
