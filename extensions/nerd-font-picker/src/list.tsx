@@ -8,9 +8,9 @@ import {
   getPreferenceValues,
   showHUD,
   showToast,
-} from "@raycast/api"
-import { existsSync } from "fs"
-import { useEffect, useState } from "react"
+} from "@raycast/api";
+import { existsSync } from "fs";
+import { useEffect, useState } from "react";
 import {
   CACHE_FILE,
   Glyph,
@@ -23,62 +23,62 @@ import {
   search,
   unicodeEscape,
   updateGlyphPool,
-} from "./utils"
+} from "./utils";
 
 export default function Command() {
-  const { iconColor } = getPreferenceValues<Preferences.List>()
-  const [results, setResults] = useState<Glyph[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const { iconColor } = getPreferenceValues<Preferences.List>();
+  const [results, setResults] = useState<Glyph[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const load = async (forceRefresh = false) => {
-    setIsLoading(true)
+    setIsLoading(true);
 
     if (forceRefresh || !existsSync(CACHE_FILE)) {
       const toast = await showToast({
         style: Toast.Style.Animated,
         title: "Building glyph cache…",
         message: "First run — this takes a few seconds",
-      })
+      });
       try {
-        const glyphs = buildCache()
-        updateGlyphPool(glyphs)
-        toast.style = Toast.Style.Success
-        toast.title = "Cache ready"
-        toast.message = undefined
-        setResults(glyphs.slice(0, MAX_DISPLAY))
+        const glyphs = buildCache();
+        updateGlyphPool(glyphs);
+        toast.style = Toast.Style.Success;
+        toast.title = "Cache ready";
+        toast.message = undefined;
+        setResults(glyphs.slice(0, MAX_DISPLAY));
       } catch (e) {
-        toast.style = Toast.Style.Failure
-        toast.title = "Build failed"
-        toast.message = e instanceof Error ? e.message : String(e)
-        setIsLoading(false)
-        return
+        toast.style = Toast.Style.Failure;
+        toast.title = "Build failed";
+        toast.message = e instanceof Error ? e.message : String(e);
+        setIsLoading(false);
+        return;
       }
     } else {
-      const glyphs = readCache()
-      updateGlyphPool(glyphs)
-      getFont()
-      setResults(glyphs.slice(0, MAX_DISPLAY))
+      const glyphs = readCache();
+      updateGlyphPool(glyphs);
+      getFont();
+      setResults(glyphs.slice(0, MAX_DISPLAY));
     }
 
-    setIsLoading(false)
-  }
+    setIsLoading(false);
+  };
 
   useEffect(() => {
-    load()
-  }, [])
+    load();
+  }, []);
 
-  const onSearchTextChange = (text: string) => setResults(search(text))
+  const onSearchTextChange = (text: string) => setResults(search(text));
 
   const copyAndClose = async (glyph: string) => {
-    await Clipboard.copy(glyph)
-    await showHUD(`Copied ${glyph}`)
-    await closeMainWindow()
-  }
+    await Clipboard.copy(glyph);
+    await showHUD(`Copied ${glyph}`);
+    await closeMainWindow();
+  };
 
   const copyAndStay = async (glyph: string) => {
-    await Clipboard.copy(glyph)
-    await showHUD(`Copied ${glyph}`)
-  }
+    await Clipboard.copy(glyph);
+    await showHUD(`Copied ${glyph}`);
+  };
 
   return (
     <List
@@ -89,8 +89,8 @@ export default function Command() {
       isShowingDetail
     >
       {results.map((g) => {
-        const iconUri = glyphToDataUri(g, iconColor)
-        const detailUri = glyphToDetailUri(g, iconColor)
+        const iconUri = glyphToDataUri(g, iconColor);
+        const detailUri = glyphToDetailUri(g, iconColor);
         return (
           <List.Item
             key={g.codepoint}
@@ -102,54 +102,24 @@ export default function Command() {
                 markdown={`![${g.name}](${detailUri})\n`}
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label
-                      title="Name"
-                      text={g.name}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Codepoint"
-                      text={g.codepoint}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="Unicode Escape"
-                      text={unicodeEscape(g.codepoint)}
-                    />
-                    <List.Item.Detail.Metadata.Label
-                      title="HTML Entity"
-                      text={`&#x${g.codepoint.slice(2)};`}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Name" text={g.name} />
+                    <List.Item.Detail.Metadata.Label title="Codepoint" text={g.codepoint} />
+                    <List.Item.Detail.Metadata.Label title="Unicode Escape" text={unicodeEscape(g.codepoint)} />
+                    <List.Item.Detail.Metadata.Label title="HTML Entity" text={`&#x${g.codepoint.slice(2)};`} />
                     <List.Item.Detail.Metadata.Separator />
-                    <List.Item.Detail.Metadata.Label
-                      title="Glyph"
-                      text={g.glyph}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Glyph" text={g.glyph} />
                   </List.Item.Detail.Metadata>
                 }
               />
             }
             actions={
               <ActionPanel>
-                <Action
-                  title="Copy Glyph & Close"
-                  onAction={() => copyAndClose(g.glyph)}
-                />
-                <Action
-                  title="Copy Glyph"
-                  onAction={() => copyAndStay(g.glyph)}
-                />
+                <Action title="Copy Glyph & Close" onAction={() => copyAndClose(g.glyph)} />
+                <Action title="Copy Glyph" onAction={() => copyAndStay(g.glyph)} />
                 <ActionPanel.Section>
-                  <Action
-                    title="Copy Codepoint"
-                    onAction={() => copyAndStay(g.codepoint)}
-                  />
-                  <Action
-                    title="Copy Name"
-                    onAction={() => copyAndStay(g.name)}
-                  />
-                  <Action
-                    title="Copy Unicode Escape"
-                    onAction={() => copyAndStay(unicodeEscape(g.codepoint))}
-                  />
+                  <Action title="Copy Codepoint" onAction={() => copyAndStay(g.codepoint)} />
+                  <Action title="Copy Name" onAction={() => copyAndStay(g.name)} />
+                  <Action title="Copy Unicode Escape" onAction={() => copyAndStay(unicodeEscape(g.codepoint))} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
                   <Action title="Refresh Cache" onAction={() => load(true)} />
@@ -157,8 +127,8 @@ export default function Command() {
               </ActionPanel>
             }
           />
-        )
+        );
       })}
     </List>
-  )
+  );
 }
