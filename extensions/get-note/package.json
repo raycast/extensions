@@ -12,24 +12,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "manualApiKey",
-      "type": "password",
-      "required": false,
-      "title": "Manual API Key",
-      "description": "Optional. Use a GetNote API key directly instead of the stored local session.",
-      "placeholder": "gk_live_..."
-    },
-    {
-      "name": "manualClientId",
-      "type": "textfield",
-      "required": false,
-      "title": "Manual Client ID",
-      "description": "Optional. Defaults to the pre-registered GetNote client ID if omitted.",
-      "placeholder": "cli_..."
-    }
-  ],
   "commands": [
     {
       "name": "recent-notes",
@@ -515,6 +497,24 @@
       }
     ]
   },
+  "preferences": [
+    {
+      "name": "manualApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Manual API Key",
+      "description": "Optional. Use a GetNote API key directly instead of the stored local session.",
+      "placeholder": "gk_live_..."
+    },
+    {
+      "name": "manualClientId",
+      "type": "textfield",
+      "required": false,
+      "title": "Manual Client ID",
+      "description": "Optional. Defaults to the pre-registered GetNote client ID if omitted.",
+      "placeholder": "cli_..."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.11"
   },
