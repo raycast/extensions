@@ -1,5 +1,11 @@
 # GitHub Changelog
 
+## [Download Repository Command] - 2026-04-28
+
+- Added "Download Repository" command to download an entire repository, a specific sub-directory, or a single file from a GitHub URL.
+- Reuses existing GitHub authentication for private repository access.
+- Streams the archive to disk and extracts only the requested directory for memory efficiency.
+
 ## [Updated contributors list] - 2026-04-24
 
 - Added new contributor to the GitHub extension
@@ -39,8 +45,8 @@
 
 ## [Fix "Clone and Open" action when repository doesn't exist] - 2025-12-17
 
-* Fix the clone command to append the target directory only when it exists
-* Always show the "Clone with Options" action instead of conditionally
+- Fix the clone command to append the target directory only when it exists
+- Always show the "Clone with Options" action instead of conditionally
 
 ## [Moved Contributor] - 2025-12-10
 

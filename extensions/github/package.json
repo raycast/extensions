@@ -44,7 +44,8 @@
     "emergerrrd",
     "ryo.",
     "Undolog",
-    "wonbywondev"
+    "wonbywondev",
+    "SandeepBaskaran"
   ],
   "pastContributors": [
     "Lemon",
@@ -500,6 +501,13 @@
           "placeholder": "5"
         }
       ]
+    },
+    {
+      "name": "download-repository",
+      "title": "Download Repository",
+      "subtitle": "GitHub",
+      "description": "Download an entire repo or a specific directory inside a repo",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -525,12 +533,12 @@
     },
     {
       "name": "enable-auto-merge",
-      "title": "Enable Auto-Merge",
+      "title": "Enable Auto-merge",
       "description": "Enable auto-merge on a pull request"
     },
     {
       "name": "disable-auto-merge",
-      "title": "Disable Auto-Merge",
+      "title": "Disable Auto-merge",
       "description": "Disable auto-merge on a pull request"
     },
     {
@@ -1040,7 +1048,8 @@
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
     "lodash": "^4.17.23",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "yauzl": "^3.2.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",
@@ -1052,6 +1061,7 @@
     "@types/lodash": "^4.17.5",
     "@types/node": "^22.1.0",
     "@types/react": "^18.3.3",
+    "@types/yauzl": "^2.10.3",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",

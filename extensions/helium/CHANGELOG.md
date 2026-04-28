@@ -1,5 +1,10 @@
 # Helium Changelog
 
+## [Fix Optimistic Tab Closing] - 2026-04-27
+
+- Use the stable Helium tab id for list identity and optimistic updates so quickly closing tabs no longer removes the wrong rows or mixes up favicons.
+- Rework tab close and deduplicate actions to keep pending closes hidden until Helium confirms the close, then refresh Search Tabs and Search Web from the latest tab state.
+
 ## [Fix Search Tab Switching] - 2026-04-25
 
 - AppleScript to switch tabs was not running due to `closeMainWindow()` in actions.tsx killing the process before. Fix was to move `closeMainWindow()` to **after** the AppleScript succeeds.

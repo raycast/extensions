@@ -1,13 +1,7 @@
 import { Action, Icon, showToast, Toast, closeMainWindow, open } from "@raycast/api";
 import type { MutatePromise } from "@raycast/utils";
 import type { Tab, Bookmark } from "../types";
-import {
-  switchToHeliumTab,
-  switchToHeliumTabById,
-  closeHeliumTab,
-  closeHeliumTabById,
-  openUrlInHelium,
-} from "./applescript";
+import { switchToHeliumTabById, closeHeliumTabById, openUrlInHelium } from "./applescript";
 import { getBrowserTabs } from "./browser";
 
 interface BaseActionProps {
@@ -16,17 +10,16 @@ interface BaseActionProps {
 
 interface MutationActionProps extends BaseActionProps {
   mutate: MutatePromise<Tab[], undefined>;
-  deletedTabIdsRef: React.MutableRefObject<Set<number>>;
+  revalidate: () => Promise<unknown> | void;
+  pendingCloseIdsRef: React.MutableRefObject<Set<string>>;
 }
 
 /**
  * Action to switch to an existing tab using AppleScript.
  *
- * Prefers the Helium AppleScript `id` bridged at fetch time (see
- * {@link getBrowserTabs}). This guarantees we hit the exact tab the user
- * picked even when several tabs share the same URL. Falls back to URL
- * matching if the id wasn't resolved (e.g., Helium wasn't running at fetch
- * time or the AS call failed).
+ * Uses the stable Helium AppleScript `id` bridged at fetch time (see
+ * {@link getBrowserTabs}) so we always target the exact tab the user picked,
+ * even when several tabs share the same URL.
  */
 export function SwitchToTabAction({ tab }: BaseActionProps) {
   return (
@@ -35,7 +28,7 @@ export function SwitchToTabAction({ tab }: BaseActionProps) {
       icon={Icon.ArrowRight}
       onAction={async () => {
         try {
-          const switched = tab.heliumId ? await switchToHeliumTabById(tab.heliumId) : await switchToHeliumTab(tab.url);
+          const switched = await switchToHeliumTabById(tab.id);
           if (switched) {
             await closeMainWindow();
           } else {
@@ -123,15 +116,15 @@ export function ReloadAction({ subject = "List", revalidate }: RevalidateActionP
 /**
  * Action to close a tab with optimistic updates
  */
-export function CloseTabAction({ tab, mutate, deletedTabIdsRef }: MutationActionProps) {
+export function CloseTabAction({ tab, mutate, revalidate, pendingCloseIdsRef }: MutationActionProps) {
   return (
     <Action
       title="Close Tab"
       icon={Icon.XMarkCircle}
       shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
       onAction={async () => {
-        // Mark tab as deleted immediately - it will be filtered out client-side
-        deletedTabIdsRef.current.add(tab.id);
+        // Keep in-flight closes hidden even if another mutation revalidates first.
+        pendingCloseIdsRef.current.add(tab.id);
 
         await showToast({
           style: Toast.Style.Animated,
@@ -139,32 +132,53 @@ export function CloseTabAction({ tab, mutate, deletedTabIdsRef }: MutationAction
         });
 
         try {
-          // Optimistically update the cache immediately
-          await mutate(
-            undefined, // Don't pass a promise - just keep the optimistic update
-            {
-              optimisticUpdate(data) {
-                if (!data) return [];
-                const filtered = data.filter((t) => t.id !== tab.id);
-                return filtered;
-              },
+          // Optimistically update the cache immediately, then reconcile after
+          // the real close finishes so we don't refetch stale tab data first.
+          await mutate(undefined, {
+            optimisticUpdate(data) {
+              if (!data) return [];
+              return data.filter((t) => t.id !== tab.id);
             },
-          );
+            rollbackOnError: false,
+            shouldRevalidateAfter: false,
+          });
 
-          // Execute the actual close in the browser (prefer id; fallback to URL)
-          const success = tab.heliumId ? await closeHeliumTabById(tab.heliumId) : await closeHeliumTab(tab.url);
+          const success = await closeHeliumTabById(tab.id);
 
           if (!success) {
             throw new Error("Tab not found or failed to close");
           }
+
+          try {
+            await Promise.resolve(revalidate());
+          } catch {
+            // `getBrowserTabs` already surfaces refresh failures.
+          }
+
+          pendingCloseIdsRef.current.delete(tab.id);
 
           await showToast({
             style: Toast.Style.Success,
             title: "Tab closed",
           });
         } catch (error) {
-          // On error, remove from deleted set so it shows again
-          deletedTabIdsRef.current.delete(tab.id);
+          pendingCloseIdsRef.current.delete(tab.id);
+
+          try {
+            await Promise.resolve(revalidate());
+          } catch {
+            // Restore the tab locally if the refresh also fails.
+            await mutate(undefined, {
+              optimisticUpdate(data) {
+                if (!data) return [tab];
+                if (data.some((t) => t.id === tab.id)) return data;
+                return [tab, ...data];
+              },
+              rollbackOnError: false,
+              shouldRevalidateAfter: false,
+            });
+          }
+
           await showToast({
             style: Toast.Style.Failure,
             title: "Failed to close tab",
@@ -233,16 +247,22 @@ export function CopyAsMarkdownAction({ tab }: BaseActionProps) {
  * provided (e.g., invoked from search-bookmarks or search-web), it fetches
  * the current tab list itself, so it can be safely dropped into any command.
  *
- * When used from a list that owns the tab cache, pass `mutate` and
- * `deletedTabIdsRef` to apply an optimistic update so the list reflects the
- * closures immediately.
+ * When used from a list that owns the tab cache, pass `mutate`, `revalidate`,
+ * and `pendingCloseIdsRef` to apply an optimistic update and then reconcile
+ * with the actual browser state after the closes finish.
  */
 interface DeduplicateTabsActionProps {
   tabs?: Tab[];
   mutate?: MutatePromise<Tab[], undefined>;
-  deletedTabIdsRef?: React.MutableRefObject<Set<number>>;
+  revalidate?: () => Promise<unknown> | void;
+  pendingCloseIdsRef?: React.MutableRefObject<Set<string>>;
 }
-export function DeduplicateTabsAction({ tabs, mutate, deletedTabIdsRef }: DeduplicateTabsActionProps = {}) {
+export function DeduplicateTabsAction({
+  tabs,
+  mutate,
+  revalidate,
+  pendingCloseIdsRef,
+}: DeduplicateTabsActionProps = {}) {
   return (
     <Action
       title="Deduplicate Tabs"
@@ -270,27 +290,45 @@ export function DeduplicateTabsAction({ tabs, mutate, deletedTabIdsRef }: Dedupl
             title: `Closing ${duplicates.length} duplicate tab${duplicates.length === 1 ? "" : "s"}`,
           });
 
-          // Optimistic update when the caller owns the cache.
-          if (mutate && deletedTabIdsRef) {
-            for (const t of duplicates) deletedTabIdsRef.current.add(t.id);
-            await mutate(undefined, {
-              optimisticUpdate(data) {
-                if (!data) return [];
-                const ids = new Set(duplicates.map((t) => t.id));
-                return data.filter((t) => !ids.has(t.id));
-              },
-            });
+          const duplicateIds = duplicates.map((t) => t.id);
+          const optimisticContext =
+            mutate && revalidate && pendingCloseIdsRef ? { mutate, revalidate, pendingCloseIdsRef } : undefined;
+
+          if (optimisticContext) {
+            for (const id of duplicateIds) optimisticContext.pendingCloseIdsRef.current.add(id);
           }
 
-          // Close each duplicate. Prefer heliumId (guaranteed to hit the exact
-          // duplicate); fall back to URL only if no id was resolved.
           let closed = 0;
-          for (const t of duplicates) {
-            try {
-              const ok = t.heliumId ? await closeHeliumTabById(t.heliumId) : await closeHeliumTab(t.url);
-              if (ok) closed += 1;
-            } catch {
-              // Ignore individual failures; surface aggregate below.
+          try {
+            if (optimisticContext) {
+              await optimisticContext.mutate(undefined, {
+                optimisticUpdate(data) {
+                  if (!data) return [];
+                  const ids = new Set(duplicateIds);
+                  return data.filter((t) => !ids.has(t.id));
+                },
+                rollbackOnError: false,
+                shouldRevalidateAfter: false,
+              });
+            }
+
+            for (const t of duplicates) {
+              try {
+                const ok = await closeHeliumTabById(t.id);
+                if (ok) closed += 1;
+              } catch {
+                // Ignore individual failures; surface aggregate below.
+              }
+            }
+          } finally {
+            if (optimisticContext) {
+              for (const id of duplicateIds) optimisticContext.pendingCloseIdsRef.current.delete(id);
+
+              try {
+                await Promise.resolve(optimisticContext.revalidate());
+              } catch {
+                // `getBrowserTabs` already surfaces refresh failures.
+              }
             }
           }
 

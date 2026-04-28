@@ -24,13 +24,8 @@ export function isBrowserExtensionAvailable(): boolean {
  * these are attached by URL match. Tabs BE never sees (local files,
  * chrome://) simply have no favicon and the UI falls back to `Icon.Globe`.
  *
- * Each tab carries its Helium AS `id` as `heliumId`, which subsequent
- * actions use to target exact tabs (duplicate URLs included) via
- * {@link switchToHeliumTabById}/{@link closeHeliumTabById}.
- *
- * `Tab.id` here is a synthetic 1-indexed ordinal (from AS traversal order),
- * used only for React keys and optimistic-update tracking. It is not a Chrome
- * tab id and should not be treated as one.
+ * `Tab.id` is the stable Helium AppleScript `id`, used everywhere we need to
+ * refer to a specific tab (React keys, optimistic state, and tab actions).
  */
 export async function getBrowserTabs(): Promise<Tab[]> {
   try {
@@ -46,13 +41,11 @@ export async function getBrowserTabs(): Promise<Tab[]> {
       if (t.favicon && !faviconByUrl.has(t.url)) faviconByUrl.set(t.url, t.favicon);
     }
 
-    return asTabs.map((t, i) => ({
-      id: i + 1,
+    return asTabs.map((t) => ({
+      id: t.heliumId,
       url: t.url,
       title: t.title || "",
       favicon: faviconByUrl.get(t.url),
-      active: false,
-      heliumId: t.heliumId,
     }));
   } catch (error) {
     await showToast({

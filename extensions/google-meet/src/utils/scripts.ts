@@ -16,12 +16,17 @@ export function getOpenedUrlsScript(browserName: SupportedBrowsers): string {
 }
 
 /**
- * Get current tab URL for Arc
+ * Get current tab URL for browsers built by The Browser Company (Arc, Dia).
+ *
+ * Their scripting dictionaries reject the flat `active tab of front window`
+ * form that the default script uses (`-1700` coercion error) and require the
+ * nested `tell front window` form instead.
+ *
  * @returns Google Meet url i.e `https://meet.google.com/pen-adzt-swz`
  */
-export function getOpenedUrlForArc() {
+export function getOpenedUrlForBrowserCompany(browserName: "Arc" | "Dia") {
   return `
-    tell application "Arc"
+    tell application "${browserName}"
       tell front window
         set activeTabURL to URL of active tab
         return activeTabURL
@@ -91,13 +96,18 @@ export const supportedBrowsers = [
   "Dia",
 ] as const;
 
-// Easy way to access the focused window when the meet link opens
+// Identify which browser the meet link landed in by asking System Events for
+// the frontmost application. The previous `lsappinfo metainfo | grep | head -1`
+// approach returned the first supported-browser name found anywhere in the
+// metadata dump — including background Chrome helper processes and Electron
+// apps whose bundle paths contain "Google Chrome Framework" — which
+// misidentified the actual frontmost browser on machines running any
+// Chromium-based browser that wasn't the default.
 export const getOpenedBrowserScript = `
-    set cmd to "lsappinfo metainfo | grep -E -o '${supportedBrowsers.join("|")}' | head -1"
-
-    set frontmostBrowser to do shell script cmd
-
-    return frontmostBrowser
+    tell application "System Events"
+      set frontApp to name of first application process whose frontmost is true
+    end tell
+    return frontApp
 `;
 
 export type SupportedBrowsers = (typeof supportedBrowsers)[number];
