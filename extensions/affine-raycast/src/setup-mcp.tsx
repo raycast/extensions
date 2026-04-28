@@ -72,7 +72,7 @@ Same credentials as this extension; no extra setup.
         <ActionPanel>
           <Action.OpenInBrowser
             url="https://github.com/DAWNCR0W/affine-mcp-server#readme"
-            title="Open Mcp Server Readme"
+            title="Open MCP Server Readme"
           />
           {hasToken && <Action title="Copy Config with Token" onAction={copyConfigWithToken} />}
         </ActionPanel>

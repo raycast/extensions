@@ -46,7 +46,7 @@
     },
     {
       "name": "setup-mcp",
-      "title": "Setup Affine AI (mcp)",
+      "title": "Setup Affine AI (MCP)",
       "description": "Instructions to add the AFFiNE MCP server so Raycast AI can read and write your docs",
       "mode": "view"
     }
