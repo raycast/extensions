@@ -2,6 +2,7 @@ import fs from "fs";
 import { mkdir, writeFile } from "fs/promises";
 import os from "os";
 import path from "path";
+import { pipeline } from "stream/promises";
 
 import yauzl from "yauzl";
 
@@ -113,35 +114,44 @@ export async function downloadGitHubContent(
     }
 
     if (!response.body) throw new Error("Empty response body");
+    const responseBody = response.body;
 
-    const fileStream = fs.createWriteStream(tempFile);
     let downloadedBytes = 0;
-
-    const reader = response.body.getReader();
-    let isDone = false;
-    while (!isDone) {
-      const { done, value } = await reader.read();
-      isDone = done;
-
-      if (value) {
-        downloadedBytes += value.length;
-        const downloadedMB = (downloadedBytes / (1024 * 1024)).toFixed(1);
-
-        let progressMsg = `Downloading... ${downloadedMB} MB`;
-        if (repoSizeBytes > 0) {
-          const percent = Math.min(Math.round((downloadedBytes / repoSizeBytes) * 100), 100);
-          progressMsg += ` / ${repoSizeMB} MB (${percent}%)`;
-        }
-
-        onProgress(progressMsg);
-        fileStream.write(Buffer.from(value));
-      }
-    }
-
-    fileStream.end();
     await new Promise<void>((resolve, reject) => {
+      const fileStream = fs.createWriteStream(tempFile);
       fileStream.on("finish", resolve);
       fileStream.on("error", reject);
+
+      const reader = responseBody.getReader();
+      let isDone = false;
+
+      void (async () => {
+        try {
+          while (!isDone) {
+            const { done, value } = await reader.read();
+            isDone = done;
+
+            if (value) {
+              downloadedBytes += value.length;
+              const downloadedMB = (downloadedBytes / (1024 * 1024)).toFixed(1);
+
+              let progressMsg = `Downloading... ${downloadedMB} MB`;
+              if (repoSizeBytes > 0) {
+                const percent = Math.min(Math.round((downloadedBytes / repoSizeBytes) * 100), 100);
+                progressMsg += ` / ${repoSizeMB} MB (${percent}%)`;
+              }
+
+              onProgress(progressMsg);
+              fileStream.write(Buffer.from(value));
+            }
+          }
+
+          fileStream.end();
+        } catch (error) {
+          fileStream.destroy();
+          reject(error);
+        }
+      })();
     });
 
     // 4. Extract
@@ -187,13 +197,12 @@ export async function downloadGitHubContent(
                   zipfile.openReadStream(entry, (err, readStream) => {
                     if (err) return reject(err);
                     const writeStream = fs.createWriteStream(entryDest);
-                    readStream.pipe(writeStream);
-
-                    writeStream.on("finish", () => {
-                      extractedCount++;
-                      zipfile.readEntry();
-                    });
-                    writeStream.on("error", reject);
+                    pipeline(readStream, writeStream)
+                      .then(() => {
+                        extractedCount++;
+                        zipfile.readEntry();
+                      })
+                      .catch(reject);
                   });
                 })
                 .catch(reject);
