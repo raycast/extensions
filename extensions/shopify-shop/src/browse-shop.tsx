@@ -1,12 +1,13 @@
-import { useState, useEffect, useRef } from "react";
-import { ActionPanel, Action, Icon, Grid, Color, Form, showToast, Toast } from "@raycast/api";
-import { useFetch, useLocalStorage, useForm } from "@raycast/utils";
+import { useState } from "react";
+import { ActionPanel, Action, Icon, Grid, Color, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { useFetch, useLocalStorage } from "@raycast/utils";
 import type { Product } from "./types";
 import ProductDetail from "./product-detail";
 import { buildStoreOrigin } from "./services/shopify-api";
 import { formatPrice, normalizeTags } from "./services/product-mapper";
 import { useSearchSuggest, useStoreMeta } from "./services/hooks";
-import { DEFAULT_STORE } from "./constants/config";
+
+type Preferences = { storeUrl: string };
 
 export default function Command() {
   type ShopifyResponse = {
@@ -15,15 +16,15 @@ export default function Command() {
   };
   const [columns] = useState(3);
   const [searchText, setSearchText] = useState("");
-  const { value: storeRoute, setValue: setStoreRoute } = useLocalStorage<string | null>("storeRoute", null);
+  const { storeUrl } = getPreferenceValues<Preferences>();
   const { value: collectionHandle, setValue: setCollectionHandle } = useLocalStorage<string | null>(
     "collectionHandle",
     null,
   );
 
   type CollectionsRoot = { collections?: { id: number; title: string; handle: string }[] } | null;
-  const storeOrigin = buildStoreOrigin(storeRoute ?? undefined);
-  const storeMetaResp = useStoreMeta(storeRoute ?? "");
+  const storeOrigin = buildStoreOrigin(storeUrl);
+  const storeMetaResp = useStoreMeta(storeUrl);
   const storeMeta = storeMetaResp.data ?? null;
   const storeCurrency = storeMeta?.currency ?? undefined;
 
@@ -39,13 +40,7 @@ export default function Command() {
   });
   const collections = collectionsResp.data?.collections ?? [];
 
-  const searchSuggest = useSearchSuggest(
-    storeRoute ?? "",
-    searchText,
-    ["product"],
-    searchText.length >= 2,
-    storeCurrency,
-  );
+  const searchSuggest = useSearchSuggest(storeUrl, searchText, ["product"], searchText.length >= 2, storeCurrency);
 
   const productsUrl = collectionHandle
     ? `${storeOrigin}/collections/${collectionHandle}/products.json?currency=${storeCurrency || "USD"}`
@@ -126,30 +121,6 @@ export default function Command() {
     products = [resp.product];
   }
 
-  const { handleSubmit, itemProps } = useForm<{ route: string }>({
-    initialValues: { route: storeRoute ?? "" },
-    validation: {
-      route: (value) => {
-        if (!value || value.trim().length === 0) {
-          return "Store URL is required";
-        }
-        try {
-          new URL(value.trim());
-          return undefined;
-        } catch {
-          return `Please enter a valid URL (e.g., ${DEFAULT_STORE})`;
-        }
-      },
-    },
-    onSubmit: async (values) => {
-      try {
-        await setStoreRoute(values.route.trim());
-        await showToast(Toast.Style.Success, "Saved route");
-      } catch {
-        await showToast(Toast.Style.Failure, "Failed to save route");
-      }
-    },
-  });
   async function handleSelectCollection(handle: string | null) {
     try {
       await setCollectionHandle(handle);
@@ -158,25 +129,6 @@ export default function Command() {
       await showToast(Toast.Style.Failure, "Failed to set collection filter");
     }
   }
-
-  // track last applied route to prevent update loops
-  const lastAppliedRouteRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    try {
-      const routeField = (itemProps as unknown as { route?: { onChange?: (value: string) => void } })?.route;
-      if (!routeField || typeof routeField.onChange !== "function") return;
-
-      // Avoid repeatedly calling onChange and causing render loops by tracking the last applied route.
-      const current = storeRoute ?? "";
-      if (lastAppliedRouteRef.current === current) return;
-
-      routeField.onChange(current);
-      lastAppliedRouteRef.current = current;
-    } catch {
-      // ignore
-    }
-  }, [storeRoute, itemProps]);
 
   return (
     <Grid
@@ -240,32 +192,9 @@ export default function Command() {
                     title="Open Product Details"
                     icon={Icon.MagnifyingGlass}
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
-                    target={<ProductDetail handle={p.handle ?? ""} baseUrl={storeRoute ?? null} />}
+                    target={<ProductDetail handle={p.handle ?? ""} baseUrl={storeUrl} />}
                   />
                   <Action.CopyToClipboard content={p.handle ?? ""} shortcut={{ modifiers: ["cmd"], key: "c" }} />
-                  <Action.Push
-                    title="Edit Store Product Route"
-                    icon={Icon.Pencil}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
-                    target={
-                      <Form
-                        actions={
-                          <ActionPanel>
-                            <Action.SubmitForm title="Save" onSubmit={handleSubmit} />
-                          </ActionPanel>
-                        }
-                      >
-                        <Form.TextField {...itemProps.route} placeholder={DEFAULT_STORE} title="Shopify Store URL" />
-                      </Form>
-                    }
-                  />
-                  {storeRoute && (
-                    <Action.CopyToClipboard
-                      title="Copy Stored Route"
-                      content={storeRoute}
-                      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
-                    />
-                  )}
                 </ActionPanel>
               }
             />

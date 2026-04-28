@@ -14,48 +14,11 @@ function isValidUrl(url: string): boolean {
 }
 
 export function buildProductJsonUrl(base?: string | null, handle?: string) {
-  const h = handle ?? "";
-  if (!base || base.length === 0) return `${DEFAULT_STORE}/products/${h}.json`;
-  const b = base.trim();
-
-  if (isValidUrl(b)) {
-    const maybe = new URL(b);
-    if (/\/products\/.+\.json$/i.test(maybe.pathname)) {
-      return `${maybe.origin}/products/${h}.json`;
-    }
-    const stripped = stripProductsPath(maybe.pathname);
-    const origin = `${maybe.protocol}//${maybe.host}${stripped && stripped !== "/" ? stripped : ""}`;
-    return `${origin.replace(/\/$/, "")}/products/${h}.json`;
-  } else {
-    const b2 = stripProductsPath(b).replace(/\/$/, "");
-    if (b2.length === 0) return `${DEFAULT_STORE}/products/${h}.json`;
-    // If the provided base looks like a hostname (e.g. "myshop.myshopify.com"),
-    // ensure we include the https:// scheme so fetch requests are absolute URLs.
-    if (/\./.test(b2) && !/^https?:\/\//i.test(b2)) {
-      return `https://${b2.replace(/\/$/, "")}/products/${h}.json`;
-    }
-    return `${b2.replace(/\/$/, "")}/products/${h}.json`;
-  }
+  return `${buildStoreOrigin(base)}/products/${handle ?? ""}.json`;
 }
 
 export function buildProductPageUrl(base?: string | null, handle?: string) {
-  const h = handle ?? "";
-  if (!base || base.length === 0) return `${DEFAULT_STORE}/products/${h}`;
-  const b = base.trim();
-
-  if (isValidUrl(b)) {
-    const maybe = new URL(b);
-    const stripped = stripProductsPath(maybe.pathname);
-    const origin = `${maybe.protocol}//${maybe.host}${stripped && stripped !== "/" ? stripped : ""}`;
-    return `${origin.replace(/\/$/, "")}/products/${h}`;
-  } else {
-    const b2 = stripProductsPath(b).replace(/\/$/, "");
-    if (b2.length === 0) return `${DEFAULT_STORE}/products/${h}`;
-    if (/\./.test(b2) && !/^https?:\/\//i.test(b2)) {
-      return `https://${b2.replace(/\/$/, "")}/products/${h}`;
-    }
-    return `${b2.replace(/\/$/, "")}/products/${h}`;
-  }
+  return `${buildStoreOrigin(base)}/products/${handle ?? ""}`;
 }
 
 export function buildStoreOrigin(base?: string | null) {
@@ -79,23 +42,7 @@ export function buildStoreOrigin(base?: string | null) {
 }
 
 export function buildProductJsUrl(base?: string | null, handle?: string) {
-  const h = handle ?? "";
-  if (!base || base.length === 0) return `${DEFAULT_STORE}/products/${h}.js`;
-  const b = base.trim();
-
-  if (isValidUrl(b)) {
-    const maybe = new URL(b);
-    const stripped = stripProductsPath(maybe.pathname);
-    const origin = `${maybe.protocol}//${maybe.host}${stripped && stripped !== "/" ? stripped : ""}`;
-    return `${origin.replace(/\/$/, "")}/products/${h}.js`;
-  } else {
-    const b2 = stripProductsPath(b).replace(/\/$/, "");
-    if (b2.length === 0) return `${DEFAULT_STORE}/products/${h}.js`;
-    if (/\./.test(b2) && !/^https?:\/\//i.test(b2)) {
-      return `https://${b2.replace(/\/$/, "")}/products/${h}.js`;
-    }
-    return `${b2.replace(/\/$/, "")}/products/${h}.js`;
-  }
+  return `${buildStoreOrigin(base)}/products/${handle ?? ""}.js`;
 }
 
 export function buildRecommendationsUrl(base?: string | null, productId?: number | string | null, currency?: string) {

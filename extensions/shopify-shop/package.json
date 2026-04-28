@@ -28,6 +28,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "storeUrl",
+      "title": "Shopify Store URL",
+      "description": "URL of your Shopify store (e.g. https://mystore.myshopify.com). The store must have its public JSON endpoints enabled (these are on by default for most Shopify themes).",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://mystore.myshopify.com",
+      "default": "https://demostore.mock.shop"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^2.2.2",

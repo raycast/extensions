@@ -1,21 +1,18 @@
 import { useEffect, useState } from "react";
-import { ActionPanel, Action, Detail, Toast, showToast, Icon } from "@raycast/api";
-import { usePromise, useFetch, useLocalStorage } from "@raycast/utils";
+import { ActionPanel, Action, Detail, Toast, showToast, Icon, getPreferenceValues } from "@raycast/api";
+import { useFetch } from "@raycast/utils";
 import TurndownService from "turndown";
-import type { SingleProductRoot, Variant, ProductJsRoot, StoreMetaRoot } from "./types";
+import type { SingleProductRoot, Variant, ProductJsRoot } from "./types";
 import { buildProductJsonUrl, buildProductJsUrl, buildProductPageUrl, buildStoreOrigin } from "./services/shopify-api";
-import { formatPrice, normalizeTags, convertCentsToDollars } from "./services/product-mapper";
+import { formatPrice, normalizeTags } from "./services/product-mapper";
+import { useStoreMeta } from "./services/hooks";
 import Recommendations from "./recommendations";
 
+type Preferences = { storeUrl: string };
+
 export function sanitizeHtml(html: string): string {
-  try {
-    const withoutScripts = html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, "");
-    const stripped = withoutScripts.replace(/<[^>]*>/g, "");
-    return stripped.replace(/\s+/g, " ").trim();
-  } catch (err) {
-    console.error("[sanitizeHtml] stripping failed:", err);
-    return "";
-  }
+  // Only strip script/style — turndown handles the rest of the HTML → markdown conversion
+  return html.replace(/<(script|style)[\s\S]*?<\/\1>/gi, "");
 }
 
 type Props = {
@@ -25,71 +22,63 @@ type Props = {
 
 export default function ProductDetail({ handle, baseUrl }: Props) {
   const [imageIndex, setImageIndex] = useState<number>(0);
-  const { value: storeRoute } = useLocalStorage<string | null>("storeRoute", null);
-  const effectiveStoreRoute = baseUrl ?? storeRoute ?? undefined;
+  const { storeUrl } = getPreferenceValues<Preferences>();
+  const effectiveStoreRoute = baseUrl ?? storeUrl;
   const storeOrigin = buildStoreOrigin(effectiveStoreRoute);
 
-  const { data: storeMeta, isLoading: isLoadingStoreMeta } = useFetch<StoreMetaRoot>(`${storeOrigin}/meta.json`, {
-    parseResponse: async (response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      return response.json() as Promise<StoreMetaRoot>;
+  const { data: storeMeta, isLoading: isLoadingStoreMeta } = useStoreMeta(effectiveStoreRoute);
+  const storeCurrency = storeMeta?.currency ?? "USD";
+
+  const productJsonUrl = `${buildProductJsonUrl(effectiveStoreRoute, handle)}?currency=${storeCurrency}`;
+  const { data: jsonData, isLoading: isLoadingJson } = useFetch<SingleProductRoot>(productJsonUrl, {
+    execute: storeMeta !== undefined,
+    parseResponse: async (res) => {
+      if (!res.ok) throw new Error(`Failed to load product (${res.status})`);
+      return res.json() as Promise<SingleProductRoot>;
+    },
+    onError: (error) => {
+      showToast({ style: Toast.Style.Failure, title: "Could not load product", message: error.message });
     },
   });
-  const storeCurrency = storeMeta?.currency;
 
-  const { isLoading: isLoadingProduct, data: productData } = usePromise(
-    async (sc?: string, productHandle?: string, route?: string) => {
-      const usedCurrency = sc ?? "USD";
-      const baseJsonUrl = buildProductJsonUrl(route ?? effectiveStoreRoute, productHandle ?? handle);
-      const productJsonUrl = `${baseJsonUrl}?currency=${usedCurrency}`;
-      const productJsUrl = `${buildProductJsUrl(route ?? effectiveStoreRoute, productHandle ?? handle)}?currency=${usedCurrency}`;
-
-      const [jsonRes, jsRes] = await Promise.all([fetch(productJsonUrl), fetch(productJsUrl)]);
-
-      if (!jsonRes.ok) {
-        throw new Error(`Failed to load product (${jsonRes.status})`);
-      }
-
-      const jsonData = (await jsonRes.json()) as SingleProductRoot;
-      let jsData: ProductJsRoot | null = null;
-
-      if (jsRes.ok) {
-        jsData = (await jsRes.json()) as ProductJsRoot;
-      }
-
-      return { product: jsonData.product ?? null, productJs: jsData };
+  const productJsUrl = `${buildProductJsUrl(effectiveStoreRoute, handle)}?currency=${storeCurrency}`;
+  const { data: jsData } = useFetch<ProductJsRoot | null>(productJsUrl, {
+    execute: storeMeta !== undefined,
+    parseResponse: async (res) => {
+      if (!res.ok) return null;
+      const json = (await res.json()) as ProductJsRoot;
+      // Normalize prices from cents (integer) to dollars
+      return {
+        ...json,
+        price: json.price / 100,
+        price_min: json.price_min / 100,
+        price_max: json.price_max / 100,
+        compare_at_price: json.compare_at_price !== null ? json.compare_at_price / 100 : null,
+        variants: json.variants.map((v) => ({
+          ...v,
+          price: v.price / 100,
+          compare_at_price: v.compare_at_price !== null ? v.compare_at_price / 100 : null,
+        })),
+      };
     },
-    [storeCurrency, handle, effectiveStoreRoute],
-    {
-      execute: storeMeta !== undefined,
-      onError: (error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Could not load product",
-          message: error.message,
-        });
-      },
-    },
-  );
+  });
 
-  const product = productData?.product ?? null;
-  const productJs = productData?.productJs ?? null;
+  const product = jsonData?.product ?? null;
+  const productJs = jsData ?? null;
 
   useEffect(() => {
     setImageIndex(0);
   }, [product?.id]);
 
-  if (isLoadingProduct || isLoadingStoreMeta || storeMeta === undefined) return <Detail isLoading />;
+  if (isLoadingStoreMeta || isLoadingJson || storeMeta === undefined) return <Detail isLoading />;
 
   if (!product) return <Detail markdown={`# Not found\nCould not load product ${handle}`} />;
+
   const turndown = new TurndownService({ headingStyle: "atx" });
   turndown.addRule("preserveBlockquote", {
     filter: "blockquote",
     replacement: (content: string) => `> ${content.replace(/\n/g, "\n> ")}`,
   });
-  // sanitizeHtml moved to module scope
 
   const sanitizedHtml = product.body_html ? sanitizeHtml(product.body_html) : "";
   const bodyMd = sanitizedHtml ? turndown.turndown(sanitizedHtml).replace(/\\\*/g, "*") : "";
@@ -101,8 +90,7 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
 
   if (productJs && productJs.variants && productJs.variants.length > 0) {
     const jsVariant = productJs.variants[0];
-    const priceInDollars = convertCentsToDollars(jsVariant.price);
-    variantPrice = priceInDollars !== null ? String(priceInDollars) : null;
+    variantPrice = jsVariant.price !== null ? String(jsVariant.price) : null;
     variantAvailable = jsVariant.available;
   }
 
@@ -246,8 +234,7 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
                   let vAvailable = v.available ?? false;
 
                   if (jsVariant) {
-                    const priceInDollars = convertCentsToDollars(jsVariant.price);
-                    vPrice = priceInDollars !== null ? String(priceInDollars) : null;
+                    vPrice = jsVariant.price !== null ? String(jsVariant.price) : null;
                     vAvailable = jsVariant.available;
                   }
 

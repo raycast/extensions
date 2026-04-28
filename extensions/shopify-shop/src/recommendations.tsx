@@ -1,8 +1,9 @@
-import { ActionPanel, Action, List, Color, Icon } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
+import { ActionPanel, Action, List, Color, Icon, getPreferenceValues } from "@raycast/api";
 import { useRecommendations, useStoreMeta } from "./services/hooks";
 import ProductDetail from "./product-detail";
 import { formatPrice } from "./services/product-mapper";
+
+type Preferences = { storeUrl: string };
 
 type Props = {
   productId: number;
@@ -11,15 +12,14 @@ type Props = {
 };
 
 export default function Recommendations({ productId, productHandle, baseUrl }: Props) {
-  const { value: storeRoute } = useLocalStorage<string | null>("storeRoute", null);
+  const { storeUrl } = getPreferenceValues<Preferences>();
+  const effectiveStoreRoute = baseUrl ?? storeUrl;
 
-  const effectiveStoreRoute = baseUrl ?? storeRoute;
-
-  const storeMetaResp = useStoreMeta(effectiveStoreRoute ?? "");
+  const storeMetaResp = useStoreMeta(effectiveStoreRoute);
   const storeMeta = storeMetaResp.data ?? null;
   const storeCurrency = storeMeta?.currency ?? undefined;
 
-  const { data, isLoading, error } = useRecommendations(effectiveStoreRoute ?? "", productId, true, storeCurrency);
+  const { data, isLoading, error } = useRecommendations(effectiveStoreRoute, productId, true, storeCurrency);
 
   const recommendations = data?.products ?? [];
 
@@ -32,7 +32,8 @@ export default function Recommendations({ productId, productHandle, baseUrl }: P
         <List.EmptyView title="Failed to Load Recommendations" description={error.message || "Unknown error"} />
       )}
       {recommendations.map((product) => {
-        const price = formatPrice(product.price, storeCurrency, true); // price is in cents
+        // prices already normalized to dollars by useRecommendations parseResponse
+        const price = formatPrice(product.price, storeCurrency);
         const availability = product.available ? "Available" : "Unavailable";
         const subtitle = [price, availability].filter(Boolean).join(" • ");
 

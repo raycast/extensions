@@ -1,12 +1,7 @@
 import { useFetch } from "@raycast/utils";
-import { showToast, Toast } from "@raycast/api";
 import { buildStoreOrigin, buildRecommendationsUrl, buildSearchSuggestUrl } from "./shopify-api";
-import type { SearchSuggestRoot, RecommendationsRoot, ProductJsRoot, StoreMetaRoot } from "../types";
+import type { SearchSuggestRoot, RecommendationsRoot, StoreMetaRoot } from "../types";
 
-/**
- * Hook to fetch search suggestions from Shopify's search/suggest endpoint
- * @param resourceTypes - Array of resource types to search (product, page, collection, article)
- */
 export function useSearchSuggest(
   storeRoute: string,
   query: string,
@@ -90,16 +85,14 @@ export function useSearchSuggest(
                 json.resources.results = {} as import("../types").SearchSuggestRoot["resources"]["results"];
               json.resources.results.collections = matched;
             }
-          } catch (err: unknown) {
-            if (process.env.NODE_ENV !== "production")
-              console.warn("[useSearchSuggest] collections fallback failed", err);
+          } catch {
+            // collections fallback is best-effort
           }
         }
-      } catch (err: unknown) {
-        if (process.env.NODE_ENV !== "production") console.warn("[useSearchSuggest] post-process failed", err);
+      } catch {
+        // post-processing is best-effort
       }
 
-      // Validate required structure before returning so callers can rely on required fields
       if (!json.resources || typeof json.resources !== "object") {
         throw new Error("Invalid search suggest response: missing 'resources' object");
       }
@@ -109,20 +102,9 @@ export function useSearchSuggest(
 
       return json as SearchSuggestRoot;
     },
-    onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : String(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Search failed",
-        message,
-      });
-    },
   });
 }
 
-/**
- * Hook to fetch product recommendations from Shopify's recommendations endpoint
- */
 export function useRecommendations(
   storeRoute: string,
   productId: number | undefined,
@@ -138,50 +120,27 @@ export function useRecommendations(
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
-      const json = await response.json();
-      return json as RecommendationsRoot;
-    },
-    onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : String(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load recommendations",
-        message,
-      });
-    },
-  });
-}
-
-/**
- * Hook to fetch product in .js format (optimized with integer prices)
- */
-export function useProductJs(storeRoute: string, handle: string | undefined, enabled = true) {
-  const baseUrl = buildStoreOrigin(storeRoute);
-  const productJsUrl = handle ? `${baseUrl}/products/${handle}.js` : null;
-
-  return useFetch<ProductJsRoot>(productJsUrl ?? "", {
-    execute: enabled && !!productJsUrl,
-    parseResponse: async (response) => {
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-      const json = await response.json();
-      return json as ProductJsRoot;
-    },
-    onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : String(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load product data",
-        message,
-      });
+      const json = (await response.json()) as RecommendationsRoot;
+      // Normalize prices from cents (integer) to dollars for all ProductJs entries
+      return {
+        ...json,
+        products: json.products.map((p) => ({
+          ...p,
+          price: p.price / 100,
+          price_min: p.price_min / 100,
+          price_max: p.price_max / 100,
+          compare_at_price: p.compare_at_price !== null ? p.compare_at_price / 100 : null,
+          variants: p.variants.map((v) => ({
+            ...v,
+            price: v.price / 100,
+            compare_at_price: v.compare_at_price !== null ? v.compare_at_price / 100 : null,
+          })),
+        })),
+      };
     },
   });
 }
 
-/**
- * Hook to fetch store metadata (from /meta.json) which contains currency and locale info.
- */
 export function useStoreMeta(storeRoute: string, enabled = true) {
   const baseUrl = buildStoreOrigin(storeRoute);
   const metaUrl = `${baseUrl}/meta.json`;
@@ -194,14 +153,6 @@ export function useStoreMeta(storeRoute: string, enabled = true) {
       }
       const json = await response.json();
       return json as StoreMetaRoot;
-    },
-    onError: (error: unknown) => {
-      const message = error instanceof Error ? error.message : String(error);
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to load store metadata",
-        message,
-      });
     },
   });
 }

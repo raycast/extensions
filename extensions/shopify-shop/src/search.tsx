@@ -1,29 +1,30 @@
 import { useState } from "react";
-import { ActionPanel, Action, List, Color, Icon } from "@raycast/api";
-import { useLocalStorage } from "@raycast/utils";
+import { ActionPanel, Action, List, Color, Icon, getPreferenceValues } from "@raycast/api";
 import { useSearchSuggest, useStoreMeta } from "./services/hooks";
 import { DEFAULT_RESOURCE_TYPES } from "./constants/config";
 import ProductDetail from "./product-detail";
 import { buildStoreOrigin } from "./services/shopify-api";
 import { formatPrice, normalizeTags, stripHtml } from "./services/product-mapper";
 
+type Preferences = { storeUrl: string };
+
 export default function SearchCommand() {
   const [searchText, setSearchText] = useState("");
-  const { value: storeRoute } = useLocalStorage<string | null>("storeRoute", null);
+  const { storeUrl } = getPreferenceValues<Preferences>();
 
-  const storeMetaResp = useStoreMeta(storeRoute ?? "");
+  const storeMetaResp = useStoreMeta(storeUrl);
   const storeMeta = storeMetaResp.data ?? null;
   const storeCurrency = storeMeta?.currency ?? undefined;
 
   const { data, isLoading, error } = useSearchSuggest(
-    storeRoute ?? "",
+    storeUrl,
     searchText,
     DEFAULT_RESOURCE_TYPES,
     searchText.length >= 2,
     storeCurrency,
   );
 
-  const storeOrigin = buildStoreOrigin(storeRoute ?? undefined);
+  const storeOrigin = buildStoreOrigin(storeUrl);
   const products = data?.resources?.results?.products ?? [];
   const pages = data?.resources?.results?.pages ?? [];
   const collections = data?.resources?.results?.collections ?? [];
@@ -69,6 +70,7 @@ export default function SearchCommand() {
             const price = formatPrice(product.price, storeCurrency);
             const availability = product.available ? "Available" : "Out of Stock";
             const subtitle = [price, availability, product.vendor].filter(Boolean).join(" • ");
+            const tags = normalizeTags(product.tags ?? null);
 
             return (
               <List.Item
@@ -78,16 +80,14 @@ export default function SearchCommand() {
                 icon={{ source: product.featured_image?.url || Icon.Box, tintColor: Color.Blue }}
                 accessories={[
                   { tag: { value: product.type || "Product", color: Color.Blue } },
-                  ...(normalizeTags(product.tags ?? null).length > 0
-                    ? [{ tag: normalizeTags(product.tags ?? null)[0] }]
-                    : []),
+                  ...(tags.length > 0 ? [{ tag: tags[0] }] : []),
                 ]}
                 actions={
                   <ActionPanel>
                     <Action.Push
                       title="View Product Details"
                       icon={Icon.MagnifyingGlass}
-                      target={<ProductDetail handle={product.handle} baseUrl={storeRoute} />}
+                      target={<ProductDetail handle={product.handle} baseUrl={storeUrl} />}
                     />
                     <Action.OpenInBrowser url={`${storeOrigin}${product.url}`} />
                     <Action.CopyToClipboard content={product.handle} title="Copy Product Handle" />
@@ -103,8 +103,7 @@ export default function SearchCommand() {
       {pages.length > 0 && (
         <List.Section title="Pages" subtitle={`${pages.length} result${pages.length === 1 ? "" : "s"}`}>
           {pages.map((page) => {
-            const bodyText = stripHtml(page.body ?? "");
-            const bodyPreview = bodyText.substring(0, 100);
+            const bodyPreview = stripHtml(page.body ?? "").substring(0, 100);
 
             return (
               <List.Item
@@ -132,8 +131,7 @@ export default function SearchCommand() {
           subtitle={`${collections.length} result${collections.length === 1 ? "" : "s"}`}
         >
           {collections.map((collection) => {
-            const bodyText = stripHtml(collection.body ?? "");
-            const bodyPreview = bodyText.substring(0, 100);
+            const bodyPreview = stripHtml(collection.body ?? "").substring(0, 100);
 
             return (
               <List.Item
@@ -161,8 +159,7 @@ export default function SearchCommand() {
       {articles.length > 0 && (
         <List.Section title="Articles" subtitle={`${articles.length} result${articles.length === 1 ? "" : "s"}`}>
           {articles.map((article) => {
-            const bodyText = stripHtml(article.body ?? "");
-            const bodyPreview = bodyText.substring(0, 100);
+            const bodyPreview = stripHtml(article.body ?? "").substring(0, 100);
             const authorText = article.author ? ` • By ${article.author}` : "";
             const subtitle = `${bodyPreview}${authorText}`;
 
