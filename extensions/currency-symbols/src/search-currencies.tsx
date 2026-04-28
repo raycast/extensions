@@ -30,7 +30,7 @@ const currencies: Currency[] = [
   { symbol: "Ξ", name: "Ethereum", code: "ETH", country: "Cryptocurrency", keywords: ["ethereum", "eth", "crypto"] },
   { symbol: "R", name: "Rand", code: "ZAR", country: "South Africa", keywords: ["rand", "zar", "south africa"] },
   { symbol: "ksh", name: "Shilling", code: "KES", country: "Kenya", keywords: ["shilling", "kes", "kenya"] },
-  { symbol: "GH₵", name: "Cedi", code: "GHS", country: "Ghana", keywords: ["cedi", "ghs", "ghana"] },
+  { symbol: "GH₵", name: "Cedi", code: "GHS", country: "Ghana", keywords: ["cedi", "ghs", "ghana", "pesewa"] },
   { symbol: "Fr", name: "Franc", code: "CHF", country: "Switzerland", keywords: ["franc", "chf", "switzerland", "swiss"] },
   { symbol: "kr", name: "Krone", code: "SEK", country: "Sweden / Norway / Denmark", keywords: ["krone", "sek", "nok", "dkk", "sweden", "norway", "denmark", "scandinavian"] },
   { symbol: "zł", name: "Złoty", code: "PLN", country: "Poland", keywords: ["zloty", "pln", "poland"] },
@@ -76,7 +76,6 @@ const currencies: Currency[] = [
   { symbol: "₭", name: "Kip", code: "LAK", country: "Laos", keywords: ["kip", "lak", "laos"] },
   { symbol: "Rp", name: "Rupiah", code: "IDR", country: "Indonesia", keywords: ["rupiah", "idr", "indonesia"] },
   { symbol: "RM", name: "Ringgit", code: "MYR", country: "Malaysia", keywords: ["ringgit", "myr", "malaysia"] },
-  { symbol: "₵", name: "Pesewa", code: "GHS", country: "Ghana", keywords: ["pesewa", "cedis", "ghs", "ghana"] },
   { symbol: "F CFA", name: "Franc CFA (West Africa)", code: "XOF", country: "West Africa", keywords: ["franc", "cfa", "xof", "west africa", "senegal", "mali", "burkina"] },
   { symbol: "FCFA", name: "Franc CFA (Central Africa)", code: "XAF", country: "Central Africa", keywords: ["franc", "cfa", "xaf", "central africa", "cameroon", "gabon"] },
   { symbol: "Br", name: "Birr", code: "ETB", country: "Ethiopia", keywords: ["birr", "etb", "ethiopia"] },
@@ -93,7 +92,7 @@ export default function SearchCurrencies() {
       {currencies.map((currency, index) => (
         <List.Item
           key={`${currency.code}-${index}`}
-          icon={currency.symbol.length <= 2 ? { source: Icon.Circle } : { source: Icon.Circle }}
+          icon={Icon.Circle}
           title={`${currency.symbol}  —  ${currency.name}`}
           subtitle={`${currency.code} · ${currency.country}`}
           accessories={[{ text: currency.symbol }]}
