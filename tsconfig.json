@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2020"],
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "jsx": "react-jsx",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "baseUrl": ".",
+    "paths": {
+      "react": ["node_modules/@raycast/api/node_modules/@types/react"],
+      "react/jsx-runtime": [
+        "node_modules/@raycast/api/node_modules/@types/react/jsx-runtime"
+      ]
+    },
+    "typeRoots": [
+      "./node_modules/@types",
+      "./node_modules/@raycast/api/node_modules/@types"
+    ]
+  },
+  "include": ["src/**/*"]
+}
