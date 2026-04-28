@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 
 const BASE_URL = "https://api.unirateapi.com/api";
 

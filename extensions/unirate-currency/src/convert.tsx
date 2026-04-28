@@ -10,7 +10,6 @@ import {
   getDefaultDecimals,
 } from "./unirate";
 
-const TODAY = new Date();
 const HISTORICAL_FLOOR = new Date("1999-01-04");
 
 function formatNumber(value: number, decimals: number): string {
@@ -26,12 +25,13 @@ export default function Command() {
 
   const defaultBase = useMemo(() => getDefaultBase(), []);
   const decimals = useMemo(() => getDefaultDecimals(), []);
+  const today = useMemo(() => new Date(), []);
 
   const [from, setFrom] = useState(defaultBase);
   const [to, setTo] = useState(defaultBase === "EUR" ? "USD" : "EUR");
   const [amount, setAmount] = useState("1");
   const [useHistorical, setUseHistorical] = useState(false);
-  const [historicalDate, setHistoricalDate] = useState<Date | null>(TODAY);
+  const [historicalDate, setHistoricalDate] = useState<Date | null>(today);
 
   const [result, setResult] = useState<string | null>(null);
   const [resultDate, setResultDate] = useState<string | null>(null);
@@ -144,7 +144,7 @@ export default function Command() {
           value={historicalDate}
           onChange={(d) => setHistoricalDate(d)}
           min={HISTORICAL_FLOOR}
-          max={TODAY}
+          max={today}
         />
       ) : null}
       {result ? (
