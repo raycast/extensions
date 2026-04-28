@@ -14,9 +14,8 @@ export class LocalFilesDataStorage implements DataStorage {
         fs.mkdirSync(dirPath, { recursive: true });
       }
       fs.writeFileSync(filePath, data);
-    } catch (error) {
       if (isPathPermissionError(error)) {
-        showPathPermissionToast(dirPath);
+        showPathPermissionToast(filePath);
       }
       throw error;
     }
