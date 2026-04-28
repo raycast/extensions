@@ -61,7 +61,7 @@ export default function Command(props: Props) {
         } catch {
           await showToast({
             style: Toast.Style.Failure,
-            title: "Loaded website data",
+            title: "Could Not Save Snapshot",
             message: "The snapshot could not be stored in local history.",
           });
         }
