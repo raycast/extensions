@@ -11,10 +11,6 @@ const PRIORITIES = [
   { title: "Low", value: "low" },
 ];
 
-function shellArg(value: string): string {
-  return `'${value.replace(/'/g, "'\\''")}'`;
-}
-
 export default function Command() {
   const [titleError, setTitleError] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,11 +29,11 @@ export default function Command() {
       return;
     }
 
-    const args: string[] = ["task", "create", shellArg(title)];
+    const args: string[] = ["task", "create", title];
 
     const description = (values.description as string)?.trim();
     if (description) {
-      args.push("--description", shellArg(description));
+      args.push("--description", description);
     }
 
     const priority = values.priority as string;
@@ -52,12 +48,12 @@ export default function Command() {
         .map((l) => l.trim())
         .filter(Boolean)
         .join(",");
-      if (cleaned) args.push("--labels", shellArg(cleaned));
+      if (cleaned) args.push("--labels", cleaned);
     }
 
     const assignee = (values.assignee as string)?.trim();
     if (assignee) {
-      args.push("--assignee", shellArg(assignee));
+      args.push("--assignee", assignee);
     }
 
     if (values.isDraft) {
@@ -67,24 +63,24 @@ export default function Command() {
     // Parent task
     const parent = (values.parent as string)?.trim();
     if (parent) {
-      args.push("--parent", shellArg(parent));
+      args.push("--parent", parent);
     }
 
     // Dependencies
     const dependsOn = (values.dependsOn as string)?.trim();
     if (dependsOn) {
-      args.push("--depends-on", shellArg(dependsOn));
+      args.push("--depends-on", dependsOn);
     }
 
     // Notes
     const notes = (values.notes as string)?.trim();
     if (notes) {
-      args.push("--notes", shellArg(notes));
+      args.push("--notes", notes);
     }
 
     for (let i = 0; i < acItems.length; i++) {
       const val = (values[`ac-${i}`] as string)?.trim();
-      if (val) args.push("--ac", shellArg(val));
+      if (val) args.push("--ac", val);
     }
 
     if (values.noDodDefaults) {
@@ -92,22 +88,22 @@ export default function Command() {
     }
     for (let i = 0; i < dodItems.length; i++) {
       const val = (values[`dod-${i}`] as string)?.trim();
-      if (val) args.push("--dod", shellArg(val));
+      if (val) args.push("--dod", val);
     }
 
     for (let i = 0; i < refItems.length; i++) {
       const val = (values[`ref-${i}`] as string)?.trim();
-      if (val) args.push("--ref", shellArg(val));
+      if (val) args.push("--ref", val);
     }
 
     for (let i = 0; i < docItems.length; i++) {
       const val = (values[`doc-${i}`] as string)?.trim();
-      if (val) args.push("--doc", shellArg(val));
+      if (val) args.push("--doc", val);
     }
 
     const attachments = ((values.attachments as string[]) || []).filter((f) => existsSync(f));
     for (const file of attachments) {
-      args.push("--ref", shellArg(file));
+      args.push("--ref", file);
     }
 
     args.push("--plain");
