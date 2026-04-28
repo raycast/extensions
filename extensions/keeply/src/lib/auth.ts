@@ -46,9 +46,11 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
+      grant_type: "authorization_code",
       code,
-      codeVerifier: authRequest.codeVerifier,
-      clientId: "raycast",
+      code_verifier: authRequest.codeVerifier,
+      client_id: "raycast",
+      redirect_uri: authRequest.redirectURI,
     }),
   });
 
@@ -62,7 +64,7 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
     body: JSON.stringify({
       grant_type: "refresh_token",
       refresh_token: refreshToken,
-      clientId: "raycast",
+      client_id: "raycast",
     }),
   });
 
@@ -76,18 +78,24 @@ async function parseTokenResponse(res: Response): Promise<OAuth.TokenResponse> {
   }
 
   const data = (await res.json()) as {
-    accessToken: string;
+    accessToken?: string;
+    access_token?: string;
     expiresIn?: number;
     expires_in?: number;
     refreshToken?: string;
     refresh_token?: string;
   };
 
+  const accessToken = data.accessToken ?? data.access_token;
+  if (!accessToken) {
+    throw new Error("Authentication response missing access token");
+  }
+
   const expiresIn = data.expiresIn ?? data.expires_in;
   const refreshToken = data.refreshToken ?? data.refresh_token;
 
   return {
-    access_token: data.accessToken,
+    access_token: accessToken,
     ...(expiresIn != null ? { expires_in: expiresIn } : {}),
     ...(refreshToken != null ? { refresh_token: refreshToken } : {}),
   };

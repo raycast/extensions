@@ -7,14 +7,17 @@ export function toError(e: unknown): Error {
   return e instanceof Error ? e : new Error(String(e));
 }
 
-export function showApiError(error: Error) {
+export function showApiError(error: Error, retryFn?: () => void) {
   const isAuthError = error.message.includes("API key") || error.message.includes("scope");
   showToast({
     style: Toast.Style.Failure,
     title: error.message,
     primaryAction: isAuthError
       ? { title: "Open Preferences", onAction: openExtensionPreferences }
-      : { title: "Retry", onAction: () => showToast({ style: Toast.Style.Animated, title: "Retrying..." }) },
+      : {
+          title: "Retry",
+          onAction: () => (retryFn ? retryFn() : undefined),
+        },
   });
 }
 

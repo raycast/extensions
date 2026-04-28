@@ -42,11 +42,11 @@ export default function SearchBookmarks() {
     isLoading: allLoading,
     mutate,
   } = useCachedPromise(() => api.listBookmarks(), [], {
-    onError: (error) => showApiError(error),
+    onError: (error) => showApiError(error, () => mutate()),
   });
 
-  const { data: sidebar } = useCachedPromise(() => api.getSidebarData(), [], {
-    onError: (error) => showApiError(error),
+  const { data: sidebar, mutate: sidebarMutate } = useCachedPromise(() => api.getSidebarData(), [], {
+    onError: (error) => showApiError(error, () => sidebarMutate()),
   });
 
   const {
@@ -55,7 +55,7 @@ export default function SearchBookmarks() {
     mutate: searchMutate,
   } = useCachedPromise((query: string) => api.searchBookmarks(query), [searchText], {
     execute: isSearchMode,
-    onError: (error) => showApiError(error),
+    onError: (error) => showApiError(error, () => searchMutate()),
   });
 
   const isLoading = isSearchMode ? searchLoading : allLoading;
