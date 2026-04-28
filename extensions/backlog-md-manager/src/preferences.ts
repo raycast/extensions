@@ -3,10 +3,7 @@ import { useCachedState } from "@raycast/utils";
 import { basename, resolve } from "path";
 import { homedir } from "os";
 
-interface Preferences {
-  projectDirectories: string;
-  backlogPath: string;
-}
+// Use the auto-generated `Preferences` type from raycast-env.d.ts
 
 export interface ProjectConfig {
   backlogPath: string;

@@ -45,12 +45,16 @@ export default function EditTask({
 
     const priority = values.priority;
     if (priority !== task.priority) {
-      args.push("--priority", priority || "low");
+      if (priority) {
+        args.push("--priority", priority);
+      }
     }
 
     const assignee = values.assignee?.trim();
     if (assignee !== (task.assignee || "")) {
-      args.push("--assignee", assignee || "");
+      if (assignee) {
+        args.push("--assignee", assignee);
+      }
     }
 
     const labels = values.labels?.trim();
