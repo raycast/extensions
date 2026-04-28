@@ -1,11 +1,13 @@
 import { symbolCode, precipitationAmount } from "../../src/utils-forecast";
 import type { TimeseriesEntry } from "../../src/weather-client";
 
-function makeEntry(overrides: {
-  next_1_hours?: { symbol?: string; precip?: number };
-  next_6_hours?: { symbol?: string; precip?: number };
-  next_12_hours?: { symbol?: string; precip?: number };
-} = {}): TimeseriesEntry {
+function makeEntry(
+  overrides: {
+    next_1_hours?: { symbol?: string; precip?: number };
+    next_6_hours?: { symbol?: string; precip?: number };
+    next_12_hours?: { symbol?: string; precip?: number };
+  } = {},
+): TimeseriesEntry {
   return {
     time: "2026-03-06T12:00:00Z",
     data: {

@@ -22,18 +22,18 @@ For date-specific forecasts, graphs include context padding (last point before t
 
 ## Keyboard Shortcuts
 
-| Action | Shortcut |
-|---|---|
-| Open forecast | `Enter` |
-| Graph ↔ Data table | `D` / `G` |
-| 48-hour detailed forecast | `Cmd+4` |
-| 9-day summary forecast | `Cmd+9` |
-| Add favorite | `Cmd+F` |
-| Remove favorite | `Cmd+Shift+F` |
-| Move favorite up / down | `Cmd+Shift+↑` / `↓` |
-| Refresh & clear cache | `Cmd+R` |
-| Show welcome message | `Cmd+Shift+W` |
-| Hide welcome message | `Cmd+Shift+Alt+W` |
+| Action                    | Shortcut            |
+| ------------------------- | ------------------- |
+| Open forecast             | `Enter`             |
+| Graph ↔ Data table        | `D` / `G`           |
+| 48-hour detailed forecast | `Cmd+4`             |
+| 9-day summary forecast    | `Cmd+9`             |
+| Add favorite              | `Cmd+F`             |
+| Remove favorite           | `Cmd+Shift+F`       |
+| Move favorite up / down   | `Cmd+Shift+↑` / `↓` |
+| Refresh & clear cache     | `Cmd+R`             |
+| Show welcome message      | `Cmd+Shift+W`       |
+| Hide welcome message      | `Cmd+Shift+Alt+W`   |
 
 ## Preferences
 
@@ -41,11 +41,11 @@ Configure via `Yr` → `Cmd+K` → Configure Command. Options: units (metric/imp
 
 ## Data Sources, Caching & Privacy
 
-| Source | Used for |
-|---|---|
+| Source                                                                        | Used for           |
+| ----------------------------------------------------------------------------- | ------------------ |
 | [MET Locationforecast 2.0](https://developer.yr.no/doc/locationforecast/2.0/) | Weather & forecast |
-| [MET Sunrise 3.0](https://developer.yr.no/doc/sunrise/3.0/) | Sunrise/sunset |
-| [Nominatim](https://nominatim.org/) | Geocoding |
+| [MET Sunrise 3.0](https://developer.yr.no/doc/sunrise/3.0/)                   | Sunrise/sunset     |
+| [Nominatim](https://nominatim.org/)                                           | Geocoding          |
 
 All APIs are public — no keys required.
 

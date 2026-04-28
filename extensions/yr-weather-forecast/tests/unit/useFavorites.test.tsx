@@ -39,7 +39,10 @@ describe("useFavorites missing entry detection", () => {
     mockedGetFavorites.mockResolvedValueOnce([alpha, beta]).mockResolvedValueOnce([beta, alpha]);
 
     const neverResolvingWeather = new Promise<never>(() => undefined);
-    const weatherEntry = { time: "2026-03-07T00:00:00Z", data: { instant: { details: { air_temperature: 12 } } } } as never;
+    const weatherEntry = {
+      time: "2026-03-07T00:00:00Z",
+      data: { instant: { details: { air_temperature: 12 } } },
+    } as never;
 
     mockedGetWeather
       .mockImplementationOnce(() => neverResolvingWeather)

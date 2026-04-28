@@ -49,7 +49,9 @@ describe("getFavorites", () => {
   });
 
   it("normalizes malformed prefixed IDs to coordinate key during migration", async () => {
-    store["favorite-locations"] = JSON.stringify([{ id: "osm:not-number", name: "Legacy", lat: 59.9139, lon: 10.7522 }]);
+    store["favorite-locations"] = JSON.stringify([
+      { id: "osm:not-number", name: "Legacy", lat: 59.9139, lon: 10.7522 },
+    ]);
 
     const favorites = await getFavorites();
     expect(favorites).toHaveLength(1);

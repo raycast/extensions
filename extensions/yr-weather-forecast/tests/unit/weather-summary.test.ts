@@ -11,14 +11,11 @@ describe("formatSummary", () => {
     expect(formatSummary(baseSummary)).toBe("Cloudy");
   });
 
-  it.each(["low", "medium", "high"] as const)(
-    "includes %s precipitation chance text",
-    (precipitationChance) => {
-      expect(formatSummary({ ...baseSummary, precipitationChance })).toBe(
-        `Cloudy, with a ${precipitationChance} chance of precipitation`,
-      );
-    },
-  );
+  it.each(["low", "medium", "high"] as const)("includes %s precipitation chance text", (precipitationChance) => {
+    expect(formatSummary({ ...baseSummary, precipitationChance })).toBe(
+      `Cloudy, with a ${precipitationChance} chance of precipitation`,
+    );
+  });
 
   it("formats single-point temperature as around X°C", () => {
     expect(formatSummary({ ...baseSummary, temperature: { min: 12.2, max: 12.4 } })).toBe("Cloudy, around 12°C");

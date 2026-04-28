@@ -25,20 +25,17 @@ afterAll(() => {
 });
 
 describe("local date string helpers", () => {
-  test.each(["Europe/Oslo", "UTC", "America/New_York"])(
-    "round-trips local dates in %s",
-    (timeZone: string) => {
-      withTimezone(timeZone, () => {
-        const parsed = parseLocalDateString("2026-03-08");
-        expect(parsed.getFullYear()).toBe(2026);
-        expect(parsed.getMonth()).toBe(2);
-        expect(parsed.getDate()).toBe(8);
-        expect(parsed.getHours()).toBe(0);
-        expect(parsed.getMinutes()).toBe(0);
-        expect(toLocalDateString(parsed)).toBe("2026-03-08");
-      });
-    },
-  );
+  test.each(["Europe/Oslo", "UTC", "America/New_York"])("round-trips local dates in %s", (timeZone: string) => {
+    withTimezone(timeZone, () => {
+      const parsed = parseLocalDateString("2026-03-08");
+      expect(parsed.getFullYear()).toBe(2026);
+      expect(parsed.getMonth()).toBe(2);
+      expect(parsed.getDate()).toBe(8);
+      expect(parsed.getHours()).toBe(0);
+      expect(parsed.getMinutes()).toBe(0);
+      expect(toLocalDateString(parsed)).toBe("2026-03-08");
+    });
+  });
 
   test("avoids UTC date shift in UTC+ timezone", () => {
     withTimezone("Europe/Oslo", () => {
@@ -72,10 +69,7 @@ describe("getPeriodName", () => {
     [17, "Afternoon"],
     [18, "Evening"],
     [23, "Evening"],
-  ] as [number, "Night" | "Morning" | "Afternoon" | "Evening"][])(
-    "hour %i -> %s",
-    (hour, expected) => {
-      expect(getPeriodName(hour)).toBe(expected);
-    }
-  );
+  ] as [number, "Night" | "Morning" | "Afternoon" | "Evening"][])("hour %i -> %s", (hour, expected) => {
+    expect(getPeriodName(hour)).toBe(expected);
+  });
 });

@@ -112,7 +112,11 @@ describe("useSearch", () => {
       expect(result.current.locations).toEqual([bergenResult]);
       expect(result.current.searchError).toBeNull();
     });
-    expect(mockedSearchLocations).toHaveBeenNthCalledWith(1, "oslo", expect.objectContaining({ signal: expect.any(Object) }));
+    expect(mockedSearchLocations).toHaveBeenNthCalledWith(
+      1,
+      "oslo",
+      expect.objectContaining({ signal: expect.any(Object) }),
+    );
     expect(mockedSearchLocations).toHaveBeenNthCalledWith(
       2,
       "bergen",

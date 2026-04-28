@@ -31,12 +31,7 @@ export class LocationUtils {
         <Action.Push
           title="Open Forecast"
           target={
-            <LazyForecastView
-              location={location}
-              onShowWelcome={onShowWelcome}
-              targetDate={targetDate ? toLocalDateString(targetDate) : undefined}
-              onFavoriteChange={onFavoriteChange}
-            />
+            <LazyForecastView location={location} onShowWelcome={onShowWelcome} onFavoriteChange={onFavoriteChange} />
           }
         />
 
