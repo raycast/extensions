@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Form, openExtensionPreferences, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { KeeplyApi } from "./lib/api";
-import { isValidUrl } from "./lib/utils";
+import { KeeplyApi } from "./lib/api.js";
+import type { Folder, Tag } from "./lib/types.js";
+import { isValidUrl, NO_FOLDER, resolveOrCreateTag, showApiError, toError } from "./lib/utils.js";
 
 const api = new KeeplyApi();
 
@@ -19,16 +20,7 @@ export default function AddBookmark() {
   const { pop } = useNavigation();
 
   const { data: sidebar, isLoading } = useCachedPromise(() => api.getSidebarData(), [], {
-    onError: (error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: error.message,
-        primaryAction:
-          error.message.includes("API key") || error.message.includes("scope")
-            ? { title: "Open Preferences", onAction: openExtensionPreferences }
-            : undefined,
-      });
-    },
+    onError: (error) => showApiError(error),
   });
 
   async function handleSubmit(values: FormValues) {
@@ -44,23 +36,7 @@ export default function AddBookmark() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving bookmark..." });
 
     try {
-      let extraTagId: string | undefined;
-
-      if (values.newTagName.trim()) {
-        const normalizedName = values.newTagName.trim().toLowerCase();
-        try {
-          const newTag = await api.createTag(normalizedName);
-          extraTagId = newTag.id;
-        } catch (error) {
-          const msg = error instanceof Error ? error.message : "";
-          if (msg.includes("already exists") && sidebar) {
-            const existing = sidebar.tags.find((t) => t.name.toLowerCase() === normalizedName);
-            if (existing) extraTagId = existing.id;
-          } else {
-            throw error;
-          }
-        }
-      }
+      const extraTagId = await resolveOrCreateTag(values.newTagName, sidebar, (name: string) => api.createTag(name));
 
       const tagIds = extraTagId ? [...values.tagIds, extraTagId] : values.tagIds;
 
@@ -79,13 +55,13 @@ export default function AddBookmark() {
 
       pop();
     } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+      const err = toError(error);
       toast.style = Toast.Style.Failure;
       toast.title = err.message;
-      toast.primaryAction =
-        err.message.includes("API key") || err.message.includes("scope")
-          ? { title: "Open Preferences", onAction: openExtensionPreferences }
-          : undefined;
+      const isAuthError = err.message.includes("API key") || err.message.includes("scope");
+      if (isAuthError) {
+        toast.primaryAction = { title: "Open Preferences", onAction: openExtensionPreferences };
+      }
     }
   }
 
@@ -103,14 +79,14 @@ export default function AddBookmark() {
       <Form.TextField id="description" title="Description" placeholder="Short description (optional)" />
       <Form.TextArea id="note" title="Note" placeholder="Personal note (optional)" />
       <Form.Separator />
-      <Form.Dropdown id="folderId" title="Folder" defaultValue="">
-        <Form.Dropdown.Item title="No folder (Unsorted)" value="" />
-        {sidebar?.folders.map((f) => (
+      <Form.Dropdown id="folderId" title="Folder" defaultValue={NO_FOLDER}>
+        <Form.Dropdown.Item title="No folder (Unsorted)" value={NO_FOLDER} />
+        {sidebar?.folders.map((f: Folder) => (
           <Form.Dropdown.Item key={f.id} title={`${f.name} (${f._count?.bookmarks ?? 0})`} value={f.id} />
         ))}
       </Form.Dropdown>
       <Form.TagPicker id="tagIds" title="Tags" defaultValue={[]}>
-        {sidebar?.tags.map((t) => (
+        {sidebar?.tags.map((t: Tag) => (
           <Form.TagPicker.Item key={t.id} title={t.name} value={t.id} />
         ))}
       </Form.TagPicker>

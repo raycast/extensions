@@ -1,4 +1,22 @@
-import type { Bookmark } from "./types";
+import { openExtensionPreferences, showToast, Toast } from "@raycast/api";
+import type { Bookmark, Tag } from "./types.js";
+
+export const NO_FOLDER = "__none__";
+
+export function toError(e: unknown): Error {
+  return e instanceof Error ? e : new Error(String(e));
+}
+
+export function showApiError(error: Error) {
+  const isAuthError = error.message.includes("API key") || error.message.includes("scope");
+  showToast({
+    style: Toast.Style.Failure,
+    title: error.message,
+    primaryAction: isAuthError
+      ? { title: "Open Preferences", onAction: openExtensionPreferences }
+      : { title: "Retry", onAction: () => showToast({ style: Toast.Style.Animated, title: "Retrying..." }) },
+  });
+}
 
 export function getDomain(url: string): string {
   try {
@@ -28,9 +46,10 @@ export function formatRelativeDate(isoString: string): string {
 
 export function getTagNames(bookmark: Bookmark): string[] {
   if (!bookmark.tags) return [];
+  type TagRow = Bookmark["tags"][number];
   return bookmark.tags
-    .map((t) => t.tag?.name ?? (t as unknown as { name?: string }).name)
-    .filter((n): n is string => Boolean(n));
+    .map((t: TagRow) => t.tag?.name ?? (t as unknown as { name?: string }).name)
+    .filter((n: string | undefined): n is string => Boolean(n));
 }
 
 export function isValidUrl(input: string): boolean {
@@ -45,4 +64,25 @@ export function isValidUrl(input: string): boolean {
 export function formatMarkdownLink(bookmark: Bookmark): string {
   const title = bookmark.title || getDomain(bookmark.url);
   return `[${title}](${bookmark.url})`;
+}
+
+export async function resolveOrCreateTag(
+  tagName: string,
+  sidebar: { tags: Tag[] } | undefined,
+  createTag: (name: string) => Promise<Tag>,
+): Promise<string | undefined> {
+  const normalizedName = tagName.trim().toLowerCase();
+  if (!normalizedName) return undefined;
+
+  try {
+    const newTag = await createTag(normalizedName);
+    return newTag.id;
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : "";
+    if (msg.includes("already exists") && sidebar) {
+      const existing = sidebar.tags.find((t) => t.name.toLowerCase() === normalizedName);
+      if (existing) return existing.id;
+    }
+    throw error;
+  }
 }

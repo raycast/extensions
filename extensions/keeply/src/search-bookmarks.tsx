@@ -14,13 +14,21 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { KeeplyApi } from "./lib/api";
-import type { Bookmark, Folder, Tag, UpdateBookmarkPayload } from "./lib/types";
-import { formatMarkdownLink, formatRelativeDate, getDomain, getTagNames, isValidUrl } from "./lib/utils";
+import { KeeplyApi } from "./lib/api.js";
+import type { Bookmark, Folder, Tag, UpdateBookmarkPayload } from "./lib/types.js";
+import {
+  formatMarkdownLink,
+  formatRelativeDate,
+  getDomain,
+  getTagNames,
+  isValidUrl,
+  NO_FOLDER,
+  resolveOrCreateTag,
+  showApiError,
+  toError,
+} from "./lib/utils.js";
 
 const api = new KeeplyApi();
-
-const NO_FOLDER = "__none__";
 
 export default function SearchBookmarks() {
   const [searchText, setSearchText] = useState("");
@@ -34,10 +42,12 @@ export default function SearchBookmarks() {
     isLoading: allLoading,
     mutate,
   } = useCachedPromise(() => api.listBookmarks(), [], {
-    onError: (error) => handleApiError(error),
+    onError: (error) => showApiError(error),
   });
 
-  const { data: sidebar } = useCachedPromise(() => api.getSidebarData(), []);
+  const { data: sidebar } = useCachedPromise(() => api.getSidebarData(), [], {
+    onError: (error) => showApiError(error),
+  });
 
   const {
     data: searchResults = [],
@@ -45,31 +55,35 @@ export default function SearchBookmarks() {
     mutate: searchMutate,
   } = useCachedPromise((query: string) => api.searchBookmarks(query), [searchText], {
     execute: isSearchMode,
-    onError: (error) => handleApiError(error),
+    onError: (error) => showApiError(error),
   });
 
   const isLoading = isSearchMode ? searchLoading : allLoading;
 
-  const folderNameMap = useMemo(() => new Map(sidebar?.folders.map((f) => [f.id, f.name]) ?? []), [sidebar]);
+  const folderNameMap = useMemo(
+    () => new Map<string, string>(sidebar?.folders.map((f: Folder) => [f.id, f.name]) ?? []),
+    [sidebar],
+  );
 
   const displayedBookmarks = useMemo(() => {
     if (isSearchMode) return searchResults;
 
-    const active = allBookmarks.filter((b) => !b.deletedAt);
+    const active = allBookmarks.filter((b: Bookmark) => !b.deletedAt);
 
-    if (filterValue === "archived") return active.filter((b) => b.archived);
+    if (filterValue === "archived") return active.filter((b: Bookmark) => b.archived);
     if (filterValue.startsWith("folder:")) {
       const id = filterValue.slice(7);
-      return active.filter((b) => !b.archived && b.folderId === id);
+      return active.filter((b: Bookmark) => !b.archived && b.folderId === id);
     }
     if (filterValue.startsWith("tag:")) {
       const id = filterValue.slice(4);
-      return active.filter((b) => !b.archived && b.tags.some((t) => t.tag.id === id));
+      return active.filter(
+        (b: Bookmark) => !b.archived && b.tags.some((t: Bookmark["tags"][number]) => t.tag.id === id),
+      );
     }
-    return active.filter((b) => !b.archived);
+    return active.filter((b: Bookmark) => !b.archived);
   }, [allBookmarks, searchResults, filterValue, isSearchMode]);
 
-  // In the default "all" browse mode, group bookmarks by folder
   const sections = useMemo(() => {
     if (isSearchMode || filterValue !== "all") return null;
     const map = new Map<string, Bookmark[]>();
@@ -81,37 +95,24 @@ export default function SearchBookmarks() {
     return map;
   }, [displayedBookmarks, isSearchMode, filterValue]);
 
-  function toError(e: unknown): Error {
-    return e instanceof Error ? e : new Error(String(e));
-  }
-
-  function handleApiError(error: Error) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: error.message,
-      primaryAction:
-        error.message.includes("API key") || error.message.includes("scope")
-          ? { title: "Open Preferences", onAction: openExtensionPreferences }
-          : { title: "Retry", onAction: () => mutate() },
-    });
-  }
-
   async function handleArchive(bookmark: Bookmark) {
     const archived = !bookmark.archived;
     try {
       await Promise.all([
         mutate(api.updateBookmark(bookmark.id, { archived }), {
-          optimisticUpdate: (data) => data?.map((b) => (b.id === bookmark.id ? { ...b, archived } : b)),
+          optimisticUpdate: (data: Bookmark[] | undefined) =>
+            data?.map((b: Bookmark) => (b.id === bookmark.id ? { ...b, archived } : b)),
           rollbackOnError: true,
         }),
         searchMutate(undefined, {
-          optimisticUpdate: (data) => data?.map((b) => (b.id === bookmark.id ? { ...b, archived } : b)),
+          optimisticUpdate: (data: Bookmark[] | undefined) =>
+            data?.map((b: Bookmark) => (b.id === bookmark.id ? { ...b, archived } : b)),
           rollbackOnError: true,
         }),
       ]);
       await showToast({ style: Toast.Style.Success, title: archived ? "Archived" : "Unarchived" });
     } catch (error) {
-      handleApiError(toError(error));
+      showApiError(toError(error));
     }
   }
 
@@ -126,17 +127,17 @@ export default function SearchBookmarks() {
     try {
       await Promise.all([
         mutate(api.deleteBookmark(bookmark.id), {
-          optimisticUpdate: (data) => data?.filter((b) => b.id !== bookmark.id),
+          optimisticUpdate: (data: Bookmark[] | undefined) => data?.filter((b: Bookmark) => b.id !== bookmark.id),
           rollbackOnError: true,
         }),
         searchMutate(undefined, {
-          optimisticUpdate: (data) => data?.filter((b) => b.id !== bookmark.id),
+          optimisticUpdate: (data: Bookmark[] | undefined) => data?.filter((b: Bookmark) => b.id !== bookmark.id),
           rollbackOnError: true,
         }),
       ]);
       await showToast({ style: Toast.Style.Success, title: "Bookmark deleted" });
     } catch (error) {
-      handleApiError(toError(error));
+      showApiError(toError(error));
     }
   }
 
@@ -155,7 +156,7 @@ export default function SearchBookmarks() {
           isShowingDetail
             ? undefined
             : [
-                ...tagNames.slice(0, 2).map((t) => ({ tag: { value: t, color: Color.Blue } })),
+                ...tagNames.slice(0, 2).map((t: string) => ({ tag: { value: t, color: Color.Blue } })),
                 ...(bookmark.archived
                   ? [{ icon: { source: Icon.Tray, tintColor: Color.Yellow }, tooltip: "Archived" }]
                   : []),
@@ -173,7 +174,7 @@ export default function SearchBookmarks() {
                 {bookmark.note && <List.Item.Detail.Metadata.Label title="Note" text={bookmark.note} />}
                 {tagNames.length > 0 && (
                   <List.Item.Detail.Metadata.TagList title="Tags">
-                    {tagNames.map((t) => (
+                    {tagNames.map((t: string) => (
                       <List.Item.Detail.Metadata.TagList.Item key={t} text={t} color={Color.Blue} />
                     ))}
                   </List.Item.Detail.Metadata.TagList>
@@ -263,14 +264,14 @@ export default function SearchBookmarks() {
       <List.Dropdown.Item title="Archived" value="archived" />
       {sidebar && sidebar.folders.length > 0 && (
         <List.Dropdown.Section title="Folders">
-          {sidebar.folders.map((f) => (
+          {sidebar.folders.map((f: Folder) => (
             <List.Dropdown.Item key={f.id} title={`${f.name} (${f._count?.bookmarks ?? 0})`} value={`folder:${f.id}`} />
           ))}
         </List.Dropdown.Section>
       )}
       {sidebar && sidebar.tags.length > 0 && (
         <List.Dropdown.Section title="Tags">
-          {sidebar.tags.map((t) => (
+          {sidebar.tags.map((t: Tag) => (
             <List.Dropdown.Item key={t.id} title={`${t.name} (${t.count})`} value={`tag:${t.id}`} />
           ))}
         </List.Dropdown.Section>
@@ -306,10 +307,10 @@ export default function SearchBookmarks() {
       ) : sections ? (
         Array.from(sections.entries())
           .filter(([, items]) => items.length > 0)
-          .map(([key, items]) => (
+          .map(([sectionKey, items]: [string, Bookmark[]]) => (
             <List.Section
-              key={key}
-              title={key === NO_FOLDER ? "Unsorted" : (folderNameMap.get(key) ?? "Unknown Folder")}
+              key={sectionKey}
+              title={sectionKey === NO_FOLDER ? "Unsorted" : (folderNameMap.get(sectionKey) ?? "Unknown Folder")}
               subtitle={String(items.length)}
             >
               {items.map(bookmarkItem)}
@@ -321,8 +322,6 @@ export default function SearchBookmarks() {
     </List>
   );
 }
-
-// --- Edit Bookmark ---
 
 interface EditBookmarkViewProps {
   bookmark: Bookmark;
@@ -356,23 +355,7 @@ function EditBookmarkView({ bookmark, sidebar, onSave }: EditBookmarkViewProps) 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving changes..." });
 
     try {
-      let extraTagId: string | undefined;
-
-      if (values.newTagName.trim()) {
-        const normalizedName = values.newTagName.trim().toLowerCase();
-        try {
-          const newTag = await api.createTag(normalizedName);
-          extraTagId = newTag.id;
-        } catch (error) {
-          const msg = error instanceof Error ? error.message : "";
-          if (msg.includes("already exists") && sidebar) {
-            const existing = sidebar.tags.find((t) => t.name.toLowerCase() === normalizedName);
-            if (existing) extraTagId = existing.id;
-          } else {
-            throw error;
-          }
-        }
-      }
+      const extraTagId = await resolveOrCreateTag(values.newTagName, sidebar, (name: string) => api.createTag(name));
 
       const payload: UpdateBookmarkPayload = {
         url: values.url,
@@ -391,13 +374,13 @@ function EditBookmarkView({ bookmark, sidebar, onSave }: EditBookmarkViewProps) 
       onSave();
       pop();
     } catch (error) {
-      const err = error instanceof Error ? error : new Error(String(error));
+      const err = toError(error);
       toast.style = Toast.Style.Failure;
       toast.title = err.message;
-      toast.primaryAction =
-        err.message.includes("API key") || err.message.includes("scope")
-          ? { title: "Open Preferences", onAction: openExtensionPreferences }
-          : undefined;
+      const isAuthError = err.message.includes("API key") || err.message.includes("scope");
+      if (isAuthError) {
+        toast.primaryAction = { title: "Open Preferences", onAction: openExtensionPreferences };
+      }
     }
   }
 
@@ -422,12 +405,16 @@ function EditBookmarkView({ bookmark, sidebar, onSave }: EditBookmarkViewProps) 
       <Form.Separator />
       <Form.Dropdown id="folderId" title="Folder" defaultValue={bookmark.folderId ?? NO_FOLDER}>
         <Form.Dropdown.Item title="No folder (Unsorted)" value={NO_FOLDER} />
-        {sidebar?.folders.map((f) => (
+        {sidebar?.folders.map((f: Folder) => (
           <Form.Dropdown.Item key={f.id} title={f.name} value={f.id} />
         ))}
       </Form.Dropdown>
-      <Form.TagPicker id="tagIds" title="Tags" defaultValue={bookmark.tags.map((t) => t.tag.id)}>
-        {sidebar?.tags.map((t) => (
+      <Form.TagPicker
+        id="tagIds"
+        title="Tags"
+        defaultValue={bookmark.tags.map((t: Bookmark["tags"][number]) => t.tag.id)}
+      >
+        {sidebar?.tags.map((t: Tag) => (
           <Form.TagPicker.Item key={t.id} title={t.name} value={t.id} />
         ))}
       </Form.TagPicker>

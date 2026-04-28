@@ -1,4 +1,4 @@
-## [Initial Version] - {PR_MERGE_DATE}
+## Keeply - {PR_MERGE_DATE}
 
 ### Added
 

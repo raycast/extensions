@@ -1,5 +1,5 @@
-import { authorize } from "./auth";
-import type { Bookmark, CreateBookmarkPayload, Folder, SidebarData, Tag, UpdateBookmarkPayload } from "./types";
+import { authorize } from "./auth.js";
+import type { Bookmark, CreateBookmarkPayload, Folder, SidebarData, Tag, UpdateBookmarkPayload } from "./types.js";
 
 export class KeeplyApi {
   private readonly baseUrl = "https://api.keeply.tools";
@@ -28,10 +28,6 @@ export class KeeplyApi {
 
     if (res.status === 204) return undefined as T;
     return res.json() as Promise<T>;
-  }
-
-  async whoami(): Promise<{ email: string; name?: string; isPro: boolean }> {
-    return this.request("/users/me");
   }
 
   async listBookmarks(): Promise<Bookmark[]> {

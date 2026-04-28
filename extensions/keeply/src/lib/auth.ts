@@ -19,7 +19,8 @@ export async function authorize(): Promise<string> {
   const authRequest = await oauthClient.authorizationRequest({
     endpoint: `${APP_URL}/oauth/authorize`,
     clientId: "raycast",
-    scope: "",
+    scope:
+      "read_bookmarks create_bookmark update_bookmark delete_bookmark search_bookmarks read_folders read_tags write_tags",
     extraParameters: { code_challenge_method: "S256" },
   });
 
@@ -46,6 +47,20 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string
     throw new Error(body.message ?? `Authentication failed (${res.status})`);
   }
 
-  const data = (await res.json()) as { accessToken: string };
-  return { access_token: data.accessToken };
+  const data = (await res.json()) as {
+    accessToken: string;
+    expiresIn?: number;
+    expires_in?: number;
+    refreshToken?: string;
+    refresh_token?: string;
+  };
+
+  const expiresIn = data.expiresIn ?? data.expires_in;
+  const refreshToken = data.refreshToken ?? data.refresh_token;
+
+  return {
+    access_token: data.accessToken,
+    ...(expiresIn != null ? { expires_in: expiresIn } : {}),
+    ...(refreshToken != null ? { refresh_token: refreshToken } : {}),
+  };
 }

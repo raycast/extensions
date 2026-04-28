@@ -1,4 +1,4 @@
-# Keeply for Raycast
+# Keeply
 
 Search, browse, and manage your [Keeply](https://keeply.tools) bookmarks without leaving your keyboard.
 
@@ -9,22 +9,21 @@ Search, browse, and manage your [Keeply](https://keeply.tools) bookmarks without
 
 ## Setup
 
-1. Open the extension — Raycast will prompt for your API key
-2. Go to [app.keeply.tools/settings](https://app.keeply.tools/settings) → **Developer** → create a new API key
-3. Enable these scopes: `read_bookmarks`, `create_bookmark`, `update_bookmark`, `delete_bookmark`, `search_bookmarks`, `read_folders`, `read_tags`, `write_tags`
-4. Paste the key into Raycast preferences
+1. Open any Keeply command in Raycast
+2. You will be prompted to sign in with your Keeply account via OAuth
+3. Authorize the extension — no API key or manual configuration required
 
 ## Keyboard Shortcuts
 
-| Action | Shortcut |
-|---|---|
-| Open in browser | ↵ |
-| Copy URL | ⌘C |
-| Copy as Markdown link | ⌘⇧C |
-| Toggle detail panel | ⌘Y |
-| Edit bookmark | ⌘E |
-| Archive / Unarchive | ⌘⇧A |
-| Delete bookmark | ⌃X |
+| Action                | Shortcut |
+| --------------------- | -------- |
+| Open in browser       | ↵        |
+| Copy URL              | ⌘C       |
+| Copy as Markdown link | ⌘⇧C      |
+| Toggle detail panel   | ⌘Y       |
+| Edit bookmark         | ⌘E       |
+| Archive / Unarchive   | ⌘⇧A      |
+| Delete bookmark       | ⌃X       |
 
 ---
 
@@ -33,17 +32,19 @@ Search, browse, and manage your [Keeply](https://keeply.tools) bookmarks without
 ### Prerequisites
 
 - Node.js 18+
-- A Keeply account with an API key (see Setup above)
+- A Keeply account (sign-in uses the same OAuth flow as the published extension)
 
 ```bash
 npm install
-npm run dev    # ray develop
+npm run dev
 ```
+
+When you run a command locally, Raycast opens the browser to authorize the app with Keeply if you are not already signed in.
 
 ### Project structure
 
 ```
-keeply-raycast/
+keeply/
 ├── package.json              # Raycast manifest — commands, preferences, metadata
 ├── assets/
 │   └── keeply-icon.png       # 512×512 extension icon
@@ -53,16 +54,7 @@ keeply-raycast/
     ├── add-bookmark.tsx      # Add bookmark form
     └── lib/
         ├── api.ts            # KeeplyApi — public API calls only
+        ├── auth.ts           # OAuth PKCE authentication
         ├── types.ts          # Shared TypeScript types
         └── utils.ts          # getDomain, formatRelativeDate, etc.
-```
-
-### Linux (Vicinae)
-
-[Vicinae](https://github.com/vicinaehq/vicinae) is a Raycast-compatible launcher for Linux. Install `@vicinae/api` as a dev dependency to get the `vici` CLI:
-
-```bash
-npm install --save-dev @vicinae/api
-npm run dev:linux     # vici develop
-npm run build:linux   # vici build
 ```
