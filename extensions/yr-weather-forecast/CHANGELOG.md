@@ -1,6 +1,6 @@
 # Yr Weather Forecast Changelog
 
-## [Reliability, dark mode, and quality overhaul] - {PR_MERGE_DATE}
+## [Reliability, dark mode, and quality overhaul] - 2026-04-28
 
 - Add 12/24-hour clock format preference (defaults to 24h)
 - Add error boundaries for graceful crash recovery
