@@ -1,6 +1,6 @@
 import { useCachedPromise } from "@raycast/utils";
 import { scrapeDesigns } from "../utils/scrape";
-import { DesignSkill, getGithubUrl, getRawDesignMdUrl, getSiteUrl } from "../shared";
+import { DesignSkill, getRawDesignMdUrl, getSiteUrl } from "../shared";
 
 export function useDesigns() {
   return useCachedPromise(
@@ -14,7 +14,6 @@ export function useDesigns() {
             category: d.category,
             description: d.description,
             designMdUrl: getRawDesignMdUrl(d.slug),
-            githubUrl: getGithubUrl(d.slug),
             siteUrl: getSiteUrl(d.slug),
           }),
         )

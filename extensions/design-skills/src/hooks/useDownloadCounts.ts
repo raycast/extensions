@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { fetchDownloadCount } from "../utils/github";
+import { fetchDownloadCount } from "../utils/api";
 
 export function useDownloadCounts(slugs: string[]) {
   const key = slugs.join(",");
@@ -7,10 +7,14 @@ export function useDownloadCounts(slugs: string[]) {
     async (k: string): Promise<Record<string, number>> => {
       const list = k ? k.split(",") : [];
       if (list.length === 0) return {};
-      const results = await Promise.all(list.map(async (slug) => [slug, await fetchDownloadCount(slug)] as const));
       const counts: Record<string, number> = {};
-      for (const [slug, count] of results) {
-        if (count !== null) counts[slug] = count;
+      const BATCH_SIZE = 10;
+      for (let i = 0; i < list.length; i += BATCH_SIZE) {
+        const batch = list.slice(i, i + BATCH_SIZE);
+        const results = await Promise.all(batch.map(async (slug) => [slug, await fetchDownloadCount(slug)] as const));
+        for (const [slug, count] of results) {
+          if (count !== null) counts[slug] = count;
+        }
       }
       return counts;
     },

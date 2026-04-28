@@ -1,5 +1,34 @@
 import { Category, SITE_BASE_URL } from "../shared";
 
+const SITEMAP_URL = `${SITE_BASE_URL}/sitemap.xml`;
+const SITEMAP_SLUG_RE = /https:\/\/getdesign\.md\/([a-z0-9.-]+)\/design-md/g;
+const SLUG_BLOCKLIST = new Set(["getdesign.md"]);
+
+function titleCase(slug: string): string {
+  return slug
+    .split(/[-.]/)
+    .filter(Boolean)
+    .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+    .join(" ");
+}
+
+// Sitemap-based fallback: returns slugs only, with derived names and "Other" category.
+// Used when the bundle scrape fails (e.g. site changes break ENTRY_RE).
+async function fetchSitemapDesigns(): Promise<ScrapedDesign[]> {
+  const res = await fetch(SITEMAP_URL);
+  if (!res.ok) throw new Error(`Failed to load sitemap: ${res.status}`);
+  const xml = await res.text();
+  const seen = new Set<string>();
+  const designs: ScrapedDesign[] = [];
+  for (const match of xml.matchAll(SITEMAP_SLUG_RE)) {
+    const slug = match[1];
+    if (SLUG_BLOCKLIST.has(slug) || seen.has(slug)) continue;
+    seen.add(slug);
+    designs.push({ slug, name: titleCase(slug), description: "", category: "Other" });
+  }
+  return designs;
+}
+
 export type ScrapedDesign = {
   slug: string;
   name: string;
@@ -41,7 +70,7 @@ async function fetchMainBundleUrl(): Promise<string> {
   return SITE_BASE_URL + matches[0];
 }
 
-export async function scrapeDesigns(): Promise<ScrapedDesign[]> {
+async function scrapeBundle(): Promise<ScrapedDesign[]> {
   const bundleUrl = await fetchMainBundleUrl();
   const res = await fetch(bundleUrl);
   if (!res.ok) throw new Error(`Failed to load bundle: ${res.status}`);
@@ -49,7 +78,6 @@ export async function scrapeDesigns(): Promise<ScrapedDesign[]> {
 
   const seen = new Set<string>();
   const designs: ScrapedDesign[] = [];
-
   for (const match of js.matchAll(ENTRY_RE)) {
     const [, slug, rawName, rawDesc, rawCategory] = match;
     if (seen.has(slug)) continue;
@@ -61,10 +89,18 @@ export async function scrapeDesigns(): Promise<ScrapedDesign[]> {
       category: CATEGORY_DISPLAY[rawCategory] ?? "Other",
     });
   }
-
-  if (designs.length === 0) {
-    throw new Error("Bundle parsed but no design entries found");
-  }
-
   return designs;
+}
+
+// Try the bundle first (full metadata). If parsing fails or yields no entries,
+// fall back to the sitemap so the extension still lists every skill, just with
+// degraded info (slug-derived name, no description, "Other" category).
+export async function scrapeDesigns(): Promise<ScrapedDesign[]> {
+  try {
+    const designs = await scrapeBundle();
+    if (designs.length > 0) return designs;
+  } catch {
+    // fall through to sitemap fallback
+  }
+  return fetchSitemapDesigns();
 }

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Clipboard, Color, Icon, List, showHUD } from "@raycast/api";
 import { DesignSkill } from "../shared";
-import { fetchDesignMd } from "../utils/github";
+import { fetchDesignMd } from "../utils/api";
 import { formatDownloadCount } from "../utils/format";
 import { DesignDetail } from "./DesignDetail";
 
@@ -48,11 +48,11 @@ export function DesignListItem({ design, downloadCount, isFavorite, onToggleFavo
               icon={Icon.Clipboard}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
               onAction={async () => {
-                const content = await fetchDesignMd(design.slug);
-                if (content) {
+                try {
+                  const content = await fetchDesignMd(design.slug);
                   await Clipboard.copy(content);
                   await showHUD("DESIGN.md copied");
-                } else {
+                } catch {
                   await showHUD("Failed to fetch DESIGN.md");
                 }
               }}

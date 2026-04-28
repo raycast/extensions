@@ -37,12 +37,14 @@ export function DesignDetail({ design }: Props) {
         <ActionPanel>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy Install Command" icon={Icon.Terminal} content={installCommand} />
-            <Action.CopyToClipboard
-              title="Copy DESIGN.md Content"
-              icon={Icon.Clipboard}
-              content={data ?? ""}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-            />
+            {data ? (
+              <Action.CopyToClipboard
+                title="Copy DESIGN.md Content"
+                icon={Icon.Clipboard}
+                content={data}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              />
+            ) : null}
             <Action.CopyToClipboard
               title="Copy DESIGN.md URL"
               content={design.designMdUrl}
