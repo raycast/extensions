@@ -1,5 +1,5 @@
 import fs from "fs";
-import { mkdir, writeFile } from "fs/promises";
+import { mkdir } from "fs/promises";
 import os from "os";
 import path from "path";
 import { pipeline } from "stream/promises";
@@ -42,6 +42,42 @@ export function parseGitHubUrl(urlStr: string): ParsedUrl {
   return { owner, repo, type, ref, path: filePath };
 }
 
+async function writeResponseBodyToFile(
+  responseBody: ReadableStream<Uint8Array>,
+  filePath: string,
+  onChunk?: (value: Uint8Array) => void,
+) {
+  await new Promise<void>((resolve, reject) => {
+    const fileStream = fs.createWriteStream(filePath);
+    fileStream.on("finish", resolve);
+    fileStream.on("error", reject);
+
+    const reader = responseBody.getReader();
+
+    void (async () => {
+      try {
+        let isDone = false;
+        while (!isDone) {
+          const { done, value } = await reader.read();
+          isDone = done;
+
+          if (value) {
+            onChunk?.(value);
+            if (!fileStream.write(Buffer.from(value))) {
+              await new Promise<void>((resolveDrain) => fileStream.once("drain", resolveDrain));
+            }
+          }
+        }
+
+        fileStream.end();
+      } catch (error) {
+        fileStream.destroy();
+        reject(error);
+      }
+    })();
+  });
+}
+
 export async function downloadGitHubContent(
   url: string,
   destPath: string,
@@ -70,9 +106,8 @@ export async function downloadGitHubContent(
     }
     throw new Error(`GitHub API Error: ${repoCheck.statusText}`);
   }
-  const repoData = (await repoCheck.json()) as { default_branch: string; size: number };
+  const repoData = (await repoCheck.json()) as { default_branch: string };
   if (!ref) ref = repoData.default_branch || "main";
-  const repoSizeKB = repoData.size; // GitHub returns size in KB
 
   // 2. Handle Single File Download (Blob)
   if (type === "blob" && targetPath) {
@@ -90,17 +125,14 @@ export async function downloadGitHubContent(
       throw new Error(`Failed to download file: ${response.statusText}`);
     }
 
-    const buffer = await response.arrayBuffer();
-    await writeFile(finalDest, Buffer.from(buffer));
+    if (!response.body) throw new Error("Empty response body");
+    await writeResponseBodyToFile(response.body, finalDest);
 
     return finalDest;
   }
 
   // 3. Handle Directory/Root Download (Tree) via Zip
-  const repoSizeBytes = repoSizeKB * 1024;
-  const repoSizeMB = (repoSizeBytes / (1024 * 1024)).toFixed(1);
-  const sizeMsg = repoSizeBytes > 0 ? `~${repoSizeMB} MB` : "";
-  onProgress(`Downloading archive ${sizeMsg}...`);
+  onProgress("Downloading archive...");
 
   const zipUrl = `https://api.github.com/repos/${owner}/${repo}/zipball/${ref}`;
   const tempDir = os.tmpdir();
@@ -115,43 +147,21 @@ export async function downloadGitHubContent(
 
     if (!response.body) throw new Error("Empty response body");
     const responseBody = response.body;
+    const archiveSizeBytes = Number(response.headers.get("content-length")) || undefined;
+    const archiveSizeMB = archiveSizeBytes ? (archiveSizeBytes / (1024 * 1024)).toFixed(1) : undefined;
 
     let downloadedBytes = 0;
-    await new Promise<void>((resolve, reject) => {
-      const fileStream = fs.createWriteStream(tempFile);
-      fileStream.on("finish", resolve);
-      fileStream.on("error", reject);
+    await writeResponseBodyToFile(responseBody, tempFile, (value) => {
+      downloadedBytes += value.length;
+      const downloadedMB = (downloadedBytes / (1024 * 1024)).toFixed(1);
 
-      const reader = responseBody.getReader();
-      let isDone = false;
+      let progressMsg = `Downloading... ${downloadedMB} MB`;
+      if (archiveSizeBytes && archiveSizeMB) {
+        const percent = Math.min(Math.round((downloadedBytes / archiveSizeBytes) * 100), 100);
+        progressMsg += ` / ${archiveSizeMB} MB (${percent}%)`;
+      }
 
-      void (async () => {
-        try {
-          while (!isDone) {
-            const { done, value } = await reader.read();
-            isDone = done;
-
-            if (value) {
-              downloadedBytes += value.length;
-              const downloadedMB = (downloadedBytes / (1024 * 1024)).toFixed(1);
-
-              let progressMsg = `Downloading... ${downloadedMB} MB`;
-              if (repoSizeBytes > 0) {
-                const percent = Math.min(Math.round((downloadedBytes / repoSizeBytes) * 100), 100);
-                progressMsg += ` / ${repoSizeMB} MB (${percent}%)`;
-              }
-
-              onProgress(progressMsg);
-              fileStream.write(Buffer.from(value));
-            }
-          }
-
-          fileStream.end();
-        } catch (error) {
-          fileStream.destroy();
-          reject(error);
-        }
-      })();
+      onProgress(progressMsg);
     });
 
     // 4. Extract
