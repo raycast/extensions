@@ -12,6 +12,7 @@ import {
   Form,
   useNavigation,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { useEffect, useRef, useState } from "react";
@@ -90,6 +91,18 @@ function TwoFAForm({
   onSubmit: (code: string) => void;
 }) {
   const { pop } = useNavigation();
+  const [codeError, setCodeError] = useState<string | undefined>();
+
+  function handleCodeChange(value: string) {
+    if (value.length === 0) {
+      setCodeError("PIN code is required");
+    } else if (!/^\d+$/.test(value.trim())) {
+      setCodeError("PIN must contain only digits");
+    } else {
+      setCodeError(undefined);
+    }
+  }
+
   return (
     <Form
       navigationTitle={`Connect ${profile.name}`}
@@ -99,15 +112,27 @@ function TwoFAForm({
             title="Connect"
             icon={Icon.Play}
             onSubmit={(values: { code: string }) => {
+              const trimmed = values.code.trim();
+              if (!trimmed || !/^\d+$/.test(trimmed)) {
+                setCodeError("Enter a valid numeric PIN code");
+                return;
+              }
               pop();
-              onSubmit(values.code.trim());
+              onSubmit(trimmed);
             }}
           />
         </ActionPanel>
       }
     >
       <Form.Description text={`Profile: ${profile.name} · Mode: ${protocol.toUpperCase()}`} />
-      <Form.TextField id="code" title="PIN Code" placeholder="Enter your PIN / TOTP code" autoFocus />
+      <Form.TextField
+        id="code"
+        title="PIN Code"
+        placeholder="Enter your PIN / TOTP code"
+        autoFocus
+        error={codeError}
+        onChange={handleCodeChange}
+      />
     </Form>
   );
 }
@@ -124,12 +149,20 @@ export default function Command() {
   const { push } = useNavigation();
 
   useEffect(() => {
-    LocalStorage.getItem<string>("profileProtocols").then((raw) => {
-      if (raw) setSavedProtocols(JSON.parse(raw));
-    });
-    LocalStorage.getItem<string>("profilePIN").then((raw) => {
-      if (raw) setSavedPIN(JSON.parse(raw));
-    });
+    (async () => {
+      try {
+        const raw = await LocalStorage.getItem<string>("profileProtocols");
+        if (raw) setSavedProtocols(JSON.parse(raw));
+      } catch {
+        await LocalStorage.removeItem("profileProtocols");
+      }
+      try {
+        const raw = await LocalStorage.getItem<string>("profilePIN");
+        if (raw) setSavedPIN(JSON.parse(raw));
+      } catch {
+        await LocalStorage.removeItem("profilePIN");
+      }
+    })();
   }, []);
 
   async function saveProtocol(profileId: string, protocol: "ovpn" | "wg") {
@@ -190,10 +223,8 @@ export default function Command() {
               /* ignore */
             }
             await pending.toast.hide();
-            await showToast({
-              style: Toast.Style.Failure,
+            await showFailureToast(new Error(`timed out (mode: ${pending.protocol.toUpperCase()})`), {
               title: `Connecting to ${profile.name} failed`,
-              message: `timed out (mode: ${pending.protocol.toUpperCase()})`,
             });
             pendingRef.current.delete(profileId);
           } else if (elapsed > 5) {
@@ -211,11 +242,7 @@ export default function Command() {
           intervalRef.current = null;
         }
       } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load profiles",
-          message: String(err),
-        });
+        await showFailureToast(err, { title: "Failed to load profiles" });
       }
     } finally {
       if (initial) setIsLoading(false);
@@ -232,7 +259,7 @@ export default function Command() {
       } finally {
         isPollingRef.current = false;
       }
-    }, 1000);
+    }, 3000);
     return () => {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
@@ -253,9 +280,8 @@ export default function Command() {
       toast.message = profile.name;
       await loadProfiles();
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Command failed";
-      toast.message = String(err);
+      await toast.hide();
+      await showFailureToast(err, { title: "Command failed" });
     }
   }
 
@@ -289,9 +315,8 @@ export default function Command() {
         toast.title = "Disconnected";
       }
     } catch (err) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Command failed";
-      toast.message = String(err);
+      await toast.hide();
+      await showFailureToast(err, { title: "Command failed" });
     }
   }
 

@@ -14,7 +14,7 @@ To set profile as a System Profile:
 2. select relevant profile
 3. press **Settings**
 4. enable **System Profile**
-4. *optionally disable Autostart*
+5. _optionally disable Autostart_
 
 ![](./media/system-profile.png)
 
