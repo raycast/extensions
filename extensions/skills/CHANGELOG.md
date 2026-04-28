@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Add Skills CLI Telemetry Opt-Out] - {PR_MERGE_DATE}
+## [Add Skills CLI Telemetry Opt-Out] - 2026-04-28
 
 - Add an extension preference to opt out of anonymous usage telemetry collected by the underlying Skills CLI when commands are run from Raycast
 - Pass `DISABLE_TELEMETRY=1` to all Skills CLI invocations when the preference is enabled
