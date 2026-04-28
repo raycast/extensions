@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Download Repository Command] - {PR_MERGE_DATE}
+## [Download Repository Command] - 2026-04-28
 
 - Added "Download Repository" command to download an entire repository, a specific sub-directory, or a single file from a GitHub URL.
 - Reuses existing GitHub authentication for private repository access.
