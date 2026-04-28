@@ -44,10 +44,10 @@ export default function EditTask({
     }
 
     const priority = values.priority;
-    if (priority !== task.priority) {
-      if (priority) {
-        args.push("--priority", priority);
-      }
+    const wantsPriorityClear =
+      priority !== task.priority && !priority && Boolean(task.priority?.trim());
+    if (priority !== task.priority && priority) {
+      args.push("--priority", priority);
     }
 
     const assignee = values.assignee?.trim();
@@ -81,7 +81,15 @@ export default function EditTask({
 
     // Only submit if there are actual changes
     if (args.length <= 3) {
-      showToast({ style: Toast.Style.Success, title: "No changes to save" });
+      if (wantsPriorityClear) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cannot clear priority",
+          message: "The backlog CLI cannot remove priority. Set a level or edit the task markdown file.",
+        });
+      } else {
+        await showToast({ style: Toast.Style.Success, title: "No changes to save" });
+      }
       setIsSubmitting(false);
       return;
     }
@@ -91,7 +99,13 @@ export default function EditTask({
     try {
       await showToast({ style: Toast.Style.Animated, title: "Updating task..." });
       await runBacklog(args, projectDir);
-      await showToast({ style: Toast.Style.Success, title: "Task updated", message: task.id });
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Task updated",
+        message: wantsPriorityClear
+          ? `${task.id} — other changes saved; priority could not be cleared (CLI limitation).`
+          : task.id,
+      });
       onComplete?.();
       pop();
     } catch (error) {
