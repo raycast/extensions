@@ -1,8 +1,9 @@
 # Currency Symbols Changelog
 
-## [1.0.0] - 2026-04-28
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
-- Initial release
-- Search 70+ world currencies by name, country, code, or symbol
-- Copy symbol, code, or both to clipboard
+
+- Search 70+ world currencies by name, country, ISO code, or symbol
+- Copy symbol only, ISO code only, or both to clipboard
+- Covers Africa, Middle East, Asia, Americas, Europe, and Cryptocurrency
