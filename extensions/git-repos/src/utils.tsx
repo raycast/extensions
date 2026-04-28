@@ -230,35 +230,54 @@ function findSubmodules(repoPath: string): string[] {
   }
 }
 
-function findGitEntries(dir: string, maxDepth: number, currentDepth = 0): { gitDirs: string[]; gitFiles: string[] } {
+async function statLink(fullPath: string, entry: fs.Dirent): Promise<fs.Stats | null> {
+  if (!entry.isSymbolicLink()) {
+    return null;
+  }
+
+  try {
+    return await fs.promises.stat(fullPath);
+  } catch {
+    return null;
+  }
+}
+
+async function findGitEntries(
+  dir: string,
+  maxDepth: number,
+  currentDepth = 0,
+): Promise<{ gitDirs: string[]; gitFiles: string[] }> {
   const gitDirs: string[] = [];
   const gitFiles: string[] = [];
 
   let entries: fs.Dirent[];
   try {
-    entries = fs.readdirSync(dir, { withFileTypes: true });
+    entries = await fs.promises.readdir(dir, { withFileTypes: true });
   } catch {
     return { gitDirs, gitFiles };
   }
 
-  for (const entry of entries) {
-    if (entry.name === ".git") {
+  await Promise.all(
+    entries.map(async (entry) => {
       const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        gitDirs.push(fullPath);
-      } else if (entry.isFile()) {
-        gitFiles.push(fullPath);
-      }
-      // Don't recurse into .git
-      continue;
-    }
+      const stat = await statLink(fullPath, entry);
 
-    if (currentDepth < maxDepth && entry.isDirectory()) {
-      const sub = findGitEntries(path.join(dir, entry.name), maxDepth, currentDepth + 1);
-      gitDirs.push(...sub.gitDirs);
-      gitFiles.push(...sub.gitFiles);
-    }
-  }
+      if (entry.name === ".git") {
+        if (entry.isDirectory() || stat?.isDirectory()) {
+          gitDirs.push(fullPath);
+        } else if (entry.isFile() || stat?.isFile()) {
+          gitFiles.push(fullPath);
+        }
+        return;
+      }
+
+      if (currentDepth < maxDepth && (entry.isDirectory() || stat?.isDirectory())) {
+        const sub = await findGitEntries(fullPath, maxDepth, currentDepth + 1);
+        gitDirs.push(...sub.gitDirs);
+        gitFiles.push(...sub.gitFiles);
+      }
+    }),
+  );
 
   return { gitDirs, gitFiles };
 }
@@ -267,7 +286,7 @@ export async function findRepos(paths: string[], maxDepth: number, includeSubmod
   let foundRepos: GitRepo[] = [];
   await Promise.allSettled(
     paths.map(async (scanPath) => {
-      const { gitDirs, gitFiles } = findGitEntries(scanPath, maxDepth);
+      const { gitDirs, gitFiles } = await findGitEntries(scanPath, maxDepth);
 
       const repos = parseRepoPaths(scanPath, gitDirs, false);
       const worktrees = parseRepoPaths(scanPath, gitFiles, false).map((repo) => ({
