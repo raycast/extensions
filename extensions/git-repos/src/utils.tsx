@@ -3,7 +3,6 @@ import { getPreferenceValues, showToast, LocalStorage, Toast } from "@raycast/ap
 import { homedir, platform } from "os";
 import path from "path";
 import fs from "fs";
-import { glob, Path } from "glob";
 import parseGitConfig from "parse-git-config";
 import parseGithubURL from "parse-github-url";
 import getDefaultBrowser from "default-browser";
@@ -231,19 +230,44 @@ function findSubmodules(repoPath: string): string[] {
   }
 }
 
+function findGitEntries(dir: string, maxDepth: number, currentDepth = 0): { gitDirs: string[]; gitFiles: string[] } {
+  const gitDirs: string[] = [];
+  const gitFiles: string[] = [];
+
+  let entries: fs.Dirent[];
+  try {
+    entries = fs.readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return { gitDirs, gitFiles };
+  }
+
+  for (const entry of entries) {
+    if (entry.name === ".git") {
+      const fullPath = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        gitDirs.push(fullPath);
+      } else if (entry.isFile()) {
+        gitFiles.push(fullPath);
+      }
+      // Don't recurse into .git
+      continue;
+    }
+
+    if (currentDepth < maxDepth && entry.isDirectory()) {
+      const sub = findGitEntries(path.join(dir, entry.name), maxDepth, currentDepth + 1);
+      gitDirs.push(...sub.gitDirs);
+      gitFiles.push(...sub.gitFiles);
+    }
+  }
+
+  return { gitDirs, gitFiles };
+}
+
 export async function findRepos(paths: string[], maxDepth: number, includeSubmodules: boolean): Promise<GitRepo[]> {
   let foundRepos: GitRepo[] = [];
   await Promise.allSettled(
     paths.map(async (scanPath) => {
-      const gitEntries = (await glob("**/.git", {
-        cwd: scanPath,
-        maxDepth,
-        follow: true,
-        withFileTypes: true,
-        dot: true,
-      })) as Path[];
-      const gitDirs = gitEntries.filter((p) => p.isDirectory()).map((p) => p.fullpath());
-      const gitFiles = gitEntries.filter((p) => p.isFile()).map((p) => p.fullpath());
+      const { gitDirs, gitFiles } = findGitEntries(scanPath, maxDepth);
 
       const repos = parseRepoPaths(scanPath, gitDirs, false);
       const worktrees = parseRepoPaths(scanPath, gitFiles, false).map((repo) => ({
