@@ -1,6 +1,6 @@
 # Kommand Changelog
 
-## [Search shortcuts by app and category] - {PR_MERGE_DATE}
+## [Search shortcuts by app and category] - 2026-04-28
 
 - Search shortcuts by app name
 - Search shortcuts by category name
