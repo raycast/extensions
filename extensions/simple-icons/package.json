@@ -145,14 +145,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.8",
+    "@raycast/api": "^1.104.11",
     "@raycast/utils": "^2.2.3",
     "array-shuffle": "^4.1.0",
     "date-fns": "^4.1.0",
     "fast-fuzzy": "^1.12.0",
-    "got": "^14.6.6",
-    "lodash": "^4.17.23",
-    "pacote": "^21.4.0",
+    "got": "^15.0.0",
+    "lodash": "^4.18.1",
+    "pacote": "^21.5.0",
     "raycast-cross-extension": "^0.2.3",
     "semver": "^7.7.4"
   },

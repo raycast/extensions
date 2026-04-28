@@ -42,7 +42,9 @@
     "brndnly",
     "oscmarb",
     "emergerrrd",
-    "ryo."
+    "ryo.",
+    "Undolog",
+    "wonbywondev"
   ],
   "pastContributors": [
     "Lemon",
@@ -365,6 +367,54 @@
           "required": false,
           "label": "Recently Closed",
           "default": false
+        }
+      ]
+    },
+    {
+      "name": "my-stats-menu",
+      "title": "My GitHub Stats Menu Bar",
+      "description": "Display your GitHub profile stats (followers, stars received, PRs, issues, commits) in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1h",
+      "preferences": [
+        {
+          "name": "useAvatarAsIcon",
+          "description": "Show your GitHub avatar as the menu bar icon instead of the GitHub logo",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Avatar",
+          "title": "Menu Bar Icon"
+        },
+        {
+          "name": "titleMetric",
+          "description": "The metric shown next to the menu bar icon",
+          "type": "dropdown",
+          "required": false,
+          "default": "followers",
+          "title": "Menu Bar Title",
+          "data": [
+            {
+              "title": "Followers",
+              "value": "followers"
+            },
+            {
+              "title": "Stars Received",
+              "value": "stars"
+            },
+            {
+              "title": "Open PRs",
+              "value": "prsOpen"
+            },
+            {
+              "title": "Open Issues",
+              "value": "issuesOpen"
+            },
+            {
+              "title": "Icon Only",
+              "value": "none"
+            }
+          ]
         }
       ]
     },

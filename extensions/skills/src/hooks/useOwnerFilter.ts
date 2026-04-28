@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { type Skill, getOwner } from "../shared";
 
-export function buildOwnerCounts(allSkills: Skill[]) {
+function buildOwnerCounts(allSkills: Skill[]) {
   const counts = new Map<string, number>();
   for (const skill of allSkills) {
     const owner = getOwner(skill);
@@ -11,11 +11,11 @@ export function buildOwnerCounts(allSkills: Skill[]) {
   return new Map([...counts.entries()].sort(([a], [b]) => a.localeCompare(b)));
 }
 
-export function filterSkillsByOwner(allSkills: Skill[], owner: string) {
+function filterSkillsByOwner(allSkills: Skill[], owner: string) {
   return owner === "all" ? allSkills : allSkills.filter((skill) => getOwner(skill) === owner);
 }
 
-export function resolveOwnerSelection(owner: string, ownerCounts: Map<string, number>) {
+function resolveOwnerSelection(owner: string, ownerCounts: Map<string, number>) {
   return owner !== "all" && !ownerCounts.has(owner) ? "all" : owner;
 }
 

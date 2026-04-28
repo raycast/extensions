@@ -28,7 +28,6 @@ import { myPreferences, preferredLanguage1, preferredLanguage2 } from "./prefere
 import ReleaseNotesPage from "./releaseVersion/releaseNotePage";
 import { Easydict } from "./releaseVersion/versionInfo";
 import { openInEudic } from "./scripts";
-import { getVolcanoWebTranslateURL } from "./translation/volcano/volcanoAPI";
 import {
   ActionListPanelProps,
   DictionaryType,
@@ -453,10 +452,6 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
     }
     case TranslationType.Baidu: {
       webUrl = getBaiduWebTranslateURL(wordInfo);
-      break;
-    }
-    case TranslationType.Volcano: {
-      webUrl = getVolcanoWebTranslateURL(wordInfo);
       break;
     }
     case DictionaryType.Linguee: {

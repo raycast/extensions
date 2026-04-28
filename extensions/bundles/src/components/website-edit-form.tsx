@@ -3,7 +3,7 @@ import { useForm, FormValidation } from "@raycast/utils";
 import React from "react";
 import { Folder, FolderItem } from "../types";
 import { updateFolder } from "../storage";
-import { isValidUrl, normalizeUrl } from "../favicon";
+import { isValidUrl, normalizeUrl } from "../url";
 
 interface WebsiteEditFormProps {
   folder: Folder;
