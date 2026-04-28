@@ -1,14 +1,21 @@
 {
-  "extends": "../../tsconfig.base.json",
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Raycast Extension",
   "compilerOptions": {
+    "target": "ES2022",
     "lib": ["ES2023"],
     "module": "Node16",
     "moduleResolution": "Node16",
     "jsx": "react-jsx",
     "rootDir": "./src",
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true
   },
   "include": ["src/**/*"]
 }
