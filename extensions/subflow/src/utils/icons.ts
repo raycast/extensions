@@ -53,7 +53,7 @@ async function loadSvglIndex(): Promise<SvglEntry[]> {
       });
   }
 
-  return inflightFetch;
+  return inflightFetch!;
 }
 
 const memoryCache = new Map<string, Image.ImageLike | undefined>();
@@ -63,7 +63,7 @@ async function fetchSvgAsDataUri(url: string): Promise<string | undefined> {
     const res = await fetch(url);
     if (!res.ok) return undefined;
     const svg = await res.text();
-    const base64 = Buffer.from(svg).toString("base64");
+    const base64 = btoa(unescape(encodeURIComponent(svg)));
     return `data:image/svg+xml;base64,${base64}`;
   } catch {
     return undefined;

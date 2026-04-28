@@ -4,7 +4,7 @@ import { useSubscriptions } from "./hooks/useSubscriptions";
 import { formatAmount, formatDate, getSubscriptionsForMonth, monthValueToLabel, stepMonth } from "./utils/date";
 import { getServiceIcon } from "./utils/icons";
 import { Subscription } from "./utils/graphql";
-import { SUBFLOW_URL } from "./utils/constants";
+import { SUBFLOW_URL, SUBFLOW_API_KEY_URL } from "./utils/constants";
 
 interface ListItem {
   subscription: Subscription;
@@ -120,6 +120,7 @@ export default function ViewSubscription() {
           actions={
             <ActionPanel>
               <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser title="Get API Key" url={SUBFLOW_API_KEY_URL} />
             </ActionPanel>
           }
         />

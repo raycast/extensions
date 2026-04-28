@@ -2,10 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 
 const API_URL = "https://api.subflow.ing";
 
-interface Preferences {
-  apiKey: string;
-}
-
 export interface StartDate {
   year: number;
   month: number;

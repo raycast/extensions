@@ -4,7 +4,7 @@ import { useSubscriptions } from "./hooks/useSubscriptions";
 import { getSubscriptionsForMonth, formatAmount, formatDate } from "./utils/date";
 import { getServiceIcon } from "./utils/icons";
 import { Subscription } from "./utils/graphql";
-import { SUBFLOW_URL } from "./utils/constants";
+import { SUBFLOW_URL, SUBFLOW_API_KEY_URL } from "./utils/constants";
 
 interface MenuItem {
   subscription: Subscription;
@@ -89,6 +89,7 @@ export default function MenuBar() {
       <MenuBarExtra icon={{ source: "extension-icon.png" }} title="⚠ Subflow" tooltip={error.message}>
         <MenuBarExtra.Item title={error.message} />
         <MenuBarExtra.Item title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        <MenuBarExtra.Item title="Get API Key" icon={Icon.Key} onAction={() => open(SUBFLOW_API_KEY_URL)} />
       </MenuBarExtra>
     );
   }
