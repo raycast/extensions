@@ -19,12 +19,8 @@ import {
 import { normalizeSiteUrlInput } from "./lib/url-validation";
 import { DS_BASE_URL } from "./config";
 
-interface StartArguments {
-  url?: string;
-}
-
 export default async function start(
-  props: LaunchProps<{ arguments: StartArguments }>,
+  props: LaunchProps<{ arguments: Arguments.Start }>,
 ) {
   let url = props.arguments.url?.trim() || "";
   let browserTabLookupFailed = false;
@@ -34,7 +30,7 @@ export default async function start(
     try {
       const tabs = await BrowserExtension.getTabs();
       const activeTab = tabs.find((t) => t.active);
-      if (activeTab?.url && activeTab.url.startsWith("http")) {
+      if (activeTab?.url && activeTab.url.startsWith("https://")) {
         url = activeTab.url;
       }
     } catch {

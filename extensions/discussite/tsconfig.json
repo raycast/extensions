@@ -17,5 +17,5 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }
