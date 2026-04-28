@@ -1,6 +1,6 @@
 # Google Meet Changelog
 
-## [New Command & Bug Fix] - {PR_MERGE_DATE}
+## [New Command & Bug Fix] - 2026-04-28
 
 - Add "Create Meet and Refocus with Specified Profile" command — creates a meeting using a selected profile, copies the link, and refocuses the previous app
 - A refocus failure (e.g. the keystroke can't be sent) no longer reports a clipboard failure when the link was already copied. Also aligned the profile-list failure toast with the one used by the refocus command for consistency.
