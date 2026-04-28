@@ -53,7 +53,9 @@ export default async function start(
 
   const normalized = normalizeSiteUrlInput(url);
   if (!normalized.ok) {
-    await showHUD(normalized.error);
+    await showHUD(
+      "error" in normalized ? normalized.error : "That URL is invalid.",
+    );
     return;
   }
 
