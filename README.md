@@ -2,9 +2,9 @@
 
 QuickCite generates MLA citations from URLs and DOIs directly in Raycast.
 
-![QuickCite input form](assets/quickcite-1.png)
+![QuickCite input form](media/quickcite-1.png)
 
-![QuickCite generated citation](assets/quickcite-2.png)
+![QuickCite generated citation](media/quickcite-2.png)
 
 ## Features
 
