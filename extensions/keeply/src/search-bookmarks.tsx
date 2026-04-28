@@ -107,11 +107,11 @@ export default function SearchBookmarks() {
         searchMutate(undefined, {
           optimisticUpdate: (data: Bookmark[] | undefined) =>
             data?.map((b: Bookmark) => (b.id === bookmark.id ? { ...b, archived } : b)),
-          rollbackOnError: true,
         }),
       ]);
       await showToast({ style: Toast.Style.Success, title: archived ? "Archived" : "Unarchived" });
     } catch (error) {
+      await searchMutate();
       showApiError(toError(error));
     }
   }
@@ -132,11 +132,11 @@ export default function SearchBookmarks() {
         }),
         searchMutate(undefined, {
           optimisticUpdate: (data: Bookmark[] | undefined) => data?.filter((b: Bookmark) => b.id !== bookmark.id),
-          rollbackOnError: true,
         }),
       ]);
       await showToast({ style: Toast.Style.Success, title: "Bookmark deleted" });
     } catch (error) {
+      await searchMutate();
       showApiError(toError(error));
     }
   }
