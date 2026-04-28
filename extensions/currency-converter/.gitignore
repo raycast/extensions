@@ -1,0 +1,26 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+node_modules
+
+# Raycast specific
+.raycast-swift-build
+compiled
+raycast-env.d.ts
+
+# misc
+.DS_Store
+dist
+
+# secrets & local config — never commit
+.env
+.env.*
+*.key
+*.pem
+local.settings.json
+.vscode/
+.idea/
+
+# logs
+*.log
+npm-debug.log*
