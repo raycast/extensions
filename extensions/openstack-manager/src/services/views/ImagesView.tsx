@@ -18,7 +18,7 @@ interface ImagesViewProps {
   configManager: ConfigManager;
 }
 
-export default function ImagesView({ configName, binaryPath, cache, configManager }: ImagesViewProps) {
+export default function ImagesView({ configName, horizonUrl, binaryPath, cache, configManager }: ImagesViewProps) {
   const [searchText, setSearchText] = useState("");
 
   const cli = useMemo(() => new CLIExecutor(binaryPath, configName), [binaryPath, configName]);
@@ -65,6 +65,7 @@ export default function ImagesView({ configName, binaryPath, cache, configManage
                     <ImageDetailView
                       imageId={image.id}
                       imageName={image.name}
+                      horizonUrl={horizonUrl}
                       binaryPath={binaryPath}
                       configName={configName}
                     />

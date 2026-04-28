@@ -15,6 +15,8 @@ export interface GenericDetailViewProps {
   horizonResourceType?: HorizonResourceType;
   binaryPath: string;
   configName: string;
+  /** Optional per-resource summary keys for the main markdown output. Falls back to server defaults. */
+  summaryKeys?: { key: string; label: string; format?: string }[];
 }
 
 /**
@@ -158,6 +160,7 @@ export default function GenericDetailView({
   horizonResourceType,
   binaryPath,
   configName,
+  summaryKeys,
 }: GenericDetailViewProps) {
   const [data, setData] = useState<Record<string, unknown> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -262,8 +265,8 @@ export default function GenericDetailView({
   const addressGroups = extractAddresses(data);
   const allIPs = getAllIPs(addressGroups);
 
-  // Build markdown summary — only these specific fields, nothing else
-  const SUMMARY_KEYS: { key: string; label: string }[] = [
+  // Build markdown summary — use custom summaryKeys if provided, else server defaults
+  const DEFAULT_SERVER_KEYS: { key: string; label: string; format?: string }[] = [
     { key: "OS-EXT-AZ:availability_zone", label: "Availability Zone" },
     { key: "availability_zone", label: "Availability Zone" },
     { key: "OS-EXT-SRV-ATTR:host", label: "Host" },
@@ -274,13 +277,25 @@ export default function GenericDetailView({
     { key: "Status", label: "Status" },
   ];
 
+  const keysToShow = summaryKeys ?? DEFAULT_SERVER_KEYS;
+
   const summaryLines: string[] = [];
   const seenLabels = new Set<string>();
-  for (const { key, label } of SUMMARY_KEYS) {
+  for (const { key, label, format } of keysToShow) {
     if (seenLabels.has(label)) continue;
     if (key in data && data[key] !== null && data[key] !== "") {
       const val = data[key];
-      summaryLines.push(`**${label}:** ${typeof val === "object" ? flattenObject(val) : String(val)}`);
+      let display: string;
+
+      if (format === "size_gib" && typeof val === "number") {
+        display = `${(val / 1024 / 1024 / 1024).toFixed(2)} GiB`;
+      } else if (format === "subnet_list" && Array.isArray(val)) {
+        display = `${val.length} subnet${val.length !== 1 ? "s" : ""}\n${val.map((s) => `  - ${s}`).join("\n")}`;
+      } else {
+        display = typeof val === "object" ? flattenObject(val) : String(val);
+      }
+
+      summaryLines.push(`**${label}:** ${display}`);
       seenLabels.add(label);
     }
   }

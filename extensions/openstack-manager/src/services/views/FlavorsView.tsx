@@ -17,7 +17,7 @@ interface FlavorsViewProps {
   configManager: ConfigManager;
 }
 
-export default function FlavorsView({ configName, binaryPath, cache, configManager }: FlavorsViewProps) {
+export default function FlavorsView({ configName, horizonUrl, binaryPath, cache, configManager }: FlavorsViewProps) {
   const [searchText, setSearchText] = useState("");
 
   const cli = useMemo(() => new CLIExecutor(binaryPath, configName), [binaryPath, configName]);
@@ -58,6 +58,7 @@ export default function FlavorsView({ configName, binaryPath, cache, configManag
                   <FlavorDetailView
                     flavorId={flavor.id}
                     flavorName={flavor.name ?? flavor.id}
+                    horizonUrl={horizonUrl}
                     binaryPath={binaryPath}
                     configName={configName}
                   />

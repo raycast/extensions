@@ -25,6 +25,11 @@ export default function NetworkDetailView({
       horizonResourceType="networks"
       binaryPath={binaryPath}
       configName={configName}
+      summaryKeys={[
+        { key: "status", label: "Status" },
+        { key: "Status", label: "Status" },
+        { key: "subnets", label: "Subnets", format: "subnet_list" },
+      ]}
     />
   );
 }

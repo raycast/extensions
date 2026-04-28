@@ -7,7 +7,7 @@
  */
 
 /** Resource types supported by the Horizon deep-link builder. */
-export type HorizonResourceType = "servers" | "networks" | "security_groups" | "clusters";
+export type HorizonResourceType = "servers" | "images" | "flavors" | "networks" | "security_groups" | "clusters";
 
 /**
  * Maps a resource type to its Horizon URL path.
@@ -15,6 +15,8 @@ export type HorizonResourceType = "servers" | "networks" | "security_groups" | "
  */
 const RESOURCE_PATH_MAP: Record<HorizonResourceType, string> = {
   servers: "compute/instance/detail",
+  images: "compute/image/detail",
+  flavors: "compute/flavor/detail",
   networks: "network/networks/detail",
   security_groups: "network/security-group/detail",
   clusters: "container-infra/clusters/detail",
