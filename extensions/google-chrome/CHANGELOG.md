@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Fix: create a snapshot to fix failed to load history (database is locked)
+
 ## [Add Name Window Command] - 2026-03-04
 
 - Add Name Window command to name the currently active Google Chrome window.
