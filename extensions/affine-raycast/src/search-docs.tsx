@@ -17,14 +17,24 @@ export default function SearchDocsCommand() {
     }
     setError(null);
     setLoading(true);
+    let stale = false;
     searchAllWorkspaces(baseUrl, apiToken, query, 30)
-      .then(setResults)
-      .catch((e) => {
-        setError(e.message);
-        setResults([]);
-        showToast(Toast.Style.Failure, "Search failed", e.message);
+      .then((data) => {
+        if (!stale) setResults(data);
       })
-      .finally(() => setLoading(false));
+      .catch((e) => {
+        if (!stale) {
+          setError(e.message);
+          setResults([]);
+          showToast(Toast.Style.Failure, "Search failed", e.message);
+        }
+      })
+      .finally(() => {
+        if (!stale) setLoading(false);
+      });
+    return () => {
+      stale = true;
+    };
   }, [query, baseUrl, apiToken]);
 
   const totalDocs = results.reduce((n, r) => n + r.docs.length, 0);

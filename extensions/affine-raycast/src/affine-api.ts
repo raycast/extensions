@@ -16,7 +16,7 @@ const WORKSPACES_QUERY = `
 const WORKSPACE_DOCS_QUERY = `
   query($workspaceId: String!) {
     workspace(id: $workspaceId) {
-      docs(pagination: { first: 50 }) {
+      docs(pagination: { first: 200 }) {
         edges {
           node {
             id
@@ -24,6 +24,10 @@ const WORKSPACE_DOCS_QUERY = `
             createdAt
             updatedAt
           }
+        }
+        pageInfo {
+          hasNextPage
+          endCursor
         }
       }
     }
@@ -151,6 +155,7 @@ export async function searchAllWorkspaces(
   limitPerWorkspace: number = 20,
 ): Promise<SearchResult[]> {
   const workspaces = await getWorkspaces(baseUrl, token);
+  if (workspaces.length === 0) return [];
   const perWs = Math.max(5, Math.ceil(limitPerWorkspace / workspaces.length));
 
   const searchResults = await Promise.allSettled(

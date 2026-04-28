@@ -7,6 +7,7 @@ export default function OpenDocCommand() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { baseUrl, apiToken, workspaceId } = getPreferenceValues<Preferences.OpenDoc>();
+  const trimmedWorkspaceId = workspaceId?.trim();
 
   useEffect(() => {
     if (!apiToken) {
@@ -14,19 +15,19 @@ export default function OpenDocCommand() {
       setLoading(false);
       return;
     }
-    if (!workspaceId?.trim()) {
+    if (!trimmedWorkspaceId) {
       setError("Set Default Workspace ID in extension preferences to list documents.");
       setLoading(false);
       return;
     }
-    getWorkspaceDocs(baseUrl, apiToken, workspaceId)
+    getWorkspaceDocs(baseUrl, apiToken, trimmedWorkspaceId)
       .then(setDocs)
       .catch((e) => {
         setError(e.message);
         showToast(Toast.Style.Failure, "Failed to load documents", e.message);
       })
       .finally(() => setLoading(false));
-  }, [baseUrl, apiToken, workspaceId]);
+  }, [baseUrl, apiToken, trimmedWorkspaceId]);
 
   if (error) {
     return (
@@ -39,8 +40,8 @@ export default function OpenDocCommand() {
   return (
     <List isLoading={loading}>
       {docs.map((doc) => {
-        const url = docUrl(baseUrl, workspaceId!, doc.id);
-        const desktopUrl = desktopAppUrl(baseUrl, workspaceId!, doc.id);
+        const url = docUrl(baseUrl, trimmedWorkspaceId!, doc.id);
+        const desktopUrl = desktopAppUrl(baseUrl, trimmedWorkspaceId!, doc.id);
         return (
           <List.Item
             key={doc.id}

@@ -1,38 +1,35 @@
-import { Action, ActionPanel, Detail, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Detail, getPreferenceValues, showToast, Toast } from "@raycast/api";
 
 export default function SetupMCPCommand() {
   const { baseUrl, apiToken } = getPreferenceValues<Preferences.SetupMcp>();
 
   const hasToken = Boolean(apiToken?.trim());
-  const configSnippet = hasToken
-    ? JSON.stringify(
-        {
-          mcpServers: {
-            affine: {
-              command: "affine-mcp",
-              env: {
-                AFFINE_BASE_URL: baseUrl || "https://app.affine.pro",
-                AFFINE_API_TOKEN: "YOUR_TOKEN",
-                AFFINE_WORKSPACE_ID: "optional-workspace-id",
-              },
+
+  function buildConfig(withToken: boolean) {
+    return JSON.stringify(
+      {
+        mcpServers: {
+          affine: {
+            command: "affine-mcp",
+            env: {
+              AFFINE_BASE_URL: baseUrl || "https://app.affine.pro",
+              AFFINE_API_TOKEN: withToken ? apiToken.trim() : "YOUR_TOKEN",
+              AFFINE_WORKSPACE_ID: "optional-workspace-id",
             },
           },
         },
-        null,
-        2,
-      )
-    : `{
-  "mcpServers": {
-    "affine": {
-      "command": "affine-mcp",
-      "env": {
-        "AFFINE_BASE_URL": "https://app.affine.pro",
-        "AFFINE_API_TOKEN": "your-token-from-affine-settings",
-        "AFFINE_WORKSPACE_ID": "optional"
-      }
-    }
+      },
+      null,
+      2,
+    );
   }
-}`;
+
+  const configSnippet = hasToken ? buildConfig(false) : buildConfig(false);
+
+  async function copyConfigWithToken() {
+    await Clipboard.copy(buildConfig(true));
+    await showToast(Toast.Style.Success, "Config copied (includes your API token)");
+  }
 
   const markdown = `# Use AFFiNE with Raycast AI
 
@@ -54,7 +51,7 @@ npm i -g affine-mcp-server
 
 For **self-hosted**: set **AFFiNE URL** in extension preferences to your instance (e.g. \`http://localhost:3010\`) and create a token there. (Desktop app: use Cloud above.)
 
-Example config (replace \`YOUR_TOKEN\` with your real token):
+${hasToken ? "> **Tip:** Your API token is configured. Use **Copy Config with Token** below to get a ready-to-paste config.\n\n" : ""}Example config${hasToken ? " (token masked for safety — use the copy action for the real value)" : " (replace `YOUR_TOKEN` with your real token)"}:
 
 \`\`\`json
 ${configSnippet}
@@ -77,6 +74,7 @@ Same credentials as this extension; no extra setup.
             url="https://github.com/DAWNCR0W/affine-mcp-server#readme"
             title="Open Mcp Server Readme"
           />
+          {hasToken && <Action title="Copy Config with Token" onAction={copyConfigWithToken} />}
         </ActionPanel>
       }
     />
