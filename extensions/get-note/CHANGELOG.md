@@ -1,6 +1,6 @@
 # GetNote Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-28
 
 - Added commands for recent notes, note search, link saving, and text-note capture
 - Added note detail, browser-opening, and delete flows in the Raycast UI
