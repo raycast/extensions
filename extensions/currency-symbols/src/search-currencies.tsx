@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, Toast, closeMainWindow, showToast } from "@raycast/api";
 
 interface Currency {
   symbol: string;
@@ -100,8 +100,17 @@ export default function SearchCurrencies() {
           actions={
             <ActionPanel>
               <Action
+                title="Paste Symbol"
+                icon={Icon.TextInput}
+                onAction={async () => {
+                  await closeMainWindow();
+                  await Clipboard.paste(currency.symbol);
+                }}
+              />
+              <Action
                 title="Copy Symbol"
                 icon={Icon.Clipboard}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
                 onAction={async () => {
                   await Clipboard.copy(currency.symbol);
                   await showToast({
@@ -121,19 +130,6 @@ export default function SearchCurrencies() {
                     style: Toast.Style.Success,
                     title: "Copied!",
                     message: `${currency.code} copied to clipboard`,
-                  });
-                }}
-              />
-              <Action
-                title={`Copy with Code (${currency.symbol} ${currency.code})`}
-                icon={Icon.AppWindowList}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                onAction={async () => {
-                  await Clipboard.copy(`${currency.symbol} ${currency.code}`);
-                  await showToast({
-                    style: Toast.Style.Success,
-                    title: "Copied!",
-                    message: `${currency.symbol} ${currency.code} copied to clipboard`,
                   });
                 }}
               />
