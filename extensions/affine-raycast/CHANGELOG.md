@@ -1,6 +1,6 @@
 # AFFiNE Extension Changelog
 
-## [Initial release: search, open, desktop app links] - {PR_MERGE_DATE}
+## [Initial release: search, open, desktop app links] - 2026-04-28
 
 - Search AFFiNE documents across all workspaces
 - Open workspace or document in browser
