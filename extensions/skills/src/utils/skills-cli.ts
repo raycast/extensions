@@ -45,7 +45,7 @@ export function isInvalidCustomNpxPathError(error: unknown): boolean {
 }
 
 function buildSkillsCliCommand(runner: PackageRunner, args: string[], executable: string = runner): string {
-  const runnerArgs = runner === "npx" ? ["-y", "skills@latest"] : ["--silent", "--no-cache", "skills@latest"];
+  const runnerArgs = runner === "npx" ? ["-y", "skills@latest"] : ["--silent", "skills@latest"];
   return [executable, ...runnerArgs, ...args].map(shellEscape).join(" ");
 }
 
