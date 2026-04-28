@@ -16,6 +16,16 @@ export async function authorize(): Promise<string> {
     return existingTokens.accessToken;
   }
 
+  if (existingTokens?.refreshToken) {
+    try {
+      const tokenSet = await refreshTokens(existingTokens.refreshToken);
+      await oauthClient.setTokens(tokenSet);
+      return tokenSet.access_token;
+    } catch {
+      // Fall through to full PKCE flow
+    }
+  }
+
   const authRequest = await oauthClient.authorizationRequest({
     endpoint: `${APP_URL}/oauth/authorize`,
     clientId: "raycast",
@@ -42,6 +52,24 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string
     }),
   });
 
+  return parseTokenResponse(res);
+}
+
+async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse> {
+  const res = await fetch(`${API_URL}/oauth/token`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      grant_type: "refresh_token",
+      refresh_token: refreshToken,
+      clientId: "raycast",
+    }),
+  });
+
+  return parseTokenResponse(res);
+}
+
+async function parseTokenResponse(res: Response): Promise<OAuth.TokenResponse> {
   if (!res.ok) {
     const body = (await res.json().catch(() => ({}))) as { message?: string };
     throw new Error(body.message ?? `Authentication failed (${res.status})`);

@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.cursor/
 .DS_Store
 
 # Raycast specific files

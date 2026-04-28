@@ -45,7 +45,7 @@ export default function AddBookmark() {
         title: values.title || undefined,
         description: values.description || undefined,
         note: values.note || undefined,
-        folderId: values.folderId || undefined,
+        folderId: values.folderId === NO_FOLDER ? undefined : values.folderId || undefined,
         tagIds: tagIds.length > 0 ? tagIds : undefined,
       });
 
