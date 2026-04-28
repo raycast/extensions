@@ -16,6 +16,7 @@ import {
   openKommand,
   ShortcutItem,
 } from "./lib/components";
+import { tokenizeForKeywords } from "./lib/keymap";
 
 export default function SearchShortcuts() {
   const hasLibrary = hasKommandLibrary();
@@ -95,6 +96,7 @@ export default function SearchShortcuts() {
               shortcut={s}
               subtitle={s.categoryIsDefault ? undefined : s.categoryName}
               keyLabels={keyLabels}
+              extraKeywords={tokenizeForKeywords(appGroup.appName)}
             />
           ))}
         </List.Section>

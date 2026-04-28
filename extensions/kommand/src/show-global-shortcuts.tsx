@@ -16,6 +16,7 @@ import {
   openKommand,
   ShortcutItem,
 } from "./lib/components";
+import { tokenizeForKeywords } from "./lib/keymap";
 
 export default function ShowGlobalShortcuts() {
   const hasLibrary = hasKommandLibrary();
@@ -90,7 +91,12 @@ export default function ShowGlobalShortcuts() {
           subtitle={`${appGroup.shortcuts.length}`}
         >
           {appGroup.shortcuts.map((s) => (
-            <ShortcutItem key={s.id} shortcut={s} keyLabels={keyLabels} />
+            <ShortcutItem
+              key={s.id}
+              shortcut={s}
+              keyLabels={keyLabels}
+              extraKeywords={tokenizeForKeywords(appGroup.appName)}
+            />
           ))}
         </List.Section>
       ))}
