@@ -1,71 +1,212 @@
-import { updateCommandMetadata, launchCommand, LaunchType, environment } from "@raycast/api";
-import { readFile } from "fs/promises";
-import { homedir } from "os";
-import path from "path";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  Color,
+  launchCommand,
+  LaunchType,
+  confirmAlert,
+  Alert,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { JobState, listJobs, isJobRunning } from "./utils/jobs";
+import { LOG_FILE } from "./utils/constants";
+import { STAGE_LABELS, progressBar, formatElapsed } from "./utils/format";
+import { IngestStatusView } from "./components/ingest-status-view";
 
-const PID_FILE = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest.pid");
-
-const SHORT_LABELS: Record<string, string> = {
-  scanning: "Scanning",
-  filtering: "Filtering",
-  copying: "Copying",
-  verifying: "Verifying",
-  renaming: "Renaming",
-  ejecting: "Ejecting",
-};
-
-function progressBar(current: number, total: number, width = 10): string {
-  if (total === 0) return "";
-  const filled = Math.round((current / total) * width);
-  return "■".repeat(filled) + "□".repeat(width - filled);
+function summarize(job: JobState): { title: string; subtitle: string } {
+  const stage = STAGE_LABELS[job.stage] ?? job.stage;
+  const { current, total } = job.progress;
+  const bar = total > 0 ? progressBar(current, total) : "";
+  const pct = total > 0 ? ` ${Math.round((current / total) * 100)}%` : "";
+  const subtitle = `${stage}  ${bar}${pct}`.trim();
+  return { title: job.folderName || job.jobId, subtitle };
 }
 
-function isProcessAlive(pid: number): boolean {
-  try {
-    process.kill(pid, 0);
-    return true;
-  } catch {
-    return false;
-  }
-}
+export default function Command() {
+  const [jobs, setJobs] = useState<JobState[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const lastSnapshotRef = useRef("");
 
-export default async function Command() {
-  if (environment.launchType === LaunchType.UserInitiated) {
-    // User pressed 'Enter' on "Ingest Status" in the root search.
-    // We no longer have a UI here. Launch the main 'ingest' command,
-    // which will detect the active job and show the status view.
+  const refresh = useCallback(async () => {
+    const all = await listJobs();
+    // Sort: running first, then newest-first within each group.
+    // Compute running status once per job to avoid double syscall.
+    const withStatus = all.map((job) => ({ job, running: isJobRunning(job) }));
+    withStatus.sort((a, b) => {
+      if (a.running !== b.running) return a.running ? -1 : 1;
+      return b.job.startedAt.localeCompare(a.job.startedAt);
+    });
+    const sorted = withStatus.map((x) => x.job);
+
+    // Skip re-render when nothing changed
+    const snapshot = JSON.stringify(sorted);
+    if (snapshot !== lastSnapshotRef.current) {
+      lastSnapshotRef.current = snapshot;
+      setJobs(sorted);
+    }
+    setIsLoading(false);
+  }, []);
+
+  useEffect(() => {
+    refresh();
+    const t = setInterval(refresh, 1000);
+    return () => clearInterval(t);
+  }, [refresh]);
+
+  const stopJob = useCallback(
+    async (job: JobState) => {
+      const ok = await confirmAlert({
+        title: `Stop "${job.folderName}"?`,
+        message: "Files already copied will remain in the destination folder.",
+        primaryAction: { title: "Stop", style: Alert.ActionStyle.Destructive },
+      });
+      if (!ok) return;
+      try {
+        process.kill(job.pid, "SIGTERM");
+        await showHUD("🛑 Ingest stopped");
+        setTimeout(refresh, 500);
+      } catch {
+        await showHUD("Could not stop process");
+      }
+    },
+    [refresh],
+  );
+
+  const startNew = useCallback(async () => {
     try {
-      await launchCommand({
-        name: "ingest",
-        type: LaunchType.UserInitiated,
+      await launchCommand({ name: "ingest", type: LaunchType.UserInitiated });
+    } catch (err) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not open Magic Ingest",
+        message: String(err),
       });
-    } catch {
-      // ignore
     }
-    return;
+  }, []);
+
+  // Single pass — avoids calling isProcessAlive (syscall) twice per job
+  const running: JobState[] = [];
+  const finished: JobState[] = [];
+  for (const job of jobs) {
+    (isJobRunning(job) ? running : finished).push(job);
   }
 
-  // Background execution (interval)
-  try {
-    const raw = await readFile(PID_FILE, "utf-8");
-    const parsed = JSON.parse(raw);
-    const running = isProcessAlive(parsed.pid) && parsed.stage !== "done";
+  const globalActions = (
+    <>
+      <Action
+        title="Start New Ingest"
+        icon={Icon.Plus}
+        shortcut={{ modifiers: ["cmd"], key: "n" }}
+        onAction={startNew}
+      />
+      <Action.Open
+        title="Open Log"
+        target={LOG_FILE}
+        icon={Icon.Document}
+        shortcut={{ modifiers: ["cmd"], key: "l" }}
+      />
+    </>
+  );
 
-    if (running) {
-      const label = SHORT_LABELS[parsed.stage] || parsed.stage;
-      const { current, total } = parsed.progress;
-      const bar = total > 0 ? progressBar(current, total) : "";
-      const pct = total > 0 ? ` ${Math.round((current / total) * 100)}%` : "";
-
-      const fileSuffix = parsed.currentFile ? ` · ${parsed.currentFile} ${parsed.filePercent ?? 0}%` : "";
-
-      await updateCommandMetadata({
-        subtitle: `${label}  ${bar}${pct}${fileSuffix}`,
-      });
-    } else {
-      await updateCommandMetadata({ subtitle: "" });
-    }
-  } catch {
-    await updateCommandMetadata({ subtitle: "" });
+  if (!isLoading && jobs.length === 0) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.Camera}
+          title="No Ingests Running"
+          description="Start one from Magic Ingest"
+          actions={<ActionPanel>{globalActions}</ActionPanel>}
+        />
+      </List>
+    );
   }
+
+  return (
+    <List isLoading={isLoading} navigationTitle="Ingest Jobs">
+      {running.length > 0 && (
+        <List.Section title={`Running (${running.length})`}>
+          {running.map((job) => {
+            const { title, subtitle } = summarize(job);
+            const elapsed = formatElapsed(new Date(job.startedAt));
+            return (
+              <List.Item
+                key={job.jobId}
+                icon={{ source: Icon.Camera, tintColor: Color.Purple }}
+                title={title}
+                subtitle={subtitle}
+                accessories={[{ text: elapsed, icon: Icon.Clock }]}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="View Details"
+                      icon={Icon.Eye}
+                      target={<IngestStatusView jobId={job.jobId} />}
+                    />
+                    <Action
+                      title="Stop Ingest"
+                      icon={Icon.Stop}
+                      style={Action.Style.Destructive}
+                      onAction={() => stopJob(job)}
+                    />
+                    <Action.ShowInFinder
+                      title="Show Destination"
+                      path={job.destDir}
+                    />
+                    {globalActions}
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
+
+      {finished.length > 0 && (
+        <List.Section title="Finished">
+          {finished.map((job) => {
+            const { title } = summarize(job);
+            const hasError = Boolean(job.error);
+            return (
+              <List.Item
+                key={job.jobId}
+                icon={{
+                  source: hasError ? Icon.ExclamationMark : Icon.CheckCircle,
+                  tintColor: hasError ? Color.Red : Color.Green,
+                }}
+                title={title}
+                subtitle={
+                  hasError ? (job.error ?? "Finished with errors") : "Complete"
+                }
+                accessories={[
+                  {
+                    text: formatElapsed(new Date(job.startedAt)),
+                    icon: Icon.Clock,
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <Action.Push
+                      title="View Details"
+                      icon={Icon.Eye}
+                      target={<IngestStatusView jobId={job.jobId} />}
+                    />
+                    <Action.ShowInFinder
+                      title="Show Destination"
+                      path={job.destDir}
+                    />
+                    {globalActions}
+                  </ActionPanel>
+                }
+              />
+            );
+          })}
+        </List.Section>
+      )}
+    </List>
+  );
 }

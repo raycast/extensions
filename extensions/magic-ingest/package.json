@@ -20,9 +20,8 @@
     {
       "name": "ingest-status",
       "title": "Ingest Status",
-      "description": "Background tracker for the running ingest",
-      "mode": "no-view",
-      "interval": "10s"
+      "description": "View and manage running ingest jobs",
+      "mode": "view"
     }
   ],
   "dependencies": {

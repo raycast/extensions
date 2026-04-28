@@ -33,13 +33,17 @@ const VIDEO_EXTENSIONS = [".mp4", ".mov", ".mxf"];
 const SIDECAR_EXTENSIONS = [".xmp"];
 const ALL_EXTENSIONS = new Set([...IMAGE_EXTENSIONS, ...VIDEO_EXTENSIONS, ...SIDECAR_EXTENSIONS]);
 const LOG_FILE = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest.log");
-const PID_FILE = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest.pid");
+const JOBS_DIR = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest", "jobs");
+
+// Per-run state; set in main()
+let JOB_ID = "unknown";
+let JOB_STATE_FILE = "";
 
 // ── Logging ──────────────────────────────────────────────────────────────────
 
 async function logLine(msg) {
   const ts = new Date().toISOString();
-  await appendFile(LOG_FILE, `${ts}  ${msg}\n`, "utf-8");
+  await appendFile(LOG_FILE, `${ts}  [${JOB_ID.slice(-6)}]  ${msg}\n`, "utf-8");
 }
 
 async function logSessionStart(cards, dest) {
@@ -218,17 +222,55 @@ function resolveCollisions(files) {
   return { resolved, collisionCount };
 }
 
+// Compare source and dest: fast size check first, fall back to SHA-256 only when
+// sizes match. Covers the "card reformatted, filenames restart, but content differs"
+// case — camera RAW/JPEG sizes almost always differ between distinct photos, so
+// we rarely pay the hash cost.
+async function filesMatch(sourcePath, destPath) {
+  try {
+    const [sa, sb] = await Promise.all([stat(sourcePath), stat(destPath)]);
+    if (sa.size !== sb.size) return false;
+    if (sa.size === 0) return true;
+    const [ha, hb] = await Promise.all([hashFile(sourcePath), hashFile(destPath)]);
+    return ha === hb;
+  } catch {
+    return false; // treat unreadable as "not a duplicate" so we don't silently skip
+  }
+}
+
 async function skipDuplicates(files, destDir) {
   let existing;
   try { existing = new Set((await readdir(destDir)).map(e => e.toLowerCase())); }
   catch { existing = new Set(); }
   const toIngest = [];
   let skippedCount = 0;
+  let renamedCount = 0;
   for (const f of files) {
-    if (existing.has(f.destFilename.toLowerCase())) skippedCount++;
-    else toIngest.push(f);
+    const key = f.destFilename.toLowerCase();
+    if (!existing.has(key)) {
+      toIngest.push(f);
+      continue;
+    }
+    const destPath = path.join(destDir, f.destFilename);
+    if (await filesMatch(f.absolutePath, destPath)) {
+      skippedCount++;
+      continue;
+    }
+    // Name collision but different content — assign a non-clashing suffix.
+    const ext = path.extname(f.destFilename);
+    const stem = path.basename(f.destFilename, ext);
+    let suffix = 2;
+    let newName;
+    do {
+      newName = `${stem}_${suffix}${ext}`;
+      suffix++;
+    } while (existing.has(newName.toLowerCase()));
+    existing.add(newName.toLowerCase());
+    renamedCount++;
+    toIngest.push({ ...f, destFilename: newName });
+    await logLine(`Dest name collision with different content: ${f.destFilename} → ${newName}`);
   }
-  return { toIngest, skippedCount };
+  return { toIngest, skippedCount, renamedCount };
 }
 
 // ── Copy ─────────────────────────────────────────────────────────────────────
@@ -386,20 +428,50 @@ async function renameFilesInDir(copyResults, verifyResults, folderName) {
 
 // ── Main Pipeline ────────────────────────────────────────────────────────────
 
-async function killPreviousIngest() {
+function isPidAlive(pid) {
   try {
-    const raw = await readFile(PID_FILE, "utf-8");
-    const prev = JSON.parse(raw);
-    if (prev.pid && prev.pid !== process.pid) {
+    process.kill(pid, 0);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Return the set of volume paths currently in use by other live ingest jobs.
+ * Scans JOBS_DIR, excluding our own state file and any stale/dead jobs.
+ */
+async function cardsInUseByOtherJobs() {
+  let entries;
+  try {
+    entries = await readdir(JOBS_DIR);
+  } catch {
+    return new Set();
+  }
+  const candidates = entries
+    .filter(fname => fname.endsWith(".json"))
+    .map(fname => path.join(JOBS_DIR, fname))
+    .filter(full => full !== JOB_STATE_FILE);
+
+  const states = await Promise.all(
+    candidates.map(async full => {
       try {
-        process.kill(prev.pid, 0); // check if alive
-        process.kill(prev.pid, "SIGTERM"); // kill it
-        await logLine(`Killed previous runner process ${prev.pid}`);
-        // Give it a moment to clean up
-        await new Promise(r => setTimeout(r, 1000));
-      } catch { /* already dead, that's fine */ }
+        return JSON.parse(await readFile(full, "utf-8"));
+      } catch {
+        return null;
+      }
+    })
+  );
+
+  const inUse = new Set();
+  for (const state of states) {
+    if (state?.pid && state.stage !== "done" && isPidAlive(state.pid)) {
+      for (const c of state.cards ?? []) {
+        if (c.path) inUse.add(c.path);
+      }
     }
-  } catch { /* no PID file or invalid JSON */ }
+  }
+  return inUse;
 }
 
 async function resolveExiftool() {
@@ -431,17 +503,22 @@ async function main() {
   // Clean up config file — no longer needed
   try { await unlink(configPath); } catch { /* ignore */ }
 
-  // Kill any previous ingest that's still running
-  await killPreviousIngest();
+  JOB_ID = opts.jobId;
+  JOB_STATE_FILE = path.join(JOBS_DIR, `${JOB_ID}.json`);
+
+  // Ensure jobs dir exists
+  await mkdir(JOBS_DIR, { recursive: true });
 
   const destDir = path.join(opts.destParent, opts.folderName);
 
   // Progress state — shared across pipeline stages
   const progressState = {
+    jobId: JOB_ID,
     pid: process.pid,
     startedAt: new Date().toISOString(),
     destDir,
-    cards: opts.volumes.map(v => ({ name: v.name, fileCount: 0 })),
+    folderName: opts.folderName,
+    cards: opts.volumes.map(v => ({ name: v.name, path: v.path, fileCount: 0 })),
     stage: "scanning",
     progress: { current: 0, total: 0 },
     error: null,
@@ -463,22 +540,22 @@ async function main() {
     try {
       do {
         writePending = false;
-        const tmp = PID_FILE + ".tmp";
+        const tmp = JOB_STATE_FILE + ".tmp";
         await writeFile(tmp, JSON.stringify(progressState), "utf-8");
-        await rename(tmp, PID_FILE);
+        await rename(tmp, JOB_STATE_FILE);
       } while (writePending);
     } finally {
       writeInFlight = false;
     }
   }
 
-  // Write initial PID/progress file (atomic)
-  const tmpInit = PID_FILE + ".tmp";
+  // Write initial state file (atomic)
+  const tmpInit = JOB_STATE_FILE + ".tmp";
   await writeFile(tmpInit, JSON.stringify(progressState), "utf-8");
-  await rename(tmpInit, PID_FILE);
+  await rename(tmpInit, JOB_STATE_FILE);
 
-  // Always clean up PID file on exit
-  const removePid = async () => { try { await unlink(PID_FILE); } catch { /* ignore */ } };
+  // Always clean up this job's state file on exit
+  const removePid = async () => { try { await unlink(JOB_STATE_FILE); } catch { /* ignore */ } };
   for (const sig of ["SIGTERM", "SIGINT", "SIGHUP"]) {
     process.on(sig, async () => {
       await logLine(`Received ${sig} — stopping`);
@@ -497,8 +574,8 @@ async function main() {
     process.exit(1);
   });
   process.on("exit", (code) => {
-    try { appendFileSyncSync(LOG_FILE, `${new Date().toISOString()}  Process exiting with code ${code}\n`); } catch { /* ignore */ }
-    try { unlinkSyncSync(PID_FILE); } catch { /* ignore */ }
+    try { appendFileSyncSync(LOG_FILE, `${new Date().toISOString()}  [${JOB_ID.slice(-6)}]  Process exiting with code ${code}\n`); } catch { /* ignore */ }
+    try { unlinkSyncSync(JOB_STATE_FILE); } catch { /* ignore */ }
   });
   const startTime = Date.now();
   const allErrors = [];
@@ -520,7 +597,7 @@ async function main() {
     }
 
     if (allFiles.length === 0) {
-
+      progressState.error = "No matching files found on the selected card(s).";
       await logLine("ERROR: No matching files found");
       return;
     }
@@ -531,21 +608,23 @@ async function main() {
     const fr = await filterFiles(allFiles, opts.targetDates, opts.starRating);
     await logLine(`${fr.afterDateFilter} match date, ${fr.afterStarFilter} match star, ${fr.matched.length} total`);
     if (fr.matched.length === 0) {
-
+      progressState.error = "No files match the selected date(s).";
       await logLine("ERROR: No files match filters");
       return;
     }
 
     // Collisions & dedup
-    const { resolved, collisionCount } = resolveCollisions(fr.matched);
-    let filesToCopy, skippedCount = 0;
+    const { resolved, collisionCount: intraCollisionCount } = resolveCollisions(fr.matched);
+    let filesToCopy, skippedCount = 0, destRenamedCount = 0;
     if (opts.skipDuplicates) {
       const dd = await skipDuplicates(resolved, destDir);
       filesToCopy = dd.toIngest;
       skippedCount = dd.skippedCount;
+      destRenamedCount = dd.renamedCount;
     } else {
       filesToCopy = resolved;
     }
+    const collisionCount = intraCollisionCount + destRenamedCount;
 
     if (filesToCopy.length === 0) {
 
@@ -553,7 +632,7 @@ async function main() {
       return;
     }
 
-    await logLine(`${filesToCopy.length} to copy (${skippedCount} skipped, ${collisionCount} collisions)`);
+    await logLine(`${filesToCopy.length} to copy (${skippedCount} skipped, ${collisionCount} collisions, ${destRenamedCount} dest-renamed)`);
     await writeProgress("copying", 0, filesToCopy.length);
 
 
@@ -593,7 +672,12 @@ async function main() {
     // Eject
     if (opts.ejectCards) {
       await writeProgress("ejecting", 0, opts.volumes.length);
+      const inUseElsewhere = await cardsInUseByOtherJobs();
       for (const vol of opts.volumes) {
+        if (inUseElsewhere.has(vol.path)) {
+          await logLine(`Eject skipped (card still in use by another job): ${vol.name}`);
+          continue;
+        }
         try {
           await execFileAsync(DISKUTIL, ["eject", vol.path]);
           await logLine(`Ejected: ${vol.name}`);

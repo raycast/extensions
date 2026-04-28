@@ -4,6 +4,7 @@ import { writeFile, open } from "fs/promises";
 import path from "path";
 import { homedir } from "os";
 import { VolumeInfo } from "./utils/volumes";
+import { newJobId } from "./utils/jobs";
 
 export interface PipelineOptions {
   volumes: VolumeInfo[];
@@ -18,22 +19,36 @@ export interface PipelineOptions {
   ejectCards: boolean;
 }
 
-const RUNNER_STDERR_LOG = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest-runner-stderr.log");
+const RUNNER_STDERR_LOG = path.join(
+  homedir(),
+  "Library",
+  "Logs",
+  "raycast-photo-ingest-runner-stderr.log",
+);
 
 /**
  * Launch the ingest pipeline as a detached background process.
  * The runner.mjs script in assets/ runs independently — it survives
  * even if the Raycast extension is closed or killed.
- * Progress and completion are shown via the menu bar UI.
+ *
+ * Returns the generated job ID so callers can reference the running job
+ * (e.g. to open its status view).
  */
-export async function runIngestPipeline(opts: PipelineOptions): Promise<void> {
-  const configPath = path.join(environment.supportPath, `ingest-config-${Date.now()}.json`);
+export async function runIngestPipeline(
+  opts: PipelineOptions,
+): Promise<string> {
+  const jobId = newJobId();
+  const configPath = path.join(
+    environment.supportPath,
+    `ingest-config-${jobId}.json`,
+  );
   const runnerPath = path.join(environment.assetsPath, "runner.mjs");
 
   // Write config for the runner
   await writeFile(
     configPath,
     JSON.stringify({
+      jobId,
       volumes: opts.volumes.map((v) => ({ path: v.path, name: v.name })),
       destParent: opts.destParent,
       folderName: opts.folderName,
@@ -78,4 +93,6 @@ export async function runIngestPipeline(opts: PipelineOptions): Promise<void> {
     title: "Magic Ingest started",
     message: "Running in background",
   });
+
+  return jobId;
 }

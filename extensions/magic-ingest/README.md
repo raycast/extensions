@@ -8,24 +8,22 @@ Fast, background photo & video ingest from memory cards — built for photograph
 - **Date filtering** — Pick which shoot days to import (scanned in under a second)
 - **Star rating filter** — Import only rated images (via EXIF metadata)
 - **Background ingest** — Runs independently of Raycast. Press Escape and keep working.
-- **Menu bar progress** — Live progress indicator with per-card file counts
+- **Multiple concurrent jobs** — Run up to 3 ingests in parallel; view and manage them from the Ingest Status screen
 - **SHA-256 verification** — Optional checksum verification for every copied file
 - **Smart collision handling** — Resolves filename conflicts across multiple cards
 - **File renaming** — Prefix files with your folder name for easy organization
 - **Photo Mechanic integration** — Opens your destination folder in PM6 when done
 - **Auto-eject** — Safely ejects cards after ingest completes
-- **Duplicate skipping** — Won't re-copy files already in the destination
+- **Duplicate skipping** — Won't re-copy files already in the destination; hash-verifies on filename collision so reformatted-card filename resets don't silently overwrite
 - **Sidecar-aware** — XMP sidecars follow their parent media files
 
 ## Requirements
 
-- **macOS** (uses native `diskutil`, `copyfile(2)`, and notification APIs)
+- **macOS** (uses native `diskutil`, `rsync`, and notification APIs)
 - **[ExifTool](https://exiftool.org/)** — Required for star rating filtering. Install via Homebrew:
-
-  ```bash
+  ```
   brew install exiftool
   ```
-
   If you don't use star rating filtering, ExifTool is not needed.
 
 ## Supported Formats
@@ -36,10 +34,10 @@ Fast, background photo & video ingest from memory cards — built for photograph
 
 ## Commands
 
-| Command           | Description                                             |
-| ----------------- | ------------------------------------------------------- |
-| **Magic Ingest**  | Open the ingest form — select cards, dates, and options |
-| **Ingest Status** | Menu bar indicator showing live progress during ingest  |
+| Command | Description |
+|---------|-------------|
+| **Magic Ingest** | Open the ingest form — select cards, dates, and options |
+| **Ingest Status** | View all running and recently-finished ingest jobs; start new ingests |
 
 ## How It Works
 
@@ -47,5 +45,5 @@ Fast, background photo & video ingest from memory cards — built for photograph
 2. Open **Magic Ingest** from Raycast
 3. Select source card(s), destination, and date range
 4. Hit submit — ingest runs in the background
-5. Watch progress in the menu bar, or close Raycast entirely
+5. Start another ingest immediately, or check progress via **Ingest Status**
 6. Get a notification when done

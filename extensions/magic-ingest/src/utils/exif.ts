@@ -48,7 +48,9 @@ export interface ExifMaps {
 }
 
 /** Batch-read EXIF metadata (dates + rating). Chunks at 500 files per exiftool call. */
-export async function batchReadExifMeta(filePaths: string[]): Promise<ExifMaps> {
+export async function batchReadExifMeta(
+  filePaths: string[],
+): Promise<ExifMaps> {
   const dates = new Map<string, string | null>();
   const ratings = new Map<string, number>();
   const BATCH_SIZE = 500;
@@ -98,7 +100,9 @@ export interface DateInfo {
   cardCount: number;
 }
 
-export async function scanDatesOnFiles(files: ScannedFile[]): Promise<Map<string, DateInfo>> {
+export async function scanDatesOnFiles(
+  files: ScannedFile[],
+): Promise<Map<string, DateInfo>> {
   const dateCounts = new Map<string, number>();
   const dateVolumes = new Map<string, Set<string>>();
 
@@ -106,7 +110,9 @@ export async function scanDatesOnFiles(files: ScannedFile[]): Promise<Map<string
   const BATCH_SIZE = 200;
   for (let i = 0; i < files.length; i += BATCH_SIZE) {
     const batch = files.slice(i, i + BATCH_SIZE);
-    const stats = await Promise.allSettled(batch.map((f) => stat(f.absolutePath)));
+    const stats = await Promise.allSettled(
+      batch.map((f) => stat(f.absolutePath)),
+    );
 
     for (let j = 0; j < stats.length; j++) {
       const result = stats[j];
@@ -171,7 +177,9 @@ export async function filterFiles(
   // Star rating: only call exiftool on date-matched files (much smaller set)
   let starMatched: ScannedFile[];
   if (starRating !== null && dateMatched.length > 0) {
-    const ratings = await batchReadRatings(dateMatched.map((f) => f.absolutePath));
+    const ratings = await batchReadRatings(
+      dateMatched.map((f) => f.absolutePath),
+    );
     starMatched = dateMatched.filter((f) => {
       const rating = ratings.get(f.absolutePath) ?? 0;
       return rating === starRating;
@@ -204,7 +212,9 @@ export async function filterFiles(
 }
 
 /** Fast date lookup via filesystem mtime. Returns map of path → YYYY-MM-DD. */
-async function batchStatDates(filePaths: string[]): Promise<Map<string, string>> {
+async function batchStatDates(
+  filePaths: string[],
+): Promise<Map<string, string>> {
   const dates = new Map<string, string>();
   const BATCH_SIZE = 200;
 
@@ -227,18 +237,23 @@ async function batchStatDates(filePaths: string[]): Promise<Map<string, string>>
 }
 
 /** Read only Rating tag via exiftool. Used when star filtering is active. */
-async function batchReadRatings(filePaths: string[]): Promise<Map<string, number>> {
+async function batchReadRatings(
+  filePaths: string[],
+): Promise<Map<string, number>> {
   const ratings = new Map<string, number>();
   const BATCH_SIZE = 500;
 
   for (let i = 0; i < filePaths.length; i += BATCH_SIZE) {
     const batch = filePaths.slice(i, i + BATCH_SIZE);
     try {
-      const { stdout } = await execFileAsync(EXIFTOOL, ["-Rating", "-json", "-quiet", ...batch], {
-        maxBuffer: 50 * 1024 * 1024,
-      });
+      const { stdout } = await execFileAsync(
+        EXIFTOOL,
+        ["-Rating", "-json", "-quiet", ...batch],
+        { maxBuffer: 50 * 1024 * 1024 },
+      );
 
-      const results: Array<{ SourceFile: string; Rating?: number }> = JSON.parse(stdout);
+      const results: Array<{ SourceFile: string; Rating?: number }> =
+        JSON.parse(stdout);
       for (const result of results) {
         ratings.set(result.SourceFile, result.Rating ?? 0);
       }
