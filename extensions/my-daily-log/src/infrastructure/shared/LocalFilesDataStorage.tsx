@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { DataStorage } from "./DataStorage";
+import { isPathPermissionError, showPathPermissionToast } from "../../shared/pathPermissionError";
 
 export class LocalFilesDataStorage implements DataStorage {
   constructor(private readonly getFilePath: (date: Date) => string) {}
@@ -8,10 +9,17 @@ export class LocalFilesDataStorage implements DataStorage {
   save(data: string, date: Date) {
     const filePath = this.getFilePath(date);
     const dirPath = path.dirname(filePath);
-    if (!fs.existsSync(dirPath)) {
-      fs.mkdirSync(dirPath, { recursive: true });
+    try {
+      if (!fs.existsSync(dirPath)) {
+        fs.mkdirSync(dirPath, { recursive: true });
+      }
+      fs.writeFileSync(filePath, data);
+    } catch (error) {
+      if (isPathPermissionError(error)) {
+        showPathPermissionToast(dirPath);
+      }
+      throw error;
     }
-    fs.writeFileSync(filePath, data);
   }
 
   dataForDateExists(date: Date): boolean {

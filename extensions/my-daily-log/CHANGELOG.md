@@ -1,5 +1,9 @@
 # my-daily-log Changelog
 
+## [Fixes] - {PR_MERGE_DATE}
+
+- Handle macOS permission errors (EPERM/EACCES) when the Daily Log Path is in a protected location (e.g. `~/Downloads`, `~/Desktop`, `~/Library/CloudStorage/…`). The extension now shows a failure toast with guidance to grant Full Disk Access or change the preference, instead of crashing.
+
 ## [Fixes] - 2023-09-08
 
 - Fixed a bug where if the folder for logs did not exist, the extension would crash
