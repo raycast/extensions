@@ -1,6 +1,6 @@
 # Brightness Control Changelog
 
-## [Fix Brightness Down bug] - 2026-04-28
+## [Fix Brightness Down bug] - {PR_MERGE_DATE}
 
 - "Brightness Down" failed with "Error: Unknown option '-10'" since subprocess evaluates the "-10" as an argument. Added a leading "--" to prevent it.
 
