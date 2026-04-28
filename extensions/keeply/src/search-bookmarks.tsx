@@ -97,21 +97,22 @@ export default function SearchBookmarks() {
 
   async function handleArchive(bookmark: Bookmark) {
     const archived = !bookmark.archived;
+    const promise = api.updateBookmark(bookmark.id, { archived });
     try {
       await Promise.all([
-        mutate(api.updateBookmark(bookmark.id, { archived }), {
+        mutate(promise, {
           optimisticUpdate: (data: Bookmark[] | undefined) =>
             data?.map((b: Bookmark) => (b.id === bookmark.id ? { ...b, archived } : b)),
           rollbackOnError: true,
         }),
-        searchMutate(undefined, {
+        searchMutate(promise, {
           optimisticUpdate: (data: Bookmark[] | undefined) =>
             data?.map((b: Bookmark) => (b.id === bookmark.id ? { ...b, archived } : b)),
+          rollbackOnError: true,
         }),
       ]);
       await showToast({ style: Toast.Style.Success, title: archived ? "Archived" : "Unarchived" });
     } catch (error) {
-      await searchMutate();
       showApiError(toError(error));
     }
   }
@@ -124,19 +125,20 @@ export default function SearchBookmarks() {
     });
     if (!confirmed) return;
 
+    const promise = api.deleteBookmark(bookmark.id);
     try {
       await Promise.all([
-        mutate(api.deleteBookmark(bookmark.id), {
+        mutate(promise, {
           optimisticUpdate: (data: Bookmark[] | undefined) => data?.filter((b: Bookmark) => b.id !== bookmark.id),
           rollbackOnError: true,
         }),
-        searchMutate(undefined, {
+        searchMutate(promise, {
           optimisticUpdate: (data: Bookmark[] | undefined) => data?.filter((b: Bookmark) => b.id !== bookmark.id),
+          rollbackOnError: true,
         }),
       ]);
       await showToast({ style: Toast.Style.Success, title: "Bookmark deleted" });
     } catch (error) {
-      await searchMutate();
       showApiError(toError(error));
     }
   }
