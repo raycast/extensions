@@ -1,0 +1,65 @@
+/**
+ * DS command — no-view mode.
+ *
+ * Grabs the URL from the argument or active browser tab and
+ * opens the matching Discussite Site immediately. No form, no extra steps.
+ *
+ * Usage:
+ *   "DS"                     → uses active browser tab URL
+ *   "DS https://example.com" → uses the provided URL
+ */
+
+import {
+  BrowserExtension,
+  closeMainWindow,
+  open,
+  showHUD,
+  LaunchProps,
+} from "@raycast/api";
+import { normalizeSiteUrlInput } from "./lib/url-validation";
+import { DS_BASE_URL } from "./config";
+
+interface StartArguments {
+  url?: string;
+}
+
+export default async function start(
+  props: LaunchProps<{ arguments: StartArguments }>,
+) {
+  let url = props.arguments.url?.trim() || "";
+  let browserTabLookupFailed = false;
+
+  // If no argument, try the active browser tab
+  if (!url) {
+    try {
+      const tabs = await BrowserExtension.getTabs();
+      const activeTab = tabs.find((t) => t.active);
+      if (activeTab?.url && activeTab.url.startsWith("http")) {
+        url = activeTab.url;
+      }
+    } catch {
+      browserTabLookupFailed = true;
+    }
+  }
+
+  if (!url) {
+    await showHUD(
+      browserTabLookupFailed
+        ? "Pass a URL or install the Raycast Browser Extension"
+        : "No URL found — open an HTTPS site first",
+    );
+    return;
+  }
+
+  const normalized = normalizeSiteUrlInput(url);
+  if (!normalized.ok) {
+    await showHUD(normalized.error);
+    return;
+  }
+
+  const destination = new URL("/", DS_BASE_URL);
+  destination.searchParams.set("url", normalized.normalizedUrl);
+
+  await closeMainWindow();
+  await open(destination.toString());
+}
