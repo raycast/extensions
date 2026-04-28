@@ -1,6 +1,6 @@
 # Changelog
 
-## [Xerox C325 Support] - 2026-04-27
+## [Xerox C325 Support] - {PR_MERGE_DATE}
 
 - Adapted the printer status command for Xerox C325 printers.
 - Added configurable OID preferences for page counts, toner supplies, device identity, and printer status.
