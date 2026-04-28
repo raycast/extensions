@@ -1,7 +1,7 @@
 # Changelog Format Rules
 
 ## Raycast Extensions Monorepo Compliance
-- Top entry for new PRs must use `[PR_MERGE_DATE]` placeholder (not `{PR_MERGE_DATE}`)
+- Top entry for new PRs must use `[PR_MERGE_DATE]` placeholder (not `2026-04-28`)
 - Format: `## [Short Title] [Version] - [PR_MERGE_DATE]`
 - For historical entries with actual dates: `## [Short Title] [Version] - YYYY-MM-DD`
 

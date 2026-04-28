@@ -1,6 +1,6 @@
 # Brreg Search Changelog
 
-## [1.0.1] - {PR_MERGE_DATE}
+## [1.0.1] - 2026-04-28
 
 _Quality, Testing & Details Fixes_
 
