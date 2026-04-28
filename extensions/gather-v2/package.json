@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gather-v2",
+  "title": "Gather V2",
+  "description": "Control Gather V2 from Raycast",
+  "icon": "command-icon.png",
+  "author": "romainbsl",
+  "version": "1.0.0",
+  "categories": [
+    "Communication",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "toggle-mic-camera",
+      "title": "Toggle Mic and Camera",
+      "subtitle": "Gather V2",
+      "description": "Toggle your microphone and camera in Gather V2 (⌘⇧D)",
+      "mode": "no-view"
+    },
+    {
+      "name": "set-availability-status",
+      "title": "Set Availability Status",
+      "subtitle": "Gather V2",
+      "description": "Set your availability status in Gather V2",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "status",
+          "type": "dropdown",
+          "placeholder": "Status",
+          "required": true,
+          "data": [
+            { "title": "Available", "value": "available" },
+            { "title": "Busy", "value": "busy" },
+            { "title": "Away", "value": "away" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "go-to-desk",
+      "title": "Go to Desk",
+      "subtitle": "Gather V2",
+      "description": "Return to your desk in Gather V2 (⌘D)",
+      "mode": "no-view"
+    },
+    {
+      "name": "search",
+      "title": "Search People and Areas",
+      "subtitle": "Gather V2",
+      "description": "Open the search bar in Gather V2 (⌘K)",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-afk",
+      "title": "Toggle Away from Keyboard",
+      "subtitle": "Gather V2",
+      "description": "Mute mic and camera, then set status to Away",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.74.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
