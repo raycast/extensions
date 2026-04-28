@@ -1,0 +1,32 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "currency-symbols",
+  "title": "Currency Symbols",
+  "description": "Search and copy currency symbols from around the world",
+  "icon": "icon.png",
+  "author": "MobileMage",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-currencies",
+      "title": "Search Currency Symbols",
+      "description": "Find and copy currency symbols like ₦, €, £, ¥ and more",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0"
+  },
+  "devDependencies": {
+    "@raycast/utils": "^1.17.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
