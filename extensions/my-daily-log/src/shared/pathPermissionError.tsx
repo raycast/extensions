@@ -15,7 +15,28 @@ export function showPathPermissionToast(path: string): void {
       title: "Open Extension Preferences",
       onAction: () => openExtensionPreferences(),
     },
-  }).catch(() => {
-    // ignore toast display errors
-  });
+  }).catch(() => undefined);
+}
+
+export function runWithPathPermissionToast<T>(path: string, fn: () => T): T {
+  try {
+    return fn();
+  } catch (error) {
+    if (isPathPermissionError(error)) {
+      showPathPermissionToast(path);
+    }
+    throw error;
+  }
+}
+
+export function runWithPathPermissionFallback<T>(path: string, fallback: T, fn: () => T): T {
+  try {
+    return fn();
+  } catch (error) {
+    if (isPathPermissionError(error)) {
+      showPathPermissionToast(path);
+      return fallback;
+    }
+    throw error;
+  }
 }
