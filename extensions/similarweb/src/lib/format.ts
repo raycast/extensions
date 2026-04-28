@@ -13,7 +13,7 @@ export function buildWebsiteSections(snapshot: WebsiteSnapshot): WebsiteSection[
     {
       key: "engagement",
       title: "Engagement",
-      subtitle: normalized.visits ? formatNumber(normalized.visits) : "No visits found",
+      subtitle: normalized.visits ? formatCompact(normalized.visits) : "No visits found",
       markdown: formatRowsSection("# Engagement", engagementRows(normalized), "No engagement metrics were available."),
     },
     {
@@ -144,7 +144,7 @@ function formatMetadataMarkdown(snapshot: WebsiteSnapshot, n: NormalizedWebsiteD
 
 function engagementRows(n: NormalizedWebsiteData): DisplayRow[] {
   return [
-    { label: "Visits", value: formatMaybeNumber(n.visits) },
+    { label: "Visits", value: formatMaybeCompact(n.visits) },
     { label: "Bounce Rate", value: formatPercent(n.bounceRate) },
     { label: "Pages per Visit", value: formatDecimal(n.pagesPerVisit) },
     { label: "Time on Site", value: formatDuration(n.timeOnSite) },
@@ -169,7 +169,7 @@ function normalizeMonthSeries(value: Record<string, unknown> | undefined): Displ
   return Object.entries(value)
     .map(([month, visits]) => {
       const numeric = asNumber(visits);
-      return numeric === undefined ? undefined : { label: month, value: formatNumber(numeric) };
+      return numeric === undefined ? undefined : { label: month, value: formatCompact(numeric) };
     })
     .filter((row): row is DisplayRow => Boolean(row))
     .sort((a, b) => a.label.localeCompare(b.label))
@@ -252,14 +252,10 @@ function formatRank(value?: number, context?: string): string {
   return context ? `#${formatNumber(value)} (${context})` : `#${formatNumber(value)}`;
 }
 
-function formatMaybeNumber(value?: number): string {
-  return value === undefined ? "Unavailable" : formatNumber(value);
-}
-
 function formatVisitsSummary(n: NormalizedWebsiteData): string {
   const last3 = n.monthlyVisits.slice(-3);
-  if (last3.length > 0) return last3.map((row) => row.value).join(" • ");
-  return formatMaybeNumber(n.visits);
+  if (last3.length > 0) return last3.map((row) => row.value).join(" \u2022 ");
+  return formatMaybeCompact(n.visits);
 }
 
 function formatPercent(value?: number): string {
@@ -282,6 +278,30 @@ function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: value >= 100 ? 0 : 2,
   }).format(value);
+}
+
+function formatMaybeCompact(value?: number): string {
+  return value === undefined ? "Unavailable" : formatCompact(value);
+}
+
+function formatCompact(value: number): string {
+  const abs = Math.abs(value);
+  const sign = value < 0 ? "-" : "";
+
+  const units: Array<{ threshold: number; suffix: string }> = [
+    { threshold: 1e12, suffix: "t" },
+    { threshold: 1e9, suffix: "b" },
+    { threshold: 1e6, suffix: "m" },
+    { threshold: 1e3, suffix: "k" },
+  ];
+
+  for (const { threshold, suffix } of units) {
+    if (abs >= threshold) {
+      return `${sign}${(abs / threshold).toFixed(2)}${suffix}`;
+    }
+  }
+
+  return formatNumber(value);
 }
 
 function formatTimestamp(value: string): string {
