@@ -1,6 +1,6 @@
 # Google Contacts Changelog
 
-## [1.0.2] - {PR_MERGE_DATE}
+## [1.0.2] - 2026-04-28
 
 - Show an actionable error in Raycast when the Google People API is disabled in the user's project, instead of dumping the raw 403 response from Google
 - Add a Troubleshooting section to the README
