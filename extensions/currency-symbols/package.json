@@ -4,7 +4,7 @@
   "title": "Currency Symbols",
   "description": "Search and copy currency symbols from around the world",
   "icon": "icon.png",
-  "author": "MobileMage",
+  "author": "mobilemage",
   "categories": ["Finance"],
   "license": "MIT",
   "commands": [
