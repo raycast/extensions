@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Fix] - 2026-04-28
+## [Fix] - {PR_MERGE_DATE}
 
 - Fix `Search History` command failing with `no such column: "unixepoch"` by using single-quoted string literals in the SQL query.
 
