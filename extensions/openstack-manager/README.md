@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/extension-icon.png" width="128" height="128" alt="OpenStack Manager Icon" />
+</p>
+
 # OpenStack Manager
 
 A Raycast extension for browsing and managing OpenStack cloud resources. Access servers, flavors, images, networks, security groups, and Kubernetes clusters across multiple cloud configurations — all from Raycast.
@@ -87,3 +91,9 @@ Add, edit, and remove cloud configurations. Configs are stored in the standard `
 The extension wraps the `openstack` CLI binary. All resource operations are executed via `openstack --os-cloud <config> <command> -f json` and the JSON output is displayed in Raycast. No direct API calls are made — the CLI handles authentication, token management, and endpoint discovery.
 
 Resource lists are cached in Raycast's LocalStorage for instant loading on subsequent opens. A background refresh fetches fresh data automatically. Detail views are also cached per resource ID.
+
+## Feedback & Issues
+
+Found a bug, have a feature request, or need help setting up your cloud configurations? 
+
+Please feel free to [open an issue](https://github.com/PhamQuang-512/OpenStack-Manager/issues) on GitHub. Contributions, suggestions, and feedback are always welcome!
