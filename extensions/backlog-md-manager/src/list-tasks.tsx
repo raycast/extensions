@@ -82,7 +82,7 @@ export default function Command() {
   const { isLoading, data, revalidate } = usePromise(
     async (cwd: string, status: string, priority: string) => {
       const args = ["task", "list", "--plain"];
-      if (status !== "All") args.push("--status", status);
+      if (status !== "All") args.push("--status", status.toLowerCase());
       if (priority !== "All") args.push("--priority", priority.toLowerCase());
 
       const stdout = await runBacklog(args, cwd);

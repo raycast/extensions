@@ -60,7 +60,13 @@ export default function EditTask({
     const labels = values.labels?.trim();
     const currentLabels = task.labels.join(", ");
     if (labels !== currentLabels) {
-      args.push("--label", labels || "");
+      if (labels) {
+        args.push("--label", labels);
+      } else {
+        for (const label of task.labels) {
+          args.push("--remove-label", label);
+        }
+      }
     }
 
     const description = values.description?.trim();
