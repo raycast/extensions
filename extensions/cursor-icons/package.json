@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cursor-icons",
+  "title": "Cursor Icons",
+  "description": "Search, copy, and paste Cursor product icons from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "nick_inzucchi",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Design Tools"
+  ],
+  "keywords": [
+    "cursor",
+    "icons",
+    "symbols",
+    "design",
+    "figma"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "cursor-icons",
+      "title": "Cursor Icons",
+      "subtitle": "Internal",
+      "description": "Search, copy, and paste Cursor product icons.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "primaryAction",
+      "type": "dropdown",
+      "title": "Primary Action",
+      "description": "Choose the first action shown for each icon.",
+      "required": false,
+      "data": [
+        {
+          "title": "Copy Icon to Clipboard",
+          "value": "copyIcon"
+        },
+        {
+          "title": "Paste Icon in Active App",
+          "value": "pasteIcon"
+        },
+        {
+          "title": "Copy Icon Name",
+          "value": "copyName"
+        },
+        {
+          "title": "Paste Icon Name",
+          "value": "pasteName"
+        }
+      ],
+      "default": "copyIcon"
+    },
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "title": "Grid Size",
+      "description": "Choose how many icons Raycast shows per row.",
+      "required": false,
+      "data": [
+        {
+          "title": "Large",
+          "value": "3"
+        },
+        {
+          "title": "Medium",
+          "value": "5"
+        },
+        {
+          "title": "Small",
+          "value": "8"
+        }
+      ],
+      "default": "8"
+    },
+    {
+      "name": "showName",
+      "type": "checkbox",
+      "title": "Show Icon Names",
+      "label": "Show icon names in the grid",
+      "description": "Display the Cursor icon name under each preview.",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showRecent",
+      "type": "checkbox",
+      "title": "Show Recent Icons",
+      "label": "Show recently used icons",
+      "description": "Display recently copied or pasted icons above all icons.",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "generate": "node scripts/generate-icons.js && node scripts/generate-extension-icons.js",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "node --test scripts/*.test.js"
+  }
+}
