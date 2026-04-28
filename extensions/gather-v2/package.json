@@ -16,7 +16,21 @@
       "name": "toggle-mic-camera",
       "title": "Toggle Mic and Camera",
       "subtitle": "Gather V2",
-      "description": "Toggle your microphone and camera in Gather V2 (⌘⇧D)",
+      "description": "Toggle your microphone and camera together in Gather V2 (⌘⇧D)",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-microphone",
+      "title": "Toggle Microphone",
+      "subtitle": "Gather V2",
+      "description": "Toggle your microphone in Gather V2 (⌘⇧A)",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-camera",
+      "title": "Toggle Camera",
+      "subtitle": "Gather V2",
+      "description": "Toggle your camera in Gather V2 (⌘⇧V)",
       "mode": "no-view"
     },
     {

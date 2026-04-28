@@ -9,6 +9,8 @@ Control [Gather V2](https://www.gather.town) from Raycast.
 | Command | Gather shortcut | What it does |
 |---|---|---|
 | Toggle Mic and Camera | ⌘⇧D | Toggle your microphone and camera together. |
+| Toggle Microphone | ⌘⇧A | Toggle your microphone only. |
+| Toggle Camera | ⌘⇧V | Toggle your camera only. |
 | Set Availability Status | ⌘O / ⌘I / ⌘U | Set status to Available, Busy or Away. |
 | Go to Desk | ⌘D | Return to your desk. |
 | Search People and Areas | ⌘K | Open the search bar. |
