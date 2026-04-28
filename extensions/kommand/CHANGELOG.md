@@ -4,6 +4,7 @@
 
 - Search shortcuts by app name
 - Search shortcuts by category name
+- Filter Search All Shortcuts by All / Global Only via dropdown
 
 ## [Initial Version] - 2026-03-12
 
