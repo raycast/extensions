@@ -216,9 +216,9 @@ function normalizeKeywordArray(value: unknown): DisplayRow[] {
       if (!label) return undefined;
       const share = asNumber(r.Value);
       const volume = asNumber(r.Volume) ?? asNumber(r.EstimatedValue);
-      const value =
+      const displayValue =
         share !== undefined ? formatPercent(share) : volume !== undefined ? formatNumber(volume) : "Available";
-      return { label, value };
+      return { label, value: displayValue };
     })
     .filter((row): row is DisplayRow => Boolean(row))
     .slice(0, 10);
