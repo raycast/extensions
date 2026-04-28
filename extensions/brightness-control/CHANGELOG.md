@@ -1,6 +1,6 @@
 # Brightness Control Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-04-28
 - Add windows support
 - Update packages
 ## [Fix Brightness Up/Down hotkey bug] - 2026-04-15
