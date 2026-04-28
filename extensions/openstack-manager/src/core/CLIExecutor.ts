@@ -17,6 +17,10 @@ export class CLIExecutor {
     private readonly cloudName: string,
   ) {}
 
+  getCloudName(): string {
+    return this.cloudName;
+  }
+
   /**
    * Runs: <binaryPath> --os-cloud <cloudName> ...args -f json
    * Returns parsed JSON output.

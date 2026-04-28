@@ -40,7 +40,7 @@ export class SecurityGroupService extends BaseService {
    * Cached in LocalStorage since the project doesn't change within a config.
    */
   private async getCurrentProjectId(): Promise<string | null> {
-    const cacheKey = "current-project-id";
+    const cacheKey = `current-project-id:${this.cli.getCloudName()}`;
     try {
       const cached = await LocalStorage.getItem<string>(cacheKey);
       if (cached) return cached;

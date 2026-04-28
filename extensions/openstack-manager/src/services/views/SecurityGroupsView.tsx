@@ -64,7 +64,7 @@ export default function SecurityGroupsView({
             icon={Icon.Shield}
             title={group.name}
             subtitle={group.description ?? ""}
-            accessories={[{ text: group.description ?? "" }]}
+            accessories={[{ text: group.id }]}
             actions={
               <ActionPanel>
                 <Action.Push
