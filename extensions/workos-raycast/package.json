@@ -1,0 +1,85 @@
+{
+  "name": "workos-raycast",
+  "version": "0.1.0",
+  "private": true,
+  "title": "WorkOS",
+  "description": "Calm quick capture for WorkOS.",
+  "icon": "workos-icon.png",
+  "author": "rees",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "keywords": [
+    "workos",
+    "tasks",
+    "todo",
+    "projects",
+    "focus",
+    "pomodoro",
+    "standup"
+  ],
+  "scripts": {
+    "dev": "ray dev",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^20.19.0",
+    "typescript": "^5.9.0"
+  },
+  "commands": [
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Quickly capture a task into WorkOS.",
+      "mode": "view"
+    },
+    {
+      "name": "open-workos",
+      "title": "Open WorkOS",
+      "description": "Open your WorkOS workspace.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "workosUrl",
+      "title": "WorkOS URL",
+      "description": "Your deployed WorkOS URL.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://workos-dashboard.vercel.app"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Matches RAYCAST_API_SECRET in the WorkOS deployment.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "email",
+      "title": "Account Email",
+      "description": "The WorkOS account that should receive captured tasks.",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "workspaceId",
+      "title": "Workspace ID",
+      "description": "Optional. Leave blank to use your first workspace.",
+      "type": "textfield",
+      "required": false
+    }
+  ]
+}
