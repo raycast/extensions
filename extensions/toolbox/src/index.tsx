@@ -12,18 +12,16 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useSelectionOrClipboard } from "./hooks/useClipboard";
 import * as scripts from "./script";
 import { Category, Info, Result, Run, RunType, Script } from "./script/type";
-
-let selectScript: Run | null = null;
-
-let isClipboardScriptRunning = false;
 
 const preferences = getPreferenceValues();
 
 export default function ToolboxList() {
   const [categorys, setCategorys] = useState<Category[]>();
+  const { text: inputText, isLoading: isInputLoading } = useSelectionOrClipboard();
 
   useEffect(() => {
     const categorys: Category[] = [];
@@ -45,7 +43,7 @@ export default function ToolboxList() {
       {categorys?.map((category) => (
         <List.Section key={category.title} title={category.title}>
           {category.items.map((item) => {
-            return <ListItem item={item} key={item.info.title} />;
+            return <ListItem item={item} inputText={inputText} isInputLoading={isInputLoading} key={item.info.title} />;
           })}
         </List.Section>
       ))}
@@ -53,11 +51,14 @@ export default function ToolboxList() {
   );
 }
 
-const ListItem = React.memo(function ListItem(props: { item: Script }) {
+const ListItem = React.memo(function ListItem(props: { item: Script; inputText: string; isInputLoading: boolean }) {
   const { pop, push } = useNavigation();
+  const isClipboardScriptRunning = useRef(false);
 
   const item = props.item;
   const info = item.info;
+  const inputText = props.inputText;
+  const isInputLoading = props.isInputLoading;
 
   const keyword = useMemo(
     () =>
@@ -71,57 +72,105 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
     [info.keywords],
   );
 
-  function moveWindow(runType: RunType) {
+  function openInputView(runType: RunType, initialQuery?: string) {
+    if (runType === "list") {
+      push(<InputListView info={info} run={item.run} initialQuery={initialQuery} />);
+      return;
+    }
+
+    if (runType === "form") {
+      push(<InputFormView info={info} run={item.run} initialQuery={initialQuery} />);
+      return;
+    }
+
     if (runType === "clipboard") {
       if (item.info.type.includes("list")) {
-        push(<InputListView info={info} />);
+        push(<InputListView info={info} run={item.run} initialQuery={initialQuery} />);
       } else {
-        push(<InputFormView info={info} />);
+        push(<InputFormView info={info} run={item.run} initialQuery={initialQuery} />);
       }
-    } else if (runType === "list") {
-      push(<InputListView info={info} />);
-    } else if (runType === "form") {
-      push(<InputFormView info={info} />);
     }
   }
 
   async function action(runType: RunType) {
-    if (isClipboardScriptRunning) return;
-    selectScript = item.run;
+    if (isClipboardScriptRunning.current) return;
 
     if (runType === "clipboard") {
-      isClipboardScriptRunning = true;
-      const query = await isClipboardContent();
-
-      let scriptResult = { result: "", isSuccess: false };
-      if (query) {
-        scriptResult = await runScript(query);
-        if (scriptResult.isSuccess) {
-          await Clipboard.copy(scriptResult.result);
-          await copyAction(pop);
-        }
+      if (!inputText) {
+        openInputView(runType);
+        return;
       }
-      isClipboardScriptRunning = false;
+
+      isClipboardScriptRunning.current = true;
+      const scriptResult = runScript(item.run, inputText);
+
       if (scriptResult.isSuccess) {
+        await Clipboard.copy(scriptResult.result);
         await showHUD("✅ Result Copied to Clipboard");
+        await copyAction(pop);
       } else {
         if (scriptResult.result) {
           await showToast(Toast.Style.Failure, scriptResult.result);
         }
-        moveWindow(runType);
+        openInputView(runType);
       }
+
+      isClipboardScriptRunning.current = false;
     } else {
-      moveWindow(runType);
+      openInputView(runType);
     }
   }
+
+  const preview = useMemo(() => {
+    if (isInputLoading || inputText.length === 0) {
+      return { hasInput: false, isSuccess: false, result: "" };
+    }
+
+    const result = runScript(item.run, inputText);
+    return { hasInput: true, ...result };
+  }, [inputText, isInputLoading, item.run]);
+
+  const previewText =
+    preview.hasInput && preview.isSuccess && preview.result.length > 0 ? truncatePreview(preview.result) : undefined;
+
+  const hasIncompatibleInput = preview.hasInput && !preview.isSuccess;
+  const canApply = preview.hasInput && preview.isSuccess;
+
+  const accessories: List.Item.Accessory[] = [
+    ...(hasIncompatibleInput ? [{ icon: Icon.Warning }] : []),
+    { text: info.desc },
+  ];
 
   return (
     <List.Item
       title={info.title}
       keywords={keyword}
       icon={info.icon}
+      subtitle={previewText}
       actions={
         <ActionPanel>
+          {canApply && (
+            <Action
+              title="Apply Result"
+              icon={Icon.Checkmark}
+              onAction={async () => {
+                await Clipboard.paste(preview.result);
+              }}
+            />
+          )}
+          {canApply && (
+            <Action.Push
+              title="Edit Before Applying"
+              icon={Icon.Pencil}
+              target={
+                item.info.type.includes("list") ? (
+                  <InputListView info={info} run={item.run} initialQuery={inputText} />
+                ) : (
+                  <InputFormView info={info} run={item.run} initialQuery={inputText} />
+                )
+              }
+            />
+          )}
           {info.type.map((type) => {
             return type === "list" ? (
               <Action
@@ -155,67 +204,50 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
           })}
         </ActionPanel>
       }
-      accessories={[
-        {
-          text: info.desc,
-        },
-      ]}
+      accessories={accessories}
     />
   );
 });
 
-const useScriptHook = () => {
+const useScriptHook = (run: Run, initialQuery = "") => {
   const [content, setContent] = useState<Result>({
-    query: "",
+    query: initialQuery,
     result: "",
     isLoading: false,
     isWaiting: false,
     isError: false,
   });
-  const [isLive, setIsLive] = useState(true);
   useEffect(() => {
+    let isActive = true;
+
+    if (content.query.length === 0) {
+      setContent((prev) => ({
+        ...prev,
+        result: "",
+        isLoading: false,
+        isWaiting: false,
+        isError: false,
+      }));
+      return () => {
+        isActive = false;
+      };
+    }
+
+    setContent((prev) => ({ ...prev, isLoading: true, isWaiting: false }));
+    const scriptResult = runScript(run, content.query);
+    if (isActive) {
+      setContent((prev) => ({
+        ...prev,
+        result: scriptResult.result,
+        isLoading: false,
+        isError: !scriptResult.isSuccess,
+      }));
+    }
+
     return () => {
-      selectScript = null;
-      setIsLive(false);
+      isActive = false;
     };
-  }, []);
-
-  async function startScript() {
-    if (content.query.length > 0) {
-      if (isLive) {
-        setContent((prev) => ({ ...prev, isLoading: true }));
-      }
-
-      const scriptResult = await runScript(content.query);
-      if (isLive) {
-        setContent((prev) => ({
-          ...prev,
-          result: scriptResult.result,
-          isLoading: false,
-          isError: !scriptResult.isSuccess,
-        }));
-      }
-    } else {
-      if (isLive) {
-        setContent((prev) => ({ ...prev, result: "", isError: false }));
-      }
-    }
-  }
-
-  useEffect(() => {
-    if (content.isLoading) {
-      setContent((prev) => ({ ...prev, isWaiting: true }));
-      return;
-    }
-    startScript();
-  }, [content.query]);
-
-  useEffect(() => {
-    if (!content.isLoading && content.isWaiting) {
-      setContent((prev) => ({ ...prev, isWaiting: false }));
-      startScript();
-    }
-  }, [content.isLoading, content.isWaiting]);
+  }, [content.query, run]);
 
   return { content, setContent };
 };
@@ -238,7 +270,6 @@ function ResultActionView(props: { content: Result; info: Info }) {
               await copyAction(pop);
             }}
           />
-
           <Action
             title="Copy Query to Clipboard"
             icon={Icon.Clipboard}
@@ -254,17 +285,18 @@ function ResultActionView(props: { content: Result; info: Info }) {
   );
 }
 
-function InputListView(props: { info: Info }) {
+function InputListView(props: { info: Info; run: Run; initialQuery?: string }) {
   const info = props.info;
-  const { content, setContent } = useScriptHook();
+  const { content, setContent } = useScriptHook(props.run, props.initialQuery ?? "");
 
   return (
     <List
       navigationTitle={"ToolBox - " + info.title}
       isLoading={content.isLoading}
       searchBarPlaceholder={"Enter your query here"}
+      searchText={content.query}
       onSearchTextChange={(query: string) => {
-        setContent({ ...content, query: query });
+        setContent((prev) => ({ ...prev, query }));
       }}
     >
       <List.Item
@@ -290,9 +322,9 @@ function InputListView(props: { info: Info }) {
   );
 }
 
-function InputFormView(props: { info: Info }) {
+function InputFormView(props: { info: Info; run: Run; initialQuery?: string }) {
   const info = props.info;
-  const { content, setContent } = useScriptHook();
+  const { content, setContent } = useScriptHook(props.run, props.initialQuery ?? "");
 
   return (
     <Form
@@ -306,10 +338,10 @@ function InputFormView(props: { info: Info }) {
         placeholder={info.example}
         value={content.query}
         onChange={(query: string) =>
-          setContent({
-            ...content,
-            query: query,
-          })
+          setContent((prev) => ({
+            ...prev,
+            query,
+          }))
         }
       />
       <Form.TextArea id="result" title="Result" value={content.result} />
@@ -317,21 +349,20 @@ function InputFormView(props: { info: Info }) {
   );
 }
 
-async function isClipboardContent() {
-  const clipboardText = await Clipboard.readText();
-  if (!clipboardText || clipboardText.length === 0) {
-    return false;
-  }
-  return clipboardText;
+const PREVIEW_MAX_LENGTH = 80;
+
+function truncatePreview(value: string, maxLength = PREVIEW_MAX_LENGTH) {
+  if (value.length <= maxLength) return value;
+  return value.slice(0, Math.max(0, maxLength - 3)) + "...";
 }
 
-async function runScript(query: string): Promise<{ result: string; isSuccess: boolean }> {
+function runScript(run: Run, query: string): { result: string; isSuccess: boolean } {
   const state = {
     result: "",
     isSuccess: false,
   };
   try {
-    const result = selectScript?.(query);
+    const result = run(query);
     if (typeof result !== "string") {
       throw result;
     }

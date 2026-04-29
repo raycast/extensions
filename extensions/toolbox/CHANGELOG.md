@@ -1,5 +1,10 @@
 # ToolBox Changelog
 
+## [Add clipboard usage] - {PR_MERGE_DATE}
+
+- Add preview of clipboard text (if exist)
+- Add new action: Edit Before Applying
+
 ## [Update] - 2025-11-14
 
 - Added support for Windows
