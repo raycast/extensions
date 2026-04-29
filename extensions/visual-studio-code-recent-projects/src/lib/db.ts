@@ -112,23 +112,29 @@ function getEntriesFromStorageJSON(): EntryLike[] | undefined {
     const seen = new Set<string>();
     const results: EntryLike[] = [];
 
+    function buildUri(uri: Record<string, unknown>): string | undefined {
+      const scheme = typeof uri.scheme === "string" ? uri.scheme : "file";
+      const authority = typeof uri.authority === "string" ? uri.authority : "";
+      const uriPath = typeof uri.path === "string" ? uri.path : undefined;
+      return uriPath ? `${scheme}://${authority}${uriPath}` : undefined;
+    }
+
     function walkItems(items: unknown[]) {
       for (const item of items) {
         if (!item || typeof item !== "object") continue;
         const obj = item as Record<string, unknown>;
+        const uri = obj.uri as Record<string, unknown> | undefined;
 
-        if (obj.id === "openRecentFolder") {
-          const uri = obj.uri as Record<string, unknown> | undefined;
-          if (uri) {
-            const scheme = typeof uri.scheme === "string" ? uri.scheme : "file";
-            const uriPath = typeof uri.path === "string" ? uri.path : undefined;
-            const authority = typeof uri.authority === "string" ? uri.authority : "";
-            if (uriPath) {
-              const folderUri = `${scheme}://${authority}${uriPath}`;
-              if (!seen.has(folderUri)) {
-                seen.add(folderUri);
-                results.push({ folderUri });
-              }
+        if (uri) {
+          const uriStr = buildUri(uri);
+          if (uriStr && !seen.has(uriStr)) {
+            seen.add(uriStr);
+            if (obj.id === "openRecentFolder") {
+              results.push({ folderUri: uriStr });
+            } else if (obj.id === "openRecentFile") {
+              results.push({ fileUri: uriStr });
+            } else if (obj.id === "openRecentWorkspace") {
+              results.push({ workspace: { configPath: uriStr } });
             }
           }
         }
