@@ -13,7 +13,9 @@ export default async function Command() {
     const result = telexTransform(selectedText);
 
     await Clipboard.paste(result);
-    await showHUD(result);
+    await Clipboard.copy(result);
+
+    await showHUD("Copied to clipboard");
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
