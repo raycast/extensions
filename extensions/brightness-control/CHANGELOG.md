@@ -5,6 +5,7 @@
 - "Brightness Down" failed with "Error: Unknown option '-10'" since subprocess evaluates the "-10" as an argument. Added a leading "--" to prevent it.
 
 ## [Update] - 2026-04-28
+
 - Add windows support
 - Update packages
 
