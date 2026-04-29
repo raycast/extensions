@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as api from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { handleErrorToastAction } from "../util/handleErrorToastAction";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { createHash } from "crypto";
 import os from "os";
 import path from "path";
@@ -57,7 +57,7 @@ const hashFile = (filePath: string) => {
   }
 };
 
-const ensureHistorySnapshot = (sourcePath: string, snapshotPath: string) => {
+const ensureHistorySnapshot = (sourcePath: string, snapshotPath: string, onData: (path: string) => void) => {
   try {
     const sourceHash = hashFile(sourcePath);
     const snapshotHash = fs.existsSync(snapshotPath) ? hashFile(snapshotPath) : null;
@@ -67,7 +67,7 @@ const ensureHistorySnapshot = (sourcePath: string, snapshotPath: string) => {
     }
 
     fs.copyFileSync(sourcePath, snapshotPath);
-    return snapshotPath;
+    onData(snapshotPath);
   } catch {
     return null;
   }
@@ -77,15 +77,16 @@ export function useHistorySearch(profile: string, query?: string): SearchResult<
   const parsedQuery = parseSearchQuery(query || "");
   const queries = getHistoryQuery("urls", "last_visit_time", parsedQuery.includeTerms, parsedQuery.excludeTerms);
   const dbPath = getHistoryDbPath(profile);
-  const placeholderDbPath = getPlaceholderDbPath();
 
+  // use ref for customRevalidate
+  const snapshotPathRef = useRef<string>(getPlaceholderDbPath());
   const [snapshotVer, setSnapshotVer] = useState(0);
-  const [snapshotPath, setSnapshotPath] = useState<string | null>(null);
   useEffect(() => {
-    const nextSnapshotPath = ensureHistorySnapshot(dbPath, getHistorySnapshotPath());
-    if (nextSnapshotPath) {
-      setSnapshotPath(nextSnapshotPath);
-    }
+    ensureHistorySnapshot(dbPath, getHistorySnapshotPath(), (path) => {
+      snapshotPathRef.current = path;
+      // trigger re-render to re-run useSQL
+      setSnapshotVer((cur) => cur + 1);
+    });
   }, [dbPath, snapshotVer]);
 
   const [retryWaiting, setRetryWaiting] = useState(false);
@@ -98,7 +99,7 @@ export function useHistorySearch(profile: string, query?: string): SearchResult<
   }, [retryTimer]);
 
   const { data, isLoading, permissionView, revalidate } = useSQL<HistoryEntry>(
-    snapshotPath || placeholderDbPath,
+    snapshotPathRef.current,
     queries as unknown as string,
     {
       onData() {
@@ -133,20 +134,22 @@ export function useHistorySearch(profile: string, query?: string): SearchResult<
           }
         }
       },
-      execute: snapshotPath != null,
+      execute: snapshotPathRef.current != null,
     },
   );
 
   const customRevalidate = () => {
-    revalidate();
-    setSnapshotVer((cur) => cur + 1);
+    ensureHistorySnapshot(dbPath, getHistorySnapshotPath(), (path) => {
+      snapshotPathRef.current = path;
+      revalidate();
+    });
   };
 
   if (!fs.existsSync(dbPath)) {
     return { isLoading: false, data: [], errorView: <NotInstalledError /> };
   }
 
-  if (!snapshotPath) {
+  if (!snapshotPathRef.current) {
     return { isLoading: true, data: [], revalidate };
   }
 
