@@ -5,6 +5,7 @@ import {
   Toast,
   confirmAlert,
   useNavigation,
+  LaunchProps,
 } from "@raycast/api";
 import TimerForm from "./timer-form";
 import { HakunaTimer, TimerResponse } from "./hakuna-api";
@@ -17,13 +18,12 @@ interface Props {
   onUpdate?: (updated: TimerResponse) => void;
 }
 
-export default function AddTimeEntry({
-  projectId,
-  taskId,
-  note,
-  entry,
-  onUpdate,
-}: Props) {
+export default function AddTimeEntry(
+  props: Props &
+    Partial<LaunchProps<{ launchContext: { entry?: TimerResponse } }>>,
+) {
+  const { projectId, taskId, note, onUpdate } = props;
+  const entry = props.entry ?? props.launchContext?.entry;
   const { apiToken } = getPreferenceValues<{ apiToken: string }>();
   const { pop } = useNavigation();
   const timer = new HakunaTimer(apiToken);

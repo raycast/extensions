@@ -49,7 +49,7 @@
       "title": "Hakuna Overview",
       "description": "Show today's worktime and overall overview in the menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "5m"
     },
     {
       "name": "profile",

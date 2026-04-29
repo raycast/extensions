@@ -46,12 +46,26 @@ export default function Command() {
     return await timer.getTimer();
   });
 
-  const isLoading = isLoadingOverview || isLoadingWorktime || isLoadingTimer;
+  const {
+    data: timeEntries,
+    isLoading: isLoadingEntries,
+    mutate: mutateEntries,
+  } = useCachedPromise(async () => {
+    const today = new Date().toISOString().split("T")[0];
+    return await timer.getTimeEntries(today);
+  });
+
+  const isLoading =
+    isLoadingOverview ||
+    isLoadingWorktime ||
+    isLoadingTimer ||
+    isLoadingEntries;
 
   const refreshAll = () => {
     mutateOverview();
     mutateWorktime();
     mutateTimer();
+    mutateEntries();
   };
 
   const handleStopTimer = async () => {
@@ -178,7 +192,52 @@ export default function Command() {
         />
       </MenuBarExtra.Section>
 
-      <MenuBarExtra.Section title="Overview">
+      {(timeEntries ?? []).length > 0 && (
+        <MenuBarExtra.Section title="Recent Entries">
+          {(timeEntries ?? [])
+            .slice(-3)
+            .reverse()
+            .map((entry) => (
+              <MenuBarExtra.Item
+                key={entry.id}
+                title={entry.task?.name ?? "Entry"}
+                subtitle={`${entry.start_time}–${entry.end_time ?? "…"} (${entry.duration})`}
+                icon={Icon.Clock}
+                onAction={async () => {
+                  await launchCommand({
+                    name: "add-time-entry",
+                    type: LaunchType.UserInitiated,
+                    context: { entry },
+                  });
+                }}
+              />
+            ))}
+          {(timeEntries ?? []).length > 3 && (
+            <MenuBarExtra.Submenu title="More Entries" icon={Icon.ChevronDown}>
+              {(timeEntries ?? [])
+                .slice(0, -3)
+                .reverse()
+                .map((entry) => (
+                  <MenuBarExtra.Item
+                    key={entry.id}
+                    title={entry.task?.name ?? "Entry"}
+                    subtitle={`${entry.start_time}–${entry.end_time ?? "…"} (${entry.duration})`}
+                    icon={Icon.Clock}
+                    onAction={async () => {
+                      await launchCommand({
+                        name: "add-time-entry",
+                        type: LaunchType.UserInitiated,
+                        context: { entry },
+                      });
+                    }}
+                  />
+                ))}
+            </MenuBarExtra.Submenu>
+          )}
+        </MenuBarExtra.Section>
+      )}
+
+      <MenuBarExtra.Section title="Profile">
         <MenuBarExtra.Item
           title="Overtime"
           subtitle={overview?.overtime || "00:00"}
