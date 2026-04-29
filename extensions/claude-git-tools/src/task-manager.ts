@@ -15,6 +15,7 @@ import {
   addTask,
   getModel,
   getSkillPath,
+  removeTask,
   updateTask,
   type Task,
 } from "./storage";
@@ -74,7 +75,7 @@ function buildClaudeCommand(
   command: TaskCommand,
   options: TaskOptions,
   model: string,
-): string {
+): string | null {
   let skillFile = "";
   if (options.skillDir && options.skillName) {
     const candidate = join(options.skillDir, `${options.skillName}.md`);

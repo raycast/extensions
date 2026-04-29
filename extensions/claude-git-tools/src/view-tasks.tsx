@@ -68,6 +68,7 @@ export default function ViewTasks() {
     );
     setTasks(updated);
     setIsLoading(false);
+    return updated;
   }, []);
 
   const handleStop = useCallback(
@@ -92,12 +93,24 @@ export default function ViewTasks() {
   );
 
   useEffect(() => {
-    refresh();
-    const hasRunning = tasks.some((t) => t.status === "running");
-    const interval = hasRunning ? 3000 : 30000;
-    const timer = setInterval(refresh, interval);
-    return () => clearInterval(timer);
-  }, [refresh, tasks]);
+    let timer: NodeJS.Timeout | undefined;
+    let isActive = true;
+
+    async function poll() {
+      const updated = await refresh();
+      if (!isActive) return;
+
+      const hasRunning = updated.some((t) => t.status === "running");
+      timer = setTimeout(poll, hasRunning ? 3000 : 30000);
+    }
+
+    void poll();
+
+    return () => {
+      isActive = false;
+      if (timer) clearTimeout(timer);
+    };
+  }, [refresh]);
 
   const running = tasks.filter((t) => t.status === "running");
   const finished = tasks.filter((t) => t.status !== "running");

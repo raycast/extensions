@@ -18,7 +18,7 @@ const COMMAND_LABELS: Record<SkillCommand, string> = {
 };
 
 async function pickSkillFile(commandLabel?: string): Promise<string | null> {
-  const { execSync } = await import("child_process");
+  const { execFileSync } = await import("child_process");
   const { existsSync } = await import("fs");
   const { homedir } = await import("os");
   const { join } = await import("path");
@@ -31,9 +31,20 @@ async function pickSkillFile(commandLabel?: string): Promise<string | null> {
     : "Select a .md skill file";
 
   try {
-    const selected = execSync(
-      `osascript -e 'POSIX path of (choose file with prompt "${prompt}" of type {"md"} default location POSIX file "${defaultDir}")'`,
-      { encoding: "utf-8", timeout: 30000 },
+    const script = `
+on run argv
+  set dialogPrompt to item 1 of argv
+  set defaultDir to POSIX file (item 2 of argv)
+  return POSIX path of (choose file with prompt dialogPrompt of type {"md"} default location defaultDir)
+end run
+`;
+    const selected = execFileSync(
+      "osascript",
+      ["-e", script, prompt, defaultDir],
+      {
+        encoding: "utf-8",
+        timeout: 30000,
+      },
     ).trim();
     return selected || null;
   } catch {
