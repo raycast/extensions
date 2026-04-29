@@ -1,6 +1,6 @@
 # Hakuna Timer Changelog
 
-## [Menu Bar, Absences, Profiles, and More] - 2026-04-29
+## [Menu Bar, Absences, Profiles, and More] - {PR_MERGE_DATE}
 
 ### New Commands
 
