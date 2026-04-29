@@ -63,6 +63,7 @@ const ensureHistorySnapshot = (sourcePath: string, snapshotPath: string, onData:
     const snapshotHash = fs.existsSync(snapshotPath) ? hashFile(snapshotPath) : null;
 
     if (sourceHash && snapshotHash && sourceHash === snapshotHash) {
+      onData(snapshotPath);
       return snapshotPath;
     }
 
