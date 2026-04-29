@@ -81,14 +81,14 @@ export function useHistorySearch(profile: string, query?: string): SearchResult<
 
   // use ref for customRevalidate
   const snapshotPathRef = useRef<string>(getPlaceholderDbPath());
-  const [snapshotVer, setSnapshotVer] = useState(0);
+  const [, setSnapshotVer] = useState(0);
   useEffect(() => {
     ensureHistorySnapshot(dbPath, getHistorySnapshotPath(), (path) => {
       snapshotPathRef.current = path;
       // trigger re-render to re-run useSQL
       setSnapshotVer((cur) => cur + 1);
     });
-  }, [dbPath, snapshotVer]);
+  }, [dbPath]);
 
   const [retryWaiting, setRetryWaiting] = useState(false);
   const [retryTimes, setRetryTimes] = useState(0);
@@ -135,7 +135,6 @@ export function useHistorySearch(profile: string, query?: string): SearchResult<
           }
         }
       },
-      execute: snapshotPathRef.current != null,
     },
   );
 
@@ -148,10 +147,6 @@ export function useHistorySearch(profile: string, query?: string): SearchResult<
 
   if (!fs.existsSync(dbPath)) {
     return { isLoading: false, data: [], errorView: <NotInstalledError /> };
-  }
-
-  if (!snapshotPathRef.current) {
-    return { isLoading: true, data: [], revalidate };
   }
 
   return {
