@@ -25,6 +25,7 @@ function GitPushInner({ skill }: { skill: SkillConfig }) {
         skillName: skill.skillName,
         skillDir: skill.skillDir,
       });
+      if (!task) return;
       toast.style = Toast.Style.Success;
       toast.title = "Git push task started";
       push(<TaskDetail task={task} />);

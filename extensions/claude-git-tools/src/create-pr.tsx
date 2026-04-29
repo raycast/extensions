@@ -63,6 +63,7 @@ function BranchPicker({
         skillName: skill.skillName,
         skillDir: skill.skillDir,
       });
+      if (!task) return;
       toast.style = Toast.Style.Success;
       toast.title = "Create PR task started";
       push(<TaskDetail task={task} />);

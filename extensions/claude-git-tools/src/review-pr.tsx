@@ -235,6 +235,7 @@ function PRPicker({
           skillDir: skill.skillDir,
         },
       );
+      if (!task) return;
       toast.style = Toast.Style.Success;
       toast.title = "PR review task started";
       push(<TaskDetail task={task} onRerunReview={() => handleReview(pr)} />);

@@ -487,6 +487,7 @@ export function TaskDetail({
                     "review-pr",
                     { prUrl: gitUrl, ...skillOpts },
                   );
+                  if (!reviewTask) return;
                   toast.style = Toast.Style.Success;
                   toast.title = "PR review task started";
                   push(
@@ -500,6 +501,7 @@ export function TaskDetail({
                           "review-pr",
                           { prUrl: gitUrl, ...so },
                         );
+                        if (!t) return;
                         push(<TaskDetail task={t} />);
                       }}
                     />,

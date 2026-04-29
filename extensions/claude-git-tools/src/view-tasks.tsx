@@ -165,6 +165,7 @@ export default function ViewTasks() {
                       ...skillOpts,
                     },
                   );
+                  if (!newTask) return;
                   toast.style = Toast.Style.Success;
                   toast.title = "PR review task started";
                   push(

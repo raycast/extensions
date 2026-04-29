@@ -1,3 +1,4 @@
+import { showToast, Toast } from "@raycast/api";
 import { execFileSync, spawn, type ChildProcess } from "child_process";
 import {
   appendFileSync,
@@ -15,6 +16,7 @@ import {
   addTask,
   getModel,
   getSkillPath,
+  removeTask,
   updateTask,
   type Task,
 } from "./storage";
@@ -74,7 +76,7 @@ function buildClaudeCommand(
   command: TaskCommand,
   options: TaskOptions,
   model: string,
-): string {
+): string | null {
   let skillFile = "";
   if (options.skillDir && options.skillName) {
     const candidate = join(options.skillDir, `${options.skillName}.md`);
@@ -84,9 +86,7 @@ function buildClaudeCommand(
   }
 
   if (!skillFile) {
-    throw new Error(
-      `No skill file configured for "${command}". Please configure a skill file first via Manage Folders & Skills.`,
-    );
+    return null;
   }
 
   let prompt: string;
@@ -548,7 +548,7 @@ export async function launchTask(
   dir: string,
   label: string,
   options: TaskOptions = {},
-): Promise<Task> {
+): Promise<Task | null> {
   ensureTaskDir();
   reapStaleTaskProcesses();
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
@@ -579,6 +579,15 @@ export async function launchTask(
 
   const model = await getModel();
   const claudeCommand = buildClaudeCommand(command, options, model);
+  if (!claudeCommand) {
+    await removeTask(id);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "No skill file configured",
+      message: "Please configure a skill file via Manage Folders & Skills",
+    });
+    return null;
+  }
   const home = homedir();
 
   const script = `
