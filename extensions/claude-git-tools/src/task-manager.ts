@@ -83,17 +83,21 @@ function buildClaudeCommand(
     }
   }
 
+  if (!skillFile) {
+    throw new Error(
+      `No skill file configured for "${command}". Please configure a skill file first via Manage Folders & Skills.`,
+    );
+  }
+
   let prompt: string;
   if (command === "git-push") {
-    prompt = skillFile
-      ? "Execute the task described in the appended system prompt"
-      : "/git-push-changes";
+    prompt = "Execute the task described in the appended system prompt";
   } else if (command === "create-pr") {
     const branch = requireTargetBranch(options);
-    prompt = skillFile ? `$ARGUMENTS=${branch}` : `/create-pr ${branch}`;
+    prompt = `$ARGUMENTS=${branch}`;
   } else {
     const prUrl = options.prUrl || "";
-    prompt = skillFile ? `$ARGUMENTS=${prUrl}` : `/pr-review ${prUrl}`;
+    prompt = `$ARGUMENTS=${prUrl}`;
   }
 
   const allowedTools = [
