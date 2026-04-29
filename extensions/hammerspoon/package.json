@@ -3,7 +3,7 @@
   "name": "hammerspoon",
   "title": "Hammerspoon",
   "description": "Control Hammerspoon from Raycast",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "icon": "icon-prod.png",
   "author": "bjrmatos",
   "contributors": [
@@ -87,6 +87,26 @@
       "title": "Search Documentation",
       "description": "Search Hammerspoon Documentation",
       "mode": "view"
+    },
+    {
+      "name": "list-scripts",
+      "title": "List Scripts",
+      "description": "List and quickly trigger User Defined Hammerspoon Scripts",
+      "keywords": [
+        "Macros",
+        "Actions"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "scriptsVariableName",
+          "title": "Scripts Variable Name",
+          "description": "The name of the global variable exported in your Hammerspoon configuration file that contains the methods to work with scripts",
+          "type": "textfield",
+          "default": "__SCRIPTS__",
+          "required": true
+        }
+      ]
     },
     {
       "name": "restart",

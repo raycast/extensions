@@ -1,5 +1,9 @@
 # Hammerspoon Changelog
 
+## [New Command] - {PR_MERGE_DATE}
+
+- add `List Scripts` command to trigger user defined hammerspoon scripts.
+
 ## [Improvements] - 2026-03-08
 
 - add `Clear Console` preference to `Reload Configuration File` command to optionally clear the Hammerspoon Console before reloading
