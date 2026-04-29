@@ -17,11 +17,11 @@ export function useRecentEntries() {
   const path = getStoragePath("state.vscdb");
 
   if (!fs.existsSync(path)) {
+    const storageEntries = getEntriesFromStorageJSON();
     return {
-      data: [],
+      data: storageEntries ?? [],
       isLoading: false,
-      error: true,
-
+      error: !storageEntries,
       removeEntry: () => Promise.resolve(),
       removeAllEntries: () => Promise.resolve(),
     };
