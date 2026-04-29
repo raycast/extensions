@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import rateLimit from "axios-rate-limit";
+import { environment } from "@raycast/api";
 
 interface ErrorResponse {
   message?: string;
@@ -116,6 +117,7 @@ export class HakunaClient {
         headers: {
           "X-Auth-Token": `${this.apiToken}`,
           "Content-Type": "application/json",
+          "User-Agent": `Raycast/${environment.raycastVersion} (${environment.extensionName}${environment.isDevelopment ? "; developmentMode" : ""}) axios/${axios.VERSION}`,
         },
       }),
       { maxRequests: 100, perMilliseconds: 60_000 },
