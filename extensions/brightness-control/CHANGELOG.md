@@ -1,6 +1,6 @@
 # Brightness Control Changelog
 
-## [Fix WMI brightness on Windows] - {PR_MERGE_DATE}
+## [Fix WMI brightness on Windows] - 2026-04-29
 
 - Fixed brightness control failing on Windows by replacing the deprecated `WmiSetBrightness` call pattern with `Invoke-CimMethod`, which properly returns a result that can be checked for success.
 
