@@ -1,0 +1,68 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "opencode",
+  "title": "OpenCode Session Manager",
+  "description": "Manage OpenCode projects, sessions, and status from Raycast",
+  "icon": "extension-icon.png",
+  "author": "mormubis",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "OpenCode",
+      "description": "Search and open OpenCode projects",
+      "mode": "view"
+    },
+    {
+      "name": "search-sessions",
+      "title": "Search Sessions",
+      "subtitle": "OpenCode",
+      "description": "Search and resume OpenCode sessions",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminal",
+      "title": "Terminal",
+      "description": "Terminal application to open OpenCode sessions in",
+      "type": "dropdown",
+      "required": false,
+      "default": "iterm2",
+      "data": [
+        { "title": "iTerm2", "value": "iterm2" },
+        { "title": "Terminal.app", "value": "terminal" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@opencode-ai/sdk": "^1.14.28",
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
