@@ -338,7 +338,7 @@ export function TaskDetail({
     const confirmed = await confirmAlert({
       title: `Close PR #${prNumber}?`,
       message: task.label,
-      primaryAction: { title: "Close", style: Alert.Style.Destructive },
+      primaryAction: { title: "Close", style: Alert.ActionStyle.Destructive },
       dismissAction: { title: "Cancel" },
     });
     if (!confirmed) return;
