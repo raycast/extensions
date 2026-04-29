@@ -54,10 +54,10 @@ export function getOpenSessions(): OpenSession[] {
   const cutoff = Date.now() - 60_000;
   const inClause = processIds.map((id) => `'${escSql(id)}'`).join(",");
 
-  const recentOutput = query(`SELECT id FROM session WHERE id IN (${inClause}) AND time_updated > ${cutoff}`);
+  const recentOutput = queryRaw(`SELECT id FROM session WHERE id IN (${inClause}) AND time_updated > ${cutoff}`);
   const recentlyUpdated = new Set<string>(recentOutput.trim().split("\n").filter(Boolean));
 
-  const todoOutput = query(
+  const todoOutput = queryRaw(
     `SELECT DISTINCT session_id FROM todo WHERE session_id IN (${inClause}) AND status = 'in_progress'`,
   );
   const hasTodos = new Set<string>(todoOutput.trim().split("\n").filter(Boolean));
@@ -77,17 +77,12 @@ export interface DbProject {
 }
 
 export function getProjects(): DbProject[] {
-  const output = query("SELECT id, worktree, name FROM project ORDER BY time_updated DESC");
-  const projects: DbProject[] = [];
-  for (const line of output.trim().split("\n")) {
-    if (!line) continue;
-    const [id, worktree, name] = line.split("|");
-    projects.push({ id, worktree, name: name || "" });
-  }
-  return projects;
+  return queryJson<{ id: string; worktree: string; name: string }>(
+    "SELECT id, worktree, COALESCE(name, '') as name FROM project ORDER BY time_updated DESC",
+  ).map((row) => ({ id: row.id, worktree: row.worktree, name: row.name }));
 }
 
-function query(sql: string): string {
+function queryRaw(sql: string): string {
   try {
     return execSync(`sqlite3 "${DB_PATH}"`, {
       encoding: "utf-8",
@@ -99,19 +94,31 @@ function query(sql: string): string {
   }
 }
 
+function queryJson<T = Record<string, unknown>>(sql: string): T[] {
+  try {
+    const output = execSync(`sqlite3 -json "${DB_PATH}"`, {
+      encoding: "utf-8",
+      input: sql,
+      timeout: 10_000,
+    });
+    if (!output.trim()) return [];
+    return JSON.parse(output) as T[];
+  } catch {
+    return [];
+  }
+}
+
 /**
  * Count sessions per project directly from the shared SQLite database.
  * The API scopes sessions to the current project, but the DB has all of them.
  */
 export function getSessionCountsByProject(): Record<string, number> {
-  const output = query(
-    "SELECT project_id, COUNT(*) FROM session WHERE time_archived IS NULL AND parent_id IS NULL GROUP BY project_id",
+  const rows = queryJson<{ project_id: string; cnt: number }>(
+    "SELECT project_id, COUNT(*) as cnt FROM session WHERE time_archived IS NULL AND parent_id IS NULL GROUP BY project_id",
   );
   const counts: Record<string, number> = {};
-  for (const line of output.trim().split("\n")) {
-    if (!line) continue;
-    const [projectId, count] = line.split("|");
-    counts[projectId] = parseInt(count, 10);
+  for (const row of rows) {
+    counts[row.project_id] = row.cnt;
   }
   return counts;
 }
@@ -128,24 +135,30 @@ export interface DbSession {
 /**
  * List recent sessions across ALL projects from the SQLite database.
  */
+interface SessionRow {
+  id: string;
+  project_id: string;
+  title: string;
+  directory: string;
+  time_created: number;
+  time_updated: number;
+}
+
+function rowToSession(row: SessionRow): DbSession {
+  return {
+    id: row.id,
+    projectId: row.project_id,
+    title: row.title || "Untitled",
+    directory: row.directory,
+    timeCreated: row.time_created,
+    timeUpdated: row.time_updated,
+  };
+}
+
 export function getRecentSessions(limit = 100): DbSession[] {
-  const output = query(
+  return queryJson<SessionRow>(
     `SELECT id, project_id, title, directory, time_created, time_updated FROM session WHERE time_archived IS NULL AND parent_id IS NULL ORDER BY time_updated DESC LIMIT ${limit}`,
-  );
-  const sessions: DbSession[] = [];
-  for (const line of output.trim().split("\n")) {
-    if (!line) continue;
-    const [id, projectId, title, directory, timeCreated, timeUpdated] = line.split("|");
-    sessions.push({
-      id,
-      projectId,
-      title: title || "Untitled",
-      directory,
-      timeCreated: parseInt(timeCreated, 10),
-      timeUpdated: parseInt(timeUpdated, 10),
-    });
-  }
-  return sessions;
+  ).map(rowToSession);
 }
 
 /**
@@ -153,40 +166,13 @@ export function getRecentSessions(limit = 100): DbSession[] {
  */
 export function getProjectSessions(projectId: string, limit = 200): DbSession[] {
   const escaped = projectId.replace(/'/g, "''");
-  const output = query(
+  return queryJson<SessionRow>(
     `SELECT id, project_id, title, directory, time_created, time_updated FROM session WHERE time_archived IS NULL AND parent_id IS NULL AND project_id = '${escaped}' ORDER BY time_updated DESC LIMIT ${limit}`,
-  );
-  const sessions: DbSession[] = [];
-  for (const line of output.trim().split("\n")) {
-    if (!line) continue;
-    const [id, pid, title, directory, timeCreated, timeUpdated] = line.split("|");
-    sessions.push({
-      id,
-      projectId: pid,
-      title: title || "Untitled",
-      directory,
-      timeCreated: parseInt(timeCreated, 10),
-      timeUpdated: parseInt(timeUpdated, 10),
-    });
-  }
-  return sessions;
+  ).map(rowToSession);
 }
 
-function parseSessionRows(output: string): DbSession[] {
-  const sessions: DbSession[] = [];
-  for (const line of output.trim().split("\n")) {
-    if (!line) continue;
-    const [id, projectId, title, directory, timeCreated, timeUpdated] = line.split("|");
-    sessions.push({
-      id,
-      projectId,
-      title: title || "Untitled",
-      directory,
-      timeCreated: parseInt(timeCreated, 10),
-      timeUpdated: parseInt(timeUpdated, 10),
-    });
-  }
-  return sessions;
+function querySessionRows(sql: string): DbSession[] {
+  return queryJson<SessionRow>(sql).map(rowToSession);
 }
 
 /**
@@ -220,35 +206,37 @@ export function searchSessions(keyword: string, limit = 30): DbSession[] {
     }
   }
 
-  // 1. Exact phrase: title (score 10) + content (score 5) in one query
-  const exactSql = [
-    `${base} AND lower(title) LIKE '%${escaped}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
-    `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${escaped}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${escaped}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
-  ].join(";\n");
-  const exactOutput = query(exactSql);
-  // First query results are title matches, second are content matches
-  // sqlite3 outputs them sequentially — split by parsing all rows and scoring by title match
-  const exactRows = parseSessionRows(exactOutput);
-  for (const s of exactRows) {
-    const inTitle = s.title.toLowerCase().includes(escaped);
-    addResults([s], inTitle ? 10 : 5);
-  }
+  // 1. Exact phrase in title (score: 10)
+  addResults(
+    querySessionRows(
+      `${base} AND lower(title) LIKE '%${escaped}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
+    ),
+    10,
+  );
 
-  // 2. Individual words — only if multi-word query, single query with UNION
+  // 2. Exact phrase in content (score: 5)
+  addResults(
+    querySessionRows(
+      `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${escaped}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${escaped}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
+    ),
+    5,
+  );
+
+  // 3. Individual words — only if multi-word query
   if (words.length > 1) {
-    const wordTitleQueries = words.map(
-      (w) => `${base} AND lower(title) LIKE '%${w}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
-    );
-    const wordContentQueries = words.map(
-      (w) =>
-        `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${w}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${w}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
-    );
-    const wordRows = parseSessionRows(query([...wordTitleQueries, ...wordContentQueries].join(";\n")));
-    for (const s of wordRows) {
-      // Score by how many words match the title (3 each) vs content (1 each)
-      const titleLower = s.title.toLowerCase();
-      const titleHits = words.filter((w) => titleLower.includes(w)).length;
-      addResults([s], titleHits * 3 + 1);
+    for (const word of words) {
+      addResults(
+        querySessionRows(
+          `${base} AND lower(title) LIKE '%${word}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
+        ),
+        3,
+      );
+      addResults(
+        querySessionRows(
+          `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${word}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${word}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
+        ),
+        1,
+      );
     }
   }
 
