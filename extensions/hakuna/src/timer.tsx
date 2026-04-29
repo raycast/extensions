@@ -23,7 +23,6 @@ export default function Timer() {
     <TimerForm
       apiToken={apiToken}
       mode="timer"
-      enableDrafts={!isRunning}
       timerDate={timerDate}
       loadInitialValues={async (t) => {
         const current = await t.getTimer();

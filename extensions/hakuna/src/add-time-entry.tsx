@@ -75,7 +75,6 @@ export default function AddTimeEntry({
     <TimerForm
       apiToken={apiToken}
       mode="entry"
-      enableDrafts
       loadInitialValues={async () => ({ projectId, taskId, note })}
       onSubmit={async ({
         taskId: tid,

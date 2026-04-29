@@ -23,7 +23,6 @@ interface Props {
   loadInitialValues?: (
     timer: HakunaTimer,
   ) => Promise<TimerFormInitialValues | undefined>;
-  enableDrafts?: boolean;
   timerDate?: string;
   onSubmit: (values: {
     taskId: string;
@@ -120,7 +119,6 @@ export default function TimerForm({
   apiToken,
   mode,
   loadInitialValues,
-  enableDrafts,
   timerDate,
   onSubmit,
   extraActions,
@@ -364,7 +362,6 @@ export default function TimerForm({
   return (
     <Form
       isLoading={isLoading}
-      enableDrafts={enableDrafts}
       actions={
         <ActionPanel>
           <Action.SubmitForm title={submitTitle} onSubmit={handleSubmit} />
