@@ -4,7 +4,7 @@
 
 - list personal and organization sites
 - run site related terminus commands
-- list multi-dev environmens
+- list multi-dev environments
 
 ## Preferences
 
