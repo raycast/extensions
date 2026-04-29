@@ -7,7 +7,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { HakunaTimer, Project } from "./hakuna-api";
 import { getSettings } from "./settings";
 import { ProjectTasks } from "./tasks";
@@ -21,11 +22,7 @@ function ProjectDetail({ project }: { project: Project }) {
     <List.Item.Detail
       metadata={
         <List.Item.Detail.Metadata>
-          <List.Item.Detail.Metadata.Link
-            title="Name"
-            target={`https://app.hakuna.ch/projects/${project.id}`}
-            text={project.name}
-          />
+          <List.Item.Detail.Metadata.Label title="Name" text={project.name} />
           <List.Item.Detail.Metadata.Label
             title="Code"
             text={project.code || "—"}
@@ -61,11 +58,8 @@ function ProjectDetail({ project }: { project: Project }) {
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Label
             title="Budget"
-            text={
-              project.budget
-                ? `${project.budget}${project.budget_is_monthly ? " 🔄" : ""}`
-                : "n/a"
-            }
+            text={project.budget ? String(project.budget) : "—"}
+            icon={project.budget_is_monthly ? Icon.Repeat : undefined}
           />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
@@ -88,38 +82,36 @@ function ProjectDetail({ project }: { project: Project }) {
 }
 
 export function ProjectsList({ initialClient }: { initialClient?: string }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [projectsEnabled, setProjectsEnabled] = useState<boolean | null>(null);
+  const { apiToken } = getSettings();
   const [selectedClient, setSelectedClient] = useState<string>(
     initialClient ?? ALL_CLIENTS,
   );
   const [showArchived, setShowArchived] = useState(false);
 
-  useEffect(() => {
-    const { apiToken } = getSettings();
-    const api = new HakunaTimer(apiToken);
-
-    (async () => {
-      try {
-        const company = await api.getCompany();
-        setProjectsEnabled(company.projects_enabled);
-        if (company.projects_enabled) {
-          setProjects(await api.getProjects());
-        }
-      } catch (error) {
+  const { data, isLoading } = useCachedPromise(
+    async (token: string) => {
+      const api = new HakunaTimer(token);
+      const company = await api.getCompany();
+      if (!company.projects_enabled) {
+        return { projectsEnabled: false, projects: [] as Project[] };
+      }
+      return { projectsEnabled: true, projects: await api.getProjects() };
+    },
+    [apiToken],
+    {
+      onError: async (error) => {
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to load projects",
           message: error instanceof Error ? error.message : "Unknown error",
         });
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
+      },
+    },
+  );
 
-  if (!isLoading && projectsEnabled === false) {
+  const projects = data?.projects ?? [];
+
+  if (!isLoading && data?.projectsEnabled === false) {
     return (
       <List navigationTitle="Projects">
         <List.EmptyView
@@ -208,10 +200,6 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
                       icon={Icon.Plus}
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
                       target={<AddTimeEntry projectId={String(project.id)} />}
-                    />
-                    <Action.OpenInBrowser
-                      title="Open in Browser"
-                      url={`https://app.hakuna.ch/projects/${project.id}`}
                     />
                     <Action
                       title={showArchived ? "Hide Archived" : "Show Archived"}

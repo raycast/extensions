@@ -1,4 +1,12 @@
-import { List, Icon, Color, ActionPanel, Action } from "@raycast/api";
+import {
+  List,
+  Icon,
+  Color,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useState, useRef, useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import {
@@ -287,8 +295,12 @@ export default function Command() {
       .then((data) =>
         setTeammateOverviews((prev) => ({ ...prev, [userId]: data })),
       )
-      .catch(() => {
-        /* silently ignore */
+      .catch(async (error) => {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load teammate overview",
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
       })
       .finally(() => fetchingRef.current.delete(userId));
   }

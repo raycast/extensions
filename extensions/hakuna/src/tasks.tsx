@@ -6,7 +6,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { HakunaTimer, Project, Task } from "./hakuna-api";
 import { getSettings } from "./settings";
 import StartTimerView from "./start-timer-view";
@@ -79,35 +79,31 @@ export function ProjectTasks({ project }: { project: Project }) {
 }
 
 export default function Command() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [projectsEnabled, setProjectsEnabled] = useState<boolean | null>(null);
+  const { apiToken } = getSettings();
 
-  useEffect(() => {
-    const { apiToken } = getSettings();
-    const api = new HakunaTimer(apiToken);
-
-    (async () => {
-      try {
-        const [company, allTasks] = await Promise.all([
-          api.getCompany(),
-          api.getTasks(),
-        ]);
-        setProjectsEnabled(company.projects_enabled);
-        setTasks(allTasks);
-      } catch (error) {
+  const { data, isLoading } = useCachedPromise(
+    async (token: string) => {
+      const api = new HakunaTimer(token);
+      const [company, allTasks] = await Promise.all([
+        api.getCompany(),
+        api.getTasks(),
+      ]);
+      return { projectsEnabled: company.projects_enabled, tasks: allTasks };
+    },
+    [apiToken],
+    {
+      onError: async (error) => {
         await showToast({
           style: Toast.Style.Failure,
           title: "Failed to load tasks",
           message: error instanceof Error ? error.message : "Unknown error",
         });
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
+      },
+    },
+  );
 
-  const enableTimerActions = projectsEnabled === false;
+  const enableTimerActions = data?.projectsEnabled === false;
+  const tasks = data?.tasks ?? [];
   const active = tasks.filter((t) => !t.archived);
   const archived = tasks.filter((t) => t.archived);
 

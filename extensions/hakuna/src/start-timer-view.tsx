@@ -5,9 +5,10 @@ import { HakunaTimer } from "./hakuna-api";
 interface Props {
   projectId?: string;
   taskId?: string;
+  note?: string;
 }
 
-export default function StartTimerView({ projectId, taskId }: Props) {
+export default function StartTimerView({ projectId, taskId, note }: Props) {
   const { apiToken } = getPreferenceValues<{ apiToken: string }>();
   const timer = new HakunaTimer(apiToken);
 
@@ -15,8 +16,7 @@ export default function StartTimerView({ projectId, taskId }: Props) {
     <TimerForm
       apiToken={apiToken}
       mode="timer"
-      enableDrafts
-      loadInitialValues={async () => ({ projectId, taskId })}
+      loadInitialValues={async () => ({ projectId, taskId, note })}
       onSubmit={async ({
         taskId: tid,
         projectId: pid,

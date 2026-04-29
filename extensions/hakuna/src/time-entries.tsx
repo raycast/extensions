@@ -17,6 +17,7 @@ import { ProjectsList } from "./project";
 import { getSettings } from "./settings";
 import Timer from "./timer";
 import AddTimeEntry from "./add-time-entry";
+import StartTimerView from "./start-timer-view";
 
 function formatTime(time: string): string {
   return time.slice(0, 5);
@@ -216,7 +217,7 @@ function EntryItem({
             shortcut={{ modifiers: ["cmd"], key: "t" }}
             onAction={() =>
               push(
-                <AddTimeEntry
+                <StartTimerView
                   projectId={
                     entry.project ? String(entry.project.id) : undefined
                   }
