@@ -46,6 +46,7 @@ const getHistoryQuery = (table: string, date_field: string, includeTerms: string
       ORDER BY ${date_field} DESC LIMIT 30;`;
 
 const getHistorySnapshotPath = () => path.join(os.tmpdir(), "raycast-google-chrome-history.sqlite");
+const getPlaceholderDbPath = () => path.join(api.environment.assetsPath, "history-placeholder.sqlite");
 
 const hashFile = (filePath: string) => {
   try {
@@ -76,11 +77,7 @@ export function useHistorySearch(profile: string, query?: string): SearchResult<
   const parsedQuery = parseSearchQuery(query || "");
   const queries = getHistoryQuery("urls", "last_visit_time", parsedQuery.includeTerms, parsedQuery.excludeTerms);
   const dbPath = getHistoryDbPath(profile);
-
-  // safe because no re-render occurs after this early return
-  if (!fs.existsSync(dbPath)) {
-    return { isLoading: false, data: [], errorView: <NotInstalledError /> };
-  }
+  const placeholderDbPath = getPlaceholderDbPath();
 
   const [snapshotVer, setSnapshotVer] = useState(0);
   const [snapshotPath, setSnapshotPath] = useState<string | null>(null);
@@ -101,7 +98,7 @@ export function useHistorySearch(profile: string, query?: string): SearchResult<
   }, [retryTimer]);
 
   const { data, isLoading, permissionView, revalidate } = useSQL<HistoryEntry>(
-    snapshotPath ?? dbPath,
+    snapshotPath || placeholderDbPath,
     queries as unknown as string,
     {
       onData() {
@@ -144,6 +141,10 @@ export function useHistorySearch(profile: string, query?: string): SearchResult<
     revalidate();
     setSnapshotVer((cur) => cur + 1);
   };
+
+  if (!fs.existsSync(dbPath)) {
+    return { isLoading: false, data: [], errorView: <NotInstalledError /> };
+  }
 
   if (!snapshotPath) {
     return { isLoading: true, data: [], revalidate };
