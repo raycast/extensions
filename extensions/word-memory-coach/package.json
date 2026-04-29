@@ -1,0 +1,73 @@
+{
+  "name": "word-memory-coach",
+  "version": "1.0.0",
+  "title": "Word Memory Coach",
+  "description": "Capture copied English words, build a daily study set, generate practice text, and export audio in Raycast.",
+  "icon": "icon.png",
+  "author": "leon_lu",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": ["Productivity"],
+  "commands": [
+    {
+      "name": "one-click-daily-review",
+      "title": "One-Click Daily Review",
+      "description": "Import recent history, generate today's article, and export audio in one step",
+      "mode": "view"
+    },
+    {
+      "name": "study-dashboard",
+      "title": "Study Today's Words",
+      "description": "Review today's captured words, generate practice text, and export audio",
+      "mode": "view"
+    },
+    {
+      "name": "capture-word",
+      "title": "Capture Current Clipboard",
+      "description": "Extract English words from the current clipboard and save them to today's list",
+      "mode": "no-view"
+    },
+    {
+      "name": "import-recent-history",
+      "title": "Import Recent Clipboard History",
+      "description": "Import English words from Raycast's recent clipboard history",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "voiceName",
+      "type": "textfield",
+      "required": false,
+      "title": "macOS Voice",
+      "description": "Voice name used by the `say` command when exporting audio",
+      "default": "Samantha"
+    },
+    {
+      "name": "autoLowercase",
+      "type": "checkbox",
+      "required": false,
+      "title": "Normalize To Lowercase",
+      "label": "Store captured words in lowercase",
+      "description": "Store captured words in lowercase for easier deduplication",
+      "default": true
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.13",
+    "react": "19.2.5"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "typescript": "6.0.3"
+  }
+}
