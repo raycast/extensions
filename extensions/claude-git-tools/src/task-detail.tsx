@@ -487,7 +487,13 @@ export function TaskDetail({
                     "review-pr",
                     { prUrl: gitUrl, ...skillOpts },
                   );
-                  if (!reviewTask) return;
+                  if (!reviewTask) {
+                    toast.style = Toast.Style.Failure;
+                    toast.title = "No skill file configured";
+                    toast.message =
+                      "Please configure one via Manage Folders & Skills";
+                    return;
+                  }
                   toast.style = Toast.Style.Success;
                   toast.title = "PR review task started";
                   push(
@@ -501,8 +507,7 @@ export function TaskDetail({
                           "review-pr",
                           { prUrl: gitUrl, ...so },
                         );
-                        if (!t) return;
-                        push(<TaskDetail task={t} />);
+                        if (t) push(<TaskDetail task={t} />);
                       }}
                     />,
                   );

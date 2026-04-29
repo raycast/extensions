@@ -10,7 +10,7 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getTasks, removeTask, updateTask, type Task } from "./storage";
 import {
   getTaskStatus,
@@ -53,7 +53,6 @@ export default function ViewTasks() {
   const { push } = useNavigation();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const hasRunningRef = useRef(true);
 
   const refresh = useCallback(async () => {
     const t = await getTasks();
@@ -68,7 +67,6 @@ export default function ViewTasks() {
       }),
     );
     setTasks(updated);
-    hasRunningRef.current = updated.some((t) => t.status === "running");
     setIsLoading(false);
   }, []);
 
@@ -95,17 +93,11 @@ export default function ViewTasks() {
 
   useEffect(() => {
     refresh();
-    let timer: NodeJS.Timeout;
-    const schedule = () => {
-      const delay = hasRunningRef.current ? 3000 : 30000;
-      timer = setTimeout(() => {
-        refresh();
-        schedule();
-      }, delay);
-    };
-    schedule();
-    return () => clearTimeout(timer);
-  }, [refresh]);
+    const hasRunning = tasks.some((t) => t.status === "running");
+    const interval = hasRunning ? 3000 : 30000;
+    const timer = setInterval(refresh, interval);
+    return () => clearInterval(timer);
+  }, [refresh, tasks]);
 
   const running = tasks.filter((t) => t.status === "running");
   const finished = tasks.filter((t) => t.status !== "running");
@@ -173,7 +165,13 @@ export default function ViewTasks() {
                       ...skillOpts,
                     },
                   );
-                  if (!newTask) return;
+                  if (!newTask) {
+                    toast.style = Toast.Style.Failure;
+                    toast.title = "No skill file configured";
+                    toast.message =
+                      "Please configure one via Manage Folders & Skills";
+                    return;
+                  }
                   toast.style = Toast.Style.Success;
                   toast.title = "PR review task started";
                   push(

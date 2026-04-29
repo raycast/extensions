@@ -63,7 +63,12 @@ function BranchPicker({
         skillName: skill.skillName,
         skillDir: skill.skillDir,
       });
-      if (!task) return;
+      if (!task) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "No skill file configured";
+        toast.message = "Please configure one via Manage Folders & Skills";
+        return;
+      }
       toast.style = Toast.Style.Success;
       toast.title = "Create PR task started";
       push(<TaskDetail task={task} />);

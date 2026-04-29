@@ -235,7 +235,12 @@ function PRPicker({
           skillDir: skill.skillDir,
         },
       );
-      if (!task) return;
+      if (!task) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "No skill file configured";
+        toast.message = "Please configure one via Manage Folders & Skills";
+        return;
+      }
       toast.style = Toast.Style.Success;
       toast.title = "PR review task started";
       push(<TaskDetail task={task} onRerunReview={() => handleReview(pr)} />);

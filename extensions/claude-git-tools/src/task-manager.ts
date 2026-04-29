@@ -1,4 +1,3 @@
-import { showToast, Toast } from "@raycast/api";
 import { execFileSync, spawn, type ChildProcess } from "child_process";
 import {
   appendFileSync,
@@ -16,7 +15,6 @@ import {
   addTask,
   getModel,
   getSkillPath,
-  removeTask,
   updateTask,
   type Task,
 } from "./storage";
@@ -76,7 +74,7 @@ function buildClaudeCommand(
   command: TaskCommand,
   options: TaskOptions,
   model: string,
-): string | null {
+): string {
   let skillFile = "";
   if (options.skillDir && options.skillName) {
     const candidate = join(options.skillDir, `${options.skillName}.md`);
@@ -485,7 +483,9 @@ export function getTaskStatus(task: Task): Task["status"] {
 
   const output = readTaskOutput(task).toLowerCase();
   if (output.includes("task canceled by user")) return "stopped";
-  return "completed";
+  return output.includes("failed") || output.includes("error")
+    ? "failed"
+    : "completed";
 }
 
 function signalTaskProcess(task: Task, signal: NodeJS.Signals): boolean {
@@ -575,27 +575,10 @@ export async function launchTask(
   };
   await addTask(task);
 
-  let claudeCommand: string | null;
-  try {
-    const model = await getModel();
-    claudeCommand = buildClaudeCommand(command, options, model);
-  } catch (error) {
-    await removeTask(id);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Failed to start task",
-      message: error instanceof Error ? error.message : String(error),
-    });
-    return null;
-  }
-
+  const model = await getModel();
+  const claudeCommand = buildClaudeCommand(command, options, model);
   if (!claudeCommand) {
-    await removeTask(id);
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "No skill file configured",
-      message: "Please configure a skill file via Manage Folders & Skills",
-    });
+    await removeTask(task.id);
     return null;
   }
   const home = homedir();
