@@ -6,6 +6,8 @@ import {
   showToast,
   Detail,
   Icon,
+  Color,
+  Toast,
 } from "@raycast/api";
 
 const MONTHS = [
@@ -42,6 +44,13 @@ interface CitationMetadata {
 
 interface FormValues {
   url: string;
+}
+
+interface CitationResult {
+  citation: string;
+  metadata: CitationMetadata;
+  sourceType: "DOI" | "Web Page";
+  sourceLabel: string;
 }
 
 type MetadataSource = Partial<CitationMetadata> | null | undefined;
@@ -106,27 +115,37 @@ interface JsonLdItem {
 
 export default function ConvertUrlToMla() {
   const [input, setInput] = useState("");
-  const [citation, setCitation] = useState("");
+  const [result, setResult] = useState<CitationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const inputKind = describeInputKind(input);
 
   const handleConvert = async (values: FormValues) => {
     const rawInput = values.url;
 
     if (!rawInput.trim()) {
-      showToast({ title: "Error", message: "Please enter a URL or DOI" });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Input Required",
+        message: "Please enter a URL or DOI",
+      });
       return;
     }
 
     setIsLoading(true);
 
     try {
-      const result = await generateCitationForInput(rawInput);
-      setCitation(result);
-      showToast({ title: "Citation generated!" });
-    } catch (error) {
-      setCitation("");
+      const nextResult = await generateCitationForInput(rawInput);
+      setResult(nextResult);
       showToast({
-        title: "Error",
+        style: Toast.Style.Success,
+        title: "Citation Generated",
+        message: `${nextResult.sourceType} metadata formatted as MLA`,
+      });
+    } catch (error) {
+      setResult(null);
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Generate Citation",
         message:
           error instanceof Error
             ? error.message
@@ -137,20 +156,40 @@ export default function ConvertUrlToMla() {
     }
   };
 
-  if (citation) {
+  if (result) {
     return (
       <Detail
-        markdown={buildResultMarkdown(citation)}
+        markdown={buildResultMarkdown(result)}
+        metadata={buildResultMetadata(result)}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard title="Copy Citation" content={citation} />
+            <Action.CopyToClipboard
+              title="Copy Citation"
+              content={result.citation}
+              icon={{ source: Icon.Clipboard, tintColor: Color.Green }}
+            />
+            <Action.Paste
+              title="Paste Citation"
+              content={result.citation}
+              icon={{ source: Icon.TextCursor, tintColor: Color.Blue }}
+            />
+            {result.metadata.url ? (
+              <Action.OpenInBrowser
+                title="Open Source"
+                url={result.metadata.url}
+                icon={{ source: Icon.Globe, tintColor: Color.Purple }}
+              />
+            ) : null}
             <Action
               title="Convert Another"
               onAction={() => {
-                setCitation("");
+                setResult(null);
                 setInput("");
               }}
-              icon={Icon.ArrowLeft}
+              icon={{
+                source: Icon.ArrowCounterClockwise,
+                tintColor: Color.Orange,
+              }}
             />
           </ActionPanel>
         }
@@ -166,23 +205,29 @@ export default function ConvertUrlToMla() {
           <Action.SubmitForm
             title="Generate Citation"
             onSubmit={handleConvert}
+            icon={{ source: Icon.Wand, tintColor: Color.Purple }}
           />
         </ActionPanel>
       }
     >
       <Form.Description
-        title="MLA Citation Generator"
-        text="Paste a URL or DOI. DOI inputs use DOI metadata only; invalid DOIs return an error instead of fake citations."
+        title="QuickCite"
+        text="Generate a clean MLA citation from a URL or DOI. DOI inputs use trusted DOI metadata only."
       />
 
       <Form.TextField
         id="url"
-        title="Input"
-        placeholder="https://example.com/article or 10.xxxx/xxxxx"
+        title="Source"
+        placeholder="https://example.com/article or 10.1038/s41586-020-2649-2"
+        info="Paste a webpage URL, DOI URL, or bare DOI. QuickCite will detect the source type automatically."
         value={input}
         onChange={setInput}
         autoFocus
       />
+
+      <Form.Separator />
+
+      <Form.Description title={inputKind.title} text={inputKind.text} />
     </Form>
   );
 }
@@ -196,7 +241,9 @@ export default function ConvertUrlToMla() {
  * - Never fallback to webpage scraping for DOI inputs.
  * - For webpage input, fetch with full URL, but output citation URL without http:// or https://.
  */
-async function generateCitationForInput(rawInput: string): Promise<string> {
+async function generateCitationForInput(
+  rawInput: string,
+): Promise<CitationResult> {
   const cleanedInput = cleanInput(rawInput);
   const doi = extractDoi(cleanedInput);
 
@@ -224,7 +271,12 @@ async function generateCitationForInput(rawInput: string): Promise<string> {
       );
     }
 
-    return buildMlaCitation(metadata);
+    return {
+      citation: buildMlaCitation(metadata),
+      metadata,
+      sourceType: "DOI",
+      sourceLabel: doi,
+    };
   }
 
   const normalizedUrl = normalizeUrl(cleanedInput);
@@ -247,7 +299,12 @@ async function generateCitationForInput(rawInput: string): Promise<string> {
     publishedDate: web.publishedDate,
   };
 
-  return buildMlaCitation(metadata);
+  return {
+    citation: buildMlaCitation(metadata),
+    metadata,
+    sourceType: "Web Page",
+    sourceLabel: host,
+  };
 }
 
 /**
@@ -301,16 +358,132 @@ function buildMlaCitation(metadata: CitationMetadata): string {
     .trim();
 }
 
-function buildResultMarkdown(citation: string): string {
-  return `# MLA Citation
+function buildResultMarkdown(result: CitationResult): string {
+  const title = cleanTitle(result.metadata.title || "") || "Untitled Source";
+
+  return `# Citation Ready
+
+**${result.sourceType} source:** ${escapeMarkdown(title)}
+
+## MLA Citation
 
 \`\`\`
-${citation}
+${result.citation}
 \`\`\`
 
 ---
 
-Press **Copy Citation** to copy it.`;
+Use **Copy Citation** or **Paste Citation** from the action panel.`;
+}
+
+function buildResultMetadata(result: CitationResult) {
+  const metadata = result.metadata;
+  const title = cleanTitle(metadata.title || "") || "Missing title";
+  const author = cleanText(metadata.author || "") || "Not found";
+  const siteName = cleanText(metadata.siteName || "") || "Not found";
+  const publishedDate =
+    formatPublicationDate(metadata.publishedDate) || "Missing date";
+  const accessDate = formatAccessDate(metadata.accessDate || new Date());
+  const sourceColor = result.sourceType === "DOI" ? Color.Purple : Color.Blue;
+
+  return (
+    <Detail.Metadata>
+      <Detail.Metadata.TagList title="Source">
+        <Detail.Metadata.TagList.Item
+          text={result.sourceType}
+          color={sourceColor}
+          icon={{ source: Icon.Circle, tintColor: sourceColor }}
+        />
+        <Detail.Metadata.TagList.Item
+          text="MLA"
+          color={Color.Green}
+          icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
+        />
+      </Detail.Metadata.TagList>
+      <Detail.Metadata.Separator />
+      <Detail.Metadata.Label
+        title="Detected"
+        text={result.sourceLabel}
+        icon={{ source: Icon.Tag, tintColor: sourceColor }}
+      />
+      <Detail.Metadata.Label
+        title="Title"
+        text={title}
+        icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
+      />
+      <Detail.Metadata.Label
+        title="Author"
+        text={author}
+        icon={{ source: Icon.Person, tintColor: Color.Orange }}
+      />
+      <Detail.Metadata.Label
+        title="Container"
+        text={siteName}
+        icon={{ source: Icon.Book, tintColor: Color.Blue }}
+      />
+      <Detail.Metadata.Label
+        title="Published"
+        text={{
+          value: publishedDate,
+          color: publishedDate === "Missing date" ? Color.Yellow : Color.Green,
+        }}
+        icon={{ source: Icon.Calendar, tintColor: Color.Green }}
+      />
+      <Detail.Metadata.Label
+        title="Accessed"
+        text={accessDate}
+        icon={{ source: Icon.Clock, tintColor: Color.Purple }}
+      />
+      <Detail.Metadata.Separator />
+      {metadata.url ? (
+        <Detail.Metadata.Link
+          title={result.sourceType === "DOI" ? "DOI" : "URL"}
+          text={formatUrlForCitation(metadata.url)}
+          target={metadata.url}
+        />
+      ) : (
+        <Detail.Metadata.Label
+          title="Source Link"
+          text="Not found"
+          icon={{ source: Icon.Link, tintColor: Color.SecondaryText }}
+        />
+      )}
+    </Detail.Metadata>
+  );
+}
+
+function describeInputKind(value: string): { title: string; text: string } {
+  const cleaned = cleanInput(value);
+
+  if (!cleaned) {
+    return {
+      title: "Ready for a source",
+      text: "Paste a URL or DOI, then generate a citation.",
+    };
+  }
+
+  if (extractDoi(cleaned)) {
+    return {
+      title: "DOI detected",
+      text: "QuickCite will use Crossref and doi.org metadata only.",
+    };
+  }
+
+  if (isHttpUrl(normalizeUrl(cleaned)) || looksLikeBareDomain(cleaned)) {
+    return {
+      title: "Web page detected",
+      text: "QuickCite will read page metadata and clean the citation URL.",
+    };
+  }
+
+  return {
+    title: "Needs a URL or DOI",
+    text: "Try a full URL, a bare domain, or a DOI beginning with 10.",
+  };
+}
+
+function escapeMarkdown(value: string): string {
+  return value.replace(/([\\`*_{}[\]()#+\-.!|>])/g, "\\$1");
 }
 
 /**
