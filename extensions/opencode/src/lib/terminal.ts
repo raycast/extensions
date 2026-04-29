@@ -11,7 +11,7 @@ function shellQuote(str: string): string {
 }
 
 function getTerminal(): string {
-  const prefs = getPreferenceValues<{ terminal?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   return prefs.terminal ?? "iterm2";
 }
 

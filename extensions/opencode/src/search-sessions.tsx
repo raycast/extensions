@@ -22,7 +22,7 @@ export function formatTime(timestamp: number): string {
   if (diffSec < 60) return "just now";
   if (diffMin < 60) return `${diffMin}m ago`;
   if (diffHour < 24) return `${diffHour}h ago`;
-  return new Date(timestamp).toLocaleDateString();
+  return new Date(ts).toLocaleDateString();
 }
 
 export function livenessTag(liveness: OpenSession["liveness"] | undefined): List.Item.Accessory | null {

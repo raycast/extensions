@@ -61,7 +61,10 @@ export async function getClient(): Promise<OpencodeClient> {
       }
       instance = await createOpencode({ port: 0 });
       return instance.client;
-    })();
+    })().catch((err) => {
+      initializing = null;
+      throw err;
+    });
   }
 
   const client = await initializing;
