@@ -589,7 +589,11 @@ export default function Command() {
       {entries.length > 0 && (
         <List.Section
           title="Entries"
-          subtitle={sumDurations(entries, timerElapsed, durationFormat)}
+          subtitle={sumDurations(
+            entries,
+            runningTimer?.date === date ? timerElapsed : 0,
+            durationFormat,
+          )}
         >
           {entries.map((entry) => (
             <EntryItem
