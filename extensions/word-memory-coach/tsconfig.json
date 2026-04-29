@@ -5,7 +5,7 @@
     "lib": ["ES2022"],
     "jsx": "react-jsx",
     "strict": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "Bundler",
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
