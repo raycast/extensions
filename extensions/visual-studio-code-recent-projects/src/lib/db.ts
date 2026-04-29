@@ -13,6 +13,10 @@ export type RemoveMethods = {
   removeAllEntries: () => Promise<void>;
 };
 
+async function warnRemoveNotSupported() {
+  await showToast(Toast.Style.Failure, "Removing entries is not supported when reading from storage.json");
+}
+
 export function useRecentEntries() {
   const path = getStoragePath("state.vscdb");
 
@@ -22,8 +26,8 @@ export function useRecentEntries() {
       data: storageEntries ?? [],
       isLoading: false,
       error: !storageEntries,
-      removeEntry: () => Promise.resolve(),
-      removeAllEntries: () => Promise.resolve(),
+      removeEntry: warnRemoveNotSupported,
+      removeAllEntries: warnRemoveNotSupported,
     };
   }
 
@@ -39,7 +43,7 @@ export function useRecentEntries() {
 
   async function removeEntry(entry: EntryLike) {
     if (!parsedEntries) {
-      await showToast(Toast.Style.Failure, "Removing entries is not supported when reading from storage.json");
+      await warnRemoveNotSupported();
       return;
     }
 
@@ -54,7 +58,7 @@ export function useRecentEntries() {
 
   async function removeAllEntries() {
     if (!parsedEntries) {
-      await showToast(Toast.Style.Failure, "Removing entries is not supported when reading from storage.json");
+      await warnRemoveNotSupported();
       return;
     }
 
