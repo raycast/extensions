@@ -5,6 +5,9 @@
   "description": "Get and set Resend official wallpapers.",
   "icon": "resend-icon.png",
   "author": "jopcmelo",
+  "contributors": [
+    "alexi.build"
+  ],
   "license": "MIT",
   "commands": [
     {
