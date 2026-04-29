@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "com-matbrady-pantheon",
+  "name": "pantheon-sites",
   "title": "Pantheon Sites",
   "description": "List and manage Pantheon sites",
   "icon": "command-icon.png",
