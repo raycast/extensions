@@ -1,118 +1,217 @@
-import { ActionPanel, Detail, Action, Icon, showToast, Toast, confirmAlert, Alert, Keyboard } from "@raycast/api";
-import { proseToMarkdown, deleteMyMindCard } from "../utils";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  confirmAlert,
+  Alert,
+  Keyboard,
+  Detail,
+  Clipboard,
+} from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { deleteObject, loadCardMarkdown, MyMindObject, pinObject, unpinObject } from "../api";
 import AddNote from "../add-a-new-note";
-import { CardWithSlug } from "../schemas";
+import { AddTagsForm } from "./AddTagsForm";
+import { EditCardForm } from "./EditCardForm";
+import { ManageSpacesView } from "./ManageSpacesView";
+import { RelatedView } from "./RelatedView";
+
+const MYMIND_WEB_URL = "https://access.mymind.com/everything";
+
+function safeHostname(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
+function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () => void }) {
+  const {
+    isLoading,
+    data: markdown = "",
+    revalidate,
+  } = useCachedPromise((id: string) => loadCardMarkdown(id).catch(() => ""), [object.id]);
+  const heading = object.title ? `# ${object.title}\n\n` : "";
+
+  const handleChange = () => {
+    revalidate();
+    onChange?.();
+  };
+
+  return (
+    <Detail
+      isLoading={isLoading}
+      markdown={heading + markdown}
+      metadata={
+        <Detail.Metadata>
+          <Detail.Metadata.Label title="Created" text={new Date(object.created).toLocaleString()} />
+          <Detail.Metadata.Label title="Modified" text={new Date(object.modified).toLocaleString()} />
+          {object.entityType && <Detail.Metadata.Label title="Type" text={object.entityType} />}
+          {object.source?.url && (
+            <Detail.Metadata.Link title="Source" target={object.source.url} text={safeHostname(object.source.url)} />
+          )}
+          {object.tags.length > 0 && (
+            <Detail.Metadata.TagList title="Tags">
+              {object.tags.map((t) => (
+                <Detail.Metadata.TagList.Item key={t.name} text={t.name} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+        </Detail.Metadata>
+      }
+      actions={<CardActions object={object} onChange={handleChange} hideDetailAction />}
+    />
+  );
+}
 
 export function CardActions({
-  card,
-  isDetailView = false,
-  onDelete,
+  object,
+  onChange,
+  hideDetailAction = false,
 }: {
-  card: CardWithSlug;
-  isDetailView?: boolean;
-  onDelete?: () => void;
+  object: MyMindObject;
+  onChange?: () => void;
+  hideDetailAction?: boolean;
 }) {
+  const mymindUrl = `${MYMIND_WEB_URL}/#${object.id}`;
+
   const handleDelete = async () => {
-    if (!card.slug) return;
-
     const proceed = await confirmAlert({
-      title: "Delete Card",
-      message: "Are you sure you want to delete this card? This action cannot be undone.",
-      primaryAction: {
-        title: "Delete",
-        style: Alert.ActionStyle.Destructive,
-      },
+      title: "Delete card",
+      message: "Move this card to the trash? You can restore it within 30 days.",
+      primaryAction: { title: "Delete", style: Alert.ActionStyle.Destructive },
     });
-
     if (!proceed) return;
-
     try {
-      await deleteMyMindCard(card.slug);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Card deleted successfully",
-      });
-
-      onDelete?.();
+      await deleteObject(object.id);
+      await showToast({ style: Toast.Style.Success, title: "Card deleted" });
+      onChange?.();
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to delete card",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      await showFailureToast(error, { title: "Failed to delete card" });
+    }
+  };
+
+  const handlePin = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Pinning…" });
+    try {
+      await pinObject(object.id);
+      toast.style = Toast.Style.Success;
+      toast.title = "Pinned";
+      onChange?.();
+    } catch (error) {
+      toast.hide();
+      await showFailureToast(error, { title: "Failed to pin card" });
+    }
+  };
+
+  const handleUnpin = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Unpinning…" });
+    try {
+      await unpinObject(object.id);
+      toast.style = Toast.Style.Success;
+      toast.title = "Unpinned";
+      onChange?.();
+    } catch (error) {
+      toast.hide();
+      await showFailureToast(error, { title: "Failed to unpin card" });
+    }
+  };
+
+  const handleCopyMarkdown = async () => {
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Fetching content…" });
+    try {
+      const markdown = await loadCardMarkdown(object.id);
+      await Clipboard.copy(markdown);
+      toast.style = Toast.Style.Success;
+      toast.title = "Copied as markdown";
+    } catch (error) {
+      toast.hide();
+      await showFailureToast(error, { title: "Failed to copy markdown" });
     }
   };
 
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {!isDetailView && (
+        {!hideDetailAction && (
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}
-            target={
-              <Detail
-                markdown={`# ${card.title || "Untitled"}
-
-${card.description || ""}
-
-${card.prose?.content ? proseToMarkdown(card.prose.content) : ""}
-
-${
-  card.note?.prose?.content
-    ? `
----
-### Notes
-${proseToMarkdown(card.note.prose.content)}`
-    : ""
-}
-
----`}
-                metadata={
-                  <Detail.Metadata>
-                    <Detail.Metadata.Label title="Created" text={new Date(card.created).toLocaleDateString()} />
-                    <Detail.Metadata.Label title="Modified" text={new Date(card.modified).toLocaleDateString()} />
-                    {card.source?.url && card.domain && (
-                      <Detail.Metadata.Link title="Source" target={card.source.url} text={card.domain} />
-                    )}
-                    {card.tags && card.tags.length > 0 && (
-                      <Detail.Metadata.TagList title="Tags">
-                        {card.tags.map((tag) => (
-                          <Detail.Metadata.TagList.Item key={tag.name} text={tag.name} color={"#eed535"} />
-                        ))}
-                      </Detail.Metadata.TagList>
-                    )}
-                  </Detail.Metadata>
-                }
-                actions={<CardActions card={card} isDetailView={true} />}
-              />
-            }
+            target={<CardDetail object={object} onChange={onChange} />}
           />
         )}
-        {card.source?.url && <Action.OpenInBrowser url={card.source.url} />}
-        {card.slug && (
-          <Action.OpenInBrowser title="Open in Mymind" url={`https://access.mymind.com/everything/#${card.slug}`} />
-        )}
-        {card.source?.url && <Action.CopyToClipboard title="Copy Source URL" content={card.source.url} />}
-        {card.slug && (
-          <Action.CopyToClipboard
-            title="Copy the Mymind URL"
-            content={`https://access.mymind.com/everything/#${card.slug}`}
-          />
-        )}
-        {card.slug && (
-          <Action
-            title="Delete Card"
-            icon={Icon.Trash}
-            style={Action.Style.Destructive}
-            onAction={handleDelete}
-            shortcut={Keyboard.Shortcut.Common.Remove}
-          />
-        )}
+        <Action.Push
+          title="Find Related"
+          icon={Icon.Network}
+          target={<RelatedView source={object} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+        />
+        <Action.Push
+          title="Edit Card"
+          icon={Icon.Pencil}
+          target={<EditCardForm object={object} onSaved={onChange} />}
+          shortcut={{ modifiers: ["cmd"], key: "e" }}
+        />
+        <Action.Push
+          title="Manage Spaces"
+          icon={Icon.Folder}
+          target={<ManageSpacesView object={object} onChange={onChange} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+        />
+        <Action.Push
+          title="Add Tags"
+          icon={Icon.Tag}
+          target={<AddTagsForm object={object} onChange={onChange} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
+        />
+        {object.source?.url && <Action.OpenInBrowser url={object.source.url} />}
+        <Action.OpenInBrowser
+          title="Open in Mymind"
+          url={mymindUrl}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+        />
       </ActionPanel.Section>
       <ActionPanel.Section>
+        <Action
+          title="Copy as Markdown"
+          icon={Icon.Clipboard}
+          onAction={handleCopyMarkdown}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+        />
+        {object.source?.url && <Action.CopyToClipboard title="Copy Source URL" content={object.source.url} />}
+        <Action.CopyToClipboard
+          title="Copy Mymind URL"
+          content={mymindUrl}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          title="Pin Card"
+          icon={Icon.Pin}
+          onAction={handlePin}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+        />
+        <Action
+          title="Unpin Card"
+          icon={Icon.PinDisabled}
+          onAction={handleUnpin}
+          shortcut={{ modifiers: ["cmd", "ctrl"], key: "p" }}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section>
+        <Action
+          title="Delete Card"
+          icon={Icon.Trash}
+          style={Action.Style.Destructive}
+          onAction={handleDelete}
+          shortcut={Keyboard.Shortcut.Common.Remove}
+        />
         <Action.Push
-          title="Add New Note"
+          title="Add a New Note"
           target={<AddNote />}
           icon={Icon.Plus}
           shortcut={{ modifiers: ["cmd"], key: "n" }}

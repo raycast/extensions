@@ -5,6 +5,9 @@
   "description": "Manage and add your thoughts to my mind",
   "icon": "extension-icon.png",
   "author": "arian",
+  "contributors": [
+    "ickas"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -28,21 +31,103 @@
       "subtitle": "mymind",
       "description": "Adds a new note to mymind",
       "mode": "view"
+    },
+    {
+      "name": "browse-spaces",
+      "title": "Browse Spaces",
+      "subtitle": "mymind",
+      "description": "Browse your mymind spaces and the cards inside them",
+      "mode": "view"
+    },
+    {
+      "name": "browse-tags",
+      "title": "Browse Tags",
+      "subtitle": "mymind",
+      "description": "Browse your mymind tags and the cards under each one",
+      "mode": "view"
+    },
+    {
+      "name": "save-to-mymind",
+      "title": "Save to mymind",
+      "subtitle": "mymind",
+      "description": "Save a URL, note, or file to mymind. Auto-detects what to do based on what you provide.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-today",
+      "title": "mymind Menu Bar",
+      "subtitle": "mymind",
+      "description": "Shows today's saves in the menu bar with a quick-capture button.",
+      "mode": "menu-bar",
+      "interval": "10m"
+    },
+    {
+      "name": "save-url-to-mymind",
+      "title": "Quick Save URL",
+      "subtitle": "mymind",
+      "description": "Save a URL to mymind in one shot. Designed as a target for Raycast Quicklinks and external deeplinks.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://…",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "title",
+          "placeholder": "Title (optional)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "tags",
+          "placeholder": "tag1, tag2 (optional)",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search-mymind",
+      "title": "Search mymind",
+      "description": "Search the user's mymind library by query, returning the top matches with title, source URL, tags, and modified date."
+    },
+    {
+      "name": "save-url-to-mymind",
+      "title": "Save URL to mymind",
+      "description": "Save a remote URL to mymind. mymind fetches and enriches the page automatically."
+    },
+    {
+      "name": "save-note-to-mymind",
+      "title": "Save Note to mymind",
+      "description": "Save a markdown note to mymind."
+    },
+    {
+      "name": "list-mymind-tags",
+      "title": "List mymind Tags",
+      "description": "List the user's mymind tags, most recently used first."
+    },
+    {
+      "name": "list-mymind-spaces",
+      "title": "List mymind Spaces",
+      "description": "List the user's mymind spaces with names, colors, and object counts."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.91.2",
-    "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.2",
-    "zod": "^3.24.2"
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.4",
+    "zod": "^4.3.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -54,25 +139,18 @@
   },
   "preferences": [
     {
-      "name": "jwt",
-      "type": "password",
+      "name": "keyId",
+      "type": "textfield",
       "required": true,
-      "title": "JWT Token",
-      "description": "Your MyMind JWT token value. Go to https://arian.gg/blog/setup for instructions."
+      "title": "Access Key ID",
+      "description": "The Key ID from your mymind access key. Generate one at https://access.mymind.com/api"
     },
     {
-      "name": "cid",
+      "name": "secretKey",
       "type": "password",
       "required": true,
-      "title": "CID",
-      "description": "Your MyMind CID value. Go to https://arian.gg/blog/setup for instructions."
-    },
-    {
-      "name": "authenticityToken",
-      "type": "password",
-      "required": true,
-      "title": "Authenticity Token",
-      "description": "Your MyMind Authenticity Token value. Go to https://arian.gg/blog/setup for instructions."
+      "title": "Access Key Secret",
+      "description": "The private key (HS256 secret) shown when you created the access key. Shown only once — keep it safe."
     }
   ]
 }
