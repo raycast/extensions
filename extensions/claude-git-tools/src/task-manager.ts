@@ -485,9 +485,7 @@ export function getTaskStatus(task: Task): Task["status"] {
 
   const output = readTaskOutput(task).toLowerCase();
   if (output.includes("task canceled by user")) return "stopped";
-  return output.includes("failed") || output.includes("error")
-    ? "failed"
-    : "completed";
+  return "completed";
 }
 
 function signalTaskProcess(task: Task, signal: NodeJS.Signals): boolean {
@@ -577,8 +575,20 @@ export async function launchTask(
   };
   await addTask(task);
 
-  const model = await getModel();
-  const claudeCommand = buildClaudeCommand(command, options, model);
+  let claudeCommand: string | null;
+  try {
+    const model = await getModel();
+    claudeCommand = buildClaudeCommand(command, options, model);
+  } catch (error) {
+    await removeTask(id);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Failed to start task",
+      message: error instanceof Error ? error.message : String(error),
+    });
+    return null;
+  }
+
   if (!claudeCommand) {
     await removeTask(id);
     await showToast({
