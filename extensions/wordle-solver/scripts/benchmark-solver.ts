@@ -1,4 +1,4 @@
-import { ANSWERS, GUESSES } from "../src/data/wordlists";
+import { ANSWERS } from "../src/data/wordlists";
 import { STARTER, TURN2_LOOKUP } from "../src/lib/constants";
 import { ALL_GREEN_CODE, computePatternCode, patternCodeToKey } from "../src/lib/pattern";
 import { buildPriors } from "../src/lib/prior";
@@ -86,7 +86,7 @@ function computeSuggestion(candidates: readonly string[]): CachedSuggestion {
   if (cached) return cached;
 
   const t0 = performance.now();
-  const result = bestGuess(candidates, GUESSES, buildPriors(candidates));
+  const result = bestGuess(candidates, candidates, buildPriors(candidates));
   if (!result) throw new Error(`No suggestion for state ${key}`);
 
   const suggestion = {

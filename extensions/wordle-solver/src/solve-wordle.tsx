@@ -129,6 +129,7 @@ export default function Command() {
     compute();
     return () => {
       cancelled = true;
+      setSolving(false);
     };
   }, [guesses, storageLoading, isSolved]);
 
