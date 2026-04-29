@@ -13,20 +13,13 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { deleteObject, loadCardMarkdown, MyMindObject, pinObject, unpinObject } from "../api";
 import AddNote from "../add-a-new-note";
+import { safeHostname } from "../utils";
 import { AddTagsForm } from "./AddTagsForm";
 import { EditCardForm } from "./EditCardForm";
 import { ManageSpacesView } from "./ManageSpacesView";
 import { RelatedView } from "./RelatedView";
 
 const MYMIND_WEB_URL = "https://access.mymind.com/everything";
-
-function safeHostname(url: string): string {
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return url;
-  }
-}
 
 function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () => void }) {
   const {
@@ -51,12 +44,16 @@ function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () 
           <Detail.Metadata.Label title="Modified" text={new Date(object.modified).toLocaleString()} />
           {object.entityType && <Detail.Metadata.Label title="Type" text={object.entityType} />}
           {object.source?.url && (
-            <Detail.Metadata.Link title="Source" target={object.source.url} text={safeHostname(object.source.url)} />
+            <Detail.Metadata.Link
+              title="Source"
+              target={object.source.url}
+              text={safeHostname(object.source.url) ?? object.source.url}
+            />
           )}
           {object.tags.length > 0 && (
             <Detail.Metadata.TagList title="Tags">
-              {object.tags.map((t) => (
-                <Detail.Metadata.TagList.Item key={t.name} text={t.name} />
+              {Array.from(new Set(object.tags.map((t) => t.name))).map((name) => (
+                <Detail.Metadata.TagList.Item key={name} text={name} />
               ))}
             </Detail.Metadata.TagList>
           )}

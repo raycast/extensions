@@ -1,5 +1,6 @@
 import { Tool } from "@raycast/api";
 import { createObject } from "../api";
+import { looksLikeUrl } from "../utils";
 
 type Input = {
   /** A remote URL to save to mymind. Must start with http:// or https://. */
@@ -15,7 +16,7 @@ type Input = {
  * its title, image, and extracted content automatically.
  */
 export default async function (input: Input): Promise<{ id: string; title?: string }> {
-  if (!/^https?:\/\/\S+$/i.test(input.url.trim())) {
+  if (!looksLikeUrl(input.url)) {
     throw new Error("URL must start with http:// or https://");
   }
   const created = await createObject({

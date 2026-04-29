@@ -94,14 +94,12 @@ export const SpaceSchema = z.object({
   objects: z.array(SpaceObjectRefSchema).nullish(),
 });
 export type Space = z.infer<typeof SpaceSchema>;
-export const SpaceListSchema = z.array(SpaceSchema);
 
 export const TagSchema = z.object({
   name: z.string(),
   flags: z.number().nullish(),
 });
 export type Tag = z.infer<typeof TagSchema>;
-export const TagListSchema = z.array(TagSchema);
 
 export const RelatedMatchSchema = z.object({
   id: z.string(),

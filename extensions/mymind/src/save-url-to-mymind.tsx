@@ -1,5 +1,6 @@
 import { LaunchProps, showHUD } from "@raycast/api";
 import { createObject, MyMindApiError } from "./api";
+import { looksLikeUrl, parseTags } from "./utils";
 
 interface Arguments {
   url: string;
@@ -7,19 +8,10 @@ interface Arguments {
   tags?: string;
 }
 
-function parseTags(raw: string | undefined): string[] | undefined {
-  if (!raw) return undefined;
-  const tags = raw
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
-  return tags.length ? tags : undefined;
-}
-
 export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
   const { url, title, tags } = props.arguments;
 
-  if (!url || !/^https?:\/\/\S+$/i.test(url.trim())) {
+  if (!url || !looksLikeUrl(url)) {
     await showHUD("✗ mymind — invalid URL");
     return;
   }

@@ -1,4 +1,5 @@
-import { api } from "./client";
+import { api, MyMindApiError } from "./client";
+import { convert, ConvertFormat } from "./convert";
 import { MyMindObject, MyMindObjectSchema, ObjectListSchema, RelatedResponseSchema, RelatedMatch } from "./schemas";
 
 export interface ListObjectsOptions {
@@ -143,9 +144,6 @@ export async function getObjectContent(id: string, format: ContentFormat = "mark
   return response.text();
 }
 
-import { convert, ConvertFormat } from "./convert";
-import { MyMindApiError } from "./client";
-
 const CONTENT_GET_FALLBACK_STATUSES = new Set([404, 405, 406]);
 
 interface ContentEnvelope {
@@ -191,24 +189,14 @@ export async function loadCardMarkdown(id: string): Promise<string> {
   return envelopeToMarkdown(envelope);
 }
 
+export type WritableContentFormat = "markdown" | "prose";
+
 export async function updateObjectContent(
   id: string,
   content: string,
-  format: Exclude<ContentFormat, "html"> = "markdown",
+  format: WritableContentFormat = "markdown",
 ): Promise<void> {
   await api.put(`/objects/${encodeURIComponent(id)}/content`, content, {
     contentType: format === "markdown" ? "text/markdown" : "application/prose+json",
   });
-}
-
-export interface ObjectDownload {
-  url: string;
-  contentType?: string;
-}
-
-export async function getObjectDownloadUrl(id: string): Promise<ObjectDownload> {
-  return {
-    url: `https://api.mymind.com/objects/${encodeURIComponent(id)}/download`,
-    contentType: undefined,
-  };
 }

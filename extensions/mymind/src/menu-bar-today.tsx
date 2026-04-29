@@ -11,21 +11,15 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { listObjects, MyMindApiError, MyMindObject } from "./api";
 
+import { safeHostname } from "./utils";
+import { useMemo } from "react";
+
 const MYMIND_WEB_URL = "https://access.mymind.com/everything";
 const MAX_VISIBLE = 8;
 const MAX_TITLE_CHARS = 40;
 
 function truncate(s: string, max: number): string {
   return s.length > max ? `${s.slice(0, max - 1)}…` : s;
-}
-
-function hostnameOf(url: string | undefined): string | undefined {
-  if (!url) return undefined;
-  try {
-    return new URL(url).hostname;
-  } catch {
-    return undefined;
-  }
 }
 
 function startOfToday(): Date {
@@ -59,8 +53,9 @@ export default function Command() {
     }
   });
 
-  const items = todaysSaves(objects).slice(0, MAX_VISIBLE);
-  const total = todaysSaves(objects).length;
+  const today = useMemo(() => todaysSaves(objects), [objects]);
+  const items = today.slice(0, MAX_VISIBLE);
+  const total = today.length;
   const tooltip = error ? "mymind — error" : `mymind — ${total} saved today`;
 
   return (
@@ -75,7 +70,7 @@ export default function Command() {
           <MenuBarExtra.Item
             key={o.id}
             title={truncate(o.title || "Untitled", MAX_TITLE_CHARS)}
-            subtitle={hostnameOf(o.source?.url)}
+            subtitle={safeHostname(o.source?.url)}
             tooltip={o.source?.url ?? o.title ?? undefined}
             onAction={() => open(o.source?.url ?? `${MYMIND_WEB_URL}/#${o.id}`)}
           />

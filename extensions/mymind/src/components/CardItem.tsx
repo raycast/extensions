@@ -1,6 +1,7 @@
 import { Grid, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { MyMindObject } from "../api";
+import { safeHostname } from "../utils";
 import { CardActions } from "./CardAction";
 
 const FALLBACK_ICON = "mymind-logo.svg";
@@ -10,12 +11,7 @@ export function cardIcon(obj: MyMindObject) {
 }
 
 export function cardHostname(obj: MyMindObject): string | undefined {
-  if (!obj.source?.url) return undefined;
-  try {
-    return new URL(obj.source.url).hostname;
-  } catch {
-    return obj.source.url;
-  }
+  return safeHostname(obj.source?.url) ?? obj.source?.url;
 }
 
 export function GridCardItem({ object, onChange }: { object: MyMindObject; onChange?: () => void }) {

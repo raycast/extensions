@@ -38,26 +38,43 @@ interface RequestOptions {
   signal?: AbortSignal;
 }
 
-function getCredentials(): { keyId: string; secretKey: string } {
-  const prefs = getPreferenceValues<ApiPreferences>();
-  const keyId = prefs.keyId?.trim();
-  const secretKey = prefs.secretKey?.trim();
-  if (!keyId || !secretKey) {
-    throw new MyMindApiError("Missing access key. Set Key ID and Secret in extension preferences.", 401);
-  }
-  return { keyId, secretKey };
-}
-
 function decodeSecret(secret: string): Buffer {
   const normalized = secret.replace(/-/g, "+").replace(/_/g, "/");
   const padded = normalized + "=".repeat((4 - (normalized.length % 4)) % 4);
   return Buffer.from(padded, "base64");
 }
 
+interface ResolvedCredentials {
+  keyId: string;
+  encodedHeader: string;
+  secretBytes: Buffer;
+}
+
+let cachedCredentials: { raw: string; resolved: ResolvedCredentials } | null = null;
+
+function getCredentials(): ResolvedCredentials {
+  const prefs = getPreferenceValues<ApiPreferences>();
+  const keyId = prefs.keyId?.trim();
+  const secretKey = prefs.secretKey?.trim();
+  if (!keyId || !secretKey) {
+    throw new MyMindApiError("Missing access key. Set Key ID and Secret in extension preferences.", 401);
+  }
+  const raw = `${keyId}:${secretKey}`;
+  if (cachedCredentials && cachedCredentials.raw === raw) {
+    return cachedCredentials.resolved;
+  }
+  const resolved: ResolvedCredentials = {
+    keyId,
+    encodedHeader: Buffer.from(JSON.stringify({ alg: "HS256", kid: keyId })).toString("base64"),
+    secretBytes: decodeSecret(secretKey),
+  };
+  cachedCredentials = { raw, resolved };
+  return resolved;
+}
+
 function signRequestToken(path: string, method: string): string {
-  const { keyId, secretKey } = getCredentials();
+  const { encodedHeader, secretBytes } = getCredentials();
   const now = Math.floor(Date.now() / 1000);
-  const header = Buffer.from(JSON.stringify({ alg: "HS256", kid: keyId })).toString("base64");
   const payload = Buffer.from(
     JSON.stringify({
       method: method.toUpperCase(),
@@ -66,8 +83,8 @@ function signRequestToken(path: string, method: string): string {
       exp: now + TOKEN_LIFETIME_SECONDS,
     }),
   ).toString("base64");
-  const data = `${header}.${payload}`;
-  const sig = createHmac("sha256", decodeSecret(secretKey)).update(data).digest("base64url");
+  const data = `${encodedHeader}.${payload}`;
+  const sig = createHmac("sha256", secretBytes).update(data).digest("base64url");
   return `${data}.${sig}`;
 }
 

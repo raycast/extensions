@@ -15,6 +15,7 @@ import { readFile, stat } from "fs/promises";
 import { basename } from "path";
 import { useEffect, useState } from "react";
 import { createObject, createObjectFromBlob, MyMindApiError } from "./api";
+import { looksLikeUrl, parseTags } from "./utils";
 
 interface FormValues {
   text: string;
@@ -24,19 +25,6 @@ interface FormValues {
 }
 
 const MAX_BLOB_BYTES = 64 * 1024 * 1024;
-
-function looksLikeUrl(value: string): boolean {
-  return /^https?:\/\/\S+$/i.test(value.trim());
-}
-
-function parseTags(raw: string): string[] | undefined {
-  if (!raw.trim()) return undefined;
-  const tags = raw
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
-  return tags.length ? tags : undefined;
-}
 
 function guessContentType(filename: string): string {
   const ext = filename.toLowerCase().split(".").pop();
@@ -97,7 +85,6 @@ export default function Command() {
       const SELECTION_MAX_CHARS = 5000;
       const selected = rawSelected && rawSelected.length <= SELECTION_MAX_CHARS ? rawSelected : "";
 
-      // Priority: Finder selection -> selected text -> frontmost browser tab -> clipboard URL.
       if (finderItems.length > 0) {
         const paths = finderItems.map((i) => i.path);
         setFiles((prev) => (prev.length === 0 ? paths : prev));

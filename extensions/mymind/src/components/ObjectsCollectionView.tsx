@@ -1,10 +1,8 @@
 import { Grid, List } from "@raycast/api";
 import { useCachedPromise, useLocalStorage } from "@raycast/utils";
 import { MyMindObject } from "../api";
+import { dedupeById, ViewMode, VIEW_MODE_KEY } from "../utils";
 import { GridCardItem, ListCardItem } from "./CardItem";
-
-type ViewMode = "grid" | "list";
-const VIEW_MODE_KEY = "mymind:viewMode";
 
 interface Props {
   navigationTitle: string;
@@ -21,11 +19,16 @@ export function ObjectsCollectionView({ navigationTitle, load, cacheKey, emptyTi
     isLoading,
     data: objects = [],
     revalidate,
-  } = useCachedPromise((key: string) => (key ? load() : load()), [cacheKey], {
-    keepPreviousData: true,
-  });
+  } = useCachedPromise(
+    // The key arg is what triggers a refetch when cacheKey changes;
+    // load() captures the real fetch parameters in its closure.
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    (_key: string) => load(),
+    [cacheKey],
+    { keepPreviousData: true },
+  );
 
-  const items = Array.from(new Map(objects.map((o) => [o.id, o])).values());
+  const items = dedupeById(objects);
   const loading = isLoading || vmLoading;
 
   if (viewMode === "list") {

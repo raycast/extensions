@@ -1,22 +1,12 @@
 import { Grid, List, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { showFailureToast, useCachedPromise, useLocalStorage } from "@raycast/utils";
-import { listObjects, search, getObject, MyMindApiError, MyMindObject } from "./api";
+import { getObjectsByIds, listObjects, search, MyMindApiError, MyMindObject } from "./api";
 import { GridCardItem, ListCardItem } from "./components/CardItem";
+import { dedupeById, ViewMode, VIEW_MODE_KEY } from "./utils";
 
-type ViewMode = "grid" | "list";
-const VIEW_MODE_KEY = "mymind:viewMode";
 const SEARCH_LIMIT = 50;
 const BROWSE_LIMIT = 1000;
-
-function dedupeById(objects: MyMindObject[]): MyMindObject[] {
-  const seen = new Set<string>();
-  return objects.filter((o) => {
-    if (seen.has(o.id)) return false;
-    seen.add(o.id);
-    return true;
-  });
-}
 
 async function loadObjects(query: string): Promise<MyMindObject[]> {
   const trimmed = query.trim();
@@ -30,8 +20,9 @@ async function loadObjects(query: string): Promise<MyMindObject[]> {
     rerank: true,
   });
   if (matches.length === 0) return [];
-  const fetched = await Promise.all(matches.map((m) => getObject(m.id).catch(() => null)));
-  return dedupeById(fetched.filter((o): o is MyMindObject => o !== null));
+  const fetched = await getObjectsByIds(matches.map((m) => m.id));
+  const byId = new Map(fetched.map((o) => [o.id, o]));
+  return matches.map((m) => byId.get(m.id)).filter((o): o is MyMindObject => o !== undefined);
 }
 
 export default function Command() {
@@ -71,7 +62,7 @@ export default function Command() {
     { keepPreviousData: true },
   );
 
-  const items = Array.from(new Map((objects ?? []).map((o) => [o.id, o])).values());
+  const items = objects ?? [];
   const loading = isLoading || viewModeLoading;
 
   if (viewMode === "list") {

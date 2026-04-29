@@ -1,6 +1,7 @@
 import { Form, ActionPanel, Action, showToast, Toast, popToRoot } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { createObject, MyMindApiError } from "./api";
+import { parseTags } from "./utils";
 
 interface FormValues {
   title: string;
@@ -17,18 +18,11 @@ export default function Command() {
 
     const toast = await showToast({ style: Toast.Style.Animated, title: "Creating note…" });
     try {
-      const tags = values.tags
-        ? values.tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean)
-        : undefined;
-
       await createObject({
         kind: "note",
         markdown: values.content,
         title: values.title || undefined,
-        tags,
+        tags: parseTags(values.tags),
       });
 
       toast.style = Toast.Style.Success;

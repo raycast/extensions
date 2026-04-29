@@ -10,8 +10,8 @@ interface FormValues {
 
 export function EditCardForm({ object, onSaved }: { object: MyMindObject; onSaved?: () => void }) {
   const { pop } = useNavigation();
-  const [content, setContent] = useState("");
-  const [title, setTitle] = useState(object.title || "");
+  const [titleDraft, setTitleDraft] = useState<string | null>(null);
+  const [contentDraft, setContentDraft] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
   const {
@@ -21,21 +21,21 @@ export function EditCardForm({ object, onSaved }: { object: MyMindObject; onSave
   } = useCachedPromise((id: string) => loadCardMarkdown(id), [object.id]);
 
   useEffect(() => {
-    if (!isLoading && !loadError) setContent(initialContent);
-  }, [isLoading, initialContent, loadError]);
-
-  useEffect(() => {
     if (loadError) {
       showFailureToast(loadError, { title: "Couldn't load existing content" });
     }
   }, [loadError]);
+
+  const initialTitle = object.title || "";
+  const title = titleDraft ?? initialTitle;
+  const content = contentDraft ?? initialContent;
 
   const handleSubmit = async (values: FormValues) => {
     setSubmitting(true);
     const toast = await showToast({ style: Toast.Style.Animated, title: "Saving…" });
     try {
       const operations: Promise<unknown>[] = [];
-      if (values.title !== (object.title || "")) {
+      if (values.title !== initialTitle) {
         operations.push(updateObjectTitle(object.id, values.title));
       }
       if (values.content !== initialContent) {
@@ -70,14 +70,14 @@ export function EditCardForm({ object, onSaved }: { object: MyMindObject; onSave
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" value={title} onChange={setTitle} />
+      <Form.TextField id="title" title="Title" value={title} onChange={setTitleDraft} />
       <Form.TextArea
         id="content"
         title="Content"
         placeholder="Markdown…"
         enableMarkdown
         value={content}
-        onChange={setContent}
+        onChange={setContentDraft}
       />
     </Form>
   );

@@ -2,6 +2,7 @@ import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@ray
 import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { addTagsToObject, MyMindObject } from "../api";
+import { parseTags } from "../utils";
 
 export function AddTagsForm({ object, onChange }: { object: MyMindObject; onChange?: () => void }) {
   const { pop } = useNavigation();
@@ -9,10 +10,7 @@ export function AddTagsForm({ object, onChange }: { object: MyMindObject; onChan
   const existing = object.tags.map((t) => t.name);
 
   const handleSubmit = async ({ tags }: { tags: string }) => {
-    const candidates = tags
-      .split(",")
-      .map((t) => t.trim())
-      .filter(Boolean);
+    const candidates = parseTags(tags) ?? [];
     const lowerExisting = new Set(existing.map((t) => t.toLowerCase()));
     const fresh = candidates.filter((t) => !lowerExisting.has(t.toLowerCase()));
 
