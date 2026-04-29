@@ -32,7 +32,6 @@ On any card you can:
 
 - **Show Details** (Enter) — markdown body + metadata sidebar.
 - **Find Related** (Cmd+Shift+R) — semantically related cards.
-  Requires mymind's Mastermind tier.
 - **Edit Card** (Cmd+E) — edit title and markdown body.
 - **Manage Spaces** (Cmd+Shift+S) — toggle the card in or out of any space.
 - **Add Tags** (Cmd+Shift+T) — append new tags. (Tag removal still has to happen on the web app — the API doesn't expose it.)
@@ -64,14 +63,11 @@ no Raycast UI opens.
 
 ## Known limitations
 
-- **Find Related** is gated to mymind's Mastermind tier. Even on
-  enabled accounts the endpoint may return 404 if the feature isn't
-  active for your plan — the view falls back to a friendly empty state.
 - **Recently Deleted** isn't yet exposed by the API, so there's no
   command to browse the trash. Restore is implemented internally and
   will surface as soon as listing is available.
-- **Grid thumbnails** use favicons today (Raycast Grid can't pass auth
-  headers to mymind's CDN). Real preview images will follow.
+- **Tag removal** still has to happen on the web app — the API
+  exposes adding tags but no delete counterpart.
 
 ## Migrating from 1.x
 

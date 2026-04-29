@@ -1,23 +1,23 @@
 import { Grid, List, Icon } from "@raycast/api";
 import { useCachedPromise, useLocalStorage, showFailureToast } from "@raycast/utils";
-import { getObjectsByIds, getRelated, MyMindApiError, MyMindObject } from "../api";
+import { getObjectsByIds, MyMindApiError, MyMindObject, search } from "../api";
 import { dedupeById, ViewMode, VIEW_MODE_KEY } from "../utils";
 import { GridCardItem, ListCardItem } from "./CardItem";
 
 const RELATED_LIMIT = 50;
-const UNAVAILABLE_HINT =
-  "GET /objects/:id/related returned 404. The endpoint requires Mastermind and may not yet be active on your account — contact mymind support if it stays unavailable.";
+const NOT_EMBEDDED_HINT =
+  "This card hasn't been indexed for similarity yet. mymind embeds new objects in the background — try again in a few minutes.";
+
+function isNotEmbedded(err: unknown): boolean {
+  return err instanceof MyMindApiError && /embedding/i.test(err.message);
+}
 
 async function loadRelated(id: string): Promise<MyMindObject[]> {
-  const matches = await getRelated(id, RELATED_LIMIT);
+  const matches = await search({ similarTo: id, limit: RELATED_LIMIT });
   if (matches.length === 0) return [];
   const fetched = await getObjectsByIds(matches.map((m) => m.id));
   const byId = new Map(fetched.map((o) => [o.id, o]));
   return dedupeById(matches.map((m) => byId.get(m.id)).filter((o): o is MyMindObject => o !== undefined));
-}
-
-function isUnavailable(error: unknown): boolean {
-  return error instanceof MyMindApiError && (error.status === 404 || error.status === 403);
 }
 
 export function RelatedView({ source }: { source: MyMindObject }) {
@@ -30,7 +30,7 @@ export function RelatedView({ source }: { source: MyMindObject }) {
     revalidate,
   } = useCachedPromise(loadRelated, [source.id], {
     onError(err) {
-      if (isUnavailable(err)) return;
+      if (isNotEmbedded(err)) return;
       showFailureToast(err, { title: "Failed to fetch related" });
     },
   });
@@ -38,10 +38,10 @@ export function RelatedView({ source }: { source: MyMindObject }) {
   const loading = isLoading || vmLoading;
   const navTitle = source.title ? `Related to "${source.title}"` : "Related";
 
-  if (error && isUnavailable(error)) {
+  if (error && isNotEmbedded(error)) {
     return (
       <List navigationTitle={navTitle}>
-        <List.EmptyView icon={Icon.Stars} title="Find Related is unavailable" description={UNAVAILABLE_HINT} />
+        <List.EmptyView icon={Icon.Stars} title="No similar cards yet" description={NOT_EMBEDDED_HINT} />
       </List>
     );
   }
@@ -57,14 +57,7 @@ export function RelatedView({ source }: { source: MyMindObject }) {
   }
 
   return (
-    <Grid
-      isLoading={loading}
-      navigationTitle={navTitle}
-      columns={5}
-      aspectRatio="3/2"
-      fit={Grid.Fit.Contain}
-      inset={Grid.Inset.Medium}
-    >
+    <Grid isLoading={loading} navigationTitle={navTitle} columns={5} aspectRatio="3/2" fit={Grid.Fit.Fill}>
       {objects.map((o) => (
         <GridCardItem key={o.id} object={o} onChange={revalidate} />
       ))}

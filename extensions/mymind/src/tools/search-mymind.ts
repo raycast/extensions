@@ -1,4 +1,4 @@
-import { getObjectsByIds, search, MyMindObject } from "../api";
+import { listObjects, MyMindObject } from "../api";
 import { safeHostname } from "../utils";
 
 type Input = {
@@ -21,10 +21,9 @@ interface ResultRow {
   domain?: string;
   tags: string[];
   modified: string;
-  score: number;
 }
 
-function summarize(obj: MyMindObject, score: number): ResultRow {
+function summarize(obj: MyMindObject): ResultRow {
   return {
     id: obj.id,
     title: obj.title || "Untitled",
@@ -32,7 +31,6 @@ function summarize(obj: MyMindObject, score: number): ResultRow {
     domain: safeHostname(obj.source?.url),
     tags: obj.tags.map((t) => t.name),
     modified: obj.modified,
-    score,
   };
 }
 
@@ -42,14 +40,6 @@ function summarize(obj: MyMindObject, score: number): ResultRow {
  */
 export default async function (input: Input): Promise<ResultRow[]> {
   const limit = Math.max(1, Math.min(input.limit ?? 20, 50));
-  const matches = await search({ q: input.query, limit, semantic: true, rerank: true });
-  if (matches.length === 0) return [];
-  const fetched = await getObjectsByIds(matches.map((m) => m.id));
-  const byId = new Map(fetched.map((o) => [o.id, o]));
-  return matches
-    .map((m) => {
-      const obj = byId.get(m.id);
-      return obj ? summarize(obj, m.score) : null;
-    })
-    .filter((row): row is ResultRow => row !== null);
+  const objects = await listObjects({ q: input.query, limit, semantic: true, rerank: true });
+  return objects.map(summarize);
 }

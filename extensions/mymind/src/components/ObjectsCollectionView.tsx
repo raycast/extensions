@@ -45,14 +45,7 @@ export function ObjectsCollectionView({ navigationTitle, load, cacheKey, emptyTi
   }
 
   return (
-    <Grid
-      isLoading={loading}
-      navigationTitle={navigationTitle}
-      columns={5}
-      aspectRatio="3/2"
-      fit={Grid.Fit.Contain}
-      inset={Grid.Inset.Medium}
-    >
+    <Grid isLoading={loading} navigationTitle={navigationTitle} columns={5} aspectRatio="3/2" fit={Grid.Fit.Fill}>
       {items.length === 0 && !loading && (
         <Grid.EmptyView title={emptyTitle ?? "Nothing here yet"} description={emptyDescription} />
       )}

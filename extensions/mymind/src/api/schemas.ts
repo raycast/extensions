@@ -74,14 +74,6 @@ export const SearchResultSchema = z.object({
 });
 export type SearchResult = z.infer<typeof SearchResultSchema>;
 
-export const SearchResponseSchema = z.object({
-  elapsed: z.number().nullish(),
-  count: z.number().nullish(),
-  query: z.string().nullish(),
-  matches: z.array(SearchResultSchema),
-});
-export type SearchResponse = z.infer<typeof SearchResponseSchema>;
-
 export const SpaceObjectRefSchema = z.object({
   id: z.string(),
 });
@@ -100,14 +92,3 @@ export const TagSchema = z.object({
   flags: z.number().nullish(),
 });
 export type Tag = z.infer<typeof TagSchema>;
-
-export const RelatedMatchSchema = z.object({
-  id: z.string(),
-  score: z.number(),
-});
-export type RelatedMatch = z.infer<typeof RelatedMatchSchema>;
-
-export const RelatedResponseSchema = z.union([
-  z.array(RelatedMatchSchema),
-  z.object({ matches: z.array(RelatedMatchSchema) }).loose(),
-]);

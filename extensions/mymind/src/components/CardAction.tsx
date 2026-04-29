@@ -25,9 +25,15 @@ function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () 
   const {
     isLoading,
     data: markdown = "",
+    error,
     revalidate,
-  } = useCachedPromise((id: string) => loadCardMarkdown(id).catch(() => ""), [object.id]);
+  } = useCachedPromise(loadCardMarkdown, [object.id]);
   const heading = object.title ? `# ${object.title}\n\n` : "";
+  const body = error
+    ? `> Couldn't load body: ${error.message}`
+    : !isLoading && !markdown.trim()
+      ? "_The mymind API doesn't expose the reader body for this card. Press ⌘↵ to open the original._"
+      : markdown;
 
   const handleChange = () => {
     revalidate();
@@ -37,7 +43,7 @@ function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () 
   return (
     <Detail
       isLoading={isLoading}
-      markdown={heading + markdown}
+      markdown={heading + body}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.Label title="Created" text={new Date(object.created).toLocaleString()} />

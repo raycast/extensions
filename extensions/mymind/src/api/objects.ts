@@ -1,18 +1,28 @@
-import { api, MyMindApiError } from "./client";
-import { convert, ConvertFormat } from "./convert";
-import { MyMindObject, MyMindObjectSchema, ObjectListSchema, RelatedResponseSchema, RelatedMatch } from "./schemas";
+import { api } from "./client";
+import { MyMindObject, MyMindObjectSchema, ObjectListSchema } from "./schemas";
 
 export interface ListObjectsOptions {
   id?: string | string[];
   q?: string;
   contentAs?: string;
   limit?: number;
+  semantic?: boolean;
+  semanticBoost?: number;
+  rerank?: boolean;
   signal?: AbortSignal;
 }
 
 export async function listObjects(opts: ListObjectsOptions = {}): Promise<MyMindObject[]> {
   const data = await api.get<unknown>("/objects", {
-    query: { id: opts.id, q: opts.q, contentAs: opts.contentAs, limit: opts.limit },
+    query: {
+      id: opts.id,
+      q: opts.q,
+      contentAs: opts.contentAs,
+      limit: opts.limit,
+      semantic: opts.semantic,
+      semanticBoost: opts.semanticBoost,
+      rerank: opts.rerank,
+    },
     signal: opts.signal,
   });
   return ObjectListSchema.parse(data);
@@ -30,18 +40,17 @@ export async function getObjectsByIds(ids: string[], signal?: AbortSignal): Prom
   return batches.flat();
 }
 
-export async function getObject(id: string, signal?: AbortSignal): Promise<MyMindObject> {
-  const data = await api.get<unknown>(`/objects/${encodeURIComponent(id)}`, { signal });
-  return MyMindObjectSchema.parse(data);
+export interface GetObjectOptions {
+  contentAs?: string;
+  signal?: AbortSignal;
 }
 
-export async function getRelated(id: string, limit = 50, signal?: AbortSignal): Promise<RelatedMatch[]> {
-  const data = await api.get<unknown>(`/objects/${encodeURIComponent(id)}/related`, {
-    query: { limit },
-    signal,
+export async function getObject(id: string, opts: GetObjectOptions = {}): Promise<MyMindObject> {
+  const data = await api.get<unknown>(`/objects/${encodeURIComponent(id)}`, {
+    query: { contentAs: opts.contentAs },
+    signal: opts.signal,
   });
-  const parsed = RelatedResponseSchema.parse(data);
-  return Array.isArray(parsed) ? parsed : parsed.matches;
+  return MyMindObjectSchema.parse(data);
 }
 
 interface CreateBase {
@@ -129,64 +138,18 @@ export async function updateObjectTitle(id: string, title: string): Promise<void
   await api.patch(`/objects/${encodeURIComponent(id)}`, { title });
 }
 
-export type ContentFormat = "markdown" | "prose" | "html";
-
-const CONTENT_ACCEPT: Record<ContentFormat, string> = {
-  markdown: "text/markdown",
-  prose: "application/prose+json",
-  html: "text/html",
-};
-
-export async function getObjectContent(id: string, format: ContentFormat = "markdown"): Promise<string> {
-  const response = await api.getRaw(`/objects/${encodeURIComponent(id)}/content`, {
-    accept: CONTENT_ACCEPT[format],
-  });
-  return response.text();
+export async function loadCardMarkdown(id: string, signal?: AbortSignal): Promise<string> {
+  const obj = await getObject(id, { contentAs: "text/markdown", signal });
+  return extractMarkdown(obj.content);
 }
 
-const CONTENT_GET_FALLBACK_STATUSES = new Set([404, 405, 406]);
-
-interface ContentEnvelope {
-  type: string;
-  body: unknown;
-}
-
-function asEnvelope(value: unknown): ContentEnvelope | null {
-  if (
-    value &&
-    typeof value === "object" &&
-    "type" in value &&
-    "body" in value &&
-    typeof (value as { type: unknown }).type === "string"
-  ) {
-    return value as ContentEnvelope;
-  }
-  return null;
-}
-
-async function envelopeToMarkdown({ type, body }: ContentEnvelope): Promise<string> {
-  if (body == null) return "";
-  if (typeof body === "string") {
-    if (type === "text/markdown") return body;
-    return convert(body, type as ConvertFormat, "text/markdown");
-  }
-  return convert(JSON.stringify(body), "application/prose+json", "text/markdown");
-}
-
-export async function loadCardMarkdown(id: string): Promise<string> {
-  try {
-    return await getObjectContent(id, "markdown");
-  } catch (err) {
-    if (!(err instanceof MyMindApiError) || !CONTENT_GET_FALLBACK_STATUSES.has(err.status)) {
-      throw err;
-    }
-  }
-  const obj = await getObject(id);
-  if (obj.content == null) return "";
-  if (typeof obj.content === "string") return obj.content;
-  const envelope = asEnvelope(obj.content);
-  if (!envelope) return "";
-  return envelopeToMarkdown(envelope);
+function extractMarkdown(content: unknown): string {
+  if (content == null) return "";
+  if (typeof content === "string") return content;
+  if (typeof content !== "object") return "";
+  const body = (content as { body?: unknown }).body;
+  if (typeof body === "string") return body;
+  return "";
 }
 
 export type WritableContentFormat = "markdown" | "prose";

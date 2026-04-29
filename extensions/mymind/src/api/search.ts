@@ -1,8 +1,9 @@
 import { api } from "./client";
-import { SearchResult, SearchResponseSchema } from "./schemas";
+import { SearchResult, SearchResultSchema, unwrapList } from "./schemas";
 
 export interface SearchOptions {
-  q: string;
+  q?: string;
+  similarTo?: string;
   limit?: number;
   semantic?: boolean;
   semanticBoost?: number;
@@ -14,6 +15,7 @@ export async function search(opts: SearchOptions): Promise<SearchResult[]> {
   const data = await api.get<unknown>("/search", {
     query: {
       q: opts.q,
+      similarTo: opts.similarTo,
       limit: opts.limit,
       semantic: opts.semantic,
       semanticBoost: opts.semanticBoost,
@@ -21,5 +23,5 @@ export async function search(opts: SearchOptions): Promise<SearchResult[]> {
     },
     signal: opts.signal,
   });
-  return SearchResponseSchema.parse(data).matches;
+  return unwrapList(SearchResultSchema, data);
 }

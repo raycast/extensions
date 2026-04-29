@@ -1,28 +1,26 @@
 import { Grid, List, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { showFailureToast, useCachedPromise, useLocalStorage } from "@raycast/utils";
-import { getObjectsByIds, listObjects, search, MyMindApiError, MyMindObject } from "./api";
+import { listObjects, MyMindApiError, MyMindObject } from "./api";
 import { GridCardItem, ListCardItem } from "./components/CardItem";
 import { dedupeById, ViewMode, VIEW_MODE_KEY } from "./utils";
 
 const SEARCH_LIMIT = 50;
-const BROWSE_LIMIT = 1000;
+const BROWSE_LIMIT = 200;
 
 async function loadObjects(query: string): Promise<MyMindObject[]> {
   const trimmed = query.trim();
   if (!trimmed) {
     return dedupeById(await listObjects({ limit: BROWSE_LIMIT }));
   }
-  const matches = await search({
-    q: trimmed,
-    limit: SEARCH_LIMIT,
-    semantic: true,
-    rerank: true,
-  });
-  if (matches.length === 0) return [];
-  const fetched = await getObjectsByIds(matches.map((m) => m.id));
-  const byId = new Map(fetched.map((o) => [o.id, o]));
-  return matches.map((m) => byId.get(m.id)).filter((o): o is MyMindObject => o !== undefined);
+  return dedupeById(
+    await listObjects({
+      q: trimmed,
+      limit: SEARCH_LIMIT,
+      semantic: true,
+      rerank: true,
+    }),
+  );
 }
 
 export default function Command() {
@@ -93,8 +91,7 @@ export default function Command() {
       searchBarPlaceholder="Search your mind…"
       columns={5}
       aspectRatio="3/2"
-      fit={Grid.Fit.Contain}
-      inset={Grid.Inset.Medium}
+      fit={Grid.Fit.Fill}
       searchBarAccessory={
         <Grid.Dropdown tooltip="View" value={viewMode} onChange={(v) => setViewMode(v as ViewMode)}>
           <Grid.Dropdown.Item title="Grid" value="grid" />
