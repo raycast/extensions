@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "raycast-api": {
+      "type": "http",
+      "url": "https://developers.raycast.com/~gitbook/mcp"
+    }
+  }
+}

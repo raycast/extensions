@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wordle-solver",
+  "title": "Wordle Solver",
+  "description": "Suggests the next best Wordle guess from your prior guesses and color feedback, using an entropy-maximizing solver.",
+  "icon": "extension-icon.png",
+  "author": "thomas_fang",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "keywords": [
+    "wordle",
+    "word game",
+    "puzzle",
+    "solver",
+    "entropy"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "solve-wordle",
+      "title": "Solve Wordle",
+      "description": "Suggests the next best Wordle guess based on your prior guesses and color feedback.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.19.2",
+    "typescript": "^5.8.2",
+    "vitest": "^2.1.8"
+  },
+  "scripts": {
+    "build": "ray build",
+    "build:data": "tsx scripts/build-data.ts",
+    "build:turn2": "tsx scripts/build-turn2-lookup.ts",
+    "build:all": "npm run build:data && npm run build:turn2",
+    "benchmark:solver": "tsx scripts/benchmark-solver.ts",
+    "benchmark:tune-frequency": "tsx scripts/tune-frequency-bonus.ts",
+    "benchmark:tune-prior": "tsx scripts/tune-prior.ts",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
