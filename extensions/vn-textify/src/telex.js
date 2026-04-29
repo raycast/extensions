@@ -1,48 +1,22 @@
-// Common English words ending in tone-marker letters (s, f, r, x, j)
-// that should NOT be transformed. Case-insensitive match.
-const SKIP_WORDS = new Set([
-  "access",
-  "actor",
-  "class",
-  "color",
-  "complex",
-  "doctor",
-  "door",
-  "error",
-  "ex",
-  "favor",
-  "fix",
-  "floor",
-  "focus",
-  "for",
-  "fox",
-  "if",
-  "index",
-  "major",
-  "mass",
-  "minor",
-  "minus",
-  "mix",
-  "monitor",
-  "motor",
-  "nor",
-  "of",
-  "pass",
-  "plus",
-  "process",
-  "proof",
-  "relax",
-  "roof",
-  "self",
-  "sensor",
-  "six",
-  "status",
-  "stress",
-  "stuff",
-  "success",
-  "virus",
-  "yes",
-]);
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, join } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+function loadDefaultSkipWords() {
+  try {
+    const data = readFileSync(join(__dirname, "skip-words.txt"), "utf-8");
+    return data
+      .split(/\r?\n/)
+      .map((w) => w.trim().toLowerCase())
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+const DEFAULT_SKIP_WORDS = new Set(loadDefaultSkipWords());
 
 const VOWELS = "aeiouyáàảãạéèẻẽẹíìỉĩịóòỏõọúùủũụýỳỷỹỵâăêôơưấầẩẫậắằẳẵặếềểễệốồổỗộớờởỡợứừửữự";
 
@@ -139,14 +113,21 @@ function getBestVowelIndex(word) {
   return firstIdx;
 }
 
-export function telexTransform(input) {
+export function telexTransform(input, customSkipWords = []) {
+  const skipWords =
+    customSkipWords.length > 0
+      ? new Set([...DEFAULT_SKIP_WORDS, ...customSkipWords.map((w) => w.toLowerCase())])
+      : DEFAULT_SKIP_WORDS;
+
   const tokens = input.split(/(\s+)/);
 
   return tokens
     .map((token) => {
       if (/^\s+$/.test(token)) return token;
-      // Skip known English words ending in tone-marker letters
-      if (SKIP_WORDS.has(token.toLowerCase().trim())) return token;
+      // Skip known English words ending in tone-marker letters.
+      // Strip surrounding punctuation so "yes," matches "yes".
+      const cleanToken = token.toLowerCase().replace(/^[^a-z]+|[^a-z]+$/g, "");
+      if (cleanToken && skipWords.has(cleanToken)) return token;
 
       let output = "";
       let tone = 0;

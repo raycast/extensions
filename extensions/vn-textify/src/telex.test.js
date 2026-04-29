@@ -60,6 +60,7 @@ const testCases = [
 
   // Edge cases
   ["",                          ""],
+  ["bus",                       "bú"],
   ["hello",                     "hello"],
   ["ban",                       "ban"],
   ["NHAS",                      "NHÁ"],
@@ -78,8 +79,10 @@ const testCases = [
   ["of",                        "of"],
 
   // ── SKIP_WORDS: valid onset but known English → skip ──
-  ["bus",                       "bú"],
   ["yes",                       "yes"],
+  ["yes, ok",                   "yes, ok"],
+  ["yes,",                      "yes,"],
+  ["status.",                   "status."],
 
   // ── LONG sentences ──
   [

@@ -1,5 +1,20 @@
-import { getSelectedText, Clipboard, showHUD, showToast, Toast } from "@raycast/api";
+import { getSelectedText, Clipboard, showHUD, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { telexTransform } from "./telex";
+
+function loadCustomSkipWords(): string[] {
+  try {
+    const prefs = getPreferenceValues<{ customSkipWords?: string }>();
+    if (prefs.customSkipWords) {
+      return prefs.customSkipWords
+        .split(/\r?\n/)
+        .map((w) => w.trim().toLowerCase())
+        .filter(Boolean);
+    }
+  } catch {
+    // Ignore if preference not set
+  }
+  return [];
+}
 
 export default async function Command() {
   try {
@@ -10,7 +25,8 @@ export default async function Command() {
       return;
     }
 
-    const result = telexTransform(selectedText);
+    const extraSkipWords = loadCustomSkipWords();
+    const result = telexTransform(selectedText, extraSkipWords);
 
     await Clipboard.paste(result);
     await Clipboard.copy(result);

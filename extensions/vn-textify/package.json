@@ -21,6 +21,15 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "customSkipWordsPath",
+      "type": "file",
+      "title": "Custom Skip Words File",
+      "description": "Path to a text file with one word per line to skip during transformation. Merged with the built-in skip words.",
+      "required": false
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.13",
     "@raycast/utils": "^1.17.0"

@@ -38,3 +38,15 @@ No IME. No switching. No side effects. Just type and transform.
 3. The selected text is replaced with: `tôi đang học code`.
 
 Mix English freely — words that don't look Vietnamese are left alone.
+
+## Custom Skip Words
+
+You can extend the list of English words that should never be transformed. Create a text file with one word per line:
+
+```
+status
+proof
+mycompanyname
+```
+
+Then in Raycast → Extensions → Transform Vietnamese Telex → Preferences, paste your words into the **Custom Skip Words** textarea (one per line). They are merged with the built-in list in `src/skip-words.txt`.
