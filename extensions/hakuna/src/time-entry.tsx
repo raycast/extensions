@@ -8,7 +8,7 @@ import {
   LaunchProps,
 } from "@raycast/api";
 import TimerForm from "./timer-form";
-import { HakunaTimer, TimerResponse } from "./hakuna-api";
+import { HakunaClient, TimerResponse } from "./hakuna-api";
 
 interface Props {
   projectId?: string;
@@ -18,7 +18,7 @@ interface Props {
   onUpdate?: (updated: TimerResponse) => void;
 }
 
-export default function AddTimeEntry(
+export default function TimeEntry(
   props: Props &
     Partial<LaunchProps<{ launchContext: { entry?: TimerResponse } }>>,
 ) {
@@ -26,7 +26,7 @@ export default function AddTimeEntry(
   const entry = props.entry ?? props.launchContext?.entry;
   const { apiToken } = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
-  const timer = new HakunaTimer(apiToken);
+  const timer = new HakunaClient(apiToken);
   const today = new Date().toISOString().split("T")[0];
 
   if (entry) {

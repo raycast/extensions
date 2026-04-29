@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { AbsenceResponse, HakunaTimer } from "./hakuna-api";
+import { AbsenceResponse, HakunaClient } from "./hakuna-api";
 import { getSettings } from "./settings";
 
 function formatDate(date: string): string {
@@ -98,18 +98,18 @@ export default function Command({
 
   const { data: absences, isLoading: absencesLoading } = useCachedPromise(
     (token: string, y: number, uid: number | undefined) =>
-      new HakunaTimer(token).getAbsences(y, uid),
+      new HakunaClient(token).getAbsences(y, uid),
     [apiToken, year, userId],
   );
 
   const { data: overview, isLoading: overviewLoading } = useCachedPromise(
     (token: string, uid: number | undefined) =>
-      new HakunaTimer(token).getOverview(uid),
+      new HakunaClient(token).getOverview(uid),
     [apiToken, userId],
   );
 
   const { data: absenceTypes, isLoading: typesLoading } = useCachedPromise(
-    (token: string) => new HakunaTimer(token).getAbsenceTypes(),
+    (token: string) => new HakunaClient(token).getAbsenceTypes(),
     [apiToken],
   );
 

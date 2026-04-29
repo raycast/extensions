@@ -12,12 +12,12 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { HakunaTimer, TimerResponse, formatDuration } from "./hakuna-api";
-import { ProjectsList } from "./project";
+import { HakunaClient, TimerResponse, formatDuration } from "./hakuna-api";
+import { ProjectsList } from "./projects";
 import { getSettings } from "./settings";
 import Timer from "./timer";
-import AddTimeEntry from "./add-time-entry";
-import StartTimerView from "./start-timer-view";
+import TimeEntry from "./time-entry";
+import StartTimer from "./start-timer";
 
 function formatTime(time: string): string {
   return time.slice(0, 5);
@@ -192,7 +192,7 @@ function EntryItem({
             title="Edit Entry"
             icon={Icon.Pencil}
             onAction={() =>
-              push(<AddTimeEntry entry={entry} onUpdate={onUpdate} />)
+              push(<TimeEntry entry={entry} onUpdate={onUpdate} />)
             }
           />
           <Action
@@ -201,7 +201,7 @@ function EntryItem({
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             onAction={() =>
               push(
-                <AddTimeEntry
+                <TimeEntry
                   projectId={
                     entry.project ? String(entry.project.id) : undefined
                   }
@@ -217,7 +217,7 @@ function EntryItem({
             shortcut={{ modifiers: ["cmd"], key: "t" }}
             onAction={() =>
               push(
-                <StartTimerView
+                <StartTimer
                   projectId={
                     entry.project ? String(entry.project.id) : undefined
                   }
@@ -426,9 +426,9 @@ export default function Command() {
   const [runningTimer, setRunningTimer] = useState<TimerResponse | null>(null);
   const [timerElapsed, setTimerElapsed] = useState(0);
   const { apiToken } = getSettings();
-  const api = new HakunaTimer(apiToken);
+  const api = new HakunaClient(apiToken);
   const { data: company } = useCachedPromise(
-    (token: string) => new HakunaTimer(token).getCompany(),
+    (token: string) => new HakunaClient(token).getCompany(),
     [apiToken],
   );
   const durationFormat = company?.duration_format ?? "hhmm";
@@ -563,7 +563,7 @@ export default function Command() {
               <Action
                 title="Add Entry"
                 icon={Icon.Plus}
-                onAction={() => push(<AddTimeEntry />)}
+                onAction={() => push(<TimeEntry />)}
               />
               <Action
                 title="Start Timer"

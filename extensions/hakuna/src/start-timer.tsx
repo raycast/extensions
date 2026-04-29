@@ -1,6 +1,6 @@
 import { getPreferenceValues, popToRoot, showToast, Toast } from "@raycast/api";
 import TimerForm from "./timer-form";
-import { HakunaTimer } from "./hakuna-api";
+import { HakunaClient } from "./hakuna-api";
 
 interface Props {
   projectId?: string;
@@ -8,9 +8,9 @@ interface Props {
   note?: string;
 }
 
-export default function StartTimerView({ projectId, taskId, note }: Props) {
+export default function StartTimer({ projectId, taskId, note }: Props) {
   const { apiToken } = getPreferenceValues<Preferences>();
-  const timer = new HakunaTimer(apiToken);
+  const timer = new HakunaClient(apiToken);
 
   return (
     <TimerForm

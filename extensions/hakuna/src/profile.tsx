@@ -10,7 +10,7 @@ import {
 import { useState, useRef, useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import {
-  HakunaTimer,
+  HakunaClient,
   OverviewResponse,
   CompanyResponse,
   UserResponse,
@@ -241,19 +241,19 @@ export default function Command() {
   const fetchingRef = useRef<Set<number>>(new Set());
 
   const { data: me, isLoading: meLoading } = useCachedPromise(
-    (token: string) => new HakunaTimer(token).getMe(),
+    (token: string) => new HakunaClient(token).getMe(),
     [apiToken],
   );
   const { data: users, isLoading: usersLoading } = useCachedPromise(
-    (token: string) => new HakunaTimer(token).getUsers(),
+    (token: string) => new HakunaClient(token).getUsers(),
     [apiToken],
   );
   const { data: overview, isLoading: overviewLoading } = useCachedPromise(
-    (token: string) => new HakunaTimer(token).getOverview(),
+    (token: string) => new HakunaClient(token).getOverview(),
     [apiToken],
   );
   const { data: company, isLoading: companyLoading } = useCachedPromise(
-    (token: string) => new HakunaTimer(token).getCompany(),
+    (token: string) => new HakunaClient(token).getCompany(),
     [apiToken],
   );
 
@@ -290,7 +290,7 @@ export default function Command() {
     )
       return;
     fetchingRef.current.add(userId);
-    new HakunaTimer(apiToken)
+    new HakunaClient(apiToken)
       .getOverview(userId)
       .then((data) =>
         setTeammateOverviews((prev) => ({ ...prev, [userId]: data })),

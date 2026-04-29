@@ -7,10 +7,10 @@ import {
   Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { HakunaTimer, Project, Task } from "./hakuna-api";
+import { HakunaClient, Project, Task } from "./hakuna-api";
 import { getSettings } from "./settings";
-import StartTimerView from "./start-timer-view";
-import AddTimeEntry from "./add-time-entry";
+import StartTimer from "./start-timer";
+import TimeEntry from "./time-entry";
 
 interface TaskItemProps {
   task: Task;
@@ -33,10 +33,7 @@ function TaskItem({ task, projectId, enableTimerActions }: TaskItemProps) {
               icon={Icon.Play}
               shortcut={{ modifiers: ["cmd"], key: "t" }}
               target={
-                <StartTimerView
-                  projectId={projectId}
-                  taskId={String(task.id)}
-                />
+                <StartTimer projectId={projectId} taskId={String(task.id)} />
               }
             />
             <Action.Push
@@ -44,7 +41,7 @@ function TaskItem({ task, projectId, enableTimerActions }: TaskItemProps) {
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               target={
-                <AddTimeEntry projectId={projectId} taskId={String(task.id)} />
+                <TimeEntry projectId={projectId} taskId={String(task.id)} />
               }
             />
           </ActionPanel>
@@ -83,7 +80,7 @@ export default function Command() {
 
   const { data, isLoading } = useCachedPromise(
     async (token: string) => {
-      const api = new HakunaTimer(token);
+      const api = new HakunaClient(token);
       const [company, allTasks] = await Promise.all([
         api.getCompany(),
         api.getTasks(),

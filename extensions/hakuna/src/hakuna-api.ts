@@ -1,4 +1,5 @@
 import axios, { AxiosInstance } from "axios";
+import rateLimit from "axios-rate-limit";
 
 interface ErrorResponse {
   message?: string;
@@ -101,7 +102,7 @@ export interface OverviewResponse {
   };
 }
 
-export class HakunaTimer {
+export class HakunaClient {
   private apiToken: string;
   private baseUrl: string;
   private axiosInstance: AxiosInstance;
@@ -109,13 +110,16 @@ export class HakunaTimer {
   constructor(apiToken: string) {
     this.apiToken = apiToken;
     this.baseUrl = "https://app.hakuna.ch/api/v1";
-    this.axiosInstance = axios.create({
-      baseURL: this.baseUrl,
-      headers: {
-        "X-Auth-Token": `${this.apiToken}`,
-        "Content-Type": "application/json",
-      },
-    });
+    this.axiosInstance = rateLimit(
+      axios.create({
+        baseURL: this.baseUrl,
+        headers: {
+          "X-Auth-Token": `${this.apiToken}`,
+          "Content-Type": "application/json",
+        },
+      }),
+      { maxRequests: 100, perMilliseconds: 60_000 },
+    );
   }
 
   async startTimer(

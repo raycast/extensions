@@ -9,11 +9,11 @@ import {
 } from "@raycast/api";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { HakunaTimer, Project } from "./hakuna-api";
+import { HakunaClient, Project } from "./hakuna-api";
 import { getSettings } from "./settings";
 import { ProjectTasks } from "./tasks";
-import StartTimerView from "./start-timer-view";
-import AddTimeEntry from "./add-time-entry";
+import StartTimer from "./start-timer";
+import TimeEntry from "./time-entry";
 
 const ALL_CLIENTS = "all";
 
@@ -90,7 +90,7 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
 
   const { data, isLoading } = useCachedPromise(
     async (token: string) => {
-      const api = new HakunaTimer(token);
+      const api = new HakunaClient(token);
       const company = await api.getCompany();
       if (!company.projects_enabled) {
         return { projectsEnabled: false, projects: [] as Project[] };
@@ -193,13 +193,13 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
                       title="Start Timer"
                       icon={Icon.Play}
                       shortcut={{ modifiers: ["cmd"], key: "t" }}
-                      target={<StartTimerView projectId={String(project.id)} />}
+                      target={<StartTimer projectId={String(project.id)} />}
                     />
                     <Action.Push
                       title="Add Entry"
                       icon={Icon.Plus}
                       shortcut={{ modifiers: ["cmd"], key: "n" }}
-                      target={<AddTimeEntry projectId={String(project.id)} />}
+                      target={<TimeEntry projectId={String(project.id)} />}
                     />
                     <Action
                       title={showArchived ? "Hide Archived" : "Show Archived"}

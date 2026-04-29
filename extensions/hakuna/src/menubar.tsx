@@ -12,7 +12,7 @@ import {
   open,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { AbsenceResponse, HakunaTimer } from "./hakuna-api";
+import { AbsenceResponse, HakunaClient } from "./hakuna-api";
 
 function absenceMenuIcon(absence: AbsenceResponse) {
   if (absence.absence_type.is_vacation) return Icon.AirplaneTakeoff;
@@ -26,7 +26,7 @@ function isTodayInAbsence(absence: AbsenceResponse, today: string): boolean {
 
 export default function Command() {
   const { apiToken } = getPreferenceValues<Preferences>();
-  const timer = new HakunaTimer(apiToken);
+  const timer = new HakunaClient(apiToken);
 
   const {
     data: overview,
@@ -192,7 +192,7 @@ export default function Command() {
           icon={Icon.Plus}
           onAction={async () => {
             await launchCommand({
-              name: "add-time-entry",
+              name: "time-entry",
               type: LaunchType.UserInitiated,
             });
           }}
@@ -239,7 +239,7 @@ export default function Command() {
                 subtitle={`${entry.start_time}–${entry.end_time ?? "…"} (${entry.duration})`}
                 onAction={async () => {
                   await launchCommand({
-                    name: "add-time-entry",
+                    name: "time-entry",
                     type: LaunchType.UserInitiated,
                     context: { entry },
                   });
@@ -258,7 +258,7 @@ export default function Command() {
                     subtitle={`${entry.start_time}–${entry.end_time ?? "…"} (${entry.duration})`}
                     onAction={async () => {
                       await launchCommand({
-                        name: "add-time-entry",
+                        name: "time-entry",
                         type: LaunchType.UserInitiated,
                         context: { entry },
                       });

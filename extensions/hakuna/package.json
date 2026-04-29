@@ -21,13 +21,13 @@
       "mode": "view"
     },
     {
-      "name": "add-time-entry",
+      "name": "time-entry",
       "title": "Enter Time",
       "description": "Add a new time entry or start a timer",
       "mode": "view"
     },
     {
-      "name": "project",
+      "name": "projects",
       "title": "Projects",
       "description": "List projects",
       "mode": "view"
@@ -45,7 +45,7 @@
       "mode": "view"
     },
     {
-      "name": "get-overview",
+      "name": "menubar",
       "title": "Hakuna Overview",
       "description": "Show today's worktime and overall overview in the menu bar",
       "mode": "menu-bar",
@@ -76,7 +76,8 @@
   "dependencies": {
     "@raycast/api": "^1.83.1",
     "@raycast/utils": "^1.17.0",
-    "axios": "^1.8.4"
+    "axios": "^1.8.4",
+    "axios-rate-limit": "^1.9.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

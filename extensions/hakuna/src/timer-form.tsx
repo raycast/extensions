@@ -2,7 +2,7 @@ import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, ReactNode, useMemo } from "react";
 import { usePromise, useCachedPromise } from "@raycast/utils";
 import {
-  HakunaTimer,
+  HakunaClient,
   Project,
   Task,
   CompanyResponse,
@@ -21,7 +21,7 @@ interface Props {
   apiToken: string;
   mode: "timer" | "entry";
   loadInitialValues?: (
-    timer: HakunaTimer,
+    timer: HakunaClient,
   ) => Promise<TimerFormInitialValues | undefined>;
   timerDate?: string;
   onSubmit: (values: {
@@ -138,7 +138,7 @@ export default function TimerForm({
   const pendingTaskId = useRef<string | null>(null);
 
   const { data: company, isLoading: companyLoading } = useCachedPromise(
-    (token: string) => new HakunaTimer(token).getCompany(),
+    (token: string) => new HakunaClient(token).getCompany(),
     [apiToken],
   );
   const projectsEnabled = company?.projects_enabled ?? false;
@@ -196,7 +196,7 @@ export default function TimerForm({
 
   const { isLoading: dataLoading } = usePromise(
     async (token: string, comp: CompanyResponse) => {
-      const timer = new HakunaTimer(token);
+      const timer = new HakunaClient(token);
       const initValues = loadInitialValues
         ? await loadInitialValues(timer)
         : undefined;
