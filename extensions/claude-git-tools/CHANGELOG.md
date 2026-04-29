@@ -4,7 +4,7 @@ All notable changes to the Claude Git Tools extension will be documented in this
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [Initial Release] - 2026-04-29
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 

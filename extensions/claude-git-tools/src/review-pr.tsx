@@ -493,7 +493,7 @@ function PRPicker({
           <Action
             title="Start New Review"
             icon={Icon.MagnifyingGlass}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
             onAction={() => handleReview(pr)}
           />
         )}
