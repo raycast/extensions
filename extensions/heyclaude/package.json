@@ -1,0 +1,200 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "heyclaude",
+  "version": "1.0.0",
+  "type": "module",
+  "title": "HeyClaude",
+  "description": "Search and copy Claude agents, MCP servers, skills, hooks, rules, commands, guides, and statuslines from HeyClaude.",
+  "icon": "icon.png",
+  "author": "jsonbored",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search HeyClaude",
+      "description": "Browse HeyClaude entries and copy install commands, configs, or full usable assets.",
+      "mode": "view",
+      "keywords": [
+        "claude",
+        "mcp",
+        "agents",
+        "skills",
+        "hooks",
+        "commands"
+      ]
+    },
+    {
+      "name": "search-agents",
+      "title": "Search Agents",
+      "description": "Browse HeyClaude Claude agents and copy reusable agent assets.",
+      "mode": "view",
+      "keywords": [
+        "agents",
+        "claude",
+        "ai"
+      ]
+    },
+    {
+      "name": "search-mcp",
+      "title": "Search MCP Servers",
+      "description": "Browse HeyClaude MCP servers and copy install or config details.",
+      "mode": "view",
+      "keywords": [
+        "mcp",
+        "servers",
+        "claude"
+      ]
+    },
+    {
+      "name": "search-tools",
+      "title": "Search Tools",
+      "description": "Browse HeyClaude AI tools and open source or documentation links.",
+      "mode": "view",
+      "keywords": [
+        "tools",
+        "ai",
+        "claude"
+      ]
+    },
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "description": "Browse HeyClaude agent skills and copy package guidance.",
+      "mode": "view",
+      "keywords": [
+        "skills",
+        "agents",
+        "claude"
+      ]
+    },
+    {
+      "name": "search-rules",
+      "title": "Search Rules",
+      "description": "Browse HeyClaude AI coding rules and copy rule content.",
+      "mode": "view",
+      "keywords": [
+        "rules",
+        "cursor",
+        "agents"
+      ]
+    },
+    {
+      "name": "search-commands",
+      "title": "Search Commands",
+      "description": "Browse HeyClaude slash commands and copy command assets.",
+      "mode": "view",
+      "keywords": [
+        "commands",
+        "slash",
+        "claude"
+      ]
+    },
+    {
+      "name": "search-hooks",
+      "title": "Search Hooks",
+      "description": "Browse HeyClaude Claude Code hooks and copy hook assets.",
+      "mode": "view",
+      "keywords": [
+        "hooks",
+        "claude",
+        "automation"
+      ]
+    },
+    {
+      "name": "search-guides",
+      "title": "Search Guides",
+      "description": "Browse HeyClaude guides and open reference pages.",
+      "mode": "view",
+      "keywords": [
+        "guides",
+        "docs",
+        "claude"
+      ]
+    },
+    {
+      "name": "search-collections",
+      "title": "Search Collections",
+      "description": "Browse curated HeyClaude collections.",
+      "mode": "view",
+      "keywords": [
+        "collections",
+        "curated",
+        "ai"
+      ]
+    },
+    {
+      "name": "search-statuslines",
+      "title": "Search Statuslines",
+      "description": "Browse HeyClaude Claude Code statusline configurations.",
+      "mode": "view",
+      "keywords": [
+        "statuslines",
+        "claude",
+        "terminal"
+      ]
+    },
+    {
+      "name": "jobs",
+      "title": "Browse HeyClaude Jobs",
+      "description": "Browse active HeyClaude jobs, review role details, and open external apply links.",
+      "mode": "view",
+      "keywords": [
+        "jobs",
+        "claude",
+        "ai",
+        "mcp",
+        "agents"
+      ]
+    },
+    {
+      "name": "submit-content",
+      "title": "Submit New Content",
+      "description": "Create a reviewed HeyClaude content submission with fields that map to the website and GitHub issue forms.",
+      "mode": "view",
+      "keywords": [
+        "submit",
+        "content",
+        "issue",
+        "github",
+        "registry"
+      ]
+    },
+    {
+      "name": "get-involved",
+      "title": "Get Involved with HeyClaude",
+      "description": "Open HeyClaude contribution, newsletter, GitHub, jobs, API, and community links.",
+      "mode": "view",
+      "keywords": [
+        "contribute",
+        "newsletter",
+        "github",
+        "jobs",
+        "support"
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "test": "node --import tsx --test test/feed.test.ts",
+    "test:junit": "mkdir -p ../../reports/junit && node --import tsx --test --test-reporter=spec --test-reporter=junit --test-reporter-destination=stdout --test-reporter-destination=../../reports/junit/raycast.xml test/feed.test.ts",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.13",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "2.1.1",
+    "tsx": "4.21.0",
+    "typescript": "6.0.2"
+  }
+}
