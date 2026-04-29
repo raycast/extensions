@@ -27,18 +27,6 @@
       "mode": "view"
     },
     {
-      "name": "get-worktime",
-      "title": "Get Today's Time Balance",
-      "description": "Get today's total worktime, including active timer",
-      "mode": "no-view"
-    },
-    {
-      "name": "get-vacation-days",
-      "title": "Get Vacation Days",
-      "description": "Get used and remaining vacation days",
-      "mode": "no-view"
-    },
-    {
       "name": "project",
       "title": "Projects",
       "description": "List projects",
