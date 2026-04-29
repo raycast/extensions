@@ -13,7 +13,7 @@ import TimerForm from "./timer-form";
 import { HakunaTimer } from "./hakuna-api";
 
 export default function Timer() {
-  const { apiToken } = getPreferenceValues<{ apiToken: string }>();
+  const { apiToken } = getPreferenceValues<Preferences>();
   const [timerDate, setTimerDate] = useState<string | undefined>(undefined);
   const isRunning = timerDate !== undefined;
 

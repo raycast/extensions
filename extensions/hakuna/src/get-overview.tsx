@@ -14,10 +14,6 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import { AbsenceResponse, HakunaTimer } from "./hakuna-api";
 
-interface Preferences {
-  apiToken: string;
-}
-
 function absenceMenuIcon(absence: AbsenceResponse) {
   if (absence.absence_type.is_vacation) return Icon.AirplaneTakeoff;
   if (absence.absence_type.grants_work_time) return Icon.PauseFilled;

@@ -9,7 +9,7 @@ interface Props {
 }
 
 export default function StartTimerView({ projectId, taskId, note }: Props) {
-  const { apiToken } = getPreferenceValues<{ apiToken: string }>();
+  const { apiToken } = getPreferenceValues<Preferences>();
   const timer = new HakunaTimer(apiToken);
 
   return (

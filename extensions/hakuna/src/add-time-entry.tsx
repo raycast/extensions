@@ -24,7 +24,7 @@ export default function AddTimeEntry(
 ) {
   const { projectId, taskId, note, onUpdate } = props;
   const entry = props.entry ?? props.launchContext?.entry;
-  const { apiToken } = getPreferenceValues<{ apiToken: string }>();
+  const { apiToken } = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
   const timer = new HakunaTimer(apiToken);
   const today = new Date().toISOString().split("T")[0];
