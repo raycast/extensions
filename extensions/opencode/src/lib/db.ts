@@ -198,7 +198,7 @@ function parseSessionRows(output: string): DbSession[] {
  * Results are scored by match count, deduplicated, and sorted by score then recency.
  */
 export function searchSessions(keyword: string, limit = 30): DbSession[] {
-  const escaped = keyword.replace(/'/g, "''").toLowerCase().trim();
+  const escaped = keyword.replace(/'/g, "''").replace(/%/g, "\\%").replace(/_/g, "\\_").toLowerCase().trim();
   if (!escaped) return [];
 
   const words = escaped.split(/\s+/).filter((w) => w.length >= 2);
@@ -222,8 +222,8 @@ export function searchSessions(keyword: string, limit = 30): DbSession[] {
 
   // 1. Exact phrase: title (score 10) + content (score 5) in one query
   const exactSql = [
-    `${base} AND lower(title) LIKE '%${escaped}%' ORDER BY time_updated DESC LIMIT ${limit}`,
-    `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${escaped}%' OR lower(json_extract(p.data, '$.input')) LIKE '%${escaped}%') ORDER BY s.time_updated DESC LIMIT ${limit}`,
+    `${base} AND lower(title) LIKE '%${escaped}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
+    `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${escaped}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${escaped}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
   ].join(";\n");
   const exactOutput = query(exactSql);
   // First query results are title matches, second are content matches
@@ -237,11 +237,11 @@ export function searchSessions(keyword: string, limit = 30): DbSession[] {
   // 2. Individual words — only if multi-word query, single query with UNION
   if (words.length > 1) {
     const wordTitleQueries = words.map(
-      (w) => `${base} AND lower(title) LIKE '%${w}%' ORDER BY time_updated DESC LIMIT ${limit}`,
+      (w) => `${base} AND lower(title) LIKE '%${w}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
     );
     const wordContentQueries = words.map(
       (w) =>
-        `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${w}%' OR lower(json_extract(p.data, '$.input')) LIKE '%${w}%') ORDER BY s.time_updated DESC LIMIT ${limit}`,
+        `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${w}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${w}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
     );
     const wordRows = parseSessionRows(query([...wordTitleQueries, ...wordContentQueries].join(";\n")));
     for (const s of wordRows) {

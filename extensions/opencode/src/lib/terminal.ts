@@ -68,7 +68,7 @@ async function openInITerm(directory: string, command: string): Promise<void> {
       tell current window
         create tab with default profile
         tell current session
-          write text "cd \\"${esc(directory)}\\" && ${esc(command)}"
+          write text "cd ${shellQuote(directory)} && ${esc(command)}"
         end tell
       end tell
     end tell
@@ -81,7 +81,7 @@ async function openInTerminalApp(directory: string, command: string): Promise<vo
   await runAppleScript(`
     tell application "Terminal"
       activate
-      do script "cd \\"${esc(directory)}\\" && ${esc(command)}"
+      do script "cd ${shellQuote(directory)} && ${esc(command)}"
     end tell
   `);
 }
