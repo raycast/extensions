@@ -4,7 +4,7 @@
 
 ### New Commands
 
-- **Hakuna Menu**: Menu bar widget showing worktime, active timer with task name, stop/edit actions, and recent time entries — updates every 5 minutes
+- **Hakuna Menu**: Menu bar widget showing worktime, active timer, stop/edit actions, today's absences, and recent time entries — updates every 5 minutes
 - **Absences**: List absences for any year, filter by type, navigate between years with keyboard shortcuts, and view other users' absences
 - **Profile**: View overtime and vacation days for yourself or other users, with group filtering
 - **Time Entries**: List today's time entries, start a timer from an existing entry, and delete entries

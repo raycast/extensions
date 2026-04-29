@@ -12,10 +12,20 @@ import {
   open,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { HakunaTimer } from "./hakuna-api";
+import { AbsenceResponse, HakunaTimer } from "./hakuna-api";
 
 interface Preferences {
   apiToken: string;
+}
+
+function absenceMenuIcon(absence: AbsenceResponse) {
+  if (absence.absence_type.is_vacation) return Icon.AirplaneTakeoff;
+  if (absence.absence_type.grants_work_time) return Icon.PauseFilled;
+  return Icon.Leaf;
+}
+
+function isTodayInAbsence(absence: AbsenceResponse, today: string): boolean {
+  return absence.start_date <= today && today <= absence.end_date;
 }
 
 export default function Command() {
@@ -55,11 +65,19 @@ export default function Command() {
     return await timer.getTimeEntries(today);
   });
 
+  const { data: absences, isLoading: isLoadingAbsences } = useCachedPromise(
+    async () => {
+      const year = new Date().getFullYear();
+      return await timer.getAbsences(year);
+    },
+  );
+
   const isLoading =
     isLoadingOverview ||
     isLoadingWorktime ||
     isLoadingTimer ||
-    isLoadingEntries;
+    isLoadingEntries ||
+    isLoadingAbsences;
 
   const refreshAll = () => {
     mutateOverview();
@@ -115,14 +133,17 @@ export default function Command() {
     }
   };
 
-  const runningText = activeTimer?.task ? ` (${activeTimer.task.name})` : "";
+  const today = new Date().toISOString().split("T")[0];
+  const todaysAbsences = (absences ?? []).filter((a) =>
+    isTodayInAbsence(a, today),
+  );
 
   return (
     <MenuBarExtra
       icon={
         activeTimer ? { source: Icon.Clock, tintColor: Color.Blue } : Icon.Clock
       }
-      title={(worktime || "00:00") + runningText}
+      title={worktime || "00:00"}
       isLoading={isLoading}
       tooltip="Hakuna Overview"
     >
@@ -192,6 +213,24 @@ export default function Command() {
         />
       </MenuBarExtra.Section>
 
+      {todaysAbsences.length > 0 && (
+        <MenuBarExtra.Section title="Today's Absences">
+          {todaysAbsences.map((absence) => (
+            <MenuBarExtra.Item
+              key={absence.id}
+              title={absence.absence_type.name}
+              icon={absenceMenuIcon(absence)}
+              onAction={async () => {
+                await launchCommand({
+                  name: "absences",
+                  type: LaunchType.UserInitiated,
+                });
+              }}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      )}
+
       {(timeEntries ?? []).length > 0 && (
         <MenuBarExtra.Section title="Recent Entries">
           {(timeEntries ?? [])
@@ -202,7 +241,6 @@ export default function Command() {
                 key={entry.id}
                 title={entry.task?.name ?? "Entry"}
                 subtitle={`${entry.start_time}–${entry.end_time ?? "…"} (${entry.duration})`}
-                icon={Icon.Clock}
                 onAction={async () => {
                   await launchCommand({
                     name: "add-time-entry",
@@ -222,7 +260,6 @@ export default function Command() {
                     key={entry.id}
                     title={entry.task?.name ?? "Entry"}
                     subtitle={`${entry.start_time}–${entry.end_time ?? "…"} (${entry.duration})`}
-                    icon={Icon.Clock}
                     onAction={async () => {
                       await launchCommand({
                         name: "add-time-entry",
