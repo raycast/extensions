@@ -185,13 +185,17 @@ function isNpxCommandResolutionFailure(error: unknown, npxCommand: string): bool
   const normalizedNpxCommand = npxCommand.toLowerCase();
   const commandBase = basename(normalizedNpxCommand).replace(/\.(cmd|exe)$/, "");
   const windowsCommandNotFound = `'${commandBase}' is not recognized as an internal or external command`;
+  // cmd.exe echoes the command name with its surrounding double quotes from the shell-escaped invocation,
+  // so the error reads `'"bunx"' is not recognized...` when bunx is missing.
+  const windowsCommandNotFoundQuoted = `'"${commandBase}"' is not recognized as an internal or external command`;
 
   const mentionsCommand =
     details.includes(`spawn ${normalizedNpxCommand} `) ||
     details.includes(`spawn ${commandBase} `) ||
     details.includes(`command not found: ${commandBase}`) ||
     details.includes(`${commandBase}: command not found`) ||
-    details.includes(windowsCommandNotFound);
+    details.includes(windowsCommandNotFound) ||
+    details.includes(windowsCommandNotFoundQuoted);
 
   const npxShimModuleNotFound =
     commandBase === "npx" &&
@@ -205,7 +209,8 @@ function isNpxCommandResolutionFailure(error: unknown, npxCommand: string): bool
     details.includes(`spawn ${commandBase} enoent`) ||
     details.includes(`command not found: ${commandBase}`) ||
     details.includes(`${commandBase}: command not found`) ||
-    details.includes(windowsCommandNotFound)
+    details.includes(windowsCommandNotFound) ||
+    details.includes(windowsCommandNotFoundQuoted)
   );
 }
 

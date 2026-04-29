@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Fix Windows bunx Fallback] - {PR_MERGE_DATE}
+
+- Fix the Skills CLI throwing `'"bunx"' is not recognized as an internal or external command` on Windows when Bun is not installed; the extension now correctly falls back to `npx` as intended
+
 ## [Add bunx support] - 2026-04-28
 
 - Added initial support for `bunx`, it is only called optimally if `npx` is not found
