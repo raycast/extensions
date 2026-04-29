@@ -171,7 +171,7 @@ function AgentPickerInstallForm({
   const allSelected = selectableAgents.length > 0 && selected.size === selectableAgents.length;
   const isReplacing = installedMatch.type === "conflict";
   const installedSource = isReplacing ? (installedMatch.source ?? "Unknown source") : "";
-  const submitTitle = isReplacing ? "Replace" : "Install";
+  const submitTitle = isReplacing ? "Replace Installed Skill" : "Install Skill";
 
   function toggleAll() {
     setSelected(allSelected ? new Set() : new Set(selectableAgents));
@@ -225,7 +225,7 @@ function AgentPickerInstallForm({
 
   return (
     <Form
-      navigationTitle={`${submitTitle} "${skill.name}"`}
+      navigationTitle={`${isReplacing ? "Replace" : "Install"} "${skill.name}"`}
       actions={
         <ActionPanel>
           <Action.SubmitForm
@@ -297,7 +297,7 @@ export function InstallSkillAction({
     return (
       <Action
         title="Replace Installed Skill"
-        icon={{ source: Icon.Warning, tintColor: Color.Orange }}
+        icon={{ source: Icon.Warning, tintColor: Color.Red }}
         style={Action.Style.Destructive}
         onAction={() => {
           push(form);

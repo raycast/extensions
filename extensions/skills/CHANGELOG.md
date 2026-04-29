@@ -4,7 +4,7 @@
 
 - Replace the green "Installed" tag in "Search Skills" with a green check-circle indicator and green skill icon for installed skills
 - Show the skill source (`owner/repo`) as the subtitle in "Search Skills" and "Manage Skills" to better distinguish skills between them
-- Hide source subtitles while the detail panel is open so skill names use the available list width
+- Move "Search Skills" result details out of the side panel and into a full-screen detail view
 - Detect skills with the same `skillId` installed from different sources. Show a warning indicator and rename the "Install Skill" action to "Replace Installed Skill" for clarity on the outcome
 - Immediately refresh installed indicators in "Search Skills" after installing or replacing a skill
 - Add "Refresh Installed Skills" actions with Cmd+R in "Manage Skills"

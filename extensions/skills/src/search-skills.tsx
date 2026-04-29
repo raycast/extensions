@@ -10,8 +10,6 @@ import { buildGithubIssueUrl } from "./shared";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [isShowingDetail, setIsShowingDetail] = useState(true);
-  const toggleDetail = () => setIsShowingDetail((prev) => !prev);
 
   const { data, isLoading, error, revalidate: revalidateSearch, searchUrl } = useDebouncedSearch(searchText);
   const { getInstalledMatch, revalidate: revalidateInstalledSkillMatches } = useInstalledSkillMatches();
@@ -54,7 +52,7 @@ export default function Command() {
       searchBarPlaceholder="Search skills..."
       onSearchTextChange={setSearchText}
       onSelectionChange={setSelectedId}
-      isShowingDetail={skills.length > 0 && isShowingDetail}
+      selectedItemId={selectedId ?? undefined}
       searchBarAccessory={
         <List.Dropdown tooltip="Filter by Owner" value={owner} storeValue onChange={setOwner}>
           <List.Dropdown.Item title="All Owners" value="all" />
@@ -85,14 +83,14 @@ export default function Command() {
         />
       ) : (
         <List.Section title={`Results for "${searchText}"`} subtitle={`${skills.length} skills`}>
-          {skills.map((skill) => (
+          {skills.map((skill, index) => (
             <SkillListItem
               key={skill.id}
               skill={skill}
-              isSelected={selectedId === skill.id}
+              resultSkills={skills}
+              resultIndex={index}
               installedMatch={getInstalledMatch(skill)}
-              isShowingDetail={isShowingDetail}
-              onToggleDetail={toggleDetail}
+              onViewedSkillChange={setSelectedId}
               onSkillInstalled={refreshCurrentResults}
             />
           ))}
