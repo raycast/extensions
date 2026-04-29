@@ -4,6 +4,10 @@
 
 - "Brightness Down" failed with "Error: Unknown option '-10'" since subprocess evaluates the "-10" as an argument. Added a leading "--" to prevent it.
 
+## [Fix WMI brightness on Windows] - {PR_MERGE_DATE}
+
+- Fixed brightness control failing on Windows by replacing the deprecated `WmiSetBrightness` call pattern with `Invoke-CimMethod`, which properly returns a result that can be checked for success.
+
 ## [Update] - 2026-04-28
 
 - Add windows support
