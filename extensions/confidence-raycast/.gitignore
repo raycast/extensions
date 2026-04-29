@@ -1,0 +1,8 @@
+node_modules
+dist
+.DS_Store
+*.log
+.vscode
+
+# Auto-generated from MATH_101.md by scripts/sync-math.mjs
+src/math/content.ts
