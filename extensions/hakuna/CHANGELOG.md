@@ -16,9 +16,14 @@
 - Show budget info when selecting a project in the timer form
 - Show the active timer in the time entries list
 - Format durations according to tenant preferences
+- Navigate time entries by day (⌘H / ⌘L) or week (⌘⇧H / ⌘⇧L), jump to today with ⌘0
 - Navigate absences by year (⌘H / ⌘L / ⌘0)
 - Filter absences by type
 - Filter profiles by group
 - View absences of other users from their profile
+
+### Removed
+
+- **Get Worktime** and **Get Vacation Days** commands — this information is now available in the Profile command
 
 ## [Initial Version] - 2024-10-04
