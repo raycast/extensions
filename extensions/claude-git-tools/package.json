@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-git-tools",
+  "title": "Claude Git Tools",
+  "description": "Git push and create PR powered by Claude",
+  "icon": "command-icon.png",
+  "author": "wang0122xl",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "git-push",
+      "title": "Git Push",
+      "description": "Use Claude to git push changes in a selected repository",
+      "mode": "view"
+    },
+    {
+      "name": "create-pr",
+      "title": "Create PR",
+      "description": "Use Claude to create a pull request in a selected repository",
+      "mode": "view"
+    },
+    {
+      "name": "manage-folders",
+      "title": "Manage Folders & Skills",
+      "description": "Manage folders and skill files for git commands",
+      "mode": "view"
+    },
+    {
+      "name": "manage-model",
+      "title": "Manage Model",
+      "description": "Select the Claude model to use (haiku, sonnet, opus)",
+      "mode": "view"
+    },
+    {
+      "name": "review-pr",
+      "title": "Review PR",
+      "description": "Review a pull request using Claude",
+      "mode": "view"
+    },
+    {
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "description": "View running and completed Claude git tasks",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.12",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
