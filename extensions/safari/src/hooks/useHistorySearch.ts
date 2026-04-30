@@ -18,7 +18,7 @@ export const getHistoryQuery = (searchText?: string) => {
         .value()
     : undefined;
   return `
-  SELECT history_items.id, title, url, datetime(visit_time+978307200, "unixepoch", "localtime") as lastVisited
+  SELECT history_items.id, title, url, datetime(visit_time+978307200, 'unixepoch', 'localtime') as lastVisited
   FROM history_items
     INNER JOIN history_visits
     ON history_visits.history_item = history_items.id

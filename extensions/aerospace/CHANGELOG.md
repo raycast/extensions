@@ -1,5 +1,13 @@
 # aerospace Changelog
 
+## [Fix] - 2026-04-24
+
+- Fix window switcher search to match on both app name and window title, enabling fuzzy finding by title keywords (e.g. searching "huddle" now finds Slack Huddle windows)
+
+## [Feature] - 2026-04-22
+
+- Add "Set to Tiling" action to window switcher (Cmd+T) — converts a floating window to tiling layout via `aerospace layout tiling`
+
 ## [Feature] - 2026-04-12
 
 - Add "Go to Workspace" command with searchable workspace list and shortcut display

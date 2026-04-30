@@ -6,7 +6,6 @@ import {
   confirmAlert,
   Detail,
   Form,
-  getApplications,
   Icon,
   List,
   openExtensionPreferences,
@@ -14,29 +13,18 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { useCachedPromise, usePromise, executeSQL } from "@raycast/utils";
-import { useState, useCallback, useMemo } from "react";
+import { useCachedPromise, executeSQL } from "@raycast/utils";
+import { useState, useCallback } from "react";
 import {
   getDbPath,
   dbExists,
   escapeSQL,
+  openWisprFlow,
   validateUUID,
   writeSQL,
-  WISPR_FLOW_BUNDLE_ID,
 } from "./db";
 import { DictionaryEntry } from "./types";
-
-function formatDateForWispr(date: Date): string {
-  const pad = (n: number, len = 2) => n.toString().padStart(len, "0");
-  const y = date.getUTCFullYear();
-  const mo = pad(date.getUTCMonth() + 1);
-  const d = pad(date.getUTCDate());
-  const h = pad(date.getUTCHours());
-  const mi = pad(date.getUTCMinutes());
-  const s = pad(date.getUTCSeconds());
-  const ms = pad(date.getUTCMilliseconds(), 3);
-  return `${y}-${mo}-${d} ${h}:${mi}:${s}.${ms} +00:00`;
-}
+import { formatDateForWispr } from "./utils";
 
 export default function Command() {
   const dbPath = getDbPath();
@@ -104,10 +92,10 @@ export default function Command() {
       try {
         const validId = validateUUID(entry.id);
         const now = formatDateForWispr(new Date());
-        writeSQL(
+        await writeSQL(
           `UPDATE Dictionary SET isDeleted = 1, modifiedAt = '${now}' WHERE id = '${validId}'`,
         );
-        revalidate();
+        await revalidate();
         await showToast({
           style: Toast.Style.Success,
           title: "Word Deleted",
@@ -115,10 +103,10 @@ export default function Command() {
           primaryAction: {
             title: "Undo",
             onAction: async (toast) => {
-              writeSQL(
+              await writeSQL(
                 `UPDATE Dictionary SET isDeleted = 0, modifiedAt = '${formatDateForWispr(new Date())}' WHERE id = '${validId}'`,
               );
-              revalidate();
+              await revalidate();
               await toast.hide();
             },
           },
@@ -163,7 +151,7 @@ export default function Command() {
         const replacementValue = values.replacement?.trim()
           ? `'${escapeSQL(values.replacement.trim(), 255)}'`
           : "NULL";
-        writeSQL(
+        await writeSQL(
           `UPDATE Dictionary SET phrase = '${escapedPhrase}', replacement = ${replacementValue}, modifiedAt = '${now}' WHERE id = '${validId}'`,
         );
         await showToast({
@@ -204,13 +192,6 @@ export default function Command() {
       </Form>
     );
   }
-
-  const { data: installedApps } = usePromise(getApplications);
-  const wisprFlowPath = useMemo(() => {
-    return (installedApps ?? []).find(
-      (app) => app.bundleId === WISPR_FLOW_BUNDLE_ID,
-    )?.path;
-  }, [installedApps]);
 
   function sourceLabel(source: string): string {
     switch (source) {
@@ -300,18 +281,15 @@ export default function Command() {
               />
             </ActionPanel.Section>
             <ActionPanel.Section>
-              {wisprFlowPath ? (
-                <Action.Open
-                  title="Open Wispr Flow"
-                  icon={Icon.Microphone}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                  target={wisprFlowPath}
-                />
-              ) : null}
+              <Action
+                title="Open Wispr Flow"
+                icon={Icon.Microphone}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+                onAction={() => openWisprFlow("wispr-flow://open")}
+              />
               <Action
                 title="Open Extension Preferences"
                 icon={Icon.Gear}
-                shortcut={{ modifiers: ["cmd"], key: "," }}
                 onAction={openExtensionPreferences}
               />
               <Action

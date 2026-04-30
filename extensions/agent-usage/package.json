@@ -7,7 +7,8 @@
   "author": "thuggyduck",
   "contributors": [
     "alexi.build",
-    "adrianbonpin"
+    "adrianbonpin",
+    "garrick_zhang"
   ],
   "platforms": [
     "macOS",
@@ -100,6 +101,14 @@
       "required": false
     },
     {
+      "name": "showMinimax",
+      "type": "checkbox",
+      "label": "Show MiniMax",
+      "description": "Show MiniMax usage in the list",
+      "default": true,
+      "required": false
+    },
+    {
       "name": "ampDisplayMode",
       "type": "dropdown",
       "title": "Amp Display Mode",
@@ -143,6 +152,13 @@
       "type": "password",
       "title": "z.ai API Token (Optional)",
       "description": "Optional fallback token. Usually auto-detected from ZAI_API_KEY or GLM_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
+      "required": false
+    },
+    {
+      "name": "minimaxApiToken",
+      "type": "password",
+      "title": "MiniMax API Token (Optional)",
+      "description": "Optional fallback token. Usually auto-detected from MINIMAX_API_KEY environment variable (set in ~/.zshrc, ~/.bashrc, etc.).",
       "required": false
     }
   ],

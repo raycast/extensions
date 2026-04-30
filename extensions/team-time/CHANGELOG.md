@@ -1,5 +1,9 @@
 # Team Time Changelog
 
+## [Add China Special Administrative Regions as Cities in China Timezone] - 2026-04-30
+
+- Added two records (Hong Kong SAR, Macau SAR) to [src/world_cities_timezones.json].
+
 ## [Menu Bar Title Group Count Preference and Team Time Menu Bar Functionality] - 2025-11-21
 
 - Added a new preference for the number of time groups to display in the menu bar title.

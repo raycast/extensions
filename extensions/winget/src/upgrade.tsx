@@ -19,7 +19,7 @@ export default function UpgradeCommand() {
         <List.Section title={sectionTitle}>
           {pkgList.map((pkg) => (
             <List.Item
-              key={pkg.id}
+              key={`${pkg.id}-${pkg.version}-${pkg.available}`}
               title={pkg.name}
               subtitle={pkg.id}
               accessories={[
