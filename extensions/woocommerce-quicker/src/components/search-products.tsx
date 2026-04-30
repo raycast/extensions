@@ -1,5 +1,6 @@
-import { Action, ActionPanel, Icon, List, popToRoot, showToast, Toast, launchCommand, LaunchType } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, popToRoot, launchCommand, LaunchType } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { useWooCommerce } from "../hooks/useWooCommerce";
 import type { WooProduct, WooStore } from "../types/types";
 import { formatCurrency } from "../helpers/formatters";
@@ -22,10 +23,9 @@ export function SearchProducts({ store }: { store: WooStore }) {
   useEffect(() => {
     if (!error) return;
     console.error(error);
-    void showToast({
+    void showFailureToast({
       title: "Error Fetching Products",
       message: error.message || "Please check your store settings and try again.",
-      style: Toast.Style.Failure,
     });
   }, [error]);
 

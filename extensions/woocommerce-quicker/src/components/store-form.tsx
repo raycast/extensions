@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, showToast, Toast, useNavigation } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useForm, FormValidation } from "@raycast/utils";
 import type { WooStore, StoreFormValues, StoreStatus } from "../types/types";
 import { randomUUID } from "crypto";
@@ -66,11 +67,10 @@ export function StoreForm({ store, action = "create", submitAction }: StoreFormP
           storeStatus = await fetchWooCommerce<StoreStatus>(submittedForm, "system_status");
         } catch (error) {
           console.error(error);
-          await showToast({
+          await showFailureToast({
             title: "Connection Error",
             message:
               "Unable to connect to the store with the provided credentials. Please check your settings and try again.",
-            style: Toast.Style.Failure,
           });
           return;
         }
@@ -94,10 +94,9 @@ export function StoreForm({ store, action = "create", submitAction }: StoreFormP
         pop();
       } catch (error) {
         console.error(error);
-        showToast({
+        await showFailureToast({
           title: responses[action].errorTitle,
           message: responses[action].errorMessage,
-          style: Toast.Style.Failure,
         });
       } finally {
         setLoadingStatus(false);

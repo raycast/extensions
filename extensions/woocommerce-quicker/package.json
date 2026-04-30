@@ -17,28 +17,28 @@
     {
       "name": "woocommerce-orders",
       "title": "Search Orders",
-      "subtitle": "WooCommerce Quicker",
+      "subtitle": "WooCommerce",
       "description": "List and search recent WooCommerce orders",
       "mode": "view"
     },
     {
       "name": "woocommerce-customers",
       "title": "Search Customers",
-      "subtitle": "WooCommerce Quicker",
+      "subtitle": "WooCommerce",
       "description": "List and search your customers",
       "mode": "view"
     },
     {
       "name": "woocommerce-products",
       "title": "Search Products",
-      "subtitle": "WooCommerce Quicker",
+      "subtitle": "WooCommerce",
       "description": "List and search your products",
       "mode": "view"
     },
     {
       "name": "manage-stores",
       "title": "Manage Stores",
-      "subtitle": "WooCommerce Quicker",
+      "subtitle": "WooCommerce",
       "description": "Manage your WooCommerce stores",
       "mode": "view"
     }

@@ -45,7 +45,18 @@ export default function ManageStores() {
                   icon={Icon.Pencil}
                   target={<StoreForm store={store} submitAction={updateStore} action="update" />}
                 />
-                <Action title="Favorite" icon={Icon.Star} onAction={() => toggleFavourite(store.id)} />
+                <Action
+                  title={store.favourite ? "Remove from Favorites" : "Add to Favorites"}
+                  icon={Icon.Star}
+                  onAction={async () => {
+                    const willBeFav = !store.favourite;
+                    await toggleFavourite(store.id);
+                    showToast({
+                      title: willBeFav ? "Added to Favorites" : "Removed from Favorites",
+                      style: Toast.Style.Success,
+                    });
+                  }}
+                />
                 <Action
                   title="Delete Store"
                   icon={Icon.Trash}

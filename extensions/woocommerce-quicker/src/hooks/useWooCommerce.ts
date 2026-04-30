@@ -50,12 +50,24 @@ export function useWooCommerce<T>(store: WooStore, endpoint: string, params?: Re
 }
 
 async function parseWooCommerceResponse<T>(response: Response) {
+  const contentType = response.headers.get("content-type") ?? "";
+
   if (!response.ok) {
-    throw new Error(response.statusText);
+    try {
+      if (contentType.includes("application/json")) {
+        const json = await response.json();
+        const message = (json && (json.message || json.error || json.data?.message)) || JSON.stringify(json);
+        throw new Error(`${response.status} ${message}`);
+      } else {
+        const text = await response.text();
+        throw new Error(`${response.status} ${text || response.statusText || "Request failed"}`);
+      }
+    } catch {
+      throw new Error(`${response.status} ${response.statusText || "Request failed"}`);
+    }
   }
 
-  const contentType = response.headers.get("content-type");
-  if (contentType?.includes("application/json")) {
+  if (contentType.includes("application/json")) {
     return (await response.json()) as T;
   }
 
@@ -63,7 +75,9 @@ async function parseWooCommerceResponse<T>(response: Response) {
 }
 
 function generateUrl(storeUrl: string, endpoint: string, params?: Record<string, string>) {
-  const url = new URL(`${storeUrl}/wp-json/wc/v3/${endpoint}`);
+  const base = storeUrl.replace(/\/+$/, "");
+  const ep = endpoint.replace(/^\/+/, "");
+  const url = new URL(`${base}/wp-json/wc/v3/${ep}`);
   if (params) {
     for (const [key, value] of Object.entries(params)) {
       if (value) url.searchParams.set(key, value);

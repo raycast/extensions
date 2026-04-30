@@ -1,5 +1,6 @@
-import { List, ActionPanel, Action, showToast, Toast, popToRoot, launchCommand, LaunchType, Icon } from "@raycast/api";
+import { List, ActionPanel, Action, popToRoot, launchCommand, LaunchType, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
+import { showFailureToast } from "@raycast/utils";
 import { useWooCommerce } from "../hooks/useWooCommerce";
 import type { WooOrder, WooStore } from "../types/types";
 import { formatCurrency } from "../helpers/formatters";
@@ -21,10 +22,9 @@ export function SearchOrders({ store }: { store: WooStore }) {
   useEffect(() => {
     if (!error) return;
     console.error(error);
-    void showToast({
+    void showFailureToast({
       title: "Error Fetching Orders",
       message: error.message || "Please check your store settings and try again.",
-      style: Toast.Style.Failure,
     });
   }, [error]);
 
