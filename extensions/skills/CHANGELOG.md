@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Show Last Updated Date in Search Results] - {PR_MERGE_DATE}
+
+- Show the repository's last updated date in the skill detail panel, displayed as a relative time (e.g. "3 days ago")
+
 ## [Fix Windows bunx Fallback] - 2026-04-30
 
 - Fix the Skills CLI throwing `'"bunx"' is not recognized as an internal or external command` on Windows when Bun is not installed; the extension now correctly falls back to `npx` as intended
@@ -23,10 +27,6 @@
 
 - Stop silently auto-updating outdated skills when opening Manage Skills
 - Fix the orange "Update available" highlight that stopped appearing for outdated skills
-
-## [Show Last Updated Date in Search Results] - {PR_MERGE_DATE}
-
-- Show the repository's last updated date in the skill detail panel, displayed as a relative time (e.g. "3 days ago")
 
 ## [Show Installed Badge in Search Results] - 2026-04-20
 
