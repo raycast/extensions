@@ -1,0 +1,34 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "terraform-docs",
+  "title": "Terraform Docs",
+  "description": "Quickly open Terraform provider documentation by typing resource names",
+  "icon": "icon.png",
+  "author": "user_7d5a7c803efb2afe5dab",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-tf-docs",
+      "title": "Open Terraform Docs",
+      "description": "Type a resource like aws_s3_bucket to open its Terraform docs",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.50.0",
+    "@types/react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/utils": "^1.15.0",
+    "@types/react": "18.2.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint"
+  }
+}
