@@ -11,10 +11,9 @@ Not all tenants use teams – always account for this.
 
 # Raycast
 
-Developer Docs: https://developers.raycast.com
-UI Docs: https://developers.raycast.com/api-reference/user-interface
-Storage: https://developers.raycast.com/api-reference/storage
-Preferences: https://developers.raycast.com/api-reference/preferences
+All the docs: https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-full.txt
+The API docs: https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-api.txt
+The utils docs: https://raw.githubusercontent.com/raycast/extensions/refs/heads/gh-pages/llms-utils.txt → 
 
 # Development
 
