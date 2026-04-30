@@ -65,7 +65,7 @@ export default function SearchErrorCodes() {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const errorEntries = useMemo(() => {
+  const allErrorEntries = useMemo(() => {
     const parents = entries.filter(
       (e) => e.category === "Error Codes" || e.url.includes("/error"),
     );
@@ -73,15 +73,21 @@ export default function SearchErrorCodes() {
     for (const entry of parents) {
       allErrors.push(...parseErrorsFromEntry(entry));
     }
-    return allErrors.filter(
-      (e) => selectedCode === "all" || e.httpCode === selectedCode,
-    );
-  }, [entries, selectedCode]);
+    return allErrors;
+  }, [entries]);
+
+  const errorEntries = useMemo(
+    () =>
+      allErrorEntries.filter(
+        (e) => selectedCode === "all" || e.httpCode === selectedCode,
+      ),
+    [allErrorEntries, selectedCode],
+  );
 
   const httpCodes = useMemo(() => {
-    const codes = new Set(errorEntries.map((e) => e.httpCode));
+    const codes = new Set(allErrorEntries.map((e) => e.httpCode));
     return [...codes].sort();
-  }, [errorEntries]);
+  }, [allErrorEntries]);
 
   const grouped = useMemo(() => {
     const groups: Record<string, ErrorEntry[]> = {};
