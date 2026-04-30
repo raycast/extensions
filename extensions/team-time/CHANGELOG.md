@@ -1,6 +1,6 @@
 # Team Time Changelog
 
-## [Add China Special Administrative Regions as Cities in China Timezone] - {PR_MERGE_DATE}
+## [Add China Special Administrative Regions as Cities in China Timezone] - 2026-04-30
 
 - Added two records (Hong Kong SAR, Macau SAR) to [src/world_cities_timezones.json].
 
