@@ -21,6 +21,19 @@ export function expandTilde(inputPath: string): string {
   return trimmed;
 }
 
+/**
+ * Normalize a full model ID (e.g. "claude-opus-4-6") to the short name
+ * ("opus") that Claude Code expects for proper feature enablement like
+ * extended context windows.
+ */
+function normalizeModelName(model: string): string {
+  if (["opus", "sonnet", "haiku"].includes(model)) return model;
+  if (model.includes("opus")) return "opus";
+  if (model.includes("sonnet")) return "sonnet";
+  if (model.includes("haiku")) return "haiku";
+  return model;
+}
+
 type TerminalApp = "Terminal" | "iTerm" | "Warp" | "kitty" | "Ghostty";
 
 /**
@@ -186,9 +199,12 @@ export async function launchClaudeCode(options: {
     args.push("--permission-mode", options.permissionMode);
   }
 
-  // Restore the session's model so a Haiku session doesn't resume with Opus
-  if (options.model) {
-    args.push("--model", options.model);
+  // Only pass --model for new sessions (not resume/continue). Claude Code
+  // remembers the model from the session and passing --model explicitly can
+  // disable features like extended context windows.
+  const isResumingSession = options.sessionId || options.continueSession;
+  if (options.model && !isResumingSession) {
+    args.push("--model", normalizeModelName(options.model));
   }
 
   if (options.prompt) {

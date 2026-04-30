@@ -1,5 +1,9 @@
 # Notion Changelog
 
+## [Add date divider to Quick Capture] - 2026-04-30
+
+- Add an `Append with a date divider` checkbox to Notion Quick Capture so captured content can be prefixed with the current date ([#27345](https://github.com/raycast/extensions/pull/27345))
+
 ## [Fix database ID resolution for create/delete actions] - 2026-02-19
 
 - Fix `Create Database Page` failing for some shared databases with "Failed to create page" / `object_not_found` style errors caused by mixed `database_id` and `data_source_id` usage ([#25393](https://github.com/raycast/extensions/issues/25393))

@@ -1,5 +1,9 @@
 # Arc Changelog
 
+## [Performance Improvement] - 2026-04-30
+
+- Replace manual tab iteration loop with AppleScript `whose` filter for direct tab lookup, improving responsiveness with many open tabs
+
 ## [New Features] - 2026-04-24
 
 - Added `Reset all tabs in current space` command to reset all tabs in the currently active space (disabled by default).

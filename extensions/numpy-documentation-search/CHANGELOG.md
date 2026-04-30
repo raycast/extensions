@@ -1,6 +1,18 @@
 # NumPy Documentation Search Changelog
 
-## [1.3.0] - 2026-04-21
+## [1.3.1] - 2026-04-30
+
+### Changed
+
+- Remove the standalone local documentation fallback guide from the packaged repository
+- Default to online documentation without requiring an initial source-selection prompt
+- Document the optional source preference pattern in the local docs fallback guide for reuse in other repos
+
+### Fixed
+
+- Remove an unused Raycast import so lint passes
+
+## [1.3.0] - 2026-04-20
 
 ### Added
 
@@ -10,7 +22,11 @@
 ### Changed
 
 - Fall back to local documentation when remote inventory loading fails
-- Load inline documentation previews from a configured local docs directory when network access is unavailable
+- Document how to replicate the Windows local-docs symlink fallback in other documentation-search extensions
+
+### Fixed
+
+- Support local documentation checkouts on Windows where the `stable` symlink is stored as a text file
 
 ## [1.2.3] - 2025-10-09
 

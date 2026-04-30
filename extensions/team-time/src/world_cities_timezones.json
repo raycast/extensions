@@ -387,7 +387,9 @@
           "Nanjing",
           "Wuhan",
           "Xi'an",
-          "Hangzhou"
+          "Hangzhou",
+          "Hong Kong SAR",
+          "Macau SAR"
         ]
       },
       { "zone": "Asia/Urumqi", "cities": ["Ürümqi", "Kashgar"] }

@@ -1,5 +1,19 @@
 # Wispr Flow Changelog
 
+## [Add Windows Support] - 2026-04-30
+
+### Platform Support
+- Added Windows
+- Added platform-specific handling for the default database path, app detection, and opening Wispr Flow commands
+
+### Database and Commands
+- Updated write operations to use the shared async SQL helper
+- Updated add, edit, delete, and archive actions to await database writes before refreshing UI state
+- Updated start recording, stop recording, and open app commands to use the shared Wispr Flow opener
+
+### Maintenance
+- Updated Raycast and TypeScript-related dependencies
+
 ## [Update] - 2026-04-22
 
 ### Voice Control

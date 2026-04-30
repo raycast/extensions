@@ -6,8 +6,8 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 
 ## Requirements
 
-- [Wispr Flow](https://wisprflow.ai) must be installed on your Mac.
-- macOS Full Disk Access may be required to read the Wispr Flow database.
+- [Wispr Flow](https://wisprflow.ai) must be installed on your computer.
+- On macOS, Full Disk Access may be required to read the Wispr Flow database.
 
 ## Commands
 
@@ -66,4 +66,4 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 
 ## How It Works
 
-Wispr Flow stores your transcription history and dictionary in a local SQLite database on your Mac. This extension reads that database locally — no network requests are made. Modifications are limited to archiving transcripts and managing dictionary entries, mirroring Wispr Flow's own functionality.
+Wispr Flow stores your transcription history and dictionary in a local SQLite database on your computer. This extension reads that database locally on macOS and Windows with no network requests. Modifications are limited to archiving transcripts and managing dictionary entries, mirroring Wispr Flow's own functionality.
