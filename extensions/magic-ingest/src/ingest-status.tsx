@@ -14,12 +14,12 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { JobState, listJobs, isJobRunning } from "./utils/jobs";
-
-/** Running flag from last refresh — avoids re-calling isJobRunning during render. */
-type JobRow = JobState & { _running: boolean };
 import { LOG_FILE } from "./utils/constants";
 import { STAGE_LABELS, progressBar, formatElapsed } from "./utils/format";
 import { IngestStatusView } from "./components/ingest-status-view";
+
+/** Running flag from last refresh — avoids re-calling isJobRunning during render. */
+type JobRow = JobState & { _running: boolean };
 
 function summarize(job: JobState): { title: string; subtitle: string } {
   const stage = STAGE_LABELS[job.stage] ?? job.stage;
@@ -44,7 +44,10 @@ export default function Command() {
       if (a.running !== b.running) return a.running ? -1 : 1;
       return b.job.startedAt.localeCompare(a.job.startedAt);
     });
-    const sorted: JobRow[] = withStatus.map(({ job, running }) => ({ ...job, _running: running }));
+    const sorted: JobRow[] = withStatus.map(({ job, running }) => ({
+      ...job,
+      _running: running,
+    }));
 
     // Skip re-render when nothing changed
     const snapshot = JSON.stringify(sorted);

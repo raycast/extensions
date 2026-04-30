@@ -92,14 +92,3 @@ async function checkPartition(partId: string): Promise<VolumeInfo | null> {
     return null;
   }
 }
-
-export async function ejectVolume(
-  mountPath: string,
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    await execFileAsync(DISKUTIL, ["eject", mountPath]);
-    return { success: true };
-  } catch (err) {
-    return { success: false, error: String(err) };
-  }
-}

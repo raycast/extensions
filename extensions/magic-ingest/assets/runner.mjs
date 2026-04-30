@@ -475,11 +475,10 @@ async function cardsInUseByOtherJobs() {
 }
 
 async function resolveExiftool() {
-  const { stat: fsStat } = await import("fs/promises");
   for (const candidate of EXIFTOOL_CANDIDATES) {
     try {
       if (candidate !== "exiftool") {
-        await fsStat(candidate);
+        await stat(candidate);
       } else {
         // For PATH fallback, verify it runs
         await execFileAsync(candidate, ["-ver"]);
@@ -627,7 +626,9 @@ async function main() {
     const collisionCount = intraCollisionCount + destRenamedCount;
 
     if (filesToCopy.length === 0) {
-
+      progressState.error =
+        "Nothing left to copy — every matching file was skipped (already in the destination) or removed by duplicate rules.";
+      await logLine("ERROR: filesToCopy empty after duplicate skip");
       await logSessionEnd({ copied: 0, skipped: skippedCount, collisions: collisionCount, verified: 0, verifyFailed: 0, renamed: 0, errors: [], durationMs: Date.now() - startTime });
       return;
     }
