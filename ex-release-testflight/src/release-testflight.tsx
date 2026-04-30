@@ -47,7 +47,19 @@ export default function Command() {
     };
 
     // 启动 wrapper（完全 detached，不依赖前台进程存活）
-    const handle = runScript(opts);
+    // runScript 会先校验 iOS Repo Root preference;校验失败抛 Error。
+    let handle;
+    try {
+      handle = runScript(opts);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "配置错误",
+        message,
+      });
+      return;
+    }
 
     // 写入初始 state（wrapper 结束后会自行覆写最终状态）
     const initialState: RunState = {

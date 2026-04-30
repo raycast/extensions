@@ -22,6 +22,15 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "iosRepoRoot",
+      "type": "directory",
+      "required": true,
+      "title": "iOS Repo Root",
+      "description": "ex-ios 项目根目录。脚本位置固定为 <root>/scripts/release_testflight.sh;构建产物固定为 <root>/build/testflight。"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.80.0",
     "@raycast/utils": "^1.17.0"

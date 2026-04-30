@@ -7,7 +7,10 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {}
+type ExtensionPreferences = {
+  /** iOS Repo Root - ex-ios 项目根目录。脚本位置固定为 <root>/scripts/release_testflight.sh;构建产物固定为 <root>/build/testflight。 */
+  "iosRepoRoot": string
+}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences

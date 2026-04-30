@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { BUILD_ROOT } from "./config";
+import { getBuildRoot } from "./config";
 
 // result.json schema(与 scripts/lib/common.sh::result_init 严格对应)
 // 任何 schema 变更只在 shell 侧发生,此处只消费。
@@ -50,9 +50,10 @@ const TS_PATTERN = /^\d{8}_\d{6}$/;
 
 export function findLatestTsDir(): string | null {
   try {
-    if (!fs.existsSync(BUILD_ROOT)) return null;
+    const buildRoot = getBuildRoot();
+    if (!buildRoot || !fs.existsSync(buildRoot)) return null;
     const entries = fs
-      .readdirSync(BUILD_ROOT, { withFileTypes: true })
+      .readdirSync(buildRoot, { withFileTypes: true })
       .filter((d) => d.isDirectory() && TS_PATTERN.test(d.name))
       .map((d) => d.name)
       .sort()
@@ -64,7 +65,7 @@ export function findLatestTsDir(): string | null {
 }
 
 export function readResultJson(ts: string): ResultJson | null {
-  const p = path.join(BUILD_ROOT, ts, "result.json");
+  const p = path.join(getBuildRoot(), ts, "result.json");
   try {
     const raw = fs.readFileSync(p, "utf8");
     return JSON.parse(raw) as ResultJson;
@@ -76,7 +77,7 @@ export function readResultJson(ts: string): ResultJson | null {
 // 读取某 stage 的 summary.txt。严禁读 .log 文件(契约约束)。
 export function readSummaryText(ts: string, summaryFile: string): string | null {
   if (!summaryFile.endsWith(".summary.txt")) return null;
-  const p = path.join(BUILD_ROOT, ts, summaryFile);
+  const p = path.join(getBuildRoot(), ts, summaryFile);
   try {
     return fs.readFileSync(p, "utf8");
   } catch {
@@ -85,11 +86,11 @@ export function readSummaryText(ts: string, summaryFile: string): string | null 
 }
 
 export function absLogDir(ts: string): string {
-  return path.join(BUILD_ROOT, ts);
+  return path.join(getBuildRoot(), ts);
 }
 
 export function absResultJsonPath(ts: string): string {
-  return path.join(BUILD_ROOT, ts, "result.json");
+  return path.join(getBuildRoot(), ts, "result.json");
 }
 
 // 在结果视图里拿 TS:优先用户传入 --ts,否则找最新目录。

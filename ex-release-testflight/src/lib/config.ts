@@ -1,9 +1,59 @@
-// 唯一路径配置文件。Raycast extension 里所有绝对路径都从这里来。
-// 修改规则:iOS repo 搬家、脚本改名、新增 stage 时,只改本文件。
+// 路径配置入口。
+// iOS repo 根目录来自 Raycast Extension Preferences(iosRepoRoot);
+// scripts / build 路径固定派生,不再暴露给用户。
+// 修改规则:脚本改名、build 目录变更时,只改本文件。
 
-export const IOS_REPO_ROOT = "/Users/wilton/Work/Project/ex-global/dev/ex-ios";
-export const SCRIPT_PATH = `${IOS_REPO_ROOT}/scripts/release_testflight.sh`;
-export const BUILD_ROOT = `${IOS_REPO_ROOT}/build/testflight`;
+import fs from "node:fs";
+import { getPreferenceValues } from "@raycast/api";
+
+interface Preferences {
+  iosRepoRoot: string;
+}
+
+function normalizeDir(p: string): string {
+  const trimmed = (p ?? "").trim();
+  if (!trimmed) return "";
+  return trimmed.replace(/\/+$/, "");
+}
+
+/** 读取用户在 Raycast Preferences 里配置的 iOS repo 根目录(去尾斜杠)。 */
+export function getIosRepoRoot(): string {
+  const { iosRepoRoot } = getPreferenceValues<Preferences>();
+  return normalizeDir(iosRepoRoot);
+}
+
+/** <iosRepoRoot>/scripts/release_testflight.sh */
+export function getScriptPath(): string {
+  return `${getIosRepoRoot()}/scripts/release_testflight.sh`;
+}
+
+/** <iosRepoRoot>/build/testflight */
+export function getBuildRoot(): string {
+  return `${getIosRepoRoot()}/build/testflight`;
+}
+
+/**
+ * 轻量校验:根目录存在、release_testflight.sh 存在。
+ * 任一条件不满足时抛出带清晰中文提示的 Error,由调用方 catch 后以
+ * showToast / Detail 等方式呈现给用户。
+ */
+export function assertProjectConfigured(): void {
+  const root = getIosRepoRoot();
+  if (!root) {
+    throw new Error(
+      "未配置 iOS Repo Root。请在 Raycast Preferences → Extensions → EXTrade Release 中选择 ex-ios 根目录。",
+    );
+  }
+  if (!fs.existsSync(root)) {
+    throw new Error(`iOS Repo Root 不存在:\n${root}\n请在 Raycast Preferences 中重新选择。`);
+  }
+  const script = getScriptPath();
+  if (!fs.existsSync(script)) {
+    throw new Error(
+      `未在所选目录下找到发布脚本:\n${script}\n请确认 Raycast Preferences 里选的是 ex-ios 仓库根目录。`,
+    );
+  }
+}
 
 // spawn 的可执行文件。shell 脚本 shebang 为 bash,使用 login shell 以便加载
 // 用户环境(xcrun、python3 等必要工具的 PATH)。

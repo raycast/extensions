@@ -1,6 +1,14 @@
 import { spawn } from "node:child_process";
 import fs from "node:fs";
-import { BASH_PATH, BUILD_ROOT, IOS_REPO_ROOT, PATH_SUPPLEMENT, SCRIPT_PATH, Stage } from "./config";
+import {
+  BASH_PATH,
+  PATH_SUPPLEMENT,
+  Stage,
+  assertProjectConfigured,
+  getBuildRoot,
+  getIosRepoRoot,
+  getScriptPath,
+} from "./config";
 import { LIVE_LOG_FILE, STATE_FILE, writeRunState, readRunState } from "./runState";
 
 export interface RunOptions {
@@ -114,6 +122,14 @@ rm -f "$0"
  *  3. 返回 {pid, kill}，不返回 promise；调用方轮询 state 文件感知进度。
  */
 export function runScript(opts: RunOptions): RunHandle {
+  // 启动前校验:preference 里配置的目录必须存在,且包含 release_testflight.sh。
+  // 校验失败直接抛出带中文提示的 Error,由调用方以 showToast 呈现。
+  assertProjectConfigured();
+
+  const iosRepoRoot = getIosRepoRoot();
+  const scriptPath = getScriptPath();
+  const buildRoot = getBuildRoot();
+
   const scriptArgs = buildArgs(opts);
   const wrapperPath = `/tmp/ex-release-wrapper-${Date.now()}.sh`;
 
@@ -121,7 +137,7 @@ export function runScript(opts: RunOptions): RunHandle {
   fs.writeFileSync(wrapperPath, WRAPPER_TEMPLATE, { mode: 0o755, encoding: "utf8" });
 
   const child = spawn(BASH_PATH, ["-l", wrapperPath, ...scriptArgs], {
-    cwd: IOS_REPO_ROOT,
+    cwd: iosRepoRoot,
     detached: true,
     stdio: ["ignore", "ignore", "ignore"], // 完全与父进程 I/O 解耦
     env: {
@@ -132,9 +148,9 @@ export function runScript(opts: RunOptions): RunHandle {
       // wrapper 通过 env 取所有配置，避免 bash 脚本内嵌路径时引号转义问题
       WRAPPER_LOG_FILE: LIVE_LOG_FILE,
       WRAPPER_STATE_FILE: STATE_FILE,
-      WRAPPER_SCRIPT_PATH: SCRIPT_PATH,
-      WRAPPER_IOS_REPO: IOS_REPO_ROOT,
-      WRAPPER_BUILD_ROOT: BUILD_ROOT,
+      WRAPPER_SCRIPT_PATH: scriptPath,
+      WRAPPER_IOS_REPO: iosRepoRoot,
+      WRAPPER_BUILD_ROOT: buildRoot,
       WRAPPER_STAGE: opts.stage,
       WRAPPER_EXPLICIT_TS: opts.ts?.trim() ?? "",
     },
