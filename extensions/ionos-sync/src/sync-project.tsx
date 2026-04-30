@@ -264,48 +264,47 @@ Press \`⌘ + ,\` while IONOS Sync is selected.`}
     );
   }
 
-  return (
+return (
     <List isLoading={isLoading} navigationTitle="IONOS Sync">
       <List.Section title="Projects" subtitle={`${projects.length} configured`}>
-        {projects.length === 0 && !isLoading ? (
-          <List.EmptyView icon={Icon.Globe} title="No projects configured" description="Press ⌘N to add a project" />
-        ) : (
-          projects.map((project) => (
-            <List.Item
-              key={project.id}
-              icon={Icon.Globe}
-              title={project.name}
-              subtitle={project.localPath}
-              accessories={[
-                {
-                  text: formatLastSync(project.lastSync),
-                  icon: {
-                    source: project.lastSync ? Icon.Clock : Icon.Circle,
-                    tintColor: lastSyncColor(project.lastSync),
-                  },
+        {projects.map((project) => (
+          <List.Item
+            key={project.id}
+            icon={Icon.Globe}
+            title={project.name}
+            subtitle={project.localPath}
+            accessories={[
+              {
+                text: formatLastSync(project.lastSync),
+                icon: {
+                  source: project.lastSync ? Icon.Clock : Icon.Circle,
+                  tintColor: lastSyncColor(project.lastSync),
                 },
-              ]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title="Start Sync"
-                    icon={Icon.ArrowClockwise}
-                    onAction={() =>
-                      push(
-                        <DirectionPicker
-                          project={project}
-                          prefs={prefs}
-                          onDone={(record) => handleSyncDone(project, record)}
-                        />,
-                      )
-                    }
-                  />
-                </ActionPanel>
-              }
-            />
-          ))
-        )}
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Start Sync"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() =>
+                    push(
+                      <DirectionPicker
+                        project={project}
+                        prefs={prefs}
+                        onDone={(record) => handleSyncDone(project, record)}
+                      />,
+                    )
+                  }
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
       </List.Section>
+      {projects.length === 0 && !isLoading && (
+        <List.EmptyView icon={Icon.Globe} title="No projects configured" description="Press ⌘N to add a project" />
+      )}
     </List>
   );
 }
