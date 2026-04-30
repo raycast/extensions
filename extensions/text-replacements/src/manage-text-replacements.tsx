@@ -52,6 +52,22 @@ function sqlEscape(s: string): string {
   return `'${s.replace(/'/g, "''")}'`;
 }
 
+function hasActiveShortcut(phrase: string): boolean {
+  const result = execFileSync(
+    "/usr/bin/sqlite3",
+    [
+      "--json",
+      DB_PATH,
+      `SELECT 1 FROM ZTEXTREPLACEMENTENTRY
+       WHERE ZSHORTCUT=${sqlEscape(phrase)}
+         AND (ZWASDELETED = 0 OR ZWASDELETED IS NULL)
+       LIMIT 1;`,
+    ],
+    { encoding: "utf8", timeout: 5000 },
+  ).trim();
+  return (JSON.parse(result || "[]") as { 1: number }[]).length > 0;
+}
+
 function loadReplacements(): Replacement[] {
   // Use --json so newlines inside ZPHRASE don't corrupt row parsing
   const output = execFileSync(
@@ -72,6 +88,10 @@ function loadReplacements(): Replacement[] {
 }
 
 function insertReplacement(phrase: string, replacement: string): void {
+  if (hasActiveShortcut(phrase)) {
+    throw new Error("A replacement with that shortcut already exists.");
+  }
+
   const zEnt = getZEnt();
   const uniqueName = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
   // CoreData timestamps are seconds since 2001-01-01, not Unix epoch
@@ -111,7 +131,14 @@ function deleteReplacement(dbPK: number): void {
 }
 
 function escapeXml(s: string): string {
-  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  // XML 1.0 forbids most ASCII control chars; strip them before escaping.
+  const xmlSafe = Array.from(s)
+    .filter((char) => {
+      const code = char.charCodeAt(0);
+      return code >= 0x20 || code === 0x09 || code === 0x0a || code === 0x0d;
+    })
+    .join("");
+  return xmlSafe.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 }
 
 function notifySystem(): void {
@@ -210,6 +237,7 @@ export default function ManageTextReplacements() {
   const [isLoading, setIsLoading] = useState(true);
 
   function refresh() {
+    setIsLoading(true);
     try {
       setReplacements(loadReplacements());
     } catch (error) {
