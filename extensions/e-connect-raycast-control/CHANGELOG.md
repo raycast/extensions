@@ -1,6 +1,6 @@
 # E-Connect Raycast Control Changelog
 
-## [Initial Version] - 2026-04-22
+## [Initial Version]
 
 - Added `Dashboard`, `Devices`, `Automations`, and `Open Web UI` commands for self-hosted E-Connect instances.
 - Added direct API-key-based connectivity for local E-Connect servers, including HTTP and optional HTTPS support.
