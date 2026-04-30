@@ -1,0 +1,70 @@
+{
+  "name": "gh-pr-tracker",
+  "title": "GitHub PR Tracker",
+  "description": "Track unread PR reviews and comments from GitHub Enterprise",
+  "icon": "command-icon.png",
+  "author": "oslen",
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "unread-updates",
+      "title": "My PR Updates",
+      "subtitle": "GitHub PR Tracker",
+      "description": "Shows unread PR review and comment updates",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ghHost",
+      "title": "GH Host",
+      "description": "Your GitHub(Enterprise) hostname",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "token",
+      "title": "Personal Access Token",
+      "description": "A PAT with repo read access",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "repos",
+      "title": "Repositories",
+      "description": "Comma-separated list of repositories in owner/repo format",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "owner/repo1, owner/repo2"
+    },
+    {
+      "name": "myLogin",
+      "title": "My GitHub Login",
+      "description": "Your GitHub username for filtering",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.x",
+    "@types/react": "18.x",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.0",
+    "react": "^18.3.1",
+    "typescript": "^5.5.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "lintfix": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
