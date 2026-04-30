@@ -141,9 +141,7 @@ function matchesWindowsBrowser(app: Application, definition: BrowserDefinition) 
       const normalizedDisplayName = normalize(name);
       return normalizedName === normalizedDisplayName;
     }) ||
-    definition.windowsExecutables?.some(
-      (executable) => normalizedPath.endsWith(`\\${executable}`) || normalizedPath.includes(`\\${executable}`),
-    ),
+    definition.windowsExecutables?.some((executable) => normalizedPath.endsWith(`\\${executable}`)),
   );
 }
 

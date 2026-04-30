@@ -296,7 +296,7 @@ export default function useChromiumBookmarks(
       isActive = false;
       clearInterval(timer);
     };
-  }, [currentProfile, enabled, isLoading, mutate, path]);
+  }, [currentProfile, enabled, mutate, path]);
 
   const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];
   const toolbarFolders = data ? getFolders(data.roots.bookmark_bar) : [];
