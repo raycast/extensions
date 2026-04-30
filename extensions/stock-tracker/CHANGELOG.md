@@ -1,6 +1,6 @@
 # Stock Tracker Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-04-30
 
 - Show a sunrise/moon icon on rows with pre/post-market prices
 - Show a ★ next to the symbol in search results when it is already in Favorites
