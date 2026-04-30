@@ -53,12 +53,14 @@ export type CachedDataParams = {
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
 };
 
-/** Optional third argument to `updateTask` — called synchronously after merge with reminders from sync when callers need fresh data before re-render */
+/** Context for `updateTask` third argument — only invoked after a successful item + optional reminders merge into cache. */
 export type TaskUpdateSyncedContext = {
   syncReminders: SyncData["reminders"] | undefined;
 };
 
-// Applies sync deltas on top of the latest React state so consecutive writes cannot use a stale snapshot.
+/**
+ * Functional `setState` merge: always reads latest `SyncData`, avoiding stale closures from `setData({ ...data })`.
+ */
 function mergeIntoCachedData(
   setData: Dispatch<SetStateAction<SyncData | undefined>>,
   merge: (prev: SyncData) => SyncData,
@@ -338,11 +340,15 @@ export type UpdateTaskArgs = {
   day_order?: number;
 };
 
+/**
+ * PATCH task via Sync `item_update`. Returns whether the updated item row was merged into cache.
+ * Empty `updatedData.items` is treated as a no-op: cache unchanged, `onSynced` not called.
+ */
 export async function updateTask(
   args: UpdateTaskArgs,
   cachedData?: CachedDataParams,
   onSynced?: (ctx: TaskUpdateSyncedContext) => void,
-): Promise<void> {
+): Promise<boolean> {
   const updatedData = await syncRequest({
     sync_token,
     resource_types: ["items", "reminders"],
@@ -357,18 +363,20 @@ export async function updateTask(
 
   const syncReminders = Array.isArray(updatedData.reminders) ? updatedData.reminders : undefined;
 
-  // If returned items length is 0 then no update is needed, we can skip.
-  if (cachedData?.setData && updatedData.items.length > 0) {
-    mergeIntoCachedData(cachedData.setData, (prev) => ({
-      ...prev,
-      items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
-      ...(syncReminders ? { reminders: syncReminders } : {}),
-    }));
+  if (!cachedData?.setData || updatedData.items.length === 0) {
+    return false;
   }
 
+  mergeIntoCachedData(cachedData.setData, (prev) => ({
+    ...prev,
+    items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
+    ...(syncReminders ? { reminders: syncReminders } : {}),
+  }));
   onSynced?.({ syncReminders });
+  return true;
 }
 
+/** Complete task; merges returned items + reminders so recurring tasks show the next due in cache. */
 export async function closeTask(id: string, { setData }: CachedDataParams) {
   const updatedData = await syncRequest({
     sync_token,

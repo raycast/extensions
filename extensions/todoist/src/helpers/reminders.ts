@@ -2,6 +2,7 @@ import { Reminder } from "../api";
 
 import { displayDateTime } from "./dates";
 
+/** Todoist 'at time of task' relative reminder (`minute_offset: 0` in API calls; sync stores `mm_offset`). */
 export function hasAtTaskTimeRelativeReminder(reminders: Reminder[] | undefined, itemId: string) {
   return !!reminders?.some(
     (r) => r.item_id === itemId && r.is_deleted !== 1 && r.type === "relative" && (r.mm_offset ?? 0) === 0,

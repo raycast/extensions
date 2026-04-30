@@ -6,6 +6,7 @@ export function isRecurring(task: Task) {
   return task.due?.is_recurring || false;
 }
 
+/** Sentence-case of `due.string` for recurring tasks (detail metadata). */
 export function displayRecurrence(task: Task): string | null {
   const s = task.due?.is_recurring ? task.due.string?.trim() : "";
   return s ? s.charAt(0).toUpperCase() + s.slice(1) : null;

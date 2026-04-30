@@ -1,3 +1,7 @@
+/**
+ * Todoist recurrence strings (`every N unit(s)`) and Raycast UI helpers for the Set Repeat menu.
+ * Presets cover interval 1; free-form `every 2 day` / `every 3 weeks` style input uses `buildDynamicRepeatOptions`.
+ */
 import { Icon } from "@raycast/api";
 import { format } from "date-fns";
 
@@ -21,9 +25,8 @@ function repeatIcon(unit: RecurrenceUnit) {
 }
 
 /**
- * All-day due + current local clock for hourly recurrence anchors.
- *
- * Todoist Sync "floating" due datetimes expect `YYYY-MM-DDTHH:MM:SS` with no zone suffix
+ * Combines an all-day `YYYY-MM-DD` due with "now" local time for hourly repeat.
+ * Todoist floating dues use `YYYY-MM-DDTHH:mm:ss` (no `Z` / offset) — avoids shifting the calendar day vs `toISOString()`.
  */
 function anchorAllDayDateToNow(date: string): string {
   if (date.includes("T")) return date;
@@ -35,17 +38,18 @@ function anchorAllDayDateToNow(date: string): string {
   return format(anchor, "yyyy-MM-dd'T'HH:mm:ss");
 }
 
+/** Builds `{ string, date? }` for `item_update` from current task due + optional recurrence rule. */
 export function repeatDuePayload(task: Task, recurrence?: string): DateOrString {
-  return recurrence
-    ? task.due?.date
-      ? {
-          string: recurrence,
-          date: isHourlyDueString(recurrence) ? anchorAllDayDateToNow(task.due.date) : task.due.date,
-        }
-      : { string: recurrence }
-    : task.due?.date
-      ? { date: task.due.date }
-      : { string: "no date" };
+  if (!recurrence) {
+    return task.due?.date ? { date: task.due.date } : { string: "no date" };
+  }
+  if (!task.due?.date) {
+    return { string: recurrence };
+  }
+  return {
+    string: recurrence,
+    date: isHourlyDueString(recurrence) ? anchorAllDayDateToNow(task.due.date) : task.due.date,
+  };
 }
 
 /** When the query uses Todoist-style "every 1 …", show matching titles ("Every 1 Day"); otherwise keep shorthand ("Every Day"). */
@@ -58,6 +62,7 @@ function presetDisplayTitle(unit: RecurrenceUnit, recurrence: string, searchTrim
     .join(" ");
 }
 
+/** Presets for `every 1 hour` … `every 1 year`; search matches title or canonical `due.string` form. */
 export function filterRepeatPresets(search: string) {
   const trimmed = search.trim();
   const q = trimmed.toLowerCase();
@@ -75,6 +80,7 @@ export function filterRepeatPresets(search: string) {
     : rows;
 }
 
+/** Matches `every N …` for N ≥ 2 (`every 1 …` is handled by `filterRepeatPresets`). */
 export function buildDynamicRepeatOptions(searchText: string) {
   const m = searchText
     .trim()
@@ -83,13 +89,15 @@ export function buildDynamicRepeatOptions(searchText: string) {
   if (!m) return [];
   const interval = parseInt(m[1], 10);
   if (!Number.isFinite(interval) || interval <= 1) return [];
-  const t = m[2]?.toLowerCase();
-  const units = t ? REPEAT_UNITS.filter((u) => u.startsWith(t) || `${u}s`.startsWith(t)) : REPEAT_UNITS;
+  const unitPrefix = m[2]?.toLowerCase();
+  const units = unitPrefix
+    ? REPEAT_UNITS.filter((u) => u.startsWith(unitPrefix) || `${u}s`.startsWith(unitPrefix))
+    : REPEAT_UNITS;
   return units.map((unit) => {
-    const lab = `${unit}s`;
+    const plural = `${unit}s`;
     return {
       key: `${unit}-${interval}`,
-      title: `Every ${interval} ${lab.charAt(0).toUpperCase()}${lab.slice(1)}`,
+      title: `Every ${interval} ${plural.charAt(0).toUpperCase()}${plural.slice(1)}`,
       recurrence: buildRecurringDueString(unit, interval),
       icon: repeatIcon(unit),
     };
