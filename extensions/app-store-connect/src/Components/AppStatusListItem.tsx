@@ -2,38 +2,40 @@ import { Action, ActionPanel, Alert, Color, Icon, List, Toast, confirmAlert, sho
 import { fetchAppStoreConnect } from "../Hooks/useAppStoreConnect";
 import { presentError } from "../Utils/utils";
 import { getCompactStatusLabel, getPlatformIcon, getPlatformLabel, getStatusInfo } from "../Utils/statusHelpers";
-import { PendingReleaseApp, ProcessedApp, STATUS_FILTERS, StatusFilter } from "../appStatus";
+import { PendingRelease, ProcessedApp, ProcessedAppVersion, STATUS_FILTERS, StatusFilter } from "../appStatus";
 import AppStatusDetail from "./AppStatusDetail";
 
 interface AppStatusListItemProps {
   app: ProcessedApp;
-  pendingReleaseApps: PendingReleaseApp[];
+  version: ProcessedAppVersion | undefined;
+  pendingReleaseApps: PendingRelease[];
   statusFilter: StatusFilter;
   onFilterChange: (filter: StatusFilter) => void;
 }
 
 export default function AppStatusListItem({
   app,
+  version,
   pendingReleaseApps,
   statusFilter,
   onFilterChange,
 }: AppStatusListItemProps) {
-  const statusInfo = app.latestVersion ? getStatusInfo(app.latestVersion.state) : null;
+  const statusInfo = version ? getStatusInfo(version.state) : null;
   const shortBundleId = compactTextMiddle(app.bundleId, 24, 8);
-  const compactStatus = app.latestVersion ? getCompactStatusLabel(app.latestVersion.state) : "No Version";
+  const compactStatus = version ? getCompactStatusLabel(version.state) : "No Version";
 
   const accessories: List.Item.Accessory[] = [];
-  if (app.latestVersion) {
+  if (version) {
     accessories.push({
       tag: {
         value: compactStatus,
         color: statusInfo?.color ?? Color.SecondaryText,
       },
-      tooltip: `Status: ${statusInfo?.label ?? app.latestVersion.state}`,
+      tooltip: `Status: ${statusInfo?.label ?? version.state}`,
     });
     accessories.push({
-      icon: getPlatformIcon(app.latestVersion.platform),
-      tooltip: getPlatformLabel(app.latestVersion.platform),
+      icon: getPlatformIcon(version.platform),
+      tooltip: getPlatformLabel(version.platform),
     });
   } else {
     accessories.push({
@@ -51,9 +53,13 @@ export default function AppStatusListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <Action.Push title="View Details" icon={Icon.Eye} target={<AppStatusDetail app={app} />} />
-            <ReleaseAppAction app={app} />
-            <ReleaseAllAppsAction apps={pendingReleaseApps} />
+            <Action.Push
+              title="View Details"
+              icon={Icon.Eye}
+              target={<AppStatusDetail app={app} version={version} />}
+            />
+            <ReleaseAppAction app={app} version={version} />
+            <ReleaseAllAppsAction pending={pendingReleaseApps} />
             <Action.OpenInBrowser title="Open in App Store Connect" url={app.appStoreConnectUrl} icon={Icon.Globe} />
             <Action.CopyToClipboard
               title="Copy Bundle ID"
@@ -82,12 +88,18 @@ export default function AppStatusListItem({
   );
 }
 
-export function ReleaseAppAction({ app, onSuccess }: { app: ProcessedApp; onSuccess?: () => void }) {
-  if (!app.latestVersion || app.latestVersion.state !== "PENDING_DEVELOPER_RELEASE") {
+export function ReleaseAppAction({
+  app,
+  version,
+  onSuccess,
+}: {
+  app: ProcessedApp;
+  version: ProcessedAppVersion | undefined;
+  onSuccess?: () => void;
+}) {
+  if (!version || version.state !== "PENDING_DEVELOPER_RELEASE") {
     return null;
   }
-
-  const version = app.latestVersion;
 
   return (
     <Action
@@ -122,24 +134,24 @@ export function ReleaseAppAction({ app, onSuccess }: { app: ProcessedApp; onSucc
   );
 }
 
-function ReleaseAllAppsAction({ apps }: { apps: PendingReleaseApp[] }) {
-  if (apps.length === 0) return null;
+function ReleaseAllAppsAction({ pending }: { pending: PendingRelease[] }) {
+  if (pending.length === 0) return null;
 
   return (
     <Action
-      title={`Release All Pending Apps (${apps.length})`}
+      title={`Release All Pending Apps (${pending.length})`}
       icon={Icon.Rocket}
       shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       onAction={async () => {
-        const preview = apps
+        const preview = pending
           .slice(0, 3)
-          .map((a) => a.name)
+          .map(({ app }) => app.name)
           .join(", ");
-        const remaining = apps.length - Math.min(apps.length, 3);
+        const remaining = pending.length - Math.min(pending.length, 3);
         const summary = remaining > 0 ? `${preview} and ${remaining} more` : preview;
 
         const confirmed = await confirmAlert({
-          title: `Release ${apps.length} apps?`,
+          title: `Release ${pending.length} apps?`,
           message: `This will immediately release all versions pending developer release: ${summary}.`,
           primaryAction: { title: "Release All", style: Alert.ActionStyle.Default },
         });
@@ -148,20 +160,20 @@ function ReleaseAllAppsAction({ apps }: { apps: PendingReleaseApp[] }) {
         const toast = await showToast({
           style: Toast.Style.Animated,
           title: "Releasing apps…",
-          message: `0/${apps.length}`,
+          message: `0/${pending.length}`,
         });
 
         const failures: string[] = [];
-        for (const [index, app] of apps.entries()) {
-          toast.message = `${index + 1}/${apps.length} · ${app.name}`;
+        for (const [index, entry] of pending.entries()) {
+          toast.message = `${index + 1}/${pending.length} · ${entry.app.name}`;
           try {
-            await releaseAppVersion(app.latestVersion.id);
+            await releaseAppVersion(entry.version.id);
           } catch (error) {
-            failures.push(`${app.name}: ${errorMessage(error)}`);
+            failures.push(`${entry.app.name}: ${errorMessage(error)}`);
           }
         }
 
-        const releasedCount = apps.length - failures.length;
+        const releasedCount = pending.length - failures.length;
         if (failures.length === 0) {
           toast.style = Toast.Style.Success;
           toast.title = "Apps released";
@@ -172,7 +184,7 @@ function ReleaseAllAppsAction({ apps }: { apps: PendingReleaseApp[] }) {
         toast.style = Toast.Style.Failure;
         toast.title = "Bulk release finished with errors";
         toast.message =
-          failures.length === apps.length
+          failures.length === pending.length
             ? "No apps were released"
             : `${releasedCount} released, ${failures.length} failed`;
       }}

@@ -1,13 +1,19 @@
 import { Action, ActionPanel, Color, Detail, Icon, useNavigation } from "@raycast/api";
 import { getPlatformIcon, getPlatformLabel, getStatusInfo } from "../Utils/statusHelpers";
-import { ProcessedApp } from "../appStatus";
+import { ProcessedApp, ProcessedAppVersion } from "../appStatus";
 import { ReleaseAppAction } from "./AppStatusListItem";
 
-export default function AppStatusDetail({ app }: { app: ProcessedApp }) {
+export default function AppStatusDetail({
+  app,
+  version,
+}: {
+  app: ProcessedApp;
+  version: ProcessedAppVersion | undefined;
+}) {
   const { pop } = useNavigation();
-  const statusInfo = app.latestVersion ? getStatusInfo(app.latestVersion.state) : null;
+  const statusInfo = version ? getStatusInfo(version.state) : null;
 
-  const markdown = buildMarkdown(app);
+  const markdown = buildMarkdown(app, version);
 
   return (
     <Detail
@@ -17,24 +23,22 @@ export default function AppStatusDetail({ app }: { app: ProcessedApp }) {
           <Detail.Metadata.Label title="App ID" text={app.id} />
           <Detail.Metadata.Label title="Bundle ID" text={app.bundleId} />
           <Detail.Metadata.Separator />
-          {app.latestVersion && (
+          {version && (
             <>
               <Detail.Metadata.TagList title="Status">
                 <Detail.Metadata.TagList.Item
-                  text={statusInfo?.label ?? app.latestVersion.state}
+                  text={statusInfo?.label ?? version.state}
                   color={statusInfo?.color ?? Color.SecondaryText}
                 />
               </Detail.Metadata.TagList>
-              <Detail.Metadata.Label title="Version" text={app.latestVersion.versionString} />
+              <Detail.Metadata.Label title="Version" text={version.versionString} />
               <Detail.Metadata.Label
                 title="Platform"
-                text={getPlatformLabel(app.latestVersion.platform)}
-                icon={getPlatformIcon(app.latestVersion.platform)}
+                text={getPlatformLabel(version.platform)}
+                icon={getPlatformIcon(version.platform)}
               />
-              <Detail.Metadata.Label title="Created" text={formatDate(app.latestVersion.createdDate)} />
-              {app.latestVersion.releaseType && (
-                <Detail.Metadata.Label title="Release Type" text={app.latestVersion.releaseType} />
-              )}
+              <Detail.Metadata.Label title="Created" text={formatDate(version.createdDate)} />
+              {version.releaseType && <Detail.Metadata.Label title="Release Type" text={version.releaseType} />}
             </>
           )}
           <Detail.Metadata.Separator />
@@ -43,7 +47,7 @@ export default function AppStatusDetail({ app }: { app: ProcessedApp }) {
       }
       actions={
         <ActionPanel>
-          <ReleaseAppAction app={app} onSuccess={pop} />
+          <ReleaseAppAction app={app} version={version} onSuccess={pop} />
           <Action.OpenInBrowser title="Open in App Store Connect" url={app.appStoreConnectUrl} icon={Icon.Globe} />
           <Action.CopyToClipboard
             title="Copy Bundle ID"
@@ -61,17 +65,17 @@ export default function AppStatusDetail({ app }: { app: ProcessedApp }) {
   );
 }
 
-function buildMarkdown(app: ProcessedApp): string {
-  const statusInfo = app.latestVersion ? getStatusInfo(app.latestVersion.state) : null;
-  const versionSection = app.latestVersion
+function buildMarkdown(app: ProcessedApp, version: ProcessedAppVersion | undefined): string {
+  const statusInfo = version ? getStatusInfo(version.state) : null;
+  const versionSection = version
     ? `
 | Field | Value |
 |-------|-------|
-| **Version** | ${app.latestVersion.versionString} |
-| **Status** | ${statusInfo?.label ?? app.latestVersion.state} |
-| **Platform** | ${getPlatformLabel(app.latestVersion.platform)} |
-| **Created** | ${formatDate(app.latestVersion.createdDate)} |
-| **Release Type** | ${app.latestVersion.releaseType ?? "N/A"} |
+| **Version** | ${version.versionString} |
+| **Status** | ${statusInfo?.label ?? version.state} |
+| **Platform** | ${getPlatformLabel(version.platform)} |
+| **Created** | ${formatDate(version.createdDate)} |
+| **Release Type** | ${version.releaseType ?? "N/A"} |
 `
     : "*No version available*";
 

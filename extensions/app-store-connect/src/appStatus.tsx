@@ -5,23 +5,26 @@ import { appsWithVersionsResponseSchema, AppStatusVersion, AppWithVersions } fro
 import SignIn from "./Components/SignIn";
 import AppStatusListItem from "./Components/AppStatusListItem";
 
+export interface ProcessedAppVersion {
+  id: string;
+  versionString: string;
+  state: string;
+  platform: string;
+  createdDate: string;
+  releaseType: string | null;
+}
+
 export interface ProcessedApp {
   id: string;
   name: string;
   bundleId: string;
-  latestVersion?: {
-    id: string;
-    versionString: string;
-    state: string;
-    platform: string;
-    createdDate: string;
-    releaseType: string | null;
-  };
+  versions: ProcessedAppVersion[];
   appStoreConnectUrl: string;
 }
 
-export interface PendingReleaseApp extends ProcessedApp {
-  latestVersion: NonNullable<ProcessedApp["latestVersion"]>;
+export interface PendingRelease {
+  app: ProcessedApp;
+  version: ProcessedAppVersion;
 }
 
 export type StatusFilter = "all" | string;
@@ -45,6 +48,14 @@ const PLATFORM_FILTERS: { value: PlatformFilter; label: string; icon: Icon }[] =
   { value: "VISION_OS", label: "visionOS", icon: Icon.Eye },
 ];
 
+export function selectVersionForPlatform(
+  app: ProcessedApp,
+  platformFilter: PlatformFilter,
+): ProcessedAppVersion | undefined {
+  if (platformFilter === "all") return app.versions[0];
+  return app.versions.find((v) => v.platform === platformFilter);
+}
+
 export default function Command() {
   const [path, setPath] = useState<string | undefined>(undefined);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
@@ -66,15 +77,26 @@ export default function Command() {
 
   const filteredApps = useMemo(
     () =>
-      apps.filter((app) => {
-        const matchesStatus = statusFilter === "all" || app.latestVersion?.state === statusFilter;
-        const matchesPlatform = platformFilter === "all" || app.latestVersion?.platform === platformFilter;
-        return matchesStatus && matchesPlatform;
-      }),
+      apps
+        .map((app) => ({ app, version: selectVersionForPlatform(app, platformFilter) }))
+        .filter(({ version }) => {
+          const matchesStatus = statusFilter === "all" || version?.state === statusFilter;
+          const matchesPlatform = platformFilter === "all" || version !== undefined;
+          return matchesStatus && matchesPlatform;
+        }),
     [apps, statusFilter, platformFilter],
   );
 
-  const pendingReleaseApps = useMemo(() => filteredApps.filter(isPendingDeveloperRelease), [filteredApps]);
+  const pendingReleaseApps = useMemo<PendingRelease[]>(
+    () =>
+      filteredApps
+        .filter(
+          (entry): entry is { app: ProcessedApp; version: ProcessedAppVersion } =>
+            entry.version?.state === "PENDING_DEVELOPER_RELEASE",
+        )
+        .map(({ app, version }) => ({ app, version })),
+    [filteredApps],
+  );
 
   const statusFilterLabel = STATUS_FILTERS.find((f) => f.value === statusFilter)?.label ?? "All Apps";
   const platformLabel = PLATFORM_FILTERS.find((f) => f.value === platformFilter)?.label ?? "All Platforms";
@@ -129,10 +151,11 @@ export default function Command() {
             }
           />
         ) : (
-          filteredApps.map((app) => (
+          filteredApps.map(({ app, version }) => (
             <AppStatusListItem
               key={app.id}
               app={app}
+              version={version}
               pendingReleaseApps={pendingReleaseApps}
               statusFilter={statusFilter}
               onFilterChange={setStatusFilter}
@@ -151,31 +174,23 @@ function processApps(apps: AppWithVersions[], includedVersions: AppStatusVersion
     const versionRelationships = app.relationships.appStoreVersions.data;
     const versions = versionRelationships
       .map((ref) => versionsById.get(ref.id))
-      .filter((v): v is AppStatusVersion => v !== undefined);
-
-    const latest = versions.slice().sort((a, b) => {
-      return new Date(b.attributes.createdDate).getTime() - new Date(a.attributes.createdDate).getTime();
-    })[0];
+      .filter((v): v is AppStatusVersion => v !== undefined)
+      .map<ProcessedAppVersion>((v) => ({
+        id: v.id,
+        versionString: v.attributes.versionString,
+        state: v.attributes.appStoreState,
+        platform: v.attributes.platform,
+        createdDate: v.attributes.createdDate,
+        releaseType: v.attributes.releaseType ?? null,
+      }))
+      .sort((a, b) => new Date(b.createdDate).getTime() - new Date(a.createdDate).getTime());
 
     return {
       id: app.id,
       name: app.attributes.name,
       bundleId: app.attributes.bundleId,
-      latestVersion: latest
-        ? {
-            id: latest.id,
-            versionString: latest.attributes.versionString,
-            state: latest.attributes.appStoreState,
-            platform: latest.attributes.platform,
-            createdDate: latest.attributes.createdDate,
-            releaseType: latest.attributes.releaseType ?? null,
-          }
-        : undefined,
+      versions,
       appStoreConnectUrl: `https://appstoreconnect.apple.com/apps/${app.id}`,
     };
   });
-}
-
-function isPendingDeveloperRelease(app: ProcessedApp): app is PendingReleaseApp {
-  return app.latestVersion?.state === "PENDING_DEVELOPER_RELEASE";
 }
