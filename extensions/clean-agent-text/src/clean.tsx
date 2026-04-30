@@ -204,14 +204,14 @@ function cleanText(raw: string, mode: "auto" | "text" | "code"): { cleaned: stri
 
 export default async function Command() {
   const { mode } = getPreferenceValues<Preferences.Clean>();
-  const raw = await Clipboard.readText();
+  const { text, file } = await Clipboard.read();
 
-  if (!raw) {
-    await showHUD("Clipboard is empty");
+  if (!text) {
+    await showHUD(file ? "Clipboard contains a file, not text" : "Clipboard is empty");
     return;
   }
 
-  const { cleaned, resolvedMode } = cleanText(raw, mode);
+  const { cleaned, resolvedMode } = cleanText(text, mode);
   await Clipboard.copy(cleaned);
   await showHUD(`Cleaned clipboard (${resolvedMode})`);
 }
