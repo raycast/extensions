@@ -62,6 +62,13 @@
       "title": "Absences",
       "description": "List your absences for the current year",
       "mode": "view"
+    },
+    {
+      "name": "clear-cache",
+      "title": "Clear Cache",
+      "subtitle": "Hakuna",
+      "description": "Clears locally cached data (projects, tasks, users, etc.). Use this if data appears outdated after changes made directly in Hakuna.",
+      "mode": "no-view"
     }
   ],
   "preferences": [

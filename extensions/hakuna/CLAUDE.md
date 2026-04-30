@@ -17,5 +17,5 @@ The utils docs: https://raw.githubusercontent.com/raycast/extensions/refs/heads/
 
 # Development
 
-- Don't run a build.
+- Run `npm run fix-lint && npm run lint && npm run build` to verify your changes.
 - Duration should always be rendered according to the preferences of the tenant. See company duration_format.

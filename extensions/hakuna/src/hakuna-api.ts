@@ -1,6 +1,28 @@
 import axios, { AxiosInstance } from "axios";
 import rateLimit from "axios-rate-limit";
-import { environment } from "@raycast/api";
+import { Cache, environment } from "@raycast/api";
+
+const cache = new Cache();
+
+const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
+interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+}
+
+function getCached<T>(key: string, ttlMs: number): T | null {
+  const raw = cache.get(key);
+  if (!raw) return null;
+  const entry = JSON.parse(raw) as CacheEntry<T>;
+  if (Date.now() - entry.timestamp > ttlMs) return null;
+  return entry.data;
+}
+
+function setCached<T>(key: string, data: T): void {
+  cache.set(key, JSON.stringify({ data, timestamp: Date.now() }));
+}
 
 interface ErrorResponse {
   message?: string;
@@ -278,60 +300,44 @@ export class HakunaClient {
     }
   }
 
-  async getUsers(): Promise<UserResponse[]> {
+  private async cachedGet<T>(url: string, ttlMs: number): Promise<T> {
+    const cached = getCached<T>(url, ttlMs);
+    if (cached) return cached;
     try {
-      const response = await this.axiosInstance.get<UserResponse[]>("/users");
+      const response = await this.axiosInstance.get<T>(url);
+      setCached(url, response.data);
       return response.data;
     } catch (error) {
       this.handleApiError(error);
     }
+  }
+
+  async getUsers(): Promise<UserResponse[]> {
+    return this.cachedGet<UserResponse[]>("/users", ONE_DAY_MS);
   }
 
   async getMe(): Promise<UserResponse> {
-    try {
-      const response = await this.axiosInstance.get<UserResponse>("/users/me");
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
+    return this.cachedGet<UserResponse>("/users/me", ONE_DAY_MS);
   }
 
   async getCompany(): Promise<CompanyResponse> {
-    try {
-      const response =
-        await this.axiosInstance.get<CompanyResponse>("/company");
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
+    return this.cachedGet<CompanyResponse>("/company", ONE_WEEK_MS);
   }
 
   async getProjects(): Promise<Project[]> {
-    try {
-      const response = await this.axiosInstance.get<Project[]>("/projects");
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
+    return this.cachedGet<Project[]>("/projects", ONE_DAY_MS);
   }
 
   async getTasks(): Promise<Task[]> {
-    try {
-      const response = await this.axiosInstance.get<Task[]>("/tasks");
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
+    return this.cachedGet<Task[]>("/tasks", ONE_DAY_MS);
   }
 
   async getAbsenceTypes(): Promise<AbsenceType[]> {
-    try {
-      const response =
-        await this.axiosInstance.get<AbsenceType[]>("/absence_types");
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
+    return this.cachedGet<AbsenceType[]>("/absence_types", ONE_WEEK_MS);
+  }
+
+  static clearCache(): void {
+    cache.clear();
   }
 
   async getAbsences(year: number, userId?: number): Promise<AbsenceResponse[]> {
