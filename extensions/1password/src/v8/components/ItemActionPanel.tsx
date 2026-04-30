@@ -55,7 +55,10 @@ function CopyOneTimePassword(item: Item) {
       field="one-time password"
       id={item.id}
       key="copy-one-time-password"
-      shortcut={{ key: "c", modifiers: ["cmd", "ctrl"] }}
+      shortcut={{
+        macOS: { key: "c", modifiers: ["cmd", "ctrl"] },
+        Windows: { key: "c", modifiers: ["ctrl", "shift", "opt"] },
+      }}
       vault_id={item.vault.id}
     />
   );
@@ -67,7 +70,7 @@ function CopyPassword(item: Item) {
       field="password"
       id={item.id}
       key="copy-password"
-      shortcut={{ key: "c", modifiers: ["cmd", "opt"] }}
+      shortcut={{ macOS: { key: "c", modifiers: ["cmd", "opt"] }, Windows: { key: "c", modifiers: ["ctrl", "opt"] } }}
       vault_id={item.vault.id}
     />
   );
@@ -75,7 +78,15 @@ function CopyPassword(item: Item) {
 
 function CopyShareItem(item: Item) {
   return (
-    <ShareItem id={item.id} key="share-item" shortcut={{ key: "s", modifiers: ["cmd", "shift"] }} title={item.title} />
+    <ShareItem
+      id={item.id}
+      key="share-item"
+      shortcut={{
+        macOS: { key: "s", modifiers: ["cmd", "shift"] },
+        Windows: { key: "s", modifiers: ["ctrl", "shift"] },
+      }}
+      title={item.title}
+    />
   );
 }
 
@@ -85,7 +96,10 @@ function CopyUsername(item: Item) {
       field="username"
       id={item.id}
       key="copy-username"
-      shortcut={{ key: "c", modifiers: ["cmd", "shift"] }}
+      shortcut={{
+        macOS: { key: "c", modifiers: ["cmd", "shift"] },
+        Windows: { key: "c", modifiers: ["ctrl", "shift"] },
+      }}
       vault_id={item.vault.id}
     />
   );
@@ -95,9 +109,11 @@ function OpenIn1Password(account: undefined | User, item: Item) {
   if (account) {
     return (
       <Action.Open
-        application="com.1password.1password"
         key="open-in-1password"
-        shortcut={{ key: "o", modifiers: ["cmd", "shift"] }}
+        shortcut={{
+          macOS: { key: "o", modifiers: ["cmd", "shift"] },
+          Windows: { key: "o", modifiers: ["ctrl", "shift"] },
+        }}
         target={`onepassword://view-item/?a=${account.account_uuid}&v=${item.vault.id}&i=${item.id}`}
         title="Open in 1Password"
       />
@@ -132,7 +148,10 @@ function PasteOneTimePassword(item: Item) {
       id={item.id}
       isPasteAction
       key="paste-one-time-password"
-      shortcut={{ key: "v", modifiers: ["cmd", "ctrl"] }}
+      shortcut={{
+        macOS: { key: "v", modifiers: ["cmd", "ctrl"] },
+        Windows: { key: "v", modifiers: ["ctrl", "shift", "opt"] },
+      }}
       vault_id={item.vault.id}
     />
   );
@@ -145,7 +164,7 @@ function PastePassword(item: Item) {
       id={item.id}
       isPasteAction
       key="paste-password"
-      shortcut={{ key: "v", modifiers: ["cmd", "opt"] }}
+      shortcut={{ macOS: { key: "v", modifiers: ["cmd", "opt"] }, Windows: { key: "v", modifiers: ["ctrl", "opt"] } }}
       vault_id={item.vault.id}
     />
   );
@@ -158,7 +177,10 @@ function PasteUsername(item: Item) {
       id={item.id}
       isPasteAction
       key="paste-username"
-      shortcut={{ key: "v", modifiers: ["cmd", "shift"] }}
+      shortcut={{
+        macOS: { key: "v", modifiers: ["cmd", "shift"] },
+        Windows: { key: "v", modifiers: ["ctrl", "shift"] },
+      }}
       vault_id={item.vault.id}
     />
   );

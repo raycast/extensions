@@ -1,7 +1,7 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
-import { getFilterTasks } from "../api";
+import { getFilterTasks, type Task } from "../api";
 import { filterSort } from "../helpers/filters";
 import { QuickLinkView, ViewMode } from "../home";
 import useCachedData from "../hooks/useCachedData";
@@ -37,8 +37,16 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   );
 
   const sections = data ?? [];
+  const tasks = sections.flatMap((section) => section.tasks);
 
-  const { viewProps } = useViewTasks(`todoist.filter${name}`, { tasks: sections.flatMap((section) => section.tasks) });
+  const {
+    sections: groupedSections,
+    sortedTasks,
+    viewProps,
+  } = useViewTasks(`todoist.filter${name}`, {
+    tasks,
+    data: cachedData,
+  });
 
   if (sections.length === 0) {
     return (
@@ -65,8 +73,23 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
     );
   }
 
+  const displayedSections =
+    viewProps.groupBy?.value !== "default"
+      ? groupedSections
+      : sections.length > 1
+        ? sections.map((s) => {
+            const idSet = new Set(s.tasks.map((t: Task) => t.id));
+            return { name: s.name, tasks: sortedTasks.filter((t: Task) => idSet.has(t.id)) };
+          })
+        : [{ name, tasks: sortedTasks }];
+
   return (
-    <TaskListSections mode={ViewMode.project} sections={sections} viewProps={viewProps} quickLinkView={quickLinkView} />
+    <TaskListSections
+      mode={ViewMode.project}
+      sections={displayedSections}
+      viewProps={viewProps}
+      quickLinkView={quickLinkView}
+    />
   );
 }
 

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Cache } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { DailyUsageCommandResponse, DailyUsageCommandResponseSchema } from "../types/usage-types";
@@ -48,6 +48,12 @@ export const useCCUsageDailyCli = () => {
       },
     },
   });
+
+  const intervalMs = parseInt(preferences.usageLimitsRefreshInterval || "60", 10) * 1000;
+  useEffect(() => {
+    const id = setInterval(() => result.revalidate(), intervalMs);
+    return () => clearInterval(id);
+  }, [intervalMs, result.revalidate]);
 
   return result;
 };

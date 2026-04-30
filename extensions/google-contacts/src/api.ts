@@ -18,6 +18,13 @@ async function fetchApi<T>(url: string, token: string, options?: RequestInit): P
       throw new Error("Authentication expired — please re-authorize in extension preferences.");
     }
     const errorBody = await response.text();
+    if (response.status === 403 && errorBody.includes("SERVICE_DISABLED")) {
+      throw new Error(
+        "Google People API is not enabled in your project. " +
+          "Visit console.cloud.google.com/apis/library/people.googleapis.com and click Enable. " +
+          "If you just enabled it, wait a minute and try again.",
+      );
+    }
     throw new Error(`Google API error ${response.status}: ${errorBody}`);
   }
   if (response.status === 204) return undefined as T;
@@ -45,6 +52,16 @@ export async function fetchAllContacts(
     pageToken = res.nextPageToken;
   } while (pageToken);
   return all;
+}
+
+export async function fetchContactsFirstPage(token: string, pageSize = 30): Promise<Person[]> {
+  const params = new URLSearchParams({
+    personFields: PERSON_FIELDS,
+    pageSize: String(pageSize),
+    sortOrder: "FIRST_NAME_ASCENDING",
+  });
+  const res = await fetchApi<ConnectionsListResponse>(`${BASE_URL}/people/me/connections?${params}`, token);
+  return res.connections ?? [];
 }
 
 export async function searchContacts(token: string, query: string): Promise<Person[]> {

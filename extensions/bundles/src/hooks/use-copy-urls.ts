@@ -1,18 +1,9 @@
 import { useCallback, useMemo } from "react";
 import { Clipboard, showToast, Toast } from "@raycast/api";
 import { Folder } from "../types";
-import {
-  collectFolderUrls,
-  formatUrlsAsMarkdown,
-  formatUrlsAsList,
-  countUrls,
-  pluralize,
-  CollectedUrl,
-} from "../utils";
+import { collectFolderUrls, formatUrlsAsMarkdown, formatUrlsAsList, pluralize } from "../utils";
 
 interface UseCopyUrlsResult {
-  /** All collected URLs from the folder (including nested) */
-  collectedUrls: CollectedUrl[];
   /** Whether there are any URLs to copy */
   hasUrls: boolean;
   /** Copy URLs as markdown with nested structure */
@@ -40,7 +31,7 @@ export function useCopyUrls(folder: Folder | undefined, allFolders: Folder[]): U
     const markdown = formatUrlsAsMarkdown(collectedUrls, folder.name);
     await Clipboard.copy(markdown);
 
-    const urlCount = countUrls(collectedUrls);
+    const urlCount = collectedUrls.length;
     await showToast({
       title: "Copied as Markdown",
       message: `${urlCount} ${pluralize(urlCount, "URL")}`,
@@ -57,7 +48,7 @@ export function useCopyUrls(folder: Folder | undefined, allFolders: Folder[]): U
     const list = formatUrlsAsList(collectedUrls);
     await Clipboard.copy(list);
 
-    const urlCount = countUrls(collectedUrls);
+    const urlCount = collectedUrls.length;
     await showToast({
       title: "Copied as List",
       message: `${urlCount} ${pluralize(urlCount, "URL")} (sorted by length)`,
@@ -66,7 +57,6 @@ export function useCopyUrls(folder: Folder | undefined, allFolders: Folder[]): U
   }, [collectedUrls, hasUrls]);
 
   return {
-    collectedUrls,
     hasUrls,
     copyAsMarkdown,
     copyAsList,

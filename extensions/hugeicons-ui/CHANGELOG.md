@@ -1,5 +1,24 @@
 # Hugeicons UI Changelog
 
+## [1.1.0] - 2026-04-27
+
+### Added
+
+- API-backed Hugeicons search, preview, and style inspection flow
+- Free bundled Hugeicons catalog for users without a key
+- Bookmark folders with create, edit, delete, and bulk add actions
+- Raycast AI tools for search, icon details, and code export
+- Settings command for color, grid size, and primary action defaults
+- Recent searches, preview-style persistence, and richer empty states
+
+### Changed
+
+- Switched to preference-based key behavior: free local icons by default, full Pro search when a key is present
+- Added SVG caching and search result caching to speed up repeat usage
+- Improved export and copy actions, including PNG clipboard and download behavior on macOS
+- Grouped "View All Styles" by Standard, Rounded, and Sharp families with duplicate visual variants merged
+- Updated README and manifest metadata to reflect the expanded feature set
+
 ## [1.0.1] - 2026-03-08
 
 ### Changed

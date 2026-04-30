@@ -11,6 +11,25 @@ function ensureNoTrailingSlash(url: string | undefined): string | undefined {
   return url;
 }
 
+function parseCustomHeaders(raw: string | undefined): Record<string, string> | undefined {
+  if (!raw || raw.trim().length === 0) {
+    return undefined;
+  }
+  const result: Record<string, string> = {};
+  for (const entry of raw.split(";")) {
+    const trimmed = entry.trim();
+    if (!trimmed) continue;
+    const colonIndex = trimmed.indexOf(":");
+    if (colonIndex <= 0) continue;
+    const key = trimmed.substring(0, colonIndex).trim();
+    const value = trimmed.substring(colonIndex + 1).trim();
+    if (key) {
+      result[key] = value;
+    }
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
 function createHomeAssistantClient(): HomeAssistant {
   const preferences = getPreferenceValues();
   const instance = ensureNoTrailingSlash((preferences.instance as string) || undefined) || "";
@@ -20,11 +39,13 @@ function createHomeAssistantClient(): HomeAssistant {
   const wifiSSIDs = ((preferences.homeSSIDs as string) || "").split(",").map((v) => v.trim());
   const usePing = preferences.usePing as boolean;
   const preferredApp = preferences.preferredapp as string | undefined;
+  const customHeaders = parseCustomHeaders((preferences.customHeaders as string) || undefined);
   const hac = new HomeAssistant(instance, token, ignoreCerts, {
     urlInternal: instanceInternal,
     wifiSSIDs: wifiSSIDs,
     usePing: usePing,
     preferCompanionApp: preferredApp === "companion",
+    customHeaders: customHeaders,
   });
   return hac;
 }
@@ -41,7 +62,10 @@ export async function getHAWSConnection(): Promise<Connection> {
     const instance = await ha.nearestURL();
     console.log(`Nearest Instance URL ${instance}`);
     const auth = createLongLivedTokenAuth(instance, ha.token);
-    con = await createConnection({ auth, createSocket: async () => createSocket(auth, ha.ignoreCerts) });
+    con = await createConnection({
+      auth,
+      createSocket: async () => createSocket(auth, ha.ignoreCerts, ha.customHeaders),
+    });
     return con;
   }
 }

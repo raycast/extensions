@@ -1,16 +1,8 @@
 import { showHUD, showToast, Toast, LaunchProps } from "@raycast/api";
-import {
-  ensureLunarReady,
-  getDisplays,
-  getCursorDisplay,
-  getBrightnessForDisplay,
-  setBrightnessForDisplay,
-} from "./utils/lunar";
+import { setBrightness } from "./utils/platform";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.SetBrightness }>) {
   const { level: levelArg } = props.arguments;
-
-  // Validate brightness level
   const brightnessLevel = parseInt(levelArg, 10);
 
   if (isNaN(brightnessLevel)) {
@@ -31,40 +23,15 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
     return;
   }
 
-  if (!(await ensureLunarReady())) {
-    return;
-  }
-
   try {
-    const allDisplays = await getDisplays();
+    const result = await setBrightness(brightnessLevel);
+    if (!result) return;
 
-    if (allDisplays.length === 0) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No Displays Found",
-        message: "Make sure Lunar is running and displays are connected",
-      });
-      return;
-    }
-
-    // Auto-detect cursor display, fallback to main display
-    const cursorDisplaySerial = await getCursorDisplay();
-    let targetDisplay = allDisplays.find((d) => d.serial === cursorDisplaySerial);
-
-    if (!targetDisplay) {
-      targetDisplay = allDisplays.find((d) => d.main) || allDisplays[0];
-    }
-
-    // Get current brightness for the HUD message
-    const currentBrightness = await getBrightnessForDisplay(targetDisplay.serial);
-
-    await setBrightnessForDisplay(targetDisplay.serial, brightnessLevel, targetDisplay.adaptive);
-
-    // Show result
-    if (currentBrightness !== null) {
-      await showHUD(`${targetDisplay.name}: ${currentBrightness}% → ${brightnessLevel}%`);
+    const currentBrightness = result.brightness ?? brightnessLevel;
+    if (result.displayName && result.previousBrightness != null) {
+      await showHUD(`${result.displayName}: ${result.previousBrightness}% → ${currentBrightness}%`);
     } else {
-      await showHUD(`${targetDisplay.name}: Set to ${brightnessLevel}%`);
+      await showHUD(`Brightness set to ${currentBrightness}%`);
     }
   } catch (error) {
     console.error("Failed to set brightness:", error);

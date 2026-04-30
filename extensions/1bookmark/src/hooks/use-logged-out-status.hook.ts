@@ -16,7 +16,7 @@ export const useLoggedOutStatus = () => {
   const [, setBookmarks] = useCachedState<RouterOutputs["bookmark"]["listAll"] | null>(CACHED_KEY_MY_BOOKMARKS, null);
   const [, setTags] = useCachedState<RouterOutputs["tag"]["list"] | null>(CACHED_KEY_MY_TAGS, null);
   const [after1Sec, setAfter1Sec] = useState(sessionToken ? true : false);
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const cleared = useRef(false);
 
   const trpcUtils = trpc.useUtils();

@@ -1,13 +1,28 @@
 import { List, Icon, ActionPanel, Action, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { fetchPrinterStats, PrinterStats } from "./snmp-client";
-import { INK_COLORS, LABELS } from "./constants";
+import { getOidConfig, INK_COLORS, LABELS } from "./constants";
 
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const host = preferences.printerIp;
   const community = preferences.snmpCommunity || "public";
+  const oidConfig = useMemo(
+    () => getOidConfig(preferences),
+    [
+      preferences.totalPagesOid,
+      preferences.blackPagesOid,
+      preferences.colorPagesOid,
+      preferences.supplyDescriptionBaseOid,
+      preferences.supplyMaxCapacityBaseOid,
+      preferences.supplyLevelBaseOid,
+      preferences.modelNameOid,
+      preferences.serialNumberOid,
+      preferences.printerNameOid,
+      preferences.printerStatusOid,
+    ],
+  );
   const labels = LABELS;
 
   const [stats, setStats] = useState<PrinterStats | null>(null);
@@ -25,7 +40,7 @@ export default function Command() {
       }
 
       try {
-        const data = await fetchPrinterStats(host, community);
+        const data = await fetchPrinterStats(host, community, oidConfig);
         // avoid updating state if component unmounted
         if (signal && signal.aborted) return;
         setStats(data);
@@ -40,7 +55,7 @@ export default function Command() {
         }
       }
     },
-    [host, community],
+    [host, community, oidConfig],
   );
 
   useEffect(() => {

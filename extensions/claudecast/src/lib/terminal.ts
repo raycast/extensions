@@ -2,10 +2,37 @@ import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { writeFileSync } from "fs";
-import { tmpdir } from "os";
+import { tmpdir, homedir } from "os";
 import { join } from "path";
+import type { PermissionMode } from "./session-parser";
 
 const execFilePromise = promisify(execFile);
+
+/**
+ * Expand shell-style ~ prefix to the user's home directory.
+ * Node fs APIs do not perform tilde expansion, so paths like ~/foo
+ * must be resolved before passing to existsSync, mkdirSync, or cd.
+ */
+export function expandTilde(inputPath: string): string {
+  const trimmed = inputPath.trim();
+  const home = homedir();
+  if (trimmed === "~") return home;
+  if (trimmed.startsWith("~/")) return home + trimmed.slice(1);
+  return trimmed;
+}
+
+/**
+ * Normalize a full model ID (e.g. "claude-opus-4-6") to the short name
+ * ("opus") that Claude Code expects for proper feature enablement like
+ * extended context windows.
+ */
+function normalizeModelName(model: string): string {
+  if (["opus", "sonnet", "haiku"].includes(model)) return model;
+  if (model.includes("opus")) return "opus";
+  if (model.includes("sonnet")) return "sonnet";
+  if (model.includes("haiku")) return "haiku";
+  return model;
+}
 
 type TerminalApp = "Terminal" | "iTerm" | "Warp" | "kitty" | "Ghostty";
 
@@ -23,7 +50,7 @@ export async function openTerminalWithCommand(
   const terminal = (options.terminalApp ||
     preferences.terminalApp ||
     "Terminal") as TerminalApp;
-  const cwd = options.cwd || process.env.HOME || "/";
+  const cwd = expandTilde(options.cwd || "") || homedir() || "/";
 
   try {
     switch (terminal) {
@@ -143,6 +170,8 @@ export async function launchClaudeCode(options: {
   prompt?: string;
   printMode?: boolean; // Use -p flag for non-interactive output
   dangerouslySkipPermissions?: boolean; // Skip permission prompts for autonomous workflows
+  permissionMode?: PermissionMode; // Restore the session's original permission mode on resume
+  model?: string; // Restore the session's original model on resume
 }): Promise<void> {
   const args: string[] = ["claude"];
 
@@ -158,6 +187,24 @@ export async function launchClaudeCode(options: {
     }
   } else if (options.continueSession) {
     args.push("-c");
+  }
+
+  // Restore the session's permission mode (unless dangerouslySkipPermissions
+  // was already set explicitly, which implies bypassPermissions)
+  if (
+    options.permissionMode &&
+    options.permissionMode !== "default" &&
+    !options.dangerouslySkipPermissions
+  ) {
+    args.push("--permission-mode", options.permissionMode);
+  }
+
+  // Only pass --model for new sessions (not resume/continue). Claude Code
+  // remembers the model from the session and passing --model explicitly can
+  // disable features like extended context windows.
+  const isResumingSession = options.sessionId || options.continueSession;
+  if (options.model && !isResumingSession) {
+    args.push("--model", normalizeModelName(options.model));
   }
 
   if (options.prompt) {

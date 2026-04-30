@@ -6,6 +6,7 @@ import {
   AUDIT_PROVIDER_LABELS,
   buildInstallCommand,
   formatInstalls,
+  formatRelativeDate,
   normalizeAllowedTools,
   Skill,
   SkillAudit,
@@ -98,6 +99,13 @@ ${installCommand}
               />
             )
           )}
+          {!stats?.rateLimited && stats?.pushedAt && (
+            <List.Item.Detail.Metadata.Label
+              title="Repo Activity"
+              text={formatRelativeDate(stats.pushedAt)}
+              icon={Icon.Calendar}
+            />
+          )}
           {frontmatter.license && (
             <List.Item.Detail.Metadata.Label title="License" text={frontmatter.license} icon={Icon.Document} />
           )}
@@ -162,11 +170,19 @@ interface SkillListItemProps {
   skill: Skill;
   rank?: number;
   isSelected: boolean;
+  isInstalled?: boolean;
   isShowingDetail: boolean;
   onToggleDetail: () => void;
 }
 
-export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onToggleDetail }: SkillListItemProps) {
+export function SkillListItem({
+  skill,
+  rank,
+  isSelected,
+  isInstalled,
+  isShowingDetail,
+  onToggleDetail,
+}: SkillListItemProps) {
   const title = rank !== undefined && rank !== null ? `#${rank} ${skill.name}` : skill.name;
   const { content, frontmatter, isLoading } = useSkillContent(skill, isSelected);
   const { stats } = useRepoStats(skill, isSelected);
@@ -178,6 +194,10 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
     rank !== undefined && rank !== null
       ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
       : { source: Icon.Hammer };
+
+  const accessories: List.Item.Accessory[] = [];
+  if (isInstalled) accessories.push({ tag: { value: "Installed", color: Color.Green } });
+  if (!isShowingDetail) accessories.push({ text: formatInstalls(skill.installs), icon: Icon.Download });
 
   const shownErrorTimestampRef = useRef<string | undefined>(undefined);
 
@@ -205,7 +225,7 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
       subtitle={isShowingDetail ? undefined : (frontmatter.description ?? skill.source)}
       keywords={[skill.name, skill.source, skill.id]}
       icon={icon}
-      accessories={isShowingDetail ? [] : [{ text: formatInstalls(skill.installs), icon: Icon.Download }]}
+      accessories={accessories}
       id={skill.id}
       detail={
         <InlineDetail
@@ -226,7 +246,12 @@ export function SkillListItem({ skill, rank, isSelected, isShowingDetail, onTogg
             icon={Icon.Terminal}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
-          <Action.OpenInBrowser title="Open Repository" url={`https://github.com/${skill.source}`} icon={Icon.Globe} />
+          <Action.OpenInBrowser
+            title="Open Repository"
+            url={`https://github.com/${skill.source}`}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
+          />
           <Action.OpenInBrowser
             title="Open Skills"
             url={`${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`}

@@ -15,11 +15,7 @@ interface LaunchContext {
 }
 
 export default function Command(props: LaunchProps<{ launchContext?: LaunchContext }>) {
-  // Handle deeplink context - render folder contents directly if opened via quicklink
-  const context = props.launchContext as LaunchContext | undefined;
-  if (context?.folderId) {
-    return <FolderContentsView folderId={context.folderId} folderName={context.folderName || "Bundle"} />;
-  }
+  const context = props.launchContext;
 
   const { showPreviewPane = false } = getPreferenceValues<Preferences>();
   const {
@@ -31,6 +27,11 @@ export default function Command(props: LaunchProps<{ launchContext?: LaunchConte
     handleDelete,
   } = useFoldersData();
   const { appMap, isLoading: isLoadingApps } = useApplicationsData();
+
+  // Handle deeplink context - render folder contents directly if opened via quicklink
+  if (context?.folderId) {
+    return <FolderContentsView folderId={context.folderId} folderName={context.folderName || "Bundle"} />;
+  }
 
   const isLoading = isLoadingFolders || isLoadingApps;
 

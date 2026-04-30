@@ -1,3 +1,4 @@
+import React from "react";
 import { ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { supportedLanguagesByCode } from "../languages";
@@ -53,6 +54,8 @@ export function QuickTranslateListItem(props: {
   // Reassigning langFrom to the detected language in case it was auto-detected
   langFrom = supportedLanguagesByCode[result.langFrom];
 
+  const pronunciationMarkdown = result.pronunciationText ? `\`\`\`\n${result.pronunciationText}\n\`\`\`\n\n` : "";
+
   return (
     <List.Item
       key={langTo.code}
@@ -65,7 +68,7 @@ export function QuickTranslateListItem(props: {
       ]}
       detail={
         <List.Item.Detail
-          markdown={result.translatedText}
+          markdown={result.translatedText + "\n\n\n" + pronunciationMarkdown}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.TagList title="Source Language">

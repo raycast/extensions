@@ -1,10 +1,7 @@
 import { showToast, Toast, confirmAlert } from "@raycast/api";
 import { Folder, FolderItem } from "./types";
 import { AppLookupMap, createWebsiteItem } from "./utils";
-import { normalizeUrl, isValidUrl, fetchWebsiteTitle, extractDomain } from "./favicon";
-
-// Shared content type for both forms
-export type ContentType = "applications" | "websites" | "folders";
+import { normalizeUrl, isValidUrl, fetchWebsiteTitle, extractDomain } from "./url";
 
 // Type-safe item filtering helpers (single source of truth)
 export const filterWebsites = (items: FolderItem[]): Array<FolderItem & { url: string }> =>
@@ -15,14 +12,6 @@ export const filterApplications = (items: FolderItem[]): Array<FolderItem & { pa
 
 export const filterFolders = (items: FolderItem[]): Array<FolderItem & { folderId: string }> =>
   items.filter((i): i is FolderItem & { folderId: string } => i.type === "folder" && !!i.folderId);
-
-/**
- * Create a Map for O(1) folder lookups by ID
- * Use this instead of repeated folders.find() calls
- */
-export function createFolderMap(folders: Folder[]): Map<string, Folder> {
-  return new Map(folders.map((f) => [f.id, f]));
-}
 
 /**
  * Create a Map for O(1) website lookups by normalized URL
@@ -180,7 +169,6 @@ export function findDuplicateUrls(urlInput: string, existingItems: FolderItem[])
 
   const existingByUrl = createWebsiteUrlMap(existingItems);
 
-  // Find duplicates
   return urlLines.filter((url) => existingByUrl.has(url)).map((url) => ({ url, name: existingByUrl.get(url)!.name }));
 }
 
@@ -213,11 +201,10 @@ export async function confirmDuplicates(
 
   const duplicateList = duplicates.map((d) => (d.type ? `• ${d.name} (${d.type})` : `• ${d.name}`)).join("\n");
 
-  const itemWord = duplicates.length === 1 ? itemType : `${itemType}s`;
   const message =
     duplicates.length === 1
       ? `This ${itemType} already exists in the folder:\n\n${duplicateList}`
-      : `These ${duplicates.length} ${itemWord} already exist in the folder:\n\n${duplicateList}`;
+      : `These ${duplicates.length} ${itemType}s already exist in the folder:\n\n${duplicateList}`;
 
   return confirmAlert({
     title,
@@ -258,7 +245,6 @@ export async function processWebsiteUrls(
 
   const existingByUrl = createWebsiteUrlMap(existingItems);
 
-  // Determine which entries to process
   const entriesToProcess = includeDuplicates ? urlEntries : urlEntries.filter((entry) => !existingByUrl.has(entry.url));
 
   if (entriesToProcess.length === 0) return [];
@@ -273,18 +259,14 @@ export async function processWebsiteUrls(
     });
   }
 
-  // Process all entries - reuse existing or create new
   const items: FolderItem[] = [];
   for (const entry of entriesToProcess) {
     const existing = existingByUrl.get(entry.url);
     if (existing && !entry.title) {
-      // For duplicates without custom title, create a new item (copy) with a new ID
       items.push(createWebsiteItem(entry.url, existing.name));
     } else if (entry.title) {
-      // Custom title provided via markdown syntax
       items.push(createWebsiteItem(entry.url, entry.title));
     } else {
-      // Fetch title for new URLs (favicons handled by getFavicon at render time)
       const title = await fetchWebsiteTitle(entry.url);
       items.push(createWebsiteItem(entry.url, title));
     }

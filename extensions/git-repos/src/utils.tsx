@@ -1,14 +1,22 @@
 import { getPreferenceValues, showToast, LocalStorage, Toast } from "@raycast/api";
 
-import { homedir } from "os";
+import { homedir, platform } from "os";
 import path from "path";
 import fs from "fs";
-import { promisify } from "util";
-import { exec } from "child_process";
-const execp = promisify(exec);
+import { glob, Path } from "glob";
 import parseGitConfig from "parse-git-config";
 import parseGithubURL from "parse-github-url";
 import getDefaultBrowser from "default-browser";
+
+export enum Platform {
+  macOS = "darwin",
+  Windows = "win32",
+}
+
+const pathSeparator: Record<Platform, string> = {
+  [Platform.macOS]: ":",
+  [Platform.Windows]: ";",
+};
 
 export enum GitRepoType {
   All = "All",
@@ -40,7 +48,7 @@ export class GitRepoService {
   private static favoritesStorageKey = "git-repos-favorites";
 
   static async gitRepos(): Promise<GitRepo[]> {
-    const preferences = getPreferenceValues<ExtensionPreferences>();
+    const preferences = getPreferenceValues<Preferences>();
     if (preferences.repoScanPath.length == 0) {
       showToast(Toast.Style.Failure, "", "Directories to scan has not been defined in settings");
       return [];
@@ -154,7 +162,8 @@ export function tildifyPath(p: string): string {
 export function parsePath(path: string): [string[], string[]] {
   const resolvedPaths: string[] = [];
   const unresolvedPaths: string[] = [];
-  const paths = path.split(":");
+  const separator = pathSeparator[platform() as Platform] ?? ":";
+  const paths = path.split(separator);
   paths.map((path) => {
     path = path.trim();
     if (path.length === 0) {
@@ -174,10 +183,10 @@ export function parsePath(path: string): [string[], string[]] {
 function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = false): GitRepo[] {
   if (submodules) {
     return repoPaths
-      .filter((path) => fs.existsSync(path))
-      .map((path) => {
-        const fullPath = path;
-        const name = `${fullPath.split("/").pop() ?? "unknown"}`;
+      .filter((submodulePath) => fs.existsSync(submodulePath))
+      .map((submodulePath) => {
+        const fullPath = submodulePath;
+        const name = path.basename(fullPath) || "unknown";
         const remotes = gitRemotes(fullPath);
         return {
           name: name,
@@ -191,7 +200,7 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
   } else {
     return repoPaths.map((repoPath) => {
       const fullPath = path.dirname(repoPath);
-      const name = fullPath.split("/").pop() ?? "unknown";
+      const name = path.basename(fullPath) || "unknown";
       const remotes = gitRemotes(fullPath);
       return {
         name: name,
@@ -205,77 +214,59 @@ function parseRepoPaths(mainPath: string, repoPaths: string[], submodules = fals
   }
 }
 
-async function findSubmodules(path: string): Promise<string[]> {
-  const { stdout } = await execp(
-    `grep -E "^\\s+path\\s*="  ${
-      path.replace(/(\s+)/g, "\\$1") + "/.gitmodules"
-    } | sed -E "s%[[:space:]]+path[[:space:]]*=[[:space:]]*%\${1%/.git}/%g"`,
-  );
-  const paths = stdout.split("\n").filter((e) => e);
-  const submodulePaths = paths.map((subPath) => {
-    const temp = `${path}${subPath}`;
-    return temp;
-  });
-  return submodulePaths;
-}
-
-async function findWorktrees(path: string, maxDepth: number): Promise<GitRepo[]> {
-  let foundRepos: GitRepo[] = [];
-  const findCmd = `find -L ${path.replace(/(\s+)/g, "\\$1")} -maxdepth ${maxDepth} -name .git -type f -print || true`;
-  const { stdout, stderr } = await execp(findCmd);
-  const filteredStderr = stderr
-    .split("\n")
-    .filter((line) => !/Permission denied|Operation not permitted/.test(line))
-    .join("\n");
-  if (!filteredStderr) {
-    const repoPaths = stdout.split("\n").filter((e) => e);
-    const repos = parseRepoPaths(path, repoPaths, false);
-    foundRepos = foundRepos.concat(repos);
-    foundRepos.map((repo) => ((repo.icon = "git-worktree-icon.png"), (repo.repoType = GitRepoType.Worktree)));
+function findSubmodules(repoPath: string): string[] {
+  const gitmodulesPath = path.join(repoPath, ".gitmodules");
+  try {
+    const content = fs.readFileSync(gitmodulesPath, "utf8");
+    const submodulePaths: string[] = [];
+    for (const line of content.split("\n")) {
+      const match = line.match(/^\s+path\s*=\s*(.+)$/);
+      if (match) {
+        submodulePaths.push(path.join(repoPath, match[1].trim()));
+      }
+    }
+    return submodulePaths;
+  } catch {
+    return [];
   }
-  return foundRepos;
 }
 
 export async function findRepos(paths: string[], maxDepth: number, includeSubmodules: boolean): Promise<GitRepo[]> {
   let foundRepos: GitRepo[] = [];
   await Promise.allSettled(
-    paths.map(async (path) => {
-      const findCmd = `find -L ${path.replace(
-        /(\s+)/g,
-        "\\$1",
-      )} -maxdepth ${maxDepth} -type d -name .git -print || true`;
-      const { stdout, stderr } = await execp(findCmd);
-      const filteredStderr = stderr
-        .split("\n")
-        .filter((line) => !/Permission denied|Operation not permitted/.test(line))
-        .join("\n");
-      if (filteredStderr) {
-        showToast(Toast.Style.Failure, "Find Failed", stderr);
-        return [];
-      }
-      const repoPaths = stdout.split("\n").filter((e) => e);
-      const repos = parseRepoPaths(path, repoPaths, false);
+    paths.map(async (scanPath) => {
+      const gitEntries = (await glob("**/.git", {
+        cwd: scanPath,
+        maxDepth,
+        follow: true,
+        withFileTypes: true,
+        dot: true,
+      })) as Path[];
+      const gitDirs = gitEntries.filter((p) => p.isDirectory()).map((p) => p.fullpath());
+      const gitFiles = gitEntries.filter((p) => p.isFile()).map((p) => p.fullpath());
+
+      const repos = parseRepoPaths(scanPath, gitDirs, false);
+      const worktrees = parseRepoPaths(scanPath, gitFiles, false).map((repo) => ({
+        ...repo,
+        icon: "git-worktree-icon.png",
+        repoType: GitRepoType.Worktree,
+      }));
       if (includeSubmodules) {
         let subRepoPaths: string[] = [];
-        await Promise.allSettled(
-          repos.map(async (repo) => {
-            const subP = await findSubmodules(repo.fullPath);
-            if (subP.length > 0) {
-              subRepoPaths = subRepoPaths.concat(subP);
-            }
-          }),
-        );
-        const subRepos = parseRepoPaths(path, subRepoPaths, true);
+        repos.forEach((repo) => {
+          const subP = findSubmodules(repo.fullPath);
+          if (subP.length > 0) {
+            subRepoPaths = subRepoPaths.concat(subP);
+          }
+        });
+        const subRepos = parseRepoPaths(scanPath, subRepoPaths, true);
         foundRepos = foundRepos.concat(repos.concat(subRepos));
       } else {
         foundRepos = foundRepos.concat(repos);
       }
-      // Search for git worktrees
-      const worktrees = await findWorktrees(path, maxDepth);
-      worktrees.forEach(function (worktree) {
-        // Only add if a repo.fullPath is not already in array
-        const found = foundRepos.findIndex((r) => r.fullPath === worktree.fullPath);
-        if (found === -1) {
+      // Only add if this worktree path hasn't already been added as a regular repo
+      worktrees.forEach((worktree) => {
+        if (foundRepos.findIndex((r) => r.fullPath === worktree.fullPath) === -1) {
           foundRepos.push(worktree);
         }
       });

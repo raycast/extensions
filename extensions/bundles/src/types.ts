@@ -17,5 +17,3 @@ export interface Folder {
   icon?: string; // Icon name from Icon enum (e.g., "Folder", "Document", "Star")
   color?: string; // Hex color code for icon tint (e.g., "#FF5733")
 }
-
-export const STORAGE_KEY = "launchpad-folders";

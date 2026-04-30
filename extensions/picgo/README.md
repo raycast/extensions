@@ -18,7 +18,6 @@ If you speak Chinese, check out [中文文档](https://github.com/RUBisco0211/ra
 - **Plugin Management**: Search, install, update, and uninstall PicGo plugins directly from Raycast via NPM.
 - **Uploader Configuration**: Manage your uploader configurations (Url, Access Key, Secret Key, etc.).
 
-
 ## Prerequisites
 
 - **NPM**: This extension requires Node.js. Ensure `npm` is accessible. You can configure the `NPM Path` in the extension preferences if it's not in the default location.
@@ -62,15 +61,16 @@ View installed plugins. You can update, uninstall, or configure them.
 
 ## Preferences
 
-| Preference | Description | Default |
-| ---------------- | -------------------------------------------------- | ------- |
-| Upload Timeout | Maximum time (in ms) to wait for upload completion. | 30000 |
-| Auto Copy URLs | Automatically copy your image URLs right after finishing uploading | true |
-| Custom Format | Use `$url` to represent the position of image URL. <br>Use `$fileName` to represent the position of file names. <br>Use `$extName` to represent the position of image extension name. <br>Ex. `[$fileName]($url)` <br> => `[img.png](https://somepath/img.png)` | `$url` |
-| Upload Proxy | Custom proxy address for uploading images (e.g., `http://127.0.0.1:7890`). | - |
-| NPM Path | Path to the NPM executable (e.g., `/usr/local/bin`). Do not include `/npm` in the path. | - |
-| NPM Proxy | Proxy address for installing plugins via NPM. | - |
-| NPM Mirror | Custom NPM registry mirror (e.g., `https://registry.npmmirror.com`). | - |
+| Preference     | Description                                                                                                                                                                                                                                                     | Default |
+| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- |
+| Upload Timeout | Maximum time (in ms) to wait for upload completion.                                                                                                                                                                                                             | 30000   |
+| Auto Copy URLs | Automatically copy your image URLs right after finishing uploading                                                                                                                                                                                              | true    |
+| Upload Result View | View upload result with `Format List` or `Image Grid` view. | `Format List` |
+| Custom Format  | Use `$url` to represent the position of image URL. <br>Use `$fileName` to represent the position of file names. <br>Use `$extName` to represent the position of image extension name. <br>Ex. `[$fileName]($url)` <br> => `[img.png](https://somepath/img.png)` | `$url`  |
+| Upload Proxy   | Custom proxy address for uploading images (e.g., `http://127.0.0.1:7890`).                                                                                                                                                                                      | -       |
+| NPM Path       | Path to the NPM executable (e.g., `/usr/local/bin`). Do not include `/npm` in the path.                                                                                                                                                                         | -       |
+| NPM Proxy      | Proxy address for installing plugins via NPM.                                                                                                                                                                                                                   | -       |
+| NPM Mirror     | Custom NPM registry mirror (e.g., `https://registry.npmmirror.com`).                                                                                                                                                                                            | -       |
 
 ## Troubleshooting
 
@@ -80,6 +80,7 @@ View installed plugins. You can update, uninstall, or configure them.
 ## For More
 
 checkout:
+
 - [PicGo-Core Documentation](https://docs.picgo.app/core/)
 
 ## License

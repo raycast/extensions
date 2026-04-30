@@ -100,7 +100,15 @@ export function ExtensionActions({
           />
 
           <ActionPanel.Section>
-            <Action.OpenInBrowser title="Open in Raycast Store" url={storeDeeplink} icon={Icon.RaycastLogoNeg} />
+            <Action.OpenInBrowser
+              title="Open in Raycast Store"
+              url={storeDeeplink}
+              icon={Icon.RaycastLogoNeg}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "s" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+              }}
+            />
             <Action.CopyToClipboard
               title="Copy Extension URL"
               content={item.url}
@@ -125,12 +133,20 @@ export function ExtensionActions({
           // eslint-disable-next-line @raycast/prefer-title-case
           title={toggles.showMacOS ? "Hide macOS-only Extensions" : "Show macOS-only Extensions"}
           icon={{ source: "platform-macos.svg", tintColor: MACOS_TINT_COLOR }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "m" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "m" },
+          }}
           onAction={onToggleMacOS}
         />
         <Action
           // eslint-disable-next-line @raycast/prefer-title-case
           title={toggles.showWindows ? "Hide Windows-only Extensions" : "Show Windows-only Extensions"}
           icon={{ source: "platform-windows.svg", tintColor: WINDOWS_TINT_COLOR }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "w" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "w" },
+          }}
           onAction={onToggleWindows}
         />
       </ActionPanel.Section>
