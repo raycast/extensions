@@ -1,6 +1,6 @@
 # Wispr Flow Changelog
 
-## [Add Windows Support] - {PR_MERGE_DATE}
+## [Add Windows Support] - 2026-04-30
 
 ### Platform Support
 - Added Windows
