@@ -1,6 +1,6 @@
 # WooCommerce Quicker Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-04-30
 
 - Search and filter WooCommerce orders by status
 - Search customers by name, email, or role
