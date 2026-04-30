@@ -287,6 +287,7 @@ export default function Command(props: LaunchProps) {
               <Action.CreateQuicklink
                 title={`Create Quicklink to Convert to ${props.case}`}
                 quicklink={{ name: `Convert to ${props.case}`, link: deeplink }}
+                shortcut={Keyboard.Shortcut.Common.CopyPath}
               />
             </ActionPanel.Section>
             <ActionPanel.Section>
