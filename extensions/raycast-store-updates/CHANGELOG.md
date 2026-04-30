@@ -1,6 +1,6 @@
 # Raycast Store Updates Changelog
 
-## [Add platform filter shortcuts] - {PR_MERGE_DATE}
+## [Add platform filter shortcuts] - 2026-04-30
 
 - Add keyboard shortcuts for toggling macOS-only and Windows-only extension filters
 - Add keyboard shortcut for opening extensions in the Raycast Store
