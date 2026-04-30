@@ -36,6 +36,7 @@ export default function TimeEntry(
         mode="entry"
         submitLabel="Update Entry"
         endTimeRequired
+        entryDate={entry.date}
         loadInitialValues={async () => ({
           projectId: entry.project ? String(entry.project.id) : undefined,
           taskId: entry.task ? String(entry.task.id) : undefined,
@@ -75,6 +76,7 @@ export default function TimeEntry(
     <TimerForm
       apiToken={apiToken}
       mode="entry"
+      entryDate={today}
       loadInitialValues={async () => ({ projectId, taskId, note })}
       onSubmit={async ({
         taskId: tid,

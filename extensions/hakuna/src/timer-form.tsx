@@ -1,13 +1,8 @@
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useState, useEffect, useRef, ReactNode, useMemo } from "react";
 import { usePromise, useCachedPromise } from "@raycast/utils";
-import {
-  HakunaClient,
-  Project,
-  Task,
-  CompanyResponse,
-  formatDuration,
-} from "./hakuna-api";
+import { HakunaClient, Project, Task, CompanyResponse } from "./hakuna-api";
+import { formatDuration } from "./duration";
 
 export interface TimerFormInitialValues {
   projectId?: string;
@@ -24,6 +19,7 @@ interface Props {
     timer: HakunaClient,
   ) => Promise<TimerFormInitialValues | undefined>;
   timerDate?: string;
+  entryDate?: string;
   onSubmit: (values: {
     taskId: string;
     projectId?: string;
@@ -120,6 +116,7 @@ export default function TimerForm({
   mode,
   loadInitialValues,
   timerDate,
+  entryDate,
   onSubmit,
   extraActions,
   submitLabel,
@@ -143,6 +140,12 @@ export default function TimerForm({
   );
   const projectsEnabled = company?.projects_enabled ?? false;
   const durationFormat = company?.duration_format ?? "hhmm";
+
+  const { data: runningTimer } = useCachedPromise(
+    (token: string) => new HakunaClient(token).getTimer(),
+    [apiToken],
+    { execute: mode === "entry" },
+  );
 
   useEffect(() => {
     const pStart = parseTime(startTime);
@@ -345,6 +348,35 @@ export default function TimerForm({
           ? "Minutes cannot exceed 60"
           : "Invalid time (e.g. 17:30)";
     }
+    if (
+      entryDate &&
+      runningTimer &&
+      runningTimer.date === entryDate &&
+      !errors.startTime &&
+      !errors.endTime
+    ) {
+      const timerStart = parseTime(runningTimer.start_time.slice(0, 5));
+      if (timerStart) {
+        const [th, tm] = timerStart.split(":").map(Number);
+        const timerStartMins = th * 60 + tm;
+        const pStart = parseTime(startTime);
+        if (pStart) {
+          const [sh, sm] = pStart.split(":").map(Number);
+          if (sh * 60 + sm >= timerStartMins) {
+            errors.startTime = `Must be before running timer (started ${timerStart})`;
+          }
+        }
+        if (!errors.startTime) {
+          const pEnd = parseTime(endTime);
+          if (pEnd) {
+            const [eh, em] = pEnd.split(":").map(Number);
+            if (eh * 60 + em > timerStartMins) {
+              errors.endTime = `Must end by ${timerStart} (timer is running)`;
+            }
+          }
+        }
+      }
+    }
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
       return;
@@ -353,8 +385,8 @@ export default function TimerForm({
     await onSubmit({
       taskId: selectedTaskId,
       projectId: projectsEnabled ? selectedProjectId || undefined : undefined,
-      startTime: startTime || undefined,
-      endTime: endTime || undefined,
+      startTime: parseTime(startTime) ?? undefined,
+      endTime: parseTime(endTime) ?? undefined,
       note,
     });
   }
@@ -362,9 +394,20 @@ export default function TimerForm({
   return (
     <Form
       isLoading={isLoading}
+      searchBarAccessory={
+        <Form.LinkAccessory
+          target="https://app.hakuna.ch"
+          text="Open In Browser"
+        />
+      }
       actions={
         <ActionPanel>
           <Action.SubmitForm title={submitTitle} onSubmit={handleSubmit} />
+          <Action.OpenInBrowser
+            title="Open in Browser"
+            url="https://app.hakuna.ch"
+            shortcut={{ modifiers: ["cmd"], key: "o" }}
+          />
           {extraActions}
         </ActionPanel>
       }

@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { AbsenceResponse, HakunaClient } from "./hakuna-api";
+import { formatDuration } from "./duration";
 
 function absenceMenuIcon(absence: AbsenceResponse) {
   if (absence.absence_type.is_vacation) return Icon.AirplaneTakeoff;
@@ -36,13 +37,23 @@ export default function Command() {
     return await timer.getOverview();
   });
 
+  const { data: company } = useCachedPromise(async () => {
+    return await timer.getCompany();
+  });
+
   const {
-    data: worktime,
+    data: worktimeSeconds,
     isLoading: isLoadingWorktime,
     mutate: mutateWorktime,
   } = useCachedPromise(async () => {
-    return await timer.getWorktime();
+    return await timer.getWorktimeSeconds();
   });
+
+  const durationFormat = company?.duration_format ?? "hhmm";
+  const worktime =
+    worktimeSeconds != null
+      ? formatDuration(worktimeSeconds, durationFormat)
+      : undefined;
 
   const {
     data: activeTimer,
@@ -143,28 +154,32 @@ export default function Command() {
       isLoading={isLoading}
       tooltip="Hakuna Overview"
     >
-      <MenuBarExtra.Section title="Time">
+      <MenuBarExtra.Section title="Timer">
         {activeTimer ? (
           <>
             <MenuBarExtra.Item
-              title="Stop Timer"
-              subtitle={
-                activeTimer.start_time
-                  ? `Started at ${activeTimer.start_time}`
-                  : undefined
-              }
-              icon={Icon.Stop}
-              onAction={handleStopTimer}
-            />
-            <MenuBarExtra.Item
-              title="Edit Timer"
-              icon={Icon.Pencil}
+              title={activeTimer.task?.name ?? "Timer"}
+              subtitle={activeTimer.project?.name}
               onAction={async () => {
                 await launchCommand({
                   name: "timer",
                   type: LaunchType.UserInitiated,
                 });
               }}
+            />
+            <MenuBarExtra.Item
+              title="Stop Timer"
+              subtitle={(() => {
+                if (!activeTimer.start_time) return undefined;
+                const [h, m] = activeTimer.start_time.split(":").map(Number);
+                const start = new Date();
+                start.setHours(h, m, 0, 0);
+                return start > new Date()
+                  ? `Starts at ${activeTimer.start_time}`
+                  : `Started at ${activeTimer.start_time}`;
+              })()}
+              icon={Icon.Stop}
+              onAction={handleStopTimer}
             />
             <MenuBarExtra.Item
               title="Cancel Timer"
@@ -283,24 +298,13 @@ export default function Command() {
           }}
         />
         <MenuBarExtra.Item
-          title="Vacation Remaining"
+          title="Vacation"
           subtitle={
-            overview ? `${overview.vacation.remaining_days} days` : "0 days"
+            overview
+              ? `${overview.vacation.remaining_days} of ${overview.vacation.redeemed_days + overview.vacation.remaining_days} available, ${overview.vacation.redeemed_days} taken`
+              : undefined
           }
           icon={Icon.Calendar}
-          onAction={async () => {
-            await launchCommand({
-              name: "profile",
-              type: LaunchType.UserInitiated,
-            });
-          }}
-        />
-        <MenuBarExtra.Item
-          title="Vacation Redeemed"
-          subtitle={
-            overview ? `${overview.vacation.redeemed_days} days` : "0 days"
-          }
-          icon={Icon.Checkmark}
           onAction={async () => {
             await launchCommand({
               name: "profile",

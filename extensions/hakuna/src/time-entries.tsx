@@ -12,7 +12,8 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { HakunaClient, TimerResponse, formatDuration } from "./hakuna-api";
+import { HakunaClient, TimerResponse } from "./hakuna-api";
+import { parseDurationToSeconds, formatDuration } from "./duration";
 import { ProjectsList } from "./projects";
 import { getSettings } from "./settings";
 import Timer from "./timer";
@@ -27,11 +28,6 @@ function offsetDate(date: string, days: number): string {
   const d = new Date(date + "T00:00:00");
   d.setDate(d.getDate() + days);
   return d.toISOString().split("T")[0];
-}
-
-function parseDurationToSeconds(duration: string): number {
-  const parts = duration.split(":").map(Number);
-  return (parts[0] ?? 0) * 3600 + (parts[1] ?? 0) * 60 + (parts[2] ?? 0);
 }
 
 function sumDurations(

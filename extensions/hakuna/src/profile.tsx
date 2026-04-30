@@ -14,8 +14,8 @@ import {
   OverviewResponse,
   CompanyResponse,
   UserResponse,
-  formatDuration,
 } from "./hakuna-api";
+import { formatOvertime } from "./duration";
 import { getSettings } from "./settings";
 import AbsencesCommand from "./absences";
 
@@ -32,11 +32,6 @@ function overtimeIcon(seconds: number): { source: Icon; tintColor: string } {
         : Color.Red
       : Color.SecondaryText;
   return { source, tintColor };
-}
-
-function formatOvertime(seconds: number, durationFormat: string): string {
-  const sign = seconds < 0 ? "−" : "";
-  return sign + formatDuration(Math.abs(seconds), durationFormat);
 }
 
 function ToggleInactiveAction({

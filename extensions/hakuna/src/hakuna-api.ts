@@ -46,18 +46,6 @@ export interface CompanyResponse {
   groups_enabled: boolean;
 }
 
-export function formatDuration(
-  totalSeconds: number,
-  durationFormat: string,
-): string {
-  if (durationFormat === "decimal") {
-    return `${(totalSeconds / 3600).toFixed(2)} h`;
-  }
-  const h = Math.floor(totalSeconds / 3600);
-  const m = Math.floor((totalSeconds % 3600) / 60);
-  return `${h}:${m.toString().padStart(2, "0")}`;
-}
-
 export interface Task {
   id: number;
   name: string;
@@ -236,7 +224,7 @@ export class HakunaClient {
     }
   }
 
-  async getWorktime(): Promise<string> {
+  async getWorktimeSeconds(): Promise<number> {
     const today = new Date().toISOString().split("T")[0];
     const entriesUrl = `/time_entries?start_date=${today}&end_date=${today}`;
     const timerUrl = "/timer";
@@ -255,15 +243,11 @@ export class HakunaClient {
         0,
       );
 
-      // Add duration of active timer if exists
       if (activeTimer && activeTimer.duration_in_seconds) {
         totalSeconds += activeTimer.duration_in_seconds;
       }
 
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-
-      return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
+      return totalSeconds;
     } catch (error) {
       this.handleApiError(error);
     }
