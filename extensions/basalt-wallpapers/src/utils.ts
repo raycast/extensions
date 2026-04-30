@@ -1,4 +1,5 @@
 import fs from "fs";
+import crypto from "crypto";
 import path from "path";
 import { environment } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
@@ -44,27 +45,77 @@ export function getThumbnailUrl(
   return url;
 }
 
-export async function setDesktopWallpaper(url: string) {
+function getCachedWallpaperPath(url: string, id?: string) {
+  const extension = path.extname(new URL(url).pathname) || ".jpg";
+  const cacheKey = id || crypto.createHash("sha1").update(url).digest("hex");
+  return path.join(environment.supportPath, `${cacheKey}${extension}`);
+}
+
+function pruneWallpaperCache(keepFilePath: string) {
+  const maxFiles = 20;
+  const files = fs
+    .readdirSync(environment.supportPath)
+    .map((file) => path.join(environment.supportPath, file))
+    .filter(
+      (filePath) => filePath !== keepFilePath && fs.statSync(filePath).isFile(),
+    )
+    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+
+  for (const filePath of files.slice(maxFiles - 1)) {
+    fs.unlinkSync(filePath);
+  }
+}
+
+function getAvailableDownloadPath(filePath: string) {
+  if (!fs.existsSync(filePath)) return filePath;
+
+  const parsedPath = path.parse(filePath);
+  let index = 2;
+  let nextPath = path.join(
+    parsedPath.dir,
+    `${parsedPath.name}-${index}${parsedPath.ext}`,
+  );
+
+  while (fs.existsSync(nextPath)) {
+    index += 1;
+    nextPath = path.join(
+      parsedPath.dir,
+      `${parsedPath.name}-${index}${parsedPath.ext}`,
+    );
+  }
+
+  return nextPath;
+}
+
+export async function setDesktopWallpaper(url: string, id?: string) {
   const tempDir = environment.supportPath;
   if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
   }
 
-  const filename = path.basename(new URL(url).pathname);
-  const filePath = path.join(tempDir, filename);
+  const filePath = getCachedWallpaperPath(url, id);
 
-  const response = await fetch(url);
-  if (!response.ok) throw new Error("Failed to download image");
+  if (!fs.existsSync(filePath)) {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error("Failed to download image");
 
-  const arrayBuffer = await response.arrayBuffer();
-  const buffer = new Uint8Array(arrayBuffer);
-  fs.writeFileSync(filePath, buffer);
+    const arrayBuffer = await response.arrayBuffer();
+    const buffer = new Uint8Array(arrayBuffer);
+    fs.writeFileSync(filePath, buffer);
+  }
+
+  fs.utimesSync(filePath, new Date(), new Date());
+  pruneWallpaperCache(filePath);
 
   const script = `tell application "System Events" to tell every desktop to set picture to "${filePath}"`;
   await runAppleScript(script);
 }
 
-export async function downloadWallpaper(url: string, name: string) {
+export async function downloadWallpaper(
+  url: string,
+  name: string,
+  id?: string,
+) {
   const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to download image");
 
@@ -85,7 +136,10 @@ export async function downloadWallpaper(url: string, name: string) {
 
   // Sanitize filename
   const safeName = name.replace(/[^a-z0-9]/gi, "_");
-  const filePath = path.join(downloadsDir, `${safeName}${extension}`);
+  const fileName = id ? `${safeName}_${id}` : safeName;
+  const filePath = getAvailableDownloadPath(
+    path.join(downloadsDir, `${fileName}${extension}`),
+  );
 
   fs.writeFileSync(filePath, buffer);
   return filePath;
