@@ -1,6 +1,6 @@
 # Kagi Search Changelog
 
-## [1.2.5] - {PR_MERGE_DATE}
+## [1.2.5] - 2026-04-30
 * Fix crash when corrupted null value in history storage
 
 ## [1.2.4] - 2026-02-06
