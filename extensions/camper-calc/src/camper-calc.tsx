@@ -169,20 +169,20 @@ export default function Command() {
         void showToast(Toast.Style.Failure, "Invalid data format");
         return;
       }
-    const migratedExpenses = migrateExpenses(parsed.expenses);
-    const confirmed = await confirmAlert({
-      title: "Replace all data?",
-      message: `This will replace all current data with ${migratedExpenses.length} imported expenses. This cannot be undone.`,
-      primaryAction: {
-        title: "Import",
-        style: Alert.ActionStyle.Destructive,
-      },
-    });
-    if (!confirmed) return;
-    setExpenses(migratedExpenses);
-    setUsageDays(parsed.usageDays || []);
-    await saveData(migratedExpenses, parsed.usageDays || []);
-    void showToast(Toast.Style.Success, "Data imported", `${migratedExpenses.length} expenses loaded`);
+      const migratedExpenses = migrateExpenses(parsed.expenses);
+      const confirmed = await confirmAlert({
+        title: "Replace all data?",
+        message: `This will replace all current data with ${migratedExpenses.length} imported expenses. This cannot be undone.`,
+        primaryAction: {
+          title: "Import",
+          style: Alert.ActionStyle.Destructive,
+        },
+      });
+      if (!confirmed) return;
+      setExpenses(migratedExpenses);
+      setUsageDays(parsed.usageDays || []);
+      await saveData(migratedExpenses, parsed.usageDays || []);
+      void showToast(Toast.Style.Success, "Data imported", `${migratedExpenses.length} expenses loaded`);
     } catch (e) {
       console.error(e);
       void showToast(Toast.Style.Failure, "Import failed", "Invalid JSON data");
