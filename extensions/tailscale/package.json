@@ -138,6 +138,7 @@
     {
       "name": "menubar",
       "title": "Menu Bar Tailscale",
+      "subtitle": "Tailscale",
       "description": "Shows Tailscale connection status in the menu bar when connected",
       "mode": "menu-bar",
       "interval": "10s",
