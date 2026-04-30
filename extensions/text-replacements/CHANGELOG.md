@@ -1,6 +1,6 @@
 # Text Replacement Changelog
 
-## [Manage Text Replacements] - {PR_MERGE_DATE}
+## [Manage Text Replacements] - 2026-04-30
 
 - Add new "Manage Text Replacements" command to search, copy, add, edit, and delete replacements
 - Copy or paste any expansion directly from Raycast
