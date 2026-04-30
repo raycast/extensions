@@ -1,6 +1,6 @@
 # Arc Changelog
 
-## [Performance Improvement] - {PR_MERGE_DATE}
+## [Performance Improvement] - 2026-04-30
 
 - Replace manual tab iteration loop with AppleScript `whose` filter for direct tab lookup, improving responsiveness with many open tabs
 
