@@ -1,21 +1,16 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  getPreferenceValues,
-  Icon,
-  List,
-  openCommandPreferences,
-  type PreferenceValues,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, getPreferenceValues, Icon, List, openCommandPreferences } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { useDocDetail } from "./hooks/useDocDetail";
 import { useInventory } from "./hooks/useInventory";
 import { type DocDetail, buildMarkdown } from "./lib/doc-detail";
-import { type DocumentationSourceMode } from "./lib/docs-source";
+// `DocumentationSourceMode` is not needed here; preferences are typed via
+// the generated `Preferences` in `raycast-env.d.ts`.
 import { type InventoryItem } from "./lib/inventory";
 import { applyPrefixPreference } from "./lib/prefix";
 import { searchInventory } from "./lib/search";
+
+// `Preferences` is generated at runtime in `raycast-env.d.ts` from `package.json`.
+// Do not manually declare it here to avoid drift with the manifest.
 
 type DetailRenderState = {
   detail?: DocDetail;
@@ -28,7 +23,8 @@ const RECOVERY_ITEM_ID = "__recovery__";
 export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [selectedId, setSelectedId] = useState<string | undefined>(undefined);
-  const preferences = getPreferenceValues<PreferenceValues>();
+  const preferences = getPreferenceValues<Preferences>();
+  const documentationSourceMode = preferences.documentationSourceMode ?? "online";
 
   const {
     data: inventory = [],
@@ -38,8 +34,8 @@ export default function Command() {
     revalidate: revalidateInventory,
     source: inventorySource,
   } = useInventory({
-    localDocsDirectory: preferences.localDocsDirectory as string | undefined,
-    mode: preferences.documentationSourceMode as DocumentationSourceMode,
+    localDocsDirectory: preferences.localDocsDirectory,
+    mode: documentationSourceMode,
   });
 
   const results = useMemo(() => searchInventory(inventory, searchText), [inventory, searchText]);
@@ -80,8 +76,8 @@ export default function Command() {
   } = useDocDetail({
     inventorySource,
     item: selectedItem,
-    localDocsDirectory: preferences.localDocsDirectory as string | undefined,
-    mode: preferences.documentationSourceMode as DocumentationSourceMode,
+    localDocsDirectory: preferences.localDocsDirectory,
+    mode: documentationSourceMode,
   });
 
   const listIsLoading = isLoadingInventory;

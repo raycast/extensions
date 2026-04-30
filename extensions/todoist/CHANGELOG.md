@@ -1,5 +1,14 @@
 # Todoist Changelog
 
+## [Scheduling, repeat options, and sync reliability] - 2026-04-30
+
+- **Set Repeat** in task actions: presets plus search (e.g. `every 2 days`), and an option to clear repeat.
+- **Pick date**: when you set a **due time** (not an all-day date), the extension can add Todoist’s **“at time of task”** relative reminder if you don’t already have one; **hourly** repeat rules get the same treatment.
+- **Accurate list after edits**: Todoist sync results merge onto the **latest** cached data so chained updates (e.g. due then reminder) don’t leave wrong or missing icons until you restart.
+- **Clear due date**: clearing the due date also applies **reminder** changes from the server so the alarm accessory matches Todoist.
+- **Complete recurring tasks**: completing uses the sync response so the **next occurrence** appears instead of the task vanishing until a full reload.
+- **Task details**: shows **Repeat** details when the task is recurring.
+
 ## [Fix group and sort actions in filter views] - 2026-04-27
 
 - In **My Tasks**, when a custom Todoist filter is selected, **Group tasks by** and **Sort tasks by** now update the list (they were previously no-ops because the UI ignored grouped/sorted output for filters).

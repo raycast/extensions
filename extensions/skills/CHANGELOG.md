@@ -3,6 +3,10 @@
 ## [Add Repository Shortcut] - {PR_MERGE_DATE}
 
 - Add a keyboard shortcut to open a skill's repository from the action panel
+- 
+## [Fix Windows bunx Fallback] - 2026-04-30
+
+- Fix the Skills CLI throwing `'"bunx"' is not recognized as an internal or external command` on Windows when Bun is not installed; the extension now correctly falls back to `npx` as intended
 
 ## [Add bunx support] - 2026-04-28
 
