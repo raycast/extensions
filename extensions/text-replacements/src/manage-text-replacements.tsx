@@ -52,7 +52,8 @@ function sqlEscape(s: string): string {
   return `'${s.replace(/'/g, "''")}'`;
 }
 
-function hasActiveShortcut(phrase: string): boolean {
+function hasActiveShortcut(phrase: string, excludeDbPK?: number): boolean {
+  const excludeClause = excludeDbPK === undefined ? "" : ` AND Z_PK != ${excludeDbPK}`;
   const result = execFileSync(
     "/usr/bin/sqlite3",
     [
@@ -60,6 +61,7 @@ function hasActiveShortcut(phrase: string): boolean {
       DB_PATH,
       `SELECT 1 FROM ZTEXTREPLACEMENTENTRY
        WHERE ZSHORTCUT=${sqlEscape(phrase)}
+         ${excludeClause}
          AND (ZWASDELETED = 0 OR ZWASDELETED IS NULL)
        LIMIT 1;`,
     ],
@@ -112,6 +114,10 @@ COMMIT;`;
 }
 
 function updateReplacement(dbPK: number, phrase: string, replacement: string): void {
+  if (hasActiveShortcut(phrase, dbPK)) {
+    throw new Error("A replacement with that shortcut already exists.");
+  }
+
   execFileSync(
     "/usr/bin/sqlite3",
     [
