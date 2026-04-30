@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Add Repository Shortcut] - {PR_MERGE_DATE}
+## [Add Repository Shortcut] - 2026-04-30
 
 - Add a keyboard shortcut to open a skill's repository from the action panel
 - 
