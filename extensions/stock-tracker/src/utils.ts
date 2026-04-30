@@ -1,13 +1,14 @@
 import { Color, Icon } from "@raycast/api";
 
+const MAGNITUDE_SUFFIXES = ["", "k", "M", "B", "T"];
+
 export function formatMoney(value?: number, currency?: string) {
   if (value === undefined || value === null || Number.isNaN(value)) {
     return "—";
   }
 
-  const magnitude = Math.floor(Math.log10(Math.max(Math.abs(value), 1)) / 3);
-  const suffices = ["", "k", "M", "B", "T"];
-  const suffix = suffices[magnitude];
+  const magnitude = Math.min(Math.floor(Math.log10(Math.max(Math.abs(value), 1)) / 3), MAGNITUDE_SUFFIXES.length - 1);
+  const suffix = MAGNITUDE_SUFFIXES[magnitude];
   const scaledValue = value / Math.pow(10, magnitude * 3);
   let strValue = scaledValue.toFixed(2);
   if (currency) {

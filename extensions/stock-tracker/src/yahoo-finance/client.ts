@@ -125,6 +125,9 @@ async function getCrumb(cookie: string, signal: AbortSignal): Promise<string> {
     headers: { cookie, ...HEADERS },
     signal,
   });
+  if (!response.ok) {
+    throw new Error(`Failed to fetch crumb: ${response.status} ${response.statusText}`);
+  }
   const crumb = await response.text();
   if (!crumb) {
     throw new Error("Failed to fetch crumb");
