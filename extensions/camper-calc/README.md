@@ -4,7 +4,7 @@
 
 Calculate the real cost of your camper van per day of use – including residual value, yearly breakdown, and category analysis.
 
-![Camper-Calc](metadata/hero.png)
+![Camper-Calc](metadata/camper-calc-1.png)
 
 ---
 
