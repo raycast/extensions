@@ -58,8 +58,8 @@ export default function main() {
         }
       }
 
-      const docsRepository = parsed as ScriptItem[]
-      return docsRepository
+      const scripts = parsed as ScriptItem[]
+      return scripts
     },
     [],
     {
@@ -104,14 +104,21 @@ function renderListItems(items: ScriptItem[], revalidateScripts: () => void) {
               onAction={async () => {
                 const preferences = getPreferenceValues()
 
+                // NOTE: we sanitize the script id to avoid Lua syntax errors caused by double-quotes or escape sensitive characters
                 try {
                   const output = await runAppleScript(
                     `
                     ;(() => {
                       const app = Application('Hammerspoon')
                       const output = app.executeLuaCode(\`
+                        local ok, sanitizedId = pcall(function() return hs.json.decode('${JSON.stringify(item.id)}') end)
+
+                        if not ok then
+                          return hs.json.encode({ error = "Failed to decode script id" })
+                        end
+
                         if ${preferences.scriptsVariableName} and type(${preferences.scriptsVariableName}.execute) == 'function' then
-                          ${preferences.scriptsVariableName}.execute("${item.id}")
+                          ${preferences.scriptsVariableName}.execute(sanitizedId)
                           return
                         end
 
