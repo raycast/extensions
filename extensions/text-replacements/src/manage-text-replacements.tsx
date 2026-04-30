@@ -208,11 +208,12 @@ function ReplacementForm({ initial, onSave }: { initial?: Replacement; onSave: (
         insertReplacement(phrase, replacement);
       }
       notifySystem();
-      onSave();
       await showToast({ style: Toast.Style.Success, title: initial ? "Replacement updated" : "Replacement added" });
       pop();
     } catch (error) {
       showFailureToast(error, { title: "Failed to save replacement" });
+    } finally {
+      onSave();
     }
   }
 
