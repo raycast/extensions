@@ -31,7 +31,20 @@ export class KeeplyApi {
   }
 
   async listBookmarks(): Promise<Bookmark[]> {
-    return this.request("/bookmarks");
+    const first = await this.request<{ data: Bookmark[]; total: number; limit: number }>("/bookmarks?limit=500");
+    const bookmarks = [...first.data];
+
+    if (first.total > first.limit) {
+      const totalPages = Math.ceil(first.total / first.limit);
+      const pages = await Promise.all(
+        Array.from({ length: totalPages - 1 }, (_, i) =>
+          this.request<{ data: Bookmark[] }>(`/bookmarks?limit=500&page=${i + 2}`),
+        ),
+      );
+      bookmarks.push(...pages.flatMap((r) => r.data));
+    }
+
+    return bookmarks;
   }
 
   async createBookmark(payload: CreateBookmarkPayload): Promise<Bookmark> {
