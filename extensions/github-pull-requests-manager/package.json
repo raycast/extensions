@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "github-pull-requests-manager",
+  "title": "GitHub Enterprise Pull Requests Manager",
+  "description": "Manage GitHub Enterprise pull requests with a focused workflow — track approvals, comments, conflicts, CI status, and review requests. Also supports GitHub.com.",
+  "icon": "extension-icon.png",
+  "author": "mickaelalvs",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "githubEnterpriseUrl",
+      "title": "GitHub URL",
+      "description": "Base URL of your GitHub instance. Use https://github.com for GitHub.com or your enterprise URL (e.g. https://github.mycompany.com).",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://github.com"
+    },
+    {
+      "name": "githubToken",
+      "title": "Personal Access Token",
+      "description": "GitHub personal access token with repo and read:org scopes",
+      "type": "password",
+      "required": true,
+      "placeholder": "ghp_xxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "filterLabel",
+      "title": "Filter by Label",
+      "description": "Only show pull requests with at least one of these labels in Wait For Review. Separate multiple labels with commas. Leave empty to show all.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "my-team, 🚀 feature"
+    }
+  ],
+  "commands": [
+    {
+      "name": "my-pull-requests",
+      "title": "All Pull Requests",
+      "subtitle": "GitHub",
+      "description": "All your GitHub Enterprise pull requests — My PRs and review requests in one view.",
+      "mode": "view"
+    },
+    {
+      "name": "my-prs",
+      "title": "My Pull Requests",
+      "subtitle": "GitHub",
+      "description": "Pull requests you authored or are assigned to — track approvals and CI status.",
+      "mode": "view"
+    },
+    {
+      "name": "reviewing",
+      "title": "Reviewing",
+      "subtitle": "GitHub",
+      "description": "Pull requests where you are requested as a reviewer.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
