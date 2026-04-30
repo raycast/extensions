@@ -1,15 +1,17 @@
-import { showHUD, showToast, Toast, openExtensionPreferences } from "@raycast/api";
-import { TTSApiError } from "./api/minimax-tts";
+import { showHUD } from "@raycast/api";
 import { clearExternalStopRequest, stopExternalPlayback } from "./utils/audio-player";
 import { getReadableText } from "./utils/text-source";
 import { prepareReadingSession } from "./utils/reading-session";
 import { playReadingSession } from "./utils/reading-runner";
 import { buildDefaultOptionsFromPrefs } from "./utils/voice-preferences";
+import { presentCommandError, showResumeSuggestion } from "./utils/errors";
+import { clearPlaybackState, readPlaybackState } from "./utils/playback-state";
 
 export default async function QuickRead() {
-  // Toggle: if our afplay is already running, stop it and return
+  // Toggle: if our afplay is already running, stop it and return.
   const wasPlaying = stopExternalPlayback();
   if (wasPlaying) {
+    await clearPlaybackState();
     await showHUD("Stopped");
     return;
   }
@@ -19,7 +21,20 @@ export default async function QuickRead() {
   try {
     const readableText = await getReadableText();
     if (!readableText) {
-      await showHUD("No selected text or clipboard text");
+      const lastState = await readPlaybackState();
+      const lastSessionAvailable = lastState && (lastState.phase === "stopped" || lastState.phase === "playing");
+
+      if (lastSessionAvailable) {
+        await showResumeSuggestion(
+          "Nothing to read",
+          "Select text in the foreground app or copy it to the clipboard, then trigger Quick Read again.",
+        );
+      } else {
+        await showResumeSuggestion(
+          "Nothing to read",
+          "Select text in the foreground app or copy it to the clipboard. You can also resume your last reading.",
+        );
+      }
       return;
     }
 
@@ -27,20 +42,6 @@ export default async function QuickRead() {
     const { session, isResuming } = await prepareReadingSession(readableText.text, readableText.source, options);
     await playReadingSession(session, isResuming);
   } catch (error) {
-    if (error instanceof TTSApiError) {
-      if (error.code === -1) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Configuration Required",
-          message: error.message,
-          primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
-        });
-        return;
-      }
-      await showHUD(`TTS error: ${error.message}`);
-      return;
-    }
-
-    await showHUD(`Error: ${error instanceof Error ? error.message : String(error)}`);
+    await presentCommandError(error, "Failed to read selection");
   }
 }

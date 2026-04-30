@@ -26,12 +26,17 @@ export class AudioPlayer {
 
       writePidFile(myPid);
 
-      proc.on("close", (code) => {
+      proc.on("close", (code, signal) => {
         this.currentProcess = null;
         removePidFileIfMatch(myPid);
         this.cleanupFile(tempPath);
 
-        if (this.stopped || code === 0 || code === null) {
+        // External stop (SIGTERM via stopExternalPlayback) leaves a STOP_FILE
+        // behind. Treat that as a graceful stop instead of throwing, so the
+        // outer command doesn't surface a confusing "afplay exited with code N".
+        const externallyStopped = signal === "SIGTERM" || existsSync(STOP_FILE);
+
+        if (this.stopped || code === 0 || code === null || externallyStopped) {
           resolve();
         } else {
           reject(new Error(`afplay exited with code ${code}`));

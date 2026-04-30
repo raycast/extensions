@@ -1,17 +1,16 @@
-import { showHUD, showToast, Toast, openExtensionPreferences } from "@raycast/api";
-import { TTSApiError } from "./api/minimax-tts";
+import { showHUD } from "@raycast/api";
 import { clearExternalStopRequest, stopExternalPlayback } from "./utils/audio-player";
 import { getLastReadingSession, updateReadingProgress } from "./utils/reading-session";
 import { playReadingSession } from "./utils/reading-runner";
+import { presentCommandError } from "./utils/errors";
+import { clearPlaybackState } from "./utils/playback-state";
 
 export default async function ResumeReading() {
-  const wasPlaying = stopExternalPlayback();
-  if (wasPlaying) {
-    await showHUD("Stopped");
-    return;
-  }
-
+  // Resume always resumes. If something is already playing, stop it first
+  // so the resumed playback can take over without a confusing "Stopped" toggle.
+  stopExternalPlayback();
   clearExternalStopRequest();
+  await clearPlaybackState();
 
   try {
     let session = await getLastReadingSession();
@@ -26,20 +25,6 @@ export default async function ResumeReading() {
 
     await playReadingSession(session, session.nextChunkIndex > 0);
   } catch (error) {
-    if (error instanceof TTSApiError) {
-      if (error.code === -1) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Configuration Required",
-          message: error.message,
-          primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
-        });
-        return;
-      }
-      await showHUD(`TTS error: ${error.message}`);
-      return;
-    }
-
-    await showHUD(`Error: ${error instanceof Error ? error.message : String(error)}`);
+    await presentCommandError(error, "Failed to resume reading");
   }
 }

@@ -38,7 +38,10 @@ export async function prepareReadingSession(
       ...existing,
       source,
       chunks,
-      options,
+      // Preserve the session's last live speed so a user-adjusted pace
+      // survives a Quick Read re-trigger on the same text. Other knobs
+      // (voice, model, language) still pick up the latest preferences.
+      options: { ...options, speed: existing.options.speed },
       updatedAt: now,
     };
     await saveReadingSession(session);

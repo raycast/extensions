@@ -36,6 +36,20 @@ export interface MiniMaxTTSResponse {
   };
 }
 
+export interface MiniMaxFileUploadResponse {
+  file?: {
+    file_id?: number;
+    bytes?: number;
+    created_at?: number;
+    filename?: string;
+    purpose?: string;
+  };
+  base_resp?: {
+    status_code: number;
+    status_msg: string;
+  };
+}
+
 export interface VoiceListResponse {
   system_voice?: MiniMaxVoicePayload[];
   voice_cloning?: MiniMaxVoicePayload[];
@@ -64,10 +78,36 @@ export interface TTSOptions {
   bitrate: number;
 }
 
+export interface MiniMaxVoiceCloneRequest {
+  file_id: number;
+  voice_id: string;
+  text: string;
+  model: string;
+  language_boost?: string;
+  clone_prompt?: {
+    prompt_audio: number;
+    prompt_text: string;
+  };
+  need_noise_reduction?: boolean;
+  need_volume_normalization?: boolean;
+  aigc_watermark?: boolean;
+}
+
+export interface MiniMaxVoiceCloneResponse {
+  input_sensitive?: boolean;
+  input_sensitive_type?: number;
+  demo_audio?: string;
+  base_resp?: {
+    status_code: number;
+    status_msg: string;
+  };
+}
+
 export interface VoiceConfig {
   id: string;
   name: string;
   category: string;
   description?: string;
   gender?: "female" | "male" | "unknown";
+  isCustom?: boolean;
 }

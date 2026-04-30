@@ -91,6 +91,43 @@ export function groupVoicesByCategory(voices: VoiceConfig[]): Array<[string, Voi
   return Array.from(groups.entries());
 }
 
+export function collectCustomVoiceIds(
+  customDefaultVoice?: string,
+  customVoiceIds?: string,
+  ...extraVoiceIds: Array<string | null | undefined>
+): string[] {
+  const seen = new Set<string>();
+  const voiceIds: string[] = [];
+
+  for (const voiceId of [customDefaultVoice, ...parseCustomVoiceIds(customVoiceIds), ...extraVoiceIds]) {
+    const trimmed = voiceId?.trim();
+    if (!trimmed || seen.has(trimmed)) continue;
+    seen.add(trimmed);
+    voiceIds.push(trimmed);
+  }
+
+  return voiceIds;
+}
+
+export function addCustomVoices(voices: VoiceConfig[], customVoiceIds: string[]): VoiceConfig[] {
+  if (customVoiceIds.length === 0) return voices;
+
+  const existingVoiceIds = new Set(voices.map((voice) => voice.id));
+  const customVoices: VoiceConfig[] = customVoiceIds
+    .filter((voiceId) => !existingVoiceIds.has(voiceId))
+    .map((voiceId) => ({
+      id: voiceId,
+      name: voiceId,
+      category: "Custom",
+      gender: "unknown",
+      isCustom: true,
+    }));
+
+  // Surface custom voices first so the IDs the user explicitly added land at
+  // the top of the picker rather than under every MiniMax category.
+  return customVoices.length > 0 ? [...customVoices, ...voices] : voices;
+}
+
 function normalizeVoiceGroup(voices: MiniMaxVoicePayload[] | undefined, fallbackCategory: string): VoiceConfig[] {
   if (!voices) return [];
 
@@ -106,6 +143,14 @@ function normalizeVoiceGroup(voices: MiniMaxVoicePayload[] | undefined, fallback
         gender: detectGender(`${voice.voice_name || ""} ${description || ""} ${voice.voice_id}`),
       };
     });
+}
+
+function parseCustomVoiceIds(rawVoiceIds: string | undefined): string[] {
+  if (!rawVoiceIds) return [];
+  return rawVoiceIds
+    .split(/[,;，；\n\r]+/u)
+    .map((voiceId) => voiceId.trim())
+    .filter(Boolean);
 }
 
 function detectCategory(voiceId: string, fallbackCategory: string): string {

@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "minimax-tts",
   "title": "MiniMax TTS",
-  "description": "Read selected text aloud using MiniMax Speech 2.8 with Chinese, English, and cloned voices",
+  "description": "Read selected text aloud with MiniMax TTS. Supports Chinese, English, and your own cloned voices.",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [
@@ -50,20 +50,79 @@
       "mode": "view"
     },
     {
+      "name": "clone-voice",
+      "title": "Clone Voice",
+      "subtitle": "MiniMax TTS",
+      "description": "Upload audio and create a cloned MiniMax voice",
+      "mode": "view"
+    },
+    {
       "name": "stop-reading",
       "title": "Stop Reading",
       "subtitle": "MiniMax TTS",
       "description": "Stop the current TTS playback",
       "mode": "no-view"
+    },
+    {
+      "name": "speed-up-reading",
+      "title": "Speed up Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Increase reading speed by 0.25× for the next segment.",
+      "mode": "no-view"
+    },
+    {
+      "name": "slow-down-reading",
+      "title": "Slow Down Reading",
+      "subtitle": "MiniMax TTS",
+      "description": "Decrease reading speed by 0.25× for the next segment.",
+      "mode": "no-view"
+    },
+    {
+      "name": "playback-status",
+      "title": "Reading Status",
+      "subtitle": "MiniMax TTS",
+      "description": "Menu-bar status of the current MiniMax TTS reading with controls",
+      "mode": "menu-bar",
+      "interval": "1m"
     }
   ],
   "preferences": [
     {
-      "name": "apiKey",
+      "name": "authMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Authentication Mode",
+      "description": "Choose which MiniMax key type to use",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto Detect (Recommended)",
+          "value": "auto"
+        },
+        {
+          "title": "Token Plan Key",
+          "value": "token-plan"
+        },
+        {
+          "title": "Open Platform API Key",
+          "value": "payg"
+        }
+      ]
+    },
+    {
+      "name": "tokenPlanKey",
       "type": "password",
-      "required": true,
-      "title": "API Key",
-      "description": "MiniMax Token Plan or API key",
+      "required": false,
+      "title": "Token Plan Key",
+      "description": "MiniMax Token Plan subscription key. Token Plan currently supports HD models only (Turbo requires the Open Platform key).",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "openPlatformApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Open Platform API Key",
+      "description": "MiniMax pay-as-you-go API key",
       "placeholder": "sk-..."
     },
     {
@@ -89,31 +148,31 @@
       "type": "dropdown",
       "required": false,
       "title": "Model",
-      "description": "MiniMax speech model",
+      "description": "Token Plan supports HD models only. Turbo models require the Open Platform API Key.",
       "default": "speech-2.8-hd",
       "data": [
         {
-          "title": "Speech 2.8 HD (Recommended)",
+          "title": "Speech 2.8 HD (Recommended, Token Plan Compatible)",
           "value": "speech-2.8-hd"
         },
         {
-          "title": "Speech 2.8 Turbo",
+          "title": "Speech 2.8 Turbo (Open Platform Only)",
           "value": "speech-2.8-turbo"
         },
         {
-          "title": "Speech 2.6 HD",
+          "title": "Speech 2.6 HD (Token Plan Compatible)",
           "value": "speech-2.6-hd"
         },
         {
-          "title": "Speech 2.6 Turbo",
+          "title": "Speech 2.6 Turbo (Open Platform Only)",
           "value": "speech-2.6-turbo"
         },
         {
-          "title": "Speech 02 HD",
+          "title": "Speech 02 HD (Token Plan Compatible)",
           "value": "speech-02-hd"
         },
         {
-          "title": "Speech 02 Turbo",
+          "title": "Speech 02 Turbo (Open Platform Only)",
           "value": "speech-02-turbo"
         }
       ]
@@ -164,9 +223,17 @@
       "name": "customDefaultVoice",
       "type": "textfield",
       "required": false,
-      "title": "Custom Default Voice ID",
-      "description": "Optional cloned or generated voice ID; overrides Default Voice",
+      "title": "Default Custom Voice ID",
+      "description": "Optional cloned or generated voice ID. Overrides Default Voice and appears in voice pickers. Get IDs from the Clone Voice command or your MiniMax dashboard.",
       "placeholder": "voice_id from MiniMax"
+    },
+    {
+      "name": "customVoiceIds",
+      "type": "textfield",
+      "required": false,
+      "title": "Extra Custom Voice IDs",
+      "description": "Comma-separated cloned or generated voice IDs to show in voice pickers (in addition to the default).",
+      "placeholder": "voice_id_1, voice_id_2"
     },
     {
       "name": "languageBoost",
@@ -211,27 +278,31 @@
       "default": "1",
       "data": [
         {
-          "title": "0.5x (Slow)",
+          "title": "0.5× (Slow)",
           "value": "0.5"
         },
         {
-          "title": "0.75x",
+          "title": "0.75×",
           "value": "0.75"
         },
         {
-          "title": "1.0x (Normal)",
+          "title": "1.0× (Normal)",
           "value": "1"
         },
         {
-          "title": "1.25x",
+          "title": "1.25×",
           "value": "1.25"
         },
         {
-          "title": "1.5x",
+          "title": "1.5×",
           "value": "1.5"
         },
         {
-          "title": "2.0x (Fast)",
+          "title": "1.75×",
+          "value": "1.75"
+        },
+        {
+          "title": "2.0× (Fast)",
           "value": "2"
         }
       ]
