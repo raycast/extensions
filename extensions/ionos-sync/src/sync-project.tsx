@@ -264,7 +264,7 @@ Press \`⌘ + ,\` while IONOS Sync is selected.`}
     );
   }
 
-return (
+  return (
     <List isLoading={isLoading} navigationTitle="IONOS Sync">
       <List.Section title="Projects" subtitle={`${projects.length} configured`}>
         {projects.map((project) => (
