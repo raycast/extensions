@@ -1,0 +1,95 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "perplexity-search",
+  "title": "Perplexity Search",
+  "description": "Search the web with the Perplexity Search API and open results from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "james_liounis",
+  "categories": [
+    "Web",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search the Web",
+      "description": "Search the web with Perplexity Search and open results.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Search the web…",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "Perplexity API Key",
+      "description": "Your Perplexity API key. Create one at https://www.perplexity.ai/settings/api",
+      "type": "password",
+      "required": true,
+      "placeholder": "pplx-XXXXXXXXXXXXXXXX"
+    },
+    {
+      "name": "maxResults",
+      "title": "Max Results",
+      "description": "Number of results to return per query (1–20).",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "country",
+      "title": "Country",
+      "description": "Optional ISO 3166-1 alpha-2 country code to bias results (e.g. US, GB, FR).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "recency",
+      "title": "Recency Filter",
+      "description": "Optionally restrict results by how recently they were published.",
+      "type": "dropdown",
+      "required": false,
+      "default": "any",
+      "data": [
+        { "value": "any", "title": "Any time" },
+        { "value": "hour", "title": "Past hour" },
+        { "value": "day", "title": "Past day" },
+        { "value": "week", "title": "Past week" },
+        { "value": "month", "title": "Past month" },
+        { "value": "year", "title": "Past year" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "version": "1.0.0"
+}
