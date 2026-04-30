@@ -56,6 +56,7 @@ export type CachedDataParams = {
 /** Context for `updateTask` third argument — only invoked after a successful item + optional reminders merge into cache. */
 export type TaskUpdateSyncedContext = {
   syncReminders: SyncData["reminders"] | undefined;
+  updatedTask: Task | undefined;
 };
 
 /**
@@ -362,6 +363,7 @@ export async function updateTask(
   });
 
   const syncReminders = Array.isArray(updatedData.reminders) ? updatedData.reminders : undefined;
+  const updatedTask = updatedData.items[0];
 
   if (!cachedData?.setData || updatedData.items.length === 0) {
     return false;
@@ -372,7 +374,7 @@ export async function updateTask(
     items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
     ...(syncReminders ? { reminders: syncReminders } : {}),
   }));
-  onSynced?.({ syncReminders });
+  onSynced?.({ syncReminders, updatedTask });
   return true;
 }
 
