@@ -53,6 +53,14 @@ export type CachedDataParams = {
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
 };
 
+// Applies sync deltas on top of the latest React state so consecutive writes cannot use a stale snapshot.
+function mergeIntoCachedData(
+  setData: Dispatch<SetStateAction<SyncData | undefined>>,
+  merge: (prev: SyncData) => SyncData,
+) {
+  setData((prev) => (prev ? merge(prev) : prev));
+}
+
 class SyncError extends Error {
   code: number;
   tag?: string;
@@ -120,7 +128,7 @@ export type AddProjectArgs = {
   view_style?: ProjectViewStyle;
 };
 
-export async function addProject(args: AddProjectArgs, { data, setData }: CachedDataParams) {
+export async function addProject(args: AddProjectArgs, { setData }: CachedDataParams) {
   const temp_id = crypto.randomUUID();
 
   const updatedData = await syncRequest({
@@ -136,12 +144,10 @@ export async function addProject(args: AddProjectArgs, { data, setData }: Cached
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      projects: updatedData.projects,
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    projects: updatedData.projects,
+  }));
 
   return updatedData.temp_id_mapping ? updatedData.temp_id_mapping[temp_id] : null;
 }
@@ -155,7 +161,7 @@ export type UpdateProjectArgs = {
   view_style?: ProjectViewStyle;
 };
 
-export async function updateProject(args: UpdateProjectArgs, { data, setData }: CachedDataParams) {
+export async function updateProject(args: UpdateProjectArgs, { setData }: CachedDataParams) {
   const updatedData = await syncRequest({
     sync_token,
     resource_types: ["projects"],
@@ -168,15 +174,13 @@ export async function updateProject(args: UpdateProjectArgs, { data, setData }: 
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      projects: data.projects.map((p) => (p.id === args.id ? updatedData.projects[0] : p)),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    projects: prev.projects.map((p) => (p.id === args.id ? updatedData.projects[0] : p)),
+  }));
 }
 
-export async function archiveProject(id: string, { data, setData }: CachedDataParams) {
+export async function archiveProject(id: string, { setData }: CachedDataParams) {
   await syncRequest({
     sync_token,
     resource_types: ["projects"],
@@ -189,15 +193,13 @@ export async function archiveProject(id: string, { data, setData }: CachedDataPa
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      projects: data.projects.filter((p) => p.id !== id),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    projects: prev.projects.filter((p) => p.id !== id),
+  }));
 }
 
-export async function deleteProject(id: string, { data, setData }: CachedDataParams) {
+export async function deleteProject(id: string, { setData }: CachedDataParams) {
   await syncRequest({
     sync_token,
     resource_types: ["projects"],
@@ -210,12 +212,10 @@ export async function deleteProject(id: string, { data, setData }: CachedDataPar
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      projects: data.projects.filter((p) => p.id !== id),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    projects: prev.projects.filter((p) => p.id !== id),
+  }));
 }
 
 export type Date = {
@@ -271,7 +271,7 @@ export async function quickAddTask(args: QuickAddTaskArgs) {
   return data;
 }
 
-export type DateOrString = { date: string; string?: undefined } | { date?: undefined; string: string };
+export type DateOrString = { date: string; string?: string } | { string: string; date?: string };
 
 export type AddTaskArgs = {
   content: string;
@@ -314,7 +314,7 @@ export async function addTask(args: AddTaskArgs, { data, setData }: CachedDataPa
 
   const newData = data ? { ...data, items: updatedData.items } : updatedData;
   if (data) {
-    setData(newData);
+    mergeIntoCachedData(setData, (prev) => ({ ...prev, items: updatedData.items }));
   }
 
   // In the case where the user uploads a file, we need to return the updated data
@@ -342,7 +342,7 @@ export type UpdateTaskArgs = {
 export async function updateTask(args: UpdateTaskArgs, cachedData?: CachedDataParams) {
   const updatedData = await syncRequest({
     sync_token,
-    resource_types: ["items"],
+    resource_types: ["items", "reminders"],
     commands: [
       {
         type: "item_update",
@@ -353,18 +353,19 @@ export async function updateTask(args: UpdateTaskArgs, cachedData?: CachedDataPa
   });
 
   // If returned items length is 0 then no update is needed, we can skip.
-  if (cachedData?.data && updatedData.items.length > 0) {
-    cachedData.setData({
-      ...cachedData.data,
-      items: cachedData.data.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
-    });
+  if (cachedData?.setData && updatedData.items.length > 0) {
+    mergeIntoCachedData(cachedData.setData, (prev) => ({
+      ...prev,
+      items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
+      ...(Array.isArray(updatedData.reminders) ? { reminders: updatedData.reminders } : {}),
+    }));
   }
 }
 
-export async function closeTask(id: string, { data, setData }: CachedDataParams) {
-  await syncRequest({
+export async function closeTask(id: string, { setData }: CachedDataParams) {
+  const updatedData = await syncRequest({
     sync_token,
-    resource_types: ["items"],
+    resource_types: ["items", "reminders"],
     commands: [
       {
         type: "item_close",
@@ -374,15 +375,23 @@ export async function closeTask(id: string, { data, setData }: CachedDataParams)
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      items: data.items.filter((i) => i.id !== id),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => {
+    const touched = updatedData.items?.find((i) => i.id === id);
+    const items =
+      touched && !touched.checked && !touched.is_deleted
+        ? prev.items.some((i) => i.id === id)
+          ? prev.items.map((i) => (i.id === id ? touched : i))
+          : [...prev.items, touched]
+        : prev.items.filter((i) => i.id !== id);
+    return {
+      ...prev,
+      ...(Array.isArray(updatedData.reminders) ? { reminders: updatedData.reminders } : {}),
+      items,
+    };
+  });
 }
 
-export async function deleteTask(id: string, { data, setData }: CachedDataParams) {
+export async function deleteTask(id: string, { setData }: CachedDataParams) {
   await syncRequest({
     sync_token,
     resource_types: ["items"],
@@ -395,12 +404,10 @@ export async function deleteTask(id: string, { data, setData }: CachedDataParams
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      items: data.items.filter((i) => i.id !== id),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    items: prev.items.filter((i) => i.id !== id),
+  }));
 }
 
 export type MoveTaskArgs = {
@@ -410,7 +417,7 @@ export type MoveTaskArgs = {
   project_id?: string;
 };
 
-export async function moveTask(args: MoveTaskArgs, { data, setData }: CachedDataParams) {
+export async function moveTask(args: MoveTaskArgs, { setData }: CachedDataParams) {
   const updatedData = await syncRequest({
     sync_token,
     resource_types: ["items"],
@@ -423,15 +430,13 @@ export async function moveTask(args: MoveTaskArgs, { data, setData }: CachedData
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      items: data.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
+  }));
 }
 
-export async function uncompleteTask(id: string, { data, setData }: CachedDataParams) {
+export async function uncompleteTask(id: string, { setData }: CachedDataParams) {
   const updatedData = await syncRequest({
     sync_token: "*",
     resource_types: ["items"],
@@ -444,12 +449,10 @@ export async function uncompleteTask(id: string, { data, setData }: CachedDataPa
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      items: updatedData.items,
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    items: updatedData.items,
+  }));
 }
 
 export type Reminder = {
@@ -480,7 +483,7 @@ export type AddReminderArgs = {
   radius?: number;
 };
 
-export async function addReminder(args: AddReminderArgs, { data, setData }: CachedDataParams) {
+export async function addReminder(args: AddReminderArgs, { setData }: CachedDataParams) {
   const temp_id = crypto.randomUUID();
 
   const updatedData = await syncRequest({
@@ -496,17 +499,15 @@ export async function addReminder(args: AddReminderArgs, { data, setData }: Cach
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      reminders: updatedData.reminders,
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    reminders: updatedData.reminders,
+  }));
 
   return updatedData.temp_id_mapping ? updatedData.temp_id_mapping[temp_id] : null;
 }
 
-export async function deleteReminder(id: string, { data, setData }: CachedDataParams) {
+export async function deleteReminder(id: string, { setData }: CachedDataParams) {
   await syncRequest({
     sync_token,
     resource_types: ["reminders"],
@@ -519,12 +520,10 @@ export async function deleteReminder(id: string, { data, setData }: CachedDataPa
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      reminders: data.reminders.filter((r) => r.id !== id),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    reminders: prev.reminders.filter((r) => r.id !== id),
+  }));
 }
 
 export type Label = {
@@ -543,7 +542,7 @@ type AddLabelArgs = {
   is_favorite?: boolean;
 };
 
-export async function addLabel(args: AddLabelArgs, { data, setData }: CachedDataParams) {
+export async function addLabel(args: AddLabelArgs, { setData }: CachedDataParams) {
   try {
     const addedData = await syncRequest({
       sync_token,
@@ -558,12 +557,10 @@ export async function addLabel(args: AddLabelArgs, { data, setData }: CachedData
       ],
     });
 
-    if (data) {
-      setData({
-        ...data,
-        labels: [...data.labels, addedData.labels[0]],
-      });
-    }
+    mergeIntoCachedData(setData, (prev) => ({
+      ...prev,
+      labels: [...prev.labels, addedData.labels[0]],
+    }));
   } catch (err) {
     if (err instanceof SyncError && err.tag === "LABEL_ALREADY_EXISTS") {
       return;
@@ -580,7 +577,7 @@ type UpdateLabelArgs = {
   is_favorite?: boolean;
 };
 
-export async function updateLabel(args: UpdateLabelArgs, { data, setData }: CachedDataParams) {
+export async function updateLabel(args: UpdateLabelArgs, { setData }: CachedDataParams) {
   const updatedData = await syncRequest({
     sync_token,
     resource_types: ["labels"],
@@ -593,15 +590,13 @@ export async function updateLabel(args: UpdateLabelArgs, { data, setData }: Cach
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      labels: data.labels.map((p) => (p.id === args.id ? updatedData.labels[0] : p)),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    labels: prev.labels.map((p) => (p.id === args.id ? updatedData.labels[0] : p)),
+  }));
 }
 
-export async function deleteLabel(id: string, { data, setData }: CachedDataParams) {
+export async function deleteLabel(id: string, { setData }: CachedDataParams) {
   await syncRequest({
     sync_token,
     resource_types: ["labels"],
@@ -614,14 +609,12 @@ export async function deleteLabel(id: string, { data, setData }: CachedDataParam
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      labels: data.labels.filter((l) => {
-        return l.id != id;
-      }),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    labels: prev.labels.filter((l) => {
+      return l.id != id;
+    }),
+  }));
 }
 
 export type Filter = {
@@ -642,7 +635,7 @@ type UpdateFilterArgs = {
   is_favorite?: boolean;
 };
 
-export async function updateFilter(args: UpdateFilterArgs, { data, setData }: CachedDataParams) {
+export async function updateFilter(args: UpdateFilterArgs, { setData }: CachedDataParams) {
   const updatedData = await syncRequest({
     sync_token,
     resource_types: ["filters"],
@@ -655,15 +648,13 @@ export async function updateFilter(args: UpdateFilterArgs, { data, setData }: Ca
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      filters: data.filters.map((p) => (p.id === args.id ? updatedData.filters[0] : p)),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    filters: prev.filters.map((p) => (p.id === args.id ? updatedData.filters[0] : p)),
+  }));
 }
 
-export async function deleteFilter(id: string, { data, setData }: CachedDataParams) {
+export async function deleteFilter(id: string, { setData }: CachedDataParams) {
   await syncRequest({
     sync_token,
     resource_types: ["filters"],
@@ -676,14 +667,12 @@ export async function deleteFilter(id: string, { data, setData }: CachedDataPara
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      filters: data.filters.filter((l) => {
-        return l.id != id;
-      }),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    filters: prev.filters.filter((l) => {
+      return l.id != id;
+    }),
+  }));
 }
 
 export type Section = {
@@ -718,7 +707,7 @@ type AddCommentArgs = {
   uids_to_notify?: string[];
 };
 
-export async function addComment(args: AddCommentArgs, { data, setData }: CachedDataParams) {
+export async function addComment(args: AddCommentArgs, { setData }: CachedDataParams) {
   const temp_id = crypto.randomUUID();
 
   const updatedData = await syncRequest({
@@ -734,12 +723,10 @@ export async function addComment(args: AddCommentArgs, { data, setData }: Cached
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      notes: updatedData.notes,
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    notes: updatedData.notes,
+  }));
 
   return updatedData.temp_id_mapping ? updatedData.temp_id_mapping[temp_id] : null;
 }
@@ -749,7 +736,7 @@ type UpdateCommentArgs = {
   content: string;
 };
 
-export async function updateComment(args: UpdateCommentArgs, { data, setData }: CachedDataParams) {
+export async function updateComment(args: UpdateCommentArgs, { setData }: CachedDataParams) {
   const updatedData = await syncRequest({
     sync_token,
     resource_types: ["notes"],
@@ -762,15 +749,13 @@ export async function updateComment(args: UpdateCommentArgs, { data, setData }: 
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      notes: data.notes.map((c) => (c.id === args.id ? updatedData.notes[0] : c)),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    notes: prev.notes.map((c) => (c.id === args.id ? updatedData.notes[0] : c)),
+  }));
 }
 
-export async function deleteComment(id: string, { data, setData }: CachedDataParams) {
+export async function deleteComment(id: string, { setData }: CachedDataParams) {
   await syncRequest({
     sync_token,
     resource_types: ["comments"],
@@ -783,12 +768,10 @@ export async function deleteComment(id: string, { data, setData }: CachedDataPar
     ],
   });
 
-  if (data) {
-    setData({
-      ...data,
-      notes: data.notes.filter((c) => c.id !== id),
-    });
-  }
+  mergeIntoCachedData(setData, (prev) => ({
+    ...prev,
+    notes: prev.notes.filter((c) => c.id !== id),
+  }));
 }
 
 export type Collaborator = {

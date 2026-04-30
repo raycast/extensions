@@ -11,7 +11,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 import {
   AddReminderArgs,
@@ -36,7 +36,8 @@ import { getRemainingLabels, getTaskLabels } from "../helpers/labels";
 import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
-import { displayReminderName } from "../helpers/reminders";
+import { displayReminderName, hasAtTaskTimeRelativeReminder } from "../helpers/reminders";
+import { buildDynamicRepeatOptions, filterRepeatPresets, isHourlyDueString, repeatDuePayload } from "../helpers/repeat";
 import { ViewMode, getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { QuickLinkView } from "../home";
 import { useFocusedTask } from "../hooks/useFocusedTask";
@@ -79,6 +80,7 @@ export default function TaskActions({
   const comments = data?.notes;
   const taskLabels = task && data?.labels ? getTaskLabels(task, data.labels) : [];
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
+  const [repeatSearchText, setRepeatSearchText] = useState("");
 
   async function completeTask(task: Task) {
     await showToast({ style: Toast.Style.Animated, title: "Completing task" });
@@ -107,17 +109,35 @@ export default function TaskActions({
     }
   }
 
-  async function updateTask(payload: UpdateTaskArgs) {
+  async function updateTask(payload: UpdateTaskArgs): Promise<boolean> {
     await showToast({ style: Toast.Style.Animated, title: "Updating task" });
 
     try {
       await apiUpdateTask(payload, { data, setData });
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
       await refreshMenuBarCommand();
+      return true;
     } catch (error) {
       await showFailureToast(error, { title: "Unable to update task" });
+      return false;
     }
   }
+
+  async function ensureAtTaskTimeReminder(itemId: string) {
+    if (hasAtTaskTimeRelativeReminder(data?.reminders, itemId)) return;
+    try {
+      await apiAddReminder({ item_id: itemId, type: "relative", minute_offset: 0 }, { data, setData });
+    } catch (error) {
+      await showFailureToast(error, { title: "Unable to add reminder" });
+    }
+  }
+
+  async function setRecurrence(recurrence?: string) {
+    if (!(await updateTask({ id: task.id, due: repeatDuePayload(task, recurrence) }))) return;
+    if (isHourlyDueString(recurrence)) await ensureAtTaskTimeReminder(task.id);
+  }
+
+  const repeatOptions = [...buildDynamicRepeatOptions(repeatSearchText), ...filterRepeatPresets(repeatSearchText)];
 
   async function addReminder(payload: AddReminderArgs) {
     await showToast({ style: Toast.Style.Animated, title: "Adding reminder" });
@@ -259,20 +279,28 @@ export default function TaskActions({
           <Action.PickDate
             title="Pick Date"
             type={Action.PickDate.Type.DateTime}
-            onChange={(date) =>
-              updateTask({
-                id: task.id,
-                due: date
-                  ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
-                  : { string: "no date" },
-              })
-            }
+            onChange={async (date) => {
+              const due = date
+                ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
+                : { string: "no date" };
+              if (!(await updateTask({ id: task.id, due }))) return;
+              if (date && !Action.PickDate.isFullDay(date)) await ensureAtTaskTimeReminder(task.id);
+            }}
           />
-          <Action
-            title="Set Due to Every Day"
+          <ActionPanel.Submenu
+            title="Set Repeat"
             icon={Icon.Repeat}
-            onAction={() => updateTask({ id: task.id, due: { string: "every day" } })}
-          />
+            filtering={false}
+            onOpen={() => setRepeatSearchText("")}
+            onSearchTextChange={setRepeatSearchText}
+          >
+            {(!repeatSearchText.trim() || repeatSearchText.toLowerCase().includes("no repeat")) && (
+              <Action title="No Repeat" icon={Icon.XMarkCircle} onAction={() => setRecurrence()} />
+            )}
+            {repeatOptions.map(({ key, title, icon, recurrence }) => (
+              <Action key={key} title={title} icon={icon} onAction={() => setRecurrence(recurrence)} />
+            ))}
+          </ActionPanel.Submenu>
         </ActionPanel.Submenu>
 
         {data?.user?.premium_status !== "not_premium" ? (

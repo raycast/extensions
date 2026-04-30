@@ -6,6 +6,11 @@ export function isRecurring(task: Task) {
   return task.due?.is_recurring || false;
 }
 
+export function displayRecurrence(task: Task): string | null {
+  const s = task.due?.is_recurring ? task.due.string?.trim() : "";
+  return s ? s.charAt(0).toUpperCase() + s.slice(1) : null;
+}
+
 export function isExactTimeTask(task: Task) {
   if (!task.due) {
     return false;
