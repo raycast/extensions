@@ -53,18 +53,19 @@ async function parseWooCommerceResponse<T>(response: Response) {
   const contentType = response.headers.get("content-type") ?? "";
 
   if (!response.ok) {
+    let message = response.statusText || "Request failed";
     try {
       if (contentType.includes("application/json")) {
         const json = await response.json();
-        const message = (json && (json.message || json.error || json.data?.message)) || JSON.stringify(json);
-        throw new Error(`${response.status} ${message}`);
+        message = (json && (json.message || json.error || json.data?.message)) || JSON.stringify(json);
       } else {
-        const text = await response.text();
-        throw new Error(`${response.status} ${text || response.statusText || "Request failed"}`);
+        message = (await response.text()) || message;
       }
     } catch {
-      throw new Error(`${response.status} ${response.statusText || "Request failed"}`);
+      // ignore parse errors and fall back to statusText
     }
+
+    throw new Error(`${response.status} ${message}`);
   }
 
   if (contentType.includes("application/json")) {
