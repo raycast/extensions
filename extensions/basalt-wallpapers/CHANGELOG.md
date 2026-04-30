@@ -1,6 +1,6 @@
 # Changelog
 
-## [Caching Improvements] - {PR_MERGE_DATE}
+## [Caching Improvements] - 2026-04-30
 
 - Reuse cached wallpaper files when setting the same wallpaper again.
 - Prevent wallpaper cache and download filename collisions.
