@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Show Last Updated Date in Search Results] - {PR_MERGE_DATE}
+## [Show Last Updated Date in Search Results] - 2026-04-30
 
 - Show the repository's last updated date in the skill detail panel, displayed as a relative time (e.g. "3 days ago")
 
