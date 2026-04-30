@@ -3,7 +3,7 @@
   "name": "cocart-docs",
   "title": "CoCart Docs",
   "description": "Search CoCart API documentation quickly, copy URLs, or open them in your browser.",
-  "icon": "extension-icon.png",
+  "icon": "icon.png",
   "author": "cocart_headless",
   "categories": [
     "Documentation",
@@ -18,17 +18,21 @@
     "documentation",
     "search"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "commands": [
     {
       "name": "search-docs",
-      "title": "Search CoCart Docs",
-      "description": "Search through CoCart API documentation",
+      "title": "Search CoCart User Guides",
+      "description": "Search through CoCart user guides, knowledge-base, tutorials, and how-to articles",
       "mode": "view"
     },
     {
       "name": "browse-endpoints",
-      "title": "Browse API Endpoints",
+      "title": "Browse API Reference",
       "description": "Browse CoCart API endpoints by version and category",
       "mode": "view"
     },
@@ -40,8 +44,8 @@
     },
     {
       "name": "search-error-codes",
-      "title": "Search Error Codes",
-      "description": "Look up CoCart API error codes",
+      "title": "Lookup Error Codes",
+      "description": "Look up error codes and their meanings in CoCart API",
       "mode": "view"
     },
     {
@@ -53,13 +57,13 @@
     {
       "name": "quick-links",
       "title": "CoCart Quick Links",
-      "description": "Quick access to CoCart documentation, GitHub, and resources",
+      "description": "Quick access to CoCart documentation sections and resources",
       "mode": "view"
     },
     {
       "name": "whats-new",
       "title": "What's New in CoCart",
-      "description": "View latest updates and breaking changes",
+      "description": "View latest updates and breaking changes in CoCart",
       "mode": "view"
     },
     {

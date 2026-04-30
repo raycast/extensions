@@ -40,24 +40,41 @@ function parseHooksFromEntry(entry: DocEntry): HookEntry[] {
   let currentSection = "";
   let i = 0;
 
-  while (i < lines.length) {
-    // Track ## section headings
-    const sectionMatch = lines[i].match(/^## (.+)$/);
-    if (sectionMatch) {
-      currentSection = sectionMatch[1];
-      i++;
-      continue;
-    }
+  // Skip YAML frontmatter (--- ... ---)
+  if (lines[0]?.trim() === "---") {
+    i = 1;
+    while (i < lines.length && lines[i]?.trim() !== "---") i++;
+    i++; // skip closing ---
+  }
 
-    // Match ### `hook_name` entries
-    const hookMatch = lines[i].match(/^### `([^`]+)`/);
+  while (i < lines.length) {
+    // Match hook/function entries first (## or ### with backtick name, or bare `cocart_name`)
+    const hookMatch =
+      lines[i].match(/^#{2,3} `([^`]+)`/) ||
+      lines[i].match(/^`(cocart[^`]+)`\s*$/);
+
+    if (!hookMatch) {
+      // Track # or ## plain-text section headings (no backticks)
+      const sectionMatch = lines[i].match(/^#{1,2} ([^`].*)$/);
+      if (sectionMatch) {
+        currentSection = sectionMatch[1];
+        i++;
+        continue;
+      }
+    }
     if (hookMatch) {
       const name = hookMatch[1];
       i++;
 
       const contentLines: string[] = [];
       while (i < lines.length) {
-        if (lines[i].match(/^### `[^`]+`/) || lines[i].match(/^## .+$/)) break;
+        if (
+          lines[i].match(/^#{2,3} `[^`]+`/) ||
+          lines[i].match(/^#{2,3} \S+$/) ||
+          lines[i].match(/^`cocart[^`]+`\s*$/) ||
+          lines[i].match(/^# .+$/)
+        )
+          break;
         contentLines.push(lines[i]);
         i++;
       }

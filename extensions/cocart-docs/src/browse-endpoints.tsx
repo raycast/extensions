@@ -5,6 +5,7 @@ import {
   showToast,
   Toast,
   Icon,
+  Color,
 } from "@raycast/api";
 import { useEffect, useState, useMemo } from "react";
 import {
@@ -15,6 +16,23 @@ import {
   refreshEntries,
   stripMdx,
 } from "./shared";
+
+function methodColor(method?: string): Color {
+  switch (method?.toUpperCase()) {
+    case "GET":
+      return Color.Green;
+    case "POST":
+      return Color.Blue;
+    case "PUT":
+      return Color.Orange;
+    case "PATCH":
+      return Color.Yellow;
+    case "DELETE":
+      return Color.Red;
+    default:
+      return Color.SecondaryText;
+  }
+}
 
 const API_CATEGORIES = new Set([
   "Cart",
@@ -100,7 +118,16 @@ export default function BrowseEndpoints() {
               key={entry.url}
               title={entry.title}
               icon={categoryIcon(entry.category)}
-              accessories={[{ tag: entry.version }]}
+              accessories={[
+                entry.method
+                  ? {
+                      tag: {
+                        value: entry.method,
+                        color: methodColor(entry.method),
+                      },
+                    }
+                  : { tag: entry.version },
+              ]}
               detail={<List.Item.Detail markdown={stripMdx(entry.content)} />}
               actions={
                 <ActionPanel>

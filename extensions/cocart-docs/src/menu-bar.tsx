@@ -15,10 +15,10 @@ export default function CoCartMenuBar() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([loadEntries(), getRecentItems()])
-      .then(([docs, recent]) => {
+    setRecentItems(getRecentItems());
+    loadEntries()
+      .then((docs) => {
         setEntries(docs);
-        setRecentItems(recent);
       })
       .catch((error) => {
         showToast({
@@ -45,13 +45,13 @@ export default function CoCartMenuBar() {
     category: string;
   }) {
     const url = entry.url.replace(/\.md$/, "");
-    await addRecentItem({
+    addRecentItem({
       title: entry.title,
       url,
       category: entry.category,
       source: "docs",
     });
-    setRecentItems(await getRecentItems());
+    setRecentItems(getRecentItems());
     await open(url);
   }
 

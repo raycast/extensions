@@ -1,11 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { RecentItem, getRecentItems, categoryIcon } from "./shared";
 
@@ -29,16 +22,8 @@ export default function RecentDocs() {
   const [selectedSource, setSelectedSource] = useState("all");
 
   useEffect(() => {
-    getRecentItems()
-      .then(setItems)
-      .catch((error) => {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load recent docs",
-          message: error instanceof Error ? error.message : "Unknown error",
-        });
-      })
-      .finally(() => setIsLoading(false));
+    setItems(getRecentItems());
+    setIsLoading(false);
   }, []);
 
   const filtered = items.filter(
