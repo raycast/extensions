@@ -730,6 +730,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "alai",
+    title: "Alai",
+    description:
+      "Generate, edit, and export high-quality AI presentations to PDF, PPTX, or a shareable link. Supports themes, vibes, and creative slide variants.",
+    icon: "https://storage.getalai.com/Alai%20Logo%20-%20Gradient%20BG.png",
+    homepage: "https://getalai.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://slides-api.getalai.com/mcp/"],
+    },
+  },
+  {
     name: "apple-script",
     title: "Apple Script",
     description:

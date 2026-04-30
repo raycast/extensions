@@ -122,6 +122,119 @@ type IssueWatches = {
   isWatching: boolean;
 };
 
+/** Sprint as returned on issues (may be one or many per ticket; search may omit `state`). */
+export type IssueSprintField = {
+  id: string;
+  name?: string;
+  state?: string;
+};
+
+const GREENHOPPER_SPRINT_SCHEMA = "com.pyxis.greenhopper.jira:gh-sprint";
+
+type JiraFieldMetadata = {
+  id: string;
+  schema?: { custom?: string };
+};
+
+let sprintCustomFieldIdsPromise: Promise<string[]> | null = null;
+
+/** All Sprint custom field keys on the site (some instances define more than one gh-sprint field). */
+async function getGreenhopperSprintFieldIds(): Promise<string[]> {
+  if (sprintCustomFieldIdsPromise === null) {
+    sprintCustomFieldIdsPromise = (async () => {
+      try {
+        const fields = await request<JiraFieldMetadata[] | { values?: JiraFieldMetadata[] }>("/field");
+        const list = Array.isArray(fields) ? fields : fields?.values;
+        if (!Array.isArray(list)) {
+          return [];
+        }
+        const ids = list
+          .filter((f) => f.schema?.custom === GREENHOPPER_SPRINT_SCHEMA)
+          .map((f) => f.id)
+          .filter(Boolean);
+        return [...new Set(ids)];
+      } catch {
+        return [];
+      }
+    })();
+  }
+  return sprintCustomFieldIdsPromise;
+}
+
+/** Flatten Jira sprint field shapes: object, array, or legacy JSON strings (incl. stringified objects in arrays). */
+function collectParsedSprintObjects(value: unknown, bucket: unknown[]): void {
+  if (value === null || value === undefined) {
+    return;
+  }
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (!trimmed) {
+      return;
+    }
+    try {
+      collectParsedSprintObjects(JSON.parse(trimmed) as unknown, bucket);
+    } catch {
+      /* ignore non-JSON sprint lines */
+    }
+    return;
+  }
+  if (Array.isArray(value)) {
+    for (const el of value) {
+      collectParsedSprintObjects(el, bucket);
+    }
+    return;
+  }
+  if (typeof value === "object") {
+    bucket.push(value);
+  }
+}
+
+function mergeIssueSprintFields(issue: Issue, sprintCustomFieldIds: string[]) {
+  if (!issue?.fields) {
+    return;
+  }
+  const f = issue.fields as Record<string, unknown>;
+  const bucket: unknown[] = [];
+  collectParsedSprintObjects(f.sprint, bucket);
+  collectParsedSprintObjects(f.closedSprints, bucket);
+  for (const fieldId of sprintCustomFieldIds) {
+    if (fieldId === "sprint" || fieldId === "closedSprints") {
+      continue;
+    }
+    collectParsedSprintObjects(f[fieldId], bucket);
+  }
+
+  const byId = new Map<string, IssueSprintField>();
+  for (const obj of bucket) {
+    if (!obj || typeof obj !== "object") {
+      continue;
+    }
+    const rec = obj as Record<string, unknown>;
+    if (rec.id === undefined || rec.id === null) {
+      continue;
+    }
+    const id = String(rec.id);
+    const name = typeof rec.name === "string" ? rec.name : undefined;
+    const state = typeof rec.state === "string" ? rec.state : undefined;
+    const prev = byId.get(id);
+    if (!prev) {
+      byId.set(id, { id, name, state });
+    } else {
+      byId.set(id, {
+        id,
+        name: prev.name ?? name,
+        state: prev.state ?? state,
+      });
+    }
+  }
+
+  const list = [...byId.values()];
+  if (list.length === 0) {
+    return;
+  }
+  f.sprint = list.length === 1 ? list[0] : list;
+}
+
 export type Issue = {
   id: string;
   key: string;
@@ -136,6 +249,8 @@ export type Issue = {
     watches: IssueWatches;
     subtasks?: Issue[];
     parent?: Issue;
+    sprint?: IssueSprintField | IssueSprintField[] | null;
+    closedSprints?: IssueSprintField[];
   };
 };
 
@@ -153,21 +268,31 @@ type GetIssuesResponse = {
 };
 
 export async function getIssues({ jql } = { jql: "" }) {
+  const sprintCustomFieldIds = await getGreenhopperSprintFieldIds();
+  const fields = [
+    "summary",
+    "updated",
+    "issuetype",
+    "status",
+    "priority",
+    "assignee",
+    "project",
+    "watches",
+    "subtasks",
+    "parent",
+    "sprint",
+    "closedSprints",
+  ];
+  for (const id of sprintCustomFieldIds) {
+    if (!fields.includes(id)) {
+      fields.push(id);
+    }
+  }
+
   const body = {
     jql,
     maxResults: 200,
-    fields: [
-      "summary",
-      "updated",
-      "issuetype",
-      "status",
-      "priority",
-      "assignee",
-      "project",
-      "watches",
-      "subtasks",
-      "parent",
-    ],
+    fields,
   };
 
   const result = await request<GetIssuesResponse>("/search/jql", {
@@ -181,9 +306,20 @@ export async function getIssues({ jql } = { jql: "" }) {
     return rawIssues;
   }
 
+  for (const issue of rawIssues) {
+    try {
+      mergeIssueSprintFields(issue, sprintCustomFieldIds);
+    } catch {
+      /* skip merge for malformed issues */
+    }
+  }
+
   const resolvedIssues = await Promise.all(
     rawIssues.map(async (issue) => {
-      issue.fields.issuetype.iconUrl = await getAuthenticatedUri(issue.fields.issuetype.iconUrl, "image/jpeg");
+      const iconUrl = issue?.fields?.issuetype?.iconUrl;
+      if (iconUrl) {
+        issue.fields.issuetype.iconUrl = await getAuthenticatedUri(iconUrl, "image/jpeg");
+      }
       return issue;
     }),
   );

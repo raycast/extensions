@@ -4,6 +4,23 @@ export function runInBackground(): boolean {
   return getPreferenceValues<Preferences>().runInBackground;
 }
 
+function parseWingetMessage(output: string, fallback: string): string {
+  const lines = output
+    .replace(/\r/g, "\n")
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0 && !/^[-\\\/|]+$/.test(l));
+  return lines.at(-1) ?? fallback;
+}
+
+function isNoopInstall(output: string): boolean {
+  const text = output.toLowerCase();
+  return (
+    text.includes("found an existing package already installed") &&
+    (text.includes("no available upgrade found") || text.includes("no newer package versions are available"))
+  );
+}
+
 // --accept-package-agreements is only valid for install/upgrade, not uninstall
 const INSTALL_FLAGS = [
   "--silent",
@@ -14,28 +31,51 @@ const INSTALL_FLAGS = [
 
 const UNINSTALL_FLAGS = ["--silent", "--accept-source-agreements", "--disable-interactivity"];
 
-export async function wingetInstall(id: string): Promise<void> {
+export async function wingetInstall(id: string): Promise<boolean> {
   if (runInBackground()) {
     await showHUD(`Installing ${id}…`);
     try {
-      await execWinget(["install", "--id", id, "--exact", ...INSTALL_FLAGS]);
-      await showHUD(`✅ Installed ${id}`);
+      const { output, exitCode } = await execWingetWithCode(["install", "--id", id, "--exact", ...INSTALL_FLAGS]);
+      if (exitCode === 0) {
+        if (isNoopInstall(output)) {
+          await showHUD(`ℹ️ Already installed: ${id}`);
+          return false;
+        }
+        await showHUD(`✅ Installed ${id}`);
+        return true;
+      }
+      await showHUD(`❌ ${parseWingetMessage(output, `Install failed: ${id}`)}`);
+      return false;
     } catch {
       await showHUD(`❌ Install failed: ${id}`);
+      return false;
     }
-    return;
   }
 
   const toast = await showToast({ style: Toast.Style.Animated, title: "Installing…", message: id });
   try {
-    await execWinget(["install", "--id", id, "--exact", ...INSTALL_FLAGS]);
-    toast.style = Toast.Style.Success;
-    toast.title = "Installed";
-    toast.message = id;
+    const { output, exitCode } = await execWingetWithCode(["install", "--id", id, "--exact", ...INSTALL_FLAGS]);
+    if (exitCode === 0) {
+      if (isNoopInstall(output)) {
+        toast.style = Toast.Style.Success;
+        toast.title = "Already installed";
+        toast.message = "No newer version available";
+        return false;
+      }
+      toast.style = Toast.Style.Success;
+      toast.title = "Installed";
+      toast.message = id;
+      return true;
+    }
+    toast.style = Toast.Style.Failure;
+    toast.title = "Install failed";
+    toast.message = parseWingetMessage(output, id);
+    return false;
   } catch (error) {
     toast.style = Toast.Style.Failure;
     toast.title = "Install failed";
     toast.message = error instanceof Error ? error.message : String(error);
+    return false;
   }
 }
 
@@ -92,7 +132,7 @@ function upgradeAllResultMessage(output: string, exitCode: number): { title: str
 /**
  * Upgrade a single package by ID, or upgrade all packages when no ID is given.
  */
-export async function wingetUpgrade(id?: string): Promise<void> {
+export async function wingetUpgrade(id?: string): Promise<boolean> {
   const isAll = id === undefined;
 
   if (runInBackground()) {
@@ -102,14 +142,22 @@ export async function wingetUpgrade(id?: string): Promise<void> {
         const { output, exitCode } = await execWingetWithCode(["upgrade", "--all", ...INSTALL_FLAGS]);
         const { title } = upgradeAllResultMessage(output, exitCode);
         await showHUD(`${exitCode === 0 ? "✅" : "⚠️"} ${title}`);
+        return exitCode === 0;
       } else {
-        await execWinget(["upgrade", "--id", id!, "--exact", ...INSTALL_FLAGS]);
-        await showHUD(`✅ Upgraded ${id}`);
+        const { output, exitCode } = await execWingetWithCode(["upgrade", "--id", id!, "--exact", ...INSTALL_FLAGS]);
+        if (exitCode === 0) {
+          await showHUD(`✅ Upgraded ${id}`);
+          return true;
+        } else {
+          const msg = parseWingetMessage(output, "Upgrade failed");
+          await showHUD(`❌ ${msg}`);
+          return false;
+        }
       }
     } catch {
       await showHUD(isAll ? "❌ Upgrade all failed" : `❌ Upgrade failed: ${id}`);
+      return false;
     }
-    return;
   }
 
   const toast = await showToast({
@@ -123,15 +171,23 @@ export async function wingetUpgrade(id?: string): Promise<void> {
       const { title, isPartial } = upgradeAllResultMessage(output, exitCode);
       toast.style = isPartial ? Toast.Style.Failure : Toast.Style.Success;
       toast.title = title;
+      return !isPartial;
     } else {
-      await execWinget(["upgrade", "--id", id!, "--exact", ...INSTALL_FLAGS]);
-      toast.style = Toast.Style.Success;
-      toast.title = "Upgraded";
-      toast.message = id;
+      const { output, exitCode } = await execWingetWithCode(["upgrade", "--id", id!, "--exact", ...INSTALL_FLAGS]);
+      if (exitCode === 0) {
+        await showToast({ style: Toast.Style.Success, title: "Upgraded", message: id });
+        return true;
+      } else {
+        const msg = parseWingetMessage(output, id!);
+        await showToast({ style: Toast.Style.Failure, title: "Upgrade failed", message: msg });
+        return false;
+      }
     }
   } catch (error) {
+    const errMsg = error instanceof Error ? error.message : String(error);
     toast.style = Toast.Style.Failure;
     toast.title = isAll ? "Upgrade all failed" : "Upgrade failed";
-    toast.message = error instanceof Error ? error.message : String(error);
+    toast.message = errMsg;
+    return false;
   }
 }

@@ -13,6 +13,7 @@ export default function Command() {
   const { breadcrumbSeparator = "·" } = getPreferenceValues<{ breadcrumbSeparator?: string }>();
   const separator = ` ${breadcrumbSeparator.trim()} `;
 
+  const [refreshKey, setRefreshKey] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [items, setItems] = useState<FormattedMatch[]>([]);
   const [filteredItems, setFilteredItems] = useState<FormattedMatch[]>([]);
@@ -31,6 +32,7 @@ export default function Command() {
 
   useEffect(() => {
     const fetchData = async () => {
+      setIsLoading(true);
       try {
         const { config, packages: packageFilesDirectory, match: matchFilesDirectory } = getEspansoConfig();
         setConfigPath(config);
@@ -128,7 +130,7 @@ export default function Command() {
       }
     };
     fetchData();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     let filtered = items;
@@ -216,6 +218,7 @@ export default function Command() {
                   separator={separator}
                   isSelected={selectedItemId === id}
                   configPath={configPath}
+                  onEdited={() => setRefreshKey((k) => k + 1)}
                 />
               );
             })}

@@ -14,7 +14,7 @@
     "System",
     "Productivity"
   ],
-  "version": "1.0.0",
+  "version": "1.1.0",
   "license": "MIT",
   "commands": [
     {
@@ -54,7 +54,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.104.11",
+    "@raycast/api": "1.104.12",
     "@raycast/utils": "2.2.3",
     "change-case": "5.4.4",
     "fs-extra": "11.3.4",
@@ -63,12 +63,13 @@
   "devDependencies": {
     "@raycast/eslint-config": "2.1.1",
     "@types/fs-extra": "11.0.4",
-    "@types/node": "25.5.2",
+    "@types/node": "25.6.0",
     "@types/react": "19.2.14",
     "@types/yaml": "1.9.7",
     "eslint": "10.2.0",
-    "prettier": "3.8.1",
-    "typescript": "6.0.2"
+    "prettier": "3.8.3",
+    "typescript": "6.0.2",
+    "vitest": "4.1.4"
   },
   "preferences": [
     {
@@ -93,7 +94,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "platforms": [
     "macOS"

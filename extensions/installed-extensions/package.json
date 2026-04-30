@@ -10,7 +10,8 @@
     "tonka3000",
     "litomore",
     "ridemountainpig",
-    "xmok"
+    "xmok",
+    "Undolog"
   ],
   "platforms": [
     "macOS",
@@ -27,6 +28,24 @@
       "description": "List your current installed Raycast extensions",
       "mode": "view",
       "preferences": [
+        {
+          "name": "sortBy",
+          "description": "Choose how the list is sorted",
+          "type": "dropdown",
+          "required": false,
+          "default": "title",
+          "title": "Sort By",
+          "data": [
+            {
+              "title": "Title (A–Z)",
+              "value": "title"
+            },
+            {
+              "title": "Recently Updated",
+              "value": "updated"
+            }
+          ]
+        },
         {
           "name": "separator",
           "description": "Select output format",
@@ -67,15 +86,15 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^24.7.0",
-    "@types/react": "19.2.2",
-    "eslint": "^9.37.0",
-    "prettier": "^3.6.2",
-    "typescript": "^5.9.3"
+    "@types/node": "^22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build",

@@ -87,7 +87,7 @@ export default function Command() {
         {...itemProps.label}
       />
 
-      <Form.TextField
+      <Form.TextArea
         title="Replace"
         placeholder="Enter replacement"
         info="The replacement text"

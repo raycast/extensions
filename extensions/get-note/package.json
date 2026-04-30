@@ -1,0 +1,537 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "get-note",
+  "title": "GetNote",
+  "description": "Search, save, and manage GetNote notes with Raycast AI",
+  "icon": "extension-icon.png",
+  "author": "fangbaiyu",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "recent-notes",
+      "title": "Recent Notes",
+      "subtitle": "GetNote",
+      "description": "Browse your latest GetNote notes",
+      "mode": "view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "GetNote",
+      "description": "Search GetNote with semantic recall",
+      "mode": "view"
+    },
+    {
+      "name": "save-link",
+      "title": "Save Link",
+      "subtitle": "GetNote",
+      "description": "Save a link note to GetNote",
+      "mode": "view"
+    },
+    {
+      "name": "save-text-note",
+      "title": "Save Text Note",
+      "subtitle": "GetNote",
+      "description": "Save a text note to GetNote",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-total-note-count",
+      "title": "Get Total GetNote Note Count",
+      "description": "Return the total number of notes across the user's entire GetNote account. Use this for questions like 'How many notes do I have?' or 'What is my total note count?'. Do not use this for knowledge-base-specific counts.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "search-notes",
+      "title": "Search GetNote Notes",
+      "description": "Search GetNote with semantic recall. Use this when the user wants to find notes by topic, concept, or a remembered fragment.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The query or semantic description to search for in GetNote."
+          },
+          "topK": {
+            "type": "number",
+            "description": "How many results to return. Default 5, maximum 10."
+          }
+        },
+        "required": [
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "get-note-detail",
+      "title": "Get GetNote Note Detail",
+      "description": "Fetch the full detail of a specific GetNote note, including summary, tags, metadata, and the source URL for link notes.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "noteId": {
+            "type": "string",
+            "description": "The GetNote note ID."
+          }
+        },
+        "required": [
+          "noteId"
+        ]
+      }
+    },
+    {
+      "name": "save-link-note",
+      "title": "Save Link to GetNote",
+      "description": "Save a link note to GetNote, wait for the async task to finish, and return the generated note summary.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "The public URL to save into GetNote."
+          }
+        },
+        "required": [
+          "url"
+        ]
+      }
+    },
+    {
+      "name": "save-text-note",
+      "title": "Save Text Note to GetNote",
+      "description": "Create a plain text note in GetNote. Use this for quick capture, memos, or turning a chat answer into a note.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Optional title for the note."
+          },
+          "content": {
+            "type": "string",
+            "description": "Markdown content of the note."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Optional tags to add to the note."
+          }
+        },
+        "required": [
+          "content"
+        ]
+      }
+    },
+    {
+      "name": "list-knowledge-bases",
+      "title": "List GetNote Knowledge Bases",
+      "description": "List the user's GetNote knowledge bases with their topic IDs and per-knowledge-base note counts. Use this only when the user explicitly asks about knowledge bases, topics, or the contents or count of a specific knowledge base. Do not use this for the overall note count across the whole account.",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "create-knowledge-base",
+      "title": "Create GetNote Knowledge Base",
+      "description": "Create a new GetNote knowledge base.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "The name of the new knowledge base."
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional description of the knowledge base."
+          },
+          "cover": {
+            "type": "string",
+            "description": "Optional cover URL of the knowledge base."
+          }
+        },
+        "required": [
+          "name"
+        ]
+      }
+    },
+    {
+      "name": "list-knowledge-base-notes",
+      "title": "List GetNote Knowledge Base Notes",
+      "description": "List notes inside a specific GetNote knowledge base.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "topicId": {
+            "type": "string",
+            "description": "The knowledge base topic ID."
+          },
+          "page": {
+            "type": "number",
+            "description": "Page number, starting from 1."
+          }
+        },
+        "required": [
+          "topicId"
+        ]
+      }
+    },
+    {
+      "name": "search-knowledge-base-notes",
+      "title": "Search GetNote Knowledge Base Notes",
+      "description": "Run semantic search within a specific GetNote knowledge base.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "topicId": {
+            "type": "string",
+            "description": "The knowledge base topic ID."
+          },
+          "query": {
+            "type": "string",
+            "description": "The semantic query to search for within the knowledge base."
+          },
+          "topK": {
+            "type": "number",
+            "description": "How many results to return. Default 5, maximum 10."
+          }
+        },
+        "required": [
+          "topicId",
+          "query"
+        ]
+      }
+    },
+    {
+      "name": "add-note-to-knowledge-base",
+      "title": "Add Note to GetNote Knowledge Base",
+      "description": "Add one or more GetNote notes to one of the user's own knowledge bases. Use list-knowledge-bases first to find the right topicId.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "topicId": {
+            "type": "string",
+            "description": "The knowledge base topic ID."
+          },
+          "noteIds": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "One or more GetNote note IDs to add."
+          }
+        },
+        "required": [
+          "topicId",
+          "noteIds"
+        ]
+      }
+    },
+    {
+      "name": "add-tags",
+      "title": "Add Tags to GetNote Note",
+      "description": "Add manual tags to a specific GetNote note.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "noteId": {
+            "type": "string",
+            "description": "The GetNote note ID."
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags to add to the note."
+          }
+        },
+        "required": [
+          "noteId",
+          "tags"
+        ]
+      }
+    },
+    {
+      "name": "delete-tag",
+      "title": "Delete GetNote Note Tag",
+      "description": "Delete a specific tag from a GetNote note. Use get-note-detail first to find the tag ID if needed.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "noteId": {
+            "type": "string",
+            "description": "The GetNote note ID."
+          },
+          "tagId": {
+            "type": "string",
+            "description": "The tag ID to delete."
+          }
+        },
+        "required": [
+          "noteId",
+          "tagId"
+        ]
+      }
+    },
+    {
+      "name": "delete-note",
+      "title": "Delete GetNote Note",
+      "description": "Move a specific GetNote note to trash. Use this when the user explicitly asks to delete, remove, or trash a note.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "noteId": {
+            "type": "string",
+            "description": "The GetNote note ID to move to trash."
+          }
+        },
+        "required": [
+          "noteId"
+        ]
+      }
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@get-note how many notes do I have",
+        "mocks": {
+          "get-total-note-count": {
+            "totalNotes": 185
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-total-note-count",
+              "arguments": {}
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note find my notes about product optimization",
+        "mocks": {
+          "search-notes": [
+            {
+              "count": 1,
+              "results": [
+                {
+                  "noteId": "1900000000000000000",
+                  "title": "Payment Flow Optimization",
+                  "content": "Add a progress bar to reduce anxiety during waiting.",
+                  "createdAt": "2026-04-07 09:00:00",
+                  "noteType": "NOTE"
+                }
+              ]
+            }
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-notes",
+              "arguments": {
+                "query": {
+                  "includes": "product optimization"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note save this idea: shorten onboarding to three steps",
+        "mocks": {
+          "save-text-note": {
+            "noteId": "1900000000000000001",
+            "title": "Shorten onboarding to three steps",
+            "createdAt": "2026-04-07 09:05:00"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "save-text-note",
+              "arguments": {
+                "content": {
+                  "includes": "shorten onboarding"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note create a knowledge base called Product Research",
+        "mocks": {
+          "create-knowledge-base": {
+            "topicId": "topic_123",
+            "name": "Product Research"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "create-knowledge-base",
+              "arguments": {
+                "name": {
+                  "includes": "Product Research"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note list notes in knowledge base topic_123",
+        "mocks": {
+          "list-knowledge-base-notes": {
+            "topicId": "topic_123",
+            "page": 1,
+            "count": 1,
+            "hasMore": false,
+            "notes": [
+              {
+                "noteId": "1900000000000000003",
+                "title": "Customer Interview Notes",
+                "content": "Summary content"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-knowledge-base-notes",
+              "arguments": {
+                "topicId": "topic_123"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note search topic_123 for RAG",
+        "mocks": {
+          "search-knowledge-base-notes": {
+            "topicId": "topic_123",
+            "count": 1,
+            "results": [
+              {
+                "noteId": "1900000000000000005",
+                "title": "RAG Overview",
+                "content": "Knowledge base recall snippet"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-knowledge-base-notes",
+              "arguments": {
+                "topicId": "topic_123",
+                "query": {
+                  "includes": "RAG"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note delete tag 123 from note 1900000000000000004",
+        "mocks": {
+          "delete-tag": {
+            "noteId": "1900000000000000004",
+            "tagId": "123",
+            "deleted": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "delete-tag",
+              "arguments": {
+                "noteId": "1900000000000000004",
+                "tagId": "123"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@get-note delete note 1900000000000000002",
+        "mocks": {
+          "delete-note": {
+            "noteId": "1900000000000000002",
+            "deleted": true
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "delete-note",
+              "arguments": {
+                "noteId": "1900000000000000002"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "manualApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Manual API Key",
+      "description": "Optional. Use a GetNote API key directly instead of the stored local session.",
+      "placeholder": "gk_live_..."
+    },
+    {
+      "name": "manualClientId",
+      "type": "textfield",
+      "required": false,
+      "title": "Manual Client ID",
+      "description": "Optional. Defaults to the pre-registered GetNote client ID if omitted.",
+      "placeholder": "cli_..."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you intended to publish to npm, remove the prepublishOnly script and run npm publish again.\\nIf you wanted to publish to the Raycast Store instead, use npm run publish.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

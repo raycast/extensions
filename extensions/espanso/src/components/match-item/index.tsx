@@ -3,6 +3,7 @@ import { pathToFileURL } from "node:url";
 import { Application, Action, ActionPanel, Clipboard, Icon, List } from "@raycast/api";
 import { FormattedMatch } from "../../lib/types";
 import { formatCategoryName, expandMatch, resolveImagePath } from "../../lib/utils";
+import EditMatchForm from "../edit-match-form";
 
 interface MatchItemProps {
   id: string;
@@ -12,6 +13,7 @@ interface MatchItemProps {
   separator: string;
   isSelected: boolean;
   configPath: string;
+  onEdited: () => void;
 }
 
 export default function MatchItem({
@@ -22,13 +24,15 @@ export default function MatchItem({
   separator,
   isSelected,
   configPath,
+  onEdited,
 }: MatchItemProps) {
-  const { triggers, replace, image_path, form, label, filePath, profile, vars } = match;
+  const { triggers, replace, image_path, form, label, filePath, profile, vars, isRegex } = match;
   const [expandedReplace, setExpandedReplace] = useState(replace ?? "");
   const [resolvedImagePath, setResolvedImagePath] = useState<string | undefined>(undefined);
 
   const isDynamic = !!vars?.length;
   const isImage = !!image_path;
+  const canEdit = !form && !image_path && !isRegex && !filePath.includes("/packages/");
 
   const refresh = () => expandMatch(replace, vars).then(setExpandedReplace);
 
@@ -48,6 +52,7 @@ export default function MatchItem({
     <List.Item
       id={id}
       title={label ?? triggers.join(", ")}
+      keywords={replace ? [replace] : undefined}
       subtitle={profile ? formatCategoryName(profile, separator) : ""}
       detail={
         <List.Item.Detail
@@ -112,6 +117,23 @@ export default function MatchItem({
           {label && <Action.CopyToClipboard title="Copy Label" content={label} />}
           <Action.OpenWith path={filePath} />
           <Action.ShowInFinder path={filePath} />
+          {canEdit && (
+            <Action.Push
+              icon={Icon.Pencil}
+              title="Edit Match"
+              shortcut={{ modifiers: ["cmd"], key: "e" }}
+              target={
+                <EditMatchForm
+                  filePath={filePath}
+                  originalTriggers={triggers}
+                  initialTrigger={triggers.join(", ")}
+                  initialLabel={label}
+                  initialReplace={replace ?? ""}
+                  onEdited={onEdited}
+                />
+              }
+            />
+          )}
           <Action.Trash title="Move the Whole File to Trash" paths={filePath} />
         </ActionPanel>
       }

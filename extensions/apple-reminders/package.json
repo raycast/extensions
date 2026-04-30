@@ -16,7 +16,8 @@
     "vmrjnvc",
     "ramith123",
     "sch01ar",
-    "0xdhrv"
+    "0xdhrv",
+    "kendaniels"
   ],
   "owner": "raycast",
   "access": "public",
@@ -224,6 +225,20 @@
       "title": "Manage Locations",
       "subtitle": "Apple Reminders",
       "description": "Manage your saved locations.",
+      "mode": "view"
+    },
+    {
+      "name": "customize-create-reminder-form",
+      "title": "Customize Create Reminder Form",
+      "subtitle": "Apple Reminders",
+      "description": "Choose which fields appear in the create reminder form and reorder them.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-create-actions",
+      "title": "Manage Create Actions",
+      "subtitle": "Apple Reminders",
+      "description": "Choose which Shortcuts run after reminders are created.",
       "mode": "view"
     }
   ],

@@ -2,6 +2,7 @@ import { List, ActionPanel, Action, Detail, Icon } from "@raycast/api";
 import { useState } from "react";
 
 import { SkillListItem } from "./components/SkillListItem";
+import { useInstalledSkillNames } from "./hooks/useInstalledSkillNames";
 import { useOwnerFilter } from "./hooks/useOwnerFilter";
 import { useDebouncedSearch } from "./hooks/useDebouncedSearch";
 import { buildGithubIssueUrl } from "./shared";
@@ -13,6 +14,7 @@ export default function Command() {
   const toggleDetail = () => setIsShowingDetail((prev) => !prev);
 
   const { data, isLoading, error, revalidate, searchUrl } = useDebouncedSearch(searchText);
+  const { installedNames } = useInstalledSkillNames();
 
   const { owner, setOwner, ownerCounts, skills } = useOwnerFilter(data?.skills ?? []);
 
@@ -85,6 +87,7 @@ export default function Command() {
               key={skill.id}
               skill={skill}
               isSelected={selectedId === skill.id}
+              isInstalled={installedNames.has(skill.skillId)}
               isShowingDetail={isShowingDetail}
               onToggleDetail={toggleDetail}
             />

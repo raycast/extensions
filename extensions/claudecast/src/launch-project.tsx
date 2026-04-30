@@ -8,6 +8,7 @@ import {
   Toast,
   Form,
   popToRoot,
+  getPreferenceValues,
 } from "@raycast/api";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { existsSync } from "fs";
@@ -21,6 +22,7 @@ import {
   Project,
 } from "./lib/project-discovery";
 import { launchClaudeCode, openTerminalWithCommand } from "./lib/terminal";
+import type { PermissionMode } from "./lib/session-parser";
 
 // Type for batched git info
 type GitInfoMap = Record<
@@ -219,8 +221,16 @@ function ProjectItem({
       });
       return;
     }
+    const prefs = getPreferenceValues<Preferences.LaunchProject>();
+    const permissionMode = (prefs.permissionMode ||
+      "default") as PermissionMode;
+    const model = prefs.model || undefined;
     await addRecentProject(project.path);
-    await launchClaudeCode({ projectPath: project.path });
+    await launchClaudeCode({
+      projectPath: project.path,
+      permissionMode,
+      model,
+    });
     await popToRoot();
   }
 
@@ -234,10 +244,16 @@ function ProjectItem({
       });
       return;
     }
+    const prefs = getPreferenceValues<Preferences.LaunchProject>();
+    const permissionMode = (prefs.permissionMode ||
+      "default") as PermissionMode;
+    const model = prefs.model || undefined;
     await addRecentProject(project.path);
     await launchClaudeCode({
       projectPath: project.path,
       continueSession: true,
+      permissionMode,
+      model,
     });
     await popToRoot();
   }
@@ -343,12 +359,18 @@ function ContinueWithPromptForm({ project }: { project: Project }) {
       return;
     }
 
+    const prefs = getPreferenceValues<Preferences.LaunchProject>();
+    const permissionMode = (prefs.permissionMode ||
+      "default") as PermissionMode;
+    const model = prefs.model || undefined;
     setIsLoading(true);
     await addRecentProject(project.path);
     await launchClaudeCode({
       projectPath: project.path,
       continueSession: true,
       prompt: values.prompt,
+      permissionMode,
+      model,
     });
     await popToRoot();
   }

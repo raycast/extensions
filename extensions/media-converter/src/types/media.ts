@@ -110,6 +110,7 @@ export const INPUT_AUDIO_EXTENSIONS = [
 export const OUTPUT_VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv", ".mpg", ".webm"] as const;
 export const OUTPUT_AUDIO_EXTENSIONS = [".mp3", ".aac", ".wav", ".flac", ".m4a"] as const;
 export const OUTPUT_IMAGE_EXTENSIONS = [".jpg", ".png", ".webp", ".heic", ".tiff", ".avif"] as const;
+export const OUTPUT_GIF_EXTENSIONS = [".gif"] as const;
 
 export const INPUT_ALL_EXTENSIONS = [
   ...INPUT_VIDEO_EXTENSIONS,
@@ -121,6 +122,7 @@ export const OUTPUT_ALL_EXTENSIONS = [
   ...OUTPUT_VIDEO_EXTENSIONS,
   ...OUTPUT_AUDIO_EXTENSIONS,
   ...OUTPUT_IMAGE_EXTENSIONS,
+  ...OUTPUT_GIF_EXTENSIONS,
 ] as const;
 
 // =============================================================================
@@ -136,8 +138,13 @@ export type InputAudioExtension = (typeof INPUT_AUDIO_EXTENSIONS)[number];
 export type OutputVideoExtension = (typeof OUTPUT_VIDEO_EXTENSIONS)[number];
 export type OutputImageExtension = (typeof OUTPUT_IMAGE_EXTENSIONS)[number];
 export type OutputAudioExtension = (typeof OUTPUT_AUDIO_EXTENSIONS)[number];
+export type OutputGifExtension = (typeof OUTPUT_GIF_EXTENSIONS)[number];
 
-export type AllOutputExtension = OutputVideoExtension | OutputAudioExtension | OutputImageExtension;
+export type AllOutputExtension =
+  | OutputVideoExtension
+  | OutputAudioExtension
+  | OutputImageExtension
+  | OutputGifExtension;
 // =============================================================================
 
 export type ImageQuality = {
@@ -279,11 +286,52 @@ export type VideoControlType =
   | "variant";
 
 // =============================================================================
+// GIF Quality Settings
+// =============================================================================
+
+export const GIF_FPS = ["10", "15", "24", "30"] as const;
+export type GifFps = (typeof GIF_FPS)[number];
+export const GIF_WIDTH = ["original", "480", "720", "1080"] as const;
+export type GifWidth = (typeof GIF_WIDTH)[number];
+
+export type GifQuality = {
+  ".gif": { fps: GifFps; width: GifWidth; loop: boolean };
+};
+
+// =============================================================================
 // Universal Quality Type
 // =============================================================================
 
-export type QualitySettings = ImageQuality | AudioQuality | VideoQuality;
+export type QualitySettings = ImageQuality | AudioQuality | VideoQuality | GifQuality;
 export type AllControlType = VideoControlType | AudioControlType | "qualityLevel";
+
+// =============================================================================
+// Trim Options
+// =============================================================================
+
+export type TrimOptions = {
+  /** Start time string in HH:MM:SS[.mmm] or bare seconds. Empty/undefined = no trim at start. */
+  start?: string;
+  /** End time string in HH:MM:SS[.mmm] or bare seconds. Empty/undefined = no trim at end. */
+  end?: string;
+};
+
+// =============================================================================
+// Preset Type (built-in + user-defined)
+// =============================================================================
+
+export type Preset = {
+  id: string;
+  name: string;
+  builtIn?: boolean;
+  mediaType: MediaType | "gif";
+  outputFormat: AllOutputExtension;
+  quality: QualitySettings;
+  trim?: TrimOptions;
+  stripMetadata?: boolean;
+  outputDir?: string;
+  description?: string;
+};
 
 // ---------------- Video builder factory ----------------
 
@@ -497,6 +545,9 @@ export const DEFAULT_QUALITIES = {
   ".mkv": { encodingMode: "crf", crf: 75, preset: "medium" },
   ".mpg": { encodingMode: "crf", crf: 75 },
   ".webm": { encodingMode: "crf", crf: 60, quality: "good" },
+
+  // GIF default
+  ".gif": { fps: "15", width: "original", loop: true },
 } as const;
 
 // Video VBR defaults (for when switching to VBR modes)
@@ -584,6 +635,19 @@ export function getMediaType(extension: string): MediaType | null {
   return null;
 }
 
+/**
+ * Return the "category" of an output extension, including GIF as its own bucket.
+ * Used by the converter form to choose the right UI controls.
+ */
+export type OutputCategory = "image" | "audio" | "video" | "gif";
+
+export function getOutputCategory(extension: AllOutputExtension): OutputCategory {
+  if (OUTPUT_GIF_EXTENSIONS.includes(extension as OutputGifExtension)) return "gif";
+  if (OUTPUT_IMAGE_EXTENSIONS.includes(extension as OutputImageExtension)) return "image";
+  if (OUTPUT_AUDIO_EXTENSIONS.includes(extension as OutputAudioExtension)) return "audio";
+  return "video";
+}
+
 type SimpleQualityMappingExtension = keyof typeof SIMPLE_QUALITY_MAPPINGS;
 
 function isOutputImageExtension(format: AllOutputExtension): format is OutputImageExtension {
@@ -604,9 +668,19 @@ export function getDefaultQuality(
     return getDefaultImageQuality(format, preferences);
   }
 
+  if (format === ".gif") {
+    const fpsPref = typeof preferences.defaultGifFps === "string" ? preferences.defaultGifFps : "";
+    const widthPref = typeof preferences.defaultGifWidth === "string" ? preferences.defaultGifWidth : "";
+    const fps = (GIF_FPS as readonly string[]).includes(fpsPref) ? (fpsPref as GifFps) : DEFAULT_QUALITIES[".gif"].fps;
+    const width = (GIF_WIDTH as readonly string[]).includes(widthPref)
+      ? (widthPref as GifWidth)
+      : DEFAULT_QUALITIES[".gif"].width;
+    return { ".gif": { fps, width, loop: true } } as QualitySettings;
+  }
+
   if (preferences.moreConversionSettings) {
     return {
-      [format]: DEFAULT_QUALITIES[format],
+      [format]: DEFAULT_QUALITIES[format as Exclude<AllOutputExtension, ".gif">],
     } as QualitySettings;
   }
 
