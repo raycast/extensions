@@ -46,11 +46,9 @@ async function fetchTokens(authRequest: OAuth.AuthorizationRequest, code: string
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      grant_type: "authorization_code",
       code,
-      code_verifier: authRequest.codeVerifier,
-      client_id: "raycast",
-      redirect_uri: authRequest.redirectURI,
+      codeVerifier: authRequest.codeVerifier,
+      clientId: "raycast",
     }),
   });
 
@@ -64,7 +62,7 @@ async function refreshTokens(refreshToken: string): Promise<OAuth.TokenResponse>
     body: JSON.stringify({
       grant_type: "refresh_token",
       refresh_token: refreshToken,
-      client_id: "raycast",
+      clientId: "raycast",
     }),
   });
 
