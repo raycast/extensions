@@ -86,7 +86,7 @@ export function buildDynamicRepeatOptions(searchText: string) {
   const t = m[2]?.toLowerCase();
   const units = t ? REPEAT_UNITS.filter((u) => u.startsWith(t) || `${u}s`.startsWith(t)) : REPEAT_UNITS;
   return units.map((unit) => {
-    const lab = interval === 1 ? unit : `${unit}s`;
+    const lab = `${unit}s`;
     return {
       key: `${unit}-${interval}`,
       title: `Every ${interval} ${lab.charAt(0).toUpperCase()}${lab.slice(1)}`,
