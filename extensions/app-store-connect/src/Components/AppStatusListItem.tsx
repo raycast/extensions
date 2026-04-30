@@ -109,7 +109,7 @@ export function ReleaseAppAction({
         const confirmed = await confirmAlert({
           title: `Release ${app.name}?`,
           message: `Version ${version.versionString} will be released on the App Store immediately.`,
-          primaryAction: { title: "Release Now", style: Alert.ActionStyle.Default },
+          primaryAction: { title: "Release Now", style: Alert.ActionStyle.Destructive },
         });
         if (!confirmed) return;
 
@@ -153,7 +153,7 @@ function ReleaseAllAppsAction({ pending }: { pending: PendingRelease[] }) {
         const confirmed = await confirmAlert({
           title: `Release ${pending.length} apps?`,
           message: `This will immediately release all versions pending developer release: ${summary}.`,
-          primaryAction: { title: "Release All", style: Alert.ActionStyle.Default },
+          primaryAction: { title: "Release All", style: Alert.ActionStyle.Destructive },
         });
         if (!confirmed) return;
 

@@ -80,9 +80,8 @@ export default function Command() {
       apps
         .map((app) => ({ app, version: selectVersionForPlatform(app, platformFilter) }))
         .filter(({ version }) => {
-          const matchesStatus = statusFilter === "all" || version?.state === statusFilter;
-          const matchesPlatform = platformFilter === "all" || version !== undefined;
-          return matchesStatus && matchesPlatform;
+          if (!version) return false;
+          return statusFilter === "all" || version.state === statusFilter;
         }),
     [apps, statusFilter, platformFilter],
   );

@@ -7,6 +7,7 @@
 - Release individual or all pending apps in `PENDING_DEVELOPER_RELEASE` state
 
 ## [Fix] - 2024-10-29
-- Add searchBarAccessory in SignIn 
+
+- Add searchBarAccessory in SignIn
 
 ## [Initial Version] - 2024-10-28
