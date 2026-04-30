@@ -5,7 +5,9 @@
   "description": "Fix formatting in Word, PowerPoint, and Excel files",
   "icon": "extension-icon.png",
   "author": "zengtianli",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -28,9 +30,18 @@
           "placeholder": "Target format",
           "required": true,
           "data": [
-            { "title": "CSV", "value": "csv" },
-            { "title": "XLSX", "value": "xlsx" },
-            { "title": "TXT", "value": "txt" }
+            {
+              "title": "CSV",
+              "value": "csv"
+            },
+            {
+              "title": "XLSX",
+              "value": "xlsx"
+            },
+            {
+              "title": "TXT",
+              "value": "txt"
+            }
           ]
         }
       ]
@@ -71,5 +82,8 @@
     "dev": "ray dev",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
