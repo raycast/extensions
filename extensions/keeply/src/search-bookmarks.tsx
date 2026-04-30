@@ -38,12 +38,13 @@ export default function SearchBookmarks() {
   const isSearchMode = searchText.length > 0;
 
   const {
-    data: allBookmarks = [],
+    data: rawBookmarks,
     isLoading: allLoading,
     mutate,
   } = useCachedPromise(() => api.listBookmarks(), [], {
     onError: (error) => showApiError(error, () => mutate()),
   });
+  const allBookmarks = Array.isArray(rawBookmarks) ? rawBookmarks : [];
 
   const { data: sidebar, mutate: sidebarMutate } = useCachedPromise(() => api.getSidebarData(), [], {
     onError: (error) => showApiError(error, () => sidebarMutate()),
