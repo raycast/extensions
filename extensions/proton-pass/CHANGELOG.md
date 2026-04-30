@@ -2,6 +2,7 @@
 
 ## [Improvements] - {PR_MERGE_DATE}
 
+- Fix: Search Items command could show results from only one vault when "All Vaults" was selected (vault share_id now used as fallback during item normalization)
 - Add optional background refresh preference to control cache refresh behavior
 - Add optional web integration to preselect items matching the active browser tab URL
 - Clarify project documentation as independent `proton-pass` implementation
