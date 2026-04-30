@@ -1,6 +1,6 @@
 # Untis Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-04-30
 
 - Fixed an issue where the timetable could not be loaded after logging in
 - Updated dependencies to address security vulnerabilities
