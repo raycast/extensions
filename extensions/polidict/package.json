@@ -5,10 +5,7 @@
   "description": "Master new vocabulary with spaced repetition, AI-powered definitions, and curated word collections",
   "icon": "extension-icon.png",
   "author": "solomkinmv",
-  "platforms": [
-    "macOS",
-    "Windows"
-  ],
+  "platforms": ["macOS"],
   "categories": [
     "Productivity",
     "Web"
