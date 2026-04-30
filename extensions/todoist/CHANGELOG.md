@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Scheduling, repeat options, and sync reliability] - {PR_MERGE_DATE}
+## [Scheduling, repeat options, and sync reliability] - 2026-04-30
 
 - **Set Repeat** in task actions: presets plus search (e.g. `every 2 days`), and an option to clear repeat.
 - **Pick date**: when you set a **due time** (not an all-day date), the extension can add Todoist’s **“at time of task”** relative reminder if you don’t already have one; **hourly** repeat rules get the same treatment.
