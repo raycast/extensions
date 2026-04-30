@@ -186,6 +186,40 @@
       "required": false,
       "placeholder": "llama3.2:latest",
       "default": "llama3.2:latest"
+    },
+    {
+      "name": "waveformWidth",
+      "title": "Waveform Width",
+      "description": "Width of the recording waveform animation in characters. Reduce if the animation wraps onto multiple lines (depends on Raycast window mode and text size).",
+      "type": "dropdown",
+      "required": false,
+      "default": "70",
+      "data": [
+        {
+          "title": "50 (Compact mode / Large text)",
+          "value": "50"
+        },
+        {
+          "title": "60",
+          "value": "60"
+        },
+        {
+          "title": "70 (Default)",
+          "value": "70"
+        },
+        {
+          "title": "80",
+          "value": "80"
+        },
+        {
+          "title": "90",
+          "value": "90"
+        },
+        {
+          "title": "105 (Original)",
+          "value": "105"
+        }
+      ]
     }
   ],
   "dependencies": {

@@ -220,7 +220,7 @@ export default function SimpleDictateCommand() {
 
   const generateWaveformMarkdown = useCallback(() => {
     const waveformHeight = 18;
-    const waveformWidth = 105;
+    const waveformWidth = parseInt(preferences.waveformWidth, 10) || 70;
     let waveform = "```\n";
     waveform += "RECORDING AUDIO... PRESS ENTER TO STOP\n\n";
 

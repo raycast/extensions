@@ -1,5 +1,13 @@
  # Changelog
 
+## [Configurable Waveform Width] - {PR_MERGE_DATE}
+
+### Added
+- New `Waveform Width` preference to control the width of the recording waveform animation. Pick a smaller value if the animation appears to wrap onto multiple lines for your Raycast window mode/text size combination.
+
+### Changed
+- Default waveform width reduced from 105 to 70 characters so the animation fits a default-width Raycast window without wrapping. Users who prefer the original look can select `105 (Original)` in preferences.
+
 ## [0.1.2] - 2025-07-29
 
 ### Fixed
