@@ -1,6 +1,6 @@
 # ZenNotes Changelog
 
-## [Initial Version] - 2026-04-30
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search ZenNotes notes from Raycast using the local `zen` CLI.
 - Open notes in the ZenNotes desktop app or directly in a floating window.
