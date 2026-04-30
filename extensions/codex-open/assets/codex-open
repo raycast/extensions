@@ -1,0 +1,79 @@
+#!/bin/sh
+set -eu
+
+usage() {
+  cat <<'EOF'
+Usage:
+  codex-open [path ...]
+  codex-open --all
+  codex-open --all /path/to/repo
+
+Examples:
+  codex-open
+  codex-open .
+  codex-open ../my-feature-worktree
+  codex-open --all
+  codex-open --all /Users/example/code/my-repo
+EOF
+}
+
+urlencode_path() {
+  python3 -c 'import pathlib, sys, urllib.parse; print(urllib.parse.quote(str(pathlib.Path(sys.argv[1]).resolve()), safe="/"))' "$1"
+}
+
+open_path() {
+  abs_path=$(python3 -c 'import pathlib, sys; print(pathlib.Path(sys.argv[1]).resolve())' "$1")
+  if [ ! -d "$abs_path" ]; then
+    echo "skip: not a directory: $1" >&2
+    return 1
+  fi
+
+  # Codex for macOS accepts a directory through the codex:// URL scheme.
+  encoded_path=$(urlencode_path "$abs_path")
+  deeplink="codex://new?path=$encoded_path"
+  echo "opening: $abs_path"
+  open "$deeplink"
+}
+
+open_all_worktrees() {
+  repo_path="${1:-.}"
+
+  if ! cd "$repo_path"; then
+    echo "cannot enter repo: $repo_path" >&2
+    exit 1
+  fi
+
+  git rev-parse --show-toplevel >/dev/null 2>&1 || {
+    echo "not a git repository: $repo_path" >&2
+    exit 1
+  }
+
+  # Use porcelain output so paths with spaces are handled without parsing columns.
+  git worktree list --porcelain | while IFS= read -r line; do
+    case "$line" in
+      worktree\ *)
+        open_path "${line#worktree }"
+        ;;
+    esac
+  done
+}
+
+if [ $# -eq 0 ]; then
+  open_path "."
+  exit 0
+fi
+
+case "$1" in
+  -h|--help)
+    usage
+    ;;
+  --all)
+    shift
+    open_all_worktrees "${1:-.}"
+    ;;
+  *)
+    for target_path in "$@"; do
+      open_path "$target_path"
+    done
+    ;;
+esac

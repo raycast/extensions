@@ -1,0 +1,86 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "codex-open",
+  "title": "Codex Open",
+  "description": "Search VS Code Project Manager projects and open them in Codex",
+  "icon": "command-icon.png",
+  "author": "miaonster",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-project-manager-projects",
+      "title": "Open Project in Codex",
+      "subtitle": "Project Manager",
+      "description": "Search VS Code Project Manager projects and open them in Codex",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "groupProjectsByTag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Group Projects",
+      "default": true,
+      "label": "by tag",
+      "description": "Group saved projects by tag"
+    },
+    {
+      "name": "hideProjectsWithoutTag",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Projects",
+      "default": false,
+      "label": "without tag",
+      "description": "Hide projects without tags"
+    },
+    {
+      "name": "hideProjectsNotEnabled",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Projects",
+      "default": false,
+      "label": "not enabled",
+      "description": "Hide projects whose enabled flag is false"
+    },
+    {
+      "name": "vscodeApp",
+      "type": "appPicker",
+      "required": false,
+      "title": "VS Code-compatible App",
+      "default": "/Applications/Visual Studio Code.app",
+      "description": "Used only to locate Project Manager storage when Projects Location is blank"
+    },
+    {
+      "name": "projectManagerDataPath",
+      "type": "directory",
+      "required": false,
+      "title": "Projects Location",
+      "description": "Set this only if the VS Code Project Manager extension stores projects in a custom directory"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.102.6",
+    "@raycast/utils": "^1.19.1",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "@typescript-eslint/eslint-plugin": "^8.26.1",
+    "@typescript-eslint/parser": "^8.26.1",
+    "eslint": "^9.22.0",
+    "eslint-config-prettier": "^10.1.1",
+    "prettier": "^3.5.3",
+    "react": "^19.0.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "eslint": "eslint .",
+    "lint": "ray lint",
+    "lint:tsc": "tsc --noEmit",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
