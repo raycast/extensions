@@ -7,8 +7,6 @@ import { SkillDetailView } from "./SkillDetailView";
 interface SkillListItemProps {
   skill: Skill;
   rank?: number;
-  resultSkills: Skill[];
-  resultIndex: number;
   installedMatch: InstalledSkillMatch;
   onViewedSkillChange: (skillId: string) => void;
   onSkillInstalled?: () => void | Promise<void>;
@@ -17,8 +15,6 @@ interface SkillListItemProps {
 export function SkillListItem({
   skill,
   rank,
-  resultSkills,
-  resultIndex,
   installedMatch,
   onViewedSkillChange,
   onSkillInstalled,
@@ -57,14 +53,7 @@ export function SkillListItem({
           <Action.Push
             title="View Details"
             icon={Icon.Sidebar}
-            target={
-              <SkillDetailView
-                resultSkills={resultSkills}
-                initialResultIndex={resultIndex}
-                onViewedSkillChange={onViewedSkillChange}
-                onSkillInstalled={onSkillInstalled}
-              />
-            }
+            target={<SkillDetailView skill={skill} onSkillInstalled={onSkillInstalled} />}
             onPush={() => onViewedSkillChange(skill.id)}
           />
           <InstallSkillAction skill={skill} installedMatch={installedMatch} onSkillInstalled={onSkillInstalled} />

@@ -38,14 +38,11 @@ function getAuditFallbackText(isLoading: boolean, availabilityState?: SkillAudit
 }
 
 interface SkillDetailViewProps {
-  resultSkills: Skill[];
-  initialResultIndex: number;
-  onViewedSkillChange: (skillId: string) => void;
+  skill: Skill;
   onSkillInstalled?: () => void | Promise<void>;
 }
 
-export function SkillDetailView({ resultSkills, initialResultIndex, onSkillInstalled }: SkillDetailViewProps) {
-  const skill = resultSkills[initialResultIndex];
+export function SkillDetailView({ skill, onSkillInstalled }: SkillDetailViewProps) {
   const { getInstalledMatch, revalidate: revalidateInstalledSkillMatches } = useInstalledSkillMatches();
   const installedMatch = getInstalledMatch(skill);
   const { content, frontmatter, isLoading } = useSkillContent(skill, true);

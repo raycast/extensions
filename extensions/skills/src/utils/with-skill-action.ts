@@ -37,14 +37,24 @@ export async function withSkillAction<T = void>({
     title: toastOpts.animatedTitle,
   });
 
+  let result: T;
   try {
-    const result = await operation();
-    toast.style = Toast.Style.Success;
-    toast.title = toastOpts.successTitle;
-    if (toastOpts.successMessage) toast.message = toastOpts.successMessage;
-    await onSuccess?.(result);
+    result = await operation();
   } catch (error) {
     await toast.hide();
     await showFailureToast(error, { title: toastOpts.failureTitle });
+    return;
+  }
+
+  toast.style = Toast.Style.Success;
+  toast.title = toastOpts.successTitle;
+  if (toastOpts.successMessage) toast.message = toastOpts.successMessage;
+
+  if (onSuccess) {
+    try {
+      await onSuccess(result);
+    } catch (error) {
+      console.error("[skills] onSuccess handler failed after a successful operation:", error);
+    }
   }
 }

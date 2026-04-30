@@ -83,12 +83,10 @@ export default function Command() {
         />
       ) : (
         <List.Section title={`Results for "${searchText}"`} subtitle={`${skills.length} skills`}>
-          {skills.map((skill, index) => (
+          {skills.map((skill) => (
             <SkillListItem
               key={skill.id}
               skill={skill}
-              resultSkills={skills}
-              resultIndex={index}
               installedMatch={getInstalledMatch(skill)}
               onViewedSkillChange={setSelectedId}
               onSkillInstalled={refreshCurrentResults}

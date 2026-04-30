@@ -87,9 +87,15 @@ function getConfirmationMessage({
     return `Security audits are pending for this skill and its security status cannot be verified. ${reviewMessage}`;
   }
 
-  return isReplacing
-    ? `This will replace the installed skill for ${formatAgentSummary(replacementAgents)}.`
-    : `This will install the skill for ${formatAgentSummary(selectedAgents)}.`;
+  if (isReplacing) {
+    const replacementSet = new Set(replacementAgents);
+    const additionalAgents = selectedAgents.filter((a) => !replacementSet.has(a));
+    const replacePart = `This will replace the installed skill for ${formatAgentSummary(replacementAgents)}.`;
+    if (additionalAgents.length === 0) return replacePart;
+    return `${replacePart} It will also install the skill for ${formatAgentSummary(additionalAgents)}.`;
+  }
+
+  return `This will install the skill for ${formatAgentSummary(selectedAgents)}.`;
 }
 
 async function hideToastSafely(toast?: Awaited<ReturnType<typeof showToast>>): Promise<void> {
