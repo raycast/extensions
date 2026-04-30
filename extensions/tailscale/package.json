@@ -174,7 +174,7 @@
           "description": "Choose the icon to show in the menu bar when connected",
           "type": "dropdown",
           "required": false,
-          "default": "icon",
+          "default": "command_icon",
           "data": [
             { "title": "Tailscale Icon", "value": "command_icon" },
             { "title": "Green Status Dot", "value": "connected" },

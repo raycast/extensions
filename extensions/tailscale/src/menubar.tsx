@@ -1,14 +1,6 @@
 import { MenuBarExtra, getPreferenceValues, openExtensionPreferences, Clipboard, Image, showHUD } from "@raycast/api";
 import { getDevices, getStatus } from "./shared";
 
-interface MenuBarPreferences {
-  showHostname: boolean;
-  showIP: boolean;
-  showTailnetName: boolean;
-  refreshInterval: string;
-  iconStyle: "command_icon" | "connected" | "link_emoji";
-}
-
 const ICONS: Record<string, Image.ImageLike> = {
   command_icon: { source: "command-icon.png" },
   connected: {
@@ -23,7 +15,7 @@ const ICONS: Record<string, Image.ImageLike> = {
 export default function MenuBar() {
   try {
     const data = getStatus();
-    const prefs = getPreferenceValues<MenuBarPreferences>();
+    const prefs = getPreferenceValues<Preferences.Menubar>();
 
     const hostname = data.Self.HostName;
     const ip = data.Self.TailscaleIPs[0];
@@ -36,7 +28,7 @@ export default function MenuBar() {
     if (prefs.showTailnetName) barTitle += (barTitle ? " · " : "") + tailnetName;
     if (activeExitNode) barTitle += (barTitle ? " · " : "") + `via ${activeExitNode.name}`;
 
-    const icon = ICONS[prefs.iconStyle] ?? ICONS["connected"];
+    const icon = ICONS[prefs.iconStyle] ?? ICONS["command_icon"];
 
     return (
       <MenuBarExtra icon={icon} title={barTitle || undefined} tooltip="Tailscale connected">
