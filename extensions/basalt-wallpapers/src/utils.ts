@@ -55,11 +55,14 @@ function pruneWallpaperCache(keepFilePath: string) {
   const maxFiles = 20;
   const files = fs
     .readdirSync(environment.supportPath)
-    .map((file) => path.join(environment.supportPath, file))
-    .filter(
-      (filePath) => filePath !== keepFilePath && fs.statSync(filePath).isFile(),
-    )
-    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+    .map((file) => {
+      const filePath = path.join(environment.supportPath, file);
+      const stat = fs.statSync(filePath);
+      return { filePath, stat };
+    })
+    .filter(({ filePath, stat }) => filePath !== keepFilePath && stat.isFile())
+    .sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs)
+    .map(({ filePath }) => filePath);
 
   for (const filePath of files.slice(maxFiles - 1)) {
     fs.unlinkSync(filePath);
