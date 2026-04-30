@@ -1,5 +1,9 @@
 # Microsoft Teams Changelog
 
+## [Fix Teams API 2.0 Permissions] - 2026-04-22
+
+- Stops Teams seeking user permission every time the extension performs an action.
+
 ## [Fix Notifications] - 2024-04-04
 
 - Fix inverted notifications for quick actions toggle mute and toggle camera.

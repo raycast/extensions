@@ -656,11 +656,7 @@ export default function FolderContentsView({ folderId, folderName, parentPath }:
   const separateSections = prefs.gridSeparateSections ?? true;
 
   if (!folder) {
-    return (
-      <List isLoading={isLoading}>
-        <List.EmptyView {...FOLDER_NOT_FOUND_VIEW} />
-      </List>
-    );
+    return <List isLoading={isLoading}>{!isLoading && <List.EmptyView {...FOLDER_NOT_FOUND_VIEW} />}</List>;
   }
 
   const commonProps = {

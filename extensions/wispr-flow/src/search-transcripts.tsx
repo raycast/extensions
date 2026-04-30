@@ -23,7 +23,8 @@ import {
   formatDuration,
   groupTranscriptsByDate,
 } from "./utils";
-import { getDbPath, dbExists, writeSQL } from "./db";
+import { getDbPath, dbExists, openWisprFlow, writeSQL } from "./db";
+import { getWindowsAppPathMap } from "./platform";
 
 const COLUMNS = `transcriptEntityId, asrText, formattedText, editedText,
   timestamp, app, url, duration, numWords, status, language, conversationId, isArchived`;
@@ -159,12 +160,28 @@ export default function Command() {
   }, [uniqueAppsData]);
 
   const { data: installedApps } = usePromise(getApplications);
+  const { data: winRegistryMap } = usePromise(() =>
+    process.platform === "win32"
+      ? getWindowsAppPathMap()
+      : Promise.resolve(new Map<string, string>()),
+  );
   const appPathMap = useMemo(() => {
     const map = new Map<string, string>();
+    const isWindows = process.platform === "win32";
     for (const app of installedApps ?? []) {
-      if (app.bundleId) {
+      if (isWindows) {
+        const exeName = app.path
+          .split(/[\\/]/)
+          .pop()
+          ?.replace(/\.exe$/i, "")
+          .toLowerCase();
+        if (exeName) map.set(exeName, app.path);
+      } else if (app.bundleId) {
         map.set(app.bundleId, app.path);
       }
+    }
+    for (const [name, path] of winRegistryMap ?? []) {
+      if (!map.has(name)) map.set(name, path);
     }
     // Map legacy bundle IDs to current app paths
     const BUNDLE_ALIASES: Record<string, string> = {
@@ -176,7 +193,7 @@ export default function Command() {
       }
     }
     return map;
-  }, [installedApps]);
+  }, [installedApps, winRegistryMap]);
 
   const allTranscripts = data ?? [];
   const groups = groupTranscriptsByDate(allTranscripts);
@@ -223,7 +240,6 @@ export default function Command() {
               appPathMap={appPathMap}
               primaryAction={primaryAction}
               confirmBeforeArchive={confirmBeforeArchive}
-              dbPath={dbPath}
               onArchive={revalidate}
             />
           ))}
@@ -249,14 +265,12 @@ function TranscriptListItem({
   appPathMap,
   primaryAction,
   confirmBeforeArchive,
-  dbPath,
   onArchive,
 }: {
   transcript: Transcript;
   appPathMap: Map<string, string>;
   primaryAction: string;
   confirmBeforeArchive: boolean;
-  dbPath: string;
   onArchive: () => void;
 }) {
   const displayText = getDisplayText(transcript);
@@ -268,7 +282,11 @@ function TranscriptListItem({
     displayText.length > 80
       ? displayText.substring(0, 80) + "..."
       : displayText;
-  const appPath = transcript.app ? appPathMap.get(transcript.app) : undefined;
+  const appKey =
+    process.platform === "win32"
+      ? transcript.app?.toLowerCase()
+      : transcript.app;
+  const appPath = appKey ? appPathMap.get(appKey) : undefined;
   const appIcon = appPath ? { fileIcon: appPath } : Icon.Microphone;
 
   const handleArchive = useCallback(async () => {
@@ -284,7 +302,7 @@ function TranscriptListItem({
       if (!confirmed) return;
     }
     const escaped = transcript.transcriptEntityId.replace(/'/g, "''");
-    writeSQL(
+    await writeSQL(
       `UPDATE History SET isArchived = 1 WHERE transcriptEntityId = '${escaped}'`,
     );
     onArchive();
@@ -294,7 +312,7 @@ function TranscriptListItem({
       primaryAction: {
         title: "Undo",
         onAction: async (toast) => {
-          writeSQL(
+          await writeSQL(
             `UPDATE History SET isArchived = 0 WHERE transcriptEntityId = '${escaped}'`,
           );
           onArchive();
@@ -302,9 +320,8 @@ function TranscriptListItem({
         },
       },
     });
-  }, [transcript.transcriptEntityId, confirmBeforeArchive, dbPath, onArchive]);
+  }, [transcript.transcriptEntityId, confirmBeforeArchive, onArchive]);
 
-  const wisprFlowPath = appPathMap.get("com.electron.wispr-flow");
   const hasOriginalText =
     transcript.asrText && transcript.asrText !== displayText;
 
@@ -414,14 +431,12 @@ function TranscriptListItem({
                 target={appPath}
               />
             ) : null}
-            {wisprFlowPath ? (
-              <Action.Open
-                title="Open Wispr Flow"
-                icon={Icon.Microphone}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
-                target={wisprFlowPath}
-              />
-            ) : null}
+            <Action
+              title="Open Wispr Flow"
+              icon={Icon.Microphone}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+              onAction={() => openWisprFlow("wispr-flow://open")}
+            />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
@@ -441,7 +456,6 @@ function TranscriptListItem({
             <Action
               title="Open Extension Preferences"
               icon={Icon.Gear}
-              shortcut={{ modifiers: ["cmd"], key: "," }}
               onAction={openExtensionPreferences}
             />
           </ActionPanel.Section>

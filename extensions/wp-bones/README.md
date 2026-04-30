@@ -16,11 +16,13 @@ This mod provides several commands centered around managing the [WP Bones](https
 
 ## Features
 
-- **Search in the WP Bones Documentation**: Search the WP Bones documentation for a specific keyword.
-- **Open the WP Bones Documentation**: Open the WP Bones documentation in your default browser.
-- **Create a New Plugin**: Create a new plugin using the WP Bones template.
-- 🆕 **See in Action**: Open the WP Bones Boilerplate in the WordPress Playground to see it in action before starting to develop.
-- **Menu bar commands**: Quickly access the most common commands from the menu bar. And check the latest version of WP Bones.
+- **Search in the WP Bones Documentation**: Search the WP Bones documentation for a specific keyword
+- **Ask WP Bones AI**: Ask questions about WP Bones and get AI-powered answers based on the documentation (requires Raycast Pro)
+- **Create a New Plugin**: Create a new plugin using the WP Bones template, with README preview before creating
+- **WP Bones Release Notes**: View the latest release notes inline without opening the browser
+- **See in Action**: Open the WP Bones Boilerplate in the WordPress Playground to see it in action before starting to develop
+- **Boilerplate Preview** (⌘P): Preview the README of any template before creating a repository
+- **Menu bar commands**: Quickly access the most common commands from the menu bar and check the latest version of WP Bones
 
 
 ## Overview

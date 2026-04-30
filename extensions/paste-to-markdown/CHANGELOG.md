@@ -1,5 +1,11 @@
 # Paste to Markdown Changelog
 
+## [Add Slack Message Composer Support] - 2026-04-15
+
+- Support for rich text copied from Slack's message composer (Quill Delta format)
+- Parse Chromium web-custom-data pasteboard type to extract Slack clipboard payloads
+- Convert Slack's Quill Delta operations to Markdown with proper formatting
+
 ## [Add Table and GFM Support] - 2026-01-06
 
 ### Added

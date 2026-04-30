@@ -1,5 +1,9 @@
 # nocal Changelog
 
+## [Chore] - 2026-04-07
+
+- Move to nocal repository
+
 ## [Initial Release] - 2026-04-02
 
 ### Added

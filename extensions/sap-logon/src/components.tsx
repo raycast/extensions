@@ -13,6 +13,7 @@ export const LANGUAGES = [
   { value: "ZH", title: "Chinese (ZH)" },
   { value: "JA", title: "Japanese (JA)" },
   { value: "KO", title: "Korean (KO)" },
+  { value: "TR", title: "Turkish (TR)" },
 ] as const;
 
 interface LanguageDropdownProps {

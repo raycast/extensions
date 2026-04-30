@@ -91,3 +91,8 @@ Google requires each OAuth app to go through a verification process for publishe
 
 **Is my data safe?**
 All authentication is handled locally by Raycast's built-in OAuth PKCE flow. Your tokens are stored securely in your system keychain. The extension never transmits data anywhere other than directly to Google's APIs.
+
+## Troubleshooting
+
+**"Google People API is not enabled in your project"**
+You need to enable the People API separately from creating your OAuth Client ID. Go to the [People API page](https://console.cloud.google.com/apis/library/people.googleapis.com) and click **Enable**. If you just enabled it, wait a minute for Google to propagate the change, then try again.

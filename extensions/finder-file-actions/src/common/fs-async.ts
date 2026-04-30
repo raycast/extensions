@@ -233,4 +233,30 @@ export const fsAsync = {
 
     return results;
   },
+
+  // create a directory with error handling
+  async createDirectory(dirPath: string): Promise<FileOperationResult> {
+    try {
+      await fs.ensureDir(dirPath);
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error : new Error("Unknown error creating directory"),
+      };
+    }
+  },
+
+  // write a file with error handling
+  async writeFile(filePath: string, content: string): Promise<FileOperationResult> {
+    try {
+      await fs.writeFile(filePath, content, "utf-8");
+      return { success: true };
+    } catch (error) {
+      return {
+        success: false,
+        error: error instanceof Error ? error : new Error("Unknown error writing file"),
+      };
+    }
+  },
 };

@@ -139,7 +139,9 @@ export default function ExploreSnippets(props: Props) {
                     ? { source: Icon.CheckCircle, tintColor: Color.Green }
                     : {
                         source: useRaycastIcon
-                          ? `${quicklink?.icon?.name}-16` || "link"
+                          ? quicklink?.icon?.name
+                            ? `${quicklink.icon.name}-16`
+                            : "link"
                           : `https://api.ray.so/favicon?url=%5C${domain}&size=64`,
                       }
                 }

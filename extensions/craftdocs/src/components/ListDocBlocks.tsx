@@ -1,16 +1,19 @@
 import { Action, ActionPanel, Color, List } from "@raycast/api";
-import React from "react";
-import { DocBlock } from "../hooks/useDocumentSearch";
+import type { ComponentProps } from "react";
+import { CraftConfig } from "../Config";
+import { DocBlock } from "../lib/search";
 import CreateDocumentItem from "./CreateDocumentItem";
-import Config from "../Config";
+
+type SearchBarAccessory = ComponentProps<typeof List>["searchBarAccessory"];
 
 type ListDocBlocksParams = {
   resultsLoading: boolean;
   setQuery: (query: string) => void;
   results: DocBlock[];
   query: string;
-  config: Config | null;
-  searchBarAccessory?: any; // Necessary due to Raycast API type conflicts. Keep it that way.
+  config: CraftConfig | null;
+  createDocumentSpaceId?: string;
+  searchBarAccessory?: SearchBarAccessory;
 };
 
 export default function ListDocBlocks({
@@ -19,9 +22,10 @@ export default function ListDocBlocks({
   setQuery,
   query,
   config,
+  createDocumentSpaceId = "",
   searchBarAccessory,
 }: ListDocBlocksParams) {
-  const showSpaceInfo = config ? config.getEnabledSpaces().length > 1 : false;
+  const showSpaceInfo = config ? config.enabledSpaces.length > 1 : false;
   return (
     <List
       isLoading={resultsLoading}
@@ -60,8 +64,8 @@ export default function ListDocBlocks({
         />
       ))}
       {query.length > 0 && (
-        <List.Section title="Create new document">
-          <CreateDocumentItem query={query} spaceID={config?.primarySpace()?.spaceID || ""} />
+        <List.Section title="Create new Document">
+          <CreateDocumentItem query={query} spaceID={createDocumentSpaceId} />
         </List.Section>
       )}
     </List>

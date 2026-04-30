@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { ActionPanel, Action, List, Icon, Color, Toast, showToast } from "@raycast/api";
 import { ComputeService, Disk } from "./ComputeService";
+import { friendlyErrorMessage } from "../../utils/errorMessages";
 
 interface ComputeDisksViewProps {
   projectId: string;
@@ -42,10 +43,11 @@ export default function ComputeDisksView({ projectId, gcloudPath }: ComputeDisks
       } catch (error: Error | unknown) {
         console.error("Error initializing:", error);
         loadingToast.then((toast) => toast.hide());
+        const friendly = friendlyErrorMessage(error, "Failed to Load Disks");
         showToast({
           style: Toast.Style.Failure,
-          title: "Failed to Load Disks",
-          message: error instanceof Error ? error.message : "Unknown error",
+          title: friendly.title,
+          message: friendly.message,
         });
       } finally {
         setIsLoading(false);

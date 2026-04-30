@@ -1,5 +1,28 @@
 # ClaudeCast Changelog
 
+## [1.5.0] - 2026-04-30
+
+### Added
+
+- **Launch Project Preferences**: Configurable Permission Mode and Model Override settings for the Launch Project command. All launch actions (New Session, Continue Last, Continue with Prompt) respect these preferences.
+- **Deep Search Permission Restore**: Sessions resumed or forked from Deep Search now restore the original permission mode.
+
+### Fixed
+
+- **Model Flag on Resume**: Removed explicit `--model` flag when resuming or continuing sessions. Claude Code remembers the model internally, and passing `--model` explicitly could disable features like extended context windows (1M). The `--model` flag is now only used for new sessions via the Launch Project model preference.
+
+## [1.4.0] - 2026-04-13
+
+### Fixed
+
+- **Underscore Path Resolution**: Projects with underscores in their path (e.g. `my_project`) now resolve correctly when browsing sessions. Claude Code encodes underscores as dashes in directory names, and the filesystem walk now probes underscore variants alongside dash variants.
+- **encodeProjectPath**: Updated to replace `_` with `-` alongside `/` and `.`, matching Claude Code's actual encoding behavior.
+
+### Added
+
+- **Permission Mode Restore on Resume**: Sessions started with non-default permission modes (e.g. `bypassPermissions`, `auto`, `plan`) now resume with the same mode. The `permissionMode` is parsed from session JSONL and passed as `--permission-mode` flag to Claude Code.
+- **Model Restore on Resume**: Sessions now resume with the same model they were started with (e.g. a Haiku session won't unexpectedly resume with Opus). The model is passed as `--model` flag to Claude Code.
+
 ## [1.3.0] - 2026-04-06
 
 ### Added

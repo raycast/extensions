@@ -1,4 +1,11 @@
-import { createContact, deleteContact, fetchAllContacts, getContact, searchContacts, updateContact } from "../api";
+import {
+  createContact,
+  deleteContact,
+  fetchContactsFirstPage,
+  getContact,
+  searchContacts,
+  updateContact,
+} from "../api";
 import { google } from "../oauth";
 
 type Input = {
@@ -97,8 +104,7 @@ export default async function tool(input: Input) {
   switch (input.operation) {
     case "search": {
       if (!input.query) {
-        const contacts = await fetchAllContacts(token);
-        return contacts.slice(0, 30);
+        return await fetchContactsFirstPage(token);
       }
       const results = await searchContacts(token, input.query);
       if (results.length === 0) {
