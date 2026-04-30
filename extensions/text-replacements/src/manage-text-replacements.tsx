@@ -209,8 +209,8 @@ function ReplacementForm({ initial, onSave }: { initial?: Replacement; onSave: (
       }
       notifySystem();
       onSave();
-      pop();
       await showToast({ style: Toast.Style.Success, title: initial ? "Replacement updated" : "Replacement added" });
+      pop();
     } catch (error) {
       showFailureToast(error, { title: "Failed to save replacement" });
     }
@@ -312,6 +312,7 @@ export default function ManageTextReplacements() {
                     title="Paste Expansion"
                     onAction={async () => {
                       await Clipboard.paste(item.replacement);
+                      await showHUD(`Pasted expansion for "${item.phrase}"`);
                     }}
                   />
                 </ActionPanel.Section>
