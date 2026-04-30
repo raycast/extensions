@@ -1,5 +1,9 @@
 # Display Input Switcher Changelog
 
+## [Added more input sources] - 2026-04-27
+
+- Added VGA-1, VGA-2, DVI-1, DVI-2 and HDMI 3 / Alt DP 2 to command argument lists
+
 ## [Added HDMI 3 source option] - 2026-04-13
 
 - Added HDMI 3 / Alt DP 2 to the list of available display input sources

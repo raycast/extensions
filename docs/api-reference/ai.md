@@ -184,6 +184,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-4
 | Anthropic_Claude_4.6_Sonnet | Anthropic's most intelligent model with the highest intelligence across most tasks. |
 | Anthropic_Claude_4.5_Opus | Anthropic's previous generation Opus model with enhanced capabilities. |
 | Anthropic_Claude_4.6_Opus | Anthropic's model for complex tasks with exceptional fluency. |
+| Anthropic_Claude_4.7_Opus | Anthropic's most powerful model with combined reasoning and non-reasoning capabilities. |
 | Perplexity_Sonar | Fast Perplexity model with integrated search capabilities. |
 | Perplexity_Sonar_Pro | Advanced Perplexity model for complex queries with search integration. |
 | Groq_Llama_4_Scout | Advanced 17B parameter multimodal model with 16 experts. |
@@ -194,7 +195,6 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-4
 | Mistral_Medium | A powerful, cost-effective, frontier-class multimodal model. |
 | Mistral_Small_3 | Latest enterprise-grade small model with improved reasoning. |
 | Mistral_Codestral | Specialized model for code-related tasks and testing. |
-| Groq_Kimi_K2_Instruct | Kimi K2 is a powerful and versatile AI model designed for a wide range of tasks. |
 | Groq_Qwen3-32B | The latest generation of large language models in the Qwen series. |
 | Google_Gemini_3.1_Flash_Lite | Ultra-fast, cost-effective model for high-volume tasks and lightweight agentic workflows. |
 | Google_Gemini_3_Flash | Fast thinking model with strong balance of speed, performance, and value. |

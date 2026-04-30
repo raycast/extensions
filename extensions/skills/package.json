@@ -10,7 +10,8 @@
     "dominik_lukes",
     "raulg",
     "elwin_liu",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "kayo_timoteo"
   ],
   "platforms": [
     "macOS",
@@ -40,7 +41,7 @@
     {
       "name": "customNpxPath",
       "title": "Custom npx Path",
-      "description": "Optional custom `npx` path override for cases when the extension cannot detect it automatically.",
+      "description": "Optional override for the `npx` executable when automatic detection does not work.",
       "placeholder": "e.g., /opt/homebrew/bin/npx or ~/.local/bin/npx",
       "type": "textfield",
       "required": false
@@ -50,6 +51,14 @@
       "title": "GitHub Personal Access Token",
       "description": "Optional token to increase the GitHub API rate limit from 60 to 5,000 requests/hour.",
       "type": "password",
+      "required": false
+    },
+    {
+      "name": "disableSkillsCliTelemetry",
+      "title": "Disable Skills CLI Telemetry",
+      "label": "Opt out of Skills CLI telemetry",
+      "description": "Opt out of anonymous usage data collected by the underlying Skills CLI for commands run through this extension. The extension itself does not collect telemetry data.",
+      "type": "checkbox",
       "required": false
     }
   ],

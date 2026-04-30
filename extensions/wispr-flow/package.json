@@ -5,7 +5,8 @@
   "description": "Search transcription history, manage your custom dictionary, and control voice recording with Wispr Flow",
   "icon": "icon.png",
   "author": "carterm",
-  "contributors": ["christi4nity", "mattiacolombomc"],
+  "contributors": ["christi4nity", "mattiacolombomc",
+    "traviscooksfdc"],
   "categories": [
     "Productivity",
     "Applications"
@@ -80,6 +81,13 @@
       "subtitle": "Wispr Flow",
       "description": "View, search, edit, and delete words in your Wispr Flow dictionary",
       "mode": "view"
+    },
+    {
+      "name": "toggle-recording",
+      "title": "Toggle Recording",
+      "subtitle": "Wispr Flow",
+      "description": "Toggle Wispr Flow voice dictation on/off",
+      "mode": "no-view"
     },
     {
       "name": "start-recording",

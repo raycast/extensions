@@ -5,6 +5,10 @@
   "description": "Navigate open tabs, bookmarks, and the web in Helium browser",
   "icon": "icon.png",
   "author": "islamtayeb",
+  "contributors": [
+    "mallsjr",
+    "IslamTayeb"
+  ],
   "platforms": [
     "macOS"
   ],
@@ -44,15 +48,6 @@
           "value": "ecosia"
         }
       ]
-    },
-    {
-      "name": "enableSpaceSwitching",
-      "title": "Enable Space Switching (Experimental)",
-      "description": "⚠️ EXPERIMENTAL: Automatically switch to Helium's macOS Space when selecting tabs. Works by briefly opening/closing a temporary tab. May cause a brief visual flicker.",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "label": "Enable automatic Space switching"
     }
   ],
   "commands": [
