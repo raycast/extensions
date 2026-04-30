@@ -14,6 +14,9 @@ import {
 } from "@raycast/api";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { JobState, listJobs, isJobRunning } from "./utils/jobs";
+
+/** Running flag from last refresh — avoids re-calling isJobRunning during render. */
+type JobRow = JobState & { _running: boolean };
 import { LOG_FILE } from "./utils/constants";
 import { STAGE_LABELS, progressBar, formatElapsed } from "./utils/format";
 import { IngestStatusView } from "./components/ingest-status-view";
@@ -28,7 +31,7 @@ function summarize(job: JobState): { title: string; subtitle: string } {
 }
 
 export default function Command() {
-  const [jobs, setJobs] = useState<JobState[]>([]);
+  const [jobs, setJobs] = useState<JobRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const lastSnapshotRef = useRef("");
 
@@ -41,7 +44,7 @@ export default function Command() {
       if (a.running !== b.running) return a.running ? -1 : 1;
       return b.job.startedAt.localeCompare(a.job.startedAt);
     });
-    const sorted = withStatus.map((x) => x.job);
+    const sorted: JobRow[] = withStatus.map(({ job, running }) => ({ ...job, _running: running }));
 
     // Skip re-render when nothing changed
     const snapshot = JSON.stringify(sorted);
@@ -59,7 +62,7 @@ export default function Command() {
   }, [refresh]);
 
   const stopJob = useCallback(
-    async (job: JobState) => {
+    async (job: JobRow) => {
       const ok = await confirmAlert({
         title: `Stop "${job.folderName}"?`,
         message: "Files already copied will remain in the destination folder.",
@@ -89,11 +92,10 @@ export default function Command() {
     }
   }, []);
 
-  // Single pass — avoids calling isProcessAlive (syscall) twice per job
-  const running: JobState[] = [];
-  const finished: JobState[] = [];
+  const running: JobRow[] = [];
+  const finished: JobRow[] = [];
   for (const job of jobs) {
-    (isJobRunning(job) ? running : finished).push(job);
+    (job._running ? running : finished).push(job);
   }
 
   const globalActions = (

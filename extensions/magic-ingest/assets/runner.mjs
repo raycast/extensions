@@ -703,7 +703,7 @@ async function main() {
 
   } catch (err) {
     await logLine(`Pipeline error: ${String(err)}`);
-
+    progressState.error = `Pipeline error: ${String(err)}`;
   } finally {
     // Write "done" stage so the UI can detect completion and clear the subtitle
     await writeProgress("done", 0, 0);
