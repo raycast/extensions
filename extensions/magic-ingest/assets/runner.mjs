@@ -479,10 +479,9 @@ async function resolveExiftool() {
     try {
       if (candidate !== "exiftool") {
         await stat(candidate);
-      } else {
-        // For PATH fallback, verify it runs
-        await execFileAsync(candidate, ["-ver"]);
       }
+      // Match UI pre-flight: ensure the binary actually runs (not just present on disk)
+      await execFileAsync(candidate, ["-ver"]);
       return candidate;
     } catch {
       // not found, try next

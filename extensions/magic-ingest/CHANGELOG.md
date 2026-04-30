@@ -1,6 +1,6 @@
 # Magic Ingest Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release: background photo & video ingest from memory cards, live progress, date and star filtering, SHA-256 verification, smart collision handling, renaming with folder prefix, Photo Mechanic integration, auto-eject, recent presets
 - Support up to 3 concurrent ingest jobs (previously only one at a time)
