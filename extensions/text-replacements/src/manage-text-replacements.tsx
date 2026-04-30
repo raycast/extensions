@@ -267,10 +267,11 @@ export default function ManageTextReplacements() {
     try {
       deleteReplacement(item.dbPK);
       notifySystem();
-      refresh();
       await showToast({ style: Toast.Style.Success, title: `Deleted "${item.phrase}"` });
     } catch (error) {
       showFailureToast(error, { title: "Failed to delete replacement" });
+    } finally {
+      refresh();
     }
   }
 
