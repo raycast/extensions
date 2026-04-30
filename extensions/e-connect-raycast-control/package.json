@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "e-connect-raycast-control",
+  "title": "E-Connect Raycast Control",
+  "description": "Control E-Connect devices, automations, and server status from Raycast.",
+  "icon": "icon.png",
+  "author": "dinh_trung_kien",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools"
+  ],
+  "keywords": [
+    "e-connect",
+    "iot",
+    "smart-home",
+    "mqtt",
+    "raycast"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "subtitle": "E-Connect",
+      "description": "View server health, alerts, and fleet summary",
+      "mode": "view"
+    },
+    {
+      "name": "devices",
+      "title": "Devices",
+      "subtitle": "E-Connect",
+      "description": "List devices and send quick power commands",
+      "mode": "view"
+    },
+    {
+      "name": "automations",
+      "title": "Automations",
+      "subtitle": "E-Connect",
+      "description": "Run or stop saved automations from Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "open-web-ui",
+      "title": "Open Web UI",
+      "subtitle": "E-Connect",
+      "description": "Open the E-Connect web interface in your browser",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverAddress",
+      "title": "Server IP:Port",
+      "description": "Direct E-Connect backend endpoint for API keys. Use IP:Port like 192.168.1.25:8000 or paste the full URL from docs/API_KEYS.md.",
+      "type": "textfield",
+      "required": true,
+      "default": "192.168.1.25:8000",
+      "placeholder": "192.168.1.25:8000"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Server-side bearer API key created in WebUI -> Settings -> API Keys for that same server.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Paste your E-Connect API key"
+    },
+    {
+      "name": "allowInsecureTls",
+      "title": "TLS",
+      "description": "Allow locally issued or self-signed certificates when using HTTPS.",
+      "type": "checkbox",
+      "required": false,
+      "label": "Allow self-signed certificates",
+      "default": false
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray fix-lint"
+  },
+  "dependencies": {
+    "@raycast/api": "1.104.12",
+    "react": "19.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.3",
+    "typescript": "5.9.3"
+  }
+}
