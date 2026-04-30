@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Add Repository Shortcut] - {PR_MERGE_DATE}
+
+- Add a keyboard shortcut to open a skill's repository from the action panel
+
 ## [Add bunx support] - 2026-04-28
 
 - Added initial support for `bunx`, it is only called optimally if `npx` is not found

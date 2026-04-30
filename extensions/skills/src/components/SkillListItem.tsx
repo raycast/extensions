@@ -238,7 +238,12 @@ export function SkillListItem({
             icon={Icon.Terminal}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
-          <Action.OpenInBrowser title="Open Repository" url={`https://github.com/${skill.source}`} icon={Icon.Globe} />
+          <Action.OpenInBrowser
+            title="Open Repository"
+            url={`https://github.com/${skill.source}`}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
+          />
           <Action.OpenInBrowser
             title="Open Skills"
             url={`${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`}
