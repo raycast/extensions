@@ -1,5 +1,9 @@
 # Tailscale Changelog
 
+## [Add new features] - {PR_MERGE_DATE}
+
+- Added Menu bar indicator: shows an icon when connected, nothing when disconnected
+
 ## [Fix Account Switcher] - 2026-04-12
 
 - Fix "Switch Account" not showing tailnet and account names correctly
