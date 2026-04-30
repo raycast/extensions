@@ -1,6 +1,6 @@
 # App Store Connect Changelog
 
-## [Add View App Status Command] - {PR_MERGE_DATE}
+## [Add View App Status Command] - 2026-04-30
 
 - Add `View App Status` command to display app statuses and release versions pending developer release
 - Filter apps by platform (iOS, macOS, tvOS, visionOS) and by App Store state
