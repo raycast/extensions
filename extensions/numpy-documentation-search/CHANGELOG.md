@@ -1,6 +1,6 @@
 # NumPy Documentation Search Changelog
 
-## [1.3.1] - {PR_MERGE_DATE}
+## [1.3.1] - 2026-04-30
 
 ### Changed
 
