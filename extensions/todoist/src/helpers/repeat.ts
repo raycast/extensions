@@ -19,10 +19,21 @@ function repeatIcon(unit: RecurrenceUnit) {
   return unit === "hour" ? Icon.Clock : Icon.Calendar;
 }
 
+function anchorAllDayDateToNow(date: string): string {
+  if (date.includes("T")) return date;
+  const [y, m, d] = date.split("-").map((n) => Number.parseInt(n, 10));
+  if (![y, m, d].every(Number.isFinite)) return date;
+  const now = new Date();
+  return new Date(y, m - 1, d, now.getHours(), now.getMinutes(), now.getSeconds(), now.getMilliseconds()).toISOString();
+}
+
 export function repeatDuePayload(task: Task, recurrence?: string): DateOrString {
   return recurrence
     ? task.due?.date
-      ? { string: recurrence, date: task.due.date }
+      ? {
+          string: recurrence,
+          date: isHourlyDueString(recurrence) ? anchorAllDayDateToNow(task.due.date) : task.due.date,
+        }
       : { string: recurrence }
     : task.due?.date
       ? { date: task.due.date }
@@ -47,7 +58,7 @@ export function buildDynamicRepeatOptions(searchText: string) {
   const m = searchText
     .trim()
     .toLowerCase()
-    .match(/^every\s+(\d+)(?:\s+([a-z]+))?$/i);
+    .match(/^every\s+(\d+)(?:\s+([a-z]+))?$/);
   if (!m) return [];
   const interval = parseInt(m[1], 10);
   if (!Number.isFinite(interval) || interval <= 1) return [];

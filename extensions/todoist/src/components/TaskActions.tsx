@@ -20,6 +20,7 @@ import {
   Reminder,
   SyncData,
   Task,
+  TaskUpdateSyncedContext,
   UpdateTaskArgs,
   addTask,
   addReminder as apiAddReminder,
@@ -109,11 +110,14 @@ export default function TaskActions({
     }
   }
 
-  async function updateTask(payload: UpdateTaskArgs): Promise<boolean> {
+  async function updateTask(
+    payload: UpdateTaskArgs,
+    onSynced?: (ctx: TaskUpdateSyncedContext) => void,
+  ): Promise<boolean> {
     await showToast({ style: Toast.Style.Animated, title: "Updating task" });
 
     try {
-      await apiUpdateTask(payload, { data, setData });
+      await apiUpdateTask(payload, { data, setData }, onSynced);
       await showToast({ style: Toast.Style.Success, title: "Task updated" });
       await refreshMenuBarCommand();
       return true;
@@ -123,18 +127,28 @@ export default function TaskActions({
     }
   }
 
-  async function ensureAtTaskTimeReminder(itemId: string) {
-    if (hasAtTaskTimeRelativeReminder(data?.reminders, itemId)) return;
+  async function ensureAtTaskTimeReminder(itemId: string, syncReminders?: Reminder[]) {
+    const hasAtTimeInSync = syncReminders !== undefined && hasAtTaskTimeRelativeReminder(syncReminders, itemId);
+    const hasAtTimeInCache = hasAtTaskTimeRelativeReminder(data?.reminders, itemId);
+    if (hasAtTimeInSync || (syncReminders === undefined && hasAtTimeInCache)) return;
     try {
       await apiAddReminder({ item_id: itemId, type: "relative", minute_offset: 0 }, { data, setData });
     } catch (error) {
+      // Sync said "missing" but cached props said "present": treat Bad Request as duplicate conflict.
+      if (hasAtTimeInCache && syncReminders !== undefined && `${error}`.includes("Bad Request")) return;
       await showFailureToast(error, { title: "Unable to add reminder" });
     }
   }
 
   async function setRecurrence(recurrence?: string) {
-    if (!(await updateTask({ id: task.id, due: repeatDuePayload(task, recurrence) }))) return;
-    if (isHourlyDueString(recurrence)) await ensureAtTaskTimeReminder(task.id);
+    let syncReminders: Reminder[] | undefined;
+    if (
+      !(await updateTask({ id: task.id, due: repeatDuePayload(task, recurrence) }, (ctx) => {
+        syncReminders = ctx.syncReminders;
+      }))
+    )
+      return;
+    if (isHourlyDueString(recurrence)) await ensureAtTaskTimeReminder(task.id, syncReminders);
   }
 
   const repeatOptions = [...buildDynamicRepeatOptions(repeatSearchText), ...filterRepeatPresets(repeatSearchText)];
@@ -283,8 +297,14 @@ export default function TaskActions({
               const due = date
                 ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
                 : { string: "no date" };
-              if (!(await updateTask({ id: task.id, due }))) return;
-              if (date && !Action.PickDate.isFullDay(date)) await ensureAtTaskTimeReminder(task.id);
+              let syncReminders: Reminder[] | undefined;
+              if (
+                !(await updateTask({ id: task.id, due }, (ctx) => {
+                  syncReminders = ctx.syncReminders;
+                }))
+              )
+                return;
+              if (date && !Action.PickDate.isFullDay(date)) await ensureAtTaskTimeReminder(task.id, syncReminders);
             }}
           />
           <ActionPanel.Submenu

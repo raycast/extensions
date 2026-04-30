@@ -53,6 +53,11 @@ export type CachedDataParams = {
   setData: Dispatch<SetStateAction<SyncData | undefined>>;
 };
 
+/** Optional third argument to `updateTask` — called synchronously after merge with reminders from sync when callers need fresh data before re-render */
+export type TaskUpdateSyncedContext = {
+  syncReminders: SyncData["reminders"] | undefined;
+};
+
 // Applies sync deltas on top of the latest React state so consecutive writes cannot use a stale snapshot.
 function mergeIntoCachedData(
   setData: Dispatch<SetStateAction<SyncData | undefined>>,
@@ -312,17 +317,11 @@ export async function addTask(args: AddTaskArgs, { data, setData }: CachedDataPa
     ],
   });
 
-  const newData = data ? { ...data, items: updatedData.items } : updatedData;
   if (data) {
     mergeIntoCachedData(setData, (prev) => ({ ...prev, items: updatedData.items }));
   }
 
-  // In the case where the user uploads a file, we need to return the updated data
-  // so that addComment doesn't overwrite the cached data with the newly created task
-  return {
-    id: updatedData.temp_id_mapping ? updatedData.temp_id_mapping[temp_id] : null,
-    data: newData,
-  };
+  return { id: updatedData.temp_id_mapping ? updatedData.temp_id_mapping[temp_id] : null };
 }
 
 export type UpdateTaskArgs = {
@@ -339,7 +338,11 @@ export type UpdateTaskArgs = {
   day_order?: number;
 };
 
-export async function updateTask(args: UpdateTaskArgs, cachedData?: CachedDataParams) {
+export async function updateTask(
+  args: UpdateTaskArgs,
+  cachedData?: CachedDataParams,
+  onSynced?: (ctx: TaskUpdateSyncedContext) => void,
+): Promise<void> {
   const updatedData = await syncRequest({
     sync_token,
     resource_types: ["items", "reminders"],
@@ -352,14 +355,18 @@ export async function updateTask(args: UpdateTaskArgs, cachedData?: CachedDataPa
     ],
   });
 
+  const syncReminders = Array.isArray(updatedData.reminders) ? updatedData.reminders : undefined;
+
   // If returned items length is 0 then no update is needed, we can skip.
   if (cachedData?.setData && updatedData.items.length > 0) {
     mergeIntoCachedData(cachedData.setData, (prev) => ({
       ...prev,
       items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
-      ...(Array.isArray(updatedData.reminders) ? { reminders: updatedData.reminders } : {}),
+      ...(syncReminders ? { reminders: syncReminders } : {}),
     }));
   }
+
+  onSynced?.({ syncReminders });
 }
 
 export async function closeTask(id: string, { setData }: CachedDataParams) {
