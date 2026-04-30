@@ -93,8 +93,13 @@ export default function Command() {
       const browsersItem = await LocalStorage.getItem("browsers");
 
       if (browsersItem) {
-        const parsedBrowsers = normalizeStoredBrowsers(JSON.parse(browsersItem.toString()) as string[]);
-        await LocalStorage.setItem("browsers", JSON.stringify(parsedBrowsers));
+        const originalBrowsers = JSON.parse(browsersItem.toString()) as string[];
+        const parsedBrowsers = normalizeStoredBrowsers(originalBrowsers);
+
+        if (JSON.stringify(parsedBrowsers) !== JSON.stringify(originalBrowsers)) {
+          await LocalStorage.setItem("browsers", JSON.stringify(parsedBrowsers));
+        }
+
         return parsedBrowsers;
       }
 

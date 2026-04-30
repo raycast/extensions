@@ -139,7 +139,7 @@ function matchesWindowsBrowser(app: Application, definition: BrowserDefinition) 
   return Boolean(
     definition.windowsDisplayNames?.some((name) => {
       const normalizedDisplayName = normalize(name);
-      return normalizedName === normalizedDisplayName || normalizedName.includes(normalizedDisplayName);
+      return normalizedName === normalizedDisplayName;
     }) ||
     definition.windowsExecutables?.some(
       (executable) => normalizedPath.endsWith(`\\${executable}`) || normalizedPath.includes(`\\${executable}`),

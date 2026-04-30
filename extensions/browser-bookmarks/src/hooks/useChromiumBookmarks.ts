@@ -4,7 +4,7 @@ import { join } from "path";
 import { promisify } from "util";
 
 import { useCachedPromise, useCachedState } from "@raycast/utils";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 const read = promisify(readFile);
 
@@ -226,9 +226,9 @@ export default function useChromiumBookmarks(
     [currentProfile, enabled, path],
   );
 
-  async function mutate() {
+  const mutate = useCallback(async () => {
     await Promise.all([mutateProfiles(), mutateBookmarks()]);
-  }
+  }, [mutateBookmarks, mutateProfiles]);
 
   const isLoading =
     isLoadingProfiles || isLoadingBookmarks || (enabled && currentProfile === "" && profiles.length > 0);
@@ -296,7 +296,7 @@ export default function useChromiumBookmarks(
       isActive = false;
       clearInterval(timer);
     };
-  }, [currentProfile, enabled, isLoading, path]);
+  }, [currentProfile, enabled, isLoading, mutate, path]);
 
   const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];
   const toolbarFolders = data ? getFolders(data.roots.bookmark_bar) : [];
