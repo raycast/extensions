@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useRef, useState } from "react";
 import type {
   GenericTrainingResult,
@@ -28,12 +19,7 @@ interface WritingSelectionTrainingProps {
   progress?: TrainingProgress;
 }
 
-export function WritingSelectionTraining({
-  items,
-  userLanguage,
-  onComplete,
-  progress,
-}: WritingSelectionTrainingProps) {
+export function WritingSelectionTraining({ items, userLanguage, onComplete, progress }: WritingSelectionTrainingProps) {
   const { pop } = useNavigation();
   const [queue, setQueue] = useState<MixedTrainingItem[]>([...items]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -127,9 +113,7 @@ export function WritingSelectionTraining({
       };
       await client.trainings.submitTrainingResult(userLanguage, result);
 
-      const correct = resultsRef.current.filter(
-        (r) => r.answers.length > 0,
-      ).length;
+      const correct = resultsRef.current.filter((r) => r.answers.length > 0).length;
       showToast({
         style: Toast.Style.Success,
         title: "Training complete!",
@@ -208,17 +192,12 @@ export function WritingSelectionTraining({
             <ActionPanel>
               {!showResult ? (
                 <>
-                  {isComplete && (
-                    <Action title="Submit" onAction={checkAnswer} />
-                  )}
+                  {isComplete && <Action title="Submit" onAction={checkAnswer} />}
                   {giveUpAction}
                 </>
               ) : (
                 <>
-                  <Action
-                    title={currentIndex < queue.length - 1 ? "Next" : "Finish"}
-                    onAction={handleNext}
-                  />
+                  <Action title={currentIndex < queue.length - 1 ? "Next" : "Finish"} onAction={handleNext} />
                   {!isCorrect && (
                     <Action
                       title="I Was Right"
@@ -233,23 +212,15 @@ export function WritingSelectionTraining({
           }
         />
         {showResult && !isCorrect && (
-          <List.Item
-            icon={Icon.ExclamationMark}
-            title={payload.text}
-            subtitle="Correct answer"
-          />
+          <List.Item icon={Icon.ExclamationMark} title={payload.text} subtitle="Correct answer" />
         )}
       </List.Section>
 
       {!showResult && (
         <List.Section title="Available Letters">
           {payload.options.map((letter, index) => {
-            const usedCount = selectedLetters.filter(
-              (s) => s === letter,
-            ).length;
-            const totalCount = payload.options.filter(
-              (o) => o === letter,
-            ).length;
+            const usedCount = selectedLetters.filter((s) => s === letter).length;
+            const totalCount = payload.options.filter((o) => o === letter).length;
             const isAvailable = usedCount < totalCount;
 
             return (
@@ -257,25 +228,12 @@ export function WritingSelectionTraining({
                 key={index}
                 icon={isAvailable ? Icon.Circle : Icon.CheckCircle}
                 title={letter}
-                accessories={
-                  !isAvailable
-                    ? [{ tag: { value: "used", color: Color.SecondaryText } }]
-                    : undefined
-                }
+                accessories={!isAvailable ? [{ tag: { value: "used", color: Color.SecondaryText } }] : undefined}
                 actions={
                   <ActionPanel>
-                    {isAvailable && (
-                      <Action
-                        title={`Select "${letter}"`}
-                        onAction={() => selectLetter(letter)}
-                      />
-                    )}
+                    {isAvailable && <Action title={`Select "${letter}"`} onAction={() => selectLetter(letter)} />}
                     {isComplete && (
-                      <Action
-                        title="Submit"
-                        shortcut={{ modifiers: ["cmd"], key: "return" }}
-                        onAction={checkAnswer}
-                      />
+                      <Action title="Submit" shortcut={{ modifiers: ["cmd"], key: "return" }} onAction={checkAnswer} />
                     )}
                     {giveUpAction}
                   </ActionPanel>

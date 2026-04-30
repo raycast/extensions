@@ -2,11 +2,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { createApiClient } from "../api";
 import type { GroupList, SupportedLanguage } from "../types";
-import {
-  queryKeys,
-  readSharedCache,
-  writeSharedCache,
-} from "../features/shared/query-keys";
+import { queryKeys, readSharedCache, writeSharedCache } from "../features/shared/query-keys";
 
 export function useGroups(
   currentLanguage: SupportedLanguage,
@@ -18,17 +14,11 @@ export function useGroups(
   const pageSize = params?.pageSize;
   const paramsKey = `${page ?? ""}|${pageSize ?? ""}`;
 
-  const [revision, setRevision] = useState(() =>
-    queryKeys.groups.revision(authIdentity, languageCode),
-  );
+  const [revision, setRevision] = useState(() => queryKeys.groups.revision(authIdentity, languageCode));
 
   useEffect(() => {
     setRevision(queryKeys.groups.revision(authIdentity, languageCode));
-    return queryKeys.groups.subscribeRevision(
-      authIdentity,
-      languageCode,
-      setRevision,
-    );
+    return queryKeys.groups.subscribeRevision(authIdentity, languageCode, setRevision);
   }, [authIdentity, languageCode]);
 
   const cacheKey = queryKeys.groups.list(authIdentity, languageCode, revision);
@@ -38,12 +28,7 @@ export function useGroups(
     isLoading,
     revalidate: revalidateGroups,
   } = useCachedPromise(
-    async (
-      revisionToken: string,
-      langCode: string,
-      authScope: string,
-      _paramsKey: string,
-    ) => {
+    async (revisionToken: string, langCode: string, authScope: string, _paramsKey: string) => {
       void revisionToken;
       void _paramsKey;
       if (!langCode) {
@@ -53,14 +38,9 @@ export function useGroups(
       const result = await client.groups.queryGroups(
         langCode,
         undefined,
-        page !== undefined || pageSize !== undefined
-          ? { page, pageSize }
-          : undefined,
+        page !== undefined || pageSize !== undefined ? { page, pageSize } : undefined,
       );
-      writeSharedCache(
-        queryKeys.groups.list(authScope, langCode, revisionToken),
-        result,
-      );
+      writeSharedCache(queryKeys.groups.list(authScope, langCode, revisionToken), result);
       return result;
     },
     [revision, languageCode, authIdentity, paramsKey],
@@ -72,10 +52,7 @@ export function useGroups(
   );
 
   const revalidate = () => {
-    const currentRevision = queryKeys.groups.revision(
-      authIdentity,
-      languageCode,
-    );
+    const currentRevision = queryKeys.groups.revision(authIdentity, languageCode);
 
     if (currentRevision !== revision) {
       setRevision(currentRevision);

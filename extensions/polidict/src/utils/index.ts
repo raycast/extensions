@@ -8,8 +8,7 @@ function hashString(value: string): string {
   let hash = 2166136261;
   for (let i = 0; i < value.length; i += 1) {
     hash ^= value.charCodeAt(i);
-    hash +=
-      (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
   }
   return (hash >>> 0).toString(36);
 }
@@ -25,9 +24,7 @@ function parseJwtPayload(token: string): Record<string, unknown> | null {
       .replace(/-/g, "+")
       .replace(/_/g, "/")
       .padEnd(Math.ceil(payload.length / 4) * 4, "=");
-    const decodedPayload = Buffer.from(normalizedPayload, "base64").toString(
-      "utf8",
-    );
+    const decodedPayload = Buffer.from(normalizedPayload, "base64").toString("utf8");
     return JSON.parse(decodedPayload) as Record<string, unknown>;
   } catch {
     return null;
@@ -80,13 +77,11 @@ const ERROR_CODE_MESSAGES: Record<string, UserError> = {
   },
   MAX_NUMBER_OF_LEARNING_ITEMS: {
     title: "Limit reached",
-    description:
-      "You have reached the maximum number of learning items. Upgrade to Polidict Plus for unlimited items.",
+    description: "You have reached the maximum number of learning items. Upgrade to Polidict Plus for unlimited items.",
   },
   MAX_NUMBER_OF_GROUPS: {
     title: "Limit reached",
-    description:
-      "You have reached the maximum number of groups. Upgrade to Polidict Plus for unlimited groups.",
+    description: "You have reached the maximum number of groups. Upgrade to Polidict Plus for unlimited groups.",
   },
 };
 
@@ -101,8 +96,7 @@ export function formatRaycastError(error: unknown): UserError {
   if (error instanceof TypeError) {
     return {
       title: "Connection error",
-      description:
-        "Could not connect to the server. Please check your internet connection and try again.",
+      description: "Could not connect to the server. Please check your internet connection and try again.",
     };
   }
 

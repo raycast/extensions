@@ -1,8 +1,4 @@
-import type {
-  SuggestionRequest,
-  SuggestionResponse,
-  SupportedLanguage,
-} from "../types";
+import type { SuggestionRequest, SuggestionResponse, SupportedLanguage } from "../types";
 import { RestClient } from "./rest-client";
 
 export class SuggestionsClient {

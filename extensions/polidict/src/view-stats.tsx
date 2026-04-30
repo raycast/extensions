@@ -29,9 +29,7 @@ function getDueEmoji(dueCount: number): string {
   return "🟠";
 }
 
-function build7DayChart(
-  history: { date: string; sessionCount: number }[],
-): string {
+function build7DayChart(history: { date: string; sessionCount: number }[]): string {
   const historyMap = new Map(history.map((d) => [d.date, d.sessionCount]));
   const today = new Date();
 
@@ -55,9 +53,7 @@ function build7DayChart(
   return "```\n" + rows.join("\n") + "\n```";
 }
 
-function buildContributionGrid(
-  history: { date: string; sessionCount: number }[],
-): string {
+function buildContributionGrid(history: { date: string; sessionCount: number }[]): string {
   const historyMap = new Map(history.map((d) => [d.date, d.sessionCount]));
 
   const today = new Date();
@@ -94,10 +90,7 @@ function buildContributionGrid(
   }
 
   const lastDay = days[days.length - 1].date;
-  const totalGridDays =
-    Math.ceil(
-      (lastDay.getTime() - gridStart.getTime()) / (1000 * 60 * 60 * 24),
-    ) + 1;
+  const totalGridDays = Math.ceil((lastDay.getTime() - gridStart.getTime()) / (1000 * 60 * 60 * 24)) + 1;
   const numWeeks = Math.ceil(totalGridDays / 7);
 
   const dayLabels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -184,9 +177,5 @@ function ViewStatsContent({ currentLanguage }: CommandShellContext) {
 }
 
 export default function ViewStats() {
-  return (
-    <CommandShell>
-      {(context) => <ViewStatsContent {...context} />}
-    </CommandShell>
-  );
+  return <CommandShell>{(context) => <ViewStatsContent {...context} />}</CommandShell>;
 }

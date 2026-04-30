@@ -18,9 +18,7 @@ export class LanguagesClient {
 
   async getNativeLanguage(): Promise<SupportedLanguage | null> {
     try {
-      return await this.restClient.get<SupportedLanguage>(
-        "/api/languages/native",
-      );
+      return await this.restClient.get<SupportedLanguage>("/api/languages/native");
     } catch {
       return null;
     }
@@ -41,9 +39,7 @@ export class LanguagesClient {
   }
 
   async setNativeLanguage(languageCode: string): Promise<SupportedLanguage> {
-    return this.restClient.put<SupportedLanguage>(
-      `/api/languages/native/${languageCode}`,
-    );
+    return this.restClient.put<SupportedLanguage>(`/api/languages/native/${languageCode}`);
   }
 
   async removeNativeLanguage(): Promise<void> {

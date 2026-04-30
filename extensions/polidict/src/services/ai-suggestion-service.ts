@@ -1,10 +1,5 @@
 import { AI, environment } from "@raycast/api";
-import type {
-  AiPrompt,
-  Group,
-  SuggestionResponse,
-  SupportedLanguage,
-} from "../types";
+import type { AiPrompt, Group, SuggestionResponse, SupportedLanguage } from "../types";
 import { createApiClient } from "../api";
 
 export type AISuggestionSource = "raycast" | "polidict";
@@ -18,10 +13,7 @@ function buildGroupsContext(groups: Group[]): string {
   if (groups.length === 0) return "";
 
   const groupsList = groups
-    .map(
-      (g) =>
-        `- "${g.id}": ${g.name}${g.description ? ` (${g.description})` : ""}`,
-    )
+    .map((g) => `- "${g.id}": ${g.name}${g.description ? ` (${g.description})` : ""}`)
     .join("\n");
 
   return `\nAvailable groups to categorize this word (select 0-3 most relevant):\n${groupsList}`;
@@ -33,9 +25,7 @@ function buildPrompt(
   nativeLanguage: SupportedLanguage | undefined,
   availableGroups: Group[] = [],
 ): string {
-  const translationPart = nativeLanguage
-    ? ` Translate definitions to ${nativeLanguage.languageName}.`
-    : "";
+  const translationPart = nativeLanguage ? ` Translate definitions to ${nativeLanguage.languageName}.` : "";
   const groupsPart = buildGroupsContext(availableGroups);
 
   return `Define "${text}" in ${targetLanguage.languageName}.${translationPart}${groupsPart}
@@ -75,12 +65,7 @@ async function getRaycastAISuggestion(
   nativeLanguage: SupportedLanguage | undefined,
   availableGroups: Group[] = [],
 ): Promise<SuggestionResponse | undefined> {
-  const prompt = buildPrompt(
-    text,
-    targetLanguage,
-    nativeLanguage,
-    availableGroups,
-  );
+  const prompt = buildPrompt(text, targetLanguage, nativeLanguage, availableGroups);
 
   const response = await AI.ask(prompt, {
     model: AI.Model["Anthropic_Claude_4.5_Haiku"],
@@ -117,12 +102,7 @@ export async function getAISuggestion(
 
   if (environment.canAccess(AI)) {
     try {
-      const suggestion = await getRaycastAISuggestion(
-        text,
-        targetLanguage,
-        nativeLanguage,
-        availableGroups,
-      );
+      const suggestion = await getRaycastAISuggestion(text, targetLanguage, nativeLanguage, availableGroups);
       if (suggestion?.definitions?.length) {
         return { suggestion, source: "raycast" };
       }
@@ -133,11 +113,7 @@ export async function getAISuggestion(
 
   if (isPlusUser) {
     try {
-      const suggestion = await getPolidictAISuggestion(
-        text,
-        targetLanguage,
-        availableGroups,
-      );
+      const suggestion = await getPolidictAISuggestion(text, targetLanguage, availableGroups);
       if (suggestion?.definitions?.length) {
         return { suggestion, source: "polidict" };
       }
@@ -153,9 +129,7 @@ export function canAccessAI(isPlusUser: boolean): boolean {
   return environment.canAccess(AI) || isPlusUser;
 }
 
-export async function executeAiPrompt(
-  aiPrompt: AiPrompt,
-): Promise<SuggestionResponse | undefined> {
+export async function executeAiPrompt(aiPrompt: AiPrompt): Promise<SuggestionResponse | undefined> {
   if (!environment.canAccess(AI)) {
     return undefined;
   }

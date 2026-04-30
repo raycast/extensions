@@ -36,32 +36,18 @@ export class GroupsClient {
   }
 
   async getGroup(languageCode: string, groupId: string): Promise<Group> {
-    return this.restClient.get<Group>(
-      `/api/languages/${languageCode}/groups/${groupId}`,
-    );
+    return this.restClient.get<Group>(`/api/languages/${languageCode}/groups/${groupId}`);
   }
 
   async createGroup(languageCode: string, group: UnsavedGroup): Promise<Group> {
-    return this.restClient.post<Group>(
-      `/api/languages/${languageCode}/groups`,
-      group,
-    );
+    return this.restClient.post<Group>(`/api/languages/${languageCode}/groups`, group);
   }
 
-  async editGroup(
-    languageCode: string,
-    groupId: string,
-    request: EditGroupRequest,
-  ): Promise<Group> {
-    return this.restClient.put<Group>(
-      `/api/languages/${languageCode}/groups/${groupId}`,
-      request,
-    );
+  async editGroup(languageCode: string, groupId: string, request: EditGroupRequest): Promise<Group> {
+    return this.restClient.put<Group>(`/api/languages/${languageCode}/groups/${groupId}`, request);
   }
 
   async deleteGroup(languageCode: string, groupId: string): Promise<void> {
-    return this.restClient.delete<void>(
-      `/api/languages/${languageCode}/groups/${groupId}`,
-    );
+    return this.restClient.delete<void>(`/api/languages/${languageCode}/groups/${groupId}`);
   }
 }

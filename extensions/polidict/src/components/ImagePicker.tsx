@@ -1,17 +1,13 @@
-import {
-  Action,
-  ActionPanel,
-  AI,
-  environment,
-  Grid,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, AI, environment, Grid, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { createApiClient, type ImageSource } from "../api";
+
+const IMAGE_SOURCE_LABEL: Record<ImageSource, string> = {
+  UNSPLASH: "Unsplash",
+  PEXELS: "Pexels",
+  FLICKR: "Flickr",
+};
 
 interface ImagePickerProps {
   initialSearchText: string;
@@ -68,13 +64,13 @@ export function ImagePicker({ initialSearchText, onSelect }: ImagePickerProps) {
     },
   );
 
+  const resolvedSourceName = data?.source !== undefined ? IMAGE_SOURCE_LABEL[data.source] : "Unknown";
+
   async function handleSelect(selectedUrl: string) {
     const selectedImage = data?.results.find((img) => img.url === selectedUrl);
     if (selectedImage?.downloadTrackingUrl) {
       const client = createApiClient();
-      client.images
-        .trackDownload(selectedImage.downloadTrackingUrl)
-        .catch(() => {});
+      client.images.trackDownload(selectedImage.downloadTrackingUrl).catch(() => {});
     }
     onSelect(selectedUrl);
     await showToast({ style: Toast.Style.Success, title: "Image selected" });
@@ -100,21 +96,9 @@ export function ImagePicker({ initialSearchText, onSelect }: ImagePickerProps) {
             setSource(value as ImageSource | "ALL");
           }}
         >
-          <Grid.Dropdown.Item
-            title="All Sources"
-            value="ALL"
-            icon={Icon.MagnifyingGlass}
-          />
-          <Grid.Dropdown.Item
-            title="Unsplash"
-            value="UNSPLASH"
-            icon={Icon.Image}
-          />
-          <Grid.Dropdown.Item
-            title="Pexels"
-            value="PEXELS"
-            icon={Icon.Camera}
-          />
+          <Grid.Dropdown.Item title="All Sources" value="ALL" icon={Icon.MagnifyingGlass} />
+          <Grid.Dropdown.Item title="Unsplash" value="UNSPLASH" icon={Icon.Image} />
+          <Grid.Dropdown.Item title="Pexels" value="PEXELS" icon={Icon.Camera} />
           <Grid.Dropdown.Item title="Flickr" value="FLICKR" icon={Icon.Globe} />
         </Grid.Dropdown>
       }
@@ -125,26 +109,20 @@ export function ImagePicker({ initialSearchText, onSelect }: ImagePickerProps) {
             key={`${source}-${index}`}
             content={image.url}
             title={
-              image.attribution
-                ? `${image.attribution.photographerName} / Unsplash`
-                : `Image ${index + 1}`
+              image.attribution ? `${image.attribution.photographerName} / ${resolvedSourceName}` : `Image ${index + 1}`
             }
             actions={
               <ActionPanel>
-                <Action
-                  title="Select Image"
-                  icon={Icon.CheckCircle}
-                  onAction={() => handleSelect(image.url)}
-                />
+                <Action title="Select Image" icon={Icon.CheckCircle} onAction={() => handleSelect(image.url)} />
                 {image.attribution && (
                   <>
                     <Action.OpenInBrowser
-                      title="View Photographer on Unsplash"
+                      title={`View Photographer on ${resolvedSourceName}`}
                       url={image.attribution.photographerUrl}
                       shortcut={{ modifiers: ["opt"], key: "p" }}
                     />
                     <Action.OpenInBrowser
-                      title="View Photo on Unsplash"
+                      title={`View Photo on ${resolvedSourceName}`}
                       url={image.attribution.photoUrl}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
                     />
@@ -167,14 +145,8 @@ export function ImagePicker({ initialSearchText, onSelect }: ImagePickerProps) {
       ) : !isLoading ? (
         <Grid.EmptyView
           icon={Icon.Image}
-          title={
-            searchText.length < 2 ? "Start typing to search" : "No images found"
-          }
-          description={
-            searchText.length < 2
-              ? "Enter at least 2 characters"
-              : "Try a different search term or source"
-          }
+          title={searchText.length < 2 ? "Start typing to search" : "No images found"}
+          description={searchText.length < 2 ? "Enter at least 2 characters" : "Try a different search term or source"}
         />
       ) : null}
     </Grid>

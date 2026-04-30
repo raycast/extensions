@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
 import React, { useState } from "react";
 import { useLookup, useUserProfile } from "./hooks";
 import { createApiClient } from "./api";
@@ -55,8 +48,7 @@ function LookupWordContent({
       showToast({
         style: Toast.Style.Failure,
         title: "Limit Reached",
-        message:
-          "You have reached the maximum number of learning items. Upgrade to Polidict Plus for unlimited items.",
+        message: "You have reached the maximum number of learning items. Upgrade to Polidict Plus for unlimited items.",
       });
       return;
     }
@@ -79,16 +71,12 @@ function LookupWordContent({
     }
   }
 
-  async function addWithDefinitions(
-    text: string,
-    definitions: ItemDefinition[],
-  ) {
+  async function addWithDefinitions(text: string, definitions: ItemDefinition[]) {
     if (!canAddLearningItems) {
       showToast({
         style: Toast.Style.Failure,
         title: "Limit Reached",
-        message:
-          "You have reached the maximum number of learning items. Upgrade to Polidict Plus for unlimited items.",
+        message: "You have reached the maximum number of learning items. Upgrade to Polidict Plus for unlimited items.",
       });
       return;
     }
@@ -115,16 +103,10 @@ function LookupWordContent({
     }
   }
 
-  async function updateWithDefinitions(
-    itemId: string,
-    definitions: ItemDefinition[],
-  ) {
+  async function updateWithDefinitions(itemId: string, definitions: ItemDefinition[]) {
     try {
       const client = createApiClient();
-      const existing = await client.learningItems.getLearningItem(
-        languageCode,
-        itemId,
-      );
+      const existing = await client.learningItems.getLearningItem(languageCode, itemId);
       await client.learningItems.updateLearningItem(languageCode, {
         ...existing,
         definitions: [...(existing.definitions ?? []), ...definitions],
@@ -157,11 +139,7 @@ function LookupWordContent({
         key={`existing-${resultItem.id}`}
         icon={Icon.CheckCircle}
         title={resultItem.text}
-        subtitle={
-          hasDefinitions
-            ? (resultItem.definitions[0].definition ?? "No definitions")
-            : "No definitions"
-        }
+        subtitle={hasDefinitions ? (resultItem.definitions[0].definition ?? "No definitions") : "No definitions"}
         accessories={[{ tag: { value: "Your Vocabulary", color: "#4CAF50" } }]}
         detail={
           <List.Item.Detail
@@ -196,28 +174,15 @@ function LookupWordContent({
               icon={Icon.SpeakerHigh}
               title="Play Speech"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
-              onAction={() =>
-                playSpeech(resultItem.text, resultItem.speechUrl ?? undefined)
-              }
+              onAction={() => playSpeech(resultItem.text, resultItem.speechUrl ?? undefined)}
             />
-            {!hasDefinitions &&
-              lookupResult.suggestedDefinitions &&
-              resultItem.id && (
-                <Action
-                  icon={
-                    lookupResult.suggestedDefinitions.source === "ai"
-                      ? Icon.Stars
-                      : Icon.Plus
-                  }
-                  title={`Add ${lookupResult.suggestedDefinitions.source === "ai" ? "AI" : "Blueprint"} Definitions`}
-                  onAction={() =>
-                    updateWithDefinitions(
-                      resultItem.id!,
-                      lookupResult.suggestedDefinitions!.definitions,
-                    )
-                  }
-                />
-              )}
+            {!hasDefinitions && lookupResult.suggestedDefinitions && resultItem.id && (
+              <Action
+                icon={lookupResult.suggestedDefinitions.source === "ai" ? Icon.Stars : Icon.Plus}
+                title={`Add ${lookupResult.suggestedDefinitions.source === "ai" ? "AI" : "Blueprint"} Definitions`}
+                onAction={() => updateWithDefinitions(resultItem.id!, lookupResult.suggestedDefinitions!.definitions)}
+              />
+            )}
             {canTriggerAi && (
               <Action
                 icon={Icon.Stars}
@@ -258,23 +223,15 @@ function LookupWordContent({
             <Action
               icon={Icon.Plus}
               title="Add with Definitions"
-              onAction={() =>
-                addWithDefinitions(resultItem.text, resultItem.definitions)
-              }
+              onAction={() => addWithDefinitions(resultItem.text, resultItem.definitions)}
             />
             <Action
               icon={Icon.SpeakerHigh}
               title="Play Speech"
               shortcut={{ modifiers: ["cmd"], key: "s" }}
-              onAction={() =>
-                playSpeech(resultItem.text, resultItem.speechUrl ?? undefined)
-              }
+              onAction={() => playSpeech(resultItem.text, resultItem.speechUrl ?? undefined)}
             />
-            <Action
-              icon={Icon.Document}
-              title="Add Text Only"
-              onAction={() => addTextOnly(resultItem.text)}
-            />
+            <Action icon={Icon.Document} title="Add Text Only" onAction={() => addTextOnly(resultItem.text)} />
             <Action.Push
               icon={Icon.Pencil}
               title="Edit & Add"
@@ -321,9 +278,7 @@ function LookupWordContent({
             <Action
               icon={Icon.Plus}
               title="Add with Definitions"
-              onAction={() =>
-                addWithDefinitions(resultItem.text, resultItem.definitions)
-              }
+              onAction={() => addWithDefinitions(resultItem.text, resultItem.definitions)}
             />
             <Action
               icon={Icon.SpeakerHigh}
@@ -331,11 +286,7 @@ function LookupWordContent({
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={() => playSpeech(resultItem.text)}
             />
-            <Action
-              icon={Icon.Document}
-              title="Add Text Only"
-              onAction={() => addTextOnly(resultItem.text)}
-            />
+            <Action icon={Icon.Document} title="Add Text Only" onAction={() => addTextOnly(resultItem.text)} />
             <Action.Push
               icon={Icon.Pencil}
               title="Edit & Add"
@@ -378,11 +329,7 @@ function LookupWordContent({
         }
         actions={
           <ActionPanel>
-            <Action
-              icon={Icon.Stars}
-              title="Get AI Definitions"
-              onAction={triggerAi}
-            />
+            <Action icon={Icon.Stars} title="Get AI Definitions" onAction={triggerAi} />
             <CurrentLanguageActions {...languageActions} />
             {signOutAction}
           </ActionPanel>
@@ -404,11 +351,7 @@ function LookupWordContent({
         }
         actions={
           <ActionPanel>
-            <Action
-              icon={Icon.Document}
-              title="Add Text Only"
-              onAction={() => addTextOnly(searchText)}
-            />
+            <Action icon={Icon.Document} title="Add Text Only" onAction={() => addTextOnly(searchText)} />
             <Action.Push
               icon={Icon.Pencil}
               title="Edit & Add"
@@ -477,9 +420,5 @@ function LookupWordContent({
 }
 
 export default function LookupWord() {
-  return (
-    <CommandShell>
-      {(context) => <LookupWordContent {...context} />}
-    </CommandShell>
-  );
+  return <CommandShell>{(context) => <LookupWordContent {...context} />}</CommandShell>;
 }

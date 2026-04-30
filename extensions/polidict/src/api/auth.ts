@@ -40,10 +40,7 @@ function isLikelyJwtToken(value: string): boolean {
   return /^[A-Za-z0-9_.-]+$/.test(value) && value.split(".").length === 3;
 }
 
-function extractTokenFromMagicLinkUrl(
-  value: string,
-  depth: number = 0,
-): string | null {
+function extractTokenFromMagicLinkUrl(value: string, depth: number = 0): string | null {
   if (depth > 3) {
     return null;
   }
@@ -59,10 +56,7 @@ function extractTokenFromMagicLinkUrl(
     if (nestedTarget) {
       return (
         extractTokenFromMagicLinkUrl(nestedTarget, depth + 1) ??
-        extractTokenFromMagicLinkUrl(
-          decodeURIComponent(nestedTarget),
-          depth + 1,
-        )
+        extractTokenFromMagicLinkUrl(decodeURIComponent(nestedTarget), depth + 1)
       );
     }
 
@@ -165,10 +159,7 @@ export async function authorize(): Promise<string> {
   return signInWithGoogle();
 }
 
-export async function requestEmailMagicLink(
-  email: string,
-  locale: AuthLocale = getAuthLocale(),
-): Promise<void> {
+export async function requestEmailMagicLink(email: string, locale: AuthLocale = getAuthLocale()): Promise<void> {
   const normalizedEmail = email.trim().toLowerCase();
   const apiUrl = getApiUrl();
 
@@ -191,9 +182,7 @@ export async function requestEmailMagicLink(
   }
 }
 
-export async function verifyEmailMagicLink(
-  magicLinkOrToken: string,
-): Promise<string> {
+export async function verifyEmailMagicLink(magicLinkOrToken: string): Promise<string> {
   const token = extractMagicLinkToken(magicLinkOrToken);
   const apiUrl = getApiUrl();
 
@@ -249,9 +238,7 @@ export async function getAccessToken(): Promise<string | null> {
   return tokenSet.accessToken;
 }
 
-async function refreshTokens(
-  refreshToken: string,
-): Promise<{ accessToken: string; refreshToken: string }> {
+async function refreshTokens(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
   const apiUrl = getApiUrl();
 
   const response = await fetch(`${apiUrl}/api/auth/refresh`, {

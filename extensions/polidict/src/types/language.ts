@@ -24,10 +24,7 @@ export interface SupportedLanguage {
   languageName: string;
 }
 
-export const SUPPORTED_LANGUAGES: Record<
-  SupportedLanguageCode,
-  SupportedLanguage
-> = {
+export const SUPPORTED_LANGUAGES: Record<SupportedLanguageCode, SupportedLanguage> = {
   "en-US": { languageCode: "en-US", languageName: "English (US)" },
   "en-GB": { languageCode: "en-GB", languageName: "English (UK)" },
   "es-ES": { languageCode: "es-ES", languageName: "Español (España)" },

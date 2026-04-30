@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { useGroups } from "./hooks";
 import { createApiClient } from "./api";
@@ -14,14 +6,8 @@ import { formatRaycastError } from "./utils";
 import { MixedTrainingRouter } from "./components/MixedTrainingRouter";
 import { CurrentLanguageActions } from "./components/CurrentLanguageActions";
 import { TrainingType } from "./types";
-import {
-  pruneExpiredTemporaryDisableState,
-  filterOutTemporarilyDisabledTypes,
-} from "./components/temporary-disable";
-import {
-  loadTemporaryDisableState,
-  saveTemporaryDisableState,
-} from "./components/temporary-disable-storage";
+import { pruneExpiredTemporaryDisableState, filterOutTemporarilyDisabledTypes } from "./components/temporary-disable";
+import { loadTemporaryDisableState, saveTemporaryDisableState } from "./components/temporary-disable-storage";
 import { CommandShell, type CommandShellContext } from "./core/command-shell";
 
 interface TrainingMode {
@@ -82,10 +68,7 @@ const TRAINING_MODES: TrainingMode[] = [
     title: "Matching",
     description: "Match words to their definitions",
     icon: Icon.Shuffle,
-    trainingTypes: [
-      TrainingType.MATCHING_LEARNING_ITEM_DEFINITION,
-      TrainingType.MATCHING_LEARNING_ITEM_LISTENING,
-    ],
+    trainingTypes: [TrainingType.MATCHING_LEARNING_ITEM_DEFINITION, TrainingType.MATCHING_LEARNING_ITEM_LISTENING],
   },
 ];
 
@@ -106,15 +89,9 @@ function StartTrainingContent({
 }: StartTrainingContentProps) {
   const { push } = useNavigation();
 
-  const { data: groups, isLoading: groupsLoading } = useGroups(
-    currentLanguage,
-    authIdentity,
-    { pageSize: 100 },
-  );
+  const { data: groups, isLoading: groupsLoading } = useGroups(currentLanguage, authIdentity, { pageSize: 100 });
 
-  const [selectedGroup, setSelectedGroup] = useState<string>(
-    defaultGroupId ?? "",
-  );
+  const [selectedGroup, setSelectedGroup] = useState<string>(defaultGroupId ?? "");
   const [isGenerating, setIsGenerating] = useState(false);
 
   const isLoading = groupsLoading;
@@ -125,16 +102,11 @@ function StartTrainingContent({
 
     try {
       const client = createApiClient();
-      const loadedState = await loadTemporaryDisableState(
-        userLanguage.languageCode,
-      );
+      const loadedState = await loadTemporaryDisableState(userLanguage.languageCode);
       const prunedState = pruneExpiredTemporaryDisableState(loadedState);
       const initialTemporaryDisableState = prunedState;
 
-      if (
-        loadedState.speaking !== prunedState.speaking ||
-        loadedState.listening !== prunedState.listening
-      ) {
+      if (loadedState.speaking !== prunedState.speaking || loadedState.listening !== prunedState.listening) {
         await saveTemporaryDisableState(userLanguage.languageCode, prunedState);
       }
 
@@ -183,19 +155,11 @@ function StartTrainingContent({
       searchBarPlaceholder="Search training modes..."
       searchBarAccessory={
         groups && groups.length > 0 ? (
-          <List.Dropdown
-            tooltip="Filter by Group"
-            value={selectedGroup}
-            onChange={setSelectedGroup}
-          >
+          <List.Dropdown tooltip="Filter by Group" value={selectedGroup} onChange={setSelectedGroup}>
             <List.Dropdown.Item title="All Groups" value="" />
             <List.Dropdown.Section title="Groups">
               {groups.map((group) => (
-                <List.Dropdown.Item
-                  key={group.id}
-                  title={group.name}
-                  value={group.id}
-                />
+                <List.Dropdown.Item key={group.id} title={group.name} value={group.id} />
               ))}
             </List.Dropdown.Section>
           </List.Dropdown>
@@ -210,15 +174,8 @@ function StartTrainingContent({
           subtitle={mode.description}
           actions={
             <ActionPanel>
-              <Action
-                title="Start Training"
-                icon={Icon.Play}
-                onAction={() => startTraining(mode)}
-              />
-              <CurrentLanguageActions
-                {...languageActions}
-                onLanguageChanged={() => setSelectedGroup("")}
-              />
+              <Action title="Start Training" icon={Icon.Play} onAction={() => startTraining(mode)} />
+              <CurrentLanguageActions {...languageActions} onLanguageChanged={() => setSelectedGroup("")} />
               {signOutAction}
             </ActionPanel>
           }
@@ -228,14 +185,8 @@ function StartTrainingContent({
   );
 }
 
-export default function StartTraining({
-  defaultGroupId = "",
-}: StartTrainingProps = {}) {
+export default function StartTraining({ defaultGroupId = "" }: StartTrainingProps = {}) {
   return (
-    <CommandShell>
-      {(context) => (
-        <StartTrainingContent {...context} defaultGroupId={defaultGroupId} />
-      )}
-    </CommandShell>
+    <CommandShell>{(context) => <StartTrainingContent {...context} defaultGroupId={defaultGroupId} />}</CommandShell>
   );
 }

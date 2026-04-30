@@ -1,11 +1,6 @@
 import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useState } from "react";
-import type {
-  FlashcardTrainingItem,
-  GenericTrainingResultItem,
-  MixedTrainingItem,
-  SupportedLanguage,
-} from "../types";
+import type { FlashcardTrainingItem, GenericTrainingResultItem, MixedTrainingItem, SupportedLanguage } from "../types";
 import { TrainingType } from "../types";
 import { useTrainingSession } from "../hooks";
 import { playSpeech } from "../utils";
@@ -25,15 +20,14 @@ export function FlashcardTraining({
   onComplete,
   progress: outerProgress,
 }: FlashcardTrainingProps) {
-  const { currentItem, progress, addResult, handleNext, requeueCurrentItem } =
-    useTrainingSession({
-      items,
-      userLanguage,
-      trainingType: TrainingType.FLASHCARD,
-      onComplete,
-      progressOffset: outerProgress?.offset,
-      progressTotal: outerProgress?.total,
-    });
+  const { currentItem, progress, addResult, handleNext, requeueCurrentItem } = useTrainingSession({
+    items,
+    userLanguage,
+    trainingType: TrainingType.FLASHCARD,
+    onComplete,
+    progressOffset: outerProgress?.offset,
+    progressTotal: outerProgress?.total,
+  });
 
   const [isFlipped, setIsFlipped] = useState(false);
 

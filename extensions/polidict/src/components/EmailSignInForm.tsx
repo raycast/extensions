@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useMemo, useState } from "react";
 
 interface EmailSignInFormValues {
@@ -41,9 +33,7 @@ export function EmailSignInForm({
       return undefined;
     }
 
-    return EMAIL_REGEX.test(normalizedEmail)
-      ? undefined
-      : "Enter a valid email address";
+    return EMAIL_REGEX.test(normalizedEmail) ? undefined : "Enter a valid email address";
   }, [email, normalizedEmail]);
 
   async function sendMagicLink(values?: EmailSignInFormValues) {
@@ -133,18 +123,8 @@ export function EmailSignInForm({
             title={linkSent ? "Verify Magic Link" : "Send Magic Link"}
             onSubmit={handleSubmit}
           />
-          {linkSent && (
-            <Action
-              icon={Icon.ArrowClockwise}
-              title="Resend Magic Link"
-              onAction={sendMagicLink}
-            />
-          )}
-          <Action
-            icon={Icon.Key}
-            title="Sign in with Google"
-            onAction={handleGoogleSignIn}
-          />
+          {linkSent && <Action icon={Icon.ArrowClockwise} title="Resend Magic Link" onAction={sendMagicLink} />}
+          <Action icon={Icon.Key} title="Sign in with Google" onAction={handleGoogleSignIn} />
         </ActionPanel>
       }
     >

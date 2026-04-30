@@ -2,15 +2,9 @@ import type { CurrentLanguageActionsProps } from "../components/CurrentLanguageA
 import { useSupportedLanguages } from "./use-supported-languages";
 import { useUserLanguages } from "./use-user-languages";
 
-type LanguageActionsProps = Omit<
-  CurrentLanguageActionsProps,
-  "onLanguageChanged"
->;
+type LanguageActionsProps = Omit<CurrentLanguageActionsProps, "onLanguageChanged">;
 
-export function useLanguageManagement(
-  authIdentity: string,
-  isAuthenticated: boolean,
-) {
+export function useLanguageManagement(authIdentity: string, isAuthenticated: boolean) {
   const {
     languages,
     currentLanguage,
@@ -24,8 +18,9 @@ export function useLanguageManagement(
     removeNativeLanguage,
     revalidate,
   } = useUserLanguages(authIdentity);
-  const { supportedLanguages, isLoading: isLoadingSupportedLanguages } =
-    useSupportedLanguages(isAuthenticated && hasLanguages);
+  const { supportedLanguages, isLoading: isLoadingSupportedLanguages } = useSupportedLanguages(
+    isAuthenticated && hasLanguages,
+  );
 
   const languageActions: LanguageActionsProps = {
     languages,

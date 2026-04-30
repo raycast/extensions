@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { createApiClient } from "../api";
 import { FIELD_LIMITS, MAX_EXAMPLES_PER_DEFINITION } from "../constants";
@@ -21,31 +13,16 @@ interface DefinitionFormProps {
   hasAIAccess?: boolean;
 }
 
-export function DefinitionForm({
-  definition,
-  onSave,
-  text,
-  currentLanguage,
-  hasAIAccess,
-}: DefinitionFormProps) {
+export function DefinitionForm({ definition, onSave, text, currentLanguage, hasAIAccess }: DefinitionFormProps) {
   const { pop } = useNavigation();
 
-  const [definitionText, setDefinitionText] = useState(
-    definition?.definition ?? "",
-  );
+  const [definitionText, setDefinitionText] = useState(definition?.definition ?? "");
   const [translation, setTranslation] = useState(definition?.translation ?? "");
   const [comment, setComment] = useState(definition?.comment ?? "");
-  const [examplesText, setExamplesText] = useState(
-    definition?.examples?.join("\n") ?? "",
-  );
+  const [examplesText, setExamplesText] = useState(definition?.examples?.join("\n") ?? "");
   const [isSuggestingExample, setIsSuggestingExample] = useState(false);
 
-  const canSuggestExample =
-    hasAIAccess &&
-    text &&
-    text.length >= 2 &&
-    currentLanguage &&
-    definitionText.length > 0;
+  const canSuggestExample = hasAIAccess && text && text.length >= 2 && currentLanguage && definitionText.length > 0;
 
   async function handleSuggestExample() {
     if (!text || !currentLanguage || isSuggestingExample) return;
@@ -95,13 +72,9 @@ export function DefinitionForm({
   }
 
   const definitionError =
-    definitionText.length > FIELD_LIMITS.DEFINITION_MAX
-      ? `Max ${FIELD_LIMITS.DEFINITION_MAX} characters`
-      : undefined;
+    definitionText.length > FIELD_LIMITS.DEFINITION_MAX ? `Max ${FIELD_LIMITS.DEFINITION_MAX} characters` : undefined;
   const translationError =
-    translation.length > FIELD_LIMITS.TRANSLATION_MAX
-      ? `Max ${FIELD_LIMITS.TRANSLATION_MAX} characters`
-      : undefined;
+    translation.length > FIELD_LIMITS.TRANSLATION_MAX ? `Max ${FIELD_LIMITS.TRANSLATION_MAX} characters` : undefined;
   const commentError =
     comment.length > FIELD_LIMITS.DEFINITION_COMMENT_MAX
       ? `Max ${FIELD_LIMITS.DEFINITION_COMMENT_MAX} characters`
@@ -118,8 +91,7 @@ export function DefinitionForm({
         : undefined;
 
   function handleSubmit() {
-    if (definitionError || translationError || commentError || examplesError)
-      return;
+    if (definitionError || translationError || commentError || examplesError) return;
 
     const saved: ItemDefinition = {
       id: definition?.id,

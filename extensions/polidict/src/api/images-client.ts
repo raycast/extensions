@@ -38,9 +38,7 @@ export class ImagesClient {
     });
   }
 
-  async searchImages(
-    request: ImageSearchRequest,
-  ): Promise<ImageSearchResponse> {
+  async searchImages(request: ImageSearchRequest): Promise<ImageSearchResponse> {
     const params: Record<string, string> = {
       text: request.text,
     };

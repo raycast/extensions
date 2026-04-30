@@ -26,26 +26,14 @@ function mapOrderDirection(order: SortOrder): string {
 export class LearningItemsClient {
   constructor(private readonly restClient: RestClient) {}
 
-  async addLearningItem(
-    languageCode: string,
-    learningItem: UnsavedLearningItem,
-  ): Promise<LearningItem> {
-    return this.restClient.post<LearningItem>(
-      `/api/languages/${languageCode}/learning-items`,
-      learningItem,
-    );
+  async addLearningItem(languageCode: string, learningItem: UnsavedLearningItem): Promise<LearningItem> {
+    return this.restClient.post<LearningItem>(`/api/languages/${languageCode}/learning-items`, learningItem);
   }
 
-  async updateLearningItem(
-    languageCode: string,
-    learningItem: LearningItem,
-  ): Promise<LearningItem> {
+  async updateLearningItem(languageCode: string, learningItem: LearningItem): Promise<LearningItem> {
     const { id, speechUrl, ...body } = learningItem;
     void speechUrl;
-    return this.restClient.patch<LearningItem>(
-      `/api/languages/${languageCode}/learning-items/${id}`,
-      body,
-    );
+    return this.restClient.patch<LearningItem>(`/api/languages/${languageCode}/learning-items/${id}`, body);
   }
 
   async queryLearningItems({
@@ -96,21 +84,11 @@ export class LearningItemsClient {
     return this.restClient.get<LearningItemList>(endpoint);
   }
 
-  async getLearningItem(
-    languageCode: string,
-    learningItemId: string,
-  ): Promise<LearningItem> {
-    return this.restClient.get<LearningItem>(
-      `/api/languages/${languageCode}/learning-items/${learningItemId}`,
-    );
+  async getLearningItem(languageCode: string, learningItemId: string): Promise<LearningItem> {
+    return this.restClient.get<LearningItem>(`/api/languages/${languageCode}/learning-items/${learningItemId}`);
   }
 
-  async deleteLearningItem(
-    languageCode: string,
-    learningItemId: string,
-  ): Promise<void> {
-    return this.restClient.delete<void>(
-      `/api/languages/${languageCode}/learning-items/${learningItemId}`,
-    );
+  async deleteLearningItem(languageCode: string, learningItemId: string): Promise<void> {
+    return this.restClient.delete<void>(`/api/languages/${languageCode}/learning-items/${learningItemId}`);
   }
 }

@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useRef, useState } from "react";
 import type {
   GenericTrainingResult,
@@ -27,9 +18,7 @@ import type { TrainingProgress } from "./MixedTrainingRouter";
 interface MatchingTrainingProps {
   items: MixedTrainingItem[];
   userLanguage: SupportedLanguage;
-  trainingType:
-    | TrainingType.MATCHING_LEARNING_ITEM_DEFINITION
-    | TrainingType.MATCHING_LEARNING_ITEM_LISTENING;
+  trainingType: TrainingType.MATCHING_LEARNING_ITEM_DEFINITION | TrainingType.MATCHING_LEARNING_ITEM_LISTENING;
   onComplete?: (results: GenericTrainingResultItem[]) => void;
   canTemporarilyDisable?: boolean;
   onTemporarilyDisable?: () => void;
@@ -41,9 +30,7 @@ interface UserPair {
   definitionIndex: number;
 }
 
-function getPayload(
-  item: MixedTrainingItem,
-): MatchingDefinitionTrainingItem | MatchingListeningTrainingItem | null {
+function getPayload(item: MixedTrainingItem): MatchingDefinitionTrainingItem | MatchingListeningTrainingItem | null {
   if (
     item.trainingType === TrainingType.MATCHING_LEARNING_ITEM_DEFINITION ||
     item.trainingType === TrainingType.MATCHING_LEARNING_ITEM_LISTENING
@@ -65,16 +52,13 @@ export function MatchingTraining({
   const { pop } = useNavigation();
   const [queue, setQueue] = useState<MixedTrainingItem[]>([...items]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedLearningItem, setSelectedLearningItem] = useState<
-    number | null
-  >(null);
+  const [selectedLearningItem, setSelectedLearningItem] = useState<number | null>(null);
   const [userPairs, setUserPairs] = useState<UserPair[]>([]);
   const [showResult, setShowResult] = useState(false);
   const resultsRef = useRef<GenericTrainingResultItem[]>([]);
 
   const currentItem = queue[currentIndex];
-  const isListening =
-    trainingType === TrainingType.MATCHING_LEARNING_ITEM_LISTENING;
+  const isListening = trainingType === TrainingType.MATCHING_LEARNING_ITEM_LISTENING;
 
   const payload = getPayload(currentItem);
   if (!payload) return null;
@@ -98,20 +82,12 @@ export function MatchingTraining({
     if (showResult || selectedLearningItem === null) return;
     if (userPairs.some((p) => p.definitionIndex === defIndex)) return;
 
-    setUserPairs([
-      ...userPairs,
-      { learningItemIndex: selectedLearningItem, definitionIndex: defIndex },
-    ]);
+    setUserPairs([...userPairs, { learningItemIndex: selectedLearningItem, definitionIndex: defIndex }]);
     setSelectedLearningItem(null);
   }
 
-  function playItemAudio(
-    item: MatchingLearningItemText | MatchingLearningItemListening,
-  ) {
-    const speechUrl =
-      "speechUrl" in item
-        ? (item as MatchingLearningItemListening).speechUrl
-        : undefined;
+  function playItemAudio(item: MatchingLearningItemText | MatchingLearningItemListening) {
+    const speechUrl = "speechUrl" in item ? (item as MatchingLearningItemListening).speechUrl : undefined;
     playSpeech(item.text, speechUrl);
   }
 
@@ -121,17 +97,14 @@ export function MatchingTraining({
     for (const userPair of userPairs) {
       const learningItem = learningItems[userPair.learningItemIndex];
       const selectedDef = sortedDefinitions[userPair.definitionIndex];
-      const isCorrect =
-        learningItem.learningItemId === selectedDef.learningItemId;
+      const isCorrect = learningItem.learningItemId === selectedDef.learningItemId;
 
       correctResults.push({
         question: {
           learningItemId: learningItem.learningItemId,
           definitionId: selectedDef.definitionId,
         },
-        answers: isCorrect
-          ? [{ learningItemId: learningItem.learningItemId }]
-          : [],
+        answers: isCorrect ? [{ learningItemId: learningItem.learningItemId }] : [],
         trainingType,
       });
     }
@@ -166,9 +139,7 @@ export function MatchingTraining({
       };
       await client.trainings.submitTrainingResult(userLanguage, result);
 
-      const correct = resultsRef.current.filter(
-        (r) => r.answers.length > 0,
-      ).length;
+      const correct = resultsRef.current.filter((r) => r.answers.length > 0).length;
       showToast({
         style: Toast.Style.Success,
         title: "Training complete!",
@@ -201,8 +172,7 @@ export function MatchingTraining({
     if (showResult) {
       const learningItem = learningItems[index];
       const selectedDef = sortedDefinitions[pair.definitionIndex];
-      const isCorrect =
-        learningItem.learningItemId === selectedDef.learningItemId;
+      const isCorrect = learningItem.learningItemId === selectedDef.learningItemId;
       return {
         icon: isCorrect ? Icon.CheckCircle : Icon.XMarkCircle,
         tintColor: isCorrect ? Color.Green : Color.Red,
@@ -213,10 +183,7 @@ export function MatchingTraining({
     return {
       icon: Icon.CheckCircle,
       tintColor: Color.Blue,
-      matchedDef: formatDefinitionText(
-        sortedDefinitions[pair.definitionIndex],
-        "",
-      ),
+      matchedDef: formatDefinitionText(sortedDefinitions[pair.definitionIndex], ""),
     };
   }
 
@@ -229,8 +196,7 @@ export function MatchingTraining({
     if (showResult) {
       const learningItem = learningItems[pair.learningItemIndex];
       const selectedDef = sortedDefinitions[index];
-      const isCorrect =
-        learningItem.learningItemId === selectedDef.learningItemId;
+      const isCorrect = learningItem.learningItemId === selectedDef.learningItemId;
       return {
         icon: isCorrect ? Icon.CheckCircle : Icon.XMarkCircle,
         tintColor: isCorrect ? Color.Green : Color.Red,
@@ -244,8 +210,7 @@ export function MatchingTraining({
   const title = isListening ? "Matching (Audio)" : "Matching";
 
   function renderDisableAction() {
-    if (!isListening || !canTemporarilyDisable || !onTemporarilyDisable)
-      return null;
+    if (!isListening || !canTemporarilyDisable || !onTemporarilyDisable) return null;
     return (
       <Action
         title="Can't Listen Right Now"
@@ -259,32 +224,21 @@ export function MatchingTraining({
     <List
       navigationTitle={`${title} (${(progress?.offset ?? 0) + currentIndex + 1}/${(progress?.total ?? items.length) + queue.length - items.length})`}
     >
-      <List.Section
-        title={isListening ? "Words (press to play audio)" : "Words"}
-      >
+      <List.Section title={isListening ? "Words (press to play audio)" : "Words"}>
         {learningItems.map((item, index) => {
           const status = getLearningItemStatus(index);
           return (
             <List.Item
               key={`word-${index}`}
               icon={{ source: status.icon, tintColor: status.tintColor }}
-              title={
-                isListening
-                  ? `${index + 1}. (Audio)`
-                  : `${index + 1}. ${item.text}`
-              }
+              title={isListening ? `${index + 1}. (Audio)` : `${index + 1}. ${item.text}`}
               subtitle={status.matchedDef}
-              accessories={
-                isListening ? [{ icon: Icon.SpeakerHigh }] : undefined
-              }
+              accessories={isListening ? [{ icon: Icon.SpeakerHigh }] : undefined}
               actions={
                 <ActionPanel>
                   {!showResult && (
                     <>
-                      <Action
-                        title="Select"
-                        onAction={() => selectLearningItem(index)}
-                      />
+                      <Action title="Select" onAction={() => selectLearningItem(index)} />
                       {renderDisableAction()}
                       {isListening && (
                         <Action
@@ -298,12 +252,7 @@ export function MatchingTraining({
                   )}
                   {showResult && (
                     <>
-                      <Action
-                        title={
-                          currentIndex < queue.length - 1 ? "Next" : "Finish"
-                        }
-                        onAction={handleNext}
-                      />
+                      <Action title={currentIndex < queue.length - 1 ? "Next" : "Finish"} onAction={handleNext} />
                       {renderDisableAction()}
                     </>
                   )}
@@ -325,19 +274,11 @@ export function MatchingTraining({
               actions={
                 <ActionPanel>
                   {!showResult && selectedLearningItem !== null && (
-                    <Action
-                      title="Match"
-                      onAction={() => selectDefinition(index)}
-                    />
+                    <Action title="Match" onAction={() => selectDefinition(index)} />
                   )}
                   {!showResult && renderDisableAction()}
                   {showResult && (
-                    <Action
-                      title={
-                        currentIndex < queue.length - 1 ? "Next" : "Finish"
-                      }
-                      onAction={handleNext}
-                    />
+                    <Action title={currentIndex < queue.length - 1 ? "Next" : "Finish"} onAction={handleNext} />
                   )}
                 </ActionPanel>
               }

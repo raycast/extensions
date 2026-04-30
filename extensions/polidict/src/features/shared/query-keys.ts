@@ -28,11 +28,7 @@ function getRevisionKey(scope: string): string {
   return `${CACHE_ROOT}:revision:${scope}`;
 }
 
-function getDomainRevisionKey(
-  domain: string,
-  authIdentity: string,
-  languageCode: string,
-): string {
+function getDomainRevisionKey(domain: string, authIdentity: string, languageCode: string): string {
   return `${CACHE_ROOT}:revision:${domain}:${getScopePrefix(authIdentity, languageCode)}`;
 }
 
@@ -42,9 +38,7 @@ function readRevision(key: string): string {
 
 function bumpRevision(key: string): string {
   const currentRevision = Number.parseInt(readRevision(key), 10);
-  const nextRevision = String(
-    Number.isNaN(currentRevision) ? 1 : currentRevision + 1,
-  );
+  const nextRevision = String(Number.isNaN(currentRevision) ? 1 : currentRevision + 1);
   revisionCache.set(key, nextRevision);
   const listeners = revisionListeners.get(key);
   if (listeners) {
@@ -55,10 +49,7 @@ function bumpRevision(key: string): string {
   return nextRevision;
 }
 
-function subscribeRevision(
-  key: string,
-  listener: RevisionListener,
-): () => void {
+function subscribeRevision(key: string, listener: RevisionListener): () => void {
   const listeners = revisionListeners.get(key) ?? new Set<RevisionListener>();
   listeners.add(listener);
   revisionListeners.set(key, listeners);
@@ -111,173 +102,94 @@ export function removeSharedCache(key: string): boolean {
 
 export const queryKeys = {
   auth: {
-    scope: (authIdentity: string, languageCode?: string) =>
-      getScopePrefix(authIdentity, languageCode ?? ""),
+    scope: (authIdentity: string, languageCode?: string) => getScopePrefix(authIdentity, languageCode ?? ""),
   },
   learningItems: {
-    scope: (authIdentity: string, languageCode: string) =>
-      getScopePrefix(authIdentity, languageCode),
+    scope: (authIdentity: string, languageCode: string) => getScopePrefix(authIdentity, languageCode),
     revisionKey: (authIdentity: string, languageCode: string) =>
       getDomainRevisionKey("learning-items", authIdentity, languageCode),
     revision: (authIdentity: string, languageCode: string) =>
-      readRevision(
-        queryKeys.learningItems.revisionKey(authIdentity, languageCode),
-      ),
+      readRevision(queryKeys.learningItems.revisionKey(authIdentity, languageCode)),
     bumpRevision: (authIdentity: string, languageCode: string) =>
-      bumpRevision(
-        queryKeys.learningItems.revisionKey(authIdentity, languageCode),
-      ),
-    subscribeRevision: (
-      authIdentity: string,
-      languageCode: string,
-      listener: RevisionListener,
-    ) =>
-      subscribeRevision(
-        queryKeys.learningItems.revisionKey(authIdentity, languageCode),
-        listener,
-      ),
-    list: (
-      authIdentity: string,
-      languageCode: string,
-      revision: string,
-      params: Partial<SearchParams>,
-    ) =>
+      bumpRevision(queryKeys.learningItems.revisionKey(authIdentity, languageCode)),
+    subscribeRevision: (authIdentity: string, languageCode: string, listener: RevisionListener) =>
+      subscribeRevision(queryKeys.learningItems.revisionKey(authIdentity, languageCode), listener),
+    list: (authIdentity: string, languageCode: string, revision: string, params: Partial<SearchParams>) =>
       `${queryKeys.learningItems.scope(authIdentity, languageCode)}:learning-items:v${revision}:${stableSerialize(
         params,
       )}`,
   },
   groups: {
-    scope: (authIdentity: string, languageCode: string) =>
-      getScopePrefix(authIdentity, languageCode),
+    scope: (authIdentity: string, languageCode: string) => getScopePrefix(authIdentity, languageCode),
     revisionKey: (authIdentity: string, languageCode: string) =>
       getDomainRevisionKey("groups", authIdentity, languageCode),
     revision: (authIdentity: string, languageCode: string) =>
       readRevision(queryKeys.groups.revisionKey(authIdentity, languageCode)),
     bumpRevision: (authIdentity: string, languageCode: string) =>
       bumpRevision(queryKeys.groups.revisionKey(authIdentity, languageCode)),
-    subscribeRevision: (
-      authIdentity: string,
-      languageCode: string,
-      listener: RevisionListener,
-    ) =>
-      subscribeRevision(
-        queryKeys.groups.revisionKey(authIdentity, languageCode),
-        listener,
-      ),
+    subscribeRevision: (authIdentity: string, languageCode: string, listener: RevisionListener) =>
+      subscribeRevision(queryKeys.groups.revisionKey(authIdentity, languageCode), listener),
     list: (authIdentity: string, languageCode: string, revision: string) =>
       `${queryKeys.groups.scope(authIdentity, languageCode)}:groups:v${revision}`,
   },
   lookup: {
-    scope: (authIdentity: string, languageCode: string) =>
-      getScopePrefix(authIdentity, languageCode),
+    scope: (authIdentity: string, languageCode: string) => getScopePrefix(authIdentity, languageCode),
     revisionKey: (authIdentity: string, languageCode: string) =>
       getDomainRevisionKey("lookup", authIdentity, languageCode),
     revision: (authIdentity: string, languageCode: string) =>
       readRevision(queryKeys.lookup.revisionKey(authIdentity, languageCode)),
     bumpRevision: (authIdentity: string, languageCode: string) =>
       bumpRevision(queryKeys.lookup.revisionKey(authIdentity, languageCode)),
-    subscribeRevision: (
-      authIdentity: string,
-      languageCode: string,
-      listener: RevisionListener,
-    ) =>
-      subscribeRevision(
-        queryKeys.lookup.revisionKey(authIdentity, languageCode),
-        listener,
-      ),
-    result: (
-      authIdentity: string,
-      languageCode: string,
-      revision: string,
-      query: string,
-    ) =>
-      `${queryKeys.lookup.scope(authIdentity, languageCode)}:lookup:v${revision}:${stableSerialize(
-        query,
-      )}`,
+    subscribeRevision: (authIdentity: string, languageCode: string, listener: RevisionListener) =>
+      subscribeRevision(queryKeys.lookup.revisionKey(authIdentity, languageCode), listener),
+    result: (authIdentity: string, languageCode: string, revision: string, query: string) =>
+      `${queryKeys.lookup.scope(authIdentity, languageCode)}:lookup:v${revision}:${stableSerialize(query)}`,
   },
   profile: {
-    scope: (authIdentity: string) =>
-      `${CACHE_ROOT}:${normalizeAuthIdentity(authIdentity)}`,
-    revisionKey: (authIdentity: string) =>
-      getRevisionKey(`${queryKeys.profile.scope(authIdentity)}:profile`),
-    revision: (authIdentity: string) =>
-      readRevision(queryKeys.profile.revisionKey(authIdentity)),
-    bumpRevision: (authIdentity: string) =>
-      bumpRevision(queryKeys.profile.revisionKey(authIdentity)),
+    scope: (authIdentity: string) => `${CACHE_ROOT}:${normalizeAuthIdentity(authIdentity)}`,
+    revisionKey: (authIdentity: string) => getRevisionKey(`${queryKeys.profile.scope(authIdentity)}:profile`),
+    revision: (authIdentity: string) => readRevision(queryKeys.profile.revisionKey(authIdentity)),
+    bumpRevision: (authIdentity: string) => bumpRevision(queryKeys.profile.revisionKey(authIdentity)),
     subscribeRevision: (authIdentity: string, listener: RevisionListener) =>
       subscribeRevision(queryKeys.profile.revisionKey(authIdentity), listener),
     current: (authIdentity: string, revision: string) =>
       `${queryKeys.profile.scope(authIdentity)}:profile:v${revision}`,
   },
   languages: {
-    scope: (authIdentity: string) =>
-      `${CACHE_ROOT}:${normalizeAuthIdentity(authIdentity)}`,
-    listRevisionKey: (authIdentity: string) =>
-      getRevisionKey(`${queryKeys.languages.scope(authIdentity)}:list`),
-    listRevision: (authIdentity: string) =>
-      readRevision(queryKeys.languages.listRevisionKey(authIdentity)),
-    bumpListRevision: (authIdentity: string) =>
-      bumpRevision(queryKeys.languages.listRevisionKey(authIdentity)),
+    scope: (authIdentity: string) => `${CACHE_ROOT}:${normalizeAuthIdentity(authIdentity)}`,
+    listRevisionKey: (authIdentity: string) => getRevisionKey(`${queryKeys.languages.scope(authIdentity)}:list`),
+    listRevision: (authIdentity: string) => readRevision(queryKeys.languages.listRevisionKey(authIdentity)),
+    bumpListRevision: (authIdentity: string) => bumpRevision(queryKeys.languages.listRevisionKey(authIdentity)),
     subscribeListRevision: (authIdentity: string, listener: RevisionListener) =>
-      subscribeRevision(
-        queryKeys.languages.listRevisionKey(authIdentity),
-        listener,
-      ),
+      subscribeRevision(queryKeys.languages.listRevisionKey(authIdentity), listener),
     list: (authIdentity: string, revision: string) =>
       `${queryKeys.languages.scope(authIdentity)}:languages:list:v${revision}`,
-    nativeRevisionKey: (authIdentity: string) =>
-      getRevisionKey(`${queryKeys.languages.scope(authIdentity)}:native`),
-    nativeRevision: (authIdentity: string) =>
-      readRevision(queryKeys.languages.nativeRevisionKey(authIdentity)),
-    bumpNativeRevision: (authIdentity: string) =>
-      bumpRevision(queryKeys.languages.nativeRevisionKey(authIdentity)),
-    subscribeNativeRevision: (
-      authIdentity: string,
-      listener: RevisionListener,
-    ) =>
-      subscribeRevision(
-        queryKeys.languages.nativeRevisionKey(authIdentity),
-        listener,
-      ),
+    nativeRevisionKey: (authIdentity: string) => getRevisionKey(`${queryKeys.languages.scope(authIdentity)}:native`),
+    nativeRevision: (authIdentity: string) => readRevision(queryKeys.languages.nativeRevisionKey(authIdentity)),
+    bumpNativeRevision: (authIdentity: string) => bumpRevision(queryKeys.languages.nativeRevisionKey(authIdentity)),
+    subscribeNativeRevision: (authIdentity: string, listener: RevisionListener) =>
+      subscribeRevision(queryKeys.languages.nativeRevisionKey(authIdentity), listener),
     native: (authIdentity: string, revision: string) =>
       `${queryKeys.languages.scope(authIdentity)}:languages:native:v${revision}`,
-    currentRevisionKey: (authIdentity: string) =>
-      getRevisionKey(`${queryKeys.languages.scope(authIdentity)}:current`),
-    currentRevision: (authIdentity: string) =>
-      readRevision(queryKeys.languages.currentRevisionKey(authIdentity)),
-    bumpCurrentRevision: (authIdentity: string) =>
-      bumpRevision(queryKeys.languages.currentRevisionKey(authIdentity)),
-    subscribeCurrentRevision: (
-      authIdentity: string,
-      listener: RevisionListener,
-    ) =>
-      subscribeRevision(
-        queryKeys.languages.currentRevisionKey(authIdentity),
-        listener,
-      ),
+    currentRevisionKey: (authIdentity: string) => getRevisionKey(`${queryKeys.languages.scope(authIdentity)}:current`),
+    currentRevision: (authIdentity: string) => readRevision(queryKeys.languages.currentRevisionKey(authIdentity)),
+    bumpCurrentRevision: (authIdentity: string) => bumpRevision(queryKeys.languages.currentRevisionKey(authIdentity)),
+    subscribeCurrentRevision: (authIdentity: string, listener: RevisionListener) =>
+      subscribeRevision(queryKeys.languages.currentRevisionKey(authIdentity), listener),
     current: (authIdentity: string, revision: string) =>
       `${queryKeys.languages.scope(authIdentity)}:languages:current:v${revision}`,
   },
 };
 
-export function invalidateLearningItemsCache(
-  authIdentity: string,
-  languageCode: string,
-): string {
+export function invalidateLearningItemsCache(authIdentity: string, languageCode: string): string {
   return queryKeys.learningItems.bumpRevision(authIdentity, languageCode);
 }
 
-export function invalidateGroupsCache(
-  authIdentity: string,
-  languageCode: string,
-): string {
+export function invalidateGroupsCache(authIdentity: string, languageCode: string): string {
   return queryKeys.groups.bumpRevision(authIdentity, languageCode);
 }
 
-export function invalidateLookupCache(
-  authIdentity: string,
-  languageCode: string,
-): string {
+export function invalidateLookupCache(authIdentity: string, languageCode: string): string {
   return queryKeys.lookup.bumpRevision(authIdentity, languageCode);
 }
 

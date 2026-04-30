@@ -1,8 +1,5 @@
 import { List } from "@raycast/api";
-import type {
-  ItemDefinition,
-  SingleLanguageBlueprintItemDefinition,
-} from "../types";
+import type { ItemDefinition, SingleLanguageBlueprintItemDefinition } from "../types";
 
 interface DefinitionsListProps {
   definitions: (ItemDefinition | SingleLanguageBlueprintItemDefinition)[];
@@ -26,9 +23,7 @@ export function DefinitionsList({ definitions }: DefinitionsListProps) {
   );
 }
 
-export function formatDefinitionMarkdown(
-  def: ItemDefinition | SingleLanguageBlueprintItemDefinition,
-): string {
+export function formatDefinitionMarkdown(def: ItemDefinition | SingleLanguageBlueprintItemDefinition): string {
   const parts: string[] = [];
 
   if (def.translation) {

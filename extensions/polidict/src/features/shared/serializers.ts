@@ -1,10 +1,4 @@
-type SerializableValue =
-  | string
-  | number
-  | boolean
-  | null
-  | SerializableValue[]
-  | { [key: string]: SerializableValue };
+type SerializableValue = string | number | boolean | null | SerializableValue[] | { [key: string]: SerializableValue };
 
 function normalizeValue(value: unknown): SerializableValue | undefined {
   if (value === null) {
@@ -12,19 +6,11 @@ function normalizeValue(value: unknown): SerializableValue | undefined {
   }
 
   const valueType = typeof value;
-  if (
-    valueType === "string" ||
-    valueType === "number" ||
-    valueType === "boolean"
-  ) {
+  if (valueType === "string" || valueType === "number" || valueType === "boolean") {
     return value as string | number | boolean;
   }
 
-  if (
-    valueType === "undefined" ||
-    valueType === "function" ||
-    valueType === "symbol"
-  ) {
+  if (valueType === "undefined" || valueType === "function" || valueType === "symbol") {
     return undefined;
   }
 
@@ -38,8 +24,8 @@ function normalizeValue(value: unknown): SerializableValue | undefined {
 
   if (valueType === "object") {
     const normalizedObject: Record<string, SerializableValue> = {};
-    const entries = Object.entries(value as Record<string, unknown>).sort(
-      ([leftKey], [rightKey]) => leftKey.localeCompare(rightKey),
+    const entries = Object.entries(value as Record<string, unknown>).sort(([leftKey], [rightKey]) =>
+      leftKey.localeCompare(rightKey),
     );
 
     for (const [key, entry] of entries) {

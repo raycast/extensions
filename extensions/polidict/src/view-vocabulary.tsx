@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Icon,
-  List,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useGroups, useLearningItems } from "./hooks";
 import { createApiClient } from "./api";
@@ -37,8 +28,7 @@ function ViewVocabularyContent({
 }: CommandShellContext) {
   const [searchText, setSearchText] = useState("");
   const [groupFilter, setGroupFilter] = useState<string>("all");
-  const [definitionFilter, setDefinitionFilter] =
-    useState<DefinitionFilter>("all");
+  const [definitionFilter, setDefinitionFilter] = useState<DefinitionFilter>("all");
   const [showingDetail, setShowingDetail] = useState(true);
 
   const [page, setPage] = useState(1);
@@ -46,11 +36,7 @@ function ViewVocabularyContent({
   const [hasMore, setHasMore] = useState(false);
   const lastProcessedPage = useRef(0);
 
-  const { data: groups, isLoading: groupsLoading } = useGroups(
-    currentLanguage,
-    authIdentity,
-    { pageSize: 100 },
-  );
+  const { data: groups, isLoading: groupsLoading } = useGroups(currentLanguage, authIdentity, { pageSize: 100 });
 
   const searchFlags: SearchFlag[] = [];
   if (definitionFilter === "none") {
@@ -72,9 +58,7 @@ function ViewVocabularyContent({
     mutate,
   } = useLearningItems(currentLanguage, authIdentity, {
     textQuery: searchText || undefined,
-    matchType: searchText
-      ? MatchType.CONTAINS_IGNORING_CASE_ANYWHERE
-      : undefined,
+    matchType: searchText ? MatchType.CONTAINS_IGNORING_CASE_ANYWHERE : undefined,
     groupIds: groupFilter !== "all" ? [groupFilter] : undefined,
     searchFlags: searchFlags.length ? searchFlags : undefined,
     pageParams: { page, pageSize: PAGE_SIZE },
@@ -90,9 +74,7 @@ function ViewVocabularyContent({
     } else {
       setAccumulatedItems((prev) => {
         const existingIds = new Set(prev.map((item) => item.id));
-        const newItems = learningItemsData.learningItems.filter(
-          (item) => !existingIds.has(item.id),
-        );
+        const newItems = learningItemsData.learningItems.filter((item) => !existingIds.has(item.id));
         return [...prev, ...newItems];
       });
     }
@@ -103,9 +85,7 @@ function ViewVocabularyContent({
 
   let items = accumulatedItems;
   if (definitionFilter === "has") {
-    items = items.filter(
-      (item) => item.definitions && item.definitions.length > 0,
-    );
+    items = items.filter((item) => item.definitions && item.definitions.length > 0);
   }
 
   const revalidate = useCallback(() => {
@@ -136,21 +116,14 @@ function ViewVocabularyContent({
     const client = createApiClient();
 
     try {
-      await mutate(
-        client.learningItems.deleteLearningItem(
-          currentLanguage.languageCode,
-          item.id,
-        ),
-        {
-          optimisticUpdate: (current): LearningItemList => ({
-            learningItems:
-              current?.learningItems.filter((i) => i.id !== item.id) ?? [],
-            hasNext: current?.hasNext ?? false,
-          }),
-          rollbackOnError: true,
-          shouldRevalidateAfter: false,
-        },
-      );
+      await mutate(client.learningItems.deleteLearningItem(currentLanguage.languageCode, item.id), {
+        optimisticUpdate: (current): LearningItemList => ({
+          learningItems: current?.learningItems.filter((i) => i.id !== item.id) ?? [],
+          hasNext: current?.hasNext ?? false,
+        }),
+        rollbackOnError: true,
+        shouldRevalidateAfter: false,
+      });
 
       setAccumulatedItems((prev) => prev.filter((i) => i.id !== item.id));
 
@@ -180,9 +153,7 @@ function ViewVocabularyContent({
     const parts: string[] = [];
 
     if (item.imageUrl) {
-      parts.push(
-        `<img src="${item.imageUrl}" alt="${item.text}" width="200" />`,
-      );
+      parts.push(`<img src="${item.imageUrl}" alt="${item.text}" width="200" />`);
     }
 
     parts.push(`**${item.text}**`);
@@ -213,20 +184,14 @@ function ViewVocabularyContent({
             if (value.startsWith("group:")) {
               setGroupFilter(value.replace("group:", ""));
             } else if (value.startsWith("def:")) {
-              setDefinitionFilter(
-                value.replace("def:", "") as DefinitionFilter,
-              );
+              setDefinitionFilter(value.replace("def:", "") as DefinitionFilter);
             }
           }}
         >
           <List.Dropdown.Section title="Groups">
             <List.Dropdown.Item title="All Groups" value="group:all" />
             {groups?.map((group) => (
-              <List.Dropdown.Item
-                key={group.id}
-                title={group.name}
-                value={`group:${group.id}`}
-              />
+              <List.Dropdown.Item key={group.id} title={group.name} value={`group:${group.id}`} />
             ))}
           </List.Dropdown.Section>
           <List.Dropdown.Section title="Definitions">
@@ -241,11 +206,7 @@ function ViewVocabularyContent({
         <List.EmptyView
           icon={Icon.Book}
           title="No items found"
-          description={
-            searchText
-              ? "Try a different search"
-              : "Add words using Lookup Word command"
-          }
+          description={searchText ? "Try a different search" : "Add words using Lookup Word command"}
           actions={
             currentLanguage ? (
               <ActionPanel>
@@ -261,10 +222,7 @@ function ViewVocabularyContent({
                     />
                   }
                 />
-                <CurrentLanguageActions
-                  {...languageActions}
-                  onLanguageChanged={() => setGroupFilter("all")}
-                />
+                <CurrentLanguageActions {...languageActions} onLanguageChanged={() => setGroupFilter("all")} />
                 {signOutAction}
               </ActionPanel>
             ) : undefined
@@ -273,8 +231,7 @@ function ViewVocabularyContent({
       ) : (
         <>
           {items.map((item) => {
-            const hasDefinitions =
-              item.definitions && item.definitions.length > 0;
+            const hasDefinitions = item.definitions && item.definitions.length > 0;
             const groupNames = getGroupNames(item.groupIds);
 
             return (
@@ -282,18 +239,12 @@ function ViewVocabularyContent({
                 key={item.id}
                 icon={hasDefinitions ? Icon.CheckCircle : Icon.Circle}
                 title={item.text}
-                subtitle={
-                  hasDefinitions ? item.definitions![0].definition : undefined
-                }
+                subtitle={hasDefinitions ? item.definitions![0].definition : undefined}
                 accessories={[
                   ...(groupNames ? [{ tag: groupNames }] : []),
-                  ...(hasDefinitions
-                    ? [{ text: `${item.definitions!.length} def` }]
-                    : []),
+                  ...(hasDefinitions ? [{ text: `${item.definitions!.length} def` }] : []),
                 ]}
-                detail={
-                  <List.Item.Detail markdown={formatItemMarkdown(item)} />
-                }
+                detail={<List.Item.Detail markdown={formatItemMarkdown(item)} />}
                 actions={
                   <ActionPanel>
                     <Action.Push
@@ -354,10 +305,7 @@ function ViewVocabularyContent({
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
                       onAction={() => revalidate()}
                     />
-                    <CurrentLanguageActions
-                      {...languageActions}
-                      onLanguageChanged={() => setGroupFilter("all")}
-                    />
+                    <CurrentLanguageActions {...languageActions} onLanguageChanged={() => setGroupFilter("all")} />
                     {signOutAction}
                     <Action
                       icon={Icon.Sidebar}
@@ -376,11 +324,7 @@ function ViewVocabularyContent({
               title={isLoading ? "Loading…" : "Load More…"}
               actions={
                 <ActionPanel>
-                  <Action
-                    icon={Icon.ArrowDown}
-                    title="Load More"
-                    onAction={loadMore}
-                  />
+                  <Action icon={Icon.ArrowDown} title="Load More" onAction={loadMore} />
                 </ActionPanel>
               }
             />
@@ -392,9 +336,5 @@ function ViewVocabularyContent({
 }
 
 export default function ViewVocabulary() {
-  return (
-    <CommandShell>
-      {(context) => <ViewVocabularyContent {...context} />}
-    </CommandShell>
-  );
+  return <CommandShell>{(context) => <ViewVocabularyContent {...context} />}</CommandShell>;
 }

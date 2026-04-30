@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { BadRequestError, createApiClient } from "../api";
 import { useGroups, useUserProfile } from "../hooks";
@@ -17,20 +7,12 @@ import {
   invalidateLookupCache,
   invalidateUserProfileCache,
 } from "../features/shared/query-keys";
-import {
-  canAccessAI,
-  getAISuggestion,
-} from "../services/ai-suggestion-service";
+import { canAccessAI, getAISuggestion } from "../services/ai-suggestion-service";
 import { FIELD_LIMITS } from "../constants";
 import { DefinitionsManager } from "./DefinitionsManager";
 import { GroupPicker } from "./GroupPicker";
 import { ImagePicker } from "./ImagePicker";
-import type {
-  ItemDefinition,
-  LearningItem,
-  SupportedLanguage,
-  UnsavedLearningItem,
-} from "../types";
+import type { ItemDefinition, LearningItem, SupportedLanguage, UnsavedLearningItem } from "../types";
 import { formatRaycastError, normalizeText } from "../utils";
 
 interface LearningItemFormProps {
@@ -52,27 +34,17 @@ export function LearningItemForm({
 }: LearningItemFormProps) {
   const { pop, push } = useNavigation();
   const { isPlusUser, canAddLearningItems } = useUserProfile(authIdentity);
-  const { data: availableGroups = [] } = useGroups(
-    currentLanguage,
-    authIdentity,
-    { pageSize: 100 },
-  );
+  const { data: availableGroups = [] } = useGroups(currentLanguage, authIdentity, { pageSize: 100 });
 
-  const [text, setText] = useState(
-    initialValues?.text ?? existingItem?.text ?? "",
-  );
-  const [comment, setComment] = useState(
-    initialValues?.comment ?? existingItem?.comment ?? "",
-  );
+  const [text, setText] = useState(initialValues?.text ?? existingItem?.text ?? "");
+  const [comment, setComment] = useState(initialValues?.comment ?? existingItem?.comment ?? "");
   const [selectedGroups, setSelectedGroups] = useState<string[]>(
     initialValues?.groupIds ?? existingItem?.groupIds ?? [],
   );
   const [definitions, setDefinitions] = useState<ItemDefinition[]>(
     initialValues?.definitions ?? existingItem?.definitions ?? [],
   );
-  const [imageUrl, setImageUrl] = useState<string | undefined>(
-    initialValues?.imageUrl ?? existingItem?.imageUrl,
-  );
+  const [imageUrl, setImageUrl] = useState<string | undefined>(initialValues?.imageUrl ?? existingItem?.imageUrl);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
 
@@ -101,12 +73,7 @@ export function LearningItemForm({
     });
 
     try {
-      const result = await getAISuggestion(
-        text,
-        currentLanguage,
-        nativeLanguage,
-        { isPlusUser, availableGroups },
-      );
+      const result = await getAISuggestion(text, currentLanguage, nativeLanguage, { isPlusUser, availableGroups });
 
       if (result?.suggestion) {
         const suggestion = result.suggestion;
@@ -123,9 +90,7 @@ export function LearningItemForm({
 
         if (suggestion.groupIds?.length) {
           const validGroupIds = new Set(availableGroups.map((g) => g.id));
-          const filteredGroups = suggestion.groupIds.filter((id) =>
-            validGroupIds.has(id),
-          );
+          const filteredGroups = suggestion.groupIds.filter((id) => validGroupIds.has(id));
           if (filteredGroups.length > 0) {
             setSelectedGroups(filteredGroups);
           }
@@ -147,10 +112,7 @@ export function LearningItemForm({
     }
   }
 
-  async function handleConflict(
-    existingId: string,
-    unsaved: UnsavedLearningItem,
-  ): Promise<LearningItem | undefined> {
+  async function handleConflict(existingId: string, unsaved: UnsavedLearningItem): Promise<LearningItem | undefined> {
     const client = createApiClient();
 
     const action = await confirmAlert({
@@ -170,27 +132,16 @@ export function LearningItemForm({
     }
 
     try {
-      const existingItem = await client.learningItems.getLearningItem(
-        languageCode,
-        existingId,
-      );
+      const existingItem = await client.learningItems.getLearningItem(languageCode, existingId);
 
-      const mergedGroupIds = Array.from(
-        new Set([
-          ...(existingItem.groupIds ?? []),
-          ...(unsaved.groupIds ?? []),
-        ]),
-      );
+      const mergedGroupIds = Array.from(new Set([...(existingItem.groupIds ?? []), ...(unsaved.groupIds ?? [])]));
 
-      const updated = await client.learningItems.updateLearningItem(
-        languageCode,
-        {
-          ...unsaved,
-          id: existingId,
-          groupIds: mergedGroupIds.length ? mergedGroupIds : undefined,
-          speechUrl: existingItem.speechUrl,
-        },
-      );
+      const updated = await client.learningItems.updateLearningItem(languageCode, {
+        ...unsaved,
+        id: existingId,
+        groupIds: mergedGroupIds.length ? mergedGroupIds : undefined,
+        speechUrl: existingItem.speechUrl,
+      });
 
       invalidateRelatedCaches();
       return updated;
@@ -215,8 +166,7 @@ export function LearningItemForm({
       showToast({
         style: Toast.Style.Failure,
         title: "Limit Reached",
-        message:
-          "You have reached the maximum number of learning items. Upgrade to Polidict Plus for unlimited items.",
+        message: "You have reached the maximum number of learning items. Upgrade to Polidict Plus for unlimited items.",
       });
       return;
     }
@@ -228,17 +178,14 @@ export function LearningItemForm({
       const client = createApiClient();
 
       if (existingItem) {
-        const updated = await client.learningItems.updateLearningItem(
-          languageCode,
-          {
-            ...existingItem,
-            text: normalizedText,
-            comment: comment || undefined,
-            definitions: definitions.length ? definitions : undefined,
-            groupIds: selectedGroups.length ? selectedGroups : undefined,
-            imageUrl: imageUrl || undefined,
-          },
-        );
+        const updated = await client.learningItems.updateLearningItem(languageCode, {
+          ...existingItem,
+          text: normalizedText,
+          comment: comment || undefined,
+          definitions: definitions.length ? definitions : undefined,
+          groupIds: selectedGroups.length ? selectedGroups : undefined,
+          imageUrl: imageUrl || undefined,
+        });
         showToast({
           style: Toast.Style.Success,
           title: "Updated successfully",
@@ -256,10 +203,7 @@ export function LearningItemForm({
         };
 
         try {
-          const created = await client.learningItems.addLearningItem(
-            languageCode,
-            unsaved,
-          );
+          const created = await client.learningItems.addLearningItem(languageCode, unsaved);
           showToast({
             style: Toast.Style.Success,
             title: "Added successfully",
@@ -268,10 +212,7 @@ export function LearningItemForm({
           onSuccess?.(created);
           pop();
         } catch (error) {
-          if (
-            error instanceof BadRequestError &&
-            error.isLearningItemConflict()
-          ) {
+          if (error instanceof BadRequestError && error.isLearningItemConflict()) {
             const existingId = error.errorDetails?.existingId;
             if (!existingId) {
               throw error;
@@ -313,10 +254,7 @@ export function LearningItemForm({
       isLoading={isSubmitting || isLoadingAI}
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title={existingItem ? "Update" : "Add"}
-            onSubmit={handleSubmit}
-          />
+          <Action.SubmitForm title={existingItem ? "Update" : "Add"} onSubmit={handleSubmit} />
           {hasAIAccess && text.length >= 2 && (
             <Action
               title="Fill with AI"
@@ -360,14 +298,7 @@ export function LearningItemForm({
               title="Search Image"
               icon={Icon.Image}
               shortcut={{ modifiers: ["cmd"], key: "i" }}
-              onAction={() =>
-                push(
-                  <ImagePicker
-                    initialSearchText={text}
-                    onSelect={setImageUrl}
-                  />,
-                )
-              }
+              onAction={() => push(<ImagePicker initialSearchText={text} onSelect={setImageUrl} />)}
             />
           )}
           {imageUrl && (
@@ -389,11 +320,7 @@ export function LearningItemForm({
         value={text}
         onChange={setText}
         autoFocus={!existingItem}
-        error={
-          text.length > FIELD_LIMITS.TEXT_MAX
-            ? `Max ${FIELD_LIMITS.TEXT_MAX} characters`
-            : undefined
-        }
+        error={text.length > FIELD_LIMITS.TEXT_MAX ? `Max ${FIELD_LIMITS.TEXT_MAX} characters` : undefined}
       />
 
       <Form.TextArea
@@ -402,11 +329,7 @@ export function LearningItemForm({
         placeholder="Optional comment"
         value={comment}
         onChange={setComment}
-        error={
-          comment.length > FIELD_LIMITS.COMMENT_MAX
-            ? `Max ${FIELD_LIMITS.COMMENT_MAX} characters`
-            : undefined
-        }
+        error={comment.length > FIELD_LIMITS.COMMENT_MAX ? `Max ${FIELD_LIMITS.COMMENT_MAX} characters` : undefined}
       />
 
       <Form.Separator />

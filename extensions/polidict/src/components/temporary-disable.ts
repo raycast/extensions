@@ -1,34 +1,21 @@
 import { TrainingType } from "../types";
 
 export type TemporaryDisableKind = "speaking" | "listening";
-export type TemporaryDisableState = Partial<
-  Record<TemporaryDisableKind, number>
->;
+export type TemporaryDisableState = Partial<Record<TemporaryDisableKind, number>>;
 
 export const TEMPORARY_DISABLE_DURATION_MS = 15 * 60 * 1000;
 
 const TEMPORARY_DISABLE_TYPES: Record<TemporaryDisableKind, TrainingType[]> = {
   speaking: [TrainingType.SPEAKING],
-  listening: [
-    TrainingType.LISTENING,
-    TrainingType.MATCHING_LEARNING_ITEM_LISTENING,
-  ],
+  listening: [TrainingType.LISTENING, TrainingType.MATCHING_LEARNING_ITEM_LISTENING],
 };
-const TEMPORARY_DISABLE_KINDS: TemporaryDisableKind[] = [
-  "speaking",
-  "listening",
-];
+const TEMPORARY_DISABLE_KINDS: TemporaryDisableKind[] = ["speaking", "listening"];
 
-export function getTemporaryDisableTypes(
-  kind: TemporaryDisableKind,
-): TrainingType[] {
+export function getTemporaryDisableTypes(kind: TemporaryDisableKind): TrainingType[] {
   return TEMPORARY_DISABLE_TYPES[kind];
 }
 
-export function addTemporaryDisabledTypes(
-  current: Set<TrainingType>,
-  kind: TemporaryDisableKind,
-): Set<TrainingType> {
+export function addTemporaryDisabledTypes(current: Set<TrainingType>, kind: TemporaryDisableKind): Set<TrainingType> {
   const next = new Set(current);
 
   getTemporaryDisableTypes(kind).forEach((type) => {
@@ -38,9 +25,7 @@ export function addTemporaryDisabledTypes(
   return next;
 }
 
-export function normalizeTemporaryDisableState(
-  value: unknown,
-): TemporaryDisableState {
+export function normalizeTemporaryDisableState(value: unknown): TemporaryDisableState {
   if (!value || typeof value !== "object") return {};
 
   const input = value as Record<string, unknown>;
@@ -91,10 +76,7 @@ export function pruneExpiredTemporaryDisableState(
   return pruned;
 }
 
-export function getActiveTemporarilyDisabledTypes(
-  current: TemporaryDisableState,
-  now = Date.now(),
-): Set<TrainingType> {
+export function getActiveTemporarilyDisabledTypes(current: TemporaryDisableState, now = Date.now()): Set<TrainingType> {
   const activeTypes = new Set<TrainingType>();
 
   TEMPORARY_DISABLE_KINDS.forEach((kind) => {
@@ -119,9 +101,7 @@ export function canTemporarilyDisableKind(
   currentDisabled: Set<TrainingType>,
   kind: TemporaryDisableKind,
 ): boolean {
-  const typesToDisable = getTemporaryDisableTypes(kind).filter((type) =>
-    availableTypes.includes(type),
-  );
+  const typesToDisable = getTemporaryDisableTypes(kind).filter((type) => availableTypes.includes(type));
 
   if (typesToDisable.length === 0) return false;
 

@@ -41,10 +41,7 @@ export class BadRequestError extends ApiError {
   }
 
   isLearningItemConflict(): boolean {
-    return (
-      this.errorDetails?.errorCode === "LEARNING_ITEM_ALREADY_EXISTS" &&
-      !!this.errorDetails?.existingId
-    );
+    return this.errorDetails?.errorCode === "LEARNING_ITEM_ALREADY_EXISTS" && !!this.errorDetails?.existingId;
   }
 }
 

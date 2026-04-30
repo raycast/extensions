@@ -1,17 +1,6 @@
-import {
-  confirmAlert,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { confirmAlert, List, showToast, Toast, useNavigation } from "@raycast/api";
 import React, { useRef, useState } from "react";
-import type {
-  GenericTrainingResult,
-  GenericTrainingResultItem,
-  MixedTrainingItem,
-  SupportedLanguage,
-} from "../types";
+import type { GenericTrainingResult, GenericTrainingResultItem, MixedTrainingItem, SupportedLanguage } from "../types";
 import { TrainingType } from "../types";
 import { createApiClient } from "../api";
 import { formatRaycastError } from "../utils";
@@ -123,12 +112,7 @@ function renderBatch(
 
     case TrainingType.WRITING:
       return (
-        <WritingTraining
-          items={batch.items}
-          userLanguage={userLanguage}
-          onComplete={onComplete}
-          progress={progress}
-        />
+        <WritingTraining items={batch.items} userLanguage={userLanguage} onComplete={onComplete} progress={progress} />
       );
 
     case TrainingType.WRITING_SELECTION:
@@ -201,9 +185,9 @@ function TrainingComponent({
 }: MixedTrainingRouterProps): React.ReactElement | null {
   const { pop } = useNavigation();
   const [batchIndex, setBatchIndex] = useState(0);
-  const [temporarilyDisabledTypes, setTemporarilyDisabledTypes] = useState<
-    Set<TrainingType>
-  >(() => getActiveTemporarilyDisabledTypes(initialTemporaryDisableState));
+  const [temporarilyDisabledTypes, setTemporarilyDisabledTypes] = useState<Set<TrainingType>>(() =>
+    getActiveTemporarilyDisabledTypes(initialTemporaryDisableState),
+  );
   const [temporaryDisableState, setTemporaryDisableState] =
     useState<TemporaryDisableState>(initialTemporaryDisableState);
   const allResultsRef = useRef<GenericTrainingResultItem[]>([]);
@@ -217,9 +201,7 @@ function TrainingComponent({
   }
 
   const batches = groupIntoBatches(items);
-  const availableTrainingTypes = Array.from(
-    new Set(batches.map((batch) => batch.trainingType)),
-  );
+  const availableTrainingTypes = Array.from(new Set(batches.map((batch) => batch.trainingType)));
   const canTemporarilyDisableListening = canTemporarilyDisableKind(
     availableTrainingTypes,
     temporarilyDisabledTypes,
@@ -231,17 +213,9 @@ function TrainingComponent({
     "speaking",
   );
 
-  function getNextEnabledBatchIndex(
-    startIndex: number,
-    disabledTypes: Set<TrainingType>,
-  ): number {
+  function getNextEnabledBatchIndex(startIndex: number, disabledTypes: Set<TrainingType>): number {
     for (let index = startIndex; index < batches.length; index++) {
-      if (
-        !isTrainingTypeTemporarilyDisabled(
-          batches[index].trainingType,
-          disabledTypes,
-        )
-      ) {
+      if (!isTrainingTypeTemporarilyDisabled(batches[index].trainingType, disabledTypes)) {
         return index;
       }
     }
@@ -251,10 +225,7 @@ function TrainingComponent({
   function handleBatchComplete(batchResults: GenericTrainingResultItem[]) {
     allResultsRef.current = [...allResultsRef.current, ...batchResults];
 
-    const nextBatchIndex = getNextEnabledBatchIndex(
-      batchIndex + 1,
-      temporarilyDisabledTypes,
-    );
+    const nextBatchIndex = getNextEnabledBatchIndex(batchIndex + 1, temporarilyDisabledTypes);
 
     if (nextBatchIndex !== -1) {
       setBatchIndex(nextBatchIndex);
@@ -269,14 +240,8 @@ function TrainingComponent({
 
   async function confirmAndDisableTemporarily(kind: TemporaryDisableKind) {
     const confirmed = await confirmAlert({
-      title:
-        kind === "speaking"
-          ? "Can't speak right now?"
-          : "Can't listen right now?",
-      message:
-        kind === "speaking"
-          ? "We'll skip speaking for 15 minutes."
-          : "We'll skip listening for 15 minutes.",
+      title: kind === "speaking" ? "Can't speak right now?" : "Can't listen right now?",
+      message: kind === "speaking" ? "We'll skip speaking for 15 minutes." : "We'll skip listening for 15 minutes.",
       primaryAction: {
         title: "Continue",
       },
@@ -286,26 +251,14 @@ function TrainingComponent({
       return;
     }
 
-    const nextDisabledTypes = addTemporaryDisabledTypes(
-      temporarilyDisabledTypes,
-      kind,
-    );
-    const nextTemporaryDisableState = applyTemporaryDisableCooldown(
-      temporaryDisableState,
-      kind,
-    );
+    const nextDisabledTypes = addTemporaryDisabledTypes(temporarilyDisabledTypes, kind);
+    const nextTemporaryDisableState = applyTemporaryDisableCooldown(temporaryDisableState, kind);
 
     setTemporarilyDisabledTypes(nextDisabledTypes);
     setTemporaryDisableState(nextTemporaryDisableState);
-    void saveTemporaryDisableState(
-      userLanguage.languageCode,
-      nextTemporaryDisableState,
-    );
+    void saveTemporaryDisableState(userLanguage.languageCode, nextTemporaryDisableState);
 
-    const nextBatchIndex = getNextEnabledBatchIndex(
-      batchIndex + 1,
-      nextDisabledTypes,
-    );
+    const nextBatchIndex = getNextEnabledBatchIndex(batchIndex + 1, nextDisabledTypes);
 
     if (nextBatchIndex !== -1) {
       setBatchIndex(nextBatchIndex);
@@ -323,9 +276,7 @@ function TrainingComponent({
       };
       await client.trainings.submitTrainingResult(userLanguage, result);
 
-      const correct = allResultsRef.current.filter(
-        (r) => r.answers.length > 0,
-      ).length;
+      const correct = allResultsRef.current.filter((r) => r.answers.length > 0).length;
       showToast({
         style: Toast.Style.Success,
         title: "Training complete!",

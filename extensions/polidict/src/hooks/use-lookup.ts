@@ -2,12 +2,7 @@ import { AI, environment } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useCallback, useEffect, useState } from "react";
 import { createApiClient } from "../api";
-import type {
-  AiPrompt,
-  ItemDefinition,
-  SuggestedDefinitionsSource,
-  SupportedLanguage,
-} from "../types";
+import type { AiPrompt, ItemDefinition, SuggestedDefinitionsSource, SupportedLanguage } from "../types";
 import { executeAiPrompt } from "../services/ai-suggestion-service";
 import { queryKeys } from "../features/shared/query-keys";
 
@@ -28,28 +23,16 @@ export interface LookupResult {
   };
 }
 
-export function useLookup(
-  authIdentity: string,
-  query: string,
-  currentLanguage: SupportedLanguage,
-) {
+export function useLookup(authIdentity: string, query: string, currentLanguage: SupportedLanguage) {
   const languageCode = currentLanguage.languageCode;
-  const [revision, setRevision] = useState(() =>
-    queryKeys.lookup.revision(authIdentity, languageCode),
-  );
+  const [revision, setRevision] = useState(() => queryKeys.lookup.revision(authIdentity, languageCode));
   const [aiResult, setAiResult] = useState<LookupResult | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
-  const [pendingAiPrompt, setPendingAiPrompt] = useState<
-    AiPrompt | undefined
-  >();
+  const [pendingAiPrompt, setPendingAiPrompt] = useState<AiPrompt | undefined>();
 
   useEffect(() => {
     setRevision(queryKeys.lookup.revision(authIdentity, languageCode));
-    return queryKeys.lookup.subscribeRevision(
-      authIdentity,
-      languageCode,
-      setRevision,
-    );
+    return queryKeys.lookup.subscribeRevision(authIdentity, languageCode, setRevision);
   }, [authIdentity, languageCode]);
 
   useEffect(() => {
@@ -57,22 +40,14 @@ export function useLookup(
     setPendingAiPrompt(undefined);
   }, [query]);
 
-  const lookupCacheKey = queryKeys.lookup.result(
-    authIdentity,
-    languageCode,
-    revision,
-    query,
-  );
+  const lookupCacheKey = queryKeys.lookup.result(authIdentity, languageCode, revision, query);
 
   const {
     data,
     isLoading,
     revalidate: revalidateLookup,
   } = useCachedPromise(
-    async (
-      revisionToken: string,
-      normalizedLookupCacheKey: string,
-    ): Promise<LookupResult | null> => {
+    async (revisionToken: string, normalizedLookupCacheKey: string): Promise<LookupResult | null> => {
       void revisionToken;
       if (!query || query.length < 2 || !languageCode) {
         return null;
@@ -137,10 +112,7 @@ export function useLookup(
   const revalidate = () => {
     setAiResult(null);
     setPendingAiPrompt(undefined);
-    const currentRevision = queryKeys.lookup.revision(
-      authIdentity,
-      languageCode,
-    );
+    const currentRevision = queryKeys.lookup.revision(authIdentity, languageCode);
 
     if (currentRevision !== revision) {
       setRevision(currentRevision);

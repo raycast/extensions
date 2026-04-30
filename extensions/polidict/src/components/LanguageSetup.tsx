@@ -10,11 +10,7 @@ export interface LanguageSetupProps {
   setNativeLanguage: (languageCode: string) => Promise<void>;
 }
 
-export function LanguageSetup({
-  onComplete,
-  addLanguage,
-  setNativeLanguage,
-}: LanguageSetupProps) {
+export function LanguageSetup({ onComplete, addLanguage, setNativeLanguage }: LanguageSetupProps) {
   const { supportedLanguages, isLoading } = useSupportedLanguages();
   const [learningLanguage, setLearningLanguage] = useState<string>("");
   const [nativeLanguageCode, setNativeLanguageCode] = useState<string>("");
@@ -54,9 +50,7 @@ export function LanguageSetup({
     }
   }
 
-  const availableForNative = supportedLanguages.filter(
-    (l) => l.languageCode !== learningLanguage,
-  );
+  const availableForNative = supportedLanguages.filter((l) => l.languageCode !== learningLanguage);
 
   return (
     <Form
@@ -82,11 +76,7 @@ export function LanguageSetup({
       >
         <Form.Dropdown.Item value="" title="Select a language..." />
         {supportedLanguages.map((lang: SupportedLanguage) => (
-          <Form.Dropdown.Item
-            key={lang.languageCode}
-            value={lang.languageCode}
-            title={lang.languageName}
-          />
+          <Form.Dropdown.Item key={lang.languageCode} value={lang.languageCode} title={lang.languageName} />
         ))}
       </Form.Dropdown>
 
@@ -99,11 +89,7 @@ export function LanguageSetup({
       >
         <Form.Dropdown.Item value="" title="None" />
         {availableForNative.map((lang: SupportedLanguage) => (
-          <Form.Dropdown.Item
-            key={lang.languageCode}
-            value={lang.languageCode}
-            title={lang.languageName}
-          />
+          <Form.Dropdown.Item key={lang.languageCode} value={lang.languageCode} title={lang.languageName} />
         ))}
       </Form.Dropdown>
     </Form>

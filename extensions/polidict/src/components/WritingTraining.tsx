@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  Icon,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
 import { useRef, useState } from "react";
 import type {
   GenericTrainingResult,
@@ -28,12 +20,7 @@ interface WritingTrainingProps {
   progress?: TrainingProgress;
 }
 
-export function WritingTraining({
-  items,
-  userLanguage,
-  onComplete,
-  progress,
-}: WritingTrainingProps) {
+export function WritingTraining({ items, userLanguage, onComplete, progress }: WritingTrainingProps) {
   const { pop } = useNavigation();
   const [queue, setQueue] = useState<MixedTrainingItem[]>([...items]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -122,9 +109,7 @@ export function WritingTraining({
       };
       await client.trainings.submitTrainingResult(userLanguage, result);
 
-      const correct = resultsRef.current.filter(
-        (r) => r.answers.length > 0,
-      ).length;
+      const correct = resultsRef.current.filter((r) => r.answers.length > 0).length;
       showToast({
         style: Toast.Style.Success,
         title: "Training complete!",
@@ -142,10 +127,8 @@ export function WritingTraining({
   }
 
   const defParts: string[] = [];
-  if (payload.definition?.translation)
-    defParts.push(`**Translation:** ${payload.definition.translation}`);
-  if (payload.definition?.definition)
-    defParts.push(`**Definition:** ${payload.definition.definition}`);
+  if (payload.definition?.translation) defParts.push(`**Translation:** ${payload.definition.translation}`);
+  if (payload.definition?.definition) defParts.push(`**Definition:** ${payload.definition.definition}`);
   if (!defParts.length) defParts.push(`**Definition:** —`);
   if (payload.comment) defParts.push(`*${payload.comment}*`);
   const definitionMarkdown = defParts.join("\n\n");
@@ -167,10 +150,7 @@ export function WritingTraining({
             </>
           ) : (
             <>
-              <Action
-                title={currentIndex < queue.length - 1 ? "Next" : "Finish"}
-                onAction={handleNext}
-              />
+              <Action title={currentIndex < queue.length - 1 ? "Next" : "Finish"} onAction={handleNext} />
               {!isCorrect && (
                 <Action
                   title="I Was Right"
@@ -200,12 +180,7 @@ export function WritingTraining({
       {showResult && (
         <>
           <Form.Separator />
-          <Form.Description
-            title="Result"
-            text={
-              isCorrect ? "✓ Correct!" : `✗ Incorrect. Answer: ${payload.text}`
-            }
-          />
+          <Form.Description title="Result" text={isCorrect ? "✓ Correct!" : `✗ Incorrect. Answer: ${payload.text}`} />
         </>
       )}
     </Form>

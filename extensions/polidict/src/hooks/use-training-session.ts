@@ -1,11 +1,6 @@
 import { showToast, Toast, useNavigation } from "@raycast/api";
 import { useRef, useState } from "react";
-import type {
-  GenericTrainingResult,
-  GenericTrainingResultItem,
-  MixedTrainingItem,
-  SupportedLanguage,
-} from "../types";
+import type { GenericTrainingResult, GenericTrainingResultItem, MixedTrainingItem, SupportedLanguage } from "../types";
 import { TrainingType } from "../types";
 import { createApiClient } from "../api";
 import { formatRaycastError } from "../utils";
@@ -62,9 +57,7 @@ export function useTrainingSession({
       };
       await client.trainings.submitTrainingResult(userLanguage, result);
 
-      const correct = resultsRef.current.filter(
-        (r) => r.answers.length > 0,
-      ).length;
+      const correct = resultsRef.current.filter((r) => r.answers.length > 0).length;
       showToast({
         style: Toast.Style.Success,
         title: "Training complete!",

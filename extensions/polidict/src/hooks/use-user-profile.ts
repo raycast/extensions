@@ -1,16 +1,10 @@
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useState } from "react";
 import { createApiClient } from "../api";
-import {
-  queryKeys,
-  readSharedCache,
-  writeSharedCache,
-} from "../features/shared/query-keys";
+import { queryKeys, readSharedCache, writeSharedCache } from "../features/shared/query-keys";
 
 export function useUserProfile(authIdentity: string) {
-  const [revision, setRevision] = useState(() =>
-    queryKeys.profile.revision(authIdentity),
-  );
+  const [revision, setRevision] = useState(() => queryKeys.profile.revision(authIdentity));
 
   useEffect(() => {
     setRevision(queryKeys.profile.revision(authIdentity));
@@ -28,10 +22,7 @@ export function useUserProfile(authIdentity: string) {
       void authIdentityForRequest;
       const client = createApiClient();
       const result = await client.user.getProfile();
-      writeSharedCache(
-        queryKeys.profile.current(authIdentityForRequest, revisionToken),
-        result,
-      );
+      writeSharedCache(queryKeys.profile.current(authIdentityForRequest, revisionToken), result);
       return result;
     },
     [authIdentity, revision],

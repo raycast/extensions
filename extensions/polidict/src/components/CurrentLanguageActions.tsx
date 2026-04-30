@@ -34,15 +34,10 @@ export function CurrentLanguageActions({
   }
 
   const selectedLanguage = currentLanguage;
-  const hasAlternativeLanguage = languages.some(
-    (language) => language.languageCode !== selectedLanguage.languageCode,
-  );
+  const hasAlternativeLanguage = languages.some((language) => language.languageCode !== selectedLanguage.languageCode);
   const availableLanguagesToAdd = supportedLanguages.filter(
     (supportedLanguage) =>
-      !languages.some(
-        (userLanguage) =>
-          userLanguage.languageCode === supportedLanguage.languageCode,
-      ),
+      !languages.some((userLanguage) => userLanguage.languageCode === supportedLanguage.languageCode),
   );
 
   async function handleLanguageChange(language: SupportedLanguage) {
@@ -98,9 +93,7 @@ export function CurrentLanguageActions({
       await removeLanguage(language.languageCode);
 
       if (language.languageCode === selectedLanguage.languageCode) {
-        const fallbackLanguage = languages.find(
-          (item) => item.languageCode !== language.languageCode,
-        );
+        const fallbackLanguage = languages.find((item) => item.languageCode !== language.languageCode);
         if (fallbackLanguage) {
           await setCurrentLanguage(fallbackLanguage);
         }
@@ -174,18 +167,11 @@ export function CurrentLanguageActions({
 
   return (
     <>
-      <ActionPanel.Submenu
-        icon={Icon.Globe}
-        title={`Study Language: ${selectedLanguage.languageName}`}
-      >
+      <ActionPanel.Submenu icon={Icon.Globe} title={`Study Language: ${selectedLanguage.languageName}`}>
         {languages.map((language) => (
           <Action
             key={language.languageCode}
-            icon={
-              language.languageCode === selectedLanguage.languageCode
-                ? Icon.CheckCircle
-                : Icon.Circle
-            }
+            icon={language.languageCode === selectedLanguage.languageCode ? Icon.CheckCircle : Icon.Circle}
             title={language.languageName}
             onAction={() => handleLanguageChange(language)}
           />
@@ -207,9 +193,7 @@ export function CurrentLanguageActions({
 
       {addLanguage && (
         <ActionPanel.Submenu icon={Icon.Plus} title="Add Study Language">
-          {isLoadingSupportedLanguages && (
-            <Action icon={Icon.Clock} title="Loading Supported Languages…" />
-          )}
+          {isLoadingSupportedLanguages && <Action icon={Icon.Clock} title="Loading Supported Languages…" />}
           {!isLoadingSupportedLanguages &&
             availableLanguagesToAdd.map((language) => (
               <Action
@@ -218,13 +202,9 @@ export function CurrentLanguageActions({
                 onAction={() => handleAddLanguage(language)}
               />
             ))}
-          {!isLoadingSupportedLanguages &&
-            availableLanguagesToAdd.length === 0 && (
-              <Action
-                icon={Icon.Info}
-                title="All Supported Languages Already Added"
-              />
-            )}
+          {!isLoadingSupportedLanguages && availableLanguagesToAdd.length === 0 && (
+            <Action icon={Icon.Info} title="All Supported Languages Already Added" />
+          )}
         </ActionPanel.Submenu>
       )}
 
@@ -247,27 +227,18 @@ export function CurrentLanguageActions({
       )}
 
       {setNativeLanguage && removeNativeLanguage && (
-        <ActionPanel.Submenu
-          icon={Icon.Pin}
-          title={`Native Language: ${nativeLanguage?.languageName ?? "Not Set"}`}
-        >
+        <ActionPanel.Submenu icon={Icon.Pin} title={`Native Language: ${nativeLanguage?.languageName ?? "Not Set"}`}>
           <Action
             icon={nativeLanguage ? Icon.Circle : Icon.CheckCircle}
             title="Not Set"
             onAction={handleNativeLanguageRemoval}
           />
-          {isLoadingSupportedLanguages && (
-            <Action icon={Icon.Clock} title="Loading Supported Languages…" />
-          )}
+          {isLoadingSupportedLanguages && <Action icon={Icon.Clock} title="Loading Supported Languages…" />}
           {!isLoadingSupportedLanguages &&
             supportedLanguages.map((language) => (
               <Action
                 key={language.languageCode}
-                icon={
-                  language.languageCode === nativeLanguage?.languageCode
-                    ? Icon.CheckCircle
-                    : Icon.Circle
-                }
+                icon={language.languageCode === nativeLanguage?.languageCode ? Icon.CheckCircle : Icon.Circle}
                 title={language.languageName}
                 onAction={() => handleNativeLanguageChange(language)}
               />

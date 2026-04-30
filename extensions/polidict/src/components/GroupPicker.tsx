@@ -1,12 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useCallback, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { createApiClient } from "../api";
@@ -20,16 +12,10 @@ interface GroupPickerProps {
   onSelect: (groupIds: string[]) => void;
 }
 
-export function GroupPicker({
-  currentLanguage,
-  selectedGroupIds,
-  onSelect,
-}: GroupPickerProps) {
+export function GroupPicker({ currentLanguage, selectedGroupIds, onSelect }: GroupPickerProps) {
   const { pop } = useNavigation();
   const [searchText, setSearchText] = useState("");
-  const [selection, setSelection] = useState<Set<string>>(
-    new Set(selectedGroupIds),
-  );
+  const [selection, setSelection] = useState<Set<string>>(new Set(selectedGroupIds));
   const [page, setPage] = useState(1);
   const [allGroups, setAllGroups] = useState<Group[]>([]);
   const [hasMore, setHasMore] = useState(true);
@@ -37,11 +23,10 @@ export function GroupPicker({
   const { isLoading } = useCachedPromise(
     async (langCode: string, query: string, pageNum: number) => {
       const client = createApiClient();
-      const result = await client.groups.queryGroups(
-        langCode,
-        query || undefined,
-        { page: pageNum, pageSize: PAGE_SIZE },
-      );
+      const result = await client.groups.queryGroups(langCode, query || undefined, {
+        page: pageNum,
+        pageSize: PAGE_SIZE,
+      });
 
       if (pageNum === 1) {
         setAllGroups(result.groups);
@@ -122,11 +107,7 @@ export function GroupPicker({
               subtitle={group.description}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Deselect"
-                    icon={Icon.Circle}
-                    onAction={() => toggleSelection(group.id)}
-                  />
+                  <Action title="Deselect" icon={Icon.Circle} onAction={() => toggleSelection(group.id)} />
                   <Action
                     title="Done"
                     icon={Icon.Check}
@@ -156,11 +137,7 @@ export function GroupPicker({
             subtitle={group.description}
             actions={
               <ActionPanel>
-                <Action
-                  title="Select"
-                  icon={Icon.CheckCircle}
-                  onAction={() => toggleSelection(group.id)}
-                />
+                <Action title="Select" icon={Icon.CheckCircle} onAction={() => toggleSelection(group.id)} />
                 <Action
                   title="Done"
                   icon={Icon.Check}
@@ -191,9 +168,7 @@ export function GroupPicker({
         <List.EmptyView
           icon={Icon.Tag}
           title="No groups found"
-          description={
-            searchText ? "Try a different search term" : "No groups available"
-          }
+          description={searchText ? "Try a different search term" : "No groups available"}
         />
       )}
     </List>

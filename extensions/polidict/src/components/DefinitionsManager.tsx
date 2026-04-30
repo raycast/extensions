@@ -1,14 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Alert,
-  confirmAlert,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { createApiClient } from "../api";
 import { DefinitionForm } from "./DefinitionForm";
@@ -118,21 +108,13 @@ export function DefinitionsManager({
   }
 
   return (
-    <List
-      navigationTitle="Manage Definitions"
-      isShowingDetail={showingDetail}
-      isLoading={isSuggestingDefinition}
-    >
+    <List navigationTitle="Manage Definitions" isShowingDetail={showingDetail} isLoading={isSuggestingDefinition}>
       <List.EmptyView
         title="No Definitions"
         description="Add a definition to get started"
         actions={
           <ActionPanel>
-            <Action
-              title="Add Definition"
-              icon={Icon.Plus}
-              onAction={handleAddDefinition}
-            />
+            <Action title="Add Definition" icon={Icon.Plus} onAction={handleAddDefinition} />
             {hasAIAccess && text.length >= 2 && (
               <Action
                 title="Suggest Definition"
@@ -150,47 +132,33 @@ export function DefinitionsManager({
         <List.Item
           key={def.id ?? index}
           title={def.translation ?? def.definition ?? "—"}
-          subtitle={
-            showingDetail
-              ? undefined
-              : def.translation
-                ? def.definition
-                : undefined
-          }
+          subtitle={showingDetail ? undefined : def.translation ? def.definition : undefined}
           accessories={
             showingDetail
               ? undefined
               : [
                   ...(def.comment ? [{ text: "💬" }] : []),
-                  ...(def.examples?.length
-                    ? [{ text: `${def.examples.length}ex` }]
-                    : []),
+                  ...(def.examples?.length ? [{ text: `${def.examples.length}ex` }] : []),
                 ]
           }
           detail={<List.Item.Detail markdown={formatDefinitionMarkdown(def)} />}
           actions={
             <ActionPanel>
-              <Action
-                title="Edit"
-                icon={Icon.Pencil}
-                onAction={() => handleEditDefinition(index)}
-              />
+              <Action title="Edit" icon={Icon.Pencil} onAction={() => handleEditDefinition(index)} />
               <Action
                 title="Add Definition"
                 icon={Icon.Plus}
                 shortcut={{ modifiers: ["cmd"], key: "n" }}
                 onAction={handleAddDefinition}
               />
-              {hasAIAccess &&
-                text.length >= 2 &&
-                definitions.length < MAX_DEFINITIONS && (
-                  <Action
-                    title="Suggest Definition"
-                    icon={Icon.Wand}
-                    shortcut={{ modifiers: ["cmd"], key: "g" }}
-                    onAction={handleSuggestDefinition}
-                  />
-                )}
+              {hasAIAccess && text.length >= 2 && definitions.length < MAX_DEFINITIONS && (
+                <Action
+                  title="Suggest Definition"
+                  icon={Icon.Wand}
+                  shortcut={{ modifiers: ["cmd"], key: "g" }}
+                  onAction={handleSuggestDefinition}
+                />
+              )}
               <Action
                 title={showingDetail ? "Hide Details" : "Show Details"}
                 icon={Icon.Sidebar}
@@ -204,12 +172,7 @@ export function DefinitionsManager({
                 shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                 onAction={() => handleDeleteDefinition(index)}
               />
-              <Action
-                title="Done"
-                icon={Icon.Check}
-                shortcut={{ modifiers: ["cmd"], key: "return" }}
-                onAction={pop}
-              />
+              <Action title="Done" icon={Icon.Check} shortcut={{ modifiers: ["cmd"], key: "return" }} onAction={pop} />
             </ActionPanel>
           }
         />

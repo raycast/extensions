@@ -27,19 +27,10 @@ export class TrainingsClient {
       excludedTrainingTypes,
     };
 
-    return this.restClient.post<MixedTraining>(
-      `/api/languages/${userLanguage.languageCode}/trainings`,
-      request,
-    );
+    return this.restClient.post<MixedTraining>(`/api/languages/${userLanguage.languageCode}/trainings`, request);
   }
 
-  async submitTrainingResult(
-    userLanguage: SupportedLanguage,
-    result: GenericTrainingResult,
-  ): Promise<void> {
-    return this.restClient.post<void>(
-      `/api/languages/${userLanguage.languageCode}/trainings/results`,
-      result,
-    );
+  async submitTrainingResult(userLanguage: SupportedLanguage, result: GenericTrainingResult): Promise<void> {
+    return this.restClient.post<void>(`/api/languages/${userLanguage.languageCode}/trainings/results`, result);
   }
 }

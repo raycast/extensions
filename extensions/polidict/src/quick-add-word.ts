@@ -1,10 +1,4 @@
-import {
-  getSelectedText,
-  LocalStorage,
-  showToast,
-  Toast,
-  type LaunchProps,
-} from "@raycast/api";
+import { getSelectedText, LocalStorage, showToast, Toast, type LaunchProps } from "@raycast/api";
 import { createApiClient, getAccessToken } from "./api";
 import { formatRaycastError, getAuthIdentityFromToken } from "./utils";
 import {
@@ -25,8 +19,7 @@ export default async function QuickAddWord({
     await showToast({
       style: Toast.Style.Failure,
       title: "No text provided",
-      message:
-        "Pass a word or phrase directly, select text in the frontmost app, or launch from root search.",
+      message: "Pass a word or phrase directly, select text in the frontmost app, or launch from root search.",
     });
     return;
   }
@@ -77,9 +70,7 @@ export default async function QuickAddWord({
   }
 }
 
-async function resolveCurrentLanguageCode(
-  token: string,
-): Promise<string | null> {
+async function resolveCurrentLanguageCode(token: string): Promise<string | null> {
   const stored = await findStoredLanguageCode(token);
   if (stored) return stored;
 

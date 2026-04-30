@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Detail,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Detail, showToast, Toast, useNavigation } from "@raycast/api";
 import type { ChildProcess } from "child_process";
 import { exec, execFile } from "child_process";
 import { promisify } from "util";
@@ -74,11 +67,7 @@ function levenshteinDistance(a: string, b: string): number {
       if (b.charAt(i - 1) === a.charAt(j - 1)) {
         matrix[i][j] = matrix[i - 1][j - 1];
       } else {
-        matrix[i][j] = Math.min(
-          matrix[i - 1][j - 1] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j] + 1,
-        );
+        matrix[i][j] = Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
       }
     }
   }
@@ -107,8 +96,7 @@ export function SpeakingTraining({
   const [queue, setQueue] = useState<MixedTrainingItem[]>([...items]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [recordingState, setRecordingState] = useState<RecordingState>("idle");
-  const [transcription, setTranscription] =
-    useState<TranscriptionResult | null>(null);
+  const [transcription, setTranscription] = useState<TranscriptionResult | null>(null);
   const [showResult, setShowResult] = useState(false);
   const resultsRef = useRef<GenericTrainingResultItem[]>([]);
   const recordingProcessRef = useRef<ChildProcess | null>(null);
@@ -131,20 +119,16 @@ export function SpeakingTraining({
   function startRecording() {
     setRecordingState("recording");
     setTranscription(null);
-    recordingProcessRef.current = execFile(
-      "rec",
-      [RECORDING_PATH, "rate", "16k"],
-      (error) => {
-        if (error && !error.killed) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Recording failed",
-            message: "Make sure sox is installed: brew install sox",
-          });
-          setRecordingState("idle");
-        }
-      },
-    );
+    recordingProcessRef.current = execFile("rec", [RECORDING_PATH, "rate", "16k"], (error) => {
+      if (error && !error.killed) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Recording failed",
+          message: "Make sure sox is installed: brew install sox",
+        });
+        setRecordingState("idle");
+      }
+    });
   }
 
   async function stopRecording() {
@@ -261,9 +245,7 @@ export function SpeakingTraining({
       };
       await client.trainings.submitTrainingResult(userLanguage, result);
 
-      const correct = resultsRef.current.filter(
-        (r) => r.answers.length > 0,
-      ).length;
+      const correct = resultsRef.current.filter((r) => r.answers.length > 0).length;
       showToast({
         style: Toast.Style.Success,
         title: "Training complete!",
@@ -282,12 +264,9 @@ export function SpeakingTraining({
 
   const firstDef = payload.definitions?.[0];
   const defParts = [`# Say this word\n\n**Word:** ${payload.text}`];
-  if (firstDef?.translation)
-    defParts.push(`**Translation:** ${firstDef.translation}`);
-  if (firstDef?.definition)
-    defParts.push(`**Definition:** ${firstDef.definition}`);
-  if (!firstDef?.translation && !firstDef?.definition)
-    defParts.push(`**Definition:** —`);
+  if (firstDef?.translation) defParts.push(`**Translation:** ${firstDef.translation}`);
+  if (firstDef?.definition) defParts.push(`**Definition:** ${firstDef.definition}`);
+  if (!firstDef?.translation && !firstDef?.definition) defParts.push(`**Definition:** —`);
   if (payload.comment) defParts.push(`*${payload.comment}*`);
   const definitionMarkdown = defParts.join("\n\n");
 
@@ -318,11 +297,7 @@ export function SpeakingTraining({
         <ActionPanel>
           {recordingState === "idle" && (
             <>
-              <Action
-                title="Start Recording"
-                shortcut={{ modifiers: [], key: "space" }}
-                onAction={startRecording}
-              />
+              <Action title="Start Recording" shortcut={{ modifiers: [], key: "space" }} onAction={startRecording} />
               {canTemporarilyDisable && onTemporarilyDisable && (
                 <Action
                   title="Can't Speak Right Now"
@@ -330,20 +305,12 @@ export function SpeakingTraining({
                   onAction={onTemporarilyDisable}
                 />
               )}
-              <Action
-                title="Play Target Audio"
-                shortcut={{ modifiers: [], key: "r" }}
-                onAction={playTargetAudio}
-              />
+              <Action title="Play Target Audio" shortcut={{ modifiers: [], key: "r" }} onAction={playTargetAudio} />
             </>
           )}
           {recordingState === "recording" && (
             <>
-              <Action
-                title="Stop Recording"
-                shortcut={{ modifiers: [], key: "space" }}
-                onAction={stopRecording}
-              />
+              <Action title="Stop Recording" shortcut={{ modifiers: [], key: "space" }} onAction={stopRecording} />
               {canTemporarilyDisable && onTemporarilyDisable && (
                 <Action
                   title="Can't Speak Right Now"
@@ -378,16 +345,8 @@ export function SpeakingTraining({
                 shortcut={{ modifiers: [], key: "backspace" }}
                 onAction={() => handleGrade(false)}
               />
-              <Action
-                title="Play My Recording"
-                shortcut={{ modifiers: [], key: "p" }}
-                onAction={playRecording}
-              />
-              <Action
-                title="Play Target Audio"
-                shortcut={{ modifiers: [], key: "r" }}
-                onAction={playTargetAudio}
-              />
+              <Action title="Play My Recording" shortcut={{ modifiers: [], key: "p" }} onAction={playRecording} />
+              <Action title="Play Target Audio" shortcut={{ modifiers: [], key: "r" }} onAction={playTargetAudio} />
               <Action
                 title="Try Again"
                 shortcut={{ modifiers: [], key: "t" }}

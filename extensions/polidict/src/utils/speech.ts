@@ -1,4 +1,5 @@
 import { execFile } from "child_process";
+import { randomUUID } from "crypto";
 
 export function playSpeech(text: string, speechUrl?: string): void {
   if (speechUrl) {
@@ -10,27 +11,18 @@ export function playSpeech(text: string, speechUrl?: string): void {
     } catch {
       return;
     }
-    execFile(
-      "curl",
-      ["-sL", speechUrl, "-o", "/tmp/polidict-speech.mp3"],
-      { timeout: 30_000 },
-      (error) => {
-        if (error) {
-          console.error("Failed to download speech audio:", error.message);
-          return;
+    const tmpFile = `/tmp/polidict-speech-${randomUUID()}.mp3`;
+    execFile("curl", ["-sL", speechUrl, "-o", tmpFile], { timeout: 30_000 }, (error) => {
+      if (error) {
+        console.error("Failed to download speech audio:", error.message);
+        return;
+      }
+      execFile("afplay", [tmpFile], { timeout: 30_000 }, (playError) => {
+        if (playError) {
+          console.error("Failed to play audio:", playError.message);
         }
-        execFile(
-          "afplay",
-          ["/tmp/polidict-speech.mp3"],
-          { timeout: 30_000 },
-          (playError) => {
-            if (playError) {
-              console.error("Failed to play audio:", playError.message);
-            }
-          },
-        );
-      },
-    );
+      });
+    });
   } else {
     execFile("say", [text], { timeout: 30_000 }, (error) => {
       if (error) {

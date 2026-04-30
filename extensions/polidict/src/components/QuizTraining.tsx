@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useRef, useState } from "react";
 import type {
   GenericTrainingResult,
@@ -31,20 +22,12 @@ interface QuizTrainingProps {
   progress?: TrainingProgress;
 }
 
-export function QuizTraining({
-  items,
-  userLanguage,
-  trainingType,
-  onComplete,
-  progress,
-}: QuizTrainingProps) {
+export function QuizTraining({ items, userLanguage, trainingType, onComplete, progress }: QuizTrainingProps) {
   const { pop } = useNavigation();
   const [queue, setQueue] = useState<MixedTrainingItem[]>([...items]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const resultsRef = useRef<GenericTrainingResultItem[]>([]);
-  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(
-    null,
-  );
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
 
   const currentItem = queue[currentIndex];
@@ -158,10 +141,7 @@ export function QuizTraining({
             }
           }
 
-          const optionText =
-            "definition" in option
-              ? formatDefinitionText(option.definition)
-              : option.text;
+          const optionText = "definition" in option ? formatDefinitionText(option.definition) : option.text;
 
           return (
             <List.Item
@@ -170,19 +150,9 @@ export function QuizTraining({
               title={optionText}
               actions={
                 <ActionPanel>
-                  {!showResult && (
-                    <Action
-                      title="Select"
-                      onAction={() => handleSelect(option, index)}
-                    />
-                  )}
+                  {!showResult && <Action title="Select" onAction={() => handleSelect(option, index)} />}
                   {showResult && (
-                    <Action
-                      title={
-                        currentIndex < queue.length - 1 ? "Next" : "Finish"
-                      }
-                      onAction={handleNext}
-                    />
+                    <Action title={currentIndex < queue.length - 1 ? "Next" : "Finish"} onAction={handleNext} />
                   )}
                 </ActionPanel>
               }

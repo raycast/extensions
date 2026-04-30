@@ -9,12 +9,7 @@ interface AuthGateProps {
   verifyEmailMagicLink: (magicLinkOrToken: string) => Promise<void>;
 }
 
-export function AuthGate({
-  isLoading,
-  requestEmailMagicLink,
-  signInWithGoogle,
-  verifyEmailMagicLink,
-}: AuthGateProps) {
+export function AuthGate({ isLoading, requestEmailMagicLink, signInWithGoogle, verifyEmailMagicLink }: AuthGateProps) {
   if (isLoading) {
     return (
       <CommandErrorView
@@ -33,11 +28,7 @@ export function AuthGate({
       description="Please sign in to use Polidict"
       actions={
         <ActionPanel>
-          <Action
-            title="Sign in with Google"
-            icon={Icon.Key}
-            onAction={signInWithGoogle}
-          />
+          <Action title="Sign in with Google" icon={Icon.Key} onAction={signInWithGoogle} />
           <Action.Push
             title="Sign in with Email"
             icon={Icon.Envelope}

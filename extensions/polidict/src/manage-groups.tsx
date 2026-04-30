@@ -15,10 +15,7 @@ import { createApiClient } from "./api";
 import { useGroups, useUserProfile } from "./hooks";
 import { CurrentLanguageActions } from "./components/CurrentLanguageActions";
 import { CommandShell, type CommandShellContext } from "./core/command-shell";
-import {
-  invalidateGroupsCache,
-  invalidateLearningItemsCache,
-} from "./features/shared/query-keys";
+import { invalidateGroupsCache, invalidateLearningItemsCache } from "./features/shared/query-keys";
 import { formatRaycastError } from "./utils";
 import type { Group, SupportedLanguage } from "./types";
 
@@ -102,12 +99,7 @@ function GroupForm({
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="name"
-        title="Name"
-        placeholder="Group name"
-        defaultValue={group?.name ?? ""}
-      />
+      <Form.TextField id="name" title="Name" placeholder="Group name" defaultValue={group?.name ?? ""} />
       <Form.TextField
         id="description"
         title="Description"
@@ -120,12 +112,7 @@ function GroupForm({
 
 const PAGE_SIZE = 20;
 
-function ManageGroupsContent({
-  authIdentity,
-  currentLanguage,
-  languageActions,
-  signOutAction,
-}: CommandShellContext) {
+function ManageGroupsContent({ authIdentity, currentLanguage, languageActions, signOutAction }: CommandShellContext) {
   const [searchText, setSearchText] = useState("");
   const { canCreateGroups } = useUserProfile(authIdentity);
 
@@ -179,9 +166,7 @@ function ManageGroupsContent({
   }
 
   const filtered = searchText
-    ? accumulatedGroups.filter((g) =>
-        g.name.toLowerCase().includes(searchText.toLowerCase()),
-      )
+    ? accumulatedGroups.filter((g) => g.name.toLowerCase().includes(searchText.toLowerCase()))
     : accumulatedGroups;
 
   async function deleteGroup(group: Group) {
@@ -216,21 +201,12 @@ function ManageGroupsContent({
   }
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Filter groups…"
-      onSearchTextChange={setSearchText}
-      throttle
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Filter groups…" onSearchTextChange={setSearchText} throttle>
       {filtered.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Folder}
           title={searchText ? "No groups match" : "No groups yet"}
-          description={
-            searchText
-              ? "Try a different search"
-              : "Create a group to organize your vocabulary"
-          }
+          description={searchText ? "Try a different search" : "Create a group to organize your vocabulary"}
           actions={
             <ActionPanel>
               {canCreateGroups && (
@@ -259,9 +235,7 @@ function ManageGroupsContent({
               icon={Icon.Folder}
               title={group.name}
               subtitle={group.description}
-              accessories={
-                group.accessType === "PUBLIC" ? [{ tag: "Public" }] : []
-              }
+              accessories={group.accessType === "PUBLIC" ? [{ tag: "Public" }] : []}
               actions={
                 <ActionPanel>
                   <Action.Push
@@ -315,11 +289,7 @@ function ManageGroupsContent({
               title={isLoading ? "Loading…" : "Load More…"}
               actions={
                 <ActionPanel>
-                  <Action
-                    icon={Icon.ArrowDown}
-                    title="Load More"
-                    onAction={loadMore}
-                  />
+                  <Action icon={Icon.ArrowDown} title="Load More" onAction={loadMore} />
                 </ActionPanel>
               }
             />
@@ -331,9 +301,5 @@ function ManageGroupsContent({
 }
 
 export default function ManageGroups() {
-  return (
-    <CommandShell>
-      {(context) => <ManageGroupsContent {...context} />}
-    </CommandShell>
-  );
+  return <CommandShell>{(context) => <ManageGroupsContent {...context} />}</CommandShell>;
 }

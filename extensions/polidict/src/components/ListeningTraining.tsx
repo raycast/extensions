@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import type {
   GenericTrainingResult,
@@ -42,9 +33,7 @@ export function ListeningTraining({
   const { pop } = useNavigation();
   const [queue, setQueue] = useState<MixedTrainingItem[]>([...items]);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(
-    null,
-  );
+  const [selectedOptionIndex, setSelectedOptionIndex] = useState<number | null>(null);
   const [showResult, setShowResult] = useState(false);
   const resultsRef = useRef<GenericTrainingResultItem[]>([]);
   const hasPlayedRef = useRef(false);
@@ -111,9 +100,7 @@ export function ListeningTraining({
       };
       await client.trainings.submitTrainingResult(userLanguage, result);
 
-      const correct = resultsRef.current.filter(
-        (r) => r.answers.length > 0,
-      ).length;
+      const correct = resultsRef.current.filter((r) => r.answers.length > 0).length;
       showToast({
         style: Toast.Style.Success,
         title: "Training complete!",
@@ -161,10 +148,7 @@ export function ListeningTraining({
                 <ActionPanel>
                   {!showResult && (
                     <>
-                      <Action
-                        title="Select"
-                        onAction={() => handleSelect(option, index)}
-                      />
+                      <Action title="Select" onAction={() => handleSelect(option, index)} />
                       {canTemporarilyDisable && onTemporarilyDisable && (
                         <Action
                           title="Can't Listen Right Now"
@@ -182,12 +166,7 @@ export function ListeningTraining({
                   )}
                   {showResult && (
                     <>
-                      <Action
-                        title={
-                          currentIndex < queue.length - 1 ? "Next" : "Finish"
-                        }
-                        onAction={handleNext}
-                      />
+                      <Action title={currentIndex < queue.length - 1 ? "Next" : "Finish"} onAction={handleNext} />
                       {canTemporarilyDisable && onTemporarilyDisable && (
                         <Action
                           title="Can't Listen Right Now"

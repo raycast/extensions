@@ -28,8 +28,7 @@ export class UserClient {
   constructor(private readonly restClient: RestClient) {}
 
   async getProfile(): Promise<UserProfile> {
-    const response =
-      await this.restClient.get<UserProfileResponse>("/api/profile");
+    const response = await this.restClient.get<UserProfileResponse>("/api/profile");
     return {
       id: response.userId,
       email: response.email,

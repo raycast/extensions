@@ -86,11 +86,7 @@ export function CommandShell({ children }: CommandShellProps) {
 
   if (!hasLanguages) {
     return (
-      <LanguageSetup
-        onComplete={revalidateLanguages}
-        addLanguage={addLanguage}
-        setNativeLanguage={setNativeLanguage}
-      />
+      <LanguageSetup onComplete={revalidateLanguages} addLanguage={addLanguage} setNativeLanguage={setNativeLanguage} />
     );
   }
 
@@ -110,12 +106,7 @@ export function CommandShell({ children }: CommandShellProps) {
     languageActions,
     nativeLanguage,
     signOutAction: (
-      <Action
-        icon={Icon.Logout}
-        title="Sign out"
-        style={Action.Style.Destructive}
-        onAction={handleSignOut}
-      />
+      <Action icon={Icon.Logout} title="Sign out" style={Action.Style.Destructive} onAction={handleSignOut} />
     ),
   });
 }

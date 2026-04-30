@@ -31,9 +31,7 @@ export class TrainingErrorBoundary extends Component<Props, State> {
               <Action
                 title="Try Again"
                 icon={Icon.ArrowClockwise}
-                onAction={() =>
-                  this.setState({ hasError: false, error: undefined })
-                }
+                onAction={() => this.setState({ hasError: false, error: undefined })}
               />
             </ActionPanel>
           }
