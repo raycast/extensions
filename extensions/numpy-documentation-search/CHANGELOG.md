@@ -3,11 +3,13 @@
 ## [1.3.1] - {PR_MERGE_DATE}
 
 ### Changed
+
 - Remove the standalone local documentation fallback guide from the packaged repository
 - Default to online documentation without requiring an initial source-selection prompt
 - Document the optional source preference pattern in the local docs fallback guide for reuse in other repos
 
 ### Fixed
+
 - Remove an unused Raycast import so lint passes
 
 ## [1.3.0] - 2026-04-20
@@ -23,6 +25,7 @@
 - Document how to replicate the Windows local-docs symlink fallback in other documentation-search extensions
 
 ### Fixed
+
 - Support local documentation checkouts on Windows where the `stable` symlink is stored as a text file
 
 ## [1.2.3] - 2025-10-09

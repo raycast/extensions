@@ -3,16 +3,14 @@ import { useEffect, useMemo, useState } from "react";
 import { useDocDetail } from "./hooks/useDocDetail";
 import { useInventory } from "./hooks/useInventory";
 import { type DocDetail, buildMarkdown } from "./lib/doc-detail";
-import { type DocumentationSourceMode } from "./lib/docs-source";
+// `DocumentationSourceMode` is not needed here; preferences are typed via
+// the generated `Preferences` in `raycast-env.d.ts`.
 import { type InventoryItem } from "./lib/inventory";
 import { applyPrefixPreference } from "./lib/prefix";
 import { searchInventory } from "./lib/search";
 
-interface Preferences {
-  documentationSourceMode?: DocumentationSourceMode;
-  localDocsDirectory?: string;
-  useShortPrefix: boolean;
-}
+// `Preferences` is generated at runtime in `raycast-env.d.ts` from `package.json`.
+// Do not manually declare it here to avoid drift with the manifest.
 
 type DetailRenderState = {
   detail?: DocDetail;
