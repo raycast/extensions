@@ -34,12 +34,7 @@ export default async function SlowDownReading() {
   const next = clampSpeed(current - SPEED_STEP);
   await writePlaybackSpeed(next);
 
-  if (session && shouldPersistSessionSpeed(session, live)) {
-    await saveReadingSession({
-      ...session,
-      options: { ...session.options, speed: next },
-    });
-  }
+  await persistPausedSessionSpeed(live, next);
 
   await showHUD(`Speed ${formatSpeed(next)} · applies to the next segment`);
 }
@@ -54,9 +49,20 @@ function resolveBaselineSpeed(
   return storedSpeed ?? 1;
 }
 
-function shouldPersistSessionSpeed(session: ReadingSession, live: PlaybackState | null): boolean {
-  if (!live) return isPausedSession(session);
-  return sessionMatchesLive(session, live);
+async function persistPausedSessionSpeed(live: PlaybackState | null, speed: number): Promise<void> {
+  if (live && (live.phase === "synthesizing" || live.phase === "playing")) {
+    return;
+  }
+
+  const latestSession = await getLastReadingSession();
+  if (!latestSession) return;
+  if (live && !sessionMatchesLive(latestSession, live)) return;
+  if (!live && !isPausedSession(latestSession)) return;
+
+  await saveReadingSession({
+    ...latestSession,
+    options: { ...latestSession.options, speed },
+  });
 }
 
 function isPausedSession(session: ReadingSession | null): session is ReadingSession {

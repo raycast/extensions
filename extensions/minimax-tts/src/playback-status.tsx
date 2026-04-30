@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { stopExternalPlayback } from "./utils/audio-player";
 import { clearPlaybackState, readPlaybackState, type PlaybackState } from "./utils/playback-state";
 import { getLastReadingSession, type ReadingSession } from "./utils/reading-session";
-import { formatSpeed, readPlaybackSpeed, SPEED_MAX, SPEED_MIN } from "./utils/playback-speed";
+import { formatSpeed, readPlaybackSpeed } from "./utils/playback-speed";
 
 interface Snapshot {
   live: PlaybackState | null;
@@ -47,8 +47,6 @@ export default function PlaybackStatus() {
   const isLive = !!live && (live.phase === "synthesizing" || live.phase === "playing");
   const hasPausedSession = !live && isPausedSession(session);
   const canAdjustSpeed = isLive || live?.phase === "stopped" || hasPausedSession;
-  const canSpeedUp = canAdjustSpeed && effectiveSpeed < SPEED_MAX;
-  const canSlowDown = canAdjustSpeed && effectiveSpeed > SPEED_MIN;
 
   return (
     <MenuBarExtra
@@ -79,12 +77,12 @@ export default function PlaybackStatus() {
         <MenuBarExtra.Item
           title="Speed Up (+0.25×)"
           icon={Icon.Plus}
-          onAction={canSpeedUp ? handleSpeedUp : handleSpeedUnavailable}
+          onAction={canAdjustSpeed ? handleSpeedUp : handleSpeedUnavailable}
         />
         <MenuBarExtra.Item
           title="Slow Down (-0.25×)"
           icon={Icon.Minus}
-          onAction={canSlowDown ? handleSlowDown : handleSpeedUnavailable}
+          onAction={canAdjustSpeed ? handleSlowDown : handleSpeedUnavailable}
         />
       </MenuBarExtra.Section>
 
