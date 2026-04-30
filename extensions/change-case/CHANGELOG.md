@@ -1,6 +1,6 @@
 # Change Case Changelog
 
-## [Add Create Quicklink shortcut] - {PR_MERGE_DATE}
+## [Add Create Quicklink shortcut] - 2026-04-30
 
 ## [Fix Swap Case] - 2026-02-09
 
