@@ -247,6 +247,12 @@ export default function Command() {
           <Action title="Return to List" shortcut={{ modifiers: [], key: "enter" }} icon={Icon.Undo} onAction={pop} />
         )}
         <Action.OpenInBrowser url={selectUrl(item)} shortcut={{ modifiers: ["cmd"], key: "enter" }} icon={Icon.Globe} />
+        <Action.CopyToClipboard
+          title="Copy URL to Clipboard"
+          content={selectUrl(item)}
+          shortcut={{ modifiers: ["cmd"], key: "c" }}
+          icon={Icon.Link}
+        />
         <Action
           title="Copy BibTeX to Clipboard"
           shortcut={{ modifiers: ["cmd"], key: "b" }}

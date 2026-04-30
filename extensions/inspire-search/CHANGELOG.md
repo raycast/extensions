@@ -1,5 +1,9 @@
 # Inspire Search Changelog
 
+## [Update] - {PR_MERGE_DATE}
+
+- Add "Copy URL to Clipboard" action (⌘C)
+
 ## [Update] - 2023-07-25
 
 - Add the ability to download KEK preprints
