@@ -19,12 +19,7 @@ export interface PipelineOptions {
   ejectCards: boolean;
 }
 
-const RUNNER_STDERR_LOG = path.join(
-  homedir(),
-  "Library",
-  "Logs",
-  "raycast-photo-ingest-runner-stderr.log",
-);
+const RUNNER_STDERR_LOG = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest-runner-stderr.log");
 
 /**
  * Launch the ingest pipeline as a detached background process.
@@ -34,14 +29,9 @@ const RUNNER_STDERR_LOG = path.join(
  * Returns the generated job ID so callers can reference the running job
  * (e.g. to open its status view).
  */
-export async function runIngestPipeline(
-  opts: PipelineOptions,
-): Promise<string> {
+export async function runIngestPipeline(opts: PipelineOptions): Promise<string> {
   const jobId = newJobId();
-  const configPath = path.join(
-    environment.supportPath,
-    `ingest-config-${jobId}.json`,
-  );
+  const configPath = path.join(environment.supportPath, `ingest-config-${jobId}.json`);
   const runnerPath = path.join(environment.assetsPath, "runner.mjs");
 
   // Write config for the runner

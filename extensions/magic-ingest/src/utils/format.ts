@@ -8,11 +8,7 @@ export const STAGE_LABELS: Record<string, string> = {
   done: "Done",
 };
 
-export function progressBar(
-  current: number,
-  total: number,
-  width = 10,
-): string {
+export function progressBar(current: number, total: number, width = 10): string {
   if (total === 0) return "";
   const filled = Math.round((current / total) * width);
   return "■".repeat(filled) + "□".repeat(width - filled);

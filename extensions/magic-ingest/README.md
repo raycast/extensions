@@ -34,9 +34,9 @@ Fast, background photo & video ingest from memory cards — built for photograph
 
 ## Commands
 
-| Command | Description |
-|---------|-------------|
-| **Magic Ingest** | Open the ingest form — select cards, dates, and options |
+| Command           | Description                                                           |
+| ----------------- | --------------------------------------------------------------------- |
+| **Magic Ingest**  | Open the ingest form — select cards, dates, and options               |
 | **Ingest Status** | View all running and recently-finished ingest jobs; start new ingests |
 
 ## How It Works

@@ -83,9 +83,7 @@ export default function Command() {
 
   // Form state
   const [selectedCards, setSelectedCards] = useState<string[]>([]);
-  const [destinationParent, setDestinationParent] = useState<string[]>([
-    DEFAULT_DESTINATION,
-  ]);
+  const [destinationParent, setDestinationParent] = useState<string[]>([DEFAULT_DESTINATION]);
   const [job, setJob] = useState("");
   const [client, setClient] = useState("");
   const [selectedDates, setSelectedDates] = useState<string[]>([]);
@@ -116,9 +114,7 @@ export default function Command() {
     setIsScanning(true);
     try {
       const vols = volList ?? volumes;
-      const selectedVols = vols
-        .filter((v) => cardPaths.includes(v.path))
-        .map((v) => ({ path: v.path, name: v.name }));
+      const selectedVols = vols.filter((v) => cardPaths.includes(v.path)).map((v) => ({ path: v.path, name: v.name }));
 
       const files = await scanMultipleVolumes(selectedVols);
       const mediaFiles = files.filter((f) => !f.isSidecar);
@@ -128,9 +124,7 @@ export default function Command() {
       if (gen !== scanGenRef.current) return;
 
       // Sort dates descending (most recent first)
-      const sorted = Array.from(dateInfos.entries()).sort((a, b) =>
-        b[0].localeCompare(a[0]),
-      );
+      const sorted = Array.from(dateInfos.entries()).sort((a, b) => b[0].localeCompare(a[0]));
 
       const options: DateOption[] = sorted.map(([date, info]) => ({
         date,
@@ -144,9 +138,7 @@ export default function Command() {
       // Auto-select dates if a preset was just loaded
       if (pendingDatesRef.current) {
         const available = new Set(options.map((o) => o.date));
-        const toSelect = pendingDatesRef.current.filter((d) =>
-          available.has(d),
-        );
+        const toSelect = pendingDatesRef.current.filter((d) => available.has(d));
         if (toSelect.length > 0) setSelectedDates(toSelect);
         pendingDatesRef.current = null;
       }
@@ -247,8 +239,7 @@ export default function Command() {
     if (activeJobs.length >= MAX_CONCURRENT_JOBS) {
       const ok = await confirmAlert({
         title: `${activeJobs.length} ingests already running`,
-        message:
-          "Running more in parallel may slow all of them down (shared disk I/O). Start another anyway?",
+        message: "Running more in parallel may slow all of them down (shared disk I/O). Start another anyway?",
         primaryAction: {
           title: "Start Anyway",
           style: Alert.ActionStyle.Default,
@@ -257,17 +248,14 @@ export default function Command() {
       if (!ok) return;
     }
 
-    const selectedVolumes = volumes.filter((v) =>
-      selectedCards.includes(v.path),
-    );
+    const selectedVolumes = volumes.filter((v) => selectedCards.includes(v.path));
 
     // Use earliest selected date for folder name
     const sortedDates = [...selectedDates].sort();
     const earliestDate = sortedDates[0];
     const folderName = `${earliestDate.replace(/-/g, "")}_${job.trim().toLowerCase().replace(/\s+/g, "-")}_${client.trim().toLowerCase().replace(/\s+/g, "-")}`;
 
-    const parsedStarRating =
-      starRating === "off" ? null : parseInt(starRating, 10);
+    const parsedStarRating = starRating === "off" ? null : parseInt(starRating, 10);
 
     // Save preset for future re-use
     await savePreset({
@@ -307,11 +295,7 @@ export default function Command() {
       navigationTitle="Magic Ingest"
       actions={
         <ActionPanel>
-          <Action.SubmitForm
-            title="Start Ingest"
-            onSubmit={handleSubmit}
-            icon={Icon.Download}
-          />
+          <Action.SubmitForm title="Start Ingest" onSubmit={handleSubmit} icon={Icon.Download} />
           <Action
             title="View Ingest Jobs"
             icon={Icon.List}
@@ -326,37 +310,17 @@ export default function Command() {
       }
     >
       {recentPresets.length > 0 && (
-        <Form.Dropdown
-          id="recentPreset"
-          title="Recent"
-          onChange={applyPreset}
-          filtering={false}
-        >
+        <Form.Dropdown id="recentPreset" title="Recent" onChange={applyPreset} filtering={false}>
           <Form.Dropdown.Item value="" title="New Ingest" icon={Icon.Plus} />
           {recentPresets.map((p) => (
-            <Form.Dropdown.Item
-              key={p.id}
-              value={p.id}
-              title={p.label}
-              icon={Icon.Clock}
-            />
+            <Form.Dropdown.Item key={p.id} value={p.id} title={p.label} icon={Icon.Clock} />
           ))}
         </Form.Dropdown>
       )}
 
-      <Form.TagPicker
-        id="sourceCards"
-        title="Source Cards"
-        value={selectedCards}
-        onChange={scanCardDates}
-      >
+      <Form.TagPicker id="sourceCards" title="Source Cards" value={selectedCards} onChange={scanCardDates}>
         {volumes.map((vol) => (
-          <Form.TagPicker.Item
-            key={vol.path}
-            value={vol.path}
-            title={vol.name}
-            icon={Icon.HardDrive}
-          />
+          <Form.TagPicker.Item key={vol.path} value={vol.path} title={vol.name} icon={Icon.HardDrive} />
         ))}
       </Form.TagPicker>
 
@@ -384,12 +348,7 @@ export default function Command() {
         value={client}
         onChange={setClient}
       />
-      <Form.TagPicker
-        id="dateFilter"
-        title="Dates"
-        value={selectedDates}
-        onChange={setSelectedDates}
-      >
+      <Form.TagPicker id="dateFilter" title="Dates" value={selectedDates} onChange={setSelectedDates}>
         {dateOptions.map((opt) => (
           <Form.TagPicker.Item
             key={opt.date}
@@ -399,13 +358,7 @@ export default function Command() {
           />
         ))}
       </Form.TagPicker>
-      <Form.Dropdown
-        id="starRating"
-        title="Stars"
-        value={starRating}
-        onChange={setStarRating}
-        filtering={false}
-      >
+      <Form.Dropdown id="starRating" title="Stars" value={starRating} onChange={setStarRating} filtering={false}>
         <Form.Dropdown.Item value="off" title="Off" />
         <Form.Dropdown.Item value="0" title="Unrated" />
         <Form.Dropdown.Item value="1" title="★" />
@@ -420,30 +373,15 @@ export default function Command() {
         value={renameFiles}
         onChange={setRenameFiles}
       />
-      <Form.Checkbox
-        id="skipDuplicates"
-        label="Skip duplicates"
-        value={skipDuplicates}
-        onChange={setSkipDuplicates}
-      />
-      <Form.Checkbox
-        id="verifyCopy"
-        label="Verify copy (SHA-256)"
-        value={verifyCopy}
-        onChange={setVerifyCopy}
-      />
+      <Form.Checkbox id="skipDuplicates" label="Skip duplicates" value={skipDuplicates} onChange={setSkipDuplicates} />
+      <Form.Checkbox id="verifyCopy" label="Verify copy (SHA-256)" value={verifyCopy} onChange={setVerifyCopy} />
       <Form.Checkbox
         id="openPhotoMechanic"
         label="Open in Photo Mechanic"
         value={openPhotoMechanic}
         onChange={setOpenPhotoMechanic}
       />
-      <Form.Checkbox
-        id="ejectCards"
-        label="Eject cards when done"
-        value={ejectCards}
-        onChange={setEjectCards}
-      />
+      <Form.Checkbox id="ejectCards" label="Eject cards when done" value={ejectCards} onChange={setEjectCards} />
     </Form>
   );
 }
@@ -451,20 +389,7 @@ export default function Command() {
 function formatDateLabel(dateStr: string): string {
   const [y, m, d] = dateStr.split("-").map(Number);
   const date = new Date(y, m - 1, d);
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const base = `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 
   const now = new Date();

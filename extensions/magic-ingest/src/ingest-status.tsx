@@ -147,21 +147,14 @@ export default function Command() {
                 accessories={[{ text: elapsed, icon: Icon.Clock }]}
                 actions={
                   <ActionPanel>
-                    <Action.Push
-                      title="View Details"
-                      icon={Icon.Eye}
-                      target={<IngestStatusView jobId={job.jobId} />}
-                    />
+                    <Action.Push title="View Details" icon={Icon.Eye} target={<IngestStatusView jobId={job.jobId} />} />
                     <Action
                       title="Stop Ingest"
                       icon={Icon.Stop}
                       style={Action.Style.Destructive}
                       onAction={() => stopJob(job)}
                     />
-                    <Action.ShowInFinder
-                      title="Show Destination"
-                      path={job.destDir}
-                    />
+                    <Action.ShowInFinder title="Show Destination" path={job.destDir} />
                     {globalActions}
                   </ActionPanel>
                 }
@@ -184,9 +177,7 @@ export default function Command() {
                   tintColor: hasError ? Color.Red : Color.Green,
                 }}
                 title={title}
-                subtitle={
-                  hasError ? (job.error ?? "Finished with errors") : "Complete"
-                }
+                subtitle={hasError ? (job.error ?? "Finished with errors") : "Complete"}
                 accessories={[
                   {
                     text: formatElapsed(new Date(job.startedAt)),
@@ -195,15 +186,8 @@ export default function Command() {
                 ]}
                 actions={
                   <ActionPanel>
-                    <Action.Push
-                      title="View Details"
-                      icon={Icon.Eye}
-                      target={<IngestStatusView jobId={job.jobId} />}
-                    />
-                    <Action.ShowInFinder
-                      title="Show Destination"
-                      path={job.destDir}
-                    />
+                    <Action.Push title="View Details" icon={Icon.Eye} target={<IngestStatusView jobId={job.jobId} />} />
+                    <Action.ShowInFinder title="Show Destination" path={job.destDir} />
                     {globalActions}
                   </ActionPanel>
                 }

@@ -21,10 +21,7 @@ export interface VolumeInfo {
  */
 export async function getExternalVolumes(): Promise<VolumeInfo[]> {
   try {
-    const { stdout: listOutput } = await execFileAsync(DISKUTIL, [
-      "list",
-      "-plist",
-    ]);
+    const { stdout: listOutput } = await execFileAsync(DISKUTIL, ["list", "-plist"]);
 
     // Extract all partition identifiers (disk0s1, disk2s1, etc.)
     const partRegex = /<string>(disk\d+s\d+)<\/string>/g;
@@ -37,9 +34,7 @@ export async function getExternalVolumes(): Promise<VolumeInfo[]> {
     }
 
     // Check all partitions in parallel for speed
-    const results = await Promise.allSettled(
-      partitions.map((partId) => checkPartition(partId)),
-    );
+    const results = await Promise.allSettled(partitions.map((partId) => checkPartition(partId)));
 
     const volumes: VolumeInfo[] = [];
     for (const result of results) {
@@ -58,33 +53,21 @@ export async function getExternalVolumes(): Promise<VolumeInfo[]> {
 
 async function checkPartition(partId: string): Promise<VolumeInfo | null> {
   try {
-    const { stdout: infoOutput } = await execFileAsync(DISKUTIL, [
-      "info",
-      "-plist",
-      partId,
-    ]);
+    const { stdout: infoOutput } = await execFileAsync(DISKUTIL, ["info", "-plist", partId]);
 
-    const isRemovableOrExternal =
-      /<key>RemovableMediaOrExternalDevice<\/key>\s*<true\/>/.test(infoOutput);
-    const isVirtual =
-      /<key>VirtualOrPhysical<\/key>\s*<string>Virtual<\/string>/.test(
-        infoOutput,
-      );
+    const isRemovableOrExternal = /<key>RemovableMediaOrExternalDevice<\/key>\s*<true\/>/.test(infoOutput);
+    const isVirtual = /<key>VirtualOrPhysical<\/key>\s*<string>Virtual<\/string>/.test(infoOutput);
 
     // Accept any physical removable/external volume. Using RemovableMediaOrExternalDevice
     // instead of !Internal fixes SD cards in built-in readers — macOS marks those as
     // Internal=true (reader is soldered in) but still sets RemovableMediaOrExternalDevice=true.
     if (!isRemovableOrExternal || isVirtual) return null;
 
-    const mountMatch = infoOutput.match(
-      /<key>MountPoint<\/key>\s*<string>(.*?)<\/string>/,
-    );
+    const mountMatch = infoOutput.match(/<key>MountPoint<\/key>\s*<string>(.*?)<\/string>/);
     if (!mountMatch?.[1]?.startsWith("/Volumes/")) return null;
 
     const mountPoint = mountMatch[1];
-    const nameMatch = infoOutput.match(
-      /<key>VolumeName<\/key>\s*<string>(.*?)<\/string>/,
-    );
+    const nameMatch = infoOutput.match(/<key>VolumeName<\/key>\s*<string>(.*?)<\/string>/);
     const name = nameMatch?.[1] || mountPoint.split("/").pop() || partId;
 
     return { name, path: mountPoint };

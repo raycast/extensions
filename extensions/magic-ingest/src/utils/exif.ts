@@ -6,11 +6,7 @@ import { ScannedFile } from "./scanner";
 const execFileAsync = promisify(execFile);
 
 /** Apple Silicon Homebrew, Intel Homebrew, then PATH. */
-const EXIFTOOL_CANDIDATES = [
-  "/opt/homebrew/bin/exiftool",
-  "/usr/local/bin/exiftool",
-  "exiftool",
-];
+const EXIFTOOL_CANDIDATES = ["/opt/homebrew/bin/exiftool", "/usr/local/bin/exiftool", "exiftool"];
 
 async function resolveExiftoolPath(): Promise<string | null> {
   for (const candidate of EXIFTOOL_CANDIDATES) {
@@ -42,9 +38,7 @@ export interface DateInfo {
  * compared to exiftool (~minutes for large RAW files like CR3).
  * Used by the form to populate the date picker before the full pipeline runs.
  */
-export async function scanDatesOnFiles(
-  files: ScannedFile[],
-): Promise<Map<string, DateInfo>> {
+export async function scanDatesOnFiles(files: ScannedFile[]): Promise<Map<string, DateInfo>> {
   const dateCounts = new Map<string, number>();
   const dateVolumes = new Map<string, Set<string>>();
 
@@ -52,9 +46,7 @@ export async function scanDatesOnFiles(
   const BATCH_SIZE = 200;
   for (let i = 0; i < files.length; i += BATCH_SIZE) {
     const batch = files.slice(i, i + BATCH_SIZE);
-    const stats = await Promise.allSettled(
-      batch.map((f) => stat(f.absolutePath)),
-    );
+    const stats = await Promise.allSettled(batch.map((f) => stat(f.absolutePath)));
 
     for (let j = 0; j < stats.length; j++) {
       const result = stats[j];

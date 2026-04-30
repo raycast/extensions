@@ -1,14 +1,4 @@
-import {
-  List,
-  ActionPanel,
-  Action,
-  Icon,
-  Color,
-  confirmAlert,
-  Alert,
-  showHUD,
-  useNavigation,
-} from "@raycast/api";
+import { List, ActionPanel, Action, Icon, Color, confirmAlert, Alert, showHUD, useNavigation } from "@raycast/api";
 import { useState, useEffect, useCallback } from "react";
 import { JobState, readJobState, isProcessAlive } from "../utils/jobs";
 import { LOG_FILE } from "../utils/constants";
@@ -31,8 +21,7 @@ export function IngestStatusView({ jobId }: { jobId: string }) {
     return () => clearInterval(t);
   }, [refresh]);
 
-  const alive =
-    info != null && isProcessAlive(info.pid) && info.stage !== "done";
+  const alive = info != null && isProcessAlive(info.pid) && info.stage !== "done";
 
   const stopIngest = useCallback(async () => {
     if (!info) return;
@@ -68,15 +57,7 @@ export function IngestStatusView({ jobId }: { jobId: string }) {
     );
   }
 
-  const {
-    stage,
-    progress,
-    cards,
-    destDir,
-    startedAt,
-    currentFile,
-    filePercent,
-  } = info ?? {
+  const { stage, progress, cards, destDir, startedAt, currentFile, filePercent } = info ?? {
     stage: "",
     progress: { current: 0, total: 0 },
     cards: [],
@@ -88,12 +69,8 @@ export function IngestStatusView({ jobId }: { jobId: string }) {
 
   const stageLabel = STAGE_LABELS[stage] || stage;
   const elapsed = formatElapsed(new Date(startedAt));
-  const pct =
-    progress.total > 0
-      ? Math.round((progress.current / progress.total) * 100)
-      : 0;
-  const bar =
-    progress.total > 0 ? progressBar(progress.current, progress.total, 20) : "";
+  const pct = progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0;
+  const bar = progress.total > 0 ? progressBar(progress.current, progress.total, 20) : "";
 
   const errorMsg = info?.error ?? null;
 
@@ -119,19 +96,10 @@ export function IngestStatusView({ jobId }: { jobId: string }) {
           actions={
             <ActionPanel>
               {alive && (
-                <Action
-                  title="Stop Ingest"
-                  icon={Icon.Stop}
-                  style={Action.Style.Destructive}
-                  onAction={stopIngest}
-                />
+                <Action title="Stop Ingest" icon={Icon.Stop} style={Action.Style.Destructive} onAction={stopIngest} />
               )}
               <Action.ShowInFinder title="Show Destination" path={destDir} />
-              <Action.Open
-                title="Open Log"
-                target={LOG_FILE}
-                icon={Icon.Document}
-              />
+              <Action.Open title="Open Log" target={LOG_FILE} icon={Icon.Document} />
               <Action title="Back" onAction={pop} />
             </ActionPanel>
           }
@@ -140,10 +108,7 @@ export function IngestStatusView({ jobId }: { jobId: string }) {
 
       {errorMsg && (
         <List.Section title="Error">
-          <List.Item
-            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-            title={errorMsg}
-          />
+          <List.Item icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }} title={errorMsg} />
         </List.Section>
       )}
 

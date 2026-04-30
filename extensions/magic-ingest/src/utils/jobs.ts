@@ -2,13 +2,7 @@ import { readdir, readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
 
-export const JOBS_DIR = path.join(
-  homedir(),
-  "Library",
-  "Logs",
-  "raycast-photo-ingest",
-  "jobs",
-);
+export const JOBS_DIR = path.join(homedir(), "Library", "Logs", "raycast-photo-ingest", "jobs");
 
 export interface CardInfo {
   name: string;
