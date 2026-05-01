@@ -123,6 +123,16 @@ export default function MenuBarConnections() {
             })
           }
         />
+        <MenuBarExtra.Item
+          title="Pair with TablePro"
+          icon={Icon.Key}
+          onAction={() =>
+            launchCommand({
+              name: "pair",
+              type: LaunchType.UserInitiated,
+            })
+          }
+        />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

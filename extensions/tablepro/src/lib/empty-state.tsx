@@ -62,6 +62,7 @@ export function ScenarioEmptyView({ scenario }: Props) {
               <Action
                 title="Pair with TablePro"
                 icon={Icon.Key}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                 onAction={async () => {
                   await launchCommand({
                     name: "pair",
@@ -89,6 +90,7 @@ export function ScenarioEmptyView({ scenario }: Props) {
               <Action
                 title="Pair with TablePro"
                 icon={Icon.Key}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                 onAction={async () => {
                   await launchCommand({
                     name: "pair",

@@ -21,7 +21,7 @@ The MCP server starts on demand. You don't need to enable it manually.
 - **Recent Tabs**: show tabs currently open in TablePro and reopen one.
 - **Run Query**: paste SQL, pick a connection, preview up to 50 of 200 fetched rows in Raycast or open the full grid in TablePro. Mutating queries ask before running.
 - **Search Query History**: full-text search across the TablePro query history.
-- **Pair with TablePro**: issue or refresh the API token.
+- **Pair with TablePro**: issue or refresh the API token. Use `cmd+shift+k` on the form to sign out and clear the local token.
 
 ## AI tools
 
@@ -46,8 +46,8 @@ The pairing flow uses PKCE so the local TablePro app and the extension agree on 
 1. Raycast generates a verifier (32 random bytes) and a SHA-256 challenge.
 2. Raycast opens `tablepro://integrations/pair?...` with the challenge and a `raycast://` callback.
 3. TablePro shows the approval sheet. On approve, TablePro mints a one-time code and opens the callback.
-4. The extension exchanges code plus verifier for the token at `POST http://127.0.0.1:<port>/v1/integrations/exchange`.
-5. The token is stored in the extension's local storage (Keychain-backed).
+4. The extension POSTs the code plus verifier to the local exchange endpoint at `127.0.0.1:<port>/v1/integrations/exchange` and receives the token.
+5. The token is stored in Raycast's encrypted extension storage.
 
 The exchange endpoint takes no auth. The single-use code is the auth.
 
@@ -64,7 +64,7 @@ The exchange endpoint takes no auth. The single-use code is the auth.
 - **TablePro is not running**: open TablePro. The MCP server starts on first request, you don't need to enable it.
 - **The connection list is empty**: open TablePro at least once so it loads `~/Library/Application Support/TablePro/connections.json`. Connections you create later show up after the next list refresh.
 - **API token was revoked**: run Pair with TablePro again. Tokens revoked from inside TablePro (Settings > Integrations > Tokens) need a fresh pairing.
-- **Pairing got stuck**: close the Pair window and start the command again. The pending verifier is cleared each run.
+- **Pairing got stuck**: close the Pair window and run the command again. Each run generates a fresh verifier, and verifiers expire after 5 minutes if the approval sheet is left open.
 - **"This connection is read-only" on a write query**: the connection's External Access is set to Read-only or Blocked, or your token's scope is read-only. Change either in TablePro under the connection editor or under Settings > Integrations > Tokens.
 - **A query times out**: TablePro hasn't connected to the database yet. Run **Open in TablePro** first, confirm the connection is live, then retry from Raycast.
 - **Run Query says the result was capped**: TablePro applies a row safety cap (default 10,000 rows). Add an explicit `LIMIT` to your query, or open it in TablePro and click Fetch All.

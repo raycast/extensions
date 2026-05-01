@@ -1,4 +1,5 @@
 import { promises as fs } from "fs";
+import { withCache } from "@raycast/utils";
 import { Connection } from "./types";
 import { connectionsFilePath } from "./paths";
 
@@ -13,6 +14,8 @@ interface RawConnection {
   database?: string;
   schema?: string;
 }
+
+const CONNECTIONS_CACHE_MAX_AGE_MS = 30_000;
 
 function isENOENT(error: unknown): boolean {
   return (
@@ -40,7 +43,7 @@ function normalize(raw: RawConnection): Connection | null {
   };
 }
 
-export async function loadConnections(): Promise<Connection[]> {
+async function readConnectionsFromDisk(): Promise<Connection[]> {
   try {
     const raw = await fs.readFile(connectionsFilePath(), "utf8");
     const parsed: unknown = JSON.parse(raw);
@@ -62,6 +65,10 @@ export async function loadConnections(): Promise<Connection[]> {
     throw error;
   }
 }
+
+export const loadConnections = withCache(readConnectionsFromDisk, {
+  maxAge: CONNECTIONS_CACHE_MAX_AGE_MS,
+});
 
 export async function findConnection(
   idOrName: string,

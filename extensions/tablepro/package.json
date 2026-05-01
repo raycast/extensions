@@ -2,12 +2,11 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tablepro",
   "title": "TablePro",
-  "description": "Open and search your TablePro database connections, browse schema, and run queries.",
+  "description": "Search TablePro connections, browse schemas and tables, and run SQL from Raycast.",
   "icon": "icon.png",
   "author": "ngoquocdat",
   "categories": [
-    "Developer Tools",
-    "Productivity"
+    "Developer Tools"
   ],
   "keywords": [
     "database",
@@ -17,9 +16,7 @@
     "postgresql",
     "mongodb",
     "redis",
-    "clickhouse",
-    "tableplus",
-    "dbeaver"
+    "clickhouse"
   ],
   "platforms": [
     "macOS"
@@ -89,12 +86,6 @@
       "title": "Pair with TablePro",
       "description": "Pair this extension with TablePro to issue an API token.",
       "mode": "view"
-    },
-    {
-      "name": "pair-callback",
-      "title": "Pair with TablePro Callback",
-      "description": "Internal callback handler for the TablePro pairing flow.",
-      "mode": "no-view"
     }
   ],
   "tools": [
@@ -121,22 +112,25 @@
     {
       "name": "describe-table",
       "title": "Describe Table",
-      "description": "Return the column list, data types, nullability, primary-key flags, defaults, and comments for a table. Always call this before generating queries against a table you have not seen so the SQL matches the real schema."
+      "description": "Return the column list, data types, nullability, primary-key flags, defaults, and comments for a table. Always call this before generating queries against a table you have not seen so the SQL matches the real schema. Do not call to list tables (use list-tables) or to get the CREATE TABLE statement (use get-table-ddl).",
+      "instructions": "Pass the connection id from list-connections. Provide schema or database only when the engine separates them (PostgreSQL, MS SQL, Oracle); omit for MySQL, SQLite, Redis, MongoDB."
     },
     {
       "name": "get-table-ddl",
       "title": "Get Table DDL",
-      "description": "Return the CREATE TABLE statement for a table, including indexes and constraints when the engine supports it. Use this when the user asks how a table is defined or wants to copy the structure."
+      "description": "Return the CREATE TABLE statement for a table, including indexes and constraints when the engine supports it. Use this when the user asks how a table is defined or wants to copy the structure. Do not call for a column-level overview (use describe-table) or to actually create or modify the table (use run-query, which will route through confirmation)."
     },
     {
       "name": "run-query",
       "title": "Run Query",
-      "description": "Execute a SQL query against a connection and return columns and rows. Mutating SQL (INSERT, UPDATE, DELETE, DROP, ALTER, TRUNCATE, MERGE, CREATE) goes through user confirmation; never bypass it. Result rows are capped at 200 by default; pass rowLimit to lower that. The connection's external-access setting can reject the query as read-only; surface that error to the user verbatim."
+      "description": "Execute a SQL query against a connection and return columns and rows. Only read-only statements (SELECT, SHOW, EXPLAIN, DESCRIBE, and WITH clauses that resolve to SELECT) skip confirmation. Every other statement routes through user confirmation; never bypass it and never claim a mutation succeeded before the tool returns. Result rows are capped at 200 by default; pass rowLimit to lower that. The connection's external-access setting can reject the query as read-only; surface that error verbatim. Do not call this tool to inspect schema (use describe-table or get-table-ddl) or to run plans (use explain-query).",
+      "instructions": "Always call describe-table on any table referenced by the query before composing SQL, unless the user has already shown you the schema in this turn. Use parameterized values when the user supplies literals."
     },
     {
       "name": "explain-query",
       "title": "Explain Query",
-      "description": "Wrap a query with EXPLAIN and return the execution plan. Use when the user asks why a query is slow or how the database will run it. Does not run the underlying query."
+      "description": "Wrap a query with EXPLAIN and return the execution plan. Use when the user asks why a query is slow or how the database will run it. Plain EXPLAIN does not execute the underlying query; EXPLAIN ANALYZE on MySQL or PostgreSQL does, and the tool routes that case through user confirmation. Do not call to actually fetch rows (use run-query) or for engines without an EXPLAIN equivalent such as Redis.",
+      "instructions": "Pass the same connection id and SQL the user wants to analyze. Do not strip or rewrite the query; the tool wraps it as-is."
     },
     {
       "name": "open-connection-window",
@@ -146,11 +140,11 @@
     {
       "name": "search-history",
       "title": "Search Query History",
-      "description": "Full-text search the saved TablePro query history. Returns query text, connection id, executed-at timestamp, duration, and row count. Use to find prior work the user is referencing."
+      "description": "Full-text search the saved TablePro query history. Returns query text, connection id, executed-at timestamp, duration, and row count. Use to find prior work the user is referencing. Do not call to re-run a past query (copy the text into run-query) or to list tables and schemas (use list-tables and list-schemas)."
     }
   ],
   "ai": {
-    "instructions": "TablePro is a native macOS database client. Use list-connections first to resolve the user's description to a connection id, then pass that id to other tools. Always describe-table before generating SQL against a table you have not seen. For mutating SQL (INSERT, UPDATE, DELETE, DROP, ALTER, TRUNCATE, MERGE) the run-query tool routes through user confirmation; never bypass that and never tell the user a mutation ran without confirming the tool returned successfully. The connection's external-access setting may reject your query as read-only; surface that error verbatim. Prefer open-connection-window when the user wants to inspect or edit data interactively rather than streaming rows in chat. If a tool throws TokenMissingError or TableProNotInstalledError, tell the user to run the Pair with TablePro Raycast command (or install TablePro from tablepro.app) and stop calling tools until they do; do not retry.",
+    "instructions": "TablePro is a native macOS database client. Connections are saved locally and exposed to this extension over a paired API token. Each connection has a type (PostgreSQL, MySQL, SQLite, MS SQL, Redis, MongoDB, ClickHouse, etc.) and may have an external-access setting that flags it read-only; that setting is enforced by TablePro, not this extension. Tool inputs reference connections by id, which list-connections returns. Only read-only SQL (SELECT, SHOW, EXPLAIN, DESCRIBE, WITH-SELECT) executes without user confirmation; everything else goes through a confirmation step in TablePro. The chat surface is good for short results and DDL; for browsing or editing data the user is better served by open-connection-window. Pairing failures surface as a token-missing error and an installation-missing error: in either case the user runs the Pair with TablePro Raycast command (and installs TablePro from tablepro.app if needed), and tools should not be retried until pairing is restored.",
     "evals": [
       {
         "input": "@tablepro list my connections",
@@ -324,6 +318,15 @@
           },
           {
             "callsTool": {
+              "name": "describe-table",
+              "arguments": {
+                "connectionId": "9F1B7D54-2A1E-4F22-9C0E-1D3A7B5C9F12",
+                "table": "users"
+              }
+            }
+          },
+          {
+            "callsTool": {
               "name": "run-query",
               "arguments": {
                 "connectionId": "9F1B7D54-2A1E-4F22-9C0E-1D3A7B5C9F12"
@@ -341,10 +344,97 @@
               "port": 5432
             }
           ],
+          "describe-table": {
+            "columns": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "nullable": false,
+                "primaryKey": true
+              }
+            ]
+          },
           "run-query": {
             "columns": [],
             "rows": [],
-            "affectedRows": 0
+            "affectedRows": 0,
+            "confirmed": true
+          }
+        }
+      },
+      {
+        "input": "@tablepro select the 10 newest rows from users on prod",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "describe-table",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228",
+                "table": "users"
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "run-query",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "prod",
+              "type": "postgresql",
+              "host": "db.example.com",
+              "port": 5432
+            }
+          ],
+          "describe-table": {
+            "columns": [
+              {
+                "name": "id",
+                "type": "uuid",
+                "nullable": false,
+                "primaryKey": true
+              },
+              {
+                "name": "created_at",
+                "type": "timestamptz",
+                "nullable": false
+              }
+            ]
+          },
+          "run-query": {
+            "columns": [
+              "id",
+              "created_at"
+            ],
+            "rows": [],
+            "confirmed": false
+          }
+        }
+      },
+      {
+        "input": "@tablepro list my connections",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": {
+            "error": "TokenMissing: extension is not paired with TablePro"
           }
         }
       }

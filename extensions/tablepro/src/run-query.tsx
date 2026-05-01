@@ -12,8 +12,8 @@ import {
   confirmAlert,
   Alert,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { showFailureToast, useCachedPromise, usePromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import {
   Connection,
   QueryResult,
@@ -26,8 +26,6 @@ import { classifyError } from "./lib/errors";
 import { executeQuery } from "./lib/mcp";
 import { openQueryDeeplink } from "./lib/deeplink";
 import { isMutatingSQL, summarizeSQL } from "./lib/sql";
-
-const MAX_ROWS = 200;
 
 export default function RunQueryCommand() {
   const {
@@ -138,7 +136,13 @@ function QueryForm({ connections }: { connections: Connection[] }) {
                 });
                 return;
               }
-              await openQueryDeeplink(target.id, trimmed);
+              try {
+                await openQueryDeeplink(target.id, trimmed);
+              } catch (err) {
+                await showFailureToast(err, {
+                  title: "Could not open query in TablePro",
+                });
+              }
             }}
           />
         </ActionPanel>
@@ -180,13 +184,16 @@ function RunningView({
   connection: Connection;
   sql: string;
 }) {
+  const abortable = useRef<AbortController>();
   const {
     data: result,
     isLoading,
     error,
-  } = useCachedPromise(
-    (id: string, q: string) => executeQuery(id, q, { rowLimit: MAX_ROWS }),
+  } = usePromise(
+    (id: string, q: string) =>
+      executeQuery(id, q, { signal: abortable.current?.signal }),
     [connection.id, sql],
+    { abortable },
   );
 
   if (error) {
@@ -227,7 +234,15 @@ function ResultView({
             <Action
               title="Open in TablePro"
               icon={Icon.AppWindow}
-              onAction={() => openQueryDeeplink(connection.id, sql)}
+              onAction={async () => {
+                try {
+                  await openQueryDeeplink(connection.id, sql);
+                } catch (err) {
+                  await showFailureToast(err, {
+                    title: "Could not open query in TablePro",
+                  });
+                }
+              }}
             />
           </ActionPanel>
         }
@@ -248,7 +263,15 @@ function ResultView({
             <Action
               title="Open in TablePro"
               icon={Icon.AppWindow}
-              onAction={() => openQueryDeeplink(connection.id, sql)}
+              onAction={async () => {
+                try {
+                  await openQueryDeeplink(connection.id, sql);
+                } catch (err) {
+                  await showFailureToast(err, {
+                    title: "Could not open query in TablePro",
+                  });
+                }
+              }}
             />
           </ActionPanel>
         }
@@ -274,11 +297,60 @@ function RowsList({
     subtitleParts.push(`${Math.round(result.durationMs)} ms`);
   }
   if (result.isTruncated) {
-    subtitleParts.push(`capped at ${MAX_ROWS.toLocaleString()}`);
+    subtitleParts.push(`capped (open in TablePro for full result)`);
   }
   const sectionTitle = subtitleParts.join(" · ");
-  const titleColumn = pickTitleColumn(result.columns);
-  const subtitleColumn = pickSubtitleColumn(result.columns, titleColumn);
+
+  const sharedActions = (
+    <>
+      <Action
+        title="Open in TablePro"
+        icon={Icon.AppWindow}
+        onAction={async () => {
+          try {
+            await openQueryDeeplink(connection.id, sql);
+          } catch (err) {
+            await showFailureToast(err, {
+              title: "Could not open query in TablePro",
+            });
+          }
+        }}
+      />
+      <Action.Push
+        title="Show as Table"
+        icon={Icon.AppWindow}
+        shortcut={{ modifiers: ["cmd"], key: "t" }}
+        target={
+          <TableMarkdownView
+            connection={connection}
+            sql={sql}
+            result={result}
+          />
+        }
+      />
+      <Action.CopyToClipboard
+        title="Copy All as JSON"
+        icon={Icon.Clipboard}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "j" }}
+        content={JSON.stringify(
+          { columns: result.columns, rows: result.rows },
+          null,
+          2,
+        )}
+      />
+      <Action.CopyToClipboard
+        title="Copy All as CSV"
+        icon={Icon.Clipboard}
+        shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+        content={resultToCSV(result)}
+      />
+      <Action.CopyToClipboard
+        title="Copy SQL"
+        content={sql}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+      />
+    </>
+  );
 
   return (
     <List
@@ -288,24 +360,18 @@ function RowsList({
     >
       <List.Section title={sectionTitle}>
         {result.rows.map((row, index) => {
-          const title = formatInline(row[titleColumn]) || `Row ${index + 1}`;
-          const subtitle = subtitleColumn
-            ? formatInline(row[subtitleColumn])
-            : undefined;
-          const accessories: List.Item.Accessory[] = [
-            { text: `#${index + 1}` },
-          ];
+          const accessories: List.Item.Accessory[] = [];
           if (index === 0 && result.isTruncated) {
-            accessories.unshift({
+            accessories.push({
               tag: { value: "Capped", color: Color.Orange },
-              tooltip: `Result was capped at ${MAX_ROWS} rows by TablePro. Open in TablePro for the full grid.`,
+              tooltip:
+                "Result was capped by TablePro. Open in TablePro for the full grid.",
             });
           }
           return (
             <List.Item
               key={index}
-              title={title}
-              subtitle={subtitle}
+              title={`#${index + 1}`}
               accessories={accessories}
               detail={
                 <List.Item.Detail
@@ -324,20 +390,11 @@ function RowsList({
               }
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Open in TablePro"
-                    icon={Icon.AppWindow}
-                    onAction={() => openQueryDeeplink(connection.id, sql)}
-                  />
+                  {sharedActions}
                   <Action.CopyToClipboard
                     title="Copy Row as JSON"
                     content={JSON.stringify(row, null, 2)}
                     shortcut={{ modifiers: ["cmd"], key: "j" }}
-                  />
-                  <Action.CopyToClipboard
-                    title="Copy SQL"
-                    content={sql}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                 </ActionPanel>
               }
@@ -349,42 +406,111 @@ function RowsList({
   );
 }
 
-function pickTitleColumn(columns: string[]): string {
-  const preferred = [
-    "name",
-    "title",
-    "email",
-    "username",
-    "label",
-    "key",
-    "id",
-  ];
-  for (const candidate of preferred) {
-    const match = columns.find((col) => col.toLowerCase() === candidate);
-    if (match) return match;
-  }
-  return columns[0] ?? "";
+function TableMarkdownView({
+  connection,
+  sql,
+  result,
+}: {
+  connection: Connection;
+  sql: string;
+  result: QueryResult;
+}) {
+  const markdown = renderMarkdownTable(result);
+  return (
+    <Detail
+      navigationTitle={`${connection.name} · table view`}
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action
+            title="Open in TablePro"
+            icon={Icon.AppWindow}
+            onAction={async () => {
+              try {
+                await openQueryDeeplink(connection.id, sql);
+              } catch (err) {
+                await showFailureToast(err, {
+                  title: "Could not open query in TablePro",
+                });
+              }
+            }}
+          />
+          <Action.CopyToClipboard
+            title="Copy Markdown"
+            content={markdown}
+            shortcut={{ modifiers: ["cmd"], key: "c" }}
+          />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
-function pickSubtitleColumn(
-  columns: string[],
-  titleColumn: string,
-): string | undefined {
-  const preferred = [
-    "id",
-    "email",
-    "status",
-    "type",
-    "created_at",
-    "updated_at",
-  ];
-  for (const candidate of preferred) {
-    const match = columns.find(
-      (col) => col.toLowerCase() === candidate && col !== titleColumn,
-    );
-    if (match) return match;
+const MARKDOWN_TABLE_ROW_LIMIT = 50;
+
+function renderMarkdownTable(result: QueryResult): string {
+  const { columns, rows } = result;
+  if (columns.length === 0) {
+    return "_No columns returned._";
   }
-  return undefined;
+  const visibleRows = rows.slice(0, MARKDOWN_TABLE_ROW_LIMIT);
+  const header = `| ${columns.map(escapeMarkdownCell).join(" | ")} |`;
+  const separator = `| ${columns.map(() => "---").join(" | ")} |`;
+  const body = visibleRows
+    .map((row) => {
+      const cells = columns.map((col) =>
+        escapeMarkdownCell(formatInline(row[col])),
+      );
+      return `| ${cells.join(" | ")} |`;
+    })
+    .join("\n");
+  const note: string[] = [];
+  if (rows.length > MARKDOWN_TABLE_ROW_LIMIT) {
+    note.push(
+      `_Showing first ${MARKDOWN_TABLE_ROW_LIMIT} of ${rows.length.toLocaleString()} rows. Open in TablePro for the full grid._`,
+    );
+  } else if (result.isTruncated) {
+    note.push(
+      `_Result was capped by TablePro. Open in TablePro for the full grid._`,
+    );
+  }
+  return [header, separator, body, "", ...note].join("\n");
+}
+
+function escapeMarkdownCell(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/\|/g, "\\|").replace(/\n/g, " ");
+}
+
+function resultToCSV(result: QueryResult): string {
+  const lines: string[] = [];
+  lines.push(result.columns.map(escapeCsvCell).join(","));
+  for (const row of result.rows) {
+    lines.push(
+      result.columns
+        .map((col) => escapeCsvCell(stringifyCell(row[col])))
+        .join(","),
+    );
+  }
+  return lines.join("\n");
+}
+
+function stringifyCell(value: unknown): string {
+  if (value === null || value === undefined) return "";
+  if (typeof value === "string") return value;
+  if (typeof value === "number" || typeof value === "boolean")
+    return String(value);
+  try {
+    return JSON.stringify(value);
+  } catch {
+    return "";
+  }
+}
+
+function escapeCsvCell(value: string): string {
+  if (/[",\n\r]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
 }
 
 function formatInline(value: unknown): string {

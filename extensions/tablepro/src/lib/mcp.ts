@@ -1,4 +1,5 @@
 import { promises as fs } from "fs";
+import { randomUUID } from "crypto";
 import {
   ColumnInfo,
   Connection,
@@ -17,8 +18,8 @@ import {
 } from "./types";
 import { handshakeFilePath, tableProInstalled } from "./paths";
 import { startMCPDeeplink } from "./deeplink";
-import { LocalStorage } from "@raycast/api";
-import { STORAGE_KEYS } from "./pairing";
+import { Toast, showToast } from "@raycast/api";
+import { readStoredApiToken } from "./storage";
 
 interface JsonRpcRequest {
   jsonrpc: "2.0";
@@ -49,6 +50,12 @@ interface InitializeResult {
   protocolVersion: string;
 }
 
+export interface MCPCallOptions {
+  signal?: AbortSignal;
+}
+
+const DEFAULT_ROW_LIMIT = 200;
+
 async function readHandshake(): Promise<MCPHandshake | null> {
   try {
     const raw = await fs.readFile(handshakeFilePath(), "utf8");
@@ -65,7 +72,10 @@ async function readHandshake(): Promise<MCPHandshake | null> {
 const HANDSHAKE_RETRY_DELAY_MS = 600;
 const HANDSHAKE_MAX_RETRIES = 12;
 
-async function ensureHandshake(allowAutoStart: boolean): Promise<MCPHandshake> {
+async function ensureHandshake(
+  allowAutoStart: boolean,
+  signal?: AbortSignal,
+): Promise<MCPHandshake> {
   if (!tableProInstalled()) {
     throw new TableProNotInstalledError();
   }
@@ -74,15 +84,57 @@ async function ensureHandshake(allowAutoStart: boolean): Promise<MCPHandshake> {
   if (!allowAutoStart) {
     throw new MCPNotRunningError();
   }
-  await startMCPDeeplink();
-  for (let attempt = 0; attempt < HANDSHAKE_MAX_RETRIES; attempt += 1) {
-    await new Promise((resolve) =>
-      setTimeout(resolve, HANDSHAKE_RETRY_DELAY_MS),
-    );
-    const handshake = await readHandshake();
-    if (handshake) return handshake;
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: "Starting TablePro…",
+  });
+  try {
+    await startMCPDeeplink();
+    for (let attempt = 0; attempt < HANDSHAKE_MAX_RETRIES; attempt += 1) {
+      if (signal?.aborted) {
+        throw signal.reason instanceof Error
+          ? signal.reason
+          : new Error("Aborted");
+      }
+      await delay(HANDSHAKE_RETRY_DELAY_MS, signal);
+      const handshake = await readHandshake();
+      if (handshake) {
+        toast.style = Toast.Style.Success;
+        toast.title = "TablePro is ready";
+        return handshake;
+      }
+    }
+    throw new MCPNotRunningError();
+  } catch (err) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Could not start TablePro";
+    if (err instanceof Error && err.message) {
+      toast.message = err.message;
+    }
+    throw err;
   }
-  throw new MCPNotRunningError();
+}
+
+function delay(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(
+        signal.reason instanceof Error ? signal.reason : new Error("Aborted"),
+      );
+      return;
+    }
+    const timeout = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort);
+      resolve();
+    }, ms);
+    const onAbort = () => {
+      clearTimeout(timeout);
+      reject(
+        signal?.reason instanceof Error ? signal.reason : new Error("Aborted"),
+      );
+    };
+    signal?.addEventListener("abort", onAbort, { once: true });
+  });
 }
 
 async function clearStaleHandshake(): Promise<void> {
@@ -94,10 +146,7 @@ async function clearStaleHandshake(): Promise<void> {
 }
 
 export async function readApiToken(): Promise<string | undefined> {
-  const value = await LocalStorage.getItem<string>(STORAGE_KEYS.apiToken);
-  if (typeof value !== "string") return undefined;
-  const trimmed = value.trim();
-  return trimmed === "" ? undefined : trimmed;
+  return readStoredApiToken();
 }
 
 async function getApiToken(): Promise<string> {
@@ -108,10 +157,8 @@ async function getApiToken(): Promise<string> {
   return token;
 }
 
-let requestCounter = 0;
 function nextRequestId(): string {
-  requestCounter += 1;
-  return `tp-${Date.now()}-${requestCounter}`;
+  return `tp-${randomUUID()}`;
 }
 
 interface SessionState {
@@ -137,6 +184,7 @@ async function postJsonRpc<T>(
   handshake: MCPHandshake,
   token: string,
   sessionId: string | null,
+  signal?: AbortSignal,
 ): Promise<{ result: T; sessionId: string | null }> {
   const body: JsonRpcRequest = {
     jsonrpc: "2.0",
@@ -158,8 +206,12 @@ async function postJsonRpc<T>(
       method: "POST",
       headers,
       body: JSON.stringify(body),
+      signal,
     });
-  } catch {
+  } catch (err) {
+    if (isAbortError(err)) {
+      throw err;
+    }
     throw new MCPNotRunningError();
   }
   if (response.status === 401) {
@@ -199,9 +251,23 @@ async function postJsonRpc<T>(
   return { result: json.result, sessionId: responseSessionId };
 }
 
+function isAbortError(err: unknown): boolean {
+  if (err instanceof Error && err.name === "AbortError") return true;
+  if (
+    typeof err === "object" &&
+    err !== null &&
+    "name" in err &&
+    (err as { name?: unknown }).name === "AbortError"
+  ) {
+    return true;
+  }
+  return false;
+}
+
 async function ensureSession(
   handshake: MCPHandshake,
   token: string,
+  signal?: AbortSignal,
 ): Promise<string> {
   if (sessionState && sessionState.initialized) {
     return sessionState.sessionId;
@@ -221,6 +287,7 @@ async function ensureSession(
       handshake,
       token,
       null,
+      signal,
     );
     if (!init.sessionId) {
       throw new Error("MCP initialize did not return a session id");
@@ -232,6 +299,7 @@ async function ensureSession(
       handshake,
       token,
       init.sessionId,
+      signal,
     );
     sessionState.initialized = true;
     return init.sessionId;
@@ -246,18 +314,19 @@ async function ensureSession(
 async function rpc<T>(
   method: string,
   params: Record<string, unknown> = {},
+  signal?: AbortSignal,
 ): Promise<T> {
   const token = await getApiToken();
-  let handshake = await ensureHandshake(true);
+  let handshake = await ensureHandshake(true, signal);
   let sessionId: string;
   try {
-    sessionId = await ensureSession(handshake, token);
+    sessionId = await ensureSession(handshake, token, signal);
   } catch (err) {
     resetSession();
     if (err instanceof MCPNotRunningError) {
       await clearStaleHandshake();
-      handshake = await ensureHandshake(true);
-      sessionId = await ensureSession(handshake, token);
+      handshake = await ensureHandshake(true, signal);
+      sessionId = await ensureSession(handshake, token, signal);
     } else {
       throw err;
     }
@@ -269,32 +338,35 @@ async function rpc<T>(
       handshake,
       token,
       sessionId,
+      signal,
     );
     return result;
   } catch (err) {
     if (err instanceof Error && /HTTP 404/.test(err.message)) {
       resetSession();
-      const fresh = await ensureSession(handshake, token);
+      const fresh = await ensureSession(handshake, token, signal);
       const { result } = await postJsonRpc<T>(
         method,
         params,
         handshake,
         token,
         fresh,
+        signal,
       );
       return result;
     }
     if (err instanceof MCPNotRunningError) {
       resetSession();
       await clearStaleHandshake();
-      handshake = await ensureHandshake(true);
-      const fresh = await ensureSession(handshake, token);
+      handshake = await ensureHandshake(true, signal);
+      const fresh = await ensureSession(handshake, token, signal);
       const { result } = await postJsonRpc<T>(
         method,
         params,
         handshake,
         token,
         fresh,
+        signal,
       );
       return result;
     }
@@ -314,13 +386,18 @@ async function safeReadError(response: Response): Promise<string> {
 export async function callTool<T>(
   name: string,
   args: Record<string, unknown> = {},
+  options: MCPCallOptions = {},
 ): Promise<T> {
   const result = await rpc<{
     content: Array<{ type: string; text?: string; data?: unknown }>;
-  }>("tools/call", {
-    name,
-    arguments: args,
-  });
+  }>(
+    "tools/call",
+    {
+      name,
+      arguments: args,
+    },
+    options.signal,
+  );
   const first = result.content?.[0];
   if (!first) {
     return undefined as T;
@@ -351,9 +428,13 @@ interface RawConnectionRow {
   safe_mode?: string;
 }
 
-export async function listConnections(): Promise<Connection[]> {
+export async function listConnections(
+  options: MCPCallOptions = {},
+): Promise<Connection[]> {
   const envelope = await callTool<{ connections: RawConnectionRow[] }>(
     "list_connections",
+    {},
+    options,
   );
   return (envelope.connections ?? []).map((row) => ({
     id: row.id,
@@ -367,21 +448,31 @@ export async function listConnections(): Promise<Connection[]> {
 
 export async function listDatabases(
   connectionId: string,
+  options: MCPCallOptions = {},
 ): Promise<DatabaseInfo[]> {
-  const envelope = await callTool<{ databases: string[] }>("list_databases", {
-    connection_id: connectionId,
-  });
+  const envelope = await callTool<{ databases: string[] }>(
+    "list_databases",
+    {
+      connection_id: connectionId,
+    },
+    options,
+  );
   return (envelope.databases ?? []).map((name) => ({ name }));
 }
 
 export async function listSchemas(
   connectionId: string,
   database?: string,
+  options: MCPCallOptions = {},
 ): Promise<SchemaInfo[]> {
-  const envelope = await callTool<{ schemas: string[] }>("list_schemas", {
-    connection_id: connectionId,
-    database,
-  });
+  const envelope = await callTool<{ schemas: string[] }>(
+    "list_schemas",
+    {
+      connection_id: connectionId,
+      database,
+    },
+    options,
+  );
   return (envelope.schemas ?? []).map((name) => ({ name, database }));
 }
 
@@ -395,14 +486,22 @@ interface RawTableRow {
 
 export async function listTables(
   connectionId: string,
-  options: { database?: string; schema?: string } = {},
+  options: {
+    database?: string;
+    schema?: string;
+    signal?: AbortSignal;
+  } = {},
 ): Promise<TableInfo[]> {
-  const envelope = await callTool<{ tables: RawTableRow[] }>("list_tables", {
-    connection_id: connectionId,
-    database: options.database,
-    schema: options.schema,
-    include_row_counts: true,
-  });
+  const envelope = await callTool<{ tables: RawTableRow[] }>(
+    "list_tables",
+    {
+      connection_id: connectionId,
+      database: options.database,
+      schema: options.schema,
+      include_row_counts: true,
+    },
+    { signal: options.signal },
+  );
   return (envelope.tables ?? []).map((row) => ({
     name: row.name,
     type: row.type,
@@ -433,13 +532,17 @@ interface RawDescribeTable {
 export async function describeTable(
   connectionId: string,
   table: string,
-  options: { schema?: string } = {},
+  options: { schema?: string; signal?: AbortSignal } = {},
 ): Promise<{ columns: ColumnInfo[] }> {
-  const envelope = await callTool<RawDescribeTable>("describe_table", {
-    connection_id: connectionId,
-    table,
-    schema: options.schema,
-  });
+  const envelope = await callTool<RawDescribeTable>(
+    "describe_table",
+    {
+      connection_id: connectionId,
+      table,
+      schema: options.schema,
+    },
+    { signal: options.signal },
+  );
   const columns: ColumnInfo[] = (envelope.columns ?? []).map((col) => ({
     name: col.name,
     type: col.data_type,
@@ -454,13 +557,17 @@ export async function describeTable(
 export async function getTableDDL(
   connectionId: string,
   table: string,
-  options: { schema?: string } = {},
+  options: { schema?: string; signal?: AbortSignal } = {},
 ): Promise<{ ddl: string }> {
-  return callTool<{ ddl: string }>("get_table_ddl", {
-    connection_id: connectionId,
-    table,
-    schema: options.schema,
-  });
+  return callTool<{ ddl: string }>(
+    "get_table_ddl",
+    {
+      connection_id: connectionId,
+      table,
+      schema: options.schema,
+    },
+    { signal: options.signal },
+  );
 }
 
 interface RawQueryResult {
@@ -494,29 +601,42 @@ function adaptQueryResult(raw: RawQueryResult): QueryResult {
 export async function executeQuery(
   connectionId: string,
   sql: string,
-  options: { database?: string; schema?: string; rowLimit?: number } = {},
+  options: {
+    database?: string;
+    schema?: string;
+    rowLimit?: number;
+    signal?: AbortSignal;
+  } = {},
 ): Promise<QueryResult> {
-  const raw = await callTool<RawQueryResult>("execute_query", {
-    connection_id: connectionId,
-    query: sql,
-    database: options.database,
-    schema: options.schema,
-    max_rows: options.rowLimit,
-  });
+  const raw = await callTool<RawQueryResult>(
+    "execute_query",
+    {
+      connection_id: connectionId,
+      query: sql,
+      database: options.database,
+      schema: options.schema,
+      max_rows: options.rowLimit ?? DEFAULT_ROW_LIMIT,
+    },
+    { signal: options.signal },
+  );
   return adaptQueryResult(raw);
 }
 
 export async function explainQuery(
   connectionId: string,
   sql: string,
-  options: { database?: string; schema?: string } = {},
+  options: { database?: string; schema?: string; signal?: AbortSignal } = {},
 ): Promise<QueryResult> {
-  const raw = await callTool<RawQueryResult>("execute_query", {
-    connection_id: connectionId,
-    query: `EXPLAIN ${sql}`,
-    database: options.database,
-    schema: options.schema,
-  });
+  const raw = await callTool<RawQueryResult>(
+    "execute_query",
+    {
+      connection_id: connectionId,
+      query: `EXPLAIN ${sql}`,
+      database: options.database,
+      schema: options.schema,
+    },
+    { signal: options.signal },
+  );
   return adaptQueryResult(raw);
 }
 
@@ -540,8 +660,14 @@ function tabTypeFromRaw(raw: string): RecentTab["tabType"] {
   return "query";
 }
 
-export async function listRecentTabs(): Promise<RecentTab[]> {
-  const envelope = await callTool<{ tabs: RawRecentTab[] }>("list_recent_tabs");
+export async function listRecentTabs(
+  options: MCPCallOptions = {},
+): Promise<RecentTab[]> {
+  const envelope = await callTool<{ tabs: RawRecentTab[] }>(
+    "list_recent_tabs",
+    {},
+    options,
+  );
   return (envelope.tabs ?? []).map((tab) => ({
     id: tab.tab_id,
     connectionId: tab.connection_id,
@@ -576,6 +702,7 @@ export interface SearchHistoryOptions {
   since?: number;
   /** Latest executed_at to include, Unix epoch seconds (inclusive). */
   until?: number;
+  signal?: AbortSignal;
 }
 
 export async function searchHistory(
@@ -596,6 +723,7 @@ export async function searchHistory(
   const envelope = await callTool<{ entries: RawHistoryEntry[] }>(
     "search_query_history",
     args,
+    { signal: options.signal },
   );
   return (envelope.entries ?? []).map((entry) => ({
     id: entry.id,
@@ -610,20 +738,34 @@ export async function searchHistory(
 
 export async function openConnectionWindow(
   connectionId: string,
+  options: MCPCallOptions = {},
 ): Promise<void> {
-  await callTool<unknown>("open_connection_window", {
-    connection_id: connectionId,
-  });
+  await callTool<unknown>(
+    "open_connection_window",
+    {
+      connection_id: connectionId,
+    },
+    options,
+  );
 }
 
 export async function exchangePairingCode(
   code: string,
   codeVerifier: string,
+  options: MCPCallOptions = {},
 ): Promise<{ token: string }> {
-  const handshake = await ensureHandshake(false);
+  const handshake = await ensureHandshake(false, options.signal);
   const url = `http${handshake.tls ? "s" : ""}://127.0.0.1:${handshake.port}/v1/integrations/exchange`;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 10000);
+  const onCallerAbort = () => controller.abort(options.signal?.reason);
+  if (options.signal) {
+    if (options.signal.aborted) {
+      controller.abort(options.signal.reason);
+    } else {
+      options.signal.addEventListener("abort", onCallerAbort, { once: true });
+    }
+  }
   let response: Response;
   try {
     response = await fetch(url, {
@@ -634,6 +776,7 @@ export async function exchangePairingCode(
     });
   } finally {
     clearTimeout(timeoutId);
+    options.signal?.removeEventListener("abort", onCallerAbort);
   }
   if (!response.ok) {
     const text = await safeReadError(response);

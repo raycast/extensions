@@ -7,6 +7,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { findConnection } from "./lib/connections";
 import { openConnectionDeeplink } from "./lib/deeplink";
 import { tableProInstalled } from "./lib/paths";
@@ -58,6 +59,10 @@ export default async function OpenConnection(
     });
     return;
   }
-  await openConnectionDeeplink(match.id);
-  await showHUD(`Opening ${match.name}`);
+  try {
+    await openConnectionDeeplink(match.id);
+    await showHUD(`Opening ${match.name}`);
+  } catch (err) {
+    await showFailureToast(err, { title: "Could not open connection" });
+  }
 }

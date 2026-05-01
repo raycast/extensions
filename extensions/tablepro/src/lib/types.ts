@@ -84,10 +84,6 @@ export interface QueryHistoryEntry {
   rowCount?: number;
 }
 
-export interface Preferences {
-  tableProAppPath?: { path: string; bundleId: string; name: string } | string;
-}
-
 export class TableProNotInstalledError extends Error {
   constructor() {
     super("TablePro is not installed");

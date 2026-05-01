@@ -7,12 +7,17 @@ import {
   LaunchProps,
   LocalStorage,
   Toast,
-  showToast,
   showHUD,
+  showToast,
   useNavigation,
   popToRoot,
 } from "@raycast/api";
-import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
+import {
+  FormValidation,
+  showFailureToast,
+  useCachedPromise,
+  useForm,
+} from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { hostname } from "os";
 import { TableProNotInstalledError } from "./lib/types";
@@ -20,7 +25,20 @@ import { loadConnections } from "./lib/connections";
 import { tableProInstalled } from "./lib/paths";
 import { pairDeeplink } from "./lib/deeplink";
 import { exchangePairingCode } from "./lib/mcp";
-import { generatePKCE, PAIR_CALLBACK_URL, STORAGE_KEYS } from "./lib/pairing";
+import {
+  PAIR_CALLBACK_URL,
+  clearPendingVerifier,
+  generatePKCE,
+  isValidPairingCode,
+  isVerifierExpired,
+  loadPendingVerifier,
+  savePendingVerifier,
+} from "./lib/pairing";
+import {
+  STORAGE_KEYS,
+  clearApiToken,
+  migrateApiTokenIfNeeded,
+} from "./lib/storage";
 import { classifyError } from "./lib/errors";
 
 interface LaunchContext {
@@ -55,13 +73,25 @@ export default function PairCommand(
   props: LaunchProps<{ launchContext: LaunchContext }>,
 ) {
   const incomingCode = props.launchContext?.code;
-  if (incomingCode) {
-    return <ExchangeView code={incomingCode} />;
+  if (incomingCode !== undefined) {
+    if (!isValidPairingCode(incomingCode)) {
+      return (
+        <Detail
+          markdown={
+            "# Invalid pairing code\n\nThe code TablePro returned was not a valid identifier. Run Pair with TablePro again."
+          }
+        />
+      );
+    }
+    return <ExchangeView code={incomingCode.trim()} />;
   }
   return <PairForm />;
 }
 
 function PairForm() {
+  const [hasToken, setHasToken] = useState(false);
+  const challengeRef = useRef<string | null>(null);
+
   const {
     data: connections,
     isLoading,
@@ -75,11 +105,34 @@ function PairForm() {
     { keepPreviousData: true },
   );
 
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      await migrateApiTokenIfNeeded();
+      const token = await LocalStorage.getItem<string>(STORAGE_KEYS.apiToken);
+      if (cancelled) return;
+      setHasToken(typeof token === "string" && token.trim().length > 0);
+
+      await clearPendingVerifier();
+      const { verifier, challenge } = generatePKCE();
+      await savePendingVerifier(verifier);
+      challengeRef.current = challenge;
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const { handleSubmit, itemProps, values } = useForm<PairFormValues>({
     async onSubmit(formValues) {
       try {
-        const { verifier, challenge } = generatePKCE();
-        await LocalStorage.setItem(STORAGE_KEYS.pendingVerifier, verifier);
+        let challenge = challengeRef.current;
+        if (!challenge) {
+          const fresh = generatePKCE();
+          await savePendingVerifier(fresh.verifier);
+          challengeRef.current = fresh.challenge;
+          challenge = fresh.challenge;
+        }
         await pairDeeplink({
           client: formValues.client,
           challenge,
@@ -90,13 +143,12 @@ function PairForm() {
               ? formValues.connections
               : undefined,
         });
-        await showHUD("Approve pairing in TablePro");
-      } catch (err) {
         await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to start pairing",
-          message: err instanceof Error ? err.message : String(err),
+          style: Toast.Style.Animated,
+          title: "Waiting for TablePro approval…",
         });
+      } catch (err) {
+        await showFailureToast(err, { title: "Failed to start pairing" });
       }
     },
     initialValues: {
@@ -134,6 +186,20 @@ function PairForm() {
             icon={Icon.QuestionMark}
             url="https://tablepro.app/docs/raycast"
           />
+          {hasToken ? (
+            <Action
+              title="Sign Out"
+              icon={Icon.Logout}
+              style={Action.Style.Destructive}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+              onAction={async () => {
+                await clearApiToken();
+                await clearPendingVerifier();
+                setHasToken(false);
+                await showHUD("Signed out of TablePro");
+              }}
+            />
+          ) : null}
         </ActionPanel>
       }
     >
@@ -174,6 +240,7 @@ function ExchangeView({ code }: { code: string }) {
   const [error, setError] = useState<unknown>(null);
   const [completed, setCompleted] = useState(false);
   const ranRef = useRef(false);
+  const cancelledRef = useRef(false);
   const { pop } = useNavigation();
 
   useEffect(() => {
@@ -181,24 +248,34 @@ function ExchangeView({ code }: { code: string }) {
     ranRef.current = true;
     (async () => {
       try {
-        const verifier = await LocalStorage.getItem<string>(
-          STORAGE_KEYS.pendingVerifier,
-        );
-        if (!verifier) {
+        const pending = await loadPendingVerifier();
+        if (!pending) {
           throw new Error(
             "Pairing verifier missing. Run Pair with TablePro again.",
           );
         }
-        const exchange = await exchangePairingCode(code, verifier);
+        if (isVerifierExpired(pending)) {
+          await clearPendingVerifier();
+          throw new Error(
+            "Pairing request expired. Run Pair with TablePro again.",
+          );
+        }
+        const exchange = await exchangePairingCode(code, pending.verifier);
+        if (cancelledRef.current) return;
         await persistToken(exchange.token);
-        await LocalStorage.removeItem(STORAGE_KEYS.pendingVerifier);
+        await clearPendingVerifier();
         setCompleted(true);
         await showHUD("Paired with TablePro");
         await popToRoot({ clearSearchBar: true });
       } catch (err) {
+        await clearPendingVerifier();
+        if (cancelledRef.current) return;
         setError(err);
       }
     })();
+    return () => {
+      cancelledRef.current = true;
+    };
   }, [code]);
 
   if (error) {
@@ -226,6 +303,22 @@ function ExchangeView({ code }: { code: string }) {
     <Detail
       markdown={`# Finishing pairing\n\n${message}`}
       isLoading={!completed}
+      actions={
+        completed ? undefined : (
+          <ActionPanel>
+            <Action
+              title="Cancel"
+              icon={Icon.XMarkCircle}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+              onAction={async () => {
+                cancelledRef.current = true;
+                await clearPendingVerifier();
+                pop();
+              }}
+            />
+          </ActionPanel>
+        )
+      }
     />
   );
 }

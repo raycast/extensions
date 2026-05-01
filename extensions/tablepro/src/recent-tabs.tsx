@@ -3,10 +3,11 @@ import {
   ActionPanel,
   Icon,
   List,
-  showToast,
   Toast,
+  showToast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useEffect, useRef } from "react";
 import { RecentTab } from "./lib/types";
 import { listRecentTabs, openConnectionWindow } from "./lib/mcp";
 import { ScenarioEmptyView } from "./lib/empty-state";
@@ -15,14 +16,38 @@ import { openTableDeeplink } from "./lib/deeplink";
 import { formatRelativeTime } from "./lib/format";
 
 export default function RecentTabsCommand() {
+  const abortable = useRef<AbortController>();
   const {
     data: tabs,
     isLoading,
     error,
     revalidate,
-  } = useCachedPromise(listRecentTabs, [], { keepPreviousData: true });
+  } = useCachedPromise(
+    () => listRecentTabs({ signal: abortable.current?.signal }),
+    [],
+    { keepPreviousData: true, abortable },
+  );
 
-  if (error) {
+  useEffect(() => {
+    if (!error) return;
+    if (tabs === undefined) return;
+    const scenario = classifyError(error);
+    if (scenario.kind !== "other") return;
+    let cancelled = false;
+    void (async () => {
+      if (cancelled) return;
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not refresh tabs",
+        message: scenario.message,
+      });
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [error, tabs]);
+
+  if (error && tabs === undefined) {
     return (
       <List>
         <ScenarioEmptyView scenario={classifyError(error)} />
@@ -77,19 +102,11 @@ export default function RecentTabsCommand() {
                       await openConnectionWindow(tab.connectionId);
                     }
                   } catch (err) {
-                    await showToast({
-                      style: Toast.Style.Failure,
+                    await showFailureToast(err, {
                       title: "Could not open tab",
-                      message: err instanceof Error ? err.message : String(err),
                     });
                   }
                 }}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={revalidate}
               />
             </ActionPanel>
           }

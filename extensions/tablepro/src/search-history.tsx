@@ -7,8 +7,8 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useRef, useState } from "react";
 import { searchHistory } from "./lib/mcp";
 import { ScenarioEmptyView } from "./lib/empty-state";
 import { classifyError } from "./lib/errors";
@@ -18,14 +18,17 @@ import { formatRelativeTime, formatRowCount } from "./lib/format";
 
 export default function SearchHistoryCommand() {
   const [query, setQuery] = useState("");
+  const abortable = useRef<AbortController>();
   const {
     data: results,
     isLoading,
     error,
     revalidate,
-  } = useCachedPromise((q: string) => searchHistory(q, 100), [query], {
-    keepPreviousData: true,
-  });
+  } = useCachedPromise(
+    (q: string) => searchHistory(q, 100, { signal: abortable.current?.signal }),
+    [query],
+    { keepPreviousData: true, abortable },
+  );
 
   if (error) {
     return (
@@ -80,11 +83,8 @@ export default function SearchHistoryCommand() {
                     try {
                       await openQueryDeeplink(entry.connectionId!, entry.query);
                     } catch (err) {
-                      await showToast({
-                        style: Toast.Style.Failure,
+                      await showFailureToast(err, {
                         title: "Could not open query",
-                        message:
-                          err instanceof Error ? err.message : String(err),
                       });
                     }
                   }}
@@ -101,12 +101,6 @@ export default function SearchHistoryCommand() {
                     title: "SQL copied",
                   });
                 }}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={revalidate}
               />
             </ActionPanel>
           }

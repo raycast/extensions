@@ -1,7 +1,6 @@
 import { Action, Tool } from "@raycast/api";
 import { QueryResult } from "../lib/types";
-import { executeQuery } from "../lib/mcp";
-import { listConnections } from "../lib/mcp";
+import { executeQuery, listConnections } from "../lib/mcp";
 import { loadConnections } from "../lib/connections";
 import { isMutatingSQL, summarizeSQL } from "../lib/sql";
 

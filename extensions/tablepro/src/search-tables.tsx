@@ -6,10 +6,9 @@ import {
   List,
   showToast,
   Toast,
-  useNavigation,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Connection, TableInfo } from "./lib/types";
 import { databaseTypeLabel, loadConnections } from "./lib/connections";
 import { listTables, getTableDDL } from "./lib/mcp";
@@ -56,7 +55,6 @@ function ConnectionPicker() {
     [],
     { keepPreviousData: true },
   );
-  const { push } = useNavigation();
 
   if (error) {
     return (
@@ -97,16 +95,10 @@ function ConnectionPicker() {
           icon={connectionIcon(connection.type)}
           actions={
             <ActionPanel>
-              <Action
+              <Action.Push
                 title="Browse Tables"
                 icon={Icon.List}
-                onAction={() => push(<TablesList connection={connection} />)}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={revalidate}
+                target={<TablesList connection={connection} />}
               />
             </ActionPanel>
           }
@@ -125,6 +117,7 @@ function TablesList({
   database?: string;
   schema?: string;
 }) {
+  const abortable = useRef<AbortController>();
   const {
     data: tables,
     isLoading,
@@ -132,9 +125,13 @@ function TablesList({
     revalidate,
   } = useCachedPromise(
     (id: string, db: string | undefined, sc: string | undefined) =>
-      listTables(id, { database: db, schema: sc }),
+      listTables(id, {
+        database: db,
+        schema: sc,
+        signal: abortable.current?.signal,
+      }),
     [connection.id, database, schema],
-    { keepPreviousData: true },
+    { keepPreviousData: true, abortable },
   );
   const [sortMode, setSortMode] = useState<SortMode>("name");
   const sortedTables = useMemo(
@@ -146,13 +143,19 @@ function TablesList({
     if (!error) return;
     if (tables === undefined) return;
     const scenario = classifyError(error);
-    if (scenario.kind === "other") {
-      showToast({
+    if (scenario.kind !== "other") return;
+    let cancelled = false;
+    void (async () => {
+      if (cancelled) return;
+      await showToast({
         style: Toast.Style.Failure,
         title: "Could not refresh tables",
         message: scenario.message,
       });
-    }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [error, tables]);
 
   if (error && tables === undefined) {
@@ -181,6 +184,16 @@ function TablesList({
           <List.Dropdown.Item title="Sort by Name" value="name" />
           <List.Dropdown.Item title="Sort by Row Count" value="rowCount" />
         </List.Dropdown>
+      }
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.RotateClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={revalidate}
+          />
+        </ActionPanel>
       }
     >
       {!isLoading && tables !== undefined && tables.length === 0 ? (
@@ -230,10 +243,8 @@ function TablesList({
                       title: "DDL copied",
                     });
                   } catch (err) {
-                    await showToast({
-                      style: Toast.Style.Failure,
+                    await showFailureToast(err, {
                       title: "Could not fetch DDL",
-                      message: err instanceof Error ? err.message : String(err),
                     });
                   }
                 }}
@@ -245,12 +256,6 @@ function TablesList({
                   modifiers: ["cmd", "shift"],
                   key: "c",
                 }}
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={revalidate}
               />
             </ActionPanel>
           }

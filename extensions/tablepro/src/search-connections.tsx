@@ -2,12 +2,14 @@ import {
   Action,
   ActionPanel,
   Icon,
+  LaunchType,
   List,
+  launchCommand,
   showToast,
   Toast,
   Clipboard,
 } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { Connection, TableProNotInstalledError } from "./lib/types";
 import { databaseTypeLabel, loadConnections } from "./lib/connections";
 import { tableProInstalled } from "./lib/paths";
@@ -51,6 +53,17 @@ export default function SearchConnections() {
       actions={
         <ActionPanel>
           <Action
+            title="Pair with TablePro"
+            icon={Icon.Key}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            onAction={() =>
+              launchCommand({
+                name: "pair",
+                type: LaunchType.UserInitiated,
+              })
+            }
+          />
+          <Action
             title="Refresh"
             icon={Icon.RotateClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
@@ -73,11 +86,7 @@ export default function SearchConnections() {
           subtitle={pluralize(items.length, "connection", "connections")}
         >
           {items.map((connection) => (
-            <ConnectionRow
-              key={connection.id}
-              connection={connection}
-              onRefresh={revalidate}
-            />
+            <ConnectionRow key={connection.id} connection={connection} />
           ))}
         </List.Section>
       ))}
@@ -85,13 +94,7 @@ export default function SearchConnections() {
   );
 }
 
-function ConnectionRow({
-  connection,
-  onRefresh,
-}: {
-  connection: Connection;
-  onRefresh: () => void;
-}) {
+function ConnectionRow({ connection }: { connection: Connection }) {
   const subtitle = formatSubtitle(connection);
   return (
     <List.Item
@@ -108,10 +111,8 @@ function ConnectionRow({
               try {
                 await openConnectionDeeplink(connection.id);
               } catch (err) {
-                await showToast({
-                  style: Toast.Style.Failure,
+                await showFailureToast(err, {
                   title: "Could not open connection",
-                  message: err instanceof Error ? err.message : String(err),
                 });
               }
             }}
@@ -119,7 +120,7 @@ function ConnectionRow({
           <Action
             title="Copy Deep Link"
             icon={Icon.Link}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
             onAction={async () => {
               await Clipboard.copy(`tablepro://connect/${connection.id}`);
               await showToast({
@@ -132,12 +133,6 @@ function ConnectionRow({
             title="Copy Connection ID"
             content={connection.id}
             shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
-          />
-          <Action
-            title="Refresh"
-            icon={Icon.RotateClockwise}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={onRefresh}
           />
         </ActionPanel>
       }

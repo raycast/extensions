@@ -7,6 +7,7 @@ import {
   launchCommand,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useRef } from "react";
 import { Connection } from "./lib/types";
 import { databaseTypeLabel, loadConnections } from "./lib/connections";
 import { listDatabases, listSchemas } from "./lib/mcp";
@@ -93,12 +94,6 @@ export default function SearchSchema() {
                   })
                 }
               />
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={revalidate}
-              />
             </ActionPanel>
           }
         />
@@ -108,14 +103,17 @@ export default function SearchSchema() {
 }
 
 function DatabasesView({ connection }: { connection: Connection }) {
+  const abortable = useRef<AbortController>();
   const {
     data: databases,
     isLoading,
     error,
     revalidate,
-  } = useCachedPromise((id: string) => listDatabases(id), [connection.id], {
-    keepPreviousData: true,
-  });
+  } = useCachedPromise(
+    (id: string) => listDatabases(id, { signal: abortable.current?.signal }),
+    [connection.id],
+    { keepPreviousData: true, abortable },
+  );
 
   if (error) {
     return (
@@ -130,6 +128,16 @@ function DatabasesView({ connection }: { connection: Connection }) {
       isLoading={isLoading}
       navigationTitle={connection.name}
       searchBarPlaceholder="Filter databases"
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.RotateClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={revalidate}
+          />
+        </ActionPanel>
+      }
     >
       {!isLoading && databases !== undefined && databases.length === 0 ? (
         <List.EmptyView
@@ -162,12 +170,6 @@ function DatabasesView({ connection }: { connection: Connection }) {
                   />
                 }
               />
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={revalidate}
-              />
             </ActionPanel>
           }
         />
@@ -183,15 +185,17 @@ function SchemasView({
   connection: Connection;
   database: string;
 }) {
+  const abortable = useRef<AbortController>();
   const {
     data: schemas,
     isLoading,
     error,
     revalidate,
   } = useCachedPromise(
-    (id: string, db: string) => listSchemas(id, db),
+    (id: string, db: string) =>
+      listSchemas(id, db, { signal: abortable.current?.signal }),
     [connection.id, database],
-    { keepPreviousData: true },
+    { keepPreviousData: true, abortable },
   );
 
   if (error) {
@@ -207,6 +211,16 @@ function SchemasView({
       isLoading={isLoading}
       navigationTitle={`${connection.name} / ${database}`}
       searchBarPlaceholder="Filter schemas"
+      actions={
+        <ActionPanel>
+          <Action
+            title="Refresh"
+            icon={Icon.RotateClockwise}
+            shortcut={{ modifiers: ["cmd"], key: "r" }}
+            onAction={revalidate}
+          />
+        </ActionPanel>
+      }
     >
       {!isLoading && schemas !== undefined && schemas.length === 0 ? (
         <List.EmptyView
@@ -232,12 +246,6 @@ function SchemasView({
                     schema={schema.name}
                   />
                 }
-              />
-              <Action
-                title="Refresh"
-                icon={Icon.RotateClockwise}
-                shortcut={{ modifiers: ["cmd"], key: "r" }}
-                onAction={revalidate}
               />
             </ActionPanel>
           }
