@@ -1,6 +1,6 @@
 # T3 Chat Changelog
 
-## [v1.6.0] - {PR_MERGE_DATE}
+## [v1.6.0] - 2026-05-01
 
 - Added support for latest AI models
 
