@@ -8,4 +8,3 @@
 - **Lossless Status** menu-bar command: live sample rate at-a-glance, refreshes within ~1s of track change via daemon-side deeplink trigger
 - **Uninstall Daemon** command: clean removal of the LaunchAgent and cached data
 - Headless Swift daemon installed as a user LaunchAgent on first run; tails Music.app's MediaToolbox log stream and applies the source format to the default output device via CoreAudio HAL
-- Old Alfred workflow detection with one-click cleanup action

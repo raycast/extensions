@@ -96,7 +96,19 @@ export default function NowPlaying() {
 
     async function loop() {
       if (cancelled) return;
-      await tick();
+      try {
+        await tick();
+      } catch (err) {
+        if (!cancelled) {
+          setLoading(false);
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Refresh failed",
+            message: (err as Error).message,
+          });
+        }
+        return;
+      }
       if (cancelled) return;
       timer = setTimeout(loop, POLL_MS);
     }

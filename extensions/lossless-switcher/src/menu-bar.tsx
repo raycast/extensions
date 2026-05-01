@@ -33,31 +33,37 @@ export default function MenuBar() {
     let cancelled = false;
     (async () => {
       try {
-        await ensureInstalled();
-      } catch {
-        // tolerate — show offline state
-      }
-      const [music, np, daemon, current] = await Promise.all([
-        fetchMusicState(),
-        readNowPlaying(NOWPLAYING_PATH),
-        daemonStatus(),
-        getCurrentFormat(),
-      ]);
-      if (cancelled) return;
-      const playing = music.state === "playing" || music.state === "paused";
-      const title =
-        playing && np?.sampleRate
-          ? rateLabel(np.sampleRate)
+        try {
+          await ensureInstalled();
+        } catch {
+          // tolerate — show offline state
+        }
+        const [music, np, daemon, current] = await Promise.all([
+          fetchMusicState(),
+          readNowPlaying(NOWPLAYING_PATH),
+          daemonStatus(),
+          getCurrentFormat(),
+        ]);
+        if (cancelled) return;
+        const playing = music.state === "playing" || music.state === "paused";
+        const title =
+          playing && np?.sampleRate
+            ? rateLabel(np.sampleRate)
+            : current
+              ? (current.label.split(" · ")[1] ?? "")
+              : "";
+        const subtitle = playing
+          ? resolveFormatLine(music, np)
           : current
-            ? (current.label.split(" · ")[1] ?? "")
-            : "";
-      const subtitle = playing
-        ? resolveFormatLine(music, np)
-        : current
-          ? current.label
-          : "Idle";
-      setVm({ title, subtitle, music, np, daemon, current });
-      setIsLoading(false);
+            ? current.label
+            : "Idle";
+        setVm({ title, subtitle, music, np, daemon, current });
+      } catch {
+        // Any failure in the parallel fetch — keep the cached title visible
+        // and let the next interval try again.
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
     })();
     return () => {
       cancelled = true;
