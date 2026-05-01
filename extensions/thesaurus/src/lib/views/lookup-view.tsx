@@ -24,7 +24,7 @@ const tagColor = (word: { strength: number }) => {
 
 const copyWord = async (word: string) => {
   await Clipboard.copy(word);
-  await showToast({ style: Toast.Style.Success, title: "Copied to Clipboard" });
+  await showToast({ style: Toast.Style.Success, title: "Copied to Clipboard", message: word });
 };
 
 const LookUpContent = ({ word }: { word: string }) => {
