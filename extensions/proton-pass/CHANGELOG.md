@@ -1,6 +1,6 @@
 # proton-pass Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-05-01
 
 - Fix: Search Items command could show results from only one vault when "All Vaults" was selected (vault share_id now used as fallback during item normalization)
 - Add optional background refresh preference to control cache refresh behavior
