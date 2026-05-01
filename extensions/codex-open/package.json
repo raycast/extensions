@@ -12,6 +12,7 @@
       "title": "Open Project in Codex",
       "subtitle": "Project Manager",
       "description": "Search VS Code Project Manager projects and open them in Codex",
+      "icon": "command-icon.png",
       "mode": "view"
     }
   ],

@@ -244,15 +244,6 @@ function ProjectListItem({ item, updateFrecency }: { item: ProjectEntry; updateF
               runCodexOpen([rootPath], `Opening ${name} in Codex`);
             }}
           />
-          <Action
-            title="Open All Worktrees in Codex"
-            icon={Icon.Folder}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-            onAction={() => {
-              updateFrecency.visitItem(item);
-              runCodexOpen(["--all", rootPath], `Opening worktrees for ${name}`);
-            }}
-          />
           <Action.ShowInFinder path={rootPath} />
           <Action.CopyToClipboard title="Copy Path" content={rootPath} />
           <Action
