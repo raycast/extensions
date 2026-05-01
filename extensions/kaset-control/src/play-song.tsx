@@ -60,21 +60,13 @@ export default function PlaySong() {
           }
         />
       ) : (
-        songs.map((song) => (
-          <SongItem key={song.id} song={song} onPlayed={revalidate} />
-        ))
+        songs.map((song) => <SongItem key={song.id} song={song} />)
       )}
     </List>
   );
 }
 
-function SongItem({
-  song,
-  onPlayed,
-}: {
-  song: SearchSong;
-  onPlayed: () => Promise<unknown>;
-}) {
+function SongItem({ song }: { song: SearchSong }) {
   const subtitle = [song.artist, song.album].filter(Boolean).join(" • ");
 
   return (
@@ -88,10 +80,7 @@ function SongItem({
           <Action
             title="Play Song"
             icon={Icon.Play}
-            onAction={async () => {
-              await playVideo(song.id);
-              await onPlayed();
-            }}
+            onAction={async () => await playVideo(song.id)}
           />
           <Action.CopyToClipboard
             title="Copy Video Id"

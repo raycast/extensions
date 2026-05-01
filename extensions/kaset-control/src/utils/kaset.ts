@@ -38,7 +38,10 @@ export interface SearchSong {
 }
 
 const YTM_BASE_URL = "https://music.youtube.com/youtubei/v1";
+// Public YouTube Music web client key (not user-secret). This may rotate.
 const YTM_API_KEY = "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30";
+// WEB_REMIX client version used by youtubei search requests. This may rotate.
+const YTM_CLIENT_VERSION = "1.20231204.01.00";
 
 // Check if Kaset is running
 export async function isKasetRunning(): Promise<boolean> {
@@ -310,7 +313,7 @@ export async function searchSongs(query: string): Promise<SearchSong[]> {
           context: {
             client: {
               clientName: "WEB_REMIX",
-              clientVersion: "1.20231204.01.00",
+              clientVersion: YTM_CLIENT_VERSION,
               hl: "en",
               gl: "US",
             },
@@ -329,6 +332,11 @@ export async function searchSongs(query: string): Promise<SearchSong[]> {
     return extractSongsFromSearchResponse(json);
   } catch (error) {
     console.error("YouTube Music search failed:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Search temporarily unavailable",
+      message: "YouTube Music search request failed. Please try again.",
+    });
     return [];
   }
 }
