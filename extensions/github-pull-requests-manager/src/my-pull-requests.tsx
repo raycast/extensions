@@ -1,6 +1,6 @@
 import { List, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { fetchMyPRsCategorized } from "./github/my-prs";
 import { fetchReviewRequestsCategorized } from "./github/reviewing";
 import { PullRequestItem } from "./components/PullRequestItem";
@@ -27,9 +27,9 @@ export default function Command() {
   const isLoading = l1 || l2;
   const error = e1 ?? e2;
 
-  if (error) {
-    showToast({ style: Toast.Style.Failure, title: "Failed to load pull requests", message: error.message });
-  }
+  useEffect(() => {
+    if (error) showToast({ style: Toast.Style.Failure, title: "Failed to load pull requests", message: error.message });
+  }, [error]);
 
   const prefs = { githubEnterpriseUrl, githubToken };
   const toggleDetail = () => setIsShowingDetail((s) => !s);
