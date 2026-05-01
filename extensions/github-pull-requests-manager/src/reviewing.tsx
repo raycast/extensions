@@ -3,10 +3,9 @@ import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { fetchReviewRequestsCategorized } from "./github/reviewing";
 import { PullRequestItem } from "./components/PullRequestItem";
-import { Preferences } from "./components/types";
 
 export default function Command() {
-  const { githubEnterpriseUrl, githubToken } = getPreferenceValues<Preferences>();
+  const { githubEnterpriseUrl, githubToken } = getPreferenceValues();
   const [isShowingDetail, setIsShowingDetail] = useState(false);
 
   const {

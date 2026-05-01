@@ -1,7 +1,5 @@
 import { GitHubUser } from "./types/pr";
 
-const loginCache = new Map<string, string>();
-
 export function getApiUrl(baseUrl: string): string {
   const url = baseUrl.replace(/\/$/, "");
   if (url === "https://github.com" || url === "http://github.com") {
@@ -11,10 +9,6 @@ export function getApiUrl(baseUrl: string): string {
 }
 
 export async function getAuthenticatedUser(baseUrl: string, token: string): Promise<string> {
-  const key = `${baseUrl}::${token}`;
-  const cached = loginCache.get(key);
-  if (cached) return cached;
-
   const apiUrl = getApiUrl(baseUrl);
   const response = await fetch(`${apiUrl}/user`, {
     headers: {
@@ -29,6 +23,5 @@ export async function getAuthenticatedUser(baseUrl: string, token: string): Prom
   }
 
   const user = (await response.json()) as GitHubUser;
-  loginCache.set(key, user.login);
   return user.login;
 }

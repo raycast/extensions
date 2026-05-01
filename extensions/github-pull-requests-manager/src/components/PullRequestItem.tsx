@@ -8,10 +8,9 @@ import { MyReviewActivity } from "../github/types/reviews";
 import { getListAccessories } from "./utils/accessories";
 import { PRDetail } from "./PRDetail";
 import { RequestChangesForm } from "./RequestChangesForm";
-import { Preferences, Category } from "./types";
+import { Category } from "./types";
 
-// Re-export so consumers only need to import from components/
-export type { Preferences, Category };
+export type { Category };
 
 export function PullRequestItem({
   pr,

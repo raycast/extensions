@@ -4,10 +4,9 @@ import { useState } from "react";
 import { fetchMyPRsCategorized } from "./github/my-prs";
 import { fetchReviewRequestsCategorized } from "./github/reviewing";
 import { PullRequestItem } from "./components/PullRequestItem";
-import { Preferences } from "./components/types";
 
 export default function Command() {
-  const { githubEnterpriseUrl, githubToken, filterLabel } = getPreferenceValues<Preferences>();
+  const { githubEnterpriseUrl, githubToken, filterLabel } = getPreferenceValues();
   const args = [githubEnterpriseUrl, githubToken, filterLabel] as const;
   const [isShowingDetail, setIsShowingDetail] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -120,7 +119,7 @@ export default function Command() {
             <PullRequestItem
               key={pr.id}
               pr={pr}
-              category="wait-for-review"
+              category="parked"
               onRevalidate={revalidate}
               preferences={prefs}
               onToggleDetail={toggleDetail}

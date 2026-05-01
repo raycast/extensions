@@ -1,7 +1,6 @@
 import { ActionPanel, Action, Form, showToast, Toast, useNavigation } from "@raycast/api";
 import { requestChanges } from "../github/actions";
 import { PullRequest } from "../github/types/pr";
-import { Preferences } from "./types";
 
 export function RequestChangesForm({
   pr,
