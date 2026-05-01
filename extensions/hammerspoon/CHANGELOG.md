@@ -1,6 +1,6 @@
 # Hammerspoon Changelog
 
-## [New Command] - {PR_MERGE_DATE}
+## [New Command] - 2026-05-01
 
 - add `List Scripts` command to trigger user defined hammerspoon scripts.
 
