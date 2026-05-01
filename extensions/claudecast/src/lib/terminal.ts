@@ -112,9 +112,10 @@ async function openInTerminalApp(
     // Write command to a temp .command file and open it with Terminal.
     // 'open -a Terminal file.command' always spawns a fresh window.
     const tempFile = join(tmpdir(), `claudecast-${Date.now()}.command`);
+    const escapedCwdForBash = cwd.replace(/"/g, '\\"');
     writeFileSync(
       tempFile,
-      `#!/bin/bash\ncd "${cwd}"\nrm -f "${tempFile}"\n${command}\n`,
+      `#!/bin/bash\ncd "${escapedCwdForBash}"\nrm -f "${tempFile}"\n${command}\n`,
       { mode: 0o755 },
     );
     await execFilePromise("open", ["-a", "Terminal", tempFile]);
@@ -180,25 +181,33 @@ async function openInKitty(
   cwd: string,
   openIn: OpenIn,
 ): Promise<void> {
+  // Real tabs require kitty's remote-control API, which the user must
+  // opt into by adding `allow_remote_control yes` and a `listen_on` socket
+  // to ~/.config/kitty/kitty.conf. If that's not configured, fall back
+  // to opening a new OS window.
   if (openIn === "tab") {
-    // Open a new tab in the existing kitty instance
-    await execFilePromise("kitty", [
-      "--single-instance",
-      "--",
-      "sh",
-      "-c",
-      `cd "${cwd}" && ${command}`,
-    ]);
-  } else {
-    // Open a new kitty window (new OS window)
-    await execFilePromise("kitty", [
-      `--directory=${cwd}`,
-      "-e",
-      "sh",
-      "-c",
-      command,
-    ]);
+    try {
+      await execFilePromise("kitten", [
+        "@",
+        "launch",
+        "--type=tab",
+        `--cwd=${cwd}`,
+        "sh",
+        "-c",
+        command,
+      ]);
+      return;
+    } catch {
+      // Remote control not configured — fall through to window mode
+    }
   }
+  await execFilePromise("kitty", [
+    `--directory=${cwd}`,
+    "-e",
+    "sh",
+    "-c",
+    command,
+  ]);
 }
 
 async function openInGhostty(
