@@ -10,7 +10,8 @@
     "effektsvk",
     "wxiaoyun",
     "lukrencijus",
-    "ridemountainpig"
+    "ridemountainpig",
+    "ajjpostma"
   ],
   "categories": [
     "Productivity",
@@ -90,12 +91,24 @@
               "value": "claude-4.5-opus"
             },
             {
+              "title": "Claude Opus 4.6",
+              "value": "claude-4.6-opus"
+            },
+            {
+              "title": "Claude Opus 4.7",
+              "value": "claude-4.7-opus"
+            },
+            {
               "title": "Claude Sonnet 4.5",
               "value": "claude-4.5-sonnet"
             },
             {
               "title": "Claude Sonnet 4.5 (Reasoning)",
               "value": "claude-4.5-sonnet-reasoning"
+            },
+            {
+              "title": "Claude Sonnet 4.6",
+              "value": "claude-4.6-sonnet"
             },
             {
               "title": "DeepSeek R1 (0528)",
@@ -178,12 +191,24 @@
               "value": "gemini-3-pro"
             },
             {
+              "title": "Gemini 3.1 Flash Lite",
+              "value": "gemini-3.1-flash-lite"
+            },
+            {
+              "title": "Gemini 3.1 Pro",
+              "value": "gemini-3.1-pro"
+            },
+            {
               "title": "Gemini Imagen 4",
               "value": "gemini-imagen-4"
             },
             {
               "title": "Gemini Imagen 4 Ultra",
               "value": "gemini-imagen-4-ultra"
+            },
+            {
+              "title": "Gemma 4 26B A4B",
+              "value": "gemma-4-26b-a4b-it"
             },
             {
               "title": "GLM 4.5",
@@ -230,12 +255,28 @@
               "value": "glm-4.7-thinking"
             },
             {
+              "title": "GLM 5",
+              "value": "glm-5"
+            },
+            {
+              "title": "GLM 5.1",
+              "value": "glm-5.1"
+            },
+            {
+              "title": "GLM 5V Turbo",
+              "value": "glm-5v-turbo"
+            },
+            {
               "title": "GPT ImageGen",
               "value": "gpt-image-1"
             },
             {
               "title": "GPT ImageGen 1.5",
               "value": "gpt-image-1.5"
+            },
+            {
+              "title": "GPT ImageGen 2",
+              "value": "gpt-image-2"
             },
             {
               "title": "GPT OSS 120B",
@@ -298,6 +339,30 @@
               "value": "gpt-5.2-pro"
             },
             {
+              "title": "GPT-5.3",
+              "value": "gpt-5.3"
+            },
+            {
+              "title": "GPT-5.4",
+              "value": "gpt-5.4"
+            },
+            {
+              "title": "GPT-5.4 mini",
+              "value": "gpt-5.4-mini"
+            },
+            {
+              "title": "GPT-5.4 nano",
+              "value": "gpt-5.4-nano"
+            },
+            {
+              "title": "GPT-5.5",
+              "value": "gpt-5.5"
+            },
+            {
+              "title": "GPT-5.5 Pro",
+              "value": "gpt-5.5-pro"
+            },
+            {
               "title": "Grok 3",
               "value": "grok-v3"
             },
@@ -326,6 +391,10 @@
               "value": "grok-4.1-fast-reasoning"
             },
             {
+              "title": "Grok 4.20",
+              "value": "grok-4.20"
+            },
+            {
               "title": "Kimi K2 (0711)",
               "value": "kimi-k2"
             },
@@ -336,6 +405,18 @@
             {
               "title": "Kimi K2 (Thinking)",
               "value": "kimi-k2-thinking"
+            },
+            {
+              "title": "Kimi K2.5",
+              "value": "kimi-k2.5"
+            },
+            {
+              "title": "Kimi K2.6",
+              "value": "kimi-k2.6"
+            },
+            {
+              "title": "Ling 2.6 Flash",
+              "value": "ling-2.6-flash"
             },
             {
               "title": "Llama 3.3 70B",
@@ -350,12 +431,40 @@
               "value": "llama-4-scout"
             },
             {
+              "title": "MiMo v2 Flash",
+              "value": "mimo-v2-flash"
+            },
+            {
+              "title": "MiMo v2 Omni",
+              "value": "mimo-v2-omni"
+            },
+            {
+              "title": "MiMo v2 Pro",
+              "value": "mimo-v2-pro"
+            },
+            {
+              "title": "MiMo v2.5",
+              "value": "mimo-v2.5"
+            },
+            {
+              "title": "MiMo v2.5 Pro",
+              "value": "mimo-v2.5-pro"
+            },
+            {
               "title": "MiniMax M2",
               "value": "minimax-m2"
             },
             {
               "title": "MiniMax M2.1",
               "value": "minimax-m2.1"
+            },
+            {
+              "title": "MiniMax M2.5",
+              "value": "minimax-m2.5"
+            },
+            {
+              "title": "MiniMax M2.7",
+              "value": "minimax-m2.7"
             },
             {
               "title": "Nano Banana",

@@ -1,5 +1,27 @@
 # Todoist Changelog
 
+## [Fix filter task freshness and recurrence reminder guard] - 2026-05-01
+
+- **Filter task typing + freshness**: Typed filter sections in `FilterTasks` and resolve each displayed task against the latest cached item by id, preventing stale task state in filter views after updates.
+- **Filter project accessory**: Tasks shown in filter views now include the project/section accessory tag (like Today view), making project context visible directly in filter results.
+- **Recurrence update correctness**: In task actions, repeat updates now build from the latest cached task snapshot when available, reducing stale due payload issues.
+- **Hourly reminder safety**: The follow-up "at time of task" reminder check for hourly recurrence now runs only when the synced task due value is a datetime (contains time), avoiding incorrect reminder handling for all-day dates.
+- **Update callback context**: Extended the `updateTask` sync callback context to include `updatedTask`, allowing post-update logic to use the server-synced task shape safely.
+
+## [Scheduling, repeat options, and sync reliability] - 2026-04-30
+
+- **Set Repeat** in task actions: presets plus search (e.g. `every 2 days`), and an option to clear repeat.
+- **Pick date**: when you set a **due time** (not an all-day date), the extension can add Todoist’s **“at time of task”** relative reminder if you don’t already have one; **hourly** repeat rules get the same treatment.
+- **Accurate list after edits**: Todoist sync results merge onto the **latest** cached data so chained updates (e.g. due then reminder) don’t leave wrong or missing icons until you restart.
+- **Clear due date**: clearing the due date also applies **reminder** changes from the server so the alarm accessory matches Todoist.
+- **Complete recurring tasks**: completing uses the sync response so the **next occurrence** appears instead of the task vanishing until a full reload.
+- **Task details**: shows **Repeat** details when the task is recurring.
+
+## [Fix group and sort actions in filter views] - 2026-04-27
+
+- In **My Tasks**, when a custom Todoist filter is selected, **Group tasks by** and **Sort tasks by** now update the list (they were previously no-ops because the UI ignored grouped/sorted output for filters).
+- Filters whose query is comma-separated (multiple sub-queries) still show one section per sub-query when **Group tasks by** is **Default**; sort order applies within that layout.
+
 ## [Show deadline as how many days remains] - 2026-03-31
 - The task deadlines are shown as "in X days" instead of a specific date, like the todoist app.
 

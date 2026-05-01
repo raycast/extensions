@@ -1,16 +1,17 @@
-import { getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
+import { getGithubToken } from "../preferences";
 import { type Skill } from "../shared";
 
 export type RepoStats = {
   stars?: number;
+  pushedAt?: string;
   rateLimited?: boolean;
 };
 
 async function fetchRepoStats(source: string): Promise<RepoStats | undefined> {
   try {
-    const { githubToken } = getPreferenceValues<{ githubToken?: string }>();
+    const githubToken = getGithubToken();
     const headers: Record<string, string> = { Accept: "application/vnd.github+json" };
     if (githubToken) {
       headers["Authorization"] = `Bearer ${githubToken}`;
@@ -21,8 +22,8 @@ async function fetchRepoStats(source: string): Promise<RepoStats | undefined> {
       return { rateLimited: true };
     }
     if (!response.ok) return undefined;
-    const data = (await response.json()) as { stargazers_count: number };
-    return { stars: data.stargazers_count };
+    const data = (await response.json()) as { stargazers_count: number; pushed_at?: string };
+    return { stars: data.stargazers_count, pushedAt: data.pushed_at };
   } catch {
     return undefined;
   }

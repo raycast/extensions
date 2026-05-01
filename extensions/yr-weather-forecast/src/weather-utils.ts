@@ -1,9 +1,10 @@
 import type { TimeseriesEntry } from "./weather-client";
 import { precipitationAmount, symbolCode } from "./utils-forecast";
-import { formatPrecip, formatTemperatureCelsius, formatWindSpeed } from "./units";
+import { formatPrecip, formatWindSpeed } from "./units";
 import { symbolToEmoji } from "./utils/weather-symbols";
 import { formatDate, formatTime as formatTimeUtil, getPeriodName } from "./utils/date-utils";
-import { getUIThresholds } from "./config/weather-config";
+import { UI_THRESHOLDS } from "./config/weather-config";
+import { TemperatureFormatter } from "./utils/weather-formatters";
 
 /**
  * Convert wind direction degrees to compass direction with arrow
@@ -17,26 +18,51 @@ export function directionFromDegrees(degrees: number): { arrow: string; name: st
 }
 
 /**
- * Format temperature from TimeseriesEntry
- */
-export function formatTemp(ts: TimeseriesEntry | undefined): string | undefined {
-  if (!ts) return undefined;
-  const details = ts?.data?.instant?.details ?? {};
-  return formatTemperatureCelsius(details.air_temperature);
-}
-
-/**
- * Filter forecast series to a specific date
+ * Filter forecast series to a specific date with extended context
+ * Handles timezone conversion between local date and UTC API data
+ * Includes the last data point of the previous day and first data point of the next day
+ * for a more complete visualization
  */
 export function filterToDate(series: TimeseriesEntry[], targetDate: Date): TimeseriesEntry[] {
-  const target = new Date(targetDate);
-  target.setHours(0, 0, 0, 0);
-  return series.filter((s) => {
+  // Coherent strategy:
+  // - interpret the user's requested date in LOCAL time
+  // - compare API timestamps by converting them to Date objects (which render in local time)
+  // - avoid manual timezone offset math (error-prone around DST)
+  const startLocal = new Date(targetDate);
+  startLocal.setHours(0, 0, 0, 0);
+
+  const endLocal = new Date(startLocal);
+  endLocal.setDate(endLocal.getDate() + 1);
+
+  const prevStartLocal = new Date(startLocal);
+  prevStartLocal.setDate(prevStartLocal.getDate() - 1);
+
+  const nextEndLocal = new Date(endLocal);
+  nextEndLocal.setDate(nextEndLocal.getDate() + 1);
+
+  const targetDayData = series.filter((s) => {
     const d = new Date(s.time);
-    const local = new Date(d);
-    local.setHours(0, 0, 0, 0);
-    return local.getTime() === target.getTime();
+    return d >= startLocal && d < endLocal;
   });
+
+  const previousDayData = series.filter((s) => {
+    const d = new Date(s.time);
+    return d >= prevStartLocal && d < startLocal;
+  });
+  const lastPreviousDay = previousDayData.length > 0 ? previousDayData[previousDayData.length - 1] : null;
+
+  const nextDayData = series.filter((s) => {
+    const d = new Date(s.time);
+    return d >= endLocal && d < nextEndLocal;
+  });
+  const firstNextDay = nextDayData.length > 0 ? nextDayData[0] : null;
+
+  const result: TimeseriesEntry[] = [];
+  if (lastPreviousDay) result.push(lastPreviousDay);
+  result.push(...targetDayData);
+  if (firstNextDay) result.push(firstNextDay);
+
+  return result;
 }
 
 /**
@@ -79,7 +105,7 @@ export function reduceToDayPeriods(series: TimeseriesEntry[], maxDays: number): 
     const byHour: Record<number, TimeseriesEntry> = {};
     for (const ts of entries) byHour[new Date(ts.time).getHours()] = ts;
     // Target representative hours: 03, 09, 15, 21
-    const targets = getUIThresholds().REPRESENTATIVE_HOURS;
+    const targets = UI_THRESHOLDS.REPRESENTATIVE_HOURS;
     for (const target of targets) {
       let chosen: TimeseriesEntry | undefined = undefined;
       for (let delta = 0; delta <= 2 && !chosen; delta++) {
@@ -107,12 +133,17 @@ export function buildWeatherTable(
 
   if (series.length === 0) return "_No data available_";
 
-  const sortedSeries = series.sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
+  const sortedSeries = [...series].sort((a, b) => new Date(a.time).getTime() - new Date(b.time).getTime());
 
   // Default columns
-  const defaultColumns = showPeriod
-    ? ["Period", "Weather", "Temp", "Wind", "Dir", "Precip"]
-    : ["Time", "Weather", "Temp", "Wind", "Dir", "Precip"];
+  const defaultColumns = [
+    showPeriod ? "Period" : "Time",
+    "Weather",
+    "Temp",
+    "Wind",
+    ...(showDirection ? ["Dir"] : []),
+    "Precip",
+  ];
 
   const finalColumns = columns || defaultColumns;
   const finalHeaders = headers || finalColumns;
@@ -134,7 +165,7 @@ export function buildWeatherTable(
     parts.push(emoji);
 
     // Temperature column
-    parts.push(formatTemp(ts) ?? "");
+    parts.push(TemperatureFormatter.format(ts) ?? "");
 
     // Wind column
     const details = ts?.data?.instant?.details ?? {};

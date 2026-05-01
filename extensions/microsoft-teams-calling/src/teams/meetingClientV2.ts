@@ -25,6 +25,7 @@ const manufacturer = "Sven Wiegand";
 const device = "Raycast";
 const app = "Raycast";
 const appVersion = "1.0.0";
+const tokenRefreshTimeoutMs = 5000;
 
 type MeetingActionV2 =
   | ToggleMuteAction
@@ -76,6 +77,9 @@ export class MeetingClientV2 implements MeetingClient {
   private ws: WebSocket | undefined;
   private readonly updateMessageDeferred: Deferred<UpdateMessage>[] = [];
   private readonly messageCallback: ((msg: UpdateMessage) => void) | undefined;
+  private tokenRefreshDeferred = new Deferred<void>();
+  private tokenSave: Promise<void> = Promise.resolve();
+  private connectedWithToken = false;
   private lastCommandFinished = false;
   private lastUpdate = {} as UpdateMessage;
 
@@ -94,16 +98,18 @@ export class MeetingClientV2 implements MeetingClient {
   }
 
   private connectWS(token: string | undefined, props: MeetingClientProps) {
-    const queryParams = {
+    this.connectedWithToken = Boolean(token);
+    const queryParams = new URLSearchParams({
       "protocol-version": apiVersion,
       manufacturer,
       device,
       app,
       "app-version": appVersion,
-    };
-    const paramNames = Object.keys(queryParams) as (keyof typeof queryParams)[];
-    const params = paramNames.map((key) => `${key}=${encodeURI(queryParams[key])}`).join("&");
-    const url = `ws://${host}:${port}?${token ? "token=" + token : ""}&${params}`;
+    });
+    if (token) {
+      queryParams.set("token", token);
+    }
+    const url = `ws://${host}:${port}?${queryParams.toString()}`;
 
     console.debug(`Connecting to ${url} …`);
     this.ws = new WebSocket(url);
@@ -140,7 +146,9 @@ export class MeetingClientV2 implements MeetingClient {
       this.messageCallback?.(statusMessageV1);
     } else if (this.isTokenRefreshMessage(msg)) {
       console.debug("Refresh token message. Updating local storage.");
-      setToken(msg.tokenRefresh);
+      this.tokenSave = setToken(msg.tokenRefresh);
+      this.connectedWithToken = true;
+      this.tokenRefreshDeferred.resolve();
     } else if (this.isResponseMessage(msg)) {
       if (msg.requestId === 0) {
         // only for responses to our requests
@@ -200,7 +208,23 @@ export class MeetingClientV2 implements MeetingClient {
     const deferredUpdateMessage = new Deferred<UpdateMessage>();
     this.updateMessageDeferred.push(deferredUpdateMessage);
     this.sendAction(action);
-    return deferredUpdateMessage.promise;
+    const updateMessage = await deferredUpdateMessage.promise;
+    await this.waitForTokenRefreshIfPairing(updateMessage);
+    return updateMessage;
+  }
+
+  private async waitForTokenRefreshIfPairing(updateMessage: UpdateMessage) {
+    const mightBePairing = !this.connectedWithToken || updateMessage.meetingUpdate.meetingPermissions.canPair;
+    if (!mightBePairing) {
+      await this.tokenSave;
+      return;
+    }
+
+    await Promise.race([
+      this.tokenRefreshDeferred.promise,
+      new Promise<void>((resolve) => setTimeout(resolve, tokenRefreshTimeoutMs)),
+    ]);
+    await this.tokenSave;
   }
 
   public async requestMeetingState(): Promise<UpdateMessage> {

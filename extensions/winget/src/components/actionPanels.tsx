@@ -37,15 +37,22 @@ export function SearchActionPanel({
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        <Action.Push
+          title="View Details"
+          target={<PackageDetailView packageId={pkg.id} packageName={pkg.name} source={pkg.source} />}
+        />
         {isInstalled ? (
           <Action
             title="Uninstall"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={async () => {
               const success = await wingetUninstall(pkg.id);
-              if (success) onUninstalled?.(pkg.id);
-              onClearSearch?.();
+              if (success) {
+                onUninstalled?.(pkg.id);
+                onClearSearch?.();
+              }
               await refreshWithFeedback(onRefresh);
             }}
           />
@@ -53,13 +60,13 @@ export function SearchActionPanel({
           <Action
             title="Install"
             icon={Icon.Download}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={async () => {
-              await wingetInstall(pkg.id);
-              if (!runInBackground()) await refreshWithFeedback(onRefresh);
+              const success = await wingetInstall(pkg.id);
+              if (success && !runInBackground()) await onRefresh?.();
             }}
           />
         )}
-        <Action.Push title="View Details" target={<PackageDetailView packageId={pkg.id} />} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
@@ -86,28 +93,53 @@ export function InstalledActionPanel({ pkg, onRefresh, onClearSearch, onUninstal
   return (
     <ActionPanel>
       <ActionPanel.Section>
-        {pkg.available && (
+        {pkg.id && (
+          <Action.Push
+            title="View Details"
+            target={<PackageDetailView packageId={pkg.id} packageName={pkg.name} source={pkg.source} />}
+          />
+        )}
+        {pkg.available ? (
           <Action
             title={`Upgrade to ${pkg.available}`}
             icon={Icon.ArrowUp}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={async () => {
-              await wingetUpgrade(pkg.id);
-              if (!runInBackground()) await refreshWithFeedback(onRefresh);
+              const success = await wingetUpgrade(pkg.id);
+              if (success && !runInBackground()) await onRefresh?.();
+            }}
+          />
+        ) : (
+          <Action
+            title="Uninstall"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            onAction={async () => {
+              const success = await wingetUninstall(pkg.id);
+              if (success) {
+                onUninstalled?.(pkg.id);
+                onClearSearch?.();
+              }
+              await refreshWithFeedback(onRefresh);
             }}
           />
         )}
-        {pkg.id && <Action.Push title="View Details" target={<PackageDetailView packageId={pkg.id} />} />}
-        <Action
-          title="Uninstall"
-          icon={Icon.Trash}
-          style={Action.Style.Destructive}
-          onAction={async () => {
-            const success = await wingetUninstall(pkg.id);
-            if (success) onUninstalled?.(pkg.id);
-            onClearSearch?.();
-            await refreshWithFeedback(onRefresh);
-          }}
-        />
+        {pkg.available && (
+          <Action
+            title="Uninstall"
+            icon={Icon.Trash}
+            style={Action.Style.Destructive}
+            onAction={async () => {
+              const success = await wingetUninstall(pkg.id);
+              if (success) {
+                onUninstalled?.(pkg.id);
+                onClearSearch?.();
+              }
+              await refreshWithFeedback(onRefresh);
+            }}
+          />
+        )}
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action
@@ -135,12 +167,17 @@ export function UpgradeActionPanel({ pkg, totalOutdated, onRefresh }: UpgradeAct
   return (
     <ActionPanel>
       <ActionPanel.Section>
+        <Action.Push
+          title="View Details"
+          target={<PackageDetailView packageId={pkg.id} packageName={pkg.name} source={pkg.source} />}
+        />
         <Action
           title={`Upgrade to ${pkg.available}`}
           icon={Icon.ArrowUp}
+          shortcut={{ modifiers: ["cmd"], key: "return" }}
           onAction={async () => {
-            await wingetUpgrade(pkg.id);
-            if (!runInBackground()) await refreshWithFeedback(onRefresh);
+            const success = await wingetUpgrade(pkg.id);
+            if (success && !runInBackground()) await onRefresh?.();
           }}
         />
         {totalOutdated > 1 && (
@@ -148,12 +185,11 @@ export function UpgradeActionPanel({ pkg, totalOutdated, onRefresh }: UpgradeAct
             title={`Upgrade All (${totalOutdated} packages)`}
             icon={Icon.ArrowUp}
             onAction={async () => {
-              await wingetUpgrade();
-              if (!runInBackground()) await refreshWithFeedback(onRefresh);
+              const success = await wingetUpgrade();
+              if (success && !runInBackground()) await onRefresh?.();
             }}
           />
         )}
-        <Action.Push title="View Details" target={<PackageDetailView packageId={pkg.id} />} />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <Action

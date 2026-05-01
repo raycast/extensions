@@ -7,7 +7,7 @@ Track usage across your AI coding agents in one place.
 
 ## Features
 
-- **Multi-Agent Support** - View usage for Amp, Claude, Codex, Copilot, Droid, Gemini, Kimi, Antigravity, Synthetic, and z.ai (GLM)
+- **Multi-Agent Support** - View usage for Amp, Claude, Codex, Copilot, Droid, Gemini, Kimi, Antigravity, MiniMax, Synthetic, and z.ai (GLM)
 - **Multi-Account Support** - Manage multiple API keys per provider with named accounts ("Work", "Personal", etc.)
 - **Quick Overview** - See remaining quotas and usage at a glance with ASCII progress bars
 - **Detailed Breakdown** - Expand each agent for full usage details
@@ -19,18 +19,19 @@ Track usage across your AI coding agents in one place.
 
 ## Supported Agents
 
-| Agent           | Data Source               | Manual Key | OpenCode | Env Var | Multi-Account | Setup                                                                                   |
-| --------------- | ------------------------- | :--------: | :------: | :-----: | :-----------: | --------------------------------------------------------------------------------------- |
-| **Amp**         | Local SQLite database     |     —      |    —     |    —    |       —       | Auto-detected from local database                                                       |
-| **Claude**      | Anthropic OAuth Usage API |     —      |    ✓     |    —    |       —       | Auto-detected after `claude` login                                                      |
-| **Codex**       | OpenAI API                |     ✓      |    —     |    —    |       ✓       | Run `codex login`, or paste token in preferences                                        |
-| **Copilot**     | GitHub Copilot internal API |    —      |    —     |    ✓    |       —       | Auto-detected from `GH_TOKEN`/`GITHUB_TOKEN`, or paste token in preferences             |
-| **Droid**       | Factory AI API            |     —      |    —     |    —    |       —       | Run `droid` command to login                                                            |
-| **Gemini**      | Local state file          |     —      |    —     |    —    |       —       | Auto-detected from local state                                                          |
-| **Kimi**        | Moonshot API              |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `kimi-for-coding`, or paste token from https://www.kimi.com/code/console   |
-| **Antigravity** | Google API                |     —      |    —     |    —    |       —       | Auto-detected from local API                                                            |
-| **Synthetic**   | Synthetic API             |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `synthetic`, or paste API key from https://synthetic.new/billing           |
-| **z.ai (GLM)**  | Zhipu API                 |     ✓      |    ✓     |    ✓    |       ✓       | Paste token, use OpenCode `zai-coding-plan`, or set `ZAI_API_KEY`/`GLM_API_KEY` env var |
+| Agent           | Data Source               | Manual Key | OpenCode | Env Var | Multi-Account | Setup                                                                                            |
+| --------------- | ------------------------- | :--------: | :------: | :-----: | :-----------: | ------------------------------------------------------------------------------------------------ |
+| **Amp**         | Local SQLite database     |     —      |    —     |    —    |       —       | Auto-detected from local database                                                                |
+| **Claude**      | Anthropic OAuth Usage API |     —      |    ✓     |    —    |       —       | Auto-detected after `claude` login                                                               |
+| **Codex**       | OpenAI API                |     ✓      |    —     |    —    |       ✓       | Run `codex login`, or paste token in preferences                                                 |
+| **Copilot**     | GitHub Copilot internal API |    —      |    —     |    ✓    |       —       | Auto-detected from `GH_TOKEN`/`GITHUB_TOKEN`, or paste token in preferences                     |
+| **Droid**       | Factory AI API            |     —      |    —     |    —    |       —       | Run `droid` command to login                                                                     |
+| **Gemini**      | Local state file          |     —      |    —     |    —    |       —       | Auto-detected from local state                                                                   |
+| **Kimi**        | Moonshot API              |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `kimi-for-coding`, or paste token from https://www.kimi.com/code/console            |
+| **Antigravity** | Google API                |     —      |    —     |    —    |       —       | Auto-detected from local API                                                                     |
+| **Synthetic**   | Synthetic API             |     ✓      |    ✓     |    —    |       ✓       | Use OpenCode `synthetic`, or paste API key from https://synthetic.new/billing                    |
+| **MiniMax**     | MiniMax API               |     ✓      |    ✓     |    ✓    |       —       | Use OpenCode `minimax-coding-plan`, set `MINIMAX_API_KEY` env var, or paste token in preferences |
+| **z.ai (GLM)**  | Zhipu API                 |     ✓      |    ✓     |    ✓    |       ✓       | Paste token, use OpenCode `zai-coding-plan`, or set `ZAI_API_KEY`/`GLM_API_KEY` env var          |
 
 **Legend:**
 

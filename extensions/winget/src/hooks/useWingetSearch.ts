@@ -15,13 +15,14 @@ function parseSearchOutput(output: string): Package[] {
 }
 
 export function useWingetSearch(query: string) {
+  const isBelowMinLength = query.trim().length < 2;
   return useCachedPromise(
     async (q: string) => {
-      if (!q.trim()) return [] as Package[];
+      if (q.trim().length < 2) return [] as Package[];
       const output = await execWinget(["search", q, "--accept-source-agreements", "--disable-interactivity"]);
       return parseSearchOutput(output);
     },
     [query],
-    { keepPreviousData: true },
+    { keepPreviousData: !isBelowMinLength },
   );
 }
