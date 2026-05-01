@@ -1,6 +1,6 @@
 # Inspire Search Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-05-01
 
 - Add "Copy URL to Clipboard" action (⌘C)
 
