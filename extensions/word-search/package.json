@@ -7,7 +7,6 @@
   "author": "rishabswift",
   "contributors": [
     "thomas",
-    "bkeys818",
     "j3lte",
     "raazi-muhammed"
   ],
@@ -65,6 +64,15 @@
       "required": false,
       "title": "Max Results",
       "type": "textfield"
+    },
+    {
+      "name": "disableHistory",
+      "description": "Disable saving search history",
+      "required": false,
+      "title": "Search History",
+      "label": "Disable search history altogether",
+      "type": "checkbox",
+      "default": false
     }
   ],
   "commands": [
