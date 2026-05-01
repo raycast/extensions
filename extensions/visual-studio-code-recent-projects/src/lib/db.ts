@@ -6,7 +6,7 @@ import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
 import { isSameEntry, isWin } from "./utils";
 import { execFilePromise } from "../utils/exec";
-import { getBuildNamePreference } from "./vscode";
+import { getBuildNamePreference, getBuildScheme } from "./vscode";
 
 export type RemoveMethods = {
   removeEntry: (entry: EntryLike) => Promise<void>;
@@ -85,10 +85,18 @@ export function useRecentEntries() {
 
 function getPath() {
   const build = getBuildNamePreference();
-  if (isWin) {
-    return `${homedir()}\\AppData\\Roaming\\${build}\\User\\globalStorage\\state.vscdb`;
+  const home = homedir();
+  const buildScheme = getBuildScheme();
+  const sharedPath = isWin
+    ? `${home}\\.${buildScheme}-shared\\sharedStorage\\state.vscdb`
+    : `${home}/.${buildScheme}-shared/sharedStorage/state.vscdb`;
+  if (fs.existsSync(sharedPath)) {
+    return sharedPath;
   }
-  return `${homedir()}/Library/Application Support/${build}/User/globalStorage/state.vscdb`;
+  if (isWin) {
+    return `${home}\\AppData\\Roaming\\${build}\\User\\globalStorage\\state.vscdb`;
+  }
+  return `${home}/Library/Application Support/${build}/User/globalStorage/state.vscdb`;
 }
 
 async function saveEntries(entries: EntryLike[]) {

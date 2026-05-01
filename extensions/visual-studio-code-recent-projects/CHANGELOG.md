@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: Search Recent Projects] - {PR_MERGE_DATE} 
+
+- Fixed `Search Recent Projects` returning empty for VS Code 1.105+ by reading the recently-opened list from the new shared-storage path (`~/.<scheme>-shared/sharedStorage/state.vscdb`) and falling back to the legacy `globalStorage` path for unmigrated builds and forks.
+
 ## [Update] - 2026-04-07
 
 - Added support for Qoder.
