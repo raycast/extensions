@@ -126,6 +126,8 @@ export function isReadOnlySQL(sql: string): boolean {
     case "EXPLAIN": {
       const after = body.slice(head[0].length).trim();
       if (/^ANALYZE\b/i.test(after)) return false;
+      // Also catch: EXPLAIN (ANALYZE ...) ...
+      if (/^\(\s*ANALYZE\b/i.test(after)) return false;
       return true;
     }
     case "PRAGMA": {
