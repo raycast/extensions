@@ -1,13 +1,9 @@
 import { AI, Clipboard, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { humanifyPhase1, humanifyFinalize } from "./lib/humanify";
-import type { IntensityLevel } from "./lib/types";
-
-interface Preferences {
-  defaultIntensity: IntensityLevel;
-}
 
 export default async function Command() {
-  const { defaultIntensity } = getPreferenceValues<Preferences>();
+  // Issue #1 fix: use auto-generated Preferences type from raycast-env.d.ts
+  const { defaultIntensity } = getPreferenceValues<Preferences.HumanifyClipboard>();
 
   const clipboardText = await Clipboard.readText();
   if (!clipboardText?.trim()) {
@@ -27,13 +23,7 @@ export default async function Command() {
     // Phase 1: rule-based cleanup
     const p1 = humanifyPhase1(text, defaultIntensity);
 
-    if (p1.alreadyHuman) {
-      toast.style = Toast.Style.Success;
-      toast.title = "Already human!";
-      toast.message = "No AI-isms detected";
-      await showHUD("✅ Text already sounds human!");
-      return;
-    }
+    // Issue #3 fix: always run LLM — Phase 1 may miss subtle AI patterns
 
     // Phase 2: Raycast AI rewrite
     const aiResult = await AI.ask(p1.prompt, {

@@ -11,13 +11,9 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useAI } from "@raycast/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { humanifyPhase1, humanifyFinalize } from "./lib/humanify";
-import type { HumanifierResult, IntensityLevel } from "./lib/types";
-
-interface Preferences {
-  defaultIntensity: IntensityLevel;
-}
+import type { HumanifierResult } from "./lib/types";
 
 // ── Result View ─────────────────────────────────────────────────────────────
 
@@ -107,12 +103,14 @@ function AIRewriteView({
     },
   });
 
-  // Once AI is done loading and we have data, finalize and push the result view
-  if (!isLoading && data && !hasFinalized) {
-    setHasFinalized(true);
-    const result = humanifyFinalize(originalText, data, phase1Stats);
-    setTimeout(() => push(<ResultView result={result} />), 0);
-  }
+  // Issue #2 fix: move side-effect into useEffect to prevent double-navigation
+  useEffect(() => {
+    if (!isLoading && data && !hasFinalized) {
+      setHasFinalized(true);
+      const result = humanifyFinalize(originalText, data, phase1Stats);
+      push(<ResultView result={result} />);
+    }
+  }, [isLoading, data, hasFinalized]);
 
   const markdown = isLoading ? `# ✍️ Rewriting...\n\n${data || "*Waiting for AI...*"}` : `# ✨ Done!\n\n${data || ""}`;
 
@@ -132,25 +130,11 @@ function AIRewriteView({
   );
 }
 
-// ── Already Human View ──────────────────────────────────────────────────────
-
-function AlreadyHumanView({ text }: { text: string }) {
-  return (
-    <Detail
-      markdown={`# ✅ Already Human!\n\nYour text doesn't have any detectable AI-isms. No changes needed.\n\n---\n\n${text}`}
-      actions={
-        <ActionPanel>
-          <Action.CopyToClipboard title="Copy Text" content={text} icon={Icon.Clipboard} />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
 // ── Main Command ────────────────────────────────────────────────────────────
 
 export default function Command() {
-  const { defaultIntensity } = getPreferenceValues<Preferences>();
+  // Issue #1 fix: use auto-generated Preferences type from raycast-env.d.ts
+  const { defaultIntensity } = getPreferenceValues<Preferences.Humanify>();
   const { push } = useNavigation();
 
   async function handleSubmit(values: { text: string; intensity: string }) {
@@ -160,14 +144,10 @@ export default function Command() {
       return;
     }
 
-    const intensity = values.intensity as IntensityLevel;
+    const intensity = values.intensity as "clean" | "rewrite" | "strip";
     const p1 = humanifyPhase1(text, intensity);
 
-    if (p1.alreadyHuman) {
-      push(<AlreadyHumanView text={text} />);
-      return;
-    }
-
+    // Issue #3 fix: always run LLM — Phase 1 may miss subtle AI patterns
     push(<AIRewriteView originalText={text} prompt={p1.prompt} creativity={p1.creativity} phase1Stats={p1.stats} />);
   }
 
