@@ -236,6 +236,7 @@ const buildSchemes: Record<string, string> = {
   Trae: "trae",
   "Trae CN": "trae-cn",
   Lingma: "lingma",
+  "VSCodium - Insiders": "vscodium-insiders",
 };
 
 export function getBuildScheme(): string {
