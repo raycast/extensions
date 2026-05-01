@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fixed missing recent projects by reading VS Code workspace storage in addition to the recently opened paths list.
+
 ## [Update] - 2026-04-07
 
 - Added support for Qoder.
