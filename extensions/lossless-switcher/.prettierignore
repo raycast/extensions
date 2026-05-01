@@ -1,0 +1,5 @@
+**/.gitkeep
+swift-src/build/
+assets/lossless-watcher
+assets/audio_format
+node_modules/

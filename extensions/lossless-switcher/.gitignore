@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+dist/
+*.log
+swift-src/build/
+assets/lossless-watcher
+assets/audio_format
+.raycast/
+coverage/
