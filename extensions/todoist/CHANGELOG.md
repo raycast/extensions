@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Fix filter task freshness and recurrence reminder guard] - {PR_MERGE_DATE}
+## [Fix filter task freshness and recurrence reminder guard] - 2026-05-01
 
 - **Filter task typing + freshness**: Typed filter sections in `FilterTasks` and resolve each displayed task against the latest cached item by id, preventing stale task state in filter views after updates.
 - **Filter project accessory**: Tasks shown in filter views now include the project/section accessory tag (like Today view), making project context visible directly in filter results.
