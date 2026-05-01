@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "reachcast",
+  "title": "ReachCast",
+  "description": "A Raycast extension that turns reusable templates into Gmail-ready messages in seconds.",
+  "icon": "extension-icon.png",
+  "author": "nishilfaldu",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-gmail-message",
+      "title": "Create Gmail Message",
+      "subtitle": "Fill a template and open Gmail",
+      "description": "Generate a Gmail-ready email from reusable templates and custom fields.",
+      "mode": "view"
+    },
+    {
+      "name": "edit-email-template",
+      "title": "Edit Email Template",
+      "subtitle": "Customize subject and body",
+      "description": "Edit the reusable Gmail template with a multiline body editor.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
