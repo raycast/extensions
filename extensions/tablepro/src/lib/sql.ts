@@ -108,7 +108,9 @@ export function isReadOnlySQL(sql: string): boolean {
   const body = stripLeadingCTE(stripped);
   const head = body.match(/^\s*([A-Za-z_]+)/);
   if (!head) return false;
-  const keyword = head[1].toUpperCase();
+  const [, captured] = head;
+  if (!captured) return false;
+  const keyword = captured.toUpperCase();
   switch (keyword) {
     case "SELECT":
     case "SHOW":
@@ -134,8 +136,10 @@ export function isReadOnlySQL(sql: string): boolean {
       const after = body.slice(head[0].length).trim();
       const name = after.match(/^([A-Za-z_][A-Za-z0-9_]*)/);
       if (!name) return false;
-      const pragma = name[1].toLowerCase();
-      const rest = after.slice(name[0].length).trim();
+      const [matched, captured] = name;
+      if (!captured) return false;
+      const pragma = captured.toLowerCase();
+      const rest = after.slice(matched.length).trim();
       if (rest.startsWith("=")) return false;
       if (rest.startsWith("(")) return READ_ONLY_PRAGMAS.has(pragma);
       return READ_ONLY_PRAGMAS.has(pragma);

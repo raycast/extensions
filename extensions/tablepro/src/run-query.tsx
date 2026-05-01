@@ -184,7 +184,7 @@ function RunningView({
   connection: Connection;
   sql: string;
 }) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | null>(null);
   const {
     data: result,
     isLoading,

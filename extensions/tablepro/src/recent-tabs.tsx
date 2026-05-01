@@ -16,7 +16,7 @@ import { openTableDeeplink } from "./lib/deeplink";
 import { formatRelativeTime } from "./lib/format";
 
 export default function RecentTabsCommand() {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | null>(null);
   const {
     data: tabs,
     isLoading,

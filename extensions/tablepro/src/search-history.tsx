@@ -18,7 +18,7 @@ import { formatRelativeTime, formatRowCount } from "./lib/format";
 
 export default function SearchHistoryCommand() {
   const [query, setQuery] = useState("");
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | null>(null);
   const {
     data: results,
     isLoading,

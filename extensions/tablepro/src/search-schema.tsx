@@ -103,7 +103,7 @@ export default function SearchSchema() {
 }
 
 function DatabasesView({ connection }: { connection: Connection }) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | null>(null);
   const {
     data: databases,
     isLoading,
@@ -185,7 +185,7 @@ function SchemasView({
   connection: Connection;
   database: string;
 }) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | null>(null);
   const {
     data: schemas,
     isLoading,

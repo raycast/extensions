@@ -117,7 +117,7 @@ function TablesList({
   database?: string;
   schema?: string;
 }) {
-  const abortable = useRef<AbortController>();
+  const abortable = useRef<AbortController | null>(null);
   const {
     data: tables,
     isLoading,
