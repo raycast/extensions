@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "humane",
+  "title": "Humane",
+  "description": "Make AI-generated text sound human. Paste or type text and get a natural-sounding rewrite powered by Raycast AI.",
+  "icon": "extension-icon.png",
+  "author": "iamanishroy",
+  "platforms": ["macOS"],
+  "categories": ["Productivity", "Developer Tools"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "humanify",
+      "title": "Humanify Text",
+      "description": "Paste AI-generated text and get a human-sounding rewrite",
+      "mode": "view",
+      "keywords": ["humanify", "rewrite", "ai", "human", "text"]
+    },
+    {
+      "name": "humanify-clipboard",
+      "title": "Humanify Clipboard",
+      "description": "Instantly humanify text from your clipboard",
+      "mode": "no-view",
+      "keywords": ["clipboard", "humanify", "quick"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultIntensity",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Intensity",
+      "description": "How aggressively to rewrite the text",
+      "default": "rewrite",
+      "data": [
+        { "title": "Clean — Fix worst AI-isms only", "value": "clean" },
+        { "title": "Rewrite — Restructure sentences", "value": "rewrite" },
+        { "title": "Strip — Very terse and direct", "value": "strip" }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\n\nIt seems like you are trying to publish the Raycast extension to npm.\n\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\n\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
