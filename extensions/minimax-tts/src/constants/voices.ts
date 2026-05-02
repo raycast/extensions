@@ -102,6 +102,28 @@ export const FALLBACK_VOICES: VoiceConfig[] = [
     gender: "male",
   },
   {
+    id: "English_CalmWoman",
+    name: "Calm Woman",
+    category: "English",
+    description: "Warm, clear, calm American English female voice for audiobooks, documentaries, and education.",
+    gender: "female",
+  },
+  {
+    id: "English_captivating_female1",
+    name: "Captivating Female",
+    category: "English",
+    description: "Bright, clear, enthusiastic American English female voice for knowledge sharing and explainers.",
+    gender: "female",
+  },
+  {
+    id: "English_AttractiveGirl",
+    name: "Attractive Woman",
+    category: "English",
+    description:
+      "Sweet, natural, neighborly American English female voice for conversational reading and social narration.",
+    gender: "female",
+  },
+  {
     id: "English_expressive_narrator",
     name: "Expressive Narrator",
     category: "English",

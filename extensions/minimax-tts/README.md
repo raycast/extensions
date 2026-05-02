@@ -161,6 +161,12 @@ Recommended Mandarin voices for paper listening:
 - `Chinese (Mandarin)_Warm_Bestie`: soft, clear, comforting female voice for relaxed listening.
 - `Chinese_sweet_girl_vv1`: bright, expressive young female voice for lighter notes and short passages.
 
+Recommended English voices for paper listening:
+
+- `English_CalmWoman`: warm, clear, guided voice for audiobooks, documentaries, and education.
+- `English_captivating_female1`: bright, clear, energetic voice for explainers and knowledge sharing.
+- `English_AttractiveGirl`: natural, conversational voice for lighter articles and notes.
+
 ## Next Steps
 
 After setup:

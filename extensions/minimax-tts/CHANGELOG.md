@@ -18,7 +18,7 @@
 - Select Quick Read Voice: choose and preview the voice used by Quick Read
 - Active Configuration row surfaces the resolved auth mode + model + region with conflict warnings
 - Set any listed voice as the Quick Read voice
-- Paper-reading defaults include MiniMax voices such as `Chinese (Mandarin)_Radio_Host`, `Chinese (Mandarin)_Sincere_Adult`, `Chinese (Mandarin)_Gentleman`, `hunyin_6`, `male-qn-jingying`, `Chinese (Mandarin)_Wise_Women`, `Chinese (Mandarin)_Gentle_Senior`, `Chinese (Mandarin)_Warm_Bestie`, and `Chinese_sweet_girl_vv1`
+- Paper-reading defaults include Mandarin and English MiniMax voices such as `Chinese (Mandarin)_Radio_Host`, `Chinese (Mandarin)_Sincere_Adult`, `Chinese (Mandarin)_Gentleman`, `hunyin_6`, `Chinese (Mandarin)_Wise_Women`, `Chinese_sweet_girl_vv1`, `English_CalmWoman`, `English_captivating_female1`, and `English_AttractiveGirl`
 - Voice list cached locally for instant warm-start; refreshes in the background
 - Voice preview and ad-hoc reading both survive view dismissal
 - Default Custom Voice ID and Extra Custom Voice IDs appear at the top of every voice picker, tagged `Default` and `Unverified` until MiniMax voice lookup confirms them

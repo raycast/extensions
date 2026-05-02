@@ -242,6 +242,18 @@
           "value": "Chinese (Mandarin)_Male_Announcer"
         },
         {
+          "title": "Calm Woman (English Female, Guided)",
+          "value": "English_CalmWoman"
+        },
+        {
+          "title": "Captivating Female (English Female, Energetic)",
+          "value": "English_captivating_female1"
+        },
+        {
+          "title": "Attractive Woman (English Female, Natural)",
+          "value": "English_AttractiveGirl"
+        },
+        {
           "title": "Expressive Narrator (English)",
           "value": "English_expressive_narrator"
         },
