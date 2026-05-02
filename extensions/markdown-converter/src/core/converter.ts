@@ -386,9 +386,17 @@ function isLayoutTable(table: HTMLTableElement): boolean {
     }
   }
 
-  // border="0" + single-row table with only inline/image content per cell
-  // (commonly email icon+text layout like [img] [text with link])
-  if (table.getAttribute("border") === "0" && rows.length === 1 && !table.querySelector("th, thead")) {
+  // Canonical email-layout reset: border="0" + cellpadding="0" + cellspacing="0"
+  // on a single-row table with no semantic header. Real data tables almost
+  // never set all three reset attributes; this trio is the de facto signature
+  // of HTML-email layout containers (Gmail, Outlook, MJML, etc.).
+  if (
+    table.getAttribute("border") === "0" &&
+    table.getAttribute("cellpadding") === "0" &&
+    table.getAttribute("cellspacing") === "0" &&
+    rows.length === 1 &&
+    !table.querySelector("th, thead")
+  ) {
     return true;
   }
 
