@@ -112,6 +112,13 @@ export class TokenRevokedError extends Error {
   }
 }
 
+export class MCPSessionExpiredError extends Error {
+  constructor(message = "Session not found") {
+    super(message);
+    this.name = "MCPSessionExpiredError";
+  }
+}
+
 export class ExternalAccessDeniedError extends Error {
   constructor(message: string) {
     super(message);

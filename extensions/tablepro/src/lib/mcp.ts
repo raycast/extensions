@@ -6,6 +6,7 @@ import {
   DatabaseInfo,
   MCPHandshake,
   MCPNotRunningError,
+  MCPSessionExpiredError,
   QueryHistoryEntry,
   QueryResult,
   RecentTab,
@@ -219,15 +220,23 @@ async function postJsonRpc<T>(
     throw new TokenRevokedError();
   }
   if (response.status === 403) {
-    const message = await safeReadError(response);
+    const message = await readJsonRpcErrorMessage(response, "Forbidden");
     throw new ExternalAccessDeniedError(message);
   }
   if (response.status === 404) {
     resetSession();
-    throw new Error(`TablePro MCP returned HTTP 404`);
+    const message = await readJsonRpcErrorMessage(
+      response,
+      "Session not found",
+    );
+    throw new MCPSessionExpiredError(message);
   }
   if (!response.ok) {
-    throw new Error(`TablePro MCP returned HTTP ${response.status}`);
+    const message = await readJsonRpcErrorMessage(
+      response,
+      `TablePro MCP returned HTTP ${response.status}`,
+    );
+    throw new Error(message);
   }
   const responseSessionId = response.headers.get("mcp-session-id");
   if (response.status === 202) {
@@ -342,7 +351,7 @@ async function rpc<T>(
     );
     return result;
   } catch (err) {
-    if (err instanceof Error && /HTTP 404/.test(err.message)) {
+    if (err instanceof MCPSessionExpiredError) {
       resetSession();
       const fresh = await ensureSession(handshake, token, signal);
       const { result } = await postJsonRpc<T>(
@@ -381,6 +390,39 @@ async function safeReadError(response: Response): Promise<string> {
   } catch {
     return `HTTP ${response.status}`;
   }
+}
+
+async function readJsonRpcErrorMessage(
+  response: Response,
+  fallback: string,
+): Promise<string> {
+  let text = "";
+  try {
+    text = await response.text();
+  } catch {
+    return fallback;
+  }
+  if (!text) return fallback;
+  try {
+    const parsed = JSON.parse(text) as {
+      jsonrpc?: string;
+      error?: { message?: string } | string;
+    };
+    if (
+      parsed.error &&
+      typeof parsed.error === "object" &&
+      typeof parsed.error.message === "string" &&
+      parsed.error.message.length > 0
+    ) {
+      return parsed.error.message;
+    }
+    if (typeof parsed.error === "string" && parsed.error.length > 0) {
+      return parsed.error;
+    }
+  } catch {
+    return text;
+  }
+  return text;
 }
 
 export async function callTool<T>(
