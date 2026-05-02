@@ -4,24 +4,9 @@ import type { SortMode } from "$lib/types";
 import type { EnterKeyAction } from "$lib/components/contents/types";
 
 type ExtensionPreferences = {
-  startDirectory?: string;
-  viewMode: "list" | "grid";
-  gridColumns: "4" | "5" | "6" | "7" | "8";
-  sortMode: SortMode;
-  showHidden: boolean;
-  showLastUsed: boolean;
-  showTags: boolean;
-  showSize: boolean;
-  showAttrChanged: boolean;
-  showCreated: boolean;
-  showContentChanged: boolean;
-  enterAction?: EnterKeyAction;
-};
-
-type DirectoryBrowserDefaults = Omit<DirectoryBrowserProps, "path">;
-
-export function getExtensionPreferences(): ExtensionPreferences {
-  return getPreferenceValues<ExtensionPreferences>();
+export function getExtensionPreferences() {
+  return getPreferenceValues<Preferences>();
+}
 }
 
 export function getDirectoryBrowserDefaults(preferences: ExtensionPreferences): DirectoryBrowserDefaults {
