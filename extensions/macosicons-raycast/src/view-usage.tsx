@@ -1,15 +1,19 @@
-import { Detail, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  // showToast,
+  // Toast,
+  Icon,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
-  getApiKey,
-  generateApiKey,
-  setApiKey,
+  ensureApiKey,
   getApiUsage,
-  oauthClient,
   signOut,
+  // authorizeWithOAuth,
   ApiUsageResponse,
 } from "./api";
-import SignIn from "./sign-in";
 
 function progressBar(value: number, max: number, width = 20): string {
   if (max <= 0) return "─".repeat(width);
@@ -24,7 +28,13 @@ function buildMarkdown(
 ): string {
   if (!apiKey) return `# Loading…`;
 
-  let md = `# API Key\n\n\`\`\`\n${apiKey}\n\`\`\`\n`;
+  let md = "";
+
+  const maskedKey =
+    apiKey.length > 8
+      ? `${apiKey.slice(0, 4)}${"•".repeat(apiKey.length - 8)}${apiKey.slice(-4)}`
+      : "••••••••";
+  md += `# API Key\n\n\`\`\`\n${maskedKey}\n\`\`\`\n`;
 
   if (!usage) return md;
 
@@ -46,7 +56,11 @@ function buildMarkdown(
     md += `**All time:** ${usage.totalUsage.toLocaleString()} requests\n`;
   }
 
-  md += `\n---\n\n[Purchase more monthly usage](https://docs.macosicons.com)\n`;
+  md += `
+  ## What is this?
+  This Raycast extension is an example of what can be built with the macOSicons.com API, which has a free limit of how many requests you can make per month. 
+  \n\nIf you want to make more requests, or you'd like to build something with the API, [visit the docs to learn more.](https://docs.macosicons.com)\n
+  `;
 
   return md;
 }
@@ -59,7 +73,7 @@ export default function ViewApiKeyCommand() {
   async function loadData() {
     setIsLoading(true);
     try {
-      const key = await getApiKey();
+      const key = await ensureApiKey();
       setApiKeyState(key ?? undefined);
 
       if (key) {
@@ -70,42 +84,32 @@ export default function ViewApiKeyCommand() {
           // No usage data available — silently skip
         }
       }
+    } catch {
+      setApiKeyState(undefined);
     } finally {
       setIsLoading(false);
     }
   }
 
-  async function handleRegenerateKey() {
-    const tokenSet = await oauthClient.getTokens();
-    const sessionToken = tokenSet?.accessToken;
-    if (!sessionToken) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Not signed in",
-        message: "Please sign in again to regenerate your API key.",
-      });
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await generateApiKey(sessionToken);
-      await setApiKey(result.apiKey);
-      setApiKeyState(result.apiKey);
-      await showToast({
-        style: Toast.Style.Success,
-        title: "API key refreshed",
-      });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to generate API key",
-        message: error instanceof Error ? error.message : "Unknown error",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }
+  // async function handleRegenerateKey() {
+  //   setIsLoading(true);
+  //   try {
+  //     const newKey = await authorizeWithOAuth();
+  //     setApiKeyState(newKey);
+  //     await showToast({
+  //       style: Toast.Style.Success,
+  //       title: "API key refreshed",
+  //     });
+  //   } catch (error) {
+  //     await showToast({
+  //       style: Toast.Style.Failure,
+  //       title: "Failed to generate API key",
+  //       message: error instanceof Error ? error.message : "Unknown error",
+  //     });
+  //   } finally {
+  //     setIsLoading(false);
+  //   }
+  // }
 
   async function handleSignOut() {
     setIsLoading(true);
@@ -119,12 +123,24 @@ export default function ViewApiKeyCommand() {
   }
 
   useEffect(() => {
-    loadData();
+    ensureApiKey()
+      .then(async (key) => {
+        setApiKeyState(key ?? undefined);
+        if (!key) return;
+        try {
+          const usageData = await getApiUsage(key);
+          setUsage(usageData);
+        } catch {
+          // Skip usage display on error
+        }
+      })
+      .catch(() => setApiKeyState(undefined))
+      .finally(() => setIsLoading(false));
   }, []);
 
-  if (!isLoading && apiKey === undefined) {
-    return <SignIn onSignIn={(key) => setApiKeyState(key)} />;
-  }
+  // if (!isLoading && apiKey === undefined) {
+  //   return <SignIn onSignIn={(key) => setApiKeyState(key)} />;
+  // }
 
   return (
     <Detail
@@ -135,8 +151,12 @@ export default function ViewApiKeyCommand() {
           {apiKey && (
             <Action.CopyToClipboard title="Copy API Key" content={apiKey} />
           )}
-          <Action title="Refresh API Key" onAction={handleRegenerateKey} />
-          <Action title="Reload Usage" onAction={loadData} />
+          {/* <Action title="Refresh API Key" onAction={handleRegenerateKey} /> */}
+          <Action
+            icon={Icon.Repeat}
+            title="Refresh Usage"
+            onAction={loadData}
+          />
           <Action
             title="Sign out"
             onAction={handleSignOut}

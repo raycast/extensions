@@ -41,7 +41,38 @@ function getInstalledApps(): InstalledApp[] {
   return apps.sort((a, b) => a.name.localeCompare(b.name));
 }
 
+const ALLOWED_ICNS_HOSTNAMES = [
+  "macosicons.com",
+  "api.macosicons.com",
+  "storage.macosicons.com",
+];
+
+function validateIcnsUrl(url: string): void {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error("Invalid icon URL");
+  }
+  if (parsed.protocol !== "https:") throw new Error("Icon URL must use HTTPS");
+  const hostname = parsed.hostname.toLowerCase();
+  const allowed = ALLOWED_ICNS_HOSTNAMES.some(
+    (h) => hostname === h || hostname.endsWith(`.${h}`),
+  );
+  if (!allowed)
+    throw new Error(`Icon URL hostname is not trusted: ${hostname}`);
+}
+
+function escapeAppleScriptString(str: string): string {
+  // Reject strings containing newlines or carriage returns — these cannot be
+  // safely embedded in AppleScript string literals and would allow injection.
+  if (/[\n\r]/.test(str)) throw new Error("Path contains illegal characters");
+  return str.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
 async function applyIcon(appPath: string, icnsUrl: string): Promise<void> {
+  validateIcnsUrl(icnsUrl);
+
   const tmpIcon = path.join(os.tmpdir(), `macosicon-${Date.now()}.icns`);
 
   // Download the .icns file
@@ -51,8 +82,8 @@ async function applyIcon(appPath: string, icnsUrl: string): Promise<void> {
   fs.writeFileSync(tmpIcon, Buffer.from(buffer));
 
   // Escape paths for embedding in AppleScript string literals
-  const escapedIcon = tmpIcon.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
-  const escapedApp = appPath.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const escapedIcon = escapeAppleScriptString(tmpIcon);
+  const escapedApp = escapeAppleScriptString(appPath);
 
   try {
     // Use execFile (no shell) + individual -e statements to avoid

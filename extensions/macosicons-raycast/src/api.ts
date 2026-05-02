@@ -1,7 +1,9 @@
 import { LocalStorage, OAuth } from "@raycast/api";
 
-// const BASE_URL = "http://localhost:3003";
+// const FRONT_BASE_URL = "http://localhost:3010";
+const FRONT_BASE_URL = "https://macosicons.com";
 const BASE_URL = "https://api.macosicons.com";
+// const BASE_URL = "http://localhost:3000";
 
 const API_KEY_KEY = "api-key";
 
@@ -40,7 +42,7 @@ export async function authorizeWithOAuth(): Promise<string> {
 
   // Start PKCE flow
   const authRequest = await oauthClient.authorizationRequest({
-    endpoint: `${BASE_URL}/api/v1/oauth/authorize`,
+    endpoint: `${FRONT_BASE_URL}/oauth/authorize`,
     clientId: "macosicons-raycast",
     scope: "",
   });
@@ -64,6 +66,12 @@ export async function authorizeWithOAuth(): Promise<string> {
   if (!res.ok) throw new Error(`OAuth token exchange failed (${res.status})`);
 
   const tokenResponse = (await res.json()) as OAuth.TokenResponse;
+  if (
+    !tokenResponse?.access_token ||
+    typeof tokenResponse.access_token !== "string"
+  ) {
+    throw new Error("OAuth token response is missing access_token");
+  }
   await oauthClient.setTokens(tokenResponse);
 
   // Generate API key from the session token (access_token = Parse session token)
