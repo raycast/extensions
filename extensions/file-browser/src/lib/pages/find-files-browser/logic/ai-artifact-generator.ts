@@ -99,11 +99,10 @@ export async function generateSearchArtifact(naturalQuery: string): Promise<Arti
   // 3. Call Raycast AI
   let aiResponse: string;
   try {
-    aiResponse = await AI.ask(fullPrompt);
-  } catch (err) {
-    return {
-      success: false,
-      error: `AI generation failed: ${err instanceof Error ? err.message : String(err)}`,
+  // 3. Build full prompt by appending the user's query
+  const fullPrompt = `${resolvedPrompt}\n\n## User Query\n\n${naturalQuery}`;
+
+  // 4. Call Raycast AI
     };
   }
 
