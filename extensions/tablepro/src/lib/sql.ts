@@ -101,11 +101,119 @@ function stripLeadingCTE(sql: string): string {
   return sql;
 }
 
+export function splitSQLStatements(sql: string): string[] {
+  const stripped = stripSQLComments(sql);
+  const statements: string[] = [];
+  let buffer = "";
+  let inSingle = false;
+  let inDouble = false;
+  let inBacktick = false;
+  let inBracket = false;
+  let dollarTag: string | null = null;
+  let i = 0;
+  while (i < stripped.length) {
+    const c = stripped[i]!;
+    if (dollarTag !== null) {
+      if (stripped.startsWith(dollarTag, i)) {
+        buffer += dollarTag;
+        i += dollarTag.length;
+        dollarTag = null;
+        continue;
+      }
+      buffer += c;
+      i += 1;
+      continue;
+    }
+    if (inSingle) {
+      buffer += c;
+      if (c === "'") {
+        if (stripped[i + 1] === "'") {
+          buffer += "'";
+          i += 2;
+          continue;
+        }
+        inSingle = false;
+      }
+      i += 1;
+      continue;
+    }
+    if (inDouble) {
+      buffer += c;
+      if (c === '"') inDouble = false;
+      i += 1;
+      continue;
+    }
+    if (inBacktick) {
+      buffer += c;
+      if (c === "`") inBacktick = false;
+      i += 1;
+      continue;
+    }
+    if (inBracket) {
+      buffer += c;
+      if (c === "]") inBracket = false;
+      i += 1;
+      continue;
+    }
+    if (c === "$") {
+      const tagMatch = stripped
+        .slice(i)
+        .match(/^\$([A-Za-z_][A-Za-z0-9_]*)?\$/);
+      if (tagMatch) {
+        dollarTag = tagMatch[0];
+        buffer += dollarTag;
+        i += dollarTag.length;
+        continue;
+      }
+    }
+    if (c === "'") {
+      inSingle = true;
+      buffer += c;
+      i += 1;
+      continue;
+    }
+    if (c === '"') {
+      inDouble = true;
+      buffer += c;
+      i += 1;
+      continue;
+    }
+    if (c === "`") {
+      inBacktick = true;
+      buffer += c;
+      i += 1;
+      continue;
+    }
+    if (c === "[") {
+      inBracket = true;
+      buffer += c;
+      i += 1;
+      continue;
+    }
+    if (c === ";") {
+      const trimmed = buffer.trim();
+      if (trimmed.length > 0) statements.push(trimmed);
+      buffer = "";
+      i += 1;
+      continue;
+    }
+    buffer += c;
+    i += 1;
+  }
+  const tail = buffer.trim();
+  if (tail.length > 0) statements.push(tail);
+  return statements;
+}
+
 export function isReadOnlySQL(sql: string): boolean {
   if (!sql) return false;
-  const stripped = stripSQLComments(sql).trim();
-  if (!stripped) return false;
-  const body = stripLeadingCTE(stripped);
+  const statements = splitSQLStatements(sql);
+  if (statements.length === 0) return false;
+  return statements.every(isReadOnlyStatement);
+}
+
+function isReadOnlyStatement(statement: string): boolean {
+  const body = stripLeadingCTE(statement.trim());
   const head = body.match(/^\s*([A-Za-z_]+)/);
   if (!head) return false;
   const [, captured] = head;
@@ -151,9 +259,9 @@ export function isReadOnlySQL(sql: string): boolean {
 
 export function isMutatingSQL(sql: string): boolean {
   if (!sql) return false;
-  const stripped = stripSQLComments(sql).trim();
-  if (!stripped) return false;
-  return !isReadOnlySQL(sql);
+  const statements = splitSQLStatements(sql);
+  if (statements.length === 0) return false;
+  return !statements.every(isReadOnlyStatement);
 }
 
 export function summarizeSQL(sql: string, max = 240): string {
