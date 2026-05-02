@@ -1,5 +1,4 @@
 {
-
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "file-browser",
   "title": "File Browser",
@@ -20,169 +19,202 @@
       "subtitle": "File Browser",
       "description": "Browse folders, review rich metadata, and take action from a responsive list or grid.",
       "mode": "view"
+    },
+    {
+      "name": "browse-tags",
+      "title": "Browse Tags",
+      "subtitle": "File Browser",
+      "description": "Browse all Finder tags, see tagged items, and take action from a responsive list or grid.",
+      "mode": "view"
+    },
+    {
+      "name": "find-files",
+      "title": "Find Files",
+      "subtitle": "File Browser",
+      "description": "Describe a file to find using natural language. Results powered by Spotlight.",
+      "mode": "view"
     }
   ],
   "preferences": [
+    {
+      "name": "startDirectory",
+      "type": "directory",
+      "required": false,
+      "title": "Start Directory",
+      "description": "Choose the directory to browse when the command opens.",
+      "default": "$HOME"
+    },
+    {
+      "name": "viewMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default View Mode",
+      "description": "Set the initial layout for items.",
+      "default": "list",
+      "data": [
         {
-          "name": "startDirectory",
-          "type": "directory",
-          "required": false,
-          "title": "Start Directory",
-          "description": "Choose the directory to browse when the command opens."
+          "title": "List",
+          "value": "list"
         },
         {
-          "name": "viewMode",
-          "type": "dropdown",
-          "required": false,
-          "title": "Default View Mode",
-          "description": "Set the initial layout for items.",
-          "default": "list",
-          "data": [
-            {
-              "title": "List",
-              "value": "list"
-            },
-            {
-              "title": "Grid",
-              "value": "grid"
-            }
-          ]
-        },
-        {
-          "name": "gridColumns",
-          "type": "dropdown",
-          "required": false,
-          "title": "Grid Columns",
-          "description": "Number of columns to use in grid view.",
-          "default": "6",
-          "data": [
-            {
-              "title": "4",
-              "value": "4"
-            },
-            {
-              "title": "5",
-              "value": "5"
-            },
-            {
-              "title": "6",
-              "value": "6"
-            },
-            {
-              "title": "7",
-              "value": "7"
-            },
-            {
-              "title": "8",
-              "value": "8"
-            }
-          ]
-        },
-        {
-          "name": "sortMode",
-          "type": "dropdown",
-          "required": false,
-          "title": "Default Sort",
-          "description": "Set how items are ordered initially.",
-          "default": "name-asc",
-          "data": [
-            {
-              "title": "Name",
-              "value": "name-asc"
-            },
-            {
-              "title": "Kind",
-              "value": "kind-asc"
-            },
-            {
-              "title": "Date Last Opened",
-              "value": "last-opened-asc"
-            },
-            {
-              "title": "Date Added",
-              "value": "added-asc"
-            },
-            {
-              "title": "Date Modified",
-              "value": "modified-asc"
-            },
-            {
-              "title": "Date Created",
-              "value": "created-asc"
-            },
-            {
-              "title": "Size",
-              "value": "size-asc"
-            },
-            {
-              "title": "Tags",
-              "value": "tags-asc"
-            }
-          ]
-        },
-        {
-          "name": "showAttrChanged",
-          "type": "checkbox",
-          "required": false,
-          "title": "Appearance",
-          "label": "Show Attribute Changed",
-          "description": "Show attribute change date as an accessory.",
-          "default": false
-        },
-        {
-          "name": "showContentChanged",
-          "type": "checkbox",
-          "required": false,
-          "title": "",
-          "label": "Show Content Changed",
-          "description": "Show content change date as an accessory.",
-          "default": false
-        },
-        {
-          "name": "showCreated",
-          "type": "checkbox",
-          "required": false,
-          "title": "",
-          "label": "Show Created",
-          "description": "Show creation date as an accessory.",
-          "default": false
-        },
-        {
-          "name": "showSize",
-          "type": "checkbox",
-          "required": false,
-          "title": "",
-          "label": "Show File Size",
-          "description": "Show file size as an accessory.",
-          "default": true
-        },
-        {
-          "name": "showHidden",
-          "type": "checkbox",
-          "required": false,
-          "title": "",
-          "label": "Show Hidden Items",
-          "description": "Display items marked as hidden.",
-          "default": true
-        },
-        {
-          "name": "showLastUsed",
-          "type": "checkbox",
-          "required": false,
-          "title": "",
-          "label": "Show Last Used",
-          "description": "Show last used date in list accessories.",
-          "default": false
-        },
-        {
-          "name": "showTags",
-          "type": "checkbox",
-          "required": false,
-          "title": "",
-          "label": "Show Tags",
-          "description": "Show Finder tags as accessories.",
-          "default": true
+          "title": "Grid",
+          "value": "grid"
         }
+      ]
+    },
+    {
+      "name": "gridColumns",
+      "type": "dropdown",
+      "required": false,
+      "title": "Grid Columns",
+      "description": "Number of columns to use in grid view.",
+      "default": "6",
+      "data": [
+        {
+          "title": "4",
+          "value": "4"
+        },
+        {
+          "title": "5",
+          "value": "5"
+        },
+        {
+          "title": "6",
+          "value": "6"
+        },
+        {
+          "title": "7",
+          "value": "7"
+        },
+        {
+          "title": "8",
+          "value": "8"
+        }
+      ]
+    },
+    {
+      "name": "sortMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Sort",
+      "description": "Set how items are ordered initially.",
+      "default": "name-asc",
+         "data": [
+           {
+             "title": "Name / △",
+             "value": "name-asc"
+           },
+           {
+             "title": "Kind / △",
+             "value": "kind-asc"
+           },
+           {
+             "title": "Date Last Opened / ▽",
+             "value": "date-last-opened-asc"
+           },
+           {
+             "title": "Date Added / ▽",
+             "value": "date-added-desc"
+           },
+           {
+             "title": "Date Modified / ▽",
+             "value": "date-modified-asc"
+           },
+           {
+             "title": "Date Created / △",
+             "value": "date-created-asc"
+           },
+           {
+             "title": "Size / △",
+             "value": "size-asc"
+           },
+           {
+             "title": "Tags / △",
+             "value": "tags-asc"
+           }
+         ]
+    },
+    {
+      "name": "enterAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Enter Key Action",
+      "description": "Choose what happens when you press Enter on an item.",
+      "default": "detail",
+      "data": [
+        {
+          "title": "Show Item Detail",
+          "value": "detail"
+        },
+        {
+          "title": "Open Item",
+          "value": "open"
+        }
+      ]
+    },
+    {
+      "name": "showAttrChanged",
+      "type": "checkbox",
+      "required": false,
+      "title": "Appearance",
+      "label": "Show Attribute Changed",
+      "description": "Show attribute change date as an accessory.",
+      "default": false
+    },
+    {
+      "name": "showContentChanged",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Content Changed",
+      "description": "Show content change date as an accessory.",
+      "default": false
+    },
+    {
+      "name": "showCreated",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Created",
+      "description": "Show creation date as an accessory.",
+      "default": false
+    },
+    {
+      "name": "showSize",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show File Size",
+      "description": "Show file size as an accessory.",
+      "default": true
+    },
+    {
+      "name": "showHidden",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Hidden Items",
+      "description": "Display items marked as hidden.",
+      "default": true
+    },
+    {
+      "name": "showLastUsed",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Last Used",
+      "description": "Show last used date in list accessories.",
+      "default": false
+    },
+    {
+      "name": "showTags",
+      "type": "checkbox",
+      "required": false,
+      "title": "",
+      "label": "Show Tags",
+      "description": "Show Finder tags as accessories.",
+      "default": true
+    }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.3",
@@ -192,13 +224,15 @@
     "@raycast/eslint-config": "^2.0.4",
     "@types/node": "22.13.10",
     "@types/react": "19.0.10",
+    "@vitest/coverage-v8": "^3.1.2",
     "eslint": "^9.22.0",
     "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.2",
+    "vitest": "^3.1.2"
   },
   "scripts": {
     "build": "ray build",
-    "build:native": "cd native && cargo build --release && rm -f ../assets/mditems && cp target/release/mditems ../assets/ && chmod +x ../assets/mditems",
+    "build:native": "node ./scripts/build-native.js",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

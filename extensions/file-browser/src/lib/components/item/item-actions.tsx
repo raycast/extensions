@@ -1,27 +1,46 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, Icon } from "@raycast/api";
+import { isNavigableDirectory } from "$lib/item-behavior";
+import { SharedActionPanel } from "../shared/action-panel";
 import type { ItemActionsProps } from "./types";
 
-export const ItemActions = ({ entry, directoryTarget }: ItemActionsProps) => (
-  <ActionPanel>
-    <ActionPanel.Section>
-      {entry.type === "directory" && directoryTarget && (
-        <Action.Push title="Open in Browser" icon={Icon.Folder} target={directoryTarget} />
-      )}
-      <Action.Open
-        title="Open"
-        target={entry.path}
-        icon={entry.type === "directory" ? Icon.Folder : Icon.ArrowRightCircle}
+export const ItemActions = ({
+  entry,
+  directoryTarget,
+  symlinkDirectoryTarget,
+  editTarget,
+  onTrashItems,
+  revalidate,
+}: ItemActionsProps) => {
+  const primaryAction =
+    isNavigableDirectory(entry) && directoryTarget ? (
+      <Action.Push title="Open in Browser" icon={Icon.Folder} target={directoryTarget} />
+    ) : null;
+
+  const secondaryAction = <Action.Open title="Open" target={entry.path} icon={Icon.ArrowRightCircle} />;
+
+  const symlinkAction =
+    entry.type === "symlink" && symlinkDirectoryTarget ? (
+      <Action.Push
+        title="Open Target in Browser"
+        icon={Icon.Folder}
+        target={symlinkDirectoryTarget}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
       />
-      <Action.OpenWith path={entry.path} shortcut={{ modifiers: ["cmd"], key: "o" }} />
-      <Action.ShowInFinder path={entry.path} shortcut={{ modifiers: ["cmd", "alt"], key: "r" }} />
-      <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
-    </ActionPanel.Section>
-    <ActionPanel.Section>
-      <Action.CopyToClipboard title="Copy Item" content={{ file: entry.path }} icon={Icon.Clipboard} />
-      <Action.CopyToClipboard title="Copy Path" content={entry.path} icon={Icon.Clipboard} />
-    </ActionPanel.Section>
-    <ActionPanel.Section>
-      <Action.Trash paths={entry.path} shortcut={{ modifiers: ["ctrl"], key: "x" }} />
-    </ActionPanel.Section>
-  </ActionPanel>
-);
+    ) : null;
+
+  const editAction = editTarget ? (
+    <Action.Push title="Edit" icon={Icon.Pencil} target={editTarget} shortcut={{ modifiers: ["cmd"], key: "e" }} />
+  ) : null;
+
+  return (
+    <SharedActionPanel
+      path={entry.path}
+      primaryAction={primaryAction}
+      secondaryAction={secondaryAction}
+      symlinkAction={symlinkAction}
+      editAction={editAction}
+      onTrashItems={onTrashItems}
+      revalidate={revalidate}
+    />
+  );
+};

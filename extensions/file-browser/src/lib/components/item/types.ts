@@ -1,13 +1,18 @@
 import type { ReactNode } from "react";
-import type { MdItem } from "$lib/types";
+import type { FinderTag, Item } from "$lib/types";
 
 export type ItemActionsProps = {
-  entry: MdItem;
+  entry: Item;
   directoryTarget?: ReactNode;
+  symlinkDirectoryTarget?: ReactNode;
+  editTarget?: ReactNode;
+  onTrashItems?: (paths: string[]) => void;
+  revalidate?: () => void;
 };
 
 export type ItemMetadataProps = {
-  entry: MdItem;
+  entry: Item;
+  tagCatalog?: FinderTag[];
 };
 
 export type FolderTreeOptions = {

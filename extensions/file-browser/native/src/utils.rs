@@ -6,7 +6,6 @@ use core_foundation::{
     number::CFNumber,
     string::CFString,
 };
-use std::path::Path;
 
 pub fn to_string_vec(v: CFTypeRef) -> Vec<String> {
     if v.is_null() {
@@ -97,10 +96,4 @@ pub fn to_unix_seconds_opt(v: CFTypeRef) -> Option<u64> {
             to_string_opt(v).and_then(|s| s.trim().parse::<u64>().ok())
         }
     }
-}
-
-pub fn is_dotfile(path: &Path) -> bool {
-    path.file_name()
-        .map(|name| name.to_string_lossy().starts_with('.'))
-        .unwrap_or(false)
 }

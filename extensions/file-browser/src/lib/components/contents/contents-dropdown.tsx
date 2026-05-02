@@ -1,62 +1,36 @@
 import { Icon } from "@raycast/api";
-import type { ContentDropdownProps, ContentsSortMode, ContentsViewMode } from "./types";
+import { useState } from "react";
+import type { ContentDropdownProps, ContentsViewMode } from "./types";
+import { buildDisplayValue, buildSummaryLabel, parseDropdownChange, sortValue, viewValue } from "./dropdown-state";
 import { useContentsView } from "./contents";
+import { getSortOptions } from "$lib/sort-contract";
 
 const viewOptions: Array<{ label: string; value: ContentsViewMode; icon: Icon }> = [
   { label: "List", value: "list", icon: Icon.AppWindowList },
   { label: "Grid", value: "grid", icon: Icon.AppWindowGrid3x3 },
 ];
 
-const sortOptions: Array<{ label: string; value: ContentsSortMode }> = [
-  { label: "Name", value: "name-asc" },
-  { label: "Kind", value: "kind-asc" },
-  { label: "Date Last Opened", value: "last-opened-asc" },
-  { label: "Date Added", value: "added-asc" },
-  { label: "Date Modified", value: "modified-asc" },
-  { label: "Date Created", value: "created-asc" },
-  { label: "Size", value: "size-asc" },
-  { label: "Tags", value: "tags-asc" },
-];
-
-const viewValue = (mode: ContentsViewMode) => `view:${mode}` as const;
-const sortValue = (mode: ContentsSortMode) => `sort:${mode}` as const;
-const viewLabelMap = viewOptions.reduce<Record<ContentsViewMode, string>>(
-  (acc, option) => {
-    acc[option.value] = option.label;
-    return acc;
-  },
-  {} as Record<ContentsViewMode, string>,
-);
-const sortLabelMap = sortOptions.reduce<Record<ContentsSortMode, string>>(
-  (acc, option) => {
-    acc[option.value] = option.label;
-    return acc;
-  },
-  {} as Record<ContentsSortMode, string>,
-);
+const sortEntries = getSortOptions();
 
 export const ContentsDropdown = ({ view, sort, onViewChange, onSortChange }: ContentDropdownProps) => {
   const { Dropdown: DropdownComponent } = useContentsView();
-  const summaryValue = "summary";
-  const viewLabel = `􀦍 ${viewLabelMap[view]}`;
-  const sortLabel = `􀵬 ${sortLabelMap[sort] ?? "Name"}`;
-  const summaryLabel = `${viewLabel} • ${sortLabel}`;
+  const summaryLabel = buildSummaryLabel(view, sort);
+  const [nonce, setNonce] = useState(0);
+  const displayValue = buildDisplayValue(view, sort, nonce);
 
   const handleChange = (newValue: string) => {
-    if (newValue === summaryValue) {
-      return;
+    const change = parseDropdownChange(newValue);
+    if (change.type === "view") {
+      onViewChange(change.value);
+    } else if (change.type === "sort") {
+      onSortChange(change.value);
     }
-
-    if (newValue.startsWith("view:")) {
-      onViewChange(newValue.slice("view:".length) as ContentsViewMode);
-    } else if (newValue.startsWith("sort:")) {
-      onSortChange(newValue.slice("sort:".length) as ContentsSortMode);
-    }
+    setNonce((n) => n + 1);
   };
 
   return (
-    <DropdownComponent tooltip="Change View or Sort" value={summaryValue} storeValue={false} onChange={handleChange}>
-      <DropdownComponent.Item value={summaryValue} title={summaryLabel} />
+    <DropdownComponent tooltip="Change View or Sort" value={displayValue} storeValue={false} onChange={handleChange}>
+      <DropdownComponent.Item value={displayValue} title={summaryLabel} />
       <DropdownComponent.Section title="􀦍 View">
         {viewOptions.map((option) => (
           <DropdownComponent.Item
@@ -68,12 +42,12 @@ export const ContentsDropdown = ({ view, sort, onViewChange, onSortChange }: Con
         ))}
       </DropdownComponent.Section>
       <DropdownComponent.Section title="􀵬 Sort By">
-        {sortOptions.map((option) => (
+        {sortEntries.map((entry) => (
           <DropdownComponent.Item
-            key={option.value}
-            title={option.label}
-            value={sortValue(option.value)}
-            icon={sort === option.value ? Icon.Cd : Icon.Circle}
+            key={entry.id}
+            title={entry.label}
+            value={sortValue(entry.id)}
+            icon={sort === entry.id ? Icon.Cd : Icon.Circle}
           />
         ))}
       </DropdownComponent.Section>

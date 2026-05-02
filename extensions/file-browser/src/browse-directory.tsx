@@ -1,39 +1,24 @@
 import { getPreferenceValues } from "@raycast/api";
+import { getExtensionPreferences, getDirectoryBrowserDefaults } from "$lib/preferences";
 import { resolveStartDirectory } from "$lib/utils";
+import { SessionViewProvider } from "$lib/pages/directory-browser/session-view-context";
 import { DirectoryBrowser } from "$lib/pages/directory-browser";
+import type { EnterKeyAction } from "$lib/components/contents/types";
 
 export default function Command() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
-  const accessoryPrefs =
-    getPreferenceValues<
-      Pick<
-        ExtensionPreferences,
-        | "showHidden"
-        | "showLastUsed"
-        | "showTags"
-        | "showSize"
-        | "showAttrChanged"
-        | "showCreated"
-        | "showContentChanged"
-      >
-    >();
-  const initialPath = resolveStartDirectory(preferences.startDirectory);
+  const preferences = getExtensionPreferences();
+  const { enterAction: rawEnterAction } = getPreferenceValues<{ enterAction?: EnterKeyAction }>();
+  const preferenceDefaultPath = resolveStartDirectory(preferences.startDirectory);
+
+  const directoryBrowserDefaults = getDirectoryBrowserDefaults(preferences);
+  const enterAction = rawEnterAction ?? "detail";
 
   return (
-    <DirectoryBrowser
-      path={initialPath}
-      initialView={preferences.viewMode}
-      initialSort={preferences.sortMode}
-      gridColumns={Number(preferences.gridColumns)}
-      enabledAccessories={{
-        showHidden: accessoryPrefs.showHidden ?? true,
-        showLastUsed: accessoryPrefs.showLastUsed ?? false,
-        showTags: accessoryPrefs.showTags ?? true,
-        showSize: accessoryPrefs.showSize ?? true,
-        showAttrChanged: accessoryPrefs.showAttrChanged ?? false,
-        showCreated: accessoryPrefs.showCreated ?? false,
-        showContentChanged: accessoryPrefs.showContentChanged ?? false,
-      }}
-    />
+    <SessionViewProvider
+      initialView={directoryBrowserDefaults.initialView}
+      initialSort={directoryBrowserDefaults.initialSort}
+    >
+      <DirectoryBrowser path={preferenceDefaultPath} enterAction={enterAction} {...directoryBrowserDefaults} />
+    </SessionViewProvider>
   );
 }

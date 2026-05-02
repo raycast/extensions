@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
-import type { MdItem } from "$lib/types";
+import type { Item } from "$lib/types";
+import { isNavigableDirectory } from "$lib/item-behavior";
 import { getPreviewMarkdown } from "./file-preview";
 import { generateFolderTree } from "./folder-tree";
 
-export function useItemPreview(entry: MdItem) {
+export function useItemPreview(entry: Item) {
   const [preview, setPreview] = useState<string | undefined>(undefined);
 
   useEffect(() => {
@@ -11,7 +12,7 @@ export function useItemPreview(entry: MdItem) {
     setPreview(undefined);
 
     (async () => {
-      if (entry.type === "directory") {
+      if (isNavigableDirectory(entry)) {
         const r = await generateFolderTree(entry.path);
         if (!cancelled) {
           setPreview(r.markdown);

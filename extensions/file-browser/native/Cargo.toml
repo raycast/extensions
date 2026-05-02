@@ -1,5 +1,5 @@
 [package]
-name = "mditems"
+name = "file-browser-native"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,3 +7,29 @@ edition = "2021"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 core-foundation = "0.10.1"
+base64 = "0.22"
+libc = "0.2"
+plist = "1"
+time = "=0.3.45"
+clap = { version = "4", features = ["derive"] }
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", features = [
+    "NSData",
+    "NSDictionary",
+    "NSError",
+    "NSString",
+    "NSURL",
+] }
+objc2-app-kit = { version = "0.3", features = ["NSBitmapImageRep", "NSImage"] }
+objc2-quick-look-thumbnailing = { version = "0.3", features = [
+    "QLThumbnailGenerationRequest",
+    "QLThumbnailGenerator",
+    "QLThumbnailRepresentation",
+    "block2",
+] }
+block2 = "0.6"
+crossbeam-channel = "0.5"
+
+[[bin]]
+name = "ray-fb"
+path = "src/bin/ray-fb.rs"

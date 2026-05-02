@@ -97,13 +97,6 @@ export async function generateFolderTree(root: string, opts?: FolderTreeOptions)
   return { markdown: tree, files, dirs, truncated };
 }
 
-// Backwards compatibility helper (unused by new code but kept if needed elsewhere)
-export async function generateFolderTreeMarkdown(root: string, opts?: FolderTreeOptions): Promise<string | undefined> {
-  const r = await generateFolderTree(root, opts);
-  if (!r.markdown) return undefined;
-  return r.markdown;
-}
-
 const segmenter =
   typeof Intl !== "undefined" && "Segmenter" in Intl
     ? new Intl.Segmenter(undefined, { granularity: "grapheme" })

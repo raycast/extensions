@@ -1,20 +1,19 @@
-import { environment } from "@raycast/api";
-import { mkdir, readFile, stat } from "fs/promises";
-import { basename, extname, join } from "path";
+import { readFile } from "fs/promises";
+import { extname } from "path";
 import { pathToFileURL } from "url";
-import { execFile } from "child_process";
-import type { MdItem } from "$lib/types";
+import type { Item } from "$lib/types";
+import { getItemThumbnail } from "$lib/ray-fb";
 
 const MAX_TEXT_PREVIEW_BYTES = 256 * 1024; // 256KB
 const QL_THUMB_SIZE = 512;
 
-function isMaybeImage(entry: MdItem) {
+function isMaybeImage(entry: Item) {
   if (entry.contentType?.startsWith("image/")) return true;
   const ext = extname(entry.path).toLowerCase();
   return [".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp", ".tiff", ".tif", ".ico", ".svg"].includes(ext);
 }
 
-function isMaybeText(entry: MdItem) {
+function isMaybeText(entry: Item) {
   if (entry.contentType?.startsWith("text/")) return true;
   const ext = extname(entry.path).toLowerCase();
   return [
@@ -87,7 +86,7 @@ function extToLang(ext: string) {
   return map[ext.toLowerCase()] ?? "";
 }
 
-async function tryReadSmallText(entry: MdItem): Promise<string | undefined> {
+async function tryReadSmallText(entry: Item): Promise<string | undefined> {
   try {
     if (entry.size > MAX_TEXT_PREVIEW_BYTES) return undefined;
     const data = await readFile(entry.path, { encoding: "utf8" });
@@ -101,34 +100,19 @@ async function tryReadSmallText(entry: MdItem): Promise<string | undefined> {
   }
 }
 
-async function generateQLThumbnail(entry: MdItem): Promise<string | undefined> {
+async function generateQLThumbnail(entry: Item): Promise<string | undefined> {
   try {
-    const baseDir = join(environment.supportPath, "thumbnails");
-    await mkdir(baseDir, { recursive: true });
-
-    // Always generate a fresh thumbnail (no caching)
-    await new Promise<void>((resolve) => {
-      execFile("qlmanage", ["-t", "-s", String(QL_THUMB_SIZE), "-o", baseDir, entry.path], () => resolve());
-    });
-
-    // qlmanage outputs `<basename>.png` in the target directory
-    const produced = join(baseDir, `${basename(entry.path)}.png`);
-    try {
-      const st = await stat(produced);
-      if (st.size > 0) {
-        return pathToFileURL(produced).toString();
-      }
-    } catch {
-      // No produced file; fall through
+    const result = await getItemThumbnail({ path: entry.path, maxSize: QL_THUMB_SIZE });
+    if (result?.path) {
+      return pathToFileURL(result.path).toString();
     }
-
     return undefined;
   } catch {
     return undefined;
   }
 }
 
-export async function getPreviewMarkdown(entry: MdItem): Promise<string | undefined> {
+export async function getPreviewMarkdown(entry: Item): Promise<string | undefined> {
   // 1) Direct image embed
   if (isMaybeImage(entry)) {
     return `![](${pathToFileURL(entry.path).toString()})`;

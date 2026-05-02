@@ -1,11 +1,21 @@
 import { Icon, type Grid, type List } from "@raycast/api";
 import type { ContentsItemProps } from "./types";
 import { useContentsView } from "./contents";
-import type { MdItem } from "$lib/types";
+import type { FinderTag, Item } from "$lib/types";
 import { convertDate, formatFileSize } from "$lib/utils";
-import { FINDER_TAG_COLORS } from "$lib/constants";
+import { buildFinderTagViews } from "$lib/pages/tag-browser/finder-tags";
+import { useItemThumbnail } from "./use-item-thumbnail";
 
-export const ContentsItem = ({ entry, actions, enabledAccessories }: ContentsItemProps) => {
+export const ContentsItem = ({
+  entry,
+  actions,
+  enabledAccessories,
+  totalEntries,
+  tagCatalog = [],
+}: ContentsItemProps) => {
+  const { view, Item: ItemComponent } = useContentsView();
+  const { thumbnail } = useItemThumbnail(entry, view, totalEntries);
+
   const baseProps = {
     title: entry.name,
     subtitle: entry.kind ?? undefined,
@@ -13,27 +23,22 @@ export const ContentsItem = ({ entry, actions, enabledAccessories }: ContentsIte
     actions: actions,
   };
 
-  const { view, Item: ItemComponent } = useContentsView();
+  const fileIcon = { fileIcon: entry.path };
+  const thumbnailOrFallback = thumbnail ? { source: thumbnail } : fileIcon;
+
   let item: React.ReactNode;
 
   if (view === "grid") {
     const GridItem = ItemComponent as typeof Grid.Item;
-    item = (
-      <GridItem
-        {...baseProps}
-        key={entry.path}
-        content={{ fileIcon: entry.path }}
-        // accessory={}
-      />
-    );
+    item = <GridItem {...baseProps} key={entry.path} content={thumbnailOrFallback} />;
   } else {
     const ListItem = ItemComponent as typeof List.Item;
     item = (
       <ListItem
         {...baseProps}
         key={entry.path}
-        icon={{ fileIcon: entry.path }}
-        accessories={createAccessories(entry, enabledAccessories)}
+        icon={thumbnailOrFallback}
+        accessories={createAccessories(entry, enabledAccessories, tagCatalog)}
       />
     );
   }
@@ -42,7 +47,7 @@ export const ContentsItem = ({ entry, actions, enabledAccessories }: ContentsIte
 };
 
 const createAccessories = (
-  entry: MdItem,
+  entry: Item,
   enabled: {
     showHidden?: boolean;
     showLastUsed?: boolean;
@@ -52,6 +57,7 @@ const createAccessories = (
     showCreated?: boolean;
     showContentChanged?: boolean;
   },
+  tagCatalog: FinderTag[] = [],
 ): List.Item.Accessory[] => {
   const acc: List.Item.Accessory[] = [];
 
@@ -68,11 +74,11 @@ const createAccessories = (
   }
 
   if (enabled?.showTags && entry?.userTags?.length > 0) {
-    entry.userTags.forEach(({ name, colorIndex }) => {
+    buildFinderTagViews(entry.userTags, tagCatalog).forEach(({ name, color }) => {
       acc.push({
         tag: {
           value: name,
-          color: FINDER_TAG_COLORS[colorIndex ?? 0],
+          color,
         },
       });
     });

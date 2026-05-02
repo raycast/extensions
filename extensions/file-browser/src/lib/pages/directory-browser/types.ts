@@ -1,4 +1,9 @@
-import type { AccessoryFlags, ContentsSortMode, ContentsViewMode } from "$lib/components/contents/types";
+import type {
+  AccessoryFlags,
+  ContentsSortMode,
+  ContentsViewMode,
+  EnterKeyAction,
+} from "$lib/components/contents/types";
 
 export type DirectoryBrowserProps = {
   path: string;
@@ -6,4 +11,6 @@ export type DirectoryBrowserProps = {
   initialSort: ContentsSortMode;
   gridColumns: number;
   enabledAccessories: AccessoryFlags;
+  enterAction: EnterKeyAction;
+  onPathVisited?: (path: string) => void;
 };

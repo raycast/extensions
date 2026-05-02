@@ -35,3 +35,12 @@ export function resolveStartDirectory(preferencePath: string | undefined) {
 
   return homedir();
 }
+
+export function pathExists(p: string): boolean {
+  try {
+    statSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+}

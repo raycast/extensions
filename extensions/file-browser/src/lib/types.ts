@@ -1,24 +1,26 @@
-export type MdItemSortMode =
+export type SortMode =
   | "name-asc"
   | "kind-asc"
-  | "last-opened-asc"
-  | "added-asc"
-  | "modified-asc"
-  | "created-asc"
+  | "date-last-opened-asc"
+  | "date-added-desc"
+  | "date-modified-asc"
+  | "date-created-asc"
   | "size-asc"
   | "tags-asc";
 
-export type MdItemUserTag = {
+export type FinderTag = {
   name: string;
   colorIndex: number | null;
 };
 
-export type MdItem = {
+export type Item = {
   type: "directory" | "file" | "symlink";
   name: string;
   path: string;
   size: number;
-  userTags: MdItemUserTag[];
+  isPackageLike?: boolean;
+  isMountRoot?: boolean;
+  userTags: FinderTag[];
   attributeChangeDate: number;
   contentCreationDate: number;
   contentModificationDate: number;
@@ -30,7 +32,3 @@ export type MdItem = {
   fsCreationDate: number;
   fsInvisible: boolean;
 };
-
-export interface MditemsOptions {
-  sortMode?: MdItemSortMode;
-}
