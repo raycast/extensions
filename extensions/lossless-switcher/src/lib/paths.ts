@@ -17,6 +17,10 @@ export const LAUNCH_AGENTS_DIR = path.join(HOME, "Library", "LaunchAgents");
 export const NOWPLAYING_PATH = path.join(CACHE_DIR, "nowplaying.json");
 export const APPLY_LOG_PATH = path.join(CACHE_DIR, "apply.log");
 export const ARTWORK_DIR = path.join(CACHE_DIR, "artwork");
+export const MENUBAR_HEARTBEAT_PATH = path.join(
+  CACHE_DIR,
+  "menu-bar.heartbeat",
+);
 
 export const WATCHER_BIN = path.join(SUPPORT_DIR, "lossless-watcher");
 export const AUDIO_FORMAT_BIN = path.join(SUPPORT_DIR, "audio_format");

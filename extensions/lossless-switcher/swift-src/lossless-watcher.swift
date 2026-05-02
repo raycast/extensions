@@ -19,7 +19,15 @@ let supportDir =
 
 let cachePath = "\(cacheDir)/nowplaying.json"
 let applyLogPath = "\(cacheDir)/apply.log"
+let menuBarHeartbeatPath = "\(cacheDir)/menu-bar.heartbeat"
 let offSwitchPath = "\(supportDir)/autoapply.off"
+
+// Stale threshold for the menu-bar heartbeat. Generous enough to cover users
+// who configure long polling intervals (up to ~10 min); past this window we
+// assume the menu-bar command is not activated and skip the refresh deeplink
+// to avoid Raycast's "must be activated before it can be run in the
+// background" error toast.
+let menuBarHeartbeatStaleSeconds: TimeInterval = 600
 
 func ensureDirs() {
     let fm = FileManager.default
@@ -240,12 +248,30 @@ final class LogWatcher {
     }
 
     private func notifyMenuBar() {
+        // Skip the deeplink unless the menu-bar command has recently
+        // heartbeated. Raycast rejects background launches of menu-bar
+        // commands that the user has not activated, surfacing a visible
+        // error. The heartbeat is touched on every render of the menu-bar
+        // command, so its absence/staleness is a reliable signal that the
+        // command is not currently active. First-activation loses the
+        // sub-second refresh on the very first track change; the polling
+        // interval picks it up.
+        guard menuBarIsActive() else { return }
+
         let p = Process()
         p.executableURL = URL(fileURLWithPath: "/usr/bin/open")
         p.arguments = ["-g", menuBarDeeplink]
         p.standardOutput = FileHandle.nullDevice
         p.standardError = FileHandle.nullDevice
         try? p.run()
+    }
+
+    private func menuBarIsActive() -> Bool {
+        let url = URL(fileURLWithPath: menuBarHeartbeatPath)
+        guard let attrs = try? FileManager.default.attributesOfItem(atPath: url.path),
+              let mtime = attrs[.modificationDate] as? Date
+        else { return false }
+        return Date().timeIntervalSince(mtime) < menuBarHeartbeatStaleSeconds
     }
 }
 

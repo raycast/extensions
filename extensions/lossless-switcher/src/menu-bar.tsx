@@ -1,6 +1,8 @@
 import { Icon, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useEffect, useState } from "react";
+import fs from "fs";
+import path from "path";
 import { fetchMusicState, type MusicState } from "./lib/applescript";
 import { readNowPlaying, type NowPlaying } from "./lib/nowplaying";
 import { resolveFormatLine } from "./lib/format-display";
@@ -10,7 +12,7 @@ import {
   type DaemonStatus,
 } from "./lib/daemon";
 import { getCurrentFormat, type CurrentFormat } from "./lib/audio-format";
-import { NOWPLAYING_PATH } from "./lib/paths";
+import { MENUBAR_HEARTBEAT_PATH, NOWPLAYING_PATH } from "./lib/paths";
 
 interface BarVM {
   title: string;
@@ -30,6 +32,16 @@ export default function MenuBar() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    // Heartbeat: signals to the Swift daemon that the menu-bar command is
+    // active and may be refreshed via deeplink. Without this, firing the
+    // background deeplink before activation triggers a Raycast error toast.
+    try {
+      fs.mkdirSync(path.dirname(MENUBAR_HEARTBEAT_PATH), { recursive: true });
+      fs.writeFileSync(MENUBAR_HEARTBEAT_PATH, String(Date.now()));
+    } catch {
+      // best-effort; daemon falls back to its polling interval
+    }
+
     let cancelled = false;
     (async () => {
       try {
