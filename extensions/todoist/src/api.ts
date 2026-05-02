@@ -537,9 +537,8 @@ export async function addReminder(args: AddReminderArgs, { setData }: CachedData
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
-    reminders: Array.isArray(updatedData.reminders)
-      ? mergeSyncedReminders(prev.reminders, updatedData.reminders)
-      : prev.reminders,
+    // Full sync token: response reminders are the full active set for this resource, so replace the cache.
+    reminders: Array.isArray(updatedData.reminders) ? updatedData.reminders : prev.reminders,
   }));
 
   return updatedData.temp_id_mapping ? updatedData.temp_id_mapping[temp_id] : null;

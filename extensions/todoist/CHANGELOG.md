@@ -3,7 +3,7 @@
 ## [Filter completion UI and incremental reminder sync] - {PR_MERGE_DATE}
 
 - **Filter views after completing a task**: Filter results are merged with cached items by id only; tasks no longer present in sync cache (for example a completed non-recurring task) are omitted instead of falling back to stale filter API rows, so the list updates immediately without reopening the extension.
-- **Merge incremental Sync reminder updates**: Todoist’s Sync API often returns **partial** `reminders` arrays. The extension now merges those deltas into the local cache (`mergeSyncedReminders` in `updateTask`, `closeTask`, and `addReminder`) instead of replacing the whole list, so editing one task’s schedule or reminders no longer clears other tasks’ alarm accessories until a full reload.
+- **Merge incremental Sync reminder updates**: Todoist’s Sync API often returns **partial** `reminders` arrays on incremental sync. The extension now merges those deltas into the local cache (`mergeSyncedReminders` in `updateTask` and `closeTask`) instead of replacing the whole list, so editing one task’s schedule or reminders no longer clears other tasks’ alarm accessories until a full reload. **`addReminder`** still uses `sync_token: "*"` for the requested resource type, so its `reminders` response remains a **full replace** of the cached list (avoids stale rows after deletes elsewhere).
 
 ## [Fix filter task freshness and recurrence reminder guard] - 2026-05-01
 
