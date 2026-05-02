@@ -174,12 +174,17 @@ export function EditSearchForm({ initialArtifact, onSubmit }: EditSearchFormProp
         canChooseDirectories
         canChooseFiles={false}
       />
-      <Form.Dropdown id="scopeMode" title="Search Depth" value={scopeMode} onChange={setScopeMode}>
+      <Form.Dropdown
+        id="scopeMode"
+        title="Search Depth"
+        value={scopeMode}
+        onChange={(value) => setScopeMode(normalizeFindFilesScopeMode(value))}
+      >
         <Form.Dropdown.Item title="This folder only" value="direct" />
         <Form.Dropdown.Item title="This folder and subfolders" value="recursive" />
       </Form.Dropdown>
-      <Form.Description id="interpretation" title="Interpretation" text={interpretation || "No interpretation"} />
-      {isRegenerating && <Form.Description id="status" title="Status" text="Regenerating with AI…" />}
+      <Form.Description title="Interpretation" text={interpretation || "No interpretation"} />
+      {isRegenerating && <Form.Description title="Status" text="Regenerating with AI…" />}
     </Form>
   );
 }

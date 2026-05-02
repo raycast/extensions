@@ -1,6 +1,7 @@
 import { getPreferenceValues } from "@raycast/api";
 import type { DirectoryBrowserProps } from "$lib/pages/directory-browser/types";
 import type { SortMode } from "$lib/types";
+import type { EnterKeyAction } from "$lib/components/contents/types";
 
 type ExtensionPreferences = {
   startDirectory?: string;
@@ -14,6 +15,7 @@ type ExtensionPreferences = {
   showAttrChanged: boolean;
   showCreated: boolean;
   showContentChanged: boolean;
+  enterAction?: EnterKeyAction;
 };
 
 type DirectoryBrowserDefaults = Omit<DirectoryBrowserProps, "path">;
@@ -27,6 +29,7 @@ export function getDirectoryBrowserDefaults(preferences: ExtensionPreferences): 
     initialView: preferences.viewMode,
     initialSort: preferences.sortMode,
     gridColumns: Number(preferences.gridColumns),
+    enterAction: preferences.enterAction ?? "detail",
     enabledAccessories: {
       showHidden: preferences.showHidden ?? true,
       showLastUsed: preferences.showLastUsed ?? false,

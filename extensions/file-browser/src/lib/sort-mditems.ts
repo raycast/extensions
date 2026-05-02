@@ -1,4 +1,4 @@
-import type { MdItem, MdItemSortMode } from "./types";
+import type { Item, SortMode } from "./types";
 
 const compareStrings = (left: string | null | undefined, right: string | null | undefined) => {
   const normalizedLeft = left?.toLocaleLowerCase() ?? "\uffff";
@@ -29,7 +29,7 @@ const parseDate = (value: number | string | null | undefined) => {
   return Number.POSITIVE_INFINITY;
 };
 
-const dateAddedValue = (item: MdItem) => {
+const dateAddedValue = (item: Item) => {
   const parsed = parseDate(item.fsContentChangeDate);
   if (Number.isFinite(parsed)) {
     return parsed;
@@ -40,13 +40,14 @@ const dateAddedValue = (item: MdItem) => {
     : Number.POSITIVE_INFINITY;
 };
 
-const comparators: Record<MdItemSortMode, (a: MdItem, b: MdItem) => number> = {
+const comparators: Record<SortMode, (a: Item, b: Item) => number> = {
   "name-asc": (a, b) => compareStrings(a.name, b.name),
   "kind-asc": (a, b) => compareStrings(a.kind, b.kind),
-  "last-opened-asc": (a, b) => compareNumbers(parseDate(a.lastUsedDate), parseDate(b.lastUsedDate)),
-  "added-asc": (a, b) => compareNumbers(dateAddedValue(a), dateAddedValue(b)),
-  "modified-asc": (a, b) => compareNumbers(parseDate(a.contentModificationDate), parseDate(b.contentModificationDate)),
-  "created-asc": (a, b) => compareNumbers(parseDate(a.fsCreationDate), parseDate(b.fsCreationDate)),
+  "date-last-opened-asc": (a, b) => compareNumbers(parseDate(a.lastUsedDate), parseDate(b.lastUsedDate)),
+  "date-added-desc": (a, b) => compareNumbers(dateAddedValue(a), dateAddedValue(b)),
+  "date-modified-asc": (a, b) =>
+    compareNumbers(parseDate(a.contentModificationDate), parseDate(b.contentModificationDate)),
+  "date-created-asc": (a, b) => compareNumbers(parseDate(a.fsCreationDate), parseDate(b.fsCreationDate)),
   "size-asc": (a, b) => compareNumbers(a.size, b.size),
   "tags-asc": (a, b) => {
     const leftTags = a.userTags.map((tag) => tag.name ?? "").join("\u0000") || "\uffff";
@@ -55,7 +56,7 @@ const comparators: Record<MdItemSortMode, (a: MdItem, b: MdItem) => number> = {
   },
 };
 
-export function sortMdItems(data: MdItem[], mode: MdItemSortMode) {
+export function sortMdItems(data: Item[], mode: SortMode) {
   const entries = [...data];
   entries.sort(comparators[mode]);
   return entries;

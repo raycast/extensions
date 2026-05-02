@@ -9,7 +9,6 @@
 import { environment } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 export { useExec } from "@raycast/utils";
-import type { AsyncState, MutatePromise } from "@raycast/utils";
 import { execFile } from "node:child_process";
 import { join } from "node:path";
 import { SEARCH_DEBUG_ENV_KEY, isSearchDebugEnabled, logSearchDebug } from "$lib/search-debug";
@@ -71,17 +70,6 @@ export type SearchResult = {
 export type HydrateItemsInput = {
   paths: string[];
   showHidden?: boolean;
-};
-
-// ---------------------------------------------------------------------------
-// Local type: mirrors the return shape of useExec<T> from @raycast/utils
-// (UseExecReturn is not exported by @raycast/utils, so we reconstruct it)
-// ---------------------------------------------------------------------------
-
-export type UseExecReturn<T> = AsyncState<T> & {
-  data: T | undefined;
-  revalidate: () => void;
-  mutate: MutatePromise<T, undefined>;
 };
 
 type ExecRayFbOptions = {
@@ -337,9 +325,7 @@ function parseSearchResult(stdout: string): SearchResult {
 // Exported hooks
 // ---------------------------------------------------------------------------
 
-export function useDirectoryItems(
-  input: ListDirectoryItemsInput | undefined,
-): UseExecReturn<Item[]> & { data: Item[] } {
+export function useDirectoryItems(input: ListDirectoryItemsInput | undefined) {
   const binary = getBinaryPath();
 
   const args = input ? buildItemsListArgs(input) : [];
@@ -356,7 +342,7 @@ export function useDirectoryItems(
   };
 }
 
-export function useFinderTags(): UseExecReturn<FinderTag[]> & { data: FinderTag[] } {
+export function useFinderTags() {
   const binary = getBinaryPath();
   const args = buildTagsListArgs();
 
@@ -371,7 +357,7 @@ export function useFinderTags(): UseExecReturn<FinderTag[]> & { data: FinderTag[
   };
 }
 
-export function useTagItems(input: ListTagItemsInput | undefined): UseExecReturn<Item[]> & { data: Item[] } {
+export function useTagItems(input: ListTagItemsInput | undefined) {
   const binary = getBinaryPath();
 
   const normalised = input ? normaliseTagName(input.name) : null;

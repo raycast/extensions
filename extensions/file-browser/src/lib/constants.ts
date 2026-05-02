@@ -28,7 +28,7 @@ export function getFinderTagColor(colorIndex: number | null | undefined): Color 
 }
 
 function isFinderTagColorIndex(colorIndex: number | null | undefined): colorIndex is FinderTagColorIndex {
-  return Number.isInteger(colorIndex) && colorIndex >= 0 && colorIndex <= 7;
+  return typeof colorIndex === "number" && Number.isInteger(colorIndex) && colorIndex >= 0 && colorIndex <= 7;
 }
 
 export const EMOJI = {

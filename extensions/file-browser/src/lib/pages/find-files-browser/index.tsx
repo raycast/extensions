@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Detail, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { ReactElement } from "react";
 import { Contents, type ContentsSortMode, type ContentsViewMode } from "$lib/components/contents";
 import type { ContentsSection } from "$lib/components/contents/types";
 import { isNavigableDirectory } from "$lib/item-behavior";
@@ -149,6 +150,10 @@ export function FindFilesBrowser({
   const handleCreateFolder = useCallback(
     async (name: string) => {
       const dir = artifact?.scopePath || scopePath;
+      if (!dir) {
+        await showToast({ style: Toast.Style.Failure, title: "No folder scope selected" });
+        return;
+      }
       try {
         await createItem({ directoryPath: dir, name });
         await showToast({
@@ -344,7 +349,7 @@ export function FindFilesBrowser({
     }
 
     let markdown: string;
-    let detailActions: JSX.Element | undefined;
+    let detailActions: ReactElement | undefined;
 
     switch (error.kind) {
       case "generation":

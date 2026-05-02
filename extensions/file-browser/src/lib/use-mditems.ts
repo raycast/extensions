@@ -2,24 +2,26 @@ import { environment } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useMemo } from "react";
 import { join } from "node:path";
-import type { MdItem, MditemsOptions } from "./types";
+import type { Item, SortMode } from "./types";
+
+type UseMditemsOptions = { sortMode?: SortMode };
 
 const binary = join(environment.assetsPath, "mditems");
 
-function parseOutput({ stdout }: { stdout: string }): MdItem[] {
+function parseOutput({ stdout }: { stdout: string }): Item[] {
   if (!stdout.trim()) {
     return [];
   }
 
   try {
-    return JSON.parse(stdout) as MdItem[];
+    return JSON.parse(stdout) as Item[];
   } catch (error) {
     console.warn("Failed to parse mditems output", error);
     return [];
   }
 }
 
-export function useMditems(directory: string | undefined, options?: MditemsOptions) {
+export function useMditems(directory: string | undefined, options?: UseMditemsOptions) {
   const args = useMemo(() => {
     if (!directory) {
       return [];
@@ -34,7 +36,7 @@ export function useMditems(directory: string | undefined, options?: MditemsOptio
     return result;
   }, [directory, options?.sortMode]);
 
-  const exec = useExec<MdItem[]>(binary, args, {
+  const exec = useExec<Item[]>(binary, args, {
     execute: args.length > 0,
     keepPreviousData: true,
     parseOutput,
