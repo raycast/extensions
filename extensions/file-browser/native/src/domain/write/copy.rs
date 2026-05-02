@@ -27,7 +27,7 @@ const COPYFILE_ALL: u32 = (1 << 0) | (1 << 2) | (1 << 3);
 // ── Public API ─────────────────────────────────────────────────
 
 /// Copy a file or directory to a destination directory.
-///
+const COPYFILE_ALL: u32 = (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3);
 /// - **Symlinks** are copied as symlinks (nofollow semantics).
 /// - **Regular files** are copied with best-effort metadata via Apple's
 ///   `copyfile(3)` (xattrs, ACLs, stat info). Falls back to `fs::copy` if
