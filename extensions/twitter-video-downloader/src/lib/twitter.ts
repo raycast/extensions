@@ -67,9 +67,19 @@ export interface FilenameVars {
 }
 
 export function formatFilename(template: string, vars: FilenameVars): string {
-  const replaced = template.replace(/\{(\w+)\}/g, (_, key) => {
-    const value = (vars as Record<string, string | number>)[key];
-    return value === undefined ? "" : String(value);
+  const replaced = template.replace(/\{(\w+)\}/g, (_, key: string) => {
+    switch (key) {
+      case "username":
+        return vars.username;
+      case "tweetId":
+        return vars.tweetId;
+      case "index":
+        return String(vars.index);
+      case "date":
+        return vars.date;
+      default:
+        return "";
+    }
   });
   return sanitizeFilename(replaced) || `${vars.username}_${vars.tweetId}`;
 }
