@@ -124,6 +124,13 @@ export const FALLBACK_VOICES: VoiceConfig[] = [
     gender: "female",
   },
   {
+    id: "English_nursery_teacher_vv2",
+    name: "Nursery Teacher",
+    category: "English",
+    description: "Sweet, natural, clear American English female voice with a warm, encouraging teaching tone.",
+    gender: "female",
+  },
+  {
     id: "English_expressive_narrator",
     name: "Expressive Narrator",
     category: "English",

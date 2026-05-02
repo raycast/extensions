@@ -166,6 +166,7 @@ Recommended English voices for paper listening:
 - `English_CalmWoman`: warm, clear, guided voice for audiobooks, documentaries, and education.
 - `English_captivating_female1`: bright, clear, energetic voice for explainers and knowledge sharing.
 - `English_AttractiveGirl`: natural, conversational voice for lighter articles and notes.
+- `English_nursery_teacher_vv2`: sweet, clear, encouraging voice for language learning and short teaching passages.
 
 ## Next Steps
 
