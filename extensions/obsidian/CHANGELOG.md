@@ -1,5 +1,9 @@
 # Obsidian Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix vault auto-discovery on Windows and Linux by reading `obsidian.json` from the per-platform Obsidian config dir
+
 ## [Fix] - 2026-04-10
 
 - Fix Open in New Obsidian Tab failing on Windows due to path separator handling
