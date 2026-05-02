@@ -1,0 +1,88 @@
+import { useMemo, useState } from "react";
+import { Action, ActionPanel, getPreferenceValues, Icon, LaunchProps, List, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+import { convert2rmb, createNzh, parsePreferences, type CommandPreferences } from "./core/rmb-converter-core";
+
+export default function ConvertToRmb(props: LaunchProps<{ arguments: { number?: string } }>) {
+  const preferences = getPreferenceValues<CommandPreferences>();
+  const [searchText, setSearchText] = useState(props.arguments.number ?? "");
+
+  const { decimalPlaces, roundingMode, moneyPrefix, yuanChar, zhengChar, moneyOptions } = useMemo(
+    () => parsePreferences(preferences),
+    [preferences],
+  );
+
+  const nzh = useMemo(() => createNzh({ moneyPrefix, yuanChar, zhengChar }), [moneyPrefix, yuanChar, zhengChar]);
+  const trimmedInput = searchText.trim();
+
+  const parsed = useMemo(
+    () => convert2rmb(trimmedInput, { decimalPlaces, roundingMode, moneyOptions, nzh }),
+    [trimmedInput, roundingMode, moneyOptions.unOmitYuan, moneyOptions.forceZheng, nzh],
+  );
+
+  return (
+    <List searchBarPlaceholder="Enter a number" searchText={searchText} onSearchTextChange={setSearchText} throttle>
+      <List.Section title="Result">
+        <List.Item
+          title={parsed.state === "ok" ? parsed.rmbValue : parsed.state === "idle" ? "Enter a number" : "Invalid input"}
+          subtitle={
+            parsed.state === "ok" && parsed.roundedValue !== trimmedInput
+              ? parsed.roundedValue
+              : parsed.state === "error"
+                ? parsed.message
+                : undefined
+          }
+          icon={
+            parsed.state === "ok" ? Icon.BankNote : parsed.state === "error" ? Icon.ExclamationMark : Icon.TextInput
+          }
+          actions={
+            <ActionPanel>
+              {parsed.state === "ok" ? (
+                <Action.CopyToClipboard title="Copy Result" content={parsed.rmbValue} />
+              ) : (
+                <Action
+                  title="Copy Result"
+                  icon={Icon.Clipboard}
+                  onAction={async () => {
+                    if (parsed.state === "error") {
+                      await showFailureToast(parsed.message, { title: "Invalid Input" });
+                    }
+                  }}
+                />
+              )}
+              <Action.OpenInBrowser
+                title="Report an Issue"
+                url="https://github.com/tofrankie/raycast-chinese-converter/issues"
+              />
+              <Action
+                title="Contact Author"
+                icon={Icon.Envelope}
+                onAction={() => open("mailto:1426203851@qq.com?subject=RMB%20Converter%20Feedback")}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+
+      <List.Section title="Feedback">
+        <List.Item
+          title="Report an issue or contact the author"
+          icon={Icon.Info}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser
+                title="Report Issue"
+                url="https://github.com/tofrankie/raycast-chinese-converter/issues"
+              />
+              <Action
+                title="Send Email"
+                icon={Icon.Envelope}
+                onAction={() => open("mailto:1426203851@qq.com?subject=RMB%20Converter%20Feedback")}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+    </List>
+  );
+}
