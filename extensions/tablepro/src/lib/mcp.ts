@@ -21,6 +21,11 @@ import { handshakeFilePath, tableProInstalled } from "./paths";
 import { startMCPDeeplink } from "./deeplink";
 import { Toast, showToast } from "@raycast/api";
 import { readStoredApiToken } from "./storage";
+import packageJson from "../../package.json";
+
+const CLIENT_NAME = "raycast-tablepro";
+const CLIENT_VERSION =
+  typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
 
 interface JsonRpcRequest {
   jsonrpc: "2.0";
@@ -29,15 +34,17 @@ interface JsonRpcRequest {
   params?: unknown;
 }
 
+type JsonRpcId = string | number | null;
+
 interface JsonRpcSuccess<T> {
   jsonrpc: "2.0";
-  id: string;
+  id: JsonRpcId;
   result: T;
 }
 
 interface JsonRpcError {
   jsonrpc: "2.0";
-  id: string;
+  id?: JsonRpcId;
   error: {
     code: number;
     message: string;
@@ -46,6 +53,9 @@ interface JsonRpcError {
 }
 
 type JsonRpcResponse<T> = JsonRpcSuccess<T> | JsonRpcError;
+
+const JSON_RPC_SESSION_NOT_FOUND = -32001;
+const JSON_RPC_FORBIDDEN = -32007;
 
 interface InitializeResult {
   protocolVersion: string;
@@ -248,16 +258,28 @@ async function postJsonRpc<T>(
   }
   const json = JSON.parse(text) as JsonRpcResponse<T>;
   if ("error" in json) {
-    const message = json.error.message;
-    if (
-      message.toLowerCase().includes("read-only") ||
-      message.toLowerCase().includes("read only")
-    ) {
-      throw new ExternalAccessDeniedError(message);
-    }
-    throw new Error(message);
+    throw classifyJsonRpcError(json.error);
   }
   return { result: json.result, sessionId: responseSessionId };
+}
+
+function classifyJsonRpcError(error: {
+  code: number;
+  message: string;
+  data?: unknown;
+}): Error {
+  if (error.code === JSON_RPC_SESSION_NOT_FOUND) {
+    resetSession();
+    return new MCPSessionExpiredError(error.message);
+  }
+  if (error.code === JSON_RPC_FORBIDDEN) {
+    return new ExternalAccessDeniedError(error.message);
+  }
+  const lowered = error.message.toLowerCase();
+  if (lowered.includes("read-only") || lowered.includes("read only")) {
+    return new ExternalAccessDeniedError(error.message);
+  }
+  return new Error(error.message);
 }
 
 function isAbortError(err: unknown): boolean {
@@ -288,7 +310,7 @@ async function ensureSession(
     const initParams = {
       protocolVersion: "2025-03-26",
       capabilities: {},
-      clientInfo: { name: "raycast-tablepro", version: "0.1.0" },
+      clientInfo: { name: CLIENT_NAME, version: CLIENT_VERSION },
     };
     const init = await postJsonRpc<InitializeResult>(
       "initialize",
@@ -302,7 +324,7 @@ async function ensureSession(
       throw new Error("MCP initialize did not return a session id");
     }
     sessionState = { sessionId: init.sessionId, initialized: false };
-    await postJsonRpc<unknown>(
+    await postJsonRpcNotification(
       "notifications/initialized",
       {},
       handshake,
@@ -381,6 +403,61 @@ async function rpc<T>(
     }
     throw err;
   }
+}
+
+async function postJsonRpcNotification(
+  method: string,
+  params: Record<string, unknown> | undefined,
+  handshake: MCPHandshake,
+  token: string,
+  sessionId: string | null,
+  signal?: AbortSignal,
+): Promise<void> {
+  const body = {
+    jsonrpc: "2.0" as const,
+    method,
+    params,
+  };
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+  if (sessionId) {
+    headers["Mcp-Session-Id"] = sessionId;
+  }
+  let response: Response;
+  try {
+    response = await fetch(mcpUrl(handshake), {
+      method: "POST",
+      headers,
+      body: JSON.stringify(body),
+      signal,
+    });
+  } catch (err) {
+    if (isAbortError(err)) throw err;
+    throw new MCPNotRunningError();
+  }
+  if (response.status === 401) {
+    resetSession();
+    throw new TokenRevokedError();
+  }
+  if (response.status === 404) {
+    resetSession();
+    const message = await readJsonRpcErrorMessage(
+      response,
+      "Session not found",
+    );
+    throw new MCPSessionExpiredError(message);
+  }
+  if (!response.ok) {
+    const message = await readJsonRpcErrorMessage(
+      response,
+      `TablePro MCP returned HTTP ${response.status}`,
+    );
+    throw new Error(message);
+  }
+  await response.text();
 }
 
 async function safeReadError(response: Response): Promise<string> {

@@ -244,6 +244,7 @@ function ExchangeView({ code }: { code: string }) {
   const { pop } = useNavigation();
 
   useEffect(() => {
+    cancelledRef.current = false;
     if (ranRef.current) return;
     ranRef.current = true;
     (async () => {
