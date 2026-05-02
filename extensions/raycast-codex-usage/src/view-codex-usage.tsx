@@ -85,6 +85,8 @@ type UsageData = {
 };
 
 const REQUEST_TIMEOUT_MS = 20000;
+const ACTIVITY_TIMEOUT_MS = 3000;
+const THREAD_LIST_LIMIT = 99;
 const CODEX_EXECUTABLE_CANDIDATES = [
   "/opt/homebrew/bin/codex",
   "/usr/local/bin/codex",
@@ -158,13 +160,13 @@ export default function Command() {
           <List.Item
             icon={Icon.Clock}
             title="Today"
-            subtitle={`${activity.todayCount} session${activity.todayCount !== 1 ? "s" : ""}`}
+            subtitle={formatSessionCount(activity.todayCount, activity.isPartial)}
             actions={<ActionPanel>{refreshAction}</ActionPanel>}
           />
           <List.Item
             icon={Icon.Calendar}
             title="Last 7 Days"
-            subtitle={`${activity.weekCount} session${activity.weekCount !== 1 ? "s" : ""}`}
+            subtitle={formatSessionCount(activity.weekCount, activity.isPartial)}
             actions={<ActionPanel>{refreshAction}</ActionPanel>}
           />
           <List.Item
@@ -311,7 +313,7 @@ function fetchCodexUsage(): Promise<UsageData> {
             id: 3,
             method: "thread/list",
             params: {
-              limit: 50,
+              limit: THREAD_LIST_LIMIT,
               sortKey: "updated_at",
               sortDirection: "desc",
               archived: false,
@@ -320,6 +322,7 @@ function fetchCodexUsage(): Promise<UsageData> {
           }) + "\n",
         );
         child.stdin.write(JSON.stringify({ id: 4, method: "skills/list", params: { cwd: homedir() } }) + "\n");
+        scheduleActivityTimeout();
         return;
       }
 
@@ -353,11 +356,6 @@ function fetchCodexUsage(): Promise<UsageData> {
 
       if (message.id === 2) {
         rateLimits = message.result as GetAccountRateLimitsResponse;
-        activityTimeout = setTimeout(() => {
-          if (rateLimits) {
-            finish(null, { rateLimits, threads, skills });
-          }
-        }, 1500);
       }
 
       if (message.id === 3) {
@@ -394,6 +392,18 @@ function fetchCodexUsage(): Promise<UsageData> {
 
       resolve(result as UsageData);
     }
+
+    function scheduleActivityTimeout() {
+      clearTimeout(activityTimeout);
+      activityTimeout = setTimeout(() => {
+        if (!rateLimits) {
+          scheduleActivityTimeout();
+          return;
+        }
+
+        finish(null, { rateLimits, threads, skills });
+      }, ACTIVITY_TIMEOUT_MS);
+    }
   });
 }
 
@@ -423,20 +433,19 @@ function getExtendedPath(): string {
 
 function getCodexWindows(response: GetAccountRateLimitsResponse): DisplayWindow[] {
   const snapshot = getCodexSnapshot(response);
-  const windows: DisplayWindow[] = [];
+  const candidates = [snapshot.primary, snapshot.secondary].flatMap((window, index) =>
+    window ? [{ window, index }] : [],
+  );
 
-  const fiveHourWindow = [snapshot.primary, snapshot.secondary].find((window) => window?.windowDurationMins === 300);
-  const weeklyWindow = [snapshot.primary, snapshot.secondary].find((window) => window?.windowDurationMins === 10080);
-
-  if (fiveHourWindow) {
-    windows.push({ id: "5h", label: "5H Limit", window: fiveHourWindow });
+  if (candidates.length === 0) {
+    return [];
   }
 
-  if (weeklyWindow) {
-    windows.push({ id: "weekly", label: "Weekly Limit", window: weeklyWindow });
-  }
-
-  return windows;
+  return candidates.map(({ window, index }) => ({
+    id: window.windowDurationMins === 300 ? "5h" : window.windowDurationMins === 10080 ? "weekly" : `window-${index}`,
+    label: getWindowLabel(window, index),
+    window,
+  }));
 }
 
 function getCodexSnapshot(response: GetAccountRateLimitsResponse): RateLimitSnapshot {
@@ -460,7 +469,36 @@ function getRecentActivity(threads: Thread[]) {
     todayCount: threads.filter((thread) => thread.updatedAt >= todayStart).length,
     weekCount: threads.filter((thread) => thread.updatedAt >= weekStart).length,
     totalCount: threads.length,
+    isPartial: threads.length === THREAD_LIST_LIMIT,
   };
+}
+
+function getWindowLabel(window: RateLimitWindow, index: number): string {
+  if (window.windowDurationMins === 300) {
+    return "5H Limit";
+  }
+
+  if (window.windowDurationMins === 10080) {
+    return "Weekly Limit";
+  }
+
+  if (index === 0) {
+    return "Primary Limit";
+  }
+
+  if (index === 1) {
+    return "Secondary Limit";
+  }
+
+  if (window.windowDurationMins) {
+    return `${window.windowDurationMins}m Limit`;
+  }
+
+  return `Limit ${index + 1}`;
+}
+
+function formatSessionCount(count: number, isPartial: boolean): string {
+  return `${count}${isPartial ? "+" : ""} ${count === 1 && !isPartial ? "session" : "sessions"}`;
 }
 
 function getRemainingColor(remainingPercent: number): Color {
