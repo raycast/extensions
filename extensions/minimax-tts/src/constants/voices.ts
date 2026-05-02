@@ -1,8 +1,92 @@
 import type { VoiceConfig, VoiceListResponse, MiniMaxVoicePayload } from "../api/types";
 
-export const DEFAULT_VOICE_ID = "Chinese (Mandarin)_News_Anchor";
+export const DEFAULT_VOICE_ID = "Chinese (Mandarin)_Radio_Host";
 
 export const FALLBACK_VOICES: VoiceConfig[] = [
+  {
+    id: "Chinese (Mandarin)_Radio_Host",
+    name: "电台男主播",
+    category: "中文普通话",
+    description: "有温度、节奏松弛的男声，适合论文、书稿和长时间导览型听书。",
+    gender: "male",
+  },
+  {
+    id: "Chinese (Mandarin)_Sincere_Adult",
+    name: "真诚青年",
+    category: "中文普通话",
+    description: "真诚稳重、同辈聊天感强，适合论文讲解和评注式阅读。",
+    gender: "male",
+  },
+  {
+    id: "Chinese (Mandarin)_Gentleman",
+    name: "温润男声",
+    category: "中文普通话",
+    description: "温润耐心、有书卷气，适合导师讲解感的长文阅读。",
+    gender: "male",
+  },
+  {
+    id: "Chinese (Mandarin)_Gentle_Youth",
+    name: "温润青年",
+    category: "中文普通话",
+    description: "年轻温和的男声，适合自然、低压力的材料阅读。",
+    gender: "male",
+  },
+  {
+    id: "Chinese (Mandarin)_Lyrical_Voice",
+    name: "抒情男声",
+    category: "中文普通话",
+    description: "柔和抒情的男声，适合散文化论文、随笔和讲稿。",
+    gender: "male",
+  },
+  {
+    id: "hunyin_6",
+    name: "舒朗男声",
+    category: "中文普通话",
+    description: "清亮、干脆利落、意气风发的男声，适合更有精神的论文导读和讲稿试听。",
+    gender: "male",
+  },
+  {
+    id: "male-qn-jingying",
+    name: "精英青年",
+    category: "中文普通话",
+    description: "专业清晰的青年男声，比高管音色更年轻、有同辈感。",
+    gender: "male",
+  },
+  {
+    id: "Chinese (Mandarin)_Wise_Women",
+    name: "阅历姐姐",
+    category: "中文普通话",
+    description: "知性娓娓的女性声音，适合前辈引路式的论文听读。",
+    gender: "female",
+  },
+  {
+    id: "Chinese (Mandarin)_Gentle_Senior",
+    name: "温柔学姐",
+    category: "中文普通话",
+    description: "温婉柔和、娓娓道来且亲切有感染力的女性声音，适合书与小说、纪录片和论文随听。",
+    gender: "female",
+  },
+  {
+    id: "Chinese (Mandarin)_Warm_Bestie",
+    name: "温暖闺蜜",
+    category: "中文普通话",
+    description: "温柔清亮、舒缓且充满关切的年轻女声，亲切自然，适合疗愈感听读。",
+    gender: "female",
+  },
+  {
+    id: "Chinese_sweet_girl_vv1",
+    name: "甜美少女",
+    category: "中文普通话",
+    description: "清脆、富有表现力且朝气蓬勃的年轻女声，适合轻松文章、笔记和更活泼的短段落听读。",
+    gender: "female",
+  },
+  {
+    id: "Chinese (Mandarin)_Reliable_Executive",
+    name: "沉稳高管",
+    category: "中文普通话",
+    description: "沉稳可靠的中年男性声音，适合正式材料和政策文本。",
+    gender: "male",
+  },
   {
     id: "Chinese (Mandarin)_News_Anchor",
     name: "新闻女声",
@@ -11,31 +95,10 @@ export const FALLBACK_VOICES: VoiceConfig[] = [
     gender: "female",
   },
   {
-    id: "Chinese (Mandarin)_Warm_Bestie",
-    name: "温暖闺蜜",
-    category: "中文普通话",
-    description: "温暖清脆的青年女性声音。",
-    gender: "female",
-  },
-  {
-    id: "Chinese (Mandarin)_Reliable_Executive",
-    name: "沉稳高管",
-    category: "中文普通话",
-    description: "沉稳可靠的中年男性声音。",
-    gender: "male",
-  },
-  {
     id: "Chinese (Mandarin)_Male_Announcer",
     name: "播报男声",
     category: "中文普通话",
-    description: "富有磁性的中年男性播报员声音。",
-    gender: "male",
-  },
-  {
-    id: "Chinese (Mandarin)_Gentleman",
-    name: "温润男声",
-    category: "中文普通话",
-    description: "温润磁性的青年男性声音。",
+    description: "富有磁性的中年男性播报员声音，适合庄重文本。",
     gender: "male",
   },
   {

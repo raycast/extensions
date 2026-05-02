@@ -183,27 +183,63 @@
       "required": false,
       "title": "Default Voice",
       "description": "Voice used for Quick Read command",
-      "default": "Chinese (Mandarin)_News_Anchor",
+      "default": "Chinese (Mandarin)_Radio_Host",
       "data": [
+        {
+          "title": "Radio Host (Chinese Male, Long Reading)",
+          "value": "Chinese (Mandarin)_Radio_Host"
+        },
+        {
+          "title": "Sincere Adult (Chinese Male, Conversational)",
+          "value": "Chinese (Mandarin)_Sincere_Adult"
+        },
+        {
+          "title": "Gentleman (Chinese Male, Scholarly)",
+          "value": "Chinese (Mandarin)_Gentleman"
+        },
+        {
+          "title": "Gentle Youth (Chinese Male, Warm)",
+          "value": "Chinese (Mandarin)_Gentle_Youth"
+        },
+        {
+          "title": "Lyrical Voice (Chinese Male, Soft)",
+          "value": "Chinese (Mandarin)_Lyrical_Voice"
+        },
+        {
+          "title": "Bright Clear Male (Chinese Male, Brisk)",
+          "value": "hunyin_6"
+        },
+        {
+          "title": "Elite Young Man (Chinese Male, Clear)",
+          "value": "male-qn-jingying"
+        },
+        {
+          "title": "Wise Woman (Chinese Female, Knowledgeable)",
+          "value": "Chinese (Mandarin)_Wise_Women"
+        },
+        {
+          "title": "Gentle Senior (Chinese Female, Warm Storytelling)",
+          "value": "Chinese (Mandarin)_Gentle_Senior"
+        },
+        {
+          "title": "Warm Bestie (Chinese Female, Comforting)",
+          "value": "Chinese (Mandarin)_Warm_Bestie"
+        },
+        {
+          "title": "Sweet Girl (Chinese Female, Expressive)",
+          "value": "Chinese_sweet_girl_vv1"
+        },
+        {
+          "title": "Reliable Executive (Chinese Male, Formal)",
+          "value": "Chinese (Mandarin)_Reliable_Executive"
+        },
         {
           "title": "News Anchor (Chinese Female)",
           "value": "Chinese (Mandarin)_News_Anchor"
         },
         {
-          "title": "Warm Bestie (Chinese Female)",
-          "value": "Chinese (Mandarin)_Warm_Bestie"
-        },
-        {
-          "title": "Reliable Executive (Chinese Male)",
-          "value": "Chinese (Mandarin)_Reliable_Executive"
-        },
-        {
           "title": "Male Announcer (Chinese Male)",
           "value": "Chinese (Mandarin)_Male_Announcer"
-        },
-        {
-          "title": "Gentleman (Chinese Male)",
-          "value": "Chinese (Mandarin)_Gentleman"
         },
         {
           "title": "Expressive Narrator (English)",

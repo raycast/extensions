@@ -34,7 +34,7 @@ The CLI is still useful for local setup and smoke tests:
 
 ```bash
 mmx auth status
-mmx speech synthesize --text "测试。" --voice "Chinese (Mandarin)_News_Anchor" --out test.mp3
+mmx speech synthesize --text "测试。" --voice "Chinese (Mandarin)_Radio_Host" --out test.mp3
 mmx speech voices --language chinese --output json
 ```
 
@@ -148,6 +148,18 @@ MiniMax's current docs say the source clone audio should be 10 seconds to 5 minu
 - Speed changes apply to the next segment because each segment is synthesized separately; paused readings remember the adjusted speed when resumed.
 
 This is designed for short papers, article excerpts, documentation pages, and other medium-length selections rather than full audiobook production.
+
+Recommended Mandarin voices for paper listening:
+
+- `Chinese (Mandarin)_Radio_Host`: relaxed long-form host tone, now the built-in default for new installs.
+- `Chinese (Mandarin)_Sincere_Adult`: sincere peer-style explanation.
+- `Chinese (Mandarin)_Gentleman`: warmer, more scholarly mentor tone.
+- `hunyin_6`: bright, brisk male voice for a more energetic paper walkthrough.
+- `male-qn-jingying`: clear younger professional voice.
+- `Chinese (Mandarin)_Wise_Women`: knowledgeable female voice for a senior-guide tone.
+- `Chinese (Mandarin)_Gentle_Senior`: warm storytelling female voice for soft lecture-style listening.
+- `Chinese (Mandarin)_Warm_Bestie`: soft, clear, comforting female voice for relaxed listening.
+- `Chinese_sweet_girl_vv1`: bright, expressive young female voice for lighter notes and short passages.
 
 ## Next Steps
 
