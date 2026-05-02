@@ -9,10 +9,11 @@ MiniMax is a strong fit for a modern Raycast reading workflow:
 - **Chinese and English support**: MiniMax Speech works well for both Chinese and English, making it practical for bilingual articles, papers, web pages, and notes.
 - **Multilingual reading**: the current MiniMax speech models are built for multilingual speech generation and include language hints such as Chinese, Cantonese, English, Japanese, and Korean.
 - **Modern model family**: MiniMax is an active multimodal model platform with current speech, text, video, image, and agent-oriented model offerings. This extension uses the Speech 2.8 family by default.
+- **Natural fit for AI-heavy Raycast workflows**: if you already use Raycast for AI, coding, research, or writing workflows and also have access to MiniMax API keys, this extension keeps paper and document listening inside the same launcher workflow instead of sending text through a separate app.
 - **Good value for daily reading**: the model quality is strong enough for long-form listening, while the pricing makes it a practical choice for frequent Raycast use.
 - **Current TTS stack**: many older TTS extensions still depend on models and APIs that have not kept pace. MiniMax keeps the reading experience closer to the current generation of speech models.
 
-The goal is not just to "play audio", but to make 1,000-5,000 character selections pleasant to listen to: quick start, voice selection, chunk-level resume, and a simple stop/restart workflow.
+The goal is not just to "play audio", but to make 1,000-5,000 character selections pleasant to listen to: quick start, voice selection, speed control, chunk-level resume, stop/restart, menu-bar playback status, and custom or cloned voices.
 
 ## Why This Uses the HTTP API
 
