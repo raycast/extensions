@@ -178,12 +178,4 @@ export const patterns: PatternDefinition[] = [
     category: "system",
     description: "Vehicle Identification Number",
   },
-
-  // Generic fallback — listed last so specific patterns win on overlap ties.
-  {
-    name: "SESSION_TOKEN",
-    pattern: /\b[A-Za-z0-9]{32,128}\b/g,
-    category: "secrets",
-    description: "Session token (generic long alphanumeric)",
-  },
 ];

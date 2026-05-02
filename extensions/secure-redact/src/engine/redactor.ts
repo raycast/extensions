@@ -94,7 +94,7 @@ function maskValue(value: string, type: string): string {
     case "IPV4": {
       const ipParts = value.split(".");
       if (ipParts.length === 4) {
-        return `${ipParts[0]}.${ipParts[1]}.***.***.`;
+        return `${ipParts[0]}.${ipParts[1]}.***.***`;
       }
       return "***.***.***.***";
     }

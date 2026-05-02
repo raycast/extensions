@@ -1,12 +1,13 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "secure-redact",
   "title": "Secure Redact",
   "description": "100% offline data redaction for sensitive information",
   "icon": "extension-icon.png",
   "author": "husnainfareed",
   "categories": [
-    "Developer Tools",
-    "Productivity"
+    "Security",
+    "Developer Tools"
   ],
   "license": "MIT",
   "platforms": [
@@ -120,8 +121,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.15",
-    "@raycast/utils": "^1.5.2"
+    "@raycast/api": "^1.104.15"
   },
   "devDependencies": {
     "@types/node": "22.19.17",

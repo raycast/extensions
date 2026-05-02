@@ -1,16 +1,3 @@
-import { getPreferenceValues } from "@raycast/api";
-import { RedactionMode, DetectionPolicy } from "./types";
-
-export interface Preferences {
-  defaultMode: RedactionMode;
-  defaultPolicy: DetectionPolicy;
-  enableAudit: boolean;
-}
-
-export function getPreferences(): Preferences {
-  return getPreferenceValues<Preferences>();
-}
-
 export const policyColors = {
   secrets: "#FF6B6B",
   balanced: "#4ECDC4",

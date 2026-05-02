@@ -1,13 +1,6 @@
 import { Clipboard, showHUD, getPreferenceValues } from "@raycast/api";
 import { redact } from "./engine";
 import { addAuditEntry, getThreatFeeds } from "./storage";
-import { RedactionMode, DetectionPolicy } from "./types";
-
-interface Preferences {
-  defaultMode: RedactionMode;
-  defaultPolicy: DetectionPolicy;
-  enableAudit: boolean;
-}
 
 export default async function RedactClipboard() {
   try {
@@ -18,7 +11,7 @@ export default async function RedactClipboard() {
       return;
     }
 
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences.RedactClipboard>();
     const feeds = await getThreatFeeds();
 
     const result = redact(

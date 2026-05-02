@@ -37,11 +37,6 @@ Best regards,
 John
 `.trim();
 
-interface Preferences {
-  defaultMode: RedactionMode;
-  defaultPolicy: DetectionPolicy;
-}
-
 export default function Workbench() {
   const [text, setText] = useState("");
   const [mode, setMode] = useState<RedactionMode>("typed");
@@ -52,7 +47,7 @@ export default function Workbench() {
   } | null>(null);
 
   useEffect(() => {
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences.Workbench>();
     setMode(preferences.defaultMode || "typed");
     setPolicy(preferences.defaultPolicy || "balanced");
   }, []);

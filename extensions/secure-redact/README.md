@@ -26,7 +26,7 @@ Coverage scales with the selected detection policy. Default: **Balanced**.
 
 ### Patterns
 
-**Secrets** — JWT, AWS access key, GitHub PAT, Stripe key, Google API key, password fields, database URLs (Postgres/MySQL/MongoDB), PEM private keys, generic session tokens.
+**Secrets** — JWT, AWS access key, GitHub PAT, Stripe key, Google API key, password fields, database URLs (Postgres/MySQL/MongoDB), PEM private keys.
 
 **Personal** — Email, US phone numbers, SSN (with area-code validation).
 
