@@ -2,7 +2,6 @@ import { ActionPanel, Action, List, getPreferenceValues, Icon, Color, open } fro
 import { useState, useMemo } from "react";
 import os from "os";
 import path from "path";
-import { Preferences } from "./types";
 import { unescapeHTML, formatFullDate, parseTorrentTitle } from "./utils/formatters";
 import { handleDownloadAction } from "./utils/actions";
 import { useSearchTorrents } from "./hooks/useSearchTorrents";

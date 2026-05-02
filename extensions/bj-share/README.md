@@ -33,7 +33,7 @@ Once your feeds are configured, open the **Search Torrents** command to view the
 * **Dropdown Menu:** Switch between your configured RSS feeds using the menu in the top right.
 * **Smart Search:** Use the search bar to filter torrents by title or specifications. If no results are found, a **"Search on Site"** action is provided.
 * **Detailed Metadata:** The list displays real-time statistics including seeders, leechers, file size, release tags (e.g., 4K, 1080p, x265, HEVC), and freeleech status.
-* **Localized Dates:** Release dates are formatted according to the `en-US` locale.
+* **Release Dates:** Dates are formatted clearly for better readability.
 
 ![alt text](metadata/bj-share-3.png)
 

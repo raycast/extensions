@@ -7,10 +7,6 @@ export interface TorrentItem {
   leechers?: string;
 }
 
-export interface Preferences {
-  downloadDir?: string;
-}
-
 export interface Feed {
   id: string;
   name: string;

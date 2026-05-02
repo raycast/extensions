@@ -21,8 +21,7 @@ export function unescapeHTML(str: string): string {
 
 export function formatFullDate(dateString?: string) {
   if (!dateString) return "Unknown Date";
-  const locale = "en-US";
-  return new Intl.DateTimeFormat(locale, {
+  return new Intl.DateTimeFormat(undefined, {
     day: "2-digit",
     month: "long",
     year: "numeric",

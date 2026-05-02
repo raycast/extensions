@@ -1,5 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { showToast, Toast, open } from "@raycast/api";
 import fs from "fs";
 import path from "path";
 import { unescapeHTML } from "./formatters";
@@ -36,7 +35,7 @@ export async function handleDownloadAction(item: TorrentItem, targetDir: string)
     fs.writeFileSync(filePath, buffer);
     toast.style = Toast.Style.Success;
     toast.title = "Success!";
-    exec(`open "${filePath}"`);
+    await open(filePath);
   } catch (error: unknown) {
     toast.style = Toast.Style.Failure;
     toast.title = "Download Error";
