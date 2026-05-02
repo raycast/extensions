@@ -14,7 +14,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { addCustomVoices, collectCustomVoiceIds, FALLBACK_VOICES, groupVoicesByCategory } from "./constants/voices";
 import { synthesizeSpeech, buildOptionsFromPrefs, listVoices, TTSApiError } from "./api/minimax-tts";
 import { chunkText } from "./utils/text-chunker";
-import { AudioPlayer } from "./utils/audio-player";
+import { AudioPlayer, clearExternalStopRequest, hasExternalStopRequest } from "./utils/audio-player";
 import { getQuickReadVoiceOverride, setQuickReadVoiceOverride } from "./utils/voice-preferences";
 import { readCachedVoices, writeCachedVoices } from "./utils/voice-cache";
 import { buildTextPreview, clearPlaybackState, writePlaybackState } from "./utils/playback-state";
@@ -108,6 +108,7 @@ export default function ReadWithVoice() {
 
       // Stop any prior in-component playback before kicking off a new one.
       playerRef.current.stopPlayback();
+      clearExternalStopRequest();
       const player = new AudioPlayer();
       playerRef.current = player;
 
@@ -123,7 +124,7 @@ export default function ReadWithVoice() {
         await writePlaybackSpeed(currentSpeed);
 
         for (let i = 0; i < total; i++) {
-          if (player.isStopped()) break;
+          if (player.isStopped() || hasExternalStopRequest()) break;
 
           // Pick up any speed change made by Speed Up / Slow Down between chunks.
           currentSpeed = (await readPlaybackSpeed()) ?? currentSpeed;
@@ -142,7 +143,7 @@ export default function ReadWithVoice() {
           });
 
           const audio = await synthesizeSpeech(chunks[i], { ...options, speed: currentSpeed });
-          if (player.isStopped()) break;
+          if (player.isStopped() || hasExternalStopRequest()) break;
 
           setProgress({ voiceId: voice.id, phase: "playing", chunkIndex: i, chunkTotal: total });
           await writePlaybackState({
@@ -160,10 +161,14 @@ export default function ReadWithVoice() {
           await player.playAudio(audio);
         }
 
-        if (!player.isStopped()) {
+        if (!player.isStopped() && !hasExternalStopRequest()) {
           await clearPlaybackState();
           await clearPlaybackSpeed();
           await showToast({ style: Toast.Style.Success, title: "Playback complete", message: voice.name });
+        } else if (hasExternalStopRequest()) {
+          await clearPlaybackState();
+          await clearPlaybackSpeed();
+          clearExternalStopRequest();
         }
       } catch (error) {
         await clearPlaybackState();
