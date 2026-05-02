@@ -193,7 +193,7 @@ function SchemasView({
     revalidate,
   } = useCachedPromise(
     (id: string, db: string) =>
-      listSchemas(id, db, { signal: abortable.current?.signal }),
+      listSchemas(id, { database: db, signal: abortable.current?.signal }),
     [connection.id, database],
     { keepPreviousData: true, abortable },
   );

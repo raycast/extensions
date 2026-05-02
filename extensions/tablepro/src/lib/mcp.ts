@@ -1,100 +1,147 @@
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import {
+  StreamableHTTPClientTransport,
+  StreamableHTTPError,
+} from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+import { McpError } from "@modelcontextprotocol/sdk/types.js";
+import { Toast, showToast } from "@raycast/api";
 import { promises as fs } from "fs";
-import { randomUUID } from "crypto";
 import {
   ColumnInfo,
   Connection,
+  ConnectionStatus,
   DatabaseInfo,
+  ExternalAccessDeniedError,
   MCPHandshake,
   MCPNotRunningError,
   MCPSessionExpiredError,
+  ProgressEvent,
   QueryHistoryEntry,
   QueryResult,
   RecentTab,
+  RemoteAccessUnsupportedError,
   SchemaInfo,
   TableInfo,
   TableProNotInstalledError,
   TokenMissingError,
   TokenRevokedError,
-  ExternalAccessDeniedError,
 } from "./types";
 import { handshakeFilePath, tableProInstalled } from "./paths";
 import { startMCPDeeplink } from "./deeplink";
-import { Toast, showToast } from "@raycast/api";
 import { readStoredApiToken } from "./storage";
 import packageJson from "../../package.json";
+
+export type { ProgressEvent } from "./types";
 
 const CLIENT_NAME = "raycast-tablepro";
 const CLIENT_VERSION =
   typeof packageJson.version === "string" ? packageJson.version : "0.0.0";
-
-interface JsonRpcRequest {
-  jsonrpc: "2.0";
-  id: string;
-  method: string;
-  params?: unknown;
-}
-
-type JsonRpcId = string | number | null;
-
-interface JsonRpcSuccess<T> {
-  jsonrpc: "2.0";
-  id: JsonRpcId;
-  result: T;
-}
-
-interface JsonRpcError {
-  jsonrpc: "2.0";
-  id?: JsonRpcId;
-  error: {
-    code: number;
-    message: string;
-    data?: unknown;
-  };
-}
-
-type JsonRpcResponse<T> = JsonRpcSuccess<T> | JsonRpcError;
-
-const JSON_RPC_SESSION_NOT_FOUND = -32001;
-const JSON_RPC_FORBIDDEN = -32007;
-
-interface InitializeResult {
-  protocolVersion: string;
-}
+const DEFAULT_ROW_LIMIT = 200;
+const HANDSHAKE_RETRY_DELAY_MS = 600;
+const HANDSHAKE_MAX_RETRIES = 12;
+const PAIRING_EXCHANGE_TIMEOUT_MS = 10_000;
+const FORBIDDEN_CODE = -32_007;
+const REQUEST_TIMEOUT_CODE = -32_001;
+const CONNECTION_CLOSED_CODE = -32_000;
 
 export interface MCPCallOptions {
   signal?: AbortSignal;
+  onProgress?: (progress: ProgressEvent) => void;
 }
 
-const DEFAULT_ROW_LIMIT = 200;
+export interface SearchHistoryOptions {
+  since?: number;
+  until?: number;
+  signal?: AbortSignal;
+}
+
+let clientPromise: Promise<Client> | null = null;
+
+async function getClient(): Promise<Client> {
+  if (clientPromise) return clientPromise;
+  const promise = createClient();
+  clientPromise = promise;
+  promise.catch(() => {
+    if (clientPromise === promise) clientPromise = null;
+  });
+  return promise;
+}
+
+export function resetClient(): void {
+  const previous = clientPromise;
+  clientPromise = null;
+  if (!previous) return;
+  previous
+    .then((client) => client.close().catch(() => undefined))
+    .catch(() => undefined);
+}
+
+async function createClient(): Promise<Client> {
+  const handshake = await ensureHandshake(true);
+  const token = await getApiToken();
+  const transport = new StreamableHTTPClientTransport(
+    new URL(mcpUrl(handshake)),
+    {
+      requestInit: {
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    },
+  );
+  const client = new Client(
+    { name: CLIENT_NAME, version: CLIENT_VERSION },
+    { capabilities: {} },
+  );
+  try {
+    await client.connect(transport);
+  } catch (err) {
+    await transport.close().catch(() => undefined);
+    throw translateTransportError(err);
+  }
+  transport.onerror = () => {
+    if (clientPromise) resetClient();
+  };
+  client.onclose = () => {
+    if (clientPromise) resetClient();
+  };
+  return client;
+}
+
+function mcpUrl(handshake: MCPHandshake): string {
+  return `http${handshake.tls ? "s" : ""}://127.0.0.1:${handshake.port}/mcp`;
+}
 
 async function readHandshake(): Promise<MCPHandshake | null> {
   try {
     const raw = await fs.readFile(handshakeFilePath(), "utf8");
     const parsed = JSON.parse(raw) as MCPHandshake;
-    if (typeof parsed.port !== "number" || typeof parsed.token !== "string") {
+    if (typeof parsed.port !== "number" || typeof parsed.token !== "string")
       return null;
-    }
-    return parsed;
+    const fingerprint =
+      typeof parsed.tlsCertFingerprint === "string"
+        ? parsed.tlsCertFingerprint
+        : undefined;
+    return { ...parsed, tlsCertFingerprint: fingerprint };
   } catch {
     return null;
   }
 }
 
-const HANDSHAKE_RETRY_DELAY_MS = 600;
-const HANDSHAKE_MAX_RETRIES = 12;
+async function clearStaleHandshake(): Promise<void> {
+  try {
+    await fs.unlink(handshakeFilePath());
+  } catch {
+    // ignore
+  }
+}
 
 async function ensureHandshake(
   allowAutoStart: boolean,
   signal?: AbortSignal,
 ): Promise<MCPHandshake> {
-  if (!tableProInstalled()) {
-    throw new TableProNotInstalledError();
-  }
+  if (!tableProInstalled()) throw new TableProNotInstalledError();
   const existing = await readHandshake();
-  if (existing) return existing;
-  if (!allowAutoStart) {
-    throw new MCPNotRunningError();
-  }
+  if (existing) return assertLoopbackHandshake(existing);
+  if (!allowAutoStart) throw new MCPNotRunningError();
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: "Starting TablePro…",
@@ -102,28 +149,32 @@ async function ensureHandshake(
   try {
     await startMCPDeeplink();
     for (let attempt = 0; attempt < HANDSHAKE_MAX_RETRIES; attempt += 1) {
-      if (signal?.aborted) {
-        throw signal.reason instanceof Error
-          ? signal.reason
-          : new Error("Aborted");
-      }
+      throwIfAborted(signal);
       await delay(HANDSHAKE_RETRY_DELAY_MS, signal);
       const handshake = await readHandshake();
       if (handshake) {
         toast.style = Toast.Style.Success;
         toast.title = "TablePro is ready";
-        return handshake;
+        return assertLoopbackHandshake(handshake);
       }
     }
     throw new MCPNotRunningError();
   } catch (err) {
     toast.style = Toast.Style.Failure;
     toast.title = "Could not start TablePro";
-    if (err instanceof Error && err.message) {
-      toast.message = err.message;
-    }
+    if (err instanceof Error && err.message) toast.message = err.message;
     throw err;
   }
+}
+
+function assertLoopbackHandshake(handshake: MCPHandshake): MCPHandshake {
+  if (handshake.tls) throw new RemoteAccessUnsupportedError();
+  return handshake;
+}
+
+function throwIfAborted(signal?: AbortSignal): void {
+  if (!signal?.aborted) return;
+  throw signal.reason instanceof Error ? signal.reason : new Error("Aborted");
 }
 
 function delay(ms: number, signal?: AbortSignal): Promise<void> {
@@ -138,7 +189,7 @@ function delay(ms: number, signal?: AbortSignal): Promise<void> {
       signal?.removeEventListener("abort", onAbort);
       resolve();
     }, ms);
-    const onAbort = () => {
+    const onAbort = (): void => {
       clearTimeout(timeout);
       reject(
         signal?.reason instanceof Error ? signal.reason : new Error("Aborted"),
@@ -148,382 +199,64 @@ function delay(ms: number, signal?: AbortSignal): Promise<void> {
   });
 }
 
-async function clearStaleHandshake(): Promise<void> {
-  try {
-    await fs.unlink(handshakeFilePath());
-  } catch {
-    // ignore
-  }
-}
-
 export async function readApiToken(): Promise<string | undefined> {
   return readStoredApiToken();
 }
 
 async function getApiToken(): Promise<string> {
   const token = await readApiToken();
-  if (!token) {
-    throw new TokenMissingError();
-  }
+  if (!token) throw new TokenMissingError();
   return token;
 }
 
-function nextRequestId(): string {
-  return `tp-${randomUUID()}`;
-}
-
-interface SessionState {
-  sessionId: string;
-  initialized: boolean;
-}
-
-let sessionState: SessionState | null = null;
-let sessionInFlight: Promise<string> | null = null;
-
-function resetSession(): void {
-  sessionState = null;
-  sessionInFlight = null;
-}
-
-function mcpUrl(handshake: MCPHandshake): string {
-  return `http${handshake.tls ? "s" : ""}://127.0.0.1:${handshake.port}/mcp`;
-}
-
-async function postJsonRpc<T>(
-  method: string,
-  params: Record<string, unknown> | undefined,
-  handshake: MCPHandshake,
-  token: string,
-  sessionId: string | null,
-  signal?: AbortSignal,
-): Promise<{ result: T; sessionId: string | null }> {
-  const body: JsonRpcRequest = {
-    jsonrpc: "2.0",
-    id: nextRequestId(),
-    method,
-    params,
-  };
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    Authorization: `Bearer ${token}`,
-  };
-  if (sessionId) {
-    headers["Mcp-Session-Id"] = sessionId;
+function translateTransportError(err: unknown): Error {
+  if (err instanceof StreamableHTTPError) {
+    if (err.code === 401) return new TokenRevokedError();
+    if (err.code === 403) return new ExternalAccessDeniedError(err.message);
+    if (err.code === 404) return new MCPSessionExpiredError(err.message);
   }
-  let response: Response;
-  try {
-    response = await fetch(mcpUrl(handshake), {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-      signal,
-    });
-  } catch (err) {
-    if (isAbortError(err)) {
-      throw err;
+  if (err instanceof McpError) {
+    if (err.code === FORBIDDEN_CODE)
+      return new ExternalAccessDeniedError(err.message);
+    if (err.code === CONNECTION_CLOSED_CODE) return new MCPNotRunningError();
+    if (err.code === REQUEST_TIMEOUT_CODE) return new Error(err.message);
+    const lowered = err.message.toLowerCase();
+    if (lowered.includes("read-only") || lowered.includes("read only")) {
+      return new ExternalAccessDeniedError(err.message);
     }
-    throw new MCPNotRunningError();
+    return new Error(err.message);
   }
-  if (response.status === 401) {
-    resetSession();
-    throw new TokenRevokedError();
-  }
-  if (response.status === 403) {
-    const message = await readJsonRpcErrorMessage(response, "Forbidden");
-    throw new ExternalAccessDeniedError(message);
-  }
-  if (response.status === 404) {
-    resetSession();
-    const message = await readJsonRpcErrorMessage(
-      response,
-      "Session not found",
-    );
-    throw new MCPSessionExpiredError(message);
-  }
-  if (!response.ok) {
-    const message = await readJsonRpcErrorMessage(
-      response,
-      `TablePro MCP returned HTTP ${response.status}`,
-    );
-    throw new Error(message);
-  }
-  const responseSessionId = response.headers.get("mcp-session-id");
-  if (response.status === 202) {
-    return { result: undefined as T, sessionId: responseSessionId };
-  }
-  const text = await response.text();
-  if (!text) {
-    return { result: undefined as T, sessionId: responseSessionId };
-  }
-  const json = JSON.parse(text) as JsonRpcResponse<T>;
-  if ("error" in json) {
-    throw classifyJsonRpcError(json.error);
-  }
-  return { result: json.result, sessionId: responseSessionId };
-}
-
-function classifyJsonRpcError(error: {
-  code: number;
-  message: string;
-  data?: unknown;
-}): Error {
-  if (error.code === JSON_RPC_SESSION_NOT_FOUND) {
-    resetSession();
-    return new MCPSessionExpiredError(error.message);
-  }
-  if (error.code === JSON_RPC_FORBIDDEN) {
-    return new ExternalAccessDeniedError(error.message);
-  }
-  const lowered = error.message.toLowerCase();
-  if (lowered.includes("read-only") || lowered.includes("read only")) {
-    return new ExternalAccessDeniedError(error.message);
-  }
-  return new Error(error.message);
-}
-
-function isAbortError(err: unknown): boolean {
-  if (err instanceof Error && err.name === "AbortError") return true;
-  if (
-    typeof err === "object" &&
-    err !== null &&
-    "name" in err &&
-    (err as { name?: unknown }).name === "AbortError"
-  ) {
-    return true;
-  }
-  return false;
-}
-
-async function ensureSession(
-  handshake: MCPHandshake,
-  token: string,
-  signal?: AbortSignal,
-): Promise<string> {
-  if (sessionState && sessionState.initialized) {
-    return sessionState.sessionId;
-  }
-  if (sessionInFlight) {
-    return sessionInFlight;
-  }
-  sessionInFlight = (async () => {
-    const initParams = {
-      protocolVersion: "2025-03-26",
-      capabilities: {},
-      clientInfo: { name: CLIENT_NAME, version: CLIENT_VERSION },
-    };
-    const init = await postJsonRpc<InitializeResult>(
-      "initialize",
-      initParams,
-      handshake,
-      token,
-      null,
-      signal,
-    );
-    if (!init.sessionId) {
-      throw new Error("MCP initialize did not return a session id");
-    }
-    sessionState = { sessionId: init.sessionId, initialized: false };
-    await postJsonRpcNotification(
-      "notifications/initialized",
-      {},
-      handshake,
-      token,
-      init.sessionId,
-      signal,
-    );
-    sessionState.initialized = true;
-    return init.sessionId;
-  })();
-  try {
-    return await sessionInFlight;
-  } finally {
-    sessionInFlight = null;
-  }
-}
-
-async function rpc<T>(
-  method: string,
-  params: Record<string, unknown> = {},
-  signal?: AbortSignal,
-): Promise<T> {
-  const token = await getApiToken();
-  let handshake = await ensureHandshake(true, signal);
-  let sessionId: string;
-  try {
-    sessionId = await ensureSession(handshake, token, signal);
-  } catch (err) {
-    resetSession();
-    if (err instanceof MCPNotRunningError) {
-      await clearStaleHandshake();
-      handshake = await ensureHandshake(true, signal);
-      sessionId = await ensureSession(handshake, token, signal);
-    } else {
-      throw err;
-    }
-  }
-  try {
-    const { result } = await postJsonRpc<T>(
-      method,
-      params,
-      handshake,
-      token,
-      sessionId,
-      signal,
-    );
-    return result;
-  } catch (err) {
-    if (err instanceof MCPSessionExpiredError) {
-      resetSession();
-      const fresh = await ensureSession(handshake, token, signal);
-      const { result } = await postJsonRpc<T>(
-        method,
-        params,
-        handshake,
-        token,
-        fresh,
-        signal,
-      );
-      return result;
-    }
-    if (err instanceof MCPNotRunningError) {
-      resetSession();
-      await clearStaleHandshake();
-      handshake = await ensureHandshake(true, signal);
-      const fresh = await ensureSession(handshake, token, signal);
-      const { result } = await postJsonRpc<T>(
-        method,
-        params,
-        handshake,
-        token,
-        fresh,
-        signal,
-      );
-      return result;
-    }
-    throw err;
-  }
-}
-
-async function postJsonRpcNotification(
-  method: string,
-  params: Record<string, unknown> | undefined,
-  handshake: MCPHandshake,
-  token: string,
-  sessionId: string | null,
-  signal?: AbortSignal,
-): Promise<void> {
-  const body = {
-    jsonrpc: "2.0" as const,
-    method,
-    params,
-  };
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    Accept: "application/json",
-    Authorization: `Bearer ${token}`,
-  };
-  if (sessionId) {
-    headers["Mcp-Session-Id"] = sessionId;
-  }
-  let response: Response;
-  try {
-    response = await fetch(mcpUrl(handshake), {
-      method: "POST",
-      headers,
-      body: JSON.stringify(body),
-      signal,
-    });
-  } catch (err) {
-    if (isAbortError(err)) throw err;
-    throw new MCPNotRunningError();
-  }
-  if (response.status === 401) {
-    resetSession();
-    throw new TokenRevokedError();
-  }
-  if (response.status === 404) {
-    resetSession();
-    const message = await readJsonRpcErrorMessage(
-      response,
-      "Session not found",
-    );
-    throw new MCPSessionExpiredError(message);
-  }
-  if (!response.ok) {
-    const message = await readJsonRpcErrorMessage(
-      response,
-      `TablePro MCP returned HTTP ${response.status}`,
-    );
-    throw new Error(message);
-  }
-  await response.text();
-}
-
-async function safeReadError(response: Response): Promise<string> {
-  try {
-    const text = await response.text();
-    return text || `HTTP ${response.status}`;
-  } catch {
-    return `HTTP ${response.status}`;
-  }
-}
-
-async function readJsonRpcErrorMessage(
-  response: Response,
-  fallback: string,
-): Promise<string> {
-  let text = "";
-  try {
-    text = await response.text();
-  } catch {
-    return fallback;
-  }
-  if (!text) return fallback;
-  try {
-    const parsed = JSON.parse(text) as {
-      jsonrpc?: string;
-      error?: { message?: string } | string;
-    };
+  if (err instanceof Error) {
+    if (err.name === "AbortError") return err;
     if (
-      parsed.error &&
-      typeof parsed.error === "object" &&
-      typeof parsed.error.message === "string" &&
-      parsed.error.message.length > 0
+      err.message.includes("fetch failed") ||
+      err.message.includes("ECONNREFUSED")
     ) {
-      return parsed.error.message;
+      return new MCPNotRunningError();
     }
-    if (typeof parsed.error === "string" && parsed.error.length > 0) {
-      return parsed.error;
-    }
-  } catch {
-    return text;
+    return err;
   }
-  return text;
+  return new Error(String(err));
 }
 
-export async function callTool<T>(
-  name: string,
-  args: Record<string, unknown> = {},
-  options: MCPCallOptions = {},
-): Promise<T> {
-  const result = await rpc<{
-    content: Array<{ type: string; text?: string; data?: unknown }>;
-  }>(
-    "tools/call",
-    {
-      name,
-      arguments: args,
-    },
-    options.signal,
-  );
-  const first = result.content?.[0];
-  if (!first) {
-    return undefined as T;
-  }
-  if (first.data !== undefined) {
-    return first.data as T;
-  }
+interface ToolContent {
+  type: string;
+  text?: string;
+  data?: unknown;
+}
+
+interface ToolCallEnvelope {
+  content?: ToolContent[];
+  structuredContent?: unknown;
+  isError?: boolean;
+}
+
+function parseToolResult<T>(envelope: ToolCallEnvelope): T {
+  if (envelope.structuredContent !== undefined)
+    return envelope.structuredContent as T;
+  const first = envelope.content?.[0];
+  if (!first) return undefined as T;
+  if (first.data !== undefined) return first.data as T;
   if (first.text !== undefined) {
     try {
       return JSON.parse(first.text) as T;
@@ -532,6 +265,73 @@ export async function callTool<T>(
     }
   }
   return undefined as T;
+}
+
+async function callTool<T>(
+  name: string,
+  args: Record<string, unknown>,
+  options: MCPCallOptions = {},
+  idempotent = false,
+): Promise<T> {
+  return invokeTool(name, args, options, idempotent, false);
+}
+
+async function invokeTool<T>(
+  name: string,
+  args: Record<string, unknown>,
+  options: MCPCallOptions,
+  idempotent: boolean,
+  retried: boolean,
+): Promise<T> {
+  let client: Client;
+  try {
+    client = await getClient();
+  } catch (err) {
+    throw translateTransportError(err);
+  }
+  try {
+    const onProgress = options.onProgress;
+    const envelope = (await client.callTool(
+      { name, arguments: args },
+      undefined,
+      {
+        signal: options.signal,
+        onprogress: onProgress
+          ? (progress) =>
+              onProgress({
+                progress: progress.progress,
+                total: progress.total,
+                message: progress.message,
+              })
+          : undefined,
+      },
+    )) as ToolCallEnvelope;
+    return parseToolResult<T>(envelope);
+  } catch (err) {
+    const translated = translateTransportError(err);
+    if (idempotent && !retried && shouldRetryAfterReset(translated)) {
+      resetClient();
+      if (translated instanceof MCPNotRunningError) {
+        await clearStaleHandshake();
+      }
+      return invokeTool<T>(name, args, options, idempotent, true);
+    }
+    throw translated;
+  }
+}
+
+function shouldRetryAfterReset(err: Error): boolean {
+  return (
+    err instanceof MCPSessionExpiredError || err instanceof MCPNotRunningError
+  );
+}
+
+function pruneArgs(args: Record<string, unknown>): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(args)) {
+    if (value !== undefined) out[key] = value;
+  }
+  return out;
 }
 
 interface RawConnectionRow {
@@ -554,6 +354,7 @@ export async function listConnections(
     "list_connections",
     {},
     options,
+    true,
   );
   return (envelope.connections ?? []).map((row) => ({
     id: row.id,
@@ -565,34 +366,64 @@ export async function listConnections(
   }));
 }
 
+interface RawConnectionStatus {
+  status: ConnectionStatus["status"];
+  current_database?: string;
+  current_schema?: string;
+  server_version?: string;
+  connected_at?: string;
+  last_active_at?: string;
+  error?: { message?: string };
+}
+
+export async function getConnectionStatus(
+  connectionId: string,
+  options: MCPCallOptions = {},
+): Promise<ConnectionStatus> {
+  const raw = await callTool<RawConnectionStatus>(
+    "get_connection_status",
+    { connection_id: connectionId },
+    options,
+    true,
+  );
+  return {
+    status: raw.status,
+    currentDatabase: raw.current_database,
+    currentSchema: raw.current_schema,
+    serverVersion: raw.server_version,
+    connectedAt: raw.connected_at,
+    lastActiveAt: raw.last_active_at,
+    errorMessage: raw.error?.message,
+  };
+}
+
 export async function listDatabases(
   connectionId: string,
   options: MCPCallOptions = {},
 ): Promise<DatabaseInfo[]> {
   const envelope = await callTool<{ databases: string[] }>(
     "list_databases",
-    {
-      connection_id: connectionId,
-    },
+    { connection_id: connectionId },
     options,
+    true,
   );
   return (envelope.databases ?? []).map((name) => ({ name }));
 }
 
 export async function listSchemas(
   connectionId: string,
-  database?: string,
-  options: MCPCallOptions = {},
+  options: { database?: string; signal?: AbortSignal } = {},
 ): Promise<SchemaInfo[]> {
   const envelope = await callTool<{ schemas: string[] }>(
     "list_schemas",
-    {
-      connection_id: connectionId,
-      database,
-    },
-    options,
+    pruneArgs({ connection_id: connectionId, database: options.database }),
+    { signal: options.signal },
+    true,
   );
-  return (envelope.schemas ?? []).map((name) => ({ name, database }));
+  return (envelope.schemas ?? []).map((name) => ({
+    name,
+    database: options.database,
+  }));
 }
 
 interface RawTableRow {
@@ -605,21 +436,18 @@ interface RawTableRow {
 
 export async function listTables(
   connectionId: string,
-  options: {
-    database?: string;
-    schema?: string;
-    signal?: AbortSignal;
-  } = {},
+  options: { database?: string; schema?: string; signal?: AbortSignal } = {},
 ): Promise<TableInfo[]> {
   const envelope = await callTool<{ tables: RawTableRow[] }>(
     "list_tables",
-    {
+    pruneArgs({
       connection_id: connectionId,
       database: options.database,
       schema: options.schema,
       include_row_counts: true,
-    },
+    }),
     { signal: options.signal },
+    true,
   );
   return (envelope.tables ?? []).map((row) => ({
     name: row.name,
@@ -642,10 +470,6 @@ interface RawColumn {
 
 interface RawDescribeTable {
   columns: RawColumn[];
-  indexes?: unknown[];
-  foreign_keys?: unknown[];
-  ddl?: string;
-  approximate_row_count?: number;
 }
 
 export async function describeTable(
@@ -655,12 +479,9 @@ export async function describeTable(
 ): Promise<{ columns: ColumnInfo[] }> {
   const envelope = await callTool<RawDescribeTable>(
     "describe_table",
-    {
-      connection_id: connectionId,
-      table,
-      schema: options.schema,
-    },
+    pruneArgs({ connection_id: connectionId, table, schema: options.schema }),
     { signal: options.signal },
+    true,
   );
   const columns: ColumnInfo[] = (envelope.columns ?? []).map((col) => ({
     name: col.name,
@@ -680,12 +501,9 @@ export async function getTableDDL(
 ): Promise<{ ddl: string }> {
   return callTool<{ ddl: string }>(
     "get_table_ddl",
-    {
-      connection_id: connectionId,
-      table,
-      schema: options.schema,
-    },
+    pruneArgs({ connection_id: connectionId, table, schema: options.schema }),
     { signal: options.signal },
+    true,
   );
 }
 
@@ -725,18 +543,19 @@ export async function executeQuery(
     schema?: string;
     rowLimit?: number;
     signal?: AbortSignal;
+    onProgress?: (progress: ProgressEvent) => void;
   } = {},
 ): Promise<QueryResult> {
   const raw = await callTool<RawQueryResult>(
     "execute_query",
-    {
+    pruneArgs({
       connection_id: connectionId,
       query: sql,
       database: options.database,
       schema: options.schema,
       max_rows: options.rowLimit ?? DEFAULT_ROW_LIMIT,
-    },
-    { signal: options.signal },
+    }),
+    { signal: options.signal, onProgress: options.onProgress },
   );
   return adaptQueryResult(raw);
 }
@@ -744,17 +563,22 @@ export async function executeQuery(
 export async function explainQuery(
   connectionId: string,
   sql: string,
-  options: { database?: string; schema?: string; signal?: AbortSignal } = {},
+  options: {
+    database?: string;
+    schema?: string;
+    signal?: AbortSignal;
+    onProgress?: (progress: ProgressEvent) => void;
+  } = {},
 ): Promise<QueryResult> {
   const raw = await callTool<RawQueryResult>(
     "execute_query",
-    {
+    pruneArgs({
       connection_id: connectionId,
       query: `EXPLAIN ${sql}`,
       database: options.database,
       schema: options.schema,
-    },
-    { signal: options.signal },
+    }),
+    { signal: options.signal, onProgress: options.onProgress },
   );
   return adaptQueryResult(raw);
 }
@@ -786,6 +610,7 @@ export async function listRecentTabs(
     "list_recent_tabs",
     {},
     options,
+    true,
   );
   return (envelope.tabs ?? []).map((tab) => ({
     id: tab.tab_id,
@@ -816,33 +641,16 @@ interface RawHistoryEntry {
   error_message?: string;
 }
 
-export interface SearchHistoryOptions {
-  /** Earliest executed_at to include, Unix epoch seconds (inclusive). */
-  since?: number;
-  /** Latest executed_at to include, Unix epoch seconds (inclusive). */
-  until?: number;
-  signal?: AbortSignal;
-}
-
 export async function searchHistory(
   query: string,
   limit = 50,
   options: SearchHistoryOptions = {},
 ): Promise<QueryHistoryEntry[]> {
-  const args: Record<string, unknown> = {
-    query,
-    limit,
-  };
-  if (options.since !== undefined) {
-    args.since = options.since;
-  }
-  if (options.until !== undefined) {
-    args.until = options.until;
-  }
   const envelope = await callTool<{ entries: RawHistoryEntry[] }>(
     "search_query_history",
-    args,
+    pruneArgs({ query, limit, since: options.since, until: options.until }),
     { signal: options.signal },
+    true,
   );
   return (envelope.entries ?? []).map((entry) => ({
     id: entry.id,
@@ -861,9 +669,7 @@ export async function openConnectionWindow(
 ): Promise<void> {
   await callTool<unknown>(
     "open_connection_window",
-    {
-      connection_id: connectionId,
-    },
+    { connection_id: connectionId },
     options,
   );
 }
@@ -875,35 +681,48 @@ export async function exchangePairingCode(
 ): Promise<{ token: string }> {
   const handshake = await ensureHandshake(false, options.signal);
   const url = `http${handshake.tls ? "s" : ""}://127.0.0.1:${handshake.port}/v1/integrations/exchange`;
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000);
-  const onCallerAbort = () => controller.abort(options.signal?.reason);
-  if (options.signal) {
-    if (options.signal.aborted) {
-      controller.abort(options.signal.reason);
-    } else {
-      options.signal.addEventListener("abort", onCallerAbort, { once: true });
-    }
-  }
+  const signal = combineSignals(
+    options.signal,
+    AbortSignal.timeout(PAIRING_EXCHANGE_TIMEOUT_MS),
+  );
   let response: Response;
   try {
     response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code, code_verifier: codeVerifier }),
-      signal: controller.signal,
+      signal,
     });
-  } finally {
-    clearTimeout(timeoutId);
-    options.signal?.removeEventListener("abort", onCallerAbort);
+  } catch (err) {
+    if (err instanceof Error && err.name === "AbortError") throw err;
+    throw new MCPNotRunningError();
   }
   if (!response.ok) {
-    const text = await safeReadError(response);
-    throw new Error(`Pairing exchange failed: ${text}`);
+    const text = await response.text().catch(() => "");
+    throw new Error(
+      `Pairing exchange failed: ${text || `HTTP ${response.status}`}`,
+    );
   }
   const json = (await response.json()) as { token?: string };
-  if (!json.token) {
-    throw new Error("Pairing exchange returned no token");
-  }
+  if (!json.token) throw new Error("Pairing exchange returned no token");
   return { token: json.token };
+}
+
+function combineSignals(
+  ...signals: Array<AbortSignal | undefined>
+): AbortSignal {
+  const filtered = signals.filter((s): s is AbortSignal => s !== undefined);
+  if (filtered.length === 1) return filtered[0]!;
+  if (typeof AbortSignal.any === "function") return AbortSignal.any(filtered);
+  const controller = new AbortController();
+  for (const signal of filtered) {
+    if (signal.aborted) {
+      controller.abort(signal.reason);
+      break;
+    }
+    signal.addEventListener("abort", () => controller.abort(signal.reason), {
+      once: true,
+    });
+  }
+  return controller.signal;
 }

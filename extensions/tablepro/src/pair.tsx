@@ -24,7 +24,7 @@ import { TableProNotInstalledError } from "./lib/types";
 import { loadConnections } from "./lib/connections";
 import { tableProInstalled } from "./lib/paths";
 import { pairDeeplink } from "./lib/deeplink";
-import { exchangePairingCode } from "./lib/mcp";
+import { exchangePairingCode, resetClient } from "./lib/mcp";
 import {
   PAIR_CALLBACK_URL,
   clearPendingVerifier,
@@ -249,6 +249,7 @@ function ExchangeView({ code }: { code: string }) {
     ranRef.current = true;
     (async () => {
       try {
+        if (!tableProInstalled()) throw new TableProNotInstalledError();
         const pending = await loadPendingVerifier();
         if (!pending) {
           throw new Error(
@@ -265,6 +266,7 @@ function ExchangeView({ code }: { code: string }) {
         if (cancelledRef.current) return;
         await persistToken(exchange.token);
         await clearPendingVerifier();
+        resetClient();
         setCompleted(true);
         await showHUD("Paired with TablePro");
         await popToRoot({ clearSearchBar: true });
@@ -339,6 +341,8 @@ function renderErrorMarkdown(err: unknown): string {
       return "# No token yet\n\nFinish the pairing flow to issue one.";
     case "token-revoked":
       return "# Token was revoked\n\nRun this command to issue a new one.";
+    case "remote-unsupported":
+      return "# Remote access not supported\n\nRaycast can only talk to TablePro on the local machine. Disable remote access in TablePro Settings and try again.";
     case "access-denied":
       return `# Access denied\n\n${scenario.message}`;
     case "other":

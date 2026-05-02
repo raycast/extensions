@@ -102,6 +102,23 @@ export function ScenarioEmptyView({ scenario }: Props) {
           }
         />
       );
+    case "remote-unsupported":
+      return (
+        <List.EmptyView
+          icon={Icon.Globe}
+          title={title}
+          description={description}
+          actions={
+            <ActionPanel>
+              <Action.Open
+                title="Open TablePro Settings"
+                icon={Icon.Gear}
+                target="tablepro://settings"
+              />
+            </ActionPanel>
+          }
+        />
+      );
     case "access-denied":
       return (
         <List.EmptyView

@@ -141,6 +141,16 @@
       "name": "search-history",
       "title": "Search Query History",
       "description": "Full-text search the saved TablePro query history. Returns query text, connection id, executed-at timestamp, duration, and row count. Use to find prior work the user is referencing. Do not call to re-run a past query (copy the text into run-query) or to list tables and schemas (use list-tables and list-schemas)."
+    },
+    {
+      "name": "get-connection-status",
+      "title": "Get Connection Status",
+      "description": "Return the live status of a TablePro connection: connected, connecting, disconnected, or error. Includes current database and schema, server version, and the most recent error message when the connection has failed. Use to answer 'is X up?' style questions before suggesting queries."
+    },
+    {
+      "name": "list-recent-tabs",
+      "title": "List Recent Tabs",
+      "description": "List the tabs currently open in TablePro across windows: the connection name, tab type (query, table, structure), display title, and the table or database the tab is scoped to. Use to answer 'what was I just working on?' or to point the user at an existing tab instead of opening a new one."
     }
   ],
   "ai": {
@@ -437,6 +447,63 @@
             "error": "TokenMissing: extension is not paired with TablePro"
           }
         }
+      },
+      {
+        "input": "@tablepro is prod up?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-connections"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-connection-status",
+              "arguments": {
+                "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "list-connections": [
+            {
+              "id": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "name": "prod",
+              "type": "postgresql",
+              "host": "db.example.com",
+              "port": 5432
+            }
+          ],
+          "get-connection-status": {
+            "status": "connected",
+            "currentDatabase": "app",
+            "serverVersion": "PostgreSQL 16.2"
+          }
+        }
+      },
+      {
+        "input": "@tablepro what was I just working on?",
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-recent-tabs"
+            }
+          }
+        ],
+        "mocks": {
+          "list-recent-tabs": [
+            {
+              "id": "TAB-1",
+              "connectionId": "3823CB84-BB87-457E-8930-6DB35E210228",
+              "connectionName": "prod",
+              "tabType": "table",
+              "title": "users",
+              "tableName": "users",
+              "databaseName": "app"
+            }
+          ]
+        }
       }
     ]
   },
@@ -451,6 +518,7 @@
     }
   ],
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
     "@raycast/api": "^1.83.0",
     "@raycast/utils": "^1.18.1"
   },

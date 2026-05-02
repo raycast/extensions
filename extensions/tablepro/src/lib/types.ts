@@ -24,6 +24,7 @@ export interface MCPHandshake {
   pid: number;
   protocolVersion: string;
   tls: boolean;
+  tlsCertFingerprint?: string;
 }
 
 export interface DatabaseInfo {
@@ -84,6 +85,22 @@ export interface QueryHistoryEntry {
   rowCount?: number;
 }
 
+export interface ConnectionStatus {
+  status: "connected" | "connecting" | "disconnected" | "error";
+  currentDatabase?: string;
+  currentSchema?: string;
+  serverVersion?: string;
+  connectedAt?: string;
+  lastActiveAt?: string;
+  errorMessage?: string;
+}
+
+export interface ProgressEvent {
+  progress: number;
+  total?: number;
+  message?: string;
+}
+
 export class TableProNotInstalledError extends Error {
   constructor() {
     super("TablePro is not installed");
@@ -123,5 +140,14 @@ export class ExternalAccessDeniedError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ExternalAccessDeniedError";
+  }
+}
+
+export class RemoteAccessUnsupportedError extends Error {
+  constructor() {
+    super(
+      "Remote MCP not yet supported in Raycast. Disable remote access in TablePro Settings.",
+    );
+    this.name = "RemoteAccessUnsupportedError";
   }
 }

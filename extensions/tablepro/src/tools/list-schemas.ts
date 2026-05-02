@@ -9,5 +9,5 @@ type Input = {
 };
 
 export default async function tool(input: Input): Promise<SchemaInfo[]> {
-  return listSchemas(input.connectionId, input.database);
+  return listSchemas(input.connectionId, { database: input.database });
 }

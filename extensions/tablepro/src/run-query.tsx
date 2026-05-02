@@ -23,7 +23,7 @@ import { databaseTypeLabel, loadConnections } from "./lib/connections";
 import { tableProInstalled } from "./lib/paths";
 import { ScenarioEmptyView } from "./lib/empty-state";
 import { classifyError } from "./lib/errors";
-import { executeQuery } from "./lib/mcp";
+import { executeQuery, ProgressEvent } from "./lib/mcp";
 import { openQueryDeeplink } from "./lib/deeplink";
 import { isMutatingSQL, summarizeSQL } from "./lib/sql";
 
@@ -185,13 +185,51 @@ function RunningView({
   sql: string;
 }) {
   const abortable = useRef<AbortController | null>(null);
+  const progressToast = useRef<Toast | null>(null);
   const {
     data: result,
     isLoading,
     error,
   } = usePromise(
-    (id: string, q: string) =>
-      executeQuery(id, q, { signal: abortable.current?.signal }),
+    async (id: string, q: string) => {
+      progressToast.current = await showToast({
+        style: Toast.Style.Animated,
+        title: "Executing query…",
+      });
+      try {
+        const queryResult = await executeQuery(id, q, {
+          signal: abortable.current?.signal,
+          onProgress: (event: ProgressEvent) => {
+            const toast = progressToast.current;
+            if (!toast) return;
+            const percent =
+              event.total && event.total > 0
+                ? Math.round((event.progress / event.total) * 100)
+                : undefined;
+            const base = event.message ?? "Executing query";
+            toast.title =
+              percent !== undefined ? `${base} (${percent}%)` : base;
+          },
+        });
+        if (progressToast.current) {
+          progressToast.current.style = Toast.Style.Success;
+          progressToast.current.title = "Query complete";
+        }
+        return queryResult;
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") {
+          if (progressToast.current) {
+            await progressToast.current.hide();
+          }
+          throw err;
+        }
+        if (progressToast.current) {
+          progressToast.current.style = Toast.Style.Failure;
+          progressToast.current.title = "Query failed";
+        }
+        throw err;
+      }
+    },
     [connection.id, sql],
     { abortable },
   );
