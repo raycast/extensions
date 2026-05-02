@@ -1,13 +1,23 @@
 import { Tool } from "@raycast/api";
-import { ORB_CTL } from "../orbstack";
-import { execAsync } from "../utils";
+import { ORB_CTL, ISOLATED_MACHINES_VERSION } from "../orbstack";
+import { execAsync, supportsIsolatedMachines } from "../utils";
 import { CreateArgs, validateCreateArgs } from "./types";
 
+async function assertIsolatedMachinesSupport(): Promise<void> {
+  const { stdout } = await execAsync(`${ORB_CTL} version`, { timeout: 1000 * 10 }); // Let's wait at most 10 seconds to get the version.
+  if (!stdout || !supportsIsolatedMachines(stdout)) {
+    throw new Error(
+      `Isolated machines require orbctl ${ISOLATED_MACHINES_VERSION} or later. Current version: ${stdout || "unknown"}. Please upgrade OrbStack.`,
+    );
+  }
+}
+
 function createMachineCommand(args: CreateArgs): string {
-  const arch = " -a " + args.architecture + " ";
-  const user_name = args.user_name ? ` -u ${args.user_name} ` : "";
-  const distro = args.version ? `${args.distro}:${args.version} ` : args.distro + " ";
-  return `${ORB_CTL} create${arch}${user_name}${distro}${args.machine_name}`;
+  const arch = ` -a ${args.architecture}`;
+  const user_name = args.user_name ? ` -u ${args.user_name}` : "";
+  const isolated = args.isolated ? " --isolated" : "";
+  const distro = args.version ? ` ${args.distro}:${args.version}` : ` ${args.distro}`;
+  return `${ORB_CTL} create${arch}${user_name}${isolated}${distro} ${args.machine_name}`;
 }
 
 export const confirmation: Tool.Confirmation<CreateArgs> = async (args) => {
@@ -35,6 +45,10 @@ export default async function tool(args: CreateArgs): Promise<string> {
   }
 
   validateCreateArgs(args);
+
+  if (args.isolated) {
+    await assertIsolatedMachinesSupport();
+  }
 
   const command = createMachineCommand(args);
 
