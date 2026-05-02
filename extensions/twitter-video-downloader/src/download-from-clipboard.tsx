@@ -1,11 +1,4 @@
-import {
-  Clipboard,
-  Toast,
-  getPreferenceValues,
-  open,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { Clipboard, Toast, getPreferenceValues, open, openExtensionPreferences, showToast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { existsSync, lstatSync } from "node:fs";
 import { homedir } from "node:os";

@@ -80,8 +80,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
           const suffix = targets.length > 1 ? `_${i + 1}` : "";
           const destination = ensureUniquePath(resolve(downloadFolder, `${filename}${suffix}.mp4`));
 
-          toast.title =
-            targets.length > 1 ? `Downloading ${i + 1}/${targets.length}…` : "Downloading…";
+          toast.title = targets.length > 1 ? `Downloading ${i + 1}/${targets.length}…` : "Downloading…";
           await downloadVideo(targets[i], destination, (fraction) => {
             toast.message = `${Math.round(fraction * 100)}%`;
           });
@@ -90,8 +89,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
 
         setSavedFiles(written);
         toast.style = Toast.Style.Success;
-        toast.title =
-          written.length > 1 ? `Downloaded ${written.length} videos` : "Download complete";
+        toast.title = written.length > 1 ? `Downloaded ${written.length} videos` : "Download complete";
         toast.message = "";
       } catch (error) {
         await showFailureToast(error, { title: "Download failed" });

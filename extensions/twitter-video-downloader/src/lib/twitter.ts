@@ -1,5 +1,6 @@
 import axios from "axios";
 import { createWriteStream, existsSync } from "node:fs";
+import { unlink } from "node:fs/promises";
 import { parse, resolve } from "node:path";
 import { pipeline } from "node:stream/promises";
 
@@ -46,17 +47,12 @@ interface VxTwitterResponse {
   media_extended?: VxTwitterMedia[];
 }
 
-export async function fetchTweetVideos(
-  parsed: ParsedTweet,
-  signal?: AbortSignal,
-): Promise<string[]> {
+export async function fetchTweetVideos(parsed: ParsedTweet, signal?: AbortSignal): Promise<string[]> {
   const { data } = await axios.get<VxTwitterResponse>(
     `https://api.vxtwitter.com/${encodeURIComponent(parsed.username)}/status/${parsed.tweetId}`,
     { timeout: 15000, signal },
   );
-  return (data.media_extended ?? [])
-    .filter((m) => m.type === "video" || m.type === "gif")
-    .map((m) => m.url);
+  return (data.media_extended ?? []).filter((m) => m.type === "video" || m.type === "gif").map((m) => m.url);
 }
 
 export interface FilenameVars {
@@ -105,7 +101,12 @@ export async function downloadVideo(
       }
     },
   });
-  await pipeline(response.data, createWriteStream(destination));
+  try {
+    await pipeline(response.data, createWriteStream(destination));
+  } catch (error) {
+    await unlink(destination).catch(() => {});
+    throw error;
+  }
 }
 
 export function todayIso(): string {
@@ -119,5 +120,5 @@ export function ensureUniquePath(target: string): string {
     const candidate = resolve(dir, `${name} (${i})${ext}`);
     if (!existsSync(candidate)) return candidate;
   }
-  return target;
+  throw new Error(`Too many duplicate files for: ${target}`);
 }
