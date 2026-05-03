@@ -1,15 +1,8 @@
-import { getPreferenceValues } from "@raycast/api";
 import type { DirectoryBrowserProps } from "$lib/pages/directory-browser/types";
-import type { SortMode } from "$lib/types";
-import type { EnterKeyAction } from "$lib/components/contents/types";
 
-type ExtensionPreferences = {
-export function getExtensionPreferences() {
-  return getPreferenceValues<Preferences>();
-}
-}
+type DirectoryBrowserDefaults = Omit<DirectoryBrowserProps, "path">;
 
-export function getDirectoryBrowserDefaults(preferences: ExtensionPreferences): DirectoryBrowserDefaults {
+export function getDirectoryBrowserDefaults(preferences: Preferences): DirectoryBrowserDefaults {
   return {
     initialView: preferences.viewMode,
     initialSort: preferences.sortMode,

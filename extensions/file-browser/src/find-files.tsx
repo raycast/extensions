@@ -10,15 +10,13 @@ import {
   mergeArtifactHistoryEntry,
   normalizeArtifactHistoryEntries,
 } from "$lib/pages/find-files-browser/logic/history";
-import { getDirectoryBrowserDefaults, getExtensionPreferences } from "$lib/preferences";
+import { getDirectoryBrowserDefaults } from "$lib/preferences";
 import type { ArtifactHistoryEntry, FindFilesSearchArtifact } from "$lib/pages/find-files-browser/logic/types";
-import type { EnterKeyAction } from "$lib/components/contents/types";
 
 export default function Command() {
-  const preferences = getExtensionPreferences();
-  const { enterAction: rawEnterAction } = getPreferenceValues<{ enterAction?: EnterKeyAction }>();
+  const preferences = getPreferenceValues<Preferences>();
   const directoryBrowserDefaults = getDirectoryBrowserDefaults(preferences);
-  const enterAction = rawEnterAction ?? "detail";
+  const enterAction = preferences.enterAction ?? "detail";
   const { push } = useNavigation();
 
   const [rawHistory, setRawHistory] = useCachedState<ArtifactHistoryEntry[]>(QUERY_HISTORY_KEY, []);

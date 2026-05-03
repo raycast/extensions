@@ -10,24 +10,18 @@ use std::path::{Path, PathBuf};
 extern "C" {
     /// Apple `copyfile(3)` — copies file data and metadata.
     /// Returns 0 on success, -1 on error (sets errno).
-    fn copyfile(
-        from: *const c_char,
-        to: *const c_char,
-        state: *mut c_void,
-        flags: u32,
-    ) -> c_int;
+    fn copyfile(from: *const c_char, to: *const c_char, state: *mut c_void, flags: u32) -> c_int;
 }
 
-/// `COPYFILE_DATA | COPYFILE_STAT | COPYFILE_XATTR | COPYFILE_ACL` = `0x0D`
+/// `COPYFILE_DATA | COPYFILE_STAT | COPYFILE_XATTR | COPYFILE_ACL` = `0x0F`
 ///
 /// Preserves file data, stat info (mode, timestamps), extended attributes,
 /// and ACLs in a single call.
-const COPYFILE_ALL: u32 = (1 << 0) | (1 << 2) | (1 << 3);
+const COPYFILE_ALL: u32 = (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3);
 
 // ── Public API ─────────────────────────────────────────────────
 
 /// Copy a file or directory to a destination directory.
-const COPYFILE_ALL: u32 = (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3);
 /// - **Symlinks** are copied as symlinks (nofollow semantics).
 /// - **Regular files** are copied with best-effort metadata via Apple's
 ///   `copyfile(3)` (xattrs, ACLs, stat info). Falls back to `fs::copy` if
@@ -37,8 +31,8 @@ const COPYFILE_ALL: u32 = (1 << 0) | (1 << 1) | (1 << 2) | (1 << 3);
 /// - Existing destinations are never overwritten.
 pub fn copy_item(src: &Path, dst_dir: &Path) -> Result<PathBuf, Box<dyn Error>> {
     // Use symlink_metadata so dangling symlinks are still "found"
-    let src_meta = fs::symlink_metadata(src)
-        .map_err(|_| format!("not found: {}", src.display()))?;
+    let src_meta =
+        fs::symlink_metadata(src).map_err(|_| format!("not found: {}", src.display()))?;
 
     if !dst_dir.exists() {
         return Err(format!("directory not found: {}", dst_dir.display()).into());
@@ -233,12 +227,17 @@ mod tests {
         assert!(result.is_ok(), "symlink copy should succeed: {:?}", result);
 
         let dst = dst_dir.join("link.txt");
-        let dst_meta = std::fs::symlink_metadata(&dst)
-            .expect("destination should exist");
-        assert!(dst_meta.is_symlink(), "destination should be a symlink, not a regular file");
+        let dst_meta = std::fs::symlink_metadata(&dst).expect("destination should exist");
+        assert!(
+            dst_meta.is_symlink(),
+            "destination should be a symlink, not a regular file"
+        );
 
         let copied_target = std::fs::read_link(&dst).expect("should read link target");
-        assert_eq!(copied_target, target, "symlink target should match original");
+        assert_eq!(
+            copied_target, target,
+            "symlink target should match original"
+        );
 
         let _ = std::fs::remove_dir_all(&dir);
     }
@@ -259,7 +258,11 @@ mod tests {
         std::fs::create_dir_all(&dst_dir).ok();
 
         let result = copy_item(&src_dir, &dst_dir);
-        assert!(result.is_ok(), "dir copy with symlink should succeed: {:?}", result);
+        assert!(
+            result.is_ok(),
+            "dir copy with symlink should succeed: {:?}",
+            result
+        );
 
         let alias_dst = dst_dir.join("src").join("alias.txt");
         let meta = std::fs::symlink_metadata(&alias_dst)
@@ -286,7 +289,9 @@ mod tests {
         std::fs::write(src_dir.join("sub").join("b.txt"), "deny").ok();
 
         // Make subdirectory unreadable to force a failure during recursion
-        let mut perms = std::fs::metadata(&src_dir.join("sub")).unwrap().permissions();
+        let mut perms = std::fs::metadata(&src_dir.join("sub"))
+            .unwrap()
+            .permissions();
         perms.set_mode(0o000);
         std::fs::set_permissions(src_dir.join("sub"), perms).ok();
 
@@ -303,7 +308,9 @@ mod tests {
         );
 
         // Restore permissions for cleanup
-        let mut perms = std::fs::metadata(&src_dir.join("sub")).unwrap().permissions();
+        let mut perms = std::fs::metadata(&src_dir.join("sub"))
+            .unwrap()
+            .permissions();
         perms.set_mode(0o755);
         std::fs::set_permissions(src_dir.join("sub"), perms).ok();
 
@@ -324,7 +331,11 @@ mod tests {
         std::fs::create_dir_all(&dst_dir).ok();
 
         let result = copy_item(&link, &dst_dir);
-        assert!(result.is_ok(), "dangling symlink copy should succeed: {:?}", result);
+        assert!(
+            result.is_ok(),
+            "dangling symlink copy should succeed: {:?}",
+            result
+        );
 
         let dst = dst_dir.join("dangling.txt");
         let meta = std::fs::symlink_metadata(&dst).expect("destination should exist");
