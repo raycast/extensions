@@ -31,11 +31,15 @@ function bucketLabel(bucket: string): string {
 }
 
 function getTaskBucket(task: Task, todayStr: string, tomorrowStr: string): string {
-  const dateStr = task.due_date
-    ? String(task.due_date).substring(0, 10)
-    : task.start_date
-      ? String(task.start_date).substring(0, 10)
-      : null;
+  let dateStr: string | null = null;
+  if (task.due_date && task.start_date) {
+    const due = String(task.due_date).substring(0, 10);
+    const start = String(task.start_date).substring(0, 10);
+    dateStr = start < due ? start : due;
+  } else {
+    const raw = task.due_date ?? task.start_date ?? null;
+    dateStr = raw ? String(raw).substring(0, 10) : null;
+  }
   if (!dateStr) return "no_due_date";
   if (dateStr < todayStr) return "overdue";
   if (dateStr === todayStr) return "today";
