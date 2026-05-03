@@ -1,3 +1,3 @@
 # Quick Note Changelog
 
-## [Initial Version] - 2026-10-13
+## [Initial Version] - {PR_MERGE_DATE}

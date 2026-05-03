@@ -2,6 +2,7 @@ import { List } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import { useEffect, useState } from "react";
 import { Note, NoteListItem } from "./note-list-item";
+import { escaped } from "./utils";
 
 type Folder = {
   id: string;
@@ -23,7 +24,7 @@ export default function Command() {
 
         const notesResult = await runAppleScript(`
           tell application "Quick Note"
-            set results to search "${searchText}"
+            set results to search "${escaped(searchText)}"
             
             if (count of results) = 0 then
               return "[]"
