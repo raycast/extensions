@@ -29,10 +29,6 @@ export function useManageFeeds() {
     setFeeds([...feeds, { id: Date.now().toString(), name: "", url: "" }]);
   };
 
-  const handleRemoveFeed = (idToRemove: string) => {
-    setFeeds(feeds.filter((feed) => feed.id !== idToRemove));
-  };
-
   const handleSubmit = async (values: Record<string, string>) => {
     const newFeeds = feeds
       .map((feed) => ({
@@ -69,7 +65,6 @@ export function useManageFeeds() {
     feeds,
     isLoading,
     handleAddFeed,
-    handleRemoveFeed,
     handleSubmit,
   };
 }
