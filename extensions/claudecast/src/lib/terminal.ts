@@ -113,6 +113,18 @@ async function openInITerm(command: string, cwd: string): Promise<void> {
   await execFilePromise("osascript", ["-e", script]);
 }
 
+// Escape a value for use inside a YAML double-quoted scalar (YAML 1.2).
+// Backslash must be escaped first; LF/CR/TAB get their YAML escape forms so
+// embedded whitespace can never break the document layout.
+function escapeYamlDoubleQuoted(s: string): string {
+  return s
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
+}
+
 async function openInWarp(command: string, cwd: string): Promise<void> {
   // Use dynamic launch configuration for reliable command execution
   const lcId = randomUUID();
@@ -126,9 +138,9 @@ name: ${lcId}
 windows:
   - tabs:
       - layout:
-          cwd: "${cwd.replace(/"/g, '\\"')}"
+          cwd: "${escapeYamlDoubleQuoted(cwd)}"
           commands:
-            - exec: "${command.replace(/"/g, '\\"')}"
+            - exec: "${escapeYamlDoubleQuoted(command)}"
 `;
   writeFileSync(lcFile, yaml, "utf-8");
   await open(`warp://launch/${lcId}`);
@@ -164,7 +176,7 @@ async function openInGhostty(command: string, cwd: string): Promise<void> {
       activate
       set cfg to new surface configuration
       set initial working directory of cfg to "${escapedCwd}"
-      set initial input of cfg to "${escapedCommand}\n"
+      set initial input of cfg to "${escapedCommand}" & (ASCII character 10)
       new window with configuration cfg
     end tell
   `;
