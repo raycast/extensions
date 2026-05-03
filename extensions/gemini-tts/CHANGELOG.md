@@ -17,7 +17,6 @@
 - Lead-chunk synthesis: the first audio segment is intentionally short (~60-260 chars at the nearest sentence boundary) so playback starts in roughly 1-2 seconds instead of waiting for a full 1400-char chunk.
 - Producer/consumer pipeline: chunk N+1 begins synthesizing in parallel with playback of chunk N, eliminating the silent gap between chunks.
 - Disk audio cache keyed on text + voice + experience preset: replays, restarts, voice previews, and re-reads of the same paragraph become instant, with an LRU sweep capped at 200 MB inside the extension's support directory.
-- Static director-profile prompt moved to `systemInstruction` so each per-chunk request only carries the transcript, lowering Gemini token-per-minute pressure across long readings.
 - Menu-bar status refreshes within ~1 second of a phase transition via background `launchCommand`, instead of waiting for the 1-minute interval tick.
 
 ### Fixes
@@ -26,6 +25,7 @@
 - Voice preview now writes playback state, so the menu bar reflects in-progress previews and Stop Reading interrupts them at the next chunk boundary.
 - Menu-bar status no longer fires a redundant background launch on every elapsed-time tick — only on actual synthesizing/playing/stopped/completed transitions.
 - Quick Read's "Nothing to read" hint now points users at Resume only when a paused reading actually exists, instead of advertising a non-existent option.
+- Reverted the `systemInstruction` split: Gemini's TTS preview models reject it with `HTTP 400 — Developer instruction is not enabled for this model`. The director profile is back inline in `contents`. Verified directly against `gemini-3.1-flash-tts-preview` (HTTP 200, audio returned).
 
 ### Menu Bar
 

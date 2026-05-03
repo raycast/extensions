@@ -4,6 +4,10 @@ Read selected macOS text aloud from Raycast with Gemini text-to-speech, tuned fo
 
 ![Gemini TTS icon](assets/command-icon.png)
 
+## Store Status
+
+Submitted to the Raycast Store — review pending. Track progress at [raycast/extensions#27612](https://github.com/raycast/extensions/pull/27612). Until it ships in the Store, install locally with `npm install && npm run dev`.
+
 ## Why This Extension
 
 Gemini TTS is not just a voice endpoint. The official TTS guide emphasizes natural-language control over style, accent, pace, tone, audio tags, and transcript structure. This extension turns those Gemini strengths into Raycast controls so daily reading does not require hand-writing prompts.
@@ -175,7 +179,7 @@ Manage long readings:
 - API: Gemini REST `POST /v1beta/models/{model}:generateContent`
 - Authentication: `x-goog-api-key: <Gemini API Key>`
 - Request config: `responseModalities: ["AUDIO"]` plus `speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName`
-- Prompt structure: per-session director profile (Audio Profile, Scene, Director's Notes) lifted into `systemInstruction`; per-chunk request carries only the synthesis preamble + transcript
+- Prompt structure: synthesis preamble + Audio Profile + Scene + Director's Notes + Transcript, all inline in `contents` (the TTS preview models reject `systemInstruction` with HTTP 400)
 - Audio response: base64 PCM from Gemini, wrapped into a 24 kHz mono 16-bit WAV file before playback
 - Playback: WAV files played through macOS `afplay`
 - Playback speed: `afplay -r <speed>` — applied at playback time, so cached audio is reusable across speed changes

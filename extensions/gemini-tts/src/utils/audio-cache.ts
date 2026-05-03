@@ -13,7 +13,13 @@ const SWEEP_BATCH_TARGET = 0.85;
 // (e.g. a director-profile rewrite, a new audio-tag mode). Old entries
 // keyed under a previous version will simply miss and be regenerated;
 // the LRU sweep cleans them out over time.
-const CACHE_VERSION = "v1";
+//
+// v2: rolled back the systemInstruction split — TTS preview models
+// reject `systemInstruction` with HTTP 400 "Developer instruction is
+// not enabled for this model". The prompt is back inline in `contents`,
+// so any v1 entries (which would have come from a pre-regression
+// state) are invalidated to be safe.
+const CACHE_VERSION = "v2";
 
 let cachedDir: string | null = null;
 

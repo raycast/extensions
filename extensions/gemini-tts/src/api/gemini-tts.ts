@@ -46,10 +46,13 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
   }
 
   const apiKey = resolveApiKey();
-  const { systemInstruction, userContent } = buildTtsPrompt(trimmedText, options);
   const requestBody: GeminiTTSRequest = {
-    systemInstruction: { parts: [{ text: systemInstruction }] },
-    contents: [{ parts: [{ text: userContent }] }],
+    // The TTS preview models reject `systemInstruction` with a 400
+    // "Developer instruction is not enabled for this model". Keep the
+    // entire prompt — director profile, scene, director's notes, and
+    // transcript — inline in `contents` so the request shape matches
+    // what these preview models actually accept.
+    contents: [{ parts: [{ text: buildTtsPrompt(trimmedText, options) }] }],
     generationConfig: {
       responseModalities: ["AUDIO"],
       speechConfig: {
@@ -176,7 +179,7 @@ async function generateSpeechOnce(
   }
 }
 
-function buildTtsPrompt(text: string, options: TTSOptions): { systemInstruction: string; userContent: string } {
+function buildTtsPrompt(text: string, options: TTSOptions): string {
   const readingExperience = resolveReadingExperienceForText(text, options.readingExperience);
   const profile = getExperienceProfile(readingExperience);
   const transcript = prepareTranscript(text, options.audioTagMode);
@@ -186,11 +189,8 @@ function buildTtsPrompt(text: string, options: TTSOptions): { systemInstruction:
   const voiceInstruction = getVoiceInstruction(options.voiceId);
   const customNotes = options.directorNotes ? [`Additional notes: ${options.directorNotes}`] : [];
 
-  // Static across every chunk in a session — moved to systemInstruction
-  // so we don't re-pay ~300 input tokens per chunk. The TTS classifier
-  // (per the API docs' PROHIBITED_CONTENT warning) still gets a clear
-  // synthesis preamble + explicit transcript label in the user content.
-  const systemInstruction = [
+  return [
+    "Synthesize speech from the transcript below. Only the text under TRANSCRIPT is spoken. Do not read instructions, labels, section headings, or director notes aloud.",
     `# AUDIO PROFILE: ${profile.name}`,
     profile.profile,
     "## THE SCENE",
@@ -205,15 +205,9 @@ function buildTtsPrompt(text: string, options: TTSOptions): { systemInstruction:
     `Audio tags: ${audioTagInstruction}`,
     "Accuracy: Do not translate, summarize, paraphrase, omit, or add words. Preserve citations, names, acronyms, statute numbers, article numbers, and technical terms as written.",
     ...customNotes,
-  ].join("\n\n");
-
-  const userContent = [
-    "Synthesize speech from the transcript below. Only the text under TRANSCRIPT is spoken. Do not read instructions, labels, section headings, or director notes aloud.",
     "#### TRANSCRIPT",
     transcript,
   ].join("\n\n");
-
-  return { systemInstruction, userContent };
 }
 
 function ensureWaveAudio(audioBuffer: Buffer, sampleRate: number): Buffer {
