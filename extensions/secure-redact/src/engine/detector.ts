@@ -36,6 +36,11 @@ export function detectSensitiveData(
 
   const enabledFeeds = feeds.filter((feed) => feed.enabled);
   for (const feed of enabledFeeds) {
+    const feedType = feed.name
+      .toUpperCase()
+      .replace(/[^A-Z0-9]+/g, "_")
+      .replace(/^_+|_+$/g, "");
+
     for (const feedPattern of feed.patterns) {
       try {
         const regex = new RegExp(feedPattern, "gi");
@@ -45,7 +50,7 @@ export function detectSensitiveData(
 
           const value = match[0];
           detections.push({
-            type: "MALICIOUS_URL",
+            type: feedType || "CUSTOM_FEED",
             value,
             start: match.index,
             end: match.index + value.length,

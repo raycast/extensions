@@ -7,12 +7,29 @@ export function redactText(
 ): string {
   if (detections.length === 0) return text;
 
-  const sorted = [...detections].sort((a, b) => b.start - a.start);
-
-  let result = text;
+  // Indexed mode keys on (type, value) so identical occurrences share an index —
+  // preserves referential consistency for the reader (e.g. two copies of the same
+  // email both render as `[EMAIL_1]`). Built in a left-to-right pass before the
+  // right-to-left replacement so indices number occurrences in source order.
   const indexMap = new Map<string, number>();
+  if (mode === "indexed") {
+    const ascending = [...detections].sort((a, b) => a.start - b.start);
+    for (const detection of ascending) {
+      const key = `${detection.type}:${detection.value}`;
+      if (!indexMap.has(key)) {
+        const nextIndex =
+          Array.from(indexMap.keys()).filter((k) =>
+            k.startsWith(detection.type + ":")
+          ).length + 1;
+        indexMap.set(key, nextIndex);
+      }
+    }
+  }
 
-  for (const detection of sorted) {
+  const descending = [...detections].sort((a, b) => b.start - a.start);
+  let result = text;
+
+  for (const detection of descending) {
     const replacement = getReplacementText(detection, mode, indexMap);
     result =
       result.substring(0, detection.start) +
@@ -35,17 +52,10 @@ function getReplacementText(
     case "typed":
       return `[${detection.type}_REDACTED]`;
 
-    case "indexed": {
-      const key = `${detection.type}:${detection.value}`;
-      if (!indexMap.has(key)) {
-        const nextIndex =
-          Array.from(indexMap.keys()).filter((k) =>
-            k.startsWith(detection.type + ":")
-          ).length + 1;
-        indexMap.set(key, nextIndex);
-      }
-      return `[${detection.type}_${indexMap.get(key)}]`;
-    }
+    case "indexed":
+      return `[${detection.type}_${indexMap.get(
+        `${detection.type}:${detection.value}`
+      )}]`;
 
     case "masked":
       return maskValue(detection.value, detection.type);

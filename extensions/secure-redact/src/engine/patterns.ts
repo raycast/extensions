@@ -1,5 +1,5 @@
 import { PatternDefinition } from "../types";
-import { luhn, iban, vin, ssn } from "./validators";
+import { luhn, iban, vin, ssn, swiftBic } from "./validators";
 
 export const patterns: PatternDefinition[] = [
   // SECRETS TIER
@@ -63,8 +63,7 @@ export const patterns: PatternDefinition[] = [
   },
   {
     name: "PHONE_US",
-    pattern:
-      /\b(?:\+1[-.\s]?)?(?:\(?[0-9]{3}\)?[-.\s]?)?[0-9]{3}[-.\s]?[0-9]{4}\b/g,
+    pattern: /\b(?:\+1[-.\s]?)?\(?[0-9]{3}\)?[-.\s][0-9]{3}[-.\s]?[0-9]{4}\b/g,
     category: "personal",
     description: "US phone number",
   },
@@ -95,7 +94,8 @@ export const patterns: PatternDefinition[] = [
   },
   {
     name: "SWIFT_BIC",
-    pattern: /\b[A-Z]{6}[A-Z0-9]{2}(?:[A-Z0-9]{3})?\b/g,
+    pattern: /\b[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}(?:[A-Z0-9]{3})?\b/g,
+    validator: swiftBic,
     category: "financial",
     description: "SWIFT/BIC code",
   },

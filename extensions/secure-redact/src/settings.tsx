@@ -89,13 +89,7 @@ export default function Settings() {
     0
   );
 
-  const packageJsonContent = `{
-  "name": "secure-redact",
-  "version": "1.0.0",
-  "description": "100% offline data redaction for sensitive information"
-}`;
-
-  const version = JSON.parse(packageJsonContent).version;
+  const version = "1.0.0";
 
   return (
     <List isLoading={isLoading} isShowingDetail navigationTitle="Settings">
@@ -321,7 +315,7 @@ Pattern-based detection using:
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Repository"
-                    text="https://github.com/placeholder/secure-redact"
+                    text="https://github.com/husnainfareed/redactor-extenstion"
                   />
                 </List.Item.Detail.Metadata>
               }
@@ -331,7 +325,7 @@ Pattern-based detection using:
             <ActionPanel>
               <Action.OpenInBrowser
                 title="Open GitHub Repository"
-                url="https://github.com/placeholder/secure-redact"
+                url="https://github.com/husnainfareed/redactor-extenstion"
               />
             </ActionPanel>
           }
