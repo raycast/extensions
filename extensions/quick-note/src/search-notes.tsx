@@ -16,20 +16,23 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true); // starts true
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchNotes() {
       setIsLoading(true);
       try {
         const foldersResult = await runAppleScript('tell application "Quick Note" to get json of every folder');
+        if (cancelled) return;
         setFolders(JSON.parse("[" + foldersResult + "]"));
 
         const notesResult = await runAppleScript(`
           tell application "Quick Note"
             set results to search "${escaped(searchText)}"
-            
+
             if (count of results) = 0 then
               return "[]"
             end if
-            
+
             set result to ""
             repeat with n in results
               set result to result & "," & (json of n)
@@ -39,15 +42,19 @@ export default function Command() {
             return result
           end tell
           `);
+        if (cancelled) return;
         setNotes(JSON.parse(notesResult));
       } catch (error) {
-        console.error("Failed to fetch notes:", error);
+        if (!cancelled) console.error("Failed to fetch notes:", error);
       } finally {
-        setIsLoading(false);
+        if (!cancelled) setIsLoading(false);
       }
     }
 
     fetchNotes();
+    return () => {
+      cancelled = true;
+    };
   }, [searchText]);
 
   function renderFlatNotesList(notes: Note[]) {
