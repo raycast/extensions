@@ -19,13 +19,15 @@ import {
 } from "./api/gemini-tts";
 import { FALLBACK_VOICES, groupVoicesByCategory, isAcademicRecommendedVoice } from "./constants/voices";
 import type { VoiceConfig } from "./api/types";
-import { AudioPlayer } from "./utils/audio-player";
+import { AudioPlayer, clearExternalStopRequest, hasExternalStopRequest } from "./utils/audio-player";
 import { getReadableText } from "./utils/text-source";
 import {
   clearQuickReadVoiceOverride,
   getActiveQuickReadVoiceId,
   setQuickReadVoiceOverride,
 } from "./utils/voice-preferences";
+import { buildTextPreview, clearPlaybackState, writePlaybackState } from "./utils/playback-state";
+import { acquireSessionLock, releaseSessionLock } from "./utils/session-lock";
 
 const PREVIEW_FALLBACK_TEXT = "这是一段 Gemini TTS 音色试听。";
 const PREVIEW_CHAR_LIMIT = 180;
@@ -97,6 +99,15 @@ export default function SelectVoice() {
 
   const handlePreviewVoice = useCallback(async (voice: VoiceConfig) => {
     playerRef.current.stopPlayback();
+    clearExternalStopRequest();
+    if (!acquireSessionLock()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Another reading is already in progress",
+        message: "Stop it first, or wait for it to finish.",
+      });
+      return;
+    }
     const player = new AudioPlayer();
     playerRef.current = player;
     setPreviewingVoiceId(voice.id);
@@ -105,10 +116,44 @@ export default function SelectVoice() {
       const readableText = await getReadableText();
       const previewText = getPreviewText(readableText?.text || PREVIEW_FALLBACK_TEXT);
       const options = resolveOptionsForText(buildOptionsFromPrefs(voice.id), previewText);
+
+      // Make the preview show up in the menu bar and respond to Stop.
+      // Preview is a single chunk, so chunkIndex/chunkTotal are 0/1.
+      const previewSummary = buildTextPreview(previewText);
+      await writePlaybackState({
+        phase: "synthesizing",
+        voiceId: voice.id,
+        source: readableText ? readableText.source : "clipboard",
+        textPreview: previewSummary,
+        totalChars: previewText.length,
+        chunkIndex: 0,
+        chunkTotal: 1,
+        speed: options.speed,
+        updatedAt: new Date().toISOString(),
+      });
+
       const audio = await synthesizeSpeech(previewText, options);
-      if (player.isStopped()) return;
+      if (player.isStopped() || hasExternalStopRequest()) {
+        await clearPlaybackState();
+        return;
+      }
+
+      await writePlaybackState({
+        phase: "playing",
+        voiceId: voice.id,
+        source: readableText ? readableText.source : "clipboard",
+        textPreview: previewSummary,
+        totalChars: previewText.length,
+        chunkIndex: 0,
+        chunkTotal: 1,
+        speed: options.speed,
+        updatedAt: new Date().toISOString(),
+      });
+
       await player.playAudio(audio, options.speed);
+      await clearPlaybackState();
     } catch (error) {
+      await clearPlaybackState();
       if (error instanceof TTSApiError) {
         if (error.code === -1 || error.code === -6) {
           await showToast({
@@ -129,12 +174,14 @@ export default function SelectVoice() {
       }
     } finally {
       setPreviewingVoiceId((current) => (current === voice.id ? null : current));
+      releaseSessionLock();
     }
   }, []);
 
-  const handleStopPreview = useCallback(() => {
+  const handleStopPreview = useCallback(async () => {
     playerRef.current.stopPlayback();
     setPreviewingVoiceId(null);
+    await clearPlaybackState();
   }, []);
 
   const handleResetVoice = useCallback(async () => {

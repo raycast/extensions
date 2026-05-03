@@ -20,6 +20,11 @@
 - Static director-profile prompt moved to `systemInstruction` so each per-chunk request only carries the transcript, lowering Gemini token-per-minute pressure across long readings.
 - Menu-bar status refreshes within ~1 second of a phase transition via background `launchCommand`, instead of waiting for the 1-minute interval tick.
 
+### Fixes
+
+- Session lock prevents two readings from running in parallel: a Quick Read trigger that lands during the lead chunk's synthesis (before any `afplay` process exists) now stops the running session cleanly instead of starting a parallel reader.
+- Voice preview now writes playback state, so the menu bar reflects in-progress previews and Stop Reading interrupts them at the next chunk boundary.
+
 ### Gemini TTS
 
 - Direct Gemini REST API integration with `x-goog-api-key` authentication.

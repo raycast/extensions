@@ -23,6 +23,7 @@ import { AudioPlayer, clearExternalStopRequest, hasExternalStopRequest } from ".
 import { getQuickReadVoiceOverride, setQuickReadVoiceOverride } from "./utils/voice-preferences";
 import { buildTextPreview, clearPlaybackState, writePlaybackState } from "./utils/playback-state";
 import { clampSpeed, clearPlaybackSpeed, readPlaybackSpeed, writePlaybackSpeed } from "./utils/playback-speed";
+import { acquireSessionLock, releaseSessionLock } from "./utils/session-lock";
 import type { SynthesisResult, TTSOptions, VoiceConfig } from "./api/types";
 
 type RowPhase = "synthesizing" | "playing";
@@ -88,6 +89,17 @@ export default function ReadWithVoice() {
       // Stop any prior in-component playback before kicking off a new one.
       playerRef.current.stopPlayback();
       clearExternalStopRequest();
+      // Acquire session lock so a Quick Read or Resume triggered while
+      // this in-component reader is running can stop us cleanly. The
+      // lock is held for the entire synth+play lifetime.
+      if (!acquireSessionLock()) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Another reading is already in progress",
+          message: "Stop it first, or wait for it to finish.",
+        });
+        return;
+      }
       const player = new AudioPlayer();
       playerRef.current = player;
 
@@ -196,6 +208,7 @@ export default function ReadWithVoice() {
         }
       } finally {
         setProgress((current) => (current?.voiceId === voice.id ? null : current));
+        releaseSessionLock();
       }
     },
     [selectedText],

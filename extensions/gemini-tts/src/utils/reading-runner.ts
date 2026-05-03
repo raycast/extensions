@@ -12,6 +12,7 @@ import {
   writePlaybackState,
 } from "./playback-state";
 import { clampSpeed, clearPlaybackSpeed, formatSpeed, readPlaybackSpeed, writePlaybackSpeed } from "./playback-speed";
+import { acquireSessionLock, releaseSessionLock } from "./session-lock";
 
 const MENU_REFRESH_MIN_INTERVAL_MS = 750;
 
@@ -26,6 +27,15 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
 
   if (chunkCount === 0) {
     await showHUD("No text to read");
+    return;
+  }
+
+  // Hold the session lock for the entire read — covers the synthesis
+  // window before any afplay process exists. Without this, a second
+  // Quick Read trigger during the lead chunk's synthesis would launch
+  // a parallel reader instead of toggle-stopping the first one.
+  if (!acquireSessionLock()) {
+    await showHUD("Another reading is already in progress");
     return;
   }
 
@@ -175,6 +185,7 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
       pending.catch(() => undefined);
     }
     player.cleanup();
+    releaseSessionLock();
   }
 }
 

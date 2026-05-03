@@ -4,6 +4,7 @@ import { tmpdir } from "os";
 import { join } from "path";
 import { randomUUID } from "crypto";
 import { execSync } from "child_process";
+import { hasActiveSession } from "./session-lock";
 
 const PID_FILE = join(tmpdir(), "gemini-tts.pid");
 const STOP_FILE = join(tmpdir(), "gemini-tts.stop");
@@ -174,42 +175,55 @@ function removePidFileIfMatch(expectedPid: number | undefined): void {
 }
 
 /**
- * Read the PID from the PID file and kill the afplay process.
- * Validates the PID belongs to afplay before killing to avoid
- * killing unrelated processes (TOCTOU mitigation).
+ * Stop any in-flight reading. Returns true if a stop signal was
+ * delivered (either an afplay process was killed, or a mid-synthesis
+ * session was asked to abort), false if nothing was running.
+ *
+ * Two cases the caller must distinguish:
+ * 1. afplay is running → kill it with SIGTERM and write STOP_FILE.
+ * 2. synthesis is running but no afplay yet → write STOP_FILE; the
+ *    running session's loop will see hasExternalStopRequest() at the
+ *    next chunk boundary and exit cleanly.
+ *
+ * Without case (2), pressing Quick Read during the lead chunk's
+ * synthesis would launch a parallel reading instead of stopping.
  */
 export function stopExternalPlayback(): boolean {
-  try {
-    if (!existsSync(PID_FILE)) {
-      return false;
-    }
-    writeStopRequest();
-    const pidStr = readFileSync(PID_FILE, "utf8").trim();
-    const pid = parseInt(pidStr, 10);
-    if (isNaN(pid)) {
-      removePidFile();
-      return false;
-    }
-
-    // Verify the PID belongs to afplay before killing
+  // Case 1: afplay is running.
+  if (existsSync(PID_FILE)) {
     try {
-      const comm = execSync(`ps -p ${pid} -o comm=`, { encoding: "utf8" }).trim();
-      if (!comm.includes("afplay")) {
+      writeStopRequest();
+      const pidStr = readFileSync(PID_FILE, "utf8").trim();
+      const pid = parseInt(pidStr, 10);
+      if (isNaN(pid)) {
         removePidFile();
-        return false;
+      } else {
+        try {
+          const comm = execSync(`ps -p ${pid} -o comm=`, { encoding: "utf8" }).trim();
+          if (comm.includes("afplay")) {
+            process.kill(pid, "SIGTERM");
+            removePidFile();
+            return true;
+          }
+        } catch {
+          // PID gone — fall through to session-lock check
+        }
+        removePidFile();
       }
     } catch {
       removePidFile();
-      return false;
     }
-
-    process.kill(pid, "SIGTERM");
-    removePidFile();
-    return true;
-  } catch {
-    removePidFile();
-    return false;
   }
+
+  // Case 2: synthesis-only window — no afplay yet, but a session lock
+  // signals an active reader. Write STOP_FILE; the reader's chunk-
+  // boundary check will pick it up and exit.
+  if (hasActiveSession()) {
+    writeStopRequest();
+    return true;
+  }
+
+  return false;
 }
 
 export function clearExternalStopRequest(): void {
