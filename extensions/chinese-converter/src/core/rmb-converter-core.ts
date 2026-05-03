@@ -35,16 +35,7 @@ export type ParsedPreferences = {
   moneyOptions: MoneyOptions;
 };
 
-export type CommandPreferences = {
-  roundingMode?: string;
-  preferTraditionalYuan?: boolean;
-  preferSimpleZheng?: boolean;
-  unOmitYuan?: boolean;
-  forceZheng?: boolean;
-  moneyPrefix?: string;
-};
-
-export function parsePreferences(preferences: CommandPreferences): ParsedPreferences {
+export function parsePreferences(preferences: Preferences.ConvertNumberToRmb): ParsedPreferences {
   return {
     decimalPlaces: 2,
     roundingMode: parseRoundingMode(preferences.roundingMode),

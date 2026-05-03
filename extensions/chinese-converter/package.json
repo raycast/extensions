@@ -15,7 +15,7 @@
     "Windows"
   ],
   "categories": [
-    "Other"
+    "Finance"
   ],
   "keywords": [
     "RMB",
@@ -34,6 +34,7 @@
     "build": "ray build",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
     "publish": "ray publish",
     "test": "vitest run"
   },

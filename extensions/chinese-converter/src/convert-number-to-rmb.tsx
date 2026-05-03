@@ -1,10 +1,10 @@
 import { useMemo, useState } from "react";
 import { Action, ActionPanel, getPreferenceValues, Icon, LaunchProps, List, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { convert2rmb, createNzh, parsePreferences, type CommandPreferences } from "./core/rmb-converter-core";
+import { convert2rmb, createNzh, parsePreferences } from "./core/rmb-converter-core";
 
 export default function ConvertToRmb(props: LaunchProps<{ arguments: { number?: string } }>) {
-  const preferences = getPreferenceValues<CommandPreferences>();
+  const preferences = getPreferenceValues<Preferences.ConvertNumberToRmb>();
   const [searchText, setSearchText] = useState(props.arguments.number ?? "");
 
   const { decimalPlaces, roundingMode, moneyPrefix, yuanChar, zhengChar, moneyOptions } = useMemo(
@@ -17,7 +17,7 @@ export default function ConvertToRmb(props: LaunchProps<{ arguments: { number?: 
 
   const parsed = useMemo(
     () => convert2rmb(trimmedInput, { decimalPlaces, roundingMode, moneyOptions, nzh }),
-    [trimmedInput, roundingMode, moneyOptions.unOmitYuan, moneyOptions.forceZheng, nzh],
+    [trimmedInput, decimalPlaces, roundingMode, moneyOptions.unOmitYuan, moneyOptions.forceZheng, nzh],
   );
 
   return (

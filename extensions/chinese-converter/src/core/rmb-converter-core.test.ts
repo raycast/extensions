@@ -78,7 +78,16 @@ describe("rmb-converter-core", () => {
       zhengChar: "正",
       moneyOptions: { unOmitYuan: true, forceZheng: false },
     });
-    expect(parsePreferences({})).toEqual({
+    expect(
+      parsePreferences({
+        roundingMode: "4",
+        unOmitYuan: false,
+        preferTraditionalYuan: false,
+        forceZheng: false,
+        preferSimpleZheng: false,
+        moneyPrefix: "",
+      }),
+    ).toEqual({
       decimalPlaces: 2,
       roundingMode: 4,
       moneyPrefix: "",
