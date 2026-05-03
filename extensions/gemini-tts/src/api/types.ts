@@ -3,7 +3,7 @@ export type GeminiLanguageMode = "auto" | "cmn" | "en" | "mixed-cmn-en";
 export type GeminiReadingExperience =
   | "auto"
   | "academic-bilingual"
-  | "legal-scholar"
+  | "legal-text"
   | "mandarin-lecture"
   | "english-paper"
   | "news-briefing"

@@ -243,13 +243,15 @@ function parseLanguageMode(languageMode: string | undefined): GeminiLanguageMode
 function parseReadingExperience(readingExperience: string | undefined): GeminiReadingExperience {
   switch (readingExperience) {
     case "auto":
-    case "legal-scholar":
+    case "legal-text":
     case "mandarin-lecture":
     case "english-paper":
     case "news-briefing":
     case "audiobook":
     case "neutral":
       return readingExperience;
+    case "legal-scholar":
+      return "legal-text";
     default:
       return "academic-bilingual";
   }
@@ -295,15 +297,14 @@ type ResolvedReadingExperience = Exclude<GeminiReadingExperience, "auto">;
 
 function getExperienceProfile(readingExperience: ResolvedReadingExperience): ExperienceProfile {
   switch (readingExperience) {
-    case "legal-scholar":
+    case "legal-text":
       return {
-        name: "The Legal Scholar",
-        profile:
-          "A precise legal-academic reader for statutes, cases, doctrinal analysis, citations, and dense scholarly prose.",
+        name: "Legal Text Mode",
+        profile: "A precise reader for professional legal text, statutes, cases, citations, and doctrinal prose.",
         scene:
           "A quiet law library reading desk. The listener is reviewing material carefully and needs retention, not entertainment.",
         style:
-          "Calm, exacting, and intellectually steady. Serious without sounding stiff. The performance should feel like a careful professor reading important legal material.",
+          "Calm, exacting, and intellectually steady. Serious without sounding stiff. The performance should feel like careful reading of professional legal material.",
         pacing:
           "Moderate and deliberate. Pause slightly around headings, quoted passages, enumerated lists, article numbers, case names, and citations.",
         articulation:
@@ -423,7 +424,7 @@ function resolveReadingExperienceForText(
 
   const legalScore = scoreLegalText(text);
   if (legalScore >= 2) {
-    return "legal-scholar";
+    return "legal-text";
   }
 
   const languageMix = analyzeLanguageMix(text);

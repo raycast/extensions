@@ -267,8 +267,9 @@ function formatExperienceLabel(readingExperience: string | undefined): string {
   switch (readingExperience) {
     case "auto":
       return "Smart Auto";
+    case "legal-text":
     case "legal-scholar":
-      return "Legal Scholar";
+      return "Legal Text Mode";
     case "mandarin-lecture":
       return "Mandarin Lecture";
     case "english-paper":

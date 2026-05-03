@@ -11,9 +11,9 @@ Gemini TTS is not just a voice endpoint. The official TTS guide emphasizes natur
 Functional advantages:
 
 - **Gemini-native director prompts**: every request is wrapped with Audio Profile, Scene, Director's Notes, and Transcript sections.
-- **Smart Auto reading mode**: the extension infers whether selected text is legal scholarship, English academic prose, Mandarin prose, or mixed Chinese-English material.
+- **Smart Auto reading mode**: the extension infers whether selected text is professional legal text, English academic prose, Mandarin prose, or mixed Chinese-English material.
 - **Research-first bilingual handling**: Chinese stays Chinese, English terms stay English, and TTS is not asked to translate while speaking.
-- **Legal and citation-aware delivery**: Legal Scholar mode adds guidance for statutes, article numbers, cases, courts, acronyms, citations, and quoted text.
+- **Legal Text Mode**: adds guidance for statutes, article numbers, cases, courts, acronyms, citations, and quoted text.
 - **Long-text friendly playback**: selections are chunked around readable boundaries so Gemini avoids the long-output drift described in the official limitations.
 - **Smart Academic Pauses**: paragraph breaks can be converted into safe English `[short pause]` audio tags without treating bracketed citations as performance tags.
 - **Academic voice recommendations**: `Sadaltager`, `Charon`, `Rasalgethi`, and `Iapetus` are highlighted as academic picks in the voice picker.
@@ -60,7 +60,7 @@ Both models accept text input and return audio output. Gemini TTS does not suppo
 
 Smart Auto routing:
 
-- Legal signals -> **Legal Scholar**
+- Legal signals -> **Legal Text Mode**
 - Mostly English text -> **English Paper Reader**
 - Mostly Chinese text -> **Mandarin Lecture**
 - Mixed academic text -> **Bilingual Academic Reader**
@@ -68,7 +68,7 @@ Smart Auto routing:
 Available manual presets:
 
 - **Bilingual Academic Reader**: Chinese-English papers, research notes, and mixed-language material.
-- **Legal Scholar**: statutes, cases, citations, doctrinal analysis, and CLSCI-style legal prose.
+- **Legal Text Mode**: statutes, cases, citations, doctrinal analysis, and professional legal prose.
 - **Mandarin Lecture**: Chinese academic notes and long-form Mandarin prose.
 - **English Paper Reader**: English papers, reports, and technical material.
 - **News Briefing**: updates, newsletters, and policy briefs.

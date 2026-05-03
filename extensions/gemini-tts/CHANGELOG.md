@@ -20,7 +20,7 @@
 - Wraps Gemini's base64 PCM response into a 24 kHz mono WAV file for `afplay`.
 - Retries transient Gemini TTS failures, including occasional text-instead-of-audio responses.
 - Reading Experience presets that generate Gemini-friendly Audio Profile, Scene, Director's Notes, and Transcript prompts.
-- Smart Auto Reading Experience that infers Legal Scholar, English Paper Reader, Mandarin Lecture, or Bilingual Academic Reader from selected text.
+- Smart Auto Reading Experience that infers Legal Text Mode, English Paper Reader, Mandarin Lecture, or Bilingual Academic Reader from selected text.
 - Expressiveness preference for subtle, balanced, or expressive delivery.
 - Audio Tags preference for Smart Academic Pauses, exact text, respecting existing tags, or adding paragraph pauses.
 - Custom Director Notes for advanced tone, accent, pacing, pronunciation, or role guidance.
