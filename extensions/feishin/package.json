@@ -1,0 +1,155 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "feishin",
+  "title": "Feishin",
+  "description": "Control Feishin music player via its remote control server",
+  "version": "1.0.0",
+  "icon": "feishin.png",
+  "author": "pacuftw",
+  "license": "MIT",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "preferences": [
+    {
+      "name": "host",
+      "type": "textfield",
+      "required": true,
+      "title": "Host",
+      "description": "Feishin server hostname or IP address",
+      "default": "localhost",
+      "placeholder": "localhost"
+    },
+    {
+      "name": "port",
+      "type": "textfield",
+      "required": true,
+      "title": "Port",
+      "description": "Remote control server port (set in Feishin Settings > Remote Control)",
+      "default": "4333",
+      "placeholder": "4333"
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": false,
+      "title": "Username",
+      "description": "Remote control username (leave empty if not configured)",
+      "placeholder": "optional"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": false,
+      "title": "Password",
+      "description": "Remote control password (leave empty if not configured)",
+      "placeholder": "optional"
+    },
+    {
+      "name": "navidromeUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Navidrome URL",
+      "description": "Your Navidrome server URL. (Only needed for cover art)",
+      "placeholder": "http://localhost:4533"
+    },
+    {
+      "name": "navidromeUsername",
+      "type": "textfield",
+      "required": false,
+      "title": "Navidrome Username",
+      "description": "Navidrome account username (Only needed for cover art)",
+      "placeholder": "optional"
+    },
+    {
+      "name": "navidromePassword",
+      "type": "password",
+      "required": false,
+      "title": "Navidrome Password",
+      "description": "Navidrome account password (Only needed for cover art)",
+      "placeholder": "optional"
+    }
+  ],
+  "commands": [
+    {
+      "name": "now-playing",
+      "title": "Now Playing",
+      "description": "Show currently playing song with full playback controls",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-play-pause",
+      "title": "Toggle Play/Pause",
+      "description": "Toggle playback in Feishin",
+      "mode": "no-view"
+    },
+    {
+      "name": "next",
+      "title": "Next Track",
+      "description": "Skip to next track",
+      "mode": "no-view"
+    },
+    {
+      "name": "previous",
+      "title": "Previous Track",
+      "description": "Go to previous track",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-up",
+      "title": "Volume up",
+      "description": "Increase volume by 10%",
+      "mode": "no-view"
+    },
+    {
+      "name": "volume-down",
+      "title": "Volume Down",
+      "description": "Decrease volume by 10%",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-shuffle",
+      "title": "Toggle Shuffle",
+      "description": "Toggle shuffle mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "cycle-repeat",
+      "title": "Cycle Repeat Mode",
+      "description": "Cycle through repeat modes: off, all, one",
+      "mode": "no-view"
+    },
+    {
+      "name": "favorite",
+      "title": "Toggle Favorite",
+      "description": "Toggle favorite status for the current song",
+      "mode": "no-view"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@types/ws": "^8.18.1",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  }
+}
