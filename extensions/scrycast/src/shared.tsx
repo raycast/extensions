@@ -54,8 +54,18 @@ export type SortOrder = "name" | "edhrec" | "usd";
 
 export const FEEDBACK_URL = "https://github.com/aayushpi/scrycast/issues";
 export const SAVED_CARDS_KEY = "savedCards";
+export const SCRYFALL_API_BASE = "https://api.scryfall.com";
+export const TAGGER_BASE_URL = "https://tagger.scryfall.com";
+export const TAGGER_BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
+
+// True DFCs have image_uris on each face; same-face layouts (Adventure, Prepared,
+// Split, etc.) have a single top-level image and no per-face image_uris.
+export function isFlippable(card: Card): boolean {
+  return card.card_faces != null && card.card_faces.length >= 2 && card.card_faces[1].image_uris != null;
+}
 
 export function getCardImageUri(card: Card, size: keyof ImageUris = "png"): string {
   if (card.image_uris?.[size]) return card.image_uris[size];
@@ -107,4 +117,102 @@ export async function copyCardImage(imageUri: string): Promise<void> {
   const tmpPath = join(tmpdir(), `scrycast-${Date.now()}.png`);
   await writeFile(tmpPath, buffer);
   await Clipboard.copy({ file: tmpPath });
+}
+
+// ─── Tagger API ───────────────────────────────────────────────────────────────
+
+export interface Tagging {
+  tag: {
+    name: string;
+    type: "ORACLE_CARD_TAG" | "ILLUSTRATION_TAG" | string;
+  };
+}
+
+interface TaggerResponse {
+  data?: { card?: { taggings: Tagging[] } };
+  errors?: Array<{ message: string }>;
+}
+
+export async function fetchCardTags(set: string, collectorNumber: string): Promise<Tagging[]> {
+  const cardUrl = `${TAGGER_BASE_URL}/card/${set}/${collectorNumber}`;
+
+  console.log(`[Scrycast] Fetching tagger page for ${set}/${collectorNumber}`);
+  const pageResponse = await fetch(cardUrl, {
+    headers: {
+      "User-Agent": TAGGER_BROWSER_UA,
+      Accept: "text/html,application/xhtml+xml",
+    },
+  });
+
+  if (!pageResponse.ok) {
+    console.error(`[Scrycast] Tagger page returned ${pageResponse.status} for ${cardUrl}`);
+    throw new Error(`Tagger page unavailable (${pageResponse.status})`);
+  }
+
+  const html = await pageResponse.text();
+  const csrfMatch = html.match(/name="csrf-token" content="([^"]+)"/);
+  if (!csrfMatch) {
+    console.error("[Scrycast] CSRF token not found. Page excerpt:", html.slice(0, 500));
+    throw new Error("Could not find CSRF token on tagger page");
+  }
+
+  const csrfToken = csrfMatch[1];
+  const setCookies: string[] =
+    typeof (pageResponse.headers as unknown as { getSetCookie?: () => string[] }).getSetCookie === "function"
+      ? (pageResponse.headers as unknown as { getSetCookie: () => string[] }).getSetCookie()
+      : [pageResponse.headers.get("set-cookie") ?? ""];
+
+  const cookieHeader = setCookies
+    .filter(Boolean)
+    .map((c) => c.split(";")[0])
+    .join("; ");
+
+  console.log(`[Scrycast] CSRF acquired (${csrfToken.slice(0, 12)}…), cookies: ${cookieHeader.slice(0, 60)}…`);
+
+  const gqlResponse = await fetch(`${TAGGER_BASE_URL}/graphql`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-CSRF-Token": csrfToken,
+      Cookie: cookieHeader,
+      Origin: TAGGER_BASE_URL,
+      Referer: cardUrl,
+    },
+    body: JSON.stringify({
+      query: `query {
+        card: cardBySet(set: ${JSON.stringify(set)}, number: ${JSON.stringify(collectorNumber)}) {
+          taggings { tag { name type } }
+        }
+      }`,
+    }),
+  });
+
+  if (!gqlResponse.ok) {
+    const body = await gqlResponse.text();
+    console.error(`[Scrycast] GraphQL ${gqlResponse.status}:`, body);
+    throw new Error(`GraphQL request failed (${gqlResponse.status})`);
+  }
+
+  const result = (await gqlResponse.json()) as TaggerResponse;
+
+  if (result.errors?.length) {
+    console.error("[Scrycast] GraphQL errors:", JSON.stringify(result.errors, null, 2));
+    throw new Error(result.errors[0]?.message ?? "GraphQL error");
+  }
+
+  const taggings: Tagging[] = result.data?.card?.taggings ?? [];
+  console.log(`[Scrycast] ${taggings.length} tags returned for ${set}/${collectorNumber}`);
+  return taggings;
+}
+
+export function tagSearchQuery(type: string, name: string): string {
+  if (type === "ORACLE_CARD_TAG") return `oracletag:"${name}"`;
+  if (type === "ILLUSTRATION_TAG") return `arttag:"${name}"`;
+  return `"${name}"`;
+}
+
+export function tagScryfallSearchUrl(type: string, name: string): string {
+  if (type === "ORACLE_CARD_TAG") return `https://scryfall.com/search?q=${encodeURIComponent(`oracletag:"${name}"`)}`;
+  if (type === "ILLUSTRATION_TAG") return `https://scryfall.com/search?q=${encodeURIComponent(`arttag:"${name}"`)}`;
+  return `https://scryfall.com/search?q=${encodeURIComponent(`"${name}"`)}`;
 }

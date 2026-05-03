@@ -13,7 +13,7 @@ import {
 } from "@raycast/api";
 import { useLocalStorage, usePromise } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { Card, getCardImageUri, getEdhrecUrl, getTaggerUrl, copyCardImage, FEEDBACK_URL } from "./shared";
+import { Card, getCardImageUri, getEdhrecUrl, getTaggerUrl, copyCardImage, isFlippable, FEEDBACK_URL } from "./shared";
 import { CardDetailView, CardTagsView, PrintsView } from "./card-views";
 
 const SAVED_DECKS_KEY = "savedDecks";
@@ -592,7 +592,7 @@ function DeckView({ deck: initialDeck, onUpdate }: { deck: SavedDeck; onUpdate: 
       {sections.map(({ label, cards }) => (
         <Grid.Section key={label} title={`${label} (${cards.length})`}>
           {cards.map(({ card, quantity }) => {
-            const isDFC = (card.card_faces?.length ?? 0) >= 2;
+            const isDFC = isFlippable(card);
             const faceIndex = isDFC && flippedCards.has(card.id) ? 1 : 0;
             const activeFace = isDFC ? card.card_faces![faceIndex] : null;
             const imageUri = activeFace?.image_uris?.png ?? getCardImageUri(card);
@@ -884,7 +884,7 @@ export default function BrowseDecks() {
           grouped.map(({ deck, cards }) => (
             <Grid.Section key={deck.id} title={`${deck.name} — ${cards.length} match${cards.length !== 1 ? "es" : ""}`}>
               {cards.map(({ card, quantity }) => {
-                const isDFC = (card.card_faces?.length ?? 0) >= 2;
+                const isDFC = isFlippable(card);
                 const faceIndex = isDFC && flippedCards.has(card.id) ? 1 : 0;
                 const activeFace = isDFC ? card.card_faces![faceIndex] : null;
                 const imageUri = activeFace?.image_uris?.png ?? getCardImageUri(card);

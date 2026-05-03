@@ -1,4 +1,4 @@
-import { Grid, ActionPanel, Action, showToast, Toast, Color, Icon, LocalStorage, useNavigation } from "@raycast/api";
+import { Grid, ActionPanel, Action, showToast, Toast, Icon, LocalStorage, useNavigation } from "@raycast/api";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useLocalStorage } from "@raycast/utils";
 import {
@@ -6,14 +6,11 @@ import {
   ScryfallSearchResponse,
   SortOrder,
   SAVED_CARDS_KEY,
-  FEEDBACK_URL,
   getCardImageUri,
-  getEdhrecUrl,
-  getTaggerUrl,
+  isFlippable,
   sortCards,
-  copyCardImage,
 } from "./shared";
-import { CardDetailView, CardTagsView, PrintsView } from "./card-views";
+import { CardDetailView, CardActions } from "./card-views";
 import Command from "./search-view";
 import { pauseCoverFetch, resumeCoverFetch } from "./cover-fetcher";
 import { COLLECTION_IDS_KEY, COLLECTION_NAMES_KEY } from "./collection";
@@ -306,7 +303,7 @@ export function SetCardsView({
           }
         >
           {cards.map((card) => {
-            const isDFC = (card.card_faces?.length ?? 0) >= 2;
+            const isDFC = isFlippable(card);
             const faceIndex = isDFC && flippedCards.has(card.id) ? 1 : 0;
             const activeFace = isDFC ? card.card_faces![faceIndex] : null;
             const imageUri = activeFace?.image_uris?.png ?? getCardImageUri(card);
@@ -322,96 +319,21 @@ export function SetCardsView({
                 title={`${isSaved ? "🔖 " : ""}${exactMatch ? "✅ " : nameMatch ? "☑️ " : ""}${card.name}`}
                 subtitle={price}
                 actions={
-                  <ActionPanel>
-                    <ActionPanel.Section title={card.name}>
-                      {isDFC && (
-                        <Action
-                          title={`Flip to ${card.card_faces![faceIndex === 0 ? 1 : 0].name}`}
-                          icon={Icon.ArrowClockwise}
-                          shortcut={{ modifiers: ["cmd"], key: "f" }}
-                          onAction={() => toggleFlip(card.id)}
-                        />
-                      )}
-                      <Action
-                        title="Show Card Details"
-                        icon={Icon.Eye}
-                        onAction={() =>
-                          push(
-                            <CardDetailView
-                              card={card}
-                              searchTagTarget={(query) => <Command initialSearch={query} />}
-                            />
-                          )
-                        }
-                      />
-                      <Action.OpenInBrowser
-                        title="Open in Scryfall"
-                        url={card.scryfall_uri}
-                        icon={{ source: Icon.Globe, tintColor: Color.Blue }}
-                        shortcut={{ modifiers: ["cmd"], key: "return" }}
-                      />
-                      <Action.OpenInBrowser
-                        title="Open in Edhrec" // eslint-disable-line @raycast/prefer-title-case
-                        url={getEdhrecUrl(card.name)}
-                        icon={{ source: Icon.Person, tintColor: Color.Green }}
-                        shortcut={{ modifiers: ["cmd", "ctrl"], key: "return" }}
-                      />
-                      <Action.CopyToClipboard
-                        title="Copy Card Name"
-                        content={card.name}
-                        shortcut={{ modifiers: ["cmd"], key: "c" }}
-                        icon={Icon.Clipboard}
-                      />
-                      <Action
-                        title="Copy Card Image"
-                        icon={Icon.Image}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                        onAction={async () => {
-                          const toast = await showToast({ style: Toast.Style.Animated, title: "Copying image…" });
-                          try {
-                            await copyCardImage(imageUri);
-                            toast.style = Toast.Style.Success;
-                            toast.title = "Image copied";
-                          } catch (err) {
-                            toast.style = Toast.Style.Failure;
-                            toast.title = "Failed to copy image";
-                            toast.message = (err as Error).message;
-                          }
-                        }}
-                      />
-                      <Action
-                        title={isSaved ? "Remove from Bookmarks" : "Bookmark Card"}
-                        icon={isSaved ? Icon.StarDisabled : Icon.Star}
-                        shortcut={{ modifiers: ["cmd"], key: "b" }}
-                        onAction={() => toggleSave(card)}
-                      />
-                      <Action.OpenInBrowser
-                        title="Open in Scryfall Tagger"
-                        url={getTaggerUrl(card)}
-                        icon={{ source: Icon.Tag, tintColor: Color.Orange }}
-                        shortcut={{ modifiers: ["cmd"], key: "t" }}
-                      />
-                      <Action.Push
-                        title="Show Tags"
-                        target={
-                          <CardTagsView card={card} searchTagTarget={(query) => <Command initialSearch={query} />} />
-                        }
-                        icon={{ source: Icon.Tag, tintColor: Color.Purple }}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
-                      />
-                      <Action.Push
-                        title="View All Prints"
-                        target={
-                          <PrintsView card={card} searchTagTarget={(query) => <Command initialSearch={query} />} />
-                        }
-                        icon={Icon.List}
-                        shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                      />
-                    </ActionPanel.Section>
-                    <ActionPanel.Section title="Feedback">
-                      <Action.OpenInBrowser title="Submit Bug or Feature Request" url={FEEDBACK_URL} icon={Icon.Bug} />
-                    </ActionPanel.Section>
-                  </ActionPanel>
+                  <CardActions
+                    card={card}
+                    imageUri={imageUri}
+                    searchTagTarget={(query) => <Command initialSearch={query} />}
+                    isDFC={isDFC}
+                    faceIndex={faceIndex}
+                    onFlip={() => toggleFlip(card.id)}
+                    onShowDetails={() =>
+                      push(
+                        <CardDetailView card={card} searchTagTarget={(query) => <Command initialSearch={query} />} />
+                      )
+                    }
+                    isSaved={isSaved}
+                    onToggleSave={toggleSave}
+                  />
                 }
               />
             );
