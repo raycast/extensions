@@ -1,5 +1,4 @@
-import { Application, getApplications } from "@raycast/api";
-import { LocalStorage } from "@raycast/api";
+import { Application, getApplications, LocalStorage } from "@raycast/api";
 import { AppEntry, LaunchpadConfig, Folder } from "./types";
 import { execSync } from "child_process";
 import { existsSync } from "fs";
@@ -136,13 +135,6 @@ function toEntries(apps: Application[], localizedNames: Map<string, string>): Ap
 
 // ── Public API ─────────────────────────────────────────────────────────────
 
-/**
- * Read the cached config straight from LocalStorage. Skips all subprocess
- * work (mdls, getApplications) so the UI can render in <10ms.
- *
- * Returns null on first ever launch — caller must fall through to
- * `firstRunLoadConfig` to import from the system Launchpad DB.
- */
 export async function loadCachedConfig(): Promise<LaunchpadConfig | null> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (!raw) return null;
@@ -153,11 +145,6 @@ export async function loadCachedConfig(): Promise<LaunchpadConfig | null> {
   }
 }
 
-/**
- * First-run import path. Pulls from the macOS Launchpad SQLite DB if
- * available, otherwise builds a flat uncategorized list from getApplications.
- * Slow: spawns mdls + a sqlite3 query.
- */
 export async function firstRunLoadConfig(): Promise<LaunchpadConfig> {
   const installedApps = await getApplications();
   const localizedNames = resolveLocalizedNames(installedApps.map((a) => a.path));
@@ -167,24 +154,8 @@ export async function firstRunLoadConfig(): Promise<LaunchpadConfig> {
   return config;
 }
 
-/**
- * Background sync: detect newly-installed / removed apps and refresh
- * localized names. Run AFTER the first paint so the user already sees their
- * folders. The returned config should replace the cached one in state.
- */
 export async function syncWithSystem(config: LaunchpadConfig): Promise<LaunchpadConfig> {
   return syncNewApps(config);
-}
-
-/**
- * @deprecated Prefer the split: loadCachedConfig() for instant render +
- * syncWithSystem() in the background. Kept for any callers that still want
- * the blocking behavior.
- */
-export async function loadConfig(): Promise<LaunchpadConfig> {
-  const cached = await loadCachedConfig();
-  if (cached) return await syncNewApps(cached);
-  return await firstRunLoadConfig();
 }
 
 export async function saveConfig(config: LaunchpadConfig): Promise<void> {
