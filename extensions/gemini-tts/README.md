@@ -15,6 +15,8 @@ Functional advantages:
 - **Research-first bilingual handling**: Chinese stays Chinese, English terms stay English, and TTS is not asked to translate while speaking.
 - **Legal Text Mode**: adds guidance for statutes, article numbers, cases, courts, acronyms, citations, and quoted text.
 - **Long-text friendly playback**: selections are chunked around readable boundaries so Gemini avoids the long-output drift described in the official limitations.
+- **Snappy first audio**: a small lead chunk is synthesized first so playback usually begins in 1-2 seconds; the next chunk is synthesized in parallel with playback so there is no silent gap between chunks.
+- **Disk audio cache**: replays, restarts, voice previews, and re-reads of the same paragraph hit a local 200 MB LRU cache and play instantly. Speed changes reuse cached audio because `afplay -r` applies speed at playback time.
 - **Smart Academic Pauses**: paragraph breaks can be converted into safe English `[short pause]` audio tags without treating bracketed citations as performance tags.
 - **Academic voice recommendations**: `Sadaltager`, `Charon`, `Rasalgethi`, and `Iapetus` are highlighted as academic picks in the voice picker.
 - **Raycast-native controls**: quick read, stop, resume, restart, speed changes, voice selection, and menu-bar status all stay inside Raycast.
@@ -173,12 +175,14 @@ Manage long readings:
 - API: Gemini REST `POST /v1beta/models/{model}:generateContent`
 - Authentication: `x-goog-api-key: <Gemini API Key>`
 - Request config: `responseModalities: ["AUDIO"]` plus `speechConfig.voiceConfig.prebuiltVoiceConfig.voiceName`
-- Prompt structure: Audio Profile, Scene, Director's Notes, and Transcript
+- Prompt structure: per-session director profile (Audio Profile, Scene, Director's Notes) lifted into `systemInstruction`; per-chunk request carries only the synthesis preamble + transcript
 - Audio response: base64 PCM from Gemini, wrapped into a 24 kHz mono 16-bit WAV file before playback
-- Playback: temporary WAV files played through macOS `afplay`
-- Playback speed: `afplay -r <speed>`
+- Playback: WAV files played through macOS `afplay`
+- Playback speed: `afplay -r <speed>` — applied at playback time, so cached audio is reusable across speed changes
+- Audio cache: SHA-256 over `(text, voice, model, language, experience, expressiveness, audio-tag mode, director notes, sample rate)` plus a cache version. LRU sweep at 200 MB inside `environment.supportPath/audio-cache/`. Clear from the menu-bar **Audio Cache** row.
+- Pipeline: chunk N+1 begins synthesis while chunk N plays. Lead chunk (~60-260 chars) is carved at the nearest sentence boundary so first-audio latency is bounded by a small synthesis instead of a full chunk.
 - Reading state: the most recent text, chunks, progress, and TTS options are stored in Raycast local storage
-- Playback stop: PID file in `$TMPDIR/gemini-tts.pid`
+- Stop semantics: PID file in `$TMPDIR/gemini-tts.pid` for active `afplay`; session lock in `$TMPDIR/gemini-tts.session.lock` covers the synthesis-only window before the first `afplay` is launched, so a Quick Read trigger during the lead chunk's synthesis still toggle-stops the running session.
 
 ## Development
 
