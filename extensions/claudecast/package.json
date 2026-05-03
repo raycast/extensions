@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claudecast",
   "title": "ClaudeCast",
-  "description": "Claude Code workflows at your fingertips: Quick prompts, session management, and agentic workflows",
+  "description": "Discover, resume, and automate Claude Code sessions: deep full-text search, one-keystroke resume, agentic loops, usage analytics, and quick prompts",
   "icon": "command-icon.png",
   "author": "qazi0",
   "contributors": [

@@ -1,9 +1,10 @@
 import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { writeFileSync } from "fs";
+import { writeFileSync, unlinkSync, mkdirSync, existsSync } from "fs";
 import { tmpdir, homedir } from "os";
 import { join } from "path";
+import { randomUUID } from "crypto";
 import type { PermissionMode } from "./session-parser";
 
 const execFilePromise = promisify(execFile);
@@ -113,9 +114,32 @@ async function openInITerm(command: string, cwd: string): Promise<void> {
 }
 
 async function openInWarp(command: string, cwd: string): Promise<void> {
-  // Warp supports a special URL scheme
-  const encodedCommand = encodeURIComponent(`cd "${cwd}" && ${command}`);
-  await open(`warp://action/new_tab?command=${encodedCommand}`);
+  // Use dynamic launch configuration for reliable command execution
+  const lcId = randomUUID();
+  const lcDir = join(homedir(), ".warp", "launch_configurations");
+  if (!existsSync(lcDir)) {
+    mkdirSync(lcDir, { recursive: true });
+  }
+  const lcFile = join(lcDir, `${lcId}.yaml`);
+  const yaml = `---
+name: ${lcId}
+windows:
+  - tabs:
+      - layout:
+          cwd: "${cwd.replace(/"/g, '\\"')}"
+          commands:
+            - exec: "${command.replace(/"/g, '\\"')}"
+`;
+  writeFileSync(lcFile, yaml, "utf-8");
+  await open(`warp://launch/${lcId}`);
+  // Clean up the temp config after launch
+  setTimeout(() => {
+    try {
+      unlinkSync(lcFile);
+    } catch {
+      /* ignore */
+    }
+  }, 30_000);
 }
 
 async function openInKitty(command: string, cwd: string): Promise<void> {
@@ -131,32 +155,21 @@ async function openInKitty(command: string, cwd: string): Promise<void> {
 }
 
 async function openInGhostty(command: string, cwd: string): Promise<void> {
-  const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-  const escapedCwd = cwd.replace(/"/g, '\\"');
+  const escapedCommand = command.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const escapedCwd = cwd.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
-  // Try direct invocation first via execFile with array arguments
-  try {
-    await execFilePromise("ghostty", [
-      `--working-directory=${cwd}`,
-      "-e",
-      "sh",
-      "-c",
-      command,
-    ]);
-  } catch {
-    // Fallback to AppleScript using execFile with array arguments
-    const script = `
-      tell application "Ghostty"
-        activate
-      end tell
-      delay 0.5
-      tell application "System Events"
-        keystroke "cd \\"${escapedCwd}\\" && ${escapedCommand}"
-        keystroke return
-      end tell
-    `;
-    await execFilePromise("osascript", ["-e", script]);
-  }
+  // Use Ghostty's native AppleScript API with surface configuration
+  const script = `
+    tell application "Ghostty"
+      activate
+      set cfg to new surface configuration
+      set initial working directory of cfg to "${escapedCwd}"
+      set initial input of cfg to "${escapedCommand}\n"
+      new window with configuration cfg
+    end tell
+  `;
+
+  await execFilePromise("osascript", ["-e", script]);
 }
 
 /**

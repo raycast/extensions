@@ -1,5 +1,20 @@
 # ClaudeCast Changelog
 
+## [1.6.0] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Ghostty Terminal Launch**: Replaced System Events keystroke simulation with Ghostty's native AppleScript surface API. The previous approach typed commands into whichever window was focused, interfering with active sessions.
+- **Warp Terminal Launch**: Replaced the non-functional `warp://action/new_tab?command=` URL scheme with a temporary YAML launch configuration opened via `warp://launch/`. Reliably opens a new window with the correct working directory and command. Double quotes in the cwd path are escaped, and the temp config cleanup window is 30 seconds to handle cold launches.
+
+### Changed
+
+- **Extension description**: Refreshed the store and repository description to highlight session search, instant resume, and agentic automation alongside quick prompts.
+
+### Contributors
+
+- Ghostty and Warp terminal launch fixes by [@Haknt](https://github.com/Haknt) ([#1](https://github.com/qazi0/claude-cast/pull/1))
+
 ## [1.5.0] - 2026-04-30
 
 ### Added
