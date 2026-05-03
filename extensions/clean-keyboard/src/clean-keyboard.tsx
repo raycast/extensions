@@ -2,10 +2,6 @@ import { Action, ActionPanel, Icon, List, getPreferenceValues, showToast, Toast 
 import { useEffect, useRef, useState } from "react";
 import { isMac, isTahoe, readFnState, setFnState } from "./lib/utils";
 
-interface Preferences {
-  lockFnKeys: boolean;
-}
-
 interface Duration {
   display: string;
   seconds: number;
@@ -62,6 +58,19 @@ export default function Command() {
   const savedFnState = useRef<boolean | null>(null);
 
   useEffect(() => {
+    return () => {
+      if (savedFnState.current !== null) {
+        try {
+          setFnState(savedFnState.current);
+        } catch {
+          // best-effort restore on unmount
+        }
+        savedFnState.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!isRunning && savedFnState.current !== null) {
       try {
         setFnState(savedFnState.current);
@@ -86,7 +95,7 @@ export default function Command() {
       handler = handlerRust;
     }
 
-    const { lockFnKeys } = getPreferenceValues<Preferences>();
+    const { lockFnKeys } = getPreferenceValues<Preferences.CleanKeyboard>();
     if (lockFnKeys && isTahoe) {
       try {
         savedFnState.current = readFnState();
