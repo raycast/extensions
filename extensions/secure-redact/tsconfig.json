@@ -8,7 +8,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
-    "skipLibCheck": true,
     "noImplicitAny": false,
     "jsx": "react-jsx",
     "strict": false,
