@@ -8,7 +8,7 @@ export function resolveLocalizedNames(paths: string[]): Map<string, string> {
   if (paths.length === 0) return result;
 
   try {
-    const quoted = paths.map((p) => `"${p}"`).join(" ");
+    const quoted = paths.map((p) => `"${p.replace(/"/g, '\\"')}"`).join(" ");
     const raw = execSync(`mdls -name kMDItemDisplayName ${quoted}`, {
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],

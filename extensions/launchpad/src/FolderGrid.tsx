@@ -286,7 +286,6 @@ export function FolderGrid({ folderId, config: initialConfig, mode, onConfigChan
                         onAction={() => moveToUncategorized(app)}
                       />
                       <MoveToFolderAction
-                        app={app}
                         config={config}
                         excludeFolderId={folder.id}
                         onMove={(targetFolderId) => moveToFolder(app, targetFolderId)}

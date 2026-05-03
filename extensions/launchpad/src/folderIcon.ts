@@ -30,7 +30,7 @@ function ensureCache() {
 async function icnsPath(appPath: string): Promise<string | null> {
   try {
     const { stdout } = await execP(
-      `plutil -extract CFBundleIconFile raw -o - "${appPath}/Contents/Info.plist"`
+      `plutil -extract CFBundleIconFile raw -o - "${appPath.replace(/"/g, '\\"')}/Contents/Info.plist"`
     );
     const iconFile = stdout.trim();
     const name = iconFile.endsWith(".icns") ? iconFile : `${iconFile}.icns`;
@@ -45,7 +45,7 @@ async function icnsPath(appPath: string): Promise<string | null> {
 async function icnsToPng(icns: string, size: number): Promise<Buffer | null> {
   const tmp = join(tmpdir(), `lp_icon_${crypto.randomUUID()}.png`);
   try {
-    await execP(`sips -s format png "${icns}" --out "${tmp}" --resampleWidth ${size} 2>/dev/null`);
+    await execP(`sips -s format png "${icns.replace(/"/g, '\\"')}" --out "${tmp}" --resampleWidth ${size} 2>/dev/null`);
     return await readFileP(tmp);
   } catch {
     return null;
@@ -65,7 +65,7 @@ async function icnsToPng(icns: string, size: number): Promise<Buffer | null> {
 function icnsPathSync(appPath: string): string | null {
   try {
     const stdout = execSync(
-      `plutil -extract CFBundleIconFile raw -o - "${appPath}/Contents/Info.plist"`,
+      `plutil -extract CFBundleIconFile raw -o - "${appPath.replace(/"/g, '\\"')}/Contents/Info.plist"`,
       { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] }
     );
     const iconFile = stdout.trim();

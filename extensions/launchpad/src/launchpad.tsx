@@ -519,7 +519,6 @@ export default function Launchpad() {
                       <>
                         <Action title="Open" onAction={() => launch(app)} />
                         <MoveToFolderAction
-                          app={app}
                           config={config}
                           onMove={(folderId) => moveAppToFolder(app, folderId)}
                         />
@@ -595,7 +594,6 @@ export function MoveToFolderAction({
   excludeFolderId,
   onMove,
 }: {
-  app: AppEntry;
   config: LaunchpadConfig;
   excludeFolderId?: string;
   onMove: (targetFolderId: string) => void;

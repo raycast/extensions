@@ -146,7 +146,11 @@ function toEntries(apps: Application[], localizedNames: Map<string, string>): Ap
 export async function loadCachedConfig(): Promise<LaunchpadConfig | null> {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (!raw) return null;
-  return JSON.parse(raw) as LaunchpadConfig;
+  try {
+    return JSON.parse(raw) as LaunchpadConfig;
+  } catch {
+    return null;
+  }
 }
 
 /**
