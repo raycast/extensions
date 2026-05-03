@@ -23,7 +23,7 @@ import { AudioPlayer, clearExternalStopRequest, hasExternalStopRequest } from ".
 import { getQuickReadVoiceOverride, setQuickReadVoiceOverride } from "./utils/voice-preferences";
 import { buildTextPreview, clearPlaybackState, writePlaybackState } from "./utils/playback-state";
 import { clampSpeed, clearPlaybackSpeed, readPlaybackSpeed, writePlaybackSpeed } from "./utils/playback-speed";
-import type { VoiceConfig } from "./api/types";
+import type { SynthesisResult, TTSOptions, VoiceConfig } from "./api/types";
 
 type RowPhase = "synthesizing" | "playing";
 
@@ -102,6 +102,15 @@ export default function ReadWithVoice() {
         let currentSpeed = clampSpeed(options.speed);
         await writePlaybackSpeed(currentSpeed);
 
+        // Same producer/consumer pipeline as reading-runner: prefetch
+        // chunk i+1 while playing chunk i so the user only ever waits
+        // for the lead chunk.
+        const startSynth = (chunkText: string): Promise<SynthesisResult> =>
+          synthesizeSpeech(chunkText, options as TTSOptions);
+
+        let pending: Promise<SynthesisResult> | null = total > 0 ? startSynth(chunks[0]) : null;
+        pending?.catch(() => undefined);
+
         for (let i = 0; i < total; i++) {
           if (player.isStopped() || hasExternalStopRequest()) break;
 
@@ -121,8 +130,19 @@ export default function ReadWithVoice() {
             updatedAt: new Date().toISOString(),
           });
 
-          const audio = await synthesizeSpeech(chunks[i], { ...options, speed: currentSpeed });
+          let audio: SynthesisResult;
+          try {
+            audio = await (pending ?? startSynth(chunks[i]));
+          } finally {
+            pending = null;
+          }
           if (player.isStopped() || hasExternalStopRequest()) break;
+
+          // Kick off the next chunk's synthesis in parallel with playback.
+          if (i + 1 < total) {
+            pending = startSynth(chunks[i + 1]);
+            pending.catch(() => undefined);
+          }
 
           setProgress({ voiceId: voice.id, phase: "playing", chunkIndex: i, chunkTotal: total });
           await writePlaybackState({
@@ -138,6 +158,10 @@ export default function ReadWithVoice() {
           });
 
           await player.playAudio(audio, currentSpeed);
+        }
+
+        if (pending) {
+          pending.catch(() => undefined);
         }
 
         if (!player.isStopped() && !hasExternalStopRequest()) {

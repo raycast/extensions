@@ -13,6 +13,11 @@ export type GeminiExpressiveness = "subtle" | "balanced" | "expressive";
 export type GeminiAudioTagMode = "off" | "preserve" | "paragraph-pauses" | "smart-pauses";
 
 export interface GeminiTTSRequest {
+  systemInstruction?: {
+    parts: Array<{
+      text: string;
+    }>;
+  };
   contents: Array<{
     parts: Array<{
       text: string;
@@ -28,6 +33,12 @@ export interface GeminiTTSRequest {
       };
     };
   };
+}
+
+export interface SynthesisResult {
+  wavPath: string;
+  managed: boolean;
+  cacheHit: boolean;
 }
 
 export interface GeminiTTSResponse {

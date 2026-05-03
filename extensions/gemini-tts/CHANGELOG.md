@@ -12,6 +12,14 @@
 - Speed up Reading and Slow Down Reading commands adjust active or paused readings by 0.25x for the next synthesized segment.
 - Persistent reading-status menu-bar item with Stop / Resume / Restart / Speed Up / Slow Down / Read / Pick Voice controls.
 
+### Performance
+
+- Lead-chunk synthesis: the first audio segment is intentionally short (~60-260 chars at the nearest sentence boundary) so playback starts in roughly 1-2 seconds instead of waiting for a full 1400-char chunk.
+- Producer/consumer pipeline: chunk N+1 begins synthesizing in parallel with playback of chunk N, eliminating the silent gap between chunks.
+- Disk audio cache keyed on text + voice + experience preset: replays, restarts, voice previews, and re-reads of the same paragraph become instant, with an LRU sweep capped at 200 MB inside the extension's support directory.
+- Static director-profile prompt moved to `systemInstruction` so each per-chunk request only carries the transcript, lowering Gemini token-per-minute pressure across long readings.
+- Menu-bar status refreshes within ~1 second of a phase transition via background `launchCommand`, instead of waiting for the 1-minute interval tick.
+
 ### Gemini TTS
 
 - Direct Gemini REST API integration with `x-goog-api-key` authentication.

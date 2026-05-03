@@ -1,5 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
+import { tmpdir } from "os";
+import { join } from "path";
+import { randomUUID } from "crypto";
+import { writeFileSync } from "fs";
 import { DEFAULT_VOICE_ID, GEMINI_VOICES, getVoiceById } from "../constants/voices";
+import { hashSynthesisRequest, lookupCache, storeCache } from "../utils/audio-cache";
 import type {
   GeminiAudioTagMode,
   GeminiExpressiveness,
@@ -8,6 +13,7 @@ import type {
   GeminiTTSModel,
   GeminiTTSRequest,
   GeminiTTSResponse,
+  SynthesisResult,
   TTSOptions,
   VoiceConfig,
 } from "./types";
@@ -21,23 +27,29 @@ const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
 
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
 
-export async function synthesizeSpeech(text: string, options: TTSOptions): Promise<string> {
+// Note on keep-alive: Node's global fetch (undici) already pools and
+// reuses TLS sockets for ~4s by default, so chunks fired in quick
+// succession share a connection automatically. No explicit Agent is
+// needed — earlier code passed `agent:` but undici only honors
+// `dispatcher:`, so that field was a no-op.
+
+export async function synthesizeSpeech(text: string, options: TTSOptions): Promise<SynthesisResult> {
   const trimmedText = text.trim();
   if (!trimmedText) {
     throw new Error("Text cannot be empty");
   }
 
+  const cacheKey = hashSynthesisRequest(trimmedText, options);
+  const cachedPath = lookupCache(cacheKey);
+  if (cachedPath) {
+    return { wavPath: cachedPath, managed: false, cacheHit: true };
+  }
+
   const apiKey = resolveApiKey();
+  const { systemInstruction, userContent } = buildTtsPrompt(trimmedText, options);
   const requestBody: GeminiTTSRequest = {
-    contents: [
-      {
-        parts: [
-          {
-            text: buildTtsPrompt(trimmedText, options),
-          },
-        ],
-      },
-    ],
+    systemInstruction: { parts: [{ text: systemInstruction }] },
+    contents: [{ parts: [{ text: userContent }] }],
     generationConfig: {
       responseModalities: ["AUDIO"],
       speechConfig: {
@@ -54,7 +66,14 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      return await generateSpeechOnce(apiKey, options.model, requestBody, options.sampleRate);
+      const wavBuffer = await generateSpeechOnce(apiKey, options.model, requestBody, options.sampleRate);
+      const cachedWritePath = storeCache(cacheKey, wavBuffer);
+      if (cachedWritePath) {
+        return { wavPath: cachedWritePath, managed: false, cacheHit: false };
+      }
+      const fallbackPath = join(tmpdir(), `gemini-tts-${randomUUID()}.wav`);
+      writeFileSync(fallbackPath, new Uint8Array(wavBuffer));
+      return { wavPath: fallbackPath, managed: true, cacheHit: false };
     } catch (error) {
       lastError = error;
       if (!shouldRetry(error) || attempt === MAX_ATTEMPTS) {
@@ -104,7 +123,7 @@ async function generateSpeechOnce(
   model: GeminiTTSModel,
   requestBody: GeminiTTSRequest,
   sampleRate: number,
-): Promise<string> {
+): Promise<Buffer> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
@@ -146,7 +165,7 @@ async function generateSpeechOnce(
       throw new TTSApiError("Decoded audio data is empty", -4);
     }
 
-    return ensureWaveAudio(pcmBuffer, sampleRate).toString("base64");
+    return ensureWaveAudio(pcmBuffer, sampleRate);
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
       throw new TTSApiError("Request timeout after 60 seconds", -2);
@@ -157,7 +176,7 @@ async function generateSpeechOnce(
   }
 }
 
-function buildTtsPrompt(text: string, options: TTSOptions): string {
+function buildTtsPrompt(text: string, options: TTSOptions): { systemInstruction: string; userContent: string } {
   const readingExperience = resolveReadingExperienceForText(text, options.readingExperience);
   const profile = getExperienceProfile(readingExperience);
   const transcript = prepareTranscript(text, options.audioTagMode);
@@ -167,8 +186,11 @@ function buildTtsPrompt(text: string, options: TTSOptions): string {
   const voiceInstruction = getVoiceInstruction(options.voiceId);
   const customNotes = options.directorNotes ? [`Additional notes: ${options.directorNotes}`] : [];
 
-  return [
-    "Synthesize speech from the transcript below. Only the text under TRANSCRIPT is spoken. Do not read instructions, labels, section headings, or director notes aloud.",
+  // Static across every chunk in a session — moved to systemInstruction
+  // so we don't re-pay ~300 input tokens per chunk. The TTS classifier
+  // (per the API docs' PROHIBITED_CONTENT warning) still gets a clear
+  // synthesis preamble + explicit transcript label in the user content.
+  const systemInstruction = [
     `# AUDIO PROFILE: ${profile.name}`,
     profile.profile,
     "## THE SCENE",
@@ -183,9 +205,15 @@ function buildTtsPrompt(text: string, options: TTSOptions): string {
     `Audio tags: ${audioTagInstruction}`,
     "Accuracy: Do not translate, summarize, paraphrase, omit, or add words. Preserve citations, names, acronyms, statute numbers, article numbers, and technical terms as written.",
     ...customNotes,
+  ].join("\n\n");
+
+  const userContent = [
+    "Synthesize speech from the transcript below. Only the text under TRANSCRIPT is spoken. Do not read instructions, labels, section headings, or director notes aloud.",
     "#### TRANSCRIPT",
     transcript,
   ].join("\n\n");
+
+  return { systemInstruction, userContent };
 }
 
 function ensureWaveAudio(audioBuffer: Buffer, sampleRate: number): Buffer {

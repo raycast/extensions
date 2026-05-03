@@ -8,19 +8,27 @@ import { execSync } from "child_process";
 const PID_FILE = join(tmpdir(), "gemini-tts.pid");
 const STOP_FILE = join(tmpdir(), "gemini-tts.stop");
 
+export interface PlayableAudio {
+  wavPath: string;
+  /** When true, the player deletes the file after playback (legacy temp). When false, the file is owned by the cache. */
+  managed: boolean;
+}
+
 export class AudioPlayer {
   private currentProcess: ChildProcess | null = null;
   private tempFiles: string[] = [];
   private stopped = false;
 
   /**
-   * Play a single base64-encoded audio chunk.
+   * Play a wav file. Accepts either a SynthesisResult-like object
+   * ({wavPath, managed}) or a legacy base64 string for backward
+   * compatibility with any callers that still produce raw audio.
    */
-  async playAudio(base64Audio: string, speed = 1): Promise<void> {
-    const tempPath = this.saveTempFile(base64Audio);
+  async playAudio(audio: PlayableAudio | string, speed = 1): Promise<void> {
+    const { path, managed } = this.resolveAudioSource(audio);
 
     return new Promise<void>((resolve, reject) => {
-      const args = Number.isFinite(speed) && speed !== 1 ? ["-r", String(speed), tempPath] : [tempPath];
+      const args = Number.isFinite(speed) && speed !== 1 ? ["-r", String(speed), path] : [path];
       const proc = spawn("afplay", args);
       this.currentProcess = proc;
       const myPid = proc.pid;
@@ -30,7 +38,9 @@ export class AudioPlayer {
       proc.on("close", (code, signal) => {
         this.currentProcess = null;
         removePidFileIfMatch(myPid);
-        this.cleanupFile(tempPath);
+        if (managed) {
+          this.cleanupFile(path);
+        }
 
         // External stop (SIGTERM via stopExternalPlayback) leaves a STOP_FILE
         // behind. Treat that as a graceful stop instead of throwing, so the
@@ -47,10 +57,23 @@ export class AudioPlayer {
       proc.on("error", (err) => {
         this.currentProcess = null;
         removePidFileIfMatch(myPid);
-        this.cleanupFile(tempPath);
+        if (managed) {
+          this.cleanupFile(path);
+        }
         reject(err);
       });
     });
+  }
+
+  private resolveAudioSource(audio: PlayableAudio | string): { path: string; managed: boolean } {
+    if (typeof audio === "string") {
+      // Legacy base64 path — write a managed temp file.
+      return { path: this.saveTempFile(audio), managed: true };
+    }
+    if (audio.managed) {
+      this.tempFiles.push(audio.wavPath);
+    }
+    return { path: audio.wavPath, managed: audio.managed };
   }
 
   /**
