@@ -27,12 +27,12 @@ export default async function QuickRead() {
       if (lastSessionAvailable) {
         await showResumeSuggestion(
           "Nothing to read",
-          "Select text in the foreground app or copy it to the clipboard, then trigger Quick Read again.",
+          "Select text in the foreground app or copy it to the clipboard. You can also resume your last reading.",
         );
       } else {
         await showResumeSuggestion(
           "Nothing to read",
-          "Select text in the foreground app or copy it to the clipboard. You can also resume your last reading.",
+          "Select text in the foreground app or copy it to the clipboard, then trigger Quick Read again.",
         );
       }
       return;

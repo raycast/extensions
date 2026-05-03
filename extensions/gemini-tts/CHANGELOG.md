@@ -25,6 +25,7 @@
 - Session lock prevents two readings from running in parallel: a Quick Read trigger that lands during the lead chunk's synthesis (before any `afplay` process exists) now stops the running session cleanly instead of starting a parallel reader.
 - Voice preview now writes playback state, so the menu bar reflects in-progress previews and Stop Reading interrupts them at the next chunk boundary.
 - Menu-bar status no longer fires a redundant background launch on every elapsed-time tick — only on actual synthesizing/playing/stopped/completed transitions.
+- Quick Read's "Nothing to read" hint now points users at Resume only when a paused reading actually exists, instead of advertising a non-existent option.
 
 ### Menu Bar
 
