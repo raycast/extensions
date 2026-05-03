@@ -122,7 +122,7 @@ export default function SearchTorrents() {
                     <List.Item.Detail.Metadata.Label title="Specs" text={specs || "None"} />
                     <List.Item.Detail.Metadata.Label
                       title="Release"
-                      text={`${formatFullDate(item.pubDate)} (Brazilian Time)`}
+                      text={`${formatFullDate(item.pubDate)}`}
                     />
                   </List.Item.Detail.Metadata>
                 }
