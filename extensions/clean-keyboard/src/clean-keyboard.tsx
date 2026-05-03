@@ -101,7 +101,7 @@ export default function Command() {
         savedFnState.current = readFnState();
         setFnState(true);
       } catch {
-        savedFnState.current = null;
+        // keep savedFnState so restore effects can undo any partial defaults write
       }
     }
 
