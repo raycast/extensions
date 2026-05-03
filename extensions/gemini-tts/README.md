@@ -54,6 +54,22 @@ Both models accept text input and return audio output. Gemini TTS does not suppo
    - Audio Tags: **Smart Academic Pauses**
    - Voice: **Sadaltager**
 
+## API Key, Quota, and Billing
+
+The Gemini API key is created in **Google AI Studio** and belongs to a Google Cloud project. The key itself does not carry a separate balance; it inherits the quota, billing tier, and billing status of its project.
+
+For this extension:
+
+- Start with the Gemini API **Free Tier** if it is available for your account and region.
+- The supported Gemini TTS models list free-tier input/output pricing, but free use is still rate-limited.
+- If requests fail because quota is exhausted or the free tier is unavailable, open **AI Studio Billing** and set up billing or prepaid credits for the project that owns the API key.
+- Google AI Pro / Google One benefits may include AI credits for supported Google products and developer tools, but those benefits are not the same thing as an automatically funded Gemini API key. Check AI Studio **Usage** and **Billing** for the actual API project.
+
+Useful search keywords:
+
+- `Google AI Studio API key`
+- `Gemini API billing AI Studio`
+
 ## Reading Experience
 
 **Smart Auto** is the default. It does not rewrite, translate, or summarize the selected text. It only chooses the director preset before sending the transcript to Gemini TTS.

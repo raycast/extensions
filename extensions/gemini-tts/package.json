@@ -85,7 +85,7 @@
       "type": "password",
       "required": true,
       "title": "Gemini API Key",
-      "description": "API key from Google AI Studio",
+      "description": "API key from Google AI Studio; quota and billing are managed on the owning AI Studio project",
       "placeholder": "AIza..."
     },
     {
