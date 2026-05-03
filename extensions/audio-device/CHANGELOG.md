@@ -1,5 +1,8 @@
 # Audio Device Changelog
 
+## [Minor fix] - {PR_MERGE_DATE}
+Fix https://github.com/raycast/extensions/issues/27616
+
 ## [Major Update] - 2026-03-27
 
 ### Default device enforcement
