@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "secure-redact",
+  "title": "Secure Redact",
+  "description": "100% offline data redaction for sensitive information",
+  "icon": "extension-icon.png",
+  "author": "husnainfareed",
+  "categories": [
+    "Security",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "preferences": [
+    {
+      "name": "defaultMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Redaction Mode",
+      "description": "How matched values are rewritten",
+      "default": "typed",
+      "data": [
+        {
+          "title": "Label ([REDACTED])",
+          "value": "label"
+        },
+        {
+          "title": "Typed ([EMAIL_REDACTED])",
+          "value": "typed"
+        },
+        {
+          "title": "Indexed ([EMAIL_1])",
+          "value": "indexed"
+        },
+        {
+          "title": "Masked (jo***@***.com)",
+          "value": "masked"
+        }
+      ]
+    },
+    {
+      "name": "defaultPolicy",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Detection Policy",
+      "description": "Which categories of patterns to scan for",
+      "default": "balanced",
+      "data": [
+        {
+          "title": "Secrets",
+          "value": "secrets"
+        },
+        {
+          "title": "Balanced",
+          "value": "balanced"
+        },
+        {
+          "title": "Standard",
+          "value": "standard"
+        },
+        {
+          "title": "Enhanced",
+          "value": "enhanced"
+        }
+      ]
+    },
+    {
+      "name": "enableAudit",
+      "type": "checkbox",
+      "required": false,
+      "title": "Audit Log",
+      "label": "Record redaction stats locally",
+      "description": "Stores aggregate stats (no input/output text) in the local audit log",
+      "default": true
+    }
+  ],
+  "commands": [
+    {
+      "name": "redact-clipboard",
+      "title": "Redact Clipboard",
+      "subtitle": "Sanitize clipboard content in place",
+      "description": "Detects and redacts sensitive data in clipboard without opening UI",
+      "mode": "no-view"
+    },
+    {
+      "name": "redact-paste",
+      "title": "Redact & Paste",
+      "subtitle": "Sanitize and paste to active app",
+      "description": "Redacts sensitive data from clipboard and pastes clean text",
+      "mode": "no-view"
+    },
+    {
+      "name": "workbench",
+      "title": "Open Workbench",
+      "subtitle": "Full editor with live preview",
+      "description": "Interactive editor to review and redact text with detection details",
+      "mode": "view"
+    },
+    {
+      "name": "audit",
+      "title": "Audit Log",
+      "subtitle": "View redaction history",
+      "description": "Dashboard showing aggregate statistics and redaction history",
+      "mode": "view"
+    },
+    {
+      "name": "feeds",
+      "title": "Threat Feeds",
+      "subtitle": "Custom pattern management",
+      "description": "Manage custom threat feeds and patterns for enhanced detection",
+      "mode": "view"
+    },
+    {
+      "name": "settings",
+      "title": "Settings",
+      "subtitle": "Manage local data",
+      "description": "Manage local storage and view privacy details",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
+}
