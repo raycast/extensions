@@ -27,26 +27,32 @@ export function EntryForm({
   onSaved?: () => void;
 }) {
   const { pop } = useNavigation();
-  const { data: latestEntry, isLoading: isLoadingEntry } = useFetch<Entry>(`${API_BASE_URL}/entries/${entry?.id}`, {
-    execute: mode === "edit" && Boolean(entry),
-    headers: apiHeaders(apiToken),
-    parseResponse: parseEntryResponse,
-    initialData: entry,
-    keepPreviousData: true,
-    onError(error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Could not load entry",
-        message: error instanceof Error ? error.message : undefined,
-      });
+  const { data: latestEntry, isLoading: isLoadingEntry } = useFetch<Entry, Entry | undefined>(
+    `${API_BASE_URL}/entries/${entry?.id}`,
+    {
+      execute: mode === "edit" && Boolean(entry),
+      headers: apiHeaders(apiToken),
+      parseResponse: parseEntryResponse,
+      initialData: entry,
+      keepPreviousData: true,
+      onError(error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could not load entry",
+          message: error instanceof Error ? error.message : undefined,
+        });
+      },
     },
-  });
-  const { data: channels = [], isLoading: isLoadingChannels } = useFetch<Channel[]>(`${API_BASE_URL}/channels`, {
-    headers: apiHeaders(apiToken),
-    parseResponse: parseChannelsResponse,
-    initialData: [],
-  });
-  const { data: tags = [], isLoading: isLoadingTags } = useFetch<Tag[]>(`${API_BASE_URL}/tags`, {
+  );
+  const { data: channels = [], isLoading: isLoadingChannels } = useFetch<Channel[], Channel[]>(
+    `${API_BASE_URL}/channels`,
+    {
+      headers: apiHeaders(apiToken),
+      parseResponse: parseChannelsResponse,
+      initialData: [],
+    },
+  );
+  const { data: tags = [], isLoading: isLoadingTags } = useFetch<Tag[], Tag[]>(`${API_BASE_URL}/tags`, {
     headers: apiHeaders(apiToken),
     parseResponse: parseTagsResponse,
     initialData: [],

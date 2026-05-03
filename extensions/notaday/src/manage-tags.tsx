@@ -41,7 +41,7 @@ function TagsList({ apiToken }: { apiToken: string }) {
     data = [],
     isLoading,
     revalidate,
-  } = useFetch<Tag[]>(`${API_BASE_URL}/tags?includeArchived=true`, {
+  } = useFetch<Tag[], Tag[]>(`${API_BASE_URL}/tags?includeArchived=true`, {
     headers: apiHeaders(apiToken),
     parseResponse: parseTagsResponse,
     initialData: [],

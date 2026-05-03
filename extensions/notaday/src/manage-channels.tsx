@@ -41,7 +41,7 @@ function ChannelsList({ apiToken }: { apiToken: string }) {
     data = [],
     isLoading,
     revalidate,
-  } = useFetch<Channel[]>(`${API_BASE_URL}/channels?includeArchived=true`, {
+  } = useFetch<Channel[], Channel[]>(`${API_BASE_URL}/channels?includeArchived=true`, {
     headers: apiHeaders(apiToken),
     parseResponse: parseChannelsResponse,
     initialData: [],
