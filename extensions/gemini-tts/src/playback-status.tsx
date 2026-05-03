@@ -4,16 +4,24 @@ import { stopExternalPlayback } from "./utils/audio-player";
 import { clearPlaybackState, readPlaybackState, type PlaybackState } from "./utils/playback-state";
 import { getLastReadingSession, type ReadingSession } from "./utils/reading-session";
 import { formatSpeed, readPlaybackSpeed } from "./utils/playback-speed";
+import { clearCache, formatCacheSize, getCacheStats, type CacheStats } from "./utils/audio-cache";
 
 interface Snapshot {
   live: PlaybackState | null;
   session: ReadingSession | null;
   speed: number | null;
+  cache: CacheStats;
   loading: boolean;
 }
 
 export default function PlaybackStatus() {
-  const [snapshot, setSnapshot] = useState<Snapshot>({ live: null, session: null, speed: null, loading: true });
+  const [snapshot, setSnapshot] = useState<Snapshot>({
+    live: null,
+    session: null,
+    speed: null,
+    cache: { fileCount: 0, totalBytes: 0 },
+    loading: true,
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -24,8 +32,9 @@ export default function PlaybackStatus() {
         getLastReadingSession(),
         readPlaybackSpeed(),
       ]);
+      const cache = getCacheStats();
       if (!mounted) return;
-      setSnapshot({ live, session, speed, loading: false });
+      setSnapshot({ live, session, speed, cache, loading: false });
     }
 
     load();
@@ -35,7 +44,7 @@ export default function PlaybackStatus() {
     };
   }, []);
 
-  const { live, session, speed, loading } = snapshot;
+  const { live, session, speed, cache, loading } = snapshot;
   const effectiveSpeed = resolveEffectiveSpeed(live, session, speed);
   const display = describeMenubar(live, session, effectiveSpeed);
 
@@ -101,10 +110,29 @@ export default function PlaybackStatus() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
+        <MenuBarExtra.Item
+          title={cache.fileCount === 0 ? "Audio Cache: Empty" : `Audio Cache: ${formatCacheSize(cache.totalBytes)}`}
+          subtitle={cache.fileCount === 0 ? undefined : `${cache.fileCount} entries`}
+          icon={Icon.HardDrive}
+          onAction={cache.fileCount === 0 ? handleCacheEmpty : handleClearCache}
+        />
         <MenuBarExtra.Item title="Open Preferences" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
+}
+
+async function handleClearCache() {
+  const cleared = clearCache();
+  if (cleared.fileCount === 0) {
+    await showHUD("Audio cache already empty");
+    return;
+  }
+  await showHUD(`Cleared ${cleared.fileCount} cached audio files (${formatCacheSize(cleared.totalBytes)})`);
+}
+
+async function handleCacheEmpty() {
+  await showHUD("Audio cache is empty — synthesized audio is cached automatically");
 }
 
 interface MenuDisplay {

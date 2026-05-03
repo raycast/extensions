@@ -14,8 +14,6 @@ import {
 import { clampSpeed, clearPlaybackSpeed, formatSpeed, readPlaybackSpeed, writePlaybackSpeed } from "./playback-speed";
 import { acquireSessionLock, releaseSessionLock } from "./session-lock";
 
-const MENU_REFRESH_MIN_INTERVAL_MS = 750;
-
 export async function playReadingSession(session: ReadingSession, isResuming = false): Promise<void> {
   const player = new AudioPlayer();
   let activeSession = session;
@@ -55,7 +53,6 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
   // through the caller's catch block.
   pending?.catch(() => undefined);
 
-  let lastMenuRefresh = 0;
   let lastPhase: PlaybackPhase | null = null;
 
   const speedSuffix = currentSpeed === 1 ? "" : ` · ${formatSpeed(currentSpeed)}`;
@@ -87,12 +84,8 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
           updatedAt: new Date().toISOString(),
         },
         lastPhase,
-        lastMenuRefresh,
-        (refreshAt) => {
-          lastMenuRefresh = refreshAt;
-          lastPhase = "synthesizing";
-        },
       );
+      lastPhase = "synthesizing";
 
       let audio: SynthesisResult;
       try {
@@ -127,12 +120,8 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
           updatedAt: new Date().toISOString(),
         },
         lastPhase,
-        lastMenuRefresh,
-        (refreshAt) => {
-          lastMenuRefresh = refreshAt;
-          lastPhase = "playing";
-        },
       );
+      lastPhase = "playing";
 
       await player.playAudio(audio, currentSpeed);
 
@@ -196,20 +185,14 @@ function startSynth(sessionOptions: TTSOptions, chunkText: string): Promise<Synt
   return synthesizeSpeech(chunkText, sessionOptions);
 }
 
-async function writeStateAndMaybeRefresh(
-  state: PlaybackState,
-  lastPhase: PlaybackPhase | null,
-  lastMenuRefresh: number,
-  onRefresh: (refreshAt: number) => void,
-): Promise<void> {
+async function writeStateAndMaybeRefresh(state: PlaybackState, lastPhase: PlaybackPhase | null): Promise<void> {
   await writePlaybackState(state);
-
-  const now = Date.now();
-  const phaseChanged = lastPhase !== state.phase;
-  const enoughTimePassed = now - lastMenuRefresh >= MENU_REFRESH_MIN_INTERVAL_MS;
-  if (phaseChanged || enoughTimePassed) {
+  // Only nudge the menu bar on actual phase transitions. A long
+  // reading otherwise launches the menu-bar command N times for no
+  // visible change. The phase set is tiny (synthesizing/playing/
+  // stopped/completed) so this caps refreshes at ~2 per chunk.
+  if (lastPhase !== state.phase) {
     requestMenuRefresh();
-    onRefresh(now);
   }
 }
 

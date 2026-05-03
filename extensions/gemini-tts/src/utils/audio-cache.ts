@@ -144,3 +144,50 @@ function sweepLRU(): void {
     }
   }
 }
+
+export interface CacheStats {
+  fileCount: number;
+  totalBytes: number;
+}
+
+export function getCacheStats(): CacheStats {
+  try {
+    const dir = getCacheDir();
+    const names = readdirSync(dir).filter((name) => name.endsWith(".wav"));
+    let totalBytes = 0;
+    for (const name of names) {
+      try {
+        totalBytes += statSync(join(dir, name)).size;
+      } catch {
+        // ignore individual stat failures
+      }
+    }
+    return { fileCount: names.length, totalBytes };
+  } catch {
+    return { fileCount: 0, totalBytes: 0 };
+  }
+}
+
+export function clearCache(): CacheStats {
+  const stats = getCacheStats();
+  try {
+    const dir = getCacheDir();
+    for (const name of readdirSync(dir)) {
+      if (!name.endsWith(".wav") && !name.endsWith(".tmp")) continue;
+      try {
+        unlinkSync(join(dir, name));
+      } catch {
+        // ignore individual delete failures
+      }
+    }
+  } catch {
+    // ignore directory-level failures
+  }
+  return stats;
+}
+
+export function formatCacheSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}

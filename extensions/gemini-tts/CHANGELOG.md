@@ -24,6 +24,11 @@
 
 - Session lock prevents two readings from running in parallel: a Quick Read trigger that lands during the lead chunk's synthesis (before any `afplay` process exists) now stops the running session cleanly instead of starting a parallel reader.
 - Voice preview now writes playback state, so the menu bar reflects in-progress previews and Stop Reading interrupts them at the next chunk boundary.
+- Menu-bar status no longer fires a redundant background launch on every elapsed-time tick — only on actual synthesizing/playing/stopped/completed transitions.
+
+### Menu Bar
+
+- Audio Cache row shows current cache size and entry count; click clears all cached audio (a fresh re-synth will repopulate as you read).
 
 ### Gemini TTS
 
