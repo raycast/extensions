@@ -120,10 +120,7 @@ export default function SearchTorrents() {
                       icon={{ source: Icon.ArrowDown, tintColor: Color.Red }}
                     />
                     <List.Item.Detail.Metadata.Label title="Specs" text={specs || "None"} />
-                    <List.Item.Detail.Metadata.Label
-                      title="Release"
-                      text={`${formatFullDate(item.pubDate)}`}
-                    />
+                    <List.Item.Detail.Metadata.Label title="Release" text={`${formatFullDate(item.pubDate)}`} />
                   </List.Item.Detail.Metadata>
                 }
               />
