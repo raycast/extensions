@@ -146,9 +146,15 @@ export default function Launchpad() {
 
   if (!config) return <Grid isLoading />;
 
+  function persistConfig(next: LaunchpadConfig) {
+    saveConfig(next).catch(() =>
+      showToast({ style: Toast.Style.Failure, title: "Failed to save — changes will be lost on restart" })
+    );
+  }
+
   function update(next: LaunchpadConfig) {
     setConfig(next);
-    saveConfig(next);
+    persistConfig(next);
     // Sync rebuild so the folder icon never lags behind the config. Replaces
     // the whole map, so folders that just emptied lose their stale composite
     // and fall back to Icon.Folder on the next render.
@@ -189,7 +195,7 @@ export default function Launchpad() {
       const folders = [...prev.folders];
       [folders[idx - 1], folders[idx]] = [folders[idx], folders[idx - 1]];
       const next = { ...prev, folders };
-      saveConfig(next);
+      persistConfig(next);
       return next;
     });
   }
@@ -202,7 +208,7 @@ export default function Launchpad() {
       const folders = [...prev.folders];
       [folders[idx], folders[idx + 1]] = [folders[idx + 1], folders[idx]];
       const next = { ...prev, folders };
-      saveConfig(next);
+      persistConfig(next);
       return next;
     });
   }
@@ -255,7 +261,7 @@ export default function Launchpad() {
       const apps = [...prev.uncategorized];
       [apps[idx - 1], apps[idx]] = [apps[idx], apps[idx - 1]];
       const next = { ...prev, uncategorized: apps };
-      saveConfig(next);
+      persistConfig(next);
       return next;
     });
   }
@@ -268,7 +274,7 @@ export default function Launchpad() {
       const apps = [...prev.uncategorized];
       [apps[idx], apps[idx + 1]] = [apps[idx + 1], apps[idx]];
       const next = { ...prev, uncategorized: apps };
-      saveConfig(next);
+      persistConfig(next);
       return next;
     });
   }
