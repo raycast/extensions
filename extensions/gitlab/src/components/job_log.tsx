@@ -9,7 +9,15 @@ const MAX_LOG_CHARS = 100_000;
 const MIN_LOG_REFRESH_MS = 5000;
 
 const TERMINAL_STATUSES = new Set(["success", "failed", "canceled", "skipped", "manual"]);
-const ANSI_REGEX = new RegExp(`${String.fromCharCode(27)}\\[[0-9;?]*[A-Za-z]`, "g");
+const ESC = String.fromCharCode(27);
+const BEL = String.fromCharCode(7);
+const ANSI_REGEX = new RegExp(
+  [
+    `${ESC}\\[[0-9;?]*[A-Za-z]`, // CSI: ESC [ ... <letter>
+    `${ESC}\\][^${BEL}${ESC}]*(?:${BEL}|${ESC}\\\\)`, // OSC: ESC ] ... BEL or ST
+  ].join("|"),
+  "g",
+);
 
 function isTerminal(status: string | undefined): boolean {
   if (!status) return false;

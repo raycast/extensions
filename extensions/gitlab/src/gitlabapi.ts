@@ -1069,12 +1069,16 @@ export class GitLab {
       false,
     );
     const limited = projects.filter((p) => !p.archived).slice(0, maxProjects);
+    // Use getFetcher() directly so per_page is honoured — this.fetch() always overrides per_page.
+    const fetcher = this.getFetcher();
     const results = await Promise.allSettled(
       limited.map(async (p) => {
-        const pipes = await this.fetch(`projects/${p.id}/pipelines`, {
-          per_page: `${perProject}`,
-          order_by: "updated_at",
-        });
+        const url = `${this.url}/api/v4/projects/${p.id}/pipelines?per_page=${perProject}&order_by=updated_at`;
+        const response = await fetcher(url, { method: "GET" });
+        if (response.status === 404) throw new Error("Not found");
+        if (response.status === 403) throw new Error("Forbidden");
+        if (!response.ok) throw new Error(`http status ${response.status}`);
+        const pipes = await response.json();
         return { project: p, pipelines: Array.isArray(pipes) ? pipes : [] };
       }),
     );
