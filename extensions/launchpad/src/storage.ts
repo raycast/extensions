@@ -1,6 +1,6 @@
 import { Application, getApplications, LocalStorage } from "@raycast/api";
 import { AppEntry, LaunchpadConfig, Folder } from "./types";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { existsSync } from "fs";
 import { join } from "path";
 import crypto from "crypto";
@@ -13,7 +13,7 @@ const STORAGE_KEY = "launchpad_config";
 // The DB lives in a per-user temp dir, not ~/Library/Application Support/Dock
 function findLaunchpadDb(): string | null {
   try {
-    const darwinUserDir = execSync("getconf DARWIN_USER_DIR", { encoding: "utf8" }).trim();
+    const darwinUserDir = execFileSync("getconf", ["DARWIN_USER_DIR"], { encoding: "utf8" }).trim();
     const dbPath = join("/private" + darwinUserDir, "com.apple.dock.launchpad", "db", "db");
     return existsSync(dbPath) ? dbPath : null;
   } catch {
@@ -48,7 +48,7 @@ function queryLaunchpadDb(dbPath: string): RawDbRow[] {
   ].join(" ");
 
   try {
-    const raw = execSync(`sqlite3 -separator '|||' "${dbPath}" "${sql}"`, {
+    const raw = execFileSync("sqlite3", ["-separator", "|||", dbPath, sql], {
       encoding: "utf8",
       stdio: ["pipe", "pipe", "pipe"],
     });

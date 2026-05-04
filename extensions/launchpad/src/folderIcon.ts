@@ -1,4 +1,4 @@
-import { exec, execSync } from "child_process";
+import { execFile, execFileSync } from "child_process";
 import { promisify } from "util";
 import {
   existsSync,
@@ -15,7 +15,11 @@ import { join } from "path";
 import { PNG } from "pngjs";
 import crypto from "crypto";
 
-const execP = promisify(exec);
+function execFileAsync(cmd: string, args: string[]): Promise<string> {
+  return new Promise((resolve, reject) =>
+    execFile(cmd, args, { encoding: "utf8" }, (err, stdout) => (err ? reject(err) : resolve(stdout)))
+  );
+}
 const readFileP = promisify(readFile);
 const writeFileP = promisify(writeFile);
 const unlinkP = promisify(unlink);
@@ -29,9 +33,10 @@ function ensureCache() {
 // Extract the .icns path from an .app bundle (async)
 async function icnsPath(appPath: string): Promise<string | null> {
   try {
-    const { stdout } = await execP(
-      `plutil -extract CFBundleIconFile raw -o - "${appPath.replace(/"/g, '\\"')}/Contents/Info.plist"`
-    );
+    const stdout = await execFileAsync("plutil", [
+      "-extract", "CFBundleIconFile", "raw", "-o", "-",
+      `${appPath}/Contents/Info.plist`,
+    ]);
     const iconFile = stdout.trim();
     const name = iconFile.endsWith(".icns") ? iconFile : `${iconFile}.icns`;
     const full = `${appPath}/Contents/Resources/${name}`;
@@ -45,7 +50,7 @@ async function icnsPath(appPath: string): Promise<string | null> {
 async function icnsToPng(icns: string, size: number): Promise<Buffer | null> {
   const tmp = join(tmpdir(), `lp_icon_${crypto.randomUUID()}.png`);
   try {
-    await execP(`sips -s format png "${icns.replace(/"/g, '\\"')}" --out "${tmp}" --resampleWidth ${size} 2>/dev/null`);
+    await execFileAsync("sips", ["-s", "format", "png", icns, "--out", tmp, "--resampleWidth", String(size)]);
     return await readFileP(tmp);
   } catch {
     return null;
@@ -64,10 +69,10 @@ async function icnsToPng(icns: string, size: number): Promise<Buffer | null> {
 // of the time the cache short-circuits before sips even runs.
 function icnsPathSync(appPath: string): string | null {
   try {
-    const stdout = execSync(
-      `plutil -extract CFBundleIconFile raw -o - "${appPath.replace(/"/g, '\\"')}/Contents/Info.plist"`,
-      { encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] }
-    );
+    const stdout = execFileSync("plutil", [
+      "-extract", "CFBundleIconFile", "raw", "-o", "-",
+      `${appPath}/Contents/Info.plist`,
+    ], { encoding: "utf8" });
     const iconFile = stdout.trim();
     const name = iconFile.endsWith(".icns") ? iconFile : `${iconFile}.icns`;
     const full = `${appPath}/Contents/Resources/${name}`;
@@ -80,9 +85,7 @@ function icnsPathSync(appPath: string): string | null {
 function icnsToPngSync(icns: string, size: number): Buffer | null {
   const tmp = join(tmpdir(), `lp_icon_${crypto.randomUUID()}.png`);
   try {
-    execSync(`sips -s format png "${icns.replace(/"/g, '\\"')}" --out "${tmp}" --resampleWidth ${size} 2>/dev/null`, {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
+    execFileSync("sips", ["-s", "format", "png", icns, "--out", tmp, "--resampleWidth", String(size)]);
     return readFileSync(tmp);
   } catch {
     return null;
