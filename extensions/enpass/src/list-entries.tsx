@@ -215,10 +215,9 @@ export default function Command() {
           : "Enter your master password or check CLI settings.";
       const normalizedMessage = message.toLowerCase();
       const isAuthError =
-        !submittedPin &&
-        (normalizedMessage.includes("password") ||
-          normalizedMessage.includes("locked") ||
-          normalizedMessage.includes("auth"));
+        normalizedMessage.includes("password") ||
+        normalizedMessage.includes("locked") ||
+        normalizedMessage.includes("auth");
       setNeedsPassword(isAuthError);
       await showToast({
         style: Toast.Style.Failure,
