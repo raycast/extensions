@@ -1,14 +1,29 @@
 # ClaudeCast Changelog
 
-## [1.6.0] - {PR_MERGE_DATE}
+## [1.7.0] - {PR_MERGE_DATE}
 
 ### Added
 
-- **Open In preference**: Choose whether Claude Code sessions open in a new window or a new tab. Supported across all five terminal apps: Terminal.app, iTerm, Warp, kitty, and Ghostty. kitty's New Tab requires `allow_remote_control yes` and a `listen_on` socket in `kitty.conf`; otherwise it falls back to a new window.
+- **Open In preference**: Choose whether Claude Code sessions open in a new window or a new tab. Supported across Terminal.app, iTerm, kitty, and Ghostty. kitty's New Tab requires `allow_remote_control yes` and a `listen_on` socket in `kitty.conf`; otherwise it falls back to a new window. Warp always opens a new window (its YAML launch config does not support opening in an existing window as a tab).
 
 ### Fixed
 
 - **Reserved shortcut**: "Continue with Prompt" in Launch Project changed from `⌘P` to `⌘⇧P` to avoid conflict with a Raycast reserved shortcut.
+
+## [1.6.0] - 2026-05-04
+
+### Fixed
+
+- **Ghostty Terminal Launch**: Replaced System Events keystroke simulation with Ghostty's native AppleScript surface API. The previous approach typed commands into whichever window was focused, interfering with active sessions.
+- **Warp Terminal Launch**: Replaced the non-functional `warp://action/new_tab?command=` URL scheme with a temporary YAML launch configuration opened via `warp://launch/`. Reliably opens a new window with the correct working directory and command. Double quotes in the cwd path are escaped, and the temp config cleanup window is 30 seconds to handle cold launches.
+
+### Changed
+
+- **Extension description**: Refreshed the store and repository description to highlight session search, instant resume, and agentic automation alongside quick prompts.
+
+### Contributors
+
+- Ghostty and Warp terminal launch fixes by [@Haknt](https://github.com/Haknt) ([#1](https://github.com/qazi0/claude-cast/pull/1))
 
 ## [1.5.0] - 2026-04-30
 

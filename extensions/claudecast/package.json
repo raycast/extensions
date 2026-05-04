@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claudecast",
   "title": "ClaudeCast",
-  "description": "Claude Code workflows at your fingertips: Quick prompts, session management, and agentic workflows",
+  "description": "Discover, resume, and automate Claude Code sessions: deep full-text search, one-keystroke resume, agentic loops, usage analytics, and quick prompts",
   "icon": "command-icon.png",
   "author": "qazi0",
   "contributors": [
@@ -275,7 +275,7 @@
     {
       "name": "openIn",
       "title": "Open In",
-      "description": "Whether to open Claude Code sessions in a new window or a new tab. Note: kitty's New Tab requires `allow_remote_control yes` and a `listen_on` socket in kitty.conf; otherwise it falls back to a new window.",
+      "description": "Whether to open Claude Code sessions in a new window or a new tab. Notes: kitty's New Tab requires `allow_remote_control yes` and a `listen_on` socket in kitty.conf (otherwise falls back to a new window). Warp always opens a new window.",
       "type": "dropdown",
       "default": "window",
       "required": false,

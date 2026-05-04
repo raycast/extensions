@@ -1,5 +1,13 @@
 # Todoist Changelog
 
+## [Fix filter task freshness and recurrence reminder guard] - 2026-05-01
+
+- **Filter task typing + freshness**: Typed filter sections in `FilterTasks` and resolve each displayed task against the latest cached item by id, preventing stale task state in filter views after updates.
+- **Filter project accessory**: Tasks shown in filter views now include the project/section accessory tag (like Today view), making project context visible directly in filter results.
+- **Recurrence update correctness**: In task actions, repeat updates now build from the latest cached task snapshot when available, reducing stale due payload issues.
+- **Hourly reminder safety**: The follow-up "at time of task" reminder check for hourly recurrence now runs only when the synced task due value is a datetime (contains time), avoiding incorrect reminder handling for all-day dates.
+- **Update callback context**: Extended the `updateTask` sync callback context to include `updatedTask`, allowing post-update logic to use the server-synced task shape safely.
+
 ## [Scheduling, repeat options, and sync reliability] - 2026-04-30
 
 - **Set Repeat** in task actions: presets plus search (e.g. `every 2 days`), and an option to clear repeat.

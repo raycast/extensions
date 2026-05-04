@@ -6,6 +6,7 @@ import {
   AUDIT_PROVIDER_LABELS,
   buildInstallCommand,
   formatInstalls,
+  formatRelativeDate,
   normalizeAllowedTools,
   Skill,
   SkillAudit,
@@ -97,6 +98,13 @@ ${installCommand}
                 icon={Icon.Star}
               />
             )
+          )}
+          {!stats?.rateLimited && stats?.pushedAt && (
+            <List.Item.Detail.Metadata.Label
+              title="Repo Activity"
+              text={formatRelativeDate(stats.pushedAt)}
+              icon={Icon.Calendar}
+            />
           )}
           {frontmatter.license && (
             <List.Item.Detail.Metadata.Label title="License" text={frontmatter.license} icon={Icon.Document} />

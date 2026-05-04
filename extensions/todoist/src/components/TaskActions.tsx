@@ -76,6 +76,7 @@ export default function TaskActions({
   const { useConfetti } = getPreferenceValues<Preferences>();
 
   const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
+  const currentTask = data?.items.find((item) => item.id === task.id) ?? task;
 
   const projects = data?.projects;
   const comments = data?.notes;
@@ -119,13 +120,17 @@ export default function TaskActions({
 
   async function setRecurrence(recurrence?: string) {
     let syncReminders: Reminder[] | undefined;
+    let updatedTask: Task | undefined;
     if (
-      !(await updateTask({ id: task.id, due: repeatDuePayload(task, recurrence) }, (ctx) => {
+      !(await updateTask({ id: task.id, due: repeatDuePayload(currentTask, recurrence) }, (ctx) => {
         syncReminders = ctx.syncReminders;
+        updatedTask = ctx.updatedTask;
       }))
     )
       return;
-    if (isHourlyDueString(recurrence)) await ensureAtTaskTimeReminder(task.id, syncReminders);
+    if (isHourlyDueString(recurrence) && updatedTask?.due?.date?.includes("T")) {
+      await ensureAtTaskTimeReminder(task.id, syncReminders);
+    }
   }
 
   const repeatOptions = [...buildDynamicRepeatOptions(repeatSearchText), ...filterRepeatPresets(repeatSearchText)];

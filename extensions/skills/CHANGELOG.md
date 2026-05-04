@@ -1,9 +1,13 @@
 # Skills Changelog
 
+## [Show Last Updated Date in Search Results] - 2026-04-30
+
+- Show the repository's last updated date in the skill detail panel, displayed as a relative time (e.g. "3 days ago")
+
 ## [Add Repository Shortcut] - 2026-04-30
 
 - Add a keyboard shortcut to open a skill's repository from the action panel
-- 
+
 ## [Fix Windows bunx Fallback] - 2026-04-30
 
 - Fix the Skills CLI throwing `'"bunx"' is not recognized as an internal or external command` on Windows when Bun is not installed; the extension now correctly falls back to `npx` as intended

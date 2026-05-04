@@ -10,7 +10,8 @@ export type AgentId =
   | "kimi"
   | "synthetic"
   | "antigravity"
-  | "zai";
+  | "zai"
+  | "minimax";
 
 export interface AgentDefinition {
   id: AgentId;

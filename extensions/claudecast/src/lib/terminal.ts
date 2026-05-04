@@ -1,9 +1,10 @@
 import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { writeFileSync } from "fs";
+import { writeFileSync, unlinkSync, mkdirSync, existsSync } from "fs";
 import { tmpdir, homedir } from "os";
 import { join } from "path";
+import { randomUUID } from "crypto";
 import type { PermissionMode } from "./session-parser";
 
 const execFilePromise = promisify(execFile);
@@ -165,15 +166,53 @@ async function openInITerm(
   await execFilePromise("osascript", ["-e", script]);
 }
 
+// Escape a value for use inside a YAML double-quoted scalar (YAML 1.2).
+// Backslash must be escaped first; LF/CR/TAB get their YAML escape forms so
+// embedded whitespace can never break the document layout.
+function escapeYamlDoubleQuoted(s: string): string {
+  return s
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
+}
+
 async function openInWarp(
   command: string,
   cwd: string,
-  openIn: OpenIn,
+  // Warp's YAML launch config opens a new window; the `openIn` preference
+  // does not apply here (no reliable URL scheme for "open in current window
+  // as tab" — the previous warp://action/new_tab?command= approach was
+  // unreliable at executing the command).
+  _openIn: OpenIn,
 ): Promise<void> {
-  // Warp supports a special URL scheme for both new windows and new tabs
-  const encodedCommand = encodeURIComponent(`cd "${cwd}" && ${command}`);
-  const action = openIn === "tab" ? "new_tab" : "new_window";
-  await open(`warp://action/${action}?command=${encodedCommand}`);
+  // Use dynamic launch configuration for reliable command execution
+  const lcId = randomUUID();
+  const lcDir = join(homedir(), ".warp", "launch_configurations");
+  if (!existsSync(lcDir)) {
+    mkdirSync(lcDir, { recursive: true });
+  }
+  const lcFile = join(lcDir, `${lcId}.yaml`);
+  const yaml = `---
+name: ${lcId}
+windows:
+  - tabs:
+      - layout:
+          cwd: "${escapeYamlDoubleQuoted(cwd)}"
+          commands:
+            - exec: "${escapeYamlDoubleQuoted(command)}"
+`;
+  writeFileSync(lcFile, yaml, "utf-8");
+  await open(`warp://launch/${lcId}`);
+  // Clean up the temp config after launch
+  setTimeout(() => {
+    try {
+      unlinkSync(lcFile);
+    } catch {
+      /* ignore */
+    }
+  }, 30_000);
 }
 
 async function openInKitty(
@@ -215,51 +254,24 @@ async function openInGhostty(
   cwd: string,
   openIn: OpenIn,
 ): Promise<void> {
-  const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-  const escapedCwd = cwd.replace(/"/g, '\\"');
+  const escapedCommand = command.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const escapedCwd = cwd.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
-  if (openIn === "tab") {
-    // Ghostty uses Cmd+T for a new tab; open via AppleScript keystroke
-    const script = `
-      tell application "Ghostty"
-        activate
-      end tell
-      delay 0.3
-      tell application "System Events"
-        keystroke "t" using {command down}
-      end tell
-      delay 0.3
-      tell application "System Events"
-        keystroke "cd \\"${escapedCwd}\\" && ${escapedCommand}"
-        keystroke return
-      end tell
-    `;
-    await execFilePromise("osascript", ["-e", script]);
-  } else {
-    // Try direct invocation first via execFile with array arguments
-    try {
-      await execFilePromise("ghostty", [
-        `--working-directory=${cwd}`,
-        "-e",
-        "sh",
-        "-c",
-        command,
-      ]);
-    } catch {
-      // Fallback to AppleScript using execFile with array arguments
-      const script = `
-        tell application "Ghostty"
-          activate
-        end tell
-        delay 0.5
-        tell application "System Events"
-          keystroke "cd \\"${escapedCwd}\\" && ${escapedCommand}"
-          keystroke return
-        end tell
-      `;
-      await execFilePromise("osascript", ["-e", script]);
-    }
-  }
+  // Use Ghostty's native AppleScript API with surface configuration.
+  // `new tab` opens the surface as a tab in the front window when one
+  // exists; `new window` always spawns a fresh window.
+  const target = openIn === "tab" ? "new tab" : "new window";
+  const script = `
+    tell application "Ghostty"
+      activate
+      set cfg to new surface configuration
+      set initial working directory of cfg to "${escapedCwd}"
+      set initial input of cfg to "${escapedCommand}" & (ASCII character 10)
+      ${target} with configuration cfg
+    end tell
+  `;
+
+  await execFilePromise("osascript", ["-e", script]);
 }
 
 /**

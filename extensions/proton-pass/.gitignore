@@ -5,6 +5,7 @@
 
 # Raycast specific files
 raycast-env.d.ts
+.test-build
 .raycast-swift-build
 .swiftpm
 compiled_raycast_swift

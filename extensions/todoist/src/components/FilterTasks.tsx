@@ -1,5 +1,6 @@
 import { List, ActionPanel, Action, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 
 import { getFilterTasks, type Task } from "../api";
 import { filterSort } from "../helpers/filters";
@@ -11,6 +12,7 @@ import CreateViewActions from "./CreateViewActions";
 import TaskListSections from "./TaskListSections";
 
 type FilterTasksProps = { name: string; quickLinkView?: QuickLinkView };
+type FilterSection = { name: string; tasks: Task[] };
 
 function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const [cachedData] = useCachedData();
@@ -19,7 +21,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const query = filter?.query || "";
 
   const { data } = useCachedPromise(
-    async (search) => {
+    async (search: string): Promise<FilterSection[]> => {
       const queries = search
         .split(",")
         .map((part: string) => part.trim())
@@ -37,7 +39,11 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   );
 
   const sections = data ?? [];
-  const tasks = sections.flatMap((section) => section.tasks);
+  const tasks = useMemo(() => {
+    if (!cachedData) return sections.flatMap((section) => section.tasks);
+    const byId = new Map(cachedData.items.map((item) => [item.id, item]));
+    return sections.flatMap((section) => section.tasks.map((task) => byId.get(task.id) ?? task));
+  }, [sections, cachedData]);
 
   const {
     sections: groupedSections,
@@ -86,6 +92,7 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   return (
     <TaskListSections
       mode={ViewMode.project}
+      showProjectAccessory
       sections={displayedSections}
       viewProps={viewProps}
       quickLinkView={quickLinkView}
