@@ -1,3 +1,5 @@
+import { showToast, Toast } from "@raycast/api";
+
 /**
  * Webhook integration for water logging
  */
@@ -32,7 +34,13 @@ export async function sendToWebhook(
     });
 
     if (!response.ok) {
-      console.error("Webhook error:", response.status, await response.text());
+      const errorText = await response.text();
+      console.error("Webhook error:", response.status, errorText);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Webhook Sync Failed",
+        message: `Error ${response.status}: ${errorText.substring(0, 50)}`,
+      });
       return false;
     }
 
@@ -40,6 +48,11 @@ export async function sendToWebhook(
     return true;
   } catch (error) {
     console.error("Webhook failed:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Webhook Error",
+      message: error instanceof Error ? error.message : "Unknown error",
+    });
     return false;
   }
 }

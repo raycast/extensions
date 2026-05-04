@@ -19,6 +19,13 @@ export interface DailyStats {
 const DATA_DIR = path.join(environment.supportPath, "water-logs");
 const getDataFilePath = (date: string) => path.join(DATA_DIR, `${date}.json`);
 
+export function formatLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 // Ensure data directory exists
 async function ensureDataDir() {
   try {
@@ -30,8 +37,7 @@ async function ensureDataDir() {
 
 // Get today's date in YYYY-MM-DD format
 export function getTodayDate(): string {
-  const today = new Date();
-  return today.toISOString().split("T")[0];
+  return formatLocalDateKey(new Date());
 }
 
 // Load logs for a specific date
@@ -94,7 +100,7 @@ export async function getDailyStats(
     totalAmount,
     logs,
     goal,
-    percentage: Math.round((totalAmount / goal) * 100),
+    percentage: goal > 0 ? Math.round((totalAmount / goal) * 100) : 0,
   };
 }
 

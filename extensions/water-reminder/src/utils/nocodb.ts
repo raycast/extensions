@@ -1,4 +1,5 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { formatLocalDateKey } from "./storage";
 
 export async function addNocoDBLog(amount: number) {
   const preferences = getPreferenceValues<Preferences>();
@@ -20,7 +21,7 @@ export async function addNocoDBLog(amount: number) {
       body: JSON.stringify({
         Title: "Water Log",
         Amount: amount,
-        Date: new Date().toISOString(),
+        Date: `${formatLocalDateKey(new Date())}T00:00:00.000Z`,
       }),
     });
 

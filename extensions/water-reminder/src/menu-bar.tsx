@@ -7,6 +7,8 @@ import {
   LaunchType,
   LocalStorage,
   Color,
+  showToast,
+  Toast,
 } from "@raycast/api";
 import React from "react";
 import { useCachedPromise } from "@raycast/utils";
@@ -22,11 +24,6 @@ const SNOOZE_UNTIL_KEY = "snoozeUntil";
 export default function MenuBarCommand() {
   const preferences = getPreferenceValues<Preferences>();
 
-  // Check if menu bar is disabled
-  if (preferences.enableMenuBar === false) {
-    return null;
-  }
-
   const dailyGoal = parseInt(preferences.dailyGoal || "2000", 10);
   const defaultAmount = parseInt(preferences.defaultAmount || "250", 10);
 
@@ -40,6 +37,7 @@ export default function MenuBarCommand() {
     },
     [],
     {
+      execute: preferences.enableMenuBar !== false,
       keepPreviousData: true,
     },
   );
@@ -64,8 +62,14 @@ export default function MenuBarCommand() {
         });
       }
 
-      // Sync to NocoDB
-      await addNocoDBLog(defaultAmount);
+      // Sync to NocoDB if configured
+      if (
+        preferences.nocodbApiToken &&
+        preferences.nocodbBaseUrl &&
+        preferences.nocodbTableId
+      ) {
+        await addNocoDBLog(defaultAmount);
+      }
 
       // Sync to Habitify if configured
       if (preferences.habitifyApiKey && preferences.habitifyHabitId) {
@@ -90,6 +94,11 @@ export default function MenuBarCommand() {
       revalidate();
     } catch (error) {
       console.error("Quick log failed:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Quick Log Failed",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   }
 
@@ -119,6 +128,10 @@ export default function MenuBarCommand() {
   const [snoozeUntil, setSnoozeUntil] = React.useState<number | null>(null);
 
   React.useEffect(() => {
+    if (preferences.enableMenuBar === false) {
+      return;
+    }
+
     LocalStorage.getItem<string>(SNOOZE_UNTIL_KEY).then((value) => {
       if (value) {
         const until = parseInt(value, 10);
@@ -129,7 +142,7 @@ export default function MenuBarCommand() {
         }
       }
     });
-  }, []);
+  }, [preferences.enableMenuBar]);
 
   async function handleSnooze(hours: number) {
     const until = Date.now() + hours * 60 * 60 * 1000;
@@ -157,6 +170,11 @@ export default function MenuBarCommand() {
     : 0;
 
   const title = percentage >= 100 ? `${totalAmount}ml` : `${percentage}%`;
+
+  // Check after hooks are registered to keep React hook order stable.
+  if (preferences.enableMenuBar === false) {
+    return null;
+  }
 
   return (
     <MenuBarExtra

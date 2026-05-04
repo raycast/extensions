@@ -41,11 +41,7 @@ export default async function Reminder() {
 
   // If manually triggered, always show HUD
   if (!isBackgroundRun) {
-    // Show HUD multiple times to extend visibility (~6 seconds)
-    for (let i = 0; i < 3; i++) {
-      await showHUD(`${title} ${message}`);
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-    }
+    await showHUD(`${title} ${message}`);
     return;
   }
 
@@ -65,8 +61,12 @@ export default async function Reminder() {
   }
 
   // Check interval (only for background runs)
-  const reminderIntervalMs =
-    parseInt(preferences.reminderInterval || "60", 10) * 60 * 1000;
+  const parsedInterval = parseInt(preferences.reminderInterval || "60", 10);
+  const reminderIntervalMinutes = Math.max(
+    isNaN(parsedInterval) ? 60 : parsedInterval,
+    1,
+  );
+  const reminderIntervalMs = reminderIntervalMinutes * 60 * 1000;
   const lastReminderTime =
     await LocalStorage.getItem<string>(LAST_REMINDER_KEY);
   const now = Date.now();
@@ -81,9 +81,5 @@ export default async function Reminder() {
   // Update last reminder time
   await LocalStorage.setItem(LAST_REMINDER_KEY, now.toString());
 
-  // Show HUD reminder (extended visibility)
-  for (let i = 0; i < 3; i++) {
-    await showHUD(`${title} ${message}`);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-  }
+  await showHUD(`${title} ${message}`);
 }

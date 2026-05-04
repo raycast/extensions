@@ -63,8 +63,14 @@ export default function LogWater() {
         });
       }
 
-      // 📊 Sync to NocoDB (using minimal signature)
-      await addNocoDBLog(amount);
+      // 📊 Sync to NocoDB if configured
+      if (
+        preferences.nocodbApiToken &&
+        preferences.nocodbBaseUrl &&
+        preferences.nocodbTableId
+      ) {
+        await addNocoDBLog(amount);
+      }
 
       // 🔄 Sync to Habitify if configured
       if (preferences.habitifyApiKey && preferences.habitifyHabitId) {

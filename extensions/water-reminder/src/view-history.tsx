@@ -7,9 +7,12 @@ import {
   getPreferenceValues,
   Icon,
   Color,
+  confirmAlert,
+  Alert,
 } from "@raycast/api";
 import React, { useEffect, useState } from "react";
 import {
+  formatLocalDateKey,
   getTodayDate,
   getDailyStats,
   DailyStats,
@@ -21,6 +24,16 @@ import {
 interface DayData {
   date: string;
   stats: DailyStats;
+}
+
+const WEEKLY_DAY_COUNT = 7;
+
+function getRecentDateKeys(days: number): string[] {
+  return Array.from({ length: days }, (_, index) => {
+    const date = new Date();
+    date.setDate(date.getDate() - index);
+    return formatLocalDateKey(date);
+  });
 }
 
 export default function ViewHistory() {
@@ -35,17 +48,18 @@ export default function ViewHistory() {
     setIsLoading(true);
     try {
       const dates = await getAvailableDates();
-      // Add today if not in list
-      if (!dates.includes(getTodayDate())) {
-        dates.unshift(getTodayDate());
-      }
+      const recentDates = getRecentDateKeys(WEEKLY_DAY_COUNT);
+      const datesToLoad = Array.from(new Set([...recentDates, ...dates])).slice(
+        0,
+        30,
+      );
 
-      const daysData: DayData[] = [];
-      for (const date of dates.slice(0, 30)) {
-        // Last 30 days max
-        const stats = await getDailyStats(date, dailyGoal);
-        daysData.push({ date, stats });
-      }
+      const daysData: DayData[] = await Promise.all(
+        datesToLoad.map(async (date) => {
+          const stats = await getDailyStats(date, dailyGoal);
+          return { date, stats };
+        }),
+      );
       setAllDays(daysData);
     } catch (error) {
       await showToast({
@@ -63,6 +77,19 @@ export default function ViewHistory() {
   }, []);
 
   async function handleDelete(date: string, log: WaterLog) {
+    const confirmed = await confirmAlert({
+      title: "Delete Water Log?",
+      message: `${log.amount}ml${log.note ? ` - ${log.note}` : ""}`,
+      primaryAction: {
+        title: "Delete Log",
+        style: Alert.ActionStyle.Destructive,
+      },
+    });
+
+    if (!confirmed) {
+      return;
+    }
+
     try {
       await deleteWaterLog(date, log.timestamp);
       await showToast({
@@ -110,7 +137,7 @@ export default function ViewHistory() {
 
     if (dateStr === getTodayDate()) {
       return "Today";
-    } else if (dateStr === yesterday.toISOString().split("T")[0]) {
+    } else if (dateStr === formatLocalDateKey(yesterday)) {
       return "Yesterday";
     }
     return date.toLocaleDateString(undefined, {
@@ -126,7 +153,11 @@ export default function ViewHistory() {
   const totalAmount = stats?.totalAmount || 0;
 
   // Calculate weekly stats
-  const weeklyStats = allDays.slice(0, 7).reduce(
+  const weeklyDateKeys = getRecentDateKeys(WEEKLY_DAY_COUNT);
+  const weeklyDays = weeklyDateKeys
+    .map((date) => allDays.find((day) => day.date === date))
+    .filter((day): day is DayData => Boolean(day));
+  const weeklyStats = weeklyDays.reduce(
     (acc, day) => {
       acc.total += day.stats.totalAmount;
       if (day.stats.percentage >= 100) acc.daysCompleted++;
@@ -162,11 +193,11 @@ export default function ViewHistory() {
       <List.Section title="📊 Weekly Summary (Last 7 Days)">
         <List.Item
           title={`Total: ${weeklyStats.total}ml`}
-          subtitle={`${weeklyStats.daysCompleted}/7 days completed`}
+          subtitle={`${weeklyStats.daysCompleted}/${WEEKLY_DAY_COUNT} days completed`}
           icon={{ source: Icon.Calendar, tintColor: Color.Purple }}
           accessories={[
             {
-              text: `Avg: ${Math.round(weeklyStats.total / 7)}ml/day`,
+              text: `Avg: ${Math.round(weeklyStats.total / WEEKLY_DAY_COUNT)}ml/day`,
             },
           ]}
         />
@@ -210,6 +241,7 @@ export default function ViewHistory() {
                       title="Refresh"
                       onAction={loadAllDays}
                       icon={Icon.ArrowClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
                     />
                     <Action
                       title="Delete Log"
