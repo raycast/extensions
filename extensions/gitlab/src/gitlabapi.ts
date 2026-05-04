@@ -1004,6 +1004,96 @@ export class GitLab {
     }
     return await response.text();
   }
+
+  async triggerPipeline(
+    projectID: number,
+    ref: string,
+    variables: { key: string; value: string }[] = [],
+  ): Promise<{ id: number; web_url: string }> {
+    const body: Record<string, any> = { ref };
+    if (variables.length > 0) {
+      body.variables = variables.map((v) => ({ key: v.key, value: v.value, variable_type: "env_var" }));
+    }
+    return await this.post(`projects/${projectID}/pipeline`, body);
+  }
+
+  async getProjectBranches(projectID: number, search?: string): Promise<Branch[]> {
+    const params: Record<string, string> = {};
+    if (search && search.length > 0) {
+      params.search = search;
+    }
+    const data: Branch[] = (await this.fetch(`projects/${projectID}/repository/branches`, params, true)) || [];
+    return data;
+  }
+
+  async getProjectTags(projectID: number, search?: string): Promise<{ name: string }[]> {
+    const params: Record<string, string> = {};
+    if (search && search.length > 0) {
+      params.search = search;
+    }
+    const data: { name: string }[] = (await this.fetch(`projects/${projectID}/repository/tags`, params, true)) || [];
+    return data;
+  }
+
+  async playJob(projectID: number, jobID: number): Promise<void> {
+    await this.post(`projects/${projectID}/jobs/${jobID}/play`);
+  }
+
+  async cancelJob(projectID: number, jobID: number): Promise<void> {
+    await this.post(`projects/${projectID}/jobs/${jobID}/cancel`);
+  }
+
+  async getJobTrace(projectID: number, jobID: number): Promise<string> {
+    const fullUrl = `${this.url}/api/v4/projects/${projectID}/jobs/${jobID}/trace`;
+    logAPI(`send GET request: ${fullUrl}`);
+    const fetcher = this.getFetcher();
+    const response = await fetcher(fullUrl, { method: "GET" });
+    if (response.status === 404) {
+      return "";
+    }
+    if (!response.ok) {
+      throw new Error(`http status ${response.status}`);
+    }
+    return await response.text();
+  }
+
+  async getMyRecentPipelines(opts: { perProject?: number; maxProjects?: number } = {}): Promise<{
+    projects: { project: Project; pipelines: any[] }[];
+    scanned: number;
+    inaccessible: number;
+  }> {
+    const perProject = opts.perProject ?? 5;
+    const maxProjects = opts.maxProjects ?? 20;
+    const projects = await this.getUserProjects(
+      { membership: "true", order_by: "last_activity_at", min_access_level: "20" },
+      false,
+    );
+    const limited = projects.filter((p) => !p.archived).slice(0, maxProjects);
+    const results = await Promise.allSettled(
+      limited.map(async (p) => {
+        const pipes = await this.fetch(`projects/${p.id}/pipelines`, {
+          per_page: `${perProject}`,
+          order_by: "updated_at",
+        });
+        return { project: p, pipelines: Array.isArray(pipes) ? pipes : [] };
+      }),
+    );
+    const out: { project: Project; pipelines: any[] }[] = [];
+    let inaccessible = 0;
+    for (const r of results) {
+      if (r.status === "fulfilled") {
+        if (r.value.pipelines.length > 0) {
+          out.push(r.value);
+        }
+      } else {
+        const msg = (r.reason?.message ?? `${r.reason}`) as string;
+        if (msg.includes("Not found")) {
+          inaccessible++;
+        }
+      }
+    }
+    return { projects: out, scanned: limited.length, inaccessible };
+  }
 }
 
 export function searchData<Type>(

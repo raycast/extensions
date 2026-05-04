@@ -110,6 +110,13 @@
       "mode": "view"
     },
     {
+      "name": "pipeline_my",
+      "title": "My Pipelines",
+      "subtitle": "GitLab",
+      "description": "List your most recent GitLab pipelines across projects",
+      "mode": "view"
+    },
+    {
       "name": "group_my",
       "title": "My Groups",
       "subtitle": "GitLab",

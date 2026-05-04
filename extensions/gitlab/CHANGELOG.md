@@ -1,5 +1,12 @@
 # GitLab Changelog
 
+## [Pipeline triggers, My Pipelines & Job controls] - 2026-05-04
+
+- Add top-level `My Pipelines` command listing your recent pipelines across projects
+- Add `Trigger New Pipeline` action with branch/tag selection and CI/CD variables
+- Add `Play Job` action for manual jobs and `Cancel Job` action for running jobs
+- Add `Show Log` action to view a job's trace inside Raycast
+
 ## [Merged MR icon in todos] - 2026-04-15
 
 - Show purple merged icon for todos on merged merge requests
