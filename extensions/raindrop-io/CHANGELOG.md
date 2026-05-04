@@ -1,6 +1,6 @@
 # Raindrop.io Extension Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-05-04
 
 - Add AppleScript fallback support for Arc browser in `src/hooks/useBrowserLink.ts`
 
