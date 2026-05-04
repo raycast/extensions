@@ -34,7 +34,7 @@
 - Configurable API port preference — override the default port (52731) from Raycast preferences
 - Extended BibTeX entry type mapping: `inproceedings`, `phdthesis`, `techreport`, and `misc` in addition to `article` and `book`
 
-## [0.1.0] - {PR_MERGE_DATE}
+## [0.1.0] - 2026-05-04
 
 ### Added
 
