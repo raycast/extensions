@@ -1,0 +1,164 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "water-reminder",
+  "version": "0.0.1",
+  "title": "Water Reminder",
+      "description": "Stay hydrated with reminders, menu bar tracking, and optional webhook or Habitify sync.",
+  "icon": "icon.png",
+  "author": "leolionart",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "log-water",
+      "title": "Log Water",
+      "subtitle": "Record Water Intake",
+      "description": "Log your water intake and sync optional integrations.",
+      "mode": "view"
+    },
+    {
+      "name": "view-history",
+      "title": "Water History",
+      "subtitle": "Water Intake",
+      "description": "View your water intake history for today with stats.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Water Tracker",
+      "subtitle": "Menu Bar",
+      "description": "Track your water intake and log a default amount from the menu bar.",
+      "mode": "menu-bar",
+      "interval": "5m"
+    },
+    {
+      "name": "reminder",
+      "title": "Water Reminder",
+      "subtitle": "HUD Notification",
+      "description": "Background service to remind you to drink water.",
+      "mode": "no-view",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "dailyGoal",
+      "title": "Daily Water Goal (ml)",
+      "description": "Your daily water intake goal in milliliters.",
+      "type": "textfield",
+      "required": false,
+      "default": "2000"
+    },
+    {
+      "name": "defaultAmount",
+      "title": "Default Amount (ml)",
+      "description": "Default water amount for quick logging.",
+      "type": "textfield",
+      "required": false,
+      "default": "250"
+    },
+    {
+      "name": "reminderInterval",
+      "title": "Reminder Interval (minutes)",
+      "description": "How often to remind you to drink water.",
+      "type": "textfield",
+      "required": false,
+      "default": "60"
+    },
+    {
+      "name": "webhookUrl",
+      "title": "Webhook URL",
+      "description": "URL to send water log data via POST request (leave empty to disable).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "enableNotifications",
+      "title": "Enable Notifications",
+      "description": "Enable periodic reminders to drink water.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show water reminders"
+    },
+    {
+      "name": "enableMenuBar",
+      "title": "Enable Menu Bar",
+      "description": "Show water tracker in the menu bar.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show in menu bar"
+    },
+    {
+      "name": "enableConfetti",
+      "title": "Enable Confetti",
+      "description": "Show confetti celebration when reaching daily goal.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Celebrate goal completion"
+    },
+    {
+      "name": "habitifyApiKey",
+      "title": "Habitify API Key",
+      "description": "Your Habitify API key (get from Settings > API Credential in Habitify app).",
+      "type": "password",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "habitifyHabitId",
+      "title": "Habitify Habit ID",
+      "description": "The ID of your water habit in Habitify.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "nocodbApiToken",
+      "title": "NocoDB API Token",
+      "description": "API token for your NocoDB table (header: xc-token).",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "nocodbBaseUrl",
+      "title": "NocoDB Base URL",
+      "description": "Base URL for NocoDB table APIs.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "https://app.nocodb.com/api/v2/tables"
+    },
+    {
+      "name": "nocodbTableId",
+      "title": "NocoDB Table ID",
+      "description": "The table ID from your NocoDB URL.",
+      "type": "textfield",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.37",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray dev",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
