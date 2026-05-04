@@ -1,0 +1,37 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "launchpad",
+  "title": "Launchpad",
+  "description": "Browse and launch installed macOS applications in a grid view — a Launchpad replacement for macOS 26 Tahoe.",
+  "icon": "icon.png",
+  "author": "ALs",
+  "license": "MIT",
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "launchpad",
+      "title": "Launchpad",
+      "description": "Open the app grid",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "pngjs": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.14",
+    "@types/pngjs": "^6.0.5",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
