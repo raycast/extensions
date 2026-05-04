@@ -37,14 +37,14 @@ The format is based on Keep a Changelog, and this project adheres to Semantic Ve
 - Cross-platform support for macOS and Windows
 - Configurable preferences:
   - Enable or disable individual OSINT platforms
-  - Auto-copy IOC to clipboard on selection
+  - Auto-copy IOC to clipboard on open
 - Multiple copy options:
   - Copy search URL
   - Copy IOC in original format
   - Copy defanged IOC for safe sharing
 - Smart URL building with platform-specific parameters:
   - Joe Sandbox uses hash-type-specific parameters (md5, sha1, sha256)
-  - Pulsedive uses base64-encoded IOCs
+  - Pulsedive uses query-string IOC lookups
   - Platform-specific search query formats
 - Visual indicators for favorite sources
 - Persistent favorites using Raycast LocalStorage

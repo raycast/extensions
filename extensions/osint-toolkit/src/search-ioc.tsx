@@ -19,7 +19,7 @@ import {
   open,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { detectIOCType, defangIOC, refangIOC } from "./utils/ioc-detection";
 import { getEnabledSourcesForIOCType } from "./utils/osint-sources";
 import { buildSearchURL } from "./utils/url-builder";
@@ -45,6 +45,7 @@ export default function SearchIOCCommand(
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [favorites, setFavorites] = useState<string[]>([]);
+  const searchRequestId = useRef(0);
 
   // Load favorites on mount
   useEffect(() => {
@@ -57,14 +58,21 @@ export default function SearchIOCCommand(
 
   // Auto-detect IOC type when search text changes
   useEffect(() => {
+    const requestId = ++searchRequestId.current;
+
     const detectAndSearch = async () => {
       if (!searchText.trim()) {
-        setIocDetection(null);
-        setSearchResults([]);
+        if (searchRequestId.current === requestId) {
+          setIocDetection(null);
+          setSearchResults([]);
+          setIsLoading(false);
+        }
         return;
       }
 
-      setIsLoading(true);
+      if (searchRequestId.current === requestId) {
+        setIsLoading(true);
+      }
 
       try {
         // Get preferences inside the effect
@@ -73,6 +81,10 @@ export default function SearchIOCCommand(
         // Refang the IOC first if it's defanged
         const refangedIOC = refangIOC(searchText.trim());
         const detection = detectIOCType(refangedIOC);
+        if (searchRequestId.current !== requestId) {
+          return;
+        }
+
         setIocDetection(detection);
 
         if (detection.isValid && detection.type !== "unknown") {
@@ -96,6 +108,10 @@ export default function SearchIOCCommand(
               ioc: detection.value,
               iocType: detection.type,
             });
+
+            if (searchRequestId.current !== requestId) {
+              return;
+            }
           }
 
           setSearchResults(results);
@@ -109,7 +125,9 @@ export default function SearchIOCCommand(
           title: "Error detecting IOC",
         });
       } finally {
-        setIsLoading(false);
+        if (searchRequestId.current === requestId) {
+          setIsLoading(false);
+        }
       }
     };
 
@@ -182,8 +200,7 @@ export default function SearchIOCCommand(
     return displays[type] || displays.unknown;
   };
 
-  // Get category icon
-  const getCategoryIcon = (category: string): string => {
+  const getCategoryLabel = (category: string): string => {
     const icons: Record<string, string> = {
       "Multi-Purpose": "🎯",
       "IP Intelligence": "🌐",
@@ -193,7 +210,8 @@ export default function SearchIOCCommand(
       "Threat Intelligence": "📡",
       "Certificate Analysis": "🔒",
     };
-    return icons[category] || "🔍";
+
+    return `${icons[category] || "🔍"} ${category}`;
   };
 
   return (
@@ -213,7 +231,28 @@ export default function SearchIOCCommand(
           >
             {searchResults.map((result: SearchResult) => {
               const typeDisplay = getIOCTypeDisplay(result.iocType);
-              const categoryIcon = getCategoryIcon(result.source.category);
+              const accessories = [
+                { text: getCategoryLabel(result.source.category) },
+                result.source.isFree
+                  ? {
+                      text: "Free",
+                      icon: Icon.Check,
+                      tooltip: "Free to use",
+                    }
+                  : {
+                      text: "Paid",
+                      icon: Icon.Lock,
+                      tooltip: "Requires subscription",
+                    },
+                ...(favorites.includes(result.source.id)
+                  ? [
+                      {
+                        icon: Icon.Star,
+                        tooltip: "Favorite",
+                      },
+                    ]
+                  : []),
+              ];
 
               return (
                 <List.Item
@@ -222,26 +261,7 @@ export default function SearchIOCCommand(
                   icon={{ source: Icon.Globe, tintColor: typeDisplay.color }}
                   title={result.source.name}
                   subtitle={result.source.description}
-                  accessories={[
-                    { text: result.source.category, icon: categoryIcon },
-                    result.source.isFree
-                      ? {
-                          text: "Free",
-                          icon: Icon.Check,
-                          tooltip: "Free to use",
-                        }
-                      : {
-                          text: "Paid",
-                          icon: Icon.Lock,
-                          tooltip: "Requires subscription",
-                        },
-                    favorites.includes(result.source.id)
-                      ? {
-                          icon: Icon.Star,
-                          tooltip: "Favorite",
-                        }
-                      : {},
-                  ]}
+                  accessories={accessories}
                   actions={
                     <ActionPanel>
                       <ActionPanel.Section title="Actions">

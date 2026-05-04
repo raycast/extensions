@@ -16,8 +16,13 @@ export async function getFavorites(): Promise<string[]> {
   if (!favoritesJson) {
     return [];
   }
+
   try {
-    return JSON.parse(favoritesJson);
+    const parsed = JSON.parse(favoritesJson);
+    return Array.isArray(parsed) &&
+      parsed.every((item) => typeof item === "string")
+      ? parsed
+      : [];
   } catch {
     return [];
   }

@@ -192,8 +192,8 @@
     },
     {
       "name": "copy_on_select",
-      "title": "Copy IOC on Selection",
-      "description": "Automatically copy the IOC to clipboard when selecting a search result",
+      "title": "Copy IOC on Open",
+      "description": "Automatically copy the IOC to the clipboard when opening a search result",
       "type": "checkbox",
       "default": false,
       "required": false,
