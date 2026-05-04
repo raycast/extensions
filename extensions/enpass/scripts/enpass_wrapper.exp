@@ -1,0 +1,16 @@
+#!/usr/bin/expect -f
+
+set timeout 30
+set password $env(ENPASS_MASTER_PASSWORD)
+spawn {*}$argv
+
+expect {
+    -re "(?i)password" {
+        send "$password\r"
+        exp_continue
+    }
+    eof
+}
+
+catch wait result
+exit [lindex $result 3]

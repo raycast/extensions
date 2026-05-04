@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "enpass",
+  "title": "Enpass",
+  "description": "Browse and copy credentials from an Enpass vault",
+  "icon": "icon.png",
+  "author": "leolionart",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-entries",
+      "title": "Search Credentials",
+      "subtitle": "Enpass",
+      "description": "Search, inspect, and copy Enpass credential fields",
+      "keywords": [
+        "enpass",
+        "password",
+        "credential",
+        "login"
+      ],
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "type": "file",
+      "required": false,
+      "title": "Vault Path",
+      "description": "Select your Enpass vault file (e.g. vault.enpassdb)",
+      "placeholder": "/path/to/vault.enpassdb"
+    },
+    {
+      "name": "keyfilePath",
+      "type": "file",
+      "required": false,
+      "title": "Keyfile Path",
+      "description": "Path to your keyfile (if any)"
+    },
+    {
+      "name": "pin",
+      "type": "password",
+      "required": false,
+      "title": "Master Password",
+      "description": "Your Enpass master password (leave empty when using an unlocked/keychain wrapper)",
+      "placeholder": "Enter your master password"
+    },
+    {
+      "name": "cliPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Enpass CLI Path",
+      "description": "Path to enpass-cli or an unlocked wrapper",
+      "placeholder": "/opt/homebrew/bin/enpass-cli",
+      "default": "/opt/homebrew/bin/enpass-cli"
+    },
+    {
+      "name": "sortMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Sort",
+      "description": "Default sorting for the credential search list",
+      "default": "updated",
+      "data": [
+        {
+          "title": "Recently Modified",
+          "value": "updated"
+        },
+        {
+          "title": "Recently Created",
+          "value": "created"
+        },
+        {
+          "title": "Recently Used",
+          "value": "used"
+        },
+        {
+          "title": "Most Used",
+          "value": "usage"
+        },
+        {
+          "title": "Title A-Z",
+          "value": "title"
+        },
+        {
+          "title": "Title Z-A",
+          "value": "titleDesc"
+        },
+        {
+          "title": "Category",
+          "value": "category"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "execa": "^9.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
