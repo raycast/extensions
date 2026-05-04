@@ -59,6 +59,27 @@ interface PackageJSONInfo {
   preview?: boolean;
 }
 
+function getWindowsVSCodeInstallRoots(): string[] {
+  const localAppDataPath = process.env.LOCALAPPDATA ?? path.join(os.homedir(), "AppData", "Local");
+  const roots = [
+    path.join(localAppDataPath, "Programs"),
+    process.env.ProgramFiles,
+    process.env["ProgramFiles(x86)"],
+  ].filter((value): value is string => Boolean(value));
+
+  return [...new Set(roots)];
+}
+
+function resolveWindowsVSCodeCLIPath(relativePath: string): string {
+  const candidates = getWindowsVSCodeInstallRoots().map((root) => path.join(root, relativePath));
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
+}
+
+function resolveWindowsVSCodeInstallPath(relativePath: string): string {
+  const candidates = getWindowsVSCodeInstallRoots().map((root) => path.join(root, relativePath));
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
+}
+
 function getNLSVariable(text: string | undefined): string | undefined {
   if (!text) {
     return text;
@@ -75,8 +96,10 @@ function cliPaths(): Record<string, string> {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     cliPaths = {
       Antigravity: path.join(programsFolder, "Antigravity", "bin", "antigravity.cmd"),
-      Code: path.join(programsFolder, "Microsoft VS Code", "bin", "code.cmd"),
-      "Code - Insiders": path.join(programsFolder, "Microsoft VS Code Insiders", "bin", "code-insiders.cmd"),
+      Code: resolveWindowsVSCodeCLIPath(path.join("Microsoft VS Code", "bin", "code.cmd")),
+      "Code - Insiders": resolveWindowsVSCodeCLIPath(
+        path.join("Microsoft VS Code Insiders", "bin", "code-insiders.cmd"),
+      ),
       Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
       Cursor: path.join(programsFolder, "cursor", "resources", "app", "bin", "cursor.cmd"),
       Positron: path.join(programsFolder, "Positron", "bin", "positron.cmd"),
@@ -112,10 +135,10 @@ function cliPaths(): Record<string, string> {
 }
 
 export function getVSCodeCLIFilename(): string {
-  const cliPathsMac = cliPaths();
-  const name = cliPathsMac[getBuildNamePreference()];
+  const availableCliPaths = cliPaths();
+  const name = availableCliPaths[getBuildNamePreference()];
   if (!name || name.length <= 0) {
-    return cliPathsMac.Code;
+    return availableCliPaths.Code;
   }
   return name;
 }
@@ -127,8 +150,8 @@ function programPaths(): Record<string, string> {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     programPaths = {
       Antigravity: path.join(programsFolder, "Antigravity"),
-      Code: path.join(programsFolder, "Microsoft VS Code"),
-      "Code - Insiders": path.join(programsFolder, "Microsoft VS Code Insiders"),
+      Code: resolveWindowsVSCodeInstallPath("Microsoft VS Code"),
+      "Code - Insiders": resolveWindowsVSCodeInstallPath("Microsoft VS Code Insiders"),
       Cursor: path.join(programsFolder, "cursor"),
       Kiro: path.join(programsFolder, "Kiro"),
       Positron: path.join(programsFolder, "Positron"),
@@ -222,6 +245,22 @@ export class VSCodeCLI {
 
   uninstallExtensionByIDSync(id: string) {
     child_process.execFileSync(this.cliFilename, ["--uninstall-extension", id, "--force"], this.execOptions);
+  }
+
+  openFolderURISync(uri: string, reuseWindow = false) {
+    child_process.execFileSync(
+      this.cliFilename,
+      [reuseWindow ? "--reuse-window" : "--new-window", "--folder-uri", uri],
+      this.execOptions,
+    );
+  }
+
+  openFileURISync(uri: string, reuseWindow = false) {
+    child_process.execFileSync(
+      this.cliFilename,
+      [reuseWindow ? "--reuse-window" : "--new-window", "--file-uri", uri],
+      this.execOptions,
+    );
   }
 
   async newWindow() {
