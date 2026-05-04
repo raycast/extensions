@@ -3,7 +3,7 @@ import {
   BRACKETS_CONTENT_REGEX,
   INTERNAL_TAG_REGEX,
   TRAILING_DASH_REGEX,
-  FREE_TAG_REGEX,
+  FREE_TAG_CLEANUP_REGEX,
 } from "./constants";
 
 export function unescapeHTML(str: string): string {
@@ -49,7 +49,7 @@ export function parseTorrentTitle(rawTitle: string) {
   cleanTitle = cleanTitle.replace(INTERNAL_TAG_REGEX, "").replace(TRAILING_DASH_REGEX, "").trim();
 
   specs = specs
-    .replace(FREE_TAG_REGEX, "")
+    .replace(FREE_TAG_CLEANUP_REGEX, "")
     .replace(/•\s*•/g, "•") // Remove double bullets if any
     .replace(/^•\s*|\s*•$/g, "") // Remove trailing/leading bullets
     .trim();

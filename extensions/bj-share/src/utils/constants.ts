@@ -9,4 +9,5 @@ export const TORRENT_SPECS_REGEX =
 export const BRACKETS_CONTENT_REGEX = /\[(.*?)\]/g;
 export const INTERNAL_TAG_REGEX = /\s*INTERNAL\s*$/i;
 export const TRAILING_DASH_REGEX = /\s+-\s*$/;
-export const FREE_TAG_REGEX = /\s*\/?\s*Free/gi;
+export const FREE_TAG_CLEANUP_REGEX = /\s*\/?\s*Free/gi;
+export const FREELEECH_DETECTION_REGEX = /\[[^\]]*\bfree\b[^\]]*\]/i;

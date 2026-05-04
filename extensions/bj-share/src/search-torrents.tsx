@@ -5,7 +5,7 @@ import path from "path";
 import { unescapeHTML, formatFullDate, parseTorrentTitle } from "./utils/formatters";
 import { handleDownloadAction } from "./utils/actions";
 import { useSearchTorrents } from "./hooks/useSearchTorrents";
-import { BASE_URL_DETAILS } from "./utils/constants";
+import { BASE_URL_DETAILS, FREELEECH_DETECTION_REGEX } from "./utils/constants";
 
 export default function SearchTorrents() {
   const preferences = getPreferenceValues<Preferences>();
@@ -19,7 +19,7 @@ export default function SearchTorrents() {
     return torrents.filter((item) => {
       const decodedTitle = unescapeHTML(item.title || "").toLowerCase();
       const matchesSearch = decodedTitle.includes(searchText.toLowerCase());
-      const matchesFree = !isFreeOnly || decodedTitle.includes("free");
+      const matchesFree = !isFreeOnly || FREELEECH_DETECTION_REGEX.test(decodedTitle);
       return matchesSearch && matchesFree;
     });
   }, [torrents, searchText, isFreeOnly]);
@@ -76,7 +76,7 @@ export default function SearchTorrents() {
       {filteredTorrents.map((item, index) => {
         const uniqueKey = item.link || String(index);
         const decodedTitle = unescapeHTML(item.title || "Unknown");
-        const isFree = decodedTitle.toLowerCase().includes("free");
+        const isFree = FREELEECH_DETECTION_REGEX.test(decodedTitle);
         const { cleanTitle, specs } = parseTorrentTitle(decodedTitle);
 
         let detailsUrl = "";

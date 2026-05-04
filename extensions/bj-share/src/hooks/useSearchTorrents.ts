@@ -56,12 +56,14 @@ export function useSearchTorrents() {
         if (isMounted) {
           setTorrents(items);
           setLastFetch(now);
+          showToast({ style: Toast.Style.Success, title: "Feed updated successfully!" });
         }
       } catch {
-        showToast({ style: Toast.Style.Failure, title: "Connection Error" });
+        if (isMounted) {
+          showToast({ style: Toast.Style.Failure, title: "Connection Error" });
+        }
       } finally {
         if (isMounted) {
-          showToast({ style: Toast.Style.Success, title: "Feed updated successfully!" });
           setIsLoading(false);
         }
       }
