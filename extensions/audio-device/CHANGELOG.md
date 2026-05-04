@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Update] - {PR_MERGE_DATE}
+- Add volume control support for windows
+- Improve install logic and show status while installing / updating from previous extension version
+
 ## [Minor fix] - 2026-05-04
 Fix https://github.com/raycast/extensions/issues/27616
 
