@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Minor fix] - {PR_MERGE_DATE}
+## [Minor fix] - 2026-05-04
 Fix https://github.com/raycast/extensions/issues/27616
 
 ## [Major Update] - 2026-03-27
