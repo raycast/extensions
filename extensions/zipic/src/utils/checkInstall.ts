@@ -1,8 +1,12 @@
 import { getApplications, showToast, Toast, open } from "@raycast/api";
 
 async function isZipicInstalled() {
-  const applications = await getApplications();
-  return applications.some(({ bundleId }) => bundleId === "studio.5km.zipic");
+  try {
+    const applications = await getApplications();
+    return applications.some(({ bundleId }) => bundleId === "studio.5km.zipic");
+  } catch (error) {
+    return false;
+  }
 }
 
 export async function checkZipicInstallation(): Promise<boolean> {
@@ -11,11 +15,11 @@ export async function checkZipicInstallation(): Promise<boolean> {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
       title: "Zipic is not installed.",
-      message: "Install it from: https://zipic.5km.tech",
+      message: "Install it from: https://zipic.app",
       primaryAction: {
-        title: "Go to https://zipic.5km.tech",
+        title: "Go to https://zipic.app",
         onAction: (toast) => {
-          open("https://zipic.5km.tech");
+          open("https://zipic.app");
           toast.hide();
         },
       },
