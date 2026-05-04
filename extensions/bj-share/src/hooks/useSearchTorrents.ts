@@ -84,7 +84,7 @@ export function useSearchTorrents() {
     cache.remove(`data_${safeUrlKey}`);
     cache.remove(`time_${safeUrlKey}`);
     setRefreshTrigger((prev) => prev + 1);
-    showToast({ style: Toast.Style.Success, title: "Updating feed..." });
+    showToast({ style: Toast.Style.Animated, title: "Updating feed..." });
   };
 
   return {
