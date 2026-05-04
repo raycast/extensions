@@ -6,6 +6,10 @@
   "icon": "icon.png",
   "author": "jergensturdley",
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-ioc",
@@ -21,131 +25,40 @@
           "required": false
         }
       ]
-    },
-    {
-      "name": "search-ip",
-      "title": "Search IP Address",
-      "subtitle": "OSINT Toolkit",
-      "description": "Search IP addresses across threat intelligence platforms",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "ip",
-          "placeholder": "Enter IP address (e.g., 8.8.8.8)",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "search-domain",
-      "title": "Search Domain",
-      "subtitle": "OSINT Toolkit",
-      "description": "Search domains across threat intelligence platforms",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "domain",
-          "placeholder": "Enter domain (e.g., example.com)",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "search-url",
-      "title": "Search URL",
-      "subtitle": "OSINT Toolkit",
-      "description": "Search URLs across threat intelligence platforms",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "url",
-          "placeholder": "Enter URL (e.g., https://example.com)",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "search-hash",
-      "title": "Search File Hash",
-      "subtitle": "OSINT Toolkit",
-      "description": "Search file hashes (MD5, SHA1, SHA256) across threat intelligence platforms",
-      "mode": "view",
-      "arguments": [
-        {
-          "name": "hash",
-          "placeholder": "Enter hash (MD5, SHA1, or SHA256)",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
-      "name": "import-source",
-      "title": "Import Custom Source",
-      "subtitle": "OSINT Toolkit",
-      "description": "Import a custom OSINT source by pasting JSON",
-      "mode": "view"
-    },
-    {
-      "name": "manage-sources",
-      "title": "Manage Custom Sources",
-      "subtitle": "OSINT Toolkit",
-      "description": "Manage your imported OSINT sources (enable/disable/delete)",
-      "mode": "view"
     }
   ],
   "preferences": [
     {
-      "name": "summary_only_mode",
-      "title": "Show Only Summary Rows",
-      "description": "When enabled, hide individual source entries and show only per-IOC summary items.",
-      "type": "checkbox",
-      "required": false,
-      "default": false,
-      "label": "Enabled"
-    },
-    {
-      "name": "virustotal_api_key",
-      "title": "VirusTotal API Key",
-      "description": "API key for VirusTotal (optional, free lookups work without it)",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "abuseipdb_api_key",
-      "title": "AbuseIPDB API Key",
-      "description": "API key for AbuseIPDB (optional)",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "shodan_api_key",
-      "title": "Shodan API Key",
-      "description": "API key for Shodan (optional)",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "alienvault_api_key",
-      "title": "AlienVault OTX API Key",
-      "description": "API key for AlienVault OTX (optional)",
-      "type": "password",
-      "required": false
-    },
-    {
-      "name": "urlscan_api_key",
-      "title": "URLScan.io API Key",
-      "description": "API key for URLScan.io (optional)",
-      "type": "password",
-      "required": false
-    },
-    {
       "name": "enable_virustotal",
       "title": "Enable VirusTotal",
       "description": "Show VirusTotal in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_alienvault",
+      "title": "Enable AlienVault OTX",
+      "description": "Show AlienVault OTX in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_pulsedive",
+      "title": "Enable Pulsedive",
+      "description": "Show Pulsedive in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_opentip",
+      "title": "Enable Kaspersky OpenTIP",
+      "description": "Show Kaspersky OpenTIP in search results",
       "type": "checkbox",
       "default": true,
       "required": false,
@@ -170,9 +83,18 @@
       "label": "Enabled"
     },
     {
-      "name": "enable_alienvault",
-      "title": "Enable AlienVault OTX",
-      "description": "Show AlienVault OTX in search results",
+      "name": "enable_ipinfo",
+      "title": "Enable ipinfo.io",
+      "description": "Show ipinfo.io in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_greynoise",
+      "title": "Enable GreyNoise",
+      "description": "Show GreyNoise in search results",
       "type": "checkbox",
       "default": true,
       "required": false,
@@ -188,9 +110,18 @@
       "label": "Enabled"
     },
     {
-      "name": "enable_threatfox",
-      "title": "Enable ThreatFox",
-      "description": "Show ThreatFox in search results",
+      "name": "enable_webcheck",
+      "title": "Enable WebCheck",
+      "description": "Show WebCheck in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_whois",
+      "title": "Enable WHOIS",
+      "description": "Show WHOIS in search results",
       "type": "checkbox",
       "default": true,
       "required": false,
@@ -206,27 +137,54 @@
       "label": "Enabled"
     },
     {
-      "name": "enable_anyrun",
-      "title": "Enable ANY.RUN",
-      "description": "Show ANY.RUN in search results",
+      "name": "enable_joesandbox",
+      "title": "Enable Joe Sandbox",
+      "description": "Show Joe Sandbox in search results",
       "type": "checkbox",
       "default": true,
       "required": false,
       "label": "Enabled"
     },
     {
-      "name": "enable_pulsedive",
-      "title": "Enable Pulsedive",
-      "description": "Show Pulsedive in search results",
+      "name": "enable_malwarebazaar",
+      "title": "Enable MalwareBazaar",
+      "description": "Show MalwareBazaar in search results",
       "type": "checkbox",
       "default": true,
       "required": false,
       "label": "Enabled"
     },
     {
-      "name": "enable_ipinfo",
-      "title": "Enable ipinfo.io",
-      "description": "Show ipinfo.io in search results",
+      "name": "enable_threatrip",
+      "title": "Enable threat.rip",
+      "description": "Show threat.rip in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_xforce",
+      "title": "Enable IBM X-Force Exchange",
+      "description": "Show IBM X-Force Exchange in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_censys",
+      "title": "Enable Censys",
+      "description": "Show Censys in search results",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    },
+    {
+      "name": "enable_crtsh",
+      "title": "Enable crt.sh",
+      "description": "Show crt.sh in search results",
       "type": "checkbox",
       "default": true,
       "required": false,
@@ -240,37 +198,18 @@
       "default": false,
       "required": false,
       "label": "Enabled"
-    },
-    {
-      "name": "enable_haveibeenpwned",
-      "title": "Enable Have I Been Pwned",
-      "description": "Enable Have I Been Pwned in search results (for email IOCs)",
-      "type": "checkbox",
-      "default": true,
-      "required": false,
-      "label": "Enabled"
-    },
-    {
-      "name": "show_hibp_quick_link",
-      "title": "Show Have I Been Pwned Quick Link",
-      "description": "Show a quick action for Have I Been Pwned when an email IOC is detected.",
-      "type": "checkbox",
-      "default": true,
-      "label": "Enabled",
-      "required": false
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.69.0",
-    "@raycast/utils": "^1.12.0"
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
     "@types/node": "20.8.10",
     "@types/react": "^19.0.1",
     "eslint": "^8.51.0",
-    "eslint-plugin-prettier": "^5.5.4",
-    "prettier": "^3.6.2",
+    "prettier": "^3.0.3",
     "typescript": "^5.2.2"
   },
   "scripts": {
@@ -278,9 +217,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "npm run build && npm run lint",
-    "publish": "npx @raycast/api@latest publish",
-    "publish:interactive": "npx @raycast/api@latest publish"
+    "publish": "npx @raycast/api@latest publish"
   },
   "categories": [
     "Security",

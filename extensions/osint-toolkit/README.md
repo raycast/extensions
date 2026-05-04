@@ -1,100 +1,172 @@
 # OSINT Toolkit
 
-Search IOCs (IPs, domains, URLs, hashes) across 25+ threat intelligence platforms directly from Raycast.
+A comprehensive OSINT (Open Source Intelligence) toolkit for Raycast that enables security analysts and researchers to quickly search Indicators of Compromise (IOCs) across multiple threat intelligence platforms.
+
+## Overview
+
+OSINT Toolkit streamlines the process of investigating potential security threats by providing instant access to 18 leading threat intelligence platforms. Simply paste any IP address, domain, URL, or file hash, and the extension automatically detects the IOC type and presents all relevant OSINT sources.
 
 ## Features
 
-- **Auto-detect IOC types**: Automatically identifies IPs, domains, URLs, and file hashes
-- **25+ OSINT platforms**: VirusTotal, Shodan, AbuseIPDB, AlienVault OTX, URLScan.io, and more
-- **Keyboard-first workflow**: Navigate and search without touching the mouse
-- **Customizable sources**: Enable/disable individual OSINT platforms
-- **Optional API keys**: Enhanced features for platforms that support them
-- **Smart defanging**: Automatically handles defanged IOCs
+### Auto-Detection
+
+- Automatically identifies IOC types: IPv4, IPv6, domains, URLs, and file hashes (MD5, SHA1, SHA256)
+- Handles defanged IOCs (e.g., `hxxp://example[.]com`) and automatically refangs them
+- Smart validation ensures only valid IOCs are processed
+
+### Favorites System
+
+- Mark frequently used OSINT sources as favorites
+- Quick action to open all favorite sources with a single keyboard shortcut
+- Favorites persist across sessions
+
+### Multiple Search Options
+
+- Open individual sources
+- Open all available sources at once
+- Open only your favorite sources
+- Copy IOCs in original or defanged format
+- Copy search URLs for sharing
+
+### Customizable
+
+- Enable or disable individual OSINT platforms
+- Automatic clipboard copy on selection (optional)
 
 ## Commands
 
-- `Search IOC` - Auto-detect and search any IOC type
-- `Search IP Address` - Search IP addresses
-- `Search Domain` - Search domains
-- `Search URL` - Search URLs
-- `Search File Hash` - Search file hashes (MD5, SHA1, SHA256)
-- `Import Custom Source` - Add your own OSINT source by pasting its JSON into a form
+### Search IOC
+
+The primary command that auto-detects the IOC type and displays all relevant OSINT sources. This is the recommended command for most use cases.
+
+**Usage:**
+
+- Launch with `search ioc`
+- Paste any IOC (IP, domain, URL, or hash)
+- Results appear automatically as you type
+
+**Keyboard Shortcuts:**
+
+- `Enter` - Open selected source in browser
+- `Cmd+F` - Add/Remove source from favorites
+- `Cmd+Opt+O` - Open all favorite sources
+- `Cmd+Shift+O` - Open all available sources
+- `Cmd+C` - Copy search URL
+- `Cmd+Shift+C` - Copy IOC
+- `Cmd+Opt+C` - Copy defanged IOC
+
+Note: Keyboard modifier keys use the platform-native modifier (use `Cmd` on macOS and `Ctrl` on Windows).
+
+The Raycast command title is "Search IOC" (internal command id: `search-ioc`).
 
 ## Supported Platforms
 
-### Multi-Purpose
+- macOS and Windows
 
-VirusTotal, AlienVault OTX, Pulsedive, Kaspersky OpenTIP
+### Multi-Purpose Platforms
+
+- **VirusTotal** - Analyze files, URLs, domains, and IP addresses
+- **AlienVault OTX** - Open Threat Exchange collaborative intelligence
+- **Pulsedive** - Free threat intelligence platform
+- **Kaspersky OpenTIP** - Kaspersky threat intelligence (hash only)
 
 ### IP Intelligence
 
-AbuseIPDB, Shodan, ipinfo.io, GreyNoise, IPQualityScore
+- **AbuseIPDB** - IP address threat intelligence and blacklist service
+- **Shodan** - Search engine for internet-connected devices
+- **ipinfo.io** - Comprehensive IP address data
+- **GreyNoise** - Internet background noise intelligence
 
-### URL/Domain Analysis
+### URL and Domain Analysis
 
-URLScan.io, WebCheck, WHOIS, SecurityTrails
+- **URLScan.io** - Website scanner and domain investigation
+- **WebCheck** - All-in-one website analysis tool
+- **WHOIS** - Domain registration information lookup
 
 ### Malware Analysis
 
-Hybrid Analysis, ANY.RUN, Joe Sandbox, MalwareBazaar
+- **Hybrid Analysis** - Free automated malware analysis
+- **Joe Sandbox** - Advanced malware analysis (hash and IP)
+- **MalwareBazaar** - Malware sample sharing platform
+- **threat.rip** - Fast threat intelligence for file hashes
 
 ### Threat Intelligence
 
-ThreatFox, ThreatCrowd, threat.rip, IBM X-Force Exchange
+- **IBM X-Force Exchange** - Threat intelligence sharing platform
 
-### Certificate/SSL
+### Certificate and SSL
 
-Censys, crt.sh
-
-## Configuration
-
-Optional API keys can be configured in Raycast preferences for enhanced features:
-
-- VirusTotal
-- AbuseIPDB
-- Shodan
-- AlienVault OTX
-- URLScan.io
-
-All platforms support free lookups without API keys.
-
-## Custom Sources
-You can add your own custom OSINT sources via the `Import Custom Source` command. Provide a JSON object with fields: `id`, `name`, `description`, `url` (use `
-${ioc}
-` as a placeholder for IOC insertion), `category` (one of: `Multi-Purpose`, `IP Intelligence`, `URL/Domain Analysis`, `Malware Analysis`, `Threat Intelligence`, `Certificate/SSL`), `supportedTypes` (array of supported IOC types), `requiresAuth`, `isFree`, and an optional `icon` string.
-
-Example JSON:
-
-```json
-{
-  "id": "my-source",
-  "name": "My Source",
-  "description": "Custom OSINT source",
-  "url": "https://example.com/search?q=${ioc}",
-  "category": "Multi-Purpose",
-  "supportedTypes": ["ip", "domain", "url"],
-  "requiresAuth": false,
-  "isFree": true,
-  "icon": "globe"
-}
-```
-
-Custom sources are stored locally and will appear alongside bundled sources in the search results. You can update or re-import an existing source (same id) to overwrite it.
-
-## Privacy & Data Handling
-
-- This extension does not transmit the IOCs or any scanned data to external servers by itself — it only opens the vendors' websites in your browser.
-- Optional API keys are stored in Raycast preferences (encrypted by Raycast). The extension does not send those keys to any external service other than the service you choose to open.
-- Recent IOCs are stored locally in your Raycast LocalStorage and are not transmitted or shared by this extension.
-
+- **Censys** - Internet-wide search for devices and certificates
+- **crt.sh** - Certificate transparency log search
 
 ## Installation
 
-1. Install the extension from Raycast Store
-2. (Optional) Configure API keys for enhanced features in Raycast preferences
-3. Start searching IOCs using the commands or pass them as arguments
+1. Open Raycast
+2. Search for "Store" and open the Extension Store
+3. Search for "OSINT Toolkit"
+4. Click "Install"
 
+## Configuration
 
-- You may want to create a PR and run CI (e.g., Codacy) before publishing.
-- Raycast may require a review of your extension before it's listed — follow the Raycast docs for additional steps.
+### Enabling/Disabling Sources
 
+You can enable or disable individual OSINT platforms in the preferences:
+
+1. Open Raycast preferences (Cmd+,)
+2. Navigate to Extensions > OSINT Toolkit
+3. Toggle checkboxes for each platform
+
+### Additional Settings
+
+- **Copy IOC on Selection** - Automatically copy the IOC to clipboard when opening a source
+
+## Usage Examples
+
+### Searching an IP Address
+
+1. Launch "Search IOC"
+2. Paste: `8.8.8.8`
+3. View results from AbuseIPDB, Shodan, VirusTotal, and other IP-focused platforms
+
+### Searching a File Hash
+
+1. Launch "Search IOC"
+2. Paste: `44d88612fea8a8f36de82e1278abb02f` (MD5 example)
+3. View results from VirusTotal, MalwareBazaar, Hybrid Analysis, and other malware analysis platforms
+
+### Searching a Domain
+
+1. Launch "Search IOC"
+2. Paste: `example.com`
+3. View results from URLScan, VirusTotal, WHOIS, and other domain analysis platforms
+
+### Using Favorites
+
+1. Open any IOC search
+2. Press `Cmd+F` on your preferred sources to mark as favorites
+3. Next time, press `Cmd+Opt+O` to open all your favorites at once
+
+## Privacy and Security
+
+- No IOC data is stored or transmitted to third parties
+- All searches open directly in your browser
+- The extension only constructs search URLs; actual queries are performed by your browser
+- All OSINT platforms are accessed via their public web interfaces
+
+## Contributing
+
+This extension is open source. Contributions, bug reports, and feature requests are welcome.
+
+## License
+
+MIT License
+
+## Support
+
+For issues, questions, or feature requests, please visit the GitHub repository or contact the author through Raycast.
+
+## Acknowledgments
+
+This extension integrates with the following OSINT platforms. All trademarks and service marks are the property of their respective owners:
+
+- VirusTotal, AbuseIPDB, Shodan, AlienVault OTX, URLScan.io, WebCheck, WHOIS, Hybrid Analysis, Joe Sandbox, MalwareBazaar, threat.rip, IBM X-Force Exchange, Pulsedive, Kaspersky OpenTIP, GreyNoise, ipinfo.io, Censys, and crt.sh.

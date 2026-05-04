@@ -100,18 +100,12 @@ export default function SearchIOCCommand(
           setSearchResults(results);
         } else {
           setSearchResults([]);
-          if (searchText.length > 3) {
-            showFailureToast({
-              title: "Unknown IOC Type",
-              message: "Could not detect IOC type. Try a specific search command.",
-            });
-          }
         }
       } catch (error) {
         console.error("Error detecting IOC:", error);
-        showFailureToast({
+        const message = error instanceof Error ? error.message : String(error);
+        showFailureToast(new Error(message || "Unknown error detecting IOC"), {
           title: "Error detecting IOC",
-          message: error.message,
         });
       } finally {
         setIsLoading(false);
@@ -178,7 +172,6 @@ export default function SearchIOCCommand(
       domain: { icon: Icon.Link, color: Color.Green, label: "Domain" },
       url: { icon: Icon.Link, color: Color.Orange, label: "URL" },
       hash: { icon: Icon.Document, color: Color.Red, label: "File Hash" },
-      email: { icon: Icon.Envelope, color: Color.Yellow, label: "Email" },
       unknown: {
         icon: Icon.QuestionMark,
         color: Color.SecondaryText,
@@ -193,10 +186,11 @@ export default function SearchIOCCommand(
     const icons: Record<string, string> = {
       "Multi-Purpose": "🎯",
       "IP Intelligence": "🌐",
-      "URL/Domain Analysis": "🔗",
+      "URL Analysis": "🔗",
+      "Domain Analysis": "🔗",
       "Malware Analysis": "🦠",
-      "Threat Feeds": "📡",
-      "Certificate/SSL": "🔒",
+      "Threat Intelligence": "📡",
+      "Certificate Analysis": "🔒",
     };
     return icons[category] || "🔍";
   };
@@ -271,12 +265,14 @@ export default function SearchIOCCommand(
                           shortcut={{ modifiers: ["cmd"], key: "c" }}
                         />
                         <Action.CopyToClipboard
-                          title="Copy Ioc"
+                          // eslint-disable-next-line @raycast/prefer-title-case
+                          title="Copy IOC"
                           content={result.ioc}
                           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                         />
                         <Action.CopyToClipboard
-                          title="Copy Defanged Ioc"
+                          // eslint-disable-next-line @raycast/prefer-title-case
+                          title="Copy Defanged IOC"
                           content={defangIOC(result.ioc, result.iocType)}
                           shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
                         />
@@ -292,8 +288,10 @@ export default function SearchIOCCommand(
                             );
                             if (favoriteResults.length === 0) {
                               await showFailureToast(
-                                new Error("No favorite sources for this IOC type"),
-                                { title: "No Favorites" }
+                                new Error(
+                                  "No favorite sources for this IOC type",
+                                ),
+                                { title: "No Favorites" },
                               );
                               return;
                             }
@@ -425,8 +423,12 @@ ${
         actions={
           <ActionPanel>
             <Action.OpenInBrowser title="Open in Browser" url={url} />
-            <Action.CopyToClipboard title="Copy URL" content={url} />
-            <Action.CopyToClipboard title="Copy Ioc" content={ioc} />
+            <Action.CopyToClipboard title="Copy Search URL" content={url} />
+            <Action.CopyToClipboard
+              // eslint-disable-next-line @raycast/prefer-title-case
+              title="Copy IOC"
+              content={ioc}
+            />
           </ActionPanel>
         }
       />

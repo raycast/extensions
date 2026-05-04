@@ -1,62 +1,15 @@
-## OSINT Toolkit - Git Ignore
 
-# --------------------
-# OS / System Files
-# --------------------
-.DS_Store
-Thumbs.db
-desktop.ini
 
-# --------------------
-# Node / Build files
-# --------------------
-node_modules/
-dist/
-build/
-out/
-.cache/
-*.tsbuildinfo
 
-# --------------------
-# Logs
-# --------------------
-*.log
-logs/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# --------------------
-# Environment & Secrets
-# --------------------
-.env
-.env.*
-.env.local
-raycast-env.d.ts
-*.local
-
-# --------------------
-# Editor / IDE
-# --------------------
-.vscode/
-.vscode/*
-.vscode/mcp.json
-.idea/
-*.sublime-workspace
-
-# --------------------
-# Codacy & CI
-# --------------------
+# Ignore Codacy artifacts (generated locally)
 .codacy/
 .codacy/logs/
-.github/instructions/codacy.instructions.md
+.codacy/cli.sh
+.github*
 
-# --------------------
-# Other temp files and artifacts
-# --------------------
-*.tmp
-*.swp
-*.swo
-*.log.*
-
+# Node / Raycast
+node_modules/
+dist/
+*.log
+*.backup
+osint-toolkit/

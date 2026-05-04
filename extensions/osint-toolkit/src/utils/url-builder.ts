@@ -5,11 +5,6 @@
  */
 
 import { IOCType } from "../types";
-import { sha256 } from "./ioc-detection";
-
-function encodeKeywordSearch(keyword: string, value: string): string {
-  return encodeURIComponent(`${keyword}:${value}`);
-}
 
 /**
  * Build search URL for a given OSINT source and IOC
@@ -58,11 +53,12 @@ export async function buildSearchURL(
     // URLScan.io
     case "urlscan":
       if (iocType === "url") {
-        return `https://urlscan.io/search/#${encodedIOC}`;
+        const escaped = ioc.replace(/([+\-=&&||><!(){}[\]^"~*?:/\\])/g, "\\$1");
+        return `https://urlscan.io/search/?q=page.url.keyword:${encodeURIComponent(escaped)}`;
       } else if (iocType === "domain") {
-        return `https://urlscan.io/search/#page.domain:${encodedIOC}`;
+        return `https://urlscan.io/search/?q=page.domain:${encodedIOC}`;
       }
-      return `https://urlscan.io/search/#${encodedIOC}`;
+      return `https://urlscan.io/search/?q=${encodedIOC}`;
 
     // WebCheck
     case "webcheck":
@@ -107,19 +103,6 @@ export async function buildSearchURL(
     case "malwarebazaar":
       return `https://bazaar.abuse.ch/browse.php?search=${encodedIOC}`;
 
-    // ThreatFox
-    case "threatfox":
-      if (iocType === "ip" || iocType === "ipv6") {
-        return `https://threatfox.abuse.ch/browse/#${encodeKeywordSearch("ip", ioc)}`;
-      } else if (iocType === "domain") {
-        return `https://threatfox.abuse.ch/browse/#${encodeKeywordSearch("domain", ioc)}`;
-      } else if (iocType === "hash") {
-        return `https://threatfox.abuse.ch/browse/#${encodeKeywordSearch("hash", ioc)}`;
-      } else if (iocType === "url") {
-        return `https://threatfox.abuse.ch/browse/#${encodeKeywordSearch("url", ioc)}`;
-      }
-      return `https://threatfox.abuse.ch/browse/#${encodeURIComponent(ioc)}`;
-
     // threat.rip
     case "threatrip":
       return `https://threat.rip/search?q=${encodeURIComponent(`hash:${ioc}`)}`;
@@ -138,10 +121,8 @@ export async function buildSearchURL(
       return `https://exchange.xforce.ibmcloud.com/`;
 
     // Pulsedive
-    case "pulsedive": {
-      const base64IOC = Buffer.from(ioc).toString("base64");
-      return `https://pulsedive.com/indicator/?ioc=${base64IOC}`;
-    }
+    case "pulsedive":
+      return `https://pulsedive.com/explore.php?q=${encodeURIComponent(`ioc=${ioc}`)}`;
 
     // Kaspersky OpenTIP
     case "opentip":
@@ -183,27 +164,14 @@ async function buildVirusTotalURL(
     case "hash":
       return `https://www.virustotal.com/gui/file/${encodedIOC}`;
     case "url":
-      // For URLs, we need to compute SHA-256 hash
       try {
-        // Normalize URL like VirusTotal does
-        let normalizedUrl = ioc;
-        try {
-          const urlObj = new URL(ioc);
-          // Add trailing slash if there's no path
-          if (urlObj.pathname === "") {
-            urlObj.pathname = "/";
-          }
-          normalizedUrl = urlObj.toString();
-        } catch {
-          // If URL parsing fails, try adding trailing slash if it ends with domain
-          if (!ioc.includes("/", ioc.indexOf("://") + 3)) {
-            normalizedUrl = ioc + "/";
-          }
-        }
-        const urlHash = await sha256(normalizedUrl);
-        return `https://www.virustotal.com/gui/url/${urlHash}`;
+        const base64url = Buffer.from(ioc)
+          .toString("base64")
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
+        return `https://www.virustotal.com/gui/url/${base64url}`;
       } catch {
-        // Fallback to search if hash computation fails
         return `https://www.virustotal.com/gui/search/${encodedIOC}`;
       }
     default:
