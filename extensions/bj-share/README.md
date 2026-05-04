@@ -11,7 +11,7 @@ Before downloading torrents, configure where you want the `.torrent` files to be
 * Press `Cmd + option + ,` to open the extension preferences.
 * Use the directory picker to select your preferred **Download Directory** (e.g., `~/Downloads`).
 
-![alt text](metadata/bj-share-1.png)
+![alt text](assets/bj-share-1.png)
 
 ### 2. Register RSS Feeds
 You can add multiple RSS feed URLs using the dynamic feed manager.
@@ -23,7 +23,7 @@ You can add multiple RSS feed URLs using the dynamic feed manager.
 * Press `Cmd + Enter` to save your feeds.
 * The manager includes URL validation to ensure your feeds are correctly formatted.
 
-![alt text](metadata/bj-share-2.png)
+![alt text](assets/bj-share-2.png)
 
 ## 🚀 Usage
 
@@ -35,7 +35,7 @@ Once your feeds are configured, open the **Search Torrents** command to view the
 * **Detailed Metadata:** The list displays real-time statistics including seeders, leechers, file size, release tags (e.g., 4K, 1080p, x265, HEVC), and freeleech status.
 * **Release Dates:** Dates are formatted clearly for better readability.
 
-![alt text](metadata/bj-share-3.png)
+![alt text](assets/bj-share-3.png)
 
 ### Available Actions
 Select any torrent from the list and press `Cmd + K` to reveal the actions menu. You can also trigger these actions directly using the following shortcuts:
