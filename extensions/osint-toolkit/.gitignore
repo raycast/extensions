@@ -1,0 +1,15 @@
+
+
+
+# Ignore Codacy artifacts (generated locally)
+.codacy/
+.codacy/logs/
+.codacy/cli.sh
+.github*
+
+# Node / Raycast
+node_modules/
+dist/
+*.log
+*.backup
+osint-toolkit/
