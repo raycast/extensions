@@ -9,7 +9,7 @@ import {
   showToast,
 } from "@raycast/api";
 
-export const API_BASE_URL = "https://devtest-api.notaday.com";
+export const API_BASE_URL = "https://api.notaday.com";
 
 export type Entry = {
   id: string;
