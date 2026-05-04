@@ -37,6 +37,10 @@ function EntriesList({ apiToken }: { apiToken: string }) {
     initialData: [],
     keepPreviousData: true,
     onError(error) {
+      if (error instanceof ApiError && error.status === 401) {
+        return;
+      }
+
       showToast({
         style: Toast.Style.Failure,
         title: "Could not load entries",

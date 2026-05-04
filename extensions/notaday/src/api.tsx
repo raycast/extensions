@@ -11,10 +11,6 @@ import {
 
 export const API_BASE_URL = "https://devtest-api.notaday.com";
 
-type Preferences = {
-  apiToken?: string;
-};
-
 export type Entry = {
   id: string;
   title: string;
@@ -81,7 +77,7 @@ export class ApiError extends Error {
 
 export function getApiToken() {
   const { apiToken } = getPreferenceValues<Preferences>();
-  return apiToken?.trim();
+  return apiToken.trim();
 }
 
 export function MissingApiToken() {
