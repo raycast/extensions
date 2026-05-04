@@ -7,7 +7,7 @@ spawn {*}$argv
 expect {
     -re "(?i)password" {
         send "$password\r"
-        exp_continue
+        expect eof
     }
     eof
 }

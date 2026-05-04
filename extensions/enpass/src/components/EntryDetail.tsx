@@ -112,6 +112,10 @@ function getVisibleFields(entry: EnpassEntry): VisibleField[] {
   return fields;
 }
 
+function isDedicatedCopyField(field: VisibleField): boolean {
+  return ["Username / Email", "Password", "URL"].includes(field.title);
+}
+
 export function EntryDetail({ entry, pin }: EntryDetailProps) {
   const [detail, setDetail] = useState<EnpassEntry>(entry);
   const [isLoading, setIsLoading] = useState(true);
@@ -138,6 +142,10 @@ export function EntryDetail({ entry, pin }: EntryDetailProps) {
   const login = getDisplayLogin(detail);
   const url = getEntryUrl(detail);
   const visibleFields = useMemo(() => getVisibleFields(detail), [detail]);
+  const additionalCopyFields = useMemo(
+    () => visibleFields.filter((field) => !isDedicatedCopyField(field)),
+    [visibleFields],
+  );
 
   return (
     <Form
@@ -193,7 +201,7 @@ export function EntryDetail({ entry, pin }: EntryDetailProps) {
                 content={url}
               />
             ) : null}
-            {visibleFields.map((field) => (
+            {additionalCopyFields.map((field) => (
               <Action.CopyToClipboard
                 key={`copy-${field.id}`}
                 title={`Copy ${field.title}`}

@@ -45,14 +45,7 @@ async function runCliCommand(
   password?: string,
 ): Promise<string> {
   if (!password) {
-    const result = await execa(cliPath, args, {
-      env: {
-        ENPASS_VAULT: getVaultPath(
-          getPreferenceValues<Preferences>().vaultPath,
-        ),
-      },
-      reject: false,
-    });
+    const result = await execa(cliPath, args, { reject: false });
 
     if (result.exitCode !== 0) {
       throw new Error(
@@ -72,9 +65,6 @@ async function runCliCommand(
     {
       env: {
         ENPASS_MASTER_PASSWORD: password,
-        ENPASS_VAULT: getVaultPath(
-          getPreferenceValues<Preferences>().vaultPath,
-        ),
       },
       reject: false,
     },
