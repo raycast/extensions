@@ -1,5 +1,11 @@
 # Ente Auth Changelog
 
+## [Fixed Ente Auth import] - {PR_MERGE_DATE}
+
+- Fixed parsing of Ente exports with bare issuer parameters
+- Handled secrets containing whitespace, dashes, or plus signs
+- Improved error logging for import failures
+
 ## [Fix spaces in export path] - 2026-03-09
 
 - Fixed issue with spaces in export path causing export to fail
