@@ -16,13 +16,18 @@ export function useSearchTorrents() {
 
   useEffect(() => {
     async function loadFeeds() {
-      const storedData = await LocalStorage.getItem<string>(STORAGE_KEY_FEEDS);
-      if (storedData) {
-        const parsedFeeds: Feed[] = JSON.parse(storedData);
-        setFeeds(parsedFeeds);
-        if (parsedFeeds.length > 0) setActiveFeedUrl(parsedFeeds[0].url);
+      try {
+        const storedData = await LocalStorage.getItem<string>(STORAGE_KEY_FEEDS);
+        if (storedData) {
+          const parsedFeeds: Feed[] = JSON.parse(storedData);
+          setFeeds(parsedFeeds);
+          if (parsedFeeds.length > 0) setActiveFeedUrl(parsedFeeds[0].url);
+        }
+      } catch {
+        showToast({ style: Toast.Style.Failure, title: "Failed to load feeds" });
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     }
     loadFeeds();
   }, []);
