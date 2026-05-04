@@ -101,7 +101,7 @@ export default function UnreadUpdates() {
     );
   }, []);
 
-  const { isLoading, revalidate } = usePromise(async () => {
+  const { isLoading, revalidate, error } = usePromise(async () => {
     const [fetchedPrs, fetchedSeen] = await Promise.all([
       fetchPRsWithActivity(),
       loadSeen(),
@@ -120,6 +120,16 @@ export default function UnreadUpdates() {
       return updated;
     });
   });
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to fetch PR data",
+        message: error.message,
+      });
+    }
+  }, [error]);
 
   const activePrs = demoMode ? getDemoPRs() : displayPrs;
   const activeSeenMap = demoMode ? demoSeenMap : seenMap;

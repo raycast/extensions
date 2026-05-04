@@ -1,6 +1,6 @@
 # GitHub PR Tracker
 
-A [Raycast](https://raycast.com) extension that tracks unread pull request activity across your GitHub Enterprise repositories. Never miss a review, comment, or push again.
+A [Raycast](https://raycast.com) extension that tracks unread pull request activity across your GitHub (Enterprise) repositories. Never miss a review, comment, or push again.
 
 ## Features
 
@@ -19,7 +19,7 @@ A [Raycast](https://raycast.com) extension that tracks unread pull request activ
 
 | Preference | Description | Required |
 |---|---|---|
-| **GH Host** | Your GitHub Enterprise hostname (e.g. `github.example.com`) | ✅ |
+| **GH Host** | Your GitHub (Enterprise) hostname (e.g. `github.example.com`) | ✅ |
 | **Personal Access Token** | A PAT with `repo` read access | ✅ |
 | **Repositories** | Comma-separated `owner/repo` list | ✅ |
 | **My GitHub Login** | Your username — used to filter out your own activity | Optional |

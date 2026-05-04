@@ -204,7 +204,7 @@ const REVIEW_STATE_LABEL: Record<string, string> = {
 function formatDate(iso: string): string {
   const d = new Date(iso);
   if (isNaN(d.getTime())) return "unknown";
-  return d.toLocaleString("en-US", {
+  return d.toLocaleString(undefined, {
     month: "short",
     day: "numeric",
     hour: "2-digit",

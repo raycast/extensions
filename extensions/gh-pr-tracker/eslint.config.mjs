@@ -1,3 +1,4 @@
+import { defineConfig } from "eslint/config";
 import { FlatCompat } from "@eslint/eslintrc";
 import js from "@eslint/js";
 import { dirname } from "path";
@@ -10,9 +11,9 @@ const compat = new FlatCompat({
   recommendedConfig: js.configs.recommended,
 });
 
-export default [
+export default defineConfig([
   ...compat.extends("@raycast"),
   {
     ignores: ["node_modules/", "assets/"],
   },
-];
+]);
