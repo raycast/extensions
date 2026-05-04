@@ -1,9 +1,8 @@
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useSQL } from "@raycast/utils";
 import { Project, Todo } from "@opencode-ai/sdk/v2/client";
 import { getClient, OpencodeNotInstalledError } from "./clients";
-
-export { OpencodeNotInstalledError };
 import {
+  DB_PATH,
   getSessionCountsByProject,
   getRecentSessions,
   getProjectSessions,
@@ -13,6 +12,7 @@ import {
   OpenSession,
 } from "./db";
 
+export { OpencodeNotInstalledError };
 export type { Project, Todo, DbSession, OpenSession };
 
 export type MessageWithParts = {
@@ -30,34 +30,24 @@ export type MessageWithParts = {
 };
 
 export function useProjects() {
-  return useCachedPromise(async () => {
-    const client = await getClient();
-    const result = await client.project.list();
-    return result.data ?? [];
-  });
+  return useSQL<{ id: string; worktree: string; name: string }>(
+    DB_PATH,
+    "SELECT id, worktree, COALESCE(name, '') as name FROM project ORDER BY time_updated DESC",
+  );
 }
 
-/**
- * Session counts per project from SQLite (cross-project, not scoped).
- */
 export function useSessionCounts() {
   return useCachedPromise(async () => {
     return getSessionCountsByProject();
   });
 }
 
-/**
- * Recent sessions across ALL projects from SQLite.
- */
 export function useAllSessions() {
   return useCachedPromise(async () => {
     return getRecentSessions(100);
   });
 }
 
-/**
- * Sessions for a specific project from SQLite.
- */
 export function useProjectSessions(projectId: string) {
   return useCachedPromise(
     async (id: string) => {
@@ -67,9 +57,6 @@ export function useProjectSessions(projectId: string) {
   );
 }
 
-/**
- * Search sessions by title + message content (merged, deduplicated).
- */
 export function useContentSearch(searchQuery: string) {
   return useCachedPromise(
     async (q: string) => {
@@ -80,9 +67,6 @@ export function useContentSearch(searchQuery: string) {
   );
 }
 
-/**
- * Sessions currently open in an OpenCode TUI, with liveness info.
- */
 export function useOpenSessions() {
   return useCachedPromise(async () => {
     return getOpenSessions();

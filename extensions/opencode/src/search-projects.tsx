@@ -3,7 +3,6 @@ import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import {
   DbSession,
   OpenSession,
-  Project,
   useOpenSessions,
   useProjectSessions,
   useProjects,
@@ -12,7 +11,13 @@ import {
 import { openOpenCode, resumeSession } from "./lib/terminal";
 import { formatTime, getLiveness, livenessTag } from "./search-sessions";
 
-function projectName(project: Project): string {
+interface ProjectRow {
+  id: string;
+  worktree: string;
+  name: string;
+}
+
+function projectName(project: ProjectRow): string {
   if (project.name) return project.name;
   const parts = project.worktree.replace(/\/$/, "").split("/");
   return parts[parts.length - 1] || project.worktree;
@@ -38,7 +43,7 @@ function groupByDirectory(sessions: DbSession[]): Array<{ folder: string; sessio
     );
 }
 
-function ProjectSessions({ project }: { project: Project }) {
+function ProjectSessions({ project }: { project: ProjectRow }) {
   const [folder, setFolder] = useState<string>("all");
   const { data: projectSessions = [], isLoading } = useProjectSessions(project.id);
   const { data: rawOpen } = useOpenSessions();
@@ -108,20 +113,14 @@ function ProjectSessions({ project }: { project: Project }) {
 }
 
 export default function SearchProjects() {
-  const { data: projects = [], isLoading: projectsLoading, error: projectsError } = useProjects();
+  const { data: projects = [], isLoading: projectsLoading, permissionView } = useProjects();
   const { data: sessionCounts = {} } = useSessionCounts();
 
-  const notInstalled = projectsError?.message?.includes("not installed");
+  if (permissionView) return permissionView;
 
   return (
     <List isLoading={projectsLoading} searchBarPlaceholder="Search projects...">
-      {notInstalled ? (
-        <List.EmptyView
-          title="OpenCode Not Installed"
-          description="Install it with: brew install anomalyco/tap/opencode"
-          icon={Icon.Warning}
-        />
-      ) : projects.length === 0 && !projectsLoading ? (
+      {projects.length === 0 && !projectsLoading ? (
         <List.EmptyView
           title="No Projects Found"
           description="Start OpenCode in a terminal to see projects here."

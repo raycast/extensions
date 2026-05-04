@@ -1,13 +1,12 @@
 import { execSync } from "child_process";
+import { executeSQL } from "@raycast/utils";
 import { homedir } from "os";
 import { join } from "path";
 
-const DB_PATH = join(homedir(), ".local", "share", "opencode", "opencode.db");
+export const DB_PATH = join(homedir(), ".local", "share", "opencode", "opencode.db");
 
-/**
- * Find session IDs currently open in OpenCode TUI instances
- * by parsing process arguments.
- */
+// --- Types ---
+
 export type SessionLiveness = "active" | "open" | "closed";
 
 export interface OpenSession {
@@ -15,112 +14,10 @@ export interface OpenSession {
   liveness: SessionLiveness;
 }
 
-/**
- * Detect which sessions are open in a terminal and whether they're actively working.
- * - "active": open in terminal AND (updated in last 60s OR has in_progress todos)
- * - "open": open in terminal but idle
- * - Sessions not in the result are closed.
- */
-function escSql(str: string): string {
-  return str.replace(/'/g, "''");
-}
-
-let openSessionsCache: { data: OpenSession[]; timestamp: number } | null = null;
-const OPEN_SESSIONS_TTL = 5_000;
-
-export function getOpenSessions(): OpenSession[] {
-  if (openSessionsCache && Date.now() - openSessionsCache.timestamp < OPEN_SESSIONS_TTL) {
-    return openSessionsCache.data;
-  }
-  // 1. Find session IDs from process list
-  const processIds: string[] = [];
-  try {
-    const output = execSync("ps aux", { encoding: "utf-8" });
-    for (const line of output.split("\n")) {
-      if (!line.includes("opencode")) continue;
-      const match = line.match(/(?:-s|--session)[=\s]+(\S+)/);
-      if (match && !processIds.includes(match[1])) {
-        processIds.push(match[1]);
-      }
-    }
-  } catch {
-    return [];
-  }
-
-  if (processIds.length === 0) return [];
-
-  // 2. Check which are recently active (updated in last 60s) or have in_progress todos
-  // Uses query() which passes SQL via stdin to avoid shell injection
-  const cutoff = Date.now() - 60_000;
-  const inClause = processIds.map((id) => `'${escSql(id)}'`).join(",");
-
-  const recentOutput = queryRaw(`SELECT id FROM session WHERE id IN (${inClause}) AND time_updated > ${cutoff}`);
-  const recentlyUpdated = new Set<string>(recentOutput.trim().split("\n").filter(Boolean));
-
-  const todoOutput = queryRaw(
-    `SELECT DISTINCT session_id FROM todo WHERE session_id IN (${inClause}) AND status = 'in_progress'`,
-  );
-  const hasTodos = new Set<string>(todoOutput.trim().split("\n").filter(Boolean));
-
-  const result = processIds.map((id) => ({
-    id,
-    liveness: (recentlyUpdated.has(id) || hasTodos.has(id) ? "active" : "open") as SessionLiveness,
-  }));
-  openSessionsCache = { data: result, timestamp: Date.now() };
-  return result;
-}
-
 export interface DbProject {
   id: string;
   worktree: string;
   name: string;
-}
-
-export function getProjects(): DbProject[] {
-  return queryJson<{ id: string; worktree: string; name: string }>(
-    "SELECT id, worktree, COALESCE(name, '') as name FROM project ORDER BY time_updated DESC",
-  ).map((row) => ({ id: row.id, worktree: row.worktree, name: row.name }));
-}
-
-function queryRaw(sql: string): string {
-  try {
-    return execSync(`sqlite3 "${DB_PATH}"`, {
-      encoding: "utf-8",
-      input: sql,
-      timeout: 10_000,
-    });
-  } catch {
-    return "";
-  }
-}
-
-function queryJson<T = Record<string, unknown>>(sql: string): T[] {
-  try {
-    const output = execSync(`sqlite3 -json "${DB_PATH}"`, {
-      encoding: "utf-8",
-      input: sql,
-      timeout: 10_000,
-    });
-    if (!output.trim()) return [];
-    return JSON.parse(output) as T[];
-  } catch {
-    return [];
-  }
-}
-
-/**
- * Count sessions per project directly from the shared SQLite database.
- * The API scopes sessions to the current project, but the DB has all of them.
- */
-export function getSessionCountsByProject(): Record<string, number> {
-  const rows = queryJson<{ project_id: string; cnt: number }>(
-    "SELECT project_id, COUNT(*) as cnt FROM session WHERE time_archived IS NULL AND parent_id IS NULL GROUP BY project_id",
-  );
-  const counts: Record<string, number> = {};
-  for (const row of rows) {
-    counts[row.project_id] = row.cnt;
-  }
-  return counts;
 }
 
 export interface DbSession {
@@ -132,9 +29,6 @@ export interface DbSession {
   timeUpdated: number;
 }
 
-/**
- * List recent sessions across ALL projects from the SQLite database.
- */
 interface SessionRow {
   id: string;
   project_id: string;
@@ -155,36 +49,55 @@ function rowToSession(row: SessionRow): DbSession {
   };
 }
 
-export function getRecentSessions(limit = 100): DbSession[] {
-  return queryJson<SessionRow>(
+function escLike(str: string): string {
+  return str.replace(/'/g, "''").replace(/%/g, "\\%").replace(/_/g, "\\_");
+}
+
+// --- Queries (async, using executeSQL) ---
+
+export async function getSessionCountsByProject(): Promise<Record<string, number>> {
+  const rows = await executeSQL<{ project_id: string; cnt: number }>(
+    DB_PATH,
+    "SELECT project_id, COUNT(*) as cnt FROM session WHERE time_archived IS NULL AND parent_id IS NULL GROUP BY project_id",
+  );
+  const counts: Record<string, number> = {};
+  for (const row of rows) {
+    counts[row.project_id] = row.cnt;
+  }
+  return counts;
+}
+
+export async function getRecentSessions(limit = 100): Promise<DbSession[]> {
+  const rows = await executeSQL<SessionRow>(
+    DB_PATH,
     `SELECT id, project_id, title, directory, time_created, time_updated FROM session WHERE time_archived IS NULL AND parent_id IS NULL ORDER BY time_updated DESC LIMIT ${limit}`,
-  ).map(rowToSession);
+  );
+  return rows.map(rowToSession);
 }
 
-/**
- * List sessions for a specific project.
- */
-export function getProjectSessions(projectId: string, limit = 200): DbSession[] {
+export async function getProjectSessions(projectId: string, limit = 200): Promise<DbSession[]> {
   const escaped = projectId.replace(/'/g, "''");
-  return queryJson<SessionRow>(
+  const rows = await executeSQL<SessionRow>(
+    DB_PATH,
     `SELECT id, project_id, title, directory, time_created, time_updated FROM session WHERE time_archived IS NULL AND parent_id IS NULL AND project_id = '${escaped}' ORDER BY time_updated DESC LIMIT ${limit}`,
-  ).map(rowToSession);
+  );
+  return rows.map(rowToSession);
 }
 
-function querySessionRows(sql: string): DbSession[] {
-  return queryJson<SessionRow>(sql).map(rowToSession);
+async function querySessionRows(sql: string): Promise<DbSession[]> {
+  const rows = await executeSQL<SessionRow>(DB_PATH, sql);
+  return rows.map(rowToSession);
 }
 
 /**
- * Search sessions using multi-word strategy inspired by recover-opencode-conversation skill:
- * 1. Exact phrase in title (best match)
- * 2. Exact phrase in content
- * 3. Individual words in title
- * 4. Individual words in content
- * Results are scored by match count, deduplicated, and sorted by score then recency.
+ * Search sessions using multi-word strategy:
+ * 1. Exact phrase in title (score 10)
+ * 2. Exact phrase in content (score 5)
+ * 3. Individual words in title (score 3 each)
+ * 4. Individual words in content (score 1 each)
  */
-export function searchSessions(keyword: string, limit = 30): DbSession[] {
-  const escaped = keyword.replace(/'/g, "''").replace(/%/g, "\\%").replace(/_/g, "\\_").toLowerCase().trim();
+export async function searchSessions(keyword: string, limit = 30): Promise<DbSession[]> {
+  const escaped = escLike(keyword.toLowerCase().trim());
   if (!escaped) return [];
 
   const words = escaped.split(/\s+/).filter((w) => w.length >= 2);
@@ -208,7 +121,7 @@ export function searchSessions(keyword: string, limit = 30): DbSession[] {
 
   // 1. Exact phrase in title (score: 10)
   addResults(
-    querySessionRows(
+    await querySessionRows(
       `${base} AND lower(title) LIKE '%${escaped}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
     ),
     10,
@@ -216,7 +129,7 @@ export function searchSessions(keyword: string, limit = 30): DbSession[] {
 
   // 2. Exact phrase in content (score: 5)
   addResults(
-    querySessionRows(
+    await querySessionRows(
       `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${escaped}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${escaped}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
     ),
     5,
@@ -226,13 +139,13 @@ export function searchSessions(keyword: string, limit = 30): DbSession[] {
   if (words.length > 1) {
     for (const word of words) {
       addResults(
-        querySessionRows(
+        await querySessionRows(
           `${base} AND lower(title) LIKE '%${word}%' ESCAPE '\\' ORDER BY time_updated DESC LIMIT ${limit}`,
         ),
         3,
       );
       addResults(
-        querySessionRows(
+        await querySessionRows(
           `${contentBase} AND (lower(json_extract(p.data, '$.text')) LIKE '%${word}%' ESCAPE '\\' OR lower(json_extract(p.data, '$.input')) LIKE '%${word}%' ESCAPE '\\') ORDER BY s.time_updated DESC LIMIT ${limit}`,
         ),
         1,
@@ -244,4 +157,67 @@ export function searchSessions(keyword: string, limit = 30): DbSession[] {
     .sort((a, b) => b.score - a.score || b.session.timeUpdated - a.session.timeUpdated)
     .slice(0, limit)
     .map((e) => e.session);
+}
+
+// --- Open sessions (sync, needs ps aux) ---
+
+let openSessionsCache: { data: OpenSession[]; timestamp: number } | null = null;
+const OPEN_SESSIONS_TTL = 5_000;
+
+export function getOpenSessions(): OpenSession[] {
+  if (openSessionsCache && Date.now() - openSessionsCache.timestamp < OPEN_SESSIONS_TTL) {
+    return openSessionsCache.data;
+  }
+
+  const processIds: string[] = [];
+  try {
+    const output = execSync("ps aux", { encoding: "utf-8" });
+    for (const line of output.split("\n")) {
+      if (!line.includes("opencode")) continue;
+      const match = line.match(/(?:-s|--session)[=\s]+(\S+)/);
+      if (match && !processIds.includes(match[1])) {
+        processIds.push(match[1]);
+      }
+    }
+  } catch {
+    return [];
+  }
+
+  if (processIds.length === 0) return [];
+
+  // Check liveness via executeSQL is async, so we keep sync sqlite3 for this one
+  const cutoff = Date.now() - 60_000;
+  const escSql = (s: string) => s.replace(/'/g, "''");
+  const inClause = processIds.map((id) => `'${escSql(id)}'`).join(",");
+
+  let recentOutput = "";
+  let todoOutput = "";
+  try {
+    recentOutput = execSync(`sqlite3 "${DB_PATH}"`, {
+      encoding: "utf-8",
+      input: `SELECT id FROM session WHERE id IN (${inClause}) AND time_updated > ${cutoff}`,
+      timeout: 5_000,
+    });
+  } catch {
+    /* ignore */
+  }
+  try {
+    todoOutput = execSync(`sqlite3 "${DB_PATH}"`, {
+      encoding: "utf-8",
+      input: `SELECT DISTINCT session_id FROM todo WHERE session_id IN (${inClause}) AND status = 'in_progress'`,
+      timeout: 5_000,
+    });
+  } catch {
+    /* ignore */
+  }
+
+  const recentlyUpdated = new Set<string>(recentOutput.trim().split("\n").filter(Boolean));
+  const hasTodos = new Set<string>(todoOutput.trim().split("\n").filter(Boolean));
+
+  const result = processIds.map((id) => ({
+    id,
+    liveness: (recentlyUpdated.has(id) || hasTodos.has(id) ? "active" : "open") as SessionLiveness,
+  }));
+  openSessionsCache = { data: result, timestamp: Date.now() };
+  return result;
 }
