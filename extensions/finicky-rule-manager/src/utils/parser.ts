@@ -245,6 +245,43 @@ function splitTopLevelObjects(arrayContent: string): string[] {
   return blocks;
 }
 
+/**
+ * Extract quoted string literals from the inside of an array like
+ *   "a", "b[0-9]", 'c'
+ * Respects escape sequences and matched quote types so patterns containing
+ * commas or ']' characters are preserved verbatim.
+ */
+function splitTopLevelStrings(arrayContent: string): string[] {
+  const out: string[] = [];
+  let i = 0;
+  while (i < arrayContent.length) {
+    const c = arrayContent[i];
+    if (c === '"' || c === "'") {
+      const quote = c;
+      let value = "";
+      i++; // skip opening quote
+      while (i < arrayContent.length) {
+        const ch = arrayContent[i];
+        if (ch === "\\" && i + 1 < arrayContent.length) {
+          value += arrayContent[i + 1];
+          i += 2;
+          continue;
+        }
+        if (ch === quote) {
+          i++; // skip closing quote
+          break;
+        }
+        value += ch;
+        i++;
+      }
+      out.push(value);
+      continue;
+    }
+    i++;
+  }
+  return out;
+}
+
 function parseHandlerBlock(block: string): Rule | null {
   try {
     const nameMatch = block.match(/\/\/\s*(?:Rule:\s*)?([^\n]+)/);
@@ -256,28 +293,27 @@ function parseHandlerBlock(block: string): Rule | null {
     }
     const browser = browserMatch[1];
 
-    // match: [ "a", "b" ]
-    const matchArrayMatch = block.match(/match\s*:\s*\[([\s\S]*?)\]/);
-    if (matchArrayMatch) {
-      const patternsContent = matchArrayMatch[1];
-      const patterns = patternsContent
-        .split(",")
-        .map((p) => {
-          const trimmed = p.trim();
-          const m = trimmed.match(/["']([^"']+)["']/);
-          return m ? m[1] : null;
-        })
-        .filter((p): p is string => p !== null);
+    // match: [ "a", "b" ] — use bracket-aware scanning so patterns containing
+    // ']' (e.g. "*://example.com/path[0-9]*") aren't truncated.
+    const matchKeyRegex = /\bmatch\s*:\s*\[/;
+    const matchKeyResult = matchKeyRegex.exec(block);
+    if (matchKeyResult) {
+      const openBracketIndex = block.indexOf("[", matchKeyResult.index);
+      const closeBracketIndex = findMatchingBracket(block, openBracketIndex, "[", "]");
+      if (openBracketIndex !== -1 && closeBracketIndex !== -1) {
+        const patternsContent = block.slice(openBracketIndex + 1, closeBracketIndex);
+        const patterns = splitTopLevelStrings(patternsContent);
 
-      if (patterns.length > 0) {
-        return {
-          id: uuid(),
-          name,
-          enabled: true,
-          matchType: "wildcards",
-          patterns,
-          browser,
-        };
+        if (patterns.length > 0) {
+          return {
+            id: uuid(),
+            name,
+            enabled: true,
+            matchType: "wildcards",
+            patterns,
+            browser,
+          };
+        }
       }
     }
 

@@ -165,7 +165,7 @@ function RuleForm(props: { title: string; initial?: Rule; onSubmit: (rule: Rule)
                 id: initial?.id ?? uuid(),
                 name: String(values.name ?? "").trim() || "Untitled Rule",
                 enabled: Boolean(values.enabled),
-                matchType: values.matchType as Rule["matchType"],
+                matchType: inputMode === "guided" ? "wildcards" : (values.matchType as Rule["matchType"]),
                 patterns,
                 browser: values.browser as string,
               };
@@ -192,10 +192,12 @@ function RuleForm(props: { title: string; initial?: Rule; onSubmit: (rule: Rule)
       <Form.TextField id="name" title="Name" defaultValue={initial?.name} />
       <Form.Checkbox id="enabled" label="Enabled" defaultValue={initial?.enabled ?? true} />
 
-      <Form.Dropdown id="matchType" title="Match Type" defaultValue={initial?.matchType ?? "wildcards"}>
-        <Form.Dropdown.Item value="wildcards" title="Wildcards (Finicky match array)" />
-        <Form.Dropdown.Item value="regex" title="Regex (tested against full urlString)" />
-      </Form.Dropdown>
+      {inputMode === "manual" && (
+        <Form.Dropdown id="matchType" title="Match Type" defaultValue={initial?.matchType ?? "wildcards"}>
+          <Form.Dropdown.Item value="wildcards" title="Wildcards (Finicky match array)" />
+          <Form.Dropdown.Item value="regex" title="Regex (tested against full urlString)" />
+        </Form.Dropdown>
+      )}
 
       <Form.Separator />
 

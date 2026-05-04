@@ -7,5 +7,4 @@ export type Rule = {
   matchType: MatchType;
   patterns: string[];
   browser: string;
-  openInBackground?: boolean;
 };
