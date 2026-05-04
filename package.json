@@ -9,7 +9,8 @@
     "macOS"
   ],
   "categories": [
-    "Productivity"
+    "Productivity",
+    "Communication"
   ],
   "keywords": [
     "slack",
@@ -45,7 +46,7 @@
     {
       "name": "slackBotToken",
       "title": "Slack Bot Token",
-      "description": "Bot token (xoxb-...) with chat:write scope.",
+      "description": "Bot token (xoxb-...) with chat:write, channels:read, and groups:read scopes.",
       "type": "password",
       "required": true
     },

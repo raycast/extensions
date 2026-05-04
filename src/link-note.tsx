@@ -3,7 +3,7 @@ import type { LaunchProps } from "@raycast/api";
 import { useLocalStorage, usePromise } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { getActiveTab } from "./lib/browser";
-import { resolveChannelIds } from "./lib/channels";
+import { CHANNEL_ID_PATTERN, resolveChannelIds } from "./lib/channels";
 import { buildQuicklink, type ChannelPresetContext } from "./lib/deeplink";
 import { useChannels } from "./lib/useChannels";
 import { loadPreferences } from "./lib/preferences";
@@ -64,7 +64,7 @@ export default function Command(props: LaunchProps<{ launchContext: ChannelPrese
     if (channels.length === 0) return; // loading 中は判定保留
     if (launchContextChannelIds.length >= launchContextEntries.length) return;
 
-    const isId = (s: string) => /^[CG][A-Z0-9]{8,}$/.test(s);
+    const isId = (s: string) => CHANNEL_ID_PATTERN.test(s);
     const unknown = launchContextEntries.filter((entry) =>
       isId(entry) ? !channels.some((c) => c.id === entry) : !channels.some((c) => c.name === entry),
     );

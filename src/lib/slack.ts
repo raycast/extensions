@@ -61,7 +61,7 @@ export function buildSlackText(opts: { url: string; title: string; comment: stri
   if (trimmedComment === "") {
     result = template
       .split("\n")
-      .filter((line) => !line.includes("{comment}"))
+      .filter((line) => line.trim() !== "{comment}")
       .join("\n");
   } else {
     result = template.replace(/\{comment\}/g, escapeMrkdwn(trimmedComment));

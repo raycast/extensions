@@ -31,7 +31,7 @@ type ConversationsListResponse = {
 
 const PAGE_LIMIT = 1000;
 const MAX_PAGES = 50;
-const CHANNEL_ID_PATTERN = /^[CG][A-Z0-9]{8,}$/;
+export const CHANNEL_ID_PATTERN = /^[CG][A-Z0-9]{8,}$/;
 
 export async function fetchAllChannels(token: string): Promise<ChannelCache> {
   const collected: SlackChannel[] = [];
