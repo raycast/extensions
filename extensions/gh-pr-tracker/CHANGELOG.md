@@ -4,7 +4,7 @@ All notable changes to the **GitHub PR Tracker** Raycast extension are documente
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [1.0.0] — 2026-05-04
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 

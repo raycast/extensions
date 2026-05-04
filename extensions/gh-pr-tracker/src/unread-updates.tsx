@@ -324,14 +324,14 @@ export default function UnreadUpdates() {
                   />
                   <Action
                     title={
-                      Object.keys(collapsed).length > 0
+                      Object.values(collapsed).some(Boolean)
                         ? "Expand All"
                         : "Collapse All"
                     }
                     icon={Icon.AppWindowList}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "e" }}
                     onAction={
-                      Object.keys(collapsed).length > 0
+                      Object.values(collapsed).some(Boolean)
                         ? expandAll
                         : collapseAll
                     }
