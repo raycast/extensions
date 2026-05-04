@@ -101,6 +101,7 @@ async function openInTerminalApp(
       tell application "Terminal"
         activate
       end tell
+      delay 0.2
       tell application "System Events"
         keystroke "t" using command down
       end tell
