@@ -154,8 +154,14 @@ async function ensureBinary() {
         title: "Downloading Windows audio CLI",
         message: "Preparing audio device support...",
       });
-      if (fs.existsSync(binaryDownload)) {
-        fs.unlinkSync(binaryDownload);
+      try {
+        for (const file of fs.readdirSync(environment.supportPath)) {
+          if (/^win-audio-cli\.\d+\.download$/.test(file)) {
+            fs.unlinkSync(path.join(environment.supportPath, file));
+          }
+        }
+      } catch {
+        // Best-effort cleanup for temp files left by crashed processes.
       }
       await downloadBinary(WINDOWS_BINARY_URL, binaryDownload);
       await verifyChecksum(binaryDownload, WINDOWS_BINARY_CHECKSUM);
@@ -267,10 +273,12 @@ async function runBinary<T>(args: string[]): Promise<T> {
   return parseJson<T>(stdout);
 }
 
-async function getDefaultWindowsVolume(type: "input" | "output", deviceId: string): Promise<number | undefined> {
+async function getWindowsVolume(type: "input" | "output", deviceId: string): Promise<number | undefined> {
   try {
     const result = await runBinary<WindowsAudioVolumeResult>([
       type === "output" ? "get-output-volume" : "get-input-volume",
+      "--id",
+      deviceId,
     ]);
     if (result.type !== type || String(result.device.id) !== String(deviceId)) {
       return undefined;
@@ -347,7 +355,7 @@ export const windowsAudioAPI: PlatformAudioAPI = {
   },
 
   async getOutputDeviceVolume(deviceId: string) {
-    return getDefaultWindowsVolume("output", deviceId);
+    return getWindowsVolume("output", deviceId);
   },
 
   async setInputDeviceVolume(deviceId: string, volume: number) {
@@ -356,6 +364,6 @@ export const windowsAudioAPI: PlatformAudioAPI = {
   },
 
   async getInputDeviceVolume(deviceId: string) {
-    return getDefaultWindowsVolume("input", deviceId);
+    return getWindowsVolume("input", deviceId);
   },
 };
