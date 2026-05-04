@@ -60,7 +60,10 @@ export function useSearchTorrents() {
       } catch {
         showToast({ style: Toast.Style.Failure, title: "Connection Error" });
       } finally {
-        if (isMounted) setIsLoading(false);
+        if (isMounted) {
+          showToast({ style: Toast.Style.Success, title: "Feed updated successfully!" });
+          setIsLoading(false);
+        }
       }
     }
     fetchFeed();

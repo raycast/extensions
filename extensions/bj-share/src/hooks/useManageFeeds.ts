@@ -9,18 +9,26 @@ export function useManageFeeds() {
 
   useEffect(() => {
     async function loadFeeds() {
-      const storedFeeds = await LocalStorage.getItem<string>(STORAGE_KEY_FEEDS);
-      let parsedFeeds: Feed[] = [];
+      try {
+        const storedFeeds = await LocalStorage.getItem<string>(STORAGE_KEY_FEEDS);
+        let parsedFeeds: Feed[] = [];
 
-      if (storedFeeds) parsedFeeds = JSON.parse(storedFeeds);
+        if (storedFeeds) {
+          try {
+            parsedFeeds = JSON.parse(storedFeeds);
+          } catch (error) {
+            console.error("Failed to parse stored feeds:", error);
+          }
+        }
 
-      if (parsedFeeds.length > 0) {
-        setFeeds(parsedFeeds);
-      } else {
-        setFeeds([{ id: Date.now().toString(), name: "", url: "" }]);
+        if (parsedFeeds.length > 0) {
+          setFeeds(parsedFeeds);
+        } else {
+          setFeeds([{ id: Date.now().toString(), name: "", url: "" }]);
+        }
+      } finally {
+        setIsLoading(false);
       }
-
-      setIsLoading(false);
     }
     loadFeeds();
   }, []);
