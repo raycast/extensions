@@ -149,7 +149,6 @@ export function buildThread(
   // Find the root of the thread
   let rootId = comment.id;
   const visited = new Set<number>();
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const current = byId.get(rootId);
     if (

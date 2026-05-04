@@ -1,9 +1,13 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gh-pr-tracker",
   "title": "GitHub PR Tracker",
   "description": "Track unread PR reviews and comments from GitHub Enterprise",
   "icon": "command-icon.png",
   "author": "oslen",
+  "categories": [
+    "Developer Tools"
+  ],
   "license": "MIT",
   "version": "1.0.0",
   "commands": [
@@ -48,14 +52,19 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.83.0",
-    "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
+    "@eslint/eslintrc": "^3.1.0",
+    "@eslint/js": "^10.0.1",
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.x",
     "@types/react": "18.x",
-    "eslint": "^8.57.1",
+    "@typescript-eslint/eslint-plugin": "^8.59.1",
+    "@typescript-eslint/parser": "^8.59.1",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react": "^7.37.5",
     "prettier": "^3.3.0",
     "react": "^18.3.1",
     "typescript": "^5.5.0"

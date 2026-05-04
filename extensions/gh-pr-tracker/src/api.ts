@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 import type {
   GHPullRequest,
   GHReview,
@@ -9,13 +8,6 @@ import type {
   GHCommit,
   PRWithActivity,
 } from "./types";
-
-interface Preferences {
-  ghHost: string;
-  token: string;
-  repos: string;
-  myLogin?: string;
-}
 
 function getConfig() {
   const prefs = getPreferenceValues<Preferences>();
@@ -38,13 +30,16 @@ async function fetchAllPages<T>(
 ): Promise<T[]> {
   let results: T[] = [];
   let page = 1;
-  // eslint-disable-next-line no-constant-condition
   while (true) {
     const separator = url.includes("?") ? "&" : "?";
     const res = await fetch(`${url}${separator}per_page=100&page=${page}`, {
       headers,
     });
-    if (!res.ok) break;
+    if (!res.ok) {
+      throw new Error(
+        `GitHub API error: ${res.status} ${res.statusText} for ${url}`,
+      );
+    }
     const batch = (await res.json()) as T[];
     if (!Array.isArray(batch) || batch.length === 0) break;
     results = results.concat(batch);
