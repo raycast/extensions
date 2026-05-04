@@ -1,18 +1,15 @@
 import { useEffect, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List, confirmAlert, open } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
-import spawn from "nano-spawn";
-import { ProcessDescription } from "pm2";
+import type { ProcessDescription } from "pm2";
 import { MetaData, ProcessActions } from "./components.js";
 import {
-  checkIfNeedSetup,
   getProcessStatusColor,
   getRaycastIcon,
   isRaycastNodeProcess,
-  pm2WrapperExamplePath,
-  pm2WrapperIndexPath,
+  listPm2Processes,
+  pm2ExamplePath,
   runPm2Command,
-  setupEnv,
 } from "./utils.js";
 
 export default function Main() {
@@ -21,11 +18,7 @@ export default function Main() {
   const [list, setList] = useState<ProcessDescription[]>([]);
 
   const loadList = async () => {
-    await checkIfNeedSetup();
-    setupEnv();
-    const { stdout } = await spawn("node", [pm2WrapperIndexPath, "list"]);
-    const parsedList = JSON.parse(stdout);
-    setList(parsedList);
+    setList(await listPm2Processes());
     setIsLoading(false);
   };
 
@@ -38,7 +31,7 @@ export default function Main() {
       icon={Icon.GameController}
       title="Start Example Process"
       onAction={async () => {
-        await runPm2Command("start", { script: pm2WrapperExamplePath, name: "raycast-pm2-example" });
+        await runPm2Command("start", { script: pm2ExamplePath, name: "raycast-pm2-example" });
         loadList();
         if (
           await confirmAlert({
