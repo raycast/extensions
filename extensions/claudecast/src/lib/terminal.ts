@@ -66,7 +66,8 @@ export async function openTerminalWithCommand(
         await openInITerm(command, cwd, openIn);
         break;
       case "Warp":
-        await openInWarp(command, cwd, openIn);
+        // Warp's YAML launch config always opens a new window; openIn is N/A
+        await openInWarp(command, cwd);
         break;
       case "kitty":
         await openInKitty(command, cwd, openIn);
@@ -178,15 +179,10 @@ function escapeYamlDoubleQuoted(s: string): string {
     .replace(/\t/g, "\\t");
 }
 
-async function openInWarp(
-  command: string,
-  cwd: string,
-  // Warp's YAML launch config opens a new window; the `openIn` preference
-  // does not apply here (no reliable URL scheme for "open in current window
-  // as tab" — the previous warp://action/new_tab?command= approach was
-  // unreliable at executing the command).
-  _openIn: OpenIn,
-): Promise<void> {
+// Warp's YAML launch config opens a new window; openIn does not apply here
+// (the previous warp://action/new_tab?command= URL scheme was unreliable
+// at executing the command).
+async function openInWarp(command: string, cwd: string): Promise<void> {
   // Use dynamic launch configuration for reliable command execution
   const lcId = randomUUID();
   const lcDir = join(homedir(), ".warp", "launch_configurations");
