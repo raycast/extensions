@@ -72,6 +72,7 @@ type OpenerItem =
       name: string;
       command: string;
       terminalApp: string;
+      closeAfterCommand: boolean;
     };
 type RecentDirectories = Record<string, number>;
 type CommandFormValues = {
@@ -317,6 +318,7 @@ function buildOpeners(applications: string[], commandOpeners: CommandOpener[]): 
       name: opener.name,
       command: opener.command,
       terminalApp: opener.terminalApp,
+      closeAfterCommand: opener.closeAfterCommand,
     })),
   ];
 }
@@ -428,17 +430,17 @@ export default function Command() {
     isLoading: isLoadingRecentDirectories,
   } = useLocalStorage<RecentDirectories>(RECENT_DIRECTORIES_STORAGE_KEY, {});
   const { data, isLoading, revalidate } = usePromise(
-    async () => {
-      if (rootFolders.length === 0) {
+    async (configuredRootFolders: string[]): Promise<ScanResult> => {
+      if (configuredRootFolders.length === 0) {
         return {
           directories: [],
           warnings: ["No root folders configured."],
         };
       }
 
-      return scanDirectories(rootFolders);
+      return scanDirectories(configuredRootFolders);
     },
-    [rootFolders.join("\n")],
+    [rootFolders],
     {
       execute: !isLoadingRootFolders,
     },
@@ -451,7 +453,7 @@ export default function Command() {
   const hasConfiguredOpeners = openers.length > 0;
 
   function openRootFolderManager() {
-    push(<RootFolderManager onRefresh={revalidate} />);
+    push(<RootFolderManager onRefresh={() => revalidate()} />);
   }
 
   function openApplicationManager() {
@@ -582,7 +584,7 @@ export default function Command() {
     >
       {warnings.length > 0 ? (
         <List.Section title="Warnings">
-          {warnings.map((warning) => (
+          {warnings.map((warning: string) => (
             <List.Item
               key={warning}
               title={warning}
@@ -593,7 +595,7 @@ export default function Command() {
                   <Action title="Manage Commands" icon={Icon.Terminal} onAction={openCommandManager} />
                   <Action title="Manage Root Folders" icon={Icon.Folder} onAction={openRootFolderManager} />
                   <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
-                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
+                  <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
                 </ActionPanel>
               }
             />
@@ -621,7 +623,7 @@ export default function Command() {
                 <Action title="Manage Applications" icon={Icon.AppWindow} onAction={openApplicationManager} />
                 <Action title="Manage Commands" icon={Icon.Terminal} onAction={openCommandManager} />
                 <Action title="Manage Root Folders" icon={Icon.Folder} onAction={openRootFolderManager} />
-                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => revalidate()} />
+                <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void revalidate()} />
                 <Action title="Open Command Preferences" icon={Icon.Gear} onAction={openCommandPreferences} />
               </ActionPanel>
             }
@@ -637,15 +639,15 @@ type RootFolderFormValues = {
 };
 
 type RootFolderManagerProps = {
-  onRefresh: () => Promise<ScanResult | undefined>;
+  onRefresh: () => Promise<unknown>;
 };
 
 function RootFolderManager({ onRefresh }: RootFolderManagerProps) {
   const { push, pop } = useNavigation();
   const { value: rootFolders = [], setValue: setRootFolders } = useLocalStorage<string[]>(ROOT_FOLDERS_STORAGE_KEY, []);
   const { data: rootFolderStatuses = [], isLoading } = usePromise(
-    () => analyzeRootFolders(rootFolders),
-    [rootFolders.join("\n")],
+    (configuredRootFolders: string[]) => analyzeRootFolders(configuredRootFolders),
+    [rootFolders],
   );
 
   function openAddRootFoldersForm() {
