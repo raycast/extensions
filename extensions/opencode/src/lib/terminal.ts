@@ -10,12 +10,41 @@ function shellQuote(str: string): string {
   return `'${str.replace(/'/g, "'\\''")}'`;
 }
 
-function getTerminal(): string {
-  const prefs = getPreferenceValues<Preferences>();
-  return prefs.terminal ?? "iterm2";
+type TerminalId = "iterm2" | "terminal" | "warp" | "ghostty" | "kitty";
+
+const terminalProcessNames: Record<TerminalId, string[]> = {
+  iterm2: ["iTerm2"],
+  kitty: ["kitty"],
+  warp: ["Warp"],
+  ghostty: ["Ghostty", "ghostty"],
+  terminal: ["Terminal"],
+};
+
+// Priority order for auto-detection
+const terminalPriority: TerminalId[] = ["iterm2", "kitty", "warp", "ghostty", "terminal"];
+
+function detectTerminal(): TerminalId {
+  try {
+    const output = execSync("ps -eo comm= | sort -u", { encoding: "utf-8" });
+    const running = new Set(output.split("\n").map((l) => l.trim().split("/").pop() ?? ""));
+
+    for (const id of terminalPriority) {
+      if (terminalProcessNames[id].some((name) => running.has(name))) {
+        return id;
+      }
+    }
+  } catch {
+    // fallback
+  }
+  return "terminal";
 }
 
-// --- iTerm2 ---
+function getTerminal(): TerminalId {
+  const prefs = getPreferenceValues<Preferences>();
+  const pref = prefs.terminal as string | undefined;
+  if (pref && pref !== "auto" && pref in terminalProcessNames) return pref as TerminalId;
+  return detectTerminal();
+}
 
 function findTtyForSession(sessionId: string): string | null {
   try {
@@ -33,6 +62,8 @@ function findTtyForSession(sessionId: string): string | null {
     return null;
   }
 }
+
+// --- iTerm2 ---
 
 async function focusITermByTty(tty: string): Promise<boolean> {
   const result = await runAppleScript(`
@@ -86,28 +117,131 @@ async function openInTerminalApp(directory: string, command: string): Promise<vo
   `);
 }
 
+// --- Warp ---
+
+async function openInWarp(directory: string, command: string): Promise<void> {
+  await runAppleScript(`
+    tell application "Warp"
+      activate
+    end tell
+    delay 0.3
+    tell application "System Events"
+      tell process "Warp"
+        keystroke "t" using command down
+        delay 0.3
+        keystroke "cd ${shellQuote(directory)} && ${esc(command)}"
+        key code 36
+      end tell
+    end tell
+  `);
+}
+
+// --- Ghostty ---
+
+async function openInGhostty(directory: string, command: string): Promise<void> {
+  await runAppleScript(`
+    tell application "Ghostty"
+      activate
+    end tell
+    delay 0.3
+    tell application "System Events"
+      tell process "Ghostty"
+        keystroke "t" using command down
+        delay 0.3
+        keystroke "cd ${shellQuote(directory)} && ${esc(command)}"
+        key code 36
+      end tell
+    end tell
+  `);
+}
+
+// --- Kitty ---
+
+async function focusKittyByTty(tty: string): Promise<boolean> {
+  try {
+    const output = execSync("kitty @ ls 2>/dev/null", { encoding: "utf-8" });
+    const windows = JSON.parse(output) as Array<{
+      id: number;
+      tabs: Array<{
+        id: number;
+        windows: Array<{ id: number; foreground_processes: Array<{ cwd: string; cmdline: string[] }> }>;
+      }>;
+    }>;
+    for (const win of windows) {
+      for (const tab of win.tabs) {
+        for (const pane of tab.windows) {
+          for (const proc of pane.foreground_processes) {
+            if (proc.cmdline.some((arg) => arg.includes(tty.replace("/dev/", "")))) {
+              execSync(`kitty @ focus-window --match id:${pane.id} 2>/dev/null`);
+              return true;
+            }
+          }
+        }
+      }
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
+async function openInKitty(directory: string, command: string): Promise<void> {
+  try {
+    // Try remote control first (requires allow_remote_control in kitty.conf)
+    execSync(
+      `kitty @ launch --type=tab --cwd=${shellQuote(directory)} -- sh -c ${shellQuote(`${command}; exec $SHELL`)}`,
+      {
+        encoding: "utf-8",
+      },
+    );
+  } catch {
+    // Fallback: open via AppleScript
+    await runAppleScript(`
+      tell application "kitty"
+        activate
+      end tell
+      delay 0.3
+      tell application "System Events"
+        tell process "kitty"
+          keystroke "t" using command down
+          delay 0.3
+          keystroke "cd ${shellQuote(directory)} && ${esc(command)}"
+          key code 36
+        end tell
+      end tell
+    `);
+  }
+}
+
 // --- Public API ---
 
+const openers: Record<TerminalId, (dir: string, cmd: string) => Promise<void>> = {
+  iterm2: openInITerm,
+  terminal: openInTerminalApp,
+  warp: openInWarp,
+  ghostty: openInGhostty,
+  kitty: openInKitty,
+};
+
 export async function openOpenCode(directory: string): Promise<void> {
-  if (getTerminal() === "iterm2") {
-    return openInITerm(directory, "opencode");
-  }
-  return openInTerminalApp(directory, "opencode");
+  const terminal = getTerminal() as TerminalId;
+  return openers[terminal](directory, "opencode");
 }
 
 export async function resumeSession(directory: string, sessionId: string, isOpen: boolean = false): Promise<void> {
   const cmd = `opencode -s ${shellQuote(sessionId)}`;
+  const terminal = getTerminal() as TerminalId;
 
-  if (isOpen && getTerminal() === "iterm2") {
+  // Try to focus existing tab for terminals that support it
+  if (isOpen) {
     const tty = findTtyForSession(sessionId);
     if (tty) {
-      const focused = await focusITermByTty(tty);
+      let focused = false;
+      if (terminal === "iterm2") focused = await focusITermByTty(tty);
+      if (terminal === "kitty") focused = await focusKittyByTty(tty);
       if (focused) return;
     }
   }
 
-  if (getTerminal() === "iterm2") {
-    return openInITerm(directory, cmd);
-  }
-  return openInTerminalApp(directory, cmd);
+  return openers[terminal](directory, cmd);
 }

@@ -34,13 +34,17 @@
     {
       "name": "terminal",
       "title": "Terminal",
-      "description": "Terminal application to open OpenCode sessions in",
+      "description": "Terminal application to open OpenCode sessions in. Auto-detect picks the first running terminal.",
       "type": "dropdown",
       "required": false,
-      "default": "iterm2",
+      "default": "auto",
       "data": [
+        { "title": "Auto-detect", "value": "auto" },
         { "title": "iTerm2", "value": "iterm2" },
-        { "title": "Terminal.app", "value": "terminal" }
+        { "title": "Terminal.app", "value": "terminal" },
+        { "title": "Warp", "value": "warp" },
+        { "title": "Ghostty", "value": "ghostty" },
+        { "title": "Kitty", "value": "kitty" }
       ]
     }
   ],
