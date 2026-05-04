@@ -19,6 +19,7 @@
         "jsx": "react-jsx"
     },
     "include": [
+        "raycast-env.d.ts",
         "src/**/*"
     ]
 }

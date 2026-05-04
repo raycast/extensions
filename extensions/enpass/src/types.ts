@@ -26,14 +26,6 @@ export interface EnpassEntry {
   usage_count?: string;
 }
 
-export interface EnpassPreferences {
-  vaultPath?: string;
-  keyfilePath?: string;
-  pin?: string;
-  cliPath?: string;
-  sortMode?: EnpassSortMode;
-}
-
 export type EnpassSortMode =
   | "updated"
   | "created"

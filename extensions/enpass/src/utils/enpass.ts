@@ -1,11 +1,11 @@
 import { execa } from "execa";
 import { Clipboard, Toast, getPreferenceValues, showToast } from "@raycast/api";
-import { EnpassEntry, EnpassPreferences, EnpassSortMode } from "../types";
+import { EnpassEntry, EnpassSortMode } from "../types";
 import path from "path";
 
 const DEFAULT_CLI_PATH = "/opt/homebrew/bin/enpass-cli";
 
-function getCliPath(preferences: EnpassPreferences): string {
+function getCliPath(preferences: Preferences): string {
   return preferences.cliPath || DEFAULT_CLI_PATH;
 }
 
@@ -48,7 +48,7 @@ async function runCliCommand(
     const result = await execa(cliPath, args, {
       env: {
         ENPASS_VAULT: getVaultPath(
-          getPreferenceValues<EnpassPreferences>().vaultPath,
+          getPreferenceValues<Preferences>().vaultPath,
         ),
       },
       reject: false,
@@ -73,7 +73,7 @@ async function runCliCommand(
       env: {
         ENPASS_MASTER_PASSWORD: password,
         ENPASS_VAULT: getVaultPath(
-          getPreferenceValues<EnpassPreferences>().vaultPath,
+          getPreferenceValues<Preferences>().vaultPath,
         ),
       },
       reject: false,
@@ -91,7 +91,7 @@ async function runCliCommand(
   return result.stdout;
 }
 
-function buildBaseArgs(preferences: EnpassPreferences): string[] {
+function buildBaseArgs(preferences: Preferences): string[] {
   const vaultPath = getVaultPath(preferences.vaultPath);
   const args = ["-vault", vaultPath];
   if (preferences.keyfilePath) {
@@ -140,7 +140,7 @@ export async function listEntries(
   pin?: string,
   sortMode?: EnpassSortMode,
 ): Promise<EnpassEntry[]> {
-  const preferences = getPreferenceValues<EnpassPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const cliSort = getCliSort(sortMode);
   const args = cliSort
     ? [...buildBaseArgs(preferences), "-json", `-sort=${cliSort}`, "list", ""]
@@ -155,7 +155,7 @@ export async function getEntryDetails(
   entry: EnpassEntry,
   pin?: string,
 ): Promise<EnpassEntry> {
-  const preferences = getPreferenceValues<EnpassPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const args = [...buildBaseArgs(preferences), "-json", "show", entry.title];
   const output = await runCliCommand(getCliPath(preferences), args, pin);
   const matches = normalizeEntries(parseJsonOutput(output));

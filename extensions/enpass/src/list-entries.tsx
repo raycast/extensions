@@ -16,7 +16,7 @@ import {
   pasteEntryField,
   pasteValue,
 } from "./utils/enpass";
-import { EnpassEntry, EnpassPreferences, EnpassSortMode } from "./types";
+import { EnpassEntry, EnpassSortMode } from "./types";
 import { PinForm } from "./components/PinForm";
 import { EntryDetail } from "./components/EntryDetail";
 
@@ -183,7 +183,7 @@ function buildAccessories(entry: EnpassEntry): List.Item.Accessory[] {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<EnpassPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const [pin, setPin] = useState<string | undefined>(preferences.pin);
   const [entries, setEntries] = useState<EnpassEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);

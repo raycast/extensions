@@ -170,12 +170,14 @@ export function EntryDetail({ entry, pin }: EntryDetailProps) {
             ) : null}
           </ActionPanel.Section>
           <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy Username / Email"
-              icon={Icon.Person}
-              content={login}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
+            {login ? (
+              <Action.CopyToClipboard
+                title="Copy Username / Email"
+                icon={Icon.Person}
+                content={login}
+                shortcut={{ modifiers: ["cmd"], key: "c" }}
+              />
+            ) : null}
             <Action
               title="Copy Password"
               icon={Icon.Key}
