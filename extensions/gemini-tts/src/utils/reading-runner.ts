@@ -14,6 +14,8 @@ import {
 import { clampSpeed, clearPlaybackSpeed, formatSpeed, readPlaybackSpeed, writePlaybackSpeed } from "./playback-speed";
 import { acquireSessionLock, releaseSessionLock } from "./session-lock";
 
+const PREFETCH_AHEAD = 3;
+
 export async function playReadingSession(session: ReadingSession, isResuming = false): Promise<void> {
   const player = new AudioPlayer();
   let activeSession = session;
@@ -28,30 +30,30 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
     return;
   }
 
-  // Hold the session lock for the entire read — covers the synthesis
-  // window before any afplay process exists. Without this, a second
-  // Quick Read trigger during the lead chunk's synthesis would launch
-  // a parallel reader instead of toggle-stopping the first one.
   if (!acquireSessionLock()) {
     await showHUD("Another reading is already in progress");
     return;
   }
 
-  // Seed the live speed value from the session so menubar / Speed Up / Slow
-  // Down can read it back. A previously adjusted session keeps its speed.
   let currentSpeed = clampSpeed(activeSession.options.speed);
   await writePlaybackSpeed(currentSpeed);
 
-  // Kick off the first chunk's synthesis immediately, before the HUD
-  // even renders. Lead-chunk + prefetch is what makes TTFA feel snappy.
-  // Guarded on startIndex < chunkCount: a session at end-of-text would
-  // otherwise call synthesizeSpeech("undefined") and crash.
-  let pending: Promise<SynthesisResult> | null =
-    startIndex < chunkCount ? startSynth(activeSession.options, activeSession.chunks[startIndex]) : null;
-  // Silence any unhandled-rejection between here and the consumer await
-  // — the loop will re-throw via `await pending` and surface the error
-  // through the caller's catch block.
-  pending?.catch(() => undefined);
+  // Prefetch buffer: fire up to PREFETCH_AHEAD synthesis requests in
+  // parallel so audio is ready before playback catches up. Each entry
+  // maps to chunk index (startIndex + offset).
+  const prefetchBuffer: Map<number, Promise<SynthesisResult>> = new Map();
+
+  function firePrefetch(idx: number): void {
+    if (idx >= chunkCount || prefetchBuffer.has(idx)) return;
+    const p = startSynth(activeSession.options, activeSession.chunks[idx]);
+    p.catch(() => undefined);
+    prefetchBuffer.set(idx, p);
+  }
+
+  // Seed the buffer: fire lead chunk + next PREFETCH_AHEAD-1 immediately.
+  for (let k = startIndex; k < Math.min(startIndex + PREFETCH_AHEAD, chunkCount); k++) {
+    firePrefetch(k);
+  }
 
   let lastPhase: PlaybackPhase | null = null;
 
@@ -66,7 +68,6 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
     for (let i = startIndex; i < chunkCount; i++) {
       if (player.isStopped() || hasExternalStopRequest()) break;
 
-      // Pick up any speed change made by Speed Up / Slow Down between chunks.
       const desiredSpeed = (await readPlaybackSpeed()) ?? currentSpeed;
       const speedChanged = desiredSpeed !== currentSpeed;
       currentSpeed = desiredSpeed;
@@ -89,22 +90,17 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
 
       let audio: SynthesisResult;
       try {
-        audio = await (pending ?? startSynth(activeSession.options, activeSession.chunks[i]));
+        audio = await (prefetchBuffer.get(i) ?? startSynth(activeSession.options, activeSession.chunks[i]));
       } finally {
-        pending = null;
+        prefetchBuffer.delete(i);
       }
 
       if (player.isStopped() || hasExternalStopRequest()) break;
 
-      // Start prefetch for chunk i+1 in parallel with playback of chunk i.
-      // This is the core win: the user only ever waits for the lead chunk;
-      // every subsequent chunk's synthesis is already in flight by the time
-      // the previous one finishes playing.
-      if (i + 1 < chunkCount) {
-        pending = startSynth(activeSession.options, activeSession.chunks[i + 1]);
-        // Swallow rejection so an early stop doesn't surface as
-        // unhandledRejection. The next consumer await would re-throw.
-        pending.catch(() => undefined);
+      // Refill prefetch buffer: keep PREFETCH_AHEAD chunks in flight ahead
+      // of current playback position.
+      for (let k = i + 1; k <= Math.min(i + PREFETCH_AHEAD, chunkCount - 1); k++) {
+        firePrefetch(k);
       }
 
       await writeStateAndMaybeRefresh(
@@ -126,8 +122,6 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
       await player.playAudio(audio, currentSpeed);
 
       if (speedChanged) {
-        // Persist the latest speed to the session so Resume Last Reading
-        // continues at the user's chosen pace.
         activeSession = {
           ...activeSession,
           options: { ...activeSession.options, speed: currentSpeed },
@@ -159,20 +153,15 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
         updatedAt: new Date().toISOString(),
       });
       requestMenuRefresh();
-      // Intentionally keep the live speed value so Resume Last Reading
-      // picks up the user's adjusted pace.
     } else if (player.isStopped()) {
       await clearPlaybackState();
       requestMenuRefresh();
-      // Same rationale: do not clear playback speed on a manual stop.
     }
   } finally {
-    // Best-effort: don't leave a prefetch promise dangling. If it's already
-    // settled this is a no-op; if it's pending, the .catch above keeps any
-    // rejection from leaking.
-    if (pending) {
-      pending.catch(() => undefined);
+    for (const p of prefetchBuffer.values()) {
+      p.catch(() => undefined);
     }
+    prefetchBuffer.clear();
     player.cleanup();
     releaseSessionLock();
   }
