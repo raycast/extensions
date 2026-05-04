@@ -23,7 +23,7 @@
     {
       "name": "ghHost",
       "title": "GH Host",
-      "description": "Your GitHub(Enterprise) hostname",
+      "description": "Your GitHub (Enterprise) hostname",
       "type": "textfield",
       "required": true
     },
@@ -41,13 +41,6 @@
       "type": "textfield",
       "required": true,
       "placeholder": "owner/repo1, owner/repo2"
-    },
-    {
-      "name": "myLogin",
-      "title": "My GitHub Login",
-      "description": "Your GitHub username for filtering",
-      "type": "textfield",
-      "required": false
     }
   ],
   "dependencies": {

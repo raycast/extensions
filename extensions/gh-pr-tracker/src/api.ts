@@ -11,7 +11,11 @@ import type {
 
 function getConfig() {
   const prefs = getPreferenceValues<Preferences>();
-  const base = `https://${prefs.ghHost}/api/v3`;
+  const isGitHubDotCom =
+    prefs.ghHost === "github.com" || prefs.ghHost === "api.github.com";
+  const base = isGitHubDotCom
+    ? "https://api.github.com"
+    : `https://${prefs.ghHost}/api/v3`;
   const headers = {
     Authorization: `token ${prefs.token}`,
     Accept: "application/vnd.github.v3+json",
@@ -20,7 +24,7 @@ function getConfig() {
     .split(",")
     .map((r) => r.trim())
     .filter(Boolean);
-  return { base, headers, repos, myLogin: prefs.myLogin ?? "" };
+  return { base, headers, repos };
 }
 
 /** Paginated GET — fetches all pages and concatenates results */
@@ -107,8 +111,4 @@ export async function fetchPRsWithActivity(): Promise<PRWithActivity[]> {
   );
 
   return perRepo.flat();
-}
-
-export function getMyLogin(): string {
-  return getConfig().myLogin;
 }

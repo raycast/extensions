@@ -19,10 +19,9 @@ A [Raycast](https://raycast.com) extension that tracks unread pull request activ
 
 | Preference | Description | Required |
 |---|---|---|
-| **GH Host** | Your GitHub (Enterprise) hostname (e.g. `github.example.com`) | ✅ |
+| **GH Host** | GitHub hostname (`github.com` or your GHE server) | ✅ |
 | **Personal Access Token** | A PAT with `repo` read access | ✅ |
 | **Repositories** | Comma-separated `owner/repo` list | ✅ |
-| **My GitHub Login** | Your username — used to filter out your own activity | Optional |
 
 ## Usage
 
