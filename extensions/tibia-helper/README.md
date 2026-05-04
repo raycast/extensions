@@ -143,7 +143,7 @@ tibia-helper/
 │   ├── data.ts                 # Item database (1,601 items)
 │   └── imbuements-data.ts      # Imbuements database (24 imbuements)
 ├── assets/
-│   └── command-icon.png        # Tibia icon (512x512)
+│   └── extension_icon.png        # Tibia icon (512x512)
 ├── package.json                # Extension manifest
 └── README.md                   # This file
 ```
