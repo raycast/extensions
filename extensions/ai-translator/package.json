@@ -1,0 +1,115 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "ai-translator",
+    "version": "0.0.1",
+    "title": "AI Translator",
+    "description": "Translate text using AI with automatic language detection and smart routing.",
+    "icon": "icon.png",
+    "author": "leolionart",
+    "license": "MIT",
+    "categories": [
+        "Productivity"
+    ],
+    "commands": [
+        {
+            "name": "translate-preview",
+            "title": "Translate",
+            "subtitle": "Preview & Paste",
+            "description": "Quick preview translation with Enter to paste.",
+            "mode": "view"
+        },
+        {
+            "name": "index",
+            "title": "Translate Text",
+            "description": "Manual translate with language selection form.",
+            "mode": "view"
+        },
+        {
+            "name": "quick-translate",
+            "title": "Quick Translate",
+            "subtitle": "Clipboard → Toast",
+            "description": "Auto-translate clipboard and show result in toast.",
+            "mode": "no-view"
+        },
+        {
+            "name": "translate-selection",
+            "title": "Translate Selection",
+            "description": "Translate selected text and paste result.",
+            "mode": "no-view"
+        },
+        {
+            "name": "translation-history",
+            "title": "Translation History",
+            "subtitle": "View Past Translations",
+            "description": "View and manage your translation history.",
+            "mode": "view"
+        },
+        {
+            "name": "expand-content",
+            "title": "Expand Content",
+            "subtitle": "Bullets → Professional",
+            "description": "Transform bullet points into professional content with bilingual paste options.",
+            "mode": "view"
+        }
+    ],
+    "preferences": [
+        {
+            "name": "apiKey",
+            "title": "API Key",
+            "description": "Your API key for an OpenAI-compatible chat completions API.",
+            "type": "password",
+            "required": true
+        },
+        {
+            "name": "apiURL",
+            "title": "API URL",
+            "description": "The chat completions endpoint for your translation API.",
+            "type": "textfield",
+            "required": true,
+            "default": "https://api.openai.com/v1/chat/completions"
+        },
+        {
+            "name": "model",
+            "title": "AI Model",
+            "description": "The AI model to use for translation.",
+            "type": "textfield",
+            "required": false,
+            "default": "gpt-4o-mini"
+        },
+        {
+            "name": "primaryLanguage",
+            "title": "Primary Language",
+            "description": "Your primary language (e.g., Vietnamese, English, Chinese).",
+            "type": "textfield",
+            "required": false,
+            "default": "Vietnamese"
+        },
+        {
+            "name": "secondaryLanguage",
+            "title": "Secondary Language",
+            "description": "Your secondary language for translation.",
+            "type": "textfield",
+            "required": false,
+            "default": "English"
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.79.0"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "^2.1.1",
+        "@types/node": "^20.10.0",
+        "@types/react": "^18.2.37",
+        "eslint": "^9.22.0",
+        "prettier": "^3.5.3",
+        "react": "^18.2.0",
+        "typescript": "^5.2.2"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray dev",
+        "lint": "ray lint",
+        "fix-lint": "ray lint --fix",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
