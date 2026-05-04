@@ -83,7 +83,10 @@ async function runCliCommand(
 
 function buildBaseArgs(preferences: Preferences): string[] {
   const vaultPath = getVaultPath(preferences.vaultPath);
-  const args = ["-vault", vaultPath];
+  const args: string[] = [];
+  if (vaultPath) {
+    args.push("-vault", vaultPath);
+  }
   if (preferences.keyfilePath) {
     args.push("-keyfile", preferences.keyfilePath);
   }

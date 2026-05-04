@@ -209,14 +209,21 @@ export default function Command() {
       setEntries(results);
       setNeedsPassword(false);
     } catch (error) {
-      setNeedsPassword(!submittedPin);
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Enter your master password or check CLI settings.";
+      const normalizedMessage = message.toLowerCase();
+      const isAuthError =
+        !submittedPin &&
+        (normalizedMessage.includes("password") ||
+          normalizedMessage.includes("locked") ||
+          normalizedMessage.includes("auth"));
+      setNeedsPassword(isAuthError);
       await showToast({
         style: Toast.Style.Failure,
         title: submittedPin ? "Failed to unlock vault" : "Could not read vault",
-        message:
-          error instanceof Error
-            ? error.message
-            : "Enter your master password or check CLI settings.",
+        message,
       });
     } finally {
       setIsLoading(false);
