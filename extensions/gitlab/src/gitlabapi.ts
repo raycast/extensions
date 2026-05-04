@@ -1087,7 +1087,7 @@ export class GitLab {
         }
       } else {
         const msg = (r.reason?.message ?? `${r.reason}`) as string;
-        if (msg.includes("Not found")) {
+        if (msg.includes("Not found") || msg.includes("Forbidden") || msg.includes("403")) {
           inaccessible++;
         }
       }

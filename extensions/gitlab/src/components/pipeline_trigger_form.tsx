@@ -31,7 +31,9 @@ export function PipelineTriggerForm(props: { projectID: number; defaultRef?: str
         setBranches(b);
         setTags(t);
         const fallback = b.find((x) => x.default)?.name ?? b[0]?.name;
-        const initial = props.defaultRef && b.some((x) => x.name === props.defaultRef) ? props.defaultRef : fallback;
+        const inBranches = props.defaultRef && b.some((x) => x.name === props.defaultRef);
+        const inTags = props.defaultRef && t.some((x) => x.name === props.defaultRef);
+        const initial = inBranches || inTags ? props.defaultRef : fallback;
         setRefValue(initial);
       } catch (e) {
         if (!didUnmount) setRefsError(getErrorMessage(e));

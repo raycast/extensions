@@ -23,7 +23,7 @@ interface RestPipeline {
 interface PipelineCardShape {
   id: number;
   iid: string;
-  projectId: number;
+  projectId: string;
   status: string;
   ref: string;
   webUrl: string;
@@ -45,7 +45,7 @@ function toPipelineCard(p: RestPipeline, project: Project): PipelineCardShape {
   return {
     id: p.id,
     iid: p.iid !== undefined ? `${p.iid}` : `${p.id}`,
-    projectId: project.id,
+    projectId: `${project.id}`,
     status: p.status,
     ref: p.ref,
     webUrl,
@@ -93,7 +93,7 @@ export function MyPipelinesList() {
           {pipelines.map((p) => (
             <PipelineListItem
               key={`${project.id}-${p.id}`}
-              pipeline={toPipelineCard(p, project) as unknown as Pipeline}
+              pipeline={toPipelineCard(p, project) as Pipeline}
               projectFullPath={project.fullPath}
               onRefreshPipelines={performRefetch}
               navigationTitle={`${project.name} · Pipelines`}
