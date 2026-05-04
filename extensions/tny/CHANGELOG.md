@@ -1,6 +1,6 @@
 # Tny Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-05-04
 
 - Fix issue where you are unable to sign in
 
