@@ -1,0 +1,89 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "quick-share",
+  "title": "Quick Share",
+  "description": "Quickly share the active browser tab or a note to one or more Slack channels.",
+  "icon": "extension-icon.png",
+  "author": "peinan",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "slack",
+    "share",
+    "browser",
+    "tab",
+    "link",
+    "note",
+    "quicklink"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "link-note",
+      "title": "Share Active Browser Tab to Slack",
+      "description": "Share the active browser tab to one or more Slack channels with an optional comment.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-note",
+      "title": "Send Quick Note to Slack",
+      "description": "Send a text-only note to one or more Slack channels.",
+      "mode": "view"
+    },
+    {
+      "name": "template-editor",
+      "title": "Edit Message Template",
+      "description": "Edit the Slack message template used by Share Active Browser Tab to Slack.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "slackBotToken",
+      "title": "Slack Bot Token",
+      "description": "Bot token (xoxb-...) with chat:write scope.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "defaultChannels",
+      "title": "Default Channels",
+      "description": "Comma-separated channel names or IDs to pre-select.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "general"
+    },
+    {
+      "name": "quickNoteDefaultChannels",
+      "title": "Quick Note Default Channels",
+      "description": "Comma-separated channel names or IDs to pre-select for Quick Note.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "idea"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
