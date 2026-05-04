@@ -149,10 +149,7 @@ export async function buildSearchURL(
 /**
  * Build VirusTotal URL based on IOC type
  */
-async function buildVirusTotalURL(
-  ioc: string,
-  iocType: IOCType,
-): Promise<string> {
+function buildVirusTotalURL(ioc: string, iocType: IOCType): string {
   const encodedIOC = encodeURIComponent(ioc);
 
   switch (iocType) {

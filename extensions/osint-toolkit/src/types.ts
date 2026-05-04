@@ -25,7 +25,6 @@ export interface OSINTSource {
   supportedTypes: IOCType[];
   requiresAuth: boolean;
   isFree: boolean;
-  icon?: string;
 }
 
 export interface SearchResult {

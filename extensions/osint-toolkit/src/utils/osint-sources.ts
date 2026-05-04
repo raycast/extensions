@@ -17,7 +17,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["ip", "ipv6", "domain", "url", "hash"],
     requiresAuth: false,
     isFree: true,
-    icon: "virus",
   },
   {
     id: "alienvault",
@@ -28,7 +27,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["ip", "ipv6", "domain", "url", "hash"],
     requiresAuth: false,
     isFree: true,
-    icon: "alien",
   },
   {
     id: "pulsedive",
@@ -39,7 +37,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["ip", "ipv6", "domain", "url", "hash"],
     requiresAuth: false,
     isFree: true,
-    icon: "wave",
   },
   {
     id: "opentip",
@@ -50,7 +47,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["hash"],
     requiresAuth: false,
     isFree: true,
-    icon: "lock",
   },
 
   // IP Intelligence
@@ -63,7 +59,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["ip", "ipv6"],
     requiresAuth: false,
     isFree: true,
-    icon: "block",
   },
   {
     id: "shodan",
@@ -74,7 +69,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["ip"],
     requiresAuth: false,
     isFree: true,
-    icon: "search",
   },
   {
     id: "ipinfo",
@@ -85,7 +79,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["ip", "ipv6"],
     requiresAuth: false,
     isFree: true,
-    icon: "globe",
   },
   {
     id: "greynoise",
@@ -96,7 +89,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["ip"],
     requiresAuth: false,
     isFree: true,
-    icon: "radio",
   },
 
   // URL Analysis
@@ -109,7 +101,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["url", "domain"],
     requiresAuth: false,
     isFree: true,
-    icon: "link",
   },
   {
     id: "webcheck",
@@ -120,7 +111,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["domain", "url"],
     requiresAuth: false,
     isFree: true,
-    icon: "check",
   },
   {
     id: "whois",
@@ -131,7 +121,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["domain"],
     requiresAuth: false,
     isFree: true,
-    icon: "info",
   },
 
   // Malware Analysis
@@ -144,7 +133,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["hash", "url", "domain"],
     requiresAuth: false,
     isFree: true,
-    icon: "dna",
   },
   {
     id: "joesandbox",
@@ -155,7 +143,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["hash", "ip"],
     requiresAuth: false,
     isFree: true,
-    icon: "sandbox",
   },
   {
     id: "malwarebazaar",
@@ -166,7 +153,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["hash"],
     requiresAuth: false,
     isFree: true,
-    icon: "shop",
   },
 
   // Threat Intelligence
@@ -179,7 +165,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["hash"],
     requiresAuth: false,
     isFree: true,
-    icon: "grave",
   },
   {
     id: "xforce",
@@ -190,7 +175,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["ip", "ipv6", "domain", "url", "hash"],
     requiresAuth: false,
     isFree: true,
-    icon: "force",
   },
 
   // SSL/Certificate
@@ -203,7 +187,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["ip", "ipv6", "domain"],
     requiresAuth: false,
     isFree: true,
-    icon: "cert",
   },
   {
     id: "crtsh",
@@ -214,7 +197,6 @@ export const OSINT_SOURCES: OSINTSource[] = [
     supportedTypes: ["domain"],
     requiresAuth: false,
     isFree: true,
-    icon: "certificate",
   },
 ];
 

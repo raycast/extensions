@@ -31,12 +31,8 @@ import {
 } from "./types";
 import { getFavorites, toggleFavorite } from "./utils/favorites";
 
-interface SearchIOCArguments {
-  ioc?: string;
-}
-
 export default function SearchIOCCommand(
-  props: LaunchProps<{ arguments: SearchIOCArguments }>,
+  props: LaunchProps<{ arguments: Arguments.SearchIoc }>,
 ) {
   const [searchText, setSearchText] = useState(props.arguments.ioc || "");
   const [iocDetection, setIocDetection] = useState<IOCDetectionResult | null>(
@@ -76,7 +72,7 @@ export default function SearchIOCCommand(
 
       try {
         // Get preferences inside the effect
-        const preferences = getPreferenceValues();
+        const preferences = getPreferenceValues<Preferences>();
 
         // Refang the IOC first if it's defanged
         const refangedIOC = refangIOC(searchText.trim());
@@ -136,7 +132,7 @@ export default function SearchIOCCommand(
   }, [searchText]);
 
   // Get preferences for the render
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences>();
 
   // Consolidate EmptyView props to ensure only one `List.EmptyView` is rendered
   const emptyViewProps = (() => {
