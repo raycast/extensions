@@ -432,12 +432,13 @@ KONFIDENZ:
     // Floor confidence based on available sources with content:
     // 2+ sources with snippets → at least 70%, 1 source → at least 60%
     const sourcesWithSnippets = sources.filter((s) => s.snippet && s.snippet.trim().length > 0).length;
-    const confidence =
-      sourcesWithSnippets >= 2
-        ? Math.max(rawConfidence, 70)
-        : sourcesWithSnippets >= 1
-          ? Math.max(rawConfidence, 60)
-          : rawConfidence;
+    const confidence = poorTocWithSources
+    ? rawConfidence
+    : sourcesWithSnippets >= 2
+    ? Math.max(rawConfidence, 70)
+    : sourcesWithSnippets >= 1
+      ? Math.max(rawConfidence, 60)
+      : rawConfidence;
 
     // Check for insufficient data
     if (klappentext.includes("INSUFFICIENT_DATA")) {
