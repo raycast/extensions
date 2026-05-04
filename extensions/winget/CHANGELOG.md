@@ -27,4 +27,3 @@
 - Copy package ID and command shortcuts to clipboard
 - Configurable winget executable path preference
 - Graceful error messages when winget executable is not found
-

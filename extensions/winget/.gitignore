@@ -1,5 +1,8 @@
 node_modules/
 .build/
+.tmp-home
+.tmp-config
+.tmp-test
 *.js.map
 .DS_Store
 .env
