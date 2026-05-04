@@ -44,12 +44,19 @@ export function useSearchTorrents() {
       const now = Date.now();
 
       if (cachedData && cachedTime && now - parseInt(cachedTime, 10) < CACHE_TTL) {
-        if (isMounted) {
-          setTorrents(JSON.parse(cachedData));
-          setLastFetch(parseInt(cachedTime, 10));
-          setIsLoading(false);
+        try {
+          const parsed = JSON.parse(cachedData);
+          if (isMounted) {
+            setTorrents(parsed);
+            setLastFetch(parseInt(cachedTime, 10));
+            setIsLoading(false);
+          }
+          return;
+        } catch (error) {
+          console.error("Failed to parse cached torrents", error);
+          cache.remove(`data_${safeUrlKey}`);
+          cache.remove(`time_${safeUrlKey}`);
         }
-        return;
       }
 
       try {
