@@ -34,25 +34,3 @@ export interface SearchResult {
   ioc: string;
   iocType: IOCType;
 }
-
-export interface ExtensionPreferences extends Record<string, unknown> {
-  enable_virustotal: boolean;
-  enable_alienvault: boolean;
-  enable_pulsedive: boolean;
-  enable_opentip: boolean;
-  enable_abuseipdb: boolean;
-  enable_shodan: boolean;
-  enable_ipinfo: boolean;
-  enable_greynoise: boolean;
-  enable_urlscan: boolean;
-  enable_webcheck: boolean;
-  enable_whois: boolean;
-  enable_hybridanalysis: boolean;
-  enable_joesandbox: boolean;
-  enable_malwarebazaar: boolean;
-  enable_threatrip: boolean;
-  enable_xforce: boolean;
-  enable_censys: boolean;
-  enable_crtsh: boolean;
-  copy_on_select: boolean;
-}

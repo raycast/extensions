@@ -6,6 +6,7 @@
 
 import {
   List,
+  Detail,
   ActionPanel,
   Action,
   Icon,
@@ -416,22 +417,19 @@ ${
 `;
 
   return (
-    <List>
-      <List.Item
-        title={source.name}
-        detail={<List.Item.Detail markdown={markdown} />}
-        actions={
-          <ActionPanel>
-            <Action.OpenInBrowser title="Open in Browser" url={url} />
-            <Action.CopyToClipboard title="Copy Search URL" content={url} />
-            <Action.CopyToClipboard
-              // eslint-disable-next-line @raycast/prefer-title-case
-              title="Copy IOC"
-              content={ioc}
-            />
-          </ActionPanel>
-        }
-      />
-    </List>
+    <Detail
+      markdown={markdown}
+      actions={
+        <ActionPanel>
+          <Action.OpenInBrowser title="Open in Browser" url={url} />
+          <Action.CopyToClipboard title="Copy Search URL" content={url} />
+          <Action.CopyToClipboard
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="Copy IOC"
+            content={ioc}
+          />
+        </ActionPanel>
+      }
+    />
   );
 }
