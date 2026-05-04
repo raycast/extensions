@@ -50,6 +50,30 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "ocr",
+      "title": "OCR",
+      "description": "Run OCR on a screen region with ShareX",
+      "mode": "no-view"
+    },
+    {
+      "name": "color-picker",
+      "title": "Color Picker",
+      "description": "Pick a color from the screen with ShareX",
+      "mode": "no-view"
+    },
+    {
+      "name": "image-effects",
+      "title": "Image Effects",
+      "description": "Open ShareX Image Effects tool",
+      "mode": "no-view"
+    },
+    {
+      "name": "image-splitter",
+      "title": "Image Splitter",
+      "description": "Open ShareX Image Splitter tool",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -158,10 +182,10 @@
     "typescript": "^5.8.2"
   },
   "scripts": {
+    "build": "ray build --output .build",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
-    "build": "ray build",
     "publish": "npx @raycast/api@latest publish",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   }
