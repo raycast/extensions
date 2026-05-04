@@ -17,18 +17,27 @@ import TaskDetail from "./TaskDetail";
 type TaskListItemProps = {
   task: Task;
   mode?: ViewMode;
+  showProjectAccessory?: boolean;
   viewProps?: ViewProps;
   data?: SyncData;
   setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
   quickLinkView?: QuickLinkView;
 };
 
-export default function TaskListItem({ task, mode, viewProps, data, setData, quickLinkView }: TaskListItemProps) {
+export default function TaskListItem({
+  task,
+  mode,
+  showProjectAccessory,
+  viewProps,
+  data,
+  setData,
+  quickLinkView,
+}: TaskListItemProps) {
   const taskComments = data?.notes.filter((note) => note.item_id === task.id);
   const accessories: List.Item.Accessory[] = [];
   const keywords: string[] = [];
 
-  if (mode !== ViewMode.project) {
+  if (showProjectAccessory ?? mode !== ViewMode.project) {
     const project = data?.projects.find((project) => project.id === task.project_id);
     const section = data?.sections.find((section) => section.id === task.section_id);
 

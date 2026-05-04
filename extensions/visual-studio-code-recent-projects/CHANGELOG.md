@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix] - 2026-05-04
+
+- Fixed `Search Recent Projects` returning no results for VS Code Insiders users. Recent Insiders builds no longer write `history.recentlyOpenedPathsList` to `state.vscdb`; the extension now falls back to reading recent folders from `storage.json` (`lastKnownMenubarData`) when the DB key is absent. Stable VS Code builds are unaffected. (Fixes [#27440](https://github.com/raycast/extensions/issues/27440))
+
 ## [Update] - 2026-04-07
 
 - Added support for Qoder.

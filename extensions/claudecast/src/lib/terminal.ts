@@ -1,9 +1,10 @@
 import { getPreferenceValues, showToast, Toast, open } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { writeFileSync } from "fs";
+import { writeFileSync, unlinkSync, mkdirSync, existsSync } from "fs";
 import { tmpdir, homedir } from "os";
 import { join } from "path";
+import { randomUUID } from "crypto";
 import type { PermissionMode } from "./session-parser";
 
 const execFilePromise = promisify(execFile);
@@ -19,6 +20,19 @@ export function expandTilde(inputPath: string): string {
   if (trimmed === "~") return home;
   if (trimmed.startsWith("~/")) return home + trimmed.slice(1);
   return trimmed;
+}
+
+/**
+ * Normalize a full model ID (e.g. "claude-opus-4-6") to the short name
+ * ("opus") that Claude Code expects for proper feature enablement like
+ * extended context windows.
+ */
+function normalizeModelName(model: string): string {
+  if (["opus", "sonnet", "haiku"].includes(model)) return model;
+  if (model.includes("opus")) return "opus";
+  if (model.includes("sonnet")) return "sonnet";
+  if (model.includes("haiku")) return "haiku";
+  return model;
 }
 
 type TerminalApp = "Terminal" | "iTerm" | "Warp" | "kitty" | "Ghostty";
@@ -99,10 +113,45 @@ async function openInITerm(command: string, cwd: string): Promise<void> {
   await execFilePromise("osascript", ["-e", script]);
 }
 
+// Escape a value for use inside a YAML double-quoted scalar (YAML 1.2).
+// Backslash must be escaped first; LF/CR/TAB get their YAML escape forms so
+// embedded whitespace can never break the document layout.
+function escapeYamlDoubleQuoted(s: string): string {
+  return s
+    .replace(/\\/g, "\\\\")
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, "\\n")
+    .replace(/\r/g, "\\r")
+    .replace(/\t/g, "\\t");
+}
+
 async function openInWarp(command: string, cwd: string): Promise<void> {
-  // Warp supports a special URL scheme
-  const encodedCommand = encodeURIComponent(`cd "${cwd}" && ${command}`);
-  await open(`warp://action/new_tab?command=${encodedCommand}`);
+  // Use dynamic launch configuration for reliable command execution
+  const lcId = randomUUID();
+  const lcDir = join(homedir(), ".warp", "launch_configurations");
+  if (!existsSync(lcDir)) {
+    mkdirSync(lcDir, { recursive: true });
+  }
+  const lcFile = join(lcDir, `${lcId}.yaml`);
+  const yaml = `---
+name: ${lcId}
+windows:
+  - tabs:
+      - layout:
+          cwd: "${escapeYamlDoubleQuoted(cwd)}"
+          commands:
+            - exec: "${escapeYamlDoubleQuoted(command)}"
+`;
+  writeFileSync(lcFile, yaml, "utf-8");
+  await open(`warp://launch/${lcId}`);
+  // Clean up the temp config after launch
+  setTimeout(() => {
+    try {
+      unlinkSync(lcFile);
+    } catch {
+      /* ignore */
+    }
+  }, 30_000);
 }
 
 async function openInKitty(command: string, cwd: string): Promise<void> {
@@ -118,32 +167,21 @@ async function openInKitty(command: string, cwd: string): Promise<void> {
 }
 
 async function openInGhostty(command: string, cwd: string): Promise<void> {
-  const escapedCommand = command.replace(/"/g, '\\"').replace(/\$/g, "\\$");
-  const escapedCwd = cwd.replace(/"/g, '\\"');
+  const escapedCommand = command.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const escapedCwd = cwd.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
-  // Try direct invocation first via execFile with array arguments
-  try {
-    await execFilePromise("ghostty", [
-      `--working-directory=${cwd}`,
-      "-e",
-      "sh",
-      "-c",
-      command,
-    ]);
-  } catch {
-    // Fallback to AppleScript using execFile with array arguments
-    const script = `
-      tell application "Ghostty"
-        activate
-      end tell
-      delay 0.5
-      tell application "System Events"
-        keystroke "cd \\"${escapedCwd}\\" && ${escapedCommand}"
-        keystroke return
-      end tell
-    `;
-    await execFilePromise("osascript", ["-e", script]);
-  }
+  // Use Ghostty's native AppleScript API with surface configuration
+  const script = `
+    tell application "Ghostty"
+      activate
+      set cfg to new surface configuration
+      set initial working directory of cfg to "${escapedCwd}"
+      set initial input of cfg to "${escapedCommand}" & (ASCII character 10)
+      new window with configuration cfg
+    end tell
+  `;
+
+  await execFilePromise("osascript", ["-e", script]);
 }
 
 /**
@@ -186,9 +224,12 @@ export async function launchClaudeCode(options: {
     args.push("--permission-mode", options.permissionMode);
   }
 
-  // Restore the session's model so a Haiku session doesn't resume with Opus
-  if (options.model) {
-    args.push("--model", options.model);
+  // Only pass --model for new sessions (not resume/continue). Claude Code
+  // remembers the model from the session and passing --model explicitly can
+  // disable features like extended context windows.
+  const isResumingSession = options.sessionId || options.continueSession;
+  if (options.model && !isResumingSession) {
+    args.push("--model", normalizeModelName(options.model));
   }
 
   if (options.prompt) {

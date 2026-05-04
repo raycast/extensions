@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "claudecast",
   "title": "ClaudeCast",
-  "description": "Claude Code workflows at your fingertips: Quick prompts, session management, and agentic workflows",
+  "description": "Discover, resume, and automate Claude Code sessions: deep full-text search, one-keystroke resume, agentic loops, usage analytics, and quick prompts",
   "icon": "command-icon.png",
   "author": "qazi0",
   "contributors": [
@@ -67,6 +67,64 @@
         "open",
         "launch",
         "workspace"
+      ],
+      "preferences": [
+        {
+          "name": "permissionMode",
+          "type": "dropdown",
+          "title": "Permission Mode",
+          "description": "Default permission mode for new sessions launched from this command",
+          "default": "default",
+          "required": false,
+          "data": [
+            {
+              "title": "Default (Interactive)",
+              "value": "default"
+            },
+            {
+              "title": "Plan Mode",
+              "value": "plan"
+            },
+            {
+              "title": "Auto Edit",
+              "value": "acceptEdits"
+            },
+            {
+              "title": "Full Auto",
+              "value": "auto"
+            },
+            {
+              "title": "Bypass Permissions",
+              "value": "bypassPermissions"
+            }
+          ]
+        },
+        {
+          "name": "model",
+          "type": "dropdown",
+          "title": "Model Override",
+          "description": "Override the extension's default model for sessions launched from this command",
+          "default": "",
+          "required": false,
+          "data": [
+            {
+              "title": "Use Extension Default",
+              "value": ""
+            },
+            {
+              "title": "Sonnet (Balanced)",
+              "value": "sonnet"
+            },
+            {
+              "title": "Opus (Most Capable)",
+              "value": "opus"
+            },
+            {
+              "title": "Haiku (Fastest)",
+              "value": "haiku"
+            }
+          ]
+        }
       ]
     },
     {

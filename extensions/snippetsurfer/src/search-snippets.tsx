@@ -18,12 +18,15 @@ export default function Command() {
     setState((previous) => ({ ...previous, snippets: orderedSnippets, filteredSnippets: filteredSnippets }));
   };
 
-  // Fetch primary action preference
+  // Fetch primary action and pasteContentScope preference
   useEffect(() => {
     const fetch = async () => {
       const preferences = await getPreferenceValues();
-      const primaryAction = preferences["primaryAction"];
-      setState((previous) => ({ ...previous, primaryAction: primaryAction }));
+      setState((previous) => ({
+        ...previous,
+        primaryAction: preferences["primaryAction"],
+        pasteContentScope: preferences["pasteContentScope"] ?? "pasteScopeFull",
+      }));
     };
     fetch();
   }, []);
@@ -193,6 +196,7 @@ export default function Command() {
                     handleAction={handleAction}
                     snippet={i}
                     primaryAction={state.primaryAction ?? ""}
+                    pasteContentScope={state.pasteContentScope ?? "pasteScopeFull"}
                     reloadSnippets={fetchData}
                     paths={state.paths ?? []}
                   />

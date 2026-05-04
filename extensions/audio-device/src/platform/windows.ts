@@ -23,8 +23,8 @@ type WindowsAudioSwitchResult = {
   device: WindowsAudioDevice;
 };
 
-const WINDOWS_BINARY_URL = "https://github.com/Inovvia/go-win-audio-cli/releases/download/1.1.0/win-audio-cli.exe";
-const WINDOWS_BINARY_CHECKSUM = "569fe05624f410b565b92fa0c729e29f170bb78907dcff7ef2cf66a01465e365";
+const WINDOWS_BINARY_URL = "https://github.com/Inovvia/go-win-audio-cli/releases/download/1.2.0/win-audio-cli.exe";
+const WINDOWS_BINARY_CHECKSUM = "14bf9816323ecc25557b66d3d8869f69fcf000159b5b49ce2235cbcbca179467";
 
 const binary = path.join(environment.supportPath, "win-audio-cli.exe");
 let hasLoggedBinaryInfo = false;

@@ -1,5 +1,9 @@
 # T3 Chat Changelog
 
+## [v1.6.0] - 2026-05-01
+
+- Added support for latest AI models
+
 ## [v1.5.0] - 2026-02-27
 
 - Add support for Windows platform

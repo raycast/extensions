@@ -1,5 +1,31 @@
 # ClaudeCast Changelog
 
+## [1.6.0] - 2026-05-04
+
+### Fixed
+
+- **Ghostty Terminal Launch**: Replaced System Events keystroke simulation with Ghostty's native AppleScript surface API. The previous approach typed commands into whichever window was focused, interfering with active sessions.
+- **Warp Terminal Launch**: Replaced the non-functional `warp://action/new_tab?command=` URL scheme with a temporary YAML launch configuration opened via `warp://launch/`. Reliably opens a new window with the correct working directory and command. Double quotes in the cwd path are escaped, and the temp config cleanup window is 30 seconds to handle cold launches.
+
+### Changed
+
+- **Extension description**: Refreshed the store and repository description to highlight session search, instant resume, and agentic automation alongside quick prompts.
+
+### Contributors
+
+- Ghostty and Warp terminal launch fixes by [@Haknt](https://github.com/Haknt) ([#1](https://github.com/qazi0/claude-cast/pull/1))
+
+## [1.5.0] - 2026-04-30
+
+### Added
+
+- **Launch Project Preferences**: Configurable Permission Mode and Model Override settings for the Launch Project command. All launch actions (New Session, Continue Last, Continue with Prompt) respect these preferences.
+- **Deep Search Permission Restore**: Sessions resumed or forked from Deep Search now restore the original permission mode.
+
+### Fixed
+
+- **Model Flag on Resume**: Removed explicit `--model` flag when resuming or continuing sessions. Claude Code remembers the model internally, and passing `--model` explicitly could disable features like extended context windows (1M). The `--model` flag is now only used for new sessions via the Launch Project model preference.
+
 ## [1.4.0] - 2026-04-13
 
 ### Fixed
