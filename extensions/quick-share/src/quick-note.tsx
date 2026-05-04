@@ -1,10 +1,10 @@
 import { Action, ActionPanel, Form, Icon, Toast, popToRoot, showToast } from "@raycast/api";
 import type { LaunchProps } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { resolveChannelIds } from "./lib/channels";
+import { CHANNEL_ID_PATTERN, resolveChannelIds } from "./lib/channels";
 import { useChannels } from "./lib/useChannels";
 import { loadPreferences } from "./lib/preferences";
-import { postMessageToAll } from "./lib/slack";
+import { escapeMrkdwn, postMessageToAll } from "./lib/slack";
 import { buildQuicklink, type ChannelPresetContext } from "./lib/deeplink";
 
 export default function Command(props: LaunchProps<{ launchContext: ChannelPresetContext }>) {
@@ -48,7 +48,7 @@ export default function Command(props: LaunchProps<{ launchContext: ChannelPrese
     if (channels.length === 0) return; // loading 中は判定保留
     if (launchContextChannelIds.length >= launchContextEntries.length) return;
 
-    const isId = (s: string) => /^[CG][A-Z0-9]{8,}$/.test(s);
+    const isId = (s: string) => CHANNEL_ID_PATTERN.test(s);
     const unknown = launchContextEntries.filter((entry) =>
       isId(entry) ? !channels.some((c) => c.id === entry) : !channels.some((c) => c.name === entry),
     );
@@ -101,7 +101,7 @@ export default function Command(props: LaunchProps<{ launchContext: ChannelPrese
     const results = await postMessageToAll({
       token: prefs.slackBotToken,
       channels: selected,
-      text: comment,
+      text: escapeMrkdwn(comment),
     });
     setSubmitting(false);
 
