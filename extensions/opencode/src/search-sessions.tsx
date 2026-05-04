@@ -133,50 +133,45 @@ export function getLiveness(openSessions: OpenSession[], sessionId: string): Ope
 }
 
 export default function SearchSessions() {
-  const [mode, setMode] = useState<string>("content");
   const [searchText, setSearchText] = useState("");
 
   const { data: recentSessions = [], isLoading: recentLoading } = useAllSessions();
-  const { data: contentResults = [], isLoading: contentLoading } = useContentSearch(
-    mode === "content" ? searchText : "",
-  );
+  const { data: searchResults = [], isLoading: searchLoading } = useContentSearch(searchText);
   const { data: rawOpen } = useOpenSessions();
   const openSessions: OpenSession[] = Array.isArray(rawOpen) ? rawOpen : [];
 
-  const isContent = mode === "content";
-  const sessions = isContent ? contentResults : recentSessions;
-  const isLoading = isContent ? contentLoading : recentLoading;
+  const isSearching = searchText.length >= 3;
+  const isLoading = isSearching ? searchLoading : recentLoading;
+
+  // When not searching: show recent sessions with active/open ones first
+  // When searching: show scored search results
+  const sessions = isSearching
+    ? searchResults
+    : [...recentSessions].sort((a, b) => {
+        const aLive = getLiveness(openSessions, a.id);
+        const bLive = getLiveness(openSessions, b.id);
+        const livenessOrder = (l: typeof aLive) => (l === "active" ? 0 : l === "open" ? 1 : 2);
+        const diff = livenessOrder(aLive) - livenessOrder(bLive);
+        return diff !== 0 ? diff : b.timeUpdated - a.timeUpdated;
+      });
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder={isContent ? "Search conversation content (min 3 chars)..." : "Filter sessions by title..."}
-      filtering={!isContent}
+      searchBarPlaceholder="Search sessions..."
+      filtering={false}
       onSearchTextChange={setSearchText}
-      throttle={isContent}
-      searchBarAccessory={
-        <List.Dropdown
-          tooltip="Search Mode"
-          onChange={(value) => {
-            setMode(value);
-            setSearchText("");
-          }}
-          value={mode}
-        >
-          <List.Dropdown.Item title="Recent" value="recent" icon={Icon.Clock} />
-          <List.Dropdown.Item title="Search Content" value="content" icon={Icon.MagnifyingGlass} />
-        </List.Dropdown>
-      }
+      throttle
     >
       {sessions.length === 0 && !isLoading ? (
         <List.EmptyView
-          title={isContent ? "No Matches" : "No Sessions Found"}
+          title={isSearching ? "No Matches" : "No Sessions Found"}
           description={
-            isContent
+            isSearching
               ? "Try a different search term (min 3 characters)."
               : "Start OpenCode in a terminal to see sessions here."
           }
-          icon={isContent ? Icon.MagnifyingGlass : Icon.Message}
+          icon={isSearching ? Icon.MagnifyingGlass : Icon.Message}
         />
       ) : (
         sessions.map((session) => (
