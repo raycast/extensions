@@ -1,6 +1,6 @@
 # Raycast PM2
 
-## [Enhancement] - {PR_MERGE_DATE}
+## [Enhancement] - 2026-05-04
 
 - Use PM2's programmatic API directly instead of the bundled wrapper
 - Upgrade PM2 to 7.0
