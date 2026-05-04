@@ -434,7 +434,8 @@
     "1weiho",
     "pnowy",
     "ridemountainpig",
-    "j3lte"
+    "j3lte",
+    "danilorequena"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",
