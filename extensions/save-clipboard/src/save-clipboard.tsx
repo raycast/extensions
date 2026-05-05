@@ -27,7 +27,7 @@ const IMAGE_SIGNATURES: [Buffer, string][] = [
   [Buffer.from([0x4d, 0x4d, 0x00, 0x2a]), ".tiff"],
 ];
 
-const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp", ".svg", ".ico"]);
+const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".gif", ".bmp", ".tiff", ".tif", ".webp"]);
 
 function detectImageFormat(filePath: string): string | null {
   try {
