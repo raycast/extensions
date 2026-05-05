@@ -33,12 +33,7 @@ function noteToMarkdown(note: ObjectNote): string {
 }
 
 function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () => void }) {
-  const {
-    isLoading,
-    data: markdown = "",
-    error,
-    revalidate,
-  } = useCachedPromise(loadCardMarkdown, [object.id]);
+  const { isLoading, data: markdown = "", error, revalidate } = useCachedPromise(loadCardMarkdown, [object.id]);
   const heading = object.title ? `# ${object.title}\n\n` : "";
   const summarySection = object.summary?.trim() ? `> ${object.summary.trim()}\n\n` : "";
   const mainBody = error

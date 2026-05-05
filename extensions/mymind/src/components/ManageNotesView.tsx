@@ -1,4 +1,16 @@
-import { Action, ActionPanel, Alert, Form, Icon, Keyboard, List, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Alert,
+  Form,
+  Icon,
+  Keyboard,
+  List,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState } from "react";
 import { addNoteToObject, deleteNote, MyMindObject, ObjectNote, updateNote } from "../api";
@@ -13,15 +25,7 @@ function noteToMarkdown(note: ObjectNote): string {
   return "";
 }
 
-function NoteForm({
-  objectId,
-  note,
-  onSaved,
-}: {
-  objectId: string;
-  note?: ObjectNote;
-  onSaved: () => void;
-}) {
+function NoteForm({ objectId, note, onSaved }: { objectId: string; note?: ObjectNote; onSaved: () => void }) {
   const { pop } = useNavigation();
   const [submitting, setSubmitting] = useState(false);
   const initial = note ? noteToMarkdown(note) : "";

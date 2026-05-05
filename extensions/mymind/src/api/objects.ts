@@ -151,11 +151,9 @@ export async function addNoteToObject(objectId: string, markdown: string): Promi
 }
 
 export async function updateNote(objectId: string, noteId: string, markdown: string): Promise<void> {
-  await api.put(
-    `/objects/${encodeURIComponent(objectId)}/notes/${encodeURIComponent(noteId)}`,
-    markdown,
-    { contentType: "text/markdown" },
-  );
+  await api.put(`/objects/${encodeURIComponent(objectId)}/notes/${encodeURIComponent(noteId)}`, markdown, {
+    contentType: "text/markdown",
+  });
 }
 
 export async function deleteNote(objectId: string, noteId: string): Promise<void> {
