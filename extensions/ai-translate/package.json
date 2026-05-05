@@ -1,0 +1,478 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-translate",
+  "title": "AI Translate",
+  "description": "Translate selected text or screenshot OCR text with DeepSeek, Xiaomi MiMo, MiniMax, Gemini, Kimi, and OpenAI.",
+  "icon": "icon.png",
+  "author": "thomas",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate Text",
+      "subtitle": "AI Translate",
+      "description": "Translate selected text, fallback text, or typed text with your configured AI provider.",
+      "mode": "view",
+      "icon": "icon.png",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Text to translate",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "keywords": ["translate", "selection", "deepseek", "mimo", "xiaomi", "minimax", "gemini", "kimi", "chatgpt", "openai"]
+    },
+    {
+      "name": "screenshot-translate",
+      "title": "Screenshot Translate",
+      "subtitle": "AI Translate",
+      "description": "Capture a screen region, OCR it, and translate the recognized text.",
+      "mode": "no-view",
+      "icon": "screenshot-translate.png",
+      "keywords": ["ocr", "screenshot", "capture", "translate"]
+    }
+  ],
+  "categories": ["Productivity", "Applications", "Developer Tools", "Web"],
+  "preferences": [
+    {
+      "title": "Default Provider",
+      "name": "defaultProvider",
+      "type": "dropdown",
+      "required": true,
+      "default": "deepseek",
+      "description": "Provider shown first and used when no provider checkbox is enabled.",
+      "data": [
+        { "title": "DeepSeek", "value": "deepseek" },
+        { "title": "Xiaomi MiMo", "value": "mimo" },
+        { "title": "MiniMax", "value": "minimax" },
+        { "title": "Gemini", "value": "gemini" },
+        { "title": "Kimi", "value": "kimi" },
+        { "title": "OpenAI / ChatGPT", "value": "openai" }
+      ]
+    },
+    {
+      "title": "Target Language",
+      "name": "targetLanguage",
+      "type": "dropdown",
+      "required": true,
+      "default": "auto",
+      "description": "Auto translates Chinese text to English and other text to Simplified Chinese.",
+      "data": [
+        { "title": "Auto", "value": "auto" },
+        { "title": "Chinese Simplified", "value": "zh-Hans" },
+        { "title": "Chinese Traditional", "value": "zh-Hant" },
+        { "title": "English", "value": "en" },
+        { "title": "Japanese", "value": "ja" },
+        { "title": "Korean", "value": "ko" },
+        { "title": "French", "value": "fr" },
+        { "title": "German", "value": "de" },
+        { "title": "Spanish", "value": "es" },
+        { "title": "Italian", "value": "it" },
+        { "title": "Portuguese", "value": "pt" },
+        { "title": "Russian", "value": "ru" }
+      ]
+    },
+    {
+      "title": "Translation Style",
+      "name": "translationStyle",
+      "type": "dropdown",
+      "required": true,
+      "default": "balanced",
+      "description": "Controls how literal or polished the sentence translation should be.",
+      "data": [
+        { "title": "Balanced", "value": "balanced" },
+        { "title": "Faithful", "value": "faithful" },
+        { "title": "Polished", "value": "polished" },
+        { "title": "Academic", "value": "academic" }
+      ]
+    },
+    {
+      "title": "OCR Engine",
+      "name": "ocrEngine",
+      "type": "dropdown",
+      "required": true,
+      "default": "local",
+      "description": "Engine used by Screenshot Translate.",
+      "data": [
+        { "title": "Local macOS Vision", "value": "local" },
+        { "title": "Tesseract Local", "value": "tesseract" },
+        { "title": "Baidu OCR API", "value": "baidu" },
+        { "title": "PaddleOCR HTTP", "value": "paddle" },
+        { "title": "MinerU Agent API", "value": "mineru" }
+      ]
+    },
+    {
+      "title": "OCR Text Layout",
+      "name": "ocrTextLayout",
+      "type": "dropdown",
+      "required": true,
+      "default": "formatted",
+      "description": "Formatted preserves OCR line breaks; compact collapses whitespace into one line.",
+      "data": [
+        { "title": "Formatted", "value": "formatted" },
+        { "title": "Compact", "value": "compact" }
+      ]
+    },
+    {
+      "name": "ocrFallbackToLocal",
+      "type": "checkbox",
+      "label": "Fallback to local OCR",
+      "required": false,
+      "description": "If an API OCR engine fails, OCR the same screenshot with local macOS Vision.",
+      "default": true
+    },
+    {
+      "title": "OCR Timeout Seconds",
+      "name": "ocrTimeoutSeconds",
+      "type": "textfield",
+      "required": false,
+      "description": "Timeout for API OCR requests and MinerU polling.",
+      "default": "20"
+    },
+    {
+      "title": "Tesseract Path",
+      "name": "tesseractPath",
+      "type": "textfield",
+      "required": false,
+      "description": "Path or command name for Tesseract. Install with `brew install tesseract` if needed.",
+      "default": "tesseract"
+    },
+    {
+      "title": "Tesseract Languages",
+      "name": "tesseractLanguages",
+      "type": "textfield",
+      "required": false,
+      "description": "Tesseract language list, for example eng, chi_sim, or eng+chi_sim.",
+      "default": "eng+chi_sim"
+    },
+    {
+      "title": "Baidu OCR API Key",
+      "name": "baiduOcrAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Baidu AI Open Platform OCR API Key.",
+      "default": ""
+    },
+    {
+      "title": "Baidu OCR Secret Key",
+      "name": "baiduOcrSecretKey",
+      "type": "password",
+      "required": false,
+      "description": "Baidu AI Open Platform OCR Secret Key.",
+      "default": ""
+    },
+    {
+      "title": "Baidu OCR Endpoint",
+      "name": "baiduOcrEndpoint",
+      "type": "dropdown",
+      "required": false,
+      "description": "Baidu OCR endpoint. General is faster; accurate is better for complex screenshots.",
+      "default": "accurate_basic",
+      "data": [
+        { "title": "Accurate Basic", "value": "accurate_basic" },
+        { "title": "General Basic", "value": "general_basic" }
+      ]
+    },
+    {
+      "title": "Baidu OCR Language",
+      "name": "baiduOcrLanguageType",
+      "type": "textfield",
+      "required": false,
+      "description": "Baidu OCR language_type parameter.",
+      "default": "CHN_ENG"
+    },
+    {
+      "title": "PaddleOCR HTTP Endpoint",
+      "name": "paddleOcrEndpoint",
+      "type": "textfield",
+      "required": false,
+      "description": "Self-hosted PaddleOCR service endpoint, usually http://localhost:8080/ocr.",
+      "default": "http://localhost:8080/ocr"
+    },
+    {
+      "title": "PaddleOCR API Key",
+      "name": "paddleOcrAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Optional bearer token for your PaddleOCR HTTP service.",
+      "default": ""
+    },
+    {
+      "title": "MinerU Base URL",
+      "name": "mineruBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "MinerU Agent API base URL.",
+      "default": "https://mineru.net/api/v1/agent"
+    },
+    {
+      "title": "MinerU Language",
+      "name": "mineruLanguage",
+      "type": "textfield",
+      "required": false,
+      "description": "MinerU language parameter, for example ch or en.",
+      "default": "ch"
+    },
+    {
+      "title": "MinerU Options",
+      "name": "mineruEnableTable",
+      "type": "checkbox",
+      "label": "Enable table recognition",
+      "required": false,
+      "description": "Useful for document screenshots; slower than plain text OCR.",
+      "default": false
+    },
+    {
+      "name": "mineruEnableFormula",
+      "type": "checkbox",
+      "label": "Enable formula recognition",
+      "required": false,
+      "description": "Useful for academic PDFs/screenshots; slower than plain text OCR.",
+      "default": false
+    },
+    {
+      "title": "Provider Switches",
+      "name": "enableDeepSeek",
+      "type": "checkbox",
+      "label": "DeepSeek",
+      "required": false,
+      "description": "Show DeepSeek translation result.",
+      "default": true
+    },
+    {
+      "name": "enableMiMo",
+      "type": "checkbox",
+      "label": "Xiaomi MiMo",
+      "required": false,
+      "description": "Show Xiaomi MiMo translation result.",
+      "default": false
+    },
+    {
+      "name": "enableMiniMax",
+      "type": "checkbox",
+      "label": "MiniMax",
+      "required": false,
+      "description": "Show MiniMax translation result.",
+      "default": false
+    },
+    {
+      "name": "enableGemini",
+      "type": "checkbox",
+      "label": "Gemini",
+      "required": false,
+      "description": "Show Gemini translation result.",
+      "default": false
+    },
+    {
+      "name": "enableKimi",
+      "type": "checkbox",
+      "label": "Kimi",
+      "required": false,
+      "description": "Show Kimi translation result.",
+      "default": false
+    },
+    {
+      "name": "enableOpenAI",
+      "type": "checkbox",
+      "label": "OpenAI / ChatGPT",
+      "required": false,
+      "description": "Show OpenAI translation result.",
+      "default": false
+    },
+    {
+      "title": "Provider Order",
+      "name": "providerOrder",
+      "type": "textfield",
+      "required": false,
+      "description": "Comma separated provider ids: deepseek,mimo,minimax,gemini,kimi,openai.",
+      "default": "deepseek,mimo,minimax,gemini,kimi,openai",
+      "placeholder": "deepseek,mimo,minimax,gemini,kimi,openai"
+    },
+    {
+      "title": "Request Timeout Seconds",
+      "name": "requestTimeoutSeconds",
+      "type": "textfield",
+      "required": false,
+      "description": "Per-provider request timeout.",
+      "default": "45"
+    },
+    {
+      "title": "Max Output Tokens",
+      "name": "maxOutputTokens",
+      "type": "textfield",
+      "required": false,
+      "description": "Maximum generated tokens for chat-compatible providers.",
+      "default": "4096"
+    },
+    {
+      "title": "DeepSeek API Key",
+      "name": "deepseekAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Your DeepSeek API key.",
+      "default": ""
+    },
+    {
+      "title": "DeepSeek Base URL",
+      "name": "deepseekBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "Anthropic-compatible DeepSeek base URL.",
+      "default": "https://api.deepseek.com/anthropic"
+    },
+    {
+      "title": "DeepSeek Model",
+      "name": "deepseekModel",
+      "type": "textfield",
+      "required": false,
+      "description": "DeepSeek model name. Official current options include deepseek-v4-flash and deepseek-v4-pro.",
+      "default": "deepseek-v4-flash"
+    },
+    {
+      "title": "Xiaomi MiMo API Key",
+      "name": "mimoAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Your Xiaomi MiMo API key.",
+      "default": ""
+    },
+    {
+      "title": "Xiaomi MiMo Base URL",
+      "name": "mimoBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "Anthropic-compatible Xiaomi MiMo base URL. Use https://token-plan-cn.xiaomimimo.com/anthropic for Token Plan.",
+      "default": "https://token-plan-cn.xiaomimimo.com/anthropic"
+    },
+    {
+      "title": "Xiaomi MiMo Model",
+      "name": "mimoModel",
+      "type": "textfield",
+      "required": false,
+      "description": "Xiaomi MiMo model name. Text options include mimo-v2-flash, mimo-v2.5, mimo-v2.5-pro, mimo-v2-pro, and mimo-v2-omni.",
+      "default": "mimo-v2-flash"
+    },
+    {
+      "title": "MiniMax API Key",
+      "name": "minimaxAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Your MiniMax API key.",
+      "default": ""
+    },
+    {
+      "title": "MiniMax Base URL",
+      "name": "minimaxBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "Anthropic-compatible MiniMax base URL.",
+      "default": "https://api.minimaxi.com/anthropic"
+    },
+    {
+      "title": "MiniMax Model",
+      "name": "minimaxModel",
+      "type": "textfield",
+      "required": false,
+      "description": "MiniMax model name. Anthropic-compatible options include MiniMax-M2.7 and MiniMax-M2.7-highspeed.",
+      "default": "MiniMax-M2.7"
+    },
+    {
+      "title": "Gemini API Key",
+      "name": "geminiAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Your Gemini API key.",
+      "default": ""
+    },
+    {
+      "title": "Gemini Base URL",
+      "name": "geminiBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "Gemini API version base URL.",
+      "default": "https://generativelanguage.googleapis.com/v1beta"
+    },
+    {
+      "title": "Gemini Model",
+      "name": "geminiModel",
+      "type": "textfield",
+      "required": false,
+      "description": "Gemini model name.",
+      "default": "gemini-2.5-flash"
+    },
+    {
+      "title": "Kimi API Key",
+      "name": "kimiAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Your Kimi/Moonshot API key.",
+      "default": ""
+    },
+    {
+      "title": "Kimi Base URL",
+      "name": "kimiBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "Kimi/Moonshot Anthropic-compatible entrypoint. Requests are sent to /v1/messages.",
+      "default": "https://api.moonshot.ai/anthropic"
+    },
+    {
+      "title": "Kimi Model",
+      "name": "kimiModel",
+      "type": "textfield",
+      "required": false,
+      "description": "Kimi model name. Official current default is kimi-k2.6; other options include kimi-k2.5 and moonshot-v1-8k/32k/128k.",
+      "default": "kimi-k2.6"
+    },
+    {
+      "title": "OpenAI API Key",
+      "name": "openAIAPIKey",
+      "type": "password",
+      "required": false,
+      "description": "Your OpenAI API key.",
+      "default": ""
+    },
+    {
+      "title": "OpenAI Base URL",
+      "name": "openAIBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "OpenAI API base URL.",
+      "default": "https://api.openai.com/v1"
+    },
+    {
+      "title": "OpenAI Model",
+      "name": "openAIModel",
+      "type": "textfield",
+      "required": false,
+      "description": "OpenAI model name.",
+      "default": "gpt-4.1-mini"
+    }
+  ],
+  "platforms": ["macOS"],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "react": "^19.1.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.2",
+    "jiti": "^2.6.1",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "generate-icons": "node scripts/generate-icons.mjs",
+    "build-swift": "bash scripts/build-swift.sh",
+    "predev": "npm run generate-icons && npm run build-swift",
+    "prebuild": "npm run generate-icons && npm run build-swift",
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix"
+  }
+}
