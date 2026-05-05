@@ -20,16 +20,14 @@ const COMMON_WORKSPACE_DIRECTORIES = new Set([
 ]);
 
 export async function getRuntimeStatuses(projects: ProjectRecord[]): Promise<Record<string, RuntimeStatus>> {
-  const inactiveStatuses = Object.fromEntries(
-    projects.map((project) => [
-      project.id,
-      {
-        isActive: false,
-        ports: [],
-        processes: [],
-      } satisfies RuntimeStatus,
-    ]),
-  );
+  const inactiveStatuses = projects.reduce<Record<string, RuntimeStatus>>((statuses, project) => {
+    statuses[project.id] = {
+      isActive: false,
+      ports: [],
+      processes: [],
+    };
+    return statuses;
+  }, {});
 
   for (const match of await getProjectProcessMatches(projects)) {
     const status = inactiveStatuses[match.project.id];

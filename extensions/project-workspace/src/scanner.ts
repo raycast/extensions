@@ -1,3 +1,4 @@
+import type { Dirent } from "fs";
 import fs from "fs/promises";
 import path from "path";
 
@@ -64,7 +65,7 @@ async function scanDirectory(options: {
   state: StorageState;
 }): Promise<void> {
   const { directoryPath, depth, maxDepth, root, projects, state } = options;
-  let entries: fs.Dirent[];
+  let entries: Dirent[];
 
   try {
     entries = await fs.readdir(directoryPath, { withFileTypes: true });
@@ -117,7 +118,7 @@ async function createProjectRecord(
   projectPath: string,
   root: ScanRoot,
   state: StorageState,
-  entries: fs.Dirent[],
+  entries: Dirent[],
   isEmptyDirectory: boolean,
 ): Promise<ProjectRecord> {
   const normalizedProjectPath = await normalizePath(projectPath);

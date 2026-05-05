@@ -1,3 +1,4 @@
+import type { Dirent } from "fs";
 import fs from "fs/promises";
 import path from "path";
 
@@ -98,7 +99,7 @@ export function isIgnoredDirectoryName(name: string): boolean {
   return IGNORED_DIRECTORY_NAMES.has(name) || name === ".DS_Store";
 }
 
-export function isProjectDirectory(entries: fs.Dirent[]): boolean {
+export function isProjectDirectory(entries: Dirent[]): boolean {
   const names = new Set(entries.map((entry) => entry.name));
 
   if (entries.some((entry) => MARKER_FILES.has(entry.name))) {
@@ -123,11 +124,11 @@ export function isProjectDirectory(entries: fs.Dirent[]): boolean {
   });
 }
 
-export function isDirectoryEmpty(entries: fs.Dirent[]): boolean {
+export function isDirectoryEmpty(entries: Dirent[]): boolean {
   return entries.filter((entry) => entry.name !== ".DS_Store").length === 0;
 }
 
-export async function detectProjectFacts(projectPath: string, entries: fs.Dirent[]): Promise<DetectedFacts> {
+export async function detectProjectFacts(projectPath: string, entries: Dirent[]): Promise<DetectedFacts> {
   const frameworks = new Set<string>();
   const languages = new Set<string>();
   const urlsFromPackageMetadata = new Set<string>();
@@ -343,7 +344,7 @@ async function walkFiles(directoryPath: string, depth: number, languages: Set<st
     return;
   }
 
-  let entries: fs.Dirent[];
+  let entries: Dirent[];
 
   try {
     entries = await fs.readdir(directoryPath, { withFileTypes: true });

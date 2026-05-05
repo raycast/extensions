@@ -104,7 +104,7 @@ export function ProjectActions({
         ) : (
           <Action.Push
             title="Archive and Clean Project"
-            icon={Icon.Archive}
+            icon={Icon.Box}
             target={<CleanupPreview project={project} archiveAfterCleanup onChanged={onStateChanged} />}
           />
         )}

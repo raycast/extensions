@@ -129,7 +129,7 @@ export default function Command() {
           <List.Dropdown.Section title="Status">
             <List.Dropdown.Item title="All" value="all" icon={Icon.List} />
             <List.Dropdown.Item title="Pinned" value="pinned" icon={Icon.Pin} />
-            <List.Dropdown.Item title="Archived" value="archived" icon={Icon.Archive} />
+            <List.Dropdown.Item title="Archived" value="archived" icon={Icon.Box} />
           </List.Dropdown.Section>
           {storageState.scanRoots.length > 0 ? (
             <List.Dropdown.Section title="Scan Roots">
@@ -218,7 +218,7 @@ function buildKeywords(project: ProjectRecord): string[] {
 
 function getProjectIcon(project: ProjectRecord, runtimeStatus?: RuntimeStatus) {
   if (project.archived) {
-    return { source: Icon.Archive, tintColor: Color.SecondaryText };
+    return { source: Icon.Box, tintColor: Color.SecondaryText };
   }
 
   if (runtimeStatus?.isActive) {

@@ -32,7 +32,7 @@ export const STATUS_CONFIG: Record<IssueStatus, { label: string; icon: IconRef }
   todo: { label: "Todo", icon: { source: Icon.Circle, tintColor: Color.PrimaryText } },
   "in-progress": { label: "In Progress", icon: { source: Icon.Circle, tintColor: Color.Blue } },
   done: { label: "Done", icon: { source: Icon.Checkmark, tintColor: Color.Green } },
-  cancelled: { label: "Cancelled", icon: { source: Icon.XMark, tintColor: Color.Red } },
+  cancelled: { label: "Cancelled", icon: { source: Icon.Xmark, tintColor: Color.Red } },
 };
 
 export const PRIORITY_CONFIG: Record<IssuePriority, { label: string; icon: IconRef }> = {

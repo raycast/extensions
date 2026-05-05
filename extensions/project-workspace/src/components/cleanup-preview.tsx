@@ -91,7 +91,7 @@ export function CleanupPreview({ project, archiveAfterCleanup = false, onChanged
               onTrash={handleTrashComplete}
             />
           ) : archiveAfterCleanup ? (
-            <Action title="Archive Project" icon={Icon.Archive} onAction={archiveProject} />
+            <Action title="Archive Project" icon={Icon.Box} onAction={archiveProject} />
           ) : null}
           <Action title="Refresh Candidates" icon={Icon.ArrowClockwise} onAction={() => void reloadCandidates()} />
         </ActionPanel>
