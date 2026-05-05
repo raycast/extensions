@@ -1,6 +1,6 @@
 # Git Repos Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-05
 
 - Fix out-of-memory crash when searching repositories by replacing glob (which uses worker threads) with a native fs traversal.
 
