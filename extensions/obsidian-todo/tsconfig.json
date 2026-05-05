@@ -12,5 +12,5 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node"]
   },
-  "include": ["src"]
+  "include": ["src", "raycast-env.d.ts"]
 }
