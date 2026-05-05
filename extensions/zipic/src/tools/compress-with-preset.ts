@@ -71,7 +71,14 @@ export default async function tool({ preset, imagePaths = [] }: Input) {
   }
 
   const url = buildCompressURL(filePaths, target);
-  await open(url);
+  try {
+    await open(url);
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Failed to open Zipic",
+    };
+  }
 
   return {
     success: true,
