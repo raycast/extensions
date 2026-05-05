@@ -10,7 +10,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import fs from "fs";
 import path from "path";
 import os from "os";
@@ -127,7 +127,7 @@ async function detectClipboard(): Promise<ClipboardState> {
 
 function convertToJpeg(sourcePath: string, destPath: string): void {
   if (process.platform === "darwin") {
-    execSync(`sips --setProperty format jpeg "${sourcePath}" --out "${destPath}"`, { stdio: "ignore" });
+    execFileSync("sips", ["--setProperty", "format", "jpeg", sourcePath, "--out", destPath], { stdio: "ignore" });
   } else {
     fs.copyFileSync(sourcePath, destPath);
   }
