@@ -1,6 +1,6 @@
 # X/Twitter Video Downloader Changelog
 
-## [2.0.0] - {PR_MERGE_DATE}
+## [2.0.0] - 2026-05-05
 
 - New "Download Video from Clipboard" no-view command. Assign a hotkey to download instantly without opening a form.
 - Multi-video tweet support: every video in a thread can now be saved in one run (configurable).
