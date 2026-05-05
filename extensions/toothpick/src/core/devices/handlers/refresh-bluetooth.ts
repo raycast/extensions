@@ -17,6 +17,8 @@ export default async function refreshBluetooth() {
     devicesService.refreshBluetooth();
     await showSuccessMessage("Bluetooth refreshed successfully");
   } catch (error) {
-    await showErrorMessage(`Failed to refresh Bluetooth: ${error instanceof Error ? error.message : error}`);
+    // Provide guidance that Bluetooth may be disabled after failure
+    const errorMessage = `Failed to refresh Bluetooth: ${error instanceof Error ? error.message : error}. Bluetooth may have been disabled; please re‑enable it manually.`;
+    await showErrorMessage(errorMessage);
   }
 }
