@@ -37,11 +37,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.15",
-    "@spotxyz/macos-audio-devices": "^1.5.0"
+    "@raycast/api": "^1.104.15"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
+    "@spotxyz/macos-audio-devices": "^1.5.0",
     "@types/node": "^24.10.1",
     "@typescript-eslint/parser": "^8.46.4",
     "eslint": "^9.39.1",

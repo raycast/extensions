@@ -119,7 +119,7 @@ export default function Command() {
               <ActionPanel>
                 <Action
                   title="Switch Input and Output"
-                  icon={Icon.ArrowClockwise}
+                  icon={Icon.Bolt}
                   onAction={async () => {
                     const toast = await showToast({
                       style: Toast.Style.Animated,
@@ -159,7 +159,7 @@ export default function Command() {
               <ActionPanel>
                 <Action
                   title="Switch Output"
-                  icon={Icon.ArrowClockwise}
+                  icon={Icon.Bolt}
                   onAction={() => void switchSingleAudioDevice(audio, "output", device)}
                 />
                 <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void reload()} />
@@ -179,7 +179,7 @@ export default function Command() {
               <ActionPanel>
                 <Action
                   title="Switch Input"
-                  icon={Icon.ArrowClockwise}
+                  icon={Icon.Bolt}
                   onAction={() => void switchSingleAudioDevice(audio, "input", device)}
                 />
                 <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={() => void reload()} />
