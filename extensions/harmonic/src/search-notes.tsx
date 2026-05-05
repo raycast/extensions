@@ -1,12 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import {
   resolveNoteName,
@@ -16,13 +8,7 @@ import {
   getAllNoteNames,
   ENHARMONIC_DISPLAY,
 } from "./lib/notes";
-import {
-  playFrequencies,
-  stopAll,
-  isPlaying,
-  type ToneType,
-  type Duration,
-} from "./lib/audio";
+import { playFrequencies, stopAll, isPlaying, type ToneType, type Duration } from "./lib/audio";
 
 const TONE_OPTIONS: { title: string; value: ToneType }[] = [
   { title: "Warm (Default)", value: "warm" },
@@ -56,24 +42,15 @@ export default function SearchNotes() {
       filtering={false}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Tone"
-          onChange={(val) => setTone(val as ToneType)}
-        >
+        <List.Dropdown tooltip="Tone" onChange={(val) => setTone(val as ToneType)}>
           {TONE_OPTIONS.map((opt) => (
-            <List.Dropdown.Item
-              key={opt.value}
-              title={opt.title}
-              value={opt.value}
-            />
+            <List.Dropdown.Item key={opt.value} title={opt.title} value={opt.value} />
           ))}
         </List.Dropdown>
       }
     >
       {resolvedNote ? (
-        <List.Section
-          title={`${ENHARMONIC_DISPLAY[resolvedNote] || resolvedNote} — All Octaves`}
-        >
+        <List.Section title={`${ENHARMONIC_DISPLAY[resolvedNote] || resolvedNote} — All Octaves`}>
           {octaves.map((note) => {
             const notable = getNotableLabel(note.name, note.octave);
             return (
@@ -82,9 +59,7 @@ export default function SearchNotes() {
                 title={note.scientificName}
                 subtitle={`${note.frequency} Hz`}
                 accessories={[
-                  ...(notable
-                    ? [{ tag: { value: notable, color: Color.Yellow } }]
-                    : []),
+                  ...(notable ? [{ tag: { value: notable, color: Color.Yellow } }] : []),
                   {
                     tag: {
                       value: getOctaveLabel(note.octave),
@@ -136,13 +111,8 @@ export default function SearchNotes() {
                         title={`Duration: ${DURATION_OPTIONS.find((d) => d.value === duration)?.title}`}
                         icon={Icon.Clock}
                         onAction={() => {
-                          const idx = DURATION_OPTIONS.findIndex(
-                            (d) => d.value === duration,
-                          );
-                          const next =
-                            DURATION_OPTIONS[
-                              (idx + 1) % DURATION_OPTIONS.length
-                            ];
+                          const idx = DURATION_OPTIONS.findIndex((d) => d.value === duration);
+                          const next = DURATION_OPTIONS[(idx + 1) % DURATION_OPTIONS.length];
                           setDuration(next.value);
                           showToast({
                             style: Toast.Style.Success,
@@ -185,17 +155,13 @@ export default function SearchNotes() {
           })}
         </List.Section>
       ) : (
-        <List.Section
-          title={searchText ? "No match — try a note name" : "All Notes"}
-        >
+        <List.Section title={searchText ? "No match — try a note name" : "All Notes"}>
           {allNotes
             .filter(
               (n) =>
                 !searchText ||
                 n.toLowerCase().includes(searchText.toLowerCase()) ||
-                (ENHARMONIC_DISPLAY[n] || "")
-                  .toLowerCase()
-                  .includes(searchText.toLowerCase()),
+                (ENHARMONIC_DISPLAY[n] || "").toLowerCase().includes(searchText.toLowerCase()),
             )
             .map((noteName) => {
               const display = ENHARMONIC_DISPLAY[noteName] || noteName;

@@ -279,9 +279,7 @@ const CHORD_DEFINITIONS: ChordDefinition[] = [
 ];
 
 /** Parse a chord symbol like "Cmaj7", "Dm7b5", "F#7#11" */
-export function parseChord(
-  input: string,
-): { rootNote: string; suffix: string } | null {
+export function parseChord(input: string): { rootNote: string; suffix: string } | null {
   const match = input.match(/^([A-Ga-g][#b]?)(.*)/);
   if (!match) return null;
 
@@ -305,8 +303,7 @@ function findChordDefinition(suffix: string): ChordDefinition | null {
   // Case-insensitive fallback
   for (const def of CHORD_DEFINITIONS) {
     if (def.symbol.toLowerCase() === normalized.toLowerCase()) return def;
-    if (def.aliases?.some((a) => a.toLowerCase() === normalized.toLowerCase()))
-      return def;
+    if (def.aliases?.some((a) => a.toLowerCase() === normalized.toLowerCase())) return def;
   }
 
   return null;
@@ -326,6 +323,8 @@ export function resolveChord(input: string, octave = 4): ChordResult | null {
     Bb: "A#",
     Cb: "B",
     Fb: "E",
+    "E#": "F",
+    "B#": "C",
   };
   const rootNote = NOTE_ALIASES[parsed.rootNote] || parsed.rootNote;
 
@@ -340,20 +339,7 @@ export function resolveChord(input: string, octave = 4): ChordResult | null {
     const absoluteSemitone = rootIndex + interval;
     const noteIndex = absoluteSemitone % 12;
     const noteOctave = octave + Math.floor(absoluteSemitone / 12);
-    const ALL_NOTES = [
-      "C",
-      "C#",
-      "D",
-      "D#",
-      "E",
-      "F",
-      "F#",
-      "G",
-      "G#",
-      "A",
-      "A#",
-      "B",
-    ];
+    const ALL_NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     return getNoteInfo(ALL_NOTES[noteIndex], noteOctave);
   });
 
@@ -386,8 +372,7 @@ export function getChordSuggestions(searchText: string): Array<{
       def.symbol.toLowerCase().startsWith(suffixFilter) ||
       def.name.toLowerCase().includes(suffixFilter) ||
       def.category.toLowerCase().includes(suffixFilter) ||
-      (def.aliases?.some((a) => a.toLowerCase().startsWith(suffixFilter)) ??
-        false)
+      (def.aliases?.some((a) => a.toLowerCase().startsWith(suffixFilter)) ?? false)
     );
   }).map((def) => ({
     symbol: `${rootNote}${def.symbol}`,

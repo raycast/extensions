@@ -1,20 +1,7 @@
 // Equal temperament: each semitone is 2^(1/12) apart
 // A4 = 440 Hz is the standard reference
 
-const NOTE_NAMES = [
-  "C",
-  "C#",
-  "D",
-  "D#",
-  "E",
-  "F",
-  "F#",
-  "G",
-  "G#",
-  "A",
-  "A#",
-  "B",
-] as const;
+const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"] as const;
 
 // Aliases for enharmonic equivalents
 const NOTE_ALIASES: Record<string, string> = {
@@ -94,9 +81,7 @@ export function resolveNoteName(input: string): string | null {
 }
 
 /** Parse scientific pitch notation like "C4", "Ab3", "F#5" */
-export function parseScientificNotation(
-  input: string,
-): { noteName: string; octave: number } | null {
+export function parseScientificNotation(input: string): { noteName: string; octave: number } | null {
   const match = input.match(/^([A-Ga-g][#b]?)\s*(\d)$/);
   if (!match) return null;
 
@@ -108,9 +93,7 @@ export function parseScientificNotation(
 
 /** Get info for a specific note at a specific octave */
 export function getNoteInfo(noteName: string, octave: number): NoteInfo {
-  const semitoneIndex = NOTE_NAMES.indexOf(
-    noteName as (typeof NOTE_NAMES)[number],
-  );
+  const semitoneIndex = NOTE_NAMES.indexOf(noteName as (typeof NOTE_NAMES)[number]);
   const frequency = noteFrequency(semitoneIndex, octave);
   const midiNumber = 12 * (octave + 1) + semitoneIndex;
 
@@ -145,10 +128,7 @@ export function getOctaveLabel(octave: number): string {
 }
 
 /** Get a label like "Middle C" for well-known notes */
-export function getNotableLabel(
-  noteName: string,
-  octave: number,
-): string | null {
+export function getNotableLabel(noteName: string, octave: number): string | null {
   if (noteName === "C" && octave === 4) return "Middle C";
   if (noteName === "A" && octave === 4) return "Concert A (Tuning Standard)";
   if (noteName === "A" && octave === 0) return "Lowest Piano Key";

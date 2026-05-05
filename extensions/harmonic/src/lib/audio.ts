@@ -51,12 +51,8 @@ function generateWav(
 
   const seamlessLoop = options?.seamlessLoop ?? false;
   // Avoid per-cycle fade in/out for looped playback (causes audible pulsing).
-  const attackSamples = seamlessLoop
-    ? 0
-    : Math.min(Math.floor(SAMPLE_RATE * 0.05), numSamples); // 50ms attack
-  const decaySamples = seamlessLoop
-    ? 0
-    : Math.min(Math.floor(SAMPLE_RATE * 0.15), numSamples); // 150ms decay
+  const attackSamples = seamlessLoop ? 0 : Math.min(Math.floor(SAMPLE_RATE * 0.05), numSamples); // 50ms attack
+  const decaySamples = seamlessLoop ? 0 : Math.min(Math.floor(SAMPLE_RATE * 0.15), numSamples); // 150ms decay
 
   const amplitude = MAX_AMPLITUDE / Math.max(frequencies.length, 1);
 
@@ -90,8 +86,7 @@ function generateWav(
         case "soft":
           // Sine with gentle exponential decay built in
           sample += Math.sin(2 * Math.PI * freq * t) * Math.exp(-t * 1.5);
-          sample +=
-            Math.sin(2 * Math.PI * freq * 2 * t) * 0.1 * Math.exp(-t * 2);
+          sample += Math.sin(2 * Math.PI * freq * 2 * t) * 0.1 * Math.exp(-t * 2);
           break;
       }
     }
@@ -105,10 +100,7 @@ function generateWav(
     }
 
     sample *= amplitude * envelope;
-    const intSample = Math.max(
-      -32768,
-      Math.min(32767, Math.floor(sample * 32767)),
-    );
+    const intSample = Math.max(-32768, Math.min(32767, Math.floor(sample * 32767)));
     buffer.writeInt16LE(intSample, 44 + i * 2);
   }
 
@@ -124,11 +116,7 @@ function playbackId(frequencies: number[]): string {
  * Play one or more frequencies. Returns an ID for the playback session.
  * For infinite duration, generates a 30-second looping file.
  */
-export function playFrequencies(
-  frequencies: number[],
-  duration: Duration = 2,
-  toneType: ToneType = "warm",
-): string {
+export function playFrequencies(frequencies: number[], duration: Duration = 2, toneType: ToneType = "warm"): string {
   const dir = ensureSupportDir();
   const id = playbackId(frequencies);
   const loop = duration === 0;
@@ -136,16 +124,9 @@ export function playFrequencies(
   const wavBuffer = generateWav(frequencies, actualDuration, toneType, {
     seamlessLoop: loop,
   });
-  const filePath = path.join(dir, `tone-${id}.wav`);
+  const filePath = path.join(dir, `tone-${id}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.wav`);
 
-  writeFileSync(
-    filePath,
-    new Uint8Array(
-      wavBuffer.buffer,
-      wavBuffer.byteOffset,
-      wavBuffer.byteLength,
-    ),
-  );
+  writeFileSync(filePath, new Uint8Array(wavBuffer.buffer, wavBuffer.byteOffset, wavBuffer.byteLength));
 
   // Stop any existing playback of this exact frequency set
   stopPlayback(id);
@@ -154,7 +135,17 @@ export function playFrequencies(
 
   const playOnce = () => {
     const proc = exec(command, (err) => {
-      if (!err && loop && runningProcesses.has(id)) {
+      // Ignore stale callbacks from previous processes using the same playback id.
+      if (runningProcesses.get(id) !== proc) {
+        try {
+          unlinkSync(filePath);
+        } catch {
+          /* already cleaned */
+        }
+        return;
+      }
+
+      if (!err && loop) {
         // Loop: play again
         playOnce();
       } else {

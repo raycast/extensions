@@ -1,24 +1,7 @@
-import {
-  ActionPanel,
-  Action,
-  List,
-  Icon,
-  Color,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { ActionPanel, Action, List, Icon, Color, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
-import {
-  resolveChord,
-  getChordSuggestions,
-  getAllChordDefinitions,
-} from "./lib/chords";
-import {
-  playFrequencies,
-  stopAll,
-  type ToneType,
-  type Duration,
-} from "./lib/audio";
+import { resolveChord, getChordSuggestions, getAllChordDefinitions } from "./lib/chords";
+import { playFrequencies, stopAll, type ToneType, type Duration } from "./lib/audio";
 
 const TONE_OPTIONS: { title: string; value: ToneType }[] = [
   { title: "Warm (Default)", value: "warm" },
@@ -73,16 +56,9 @@ export default function SearchChords() {
       filtering={false}
       onSearchTextChange={setSearchText}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Tone"
-          onChange={(val) => setTone(val as ToneType)}
-        >
+        <List.Dropdown tooltip="Tone" onChange={(val) => setTone(val as ToneType)}>
           {TONE_OPTIONS.map((opt) => (
-            <List.Dropdown.Item
-              key={opt.value}
-              title={opt.title}
-              value={opt.value}
-            />
+            <List.Dropdown.Item key={opt.value} title={opt.title} value={opt.value} />
           ))}
         </List.Dropdown>
       }
@@ -93,9 +69,7 @@ export default function SearchChords() {
           <List.Section title={`${chord.fullName}`}>
             <List.Item
               title={chord.symbol}
-              subtitle={chord.notes
-                .map((n) => `${n.scientificName} (${n.frequency} Hz)`)
-                .join("  ·  ")}
+              subtitle={chord.notes.map((n) => `${n.scientificName} (${n.frequency} Hz)`).join("  ·  ")}
               accessories={[
                 {
                   tag: {
@@ -131,8 +105,7 @@ export default function SearchChords() {
                       {
                         tag: {
                           value: s.category,
-                          color:
-                            CATEGORY_COLORS[s.category] || Color.PrimaryText,
+                          color: CATEGORY_COLORS[s.category] || Color.PrimaryText,
                         },
                       },
                     ]}
@@ -167,11 +140,7 @@ export default function SearchChords() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action
-                    title="Select Chord"
-                    icon={Icon.MagnifyingGlass}
-                    onAction={() => setSearchText(s.symbol)}
-                  />
+                  <Action title="Select Chord" icon={Icon.MagnifyingGlass} onAction={() => setSearchText(s.symbol)} />
                 </ActionPanel>
               }
             />
@@ -181,10 +150,7 @@ export default function SearchChords() {
         <>
           {searchText && (
             <List.Section title="No Match">
-              <List.Item
-                title="No chord found"
-                subtitle='Try something like "Cmaj7" or "Dm"'
-              />
+              <List.Item title="No chord found" subtitle='Try something like "Cmaj7" or "Dm"' />
             </List.Section>
           )}
           {!searchText &&
