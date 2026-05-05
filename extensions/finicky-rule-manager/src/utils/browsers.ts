@@ -56,13 +56,17 @@ export async function detectInstalledBrowsers(): Promise<Browser[]> {
  * Gets a cached list of browsers or detects them
  */
 let cachedBrowsers: Browser[] | null = null;
+let cacheUpdatedAt = 0;
+const BROWSER_CACHE_TTL_MS = 60 * 1000;
 
 export async function getInstalledBrowsers(): Promise<Browser[]> {
-  if (cachedBrowsers) {
+  const cacheIsFresh = Date.now() - cacheUpdatedAt < BROWSER_CACHE_TTL_MS;
+  if (cachedBrowsers && cacheIsFresh) {
     return cachedBrowsers;
   }
 
   cachedBrowsers = await detectInstalledBrowsers();
+  cacheUpdatedAt = Date.now();
   return cachedBrowsers;
 }
 
@@ -71,4 +75,5 @@ export async function getInstalledBrowsers(): Promise<Browser[]> {
  */
 export function clearBrowserCache(): void {
   cachedBrowsers = null;
+  cacheUpdatedAt = 0;
 }

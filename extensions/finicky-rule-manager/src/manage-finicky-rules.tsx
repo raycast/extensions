@@ -5,6 +5,7 @@ import {
   confirmAlert,
   Form,
   Icon,
+  LocalStorage,
   List,
   open,
   popToRoot,
@@ -14,7 +15,7 @@ import {
   getPreferenceValues,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-import { loadRules, saveRules, getDefaultBrowser } from "./storage";
+import { loadRules, saveRules, getDefaultBrowser, setDefaultBrowser } from "./storage";
 import { Rule } from "./types";
 import { expandTilde } from "./utils/path";
 import { generateFinickyConfig, writeConfigFile } from "./utils/finicky";
@@ -24,6 +25,20 @@ import fs from "fs/promises";
 
 function uuid(): string {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+const IMPORT_DISMISSED_KEY = "importDismissed";
+
+async function isImportDismissed(): Promise<boolean> {
+  return (await LocalStorage.getItem<string>(IMPORT_DISMISSED_KEY)) === "true";
+}
+
+async function setImportDismissed(dismissed: boolean): Promise<void> {
+  if (dismissed) {
+    await LocalStorage.setItem(IMPORT_DISMISSED_KEY, "true");
+    return;
+  }
+  await LocalStorage.removeItem(IMPORT_DISMISSED_KEY);
 }
 
 async function syncConfigFile(args: { configPath: string; defaultBrowser: string; rules: Rule[] }) {
@@ -315,6 +330,7 @@ export default function Command() {
 
     const existingRules = await loadRules();
     if (existingRules.length > 0) return;
+    if (await isImportDismissed()) return;
 
     try {
       const expandedPath = expandTilde(configPath);
@@ -335,6 +351,8 @@ export default function Command() {
 
       if (shouldImport) {
         await importFromConfig();
+      } else {
+        await setImportDismissed(true);
       }
     } catch {
       // Config file doesn't exist, no import needed
@@ -362,6 +380,9 @@ export default function Command() {
         });
         return;
       }
+      if (parsed.defaultBrowser) {
+        await setDefaultBrowser(parsed.defaultBrowser);
+      }
 
       const shouldMerge = rules.length > 0;
       let message = `Import ${parsed.rules.length} rule(s)?`;
@@ -382,7 +403,7 @@ export default function Command() {
 
         if (mergeConfirm) {
           const mergedRules = [...rules, ...parsed.rules];
-          await persistAndSync(mergedRules);
+          await persistAndSync(mergedRules, parsed.defaultBrowser);
           message = `Merged ${parsed.rules.length} rules`;
         } else {
           const replaceConfirm = await confirmAlert({
@@ -399,13 +420,15 @@ export default function Command() {
           });
           if (!replaceConfirm) return;
 
-          await persistAndSync(parsed.rules);
+          await persistAndSync(parsed.rules, parsed.defaultBrowser);
           message = `Imported ${parsed.rules.length} rules`;
         }
       } else {
-        await persistAndSync(parsed.rules);
+        await persistAndSync(parsed.rules, parsed.defaultBrowser);
         message = `Imported ${parsed.rules.length} rules`;
       }
+
+      await setImportDismissed(false);
 
       await showToast({
         style: Toast.Style.Success,
@@ -424,7 +447,7 @@ export default function Command() {
     refresh().then(() => checkAndOfferImport());
   }, []);
 
-  async function persistAndSync(nextRules: Rule[]) {
+  async function persistAndSync(nextRules: Rule[], defaultBrowserOverride?: string) {
     if (!configPath) {
       await showToast({
         style: Toast.Style.Failure,
@@ -440,7 +463,7 @@ export default function Command() {
     setRules(nextRules);
 
     try {
-      const defaultBrowser = await getDefaultBrowser();
+      const defaultBrowser = defaultBrowserOverride ?? (await getDefaultBrowser());
       await syncConfigFile({ configPath, defaultBrowser, rules: nextRules });
       await showToast({ style: Toast.Style.Success, title: "Finicky config updated" });
     } catch (e) {
