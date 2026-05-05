@@ -1,6 +1,6 @@
 # Open With App Changelog
 
-## [Add Bloom support] - {PR_MERGE_DATE}
+## [Add Bloom support] - 2026-05-05
 
 - Read the selection from Bloom in addition to Finder
 - Detect the frontmost file manager at runtime; Finder remains the fallback
