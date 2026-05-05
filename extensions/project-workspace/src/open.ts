@@ -67,7 +67,9 @@ function launchApp(appPath: string, targetPath: string): Promise<void> {
         : spawn("open", ["-a", appPath, targetPath], { detached: true, stdio: "ignore" });
 
     child.once("error", reject);
+    child.on("close", () => {
+      resolve();
+    });
     child.unref();
-    resolve();
   });
 }

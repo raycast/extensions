@@ -57,7 +57,10 @@ export function createIssue(fields: {
   completedAt?: string;
 }): Issue {
   const issues = loadIssues();
-  const seq = issues.length > 0 ? Math.max(...issues.map((i) => i.seq)) + 1 : 1;
+  const validSeqs = issues
+    .map((i) => i.seq)
+    .filter((seq) => typeof seq === "number" && Number.isInteger(seq) && seq > 0);
+  const seq = validSeqs.length > 0 ? Math.max(...validSeqs) + 1 : 1;
   const now = new Date().toISOString();
   const issue: Issue = {
     id: `ISS-${String(seq).padStart(3, "0")}`,

@@ -19,6 +19,11 @@ const COMMON_WORKSPACE_DIRECTORIES = new Set([
   "sites",
 ]);
 
+export function clearWorkspaceCaches(): void {
+  workspacePatternsCache.clear();
+  workspaceNameCache.clear();
+}
+
 export async function getRuntimeStatuses(projects: ProjectRecord[]): Promise<Record<string, RuntimeStatus>> {
   const inactiveStatuses = projects.reduce<Record<string, RuntimeStatus>>((statuses, project) => {
     statuses[project.id] = {

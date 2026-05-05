@@ -126,7 +126,13 @@ async function addCandidate(
   }
 }
 
-async function calculateSize(candidatePath: string): Promise<number> {
+async function calculateSize(candidatePath: string, depth = 0): Promise<number> {
+  const MAX_DEPTH = 100;
+
+  if (depth > MAX_DEPTH) {
+    return 0;
+  }
+
   const stat = await fs.lstat(candidatePath);
 
   if (stat.isSymbolicLink()) {
@@ -145,7 +151,7 @@ async function calculateSize(candidatePath: string): Promise<number> {
   let totalSize = 0;
 
   for (const entry of entries) {
-    totalSize += await calculateSize(path.join(candidatePath, entry.name));
+    totalSize += await calculateSize(path.join(candidatePath, entry.name), depth + 1);
   }
 
   return totalSize;
