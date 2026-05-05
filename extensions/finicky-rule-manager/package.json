@@ -17,9 +17,10 @@
     {
       "name": "configPath",
       "type": "textfield",
-      "required": false,
+      "required": true,
       "title": "Finicky Config Path",
       "description": "Path to your Finicky config file (e.g. ~/.finicky.js)",
+      "default": "~/.finicky.js",
       "placeholder": "~/.finicky.js"
     },
     {
