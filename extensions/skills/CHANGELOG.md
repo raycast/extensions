@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Improve Installed Indicators, Source Matching & Refresh] - {PR_MERGE_DATE}
+## [Improve Installed Indicators, Source Matching & Refresh] - 2026-05-05
 
 - Replace the green "Installed" tag in "Search Skills" with a green check-circle indicator and green skill icon for installed skills
 - Show the skill source (`owner/repo`) as the subtitle in "Search Skills" and "Manage Skills" to better distinguish skills between them
