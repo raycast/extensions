@@ -154,17 +154,16 @@ export default async function tool({
 
           const localPath = path.join(desktopDir, filename);
 
-          // Create write stream
-          const file = fs.createWriteStream(localPath);
-
           // Choose http or https based on URL
           const requester = url.startsWith("https") ? https : http;
 
-          // Download the file
+          // Download the file — defer creating the write stream until we know
+          // we have a 200 response so redirects/errors don't leave empty files.
           requester
             .get(url, (response) => {
               // Check if redirection
               if (response.statusCode === 301 || response.statusCode === 302) {
+                response.resume();
                 if (response.headers.location && redirectsLeft > 0) {
                   downloadFile(response.headers.location, redirectsLeft - 1).then(resolve);
                   return;
@@ -175,22 +174,25 @@ export default async function tool({
 
               // Check for successful response
               if (response.statusCode !== 200) {
+                response.resume();
                 resolve(null);
                 return;
               }
 
-              // Pipe the response to the file
+              const file = fs.createWriteStream(localPath);
               response.pipe(file);
 
-              // When download completes
               file.on("finish", () => {
                 file.close();
                 resolve(localPath);
               });
+              file.on("error", () => {
+                file.close();
+                fs.unlink(localPath, () => {});
+                resolve(null);
+              });
             })
             .on("error", () => {
-              // On error, delete the file and resolve null
-              fs.unlink(localPath, () => {});
               resolve(null);
             });
         } catch (error) {
