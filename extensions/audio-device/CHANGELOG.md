@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-05-05
 
 - Add volume control support for windows
 - Improve install logic and show status while installing / updating from previous extension version
