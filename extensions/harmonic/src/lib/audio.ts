@@ -28,6 +28,7 @@ function generateWav(
   frequencies: number[],
   durationSecs: number,
   toneType: ToneType,
+  options?: { seamlessLoop?: boolean },
 ): Buffer {
   const numSamples = Math.floor(SAMPLE_RATE * durationSecs);
   const dataSize = numSamples * 2; // 16-bit mono
@@ -48,9 +49,14 @@ function generateWav(
   buffer.write("data", 36);
   buffer.writeUInt32LE(dataSize, 40);
 
-  // Attack/decay envelope to prevent clicks
-  const attackSamples = Math.min(Math.floor(SAMPLE_RATE * 0.05), numSamples); // 50ms attack
-  const decaySamples = Math.min(Math.floor(SAMPLE_RATE * 0.15), numSamples); // 150ms decay
+  const seamlessLoop = options?.seamlessLoop ?? false;
+  // Avoid per-cycle fade in/out for looped playback (causes audible pulsing).
+  const attackSamples = seamlessLoop
+    ? 0
+    : Math.min(Math.floor(SAMPLE_RATE * 0.05), numSamples); // 50ms attack
+  const decaySamples = seamlessLoop
+    ? 0
+    : Math.min(Math.floor(SAMPLE_RATE * 0.15), numSamples); // 150ms decay
 
   const amplitude = MAX_AMPLITUDE / Math.max(frequencies.length, 1);
 
@@ -92,9 +98,9 @@ function generateWav(
 
     // Apply envelope
     let envelope = 1;
-    if (i < attackSamples) {
+    if (attackSamples > 0 && i < attackSamples) {
       envelope = i / attackSamples;
-    } else if (i > numSamples - decaySamples) {
+    } else if (decaySamples > 0 && i > numSamples - decaySamples) {
       envelope = (numSamples - i) / decaySamples;
     }
 
@@ -125,8 +131,11 @@ export function playFrequencies(
 ): string {
   const dir = ensureSupportDir();
   const id = playbackId(frequencies);
-  const actualDuration = duration === 0 ? 30 : duration;
-  const wavBuffer = generateWav(frequencies, actualDuration, toneType);
+  const loop = duration === 0;
+  const actualDuration = loop ? 30 : duration;
+  const wavBuffer = generateWav(frequencies, actualDuration, toneType, {
+    seamlessLoop: loop,
+  });
   const filePath = path.join(dir, `tone-${id}.wav`);
 
   writeFileSync(
@@ -141,7 +150,6 @@ export function playFrequencies(
   // Stop any existing playback of this exact frequency set
   stopPlayback(id);
 
-  const loop = duration === 0;
   const command = `afplay "${filePath}"`;
 
   const playOnce = () => {
