@@ -5,9 +5,15 @@
   "description": "Search notes and chords, see their frequencies, and play them as tones",
   "icon": "extension-icon.png",
   "author": "chandlervdw",
-  "categories": ["Media", "Productivity"],
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "search-notes",
@@ -25,15 +31,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.0"
+    "@raycast/api": "^1.104.15"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.10.1",
-    "@types/react": "^18.3.12",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",

@@ -43,12 +43,12 @@ Then open Raycast and search for "Search Notes" or "Search Chords".
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action |
-| --- | --- |
-| `Cmd+1` | Play for 1 second |
-| `Cmd+2` | Play for 2 seconds |
-| `Cmd+5` | Play for 5 seconds |
-| `Cmd+0` | Play infinitely |
-| `Cmd+Shift+S` | Stop all playback |
-| `Cmd+C` | Copy frequency / chord notes |
+| Shortcut      | Action                       |
+| ------------- | ---------------------------- |
+| `Cmd+1`       | Play for 1 second            |
+| `Cmd+2`       | Play for 2 seconds           |
+| `Cmd+5`       | Play for 5 seconds           |
+| `Cmd+0`       | Play infinitely              |
+| `Cmd+Shift+S` | Stop all playback            |
+| `Cmd+C`       | Copy frequency / chord notes |
 | `Cmd+Shift+C` | Copy note name / frequencies |
