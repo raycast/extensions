@@ -2,14 +2,14 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-translate",
   "title": "AI Translate",
-  "description": "Translate selected text or screenshot OCR text with DeepSeek, Xiaomi MiMo, MiniMax, Gemini, Kimi, and OpenAI.",
+  "description": "Translate selected text, translate screenshots, or extract screenshot text with OCR and AI providers.",
   "icon": "icon.png",
   "author": "xianwei_zhang",
   "license": "MIT",
   "commands": [
     {
       "name": "translate",
-      "title": "Translate Text",
+      "title": "Translate Selected Text",
       "subtitle": "AI Translate",
       "description": "Translate selected text, fallback text, or typed text with your configured AI provider.",
       "mode": "view",
@@ -26,12 +26,21 @@
     },
     {
       "name": "screenshot-translate",
-      "title": "Screenshot Translate",
+      "title": "Translate Screenshot",
       "subtitle": "AI Translate",
       "description": "Capture a screen region, OCR it, and translate the recognized text.",
       "mode": "no-view",
       "icon": "screenshot-translate.png",
       "keywords": ["ocr", "screenshot", "capture", "translate"]
+    },
+    {
+      "name": "extract-text-from-screenshot",
+      "title": "Extract Text from Screenshot",
+      "subtitle": "AI Translate",
+      "description": "Capture a screen region, OCR it, and copy the recognized text to the clipboard.",
+      "mode": "no-view",
+      "icon": "screenshot-translate.png",
+      "keywords": ["ocr", "screenshot", "capture", "extract", "copy", "clipboard", "text"]
     }
   ],
   "categories": ["Productivity", "Applications", "Developer Tools", "Web"],

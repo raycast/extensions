@@ -4,8 +4,9 @@
 
 ## 功能
 
-- 选中翻译：选中任意应用里的文本后运行 `Translate Text`。
-- 截图翻译：运行 `Screenshot Translate`，框选屏幕区域，系统 Vision OCR 识别后自动打开翻译结果。
+- 选中翻译：选中任意应用里的文本后运行 `Translate Selected Text`。
+- 截图翻译：运行 `Translate Screenshot`，框选屏幕区域，OCR 识别后自动打开翻译结果。
+- 纯 OCR：运行 `Extract Text from Screenshot`，框选屏幕区域，OCR 识别后复制到剪贴板。
 - OCR 引擎：支持本地 macOS Vision、Tesseract、本地/自托管 PaddleOCR、百度 OCR API、MinerU Agent API。
 - 多模型：支持 DeepSeek、小米 MiMo、MiniMax、Gemini、Kimi、OpenAI / ChatGPT。
 - 可配置：Provider 开关、排序、目标语言、翻译风格、模型名、Base URL、API Key。
@@ -29,7 +30,7 @@ Current model IDs worth trying:
 
 ## 快捷键
 
-Raycast 扩展不能在代码里强制写入全局快捷键。安装后在 Raycast Settings > Extensions > AI Translate 里给 `Screenshot Translate` 绑定你想要的快捷键即可。
+Raycast 扩展不能在代码里强制写入全局快捷键。安装后在 Raycast Settings > Extensions > AI Translate 里给 `Translate Screenshot` 或 `Extract Text from Screenshot` 绑定你想要的快捷键即可。
 
 ## 开发
 
