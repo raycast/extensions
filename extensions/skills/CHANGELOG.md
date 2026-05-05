@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Add Newly Supported Agents] - {PR_MERGE_DATE}
+
+- Add 11 agents supported by the Skills CLI: AiderDesk, Code Studio, CodeArts Agent, Codemaker, Devin for Terminal, Dexto, ForgeCode, IBM Bob, Rovo Dev, Tabnine CLI, and Universal
+
 ## [Improve Installed Indicators, Source Matching & Refresh] - 2026-05-05
 
 - Replace the green "Installed" tag in "Search Skills" with a green check-circle indicator and green skill icon for installed skills
