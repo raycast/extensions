@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sound-switcher",
+  "title": "Sound Switcher",
+  "description": "Switch macOS input and output sound devices together, or control them separately.",
+  "icon": "command-icon.png",
+  "author": "corychainsman",
+  "keywords": [
+    "audio",
+    "sound",
+    "input",
+    "output",
+    "device"
+  ],
+  "license": "MIT",
+  "categories": [
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Switch Sound Device",
+      "description": "Switch sound input and output together or separately",
+      "icon": "command-icon.png",
+      "mode": "view"
+    }
+  ],
+  "scripts": {
+    "copy-binary": "node scripts/copy-binary.js",
+    "build": "npm run copy-binary && ray build -e dist",
+    "dev": "npm run copy-binary && ray develop",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@spotxyz/macos-audio-devices": "^1.5.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.10.1",
+    "@typescript-eslint/parser": "^8.46.4",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.8"
+  }
+}
