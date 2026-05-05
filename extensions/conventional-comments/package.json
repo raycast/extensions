@@ -3,8 +3,11 @@
   "name": "conventional-comments",
   "title": "Conventional Comments",
   "description": "Paste conventional comment into your foremost application",
-  "icon": "icon.png",
+  "icon": "extension-icon.png",
   "author": "krzysztofzuraw",
+  "contributors": [
+    "0xdhrv"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -20,26 +23,86 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "generate-conventional-comment",
+      "title": "Generate Conventional Comment",
+      "description": "Generate a conventional code review comment in the format <label> [decorations]: <subject> with optional discussion."
+    },
+    {
+      "name": "generate-conventional-commit",
+      "title": "Generate Conventional Commit",
+      "description": "Generate a conventional commit message with optional scope, body, and breaking change footer."
+    }
+  ],
+  "ai": {
+    "instructions": "You help users write conventional comments and conventional commits. For generation requests, always call the matching tool (`generate-conventional-comment` or `generate-conventional-commit`) and return the tool output directly. For conventional comments, follow https://conventionalcomments.org: use `<label> [decorations]: <subject>` and optional discussion in a separate paragraph. Prefer these labels: praise, nitpick, suggestion, issue, todo, question, thought, chore, note (optionally typo, polish, quibble). Use decorations sparingly and only when useful (e.g. non-blocking, blocking, if-minor, or a focused area like security/test/ux). If decorations are needed, include them in the `label` argument (for example: `issue (non-blocking)` or `suggestion (security)`). Keep subjects concise and actionable; include discussion only when it adds rationale or next steps.",
+    "evals": [
+      {
+        "input": "@conventional-comments Generate a conventional review comment with label suggestion, subject \"extract this into a helper\", and content \"This logic is duplicated in three places.\"",
+        "mocks": {
+          "generate-conventional-comment": [
+            "suggestion: extract this into a helper\n\nThis logic is duplicated in three places."
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "generate-conventional-comment"
+          }
+        ]
+      },
+      {
+        "input": "@conventional-comments Create a conventional commit for type fix, scope parser, and description \"handle empty input\".",
+        "mocks": {
+          "generate-conventional-commit": [
+            "fix(parser): handle empty input"
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "generate-conventional-commit"
+          }
+        ]
+      },
+      {
+        "input": "@conventional-comments Write a non-blocking issue comment about missing input sanitization and add a short rationale.",
+        "mocks": {
+          "generate-conventional-comment": [
+            "issue (non-blocking): missing input sanitization\n\nUnsanitized user input can leak unsafe HTML into downstream rendering paths."
+          ]
+        },
+        "expected": [
+          {
+            "callsTool": "generate-conventional-comment"
+          }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@jeromefitz/conventional-gitmoji": "^1.0.0",
-    "@raycast/api": "^1.25.0"
+    "@jeromefitz/conventional-gitmoji": "^5.0.0",
+    "@raycast/api": "^1.104.15"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "~25.6.0",
+    "@types/react": "^19.2.14",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "eslint": "^10.3.0",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
-    "tsc": "tsc --project . --noEmit",
-    "lint": "eslint --fix --quiet --ext .ts,.tsx,.es,.jsx src/"
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }
