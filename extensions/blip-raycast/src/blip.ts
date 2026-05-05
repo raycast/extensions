@@ -77,8 +77,8 @@ function buildBlipFinderServiceScript(path: string) {
     "repeat 5 times",
     "  set serviceState to my clickBlipService()",
     '  if serviceState is "clicked" then return "clicked"',
-    '  if serviceState is "disabled" then set sawDisabledService to true',
-    "  delay 0.2",
+  if serviceState is "disabled" then set sawDisabledService to true
+  if sawDisabledService then exit repeat
     "end repeat",
     `if sawDisabledService then error ${quoted(BLIP_SERVICE_DISABLED_MESSAGE)}`,
     `error ${quoted(BLIP_SERVICE_NOT_FOUND_MESSAGE)}`,
