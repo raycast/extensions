@@ -52,7 +52,7 @@ export default function tool(input: Input) {
     throw new Error(`Unknown type "${typeKey}". Use one of: ${availableTypes}`);
   }
 
-  const format = (input.format?.trim() || gitmoji.format).toString();
+  const format = (input.format?.trim() ?? gitmoji.format).toString();
   const scope = input.scope?.trim();
   const hasTypeToken = format.includes("type");
 
