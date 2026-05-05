@@ -29,6 +29,7 @@ import { EntryLike, EntryType, PinMethods } from "./lib/types";
 import {
   filterEntriesByType,
   filterUnpinnedEntries,
+  getErrorMessage,
   isFileEntry,
   isFolderEntry,
   isRemoteEntry,
@@ -312,15 +313,23 @@ function RemoteItem(
   };
 
   const openRemoteInWindows = async (revert = false) => {
-    const cli = getVSCodeCLI();
-    const reuseWindow = closeOtherWindows !== revert;
+    try {
+      const cli = getVSCodeCLI();
+      const reuseWindow = closeOtherWindows !== revert;
 
-    if (isRemoteWorkspaceEntry(props.entry)) {
-      cli.openFileURISync(props.uri, reuseWindow);
-      return;
+      if (isRemoteWorkspaceEntry(props.entry)) {
+        cli.openFileURISync(props.uri, reuseWindow);
+        return;
+      }
+
+      cli.openFolderURISync(props.uri, reuseWindow);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: `Failed to open in ${build}`,
+        message: getErrorMessage(error),
+      });
     }
-
-    cli.openFolderURISync(props.uri, reuseWindow);
   };
 
   return (
@@ -366,23 +375,41 @@ function RemoteItem(
 }
 
 function getRemoteDisplay(entry: EntryLike, uri: string, subtitle?: string) {
+  const fallbackTitle = getRemoteBasename(uri);
+
   if (subtitle) {
     return {
-      title: decodeURI(basename(uri)),
+      title: fallbackTitle,
       subtitle,
     };
   }
 
-  const remoteUri = new URL(uri);
-  const remotePath = decodeURIComponent(remoteUri.pathname);
-  const remoteName = decodeURIComponent(basename(remotePath));
-  const remoteParentPath = dirname(remotePath);
   const remoteAuthority = getEntryRemoteAuthority(entry);
 
-  return {
-    title: remoteAuthority ? `${remoteName} [${formatRemoteAuthority(remoteAuthority)}]` : remoteName,
-    subtitle: formatRemotePath(remoteParentPath, remoteAuthority),
-  };
+  try {
+    const remoteUri = new URL(uri);
+    const remotePath = decodeURIComponent(remoteUri.pathname);
+    const remoteName = decodeURIComponent(basename(remotePath));
+    const remoteParentPath = dirname(remotePath);
+
+    return {
+      title: remoteAuthority ? `${remoteName} [${formatRemoteAuthority(remoteAuthority)}]` : remoteName,
+      subtitle: formatRemotePath(remoteParentPath, remoteAuthority),
+    };
+  } catch {
+    return {
+      title: remoteAuthority ? `${fallbackTitle} [${formatRemoteAuthority(remoteAuthority)}]` : fallbackTitle,
+      subtitle: "/",
+    };
+  }
+}
+
+function getRemoteBasename(uri: string) {
+  try {
+    return decodeURI(basename(uri));
+  } catch {
+    return basename(uri);
+  }
 }
 
 function getEntryRemoteAuthority(entry: EntryLike) {
