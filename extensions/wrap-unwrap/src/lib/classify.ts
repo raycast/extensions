@@ -61,6 +61,16 @@ export type Classified = {
   hardBreak?: "spaces" | "backslash";
 };
 
+/** True iff two records have identical blockquote prefix stacks (depth + per-frame marker/spaceAfter). */
+export function samePrefixStack(a: Classified, b: Classified): boolean {
+  if (a.prefixes.length !== b.prefixes.length) return false;
+  for (let i = 0; i < a.prefixes.length; i++) {
+    if (a.prefixes[i].marker !== b.prefixes[i].marker) return false;
+    if (a.prefixes[i].spaceAfter !== b.prefixes[i].spaceAfter) return false;
+  }
+  return true;
+}
+
 function peelBlockquotes(line: string): {
   prefixes: BlockquoteFrame[];
   content: string;

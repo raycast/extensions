@@ -1,5 +1,5 @@
 // src/lib/wrap.ts
-import { classify, type Classified } from "./classify.js";
+import { classify, samePrefixStack, type Classified } from "./classify.js";
 import { protectInline, restoreInline } from "./inline.js";
 
 export type WrapOptions = {
@@ -103,7 +103,7 @@ export function wrap(text: string, opts: WrapOptions): string {
     while (j < records.length && !endsWithHardBreak) {
       const next = records[j];
       if (next.role !== "prose") break;
-      if (next.prefixes.length !== rec.prefixes.length) break;
+      if (!samePrefixStack(next, rec)) break;
       // For list-item: a following prose line is a continuation regardless of indent.
       // Strip leading whitespace on continuation (matches unwrap behavior).
       combined += " " + next.content.replace(/^\s+/, "");

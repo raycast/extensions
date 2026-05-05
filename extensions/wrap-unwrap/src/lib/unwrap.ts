@@ -1,5 +1,5 @@
 // src/lib/unwrap.ts
-import { classify, type Classified } from "./classify.js";
+import { classify, samePrefixStack, type Classified } from "./classify.js";
 import { HYPHEN_BREAK_END } from "./regex.js";
 
 export type UnwrapOptions = {
@@ -8,15 +8,6 @@ export type UnwrapOptions = {
 };
 
 const REFLOWABLE_ROLES = new Set<Classified["role"]>(["prose", "list-item"]);
-
-function samePrefixStack(a: Classified, b: Classified): boolean {
-  if (a.prefixes.length !== b.prefixes.length) return false;
-  for (let i = 0; i < a.prefixes.length; i++) {
-    if (a.prefixes[i].marker !== b.prefixes[i].marker) return false;
-    if (a.prefixes[i].spaceAfter !== b.prefixes[i].spaceAfter) return false;
-  }
-  return true;
-}
 
 /** Build the prefix string used for re-emission. */
 function emitPrefix(prefixes: Classified["prefixes"]): string {
