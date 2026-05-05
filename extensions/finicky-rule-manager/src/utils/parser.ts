@@ -310,6 +310,18 @@ function parseHandlerBlock(block: string): Rule | null {
       return null;
     }
 
+    const singleStringMatch = block.match(/\bmatch\s*:\s*["']([^"']+)["']/);
+    if (singleStringMatch) {
+      return {
+        id: uuid(),
+        name,
+        enabled: true,
+        matchType: "wildcards",
+        patterns: [singleStringMatch[1]],
+        browser,
+      };
+    }
+
     // match: [ "a", "b" ] — use bracket-aware scanning so patterns containing
     // ']' (e.g. "*://example.com/path[0-9]*") aren't truncated.
     const matchKeyRegex = /\bmatch\s*:\s*\[/;
