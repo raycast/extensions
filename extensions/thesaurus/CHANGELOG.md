@@ -1,6 +1,6 @@
 # Thesaurus (Merriam Webster) Changelog
 
-## [Copy Result Tags] - {PR_MERGE_DATE}
+## [Copy Result Tags] - 2026-05-05
 
 - Added click-to-copy support for synonym and antonym result tags.
 
