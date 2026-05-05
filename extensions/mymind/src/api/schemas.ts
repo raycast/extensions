@@ -43,10 +43,28 @@ export const ObjectNoteSchema = z.object({
 });
 export type ObjectNote = z.infer<typeof ObjectNoteSchema>;
 
+export const PaletteSchema = z
+  .object({
+    dominantColor: z.string().nullish(),
+  })
+  .loose();
+export type Palette = z.infer<typeof PaletteSchema>;
+
+export const BlobReferenceSchema = z
+  .object({
+    url: z.string().nullish(),
+    mime: z.string().nullish(),
+    size: z.number().nullish(),
+    palette: PaletteSchema.nullish(),
+  })
+  .loose();
+export type BlobReference = z.infer<typeof BlobReferenceSchema>;
+
 export const MyMindObjectSchema = z.object({
   id: z.string(),
   title: nullishString(),
   entityType: z.string().nullish(),
+  summary: z.string().nullish(),
   content: z.unknown().nullish(),
   spaces: z
     .array(ObjectSpaceSchema)
@@ -56,8 +74,12 @@ export const MyMindObjectSchema = z.object({
     .array(ObjectTagSchema)
     .nullish()
     .transform((v) => v ?? []),
-  notes: z.array(ObjectNoteSchema).nullish(),
+  notes: z
+    .array(ObjectNoteSchema)
+    .nullish()
+    .transform((v) => v ?? []),
   source: ObjectSourceSchema.nullish(),
+  blob: BlobReferenceSchema.nullish(),
   bumped: z.string(),
   created: z.string(),
   modified: z.string(),
@@ -66,13 +88,6 @@ export const MyMindObjectSchema = z.object({
 export type MyMindObject = z.infer<typeof MyMindObjectSchema>;
 
 export const ObjectListSchema = z.array(MyMindObjectSchema);
-
-export const SearchResultSchema = z.object({
-  id: z.string(),
-  score: z.number(),
-  semanticScore: z.number().nullish(),
-});
-export type SearchResult = z.infer<typeof SearchResultSchema>;
 
 export const SpaceObjectRefSchema = z.object({
   id: z.string(),

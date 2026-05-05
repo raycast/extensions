@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { createHmac } from "crypto";
 
 const BASE_URL = "https://api.mymind.com";
-const USER_AGENT = "raycast-mymind/2.1.0";
+const USER_AGENT = "raycast-mymind/2.3.0";
 const TOKEN_LIFETIME_SECONDS = 60;
 
 interface ApiPreferences {
@@ -196,7 +196,7 @@ export const api = {
     const response = await request("PUT", path, { ...withJsonAccept(opts), body });
     return readJson<T>(response);
   },
-  async delete(path: string, opts?: RequestOptions): Promise<void> {
-    await request("DELETE", path, withJsonAccept(opts));
+  async delete(path: string, body?: unknown, opts?: RequestOptions): Promise<void> {
+    await request("DELETE", path, { ...withJsonAccept(opts), body });
   },
 };

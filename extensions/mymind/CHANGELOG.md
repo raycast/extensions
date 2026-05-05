@@ -45,15 +45,21 @@ support.
 ### Card actions
 
 - Show Details (Enter) with metadata sidebar and the markdown body
-  rendered inline. Refreshes after edits.
+  rendered inline. Surfaces summary as a blockquote above the body,
+  appends a Notes section after, and shows dominant color from
+  `blob.palette` as a tag.
+- Manage Notes (Cmd+Shift+N) — add (`POST`), edit (`PUT`), and delete
+  (`DELETE`) notes via `/objects/:id/notes/:noteId`.
 - Find Related (Cmd+Shift+R) — pushes a view of semantically related
-  cards using `GET /search?similarTo=:id`.
-- Edit Card (Cmd+E) — read existing content, edit title and markdown,
-  save back via `PATCH /objects/:id` and `PUT /objects/:id/content`.
+  cards via `GET /objects?similarTo=:id` (one round-trip).
+- Edit Card (Cmd+E) — read existing content, edit title, summary,
+  and markdown, save back via `PATCH /objects/:id` and `PUT
+  /objects/:id/content`.
 - Manage Spaces (Cmd+Shift+S) — toggle the card in or out of any space
   via `PUT`/`DELETE /spaces/:spaceId/objects/:objectId`.
-- Add Tags (Cmd+Shift+T) — append tags via `POST /objects/:id/tags`.
-  Removal still happens on the web app — the API doesn't expose it.
+- Manage Tags (Cmd+Shift+T) — add via `POST /objects/:id/tags` and
+  remove via `DELETE /objects/:id/tags`. The form pre-selects current
+  tags; deselecting one removes it on save.
 - Copy as Markdown (Cmd+Shift+M) — pulls markdown via
   `GET /objects/:id/content` with `Accept: text/markdown`.
 - Pin (Cmd+Shift+P) and Unpin (Cmd+Ctrl+P).
@@ -73,16 +79,23 @@ support.
 ### Internals
 
 - New `src/api/` module: `client.ts` (HMAC signer, problem+json error
-  parsing), `objects.ts`, `search.ts`, `spaces.ts`, `tags.ts`,
-  `thumbnails.ts`, plus shared zod schemas with a `unwrapList` helper
-  that tolerates both bare arrays and `{matches|items|...}` envelopes.
+  parsing), `objects.ts`, `spaces.ts`, `tags.ts`, `thumbnails.ts`, plus
+  shared zod schemas with a `unwrapList` helper that tolerates both
+  bare arrays and `{matches|items|...}` envelopes.
+- Browse Spaces uses `GET /objects?spaceId=…` (single request) and
+  Find Related uses `GET /objects?similarTo=…`, replacing the previous
+  search-then-hydrate two-step.
+- Object schema gains `summary`, `notes`, and `blob.palette`
+  (dominant color) fields exposed by mymind API v0.4.0.
 - All JSON endpoints default to `Accept: application/json` (mymind
   content-negotiates and returns HTML otherwise).
 - Render-layer dedupe by id in every list/grid view.
 - Grid thumbnails: bytes from `GET /objects/:id/thumbnail?size=…` are
   cached on disk under `environment.supportPath/thumbnails/`, keyed by
   `id|modified|size`, fetched through a 6-wide semaphore with in-flight
-  de-dup and atomic rename. A 30-day mtime sweep runs on module load.
+  de-dup and atomic rename. Falls back to `GET /objects/:id/screenshot`
+  when `/thumbnail` returns nothing usable. A 30-day mtime sweep runs
+  on module load.
 
 ### Known limitations
 
@@ -90,8 +103,9 @@ support.
   way to list trashed objects (only `q`, `id`, `contentAs`, `limit`).
   The `restoreObject` helper is wired and will be used as soon as
   listing exists.
-- **Tag removal** still happens on the web app — the API exposes
-  `POST /objects/:id/tags` but no `DELETE` counterpart.
+- **Article reader body** isn't returned for `entityType: "Article"` —
+  `/content` returns 422 and `?contentAs=text/markdown` returns
+  `content: undefined`. Show Details degrades to a friendly hint.
 
 ### Dependency updates
 

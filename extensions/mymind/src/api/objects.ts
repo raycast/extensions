@@ -4,6 +4,8 @@ import { MyMindObject, MyMindObjectSchema, ObjectListSchema } from "./schemas";
 export interface ListObjectsOptions {
   id?: string | string[];
   q?: string;
+  spaceId?: string;
+  similarTo?: string;
   contentAs?: string;
   limit?: number;
   semantic?: boolean;
@@ -17,6 +19,8 @@ export async function listObjects(opts: ListObjectsOptions = {}): Promise<MyMind
     query: {
       id: opts.id,
       q: opts.q,
+      spaceId: opts.spaceId,
+      similarTo: opts.similarTo,
       contentAs: opts.contentAs,
       limit: opts.limit,
       semantic: opts.semantic,
@@ -26,18 +30,6 @@ export async function listObjects(opts: ListObjectsOptions = {}): Promise<MyMind
     signal: opts.signal,
   });
   return ObjectListSchema.parse(data);
-}
-
-const OBJECTS_BY_IDS_BATCH = 25;
-
-export async function getObjectsByIds(ids: string[], signal?: AbortSignal): Promise<MyMindObject[]> {
-  if (ids.length === 0) return [];
-  const chunks: string[][] = [];
-  for (let i = 0; i < ids.length; i += OBJECTS_BY_IDS_BATCH) {
-    chunks.push(ids.slice(i, i + OBJECTS_BY_IDS_BATCH));
-  }
-  const batches = await Promise.all(chunks.map((chunk) => listObjects({ id: chunk, limit: chunk.length, signal })));
-  return batches.flat();
 }
 
 export interface GetObjectOptions {
@@ -126,6 +118,14 @@ export async function addTagsToObject(id: string, tags: string[]): Promise<void>
   );
 }
 
+export async function removeTagsFromObject(id: string, tags: string[]): Promise<void> {
+  if (!tags.length) return;
+  await api.delete(
+    `/objects/${encodeURIComponent(id)}/tags`,
+    tags.map((name) => ({ name })),
+  );
+}
+
 export async function pinObject(id: string, position?: number): Promise<void> {
   await api.post(`/objects/${encodeURIComponent(id)}/pin`, position !== undefined ? { position } : undefined);
 }
@@ -134,8 +134,32 @@ export async function unpinObject(id: string): Promise<void> {
   await api.delete(`/objects/${encodeURIComponent(id)}/pin`);
 }
 
-export async function updateObjectTitle(id: string, title: string): Promise<void> {
-  await api.patch(`/objects/${encodeURIComponent(id)}`, { title });
+export interface UpdateObjectFields {
+  title?: string;
+  summary?: string | null;
+}
+
+export async function updateObject(id: string, fields: UpdateObjectFields): Promise<void> {
+  if (Object.keys(fields).length === 0) return;
+  await api.patch(`/objects/${encodeURIComponent(id)}`, fields);
+}
+
+export async function addNoteToObject(objectId: string, markdown: string): Promise<void> {
+  await api.post(`/objects/${encodeURIComponent(objectId)}/notes`, markdown, {
+    contentType: "text/markdown",
+  });
+}
+
+export async function updateNote(objectId: string, noteId: string, markdown: string): Promise<void> {
+  await api.put(
+    `/objects/${encodeURIComponent(objectId)}/notes/${encodeURIComponent(noteId)}`,
+    markdown,
+    { contentType: "text/markdown" },
+  );
+}
+
+export async function deleteNote(objectId: string, noteId: string): Promise<void> {
+  await api.delete(`/objects/${encodeURIComponent(objectId)}/notes/${encodeURIComponent(noteId)}`);
 }
 
 export async function loadCardMarkdown(id: string, signal?: AbortSignal): Promise<string> {

@@ -125,23 +125,34 @@ async function fetchAndStore(
 ): Promise<string | null> {
   await acquire();
   try {
-    const response = await api.getRaw(`/objects/${encodeURIComponent(key.id)}/thumbnail`, {
-      query: { size },
-      signal,
-    });
+    const thumbnail = await tryFetchImage(`/objects/${encodeURIComponent(key.id)}/thumbnail`, { size }, signal);
+    const bytes =
+      thumbnail ?? (await tryFetchImage(`/objects/${encodeURIComponent(key.id)}/screenshot`, undefined, signal));
+    if (!bytes) return null;
+    const finalPath = join(THUMB_DIR, `${hash}.${bytes.ext}`);
+    const tmpPath = `${finalPath}.tmp`;
+    await mkdir(THUMB_DIR, { recursive: true });
+    await writeFile(tmpPath, bytes.buf);
+    await rename(tmpPath, finalPath);
+    return finalPath;
+  } finally {
+    release();
+  }
+}
+
+async function tryFetchImage(
+  path: string,
+  query: Record<string, string> | undefined,
+  signal?: AbortSignal,
+): Promise<{ buf: Buffer; ext: string } | null> {
+  try {
+    const response = await api.getRaw(path, { query, signal });
     const ext = extForContentType(response.headers.get("content-type"));
     if (!ext) return null;
     const buf = Buffer.from(await response.arrayBuffer());
-    const finalPath = join(THUMB_DIR, `${hash}.${ext}`);
-    const tmpPath = `${finalPath}.tmp`;
-    await mkdir(THUMB_DIR, { recursive: true });
-    await writeFile(tmpPath, buf);
-    await rename(tmpPath, finalPath);
-    return finalPath;
+    return { buf, ext };
   } catch {
     return null;
-  } finally {
-    release();
   }
 }
 

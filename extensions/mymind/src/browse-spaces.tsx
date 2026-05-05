@@ -1,16 +1,18 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
-import { getObjectsByIds, listSpaces, MyMindObject, Space } from "./api";
+import { listObjects, listSpaces, MyMindObject, Space } from "./api";
 import { ObjectsCollectionView } from "./components/ObjectsCollectionView";
 
+const SPACE_OBJECTS_LIMIT = 1000;
+
 function SpaceObjectsView({ space }: { space: Space }) {
-  const ids = (space.objects ?? []).map((o) => o.id);
+  const count = space.objects?.length ?? 0;
 
   return (
     <ObjectsCollectionView
       navigationTitle={`Space: ${space.name}`}
-      cacheKey={`space:${space.id}:${ids.length}`}
-      load={async (): Promise<MyMindObject[]> => getObjectsByIds(ids)}
+      cacheKey={`space:${space.id}:${count}`}
+      load={async (): Promise<MyMindObject[]> => listObjects({ spaceId: space.id, limit: SPACE_OBJECTS_LIMIT })}
       emptyTitle="This space is empty"
     />
   );

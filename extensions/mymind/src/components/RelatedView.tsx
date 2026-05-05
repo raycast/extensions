@@ -1,6 +1,6 @@
 import { Grid, List, Icon } from "@raycast/api";
 import { useCachedPromise, useLocalStorage, showFailureToast } from "@raycast/utils";
-import { getObjectsByIds, MyMindApiError, MyMindObject, search } from "../api";
+import { listObjects, MyMindApiError, MyMindObject } from "../api";
 import { dedupeById, ViewMode, VIEW_MODE_KEY } from "../utils";
 import { GridCardItem, ListCardItem } from "./CardItem";
 
@@ -13,11 +13,7 @@ function isNotEmbedded(err: unknown): boolean {
 }
 
 async function loadRelated(id: string): Promise<MyMindObject[]> {
-  const matches = await search({ similarTo: id, limit: RELATED_LIMIT });
-  if (matches.length === 0) return [];
-  const fetched = await getObjectsByIds(matches.map((m) => m.id));
-  const byId = new Map(fetched.map((o) => [o.id, o]));
-  return dedupeById(matches.map((m) => byId.get(m.id)).filter((o): o is MyMindObject => o !== undefined));
+  return dedupeById(await listObjects({ similarTo: id, limit: RELATED_LIMIT }));
 }
 
 export function RelatedView({ source }: { source: MyMindObject }) {
