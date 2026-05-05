@@ -84,8 +84,12 @@ export function buildCompressURL(filePaths: string[], preset: ZipicPreset): stri
   }
 
   params.append("ratio", String(opt.resizing.ratio));
-  params.append("width", String(opt.resizing.width));
-  params.append("height", String(opt.resizing.height));
+  if (opt.resizing.width > 0) {
+    params.append("width", String(opt.resizing.width));
+  }
+  if (opt.resizing.height > 0) {
+    params.append("height", String(opt.resizing.height));
+  }
 
   // Zipic parses query items via Swift's URLComponents which does not
   // decode `+` back to space. URLSearchParams encodes spaces as `+`, so
