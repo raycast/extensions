@@ -73,7 +73,6 @@ export class Device {
         onAction={() => Clipboard.copy(this.macAddress)}
         icon={Icon.Hammer}
       />,
-      <Action title="Refresh" key="refresh-action" onAction={() => refreshDevice(this)} icon={Icon.ArrowClockwise} />,
       <Action
         title={`Copy Device Data`}
         key="copy-device-data"
@@ -88,6 +87,7 @@ export class Device {
         icon={Icon.Pencil}
         shortcut={Keyboard.Shortcut.Common.CopyName}
       />,
+      <Action title="Refresh" key="refresh-action" onAction={() => refreshDevice(this)} icon={Icon.ArrowClockwise} />,
       ...additionalActions,
     ];
   }
