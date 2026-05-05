@@ -26,7 +26,7 @@ interface FormData {
   keep_alive: string;
 }
 
-export function EditModel(props: props): JSX.Element {
+export function EditModel(props: props): React.JSX.Element {
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, [], {
     onData: (data) => {
       if (props.server === undefined || props.model === undefined) return;
@@ -102,8 +102,8 @@ export function EditModel(props: props): JSX.Element {
       {!IsLoadingModel && Model && itemProps.server.value && (
         <Form.Dropdown title="Model" {...itemProps.model}>
           {itemProps.server.value &&
-            Model.get(itemProps.server.value)!
-              .filter((model) => {
+            Model.get(itemProps.server.value)
+              ?.filter((model) => {
                 if (!model.capabilities || !props.capabilities || model.capabilities.length < props.capabilities.length)
                   return false;
                 if (
@@ -115,8 +115,8 @@ export function EditModel(props: props): JSX.Element {
                   return false;
                 return true;
               })
-              .sort()
-              .map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
+              ?.sort()
+              ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
         </Form.Dropdown>
       )}
       <Form.Checkbox
@@ -126,6 +126,12 @@ export function EditModel(props: props): JSX.Element {
         onChange={SetCheckboxAdvanced}
       />
       {CheckboxAdvanced && <Form.TextField title="Keep Alive" info={InfoKeepAlive} {...itemProps.keep_alive} />}
+      {props.command === CommandAnswer.TRANSLATE && (
+        <React.Fragment>
+          <Form.Separator />
+          <Form.Description title="note" text="It is highly recommended to use the TranslateGemma model." />
+        </React.Fragment>
+      )}
     </Form>
   );
 }

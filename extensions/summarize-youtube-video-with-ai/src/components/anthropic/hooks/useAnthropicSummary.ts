@@ -1,11 +1,10 @@
-import Anthropic from "@anthropic-ai/sdk";
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { ANTHROPIC_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-
-import { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
+import type { AnthropicPreferences } from "../../../summarizeVideoWithAnthropic";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
+import { getAnthropicClient } from "../../../utils/sdkClients";
 
 type GetAnthropicSummaryProps = {
   transcript?: string;
@@ -13,12 +12,7 @@ type GetAnthropicSummaryProps = {
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const useAnthropicSummary = async ({
-  transcript,
-  setSummaryIsLoading,
-  setSummary,
-}: GetAnthropicSummaryProps) => {
-  const abortController = new AbortController();
+export const useAnthropicSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetAnthropicSummaryProps) => {
   const preferences = getPreferenceValues() as AnthropicPreferences;
   const { anthropicApiToken, language, anthropicModel, creativity } = preferences;
 
@@ -35,9 +29,8 @@ export const useAnthropicSummary = async ({
   useEffect(() => {
     if (!transcript) return;
 
-    const anthropic = new Anthropic({
-      apiKey: anthropicApiToken,
-    });
+    const abortController = new AbortController();
+    const anthropic = getAnthropicClient(anthropicApiToken);
 
     setSummaryIsLoading(true);
 
@@ -55,7 +48,7 @@ export const useAnthropicSummary = async ({
         max_tokens: 8192,
         stream: true,
         messages: [{ role: "user", content: aiInstructions }],
-        temperature: parseInt(creativity),
+        temperature: Number.parseInt(creativity),
       },
       { signal: abortController.signal },
     );
@@ -89,5 +82,5 @@ export const useAnthropicSummary = async ({
     return () => {
       abortController.abort();
     };
-  }, [transcript]);
+  }, [transcript, anthropicApiToken, anthropicModel, creativity, language, setSummary, setSummaryIsLoading]);
 };

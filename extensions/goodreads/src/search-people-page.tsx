@@ -14,7 +14,7 @@ interface SearchPeoplePageProps {
 
 export default function SearchPeoplePage(props: SearchPeoplePageProps) {
   const [searchQuery, setSearch] = useState(props.arguments.name);
-  const { data, isLoading } = useCachedPromise(fetchPeopleByName, [searchQuery], { execute: searchQuery.length > 0 });
+  const { data, isLoading } = useCachedPromise(fetchPeopleByName, [searchQuery], { execute: searchQuery?.length > 0 });
 
   return (
     <List

@@ -102,9 +102,9 @@ export default async function Command(props: LaunchProps<{ launchContext: { rege
   }
 
   const now = new Date();
-  const formattedTime = !isValidNotificationTime(notificationTime)
-    ? chrono.parseDate("9am", now)
-    : chrono.parseDate(notificationTime, now);
+  const formattedTime = (
+    !isValidNotificationTime(notificationTime) ? chrono.parseDate("9am", now) : chrono.parseDate(notificationTime, now)
+  )!;
 
   const preTime = subMinutes(formattedTime, 10);
 

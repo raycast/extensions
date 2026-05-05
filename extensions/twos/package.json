@@ -5,8 +5,15 @@
   "description": "Add new 'thing' to Twos",
   "icon": "twos-icon.png",
   "author": "ekafyi",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "categories": [
     "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -36,16 +43,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.60.1",
-    "axios": "^1.8.4"
+    "@raycast/api": "^1.103.6",
+    "axios": "^1.13.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.9",
-    "@types/react": "18.2.33",
-    "eslint": "^8.52.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "24.10.1",
+    "@types/react": "19.2.6",
+    "eslint": "^9.39.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

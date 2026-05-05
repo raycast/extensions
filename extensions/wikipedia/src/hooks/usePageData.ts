@@ -58,7 +58,7 @@ function usePageLinks(title: string, language: string) {
   );
 }
 
-export function useAvalableLanguages(title: string, language: string) {
+export function useAvailableLanguages(title: string, language: string) {
   return useCachedPromise(
     (title: string, language: string) =>
       wiki({
@@ -66,8 +66,8 @@ export function useAvalableLanguages(title: string, language: string) {
         headers: getApiOptions(language)?.headers,
       })
         .page(title)
-        .then((page) => page.langlinks().then((items) => items.flatMap((item) => item.lang)))
-        .catch(() => [language]),
+        .then((page) => page.langlinks())
+        .catch(() => [{ lang: language, title }]),
     [title, language],
   );
 }

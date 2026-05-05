@@ -3,7 +3,10 @@ import { useState } from "react";
 import { trpc } from "@/utils/trpc.util";
 import { Form, ActionPanel, Action, useNavigation, showToast, Toast, Icon } from "@raycast/api";
 
-export type KeyToEdit = "name" | "image" | "description";
+const userAndSpaceFields = ["myNickname", "myImage"] as const;
+const spaceFields = ["name", "image", "description"] as const;
+
+export type KeyToEdit = (typeof userAndSpaceFields)[number] | (typeof spaceFields)[number];
 
 function Body(props: { spaceId: string; keyToEdit: KeyToEdit; value: string }) {
   const { spaceId, keyToEdit, value } = props;

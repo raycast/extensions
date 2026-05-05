@@ -67,7 +67,7 @@ export default function Command() {
             defaultValue="signature"
             title="Search by"
             value={state.searchType}
-            onChange={(newSearchType) =>
+            onChange={(newSearchType: SearchType) =>
               setState((prevState) => ({ ...prevState, searchType: newSearchType as SearchType }))
             }
           >

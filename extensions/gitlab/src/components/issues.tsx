@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List, Color, Detail, Image } from "@raycast/api";
+import { Action, ActionPanel, List, Color, Detail, Image, Icon } from "@raycast/api";
 import { gql } from "@apollo/client";
 import { useEffect, useState } from "react";
 import { getGitLabGQL, gitlab } from "../common";
@@ -6,6 +6,7 @@ import { Group, Issue, Project } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import {
   capitalizeFirstLetter,
+  formatDate,
   getErrorMessage,
   now,
   optimizeMarkdownText,
@@ -19,7 +20,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { userIcon } from "./users";
 import { CacheActionPanelSection } from "./cache_actions";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export enum IssueScope {
   created_by_me = "created_by_me",
@@ -42,11 +43,11 @@ const GET_ISSUE_DETAIL = gql`
   }
 `;
 
-export function IssueListEmptyView(): JSX.Element {
+export function IssueListEmptyView() {
   return <List.EmptyView title="No Issues" icon={{ source: "issues.svg", tintColor: Color.PrimaryText }} />;
 }
 
-export function IssueDetailFetch(props: { project: Project; issueId: number }): JSX.Element {
+export function IssueDetailFetch(props: { project: Project; issueId: number }) {
   const { issue, isLoading, error } = useIssue(props.project.id, props.issueId);
   if (error) {
     showErrorToast(error, "Could not fetch Issue Details");
@@ -67,7 +68,7 @@ function stateColor(state: string): Color.ColorLike {
   return state === "closed" ? "red" : "green";
 }
 
-export function IssueDetail(props: { issue: Issue }): JSX.Element {
+export function IssueDetail(props: { issue: Issue }) {
   const issue = props.issue;
   const { issueDetail, error, isLoading } = useDetail(props.issue.id);
   if (error) {
@@ -105,13 +106,15 @@ export function IssueDetail(props: { issue: Issue }): JSX.Element {
               <Detail.Metadata.TagList.Item key={issue.id} text={issue.author.name} icon={userIcon(issue.author)} />
             </Detail.Metadata.TagList>
           )}
-          {issue.assignees.length > 0 && (
-            <Detail.Metadata.TagList title="Assignee">
-              {issue.assignees.map((a) => (
-                <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />
-              ))}
-            </Detail.Metadata.TagList>
-          )}
+          <Detail.Metadata.TagList title="Assignee">
+            {issue.assignees.length > 0 ? (
+              issue.assignees.map((a) => <Detail.Metadata.TagList.Item key={a.id} text={a.name} icon={userIcon(a)} />)
+            ) : (
+              <Detail.Metadata.TagList.Item text="-" />
+            )}
+          </Detail.Metadata.TagList>
+          {issue.created_at && <Detail.Metadata.Label title="Created" text={formatDate(issue.created_at)} />}
+          {issue.updated_at && <Detail.Metadata.Label title="Updated" text={formatDate(issue.updated_at)} />}
           {issue.milestone && <Detail.Metadata.Label title="Milestone" text={issue.milestone.title} />}
           {issue.labels.length > 0 && (
             <Detail.Metadata.TagList title="Labels">
@@ -191,7 +194,7 @@ function useDetail(issueID: number): {
   return { issueDetail, error, isLoading };
 }
 
-export function IssueListItem(props: { issue: Issue; refreshData: () => void }): JSX.Element {
+export function IssueListItem(props: { issue: Issue; refreshData: () => void }) {
   const issue = props.issue;
   const tintColor = issue.state === "opened" ? Color.Green : Color.Red;
   return (
@@ -207,6 +210,18 @@ export function IssueListItem(props: { issue: Issue; refreshData: () => void }):
         tooltip: `Status: ${capitalizeFirstLetter(issue.state)}`,
       }}
       accessories={[
+        {
+          text: issue.merge_requests_count > 0 ? `${issue.merge_requests_count}` : undefined,
+          icon: issue.merge_requests_count > 0 ? { source: "branch.png", tintColor: Color.PrimaryText } : undefined,
+        },
+        {
+          icon: issue.user_notes_count && issue.user_notes_count > 0 ? Icon.SpeechBubble : undefined,
+          text: issue.user_notes_count && issue.user_notes_count > 0 ? issue.user_notes_count.toString() : undefined,
+          tooltip:
+            issue.user_notes_count && issue.user_notes_count > 0
+              ? `Number of Comments ${issue.user_notes_count}`
+              : undefined,
+        },
         {
           tag: issue.milestone ? issue.milestone.title : "",
           tooltip: issue.milestone ? `Milestone: ${issue.milestone.title}` : undefined,
@@ -263,7 +278,7 @@ export function IssueList({
   state = IssueState.all,
   project = undefined,
   group = undefined,
-}: IssueListProps): JSX.Element {
+}: IssueListProps) {
   const [searchText, setSearchText] = useState<string>();
   const [searchState, setSearchState] = useState<IssueState>(state);
   const { issues, error, isLoading, refresh } = useSearch(searchText, scope, searchState, project, group);
@@ -330,7 +345,7 @@ export function injectQueryNamedParameters(
   requestParams: Record<string, any>,
   query: Query,
   scope: IssueScope,
-  isNegative: boolean
+  isNegative: boolean,
 ) {
   const namedParams = isNegative ? query.negativeNamed : query.named;
   for (const extraParam of Object.keys(namedParams)) {
@@ -380,7 +395,7 @@ export function useSearch(
   scope: IssueScope,
   state: IssueState,
   project?: Project,
-  group?: Group
+  group?: Group,
 ): {
   issues?: Issue[];
   error?: string;
@@ -454,7 +469,7 @@ export function useSearch(
 
 export function useIssue(
   projectID: number,
-  issueID: number
+  issueID: number,
 ): {
   issue?: Issue;
   error?: string;

@@ -1,9 +1,10 @@
-import { getApplications, showToast, Toast, showHUD, open } from '@raycast/api';
+import { getApplications, showToast, Toast, showHUD } from '@raycast/api';
 import { runAppleScript, showFailureToast } from '@raycast/utils';
 
 export const APP_NAME = 'LookAway';
 export const REQUIRED_VERSION = '1.11.3';
-export const APP_BUNDLE_ID = 'com.mysticalbits.lookaway';
+export const REQUIRED_VERSION_FOR_START_STOP = '1.13.5';
+export const APP_BUNDLE_ID_BASE = 'com.mysticalbits.lookaway';
 
 // Simple version comparison (e.g., "1.11.3" vs "1.10.0")
 export function compareVersions(v1: string, v2: string): number {
@@ -20,34 +21,33 @@ export function compareVersions(v1: string, v2: string): number {
   return 0;
 }
 
-export async function isLookAwayInstalledAndRecent(): Promise<boolean> {
+async function findLookAwayApp(): Promise<string | null> {
   const applications = await getApplications();
-  const lookAwayApp = applications.find((app) => app.bundleId === APP_BUNDLE_ID);
+  const lookAwayApp = applications.find((app) => app.bundleId?.startsWith(APP_BUNDLE_ID_BASE));
+  return lookAwayApp?.bundleId || null;
+}
 
-  if (!lookAwayApp) {
+export async function isLookAwayInstalledAndRecent(requiredVersion: string = REQUIRED_VERSION): Promise<boolean> {
+  const bundleId = await findLookAwayApp();
+
+  if (!bundleId) {
     await showToast({
       style: Toast.Style.Failure,
       title: `${APP_NAME} not found`,
-      message: `Please install ${APP_NAME} from lookaway.app`,
-      primaryAction: {
-        title: 'View on lookaway.app',
-        onAction: () => {
-          open('https://lookaway.app');
-        },
-      },
+      message: `Please install ${APP_NAME} from lookaway.com`,
     });
     return false;
   }
 
   try {
-    const versionScript = `tell application id "${APP_BUNDLE_ID}" to get version`;
+    const versionScript = `tell application id "${bundleId}" to get version`;
     const installedVersion = await runAppleScript(versionScript);
 
-    if (compareVersions(installedVersion, REQUIRED_VERSION) < 0) {
+    if (compareVersions(installedVersion, requiredVersion) < 0) {
       await showToast({
         style: Toast.Style.Failure,
-        title: `${APP_NAME} version too old`,
-        message: `Please update to ${APP_NAME} v${REQUIRED_VERSION} or later.`,
+        title: `${APP_NAME} version v${requiredVersion} required`,
+        message: `Please update to ${APP_NAME} v${requiredVersion} or later to run this command.`,
       });
       return false;
     }
@@ -67,10 +67,13 @@ export async function runLookAwayCommand(
   commandCode: string,
   successMessage: string,
   durationSeconds?: number,
+  requiredVersion?: string,
 ) {
-  if (!(await isLookAwayInstalledAndRecent())) {
+  if (!(await isLookAwayInstalledAndRecent(requiredVersion))) {
     return;
   }
+
+  const bundleId = await findLookAwayApp();
 
   let script: string;
   let finalSuccessMessage = successMessage;
@@ -88,10 +91,10 @@ export async function runLookAwayCommand(
         return;
       }
       if (commandCode === 'paustemp') {
-        script = `tell application id "${APP_BUNDLE_ID}" to pause temporarily for ${durationSeconds}`;
+        script = `tell application id "${bundleId}" to pause temporarily for ${durationSeconds}`;
       } else {
         // pstpnbrk
-        script = `tell application id "${APP_BUNDLE_ID}" to postpone break by ${durationSeconds}`;
+        script = `tell application id "${bundleId}" to postpone break by ${durationSeconds}`;
       }
       const hours = Math.floor(durationSeconds / 3600);
       const minutes = Math.floor((durationSeconds % 3600) / 60);
@@ -110,7 +113,7 @@ export async function runLookAwayCommand(
       if (durationSeconds !== undefined) {
         console.warn(`Duration argument provided for command '${commandName}' which does not support it.`);
       }
-      script = `tell application id "${APP_BUNDLE_ID}" to ${commandName}`;
+      script = `tell application id "${bundleId}" to ${commandName}`;
       break;
   }
 

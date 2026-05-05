@@ -19,8 +19,9 @@ export function ConvertMcpToolsToOllamaTools(tools: McpServerTool[]): OllamaApiT
         },
       },
     };
-    Object.keys(tool.inputSchema.properties).forEach((k: string) => {
-      const value = tool.inputSchema.properties[k];
+    const schemaProps = tool.inputSchema.properties ?? {};
+    Object.keys(schemaProps).forEach((k: string) => {
+      const value = schemaProps[k];
       tO.function.parameters.properties[k] = {
         type: value.type,
         description: value.description || "",

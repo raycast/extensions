@@ -18,7 +18,8 @@
     "ridemountainpig",
     "1weiho",
     "xmok",
-    "niksite"
+    "niksite",
+    "ojowwalker77"
   ],
   "pastContributors": [
     "axsuul",
@@ -518,8 +519,8 @@
     ]
   },
   "dependencies": {
-    "@raycast/api": "^1.91.0",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.103.10",
+    "@raycast/utils": "^2.2.2",
     "ahooks": "^3.8.1",
     "bplist-creator": "^0.1.1",
     "fuse.js": "^7.0.0",
@@ -530,20 +531,21 @@
     "simple-plist": "^1.4.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
     "@types/lodash": "^4.17.7",
-    "@types/node": "~18.11.10",
-    "@types/pinyin": "^2.10.2",
-    "@types/react": "^18.3.5",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.5.4"
+    "@types/pinyin": "^2.10.2"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [

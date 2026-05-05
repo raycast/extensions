@@ -1,5 +1,8 @@
 # Catppuccin Changelog
 
+## [Data Sourcing] - 2025-07-03
+- Source data from `catppuccin.dvh.sh`
+
 ## [Search Improvements and Refactoring] - 2025-01-03
 
 - Use fuzzy search for `search-palette`, `search-ports`, and `search-userstyles`

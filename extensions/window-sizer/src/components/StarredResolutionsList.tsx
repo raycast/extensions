@@ -5,7 +5,7 @@ interface StarredResolutionsListProps {
   starredResolutions: Resolution[];
   onResizeWindow: (width: number, height: number) => Promise<void>;
   onToggleStar: (resolution: Resolution) => Promise<void>;
-  selectedItemId?: string | undefined;
+  selectedItemId?: string;
 }
 
 export function StarredResolutionsList({

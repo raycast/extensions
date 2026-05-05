@@ -2,8 +2,10 @@ import fetch from "node-fetch";
 import { getPreferenceValues } from "@raycast/api";
 import { ErrorResponse, Items, Library } from "./types";
 
+const baseUrl = "https://web.getmatter.com/api";
+
 async function getQueue(page: number) {
-  const url = `https://web.getmatter.com/api/library_items/queue_feed?page=${page}`;
+  const url = `${baseUrl}/library_items/queue_feed?page=${page}`;
   const token = getPreferenceValues<Preferences>().matterToken;
   const options = {
     method: "GET",
@@ -18,7 +20,7 @@ async function getQueue(page: number) {
 }
 
 async function getFavorites(page: number) {
-  const url = `https://web.getmatter.com/api/library_items/favorites_feed?page=${page}`;
+  const url = `${baseUrl}/library_items/favorites_feed?page=${page}`;
   const token = getPreferenceValues<Preferences>().matterToken;
   const options = {
     method: "GET",
@@ -33,7 +35,7 @@ async function getFavorites(page: number) {
 }
 
 async function setFavorite(contentId: string, isFavorited: boolean) {
-  const url = "https://web.getmatter.com/api/library_entries";
+  const url = `${baseUrl}/library_entries`;
   const token = getPreferenceValues<Preferences>().matterToken;
 
   const data = {
@@ -53,4 +55,35 @@ async function setFavorite(contentId: string, isFavorited: boolean) {
   return (await response.json()) as Library | ErrorResponse;
 }
 
-export { getQueue, getFavorites, setFavorite };
+async function bookmarkUrl(url: string) {
+  const apiUrl = `${baseUrl}/save`;
+  const token = getPreferenceValues<Preferences>().matterToken;
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "text/plain",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ url }),
+  };
+
+  const response = await fetch(apiUrl, options);
+  let detail = "";
+  let raw = "";
+  try {
+    const json = await response.json();
+    if (json && typeof json === "object" && "detail" in json) {
+      detail = typeof json.detail === "string" ? json.detail : JSON.stringify(json.detail);
+    }
+    raw = JSON.stringify(json);
+  } catch {
+    raw = await response.text();
+  }
+  return {
+    detail,
+    raw,
+    status: response.status,
+  };
+}
+
+export { getQueue, getFavorites, setFavorite, bookmarkUrl };

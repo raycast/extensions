@@ -26,7 +26,8 @@ export function useInteract(status: Status) {
         });
       } else {
         showToast(Toast.Style.Animated, "Boosting the status ...");
-        apiServer.reblogStatus(status.id), showToast(Toast.Style.Success, "Boosted!");
+        await apiServer.reblogStatus(status.id);
+        showToast(Toast.Style.Success, "Boosted!");
         setStatusInfo({
           ...statusInfo,
           reblogsCount: status.reblogs_count + 1,
@@ -51,7 +52,8 @@ export function useInteract(status: Status) {
         });
       } else {
         showToast(Toast.Style.Animated, "Favouriting the status...");
-        apiServer.favouriteStatus(status.id), showToast(Toast.Style.Success, "Favourite successful!");
+        await apiServer.favouriteStatus(status.id);
+        showToast(Toast.Style.Success, "Favourite successful!");
         setStatusInfo({
           ...statusInfo,
           favourited: true,

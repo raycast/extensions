@@ -174,7 +174,6 @@
     "@types/react": "^19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
-    "react-devtools": "^6.1.1",
     "typescript": "^5.2.2"
   },
   "scripts": {

@@ -34,7 +34,7 @@ export const executeJxa = async (script: string) => {
 const parseUrl = (url: string) => {
   try {
     return new URL(url);
-  } catch (err) {
+  } catch {
     return null;
   }
 };

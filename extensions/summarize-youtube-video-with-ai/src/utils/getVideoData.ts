@@ -10,6 +10,7 @@ export type VideoDataTypes = {
   title: ytdl.videoInfo["videoDetails"]["title"];
   video_url: ytdl.videoInfo["videoDetails"]["video_url"];
   viewCount: ytdl.videoInfo["videoDetails"]["viewCount"];
+  videoId: ytdl.videoInfo["videoDetails"]["videoId"];
 };
 
 export async function getVideoData(video: string) {
@@ -31,6 +32,7 @@ export async function getVideoData(video: string) {
     title: basicVideoInformation.videoDetails.title,
     video_url: basicVideoInformation.videoDetails.video_url,
     viewCount,
+    videoId: basicVideoInformation.videoDetails.videoId,
   };
 
   return videoDetails;

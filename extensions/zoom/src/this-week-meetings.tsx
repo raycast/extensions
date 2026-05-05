@@ -4,14 +4,14 @@ import { isThisWeek } from "date-fns";
 import { useMemo, Fragment } from "react";
 import { withZoomAuth } from "./components/withZoomAuth";
 import { getUpcomingMeetings } from "./api/meetings";
-import { getMeetingsSections, getMeetingTitle } from "./helpers/meetings";
+import { getMeetingsSections, getMeetingTitle, getZoomUrlForPlatform } from "./helpers/meetings";
 
 function ThisWeekMeetings() {
   const { data, isLoading } = useCachedPromise(getUpcomingMeetings);
 
   const sections = useMemo(() => {
     const thisWeekMeetings = data?.meetings?.filter(
-      (meeting) => "start_time" in meeting && isThisWeek(new Date(meeting.start_time))
+      (meeting) => "start_time" in meeting && isThisWeek(new Date(meeting.start_time)),
     );
     return getMeetingsSections(thisWeekMeetings);
   }, [data]);
@@ -30,7 +30,7 @@ function ThisWeekMeetings() {
                     <MenuBarExtra.Item
                       key={`${meeting.uuid}-${index}`}
                       title={`${getMeetingTitle(meeting)}: ${meeting.topic}`}
-                      onAction={() => open(meeting.join_url)}
+                      onAction={() => open(getZoomUrlForPlatform(meeting.join_url))}
                     />
                   );
                 }

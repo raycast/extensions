@@ -75,7 +75,10 @@ export default function ParentIssueSubmenus({
         <Action
           title="Remove Parent Issue"
           icon={{ source: { light: "light/parent-issue.svg", dark: "dark/parent-issue.svg" } }}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "k" },
+            Windows: { modifiers: ["ctrl", "shift"], key: "k" },
+          }}
           onAction={() => setParentIssue(null)}
         />
       ) : null}

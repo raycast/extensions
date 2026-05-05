@@ -1,3 +1,6 @@
+import { DeparturesQuery, QuayDepartures } from "./api/departuresQuery";
+import { Quay } from "./api/fragments";
+
 export type QuayLineFavorites = {
   stopPlaceId: string;
   quayId: string;
@@ -5,8 +8,8 @@ export type QuayLineFavorites = {
 };
 
 export type StopPlaceQuayDeparturesQuery = {
-  stopPlace?: Departures;
-  favorites: QuayDeparture[];
+  stopPlace?: DeparturesQuery;
+  favorites: QuayDepartures[];
 };
 
 export type DirectionType = "unknown" | "outbound" | "inbound" | "clockwise" | "anticlockwise";
@@ -25,52 +28,8 @@ export enum TransportMode {
   Trolleybus = "trolleybus",
   Unknown = "unknown",
   Water = "water",
+  Foot = "foot",
 }
-
-export type Departures = {
-  id: string;
-  name: string;
-  description?: string;
-  latitude: number;
-  longitude: number;
-  quays?: Array<QuayDeparture>;
-};
-
-export type QuayDeparture = {
-  id: string;
-  name: string;
-  description?: string;
-  publicCode?: string;
-  estimatedCalls: Array<EstimatedCall>;
-};
-
-export type EstimatedCall = {
-  date: string;
-  expectedDepartureTime: string | null;
-  aimedDepartureTime: string;
-  realtime: boolean;
-  predictionInaccurate: boolean;
-  cancellation: boolean;
-  quay: { id: string };
-  destinationDisplay?: DestinationDisplay;
-  serviceJourney: {
-    id: string;
-    directionType: DirectionType;
-    line: {
-      id: string;
-      description?: string;
-      publicCode?: string;
-      transportMode?: TransportMode;
-      transportSubmode?: string;
-      authority?: {
-        id: string;
-        name: string;
-        url?: string;
-      };
-    };
-    estimatedCalls: Array<SjEstimatedCall>;
-  };
-};
 
 export type DestinationDisplay = {
   frontText?: string;
@@ -94,13 +53,7 @@ export type StopPlace = {
   id: string;
   latitude?: number;
   longitude?: number;
-  quays?: Array<{
-    id: string;
-    description?: string;
-    name: string;
-    publicCode?: string;
-    stopPlace?: { id: string };
-  }>;
+  quays?: Quay[];
 };
 
 export type Feature = {

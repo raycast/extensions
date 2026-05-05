@@ -6,18 +6,20 @@ import {
   confirmAlert,
   Form,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { Item, Server, ServerType } from "../types";
+import { Currency, Item, Label, Server, ServerType, Term } from "../types";
 import PriceListItem from "./price-list-item";
 import NextDueDate from "./next-due-date";
-import { deleteServer, numOrUnlimited } from "../utils";
-import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
+import { addServer, deleteServer, numOrUnlimited } from "../utils";
+import { FormValidation, MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { useState } from "react";
 import useGet, { usePut } from "../hooks";
+import dayjs from "dayjs";
 
 export default function ServerItem({ server, mutate }: { server: Server; mutate: MutatePromise<Server[]> }) {
   async function confirmAndDeleteServer(server: Server) {
@@ -41,8 +43,7 @@ export default function ServerItem({ server, mutate }: { server: Server; mutate:
         });
         toast.style = Toast.Style.Success;
         toast.title = "Deleted server";
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (_) {
+      } catch {
         toast.style = Toast.Style.Failure;
         toast.title = "Could not delete";
       }
@@ -98,11 +99,13 @@ export default function ServerItem({ server, mutate }: { server: Server; mutate:
             title="Update Server"
             target={<EditServer server={server} mutate={mutate} />}
           />
+          <Action.Push icon={Icon.Plus} title="Add Server" target={<AddServer mutate={mutate} />} />
           <Action
             icon={Icon.Trash}
             title="Delete Server"
             onAction={() => confirmAndDeleteServer(server)}
             style={Action.Style.Destructive}
+            shortcut={Keyboard.Shortcut.Common.Remove}
           />
         </ActionPanel>
       }
@@ -220,6 +223,168 @@ function EditServer({ server, mutate }: { server: Server; mutate: MutatePromise<
       </Form.Dropdown>
       <Form.DatePicker title="Owned since" type={Form.DatePicker.Type.Date} {...itemProps.owned_since} />
       <Form.Checkbox label="I still have this server" {...itemProps.active} />
+      <Form.Checkbox label="Allow some of this data to be public" {...itemProps.show_public} />
+    </Form>
+  );
+}
+
+function AddServer({ mutate }: { mutate: MutatePromise<Server[]> }) {
+  const [isAdding, setIsAdding] = useState(false);
+  const { isLoading: isLoadingProviders, data: providers } = useGet<Item>("providers");
+  const { isLoading: isLoadingLocations, data: locations } = useGet<Item>("locations");
+  const { isLoading: isLoadingOS, data: os } = useGet<Item>("os");
+  const { isLoading: isLoadingLabels, data: labels } = useGet<Label>("labels");
+  const { pop } = useNavigation();
+
+  type AddServer = {
+    hostname: string;
+    server_type: string;
+    os_id: string;
+    ip1: string;
+    ip2: string;
+    ns1: string;
+    ns2: string;
+    ssh_port: string;
+    bandwidth: string;
+    was_promo: string;
+    provider_id: string;
+    price: string;
+    payment_term: string;
+    currency: string;
+    ram: string;
+    ram_type: string;
+    disk: string;
+    disk_type: string;
+    cpu: string;
+    location_id: string;
+    owned_since: Date | null;
+    next_due_date: Date | null;
+    labels: string[];
+    show_public: boolean;
+  };
+  const { handleSubmit, itemProps } = useForm<AddServer>({
+    async onSubmit(values) {
+      setIsAdding(true);
+      try {
+        const ram = +values.ram;
+        const disk = +values.disk;
+        const body = {
+          ...values,
+          active: 1,
+          price: +values.price,
+          owned_since: values.owned_since?.toISOString().split("T")[0],
+          next_due_date: values.next_due_date?.toISOString().split("T")[0],
+          show_public: +values.show_public as Server["show_public"],
+          ram,
+          ram_as_mb: values.ram_type === "MB" ? ram : ram * 1024,
+          disk,
+          disk_as_gb: values.disk_type === "GB" ? disk : disk * 1024,
+        };
+        await mutate(addServer(body));
+        pop();
+      } catch (error) {
+        await showFailureToast(error);
+      } finally {
+        setIsAdding(false);
+      }
+    },
+    initialValues: {
+      price: "2.50",
+      ssh_port: "22",
+      bandwidth: "1000",
+      ram: "2024",
+      disk: "10",
+      cpu: "2",
+      owned_since: new Date(),
+      next_due_date: dayjs(new Date()).add(365, "day").toDate(),
+    },
+    validation: {
+      hostname: FormValidation.Required,
+      ip1: FormValidation.Required,
+      ip2: FormValidation.Required,
+      owned_since: FormValidation.Required,
+      next_due_date: FormValidation.Required,
+    },
+  });
+
+  const isLoading = isLoadingProviders || isLoadingLocations || isLoadingOS || isLoadingLabels || isAdding;
+
+  return (
+    <Form
+      isLoading={isLoading}
+      navigationTitle="Items > Add Server"
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm icon={Icon.Check} title="Add Server" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.TextField title="Hostname" placeholder="Enter server.hostname" {...itemProps.hostname} />
+      <Form.Dropdown title="Server type" {...itemProps.server_type}>
+        {Object.entries(ServerType)
+          .filter(([key]) => isNaN(Number(key)))
+          .map(([key, val]) => (
+            <Form.Dropdown.Item key={key} title={key} value={val.toString()} />
+          ))}
+      </Form.Dropdown>
+      <Form.Dropdown title="OS" {...itemProps.os_id}>
+        {os.map((item) => (
+          <Form.Dropdown.Item key={item.id} title={item.name} value={item.id.toString()} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextField title="IP 1" {...itemProps.ip1} />
+      <Form.TextField title="IP 2" {...itemProps.ip2} />
+      <Form.TextField title="NS1" {...itemProps.ns1} />
+      <Form.TextField title="NS2" {...itemProps.ns2} />
+      <Form.TextField title="SSH" {...itemProps.ssh_port} />
+      <Form.TextField title="Bandwidth GB" {...itemProps.bandwidth} />
+      <Form.Dropdown title="Promo price" {...itemProps.was_promo}>
+        <Form.Dropdown.Item title="Yes" value="1" />
+        <Form.Dropdown.Item title="No" value="0" />
+      </Form.Dropdown>
+      <Form.Dropdown title="Provider" {...itemProps.provider_id}>
+        {providers.map((provider) => (
+          <Form.Dropdown.Item key={provider.id} title={provider.name} value={provider.id.toString()} />
+        ))}
+      </Form.Dropdown>
+      <Form.TextField title="Price" {...itemProps.price} />
+      <Form.Dropdown title="Term" {...itemProps.payment_term}>
+        {Object.entries(Term)
+          .filter(([key]) => isNaN(Number(key)))
+          .map(([key, val]) => (
+            <Form.Dropdown.Item key={key} title={key} value={val.toString()} />
+          ))}
+      </Form.Dropdown>
+      <Form.Dropdown title="Currency" {...itemProps.currency}>
+        {Object.entries(Currency)
+          .filter(([key]) => isNaN(Number(key)))
+          .map(([key, val]) => (
+            <Form.Dropdown.Item key={key} title={key} value={val} />
+          ))}
+      </Form.Dropdown>
+      <Form.TextField title="RAM" {...itemProps.ram} />
+      <Form.Dropdown title="RAM type" {...itemProps.ram_type}>
+        <Form.Dropdown.Item title="MB" value="MB" />
+        <Form.Dropdown.Item title="GB" value="GB" />
+      </Form.Dropdown>
+      <Form.TextField title="Disk" {...itemProps.disk} />
+      <Form.Dropdown title="Disk type" {...itemProps.disk_type}>
+        <Form.Dropdown.Item title="GB" value="GB" />
+        <Form.Dropdown.Item title="TB" value="TB" />
+      </Form.Dropdown>
+      <Form.TextField title="CPU" {...itemProps.cpu} />
+      <Form.Dropdown title="Location" {...itemProps.location_id}>
+        {locations.map((location) => (
+          <Form.Dropdown.Item key={location.id} title={location.name} value={location.id.toString()} />
+        ))}
+      </Form.Dropdown>
+      <Form.DatePicker title="Owned since" type={Form.DatePicker.Type.Date} {...itemProps.owned_since} />
+      <Form.DatePicker title="Next due date" type={Form.DatePicker.Type.Date} {...itemProps.next_due_date} />
+      <Form.TagPicker title="Label" {...itemProps.labels}>
+        {labels.map((label) => (
+          <Form.TagPicker.Item key={label.id} title={label.label} value={label.id.toString()} />
+        ))}
+      </Form.TagPicker>
       <Form.Checkbox label="Allow some of this data to be public" {...itemProps.show_public} />
     </Form>
   );

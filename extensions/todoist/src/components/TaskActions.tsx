@@ -1,6 +1,17 @@
-import { Action, ActionPanel, Color, Icon, Toast, confirmAlert, showToast, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Icon,
+  Toast,
+  confirmAlert,
+  showToast,
+  useNavigation,
+  open,
+  getPreferenceValues,
+} from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { Fragment } from "react";
+import { Fragment, useState } from "react";
 
 import {
   AddReminderArgs,
@@ -9,6 +20,7 @@ import {
   Reminder,
   SyncData,
   Task,
+  TaskUpdateSyncedContext,
   UpdateTaskArgs,
   addTask,
   addReminder as apiAddReminder,
@@ -25,7 +37,8 @@ import { getRemainingLabels, getTaskLabels } from "../helpers/labels";
 import { refreshMenuBarCommand } from "../helpers/menu-bar";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { getProjectIcon } from "../helpers/projects";
-import { displayReminderName } from "../helpers/reminders";
+import { displayReminderName, hasAtTaskTimeRelativeReminder } from "../helpers/reminders";
+import { buildDynamicRepeatOptions, filterRepeatPresets, isHourlyDueString, repeatDuePayload } from "../helpers/repeat";
 import { ViewMode, getTaskAppUrl, getTaskUrl } from "../helpers/tasks";
 import { QuickLinkView } from "../home";
 import { useFocusedTask } from "../hooks/useFocusedTask";
@@ -60,13 +73,67 @@ export default function TaskActions({
   quickLinkView,
 }: TaskActionsProps) {
   const { pop } = useNavigation();
+  const { useConfetti } = getPreferenceValues<Preferences>();
 
   const { focusedTask, focusTask, unfocusTask } = useFocusedTask();
+  const currentTask = data?.items.find((item) => item.id === task.id) ?? task;
 
   const projects = data?.projects;
   const comments = data?.notes;
   const taskLabels = task && data?.labels ? getTaskLabels(task, data.labels) : [];
   const remainingLabels = task && data?.labels ? getRemainingLabels(task, data.labels) : [];
+  const [repeatSearchText, setRepeatSearchText] = useState("");
+
+  /**
+   * Wrapper around sync `updateTask`: returns whether Todoist returned an item row that we merged into cache.
+   * The optional callback runs only in that success path — use it so "at time of task" reminders follow real due updates.
+   */
+  async function updateTask(
+    payload: UpdateTaskArgs,
+    onSynced?: (ctx: TaskUpdateSyncedContext) => void,
+  ): Promise<boolean> {
+    await showToast({ style: Toast.Style.Animated, title: "Updating task" });
+
+    try {
+      const merged = await apiUpdateTask(payload, { data, setData }, onSynced);
+      await showToast({ style: Toast.Style.Success, title: "Task updated" });
+      await refreshMenuBarCommand();
+      return merged;
+    } catch (error) {
+      await showFailureToast(error, { title: "Unable to update task" });
+      return false;
+    }
+  }
+
+  /** Ensures Todoist relative reminder offset 0 when user sets a timed due / hourly repeat and none exists yet. */
+  async function ensureAtTaskTimeReminder(itemId: string, syncReminders?: Reminder[]) {
+    // Sync batches are incremental; empty `[]` means "no reminder deltas" — still check merged cache via `data.reminders`.
+    const hasAtTimeInCache = hasAtTaskTimeRelativeReminder(data?.reminders, itemId);
+    if (hasAtTaskTimeRelativeReminder(syncReminders, itemId) || hasAtTimeInCache) return;
+    try {
+      await apiAddReminder({ item_id: itemId, type: "relative", minute_offset: 0 }, { data, setData });
+    } catch (error) {
+      if (hasAtTimeInCache && syncReminders !== undefined && `${error}`.includes("Bad Request")) return;
+      await showFailureToast(error, { title: "Unable to add reminder" });
+    }
+  }
+
+  async function setRecurrence(recurrence?: string) {
+    let syncReminders: Reminder[] | undefined;
+    let updatedTask: Task | undefined;
+    if (
+      !(await updateTask({ id: task.id, due: repeatDuePayload(currentTask, recurrence) }, (ctx) => {
+        syncReminders = ctx.syncReminders;
+        updatedTask = ctx.updatedTask;
+      }))
+    )
+      return;
+    if (isHourlyDueString(recurrence) && updatedTask?.due?.date?.includes("T")) {
+      await ensureAtTaskTimeReminder(task.id, syncReminders);
+    }
+  }
+
+  const repeatOptions = [...buildDynamicRepeatOptions(repeatSearchText), ...filterRepeatPresets(repeatSearchText)];
 
   async function completeTask(task: Task) {
     await showToast({ style: Toast.Style.Animated, title: "Completing task" });
@@ -86,17 +153,12 @@ export default function TaskActions({
     } catch (error) {
       await showFailureToast(error, { title: "Unable to complete task" });
     }
-  }
-
-  async function updateTask(payload: UpdateTaskArgs) {
-    await showToast({ style: Toast.Style.Animated, title: "Updating task" });
-
-    try {
-      await apiUpdateTask(payload, { data, setData });
-      await showToast({ style: Toast.Style.Success, title: "Task updated" });
-      await refreshMenuBarCommand();
-    } catch (error) {
-      await showFailureToast(error, { title: "Unable to update task" });
+    if (useConfetti) {
+      try {
+        await open("raycast://extensions/raycast/raycast/confetti");
+      } catch (error) {
+        await showFailureToast(error, { title: "Unable to show celebration" });
+      }
     }
   }
 
@@ -232,19 +294,41 @@ export default function TaskActions({
           target={<TaskEdit task={task} />}
         />
 
-        <Action.PickDate
+        <ActionPanel.Submenu
           title="Schedule Task"
-          type={Action.PickDate.Type.DateTime}
+          icon={Icon.Calendar}
           shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
-          onChange={(date) =>
-            updateTask({
-              id: task.id,
-              due: date
+        >
+          <Action.PickDate
+            title="Pick Date"
+            type={Action.PickDate.Type.DateTime}
+            onChange={async (date) => {
+              const due = date
                 ? { date: Action.PickDate.isFullDay(date) ? getAPIDate(date) : date.toISOString() }
-                : { string: "no date" },
-            })
-          }
-        />
+                : { string: "no date" };
+              let syncReminders: Reminder[] | undefined;
+              const merged = await updateTask({ id: task.id, due }, (ctx) => {
+                syncReminders = ctx.syncReminders;
+              });
+              if (!merged) return;
+              if (date && !Action.PickDate.isFullDay(date)) await ensureAtTaskTimeReminder(task.id, syncReminders);
+            }}
+          />
+          <ActionPanel.Submenu
+            title="Set Repeat"
+            icon={Icon.Repeat}
+            filtering={false}
+            onOpen={() => setRepeatSearchText("")}
+            onSearchTextChange={setRepeatSearchText}
+          >
+            {(!repeatSearchText.trim() || repeatSearchText.toLowerCase().includes("no repeat")) && (
+              <Action title="No Repeat" icon={Icon.XMarkCircle} onAction={() => setRecurrence()} />
+            )}
+            {repeatOptions.map(({ key, title, icon, recurrence }) => (
+              <Action key={key} title={title} icon={icon} onAction={() => setRecurrence(recurrence)} />
+            ))}
+          </ActionPanel.Submenu>
+        </ActionPanel.Submenu>
 
         {data?.user?.premium_status !== "not_premium" ? (
           <Action.PickDate

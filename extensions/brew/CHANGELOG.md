@@ -1,6 +1,65 @@
 # Brew Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Bug Fix & Launch Argument] - {PR_MERGE_DATE}
+
+- Added launch argument to Search command for pre-filling the search query before opening
+- Fixed search not working while the formulae/cask index is being downloaded on cold start
+
+## [Cask Id] - 2026-03-24
+
+- Add cask id to the cask metadata
+
+## [Improvements] - 2026-02-24
+
+- Remove updating homebrew index toast from outdated command
+
+## [Bug Fix] - 2026-02-24
+
+- Improve install/uninstall/upgrade failure toasts by surfacing concise Homebrew errors instead of full auto-update logs.
+- Keep full `stderr`/`stdout` output available through the toast's `Copy Logs` action for debugging.
+
+## [Improvements] - 2026-02-19
+
+- Improve handling of abort signal when loading search command
+
+## [Improved Memory Usage] - 2026-02-16
+
+- Use chunking to significantly reduce working memory
+
+## [Metadata Detail Panel] - 2026-01-27
+
+- Added optional split-view metadata panel for search results
+- Enable "Show metadata panel in search results" in Search command preferences (default true)
+- Displays package description and metadata alongside the search list
+
+## [Improvements] - 2026-01-05
+
+- Add a toggle to filter installed packages, allowing users to hide dependencies and show only those explicitly "installed on request".
+
+## [Homebrew 5.0 Support] - 2025-12-16
+
+- Added compatibility with Homebrew 5.0
+  - Added preference to disable concurrent downloads (enabled by default in Homebrew 5.0)
+  - Added preference to opt-in to Homebrew's new internal API (96% smaller downloads)
+  - Updated documentation with Homebrew 5.0 compatibility information
+- Improved first-run experience with download progress indicators for large downloads (30 MB+)
+- Added hidden-by-default "Clear Cache" command for troubleshooting
+- Reordered Casks over Formulae in Search for better readability and discoverability
+- Optimized package loading with two-phase strategy (fast list, then full metadata)
+- Added lazy loading for package details to reduce initial load time
+- Added Upgrade view with clearer progress indicators and easier cancellation
+- Refactored codebase with improved error handling and logging
+
+## [Improvements] - 2025-12-01
+
+- Update dependencies and replace node-fetch with native fetch API
+- Upgrade react to 19.0.10
+
+## [Bug Fix] - 2025-11-03
+
+- Fixed an issue where the the terminal command may be mis-typed in the Raycast window
+
+## [Improvements] - 2025-02-17
 
 - Add a new action to open the Brew formula/cask page in the browser
 

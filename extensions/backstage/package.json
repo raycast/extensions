@@ -27,6 +27,20 @@
       "required": true
     },
     {
+      "type": "password",
+      "name": "backstageStaticToken",
+      "title": "Static Backstage API token",
+      "description": "Static Backstage API token (for use in place of OAuth authentication)",
+      "required": false
+    },
+    {
+      "type": "textfield",
+      "name": "backstageApiUrl",
+      "title": "Backstage API URL",
+      "description": "Backstage API URL, if different from Backstage URL",
+      "required": false
+    },
+    {
       "type": "textfield",
       "name": "iapOAuthClientId",
       "title": "Google OAuth Client ID for IAP",

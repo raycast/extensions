@@ -1,39 +1,38 @@
 import { ActionPanel, Action, List, Icon, useNavigation } from "@raycast/api";
-import useEndOfLifeProducts from "../hooks/useEndOfLifeProducts";
-import ProductDetails from "../components/ProductDetails";
+import { useFetch } from "@raycast/utils";
+import { AllProductsResponse } from "../types";
+import ProductDetails from "./ProductDetails";
 
-function ProductsList() {
+export default function ProductsList() {
   const { push } = useNavigation();
-  const [products, isLoading] = useEndOfLifeProducts();
+  const { data, isLoading } = useFetch<AllProductsResponse>("https://endoflife.date/api/v1/products");
 
   return (
-    <List isLoading={isLoading}>
-      <EmptyView />
+    <List isLoading={isLoading} searchBarPlaceholder="Search products...">
       <List.Section title="Products">
-        {products.map((product: string) => (
+        {data?.result.map((product) => (
           <List.Item
-            id={product}
-            key={product}
-            title={product}
+            id={product.name}
+            key={product.name}
+            title={product.label}
+            subtitle={product.aliases.join(", ")}
+            accessories={product.tags.map((tag) => ({ tag }))}
             actions={
-              <ActionPanel title={product}>
-                <Action title={`View ${product} Cycles`} onAction={() => push(<ProductDetails product={product} />)} />
+              <ActionPanel title={product.label}>
+                <Action
+                  title={`View ${product.label} Releases`}
+                  onAction={() => push(<ProductDetails product={product.name} />)}
+                />
                 <Action.OpenInBrowser
-                  title="View on endoflife.com"
-                  url={`https://endoflife.date/${product}`}
-                  icon={Icon.Rocket}
+                  title="View on Endoflife.date"
+                  url={`https://endoflife.date/${product.name}`}
+                  icon={Icon.Globe}
                 />
               </ActionPanel>
             }
           />
-        ))}
+        )) || []}
       </List.Section>
     </List>
   );
 }
-
-function EmptyView() {
-  return <List.EmptyView icon="empty-view.png" description="No Products" />;
-}
-
-export default ProductsList;

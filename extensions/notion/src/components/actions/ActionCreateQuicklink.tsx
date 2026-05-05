@@ -1,13 +1,12 @@
-import { Action } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { Action, getPreferenceValues } from "@raycast/api";
 
 import { getPageName, Page } from "../../utils/notion";
-import { urlForPreferredMethod, checkedDefaultOpenMethod } from "../../utils/openPage";
+import { urlForPreferredMethod } from "../../utils/openPage";
 
 export default function ActionCreateQuicklink({ page }: { page: Page }) {
-  const { isLoading } = usePromise(checkedDefaultOpenMethod);
-  if (!page.url || isLoading) return null;
-  const link = urlForPreferredMethod(page.url);
+  if (!page.url) return null;
+  const open_in = getPreferenceValues<Preferences>().open_in;
+  const link = urlForPreferredMethod(page.url, open_in);
 
   return (
     <Action.CreateQuicklink

@@ -6,7 +6,9 @@ import { promises as fsPromises } from "fs";
 import path from "path";
 
 function isSystem(appPath: string): boolean {
-  return path.normalize(appPath).startsWith("/System/");
+  const normalizedPath = path.normalize(appPath);
+  if (normalizedPath.startsWith("/System/")) return true;
+  return false;
 }
 
 export function filterApps(apps: Application[]): Application[] {

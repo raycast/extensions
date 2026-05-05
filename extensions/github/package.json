@@ -17,7 +17,6 @@
     "LunaticMuch",
     "aeorge",
     "daquinoaldo",
-    "ppy",
     "lin",
     "marcotf",
     "qeude",
@@ -35,7 +34,22 @@
     "shyaka",
     "sushichan044",
     "luarmr",
-    "iontea"
+    "nicolas-marien",
+    "iontea",
+    "ridemountainpig",
+    "kud",
+    "MartinGonzalez",
+    "brndnly",
+    "oscmarb",
+    "emergerrrd",
+    "ryo.",
+    "Undolog",
+    "wonbywondev",
+    "SandeepBaskaran"
+  ],
+  "pastContributors": [
+    "Lemon",
+    "ppy"
   ],
   "categories": [
     "Developer Tools",
@@ -89,6 +103,14 @@
           "default": false,
           "label": "Recently Closed",
           "description": "Includes pull request you recently closed in the menu list."
+        },
+        {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the list."
         }
       ]
     },
@@ -217,6 +239,12 @@
       "mode": "view"
     },
     {
+      "name": "my-starred-repositories",
+      "title": "My Starred Repositories",
+      "description": "List repositories you have starred",
+      "mode": "view"
+    },
+    {
       "name": "workflow-runs",
       "title": "Workflow Runs",
       "description": "Manage workflow runs for a selected GitHub repository.",
@@ -250,36 +278,6 @@
           "description": "Show the unread count in the menu bar.",
           "default": true,
           "required": false
-        },
-        {
-          "name": "repositoryFilterMode",
-          "type": "dropdown",
-          "required": false,
-          "default": "all",
-          "title": "Repository Filter Mode",
-          "description": "How to filter repositories",
-          "data": [
-            {
-              "title": "All Repositories",
-              "value": "all"
-            },
-            {
-              "title": "Include Only Listed Repositories",
-              "value": "include"
-            },
-            {
-              "title": "Exclude Listed Repositories",
-              "value": "exclude"
-            }
-          ]
-        },
-        {
-          "name": "repositoryList",
-          "type": "textfield",
-          "required": false,
-          "title": "Repository List",
-          "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
-          "placeholder": "owner/repo1, owner/repo2, owner/repo3"
         }
       ]
     },
@@ -374,6 +372,54 @@
       ]
     },
     {
+      "name": "my-stats-menu",
+      "title": "My GitHub Stats Menu Bar",
+      "description": "Display your GitHub profile stats (followers, stars received, PRs, issues, commits) in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "1h",
+      "preferences": [
+        {
+          "name": "useAvatarAsIcon",
+          "description": "Show your GitHub avatar as the menu bar icon instead of the GitHub logo",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Avatar",
+          "title": "Menu Bar Icon"
+        },
+        {
+          "name": "titleMetric",
+          "description": "The metric shown next to the menu bar icon",
+          "type": "dropdown",
+          "required": false,
+          "default": "followers",
+          "title": "Menu Bar Title",
+          "data": [
+            {
+              "title": "Followers",
+              "value": "followers"
+            },
+            {
+              "title": "Stars Received",
+              "value": "stars"
+            },
+            {
+              "title": "Open PRs",
+              "value": "prsOpen"
+            },
+            {
+              "title": "Open Issues",
+              "value": "issuesOpen"
+            },
+            {
+              "title": "Icon Only",
+              "value": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "my-pull-requests-menu",
       "title": "My Pull Requests Menu Bar",
       "description": "Display My Pull Requests in the Menu Bar",
@@ -439,44 +485,29 @@
           "description": "Includes pull request you recently closed in the menu list."
         },
         {
+          "name": "includeDrafts",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Drafts",
+          "description": "Include draft pull requests in the menu list."
+        },
+        {
           "name": "maxitems",
           "description": "Maximum pull requests shown per category.",
           "type": "textfield",
           "required": false,
           "title": "Max Pull Requests per category",
           "placeholder": "5"
-        },
-        {
-          "name": "repositoryFilterMode",
-          "type": "dropdown",
-          "required": false,
-          "default": "all",
-          "title": "Repository Filter Mode",
-          "description": "How to filter repositories",
-          "data": [
-            {
-              "title": "All Repositories",
-              "value": "all"
-            },
-            {
-              "title": "Include Only Listed Repositories",
-              "value": "include"
-            },
-            {
-              "title": "Exclude Listed Repositories",
-              "value": "exclude"
-            }
-          ]
-        },
-        {
-          "name": "repositoryList",
-          "type": "textfield",
-          "required": false,
-          "title": "Repository List",
-          "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
-          "placeholder": "owner/repo1, owner/repo2, owner/repo3"
         }
       ]
+    },
+    {
+      "name": "download-repository",
+      "title": "Download Repository",
+      "subtitle": "GitHub",
+      "description": "Download an entire repo or a specific directory inside a repo",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -499,6 +530,16 @@
       "name": "search-repositories",
       "title": "Search Repositories",
       "description": "Search github repositories"
+    },
+    {
+      "name": "enable-auto-merge",
+      "title": "Enable Auto-merge",
+      "description": "Enable auto-merge on a pull request"
+    },
+    {
+      "name": "disable-auto-merge",
+      "title": "Disable Auto-merge",
+      "description": "Disable auto-merge on a pull request"
     },
     {
       "name": "merge-pull-request",
@@ -779,6 +820,93 @@
         ]
       },
       {
+        "input": "@github enable auto-merge on the release PR in macos repo",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-pull-requests",
+              "arguments": {
+                "query": {
+                  "includes": "repo:org/macos"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "enable-auto-merge",
+              "arguments": {
+                "pullRequestId": "pr_123"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/org/macos",
+              "nameWithOwner": "org/macos",
+              "name": "macos",
+              "id": "REPO_123"
+            }
+          ],
+          "search-pull-requests": [
+            {
+              "title": "Release",
+              "id": "pr_123"
+            }
+          ],
+          "enable-auto-merge": {}
+        }
+      },
+      {
+        "input": "@github disable auto-merge on the bugfix PR in backend repo",
+        "expected": [
+          {
+            "callsTool": "search-repositories"
+          },
+          {
+            "callsTool": {
+              "name": "search-pull-requests",
+              "arguments": {
+                "query": {
+                  "includes": "repo:org/backend"
+                }
+              }
+            }
+          },
+          {
+            "callsTool": {
+              "name": "disable-auto-merge",
+              "arguments": {
+                "pullRequestId": "pr_456"
+              }
+            }
+          }
+        ],
+        "mocks": {
+          "search-repositories": [
+            {
+              "url": "https://github.com/org/backend",
+              "nameWithOwner": "org/backend",
+              "name": "backend",
+              "id": "REPO_456"
+            }
+          ],
+          "search-pull-requests": [
+            {
+              "title": "Fix timeout error",
+              "id": "pr_456",
+              "number": 42
+            }
+          ],
+          "disable-auto-merge": {}
+        }
+      },
+      {
         "input": "@github run release.yml in raycast-macos",
         "mocks": {
           "search-repositories": [
@@ -881,6 +1009,36 @@
       "default": true,
       "label": "PRs include team review requests",
       "description": "Include PRs where your team's review was requested as well as your own."
+    },
+    {
+      "name": "repositoryFilterMode",
+      "type": "dropdown",
+      "required": false,
+      "default": "all",
+      "title": "Repository Filter Mode",
+      "description": "How to filter repositories",
+      "data": [
+        {
+          "title": "All Repositories",
+          "value": "all"
+        },
+        {
+          "title": "Include Only Listed Repositories",
+          "value": "include"
+        },
+        {
+          "title": "Exclude Listed Repositories",
+          "value": "exclude"
+        }
+      ]
+    },
+    {
+      "name": "repositoryList",
+      "type": "textfield",
+      "required": false,
+      "title": "Repository List",
+      "description": "Comma-separated list of repositories to include/exclude (e.g., 'owner/repo1, owner/repo2')",
+      "placeholder": "owner/repo1, owner/repo2, owner/repo3"
     }
   ],
   "dependencies": {
@@ -889,8 +1047,9 @@
     "@raycast/utils": "^1.16.0",
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
-    "lodash": "^4.17.21",
-    "node-fetch": "^3.3.2"
+    "lodash": "^4.17.23",
+    "node-fetch": "^3.3.2",
+    "yauzl": "^3.2.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",
@@ -902,6 +1061,7 @@
     "@types/lodash": "^4.17.5",
     "@types/node": "^22.1.0",
     "@types/react": "^18.3.3",
+    "@types/yauzl": "^2.10.3",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
@@ -918,5 +1078,9 @@
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish",
     "generate": "graphql-codegen --config codegen.ts"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

@@ -1,4 +1,4 @@
-import { List, ActionPanel, Action, Icon, showToast, Toast } from "@raycast/api";
+import { List, ActionPanel, Action, Icon, showToast, Toast, Keyboard } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { FastlyService } from "../types";
 import { getServices, purgeCache, getServiceDomains } from "../api";
@@ -126,19 +126,29 @@ export function ServiceList() {
                       });
                     }
                   }}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "p" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "p" },
+                  }}
                 />
                 <Action.OpenInBrowser
+                  // eslint-disable-next-line @raycast/prefer-title-case
                   title="View Real-time Stats"
                   url={`https://manage.fastly.com/observability/dashboard/system/overview/realtime/${service.id}`}
                   icon={Icon.BarChart}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "r" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+                  }}
                 />
                 <Action.OpenInBrowser
                   title="View Service Logs"
                   url={`https://manage.fastly.com/observability/logs/explorer/${service.id}`}
                   icon={Icon.Terminal}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "shift"], key: "l" },
+                    Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+                  }}
                 />
               </ActionPanel.Section>
 
@@ -147,7 +157,7 @@ export function ServiceList() {
                   title="Refresh List"
                   icon={Icon.ArrowClockwise}
                   onAction={loadServices}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={Keyboard.Shortcut.Common.Refresh}
                 />
               </ActionPanel.Section>
             </ActionPanel>

@@ -31,7 +31,7 @@ The following actions are available:
 - Copy to Clipboard `⌘⏎`
 - Copy Project Mail Address `⌃E`
 - Log Time `⌃⌘⏎`
-- Show Tasks `⌃Space`
+- Show Tasks `⌃⏎`
 
 
 ### Tasks

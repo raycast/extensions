@@ -34,6 +34,7 @@ export default function CommandDetailView(props: {
           cancel={cancel}
           files={selectedFiles}
           speaking={speaking}
+          // @ts-expect-error: To keep to original code
           stopSpeech={stopSpeech}
           restartSpeech={restartSpeech}
         />

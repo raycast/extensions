@@ -1,175 +1,287 @@
-import { ActionPanel, List, Action, Icon, Detail } from "@raycast/api";
-import { wpCommands, WPCommand } from "./data/commands";
-import React from "react";
+import { ActionPanel, Detail, List, Action, Icon } from "@raycast/api";
+import wpCommands from "./wpcli-commands.json";
 
-export default function Command() {
-  return <CommandList commands={wpCommands} parentName={"wp"} parentCommand={null} isTopLevel />;
+interface WPCommand {
+  command: string;
+  description: string;
+  url: string;
+  subcommands?: WPSubcommand[];
 }
 
-function CommandList({
-  commands,
-  parentName,
-  parentCommand,
-  isTopLevel,
-}: {
-  commands: WPCommand[];
-  parentName: string;
-  parentCommand: WPCommand | null;
-  isTopLevel?: boolean;
-}) {
+interface WPSubcommand {
+  name: string;
+  description: string;
+}
+
+function SubcommandsList({ command }: { command: WPCommand }) {
   return (
-    <List navigationTitle={parentName === "wp" ? "WP-CLI Commands" : `${parentName} Subcommands`}>
-      {parentCommand && (
-        <List.Section title="Main Command">
+    <List searchBarPlaceholder={`Search ${command.command} subcommands...`}>
+      {/* Parent Command */}
+      <List.Item
+        icon={Icon.Terminal}
+        title={command.command}
+        subtitle={command.description}
+        actions={
+          <ActionPanel>
+            <Action.Push
+              title="Show Details"
+              target={
+                <Detail
+                  markdown={`# ${command.command}
+
+## Description
+${command.description}
+
+## Documentation
+[View full documentation](${command.url})
+
+## Available Subcommands
+This command has ${command.subcommands?.length || 0} subcommands:
+
+${command.subcommands?.map((sub) => `- **${sub.name}**: ${sub.description}`).join("\n") || ""}
+
+## Usage Examples
+Run this command in your terminal:
+\`\`\`bash
+# Basic usage
+${command.command}
+
+# Get help for this command
+${command.command} --help
+
+# Example with common options
+${command.command} [arguments] [--option=value]
+\`\`\`
+
+## Common Usage Patterns
+\`\`\`bash
+# List available subcommands
+${command.command} --help
+
+# Get version info (if supported)
+${command.command} --version
+\`\`\`
+
+For more information about available options and subcommands, visit the [official documentation](${command.url}).`}
+                  actions={
+                    <ActionPanel>
+                      <ActionPanel.Section title="Copy Commands">
+                        <Action.CopyToClipboard title="Copy Command" content={command.command} icon={Icon.Terminal} />
+                        <Action.CopyToClipboard
+                          title="Copy with Help Flag"
+                          content={`${command.command} --help`}
+                          icon={Icon.QuestionMark}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Example Code"
+                          content={`# ${command.description}
+${command.command}`}
+                          icon={Icon.Code}
+                        />
+                        <Action.CopyToClipboard
+                          title="Copy Usage Examples"
+                          content={`# ${command.description}
+# Basic usage
+${command.command}
+
+# Get help
+${command.command} --help`}
+                          icon={Icon.CodeBlock}
+                        />
+                      </ActionPanel.Section>
+                      <ActionPanel.Section title="Documentation">
+                        <Action.OpenInBrowser title="Open Documentation" url={command.url} icon={Icon.Globe} />
+                      </ActionPanel.Section>
+                    </ActionPanel>
+                  }
+                />
+              }
+            />
+            <Action.CopyToClipboard title="Copy Command" content={command.command} />
+            <Action.OpenInBrowser title="Open Documentation" url={command.url} />
+          </ActionPanel>
+        }
+      />
+
+      {/* Separator */}
+      <List.Section title="Subcommands">
+        {command.subcommands?.map((subcommand: WPSubcommand, index: number) => (
           <List.Item
-            key={parentCommand.name + "-parent"}
-            title={parentCommand.name}
-            subtitle={parentCommand.description}
+            key={index}
             icon={Icon.Terminal}
+            title={`${command.command} ${subcommand.name}`}
+            subtitle={subcommand.description}
             actions={
               <ActionPanel>
                 <Action.Push
                   title="Show Details"
                   target={
-                    <CommandDetail
-                      command={parentCommand}
-                      parentName={parentName.split(" ").slice(0, -1).join(" ") || "wp"}
-                      alwaysShowCopyAction
+                    <Detail
+                      markdown={`# ${command.command} ${subcommand.name}
+
+## Description
+${subcommand.description}
+
+## Parent Command
+${command.command}: ${command.description}
+
+## Documentation
+[View full documentation](${command.url})
+
+## Usage Examples
+Run this subcommand in your terminal:
+\`\`\`bash
+# Basic usage
+${command.command} ${subcommand.name}
+
+# Get help for this subcommand
+${command.command} ${subcommand.name} --help
+
+# Example with common options
+${command.command} ${subcommand.name} [arguments] [--option=value]
+\`\`\`
+
+For more information about available options and parameters, visit the [official documentation](${command.url}).`}
+                      actions={
+                        <ActionPanel>
+                          <ActionPanel.Section title="Copy Commands">
+                            <Action.CopyToClipboard
+                              title="Copy Command"
+                              content={`${command.command} ${subcommand.name}`}
+                              icon={Icon.Terminal}
+                            />
+                            <Action.CopyToClipboard
+                              title="Copy with Help Flag"
+                              content={`${command.command} ${subcommand.name} --help`}
+                              icon={Icon.QuestionMark}
+                            />
+                            <Action.CopyToClipboard
+                              title="Copy Example Code"
+                              content={`# ${subcommand.description}
+${command.command} ${subcommand.name}`}
+                              icon={Icon.Code}
+                            />
+                            <Action.CopyToClipboard
+                              title="Copy Usage Examples"
+                              content={`# ${subcommand.description}
+# Basic usage
+${command.command} ${subcommand.name}
+
+# Get help
+${command.command} ${subcommand.name} --help`}
+                              icon={Icon.CodeBlock}
+                            />
+                          </ActionPanel.Section>
+                          <ActionPanel.Section title="Documentation">
+                            <Action.OpenInBrowser title="Open Documentation" url={command.url} icon={Icon.Globe} />
+                          </ActionPanel.Section>
+                        </ActionPanel>
+                      }
                     />
                   }
                 />
+                <Action.CopyToClipboard title="Copy Command" content={`${command.command} ${subcommand.name}`} />
+                <Action.OpenInBrowser title="Open Documentation" url={command.url} />
               </ActionPanel>
             }
           />
-        </List.Section>
-      )}
-      {isTopLevel ? (
-        <>
-          {commands.map((command) => (
-            <List.Item
-              key={command.name}
-              title={command.name}
-              subtitle={command.description}
-              icon={command.subcommands ? Icon.ChevronRight : Icon.Terminal}
-              actions={
-                <ActionPanel>
-                  {command.subcommands ? (
-                    <Action.Push
-                      title="Show Subcommands"
-                      target={
-                        <CommandList
-                          commands={command.subcommands as WPCommand[]}
-                          parentName={`wp ${command.name}`}
-                          parentCommand={command}
-                        />
-                      }
-                    />
-                  ) : null}
-                  <Action.Push
-                    title="Show Details"
-                    target={<CommandDetail command={command} parentName={parentName} />}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </>
-      ) : (
-        <List.Section title="Subcommands">
-          {commands.map((command) => (
-            <List.Item
-              key={command.name}
-              title={command.name}
-              subtitle={command.description}
-              icon={command.subcommands ? Icon.ChevronRight : Icon.Terminal}
-              actions={
-                <ActionPanel>
-                  {command.subcommands ? (
-                    <Action.Push
-                      title="Show Subcommands"
-                      target={
-                        <CommandList
-                          commands={command.subcommands as WPCommand[]}
-                          parentName={`wp ${command.name}`}
-                          parentCommand={command}
-                        />
-                      }
-                    />
-                  ) : null}
-                  <Action.Push
-                    title="Show Details"
-                    target={<CommandDetail command={command} parentName={parentName} />}
-                  />
-                </ActionPanel>
-              }
-            />
-          ))}
-        </List.Section>
-      )}
+        ))}
+      </List.Section>
     </List>
   );
 }
 
-function getWpCliDocUrl(command: WPCommand, parentName: string) {
-  // parentName is like 'wp plugin', command.name is 'install' for subcommands
-  const parts = parentName.split(" ").slice(1); // remove 'wp'
-  const urlParts = [...parts, command.name].filter(Boolean);
-  return `https://developer.wordpress.org/cli/commands/${urlParts.join("/")}/`;
-}
+export default function Command() {
+  return (
+    <List searchBarPlaceholder="Search WP-CLI commands...">
+      {wpCommands.map((cmd: WPCommand, index: number) => (
+        <List.Item
+          key={index}
+          icon={cmd.subcommands ? Icon.ChevronRight : Icon.Terminal}
+          title={cmd.command}
+          subtitle={cmd.description}
+          accessories={cmd.subcommands ? [{ text: `${cmd.subcommands.length} subcommands` }] : undefined}
+          actions={
+            <ActionPanel>
+              {cmd.subcommands ? (
+                <Action.Push title="Show Subcommands" target={<SubcommandsList command={cmd} />} />
+              ) : (
+                <Action.Push
+                  title="Show Details"
+                  target={
+                    <Detail
+                      markdown={`# ${cmd.command}
 
-function CommandDetail({
-  command,
-  parentName,
-  alwaysShowCopyAction,
-}: {
-  command: WPCommand;
-  parentName: string;
-  alwaysShowCopyAction?: boolean;
-}) {
-  const fullCommand = `${parentName} ${command.name}`.replace(/^wp wp/, "wp");
-  let markdown = `# ${fullCommand}\n\n${command.description}`;
+## Description
+${cmd.description}
 
-  // Prepare all examples (main + subcommands)
-  const examples: { label: string; code: string }[] = [];
-  if (command.example) {
-    examples.push({ label: `Example for ${fullCommand}`, code: command.example });
-  }
-  if (command.subcommands) {
-    for (const sub of command.subcommands) {
-      if (sub.example) {
-        examples.push({ label: `Example for ${fullCommand} ${sub.name}`, code: sub.example });
-      }
-    }
-  }
+## Documentation
+[View full documentation](${cmd.url})
 
-  const docUrl = getWpCliDocUrl(command, parentName);
+## Usage Examples
+Run this command in your terminal:
+\`\`\`bash
+# Basic usage
+${cmd.command}
 
-  // Show copy action if alwaysShowCopyAction is true, or if there are no subcommands
-  const actions =
-    alwaysShowCopyAction || !command.subcommands || command.subcommands.length === 0 ? (
-      <ActionPanel>
-        <Action.CopyToClipboard title="Copy Command" content={fullCommand} />
-        {examples.map((ex, i) => (
-          <Action.CopyToClipboard key={i} title={`Copy Example: ${ex.label}`} content={ex.code} />
-        ))}
-        <Action.OpenInBrowser url={docUrl} title="Open Wp-Cli Documentation" />
-      </ActionPanel>
-    ) : (
-      <ActionPanel>
-        {examples.map((ex, i) => (
-          <Action.CopyToClipboard key={i} title={`Copy Example: ${ex.label}`} content={ex.code} />
-        ))}
-        <Action.OpenInBrowser url={docUrl} title="Open Wp-Cli Documentation" />
-      </ActionPanel>
-    );
+# Get help for this command
+${cmd.command} --help
 
-  // Render examples in markdown with copy icon
-  if (examples.length > 0) {
-    markdown += `\n\n## Examples\n`;
-    examples.forEach((ex) => {
-      markdown += `\n**${ex.label}:**\n\n\`\`\`bash\n${ex.code}\n\`\`\``;
-    });
-  }
+# Example with common options
+${cmd.command} [arguments] [--option=value]
+\`\`\`
 
-  return <Detail markdown={markdown} actions={actions} />;
+## Common Usage Patterns
+\`\`\`bash
+# List available options
+${cmd.command} --help
+
+# Get version info (if supported)
+${cmd.command} --version
+\`\`\`
+
+For more information about available options and subcommands, visit the [official documentation](${cmd.url}).`}
+                      actions={
+                        <ActionPanel>
+                          <ActionPanel.Section title="Copy Commands">
+                            <Action.CopyToClipboard title="Copy Command" content={cmd.command} icon={Icon.Terminal} />
+                            <Action.CopyToClipboard
+                              title="Copy with Help Flag"
+                              content={`${cmd.command} --help`}
+                              icon={Icon.QuestionMark}
+                            />
+                            <Action.CopyToClipboard
+                              title="Copy Example Code"
+                              content={`# ${cmd.description}
+${cmd.command}`}
+                              icon={Icon.Code}
+                            />
+                            <Action.CopyToClipboard
+                              title="Copy Usage Examples"
+                              content={`# ${cmd.description}
+# Basic usage
+${cmd.command}
+
+# Get help
+${cmd.command} --help`}
+                              icon={Icon.CodeBlock}
+                            />
+                          </ActionPanel.Section>
+                          <ActionPanel.Section title="Documentation">
+                            <Action.OpenInBrowser title="Open Documentation" url={cmd.url} icon={Icon.Globe} />
+                          </ActionPanel.Section>
+                        </ActionPanel>
+                      }
+                    />
+                  }
+                />
+              )}
+              <Action.OpenInBrowser title="Open Documentation" url={cmd.url} />
+              <Action.CopyToClipboard title="Copy Command" content={cmd.command} />
+            </ActionPanel>
+          }
+        />
+      ))}
+    </List>
+  );
 }

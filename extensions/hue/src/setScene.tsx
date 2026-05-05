@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Grid, Icon, Toast, useNavigation } from "@raycast/api";
-import { Group, Id, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
+import type { Group, Id, Palette, PngUri, PngUriCache, Scene } from "./lib/types";
 import UnlinkAction from "./components/UnlinkAction";
 import ManageHueBridge from "./components/ManageHueBridge";
 import { SendHueMessage, useHue } from "./hooks/useHue";

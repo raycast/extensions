@@ -3,9 +3,13 @@
   "name": "hammerspoon",
   "title": "Hammerspoon",
   "description": "Control Hammerspoon from Raycast",
-  "version": "1.0.0",
+  "version": "1.3.0",
   "icon": "icon-prod.png",
   "author": "bjrmatos",
+  "contributors": [
+    "that70schris",
+    "CaffeineCat"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -15,10 +19,50 @@
   },
   "commands": [
     {
+      "name": "open-configuration-file",
+      "title": "Open Configuration File",
+      "description": "Open the Hammerspoon configuration file",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "configFilePath",
+          "title": "Configuration File Path",
+          "description": "Path to the Hammerspoon configuration file. Defaults to hs.configdir/init.lua",
+          "type": "file",
+          "required": false
+        },
+        {
+          "name": "editorApp",
+          "title": "Editor Application",
+          "description": "Application to use when opening the configuration file. If not set it uses the default application for the .lua file type.",
+          "type": "appPicker",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "reload-configuration-file",
       "title": "Reload Configuration File",
-      "description": "Reloads the Hammerspoon configuration file and opens the console",
-      "mode": "no-view"
+      "description": "Reloads the Hammerspoon configuration file",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "clearConsole",
+          "label": "Clear Console",
+          "description": "Clear the Hammerspoon Console before reloading the configuration file",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "openConsole",
+          "label": "Open Console",
+          "description": "Open the Hammerspoon Console after reloading the configuration file",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        }
+      ]
     },
     {
       "name": "open-console",
@@ -31,6 +75,38 @@
       "title": "Open Preferences",
       "description": "Displays the Hammerspoon Preferences panel and focuses it",
       "mode": "no-view"
+    },
+    {
+      "name": "open-documentation",
+      "title": "Open Documentation",
+      "description": "Displays the Hammerspoon documentation panel and focuses it",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-documentation",
+      "title": "Search Documentation",
+      "description": "Search Hammerspoon Documentation",
+      "mode": "view"
+    },
+    {
+      "name": "list-scripts",
+      "title": "List Scripts",
+      "description": "List and quickly trigger User Defined Hammerspoon Scripts",
+      "keywords": [
+        "Macros",
+        "Actions"
+      ],
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "scriptsVariableName",
+          "title": "Scripts Variable Name",
+          "description": "The name of the global variable exported in your Hammerspoon configuration file that contains the methods to work with scripts",
+          "type": "textfield",
+          "default": "__SCRIPTS__",
+          "required": true
+        }
+      ]
     },
     {
       "name": "restart",
@@ -71,7 +147,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
-    "dev-mode": "zx publish.mjs dev",
     "publish": "zx publish.mjs"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

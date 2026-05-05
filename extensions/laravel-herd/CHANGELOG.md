@@ -1,5 +1,8 @@
 # Laravel Herd Changelog
 
+## Bugfix - 2025-06-11
+- Fixes a bug where »Open in IDE« was not working in some cases. #19610
+
 
 ## Log Viewer Commands, Refresh & Bugfixes - 2025-04-09
 
@@ -12,4 +15,4 @@
 - Polished README
 
 
-## [Initial Version] - April 8, 2025
+## [Initial Version] - 2025-04-08

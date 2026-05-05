@@ -1,8 +1,10 @@
 import type { Tags } from "exifreader";
-import { type FC, useEffect, useMemo } from "react";
+import { parse } from "node:path";
+import { type FC, useEffect } from "react";
 
 import { Action, ActionPanel, Detail, Icon, Toast, showToast, useNavigation } from "@raycast/api";
 
+import { TagDetails } from "@/components/TagDetails";
 import useTagsMarkdown from "@/hooks/use-tags-markdown";
 
 import RawDataScreen from "./RawData";
@@ -15,8 +17,9 @@ interface TagsScreenProps {
 const TagsScreen: FC<TagsScreenProps> = ({ tags, file }) => {
   const { push } = useNavigation();
 
-  const tagsString = useMemo(() => JSON.stringify(tags, null, 2), [tags]);
-  const { table, image, location, thumbnail } = useTagsMarkdown(tags, file);
+  const { rawTagsMarkdown, stringifiedJson, image, location, thumbnail } = useTagsMarkdown(tags, file);
+
+  const fileName = parse(file).name + parse(file).ext;
 
   useEffect(() => {
     showToast({ style: Toast.Style.Success, title: "Tags", message: "Tags loaded" });
@@ -27,13 +30,16 @@ const TagsScreen: FC<TagsScreenProps> = ({ tags, file }) => {
       navigationTitle="Exif Tags"
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy JSON" content={tagsString} />
-          {tagsString.length < 10000 ? (
-            <Action title="View Raw Tags" icon={Icon.CodeBlock} onAction={() => push(<RawDataScreen tags={tags} />)} />
-          ) : null}
+          <Action.CopyToClipboard title="Copy JSON" content={stringifiedJson} />
+          <Action
+            title="View Raw Tags"
+            icon={Icon.CodeBlock}
+            onAction={() => push(<RawDataScreen tags={tags} file={file} />)}
+          />
         </ActionPanel>
       }
-      markdown={[image, thumbnail, location, table].join("\n")}
+      markdown={[tags.Thumbnail?.base64 ? thumbnail : image, location, rawTagsMarkdown].join("\n")}
+      metadata={<TagDetails fileName={fileName} tags={tags} />}
     />
   );
 };

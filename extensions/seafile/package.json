@@ -1,0 +1,72 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "seafile",
+  "title": "Seafile",
+  "description": "Open Source File Sync and Share Software",
+  "icon": "seafile.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-files",
+      "title": "Search Files",
+      "description": "Search files in your libraries",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "seafile_url",
+      "title": "Seafile URL",
+      "placeholder": "https://plus.seafile.com/",
+      "description": "Seafile URL",
+      "required": true,
+      "type": "textfield",
+      "default": "https://plus.seafile.com/"
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "placeholder": "username",
+      "description": "Username",
+      "required": true,
+      "type": "textfield"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "placeholder": "hunter2",
+      "description": "Password",
+      "required": true,
+      "type": "password"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "filesize": "^11.0.13"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

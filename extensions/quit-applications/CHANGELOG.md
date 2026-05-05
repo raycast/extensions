@@ -1,5 +1,17 @@
 # Quit Applications Changelog
 
+## [Bug fix] - 2026-04-04
+
+- Fixed error when a foreground process has no file property (error -1728)
+
+## [Bug fix] - 2025-10-09
+
+- Fixed Apple Events authorization error (-1743) by adding fallback to `ps` command when System Events permission is not granted
+
+## [Bug fix] - 2025-05-27
+
+- Fixed issue where excluded applications still appeared in the list when multiple windows were open
+
 ## [Update] - 2025-04-25
 
 - Added `Quit All Applications` to quit all applications at once

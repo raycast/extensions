@@ -1,10 +1,15 @@
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
-import axios, { AxiosError } from "axios";
+import { LocalStorage, Toast, getPreferenceValues, open, openExtensionPreferences, showToast } from "@raycast/api";
 import { useState } from "react";
 
-export const API_URL = "https://api.capacities.io";
-const SPACES_UPDATE_INTERVAL = 1000 * 60 * 10;
-const SPACE_INFO_UPDATE_INTERVAL = 1000 * 60 * 10;
+const { communicationToken } = getPreferenceValues<Preferences>();
+export const API_URL = "http://localhost:10334";
+export const API_HEADERS = {
+  Accept: "application/json",
+  Authorization: `Bearer ${communicationToken}`,
+  "Content-Type": "application/json",
+};
+const SPACES_UPDATE_INTERVAL = 0;
+const SPACE_INFO_UPDATE_INTERVAL = 0;
 
 // API TYPES
 type GetSpacesInfoResponse = {
@@ -34,11 +39,6 @@ type GetSpaceInfoResponse = {
   }[];
 };
 
-// STORE TYPES
-export interface Preferences {
-  bearerToken: string;
-}
-
 type CapacitiesStore = {
   spacesLastUpdated: string | undefined;
   spaces: { id: string; title: string }[];
@@ -52,19 +52,62 @@ type CapacitiesStore = {
   };
 };
 
-export function axiosErrorHandler(e: unknown) {
-  if (e instanceof AxiosError && e.response?.status === 429) {
-    return "Too Many Requests. Please try again later.";
-  } else if (e instanceof AxiosError && e.response?.status === 400) {
-    return "Invalid request. Please try again.";
-  } else if (e instanceof AxiosError && e.response?.status === 401) {
-    return "Unauthorized. Please check your API key.";
-  } else if (e instanceof AxiosError && e.response?.status === 500) {
-    return "Something went wrong.";
-  } else if (e instanceof AxiosError && (e.response?.status === 503 || e.response?.status === 555)) {
-    return "Service Unavailable. Please try again later.";
+export function handleAPIError(response: Response) {
+  if (response.ok) return;
+  const status = response.status;
+  if (status === 401) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "You're communication token is invalid",
+      message: "Please update your communication token in the extension preferences and try again.",
+      primaryAction: {
+        title: "Open Extension Preferences",
+        onAction: () => openExtensionPreferences(),
+        shortcut: {
+          modifiers: ["cmd"],
+          key: "o",
+        },
+      },
+    });
   } else {
-    return "Request failed. You might be offline, please try again when back online.";
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Something went wrong",
+      message: `Error Message: ${response.status} - ${response.statusText}`,
+    });
+  }
+}
+
+export function handleUnexpectedError(error: Error) {
+  if (error.message.includes("fetch failed")) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Cannot connect",
+      message:
+        "Capacities needs to be open for the extension to work. Please open Capacities and try again. If the problem persists, please check if you activated the extension in the Capacities settings.",
+      primaryAction: {
+        title: "Open Capacities",
+        onAction: () => open("capacities://", "Capacities"),
+        shortcut: {
+          modifiers: ["cmd"],
+          key: "o",
+        },
+      },
+    });
+  } else {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "An unexpected error occurred",
+      message: `Capacities needs to be open for the extension to work. Please open Capacities and try again. If the problem persists, please check if you activated the extension in the Capacities settings. (Error Message: ${error.message})`,
+      primaryAction: {
+        title: "Open Capacities",
+        onAction: () => open("capacities://", "Capacities"),
+        shortcut: {
+          modifiers: ["cmd"],
+          key: "o",
+        },
+      },
+    });
   }
 }
 
@@ -81,8 +124,7 @@ async function getCapacitiesStore(): Promise<CapacitiesStore> {
   }
 }
 
-export async function loadAndSaveCapacitiesStore(forceUpdate: boolean, throwError: boolean): Promise<CapacitiesStore> {
-  let errorMessage: string | undefined = undefined;
+export async function loadAndSaveCapacitiesStore(forceUpdate: boolean): Promise<CapacitiesStore | undefined> {
   let store: CapacitiesStore | undefined = undefined;
   try {
     store = await getCapacitiesStore();
@@ -91,44 +133,41 @@ export async function loadAndSaveCapacitiesStore(forceUpdate: boolean, throwErro
       !store.spacesLastUpdated ||
       Date.now() - new Date(store.spacesLastUpdated).getTime() > SPACES_UPDATE_INTERVAL
     ) {
-      try {
-        const resp = await axios.get<GetSpacesInfoResponse>(`${API_URL}/spaces`, {
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${getPreferenceValues<Preferences>().bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        });
+      const response = await fetch(`${API_URL}/spaces`, {
+        headers: API_HEADERS,
+      });
 
-        const data = resp.data;
-
-        if (data.spaces) {
-          store.spaces = data.spaces.map((el) => {
-            return {
-              id: el.id,
-              title: el.title,
-            };
-          });
-        }
-        const spaces = data?.spaces || [];
-        for (const space of spaces) {
-          const index = store.spaces.findIndex((s) => s.id === space.id);
-          if (index === -1) {
-            store.spaces.push({
-              id: space.id,
-              title: space.title,
-            });
-          } else {
-            store.spaces[index] = {
-              id: space.id,
-              title: space.title,
-            };
-          }
-        }
-        store.spacesLastUpdated = new Date().toISOString();
-      } catch (e) {
-        errorMessage = axiosErrorHandler(e);
+      if (!response.ok) {
+        handleAPIError(response);
+        return store;
       }
+      const result = (await response.json()) as GetSpacesInfoResponse;
+      const data = result;
+
+      if (data.spaces) {
+        store.spaces = data.spaces.map((el) => {
+          return {
+            id: el.id,
+            title: el.title,
+          };
+        });
+      }
+      const spaces = data?.spaces || [];
+      for (const space of spaces) {
+        const index = store.spaces.findIndex((s) => s.id === space.id);
+        if (index === -1) {
+          store.spaces.push({
+            id: space.id,
+            title: space.title,
+          });
+        } else {
+          store.spaces[index] = {
+            id: space.id,
+            title: space.title,
+          };
+        }
+      }
+      store.spacesLastUpdated = new Date().toISOString();
     }
 
     const spaceIdsToUpdate: string[] = [];
@@ -153,38 +192,35 @@ export async function loadAndSaveCapacitiesStore(forceUpdate: boolean, throwErro
     }
 
     for (const spaceId of spaceIdsToUpdate) {
-      try {
-        const resp = await axios.get<GetSpaceInfoResponse>(`${API_URL}/space-info?spaceid=${spaceId}`, {
-          headers: {
-            accept: "application/json",
-            Authorization: `Bearer ${getPreferenceValues<Preferences>().bearerToken}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        const data = resp.data;
-        store.spacesInfo[spaceId] = {
-          lastUpdated: new Date().toISOString(),
-          structures: data.structures,
-        };
-      } catch (e) {
-        errorMessage = axiosErrorHandler(e);
+      const response = await fetch(`${API_URL}/space-info?spaceid=${spaceId}`, {
+        headers: API_HEADERS,
+      });
+      if (!response.ok) {
+        handleAPIError(response);
+        return store;
       }
+      const result = (await response.json()) as GetSpaceInfoResponse;
+      const data = result;
+      store.spacesInfo[spaceId] = {
+        lastUpdated: new Date().toISOString(),
+        structures: data.structures,
+      };
     }
-
-    if (errorMessage && throwError) throw new Error(errorMessage);
 
     await LocalStorage.setItem("capacitiesStore", JSON.stringify(store));
     return store;
   } catch (e) {
-    if (!throwError && store) return store;
-    throw new Error(errorMessage || "Failed to load Capacities store");
+    if (e instanceof Error) {
+      handleUnexpectedError(e);
+    } else {
+      console.log(e);
+    }
+    return undefined;
   }
 }
 
 export function useCapacitiesStore(forceUpdate = false) {
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | undefined>(undefined);
   const [store, setStore] = useState<CapacitiesStore | undefined>(undefined);
 
   function triggerLoading() {
@@ -196,23 +232,23 @@ export function useCapacitiesStore(forceUpdate = false) {
         }
       })
       .catch((e) => {
-        console.error(e?.message);
-        setError("Failed to load Capacities store");
+        if (e instanceof Error) {
+          handleUnexpectedError(e);
+        } else {
+          console.log(e);
+        }
       });
 
-    loadAndSaveCapacitiesStore(forceUpdate, false)
-      .then((store) => {
-        setStore(store);
-        if (store.spacesLastUpdated) {
-          setIsLoading(false);
-        } else {
-          setError("Failed to load Capacities store");
-        }
-      })
-      .catch((e) => {
-        setError(e?.message || "Failed to load Capacities store");
-      });
+    loadAndSaveCapacitiesStore(forceUpdate).then((store) => {
+      if (!store) return;
+      setStore(store);
+      if (store.spacesLastUpdated) {
+        setIsLoading(false);
+      } else {
+        handleUnexpectedError(new Error("Failed to load Capacities store"));
+      }
+    });
   }
 
-  return { store, isLoading, error, triggerLoading };
+  return { store, isLoading, triggerLoading };
 }

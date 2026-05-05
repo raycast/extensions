@@ -1,5 +1,16 @@
 # Steam Changelog
 
+## [Update] - 2025-11-08
+
+- Toggled on windows support
+- Fixed some typos and deprecation warnings
+
+## [Routine Maintenance] - 2025-08-26
+
+- Remove the typo dependency `data-fns`
+- Drop redundant `node-fetch` dependency
+- Bump all dependencies to the latest
+
 ## [New Feature] - 2024-10-14
 
 - Add support for browsing ProtonDB scores

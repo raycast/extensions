@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { ReactNode, JSX, useEffect, useState, useRef } from "react";
 import {
   Form,
   ActionPanel,
@@ -23,7 +23,7 @@ const cache = new Cache();
 const { instance }: Preferences = getPreferenceValues();
 
 interface CommandProps extends LaunchProps<{ draftValues: Partial<StatusRequest> }> {
-  children?: React.ReactNode;
+  children?: ReactNode;
 }
 
 interface StatusForm extends StatusRequest {
@@ -73,7 +73,7 @@ export default function SimpleCommand(props: CommandProps) {
         value.files?.map(async (file) => {
           const { id } = await apiServer.uploadAttachment({ file, description: value.description });
           return id;
-        }) ?? []
+        }) ?? [],
       );
 
       const newStatus: Partial<StatusRequest> = {
@@ -85,9 +85,9 @@ export default function SimpleCommand(props: CommandProps) {
 
       const response = await apiServer.postNewStatus(newStatus);
 
-      value.scheduled_at
-        ? showToast(Toast.Style.Success, "Scheduled", dateTimeFormatter(value.scheduled_at, "long"))
-        : showToast(Toast.Style.Success, "Status has been published");
+      if (value.scheduled_at)
+        showToast(Toast.Style.Success, "Scheduled", dateTimeFormatter(value.scheduled_at, "long"));
+      else showToast(Toast.Style.Success, "Status has been published");
 
       setStatusInfo(response);
       setState((prevState) => ({
@@ -143,7 +143,7 @@ export default function SimpleCommand(props: CommandProps) {
         onChange={(value) => setState((prevState) => ({ ...prevState, content: value }))}
       />
       {!props.children && <VisibilityDropdown />}
-      {props.children}
+      {props.children as JSX.Element}
       <Form.Checkbox
         id="markdown"
         label="Markdown"

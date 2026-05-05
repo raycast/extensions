@@ -1,5 +1,23 @@
 # Linkwarden Changelog
 
+## [Fix Undefined Data Crash] - 2026-04-22
+
+- Fixed `TypeError: Cannot read properties of undefined (reading 'map')` crash in the "Add Website to Linkwarden" command when the API returns an unexpected body shape
+- Hardened `useTags` and `useCollections` so `data` is always an array, regardless of the API response shape
+- Replaced unchecked `as Collection` cast in the submit handler with a graceful failure toast
+- Guarded the same latent `.map` / `.length` call sites in the "Search Linkwarden" command
+
+## [Fix Potential Search Errors] - 2026-03-23
+
+- Fixed "Bad Request" error caused by sending empty `collectionId` to the API
+- Fixed search text not being URL-encoded, causing malformed requests with special characters
+- Added error toast when link fetching fails (previously silent)
+- Fixed double-slash in API URLs when instance URL has a trailing slash
+
+## [Add Helium Browser Support] - 2026-01-26
+
+- Added Helium to the list of supported Chromium browsers
+
 ## [Improve UX] - 2025-03-10
 
 - Added a success toast when a link is added and pop to root

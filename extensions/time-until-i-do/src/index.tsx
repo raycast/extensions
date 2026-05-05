@@ -1,87 +1,71 @@
 import { Action, ActionPanel, Detail, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import moment from "moment";
-import fetch from "node-fetch";
-import { useEffect } from "react";
-
-interface Preferences {
-  bigDayDate: any;
-  bigDayName: any;
-}
+import { useState, useEffect, useMemo } from "react";
 
 export default function TimeUntil() {
-  const { bigDayDate } = getPreferenceValues<Preferences>();
-  const { bigDayName } = getPreferenceValues<Preferences>();
+  const { bigDayDate, bigDayName } = getPreferenceValues<Preferences>();
+  const [now, setNow] = useState(moment());
 
-  const bigDay = moment(bigDayDate);
-  const now = moment();
+  const bigDay = useMemo(() => moment(bigDayDate), [bigDayDate]);
 
-  const yearsUntil = bigDay.diff(now, "years", true).toFixed(2);
-  const monthsUntil = bigDay.diff(now, "months").toLocaleString();
-  const weeksUntil = bigDay.diff(now, "weeks").toLocaleString();
-  const daysUntil = bigDay.diff(now, "days").toLocaleString();
-  const hoursUntil = bigDay.diff(now, "hours").toLocaleString();
-  const minutesUntil = bigDay.diff(now, "minutes").toLocaleString();
-  const secondsUntil = bigDay.diff(now, "seconds").toLocaleString();
+  useEffect(() => {
+    const interval = setInterval(() => setNow(moment()), 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const countdownCopy = () => {
-    return (
-      "# Time Until " +
-      bigDayName +
-      " ⏱\n\n" +
-      "🎉 Only " +
-      yearsUntil +
-      " year(s) until the big event!\n\n" +
-      "🎉 Just " +
-      monthsUntil +
-      " month(s) to go!\n\n" +
-      "🎉 Only " +
-      weeksUntil +
-      " week(s) left until " +
-      bigDayName +
-      "!\n\n" +
-      "🎉 Just " +
-      daysUntil +
-      " day(s) to go until " +
-      bigDayName +
-      "!\n\n" +
-      "🎉 Only " +
-      hoursUntil +
-      " hour(s) until " +
-      bigDayName +
-      "!\n\n" +
-      "🎉 Just " +
-      minutesUntil +
-      " minute(s) until " +
-      bigDayName +
-      "!\n\n" +
-      "🎉 Only " +
-      secondsUntil +
-      " second(s) until " +
-      bigDayName +
-      "!"
-    );
-  };
+  const timeLeft = useMemo(() => {
+    if (!bigDayDate || bigDay.isBefore(now)) return null;
 
-  const FocusPoint = () => {
-    return (
-      "# Focus Points 🔍\n" +
-      "- Family 👨‍👩‍👧‍👦\n" +
-      "- Future 🔮\n" +
-      "- Faith 🙏\n" +
-      "- Fitness 🏋️‍♂️\n" +
-      "- Finances 💰\n" +
-      "- Friends 👯‍♂️\n" +
-      "- Fun 🎉\n" +
-      "- Freedom 🕊️\n"
-    );
-  };
+    return {
+      days: bigDay.diff(now, "days"),
+      hours: bigDay.diff(now, "hours") % 24,
+      minutes: bigDay.diff(now, "minutes") % 60,
+      seconds: bigDay.diff(now, "seconds") % 60,
+      totalDays: bigDay.diff(now, "days"),
+    };
+  }, [bigDay, now, bigDayDate]);
+
+  const markdown = useMemo(() => {
+    if (!bigDayName?.trim() || !bigDayDate) {
+      return "# ⚙️ Setup Required\n\nConfigure your event in preferences.";
+    }
+
+    if (!timeLeft) {
+      return `# 🎉 ${bigDayName}\n\n**Event Date:** ${bigDay.format(
+        "MMMM Do, YYYY",
+      )}\n\n✨ The day has arrived or passed!`;
+    }
+
+    const { days, hours, minutes, seconds, totalDays } = timeLeft;
+
+    return [
+      `# ⏰ ${bigDayName}`,
+      `**${bigDay.format("MMMM Do, YYYY")}**`,
+      "",
+      `## ${totalDays} ${totalDays === 1 ? "Day" : "Days"} Remaining`,
+      "",
+      `**${days}d ${hours}h ${minutes}m ${seconds}s**`,
+    ].join("\n");
+  }, [bigDayName, bigDayDate, bigDay, timeLeft]);
 
   return (
     <Detail
-      markdown={countdownCopy() + "\n" + "\n\n"} // + FocusPoint()
+      markdown={markdown}
+      metadata={
+        timeLeft && (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="Event" text={bigDayName || "Untitled Event"} />
+            <Detail.Metadata.Label title="Date" text={bigDay.format("MMMM Do, YYYY")} />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label title="Days Left" text={timeLeft.totalDays.toString()} />
+            <Detail.Metadata.Label title="Hours Left" text={bigDay.diff(now, "hours").toString()} />
+            <Detail.Metadata.Label title="Minutes Left" text={bigDay.diff(now, "minutes").toLocaleString()} />
+          </Detail.Metadata>
+        )
+      }
       actions={
         <ActionPanel>
-          <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
+          <Action title="Preferences" onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />

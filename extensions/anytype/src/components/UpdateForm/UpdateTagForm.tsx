@@ -5,6 +5,7 @@ import { Color, Tag } from "../../models";
 import { colorToHex, hexToColor } from "../../utils";
 
 export interface UpdateTagFormValues {
+  key: string;
   name: string;
   color: string;
 }
@@ -21,6 +22,7 @@ export function UpdateTagForm({ spaceId, propertyId, tag, mutateTags }: UpdateTa
 
   const { handleSubmit, itemProps } = useForm<UpdateTagFormValues>({
     initialValues: {
+      key: tag.key,
       name: tag.name,
       color: hexToColor[tag.color] as Color,
     },
@@ -32,11 +34,12 @@ export function UpdateTagForm({ spaceId, propertyId, tag, mutateTags }: UpdateTa
         });
 
         await updateTag(spaceId, propertyId, tag.id, {
-          name: values.name || "",
+          key: values.key,
+          name: values.name,
           color: values.color as Color,
         });
 
-        showToast(Toast.Style.Success, "Tag updated successfully");
+        await showToast(Toast.Style.Success, "Tag updated successfully");
         mutateTags();
         pop();
       } catch (error) {
@@ -60,8 +63,14 @@ export function UpdateTagForm({ spaceId, propertyId, tag, mutateTags }: UpdateTa
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.name} title="Name" placeholder="Enter tag name" info="The name of the tag" />
-      <Form.Dropdown {...itemProps.color} title="Color" info="The color of the tag">
+      <Form.TextField {...itemProps.name} title="Name" placeholder="Add name" info="The name of the tag" />
+      <Form.TextField
+        {...itemProps.key}
+        title="Key"
+        placeholder="Add key"
+        info="The key for the tag must be unique and in snake_case format"
+      />
+      <Form.Dropdown {...itemProps.color} title="Color" placeholder="Select color" info="The color of the tag">
         {tagColorKeys.map((key) => {
           const value = Color[key];
           return (

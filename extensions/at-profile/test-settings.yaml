@@ -1,0 +1,25 @@
+version: "1.0"
+profileHistory:
+  - testuser1
+  - testuser2
+  - demoaccount
+platformSettings:
+  x: true
+  instagram: true
+  github: true
+  linkedin: false
+  facebook: false
+  reddit: true
+  youtube: true
+  tiktok: false
+  threads: true
+  raycast: true
+customApps:
+  - name: "Test Platform"
+    value: "testplatform"
+    urlTemplate: "https://example.com/{profile}"
+    enabled: true
+  - name: "Another Platform" 
+    value: "anotherplatform"
+    urlTemplate: "https://another.example.com/user/{profile}"
+    enabled: true

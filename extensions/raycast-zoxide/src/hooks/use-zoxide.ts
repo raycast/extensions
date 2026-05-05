@@ -1,10 +1,11 @@
 import { useExec } from "@raycast/utils";
+import { pathFor } from "@utils/path-helpers";
 
 export const useZoxide = (command: string, options?: object) => {
   options = {
     shell: true,
     env: {
-      PATH: "/usr/bin:/bin:/usr/sbin:/sbin:/opt/homebrew/bin:/opt/homebrew/sbin",
+      PATH: pathFor("zoxide"),
     },
     ...options,
   };

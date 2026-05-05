@@ -5,7 +5,7 @@ import { useCache } from "../cache";
 import { LabelList } from "./label";
 import { showErrorToast } from "../utils";
 
-export function ProjectLabelList(props: { project: Project; navigationTitle?: string }): JSX.Element {
+export function ProjectLabelList(props: { project: Project; navigationTitle?: string }) {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Label[]>(
     `project_${props.project.id}_labels`,
@@ -21,7 +21,7 @@ export function ProjectLabelList(props: { project: Project; navigationTitle?: st
           limit: 50,
         });
       },
-    }
+    },
   );
 
   if (error) {

@@ -19,7 +19,7 @@ export default function EditTaskForm(props: {
       });
       pop();
     },
-    [props.onEdit, pop]
+    [props.onEdit, pop],
   );
 
   return (

@@ -45,9 +45,11 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^4.0.0",
     "prettier": "^2.6.2",
-    "react-devtools": "^4.24.6",
     "typescript": "^4.6.4"
   },
   "license": "MIT",
-  "categories": ["Applications", "Productivity"]
+  "categories": [
+    "Applications",
+    "Productivity"
+  ]
 }

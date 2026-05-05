@@ -1,3 +1,5 @@
-# Geist UI Components
+<img src="./assets/geist-banner-dark.png" />
 
-This extension provides links to components in Geist UI Documentation 
+# Geist UI Components & Hooks
+
+This extension provides links to components & hooks in [Geist UI](https://geist-ui.dev/en-us) Documentation.

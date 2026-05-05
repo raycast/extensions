@@ -4,7 +4,7 @@ import { NodeHtmlMarkdown } from "node-html-markdown";
 
 export function ItemDetail({ item }: { item: SearchItem | Item }) {
   const markdown = `## Description \n\n --- \n ${NodeHtmlMarkdown.translate(
-    item.description_html ?? item.description
+    item.description_html ?? item.description,
   )}`;
   return (
     <List.Item.Detail

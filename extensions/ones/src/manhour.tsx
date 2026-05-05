@@ -174,7 +174,7 @@ export function AddOrUpdateManhour(props: AddOrUpdateManhourProps) {
         showToast(
           Toast.Style.Failure,
           `${(props.manhour ? "Modify" : "Add") + " manhour failed"}`,
-          (err as Error).message
+          (err as Error).message,
         );
       }
     };
@@ -275,7 +275,7 @@ export function ManageManhour(props: ManageManhourProps) {
       fn();
       return () => abortCtrl.abort();
     },
-    [setManhoursMap, setWeekdaysMap, setManhourRecordedSums, setManhourEstimatedSums, setManhourDates, setSearchText]
+    [setManhoursMap, setWeekdaysMap, setManhourRecordedSums, setManhourEstimatedSums, setManhourDates, setSearchText],
   );
 
   useEffect(() => {

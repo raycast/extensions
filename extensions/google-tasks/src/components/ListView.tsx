@@ -65,7 +65,7 @@ export default function ListView(props: { listId: string }) {
         }
       })();
     },
-    [state.tasks, setState]
+    [state.tasks, setState],
   );
   const handleEdit = useCallback(
     (listId: string, taskToEdit: Task) => {
@@ -90,7 +90,7 @@ export default function ListView(props: { listId: string }) {
         }
       })();
     },
-    [state.tasks, setState]
+    [state.tasks, setState],
   );
 
   const handleToggle = useCallback(
@@ -116,7 +116,7 @@ export default function ListView(props: { listId: string }) {
         }
       })();
     },
-    [state.tasks, setState]
+    [state.tasks, setState],
   );
 
   const handleDelete = useCallback(
@@ -142,7 +142,7 @@ export default function ListView(props: { listId: string }) {
         }
       })();
     },
-    [state.tasks, setState]
+    [state.tasks, setState],
   );
 
   const filterTasks = useCallback(() => {

@@ -5,6 +5,7 @@ import { ONE_WEEK_MS, withCache } from "./cache";
 import { writeFileSync } from "fs";
 import path from "path";
 import os from "os";
+import { getPrefixFromSvgUrl, prefixSvgIds } from "./prefix-svg";
 
 export const APP_URL = "https://svgl.app";
 export const API_URL = "https://api.svgl.app";
@@ -40,7 +41,8 @@ export const fetchSvg = async (url: string) => {
     `svgl_svg_${url}`,
     async () => {
       const res = await fetch(url);
-      return await res.text();
+      const svg = await res.text();
+      return prefixSvgIds(svg, getPrefixFromSvgUrl(url));
     },
     ONE_WEEK_MS,
   );

@@ -20,3 +20,4 @@
 - Notifications:
 	- Only push video update reminders, the default is Off
 	- Use terminal-notifier to push, download terminal-notifier through `brew install terminal-notifier`, then get the address to fill in through `which terminal-notifier`
+  - Uses BurnToast to push notifications on Windows. You need to install the BurnToast module first. Run `Install-Module -Name BurnToast -Scope CurrentUser -Force` in PowerShell to install.

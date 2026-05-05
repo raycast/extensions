@@ -12,14 +12,18 @@
   ],
   "author": "franzwilhelm",
   "contributors": [
-    "bkeys818",
     "michaelfaisst",
     "teziovsky",
     "lukebars",
     "AlanHuang",
     "alexs",
     "ARui",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "AdrianKokot",
+    "xmok"
+  ],
+  "pastContributors": [
+    "bkeys818"
   ],
   "license": "MIT",
   "commands": [
@@ -59,7 +63,7 @@
       "title": "Toggl Menu Bar",
       "description": "View, start, or stop existing time entries from the Menu Bar.",
       "mode": "menu-bar",
-      "interval": "10s",
+      "interval": "30s",
       "preferences": [
         {
           "name": "showTitleInMenuBar",
@@ -159,29 +163,75 @@
       "description": "Number of days to look back when fetching time entries (default: 14, max: 60)",
       "placeholder": "Enter a number between 1-60",
       "default": "14"
+    },
+    {
+      "description": "The API responses cache time-to-live in seconds.",
+      "name": "cacheTtl",
+      "placeholder": "Enter cache TTL in seconds (default: 30)",
+      "required": false,
+      "title": "Cache TTL",
+      "type": "textfield",
+      "default": "30"
+    },
+    {
+      "name": "liteMode",
+      "type": "checkbox",
+      "required": false,
+      "title": "Low Data Mode",
+      "description": "Reduces API usage for free-tier users (30 req/hour). Data syncs once per hour instead of in real time — entries from web/mobile may take up to an hour to appear. Use Cmd+Shift+R to sync manually.",
+      "label": "Enable Low Data Mode",
+      "default": false
+    },
+    {
+      "name": "extensionStartScript",
+      "type": "textfield",
+      "required": false,
+      "title": "On Timer Start Script",
+      "description": "Path to a script or command to run when a timer starts. The time entry JSON is passed as an argument.",
+      "placeholder": "/path/to/script.sh"
+    },
+    {
+      "name": "extensionStopScript",
+      "type": "textfield",
+      "required": false,
+      "title": "On Timer Stop Script",
+      "description": "Path to a script or command to run when a timer stops.",
+      "placeholder": "/path/to/script.sh"
+    },
+    {
+      "name": "extensionUpdateScript",
+      "type": "textfield",
+      "required": false,
+      "title": "On Timer Fetch Script",
+      "description": "Path to a script or command to run whenever the running time entry is fetched. Useful for keeping external bars in sync.",
+      "placeholder": "/path/to/script.sh"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.75.1",
-    "@raycast/utils": "^1.15.0",
-    "dayjs": "^1.11.11",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "dayjs": "^1.11.11"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.0.4",
     "@trivago/prettier-plugin-sort-imports": "^4.3.0",
-    "@types/node": "~20.12.12",
-    "@types/react": "~18.3.3",
-    "eslint": "^8.56.0",
-    "react-devtools": "^4.27.2",
-    "typescript": "^5.4.5"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
     "pull-contributions": "npx @raycast/api@latest pull-contributions"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

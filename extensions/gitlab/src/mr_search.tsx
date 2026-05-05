@@ -1,5 +1,5 @@
 import { SearchMyMergeRequests } from "./components/mr_search";
 
-export default function MyMergeRequestsSearchRoot(): JSX.Element {
+export default function MyMergeRequestsSearchRoot() {
   return <SearchMyMergeRequests />;
 }

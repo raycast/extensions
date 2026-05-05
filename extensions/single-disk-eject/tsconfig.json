@@ -1,11 +1,11 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 16",
+  "display": "Node 22",
   "include": ["src/**/*"],
   "compilerOptions": {
-    "lib": ["es2020"],
+    "lib": ["es2023"],
     "module": "commonjs",
-    "target": "es2020",
+    "target": "es2022",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,

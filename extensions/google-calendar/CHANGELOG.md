@@ -1,10 +1,31 @@
 # Google Calendar Changelog
 
-## [1.2.1] - {PR_MERGE_DATE}
+## [1.4.2] - 2026-04-09
+
+- Fix timezone offset calculation for half-hour timezones (e.g. IST +05:30) that caused events to be scheduled one hour off
+
+## [1.4.1] - 2026-02-13
+
+- Add new command: create-quick-event – create Google Calendar events using a rule-based natural language parser (no AI setup required)
+
+## [1.4.0] - 2026-01-28
+
+- Added options to set default calendar, attendees, description, event duration, and send invitations
+
+## [1.3.1] - 2025-11-25
+
+- Allow the user to configure if they wish to open a meeting directly as the default action instead of the calendar event, defaults to the existing behaviour.
+
+## [1.3.0] - 2025-05-30
+
+- Feat(create-event): Enable creating events with natural language duration string input.
+- Chore(deps): Added `parse-duration`.
+
+## [1.2.1] - 2025-05-30
 
 - Changed "Copy Meeting Link" action shortcut to "cmd + shift + ," to not conflict with "Copy Event Title"
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2025-05-30
 
 - Added listing of calendars (request [#17411](https://github.com/raycast/extensions/issues/17411))
 - Fix issue with timezones in calendar event creation using AI

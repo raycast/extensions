@@ -6,7 +6,7 @@ import { getErrorMessage, showErrorToast } from "../utils";
 import { IssueDetail } from "./issues";
 import { MRDetail } from "./mr";
 
-export function ShowTodoDetailsAction(props: { todo: Todo }): JSX.Element | null {
+export function ShowTodoDetailsAction(props: { todo: Todo }): React.ReactNode | null {
   const todo = props.todo;
   const icon = { source: GitLabIcons.show_details, tintColor: Color.PrimaryText };
   if (todo.target_type === "MergeRequest") {
@@ -20,7 +20,7 @@ export function ShowTodoDetailsAction(props: { todo: Todo }): JSX.Element | null
   }
 }
 
-export function CloseTodoAction(props: { todo: Todo; finished?: () => void }): JSX.Element {
+export function CloseTodoAction(props: { todo: Todo; finished?: () => void }) {
   const todo = props.todo;
   async function handleAction() {
     try {
@@ -43,7 +43,7 @@ export function CloseTodoAction(props: { todo: Todo; finished?: () => void }): J
   );
 }
 
-export function CloseAllTodoAction(props: { finished?: () => void }): JSX.Element {
+export function CloseAllTodoAction(props: { finished?: () => void }) {
   async function handleAction() {
     try {
       await gitlab.post(`todos/mark_as_done`);

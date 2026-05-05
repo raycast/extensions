@@ -23,7 +23,7 @@ export const dateTimeFormatter = (time: Date, type: "short" | "long") => {
 
 export const statusParser = (
   { content, media_attachments, account, created_at }: Status,
-  type: "idAndDate" | "date"
+  type: "idAndDate" | "date",
 ) => {
   const images = media_attachments.filter((attachment) => attachment.type === "image");
   const parsedImages = images.reduce((link, image) => link + `![${image.description}](${image.remote_url})`, "");

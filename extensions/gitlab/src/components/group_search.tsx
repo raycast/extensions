@@ -5,7 +5,7 @@ import { Group } from "../gitlabapi";
 import { getErrorMessage, showErrorToast } from "../utils";
 import { GroupListEmptyView, GroupListItem } from "./groups";
 
-export function GroupSearchList(): JSX.Element {
+export function GroupSearchList() {
   const [searchText, setSearchText] = useState<string>();
   const { groups, error, isLoading } = useSearch(searchText);
 

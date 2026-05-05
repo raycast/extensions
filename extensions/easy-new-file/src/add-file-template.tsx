@@ -4,14 +4,11 @@ import { checkIsFile, getSelectedFile, isEmpty, showCustomHUD, showCustomToast }
 import fse from "fs-extra";
 import { parse } from "path";
 import { ActionOpenCommandPreferences } from "./components/action-open-command-preferences";
+import { MutatePromise } from "@raycast/utils";
+import { TemplateType } from "./types/file-type";
 
-export default function AddFileTemplate(props: { setRefresh: React.Dispatch<React.SetStateAction<number>> }) {
-  const setRefresh =
-    typeof props.setRefresh == "undefined"
-      ? () => {
-          return;
-        }
-      : props.setRefresh;
+export default function AddFileTemplate(props: { mutate: MutatePromise<TemplateType[]> }) {
+  const mutate = props.mutate;
   const [filePaths, setFilePaths] = useState<string[]>([]);
   const [name, setName] = useState<string>("");
   const [pathError, setPathError] = useState<string | undefined>();
@@ -46,7 +43,7 @@ export default function AddFileTemplate(props: { setRefresh: React.Dispatch<Reac
                 finalName = parse(filePaths[0]).name;
               }
               await addFileTemplate(finalName, filePaths[0], setPathError);
-              setRefresh(Date.now());
+              await mutate();
             }}
           />
 

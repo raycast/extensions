@@ -3,17 +3,17 @@ import { App } from "../models";
 import getList from "./getList";
 import setList from "./setList";
 
-export default async function updateItem(item: App, updates: Partial<App>): Promise<void> {
+export default async function updateItem(index: number, updates: Partial<App>): Promise<void> {
   const list = await getList();
 
-  const index = list.findIndex(({ path }) => path === item.path);
+  const item = list.at(index);
 
-  if (index === -1) {
+  if (!item) {
     throw new HarpoonError(ErrorCode.itemNotFound);
   }
 
   list[index] = {
-    ...list[index],
+    ...item,
     ...updates,
   };
 

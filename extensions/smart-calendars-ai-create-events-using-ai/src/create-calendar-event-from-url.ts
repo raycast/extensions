@@ -14,22 +14,14 @@ export default async function Command() {
 
     // Check if we have text to process
     if (!clipboardText) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No URL found in clipboard",
-        message: "Copy a URL first",
-      });
+      await showFailureToast("No URL found in clipboard");
       return;
     }
 
     // Validate that it's a proper URL
     const urlRegex = /^https?:\/\/.+/i;
     if (!urlRegex.test(clipboardText.trim())) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Invalid URL",
-        message: "URL must start with http:// or https://",
-      });
+      await showFailureToast("Invalid URL - must start with http:// or https://");
       return;
     }
 
@@ -49,7 +41,7 @@ export default async function Command() {
     const url = `smartcalendars://webpage/${encodedUrl}`;
 
     // Update toast
-    loadingToast.title = "Creating calendar event from webpage...";
+    loadingToast.title = "Creating calendar event/reminder from webpage...";
 
     // Open the URL
     await open(url);
@@ -57,11 +49,11 @@ export default async function Command() {
     // Show success toast
     await showToast({
       style: Toast.Style.Success,
-      title: "Calendar event created",
+      title: "Calendar event/reminder created",
       message: "URL sent to Smart Calendars app",
     });
   } catch (error) {
     // Show error toast
-    await showFailureToast(error, { title: "Failed to create calendar event" });
+    await showFailureToast(error, { title: "Failed to create calendar event/reminder" });
   }
 }

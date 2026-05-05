@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, launchCommand, LaunchType, LocalStorage, showToast } from "@raycast/api";
 import { useForm } from "@raycast/utils";
-import { Command } from "./lib/commands/types";
+import { type Command } from "./lib/commands/types";
 
 interface ImportFormValues {
   json: string;
@@ -75,7 +75,7 @@ export default function Command() {
             try {
               /* Assume value is a data string, as is default for export via Search PromptLab Commands interface. */
               commandData = JSON.parse(value as string) as Command;
-            } catch (error) {
+            } catch {
               /* Fallback to using the value as raw JSON. */
               commandData = value as Command;
             }

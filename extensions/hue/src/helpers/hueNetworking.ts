@@ -1,12 +1,14 @@
 import { APP_NAME } from "./constants";
-import tls, { PeerCertificate } from "tls";
+import { PeerCertificate } from "tls";
 import * as https from "https";
 import { HueApiService, LinkResponse, MDnsService } from "../lib/types";
 import Bonjour from "bonjour-service";
 import { isIPv4 } from "net";
+import { environment } from "@raycast/api";
+import fs from "fs";
 
 /**
- * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
+ * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
  */
 export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: string; id: string }> {
   console.info("Discovering bridge using MeetHue's public API…");
@@ -57,7 +59,7 @@ export async function discoverBridgeUsingHuePublicApi(): Promise<{ ipAddress: st
 }
 
 /**
- * Ignoring that you could have more than one Hue Bridge on a network as this is unlikely in 99.9% of users situations
+ * Ignoring that there could be more than one Hue Bridge on a network as this is rare.
  */
 export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id: string }> {
   console.info("Discovering bridge using mDNS…");
@@ -84,20 +86,7 @@ export async function discoverBridgeUsingMdns(): Promise<{ ipAddress: string; id
   });
 }
 
-function isValidBridgeCertificate(peerCertificate: PeerCertificate, bridgeId?: string) {
-  return (
-    // The subject CN is the given Bridge ID or a valid Bridge ID
-    (peerCertificate.subject.CN === bridgeId || /^([0-9a-fA-F]){16}$/.test(peerCertificate.subject.CN)) &&
-    // The issuer CN is equal to the subject CN or “root-bridge”
-    (peerCertificate.subject.CN === peerCertificate.issuer.CN || peerCertificate.issuer.CN === "root-bridge")
-  );
-}
-
-export async function getUsernameFromBridge(
-  ipAddress: string,
-  bridgeId: string | undefined = undefined,
-  certificate: Buffer,
-): Promise<string> {
+export async function getUsernameFromBridge(ipAddress: string, bridgeId: string): Promise<string> {
   return new Promise((resolve, reject) => {
     const request = https.request(
       {
@@ -105,16 +94,7 @@ export async function getUsernameFromBridge(
         path: "/api",
         hostname: ipAddress,
         port: 443,
-        ca: certificate,
-        agent: new https.Agent({
-          checkServerIdentity: (hostname, peerCertificate) => {
-            if (!isValidBridgeCertificate(peerCertificate, bridgeId)) {
-              reject("TLS certificate is not a valid Hue Bridge certificate");
-            }
-
-            return undefined;
-          },
-        }),
+        agent: getBridgeHttpsAgent(bridgeId),
         headers: {
           "Content-Type": "application/json",
         },
@@ -148,46 +128,56 @@ export async function getUsernameFromBridge(
   });
 }
 
-export function getCertificate(host: string, bridgeId?: string): Promise<PeerCertificate> {
-  return new Promise((resolve, reject) => {
-    const socket = tls.connect(
-      {
-        host: host,
-        port: 443,
-        rejectUnauthorized: false,
-      },
-      () => {
-        console.log("Getting certificate from the Hue Bridge…");
-        socket.end();
-        const peerCertificate: PeerCertificate = socket.getPeerCertificate();
+let _bridgeHttpsAgent: https.Agent | null = null;
 
-        /*
-         * The Hue Bridge uses either a self-signed certificate, or a certificate signed by a root-bridge certificate.
-         * In both cases, the CN (common name) of the certificate is the ID of the Hue Bridge, which is a 16 character hex string.
-         * The CN of a self-signed certificate is also the ID of the Hue Bridge.
-         * The CN of a certificate signed by the Hue Bridge root certificate is 'root-bridge'.
-         * https://developers.meethue.com/develop/application-design-guidance/using-https/#Common%20name%20validation
-         * https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
-         */
-        if (!isValidBridgeCertificate(peerCertificate, bridgeId)) {
-          return reject("TLS certificate is not a valid Hue Bridge certificate");
-        }
+/**
+ * Creates a bridge-specific HTTPS agent that inherits the connection pooling and TLS
+ * session resumption settings from our base agent.
+ * @param bridgeId Bridge ID for certificate validation
+ * @returns HTTPS agent configured for the specific Hue Bridge
+ */
+export function getBridgeHttpsAgent(bridgeId: string): https.Agent {
+  if (_bridgeHttpsAgent) return _bridgeHttpsAgent;
 
-        return resolve(peerCertificate);
-      },
-    );
-
-    socket.on("error", (error) => {
-      return reject(error);
-    });
+  _bridgeHttpsAgent = new https.Agent({
+    keepAlive: true,
+    rejectUnauthorized: true,
+    ca: getCaCertificate(),
+    checkServerIdentity: (_hostname, peerCertificate) => validateBridgeCertificate(peerCertificate, bridgeId),
   });
+
+  return _bridgeHttpsAgent;
 }
 
-export function createPemString(cert: PeerCertificate): string {
-  const insertNewlines = (str: string): string => {
-    const regex = new RegExp(`(.{64})`, "g");
-    return str.replace(regex, "$1\n");
-  };
-  const base64 = cert.raw.toString("base64");
-  return `-----BEGIN CERTIFICATE-----\n${insertNewlines(base64)}-----END CERTIFICATE-----\n`;
+/**
+ * The Hue Bridge uses a certificate signed by a root-bridge certificate, or an intermediate certificate which will
+ * be signed by a root-bridge certificate.
+ * The CN (common name) of the certificate matches the ID of the Hue Bridge, which is a 16-character hex string.
+ * The CN of a certificate signed by the Hue Bridge root certificate is 'root-bridge'.
+ * https://developers.meethue.com/develop/application-design-guidance/using-https/#Common%20name%20validation
+ * https://developers.meethue.com/develop/application-design-guidance/using-https/#Self-signed%20certificates
+ */
+function validateBridgeCertificate(peerCertificate: PeerCertificate, bridgeId: string) {
+  if (peerCertificate.subject.CN.toLowerCase() !== bridgeId.toLowerCase()) {
+    throw new Error("Server identity check failed. Certificate subject’s Common Name does not match the Bridge ID.");
+  }
+
+  if (peerCertificate.issuer.CN !== "root-bridge") {
+    throw new Error(
+      "Server identity check failed. Certificate issuer’s Common Name does not match the expected value.",
+    );
+  }
+
+  // Return undefined to indicate that the server identity check succeeded
+  return undefined;
+}
+
+let _caCertificate: Buffer | null = null;
+
+export function getCaCertificate(): Buffer {
+  if (_caCertificate) return _caCertificate;
+
+  _caCertificate = fs.readFileSync(environment.assetsPath + "/huebridge_cacert.pem");
+
+  return _caCertificate;
 }

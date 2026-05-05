@@ -1,5 +1,35 @@
 # Ente Auth Changelog
 
+## [Fix spaces in export path] - 2026-03-09
+
+- Fixed issue with spaces in export path causing export to fail
+
+## [Fix import edge cases] - 2026-03-05
+
+- Fixed cases when ente auth added dashes and plus signs into secret (so far it wasn't parsing correctly)
+- Fixed hiding ente auth entries that were trashed
+
+## [Fix import deleting export file] - 2026-02-01
+
+- Fixed import command deleting the export file before re-exporting, causing ENOENT if export fails
+- Added missing return in export command error handling
+
+## [Handle double-encoded TOTP + Maintenance] - 2025-12-02
+
+- Handle double-encoded TOTP
+- Change the "Copy Next" `shortcut` to be cross-platform
+- Remove unnecessary deps
+- Mention default values the extension uses for reference
+
+## [Windows Support] - 2025-08-25
+
+- Added windows support
+
+## [Bug fix] - 2025-07-11
+
+- removed flickering "no secrets found" message when opening the extension
+- slightly updated "no secrets found" message
+
 ## [Bug fix] - 2025-05-12
 
 - fix variable for assigning user preferred values
@@ -18,12 +48,15 @@
 - Restructured imports and added logging when folders already exist
 
 ## [Bug fix] - 2024-11-14
+
 - Allow path to be resolved during runtime (e.g ~/Desktop/Ente)
 
 ## [Update Readme] - 2024-11-14
+
 - Fix a typo in the readme
 
 ## [Bug fix] - 2024-11-13
+
 - Added PR-15036 changes contributed by albarin
 
 ## [New Additions] - 2024-11-13
@@ -31,6 +64,7 @@
 - Add the ability to change preferred actions; e.g. (paste or copy on enter)
 
 ## [Bug fix] - 2024-08-28
+
 - Fix error in `Get TOPT` command when secrets are empty
 
 ## [Initial Version] - 2024-08-28

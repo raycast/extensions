@@ -1,44 +1,53 @@
-import { readFile } from "node:fs/promises";
-import { homedir } from "node:os";
-import { join } from "node:path";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import { Cache } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import bplist from "bplist-parser";
-import { Voice, getVoices } from "mac-say";
 import { minRate, maxRate } from "./constants.js";
 import { systemDefault } from "./constants.js";
+import { Voice, getVoices, isMacOS, isWindows } from "./speech.js";
 import { ParsedSaySettings, SpeechPlist, StoredSaySettings } from "./types.js";
 
 const cache = new Cache();
 
-export const getCache = (key: string): string => JSON.parse(cache.get(key) ?? `"${systemDefault}"`);
+function getCache(key: string): string;
+function getCache(key: "keepSilentOnError"): boolean;
+function getCache(key: string | "keepSilentOnError"): string | boolean {
+  return JSON.parse(cache.get(key) ?? `"${systemDefault}"`);
+}
 
 export const useSaySettings = () => {
   const [voice, setVoice] = useCachedState<string>("voice", systemDefault);
   const [rate, setRate] = useCachedState<string>("rate", systemDefault);
   const [device, setAudioDevice] = useCachedState<string>("audioDevice", systemDefault);
-  return { voice, rate, device, setVoice, setRate, setAudioDevice };
+  const [keepSilentOnError, setKeepSilentOnError] = useCachedState<boolean>("keepSilentOnError", false);
+  return { voice, rate, device, keepSilentOnError, setVoice, setRate, setAudioDevice, setKeepSilentOnError };
 };
 
-export const getSaySettings = () => {
+const getSaySettings = () => {
   const voice = getCache("voice");
   const rate = getCache("rate");
   const audioDevice = getCache("audioDevice");
-  return { voice, rate, audioDevice };
+  const keepSilentOnError = getCache("keepSilentOnError");
+  return { voice, rate, audioDevice, keepSilentOnError };
 };
 
-export const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
-  const { voice, rate, audioDevice } = settings;
+const parseSaySettings = (settings: StoredSaySettings): ParsedSaySettings => {
+  const { voice, rate, audioDevice, keepSilentOnError } = settings;
   return {
     voice: voice === systemDefault ? undefined : voice,
     rate: rate === systemDefault ? undefined : parseInt(rate, 10),
     audioDevice: audioDevice === systemDefault ? undefined : audioDevice,
+    keepSilentOnError,
   };
 };
 
+export const getParsedSaySettings = (): ParsedSaySettings => parseSaySettings(getSaySettings());
+
 export const getSortedVoices = async () => {
-  const orignalVoices = await getVoices();
-  return orignalVoices.sort((a, b) => {
+  const originalVoices = await getVoices();
+  return originalVoices.sort((a, b) => {
     if (a.languageCode === b.languageCode) {
       return a.name.localeCompare(b.name);
     }
@@ -51,12 +60,18 @@ export const getSortedVoices = async () => {
 export const languageCodeToEmojiFlag = (languageCode: string) => {
   if (languageCode === "ar_001") return undefined;
   if (languageCode === "en-scotland") return "🏴󠁧󠁢󠁳󠁣󠁴󠁿";
-  const codePoints = languageCode
-    .slice(-2)
+  const countryCode = languageCode.split(/[-_]/).at(-1);
+  if (!countryCode || !/^[a-z]{2}$/i.test(countryCode)) return undefined;
+  const codePoints = countryCode
     .toUpperCase()
     .split("")
     .map((char) => 127397 + char.charCodeAt(0));
   return String.fromCodePoint(...codePoints);
+};
+
+export const languageCodeToLanguageName = (languageCode: string) => {
+  const languageCodePart = languageCode.split(/[-_]/)[0];
+  return new Intl.DisplayNames(["en"], { type: "language" }).of(languageCodePart) ?? "Other";
 };
 
 export const voiceNameToEmojiFlag = (voices: Voice[], voiceName?: string) => {
@@ -76,9 +91,11 @@ export const getRates = () => {
 };
 
 export const getSpeechPlist = async () => {
+  if (!isMacOS) return undefined;
+
   try {
-    const speechPlistPath = join(homedir(), "Library/Preferences/com.apple.speech.voice.prefs.plist");
-    const speechPlistFile = await readFile(speechPlistPath);
+    const speechPlistPath = path.join(os.homedir(), "Library/Preferences/com.apple.speech.voice.prefs.plist");
+    const speechPlistFile = await fs.readFile(speechPlistPath);
     const speechPlistJson = bplist.parseBuffer(speechPlistFile);
 
     const foundRate = speechPlistJson?.[0]?.VoiceRateDataArray.find(
@@ -92,4 +109,20 @@ export const getSpeechPlist = async () => {
   } catch {
     return undefined;
   }
+};
+
+export const getSystemSettingsName = () => (isWindows ? "Windows Settings" : "System Settings");
+
+export const getSystemSettingsUrl = () =>
+  isWindows ? "ms-settings:speech" : "x-apple.systempreferences:com.apple.preference.universalaccess";
+
+export const getConfigureSpeechTitle = () => (isWindows ? "Configure Speech" : "Configure Spoken Content");
+
+export const getAdvancedMessage = () => {
+  if (isWindows) {
+    return "This configuration page does not alter your system settings. For more advanced configurations please go to Windows Settings -> Time & language -> Speech.";
+  }
+
+  const menuTitle = os.release().startsWith("25") ? "Live Speech" : "Spoken Content";
+  return `This configuration page does not alter your system settings. For more advanced configurations please go to System Settings -> Accessibility -> ${menuTitle}.`;
 };

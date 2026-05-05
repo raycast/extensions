@@ -13,8 +13,9 @@ import {
 } from "@raycast/api";
 import { showFailureToast, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { checkApiTokenValidity, displayCode, getToken } from "../api";
+import { checkApiTokenValidity, createApiKey, createChallenge } from "../api";
 import { apiAppName, downloadUrl, localStorageKeys } from "../utils";
+import { migrateAuthKey } from "../utils/migrateAuthKey";
 
 type EnsureAuthenticatedProps = {
   placeholder?: string;
@@ -28,7 +29,7 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
   const [challengeId, setChallengeId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const { handleSubmit, itemProps } = useForm<{ userCode: string }>({
+  const { handleSubmit, itemProps } = useForm<{ code: string }>({
     onSubmit: async (values) => {
       if (!challengeId) {
         await showFailureToast({
@@ -40,9 +41,9 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
 
       try {
         setIsLoading(true);
-        const { app_key } = await getToken(challengeId, values.userCode);
-        await LocalStorage.setItem(localStorageKeys.appKey, app_key);
-        showToast({ style: Toast.Style.Success, title: "Successfully paired" });
+        const { api_key } = await createApiKey({ challenge_id: challengeId, code: values.code });
+        await LocalStorage.setItem(localStorageKeys.apiKey, api_key);
+        await showToast({ style: Toast.Style.Success, title: "Successfully paired" });
         setHasToken(true);
         setTokenIsValid(true);
       } catch (error) {
@@ -52,7 +53,7 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
       }
     },
     validation: {
-      userCode: (value) => {
+      code: (value) => {
         if (!value) {
           return "The code is required.";
         } else if (!/^\d{4}$/.test(value)) {
@@ -64,7 +65,9 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
 
   useEffect(() => {
     const retrieveAndValidateToken = async () => {
-      const token = await LocalStorage.getItem<string>(localStorageKeys.appKey);
+      await migrateAuthKey();
+
+      const token = getPreferenceValues().apiKey || (await LocalStorage.getItem(localStorageKeys.apiKey));
       if (token) {
         const isValid = await checkApiTokenValidity();
         setHasToken(true);
@@ -79,17 +82,17 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
   async function startChallenge() {
     try {
       setIsLoading(true);
-      const { challenge_id } = await displayCode(apiAppName);
+      const { challenge_id } = await createChallenge({ app_name: apiAppName });
       setChallengeId(challenge_id);
 
       // Prevent window from closing
-      showToast({
+      await showToast({
         style: Toast.Style.Animated,
         title: "Pairing started",
         message: "Check the app for the 4-digit code.",
       });
     } catch (error) {
-      showToast({
+      await showToast({
         style: Toast.Style.Failure,
         title: "Failed to start pairing",
         message: error instanceof Error ? error.message : "An unknown error occurred.",
@@ -125,6 +128,20 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
     return <>{children}</>;
   }
 
+  // If API key is set in settings, no need for pairing flow
+  const settingsApiKey = getPreferenceValues().apiKey;
+  if (settingsApiKey) {
+    return (
+      <List searchBarPlaceholder="Invalid API Key">
+        <List.EmptyView
+          icon={Icon.XMarkCircle}
+          title="Invalid API Key"
+          description="The API key provided in settings is invalid. Please check your settings."
+        />
+      </List>
+    );
+  }
+
   return challengeId ? (
     <Form
       isLoading={isLoading}
@@ -134,12 +151,7 @@ export function EnsureAuthenticated({ placeholder, viewType, children }: EnsureA
         </ActionPanel>
       }
     >
-      <Form.TextField
-        {...itemProps.userCode}
-        id="userCode"
-        title="Verification Code"
-        placeholder="Enter the 4-digit code from popup"
-      />
+      <Form.TextField {...itemProps.code} id="code" title="Code" placeholder="Enter 4-digit code from popup" />
     </Form>
   ) : (
     <List

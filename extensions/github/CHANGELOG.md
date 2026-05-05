@@ -1,5 +1,114 @@
 # GitHub Changelog
 
+## [Download Repository Command] - 2026-04-28
+
+- Added "Download Repository" command to download an entire repository, a specific sub-directory, or a single file from a GitHub URL.
+- Reuses existing GitHub authentication for private repository access.
+- Streams the archive to disk and extracts only the requested directory for memory efficiency.
+
+## [Updated contributors list] - 2026-04-24
+
+- Added new contributor to the GitHub extension
+
+## [Add My GitHub Stats Menu Bar] - 2026-04-23
+
+- Added a new `My GitHub Stats Menu Bar` command that surfaces profile stats (Followers, Following, Stars Received, Forks Received, PRs Authored/Merged/Open, Issues Authored/Open, Commits in the last year, Public Repos, Organizations) directly in the macOS menu bar
+- Added a `Menu Bar Title` preference to choose which metric is shown next to the icon: Followers (default), Stars Received, Open PRs, Open Issues, or Icon only
+- Each item opens the relevant GitHub page (profile tabs, search queries, organizations) on click
+
+## [Fix PR List Accessories Alignment] - 2026-04-13
+
+- Pull Requests: Always show comment count (zero shown as dimmed) to prevent accessories from shifting
+- Pull Requests: Replace variable-length relative date with fixed `MMM dd` format (e.g. "Mar 30")
+- Pull Requests: Replace review decision text badges with compact icons to prevent truncation on long titles
+- Pull Requests: Add placeholder icon for rows without a review decision to keep CI check column aligned
+- Pull Requests: Add `showAuthor` prop to show author icon in Search and Repository views
+
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Improve Auto-Merge Support] - 2026-03-05
+
+- Pull Requests: Fix auto-merge actions not appearing due to inverted condition
+- Pull Requests: Add merge method selection when enabling auto-merge
+- Pull Requests: Show "Auto-merge" tag in list and detail views
+- Create Pull Request: Add auto-merge option with merge method picker
+- Added AI tools to enable and disable auto-merge on pull requests
+
+## [Add Pagination Support to My Starred Repositories] - 2026-01-24
+
+- My Starred Repositories: Migrated from REST API to GraphQL API for better pagination support
+- My Starred Repositories: Added pagination to load all starred repositories beyond initial fetch limit
+- My Starred Repositories: Improved loading states with skeleton items during pagination
+- Enhanced type safety across repository components with generic types
+
+## [Fix "Clone and Open" action when repository doesn't exist] - 2025-12-17
+
+- Fix the clone command to append the target directory only when it exists
+- Always show the "Clone with Options" action instead of conditionally
+
+## [Moved Contributor] - 2025-12-10
+
+## [Fix filter visited repositories] - 2025-12-09
+
+- Add validation to filter history for only repositories that exist in current data
+- Refactor repository filtering to handle undefined searchText and searchFilter explicitly
+
+## [Use distinct status icons for PR states] - 2025-12-08
+
+- My Pull Requests Menu Bar: Added dedicated icons for merged, closed, draft, and merge queue PR states
+
+## [Add option to filter draft pull requests] - 2025-12-07
+
+- My Pull Requests: Added "Drafts" preference to show or hide draft pull requests
+- My Pull Requests Menu Bar: Added "Drafts" preference to show or hide draft pull requests
+
+## [Fix Create Pull Request branch selection] - 2025-11-27
+
+- Create Pull Request: Fixed issue where the default branch wasn't appearing in the "From" dropdown options
+- Create Pull Request: Fixed validation errors when searching for branches while a branch is already selected
+- Create Pull Request: Prevented selecting the same branch for both "From" and "Into" fields
+
+## [Show organization projects when creating issues] - 2025-12-07
+
+- Include organization-level Projects in the Create Issue project picker
+
+## [Add Download Repository command and copy markdown URL actions] - 2025-11-19
+
+- Search Repositories: Added "Download Repository" action to download a repository as a zip file
+- Added "Copy Markdown URL" actions to copy an issue's markdown URL
+
+## [Checkout PR project action] - 2025-10-24
+
+- My Pull Requests: Added "Check Out PR" action to clone repository and switch to PR branch locally
+
+## [Unified handle notification icon retrieval error] - 2025-10-02
+
+- Notifications Command and Menu Bar: Display a fallback icon when the notification icon retrieval fails.
+
+## [Fix clone with options action] - 2025-09-08
+
+- Fix the clone action by adding the quote to the command to prevent issues with spaces in the path
+
+## [Add My Starred Repositories command] - 2025-08-25
+
+- Add new "My Starred Repositories" command to view starred repositories
+- Displays starred repositories with support for sorting and visiting history
+- Integrated with existing repository list components for consistent experience
+
+## [Issue type specification] - 2025-08-22
+
+- Adds the ability to specify the issue type when creating a new issue.
+
+## [Fix repository filtering] - 2025-06-26
+
+- Correct the repository filtering for exclude mode
+
+## [Add repository filtering] - 2025-06-05
+
+- my-issues, my-pull-requests and menu counterparts can now specify repositories to include / exclude
+
 ## [Filter recently closed PRs by last update date] - 2025-04-16
 
 - Fixed a bug where active pull requests could be hidden: the `updated` filter is now only applied to closed PRs, so all active PRs are always shown in `My Pull Requests`.

@@ -1,4 +1,4 @@
-export declare const appRouter: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+export declare const appRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import(".prisma/client").PrismaClient<{
             log: "error"[];
@@ -10,26 +10,23 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
             deviceName: string;
         } | undefined;
         headers: Headers;
-        accessToken: string;
-        refreshToken: string;
-        iat: number;
-        exp: number;
+        jti: string;
     };
     meta: object;
     errorShape: {
         data: {
             zodError: import("zod").typeToFlattenedError<any, string> | null;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+            code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
             httpStatus: number;
             path?: string;
             stack?: string;
         };
         message: string;
-        code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
     };
     transformer: true;
-}, import("@trpc/server/unstable-core-do-not-import").DecorateCreateRouterOptions<{
-    hello: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+}, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
+    hello: import("@trpc/server").TRPCBuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -41,25 +38,22 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deviceName: string;
             } | undefined;
             headers: Headers;
-            accessToken: string;
-            refreshToken: string;
-            iat: number;
-            exp: number;
+            jti: string;
         };
         meta: object;
         errorShape: {
             data: {
                 zodError: import("zod").typeToFlattenedError<any, string> | null;
-                code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+                code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
                 httpStatus: number;
                 path?: string;
                 stack?: string;
             };
             message: string;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+            code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
         };
         transformer: true;
-    }, {
+    }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
         get: import("@trpc/server").TRPCQueryProcedure<{
             input: {
                 name: string;
@@ -68,9 +62,10 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 success: boolean;
                 message: string;
             };
+            meta: object;
         }>;
-    }>;
-    user: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+    }>>;
+    user: import("@trpc/server").TRPCBuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -82,25 +77,22 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deviceName: string;
             } | undefined;
             headers: Headers;
-            accessToken: string;
-            refreshToken: string;
-            iat: number;
-            exp: number;
+            jti: string;
         };
         meta: object;
         errorShape: {
             data: {
                 zodError: import("zod").typeToFlattenedError<any, string> | null;
-                code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+                code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
                 httpStatus: number;
                 path?: string;
                 stack?: string;
             };
             message: string;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+            code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
         };
         transformer: true;
-    }, {
+    }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
         me: import("@trpc/server").TRPCQueryProcedure<{
             input: {
                 device?: string | undefined;
@@ -138,6 +130,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 updatedAt: Date;
                 image: string | null;
             };
+            meta: object;
         }>;
         listBySpaceId: import("@trpc/server").TRPCQueryProcedure<{
             input: string;
@@ -161,6 +154,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 authEmail: string | null;
                 role: import(".prisma/client").$Enums.TeamRole;
             })[];
+            meta: object;
         }>;
         inviteMembers: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -168,6 +162,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 emails: string[];
             };
             output: void;
+            meta: object;
         }>;
         subscribeTag: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -175,6 +170,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 tagName: string;
             };
             output: void;
+            meta: object;
         }>;
         unsubscribeTag: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -182,15 +178,17 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 tagName: string;
             };
             output: void;
+            meta: object;
         }>;
         updateName: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 name: string;
             };
             output: void;
+            meta: object;
         }>;
-    }>;
-    bookmark: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+    }>>;
+    bookmark: import("@trpc/server").TRPCBuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -202,25 +200,22 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deviceName: string;
             } | undefined;
             headers: Headers;
-            accessToken: string;
-            refreshToken: string;
-            iat: number;
-            exp: number;
+            jti: string;
         };
         meta: object;
         errorShape: {
             data: {
                 zodError: import("zod").typeToFlattenedError<any, string> | null;
-                code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+                code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
                 httpStatus: number;
                 path?: string;
                 stack?: string;
             };
             message: string;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+            code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
         };
         transformer: true;
-    }, {
+    }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
         hello: import("@trpc/server").TRPCQueryProcedure<{
             input: {
                 text: string;
@@ -228,6 +223,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
             output: {
                 greeting: string;
             };
+            meta: object;
         }>;
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -250,6 +246,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deletedAt: Date | null;
                 updatedAt: Date;
             };
+            meta: object;
         }>;
         listAll: import("@trpc/server").TRPCQueryProcedure<{
             input: {
@@ -268,6 +265,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 createdAt: Date;
                 updatedAt: Date;
             }[];
+            meta: object;
         }>;
         listRecent: import("@trpc/server").TRPCQueryProcedure<{
             input: void;
@@ -284,10 +282,12 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deletedAt: Date | null;
                 updatedAt: Date;
             }[];
+            meta: object;
         }>;
         delete: import("@trpc/server").TRPCMutationProcedure<{
             input: string;
             output: void;
+            meta: object;
         }>;
         exists: import("@trpc/server").TRPCQueryProcedure<{
             input: {
@@ -295,6 +295,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 url: string;
             };
             output: boolean;
+            meta: object;
         }>;
         update: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -317,6 +318,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deletedAt: Date | null;
                 updatedAt: Date;
             };
+            meta: object;
         }>;
         import: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -330,9 +332,10 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 browserName: string;
             };
             output: void;
+            meta: object;
         }>;
-    }>;
-    space: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+    }>>;
+    space: import("@trpc/server").TRPCBuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -344,25 +347,22 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deviceName: string;
             } | undefined;
             headers: Headers;
-            accessToken: string;
-            refreshToken: string;
-            iat: number;
-            exp: number;
+            jti: string;
         };
         meta: object;
         errorShape: {
             data: {
                 zodError: import("zod").typeToFlattenedError<any, string> | null;
-                code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+                code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
                 httpStatus: number;
                 path?: string;
                 stack?: string;
             };
             message: string;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+            code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
         };
         transformer: true;
-    }, {
+    }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 name: string;
@@ -370,12 +370,14 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 description?: string | undefined;
             };
             output: void;
+            meta: object;
         }>;
         leave: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 spaceId: string;
             };
             output: void;
+            meta: object;
         }>;
         get: import("@trpc/server").TRPCQueryProcedure<{
             input: {
@@ -417,6 +419,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 updatedAt: Date;
                 image: string | null;
             }) | null;
+            meta: object;
         }>;
         update: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -424,8 +427,11 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 description?: string | undefined;
                 name?: string | undefined;
                 image?: string | undefined;
+                myNickname?: string | undefined;
+                myImage?: string | undefined;
             };
             output: void;
+            meta: object;
         }>;
         removeUser: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -433,9 +439,10 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 targetEmail: string;
             };
             output: void;
+            meta: object;
         }>;
-    }>;
-    spaceAuth: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+    }>>;
+    spaceAuth: import("@trpc/server").TRPCBuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -447,32 +454,31 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deviceName: string;
             } | undefined;
             headers: Headers;
-            accessToken: string;
-            refreshToken: string;
-            iat: number;
-            exp: number;
+            jti: string;
         };
         meta: object;
         errorShape: {
             data: {
                 zodError: import("zod").typeToFlattenedError<any, string> | null;
-                code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+                code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
                 httpStatus: number;
                 path?: string;
                 stack?: string;
             };
             message: string;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+            code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
         };
         transformer: true;
-    }, {
+    }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
         listAuthenticatedSpaceIds: import("@trpc/server").TRPCQueryProcedure<{
             input: void;
             output: string[];
+            meta: object;
         }>;
         listAuthRequiredSpaceIds: import("@trpc/server").TRPCQueryProcedure<{
             input: void;
             output: string[];
+            meta: object;
         }>;
         sendAuthCode: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -480,6 +486,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 authEmail: string;
             };
             output: void;
+            meta: object;
         }>;
         verifyAuthCode: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -488,18 +495,14 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 authEmail: string;
             };
             output: void;
-        }>;
-        lastVerifiedEmail: import("@trpc/server").TRPCQueryProcedure<{
-            input: {
-                spaceId: string;
-            };
-            output: any;
+            meta: object;
         }>;
         listMemberAuthPolicies: import("@trpc/server").TRPCQueryProcedure<{
             input: {
                 spaceId: string;
             };
             output: string[];
+            meta: object;
         }>;
         createMemberAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -508,6 +511,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 authCheckInterval: string;
             };
             output: void;
+            meta: object;
         }>;
         deleteMemberAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -515,6 +519,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 emailPattern: string;
             };
             output: void;
+            meta: object;
         }>;
         updateMemberAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -523,9 +528,24 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 authCheckInterval: string;
             };
             output: void;
+            meta: object;
         }>;
-    }>;
-    tag: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+        checkMySessionToPassAuthPolicy: import("@trpc/server").TRPCMutationProcedure<{
+            input: {
+                spaceId: string;
+                policyToAdd?: {
+                    emailPattern: string;
+                    authCheckInterval: string;
+                } | undefined;
+                policyToRemove?: {
+                    emailPattern: string;
+                } | undefined;
+            };
+            output: boolean;
+            meta: object;
+        }>;
+    }>>;
+    tag: import("@trpc/server").TRPCBuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -537,25 +557,22 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deviceName: string;
             } | undefined;
             headers: Headers;
-            accessToken: string;
-            refreshToken: string;
-            iat: number;
-            exp: number;
+            jti: string;
         };
         meta: object;
         errorShape: {
             data: {
                 zodError: import("zod").typeToFlattenedError<any, string> | null;
-                code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+                code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
                 httpStatus: number;
                 path?: string;
                 stack?: string;
             };
             message: string;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+            code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
         };
         transformer: true;
-    }, {
+    }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
         get: import("@trpc/server").TRPCQueryProcedure<{
             input: {
                 spaceId: string;
@@ -569,6 +586,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 updatedAt: Date;
                 icon: string | null;
             };
+            meta: object;
         }>;
         list: import("@trpc/server").TRPCQueryProcedure<{
             input: {
@@ -587,6 +605,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 updatedAt: Date;
                 icon: string | null;
             })[];
+            meta: object;
         }>;
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -601,6 +620,7 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 updatedAt: Date;
                 icon: string | null;
             };
+            meta: object;
         }>;
         delete: import("@trpc/server").TRPCMutationProcedure<{
             input: {
@@ -608,9 +628,10 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 tagName: string;
             };
             output: void;
+            meta: object;
         }>;
-    }>;
-    activity: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+    }>>;
+    activity: import("@trpc/server").TRPCBuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -622,35 +643,33 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deviceName: string;
             } | undefined;
             headers: Headers;
-            accessToken: string;
-            refreshToken: string;
-            iat: number;
-            exp: number;
+            jti: string;
         };
         meta: object;
         errorShape: {
             data: {
                 zodError: import("zod").typeToFlattenedError<any, string> | null;
-                code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+                code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
                 httpStatus: number;
                 path?: string;
                 stack?: string;
             };
             message: string;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+            code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
         };
         transformer: true;
-    }, {
+    }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
         create: import("@trpc/server").TRPCMutationProcedure<{
             input: {
-                type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "BOOKMARK_IMPORTED_FROM_BROWSER" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "SPACE_CREATED" | "SPACE_UPDATED" | "SPACE_DELETED" | "SPACE_MEMBER_INVITED" | "SPACE_MEMBER_JOINED" | "SPACE_MEMBER_LEFT" | "SPACE_MEMBER_REMOVED" | "SPACE_MEMBER_ROLE_CHANGED" | "SPACE_PLAN_CHANGED" | "SPACE_MEMBER_AUTH_CODE_SENT" | "SPACE_MEMBER_AUTH_CODE_VERIFIED" | "SPACE_MEMBER_AUTH_POLICY_CREATED" | "SPACE_MEMBER_AUTH_POLICY_DELETED" | "SPACE_MEMBER_AUTH_POLICY_UPDATED";
+                type: "BOOKMARK_OPEN" | "BOOKMARK_COPY";
                 spaceId: string;
                 data: Record<string, string>;
             };
             output: void;
+            meta: object;
         }>;
-    }>;
-    login: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+    }>>;
+    login: import("@trpc/server").TRPCBuiltRouter<{
         ctx: {
             db: import(".prisma/client").PrismaClient<{
                 log: "error"[];
@@ -662,31 +681,29 @@ export declare const appRouter: import("@trpc/server/unstable-core-do-not-import
                 deviceName: string;
             } | undefined;
             headers: Headers;
-            accessToken: string;
-            refreshToken: string;
-            iat: number;
-            exp: number;
+            jti: string;
         };
         meta: object;
         errorShape: {
             data: {
                 zodError: import("zod").typeToFlattenedError<any, string> | null;
-                code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+                code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
                 httpStatus: number;
                 path?: string;
                 stack?: string;
             };
             message: string;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+            code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
         };
         transformer: true;
-    }, {
+    }, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
         generateMagicLink: import("@trpc/server").TRPCMutationProcedure<{
             input: {
                 email: string;
             };
             output: void;
+            meta: object;
         }>;
-    }>;
+    }>>;
 }>>;
 export type AppRouter = typeof appRouter;

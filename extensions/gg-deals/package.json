@@ -30,7 +30,6 @@
     "@types/user-agents": "^1.0.2",
     "eslint": "^7.32.0",
     "prettier": "^2.8.8",
-    "react-devtools": "^4.27.8",
     "typescript": "^4.4.3"
   },
   "scripts": {

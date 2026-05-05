@@ -2,11 +2,12 @@ import { ActionPanel, Color, Image, launchCommand, LaunchType, List } from "@ray
 import { Project, Todo, User } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
 import { CloseAllTodoAction, CloseTodoAction, ShowTodoDetailsAction } from "./todo_actions";
+import { MRState } from "./mr";
 import { GitLabOpenInBrowserAction } from "./actions";
 import { useTodos } from "./todo/utils";
 import { MyProjectsDropdown } from "./project";
 import { useState } from "react";
-import { capitalizeFirstLetter, getErrorMessage, showErrorToast } from "../utils";
+import { capitalizeFirstLetter, getErrorMessage, isWindows, showErrorToast } from "../utils";
 import { CacheActionPanelSection } from "./cache_actions";
 
 function userToIcon(user?: User): Image.ImageLike {
@@ -56,14 +57,16 @@ function getTargetTypeSource(tt: string): string {
 }
 
 export function getTodoIcon(todo: Todo, overrideTintColor?: Color.ColorLike | null): Image.ImageLike {
-  const tt = todo.target_type;
+  if (todo.target_type === "MergeRequest" && todo.target?.state === MRState.merged) {
+    return { source: GitLabIcons.merged, tintColor: overrideTintColor ?? Color.Purple };
+  }
   return {
-    source: getTargetTypeSource(tt),
-    tintColor: overrideTintColor ? overrideTintColor : getActionColor(todo.action_name),
+    source: getTargetTypeSource(todo.target_type),
+    tintColor: overrideTintColor ?? getActionColor(todo.action_name),
   };
 }
 
-function TodoListEmptyView(props: { searchMode: boolean }): JSX.Element {
+function TodoListEmptyView(props: { searchMode: boolean }) {
   if (props.searchMode) {
     return <List.EmptyView title="No Todos" icon={{ source: GitLabIcons.todo, tintColor: Color.PrimaryText }} />;
   }
@@ -76,7 +79,7 @@ function TodoListEmptyView(props: { searchMode: boolean }): JSX.Element {
   );
 }
 
-export function TodoList(): JSX.Element {
+export function TodoList() {
   const [project, setProject] = useState<Project>();
   const { todos, error, isLoading, performRefetch: refresh } = useTodos(undefined, project);
 
@@ -91,7 +94,9 @@ export function TodoList(): JSX.Element {
   const refreshAll = async () => {
     refresh();
     try {
-      await launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+      if (!isWindows) {
+        await launchCommand({ name: "todomenubar", type: LaunchType.UserInitiated });
+      }
     } catch (error) {
       showErrorToast(getErrorMessage(error), "Could not open Todos Menu Command");
     }
@@ -118,7 +123,7 @@ export function getPrettyTodoActionName(todo: Todo): string {
   return capitalizeFirstLetter(todo.action_name.replaceAll("_", " "));
 }
 
-export function TodoListItem(props: { todo: Todo; refreshData: () => void }): JSX.Element {
+export function TodoListItem(props: { todo: Todo; refreshData: () => void }) {
   const todo = props.todo;
   const subtitle = todo.group ? todo.group.full_path : todo.project_with_namespace || "";
   const updatedAt = todo.updated_at ? new Date(todo.updated_at) : undefined;

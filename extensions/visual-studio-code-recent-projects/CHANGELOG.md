@@ -1,5 +1,41 @@
 # Visual Studio Code Changelog
 
+## [Fix] - 2026-05-04
+
+- Fixed `Search Recent Projects` returning no results for VS Code Insiders users. Recent Insiders builds no longer write `history.recentlyOpenedPathsList` to `state.vscdb`; the extension now falls back to reading recent folders from `storage.json` (`lastKnownMenubarData`) when the DB key is absent. Stable VS Code builds are unaffected. (Fixes [#27440](https://github.com/raycast/extensions/issues/27440))
+
+## [Update] - 2026-04-07
+
+- Added support for Qoder.
+
+## [Update] - 2026-03-30
+
+- Added support for Lingma.
+
+## [Fix: Windows Support] - 2026-01-08
+
+- Resolved `setLocale` warnings in bash by clearing environment variables.
+- "Commands" command now supports Windows.
+- "Open With VSCode" command now works on Windows.
+- "Open New VSCode" command now supports Windows.
+- Updated Dependencies
+
+## [Update] - 2025-12-12
+
+- Added Windows support
+
+## [Update] - 2025-11-25
+
+- Added support for Antigravity.
+
+## [Enhancements] - 2025-11-19
+
+- Improved `Search Recent Projects` for remote workspaces by fuzzy matching remote authorities.
+
+## [Update] - 2025-08-04
+
+- Added support for Kiro.
+
 ## [Update] - 2025-03-05
 
 - Added support for Trae CN.

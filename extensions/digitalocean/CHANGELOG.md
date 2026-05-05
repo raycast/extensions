@@ -1,5 +1,9 @@
 # DigitalOcean Changelog
 
+## [Fix] - 2025-05-30
+
+Fixed an error in App Platform where it would not load if deployed using GitHub Actions
+
 ## [Minor Changes] - 2024-11-21
 
 - View "Env Vars" in `Search App Platform`

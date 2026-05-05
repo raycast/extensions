@@ -41,12 +41,25 @@ export const getScreenshotUrl = (images: ImagesResponse | undefined, fallback: "
   return fallback;
 };
 
+export const getBannerUrl = (images: ImagesResponse | undefined, fallback: "episode.png") => {
+  if (images && images.thumb && images.thumb.length > 0) {
+    return `https://${images.thumb[0]}`;
+  }
+
+  return fallback;
+};
+
 export const getTraktUrl = (
   type: "movies" | "shows" | "season" | "episode",
-  slug: string,
+  slug: string | undefined,
   seasonNumber: number = 0,
   episodeNumber: number = 0,
 ) => {
+  // Guard against missing slug values returned by the API. We fall back to a generic listing URL.
+  if (!slug) {
+    return `${TRAKT_APP_URL}`;
+  }
+
   switch (type) {
     case "movies":
     case "shows":

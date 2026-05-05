@@ -4,13 +4,13 @@ import { useCache } from "../cache";
 import { gitlab } from "../common";
 import { Project, User, searchData } from "../gitlabapi";
 import { GitLabIcons } from "../icons";
-import { capitalizeFirstLetter, daysInSeconds, showErrorToast } from "../utils";
+import { capitalizeFirstLetter, daysInSeconds, shortify, showErrorToast } from "../utils";
 import { DefaultActions, GitLabOpenInBrowserAction } from "./actions";
 import { CacheActionPanelSection } from "./cache_actions";
 import { IssueDetailFetch } from "./issues";
 import { MRDetailFetch } from "./mr";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 export interface PushData {
   commit_count: number;
@@ -27,6 +27,7 @@ export interface Note {
   noteable_iid?: number;
   noteable_id?: number;
   noteable_type?: string;
+  body?: string;
 }
 
 export interface Event {
@@ -42,7 +43,7 @@ export interface Event {
   author?: User;
 }
 
-export function EventListItem(props: { event: Event }): JSX.Element {
+export function EventListItem(props: { event: Event }) {
   const ev = props.event;
   const { data: project, error } = useCache<Project | undefined>(
     `event_project_${ev.project_id}`,
@@ -54,12 +55,13 @@ export function EventListItem(props: { event: Event }): JSX.Element {
       deps: [ev.project_id],
       secondsToRefetch: 15 * 60,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   let title = "";
+  let subtitle: string | undefined = undefined;
   let icon: Image.ImageLike | undefined;
   const action_name = ev.action_name;
-  let actionElement: JSX.Element | undefined;
+  let actionElement: React.ReactNode | undefined;
   switch (action_name) {
     case "updated":
       {
@@ -158,11 +160,13 @@ export function EventListItem(props: { event: Event }): JSX.Element {
               case "closed":
                 {
                   icon = { source: GitLabIcons.issue, tintColor: Color.Red };
+                  subtitle = shortify(ev.target_title, 50);
                 }
                 break;
               case "opened":
                 {
                   icon = { source: GitLabIcons.issue, tintColor: Color.Green };
+                  subtitle = shortify(ev.target_title, 50);
                 }
                 break;
               case "commented on":
@@ -195,21 +199,25 @@ export function EventListItem(props: { event: Event }): JSX.Element {
               case "closed":
                 {
                   icon = { source: GitLabIcons.merged, tintColor: Color.Purple };
+                  subtitle = shortify(ev.target_title, 50);
                 }
                 break;
               case "opened":
                 {
                   icon = { source: GitLabIcons.mropen, tintColor: Color.Green };
+                  subtitle = shortify(ev.target_title, 50);
                 }
                 break;
               case "accepted":
                 {
                   icon = { source: GitLabIcons.mraccepted, tintColor: Color.Green };
+                  subtitle = shortify(ev.target_title, 50);
                 }
                 break;
               case "commented on":
                 {
                   icon = { source: GitLabIcons.comment, tintColor: Color.Green };
+                  subtitle = shortify(ev.target_title, 50);
                 }
                 break;
             }
@@ -310,6 +318,10 @@ export function EventListItem(props: { event: Event }): JSX.Element {
                 break;
               case "commented on":
                 {
+                  const body = ev.note?.body;
+                  if (body !== undefined && body.length > 0) {
+                    subtitle = shortify(body, 50);
+                  }
                   icon = { source: GitLabIcons.comment, tintColor: Color.Yellow };
                 }
                 break;
@@ -386,11 +398,12 @@ export function EventListItem(props: { event: Event }): JSX.Element {
     icon = { source: Icon.QuestionMark, tintColor: Color.SecondaryText };
     actionElement = <Action.CopyToClipboard content={JSON.stringify(ev, null, 2)} title="Copy Event Details" />;
   }
-  const accessoryTitle = project && !error ? project.fullPath : undefined;
+  const accessoryTitle = project && !error ? project.name_with_namespace : undefined;
 
   return (
     <List.Item
       title={{ value: title || "", tooltip: ev.target_title }}
+      subtitle={subtitle}
       icon={icon}
       accessories={[
         { text: accessoryTitle },
@@ -423,11 +436,11 @@ function EventListDropdown(props: { onChange: (text: string) => void }) {
   );
 }
 
-function EventListEmptyView(): JSX.Element {
+function EventListEmptyView() {
   return <List.EmptyView title="No Activity" icon={{ source: GitLabIcons.activity, tintColor: Color.PrimaryText }} />;
 }
 
-export function EventList(): JSX.Element {
+export function EventList() {
   const [scope, setScope] = useState<string>(ScopeType.MyActivities);
   const [searchText, setSearchText] = useState<string>();
   const params: Record<string, any> = {};
@@ -452,7 +465,7 @@ export function EventList(): JSX.Element {
           limit: 50,
         });
       },
-    }
+    },
   );
   if (error) {
     showErrorToast(error, "Cannot search Events");

@@ -13,11 +13,11 @@ export interface Mirror {
 
 export const mirrors: Array<Mirror> = [
   {
-    baseUrl: "https://libgen.is",
+    baseUrl: "https://libgen.bz",
     parse: parseContentIntoBooks,
   },
   {
-    baseUrl: "https://libgen.st",
+    baseUrl: "https://libgen.li",
     parse: parseContentIntoBooks,
   },
 ];

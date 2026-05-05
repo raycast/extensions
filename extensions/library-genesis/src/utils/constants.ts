@@ -189,6 +189,6 @@ export const languages = [
 ];
 
 export const DEFAULT_MIRROR = {
-  name: "libgen.is",
-  url: "https://libgen.is",
+  name: "libgen.bz",
+  url: "https://libgen.bz",
 };

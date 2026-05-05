@@ -1,5 +1,28 @@
 # Mail Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Security] - 2026-03-16
+
+- Upgrade `mailparser` to 3.9.4 to fix DoS via uncontrolled recursion in nodemailer's addressparser (CVE-2025-14874)
+
+## [Improvement] - 2026-01-19
+
+- Add "Refresh" action to message actions
+- Add preference to auto-fill the reply subject when replying to an email
+
+## [Add AI Tools] - 2026-01-01
+
+- Add new AI tool `list-account-emails` to list all available email addresses from the user's mail accounts
+- Enhance `send-email` tool to allow changing the sender email address via the `from` parameter
+
+## [Improvement] - 2025-09-19
+
+- Reduce distraction by removing the background HUD for intermittent "Failed to refresh messages" in `Refresh Mail`; now logs to console instead.
+- Standardize capitalization/copy in `Refresh Mail` to keep toasts consistent.
+
 ## [🌟 New Feature] - 2025-05-19
 
 - 📧 Add the copy-foreground-mail-deeplink command to copy the foreground mail deeplink to the clipboard.

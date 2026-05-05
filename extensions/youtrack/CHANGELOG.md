@@ -1,5 +1,25 @@
 # YouTrack Changelog
 
+## [Update] - 2025-08-08
+
+- Bugfixes and improvements
+
+## [Update] - 2025-06-23
+
+- Move screenshots to `metadata`
+
+## [Update] - 2025-06-23
+
+- Switch to [udamir/youtrack-client](https://github.com/udamir/youtrack-client) with global refactoring
+- Improve `browse` command:
+  - Add `apply command` command to apply [YouTrack command](https://www.jetbrains.com/help/youtrack/cloud/commands.html) to a selected issue
+  - Add `show last comment` command to show the latest command
+  - Add `delete issue` command
+  - Support images in inline text both for issues and comments
+  - Adjust list view
+  - Adjust issue details view
+- Add AI tools: `apply-command`, `create-issue`, `get-comments`, `get-issues`, `get-projects`, `get-self`, `get-users`
+
 ## [Update dependencies] - 2025-02-12
 
 ## [Update] - 2025-01-07

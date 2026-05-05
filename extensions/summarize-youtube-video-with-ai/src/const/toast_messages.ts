@@ -22,6 +22,11 @@ export const FINDING_ANSWER = {
   message: "Answering your question",
 };
 
+export const QUESTION_ANSWERED = {
+  title: "✅",
+  message: "Answer has been saved!",
+};
+
 export const GETTING_VIDEO_URL = {
   title: "🔗",
   message: "Checking video URL",

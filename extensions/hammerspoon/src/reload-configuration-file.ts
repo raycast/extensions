@@ -1,4 +1,4 @@
-import { showHUD } from '@raycast/api'
+import { getPreferenceValues, showHUD } from '@raycast/api'
 import { runAppleScript, showFailureToast } from '@raycast/utils'
 import { checkHammerspoonInstallation } from './utils/installation'
 
@@ -9,10 +9,16 @@ export default async function main() {
     return
   }
 
+  const { clearConsole, openConsole } = getPreferenceValues<Preferences.ReloadConfigurationFile>()
+
   try {
     await runAppleScript(`
       tell application "Hammerspoon"
-        execute lua code "hs.reload(); hs.openConsole()"
+        execute lua code "
+          ${clearConsole ? 'hs.console.clearConsole();' : ''}
+          hs.reload();
+          ${openConsole ? 'hs.openConsole();' : ''}
+      "
       end tell
     `)
   } catch (error) {

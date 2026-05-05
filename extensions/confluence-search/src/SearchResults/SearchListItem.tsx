@@ -46,6 +46,7 @@ export function SearchListItem({ searchResult, actions }: { searchResult: Search
       icon={searchResult.icon}
       subtitle={searchResult.space}
       accessories={accessories}
+      // @ts-expect-error: To keep the original code
       actions={actions}
     />
   );

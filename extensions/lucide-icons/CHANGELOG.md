@@ -1,5 +1,15 @@
 # Lucide Icons Changelog
 
+## [Updates] - 2025-12-16
+
+- Add support for Windows
+- Update (dev) dependencies
+
+## [Update] - 2025-06-12
+
+- Added the preference to select the primary action to use.
+- Added the action to paste SVG.
+
 ## [Update] - 2025-04-15
 
 - Add the preference to copy icon name in Pascal Case.

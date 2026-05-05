@@ -3,6 +3,26 @@ import type { RegistryEntry } from "./types";
 
 export const OFFICIAL_ENTRIES: RegistryEntry[] = [
   {
+    name: "atono",
+    title: "Atono",
+    description:
+      "AI-powered project management for product teams. Connect your AI assistant to Atono's workflow platform to create and update stories, track bugs, manage team assignments, and document fixes—all through natural language commands.",
+    icon: {
+      source: {
+        light: "https://atono-test.directus.app/assets/feaa7f21-4bbe-4164-b725-ff2729725cbf",
+        dark: "https://atono-test.directus.app/assets/869c76cd-bb5f-459c-88d1-2315a7b8a545",
+      },
+    },
+    homepage: "https://docs.atono.io/docs/mcp-server-for-atono/",
+    configuration: {
+      command: "docker",
+      args: ["run", "-i", "--rm", "-e", "X_API_KEY", "atonoai/atono-mcp-server"],
+      env: {
+        X_API_KEY: "<YOUR_API_KEY_HERE>",
+      },
+    },
+  },
+  {
     name: "brave-search",
     title: "Brave Search",
     description:
@@ -37,6 +57,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
         "--api-key",
         "YOUR_API_KEY_HERE",
       ],
+    },
+  },
+  {
+    name: "circleback",
+    title: "Circleback",
+    description:
+      "Circleback's Model Context Protocol (MCP) server provides AI agents access to your Circleback data. It has tools available for searching and accessing meetings, transcripts, calendar events, emails, people, companies, and more.",
+    icon: "circleback.svg",
+    homepage: "https://circleback.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://app.circleback.ai/api/mcp"],
     },
   },
   {
@@ -139,7 +171,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     title: "Google Drive",
     description: "This MCP server integrates with Google Drive to allow listing, reading, and searching over files.",
     icon: "https://svgl.app/library/drive.svg",
-    homepage: "https://github.com/modelcontextprotocol/servers/tree/main/src/gdrive",
+    homepage: "https://github.com/modelcontextprotocol/servers-archived/tree/main/src/gdrive",
     configuration: {
       command: "npx",
       args: ["-y", "@modelcontextprotocol/server-gdrive"],
@@ -171,6 +203,49 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "@heroku/mcp-server"],
       env: {
         HEROKU_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
+  {
+    name: "kagimcp",
+    title: "Kagi Search",
+    description: "The Official Model Context Protocol (MCP) server for Kagi search & other tools.",
+    icon: "kagi.svg",
+    homepage: "https://github.com/kagisearch/kagimcp",
+    configuration: {
+      command: "uvx",
+      args: ["kagimcp"],
+      env: {
+        KAGI_API_KEY: "YOUR_API_KEY_HERE",
+        KAGI_SUMMARIZER_ENGINE: "YOUR_ENGINE_CHOICE_HERE", // Defaults to "cecil" engine if env var not present
+      },
+    },
+  },
+  {
+    name: "keboola",
+    title: "Keboola",
+    description:
+      "Keboola MCP Server is an open-source bridge between your Keboola project and modern AI tools. It turns Keboola features—like storage access, SQL transformations, and job triggers—into callable tools for Claude, Cursor, CrewAI, LangChain, Amazon Q, and more.",
+    icon: "keboola.svg",
+    homepage: "https://github.com/keboola/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["mcp-remote", "https://mcp.canary-orion.keboola.dev/sse"],
+    },
+  },
+  {
+    name: "keboola-local",
+    title: "Keboola (Local)",
+    description:
+      "Keboola MCP Server is an open-source bridge between your Keboola project and modern AI tools. It turns Keboola features—like storage access, SQL transformations, and job triggers—into callable tools for Claude, Cursor, CrewAI, LangChain, Amazon Q, and more. This is the local server version.",
+    icon: "keboola.svg",
+    homepage: "https://github.com/keboola/mcp-server",
+    configuration: {
+      command: "uvx",
+      args: ["keboola_mcp_server", "--api-url", "https://connection.YOUR_REGION.keboola.com"],
+      env: {
+        KBC_STORAGE_TOKEN: "your_keboola_storage_token",
+        KBC_WORKSPACE_SCHEMA: "your_workspace_schema",
       },
     },
   },
@@ -222,7 +297,51 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     homepage: "https://www.prisma.io/docs/postgres/integrations/mcp-server",
     configuration: {
       command: "npx",
-      args: ["-y", "mcp-remote", "https://api.prisma.io/mcp-server/mcp"],
+      args: ["-y", "mcp-remote", "https://mcp.prisma.io/mcp"],
+    },
+  },
+  {
+    name: "razuna",
+    title: "Razuna",
+    description:
+      "AI-powered digital asset management for teams. Connect your AI assistant to Razuna's platform to search, organize, and manage your files using natural language commands.",
+    icon: {
+      source: {
+        light:
+          "https://app.razuna.com/file/remote?i=6959b8cf1e1400a2cce596fc&f=t&dl=t&c=a0f49bf3ea58a5c444af4cc489e27dcf&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiIvZmlsZS9yZW1vdGU_aT02OTU5YjhjZjFlMTQwMGEyY2NlNTk2ZmMmZj10JmRsPXQmYz1hMGY0OWJmM2VhNThhNWM0NDRhZjRjYzQ4OWUyN2RjZiIsInR5cGUiOiJkaXJlY3QifQ.usKNeusn0MmM9xu7gi2OyWBoZ9fOEVeMPiXDrP0zMwo",
+        dark: "https://app.razuna.com/file/remote?i=6959b8cf1e1400a2cce596fc&f=t&dl=t&c=a0f49bf3ea58a5c444af4cc489e27dcf&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiIvZmlsZS9yZW1vdGU_aT02OTU5YjhjZjFlMTQwMGEyY2NlNTk2ZmMmZj10JmRsPXQmYz1hMGY0OWJmM2VhNThhNWM0NDRhZjRjYzQ4OWUyN2RjZiIsInR5cGUiOiJkaXJlY3QifQ.usKNeusn0MmM9xu7gi2OyWBoZ9fOEVeMPiXDrP0zMwo",
+      },
+    },
+    homepage: "https://help.razuna.com/p/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
+    },
+  },
+  {
+    name: "Rube",
+    title: "Rube - by Composio",
+    description:
+      "Rube is a MCP server that connects your AI tools to 500+ apps like Gmail, Slack, GitHub, and Notion. Simply install it in your AI client, authenticate once with your apps, and start asking your AI to perform real actions like 'Send an email' or 'Create a task.'",
+    icon: "https://files.buildwithfern.com/v3composio.docs.buildwithfern.com/2025-08-25T08:13:31.781Z/assets/logo.svg",
+    homepage: "https://rube.composio.dev",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://rube.composio.dev/mcp"],
+      env: {
+        npm_config_yes: "true",
+      },
+    },
+  },
+  {
+    name: "sanity",
+    title: "Sanity",
+    description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
+    icon: "sanity.svg",
+    homepage: "https://www.sanity.io/docs/ai/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sanity.io", "--transport", "http-only"],
     },
   },
   {
@@ -316,6 +435,18 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "thena",
+    title: "Thena",
+    description:
+      "A Model Context Protocol server that enables AI assistants to interact with Thena's services, providing seamless integration and enhanced capabilities for AI-powered applications.",
+    icon: "thena.svg",
+    homepage: "https://thena.ai",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.thena.ai/sse"],
+    },
+  },
+  {
     name: "xero",
     title: "Xero",
     description:
@@ -397,7 +528,7 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     name: "pydantic-logfire",
     title: "Pydantic Logfire",
     description:
-      "This repository contains a Model Context Protocol (MCP) server with tools that can access the OpenTelemetry traces and metrics you've sent to Logfire.\n\nThis MCP server enables LLMs to retrieve your application's telemetry data, analyze distributed traces, and make use of the results of arbitrary SQL queries executed using the Logfire APIs.",
+      "This repository contains a Model Context Protocol (MCP) server with tools that can access the OpenTelemetry traces and metrics you've sent to Logfire. This MCP server enables LLMs to retrieve your application's telemetry data, analyze distributed traces, and make use of the results of arbitrary SQL queries executed using the Logfire APIs.",
     icon: "pydantic.svg",
     homepage: "https://github.com/pydantic/logfire-mcp",
     configuration: {
@@ -445,19 +576,31 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       command: "npx",
       args: ["-y", "@apify/actors-mcp-server"],
       env: {
-        APIFY_API_TOKEN: "YOUR_API_TOKEN_HERE",
+        APIFY_TOKEN: "YOUR_API_TOKEN_HERE",
       },
     },
   },
   {
     name: "nuxt",
     title: "Nuxt",
-    description: "Access Nuxt documentation and modules with the public Nuxt MCP server",
+    description: "Access Nuxt documentation, migration guide, modules, and blog posts with the public Nuxt MCP server",
     icon: "nuxt.svg",
-    homepage: "https://mcp.nuxt.com/",
+    homepage: "https://nuxt.com/mcp",
     configuration: {
       command: "npx",
-      args: ["mcp-remote", "https://mcp.nuxt.space/sse"],
+      args: ["mcp-remote", "https://nuxt.com/mcp"],
+    },
+  },
+  {
+    name: "nuxt-ui",
+    title: "Nuxt UI",
+    description:
+      "Access Nuxt UI documentation, components, and configuration with the official Nuxt UI Model Context Protocol (MCP) server.",
+    icon: "nuxt.svg",
+    homepage: "https://ui.nuxt.com/docs/getting-started/ai/mcp",
+    configuration: {
+      command: "npx",
+      args: ["mcp-remote", "https://ui.nuxt.com/mcp"],
     },
   },
   {
@@ -472,6 +615,76 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["zeabur-mcp@latest"],
       env: {
         ZEABUR_TOKEN: "YOUR_ZEABUR_TOKEN_HERE",
+      },
+    },
+  },
+  {
+    name: "grafana",
+    title: "Grafana",
+    description:
+      "Official Grafana MCP server that provides seamless integration with Grafana APIs, enabling monitoring, visualization, and observability capabilities for developers and tools.",
+    icon: "https://svgl.app/library/grafana.svg",
+    homepage: "https://github.com/grafana/mcp-grafana",
+    configuration: {
+      command: "docker",
+      args: ["run", "--rm", "-p", "8000:8000", "-e", "GRAFANA_URL", "-e", "GRAFANA_API_KEY", "mcp/grafana"],
+      env: {
+        GRAFANA_URL: "YOUR_GRAFANA_URL_HERE",
+        GRAFANA_API_KEY: "YOUR_SERVICE_ACCOUNT_TOKEN_HERE",
+      },
+    },
+  },
+  {
+    name: "anytype",
+    title: "Anytype",
+    description:
+      "An MCP server enabling AI assistants to interact with Anytype - your safe haven for digital collaboration - to organize channels, pages, lists, and more through natural language.",
+    icon: "anytype.png",
+    homepage: "https://github.com/anyproto/anytype-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@anyproto/anytype-mcp"],
+      env: {
+        OPENAPI_MCP_HEADERS: '{"Authorization":"Bearer <YOUR_API_KEY>", "Anytype-Version":"2025-11-08"}',
+      },
+    },
+  },
+  {
+    name: "gen-pdf",
+    title: "Gen-PDF",
+    description:
+      "MCP server to generate professional looking PDF. Perfect for creating reports, invoices, contracts, and more.",
+    icon: "https://gen-pdf.com/favicon.ico",
+    homepage: "https://gen-pdf.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://gen-pdf.com/mcp"],
+    },
+  },
+  {
+    name: "linear",
+    title: "Linear",
+    description:
+      "The Model Context Protocol (MCP) server provides a standardized interface that allows any compatible AI model or agent to access your Linear data in a simple and secure way. The Linear MCP server has tools available for finding, creating, and updating objects in Linear like issues, projects, and comments.",
+    icon: "https://svgl.app/library/linear.svg",
+    homepage: "https://linear.app/docs/mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.linear.app/sse"],
+    },
+  },
+  {
+    name: "routemesh",
+    title: "RouteMesh",
+    description:
+      "Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover.",
+    icon: "https://routeme.sh/icon.png",
+    homepage: "https://github.com/routemesh/routemesh-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@routemesh/mcp"],
+      env: {
+        ROUTEMESH_API_KEY: "YOUR_API_KEY_HERE",
       },
     },
   },
@@ -514,6 +727,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         AIRTABLE_API_KEY: "YOUR_API_KEY_HERE",
       },
+    },
+  },
+  {
+    name: "alai",
+    title: "Alai",
+    description:
+      "Generate, edit, and export high-quality AI presentations to PDF, PPTX, or a shareable link. Supports themes, vibes, and creative slide variants.",
+    icon: "https://storage.getalai.com/Alai%20Logo%20-%20Gradient%20BG.png",
+    homepage: "https://getalai.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://slides-api.getalai.com/mcp/"],
     },
   },
   {

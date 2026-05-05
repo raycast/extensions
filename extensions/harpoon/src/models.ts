@@ -4,4 +4,4 @@ export interface App {
   path: string;
 }
 
-export type AppList = App[];
+export type AppList = (App | null)[];

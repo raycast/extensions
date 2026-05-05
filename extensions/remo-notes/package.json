@@ -1,0 +1,115 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "remo-notes",
+  "title": "Remo",
+  "description": "Simple, fast, and portable note-taking. Capture ideas instantly, stay organized, and turn notes into action with AI-powered workflows.",
+  "icon": "extension-icon.png",
+  "author": "alfredmouelle",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "label": "Remo API Key",
+      "title": "API Key",
+      "description": "Generate it in Remo Settings > API Keys"
+    },
+    {
+      "name": "autoFormat",
+      "type": "checkbox",
+      "required": false,
+      "label": "Auto-format with AI",
+      "title": "AI Formatting",
+      "description": "Automatically format captured text using AI",
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "subtitle": "Clipboard to Note",
+      "description": "Create a note from clipboard content",
+      "mode": "no-view"
+    },
+    {
+      "name": "pinned-notes",
+      "title": "Pinned Notes",
+      "subtitle": "Remo",
+      "description": "View pinned notes in Menu Bar",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "ask-ai",
+      "title": "Ask AI",
+      "subtitle": "Chat with Notes",
+      "description": "Ask questions about your notes",
+      "mode": "view"
+    },
+    {
+      "name": "daily-note",
+      "title": "Daily Note",
+      "subtitle": "Open Today's Note",
+      "description": "Open or create a note for today",
+      "mode": "no-view"
+    },
+    {
+      "name": "search-folders",
+      "title": "Search Folders",
+      "subtitle": "Browse by Folder",
+      "description": "Browse notes by folder",
+      "mode": "view"
+    },
+    {
+      "name": "trash",
+      "title": "Trash",
+      "subtitle": "Deleted Notes",
+      "description": "View and restore deleted notes",
+      "mode": "view"
+    },
+    {
+      "name": "create-note",
+      "title": "Create Note",
+      "description": "Create a new note in Remo",
+      "mode": "view"
+    },
+    {
+      "name": "search-notes",
+      "title": "Search Notes",
+      "subtitle": "Remo",
+      "description": "Search notes using AI",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.3",
+    "turndown": "^7.2.2"
+  },
+  "devDependencies": {
+    "@types/turndown": "^5.0.6",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.2.0",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "react": "^19.2.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepare-publish": "node ../../scripts/raycast-lockfile.mjs",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\\"prepublishOnly\\\" script and rerun \\\"npm publish\\\" again.\\nIf you wanted to publish it to the Raycast Store instead, use \\\"npm run publish\\\" instead.\\n\\n\" && exit 1",
+    "publish": "pnpm run prepare-publish && pnpm dlx @raycast/api@latest publish",
+    "type-check": "tsc --noEmit"
+  }
+}

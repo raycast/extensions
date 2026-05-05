@@ -1,6 +1,10 @@
+<p align="center">
+    <img src="./assets/notion-logo.png" width="150" height="150" />
+</p>
+
 # Notion
 
-The fastest way to search and create Notion pages.
+The fastest way to search and create [Notion](https://notion.com) pages.
 
 ## Using internal integration
 
@@ -9,7 +13,6 @@ If you are not logging in through OAuth, you can still use the extension with an
 1. Create a new integration over [here](https://www.notion.so/my-integrations)
 2. Copy the `Internal Integration Secret` (under `Secrets`)
 3. Manually give the integration access to the specific pages or databases by [adding connections to them](https://www.notion.so/help/add-and-manage-connections-with-the-api#add-connections-to-pages)
-
 
 ## I can't find the Notion page or database from Raycast
 

@@ -43,7 +43,7 @@ export default function Command() {
   ];
 
   const filterMap = {
-    "0": (_item: Bilibili.DynamicItem) => true,
+    "0": (item: Bilibili.DynamicItem) => !!item,
     "1": (item: Bilibili.DynamicItem) =>
       item.type === "DYNAMIC_TYPE_AV" ? item.modules.module_dynamic.major.archive.last_play_time === 0 : false,
     "2": (item: Bilibili.DynamicItem) =>
@@ -67,6 +67,7 @@ export default function Command() {
 
       return (
         <Video
+          key={bvid}
           title={title}
           cover={cover}
           url={jump_url}
@@ -112,11 +113,12 @@ export default function Command() {
         />
       );
     } else if (isPost(item)) {
-      const { text } = item.modules.module_dynamic.desc;
+      const { text = `${item.modules.module_author.name}'s Post` } = item.modules.module_dynamic.desc || {};
       const { like, forward, comment } = item.modules.module_stat;
 
       return (
         <Post
+          key={item.id_str}
           desc={text}
           pubdate={pub_ts}
           url={`https://www.bilibili.com/opus/${item.id_str}`}
@@ -139,6 +141,7 @@ export default function Command() {
 
       return (
         <Post
+          key={item.id_str}
           title={major.music.title}
           desc={desc.text}
           pubdate={pub_ts}
@@ -162,6 +165,7 @@ export default function Command() {
 
       return (
         <Post
+          key={item.id_str}
           title={liveDate.live_play_info.title}
           desc={liveDate.live_play_info.title}
           pubdate={pub_ts}

@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Icon, List, popToRoot, Color } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import path from "node:path";
+import path from "path";
 import { useEffect, useState } from "react";
 import fs from "fs";
 import { folderName, log } from "../utils";
@@ -25,7 +25,7 @@ function createSpotlightResult(filePath: string): SpotlightSearchResult {
       kMDItemLastUsedDate: stats.atime.toISOString(),
       kMDItemUseCount: 0,
     };
-  } catch (error) {
+  } catch {
     // Provide fallback for errors
     return {
       path: filePath,
@@ -52,7 +52,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
   const [isLoading, setIsLoading] = useState(true);
 
   // Get pin functionality from useFolderSearch hook
-  const { resultIsPinned, toggleResultPinnedStatus, pinnedResults } = useFolderSearch();
+  const { resultIsPinned, toggleResultPinnedStatus } = useFolderSearch();
 
   // Handle return to main view with callback
   const handleReturn = () => {
@@ -66,13 +66,13 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
   };
 
   // Function that toggles pins and calls onReturn afterward
-  const handleTogglePin = (result: SpotlightSearchResult, resultIndex: number) => {
+  const handleTogglePin = (result: SpotlightSearchResult) => {
     const timestamp = new Date().toISOString().slice(11, 23);
     const action = resultIsPinned(result) ? "Unpinning" : "Pinning";
     log("debug", "Directory", `[${timestamp}] ${action} folder: ${result.path}`);
 
     // Toggle the pin status
-    toggleResultPinnedStatus(result, resultIndex);
+    toggleResultPinnedStatus(result);
 
     // Add a delay to ensure the pin toggle has completed
     setTimeout(() => {
@@ -90,7 +90,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
         .filter((file) => {
           try {
             return fs.statSync(path.join(directoryPath, file)).isDirectory();
-          } catch (e) {
+          } catch {
             return false; // Skip files we can't stat
           }
         })
@@ -131,7 +131,6 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                 {(() => {
                   const parentPath = safeParentDirectory(directoryPath);
                   const parentResult = createSpotlightResult(parentPath);
-                  const parentPinnedIndex = pinnedResults.findIndex((pin) => pin.path === parentPath);
 
                   return (
                     <Action
@@ -139,7 +138,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                       icon={!resultIsPinned(parentResult) ? Icon.Star : Icon.StarDisabled}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                       onAction={() => {
-                        handleTogglePin(parentResult, parentPinnedIndex);
+                        handleTogglePin(parentResult);
                       }}
                     />
                   );
@@ -152,7 +151,6 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
         {files.map((file) => {
           const filePath = path.join(directoryPath, file);
           const result = createSpotlightResult(filePath);
-          const pinnedIndex = pinnedResults.findIndex((pin) => pin.path === filePath);
 
           return (
             <List.Item
@@ -172,7 +170,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                     }}
                   />
                   <Action.OpenWith
-                    title="Open With…"
+                    title="Open with…"
                     shortcut={{ modifiers: ["cmd"], key: "o" }}
                     path={filePath}
                     onOpen={() => {
@@ -186,7 +184,7 @@ export function Directory({ path: directoryPath, onReturn }: DirectoryProps) {
                     icon={!resultIsPinned(result) ? Icon.Star : Icon.StarDisabled}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
                     onAction={() => {
-                      handleTogglePin(result, pinnedIndex);
+                      handleTogglePin(result);
                     }}
                   />
                   <ActionPanel.Section>

@@ -51,7 +51,7 @@ const Detail = ({ company, hubspotUrl }: { company: Company; hubspotUrl: string 
   const formattingRules = (() => {
     try {
       return JSON.parse(preferences.propertyFormatting || "{}");
-    } catch (e) {
+    } catch {
       console.error("Failed to parse property formatting rules");
       return {};
     }

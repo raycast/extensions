@@ -1,5 +1,5 @@
 import { z } from "zod";
-export declare const activityRouter: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+export declare const activityRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import(".prisma/client").PrismaClient<{
             log: "error"[];
@@ -11,31 +11,29 @@ export declare const activityRouter: import("@trpc/server/unstable-core-do-not-i
             deviceName: string;
         } | undefined;
         headers: Headers;
-        accessToken: string;
-        refreshToken: string;
-        iat: number;
-        exp: number;
+        jti: string;
     };
     meta: object;
     errorShape: {
         data: {
             zodError: z.typeToFlattenedError<any, string> | null;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+            code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
             httpStatus: number;
             path?: string;
             stack?: string;
         };
         message: string;
-        code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
     };
     transformer: true;
-}, {
+}, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
     create: import("@trpc/server").TRPCMutationProcedure<{
         input: {
-            type: "APP_OPEN" | "LOGIN" | "LOGOUT" | "BOOKMARK_OPEN" | "BOOKMARK_COPY" | "BOOKMARK_CREATED" | "BOOKMARK_UPDATED" | "BOOKMARK_DELETED" | "BOOKMARK_IMPORTED_FROM_BROWSER" | "SUBSCRIBE_TAG" | "UNSUBSCRIBE_TAG" | "TAG_CREATED" | "TAG_UPDATED" | "TAG_DELETED" | "SPACE_CREATED" | "SPACE_UPDATED" | "SPACE_DELETED" | "SPACE_MEMBER_INVITED" | "SPACE_MEMBER_JOINED" | "SPACE_MEMBER_LEFT" | "SPACE_MEMBER_REMOVED" | "SPACE_MEMBER_ROLE_CHANGED" | "SPACE_PLAN_CHANGED" | "SPACE_MEMBER_AUTH_CODE_SENT" | "SPACE_MEMBER_AUTH_CODE_VERIFIED" | "SPACE_MEMBER_AUTH_POLICY_CREATED" | "SPACE_MEMBER_AUTH_POLICY_DELETED" | "SPACE_MEMBER_AUTH_POLICY_UPDATED";
+            type: "BOOKMARK_OPEN" | "BOOKMARK_COPY";
             spaceId: string;
             data: Record<string, string>;
         };
         output: void;
+        meta: object;
     }>;
-}>;
+}>>;

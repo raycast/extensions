@@ -60,8 +60,8 @@ export async function downloadIcibaWordAudio(queryWordInfo: QueryWordInfo, callb
     const phoneticUrl = symbol.ph_am_mp3.length
       ? symbol.ph_am_mp3
       : symbol.ph_tts_mp3.length
-      ? symbol.ph_tts_mp3
-      : symbol.ph_en_mp3;
+        ? symbol.ph_tts_mp3
+        : symbol.ph_en_mp3;
     if (phoneticUrl.length) {
       const audioPath = getWordAudioPath(queryWordInfo.word);
       downloadAudio(phoneticUrl, audioPath, callback);

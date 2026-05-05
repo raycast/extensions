@@ -8,7 +8,7 @@ export function RefreshPipelinesAction(props: {
   onRefreshPipelines?: () => void;
   pipeline: Pipeline;
   shortcut?: Keyboard.Shortcut;
-}): JSX.Element {
+}) {
   const handle = () => {
     if (props.onRefreshPipelines) {
       props.onRefreshPipelines();
@@ -28,7 +28,7 @@ export function RetryFailedPipelineJobsAction(props: {
   onRetryFailedJobs?: () => void;
   pipeline: Pipeline;
   shortcut?: Keyboard.Shortcut;
-}): JSX.Element | null {
+}): React.ReactElement | null {
   const pipeline = props.pipeline;
   async function handle() {
     try {
@@ -52,7 +52,7 @@ export function RetryFailedPipelineJobsAction(props: {
   }
 }
 
-export function PipelineItemActions(props: { pipeline: Pipeline; onDataChange?: () => void }): JSX.Element {
+export function PipelineItemActions(props: { pipeline: Pipeline; onDataChange?: () => void }) {
   const pipeline = props.pipeline;
   return (
     <React.Fragment>

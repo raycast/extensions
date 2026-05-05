@@ -1,4 +1,3 @@
-import * as OTPAuth from "otpauth";
 import { useEffect, useMemo, useState } from "react";
 import {
   Action,
@@ -6,6 +5,7 @@ import {
   BrowserExtension,
   Clipboard,
   Color,
+  environment,
   getPreferenceValues,
   Icon,
   List,
@@ -13,6 +13,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
+import { getGenerator as getTotpGenerator } from "~/utils/authenticatorTotp";
 
 import RootErrorBoundary from "~/components/RootErrorBoundary";
 import { BitwardenProvider } from "~/context/bitwarden";
@@ -26,13 +27,14 @@ import VaultItemContext, { useSelectedVaultItem } from "~/components/searchVault
 import useGetUpdatedVaultItem from "~/components/searchVault/utils/useGetUpdatedVaultItem";
 import { getTransientCopyPreference } from "~/utils/preferences";
 import { showCopySuccessMessage } from "~/utils/clipboard";
-import { captureException } from "~/utils/development";
 import useFrontmostApplicationName from "~/utils/hooks/useFrontmostApplicationName";
 import { ActionWithReprompt, DebuggingBugReportingActionSection, VaultActionsSection } from "~/components/actions";
-import { Err, Ok, Result, tryCatch } from "~/utils/errors";
+import { Err, tryCatch } from "~/utils/errors";
 import { useVaultSearch } from "~/utils/search";
 import ListFolderDropdown from "~/components/ListFolderDropdown";
-import ComponentReverser from "~/components/ComponentReverser";
+import ComponentOrderer from "~/components/ComponentOrderer";
+import { useStateEffect } from "~/utils/hooks/useStateEffect";
+import { captureException } from "~/utils/development";
 
 const AuthenticatorCommand = () => (
   <RootErrorBoundary>
@@ -52,7 +54,7 @@ function AuthenticatorList() {
   const vault = useVaultContext();
   const { data: activeTabUrl, isLoading: isActiveTabLoading } = useActiveTab();
 
-  const vaultItems = useMemo(() => vault.items.filter((item) => item.login?.totp), [vault.items]);
+  const vaultItems = vault.items.filter((item) => item.login?.totp);
   const { setSearchText, filteredItems } = useVaultSearch(vaultItems);
 
   const itemMatches = useMemo(() => {
@@ -115,7 +117,7 @@ function ListItem({ item }: { item: Item }) {
   const preferences = getPreferenceValues<Preferences.Authenticator>();
 
   const [canGenerate, setCanGenerate] = useState(!item.reprompt);
-  const { code, time, error, isLoading } = authenticator.useCode(item, canGenerate);
+  const { code, time, error, isLoading } = useVaultItemCodeGenerator({ item, canGenerate });
 
   function getAccessories(): List.Item.Props["accessories"] {
     if (!canGenerate) {
@@ -152,10 +154,10 @@ function ListItem({ item }: { item: Item }) {
         actions={
           <ActionPanel>
             {canGenerate ? (
-              <ComponentReverser reverse={preferences.primaryAction === "paste"}>
-                <CopyCodeAction />
-                <PasteCodeAction />
-              </ComponentReverser>
+              <ComponentOrderer first={preferences.primaryAction}>
+                <CopyCodeAction data-order-key="copy" />
+                <PasteCodeAction data-order-key="paste" />
+              </ComponentOrderer>
             ) : (
               <ConfirmAction onConfirm={() => setCanGenerate(true)} />
             )}
@@ -233,7 +235,7 @@ function useGetCodeForAction(action: "copy" | "paste") {
       const totp = await getVaultItem(selectedItem, (item) => item.login?.totp, "Getting code...");
       if (!totp) throw new Error("Failed to get totp");
 
-      const [generator, error] = authenticator.getGenerator(totp);
+      const [generator, error] = getTotpGenerator(totp);
       if (error) throw error;
 
       return generator.generate();
@@ -247,81 +249,82 @@ function useGetCodeForAction(action: "copy" | "paste") {
 
 function useActiveTab() {
   return usePromise(async () => {
+    if (!environment.canAccess(BrowserExtension)) return undefined;
+
     const [tabs, error] = await tryCatch(BrowserExtension.getTabs());
     if (error) return undefined;
+
     const activeTab = tabs.find((tab) => tab.active);
     return activeTab ? { ...activeTab, url: new URL(activeTab.url) } : undefined;
   });
 }
 
-type AuthenticatorOptions = {
-  secret: string;
-  period: number;
-  algorithm: string;
-  digits: number;
+type UseVaultItemCodeGeneratorArgs = {
+  item: Item;
+  canGenerate: boolean;
 };
 
-const authenticator = {
-  parseTotp(totpString: string): AuthenticatorOptions {
-    if (totpString.includes("otpauth")) {
-      const [otp, error] = tryCatch(() => OTPAuth.URI.parse(totpString));
-      if (error) throw error;
-      if (!(otp instanceof OTPAuth.TOTP)) throw new Error("Invalid authenticator key");
+function useVaultItemCodeGenerator(args: UseVaultItemCodeGeneratorArgs) {
+  const { item, canGenerate } = args;
 
-      return { algorithm: otp.algorithm, secret: otp.secret.base32.toString(), period: otp.period, digits: otp.digits };
-    }
+  const [[generator, error, isLoading = false], setState] = useStateEffect(() => {
+    const { totp } = item.login ?? {};
+    if (!canGenerate) return Loading(new Error("Needs confirmation..."));
+    if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
+    if (!totp) return Err(new Error("No TOTP found"));
 
-    return { secret: totpString, period: 30, algorithm: "SHA1", digits: 6 };
-  },
-  getGenerator(totpString: string): Result<OTPAuth.TOTP> {
-    const [options, error] = tryCatch(() => authenticator.parseTotp(totpString));
-    if (error) return Err(error);
-    return Ok(new OTPAuth.TOTP(options));
-  },
-  useCode(item: Item, canGenerate = true) {
-    const [generator, error, isLoading = false] = useMemo(() => {
-      const { totp } = item.login ?? {};
-      if (!canGenerate) return Loading(new Error("Needs confirmation..."));
-      if (totp === SENSITIVE_VALUE_PLACEHOLDER) return Loading(new Error("Loading..."));
-      if (!totp) return Err(new Error("No TOTP found"));
+    return getTotpGenerator(totp);
+  }, [item, canGenerate]);
 
-      return authenticator.getGenerator(totp);
-    }, [item, canGenerate]);
+  const [code, setCode] = useState<string | null>(null);
+  const [time, setTime] = useState<number | null>(null);
 
-    const [code, setCode] = useState(() => (!error ? generator.generate() : null));
-    const [time, setTime] = useState(() => (!error ? Math.ceil(generator.remaining() / 1000) : null));
+  useEffect(() => {
+    if (error) return;
 
-    useEffect(() => {
-      if (error) return;
+    let interval: NodeJS.Timeout | undefined;
+    let timeout: NodeJS.Timeout | undefined;
 
-      const setTimeAndCode = () => {
+    const cleanup = () => {
+      clearTimeout(timeout);
+      clearInterval(interval);
+    };
+
+    const setTimeAndCode = () => {
+      try {
         const timeRemaining = Math.ceil(generator.remaining() / 1000);
         setTime(timeRemaining);
 
         if (timeRemaining === generator.period) {
           setCode(generator.generate());
         }
-      };
+      } catch (error) {
+        setState(Err(new Error("Failed to regenerate")));
+        cleanup();
+        captureException("Failed to regenerate", error);
+      }
+    };
 
-      let interval: NodeJS.Timeout | undefined;
+    try {
       // set an initial timeout to ensure the first evaluation is time accurate
       // and then keep evaluating every second
-      const timeout = setTimeout(() => {
+      timeout = setTimeout(() => {
         setTimeAndCode();
         interval = setInterval(setTimeAndCode, 1000);
       }, generator.remaining() % 1000);
 
       setCode(generator.generate()); // first generation before the interval starts
+    } catch (error) {
+      setState(Err(new Error("Failed to generate")));
+      cleanup();
+      captureException("Failed to generate", error);
+    }
 
-      return () => {
-        clearTimeout(timeout);
-        clearInterval(interval);
-      };
-    }, [item, generator]);
+    return cleanup;
+  }, [item, generator]);
 
-    return { code, time, error, isLoading };
-  },
-};
+  return { code, time, error, isLoading };
+}
 
 function Loading(error: Error) {
   return [null, error, true] as const;

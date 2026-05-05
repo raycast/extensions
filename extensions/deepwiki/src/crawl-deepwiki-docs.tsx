@@ -2,12 +2,9 @@ import { showToast, Toast, Clipboard, LaunchProps } from "@raycast/api"
 import fetch, { Response as FetchResponse } from "node-fetch"
 import * as cheerio from "cheerio"
 import { URL } from "url"
+import { getRepoIdentifierFromArgumentOrCurrentTab } from "./get-repo-identifier"
 
 const MAX_CONCURRENCY = 5 // Limit concurrent fetches
-
-interface Arguments {
-  repoIdentifier: string
-}
 
 // Define a type for tracking crawl statistics
 interface CrawlStats {
@@ -17,13 +14,12 @@ interface CrawlStats {
 }
 
 function isValidHttpUrl(string: string): boolean {
-  let url
   try {
-    url = new URL(string)
+    const url = new URL(string)
+    return url.protocol === "http:" || url.protocol === "https:"
   } catch (_) {
     return false
   }
-  return url.protocol === "http:" || url.protocol === "https:"
 }
 
 function getBaseUrl(repoIdentifier: string): string | null {
@@ -98,8 +94,20 @@ async function crawlPage(
   }
 }
 
-export default async function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const { repoIdentifier } = props.arguments
+export default async function Command(props: LaunchProps<{ arguments: Arguments.CrawlDeepwikiDocs }>) {
+  let repoIdentifier: string
+
+  try {
+    repoIdentifier = await getRepoIdentifierFromArgumentOrCurrentTab(props.arguments.repoIdentifier)
+  } catch (error) {
+    await showToast(
+      Toast.Style.Failure,
+      "Missing Repository Identifier",
+      error instanceof Error ? error.message : "Could not determine repository from the current browser tab.",
+    )
+    return
+  }
+
   const baseUrl = getBaseUrl(repoIdentifier)
 
   if (!baseUrl) {

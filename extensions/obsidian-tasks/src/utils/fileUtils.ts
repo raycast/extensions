@@ -2,7 +2,7 @@ import fs from "fs-extra";
 import path from "path";
 import matter from "gray-matter";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences, TaskFile, Task } from "../types";
+import { TaskFile, Task } from "../types";
 import { parseTask } from "./taskParser";
 
 export const getTasksFilePath = (): string => {

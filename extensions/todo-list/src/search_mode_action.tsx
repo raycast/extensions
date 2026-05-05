@@ -13,6 +13,7 @@ const SearchModeAction = () => {
         await clearSearchBar();
       }}
       shortcut={{ key: "s", modifiers: ["cmd"] }}
+      // eslint-disable-next-line @raycast/prefer-title-case
       title={`Switch to ${searchMode ? "insert" : "search"} mode`}
     />
   );

@@ -2,12 +2,9 @@ import { environment, getPreferenceValues } from "@raycast/api";
 import { VAULT_TIMEOUT_MS_TO_LABEL } from "~/constants/labels";
 import { CommandName } from "~/types/general";
 
-export function getServerUrlPreference(): string {
+export function getServerUrlPreference(): string | undefined {
   const { serverUrl } = getPreferenceValues<Preferences>();
-  if (serverUrl === "" || serverUrl === "bitwarden.com" || serverUrl === "https://bitwarden.com") {
-    return "";
-  }
-  return serverUrl;
+  return !serverUrl || serverUrl === "bitwarden.com" || serverUrl === "https://bitwarden.com" ? undefined : serverUrl;
 }
 
 type PreferenceKeyOfCommandsWithTransientOptions =

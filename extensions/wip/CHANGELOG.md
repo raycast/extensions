@@ -1,5 +1,9 @@
 # WIP Changelog
 
+## [Improved authentication error handling] - 2025-06-16
+
+- Improve authentication error handling
+
 ## [Fixed typo] - 2025-05-05
 
 - Fix typo in subtitle

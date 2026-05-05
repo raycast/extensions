@@ -16,7 +16,12 @@
     "yvysunu",
     "pernielsentikaer",
     "dianne_mcewan",
-    "stphstph"
+    "stphstph",
+    "bendrucker"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Data"

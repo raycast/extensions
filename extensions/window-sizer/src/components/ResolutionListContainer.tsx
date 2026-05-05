@@ -76,7 +76,7 @@ export function ResolutionListContainer({
     <List
       isLoading={externalIsLoading || !isContentReady}
       searchBarPlaceholder="Search for sizes and commands..."
-      navigationTitle="Window Sizer"
+      navigationTitle="Resize Window"
       selectedItemId={selectedItemId}
       onSelectionChange={(id) => setSelectedItemId(id || undefined)}
     >

@@ -1,0 +1,25 @@
+import { getPreferenceValues } from "@raycast/api";
+
+export const usePreferences = () => {
+  const preferences = getPreferenceValues<Preferences>();
+  let { API_TOKEN, STYLE_PREFERENCE } = preferences;
+  const { KIT_FILTER, REMEMBER_LAST_KIT } = preferences;
+  let account = "pro";
+  const hasCustomToken = !!API_TOKEN;
+
+  //if pro API Token not provided, use free API Token
+  if (!API_TOKEN) {
+    API_TOKEN = "D7A31EA9-20D8-434E-A6C6-8ADC890ADCB8";
+    account = "free";
+    STYLE_PREFERENCE = "fas";
+  }
+
+  return {
+    API_TOKEN,
+    STYLE_PREFERENCE,
+    account,
+    hasCustomToken,
+    kitFilter: KIT_FILTER,
+    rememberLastKit: REMEMBER_LAST_KIT,
+  };
+};

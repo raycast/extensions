@@ -12,7 +12,7 @@ const importOptions: IImportOptions = {
   showLogs: false,
 };
 
-initializeFirebaseApp(JSON.parse(readFile(preferences.firebaseAuth)));
+const db = initializeFirebaseApp(JSON.parse(readFile(preferences.firebaseAuth)));
 
 export default async function Command() {
   try {
@@ -29,7 +29,7 @@ export default async function Command() {
       await closeMainWindow({ clearRootSearch: true });
       await Promise.all(
         fileSystemItems.map(async (file) => {
-          await restore(file.path, importOptions);
+          await restore(db, file.path, importOptions);
         })
       );
       await showHUD("🤟 Collection imported with success !! 🤟");

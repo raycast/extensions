@@ -51,4 +51,6 @@ Apply filters and transformations to various image formats, and convert between 
 - Strip EXIF Data (Disabled by Default)
   - Remove EXIF data from the provided images.
 
+Visit the [GitHub project](https://github.com/users/SKaplanOfficial/projects/10/views/1) to view upcoming additions and improvements.
+
 Filter thumbnail image credit: <https://unsplash.com/photos/UBA_W3_LsOk>

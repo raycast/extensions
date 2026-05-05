@@ -12,9 +12,10 @@ Here you will find requirements and guidelines that you'll need to follow in ord
   - Ensure you use your **Raycast** account username in the `author` field
   - Ensure you use `MIT` in the `license` field
   - Ensure you are using the latest Raycast API version
+  - Ensure the `platforms` field matching the requirement of your extension, eg. if you use platform-specific APIs, restrict the `platforms` field to the corresponding platform
 - Please use `npm` for installing dependencies and include `package-lock.json` in your pull request. We use `npm` on our Continuous Integration (CI) environment when building and publishing extensions so, by providing a `package-lock.json` file, we ensure that the dependencies on the server match the same versions as your local dependencies.
 - Please check the terms of service of third-party services that your extension uses.
-- Read the [Extension Guidelines](https://manual.raycast.com/extensions) and make sure that your Extension comply with it.
+- Read the [Extension Guidelines](https://manual.raycast.com/extensions-guidelines) and make sure that your Extension comply with it.
 - Make sure to **run a distribution build** with `npm run build` locally before submitting the extension for review. This will perform additional type checking and create an optimized build. Open the extension in Raycast to check whether everything works as expected with the distribution build. In addition, you can perform linting and code style checks by running `npm run lint`. (Those checks will later also run via automated GitHub checks.)
 
 ## Extensions and Commands Naming
@@ -144,6 +145,7 @@ You can use [Raycast Wallpapers](https://www.raycast.com/wallpapers) to make you
 - ✅ Select the most informative commands to showcase what your extension does – focus on giving the user as much detail as possible
 - ❌ Do not use multiple backgrounds for different screenshots – be consistent and use the same across all screenshots
 - ❌ Do not share sensitive data in your screenshots – these will be visible in the Store, as well as the Extension repository on GitHub
+- ❌ Do not include screenshots of other applications - keep the focus entirely on your extension within Raycast
 - ❌ Avoid using screenshots in different themes (light and dark), unless it is to demonstrate what your extension does
 
 ## Version History

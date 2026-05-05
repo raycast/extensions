@@ -1,4 +1,4 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { Resolution } from "../types";
@@ -81,8 +81,8 @@ export function useStarredResolutions() {
 
   // Function to toggle star status
   async function toggleStarResolution(resolution: Resolution) {
+    const isStarred = starredResolutions.some((r) => isSameResolution(r, resolution));
     try {
-      const isStarred = starredResolutions.some((r) => isSameResolution(r, resolution));
       const updatedResolutions = isStarred
         ? starredResolutions.filter((r) => !isSameResolution(r, resolution))
         : [...starredResolutions, { ...resolution, isStarred: true }];
@@ -92,6 +92,12 @@ export function useStarredResolutions() {
 
       // Only update state after storage is confirmed
       setStarredResolutions(updatedResolutions);
+
+      // Show toast notification
+      await showToast({
+        style: Toast.Style.Success,
+        title: isStarred ? "Removed from Starred Sizes" : "Marked as Starred",
+      });
     } catch (error) {
       console.error("Error toggling star status:", error);
       throw error;

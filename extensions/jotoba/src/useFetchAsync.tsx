@@ -5,7 +5,7 @@ import fetch from "node-fetch";
  * Is this sort of useless and could be integrated into useJotobaAsync? Yes.
  */
 const useFetchAsync = (
-  baseUrl: string
+  baseUrl: string,
 ): ((config: fetchAsyncConfig, callback: (results: JotobaResults) => Promise<JotobaResults>) => Promise<Json>) => {
   const rqUrl = baseUrl;
 

@@ -1,10 +1,17 @@
 import { Icon, Color, List, ActionPanel, Action } from "@raycast/api";
 import useVercel from "../../hooks/use-vercel-info";
 import fromNow from "../../utils/time";
-import { Deployment, DeploymentState } from "../../types";
+import { Deployment, DeploymentState, Team } from "../../types";
 import InspectDeployment from "../inspect-deployment";
 import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "../../vercel";
+import {
+  getDeploymentId,
+  isDeploymentCancellable,
+  runCancelDeployment,
+  CANCEL_DEPLOYMENT_ACTION,
+  CANCEL_DEPLOYMENT_SHORTCUT,
+} from "../../deployment";
 import { useFetch } from "@raycast/utils";
 
 const DeploymentsList = ({ projectId }: { projectId?: string }) => {
@@ -29,7 +36,7 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
     revalidate();
   };
 
-  const team = teams?.find((team) => team.id === selectedTeam);
+  const team = teams?.find((team: Team) => team.id === selectedTeam);
   return (
     <List
       throttle
@@ -58,21 +65,37 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                 {user && (
                   <Action.OpenInBrowser
                     title={`Visit on Vercel`}
-                    url={getDeploymentURL(
-                      team?.slug || user.username,
-                      deployment.name,
-                      /* @ts-expect-error Property id does not exist on type Deployment */
-                      deployment.id || deployment.uid,
-                    )}
+                    url={getDeploymentURL(team?.slug || user.username, deployment.name, getDeploymentId(deployment))}
                     icon={Icon.Link}
-                    shortcut={{ modifiers: ["cmd", "opt"], key: "v" }}
+                    shortcut={{
+                      macOS: { modifiers: ["cmd", "opt"], key: "v" },
+                      Windows: { modifiers: ["ctrl", "opt"], key: "v" },
+                    }}
+                  />
+                )}
+                {isDeploymentCancellable(deployment) && (
+                  <Action
+                    title={CANCEL_DEPLOYMENT_ACTION.title}
+                    icon={Icon.Stop}
+                    style={Action.Style.Destructive}
+                    shortcut={CANCEL_DEPLOYMENT_SHORTCUT}
+                    onAction={() =>
+                      runCancelDeployment({
+                        deployment,
+                        teamId: selectedTeam || undefined,
+                        onSuccess: revalidate,
+                      })
+                    }
                   />
                 )}
                 <Action.CopyToClipboard
                   title={`Copy URL`}
                   content={`https://${deployment.url}`}
                   icon={Icon.CopyClipboard}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                  shortcut={{
+                    macOS: { modifiers: ["cmd", "opt"], key: "c" },
+                    Windows: { modifiers: ["ctrl", "opt"], key: "c" },
+                  }}
                 />
               </ActionPanel>
             }
@@ -108,7 +131,7 @@ const getCommitDeploymentBranch = (deployment: Deployment) => {
   return deployment.meta.githubCommitRef ?? null;
 };
 
-const StateIcon = (state?: DeploymentState) => {
+export const StateIcon = (state?: DeploymentState) => {
   switch (state) {
     case "READY":
       return { source: Icon.Dot, tintColor: Color.Green };

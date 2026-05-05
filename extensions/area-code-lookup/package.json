@@ -1,0 +1,45 @@
+{
+  "name": "area-code-lookup",
+  "title": "Area & Country Codes",
+  "description": "Quickly lookup area codes and country codes to see location and current timezone",
+  "icon": "extension-icon.png",
+  "author": "dare",
+  "license": "MIT",
+  "categories": [
+    "Other"
+  ],
+  "commands": [
+    {
+      "name": "lookup",
+      "title": "Lookup Code",
+      "description": "Get location and current timezone for area codes and country codes",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "areaCode",
+          "type": "text",
+          "placeholder": "Code (e.g., 416 or +44)",
+          "required": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.39.2",
+    "prettier": "^3.4.0",
+    "typescript": "^5.7.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

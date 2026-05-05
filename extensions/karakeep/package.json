@@ -1,0 +1,297 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "karakeep",
+  "title": "Karakeep",
+  "description": "A self-hostable bookmark-everything app (links, notes and images) with AI-based automatic tagging and full text search",
+  "icon": "logo-icon.png",
+  "author": "luolei",
+  "contributors": [
+    "kdurek",
+    "edequalsawesome",
+    "chrismessina"
+  ],
+  "categories": [
+    "Web"
+  ],
+  "keywords": [
+    "bookmark",
+    "link",
+    "note",
+    "image",
+    "ai",
+    "tag",
+    "search"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Select your preferred language",
+      "type": "dropdown",
+      "required": false,
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "中文",
+          "value": "zh"
+        }
+      ],
+      "default": "en"
+    },
+    {
+      "name": "apiUrl",
+      "type": "textfield",
+      "required": true,
+      "title": "API Host",
+      "description": "Enter the API host URL",
+      "placeholder": "https://your-karakeep.host.com",
+      "default": ""
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": true,
+      "title": "API Key",
+      "description": "Enter your API key",
+      "placeholder": "Enter your Karakeep API key",
+      "default": ""
+    },
+    {
+      "name": "linkMainAction",
+      "type": "dropdown",
+      "label": "Default Link Action",
+      "title": "Default Link Action",
+      "required": false,
+      "description": "Select the default action when opening a bookmark link",
+      "data": [
+        {
+          "title": "Open in Browser",
+          "value": "openInBrowser"
+        },
+        {
+          "title": "View Details",
+          "value": "viewDetail"
+        },
+        {
+          "title": "Edit",
+          "value": "edit"
+        }
+      ]
+    },
+    {
+      "name": "textMainAction",
+      "type": "dropdown",
+      "label": "Default Note Action",
+      "title": "Default Note Action",
+      "required": false,
+      "description": "Select the default action when opening a note",
+      "data": [
+        {
+          "title": "View Details",
+          "value": "viewDetail"
+        },
+        {
+          "title": "Copy Content",
+          "value": "copy"
+        },
+        {
+          "title": "Edit",
+          "value": "edit"
+        }
+      ]
+    },
+    {
+      "name": "prefillUrlFromBrowser",
+      "type": "checkbox",
+      "label": "Prefill URL from Browser",
+      "title": "Prefill URL from Active Browser Tab",
+      "description": "Automatically prefill the URL field with the active browser tab when creating a bookmark",
+      "default": true,
+      "required": false
+    },
+    {
+      "label": "Show Website Icon",
+      "name": "showWebsitePreview",
+      "title": "Show Website Icon",
+      "description": "Display website icon in the list",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayBookmarkPreview",
+      "type": "checkbox",
+      "label": "Preview Image",
+      "title": "Custom display elements in list view",
+      "description": "Display bookmark preview in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayTags",
+      "type": "checkbox",
+      "label": "Tags",
+      "description": "Display tags in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayCreatedAt",
+      "type": "checkbox",
+      "label": "Created At",
+      "description": "Display created at in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayDescription",
+      "type": "checkbox",
+      "label": "Description",
+      "description": "Display description in the list",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "displayNote",
+      "type": "checkbox",
+      "label": "Note",
+      "description": "Display note in the list",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "displayBookmarkStatus",
+      "type": "checkbox",
+      "label": "Status",
+      "description": "Display bookmark status in the list",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "displaySummary",
+      "type": "checkbox",
+      "label": "Summary",
+      "description": "Display summary in the list",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "verboseLogging",
+      "type": "checkbox",
+      "required": false,
+      "title": "Verbose Logging",
+      "label": "Enable detailed logging",
+      "description": "Show detailed logs in the Raycast console for debugging",
+      "default": false
+    }
+  ],
+  "commands": [
+    {
+      "name": "bookmarks",
+      "title": "Bookmarks",
+      "subtitle": "Karakeep",
+      "description": "List all your bookmarks",
+      "mode": "view"
+    },
+    {
+      "name": "lists",
+      "title": "Lists",
+      "subtitle": "Karakeep",
+      "description": "List all your lists",
+      "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Tags",
+      "subtitle": "Karakeep",
+      "description": "List all your tags",
+      "mode": "view"
+    },
+    {
+      "name": "createBookmark",
+      "title": "Create Bookmark",
+      "subtitle": "Karakeep",
+      "description": "Create a new bookmark",
+      "mode": "view"
+    },
+    {
+      "name": "createNote",
+      "title": "Create Note",
+      "subtitle": "Karakeep",
+      "description": "Create a new note",
+      "mode": "view"
+    },
+    {
+      "name": "createList",
+      "title": "Create List",
+      "subtitle": "Karakeep",
+      "description": "Create a new list",
+      "mode": "view"
+    },
+    {
+      "name": "notes",
+      "title": "Notes",
+      "subtitle": "Karakeep",
+      "description": "List all your notes",
+      "mode": "view"
+    },
+    {
+      "name": "highlights",
+      "title": "Highlights",
+      "subtitle": "Karakeep",
+      "description": "View and manage your highlights",
+      "mode": "view"
+    },
+    {
+      "name": "stats",
+      "title": "My Stats",
+      "subtitle": "Karakeep",
+      "description": "View your Karakeep usage statistics",
+      "mode": "view"
+    },
+    {
+      "name": "backups",
+      "title": "Backups",
+      "subtitle": "Karakeep",
+      "description": "Create, download, and delete account backups",
+      "mode": "view"
+    },
+    {
+      "name": "quickBookmark",
+      "title": "Quick Bookmark",
+      "subtitle": "Karakeep",
+      "description": "Quickly bookmark the current browser tab",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-logger": "^1.2.2",
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.3",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.35.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

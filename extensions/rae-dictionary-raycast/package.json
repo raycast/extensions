@@ -15,44 +15,43 @@
   "commands": [
     {
       "name": "query-rae-word",
-      "title": "Query Word In RAE",
+      "title": "Query Word in RAE",
       "subtitle": "RAE Dictionary",
       "description": "Query a word in the RAE dictionary",
       "mode": "view"
     },
     {
       "name": "query-rae-daily-word",
-      "title": "Query Word Of The Day In RAE",
+      "title": "Query Word of the Day in RAE",
       "subtitle": "RAE Dictionary",
       "description": "Query the RAE word of the day",
       "mode": "view"
     },
     {
       "name": "query-rae-random-word",
-      "title": "Query Random Word In RAE",
+      "title": "Query Random Word in RAE",
       "subtitle": "RAE Dictionary",
       "description": "Query a random word from the RAE dictionary",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.97.0",
-    "@raycast/utils": "^1.17.0",
-    "node-fetch": "^3.3.2"
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.27.1",
     "@babel/preset-typescript": "^7.27.1",
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/jest": "^29.5.11",
-    "@types/node": "22.13.10",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.5.0",
     "@types/node-fetch": "^2.6.9",
-    "eslint": "^9.22.0",
+    "eslint": "^10.1.0",
     "jest": "^29.7.0",
-    "prettier": "^3.5.3",
-    "ts-jest": "^29.1.1",
+    "prettier": "^3.8.1",
+    "ts-jest": "^29.4.6",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
@@ -65,5 +64,8 @@
     "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch --config jest.config.ts",
     "test:coverage": "NODE_OPTIONS=--experimental-vm-modules jest --coverage --config jest.config.ts",
     "test:updateSnapshots": "NODE_OPTIONS=--experimental-vm-modules jest --updateSnapshot --config jest.config.ts"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

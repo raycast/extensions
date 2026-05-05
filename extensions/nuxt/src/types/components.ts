@@ -1,7 +1,6 @@
 export interface ComponentInfo {
   exists: boolean;
   isBase: boolean;
-  isPro: boolean;
   isProse: boolean;
 }
 

@@ -2,8 +2,7 @@
 import "cross-fetch/polyfill";
 
 import { Action, ActionPanel, List, getPreferenceValues } from "@raycast/api";
-import { useState } from "react";
-import { useAsyncEffect } from "use-async-effect";
+import { useEffect, useState } from "react";
 
 import {
   fetchFavouriteSpaces,
@@ -20,7 +19,7 @@ import { useAuthorizeSite } from "./util/hooks";
 import { capitalize } from "./util/text";
 import { usePromise } from "@raycast/utils";
 
-const { searchAttachments, sort } = getPreferenceValues();
+const { searchAttachments, searchWhiteboards, sort } = getPreferenceValues();
 
 export default function Command() {
   const site = useAuthorizeSite();
@@ -29,12 +28,18 @@ export default function Command() {
   const state = useSearch(site, searchText, spaceFilter);
   const [spaces, setSpaces] = useState([]) as any[];
 
-  useAsyncEffect(async () => {
-    if (!site) {
-      return;
-    }
-    const spaces = await fetchFavouriteSpaces(site);
-    setSpaces(spaces);
+  useEffect(() => {
+    (async () => {
+      if (!site) {
+        return;
+      }
+      try {
+        const spaces = await fetchFavouriteSpaces(site);
+        setSpaces(spaces);
+      } catch (error) {
+        console.error("Error fetching favourite spaces:", error);
+      }
+    })();
   }, [site]);
 
   const titleText = state.isRecentResults ? "Recently Viewed" : "Search Results";
@@ -102,7 +107,7 @@ function useSearch(site?: Site, searchText = "", spaceFilter = "") {
       failureToastOptions: {
         title: "Could not perform search",
       },
-    }
+    },
   );
 
   const state: SearchState = {
@@ -118,14 +123,21 @@ async function performSearch(
   site: Site,
   searchText: string,
   spaceFilter: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
 ): Promise<SearchResult[]> {
   const spaceKey = spaceFilter === "" ? undefined : spaceFilter;
 
   if (searchText) {
     const searchResults = (await fetchSearchByText(
-      { site, text: searchText, includeAttachments: searchAttachments, spaceKey, sort },
-      signal
+      {
+        site,
+        text: searchText,
+        includeAttachments: searchAttachments,
+        includeWhiteboards: searchWhiteboards,
+        spaceKey,
+        sort,
+      },
+      signal,
     )) as any;
     return searchResults.results.map((item: any) => mapToSearchResult(item, searchResults._links));
   } else {

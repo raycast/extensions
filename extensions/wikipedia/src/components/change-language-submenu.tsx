@@ -1,12 +1,13 @@
 import { Action, ActionPanel } from "@raycast/api";
 
-import { languages, useLanguage } from "../utils/language";
+import { languages } from "../utils/language";
 
-import { useAvalableLanguages } from "@/hooks/usePageData";
+import WikipediaPage from "./wikipedia-page";
 
-export function ChangeLanguageSubmenu({ title }: { title: string }) {
-  const [language, setLanguage] = useLanguage();
-  const { data: availableLanguages, isLoading } = useAvalableLanguages(title, language);
+import { useAvailableLanguages } from "@/hooks/usePageData";
+
+export function ChangeLanguageSubmenu({ title, language }: { title: string; language: string }) {
+  const { data: availableLanguages, isLoading } = useAvailableLanguages(title, language);
 
   return (
     <ActionPanel.Submenu
@@ -17,15 +18,21 @@ export function ChangeLanguageSubmenu({ title }: { title: string }) {
     >
       {languages
         .filter(({ value }) => value !== language)
-        .filter(({ value }) => availableLanguages?.includes(value))
-        .map((language) => (
-          <Action
-            key={language.value}
-            icon={language.icon}
-            title={language.title}
-            onAction={() => setLanguage(language.value)}
-          />
-        ))}
+        .map(({ value, icon, title }) => {
+          const translatedTitle = availableLanguages?.find(({ lang }) => lang === value)?.title;
+          if (!translatedTitle) {
+            return null;
+          }
+
+          return (
+            <Action.Push
+              key={value}
+              icon={icon}
+              title={title}
+              target={<WikipediaPage title={translatedTitle} language={value} />}
+            />
+          );
+        })}
     </ActionPanel.Submenu>
   );
 }

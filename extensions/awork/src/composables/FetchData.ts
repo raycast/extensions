@@ -1,17 +1,30 @@
+import { getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import fetch from "node-fetch";
 import { baseURI, refreshToken } from "./WebClient";
+import { fetchWithTimeout } from "./HttpClient";
+import { mockProjects, mockTasks, mockTypeOfWork } from "./MockData";
 
 interface company {
   id: string;
   name: string;
 }
 
+interface projectStatus {
+  type: string;
+}
+
 export interface project {
   id: string;
   name: string;
   isBillableByDefault: boolean;
+  projectKey?: string;
   company?: company;
+  projectStatus: projectStatus;
+}
+
+interface taskStatus {
+  type: string;
+  icon: string;
 }
 
 export interface task {
@@ -20,12 +33,18 @@ export interface task {
   projectId: string;
   project: project;
   typeOfWorkId?: string;
+  taskIdentifier?: string;
+  taskStatus: taskStatus;
 }
 
 export interface typeOfWork {
   id: string;
   name: string;
 }
+
+const useMockData = false;
+
+const preferences = getPreferenceValues<Preferences>();
 
 const getRequestOptions = (token: string) => ({
   method: "GET",
@@ -36,36 +55,72 @@ const getRequestOptions = (token: string) => ({
 });
 
 export const getProjects =
-  (token: string, searchText: string, pageSize: number) => async (options: { page: number }) => {
-    return fetch(
+  (token: string, searchText: string, pageSize: number) =>
+  async (options: {
+    page: number;
+  }): Promise<{
+    data: project[];
+    hasMore: boolean;
+  }> => {
+    if (useMockData) {
+      return { data: mockProjects, hasMore: false };
+    }
+    let filterBy = preferences.showDoneProjects ? "" : "projectStatus/type ne 'closed'";
+    if (searchText !== "") {
+      const searchTextIsUuid = searchText.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
+
+      if (filterBy) {
+        filterBy = filterBy + " and ";
+      }
+
+      if (searchTextIsUuid) {
+        filterBy = filterBy + `id eq guid'${encodeURIComponent(searchText)}'`;
+      } else {
+        const encodedSearchText = encodeURIComponent(searchText.replaceAll("'", ""));
+        filterBy = filterBy + `(substringof('${encodedSearchText}',name) or projectKey eq '${encodedSearchText}')`;
+      }
+    }
+
+    return fetchWithTimeout(
       new URL(
-        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${searchText ? `&filterby=substringof('${encodeURIComponent(searchText)}',name)` : ""}`,
+        `${baseURI}/projects?page=${options.page + 1}&pageSize=${pageSize}&orderby=updatedOn desc${filterBy ? "&filterby=" + filterBy : ""}`,
       ),
       getRequestOptions(token),
     )
-      .then((response) => {
+      .then(async (response) => {
         if (!response.ok) {
+          if (response.status === 401) {
+            const bodyText = await response.text();
+            if (bodyText.match(/token expired/i)) {
+              const newTokens = await refreshToken();
+              if (newTokens) {
+                return getProjects(newTokens.accessToken, searchText, pageSize)(options);
+              }
+            }
+          }
           const error = new Error(`HTTP error! status: ${response.status}`);
           error.name = "FetchError";
           throw error;
         }
-        return { body: response.text(), headers: response.headers };
-      })
-      .then(async (result) => {
-        const data = await result.body;
+
+        const data = await response.text();
         if (data.match(/token expired/i)) {
-          await refreshToken();
+          const newTokens = await refreshToken();
+          if (newTokens) {
+            return getProjects(newTokens.accessToken, searchText, pageSize)(options);
+          }
           return { data: [], hasMore: false };
         }
+
         return {
           data: <Array<project>>JSON.parse(data),
-          hasMore: Number(result.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
+          hasMore: Number(response.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
         };
       })
       .catch((e: Error) => {
         showFailureToast(e, {
-          title: e.name === "FetchError" ? "Couldn´t load Projects" : e.name,
-          message: e.name === "FetchError" ? e.name + ": " + e.message : e.message,
+          title: e.name === "FetchError" || e.name === "TimeoutError" ? "Couldn´t load Projects" : e.name,
+          message: `${e.name}: ${e.message}`,
         });
         console.error(e);
         return { data: [] as project[], hasMore: false };
@@ -73,61 +128,110 @@ export const getProjects =
   };
 
 export const getTasks =
-  (token: string, searchText: string, pageSize: number, projectId?: string) => async (options: { page: number }) => {
+  (token: string, searchText: string, pageSize: number, projectId?: string) =>
+  async (options: { page: number }): Promise<{ data: task[]; hasMore: boolean }> => {
+    if (useMockData) {
+      return { data: mockTasks, hasMore: false };
+    }
     const route = projectId ? `projects/${projectId}/projecttasks` : "me/projecttasks";
     const pagination = `page=${options.page + 1}&pageSize=${pageSize}`;
-    let filterBy = "filterby=taskstatus/type ne 'done'";
+    let filterBy = preferences.showDoneTasks ? "" : "taskstatus/type ne 'done'";
 
     if (searchText) {
       const searchTextIsUuid = searchText.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
 
+      if (filterBy) {
+        filterBy = `${filterBy} and `;
+      }
+
       if (searchTextIsUuid) {
-        filterBy = `${filterBy} and id eq guid'${searchText}'`;
+        filterBy = `${filterBy}id eq guid'${encodeURIComponent(searchText)}'`;
       } else {
-        filterBy = `${filterBy} and (substringof('${searchText}',name) or substringof('${searchText}',project/name))`;
+        const encodedSearchText = encodeURIComponent(searchText.replaceAll("'", ""));
+        filterBy = `${filterBy}(substringof('${encodedSearchText}',name) or substringof('${encodedSearchText}',project/name) or substringof('${encodedSearchText}', taskIdentifier))`;
       }
     }
 
-    return fetch(new URL(`${baseURI}/${route}?${pagination}&${encodeURIComponent(filterBy)}`), getRequestOptions(token))
-      .then((response) => ({
-        body: response.text(),
-        headers: response.headers,
-      }))
-      .then(async (result) => {
-        const data = await result.body;
+    return fetchWithTimeout(
+      new URL(`${baseURI}/${route}?${pagination}${filterBy ? `&filterby=${filterBy}` : ""}`),
+      getRequestOptions(token),
+    )
+      .then(async (response) => {
+        if (!response.ok) {
+          if (response.status === 401) {
+            const bodyText = await response.text();
+            if (bodyText.match(/token expired/i)) {
+              const newTokens = await refreshToken();
+              if (newTokens) {
+                return getTasks(newTokens.accessToken, searchText, pageSize, projectId)(options);
+              }
+            }
+          }
+          const error = new Error(`HTTP error! status: ${response.status}`);
+          error.name = "FetchError";
+          throw error;
+        }
+
+        const data = await response.text();
         if (data.match(/token expired/i)) {
-          await refreshToken();
+          const newTokens = await refreshToken();
+          if (newTokens) {
+            return getTasks(newTokens.accessToken, searchText, pageSize, projectId)(options);
+          }
           return { data: [], hasMore: false };
         }
+
         return {
           data: <Array<task>>JSON.parse(data),
-          hasMore: Number(result.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
+          hasMore: Number(response.headers.get("aw-totalitems")) > pageSize * (options.page + 1),
         };
       })
       .catch((e: Error) => {
         showFailureToast(e, {
-          title: e.name === "FetchError" ? "Couldn´t load Tasks" : e.name,
-          message: e.name === "FetchError" ? e.name + ": " + e.message : e.message,
+          title: e.name === "FetchError" || e.name === "TimeoutError" ? "Couldn´t load Tasks" : e.name,
+          message: `${e.name}: ${e.message}`,
         });
         console.error(e);
         return { data: [], hasMore: false };
       });
   };
 
-export const getTypesOfWork = async (token: string) => {
-  return fetch(`${baseURI}/typeofwork?OrderBy=name`, getRequestOptions(token))
-    .then((response) => response.text())
-    .then(async (result) => {
-      if (result.match(/token expired/)) {
-        await refreshToken();
+export const getTypesOfWork = async (token: string): Promise<string | typeOfWork[]> => {
+  if (useMockData) {
+    return mockTypeOfWork;
+  }
+  return fetchWithTimeout(`${baseURI}/typeofwork?OrderBy=name`, getRequestOptions(token))
+    .then(async (response) => {
+      if (!response.ok) {
+        if (response.status === 401) {
+          const bodyText = await response.text();
+          if (bodyText.match(/token expired/i)) {
+            const newTokens = await refreshToken();
+            if (newTokens) {
+              return getTypesOfWork(newTokens.accessToken);
+            }
+            return "Invalid Token";
+          }
+        }
+        const error = new Error(`HTTP error! status: ${response.status}`);
+        error.name = "FetchError";
+        throw error;
+      }
+
+      const result = await response.text();
+      if (result.match(/token expired/i)) {
+        const newTokens = await refreshToken();
+        if (newTokens) {
+          return getTypesOfWork(newTokens.accessToken);
+        }
         return "Invalid Token";
       }
       return <Array<typeOfWork>>JSON.parse(result);
     })
     .catch((e: Error) => {
-      showFailureToast({
-        title: e.name === "FetchError" ? "Couldn´t load Types of work" : e.name,
-        message: e.name === "FetchError" ? e.name + ": " + e.message : e.message,
+      showFailureToast(e, {
+        title: e.name === "FetchError" || e.name === "TimeoutError" ? "Couldn´t load Types of work" : e.name,
+        message: `${e.name}: ${e.message}`,
       });
       console.error(e);
       return "error";

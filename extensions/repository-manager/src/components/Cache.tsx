@@ -1,10 +1,19 @@
 import { Action, Icon } from '@raycast/api'
-import { withToast } from '../ui/toast'
+import { showSuccessToast, showErrorToast } from '../ui/toast'
 import { clearCache, preferences } from '../helpers'
 
 export default function Cache() {
     if (!preferences.enableProjectsCaching) {
         return null
+    }
+
+    async function handleClearCache() {
+        try {
+            clearCache()
+            await showSuccessToast('Cache cleared')
+        } catch (error) {
+            await showErrorToast('Failed to clear cache')
+        }
     }
 
     return (
@@ -13,14 +22,7 @@ export default function Cache() {
             key="clear-cache"
             icon={Icon.Trash}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'delete' }}
-            onAction={withToast({
-                action: () => {
-                    clearCache()
-                    return Promise.resolve()
-                },
-                onSuccess: () => 'Cache cleared',
-                onFailure: () => 'Failed to clear cache',
-            })}
+            onAction={handleClearCache}
         />
     )
 }

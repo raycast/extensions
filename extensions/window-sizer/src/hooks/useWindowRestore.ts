@@ -1,4 +1,4 @@
-import { showHUD, showToast, Toast, closeMainWindow, popToRoot } from "@raycast/api";
+import { showHUD, showToast, Toast, closeMainWindow, PopToRootType } from "@raycast/api";
 import { useWindowInfo } from "./useWindowInfo";
 import { useWindowStateManager } from "./useWindowStateManager";
 import { resizeWindow } from "../swift-app";
@@ -91,10 +91,9 @@ export function useWindowRestore() {
       const appRestrictionInfo = sizeWasRestricted ? " (Restricted)" : "";
 
       // Show feedback based on actual dimensions
-      await showHUD(`↺ Restored to ${result.width}×${result.height}${appRestrictionInfo}`);
-
-      // Return to root after execution
-      await popToRoot();
+      await showHUD(`↺ Restored to ${result.width}×${result.height}${appRestrictionInfo}`, {
+        popToRootType: PopToRootType.Immediate,
+      });
     } catch (error) {
       logError("Error restoring window size:", error);
 

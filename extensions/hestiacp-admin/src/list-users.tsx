@@ -20,6 +20,7 @@ import { AddUserFormValues } from "./types/users";
 import useHestia from "./utils/hooks/useHestia";
 import InvalidUrlComponent from "./components/InvalidUrlComponent";
 import { NodeHtmlMarkdown } from "node-html-markdown";
+import ListCronJobsComponent from "./components/list-cron-jobs";
 
 export default function ListUsers() {
   if (!isValidApiUrl()) return <InvalidUrlComponent />;
@@ -49,6 +50,7 @@ export default function ListUsers() {
                     content={JSON.stringify(data)}
                   />
                   <ActionPanel.Section>
+                    {/* eslint-disable-next-line @raycast/prefer-title-case */}
                     <ActionPanel.Submenu title="Go To" icon={Icon.ArrowRight}>
                       <Action.Push
                         title="Web Domains"
@@ -61,6 +63,7 @@ export default function ListUsers() {
                         icon={Icon.Envelope}
                         target={<ListMailDomainsComponent user={user} />}
                       />
+                      <Action.Push title="Cron Jobs" icon={Icon.Clock} target={<ListCronJobsComponent user={user} />} />
                     </ActionPanel.Submenu>
                   </ActionPanel.Section>
                   <ActionPanel.Section>

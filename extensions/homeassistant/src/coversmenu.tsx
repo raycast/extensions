@@ -33,7 +33,9 @@ export default function CoversMenuCommand() {
         icon={Icon.Terminal}
       />
       <MenuBarExtra.Section title="Covers">
-        {entities?.map((e) => <CoverMenubarItem key={e.entity_id} state={e} />)}
+        {entities?.map((e) => (
+          <CoverMenubarItem key={e.entity_id} state={e} />
+        ))}
       </MenuBarExtra.Section>
       <MenuBarExtra.Section>
         <RUIMenuBarExtra.ConfigureCommand />

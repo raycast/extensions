@@ -1,7 +1,7 @@
-import { Toast, ToastStyle } from "@raycast/api";
+import { Clipboard, getPreferenceValues, Toast } from "@raycast/api";
 import { setTimeout } from "timers/promises";
 
-export default async () => {
+export default async function Command() {
   const answers: string[] = [
     "Nah, don't do it.",
     "Nope",
@@ -27,13 +27,22 @@ export default async () => {
     "Can't think of any reason why not.",
   ];
 
-  const randomElement = answers[Math.floor(Math.random() * answers.length)];
+  const answer = answers[Math.floor(Math.random() * answers.length)];
 
-  const toast = new Toast({ style: ToastStyle.Animated, title: "The Magic 8-Ball says.." });
+  const toast = new Toast({ style: Toast.Style.Animated, title: "The Magic 8-Ball says.." });
   await toast.show();
-
   await setTimeout(350);
 
-  toast.style = ToastStyle.Success;
-  toast.title = randomElement;
-};
+  const { defaultAction } = getPreferenceValues<Preferences.Index>();
+
+  toast.style = Toast.Style.Success;
+  toast.title = answer;
+
+  if (defaultAction === "paste") {
+    await Clipboard.paste(answer);
+    toast.message = "Pasted to current app";
+  } else if (defaultAction === "copy") {
+    await Clipboard.copy(answer);
+    toast.message = "Copied to clipboard";
+  }
+}

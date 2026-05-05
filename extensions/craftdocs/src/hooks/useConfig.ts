@@ -1,24 +1,83 @@
 import { useEffect, useState } from "react";
-import Config from "../Config";
-import { UseAppExists } from "./useAppExists";
+import {
+  buildCraftConfig,
+  CraftConfig,
+  CraftConfigSnapshot,
+  loadCraftConfigSnapshot,
+  toggleSpaceEnabled,
+  updateSpaceCustomName,
+} from "../Config";
+import { UseCraftEnvironment } from "./useCraftEnvironment";
 
 export type UseConfig = {
   configLoading: boolean;
-  config: Config | null;
+  config: CraftConfig | null;
+  refreshConfig: () => void;
+  setSpaceCustomName: (spaceID: string, customName: string | null) => void;
+  toggleSpaceEnabled: (spaceID: string) => void;
 };
 
-export default function useConfig({ appExistsLoading, appExists }: UseAppExists) {
-  const [state, setState] = useState<UseConfig>({ configLoading: true, config: null as Config | null });
+type ConfigState = {
+  configLoading: boolean;
+  config: CraftConfig | null;
+  snapshot: CraftConfigSnapshot | null;
+};
 
-  useEffect(() => {
-    if (appExistsLoading) return;
+export default function useConfig({ environmentLoading, environment }: UseCraftEnvironment): UseConfig {
+  const [state, setState] = useState<ConfigState>({
+    configLoading: true,
+    config: null,
+    snapshot: null,
+  });
 
-    if (!appExists) {
-      return setState((prev) => ({ ...prev, configIsLoading: false }));
+  const loadConfig = () => {
+    if (environmentLoading) {
+      return;
     }
 
-    setState({ configLoading: false, config: new Config() });
-  }, [appExistsLoading]);
+    if (!environment || environment.status !== "ready") {
+      setState({
+        configLoading: false,
+        config: null,
+        snapshot: null,
+      });
+      return;
+    }
 
-  return state;
+    const snapshot = loadCraftConfigSnapshot(environment);
+    setState({
+      configLoading: false,
+      snapshot,
+      config: buildCraftConfig(snapshot),
+    });
+  };
+
+  const applySnapshotUpdate = (updater: (snapshot: CraftConfigSnapshot) => CraftConfigSnapshot) => {
+    setState((previousState) => {
+      if (!previousState.snapshot) {
+        return previousState;
+      }
+
+      const nextSnapshot = updater(previousState.snapshot);
+
+      return {
+        configLoading: false,
+        snapshot: nextSnapshot,
+        config: buildCraftConfig(nextSnapshot),
+      };
+    });
+  };
+
+  useEffect(() => {
+    loadConfig();
+  }, [environmentLoading, environment]);
+
+  return {
+    configLoading: state.configLoading,
+    config: state.config,
+    refreshConfig: loadConfig,
+    setSpaceCustomName: (spaceID, customName) =>
+      applySnapshotUpdate((snapshot) => updateSpaceCustomName(snapshot, spaceID, customName)),
+    toggleSpaceEnabled: (spaceID) => applySnapshotUpdate((snapshot) => toggleSpaceEnabled(snapshot, spaceID)),
+  };
 }

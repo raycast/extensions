@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "meme-generator",
   "title": "Meme Generator",
-  "description": "Generate memes with the help of Imgflip API",
+  "description": "Generate memes with the help of Imgflip or Memegen API",
   "icon": "command-icon.png",
   "author": "timoransky",
   "contributors": [
@@ -17,8 +17,15 @@
     {
       "name": "generateMeme",
       "title": "Generate Meme",
-      "subtitle": "imgflip",
+      "subtitle": "imgflip.com",
       "description": "Generate meme with the help of Imgflip API",
+      "mode": "view"
+    },
+    {
+      "name": "generateMemeMemegen",
+      "title": "Generate Meme",
+      "subtitle": "memegen.link",
+      "description": "Generate meme with the help of Memegen API",
       "mode": "view"
     }
   ],
@@ -46,7 +53,12 @@
         "input": "@meme-generator search for drake meme",
         "mocks": {
           "search-meme-templates": [
-            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 }
+            {
+              "id": "181913649",
+              "title": "Drake Hotline Bling",
+              "url": "https://i.imgflip.com/30b1gx.jpg",
+              "boxCount": 2
+            }
           ]
         },
         "expected": [
@@ -69,13 +81,30 @@
         "input": "@meme-generator create drake hotline bling meme with text 'Searching templates' and 'Generating the meme'",
         "mocks": {
           "find-meme-template": [
-            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 },
-            { "id": "87743020", "title": "Two Buttons", "url": "https://i.imgflip.com/1g8my4.jpg", "boxCount": 3 }
+            {
+              "id": "181913649",
+              "title": "Drake Hotline Bling",
+              "url": "https://i.imgflip.com/30b1gx.jpg",
+              "boxCount": 2
+            },
+            {
+              "id": "87743020",
+              "title": "Two Buttons",
+              "url": "https://i.imgflip.com/1g8my4.jpg",
+              "boxCount": 3
+            }
           ],
           "search-meme-templates": [
-            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 }
+            {
+              "id": "181913649",
+              "title": "Drake Hotline Bling",
+              "url": "https://i.imgflip.com/30b1gx.jpg",
+              "boxCount": 2
+            }
           ],
-          "generate-meme-from-template": { "url": "https://i.imgflip.com/generated_meme.jpg" }
+          "generate-meme-from-template": {
+            "url": "https://i.imgflip.com/generated_meme.jpg"
+          }
         },
         "expected": [
           {
@@ -96,8 +125,18 @@
         "input": "@meme-generator list available templates",
         "mocks": {
           "find-meme-template": [
-            { "id": "181913649", "title": "Drake Hotline Bling", "url": "https://i.imgflip.com/30b1gx.jpg", "boxCount": 2 },
-            { "id": "87743020", "title": "Two Buttons", "url": "https://i.imgflip.com/1g8my4.jpg", "boxCount": 3 }
+            {
+              "id": "181913649",
+              "title": "Drake Hotline Bling",
+              "url": "https://i.imgflip.com/30b1gx.jpg",
+              "boxCount": 2
+            },
+            {
+              "id": "87743020",
+              "title": "Two Buttons",
+              "url": "https://i.imgflip.com/1g8my4.jpg",
+              "boxCount": 3
+            }
           ]
         },
         "expected": [
@@ -130,19 +169,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.0",
-    "@raycast/utils": "^1.16.3",
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^1.17.0",
     "node-fetch": "^3.3.2",
     "tempy": "3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^22.13.10",
-    "@types/react": "^19.0.10",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "react-devtools": "^6.1.1",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -151,5 +189,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

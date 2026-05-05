@@ -10,7 +10,7 @@ import { GitLabOpenInBrowserAction } from "./actions";
 import { GitLabIcons } from "../icons";
 import { Pipeline } from "../gitlabapi";
 
-/* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const GET_PIPELINES = gql`
   query GetProjectPipeplines($fullPath: ID!) {
@@ -96,7 +96,7 @@ export function PipelineListItem(props: {
   projectFullPath: string;
   onRefreshPipelines: () => void;
   navigationTitle?: string;
-}): JSX.Element {
+}) {
   const pipeline = props.pipeline;
   const icon = getIcon(pipeline.status);
   const dateStatus = getDateStatus(pipeline);
@@ -144,7 +144,7 @@ export function PipelineListItem(props: {
   );
 }
 
-export function PipelineList(props: { projectFullPath: string; navigationTitle?: string }): JSX.Element {
+export function PipelineList(props: { projectFullPath: string; navigationTitle?: string }) {
   const { pipelines, error, isLoading, refresh } = useSearch("", props.projectFullPath);
   useInterval(() => {
     refresh();
@@ -171,7 +171,7 @@ export function PipelineList(props: { projectFullPath: string; navigationTitle?:
 
 export function useSearch(
   query: string | undefined,
-  projectFullPath: string
+  projectFullPath: string,
 ): {
   pipelines: any[];
   error?: string;

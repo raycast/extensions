@@ -6,6 +6,10 @@
   "description": "Detect languages through Raycast AI or third-party language detectors.",
   "icon": "language-detector-icon.png",
   "author": "litomore",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Fun",
     "Media",
@@ -50,19 +54,19 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.94.2",
-    "@raycast/utils": "^1.19.1",
-    "mac-say": "^0.3.1",
-    "raycast-backend-api": "^0.1.1",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "mac-say": "^0.3.3",
+    "raycast-backend-api": "^0.1.2",
     "raycast-cross-extension": "^0.2.3",
-    "raycast-language-detector": "^0.2.0"
+    "raycast-language-detector": "^0.2.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.13.14",
-    "@types/react": "^19.0.12",
-    "eslint": "^9.23.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   }
 }

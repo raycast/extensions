@@ -45,7 +45,12 @@ export const getTimetable = async (date: Date): Promise<Timetable> => {
 
   const timetable = await client.getOwnTimetableFor(date);
 
+  if (!Array.isArray(timetable)) {
+    return [];
+  }
+
   return timetable
+    .filter((value) => value.su?.length > 0)
     .map((value) => {
       const subject = value.su[0];
 
@@ -86,6 +91,8 @@ export const getTimetable = async (date: Date): Promise<Timetable> => {
         status = "active";
       }
 
+      const subjectShort = subject.name.replace(/\d/g, "").split("_")[0] || subject.name || subject.longname;
+
       return {
         id: String(value.id),
         date,
@@ -93,14 +100,13 @@ export const getTimetable = async (date: Date): Promise<Timetable> => {
         status,
         subject: {
           id: String(subject.id),
-          short: subject.name.replace(/\d/g, "").split("_")[0],
-          long: subject.longname,
+          short: subjectShort,
+          long: subject.longname || subject.name,
         },
-        room: value.kl[0].longname,
+        room: value.kl?.[0]?.longname ?? "",
         cancelled: value.code == "cancelled",
         info: value.info,
-
-        teacher: toTitleCase(value.te.map((s) => s.longname).join(", ")),
+        teacher: toTitleCase((value.te ?? []).map((s) => s.longname).join(", ")),
         original: value,
       } satisfies Lesson;
     })

@@ -1,11 +1,11 @@
 import { Action, ActionPanel, Icon } from '@raycast/api'
-import type { Instance } from '@scaleway/sdk'
+import type { Instancev1 } from '@scaleway/sdk'
 import { useAPI } from 'helpers/useAPI'
 import { powerOffInstance, powerOnInstance, rebootInstance } from './actions'
 import { getServerUrl } from './urls'
 
 type ServerActionProps = {
-  server: Instance.v1.Server
+  server: Instancev1.Server
   toggleIsDetailOpen: () => void
   reloadServer: () => Promise<void> | void
 }
