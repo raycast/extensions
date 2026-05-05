@@ -287,11 +287,28 @@ function parseHandlerBlock(block: string): Rule | null {
     const nameMatch = block.match(/\/\/\s*(?:Rule:\s*)?([^\n]+)/);
     const name = nameMatch ? nameMatch[1].trim() : "Imported Rule";
 
+    // Support both browser: "App" and browser: { name: "App", ... }
     const browserMatch = block.match(/browser\s*:\s*["']([^"']+)["']/);
-    if (!browserMatch) {
+    let browser = browserMatch?.[1];
+
+    if (!browser) {
+      const browserObjectMatch = /\bbrowser\s*:\s*\{/.exec(block);
+      if (browserObjectMatch) {
+        const openBraceIndex = block.indexOf("{", browserObjectMatch.index);
+        const closeBraceIndex = findMatchingBracket(block, openBraceIndex, "{", "}");
+        if (openBraceIndex !== -1 && closeBraceIndex !== -1) {
+          const browserObjectContent = block.slice(openBraceIndex + 1, closeBraceIndex);
+          const browserNameMatch = browserObjectContent.match(/name\s*:\s*["']([^"']+)["']/);
+          if (browserNameMatch) {
+            browser = browserNameMatch[1];
+          }
+        }
+      }
+    }
+
+    if (!browser) {
       return null;
     }
-    const browser = browserMatch[1];
 
     // match: [ "a", "b" ] — use bracket-aware scanning so patterns containing
     // ']' (e.g. "*://example.com/path[0-9]*") aren't truncated.

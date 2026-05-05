@@ -47,6 +47,7 @@ The extension integrates with Raycast AI Chat, allowing you to manage rules usin
 - "What rules do I have for GitHub?"
 
 The AI will:
+
 - ✓ Automatically detect conflicts before creating rules
 - ✓ Ask clarifying questions if your request is ambiguous
 - ✓ Confirm destructive actions before executing

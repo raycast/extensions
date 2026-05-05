@@ -11,14 +11,14 @@ type Input = {
   name: string;
 
   /**
-   * The match type: "wildcards" for URL patterns like *://*.example.com/* or "regex" for regular expressions
+   * The match type to use: "wildcards" or "regex"
    */
-  matchType: "wildcards" | "regex";
+  matchType: string;
 
   /**
-   * Array of URL patterns or regex patterns to match. For wildcards use patterns like "*://*.google.com/*", "*://mail.google.com/*". For regex use patterns like "salesforce", "github.com/myorg"
+   * URL patterns as a comma-separated or newline-separated string
    */
-  patterns: string[];
+  patterns: string;
 
   /**
    * The browser to open matching URLs in (e.g., "Arc", "Brave Browser", "Google Chrome", "Safari")
@@ -35,6 +35,19 @@ function uuid(): string {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function normalizeMatchType(value: string): Rule["matchType"] {
+  const matchType = value.trim().toLowerCase();
+  if (matchType === "wildcards" || matchType === "regex") return matchType;
+  throw new Error(`Invalid matchType "${value}". Use "wildcards" or "regex".`);
+}
+
+function parsePatterns(value: string): string[] {
+  return value
+    .split(/[\n,]/)
+    .map((pattern) => pattern.trim())
+    .filter(Boolean);
+}
+
 async function syncConfigFile(args: { configPath: string; defaultBrowser: string; rules: Rule[] }) {
   const configPath = expandTilde(args.configPath);
   const contents = generateFinickyConfig({ defaultBrowser: args.defaultBrowser, rules: args.rules });
@@ -48,13 +61,18 @@ export default async function tool(input: Input) {
   const preferences = getPreferenceValues<{ configPath?: string }>();
   const configPath = (preferences.configPath ?? "").trim();
   const defaultBrowser = await getDefaultBrowser();
+  const patterns = parsePatterns(input.patterns);
+
+  if (patterns.length === 0) {
+    return "❌ Please provide at least one URL pattern.";
+  }
 
   const rule: Rule = {
     id: uuid(),
     name: input.name,
     enabled: input.enabled ?? true,
-    matchType: input.matchType,
-    patterns: input.patterns,
+    matchType: normalizeMatchType(input.matchType),
+    patterns,
     browser: input.browser,
   };
 
@@ -66,7 +84,7 @@ export default async function tool(input: Input) {
 
     // Check if any patterns overlap
     return existingRule.patterns.some((existingPattern) =>
-      input.patterns.some((newPattern) => {
+      patterns.some((newPattern) => {
         // Simple conflict detection: check if patterns are similar
         if (existingRule.matchType === "wildcards" && input.matchType === "wildcards") {
           // Extract domain from wildcard patterns
@@ -92,5 +110,5 @@ export default async function tool(input: Input) {
     await syncConfigFile({ configPath, defaultBrowser, rules: updatedRules });
   }
 
-  return `✓ Successfully created rule "${input.name}"\n- Patterns: ${input.patterns.join(", ")}\n- Browser: ${input.browser}\n- Status: ${input.enabled ? "Enabled" : "Disabled"}`;
+  return `✓ Successfully created rule "${input.name}"\n- Patterns: ${patterns.join(", ")}\n- Browser: ${input.browser}\n- Status: ${input.enabled ? "Enabled" : "Disabled"}`;
 }

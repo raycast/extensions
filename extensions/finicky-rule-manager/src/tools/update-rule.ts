@@ -16,9 +16,9 @@ type Input = {
   name?: string;
 
   /**
-   * New patterns array (optional)
+   * New patterns as a comma-separated or newline-separated string (optional)
    */
-  patterns?: string[];
+  patterns?: string;
 
   /**
    * New browser (optional)
@@ -30,6 +30,13 @@ type Input = {
    */
   enabled?: boolean;
 };
+
+function parsePatterns(value: string): string[] {
+  return value
+    .split(/[\n,]/)
+    .map((pattern) => pattern.trim())
+    .filter(Boolean);
+}
 
 async function syncConfigFile(args: { configPath: string; defaultBrowser: string; rules: Rule[] }) {
   const configPath = expandTilde(args.configPath);
@@ -63,8 +70,12 @@ export default async function tool(input: Input) {
   }
 
   if (input.patterns !== undefined) {
-    rule.patterns = input.patterns;
-    updates.push(`patterns → ${input.patterns.join(", ")}`);
+    const patterns = parsePatterns(input.patterns);
+    if (patterns.length === 0) {
+      return "❌ Please provide at least one URL pattern when updating patterns.";
+    }
+    rule.patterns = patterns;
+    updates.push(`patterns → ${patterns.join(", ")}`);
   }
 
   if (input.browser !== undefined) {
