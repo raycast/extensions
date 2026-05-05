@@ -1,0 +1,73 @@
+{
+  "$schema": "https://raycast.com/schemas/extension.json",
+  "name": "odoo",
+  "title": "Mindnow Odoo",
+  "description": "Mindnow internal Odoo shortcuts (attendance and more)",
+  "icon": "extension-icon.png",
+  "author": "madat",
+  "platforms": ["macOS", "Windows"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "attendance",
+      "title": "Attendance",
+      "subtitle": "Mindnow Odoo HR check-in / check-out",
+      "description": "Opens attendance details from Mindnow Odoo. Check in/out or refresh session from the action panel.",
+      "mode": "view",
+      "keywords": ["mindnow", "odoo", "check in", "check out", "hr", "attendance"]
+    },
+    {
+      "name": "timesheets",
+      "title": "Timesheets",
+      "subtitle": "Mindnow Odoo · browse timesheet lines",
+      "description": "Lists your timesheet lines from the last 30 days, grouped by date. Refresh or add a line from actions.",
+      "mode": "view",
+      "keywords": ["mindnow", "odoo", "timesheet", "time", "project", "task"]
+    },
+    {
+      "name": "add-timesheet-line",
+      "title": "Add Timesheet Line",
+      "subtitle": "Mindnow Odoo · log time",
+      "description": "Create a timesheet entry: project, task, date, duration.",
+      "mode": "view",
+      "keywords": ["mindnow", "odoo", "timesheet", "time", "log", "project"]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Login email for your Odoo user",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Password or API key (Account security → New API Key)",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
