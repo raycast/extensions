@@ -1,0 +1,98 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "project-workspace",
+  "title": "Project Workspace",
+  "description": "Scan local codebases, monitor dev servers, manage offline issues, and turn brainstorms into action",
+  "icon": "extension-icon.png",
+  "author": "DavidWilde",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-projects",
+      "title": "List Projects",
+      "subtitle": "Workspace Catalog",
+      "description": "Scan codebases, enrich project metadata, pin favorites, and open projects in your tools",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "initialScanRoot",
+          "title": "Initial Scan Root",
+          "description": "Required before the command opens. Choose the first directory to scan. You can add more scan roots later from the command actions.",
+          "type": "directory",
+          "required": true,
+          "placeholder": "/Users/you/Projects"
+        },
+        {
+          "name": "additionalScanRoots",
+          "title": "Additional Scan Roots",
+          "description": "Optional. Enter more absolute paths separated by new lines or commas if you want to seed multiple roots during first setup.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "/Users/you/Work,/Users/you/Archive"
+        },
+        {
+          "name": "defaultIdeApp",
+          "title": "Default IDE",
+          "description": "Required. Choose the IDE used by Quick Open when a project does not define its own IDE override.",
+          "type": "appPicker",
+          "required": true
+        },
+        {
+          "name": "defaultTerminalApp",
+          "title": "Default Terminal",
+          "description": "Required. Choose the terminal used by Quick Open when a project does not define its own terminal override.",
+          "type": "appPicker",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "running-projects",
+      "title": "Running Projects",
+      "subtitle": "Dev Server Monitor",
+      "description": "Show active dev servers for saved projects with monorepo-aware names, ports, and paths",
+      "mode": "view"
+    },
+    {
+      "name": "list-issues",
+      "title": "List Issues",
+      "subtitle": "Offline Planning",
+      "description": "Track local project work with statuses, priorities, labels, and completion dates",
+      "mode": "view"
+    },
+    {
+      "name": "list-brainstorms",
+      "title": "List Brainstorms",
+      "subtitle": "Idea Capture",
+      "description": "Capture Markdown brainstorms per project and turn them into issues with Raycast AI",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
