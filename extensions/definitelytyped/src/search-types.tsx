@@ -110,9 +110,7 @@ function EmptyView({
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
-
   const shouldSearch = searchText.length >= 2;
-
   const { value: favorites = [], setValue: setFavorites } = useLocalStorage<string[]>("dt-favorites", []);
 
   async function toggleFavorite(dirName: string) {
@@ -121,6 +119,10 @@ export default function Command() {
 
     try {
       await setFavorites(newFavorites);
+      await showToast({
+        style: Toast.Style.Success,
+        title: isFav ? "Removed from Favorites" : "Added to Favorites",
+      });
     } catch {
       await showToast({ style: Toast.Style.Failure, title: "Failed to update favorites" });
     }
@@ -130,7 +132,7 @@ export default function Command() {
   const favoritePackages = useMemo(() => favorites.map(toTypePackage), [favorites]);
 
   const { isLoading, data, error } = useFetch<NpmSearchResponse>(
-    `${NPM_SEARCH_BASE}?text=%40types%2F${encodeURIComponent(searchText)}&size=20`,
+    `${NPM_SEARCH_BASE}?text=%40types%2F${encodeURIComponent(searchText)}&size=30`,
     {
       execute: shouldSearch,
       keepPreviousData: false,
@@ -142,6 +144,7 @@ export default function Command() {
     const seen = new Set<string>();
 
     return data.objects
+      .filter(({ package: pkg }) => pkg.name.startsWith("@types/"))
       .map(({ package: pkg }) => toTypePackage(pkg.name))
       .filter((pkg) => {
         if (seen.has(pkg.dirName)) return false;
@@ -178,7 +181,7 @@ export default function Command() {
           <List.EmptyView
             icon={Icon.MagnifyingGlass}
             title="Search @types packages"
-            description="Type at least 2 characters to search • press ⌘⇧F (macOS) or Ctrl+Shift+f (Windows) on any result to favorite"
+            description="Type at least 2 characters to search • press ⌘⇧F (macOS) or Ctrl+Shift+F (Windows) on any result to favorite"
           />
         )
       ) : (
@@ -195,7 +198,7 @@ export default function Command() {
                 accessories={[
                   {
                     icon: isFavorite ? Icon.StarCircle : Icon.Star,
-                    tooltip: "⌘⇧F (macOS) or Ctrl+Shift+f (Windows) to favorite",
+                    tooltip: "⌘⇧F (macOS) or Ctrl+Shift+F (Windows) to favorite",
                   },
                 ]}
                 actions={

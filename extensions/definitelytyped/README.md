@@ -20,7 +20,7 @@ Searches are performed live against the [npm registry](https://www.npmjs.com/) â
 
 ### Windows
 
-- `Ctrl + shift + C`: Copy install command (`npm install -D @types/...`)
+- `Ctrl + Shift + C`: Copy install command (`npm install -D @types/...`)
 - `Ctrl + Shift + F`: Add or remove package from favorites
 - `Ctrl + x`: Open package on [npmx.dev](https://npmx.dev)
 - `Ctrl + n`: Open package on [npmjs.com](https://www.npmjs.com/)

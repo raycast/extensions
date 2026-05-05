@@ -15,7 +15,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "types",
+      "name": "search-types",
       "title": "Search @Types Packages",
       "subtitle": "DefinitelyTyped",
       "description": "Find and copy install commands for TypeScript type definitions",
