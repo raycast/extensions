@@ -85,7 +85,7 @@ function buildDropdownOptions(entries: DocEntry[]) {
 function applyFilter(entries: DocEntry[], filter: string): DocEntry[] {
   if (filter === "all") return entries;
   if (filter === "stable") return entries.filter((e) => e.version !== "v1");
-  if (filter === "legacy") return entries.filter((e) => e.version !== "v2");
+  if (filter === "legacy") return entries.filter((e) => e.version === "v1");
 
   const [version, ...catParts] = filter.split(":");
   const category = catParts.join(":");
