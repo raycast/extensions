@@ -47,6 +47,9 @@ const STATUS_ORDER = [
   "CANCELLED",
 ];
 
+const PAYPAL_TERMINAL = new Set(["PAID", "CANCELLED", "REFUNDED"]);
+const LOCAL_CUSTOM = new Set(["UNPAID", "OVERDUE"]);
+
 const STATUS_COLOR: Record<string, Color> = {
   DRAFT: Color.SecondaryText,
   SENT: Color.Blue,
@@ -682,7 +685,11 @@ export default function MyInvoicesCommand() {
             record.invoiceId,
           );
           const normalized = status as InvoiceRecord["status"];
-          if (normalized !== record.status) {
+          if (
+            normalized !== record.status &&
+            (!LOCAL_CUSTOM.has(record.status) ||
+              PAYPAL_TERMINAL.has(normalized))
+          ) {
             await updateInvoiceStatus(record.invoiceId, normalized);
             setInvoices((prev) =>
               prev.map((i) =>
