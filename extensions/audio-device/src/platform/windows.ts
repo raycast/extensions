@@ -115,9 +115,10 @@ function verifyChecksum(filePath: string, expectedChecksum: string): Promise<voi
 let hasVerifiedBinaryThisSession = false;
 
 async function ensureBinary() {
-  let shouldDownload = !fs.existsSync(binary);
+  const binaryExists = fs.existsSync(binary);
+  let shouldDownload = !binaryExists;
 
-  if (fs.existsSync(binary)) {
+  if (binaryExists) {
     // Verify checksum at least once per session to catch corrupt binaries
     if (!hasVerifiedBinaryThisSession) {
       try {
