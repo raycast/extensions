@@ -4,7 +4,7 @@
   "title": "AI Translate",
   "description": "Translate selected text or screenshot OCR text with DeepSeek, Xiaomi MiMo, MiniMax, Gemini, Kimi, and OpenAI.",
   "icon": "icon.png",
-  "author": "thomas",
+  "author": "xianwei_zhang",
   "license": "MIT",
   "commands": [
     {
