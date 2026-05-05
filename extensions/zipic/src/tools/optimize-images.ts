@@ -1,11 +1,12 @@
-import { getSelectedFinderItems } from "@raycast/api";
-import { exec } from "child_process";
+import { getSelectedFinderItems, open } from "@raycast/api";
 import path from "path";
 import fs from "fs";
 import https from "https";
 import http from "http";
 import { homedir } from "os";
 import { checkZipicInstallation } from "../utils/checkInstall";
+
+const MAX_REDIRECTS = 5;
 
 type Input = {
   /**
@@ -131,7 +132,7 @@ export default async function tool({
     }
 
     // Function to download a file from URL
-    const downloadFile = async (url: string): Promise<string | null> => {
+    const downloadFile = async (url: string, redirectsLeft = MAX_REDIRECTS): Promise<string | null> => {
       return new Promise((resolve) => {
         try {
           // Create desktop directory if it doesn't exist
@@ -164,10 +165,12 @@ export default async function tool({
             .get(url, (response) => {
               // Check if redirection
               if (response.statusCode === 301 || response.statusCode === 302) {
-                if (response.headers.location) {
-                  downloadFile(response.headers.location).then(resolve);
+                if (response.headers.location && redirectsLeft > 0) {
+                  downloadFile(response.headers.location, redirectsLeft - 1).then(resolve);
                   return;
                 }
+                resolve(null);
+                return;
               }
 
               // Check for successful response
@@ -358,8 +361,7 @@ export default async function tool({
     const url = `zipic://compress?${urlParams}`;
 
     try {
-      // Execute compression command
-      exec(`open "${url}"`);
+      await open(url);
     } catch (error) {
       return {
         success: false,

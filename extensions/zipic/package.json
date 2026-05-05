@@ -57,8 +57,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.15",
-    "@raycast/utils": "^2.2.4",
-    "open": "^10.2.0"
+    "@raycast/utils": "^2.2.4"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -93,7 +92,7 @@
     }
   ],
   "ai": {
-    "instructions": "You help users compress images with the Zipic app via three tools:\n\n1. `optimize-images` \u2014 compresses images with explicit options (format, level, resize, save location, suffix, subfolder, etc.). Use this for any compression request that does NOT mention a saved preset by name.\n\n2. `compress-with-preset` \u2014 applies a saved preset by name or ID. Use ONLY when the user explicitly names a preset (e.g. 'use my Wechat preset', 'apply the AVIF preset'). Pass the preset name verbatim.\n\n3. `list-presets` \u2014 reads the user's saved Zipic presets. Use when the user asks what presets they have, or when resolving a preset they referenced indirectly.\n\nSTRICT RULES:\n- NEVER call `optimize-images` or `compress-with-preset` unless the user has EXPLICITLY asked to compress, optimize, resize, or convert images. Capability questions ('what can you do?', 'how do you work?', 'help') must be answered with text only \u2014 no tool calls that perform compression.\n- Generic compression requests (e.g. 'compress to webp', 'reduce quality') \u2192 `optimize-images`. Do NOT call `list-presets` first.\n- Presets are managed inside the Zipic app \u2014 Raycast can read them but cannot create, edit, or delete them. If the user asks to manage presets, tell them to open the Zipic app.\n- Before compressing, ensure the user has selected images in Finder or provided paths.",
+    "instructions": "You help users compress images with the Zipic app via three tools:\n\n1. `optimize-images` — compresses images with explicit options (format, level, resize, save location, suffix, subfolder, etc.). Use this for any compression request that does NOT mention a saved preset by name.\n\n2. `compress-with-preset` — applies a saved preset by name or ID. Use ONLY when the user explicitly names a preset (e.g. 'use my Wechat preset', 'apply the AVIF preset'). Pass the preset name verbatim.\n\n3. `list-presets` — reads the user's saved Zipic presets. Use when the user asks what presets they have, or when resolving a preset they referenced indirectly.\n\nSTRICT RULES:\n- NEVER call `optimize-images` or `compress-with-preset` unless the user has EXPLICITLY asked to compress, optimize, resize, or convert images. Capability questions ('what can you do?', 'how do you work?', 'help') must be answered with text only — no tool calls that perform compression.\n- Generic compression requests (e.g. 'compress to webp', 'reduce quality') → `optimize-images`. Do NOT call `list-presets` first.\n- Presets are managed inside the Zipic app — Raycast can read them but cannot create, edit, or delete them. If the user asks to manage presets, tell them to open the Zipic app.\n- Before compressing, ensure the user has selected images in Finder or provided paths.",
     "evals": [
       {
         "input": "@zipic Compress the images",
@@ -369,7 +368,7 @@
                 "name": "AVIF",
                 "isDefault": false,
                 "isFavorite": false,
-                "summary": "Level 2 \u00b7 AVIF",
+                "summary": "Level 2 · AVIF",
                 "level": 2,
                 "format": "avif"
               }
@@ -429,7 +428,7 @@
                 "name": "AVIF",
                 "isDefault": false,
                 "isFavorite": false,
-                "summary": "Level 2 \u00b7 AVIF",
+                "summary": "Level 2 · AVIF",
                 "level": 2,
                 "format": "avif"
               }

@@ -8,25 +8,11 @@ import {
   showToast,
   Toast,
   getSelectedFinderItems,
-  getPreferenceValues,
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { checkZipicInstallation } from "./utils/checkInstall";
-
-interface CompressionOptions {
-  level: string;
-  format: string;
-  location: string;
-  directory: string;
-  width: string;
-  height: string;
-  addSuffix: boolean;
-  suffix: string;
-  addSubfolder: boolean;
-  specified: boolean;
-}
 
 interface FormValues {
   level: string;
@@ -41,26 +27,25 @@ interface FormValues {
   specified: boolean;
 }
 
+const DEFAULT_FORM_VALUES: FormValues = {
+  level: "3",
+  format: "original",
+  location: "original",
+  directory: "",
+  width: "0",
+  height: "0",
+  addSuffix: false,
+  suffix: "-compressed",
+  addSubfolder: false,
+  specified: false,
+};
+
 export default function Command() {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(true);
   const [filePaths, setFilePaths] = useState<string[]>([]);
   const [isInstalled, setIsInstalled] = useState(false);
-
-  const preferences = getPreferenceValues<CompressionOptions>();
-
-  const [formValues, setFormValues] = useState<FormValues>({
-    level: preferences.level ? String(parseInt(preferences.level.toString())) : "3",
-    format: preferences.format || "original",
-    location: preferences.location || "original",
-    directory: preferences.directory || "",
-    width: preferences.width?.toString() || "0",
-    height: preferences.height?.toString() || "0",
-    addSuffix: preferences.addSuffix || false,
-    suffix: preferences.suffix || "-compressed",
-    addSubfolder: preferences.addSubfolder || false,
-    specified: preferences.specified || false,
-  });
+  const [formValues, setFormValues] = useState<FormValues>(DEFAULT_FORM_VALUES);
 
   useEffect(() => {
     async function initialize() {
