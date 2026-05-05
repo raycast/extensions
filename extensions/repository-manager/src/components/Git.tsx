@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, useNavigation } from '@raycast/api'
 import { Project } from '../project'
+import GitCommitsDetail from './GitCommitsDetail'
 import GitPullDetail from './GitPullDetail'
 import GitStatusDetail from './GitStatusDetail'
 
@@ -16,6 +17,11 @@ export default function Git({ project }: GitProps) {
             icon={Icon.WrenchScrewdriver}
             shortcut={{ modifiers: ['cmd'], key: 'g' }}
         >
+            <Action
+                title="Git Commits"
+                icon={Icon.List}
+                onAction={() => push(<GitCommitsDetail project={project} />)}
+            />
             <Action
                 title="Git Status"
                 icon={Icon.Code}

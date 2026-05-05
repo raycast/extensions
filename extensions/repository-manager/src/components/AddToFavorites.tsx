@@ -1,6 +1,6 @@
-import { Action, Icon, LocalStorage } from '@raycast/api'
+import { Action, Icon } from '@raycast/api'
 import { showSuccessToast, showErrorToast } from '../ui/toast'
-import { getFavoriteProjects } from '../helpers'
+import { getFavoriteProjects, setFavoriteProjects } from '../helpers'
 import { Project } from '../project'
 
 type AddToFavoritesProps = {
@@ -11,13 +11,8 @@ type AddToFavoritesProps = {
 export default function AddToFavorites({ project, onFavoriteChange }: AddToFavoritesProps) {
     async function addProjectToFavorites() {
         const favorites = await getFavoriteProjects()
-
-        if (favorites) {
-            const newFavorites = [...favorites, project.name].filter((value, index, self) => self.indexOf(value) === index)
-            await LocalStorage.setItem('favorites', JSON.stringify(newFavorites))
-        } else {
-            await LocalStorage.setItem('favorites', JSON.stringify([project.name]))
-        }
+        const favoritesWithoutLegacyName = favorites.filter((favorite) => favorite !== project.name)
+        await setFavoriteProjects([...favoritesWithoutLegacyName, project.fullPath])
 
         onFavoriteChange()
     }
@@ -25,10 +20,8 @@ export default function AddToFavorites({ project, onFavoriteChange }: AddToFavor
     async function removeProjectFromFavorites() {
         const favorites = await getFavoriteProjects()
 
-        if (favorites) {
-            const newFavorites = favorites.filter((value) => value !== project.name)
-            await LocalStorage.setItem('favorites', JSON.stringify(newFavorites))
-        }
+        const newFavorites = favorites.filter((value) => value !== project.fullPath && value !== project.name)
+        await setFavoriteProjects(newFavorites)
 
         onFavoriteChange()
     }

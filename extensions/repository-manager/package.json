@@ -67,7 +67,6 @@
       "type": "checkbox",
       "label": "Enable Projects Caching",
       "name": "enableProjectsCaching",
-      "title": "Enable Projects Caching",
       "description": "Enable caching of projects to avoid scanning directories every time (you can clear it by using the \"Clear Cache\" command)",
       "required": true,
       "default": true
@@ -76,9 +75,24 @@
       "type": "checkbox",
       "label": "Group projects by folder",
       "name": "enableProjectsGrouping",
-      "title": "Group projects by folder",
       "description": "Group projects by folder",
       "required": true,
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "label": "Show Recently Opened",
+      "name": "showRecentlyOpenedInList",
+      "description": "Show the top Recently Opened section in the repository list. The Recently Opened filter and item indicators remain available when this is disabled.",
+      "required": false,
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "label": "Show Git Info",
+      "name": "showGitInfoInList",
+      "description": "Display Git status, ahead/behind, upstream, and recent-open indicators in the repository list. Filters still work when this is disabled.",
+      "required": false,
       "default": true
     },
     {
@@ -118,7 +132,6 @@
       "type": "checkbox",
       "label": "Resize Editor Window After Launch",
       "name": "resizeEditorWindowAfterLaunch",
-      "title": "Resize Editor Window After Launch",
       "description": "Resize the editor window after launching a project",
       "required": false
     },

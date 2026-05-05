@@ -14,11 +14,12 @@ export default function Config({ project }: ConfigProps) {
     async function createConfig() {
         try {
             // Safely create the directory structure using fs.mkdir
-            const configDir = path.dirname(project.configPath)
+            const configDir = path.join(project.fullPath, '.raycast')
+            const configPath = path.join(configDir, 'repository-manager.json')
             await fs.mkdir(configDir, { recursive: true })
 
             const defaultConfig = getDefaultProjectConfig(project)
-            await fs.writeFile(project.configPath, JSON.stringify(defaultConfig, null, 2))
+            await fs.writeFile(configPath, JSON.stringify(defaultConfig, null, 2))
 
             clearCache()
 
@@ -32,9 +33,9 @@ export default function Config({ project }: ConfigProps) {
 
             // Check if editorApp is configured before trying to open
             if (preferences.editorApp?.path) {
-                await open(project.configPath, preferences.editorApp.path)
+                await open(configPath, preferences.editorApp.path)
             } else {
-                await open(project.configPath)
+                await open(configPath)
             }
 
             await showSuccessToast('Config file has been created')
@@ -55,6 +56,52 @@ export default function Config({ project }: ConfigProps) {
         } catch (error) {
             console.error('Failed to open config:', error)
             await showErrorToast('Failed to open config file')
+        }
+    }
+
+    async function validateConfig() {
+        try {
+            const config = JSON.parse(await fs.readFile(project.configPath, 'utf8'))
+
+            if (config.urls && typeof config.urls !== 'object') {
+                throw new Error('`urls` must be an object')
+            }
+
+            if (config.dynamicUrlElements && !Array.isArray(config.dynamicUrlElements)) {
+                throw new Error('`dynamicUrlElements` must be an array')
+            }
+
+            if (config.developmentCommand?.apps && !Array.isArray(config.developmentCommand.apps)) {
+                throw new Error('`developmentCommand.apps` must be an array')
+            }
+
+            if (config.developmentCommand?.urls && !Array.isArray(config.developmentCommand.urls)) {
+                throw new Error('`developmentCommand.urls` must be an array')
+            }
+
+            await showSuccessToast('Config file is valid')
+        } catch (error) {
+            console.error('Failed to validate config:', error)
+            const message = error instanceof Error ? error.message : 'Invalid config file'
+            await showErrorToast('Config file is invalid', message)
+        }
+    }
+
+    async function migrateLegacyConfig() {
+        try {
+            const preferredConfigPath = path.join(project.fullPath, '.raycast', 'repository-manager.json')
+
+            if (existsSync(preferredConfigPath)) {
+                await showErrorToast('Migration skipped', 'repository-manager.json already exists')
+                return
+            }
+
+            await fs.rename(project.configPath, preferredConfigPath)
+            clearCache()
+            await showSuccessToast('Config file migrated', 'Renamed to repository-manager.json')
+        } catch (error) {
+            console.error('Failed to migrate config:', error)
+            await showErrorToast('Failed to migrate config file')
         }
     }
 
@@ -103,6 +150,20 @@ export default function Config({ project }: ConfigProps) {
                 icon={Icon.Pencil}
                 onAction={editConfig}
             />
+            <Action
+                title="Validate Config"
+                key="validate-config"
+                icon={Icon.CheckCircle}
+                onAction={validateConfig}
+            />
+            {project.hasLegacyConfig && (
+                <Action
+                    title="Migrate Config Filename"
+                    key="migrate-config"
+                    icon={Icon.ArrowClockwise}
+                    onAction={migrateLegacyConfig}
+                />
+            )}
             <Action
                 title="Delete Config"
                 key="delete-config"

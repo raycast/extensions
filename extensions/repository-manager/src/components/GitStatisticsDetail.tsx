@@ -17,6 +17,7 @@ type CommitStat = {
 
 export default function GitStatisticsDetail({ project }: GitStatisticsDetailProps) {
     const { push, pop } = useNavigation()
+    const [shouldLoadCloc, setShouldLoadCloc] = useState(false)
     const [clocAvailable, setClocAvailable] = useState<boolean | null>(null)
 
     const { isLoading: isLoadingCommits, data: totalCommits } = useExec('git', ['rev-list', '--all', '--count'], { cwd: project.fullPath })
@@ -25,6 +26,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
 
     // First check if cloc is available
     const { isLoading: isCheckingCloc, error: clocCheckError } = useExec('which', ['cloc'], {
+        execute: shouldLoadCloc,
         env: {
             ...process.env,
             PATH: '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:' + (process.env.PATH || ''),
@@ -41,7 +43,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
     // Only run cloc if we confirmed it's available
     const { isLoading: isLoadingCloc, data: clocData } = useExec('cloc', ['.', '--exclude-dir=node_modules,vendor,.git,dist,build', '--git', '--exclude-ext=lock'], {
         cwd: project.fullPath,
-        execute: clocAvailable === true,
+        execute: shouldLoadCloc && clocAvailable === true,
         timeout: 30000, // 30 second timeout
         env: {
             ...process.env,
@@ -57,19 +59,23 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
 
     // Set cloc as unavailable if the version check failed
     useEffect(() => {
-        if (clocCheckError && clocAvailable !== false) {
+        if (shouldLoadCloc && clocCheckError && clocAvailable !== false) {
             setClocAvailable(false)
         }
-    }, [clocCheckError, clocAvailable])
+    }, [shouldLoadCloc, clocCheckError, clocAvailable])
 
     // Handle cloc errors
     useEffect(() => {
+        if (!shouldLoadCloc) {
+            return
+        }
+
         if (clocAvailable === false) {
             showFailureToast('Code Statistics Error', { title: 'cloc command not found' })
         } else if (clocAvailable === true && !isLoadingCloc && (!clocData || clocData.trim().length === 0)) {
             showFailureToast('Code Statistics Error', { title: 'cloc command failed to generate statistics' })
         }
-    }, [clocAvailable, isLoadingCloc, clocData])
+    }, [shouldLoadCloc, clocAvailable, isLoadingCloc, clocData])
 
     const { isLoading: isLoadingCommitsByPerson, data: commitsByPerson } = useExec('git', ['shortlog', '-s', '-n', '--all'], {
         cwd: project.fullPath,
@@ -115,7 +121,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
         },
     })
 
-    const isLoading = isLoadingCommits || isLoadingBranches || isLoadingTags || isLoadingCommitsByPerson || isCheckingCloc || (clocAvailable === true && isLoadingCloc)
+    const isLoading = isLoadingCommits || isLoadingBranches || isLoadingTags || isLoadingCommitsByPerson || (shouldLoadCloc && (isCheckingCloc || (clocAvailable === true && isLoadingCloc)))
 
     const formatClocData = (clocData: string): string => {
         const lines = clocData.trim().split('\n')
@@ -165,6 +171,10 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
     }
 
     const getClocSection = () => {
+        if (!shouldLoadCloc) {
+            return 'Code statistics are not loaded yet. Use the "Generate Code Statistics" action to run cloc for this repository.'
+        }
+
         if (isCheckingCloc) {
             return 'Checking if cloc is available...'
         }
@@ -238,6 +248,12 @@ ${getClocSection()}
             markdown={markdown}
             actions={
                 <ActionPanel>
+                    <Action
+                        title="Generate Code Statistics"
+                        icon={Icon.BarChart}
+                        shortcut={{ modifiers: ['cmd'], key: 'l' }}
+                        onAction={() => setShouldLoadCloc(true)}
+                    />
                     <Action
                         title="Close"
                         icon={Icon.XMarkCircle}

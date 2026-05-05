@@ -1,15 +1,30 @@
-import React, { useMemo } from 'react'
-import { List, Icon } from '@raycast/api'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Action, ActionPanel, List, Icon, openExtensionPreferences } from '@raycast/api'
 import { useCachedPromise } from '@raycast/utils'
-import { homedir } from 'os'
+import { existsSync } from 'fs'
 
-import { fetchPrimaryDirectories, fetchProjects, preferences } from './helpers'
+import { clearCache, fetchGitHealthForProjects, fetchPrimaryDirectories, fetchProjects, preferences, resolveUserPath } from './helpers'
 import { DirectoriesDropdown, useDirectory } from './components/DirectoriesDropdown'
 import ProjectListItem from './components/ProjectListItem'
-import { groupByDirectory, GroupedProjectList, Project, ProjectList, sortGroupedProjectsByFavorite } from './project'
+import { GitHealth, groupByDirectory, GroupedProjectList, Project, ProjectList, sortGroupedProjectsByFavorite } from './project'
+
+const GIT_HEALTH_FILTERS = new Set(['needs-attention', 'dirty', 'ahead', 'behind', 'no-upstream'])
+const GIT_HEALTH_BATCH_INTERVAL = 120
+
+function isAbortError(error: unknown): boolean {
+    return error instanceof Error && error.name === 'AbortError'
+}
+
+function getResolvedProjectsPath(): string {
+    return resolveUserPath(preferences.projectsPath)
+}
 
 export default function Command() {
     const { directory } = useDirectory()
+    const [gitHealthByPath, setGitHealthByPath] = useState<Record<string, GitHealth | null>>({})
+    const [isLoadingGitHealth, setIsLoadingGitHealth] = useState(false)
+    const pendingGitHealthByPath = useRef<Record<string, GitHealth | null>>({})
+    const gitHealthFlushTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
     const {
         data: rawProjects,
@@ -20,20 +35,128 @@ export default function Command() {
         initialData: [],
     })
 
-    const directories = useMemo(() => {
+    const isGitHealthFilterSelected = Boolean(directory && GIT_HEALTH_FILTERS.has(directory))
+    const shouldLoadGitHealth = preferences.showGitInfoInList !== false || isGitHealthFilterSelected
+
+    useEffect(() => {
+        let isMounted = true
+        const abortController = new AbortController()
+
+        const flushPendingGitHealth = () => {
+            if (!isMounted) {
+                return
+            }
+
+            const pendingGitHealth = pendingGitHealthByPath.current
+            pendingGitHealthByPath.current = {}
+            gitHealthFlushTimer.current = null
+
+            if (Object.keys(pendingGitHealth).length > 0) {
+                setGitHealthByPath((currentGitHealthByPath) => ({
+                    ...currentGitHealthByPath,
+                    ...pendingGitHealth,
+                }))
+            }
+        }
+
+        const scheduleGitHealthFlush = () => {
+            if (gitHealthFlushTimer.current) {
+                return
+            }
+
+            gitHealthFlushTimer.current = setTimeout(flushPendingGitHealth, GIT_HEALTH_BATCH_INTERVAL)
+        }
+
+        if (!rawProjects?.length || !shouldLoadGitHealth) {
+            setGitHealthByPath({})
+            setIsLoadingGitHealth(false)
+            return
+        }
+
+        setGitHealthByPath({})
+        setIsLoadingGitHealth(true)
+
+        fetchGitHealthForProjects(
+            rawProjects,
+            (fullPath, gitHealth) => {
+                if (isMounted) {
+                    pendingGitHealthByPath.current[fullPath] = gitHealth
+                    scheduleGitHealthFlush()
+                }
+            },
+            abortController.signal,
+        )
+            .then((nextGitHealthByPath) => {
+                if (isMounted) {
+                    if (gitHealthFlushTimer.current) {
+                        clearTimeout(gitHealthFlushTimer.current)
+                        gitHealthFlushTimer.current = null
+                    }
+                    pendingGitHealthByPath.current = {}
+                    setGitHealthByPath(nextGitHealthByPath)
+                }
+            })
+            .catch((error) => {
+                if (abortController.signal.aborted || isAbortError(error)) {
+                    return
+                }
+
+                console.error('Failed to fetch Git health:', error)
+                if (isMounted) {
+                    setGitHealthByPath({})
+                }
+            })
+            .finally(() => {
+                if (isMounted) {
+                    setIsLoadingGitHealth(false)
+                }
+            })
+
+        return () => {
+            isMounted = false
+            abortController.abort()
+            pendingGitHealthByPath.current = {}
+            if (gitHealthFlushTimer.current) {
+                clearTimeout(gitHealthFlushTimer.current)
+                gitHealthFlushTimer.current = null
+            }
+        }
+    }, [rawProjects, shouldLoadGitHealth])
+
+    const projects = useMemo(() => {
         if (!rawProjects?.length) return []
-        return fetchPrimaryDirectories(rawProjects)
-    }, [rawProjects])
+
+        return rawProjects.map((project) => {
+            if (!Object.prototype.hasOwnProperty.call(gitHealthByPath, project.fullPath)) {
+                return project
+            }
+
+            const projectWithGitHealth = new Project(project)
+            projectWithGitHealth.gitHealth = gitHealthByPath[project.fullPath]
+            return projectWithGitHealth
+        })
+    }, [rawProjects, gitHealthByPath])
+
+    const directories = useMemo(() => {
+        if (!projects.length) return []
+        return fetchPrimaryDirectories(projects)
+    }, [projects])
 
     const filteredProjects = useMemo(() => {
-        if (!rawProjects?.length) return []
+        if (!projects.length) return []
 
-        return rawProjects.filter((project: Project) => {
+        return projects.filter((project: Project) => {
             if (!directory || directory === 'all') return true
             if (directory === 'favorites') return project.isFavorite
+            if (directory === 'needs-attention') return Boolean(project.gitHealth?.isDirty || project.gitHealth?.ahead || project.gitHealth?.behind || project.gitHealth?.hasUpstream === false)
+            if (directory === 'dirty') return Boolean(project.gitHealth?.isDirty)
+            if (directory === 'ahead') return Boolean(project.gitHealth && project.gitHealth.ahead > 0)
+            if (directory === 'behind') return Boolean(project.gitHealth && project.gitHealth.behind > 0)
+            if (directory === 'no-upstream') return project.gitHealth?.hasUpstream === false
+            if (directory === 'recent') return Boolean(project.lastOpenedAt)
             return project.primaryDirectory.name === directory
         })
-    }, [rawProjects, directory])
+    }, [projects, directory])
 
     const processedProjects = useMemo(() => {
         if (!filteredProjects.length) return null
@@ -43,15 +166,23 @@ export default function Command() {
         if (projectsGroupingEnabled) {
             const grouped = groupByDirectory(filteredProjects)
 
-            // When "all" is selected, create a special "Favorites" group at the top
+            // When "all" is selected, create special groups at the top
             if (!directory || directory === 'all') {
+                const shouldShowRecentlyOpenedSection = preferences.showRecentlyOpenedInList !== false
+                const recentProjects = shouldShowRecentlyOpenedSection
+                    ? filteredProjects
+                          .filter((project) => project.lastOpenedAt)
+                          .sort((a, b) => new Date(b.lastOpenedAt || 0).getTime() - new Date(a.lastOpenedAt || 0).getTime())
+                          .slice(0, 8)
+                    : []
+                const recentProjectPaths = new Set(recentProjects.map((project) => project.fullPath))
                 const favoritesFromAllGroups: Project[] = []
                 const groupsWithoutFavorites: GroupedProjectList = {}
 
                 // Extract favorites from all groups
                 Object.entries(grouped).forEach(([dirName, projects]) => {
-                    const favorites = projects.filter((p) => p.isFavorite)
-                    const nonFavorites = projects.filter((p) => !p.isFavorite)
+                    const favorites = projects.filter((p) => p.isFavorite && !recentProjectPaths.has(p.fullPath))
+                    const nonFavorites = projects.filter((p) => !p.isFavorite && !recentProjectPaths.has(p.fullPath))
 
                     favoritesFromAllGroups.push(...favorites)
 
@@ -62,6 +193,10 @@ export default function Command() {
 
                 // Create the final grouped structure
                 const result: GroupedProjectList = {}
+
+                if (recentProjects.length > 0) {
+                    result['Recently Opened'] = recentProjects
+                }
 
                 // Add Favorites group first if there are any favorites
                 if (favoritesFromAllGroups.length > 0) {
@@ -82,6 +217,10 @@ export default function Command() {
         }
 
         return [...filteredProjects].sort((a, b) => {
+            if (directory === 'recent') {
+                return new Date(b.lastOpenedAt || 0).getTime() - new Date(a.lastOpenedAt || 0).getTime()
+            }
+
             if (a.isFavorite === b.isFavorite) {
                 return a.name.localeCompare(b.name)
             }
@@ -90,21 +229,101 @@ export default function Command() {
     }, [filteredProjects, directory])
 
     const isGrouped = preferences.enableProjectsGrouping
-    const showEmptyView = !isLoadingProjects && (!processedProjects || (Array.isArray(processedProjects) && processedProjects.length === 0))
+    const isLoading = isLoadingProjects || (isGitHealthFilterSelected && isLoadingGitHealth)
+    const showEmptyView = !isLoading && (!processedProjects || (Array.isArray(processedProjects) && processedProjects.length === 0))
+    const emptyViewTitle = useMemo(() => {
+        if (isLoadingProjects) {
+            return 'Scanning repositories...'
+        }
+
+        if (!rawProjects?.length) {
+            return `No projects found in ${preferences.projectsPath}`
+        }
+
+        if (isGitHealthFilterSelected) {
+            return 'No repositories match this health filter'
+        }
+
+        if (directory === 'favorites') {
+            return 'No favorite repositories yet'
+        }
+
+        if (directory === 'recent') {
+            return 'No recently opened repositories yet'
+        }
+
+        return 'No repositories match this filter'
+    }, [directory, isGitHealthFilterSelected, isLoadingProjects, rawProjects?.length])
+
+    const emptyViewDescription = useMemo(() => {
+        if (isGitHealthFilterSelected && !isLoadingGitHealth) {
+            return 'Try another health filter or refresh Git status.'
+        }
+
+        if (!rawProjects?.length) {
+            return 'Check your projects path in preferences or refresh after creating a repository.'
+        }
+
+        return undefined
+    }, [isGitHealthFilterSelected, isLoadingGitHealth, rawProjects?.length])
 
     const handleFavoriteChange = () => {
         revalidate()
     }
 
+    const handleClearCache = () => {
+        clearCache(false)
+        revalidate()
+    }
+
+    const resolvedProjectsPath = getResolvedProjectsPath()
+    const projectsPathExists = existsSync(resolvedProjectsPath)
+
+    const listActionItems = (
+        <React.Fragment>
+            <Action
+                title="Refresh Repositories"
+                icon={Icon.ArrowClockwise}
+                shortcut={{ modifiers: ['cmd'], key: 'r' }}
+                onAction={revalidate}
+            />
+            {projectsPathExists && (
+                <Action.ShowInFinder
+                    title="Reveal Projects Folder"
+                    path={resolvedProjectsPath}
+                />
+            )}
+            <Action
+                title="Open Extension Preferences"
+                icon={Icon.Gear}
+                shortcut={{ modifiers: ['cmd'], key: ',' }}
+                onAction={openExtensionPreferences}
+            />
+            {preferences.enableProjectsCaching && (
+                <Action
+                    title="Clear Cache"
+                    icon={Icon.Trash}
+                    shortcut={{ modifiers: ['cmd', 'shift'], key: 'delete' }}
+                    onAction={handleClearCache}
+                />
+            )}
+        </React.Fragment>
+    )
+
+    const listActions = <ActionPanel>{listActionItems}</ActionPanel>
+
     return (
         <List
-            isLoading={isLoadingProjects || !processedProjects}
+            isLoading={isLoading}
             searchBarAccessory={directories.length > 0 ? <DirectoriesDropdown directories={directories} /> : undefined}
+            actions={listActions}
         >
             {showEmptyView && (
                 <List.EmptyView
                     icon={Icon.MagnifyingGlass}
-                    title={`No project found in directory ${preferences.projectsPath.replace(homedir(), '~')}`}
+                    title={emptyViewTitle}
+                    description={emptyViewDescription}
+                    actions={listActions}
                 />
             )}
             {processedProjects && isGrouped
@@ -120,6 +339,7 @@ export default function Command() {
                                   project={project}
                                   directories={directories}
                                   onFavoriteChange={handleFavoriteChange}
+                                  listActions={listActionItems}
                               />
                           ))}
                       </List.Section>
@@ -130,6 +350,7 @@ export default function Command() {
                           project={project}
                           directories={directories}
                           onFavoriteChange={handleFavoriteChange}
+                          listActions={listActionItems}
                       />
                   ))}
         </List>

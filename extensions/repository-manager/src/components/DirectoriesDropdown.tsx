@@ -17,6 +17,39 @@ export function useDirectory() {
     return { directory, setDirectory }
 }
 
+const healthFilters = [
+    {
+        title: 'Needs Attention',
+        value: 'needs-attention',
+        icon: { source: Icon.ExclamationMark, tintColor: Color.Red },
+    },
+    {
+        title: 'Dirty',
+        value: 'dirty',
+        icon: { source: Icon.Pencil, tintColor: Color.Orange },
+    },
+    {
+        title: 'Ahead',
+        value: 'ahead',
+        icon: { source: Icon.ArrowUp, tintColor: Color.Green },
+    },
+    {
+        title: 'Behind',
+        value: 'behind',
+        icon: { source: Icon.ArrowDown, tintColor: Color.Red },
+    },
+    {
+        title: 'No Upstream',
+        value: 'no-upstream',
+        icon: { source: Icon.Link, tintColor: Color.SecondaryText },
+    },
+    {
+        title: 'Recently Opened',
+        value: 'recent',
+        icon: Icon.Clock,
+    },
+]
+
 export const DirectoriesDropdown = React.memo(({ directories }: DirectoriesDropdownProps) => {
     const { directory, setDirectory } = useDirectory()
 
@@ -42,6 +75,16 @@ export const DirectoriesDropdown = React.memo(({ directories }: DirectoriesDropd
                         tintColor: Color.Yellow,
                     }}
                 />
+            </List.Dropdown.Section>
+            <List.Dropdown.Section title="Health">
+                {healthFilters.map((filter) => (
+                    <List.Dropdown.Item
+                        key={filter.value}
+                        title={filter.title}
+                        value={filter.value}
+                        icon={filter.icon}
+                    />
+                ))}
             </List.Dropdown.Section>
             <List.Dropdown.Section>
                 {directories.map((dir: Directory, index: number) => (
