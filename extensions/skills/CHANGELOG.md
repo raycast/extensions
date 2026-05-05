@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Add Newly Supported Agents] - {PR_MERGE_DATE}
+## [Add Newly Supported Agents] - 2026-05-05
 
 - Add 11 agents supported by the Skills CLI: AiderDesk, Code Studio, CodeArts Agent, Codemaker, Devin for Terminal, Dexto, ForgeCode, IBM Bob, Rovo Dev, Tabnine CLI, and Universal
 
