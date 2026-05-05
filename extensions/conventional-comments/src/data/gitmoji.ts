@@ -1,5 +1,5 @@
-// Raycast's build pipeline supports this ESM package, but `tsc` in this legacy
-// CommonJS setup reports an interop error for the import.
+// Raycast's build pipeline supports this ESM package, but `tsc` reports an interop
+// error for this ESM-only package even with Node16 module resolution.
 // @ts-expect-error ESM-only package consumed by Raycast bundler
 import { types } from "@jeromefitz/conventional-gitmoji";
 
