@@ -48,11 +48,21 @@ export default function Command() {
       setState({ status: "ready", audio, isRefreshing: false });
       void cacheAudioDeviceState(audio);
     } catch (error) {
-      if (error instanceof AudioDevicesBackendMissingError) {
-        setState({ status: "missing-backend" });
-      } else {
-        setState({ status: "error", error: error instanceof Error ? error : new Error(String(error)) });
+      const nextState = getErrorState(error);
+
+      if (preserveReadyState) {
+        setState((previousState) =>
+          previousState.status === "ready" ? { ...previousState, isRefreshing: false } : nextState,
+        );
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Could not refresh audio devices",
+          message: getErrorMessage(error),
+        });
+        return;
       }
+
+      setState(nextState);
     }
   }
 
@@ -212,6 +222,18 @@ export default function Command() {
       toast.message = error instanceof Error ? error.message : String(error);
     }
   }
+}
+
+function getErrorState(error: unknown): ViewState {
+  if (error instanceof AudioDevicesBackendMissingError) {
+    return { status: "missing-backend" };
+  }
+
+  return { status: "error", error: error instanceof Error ? error : new Error(String(error)) };
+}
+
+function getErrorMessage(error: unknown) {
+  return error instanceof Error ? error.message : String(error);
 }
 
 async function getCachedAudioDeviceState(): Promise<AudioDeviceState | undefined> {
