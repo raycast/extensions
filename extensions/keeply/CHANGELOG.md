@@ -1,4 +1,4 @@
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-05-05
 
 ### Added
 
