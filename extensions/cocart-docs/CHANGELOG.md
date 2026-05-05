@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-05-05
 
 - **Search CoCart Docs** — Full-text search across 120+ pages of CoCart API documentation with inline detail preview
 - **Browse API Endpoints** — Browse endpoints by version (v2/v1) and category (Cart, Products, Sessions, Store, User, JWT, Plugins)
