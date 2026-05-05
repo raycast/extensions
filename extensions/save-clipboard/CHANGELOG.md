@@ -1,6 +1,6 @@
 # Save Clipboard As Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-05
 
 - Save images, files, text, and HTML content from your clipboard to disk
 - Automatic file type detection via magic bytes (JPG, PNG, GIF, BMP, TIFF, WebP)
