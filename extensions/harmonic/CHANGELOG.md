@@ -1,6 +1,6 @@
 # Harmonic Changelog
 
-## [Harmonic] - {PR_MERGE_DATE}
+## [Harmonic] - 2026-05-05
 
 - Search for notes by name (e.g. "A flat", "C#", "Bb")
 - View frequencies across all octaves (0-8) with MIDI numbers
