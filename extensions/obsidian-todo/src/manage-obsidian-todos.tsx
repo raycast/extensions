@@ -19,7 +19,6 @@ import {
   addTodo,
   buildObsidianOpenUrl,
   deleteTodo,
-  ExtensionPreferences,
   loadTodoNote,
   resolveTodoNotePath,
   setTodoCompleted,
@@ -29,7 +28,7 @@ import {
 } from "./lib/todo-note";
 
 export default function Command() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const resolvedNotePath = resolveTodoNotePath(preferences);
   const [note, setNote] = useState<TodoNote | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -354,7 +353,7 @@ function TodoForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextArea
+      <Form.TextField
         id="text"
         title="Todo"
         placeholder="Buy groceries"

@@ -4,13 +4,6 @@ import { basename, dirname, extname, isAbsolute, join } from "path";
 
 export type NewTodoPlacement = "append" | "prepend";
 
-export interface ExtensionPreferences {
-  vaultPath: string;
-  todoNotePath: string;
-  createNoteIfMissing: boolean;
-  newTodoPlacement: NewTodoPlacement;
-}
-
 export interface TodoItem {
   id: string;
   lineIndex: number;
@@ -28,7 +21,7 @@ export interface TodoNote {
 
 const TASK_PATTERN = /^(\s*)([-*])\s+\[([ xX])\]\s+(.*)$/;
 
-export function resolveTodoNotePath(preferences: ExtensionPreferences): string {
+export function resolveTodoNotePath(preferences: Preferences): string {
   if (isAbsolute(preferences.todoNotePath)) {
     return preferences.todoNotePath;
   }
@@ -40,7 +33,7 @@ export function buildObsidianOpenUrl(notePath: string): string {
   return `obsidian://open?path=${encodeURIComponent(notePath)}`;
 }
 
-export async function loadTodoNote(preferences: ExtensionPreferences): Promise<TodoNote> {
+export async function loadTodoNote(preferences: Preferences): Promise<TodoNote> {
   const notePath = resolveTodoNotePath(preferences);
   await ensureTodoNoteExists(notePath, preferences.createNoteIfMissing);
 
@@ -59,7 +52,7 @@ export async function loadTodoNote(preferences: ExtensionPreferences): Promise<T
   };
 }
 
-export async function addTodo(preferences: ExtensionPreferences, text: string): Promise<void> {
+export async function addTodo(preferences: Preferences, text: string): Promise<void> {
   const note = await loadTodoNote(preferences);
   const lines = [...note.lines];
   const newLine = buildTaskLine(text);
@@ -70,28 +63,27 @@ export async function addTodo(preferences: ExtensionPreferences, text: string): 
 }
 
 export async function setTodoCompleted(
-  preferences: ExtensionPreferences,
+  preferences: Preferences,
   todo: TodoItem,
   completed: boolean
 ): Promise<void> {
   const note = await loadTodoNote(preferences);
-  note.lines[todo.lineIndex] = buildTaskLine(todo.text, completed, todo.indent, todo.bullet);
+  const lineIndex = resolveTodoLineIndex(note.lines, todo);
+  note.lines[lineIndex] = buildTaskLine(todo.text, completed, todo.indent, todo.bullet);
   await saveTodoNote(note.notePath, note.lines);
 }
 
-export async function updateTodoText(
-  preferences: ExtensionPreferences,
-  todo: TodoItem,
-  text: string
-): Promise<void> {
+export async function updateTodoText(preferences: Preferences, todo: TodoItem, text: string): Promise<void> {
   const note = await loadTodoNote(preferences);
-  note.lines[todo.lineIndex] = buildTaskLine(text, todo.completed, todo.indent, todo.bullet);
+  const lineIndex = resolveTodoLineIndex(note.lines, todo);
+  note.lines[lineIndex] = buildTaskLine(text, todo.completed, todo.indent, todo.bullet);
   await saveTodoNote(note.notePath, note.lines);
 }
 
-export async function deleteTodo(preferences: ExtensionPreferences, todo: TodoItem): Promise<void> {
+export async function deleteTodo(preferences: Preferences, todo: TodoItem): Promise<void> {
   const note = await loadTodoNote(preferences);
-  note.lines.splice(todo.lineIndex, 1);
+  const lineIndex = resolveTodoLineIndex(note.lines, todo);
+  note.lines.splice(lineIndex, 1);
   await saveTodoNote(note.notePath, note.lines);
 }
 
@@ -140,6 +132,33 @@ function parseTodos(lines: string[]): TodoItem[] {
 
 function buildTaskLine(text: string, completed = false, indent = 0, bullet: "-" | "*" = "-"): string {
   return `${" ".repeat(indent)}${bullet} [${completed ? "x" : " "}] ${text.trim()}`;
+}
+
+function resolveTodoLineIndex(lines: string[], todo: TodoItem): number {
+  const expectedLine = buildTaskLine(todo.text, todo.completed, todo.indent, todo.bullet);
+
+  if (lines[todo.lineIndex] === expectedLine) {
+    return todo.lineIndex;
+  }
+
+  const exactMatchIndex = lines.indexOf(expectedLine);
+  if (exactMatchIndex >= 0) {
+    return exactMatchIndex;
+  }
+
+  const matchingTodos = parseTodos(lines).filter(
+    (candidate) => candidate.text === todo.text && candidate.indent === todo.indent && candidate.bullet === todo.bullet
+  );
+
+  if (matchingTodos.length === 1) {
+    return matchingTodos[0].lineIndex;
+  }
+
+  if (matchingTodos.length === 0) {
+    throw new Error("The todo no longer matches the note contents. Reload the note and try again.");
+  }
+
+  throw new Error("The todo appears more than once in the note. Reload the note and try again.");
 }
 
 function getPrependInsertIndex(lines: string[]): number {
