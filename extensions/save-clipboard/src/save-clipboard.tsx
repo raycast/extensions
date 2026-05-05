@@ -57,7 +57,7 @@ interface ClipboardState {
 }
 
 function getDefaultDirectory(): string {
-  const prefs = getPreferenceValues<{ defaultDirectory?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   return prefs.defaultDirectory || path.join(os.homedir(), "Downloads");
 }
 
