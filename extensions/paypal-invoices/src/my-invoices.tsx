@@ -44,6 +44,7 @@ const STATUS_ORDER = [
   "UNPAID",
   "OVERDUE",
   "PAID",
+  "REFUNDED",
   "CANCELLED",
 ];
 
@@ -56,6 +57,7 @@ const STATUS_COLOR: Record<string, Color> = {
   UNPAID: Color.Orange,
   OVERDUE: Color.Red,
   PAID: Color.Green,
+  REFUNDED: Color.Purple,
   CANCELLED: Color.SecondaryText,
 };
 
@@ -65,6 +67,7 @@ const STATUS_ICON: Record<string, Icon> = {
   UNPAID: Icon.Clock,
   OVERDUE: Icon.ExclamationMark,
   PAID: Icon.Checkmark,
+  REFUNDED: Icon.ArrowCounterClockwise,
   CANCELLED: Icon.XMarkCircle,
 };
 
@@ -677,7 +680,10 @@ export default function MyInvoicesCommand() {
       setIsLoading(false);
 
       const toRefresh = records.filter(
-        (r) => r.status !== "PAID" && r.status !== "CANCELLED",
+        (r) =>
+          r.status !== "PAID" &&
+          r.status !== "CANCELLED" &&
+          r.status !== "REFUNDED",
       );
       for (const record of toRefresh) {
         try {

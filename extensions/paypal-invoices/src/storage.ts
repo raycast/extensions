@@ -8,7 +8,14 @@ export interface InvoiceRecord {
   total: number;
   createdAt: string;
   dueDate?: string;
-  status: "DRAFT" | "SENT" | "PAID" | "CANCELLED" | "OVERDUE" | "UNPAID";
+  status:
+    | "DRAFT"
+    | "SENT"
+    | "PAID"
+    | "CANCELLED"
+    | "OVERDUE"
+    | "UNPAID"
+    | "REFUNDED";
   payerViewUrl?: string;
   invoicerViewUrl: string;
 }
