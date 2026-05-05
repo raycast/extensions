@@ -87,7 +87,10 @@ export function buildCompressURL(filePaths: string[], preset: ZipicPreset): stri
   params.append("width", String(opt.resizing.width));
   params.append("height", String(opt.resizing.height));
 
-  return `zipic://compress?${params.toString()}`;
+  // Zipic parses query items via Swift's URLComponents which does not
+  // decode `+` back to space. URLSearchParams encodes spaces as `+`, so
+  // swap them to `%20` before handing the URL to Zipic.
+  return `zipic://compress?${params.toString().replace(/\+/g, "%20")}`;
 }
 
 export function describePreset(preset: ZipicPreset): string {

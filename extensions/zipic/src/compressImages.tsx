@@ -19,7 +19,10 @@ export default async function main() {
     for (const path of filePaths) {
       params.append("url", path);
     }
-    await open(`zipic://compress?${params.toString()}`);
+    // Zipic parses query items via Swift's URLComponents which does not
+    // decode `+` back to space. URLSearchParams encodes spaces as `+`, so
+    // swap them to `%20` before handing the URL to Zipic.
+    await open(`zipic://compress?${params.toString().replace(/\+/g, "%20")}`);
 
     await showHUD(`Compressing ${filePaths.length} item(s) with Zipic`);
   } catch (e) {
