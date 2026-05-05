@@ -5,10 +5,23 @@
   "description": "Download videos from X/Twitter with ease",
   "icon": "icon.png",
   "author": "kaanrkaraman",
-  "categories": ["Media", "Fun", "Web"],
+  "categories": [
+    "Media",
+    "Fun",
+    "Web"
+  ],
   "license": "MIT",
-  "platforms": ["macOS"],
-  "keywords": ["twitter", "x", "video", "download", "tweet"],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "keywords": [
+    "twitter",
+    "x",
+    "video",
+    "download",
+    "tweet"
+  ],
   "commands": [
     {
       "name": "index",
@@ -61,17 +74,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.3",
-    "axios": "^1.8.4"
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4",
+    "axios": "^1.16.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
-    "@types/node": "^22.14.1",
-    "@types/react": "^19.1.2",
-    "eslint": "^9.24.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",

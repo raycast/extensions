@@ -68,16 +68,18 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Index 
           return;
         }
         const targets = prefs.downloadAllMedia ? videos : videos.slice(0, 1);
+        const filenameTemplate = prefs.filenameTemplate || "{username}_{tweetId}";
+        const templateHasIndex = filenameTemplate.includes("{index}");
         const written: string[] = [];
 
         for (let i = 0; i < targets.length; i++) {
-          const filename = formatFilename(prefs.filenameTemplate || "{username}_{tweetId}", {
+          const filename = formatFilename(filenameTemplate, {
             username: parsed.username,
             tweetId: parsed.tweetId,
             index: i + 1,
             date: todayIso(),
           });
-          const suffix = targets.length > 1 ? `_${i + 1}` : "";
+          const suffix = targets.length > 1 && !templateHasIndex ? `_${i + 1}` : "";
           const destination = ensureUniquePath(resolve(downloadFolder, `${filename}${suffix}.mp4`));
 
           toast.title = targets.length > 1 ? `Downloading ${i + 1}/${targets.length}…` : "Downloading…";
