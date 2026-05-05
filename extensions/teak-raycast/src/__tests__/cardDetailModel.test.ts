@@ -9,6 +9,7 @@ import {
 } from "../lib/cardDetailModel";
 
 const baseCard: RaycastCard = {
+  appUrl: "https://app.teakvault.com/?card=card_123456",
   id: "card_123456",
   type: "link",
   content: "Line one\nLine two",
@@ -41,7 +42,7 @@ describe("card detail model", () => {
       id: "card_abcdef",
       type: "text",
     };
-    expect(getCardTitle(fallbackCard)).toBe("TEXT Card • abcdef");
+    expect(getCardTitle(fallbackCard)).toBe("TEXT Card");
   });
 
   test("chooses hero media with deterministic global priority", () => {
@@ -83,8 +84,8 @@ describe("card detail model", () => {
     expect(getDetailStatusChips(baseCard)).toEqual([
       { kind: "type", text: "link" },
       { kind: "favorite", text: "Favorited" },
-      { kind: "aiSummary", text: "AI Summary" },
-      { kind: "aiTags", text: "AI Tags" },
+      { kind: "aiSummary", text: "Teak Summary" },
+      { kind: "aiTags", text: "Teak Tags" },
     ]);
 
     expect(

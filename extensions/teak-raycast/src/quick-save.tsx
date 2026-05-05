@@ -1,13 +1,15 @@
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Form,
   Icon,
+  open,
   showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { MissingApiKeyDetail } from "./components/MissingApiKeyDetail";
 import { SetApiKeyAction } from "./components/SetApiKeyAction";
 import {
@@ -21,6 +23,29 @@ type FormValues = {
   content: string;
 };
 
+const addSuccessActions = (
+  toast: Toast,
+  result: Awaited<ReturnType<typeof quickSaveCard>>,
+) => {
+  if (result.appUrl) {
+    toast.primaryAction = {
+      onAction: () => {
+        void open(result.appUrl!);
+      },
+      title: "Open Card",
+    };
+  }
+
+  if (result.card?.url) {
+    toast.secondaryAction = {
+      onAction: () => {
+        void open(result.card!.url!);
+      },
+      title: "Open Source URL",
+    };
+  }
+};
+
 export default function QuickSaveCommand() {
   const [content, setContent] = useState("");
   const [isSaving, setIsSaving] = useState(false);
@@ -28,13 +53,34 @@ export default function QuickSaveCommand() {
   const { apiKey } = getPreferences();
   const hasApiKey = Boolean(apiKey?.trim());
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadClipboardText = async () => {
+      try {
+        const clipboardText = await Clipboard.readText();
+        if (isMounted && !content.trim() && clipboardText?.trim()) {
+          setContent(clipboardText.trim());
+        }
+      } catch {
+        // Ignore clipboard prefill failures and keep the form usable.
+      }
+    };
+
+    void loadClipboardText();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const handleSubmit = async (values: FormValues) => {
     const trimmed = values.content.trim();
     if (!trimmed) {
       await showToast({
+        message: "Enter text or a URL before saving.",
         style: Toast.Style.Failure,
         title: "Nothing to save",
-        message: "Enter text or a URL before saving.",
       });
       return;
     }
@@ -46,15 +92,14 @@ export default function QuickSaveCommand() {
     });
 
     try {
-      const result = await quickSaveCard(trimmed);
-      if (result.status === "duplicate") {
-        toast.style = Toast.Style.Success;
-        toast.title = "Already saved";
-        toast.message = "This URL already exists in your Teak vault.";
-      } else {
-        toast.style = Toast.Style.Success;
-        toast.title = "Saved to Teak";
-      }
+      const result = await quickSaveCard({
+        content: trimmed,
+        source: "raycast_quick_save",
+      });
+      addSuccessActions(toast, result);
+      toast.style = Toast.Style.Success;
+      toast.title = "Saved to Teak";
+
       await showHUD("Teak capture complete");
       setContent("");
     } catch (error) {

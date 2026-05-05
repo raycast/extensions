@@ -11,11 +11,14 @@ import {
   parseCardsResponse,
   parseQuickSaveResponse,
   parseRaycastCard,
+  parseTagsResponse,
   type QuickSaveResponse,
   type RaycastCard,
+  type TagsResponse,
 } from "./apiParsers";
 import { getApiBaseUrl } from "./constants";
 import { getPreferences } from "./preferences";
+import type { RaycastCardType, RaycastSort } from "./searchFilters";
 
 export {
   buildCardsSearchParams,
@@ -26,6 +29,33 @@ export {
 } from "./apiErrors";
 
 export type { RaycastCard } from "./apiParsers";
+export type { TagSummary, TagsResponse } from "./apiParsers";
+
+export type CardSearchInput = {
+  createdAfter?: number;
+  createdBefore?: number;
+  favorited?: boolean;
+  limit?: number;
+  query?: string;
+  sort?: RaycastSort;
+  tag?: string;
+  type?: RaycastCardType;
+};
+
+export type CreateCardInput = {
+  content?: string;
+  notes?: string | null;
+  source?: string;
+  tags?: string[];
+  url?: string;
+};
+
+export type UpdateCardInput = {
+  content?: string;
+  notes?: string | null;
+  tags?: string[];
+  url?: string;
+};
 
 const getErrorCodeFromResponse = (
   payloadCode: string | undefined,
@@ -63,11 +93,21 @@ const getRequestTimeoutMs = (): number => {
 };
 
 const withLoopbackFallback = (url: string): string => {
-  if (!url.includes("localhost")) {
+  let parsedUrl: URL;
+
+  try {
+    parsedUrl = new URL(url);
+  } catch {
     return url;
   }
 
-  return url.replace("localhost", "127.0.0.1");
+  const hostname = parsedUrl.hostname.toLowerCase();
+  if (hostname !== "localhost" && !hostname.endsWith(".localhost")) {
+    return url;
+  }
+
+  parsedUrl.hostname = "127.0.0.1";
+  return parsedUrl.toString();
 };
 
 const parseJson = async (response: Response): Promise<unknown> => {
@@ -118,7 +158,6 @@ export const request = async <T>(
       } catch {
         throw new RaycastApiError("NETWORK_ERROR");
       }
-      // Continue with normal response parsing/error mapping below.
     } else {
       throw new RaycastApiError("NETWORK_ERROR");
     }
@@ -140,21 +179,35 @@ export const request = async <T>(
   );
 };
 
-export const quickSaveCard = async (
-  content: string,
+export const createCard = async (
+  input: CreateCardInput,
 ): Promise<QuickSaveResponse> => {
   return request<QuickSaveResponse>("/cards", parseQuickSaveResponse, {
+    body: JSON.stringify(input),
     method: "POST",
-    body: JSON.stringify({ content }),
   });
 };
 
+export const quickSaveCard = async (
+  input: string | CreateCardInput,
+): Promise<QuickSaveResponse> => {
+  return createCard(
+    typeof input === "string"
+      ? {
+          content: input,
+        }
+      : input,
+  );
+};
+
 export const searchCards = async (
-  query: string,
-  limit = DEFAULT_LIMIT,
+  input: CardSearchInput = {},
 ): Promise<CardsResponse> => {
   return request<CardsResponse>(
-    `/cards/search?${buildCardsSearchParams(query, limit)}`,
+    `/cards/search?${buildCardsSearchParams({
+      ...input,
+      limit: input.limit ?? DEFAULT_LIMIT,
+    })}`,
     parseCardsResponse,
     {
       method: "GET",
@@ -163,14 +216,50 @@ export const searchCards = async (
 };
 
 export const getFavoriteCards = async (
-  query: string,
-  limit = DEFAULT_LIMIT,
+  input: CardSearchInput = {},
 ): Promise<CardsResponse> => {
   return request<CardsResponse>(
-    `/cards/favorites?${buildCardsSearchParams(query, limit)}`,
+    `/cards/favorites?${buildCardsSearchParams({
+      ...input,
+      limit: input.limit ?? DEFAULT_LIMIT,
+    })}`,
     parseCardsResponse,
     {
       method: "GET",
+    },
+  );
+};
+
+export const getCardById = async (cardId: string): Promise<RaycastCard> => {
+  const normalizedCardId = cardId.trim();
+  if (!normalizedCardId) {
+    throw new RaycastApiError("INVALID_INPUT");
+  }
+
+  return request(
+    `/cards/${encodeURIComponent(normalizedCardId)}`,
+    parseRaycastCard,
+    {
+      method: "GET",
+    },
+  );
+};
+
+export const updateCard = async (
+  cardId: string,
+  input: UpdateCardInput,
+): Promise<RaycastCard> => {
+  const normalizedCardId = cardId.trim();
+  if (!normalizedCardId) {
+    throw new RaycastApiError("INVALID_INPUT");
+  }
+
+  return request(
+    `/cards/${encodeURIComponent(normalizedCardId)}`,
+    parseRaycastCard,
+    {
+      body: JSON.stringify(input),
+      method: "PATCH",
     },
   );
 };
@@ -188,8 +277,8 @@ export const setCardFavorite = async (
     `/cards/${encodeURIComponent(normalizedCardId)}/favorite`,
     parseRaycastCard,
     {
-      method: "PATCH",
       body: JSON.stringify({ isFavorited }),
+      method: "PATCH",
     },
   );
 };
@@ -207,4 +296,10 @@ export const softDeleteCard = async (cardId: string): Promise<void> => {
       method: "DELETE",
     },
   );
+};
+
+export const listTags = async (): Promise<TagsResponse> => {
+  return request<TagsResponse>("/tags", parseTagsResponse, {
+    method: "GET",
+  });
 };

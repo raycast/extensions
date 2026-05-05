@@ -3,20 +3,28 @@ import { parseCardsResponse } from "../lib/apiParsers";
 
 const getPreferenceValuesMock = mock(() => ({ apiKey: "valid-test-key" }));
 
-mock.module("@raycast/api", () => ({
-  environment: { isDevelopment: false },
-  getPreferenceValues: getPreferenceValuesMock,
-}));
+const mockRaycastApi = (isDevelopment: boolean) => {
+  mock.module("@raycast/api", () => ({
+    environment: { isDevelopment },
+    getPreferenceValues: getPreferenceValuesMock,
+  }));
+};
+
+mockRaycastApi(false);
 
 const {
+  createCard,
+  getCardById,
   RaycastApiError,
   request,
   searchCards,
   setCardFavorite,
   softDeleteCard,
+  updateCard,
 } = await import("../lib/api");
 
 const sampleCard = {
+  appUrl: "https://app.teakvault.com/?card=card_123",
   id: "card_123",
   type: "link",
   content: "https://teakvault.com",
@@ -68,6 +76,7 @@ afterEach(() => {
   getPreferenceValuesMock.mockImplementation(() => ({
     apiKey: "valid-test-key",
   }));
+  mockRaycastApi(false);
 });
 
 describe("raycast request handling", () => {
@@ -101,7 +110,7 @@ describe("raycast request handling", () => {
     }) as unknown as typeof fetch;
 
     try {
-      await searchCards("", 1);
+      await searchCards({ limit: 1 });
       expect.unreachable();
     } catch (error) {
       expect(error).toBeInstanceOf(RaycastApiError);
@@ -109,6 +118,34 @@ describe("raycast request handling", () => {
         "NETWORK_ERROR",
       );
     }
+  });
+
+  test("retries development requests against a valid loopback URL", async () => {
+    mockRaycastApi(true);
+    const { searchCards: searchCardsInDev } = await import(
+      `../lib/api?dev-fallback=${crypto.randomUUID()}`
+    );
+    const capturedUrls: string[] = [];
+
+    globalThis.fetch = mock((input: RequestInfo | URL) => {
+      capturedUrls.push(String(input));
+      throw new Error("Connection failed");
+    }) as unknown as typeof fetch;
+
+    try {
+      await searchCardsInDev({ limit: 1 });
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toBeInstanceOf(RaycastApiError);
+      expect((error as InstanceType<typeof RaycastApiError>).code).toBe(
+        "NETWORK_ERROR",
+      );
+    }
+
+    expect(capturedUrls).toEqual([
+      "http://api.teak.localhost:1355/v1/cards/search?limit=1",
+      "http://127.0.0.1:1355/v1/cards/search?limit=1",
+    ]);
   });
 
   test("maps timed out requests to NETWORK_ERROR", async () => {
@@ -123,7 +160,7 @@ describe("raycast request handling", () => {
     }) as unknown as typeof fetch;
 
     try {
-      await searchCards("", 1);
+      await searchCards({ limit: 1 });
       expect.unreachable();
     } catch (error) {
       expect(error).toBeInstanceOf(RaycastApiError);
@@ -139,7 +176,7 @@ describe("raycast request handling", () => {
     ) as unknown as typeof fetch;
 
     try {
-      await searchCards("", 1);
+      await searchCards({ limit: 1 });
       expect.unreachable();
     } catch (error) {
       expect(error).toBeInstanceOf(RaycastApiError);
@@ -155,7 +192,7 @@ describe("raycast request handling", () => {
     ) as unknown as typeof fetch;
 
     try {
-      await searchCards("", 1);
+      await searchCards({ limit: 1 });
       expect.unreachable();
     } catch (error) {
       expect(error).toBeInstanceOf(RaycastApiError);
@@ -171,7 +208,7 @@ describe("raycast request handling", () => {
     ) as unknown as typeof fetch;
 
     try {
-      await searchCards("", 1);
+      await searchCards({ limit: 1 });
       expect.unreachable();
     } catch (error) {
       expect(error).toBeInstanceOf(RaycastApiError);
@@ -224,13 +261,88 @@ describe("raycast request handling", () => {
     expect(capturedMethod).toBe("DELETE");
   });
 
+  test("createCard posts structured bookmark payloads", async () => {
+    let capturedBody: unknown = null;
+
+    globalThis.fetch = mock(
+      async (_input: RequestInfo | URL, init?: RequestInit) => {
+        capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
+        return createCardsResponse(200, {
+          appUrl: sampleCard.appUrl,
+          card: sampleCard,
+          cardId: sampleCard.id,
+          status: "created",
+        });
+      },
+    ) as unknown as typeof fetch;
+
+    const result = await createCard({
+      content: "Teak",
+      source: "raycast_test",
+      tags: ["design"],
+      url: "https://teakvault.com",
+    });
+
+    expect(capturedBody).toEqual({
+      content: "Teak",
+      source: "raycast_test",
+      tags: ["design"],
+      url: "https://teakvault.com",
+    });
+    expect(result.card?.id).toBe("card_123");
+  });
+
+  test("getCardById sends a GET request to the card endpoint", async () => {
+    let capturedMethod: string | null = null;
+
+    globalThis.fetch = mock(
+      async (_input: RequestInfo | URL, init?: RequestInit) => {
+        capturedMethod = init?.method ?? null;
+        return createCardsResponse(200, sampleCard);
+      },
+    ) as unknown as typeof fetch;
+
+    const result = await getCardById("card_123");
+
+    expect(capturedMethod).toBe("GET");
+    expect(result.id).toBe("card_123");
+  });
+
+  test("updateCard patches the card endpoint", async () => {
+    let capturedBody: unknown = null;
+    let capturedMethod: string | null = null;
+
+    globalThis.fetch = mock(
+      async (_input: RequestInfo | URL, init?: RequestInit) => {
+        capturedMethod = init?.method ?? null;
+        capturedBody = init?.body ? JSON.parse(String(init.body)) : null;
+        return createCardsResponse(200, {
+          ...sampleCard,
+          notes: "Updated note",
+        });
+      },
+    ) as unknown as typeof fetch;
+
+    const result = await updateCard("card_123", {
+      notes: "Updated note",
+      tags: ["design"],
+    });
+
+    expect(capturedMethod).toBe("PATCH");
+    expect(capturedBody).toEqual({
+      notes: "Updated note",
+      tags: ["design"],
+    });
+    expect(result.notes).toBe("Updated note");
+  });
+
   test("fails fast when API key is missing", async () => {
     const fetchMock = mock(async () => createCardsResponse());
     globalThis.fetch = fetchMock as unknown as typeof fetch;
     getPreferenceValuesMock.mockImplementation(() => ({ apiKey: "   " }));
 
     try {
-      await searchCards("", 1);
+      await searchCards({ limit: 1 });
       expect.unreachable();
     } catch (error) {
       expect(error).toBeInstanceOf(RaycastApiError);

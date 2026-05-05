@@ -3,6 +3,7 @@ import { RaycastApiError } from "../lib/apiErrors";
 import { parseCardsResponse, parseQuickSaveResponse } from "../lib/apiParsers";
 
 const sampleCard = {
+  appUrl: "https://app.teakvault.com/?card=card_123",
   id: "card_123",
   type: "link",
   content: "https://teakvault.com",
@@ -44,17 +45,22 @@ describe("raycast api response parsing", () => {
 
   test("parses a valid quick-save response", () => {
     const result = parseQuickSaveResponse({
+      appUrl: "https://app.teakvault.com/?card=card_123",
+      card: sampleCard,
       status: "created",
       cardId: "card_123",
     });
 
     expect(result.status).toBe("created");
     expect(result.cardId).toBe("card_123");
+    expect(result.card?.id).toBe("card_123");
   });
 
   test("rejects quick-save response with unknown status", () => {
     expect(() => {
       parseQuickSaveResponse({
+        appUrl: "https://app.teakvault.com/?card=card_123",
+        card: sampleCard,
         status: "saved",
         cardId: "card_123",
       });

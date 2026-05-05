@@ -3,7 +3,6 @@ import {
   ActionPanel,
   Detail,
   Icon,
-  open,
   showToast,
   Toast,
   useNavigation,
@@ -18,13 +17,15 @@ import {
   softDeleteCard,
 } from "../lib/api";
 import {
+  getCardDomain,
   getCardTitle,
   getDetailStatusChips,
   getHeroMediaUrl,
   getOpenableUrl,
+  getTeakUrl,
 } from "../lib/cardDetailModel";
-import { TEAK_APP_URL } from "../lib/constants";
 import { formatDateTime } from "../lib/dateFormat";
+import { EditCardForm } from "./EditCardForm";
 import { SetApiKeyAction } from "./SetApiKeyAction";
 
 const FAVORITE_MUTATION_DEBOUNCE_MS = 300;
@@ -267,6 +268,7 @@ export function CardDetail({
   }, []);
 
   const openableUrl = getOpenableUrl(cardState);
+  const domain = getCardDomain(cardState);
   const metadataUrl = cardState.url
     ? truncateMiddle(cardState.url, MAX_METADATA_URL_LENGTH)
     : undefined;
@@ -315,6 +317,14 @@ export function CardDetail({
             shortcut={{ modifiers: ["cmd"], key: "f" }}
             title={cardState.isFavorited ? "Remove Favorite" : "Add Favorite"}
           />
+          <Action.Push
+            icon={Icon.Pencil}
+            shortcut={{ modifiers: ["cmd"], key: "e" }}
+            target={
+              <EditCardForm card={cardState} onCardUpdated={emitCardUpdate} />
+            }
+            title="Edit Tags & Notes"
+          />
           <Action
             icon={Icon.Trash}
             onAction={() => {
@@ -338,11 +348,10 @@ export function CardDetail({
               title="Copy URL"
             />
           ) : null}
-          <Action
-            icon={Icon.House}
-            onAction={() => open(TEAK_APP_URL)}
+          <Action.OpenInBrowser
             shortcut={{ modifiers: ["cmd"], key: "o" }}
-            title="Open Teak App"
+            title="Open in Teak"
+            url={getTeakUrl(cardState)}
           />
           <SetApiKeyAction />
         </ActionPanel>
@@ -363,6 +372,10 @@ export function CardDetail({
             />
           ) : null}
           {cardState.url ? <Detail.Metadata.Separator /> : null}
+          {domain ? (
+            <Detail.Metadata.Label text={domain} title="Domain" />
+          ) : null}
+          {domain ? <Detail.Metadata.Separator /> : null}
           <Detail.Metadata.TagList title="Status">
             {statusChips.map((chip) => (
               <Detail.Metadata.TagList.Item
