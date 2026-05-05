@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-05-05
 
 - Initial release
 - Ask Hermes: Quick question and answer
