@@ -1,6 +1,6 @@
 # ShareX Changelog
 
-## [Feature] - {PR_MERGE_DATE}
+## [Feature] - 2026-05-05
 - Add OCR, Screen Color Picker, Image Splitter and Image effects commands.
 
 ## [Feature] - 2026-04-12
