@@ -368,15 +368,15 @@ export default function Command() {
 
       if (shouldMerge) {
         const mergeConfirm = await confirmAlert({
-          title: "Merge or Replace?",
+          title: "Merge Imported Rules?",
           message: `Found ${parsed.rules.length} rules in config. You have ${rules.length} existing rules.`,
           primaryAction: {
             title: "Merge (Keep Both)",
             style: Alert.ActionStyle.Default,
           },
           dismissAction: {
-            title: "Replace (Delete Existing)",
-            style: Alert.ActionStyle.Destructive,
+            title: "Cancel",
+            style: Alert.ActionStyle.Cancel,
           },
         });
 
@@ -385,6 +385,20 @@ export default function Command() {
           await persistAndSync(mergedRules);
           message = `Merged ${parsed.rules.length} rules`;
         } else {
+          const replaceConfirm = await confirmAlert({
+            title: "Replace Existing Rules?",
+            message: `This will delete ${rules.length} existing rule(s).`,
+            primaryAction: {
+              title: "Replace",
+              style: Alert.ActionStyle.Destructive,
+            },
+            dismissAction: {
+              title: "Cancel",
+              style: Alert.ActionStyle.Cancel,
+            },
+          });
+          if (!replaceConfirm) return;
+
           await persistAndSync(parsed.rules);
           message = `Imported ${parsed.rules.length} rules`;
         }

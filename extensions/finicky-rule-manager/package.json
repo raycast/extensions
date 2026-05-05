@@ -6,8 +6,7 @@
   "icon": "extension-icon.png",
   "author": "NormC",
   "platforms": [
-    "macOS",
-    "Windows"
+    "macOS"
   ],
   "categories": [
     "Applications",
