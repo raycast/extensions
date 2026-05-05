@@ -1,6 +1,6 @@
 # Blip Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-05-05
 
 - Fix triggering Blip from Finder Services on localized macOS systems.
 
