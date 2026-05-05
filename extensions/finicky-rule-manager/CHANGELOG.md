@@ -1,6 +1,6 @@
 # Finicky Rule Manager Changelog
 
-## [Require Config Path Preference] - {PR_MERGE_DATE}
+## [Require Config Path Preference] - 2026-05-05
 
 - Make the Finicky config path a required preference with a default of `~/.finicky.js`
 
