@@ -58,14 +58,17 @@ export function getGramCliPath(build: GramBuild = gramBuild): string | null {
 
 export async function closeGramWindow(windowTitle: string, build: GramBuild = gramBuild): Promise<boolean> {
   const { processName } = BuildMetadata[build];
-  const escapedTitle = windowTitle.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  const escapedTitle = windowTitle
+    .split('"')
+    .map((part) => JSON.stringify(part))
+    .join(" & quote & ");
 
   const script = `
       tell application "System Events"
         tell process "${processName}"
-          set targetWindow to first window whose name contains "${escapedTitle}"
+          set targetWindow to first window whose name contains (${escapedTitle})
           if exists targetWindow then
-            click (first button of targetWindow whose description is "close button")
+            click button 1 of targetWindow
             return "true"
           end if
           return "false"
