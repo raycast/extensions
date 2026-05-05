@@ -1,0 +1,78 @@
+{
+  "name": "obsidian-todo",
+  "title": "Obsidian Todo",
+  "description": "Add and manage markdown todos in your Obsidian ToDo note from Raycast.",
+  "icon": "icon.png",
+  "author": "williebsweet",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "keywords": ["obsidian", "todo", "tasks", "markdown", "notes"],
+  "commands": [
+    {
+      "name": "manage-obsidian-todos",
+      "title": "Manage Obsidian Todos",
+      "subtitle": "Obsidian",
+      "description": "Add, edit, complete, and delete todos in your Obsidian ToDo note.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "vaultPath",
+      "title": "Obsidian Vault Folder",
+      "description": "The root folder of your Obsidian vault.",
+      "type": "directory",
+      "required": true
+    },
+    {
+      "name": "todoNotePath",
+      "title": "ToDo Note Path",
+      "description": "Path to your todo note inside the vault. Relative paths are resolved from the vault root.",
+      "type": "textfield",
+      "placeholder": "ToDo.md",
+      "default": "ToDo.md",
+      "required": true
+    },
+    {
+      "name": "createNoteIfMissing",
+      "title": "Missing Note",
+      "description": "Automatically create the todo note if it does not exist yet.",
+      "type": "checkbox",
+      "label": "Create the note automatically",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "newTodoPlacement",
+      "title": "New Todo Placement",
+      "description": "Choose where new todos should be inserted in the note.",
+      "type": "dropdown",
+      "default": "append",
+      "required": true,
+      "data": [
+        {
+          "title": "Append to the end",
+          "value": "append"
+        },
+        {
+          "title": "Prepend near the top",
+          "value": "prepend"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  }
+}
