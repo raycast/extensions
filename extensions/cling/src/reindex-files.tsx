@@ -1,32 +1,7 @@
 import { Action, ActionPanel, Detail, LaunchProps, showHUD, popToRoot, Icon } from "@raycast/api";
 import { execFile, ChildProcess } from "child_process";
-import { promisify } from "util";
 import { useEffect, useRef, useState } from "react";
-
-const execFileP = promisify(execFile);
-
-const FALLBACK_CLI = "/Applications/Cling.app/Contents/SharedSupport/ClingCLI";
-
-let cachedCLI: string | null = null;
-
-async function resolveClingCLI(): Promise<string> {
-  if (cachedCLI) return cachedCLI;
-  try {
-    const { stdout } = await execFileP("/bin/ps", ["-Axo", "comm="]);
-    const line = stdout.split("\n").find((l) => l.includes("/Cling.app/Contents/MacOS/"));
-    if (line) {
-      const marker = "/Cling.app";
-      const end = line.indexOf(marker) + marker.length;
-      const bundle = line.slice(0, end);
-      cachedCLI = `${bundle}/Contents/SharedSupport/ClingCLI`;
-      return cachedCLI;
-    }
-  } catch {
-    // fall through to fallback
-  }
-  cachedCLI = FALLBACK_CLI;
-  return cachedCLI;
-}
+import { clingInstalled, NOT_INSTALLED_MARKDOWN, resolveClingCLI } from "./cling";
 
 type ClingScope = {
   name: string;
@@ -130,6 +105,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Reinde
   const isAll = !scope;
   const label = isAll ? "all scopes" : scope;
 
+  const [installed] = useState(() => clingInstalled());
   const [body, setBody] = useState("_Starting reindex..._");
   const [header, setHeader] = useState<string | null>(null);
   const [finished, setFinished] = useState(false);
@@ -137,7 +113,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Reinde
   const pollTimer = useRef<NodeJS.Timeout | null>(null);
   const cancelled = useRef(false);
   const finishedRef = useRef(false);
-  const cliPath = useRef<string>(FALLBACK_CLI);
+  const cliPath = useRef<string>(resolveClingCLI());
 
   const stopPolling = () => {
     if (pollTimer.current) {
@@ -163,37 +139,31 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Reinde
   };
 
   useEffect(() => {
-    let cancelledEffect = false;
+    if (!installed) return;
 
-    (async () => {
-      cliPath.current = await resolveClingCLI();
-      if (cancelledEffect) return;
+    const args = ["reindex", "--wait"];
+    if (!isAll) {
+      args.push("--scope", scope);
+    }
 
-      const args = ["reindex", "--wait"];
-      if (!isAll) {
-        args.push("--scope", scope);
+    const child = execFile(cliPath.current, args, (error) => {
+      stopPolling();
+      finishedRef.current = true;
+      setFinished(true);
+      if (cancelled.current) {
+        setHeader(`### Reindex cancelled (${label})`);
+      } else if (error) {
+        setHeader(`### Reindex failed (${label})\n\n\`\`\`\n${error.message}\n\`\`\``);
+      } else {
+        setHeader(`### Reindex complete (${label})`);
       }
+    });
+    reindexProc.current = child;
 
-      const child = execFile(cliPath.current, args, (error) => {
-        stopPolling();
-        finishedRef.current = true;
-        setFinished(true);
-        if (cancelled.current) {
-          setHeader(`### Reindex cancelled (${label})`);
-        } else if (error) {
-          setHeader(`### Reindex failed (${label})\n\n\`\`\`\n${error.message}\n\`\`\``);
-        } else {
-          setHeader(`### Reindex complete (${label})`);
-        }
-      });
-      reindexProc.current = child;
-
-      pollStatus();
-      pollTimer.current = setInterval(pollStatus, 2000);
-    })();
+    pollStatus();
+    pollTimer.current = setInterval(pollStatus, 2000);
 
     return () => {
-      cancelledEffect = true;
       stopPolling();
     };
   }, []);
@@ -213,6 +183,10 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Reinde
     await showHUD(`Cling: Cancelling reindex (${label})...`);
     await popToRoot();
   };
+
+  if (!installed) {
+    return <Detail markdown={NOT_INSTALLED_MARKDOWN} />;
+  }
 
   const footer = finished
     ? ""

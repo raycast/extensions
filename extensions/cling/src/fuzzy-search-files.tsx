@@ -1,11 +1,12 @@
 import {
   Action,
   ActionPanel,
+  Application,
   Detail,
   Icon,
   LaunchProps,
   List,
-  getPreferenceValues,
+  getFrontmostApplication,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -13,78 +14,24 @@ import { useExec } from "@raycast/utils";
 import { basename, dirname, extname } from "path";
 import { execFileSync } from "child_process";
 import { homedir } from "os";
-import { useCallback, useState, useMemo } from "react";
-import { closeSync, existsSync, openSync, readSync, readdirSync, statSync } from "fs";
+import { useCallback, useEffect, useState, useMemo } from "react";
+import { closeSync, openSync, readSync, readdirSync, statSync } from "fs";
+import {
+  AppRef,
+  clingInstalled,
+  getClingDefault,
+  getEditorApp,
+  getShelfApp,
+  getTerminalApp,
+  NOT_INSTALLED_MARKDOWN,
+  resolveClingCLI,
+} from "./cling";
 
-const CLING = "/Applications/Cling.app/Contents/SharedSupport/ClingCLI";
 const HOME = homedir();
-
-const SHELF_BUNDLE_IDS = [
-  "at.EternalStorms.Yoink",
-  "at.EternalStorms.Yoink-setapp",
-  "me.damir.dropover-mac",
-  "com.hachipoo.Dockside",
-];
-
-function detectShelfApp(): string | undefined {
-  for (const bundleID of SHELF_BUNDLE_IDS) {
-    try {
-      const result = execFileSync("mdfind", [`kMDItemCFBundleIdentifier == '${bundleID}'`], {
-        encoding: "utf-8",
-      }).trim();
-      if (result) return result.split("\n")[0];
-    } catch {
-      continue;
-    }
-  }
-  return undefined;
-}
-
-function getShelfApp(): string | undefined {
-  const prefs = getPreferenceValues<Preferences>();
-  if (prefs.shelfApp?.path) return prefs.shelfApp.path;
-
-  const clingShelf = getClingDefault("shelfApp");
-  if (clingShelf) return clingShelf;
-
-  return detectShelfApp();
-}
-
-function getClingDefault(key: string): string | undefined {
-  try {
-    return execFileSync("defaults", ["read", "com.lowtechguys.Cling", key], { encoding: "utf-8" }).trim();
-  } catch {
-    return undefined;
-  }
-}
-
 const COPY_WITH_TILDE = getClingDefault("copyPathsWithTilde") !== "0";
 
 function copyablePath(filePath: string): string {
   return COPY_WITH_TILDE ? tildify(filePath) : filePath;
-}
-
-function getTerminalApp(): string {
-  const prefs = getPreferenceValues<Preferences>();
-  return prefs.terminalApp?.path ?? getClingDefault("terminalApp") ?? "Terminal";
-}
-
-const VSCODE_PATHS = [
-  "/Applications/Visual Studio Code.app",
-  "/Applications/Visual Studio Code - Insiders.app",
-  `${HOME}/Applications/Visual Studio Code.app`,
-  `${HOME}/Applications/Visual Studio Code - Insiders.app`,
-];
-
-function getEditorApp(): string {
-  const prefs = getPreferenceValues<Preferences>();
-  if (prefs.editorApp?.path) return prefs.editorApp.path;
-
-  const clingEditor = getClingDefault("editorApp");
-  if (clingEditor) return clingEditor;
-
-  const vscode = VSCODE_PATHS.find((p) => existsSync(p));
-  return vscode ?? "TextEdit";
 }
 const MAX_PREVIEW_BYTES = 20_000;
 const MAX_PREVIEW_LINES = 80;
@@ -290,23 +237,43 @@ function FileDetail({ filePath, isDir }: { filePath: string; isDir: boolean }) {
   );
 }
 
+type AppPaths = {
+  terminal: AppRef;
+  editor: AppRef;
+  shelf: AppRef | undefined;
+  frontmost: Application | undefined;
+};
+
+function appIcon(app: { path: string | undefined }, fallback: Icon) {
+  return app.path ? { fileIcon: app.path } : fallback;
+}
+
+function appTarget(app: AppRef): string {
+  return app.path ?? app.name;
+}
+
+function samePath(a: string | undefined, b: string | undefined): boolean {
+  return !!a && !!b && a.replace(/\/+$/, "") === b.replace(/\/+$/, "");
+}
+
 function FileActions({
   filePath,
   isDir,
   name,
   searchText,
   onRemove,
+  apps,
+  cli,
 }: {
   filePath: string;
   isDir: boolean;
   name: string;
   searchText: string;
   onRemove: (path: string) => void;
+  apps: AppPaths;
+  cli: string;
 }) {
   const terminalDir = isDir ? filePath : dirname(filePath);
-  const terminal = getTerminalApp();
-  const editor = getEditorApp();
-  const shelf = getShelfApp();
   return (
     <ActionPanel>
       <ActionPanel.Section>
@@ -339,34 +306,43 @@ function FileActions({
         />
       </ActionPanel.Section>
 
-      <ActionPanel.Section title="Open In">
+      <ActionPanel.Section title="Apps">
         <Action.Open
-          title="Open in Terminal"
-          icon={Icon.Terminal}
+          title={`Open in ${apps.terminal.name}`}
+          icon={appIcon(apps.terminal, Icon.Terminal)}
           target={terminalDir}
-          application={terminal}
+          application={appTarget(apps.terminal)}
           shortcut={{ modifiers: ["cmd"], key: "t" }}
         />
         <Action.Open
-          title="Open in Editor"
-          icon={Icon.Code}
+          title={apps.editor.path ? `Edit with ${apps.editor.name}` : "Open in Editor"}
+          icon={appIcon(apps.editor, Icon.Code)}
           target={filePath}
-          application={editor}
+          application={appTarget(apps.editor)}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
         />
-      </ActionPanel.Section>
-
-      {shelf && (
-        <ActionPanel.Section title="Shelf">
+        {apps.shelf && (
           <Action.Open
-            title="Shelve File"
-            icon={Icon.Tray}
+            title={`Shelve in ${apps.shelf.name}`}
+            icon={appIcon(apps.shelf, Icon.Tray)}
             target={filePath}
-            application={shelf}
+            application={appTarget(apps.shelf)}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
-        </ActionPanel.Section>
-      )}
+        )}
+        {apps.frontmost &&
+          !samePath(apps.frontmost.path, apps.editor.path) &&
+          !samePath(apps.frontmost.path, apps.terminal.path) &&
+          !samePath(apps.frontmost.path, apps.shelf?.path) && (
+            <Action.Open
+              title={`Open in ${apps.frontmost.name}`}
+              icon={{ fileIcon: apps.frontmost.path }}
+              target={filePath}
+              application={apps.frontmost}
+              shortcut={{ modifiers: ["cmd", "opt"], key: "return" }}
+            />
+          )}
+      </ActionPanel.Section>
 
       <ActionPanel.Section title="Other">
         {searchText && (
@@ -385,7 +361,7 @@ function FileActions({
           shortcut={{ modifiers: ["cmd", "shift"], key: "x" }}
           onAction={async () => {
             try {
-              execFileSync(CLING, ["index", "remove", filePath]);
+              execFileSync(cli, ["index", "remove", filePath]);
               onRemove(filePath);
               await showToast({ style: Toast.Style.Success, title: "Excluded from index", message: name });
             } catch {
@@ -404,13 +380,24 @@ function FileActions({
 }
 
 export default function Command(props: LaunchProps) {
+  const installed = useMemo(() => clingInstalled(), []);
+  const cli = useMemo(() => resolveClingCLI(), []);
+  const baseApps = useMemo(() => ({ terminal: getTerminalApp(), editor: getEditorApp(), shelf: getShelfApp() }), []);
+  const [frontmost, setFrontmost] = useState<Application | undefined>();
+  useEffect(() => {
+    getFrontmostApplication()
+      .then(setFrontmost)
+      .catch(() => {});
+  }, []);
+  const apps = useMemo<AppPaths>(() => ({ ...baseApps, frontmost }), [baseApps, frontmost]);
+
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
   const [hidden, setHidden] = useState<Set<string>>(new Set());
 
   const { isLoading, data } = useExec(
-    CLING,
+    cli,
     searchText.length > 0 ? ["search", searchText, "--count", "50"] : ["recents", "--count", "50"],
-    { keepPreviousData: true },
+    { keepPreviousData: true, execute: installed },
   );
 
   const results = useMemo(() => {
@@ -429,6 +416,10 @@ export default function Command(props: LaunchProps) {
   const onRemove = useCallback((path: string) => {
     setHidden((prev) => new Set(prev).add(path));
   }, []);
+
+  if (!installed) {
+    return <Detail markdown={NOT_INSTALLED_MARKDOWN} />;
+  }
 
   return (
     <List
@@ -449,7 +440,15 @@ export default function Command(props: LaunchProps) {
           accessories={isDir ? [{ icon: Icon.Folder, tooltip: "Directory" }] : []}
           quickLook={{ path: filePath }}
           actions={
-            <FileActions filePath={filePath} isDir={isDir} name={name} searchText={searchText} onRemove={onRemove} />
+            <FileActions
+              filePath={filePath}
+              isDir={isDir}
+              name={name}
+              searchText={searchText}
+              onRemove={onRemove}
+              apps={apps}
+              cli={cli}
+            />
           }
         />
       ))}
