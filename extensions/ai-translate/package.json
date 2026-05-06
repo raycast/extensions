@@ -108,8 +108,7 @@
         { "title": "Local macOS Vision", "value": "local" },
         { "title": "Tesseract Local", "value": "tesseract" },
         { "title": "Baidu OCR API", "value": "baidu" },
-        { "title": "PaddleOCR HTTP", "value": "paddle" },
-        { "title": "MinerU Agent API", "value": "mineru" }
+        { "title": "PaddleOCR HTTP", "value": "paddle" }
       ]
     },
     {
@@ -137,7 +136,7 @@
       "name": "ocrTimeoutSeconds",
       "type": "textfield",
       "required": false,
-      "description": "Timeout for API OCR requests and MinerU polling.",
+      "description": "Timeout for API OCR requests.",
       "default": "20"
     },
     {
@@ -207,39 +206,6 @@
       "required": false,
       "description": "Optional bearer token for your PaddleOCR HTTP service.",
       "default": ""
-    },
-    {
-      "title": "MinerU Base URL",
-      "name": "mineruBaseURL",
-      "type": "textfield",
-      "required": false,
-      "description": "MinerU Agent API base URL.",
-      "default": "https://mineru.net/api/v1/agent"
-    },
-    {
-      "title": "MinerU Language",
-      "name": "mineruLanguage",
-      "type": "textfield",
-      "required": false,
-      "description": "MinerU language parameter, for example ch or en.",
-      "default": "ch"
-    },
-    {
-      "title": "MinerU Options",
-      "name": "mineruEnableTable",
-      "type": "checkbox",
-      "label": "Enable table recognition",
-      "required": false,
-      "description": "Useful for document screenshots; slower than plain text OCR.",
-      "default": false
-    },
-    {
-      "name": "mineruEnableFormula",
-      "type": "checkbox",
-      "label": "Enable formula recognition",
-      "required": false,
-      "description": "Useful for academic PDFs/screenshots; slower than plain text OCR.",
-      "default": false
     },
     {
       "title": "Provider Switches",

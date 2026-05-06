@@ -24,25 +24,6 @@ interface BaiduOCRResponse {
   error_msg?: string;
 }
 
-interface MinerUCreateResponse {
-  code?: number;
-  msg?: string;
-  data?: {
-    task_id?: string;
-    file_url?: string;
-  };
-}
-
-interface MinerUPollResponse {
-  code?: number;
-  msg?: string;
-  data?: {
-    state?: string;
-    markdown_url?: string;
-    err_msg?: string;
-  };
-}
-
 export async function recognizeScreenshotText(preferences: ExtensionPreferences): Promise<string | undefined> {
   const imagePath = await captureScreenshotToFile();
   if (!imagePath) {
@@ -94,8 +75,6 @@ async function recognizeImageWithEngine(
       return recognizeWithBaidu(imagePath, preferences);
     case "paddle":
       return recognizeWithPaddle(imagePath, preferences);
-    case "mineru":
-      return recognizeWithMinerU(imagePath, preferences);
   }
 }
 
@@ -219,53 +198,6 @@ async function recognizeWithPaddle(imagePath: string, preferences: ExtensionPref
   return text;
 }
 
-async function recognizeWithMinerU(imagePath: string, preferences: ExtensionPreferences): Promise<string> {
-  const baseURL = (preferences.mineruBaseURL?.trim() || "https://mineru.net/api/v1/agent").replace(/\/+$/, "");
-  const timeoutMs = getOCRTimeoutMs(preferences);
-  const fileName = `screenshot-${Date.now()}.png`;
-  const createResponse = await postJson<MinerUCreateResponse>(
-    `${baseURL}/parse/file`,
-    {
-      file_name: fileName,
-      language: preferences.mineruLanguage?.trim() || "ch",
-      enable_table: Boolean(preferences.mineruEnableTable),
-      is_ocr: true,
-      enable_formula: Boolean(preferences.mineruEnableFormula),
-    },
-    timeoutMs,
-  );
-
-  if (createResponse.code !== 0 || !createResponse.data?.task_id || !createResponse.data?.file_url) {
-    throw new Error(createResponse.msg ?? "MinerU failed to create parse task.");
-  }
-
-  await putBinary(createResponse.data.file_url, await readFile(imagePath), timeoutMs);
-
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    await delay(1200);
-    const pollResponse = await fetchJson<MinerUPollResponse>(
-      `${baseURL}/parse/${encodeURIComponent(createResponse.data.task_id)}`,
-      Math.max(deadline - Date.now(), 1000),
-    );
-
-    const state = pollResponse.data?.state;
-    if (state === "done") {
-      const markdownURL = pollResponse.data?.markdown_url;
-      if (!markdownURL) {
-        throw new Error("MinerU task finished without markdown_url.");
-      }
-      return cleanupMarkdown(await fetchText(markdownURL, Math.max(deadline - Date.now(), 1000)));
-    }
-
-    if (state === "failed" || state === "error") {
-      throw new Error(pollResponse.data?.err_msg ?? pollResponse.msg ?? "MinerU OCR task failed.");
-    }
-  }
-
-  throw new Error("MinerU OCR timed out.");
-}
-
 async function postJson<T>(
   url: string,
   body: unknown,
@@ -287,29 +219,6 @@ async function postForm<T>(url: string, body: URLSearchParams, timeoutMs: number
     body,
   });
   return parseJSONResponse<T>(response);
-}
-
-async function putBinary(url: string, body: Buffer, timeoutMs: number): Promise<void> {
-  const arrayBuffer = body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength) as ArrayBuffer;
-  const response = await fetchWithTimeout(url, timeoutMs, {
-    method: "PUT",
-    body: arrayBuffer,
-  });
-  if (!response.ok) {
-    throw new Error(`Upload failed with HTTP ${response.status}.`);
-  }
-}
-
-async function fetchJson<T>(url: string, timeoutMs: number): Promise<T> {
-  return parseJSONResponse<T>(await fetchWithTimeout(url, timeoutMs));
-}
-
-async function fetchText(url: string, timeoutMs: number): Promise<string> {
-  const response = await fetchWithTimeout(url, timeoutMs);
-  if (!response.ok) {
-    throw new Error(`HTTP ${response.status}: ${await response.text()}`);
-  }
-  return response.text();
 }
 
 async function fetchWithTimeout(url: string, timeoutMs: number, init?: RequestInit): Promise<Response> {
@@ -378,13 +287,6 @@ function normalizeTextValue(value: unknown): string[] {
   return [];
 }
 
-function cleanupMarkdown(markdown: string): string {
-  return markdown
-    .replace(/!\[[^\]]*]\([^)]+\)/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
-}
-
 function formatOCRText(text: string, preferences: ExtensionPreferences): string {
   const trimmed = text.trim();
   if (preferences.ocrTextLayout === "compact") {
@@ -413,10 +315,6 @@ function getOCRTimeoutMs(preferences: ExtensionPreferences): number {
     return 20_000;
   }
   return Math.min(Math.max(seconds, 5), 180) * 1000;
-}
-
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function hashText(text: string): string {

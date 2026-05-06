@@ -38,8 +38,6 @@ function ocrEngineTitle(engine: string): string {
       return "Baidu OCR";
     case "paddle":
       return "PaddleOCR HTTP";
-    case "mineru":
-      return "MinerU Agent";
     default:
       return engine;
   }

@@ -4,7 +4,7 @@ export type ProviderId = (typeof PROVIDER_IDS)[number];
 
 export type TranslationStyle = "balanced" | "faithful" | "polished" | "academic";
 
-export type OCREngine = "local" | "tesseract" | "baidu" | "paddle" | "mineru";
+export type OCREngine = "local" | "tesseract" | "baidu" | "paddle";
 
 export type OCRTextLayout = "formatted" | "compact";
 
@@ -26,10 +26,6 @@ export interface ExtensionPreferences {
   baiduOcrLanguageType?: string;
   paddleOcrEndpoint?: string;
   paddleOcrAPIKey?: string;
-  mineruBaseURL?: string;
-  mineruLanguage?: string;
-  mineruEnableTable?: boolean;
-  mineruEnableFormula?: boolean;
   enableDeepSeek?: boolean;
   enableMiMo?: boolean;
   enableMiniMax?: boolean;
