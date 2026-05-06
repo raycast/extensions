@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
-import { useFrecencySorting } from "@raycast/utils";
+
 import {
   DbSession,
   OpenSession,
@@ -93,11 +93,9 @@ function SessionActivity({ session }: { session: DbSession }) {
 export function SessionListItem({
   session,
   liveness,
-  onResume,
 }: {
   session: DbSession;
   liveness: OpenSession["liveness"] | undefined;
-  onResume?: () => void;
 }) {
   const accessories: List.Item.Accessory[] = [];
   const tag = livenessTag(liveness);
@@ -116,10 +114,7 @@ export function SessionListItem({
           <Action
             title="Resume in Terminal"
             icon={Icon.Terminal}
-            onAction={() => {
-              onResume?.();
-              resumeSession(session.directory, session.id, liveness !== undefined);
-            }}
+            onAction={() => resumeSession(session.directory, session.id, liveness !== undefined)}
           />
           <Action.Push title="View Activity" icon={Icon.Eye} target={<SessionActivity session={session} />} />
           <Action.CopyToClipboard
@@ -146,22 +141,19 @@ export default function SearchSessions() {
   const { data: rawOpen } = useOpenSessions();
   const openSessions: OpenSession[] = Array.isArray(rawOpen) ? rawOpen : [];
 
-  // Frecency sorting — sessions you resume often bubble to the top
-  const { data: frecencySorted, visitItem } = useFrecencySorting(recentSessions, {
-    key: (s) => s.id,
-    sortUnvisited: (a, b) => {
-      // Among unvisited: active/open first, then by recency
-      const aLive = getLiveness(openSessions, a.id);
-      const bLive = getLiveness(openSessions, b.id);
-      const livenessOrder = (l: typeof aLive) => (l === "active" ? 0 : l === "open" ? 1 : 2);
-      const diff = livenessOrder(aLive) - livenessOrder(bLive);
-      return diff !== 0 ? diff : b.timeUpdated - a.timeUpdated;
-    },
-  });
-
   const isSearching = searchText.length >= 3;
   const isLoading = isSearching ? searchLoading : recentLoading;
-  const sessions = isSearching ? searchResults : frecencySorted;
+
+  // Recent sessions with active/open ones first
+  const sessions = isSearching
+    ? searchResults
+    : [...recentSessions].sort((a, b) => {
+        const aLive = getLiveness(openSessions, a.id);
+        const bLive = getLiveness(openSessions, b.id);
+        const livenessOrder = (l: typeof aLive) => (l === "active" ? 0 : l === "open" ? 1 : 2);
+        const diff = livenessOrder(aLive) - livenessOrder(bLive);
+        return diff !== 0 ? diff : b.timeUpdated - a.timeUpdated;
+      });
 
   return (
     <List
@@ -183,12 +175,7 @@ export default function SearchSessions() {
         />
       ) : (
         sessions.map((session) => (
-          <SessionListItem
-            key={session.id}
-            session={session}
-            liveness={getLiveness(openSessions, session.id)}
-            onResume={() => visitItem(session)}
-          />
+          <SessionListItem key={session.id} session={session} liveness={getLiveness(openSessions, session.id)} />
         ))
       )}
     </List>
