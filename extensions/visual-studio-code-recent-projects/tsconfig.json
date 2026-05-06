@@ -7,19 +7,15 @@
   ],
   "compilerOptions": {
     "lib": [
-      "es2023"
+      "es2020"
     ],
     "module": "commonjs",
-    "target": "es2023",
+    "target": "es2020",
     "strict": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "jsx": "react-jsx",
-    "types": [
-      "node",
-      "react"
-    ]
+    "jsx": "react-jsx"
   }
 }

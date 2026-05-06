@@ -465,7 +465,7 @@ function getRemoteFileIconPath(uri: string, remoteAuthority: string | undefined)
   try {
     const remoteUri = new URL(uri);
     const distro = decodeURIComponent(remoteAuthority.slice(4));
-    const remotePath = decodeURIComponent(remoteUri.pathname).replaceAll("/", "\\");
+    const remotePath = decodeURIComponent(remoteUri.pathname).replace(/\//g, "\\");
     return `\\\\wsl.localhost\\${distro}${remotePath}`;
   } catch {
     return undefined;
