@@ -16,6 +16,7 @@ import { useState, useEffect } from "react";
 import {
   executePrompt,
   ClaudeResponse,
+  ensureClaudeApiAuth,
   ensureClaudeInstalled,
 } from "./lib/claude-cli";
 
@@ -435,9 +436,13 @@ function ExecutingTransformView({
   useEffect(() => {
     async function execute() {
       try {
-        // Check if Claude is installed first
         if (!(await ensureClaudeInstalled())) {
           setError("Claude Code not installed");
+          setIsLoading(false);
+          return;
+        }
+        if (!(await ensureClaudeApiAuth())) {
+          setError("Claude authentication missing");
           setIsLoading(false);
           return;
         }
