@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: Shared Storage Support] - {PR_MERGE_DATE}
+
+- Added Shared Storage support for new version of VS Code
+
 ## [Update] - 2026-04-07
 
 - Added support for Qoder.

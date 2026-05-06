@@ -119,6 +119,58 @@ export function getVSCodeCLIFilename(): string {
   return name;
 }
 
+function productJSONPaths(): Record<string, string> {
+  let productJSONPaths: Record<string, string> = {};
+
+  if (isWin) {
+    const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
+    productJSONPaths = {
+      Antigravity: path.join(programsFolder, "Antigravity", "resources", "app", "product.json"),
+      Code: path.join(programsFolder, "Microsoft VS Code", "resources", "app", "product.json"),
+      "Code - Insiders": path.join(programsFolder, "Microsoft VS Code Insiders", "resources", "app", "product.json"),
+      Cursor: path.join(programsFolder, "cursor", "resources", "app", "product.json"),
+      Kiro: path.join(programsFolder, "Kiro", "resources", "app", "product.json"),
+      Positron: path.join(programsFolder, "Positron", "resources", "app", "product.json"),
+      Qoder: path.join(programsFolder, "Qoder", "resources", "app", "product.json"),
+      Trae: path.join(programsFolder, "Trae", "resources", "app", "product.json"),
+      "Trae CN": path.join(programsFolder, "Trae CN", "resources", "app", "product.json"),
+      VSCodium: path.join(programsFolder, "VSCodium", "resources", "app", "product.json"),
+      "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders", "resources", "app", "product.json"),
+      Windsurf: path.join(programsFolder, "Windsurf", "resources", "app", "product.json"),
+      Lingma: path.join(programsFolder, "Lingma", "resources", "app", "product.json"),
+    };
+  }
+
+  if (isMac) {
+    productJSONPaths = {
+      Antigravity: "/Applications/Antigravity.app/Contents/Resources/app/product.json",
+      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/product.json",
+      "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/product.json",
+      Cursor: "/Applications/Cursor.app/Contents/Resources/app/product.json",
+      Kiro: "/Applications/Kiro.app/Contents/Resources/app/product.json",
+      Positron: "/Applications/Positron.app/Contents/Resources/app/product.json",
+      Qoder: "/Applications/Qoder.app/Contents/Resources/app/product.json",
+      Trae: "/Applications/Trae.app/Contents/Resources/app/product.json",
+      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app/product.json",
+      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app/product.json",
+      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app/product.json",
+      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app/product.json",
+      Lingma: "/Applications/Lingma.app/Contents/Resources/app/product.json",
+    };
+  }
+
+  return productJSONPaths;
+}
+
+export function getProductJSONPath(): string {
+  const productJSONPathsForPlatform = productJSONPaths();
+  const name = productJSONPathsForPlatform[getBuildNamePreference()];
+  if (!name || name.length <= 0) {
+    return productJSONPathsForPlatform.Code;
+  }
+  return name;
+}
+
 export class VSCodeCLI {
   private cliFilename: string;
   private execOptions: child_process.ExecFileOptions | undefined;
