@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Form, showToast, Toast, popToRoot, Icon, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Form, showToast, Toast, popToRoot, Icon, getPreferenceValues, openExtensionPreferences } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { readdirSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 import { homedir } from "os";
@@ -6,7 +6,8 @@ import { join } from "path";
 import { exec } from "child_process";
 
 function resolveNotesDir(): string {
-  const { notesDir } = getPreferenceValues<{ notesDir: string }>();
+  const { notesDir } = getPreferenceValues<{ notesDir?: string }>();
+  if (!notesDir) return "";
   return notesDir.startsWith("~") ? join(homedir(), notesDir.slice(1)) : notesDir;
 }
 
@@ -28,6 +29,20 @@ export default function CreateNoteCommand() {
 
   useEffect(() => {
     const baseDir = resolveNotesDir();
+    if (!baseDir) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Notes directory not configured",
+        message: "Open preferences to set it",
+        primaryAction: {
+          title: "Open Preferences",
+          onAction: () => openExtensionPreferences(),
+        },
+      });
+      setLoadingTemplates(false);
+      return;
+    }
+
     const templateDir = join(baseDir, ".note-templates");
 
     if (!existsSync(templateDir)) {
@@ -47,6 +62,16 @@ export default function CreateNoteCommand() {
     }
 
     const baseDir = resolveNotesDir();
+    if (!baseDir) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Notes directory not configured",
+        message: "Open preferences to set it",
+        primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+      });
+      return;
+    }
+
     const folderPath = join(baseDir, folderName);
     const fileName = values.useIndex ? "index.md" : `${folderName}.md`;
     const filePath = join(folderPath, fileName);
