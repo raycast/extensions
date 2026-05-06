@@ -1,4 +1,5 @@
 import { Cache } from "@raycast/api";
+import { z } from "zod";
 import { Db, withDb } from "./sqlite";
 
 export const RAYCAST_HISTORY_CHAR_CAP = 32_768;
@@ -8,12 +9,16 @@ const SCHEMA_VERSION = "1";
 const SCHEMA_CACHE_KEY = "schema-version";
 const cache = new Cache();
 
-export type ClipRow = {
-  id: number;
-  preview: string;
-  char_count: number;
-  created_at: number;
-};
+const ClipRowSchema = z.object({
+  id: z.number(),
+  preview: z.string(),
+  char_count: z.number(),
+  created_at: z.number(),
+});
+const ClipRowsSchema = z.array(ClipRowSchema);
+const ContentRowSchema = z.object({ content: z.string() });
+
+export type ClipRow = z.infer<typeof ClipRowSchema>;
 
 let schemaReadyInProcess = false;
 
@@ -38,16 +43,6 @@ function ensureSchemaSync({ db }: { db: Db }) {
   schemaReadyInProcess = true;
 }
 
-// thin row-shape narrower — node:sqlite returns `unknown[]` from .all() since the engine
-// has no compile-time knowledge of the schema, and we own the schema so the cast is safe
-function rows<T>({ values }: { values: unknown[] }) {
-  return values as T[];
-}
-
-function row<T>({ value }: { value: unknown }) {
-  return value as T | undefined;
-}
-
 export async function withVault<T>({ run }: { run: (db: Db) => T }) {
   return withDb({
     run: (db) => {
@@ -57,24 +52,28 @@ export async function withVault<T>({ run }: { run: (db: Db) => T }) {
   });
 }
 
+function escapeLikePattern({ value }: { value: string }) {
+  return value.replace(/[\\%_]/g, "\\$&");
+}
+
 export async function listClips({ search, limit }: { search: string; limit: number }) {
   return withVault({
     run: (db) => {
       if (search.trim().length > 0) {
         const stmt = db.prepare(`
           SELECT id, preview, char_count, created_at FROM clips
-          WHERE content LIKE ?
+          WHERE content LIKE ? ESCAPE '\\'
           ORDER BY created_at DESC
           LIMIT ?
         `);
-        return rows<ClipRow>({ values: stmt.all(`%${search}%`, limit) });
+        return ClipRowsSchema.parse(stmt.all(`%${escapeLikePattern({ value: search })}%`, limit));
       }
       const stmt = db.prepare(`
         SELECT id, preview, char_count, created_at FROM clips
         ORDER BY created_at DESC
         LIMIT ?
       `);
-      return rows<ClipRow>({ values: stmt.all(limit) });
+      return ClipRowsSchema.parse(stmt.all(limit));
     },
   });
 }
@@ -82,8 +81,9 @@ export async function listClips({ search, limit }: { search: string; limit: numb
 export async function getClipContent({ id }: { id: number }) {
   return withVault({
     run: (db) => {
-      const stmt = db.prepare(`SELECT content FROM clips WHERE id = ?`);
-      return row<{ content: string }>({ value: stmt.get(id) })?.content;
+      const value = db.prepare(`SELECT content FROM clips WHERE id = ?`).get(id);
+      if (!value) return undefined;
+      return ContentRowSchema.parse(value).content;
     },
   });
 }

@@ -1,7 +1,10 @@
 import { Cache, Clipboard } from "@raycast/api";
 import { createHash } from "crypto";
+import { z } from "zod";
 import { PREVIEW_CHAR_LIMIT, RAYCAST_HISTORY_CHAR_CAP, withVault } from "./db";
 import { getMaxEntries } from "./preferences";
+
+const CountRowSchema = z.object({ n: z.number() });
 
 const LAST_HASH_CACHE_KEY = "last-large-clip-sha256";
 const cache = new Cache();
@@ -42,6 +45,9 @@ export async function evictOldEntries() {
   const max = getMaxEntries();
   return withVault({
     run: (db) => {
+      // skip the full-table NOT IN scan on the common path (under cap)
+      const { n } = CountRowSchema.parse(db.prepare("SELECT COUNT(*) AS n FROM clips").get());
+      if (n <= max) return;
       db.prepare(
         `DELETE FROM clips
          WHERE id NOT IN (
@@ -52,8 +58,7 @@ export async function evictOldEntries() {
   });
 }
 
-// Clipboard.readText() returns undefined for image-only / file-only clipboards, so we naturally
-// skip non-text content here without needing to inspect Clipboard.read()'s file/html branches
+// Clipboard.readText() returns undefined for image/file-only clipboards, so non-text content is naturally skipped
 export async function captureFromClipboard(): Promise<CaptureOutcome> {
   const text = await Clipboard.readText();
   if (!text) return { kind: "empty" };
