@@ -304,7 +304,11 @@ Press \`⌘ + ,\` while IONOS Sync is selected.`}
         ))}
       </List.Section>
       {projects.length === 0 && !isLoading && (
-        <List.EmptyView icon={Icon.Globe} title="No projects configured" description="Press ⌘N to add a project" />
+        <List.EmptyView
+          icon={Icon.Globe}
+          title="No projects configured"
+          description='Run the "Manage Projects" command to add your first project'
+        />
       )}
     </List>
   );
