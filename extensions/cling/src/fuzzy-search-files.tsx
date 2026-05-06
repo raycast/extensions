@@ -158,7 +158,7 @@ function filePreviewMarkdown(filePath: string, isDir: boolean): string {
   }
 
   if (IMAGE_EXTS.has(ext)) {
-    return `![${name}](${filePath})`;
+    return `![${name}](<${filePath}>)`;
   }
 
   if (VIDEO_EXTS.has(ext)) {
