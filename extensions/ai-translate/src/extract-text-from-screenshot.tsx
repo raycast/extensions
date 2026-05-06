@@ -5,9 +5,7 @@ import {
   Icon,
   LaunchProps,
   LaunchType,
-  PopToRootType,
   Toast,
-  closeMainWindow,
   launchCommand,
   showHUD,
   showToast,
@@ -36,13 +34,12 @@ export default function Command(
 
   useEffect(() => {
     if (!initialText) {
-      void captureAndOpenResult();
+      void captureAndSetText();
     }
   }, [initialText]);
 
-  async function captureAndOpenResult() {
+  async function captureAndSetText() {
     setIsLoading(true);
-    await closeMainWindow({ popToRootType: PopToRootType.Immediate });
 
     try {
       const preferences = readPreferences();
@@ -60,11 +57,8 @@ export default function Command(
         return;
       }
 
-      await launchCommand({
-        name: "extract-text-from-screenshot",
-        type: LaunchType.UserInitiated,
-        context: { text: recognizedText },
-      });
+      setText(recognizedText);
+      setIsLoading(false);
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
       await showHUD(`OCR failed: ${message}`);
@@ -110,7 +104,7 @@ export default function Command(
               icon={Icon.Camera}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
               title="Retake Screenshot"
-              onAction={() => void captureAndOpenResult()}
+              onAction={() => void captureAndSetText()}
             />
           </ActionPanel.Section>
         </ActionPanel>
