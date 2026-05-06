@@ -45,15 +45,18 @@ const CreateAliasAI = () => {
           AI.ask(AI_PROMPT(purpose), { creativity: "none" }),
         ]);
 
-        const cleaned = raw.replace(/```(?:json)?\n?/g, "").trim();
-        const { local_part, description } = JSON.parse(cleaned) as { local_part: string; description: string };
+        const jsonMatch = raw.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("AI returned an unexpected response format");
+        const { local_part, description } = JSON.parse(jsonMatch[0]) as { local_part: string; description: string };
 
         const isSharedDomain = options.sharedDomains.includes(options.defaultAliasDomain);
+        const fallbackFormat =
+          options.defaultAliasFormat === "custom" ? "random_characters" : options.defaultAliasFormat;
 
         const response = await alias.create({
           description,
           domain: options.defaultAliasDomain,
-          format: isSharedDomain ? options.defaultAliasFormat : "custom",
+          format: isSharedDomain ? fallbackFormat : "custom",
           ...(isSharedDomain ? {} : { local_part }),
         });
 

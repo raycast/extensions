@@ -1,6 +1,6 @@
 # Addy Changelog
 
-## [AI Alias Creation] - 2026-05-06
+## [AI Alias Creation] - {PR_MERGE_DATE}
 
 ### Added
 - New "Create Alias with AI" command: describe a purpose in plain language and AI generates a meaningful alias name and description
