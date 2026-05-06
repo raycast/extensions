@@ -10,6 +10,7 @@ export default function Command() {
     data: posts,
     isLoading,
     pagination,
+    revalidate,
   } = usePromise(
     () => async (options: { page: number }) => {
       const posts = await fetchPosts({
@@ -30,7 +31,16 @@ export default function Command() {
   return (
     <List isLoading={isLoading} pagination={pagination} searchBarPlaceholder="Search posts...">
       {posts?.map((post) => (
-        <PostListItem key={post.id} post={post} onLoadMore={pagination?.onLoadMore} canLoadMore={pagination?.hasMore} />
+        <PostListItem
+          key={post.id}
+          post={post}
+          onLoadMore={pagination?.onLoadMore}
+          canLoadMore={pagination?.hasMore}
+          onClearCache={() => {
+            clearPostsCache();
+            revalidate();
+          }}
+        />
       ))}
     </List>
   );
@@ -40,10 +50,12 @@ function PostListItem({
   post,
   onLoadMore,
   canLoadMore,
+  onClearCache,
 }: {
   post: SubstackPost;
   onLoadMore?: () => void;
   canLoadMore?: boolean;
+  onClearCache?: () => void;
 }) {
   const date = new Date(post.post_date).toLocaleDateString("en-US", {
     year: "numeric",
@@ -102,7 +114,7 @@ function PostListItem({
               title="Clear Cache"
               shortcut={Keyboard.Shortcut.Common.Refresh}
               onAction={async () => {
-                clearPostsCache();
+                onClearCache?.();
                 await showToast({ style: Toast.Style.Success, title: "Cache cleared" });
               }}
             />
