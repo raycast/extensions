@@ -37,7 +37,9 @@ In those cases, a screenshot is the most reliable input. AI Translate treats scr
 
 ## Prompt Customization
 
-AI Translate sends a prompt with every translation request. In extension preferences, `Prompt Profile` gives you built-in instruction frames for common translation scenarios:
+AI Translate sends a prompt with every translation request. The default system prompt is sense-for-sense: it asks the model to write as a native speaker of the target language would naturally express the same idea, avoiding word-for-word translation while still preserving the source meaning, tone, facts, and level of formality.
+
+In extension preferences, `Prompt Profile` gives you built-in instruction frames for common translation scenarios:
 
 - `Screenshot OCR`: repair OCR artifacts and keep UI text concise.
 - `General Translation`: everyday sentence and paragraph translation.

@@ -9,3 +9,4 @@
 - Collapsed DeepSeek, Xiaomi MiMo, MiniMax, and Kimi to a single Anthropic-compatible API key/base URL/model entry each.
 - Kept OpenAI and Gemini on their native API protocols.
 - Added prompt profiles and custom prompt instructions for reusable translation behavior.
+- Refined the default system prompt toward native, sense-for-sense translation instead of literal wording.
