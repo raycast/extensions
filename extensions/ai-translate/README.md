@@ -50,7 +50,7 @@ In those cases, a screenshot is the most reliable input. AI Translate treats scr
 | DeepSeek    | Anthropic-compatible Messages     | `https://api.deepseek.com/anthropic`               | `deepseek-v4-flash` |
 | Xiaomi MiMo | Token Plan / Anthropic-compatible | `https://token-plan-cn.xiaomimimo.com/anthropic`   | `mimo-v2-flash`     |
 | MiniMax     | Token Plan / Anthropic-compatible | `https://api.minimaxi.com/anthropic`               | `MiniMax-M2.7`      |
-| Kimi        | Anthropic-compatible Messages     | `https://api.moonshot.ai/anthropic`                | `kimi-k2.6`         |
+| Kimi        | Anthropic-compatible Coding       | `https://api.kimi.com/coding/`                     | `kimi-k2.6`         |
 | Gemini      | Native Gemini API                 | `https://generativelanguage.googleapis.com/v1beta` | `gemini-2.5-flash`  |
 | OpenAI      | Native Chat Completions API       | `https://api.openai.com/v1`                        | `gpt-4.1-mini`      |
 

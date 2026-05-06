@@ -525,8 +525,8 @@
       "name": "kimiBaseURL",
       "type": "textfield",
       "required": false,
-      "description": "Kimi/Moonshot Anthropic-compatible entrypoint. Requests are sent to /v1/messages.",
-      "default": "https://api.moonshot.ai/anthropic"
+      "description": "Kimi Anthropic-compatible coding entrypoint. Requests are sent to /v1/messages.",
+      "default": "https://api.kimi.com/coding/"
     },
     {
       "title": "Kimi Model",
