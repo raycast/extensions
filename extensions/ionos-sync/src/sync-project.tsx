@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { loadProjects, saveProjects } from "./storage";
-import { spawnRsync } from "./rsync";
+import { spawnRsync, RsyncProcess } from "./rsync";
 import { Project, SyncDirection, SyncMode, SyncRecord } from "./types";
 
 // ─── Sync Output Detail View ──────────────────────────────────────────────────
@@ -37,6 +37,7 @@ function SyncOutputView({
   useEffect(() => {
     let mounted = true;
     let lineCount = 0;
+    let child: RsyncProcess | undefined;
 
     const toastPromise = showToast({
       style: Toast.Style.Animated,
@@ -44,22 +45,22 @@ function SyncOutputView({
       message: project.name,
     });
 
-    const child = spawnRsync(project, direction, mode, prefs);
-
-    child.all?.on("data", (chunk: Buffer) => {
-      const text = chunk.toString();
-      for (const line of text.split("\n")) {
-        if (line.trim() && !line.includes("setlocale")) {
-          if (mounted) setLines((prev) => [...prev, line]);
-          lineCount++;
-        }
-      }
-    });
-
     (async () => {
       const toast = await toastPromise;
       try {
-        const result = await child;
+        const runningChild = await spawnRsync(project, direction, mode, prefs);
+        child = runningChild;
+        runningChild.all?.on("data", (chunk: Buffer) => {
+          const text = chunk.toString();
+          for (const line of text.split("\n")) {
+            if (line.trim() && !line.includes("setlocale")) {
+              if (mounted) setLines((prev) => [...prev, line]);
+              lineCount++;
+            }
+          }
+        });
+
+        const result = await runningChild.result;
         if (!mounted) return;
 
         setRunning(false);
@@ -98,7 +99,7 @@ function SyncOutputView({
     return () => {
       mounted = false;
       try {
-        if (!child.killed) child.kill();
+        child?.kill();
       } catch (err) {
         console.error("failed to kill rsync child:", err);
       }

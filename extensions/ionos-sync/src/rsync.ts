@@ -1,9 +1,18 @@
-import { execa, ExecaChildProcess } from "execa";
 import { Project, SyncDirection, SyncMode } from "./types";
 
 export interface RsyncResult {
   output: string[];
   exitCode: number;
+}
+
+interface RsyncExit {
+  exitCode: number | null;
+}
+
+export interface RsyncProcess {
+  all?: NodeJS.ReadableStream;
+  kill: () => void;
+  result: Promise<RsyncExit>;
 }
 
 /**
@@ -63,21 +72,31 @@ export function buildRsyncArgs(
  * Runs rsync and returns a child process you can attach to for streaming.
  * The caller collects stdout/stderr lines and updates React state.
  */
-export function spawnRsync(
+export async function spawnRsync(
   project: Project,
   direction: SyncDirection,
   mode: SyncMode,
   prefs: Preferences,
-): ExecaChildProcess {
+): Promise<RsyncProcess> {
   const args = buildRsyncArgs(project, direction, mode, prefs);
-  return execa("rsync", args, {
+  const { execa } = await import("execa");
+  const child = execa("rsync", args, {
     all: true, // merge stdout + stderr into .all stream
     reject: false, // don't throw on non-zero exit — we handle it
     env: {
       ...process.env,
       PATH: "/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin",
     },
-  });
+  }) as unknown as Promise<RsyncExit> & {
+    all?: NodeJS.ReadableStream;
+    kill: () => void;
+  };
+
+  return {
+    all: child.all,
+    kill: child.kill.bind(child),
+    result: child,
+  };
 }
 
 /**
@@ -91,7 +110,7 @@ export async function runRsync(
   prefs: Preferences,
   onLine?: (line: string) => void,
 ): Promise<RsyncResult> {
-  const child = spawnRsync(project, direction, mode, prefs);
+  const child = await spawnRsync(project, direction, mode, prefs);
   const lines: string[] = [];
 
   child.all?.on("data", (chunk: Buffer) => {
@@ -104,7 +123,7 @@ export async function runRsync(
     }
   });
 
-  const result = await child;
+  const result = await child.result;
   return {
     output: lines,
     exitCode: result.exitCode ?? 1,
