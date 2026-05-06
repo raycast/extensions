@@ -1,0 +1,163 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "system-status",
+  "description": "Hide your taskbar once and for all. View your internet connection, volume, battery, time and date directly from Raycast.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "preferences": [
+    {
+      "name": "showSeconds",
+      "type": "checkbox",
+      "title": "Show Seconds",
+      "label": "Show seconds in time display",
+      "description": "Display seconds in the time row.",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "detailViewMode",
+      "type": "dropdown",
+      "title": "Detail View Mode",
+      "description": "Choose whether details appear in the side panel or open on a subpage.",
+      "required": false,
+      "default": "inline",
+      "data": [
+        {
+          "title": "Inline Side Panel",
+          "value": "inline"
+        },
+        {
+          "title": "Open Details on Enter",
+          "value": "subpage"
+        }
+      ]
+    },
+    {
+      "name": "timeFormat",
+      "type": "dropdown",
+      "title": "Time Format",
+      "description": "Choose how time is displayed.",
+      "required": false,
+      "default": "12h",
+      "data": [
+        {
+          "title": "12-hour",
+          "value": "12h"
+        },
+        {
+          "title": "24-hour, short",
+          "value": "24h-short"
+        },
+        {
+          "title": "24-hour, long",
+          "value": "24h-long"
+        }
+      ]
+    },
+    {
+      "name": "dateFormat",
+      "type": "dropdown",
+      "title": "Date Format",
+      "description": "Choose how the date row is displayed.",
+      "required": false,
+      "default": "D/MM/YYYY",
+      "data": [
+        {
+          "title": "D/MM/YYYY",
+          "value": "D/MM/YYYY"
+        },
+        {
+          "title": "D/MM/YY",
+          "value": "D/MM/YY"
+        },
+        {
+          "title": "D/M/YY",
+          "value": "D/M/YY"
+        },
+        {
+          "title": "D/M/YYYY",
+          "value": "D/M/YYYY"
+        },
+        {
+          "title": "DD/MM/YY",
+          "value": "DD/MM/YY"
+        },
+        {
+          "title": "DD/MM/YYYY",
+          "value": "DD/MM/YYYY"
+        },
+        {
+          "title": "DD-Mth-YY",
+          "value": "DD-Mth-YY"
+        },
+        {
+          "title": "DD-Month-YYYY",
+          "value": "DD-Month-YYYY"
+        },
+        {
+          "title": "YYYY-MM-DD",
+          "value": "YYYY-MM-DD"
+        },
+        {
+          "title": "YY/MM/DD",
+          "value": "YY/MM/DD"
+        },
+        {
+          "title": "YYYY/MM/DD",
+          "value": "YYYY/MM/DD"
+        }
+      ]
+    },
+    {
+      "name": "dateDetailFormat",
+      "type": "dropdown",
+      "title": "Date Detail Format",
+      "description": "Choose how the detailed date view is displayed.",
+      "required": false,
+      "default": "Day, D Month YYYY",
+      "data": [
+        {
+          "title": "Day, D Month YYYY",
+          "value": "Day, D Month YYYY"
+        },
+        {
+          "title": "D Month YYYY",
+          "value": "D Month YYYY"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "system-status",
+      "title": "System Status",
+      "description": "View your internet connection, volume, battery, time and date directly from Raycast.",
+      "mode": "view",
+      "subtitle": "Jamex"
+    }
+  ],
+  "title": "System Status - View Your Internet, Volume, Battery and More (by Jamex)",
+  "author": "JamexCEO",
+  "platforms": ["Windows"],
+  "categories": ["Data", "Documentation", "Productivity", "System", "Other"]
+}
