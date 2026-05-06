@@ -28,6 +28,21 @@
       "subtitle": "OpenCode",
       "description": "Search and resume OpenCode sessions",
       "mode": "view"
+    },
+    {
+      "name": "new-session",
+      "title": "New Session",
+      "subtitle": "OpenCode",
+      "description": "Start a new OpenCode session in a directory",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "directory",
+          "type": "text",
+          "placeholder": "Directory path",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

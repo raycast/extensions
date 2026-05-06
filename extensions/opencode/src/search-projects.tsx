@@ -71,7 +71,16 @@ function ProjectSessions({ project }: { project: ProjectRow }) {
       }
     >
       {projectSessions.length === 0 ? (
-        <List.EmptyView title="No Sessions" description="No sessions found for this project." icon={Icon.Message} />
+        <List.EmptyView
+          title="No Sessions"
+          description="No sessions found for this project."
+          icon={Icon.Message}
+          actions={
+            <ActionPanel>
+              <Action title="New Session" icon={Icon.Plus} onAction={() => openOpenCode(project.worktree)} />
+            </ActionPanel>
+          }
+        />
       ) : (
         filtered.map((group) => (
           <List.Section key={group.folder} title={group.folder} subtitle={`${group.sessions.length}`}>
@@ -94,6 +103,12 @@ function ProjectSessions({ project }: { project: ProjectRow }) {
                         title="Resume in Terminal"
                         icon={Icon.Terminal}
                         onAction={() => resumeSession(session.directory, session.id, liveness !== undefined)}
+                      />
+                      <Action
+                        title="New Session"
+                        icon={Icon.Plus}
+                        shortcut={{ modifiers: ["cmd"], key: "n" }}
+                        onAction={() => openOpenCode(project.worktree)}
                       />
                       <Action.CopyToClipboard
                         title="Copy Session ID"
@@ -151,8 +166,9 @@ export default function SearchProjects() {
                     target={<ProjectSessions project={project} />}
                   />
                   <Action
-                    title="Open in Terminal"
-                    icon={Icon.Terminal}
+                    title="New Session"
+                    icon={Icon.Plus}
+                    shortcut={{ modifiers: ["cmd"], key: "n" }}
                     onAction={() => openOpenCode(project.worktree)}
                   />
                   <Action.CopyToClipboard
