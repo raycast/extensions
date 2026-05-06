@@ -5,11 +5,7 @@ import {
   buildTaskDetailActionSpecs,
   buildTaskListActionSpecs,
 } from "../src/lib/task-flow";
-import {
-  createTaskFormController,
-  deleteFocusedWorkLog,
-  type TaskFormValues,
-} from "../src/lib/task-form-controller";
+import { createTaskFormController, deleteFocusedWorkLog, type TaskFormValues } from "../src/lib/task-form-controller";
 import { formatTaskDate } from "../src/lib/date";
 import type { TaskRecord } from "../src/lib/types";
 
@@ -131,9 +127,7 @@ test("menu bar to-do task exposes start, archive, and open actions", () => {
 });
 
 test("menu bar in-progress task exposes complete, archive, and open actions", () => {
-  const specs = buildMenuBarTaskActionSpecs(
-    createTask({ status: "in_progress" }),
-  );
+  const specs = buildMenuBarTaskActionSpecs(createTask({ status: "in_progress" }));
 
   assert.deepEqual(
     specs.map((spec) => spec.title),
@@ -143,9 +137,7 @@ test("menu bar in-progress task exposes complete, archive, and open actions", ()
 
 test("menu bar done and archived tasks do not expose active lifecycle actions", () => {
   const doneSpecs = buildMenuBarTaskActionSpecs(createTask({ status: "done" }));
-  const archivedSpecs = buildMenuBarTaskActionSpecs(
-    createTask({ status: "archived" }),
-  );
+  const archivedSpecs = buildMenuBarTaskActionSpecs(createTask({ status: "archived" }));
 
   assert.deepEqual(
     doneSpecs.map((spec) => spec.title),
@@ -297,11 +289,7 @@ test("formatTaskDate includes time when a timestamp is present", () => {
 test("deleteFocusedWorkLog removes the focused work log and selects the next entry", () => {
   const result = deleteFocusedWorkLog(
     createTaskFormValues({
-      workLogs: [
-        createWorkLog({ id: "a" }),
-        createWorkLog({ id: "b" }),
-        createWorkLog({ id: "c" }),
-      ],
+      workLogs: [createWorkLog({ id: "a" }), createWorkLog({ id: "b" }), createWorkLog({ id: "c" })],
     }),
     "b",
   );
@@ -318,10 +306,7 @@ function createRepositoryStub(
     completeTask: (taskId: string) => Promise<TaskRecord>;
     updateTask: (taskId: string, values: unknown) => Promise<TaskRecord>;
     createTask: (values: unknown) => Promise<TaskRecord>;
-    createWorkLog: (
-      taskId: string,
-      input: { body: string },
-    ) => Promise<TaskRecord["workLogs"][number]>;
+    createWorkLog: (taskId: string, input: { body: string }) => Promise<TaskRecord["workLogs"][number]>;
     startTask: (taskId: string) => Promise<TaskRecord>;
     reopenTask: (taskId: string) => Promise<TaskRecord>;
     archiveTask: (taskId: string) => Promise<TaskRecord>;
@@ -329,8 +314,7 @@ function createRepositoryStub(
   }> = {},
 ) {
   return {
-    completeTask:
-      overrides.completeTask ?? (async () => createTask({ status: "done" })),
+    completeTask: overrides.completeTask ?? (async () => createTask({ status: "done" })),
     updateTask: overrides.updateTask ?? (async () => createTask()),
     createTask: overrides.createTask ?? (async () => createTask()),
     createWorkLog:
@@ -341,19 +325,14 @@ function createRepositoryStub(
         createdAt: "2026-04-03T00:00:00.000Z",
         updatedAt: null,
       })),
-    startTask:
-      overrides.startTask ??
-      (async () => createTask({ status: "in_progress" })),
+    startTask: overrides.startTask ?? (async () => createTask({ status: "in_progress" })),
     reopenTask: overrides.reopenTask ?? (async () => createTask()),
-    archiveTask:
-      overrides.archiveTask ?? (async () => createTask({ status: "archived" })),
+    archiveTask: overrides.archiveTask ?? (async () => createTask({ status: "archived" })),
     deleteTask: overrides.deleteTask ?? (async () => undefined),
   } as never;
 }
 
-function createController(
-  overrides: Partial<Parameters<typeof createTaskFormController>[0]> = {},
-) {
+function createController(overrides: Partial<Parameters<typeof createTaskFormController>[0]> = {}) {
   return createTaskFormController({
     repository: createRepositoryStub(),
     pop: () => undefined,
@@ -380,9 +359,7 @@ function createTask(overrides: Partial<TaskRecord> = {}): TaskRecord {
   };
 }
 
-function createWorkLog(
-  overrides: Partial<TaskRecord["workLogs"][number]> = {},
-): TaskRecord["workLogs"][number] {
+function createWorkLog(overrides: Partial<TaskRecord["workLogs"][number]> = {}): TaskRecord["workLogs"][number] {
   return {
     id: overrides.id ?? "log-id",
     body: overrides.body ?? "Logged progress",
@@ -391,9 +368,7 @@ function createWorkLog(
   };
 }
 
-function createTaskFormValues(
-  overrides: Partial<TaskFormValues> = {},
-): TaskFormValues {
+function createTaskFormValues(overrides: Partial<TaskFormValues> = {}): TaskFormValues {
   return {
     header: overrides.header ?? "Task",
     body: overrides.body ?? "Task body",

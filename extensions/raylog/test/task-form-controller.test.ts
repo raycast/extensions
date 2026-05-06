@@ -1,9 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  createTaskFormController,
-  type TaskFormValues,
-} from "../src/lib/task-form-controller";
+import { createTaskFormController, type TaskFormValues } from "../src/lib/task-form-controller";
 import { submitTaskForm } from "../src/lib/task-form-submit";
 import type { TaskRecord } from "../src/lib/types";
 
@@ -127,11 +124,7 @@ test("controller routes unexpected persistence failures to the mutation error to
     popToRootImpl: async () => undefined,
     showToastImpl: async () => undefined,
     confirmAlertImpl: async () => true,
-    showTaskMutationFailureToastImpl: async (
-      _error,
-      title,
-      fallbackMessage,
-    ) => {
+    showTaskMutationFailureToastImpl: async (_error, title, fallbackMessage) => {
       failures.push({ title, fallbackMessage });
     },
   });
@@ -156,10 +149,7 @@ function createRepositoryStub(
   overrides: Partial<{
     updateTask: (taskId: string, values: unknown) => Promise<TaskRecord>;
     createTask: (values: unknown) => Promise<TaskRecord>;
-    createWorkLog: (
-      taskId: string,
-      input: { body: string },
-    ) => Promise<TaskRecord["workLogs"][number]>;
+    createWorkLog: (taskId: string, input: { body: string }) => Promise<TaskRecord["workLogs"][number]>;
     startTask: (taskId: string) => Promise<TaskRecord>;
   }> = {},
 ) {
@@ -174,9 +164,7 @@ function createRepositoryStub(
         createdAt: "2026-04-03T00:00:00.000Z",
         updatedAt: null,
       })),
-    startTask:
-      overrides.startTask ??
-      (async () => createTask({ status: "in_progress" })),
+    startTask: overrides.startTask ?? (async () => createTask({ status: "in_progress" })),
   };
 }
 
@@ -195,9 +183,7 @@ function createTask(overrides: Partial<TaskRecord> = {}): TaskRecord {
   };
 }
 
-function createWorkLog(
-  overrides: Partial<TaskRecord["workLogs"][number]> = {},
-): TaskRecord["workLogs"][number] {
+function createWorkLog(overrides: Partial<TaskRecord["workLogs"][number]> = {}): TaskRecord["workLogs"][number] {
   return {
     id: overrides.id ?? "log-id",
     body: overrides.body ?? "Logged progress",
@@ -206,9 +192,7 @@ function createWorkLog(
   };
 }
 
-function createTaskFormValues(
-  overrides: Partial<TaskFormValues> = {},
-): TaskFormValues {
+function createTaskFormValues(overrides: Partial<TaskFormValues> = {}): TaskFormValues {
   return {
     header: overrides.header ?? "Task",
     body: overrides.body ?? "Task body",

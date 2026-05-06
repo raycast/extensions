@@ -16,10 +16,7 @@ test("menu bar current task renders as a submenu section entry", () => {
 test("menu bar next tasks exclude the current task and stay in submenu entries", () => {
   const currentTask = createTask({ id: "current-task" });
   const nextTask = createTask({ id: "next-task", header: "Next Task" });
-  const sections = buildMenuBarTaskSubmenuSections(currentTask, [
-    currentTask,
-    nextTask,
-  ]);
+  const sections = buildMenuBarTaskSubmenuSections(currentTask, [currentTask, nextTask]);
 
   assert.equal(sections.length, 2);
   assert.equal(sections[1]?.title, "Next 5 Tasks");
@@ -32,10 +29,7 @@ test("menu bar next tasks exclude the current task and stay in submenu entries",
 test("menu bar submenu sections never create a complete current task row", () => {
   const currentTask = createTask({ id: "current-task" });
   const nextTask = createTask({ id: "next-task", status: "in_progress" });
-  const sections = buildMenuBarTaskSubmenuSections(currentTask, [
-    currentTask,
-    nextTask,
-  ]);
+  const sections = buildMenuBarTaskSubmenuSections(currentTask, [currentTask, nextTask]);
 
   const allTitles = sections.flatMap((section) =>
     section.items.flatMap((item) => [item.task.header, item.dueLabel ?? ""]),
@@ -46,10 +40,7 @@ test("menu bar submenu sections never create a complete current task row", () =>
 
 test("menu bar due label drops the verbose prefix but keeps due metadata", () => {
   const today = toCanonicalDateString(new Date());
-  const sections = buildMenuBarTaskSubmenuSections(
-    createTask({ dueDate: today }),
-    [],
-  );
+  const sections = buildMenuBarTaskSubmenuSections(createTask({ dueDate: today }), []);
 
   assert.equal(sections[0]?.items[0]?.dueLabel, "Due Today");
   assert.equal(sections[0]?.items[0]?.dueTone, "warning");

@@ -22,9 +22,7 @@ async function main(): Promise<void> {
   }
 
   const document = createEmptyDocument();
-  document.tasks = Array.from({ length: options.taskCount }, (_, index) =>
-    createTaskRecord(index),
-  );
+  document.tasks = Array.from({ length: options.taskCount }, (_, index) => createTaskRecord(index));
 
   const markdown = mergeRaylogMarkdown(buildNotePreamble(options.taskCount), document);
   parseRaylogMarkdown(markdown);
@@ -32,11 +30,8 @@ async function main(): Promise<void> {
   await fs.promises.writeFile(targetPath, markdown, "utf8");
 
   process.stdout.write(
-    [
-      `Generated ${options.taskCount} tasks.`,
-      `Source: ${options.sourceNotePath}`,
-      `Output: ${targetPath}`,
-    ].join("\n") + "\n",
+    [`Generated ${options.taskCount} tasks.`, `Source: ${options.sourceNotePath}`, `Output: ${targetPath}`].join("\n") +
+      "\n",
   );
 }
 
@@ -107,7 +102,8 @@ function parseArgs(argv: string[]): {
 }
 
 function printHelp(): void {
-  process.stdout.write(`Usage: npm run generate:stress-note -- <storage-note-path> [--count 5000] [--output /path/to/file.md]
+  process.stdout
+    .write(`Usage: npm run generate:stress-note -- <storage-note-path> [--count 5000] [--output /path/to/file.md]
 
 Creates a new markdown file next to your current Raylog datastore and fills it
 with a large set of valid tasks for stress testing.

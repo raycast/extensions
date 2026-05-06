@@ -33,18 +33,10 @@ test("fromCanonicalDateString still accepts legacy ISO timestamps", () => {
 
 test("formatTaskDate renders date-only and legacy timestamp values correctly", () => {
   assert.equal(formatTaskDate("2026-04-10"), "Apr 10, 2026");
-  assert.equal(
-    formatTaskDate(new Date(2026, 3, 10, 15, 45, 0, 0).toISOString()),
-    "Apr 10, 2026 3:45 PM",
-  );
+  assert.equal(formatTaskDate(new Date(2026, 3, 10, 15, 45, 0, 0).toISOString()), "Apr 10, 2026 3:45 PM");
 });
 
 test("compareCanonicalDateStrings compares mixed legacy and date-only values by calendar day", () => {
-  assert.ok(
-    compareCanonicalDateStrings("2026-04-02", "2026-04-03T07:00:00.000Z") < 0,
-  );
-  assert.equal(
-    compareCanonicalDateStrings("2026-04-03", "2026-04-03T07:00:00.000Z"),
-    0,
-  );
+  assert.ok(compareCanonicalDateStrings("2026-04-02", "2026-04-03T07:00:00.000Z") < 0);
+  assert.equal(compareCanonicalDateStrings("2026-04-03", "2026-04-03T07:00:00.000Z"), 0);
 });

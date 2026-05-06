@@ -7,7 +7,7 @@ export interface MenuBarRepository {
   listTasks(): Promise<TaskRecord[]>;
 }
 
-export interface MenuBarViewState extends MenuBarCacheState {}
+export type MenuBarViewState = MenuBarCacheState;
 
 export async function refreshMenuBarState(options: {
   repository?: MenuBarRepository;

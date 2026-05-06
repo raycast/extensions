@@ -20,42 +20,12 @@ test("development docs include the complete validated command flow", async () =>
   assertEdge(parsed, "Raylog", "", "List Tasks command");
   assertEdge(parsed, "Raylog", "", "Add Task command");
   assertEdge(parsed, "Raylog", "", "Refresh Menu Bar command");
-  assertEdge(
-    parsed,
-    "List Tasks command",
-    "",
-    "Storage note configured and valid?",
-  );
-  assertEdge(
-    parsed,
-    "Add Task command",
-    "",
-    "Storage note configured and valid?",
-  );
-  assertEdge(
-    parsed,
-    "Storage note configured and valid?",
-    "No",
-    "Setup / reset empty state",
-  );
-  assertEdge(
-    parsed,
-    "Setup / reset empty state",
-    "Open Extension Preferences",
-    "Storage note configured and valid?",
-  );
-  assertEdge(
-    parsed,
-    "Setup / reset empty state",
-    "Generate New Task Database",
-    "Storage note configured and valid?",
-  );
-  assertEdge(
-    parsed,
-    "Setup / reset empty state",
-    "Reset Storage Note",
-    "Storage note configured and valid?",
-  );
+  assertEdge(parsed, "List Tasks command", "", "Storage note configured and valid?");
+  assertEdge(parsed, "Add Task command", "", "Storage note configured and valid?");
+  assertEdge(parsed, "Storage note configured and valid?", "No", "Setup / reset empty state");
+  assertEdge(parsed, "Setup / reset empty state", "Open Extension Preferences", "Storage note configured and valid?");
+  assertEdge(parsed, "Setup / reset empty state", "Generate New Task Database", "Storage note configured and valid?");
+  assertEdge(parsed, "Setup / reset empty state", "Reset Storage Note", "Storage note configured and valid?");
 
   assertEdge(
     parsed,
@@ -69,108 +39,28 @@ test("development docs include the complete validated command flow", async () =>
     "Yes, launch last used list layout",
     "Task list without detail pane",
   );
-  assertEdge(
-    parsed,
-    "Storage note configured and valid?",
-    "Yes, launch Add Task",
-    "Standalone Add Task form",
-  );
-  assertEdge(
-    parsed,
-    "Task summary with detail pane",
-    "Enter",
-    "View Task window",
-  );
-  assertEdge(
-    parsed,
-    "Task summary with detail pane",
-    "Cmd+F",
-    "Task list without detail pane",
-  );
-  assertEdge(
-    parsed,
-    "Task summary with detail pane",
-    "Cmd+L",
-    "Edit Task form (new log focused)",
-  );
-  assertEdge(
-    parsed,
-    "Task summary with detail pane",
-    "Cmd+Shift+C",
-    "Complete selected task",
-  );
+  assertEdge(parsed, "Storage note configured and valid?", "Yes, launch Add Task", "Standalone Add Task form");
+  assertEdge(parsed, "Task summary with detail pane", "Enter", "View Task window");
+  assertEdge(parsed, "Task summary with detail pane", "Cmd+F", "Task list without detail pane");
+  assertEdge(parsed, "Task summary with detail pane", "Cmd+L", "Edit Task form (new log focused)");
+  assertEdge(parsed, "Task summary with detail pane", "Cmd+Shift+C", "Complete selected task");
   assertEdge(parsed, "Task summary with detail pane", "Cmd+N", "Add Task form");
-  assertEdge(
-    parsed,
-    "Task summary with detail pane",
-    "Cmd+E",
-    "Edit Task form",
-  );
-  assertEdge(
-    parsed,
-    "Task list without detail pane",
-    "Enter",
-    "View Task window",
-  );
-  assertEdge(
-    parsed,
-    "Task list without detail pane",
-    "Cmd+F",
-    "Task summary with detail pane",
-  );
-  assertEdge(
-    parsed,
-    "Full-window task detail",
-    "Default action: Log Work",
-    "Edit Task form (new log focused)",
-  );
+  assertEdge(parsed, "Task summary with detail pane", "Cmd+E", "Edit Task form");
+  assertEdge(parsed, "Task list without detail pane", "Enter", "View Task window");
+  assertEdge(parsed, "Task list without detail pane", "Cmd+F", "Task summary with detail pane");
+  assertEdge(parsed, "Full-window task detail", "Default action: Log Work", "Edit Task form (new log focused)");
   assertEdge(parsed, "Full-window task detail", "Cmd+Shift+C", "Complete task");
-  assertEdge(
-    parsed,
-    "Edit Task form (new log focused)",
-    "Save",
-    "Full-window task detail",
-  );
+  assertEdge(parsed, "Edit Task form (new log focused)", "Save", "Full-window task detail");
   assertEdge(parsed, "Full-window task detail", "Delete Task", "Delete task");
-  assertEdge(
-    parsed,
-    "Current task in menu bar",
-    "Click current task",
-    "Menu bar task submenu",
-  );
-  assertEdge(
-    parsed,
-    "Current task in menu bar",
-    "Click task in Next 5 Tasks",
-    "Menu bar task submenu",
-  );
-  assertEdge(
-    parsed,
-    "Menu bar task submenu",
-    "Open Task",
-    "Full-window task detail",
-  );
+  assertEdge(parsed, "Current task in menu bar", "Click current task", "Menu bar task submenu");
+  assertEdge(parsed, "Current task in menu bar", "Click task in Next 5 Tasks", "Menu bar task submenu");
+  assertEdge(parsed, "Menu bar task submenu", "Open Task", "Full-window task detail");
   assertEdge(parsed, "Menu bar task submenu", "Start Task", "Start task");
   assertEdge(parsed, "Menu bar task submenu", "Complete Task", "Complete task");
   assertEdge(parsed, "Menu bar task submenu", "Archive Task", "Archive task");
-  assertEdge(
-    parsed,
-    "Current task in menu bar",
-    "Open Task List",
-    "Task summary with detail pane",
-  );
-  assertEdge(
-    parsed,
-    "Current task in menu bar",
-    "Open Task List",
-    "Task list without detail pane",
-  );
-  assertEdge(
-    parsed,
-    "Refresh Menu Bar command",
-    "No storage note",
-    "Set Up Raylog menu bar state",
-  );
+  assertEdge(parsed, "Current task in menu bar", "Open Task List", "Task summary with detail pane");
+  assertEdge(parsed, "Current task in menu bar", "Open Task List", "Task list without detail pane");
+  assertEdge(parsed, "Refresh Menu Bar command", "No storage note", "Set Up Raylog menu bar state");
   assertEdge(
     parsed,
     "Set Up Raylog menu bar state",
@@ -189,10 +79,7 @@ test("readme highlights task logging and current setup guidance", async () => {
   assert.match(readme, /progress logging/i);
   assert.match(readme, /built-in work logging/i);
   assert.match(readme, /Cmd\+L/);
-  assert.match(
-    readme,
-    /menu bar feature is inactive until you run `Refresh Menu Bar`/i,
-  );
+  assert.match(readme, /menu bar feature is inactive until you run `Refresh Menu Bar`/i);
   assert.match(readme, /"schemaVersion": 1/);
   assert.doesNotMatch(readme, /```mermaid/);
 });
@@ -227,16 +114,7 @@ test("documented action-derived Mermaid edges map back to implementation", async
     ...getDocumentedEdgesForNode(
       parsed,
       "Task summary with detail pane",
-      new Set([
-        "Enter",
-        "Cmd+L",
-        "Cmd+N",
-        "Cmd+E",
-        "Cmd+Shift+C",
-        "Cmd+S",
-        "Cmd+R",
-        "Cmd+Shift+A",
-      ]),
+      new Set(["Enter", "Cmd+L", "Cmd+N", "Cmd+E", "Cmd+Shift+C", "Cmd+S", "Cmd+R", "Cmd+Shift+A"]),
     ),
     ...getDocumentedEdgesForNode(
       parsed,
@@ -267,21 +145,11 @@ async function readWorkspaceFile(relativePath: string): Promise<string> {
   return fs.promises.readFile(path.join(workspaceRoot, relativePath), "utf8");
 }
 
-function extractSingleMermaidBlock(
-  markdown: string,
-  fileLabel: string,
-  anchor?: string,
-): string {
-  const scopedMarkdown = anchor
-    ? markdown.slice(markdown.indexOf(anchor))
-    : markdown;
+function extractSingleMermaidBlock(markdown: string, fileLabel: string, anchor?: string): string {
+  const scopedMarkdown = anchor ? markdown.slice(markdown.indexOf(anchor)) : markdown;
   const matches = [...scopedMarkdown.matchAll(/```mermaid\n([\s\S]*?)```/g)];
 
-  assert.equal(
-    matches.length,
-    1,
-    `${fileLabel} should contain exactly one Mermaid block in the targeted section.`,
-  );
+  assert.equal(matches.length, 1, `${fileLabel} should contain exactly one Mermaid block in the targeted section.`);
 
   return matches[0][1].trim();
 }
@@ -298,9 +166,7 @@ function parseMermaidFlow(diagram: string): {
   const edges: Array<{ from: string; action: string; to: string }> = [];
   for (const rawLine of diagram.split("\n")) {
     const line = rawLine.trim().replace(/([A-Za-z0-9_]+)\["[^"]+"\]/g, "$1");
-    const match = line.match(
-      /^([A-Za-z0-9_]+)\s*-->\s*(?:\|"([^"]+)"\||\|([^|]+)\|)?\s*([A-Za-z0-9_]+)/,
-    );
+    const match = line.match(/^([A-Za-z0-9_]+)\s*-->\s*(?:\|"([^"]+)"\||\|([^|]+)\|)?\s*([A-Za-z0-9_]+)/);
 
     if (!match) {
       continue;
@@ -325,9 +191,7 @@ function assertEdge(
   to: string,
 ) {
   assert.ok(
-    parsed.edges.some(
-      (edge) => edge.from === from && edge.action === action && edge.to === to,
-    ),
+    parsed.edges.some((edge) => edge.from === from && edge.action === action && edge.to === to),
     `Missing Mermaid edge: ${from} --${action || "(unlabeled)"}--> ${to}`,
   );
 }
@@ -339,9 +203,7 @@ function getDocumentedEdgesForNode(
   from: string,
   actions: Set<string>,
 ) {
-  return parsed.edges.filter(
-    (edge) => edge.from === from && actions.has(edge.action),
-  );
+  return parsed.edges.filter((edge) => edge.from === from && actions.has(edge.action));
 }
 
 function buildDocumentedListFlowEdges(task: TaskRecord) {
@@ -390,9 +252,7 @@ function buildDocumentedMenuFlowEdges(task: TaskRecord) {
   }));
 }
 
-function mapListSpecToDiagramTarget(
-  spec: ReturnType<typeof buildTaskListActionSpecs>[number],
-): string {
+function mapListSpecToDiagramTarget(spec: ReturnType<typeof buildTaskListActionSpecs>[number]): string {
   switch (spec.title) {
     case "Open Task":
       return "View Task window";
@@ -417,9 +277,7 @@ function mapListSpecToDiagramTarget(
   }
 }
 
-function mapListSpecToDiagramAction(
-  spec: ReturnType<typeof buildTaskListActionSpecs>[number],
-): string {
+function mapListSpecToDiagramAction(spec: ReturnType<typeof buildTaskListActionSpecs>[number]): string {
   if (spec.title === "Open Task") {
     return "Enter";
   }
@@ -427,9 +285,7 @@ function mapListSpecToDiagramAction(
   return spec.shortcut ? formatShortcut(spec.shortcut) : spec.title;
 }
 
-function mapDetailSpecToDiagramTarget(
-  spec: ReturnType<typeof buildTaskDetailActionSpecs>[number],
-): string {
+function mapDetailSpecToDiagramTarget(spec: ReturnType<typeof buildTaskDetailActionSpecs>[number]): string {
   switch (spec.title) {
     case "Log Work":
       return "Edit Task form (new log focused)";
@@ -483,13 +339,10 @@ function mapMenuSpecToDiagramTarget(title: string): string {
 }
 
 function formatShortcut(shortcut: Keyboard.Shortcut): string {
-  const macShortcut = (
-    "macOS" in shortcut
-      ? shortcut.macOS
-      : "macos" in shortcut
-        ? shortcut.macos
-        : shortcut
-  ) as { modifiers: string[]; key: string };
+  const macShortcut = ("macOS" in shortcut ? shortcut.macOS : "macos" in shortcut ? shortcut.macos : shortcut) as {
+    modifiers: string[];
+    key: string;
+  };
   const modifierLabels = macShortcut.modifiers.map((modifier) => {
     switch (modifier) {
       case "cmd":
@@ -508,18 +361,11 @@ function formatShortcut(shortcut: Keyboard.Shortcut): string {
   return [...modifierLabels, macShortcut.key.toUpperCase()].join("+");
 }
 
-function assertDocumentedEdgeIsImplemented(edge: {
-  from: string;
-  action: string;
-  to: string;
-}) {
+function assertDocumentedEdgeIsImplemented(edge: { from: string; action: string; to: string }) {
   const implementedEdges = getImplementedEdgesForSource(edge.from);
 
   assert.ok(
-    implementedEdges.some(
-      (candidate) =>
-        candidate.action === edge.action && candidate.to === edge.to,
-    ),
+    implementedEdges.some((candidate) => candidate.action === edge.action && candidate.to === edge.to),
     `Documented Mermaid edge is not implemented: ${edge.from} --${edge.action}--> ${edge.to}`,
   );
 }
@@ -535,9 +381,7 @@ function getImplementedEdgesForSource(source: string) {
     case "Full-window task detail":
       return [
         ...buildDocumentedDetailFlowEdges(createTask({ status: "todo" })),
-        ...buildDocumentedDetailFlowEdges(
-          createTask({ status: "in_progress" }),
-        ),
+        ...buildDocumentedDetailFlowEdges(createTask({ status: "in_progress" })),
         ...buildDocumentedDetailFlowEdges(createTask({ status: "done" })),
         ...buildDocumentedDetailFlowEdges(createTask({ status: "archived" })),
       ];

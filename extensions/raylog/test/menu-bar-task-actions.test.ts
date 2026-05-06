@@ -31,12 +31,7 @@ test("completing a menu bar task refreshes menu state after the mutation", async
     },
   });
 
-  assert.deepEqual(calls, [
-    "loading:true",
-    "complete:current-task",
-    "toast:success:Task completed",
-    "refresh",
-  ]);
+  assert.deepEqual(calls, ["loading:true", "complete:current-task", "toast:success:Task completed", "refresh"]);
 });
 
 test("failed menu bar task actions stop loading and surface an error toast", async () => {
@@ -67,11 +62,7 @@ test("failed menu bar task actions stop loading and surface an error toast", asy
     },
   });
 
-  assert.deepEqual(calls, [
-    "loading:true",
-    "loading:false",
-    "toast:failure:Unable to complete task:boom",
-  ]);
+  assert.deepEqual(calls, ["loading:true", "loading:false", "toast:failure:Unable to complete task:boom"]);
 });
 
 function createTask(overrides: Partial<TaskRecord> = {}): TaskRecord {

@@ -1,4 +1,4 @@
-import { nanoid } from "nanoid";
+import { randomUUID } from "node:crypto";
 import { RaylogTaskNotFoundError, RaylogWorkLogNotFoundError } from "./storage-errors";
 import { readStorageDocument, readStorageMarkdown, writeStorageDocument } from "./storage-markdown";
 import { isRaylogDocument, parseRaylogMarkdown } from "./storage-schema";
@@ -72,7 +72,7 @@ export class RaylogRepository {
       const now = new Date().toISOString();
       const status = input.status ?? "todo";
       const task: TaskRecord = {
-        id: nanoid(),
+        id: randomUUID(),
         header: input.header.trim(),
         body: input.body?.trim() ?? "",
         workLogs: [],
@@ -174,7 +174,7 @@ export class RaylogRepository {
         }
 
         createdWorkLog = {
-          id: nanoid(),
+          id: randomUUID(),
           body: input.body.trim(),
           createdAt: now,
           updatedAt: null,

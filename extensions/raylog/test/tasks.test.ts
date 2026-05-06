@@ -62,14 +62,8 @@ test("task filter labels and descriptions clarify all-tasks, open-tasks, and to-
     getTaskFilterDescription("all"),
     "Includes to-do, in-progress, and done tasks. Archived tasks stay in their own view.",
   );
-  assert.equal(
-    getTaskFilterDescription("open"),
-    "Shows tasks with To Do or In Progress status.",
-  );
-  assert.equal(
-    getTaskFilterDescription("todo"),
-    "Shows only tasks with To Do status.",
-  );
+  assert.equal(getTaskFilterDescription("open"), "Shows tasks with To Do or In Progress status.");
+  assert.equal(getTaskFilterDescription("todo"), "Shows only tasks with To Do status.");
 });
 
 test("open filter includes to-do and in-progress tasks only", () => {
@@ -227,9 +221,7 @@ test("task log search also matches work log bodies", () => {
   ];
 
   assert.deepEqual(
-    filterTasks(tasks, "all", "changelog", 7, { includeWorkLogs: true }).map(
-      (task) => task.id,
-    ),
+    filterTasks(tasks, "all", "changelog", 7, { includeWorkLogs: true }).map((task) => task.id),
     ["b"],
   );
   assert.deepEqual(

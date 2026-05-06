@@ -14,9 +14,7 @@ test("writes successful menu bar refreshes to cache", async () => {
 
   const state = await refreshMenuBarState({
     repository: {
-      listTasks: async () => [
-        createTask({ id: "task-1", header: "Ship", dueDate: "2026-04-10" }),
-      ],
+      listTasks: async () => [createTask({ id: "task-1", header: "Ship", dueDate: "2026-04-10" })],
     },
     cacheStore,
   });
@@ -97,9 +95,7 @@ test("clearMenuBarCache removes persisted state explicitly", () => {
   assert.equal(readMenuBarCache(cacheStore), undefined);
 });
 
-function createCacheStore(
-  initialValues: Record<string, string> = {},
-): MenuBarCacheStore {
+function createCacheStore(initialValues: Record<string, string> = {}): MenuBarCacheStore {
   const values = new Map(Object.entries(initialValues));
 
   return {

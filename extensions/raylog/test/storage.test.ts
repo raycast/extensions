@@ -18,10 +18,7 @@ import type { TaskRecord } from "../src/lib/types";
 
 test("flags an empty markdown note for initialization", async () => {
   const notePath = await createTempMarkdownFile("");
-  await assert.rejects(
-    () => ensureStorageNote(notePath),
-    RaylogInitializationRequiredError,
-  );
+  await assert.rejects(() => ensureStorageNote(notePath), RaylogInitializationRequiredError);
 });
 
 test("parses a valid v1 markdown note with todo task status", () => {
@@ -113,10 +110,7 @@ test("describes malformed task data inside the Raylog block", () => {
     (error: unknown) => {
       assert.ok(error instanceof RaylogParseError);
       assert.match(error.message, /Raylog database is corrupted/i);
-      assert.match(
-        error.message,
-        /Malformed task data: task header is invalid/i,
-      );
+      assert.match(error.message, /Malformed task data: task header is invalid/i);
       return true;
     },
   );
@@ -164,10 +158,7 @@ test("flags a missing block while preserving markdown content", async () => {
   const originalMarkdown = "# Existing Note\n\nKeep this text.";
   const notePath = await createTempMarkdownFile(originalMarkdown);
 
-  await assert.rejects(
-    () => ensureStorageNote(notePath),
-    RaylogInitializationRequiredError,
-  );
+  await assert.rejects(() => ensureStorageNote(notePath), RaylogInitializationRequiredError);
 
   const unchangedMarkdown = await fs.promises.readFile(notePath, "utf8");
   assert.match(unchangedMarkdown, /# Existing Note/);
@@ -237,18 +228,13 @@ test("creates, updates, and deletes work logs without clobbering markdown", asyn
   assert.equal(taskAfterCreate.workLogs[0]?.body, "Implemented first pass");
   assert.ok(taskAfterCreate.updatedAt >= createdTask.updatedAt);
 
-  const updatedWorkLog = await repository.updateWorkLog(
-    createdTask.id,
-    createdWorkLog.id,
-    { body: "Implemented and tested first pass" },
-  );
+  const updatedWorkLog = await repository.updateWorkLog(createdTask.id, createdWorkLog.id, {
+    body: "Implemented and tested first pass",
+  });
   assert.ok(updatedWorkLog.updatedAt);
 
   const taskAfterUpdate = await repository.getTask(createdTask.id);
-  assert.equal(
-    taskAfterUpdate.workLogs[0]?.body,
-    "Implemented and tested first pass",
-  );
+  assert.equal(taskAfterUpdate.workLogs[0]?.body, "Implemented and tested first pass");
 
   await repository.deleteWorkLog(createdTask.id, createdWorkLog.id);
   const taskAfterDelete = await repository.getTask(createdTask.id);
@@ -329,10 +315,7 @@ test("serializes concurrent creates so both tasks persist", async () => {
 
   const tasks = await repository.listTasks();
   assert.equal(tasks.length, 2);
-  assert.deepEqual(tasks.map((task) => task.header).sort(), [
-    "First task",
-    "Second task",
-  ]);
+  assert.deepEqual(tasks.map((task) => task.header).sort(), ["First task", "Second task"]);
 });
 
 test("serializes concurrent updates in invocation order", async () => {
@@ -476,9 +459,7 @@ test("rejects v1 documents with malformed work logs", () => {
         id: "task-1",
         header: "Header",
         body: "",
-        workLogs: [
-          { id: "log-1", body: "", createdAt: "2026-03-31T00:00:00.000Z" },
-        ],
+        workLogs: [{ id: "log-1", body: "", createdAt: "2026-03-31T00:00:00.000Z" }],
         status: "todo",
         dueDate: null,
         startDate: null,
@@ -499,9 +480,7 @@ test("rejects v1 documents with malformed work logs", () => {
 });
 
 async function createTempMarkdownFile(contents: string): Promise<string> {
-  const directory = await fs.promises.mkdtemp(
-    path.join(os.tmpdir(), "raylog-"),
-  );
+  const directory = await fs.promises.mkdtemp(path.join(os.tmpdir(), "raylog-"));
   const notePath = path.join(directory, "tasks.md");
   await fs.promises.writeFile(notePath, contents, "utf8");
   return notePath;
