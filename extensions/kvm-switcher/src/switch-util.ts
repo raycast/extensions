@@ -26,7 +26,8 @@ export async function switchMonitorInput(inputCode: string | number, inputName: 
     if (process.platform === "win32") {
       const csFilePath = path.join(environment.assetsPath, "MonitorSwitcher.cs");
 
-      const psCommand = `Add-Type -Path '${csFilePath}'; [MonitorControl]::SetInput(${sanitizedCode})`;
+      const escapedCsFilePath = csFilePath.replace(/'/g, "''");
+      const psCommand = `Add-Type -Path '${escapedCsFilePath}'; [MonitorControl]::SetInput(${sanitizedCode})`;
 
       const psPath = process.env.SystemRoot
         ? `${process.env.SystemRoot}\\System32\\WindowsPowerShell\\v1.0\\powershell.exe`
