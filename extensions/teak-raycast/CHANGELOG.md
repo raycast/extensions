@@ -1,6 +1,6 @@
 # Changelog
 
-## 1.0.30 - {PR_MERGED_AT}
+## 1.0.30 - {PR_MERGE_DATE}
 
 - Add **Save to Teak** fallback command so you can capture text or URLs from Raycast root search
 - Add **Save Selected Text** command to send the currently highlighted text from any app to Teak

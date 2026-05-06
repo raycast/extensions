@@ -5,7 +5,6 @@ import {
   Form,
   Icon,
   open,
-  showHUD,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -100,7 +99,6 @@ export default function QuickSaveCommand() {
       toast.style = Toast.Style.Success;
       toast.title = "Saved to Teak";
 
-      await showHUD("Teak capture complete");
       setContent("");
     } catch (error) {
       toast.style = Toast.Style.Failure;

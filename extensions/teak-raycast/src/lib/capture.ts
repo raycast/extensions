@@ -1,4 +1,4 @@
-import { open, showHUD, showToast, Toast } from "@raycast/api";
+import { open, showToast, Toast } from "@raycast/api";
 import {
   type CreateCardInput,
   createCard,
@@ -72,7 +72,6 @@ export const saveCardWithFeedback = async (
 
     toast.style = Toast.Style.Success;
     toast.title = "Saved to Teak";
-    await showHUD("Teak capture complete");
 
     return result;
   } catch (error) {

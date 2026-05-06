@@ -1,5 +1,5 @@
 import {
-  LaunchType,
+  type LaunchProps,
   openExtensionPreferences,
   showToast,
   Toast,
@@ -7,17 +7,9 @@ import {
 import { extractFirstHttpUrl, saveCardWithFeedback } from "./lib/capture";
 import { getPreferences } from "./lib/preferences";
 
-type Arguments = {
-  content?: string;
-};
-
-type LaunchProps = {
-  arguments: Arguments;
-  fallbackText?: string;
-  launchType: LaunchType;
-};
-
-export default async function SaveTextCommand(props: LaunchProps) {
+export default async function SaveTextCommand(
+  props: LaunchProps<{ arguments: Arguments.SaveText }>,
+) {
   const { apiKey } = getPreferences();
   if (!apiKey?.trim()) {
     await showToast({
