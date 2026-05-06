@@ -1,70 +1,93 @@
 # AI Translate for Raycast
 
-一个面向整句翻译的 Raycast 扩展，参考 Easydict 的交互骨架，但核心目标从“查词”改为“选中文本 / 截图 OCR 后调用大模型翻译”。
+AI Translate is a Raycast extension for sentence-level AI translation and screenshot OCR workflows.
 
-## 功能
+Many translation extensions still center on conventional machine translation engines. They are fast, but they often miss context, tone, domain vocabulary, and the structure of long sentences. AI Translate is built for a newer workflow: extract the text you are looking at, send it to an AI model you control, and get a translation that reads like a real sentence rather than a word-by-word conversion.
 
-- 选中翻译：选中任意应用里的文本后运行 `Translate Selected Text`。
-- 截图翻译：运行 `Translate Screenshot`，框选屏幕区域，OCR 识别后自动打开翻译结果。
-- 交互式 OCR：运行 `Extract Text from Screenshot`，框选屏幕区域，OCR 识别后可编辑、复制、压缩复制或继续翻译。
-- 快速复制 OCR：运行 `Copy Text from Screenshot`，框选屏幕区域，OCR 识别后直接复制到剪贴板。
-- OCR 引擎：支持本地 macOS Vision、Tesseract、百度 OCR API、本地/自托管 PaddleOCR。
-- 多模型：支持 DeepSeek、小米 MiMo、MiniMax、Gemini、Kimi、OpenAI / ChatGPT。
-- 可配置：Provider 开关、排序、目标语言、翻译风格、模型名、Base URL、API Key。
+The extension prioritizes cost-effective, high-quality China-based model providers such as DeepSeek, Xiaomi MiMo, MiniMax, and Kimi, while still supporting OpenAI / ChatGPT and Gemini for users who prefer those ecosystems. If you already subscribe to a Token Plan or provider-specific plan, you can bring your own API key, base URL, and model ID directly into Raycast.
+
+## Features
+
+- Translate selected text from any app with `Translate Selected Text`.
+- Translate screenshots with `Translate Screenshot`: capture a region, run OCR, then translate the recognized text.
+- Review OCR results with `Extract Text from Screenshot`: capture a region, edit the extracted text, copy it, compact it, translate it, or retake the screenshot.
+- Copy OCR text silently with `Copy Text from Screenshot`: capture a region and copy the recognized text directly to the clipboard.
+- Use local or API OCR engines: macOS Vision, Tesseract, Baidu OCR API, or a self-hosted PaddleOCR HTTP service.
+- Compare multiple AI providers in one result view.
+- Configure provider order, target language, translation style, model ID, base URL, and API key.
+
+## Why AI Translation
+
+- **Better sentence quality**: LLMs are better at preserving context, pronouns, idioms, tone, technical terms, and academic phrasing than traditional machine translation.
+- **Cost control**: OpenAI and Claude-class providers can be expensive for everyday translation. This extension is designed to work well with cost-effective providers such as DeepSeek, Xiaomi MiMo, MiniMax, and Kimi.
+- **Token Plan friendly**: Developers who already pay for Xiaomi MiMo, MiniMax, or other provider-specific plans can reuse those credentials instead of paying again for a separate translation service.
+- **Provider independence**: OpenAI / ChatGPT and Gemini are also supported, so you can pick the model that fits your quality, latency, and budget.
+- **Screenshot-native workflow**: Translate text that cannot be selected, including app UI, images, PDFs, slides, websites, and videos.
+
+## Commands
+
+| Command                        | Purpose                                                                                        |
+| ------------------------------ | ---------------------------------------------------------------------------------------------- |
+| `Translate Selected Text`      | Translate selected text, typed text, or a fallback argument.                                   |
+| `Translate Screenshot`         | Capture a screen region, run OCR, and send the recognized text to the translation view.        |
+| `Extract Text from Screenshot` | Capture a screen region and open an editable OCR result view with copy, translate, and retake. |
+| `Copy Text from Screenshot`    | Capture a screen region, run OCR, copy the recognized text, and stay out of the user's way.    |
 
 ## AI Provider Defaults
 
-| Provider    | Anthropic Base URL                               | Default Model       |
-| ----------- | ------------------------------------------------ | ------------------- |
-| DeepSeek    | `https://api.deepseek.com/anthropic`             | `deepseek-v4-flash` |
-| Xiaomi MiMo | `https://token-plan-cn.xiaomimimo.com/anthropic` | `mimo-v2-flash`     |
-| MiniMax     | `https://api.minimaxi.com/anthropic`             | `MiniMax-M2.7`      |
-| Kimi        | `https://api.moonshot.ai/anthropic`              | `kimi-k2.6`         |
+| Provider    | Protocol                          | Base URL                                           | Default Model       |
+| ----------- | --------------------------------- | -------------------------------------------------- | ------------------- |
+| DeepSeek    | Anthropic-compatible Messages     | `https://api.deepseek.com/anthropic`               | `deepseek-v4-flash` |
+| Xiaomi MiMo | Token Plan / Anthropic-compatible | `https://token-plan-cn.xiaomimimo.com/anthropic`   | `mimo-v2-flash`     |
+| MiniMax     | Token Plan / Anthropic-compatible | `https://api.minimaxi.com/anthropic`               | `MiniMax-M2.7`      |
+| Kimi        | Anthropic-compatible Messages     | `https://api.moonshot.ai/anthropic`                | `kimi-k2.6`         |
+| Gemini      | Native Gemini API                 | `https://generativelanguage.googleapis.com/v1beta` | `gemini-2.5-flash`  |
+| OpenAI      | Native Chat Completions API       | `https://api.openai.com/v1`                        | `gpt-4.1-mini`      |
 
-DeepSeek, MiMo, MiniMax, and Kimi use one Anthropic-compatible entrypoint each. The extension appends `/v1/messages` automatically. OpenAI and Gemini keep their native protocols. Model preferences remain text fields so newer model IDs can be entered without changing the extension.
+DeepSeek, Xiaomi MiMo, MiniMax, and Kimi use a single Anthropic-compatible entrypoint each. The extension appends `/v1/messages` automatically. OpenAI and Gemini use their native protocols. Model preferences remain editable text fields so newer model IDs can be entered without changing the extension.
 
-Current model IDs worth trying:
+Model IDs worth trying:
 
 - Xiaomi MiMo: `mimo-v2.5`, `mimo-v2.5-pro`, `mimo-v2-pro`, `mimo-v2-omni`
 - MiniMax: `MiniMax-M2.7-highspeed`
 - Kimi: `kimi-k2.5`, `moonshot-v1-8k`, `moonshot-v1-32k`, `moonshot-v1-128k`
 
-## 官方接口文档
+## Official API Documentation
 
-| Provider         | 接入方式                                   | 官方文档                                                                                                                                                                                               |
+| Provider         | Integration path                           | Official documentation                                                                                                                                                                                 |
 | ---------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | DeepSeek         | Anthropic-compatible Messages              | [Anthropic API](https://api-docs.deepseek.com/guides/anthropic_api)                                                                                                                                    |
 | Xiaomi MiMo      | Token Plan / Anthropic-compatible Messages | [Anthropic API Compatibility](https://platform.xiaomimimo.com/static/docs/api/chat/anthropic-api.md), [Token Plan Quick Access](https://platform.xiaomimimo.com/static/docs/tokenplan/quick-access.md) |
-| MiniMax          | Token Plan / Anthropic-compatible Messages | [Anthropic API 兼容](https://platform.minimaxi.com/docs/api-reference/text-anthropic-api), [Token Plan 快速接入](https://platform.minimaxi.com/docs/token-plan/quickstart)                             |
-| Gemini           | Gemini `generateContent`                   | [Text generation](https://ai.google.dev/gemini-api/docs/text-generation), [Gemini API reference](https://ai.google.dev/gemini-api/docs/api-overview)                                                   |
-| Kimi             | Anthropic-compatible agent integration     | [ClaudeCode / Cline / RooCode 接入说明](https://platform.kimi.ai/docs/guide/agent-support), [API Overview](https://platform.kimi.ai/docs/api/overview)                                                 |
+| MiniMax          | Token Plan / Anthropic-compatible Messages | [Anthropic API Compatibility](https://platform.minimaxi.com/docs/api-reference/text-anthropic-api), [Token Plan Quickstart](https://platform.minimaxi.com/docs/token-plan/quickstart)                  |
+| Gemini           | Gemini `generateContent`                   | [Text Generation](https://ai.google.dev/gemini-api/docs/text-generation), [Gemini API Reference](https://ai.google.dev/gemini-api/docs/api-overview)                                                   |
+| Kimi             | Anthropic-compatible agent integration     | [Claude Code / Cline / RooCode Integration](https://platform.kimi.ai/docs/guide/agent-support), [API Overview](https://platform.kimi.ai/docs/api/overview)                                             |
 | OpenAI / ChatGPT | Chat Completions                           | [Chat Completions API Reference](https://platform.openai.com/docs/api-reference/chat/create)                                                                                                           |
 
-| OCR Engine     | 官方文档                                                                                                                                                                                                             |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Baidu OCR API  | [通用文字识别（标准版）](https://cloud.baidu.com/doc/OCR/s/zk3h7xz52), [通用文字识别（高精度版）](https://cloud.baidu.com/doc/OCR/s/1k3h7y3db), [鉴权认证机制](https://cloud.baidu.com/doc/AI_REFERENCE/s/um3zhy50e) |
-| PaddleOCR HTTP | [Server Deployment](https://paddlepaddle.github.io/PaddleOCR/main/en/version3.x/deployment/serving.html), [OCR Pipeline Usage](https://www.paddleocr.ai/main/en/version3.x/pipeline_usage/OCR.html)                  |
+| OCR Engine     | Official documentation                                                                                                                                                                                                    |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Baidu OCR API  | [General Text Recognition](https://cloud.baidu.com/doc/OCR/s/zk3h7xz52), [Accurate Text Recognition](https://cloud.baidu.com/doc/OCR/s/1k3h7y3db), [Authentication](https://cloud.baidu.com/doc/AI_REFERENCE/s/um3zhy50e) |
+| PaddleOCR HTTP | [Server Deployment](https://paddlepaddle.github.io/PaddleOCR/main/en/version3.x/deployment/serving.html), [OCR Pipeline Usage](https://www.paddleocr.ai/main/en/version3.x/pipeline_usage/OCR.html)                       |
 
-## 快捷键
+## Keyboard Shortcuts
 
-Raycast 扩展不能在代码里强制写入全局快捷键。安装后在 Raycast Settings > Extensions > AI Translate 里给 `Translate Screenshot`、`Extract Text from Screenshot` 或 `Copy Text from Screenshot` 绑定你想要的快捷键即可。
+Raycast extensions cannot force global hotkeys from code. After installing the extension, open Raycast Settings > Extensions > AI Translate and assign your preferred hotkeys to `Translate Screenshot`, `Extract Text from Screenshot`, or `Copy Text from Screenshot`.
 
-## 开发
+## Development
 
 ```bash
 npm install
 npm run dev
 ```
 
-`npm run dev` 会先生成图标并编译 Swift OCR 二进制。首次截图 OCR 可能需要 macOS 授予 Raycast 屏幕录制权限。
+`npm run dev` generates the icon and compiles the Swift OCR helper before starting Raycast development mode. The first screenshot OCR run may require macOS Screen Recording permission for Raycast.
 
-## OCR API 选择
+## OCR Engine Notes
 
-- `Local macOS Vision`：默认方案，最快、无网络、隐私最好。
-- `Tesseract Local`：参考 omarchy-cmd-ocr 的轻量本地 pipeline；可用 `brew install tesseract` 安装，并通过 `Tesseract Languages` 配置 `eng+chi_sim` 等语言包。
-- `Baidu OCR API`：同步接口，适合截图翻译；`general_basic` 更快，`accurate_basic` 更稳。
-- `PaddleOCR HTTP`：适合你自托管 PaddleOCR service，默认 endpoint 是 `http://localhost:8080/ocr`。
+- `Local macOS Vision`: the default option; fast, private, and network-free.
+- `Tesseract Local`: a lightweight local OCR pipeline inspired by omarchy-cmd-ocr. Install it with `brew install tesseract`, then configure languages such as `eng+chi_sim` in `Tesseract Languages`.
+- `Baidu OCR API`: a synchronous OCR API suitable for screenshot translation. `general_basic` is faster; `accurate_basic` is more robust for complex screenshots.
+- `PaddleOCR HTTP`: use this with a local or self-hosted PaddleOCR service. The default endpoint is `http://localhost:8080/ocr`.
 
-API OCR 失败时默认会用同一张截图回退到本地 Vision OCR。
+If an API OCR engine fails, the extension can fall back to local macOS Vision OCR on the same screenshot.
 
-`OCR Text Layout` 借鉴了 omarchy-cmd-ocr 的双模式：`Formatted` 保留换行，`Compact` 会把识别结果压成单行，更适合对零散 UI 文本做整句翻译。
+`OCR Text Layout` follows the same practical split as omarchy-cmd-ocr: `Formatted` preserves line breaks, while `Compact` collapses whitespace into a single line for cleaner sentence translation.

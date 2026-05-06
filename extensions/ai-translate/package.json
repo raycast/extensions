@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-translate",
   "title": "AI Translate",
-  "description": "Translate selected text, translate screenshots, or extract screenshot text with OCR and AI providers.",
+  "description": "AI-powered sentence translation for selected text, screenshots, and OCR with BYOK model providers.",
   "icon": "icon.png",
   "author": "xianwei_zhang",
   "license": "MIT",
@@ -22,7 +22,18 @@
           "required": false
         }
       ],
-      "keywords": ["translate", "selection", "deepseek", "mimo", "xiaomi", "minimax", "gemini", "kimi", "chatgpt", "openai"]
+      "keywords": [
+        "translate",
+        "selection",
+        "deepseek",
+        "mimo",
+        "xiaomi",
+        "minimax",
+        "gemini",
+        "kimi",
+        "chatgpt",
+        "openai"
+      ]
     },
     {
       "name": "screenshot-translate",
@@ -31,7 +42,12 @@
       "description": "Capture a screen region, OCR it, and translate the recognized text.",
       "mode": "no-view",
       "icon": "screenshot-translate.png",
-      "keywords": ["ocr", "screenshot", "capture", "translate"]
+      "keywords": [
+        "ocr",
+        "screenshot",
+        "capture",
+        "translate"
+      ]
     },
     {
       "name": "extract-text-from-screenshot",
@@ -40,7 +56,15 @@
       "description": "Capture a screen region, OCR it, and review or edit the extracted text before copying or translating it.",
       "mode": "view",
       "icon": "screenshot-translate.png",
-      "keywords": ["ocr", "screenshot", "capture", "extract", "review", "edit", "text"]
+      "keywords": [
+        "ocr",
+        "screenshot",
+        "capture",
+        "extract",
+        "review",
+        "edit",
+        "text"
+      ]
     },
     {
       "name": "copy-text-from-screenshot",
@@ -49,10 +73,22 @@
       "description": "Capture a screen region, OCR it, and copy the recognized text to the clipboard without opening a result view.",
       "mode": "no-view",
       "icon": "screenshot-translate.png",
-      "keywords": ["ocr", "screenshot", "capture", "copy", "clipboard", "text"]
+      "keywords": [
+        "ocr",
+        "screenshot",
+        "capture",
+        "copy",
+        "clipboard",
+        "text"
+      ]
     }
   ],
-  "categories": ["Productivity", "Applications", "Developer Tools", "Web"],
+  "categories": [
+    "Productivity",
+    "Applications",
+    "Developer Tools",
+    "Web"
+  ],
   "preferences": [
     {
       "title": "Default Provider",
@@ -62,12 +98,30 @@
       "default": "deepseek",
       "description": "Provider shown first and used when no provider checkbox is enabled.",
       "data": [
-        { "title": "DeepSeek", "value": "deepseek" },
-        { "title": "Xiaomi MiMo", "value": "mimo" },
-        { "title": "MiniMax", "value": "minimax" },
-        { "title": "Gemini", "value": "gemini" },
-        { "title": "Kimi", "value": "kimi" },
-        { "title": "OpenAI / ChatGPT", "value": "openai" }
+        {
+          "title": "DeepSeek",
+          "value": "deepseek"
+        },
+        {
+          "title": "Xiaomi MiMo",
+          "value": "mimo"
+        },
+        {
+          "title": "MiniMax",
+          "value": "minimax"
+        },
+        {
+          "title": "Gemini",
+          "value": "gemini"
+        },
+        {
+          "title": "Kimi",
+          "value": "kimi"
+        },
+        {
+          "title": "OpenAI / ChatGPT",
+          "value": "openai"
+        }
       ]
     },
     {
@@ -78,18 +132,54 @@
       "default": "auto",
       "description": "Auto translates Chinese text to English and other text to Simplified Chinese.",
       "data": [
-        { "title": "Auto", "value": "auto" },
-        { "title": "Chinese Simplified", "value": "zh-Hans" },
-        { "title": "Chinese Traditional", "value": "zh-Hant" },
-        { "title": "English", "value": "en" },
-        { "title": "Japanese", "value": "ja" },
-        { "title": "Korean", "value": "ko" },
-        { "title": "French", "value": "fr" },
-        { "title": "German", "value": "de" },
-        { "title": "Spanish", "value": "es" },
-        { "title": "Italian", "value": "it" },
-        { "title": "Portuguese", "value": "pt" },
-        { "title": "Russian", "value": "ru" }
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Chinese Simplified",
+          "value": "zh-Hans"
+        },
+        {
+          "title": "Chinese Traditional",
+          "value": "zh-Hant"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        }
       ]
     },
     {
@@ -100,10 +190,22 @@
       "default": "balanced",
       "description": "Controls how literal or polished the sentence translation should be.",
       "data": [
-        { "title": "Balanced", "value": "balanced" },
-        { "title": "Faithful", "value": "faithful" },
-        { "title": "Polished", "value": "polished" },
-        { "title": "Academic", "value": "academic" }
+        {
+          "title": "Balanced",
+          "value": "balanced"
+        },
+        {
+          "title": "Faithful",
+          "value": "faithful"
+        },
+        {
+          "title": "Polished",
+          "value": "polished"
+        },
+        {
+          "title": "Academic",
+          "value": "academic"
+        }
       ]
     },
     {
@@ -114,10 +216,22 @@
       "default": "local",
       "description": "Engine used by Screenshot Translate.",
       "data": [
-        { "title": "Local macOS Vision", "value": "local" },
-        { "title": "Tesseract Local", "value": "tesseract" },
-        { "title": "Baidu OCR API", "value": "baidu" },
-        { "title": "PaddleOCR HTTP", "value": "paddle" }
+        {
+          "title": "Local macOS Vision",
+          "value": "local"
+        },
+        {
+          "title": "Tesseract Local",
+          "value": "tesseract"
+        },
+        {
+          "title": "Baidu OCR API",
+          "value": "baidu"
+        },
+        {
+          "title": "PaddleOCR HTTP",
+          "value": "paddle"
+        }
       ]
     },
     {
@@ -128,8 +242,14 @@
       "default": "formatted",
       "description": "Formatted preserves OCR line breaks; compact collapses whitespace into one line.",
       "data": [
-        { "title": "Formatted", "value": "formatted" },
-        { "title": "Compact", "value": "compact" }
+        {
+          "title": "Formatted",
+          "value": "formatted"
+        },
+        {
+          "title": "Compact",
+          "value": "compact"
+        }
       ]
     },
     {
@@ -188,8 +308,14 @@
       "description": "Baidu OCR endpoint. General is faster; accurate is better for complex screenshots.",
       "default": "accurate_basic",
       "data": [
-        { "title": "Accurate Basic", "value": "accurate_basic" },
-        { "title": "General Basic", "value": "general_basic" }
+        {
+          "title": "Accurate Basic",
+          "value": "accurate_basic"
+        },
+        {
+          "title": "General Basic",
+          "value": "general_basic"
+        }
       ]
     },
     {
@@ -435,7 +561,9 @@
       "default": "gpt-4.1-mini"
     }
   ],
-  "platforms": ["macOS"],
+  "platforms": [
+    "macOS"
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.6",
     "react": "^19.1.5"
