@@ -3,7 +3,7 @@
 ## [Initial Version] - {PR_MERGE_DATE}
 
 - Initial local Raycast extension with selected-text translation, screenshot OCR translation, and configurable AI providers.
-- Added a pure OCR screenshot command that copies extracted text to the clipboard.
+- Split screenshot OCR into an interactive extraction command and a quiet copy-to-clipboard command.
 - Removed MinerU OCR and kept API OCR focused on Baidu OCR and PaddleOCR HTTP.
 - Added Xiaomi MiMo provider and refreshed DeepSeek, MiniMax, and Kimi defaults from provider docs.
 - Collapsed DeepSeek, Xiaomi MiMo, MiniMax, and Kimi to a single Anthropic-compatible API key/base URL/model entry each.

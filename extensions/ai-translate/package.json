@@ -37,10 +37,19 @@
       "name": "extract-text-from-screenshot",
       "title": "Extract Text from Screenshot",
       "subtitle": "AI Translate",
-      "description": "Capture a screen region, OCR it, and copy the recognized text to the clipboard.",
+      "description": "Capture a screen region, OCR it, and review or edit the extracted text before copying or translating it.",
+      "mode": "view",
+      "icon": "screenshot-translate.png",
+      "keywords": ["ocr", "screenshot", "capture", "extract", "review", "edit", "text"]
+    },
+    {
+      "name": "copy-text-from-screenshot",
+      "title": "Copy Text from Screenshot",
+      "subtitle": "AI Translate",
+      "description": "Capture a screen region, OCR it, and copy the recognized text to the clipboard without opening a result view.",
       "mode": "no-view",
       "icon": "screenshot-translate.png",
-      "keywords": ["ocr", "screenshot", "capture", "extract", "copy", "clipboard", "text"]
+      "keywords": ["ocr", "screenshot", "capture", "copy", "clipboard", "text"]
     }
   ],
   "categories": ["Productivity", "Applications", "Developer Tools", "Web"],

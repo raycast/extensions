@@ -1,4 +1,4 @@
-import { Clipboard, PopToRootType, closeMainWindow, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, PopToRootType, Toast, closeMainWindow, showHUD, showToast } from "@raycast/api";
 import { recognizeScreenshotText } from "./ocr-engines";
 import { readPreferences } from "./preferences";
 
@@ -21,7 +21,7 @@ export default async function command() {
 
     await Clipboard.copy(recognizedText);
     toast.hide();
-    await showHUD("Extracted text copied to Clipboard");
+    await showHUD("Copied extracted text to Clipboard");
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     await showHUD(`OCR failed: ${message}`);
