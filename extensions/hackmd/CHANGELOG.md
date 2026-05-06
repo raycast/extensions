@@ -1,6 +1,6 @@
 # HackMD Changelog
 
-## [Add Action Panel and Keyboard Shortcuts] - {PR_MERGE_DATE}
+## [Add Action Panel and Keyboard Shortcuts] - 2026-05-06
 
 - Add copy shortcut for note links
 - Add action panel shortcuts to release notes
