@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { LANGUAGE_CHOICES, getLanguageTitle, resolveTargetLanguage } from "./languages";
+import { getTierLabel } from "./models";
 import {
   PROVIDER_TITLES,
   getMaxOutputTokens,
@@ -23,11 +24,16 @@ import {
   readPreferences,
 } from "./preferences";
 import { MissingAPIKeyError, translateWithProvider } from "./providers";
-import { TranslationRequest, TranslationResult } from "./types";
-
-interface TranslateArguments {
-  text?: string;
-}
+import { loadRuntimeSettings, updateRuntimeSetting } from "./runtime-settings";
+import { speakText } from "./tts";
+import {
+  ModelTier,
+  PromptProfile,
+  RuntimeSettings,
+  TranslationRequest,
+  TranslationResult,
+  TranslationStyle,
+} from "./types";
 
 const providerIcons = {
   deepseek: Icon.Waveform,
@@ -38,20 +44,42 @@ const providerIcons = {
   openai: Icon.Message,
 } as const;
 
-export default function Command(props: LaunchProps<{ arguments: TranslateArguments }>) {
+const PROMPT_PROFILE_LABELS: Record<PromptProfile, string> = {
+  screenshot: "Screenshot OCR",
+  general: "General",
+  technical: "Technical",
+  academic: "Academic",
+  legal: "Legal",
+  subtitle: "Subtitle",
+  custom: "Custom",
+};
+
+const STYLE_LABELS: Record<TranslationStyle, string> = {
+  balanced: "Balanced",
+  faithful: "Faithful",
+  polished: "Polished",
+  academic: "Academic",
+};
+
+export default function Command(props: LaunchProps) {
   const preferences = useMemo(() => readPreferences(), []);
   const [inputText, setInputText] = useState<string>();
   const [targetLanguage, setTargetLanguage] = useState(preferences.targetLanguage);
   const [results, setResults] = useState<TranslationResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [manualRunId, setManualRunId] = useState(0);
+  const [runtimeSettings, setRuntimeSettings] = useState<RuntimeSettings>();
   const requestSequence = useRef(0);
+
+  useEffect(() => {
+    void loadRuntimeSettings().then(setRuntimeSettings);
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
 
     async function setup() {
-      const launchText = normalizeInputText(props.arguments?.text ?? props.fallbackText ?? "");
+      const launchText = normalizeInputText(props.fallbackText ?? "");
       if (launchText) {
         if (isMounted) setInputText(launchText);
         return;
@@ -69,12 +97,10 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
     return () => {
       isMounted = false;
     };
-  }, [props.arguments?.text, props.fallbackText]);
+  }, [props.fallbackText]);
 
   useEffect(() => {
-    if (inputText === undefined) {
-      return;
-    }
+    if (inputText === undefined || !runtimeSettings) return;
 
     const sequence = ++requestSequence.current;
     const text = normalizeInputText(inputText);
@@ -91,9 +117,11 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
     }, 350);
 
     return () => clearTimeout(timer);
-  }, [inputText, targetLanguage, manualRunId]);
+  }, [inputText, targetLanguage, manualRunId, runtimeSettings]);
 
   async function runTranslations(text: string, sequence: number) {
+    if (!runtimeSettings) return;
+
     const providerIds = getOrderedProviderIds(preferences);
     const pendingResults = providerIds.map<TranslationResult>((providerId) => ({
       providerId,
@@ -107,16 +135,16 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
       text,
       targetLanguage: resolvedTargetLanguage,
       targetLanguageTitle: getLanguageTitle(resolvedTargetLanguage),
-      style: preferences.translationStyle,
-      promptProfile: preferences.promptProfile ?? "screenshot",
-      customPromptInstructions: preferences.customPromptInstructions,
+      style: runtimeSettings.translationStyle,
+      promptProfile: runtimeSettings.promptProfile,
+      customPromptInstructions: runtimeSettings.customPromptInstructions || preferences.customPromptInstructions,
       timeoutMs: getTimeoutMs(preferences),
       maxOutputTokens: getMaxOutputTokens(preferences),
     };
 
     await Promise.all(
       providerIds.map(async (providerId) => {
-        const config = getProviderConfig(providerId, preferences);
+        const config = getProviderConfig(providerId, preferences, runtimeSettings.modelTier);
         const startedAt = Date.now();
 
         try {
@@ -124,6 +152,7 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
           updateResult(sequence, {
             providerId,
             providerTitle: config.title,
+            modelName: config.model,
             status: "success",
             translation,
             durationMs: Date.now() - startedAt,
@@ -132,6 +161,7 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
           updateResult(sequence, {
             providerId,
             providerTitle: config.title,
+            modelName: config.model,
             status: error instanceof MissingAPIKeyError ? "missing-key" : "error",
             error: error instanceof Error ? error.message : String(error),
             durationMs: Date.now() - startedAt,
@@ -146,39 +176,53 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
   }
 
   function updateResult(sequence: number, result: TranslationResult) {
-    if (sequence !== requestSequence.current) {
-      return;
-    }
-
-    setResults((previousResults) =>
-      previousResults.map((previousResult) =>
-        previousResult.providerId === result.providerId ? result : previousResult,
-      ),
-    );
+    if (sequence !== requestSequence.current) return;
+    setResults((prev) => prev.map((r) => (r.providerId === result.providerId ? result : r)));
   }
 
   function retry() {
-    setManualRunId((value) => value + 1);
+    setManualRunId((v) => v + 1);
+  }
+
+  async function switchModelTier(tier: ModelTier) {
+    const updated = await updateRuntimeSetting("modelTier", tier);
+    setRuntimeSettings(updated);
+    await showToast({ style: Toast.Style.Success, title: `Model: ${getTierLabel(tier)}` });
+  }
+
+  async function switchPromptProfile(profile: PromptProfile) {
+    const updated = await updateRuntimeSetting("promptProfile", profile);
+    setRuntimeSettings(updated);
+    await showToast({ style: Toast.Style.Success, title: `Profile: ${PROMPT_PROFILE_LABELS[profile]}` });
+  }
+
+  async function switchStyle(style: TranslationStyle) {
+    const updated = await updateRuntimeSetting("translationStyle", style);
+    setRuntimeSettings(updated);
+    await showToast({ style: Toast.Style.Success, title: `Style: ${STYLE_LABELS[style]}` });
   }
 
   const resolvedTargetLanguage = resolveTargetLanguage(targetLanguage, inputText ?? "");
   const targetLanguageTitle = getLanguageTitle(resolvedTargetLanguage);
+  const currentTier = runtimeSettings?.modelTier ?? "fast";
+  const currentProfile = runtimeSettings?.promptProfile ?? "general";
+  const currentStyle = runtimeSettings?.translationStyle ?? "balanced";
 
   return (
     <List
       filtering={false}
       isLoading={isLoading}
       isShowingDetail={results.length > 0}
-      navigationTitle="AI Translate"
+      navigationTitle={`AI Translate · ${getTierLabel(currentTier)} · ${PROMPT_PROFILE_LABELS[currentProfile]}`}
       onSearchTextChange={setInputText}
       searchBarAccessory={
         <List.Dropdown tooltip="Target Language" value={targetLanguage} onChange={setTargetLanguage}>
-          {LANGUAGE_CHOICES.map((language) => (
-            <List.Dropdown.Item key={language.value} title={language.title} value={language.value} />
+          {LANGUAGE_CHOICES.map((lang) => (
+            <List.Dropdown.Item key={lang.value} title={lang.title} value={lang.value} />
           ))}
         </List.Dropdown>
       }
-      searchBarPlaceholder="Select text, paste OCR text, or type to translate..."
+      searchBarPlaceholder="Select text, paste, or type to translate..."
       searchText={inputText ?? ""}
     >
       {results.map((result) => (
@@ -190,13 +234,25 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
           subtitle={subtitle(result)}
           accessories={accessories(result, targetLanguageTitle)}
           detail={<List.Item.Detail markdown={detailMarkdown(result, inputText ?? "")} />}
-          actions={<ResultActions result={result} sourceText={inputText ?? ""} onRetry={retry} />}
+          actions={
+            <ResultActions
+              result={result}
+              sourceText={inputText ?? ""}
+              currentTier={currentTier}
+              currentProfile={currentProfile}
+              currentStyle={currentStyle}
+              onRetry={retry}
+              onSwitchModelTier={switchModelTier}
+              onSwitchPromptProfile={switchPromptProfile}
+              onSwitchStyle={switchStyle}
+            />
+          }
         />
       ))}
       <List.EmptyView
         icon={Icon.Text}
-        title={inputText === undefined ? "Reading selected text" : "Select or type text to translate"}
-        description="Use Screenshot Translate for OCR, or type directly in the search bar."
+        title={inputText === undefined ? "Reading selected text..." : "Select or type text to translate"}
+        description={`Model: ${getTierLabel(currentTier)} · Profile: ${PROMPT_PROFILE_LABELS[currentProfile]}`}
         actions={
           <ActionPanel>
             <Action
@@ -204,7 +260,12 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
               title="Screenshot Translate"
               onAction={() => launchCommand({ name: "screenshot-translate", type: LaunchType.UserInitiated })}
             />
-            <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
+            <Action
+              icon={Icon.Gear}
+              title="Translation Settings"
+              onAction={() => launchCommand({ name: "translation-settings", type: LaunchType.UserInitiated })}
+            />
+            <Action icon={Icon.Gear} title="Extension Preferences" onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
@@ -215,58 +276,127 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
 function ResultActions({
   result,
   sourceText,
+  currentTier,
+  currentProfile,
+  currentStyle,
   onRetry,
+  onSwitchModelTier,
+  onSwitchPromptProfile,
+  onSwitchStyle,
 }: {
   result: TranslationResult;
   sourceText: string;
+  currentTier: ModelTier;
+  currentProfile: PromptProfile;
+  currentStyle: TranslationStyle;
   onRetry: () => void;
+  onSwitchModelTier: (tier: ModelTier) => void;
+  onSwitchPromptProfile: (profile: PromptProfile) => void;
+  onSwitchStyle: (style: TranslationStyle) => void;
 }) {
   const canUseTranslation = result.status === "success" && Boolean(result.translation);
 
   return (
     <ActionPanel>
-      {canUseTranslation ? (
+      {canUseTranslation && (
         <ActionPanel.Section>
-          <Action.CopyToClipboard
-            content={result.translation ?? ""}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
-            title="Copy Translation"
-          />
+          <Action.CopyToClipboard content={result.translation ?? ""} title="Copy Translation" />
           <Action.Paste
             content={result.translation ?? ""}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             title="Paste Translation"
           />
+          <Action
+            icon={Icon.SpeakerOn}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
+            title="Read Translation Aloud"
+            onAction={() => void speakText(result.translation ?? "")}
+          />
+          <Action
+            icon={Icon.SpeakerOn}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+            title="Read Source Aloud"
+            onAction={() => void speakText(sourceText)}
+          />
         </ActionPanel.Section>
-      ) : null}
-      <ActionPanel.Section>
+      )}
+      <ActionPanel.Section title="Translate">
         <Action
           icon={Icon.ArrowClockwise}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
-          title="Retry Translation"
+          title="Retry"
           onAction={onRetry}
         />
         <Action
           icon={Icon.Camera}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
           title="Screenshot Translate"
           onAction={() => launchCommand({ name: "screenshot-translate", type: LaunchType.UserInitiated })}
         />
-        <Action.CopyToClipboard content={sourceText} title="Copy Source Text" />
-        <Action icon={Icon.Gear} title="Open Extension Preferences" onAction={openExtensionPreferences} />
-        {result.status === "error" || result.status === "missing-key" ? (
+        <Action.CopyToClipboard
+          content={sourceText}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          title="Copy Source Text"
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Submenu
+        icon={Icon.Bolt}
+        shortcut={{ modifiers: ["cmd"], key: "m" }}
+        title={`Model: ${getTierLabel(currentTier)}`}
+      >
+        {(["fast", "pro", "custom"] as ModelTier[]).map((tier) => (
+          <Action
+            key={tier}
+            icon={tier === currentTier ? Icon.Checkmark : Icon.Circle}
+            title={getTierLabel(tier)}
+            onAction={() => onSwitchModelTier(tier)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+      <ActionPanel.Submenu
+        icon={Icon.Document}
+        shortcut={{ modifiers: ["cmd"], key: "p" }}
+        title={`Profile: ${PROMPT_PROFILE_LABELS[currentProfile]}`}
+      >
+        {(Object.keys(PROMPT_PROFILE_LABELS) as PromptProfile[]).map((profile) => (
+          <Action
+            key={profile}
+            icon={profile === currentProfile ? Icon.Checkmark : Icon.Circle}
+            title={PROMPT_PROFILE_LABELS[profile]}
+            onAction={() => onSwitchPromptProfile(profile)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+      <ActionPanel.Submenu
+        icon={Icon.Pencil}
+        shortcut={{ modifiers: ["cmd"], key: "y" }}
+        title={`Style: ${STYLE_LABELS[currentStyle]}`}
+      >
+        {(Object.keys(STYLE_LABELS) as TranslationStyle[]).map((style) => (
+          <Action
+            key={style}
+            icon={style === currentStyle ? Icon.Checkmark : Icon.Circle}
+            title={STYLE_LABELS[style]}
+            onAction={() => onSwitchStyle(style)}
+          />
+        ))}
+      </ActionPanel.Submenu>
+      <ActionPanel.Section title="Settings">
+        <Action
+          icon={Icon.Gear}
+          title="Translation Settings"
+          onAction={() => launchCommand({ name: "translation-settings", type: LaunchType.UserInitiated })}
+        />
+        <Action icon={Icon.Gear} title="Extension Preferences" onAction={openExtensionPreferences} />
+        {(result.status === "error" || result.status === "missing-key") && (
           <Action
             icon={Icon.ExclamationMark}
-            title="Show Error Toast"
+            title="Show Error"
             onAction={() =>
-              showToast({
-                style: Toast.Style.Failure,
-                title: result.providerTitle,
-                message: result.error,
-              })
+              showToast({ style: Toast.Style.Failure, title: result.providerTitle, message: result.error })
             }
           />
-        ) : null}
+        )}
       </ActionPanel.Section>
     </ActionPanel>
   );
@@ -290,7 +420,11 @@ function subtitle(result: TranslationResult): string {
 }
 
 function accessories(result: TranslationResult, targetLanguageTitle: string): List.Item.Accessory[] {
-  const items: List.Item.Accessory[] = [{ text: targetLanguageTitle }];
+  const items: List.Item.Accessory[] = [];
+  if (result.modelName) {
+    items.push({ tag: result.modelName });
+  }
+  items.push({ text: targetLanguageTitle });
   if (result.durationMs !== undefined && result.status !== "pending") {
     items.push({ text: `${(result.durationMs / 1000).toFixed(1)}s` });
   }
@@ -310,34 +444,38 @@ function iconColor(status: TranslationResult["status"]): Color {
 }
 
 function detailMarkdown(result: TranslationResult, sourceText: string): string {
+  const modelTag = result.modelName ? ` · \`${result.modelName}\`` : "";
+
   if (result.status === "pending") {
-    return `# ${result.providerTitle}\n\nTranslating...`;
+    return `**${result.providerTitle}**${modelTag}\n\nTranslating...`;
   }
 
   if (result.status === "missing-key") {
     return [
-      `# ${result.providerTitle}`,
+      `**${result.providerTitle}**${modelTag}`,
       "",
-      "API key is not configured. Open extension preferences and add the key for this provider.",
+      "API key is not configured. Open **Extension Preferences** to add the key.",
       "",
-      "## Source",
-      fenced(sourceText),
+      "---",
+      "",
+      quoted(sourceText),
     ].join("\n");
   }
 
   if (result.status === "error") {
     return [
-      `# ${result.providerTitle}`,
+      `**${result.providerTitle}**${modelTag}`,
       "",
-      result.error ?? "Translation failed.",
+      `Error: ${result.error ?? "Translation failed."}`,
       "",
-      "## Source",
-      fenced(sourceText),
+      "---",
+      "",
+      quoted(sourceText),
     ].join("\n");
   }
 
   return [
-    `# ${result.providerTitle}`,
+    `**${result.providerTitle}**${modelTag}`,
     "",
     "## Translation",
     "",
@@ -345,13 +483,17 @@ function detailMarkdown(result: TranslationResult, sourceText: string): string {
     "",
     "---",
     "",
-    "## Source",
-    fenced(sourceText),
+    "**Source**",
+    "",
+    quoted(sourceText),
   ].join("\n");
 }
 
-function fenced(text: string): string {
-  return `\`\`\`text\n${text.replace(/```/g, "'''")}\n\`\`\``;
+function quoted(text: string): string {
+  return text
+    .split("\n")
+    .map((line) => `> ${line}`)
+    .join("\n");
 }
 
 function singleLinePreview(text: string): string {

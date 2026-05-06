@@ -9,51 +9,43 @@
   "commands": [
     {
       "name": "translate",
-      "title": "Translate Selected Text",
+      "title": "Translate",
       "subtitle": "AI Translate",
-      "description": "Translate selected text, fallback text, or typed text with your configured AI provider.",
+      "description": "Translate selected text or type text to translate. Switch models, prompt profiles, and styles on the fly.",
       "mode": "view",
       "icon": "icon.png",
-      "arguments": [
-        {
-          "name": "text",
-          "placeholder": "Text to translate",
-          "type": "text",
-          "required": false
-        }
-      ],
       "keywords": [
         "translate",
+        "ai",
         "selection",
         "deepseek",
         "mimo",
-        "xiaomi",
         "minimax",
         "gemini",
         "kimi",
-        "chatgpt",
         "openai"
       ]
     },
     {
       "name": "screenshot-translate",
-      "title": "Translate Screenshot",
+      "title": "Screenshot Translate",
       "subtitle": "AI Translate",
-      "description": "Capture a screen region, OCR it, and translate the recognized text.",
-      "mode": "no-view",
+      "description": "Capture a screen region, OCR the text, review it, and translate with multiple providers. Switch models to compare.",
+      "mode": "view",
       "icon": "screenshot-translate.png",
       "keywords": [
         "ocr",
         "screenshot",
         "capture",
-        "translate"
+        "translate",
+        "image"
       ]
     },
     {
-      "name": "extract-text-from-screenshot",
-      "title": "Extract Text from Screenshot",
+      "name": "screenshot-ocr",
+      "title": "Screenshot OCR",
       "subtitle": "AI Translate",
-      "description": "Capture a screen region, OCR it, and review or edit the extracted text before copying or translating it.",
+      "description": "Capture a screen region and extract text with OCR. Review, copy, or send to translate.",
       "mode": "view",
       "icon": "screenshot-translate.png",
       "keywords": [
@@ -61,25 +53,25 @@
         "screenshot",
         "capture",
         "extract",
-        "review",
-        "edit",
-        "text"
+        "copy",
+        "text",
+        "recognize"
       ]
     },
     {
-      "name": "copy-text-from-screenshot",
-      "title": "Copy Text from Screenshot",
+      "name": "translation-settings",
+      "title": "Translation Settings",
       "subtitle": "AI Translate",
-      "description": "Capture a screen region, OCR it, and copy the recognized text to the clipboard without opening a result view.",
-      "mode": "no-view",
-      "icon": "screenshot-translate.png",
+      "description": "Configure model tier, prompt profile, translation style, and custom instructions.",
+      "mode": "view",
+      "icon": "icon.png",
       "keywords": [
-        "ocr",
-        "screenshot",
-        "capture",
-        "copy",
-        "clipboard",
-        "text"
+        "settings",
+        "model",
+        "prompt",
+        "profile",
+        "style",
+        "configure"
       ]
     }
   ],
@@ -273,10 +265,6 @@
         {
           "title": "Baidu OCR API",
           "value": "baidu"
-        },
-        {
-          "title": "PaddleOCR HTTP",
-          "value": "paddle"
         }
       ]
     },
@@ -367,26 +355,31 @@
     {
       "title": "Baidu OCR Language",
       "name": "baiduOcrLanguageType",
-      "type": "textfield",
+      "type": "dropdown",
       "required": false,
-      "description": "Baidu OCR language_type parameter.",
-      "default": "CHN_ENG"
+      "description": "Language hint for Baidu OCR. Auto Detect only works with accurate_basic.",
+      "default": "CHN_ENG",
+      "data": [
+        { "title": "Auto Detect", "value": "auto_detect" },
+        { "title": "Chinese + English", "value": "CHN_ENG" },
+        { "title": "English", "value": "ENG" },
+        { "title": "Japanese", "value": "JAP" },
+        { "title": "Korean", "value": "KOR" },
+        { "title": "French", "value": "FRE" },
+        { "title": "German", "value": "GER" },
+        { "title": "Spanish", "value": "SPA" },
+        { "title": "Portuguese", "value": "POR" },
+        { "title": "Italian", "value": "ITA" },
+        { "title": "Russian", "value": "RUS" }
+      ]
     },
     {
-      "title": "PaddleOCR HTTP Endpoint",
-      "name": "paddleOcrEndpoint",
-      "type": "textfield",
+      "name": "baiduOcrParagraph",
+      "type": "checkbox",
+      "label": "Auto paragraph detection",
       "required": false,
-      "description": "Self-hosted PaddleOCR service endpoint, usually http://localhost:8080/ocr.",
-      "default": "http://localhost:8080/ocr"
-    },
-    {
-      "title": "PaddleOCR API Key",
-      "name": "paddleOcrAPIKey",
-      "type": "password",
-      "required": false,
-      "description": "Optional bearer token for your PaddleOCR HTTP service.",
-      "default": ""
+      "description": "Group OCR lines into paragraphs (Baidu paragraph=true).",
+      "default": false
     },
     {
       "title": "Provider Switches",

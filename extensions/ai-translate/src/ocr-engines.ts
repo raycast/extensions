@@ -20,6 +20,7 @@ interface BaiduTokenResponse {
 
 interface BaiduOCRResponse {
   words_result?: Array<{ words?: string }>;
+  paragraphs_result?: Array<{ words_result_idx?: number[] }>;
   error_code?: number;
   error_msg?: string;
 }
@@ -73,8 +74,6 @@ async function recognizeImageWithEngine(
       return recognizeWithTesseract(imagePath, preferences);
     case "baidu":
       return recognizeWithBaidu(imagePath, preferences);
-    case "paddle":
-      return recognizeWithPaddle(imagePath, preferences);
   }
 }
 
@@ -103,15 +102,20 @@ async function recognizeWithBaidu(imagePath: string, preferences: ExtensionPrefe
 
   const accessToken = await getBaiduAccessToken(apiKey, secretKey, getOCRTimeoutMs(preferences));
   const endpoint = preferences.baiduOcrEndpoint === "general_basic" ? "general_basic" : "accurate_basic";
+  const useParagraph = Boolean(preferences.baiduOcrParagraph);
+  const langType = preferences.baiduOcrLanguageType?.trim() || "CHN_ENG";
   const image = (await readFile(imagePath)).toString("base64");
-  const body = new URLSearchParams({
+
+  const params: Record<string, string> = {
     image,
     detect_direction: "true",
-    language_type: preferences.baiduOcrLanguageType?.trim() || "CHN_ENG",
-  });
+    language_type: langType === "auto_detect" && endpoint === "general_basic" ? "CHN_ENG" : langType,
+  };
+  if (useParagraph) params.paragraph = "true";
+
   const data = await postForm<BaiduOCRResponse>(
     `https://aip.baidubce.com/rest/2.0/ocr/v1/${endpoint}?access_token=${encodeURIComponent(accessToken)}`,
-    body,
+    new URLSearchParams(params),
     getOCRTimeoutMs(preferences),
   );
 
@@ -119,11 +123,17 @@ async function recognizeWithBaidu(imagePath: string, preferences: ExtensionPrefe
     throw new Error(data.error_msg ?? `Baidu OCR error ${data.error_code}`);
   }
 
-  return (data.words_result ?? [])
-    .map((item) => item.words?.trim() ?? "")
-    .filter(Boolean)
-    .join("\n")
-    .trim();
+  const words = (data.words_result ?? []).map((item) => item.words?.trim() ?? "");
+
+  if (useParagraph && data.paragraphs_result?.length) {
+    return data.paragraphs_result
+      .map((para) => (para.words_result_idx ?? []).map((idx) => words[idx] ?? "").join(" "))
+      .filter(Boolean)
+      .join("\n\n")
+      .trim();
+  }
+
+  return words.filter(Boolean).join("\n").trim();
 }
 
 async function getBaiduAccessToken(apiKey: string, secretKey: string, timeoutMs: number): Promise<string> {
@@ -161,41 +171,6 @@ async function getBaiduAccessToken(apiKey: string, secretKey: string, timeoutMs:
   );
 
   return data.access_token;
-}
-
-async function recognizeWithPaddle(imagePath: string, preferences: ExtensionPreferences): Promise<string> {
-  const endpoint = preferences.paddleOcrEndpoint?.trim();
-  if (!endpoint) {
-    throw new Error("PaddleOCR HTTP endpoint is not configured.");
-  }
-
-  const image = (await readFile(imagePath)).toString("base64");
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-  const apiKey = preferences.paddleOcrAPIKey?.trim();
-  if (apiKey) {
-    headers.Authorization = `Bearer ${apiKey}`;
-  }
-
-  const data = await postJson<unknown>(
-    endpoint,
-    {
-      file: image,
-      fileType: 1,
-      useDocOrientationClassify: false,
-      useDocUnwarping: false,
-      useTextlineOrientation: true,
-      visualize: false,
-    },
-    getOCRTimeoutMs(preferences),
-    headers,
-  );
-
-  const text = extractPaddleText(data);
-  if (!text) {
-    throw new Error("PaddleOCR returned no text.");
-  }
-
-  return text;
 }
 
 async function postJson<T>(
@@ -270,47 +245,6 @@ function isRawResponse(value: unknown): value is { raw: string } {
   );
 }
 
-function extractPaddleText(data: unknown): string {
-  const recTexts = collectValuesByKey(data, new Set(["rec_texts", "recTexts", "texts", "text"]));
-  return recTexts
-    .flatMap((value) => normalizeTextValue(value))
-    .filter(Boolean)
-    .join("\n")
-    .trim();
-}
-
-function collectValuesByKey(value: unknown, keys: Set<string>, output: unknown[] = []): unknown[] {
-  if (!value || typeof value !== "object") {
-    return output;
-  }
-
-  if (Array.isArray(value)) {
-    value.forEach((item) => collectValuesByKey(item, keys, output));
-    return output;
-  }
-
-  for (const [key, nestedValue] of Object.entries(value)) {
-    if (keys.has(key)) {
-      output.push(nestedValue);
-    } else {
-      collectValuesByKey(nestedValue, keys, output);
-    }
-  }
-  return output;
-}
-
-function normalizeTextValue(value: unknown): string[] {
-  if (typeof value === "string") {
-    return [value.trim()];
-  }
-
-  if (Array.isArray(value)) {
-    return value.flatMap((item) => normalizeTextValue(item));
-  }
-
-  return [];
-}
-
 function formatOCRText(text: string, preferences: ExtensionPreferences): string {
   const trimmed = text.trim();
   if (preferences.ocrTextLayout === "compact") {
@@ -343,4 +277,43 @@ function getOCRTimeoutMs(preferences: ExtensionPreferences): number {
 
 function hashText(text: string): string {
   return createHash("sha256").update(text).digest("hex").slice(0, 16);
+}
+
+export function stripLineBreaks(text: string): string {
+  return text
+    .replace(/\r?\n/g, " ")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
+export function autoParagraph(text: string): string {
+  const lines = text.split(/\r?\n/);
+  const paragraphs: string[] = [];
+  let buffer = "";
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) {
+      if (buffer) {
+        paragraphs.push(buffer.trim());
+        buffer = "";
+      }
+      continue;
+    }
+
+    const endPunct = ".!?;:。！？；：…—”“」』）>]";
+    const endsWithPunctuation = new RegExp(`[${endPunct}]$`).test(buffer.trim());
+    const startsWithCapitalOrNumber = /^[A-Z0-9（「『【(]/.test(trimmed);
+    const isShortLine = buffer.length > 0 && buffer.length < 40;
+
+    if (buffer && (endsWithPunctuation || startsWithCapitalOrNumber || isShortLine)) {
+      paragraphs.push(buffer.trim());
+      buffer = trimmed;
+    } else {
+      buffer = buffer ? `${buffer} ${trimmed}` : trimmed;
+    }
+  }
+
+  if (buffer) paragraphs.push(buffer.trim());
+  return paragraphs.join("\n\n");
 }

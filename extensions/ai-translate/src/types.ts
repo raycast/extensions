@@ -6,11 +6,20 @@ export type TranslationStyle = "balanced" | "faithful" | "polished" | "academic"
 
 export type PromptProfile = "screenshot" | "general" | "technical" | "academic" | "legal" | "subtitle" | "custom";
 
-export type OCREngine = "local" | "tesseract" | "baidu" | "paddle";
+export type ModelTier = "fast" | "pro" | "custom";
+
+export type OCREngine = "local" | "tesseract" | "baidu";
 
 export type OCRTextLayout = "formatted" | "compact";
 
 export type ProviderAPIProtocol = "openai" | "anthropic";
+
+export interface RuntimeSettings {
+  modelTier: ModelTier;
+  promptProfile: PromptProfile;
+  translationStyle: TranslationStyle;
+  customPromptInstructions: string;
+}
 
 export interface ExtensionPreferences {
   defaultProvider: ProviderId;
@@ -28,8 +37,7 @@ export interface ExtensionPreferences {
   baiduOcrSecretKey?: string;
   baiduOcrEndpoint?: string;
   baiduOcrLanguageType?: string;
-  paddleOcrEndpoint?: string;
-  paddleOcrAPIKey?: string;
+  baiduOcrParagraph?: boolean;
   enableDeepSeek?: boolean;
   enableMiMo?: boolean;
   enableMiniMax?: boolean;
@@ -84,6 +92,7 @@ export type TranslationStatus = "pending" | "success" | "error" | "missing-key";
 export interface TranslationResult {
   providerId: ProviderId;
   providerTitle: string;
+  modelName?: string;
   status: TranslationStatus;
   translation?: string;
   error?: string;

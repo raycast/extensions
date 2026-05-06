@@ -1,5 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
-import { ExtensionPreferences, PROVIDER_IDS, ProviderConfig, ProviderId } from "./types";
+import { resolveModel } from "./models";
+import { ExtensionPreferences, ModelTier, PROVIDER_IDS, ProviderConfig, ProviderId } from "./types";
 
 export const PROVIDER_TITLES: Record<ProviderId, string> = {
   deepseek: "DeepSeek",
@@ -77,14 +78,20 @@ export function getOrderedProviderIds(preferences: ExtensionPreferences): Provid
   return isProviderId(preferences.defaultProvider) ? [preferences.defaultProvider] : ["deepseek"];
 }
 
-export function getProviderConfig(id: ProviderId, preferences: ExtensionPreferences): ProviderConfig {
+export function getProviderConfig(
+  id: ProviderId,
+  preferences: ExtensionPreferences,
+  modelTier?: ModelTier,
+): ProviderConfig {
   const keys = providerPreferenceKeys[id];
+  const customModel = stringValue(preferences[keys.model]);
+  const model = modelTier ? resolveModel(id, modelTier, customModel) : customModel;
   return {
     id,
     title: PROVIDER_TITLES[id],
     apiKey: stringValue(preferences[keys.apiKey]),
     baseURL: stringValue(preferences[keys.baseURL]),
-    model: stringValue(preferences[keys.model]),
+    model,
     apiProtocol: isAnthropicProvider(id) ? "anthropic" : "openai",
   };
 }
