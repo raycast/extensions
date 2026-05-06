@@ -1,6 +1,6 @@
 # GIF Search Changelog
 
-## [Add Paste GIF Link action] - {PR_MERGE_DATE}
+## [Add Paste GIF Link action] - 2026-05-06
 
 - Added a new action to paste a GIF link into the front-most application
 - Added Windows shortcut support
