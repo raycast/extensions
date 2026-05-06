@@ -3,6 +3,8 @@ import fs from "fs";
 import os from "os";
 import { findFFmpegPath } from "./ffmpeg";
 import { execPromise } from "./exec";
+import { runFFmpegWithProgress, probeDurationSec, type ProgressInfo } from "./ffmpegRun";
+import { parseTimeString, toFfmpegTime } from "./time";
 import {
   AllOutputExtension,
   OutputImageExtension,
@@ -12,8 +14,11 @@ import {
   ImageQuality,
   AudioQuality,
   VideoQuality,
+  GifQuality,
   getMediaType,
+  getOutputCategory,
   Percentage,
+  TrimOptions,
 } from "../types/media";
 
 function convertQualityToCrf(qualityPercentage: Percentage): number {
@@ -22,26 +27,66 @@ function convertQualityToCrf(qualityPercentage: Percentage): number {
   return Math.round(51 - (qualityPercentage / 100) * 51);
 }
 
-function getUniqueOutputPath(filePath: string, extension: string): string {
-  const outputFilePath = filePath.replace(path.extname(filePath), extension);
+function getUniqueOutputPath(filePath: string, extension: string, outputDir?: string): string {
+  const baseName = path.basename(filePath, path.extname(filePath));
+  const dir = outputDir && outputDir.length > 0 ? outputDir : path.dirname(filePath);
+  const outputFilePath = path.join(dir, `${baseName}${extension}`);
   let finalOutputPath = outputFilePath;
   let counter = 1;
 
   while (fs.existsSync(finalOutputPath)) {
-    const fileName = path.basename(outputFilePath, extension);
-    const dirName = path.dirname(outputFilePath);
-    finalOutputPath = path.join(dirName, `${fileName}(${counter})${extension}`);
+    finalOutputPath = path.join(dir, `${baseName}(${counter})${extension}`);
     counter++;
   }
 
   return finalOutputPath;
 }
 
+export type ConvertOptions = {
+  returnCommandString?: boolean;
+  outputDir?: string;
+  stripMetadata?: boolean;
+  trim?: TrimOptions;
+  onProgress?: (p: ProgressInfo) => void;
+};
+
+/**
+ * Build input-side trim flags for FFmpeg.
+ * When both start and end are present, use `-ss <start> -t <duration>` to avoid
+ * ambiguity from input-side `-to` (which is absolute in the source timeline).
+ */
+function buildTrimFlags(trim: TrimOptions | undefined): string {
+  if (!trim) return "";
+  const parts: string[] = [];
+  const start = parseTimeString(trim.start ?? "");
+  const end = parseTimeString(trim.end ?? "");
+  if (start !== null && start > 0) parts.push(`-ss ${toFfmpegTime(start)}`);
+  if (start !== null && start > 0 && end !== null && end > start) {
+    parts.push(`-t ${toFfmpegTime(end - start)}`);
+  } else if (end !== null && end > 0) {
+    parts.push(`-to ${toFfmpegTime(end)}`);
+  }
+  return parts.length > 0 ? ` ${parts.join(" ")}` : "";
+}
+
+function appendMetadataBeforeOutput(cmd: string, metadataFlag: string, outputPath: string): string {
+  if (!metadataFlag || cmd.includes(metadataFlag)) return cmd;
+  const quotedOutput = `"${outputPath}"`;
+  const yOutput = `-y ${quotedOutput}`;
+  if (cmd.includes(yOutput)) {
+    return cmd.replace(yOutput, `${metadataFlag} ${yOutput}`);
+  }
+  if (cmd.includes(quotedOutput)) {
+    return cmd.replace(quotedOutput, `${metadataFlag} ${quotedOutput}`);
+  }
+  return cmd + metadataFlag;
+}
+
 export async function convertMedia<T extends AllOutputExtension>(
   filePath: string,
   outputFormat: T,
   quality: QualitySettings,
-  returnCommandString = false,
+  opts: ConvertOptions = {},
 ): Promise<string> {
   const ffmpegPath = await findFFmpegPath();
 
@@ -50,13 +95,65 @@ export async function convertMedia<T extends AllOutputExtension>(
     throw new Error("FFmpeg is not installed or configured. Please install FFmpeg to use this converter.");
   }
 
-  let ffmpegCmd = `"${ffmpegPath.path}" -i`;
+  const { returnCommandString = false, outputDir, stripMetadata, trim, onProgress } = opts;
+  const trimFlags = buildTrimFlags(trim);
+  const metadataFlag = stripMetadata ? " -map_metadata -1" : "";
+
+  let ffmpegCmd = `"${ffmpegPath.path}"${trimFlags} -i`;
+  const outputCategory = getOutputCategory(outputFormat);
   const currentMediaType = getMediaType(path.extname(filePath))!;
+
+  // Helper to execute the final single-shot command, optionally with progress.
+  const execWithOptionalProgress = async (cmd: string): Promise<void> => {
+    if (onProgress && (currentMediaType === "video" || outputCategory === "gif")) {
+      const total = (await probeDurationSec(ffmpegPath.path, filePath)) ?? undefined;
+      await runFFmpegWithProgress(cmd, { totalDurationSec: total, onProgress });
+    } else {
+      await execPromise(cmd);
+    }
+  };
+
+  // Special handling: GIF output from a video input.
+  if (outputCategory === "gif") {
+    const gifQuality = quality as GifQuality;
+    const gifSettings = gifQuality[".gif"];
+    const finalOutputPath = getUniqueOutputPath(filePath, ".gif", outputDir);
+
+    const fps = gifSettings.fps;
+    const scale = gifSettings.width === "original" ? "iw" : gifSettings.width;
+    const filterBase = `fps=${fps},scale=${scale}:-1:flags=lanczos`;
+    const loopArg = gifSettings.loop ? "0" : "-1"; // 0 = infinite loop, -1 = no loop
+
+    const tempPaletteFile = path.join(os.tmpdir(), `gif_palette_${Date.now()}.png`);
+    const paletteCmd = `"${ffmpegPath.path}"${trimFlags} -i "${filePath}" -vf "${filterBase},palettegen=stats_mode=diff" -y "${tempPaletteFile}"`;
+    const finalCmd = `"${ffmpegPath.path}"${trimFlags} -i "${filePath}" -i "${tempPaletteFile}" -lavfi "${filterBase} [x]; [x][1:v] paletteuse=dither=bayer:bayer_scale=5:diff_mode=rectangle" -loop ${loopArg}${metadataFlag} -y "${finalOutputPath}"`;
+
+    if (returnCommandString) {
+      return `${paletteCmd}\n${finalCmd}`;
+    }
+
+    try {
+      console.log(`Executing FFmpeg palette command: ${paletteCmd}`);
+      await execPromise(paletteCmd);
+      console.log(`Executing FFmpeg GIF command: ${finalCmd}`);
+      await execWithOptionalProgress(finalCmd);
+      return finalOutputPath;
+    } finally {
+      if (fs.existsSync(tempPaletteFile)) {
+        try {
+          fs.unlinkSync(tempPaletteFile);
+        } catch {
+          /* ignore */
+        }
+      }
+    }
+  }
+
   switch (currentMediaType) {
     case "image": {
       const currentOutputFormat = outputFormat as OutputImageExtension;
       const imageQuality = quality as ImageQuality;
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
 
       let tempHeicFile: string | null = null;
       let tempPaletteFile: string | null = null;
@@ -73,6 +170,14 @@ export async function convertMedia<T extends AllOutputExtension>(
           try {
             // Attempt HEIC conversion using SIPS directly
             await execPromise(sipsCmd);
+            if (stripMetadata) {
+              // Best-effort metadata strip on macOS
+              try {
+                await execPromise(`sips -d all "${finalOutputPath}"`);
+              } catch (stripErr) {
+                console.warn("SIPS metadata strip failed:", stripErr);
+              }
+            }
           } catch (error) {
             // Parse error to provide more specific feedback
             const errorMessage = String(error);
@@ -132,7 +237,7 @@ export async function convertMedia<T extends AllOutputExtension>(
                   const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette.png`;
                   tempPaletteFile = path.join(os.tmpdir(), tempPaletteFileName);
                   const paletteCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -vf "palettegen=max_colors=256" -y "${tempPaletteFile}"`;
-                  ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5" -compression_level 100 -y "${finalOutputPath}"`;
+                  ffmpegCmd = `"${ffmpegPath.path}" -i "${processedInputPath}" -i "${tempPaletteFile}" -lavfi "paletteuse=dither=bayer:bayer_scale=5" -compression_level 100${metadataFlag} -y "${finalOutputPath}"`;
                   return `${paletteCmd}\n${ffmpegCmd}`;
                 } else {
                   const tempPaletteFileName = `${path.basename(filePath, path.extname(filePath))}_palette_${Date.now()}.png`;
@@ -166,6 +271,7 @@ export async function convertMedia<T extends AllOutputExtension>(
               ffmpegCmd += ` -c:v libaom-av1 -crf ${Math.round(63 - (Number(imageQuality[".avif"]) / 100) * 63)} -still-picture 1`;
               break;
           }
+          ffmpegCmd = appendMetadataBeforeOutput(ffmpegCmd, metadataFlag, finalOutputPath);
           if (currentOutputFormat !== ".png" || imageQuality[".png"] !== "png-8") {
             ffmpegCmd += ` -y "${finalOutputPath}"`;
           } else {
@@ -195,7 +301,7 @@ export async function convertMedia<T extends AllOutputExtension>(
     case "audio": {
       const currentOutputFormat = outputFormat as OutputAudioExtension;
       const audioQuality = quality as AudioQuality;
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
 
       ffmpegCmd += ` "${filePath}"`;
 
@@ -243,12 +349,13 @@ export async function convertMedia<T extends AllOutputExtension>(
           throw new Error(`Unknown audio output format: ${currentOutputFormat}`);
       }
 
+      ffmpegCmd += metadataFlag;
       ffmpegCmd += ` -y "${finalOutputPath}"`;
       if (returnCommandString) {
         return ffmpegCmd;
       }
       console.log(`Executing FFmpeg audio command: ${ffmpegCmd}`);
-      await execPromise(ffmpegCmd);
+      await execWithOptionalProgress(ffmpegCmd);
       return finalOutputPath;
     }
 
@@ -306,7 +413,7 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
 
       // Handle encoding mode (unified for all formats except .mov)
-      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat);
+      const finalOutputPath = getUniqueOutputPath(filePath, currentOutputFormat, outputDir);
       let logFilePrefix: string | null = null;
 
       if (currentOutputFormat !== ".mov") {
@@ -329,7 +436,8 @@ export async function convertMedia<T extends AllOutputExtension>(
                 logFilePrefix = path.join(os.tmpdir(), `ffmpeg2pass_${Date.now()}`);
                 const nullDevice = process.platform === "win32" ? "NUL" : "/dev/null";
                 const firstPassCmd = ffmpegCmd + ` -pass 1 -passlogfile "${logFilePrefix}" -f null ${nullDevice}`;
-                const secondPassCmd = ffmpegCmd + ` -pass 2 -passlogfile "${logFilePrefix}" -y "${finalOutputPath}"`;
+                const secondPassCmd =
+                  ffmpegCmd + `${metadataFlag} -pass 2 -passlogfile "${logFilePrefix}" -y "${finalOutputPath}"`;
                 return `${firstPassCmd}\n${secondPassCmd}`;
               } else {
                 // First pass - need to specify log file prefix for 2-pass encoding
@@ -350,12 +458,13 @@ export async function convertMedia<T extends AllOutputExtension>(
       }
 
       try {
+        ffmpegCmd += metadataFlag;
         ffmpegCmd += ` -y "${finalOutputPath}"`;
         if (returnCommandString) {
           return ffmpegCmd;
         }
         console.log(`Executing FFmpeg video command: ${ffmpegCmd}`);
-        await execPromise(ffmpegCmd);
+        await execWithOptionalProgress(ffmpegCmd);
         return finalOutputPath;
       } finally {
         // Clean up 2-pass log files if they exist

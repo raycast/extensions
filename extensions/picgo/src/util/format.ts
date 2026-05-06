@@ -2,7 +2,7 @@ import { type IImgInfo } from "picgo";
 import type { ImgUrlExportFormat } from "../types/type";
 import { getPreferenceValues } from "@raycast/api";
 
-const { customFormat } = getPreferenceValues<Preferences>();
+const { customFormat } = getPreferenceValues<Preferences.UploadImages>();
 
 const fileName = (img: IImgInfo) =>
     img.fileName?.replace(new RegExp(`\\${img.extname}`), "") ?? img.imgUrl?.split("/").pop()?.split(".")[0] ?? "image";
@@ -31,7 +31,7 @@ export const exportFormats: Record<string, ImgUrlExportFormat> = {
     },
     custom: {
         name: "custom",
-        label: "Custom Format",
+        label: "Custom",
         generate: (imgs) =>
             imgs
                 .map((img) => {

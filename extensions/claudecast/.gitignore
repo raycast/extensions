@@ -3,3 +3,5 @@ dist/
 .DS_Store
 *.log
 SESSION_NOTES.md
+CLAUDE.md
+PR-*.md

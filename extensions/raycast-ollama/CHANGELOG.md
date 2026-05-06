@@ -1,5 +1,9 @@
 # raycast-ollama Changelog
 
+## [Improvement] - 2026-04-06
+
+- Added AI Extension "Web Search" and "Web Fetch". This feature requires the Ollama Web Search API Key.
+
 ## [Improvement and Fix] - 2026-02-02
 
 - [Improvement] Command "Manage Models": added "Load Model on Memory" action, which loads the model on memory with no expiration date.
@@ -61,10 +65,10 @@
 ## [Improvement] - 2024-06-03
 
 - **Command 'Manage Models'**: Support for multiple configured Ollama Server, manage and use models from different server.
-- **Command 'Custom Command'**: changed prompt format to the [Raycast Prompt Explorer](https://prompts.ray.so/) one. More details on supported tag on the *README.md*. ***WARNING***: This change combined with allowing multiple Ollama server feature break all configured custom command so all custom commands need to be reconfigured.
+- **Command 'Custom Command'**: changed prompt format to the [Raycast Prompt Explorer](https://prompts.ray.so/) one. More details on supported tag on the _README.md_. **_WARNING_**: This change combined with allowing multiple Ollama server feature break all configured custom command so all custom commands need to be reconfigured.
 - **Command 'Summarize Website'**: New command that summarize the content of the current web browser tab. For this feature [Raycast Browser Extentision](https://www.raycast.com/browser-extension) is required.
 - **Command 'Chat with Ollama'**: Improved UI, combine models from different Ollama Server and use browser content on prompt with [Raycast Browser Extentision](https://www.raycast.com/browser-extension).
-- Added support for *keep_alive*, you can now chose how many minutes the model must stay on memory.
+- Added support for _keep_alive_, you can now chose how many minutes the model must stay on memory.
 
 ## [BugFix] - 2024-03-12
 

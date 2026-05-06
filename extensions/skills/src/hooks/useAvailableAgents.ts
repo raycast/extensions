@@ -4,7 +4,7 @@ import { discoverAgents, KNOWN_AGENT_NAMES } from "../utils/skills-cli";
 const INITIAL_DATA = { agents: KNOWN_AGENT_NAMES, skillAgentMap: {} };
 
 export function useAvailableAgents() {
-  const { data, isLoading } = useCachedPromise(discoverAgents, [], {
+  const { data, isLoading, revalidate } = useCachedPromise(discoverAgents, [], {
     keepPreviousData: true,
     initialData: INITIAL_DATA,
   });
@@ -12,5 +12,6 @@ export function useAvailableAgents() {
     agents: data?.agents ?? KNOWN_AGENT_NAMES,
     skillAgentMap: data?.skillAgentMap ?? {},
     isLoading,
+    revalidate,
   };
 }

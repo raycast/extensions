@@ -25,7 +25,18 @@ try {
         throw "Could not resolve physical device ID for $cleanDrive"
     }
 
-    # 3. Load C# and Eject
+    # 3. Release CIM object handles to the volume to avoid self-vetoing the eject
+    $logicalDisk = $null
+    $partition = $null
+    $diskDrive = $null
+    Remove-Variable logicalDisk, partition, diskDrive -ErrorAction SilentlyContinue
+    
+    # Force WMI/COM to release underlying volume locks
+    [System.GC]::Collect()
+    [System.GC]::WaitForPendingFinalizers()
+    Start-Sleep -Milliseconds 250
+
+    # 4. Load C# and Eject
     $CsFilePath = Join-Path $PSScriptRoot "USBEjector.cs"
 
     if (-not ([System.Management.Automation.PSTypeName]'USBEjector').Type) {

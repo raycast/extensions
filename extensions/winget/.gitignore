@@ -1,0 +1,6 @@
+node_modules/
+.build/
+*.js.map
+.DS_Store
+.env
+.vscode/

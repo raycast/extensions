@@ -1,5 +1,10 @@
 # Picgo Changelog
 
+## [Image Preview Grid View] - 2026-04-06
+
+- Add a new `Image Grid` view for uploaded image results.
+- Add new preference `Upload Result View`, you can pick the former `Format List` or newly added `Image Grid` view as the default view to display uploaded image results.
+
 ## [Bugfix: Plugin Search Error] - 2026-04-01
 
 - Fix error when a plugin package data has no `description` field.

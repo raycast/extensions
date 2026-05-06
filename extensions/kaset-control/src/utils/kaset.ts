@@ -28,6 +28,21 @@ export interface KasetState {
   likeStatus: LikeStatus;
 }
 
+export interface SearchSong {
+  id: string;
+  title: string;
+  artist: string;
+  album?: string;
+  duration?: string;
+  artworkURL?: string;
+}
+
+const YTM_BASE_URL = "https://music.youtube.com/youtubei/v1";
+// Public YouTube Music web client key (not user-secret). This may rotate.
+const YTM_API_KEY = "AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30";
+// WEB_REMIX client version used by youtubei search requests. This may rotate.
+const YTM_CLIENT_VERSION = "1.20231204.01.00";
+
 // Check if Kaset is running
 export async function isKasetRunning(): Promise<boolean> {
   try {
@@ -125,6 +140,25 @@ export async function playPause(): Promise<void> {
   const state = await getPlayerInfo();
   await runAppleScript(`tell application "Kaset" to playpause`);
   await showHUD(state?.playerState === "playing" ? "⏸️ Paused" : "▶️ Playing");
+}
+
+// Play a specific YouTube video by video ID
+export async function playVideo(videoId: string): Promise<void> {
+  const normalizedId = videoId.trim();
+  if (!/^[a-zA-Z0-9_-]{6,}$/.test(normalizedId)) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Invalid video ID",
+      message: "Please provide a valid YouTube video ID",
+    });
+    return;
+  }
+
+  if (!(await ensureKasetRunning())) return;
+  await runAppleScript(
+    `tell application "Kaset" to play video "${normalizedId}"`,
+  );
+  await showHUD("▶️ Playing selected song");
 }
 
 // Next track
@@ -260,6 +294,232 @@ export async function dislikeTrack(): Promise<void> {
   await showHUD(
     stateBefore?.likeStatus === "disliked" ? "👎 Undisliked" : "👎 Disliked",
   );
+}
+
+export async function searchSongs(query: string): Promise<SearchSong[]> {
+  const trimmedQuery = query.trim();
+  if (!trimmedQuery) return [];
+
+  try {
+    const response = await fetch(
+      `${YTM_BASE_URL}/search?key=${YTM_API_KEY}&prettyPrint=false`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Origin: "https://music.youtube.com",
+        },
+        body: JSON.stringify({
+          context: {
+            client: {
+              clientName: "WEB_REMIX",
+              clientVersion: YTM_CLIENT_VERSION,
+              hl: "en",
+              gl: "US",
+            },
+          },
+          query: trimmedQuery,
+          params: "EgWKAQIIAWoMEA4QChADEAQQCRAF",
+        }),
+      },
+    );
+
+    if (!response.ok) {
+      throw new Error(`Search failed (${response.status})`);
+    }
+
+    const json = (await response.json()) as Record<string, unknown>;
+    return extractSongsFromSearchResponse(json);
+  } catch (error) {
+    console.error("YouTube Music search failed:", error);
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Search temporarily unavailable",
+      message: "YouTube Music search request failed. Please try again.",
+    });
+    return [];
+  }
+}
+
+function extractSongsFromSearchResponse(
+  response: Record<string, unknown>,
+): SearchSong[] {
+  const renderers = collectRenderers(
+    response,
+    "musicResponsiveListItemRenderer",
+  );
+  const songs = renderers
+    .map(parseSongRenderer)
+    .filter((song): song is SearchSong => song !== null);
+
+  const uniqueById = new Map<string, SearchSong>();
+  for (const song of songs) {
+    if (!uniqueById.has(song.id)) {
+      uniqueById.set(song.id, song);
+    }
+  }
+
+  return [...uniqueById.values()];
+}
+
+function parseSongRenderer(
+  renderer: Record<string, unknown>,
+): SearchSong | null {
+  const videoId = extractVideoIdFromRenderer(renderer);
+  if (!videoId) return null;
+
+  const title = extractFlexText(renderer, 0) ?? "Unknown Title";
+  const subtitleText = extractFlexText(renderer, 1) ?? "";
+  const subtitleParts = subtitleText
+    .split(" • ")
+    .map((part) => part.trim())
+    .filter(Boolean);
+  const artist = subtitleParts[0] ?? "Unknown Artist";
+  const album = subtitleParts[1];
+  const duration = extractFixedText(renderer, 0);
+  const artworkURL = extractThumbnailURL(renderer);
+
+  return {
+    id: videoId,
+    title,
+    artist,
+    album,
+    duration,
+    artworkURL,
+  };
+}
+
+function collectRenderers(
+  node: unknown,
+  rendererKey: string,
+  collected: Record<string, unknown>[] = [],
+): Record<string, unknown>[] {
+  if (!node || typeof node !== "object") return collected;
+
+  if (Array.isArray(node)) {
+    for (const item of node) {
+      collectRenderers(item, rendererKey, collected);
+    }
+    return collected;
+  }
+
+  const nodeRecord = node as Record<string, unknown>;
+  const renderer = nodeRecord[rendererKey];
+  if (renderer && typeof renderer === "object" && !Array.isArray(renderer)) {
+    collected.push(renderer as Record<string, unknown>);
+  }
+
+  for (const value of Object.values(nodeRecord)) {
+    collectRenderers(value, rendererKey, collected);
+  }
+
+  return collected;
+}
+
+function extractVideoIdFromRenderer(
+  renderer: Record<string, unknown>,
+): string | null {
+  const playlistItemData = asRecord(renderer["playlistItemData"]);
+  const fromPlaylistData = asString(playlistItemData?.["videoId"]);
+  if (fromPlaylistData) return fromPlaylistData;
+
+  const directNavigation = asRecord(renderer["navigationEndpoint"]);
+  const fromDirectNavigation = extractVideoIdFromNavigation(directNavigation);
+  if (fromDirectNavigation) return fromDirectNavigation;
+
+  const flexColumns = asArray(renderer["flexColumns"]);
+  for (const column of flexColumns) {
+    const columnRenderer = asRecord(column);
+    const flexRenderer = asRecord(
+      columnRenderer?.["musicResponsiveListItemFlexColumnRenderer"],
+    );
+    const text = asRecord(flexRenderer?.["text"]);
+    const runs = asArray(text?.["runs"]);
+    for (const run of runs) {
+      const runRecord = asRecord(run);
+      const navigationEndpoint = asRecord(runRecord?.["navigationEndpoint"]);
+      const videoId = extractVideoIdFromNavigation(navigationEndpoint);
+      if (videoId) return videoId;
+    }
+  }
+
+  return null;
+}
+
+function extractVideoIdFromNavigation(
+  navigationEndpoint: Record<string, unknown> | undefined,
+): string | null {
+  if (!navigationEndpoint) return null;
+  const watchEndpoint = asRecord(navigationEndpoint["watchEndpoint"]);
+  const videoId = asString(watchEndpoint?.["videoId"]);
+  return videoId ?? null;
+}
+
+function extractFlexText(
+  renderer: Record<string, unknown>,
+  index: number,
+): string | null {
+  const flexColumns = asArray(renderer["flexColumns"]);
+  const column = asRecord(flexColumns[index]);
+  const flexRenderer = asRecord(
+    column?.["musicResponsiveListItemFlexColumnRenderer"],
+  );
+  return extractTextRuns(asRecord(flexRenderer?.["text"]));
+}
+
+function extractFixedText(
+  renderer: Record<string, unknown>,
+  index: number,
+): string | undefined {
+  const fixedColumns = asArray(renderer["fixedColumns"]);
+  const column = asRecord(fixedColumns[index]);
+  const fixedRenderer = asRecord(
+    column?.["musicResponsiveListItemFixedColumnRenderer"],
+  );
+  return extractTextRuns(asRecord(fixedRenderer?.["text"])) ?? undefined;
+}
+
+function extractTextRuns(
+  text: Record<string, unknown> | undefined,
+): string | null {
+  if (!text) return null;
+  const runs = asArray(text["runs"]);
+  if (runs.length > 0) {
+    const joined = runs
+      .map((run) => asString(asRecord(run)?.["text"]))
+      .filter((run): run is string => Boolean(run))
+      .join("");
+    return joined || null;
+  }
+
+  return asString(text["simpleText"]) ?? null;
+}
+
+function extractThumbnailURL(
+  renderer: Record<string, unknown>,
+): string | undefined {
+  const thumbnail = asRecord(renderer["thumbnail"]);
+  const musicThumbnailRenderer = asRecord(
+    thumbnail?.["musicThumbnailRenderer"],
+  );
+  const thumbnailData = asRecord(musicThumbnailRenderer?.["thumbnail"]);
+  const thumbnails = asArray(thumbnailData?.["thumbnails"]);
+  const lastThumbnail = asRecord(thumbnails[thumbnails.length - 1]);
+  return asString(lastThumbnail?.["url"]) ?? undefined;
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object" || Array.isArray(value))
+    return undefined;
+  return value as Record<string, unknown>;
+}
+
+function asArray(value: unknown): unknown[] {
+  return Array.isArray(value) ? value : [];
+}
+
+function asString(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
 }
 
 // Format seconds to MM:SS

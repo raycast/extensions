@@ -102,11 +102,11 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2025.11.0",
+  version: "2026.3.0",
   get sha256() {
-    if (platform === "windows") return "0484bae6306762881678097406d6bf00a58e291720dbc7d62f044e5f4d8286ed";
-    if (process.arch === "arm64") return "59eac955be7b15bfc21c81101a194a9fbba32f48a61154b4f4b6e007efab6fd6";
-    return "213108a65eeb7294ffcd7303f8fe5308dc2af970735aefeb4d23fc9753a2ac01";
+    if (platform === "windows") return "3f129e6d15ae950b5840d20ce9bcf99c2248ce5330f4d4c70e859512d5992371";
+    if (process.arch === "arm64") return "d935e9885ed215ecb0de9a7e7251487012b007a74fedbaaec6074d299fef3e02";
+    return "015ed86b1f9e23a366e0c7937a5b5cfcd26348505608e5e446890cd83a00b1d2";
   },
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
@@ -363,7 +363,7 @@ export class Bitwarden {
   async login(): Promise<MaybeError> {
     try {
       await this.exec(["login", "--apikey"], { resetVaultTimeout: true });
-      await this.saveLastVaultStatus("login", "unlocked");
+      await this.saveLastVaultStatus("login", "locked");
       await this.callActionListeners("login");
       return { result: undefined };
     } catch (execError) {
@@ -772,13 +772,7 @@ export class Bitwarden {
     }
     if (/Invalid session token/i.test(errorContent)) {
       if (!skipInvalidSessionTokenLogout) {
-        // Avoid running the full logout lifecycle here (which fires logout listeners).
-        // Clear the session token and mark the vault as unauthenticated so callers
-        // can perform an explicit `bitwarden.logout()` when they want the full
-        // logout side-effects (listeners, storage updates, etc.). This prevents
-        // duplicate listener invocations.
-        this.clearSessionToken();
-        await this.saveLastVaultStatus("handleCommonErrors:InvalidSessionToken", "unauthenticated");
+        await this.logout({ reason: "Invalid session token", immediate: true });
       }
       return { error: new InvalidSessionTokenError() };
     }

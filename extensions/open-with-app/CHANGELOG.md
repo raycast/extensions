@@ -1,5 +1,11 @@
 # Open With App Changelog
 
+## [Add Bloom support] - 2026-05-05
+
+- Read the selection from Bloom in addition to Finder
+- Detect the frontmost file manager at runtime; Finder remains the fallback
+- Refactor selection retrieval behind a pluggable provider interface so other file managers can be added later
+
 ## [Fix Recommended Applications section position] - 2024-11-26
 
 - Fix: keep the Recommended Applications section always on top of the Other Applications section

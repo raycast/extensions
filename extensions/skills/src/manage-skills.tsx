@@ -1,7 +1,7 @@
-import { List, Icon, Detail, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
+import { List, Detail, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
-import { isNpxResolutionError } from "./utils/skills-cli";
+import { isInvalidCustomNpxPathError, isNpxResolutionError } from "./utils/skills-cli";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
 import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
 
@@ -11,42 +11,31 @@ export default function Command() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isShowingDetail, setIsShowingDetail] = useState(true);
   const toggleDetail = () => setIsShowingDetail((prev) => !prev);
+  const hasInvalidCustomNpxPathError = error ? isInvalidCustomNpxPathError(error) : false;
   const hasNpxResolutionError = error ? isNpxResolutionError(error) : false;
 
   if (error && skills.length === 0) {
-    let errorMarkdown = `# Error Loading Installed Skills
-
-**Error:** ${error?.message}
-
----
-
-This is a local skills CLI execution failure.
-
-If this persists:
-
-1. Retry the command.
-2. Open Extension Preferences and verify **Custom npx Path** if you use a non-standard Node.js setup.
-3. Run \`npx -y skills@latest list -g\` in Terminal to inspect the underlying CLI error.
-`;
-
-    if (hasNpxResolutionError) {
-      errorMarkdown = `# Error Loading Installed Skills
-
-**Error:** ${error?.message}
-
----
-
-This is an npx resolution issue in the local CLI runtime.
-
-1. Run \`which npx\` in Terminal.
-2. Open Extension Preferences (\`Cmd+Shift+,\`).
-3. Set **Custom npx Path** to the path from step 1, then retry.
-`;
-    }
+    const { errorTitle, errorDetails } = hasInvalidCustomNpxPathError
+      ? {
+          errorTitle: "Invalid Custom npx Path",
+          errorDetails:
+            "The configured **Custom npx Path** does not point to a valid `npx` executable.\n\n1. Open Extension Preferences (`Cmd+Shift+,`).\n2. Fix or clear **Custom npx Path**.\n3. If unsure, run `which npx` in Terminal and use that value.",
+        }
+      : hasNpxResolutionError
+        ? {
+            errorTitle: "Unable to Load Installed Skills",
+            errorDetails:
+              "This is a package runner resolution issue in the local CLI runtime.\n\n1. Install or repair Bun so `bunx` works.\n2. If you need to force Node/npm instead, run `which npx` in Terminal.\n3. Open Extension Preferences (`Cmd+Shift+,`) and set **Custom npx Path** to the path from step 2, then retry.",
+          }
+        : {
+            errorTitle: "Unable to Load Installed Skills",
+            errorDetails:
+              "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you force a non-standard Node.js setup.\n3. Run `bunx skills@latest list -g` (or `npx -y skills@latest list -g` if Bun is not installed) in Terminal to inspect the underlying CLI error.",
+          };
 
     return (
       <Detail
-        markdown={errorMarkdown}
+        markdown={`# ${errorTitle}\n\n**Error:** ${error.message}\n\n---\n\n${errorDetails}`}
         actions={
           <ActionPanel>
             <Action title="Retry" onAction={revalidate} icon={Icon.RotateClockwise} />
@@ -91,22 +80,32 @@ This is an npx resolution issue in the local CLI runtime.
       {skills.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No Installed Skills"
-          description="Install skills using the Search Skills command"
+          description="Install skills from Search Skills to manage them here."
           icon={Icon.Box}
           actions={
             <ActionPanel>
-              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+              <Action
+                title="Refresh"
+                onAction={revalidate}
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
             </ActionPanel>
           }
         />
       ) : filteredSkills.length === 0 && !isLoading ? (
         <List.EmptyView
-          title="No Skills for This Agent"
+          title="No Results for Current Filter"
           description={`No installed skills match the "${selectedAgent}" filter. Try selecting a different agent.`}
           icon={Icon.Filter}
           actions={
             <ActionPanel>
-              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+              <Action
+                title="Refresh"
+                onAction={revalidate}
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
             </ActionPanel>
           }
         />
@@ -127,7 +126,13 @@ This is an npx resolution issue in the local CLI runtime.
                 }
                 actions={
                   <ActionPanel>
-                    <UpdateSkillAction onUpdate={revalidate} />
+                    <UpdateSkillAction mutate={mutate} />
+                    <Action
+                      title="Refresh Installed Skills"
+                      onAction={revalidate}
+                      icon={Icon.RotateClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    />
                   </ActionPanel>
                 }
               />
@@ -142,7 +147,7 @@ This is an npx resolution issue in the local CLI runtime.
                 isShowingDetail={isShowingDetail}
                 mutate={mutate}
                 onToggleDetail={toggleDetail}
-                onUpdate={revalidate}
+                onRefresh={revalidate}
               />
             ))}
           </List.Section>

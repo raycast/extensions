@@ -19,6 +19,7 @@ compiled_raycast_rust
 .vscode/
 *.swp
 *.swo
+.cursor/
 
 # Logs
 *.log

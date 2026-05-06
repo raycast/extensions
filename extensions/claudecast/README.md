@@ -5,8 +5,8 @@
 <h1 align="center">ClaudeCast</h1>
 
 <p align="center">
-  <strong>Claude Code workflows at your fingertips</strong><br>
-  A comprehensive Raycast extension that bridges Claude Code's powerful agentic CLI with Raycast's instant-access UI.
+  <strong>Discover, resume, and automate Claude Code sessions</strong><br>
+  Deep full-text search, one-keystroke resume, agentic loops, usage analytics, and quick prompts &mdash; bridging Claude Code's powerful agentic CLI with Raycast's instant-access UI.
 </p>
 
 ![ClaudeCast Main Menu](metadata/claudecast-10.png)

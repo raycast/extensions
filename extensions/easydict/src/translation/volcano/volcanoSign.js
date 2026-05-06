@@ -7,8 +7,7 @@
  *
  * Copyright (c) 2022 by tisfeng, All Rights Reserved.
  */
-
-import CryptoJS from "crypto-js";
+import crypto from "node:crypto";
 import { AppKeyStore } from "../../preferences";
 
 const accessKey = AppKeyStore.volcanoSecretId;
@@ -99,29 +98,29 @@ export const genVolcanoSign = function (query, params) {
     headers: {
       "Content-Type": "application/json",
       "X-Date": curTime,
-      "X-Content-Sha256": CryptoJS.SHA256(Body.toString()).toString(CryptoJS.enc.Hex),
+      "X-Content-Sha256": crypto.createHash("sha256").update(Body.toString()).digest("hex"),
     },
     getSignedHeaders: function () {
       let headerList = [];
       for (let key of Object.keys(this.headers).sort()) {
-        headerList.push(key.toLocaleLowerCase());
+        headerList.push(key.toLowerCase());
       }
       return headerList.join(";");
     },
     toString: function () {
       let str = "";
       for (let key of Object.keys(this.headers).sort()) {
-        str += `${key.toLocaleLowerCase()}:${this.headers[key]}\n`;
+        str += `${key.toLowerCase()}:${this.headers[key]}\n`;
       }
       return str;
     },
   };
 
   const getSigningKey = function (sk, date, region, service) {
-    const kdate = CryptoJS.HmacSHA256(date, sk);
-    const kregion = CryptoJS.HmacSHA256(region, kdate);
-    const kservice = CryptoJS.HmacSHA256(service, kregion);
-    return CryptoJS.HmacSHA256("request", kservice);
+    const kdate = crypto.createHmac("sha256", sk).update(date).digest();
+    const kregion = crypto.createHmac("sha256", kdate).update(region).digest();
+    const kservice = crypto.createHmac("sha256", kregion).update(service).digest();
+    return crypto.createHmac("sha256", kservice).update("request").digest();
   };
 
   const canonicalRequest = [
@@ -132,10 +131,10 @@ export const genVolcanoSign = function (query, params) {
     Header.getSignedHeaders(),
     Header.headers["X-Content-Sha256"],
   ].join("\n");
-  const hashCanonicalRequest = CryptoJS.SHA256(canonicalRequest).toString(CryptoJS.enc.Hex);
+  const hashCanonicalRequest = crypto.createHash("sha256").update(canonicalRequest).digest("hex");
   const signing_str = [MetaData.algorithm, curTime, MetaData.getCredentialScope(), hashCanonicalRequest].join("\n");
   const signing_key = getSigningKey(Credentials.sk, MetaData.date, MetaData.region, MetaData.service);
-  const sign = CryptoJS.HmacSHA256(signing_str, signing_key).toString(CryptoJS.enc.Hex);
+  const sign = crypto.createHmac("sha256", signing_key).update(signing_str).digest("hex");
 
   const Authorization = [
     `${MetaData.algorithm} Credential=${Credentials.ak}/${MetaData.getCredentialScope()}`,

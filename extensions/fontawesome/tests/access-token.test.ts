@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   buildScopedCacheKey,
+  getApiTokenConfigurationError,
   getAccessTokenStorageKeys,
   shouldRefreshAccessToken,
 } from "../src/utils/access-token.ts";
@@ -42,4 +43,26 @@ test("refreshes when there is no cached access token for the selected API token"
 test("buildScopedCacheKey keeps scopes stable and readable", () => {
   assert.equal(buildScopedCacheKey("iconData", "token-a"), "iconData:token-a");
   assert.equal(buildScopedCacheKey("iconData", "token-a", "far"), "iconData:token-a:far");
+});
+
+test("reports a helpful configuration error when required scopes are missing", () => {
+  assert.equal(
+    getApiTokenConfigurationError(["public", "kits_read"]),
+    'Your Font Awesome API token is missing the required permissions. Recreate it with "Read kits data", "Allowed domains", and "Pro icons and metadata" enabled.',
+  );
+});
+
+test("accepts a correctly configured pro token", () => {
+  assert.equal(
+    getApiTokenConfigurationError(["public", "kits_read", "domains_read", "svg_icons_pro"]),
+    undefined,
+  );
+});
+
+test("does not report missing permissions when token validation is disabled", () => {
+  assert.equal(getApiTokenConfigurationError(["public", "kits_read"], false), undefined);
+});
+
+test("does not report missing permissions before scopes are loaded", () => {
+  assert.equal(getApiTokenConfigurationError(undefined), undefined);
 });

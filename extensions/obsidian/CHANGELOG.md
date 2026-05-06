@@ -1,5 +1,18 @@
 # Obsidian Changelog
 
+## [Fix] - 2026-05-05
+
+- Fix vault auto-discovery on Windows and Linux by reading `obsidian.json` from the per-platform Obsidian config dir
+
+## [Fix] - 2026-04-10
+
+- Fix Open in New Obsidian Tab failing on Windows due to path separator handling
+
+## [Wikilink Actions] - 2026-04-07
+
+- New: Copy Wikilink — copies `[[Note Title]]` to clipboard (⌥W)
+- New: Paste Wikilink — pastes `[[Note Title]]` into the focused app (⌥⇧W)
+
 ## [Silent Mode No Longer Activates Obsidian] - 2026-03-31
 
 - Fix: Append to Daily Note, Append Task, and custom actions with silent mode enabled no longer bring Obsidian to the foreground

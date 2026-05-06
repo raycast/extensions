@@ -1,5 +1,9 @@
 # Databuddy
 
+## [Open Website Directly in Databuddy] - 2026-04-04
+
+- Deep link website "Open in Databuddy" actions to the selected website page
+
 ## [Initial Version] - 2026-04-01
 
 - View all websites connected to your Databuddy account

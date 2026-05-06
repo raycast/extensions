@@ -1,5 +1,13 @@
 # Git Repos Changelog
 
+## [Bug Fix] - 2026-05-05
+
+- Fix out-of-memory crash when searching repositories by replacing glob (which uses worker threads) with a native fs traversal.
+
+## [Enhancement] - 2026-04-10
+
+- Added Windows compatibility
+
 ## [Added Command] - 2026-03-26
 
 - Added a new `Clone Repo` command to clone a repository into one of the scanned directories from preferences.
