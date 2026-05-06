@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ai-translate",
   "title": "AI Translate",
-  "description": "AI-powered sentence translation for selected text, screenshots, and OCR with BYOK model providers.",
+  "description": "Fast screenshot OCR translation for text that cannot be selected, powered by BYOK AI providers.",
   "icon": "icon.png",
   "author": "xianwei_zhang",
   "license": "MIT",

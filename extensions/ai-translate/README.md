@@ -1,20 +1,28 @@
 # AI Translate for Raycast
 
-AI Translate is a Raycast extension for sentence-level AI translation and screenshot OCR workflows.
+AI Translate is a Raycast extension for fast screenshot OCR translation.
 
-Many translation extensions still center on conventional machine translation engines. They are fast, but they often miss context, tone, domain vocabulary, and the structure of long sentences. AI Translate is built for a newer workflow: extract the text you are looking at, send it to an AI model you control, and get a translation that reads like a real sentence rather than a word-by-word conversion.
+Version 1.0.0 is intentionally focused: take a screenshot quickly, extract the text reliably, and translate it with as little friction as possible. The goal is not to become a full translation suite. It is to make the common "I can see the text, but I cannot select it" moment feel effortless.
+
+Many translation extensions still center on conventional machine translation engines. They are fast, but they often miss context, tone, domain vocabulary, and the structure of long sentences. AI Translate is built for a newer workflow: capture the text you are looking at, send it to an AI model you control, and get a translation that reads like a real sentence rather than a word-by-word conversion.
 
 The extension prioritizes cost-effective, high-quality China-based model providers such as DeepSeek, Xiaomi MiMo, MiniMax, and Kimi, while still supporting OpenAI / ChatGPT and Gemini for users who prefer those ecosystems. If you already subscribe to a Token Plan or provider-specific plan, you can bring your own API key, base URL, and model ID directly into Raycast.
 
 ## Features
 
-- Translate selected text from any app with `Translate Selected Text`.
 - Translate screenshots with `Translate Screenshot`: capture a region, run OCR, then translate the recognized text.
 - Review OCR results with `Extract Text from Screenshot`: capture a region, edit the extracted text, copy it, compact it, translate it, or retake the screenshot.
 - Copy OCR text silently with `Copy Text from Screenshot`: capture a region and copy the recognized text directly to the clipboard.
+- Translate selected text from any app with `Translate Selected Text` when selection is available.
 - Use local or API OCR engines: macOS Vision, Tesseract, Baidu OCR API, or a self-hosted PaddleOCR HTTP service.
 - Compare multiple AI providers in one result view.
 - Configure provider order, target language, translation style, model ID, base URL, and API key.
+
+## Why Screenshots
+
+Raycast's built-in translation is useful when the source text can be selected or passed as plain text. But many real workflows do not expose text cleanly: app UI, images, PDFs, slides, videos, remote desktops, protected documents, and web pages with broken selection all get in the way.
+
+In those cases, a screenshot is the most reliable input. AI Translate treats screenshot capture as the primary workflow, then layers OCR and AI translation on top of it. You can bind a hotkey, capture the exact region you care about, and translate what is actually visible on the screen.
 
 ## Why AI Translation
 
