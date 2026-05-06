@@ -89,20 +89,62 @@
       "description": "Select the language for AI translations and explanations",
       "default": "English",
       "data": [
-        { "title": "English", "value": "English" },
-        { "title": "Spanish", "value": "Spanish" },
-        { "title": "French", "value": "French" },
-        { "title": "German", "value": "German" },
-        { "title": "Italian", "value": "Italian" },
-        { "title": "Portuguese", "value": "Portuguese" },
-        { "title": "Russian", "value": "Russian" },
-        { "title": "Chinese", "value": "Chinese" },
-        { "title": "Japanese", "value": "Japanese" },
-        { "title": "Korean", "value": "Korean" },
-        { "title": "Hindi", "value": "Hindi" },
-        { "title": "Arabic", "value": "Arabic" },
-        { "title": "Dutch", "value": "Dutch" },
-        { "title": "Turkish", "value": "Turkish" }
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Hindi",
+          "value": "Hindi"
+        },
+        {
+          "title": "Arabic",
+          "value": "Arabic"
+        },
+        {
+          "title": "Dutch",
+          "value": "Dutch"
+        },
+        {
+          "title": "Turkish",
+          "value": "Turkish"
+        }
       ]
     }
   ],
@@ -135,5 +177,8 @@
   ],
   "categories": [
     "Other"
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
