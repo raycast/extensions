@@ -1,4 +1,5 @@
-import { execSync } from "child_process";
+import { exec } from "child_process";
+import { promisify } from "util";
 import { executeSQL } from "@raycast/utils";
 import { homedir } from "os";
 import { join } from "path";
@@ -161,18 +162,20 @@ export async function searchSessions(keyword: string, limit = 30): Promise<DbSes
 
 // --- Open sessions (sync, needs ps aux) ---
 
+const execAsync = promisify(exec);
+
 let openSessionsCache: { data: OpenSession[]; timestamp: number } | null = null;
 const OPEN_SESSIONS_TTL = 5_000;
 
-export function getOpenSessions(): OpenSession[] {
+export async function getOpenSessions(): Promise<OpenSession[]> {
   if (openSessionsCache && Date.now() - openSessionsCache.timestamp < OPEN_SESSIONS_TTL) {
     return openSessionsCache.data;
   }
 
   const processIds: string[] = [];
   try {
-    const output = execSync("ps aux", { encoding: "utf-8" });
-    for (const line of output.split("\n")) {
+    const { stdout } = await execAsync("ps aux");
+    for (const line of stdout.split("\n")) {
       if (!line.includes("opencode")) continue;
       const match = line.match(/(?:-s|--session)[=\s]+(\S+)/);
       if (match && !processIds.includes(match[1])) {
@@ -185,34 +188,23 @@ export function getOpenSessions(): OpenSession[] {
 
   if (processIds.length === 0) return [];
 
-  // Check liveness via executeSQL is async, so we keep sync sqlite3 for this one
   const cutoff = Date.now() - 60_000;
   const escSql = (s: string) => s.replace(/'/g, "''");
   const inClause = processIds.map((id) => `'${escSql(id)}'`).join(",");
 
-  let recentOutput = "";
-  let todoOutput = "";
-  try {
-    recentOutput = execSync(`sqlite3 "${DB_PATH}"`, {
-      encoding: "utf-8",
-      input: `SELECT id FROM session WHERE id IN (${inClause}) AND time_updated > ${cutoff}`,
-      timeout: 5_000,
-    });
-  } catch {
-    /* ignore */
-  }
-  try {
-    todoOutput = execSync(`sqlite3 "${DB_PATH}"`, {
-      encoding: "utf-8",
-      input: `SELECT DISTINCT session_id FROM todo WHERE session_id IN (${inClause}) AND status = 'in_progress'`,
-      timeout: 5_000,
-    });
-  } catch {
-    /* ignore */
-  }
+  const [recentRows, todoRows] = await Promise.all([
+    executeSQL<{ id: string }>(
+      DB_PATH,
+      `SELECT id FROM session WHERE id IN (${inClause}) AND time_updated > ${cutoff}`,
+    ).catch(() => [] as { id: string }[]),
+    executeSQL<{ session_id: string }>(
+      DB_PATH,
+      `SELECT DISTINCT session_id FROM todo WHERE session_id IN (${inClause}) AND status = 'in_progress'`,
+    ).catch(() => [] as { session_id: string }[]),
+  ]);
 
-  const recentlyUpdated = new Set<string>(recentOutput.trim().split("\n").filter(Boolean));
-  const hasTodos = new Set<string>(todoOutput.trim().split("\n").filter(Boolean));
+  const recentlyUpdated = new Set(recentRows.map((r) => r.id));
+  const hasTodos = new Set(todoRows.map((r) => r.session_id));
 
   const result = processIds.map((id) => ({
     id,

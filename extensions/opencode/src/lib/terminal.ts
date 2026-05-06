@@ -99,7 +99,7 @@ async function openInITerm(directory: string, command: string): Promise<void> {
       tell current window
         create tab with default profile
         tell current session
-          write text "cd ${shellQuote(directory)} && ${esc(command)}"
+          write text "cd ${esc(shellQuote(directory))} && ${esc(command)}"
         end tell
       end tell
     end tell
@@ -112,7 +112,7 @@ async function openInTerminalApp(directory: string, command: string): Promise<vo
   await runAppleScript(`
     tell application "Terminal"
       activate
-      do script "cd ${shellQuote(directory)} && ${esc(command)}"
+      do script "cd ${esc(shellQuote(directory))} && ${esc(command)}"
     end tell
   `);
 }
@@ -129,7 +129,7 @@ async function openInWarp(directory: string, command: string): Promise<void> {
       tell process "Warp"
         keystroke "t" using command down
         delay 0.3
-        keystroke "cd ${shellQuote(directory)} && ${esc(command)}"
+        keystroke "cd ${esc(shellQuote(directory))} && ${esc(command)}"
         key code 36
       end tell
     end tell
@@ -148,7 +148,7 @@ async function openInGhostty(directory: string, command: string): Promise<void> 
       tell process "Ghostty"
         keystroke "t" using command down
         delay 0.3
-        keystroke "cd ${shellQuote(directory)} && ${esc(command)}"
+        keystroke "cd ${esc(shellQuote(directory))} && ${esc(command)}"
         key code 36
       end tell
     end tell
@@ -205,7 +205,7 @@ async function openInKitty(directory: string, command: string): Promise<void> {
         tell process "kitty"
           keystroke "t" using command down
           delay 0.3
-          keystroke "cd ${shellQuote(directory)} && ${esc(command)}"
+          keystroke "cd ${esc(shellQuote(directory))} && ${esc(command)}"
           key code 36
         end tell
       end tell

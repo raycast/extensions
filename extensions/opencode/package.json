@@ -19,21 +19,21 @@
       "name": "search-projects",
       "title": "Search Projects",
       "subtitle": "OpenCode",
-      "description": "Search and open OpenCode projects",
+      "description": "Browse projects with session counts, drill into sessions grouped by folder",
       "mode": "view"
     },
     {
       "name": "search-sessions",
       "title": "Search Sessions",
       "subtitle": "OpenCode",
-      "description": "Search and resume OpenCode sessions",
+      "description": "Find conversations by title or content, see which are active, resume in terminal",
       "mode": "view"
     },
     {
       "name": "new-session",
       "title": "New Session",
       "subtitle": "OpenCode",
-      "description": "Start a new OpenCode session in a directory",
+      "description": "Start a fresh OpenCode conversation in any project directory",
       "mode": "no-view",
       "arguments": [
         {
