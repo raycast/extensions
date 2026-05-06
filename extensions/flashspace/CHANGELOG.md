@@ -1,6 +1,6 @@
 # FlashSpace Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-06
 
 Manage FlashSpace directly from Raycast — fast workspace, profile, and app control to stay focused.
 
