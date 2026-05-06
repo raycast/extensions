@@ -141,7 +141,7 @@ export default function Command() {
                     icon={Filled + tablerIcon.name + ".svg"}
                     shortcut={{
                       macOS: { modifiers: ["opt"], key: "return" },
-                      windows: { modifiers: ["alt"], key: "return" },
+                      Windows: { modifiers: ["alt"], key: "return" },
                     }}
                   />
                 )}
@@ -152,7 +152,7 @@ export default function Command() {
                     onAction={() => downloadSVG(filled, tablerIcon.name)}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "opt"], key: "return" },
-                      windows: { modifiers: ["ctrl", "alt"], key: "return" },
+                      Windows: { modifiers: ["ctrl", "alt"], key: "return" },
                     }}
                   />
                 )}
@@ -167,7 +167,7 @@ export default function Command() {
                     content={`&#x${tablerIcon.styles.outline.unicode};`}
                     shortcut={{
                       macOS: { modifiers: ["cmd"], key: "." },
-                      windows: { modifiers: ["ctrl"], key: "." },
+                      Windows: { modifiers: ["ctrl"], key: "." },
                     }}
                   />
                 )}
@@ -177,7 +177,7 @@ export default function Command() {
                     content={`&#x${tablerIcon.styles.filled.unicode};`}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "opt"], key: "." },
-                      windows: { modifiers: ["ctrl", "alt"], key: "." },
+                      Windows: { modifiers: ["ctrl", "alt"], key: "." },
                     }}
                   />
                 )}
