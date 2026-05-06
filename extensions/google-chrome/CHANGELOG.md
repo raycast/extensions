@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Fix Chrome History Search When Chrome Is Running] - {PR_MERGE_DATE}
+
+- Fix searching Chrome history while Chrome keeps the history database locked.
+
 ## [Add Name Window Command] - 2026-03-04
 
 - Add Name Window command to name the currently active Google Chrome window.
