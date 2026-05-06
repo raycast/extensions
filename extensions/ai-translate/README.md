@@ -22,13 +22,15 @@ The extension prioritizes cost-effective, high-quality China-based model provide
 
 Raycast's built-in translation is useful when the source text can be selected or passed as plain text. But many real workflows do not expose text cleanly: app UI, images, PDFs, slides, videos, remote desktops, protected documents, and web pages with broken selection all get in the way.
 
+Raycast's built-in AI features also do not provide this level of model routing for translation. AI Translate lets you choose the provider, model ID, base URL, and API key yourself, so a translation workflow can use the exact model plan you already pay for.
+
 In those cases, a screenshot is the most reliable input. AI Translate treats screenshot capture as the primary workflow, then layers OCR and AI translation on top of it. You can bind a hotkey, capture the exact region you care about, and translate what is actually visible on the screen.
 
 ## Why AI Translation
 
 - **Better sentence quality**: LLMs are better at preserving context, pronouns, idioms, tone, technical terms, and academic phrasing than traditional machine translation.
 - **Cost control**: OpenAI and Claude-class providers can be expensive for everyday translation. This extension is designed to work well with cost-effective providers such as DeepSeek, Xiaomi MiMo, MiniMax, and Kimi.
-- **Token Plan friendly**: Developers who already pay for Xiaomi MiMo, MiniMax, or other provider-specific plans can reuse those credentials instead of paying again for a separate translation service.
+- **Token Plan friendly**: Developers who already pay for Xiaomi MiMo, MiniMax, Kimi, or other provider-specific Token Plans / Coding Plans can reuse those credentials, route translation to the right model, and get more value from an existing subscription.
 - **Provider independence**: OpenAI / ChatGPT and Gemini are also supported, so you can pick the model that fits your quality, latency, and budget.
 - **Screenshot-native workflow**: Translate text that cannot be selected, including app UI, images, PDFs, slides, websites, and videos.
 
