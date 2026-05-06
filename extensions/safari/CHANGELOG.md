@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Fix] - 2026-05-06
+## [Fix] - {PR_MERGE_DATE}
 
 - Fix `Search History` command failing with `no such column: "%...%"` by using single-quoted string literals for search terms in the SQL query.
 
