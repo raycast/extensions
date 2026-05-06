@@ -68,14 +68,7 @@ export function useSearchSuggest(
                   title: c.title,
                   handle: c.handle,
                   url: `/collections/${c.handle}`,
-                  featured_image: c.image
-                    ? {
-                        url: c.image.src,
-                        alt: c.image.alt ?? "",
-                        width: c.image.width ?? 0,
-                        height: c.image.height ?? 0,
-                      }
-                    : undefined,
+                  image: c.image?.src,
                   body: c.description || "",
                 }));
 
