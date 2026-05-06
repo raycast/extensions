@@ -14,12 +14,12 @@
 
 ## AI Provider Defaults
 
-| Provider | Anthropic Base URL | Default Model |
-| --- | --- | --- |
-| DeepSeek | `https://api.deepseek.com/anthropic` | `deepseek-v4-flash` |
-| Xiaomi MiMo | `https://token-plan-cn.xiaomimimo.com/anthropic` | `mimo-v2-flash` |
-| MiniMax | `https://api.minimaxi.com/anthropic` | `MiniMax-M2.7` |
-| Kimi | `https://api.moonshot.ai/anthropic` | `kimi-k2.6` |
+| Provider    | Anthropic Base URL                               | Default Model       |
+| ----------- | ------------------------------------------------ | ------------------- |
+| DeepSeek    | `https://api.deepseek.com/anthropic`             | `deepseek-v4-flash` |
+| Xiaomi MiMo | `https://token-plan-cn.xiaomimimo.com/anthropic` | `mimo-v2-flash`     |
+| MiniMax     | `https://api.minimaxi.com/anthropic`             | `MiniMax-M2.7`      |
+| Kimi        | `https://api.moonshot.ai/anthropic`              | `kimi-k2.6`         |
 
 DeepSeek, MiMo, MiniMax, and Kimi use one Anthropic-compatible entrypoint each. The extension appends `/v1/messages` automatically. OpenAI and Gemini keep their native protocols. Model preferences remain text fields so newer model IDs can be entered without changing the extension.
 
@@ -28,6 +28,22 @@ Current model IDs worth trying:
 - Xiaomi MiMo: `mimo-v2.5`, `mimo-v2.5-pro`, `mimo-v2-pro`, `mimo-v2-omni`
 - MiniMax: `MiniMax-M2.7-highspeed`
 - Kimi: `kimi-k2.5`, `moonshot-v1-8k`, `moonshot-v1-32k`, `moonshot-v1-128k`
+
+## 官方接口文档
+
+| Provider         | 接入方式                                   | 官方文档                                                                                                                                                                                               |
+| ---------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| DeepSeek         | Anthropic-compatible Messages              | [Anthropic API](https://api-docs.deepseek.com/guides/anthropic_api)                                                                                                                                    |
+| Xiaomi MiMo      | Token Plan / Anthropic-compatible Messages | [Anthropic API Compatibility](https://platform.xiaomimimo.com/static/docs/api/chat/anthropic-api.md), [Token Plan Quick Access](https://platform.xiaomimimo.com/static/docs/tokenplan/quick-access.md) |
+| MiniMax          | Token Plan / Anthropic-compatible Messages | [Anthropic API 兼容](https://platform.minimaxi.com/docs/api-reference/text-anthropic-api), [Token Plan 快速接入](https://platform.minimaxi.com/docs/token-plan/quickstart)                             |
+| Gemini           | Gemini `generateContent`                   | [Text generation](https://ai.google.dev/gemini-api/docs/text-generation), [Gemini API reference](https://ai.google.dev/gemini-api/docs/api-overview)                                                   |
+| Kimi             | Anthropic-compatible agent integration     | [ClaudeCode / Cline / RooCode 接入说明](https://platform.kimi.ai/docs/guide/agent-support), [API Overview](https://platform.kimi.ai/docs/api/overview)                                                 |
+| OpenAI / ChatGPT | Chat Completions                           | [Chat Completions API Reference](https://platform.openai.com/docs/api-reference/chat/create)                                                                                                           |
+
+| OCR Engine     | 官方文档                                                                                                                                                                                                             |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Baidu OCR API  | [通用文字识别（标准版）](https://cloud.baidu.com/doc/OCR/s/zk3h7xz52), [通用文字识别（高精度版）](https://cloud.baidu.com/doc/OCR/s/1k3h7y3db), [鉴权认证机制](https://cloud.baidu.com/doc/AI_REFERENCE/s/um3zhy50e) |
+| PaddleOCR HTTP | [Server Deployment](https://paddlepaddle.github.io/PaddleOCR/main/en/version3.x/deployment/serving.html), [OCR Pipeline Usage](https://www.paddleocr.ai/main/en/version3.x/pipeline_usage/OCR.html)                  |
 
 ## 快捷键
 
@@ -48,6 +64,7 @@ npm run dev
 - `Tesseract Local`：参考 omarchy-cmd-ocr 的轻量本地 pipeline；可用 `brew install tesseract` 安装，并通过 `Tesseract Languages` 配置 `eng+chi_sim` 等语言包。
 - `Baidu OCR API`：同步接口，适合截图翻译；`general_basic` 更快，`accurate_basic` 更稳。
 - `PaddleOCR HTTP`：适合你自托管 PaddleOCR service，默认 endpoint 是 `http://localhost:8080/ocr`。
+
 API OCR 失败时默认会用同一张截图回退到本地 Vision OCR。
 
 `OCR Text Layout` 借鉴了 omarchy-cmd-ocr 的双模式：`Formatted` 保留换行，`Compact` 会把识别结果压成单行，更适合对零散 UI 文本做整句翻译。
