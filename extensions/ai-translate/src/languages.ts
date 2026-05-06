@@ -24,9 +24,21 @@ export function resolveTargetLanguage(preferredLanguage: string, text: string): 
     return preferredLanguage;
   }
 
-  return containsChinese(text) ? "en" : "zh-Hans";
+  return looksLikeChinese(text) ? "en" : "zh-Hans";
 }
 
-function containsChinese(text: string): boolean {
+function looksLikeChinese(text: string): boolean {
+  if (containsJapaneseKana(text) || containsHangul(text)) {
+    return false;
+  }
+
   return /[\u3400-\u9fff\uf900-\ufaff]/.test(text);
+}
+
+function containsJapaneseKana(text: string): boolean {
+  return /[\u3040-\u30ff]/.test(text);
+}
+
+function containsHangul(text: string): boolean {
+  return /[\uac00-\ud7a3]/.test(text);
 }

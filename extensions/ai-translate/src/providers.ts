@@ -76,21 +76,8 @@ async function translateWithOpenAICompatible(config: ProviderConfig, request: Tr
     ],
     temperature: 0.2,
     stream: false,
+    max_tokens: request.maxOutputTokens,
   };
-
-  if (usesMaxCompletionTokens(config.id)) {
-    body.max_completion_tokens = request.maxOutputTokens;
-  } else {
-    body.max_tokens = request.maxOutputTokens;
-  }
-
-  if (config.id === "kimi") {
-    body.thinking = { type: "disabled" };
-  }
-
-  if (config.id === "kimi" && config.model === "kimi-k2.6") {
-    delete body.temperature;
-  }
 
   const response = await postJson<OpenAICompatibleResponse>(
     chatCompletionsUrl(config.baseURL),
@@ -108,10 +95,6 @@ async function translateWithOpenAICompatible(config: ProviderConfig, request: Tr
   }
 
   return cleanModelOutput(content);
-}
-
-function usesMaxCompletionTokens(providerId: ProviderConfig["id"]): boolean {
-  return providerId === "mimo";
 }
 
 async function translateWithAnthropicCompatible(config: ProviderConfig, request: TranslationRequest): Promise<string> {

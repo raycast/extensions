@@ -10,3 +10,4 @@
 - Kept OpenAI and Gemini on their native API protocols.
 - Added prompt profiles and custom prompt instructions for reusable translation behavior.
 - Refined the default system prompt toward native, sense-for-sense translation instead of literal wording.
+- Addressed review feedback for auto language detection, OCR API error parsing, provider cleanup, and search debounce latency.

@@ -239,11 +239,35 @@ async function fetchWithTimeout(url: string, timeoutMs: number, init?: RequestIn
 
 async function parseJSONResponse<T>(response: Response): Promise<T> {
   const text = await response.text();
-  const data = text ? (JSON.parse(text) as unknown) : {};
+  const data = safeParseJson(text);
   if (!response.ok) {
     throw new Error(extractAPIError(data) ?? `HTTP ${response.status}: ${text.slice(0, 240)}`);
   }
+  if (isRawResponse(data)) {
+    throw new Error(`Invalid JSON response: ${data.raw.slice(0, 240)}`);
+  }
   return data as T;
+}
+
+function safeParseJson(text: string): unknown {
+  if (!text) {
+    return {};
+  }
+
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { raw: text };
+  }
+}
+
+function isRawResponse(value: unknown): value is { raw: string } {
+  return (
+    value !== null &&
+    typeof value === "object" &&
+    "raw" in value &&
+    typeof (value as { raw?: unknown }).raw === "string"
+  );
 }
 
 function extractPaddleText(data: unknown): string {

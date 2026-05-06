@@ -180,7 +180,6 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
       }
       searchBarPlaceholder="Select text, paste OCR text, or type to translate..."
       searchText={inputText ?? ""}
-      throttle
     >
       {results.map((result) => (
         <List.Item
