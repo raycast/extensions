@@ -1,6 +1,6 @@
 # Raycast Weekly Newsletter Changelog
 
-## [Update Posts Loading and Cache] - {PR_MERGE_DATE}
+## [Update Posts Loading and Cache] - 2026-05-06
 
 - Updated Raycast dependencies to the latest compatible versions.
 - Added paginated loading for older newsletter posts in the browse posts command.
