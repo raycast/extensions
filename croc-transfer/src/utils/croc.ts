@@ -1,4 +1,4 @@
-import { execSync, execFile } from "child_process";
+import { execSync, execFile, execFileSync } from "child_process";
 import { existsSync } from "fs";
 import { getPreferenceValues } from "@raycast/api";
 
@@ -67,7 +67,7 @@ export function resolveCrocPathAsync(): Promise<string | null> {
 
 export function getCrocVersion(crocPath: string): string | null {
   try {
-    const output = execSync(`"${crocPath}" --version`, {
+    const output = execFileSync(crocPath, ["--version"], {
       encoding: "utf8",
       timeout: 3000,
     });

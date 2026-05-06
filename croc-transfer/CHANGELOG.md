@@ -1,6 +1,6 @@
 # Croc Transfer Changelog
 
-## [Initial Version] - 2026-04-09
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 - **Send File** command: Pick files or folders (or pre-select in Finder), optionally set a custom code phrase, and watch live transfer progress with speed, ETA, and size stats

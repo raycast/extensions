@@ -1,4 +1,4 @@
-import { spawn, ChildProcess } from "child_process";
+import { spawn, ChildProcess, execSync } from "child_process";
 import { tmpdir } from "os";
 import { join } from "path";
 import {
@@ -8,6 +8,7 @@ import {
   mkdirSync,
   statSync,
   rmSync,
+  existsSync,
 } from "fs";
 
 export interface TransferProgress {
@@ -125,6 +126,37 @@ function cleanOutput(raw: string): string {
   return raw.replace(/\x1b\[[0-9;]*[mGKHFJACBD]/g, "").replace(/\r/g, "\n");
 }
 
+function findPython3Path(): string {
+  const candidatePaths = [
+    "/usr/bin/python3",
+    "/usr/local/bin/python3",
+    "/opt/homebrew/bin/python3",
+    "/opt/local/bin/python3",
+  ];
+
+  for (const path of candidatePaths) {
+    if (existsSync(path)) {
+      return path;
+    }
+  }
+
+  try {
+    const result = execSync("which python3", {
+      encoding: "utf8",
+      timeout: 3000,
+    }).trim();
+    if (result && existsSync(result)) {
+      return result;
+    }
+  } catch {
+    // which failed
+  }
+
+  throw new Error(
+    "Python 3 not found. Please install Python 3 or Xcode Command Line Tools.",
+  );
+}
+
 function spawnWithPty(
   crocPath: string,
   args: string[],
@@ -154,7 +186,8 @@ function spawnWithPty(
   };
 
   try {
-    proc = spawn("/usr/bin/python3", [wrapperPath, crocPath, ...args], {
+    const pythonPath = findPython3Path();
+    proc = spawn(pythonPath, [wrapperPath, crocPath, ...args], {
       cwd,
       env: { ...process.env, TERM: "xterm-256color", ...extraEnv },
       stdio: ["ignore", "pipe", "pipe"],
