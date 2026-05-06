@@ -20,8 +20,17 @@ interface ExtractArguments {
   text?: string;
 }
 
-export default function Command(props: LaunchProps<{ arguments: ExtractArguments }>) {
-  const initialText = useMemo(() => normalizeText(props.arguments?.text ?? props.fallbackText), []);
+interface ExtractLaunchContext {
+  text?: string;
+}
+
+export default function Command(
+  props: LaunchProps<{ arguments: ExtractArguments; launchContext: ExtractLaunchContext }>,
+) {
+  const initialText = useMemo(
+    () => normalizeText(props.launchContext?.text ?? props.arguments?.text ?? props.fallbackText),
+    [],
+  );
   const [text, setText] = useState(initialText);
   const [isLoading, setIsLoading] = useState(!initialText);
 
@@ -54,7 +63,7 @@ export default function Command(props: LaunchProps<{ arguments: ExtractArguments
       await launchCommand({
         name: "extract-text-from-screenshot",
         type: LaunchType.UserInitiated,
-        fallbackText: recognizedText,
+        context: { text: recognizedText },
       });
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
@@ -110,7 +119,7 @@ export default function Command(props: LaunchProps<{ arguments: ExtractArguments
       <Form.TextArea
         id="text"
         title="Extracted Text"
-        placeholder="Screenshot text will appear here"
+        placeholder={isLoading ? "Reading screenshot text..." : "No text detected yet"}
         value={text}
         onChange={setText}
       />
