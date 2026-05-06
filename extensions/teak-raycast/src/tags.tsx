@@ -26,9 +26,7 @@ function TagCardsView({ tag }: { tag: string }) {
       emptyTitle={`No cards tagged "${tag}"`}
       getItemIcon={(card) => (card.isFavorited ? Icon.Star : Icon.Document)}
       latestSectionTitle={`Cards tagged "${tag}"`}
-      loadCards={(input) =>
-        searchCards({ ...input, limit: 50, tag: input.tag ?? tag })
-      }
+      loadCards={(input) => searchCards({ ...input, limit: 50, tag })}
       navigationTitle={`Tag: ${tag}`}
       searchBarPlaceholder={`Search within "${tag}" or use type:, sort:oldest`}
     />
