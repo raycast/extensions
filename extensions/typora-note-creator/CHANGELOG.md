@@ -1,6 +1,6 @@
 # Typora Note Creator Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-05-06
 
 - Handle undefined notesDir preference to prevent startsWith error
 
