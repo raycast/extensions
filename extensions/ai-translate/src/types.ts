@@ -4,6 +4,8 @@ export type ProviderId = (typeof PROVIDER_IDS)[number];
 
 export type TranslationStyle = "balanced" | "faithful" | "polished" | "academic";
 
+export type PromptProfile = "screenshot" | "general" | "technical" | "academic" | "legal" | "subtitle" | "custom";
+
 export type OCREngine = "local" | "tesseract" | "baidu" | "paddle";
 
 export type OCRTextLayout = "formatted" | "compact";
@@ -14,6 +16,8 @@ export interface ExtensionPreferences {
   defaultProvider: ProviderId;
   targetLanguage: string;
   translationStyle: TranslationStyle;
+  promptProfile?: PromptProfile;
+  customPromptInstructions?: string;
   ocrEngine: OCREngine;
   ocrTextLayout: OCRTextLayout;
   ocrFallbackToLocal?: boolean;
@@ -69,6 +73,8 @@ export interface TranslationRequest {
   targetLanguage: string;
   targetLanguageTitle: string;
   style: TranslationStyle;
+  promptProfile: PromptProfile;
+  customPromptInstructions?: string;
   timeoutMs: number;
   maxOutputTokens: number;
 }

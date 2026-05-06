@@ -209,6 +209,52 @@
       ]
     },
     {
+      "title": "Prompt Profile",
+      "name": "promptProfile",
+      "type": "dropdown",
+      "required": true,
+      "default": "screenshot",
+      "description": "Built-in prompt frame appended to every translation request.",
+      "data": [
+        {
+          "title": "Screenshot OCR",
+          "value": "screenshot"
+        },
+        {
+          "title": "General Translation",
+          "value": "general"
+        },
+        {
+          "title": "Technical / Developer",
+          "value": "technical"
+        },
+        {
+          "title": "Academic Writing",
+          "value": "academic"
+        },
+        {
+          "title": "Legal / Policy",
+          "value": "legal"
+        },
+        {
+          "title": "Subtitle / Conversation",
+          "value": "subtitle"
+        },
+        {
+          "title": "Custom Only",
+          "value": "custom"
+        }
+      ]
+    },
+    {
+      "title": "Custom Prompt Instructions",
+      "name": "customPromptInstructions",
+      "type": "textfield",
+      "required": false,
+      "description": "Optional prompt instructions sent with every translation, for terminology, audience, tone, or formatting preferences.",
+      "default": ""
+    },
+    {
       "title": "OCR Engine",
       "name": "ocrEngine",
       "type": "dropdown",

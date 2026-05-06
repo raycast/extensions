@@ -108,6 +108,8 @@ export default function Command(props: LaunchProps<{ arguments: TranslateArgumen
       targetLanguage: resolvedTargetLanguage,
       targetLanguageTitle: getLanguageTitle(resolvedTargetLanguage),
       style: preferences.translationStyle,
+      promptProfile: preferences.promptProfile ?? "screenshot",
+      customPromptInstructions: preferences.customPromptInstructions,
       timeoutMs: getTimeoutMs(preferences),
       maxOutputTokens: getMaxOutputTokens(preferences),
     };

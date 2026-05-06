@@ -16,6 +16,7 @@ The extension prioritizes cost-effective, high-quality China-based model provide
 - Translate selected text from any app with `Translate Selected Text` when selection is available.
 - Use local or API OCR engines: macOS Vision, Tesseract, Baidu OCR API, or a self-hosted PaddleOCR HTTP service.
 - Compare multiple AI providers in one result view.
+- Tune translation behavior with built-in prompt profiles and optional custom prompt instructions.
 - Configure provider order, target language, translation style, model ID, base URL, and API key.
 
 ## Why Screenshots
@@ -33,6 +34,20 @@ In those cases, a screenshot is the most reliable input. AI Translate treats scr
 - **Token Plan friendly**: Developers who already pay for Xiaomi MiMo, MiniMax, Kimi, or other provider-specific Token Plans / Coding Plans can reuse those credentials, route translation to the right model, and get more value from an existing subscription.
 - **Provider independence**: OpenAI / ChatGPT and Gemini are also supported, so you can pick the model that fits your quality, latency, and budget.
 - **Screenshot-native workflow**: Translate text that cannot be selected, including app UI, images, PDFs, slides, websites, and videos.
+
+## Prompt Customization
+
+AI Translate sends a prompt with every translation request. In extension preferences, `Prompt Profile` gives you built-in instruction frames for common translation scenarios:
+
+- `Screenshot OCR`: repair OCR artifacts and keep UI text concise.
+- `General Translation`: everyday sentence and paragraph translation.
+- `Technical / Developer`: preserve APIs, commands, code identifiers, logs, and filenames.
+- `Academic Writing`: preserve argument structure, citations, and domain terminology.
+- `Legal / Policy`: preserve defined terms, obligations, conditions, and legal modality.
+- `Subtitle / Conversation`: use natural spoken phrasing.
+- `Custom Only`: use your own instruction frame.
+
+`Custom Prompt Instructions` lets you add your own reusable guidance, such as a preferred glossary, audience, tone, field-specific terminology, or formatting rule. The extension keeps the source text in a separate `Text:` block, so you do not need to include a placeholder in your custom prompt.
 
 ## Commands
 
