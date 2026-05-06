@@ -2,7 +2,7 @@ import { Icon, Image } from "@raycast/api";
 import { existsSync, readFileSync, promises as fsPromises } from "fs";
 import { homedir } from "os";
 import { join } from "path";
-import { parse as parseToml } from "smol-toml";
+import { parse as parseToml } from "toml";
 import { parse as parseYaml } from "yaml";
 import { SF_SYMBOL_OPTIONS } from "./sf-symbols";
 

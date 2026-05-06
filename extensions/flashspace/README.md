@@ -5,6 +5,7 @@ Manage [FlashSpace](https://github.com/wojciech-kulik/FlashSpace) workspaces, pr
 ## Features
 
 ### Workspace Management
+
 - **List Workspaces** – View all workspaces with display assignments
 - **Create Workspace** – Create new workspaces with display, icon, and hotkey options
 - **Delete Workspace** – Remove workspaces with confirmation dialog
@@ -12,11 +13,13 @@ Manage [FlashSpace](https://github.com/wojciech-kulik/FlashSpace) workspaces, pr
 - **Activate Workspace** – Quick-switch to any workspace by name
 
 ### Profile Management
+
 - **List Profiles** – View all profiles with active indicator
 - **Create Profile** – Create profiles with copy and activate options
 - **Delete Profile** – Remove profiles with confirmation dialog
 
 ### App Management
+
 - **Assign App** – Assign running apps to workspaces
 - **Unassign App** – Remove app assignments from all workspaces
 - **Assign Visible Apps** – Bulk-assign all visible apps to a workspace
@@ -25,6 +28,7 @@ Manage [FlashSpace](https://github.com/wojciech-kulik/FlashSpace) workspaces, pr
 - **Floating Apps** – Toggle float/unfloat for apps
 
 ### Utility Commands
+
 - **Focus Window** – Focus windows by direction or cycle through apps/windows
 - **List Displays** – View connected displays with active indicator
 - **Get Status** – View current active profile, workspace, app, and display

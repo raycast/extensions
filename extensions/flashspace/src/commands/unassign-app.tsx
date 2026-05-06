@@ -59,19 +59,16 @@ export default function UnassignApp() {
   );
 
   async function handleUnassign(name: string, bundleId?: string) {
-    if (!bundleId) {
-      await showToast({ style: Toast.Style.Failure, title: "Cannot unassign", message: "No bundle ID available" });
-      return;
-    }
+    const identifier = bundleId || name;
     const toast = await showToast({ style: Toast.Style.Animated, title: "Unassigning app..." });
 
     try {
-      await runFlashspaceAsync(["unassign-app", "--name", bundleId]);
+      await runFlashspaceAsync(["unassign-app", "--name", identifier]);
       toast.style = Toast.Style.Success;
       toast.title = `"${name}" unassigned from all workspaces`;
       setOverrides((current) => ({
         ...current,
-        [bundleId]: { app: { name, bundleId }, isAssigned: false },
+        [identifier]: { app: { name, bundleId }, isAssigned: false },
       }));
       revalidate();
     } catch (error) {
