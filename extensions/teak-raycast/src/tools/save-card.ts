@@ -1,4 +1,5 @@
 import { createCard } from "../lib/api";
+import { extractFirstHttpUrl } from "../lib/capture";
 
 /**
  * Save a note or URL to Teak.
@@ -10,9 +11,12 @@ export default async function tool(content: string) {
     throw new Error("Provide text or a URL to save.");
   }
 
+  const url = extractFirstHttpUrl(normalizedContent);
+
   const result = await createCard({
     content: normalizedContent,
     source: "raycast_ai_tool",
+    url: url ?? undefined,
   });
 
   return `Saved to Teak: ${result.cardId}`;
