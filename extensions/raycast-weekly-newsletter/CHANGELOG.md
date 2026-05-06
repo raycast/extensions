@@ -1,6 +1,6 @@
 # Raycast Weekly Newsletter Changelog
 
-## [Update Posts Loading and Add Cache] - {PG_MERGE_DATE}
+## [Update Posts Loading and Cache] - {PG_MERGE_DATE}
 
 - Updated Raycast dependencies to the latest compatible versions.
 - Added paginated loading for older newsletter posts in the browse posts command.
