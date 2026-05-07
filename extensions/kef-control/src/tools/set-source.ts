@@ -11,9 +11,18 @@ export type Source = "wifi" | "bluetooth" | "tv" | "optical" | "usb" | "aux" | "
  */
 export default async function (args: SetSourceArgs) {
   const preferences = getPreferenceValues<Preferences>();
-  await fetch(
-    `http://${preferences["ip-address"]}/api/setData?path=settings:/kef/play/physicalSource&roles=value&value={"type":"kefPhysicalSource","kefPhysicalSource":"${args.source}"}`,
-  );
+  const response = await fetch(`http://${preferences["ip-address"]}/api/setData`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      path: "settings:/kef/play/physicalSource",
+      roles: "value",
+      value: { type: "kefPhysicalSource", kefPhysicalSource: args.source },
+    }),
+  });
+  if (!response.ok) {
+    throw new Error(`KEF setData failed: ${response.status} ${response.statusText}`);
+  }
 }
 
 export const confirmation: Tool.Confirmation<SetSourceArgs> = async (input) => {
