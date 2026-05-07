@@ -1222,12 +1222,14 @@ export async function streamSessionUsage(
       try {
         const entry: JSONLEntry = JSON.parse(line);
         if (!entry.message?.usage) return;
-        if (
-          afterDate &&
-          entry.timestamp &&
-          new Date(entry.timestamp) < afterDate
-        ) {
-          return;
+        if (afterDate) {
+          // Skip entries older than the cutoff. Entries lacking a timestamp
+          // (older JSONL formats) are also skipped: without a timestamp we
+          // can't verify they fall inside the requested range, so counting
+          // them would inflate today/week/month totals.
+          if (!entry.timestamp || new Date(entry.timestamp) < afterDate) {
+            return;
+          }
         }
 
         const usage = entry.message.usage;

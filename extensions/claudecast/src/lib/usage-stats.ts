@@ -142,58 +142,32 @@ function resolvePricing(model?: string): Pricing {
 }
 
 /**
- * Apply per-token-type tier pricing for a single token count. The threshold
- * applies independently to each token type (input, output, cache_*). Anthropic
- * documents the threshold as input-tokens-per-request; we apply it to each
- * type independently for simplicity, which slightly over-prices on the safe
- * side rather than undercounting.
- */
-function pricedTokens(
-  tokens: number,
-  basePerMTok: number,
-  abovePerMTok: number | undefined,
-  threshold: number | undefined,
-): number {
-  if (!threshold || abovePerMTok === undefined) {
-    return (tokens / 1_000_000) * basePerMTok;
-  }
-  const below = Math.min(tokens, threshold);
-  const above = Math.max(tokens - threshold, 0);
-  return (below / 1_000_000) * basePerMTok + (above / 1_000_000) * abovePerMTok;
-}
-
-/**
  * Compute the cost of a single deduplicated message using tier-aware pricing.
  * The streaming-chunk dedup inside streamSessionUsage ensures `msg` represents
  * the cumulative final usage for one request, not double-counted chunks.
+ *
+ * Per Anthropic, the 200K-token tier is keyed on *input tokens per request*:
+ * if a single request crosses the threshold, ALL token types (input, output,
+ * cache read, cache write) bill at the high-tier flat rate for that request.
+ * The high tier is not a split-at-threshold calculation per token type.
  */
 function calculateMessageCost(msg: MessageUsage): number {
   const p = resolvePricing(msg.model);
+  const inHighTier =
+    p.tier !== undefined && msg.inputTokens > p.tier.thresholdTokens;
+  const inputRate = inHighTier ? p.tier!.inputPerMTok : p.inputPerMTok;
+  const outputRate = inHighTier ? p.tier!.outputPerMTok : p.outputPerMTok;
+  const cacheReadRate = inHighTier
+    ? p.tier!.cacheReadPerMTok
+    : p.cacheReadPerMTok;
+  const cacheWriteRate = inHighTier
+    ? p.tier!.cacheWritePerMTok
+    : p.cacheWritePerMTok;
   return (
-    pricedTokens(
-      msg.inputTokens,
-      p.inputPerMTok,
-      p.tier?.inputPerMTok,
-      p.tier?.thresholdTokens,
-    ) +
-    pricedTokens(
-      msg.outputTokens,
-      p.outputPerMTok,
-      p.tier?.outputPerMTok,
-      p.tier?.thresholdTokens,
-    ) +
-    pricedTokens(
-      msg.cacheReadTokens,
-      p.cacheReadPerMTok,
-      p.tier?.cacheReadPerMTok,
-      p.tier?.thresholdTokens,
-    ) +
-    pricedTokens(
-      msg.cacheCreationTokens,
-      p.cacheWritePerMTok,
-      p.tier?.cacheWritePerMTok,
-      p.tier?.thresholdTokens,
-    )
+    (msg.inputTokens / 1_000_000) * inputRate +
+    (msg.outputTokens / 1_000_000) * outputRate +
+    (msg.cacheReadTokens / 1_000_000) * cacheReadRate +
+    (msg.cacheCreationTokens / 1_000_000) * cacheWriteRate
   );
 }
 

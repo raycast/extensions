@@ -11,7 +11,8 @@
 ### Fixed
 
 - **Cost Calculation: Streaming Chunk Deduplication**: Anthropic streams response chunks where each chunk's `usage` is cumulative. Naive summing inflated session totals by 2x to 4x. Now deduped by `(message.id, requestId)` so per-message totals reflect the final cumulative value once per request.
-- **Cost Calculation: Sonnet 200K Token Tier**: Above 200K input tokens per message, Sonnet rates double. The pricing table now applies tier pricing per message (per request), so heavy sessions are no longer underbilled by ~43%.
+- **Cost Calculation: Sonnet 200K Token Tier**: Above 200K input tokens per message, Sonnet rates double across all token types (input, output, cache read, cache write). The pricing now applies a flat per-request high tier keyed off the message's input token count, matching Anthropic's billing.
+- **Cost Calculation: Date-Range Filter Skips Timestampless Entries**: When a date range is active (today/week/month/daily chart), entries without a `timestamp` field are excluded. Previously they passed through the filter and inflated reported costs for users with older session files.
 - **Cost Calculation: Opus 4.7 Pricing Row**: Added an explicit `opus-4-7` row at the $5/$25 tier. Without it, Opus 4.7 sessions matched the older `opus` substring and were billed at the $15/$75 tier (3x overcharge).
 - **Cost Calculation: Daily Chart Bucketing**: Daily costs are now attributed to each day's actual usage timestamps. Previously a multi-day session stamped all of its cost on the file's last-modified date.
 - **Cost Calculation: Opus 4.1 Pricing Row**: Added an explicit `opus-4-1` row at the $15/$75 tier for users still resuming pre-4.5 sessions.
