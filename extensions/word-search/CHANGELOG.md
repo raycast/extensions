@@ -1,6 +1,6 @@
 # Word Search Changelog
 
-## [History] - 2025-11-09
+## [History] - {PR_MERGE_DATE}
 
 - Added History Section
 
