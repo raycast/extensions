@@ -144,6 +144,9 @@ function loadFilePreview(filePath: string): string | null {
 
   if (TEXT_EXTS.has(ext)) {
     try {
+      const MAX_PREVIEW_BYTES = 100_000;
+      const stat = statSync(filePath);
+      if (stat.size > MAX_PREVIEW_BYTES) return null;
       const content = readFileSync(filePath, "utf8");
       return ext === ".md"
         ? content
@@ -161,7 +164,7 @@ function fileMetadataMarkdown(filePath: string): string {
   try {
     const stat = statSync(filePath);
     const sizeKB = (stat.size / 1024).toFixed(1);
-    const modified = stat.mtime.toLocaleString();
+    const modified = stat.mtime.toLocaleString("en-US");
     return `## ${basename(filePath)}\n\n| | |\n|---|---|\n| **Format** | \`${ext || "unknown"}\` |\n| **Size** | ${sizeKB} KB |\n| **Modified** | ${modified} |\n\n*Press ⌘Y to open with Quick Look, or ⌘O to open with the default app.*`;
   } catch {
     return `## ${basename(filePath)}\n\n*Press ⌘Y to open with Quick Look.*`;
@@ -322,7 +325,7 @@ function RecordDetail({ record }: { record: TransferRecord }) {
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Date"
-            text={new Date(record.timestamp).toLocaleString()}
+            text={new Date(record.timestamp).toLocaleString("en-US")}
             icon={Icon.Clock}
           />
           {record.size !== undefined && (
