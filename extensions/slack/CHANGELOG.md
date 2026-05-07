@@ -1,6 +1,6 @@
 # Slack Changelog
 
-## [Accent-insensitive search] - {PR_MERGE_DATE}
+## [Accent-insensitive search] - 2026-05-07
 
 - "Open Channel" and "Send Message" now match channel and user names regardless of diacritics, so typing `Angeles` finds `Ángeles` (and the same for any accented characters).
 
