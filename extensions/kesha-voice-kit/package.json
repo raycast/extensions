@@ -22,6 +22,13 @@
       "subtitle": "Kesha Voice Kit",
       "description": "Synthesize speech from the current clipboard text and play it through the default output. English and Russian auto-routed; falls back to macOS system voices when AVSpeech is available.",
       "mode": "no-view"
+    },
+    {
+      "name": "stop-speech",
+      "title": "Stop Speech",
+      "subtitle": "Kesha Voice Kit",
+      "description": "Stop any in-flight playback from Speak Clipboard. Bind a global hotkey to interrupt speech mid-sentence.",
+      "mode": "no-view"
     }
   ],
   "preferences": [
