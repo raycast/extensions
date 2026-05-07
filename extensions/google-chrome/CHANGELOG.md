@@ -1,6 +1,6 @@
 # Google Chrome Changelog
 
-## [Fix Chrome History Search When Chrome Is Running] - {PR_MERGE_DATE}
+## [Fix Chrome History Search When Chrome Is Running] - 2026-05-07
 
 - Fix searching Chrome history while Chrome keeps the history database locked.
 
