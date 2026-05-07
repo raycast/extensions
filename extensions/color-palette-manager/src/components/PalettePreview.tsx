@@ -19,11 +19,7 @@ export function PalettePreview({ palette }: PalettePreviewProps) {
           actions={
             <ActionPanel>
               <Action.CopyToClipboard title={`Copy Color ${index + 1} - ${color}`} content={color} />
-              <ActionPanel.Submenu
-                title="Copy Palette Colors"
-                icon={Icon.CopyClipboard}
-                shortcut={SHORTCUTS.COPY_PALETTE}
-              >
+              <ActionPanel.Submenu title="Copy Palette as…" icon={Icon.Clipboard} shortcut={SHORTCUTS.COPY_PALETTE}>
                 {COPY_FORMATS.map(({ format, title, icon }) => (
                   <Action.CopyToClipboard
                     key={format}

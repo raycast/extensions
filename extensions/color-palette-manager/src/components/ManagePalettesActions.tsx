@@ -1,7 +1,8 @@
 import { Action, ActionPanel, Icon, LaunchType } from "@raycast/api";
-import { SHORTCUTS } from "../constants";
+import { COPY_FORMATS, SHORTCUTS } from "../constants";
 import SaveColorPaletteCommand from "../save-color-palette";
 import { ManagePaletteActions, SavedPalette } from "../types";
+import { copyPalette } from "../utils/copyPalette";
 import { isValidHexColor } from "../utils/isValidHexColor";
 import { PalettePreview } from "./PalettePreview";
 
@@ -59,6 +60,12 @@ export function ManagePalettesActions({ palette, paletteActions, onPaletteUpdate
         icon={Icon.Duplicate}
         shortcut={SHORTCUTS.DUPLICATE_PALETTE}
       />
+
+      <ActionPanel.Submenu title="Copy Palette as…" icon={Icon.Clipboard} shortcut={SHORTCUTS.COPY_PALETTE}>
+        {COPY_FORMATS.map(({ format, title, icon }) => (
+          <Action.CopyToClipboard key={format} title={title} content={copyPalette(palette, format)} icon={icon} />
+        ))}
+      </ActionPanel.Submenu>
 
       <Action.CopyToClipboard
         title="Copy Link to Coolors.co"

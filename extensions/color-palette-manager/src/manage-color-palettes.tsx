@@ -33,8 +33,12 @@ export default function ManageColorPalettes() {
       {filteredPalettes.length === 0 ? (
         <List.EmptyView
           icon={Icon.Ellipsis}
-          title="No Color Palettes Found"
-          description="Create your first Color Palette using the Save Color Palette command"
+          title={colorPalettes && colorPalettes.length > 0 ? "No Matches" : "No Color Palettes Yet"}
+          description={
+            colorPalettes && colorPalettes.length > 0
+              ? "No saved palettes match your search."
+              : "Create your first palette using the Save Color Palette or Import Color Palette command."
+          }
         />
       ) : (
         filteredPalettes.map((palette) => (

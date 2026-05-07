@@ -54,7 +54,7 @@ export default function ImportColorPalette() {
     },
     async onSubmit(values) {
       try {
-        const { validColors, invalidEntries } = parseColorList(values.pastedColors, values.separator);
+        const { validColors, invalidEntries, duplicateCount } = parseColorList(values.pastedColors, values.separator);
         if (validColors.length === 0) {
           showToast({
             style: Toast.Style.Failure,
@@ -65,7 +65,7 @@ export default function ImportColorPalette() {
         }
         const colors = validColors.slice(0, MAX_COLOR_FIELDS);
         const overflow = Math.max(0, validColors.length - MAX_COLOR_FIELDS);
-        const skipped = invalidEntries.length + overflow;
+        const skipped = invalidEntries.length + overflow + duplicateCount;
 
         const palette: SavedPalette = {
           id: randomUUID(),
@@ -143,6 +143,7 @@ export default function ImportColorPalette() {
       <Form.TextField
         {...itemProps.name}
         title="Name*"
+        placeholder="e.g., Editorial Brights"
         info={`Insert the name of your Color Palette (max ${NAME_FIELD_MAXLENGTH} characters)`}
         {...focus.create("name")}
       />

@@ -38,6 +38,7 @@ export default function SaveColorPalette(props: SavePaletteFormProps) {
       <Form.TextField
         {...form.items.name}
         title="Name*"
+        placeholder="e.g., Sunset Warm"
         info={`Insert the name of your Color Palette (max ${NAME_FIELD_MAXLENGTH} characters)`}
         {...focus.create("name")}
       />

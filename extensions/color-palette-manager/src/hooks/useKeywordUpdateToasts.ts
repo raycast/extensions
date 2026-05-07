@@ -21,19 +21,19 @@ export function useKeywordUpdateToasts(): UseKeywordUpdateToastsReturn {
       if (hasInvalid && hasDuplicates) {
         showToast({
           style: Toast.Style.Failure,
-          title: "No keywords updated.",
-          message: `${invalidKeywords.length} invalid, ${duplicateKeywords.length} duplicate keywords`,
+          title: "No Keywords Updated",
+          message: `${invalidKeywords.length} invalid, ${duplicateKeywords.length} duplicate`,
         });
       } else if (hasInvalid) {
         showToast({
           style: Toast.Style.Failure,
-          title: "Invalid keywords.",
-          message: `${invalidKeywords.join(", ")}`,
+          title: "Invalid Keywords",
+          message: invalidKeywords.join(", "),
         });
       } else if (hasDuplicates) {
         showToast({
           style: Toast.Style.Success,
-          title: "No new keywords.",
+          title: "No New Keywords",
           message: `${duplicateKeywords.join(", ")} already exist`,
         });
       }
@@ -41,9 +41,9 @@ export function useKeywordUpdateToasts(): UseKeywordUpdateToastsReturn {
       // Partial success
       showToast({
         style: Toast.Style.Success,
-        title: `${totalSuccessful} keywords updated.`,
+        title: `${totalSuccessful} Keywords Updated`,
         message: hasInvalid
-          ? `${invalidKeywords.length} invalid keywords skipped`
+          ? `${invalidKeywords.length} invalid skipped`
           : `${duplicateKeywords.length} duplicates skipped`,
       });
     } else if (totalSuccessful > 0) {
@@ -54,20 +54,20 @@ export function useKeywordUpdateToasts(): UseKeywordUpdateToastsReturn {
       if (addedCount > 0 && removedCount > 0) {
         showToast({
           style: Toast.Style.Success,
-          title: "Keywords updated.",
+          title: "Keywords Updated",
           message: `${addedCount} added, ${removedCount} removed`,
         });
       } else if (addedCount > 0) {
         showToast({
           style: Toast.Style.Success,
-          title: "Keywords added.",
-          message: `${validKeywords.join(", ")}`,
+          title: "Keywords Added",
+          message: validKeywords.join(", "),
         });
       } else if (removedCount > 0) {
         showToast({
           style: Toast.Style.Success,
-          title: "Keywords removed.",
-          message: `${removedKeywords.join(", ")}`,
+          title: "Keywords Removed",
+          message: removedKeywords.join(", "),
         });
       }
     }

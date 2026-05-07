@@ -36,8 +36,8 @@ export function usePaletteActions(
         if (!paletteToDelete) {
           showToast({
             style: Toast.Style.Failure,
-            title: "Error.",
-            message: "Palette not found or already deleted.",
+            title: "Palette Not Found",
+            message: "It may have been deleted already.",
           });
           return;
         }
@@ -48,14 +48,14 @@ export function usePaletteActions(
 
         showToast({
           style: Toast.Style.Success,
-          title: "Palette Deleted.",
-          message: `"${paletteName}" has been deleted.`,
+          title: "Palette Deleted",
+          message: paletteName,
         });
       } catch {
         showToast({
           style: Toast.Style.Failure,
-          title: "Deletion Failed.",
-          message: `Failed to delete "${paletteName}". Please try again.`,
+          title: "Delete Failed",
+          message: `Could not delete "${paletteName}". Please try again.`,
         });
       }
     },
@@ -96,14 +96,14 @@ export function usePaletteActions(
 
         showToast({
           style: Toast.Style.Success,
-          title: "Palette Duplicated.",
-          message: `"${duplicatedPalette.name}" has been created.`,
+          title: "Palette Duplicated",
+          message: duplicatedPalette.name,
         });
       } catch {
         showToast({
           style: Toast.Style.Failure,
-          title: "Duplication Failed.",
-          message: `Failed to duplicate "${palette.name}". Please try again.`,
+          title: "Duplicate Failed",
+          message: `Could not duplicate "${palette.name}". Please try again.`,
         });
       }
     },
