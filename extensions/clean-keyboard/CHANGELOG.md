@@ -1,6 +1,6 @@
 # Clean Keyboard Changelog
 
-## [Lock Fn Keys] - {PR_MERGE_DATE}
+## [Lock Fn Keys] - 2026-05-07
 
 - Added opt-in preference to also block the function row while cleaning (macOS Tahoe 26+ only)
 
