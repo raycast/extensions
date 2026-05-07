@@ -1,5 +1,5 @@
 import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
-import { execFile } from "node:child_process";
+import { execFile, spawn as spawnProcess } from "node:child_process";
 import { promisify } from "node:util";
 import { access, constants, mkdtemp, rm } from "node:fs/promises";
 import { homedir, tmpdir } from "node:os";
@@ -112,9 +112,24 @@ export default async function Command() {
     args.push("--", text);
     await execFileAsync(spawn.command, args, { maxBuffer: 4 * 1024 * 1024 });
 
-    await showHUD("🔊 Playing…");
-    await execFileAsync("/usr/bin/afplay", [audioPath]);
-    await showHUD("✓ Played clipboard");
+    // Detach afplay so this no-view command can return immediately —
+    // Raycast tears down the JS runtime not long after default() resolves,
+    // and an awaited `afplay` was getting cut off mid-playback (only the
+    // first sentence of long clipboards was audible). With `detached:true`
+    // + unref(), afplay keeps running after Speak Clipboard returns.
+    //
+    // Tempdir cleanup in `finally` runs immediately, BEFORE playback
+    // completes. That's safe on POSIX: macOS keeps the unlinked file's
+    // inode alive while afplay holds an open fd, so the audio plays to
+    // completion even though the path no longer exists.
+    //
+    // Stop Speech (pkill afplay) remains the canonical cancel path.
+    const afplay = spawnProcess("/usr/bin/afplay", [audioPath], {
+      detached: true,
+      stdio: "ignore",
+    });
+    afplay.unref();
+    await showHUD("🔊 Playing — Stop Speech to cancel");
   } catch (err: unknown) {
     // Node's subprocess errors include the full argv (clipboard payload)
     // in both `.message` and `.cmd`. Log only non-sensitive exit metadata
