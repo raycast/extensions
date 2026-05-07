@@ -12,7 +12,10 @@ const WEEKDAY_NAMES = [
 
 const WEEKDAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-export function computeNextRun(schedule: JobSchedule, lastRunTime?: Date | null): Date {
+export function computeNextRun(
+  schedule: JobSchedule,
+  lastRunTime?: Date | null,
+): Date {
   if (schedule.type === "interval") {
     const base = lastRunTime ?? new Date();
     return new Date(base.getTime() + schedule.seconds * 1000);
@@ -97,7 +100,10 @@ export function describeSchedules(schedules: JobSchedule[]): string {
   );
 
   // Group calendar schedules whose only difference is Weekday.
-  const groups = new Map<string, { sample: CalendarSchedule; weekdays: Set<number> }>();
+  const groups = new Map<
+    string,
+    { sample: CalendarSchedule; weekdays: Set<number> }
+  >();
   const ungrouped: CalendarSchedule[] = [];
   for (const c of calendars) {
     if (c.Weekday === undefined) {
@@ -115,7 +121,8 @@ export function describeSchedules(schedules: JobSchedule[]): string {
   }
 
   const parts: string[] = [];
-  for (const interval of intervals) parts.push(describeInterval(interval.seconds));
+  for (const interval of intervals)
+    parts.push(describeInterval(interval.seconds));
   for (const { sample, weekdays } of groups.values()) {
     parts.push(`${formatWeekdaySet(weekdays)} at ${formatTime(sample)}`);
   }

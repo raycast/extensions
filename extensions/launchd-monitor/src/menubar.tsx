@@ -7,7 +7,11 @@ import {
   showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getAllJobStatuses, kickstartJob, KickstartCancelledError } from "./api/launchd";
+import {
+  getAllJobStatuses,
+  kickstartJob,
+  KickstartCancelledError,
+} from "./api/launchd";
 import { getLogTail } from "./api/logs";
 import { timeAgo, timeUntil, formatDateTime } from "./utils/time";
 import {

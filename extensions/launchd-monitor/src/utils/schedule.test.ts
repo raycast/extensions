@@ -1,12 +1,19 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { computeNextRun, describeSchedule, describeSchedules } from "./schedule";
+import {
+  computeNextRun,
+  describeSchedule,
+  describeSchedules,
+} from "./schedule";
 import { CalendarSchedule, IntervalSchedule } from "../api/types";
 
 const cal = (s: Omit<CalendarSchedule, "type">): CalendarSchedule => ({
   type: "calendar",
   ...s,
 });
-const iv = (seconds: number): IntervalSchedule => ({ type: "interval", seconds });
+const iv = (seconds: number): IntervalSchedule => ({
+  type: "interval",
+  seconds,
+});
 
 describe("computeNextRun", () => {
   beforeEach(() => {
@@ -68,19 +75,27 @@ describe("computeNextRun", () => {
 describe("describeSchedule", () => {
   describe("calendar", () => {
     it("describes daily schedule", () => {
-      expect(describeSchedule(cal({ Hour: 9, Minute: 30 }))).toBe("Daily at 9:30 AM");
+      expect(describeSchedule(cal({ Hour: 9, Minute: 30 }))).toBe(
+        "Daily at 9:30 AM",
+      );
     });
 
     it("describes weekday schedule with Weekday=0", () => {
-      expect(describeSchedule(cal({ Weekday: 0, Hour: 14 }))).toBe("Every Sunday at 2:00 PM");
+      expect(describeSchedule(cal({ Weekday: 0, Hour: 14 }))).toBe(
+        "Every Sunday at 2:00 PM",
+      );
     });
 
     it("describes weekday schedule with Weekday=7 as Sunday", () => {
-      expect(describeSchedule(cal({ Weekday: 7, Hour: 14 }))).toBe("Every Sunday at 2:00 PM");
+      expect(describeSchedule(cal({ Weekday: 7, Hour: 14 }))).toBe(
+        "Every Sunday at 2:00 PM",
+      );
     });
 
     it("describes monthly schedule", () => {
-      expect(describeSchedule(cal({ Day: 1, Hour: 0 }))).toBe("Monthly on day 1 at 12:00 AM");
+      expect(describeSchedule(cal({ Day: 1, Hour: 0 }))).toBe(
+        "Monthly on day 1 at 12:00 AM",
+      );
     });
   });
 
@@ -121,7 +136,9 @@ describe("describeSchedules", () => {
   });
 
   it("compacts all 7 days into 'Every day'", () => {
-    const schedules = [0, 1, 2, 3, 4, 5, 6].map((d) => cal({ Weekday: d, Hour: 7 }));
+    const schedules = [0, 1, 2, 3, 4, 5, 6].map((d) =>
+      cal({ Weekday: d, Hour: 7 }),
+    );
     expect(describeSchedules(schedules)).toBe("Every day at 7:00 AM");
   });
 

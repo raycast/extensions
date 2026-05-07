@@ -42,4 +42,8 @@ export interface JobStatus {
   plistPath: string | null;
 }
 
-export type OverallStatus = "all-ok" | "has-failures" | "has-running" | "not-loaded";
+export type OverallStatus =
+  | "all-ok"
+  | "has-failures"
+  | "has-running"
+  | "not-loaded";

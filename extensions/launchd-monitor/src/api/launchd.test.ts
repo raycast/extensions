@@ -88,15 +88,23 @@ describe("labelToDisplayName", () => {
 
 describe("isDaemonPlistPath", () => {
   it("returns true for /Library/LaunchDaemons paths", () => {
-    expect(isDaemonPlistPath("/Library/LaunchDaemons/com.example.foo.plist")).toBe(true);
+    expect(
+      isDaemonPlistPath("/Library/LaunchDaemons/com.example.foo.plist"),
+    ).toBe(true);
   });
 
   it("returns false for user LaunchAgents", () => {
-    expect(isDaemonPlistPath("/Users/foo/Library/LaunchAgents/com.example.foo.plist")).toBe(false);
+    expect(
+      isDaemonPlistPath(
+        "/Users/foo/Library/LaunchAgents/com.example.foo.plist",
+      ),
+    ).toBe(false);
   });
 
   it("returns false for system LaunchAgents", () => {
-    expect(isDaemonPlistPath("/Library/LaunchAgents/com.example.foo.plist")).toBe(false);
+    expect(
+      isDaemonPlistPath("/Library/LaunchAgents/com.example.foo.plist"),
+    ).toBe(false);
   });
 
   it("returns false for null", () => {
@@ -114,10 +122,7 @@ describe("parseScheduleFromPlist", () => {
 
   it("returns multiple calendar schedules for an array", () => {
     const plist = {
-      StartCalendarInterval: [
-        { Hour: 9 },
-        { Hour: 17 },
-      ],
+      StartCalendarInterval: [{ Hour: 9 }, { Hour: 17 }],
     };
     expect(parseScheduleFromPlist(plist)).toEqual([
       { type: "calendar", Hour: 9 },
@@ -127,7 +132,9 @@ describe("parseScheduleFromPlist", () => {
 
   it("returns an interval schedule for StartInterval", () => {
     const plist = { StartInterval: 300 };
-    expect(parseScheduleFromPlist(plist)).toEqual([{ type: "interval", seconds: 300 }]);
+    expect(parseScheduleFromPlist(plist)).toEqual([
+      { type: "interval", seconds: 300 },
+    ]);
   });
 
   it("combines StartInterval and StartCalendarInterval", () => {

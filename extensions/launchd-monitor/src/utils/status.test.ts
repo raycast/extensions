@@ -26,7 +26,10 @@ const baseJob: JobStatus = {
   program: null,
   plistPath: null,
 };
-const ok = (over: Partial<JobStatus> = {}): JobStatus => ({ ...baseJob, ...over });
+const ok = (over: Partial<JobStatus> = {}): JobStatus => ({
+  ...baseJob,
+  ...over,
+});
 const failing = ok({ success: false, lastExitCode: 1 });
 const notLoaded = ok({ loaded: false, success: null, lastExitCode: null });
 const running = ok({ running: true, pid: 4321, success: null });
@@ -38,7 +41,9 @@ describe("getOverallStatus", () => {
   });
 
   it("prioritizes failures over everything else", () => {
-    expect(getOverallStatus([failing, notLoaded, running])).toBe("has-failures");
+    expect(getOverallStatus([failing, notLoaded, running])).toBe(
+      "has-failures",
+    );
   });
 
   it("surfaces running jobs above not-loaded", () => {
@@ -94,8 +99,8 @@ describe("getStatusText", () => {
   });
 
   it("returns 'Killed (signal N)' for signal kills", () => {
-    expect(getStatusText(ok({ success: false, lastExitCode: null, signal: 9 }))).toBe(
-      "Killed (signal 9)",
-    );
+    expect(
+      getStatusText(ok({ success: false, lastExitCode: null, signal: 9 })),
+    ).toBe("Killed (signal 9)");
   });
 });

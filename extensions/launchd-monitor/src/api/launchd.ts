@@ -6,7 +6,10 @@ import { LaunchctlListResult, JobSchedule, JobStatus } from "./types";
 import { getLogLastModified } from "./logs";
 import { computeNextRun, describeSchedules } from "../utils/schedule";
 
-export function parseLaunchctlList(output: string, label: string): LaunchctlListResult {
+export function parseLaunchctlList(
+  output: string,
+  label: string,
+): LaunchctlListResult {
   const result: LaunchctlListResult = {
     label,
     lastExitStatus: null,
@@ -76,7 +79,9 @@ export function isDaemonPlistPath(plistPath: string | null): boolean {
   return plistPath?.startsWith("/Library/LaunchDaemons") ?? false;
 }
 
-export function parseScheduleFromPlist(plist: Record<string, unknown>): JobSchedule[] {
+export function parseScheduleFromPlist(
+  plist: Record<string, unknown>,
+): JobSchedule[] {
   const schedules: JobSchedule[] = [];
 
   const interval = plist.StartInterval;
@@ -199,7 +204,8 @@ export async function getJobStatus(label: string): Promise<JobStatus> {
     success,
     lastRunTime,
     nextRunTime,
-    scheduleDescription: schedules.length > 0 ? describeSchedules(schedules) : null,
+    scheduleDescription:
+      schedules.length > 0 ? describeSchedules(schedules) : null,
     stdoutPath: info.stdoutPath,
     stderrPath: info.stderrPath,
     program: info.program,
@@ -207,7 +213,9 @@ export async function getJobStatus(label: string): Promise<JobStatus> {
   };
 }
 
-export async function getAllJobStatuses(labels: string[]): Promise<JobStatus[]> {
+export async function getAllJobStatuses(
+  labels: string[],
+): Promise<JobStatus[]> {
   return Promise.all(labels.map(getJobStatus));
 }
 
