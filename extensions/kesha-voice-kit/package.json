@@ -28,7 +28,7 @@
     {
       "name": "keshaBinPath",
       "title": "`kesha` binary path",
-      "description": "Absolute path to the `kesha` CLI. Leave blank to use PATH (default).",
+      "description": "Absolute path to the `kesha` CLI. Leave blank to auto-detect (~/.bun/bin, /opt/homebrew/bin, /usr/local/bin, ~/.npm-global/bin, ~/.local/bin). Raycast launches without your shell PATH, so a bare `kesha` lookup typically fails — set this if auto-detection misses your install.",
       "type": "textfield",
       "required": false,
       "default": "",

@@ -4,6 +4,7 @@ import { promisify } from "node:util";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { notFoundMessage, resolveKeshaBin } from "./lib/kesha-bin";
 
 const execFileAsync = promisify(execFile);
 
@@ -18,7 +19,6 @@ const MAX_CHARS = 4000;
 
 export default async function Command() {
   const prefs = getPreferenceValues<Prefs>();
-  const keshaBin = prefs.keshaBinPath?.trim() || "kesha";
   const voice = prefs.defaultVoice?.trim() || "";
 
   const text = (await Clipboard.readText())?.trim() ?? "";
@@ -28,6 +28,13 @@ export default async function Command() {
   }
   if (text.length > MAX_CHARS) {
     await showHUD(`✗ Clipboard too long (${text.length} > ${MAX_CHARS} chars)`);
+    return;
+  }
+
+  const keshaBin = await resolveKeshaBin(prefs.keshaBinPath);
+  if (!keshaBin) {
+    await showHUD("✗ kesha CLI not found — see extension logs");
+    console.error(notFoundMessage());
     return;
   }
 
@@ -51,24 +58,15 @@ export default async function Command() {
     await execFileAsync("/usr/bin/afplay", [wavPath]);
     await showHUD("✓ Played clipboard");
   } catch (err: unknown) {
-    const code = (err as NodeJS.ErrnoException | undefined)?.code;
-    if (code === "ENOENT") {
-      await showHUD(
-        `✗ \`${keshaBin}\` not found — see https://github.com/drakulavich/kesha-voice-kit#install`,
-      );
-    } else {
-      // Node's subprocess errors include the full argv (clipboard payload)
-      // in both `.message` and `.cmd`. Log only non-sensitive exit metadata
-      // so secrets pasted into the clipboard don't hit extension logs or
-      // macOS notification history.
-      const e = err as
-        | (NodeJS.ErrnoException & { signal?: string })
-        | undefined;
-      console.error(
-        `speak-clipboard failed: exitCode=${e?.code ?? "?"} signal=${e?.signal ?? "?"}`,
-      );
-      await showHUD("✗ Speech synthesis failed (see extension logs)");
-    }
+    // Node's subprocess errors include the full argv (clipboard payload)
+    // in both `.message` and `.cmd`. Log only non-sensitive exit metadata
+    // so secrets pasted into the clipboard don't hit extension logs or
+    // macOS notification history.
+    const e = err as (NodeJS.ErrnoException & { signal?: string }) | undefined;
+    console.error(
+      `speak-clipboard failed: exitCode=${e?.code ?? "?"} signal=${e?.signal ?? "?"}`,
+    );
+    await showHUD("✗ Speech synthesis failed (see extension logs)");
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

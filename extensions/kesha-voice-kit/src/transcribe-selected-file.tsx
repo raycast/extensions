@@ -12,6 +12,7 @@ import { useEffect, useState } from "react";
 import { execFile } from "node:child_process";
 import { basename } from "node:path";
 import { promisify } from "node:util";
+import { notFoundMessage, resolveKeshaBin } from "./lib/kesha-bin";
 
 const execFileAsync = promisify(execFile);
 
@@ -45,7 +46,7 @@ export default function Command() {
     // execFile honors the signal by sending SIGTERM to the child.
     const controller = new AbortController();
     let mounted = true;
-    void transcribe(prefs.keshaBinPath?.trim() || "kesha", controller.signal)
+    void transcribe(prefs.keshaBinPath, controller.signal)
       .then((next) => {
         if (mounted) setState(next);
       })
@@ -91,9 +92,17 @@ export default function Command() {
 }
 
 async function transcribe(
-  keshaBin: string,
+  keshaBinPref: string | undefined,
   signal: AbortSignal,
 ): Promise<State> {
+  const keshaBin = await resolveKeshaBin(keshaBinPref);
+  if (!keshaBin) {
+    return {
+      status: "error",
+      message: "kesha CLI not found.",
+      hint: notFoundMessage(),
+    };
+  }
   const items = await getSelectedFinderItems().catch(() => []);
   if (items.length === 0) {
     return {
@@ -154,12 +163,7 @@ async function transcribe(
       title: "Transcription failed",
     });
     const message = err instanceof Error ? err.message : String(err);
-    const code = (err as NodeJS.ErrnoException | undefined)?.code;
-    const hint =
-      code === "ENOENT"
-        ? "The `kesha` CLI was not found on PATH. Install it (see https://github.com/drakulavich/kesha-voice-kit#install) or set an absolute path in this extension's preferences."
-        : undefined;
-    return { status: "error", message, hint };
+    return { status: "error", message };
   }
 }
 

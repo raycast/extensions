@@ -5,3 +5,4 @@
 - Add **Transcribe Selected Audio** command — transcribes the audio file selected in Finder using the local `kesha` CLI, shows transcript + detected language, pre-copies to clipboard.
 - Add **Speak Clipboard** command — synthesizes the current clipboard text via `kesha say` and plays it through the default output; voice auto-routed by detected language (Kokoro for English, Piper for Russian, AVSpeech for macOS system voices).
 - Preferences for overriding the `kesha` binary path and default voice.
+- Auto-detect the `kesha` binary across the well-known global install locations (`~/.bun/bin`, `/opt/homebrew/bin`, `/usr/local/bin`, `~/.npm-global/bin`, `~/.local/bin`). Raycast launches without the user's shell PATH, so a bare lookup of `kesha` would otherwise fail with `exitCode=127`.
