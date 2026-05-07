@@ -31,8 +31,8 @@ export default async function Command() {
     return;
   }
 
-  const keshaBin = await resolveKeshaBin(prefs.keshaBinPath);
-  if (!keshaBin) {
+  const spawn = await resolveKeshaBin(prefs.keshaBinPath);
+  if (!spawn) {
     await showHUD("✗ kesha CLI not found — see extension logs");
     console.error(notFoundMessage());
     return;
@@ -47,12 +47,12 @@ export default async function Command() {
   try {
     // `--` terminates option parsing: any leading `--` in the clipboard
     // payload (e.g. a pasted code diff) won't be misread as a flag.
-    const args = ["say", "--out", wavPath];
+    const args = [...spawn.prefixArgs, "say", "--out", wavPath];
     if (voice) {
       args.push("--voice", voice);
     }
     args.push("--", text);
-    await execFileAsync(keshaBin, args, { maxBuffer: 4 * 1024 * 1024 });
+    await execFileAsync(spawn.command, args, { maxBuffer: 4 * 1024 * 1024 });
 
     await showHUD("🔊 Playing…");
     await execFileAsync("/usr/bin/afplay", [wavPath]);

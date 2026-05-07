@@ -95,8 +95,8 @@ async function transcribe(
   keshaBinPref: string | undefined,
   signal: AbortSignal,
 ): Promise<State> {
-  const keshaBin = await resolveKeshaBin(keshaBinPref);
-  if (!keshaBin) {
+  const spawn = await resolveKeshaBin(keshaBinPref);
+  if (!spawn) {
     return {
       status: "error",
       message: "kesha CLI not found.",
@@ -127,10 +127,14 @@ async function transcribe(
   });
 
   try {
-    const { stdout } = await execFileAsync(keshaBin, ["--json", path], {
-      maxBuffer: 16 * 1024 * 1024,
-      signal,
-    });
+    const { stdout } = await execFileAsync(
+      spawn.command,
+      [...spawn.prefixArgs, "--json", path],
+      {
+        maxBuffer: 16 * 1024 * 1024,
+        signal,
+      },
+    );
     const parsed = JSON.parse(stdout) as TranscribeResult[];
     if (!parsed.length) {
       await showToast({
