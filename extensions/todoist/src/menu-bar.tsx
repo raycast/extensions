@@ -17,7 +17,7 @@ import MenuBarTask from "./components/MenubarTask";
 import { getToday } from "./helpers/dates";
 import { groupByDates } from "./helpers/groupBy";
 import { truncateMiddle } from "./helpers/menu-bar";
-import { sortByDefault } from "./helpers/sortBy";
+import { sortByDefault, sortByPriority } from "./helpers/sortBy";
 import { getTasksForTodayView, getTasksForUpcomingView } from "./helpers/tasks";
 import { withTodoistApi } from "./helpers/withTodoistApi";
 import useFilterTasks from "./hooks/useFilterData";
@@ -26,6 +26,8 @@ import useSyncData from "./hooks/useSyncData";
 
 type MenuBarProps = LaunchProps<{ launchContext: { fromCommand: boolean } }>;
 
+const byPriorityThenDefault = (a: Task, b: Task) => sortByPriority(a, b) || sortByDefault(a, b);
+
 function MenuBar(props: MenuBarProps) {
   const launchedFromWithinCommand = props.launchContext?.fromCommand ?? false;
   // Don't perform a full sync if the command was launched from within another commands
@@ -33,9 +35,13 @@ function MenuBar(props: MenuBarProps) {
   const { focusedTask, unfocusTask } = useFocusedTask();
   const { view, filter, upcomingDays, hideMenuBarCount, showNextTask, taskWidth } =
     getPreferenceValues<Preferences.MenuBar>();
-  const { data: filterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
+  const { data: rawFilterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
+  const filterTasks = useMemo(
+    () => (rawFilterTasks ? [...rawFilterTasks].sort(byPriorityThenDefault) : undefined),
+    [rawFilterTasks],
+  );
 
-  const tasks = useMemo(() => {
+  const rawTasks = useMemo(() => {
     if (view === "inbox") {
       const inboxProject = data?.projects.find((p) => p.inbox_project);
       return data?.items.filter((t) => t.project_id === inboxProject?.id) ?? [];
@@ -59,6 +65,8 @@ function MenuBar(props: MenuBarProps) {
 
     return data?.items.filter((t) => t.due?.date) ?? [];
   }, [data, upcomingDays, view]);
+
+  const tasks = useMemo(() => [...rawTasks].sort(byPriorityThenDefault), [rawTasks]);
 
   useEffect(() => {
     const isFocusedTaskInTasks = data?.items?.some((t) => t.id === focusedTask.id);
@@ -234,7 +242,7 @@ const TodayView = ({ tasks, data, setData }: TaskViewProps) => {
 
 const FilterView = ({ tasks, data, setData }: TaskViewProps) => {
   const sections = useMemo(() => {
-    const sortedTasks = [...tasks].sort(sortByDefault);
+    const sortedTasks = [...tasks];
     return groupByDates(sortedTasks);
   }, [tasks]);
 
@@ -289,7 +297,7 @@ const UpcomingView = ({ tasks, data, setData }: TaskViewProps) => {
 
 const InboxView = ({ tasks, data, setData }: TaskViewProps) => {
   const transformedTasks = useMemo(() => {
-    const sortedTasks = [...tasks].sort(sortByDefault);
+    const sortedTasks = [...tasks];
     return sortedTasks;
   }, [tasks]);
 
