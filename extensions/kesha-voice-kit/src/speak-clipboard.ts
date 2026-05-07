@@ -1,8 +1,8 @@
 import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { mkdtemp, rm } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { access, constants, mkdtemp, rm } from "node:fs/promises";
+import { homedir, tmpdir } from "node:os";
 import { join } from "node:path";
 import { notFoundMessage, resolveKeshaBin } from "./lib/kesha-bin";
 
@@ -17,9 +17,54 @@ interface Prefs {
 // don't leak a background `kesha say` process on very long clipboards.
 const MAX_CHARS = 4000;
 
+// kesha install --tts caches models under ~/.cache/kesha/models/. Checking
+// whether the canonical entry-point file exists is a fast (~µs) capability
+// probe — no need to spawn `kesha-engine --capabilities-json` on every
+// Speak Clipboard invocation.
+const KOKORO_MODEL = join(
+  homedir(),
+  ".cache/kesha/models/kokoro-82m/model.onnx",
+);
+const VOSK_RU_MODEL = join(homedir(), ".cache/kesha/models/vosk-ru/model.onnx");
+
+// AVSpeech voice ids that ship with macOS as default-installed compact
+// voices. These are the fallback when the higher-quality Kokoro/Vosk
+// models aren't staged on the user's machine.
+const MACOS_EN_FALLBACK = "macos-com.apple.voice.compact.en-US.Samantha";
+const MACOS_RU_FALLBACK = "macos-com.apple.voice.compact.ru-RU.Milena";
+
+async function isReadable(path: string): Promise<boolean> {
+  try {
+    await access(path, constants.R_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Pick a voice based on detected language and which TTS models the user has
+ *  staged. Higher-quality Kokoro / Vosk-TTS are preferred when available;
+ *  AVSpeech (Samantha / Milena) is the fallback so the command works even
+ *  before `kesha install --tts` runs.
+ *
+ *  Override order:
+ *  1. `defaultVoice` preference (explicit user choice — always wins).
+ *  2. Cyrillic detected → Vosk-TTS if model present, else AVSpeech Milena.
+ *  3. Else → Kokoro if model present, else AVSpeech Samantha. */
+async function pickVoice(text: string, prefs: Prefs): Promise<string> {
+  const override = prefs.defaultVoice?.trim();
+  if (override) return override;
+  const hasCyrillic = /[Ѐ-ӿ]/.test(text);
+  if (hasCyrillic) {
+    return (await isReadable(VOSK_RU_MODEL))
+      ? "ru-vosk-m02"
+      : MACOS_RU_FALLBACK;
+  }
+  return (await isReadable(KOKORO_MODEL)) ? "en-am_michael" : MACOS_EN_FALLBACK;
+}
+
 export default async function Command() {
   const prefs = getPreferenceValues<Prefs>();
-  const voice = prefs.defaultVoice?.trim() || "";
 
   const text = (await Clipboard.readText())?.trim() ?? "";
   if (!text) {
@@ -31,6 +76,7 @@ export default async function Command() {
     return;
   }
 
+  const voice = await pickVoice(text, prefs);
   const spawn = await resolveKeshaBin(prefs.keshaBinPath);
   if (!spawn) {
     await showHUD("✗ kesha CLI not found — see extension logs");

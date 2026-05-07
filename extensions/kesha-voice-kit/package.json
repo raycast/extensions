@@ -44,11 +44,11 @@
     {
       "name": "defaultVoice",
       "title": "Default voice (Speak Clipboard)",
-      "description": "Voice id passed to `kesha say --voice`. Leave blank to let Kesha auto-route by detected language.",
+      "description": "Voice id passed to `kesha say --voice`. Leave blank to auto-route by detected language: Kokoro `en-am_michael` (English) or Vosk `ru-vosk-m02` (Russian) when their TTS models are installed (`kesha install --tts`); otherwise the matching AVSpeech system voice (Samantha / Milena).",
       "type": "textfield",
       "required": false,
       "default": "",
-      "placeholder": "en-af_heart, ru-denis, macos-com.apple.voice.compact.en-US.Samantha, ..."
+      "placeholder": "en-am_michael, ru-vosk-m02, macos-com.apple.voice.compact.en-US.Samantha, ..."
     }
   ],
   "dependencies": {
