@@ -81,33 +81,35 @@ export default function SearchResults(
         />
       ) : (
         <>
-          <List.Section title="History">
-            {historyData.map((word) => (
-              <List.Item
-                icon={"command-icon.png"}
-                key={word.word + "history"}
-                title={word.word}
-                subtitle={word.defs !== undefined ? word.defs[0] : ""}
-                actions={
-                  <Actions word={word}>
-                    <Action
-                      title="Toggle Details"
-                      onAction={() => setShowDetails((d) => !d)}
-                      shortcut={{ key: "d", modifiers: ["cmd"] }}
-                    />
-                    <Action
-                      icon={Icon.Trash}
-                      style={Action.Style.Destructive}
-                      title="Remove from History"
-                      shortcut={{ key: "x", modifiers: ["ctrl"] }}
-                      onAction={() => remove(word)}
-                    />
-                  </Actions>
-                }
-                detail={<List.Item.Detail markdown={getWordMarkdown(word)} />}
-              />
-            ))}
-          </List.Section>
+          {historyData.length > 0 && (
+            <List.Section title="History">
+              {historyData.map((word) => (
+                <List.Item
+                  icon={"command-icon.png"}
+                  key={word.word + "history"}
+                  title={word.word}
+                  subtitle={word.defs !== undefined ? word.defs[0] : ""}
+                  actions={
+                    <Actions word={word}>
+                      <Action
+                        title="Toggle Details"
+                        onAction={() => setShowDetails((d) => !d)}
+                        shortcut={{ key: "d", modifiers: ["cmd"] }}
+                      />
+                      <Action
+                        icon={Icon.Trash}
+                        style={Action.Style.Destructive}
+                        title="Remove from History"
+                        shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                        onAction={() => remove(word)}
+                      />
+                    </Actions>
+                  }
+                  detail={<List.Item.Detail markdown={getWordMarkdown(word)} />}
+                />
+              ))}
+            </List.Section>
+          )}
           <List.Section title="Results">
             {data?.map((word) => (
               <List.Item
