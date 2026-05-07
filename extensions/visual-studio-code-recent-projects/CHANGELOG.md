@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Fix: Shared Storage Support] - {PR_MERGE_DATE}
+## [Fix: Shared Storage Support] - 2026-05-07
 
 - Added Shared Storage support for new version of VS Code
 
