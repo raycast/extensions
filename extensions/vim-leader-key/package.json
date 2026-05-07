@@ -1,7 +1,7 @@
 {
   "name": "vim-leader-key",
-  "title": "Vim Leader Key",
-  "description": "Vim-style leader key for launching apps, running commands, and triggering actions with key sequences",
+  "title": "Vim Leader Key - Keyboard Shortcut Sequences",
+  "description": "Vim-style keyboard shortcut sequences for launching apps, running commands, and triggering actions",
   "icon": "icon.png",
   "author": "akshay_k",
   "categories": [

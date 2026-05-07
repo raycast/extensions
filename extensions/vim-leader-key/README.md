@@ -1,6 +1,6 @@
-# Leader Key for Raycast
+# Vim Leader Key - Keyboard Shortcut Sequences
 
-A Vim-style leader key extension for Raycast that enables quick navigation through hierarchical menus using single keystrokes. Organize your apps, commands, and shortcuts into logical groups for lightning-fast access.
+A Vim-style keyboard shortcut sequences extension for Raycast that enables quick navigation through hierarchical menus using single keystrokes. Organize your apps, commands, and shortcuts into logical groups for lightning-fast access.
 
 ## Features
 
