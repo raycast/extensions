@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - 2026-05-07
+## [Update] - {PR_MERGE_DATE}
 
 - Added Quick Capture command for creating shortcuts from the current browser tab, selected Finder item, selected/clipboard URL or path, or frontmost app
 - Added an option to open URL shortcuts in the active browser, with URL browser pickers filtered to web-capable apps
