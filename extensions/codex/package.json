@@ -4,6 +4,10 @@
   "title": "Codex",
   "description": "Browse, search, and jump to your Codex Desktop threads. See which threads are actively running, open them directly in Codex, copy deep links, and navigate to project directories — all from Raycast.",
   "icon": "command-icon.png",
+  "screenshots": [
+    { "title": "Search Codex Threads", "path": "assets/screenshot-1.png" },
+    { "title": "Running Threads", "path": "assets/screenshot-2.png" }
+  ],
   "author": "ysnows",
   "categories": [
     "Developer Tools",
