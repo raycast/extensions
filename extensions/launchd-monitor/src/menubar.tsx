@@ -7,47 +7,16 @@ import {
   showHUD,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { getAllJobStatuses, kickstartJob } from "./api/launchd";
+import { getAllJobStatuses, kickstartJob, KickstartCancelledError } from "./api/launchd";
 import { getLogTail } from "./api/logs";
-import { JobStatus, OverallStatus } from "./api/types";
 import { timeAgo, timeUntil, formatDateTime } from "./utils/time";
-
-function getOverallStatus(jobs: JobStatus[]): OverallStatus {
-  if (jobs.some((j) => !j.loaded)) return "not-loaded";
-  if (jobs.some((j) => j.success === false)) return "has-failures";
-  return "all-ok";
-}
-
-function getMenuBarIcon(status: OverallStatus): Icon {
-  switch (status) {
-    case "all-ok":
-      return Icon.CheckCircle;
-    case "has-failures":
-      return Icon.ExclamationMark;
-    case "not-loaded":
-      return Icon.QuestionMark;
-  }
-}
-
-function getMenuBarTitle(jobs: JobStatus[]): string | undefined {
-  const failCount = jobs.filter((j) => j.success === false).length;
-  if (failCount > 0) return `${failCount} failed`;
-  return undefined;
-}
-
-function getJobIcon(job: JobStatus): Icon {
-  if (!job.loaded) return Icon.QuestionMark;
-  if (job.success === null) return Icon.Circle;
-  return job.success ? Icon.CheckCircle : Icon.XMarkCircle;
-}
-
-function getStatusText(job: JobStatus): string {
-  if (!job.loaded) return "Not Loaded";
-  if (job.success === null) return "Never Run";
-  if (job.success) return "OK";
-  if (job.signal) return `Killed (signal ${job.signal})`;
-  return `Failed (exit ${job.lastExitCode})`;
-}
+import {
+  getOverallStatus,
+  getMenuBarIcon,
+  getMenuBarTitle,
+  getJobIcon,
+  getStatusText,
+} from "./utils/status";
 
 export default function Command() {
   const { launchdLabels } = getPreferenceValues<Preferences.Menubar>();
@@ -180,10 +149,14 @@ export default function Command() {
             icon={Icon.Play}
             onAction={async () => {
               try {
-                await kickstartJob(job.label);
+                await kickstartJob(job.label, job.plistPath);
                 await showHUD(`Started ${job.displayName}`);
                 revalidate();
               } catch (e) {
+                if (e instanceof KickstartCancelledError) {
+                  await showHUD("Cancelled");
+                  return;
+                }
                 await showHUD(
                   `Failed to start: ${e instanceof Error ? e.message : "unknown error"}`,
                 );

@@ -1,13 +1,15 @@
 export interface LaunchctlListResult {
   label: string;
-  lastExitStatus: number;
+  lastExitStatus: number | null;
+  pid: number | null;
   stdoutPath: string | null;
   stderrPath: string | null;
   program: string | null;
   loaded: boolean;
 }
 
-export interface JobSchedule {
+export interface CalendarSchedule {
+  type: "calendar";
   Weekday?: number;
   Month?: number;
   Day?: number;
@@ -15,10 +17,19 @@ export interface JobSchedule {
   Minute?: number;
 }
 
+export interface IntervalSchedule {
+  type: "interval";
+  seconds: number;
+}
+
+export type JobSchedule = CalendarSchedule | IntervalSchedule;
+
 export interface JobStatus {
   label: string;
   displayName: string;
   loaded: boolean;
+  running: boolean;
+  pid: number | null;
   lastExitCode: number | null;
   signal: number | null;
   success: boolean | null;
@@ -31,4 +42,4 @@ export interface JobStatus {
   plistPath: string | null;
 }
 
-export type OverallStatus = "all-ok" | "has-failures" | "not-loaded";
+export type OverallStatus = "all-ok" | "has-failures" | "has-running" | "not-loaded";
