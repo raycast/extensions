@@ -63,7 +63,7 @@ export function parseNaturalLanguageTask(
 
 function extractDetails(text: string) {
   const match = text.match(/\s(?:--|\/\/)\s(.+)$/);
-  if (!match?.index) return { text, details: undefined };
+  if (match === null || match.index === undefined) return { text, details: undefined };
 
   return {
     text: text.slice(0, match.index).trim(),

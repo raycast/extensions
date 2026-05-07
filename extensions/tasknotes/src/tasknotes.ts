@@ -1,25 +1,11 @@
 import { existsSync } from "node:fs";
-import { mkdir, readFile, readdir, rename, stat, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import YAML from "yaml";
 
 export type TaskStatus = "open" | "done" | string;
-
-export type Preferences = {
-  vaultPath: string;
-  vaultMode: "single" | "multiple";
-  tasksFolder: string;
-  storeTitleInFilename?: boolean;
-  filenameFormat: "title" | "zettel" | "timestamp";
-  taskTag: string;
-  taskPropertyName?: string;
-  taskPropertyValue?: string;
-  openStatus: string;
-  doneStatus: string;
-  showCompletedTasks?: boolean;
-};
 
 export type TaskNote = {
   title: string;
@@ -230,47 +216,6 @@ export async function setTaskStatus(task: TaskNote, status: string): Promise<voi
   }
 
   await writeTaskFile(task.path, frontmatter, task.body);
-}
-
-export async function updateTaskTitle(task: TaskNote, title: string): Promise<TaskNote> {
-  const nextTitle = title.trim();
-  if (!nextTitle) throw new Error("Task title is required.");
-
-  const settings = await settingsForTask(task);
-  const frontmatter: Record<string, unknown> = {
-    ...task.frontmatter,
-    [field(settings, "dateModified")]: formatDateTime(new Date()),
-  };
-
-  if (settings.storeTitleInFilename) {
-    delete frontmatter[field(settings, "title")];
-  } else {
-    frontmatter[field(settings, "title")] = nextTitle;
-  }
-
-  await writeTaskFile(task.path, frontmatter, task.body);
-  const nextPath = path.join(
-    path.dirname(task.path),
-    `${filenameStem({ title: nextTitle }, settings, new Date())}${markdownExtension}`,
-  );
-
-  if (nextPath !== task.path && !existsSync(nextPath)) {
-    await rename(task.path, nextPath);
-    const nextTask = await readTaskNote(nextPath, {
-      name: task.vaultName,
-      path: task.vaultPath,
-      settings,
-    });
-    if (nextTask) return nextTask;
-  }
-
-  const nextTask = await readTaskNote(task.path, {
-    name: task.vaultName,
-    path: task.vaultPath,
-    settings,
-  });
-  if (!nextTask) throw new Error("Updated task could not be read back from disk.");
-  return nextTask;
 }
 
 export function obsidianUrl(task: TaskNote): string {
