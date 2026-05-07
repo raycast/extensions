@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: Windows app path resolution] - {PR_MERGE_DATE}
+
+- Fixed `product.json` resolution for Windows builds that use VS Code's versioned resources layout.
+
 ## [Fix: Shared Storage Support] - 2026-05-07
 
 - Added Shared Storage support for new version of VS Code
