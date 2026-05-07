@@ -2,6 +2,8 @@
 
 ## [1.2.0] - 2026-05-07
 
+Thanks to [@tolshao](https://github.com/tolshao) for contributing this release.
+
 - Add China region API endpoint (`api.minimaxi.com`) alongside International (`api.minimax.io`)
 - Add MiniMax M2.7 and M2.7-highspeed models
 - Add M2-her (Roleplay) and M2.5-highspeed model variants

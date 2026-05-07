@@ -150,6 +150,11 @@ npm run fix-lint
 - `@raycast/api`: ^1.104.5
 - `@raycast/utils`: ^2.2.2
 
+## Contributors
+
+- [@monfortegg](https://github.com/monfortegg) — creator and maintainer
+- [@tolshao](https://github.com/tolshao) — China region support, M2.7 models, API key validation (v1.2.0)
+
 ## License
 
 MIT - see [LICENSE](LICENSE) for details.
