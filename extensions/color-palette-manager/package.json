@@ -37,6 +37,13 @@
       "mode": "view"
     },
     {
+      "name": "import-color-palette",
+      "title": "Import Color Palette",
+      "subtitle": "Color Palette Manager",
+      "description": "Import a color palette by pasting a separator-delimited list of hex colors.",
+      "mode": "view"
+    },
+    {
       "name": "create-colors-with-ai",
       "title": "Create Colors with AI",
       "subtitle": "Color Palette Manager",

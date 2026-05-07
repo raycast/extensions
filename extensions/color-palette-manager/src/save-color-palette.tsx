@@ -34,7 +34,7 @@ export default function SaveColorPalette(props: SavePaletteFormProps) {
       actions={<SavePaletteActions form={form} formActions={formActions} colorFields={colorFields} focus={focus} />}
       enableDrafts={!isEditing}
     >
-      <Form.Description text={isEditing ? "Edit Color Palette" : "Create Color Palette"} />
+      <Form.Description text={isEditing ? "Edit Color Palette" : "Save Color Palette"} />
       <Form.TextField
         {...form.items.name}
         title="Name*"
