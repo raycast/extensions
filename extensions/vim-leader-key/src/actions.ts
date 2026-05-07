@@ -20,9 +20,6 @@ import {
 const execAsync = promisify(exec);
 
 type ActionPreferences = Preferences & {
-  openUrlsInActiveBrowser?: boolean;
-};
-
 export async function executeAction(
   action: Action,
   onComplete?: () => void,
@@ -31,7 +28,7 @@ export async function executeAction(
   const { type, value, label } = action;
 
   try {
-    const prefs = getPreferenceValues<ActionPreferences>();
+    const prefs = getPreferenceValues<Preferences>();
     const useActiveBrowser = shouldUseActiveBrowserForAction(action, prefs);
     await closeMainWindow();
 
