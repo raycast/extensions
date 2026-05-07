@@ -88,12 +88,24 @@ export default async function Command() {
   // and synthesis work happens behind the already-visible feedback.
   await showHUD("🎙  Synthesizing…");
   const dir = await mkdtemp(join(tmpdir(), "raycast-kesha-"));
-  const wavPath = join(dir, "speak.wav");
+  // OGG/Opus output: ~10× smaller than WAV, side-steps the WAVE_FORMAT_
+  // EXTENSIBLE channel-mask bug from #245 (mono played in left ear only),
+  // and `afplay` on macOS 10.13+ decodes Opus natively. The format is
+  // inferred from the `.ogg` extension; explicit `--format ogg-opus`
+  // documents the intent for grep-ability across the kesha pipeline.
+  const audioPath = join(dir, "speak.ogg");
 
   try {
     // `--` terminates option parsing: any leading `--` in the clipboard
     // payload (e.g. a pasted code diff) won't be misread as a flag.
-    const args = [...spawn.prefixArgs, "say", "--out", wavPath];
+    const args = [
+      ...spawn.prefixArgs,
+      "say",
+      "--format",
+      "ogg-opus",
+      "--out",
+      audioPath,
+    ];
     if (voice) {
       args.push("--voice", voice);
     }
@@ -101,7 +113,7 @@ export default async function Command() {
     await execFileAsync(spawn.command, args, { maxBuffer: 4 * 1024 * 1024 });
 
     await showHUD("🔊 Playing…");
-    await execFileAsync("/usr/bin/afplay", [wavPath]);
+    await execFileAsync("/usr/bin/afplay", [audioPath]);
     await showHUD("✓ Played clipboard");
   } catch (err: unknown) {
     // Node's subprocess errors include the full argv (clipboard payload)
