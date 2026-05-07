@@ -33,12 +33,20 @@ function MenuBar(props: MenuBarProps) {
   // Don't perform a full sync if the command was launched from within another commands
   const { data, setData, isLoading } = useSyncData(!launchedFromWithinCommand);
   const { focusedTask, unfocusTask } = useFocusedTask();
-  const { view, filter, upcomingDays, hideMenuBarCount, showNextTask, taskWidth } =
-    getPreferenceValues<Preferences.MenuBar>();
+  const {
+    view,
+    filter,
+    upcomingDays,
+    hideMenuBarCount,
+    showNextTask,
+    taskWidth,
+    sortByPriority: sortByPriorityPref,
+  } = getPreferenceValues<Preferences.MenuBar>();
+  const sorter = sortByPriorityPref ? byPriorityThenDefault : sortByDefault;
   const { data: rawFilterTasks, isLoading: isLoadingFilter } = useFilterTasks(view === "filter" ? filter : "");
   const filterTasks = useMemo(
-    () => (rawFilterTasks ? [...rawFilterTasks].sort(byPriorityThenDefault) : undefined),
-    [rawFilterTasks],
+    () => (rawFilterTasks ? [...rawFilterTasks].sort(sorter) : undefined),
+    [rawFilterTasks, sorter],
   );
 
   const rawTasks = useMemo(() => {
@@ -66,7 +74,7 @@ function MenuBar(props: MenuBarProps) {
     return data?.items.filter((t) => t.due?.date) ?? [];
   }, [data, upcomingDays, view]);
 
-  const tasks = useMemo(() => [...rawTasks].sort(byPriorityThenDefault), [rawTasks]);
+  const tasks = useMemo(() => [...rawTasks].sort(sorter), [rawTasks, sorter]);
 
   useEffect(() => {
     const isFocusedTaskInTasks = data?.items?.some((t) => t.id === focusedTask.id);
