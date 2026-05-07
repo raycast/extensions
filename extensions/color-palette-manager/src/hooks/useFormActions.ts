@@ -99,17 +99,17 @@ export function useFormActions({
       return;
     }
 
-    // Get current values for all color fields
+    // Get current values for all color fields. Include empty strings so the
+    // array index matches the visual (1-based) position — otherwise removing
+    // colorN when an earlier field is empty splices the wrong element (or
+    // no-ops when colorN exceeds the compacted length).
     const currentColors: string[] = [];
     for (let i = 1; i <= colorFields.count; i++) {
       const colorKey = `color${i}` as keyof PaletteFormFields;
-      const colorValue = form.colors[colorKey]?.value as string;
-      if (colorValue) {
-        currentColors.push(colorValue);
-      }
+      currentColors.push((form.colors[colorKey]?.value as string) || "");
     }
 
-    // Remove the specific color from the array
+    // Remove the specific color from the array by visual index
     currentColors.splice(colorIndex - 1, 1);
 
     // Clear all color fields first

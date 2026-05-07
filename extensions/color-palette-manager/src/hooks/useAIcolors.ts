@@ -29,13 +29,14 @@ export function useAIcolors({
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [isLoadingMessage, setIsLoadingMessage] = useState<string | null>(null);
 
-  // Parse and validate color count with limit handling
-  const [colorCount, setColorCount] = useState<number>(DEFAULT_COLOR_FIELDS);
-  useEffect(() => {
-    // Extract only digits from the input string
+  // Parse and validate color count with limit handling — computed synchronously
+  // so the very first useAI prompt already contains the correct count (otherwise
+  // the initial render fires with DEFAULT_COLOR_FIELDS and the effect-corrected
+  // value triggers a second AI call, burning a credit).
+  const colorCount = useMemo(() => {
     const digitsOnly = requestedTotalColors?.replace(/\D/g, "") || "";
     const requestedColors = parseInt(digitsOnly !== "" ? digitsOnly : String(DEFAULT_COLOR_FIELDS), 10);
-    setColorCount(Math.min(requestedColors, MAX_COLOR_FIELDS));
+    return Math.min(requestedColors, MAX_COLOR_FIELDS);
   }, [requestedTotalColors]);
 
   // Parse creativity with fallback
