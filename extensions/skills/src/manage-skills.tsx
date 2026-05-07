@@ -1,9 +1,12 @@
 import { List, Detail, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
+import { ensureSupportDir } from "./utils/ensure-support-dir";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
 import { isInvalidCustomNpxPathError, isNpxResolutionError } from "./utils/skills-cli";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
 import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
+
+ensureSupportDir();
 
 export default function Command() {
   const { skills, isLoading, error, revalidate, mutate } = useInstalledSkills();

@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Fix Support Directory Initialization] - {PR_MERGE_DATE}
+
+- Ensure the extension support directory exists before cached hooks run, preventing "Could not create extension support directory" errors on first launch
+
 ## [Add Newly Supported Agents] - 2026-05-05
 
 - Add 11 agents supported by the Skills CLI: AiderDesk, Code Studio, CodeArts Agent, Codemaker, Devin for Terminal, Dexto, ForgeCode, IBM Bob, Rovo Dev, Tabnine CLI, and Universal
