@@ -1,6 +1,6 @@
 # Tailscale Changelog
 
-## [Add new features] - {PR_MERGE_DATE}
+## [Add new features] - 2026-05-07
 
 - Added Menu bar indicator: shows an icon when connected, nothing when disconnected
 
