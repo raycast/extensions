@@ -1,5 +1,10 @@
 # Todoist Changelog
 
+## [Menu bar priority sorting] - {PR_MERGE_DATE}
+
+- **Sort menu bar tasks by priority**: Tasks shown in the menu bar (Today, Upcoming, Inbox, and Filter views) are now ordered by priority first (highest first), then by their existing default order, so the most important tasks surface at the top.
+- **Toggle from preferences**: A new **Sort tasks by priority** checkbox in the menu bar command preferences lets you turn priority sorting off and fall back to the previous default ordering. Enabled by default.
+
 ## [Filter completion UI and incremental reminder sync] - 2026-05-04
 
 - **Duplicate “at task time” reminders on hourly repeat**: Applying the **same** hourly recurrence twice (when the task already had a timed due and a relative-at-task reminder) no longer queues a second identical reminder; the extension now trusts the merged cache whenever Sync returns an empty `reminders` delta, not only when the field was omitted entirely.
