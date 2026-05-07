@@ -4,15 +4,12 @@ import { join } from "path";
 import { getPreferenceValues } from "@raycast/api";
 import yaml from "js-yaml";
 
-interface Preferences {
-  tabbyPath?: string;
-  configPath?: string;
-}
-
 function getDefaultConfigPath(): string {
   if (process.platform === "win32") {
     const appData = process.env.APPDATA ?? join(homedir(), "AppData", "Roaming");
-    return join(appData, "tabby", "config.yaml");
+    const localAppData = process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local");
+    const candidates = [join(appData, "tabby", "config.yaml"), join(localAppData, "tabby", "config.yaml")];
+    return candidates.find(existsSync) ?? candidates[0];
   }
   return join(homedir(), "Library", "Application Support", "tabby", "config.yaml");
 }

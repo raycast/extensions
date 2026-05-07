@@ -7,11 +7,6 @@ import { homedir } from "os";
 import { join } from "path";
 import { getTabbyProfiles, getProfileGroups, TabbyProfile } from "./utils/get-tabby-profiles";
 
-interface Preferences {
-  tabbyPath?: string;
-  configPath?: string;
-}
-
 function resolveTabbyCli(): string {
   const { tabbyPath } = getPreferenceValues<Preferences>();
   if (tabbyPath && tabbyPath.trim().length > 0) {
