@@ -11,7 +11,7 @@
   ],
   "categories": [
     "Productivity",
-    "Applications"
+    "Web"
   ],
   "license": "MIT",
   "commands": [
@@ -40,17 +40,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.10",
-    "@raycast/utils": "^2.2.2",
-    "turndown": "^7.2.2"
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4",
+    "turndown": "^7.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.0.1",
-    "@types/react": "19.2.7",
-    "eslint": "^9.39.1",
-    "prettier": "^3.7.4",
-    "typescript": "^5.9.3"
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",

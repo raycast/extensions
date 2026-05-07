@@ -2,6 +2,13 @@ import { useFetch } from "@raycast/utils";
 import { buildStoreOrigin, buildRecommendationsUrl, buildSearchSuggestUrl } from "./shopify-api";
 import type { SearchSuggestRoot, RecommendationsRoot, StoreMetaRoot } from "../types";
 
+type FetchResponse = {
+  ok: boolean;
+  status: number;
+  statusText: string;
+  json: () => Promise<unknown>;
+};
+
 export function useSearchSuggest(
   storeRoute: string,
   query: string,
@@ -14,7 +21,7 @@ export function useSearchSuggest(
 
   return useFetch<SearchSuggestRoot>(searchUrl ?? "", {
     execute: enabled && !!searchUrl,
-    parseResponse: async (response) => {
+    parseResponse: async (response: FetchResponse) => {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -39,44 +46,47 @@ export function useSearchSuggest(
         if (wantsCollections && !hasCollections && query && query.trim().length > 0) {
           try {
             const collectionsUrl = `${baseUrl}/collections.json`;
-            const collResp = await fetch(collectionsUrl);
-            if (collResp.ok) {
-              const collJson = (await collResp.json()) as { collections?: unknown } | unknown;
-              type RawCollection = {
-                id: number;
-                title: string;
-                handle: string;
-                description?: string;
-                image?: { src: string; alt?: string; width?: number; height?: number };
-              };
-              const collectionsField =
-                collJson && typeof collJson === "object"
-                  ? (collJson as { collections?: unknown }).collections
-                  : undefined;
-              const allCollections: RawCollection[] = Array.isArray(collectionsField)
-                ? (collectionsField as RawCollection[])
-                : [];
-              const q = query.trim().toLowerCase();
-              const matched: import("../types").SearchCollection[] = allCollections
-                .filter((c) => {
-                  const title = (c.title || "").toLowerCase();
-                  const handle = (c.handle || "").toLowerCase();
-                  return title.includes(q) || handle.includes(q);
-                })
-                .map((c) => ({
-                  id: c.id,
-                  title: c.title,
-                  handle: c.handle,
-                  url: `/collections/${c.handle}`,
-                  image: c.image?.src,
-                  body: c.description || "",
-                }));
+            const fetchFn = (globalThis as { fetch?: (input: string) => Promise<FetchResponse> }).fetch;
+            if (fetchFn) {
+              const collResp = await fetchFn(collectionsUrl);
+              if (collResp.ok) {
+                const collJson = (await collResp.json()) as { collections?: unknown } | unknown;
+                type RawCollection = {
+                  id: number;
+                  title: string;
+                  handle: string;
+                  description?: string;
+                  image?: { src: string; alt?: string; width?: number; height?: number };
+                };
+                const collectionsField =
+                  collJson && typeof collJson === "object"
+                    ? (collJson as { collections?: unknown }).collections
+                    : undefined;
+                const allCollections: RawCollection[] = Array.isArray(collectionsField)
+                  ? (collectionsField as RawCollection[])
+                  : [];
+                const q = query.trim().toLowerCase();
+                const matched: import("../types").SearchCollection[] = allCollections
+                  .filter((c) => {
+                    const title = (c.title || "").toLowerCase();
+                    const handle = (c.handle || "").toLowerCase();
+                    return title.includes(q) || handle.includes(q);
+                  })
+                  .map((c) => ({
+                    id: c.id,
+                    title: c.title,
+                    handle: c.handle,
+                    url: `/collections/${c.handle}`,
+                    image: c.image?.src,
+                    body: c.description || "",
+                  }));
 
-              if (!json.resources)
-                json.resources = { results: {} } as import("../types").SearchSuggestRoot["resources"];
-              if (!json.resources.results)
-                json.resources.results = {} as import("../types").SearchSuggestRoot["resources"]["results"];
-              json.resources.results.collections = matched;
+                if (!json.resources)
+                  json.resources = { results: {} } as import("../types").SearchSuggestRoot["resources"];
+                if (!json.resources.results)
+                  json.resources.results = {} as import("../types").SearchSuggestRoot["resources"]["results"];
+                json.resources.results.collections = matched;
+              }
             }
           } catch {
             // collections fallback is best-effort
@@ -109,7 +119,7 @@ export function useRecommendations(
 
   return useFetch<RecommendationsRoot>(recommendationsUrl ?? "", {
     execute: enabled && !!recommendationsUrl,
-    parseResponse: async (response) => {
+    parseResponse: async (response: FetchResponse) => {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
@@ -140,7 +150,7 @@ export function useStoreMeta(storeRoute: string, enabled = true) {
 
   return useFetch<StoreMetaRoot>(metaUrl, {
     execute: enabled,
-    parseResponse: async (response) => {
+    parseResponse: async (response: FetchResponse) => {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }

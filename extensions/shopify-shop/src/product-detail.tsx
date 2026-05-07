@@ -8,7 +8,11 @@ import { formatPrice, normalizeTags } from "./services/product-mapper";
 import { useStoreMeta } from "./services/hooks";
 import Recommendations from "./recommendations";
 
-type Preferences = { storeUrl: string };
+type FetchResponse = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+};
 
 export function sanitizeHtml(html: string): string {
   // Only strip script/style — turndown handles the rest of the HTML → markdown conversion
@@ -32,19 +36,20 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
   const productJsonUrl = `${buildProductJsonUrl(effectiveStoreRoute, handle)}?currency=${storeCurrency}`;
   const { data: jsonData, isLoading: isLoadingJson } = useFetch<SingleProductRoot>(productJsonUrl, {
     execute: storeMeta !== undefined,
-    parseResponse: async (res) => {
+    parseResponse: async (res: FetchResponse) => {
       if (!res.ok) throw new Error(`Failed to load product (${res.status})`);
       return res.json() as Promise<SingleProductRoot>;
     },
-    onError: (error) => {
-      showToast({ style: Toast.Style.Failure, title: "Could not load product", message: error.message });
+    onError: (error: unknown) => {
+      const message = error instanceof Error ? error.message : "Unknown error";
+      showToast({ style: Toast.Style.Failure, title: "Could not load product", message });
     },
   });
 
   const productJsUrl = `${buildProductJsUrl(effectiveStoreRoute, handle)}?currency=${storeCurrency}`;
   const { data: jsData } = useFetch<ProductJsRoot | null>(productJsUrl, {
     execute: storeMeta !== undefined,
-    parseResponse: async (res) => {
+    parseResponse: async (res: FetchResponse) => {
       if (!res.ok) return null;
       const json = (await res.json()) as ProductJsRoot;
       // Normalize prices from cents (integer) to dollars

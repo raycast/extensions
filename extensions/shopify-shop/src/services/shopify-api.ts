@@ -4,13 +4,14 @@ function stripProductsPath(path: string) {
   return path.replace(/\/products(\.json)?\/?$/i, "");
 }
 
-function isValidUrl(url: string): boolean {
-  try {
-    new URL(url);
-    return true;
-  } catch {
-    return false;
-  }
+function parseHttpUrl(url: string): { protocol: string; host: string; pathname: string } | null {
+  const match = url.match(/^(https?):\/\/([^/?#]+)(\/[^?#]*)?/i);
+  if (!match) return null;
+  return {
+    protocol: `${match[1].toLowerCase()}:`,
+    host: match[2],
+    pathname: match[3] ?? "/",
+  };
 }
 
 export function buildProductJsonUrl(base?: string | null, handle?: string) {
@@ -25,8 +26,8 @@ export function buildStoreOrigin(base?: string | null) {
   if (!base || base.length === 0) return DEFAULT_STORE;
   const b = base.trim();
 
-  if (isValidUrl(b)) {
-    const maybe = new URL(b);
+  const maybe = parseHttpUrl(b);
+  if (maybe) {
     const stripped = stripProductsPath(maybe.pathname);
     const origin = `${maybe.protocol}//${maybe.host}${stripped && stripped !== "/" ? stripped : ""}`;
     return origin.replace(/\/$/, "");

@@ -3,8 +3,6 @@ import { useRecommendations, useStoreMeta } from "./services/hooks";
 import ProductDetail from "./product-detail";
 import { formatPrice } from "./services/product-mapper";
 
-type Preferences = { storeUrl: string };
-
 type Props = {
   productId: number;
   productHandle: string;

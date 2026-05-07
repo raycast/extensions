@@ -6,8 +6,6 @@ import ProductDetail from "./product-detail";
 import { buildStoreOrigin } from "./services/shopify-api";
 import { formatPrice, normalizeTags, stripHtml } from "./services/product-mapper";
 
-type Preferences = { storeUrl: string };
-
 export default function SearchCommand() {
   const [searchText, setSearchText] = useState("");
   const { storeUrl } = getPreferenceValues<Preferences>();

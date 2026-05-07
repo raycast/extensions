@@ -7,7 +7,11 @@ import { buildStoreOrigin } from "./services/shopify-api";
 import { formatPrice, normalizeTags } from "./services/product-mapper";
 import { useSearchSuggest, useStoreMeta } from "./services/hooks";
 
-type Preferences = { storeUrl: string };
+type FetchResponse = {
+  ok: boolean;
+  status: number;
+  json: () => Promise<unknown>;
+};
 
 export default function Command() {
   type ShopifyResponse = {
@@ -29,7 +33,7 @@ export default function Command() {
   const storeCurrency = storeMeta?.currency ?? undefined;
 
   const collectionsResp = useFetch<CollectionsRoot>(`${storeOrigin}/collections.json`, {
-    parseResponse: async (res) => {
+    parseResponse: async (res: FetchResponse) => {
       try {
         return (await res.json()) as CollectionsRoot;
       } catch {
@@ -47,12 +51,15 @@ export default function Command() {
     : `${storeOrigin}/products.json?currency=${storeCurrency || "USD"}`;
 
   const response = useFetch<ShopifyResponse | null>(productsUrl, {
-    parseResponse: async (res) => {
+    parseResponse: async (res: FetchResponse) => {
+      if (!res.ok) {
+        throw new Error(`Failed to load products (${res.status})`);
+      }
       try {
         const json = await res.json();
         return json as ShopifyResponse;
       } catch {
-        return null;
+        throw new Error("Store returned an invalid products response");
       }
     },
     keepPreviousData: true,
@@ -61,7 +68,8 @@ export default function Command() {
 
   const isLoadingFromFetch = response.isLoading || searchSuggest.isLoading || storeMetaResp.isLoading;
   const resp = response.data ?? null;
-  const isLoading = isLoadingFromFetch || (resp === null && !searchSuggest.data);
+  const hasError = Boolean(response.error || searchSuggest.error || storeMetaResp.error || collectionsResp.error);
+  const isLoading = isLoadingFromFetch || (resp === null && !searchSuggest.data && !hasError);
   const errorMessage =
     response.error?.message ??
     searchSuggest.error?.message ??
