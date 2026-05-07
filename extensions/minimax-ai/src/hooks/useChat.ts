@@ -25,9 +25,7 @@ export function useChat(): UseChatReturn {
     if (prefs.minimaxApiKey === validatedKeyRef.current) return;
 
     const validateApiKey = async () => {
-      const apiEndpoint = prefs.apiEndpoint === "international"
-        ? API_ENDPOINTS.international
-        : API_ENDPOINTS.china;
+      const apiEndpoint = prefs.apiEndpoint === "international" ? API_ENDPOINTS.international : API_ENDPOINTS.china;
 
       const result = await MiniMaxProvider.validateApiKey(prefs.minimaxApiKey, apiEndpoint);
       setIsApiKeyValid(result.valid);
@@ -59,9 +57,7 @@ export function useChat(): UseChatReturn {
       systemPrompt = systemPrompt ? `${conciseInstruction}\n\n${systemPrompt}` : conciseInstruction;
     }
 
-    const apiEndpoint = prefs.apiEndpoint === "international"
-      ? API_ENDPOINTS.international
-      : API_ENDPOINTS.china;
+    const apiEndpoint = prefs.apiEndpoint === "international" ? API_ENDPOINTS.international : API_ENDPOINTS.china;
 
     return new MiniMaxProvider({
       apiKey: prefs.minimaxApiKey,

@@ -60,7 +60,7 @@ export class MiniMaxProvider implements AIProvider {
         return { valid: false, error: "Invalid API key" };
       }
 
-      const data = await response.json() as MiniMaxErrorResponse;
+      const data = (await response.json()) as MiniMaxErrorResponse;
       return { valid: false, error: data.error?.message || data.message || `API Error: ${response.status}` };
     } catch {
       // Network errors leave validation state as unknown so requests can still proceed
