@@ -1,0 +1,5 @@
+# OMC AI agent state — local development artifact, must never reach the
+# published Raycast Store extension tree. Greptile flagged a previously
+# committed `.omc/state/last-tool-error.json` on PR #27375; this entry
+# prevents a recurrence.
+.omc/
