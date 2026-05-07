@@ -171,8 +171,8 @@ export function AddItemForm({
           <Form.Separator />
           <Form.Dropdown
             id="browser"
-            title="Default Browser"
-            info="URLs in this group will open with this browser unless overridden by the individual action"
+            title="Default Browser for URLs"
+            info="URL actions inside this group inherit this browser unless the individual URL action overrides it."
           >
             <Form.Dropdown.Item
               value=""
@@ -421,9 +421,9 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
           <Form.Separator />
           <Form.Dropdown
             id="browser"
-            title="Default Browser"
+            title="Default Browser for URLs"
             defaultValue={(item as Group).browser || ""}
-            info="URLs in this group will open with this browser unless overridden by the individual action"
+            info="URL actions inside this group inherit this browser unless the individual URL action overrides it."
           >
             <Form.Dropdown.Item
               value=""

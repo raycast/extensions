@@ -31,6 +31,7 @@ A Vim-style leader key extension for Raycast that enables quick navigation throu
 - **Legacy Migration**: Automatic upgrade from flat key sequences
 - **Conflict Detection**: Prevents duplicate keys within groups
 - **Visual Editor**: Intuitive forms for adding and editing items
+- **Quick Capture**: Turn your current browser tab, selected Finder item, URL/path text, clipboard URL/path, or frontmost app into a shortcut
 
 ### 🎯 Smart UI/UX
 
@@ -45,6 +46,7 @@ A Vim-style leader key extension for Raycast that enables quick navigation throu
 2. Run `Leader Key` command
 3. Press any key to see available actions
 4. Use `⌘N` to add new actions or `⌘⇧N` to add groups
+5. Run `Quick Capture` to add the current app, URL, or folder with a prefilled form
 
 ## Default Configuration
 
@@ -92,6 +94,10 @@ u → URLs/
 
 - Shell scripts: `open ~/Downloads`
 - Complex commands: `git status && git pull`
+
+### Quick Capture
+
+Run `Quick Capture` to detect the current context and create a prefilled shortcut. It tries the active browser tab first when the Raycast Browser Extension is available, then selected Finder items, selected text, clipboard text, and finally the frontmost application. You can edit the label, key, type, value, and destination group before saving.
 
 ## Configuration
 

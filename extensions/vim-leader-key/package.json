@@ -17,6 +17,12 @@
       "mode": "view"
     },
     {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "description": "Capture the current app, URL, folder, or path as a Leader Key shortcut",
+      "mode": "view"
+    },
+    {
       "name": "import-config",
       "title": "Import Config",
       "description": "Import a Leader Key config.json file",
@@ -64,6 +70,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "node --test --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON test/*.test.ts",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   },
