@@ -215,9 +215,29 @@ export function useRecentEntries() {
     const visibleStorageEntryKeys = getVisibleStorageEntryKeys(combinedEntries ?? []);
 
     if (visibleDatabaseEntries.length === 0) {
-      await warnRemoveNotSupported(
-        "Removing all entries is not supported when only storage-backed entries are present",
-      );
+      if (visibleStorageEntryKeys.length === 0) {
+        await warnRemoveNotSupported();
+        return;
+      }
+
+      if (
+        await confirmAlert({
+          icon: Icon.Trash,
+          title: "Remove all recent entries?",
+          message: "This cannot be undone.",
+          dismissAction: {
+            title: "Cancel",
+            style: Alert.ActionStyle.Cancel,
+          },
+          primaryAction: {
+            title: "Remove",
+            style: Alert.ActionStyle.Destructive,
+          },
+        })
+      ) {
+        suppressStorageEntries(visibleStorageEntryKeys);
+        await showStorageEntriesHiddenToast("All visible entries removed");
+      }
       return;
     }
 
