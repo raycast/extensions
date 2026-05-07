@@ -25,11 +25,11 @@ export function useChat(): UseChatReturn {
     if (prefs.minimaxApiKey === validatedKeyRef.current) return;
 
     const validateApiKey = async () => {
+      validatedKeyRef.current = prefs.minimaxApiKey;
       const apiEndpoint = prefs.apiEndpoint === "international" ? API_ENDPOINTS.international : API_ENDPOINTS.china;
 
       const result = await MiniMaxProvider.validateApiKey(prefs.minimaxApiKey, apiEndpoint);
       setIsApiKeyValid(result.valid);
-      validatedKeyRef.current = prefs.minimaxApiKey;
 
       if (result.valid === false) {
         await showToast({

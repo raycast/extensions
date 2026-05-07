@@ -30,7 +30,7 @@ export class MiniMaxProvider implements AIProvider {
 
   constructor(config: ProviderConfig & { apiEndpoint?: string }) {
     this.apiKey = config.apiKey;
-    this.model = config.model || "MiniMax-M2.5";
+    this.model = config.model || "MiniMax-M2.7";
     this.defaultTemperature = config.temperature ?? 0.7;
     this.defaultMaxTokens = config.maxTokens ?? 4096;
     this.systemPrompt = config.systemPrompt;
@@ -60,8 +60,8 @@ export class MiniMaxProvider implements AIProvider {
         return { valid: false, error: "Invalid API key" };
       }
 
-      const data = (await response.json()) as MiniMaxErrorResponse;
-      return { valid: false, error: data.error?.message || data.message || `API Error: ${response.status}` };
+      // Non-401 HTTP errors (rate limits, server errors) are transient; treat as unknown
+      return { valid: null };
     } catch {
       // Network errors leave validation state as unknown so requests can still proceed
       return { valid: null };
