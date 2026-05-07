@@ -1,6 +1,6 @@
 import { AI, showToast, Toast } from "@raycast/api";
 import { useAI } from "@raycast/utils";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_COLOR_FIELDS, MAX_COLOR_FIELDS } from "../constants";
 import { ColorItem } from "../types";
 import { createColorItems, parseAIColors } from "../utils/aiColorProcessing";
@@ -90,7 +90,19 @@ export function useAIcolors({
     }
   }, [jsonColorsError, descriptionError, titleError]);
 
+  // Sentinel for the race window where description has just finished and
+  // execute: !isLoadingDescription has flipped the title hook to true, but the
+  // title hook's own isLoading hasn't transitioned up yet (its internal effect
+  // runs after this render). Without the sentinel, all three isLoading* flags
+  // momentarily read false and the aggregate isLoading would clear prematurely,
+  // firing the success toast before the title call has even started.
+  const hasStartedTitle = useRef(false);
+
   useEffect(() => {
+    if (isLoadingTitle) {
+      hasStartedTitle.current = true;
+    }
+
     if (isLoadingJsonColors) {
       setIsLoadingMessage("Loading colors...");
     } else if (isLoadingDescription) {
@@ -101,7 +113,7 @@ export function useAIcolors({
       setIsLoadingMessage(null);
     }
 
-    if (!isLoadingJsonColors && !isLoadingDescription && !isLoadingTitle) {
+    if (!isLoadingJsonColors && !isLoadingDescription && !isLoadingTitle && hasStartedTitle.current) {
       setIsLoading(false);
     }
   }, [isLoadingJsonColors, isLoadingDescription, isLoadingTitle]);
