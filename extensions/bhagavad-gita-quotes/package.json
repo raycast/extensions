@@ -179,6 +179,7 @@
     "Other"
   ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "windows"
   ]
 }
