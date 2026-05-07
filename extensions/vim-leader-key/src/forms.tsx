@@ -26,6 +26,7 @@ import {
   checkKeyConflict,
 } from "./storage";
 import { getActionIcon, getActionTypeLabel } from "./actions";
+import { filterWebUrlApplications } from "./browser-utils";
 
 export interface AddItemFormProps {
   config: RootConfig;
@@ -44,6 +45,7 @@ export function AddItemForm({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionType, setActionType] = useState<ActionType>("application");
   const [applications, setApplications] = useState<Application[]>([]);
+  const [webApplications, setWebApplications] = useState<Application[]>([]);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
 
   const parentGroup =
@@ -54,6 +56,7 @@ export function AddItemForm({
       const apps = await getApplications();
       apps.sort((a, b) => a.name.localeCompare(b.name));
       setApplications(apps);
+      setWebApplications(await filterWebUrlApplications(apps));
       setIsLoadingApps(false);
     }
     loadApps();
@@ -179,7 +182,7 @@ export function AddItemForm({
               title="System Default"
               icon={Icon.Globe}
             />
-            {applications.map((app) => (
+            {webApplications.map((app) => (
               <Form.Dropdown.Item
                 key={app.bundleId || app.path}
                 value={app.path}
@@ -257,7 +260,7 @@ export function AddItemForm({
                 title="System Default"
                 icon={Icon.Globe}
               />
-              {applications.map((app) => (
+              {webApplications.map((app) => (
                 <Form.Dropdown.Item
                   key={app.bundleId || app.path}
                   value={app.path}
@@ -284,6 +287,7 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [actionType, setActionType] = useState<ActionType>("application");
   const [applications, setApplications] = useState<Application[]>([]);
+  const [webApplications, setWebApplications] = useState<Application[]>([]);
   const [isLoadingApps, setIsLoadingApps] = useState(true);
 
   const parentPath = itemPath.slice(0, -1);
@@ -297,6 +301,7 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
       const apps = await getApplications();
       apps.sort((a, b) => a.name.localeCompare(b.name));
       setApplications(apps);
+      setWebApplications(await filterWebUrlApplications(apps));
       setIsLoadingApps(false);
     }
     loadApps();
@@ -430,7 +435,7 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
               title="System Default"
               icon={Icon.Globe}
             />
-            {applications.map((app) => (
+            {webApplications.map((app) => (
               <Form.Dropdown.Item
                 key={app.bundleId || app.path}
                 value={app.path}
@@ -511,7 +516,7 @@ export function EditItemForm({ config, itemPath, onSave }: EditItemFormProps) {
                 title="System Default"
                 icon={Icon.Globe}
               />
-              {applications.map((app) => (
+              {webApplications.map((app) => (
                 <Form.Dropdown.Item
                   key={app.bundleId || app.path}
                   value={app.path}

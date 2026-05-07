@@ -52,6 +52,15 @@
       "title": "Timeout Duration",
       "description": "Seconds of inactivity before resetting (2.5 - 6 seconds)",
       "required": false
+    },
+    {
+      "name": "openUrlsInActiveBrowser",
+      "type": "checkbox",
+      "default": false,
+      "title": "Open URLs in Active Browser",
+      "description": "Open URL shortcuts in the active browser instead of the configured or default browser when a browser is active",
+      "label": "Open URLs in active browser",
+      "required": false
     }
   ],
   "dependencies": {

@@ -28,6 +28,7 @@ import {
   saveConfig,
 } from "./storage";
 import { ActionType, RootConfig } from "./types";
+import { filterWebUrlApplications } from "./browser-utils";
 
 type CapturableActionType = Exclude<ActionType, "command">;
 
@@ -36,7 +37,7 @@ const ROOT_DESTINATION = JSON.stringify([]);
 export default function QuickCapture() {
   const [config, setConfig] = useState<RootConfig | null>(null);
   const [candidate, setCandidate] = useState<CaptureCandidate | null>(null);
-  const [applications, setApplications] = useState<Application[]>([]);
+  const [webApplications, setWebApplications] = useState<Application[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [destinationValue, setDestinationValue] = useState(ROOT_DESTINATION);
@@ -58,7 +59,7 @@ export default function QuickCapture() {
 
       setConfig(loadedConfig);
       setCandidate(detectedCandidate);
-      setApplications(installedApplications);
+      setWebApplications(await filterWebUrlApplications(installedApplications));
 
       if (detectedCandidate) {
         setLabel(detectedCandidate.label);
@@ -266,7 +267,7 @@ export default function QuickCapture() {
           onChange={setBrowser}
           info="Choose which browser to open this URL with. System Default inherits from the parent group or OS default."
         >
-          <BrowserDropdownItems applications={applications} />
+          <BrowserDropdownItems applications={webApplications} />
         </Form.Dropdown>
       )}
     </Form>

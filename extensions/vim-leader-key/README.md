@@ -105,6 +105,7 @@ Run `Quick Capture` to detect the current context and create a prefilled shortcu
 
 - **Auto-Reset Timeout**: Enable/disable automatic return to root
 - **Timeout Duration**: Set timeout between 2.5-6 seconds
+- **Open URLs in Active Browser**: Open URL shortcuts in the frontmost browser when one is active, with existing configured/default browser behavior as fallback
 
 ### Import/Export
 
