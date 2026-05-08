@@ -1,6 +1,6 @@
 # tabler Changelog
 
-## [Add Missing Action Shortcuts] - {PR_MERGE_DATE}
+## [Add Missing Action Shortcuts] - 2026-05-08
 
 - Add keyboard shortcuts for copying outline SVGs and HTML chars
 - Add Windows equivalents for custom Command-based shortcuts
