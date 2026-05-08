@@ -4,7 +4,7 @@ Send your active [Lightroom Classic](https://www.adobe.com/products/photoshop-li
 
 ## Commands
 
-### Send Lightroom Photo to Photo Mechanic
+### Open Lightroom Photo in Photo Mechanic
 
 Reveals the currently active photo in Lightroom Classic inside Photo Mechanic — the containing folder opens as a contact sheet with that specific image selected. Equivalent to dragging the file onto Photo Mechanic's icon.
 
