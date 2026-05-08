@@ -1,0 +1,22 @@
+# Treat all image and binary assets as binary files
+*.png binary
+*.gif binary
+*.jpg binary
+*.jpeg binary
+*.svg binary
+*.wasm binary
+*.mp4 binary
+*.mov binary
+*.zip binary
+*.tar.gz binary
+*.tar binary
+*.gz binary
+*.bz2 binary
+*.7z binary
+*.dmg binary
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.a binary
+*.lib binary
