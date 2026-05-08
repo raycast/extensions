@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "flickr-uploader",
   "title": "Flickr Uploader",
   "description": "Upload and publish single photos to Flickr with metadata, albums, and groups.",

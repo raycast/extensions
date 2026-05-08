@@ -63,9 +63,10 @@ Upload photos to Flickr directly from Raycast with full metadata support, includ
 ## Privacy & Security
 
 - API credentials are stored securely in Raycast's encrypted preferences
-- OAuth tokens are stored in Raycast's local encrypted storage
+- OAuth tokens are stored in Raycast's local storage (unencrypted)
 - No data is sent to third parties except Flickr
 - The extension connects directly to Flickr's API
+- For maximum security, only use on your personal computer
 
 ## Troubleshooting
 

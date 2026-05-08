@@ -77,11 +77,14 @@ export default function Command() {
         });
 
         let photosetId = submittedValues.photosetId;
+        let isNewPhotoset = false;
         if (submittedValues.newPhotosetTitle.trim()) {
           photosetId = await createPhotoset(auth, submittedValues.newPhotosetTitle.trim(), photoId);
+          isNewPhotoset = true;
         }
 
-        if (photosetId) {
+        // Only add to photoset if it's an existing one (createPhotoset already adds the photo)
+        if (photosetId && !isNewPhotoset) {
           await addPhotoToPhotoset(auth, photosetId, photoId);
         }
 

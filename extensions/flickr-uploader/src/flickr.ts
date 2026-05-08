@@ -9,11 +9,6 @@ const OAUTH_ACCESS_TOKEN_URL = "https://www.flickr.com/services/oauth/access_tok
 const REST_URL = "https://www.flickr.com/services/rest";
 const UPLOAD_URL = "https://up.flickr.com/services/upload/";
 
-type FlickrPreferences = {
-  flickrApiKey: string;
-  flickrApiSecret: string;
-};
-
 type RequestTokenResponse = {
   oauth_token: string;
   oauth_token_secret: string;
@@ -67,7 +62,7 @@ async function buildOAuthParams(
   token?: { value: string; secret: string },
 ) {
   const { randomBytes } = await import("node:crypto");
-  const preferences = getPreferenceValues<FlickrPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const oauthParams: Record<string, string> = {
     oauth_consumer_key: preferences.flickrApiKey,
     oauth_nonce: randomBytes(16).toString("hex"),
@@ -163,11 +158,11 @@ async function flickrRest<T>(
     ...signedParams,
   };
 
-  const response = await fetch(REST_URL, {
+  const url = httpMethod === "GET" ? `${REST_URL}?${toSearchParams(params).toString()}` : REST_URL;
+
+  const response = await fetch(url, {
     method: httpMethod,
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
+    headers: httpMethod === "POST" ? { "Content-Type": "application/x-www-form-urlencoded" } : undefined,
     body: httpMethod === "POST" ? toSearchParams(params).toString() : undefined,
   });
 
