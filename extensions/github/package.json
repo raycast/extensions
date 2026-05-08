@@ -376,7 +376,7 @@
       "title": "My GitHub Stats Menu Bar",
       "description": "Display your GitHub profile stats (followers, stars received, PRs, issues, commits) in the Menu Bar",
       "mode": "menu-bar",
-      "interval": "1h",
+      "interval": "15m",
       "preferences": [
         {
           "name": "useAvatarAsIcon",
@@ -386,6 +386,41 @@
           "default": true,
           "label": "Avatar",
           "title": "Menu Bar Icon"
+        },
+        {
+          "name": "notifyOnNewStars",
+          "description": "Show a badge in the menu bar title and a 'What's New' section when your repositories receive new stars",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Notify on new stars",
+          "title": "New Stars Notification"
+        },
+        {
+          "name": "refreshFrequency",
+          "description": "How often to refresh stats in the background. Lower values keep the data fresher but use more GitHub API quota.",
+          "type": "dropdown",
+          "required": false,
+          "default": "30m",
+          "title": "Refresh Frequency",
+          "data": [
+            {
+              "title": "15 minutes",
+              "value": "15m"
+            },
+            {
+              "title": "30 minutes",
+              "value": "30m"
+            },
+            {
+              "title": "1 hour",
+              "value": "1h"
+            },
+            {
+              "title": "2 hours",
+              "value": "2h"
+            }
+          ]
         },
         {
           "name": "titleMetric",
