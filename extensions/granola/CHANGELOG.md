@@ -1,6 +1,6 @@
 # Granola Changelog
 
-## [2.1.3] - {PR_MERGE_DATE}
+## [2.1.3] - 2026-05-08
 
 ### New Features
 
