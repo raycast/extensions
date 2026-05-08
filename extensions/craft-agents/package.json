@@ -21,7 +21,7 @@
     },
     {
       "name": "new-session-quick",
-      "title": "New Session (Quick)",
+      "title": "Quick New Session",
       "description": "Open a fresh Craft Agents session with no arguments, same as clicking the app's \"New Session\" menu item.",
       "mode": "no-view"
     },

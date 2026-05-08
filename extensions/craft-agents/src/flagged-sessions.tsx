@@ -1,23 +1,11 @@
 import { Action, ActionPanel, Alert, Icon, List, Toast, confirmAlert, open, showToast } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { buildAction, buildSessionLink } from "./lib/deeplink";
+import { formatRelative } from "./lib/format";
 import { logger } from "./lib/logger";
 import { getPrefs } from "./lib/preferences";
 import { listSessions } from "./lib/sessions";
 import type { SessionRecord } from "./lib/sessions.schema";
-
-function formatRelative(date: Date | undefined): string {
-  if (!date) return "";
-  const diff = Date.now() - date.getTime();
-  const m = Math.floor(diff / 60_000);
-  if (m < 1) return "just now";
-  if (m < 60) return `${m}m ago`;
-  const h = Math.floor(m / 60);
-  if (h < 24) return `${h}h ago`;
-  const d = Math.floor(h / 24);
-  if (d < 30) return `${d}d ago`;
-  return date.toLocaleDateString();
-}
 
 function subtitle(rec: SessionRecord): string {
   return rec.labels.length ? rec.labels.join(" · ") : "";
@@ -72,9 +60,7 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter flagged sessions">
-      {records.length === 0 && !isLoading ? (
-        <List.EmptyView icon={Icon.Star} title="No flagged sessions" />
-      ) : null}
+      {records.length === 0 && !isLoading ? <List.EmptyView icon={Icon.Star} title="No flagged sessions" /> : null}
       {records.map((rec) => (
         <List.Item
           key={rec.id}
@@ -85,11 +71,7 @@ export default function Command() {
           keywords={[rec.id, ...rec.labels]}
           actions={
             <ActionPanel>
-              <Action
-                title="Open in Craft Agents"
-                icon={Icon.ArrowRight}
-                onAction={() => openSession(rec.id)}
-              />
+              <Action title="Open in Craft Agents" icon={Icon.ArrowRight} onAction={() => openSession(rec.id)} />
               <Action
                 title="Unflag"
                 icon={Icon.StarDisabled}

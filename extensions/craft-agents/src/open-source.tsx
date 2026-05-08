@@ -58,11 +58,7 @@ export default function Command() {
           keywords={[rec.slug, rec.provider ?? ""].filter(Boolean)}
           actions={
             <ActionPanel>
-              <Action
-                title="Open in Craft Agents"
-                icon={Icon.ArrowRight}
-                onAction={() => openSource(rec.slug)}
-              />
+              <Action title="Open in Craft Agents" icon={Icon.ArrowRight} onAction={() => openSource(rec.slug)} />
               <Action
                 title="Trigger Oauth"
                 icon={Icon.Key}

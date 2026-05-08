@@ -4,21 +4,18 @@ import { AppError, ErrorCode } from "./errors";
 
 /**
  * Expand a leading `~` to the user's home directory, then resolve to an absolute path.
- * Rejects paths that would escape via `..` segments.
+ *
+ * The path comes from a Raycast user preference, so it is already user-controlled.
+ * `path.resolve` normalises any `..` segments, which makes traversal checks moot —
+ * we just ensure the input is non-empty and produce a canonical absolute path.
  */
 export function resolveWorkspacePath(raw: string | undefined | null): string {
   if (!raw || raw.trim() === "") {
     throw new AppError(ErrorCode.WORKSPACE_NOT_FOUND, "workspace path is not configured");
   }
-  const expanded = raw.startsWith("~") ? path.join(os.homedir(), raw.slice(1).replace(/^[/\\]/, "")) : raw;
-  const resolved = path.resolve(expanded);
-  // After resolve, there should be no `..` left; if the original contained traversal,
-  // the resolved form still points somewhere real — reject any path that resolves
-  // outside the user's home unless it's absolute from root.
-  if (resolved.split(path.sep).includes("..")) {
-    throw new AppError(ErrorCode.PATH_TRAVERSAL, `path traversal detected in workspace path: ${raw}`);
-  }
-  return resolved;
+  const trimmed = raw.trim();
+  const expanded = trimmed.startsWith("~") ? path.join(os.homedir(), trimmed.slice(1).replace(/^[/\\]/, "")) : trimmed;
+  return path.resolve(expanded);
 }
 
 export function sessionsDir(workspaceRoot: string): string {

@@ -1,11 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { z } from "zod";
 import { resolveWorkspacePath } from "./workspace";
-
-const PrefsSchema = z.object({
-  workspaceRoot: z.string().optional(),
-  globalSkillsDir: z.string().optional(),
-});
 
 export interface ResolvedPrefs {
   workspaceRoot: string;
@@ -13,14 +7,13 @@ export interface ResolvedPrefs {
 }
 
 /**
- * Read Raycast preferences, validate, and resolve `~` / paths.
+ * Read Raycast preferences and resolve `~` / paths.
  * Throws AppError if workspaceRoot is missing or unresolvable.
  */
 export function getPrefs(): ResolvedPrefs {
-  const raw = getPreferenceValues<Record<string, string>>();
-  const parsed = PrefsSchema.parse(raw);
+  const raw = getPreferenceValues<Preferences>();
   return {
-    workspaceRoot: resolveWorkspacePath(parsed.workspaceRoot),
-    globalSkillsDir: parsed.globalSkillsDir ?? "~/.agents/skills",
+    workspaceRoot: resolveWorkspacePath(raw.workspaceRoot),
+    globalSkillsDir: raw.globalSkillsDir?.trim() || "~/.agents/skills",
   };
 }

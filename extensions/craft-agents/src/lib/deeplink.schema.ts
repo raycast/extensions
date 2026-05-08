@@ -49,12 +49,5 @@ export const ActionKindSchema = z.enum([
 ]);
 export type ActionKind = z.infer<typeof ActionKindSchema>;
 
-export const CompoundRouteHostSchema = z.enum([
-  "allSessions",
-  "flagged",
-  "state",
-  "sources",
-  "settings",
-  "skills",
-]);
+export const CompoundRouteHostSchema = z.enum(["allSessions", "flagged", "state", "sources", "settings", "skills"]);
 export type CompoundRouteHost = z.infer<typeof CompoundRouteHostSchema>;

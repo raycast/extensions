@@ -49,11 +49,7 @@ export default function Command() {
           keywords={[rec.slug]}
           actions={
             <ActionPanel>
-              <Action
-                title="Open in Craft Agents"
-                icon={Icon.ArrowRight}
-                onAction={() => openSkill(rec.slug)}
-              />
+              <Action title="Open in Craft Agents" icon={Icon.ArrowRight} onAction={() => openSkill(rec.slug)} />
               <Action.CopyToClipboard title="Copy Slug" content={rec.slug} />
               <Action.CopyToClipboard title="Copy Deep Link" content={buildSkillLink(rec.slug)} />
             </ActionPanel>
