@@ -27,7 +27,7 @@
       "arguments": [
         {
           "name": "text",
-          "placeholder": "Task, date, tags, contexts, priority...",
+          "placeholder": "Task, date, #tag, @context",
           "type": "text",
           "required": true
         }
