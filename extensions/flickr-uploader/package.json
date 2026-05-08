@@ -1,0 +1,63 @@
+{
+  "name": "flickr-uploader",
+  "title": "Flickr Uploader",
+  "description": "Upload and publish single photos to Flickr with metadata, albums, and groups.",
+  "icon": "icon.png",
+  "author": "christoph",
+  "license": "MIT",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "upload-photo",
+      "title": "Upload Photo",
+      "description": "Upload a single photo to Flickr with publishing metadata.",
+      "mode": "view"
+    },
+    {
+      "name": "setup-flickr",
+      "title": "Setup Flickr",
+      "description": "Connect your Flickr account via OAuth.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "flickrApiKey",
+      "title": "Flickr API Key",
+      "description": "Your Flickr API key from the App Garden.",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "Enter your Flickr API key"
+    },
+    {
+      "name": "flickrApiSecret",
+      "title": "Flickr API Secret",
+      "description": "Your Flickr API secret from the App Garden.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Enter your Flickr API secret"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4",
+    "react": "19.0.0",
+    "react-dom": "19.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "typescript": "^5.8.3"
+  }
+}
