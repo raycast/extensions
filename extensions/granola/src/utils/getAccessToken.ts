@@ -10,7 +10,11 @@ interface LocalGranolaUserInfo {
 
 function parseMaybeJsonRecord(value: unknown): Record<string, unknown> | undefined {
   if (typeof value === "string") {
-    return JSON.parse(value) as Record<string, unknown>;
+    try {
+      return JSON.parse(value) as Record<string, unknown>;
+    } catch {
+      return undefined;
+    }
   }
 
   if (typeof value === "object" && value !== null) {
