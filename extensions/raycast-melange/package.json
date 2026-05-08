@@ -62,15 +62,13 @@
   },
   "dependencies": {
     "@raycast/api": "^1.104.15",
-    "@raycast/utils": "^2.2.4",
     "cheerio": "^1.1.2"
   },
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^24.10.1",
     "eslint": "^10.3.0",
     "prettier": "^3.8.3",
-    "typescript": "^5.9.3",
-    "typescript-eslint": "^8.59.2"
+    "typescript": "^5.9.3"
   }
 }

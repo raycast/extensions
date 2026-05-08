@@ -1,23 +1,4 @@
-import js from "@eslint/js";
-import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
+import raycast from "@raycast/eslint-config";
 
-export default [
-  {
-    ignores: ["dist/**", "node_modules/**"],
-  },
-  js.configs.recommended,
-  ...tseslint.configs.recommended,
-  {
-    files: ["src/**/*.{ts,tsx}"],
-    languageOptions: {
-      parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-      },
-    },
-    rules: {
-      "@typescript-eslint/no-explicit-any": "error",
-    },
-  },
-];
+export default defineConfig([...raycast]);

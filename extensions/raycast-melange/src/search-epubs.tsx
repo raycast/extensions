@@ -5,11 +5,6 @@ import { SearchResult, buildAbsoluteUrl, buildSearchPath, buildSlowDownloadUrl, 
 import { buildCleanFileBaseName, downloadEpub, getContainingDirectory } from "./download";
 import { RankedSearchResult, rankResultsByFuzzyMatch } from "./fuzzy";
 
-type ExtensionPreferences = {
-  annaSecretKey?: string;
-  downloadDirectory?: string;
-};
-
 const SEARCH_DEBOUNCE_MS = 200;
 const MIN_SEARCH_LENGTH = 2;
 const MAX_RESULT_PAGES = 1;
@@ -19,7 +14,7 @@ const MAX_SEARCH_CACHE_ENTRIES = 20;
 const searchPageCache = new Map<string, Promise<Awaited<ReturnType<typeof searchEpubs>>>>();
 
 export default function Command() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState("");
   const debouncedSearchText = useDebouncedValue(searchText.trim(), SEARCH_DEBOUNCE_MS);
   const [results, setResults] = useState<SearchResult[]>([]);
