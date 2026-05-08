@@ -5,6 +5,7 @@ import { homedir } from "node:os";
 import { SearchResult, getFastDownloadUrl } from "./annas";
 
 const DEFAULT_DOWNLOAD_DIRECTORY = "~/Downloads/Annas Archive";
+const DOWNLOAD_TIMEOUT_MS = 120000;
 
 export type DownloadOptions = {
   secretKey: string;
@@ -16,13 +17,7 @@ export async function downloadEpub(result: SearchResult, options: DownloadOption
   await mkdir(targetDirectory, { recursive: true });
 
   const { downloadUrl } = await getFastDownloadUrl(result.md5, options.secretKey);
-  const response = await fetch(downloadUrl);
-
-  if (!response.ok) {
-    throw new Error(`Download failed with HTTP ${response.status}.`);
-  }
-
-  const bytes = Buffer.from(await response.arrayBuffer());
+  const bytes = await fetchDownloadBytes(downloadUrl);
   if (bytes.length === 0) {
     throw new Error("Downloaded file was empty.");
   }
@@ -34,6 +29,29 @@ export async function downloadEpub(result: SearchResult, options: DownloadOption
 
   await writeFile(targetPath, bytes);
   return targetPath;
+}
+
+async function fetchDownloadBytes(downloadUrl: string): Promise<Buffer> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), DOWNLOAD_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(downloadUrl, { signal: controller.signal });
+
+    if (!response.ok) {
+      throw new Error(`Download failed with HTTP ${response.status}.`);
+    }
+
+    return Buffer.from(await response.arrayBuffer());
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Download timed out.");
+    }
+
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export function getContainingDirectory(filePath: string): string {
