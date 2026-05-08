@@ -4,6 +4,10 @@ import { FlickrAuth, PendingOAuth } from "./types";
 const AUTH_STORAGE_KEY = "flickr-auth";
 const PENDING_OAUTH_STORAGE_KEY = "pending-oauth";
 
+// Use LocalStorage for auth tokens
+// Note: Raycast's LocalStorage is stored on disk but not encrypted
+// For maximum security, only use this extension on your personal computer
+
 export async function getStoredAuth() {
   const value = await LocalStorage.getItem<string>(AUTH_STORAGE_KEY);
   return value ? (JSON.parse(value) as FlickrAuth) : undefined;
