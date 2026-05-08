@@ -62,7 +62,7 @@ async function buildOAuthParams(
   token?: { value: string; secret: string },
 ) {
   const { randomBytes } = await import("node:crypto");
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<{ flickrApiKey: string; flickrApiSecret: string }>();
   const oauthParams: Record<string, string> = {
     oauth_consumer_key: preferences.flickrApiKey,
     oauth_nonce: randomBytes(16).toString("hex"),
