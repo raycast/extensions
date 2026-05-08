@@ -1,6 +1,6 @@
 import { basename } from "path";
-import { isGroup } from "./types.ts";
-import type { Action, ActionType, Group, RootConfig } from "./types.ts";
+import { isGroup } from "./types";
+import type { Action, ActionType, Group, RootConfig } from "./types";
 
 export interface GroupDestination {
   label: string;
@@ -131,13 +131,13 @@ function looksLikePath(value: string): boolean {
   );
 }
 
-function getUrlLabel(value: string): string {
+export function getUrlLabel(value: string): string {
   try {
     const url = new URL(value);
     if (url.protocol === "raycast:") {
       return "Raycast";
     }
-    return url.hostname.replace(/^www\./, "");
+    return url.hostname.replace(/^www\./, "") || value;
   } catch {
     return value;
   }

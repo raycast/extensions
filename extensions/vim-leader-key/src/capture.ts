@@ -9,7 +9,7 @@ import {
 } from "@raycast/api";
 import { basename } from "path";
 import { ActionType } from "./types";
-import { inferActionFromText } from "./capture-utils";
+import { getUrlLabel, inferActionFromText } from "./capture-utils";
 
 export interface CaptureCandidate {
   type: Exclude<ActionType, "command">;
@@ -127,14 +127,5 @@ async function getFrontmostApplicationCandidate(): Promise<CaptureCandidate | nu
     };
   } catch {
     return null;
-  }
-}
-
-function getUrlLabel(value: string): string {
-  try {
-    const url = new URL(value);
-    return url.hostname.replace(/^www\./, "") || value;
-  } catch {
-    return value;
   }
 }
