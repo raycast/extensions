@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 
 import { Cache, getPreferenceValues } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useMemo } from "react";
 
 import { getGitHubClient } from "../api/githubClient";
 
@@ -25,7 +26,7 @@ function getCacheNamespace(token: string | null): string {
 export function useViewerStats() {
   const { github, token } = getGitHubClient();
   const { refreshFrequency } = getPreferenceValues<Preferences.MyStatsMenu>();
-  const cache = new Cache({ namespace: getCacheNamespace(token) });
+  const cache = useMemo(() => new Cache({ namespace: getCacheNamespace(token) }), [token]);
 
   const fetchFresh = async () => {
     const { viewer, rateLimit } = await github.getViewerStats({ repositoriesCount: 100 });

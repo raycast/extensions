@@ -8,6 +8,7 @@ import {
   MenuBarSection,
   MenuBarSubmenu,
 } from "./components/Menu";
+import { IssueState, PullRequestState } from "./generated/graphql";
 import { withGitHubClient } from "./helpers/withGithubClient";
 import { useStarsTracker } from "./hooks/useStarsTracker";
 import { useViewerStats } from "./hooks/useViewerStats";
@@ -26,34 +27,33 @@ function formatResetAt(resetAt: string): string {
   return `in ${formatDistanceToNowStrict(date)}`;
 }
 
-function prStateIcon(state: string): Image.ImageLike {
+function prStateIcon(state: PullRequestState): Image.ImageLike {
   switch (state) {
-    case "OPEN":
+    case PullRequestState.Open:
       return { source: "pull-request-open.svg", tintColor: Color.Green };
-    case "MERGED":
+    case PullRequestState.Merged:
       return { source: "pull-request-merged.svg", tintColor: Color.Purple };
-    case "CLOSED":
+    case PullRequestState.Closed:
       return { source: "pull-request-closed.svg", tintColor: Color.Red };
-    default:
-      return { source: "pull-request-open.svg", tintColor: Color.PrimaryText };
   }
 }
 
-function issueStateIcon(state: string): Image.ImageLike {
+function issueStateIcon(state: IssueState): Image.ImageLike {
   switch (state) {
-    case "OPEN":
+    case IssueState.Open:
       return { source: "issue-open.svg", tintColor: Color.Green };
-    case "CLOSED":
-      return { source: "issue-closed.svg", tintColor: Color.Purple };
-    default:
-      return { source: "issue-open.svg", tintColor: Color.PrimaryText };
+    case IssueState.Closed:
+      return { source: "issue-closed.svg", tintColor: Color.Red };
   }
 }
 
 function MyStatsMenu() {
   const { titleMetric, useAvatarAsIcon, notifyOnNewStars } = getPreferenceValues<Preferences.MyStatsMenu>();
   const { data, isLoading, error } = useViewerStats();
-  const { totalNewStars, perRepoNew, markAllSeen } = useStarsTracker(data?.ownedReposBreakdown, notifyOnNewStars);
+  const { totalNewStars, perRepoNew, markRepoSeen, markAllSeen } = useStarsTracker(
+    data?.ownedReposBreakdown,
+    notifyOnNewStars,
+  );
 
   const metricValue = (metric: TitleMetric): number | undefined => {
     if (!data) return undefined;
@@ -118,7 +118,7 @@ function MyStatsMenu() {
                   icon={{ source: Icon.Star, tintColor: Color.Yellow }}
                   onAction={async () => {
                     await open(`${repo.url}/stargazers`);
-                    await markAllSeen();
+                    await markRepoSeen(repo.id);
                   }}
                 />
               ))}

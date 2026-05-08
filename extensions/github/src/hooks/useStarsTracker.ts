@@ -24,6 +24,7 @@ export type StarDelta = {
 export type StarsTracker = {
   totalNewStars: number;
   perRepoNew: StarDelta[];
+  markRepoSeen: (id: string) => Promise<void>;
   markAllSeen: () => Promise<void>;
 };
 
@@ -115,9 +116,27 @@ export function useStarsTracker(repos: RepoStarInfo[] | undefined, enabled: bool
     }
   }, [repos, revalidate]);
 
+  const markRepoSeen = useCallback(
+    async (id: string) => {
+      if (!repos) return;
+      try {
+        const target = repos.find((repo) => repo.id === id);
+        if (!target) return;
+        const snapshot = (await readSnapshot()) ?? {};
+        snapshot[id] = target.stargazerCount;
+        await writeSnapshot(snapshot);
+        await revalidate();
+      } catch (error) {
+        await showFailureToast(error, { title: "Could not mark repository as seen" });
+      }
+    },
+    [repos, revalidate],
+  );
+
   return {
     totalNewStars: data?.totalNewStars ?? 0,
     perRepoNew: data?.perRepoNew ?? [],
+    markRepoSeen,
     markAllSeen,
   };
 }
