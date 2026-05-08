@@ -1,12 +1,8 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
-interface Preferences {
-  delay: string;
-}
-
 export default async function command() {
-  const { delay } = getPreferenceValues<Preferences>();
+  const { delay } = getPreferenceValues<Preferences.SendToPhotoMechanic>();
   const delaySeconds = Math.max(0.3, parseFloat(delay) || 0.7);
 
   await showToast({ style: Toast.Style.Animated, title: "Sending to Photo Mechanic…" });
