@@ -1,8 +1,8 @@
 import { MemoryInterface } from "../Interfaces";
-import { execp } from "../utils";
+import { execf } from "../utils";
 
 export const getTopRamProcess = async (): Promise<string[][]> => {
-  const output = await execp("/usr/bin/top -l 1 -o mem -n 5 -stats command,mem");
+  const output = await execf("/usr/bin/top", ["-l", "1", "-o", "mem", "-n", "5", "-stats", "command,mem"]);
   const processList = output.trim().split("\n").slice(12, 17);
   const modProcessList: string[][] = [];
 
@@ -24,21 +24,27 @@ export const getTopRamProcess = async (): Promise<string[][]> => {
 };
 
 export const getMemoryUsage = async (): Promise<MemoryInterface> => {
-  const pHwPagesize = await execp("/usr/sbin/sysctl -n hw.pagesize");
-  const hwPagesize: number = parseFloat(pHwPagesize);
-  const pMemTotal = await execp("/usr/sbin/sysctl -n hw.memsize");
-  const memTotal: number = parseFloat(pMemTotal) / 1024 / 1024;
-  const pVmPagePageableInternalCount = await execp("/usr/sbin/sysctl -n vm.page_pageable_internal_count");
-  const pVmPagePurgeableCount = await execp("/usr/sbin/sysctl -n vm.page_purgeable_count");
-  const pagesApp: number = parseFloat(pVmPagePageableInternalCount) - parseFloat(pVmPagePurgeableCount);
-  const pPagesWired = await execp("/usr/bin/vm_stat | awk '/ wired/ { print $4 }'");
-  const pagesWired: number = parseFloat(pPagesWired);
-  const pPagesCompressed = await execp("/usr/bin/vm_stat | awk '/ occupied/ { printf $5 }'");
-  const pagesCompressed: number = parseFloat(pPagesCompressed) || 0;
+  const [pHwPagesize, pMemTotal, pVmPagePageableInternalCount, pVmPagePurgeableCount, vmStatOutput] = await Promise.all(
+    [
+      execf("/usr/sbin/sysctl", ["-n", "hw.pagesize"]),
+      execf("/usr/sbin/sysctl", ["-n", "hw.memsize"]),
+      execf("/usr/sbin/sysctl", ["-n", "vm.page_pageable_internal_count"]),
+      execf("/usr/sbin/sysctl", ["-n", "vm.page_purgeable_count"]),
+      execf("/usr/bin/vm_stat"),
+    ],
+  );
+
+  const hwPagesize = parseFloat(pHwPagesize);
+  const memTotal = parseFloat(pMemTotal) / 1024 / 1024;
+  const pagesApp = parseFloat(pVmPagePageableInternalCount) - parseFloat(pVmPagePurgeableCount);
+
+  const vmLines = vmStatOutput.split("\n");
+  const wiredLine = vmLines.find((l) => l.includes("wired"));
+  const pagesWired = parseFloat(wiredLine?.match(/(\d+)/g)?.pop() ?? "0");
+  const compressedLine = vmLines.find((l) => l.includes("occupied"));
+  const pagesCompressed = parseFloat(compressedLine?.match(/(\d+)/g)?.pop() ?? "0");
+
   const memUsed = ((pagesApp + pagesWired + pagesCompressed) * hwPagesize) / 1024 / 1024;
 
-  return {
-    memTotal: memTotal,
-    memUsed: memUsed,
-  };
+  return { memTotal, memUsed };
 };

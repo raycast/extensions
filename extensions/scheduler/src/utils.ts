@@ -186,7 +186,6 @@ export function createRaycastCommand(deeplink: string, runInBackground?: boolean
   return {
     deeplink,
     type: runInBackground ? "background" : "user-initiated",
-    arguments: null,
   };
 }
 

@@ -26,34 +26,36 @@ export class Easydict {
   static repo = "Raycast-Easydict";
 
   // * NOTE: this is new version info, don't use it directly. Use getCurrentStoredVersionInfo() instead.
-  version = "2.11.0";
+  version = "2.11.2";
   buildNumber = 30;
-  versionDate = "2025-07-01";
+  versionDate = "2026-04-12";
   isNeedPrompt = true;
   hasPrompted = false; // * always default false, only show once, then should be set to true.
 
   releaseMarkdown = `
 ## [v${this.version}] - ${this.versionDate}
 
-### ✨ 新功能
-
-- 添加 DeepLX 翻译支持
-- 添加 Gemini 翻译支持
-
 ### 💎 改进
 
-- 更新依赖并优化稳定性
+- 移除 \`crypto-js\` 和 \`qs\` 依赖，简化火山翻译
+- 用 \`nano-staged\` 替换 \`lint-staged\`
+- 更新依赖，提升稳定性
+
+### 🐞 修复
+
+- 支持 OpenAI 推理模型的 \`max_completion_tokens\` 参数
 
 ---
 
-### ✨ New Features
-
-- Add DeepLX support
-- Add support for Gemini translation
-
 ### 💎 Improvement
 
+- Remove \`crypto-js\` and \`qs\` dependencies, and simplify Volcano translation
+- Replace \`lint-staged\` with \`nano-staged\`
 - Update dependencies and improve stability
+
+### 🐞 Fixed
+
+- Support \`max_completion_tokens\` for OpenAI reasoning models
 `;
   getRepoUrl() {
     return `${githubUrl}/${Easydict.author}/${Easydict.repo}`;

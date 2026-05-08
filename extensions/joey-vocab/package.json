@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "joey-vocab",
+  "title": "Joey Vocab",
+  "description": "Quickly add vocabulary cards to your Joey decks",
+  "icon": "extension-icon.png",
+  "author": "tai",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "add-card",
+      "title": "Search Word",
+      "description": "Search and add vocabulary cards to your Joey deck",
+      "mode": "view"
+    },
+    {
+      "name": "search-selected-word",
+      "title": "Search Selected Word",
+      "description": "Look up the selected word in Joey dictionary",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "email",
+      "title": "Email",
+      "description": "Your Joey account email",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Your Joey account password",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.3",
+    "@raycast/utils": "^2.2.3",
+    "@supabase/supabase-js": "2.83.0",
+    "ts-fsrs": "^4.6.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.14.1",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepare": "husky",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix --max-warnings 0",
+      "prettier --write"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

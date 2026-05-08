@@ -9,6 +9,7 @@ import {
   Image,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
+import { useMemo } from "react";
 import {
   setDesktopWallpaper,
   downloadWallpaper,
@@ -18,10 +19,11 @@ import {
 } from "./utils";
 
 export default function Command() {
+  const apiUrl = useMemo(() => `${API_TRIPLE_URL}?cacheBust=${Date.now()}`, []);
   const { isLoading, data } = useFetch<{
     today: Wallpaper;
     random: Wallpaper[];
-  }>(API_TRIPLE_URL, {
+  }>(apiUrl, {
     onError: (error) => {
       showToast({
         style: Toast.Style.Failure,
@@ -69,7 +71,7 @@ ${wallpaper.description || ""}
                       title: "Setting wallpaper...",
                     });
                     try {
-                      await setDesktopWallpaper(wallpaper.url);
+                      await setDesktopWallpaper(wallpaper.url, wallpaper.id);
                       toast.style = Toast.Style.Success;
                       toast.title = "Wallpaper set successfully";
                     } catch (error) {
@@ -94,6 +96,7 @@ ${wallpaper.description || ""}
                         const path = await downloadWallpaper(
                           wallpaper.url,
                           wallpaper.name,
+                          wallpaper.id,
                         );
                         toast.style = Toast.Style.Success;
                         toast.title = "Wallpaper downloaded";

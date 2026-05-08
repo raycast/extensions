@@ -1,5 +1,9 @@
 # Laby.net Changelog
 
+## [Maintenance] - 2026-03-16
+
+- Update axios to ^0.30.3 to address CVE for denial of service via `__proto__` key in `mergeConfig`
+
 ## [API Adjustments] - 2024-10-14
 - Adjust models to match the latest API changes
 - Add icon and link to profile badges

@@ -1,0 +1,388 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "portfolio-tracker",
+  "title": "Portfolio Tracker",
+  "description": "Track value of your Stocks, ETFs, Properties, Cash, Debt and Crypto with automatic price updates over time to see your net worth",
+  "icon": "extension-icon.png",
+  "author": "filipawaits",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "portfolio",
+      "title": "Portfolio Tracker",
+      "description": "Track your investment portfolio and net worth across multiple accounts",
+      "mode": "view"
+    },
+    {
+      "name": "search-investments",
+      "title": "Search Investments",
+      "subtitle": "Portfolio Tracker",
+      "description": "Search for stocks ETFs, and funds to add to your portfolio",
+      "mode": "view"
+    },
+    {
+      "name": "fire",
+      "title": "FIRE Dashboard",
+      "subtitle": "Portfolio Tracker",
+      "description": "Financial Independence, Retire Early — track your progress to financial freedom",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-portfolio-summary",
+      "title": "Get Portfolio Summary",
+      "description": "Returns a complete overview of the user's investment portfolio including all accounts, positions, asset type allocation, currencies held, and position counts. Use this to answer questions about portfolio composition, holdings, and asset allocation. This tool takes no arguments — call it with an empty input {}."
+    },
+    {
+      "name": "get-account-details",
+      "title": "Get Account Details",
+      "description": "Returns detailed information about a specific portfolio account identified by name. Includes all positions within that account with their full details. Use when the user asks about a specific account."
+    },
+    {
+      "name": "get-position-details",
+      "title": "Get Position Details",
+      "description": "Returns detailed information about a specific position identified by name or Yahoo Finance symbol. Searches across all accounts. Use when the user asks about a specific holding or investment."
+    },
+    {
+      "name": "get-debt-summary",
+      "title": "Get Debt Summary",
+      "description": "Returns a focused summary of all debt positions including balances, APR, monthly repayments, and repayment status. Use when the user asks about their debts, total debt, or repayment progress. This tool takes no arguments — call it with an empty input {}."
+    },
+    {
+      "name": "get-fire-projection",
+      "title": "Get FIRE Projection",
+      "description": "Returns the user's current FIRE baseline: settings, contributions, projection timeline, Coast FIRE analysis, and lump sum solver table. Use ONLY for read-only questions about the current state — 'When will I reach FIRE?', 'What is my FIRE number?', 'Can I coast now?', 'How much to retire 3 years earlier?'. Do NOT use this tool if the user mentions any change, addition, increase, decrease, or hypothetical ('if I add', 'what if', 'if I contributed', 'if growth drops') — use simulate-fire-scenario instead. This tool takes no arguments — call it with an empty input {}."
+    },
+    {
+      "name": "simulate-fire-scenario",
+      "title": "Simulate FIRE Scenario",
+      "description": "Runs a custom FIRE projection with overrides and compares it against the user's current baseline. Use this tool whenever the user mentions ANY change or hypothetical — 'if I add £4000/month', 'what if I increase contributions', 'if growth drops to 5%', 'if I invested a lump sum', 'if I retired at 55', 'if I stop contributing at 45'. This tool self-loads the baseline, so you do NOT need to call get-fire-projection first. Available overrides: monthlyContribution (replace total), additionalMonthlyContribution (add to current), currentPortfolioValue, targetValue, annualGrowthRate, annualInflation, withdrawalRate, yearOfBirth, coastFromAge, targetRetirementAge."
+    }
+  ],
+  "ai": {
+    "instructions": "Portfolio Tracker is a personal finance extension that tracks stocks, ETFs, properties, cash, and debt across multiple accounts. All data is stored locally — there are no external accounts or servers. Prices refresh daily via Yahoo Finance.\n\nTOOL CALLING RULES:\n- Always call ONE tool at a time and wait for its result before deciding whether another tool call is needed.\n- Never chain tool calls speculatively. Read the result of the first tool before calling a second.\n- This is critical for compatibility with all AI models.\n\nFIRE MATH (all formulas — use these directly, do not re-derive):\n  Real growth rate:        r = (nominalGrowthRate - inflationRate) / 100\n  FIRE Number:             FN = annualSpending × (100 / withdrawalRate)\n  Year-by-year growth:     V(n) = V(n-1) × (1 + r) + C × (1 + r/2)\n    where C = annualContribution (monthly × 12), r/2 = half-year contribution approximation\n  Time to FIRE (approx):   n ≈ log((FN × r + C) / (P × r + C)) / log(1 + r)\n  Coast FIRE balance:      Coast_FN = FN / (1 + r)^yearsToRetirement\n  Coast retirement age:    n_coast = log(FN / P) / log(1 + r); retireYear = currentYear + n_coast\n  Lump sum solver:         P_required = (FN - C×(1+r/2)×((1+r)^N-1)/r) / (1+r)^N; Lump_Sum = P_required - P_current  (N = targetYear - currentYear)\n  Safe withdrawal income:  annualIncome = FN × (withdrawalRate / 100)\n\nCOAST FIRE QUESTIONS — two common forms:\n  Q1 'If I stop contributing now, when can I retire?'\n     → n_coast = log(FN / P) / log(1 + r); retirementYear = currentYear + n_coast\n  Q2 'When can I start coasting to retire at age/year T?'\n     → requiredCoastBalance = FN / (1 + r)^(T - currentYear)\n     → Find first year where V(n) with contributions >= requiredCoastBalance using Formula V(n)\n\nTOOL ROUTING RULE:\n- get-fire-projection: ONLY for read-only baseline questions (current state, Coast FIRE, lump sum table). No inputs.\n- simulate-fire-scenario: ANY question involving a change or hypothetical (contributions, growth rate, lump sum, coast age, retirement age). It loads the baseline itself — do NOT call get-fire-projection first.\nWhen in doubt, prefer simulate-fire-scenario.\n\nOther rules:\n- Portfolio values from tools may not reflect live market prices (cached daily). Note this when discussing exact values.\n- Debt balances are subtracted from portfolio value to produce net worth.\n- Property positions use UK HPI data for appreciation.\n- Holdings in different currencies are converted to the base currency (default GBP) using live FX rates.\n- SIPP/pension access age is configurable (UK default: 57).",
+    "evals": [
+      {
+        "input": "@portfolio-tracker If I stop contributing today, when could I retire?",
+        "mocks": {
+          "get-fire-projection": "═══════════════════════════════════════════════════════\nMATHEMATICAL REFERENCE (use these for all calculations)\n═══════════════════════════════════════════════════════\n\nCORE FORMULAS:\n\n  1. Real Growth Rate:\n     r = (nominalGrowthRate - inflationRate) / 100\n     r = (7.00% - 2.50%) / 100\n     r = 0.045000  (4.50% real return)\n\n  6. Coast FIRE Number (portfolio needed to reach FN with zero contributions):\n     Coast_FIRE_Number(n) = FN / (1 + r)^n\n\n  7. Coast FIRE retirement age (if coasting from NOW with current portfolio P):\n     n_coast = log(FN / P) / log(1 + r)\n     retirementYear = currentYear + n_coast\n\nCURRENT VALUES (substitute into formulas above):\n  P  (current portfolio)   = £200,000.00\n  FN (FIRE Number / target)= £750,000.00\n  r  (real growth rate)    = 0.045000\n  C  (annual contribution) = £18,000.00 (£1,500.00/month × 12)\n  currentYear              = 2025\n  yearOfBirth              = 1990\n  withdrawalRate           = 4.00%\n\nFIRE PROGRESS:\n  Progress to FIRE: 26.7%  (£200,000.00 of £750,000.00)\n  Remaining gap:    £550,000.00\n\nFIRE PROJECTION:\n  Current Portfolio Value: £200,000.00\n  Target Value:            £750,000.00\n  FIRE Year:               2038\n  FIRE Age:                48\n  Calendar Days to FIRE:   4,745\n  Working Days to FIRE:    3,150\n\nCOAST FIRE ANALYSIS:\n─────────────────────\nQ1 — If I stop contributing TODAY, when can I retire?\n  Formula: n = log(FN / P) / log(1 + r)\n           n = log(£750,000.00 / £200,000.00) / log(1 + 0.045000)\n           n = 30.57 years from now\n  → Coast retirement year: 2056\n  → Coast retirement age:  66\n  → This is 18 year(s) LATER than your current FIRE year (2038).\n    Coasting now means trading monthly contributions for working a bit longer."
+        },
+        "expected": [
+          {
+            "callsTool": "get-fire-projection"
+          },
+          {
+            "includes": "2056"
+          },
+          {
+            "includes": "66"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker When can I start coasting if I want to retire at 55?",
+        "mocks": {
+          "get-fire-projection": "CURRENT VALUES (substitute into formulas above):\n  P  (current portfolio)   = £200,000.00\n  FN (FIRE Number / target)= £750,000.00\n  r  (real growth rate)    = 0.045000\n  C  (annual contribution) = £18,000.00 (£1,500.00/month × 12)\n  currentYear              = 2025\n  yearOfBirth              = 1990\n\nCOAST FIRE ANALYSIS:\n─────────────────────\nQ2 — When can I start coasting to retire at age 48 (2038)?\n  Formula: Required_Coast_Balance = FN / (1 + r)^n\n           Required_Coast_Balance = £750,000.00 / (1 + 0.045000)^13\n           Required_Coast_Balance = £426,508.32\n\n  → You can start coasting in: 2033 (at age 43)\n  → That is 8 year(s) from now.\n  → You could enjoy 5 year(s) of coast mode before full FIRE.\n  Current gap to Coast FIRE Number: £226,508.32\n  (46.9% of the way to Coast FIRE)\n\nQ2b — Coast FIRE balance required for common retirement ages:\n  Retire at 55 (2045): need £312,448.17 — 64.0% there (gap: £112,448.17)\n  Retire at 57 (2047): need £286,047.22 — 69.9% there (gap: £86,047.22)\n  Retire at 60 (2050): need £247,831.44 — 80.7% there (gap: £47,831.44)\n  Retire at 65 (2055): need £198,272.10 — ✅ already reached!"
+        },
+        "expected": [
+          {
+            "callsTool": "get-fire-projection"
+          },
+          {
+            "includes": "312,448"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker What if I stop contributing at age 45 and coast to retirement?",
+        "mocks": {
+          "simulate-fire-scenario": "FIRE What-If Scenario Comparison\n================================\n\nFORMULAS USED:\n  Real rate: r = (7 - 2.5) / 100 = 0.045000\n  Year-by-year: V(n) = V(n-1) × (1 + r) + C × (1 + r/2)\n    where C = annual contribution = £18,000.00/year\n  Coast FIRE balance: Coast_Balance = FN / (1 + r)^yearsToRetirement\n\nCOAST FIRE SCENARIO:\n  Stop contributing at age: 45 (year 2035)\n  Portfolio at coast start: £368,124.50\n  Formula: n = log(FN / V_coast) / log(1 + r)\n           n = log(£750,000.00 / £368,124.50) / log(1 + 0.045000)\n           n = 16.41 years from coast start\n  → Coast FIRE year: 2051\n  → Coast FIRE age:  61\n\nChanges Applied:\n  • Coast Mode: stop contributing at age 45\n\nBaseline (Current Settings):\n  Monthly Contributions: £1,500.00\n  Annual Contributions: £18,000.00\n  Real Growth Rate: 4.50%\n  FIRE Year: 2038\n  FIRE Age: 48\n  Days to FIRE: 4,745\n\nImpact:\n  FIRE reached 13 year(s) LATER (age 61 vs 48).\n  Coasting from age 45 delays retirement by 13 years compared to continuing contributions."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "simulate-fire-scenario",
+              "arguments": {
+                "coastFromAge": 45
+              }
+            }
+          },
+          {
+            "includes": "2051"
+          },
+          {
+            "includes": "61"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker What if I increase my contributions by £500 per month?",
+        "mocks": {
+          "simulate-fire-scenario": "FIRE What-If Scenario Comparison\n================================\n\nFORMULAS USED:\n  Real rate: r = (7 - 2.5) / 100 = 0.045000\n  Year-by-year: V(n) = V(n-1) × (1 + r) + C × (1 + r/2)\n    where C = annual contribution = £24,000.00/year\n\nChanges Applied:\n  • Monthly Contributions: £1,500.00 → £2,000.00\n\nBaseline (Current Settings):\n  Monthly Contributions: £1,500.00\n  Annual Contributions: £18,000.00\n  Real Growth Rate: 4.50%\n  FIRE Year: 2038\n  FIRE Age: 48\n  Days to FIRE: 4,745\n\nScenario (With Changes):\n  Monthly Contributions: £2,000.00\n  Annual Contributions: £24,000.00\n  Real Growth Rate: 4.50%\n  FIRE Year: 2036\n  FIRE Age: 46\n  Days to FIRE: 3,832\n\nImpact:\n  FIRE reached 2 year(s) EARLIER (age 46 vs 48).\n  913 fewer calendar days to FIRE."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "simulate-fire-scenario",
+              "arguments": {
+                "additionalMonthlyContribution": 500
+              }
+            }
+          },
+          {
+            "includes": "EARLIER"
+          },
+          {
+            "includes": "2036"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker What if my growth rate drops to 5%?",
+        "mocks": {
+          "simulate-fire-scenario": "FIRE What-If Scenario Comparison\n================================\n\nFORMULAS USED:\n  Real rate: r = (5 - 2.5) / 100 = 0.025000\n  Year-by-year: V(n) = V(n-1) × (1 + r) + C × (1 + r/2)\n    where C = annual contribution = £18,000.00/year\n\nChanges Applied:\n  • Growth Rate: 7.00% → 5.00%\n\nBaseline (Current Settings):\n  Real Growth Rate: 4.50%\n  FIRE Year: 2038\n  FIRE Age: 48\n\nScenario (With Changes):\n  Real Growth Rate: 2.50%\n  FIRE Year: 2044\n  FIRE Age: 54\n\nImpact:\n  FIRE reached 6 year(s) LATER (age 54 vs 48)."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "simulate-fire-scenario",
+              "arguments": {
+                "annualGrowthRate": 5
+              }
+            }
+          },
+          {
+            "includes": "LATER"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker When will I reach FIRE?",
+        "mocks": {
+          "get-fire-projection": "CURRENT VALUES (substitute into formulas above):\n  P  (current portfolio)   = £200,000.00\n  FN (FIRE Number / target)= £750,000.00\n  r  (real growth rate)    = 0.045000\n  C  (annual contribution) = £18,000.00 (£1,500.00/month × 12)\n  currentYear              = 2025\n  yearOfBirth              = 1990\n\nFIRE SETTINGS:\n  Target (FIRE Number):       £750,000.00\n  Withdrawal Rate:            4.00%\n  Annual Growth Rate (Nominal):7.00%\n  Annual Inflation:           2.50%\n  Real Growth Rate:           4.50%\n  Year of Birth:              1990\n\nCONTRIBUTIONS:\n  Total Monthly:  £1,500.00\n  Total Annual:   £18,000.00\n\nFIRE PROJECTION:\n  Current Portfolio Value: £200,000.00\n  Target Value:            £750,000.00\n  FIRE Year:               2038\n  FIRE Age:                48\n  Calendar Days to FIRE:   4,745\n  Working Days to FIRE:    3,150"
+        },
+        "expected": [
+          {
+            "callsTool": "get-fire-projection"
+          },
+          {
+            "includes": "2038"
+          },
+          {
+            "includes": "48"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker How much annual income would my FIRE number generate?",
+        "mocks": {
+          "get-fire-projection": "MATHEMATICAL REFERENCE (use these for all calculations)\n\n  9. Safe withdrawal income check:\n     Annual_Income = FIRE_Number × (withdrawalRate / 100)\n     At current FIRE Number: £30,000.00/year = £2,500.00/month\n\nCURRENT VALUES (substitute into formulas above):\n  P  (current portfolio)   = £200,000.00\n  FN (FIRE Number / target)= £750,000.00\n  r  (real growth rate)    = 0.045000\n  withdrawalRate           = 4.00%\n\nFIRE SETTINGS:\n  Target (FIRE Number):       £750,000.00\n  Withdrawal Rate:            4.00%\n\nFIRE PROJECTION:\n  FIRE Year:               2038\n  FIRE Age:                48"
+        },
+        "expected": [
+          {
+            "callsTool": "get-fire-projection"
+          },
+          {
+            "includes": "30,000"
+          },
+          {
+            "includes": "2,500"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker How much would I need to invest today to retire 3 years earlier?",
+        "mocks": {
+          "get-fire-projection": "LUMP SUM SOLVER — capital needed today to retire N years earlier:\n──────────────────────────────────────────────────────────────────\nFormula: P_required = [ FN - C×(1+r/2)×((1+r)^N - 1)/r ] / (1+r)^N\n         Lump_Sum = P_required - P_current (£200,000.00)\n         FN = £750,000.00, r = 0.045000, C = £18,000.00/year\n\n  Retire 1 year(s) earlier (2037, age 47): invest £33,492.18 today\n  Retire 2 year(s) earlier (2036, age 46): invest £69,768.44 today\n  Retire 3 year(s) earlier (2035, age 45): invest £109,021.67 today\n  Retire 4 year(s) earlier (2034, age 44): invest £151,472.09 today\n  Retire 5 year(s) earlier (2033, age 43): invest £197,369.82 today\n\n  To use this for a specific target year T:\n    N = T - currentYear\n    compoundFactor = (1 + r)^N\n    contribFV = C × (1 + r/2) × (compoundFactor - 1) / r\n    P_required = (FN - contribFV) / compoundFactor\n    Lump_Sum = P_required - P_current\n\nFIRE PROJECTION:\n  Current Portfolio Value: £200,000.00\n  Target Value:            £750,000.00\n  FIRE Year:               2038\n  FIRE Age:                48"
+        },
+        "expected": [
+          {
+            "callsTool": "get-fire-projection"
+          },
+          {
+            "includes": "109,021"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker What's in my portfolio?",
+        "mocks": {
+          "get-portfolio-summary": "Portfolio Overview: 3 account(s), 7 position(s)\nCurrencies held: GBP, USD\n\nAsset Allocation:\n  Stock: 2 position(s) — AAPL, MSFT\n  ETF: 2 position(s) — VUSA.L, VWRL.L\n  Cash: 1 position(s) — GBP-CASH\n  Mortgage Property: 1 position(s) — PROPERTY\n  Credit Card: 1 position(s) — AMEX\n\nAccounts & Holdings:\nAccount: Vanguard ISA (ISA) — 3 position(s)\n  - Vanguard S&P 500 (VUSA.L) | Type: ETF | Units: 150 | Currency: GBP\n  - Vanguard All-World (VWRL.L) | Type: ETF | Units: 80 | Currency: GBP\n  - GBP Cash (GBP-CASH) | Type: Cash | Units: 5000 | Currency: GBP\n\nAccount: Trading 212 (Brokerage) — 2 position(s)\n  - Apple Inc. (AAPL) | Type: Stock | Units: 10 | Currency: USD\n  - Microsoft (MSFT) | Type: Stock | Units: 5 | Currency: USD"
+        },
+        "expected": [
+          {
+            "callsTool": "get-portfolio-summary"
+          },
+          {
+            "includes": "Vanguard"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker What's my current asset allocation?",
+        "mocks": {
+          "get-portfolio-summary": "Portfolio Overview: 2 account(s), 5 position(s)\nCurrencies held: GBP, USD\n\nAsset Allocation:\n  Stock: 2 position(s) — AAPL, MSFT\n  ETF: 2 position(s) — VUSA.L, VWRL.L\n  Cash: 1 position(s) — GBP-CASH\n\nAccounts & Holdings:\nAccount: ISA (ISA) — 3 position(s)\nAccount: Brokerage (Brokerage) — 2 position(s)"
+        },
+        "expected": [
+          {
+            "callsTool": "get-portfolio-summary"
+          },
+          {
+            "includes": "Stock"
+          },
+          {
+            "includes": "ETF"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker How many units of VUSA do I have?",
+        "mocks": {
+          "get-position-details": "Position Details for \"Vanguard S&P 500\"\n══════════════════════════════════════════════════\n\nName: Vanguard S&P 500\nSymbol: VUSA.L\nType: ETF\nAccount: Vanguard ISA (ISA)\nCurrency: GBP\nUnits: 150"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-position-details",
+              "arguments": {
+                "query": {
+                  "includes": "VUSA"
+                }
+              }
+            }
+          },
+          {
+            "includes": "150"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker What's in my ISA?",
+        "mocks": {
+          "get-account-details": "Account: Vanguard ISA (ISA) — 3 position(s)\n  - Vanguard S&P 500 (VUSA.L) | Type: ETF | Units: 150 | Currency: GBP\n  - Vanguard All-World (VWRL.L) | Type: ETF | Units: 80 | Currency: GBP\n  - GBP Cash (GBP-CASH) | Type: Cash | Units: 5000 | Currency: GBP\n\n  Total positions: 3\n  Currencies: GBP"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-account-details",
+              "arguments": {
+                "accountName": {
+                  "includes": "ISA"
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker How much debt do I have?",
+        "mocks": {
+          "get-debt-summary": "Debt Summary\n============\n\nTotal Debt Positions: 2\n  Active: 2\n  Paid Off: 0\n  Archived: 0\n\nTotal Active Debt Balance: £8,500.00\nTotal Monthly Repayments: £350.00\nTotal Annual Repayments: £4,200.00\n\nActive Debts:\n  Credit Card (Credit Card)\n    Account: Debt\n    Balance: £3,500.00\n    APR: 22.90%\n    Monthly Repayment: £150.00\n\n  Car Loan (Auto Loan)\n    Account: Debt\n    Balance: £5,000.00\n    APR: 6.50%\n    Monthly Repayment: £200.00"
+        },
+        "expected": [
+          {
+            "callsTool": "get-debt-summary"
+          },
+          {
+            "includes": "8,500"
+          }
+        ]
+      },
+      {
+        "input": "@portfolio-tracker What if I increase my contributions by £200 per month?",
+        "mocks": {
+          "simulate-fire-scenario": "FIRE What-If Scenario Comparison\n================================\n\nFORMULAS USED:\n  Real rate: r = (7 - 2.5) / 100 = 0.045000\n  Year-by-year: V(n) = V(n-1) × (1 + r) + C × (1 + r/2)\n    where C = annual contribution = £20,400.00/year\n\nChanges Applied:\n  • Monthly Contributions: £1,500.00 → £1,700.00\n\nBaseline (Current Settings):\n  FIRE Year: 2038\n  FIRE Age: 48\n  Days to FIRE: 4,745\n\nScenario (With Changes):\n  FIRE Year: 2037\n  FIRE Age: 47\n  Days to FIRE: 4,380\n\nImpact:\n  FIRE reached 1 year(s) EARLIER (age 47 vs 48).\n  365 fewer calendar days to FIRE."
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "simulate-fire-scenario",
+              "arguments": {
+                "additionalMonthlyContribution": 200
+              }
+            }
+          },
+          {
+            "includes": "EARLIER"
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "baseCurrency",
+      "type": "dropdown",
+      "required": true,
+      "title": "Base Currency",
+      "description": "Currency used to display total portfolio value. All holdings will be converted to this currency.",
+      "default": "GBP",
+      "data": [
+        {
+          "title": "GBP (£)",
+          "value": "GBP"
+        },
+        {
+          "title": "USD ($)",
+          "value": "USD"
+        },
+        {
+          "title": "EUR (€)",
+          "value": "EUR"
+        },
+        {
+          "title": "CHF (Fr)",
+          "value": "CHF"
+        },
+        {
+          "title": "JPY (¥)",
+          "value": "JPY"
+        },
+        {
+          "title": "CAD (C$)",
+          "value": "CAD"
+        },
+        {
+          "title": "AUD (A$)",
+          "value": "AUD"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "@raycast/utils": "^1.17.0",
+    "yahoo-finance2": "^3.13.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/jest": "^29.5.14",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "ts-jest": "^29.3.4",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "lint:eslint": "eslint src/",
+    "lint:prettier": "prettier --check \"src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit",
+    "test": "jest --verbose",
+    "test:watch": "jest --watch",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

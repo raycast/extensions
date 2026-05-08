@@ -1,0 +1,3 @@
+node_modules/
+.claude/
+raycast-env.d.ts

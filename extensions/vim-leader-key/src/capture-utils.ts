@@ -1,6 +1,11 @@
 import { basename } from "path";
-import { isGroup } from "./types";
-import type { Action, ActionType, Group, RootConfig } from "./types";
+import type {
+  Action,
+  ActionOrGroup,
+  ActionType,
+  Group,
+  RootConfig,
+} from "./types";
 
 export interface GroupDestination {
   label: string;
@@ -39,6 +44,10 @@ export function flattenGroupDestinations(
   config: RootConfig,
 ): GroupDestination[] {
   const destinations: GroupDestination[] = [{ label: "Root", path: [] }];
+
+  function isGroup(item: ActionOrGroup): item is Group {
+    return item.type === "group";
+  }
 
   function visit(group: RootConfig | Group, path: string[], labels: string[]) {
     for (const item of group.actions) {

@@ -1,8 +1,9 @@
 import { Clipboard, showToast, Toast, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
+import { outputResult } from "./utils";
 
 export default async function Command() {
-  const { preserveParagraphs } = getPreferenceValues<Preferences.RemoveLineBreaks>();
+  const { preserveParagraphs } = getPreferenceValues<{ preserveParagraphs: boolean }>();
 
   try {
     const text = await Clipboard.readText();
@@ -26,12 +27,7 @@ export default async function Command() {
     // Normalize multiple spaces into single space
     processed = processed.replace(/[ \t\r\f\v]+/g, " ").trim();
 
-    await Clipboard.copy(processed);
-
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Line breaks removed",
-    });
+    await outputResult(processed, "Line breaks removed");
   } catch (error) {
     await showFailureToast(error, { title: "Failed to process clipboard" });
   }

@@ -63,6 +63,14 @@ export class PremiumFeatureError extends ManuallyThrownError {
     this.name = "PremiumFeatureError";
   }
 }
+
+export class InvalidSessionTokenError extends ManuallyThrownError {
+  constructor(message?: string, stack?: string) {
+    super(message ?? "Invalid session token", stack);
+    this.name = "InvalidSessionTokenError";
+  }
+}
+
 export class SendNeedsPasswordError extends ManuallyThrownError {
   constructor(message?: string, stack?: string) {
     super(message ?? "This Send has a is protected by a password", stack);
@@ -117,6 +125,7 @@ export function Err<E = Error>(error: E): Failure<E> {
 }
 
 export function tryCatch<T, E = Error>(fn: () => T): Result<T, E>;
+export function tryCatch<T, E = Error>(fn: () => Promise<T>): Promise<Result<T, E>>;
 export function tryCatch<T, E = Error>(promise: Promise<T>): Promise<Result<T, E>>;
 /**
  * Executes a function or a promise safely inside a try/catch and

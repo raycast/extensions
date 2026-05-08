@@ -1,5 +1,14 @@
 # Ente Auth Changelog
 
+## [Fix spaces in export path] - 2026-03-09
+
+- Fixed issue with spaces in export path causing export to fail
+
+## [Fix import edge cases] - 2026-03-05
+
+- Fixed cases when ente auth added dashes and plus signs into secret (so far it wasn't parsing correctly)
+- Fixed hiding ente auth entries that were trashed
+
 ## [Fix import deleting export file] - 2026-02-01
 
 - Fixed import command deleting the export file before re-exporting, causing ENOENT if export fails

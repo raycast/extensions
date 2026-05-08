@@ -34,6 +34,7 @@ export class State {
   public attributes: Record<string, any> = {};
   public last_updated = "";
   public last_changed = "";
+  public area_name?: string;
 }
 
 export interface HomeAssistantOptions {
@@ -41,6 +42,7 @@ export interface HomeAssistantOptions {
   wifiSSIDs?: string[];
   usePing?: boolean;
   preferCompanionApp?: boolean;
+  customHeaders?: Record<string, string>;
 }
 
 export class HomeAssistant {
@@ -53,6 +55,7 @@ export class HomeAssistant {
   private usePing = true;
   private messageSubscription?: object | null;
   public preferCompanionApp = false;
+  public customHeaders: Record<string, string> | undefined;
 
   constructor(url: string, token: string, ignoreCerts: boolean, options: HomeAssistantOptions | undefined = undefined) {
     this.token = token;
@@ -62,6 +65,7 @@ export class HomeAssistant {
     this.usePing = options?.usePing ?? true;
     this._ignoreCerts = ignoreCerts;
     this.preferCompanionApp = options?.preferCompanionApp === undefined ? false : options.preferCompanionApp;
+    this.customHeaders = options?.customHeaders;
   }
 
   private httpsAgent(url: string): Agent | undefined {
@@ -189,6 +193,7 @@ export class HomeAssistant {
         agent: this.httpsAgent(fullUrl),
         method: "GET",
         headers: {
+          ...this.customHeaders,
           "Content-Type": "application/json",
           Authorization: `Bearer ${this.token}`,
         },
@@ -211,6 +216,7 @@ export class HomeAssistant {
       agent: this.httpsAgent(fullUrl),
       method: "POST",
       headers: {
+        ...this.customHeaders,
         "Content-Type": "application/json",
         Authorization: `Bearer ${this.token}`,
       },
@@ -394,6 +400,7 @@ export class HomeAssistant {
     const response = await fetch(fullUrl, {
       method: "GET",
       headers: {
+        ...this.customHeaders,
         "Content-Type": "application/json",
         Authorization: `Bearer ${this.token}`,
       },

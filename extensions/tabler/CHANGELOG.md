@@ -1,5 +1,10 @@
 # tabler Changelog
 
+## [Add Missing Action Shortcuts] - 2026-05-08
+
+- Add keyboard shortcuts for copying outline SVGs and HTML chars
+- Add Windows equivalents for custom Command-based shortcuts
+
 ## [Fix Pagination & Add Search] - 2025-10-15
 
 - Fixed pagination issue where only icons starting with 'A' were displayed

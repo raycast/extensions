@@ -2,7 +2,7 @@ import { environment, getPreferenceValues } from "@raycast/api";
 
 const SIGNATURE = "Created with <a href='https://raycast.com'>Raycast</a>";
 
-const preferences: Preferences.CreateEvent = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 export function roundUpTime(date = new Date(), roundMins = 15) {
   const ms = 1000 * 60 * roundMins;
@@ -132,7 +132,7 @@ export function toISO8601WithTimezoneOffset(date = new Date()) {
   const seconds = date.getSeconds().toString().padStart(2, "0");
 
   const offset = date.getTimezoneOffset();
-  const offsetHours = Math.abs(Math.floor(offset / 60))
+  const offsetHours = Math.floor(Math.abs(offset) / 60)
     .toString()
     .padStart(2, "0");
   const offsetMinutes = Math.abs(offset % 60)

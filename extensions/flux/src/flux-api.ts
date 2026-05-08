@@ -174,7 +174,17 @@ export async function getMenuState(option: MenuSpec): Promise<number> {
 }
 
 export async function openPreferences(): Promise<boolean> {
-  return await as_clickMenu("Preferences...");
+  // f.lux uses custom-drawn menu items with no accessible names, so we target by index.
+  // Menu item 4 is the Preferences item; AXPress avoids wiping the location field.
+  return (
+    (await runAppleScript(
+      scpt_fluxScope(`
+        perform action "AXPress" of menu item 4 of menu 1 of menu bar item 1 of menu bar 2
+
+        return 0
+      `),
+    )) === "0"
+  );
 }
 
 export async function toggleOption(option: OptionsAction): Promise<boolean> {

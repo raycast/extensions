@@ -1,5 +1,5 @@
 import { ActionPanel, Action, List, Icon, Color } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, usePromise } from "@raycast/utils";
 import { toshl } from "./utils/toshl";
 import { format, subDays, addDays, isWithinInterval, parseISO } from "date-fns";
 import { formatCurrency } from "./utils/helpers";
@@ -10,9 +10,7 @@ export default function Budgets() {
   const sixtyDaysAgo = format(subDays(today, 60), "yyyy-MM-dd");
   const sixtyDaysFromNow = format(addDays(today, 60), "yyyy-MM-dd");
 
-  const { data: budgets, isLoading } = useCachedPromise(() =>
-    toshl.getBudgets({ from: sixtyDaysAgo, to: sixtyDaysFromNow }),
-  );
+  const { data: budgets, isLoading } = usePromise(() => toshl.getBudgets({ from: sixtyDaysAgo, to: sixtyDaysFromNow }));
   const { data: categories } = useCachedPromise(() => toshl.getCategories());
 
   // Check if budget period includes today

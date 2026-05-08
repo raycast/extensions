@@ -1,8 +1,18 @@
 # Accordance Changelog
 
+## [Update] - 2026-02-16
+
+- Fix AppleScript injection vulnerability in verse retrieval and module checking
+- Add verse range support (e.g. Deut 2:1-5) to Read Bible command
+- Add "Open in Accordance" action (Cmd+O) to Get Verses and Read Bible commands
+- Fix end-of-Bible producing duplicate verse items in Read Bible
+- Fix pagination stopping permanently when a single verse fails to load
+- Remove duplicated code and improve naming consistency across commands
+
 ## [Initial Release] - 2025-11-06
 
 ### Added
+
 - **Verse Lookup**: Search and display Bible verses directly from Raycast search bar
 - **Module Selection**: Dynamic dropdown to choose from available Accordance text modules
 - **Sequential Reading**: Read through Bible verses chapter by chapter with navigation
@@ -19,6 +29,7 @@
   - Dynamic module selection respects user preference with intelligent fallbacks
 
 ### Features
+
 - **Get Verses Command**: Primary interface for verse lookup with module selection
 - **Read Bible Command**: Sequential reading with forward/backward navigation
 - **Search Texts Command**: Quick search with direct execution (no UI)
@@ -27,6 +38,7 @@
 - **Open Workspace Command**: File-based workspace discovery and opening
 
 ### Technical
+
 - **Dynamic Module Selection**: Intelligent default module detection (respects user preferences)
 - **File System Integration**: Direct workspace file discovery without AppleScript
 - **AppleScript Integration**: Communication with Accordance for verse retrieval
@@ -35,6 +47,7 @@
 - **Accessibility**: Full keyboard navigation and screen reader support
 
 ### Requirements
+
 - **Accordance Bible Software**: Required for functionality (available at AccordanceBible.com)
 - **macOS**: Platform-specific implementation using AppleScript
 - **Raycast**: Latest API compatibility

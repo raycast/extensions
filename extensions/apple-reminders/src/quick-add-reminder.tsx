@@ -14,6 +14,8 @@ import { createReminder, getData } from "swift:../swift/AppleReminders";
 
 import { NewReminder } from "./create-reminder";
 import { Data } from "./hooks/useData";
+import { normalizePostCreateActions, STORAGE_KEY } from "./hooks/usePostCreateActions";
+import { runPostCreateActions } from "./post-create-shortcuts";
 
 export default async function Command(props: LaunchProps<{ arguments: Arguments.QuickAddReminder }>) {
   try {
@@ -36,7 +38,19 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       if (dateMatch && dateMatch.length > 0) {
         const chronoDate = dateMatch[0].start;
         isDateTime = chronoDate.isCertain("hour") || chronoDate.isCertain("minute") || chronoDate.isCertain("second");
-        const date = chronoDate.date();
+        let date = chronoDate.date();
+
+        const hasExplicitDate =
+          chronoDate.isCertain("weekday") ||
+          chronoDate.isCertain("day") ||
+          chronoDate.isCertain("month") ||
+          chronoDate.isCertain("year");
+
+        // If the user only specified a time and it already passed today, schedule it for tomorrow.
+        if (isDateTime && !hasExplicitDate && date.getTime() < Date.now()) {
+          date = addDays(date, 1);
+        }
+
         dueDate = isDateTime ? date.toISOString() : format(date, "yyyy-MM-dd");
       }
 
@@ -61,8 +75,18 @@ export default async function Command(props: LaunchProps<{ arguments: Arguments.
       }
 
       await createReminder(reminder);
+      const storedActions = await LocalStorage.getItem<string>(STORAGE_KEY);
+      await runPostCreateActions(
+        normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []),
+        "quick-add",
+      );
 
-      const formattedDueDate = dueDate ? ` due ${format(dueDate, `${isDateTime ? "PPPpp" : "PPP"}`)}` : "";
+      let formattedDueDate = "";
+      if (dueDate) {
+        // Parse the date string back to a Date object for formatting
+        const dateObj = isDateTime ? new Date(dueDate) : new Date(dueDate + "T00:00:00");
+        formattedDueDate = ` due ${format(dateObj, isDateTime ? "PPPpp" : "PPP")}`;
+      }
       const toastMessage = `Added "${title}" to ${reminderList?.title ?? "default list"}${formattedDueDate}`;
 
       await showToast({
@@ -179,6 +203,8 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
     }
 
     await createReminder(newReminder);
+    const storedActions = await LocalStorage.getItem<string>(STORAGE_KEY);
+    await runPostCreateActions(normalizePostCreateActions(storedActions ? JSON.parse(storedActions) : []), "quick-add");
 
     await showToast({
       style: Toast.Style.Success,
@@ -198,9 +224,12 @@ Task text: "${props.fallbackText ?? props.arguments.text}"`;
 
 async function askAI(prompt: string): Promise<NewReminder & { description: string }> {
   const maxRetries = 3;
+  let lastError: Error | undefined;
+
   for (let i = 0; i < maxRetries; i++) {
     try {
-      const result = await AI.ask(prompt, { model: AI.Model.OpenAI_GPT4o });
+      // Don't specify a model - let Raycast use the user's selected model or default
+      const result = await AI.ask(prompt);
       const jsonMatch = result.match(/[{\\[]{1}([,:{}\\[\]0-9.\-+Eaeflnr-u \n\r\t]|".*?")+[}\]]{1}/gis)?.[0];
       if (!jsonMatch) {
         throw new Error("Invalid result returned from AI");
@@ -211,9 +240,15 @@ async function askAI(prompt: string): Promise<NewReminder & { description: strin
       }
       return json;
     } catch (error) {
-      console.log(`Retriying AI call. Retry count: ${i}`);
+      lastError = error instanceof Error ? error : new Error(String(error));
+      console.log(`Retrying AI call. Retry count: ${i + 1}/${maxRetries}. Error: ${lastError.message}`);
+
+      // If this is the last retry, throw the error
+      if (i === maxRetries - 1) {
+        throw lastError;
+      }
     }
   }
 
-  throw new Error("Max retries reached. Unable to get a valid response from AI.");
+  throw lastError || new Error("Max retries reached. Unable to get a valid response from AI.");
 }

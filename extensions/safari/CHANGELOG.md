@@ -1,5 +1,13 @@
 # Safari Changelog
 
+## [Fix] - 2026-05-06
+
+- Fix `Search History` command failing with `no such column: "%...%"` by using single-quoted string literals for search terms in the SQL query.
+
+## [Fix] - 2026-04-28
+
+- Fix `Search History` command failing with `no such column: "unixepoch"` by using single-quoted string literals in the SQL query.
+
 ## [Performance] - 2026-01-12
 
 - Significantly improved `Search Tabs` loading speed by replacing JXA with native Swift ScriptingBridge (˜4x faster load). 

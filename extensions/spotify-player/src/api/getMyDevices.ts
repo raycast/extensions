@@ -1,7 +1,8 @@
+import { withCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
-export async function getMyDevices() {
+async function _getMyDevices() {
   const { spotifyClient } = getSpotifyClient();
 
   try {
@@ -13,3 +14,5 @@ export async function getMyDevices() {
     throw new Error(error);
   }
 }
+
+export const getMyDevices = withCache("api:devices", 30000, _getMyDevices);

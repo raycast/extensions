@@ -46,7 +46,7 @@ function SearchResultActions({
 
   return (
     <Action
-      title="Add to Favorites"
+      title="⭐ Add to Favorites"
       onAction={() => onAddFavorite(entity)}
       shortcut={KEYBOARD_SHORTCUTS.ADD_TO_FAVORITES}
     />

@@ -20,6 +20,7 @@ interface Preferences {
   printerIP: string;
   apiKey: string;
   requestTimeout?: string;
+  prusaConnectUUID?: string;
 }
 
 function formatTime(seconds: number): string {
@@ -79,6 +80,8 @@ function getStateColor(state: string): Color {
 }
 
 export default function Command() {
+  const { prusaConnectUUID: rawPrusaConnectUUID } = getPreferenceValues<Preferences>();
+  const prusaConnectUUID = rawPrusaConnectUUID?.trim();
   const [isLoading, setIsLoading] = useState(true);
   const [status, setStatus] = useState<PrinterStatus | null>(null);
   const [printerInfo, setPrinterInfo] = useState<PrinterInfo | null>(null);
@@ -382,6 +385,16 @@ export default function Command() {
               icon={Icon.Print}
               title={printerInfo.model || "Prusa Printer"}
               subtitle={printerInfo.name || printerInfo.hostname}
+              actions={
+                prusaConnectUUID ? (
+                  <ActionPanel>
+                    <Action.OpenInBrowser
+                      title="Open in Prusa Connect"
+                      url={`https://connect.prusa3d.com/printer/${prusaConnectUUID}/dashboard`}
+                    />
+                  </ActionPanel>
+                ) : undefined
+              }
             />
           )}
 

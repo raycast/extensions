@@ -3,6 +3,8 @@ import type { Image } from "@raycast/api";
 export interface Company {
   name: string;
   organizationNumber: string;
+  organizationFormCode?: string;
+  organizationFormDescription?: string;
   address?: string;
   postalCode?: string;
   city?: string;
@@ -26,6 +28,7 @@ export interface Company {
   description?: string;
   bregUrl: string;
   accountingYear?: string;
+  isAuditRequired?: boolean;
   isAudited?: boolean;
   isVatRegistered?: boolean;
   lastAccountsFromDate?: string;
@@ -41,15 +44,25 @@ export interface FinancialYear {
   ebitda?: number;
 }
 
-export interface SearchResult {
-  companies: Company[];
-  hasMore: boolean;
-}
-
 // BRREG Enhetsregisteret entity summary used in search lists and favorites
 export interface Enhet {
   organisasjonsnummer: string;
   navn: string;
+  organisasjonsform?: {
+    kode?: string;
+    beskrivelse?: string;
+  };
+  /**
+   * Raw website field from BRREG search responses.
+   * Internal code should prefer `website` (normalized URL).
+   */
+  hjemmeside?: string;
+  /**
+   * VAT registration flags as returned by BRREG Enhetsregisteret.
+   * Either field may be present depending on endpoint/version.
+   */
+  mvaRegistrert?: boolean;
+  registrertIMvaregisteret?: boolean;
   forretningsadresse?: {
     land?: string;
     landkode?: string;

@@ -1,5 +1,17 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Alai MCP Server] - 2026-04-30
+
+Add community Alai MCP Server to registry for AI-powered presentation generation (text-to-slides, exports to PDF, PPTX, or shareable link).
+
+## [Add Sanity MCP Server] - 2026-03-07
+
+Add official Sanity MCP Server to registry for direct access to Sanity projects.
+
+## [Add RouteMesh MCP Server] - 2026-03-05
+
+Add official RouteMesh MCP Server to registry for multi-chain EVM RPC access with RouteMesh routing and failover.
+
 ## [Add Razuna MCP Server] - 2026-02-03
 
 Add official Razuna MCP Server to registry.

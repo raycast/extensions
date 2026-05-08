@@ -2,8 +2,9 @@ import { ActionPanel, Action, List, Icon, Color, Form, useNavigation } from "@ra
 import { useCachedPromise, usePromise } from "@raycast/utils";
 import { useState, useMemo } from "react";
 import { toshl } from "./utils/toshl";
-import { TransactionForm } from "./components/TransactionForm";
+import { EntryEditDeleteSections } from "./components/EntryEditDeleteSections";
 import { Transaction } from "./utils/types";
+import { isTransferEntry } from "./utils/toshl-model";
 import { format, subDays, subMonths, startOfMonth, endOfMonth } from "date-fns";
 import { formatCurrency } from "./utils/helpers";
 
@@ -197,21 +198,17 @@ export default function SearchEntries() {
     revalidate,
   } = usePromise(
     async (fromDate: string, toDate: string) => {
-      return toshl.getTransactions({ from: fromDate, to: toDate, per_page: 200 });
+      return toshl.getAllTransactions({ from: fromDate, to: toDate });
     },
     [from, to],
   );
-
-  // Helper to check if entry is a transfer
-  const isTransfer = (t: Transaction) => !!t.transaction?.account;
 
   // Filter transactions based on current filters
   const filteredTransactions = useMemo(() => {
     if (!transactions) return [];
 
     return transactions.filter((t) => {
-      // Type filter - check for transfers first
-      const entryIsTransfer = isTransfer(t);
+      const entryIsTransfer = isTransferEntry(t);
       if (filters.type === "transfer" && !entryIsTransfer) return false;
       if (filters.type === "expense" && (t.amount >= 0 || entryIsTransfer)) return false;
       if (filters.type === "income" && (t.amount < 0 || entryIsTransfer)) return false;
@@ -244,9 +241,9 @@ export default function SearchEntries() {
 
   // Calculate summary
   const summary = useMemo(() => {
-    const transfers = filteredTransactions.filter((t) => isTransfer(t));
-    const expenses = filteredTransactions.filter((t) => t.amount < 0 && !isTransfer(t));
-    const incomes = filteredTransactions.filter((t) => t.amount >= 0 && !isTransfer(t));
+    const transfers = filteredTransactions.filter((t) => isTransferEntry(t));
+    const expenses = filteredTransactions.filter((t) => t.amount < 0 && !isTransferEntry(t));
+    const incomes = filteredTransactions.filter((t) => t.amount >= 0 && !isTransferEntry(t));
     const totalExpenses = expenses.reduce((sum, t) => sum + Math.abs(t.amount), 0);
     const totalIncome = incomes.reduce((sum, t) => sum + t.amount, 0);
     const totalTransfers = transfers.reduce((sum, t) => sum + Math.abs(t.amount), 0);
@@ -322,7 +319,7 @@ export default function SearchEntries() {
       {sortedDates.map((date) => (
         <List.Section key={date} title={format(new Date(date), "EEEE, MMM d, yyyy")}>
           {transactionsByDate[date].map((transaction) => {
-            const entryIsTransfer = isTransfer(transaction);
+            const entryIsTransfer = isTransferEntry(transaction);
             const toAccountId = transaction.transaction?.account;
 
             // Determine icon and subtitle based on type
@@ -390,29 +387,16 @@ export default function SearchEntries() {
                         }
                       />
                     </ActionPanel.Section>
-                    <ActionPanel.Section title="Edit">
-                      <Action
-                        title="Edit Entry"
-                        icon={Icon.Pencil}
-                        onAction={() =>
-                          push(
-                            <TransactionForm
-                              type={transaction.amount < 0 ? "expense" : "income"}
-                              transaction={transaction}
-                              onSubmit={async (values) => {
-                                await toshl.updateTransaction(
-                                  transaction.id,
-                                  values,
-                                  transaction.repeat ? "one" : undefined,
-                                );
-                                revalidate();
-                                pop();
-                              }}
-                            />,
-                          )
-                        }
-                      />
-                    </ActionPanel.Section>
+                    <EntryEditDeleteSections
+                      transaction={transaction}
+                      push={push}
+                      pop={pop}
+                      revalidate={revalidate}
+                      onDeleted={async (t, mode) => {
+                        await toshl.deleteTransaction(t.id, mode);
+                        revalidate();
+                      }}
+                    />
                     <ActionPanel.Section>
                       <Action.OpenInBrowser title="Open in Toshl" url="https://toshl.com/app/#/expenses" />
                     </ActionPanel.Section>
