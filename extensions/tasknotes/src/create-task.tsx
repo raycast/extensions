@@ -37,17 +37,25 @@ export default function Command() {
       return;
     }
 
-    const task = await createTaskNote(values as NewTaskValues);
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Task created",
-      message: task.title,
-      primaryAction: {
-        title: "Open in Obsidian",
-        onAction: () => open(obsidianUrl(task)),
-      },
-    });
-    await popToRoot();
+    try {
+      const task = await createTaskNote(values as NewTaskValues);
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Task created",
+        message: task.title,
+        primaryAction: {
+          title: "Open in Obsidian",
+          onAction: () => open(obsidianUrl(task)),
+        },
+      });
+      await popToRoot();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Could not create task",
+        message: error instanceof Error ? error.message : String(error),
+      });
+    }
   }
 
   return (
