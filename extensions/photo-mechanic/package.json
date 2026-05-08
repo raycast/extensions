@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "photo-mechanic",
+  "title": "Photo Mechanic",
+  "description": "Send your active Lightroom Classic photo to Photo Mechanic with a single keystroke.",
+  "icon": "extension-icon.png",
+  "author": "dustchambers",
+  "categories": ["Media"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "send-to-photo-mechanic",
+      "title": "Send Lightroom Photo to Photo Mechanic",
+      "description": "Reveals the active Lightroom Classic photo in Photo Mechanic — equivalent to dragging the file onto Photo Mechanic's icon.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "delay",
+          "title": "Show in Finder Delay",
+          "description": "Seconds to wait after triggering Show in Finder before reading the file path. Increase if your catalog is on a slow network drive.",
+          "type": "textfield",
+          "required": false,
+          "default": "0.7",
+          "placeholder": "0.7"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use the \\`npm run publish\\` command.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
