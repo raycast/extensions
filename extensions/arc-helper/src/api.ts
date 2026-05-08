@@ -21,7 +21,7 @@ export interface Item {
   loot_area: string | null;
   ammo_type: string | null;
   shield_type?: string;
-  sources?: unknown;
+  sources?: unknown[];
   locations?: unknown[];
   guide_links?: GuideLink[];
   game_asset_id?: number;
