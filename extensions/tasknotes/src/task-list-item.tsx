@@ -39,6 +39,9 @@ function taskAccessories(
 }
 
 function dateAccessories(task: TaskNote, mode: DateAccessoryMode): List.Item.Accessory[] {
+  if (mode === "agenda" && task.due && task.scheduled && new Date(task.scheduled) < new Date(task.due)) {
+    return [{ tag: { value: `Scheduled ${task.scheduled}`, color: Color.Blue } }];
+  }
   if (task.due) return [{ tag: { value: `Due ${task.due}`, color: Color.Red } }];
   if (mode === "agenda" && task.scheduled)
     return [{ tag: { value: `Scheduled ${task.scheduled}`, color: Color.Blue } }];
