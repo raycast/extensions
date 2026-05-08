@@ -1,0 +1,76 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "raycast-melange",
+  "title": "Raycast Melange",
+  "description": "Search Anna's Archive for English EPUB results and open download pages from Raycast.",
+  "icon": "icon.png",
+  "author": "sws",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "keywords": [
+    "anna",
+    "archive",
+    "books",
+    "epub",
+    "ebooks",
+    "search"
+  ],
+  "commands": [
+    {
+      "name": "search-epubs",
+      "title": "Search EPUBs",
+      "subtitle": "Anna's Archive",
+      "description": "Search Anna's Archive for EPUB files.",
+      "mode": "view",
+      "keywords": [
+        "anna",
+        "archive",
+        "book",
+        "epub"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "annaSecretKey",
+      "title": "Anna's Archive Secret Key",
+      "description": "Optional member secret key used only for Anna's official fast download API.",
+      "type": "password",
+      "required": false,
+      "placeholder": "Secret key"
+    },
+    {
+      "name": "downloadDirectory",
+      "title": "Download Directory",
+      "description": "Folder where downloaded EPUB files are saved.",
+      "type": "directory",
+      "required": false,
+      "default": "~/Downloads/Annas Archive"
+    }
+  ],
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4",
+    "cheerio": "^1.1.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^24.10.1",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.59.2"
+  }
+}
