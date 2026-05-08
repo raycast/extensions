@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Action, ActionPanel, List, Icon, openExtensionPreferences } from '@raycast/api'
-import { useCachedPromise } from '@raycast/utils'
+import { useCachedPromise, useCachedState } from '@raycast/utils'
 import { existsSync } from 'fs'
 
-import { clearCache, fetchGitHealthForProjects, fetchPrimaryDirectories, fetchProjects, preferences, resolveUserPath } from './helpers'
+import { clearCache, fetchGitHealthForProjects, fetchPrimaryDirectories, fetchProjects, getAllProjectTags, preferences, resolveUserPath } from './helpers'
 import { DirectoriesDropdown, useDirectory } from './components/DirectoriesDropdown'
 import ProjectListItem from './components/ProjectListItem'
 import { GitHealth, groupByDirectory, GroupedProjectList, Project, ProjectList, sortGroupedProjectsByFavorite } from './project'
@@ -21,6 +21,7 @@ function getResolvedProjectsPath(): string {
 
 export default function Command() {
     const { directory } = useDirectory()
+    const [selectedTags, setSelectedTags] = useCachedState<string[]>('selectedTags', [])
     const [gitHealthByPath, setGitHealthByPath] = useState<Record<string, GitHealth | null>>({})
     const [isLoadingGitHealth, setIsLoadingGitHealth] = useState(false)
     const pendingGitHealthByPath = useRef<Record<string, GitHealth | null>>({})
@@ -142,10 +143,16 @@ export default function Command() {
         return fetchPrimaryDirectories(projects)
     }, [projects])
 
+    const availableTags = useMemo(() => getAllProjectTags(projects), [projects])
+
     const filteredProjects = useMemo(() => {
         if (!projects.length) return []
 
         return projects.filter((project: Project) => {
+            if (selectedTags.length > 0 && !selectedTags.every((tag) => project.tags.includes(tag))) {
+                return false
+            }
+
             if (!directory || directory === 'all') return true
             if (directory === 'favorites') return project.isFavorite
             if (directory === 'needs-attention') return Boolean(project.gitHealth?.isDirty || project.gitHealth?.ahead || project.gitHealth?.behind || project.gitHealth?.hasUpstream === false)
@@ -156,7 +163,7 @@ export default function Command() {
             if (directory === 'recent') return Boolean(project.lastOpenedAt)
             return project.primaryDirectory.name === directory
         })
-    }, [projects, directory])
+    }, [projects, directory, selectedTags])
 
     const processedProjects = useMemo(() => {
         if (!filteredProjects.length) return null
@@ -244,6 +251,10 @@ export default function Command() {
             return 'No repositories match this health filter'
         }
 
+        if (selectedTags.length > 0) {
+            return 'No repositories match the selected tags'
+        }
+
         if (directory === 'favorites') {
             return 'No favorite repositories yet'
         }
@@ -253,11 +264,15 @@ export default function Command() {
         }
 
         return 'No repositories match this filter'
-    }, [directory, isGitHealthFilterSelected, isLoadingProjects, rawProjects?.length])
+    }, [directory, isGitHealthFilterSelected, isLoadingProjects, rawProjects?.length, selectedTags.length])
 
     const emptyViewDescription = useMemo(() => {
         if (isGitHealthFilterSelected && !isLoadingGitHealth) {
             return 'Try another health filter or refresh Git status.'
+        }
+
+        if (selectedTags.length > 0) {
+            return `Selected tags: ${selectedTags.join(', ')}`
         }
 
         if (!rawProjects?.length) {
@@ -265,9 +280,13 @@ export default function Command() {
         }
 
         return undefined
-    }, [isGitHealthFilterSelected, isLoadingGitHealth, rawProjects?.length])
+    }, [isGitHealthFilterSelected, isLoadingGitHealth, rawProjects?.length, selectedTags])
 
     const handleFavoriteChange = () => {
+        revalidate()
+    }
+
+    const handleProjectChange = () => {
         revalidate()
     }
 
@@ -287,6 +306,13 @@ export default function Command() {
                 shortcut={{ modifiers: ['cmd'], key: 'r' }}
                 onAction={revalidate}
             />
+            {selectedTags.length > 0 && (
+                <Action
+                    title="Clear Tag Filter"
+                    icon={Icon.XMarkCircle}
+                    onAction={() => setSelectedTags([])}
+                />
+            )}
             {projectsPathExists && (
                 <Action.ShowInFinder
                     title="Reveal Projects Folder"
@@ -296,7 +322,7 @@ export default function Command() {
             <Action
                 title="Open Extension Preferences"
                 icon={Icon.Gear}
-                shortcut={{ modifiers: ['cmd'], key: ',' }}
+                shortcut={{ modifiers: ['cmd', 'shift'], key: ',' }}
                 onAction={openExtensionPreferences}
             />
             {preferences.enableProjectsCaching && (
@@ -315,7 +341,16 @@ export default function Command() {
     return (
         <List
             isLoading={isLoading}
-            searchBarAccessory={directories.length > 0 ? <DirectoriesDropdown directories={directories} /> : undefined}
+            searchBarAccessory={
+                directories.length > 0 ? (
+                    <DirectoriesDropdown
+                        directories={directories}
+                        availableTags={availableTags}
+                        selectedTags={selectedTags}
+                        onSelectedTagsChange={setSelectedTags}
+                    />
+                ) : undefined
+            }
             actions={listActions}
         >
             {showEmptyView && (
@@ -338,7 +373,9 @@ export default function Command() {
                                   key={`${project.fullPath}-${project.name}`}
                                   project={project}
                                   directories={directories}
+                                  availableTags={availableTags}
                                   onFavoriteChange={handleFavoriteChange}
+                                  onProjectChange={handleProjectChange}
                                   listActions={listActionItems}
                               />
                           ))}
@@ -349,7 +386,9 @@ export default function Command() {
                           key={`${project.fullPath}-${project.name}`}
                           project={project}
                           directories={directories}
+                          availableTags={availableTags}
                           onFavoriteChange={handleFavoriteChange}
+                          onProjectChange={handleProjectChange}
                           listActions={listActionItems}
                       />
                   ))}

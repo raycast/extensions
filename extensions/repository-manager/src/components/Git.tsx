@@ -3,6 +3,7 @@ import { Project } from '../project'
 import GitCommitsDetail from './GitCommitsDetail'
 import GitPullDetail from './GitPullDetail'
 import GitStatusDetail from './GitStatusDetail'
+import { GenerateAIRepoBriefAction } from './AIRepoBrief'
 
 type GitProps = {
     project: Project
@@ -32,6 +33,7 @@ export default function Git({ project }: GitProps) {
                 icon={Icon.Download}
                 onAction={() => push(<GitPullDetail project={project} />)}
             />
+            <GenerateAIRepoBriefAction project={project} />
         </ActionPanel.Submenu>
     )
 }

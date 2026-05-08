@@ -14,15 +14,19 @@ import { Directory } from './DirectoriesDropdown'
 import { PrimaryAction } from '../helpers'
 import AddToFavorites from './AddToFavorites'
 import GitStatisticsDetail from './GitStatisticsDetail'
+import { ManageProjectTags } from './ProjectTags'
+import { GenerateAIRepoBriefAction } from './AIRepoBrief'
 
 type ProjectListItemProps = {
     project: Project
     directories: Directory[]
+    availableTags: string[]
     onFavoriteChange: () => void
+    onProjectChange: () => void
     listActions?: React.JSX.Element
 }
 
-const ProjectListItem = React.memo(({ project, directories, onFavoriteChange, listActions }: ProjectListItemProps) => {
+const ProjectListItem = React.memo(({ project, directories, availableTags, onFavoriteChange, onProjectChange, listActions }: ProjectListItemProps) => {
     const preferences = getPreferenceValues()
     const { push } = useNavigation()
 
@@ -79,6 +83,19 @@ const ProjectListItem = React.memo(({ project, directories, onFavoriteChange, li
     const accessories = useMemo(() => {
         const health = project.gitHealth
         const healthAccessories = []
+        const visibleTags = project.tags.slice(0, 3)
+        const hiddenTagsCount = Math.max(project.tags.length - visibleTags.length, 0)
+        const tagAccessories = visibleTags.map((tag) => ({
+            tag: { value: tag, color: Color.Blue },
+            tooltip: `Tag: ${tag}`,
+        }))
+
+        if (hiddenTagsCount > 0) {
+            tagAccessories.push({
+                tag: { value: `+${hiddenTagsCount}`, color: Color.SecondaryText },
+                tooltip: project.tags.slice(visibleTags.length).join(', '),
+            })
+        }
 
         if (preferences.showGitInfoInList !== false) {
             if (project.lastOpenedAt) {
@@ -124,6 +141,7 @@ const ProjectListItem = React.memo(({ project, directories, onFavoriteChange, li
                 icon: project.isFavorite ? { source: Icon.Star, tintColor: Color.Yellow } : null,
                 tooltip: project.isFavorite ? 'Favorite' : null,
             },
+            ...tagAccessories,
             ...healthAccessories,
             { text: project.displayPath, tooltip: 'Full Path' },
             {
@@ -134,7 +152,7 @@ const ProjectListItem = React.memo(({ project, directories, onFavoriteChange, li
                 tooltip: 'Main Directory',
             },
         ]
-    }, [preferences.showGitInfoInList, project.gitHealth, project.isFavorite, project.displayPath, project.primaryDirectory.name, project.lastOpenedAt, primaryDirectory?.icon?.tintColor])
+    }, [preferences.showGitInfoInList, project.gitHealth, project.isFavorite, project.tags, project.displayPath, project.primaryDirectory.name, project.lastOpenedAt, primaryDirectory?.icon?.tintColor])
 
     return (
         <List.Item
@@ -156,14 +174,23 @@ const ProjectListItem = React.memo(({ project, directories, onFavoriteChange, li
                             project={project}
                             onFavoriteChange={onFavoriteChange}
                         />
+                        <ManageProjectTags
+                            project={project}
+                            availableTags={availableTags}
+                            onTagsChange={onProjectChange}
+                        />
                         <Action
                             title="Repo Statistics"
                             icon={Icon.BarChart}
                             shortcut={{ modifiers: ['cmd'], key: 's' }}
                             onAction={handleRepoStatistics}
                         />
+                        <GenerateAIRepoBriefAction project={project} />
                         <ProjectScripts project={project} />
-                        <Config project={project} />
+                        <Config
+                            project={project}
+                            onConfigChange={onProjectChange}
+                        />
                         <Copy project={project} />
                         <Action.Push
                             title="Details"

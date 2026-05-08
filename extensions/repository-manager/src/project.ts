@@ -85,6 +85,7 @@ export class Project {
     gitRemotes: Repo[] = []
     gitHealth: GitHealth | null = null
     isFavorite = false
+    tags: string[] = []
     lastOpenedAt: string | null = null
 
     constructor(cachedProject?: Project, projectPath?: string) {

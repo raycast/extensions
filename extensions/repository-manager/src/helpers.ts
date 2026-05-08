@@ -39,6 +39,7 @@ const PROJECT_SCAN_CONCURRENCY = 8
 const PROJECTS_CACHE_KEY = 'projects'
 const PROJECTS_CACHE_VERSION = 2
 const FAVORITES_STORAGE_KEY = 'favorites'
+const PROJECT_TAGS_STORAGE_KEY = 'projectTags'
 const IGNORED_DIRECTORY_NAMES = new Set(['.cache', '.next', '.nuxt', '.output', '.turbo', '.vercel', 'bower_components', 'coverage', 'node_modules'])
 
 type ProjectsCachePayload = {
@@ -47,6 +48,8 @@ type ProjectsCachePayload = {
     maxScanningLevels: number
     projects: ProjectList
 }
+
+export type ProjectTagsByPath = Record<string, string[]>
 
 function isAbortError(error: unknown): boolean {
     return error instanceof Error && error.name === 'AbortError'
@@ -179,10 +182,11 @@ export async function fetchProjects(): Promise<ProjectList> {
     try {
         const favorites = await getFavoriteProjects()
         const recentProjects = await getRecentProjects()
+        const projectTagsByPath = await getProjectTagsByPath()
 
         if (!preferences.enableProjectsCaching || process.env.NODE_ENV === 'development') {
             const projects = await getDirectories(preferences.projectsPath)
-            return await enrichProjects(projects, favorites, recentProjects)
+            return await enrichProjects(projects, favorites, recentProjects, projectTagsByPath)
         }
 
         const cache = new Cache()
@@ -218,7 +222,7 @@ export async function fetchProjects(): Promise<ProjectList> {
             cache.set(PROJECTS_CACHE_KEY, JSON.stringify(createProjectsCachePayload(projects)))
         }
 
-        return await enrichProjects(projects, favorites, recentProjects)
+        return await enrichProjects(projects, favorites, recentProjects, projectTagsByPath)
     } catch (error) {
         console.error('Failed to fetch projects:', error)
         await showToast({
@@ -235,7 +239,7 @@ async function filterExistingProjects(projects: ProjectList): Promise<ProjectLis
     return projects.filter((_, index) => existence[index])
 }
 
-async function enrichProjects(projects: ProjectList, favorites: string[], recentProjects: RecentProject[]): Promise<ProjectList> {
+async function enrichProjects(projects: ProjectList, favorites: string[], recentProjects: RecentProject[], projectTagsByPath: ProjectTagsByPath): Promise<ProjectList> {
     const favoriteSet = new Set(favorites)
     const migratedFavoritePaths = new Set<string>()
     const migratedLegacyNames = new Set<string>()
@@ -253,6 +257,7 @@ async function enrichProjects(projects: ProjectList, favorites: string[], recent
         project.isFavorite = isPathFavorite || isLegacyFavorite
         project.lastOpenedAt = recentByPath.get(project.fullPath) || null
         project.gitHealth = null
+        project.tags = normalizeProjectTags(projectTagsByPath[project.fullPath] || [])
         return project
     })
 
@@ -476,6 +481,63 @@ export async function getFavoriteProjects(): Promise<string[]> {
 export async function setFavoriteProjects(favorites: string[]): Promise<void> {
     const uniqueFavorites = [...new Set(favorites)]
     await LocalStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(uniqueFavorites))
+}
+
+export function normalizeProjectTags(tags: string[]): string[] {
+    return [...new Set(tags.map((tag) => tag.trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b))
+}
+
+export async function getProjectTagsByPath(): Promise<ProjectTagsByPath> {
+    try {
+        const projectTags = await LocalStorage.getItem<string>(PROJECT_TAGS_STORAGE_KEY)
+        const parsedProjectTags = projectTags ? JSON.parse(projectTags) : {}
+
+        if (!parsedProjectTags || typeof parsedProjectTags !== 'object' || Array.isArray(parsedProjectTags)) {
+            return {}
+        }
+
+        return Object.entries(parsedProjectTags).reduce<ProjectTagsByPath>((normalizedProjectTags, [projectPath, tags]) => {
+            if (Array.isArray(tags)) {
+                normalizedProjectTags[projectPath] = normalizeProjectTags(tags.filter((tag): tag is string => typeof tag === 'string'))
+            }
+
+            return normalizedProjectTags
+        }, {})
+    } catch (error) {
+        console.error('Failed to get project tags:', error)
+        return {}
+    }
+}
+
+export async function setProjectTagsByPath(projectTagsByPath: ProjectTagsByPath): Promise<void> {
+    const normalizedProjectTags = Object.entries(projectTagsByPath).reduce<ProjectTagsByPath>((normalized, [projectPath, tags]) => {
+        const normalizedTags = normalizeProjectTags(tags)
+
+        if (normalizedTags.length > 0) {
+            normalized[projectPath] = normalizedTags
+        }
+
+        return normalized
+    }, {})
+
+    await LocalStorage.setItem(PROJECT_TAGS_STORAGE_KEY, JSON.stringify(normalizedProjectTags))
+}
+
+export async function setProjectTags(project: Project, tags: string[]): Promise<void> {
+    const projectTagsByPath = await getProjectTagsByPath()
+    const normalizedTags = normalizeProjectTags(tags)
+
+    if (normalizedTags.length > 0) {
+        projectTagsByPath[project.fullPath] = normalizedTags
+    } else {
+        delete projectTagsByPath[project.fullPath]
+    }
+
+    await setProjectTagsByPath(projectTagsByPath)
+}
+
+export function getAllProjectTags(projects: ProjectList): string[] {
+    return normalizeProjectTags(projects.flatMap((project) => project.tags || []))
 }
 
 type RecentProject = {
