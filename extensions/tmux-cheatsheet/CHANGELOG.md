@@ -1,6 +1,6 @@
 # Tmux Cheatsheet Changelog
 
-## [Updated shortcuts and dependencies] - {PR_MERGE_DATE}
+## [Updated shortcuts and dependencies] - 2026-05-08
 
 - Update/add shortcuts for copying commands from the list and detail views
 - Update Raycast, React, TypeScript, Prettier, and linting-related dependencies
