@@ -18,9 +18,9 @@ interface UserInfo {
 const API_CONFIG = {
   API_URL: "https://api.granola.ai/v1",
   STREAM_API_URL: "https://stream.api.granola.ai/v1",
-  CLIENT_VERSION: "6.476.0",
+  CLIENT_VERSION: "7.162.1",
   getUserAgent(): string {
-    return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Granola/${this.CLIENT_VERSION} Chrome/136.0.7103.115 Electron/36.3.2 Safari/537.36`;
+    return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Granola/${this.CLIENT_VERSION} Chrome/146.0.7680.188 Electron/41.2.1 Safari/537.36`;
   },
   // Unique delimiter that's extremely unlikely to appear in content
   CHUNK_DELIMITER: "\x1F\x1E\x1D__GRANOLA_CHUNK__\x1D\x1E\x1F",
@@ -91,6 +91,14 @@ export interface DocumentList {
   document_ids?: string[];
 }
 
+export interface DocumentListMutationResult {
+  id?: string;
+  title?: string;
+  success?: boolean;
+  message?: string;
+  attioSync?: unknown;
+}
+
 export interface ChatMessage {
   role: "USER" | "ASSISTANT";
   text: string;
@@ -105,11 +113,30 @@ export interface ChatWithDocumentsRequest {
     model: string;
   };
   num_meetings_in_context?: number;
+  num_total_documents?: number;
+  user_timezone?: string;
   enable_reasoning?: boolean;
   exclude_transcripts?: boolean;
+  transcripts?: boolean;
   meeting_chat_date_range?: {
     start_date?: string;
     end_date?: string;
+  };
+}
+
+interface ChatStreamEvent {
+  type?: string;
+  delta?: string;
+  response?: string;
+  responseText?: string;
+  contentType?: string;
+  error?: string;
+  text?: string;
+  plain_text?: string;
+  output?: {
+    text?: string;
+    plain_text?: string;
+    response_lines?: Array<{ answer_text?: string }>;
   };
 }
 
@@ -234,6 +261,31 @@ async function handleApiError(response: Response, operationName: string): Promis
   }
 
   throw error;
+}
+
+async function postToGranolaApi<T>(
+  endpoint: string,
+  body: Record<string, unknown> | undefined,
+  operationName: string,
+  signal?: AbortSignal,
+): Promise<T> {
+  const headers = await createHeaders();
+  const response = await fetch(`${API_CONFIG.API_URL}/${endpoint}`, {
+    method: "POST",
+    headers,
+    body: body === undefined ? null : JSON.stringify(body),
+    signal,
+  });
+
+  if (!response.ok) {
+    await handleApiError(response, operationName);
+  }
+
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  return (await response.json()) as T;
 }
 
 /**
@@ -1306,12 +1358,64 @@ export async function getDocumentListsMetadata(includeDocumentIds = true): Promi
   return (await response.json()) as DocumentListsMetadataResponse;
 }
 
+export async function getDocumentList(listId: string, signal?: AbortSignal): Promise<DocumentList> {
+  return postToGranolaApi<DocumentList>("get-document-list", { list_id: listId }, "Get document list", signal);
+}
+
+export async function createDocumentList(title: string, signal?: AbortSignal): Promise<DocumentListMutationResult> {
+  return postToGranolaApi<DocumentListMutationResult>(
+    "create-document-list-v2",
+    { title },
+    "Create document list",
+    signal,
+  );
+}
+
+export async function addDocumentToList(
+  documentListId: string,
+  documentId: string,
+  signal?: AbortSignal,
+): Promise<DocumentListMutationResult> {
+  return postToGranolaApi<DocumentListMutationResult>(
+    "add-document-to-list",
+    { document_list_id: documentListId, document_id: documentId },
+    "Add document to list",
+    signal,
+  );
+}
+
+export async function removeDocumentFromList(
+  documentListId: string,
+  documentId: string,
+  signal?: AbortSignal,
+): Promise<DocumentListMutationResult> {
+  return postToGranolaApi<DocumentListMutationResult>(
+    "remove-document-from-list",
+    { document_list_id: documentListId, document_id: documentId },
+    "Remove document from list",
+    signal,
+  );
+}
+
+export async function deleteDocumentList(
+  documentListId: string,
+  signal?: AbortSignal,
+): Promise<DocumentListMutationResult> {
+  return postToGranolaApi<DocumentListMutationResult>(
+    "delete-document-list-v2",
+    { id: documentListId },
+    "Delete document list",
+    signal,
+  );
+}
+
 /**
  * Chat with documents using streaming API
  */
 export async function chatWithDocuments(
   request: ChatWithDocumentsRequest,
   onChunk?: (chunk: string) => void,
+  signal?: AbortSignal,
 ): Promise<string> {
   const headers = await createHeaders({
     Accept: "*/*",
@@ -1335,6 +1439,7 @@ export async function chatWithDocuments(
     method: "POST",
     headers,
     body: JSON.stringify(requestBody),
+    signal,
   });
 
   if (!response.ok) {
@@ -1347,7 +1452,51 @@ export async function chatWithDocuments(
   }
 
   let fullResponse = "";
+  let pending = "";
   let done = false;
+
+  const processEvent = (eventText: string) => {
+    if (!eventText.trim()) return;
+    try {
+      const event = JSON.parse(eventText) as ChatStreamEvent;
+      if (event.type === "error") {
+        throw new Error(event.error || "Granola chat stream returned an error");
+      }
+      if (event.type === "text_delta" && typeof event.delta === "string") {
+        fullResponse += event.delta;
+        onChunk?.(event.delta);
+        return;
+      }
+      if (event.type === "stream_completed") {
+        const finalText =
+          event.contentType === "text" ? event.responseText || event.response : event.response || event.responseText;
+        if (typeof finalText === "string" && finalText.length > fullResponse.length) {
+          fullResponse = finalText;
+        }
+        return;
+      }
+      if (event.type === "output_delta" && event.output) {
+        const outputText =
+          typeof event.output.text === "string"
+            ? event.output.text
+            : typeof event.output.plain_text === "string"
+              ? event.output.plain_text
+              : undefined;
+        if (outputText !== undefined) {
+          const delta = outputText.startsWith(fullResponse) ? outputText.slice(fullResponse.length) : outputText;
+          fullResponse = outputText;
+          if (delta) onChunk?.(delta);
+        }
+      }
+    } catch (error) {
+      if (error instanceof SyntaxError) {
+        fullResponse += eventText;
+        onChunk?.(eventText);
+        return;
+      }
+      throw error;
+    }
+  };
 
   while (!done) {
     const { value, done: readerDone } = await reader.read();
@@ -1355,9 +1504,17 @@ export async function chatWithDocuments(
 
     if (value) {
       const chunk = new TextDecoder().decode(value);
-      fullResponse += chunk;
-      onChunk?.(chunk);
+      pending += chunk;
+      const parts = pending.split("-----CHUNK_BOUNDARY-----");
+      pending = parts.pop() ?? "";
+      for (const part of parts) {
+        processEvent(part);
+      }
     }
+  }
+
+  if (pending.trim()) {
+    processEvent(pending);
   }
 
   return fullResponse;

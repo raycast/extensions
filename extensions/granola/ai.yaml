@@ -8,10 +8,11 @@ instructions: |
     - Use `get-transcript` only for transcript requests.
     - Use `list-folders` only for folder questions or to get a folder ID.
     - If the user explicitly mentions a folder (for example, includes the word "folder" or asks for a folder by name), call `list-folders` first, then use the matching folder ID with `list-meetings`.
+    - For shared-folder meeting queries, call `list-folders` first, choose folders where `isShared` is true, then call `list-meetings` with the matching shared folder ID.
     - If the user asks for available recipes or to search recipes, call `recipes` with action `"list"` or `"search"` and the query.
     - Any `/slug` token (for example `/tldr`) is a recipe; call `recipes` first with that slug and do not treat it as a title.
     - Use `save-to-notion` only after you have the note IDs, pass them as `noteIds`, and preserve the order returned by `list-meetings`.
-    - For shared documents queries ("shared with me", "team notes", etc.), use `list-meetings` with `source: "shared"`.
+    - For shared documents queries that are not specifically about folders ("shared with me", "team notes", etc.), use `list-meetings` with `source: "shared"`.
     - To identify team vs private folders, use `list-folders` and check the `isShared` and `userRole` fields.
 
 evals:

@@ -80,6 +80,11 @@
       "description": "List folders with metadata, note counts, and sharing info"
     },
     {
+      "name": "manage-folders",
+      "title": "Manage Folders",
+      "description": "Get, create, delete, and add or remove notes from Granola folders"
+    },
+    {
       "name": "save-to-notion",
       "title": "Save to Notion",
       "description": "Save one or more notes to Notion"
@@ -102,7 +107,7 @@
   ],
   "dependencies": {
     "@danielxceron/youtube-transcript": "^1.2.3",
-    "@raycast/api": "^1.93.1",
+    "@raycast/api": "^1.104.16",
     "@raycast/utils": "^1.19.1",
     "@types/turndown": "^5.0.5",
     "archiver": "^7.0.1",
