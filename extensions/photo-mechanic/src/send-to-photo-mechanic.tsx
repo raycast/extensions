@@ -3,7 +3,7 @@ import { runAppleScript } from "@raycast/utils";
 
 export default async function command() {
   const { delay } = getPreferenceValues<Preferences.SendToPhotoMechanic>();
-  const delaySeconds = Math.max(0.3, parseFloat(delay) || 0.7);
+  const delaySeconds = Math.min(30, Math.max(0.3, parseFloat(delay) || 0.7));
 
   await showToast({ style: Toast.Style.Animated, title: "Sending to Photo Mechanic…" });
 
@@ -64,7 +64,7 @@ export default async function command() {
     await showToast({
       style: Toast.Style.Failure,
       title: "Couldn't send to Photo Mechanic",
-      message: String(error),
+      message: error instanceof Error ? error.message : String(error),
     });
   }
 }
