@@ -1,9 +1,9 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Detail, Icon, List, Toast, showToast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { defaultVaultName, listVaults, setDefaultVaultName, sortVaultsForDefault, type VaultInfo } from "./tasknotes";
 
 export default function Command() {
-  const { data, isLoading, revalidate } = useCachedPromise(async () => {
+  const { data, error, isLoading, revalidate } = useCachedPromise(async () => {
     const [vaults, currentDefaultVault] = await Promise.all([listVaults(), defaultVaultName()]);
     const effectiveDefaultVault = currentDefaultVault || (vaults.length === 1 ? vaults[0].name : undefined);
 
@@ -12,6 +12,10 @@ export default function Command() {
       vaults: sortVaultsForDefault(vaults, effectiveDefaultVault),
     };
   });
+
+  if (error) {
+    return <Detail markdown={`# Switch Default Vault\n\n${error.message}`} />;
+  }
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search vaults...">
