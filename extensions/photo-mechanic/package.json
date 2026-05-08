@@ -10,7 +10,7 @@
   "commands": [
     {
       "name": "send-to-photo-mechanic",
-      "title": "Send Lightroom Photo to Photo Mechanic",
+      "title": "Open Lightroom Photo in Photo Mechanic",
       "description": "Reveals the active Lightroom Classic photo in Photo Mechanic — equivalent to dragging the file onto Photo Mechanic's icon.",
       "mode": "no-view",
       "preferences": [
