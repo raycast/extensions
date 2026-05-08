@@ -21,7 +21,7 @@ export interface Attachment {
 }
 
 export interface DocumentStructure {
-  attachments: Attachment[];
+  attachments?: Attachment[];
   type?: string;
   content?: ContentNode[];
 }
