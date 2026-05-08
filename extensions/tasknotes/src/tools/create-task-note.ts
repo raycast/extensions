@@ -1,5 +1,5 @@
 import { Tool } from "@raycast/api";
-import { createTaskNote, formatDate } from "../tasknotes";
+import { createTaskNote } from "../tasknotes";
 
 type Input = {
   /**
@@ -85,7 +85,7 @@ export default async function tool(input: Input) {
 
 function parseDate(value: string | undefined) {
   if (!value) return undefined;
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return undefined;
-  return formatDate(date);
+  const datePart = value.slice(0, 10);
+  if (Number.isNaN(new Date(`${datePart}T00:00:00`).getTime())) return undefined;
+  return datePart;
 }
