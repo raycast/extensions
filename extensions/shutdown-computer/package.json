@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "shutdown-computer",
-  "description": "Schedule a Windows shutdown after a specified amount of time.",
+  "description": "Schedule and monitor a Windows shutdown timer from Raycast.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",
@@ -12,11 +12,11 @@
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
   },
   "dependencies": {
-    "@raycast/api": "^1.103.0",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.0.4",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "22.19.17",
     "@types/react": "19.0.10",
     "eslint": "^9.22.0",
@@ -30,7 +30,6 @@
       "title": "Schedule Shutdown",
       "description": "Shut down the computer after a specified delay.",
       "mode": "no-view",
-      "subtitle": "Shutdown Timer",
       "arguments": [
         {
           "name": "amount",
