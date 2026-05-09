@@ -1,6 +1,6 @@
 # AI Translate Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial local Raycast extension with selected-text translation, screenshot OCR translation, and configurable AI providers.
 - Split screenshot OCR into an interactive extraction command and a quiet copy-to-clipboard command.

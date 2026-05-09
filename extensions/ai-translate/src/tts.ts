@@ -28,7 +28,7 @@ interface GeminiTTSResponse {
 }
 
 export async function speakText(text: string): Promise<void> {
-  const preferences = getPreferenceValues<{ geminiAPIKey?: string }>();
+  const preferences = getPreferenceValues<Preferences>();
   const apiKey = preferences.geminiAPIKey?.trim();
 
   if (!apiKey) {
