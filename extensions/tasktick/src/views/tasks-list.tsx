@@ -74,14 +74,30 @@ export function TasksList({ cliPath, prefs }: Props) {
 
   useEffect(() => {
     const stream = new EventsStream(cliPath);
-    const setRunning = (id: string, running: boolean) =>
+    stream.on("started", ({ id }) =>
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, status: "running" } : t)),
+      ),
+    );
+    // Update lastExitCode inline so the row icon flips to its red/green
+    // state immediately — without this, a freshly-failed task stays
+    // green/blue until the next full list refresh (or vice versa).
+    stream.on("completed", ({ id, exitCode }) =>
       setTasks((prev) =>
         prev.map((t) =>
-          t.id === id ? { ...t, status: running ? "running" : "idle" } : t,
+          t.id === id ? { ...t, status: "idle", lastExitCode: exitCode } : t,
         ),
-      );
-    stream.on("started", ({ id }) => setRunning(id, true));
-    stream.on("completed", ({ id }) => setRunning(id, false));
+      ),
+    );
+    // EventEmitter throws uncaught if "error" has no listener — a CLI that
+    // disappears mid-session would otherwise crash the extension.
+    stream.on("error", (err) => {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Events stream error",
+        message: err.message,
+      });
+    });
     return () => stream.kill();
   }, [cliPath]);
 
