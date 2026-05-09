@@ -8,6 +8,8 @@ import tildify from "tildify";
 import * as fs from "fs";
 import * as path from "path";
 import { execFilePromise } from "./utils/exec";
+import { showGitBranch, gitBranchColor } from "./preferences";
+import { isValidHexColor } from "./utils";
 
 const DB_PATH = `${homedir()}/Library/Application Support/Cursor/User/globalStorage/state.vscdb`;
 const RECENT_ENTRIES_QUERY =
@@ -168,9 +170,13 @@ export default function ActiveWorkspaces() {
         if (window.fileName) {
           accessories.push({ text: window.fileName, tooltip: `Open file: ${window.fileName}` });
         }
-        if (window.gitBranch) {
+        if (showGitBranch && window.gitBranch) {
+          const color =
+            gitBranchColor && isValidHexColor(gitBranchColor)
+              ? { light: gitBranchColor, dark: gitBranchColor, adjustContrast: false }
+              : Color.Green;
           accessories.push({
-            tag: { value: window.gitBranch, color: Color.Green },
+            tag: { value: window.gitBranch, color },
             tooltip: `Branch: ${window.gitBranch}`,
           });
         }
