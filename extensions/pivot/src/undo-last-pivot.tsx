@@ -60,8 +60,15 @@ export default function UndoLastPivot() {
     const results = (await setDefaultHandlersBatch(pairs)) as PivotResult[];
     const successes = results.filter((r) => r.ok);
     const failures = results.filter((r) => !r.ok);
+    const retriable = failures.filter((f) => op.previousHandlers[f.ext] != null);
 
-    await setLastOp(null);
+    if (retriable.length === 0) {
+      await setLastOp(null);
+    } else {
+      const remaining: Record<string, string | null> = {};
+      for (const f of retriable) remaining[f.ext] = op.previousHandlers[f.ext];
+      await setLastOp({ ...op, previousHandlers: remaining });
+    }
 
     toast.style = failures.length === 0 ? Toast.Style.Success : Toast.Style.Failure;
     toast.title =
