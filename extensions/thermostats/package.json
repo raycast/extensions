@@ -3,7 +3,7 @@
     "name": "thermostats",
     "title": "Thermostats",
     "description": "Control your thermostats inside Raycast via Seam",
-    "icon": "extension-icon.png",
+    "icon": "assets/extension-icon.png",
     "author": "humanfriend22",
     "license": "MIT",
     "commands": [
@@ -15,26 +15,22 @@
             "arguments": []
         },
         {
-            "name": "apikey",
-            "title": "Set Seam Api Key",
-            "description": "Set your Seam API Key to control your thermostats",
-            "mode": "no-view",
-            "arguments": [
-                {
-                    "name": "apiKey",
-                    "type": "password",
-                    "placeholder": "Enter your Seam API key",
-                    "required": true
-                }
-            ]
-        },
-        {
             "name": "reset",
             "title": "Reset",
-            "description": "Remove your Seam API Key & erase all cached data",
+            "description": "Erase all cached data",
             "mode": "no-view"
         }
     ],
+    "preferences": [
+        {
+            "name": "seam_apikey",
+            "title": "Seam API Key",
+            "description": "Your Seam API Key to control your thermostats",
+            "type": "password",
+            "required": true
+        }
+    ],
+    "categories": ["Productivity", "Other"],
     "dependencies": {
         "@raycast/api": "^1.102.3",
         "@raycast/utils": "^1.17.0",

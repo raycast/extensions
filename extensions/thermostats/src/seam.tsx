@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { LocalStorage } from "@raycast/api";
+import { getPreferenceValues } from "@raycast/api";
 import { Seam } from "seam";
 
 export enum DeviceStatus {
@@ -18,11 +18,11 @@ export const isValidSeamApiKey = (key: string = "") =>
   !!key && key.length === SEAM_API_KEY_LENGTH && key.startsWith(SEAM_API_KEY_PREFIX);
 
 export async function loadSeam(): Promise<[Seam, ""] | [null, string]> {
-  const key = await LocalStorage.getItem<string>("seam_api_key");
-  if (!isValidSeamApiKey(key)) {
+  const { seam_apikey } = getPreferenceValues();
+  if (!isValidSeamApiKey(seam_apikey)) {
     return [null, `Invalid API Key. Please set a valid Seam API key in your Raycast settings.`];
   }
-  process.env["SEAM_API_KEY"] = key;
+  process.env["SEAM_API_KEY"] = seam_apikey;
   const seam = new Seam();
   return [seam, ""];
 }
