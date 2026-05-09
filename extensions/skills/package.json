@@ -38,6 +38,18 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "description": "Search the skills.sh marketplace for agent skills matching a query."
+    },
+    {
+      "name": "read-skill",
+      "title": "Read Skill",
+      "description": "Fetch the full SKILL.md content for a specific skill to understand what it does."
+    }
+  ],
   "preferences": [
     {
       "name": "customNpxPath",
