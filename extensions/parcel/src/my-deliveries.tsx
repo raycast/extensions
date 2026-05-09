@@ -5,6 +5,7 @@ import {
   Icon,
   List,
   Toast,
+  getPreferenceValues,
   launchCommand,
   LaunchType,
   showToast,
@@ -16,28 +17,16 @@ import { Delivery, FilterMode, STATUS_DESCRIPTIONS, getStatusIcon } from "./api"
 import { useDeliveries } from "./hooks/useDeliveries";
 import { useCarriers } from "./hooks/useCarriers";
 
+interface ParcelCommandPreferences {
+  apiKey: string;
+  ambiguousDotDateOrder?: "month_day" | "day_month";
+}
+
 /**
  * Placeholder value returned by some carriers when the date is unknown.
  * This is based on observed API responses and may not be exhaustive.
  */
 const UNKNOWN_DATE_PLACEHOLDER = "--//--";
-
-/**
- * Whether the user's locale typically writes numeric dates as month/day (e.g. en-US)
- * vs day/month (e.g. en-GB). Used to disambiguate `01.02.2025`-style strings.
- */
-function prefersMonthBeforeDayInNumericLocale(): boolean {
-  const parts = new Intl.DateTimeFormat(undefined, {
-    day: "numeric",
-    month: "numeric",
-  }).formatToParts(new Date(2000, 0, 2));
-  const iMonth = parts.findIndex((p) => p.type === "month");
-  const iDay = parts.findIndex((p) => p.type === "day");
-  if (iMonth === -1 || iDay === -1) return true;
-  return iMonth < iDay;
-}
-
-const TRY_MONTH_DAY_FIRST = prefersMonthBeforeDayInNumericLocale();
 
 const NUMERIC_DOT_FORMATS_MONTH_FIRST = [
   "MM.dd.yyyy HH:mm:ss",
@@ -53,12 +42,7 @@ const NUMERIC_DOT_FORMATS_DAY_FIRST = [
   "MM.dd.yyyy HH:mm",
 ] as const;
 
-/**
- * Supported date formats for parsing delivery dates.
- * Dot-separated numeric formats follow the user's locale (US-style vs GB/EU-style) first.
- */
-const DATE_FORMATS = [
-  ...(TRY_MONTH_DAY_FIRST ? NUMERIC_DOT_FORMATS_MONTH_FIRST : NUMERIC_DOT_FORMATS_DAY_FIRST),
+const REST_DATE_FORMATS = [
   "MMMM dd, yyyy HH:mm", // American written format
   "yyyy-MM-dd HH:mm:ss", // ISO 8601
   "EEEE, d MMMM h:mm a", // Day name, date, 12-hour time (e.g. "Saturday, 31 May 5:26 am")
@@ -68,9 +52,14 @@ const DATE_FORMATS = [
 ] as const;
 
 /**
- * Parse carrier/API date strings; handles ambiguous `dd.MM` vs `MM.dd` using system locale order.
+ * Parse carrier/API date strings; ambiguous `dd.MM` vs `MM.dd` follows extension preference `ambiguousDotDateOrder`.
  */
-function parseDeliveryDate(dateString: string): Date | null {
+function parseDeliveryDate(dateString: string, ambiguousNumericMonthFirst: boolean): Date | null {
+  const dateFormats = [
+    ...(ambiguousNumericMonthFirst ? NUMERIC_DOT_FORMATS_MONTH_FIRST : NUMERIC_DOT_FORMATS_DAY_FIRST),
+    ...REST_DATE_FORMATS,
+  ];
+
   const dotSeparatedMatch = dateString.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})(?:\s+(\d{1,2}):(\d{2})(?::(\d{2}))?)?/);
   if (dotSeparatedMatch) {
     const [, first, second, , , , sec] = dotSeparatedMatch;
@@ -89,7 +78,9 @@ function parseDeliveryDate(dateString: string): Date | null {
     } else {
       const americanFmt = hasSeconds ? `MM.dd.yyyy HH:mm:ss` : `MM.dd.yyyy HH:mm`;
       const europeanFmt = hasSeconds ? `dd.MM.yyyy HH:mm:ss` : `dd.MM.yyyy HH:mm`;
-      const [primaryFmt, secondaryFmt] = TRY_MONTH_DAY_FIRST ? [americanFmt, europeanFmt] : [europeanFmt, americanFmt];
+      const [primaryFmt, secondaryFmt] = ambiguousNumericMonthFirst
+        ? [americanFmt, europeanFmt]
+        : [europeanFmt, americanFmt];
       const primary = parse(dateString, primaryFmt, new Date());
       if (isValid(primary)) return primary;
       const secondary = parse(dateString, secondaryFmt, new Date());
@@ -97,7 +88,7 @@ function parseDeliveryDate(dateString: string): Date | null {
     }
   }
 
-  for (const fmt of DATE_FORMATS) {
+  for (const fmt of dateFormats) {
     const date = parse(dateString, fmt, new Date());
     if (isValid(date)) return date;
   }
@@ -106,6 +97,8 @@ function parseDeliveryDate(dateString: string): Date | null {
 
 export default function Command() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.ACTIVE);
+  const { ambiguousDotDateOrder } = getPreferenceValues<ParcelCommandPreferences>();
+  const ambiguousNumericMonthFirst = ambiguousDotDateOrder !== "day_month";
   const { deliveries, isLoading, error } = useDeliveries(filterMode);
   const { carriers } = useCarriers();
 
@@ -128,7 +121,7 @@ export default function Command() {
    */
   const getDaysUntilDelivery = (delivery: Delivery): number | null => {
     if (!delivery.date_expected) return null;
-    const parsed = parseDeliveryDate(delivery.date_expected);
+    const parsed = parseDeliveryDate(delivery.date_expected, ambiguousNumericMonthFirst);
     if (!parsed) return null;
     const deliveryDate = parsed;
     const today = new Date();
@@ -150,7 +143,7 @@ export default function Command() {
     // Check if the original string contains time information
     const hasTimeInfo = /[0-9]{1,2}:[0-9]{2}/.test(dateString) || /[0-9]{1,2}:[0-9]{2} [AP]M/i.test(dateString);
 
-    const date = parseDeliveryDate(dateString);
+    const date = parseDeliveryDate(dateString, ambiguousNumericMonthFirst);
     if (!date) {
       console.error(`All supported date formats failed for: ${dateString}`);
       return dateString;
@@ -204,8 +197,10 @@ export default function Command() {
    */
   const formatExpectedDelivery = (delivery: Delivery): string => {
     if (!delivery.date_expected) return "Not available";
-    const start = parseDeliveryDate(delivery.date_expected);
-    const end = delivery.date_expected_end ? parseDeliveryDate(delivery.date_expected_end) : null;
+    const start = parseDeliveryDate(delivery.date_expected, ambiguousNumericMonthFirst);
+    const end = delivery.date_expected_end
+      ? parseDeliveryDate(delivery.date_expected_end, ambiguousNumericMonthFirst)
+      : null;
     if (!start) return "Not available";
 
     const now = new Date();

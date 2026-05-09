@@ -1,8 +1,8 @@
 # Parcel Changelog
 
-## [Locale-aware numeric date parsing] - {PR_MERGE_DATE}
+## [Ambiguous dotted date preference] - {PR_MERGE_DATE}
 
-- Ambiguous dot-separated dates (e.g. `06.07.2025` when both parts could be month or day) now follow your **system locale** (month-first vs day-first), instead of always assuming US order
+- Ambiguous dot-separated dates (e.g. `06.07.2025` when both parts could be month or day) use a new extension preference: **Month/Day first (US)** vs **Day/Month first (EU/GB)**
 - Expected delivery **day countdown** uses the same parser as on-screen dates so badges stay consistent with the formatted text
 
 ## [Fix Carrier Dropdown Default] - 2026-01-30
@@ -27,7 +27,7 @@
 - The Add Delivery form now prevents leaving required form fields empty
 - Deliveries added from the extension will automatically use your system's language in Parcel
 - Replaced the success toast with a cleaner Raycast HUD notification
-- Fixed API errors to display the specific error from Parcel rather than a generic "Something went wrong" 
+- Fixed API errors to display the specific error from Parcel rather than a generic "Something went wrong"
 
 ## [Detail View Refactor, Metadata, UX] - 2025-09-19
 
@@ -77,3 +77,4 @@
 - Added action to copy tracking numbers
 - Added support for filtering between active and recent deliveries
 - Created a clean UI with color-coded status indicators and delivery timeframes
+
