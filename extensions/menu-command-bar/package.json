@@ -12,7 +12,7 @@
     {
       "name": "menu-command-bar",
       "title": "Menu Command Bar",
-      "description": "v01 — Search and invoke menu items in the frontmost app, with MRU memory.",
+      "description": "Search and invoke menu items in the frontmost app, with memory of recently used items.",
       "mode": "view"
     }
   ],

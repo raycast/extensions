@@ -249,10 +249,12 @@ func findMenuItem(in menu: AXUIElement, path: [String]) -> AXUIElement? {
 }
 
 func cmdInvoke(bundleId: String, path: [String]) -> Int32 {
-    // Locate the app by bundleId among running apps; fall back to frontmost if it matches.
+    // Locate the app strictly by bundleId. We must not fall back to the frontmost app,
+    // because the user may have switched apps between picking the item and invoking it —
+    // firing kAXPressAction on the wrong app would be a surprising and dangerous default.
     let candidates = NSWorkspace.shared.runningApplications.filter { $0.bundleIdentifier == bundleId }
-    guard let app = candidates.first ?? frontmostApp() else {
-        FileHandle.standardError.write("app not running\n".data(using: .utf8)!)
+    guard let app = candidates.first else {
+        FileHandle.standardError.write("app not running: \(bundleId)\n".data(using: .utf8)!)
         return 2
     }
 
