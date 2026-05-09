@@ -65,6 +65,8 @@ export type Activity = {
   steps: Step[] | null;
   source: string | null;
   externalId: string | null;
+  plannedActivityId: string | null;
+  completedActivityId: string | null;
   createdAt: number;
   updatedAt: number;
 };
@@ -103,6 +105,7 @@ export type ListActivitiesParams = {
   completed?: string;
   limit?: number;
   offset?: number;
+  includePaired?: boolean;
 };
 
 export type ListActivitiesResponse = {
@@ -122,4 +125,16 @@ export type DeleteResponse = {
 
 export type BatchDeleteResponse = {
   deleted: number;
+};
+
+export type PairResponse = {
+  paired: true;
+  completedActivityId: string;
+  plannedActivityId: string;
+};
+
+export type UnpairResponse = {
+  unpaired: true;
+  activityId: string;
+  partnerId: string | null;
 };

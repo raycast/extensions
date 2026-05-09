@@ -1,5 +1,10 @@
 # Shape Calendar Changelog
 
+## [Pair and Unpair Activities] - {PR_MERGE_DATE}
+
+- Pair completed activities with their planned counterparts via AI
+- Unpair activities via AI
+
 ## [Structured Workouts] - 2026-03-30
 
 - View structured workout steps (intervals, repeats, warmup/cooldown) in activity details
