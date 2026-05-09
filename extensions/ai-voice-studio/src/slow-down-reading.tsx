@@ -10,10 +10,16 @@ import {
 } from "./utils/playback-speed";
 import { getLastReadingSession, saveReadingSession, type ReadingSession } from "./utils/reading-session";
 import { runMimoSpeedDown } from "./mimo-speed-down";
+import { runOpenAISpeedDown } from "./openai-speed-down";
 import { getDefaultProvider } from "./utils/provider";
 
 export default async function SlowDownReading() {
-  if (getDefaultProvider() === "mimo") {
+  const provider = getDefaultProvider();
+  if (provider === "openai") {
+    await runOpenAISpeedDown();
+    return;
+  }
+  if (provider === "mimo") {
     await runMimoSpeedDown();
     return;
   }

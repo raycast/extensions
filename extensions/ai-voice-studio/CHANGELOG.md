@@ -13,6 +13,9 @@
 - Added MiMo commands: TTS Studio, Quick Read with MiMo, Read with MiMo Voice, Set MiMo Quick Read Voice, and MiMo Reading Status.
 - Added MiMo provider files for API calls, voices, expressive controls, chunking, status, voice override storage, and lookahead playback.
 - Added MiMo extension icons.
+- Added OpenAI as a third TTS provider through the Speech API.
+- Added OpenAI commands: Quick Read with OpenAI, Read with OpenAI Voice, and Set OpenAI Quick Read Voice.
+- Added OpenAI provider files for API calls, voices, chunking, status, voice override storage, and lookahead playback.
 - Extended the shared audio player to support WAV playback, playback-rate arguments, and abort signals.
 
 ### Verified

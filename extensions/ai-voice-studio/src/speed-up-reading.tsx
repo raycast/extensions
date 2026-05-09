@@ -10,10 +10,16 @@ import {
 } from "./utils/playback-speed";
 import { getLastReadingSession, saveReadingSession, type ReadingSession } from "./utils/reading-session";
 import { runMimoSpeedUp } from "./mimo-speed-up";
+import { runOpenAISpeedUp } from "./openai-speed-up";
 import { getDefaultProvider } from "./utils/provider";
 
 export default async function SpeedUpReading() {
-  if (getDefaultProvider() === "mimo") {
+  const provider = getDefaultProvider();
+  if (provider === "openai") {
+    await runOpenAISpeedUp();
+    return;
+  }
+  if (provider === "mimo") {
     await runMimoSpeedUp();
     return;
   }

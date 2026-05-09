@@ -7,10 +7,16 @@ import { buildDefaultOptionsFromPrefs } from "./utils/voice-preferences";
 import { presentCommandError, showResumeSuggestion } from "./utils/errors";
 import { clearPlaybackState, readPlaybackState } from "./utils/playback-state";
 import { runMimoQuickRead } from "./mimo-quick-read";
+import { runOpenAIQuickRead } from "./openai-quick-read";
 import { getDefaultProvider } from "./utils/provider";
 
 export default async function QuickRead() {
-  if (getDefaultProvider() === "mimo") {
+  const provider = getDefaultProvider();
+  if (provider === "openai") {
+    await runOpenAIQuickRead();
+    return;
+  }
+  if (provider === "mimo") {
     await runMimoQuickRead();
     return;
   }

@@ -2,21 +2,36 @@ import { LaunchType, Toast, launchCommand, showHUD, showToast } from "@raycast/a
 import { stopExternalPlayback } from "./utils/audio-player";
 import { clearPlaybackState, readPlaybackState } from "./utils/playback-state";
 import { getLastReadingSession } from "./utils/reading-session";
-import { clearNowPlaying, getNowPlaying, requestPlaybackStop } from "./utils/mimo-playback-state";
+import {
+  clearNowPlaying as clearMimoNowPlaying,
+  getNowPlaying as getMimoNowPlaying,
+  requestPlaybackStop as requestMimoPlaybackStop,
+} from "./utils/mimo-playback-state";
+import {
+  clearNowPlaying as clearOpenAINowPlaying,
+  getNowPlaying as getOpenAINowPlaying,
+  requestPlaybackStop as requestOpenAIPlaybackStop,
+} from "./utils/openai-playback-state";
 
 export default async function StopReading() {
-  const mimoState = await getNowPlaying();
-  await requestPlaybackStop();
+  const [mimoState, openAIState] = await Promise.all([getMimoNowPlaying(), getOpenAINowPlaying()]);
+  await Promise.all([requestMimoPlaybackStop(), requestOpenAIPlaybackStop()]);
   const stopped = stopExternalPlayback();
 
   if (stopped) {
-    await Promise.all([clearPlaybackState(), clearNowPlaying()]);
+    await Promise.all([clearPlaybackState(), clearMimoNowPlaying(), clearOpenAINowPlaying()]);
     await showHUD("Playback stopped");
     return;
   }
 
   if (mimoState?.status === "playing" || mimoState?.status === "synthesizing") {
-    await clearNowPlaying();
+    await clearMimoNowPlaying();
+    await showHUD("Playback stopped");
+    return;
+  }
+
+  if (openAIState?.status === "playing" || openAIState?.status === "synthesizing") {
+    await clearOpenAINowPlaying();
     await showHUD("Playback stopped");
     return;
   }

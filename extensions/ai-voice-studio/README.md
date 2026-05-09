@@ -2,7 +2,7 @@
 
 Read and generate speech from Raycast with multiple AI TTS providers.
 
-AI Voice Studio merges the original MiniMax TTS reading workflow with Xiaomi MiMo expressive TTS. The extension is now structured as a provider hub: MiniMax remains the long-form reading and voice-clone provider, MiMo adds an expressive studio with voice, style, rhythm, emotion, and pacing controls, and the manifest is ready for a future Doubao provider.
+AI Voice Studio merges the original MiniMax TTS reading workflow with Xiaomi MiMo expressive TTS and OpenAI Speech API playback. The extension is structured as a provider hub: MiniMax remains the long-form reading and voice-clone provider, MiMo adds an expressive studio with voice, style, rhythm, emotion, and pacing controls, OpenAI adds a simple `gpt-4o-mini-tts` reading path, and the manifest is ready for a future Doubao provider.
 
 ## Providers
 
@@ -33,6 +33,19 @@ MiMo is integrated as the expressive provider:
 - Lookahead chunk synthesis so the next chunk can be prepared while the current chunk is playing.
 - MiMo-specific status and speed override storage.
 
+### OpenAI
+
+OpenAI is integrated through the Speech API:
+
+- Quick Read with OpenAI.
+- Read with OpenAI Voice.
+- Set OpenAI Quick Read Voice.
+- Default `gpt-4o-mini-tts` model, with `tts-1` and `tts-1-hd` as legacy options.
+- Built-in OpenAI voices including `cedar`, `marin`, `coral`, `alloy`, `nova`, and `shimmer`.
+- Optional speech instructions for `gpt-4o-mini-tts`.
+- MP3 and WAV response formats.
+- Provider-scoped status, stop, speed, and voice override storage.
+
 ## Commands
 
 | Command | Provider | Purpose |
@@ -47,6 +60,9 @@ MiMo is integrated as the expressive provider:
 | Quick Read with MiMo | MiMo | Direct MiMo quick-read command, regardless of the default provider. |
 | Read with MiMo Voice | MiMo | Browse MiMo voices and read with the selected voice. |
 | Set MiMo Quick Read Voice | MiMo | Choose the MiMo voice used by Quick Read when MiMo is selected. |
+| Quick Read with OpenAI | OpenAI | Direct OpenAI quick-read command, regardless of the default provider. |
+| Read with OpenAI Voice | OpenAI | Browse OpenAI voices and read with the selected voice. |
+| Set OpenAI Quick Read Voice | OpenAI | Choose the OpenAI voice used by Quick Read when OpenAI is selected. |
 | Stop Reading | Shared | Stop current playback. |
 | Increase Reading Speed | Shared | Increase speed for the default provider. |
 | Decrease Reading Speed | Shared | Decrease speed for the default provider. |
@@ -57,7 +73,7 @@ MiMo is integrated as the expressive provider:
 
 ### Shared
 
-- **Default TTS Provider**: `MiniMax` or `MiMo`. This controls the shared Quick Read and speed commands.
+- **Default TTS Provider**: `MiniMax`, `MiMo`, or `OpenAI`. This controls the shared Quick Read and speed commands.
 
 ### MiniMax
 
@@ -83,6 +99,17 @@ MiMo is integrated as the expressive provider:
 
 MiMo preferences intentionally use the `mimo*` prefix internally so they do not collide with the older MiniMax preference names. A future Doubao provider should follow the same pattern with `doubao*` names.
 
+### OpenAI
+
+- **OpenAI API Key**
+- **OpenAI TTS Model**
+- **OpenAI Default Voice**
+- **OpenAI Response Format**
+- **OpenAI Playback Rate**
+- **OpenAI Speaking Instructions** (`gpt-4o-mini-tts`)
+
+OpenAI preferences use the `openai*` prefix internally so they stay independent from MiniMax, MiMo, and future providers.
+
 ## Setup
 
 ```bash
@@ -105,8 +132,10 @@ npx tsc --noEmit
 - MiniMax voice clone: file upload plus `POST /v1/voice_clone`.
 - MiMo API: `POST {MiMo Token Plan Base URL}/chat/completions`.
 - MiMo audio is returned as base64 WAV.
+- OpenAI API: `POST https://api.openai.com/v1/audio/speech`.
+- OpenAI audio is returned as binary MP3 or WAV and converted to base64 before playback.
 - Playback uses macOS `afplay`.
-- The shared audio player now supports MP3/WAV temp files, optional playback rate, and abort signals for MiMo lookahead synthesis.
+- The shared audio player now supports MP3/WAV temp files, optional playback rate, and abort signals for MiMo/OpenAI lookahead synthesis.
 - Provider-specific local storage keys are kept separate for voice overrides, live playback state, and speed overrides.
 
 ## Provider Extension Pattern
