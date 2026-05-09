@@ -176,7 +176,13 @@ func frontmostApp() -> NSRunningApplication? {
 
 func menuBar(for app: NSRunningApplication) -> AXUIElement? {
     let appEl = AXUIElementCreateApplication(app.processIdentifier)
-    return axAttr(appEl, kAXMenuBarAttribute) as! AXUIElement?
+    // The Accessibility API returns CFTypeRef. We verify the type ID before casting
+    // so an unexpected return type returns nil instead of trapping at runtime.
+    guard let value = axAttr(appEl, kAXMenuBarAttribute),
+          CFGetTypeID(value) == AXUIElementGetTypeID() else {
+        return nil
+    }
+    return (value as! AXUIElement)
 }
 
 // MARK: - Commands
@@ -216,7 +222,10 @@ func cmdList() -> Int32 {
         },
     ]
 
-    let data = try! JSONSerialization.data(withJSONObject: json, options: [])
+    guard let data = try? JSONSerialization.data(withJSONObject: json, options: []) else {
+        FileHandle.standardError.write("failed to serialise JSON\n".data(using: .utf8)!)
+        return 6
+    }
     FileHandle.standardOutput.write(data)
     FileHandle.standardOutput.write("\n".data(using: .utf8)!)
     return 0

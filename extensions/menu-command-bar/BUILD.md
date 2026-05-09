@@ -33,7 +33,7 @@ file menubar-helper
 - **Build flags**: exactly the commands above (`-O`, two `-target` builds, then `lipo -create`).
 - **SHA-256 of `assets/menubar-helper`**:
   ```
-  68e4d9181870fbd2cc237a60e6a9150d4a334da3543aa5353fa1505602c7135f
+  cdfc3a1de07b2cc40498b31db0fd03a63f297534b9ce9be36133fa4ed47a2d4e
   ```
 
 Reviewers can rebuild from source and compare the resulting binary's behavior. Note: Swift binaries are not byte-for-byte reproducible across machines (timestamps, build paths, randomized symbol orderings), so the SHA above is for the specific binary committed; rebuilt outputs will differ in bytes but be functionally equivalent.
