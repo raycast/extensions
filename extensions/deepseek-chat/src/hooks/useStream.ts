@@ -1,16 +1,16 @@
-import { useState, useCallback, useRef } from 'react';
-import { streamChat } from '../api/deepseek';
+import { useState, useCallback, useRef } from "react";
+import { streamChat } from "../api/deepseek";
 
-type StreamStatus = 'idle' | 'streaming' | 'done' | 'error';
+type StreamStatus = "idle" | "streaming" | "done" | "error";
 
 interface Preferences {
   apiKey: string;
-  model: 'deepseek-chat' | 'deepseek-reasoner';
+  model: "deepseek-chat" | "deepseek-reasoner";
 }
 
 export function useStream(preferences: Preferences) {
-  const [text, setText] = useState('');
-  const [status, setStatus] = useState<StreamStatus>('idle');
+  const [text, setText] = useState("");
+  const [status, setStatus] = useState<StreamStatus>("idle");
   const abortRef = useRef<AbortController | null>(null);
 
   const submit = useCallback(
@@ -18,8 +18,8 @@ export function useStream(preferences: Preferences) {
       return new Promise((resolve, reject) => {
         const controller = new AbortController();
         abortRef.current = controller;
-        setText('');
-        setStatus('streaming');
+        setText("");
+        setStatus("streaming");
 
         streamChat({
           prompt: question,
@@ -28,12 +28,12 @@ export function useStream(preferences: Preferences) {
           signal: controller.signal,
           onChunk: (fullText) => setText(fullText),
           onComplete: (fullText) => {
-            setStatus('done');
+            setStatus("done");
             abortRef.current = null;
             resolve(fullText);
           },
           onError: (error) => {
-            setStatus('error');
+            setStatus("error");
             abortRef.current = null;
             reject(error);
           },
@@ -46,12 +46,12 @@ export function useStream(preferences: Preferences) {
   const cancel = useCallback(() => {
     abortRef.current?.abort();
     abortRef.current = null;
-    setStatus('idle');
+    setStatus("idle");
   }, []);
 
   const reset = useCallback(() => {
-    setText('');
-    setStatus('idle');
+    setText("");
+    setStatus("idle");
   }, []);
 
   return { text, status, submit, cancel, reset };

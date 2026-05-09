@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { loadHistory, saveHistory } from '../utils/storage';
+import { useState, useEffect } from "react";
+import { loadHistory, saveHistory } from "../utils/storage";
 
 export interface HistoryEntry {
   id: string;
@@ -16,7 +16,7 @@ export function useHistory() {
     loadHistory().then(setHistory);
   }, []);
 
-  const addEntry = async (entry: Omit<HistoryEntry, 'id' | 'timestamp'>) => {
+  const addEntry = async (entry: Omit<HistoryEntry, "id" | "timestamp">) => {
     const newEntry: HistoryEntry = {
       ...entry,
       id: Date.now().toString(),

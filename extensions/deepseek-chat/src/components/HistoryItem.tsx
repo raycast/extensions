@@ -1,12 +1,13 @@
-import { List, ActionPanel, Action, Icon } from '@raycast/api';
-import type { HistoryEntry } from '../hooks/useHistory';
+import { List, ActionPanel, Action, Icon } from "@raycast/api";
+import type { HistoryEntry } from "../hooks/useHistory";
 
 interface HistoryItemProps {
   entry: HistoryEntry;
 }
 
 export function HistoryItem({ entry }: HistoryItemProps) {
-  const preview = entry.answer.length > 80 ? entry.answer.slice(0, 80) + '...' : entry.answer;
+  const preview =
+    entry.answer.length > 80 ? entry.answer.slice(0, 80) + "..." : entry.answer;
 
   return (
     <List.Item

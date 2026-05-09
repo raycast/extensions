@@ -1,7 +1,7 @@
-import { LocalStorage } from '@raycast/api';
-import type { HistoryEntry } from '../hooks/useHistory';
+import { LocalStorage } from "@raycast/api";
+import type { HistoryEntry } from "../hooks/useHistory";
 
-const HISTORY_KEY = 'deepseek_history';
+const HISTORY_KEY = "deepseek_history";
 const MAX_ENTRIES = 50;
 
 export async function loadHistory(): Promise<HistoryEntry[]> {

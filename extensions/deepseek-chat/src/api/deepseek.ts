@@ -1,8 +1,8 @@
-import fetch from 'node-fetch';
+import fetch from "node-fetch";
 
 export interface StreamOptions {
   prompt: string;
-  model: 'deepseek-chat' | 'deepseek-reasoner';
+  model: "deepseek-chat" | "deepseek-reasoner";
   apiKey: string;
   signal?: AbortSignal;
   onChunk: (text: string) => void;
@@ -11,18 +11,19 @@ export interface StreamOptions {
 }
 
 export async function streamChat(options: StreamOptions): Promise<void> {
-  const { prompt, model, apiKey, signal, onChunk, onComplete, onError } = options;
+  const { prompt, model, apiKey, signal, onChunk, onComplete, onError } =
+    options;
 
   try {
-    const response = await fetch('https://api.deepseek.com/chat/completions', {
-      method: 'POST',
+    const response = await fetch("https://api.deepseek.com/chat/completions", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
         model,
-        messages: [{ role: 'user', content: prompt }],
+        messages: [{ role: "user", content: prompt }],
         stream: true,
       }),
       signal,
@@ -34,19 +35,19 @@ export async function streamChat(options: StreamOptions): Promise<void> {
     }
 
     return new Promise<void>((resolve, reject) => {
-      let fullText = '';
-      let buffer = '';
+      let fullText = "";
+      let buffer = "";
 
-      response.body!.on('data', (chunk: Buffer) => {
+      response.body!.on("data", (chunk: Buffer) => {
         buffer += chunk.toString();
-        const lines = buffer.split('\n');
+        const lines = buffer.split("\n");
         buffer = lines.pop()!;
 
         for (const line of lines) {
           const trimmed = line.trim();
-          if (!trimmed || !trimmed.startsWith('data: ')) continue;
+          if (!trimmed || !trimmed.startsWith("data: ")) continue;
           const data = trimmed.slice(6);
-          if (data === '[DONE]') {
+          if (data === "[DONE]") {
             onComplete(fullText);
             resolve();
             return;
@@ -64,17 +65,17 @@ export async function streamChat(options: StreamOptions): Promise<void> {
         }
       });
 
-      response.body!.on('end', () => {
+      response.body!.on("end", () => {
         onComplete(fullText);
         resolve();
       });
 
-      response.body!.on('error', (err) => {
+      response.body!.on("error", (err) => {
         reject(err);
       });
     });
   } catch (err) {
-    if (err instanceof Error && err.name === 'AbortError') {
+    if (err instanceof Error && err.name === "AbortError") {
       return; // cancelled, no error
     }
     onError(err instanceof Error ? err : new Error(String(err)));
