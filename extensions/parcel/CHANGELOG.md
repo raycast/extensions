@@ -1,5 +1,10 @@
 # Parcel Changelog
 
+## [Locale-aware numeric date parsing] - {PR_MERGE_DATE}
+
+- Ambiguous dot-separated dates (e.g. `06.07.2025` when both parts could be month or day) now follow your **system locale** (month-first vs day-first), instead of always assuming US order
+- Expected delivery **day countdown** uses the same parser as on-screen dates so badges stay consistent with the formatted text
+
 ## [Fix Carrier Dropdown Default] - 2026-01-30
 
 - Fixed the "Add Delivery" carrier dropdown auto-selecting the first carrier (4PX) instead of starting with no selection
