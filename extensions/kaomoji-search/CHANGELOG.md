@@ -1,5 +1,10 @@
 # Kaomoji Search Changelog
 
+## [Use native copy/paste actions] - {PR_MERGE_DATE}
+
+- Replace manual `Clipboard.copy` / `Clipboard.paste` actions with `Action.CopyToClipboard` and `Action.Paste`
+- Keep recent history behavior by adding kaomoji through `onCopy` / `onPaste` callbacks
+
 ## [Update] - 2025-10-14
 
 - Added support for pinning kaomojis

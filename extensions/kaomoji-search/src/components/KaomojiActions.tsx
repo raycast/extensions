@@ -1,13 +1,4 @@
-import {
-  ActionPanel,
-  Action,
-  Clipboard,
-  Icon,
-  Keyboard,
-  showToast,
-  Toast,
-  openExtensionPreferences,
-} from "@raycast/api";
+import { ActionPanel, Action, Icon, Keyboard, showToast, Toast, openExtensionPreferences } from "@raycast/api";
 import { useCallback, useMemo } from "react";
 import { useRecentKaomoji } from "../hooks/useRecentKaomoji";
 import { SearchResult } from "../types";
@@ -22,16 +13,33 @@ interface KaomojiActionsProps {
 export function KaomojiActions({ searchResult, primaryAction, toggleFavorite, isFavorite }: KaomojiActionsProps) {
   const { addKaomoji } = useRecentKaomoji();
 
-  const pasteInActiveApp = useCallback(() => {
-    addKaomoji(searchResult);
-    Clipboard.paste(searchResult.name);
-  }, [addKaomoji, searchResult]);
+  const pasteInActiveApp = useMemo(
+    () => (
+      <Action.Paste
+        title="Paste in Active App"
+        content={searchResult.name}
+        icon={Icon.Clipboard}
+        onPaste={() => addKaomoji(searchResult)}
+        key="paste-in-active-app"
+      />
+    ),
+    [searchResult, addKaomoji],
+  );
 
-  const copyToClipboard = useCallback(() => {
-    addKaomoji(searchResult);
-    Clipboard.copy(searchResult.name);
-    showToast({ title: "Copied to Clipboard", style: Toast.Style.Success });
-  }, [addKaomoji, searchResult]);
+  const copyToClipboard = useMemo(
+    () => (
+      <Action.CopyToClipboard
+        title="Copy to Clipboard"
+        content={searchResult.name}
+        icon={Icon.Clipboard}
+        onCopy={() => {
+          addKaomoji(searchResult);
+        }}
+        key="copy-to-clipboard"
+      />
+    ),
+    [searchResult, addKaomoji],
+  );
 
   const isPinned = isFavorite(searchResult);
 
@@ -43,25 +51,13 @@ export function KaomojiActions({ searchResult, primaryAction, toggleFavorite, is
     });
   }, [toggleFavorite, searchResult, isPinned]);
 
-  const PasteInActiveAppAction = useMemo(() => {
-    return (
-      <Action title="Paste in Active App" onAction={pasteInActiveApp} icon={Icon.Clipboard} key="paste-in-active-app" />
-    );
-  }, [pasteInActiveApp]);
-
-  const CopyToClipboardAction = useMemo(() => {
-    return (
-      <Action title="Copy to Clipboard" onAction={copyToClipboard} icon={Icon.Clipboard} key="copy-to-clipboard" />
-    );
-  }, [copyToClipboard]);
-
   const actions = useMemo(() => {
     if (primaryAction === "copy-to-clipboard") {
-      return [CopyToClipboardAction, PasteInActiveAppAction];
+      return [copyToClipboard, pasteInActiveApp];
     } else {
-      return [PasteInActiveAppAction, CopyToClipboardAction];
+      return [pasteInActiveApp, copyToClipboard];
     }
-  }, [primaryAction, CopyToClipboardAction, PasteInActiveAppAction]);
+  }, [primaryAction, copyToClipboard, pasteInActiveApp]);
 
   return (
     <ActionPanel>
