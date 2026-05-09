@@ -1,7 +1,6 @@
 import { List, Icon, ActionPanel, Action, Image } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import fetch from "node-fetch";
 import { countryFlags, nationalityFlags, getTeamColor } from "./constants";
 
 // --- TYPES ---
@@ -127,7 +126,6 @@ export default function Standings() {
       fetch("https://api.jolpi.ca/ergast/f1/current/constructorStandings.json"),
     ]);
 
-    // 🟢 FIXED: Specific response typing
     const dJson = (await dRes.json()) as DriverStandingsResponse;
     const cJson = (await cRes.json()) as ConstructorStandingsResponse;
 
@@ -142,7 +140,6 @@ export default function Standings() {
     <List
       isLoading={isLoading}
       searchBarAccessory={
-        // 🟢 FIXED: Typed the callback to match ViewType instead of any
         <List.Dropdown
           tooltip="Championship"
           onChange={(val) => setView(val as ViewType)}

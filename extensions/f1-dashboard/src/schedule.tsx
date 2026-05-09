@@ -1,6 +1,5 @@
 import { List, Icon, Image, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import fetch from "node-fetch";
 import { countryFlags } from "./constants";
 import { format } from "date-fns";
 
@@ -74,7 +73,6 @@ export default function Schedule() {
     },
   );
 
-  // 🟢 Updated formatting function with safe fallbacks
   const formatSession = (session?: Session) => {
     if (!session) return null;
 
@@ -88,13 +86,11 @@ export default function Schedule() {
       return format(d, `E, ${safeDateFmt}`);
     }
 
-    // Ensure the time string ends with 'Z' so JS knows it's UTC time from the API
     const timeString = session.time.endsWith("Z")
       ? session.time
       : `${session.time}Z`;
     const d = new Date(`${session.date}T${timeString}`);
 
-    // Format safely
     return format(d, `E, ${safeDateFmt}, ${safeTimeFmt}`);
   };
 

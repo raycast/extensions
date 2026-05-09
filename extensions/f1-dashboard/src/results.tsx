@@ -1,10 +1,9 @@
 import { List, Icon, ActionPanel, Action, Image } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
-import fetch from "node-fetch";
 import { historicCountryFlags, nationalityFlags } from "./constants";
 
-// --- TYPES ---
+// TYPES
 interface RaceResult {
   positionText: string;
   points: string;
@@ -39,7 +38,6 @@ function RaceDetail({ race, year }: { race: Race; year: string }) {
     const res = await fetch(
       `https://api.jolpi.ca/ergast/f1/${year}/${race.round}/results.json`,
     );
-    // 🟢 FIXED: Defined the structure instead of using 'any'
     const json = (await res.json()) as ErgastResponse<ResultsData>;
     return (json.MRData?.RaceTable?.Races[0]?.Results || []) as RaceResult[];
   });
@@ -84,7 +82,6 @@ export default function HistoricalResults() {
   const { isLoading, data: races = [] } = usePromise(
     async (y: string) => {
       const res = await fetch(`https://api.jolpi.ca/ergast/f1/${y}.json`);
-      // 🟢 FIXED: Type cast to the defined response interface
       const json = (await res.json()) as ErgastResponse<Race>;
       return (json.MRData?.RaceTable?.Races || []) as Race[];
     },
