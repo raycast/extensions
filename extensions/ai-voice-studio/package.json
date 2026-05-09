@@ -1,0 +1,585 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-voice-studio",
+  "title": "AI Voice Studio",
+  "description": "Read and generate speech from Raycast with MiniMax and Xiaomi MiMo voices, TTS Studio controls, speed control, resume, and voice cloning.",
+  "icon": "command-icon.png",
+  "author": "xianwei_zhang",
+  "categories": [
+    "Media",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "1.0.0",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "quick-read",
+      "title": "Quick Read",
+      "subtitle": "AI Voice Studio",
+      "description": "Read selected text, or clipboard text if no selection is available, with the default TTS provider. Trigger again to stop.",
+      "mode": "no-view"
+    },
+    {
+      "name": "resume-reading",
+      "title": "Resume Last Reading",
+      "subtitle": "MiniMax",
+      "description": "Resume the previous MiniMax reading from the next unfinished chunk.",
+      "mode": "no-view"
+    },
+    {
+      "name": "restart-reading",
+      "title": "Restart Last Reading",
+      "subtitle": "MiniMax",
+      "description": "Restart the previous MiniMax reading from the beginning.",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-with-voice",
+      "title": "Read with MiniMax Voice",
+      "subtitle": "MiniMax",
+      "description": "Browse MiniMax voices and read selected text aloud.",
+      "mode": "view"
+    },
+    {
+      "name": "select-voice",
+      "title": "Set MiniMax Quick Read Voice",
+      "subtitle": "MiniMax",
+      "description": "Choose and preview the MiniMax voice used by Quick Read when MiniMax is the default provider.",
+      "mode": "view"
+    },
+    {
+      "name": "clone-voice",
+      "title": "Clone MiniMax Voice",
+      "subtitle": "MiniMax",
+      "description": "Upload audio and create a cloned MiniMax voice.",
+      "mode": "view"
+    },
+    {
+      "name": "tts-studio",
+      "title": "TTS Studio",
+      "subtitle": "MiMo",
+      "description": "Generate and play MiMo speech from typed, selected, or pasted text, with voice, emotion, and style controls.",
+      "icon": "mimo-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "mimo-quick-read",
+      "title": "Quick Read with MiMo",
+      "subtitle": "MiMo",
+      "description": "Read selected or clipboard text with your default MiMo voice. Run again to stop playback.",
+      "icon": "mimo-icon.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "mimo-read-with-voice",
+      "title": "Read with MiMo Voice",
+      "subtitle": "MiMo",
+      "description": "Browse MiMo voices and read selected or clipboard text aloud.",
+      "icon": "mimo-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "mimo-select-voice",
+      "title": "Set MiMo Quick Read Voice",
+      "subtitle": "MiMo",
+      "description": "Choose and preview the MiMo voice used by Quick Read when MiMo is the default provider.",
+      "icon": "mimo-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "stop-reading",
+      "title": "Stop Reading",
+      "subtitle": "AI Voice Studio",
+      "description": "Stop the current TTS playback.",
+      "mode": "no-view"
+    },
+    {
+      "name": "speed-up-reading",
+      "title": "Increase Reading Speed",
+      "subtitle": "AI Voice Studio",
+      "description": "Increase reading speed by 0.25x for the default provider.",
+      "mode": "no-view"
+    },
+    {
+      "name": "slow-down-reading",
+      "title": "Decrease Reading Speed",
+      "subtitle": "AI Voice Studio",
+      "description": "Decrease reading speed by 0.25x for the default provider.",
+      "mode": "no-view"
+    },
+    {
+      "name": "playback-status",
+      "title": "MiniMax Reading Status",
+      "subtitle": "MiniMax",
+      "description": "Menu-bar status of the current MiniMax reading with controls.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    },
+    {
+      "name": "mimo-status",
+      "title": "MiMo Reading Status",
+      "subtitle": "MiMo",
+      "description": "Show MiMo playback status, speed, and controls in the menu bar.",
+      "icon": "mimo-icon.png",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultProvider",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default TTS Provider",
+      "description": "Provider used by Quick Read and the shared speed controls.",
+      "default": "minimax",
+      "data": [
+        {
+          "title": "MiniMax (Long Reading and Voice Clone)",
+          "value": "minimax"
+        },
+        {
+          "title": "MiMo (Expressive Studio)",
+          "value": "mimo"
+        }
+      ]
+    },
+    {
+      "name": "authMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "MiniMax Authentication Mode",
+      "description": "Choose which MiniMax key type to use",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto Detect (Recommended)",
+          "value": "auto"
+        },
+        {
+          "title": "Token Plan Key",
+          "value": "token-plan"
+        },
+        {
+          "title": "Open Platform API Key",
+          "value": "payg"
+        }
+      ]
+    },
+    {
+      "name": "tokenPlanKey",
+      "type": "password",
+      "required": false,
+      "title": "MiniMax Token Plan Key",
+      "description": "MiniMax Token Plan subscription key. Token Plan currently supports HD models only (Turbo requires the Open Platform key).",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "openPlatformApiKey",
+      "type": "password",
+      "required": false,
+      "title": "MiniMax Open Platform API Key",
+      "description": "MiniMax pay-as-you-go API key",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "required": false,
+      "title": "MiniMax Region",
+      "description": "MiniMax API region",
+      "default": "cn",
+      "data": [
+        {
+          "title": "China (api.minimaxi.com)",
+          "value": "cn"
+        },
+        {
+          "title": "Global (api.minimax.io)",
+          "value": "global"
+        }
+      ]
+    },
+    {
+      "name": "model",
+      "type": "dropdown",
+      "required": false,
+      "title": "MiniMax Model",
+      "description": "Token Plan supports HD models only. Turbo models require the Open Platform API Key.",
+      "default": "speech-2.8-hd",
+      "data": [
+        {
+          "title": "Speech 2.8 HD (Recommended, Token Plan Compatible)",
+          "value": "speech-2.8-hd"
+        },
+        {
+          "title": "Speech 2.8 Turbo (Open Platform Only)",
+          "value": "speech-2.8-turbo"
+        },
+        {
+          "title": "Speech 2.6 HD (Token Plan Compatible)",
+          "value": "speech-2.6-hd"
+        },
+        {
+          "title": "Speech 2.6 Turbo (Open Platform Only)",
+          "value": "speech-2.6-turbo"
+        },
+        {
+          "title": "Speech 02 HD (Token Plan Compatible)",
+          "value": "speech-02-hd"
+        },
+        {
+          "title": "Speech 02 Turbo (Open Platform Only)",
+          "value": "speech-02-turbo"
+        }
+      ]
+    },
+    {
+      "name": "defaultVoice",
+      "type": "dropdown",
+      "required": false,
+      "title": "MiniMax Default Voice",
+      "description": "Voice used for Quick Read command",
+      "default": "Chinese (Mandarin)_Radio_Host",
+      "data": [
+        {
+          "title": "Radio Host (Chinese Male, Long Reading)",
+          "value": "Chinese (Mandarin)_Radio_Host"
+        },
+        {
+          "title": "Sincere Adult (Chinese Male, Conversational)",
+          "value": "Chinese (Mandarin)_Sincere_Adult"
+        },
+        {
+          "title": "Gentleman (Chinese Male, Scholarly)",
+          "value": "Chinese (Mandarin)_Gentleman"
+        },
+        {
+          "title": "Gentle Youth (Chinese Male, Warm)",
+          "value": "Chinese (Mandarin)_Gentle_Youth"
+        },
+        {
+          "title": "Lyrical Voice (Chinese Male, Soft)",
+          "value": "Chinese (Mandarin)_Lyrical_Voice"
+        },
+        {
+          "title": "Bright Clear Male (Chinese Male, Brisk)",
+          "value": "hunyin_6"
+        },
+        {
+          "title": "Elite Young Man (Chinese Male, Clear)",
+          "value": "male-qn-jingying"
+        },
+        {
+          "title": "Wise Woman (Chinese Female, Knowledgeable)",
+          "value": "Chinese (Mandarin)_Wise_Women"
+        },
+        {
+          "title": "Gentle Senior (Chinese Female, Warm Storytelling)",
+          "value": "Chinese (Mandarin)_Gentle_Senior"
+        },
+        {
+          "title": "Warm Bestie (Chinese Female, Comforting)",
+          "value": "Chinese (Mandarin)_Warm_Bestie"
+        },
+        {
+          "title": "Sweet Girl (Chinese Female, Expressive)",
+          "value": "Chinese_sweet_girl_vv1"
+        },
+        {
+          "title": "Reliable Executive (Chinese Male, Formal)",
+          "value": "Chinese (Mandarin)_Reliable_Executive"
+        },
+        {
+          "title": "News Anchor (Chinese Female)",
+          "value": "Chinese (Mandarin)_News_Anchor"
+        },
+        {
+          "title": "Male Announcer (Chinese Male)",
+          "value": "Chinese (Mandarin)_Male_Announcer"
+        },
+        {
+          "title": "Calm Woman (English Female, Guided)",
+          "value": "English_CalmWoman"
+        },
+        {
+          "title": "Captivating Female (English Female, Energetic)",
+          "value": "English_captivating_female1"
+        },
+        {
+          "title": "Attractive Woman (English Female, Natural)",
+          "value": "English_AttractiveGirl"
+        },
+        {
+          "title": "Nursery Teacher (English Female, Clear)",
+          "value": "English_nursery_teacher_vv2"
+        },
+        {
+          "title": "Expressive Narrator (English)",
+          "value": "English_expressive_narrator"
+        },
+        {
+          "title": "Magnetic-voiced Man (English)",
+          "value": "English_magnetic_voiced_man"
+        },
+        {
+          "title": "Graceful Lady (English)",
+          "value": "English_Graceful_Lady"
+        }
+      ]
+    },
+    {
+      "name": "customDefaultVoice",
+      "type": "textfield",
+      "required": false,
+      "title": "MiniMax Default Custom Voice ID",
+      "description": "Optional cloned or generated voice ID. Overrides Default Voice and appears in voice pickers. Get IDs from the Clone Voice command or your MiniMax dashboard.",
+      "placeholder": "voice_id from MiniMax"
+    },
+    {
+      "name": "customVoiceIds",
+      "type": "textfield",
+      "required": false,
+      "title": "MiniMax Extra Custom Voice IDs",
+      "description": "Comma-separated cloned or generated voice IDs to show in voice pickers (in addition to the default).",
+      "placeholder": "voice_id_1, voice_id_2"
+    },
+    {
+      "name": "languageBoost",
+      "type": "dropdown",
+      "required": false,
+      "title": "MiniMax Language Boost",
+      "description": "Language hint for speech synthesis",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "Cantonese",
+          "value": "Chinese,Yue"
+        },
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        }
+      ]
+    },
+    {
+      "name": "speechRate",
+      "type": "dropdown",
+      "required": false,
+      "title": "MiniMax Speech Rate",
+      "description": "Playback speed for speech synthesis",
+      "default": "1",
+      "data": [
+        {
+          "title": "0.5× (Slow)",
+          "value": "0.5"
+        },
+        {
+          "title": "0.75×",
+          "value": "0.75"
+        },
+        {
+          "title": "1.0× (Normal)",
+          "value": "1"
+        },
+        {
+          "title": "1.25×",
+          "value": "1.25"
+        },
+        {
+          "title": "1.5×",
+          "value": "1.5"
+        },
+        {
+          "title": "1.75×",
+          "value": "1.75"
+        },
+        {
+          "title": "2.0× (Fast)",
+          "value": "2"
+        }
+      ]
+    },
+    {
+      "name": "mimoApiKey",
+      "type": "password",
+      "required": false,
+      "title": "MiMo Token Plan API Key",
+      "description": "Your Xiaomi MiMo Token Plan API key. Starts with tp-.",
+      "placeholder": "tp-..."
+    },
+    {
+      "name": "mimoTokenPlanBaseUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "MiMo Token Plan Base URL",
+      "description": "OpenAI-compatible Token Plan base URL from your MiMo subscription page.",
+      "placeholder": "https://token-plan-cn.xiaomimimo.com/v1",
+      "default": "https://token-plan-cn.xiaomimimo.com/v1"
+    },
+    {
+      "name": "mimoModelId",
+      "type": "dropdown",
+      "required": false,
+      "title": "MiMo TTS Model",
+      "description": "MiMo text-to-speech model.",
+      "default": "mimo-v2.5-tts",
+      "data": [
+        {
+          "title": "MiMo-V2.5-TTS (Recommended)",
+          "value": "mimo-v2.5-tts"
+        },
+        {
+          "title": "MiMo-V2-TTS (Legacy)",
+          "value": "mimo-v2-tts"
+        }
+      ]
+    },
+    {
+      "name": "mimoDefaultVoice",
+      "type": "dropdown",
+      "required": false,
+      "title": "MiMo Default Voice",
+      "description": "Voice used by Quick Read when MiMo is the default provider.",
+      "default": "mimo_default",
+      "data": [
+        {
+          "title": "MiMo Default",
+          "value": "mimo_default"
+        },
+        {
+          "title": "Bingtang (Chinese, Female)",
+          "value": "冰糖"
+        },
+        {
+          "title": "Moli (Chinese, Female)",
+          "value": "茉莉"
+        },
+        {
+          "title": "Soda (Chinese, Male)",
+          "value": "苏打"
+        },
+        {
+          "title": "Baihua (Chinese, Male)",
+          "value": "白桦"
+        },
+        {
+          "title": "Mia (English, Female)",
+          "value": "Mia"
+        },
+        {
+          "title": "Chloe (English, Female)",
+          "value": "Chloe"
+        },
+        {
+          "title": "Milo (English, Male)",
+          "value": "Milo"
+        },
+        {
+          "title": "Dean (English, Male)",
+          "value": "Dean"
+        },
+        {
+          "title": "Legacy Chinese Female",
+          "value": "default_zh"
+        },
+        {
+          "title": "Legacy English Female",
+          "value": "default_en"
+        }
+      ]
+    },
+    {
+      "name": "mimoSpeechRate",
+      "type": "dropdown",
+      "required": false,
+      "title": "MiMo Speech Rate",
+      "description": "Default speed guidance sent to MiMo. Can be overridden per playback.",
+      "default": "0",
+      "data": [
+        {
+          "title": "0.5x (Slow)",
+          "value": "-50"
+        },
+        {
+          "title": "0.75x",
+          "value": "-25"
+        },
+        {
+          "title": "1.0x (Normal)",
+          "value": "0"
+        },
+        {
+          "title": "1.25x",
+          "value": "25"
+        },
+        {
+          "title": "1.5x",
+          "value": "50"
+        },
+        {
+          "title": "1.75x",
+          "value": "75"
+        },
+        {
+          "title": "2.0x (Fast)",
+          "value": "100"
+        }
+      ]
+    },
+    {
+      "name": "mimoStylePrompt",
+      "type": "textfield",
+      "required": false,
+      "title": "MiMo Speaking Style",
+      "description": "Optional natural-language style guidance sent to MiMo with every request.",
+      "placeholder": "Natural, clear, and restrained; suitable for long-form reading."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "tts",
+    "text to speech",
+    "speech",
+    "voice",
+    "minimax",
+    "mimo",
+    "doubao"
+  ]
+}
