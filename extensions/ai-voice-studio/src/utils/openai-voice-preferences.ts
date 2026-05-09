@@ -19,7 +19,7 @@ export async function getActiveQuickReadVoiceId(): Promise<{ voiceId: string; is
     await clearQuickReadVoiceOverride();
   }
 
-  return { voiceId: buildOptionsFromPrefs().voice, isOverride: false };
+  return { voiceId: (await buildOptionsFromPrefs()).voice, isOverride: false };
 }
 
 export async function getQuickReadVoiceOverride(): Promise<string | null> {

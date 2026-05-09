@@ -5,7 +5,7 @@
 ### Changed
 - Renamed the extension from `MiniMax TTS` to `AI Voice Studio`.
 - Renamed the package slug from `minimax-tts` to `ai-voice-studio`.
-- Added a shared **Default TTS Provider** preference for provider-aware Quick Read and speed controls.
+- Moved the shared default provider setting and OpenAI model controls into a dedicated **Configure Voice Providers** command so Raycast Preferences stay shorter.
 - Re-labeled MiniMax preferences and commands so they remain clear inside a multi-provider extension.
 
 ### Added
@@ -16,6 +16,7 @@
 - Added OpenAI as a third TTS provider through the Speech API.
 - Added OpenAI commands: Quick Read with OpenAI, Read with OpenAI Voice, and Set OpenAI Quick Read Voice.
 - Added OpenAI provider files for API calls, voices, chunking, status, voice override storage, and lookahead playback.
+- Added Configure Voice Providers for choosing the default provider and OpenAI model settings outside the Preferences sidebar.
 - Extended the shared audio player to support WAV playback, playback-rate arguments, and abort signals.
 
 ### Verified

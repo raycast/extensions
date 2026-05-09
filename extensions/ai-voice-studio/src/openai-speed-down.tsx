@@ -1,4 +1,4 @@
-import { getPreferenceValues, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import {
   adjustSpeed,
   formatSpeed,
@@ -7,14 +7,15 @@ import {
   SPEED_MIN,
   SPEED_STEP,
 } from "./utils/openai-playback-state";
+import { getOpenAISettings } from "./utils/provider-settings";
 
 export default async function SpeedDown() {
   await runOpenAISpeedDown();
 }
 
 export async function runOpenAISpeedDown() {
-  const prefs = getPreferenceValues<Preferences>();
-  const fallback = parseRateString(prefs.openaiPlaybackRate);
+  const settings = await getOpenAISettings();
+  const fallback = parseRateString(settings.playbackRate);
   const before = (await getSpeedOverride()) ?? fallback;
   const next = await adjustSpeed(-SPEED_STEP, fallback);
 

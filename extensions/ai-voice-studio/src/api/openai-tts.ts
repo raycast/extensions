@@ -8,6 +8,7 @@ import {
   isVoiceAvailableForModel,
 } from "../constants/openai-voices";
 import { getSpeedOverride, parseRateString, rateToInstruction } from "../utils/openai-playback-state";
+import { getOpenAISettings, type OpenAIProviderSettings } from "../utils/provider-settings";
 import type { OpenAITTSModel, OpenAIResponseFormat, TTSOptionOverrides, TTSOptions } from "./openai-types";
 
 const DEFAULT_BASE_URL = "https://api.openai.com/v1";
@@ -110,22 +111,35 @@ async function readErrorDetail(response: Response): Promise<string> {
 }
 
 export function getActiveModel(): OpenAITTSModel {
-  const prefs = getPreferenceValues<Preferences>();
-  return normalizeModel(prefs.openaiModel);
+  return DEFAULT_MODEL;
+}
+
+export async function getActiveModelAsync(): Promise<OpenAITTSModel> {
+  const settings = await getOpenAISettings();
+  return normalizeModel(settings.model);
 }
 
 export function getModelLabel(model: OpenAITTSModel): string {
   return MODEL_LABELS[model];
 }
 
-export function buildOptionsFromPrefs(
+export async function buildOptionsFromPrefs(
+  voiceOverride?: string,
+  overrides: TTSOptionOverrides = {},
+  speedOverrideRate?: number | null,
+): Promise<TTSOptions> {
+  const settings = await getOpenAISettings();
+  return buildOptionsFromSettings(settings, voiceOverride, overrides, speedOverrideRate);
+}
+
+function buildOptionsFromSettings(
+  settings: OpenAIProviderSettings,
   voiceOverride?: string,
   overrides: TTSOptionOverrides = {},
   speedOverrideRate?: number | null,
 ): TTSOptions {
-  const prefs = getPreferenceValues<Preferences>();
-  const model = normalizeModel(prefs.openaiModel);
-  const voice = voiceOverride || prefs.openaiVoice || DEFAULT_VOICE;
+  const model = normalizeModel(settings.model);
+  const voice = voiceOverride || settings.voice || DEFAULT_VOICE;
   const voiceConfig = getVoiceById(voice);
 
   if (!voiceConfig) {
@@ -142,13 +156,13 @@ export function buildOptionsFromPrefs(
   const rate =
     typeof speedOverrideRate === "number"
       ? speedOverrideRate
-      : parseRateString(prefs.openaiPlaybackRate || String(SPEED_DEFAULT));
+      : parseRateString(settings.playbackRate || String(SPEED_DEFAULT));
 
   return {
     model,
     voice,
-    instructions: buildInstructions(overrides.instructions ?? prefs.openaiInstructions, rate),
-    format: normalizeFormat(prefs.openaiResponseFormat),
+    instructions: buildInstructions(overrides.instructions ?? settings.instructions, rate),
+    format: normalizeFormat(settings.responseFormat),
     playbackRate: rate,
   };
 }
@@ -161,7 +175,7 @@ export async function buildOptionsAsync(
   return buildOptionsFromPrefs(voiceOverride, overrides, speedOverride);
 }
 
-export function validateOptions(voiceOverride?: string): TTSOptions {
+export async function validateOptions(voiceOverride?: string): Promise<TTSOptions> {
   return buildOptionsFromPrefs(voiceOverride);
 }
 

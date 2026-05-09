@@ -11,9 +11,9 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildOptionsAsync, getActiveModel, getModelLabel } from "./api/openai-tts";
+import { buildOptionsAsync, getActiveModelAsync, getModelLabel } from "./api/openai-tts";
 import type { VoiceConfig } from "./api/openai-types";
-import { MODEL_LABELS, VOICE_CATEGORIES, getVoicesByCategory } from "./constants/openai-voices";
+import { DEFAULT_MODEL, MODEL_LABELS, VOICE_CATEGORIES, getVoicesByCategory } from "./constants/openai-voices";
 import { AudioPlayer } from "./utils/audio-player";
 import { showTTSFailure } from "./utils/openai-feedback";
 import { chunkText } from "./utils/openai-text-chunker";
@@ -32,13 +32,13 @@ import {
   setSpeedOverride,
   SPEED_STEP,
 } from "./utils/openai-playback-state";
-import { getPreferenceValues } from "@raycast/api";
+import { getOpenAISettings } from "./utils/provider-settings";
 
 type SelectionSource = "selection" | "clipboard" | "none";
 
 export default function ReadWithVoice() {
-  const currentModel = getActiveModel();
-  const prefs = getPreferenceValues<Preferences>();
+  const [currentModel, setCurrentModel] = useState(DEFAULT_MODEL);
+  const [defaultPlaybackRate, setDefaultPlaybackRate] = useState("1");
   const [selectedText, setSelectedText] = useState("");
   const [selectionSource, setSelectionSource] = useState<SelectionSource>("none");
   const [isLoading, setIsLoading] = useState(false);
@@ -83,6 +83,12 @@ export default function ReadWithVoice() {
   }, []);
 
   useEffect(() => {
+    getActiveModelAsync()
+      .then(setCurrentModel)
+      .catch(() => undefined);
+    getOpenAISettings()
+      .then((settings) => setDefaultPlaybackRate(settings.playbackRate))
+      .catch(() => undefined);
     refreshSelection(true).catch(() => undefined);
     refreshSpeed().catch(() => undefined);
     const player = playerRef.current;
@@ -192,7 +198,7 @@ export default function ReadWithVoice() {
   }, []);
 
   const handleSpeedUp = useCallback(async () => {
-    const fallback = parseRateString(prefs.openaiPlaybackRate);
+    const fallback = parseRateString(defaultPlaybackRate);
     const current = (await getSpeedOverride()) ?? fallback;
     const next = await setSpeedOverride(current + SPEED_STEP);
     setSpeed(next);
@@ -201,10 +207,10 @@ export default function ReadWithVoice() {
       title: `Speed ${formatSpeed(next)}`,
       message: "Applies to the next playback",
     });
-  }, [prefs.openaiPlaybackRate]);
+  }, [defaultPlaybackRate]);
 
   const handleSpeedDown = useCallback(async () => {
-    const fallback = parseRateString(prefs.openaiPlaybackRate);
+    const fallback = parseRateString(defaultPlaybackRate);
     const current = (await getSpeedOverride()) ?? fallback;
     const next = await setSpeedOverride(current - SPEED_STEP);
     setSpeed(next);
@@ -213,7 +219,7 @@ export default function ReadWithVoice() {
       title: `Speed ${formatSpeed(next)}`,
       message: "Applies to the next playback",
     });
-  }, [prefs.openaiPlaybackRate]);
+  }, [defaultPlaybackRate]);
 
   const textPreview = selectedText
     ? selectedText.length > 90
@@ -221,7 +227,7 @@ export default function ReadWithVoice() {
       : selectedText
     : "No text loaded";
 
-  const effectiveRate = speed ?? parseRateString(prefs.openaiPlaybackRate);
+  const effectiveRate = speed ?? parseRateString(defaultPlaybackRate);
   const speedLabel = `${formatSpeed(effectiveRate)}${speed === null ? " (from preferences)" : " (override)"}`;
 
   const stopAction = playingVoiceId ? (

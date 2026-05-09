@@ -1,8 +1,14 @@
 import { Action, ActionPanel, Color, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildOptionsAsync, getActiveModel, getModelLabel, synthesizeSpeech } from "./api/openai-tts";
+import { buildOptionsAsync, getActiveModelAsync, getModelLabel, synthesizeSpeech } from "./api/openai-tts";
 import type { VoiceConfig } from "./api/openai-types";
-import { MODEL_LABELS, VOICE_CATEGORIES, getVoiceById, getVoicesByCategory } from "./constants/openai-voices";
+import {
+  DEFAULT_MODEL,
+  MODEL_LABELS,
+  VOICE_CATEGORIES,
+  getVoiceById,
+  getVoicesByCategory,
+} from "./constants/openai-voices";
 import { AudioPlayer } from "./utils/audio-player";
 import { showTTSFailure } from "./utils/openai-feedback";
 import { getPreviewText } from "./utils/openai-text-source";
@@ -17,7 +23,7 @@ const PREVIEW_FALLBACK_TEXT = "This is a short OpenAI TTS voice preview.";
 const PREVIEW_CHAR_LIMIT = 180;
 
 export default function SelectVoice() {
-  const currentModel = getActiveModel();
+  const [currentModel, setCurrentModel] = useState(DEFAULT_MODEL);
   const [activeVoiceId, setActiveVoiceId] = useState<string | null>(null);
   const [usesOverride, setUsesOverride] = useState(false);
   const [previewingVoiceId, setPreviewingVoiceId] = useState<string | null>(null);
@@ -38,10 +44,11 @@ export default function SelectVoice() {
 
     async function load() {
       try {
-        const activeVoice = await getActiveQuickReadVoiceId();
+        const [activeVoice, model] = await Promise.all([getActiveQuickReadVoiceId(), getActiveModelAsync()]);
         if (!mounted) return;
         setActiveVoiceId(activeVoice.voiceId);
         setUsesOverride(activeVoice.isOverride);
+        setCurrentModel(model);
       } finally {
         if (mounted) setIsLoading(false);
       }

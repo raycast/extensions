@@ -51,6 +51,7 @@ OpenAI is integrated through the Speech API:
 | Command | Provider | Purpose |
 | --- | --- | --- |
 | Quick Read | Default provider | Read selected text or clipboard text. The provider is controlled by **Default TTS Provider**. |
+| Configure Voice Providers | Shared | Configure the default provider and OpenAI model, voice, format, speed, and speaking instructions in a dedicated window. |
 | Resume Last Reading | MiniMax | Resume the previous MiniMax reading session. |
 | Restart Last Reading | MiniMax | Restart the previous MiniMax reading session from the beginning. |
 | Read with MiniMax Voice | MiniMax | Browse MiniMax voices and read with the selected voice. |
@@ -73,7 +74,7 @@ OpenAI is integrated through the Speech API:
 
 ### Shared
 
-- **Default TTS Provider**: `MiniMax`, `MiMo`, or `OpenAI`. This controls the shared Quick Read and speed commands.
+- **Configure Voice Providers** command: choose `MiniMax`, `MiMo`, or `OpenAI` as the default provider for shared Quick Read and speed commands.
 
 ### MiniMax
 
@@ -101,14 +102,10 @@ MiMo preferences intentionally use the `mimo*` prefix internally so they do not 
 
 ### OpenAI
 
-- **OpenAI API Key**
-- **OpenAI TTS Model**
-- **OpenAI Default Voice**
-- **OpenAI Response Format**
-- **OpenAI Playback Rate**
-- **OpenAI Speaking Instructions** (`gpt-4o-mini-tts`)
+- **OpenAI API Key** remains in Raycast Preferences.
+- **OpenAI TTS Model**, **Default Voice**, **Response Format**, **Playback Rate**, and **Speaking Instructions** live in the **Configure Voice Providers** command.
 
-OpenAI preferences use the `openai*` prefix internally so they stay independent from MiniMax, MiMo, and future providers.
+OpenAI API-key preferences and LocalStorage settings use the `openai*` prefix internally so they stay independent from MiniMax, MiMo, and future providers.
 
 ## Setup
 
@@ -134,6 +131,7 @@ npx tsc --noEmit
 - MiMo audio is returned as base64 WAV.
 - OpenAI API: `POST https://api.openai.com/v1/audio/speech`.
 - OpenAI audio is returned as binary MP3 or WAV and converted to base64 before playback.
+- OpenAI model settings and the shared default provider are stored in Raycast LocalStorage by the Configure Voice Providers command; API keys stay in Raycast Preferences.
 - Playback uses macOS `afplay`.
 - The shared audio player now supports MP3/WAV temp files, optional playback rate, and abort signals for MiMo/OpenAI lookahead synthesis.
 - Provider-specific local storage keys are kept separate for voice overrides, live playback state, and speed overrides.

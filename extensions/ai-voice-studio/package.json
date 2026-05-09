@@ -23,6 +23,13 @@
       "mode": "no-view"
     },
     {
+      "name": "configure-providers",
+      "title": "Configure Voice Providers",
+      "subtitle": "AI Voice Studio",
+      "description": "Configure the default provider and OpenAI model, voice, format, speed, and speaking instructions.",
+      "mode": "view"
+    },
+    {
       "name": "resume-reading",
       "title": "Resume Last Reading",
       "subtitle": "MiniMax",
@@ -150,28 +157,6 @@
     }
   ],
   "preferences": [
-    {
-      "name": "defaultProvider",
-      "type": "dropdown",
-      "required": false,
-      "title": "Default TTS Provider",
-      "description": "Provider used by Quick Read and the shared speed controls.",
-      "default": "minimax",
-      "data": [
-        {
-          "title": "MiniMax (Long Reading and Voice Clone)",
-          "value": "minimax"
-        },
-        {
-          "title": "MiMo (Expressive Studio)",
-          "value": "mimo"
-        },
-        {
-          "title": "OpenAI (Speech API)",
-          "value": "openai"
-        }
-      ]
-    },
     {
       "name": "authMode",
       "type": "dropdown",
@@ -586,154 +571,6 @@
       "title": "OpenAI API Key",
       "description": "Your OpenAI API key for the Speech API.",
       "placeholder": "sk-..."
-    },
-    {
-      "name": "openaiModel",
-      "type": "dropdown",
-      "required": false,
-      "title": "OpenAI TTS Model",
-      "description": "OpenAI model used for speech generation.",
-      "default": "gpt-4o-mini-tts",
-      "data": [
-        {
-          "title": "GPT-4o Mini TTS (Recommended)",
-          "value": "gpt-4o-mini-tts"
-        },
-        {
-          "title": "TTS-1 (Lower Latency)",
-          "value": "tts-1"
-        },
-        {
-          "title": "TTS-1 HD (Higher Quality Legacy)",
-          "value": "tts-1-hd"
-        }
-      ]
-    },
-    {
-      "name": "openaiVoice",
-      "type": "dropdown",
-      "required": false,
-      "title": "OpenAI Default Voice",
-      "description": "Voice used by Quick Read when OpenAI is the default provider.",
-      "default": "cedar",
-      "data": [
-        {
-          "title": "Cedar (Recommended)",
-          "value": "cedar"
-        },
-        {
-          "title": "Marin (Recommended)",
-          "value": "marin"
-        },
-        {
-          "title": "Coral",
-          "value": "coral"
-        },
-        {
-          "title": "Alloy",
-          "value": "alloy"
-        },
-        {
-          "title": "Ash",
-          "value": "ash"
-        },
-        {
-          "title": "Ballad",
-          "value": "ballad"
-        },
-        {
-          "title": "Echo",
-          "value": "echo"
-        },
-        {
-          "title": "Fable",
-          "value": "fable"
-        },
-        {
-          "title": "Nova",
-          "value": "nova"
-        },
-        {
-          "title": "Onyx",
-          "value": "onyx"
-        },
-        {
-          "title": "Sage",
-          "value": "sage"
-        },
-        {
-          "title": "Shimmer",
-          "value": "shimmer"
-        },
-        {
-          "title": "Verse",
-          "value": "verse"
-        }
-      ]
-    },
-    {
-      "name": "openaiResponseFormat",
-      "type": "dropdown",
-      "required": false,
-      "title": "OpenAI Response Format",
-      "description": "Audio container returned by OpenAI Speech API.",
-      "default": "mp3",
-      "data": [
-        {
-          "title": "MP3",
-          "value": "mp3"
-        },
-        {
-          "title": "WAV",
-          "value": "wav"
-        }
-      ]
-    },
-    {
-      "name": "openaiPlaybackRate",
-      "type": "dropdown",
-      "required": false,
-      "title": "OpenAI Playback Rate",
-      "description": "Default local playback speed for OpenAI speech.",
-      "default": "1",
-      "data": [
-        {
-          "title": "0.5x (Slow)",
-          "value": "0.5"
-        },
-        {
-          "title": "0.75x",
-          "value": "0.75"
-        },
-        {
-          "title": "1.0x (Normal)",
-          "value": "1"
-        },
-        {
-          "title": "1.25x",
-          "value": "1.25"
-        },
-        {
-          "title": "1.5x",
-          "value": "1.5"
-        },
-        {
-          "title": "1.75x",
-          "value": "1.75"
-        },
-        {
-          "title": "2.0x (Fast)",
-          "value": "2"
-        }
-      ]
-    },
-    {
-      "name": "openaiInstructions",
-      "type": "textfield",
-      "required": false,
-      "title": "OpenAI Speaking Instructions",
-      "description": "Optional natural-language speech guidance for gpt-4o-mini-tts requests.",
-      "placeholder": "Read naturally and clearly; preserve Chinese and English pronunciation."
     }
   ],
   "dependencies": {

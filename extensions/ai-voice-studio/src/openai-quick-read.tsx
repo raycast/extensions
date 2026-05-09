@@ -35,7 +35,7 @@ export async function runOpenAIQuickRead() {
 
   try {
     const { voiceId } = await getActiveQuickReadVoiceId();
-    validateOptions(voiceId);
+    await validateOptions(voiceId);
   } catch (error) {
     await showTTSFailure(error);
     return;

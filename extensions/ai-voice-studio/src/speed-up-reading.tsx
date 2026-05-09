@@ -14,7 +14,7 @@ import { runOpenAISpeedUp } from "./openai-speed-up";
 import { getDefaultProvider } from "./utils/provider";
 
 export default async function SpeedUpReading() {
-  const provider = getDefaultProvider();
+  const provider = await getDefaultProvider();
   if (provider === "openai") {
     await runOpenAISpeedUp();
     return;
