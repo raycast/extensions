@@ -44,7 +44,8 @@ export async function streamChat(options: StreamOptions): Promise<void> {
         resolve();
       };
 
-      response.body!.on("data", (chunk: Buffer) => {
+      const body = response.body as unknown as NodeJS.ReadableStream;
+      body.on("data", (chunk: Buffer) => {
         buffer += chunk.toString();
         const lines = buffer.split("\n");
         buffer = lines.pop()!;
@@ -70,9 +71,9 @@ export async function streamChat(options: StreamOptions): Promise<void> {
         }
       });
 
-      response.body!.on("end", finish);
+      body.on("end", finish);
 
-      response.body!.on("error", (err) => {
+      body.on("error", (err: Error) => {
         reject(err);
       });
     });
