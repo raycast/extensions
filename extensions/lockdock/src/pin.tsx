@@ -8,15 +8,17 @@ import { getLockDockPathSafe } from "./lib/binary";
 
 export default function Command() {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isRunning = isIpcRunning();
   const {
     isLoading,
     data: status,
     revalidate,
   } = usePromise(getState, [], {
     failureToastOptions: { title: "Failed to load Dock status" },
+    execute: isRunning,
   });
 
-  if (!isIpcRunning()) {
+  if (!isRunning) {
     const binPath = getLockDockPathSafe();
     if (!binPath) {
       return <LockdockNotInstalled />;
