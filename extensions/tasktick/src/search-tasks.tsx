@@ -5,14 +5,8 @@ import { resolveCliPath } from "./lib/cli-detection";
 import { TasksList } from "./views/tasks-list";
 import { CliNotFound } from "./views/cli-not-found";
 
-interface Prefs {
-  cliPath?: string;
-  showCompletionToast: boolean;
-  logsFormat: "text" | "json";
-}
-
 export default function Command() {
-  const prefs = getPreferenceValues<Prefs>();
+  const prefs = getPreferenceValues<Preferences.SearchTasks>();
   const [cliPath, setCliPath] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {

@@ -1,5 +1,5 @@
 // src/views/tasks-list.tsx
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   ActionPanel,
   Action,
@@ -7,7 +7,6 @@ import {
   Icon,
   showToast,
   Toast,
-  Clipboard,
 } from "@raycast/api";
 import { tasktick, CliError } from "../lib/tasktick";
 import { EventsStream } from "../lib/events";
@@ -33,12 +32,24 @@ function sortTasks(tasks: Task[]): Task[] {
 
 interface Props {
   cliPath: string;
-  prefs: { showCompletionToast: boolean; logsFormat: "text" | "json" };
+  prefs: Preferences.SearchTasks;
 }
 
 export function TasksList({ cliPath, prefs }: Props) {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setLoading] = useState(true);
+  // The post-action refresh runs on a 2s delay so the GUI has time to flush
+  // the run's lastRunAt back to SwiftData. We track the timer so unmount can
+  // cancel it — otherwise a quick navigate-away triggers setState on a dead
+  // component tree.
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(
+    () => () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+    },
+    [],
+  );
 
   const refresh = useCallback(async () => {
     setLoading(true);
@@ -104,7 +115,11 @@ export function TasksList({ cliPath, prefs }: Props) {
             message: task.name,
           });
         }
-        setTimeout(() => refresh(), 2000);
+        if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = setTimeout(() => {
+          refreshTimerRef.current = null;
+          refresh();
+        }, 2000);
       } catch (err) {
         const msg = err instanceof CliError ? err.message : String(err);
         await showToast({
@@ -177,11 +192,10 @@ export function TasksList({ cliPath, prefs }: Props) {
                     />
                   }
                 />
-                <Action
+                <Action.CopyToClipboard
                   title="Copy Task ID"
-                  icon={Icon.Clipboard}
+                  content={task.id}
                   shortcut={{ modifiers: ["cmd"], key: "c" }}
-                  onAction={() => Clipboard.copy(task.id)}
                 />
                 <Action
                   title="Refresh List"

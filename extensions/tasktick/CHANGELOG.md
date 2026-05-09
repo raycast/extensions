@@ -1,6 +1,6 @@
 # TaskTick Changelog
 
-## [Initial Version] - 2026-05-09
+## [Initial Version] - {PR_MERGE_DATE}
 
 - Search and run TaskTick scheduled tasks from Raycast
 - Run, Stop, Restart, and Reveal actions with keyboard shortcuts

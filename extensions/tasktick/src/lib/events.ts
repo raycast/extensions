@@ -40,8 +40,11 @@ export class EventsStream extends EventEmitter {
 
   private start() {
     if (this.killed) return;
+    // stderr is "ignore" (not "pipe") because we never read it — leaving it
+    // piped without a consumer would deadlock the subprocess once the OS
+    // pipe buffer fills (typically 64 KB on macOS).
     this.proc = spawn(this.cliPath, ["events"], {
-      stdio: ["ignore", "pipe", "pipe"],
+      stdio: ["ignore", "pipe", "ignore"],
     });
     const rl = readline.createInterface({ input: this.proc.stdout! });
 
