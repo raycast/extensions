@@ -17,7 +17,7 @@ export function HistoryItem({ entry }: HistoryItemProps) {
       detail={<List.Item.Detail markdown={entry.answer} />}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard content={entry.answer} title="复制回答" />
+          <Action.CopyToClipboard content={entry.answer} title="Copy Answer" />
         </ActionPanel>
       }
     />

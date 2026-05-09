@@ -13,11 +13,6 @@ import { useHistory } from "./hooks/useHistory";
 import { AnswerItem } from "./components/AnswerItem";
 import { HistoryItem } from "./components/HistoryItem";
 
-interface Preferences {
-  apiKey: string;
-  model: "deepseek-chat" | "deepseek-reasoner";
-}
-
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const { text, status, submit, reset } = useStream(preferences);
@@ -32,7 +27,7 @@ export default function Command() {
       addEntry({ question, answer, model: preferences.model });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      showToast(Toast.Style.Failure, "请求失败", msg);
+      showToast(Toast.Style.Failure, "Request failed", msg);
     }
   };
 
@@ -48,7 +43,7 @@ export default function Command() {
 
   return (
     <List
-      searchBarPlaceholder="请输入你的问题..."
+      searchBarPlaceholder="Type your question..."
       searchText={searchText}
       isShowingDetail={showDetail}
       onSearchTextChange={(text) => {
@@ -61,23 +56,23 @@ export default function Command() {
         <List.Item
           title={
             currentQuestion
-              ? `提问: ${currentQuestion}`
-              : "输入问题后按回车提交"
+              ? `Ask: ${currentQuestion}`
+              : "Type a question and press Enter"
           }
           icon={currentQuestion ? Icon.ArrowRight : Icon.Message}
           detail={
             <List.Item.Detail
               markdown={
                 currentQuestion
-                  ? `## 即将提问\n\n${currentQuestion}\n\n按 **Enter** 提交`
-                  : "## DeepSeek Chat\n\n在搜索框输入问题，按 **Enter** 提交"
+                  ? `## Ready to ask\n\n${currentQuestion}\n\nPress **Enter** to submit`
+                  : "## DeepSeek Chat\n\nType a question in the search bar and press **Enter** to submit"
               }
             />
           }
           actions={
             <ActionPanel>
               <Action
-                title="提交问题"
+                title="Submit Question"
                 onAction={() => handleSubmit(currentQuestion)}
               />
             </ActionPanel>
@@ -91,7 +86,7 @@ export default function Command() {
       )}
 
       {/* History */}
-      <List.Section title="历史记录">
+      <List.Section title="History">
         {history.map((entry) => (
           <HistoryItem key={entry.id} entry={entry} />
         ))}

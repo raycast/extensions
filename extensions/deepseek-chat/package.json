@@ -1,15 +1,17 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "deepseek-chat",
   "title": "DeepSeek Chat",
-  "description": "调用 DeepSeek API 进行智能问答",
+  "description": "Ask questions to DeepSeek AI models directly from Raycast",
   "icon": "icon.png",
   "author": "valley",
   "license": "MIT",
+  "categories": ["Productivity"],
   "commands": [
     {
       "name": "index",
       "title": "Ask DeepSeek",
-      "description": "向 DeepSeek 提问",
+      "description": "Ask questions to DeepSeek AI",
       "mode": "view"
     }
   ],
@@ -17,14 +19,14 @@
     {
       "name": "apiKey",
       "title": "DeepSeek API Key",
-      "description": "你的 DeepSeek API Key",
+      "description": "Your DeepSeek API Key",
       "type": "password",
       "required": true
     },
     {
       "name": "model",
-      "title": "模型选择",
-      "description": "选择使用的 DeepSeek 模型",
+      "title": "Model",
+      "description": "Select the DeepSeek model to use",
       "type": "dropdown",
       "required": true,
       "data": [
@@ -41,13 +43,11 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.0",
-    "node-fetch": "^2.7.0"
+    "@raycast/api": "^1.93.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "20.8.10",
-    "@types/node-fetch": "^2.6.13",
     "@types/react": "19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.2.5",

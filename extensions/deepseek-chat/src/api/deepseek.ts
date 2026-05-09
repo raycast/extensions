@@ -1,5 +1,3 @@
-import fetch from "node-fetch";
-
 export interface StreamOptions {
   prompt: string;
   model: "deepseek-chat" | "deepseek-reasoner";
@@ -37,6 +35,14 @@ export async function streamChat(options: StreamOptions): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       let fullText = "";
       let buffer = "";
+      let finished = false;
+
+      const finish = () => {
+        if (finished) return;
+        finished = true;
+        onComplete(fullText);
+        resolve();
+      };
 
       response.body!.on("data", (chunk: Buffer) => {
         buffer += chunk.toString();
@@ -48,8 +54,7 @@ export async function streamChat(options: StreamOptions): Promise<void> {
           if (!trimmed || !trimmed.startsWith("data: ")) continue;
           const data = trimmed.slice(6);
           if (data === "[DONE]") {
-            onComplete(fullText);
-            resolve();
+            finish();
             return;
           }
           try {
@@ -65,10 +70,7 @@ export async function streamChat(options: StreamOptions): Promise<void> {
         }
       });
 
-      response.body!.on("end", () => {
-        onComplete(fullText);
-        resolve();
-      });
+      response.body!.on("end", finish);
 
       response.body!.on("error", (err) => {
         reject(err);

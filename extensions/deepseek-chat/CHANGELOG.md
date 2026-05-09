@@ -1,6 +1,6 @@
 # DeepSeek Chat Changelog
 
-## [Initial Version] - 2026-05-08
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Support DeepSeek Chat (V3) and DeepSeek Reasoner (R1) models
 - Streaming responses for real-time AI chat

@@ -9,10 +9,10 @@ interface AnswerItemProps {
 export function AnswerItem({ text, status, onSubmit }: AnswerItemProps) {
   const statusText =
     status === "streaming"
-      ? "回答中..."
+      ? "Answering..."
       : status === "error"
-        ? "出错了"
-        : "回答完成";
+        ? "Error"
+        : "Done";
   const preview = text.length > 80 ? text.slice(0, 80) + "..." : text;
 
   return (
@@ -28,16 +28,16 @@ export function AnswerItem({ text, status, onSubmit }: AnswerItemProps) {
       }
       detail={
         <List.Item.Detail
-          markdown={text || "等待回答..."}
+          markdown={text || "Waiting for response..."}
           isLoading={status === "streaming"}
         />
       }
       actions={
         <ActionPanel>
-          <Action title="新问题" onAction={onSubmit} />
+          <Action title="New Question" onAction={onSubmit} />
           <Action.CopyToClipboard
             content={text}
-            title="复制回答"
+            title="Copy Answer"
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
         </ActionPanel>
