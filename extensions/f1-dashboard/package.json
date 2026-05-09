@@ -1,0 +1,94 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "f1-dashboard",
+  "title": "F1 Dashboard",
+  "description": "Live Formula 1 standings, schedules and results",
+  "icon": "f1-dashboard-icon.png",
+  "author": "pranay_pandey",
+  "license": "MIT",
+  "categories": [
+    "Fun",
+    "News",
+    "Data"
+  ],
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "standings",
+      "title": "Championship Standings",
+      "description": "View current F1 Driver and Constructor standings.",
+      "mode": "view"
+    },
+    {
+      "name": "schedule",
+      "title": "Race Schedule",
+      "description": "View the upcoming F1 calendar and session timings.",
+      "mode": "view",
+      "preferences": [
+        {
+          "required": false,
+          "description": "Choose date format",
+          "type": "dropdown",
+          "title": "Date Format",
+          "name": "dateFormat",
+          "data": [
+            { "title": "MM/DD/YYYY", "value": "MM/dd/yyyy" },
+            { "title": "DD/MM/YYYY", "value": "dd/MM/yyyy" },
+            { "title": "YYYY-MM-DD", "value": "yyyy-MM-dd" }
+          ],
+          "default": "MM/dd/yyyy"
+        },
+        {
+          "required": false,
+          "description": "Choose time format",
+          "type": "dropdown",
+          "title": "Time Format",
+          "name": "timeFormat",
+          "data": [
+            { "title": "24-Hour Time (eg 16:00)", "value": "HH:mm" },
+            { "title": "12-Hour Time (eg 4:00 PM)", "value": "h:mm a" }
+          ],
+          "default": "HH:mm"
+        }
+      ]
+    },
+    {
+      "name": "news",
+      "title": "Latest F1 News",
+      "description": "Read the latest Formula 1 headlines from the paddock",
+      "mode": "view"
+    },
+    {
+      "name": "results",
+      "title": "Race Results",
+      "description": "View full grid classifications for any F1 race since 1950",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.4",
+    "date-fns": "^4.1.0",
+    "node-fetch": "^3.3.2",
+    "rss-parser": "^3.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  }
+}

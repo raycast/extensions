@@ -1,0 +1,212 @@
+import { List, Icon, ActionPanel, Action, Image } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
+import fetch from "node-fetch";
+import { countryFlags, nationalityFlags, getTeamColor } from "./constants";
+
+// --- TYPES ---
+interface Driver {
+  driverId: string;
+  givenName: string;
+  familyName: string;
+  url: string;
+  nationality: string;
+}
+interface Constructor {
+  constructorId: string;
+  name: string;
+  url: string;
+}
+interface DriverStanding {
+  position: string;
+  points: string;
+  Driver: Driver;
+  Constructors: Constructor[];
+}
+interface ConstructorStanding {
+  position: string;
+  points: string;
+  Constructor: Constructor;
+}
+interface RaceResult {
+  round: string;
+  raceName: string;
+  Circuit: { Location: { country: string } };
+  Results: {
+    positionText: string;
+    points: string;
+    status: string;
+    grid: string;
+  }[];
+}
+
+// API Response Wrappers
+interface DriverStandingsResponse {
+  MRData: {
+    StandingsTable: {
+      StandingsLists: { DriverStandings: DriverStanding[] }[];
+    };
+  };
+}
+
+interface ConstructorStandingsResponse {
+  MRData: {
+    StandingsTable: {
+      StandingsLists: { ConstructorStandings: ConstructorStanding[] }[];
+    };
+  };
+}
+
+type ViewType = "drivers" | "constructors";
+
+function DriverDetail({
+  driver,
+  teamName,
+}: {
+  driver: Driver;
+  teamName: string;
+  teamColor: string;
+}) {
+  const { isLoading, data: races = [] } = usePromise(async () => {
+    const res = await fetch(
+      `https://api.jolpi.ca/ergast/f1/current/drivers/${driver.driverId}/results.json`,
+    );
+    const json = (await res.json()) as {
+      MRData: { RaceTable: { Races: RaceResult[] } };
+    };
+    return json.MRData.RaceTable.Races;
+  });
+
+  return (
+    <List
+      isLoading={isLoading}
+      navigationTitle={`${driver.givenName} ${driver.familyName} - Results`}
+    >
+      <List.Section
+        title={`${driver.givenName} ${driver.familyName}`}
+        subtitle={teamName}
+      >
+        {races.map((race) => {
+          const res = race.Results[0];
+          const flag = countryFlags[race.Circuit.Location.country];
+          return (
+            <List.Item
+              key={race.round}
+              title={race.raceName}
+              subtitle={
+                ["R", "D", "W", "E"].includes(res.positionText)
+                  ? "DNF"
+                  : `P${res.positionText}`
+              }
+              icon={
+                flag
+                  ? {
+                      source: `https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/${flag}.svg`,
+                      mask: Image.Mask.Circle,
+                    }
+                  : Icon.CheckCircle
+              }
+              accessories={[
+                { text: `Started P${res.grid}` },
+                { text: `${res.points} pts` },
+              ]}
+            />
+          );
+        })}
+      </List.Section>
+    </List>
+  );
+}
+
+export default function Standings() {
+  const [view, setView] = useState<ViewType>("drivers");
+
+  const { isLoading, data } = usePromise(async () => {
+    const [dRes, cRes] = await Promise.all([
+      fetch("https://api.jolpi.ca/ergast/f1/current/driverStandings.json"),
+      fetch("https://api.jolpi.ca/ergast/f1/current/constructorStandings.json"),
+    ]);
+
+    // 🟢 FIXED: Specific response typing
+    const dJson = (await dRes.json()) as DriverStandingsResponse;
+    const cJson = (await cRes.json()) as ConstructorStandingsResponse;
+
+    return {
+      drivers: dJson.MRData.StandingsTable.StandingsLists[0].DriverStandings,
+      constructors:
+        cJson.MRData.StandingsTable.StandingsLists[0].ConstructorStandings,
+    };
+  });
+
+  return (
+    <List
+      isLoading={isLoading}
+      searchBarAccessory={
+        // 🟢 FIXED: Typed the callback to match ViewType instead of any
+        <List.Dropdown
+          tooltip="Championship"
+          onChange={(val) => setView(val as ViewType)}
+        >
+          <List.Dropdown.Item title="Drivers" value="drivers" />
+          <List.Dropdown.Item title="Constructors" value="constructors" />
+        </List.Dropdown>
+      }
+    >
+      {view === "drivers" &&
+        (data?.drivers || []).map((s) => {
+          const teamName = s.Constructors[0]?.name || "Unknown";
+          const natCode = nationalityFlags[s.Driver.nationality];
+          return (
+            <List.Item
+              key={s.Driver.driverId}
+              title={`${s.position}. ${s.Driver.givenName} ${s.Driver.familyName}`}
+              subtitle={teamName}
+              icon={
+                natCode
+                  ? {
+                      source: `https://raw.githubusercontent.com/HatScripts/circle-flags/gh-pages/flags/${natCode}.svg`,
+                      mask: Image.Mask.Circle,
+                    }
+                  : Icon.Person
+              }
+              accessories={[
+                {
+                  text: `${s.points} pts`,
+                  icon: {
+                    source: Icon.CircleFilled,
+                    tintColor: getTeamColor(teamName),
+                  },
+                },
+              ]}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Results"
+                    target={
+                      <DriverDetail
+                        driver={s.Driver}
+                        teamName={teamName}
+                        teamColor={getTeamColor(teamName)}
+                      />
+                    }
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      {view === "constructors" &&
+        (data?.constructors || []).map((s) => (
+          <List.Item
+            key={s.Constructor.constructorId}
+            title={`${s.position}. ${s.Constructor.name}`}
+            icon={{
+              source: Icon.CircleFilled,
+              tintColor: getTeamColor(s.Constructor.name),
+            }}
+            accessories={[{ text: `${s.points} pts` }]}
+          />
+        ))}
+    </List>
+  );
+}
