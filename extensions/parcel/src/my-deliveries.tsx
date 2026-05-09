@@ -17,11 +17,6 @@ import { Delivery, FilterMode, STATUS_DESCRIPTIONS, getStatusIcon } from "./api"
 import { useDeliveries } from "./hooks/useDeliveries";
 import { useCarriers } from "./hooks/useCarriers";
 
-interface ParcelCommandPreferences {
-  apiKey: string;
-  ambiguousDotDateOrder?: "month_day" | "day_month";
-}
-
 /**
  * Placeholder value returned by some carriers when the date is unknown.
  * This is based on observed API responses and may not be exhaustive.
@@ -97,7 +92,7 @@ function parseDeliveryDate(dateString: string, ambiguousNumericMonthFirst: boole
 
 export default function Command() {
   const [filterMode, setFilterMode] = useState<FilterMode>(FilterMode.ACTIVE);
-  const { ambiguousDotDateOrder } = getPreferenceValues<ParcelCommandPreferences>();
+  const { ambiguousDotDateOrder } = getPreferenceValues<Preferences>();
   const ambiguousNumericMonthFirst = ambiguousDotDateOrder !== "day_month";
   const { deliveries, isLoading, error } = useDeliveries(filterMode);
   const { carriers } = useCarriers();
