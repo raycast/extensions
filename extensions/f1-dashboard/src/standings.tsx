@@ -30,8 +30,8 @@ interface ConstructorStanding {
 interface RaceResult {
   round: string;
   raceName: string;
-  Circuit: { Location: { country: string } };
-  Results: {
+  Circuit?: { Location?: { country?: string } };
+  Results?: {
     positionText: string;
     points: string;
     status: string;
@@ -41,17 +41,17 @@ interface RaceResult {
 
 // API Response Wrappers
 interface DriverStandingsResponse {
-  MRData: {
-    StandingsTable: {
-      StandingsLists: { DriverStandings: DriverStanding[] }[];
+  MRData?: {
+    StandingsTable?: {
+      StandingsLists?: { DriverStandings?: DriverStanding[] }[];
     };
   };
 }
 
 interface ConstructorStandingsResponse {
-  MRData: {
-    StandingsTable: {
-      StandingsLists: { ConstructorStandings: ConstructorStanding[] }[];
+  MRData?: {
+    StandingsTable?: {
+      StandingsLists?: { ConstructorStandings?: ConstructorStanding[] }[];
     };
   };
 }
@@ -69,10 +69,16 @@ function DriverDetail({
     const res = await fetch(
       `https://api.jolpi.ca/ergast/f1/current/drivers/${driver.driverId}/results.json`,
     );
+
+    // Defensive check for bad network response
+    if (!res.ok) throw new Error("Failed to fetch driver results");
+
     const json = (await res.json()) as {
-      MRData: { RaceTable: { Races: RaceResult[] } };
+      MRData?: { RaceTable?: { Races?: RaceResult[] } };
     };
-    return json.MRData.RaceTable.Races;
+
+    // Safely return empty array if API data is missing
+    return json?.MRData?.RaceTable?.Races ?? [];
   });
 
   return (
@@ -85,8 +91,12 @@ function DriverDetail({
         subtitle={teamName}
       >
         {races.map((race) => {
-          const res = race.Results[0];
-          const flag = countryFlags[race.Circuit.Location.country];
+          const res = race.Results?.[0];
+          if (!res) return null;
+
+          const country = race.Circuit?.Location?.country;
+          const flag = country ? countryFlags[country] : undefined;
+
           return (
             <List.Item
               key={race.round}
@@ -125,15 +135,19 @@ export default function Standings() {
       fetch("https://api.jolpi.ca/ergast/f1/current/constructorStandings.json"),
     ]);
 
+    // Defensive check for bad network response
+    if (!dRes.ok || !cRes.ok) throw new Error("Failed to fetch standings data");
+
     const dJson = (await dRes.json()) as DriverStandingsResponse;
     const cJson = (await cRes.json()) as ConstructorStandingsResponse;
 
     return {
       drivers:
-        dJson.MRData.StandingsTable.StandingsLists[0]?.DriverStandings ?? [],
-      constructors:
-        cJson.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings ??
+        dJson?.MRData?.StandingsTable?.StandingsLists?.[0]?.DriverStandings ??
         [],
+      constructors:
+        cJson?.MRData?.StandingsTable?.StandingsLists?.[0]
+          ?.ConstructorStandings ?? [],
     };
   });
 
@@ -152,8 +166,13 @@ export default function Standings() {
     >
       {view === "drivers" &&
         (data?.drivers || []).map((s) => {
-          const teamName = s.Constructors[0]?.name || "Unknown";
+          // ✅ FULLY BULLETPROOF: Skip rendering if core driver data is missing
+          if (!s.Driver?.driverId || !s.Driver?.givenName) return null;
+
+          const teamName = s.Constructors?.[0]?.name || "Unknown";
+          // We know s.Driver exists here, so we can access nationality safely
           const natCode = nationalityFlags[s.Driver.nationality];
+
           return (
             <List.Item
               key={s.Driver.driverId}
@@ -190,17 +209,23 @@ export default function Standings() {
           );
         })}
       {view === "constructors" &&
-        (data?.constructors || []).map((s) => (
-          <List.Item
-            key={s.Constructor.constructorId}
-            title={`${s.position}. ${s.Constructor.name}`}
-            icon={{
-              source: Icon.CircleFilled,
-              tintColor: getTeamColor(s.Constructor.name),
-            }}
-            accessories={[{ text: `${s.points} pts` }]}
-          />
-        ))}
+        (data?.constructors || []).map((s) => {
+          // ✅ FULLY BULLETPROOF: Skip rendering if core constructor data is missing
+          if (!s.Constructor?.constructorId || !s.Constructor?.name)
+            return null;
+
+          return (
+            <List.Item
+              key={s.Constructor.constructorId}
+              title={`${s.position}. ${s.Constructor.name}`}
+              icon={{
+                source: Icon.CircleFilled,
+                tintColor: getTeamColor(s.Constructor.name),
+              }}
+              accessories={[{ text: `${s.points} pts` }]}
+            />
+          );
+        })}
     </List>
   );
 }

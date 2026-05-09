@@ -1,7 +1,7 @@
 import { List, Icon, Image, getPreferenceValues } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { countryFlags } from "./constants";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 
 interface Session {
   date: string;
@@ -38,7 +38,6 @@ interface Race {
 }
 
 export default function Schedule() {
-  // Retrieve the user's formatting preferences (made optional in case they haven't loaded yet)
   const preferences = getPreferenceValues<{
     dateFormat?: string;
     timeFormat?: string;
@@ -51,24 +50,31 @@ export default function Schedule() {
         fetch("https://api.jolpi.ca/ergast/f1/current/results.json?limit=1000"),
       ]);
 
+      // Defensive check for bad network response
+      if (!scheduleRes.ok || !resultsRes.ok) {
+        throw new Error("Failed to fetch schedule or results data");
+      }
+
       const scheduleJson = (await scheduleRes.json()) as {
-        MRData: { RaceTable: { Races: Race[] } };
+        MRData?: { RaceTable?: { Races?: Race[] } };
       };
       const resultsJson = (await resultsRes.json()) as {
-        MRData: { RaceTable: { Races: Race[] } };
+        MRData?: { RaceTable?: { Races?: Race[] } };
       };
 
-      const allRaces = scheduleJson.MRData.RaceTable.Races;
-      const completedRaces = resultsJson.MRData.RaceTable.Races;
+      // Safe API access with fallbacks
+      const allRaces = scheduleJson?.MRData?.RaceTable?.Races ?? [];
+      const completedRaces = resultsJson?.MRData?.RaceTable?.Races ?? [];
 
       return allRaces.map((race) => {
         const pastRaceMatch = completedRaces.find(
           (r) => r.round === race.round,
         );
-        if (pastRaceMatch && pastRaceMatch.Results) {
-          race.Results = pastRaceMatch.Results;
-        }
-        return race;
+        // Return a fresh object instead of mutating the API response directly
+        return {
+          ...race,
+          Results: pastRaceMatch?.Results ?? race.Results,
+        };
       });
     },
   );
@@ -76,20 +82,21 @@ export default function Schedule() {
   const formatSession = (session?: Session) => {
     if (!session) return null;
 
-    // Fallback to defaults if preferences are missing or undefined
     const safeDateFmt = preferences.dateFormat || "MM/dd/yyyy";
     const safeTimeFmt = preferences.timeFormat || "HH:mm";
 
-    // If a session has a date but no time
     if (!session.time) {
       const d = new Date(session.date);
+      if (!isValid(d)) return "Unknown Date"; // Guard against Invalid Date crashes
       return format(d, `E, ${safeDateFmt}`);
     }
 
-    const timeString = session.time.endsWith("Z")
-      ? session.time
-      : `${session.time}Z`;
+    // ✅ FIXED: Only append "Z" if there is no timezone designator already present
+    const hasTimezone = /Z|[+-]\d{2}:\d{2}$/.test(session.time);
+    const timeString = hasTimezone ? session.time : `${session.time}Z`;
     const d = new Date(`${session.date}T${timeString}`);
+
+    if (!isValid(d)) return "Unknown Time"; // Guard against Invalid Date crashes
 
     return format(d, `E, ${safeDateFmt}, ${safeTimeFmt}`);
   };
@@ -122,11 +129,13 @@ export default function Schedule() {
       });
     } else {
       markdown += `![Layout](${race.Circuit.circuitId}.svg?raycast-height=200)\n\n### Session Timings\n\n`;
+
       const sessions = [
         { label: "Practice 1", val: formatSession(race.FirstPractice) },
+        { label: "Practice 2", val: formatSession(race.SecondPractice) },
         {
-          label: race.Sprint ? "Sprint Qualifying" : "Practice 2",
-          val: formatSession(race.SecondPractice),
+          label: "Sprint Qualifying",
+          val: formatSession(race.SprintQualifying),
         },
         { label: "Sprint Race", val: formatSession(race.Sprint) },
         { label: "Practice 3", val: formatSession(race.ThirdPractice) },
@@ -136,6 +145,7 @@ export default function Schedule() {
           val: formatSession({ date: race.date, time: race.time }),
         },
       ];
+
       sessions.forEach(
         (s) => s.val && (markdown += `* **${s.label}:** ${s.val}\n`),
       );
@@ -164,6 +174,14 @@ export default function Schedule() {
 
   return (
     <List isLoading={isLoading} isShowingDetail>
+      {!isLoading && races.length === 0 && (
+        <List.EmptyView
+          title="No Schedule Data"
+          description="Unable to load the F1 schedule right now."
+          icon={Icon.Calendar}
+        />
+      )}
+
       {upcomingRaces.length > 0 && (
         <List.Section title="Upcoming Races">
           {upcomingRaces.map(renderRaceItem)}

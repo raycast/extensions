@@ -16,21 +16,22 @@ interface RaceResult {
 interface Race {
   round: string;
   raceName: string;
-  Circuit: { circuitName: string; Location: { country: string } };
+  Circuit?: { circuitName?: string; Location?: { country?: string } };
   date: string;
 }
 
 // API Response Wrappers
 interface ErgastResponse<T> {
-  MRData: {
-    RaceTable: {
-      Races: T[];
+  // ✅ FIXED: Make MRData and inner layers optional
+  MRData?: {
+    RaceTable?: {
+      Races?: T[];
     };
   };
 }
 
 interface ResultsData extends Race {
-  Results: RaceResult[];
+  Results?: RaceResult[];
 }
 
 function RaceDetail({ race, year }: { race: Race; year: string }) {
@@ -38,20 +39,38 @@ function RaceDetail({ race, year }: { race: Race; year: string }) {
     const res = await fetch(
       `https://api.jolpi.ca/ergast/f1/${year}/${race.round}/results.json`,
     );
+
+    // ✅ GUARD: Network check
+    if (!res.ok) throw new Error("Failed to fetch race results");
+
     const json = (await res.json()) as ErgastResponse<ResultsData>;
-    return (json.MRData?.RaceTable?.Races[0]?.Results || []) as RaceResult[];
+
+    // ✅ GUARD: Deep optional chaining and array index access
+    return json?.MRData?.RaceTable?.Races?.[0]?.Results ?? [];
   });
 
   return (
     <List isLoading={isLoading} navigationTitle={`${race.raceName} Results`}>
+      {/* ✅ ADDED: Explicit Empty View */}
+      {!isLoading && results.length === 0 && (
+        <List.EmptyView
+          title="No Results Data"
+          description="Results are not available for this race yet."
+          icon={Icon.Document}
+        />
+      )}
+
       <List.Section title="Grid Classification">
         {results.map((res, i) => {
+          // ✅ GUARD: Ensure core driver data exists
+          if (!res?.Driver?.givenName) return null;
+
           const natCode = nationalityFlags[res.Driver.nationality];
           return (
             <List.Item
               key={i}
               title={`P${res.positionText} - ${res.Driver.givenName} ${res.Driver.familyName}`}
-              subtitle={res.Constructor.name}
+              subtitle={res.Constructor?.name || "Unknown"}
               icon={
                 natCode
                   ? {
@@ -82,8 +101,12 @@ export default function HistoricalResults() {
   const { isLoading, data: races = [] } = usePromise(
     async (y: string) => {
       const res = await fetch(`https://api.jolpi.ca/ergast/f1/${y}.json`);
+
+      // ✅ GUARD: Network check
+      if (!res.ok) throw new Error("Failed to fetch historical races");
+
       const json = (await res.json()) as ErgastResponse<Race>;
-      return (json.MRData?.RaceTable?.Races || []) as Race[];
+      return json?.MRData?.RaceTable?.Races ?? [];
     },
     [year],
   );
@@ -99,13 +122,26 @@ export default function HistoricalResults() {
         </List.Dropdown>
       }
     >
+      {/* ✅ ADDED: Explicit Empty View */}
+      {!isLoading && races.length === 0 && (
+        <List.EmptyView
+          title="No Races Found"
+          description={`No race data available for the ${year} season.`}
+          icon={Icon.Calendar}
+        />
+      )}
+
       {races.map((r) => {
-        const flag = historicCountryFlags[r.Circuit.Location.country];
+        if (!r?.round) return null;
+
+        const country = r.Circuit?.Location?.country;
+        const flag = country ? historicCountryFlags[country] : undefined;
+
         return (
           <List.Item
             key={r.round}
             title={r.raceName}
-            subtitle={r.Circuit.circuitName}
+            subtitle={r.Circuit?.circuitName || "Unknown Circuit"}
             icon={
               flag
                 ? {

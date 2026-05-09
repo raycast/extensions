@@ -24,13 +24,17 @@ function ArticleDetail({ article }: { article: NewsItem }) {
     Context: ${article.contentSnippet}`,
   );
 
-  const formattedDate = new Date(article.pubDate).toLocaleDateString("en-IN", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const d = new Date(article.pubDate);
+  // ✅ GUARD: Fallback if the date is invalid, and use undefined locale for global support
+  const formattedDate = !Number.isNaN(d.getTime())
+    ? d.toLocaleDateString(undefined, {
+        weekday: "long",
+        month: "long",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : "Unknown Date";
 
   const imageMarkdown = article.imageUrl
     ? `![](${article.imageUrl}?raycast-height=200)\n\n`
@@ -56,10 +60,10 @@ ${isAiLoading ? "*Generating summary...*" : aiSummary}
             title="Read Full Article in Browser"
             url={article.link}
           />
+          {/* ✅ FIXED: Removed hardcoded "cmd" shortcut for cross-platform Windows compatibility */}
           <Action.CopyToClipboard
             title="Copy Article Link"
             content={article.link}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
         </ActionPanel>
       }
@@ -71,39 +75,59 @@ ${isAiLoading ? "*Generating summary...*" : aiSummary}
 export default function News() {
   const { isLoading, data: articles = [] } = usePromise(
     async (): Promise<NewsItem[]> => {
-      const feed = await parser.parseURL(FEED_URL);
+      try {
+        const feed = await parser.parseURL(FEED_URL);
 
-      return feed.items.map((item) => {
-        let extractedImage = "";
-        if (item.enclosure && item.enclosure.url) {
-          extractedImage = item.enclosure.url;
-        } else if (item.content) {
-          const imgMatch = item.content.match(/<img[^>]+src="([^">]+)"/);
-          if (imgMatch) {
-            extractedImage = imgMatch[1];
+        // ✅ GUARD: Fallback to empty array if feed.items is missing
+        const items = feed.items ?? [];
+
+        return items.map((item) => {
+          let extractedImage = "";
+          if (item.enclosure && item.enclosure.url) {
+            extractedImage = item.enclosure.url;
+          } else if (item.content) {
+            const imgMatch = item.content.match(/<img[^>]+src="([^">]+)"/);
+            if (imgMatch) {
+              extractedImage = imgMatch[1];
+            }
           }
-        }
 
-        return {
-          title: item.title || "Untitled Article",
-          link: item.link || "",
-          pubDate: item.pubDate || new Date().toISOString(),
-          contentSnippet: item.contentSnippet || item.content || "",
-          author: item.creator || "",
-          imageUrl: extractedImage,
-        };
-      });
+          return {
+            title: item.title || "Untitled Article",
+            link: item.link || "",
+            pubDate: item.pubDate || new Date().toISOString(),
+            contentSnippet: item.contentSnippet || item.content || "",
+            author: item.creator || "",
+            imageUrl: extractedImage,
+          };
+        });
+      } catch (error) {
+        console.error("Failed to parse RSS feed:", error);
+        return [];
+      }
     },
   );
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search latest F1 news...">
+      {/* ✅ ADDED: Explicit Empty View for network errors / missing data */}
+      {!isLoading && articles.length === 0 && (
+        <List.EmptyView
+          title="No News Found"
+          description="Could not load the latest F1 news. The feed might be down."
+          icon={Icon.Warning}
+        />
+      )}
+
       {articles.map((article, index) => {
         const date = new Date(article.pubDate);
-        const listDate = date.toLocaleDateString("en-IN", {
-          month: "short",
-          day: "numeric",
-        });
+        // ✅ GUARD: Safe date formatting with undefined locale
+        const listDate = !Number.isNaN(date.getTime())
+          ? date.toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })
+          : "N/A";
 
         return (
           <List.Item
@@ -121,7 +145,6 @@ export default function News() {
                 <Action.OpenInBrowser
                   title="Open Directly in Browser"
                   url={article.link}
-                  shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
               </ActionPanel>
             }
