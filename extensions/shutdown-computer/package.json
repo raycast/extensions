@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "shutdown-computer",
+  "description": "Schedule a Windows shutdown after a specified amount of time.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "shutdown",
+      "title": "Schedule Shutdown",
+      "description": "Shut down the computer after a specified delay.",
+      "mode": "no-view",
+      "subtitle": "Shutdown Timer",
+      "arguments": [
+        {
+          "name": "amount",
+          "type": "text",
+          "placeholder": "Amount",
+          "required": true
+        },
+        {
+          "name": "unit",
+          "type": "dropdown",
+          "placeholder": "Unit",
+          "required": true,
+          "data": [
+            {
+              "title": "Seconds",
+              "value": "seconds"
+            },
+            {
+              "title": "Minutes",
+              "value": "minutes"
+            },
+            {
+              "title": "Hours",
+              "value": "hours"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "monitor-shutdown",
+      "title": "Shutdown Timer",
+      "description": "Show the active shutdown countdown in the menu bar.",
+      "mode": "menu-bar"
+    }
+  ],
+  "title": "Shutdown Computer",
+  "author": "ayoub_abedrabbo",
+  "platforms": [
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ]
+}
