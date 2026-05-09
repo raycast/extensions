@@ -64,7 +64,6 @@ function DriverDetail({
 }: {
   driver: Driver;
   teamName: string;
-  teamColor: string;
 }) {
   const { isLoading, data: races = [] } = usePromise(async () => {
     const res = await fetch(
@@ -130,9 +129,11 @@ export default function Standings() {
     const cJson = (await cRes.json()) as ConstructorStandingsResponse;
 
     return {
-      drivers: dJson.MRData.StandingsTable.StandingsLists[0].DriverStandings,
+      drivers:
+        dJson.MRData.StandingsTable.StandingsLists[0]?.DriverStandings ?? [],
       constructors:
-        cJson.MRData.StandingsTable.StandingsLists[0].ConstructorStandings,
+        cJson.MRData.StandingsTable.StandingsLists[0]?.ConstructorStandings ??
+        [],
     };
   });
 
@@ -180,11 +181,7 @@ export default function Standings() {
                   <Action.Push
                     title="Results"
                     target={
-                      <DriverDetail
-                        driver={s.Driver}
-                        teamName={teamName}
-                        teamColor={getTeamColor(teamName)}
-                      />
+                      <DriverDetail driver={s.Driver} teamName={teamName} />
                     }
                   />
                 </ActionPanel>
