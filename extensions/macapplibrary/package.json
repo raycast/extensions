@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macapplibrary",
+  "title": "MacAppLibrary",
+  "description": "Search and manage your macAppLibrary from Raycast.",
+  "icon": "command-icon.png",
+  "author": "tommertron",
+  "license": "MIT",
+  "categories": ["Applications", "Productivity"],
+  "commands": [
+    {
+      "name": "search-apps",
+      "title": "Search Apps",
+      "description": "Search your macAppLibrary, open/reveal/quit apps, pull or submit community data, and generate AI descriptions.",
+      "mode": "view"
+    },
+    {
+      "name": "categories",
+      "title": "Browse Categories",
+      "description": "Browse your macAppLibrary apps grouped by category.",
+      "mode": "view"
+    },
+    {
+      "name": "running-apps",
+      "title": "Running Apps",
+      "description": "List the apps that are currently running.",
+      "mode": "view"
+    },
+    {
+      "name": "favorites",
+      "title": "Favorite Apps",
+      "description": "Quickly access the apps you've marked as favorite.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.12.7",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
