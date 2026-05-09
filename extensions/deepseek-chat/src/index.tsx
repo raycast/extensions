@@ -13,6 +13,11 @@ import { useHistory } from "./hooks/useHistory";
 import { AnswerItem } from "./components/AnswerItem";
 import { HistoryItem } from "./components/HistoryItem";
 
+interface Preferences {
+  apiKey: string;
+  model: "deepseek-chat" | "deepseek-reasoner";
+}
+
 export default function Command() {
   const preferences = getPreferenceValues<Preferences>();
   const { text, status, submit, reset } = useStream(preferences);

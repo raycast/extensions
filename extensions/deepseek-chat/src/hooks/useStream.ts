@@ -3,6 +3,11 @@ import { streamChat } from "../api/deepseek";
 
 type StreamStatus = "idle" | "streaming" | "done" | "error";
 
+interface Preferences {
+  apiKey: string;
+  model: "deepseek-chat" | "deepseek-reasoner";
+}
+
 export function useStream(preferences: Preferences) {
   const [text, setText] = useState("");
   const [status, setStatus] = useState<StreamStatus>("idle");
