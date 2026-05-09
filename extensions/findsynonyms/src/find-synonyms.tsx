@@ -5,7 +5,7 @@ import { useState } from "react";
 function useSynonyms(word: string) {
   const { data, isLoading, error } = useFetch<
     { word: string; score: number }[]
-  >(`https://api.datamuse.com/words?rel_syn=${word}`);
+  >(`https://api.datamuse.com/words?rel_syn=${word}`, { execute: !!word });
   return {
     synonyms: data?.map((item) => item.word) ?? [],
     scores: data?.map((item) => item.score) ?? [],
