@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="84" y1="58" x2="430" y2="462" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#141822"/>
+      <stop offset="0.55" stop-color="#263148"/>
+      <stop offset="1" stop-color="#0D6E5F"/>
+    </linearGradient>
+    <linearGradient id="panel" x1="118" y1="114" x2="394" y2="402" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#F8FBFF"/>
+      <stop offset="1" stop-color="#DCE9EE"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" fill="url(#bg)"/>
+  <path d="M128 140c0-24 20-44 44-44h168c24 0 44 20 44 44v144c0 24-20 44-44 44h-92l-72 64c-10 9-26 2-26-12v-52h-12c-24 0-44-20-44-44V140z" fill="url(#panel)"/>
+  <path d="M162 170c0-12 10-22 22-22h144c12 0 22 10 22 22s-10 22-22 22H184c-12 0-22-10-22-22z" fill="#1B2433"/>
+  <path d="M162 236c0-12 10-22 22-22h86c12 0 22 10 22 22s-10 22-22 22h-86c-12 0-22-10-22-22z" fill="#0D7B6C"/>
+  <rect x="274" y="304" width="142" height="92" rx="24" fill="#101622"/>
+  <path d="M310 334h44c12 0 22 10 22 22s-10 22-22 22h-44v-20h44a2 2 0 0 0 0-4h-44v-20z" fill="#FFFFFF"/>
+  <path d="M296 334h22v44h-22z" fill="#54E3C1"/>
+  <path d="M393 320l12 24 27 4-20 19 5 27-24-13-24 13 5-27-20-19 27-4 12-24z" fill="#54E3C1"/>
+</svg>

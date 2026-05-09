@@ -1,0 +1,7 @@
+node_modules/
+dist/
+dist-daemon/
+assets/daemon-dist/
+.raycast/
+coverage/
+*.log

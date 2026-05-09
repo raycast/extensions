@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "dist-daemon",
+    "rootDir": "src",
+    "noEmit": false,
+    "declaration": false,
+    "sourceMap": true
+  },
+  "include": ["src/daemon/**/*.ts", "src/lib/**/*.ts"]
+}
