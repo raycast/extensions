@@ -15,11 +15,7 @@ export function LockdockNotRunning({ binPath }: { binPath: string }) {
         icon={Icon.Play}
         actions={
           <ActionPanel>
-            <Action
-              title="Enable Daemon"
-              icon={Icon.Terminal}
-              onAction={() => enableDaemon(binPath)}
-            />
+            <Action title="Enable Daemon" icon={Icon.Terminal} onAction={() => enableDaemon(binPath)} />
           </ActionPanel>
         }
       />

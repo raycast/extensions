@@ -4,14 +4,13 @@ import path from "node:path";
 
 const DEFAULT_PATHS = [
   "/opt/homebrew/bin/lockdock",
+  "/usr/local/bin/lockdock",
   path.join(homedir(), ".local", "bin", "lockdock"),
 ];
 
 export class LockdockNotInstalledError extends Error {
   constructor() {
-    super(
-      "LockDock is not installed or not found in PATH. Install it with: brew install mishamyrt/tap/lockdock",
-    );
+    super("LockDock is not installed or not found in PATH. Install it with: brew install mishamyrt/tap/lockdock");
     this.name = "LockdockNotInstalledError";
   }
 }

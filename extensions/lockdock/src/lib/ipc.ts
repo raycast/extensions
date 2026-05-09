@@ -3,13 +3,7 @@ import { createConnection } from "node:net";
 import { homedir } from "node:os";
 import path from "node:path";
 
-const SOCKET_PATH = path.join(
-  homedir(),
-  "Library",
-  "Caches",
-  "co.myrt.lockdock",
-  "control.sock",
-);
+const SOCKET_PATH = path.join(homedir(), "Library", "Caches", "co.myrt.lockdock", "control.sock");
 
 export interface DockStatus {
   displays: string[];
@@ -69,10 +63,7 @@ function parseStatus(response: unknown): DockStatus {
   }
 
   const { displays, location, target } = response;
-  if (
-    !Array.isArray(displays) ||
-    !displays.every((display) => typeof display === "string")
-  ) {
+  if (!Array.isArray(displays) || !displays.every((display) => typeof display === "string")) {
     throw new Error("lockdock returned displays in an unexpected format.");
   }
   if (typeof location !== "number") {
@@ -106,9 +97,7 @@ function isDaemonError(value: unknown): value is {
   success: false;
   reason: string;
 } {
-  return (
-    isRecord(value) && value.success === false && typeof value.reason === "string"
-  );
+  return isRecord(value) && value.success === false && typeof value.reason === "string";
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

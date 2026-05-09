@@ -32,11 +32,7 @@ export function LockdockNotInstalled() {
               icon={Icon.Terminal}
               onAction={() => installLockdock(SCRIPT_COMMAND)}
             />
-            <Action.OpenInBrowser
-              title="Open Lockdock on GitHub"
-              icon={Icon.Globe}
-              url={LOCKDOCK_GITHUB}
-            />
+            <Action.OpenInBrowser title="Open Lockdock on GitHub" icon={Icon.Globe} url={LOCKDOCK_GITHUB} />
           </ActionPanel>
         }
       />

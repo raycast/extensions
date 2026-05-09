@@ -1,6 +1,6 @@
 # Lockdock Changelog
 
-## [1.0.0] - 2026-05-09
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Added Dock pinning
 - Added Lockdock detector and installer

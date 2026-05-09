@@ -1,23 +1,12 @@
 import { Action, ActionPanel, List, Toast, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-
 import { useState } from "react";
-
 import { LockdockNotInstalled } from "./components/LockdockNotInstalled";
 import { LockdockNotRunning } from "./components/LockdockNotRunning";
-
 import { DockStatus, getState, isIpcRunning, lockDock, unlockDock } from "./lib/ipc";
 import { getLockDockPathSafe } from "./lib/binary";
 
 export default function Command() {
-  if (!isIpcRunning()) {
-    const binPath = getLockDockPathSafe();
-    if (!binPath) {
-      return <LockdockNotInstalled />;
-    }
-    return <LockdockNotRunning binPath={binPath} />;
-  }
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     isLoading,
@@ -26,6 +15,14 @@ export default function Command() {
   } = usePromise(getState, [], {
     failureToastOptions: { title: "Failed to load Dock status" },
   });
+
+  if (!isIpcRunning()) {
+    const binPath = getLockDockPathSafe();
+    if (!binPath) {
+      return <LockdockNotInstalled />;
+    }
+    return <LockdockNotRunning binPath={binPath} />;
+  }
 
   const runAction = async (
     loadingTitle: string,
@@ -80,10 +77,7 @@ export default function Command() {
   };
 
   return (
-    <List
-      isLoading={isLoading || isSubmitting}
-      searchBarPlaceholder="Select a display"
-    >
+    <List isLoading={isLoading || isSubmitting} searchBarPlaceholder="Select a display">
       <List.Section title="Displays">
         {(status?.displays ?? []).map((display, index) => (
           <List.Item
@@ -112,10 +106,7 @@ export default function Command() {
   );
 }
 
-function getDisplayAccessories(
-  status: DockStatus | undefined,
-  displayIndex: number,
-) {
+function getDisplayAccessories(status: DockStatus | undefined, displayIndex: number) {
   if (!status) {
     return [];
   }

@@ -10,7 +10,7 @@
   A Raycast extension for <a href="https://github.com/mishamyrt/lockdock">Lockdock</a>, the macOS Dock locker.
 </p>
 
-![screenshot](./media/screenshot-1.png)
+![screenshot](./media/screenshot-1.jpg)
 
 ## Prerequisites
 
