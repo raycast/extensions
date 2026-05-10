@@ -1,6 +1,6 @@
 # Kaomoji Search Changelog
 
-## [Use native copy/paste actions] - {PR_MERGE_DATE}
+## [Use native copy/paste actions] - 2026-05-10
 
 - Replace manual `Clipboard.copy` / `Clipboard.paste` actions with `Action.CopyToClipboard` and `Action.Paste`
 - Keep recent history behavior by adding kaomoji through `onCopy` / `onPaste` callbacks
