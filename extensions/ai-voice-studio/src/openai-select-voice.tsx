@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildOptionsAsync, getActiveModelAsync, getModelLabel, synthesizeSpeech } from "./api/openai-tts";
 import type { VoiceConfig } from "./api/openai-types";
@@ -111,7 +111,7 @@ export default function SelectVoice() {
     const activeVoice = await getActiveQuickReadVoiceId();
     setActiveVoiceId(activeVoice.voiceId);
     setUsesOverride(activeVoice.isOverride);
-    await showToast({ style: Toast.Style.Success, title: "Using the default voice from preferences" });
+    await showToast({ style: Toast.Style.Success, title: "Using the configured default voice" });
   }, []);
 
   const currentVoice = activeVoiceId ? getVoiceById(activeVoiceId) : undefined;
@@ -125,10 +125,8 @@ export default function SelectVoice() {
     >
       <List.Section title="Current">
         <List.Item
-          title={currentVoice?.name ?? activeVoiceId ?? "Default from Preferences"}
-          subtitle={
-            usesOverride ? "Custom Quick Read voice" : `Default from Preferences · ${getModelLabel(currentModel)}`
-          }
+          title={currentVoice?.name ?? activeVoiceId ?? "Configured Default"}
+          subtitle={usesOverride ? "Custom Quick Read voice" : `Configured Default · ${getModelLabel(currentModel)}`}
           icon={{ source: Icon.Star, tintColor: usesOverride ? Color.Yellow : Color.SecondaryText }}
           detail={
             <CurrentVoiceDetail voice={currentVoice} model={MODEL_LABELS[currentModel]} usesOverride={usesOverride} />
@@ -145,7 +143,7 @@ export default function SelectVoice() {
               {usesOverride && (
                 <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
               )}
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -173,7 +171,7 @@ export default function SelectVoice() {
                     <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
                   )}
                   <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
-                  <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                  <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
                 </ActionPanel>
               }
             />
@@ -182,6 +180,10 @@ export default function SelectVoice() {
       ))}
     </List>
   );
+}
+
+function openProviderSettings() {
+  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
 }
 
 function CurrentVoiceDetail({
@@ -198,14 +200,14 @@ function CurrentVoiceDetail({
       markdown={
         voice
           ? `## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}`
-          : "## Default from Preferences\n\nQuick Read will use the default voice configured in extension preferences."
+          : "## Configured Default\n\nQuick Read will use the default voice from Configure Voice Providers."
       }
       metadata={
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Model" text={model} />
           <List.Item.Detail.Metadata.Label
             title="Mode"
-            text={usesOverride ? "Custom Quick Read voice" : "Default from Preferences"}
+            text={usesOverride ? "Custom Quick Read voice" : "Configured Default"}
           />
           {voice ? <List.Item.Detail.Metadata.Label title="Voice ID" text={voice.id} /> : null}
         </List.Item.Detail.Metadata>

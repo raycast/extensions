@@ -7,6 +7,7 @@ import {
   isVoiceAvailableForModel,
 } from "../constants/mimo-voices";
 import { getSpeedOverride, parseRateString, rateToInstruction } from "../utils/mimo-playback-state";
+import { getMimoSettings, type MimoProviderSettings } from "../utils/provider-settings";
 import type { MimoTTSModel, TTSOptionOverrides, TTSOptions } from "./mimo-types";
 
 const DEFAULT_TOKEN_PLAN_BASE_URL = "https://token-plan-cn.xiaomimimo.com/v1";
@@ -173,26 +174,42 @@ function normalizeBaseUrl(baseUrl: string | undefined): string {
 }
 
 export function getActiveModel(): MimoTTSModel {
-  const prefs = getPreferenceValues<Preferences>();
-  return normalizeModel(prefs.mimoModelId);
+  return DEFAULT_MODEL;
+}
+
+export async function getActiveModelAsync(): Promise<MimoTTSModel> {
+  const settings = await getMimoSettings();
+  return normalizeModel(settings.model);
 }
 
 export function getModelLabel(model: MimoTTSModel): string {
   return MODEL_LABELS[model];
 }
 
-export function buildOptionsFromPrefs(
+export async function buildOptionsFromPrefs(
+  voiceOverride?: string,
+  overrides: TTSOptionOverrides = {},
+  speedOverrideRate?: number | null,
+): Promise<TTSOptions> {
+  const settings = await getMimoSettings();
+  return buildOptionsFromSettings(settings, voiceOverride, overrides, speedOverrideRate);
+}
+
+function buildOptionsFromSettings(
+  settings: MimoProviderSettings,
   voiceOverride?: string,
   overrides: TTSOptionOverrides = {},
   speedOverrideRate?: number | null,
 ): TTSOptions {
-  const prefs = getPreferenceValues<Preferences>();
-  const model = normalizeModel(prefs.mimoModelId);
-  const voice = voiceOverride || prefs.mimoDefaultVoice || DEFAULT_VOICE;
+  const model = normalizeModel(settings.model);
+  const voice = voiceOverride || settings.defaultVoice || DEFAULT_VOICE;
   const voiceConfig = getVoiceById(voice);
 
   if (!voiceConfig) {
-    throw new TTSApiError(`Unknown voice "${voice}". Pick a MiMo voice in preferences or Set Quick Read Voice.`, -1);
+    throw new TTSApiError(
+      `Unknown voice "${voice}". Pick a MiMo voice in Configure Voice Providers or Set Quick Read Voice.`,
+      -1,
+    );
   }
 
   if (!isVoiceAvailableForModel(voiceConfig, model)) {
@@ -207,13 +224,13 @@ export function buildOptionsFromPrefs(
       ? speedOverrideRate
       : overrides.speechRate !== undefined
         ? parseRateString(overrides.speechRate)
-        : parseRateString(prefs.mimoSpeechRate);
+        : parseRateString(settings.speechRate);
 
   return {
     model,
     voice,
     stylePrompt: buildStylePrompt(
-      overrides.baseStylePrompt ?? prefs.mimoStylePrompt,
+      overrides.baseStylePrompt ?? settings.stylePrompt,
       rate,
       overrides.additionalStylePrompt,
     ),
@@ -237,7 +254,7 @@ export async function buildOptionsAsync(
 }
 
 /** Validate preferences without making any network call. */
-export function validateOptions(voiceOverride?: string): TTSOptions {
+export async function validateOptions(voiceOverride?: string): Promise<TTSOptions> {
   return buildOptionsFromPrefs(voiceOverride);
 }
 

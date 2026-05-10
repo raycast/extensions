@@ -130,7 +130,7 @@ export function formatSpeed(rate: number): string {
 }
 
 /**
- * Parse a rate string from preferences, form values, or LocalStorage.
+ * Parse a rate string from configured defaults, form values, or LocalStorage.
  *
  * Supports both modern decimal values ("1.25", "0.5", "2") and legacy
  * percentage offsets used by earlier versions ("-50" = 0.5x, "100" = 2x).

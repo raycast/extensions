@@ -216,5 +216,5 @@ async function handleSlowDown() {
 }
 
 async function handleSpeedUnavailable() {
-  await showHUD("No active reading. Open Preferences to change the default speed.");
+  await showHUD("No active reading. Use Configure Voice Providers to change the default speed.");
 }

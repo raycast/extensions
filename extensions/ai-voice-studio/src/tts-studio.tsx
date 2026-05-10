@@ -4,14 +4,14 @@ import {
   Clipboard,
   Form,
   Icon,
+  LaunchType,
   Toast,
-  getPreferenceValues,
   getSelectedText,
-  openExtensionPreferences,
+  launchCommand,
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildOptionsFromPrefs, getActiveModel, getModelLabel } from "./api/mimo-tts";
+import { buildOptionsFromPrefs, getActiveModelAsync, getModelLabel } from "./api/mimo-tts";
 import { showTTSFailure } from "./utils/mimo-feedback";
 import {
   EMOTION_TAGS,
@@ -24,6 +24,7 @@ import {
 } from "./constants/mimo-controls";
 import {
   DEFAULT_VOICE,
+  DEFAULT_MODEL,
   VOICE_CATEGORIES,
   getVoiceById,
   getVoicesByCategory,
@@ -47,6 +48,7 @@ import {
   setSpeedOverride,
   SPEED_STEP,
 } from "./utils/mimo-playback-state";
+import { getMimoSettings } from "./utils/provider-settings";
 
 interface ControlFormValues extends Form.Values {
   text: string;
@@ -63,8 +65,7 @@ interface ControlFormValues extends Form.Values {
 }
 
 export default function MiMoStudio() {
-  const currentModel = getActiveModel();
-  const prefs = getPreferenceValues<Preferences>();
+  const [currentModel, setCurrentModel] = useState(DEFAULT_MODEL);
   const availableVoices = useMemo(() => getVoicesForModel(currentModel), [currentModel]);
   const [text, setText] = useState("");
   const [voiceId, setVoiceId] = useState(availableVoices[0]?.id ?? DEFAULT_VOICE);
@@ -81,13 +82,15 @@ export default function MiMoStudio() {
         getActiveQuickReadVoiceId().catch(() => ({ voiceId: DEFAULT_VOICE, isOverride: false })),
         getSpeedOverride(),
       ]);
+      const [model, settings] = await Promise.all([getActiveModelAsync(), getMimoSettings()]);
+      const modelVoices = getVoicesForModel(model);
 
       if (!mounted) return;
+      setCurrentModel(model);
       setText(initialText);
-      setVoiceId(
-        availableVoices.some((voice) => voice.id === activeVoice.voiceId) ? activeVoice.voiceId : DEFAULT_VOICE,
-      );
-      const initialRate = override ?? parseRateString(prefs.mimoSpeechRate);
+      const fallbackVoice = modelVoices[0]?.id ?? DEFAULT_VOICE;
+      setVoiceId(modelVoices.some((voice) => voice.id === activeVoice.voiceId) ? activeVoice.voiceId : fallbackVoice);
+      const initialRate = override ?? parseRateString(settings.speechRate);
       setSpeechRate(matchRateOptionValue(initialRate));
     }
 
@@ -97,7 +100,7 @@ export default function MiMoStudio() {
       mounted = false;
       playerRef.current.cleanup();
     };
-  }, [availableVoices, prefs.mimoSpeechRate]);
+  }, []);
 
   const handleSubmit = useCallback(async (values: ControlFormValues) => {
     const textToRead = values.text.trim();
@@ -120,7 +123,7 @@ export default function MiMoStudio() {
       const rate = parseRateString(values.speechRate);
       await setSpeedOverride(rate);
 
-      const options = buildOptionsFromPrefs(
+      const options = await buildOptionsFromPrefs(
         values.voiceId,
         {
           additionalStylePrompt: joinNaturalInstructions(values.performancePreset, values.directorPrompt),
@@ -281,7 +284,7 @@ export default function MiMoStudio() {
               onAction={handleStop}
             />
           ) : null}
-          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
         </ActionPanel>
       }
     >
@@ -388,6 +391,10 @@ async function loadInitialText(): Promise<string> {
   const selectedText = await getSelectedText().catch(() => "");
   if (selectedText.trim()) return selectedText;
   return "";
+}
+
+function openProviderSettings() {
+  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
 }
 
 function selectedTags(tags: string[] | undefined): string[] {

@@ -7,7 +7,8 @@ import {
   List,
   Toast,
   getSelectedText,
-  openExtensionPreferences,
+  LaunchType,
+  launchCommand,
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -228,7 +229,7 @@ export default function ReadWithVoice() {
     : "No text loaded";
 
   const effectiveRate = speed ?? parseRateString(defaultPlaybackRate);
-  const speedLabel = `${formatSpeed(effectiveRate)}${speed === null ? " (from preferences)" : " (override)"}`;
+  const speedLabel = `${formatSpeed(effectiveRate)}${speed === null ? " (default)" : " (override)"}`;
 
   const stopAction = playingVoiceId ? (
     <Action title="Stop Playback" icon={Icon.Stop} shortcut={{ modifiers: ["cmd"], key: "." }} onAction={handleStop} />
@@ -262,7 +263,7 @@ export default function ReadWithVoice() {
       <List.EmptyView
         icon={Icon.SpeakerOff}
         title="No voices found"
-        description={`Try another search term or change the model in preferences. Current model: ${MODEL_LABELS[currentModel]}`}
+        description={`Try another search term or change the model in Configure Voice Providers. Current model: ${MODEL_LABELS[currentModel]}`}
       />
       <List.Section title="Current Text">
         <List.Item
@@ -297,7 +298,7 @@ export default function ReadWithVoice() {
               />
               {stopAction}
               {speedActions}
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -342,7 +343,7 @@ export default function ReadWithVoice() {
                     onAction={loadFromClipboard}
                   />
                   <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
-                  <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                  <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
                 </ActionPanel>
               }
             />
@@ -351,6 +352,10 @@ export default function ReadWithVoice() {
       ))}
     </List>
   );
+}
+
+function openProviderSettings() {
+  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
 }
 
 function SelectionDetail({

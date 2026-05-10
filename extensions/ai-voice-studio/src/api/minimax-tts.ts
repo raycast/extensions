@@ -2,6 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import { basename, extname } from "node:path";
 import { getPreferenceValues } from "@raycast/api";
 import { DEFAULT_VOICE_ID, normalizeVoiceList } from "../constants/voices";
+import { getMiniMaxSettings } from "../utils/provider-settings";
 import type {
   MiniMaxFileUploadResponse,
   MiniMaxRegion,
@@ -325,16 +326,17 @@ export async function downloadAudioAsBase64(audioUrl: string): Promise<string> {
   }
 }
 
-export function buildOptionsFromPrefs(voiceOverride?: string): TTSOptions {
+export async function buildOptionsFromPrefs(voiceOverride?: string): Promise<TTSOptions> {
   const prefs = getPreferenceValues<Preferences>();
-  const voiceId = voiceOverride || prefs.customDefaultVoice?.trim() || prefs.defaultVoice || DEFAULT_VOICE_ID;
-  const speed = parseSpeechRate(prefs.speechRate);
+  const settings = await getMiniMaxSettings();
+  const voiceId = voiceOverride || settings.customDefaultVoice?.trim() || settings.defaultVoice || DEFAULT_VOICE_ID;
+  const speed = parseSpeechRate(settings.speechRate);
 
   return {
     voiceId,
-    model: prefs.model || DEFAULT_MODEL,
+    model: settings.model || DEFAULT_MODEL,
     speed,
-    languageBoost: prefs.languageBoost || "auto",
+    languageBoost: settings.languageBoost || "auto",
     region: parseRegion(prefs.region),
     format: DEFAULT_AUDIO_FORMAT,
     sampleRate: DEFAULT_SAMPLE_RATE,

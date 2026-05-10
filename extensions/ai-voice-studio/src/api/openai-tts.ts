@@ -143,7 +143,10 @@ function buildOptionsFromSettings(
   const voiceConfig = getVoiceById(voice);
 
   if (!voiceConfig) {
-    throw new TTSApiError(`Unknown voice "${voice}". Pick an OpenAI voice in preferences or Set Quick Read Voice.`, -1);
+    throw new TTSApiError(
+      `Unknown voice "${voice}". Pick an OpenAI voice in Configure Voice Providers or Set Quick Read Voice.`,
+      -1,
+    );
   }
 
   if (!isVoiceAvailableForModel(voiceConfig, model)) {

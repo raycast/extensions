@@ -20,6 +20,7 @@ import {
 import { AudioPlayer } from "./utils/audio-player";
 import { setQuickReadVoiceOverride } from "./utils/voice-preferences";
 import { lookupUploadCache, rememberUploadCache } from "./utils/upload-cache";
+import { getMiniMaxSettings } from "./utils/provider-settings";
 
 const DEFAULT_PREVIEW_TEXT = "这是一个 MiniMax 克隆音色试听。";
 const MODEL_OPTIONS = [
@@ -66,15 +67,16 @@ interface CloneVoiceResult {
 
 type FormErrorKey = "voiceId" | "sourceAudio" | "promptAudio" | "promptText" | "previewText";
 type FormErrors = Partial<Record<FormErrorKey, string>>;
+type PreferenceDefaults = { model: string; languageBoost: string; preferTokenPlanModelsOnly: boolean };
 
 export default function CloneVoiceCommand() {
-  const prefs = useMemo(() => getPreferenceDefaults(), []);
+  const [prefs, setPrefs] = useState<PreferenceDefaults | null>(null);
   const availableModelOptions = useMemo(
     () =>
-      prefs.preferTokenPlanModelsOnly
+      prefs?.preferTokenPlanModelsOnly
         ? MODEL_OPTIONS.filter((option) => isTokenPlanCompatibleModel(option.value))
         : MODEL_OPTIONS,
-    [prefs.preferTokenPlanModelsOnly],
+    [prefs?.preferTokenPlanModelsOnly],
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<CloneVoiceResult | null>(null);
@@ -82,6 +84,9 @@ export default function CloneVoiceCommand() {
   const playerRef = useRef(new AudioPlayer());
 
   useEffect(() => {
+    getPreferenceDefaults()
+      .then(setPrefs)
+      .catch(() => undefined);
     // Preview clip playback survives view dismissal — no cleanup on unmount.
     return () => {
       // intentionally empty
@@ -238,6 +243,10 @@ export default function CloneVoiceCommand() {
     );
   }
 
+  if (!prefs) {
+    return <Form isLoading navigationTitle="Clone Voice" />;
+  }
+
   return (
     <Form
       isLoading={isSubmitting}
@@ -370,7 +379,7 @@ function buildResultMarkdown(result: CloneVoiceResult): string {
       ? "- Press **⏎** to play the MiniMax-generated preview clip."
       : "- Press **⏎** to set this voice as the Quick Read default.",
     "- **⌘⏎** sets this as your Quick Read default; trigger Quick Read to hear it.",
-    "- **⌘⇧.** copies the Voice ID for use elsewhere (e.g. as a `customDefaultVoice`).",
+    "- **⌘⇧.** copies the Voice ID for use in Configure Voice Providers.",
     "",
   ];
 
@@ -396,18 +405,19 @@ function buildResultMarkdown(result: CloneVoiceResult): string {
   ].join("\n");
 }
 
-function getPreferenceDefaults(): { model: string; languageBoost: string; preferTokenPlanModelsOnly: boolean } {
+async function getPreferenceDefaults(): Promise<PreferenceDefaults> {
   const prefs = getPreferenceValues<Preferences>();
+  const settings = await getMiniMaxSettings();
   const preferTokenPlanModelsOnly =
     prefs.authMode === "token-plan" || (!!prefs.tokenPlanKey?.trim() && !prefs.openPlatformApiKey?.trim());
   const preferredModel =
-    preferTokenPlanModelsOnly && !isTokenPlanCompatibleModel(prefs.model || "speech-2.8-hd")
+    preferTokenPlanModelsOnly && !isTokenPlanCompatibleModel(settings.model || "speech-2.8-hd")
       ? "speech-2.8-hd"
-      : prefs.model || "speech-2.8-hd";
+      : settings.model || "speech-2.8-hd";
 
   return {
     model: preferredModel,
-    languageBoost: prefs.languageBoost || "auto",
+    languageBoost: settings.languageBoost || "auto",
     preferTokenPlanModelsOnly,
   };
 }

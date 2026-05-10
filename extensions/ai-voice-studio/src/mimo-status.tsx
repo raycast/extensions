@@ -1,13 +1,4 @@
-import {
-  Color,
-  Icon,
-  LaunchType,
-  MenuBarExtra,
-  getPreferenceValues,
-  launchCommand,
-  openExtensionPreferences,
-  showHUD,
-} from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { stopExternalPlayback } from "./utils/audio-player";
 import {
@@ -24,17 +15,18 @@ import {
   SPEED_STEP,
   type NowPlayingState,
 } from "./utils/mimo-playback-state";
+import { getMimoSettings } from "./utils/provider-settings";
 
 export default function MenuBarStatus() {
-  const prefs = getPreferenceValues<Preferences>();
-  const prefRate = parseRateString(prefs.mimoSpeechRate);
+  const [prefRate, setPrefRate] = useState(1);
   const [state, setState] = useState<NowPlayingState | null | undefined>(undefined);
   const [override, setOverride] = useState<number | null>(null);
 
   useEffect(() => {
-    Promise.all([getNowPlaying(), getSpeedOverride()]).then(([s, r]) => {
+    Promise.all([getNowPlaying(), getSpeedOverride(), getMimoSettings()]).then(([s, r, settings]) => {
       setState(s);
       setOverride(r);
+      setPrefRate(parseRateString(settings.speechRate));
     });
   }, []);
 
@@ -131,7 +123,7 @@ export default function MenuBarStatus() {
 
       <MenuBarExtra.Section title="Playback Speed">
         <MenuBarExtra.Item
-          title={`${formatSpeed(effectiveRate)}${override === null ? " (from preferences)" : " (override)"}`}
+          title={`${formatSpeed(effectiveRate)}${override === null ? " (default)" : " (override)"}`}
           icon={Icon.Gauge}
         />
         <MenuBarExtra.Item

@@ -1,4 +1,4 @@
-import { getPreferenceValues, showHUD } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import {
   adjustSpeed,
   formatSpeed,
@@ -7,14 +7,15 @@ import {
   SPEED_MIN,
   SPEED_STEP,
 } from "./utils/mimo-playback-state";
+import { getMimoSettings } from "./utils/provider-settings";
 
 export default async function SpeedDown() {
   await runMimoSpeedDown();
 }
 
 export async function runMimoSpeedDown() {
-  const prefs = getPreferenceValues<Preferences>();
-  const fallback = parseRateString(prefs.mimoSpeechRate);
+  const settings = await getMimoSettings();
+  const fallback = parseRateString(settings.speechRate);
   const before = (await getSpeedOverride()) ?? fallback;
   const next = await adjustSpeed(-SPEED_STEP, fallback);
 

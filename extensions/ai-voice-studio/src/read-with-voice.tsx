@@ -7,10 +7,12 @@ import {
   getSelectedText,
   Icon,
   Color,
+  LaunchType,
   getPreferenceValues,
+  launchCommand,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { addCustomVoices, collectCustomVoiceIds, FALLBACK_VOICES, groupVoicesByCategory } from "./constants/voices";
 import { synthesizeSpeech, buildOptionsFromPrefs, listVoices, TTSApiError } from "./api/minimax-tts";
 import { chunkText } from "./utils/text-chunker";
@@ -19,6 +21,7 @@ import { getQuickReadVoiceOverride, setQuickReadVoiceOverride } from "./utils/vo
 import { readCachedVoices, writeCachedVoices } from "./utils/voice-cache";
 import { buildTextPreview, clearPlaybackState, writePlaybackState } from "./utils/playback-state";
 import { clampSpeed, clearPlaybackSpeed, readPlaybackSpeed, writePlaybackSpeed } from "./utils/playback-speed";
+import { getMiniMaxSettings } from "./utils/provider-settings";
 import type { VoiceConfig } from "./api/types";
 
 type RowPhase = "synthesizing" | "playing";
@@ -35,19 +38,21 @@ export default function ReadWithVoice() {
   const [voices, setVoices] = useState<VoiceConfig[]>(FALLBACK_VOICES);
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState<RowProgress | null>(null);
+  const [customDefaultVoiceId, setCustomDefaultVoiceId] = useState<string | null>(null);
   const playerRef = useRef(new AudioPlayer());
-  const customDefaultVoiceId = useMemo(() => getPreferenceValues<Preferences>().customDefaultVoice?.trim() || null, []);
 
   useEffect(() => {
     let mounted = true;
 
     async function load() {
       const prefs = getPreferenceValues<Preferences>();
+      const settings = await getMiniMaxSettings();
+      if (mounted) setCustomDefaultVoiceId(settings.customDefaultVoice?.trim() || null);
       const cacheKey = { region: prefs.region || "cn", authMode: prefs.authMode || "auto" };
       const quickReadVoiceOverride = await getQuickReadVoiceOverride();
       const customVoiceIds = collectCustomVoiceIds(
-        prefs.customDefaultVoice,
-        prefs.customVoiceIds,
+        settings.customDefaultVoice,
+        settings.customVoiceIds,
         quickReadVoiceOverride,
       );
       const withCustomVoices = (voiceList: VoiceConfig[]) => addCustomVoices(voiceList, customVoiceIds);
@@ -119,7 +124,7 @@ export default function ReadWithVoice() {
       setProgress({ voiceId: voice.id, phase: "synthesizing", chunkIndex: 0, chunkTotal: total });
 
       try {
-        const options = buildOptionsFromPrefs(voice.id);
+        const options = await buildOptionsFromPrefs(voice.id);
         let currentSpeed = clampSpeed(options.speed);
         await writePlaybackSpeed(currentSpeed);
 
@@ -179,7 +184,10 @@ export default function ReadWithVoice() {
               style: Toast.Style.Failure,
               title: error.code === -1 ? "Configuration Required" : "Model Not Available",
               message: error.message,
-              primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+              primaryAction:
+                error.code === -6
+                  ? { title: "Configure Voice Providers", onAction: openProviderSettings }
+                  : { title: "Open Preferences", onAction: () => openExtensionPreferences() },
             });
           } else {
             await showToast({ style: Toast.Style.Failure, title: "TTS Error", message: error.message });
@@ -239,7 +247,8 @@ export default function ReadWithVoice() {
                   onAction={handleStop}
                 />
               )}
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
+              <Action title="Open Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -282,7 +291,8 @@ export default function ReadWithVoice() {
                       />
                     )}
                     <Action.CopyToClipboard title="Copy Voice Id" content={voice.id} />
-                    <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                    <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
+                    <Action title="Open Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
                   </ActionPanel>
                 }
               />
@@ -292,6 +302,10 @@ export default function ReadWithVoice() {
       ))}
     </List>
   );
+}
+
+function openProviderSettings() {
+  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
 }
 
 function progressLabel(progress: RowProgress): string {

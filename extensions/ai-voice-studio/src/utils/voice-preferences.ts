@@ -15,7 +15,7 @@ export async function getActiveQuickReadVoiceId(): Promise<{ voiceId: string; is
     return { voiceId: voiceOverride, isOverride: true };
   }
 
-  return { voiceId: buildOptionsFromPrefs().voiceId, isOverride: false };
+  return { voiceId: (await buildOptionsFromPrefs()).voiceId, isOverride: false };
 }
 
 export async function getQuickReadVoiceOverride(): Promise<string | null> {

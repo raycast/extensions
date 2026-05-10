@@ -37,7 +37,7 @@ export async function runMimoQuickRead() {
   // Dry-validate config BEFORE any user-visible "loading" state.
   try {
     const { voiceId } = await getActiveQuickReadVoiceId();
-    validateOptions(voiceId);
+    await validateOptions(voiceId);
   } catch (error) {
     await showTTSFailure(error);
     return;

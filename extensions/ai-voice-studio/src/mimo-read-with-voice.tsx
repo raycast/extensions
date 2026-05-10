@@ -7,13 +7,14 @@ import {
   List,
   Toast,
   getSelectedText,
-  openExtensionPreferences,
+  LaunchType,
+  launchCommand,
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { buildOptionsAsync, getActiveModel, getModelLabel } from "./api/mimo-tts";
+import { buildOptionsAsync, getActiveModelAsync, getModelLabel } from "./api/mimo-tts";
 import type { VoiceConfig } from "./api/mimo-types";
-import { MODEL_LABELS, VOICE_CATEGORIES, getVoicesByCategory } from "./constants/mimo-voices";
+import { DEFAULT_MODEL, MODEL_LABELS, VOICE_CATEGORIES, getVoicesByCategory } from "./constants/mimo-voices";
 import { AudioPlayer } from "./utils/audio-player";
 import { showTTSFailure } from "./utils/mimo-feedback";
 import { chunkText } from "./utils/mimo-text-chunker";
@@ -32,13 +33,13 @@ import {
   setSpeedOverride,
   SPEED_STEP,
 } from "./utils/mimo-playback-state";
-import { getPreferenceValues } from "@raycast/api";
+import { getMimoSettings } from "./utils/provider-settings";
 
 type SelectionSource = "selection" | "clipboard" | "none";
 
 export default function ReadWithVoice() {
-  const currentModel = getActiveModel();
-  const prefs = getPreferenceValues<Preferences>();
+  const [currentModel, setCurrentModel] = useState(DEFAULT_MODEL);
+  const [defaultSpeechRate, setDefaultSpeechRate] = useState("0");
   const [selectedText, setSelectedText] = useState("");
   const [selectionSource, setSelectionSource] = useState<SelectionSource>("none");
   const [isLoading, setIsLoading] = useState(false);
@@ -85,6 +86,12 @@ export default function ReadWithVoice() {
   }, []);
 
   useEffect(() => {
+    getActiveModelAsync()
+      .then(setCurrentModel)
+      .catch(() => undefined);
+    getMimoSettings()
+      .then((settings) => setDefaultSpeechRate(settings.speechRate))
+      .catch(() => undefined);
     refreshSelection(true).catch(() => undefined);
     refreshSpeed().catch(() => undefined);
     const player = playerRef.current;
@@ -194,7 +201,7 @@ export default function ReadWithVoice() {
   }, []);
 
   const handleSpeedUp = useCallback(async () => {
-    const fallback = parseRateString(prefs.mimoSpeechRate);
+    const fallback = parseRateString(defaultSpeechRate);
     const current = (await getSpeedOverride()) ?? fallback;
     const next = await setSpeedOverride(current + SPEED_STEP);
     setSpeed(next);
@@ -203,10 +210,10 @@ export default function ReadWithVoice() {
       title: `Speed ${formatSpeed(next)}`,
       message: "Applies to the next playback",
     });
-  }, [prefs.mimoSpeechRate]);
+  }, [defaultSpeechRate]);
 
   const handleSpeedDown = useCallback(async () => {
-    const fallback = parseRateString(prefs.mimoSpeechRate);
+    const fallback = parseRateString(defaultSpeechRate);
     const current = (await getSpeedOverride()) ?? fallback;
     const next = await setSpeedOverride(current - SPEED_STEP);
     setSpeed(next);
@@ -215,7 +222,7 @@ export default function ReadWithVoice() {
       title: `Speed ${formatSpeed(next)}`,
       message: "Applies to the next playback",
     });
-  }, [prefs.mimoSpeechRate]);
+  }, [defaultSpeechRate]);
 
   const textPreview = selectedText
     ? selectedText.length > 90
@@ -223,8 +230,8 @@ export default function ReadWithVoice() {
       : selectedText
     : "No text loaded";
 
-  const effectiveRate = speed ?? parseRateString(prefs.mimoSpeechRate);
-  const speedLabel = `${formatSpeed(effectiveRate)}${speed === null ? " (from preferences)" : " (override)"}`;
+  const effectiveRate = speed ?? parseRateString(defaultSpeechRate);
+  const speedLabel = `${formatSpeed(effectiveRate)}${speed === null ? " (default)" : " (override)"}`;
 
   const stopAction = playingVoiceId ? (
     <Action title="Stop Playback" icon={Icon.Stop} shortcut={{ modifiers: ["cmd"], key: "." }} onAction={handleStop} />
@@ -258,7 +265,7 @@ export default function ReadWithVoice() {
       <List.EmptyView
         icon={Icon.SpeakerOff}
         title="No voices found"
-        description={`Try another search term or change the model in preferences. Current model: ${MODEL_LABELS[currentModel]}`}
+        description={`Try another search term or change the model in Configure Voice Providers. Current model: ${MODEL_LABELS[currentModel]}`}
       />
       <List.Section title="Current Text">
         <List.Item
@@ -293,7 +300,7 @@ export default function ReadWithVoice() {
               />
               {stopAction}
               {speedActions}
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -338,7 +345,7 @@ export default function ReadWithVoice() {
                     onAction={loadFromClipboard}
                   />
                   <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
-                  <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                  <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
                 </ActionPanel>
               }
             />
@@ -347,6 +354,10 @@ export default function ReadWithVoice() {
       ))}
     </List>
   );
+}
+
+function openProviderSettings() {
+  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
 }
 
 function SelectionDetail({

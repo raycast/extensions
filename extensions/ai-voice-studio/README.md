@@ -51,7 +51,7 @@ OpenAI is integrated through the Speech API:
 | Command | Provider | Purpose |
 | --- | --- | --- |
 | Quick Read | Default provider | Read selected text or clipboard text. The provider is controlled by **Default TTS Provider**. |
-| Configure Voice Providers | Shared | Configure the default provider and OpenAI model, voice, format, speed, and speaking instructions in a dedicated window. |
+| Configure Voice Providers | Shared | Configure the default provider plus MiniMax, MiMo, and OpenAI model, voice, speed, style, and format settings in a dedicated window. |
 | Resume Last Reading | MiniMax | Resume the previous MiniMax reading session. |
 | Restart Last Reading | MiniMax | Restart the previous MiniMax reading session from the beginning. |
 | Read with MiniMax Voice | MiniMax | Browse MiniMax voices and read with the selected voice. |
@@ -74,7 +74,7 @@ OpenAI is integrated through the Speech API:
 
 ### Shared
 
-- **Configure Voice Providers** command: choose `MiniMax`, `MiMo`, or `OpenAI` as the default provider for shared Quick Read and speed commands.
+- **Configure Voice Providers** command: choose `MiniMax`, `MiMo`, or `OpenAI` as the default provider for shared Quick Read and speed commands. Provider model, voice, speed, style, and format controls live there.
 
 ### MiniMax
 
@@ -82,23 +82,17 @@ OpenAI is integrated through the Speech API:
 - **MiniMax Token Plan Key**
 - **MiniMax Open Platform API Key**
 - **MiniMax Region**
-- **MiniMax Model**
-- **MiniMax Default Voice**
-- **MiniMax Default Custom Voice ID**
-- **MiniMax Extra Custom Voice IDs**
-- **MiniMax Language Boost**
-- **MiniMax Speech Rate**
+
+MiniMax model, default voice, custom voice IDs, language boost, and speech rate live in the **Configure Voice Providers** command.
 
 ### MiMo
 
 - **MiMo Token Plan API Key**
 - **MiMo Token Plan Base URL**
-- **MiMo TTS Model**
-- **MiMo Default Voice**
-- **MiMo Speech Rate**
-- **MiMo Speaking Style**
 
-MiMo preferences intentionally use the `mimo*` prefix internally so they do not collide with the older MiniMax preference names. A future Doubao provider should follow the same pattern with `doubao*` names.
+MiMo model, default voice, speech rate, and speaking style live in the **Configure Voice Providers** command.
+
+MiMo API-key preferences and LocalStorage settings intentionally use the `mimo*` prefix internally so they do not collide with MiniMax settings. A future Doubao provider should follow the same pattern with `doubao*` names.
 
 ### OpenAI
 
@@ -131,7 +125,7 @@ npx tsc --noEmit
 - MiMo audio is returned as base64 WAV.
 - OpenAI API: `POST https://api.openai.com/v1/audio/speech`.
 - OpenAI audio is returned as binary MP3 or WAV and converted to base64 before playback.
-- OpenAI model settings and the shared default provider are stored in Raycast LocalStorage by the Configure Voice Providers command; API keys stay in Raycast Preferences.
+- Provider model, voice, speed, style, format, and shared default-provider settings are stored in Raycast LocalStorage by the Configure Voice Providers command; API keys and connection details stay in Raycast Preferences.
 - Playback uses macOS `afplay`.
 - The shared audio player now supports MP3/WAV temp files, optional playback rate, and abort signals for MiMo/OpenAI lookahead synthesis.
 - Provider-specific local storage keys are kept separate for voice overrides, live playback state, and speed overrides.
@@ -144,5 +138,5 @@ When adding Doubao, keep it provider-scoped:
 - `src/api/doubao-types.ts`
 - `src/constants/doubao-voices.ts`
 - `src/utils/doubao-*`
-- `doubao*` preference names
+- `doubao*` preference or LocalStorage setting names
 - direct provider commands first, then wire shared Quick Read after the provider is stable

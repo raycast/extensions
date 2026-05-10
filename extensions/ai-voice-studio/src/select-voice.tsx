@@ -3,13 +3,15 @@ import {
   ActionPanel,
   Color,
   Icon,
+  LaunchType,
   List,
   getPreferenceValues,
+  launchCommand,
   openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   synthesizeSpeech,
   buildOptionsFromPrefs,
@@ -27,6 +29,7 @@ import {
   setQuickReadVoiceOverride,
 } from "./utils/voice-preferences";
 import { readCachedVoices, writeCachedVoices } from "./utils/voice-cache";
+import { getMiniMaxSettings, type MiniMaxProviderSettings } from "./utils/provider-settings";
 
 const PREVIEW_FALLBACK_TEXT = "这是一段 MiniMax TTS 音色试听。";
 const PREVIEW_CHAR_LIMIT = 180;
@@ -44,19 +47,26 @@ export default function SelectVoice() {
   const [usesOverride, setUsesOverride] = useState(false);
   const [previewingVoiceId, setPreviewingVoiceId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [configStatus, setConfigStatus] = useState<ConfigStatus | null>(null);
+  const [customDefaultVoiceId, setCustomDefaultVoiceId] = useState<string | null>(null);
   const playerRef = useRef(new AudioPlayer());
-
-  const configStatus = useMemo(() => buildConfigStatus(), []);
-  const customDefaultVoiceId = useMemo(() => getPreferenceValues<Preferences>().customDefaultVoice?.trim() || null, []);
 
   useEffect(() => {
     let mounted = true;
 
     async function load() {
       const prefs = getPreferenceValues<Preferences>();
+      const settings = await getMiniMaxSettings();
+      if (mounted) {
+        setConfigStatus(buildConfigStatus(settings));
+        setCustomDefaultVoiceId(settings.customDefaultVoice?.trim() || null);
+      }
       const cacheKey = { region: prefs.region || "cn", authMode: prefs.authMode || "auto" };
       const withCustomVoices = (voiceList: VoiceConfig[], extraVoiceId?: string) =>
-        addCustomVoices(voiceList, collectCustomVoiceIds(prefs.customDefaultVoice, prefs.customVoiceIds, extraVoiceId));
+        addCustomVoices(
+          voiceList,
+          collectCustomVoiceIds(settings.customDefaultVoice, settings.customVoiceIds, extraVoiceId),
+        );
 
       const cached = await readCachedVoices(cacheKey.region, cacheKey.authMode);
       if (mounted && cached) {
@@ -127,7 +137,7 @@ export default function SelectVoice() {
     try {
       const readableText = await getReadableText();
       const previewText = getPreviewText(readableText?.text || PREVIEW_FALLBACK_TEXT);
-      const audio = await synthesizeSpeech(previewText, buildOptionsFromPrefs(voice.id));
+      const audio = await synthesizeSpeech(previewText, await buildOptionsFromPrefs(voice.id));
       if (player.isStopped()) return;
       await player.playAudio(audio);
     } catch (error) {
@@ -137,7 +147,10 @@ export default function SelectVoice() {
             style: Toast.Style.Failure,
             title: error.code === -1 ? "Configuration Required" : "Model Not Available",
             message: error.message,
-            primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+            primaryAction:
+              error.code === -6
+                ? { title: "Configure Voice Providers", onAction: openProviderSettings }
+                : { title: "Open Preferences", onAction: () => openExtensionPreferences() },
           });
         } else {
           await showToast({ style: Toast.Style.Failure, title: "Preview failed", message: error.message });
@@ -168,7 +181,7 @@ export default function SelectVoice() {
   }, []);
 
   const activeVoice = activeVoiceId ? voices.find((voice) => voice.id === activeVoiceId) : undefined;
-  const activeVoiceTitle = activeVoice?.name || activeVoiceId || "Preference default";
+  const activeVoiceTitle = activeVoice?.name || activeVoiceId || "Configured default";
   const activeVoiceSubtitle = activeVoice?.id || activeVoiceId || undefined;
 
   return (
@@ -187,7 +200,7 @@ export default function SelectVoice() {
           actions={
             <ActionPanel>
               {usesOverride && (
-                <Action title="Reset to Preference Default" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
+                <Action title="Reset to Configured Default" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
               )}
               {previewingVoiceId && (
                 <Action
@@ -197,22 +210,28 @@ export default function SelectVoice() {
                   onAction={handleStopPreview}
                 />
               )}
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
+              <Action title="Open Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
         <List.Item
           title="Active Configuration"
-          subtitle={`${configStatus.authLabel} · ${configStatus.modelLabel} · ${configStatus.regionLabel}`}
+          subtitle={
+            configStatus
+              ? `${configStatus.authLabel} · ${configStatus.modelLabel} · ${configStatus.regionLabel}`
+              : "Loading"
+          }
           icon={{
-            source: configStatus.warning ? Icon.ExclamationMark : Icon.Info,
-            tintColor: configStatus.warning ? Color.Orange : Color.SecondaryText,
+            source: configStatus?.warning ? Icon.ExclamationMark : Icon.Info,
+            tintColor: configStatus?.warning ? Color.Orange : Color.SecondaryText,
           }}
           accessories={
-            configStatus.warning ? [{ tag: { value: configStatus.warning, color: Color.Orange } }] : undefined
+            configStatus?.warning ? [{ tag: { value: configStatus.warning, color: Color.Orange } }] : undefined
           }
           actions={
             <ActionPanel>
+              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
               <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
             </ActionPanel>
           }
@@ -251,13 +270,14 @@ export default function SelectVoice() {
                   )}
                   {usesOverride && (
                     <Action
-                      title="Reset to Preference Default"
+                      title="Reset to Configured Default"
                       icon={Icon.RotateClockwise}
                       onAction={handleResetVoice}
                     />
                   )}
                   <Action.CopyToClipboard title="Copy Voice Id" content={voice.id} />
-                  <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+                  <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
+                  <Action title="Open Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
                 </ActionPanel>
               }
             />
@@ -268,15 +288,19 @@ export default function SelectVoice() {
   );
 }
 
+function openProviderSettings() {
+  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
+}
+
 function getPreviewText(text: string): string {
   return Array.from(text.trim()).slice(0, PREVIEW_CHAR_LIMIT).join("") || PREVIEW_FALLBACK_TEXT;
 }
 
-function buildConfigStatus(): ConfigStatus {
+function buildConfigStatus(settings: MiniMaxProviderSettings): ConfigStatus {
   const prefs = getPreferenceValues<Preferences>();
   const tokenPlanKey = prefs.tokenPlanKey?.trim();
   const openPlatformApiKey = prefs.openPlatformApiKey?.trim();
-  const model = prefs.model || "speech-2.8-hd";
+  const model = settings.model || "speech-2.8-hd";
   const authMode = prefs.authMode || "auto";
 
   const tokenPlanCompatible = isTokenPlanCompatibleModel(model);

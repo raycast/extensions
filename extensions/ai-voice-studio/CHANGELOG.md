@@ -5,8 +5,8 @@
 ### Changed
 - Renamed the extension from `MiniMax TTS` to `AI Voice Studio`.
 - Renamed the package slug from `minimax-tts` to `ai-voice-studio`.
-- Moved the shared default provider setting and OpenAI model controls into a dedicated **Configure Voice Providers** command so Raycast Preferences stay shorter.
-- Re-labeled MiniMax preferences and commands so they remain clear inside a multi-provider extension.
+- Moved the shared default provider plus MiniMax, MiMo, and OpenAI model/voice/speed/style controls into a dedicated **Configure Voice Providers** command so Raycast Preferences stay shorter.
+- Reduced Raycast Preferences to provider API keys, auth mode, region, and connection details.
 
 ### Added
 - Added Xiaomi MiMo as a second TTS provider.
@@ -16,7 +16,7 @@
 - Added OpenAI as a third TTS provider through the Speech API.
 - Added OpenAI commands: Quick Read with OpenAI, Read with OpenAI Voice, and Set OpenAI Quick Read Voice.
 - Added OpenAI provider files for API calls, voices, chunking, status, voice override storage, and lookahead playback.
-- Added Configure Voice Providers for choosing the default provider and OpenAI model settings outside the Preferences sidebar.
+- Added Configure Voice Providers for choosing the default provider and provider model, voice, speed, style, and format settings outside the Preferences sidebar.
 - Extended the shared audio player to support WAV playback, playback-rate arguments, and abort signals.
 
 ### Verified
@@ -55,7 +55,7 @@
 - Token Plan Key and Open Platform API Key authentication modes (auto-detected by default)
 - China and Global MiniMax API regions
 - Adjustable speech rate (0.5× to 2.0×)
-- Configuration and model-mismatch errors offer Open Preferences as a primary action
+- Configuration and model-mismatch errors offer the relevant settings action as a primary action
 
 ### Commands
 - Stop Reading: dedicated command; surfaces "Resume Last Reading" when nothing is active but a paused session exists
