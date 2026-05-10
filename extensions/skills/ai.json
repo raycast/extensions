@@ -1,5 +1,5 @@
 {
-  "instructions": "You are an AI assistant that helps users discover and understand agent skills from the skills.sh marketplace.\n\n### Rules\n- **Search first**: Never guess or assume skill names. Always call `search-skills` before anything else.\n- **Read before describing**: If the user asks what a skill does or how it works, call `read-skill` after finding it via `search-skills`.\n- **Always show the install command**: Include the `installCommand` from search results whenever recommending a skill.\n- **Be concise**: Present the top 3–5 most relevant results unless the user asks for more.\n- **Installed skills**: If the user asks what skills they have or what is installed, call `list-installed-skills`.",
+  "instructions": "You are an AI assistant that helps users discover and understand agent skills from the skills.sh marketplace.\n\n### Rules\n- **Search first**: Never guess or assume skill names. Always call `search-skills` before anything else.\n- **Read before describing**: If the user asks what a skill does or how it works, call `read-skill` after finding it via `search-skills`.\n- **Always show the install command**: Include the `installCommand` from search results whenever recommending a skill.\n- **Be concise**: Present the top 3–5 most relevant results unless the user asks for more.\n- **Installed skills**: If the user asks what skills they have or what is installed, call `list-installed-skills`.\n- **Install confirmation**: Always confirm with the user before calling `install-skill`. Never install without explicit approval.\n- **Agent selection**: Before installing, ask which agents the user wants to install for (e.g. Claude Code, Cursor). Pass the answer as `agents`. Only omit `agents` if the user explicitly says \"all\".",
   "evals": [
     {
       "input": "@skills what skills are available for GraphQL?",
@@ -112,13 +112,58 @@
             {
               "name": "graphql-schema",
               "path": "~/.agents/skills/graphql-schema",
-              "agents": ["Claude Code"],
+              "agents": "Claude Code",
               "agentCount": 1,
               "source": "apollographql/skills",
               "installedAt": "2025-03-15T08:30:00Z",
               "updatedAt": "2025-03-15T08:30:00Z"
             }
           ]
+        }
+      }
+    },
+    {
+      "input": "@skills install apollo-client for me",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "search-skills",
+            "arguments": {
+              "query": "apollo-client"
+            }
+          }
+        },
+        {
+          "callsTool": {
+            "name": "install-skill",
+            "arguments": {
+              "source": "apollographql/skills",
+              "skillId": "apollo-client",
+              "agents": "Claude Code"
+            }
+          }
+        },
+        {
+          "includes": "Apollo Client"
+        }
+      ],
+      "mocks": {
+        "search-skills": {
+          "skills": [
+            {
+              "name": "Apollo Client",
+              "skillId": "apollo-client",
+              "source": "apollographql/skills",
+              "installs": 5100,
+              "installCommand": "npx skills add apollographql/skills@apollo-client"
+            }
+          ],
+          "count": 1
+        },
+        "install-skill": {
+          "success": true,
+          "installedSkill": "Apollo Client",
+          "agents": ["Claude Code"]
         }
       }
     },
