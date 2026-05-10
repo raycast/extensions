@@ -15,6 +15,7 @@ import {
   fetchAccountSnapshot,
   formatCurrency,
   formatDateTime,
+  formatFlows,
   formatPercentage,
   formatPlan,
   getErrorMessage,
@@ -100,6 +101,10 @@ export default function Command() {
         <QuotaMenuItem
           title="Weekly Quota"
           quota={snapshot?.subscription?.quota_7_day}
+        />
+        <MenuBarExtra.Item
+          title="Monthly Quota"
+          subtitle={`${formatFlows(snapshot?.subscription?.quota_monthly?.max_flows)} cap`}
         />
       </MenuBarExtra.Section>
 

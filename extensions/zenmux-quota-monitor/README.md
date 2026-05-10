@@ -5,7 +5,7 @@ Monitor your ZenMux subscription quota and Pay As You Go credit balance from Ray
 ## Features
 
 - View your ZenMux plan, account status, Flow rate, and PAYG balance.
-- Track 5-hour and weekly subscription quota usage.
+- Track 5-hour, weekly, and monthly subscription quota.
 - Show compact usage stats in the macOS menu bar.
 - Open the ZenMux subscription, PAYG, and Management consoles from Raycast.
 

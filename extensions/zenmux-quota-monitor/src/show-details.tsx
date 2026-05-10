@@ -185,6 +185,30 @@ export default function Command() {
           snapshot,
           () => void refresh(true),
         )}
+        <List.Item
+          icon={Icon.Calendar}
+          title="Monthly Quota"
+          subtitle="Billing cycle cap"
+          accessories={[
+            {
+              text: formatFlows(
+                snapshot?.subscription?.quota_monthly?.max_flows,
+              ),
+            },
+            {
+              text: formatCurrency(
+                snapshot?.subscription?.quota_monthly?.max_value_usd,
+                snapshot?.subscription?.currency,
+              ),
+            },
+          ]}
+          actions={
+            <UsageActions
+              snapshot={snapshot}
+              onRefresh={() => void refresh(true)}
+            />
+          }
+        />
       </List.Section>
 
       <List.Section title="Account">
