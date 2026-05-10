@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.2.0] - {PR_MERGE_DATE}
+## [1.2.0] - 2026-05-10
 
 Thanks to [@tolshao](https://github.com/tolshao) for contributing this release.
 
