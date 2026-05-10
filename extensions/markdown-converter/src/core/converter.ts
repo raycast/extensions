@@ -439,7 +439,9 @@ function unwrapLayoutTables(doc: Document): void {
       }
 
       const fragment = doc.createDocumentFragment();
-      const tableRows = Array.from(table.querySelectorAll(":scope > tbody > tr, :scope > tr"));
+      const tableRows = Array.from(
+        table.querySelectorAll(":scope > thead > tr, :scope > tbody > tr, :scope > tfoot > tr, :scope > tr"),
+      );
       for (const row of tableRows) {
         const rowCells = Array.from(row.querySelectorAll(":scope > td, :scope > th"));
         for (const cell of rowCells) {
