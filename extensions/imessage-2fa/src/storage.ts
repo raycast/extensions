@@ -1,5 +1,6 @@
 import { LocalStorage, OAuth } from "@raycast/api";
 import { randomUUID } from "crypto";
+import { clearOAuthClient } from "./oauth-clients";
 
 export interface Account {
   id: string;
@@ -53,6 +54,9 @@ export async function removeAccount(accountId: string): Promise<void> {
     description: "Cleanup",
   });
   await oauthClient.removeTokens();
+
+  // Drop any cached PKCE client so a future re-add doesn't reuse the stale instance.
+  clearOAuthClient(accountId);
 }
 
 export async function renameAccount(accountId: string, newName: string): Promise<void> {

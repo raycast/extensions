@@ -20,7 +20,6 @@ import { useEmails } from "./emails";
 import { useGmail } from "./gmail";
 import { Message, SearchType, MessageSource, Preferences, VerificationLink } from "./types";
 import { extractCode, formatDate, extractVerificationLink, extractTextFromBinaryData } from "./utils";
-import { getAccounts } from "./storage";
 import ManageGoogleAccounts from "./account-manager";
 import { OAuthErrorView } from "./components/OAuthErrorView";
 // import applescript from "applescript"; // Unused import
@@ -37,14 +36,6 @@ export default function Command() {
   const [searchType] = useState<SearchType>("code");
   const [selectedItemId, setSelectedItemId] = useState<string>();
   const [verificationLinks, setVerificationLinks] = useState<VerificationLink[]>([]);
-  const [gmailAccountCount, setGmailAccountCount] = useState<number>(0);
-
-  // Initialize message source based on user preferences
-  useEffect(() => {
-    if (preferences.emailSource === "gmail") {
-      getAccounts().then((accounts) => setGmailAccountCount(accounts.length));
-    }
-  }, [preferences.emailSource]);
 
   const [messageSource, setMessageSource] = useState<MessageSource>(() => {
     return preferences.defaultSource || "all";
@@ -75,6 +66,7 @@ export default function Command() {
     data: gmailData,
     revalidate: revalidateGmail,
     isLoading: isGmailLoading,
+    accountCount: gmailAccountCount,
   } = useGmail({
     searchText,
     searchType,
