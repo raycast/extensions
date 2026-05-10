@@ -75,23 +75,29 @@ async function fetchInstagramMediaWithRetry(shortcode: string, progressToast?: T
   let lastError: unknown = null;
 
   for (let attempt = 1; attempt <= GRAPHQL_MAX_ATTEMPTS; attempt++) {
+    let response;
     try {
-      const response = await axios.get(`https://www.instagram.com/graphql/query?${params.toString()}`, {
+      response = await axios.get(`https://www.instagram.com/graphql/query?${params.toString()}`, {
         headers,
         validateStatus: (status) => status < 500,
       });
+    } catch (error) {
+      lastError = error;
+    }
 
+    if (response) {
       if (response.status === 200) {
         const media = response.data?.data?.xdt_shortcode_media;
         if (media) return media;
         lastError = new Error("Instagram returned an empty media response (likely rate-limited).");
       } else if (response.status === 401 || response.status === 429) {
         lastError = new Error(`Instagram rate-limit (status ${response.status}).`);
+      } else if (response.status === 400 || response.status === 403 || response.status === 404) {
+        // Post does not exist or is not accessible — don't waste retries.
+        throw new Error(`Instagram returned status ${response.status} — post may be private or deleted.`);
       } else {
         lastError = new Error(`Unexpected status ${response.status} from Instagram.`);
       }
-    } catch (error) {
-      lastError = error;
     }
 
     if (attempt < GRAPHQL_MAX_ATTEMPTS) {
