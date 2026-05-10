@@ -65,17 +65,6 @@ export default function ImportFromDatabase() {
           <List.Dropdown.Item title={`All (${dbChats?.length ?? 0})`} value="all" />
         </List.Dropdown>
       }
-      actions={
-        newCount > 0 ? (
-          <ActionPanel>
-            <Action
-              title={`Import All ${newCount} New Chat${newCount === 1 ? "" : "s"}`}
-              icon={Icon.Download}
-              onAction={() => importChats(dbChats ?? [])}
-            />
-          </ActionPanel>
-        ) : null
-      }
     >
       {error ? (
         <List.EmptyView icon={Icon.Warning} title="Cannot read WhatsApp database" description={error} />
