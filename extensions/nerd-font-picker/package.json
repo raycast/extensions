@@ -19,12 +19,30 @@
       "mode": "view",
       "preferences": [
         {
-          "name": "iconColor",
-          "title": "Icon Colour",
-          "description": "Hex colour used to render each glyph (e.g. #ffffff)",
+          "name": "fontName",
+          "title": "Font Name",
+          "description": "Name filter for selecting a Nerd Font when multiple are installed (e.g. JetBrainsMono). Leave blank to use the first font found.",
           "type": "textfield",
           "required": false,
-          "default": "#ffffff"
+          "default": ""
+        },
+        {
+          "name": "iconColor",
+          "title": "Icon Colour",
+          "description": "Colour used to render each glyph icon",
+          "type": "dropdown",
+          "required": false,
+          "default": "white",
+          "data": [
+            {
+              "title": "White",
+              "value": "white"
+            },
+            {
+              "title": "Black",
+              "value": "black"
+            }
+          ]
         }
       ]
     }

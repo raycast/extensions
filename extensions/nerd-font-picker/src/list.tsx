@@ -22,11 +22,11 @@ import {
   readCache,
   search,
   unicodeEscape,
-  updateGlyphPool,
 } from "./utils";
 
 export default function Command() {
-  const { iconColor } = getPreferenceValues<Preferences.List>();
+  const { iconColor, fontName } = getPreferenceValues<Preferences.List>();
+  const [allGlyphs, setAllGlyphs] = useState<Glyph[]>([]);
   const [results, setResults] = useState<Glyph[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -40,8 +40,9 @@ export default function Command() {
         message: "First run — this takes a few seconds",
       });
       try {
-        const glyphs = buildCache();
-        updateGlyphPool(glyphs);
+        getFont(fontName);
+        const glyphs = await buildCache();
+        setAllGlyphs(glyphs);
         toast.style = Toast.Style.Success;
         toast.title = "Cache ready";
         toast.message = undefined;
@@ -55,8 +56,8 @@ export default function Command() {
       }
     } else {
       const glyphs = readCache();
-      updateGlyphPool(glyphs);
-      getFont();
+      setAllGlyphs(glyphs);
+      getFont(fontName);
       setResults(glyphs.slice(0, MAX_DISPLAY));
     }
 
@@ -67,7 +68,7 @@ export default function Command() {
     load();
   }, []);
 
-  const onSearchTextChange = (text: string) => setResults(search(text));
+  const onSearchTextChange = (text: string) => setResults(search(allGlyphs, text));
 
   const copyAndClose = async (glyph: string) => {
     await Clipboard.copy(glyph);
@@ -115,14 +116,34 @@ export default function Command() {
             actions={
               <ActionPanel>
                 <Action title="Copy Glyph & Close" onAction={() => copyAndClose(g.glyph)} />
-                <Action title="Copy Glyph" onAction={() => copyAndStay(g.glyph)} />
+                <Action
+                  title="Copy Glyph"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  onAction={() => copyAndStay(g.glyph)}
+                />
                 <ActionPanel.Section>
-                  <Action title="Copy Codepoint" onAction={() => copyAndStay(g.codepoint)} />
-                  <Action title="Copy Name" onAction={() => copyAndStay(g.name)} />
-                  <Action title="Copy Unicode Escape" onAction={() => copyAndStay(unicodeEscape(g.codepoint))} />
+                  <Action
+                    title="Copy Codepoint"
+                    shortcut={{ modifiers: ["opt"], key: "c" }}
+                    onAction={() => copyAndStay(g.codepoint)}
+                  />
+                  <Action
+                    title="Copy Name"
+                    shortcut={{ modifiers: ["opt"], key: "n" }}
+                    onAction={() => copyAndStay(g.name)}
+                  />
+                  <Action
+                    title="Copy Unicode Escape"
+                    shortcut={{ modifiers: ["opt"], key: "u" }}
+                    onAction={() => copyAndStay(unicodeEscape(g.codepoint))}
+                  />
                 </ActionPanel.Section>
                 <ActionPanel.Section>
-                  <Action title="Refresh Cache" onAction={() => load(true)} />
+                  <Action
+                    title="Refresh Cache"
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+                    onAction={() => load(true)}
+                  />
                 </ActionPanel.Section>
               </ActionPanel>
             }
