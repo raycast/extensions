@@ -55,10 +55,14 @@ export default function Command() {
         return;
       }
     } else {
-      const glyphs = readCache();
-      setAllGlyphs(glyphs);
-      getFont(fontName);
-      setResults(glyphs.slice(0, MAX_DISPLAY));
+      try {
+        const glyphs = readCache();
+        setAllGlyphs(glyphs);
+        getFont(fontName);
+        setResults(glyphs.slice(0, MAX_DISPLAY));
+      } catch {
+        return load(true);
+      }
     }
 
     setIsLoading(false);
