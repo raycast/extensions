@@ -23,6 +23,7 @@ import {
   submitCommunity,
 } from "./lib/api";
 import { EditMetadataForm } from "./components/EditMetadataForm";
+import { NotRunningView } from "./components/NotRunningView";
 
 export default function Categories() {
   const { data, isLoading, revalidate, error } = useCachedPromise(
@@ -32,25 +33,7 @@ export default function Categories() {
   );
 
   if (error instanceof MacAppLibraryNotRunningError) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="macAppLibrary is not running"
-          description="Open the macAppLibrary app, then retry."
-          actions={
-            <ActionPanel>
-              <Action
-                title="Retry"
-                icon={Icon.ArrowClockwise}
-                onAction={revalidate}
-              />
-              <Action.Open title="Open Macapplibrary" target="macAppLibrary" />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
+    return <NotRunningView onRetry={revalidate} />;
   }
 
   return (

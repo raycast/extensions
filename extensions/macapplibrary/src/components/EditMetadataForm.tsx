@@ -69,9 +69,7 @@ export function EditMetadataForm({
                 onSaved?.();
                 pop();
               } catch (e) {
-                toast.style = Toast.Style.Failure;
-                toast.title = "Save failed";
-                toast.message = e instanceof Error ? e.message : String(e);
+                toast.hide();
                 await showFailureToast(e, { title: "Save failed" });
               }
             }}
