@@ -106,13 +106,11 @@ function AttachmentItem({ attachment }) {
   const { isLoading, data, revalidate } = useCachedPromise(downloadAttachment, [attachment], {
     abortable,
     onError: (e) => {
-      if (e.message == "Token Expired") revalidate();
-      else
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Something went wrong",
-          message: e.message,
-        });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong",
+        message: e.message,
+      });
     },
   });
 
@@ -179,13 +177,11 @@ export default function MessageComponent({ id }: { id: string }): React.ReactNod
       }
     },
     onError: (e) => {
-      if (e.message == "Token Expired") revalidate();
-      else
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Something went wrong",
-          message: e.message,
-        });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong",
+        message: e.message,
+      });
     },
   });
 
@@ -201,13 +197,11 @@ export default function MessageComponent({ id }: { id: string }): React.ReactNod
         open(htmlPath);
       }
     } catch (e) {
-      if (e.message == "Token Expired") revalidate();
-      else
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Something went wrong",
-          message: e.message,
-        });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong",
+        message: e.message,
+      });
     }
   };
 

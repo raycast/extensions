@@ -47,7 +47,6 @@ function NewCustomEmail({ update }) {
     abortable,
     onError: (e) => {
       if (e.message == "Email Expired") revalidate();
-      else if (e.message == "Token Expired") revalidate();
       else
         showToast({
           style: Toast.Style.Failure,
@@ -143,7 +142,6 @@ export default function Command() {
     keepPreviousData: true,
     onError: (e) => {
       if (e.message == "Email Expired") revalidate();
-      else if (e.message == "Token Expired") revalidate();
       else
         showToast({
           style: Toast.Style.Failure,
@@ -172,13 +170,11 @@ export default function Command() {
         open(htmlPath);
       }
     } catch (e) {
-      if (e.message == "Token Expired") revalidate();
-      else
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Something went wrong",
-          message: e.message,
-        });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong",
+        message: e.message,
+      });
     }
   };
 
@@ -310,7 +306,7 @@ export default function Command() {
                       <Action.Push
                         title="View Email"
                         icon={{ source: Icon.Eye }}
-                        target={MessageComponent({ id: message.id })}
+                        target={<MessageComponent id={message.id} />}
                       />
                       <ActionPanel.Submenu title="View Email Externally" icon={{ source: Icon.Upload }}>
                         <Action

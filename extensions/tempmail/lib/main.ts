@@ -172,7 +172,17 @@ export async function getMailboxData() {
     }
   }
 
-  const { token } = await getIdentity();
+  let identity: Identity;
+  try {
+    identity = await getIdentity();
+  } catch (e) {
+    if (e.message === "Token Expired") {
+      identity = await getIdentity();
+    } else {
+      throw e;
+    }
+  }
+  const { token } = identity;
 
   const expiryTime = (await LocalStorage.getItem("expiry_time")) as number | null;
   const auth: Auth = await getAuth();
@@ -328,7 +338,7 @@ export async function downloadAttachment({
     return filePath;
   }
 
-  const file = fs.createWriteStream(filePath, { encoding: transferEncoding as BufferEncoding });
+  const file = fs.createWriteStream(filePath);
   let response: AxiosResponse;
 
   try {
