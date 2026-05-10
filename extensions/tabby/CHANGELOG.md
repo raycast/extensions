@@ -1,6 +1,6 @@
 # Tabby Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-05-10
 
 - Added Windows platform support
 - Added preferences to override the Tabby executable and config paths
