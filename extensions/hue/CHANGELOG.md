@@ -1,5 +1,9 @@
 # Hue Changelog
 
+## [Fix manual bridge IP pairing] - 2026-05-10
+
+- Fix "No bridge ID" failure when pairing using a manually-configured Bridge IP address. The bridge ID is now auto-fetched from `/api/0/config` so the certificate validator has the value it needs. Previously, the manual-IP path was unusable on networks with multiple bridges where auto-discovery picks the wrong one.
+
 ## [Update HTTPS support] - 2025-12-25
 
 - Add CA Certificate

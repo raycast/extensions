@@ -8,7 +8,46 @@ import createHueClient from "./createHueClient";
 import { discoverBridgeUsingHuePublicApi, discoverBridgeUsingMdns } from "../helpers/hueNetworking";
 import { linkWithBridge } from "./linkWithBridge";
 import * as net from "net";
+import * as https from "https";
 import Style = Toast.Style;
+
+async function fetchBridgeIdFromIp(ipAddress: string): Promise<string | undefined> {
+  return new Promise((resolve) => {
+    const req = https.request(
+      {
+        hostname: ipAddress,
+        port: 443,
+        path: "/api/0/config",
+        method: "GET",
+        rejectUnauthorized: false,
+        timeout: 5000,
+      },
+      (res) => {
+        let data = "";
+        res.on("data", (chunk) => (data += chunk));
+        res.on("end", () => {
+          try {
+            const config = JSON.parse(data);
+            const bridgeid = config.bridgeid;
+            if (typeof bridgeid === "string" && bridgeid.length > 0) {
+              resolve(bridgeid.toLowerCase());
+              return;
+            }
+          } catch {
+            /* fall through */
+          }
+          resolve(undefined);
+        });
+      },
+    );
+    req.on("error", () => resolve(undefined));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(undefined);
+    });
+    req.end();
+  });
+}
 
 export type HueBridgeState = {
   value: StateValue;
@@ -81,9 +120,20 @@ export default function hueBridgeMachine(
               console.log("Using bridge username from preferences");
             }
 
+            let bridgeId: string | undefined = undefined;
+            if (bridgeIpAddress) {
+              bridgeId = await fetchBridgeIdFromIp(bridgeIpAddress);
+              if (bridgeId) {
+                console.log(`Auto-detected bridge ID ${bridgeId} from manual IP ${bridgeIpAddress}`);
+              } else {
+                console.warn(`Could not fetch bridge ID from ${bridgeIpAddress}/api/0/config`);
+              }
+            }
+
             return {
               bridgeIpAddress: bridgeIpAddress,
               bridgeUsername: bridgeUsername,
+              bridgeId: bridgeId,
             };
           }),
           onDone: {
@@ -91,6 +141,7 @@ export default function hueBridgeMachine(
             actions: assign({
               bridgeIpAddress: ({ event }) => event.output.bridgeIpAddress,
               bridgeUsername: ({ event }) => event.output.bridgeUsername,
+              bridgeId: ({ event }) => event.output.bridgeId,
             }),
           },
           onError: {
