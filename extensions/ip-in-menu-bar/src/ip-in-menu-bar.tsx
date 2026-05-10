@@ -96,7 +96,9 @@ export default function Command() {
 
   const { isLoading, revalidate } = usePromise(fetchPublicIps, [], {
     execute: shouldFetch,
-    onData: (ips) => setCache({ ips, fingerprint, fetchedAt: Date.now() }),
+    onData: (ips) => {
+      if (ips.ipv4 || ips.ipv6) setCache({ ips, fingerprint, fetchedAt: Date.now() });
+    },
   });
 
   const publicIps = cache?.ips ?? {};
