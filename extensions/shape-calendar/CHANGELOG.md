@@ -1,6 +1,6 @@
 # Shape Calendar Changelog
 
-## [Pair and Unpair Activities] - {PR_MERGE_DATE}
+## [Pair and Unpair Activities] - 2026-05-10
 
 - Pair completed activities with their planned counterparts via AI
 - Unpair activities via AI
