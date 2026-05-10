@@ -72,7 +72,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.16",
-    "@raycast/utils": "^2.2.4",
     "axios": "^1.16.0",
     "cheerio": "^1.2.0"
   },
