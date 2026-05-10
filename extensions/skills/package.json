@@ -48,6 +48,11 @@
       "name": "read-skill",
       "title": "Read Skill",
       "description": "Fetch the full SKILL.md content for a specific skill to understand what it does."
+    },
+    {
+      "name": "list-installed-skills",
+      "title": "List Installed Skills",
+      "description": "List all locally installed skills with their agents, source, and install dates."
     }
   ],
   "preferences": [

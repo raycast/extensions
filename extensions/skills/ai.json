@@ -1,5 +1,5 @@
 {
-  "instructions": "You are an AI assistant that helps users discover and understand agent skills from the skills.sh marketplace.\n\n### Rules\n- **Search first**: Never guess or assume skill names. Always call `search-skills` before anything else.\n- **Read before describing**: If the user asks what a skill does or how it works, call `read-skill` after finding it via `search-skills`.\n- **Always show the install command**: Include the `installCommand` from search results whenever recommending a skill.\n- **Be concise**: Present the top 3–5 most relevant results unless the user asks for more.",
+  "instructions": "You are an AI assistant that helps users discover and understand agent skills from the skills.sh marketplace.\n\n### Rules\n- **Search first**: Never guess or assume skill names. Always call `search-skills` before anything else.\n- **Read before describing**: If the user asks what a skill does or how it works, call `read-skill` after finding it via `search-skills`.\n- **Always show the install command**: Include the `installCommand` from search results whenever recommending a skill.\n- **Be concise**: Present the top 3–5 most relevant results unless the user asks for more.\n- **Installed skills**: If the user asks what skills they have or what is installed, call `list-installed-skills`.",
   "evals": [
     {
       "input": "@skills what skills are available for GraphQL?",
@@ -84,6 +84,41 @@
         },
         "read-skill": {
           "content": "# Apollo Client 4.x Guide\n\nGuide for building React applications with Apollo Client 4.x. Use this skill when setting up Apollo Client in a React project, writing GraphQL queries or mutations with hooks, configuring caching or cache policies, managing local state with reactive variables, or troubleshooting Apollo Client errors or performance issues."
+        }
+      }
+    },
+    {
+      "input": "@skills what skills do I have installed?",
+      "expected": [
+        {
+          "callsTool": "list-installed-skills"
+        },
+        {
+          "includes": "apollo-client"
+        }
+      ],
+      "mocks": {
+        "list-installed-skills": {
+          "skills": [
+            {
+              "name": "apollo-client",
+              "path": "~/.agents/skills/apollo-client",
+              "agents": ["Claude Code", "Cursor"],
+              "agentCount": 2,
+              "source": "apollographql/skills",
+              "installedAt": "2025-04-01T10:00:00Z",
+              "updatedAt": "2025-04-01T10:00:00Z"
+            },
+            {
+              "name": "graphql-schema",
+              "path": "~/.agents/skills/graphql-schema",
+              "agents": ["Claude Code"],
+              "agentCount": 1,
+              "source": "apollographql/skills",
+              "installedAt": "2025-03-15T08:30:00Z",
+              "updatedAt": "2025-03-15T08:30:00Z"
+            }
+          ]
         }
       }
     },
