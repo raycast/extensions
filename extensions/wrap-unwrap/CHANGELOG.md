@@ -1,6 +1,6 @@
 # Wrap Unwrap Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-10
 
 - Add **Wrap Text** command — wrap text at a configurable column width with Markdown awareness.
 - Add **Unwrap Text** command — reflow wrapped text into continuous paragraphs, preserving Markdown structure.
