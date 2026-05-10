@@ -82,7 +82,7 @@ export const Sections = ({ details = false, item, unlike }: BaseProps) => {
             <Action
               title="Download Image"
               icon={Icon.Desktop}
-              shortcut={{ modifiers: ["cmd"], key: "s" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
               onAction={() => saveImage({ url: imageUrl, id: String(item.id) })}
             />
           </ActionPanel.Section>

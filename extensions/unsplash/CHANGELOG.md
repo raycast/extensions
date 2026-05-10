@@ -4,6 +4,7 @@
 
 - Added Raycast common keyboard shortcuts
 - Ignored `node_modules`
+- Bump Raycast dependencies
 
 ## [Error Handling Enhancements] - 2025-09-09
 
