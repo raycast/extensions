@@ -61,7 +61,7 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
             content={item.links.html}
             title="Copy URL"
             icon={Icon.Clipboard}
-            shortcut={Keyboard.Shortcut.Common.Copy}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
           />
         )}
 
@@ -70,7 +70,7 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
             content={imageUrl}
             title="Copy Cover URL"
             icon={Icon.Clipboard}
-            shortcut={Keyboard.Shortcut.Common.CopyName}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
           />
         )}
 
@@ -79,7 +79,7 @@ export const Sections: React.FC<BaseProps> = ({ details = false, item }) => {
             content={item.user.links.html}
             title="Copy Author URL"
             icon={Icon.Clipboard}
-            shortcut={Keyboard.Shortcut.Common.CopyPath}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
           />
         )}
       </ActionPanel.Section>
