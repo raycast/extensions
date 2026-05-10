@@ -1,0 +1,4 @@
+node_modules/
+dist/
+docs/
+.DS_Store
