@@ -76,6 +76,7 @@ export const copyQSpacePath = async () => {
     .map(qSpaceUrlToPath);
 
   if (paths.length === 0) {
+    await showFailureHUD({ title: "Nothing to Copy", style: Toast.Style.Failure });
     return "";
   }
 
