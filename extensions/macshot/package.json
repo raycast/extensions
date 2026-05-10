@@ -1,0 +1,146 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "macshot",
+  "title": "Macshot",
+  "description": "Capture, record, and annotate your screen with macshot",
+  "icon": "extension-icon.png",
+  "author": "lmilojevic",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "capture-area",
+      "title": "Capture Area",
+      "subtitle": "macshot",
+      "description": "Start area capture",
+      "icon": "capture-area.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-fullscreen",
+      "title": "Capture Fullscreen",
+      "subtitle": "macshot",
+      "description": "Capture the full screen",
+      "icon": "capture-fullscreen.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "capture-last",
+      "title": "Capture Last Area",
+      "subtitle": "macshot",
+      "description": "Re-capture the last selected area",
+      "icon": "capture-last.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-capture",
+      "title": "Quick Capture",
+      "subtitle": "macshot",
+      "description": "Quick capture using your Enter action",
+      "icon": "quick-capture.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "ocr",
+      "title": "OCR",
+      "subtitle": "macshot",
+      "description": "Capture area and extract text",
+      "icon": "ocr.png",
+      "mode": "no-view",
+      "keywords": [
+        "ocr",
+        "text recognition"
+      ]
+    },
+    {
+      "name": "record",
+      "title": "Record Area",
+      "subtitle": "macshot",
+      "description": "Start area recording",
+      "icon": "record.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "record-fullscreen",
+      "title": "Record Fullscreen",
+      "subtitle": "macshot",
+      "description": "Start full-screen recording",
+      "icon": "record-fullscreen.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "stop-recording",
+      "title": "Stop Recording",
+      "subtitle": "macshot",
+      "description": "Stop the current recording",
+      "icon": "stop-recording.png",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "scroll-capture",
+      "title": "Scroll Capture",
+      "subtitle": "macshot",
+      "description": "Start scroll capture",
+      "icon": "scroll-capture.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-history",
+      "title": "Open History",
+      "subtitle": "macshot",
+      "description": "Open the recent captures overlay",
+      "icon": "history.png",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Settings",
+      "subtitle": "macshot",
+      "description": "Open macshot settings window",
+      "icon": "settings.png",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "open-in-editor",
+      "title": "Open in Editor",
+      "subtitle": "macshot",
+      "description": "Open an image file in the macshot editor",
+      "icon": "open-editor.png",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "filepath",
+          "placeholder": "File Path",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "categories": [
+    "Applications"
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.1",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.5.4",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}
