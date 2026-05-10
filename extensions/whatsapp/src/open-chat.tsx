@@ -48,12 +48,13 @@ export default function ChatList() {
   return (
     <List
       selectedItemId={selectedItemId}
+      filtering={true}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Filter by name or enter a phone number..."
     >
       {showUnknownNumber ? (
         <List.Section title="Unknown Number">
-          <UnknownNumberItem phoneNumber={parsedSearchPhone.phoneNumber} />
+          <UnknownNumberItem phoneNumber={parsedSearchPhone.phoneNumber} searchText={searchText} />
         </List.Section>
       ) : null}
       {chats.length === 0 ? (
@@ -145,7 +146,7 @@ function getChatItemProps(chat: WhatsAppChat) {
   }
 }
 
-function UnknownNumberItem({ phoneNumber }: { phoneNumber: string }) {
+function UnknownNumberItem({ phoneNumber, searchText }: { phoneNumber: string; searchText: string }) {
   const digits = phoneNumber.replace(/\D/g, "");
   const appUrl = `whatsapp://send?phone=${digits}&text=`;
   const webUrl = `https://web.whatsapp.com/send?phone=${digits}&text=`;
@@ -155,6 +156,7 @@ function UnknownNumberItem({ phoneNumber }: { phoneNumber: string }) {
       title={phoneNumber}
       subtitle="Not in your chats"
       icon={Icon.PhoneRinging}
+      keywords={[searchText, phoneNumber, digits]}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
