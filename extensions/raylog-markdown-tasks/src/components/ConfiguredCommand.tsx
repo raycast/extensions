@@ -124,7 +124,7 @@ export default function ConfiguredCommand({ children }: ConfiguredCommandProps) 
 
     const confirmed = await confirmAlert({
       title: "Create Raylog Database?",
-      message: `Create a Raylog database in "${path.basename(configuredNotePath)}"? Existing markdown outside the Raylog block will be preserved.`,
+      message: `Create a Raylog database in "${path.basename(configuredNotePath)}"? Existing markdown outside the managed block will be preserved.`,
       primaryAction: {
         title: "Create Database",
         style: Alert.ActionStyle.Default,

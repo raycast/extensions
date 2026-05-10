@@ -1,22 +1,14 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "raylog",
-  "title": "Raylog",
+  "name": "raylog-markdown-tasks",
+  "title": "Raylog - Markdown Tasks",
   "description": "Manage focused local tasks from Raycast with a standalone markdown note.",
-  "icon": "Raylog.png",
+  "icon": "raylog-markdown-tasks.png",
   "author": "dillon-mccardell",
   "categories": [
     "Productivity"
   ],
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Dillon-McCardell/Raylog.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Dillon-McCardell/Raylog/issues"
-  },
-  "homepage": "https://github.com/Dillon-McCardell/Raylog/blob/main/README.md",
   "keywords": [
     "tasks",
     "notes",

@@ -74,7 +74,7 @@ test("no-storage setup refresh clears cache and returns setup state", async () =
     cacheStore,
   });
 
-  assert.equal(state.title, "Set Up Raylog");
+  assert.equal(state.title, "Set Up Raylog - Markdown Tasks");
   assert.equal(readMenuBarCache(cacheStore), undefined);
 });
 
@@ -84,7 +84,7 @@ test("clearMenuBarCache removes persisted state explicitly", () => {
     {
       currentTask: undefined,
       menuTasks: [],
-      title: "Raylog",
+      title: "Raylog - Markdown Tasks",
       tooltip: "Tooltip",
     },
     cacheStore,

@@ -18,7 +18,7 @@ export async function refreshMenuBarState(options: {
     return {
       currentTask: undefined,
       menuTasks: [],
-      title: "Set Up Raylog",
+      title: "Set Up Raylog - Markdown Tasks",
       tooltip: "Configure a Raylog storage note in extension preferences.",
     };
   }

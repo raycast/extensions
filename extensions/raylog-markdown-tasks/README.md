@@ -1,13 +1,14 @@
-# Raylog
+# Raylog - Markdown Tasks
 
 Minimalist task management and progress logging in Raycast, backed by a single
 standalone markdown note.
 
-Raylog is a compact Raycast extension for people who want fast local task capture
-without adopting a larger notes or project-management stack. It stores tasks in
-one markdown file, but the workflow is built entirely around Raycast. Beyond
-tracking what needs to get done, Raylog lets you log work as you make progress,
-so each task carries its own running history of effort, updates, and momentum.
+Raylog - Markdown Tasks is a compact Raycast extension for people who want fast
+local task capture without adopting a larger notes or project-management stack.
+It stores tasks in one markdown file, but the workflow is built entirely around
+Raycast. Beyond tracking what needs to get done, Raylog lets you log work as you
+make progress, so each task carries its own running history of effort, updates,
+and momentum.
 
 ## Features
 
@@ -92,5 +93,5 @@ Raylog manages a JSON block inside your configured markdown note.
 Markdown outside the managed block is preserved. The managed block is intended to
 be written by Raylog, not edited manually.
 
-If the storage block is malformed or from an old schema, Raylog will prompt you
-to reset the note to a fresh document.
+If the storage block is malformed or from an old schema, Raylog - Markdown Tasks
+will prompt you to reset the note to a fresh document.

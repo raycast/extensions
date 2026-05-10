@@ -2,13 +2,14 @@
 
 ## Window Flow
 
-This diagram is the implementation-facing source of truth for Raylog's current
-window and navigation flow. The automated test suite validates the Mermaid block
-below so the documented flow stays aligned with the extension behavior.
+This diagram is the implementation-facing source of truth for Raylog - Markdown
+Tasks' current window and navigation flow. The automated test suite validates
+the Mermaid block below so the documented flow stays aligned with the extension
+behavior.
 
 ```mermaid
 flowchart TD
-    A["Raylog"] --> B["List Tasks command"]
+    A["Raylog - Markdown Tasks"] --> B["List Tasks command"]
     A --> C["Add Task command"]
     A --> M["Refresh Menu Bar command"]
 
@@ -86,7 +87,7 @@ flowchart TD
 
     subgraph MENU["Refresh Menu Bar"]
         M --> M1["Current task in menu bar"]
-        M -->|"No storage note"| M3["Set Up Raylog menu bar state"]
+        M -->|"No storage note"| M3["Set Up Raylog - Markdown Tasks menu bar state"]
         M1 -->|"Click current task"| M2["Menu bar task submenu"]
         M1 -->|"Click task in Next 5 Tasks"| M2
         M2 -->|"Open Task"| E1

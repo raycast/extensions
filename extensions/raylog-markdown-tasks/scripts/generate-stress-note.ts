@@ -111,7 +111,7 @@ with a large set of valid tasks for stress testing.
 }
 
 function buildNotePreamble(taskCount: number): string {
-  return `# Raylog Stress Test
+  return `# Raylog - Markdown Tasks Stress Test
 
 Generated ${taskCount} tasks for extension stress testing.
 Open this file as a separate Raylog datastore in Raycast to measure load and
@@ -130,7 +130,7 @@ function createTaskRecord(index: number): TaskRecord {
     id: `stress-task-${String(index + 1).padStart(5, "0")}`,
     header: `Stress task ${index + 1}`,
     body: [
-      `Synthetic task ${index + 1} for Raylog stress testing.`,
+      `Synthetic task ${index + 1} for Raylog - Markdown Tasks stress testing.`,
       `Batch ${Math.floor(index / 100) + 1}, lane ${(index % 12) + 1}.`,
       `This record exists to exercise parsing, filtering, rendering, and scrolling at scale.`,
     ].join("\n\n"),

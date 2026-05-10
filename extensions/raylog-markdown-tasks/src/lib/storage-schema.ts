@@ -224,7 +224,7 @@ function describeValidationFailure(message: string): string {
     return `${trimTrailingPeriod(message)}.`;
   }
 
-  return `Malformed Raylog data: ${lowercaseFirst(trimTrailingPeriod(message))}.`;
+  return `Malformed Raylog - Markdown Tasks data: ${lowercaseFirst(trimTrailingPeriod(message))}.`;
 }
 
 function trimTrailingPeriod(value: string): string {

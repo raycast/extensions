@@ -17,9 +17,9 @@ test("development docs include the complete validated command flow", async () =>
   const diagram = extractSingleMermaidBlock(markdown, "docs/DEVELOPMENT.md");
   const parsed = parseMermaidFlow(diagram);
 
-  assertEdge(parsed, "Raylog", "", "List Tasks command");
-  assertEdge(parsed, "Raylog", "", "Add Task command");
-  assertEdge(parsed, "Raylog", "", "Refresh Menu Bar command");
+  assertEdge(parsed, "Raylog - Markdown Tasks", "", "List Tasks command");
+  assertEdge(parsed, "Raylog - Markdown Tasks", "", "Add Task command");
+  assertEdge(parsed, "Raylog - Markdown Tasks", "", "Refresh Menu Bar command");
   assertEdge(parsed, "List Tasks command", "", "Storage note configured and valid?");
   assertEdge(parsed, "Add Task command", "", "Storage note configured and valid?");
   assertEdge(parsed, "Storage note configured and valid?", "No", "Setup / reset empty state");
@@ -60,10 +60,10 @@ test("development docs include the complete validated command flow", async () =>
   assertEdge(parsed, "Menu bar task submenu", "Archive Task", "Archive task");
   assertEdge(parsed, "Current task in menu bar", "Open Task List", "Task summary with detail pane");
   assertEdge(parsed, "Current task in menu bar", "Open Task List", "Task list without detail pane");
-  assertEdge(parsed, "Refresh Menu Bar command", "No storage note", "Set Up Raylog menu bar state");
+  assertEdge(parsed, "Refresh Menu Bar command", "No storage note", "Set Up Raylog - Markdown Tasks menu bar state");
   assertEdge(
     parsed,
-    "Set Up Raylog menu bar state",
+    "Set Up Raylog - Markdown Tasks menu bar state",
     "Open Extension Preferences",
     "Storage note configured and valid?",
   );

@@ -28,8 +28,8 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(!repository && !cachedState);
   const [currentTask, setCurrentTask] = useState<TaskRecord | undefined>(cachedState?.currentTask);
   const [menuTasks, setMenuTasks] = useState<TaskRecord[]>(cachedState?.menuTasks ?? []);
-  const [title, setTitle] = useState(cachedState?.title ?? "Raylog");
-  const [tooltip, setTooltip] = useState(cachedState?.tooltip ?? "Raylog task menu bar");
+  const [title, setTitle] = useState(cachedState?.title ?? "Raylog - Markdown Tasks");
+  const [tooltip, setTooltip] = useState(cachedState?.tooltip ?? "Raylog - Markdown Tasks menu bar");
 
   const loadMenuBarTasks = useCallback(async () => {
     const nextState = await refreshMenuBarState({
