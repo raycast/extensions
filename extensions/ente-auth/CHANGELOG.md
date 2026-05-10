@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Fixed Ente Auth import] - {PR_MERGE_DATE}
+## [Fixed Ente Auth import] - 2026-05-10
 
 - Fixed parsing of Ente exports with bare issuer parameters
 - Handled secrets containing whitespace, dashes, or plus signs
