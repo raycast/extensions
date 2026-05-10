@@ -1,6 +1,6 @@
 # Parcel Changelog
 
-## [Ambiguous dotted date preference] - {PR_MERGE_DATE}
+## [Ambiguous dotted date preference] - 2026-05-10
 
 - Ambiguous dot-separated dates (e.g. `06.07.2025` when both parts could be month or day) use a new extension preference: **Month/Day first (US)** vs **Day/Month first (EU/GB)**
 - Expected delivery **day countdown** uses the same parser as on-screen dates so badges stay consistent with the formatted text
