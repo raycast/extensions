@@ -24,7 +24,9 @@ export default async function Command(
 
   await closeMainWindow();
 
-  filepaths.forEach((filepath) =>
-    open(`macshot://open?file=${encodeURIComponent(filepath)}`),
+  await Promise.all(
+    filepaths.map((filepath) =>
+      open(`macshot://open?file=${encodeURIComponent(filepath)}`),
+    ),
   );
 }

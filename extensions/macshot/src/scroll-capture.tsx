@@ -2,5 +2,5 @@ import { closeMainWindow, open } from "@raycast/api";
 
 export default async function Command() {
   await closeMainWindow();
-  open("macshot://scroll-capture");
+  await open("macshot://scroll-capture");
 }
