@@ -77,6 +77,38 @@ function getIcon(event: calendar_v3.Schema$Event) {
   };
 }
 
+export function getEventSection(date: Date, now = new Date()) {
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const startOfNextWeek = new Date(now);
+  const daysUntilNextMonday = (8 - now.getDay()) % 7 || 7;
+  startOfNextWeek.setDate(now.getDate() + daysUntilNextMonday);
+  startOfNextWeek.setHours(0, 0, 0, 0);
+  const endOfNextWeek = new Date(startOfNextWeek);
+  endOfNextWeek.setDate(startOfNextWeek.getDate() + 7);
+
+  if (
+    date.getFullYear() === now.getFullYear() &&
+    date.getMonth() === now.getMonth() &&
+    date.getDate() === now.getDate()
+  ) {
+    return "Today";
+  } else if (
+    date.getFullYear() === tomorrow.getFullYear() &&
+    date.getMonth() === tomorrow.getMonth() &&
+    date.getDate() === tomorrow.getDate()
+  ) {
+    return "Tomorrow";
+  } else if (date >= startOfNextWeek && date < endOfNextWeek) {
+    return "Next Week";
+  } else if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
+    return `Rest of ${date.toLocaleString("default", { month: "long" })}`;
+  } else {
+    // Group by month name
+    return date.toLocaleString("default", { month: "long" });
+  }
+}
+
 function Command(props: LaunchProps) {
   const { calendarId } = (props.launchContext ?? {}) as { calendarId?: string };
   const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(calendarId ?? null);
@@ -98,35 +130,7 @@ function Command(props: LaunchProps) {
       (acc, event) => {
         const date = new Date(event.start?.dateTime ?? event.start?.date ?? "");
         const now = new Date();
-        const tomorrow = new Date(now);
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const nextWeekStart = new Date(now);
-        nextWeekStart.setDate(now.getDate() + 2); // Start after tomorrow
-        const nextWeekEnd = new Date(now);
-        nextWeekEnd.setDate(now.getDate() + 7);
-
-        let section;
-
-        if (
-          date.getFullYear() === now.getFullYear() &&
-          date.getMonth() === now.getMonth() &&
-          date.getDate() === now.getDate()
-        ) {
-          section = "Today";
-        } else if (
-          date.getFullYear() === tomorrow.getFullYear() &&
-          date.getMonth() === tomorrow.getMonth() &&
-          date.getDate() === tomorrow.getDate()
-        ) {
-          section = "Tomorrow";
-        } else if (date >= nextWeekStart && date <= nextWeekEnd) {
-          section = "Next Week";
-        } else if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
-          section = `Rest of ${date.toLocaleString("default", { month: "long" })}`;
-        } else {
-          // Group by month name
-          section = date.toLocaleString("default", { month: "long" });
-        }
+        const section = getEventSection(date, now);
 
         if (!acc[section]) {
           acc[section] = [];
