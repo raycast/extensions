@@ -1,13 +1,8 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 import { writeFile, mkdir, access, readdir } from "fs/promises";
 import path from "path";
 import { pathToFileURL } from "url";
 import crypto from "crypto";
-
-interface Preferences {
-  pat: string;
-}
 
 function getAuthHeader(): string {
   const prefs = getPreferenceValues<Preferences>();

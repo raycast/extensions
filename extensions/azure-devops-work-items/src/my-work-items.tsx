@@ -1548,7 +1548,7 @@ function CreateWorkItemForm({
   onCreated?: (item: WorkItem) => void;
 }) {
   const { pop, push } = useNavigation();
-  const prefs = getPreferenceValues<{ email: string }>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const [appDefaultProject, setAppDefaultProject] = useState<string>("");
   useEffect(() => {

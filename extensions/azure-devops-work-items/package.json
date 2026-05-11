@@ -29,7 +29,7 @@
       "title": "Your Email",
       "type": "textfield",
       "required": true,
-      "description": "The email used in Azure DevOps (used to resolve @Me in WIQL queries)",
+      "description": "The email used in Azure DevOps. Used as the default Assignee when creating a new work item.",
       "placeholder": "you@example.com"
     },
     {
@@ -42,8 +42,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.84.0",
-    "@raycast/utils": "^2.2.4",
-    "node-fetch": "^3.3.2"
+    "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

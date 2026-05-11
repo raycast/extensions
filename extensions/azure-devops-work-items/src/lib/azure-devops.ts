@@ -1,12 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import fetch from "node-fetch";
 import { readFile } from "fs/promises";
-
-interface Preferences {
-  organization: string;
-  email: string;
-  pat: string;
-}
 
 export function parseList(s: string | undefined): string[] {
   return (s ?? "")
@@ -627,17 +620,32 @@ export interface Project {
 
 export async function getProjects(): Promise<Project[]> {
   const { headers, org } = getAuth();
-  const url = `https://dev.azure.com/${org}/_apis/projects?api-version=${API_VERSION}&$top=200`;
-  const res = await fetch(url, { headers });
-  if (!res.ok) {
-    throw new Error(
-      `Failed to fetch projects (${res.status}): ${await res.text()}`,
-    );
-  }
-  const data = (await res.json()) as { value: { id: string; name: string }[] };
-  return data.value
-    .map((p) => ({ id: p.id, name: p.name }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const all: Project[] = [];
+  let continuationToken: string | undefined = undefined;
+  const pageSize = 200;
+  do {
+    const params = new URLSearchParams({
+      "api-version": API_VERSION,
+      $top: String(pageSize),
+    });
+    if (continuationToken) {
+      params.set("continuationToken", continuationToken);
+    }
+    const url = `https://dev.azure.com/${org}/_apis/projects?${params.toString()}`;
+    const res = await fetch(url, { headers });
+    if (!res.ok) {
+      throw new Error(
+        `Failed to fetch projects (${res.status}): ${await res.text()}`,
+      );
+    }
+    const data = (await res.json()) as {
+      value: { id: string; name: string }[];
+    };
+    for (const p of data.value) all.push({ id: p.id, name: p.name });
+    continuationToken = res.headers.get("x-ms-continuationtoken") ?? undefined;
+  } while (continuationToken);
+
+  return all.sort((a, b) => a.name.localeCompare(b.name));
 }
 
 export async function uploadAttachment(
