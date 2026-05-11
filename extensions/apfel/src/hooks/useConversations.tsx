@@ -7,17 +7,15 @@ export function useConversations(): ConversationsHook {
   const [isLoading, setLoading] = useState<boolean>(true);
   const hasLoadedRef = useRef(false);
 
-  useEffect(() => {
-    (async () => {
-      const storedConversations = await LocalStorage.getItem<string>("conversations");
-
-      if (storedConversations) {
-        setData((previous) => [...previous, ...JSON.parse(storedConversations)]);
-      }
-
       setLoading(false);
+      hasLoadedRef.current = true;
     })();
   }, []);
+
+  useEffect(() => {
+    if (!hasLoadedRef.current) return;
+
+    LocalStorage.setItem("conversations", JSON.stringify(data.filter((x) => x.chats.length > 0)));
 
   useEffect(() => {
     if (!hasLoadedRef.current) return;
