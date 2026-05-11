@@ -11,8 +11,9 @@ import {
   Color,
   open,
 } from "@raycast/api";
+import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { AbsenceResponse, HakunaClient } from "./hakuna-api";
+import { AbsenceResponse, HakunaClient, TimeEntryResponse } from "./hakuna-api";
 import { formatDuration } from "./duration";
 
 function absenceMenuIcon(absence: AbsenceResponse) {
@@ -27,40 +28,26 @@ function isTodayInAbsence(absence: AbsenceResponse, today: string): boolean {
 
 export default function Command() {
   const { apiToken } = getPreferenceValues<Preferences>();
-  const timer = new HakunaClient(apiToken);
+  const client = new HakunaClient(apiToken);
 
   const {
     data: overview,
     isLoading: isLoadingOverview,
     mutate: mutateOverview,
   } = useCachedPromise(async () => {
-    return await timer.getOverview();
+    return await client.getOverview();
   });
 
   const { data: company } = useCachedPromise(async () => {
-    return await timer.getCompany();
+    return await client.getCompany();
   });
-
-  const {
-    data: worktimeSeconds,
-    isLoading: isLoadingWorktime,
-    mutate: mutateWorktime,
-  } = useCachedPromise(async () => {
-    return await timer.getWorktimeSeconds();
-  });
-
-  const durationFormat = company?.duration_format ?? "hhmm";
-  const worktime =
-    worktimeSeconds != null
-      ? formatDuration(worktimeSeconds, durationFormat)
-      : undefined;
 
   const {
     data: activeTimer,
     isLoading: isLoadingTimer,
     mutate: mutateTimer,
   } = useCachedPromise(async () => {
-    return await timer.getTimer();
+    return await client.getTimer();
   });
 
   const {
@@ -69,33 +56,45 @@ export default function Command() {
     mutate: mutateEntries,
   } = useCachedPromise(async () => {
     const today = new Date().toISOString().split("T")[0];
-    return await timer.getTimeEntries(today);
+    return await client.getTimeEntries(today);
   });
 
   const { data: absences, isLoading: isLoadingAbsences } = useCachedPromise(
     async () => {
       const year = new Date().getFullYear();
-      return await timer.getAbsences(year);
+      return await client.getAbsences(year);
     },
   );
 
+  const durationFormat = company?.duration_format ?? "hhmm";
+  const worktimeSeconds = useMemo(() => {
+    if (timeEntries == null) return undefined;
+    const total = timeEntries.reduce(
+      (sum, e) => sum + e.duration_in_seconds,
+      0,
+    );
+    return total + (activeTimer?.duration_in_seconds ?? 0);
+  }, [timeEntries, activeTimer]);
+  const worktime =
+    worktimeSeconds != null
+      ? formatDuration(worktimeSeconds, durationFormat)
+      : undefined;
+
   const isLoading =
     isLoadingOverview ||
-    isLoadingWorktime ||
     isLoadingTimer ||
     isLoadingEntries ||
     isLoadingAbsences;
 
   const refreshAll = () => {
     mutateOverview();
-    mutateWorktime();
     mutateTimer();
     mutateEntries();
   };
 
   const handleStopTimer = async () => {
     try {
-      const stopped = await timer.stopTimer();
+      const stopped = await client.stopTimer();
       await showToast({
         style: Toast.Style.Success,
         title: "Timer Stopped",
@@ -124,7 +123,7 @@ export default function Command() {
       })
     ) {
       try {
-        await timer.deleteTimer();
+        await client.deleteTimer();
         await showToast({
           style: Toast.Style.Success,
           title: "Timer Cancelled",
@@ -143,6 +142,21 @@ export default function Command() {
   const today = new Date().toISOString().split("T")[0];
   const todaysAbsences = (absences ?? []).filter((a) =>
     isTodayInAbsence(a, today),
+  );
+
+  const timeEntryItem = (entry: TimeEntryResponse) => (
+    <MenuBarExtra.Item
+      key={entry.id}
+      title={entry.task?.name ?? "Entry"}
+      subtitle={`${entry.start_time}–${entry.end_time ?? "…"} (${entry.duration})`}
+      onAction={async () => {
+        await launchCommand({
+          name: "time-entry",
+          type: LaunchType.UserInitiated,
+          context: { timeEntry: entry },
+        });
+      }}
+    />
   );
 
   return (
@@ -224,62 +238,12 @@ export default function Command() {
         />
       </MenuBarExtra.Section>
 
-      {todaysAbsences.length > 0 && (
-        <MenuBarExtra.Section title="Today's Absences">
-          {todaysAbsences.map((absence) => (
-            <MenuBarExtra.Item
-              key={absence.id}
-              title={absence.absence_type.name}
-              icon={absenceMenuIcon(absence)}
-              onAction={async () => {
-                await launchCommand({
-                  name: "absences",
-                  type: LaunchType.UserInitiated,
-                });
-              }}
-            />
-          ))}
-        </MenuBarExtra.Section>
-      )}
-
       {(timeEntries ?? []).length > 0 && (
         <MenuBarExtra.Section title="Recent Entries">
-          {(timeEntries ?? [])
-            .slice(-3)
-            .reverse()
-            .map((entry) => (
-              <MenuBarExtra.Item
-                key={entry.id}
-                title={entry.task?.name ?? "Entry"}
-                subtitle={`${entry.start_time}–${entry.end_time ?? "…"} (${entry.duration})`}
-                onAction={async () => {
-                  await launchCommand({
-                    name: "time-entry",
-                    type: LaunchType.UserInitiated,
-                    context: { entry },
-                  });
-                }}
-              />
-            ))}
+          {(timeEntries ?? []).slice(-3).reverse().map(timeEntryItem)}
           {(timeEntries ?? []).length > 3 && (
             <MenuBarExtra.Submenu title="More Entries" icon={Icon.ChevronDown}>
-              {(timeEntries ?? [])
-                .slice(0, -3)
-                .reverse()
-                .map((entry) => (
-                  <MenuBarExtra.Item
-                    key={entry.id}
-                    title={entry.task?.name ?? "Entry"}
-                    subtitle={`${entry.start_time}–${entry.end_time ?? "…"} (${entry.duration})`}
-                    onAction={async () => {
-                      await launchCommand({
-                        name: "time-entry",
-                        type: LaunchType.UserInitiated,
-                        context: { entry },
-                      });
-                    }}
-                  />
-                ))}
+              {(timeEntries ?? []).slice(0, -3).reverse().map(timeEntryItem)}
             </MenuBarExtra.Submenu>
           )}
         </MenuBarExtra.Section>
@@ -289,7 +253,7 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Overtime"
           subtitle={overview?.overtime || "00:00"}
-          icon={Icon.Paragraph}
+          icon={Icon.Calculator}
           onAction={async () => {
             await launchCommand({
               name: "profile",
@@ -313,6 +277,24 @@ export default function Command() {
           }}
         />
       </MenuBarExtra.Section>
+
+      {todaysAbsences.length > 0 && (
+        <MenuBarExtra.Section title="Today's Absences">
+          {todaysAbsences.map((absence) => (
+            <MenuBarExtra.Item
+              key={absence.id}
+              title={absence.absence_type.name}
+              icon={absenceMenuIcon(absence)}
+              onAction={async () => {
+                await launchCommand({
+                  name: "absences",
+                  type: LaunchType.UserInitiated,
+                });
+              }}
+            />
+          ))}
+        </MenuBarExtra.Section>
+      )}
 
       <MenuBarExtra.Section title="Website">
         <MenuBarExtra.Item

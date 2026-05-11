@@ -3,21 +3,30 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { HakunaClient, Project } from "./hakuna-api";
+import { ClientStub, HakunaClient, ProjectResponse } from "./hakuna-api";
 import { getSettings } from "./settings";
 import { ProjectTasks } from "./tasks";
-import StartTimer from "./start-timer";
 import TimeEntry from "./time-entry";
+import Timer from "./timer";
 
 const ALL_CLIENTS = "all";
 
-function ProjectDetail({ project }: { project: Project }) {
+function clientName(client?: string | ClientStub): string | undefined {
+  if (client === undefined || client === null) {
+    return undefined;
+  }
+
+  return typeof client === "object" ? client.name : client;
+}
+
+function ProjectDetail({ project }: { project: ProjectResponse }) {
   return (
     <List.Item.Detail
       metadata={
@@ -25,15 +34,15 @@ function ProjectDetail({ project }: { project: Project }) {
           <List.Item.Detail.Metadata.Label title="Name" text={project.name} />
           <List.Item.Detail.Metadata.Label
             title="Code"
-            text={project.code || "—"}
+            text={project.code ?? "—"}
           />
           <List.Item.Detail.Metadata.Label
             title="Starts On"
-            text={project.starts_on || "—"}
+            text={project.starts_on ?? "—"}
           />
           <List.Item.Detail.Metadata.Label
             title="Ends On"
-            text={project.ends_on || "—"}
+            text={project.ends_on ?? "—"}
           />
           <List.Item.Detail.Metadata.TagList title="Status">
             <List.Item.Detail.Metadata.TagList.Item
@@ -44,7 +53,7 @@ function ProjectDetail({ project }: { project: Project }) {
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Client"
-            text={project.client || "—"}
+            text={clientName(project.client) ?? "—"}
           />
           <List.Item.Detail.Metadata.TagList title="Teams">
             {(project.teams ?? []).map((t) => (
@@ -58,13 +67,13 @@ function ProjectDetail({ project }: { project: Project }) {
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Label
             title="Budget"
-            text={project.budget ? String(project.budget) : "—"}
+            text={project.budget === undefined ? String(project.budget) : "—"}
             icon={project.budget_is_monthly ? Icon.Repeat : undefined}
           />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title="Notes"
-            text={project.notes || "—"}
+            text={project.notes?.trim() || "—"}
           />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.TagList title="Tasks">
@@ -90,12 +99,12 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
 
   const { data, isLoading } = useCachedPromise(
     async (token: string) => {
-      const api = new HakunaClient(token);
-      const company = await api.getCompany();
+      const client = new HakunaClient(token);
+      const company = await client.getCompany();
       if (!company.projects_enabled) {
-        return { projectsEnabled: false, projects: [] as Project[] };
+        return { projectsEnabled: false, projects: [] as ProjectResponse[] };
       }
-      return { projectsEnabled: true, projects: await api.getProjects() };
+      return { projectsEnabled: true, projects: await client.getProjects() };
     },
     [apiToken],
     {
@@ -148,13 +157,14 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
                 ...(initialClient ? [initialClient] : []),
                 ...clients,
               ]),
-            ].map((clientName) => (
-              <List.Dropdown.Item
-                key={clientName}
-                title={clientName}
-                value={clientName}
-              />
-            ))}
+            ]
+              .map((client) => ({
+                key: (typeof client === "object" ? client.id : client)!,
+                value: clientName(client)!,
+              }))
+              .map(({ key, value }) => (
+                <List.Dropdown.Item key={key} title={value} value={value} />
+              ))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }
@@ -181,7 +191,7 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
                     ? `[${project.code}] ${project.name}`
                     : project.name
                 }
-                subtitle={project.client || undefined}
+                subtitle={clientName(project.client)}
                 detail={<ProjectDetail project={project} />}
                 actions={
                   <ActionPanel>
@@ -192,14 +202,17 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
                     <Action.Push
                       title="Start Timer"
                       icon={Icon.Play}
-                      shortcut={{ modifiers: ["cmd"], key: "t" }}
-                      target={<StartTimer projectId={String(project.id)} />}
+                      shortcut={{
+                        macOS: { modifiers: ["cmd"], key: "t" },
+                        Windows: { modifiers: ["ctrl"], key: "t" },
+                      }}
+                      target={<Timer projectId={project.id} />}
                     />
                     <Action.Push
                       title="Add Entry"
                       icon={Icon.Plus}
-                      shortcut={{ modifiers: ["cmd"], key: "n" }}
-                      target={<TimeEntry projectId={String(project.id)} />}
+                      shortcut={Keyboard.Shortcut.Common.New}
+                      target={<TimeEntry projectId={project.id} />}
                     />
                     <Action
                       title={showArchived ? "Hide Archived" : "Show Archived"}

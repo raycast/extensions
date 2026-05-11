@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
 import { AbsenceResponse, HakunaClient } from "./hakuna-api";
@@ -20,7 +20,6 @@ function getMonthLabel(date: string): string {
 
 function absenceIcon(absence: AbsenceResponse): {
   source: Icon;
-  tintColor?: Color;
 } {
   if (absence.absence_type.is_vacation) return { source: Icon.AirplaneTakeoff };
   if (absence.absence_type.grants_work_time)
@@ -51,7 +50,6 @@ function AbsenceDetail({ absence }: { absence: AbsenceResponse }) {
           <List.Item.Detail.Metadata.TagList title="Type">
             <List.Item.Detail.Metadata.TagList.Item
               text={absence.absence_type.name}
-              color={absence.absence_type.color}
             />
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Separator />
@@ -93,24 +91,23 @@ export default function Command({
 }: { userId?: number; userName?: string } = {}) {
   const { apiToken } = getSettings();
   const currentYear = new Date().getFullYear();
+  const client = new HakunaClient(apiToken);
   const [year, setYear] = useState(currentYear);
   const [typeFilter, setTypeFilter] = useState("all");
 
   const { data: absences, isLoading: absencesLoading } = useCachedPromise(
-    (token: string, y: number, uid: number | undefined) =>
-      new HakunaClient(token).getAbsences(y, uid),
-    [apiToken, year, userId],
+    (y: number, uid: number | undefined) => client.getAbsences(y, uid),
+    [year, userId],
   );
 
   const { data: overview, isLoading: overviewLoading } = useCachedPromise(
-    (token: string, uid: number | undefined) =>
-      new HakunaClient(token).getOverview(uid),
-    [apiToken, userId],
+    (uid: number | undefined) => client.getOverview(uid),
+    [userId],
   );
 
   const { data: absenceTypes, isLoading: typesLoading } = useCachedPromise(
-    (token: string) => new HakunaClient(token).getAbsenceTypes(),
-    [apiToken],
+    () => client.getAbsenceTypes(),
+    [],
   );
 
   const isLoading = absencesLoading || overviewLoading || typesLoading;
@@ -137,19 +134,28 @@ export default function Command({
   const yearActions = (
     <ActionPanel.Section title={`Year: ${year}`}>
       <Action
+        title="Current Year"
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "0" },
+          Windows: { modifiers: ["ctrl"], key: "0" },
+        }}
+        onAction={() => setYear(currentYear)}
+      />
+      <Action
         title="Previous Year"
-        shortcut={{ modifiers: ["cmd"], key: "h" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "h" },
+          Windows: { modifiers: ["ctrl"], key: "h" },
+        }}
         onAction={() => setYear((y) => y - 1)}
       />
       <Action
         title="Next Year"
-        shortcut={{ modifiers: ["cmd"], key: "l" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "l" },
+          Windows: { modifiers: ["ctrl"], key: "l" },
+        }}
         onAction={() => setYear((y) => y + 1)}
-      />
-      <Action
-        title="Current Year"
-        shortcut={{ modifiers: ["cmd"], key: "0" }}
-        onAction={() => setYear(currentYear)}
       />
     </ActionPanel.Section>
   );

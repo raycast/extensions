@@ -15,12 +15,9 @@ import {
   CompanyResponse,
   UserResponse,
 } from "./hakuna-api";
-import { formatOvertime } from "./duration";
+import { formatOvertime, FORTY_HOURS, TEN_HOURS } from "./duration";
 import { getSettings } from "./settings";
 import AbsencesCommand from "./absences";
-
-const TEN_HOURS = 10 * 3600;
-const FORTY_HOURS = 40 * 3600;
 
 function overtimeIcon(seconds: number): { source: Icon; tintColor: string } {
   const abs = Math.abs(seconds);
@@ -45,7 +42,10 @@ function ToggleInactiveAction({
     <Action
       title={showInactive ? "Hide Inactive Members" : "Show Inactive Members"}
       icon={showInactive ? Icon.EyeDisabled : Icon.Eye}
-      shortcut={{ modifiers: ["cmd"], key: "i" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd"], key: "i" },
+        Windows: { modifiers: ["ctrl"], key: "i" },
+      }}
       onAction={onToggle}
     />
   );
@@ -81,14 +81,25 @@ function OverviewMetadata({
       />
       <List.Item.Detail.Metadata.Separator />
       <List.Item.Detail.Metadata.Label
+        title="Vacation Days Total"
+        text={String(
+          overview.vacation.redeemed_days + overview.vacation.remaining_days,
+        )}
+      />
+      <List.Item.Detail.Metadata.Label
         title="Vacation Days Used"
         text={String(overview.vacation.redeemed_days)}
-        icon={Icon.Airplane}
       />
       <List.Item.Detail.Metadata.Label
         title="Vacation Days Remaining"
-        text={String(overview.vacation.remaining_days)}
-        icon={Icon.Airplane}
+        text={
+          overview.vacation.remaining_days < 0
+            ? {
+                value: String(overview.vacation.remaining_days),
+                color: Color.Red,
+              }
+            : String(overview.vacation.remaining_days)
+        }
       />
     </>
   );
@@ -104,11 +115,18 @@ function UserDetailMetadata({
   const statusColor = user.status === "active" ? Color.Green : Color.Red;
   return (
     <>
-      <List.Item.Detail.Metadata.Label
-        title="Email"
-        text={user.email}
-        icon={Icon.Envelope}
-      />
+      {user.email ? (
+        <List.Item.Detail.Metadata.Link
+          title="Email"
+          text={user.email}
+          target={`mailto:${user.email}`}
+        />
+      ) : (
+        <List.Item.Detail.Metadata.Label
+          title="Email"
+          text={user.email ?? "—"}
+        />
+      )}
       <List.Item.Detail.Metadata.Label
         title="Status"
         text={{ value: user.status, color: statusColor }}

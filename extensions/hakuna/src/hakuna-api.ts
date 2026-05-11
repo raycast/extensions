@@ -1,9 +1,11 @@
 import axios, { AxiosInstance } from "axios";
-import rateLimit from "axios-rate-limit";
+import rateLimit, { getLimiter } from "axios-rate-limit";
 import { Cache, environment } from "@raycast/api";
 
 const cache = new Cache();
 
+const THIRTY_SECONDS_MS = 30 * 1000;
+const ONE_HOUR_MS = 60 * 60 * 1000;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -16,7 +18,8 @@ function getCached<T>(key: string, ttlMs: number): T | null {
   const raw = cache.get(key);
   if (!raw) return null;
   const entry = JSON.parse(raw) as CacheEntry<T>;
-  if (Date.now() - entry.timestamp > ttlMs) return null;
+  const remainingTtl = Date.now() - entry.timestamp - ttlMs;
+  if (remainingTtl > 0) return null;
   return entry.data;
 }
 
@@ -33,64 +36,84 @@ interface ErrorResponse {
 export interface UserResponse {
   id: number;
   name: string;
-  email: string;
+  email?: string;
   status: string;
   groups: string[];
 }
 
 export interface CompanyResponse {
   company_name: string;
-  duration_format: string;
+  duration_format: "decimal" | "hhmm";
   absence_requests_enabled: boolean;
   projects_enabled: boolean;
   groups_enabled: boolean;
 }
 
-export interface Task {
+export interface TaskResponse {
   id: number;
   name: string;
-  archived: boolean;
-  default: boolean;
+  archived?: boolean;
+  default?: boolean;
 }
 
-export interface Project {
+export interface ProjectStub {
+  id: number;
+  code?: string;
+  name: string;
+  client?: string | ClientStub;
+  archived?: boolean;
+}
+
+export interface ProjectResponse extends ProjectStub {
+  tasks: TaskResponse[];
+  starts_on?: string;
+  ends_on?: string;
+  notes?: string;
+  budget?: string;
+  budget_in_seconds?: number;
+  budget_is_monthly?: boolean;
+  groups?: string[];
+  teams?: string[];
+}
+
+export interface ClientStub {
   id: number;
   name: string;
-  code: string | null;
-  client: string;
-  tasks: Task[];
-  starts_on: string | null;
-  ends_on: string | null;
-  budget: string | null;
-  budget_in_seconds: number | null;
-  budget_is_monthly: boolean;
-  groups: string[] | null;
-  teams: string[] | null;
-  notes: string | null;
-  archived: boolean;
 }
 
 export interface TimerResponse {
-  id: number;
-  starts: string;
-  ends: string | null;
   date: string;
   start_time: string;
-  end_time: string | null;
   duration: string;
   duration_in_seconds: number;
-  note: string | null;
-  task?: { id: number; name: string };
-  project?: { id: number; name: string; code: string | null; client: string };
+  note?: string;
+  user?: UserResponse;
+  task?: TaskResponse;
+  project?: ProjectStub;
 }
 
-export interface AbsenceType {
+export interface TimeEntryResponse {
+  id: number;
+  date: string;
+  start_time: string;
+  end_time?: string;
+  duration: string;
+  duration_in_seconds: number;
+  note?: string;
+  user?: UserResponse;
+  task?: TaskResponse;
+  project?: ProjectStub;
+}
+
+export interface AbsenceStub {
   id: number;
   name: string;
-  color: string;
-  is_vacation: boolean;
+  archived: boolean;
   grants_work_time: boolean;
+  is_vacation: boolean;
 }
+
+export interface AbsenceTypeResponse extends AbsenceStub {}
 
 export interface AbsenceResponse {
   id: number;
@@ -99,9 +122,9 @@ export interface AbsenceResponse {
   first_half_day: boolean;
   second_half_day: boolean;
   is_recurring: boolean;
-  weekly_repeat_interval: number | null;
-  user: { id: number; name: string };
-  absence_type: AbsenceType;
+  weekly_repeat_interval?: number;
+  user: UserResponse;
+  absence_type: AbsenceStub;
 }
 
 export interface OverviewResponse {
@@ -112,6 +135,8 @@ export interface OverviewResponse {
     remaining_days: number;
   };
 }
+
+const rateLimiter = getLimiter({ maxRequests: 100, duration: "1m" });
 
 export class HakunaClient {
   private apiToken: string;
@@ -130,13 +155,13 @@ export class HakunaClient {
           "User-Agent": `Raycast/${environment.raycastVersion} (${environment.extensionName}${environment.isDevelopment ? "; developmentMode" : ""}) axios/${axios.VERSION}`,
         },
       }),
-      { maxRequests: 100, perMilliseconds: 60_000 },
+      { rateLimiter },
     );
   }
 
   async startTimer(
-    taskId: string,
-    projectId?: string,
+    taskId: number,
+    projectId?: number,
     startTime?: string,
     note?: string,
   ): Promise<TimerResponse> {
@@ -145,8 +170,8 @@ export class HakunaClient {
     }
 
     const payload: {
-      task_id: string;
-      project_id?: string;
+      task_id: number;
+      project_id?: number;
       start_time?: string;
       note?: string;
     } = {
@@ -168,12 +193,11 @@ export class HakunaClient {
   }
 
   async getTimer(): Promise<TimerResponse | null> {
-    try {
-      const response = await this.axiosInstance.get<TimerResponse>("/timer");
-      return response.data.date === null ? null : response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
+    const result = await this.cachedGet<TimerResponse>(
+      "/timer",
+      THIRTY_SECONDS_MS,
+    );
+    return result.date === null ? null : result;
   }
 
   async deleteTimer(): Promise<void> {
@@ -215,73 +239,19 @@ export class HakunaClient {
     }
   }
 
-  async stopTimer(): Promise<TimerResponse> {
+  async stopTimer(): Promise<TimeEntryResponse> {
     try {
-      const response = await this.axiosInstance.put<TimerResponse>("/timer");
+      const response =
+        await this.axiosInstance.put<TimeEntryResponse>("/timer");
       return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
-  }
-
-  async getWorktimeSeconds(): Promise<number> {
-    const today = new Date().toISOString().split("T")[0];
-    const entriesUrl = `/time_entries?start_date=${today}&end_date=${today}`;
-    const timerUrl = "/timer";
-
-    try {
-      const [entriesResponse, timerResponse] = await Promise.all([
-        this.axiosInstance.get<TimerResponse[]>(entriesUrl),
-        this.axiosInstance.get<TimerResponse>(timerUrl),
-      ]);
-
-      const entries = entriesResponse.data;
-      const activeTimer = timerResponse.data;
-
-      let totalSeconds = entries.reduce(
-        (sum, entry) => sum + entry.duration_in_seconds,
-        0,
-      );
-
-      if (activeTimer && activeTimer.duration_in_seconds) {
-        totalSeconds += activeTimer.duration_in_seconds;
-      }
-
-      return totalSeconds;
     } catch (error) {
       this.handleApiError(error);
     }
   }
 
   async getOverview(userId?: number): Promise<OverviewResponse> {
-    try {
-      const url = userId ? `/overview?user_id=${userId}` : "/overview";
-      const response = await this.axiosInstance.get<OverviewResponse>(url);
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
-  }
-
-  async getOvertime(): Promise<string> {
-    try {
-      const response =
-        await this.axiosInstance.get<OverviewResponse>("/overview");
-      return response.data.overtime;
-    } catch (error) {
-      this.handleApiError(error);
-    }
-  }
-
-  async getVacationDays(): Promise<string> {
-    try {
-      const response =
-        await this.axiosInstance.get<OverviewResponse>("/overview");
-      const { redeemed_days, remaining_days } = response.data.vacation;
-      return `${redeemed_days}/${remaining_days}`;
-    } catch (error) {
-      this.handleApiError(error);
-    }
+    const url = userId ? `/overview?user_id=${userId}` : "/overview";
+    return this.cachedGet<OverviewResponse>(url, THIRTY_SECONDS_MS);
   }
 
   private async cachedGet<T>(url: string, ttlMs: number): Promise<T> {
@@ -308,16 +278,16 @@ export class HakunaClient {
     return this.cachedGet<CompanyResponse>("/company", ONE_WEEK_MS);
   }
 
-  async getProjects(): Promise<Project[]> {
-    return this.cachedGet<Project[]>("/projects", ONE_DAY_MS);
+  async getProjects(): Promise<ProjectResponse[]> {
+    return this.cachedGet<ProjectResponse[]>("/projects", ONE_DAY_MS);
   }
 
-  async getTasks(): Promise<Task[]> {
-    return this.cachedGet<Task[]>("/tasks", ONE_DAY_MS);
+  async getTasks(): Promise<TaskResponse[]> {
+    return this.cachedGet<TaskResponse[]>("/tasks", ONE_DAY_MS);
   }
 
-  async getAbsenceTypes(): Promise<AbsenceType[]> {
-    return this.cachedGet<AbsenceType[]>("/absence_types", ONE_WEEK_MS);
+  async getAbsenceTypes(): Promise<AbsenceStub[]> {
+    return this.cachedGet<AbsenceStub[]>("/absence_types", ONE_WEEK_MS);
   }
 
   static clearCache(): void {
@@ -325,26 +295,17 @@ export class HakunaClient {
   }
 
   async getAbsences(year: number, userId?: number): Promise<AbsenceResponse[]> {
-    try {
-      const url = userId
-        ? `/absences?year=${year}&user_id=${userId}`
-        : `/absences?year=${year}`;
-      const response = await this.axiosInstance.get<AbsenceResponse[]>(url);
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
+    const url = userId
+      ? `/absences?year=${year}&user_id=${userId}`
+      : `/absences?year=${year}`;
+    return this.cachedGet<AbsenceResponse[]>(url, ONE_HOUR_MS);
   }
 
-  async getTimeEntries(date: string): Promise<TimerResponse[]> {
-    try {
-      const response = await this.axiosInstance.get<TimerResponse[]>(
-        `/time_entries?start_date=${date}&end_date=${date}`,
-      );
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
+  async getTimeEntries(date: string): Promise<TimeEntryResponse[]> {
+    return this.cachedGet<TimeEntryResponse[]>(
+      `/time_entries?start_date=${date}&end_date=${date}`,
+      THIRTY_SECONDS_MS,
+    );
   }
 
   async deleteTimeEntry(id: number): Promise<void> {
@@ -357,19 +318,19 @@ export class HakunaClient {
 
   async updateTimeEntry(
     id: number,
-    taskId: string,
-    projectId: string | undefined,
+    taskId: number,
+    projectId: number | undefined,
     date: string,
     startTime: string,
-    endTime: string,
+    endTime?: string,
     note?: string,
   ): Promise<TimerResponse> {
     const payload: {
-      task_id: string;
-      project_id?: string;
+      task_id: number;
+      project_id?: number;
       date: string;
       start_time: string;
-      end_time: string;
+      end_time?: string;
       note?: string;
     } = { task_id: taskId, date, start_time: startTime, end_time: endTime };
     if (projectId) payload.project_id = projectId;
@@ -387,26 +348,31 @@ export class HakunaClient {
   }
 
   async createTimeEntry(
-    taskId: string,
-    projectId: string | undefined,
+    taskId: number,
+    projectId: number | undefined,
     date: string,
     startTime: string,
-    endTime: string,
+    endTime?: string | null,
     note?: string,
-  ): Promise<TimerResponse> {
+  ): Promise<TimeEntryResponse> {
     const payload: {
-      task_id: string;
-      project_id?: string;
+      task_id: number;
+      project_id?: number;
       date: string;
       start_time: string;
-      end_time: string;
+      end_time: string | null;
       note?: string;
-    } = { task_id: taskId, date, start_time: startTime, end_time: endTime };
+    } = {
+      task_id: taskId,
+      date,
+      start_time: startTime,
+      end_time: endTime ?? null,
+    };
     if (projectId) payload.project_id = projectId;
     if (note) payload.note = note;
 
     try {
-      const response = await this.axiosInstance.post<TimerResponse>(
+      const response = await this.axiosInstance.post<TimeEntryResponse>(
         "/time_entries",
         payload,
       );
@@ -419,11 +385,6 @@ export class HakunaClient {
   private handleApiError(error: unknown): never {
     if (axios.isAxiosError(error) && error.response) {
       const errorData = error.response.data as ErrorResponse;
-      if (errorData.error === "Timer not running") {
-        throw new Error(
-          "No active timer. Please start a timer before attempting to stop it.",
-        );
-      }
       throw new Error(
         `API Error: ${error.response.status} - ${errorData.message || errorData.error || "Unknown error"}`,
       );

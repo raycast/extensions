@@ -1,279 +1,269 @@
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
-import { useState, useEffect, useRef, ReactNode, useMemo } from "react";
-import { usePromise, useCachedPromise } from "@raycast/utils";
-import { HakunaClient, Project, Task, CompanyResponse } from "./hakuna-api";
-import { formatDuration } from "./duration";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  Keyboard,
+  showToast,
+  Toast,
+  popToRoot,
+  Icon,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useCachedPromise } from "@raycast/utils";
+import {
+  HakunaClient,
+  ProjectResponse,
+  TaskResponse,
+  CompanyResponse,
+} from "./hakuna-api";
+import {
+  formatDate,
+  formatDuration,
+  parseDate,
+  formatTime,
+  compareTime,
+  parseTime,
+  calculateDurationSeconds,
+} from "./duration";
 
-export interface TimerFormInitialValues {
-  projectId?: string;
-  taskId?: string;
+interface Props {
+  apiToken: string;
+
+  entryId?: number;
+  date?: string;
+  projectId?: number;
+  taskId?: number;
   startTime?: string;
   endTime?: string;
   note?: string;
 }
 
-interface Props {
-  apiToken: string;
-  mode: "timer" | "entry";
-  loadInitialValues?: (
-    timer: HakunaClient,
-  ) => Promise<TimerFormInitialValues | undefined>;
-  timerDate?: string;
-  entryDate?: string;
-  onSubmit: (values: {
-    taskId: string;
-    projectId?: string;
-    startTime?: string;
-    endTime?: string;
-    note: string;
-  }) => Promise<void>;
-  extraActions?: ReactNode;
-  submitLabel?: string;
-  endTimeRequired?: boolean;
-}
-
-function currentTime(): string {
-  const now = new Date();
-  return `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
-}
-
-function parseTime(input: string): string | null {
-  const s = input.trim().replace(/[.,;]/g, ":");
-  let hours: number;
-  let minutes: number;
-
-  const parts = s.split(":");
-
-  if (parts.length === 1) {
-    const digits = parts[0];
-    if (!/^\d+$/.test(digits) || digits.length === 0) return null;
-
-    if (digits.length === 1) {
-      hours = parseInt(digits, 10);
-      minutes = 0;
-    } else if (digits.length === 2) {
-      const n = parseInt(digits, 10);
-      if (n <= 23) {
-        hours = n;
-        minutes = 0;
-      } else {
-        hours = parseInt(digits[0], 10);
-        minutes = parseInt(digits[1], 10) * 10;
-      }
-    } else if (digits.length === 3) {
-      const firstTwo = parseInt(digits.substring(0, 2), 10);
-      if (firstTwo <= 23) {
-        hours = firstTwo;
-        minutes = parseInt(digits[2], 10) * 10;
-      } else {
-        hours = parseInt(digits[0], 10);
-        minutes = parseInt(digits.substring(1), 10);
-      }
-    } else if (digits.length === 4) {
-      hours = parseInt(digits.substring(0, 2), 10);
-      minutes = parseInt(digits.substring(2), 10);
-    } else {
-      return null;
-    }
-  } else if (parts.length === 2) {
-    const [hStr, mStr] = parts;
-    if (!/^\d+$/.test(hStr)) return null;
-    hours = parseInt(hStr, 10);
-    if (mStr === "") {
-      minutes = 0;
-    } else if (!/^\d+$/.test(mStr)) {
-      return null;
-    } else if (mStr.length === 1) {
-      minutes = parseInt(mStr, 10) * 10;
-    } else {
-      minutes = parseInt(mStr, 10);
-    }
-  } else if (parts.length === 3) {
-    const [hStr, mStr, sStr] = parts;
-    if (!/^\d+$/.test(hStr) || !/^\d+$/.test(mStr) || !/^\d+$/.test(sStr))
-      return null;
-    hours = parseInt(hStr, 10);
-    minutes = parseInt(mStr, 10);
-    if (parseInt(sStr, 10) > 0) minutes++;
-  } else {
-    return null;
-  }
-
-  if (minutes > 60) return null;
-  if (minutes === 60) {
-    minutes = 0;
-    hours++;
-  }
-
-  if (hours === 24 && minutes === 0) hours = 0;
-  else if (hours > 23) return null;
-
-  return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`;
-}
-
 export default function TimerForm({
   apiToken,
-  mode,
-  loadInitialValues,
-  timerDate,
-  entryDate,
-  onSubmit,
-  extraActions,
-  submitLabel,
-  endTimeRequired,
-}: Props) {
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [selectedProjectId, setSelectedProjectId] = useState("");
-  const [selectedTaskId, setSelectedTaskId] = useState("");
-  const [startTime, setStartTime] = useState(currentTime());
-  const [endTime, setEndTime] = useState("");
-  const [note, setNote] = useState("");
-  const [duration, setDuration] = useState("");
-  const firstFieldRef = useRef<Form.ItemReference>(null);
-  const originalStartTime = useRef<string | null>(null);
-  const pendingTaskId = useRef<string | null>(null);
 
-  const { data: company, isLoading: companyLoading } = useCachedPromise(
-    (token: string) => new HakunaClient(token).getCompany(),
-    [apiToken],
+  entryId: initialEntryId,
+  date: initialDate,
+  projectId: initialProjectId,
+  taskId: initialTaskId,
+  startTime: initialStartTime,
+  endTime: initialEndTime,
+  note: initialNote,
+}: Props) {
+  const client = new HakunaClient(apiToken);
+
+  const [projects, setProjects] = useState<ProjectResponse[]>([]);
+  const [tasks, setTasks] = useState<TaskResponse[]>([]);
+  const [selectedProjectId, setSelectedProjectId] = useState(
+    initialProjectId ? String(initialProjectId) : "",
   );
+  const [selectedTaskId, setSelectedTaskId] = useState(
+    initialTaskId ? String(initialTaskId) : "",
+  );
+
+  const [startTime, setStartTime] = useState(
+    (initialStartTime ? formatTime(initialStartTime) : null) ?? "",
+  );
+  const [endTime, setEndTime] = useState(
+    (initialEndTime ? formatTime(initialEndTime) : null) ?? "",
+  );
+  const [note, setNote] = useState(initialNote ?? "");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [date, setDate] = useState<Date | null>(
+    parseDate(initialDate) ?? new Date(),
+  );
+  const [duration, setDuration] = useState("");
+
+  const [projectTaskHistory, setProjectTaskHistory] = useState<
+    Record<number, number>
+  >(
+    initialProjectId && initialTaskId
+      ? { [initialProjectId]: initialTaskId }
+      : {},
+  );
+
+  const firstFieldRef = useRef<Form.ItemReference>(null);
+
+  const {
+    data: timer,
+    isLoading: isLoadingTimer,
+    mutate: mutateTimer,
+  } = useCachedPromise(async () => {
+    return await client.getTimer();
+  });
+
+  const {
+    data: company,
+    isLoading: isLoadingCompany,
+    mutate: mutateCompany,
+  } = useCachedPromise(async () => {
+    return await client.getCompany();
+  });
+
+  const {
+    data: lastEntryEndTime,
+    isLoading: isLoadingEntries,
+    mutate: mutateEntries,
+  } = useCachedPromise(async () => {
+    const entries = await client.getTimeEntries(
+      formatDate(date ?? new Date())!,
+    );
+
+    const sortedEntries = entries?.sort((a, b) =>
+      compareTime(parseTime(a.end_time), parseTime(b.end_time)),
+    );
+
+    if (!sortedEntries.length) {
+      return null;
+    }
+
+    const endTime = sortedEntries[sortedEntries.length - 1].end_time;
+    if (!endTime) {
+      return null;
+    }
+
+    return endTime;
+  });
+
   const projectsEnabled = company?.projects_enabled ?? false;
   const durationFormat = company?.duration_format ?? "hhmm";
 
-  const { data: runningTimer } = useCachedPromise(
-    (token: string) => new HakunaClient(token).getTimer(),
-    [apiToken],
-    { execute: mode === "entry" },
-  );
-
   useEffect(() => {
-    const pStart = parseTime(startTime);
-    const pEnd = parseTime(endTime);
-    if (endTime && pStart && pEnd) {
-      const [sh, sm] = pStart.split(":").map(Number);
-      const [eh, em] = pEnd.split(":").map(Number);
-      const startMins = sh * 60 + sm;
-      const endMins = eh * 60 + em;
-      const diffMins =
-        endMins >= startMins
-          ? endMins - startMins
-          : 24 * 60 - startMins + endMins;
-      setDuration(formatDuration(diffMins * 60, durationFormat));
-      return;
-    }
+    const pStart = formatTime(startTime);
+    const pEnd = formatTime(endTime);
 
-    if (!timerDate) {
+    if (!pStart) {
       setDuration("");
       return;
     }
 
-    const tick = () => {
-      const [h, m] = startTime.split(":").map(Number);
-      if (isNaN(h) || isNaN(m)) return;
-      const [y, mo, d] = timerDate.split("-").map(Number);
-      const start = new Date(y, mo - 1, d, h, m, 0);
-      const current = formatDuration(
-        Math.floor(Math.max(0, Date.now() - start.getTime()) / 1000),
-        durationFormat,
-      );
+    if (pEnd) {
+      const diffSeconds = calculateDurationSeconds(pStart, pEnd);
+      setDuration(formatDuration(diffSeconds, durationFormat));
+      return;
+    }
 
-      const orig = originalStartTime.current;
-      if (orig && orig !== startTime) {
-        const [oh, om] = orig.split(":").map(Number);
-        const origStart = new Date(y, mo - 1, d, oh, om, 0);
-        const before = formatDuration(
-          Math.floor(Math.max(0, Date.now() - origStart.getTime()) / 1000),
-          durationFormat,
-        );
-        setDuration(`${current} (before: ${before})`);
-      } else {
-        setDuration(current);
+    const { hours: start_h, minutes: start_m } = parseTime(pStart)!;
+    const tick = () => {
+      const now = new Date();
+      const now_h = now.getHours();
+      const now_m = now.getMinutes();
+      if (start_h > now_h || (start_h == now_h && start_m > now_m)) {
+        // start is in the future
+        setDuration("");
+        return;
       }
+
+      const diffSeconds = calculateDurationSeconds(pStart, formatTime(now)!);
+      setDuration(formatDuration(diffSeconds, durationFormat));
     };
 
     tick();
-    const interval = setInterval(tick, 500);
+    const interval = setInterval(tick, 900);
     return () => clearInterval(interval);
-  }, [timerDate, startTime, endTime, durationFormat]);
+  }, [timer, startTime, endTime, durationFormat]);
 
-  const { isLoading: dataLoading } = usePromise(
-    async (token: string, comp: CompanyResponse) => {
-      const timer = new HakunaClient(token);
-      const initValues = loadInitialValues
-        ? await loadInitialValues(timer)
-        : undefined;
+  const { isLoading: isProjectsOrTasksLoading, mutate: mutateProjectsOrTasks } =
+    useCachedPromise(
+      async (comp: CompanyResponse) => {
+        const result = {
+          projectsEnabled: comp.projects_enabled,
+          projects: [] as ProjectResponse[],
+          tasks: [] as TaskResponse[],
+        };
 
-      const result = {
-        projectsEnabled: comp.projects_enabled,
-        projects: [] as Project[],
-        tasks: [] as Task[],
-        initValues,
-      };
-
-      if (comp.projects_enabled) {
-        const allProjects = await timer.getProjects();
-        result.projects = allProjects.filter((p) => !p.archived);
-      } else {
-        const allTasks = await timer.getTasks();
-        result.tasks = allTasks.filter((t) => !t.archived);
-      }
-
-      return result;
-    },
-    [apiToken, company!],
-    {
-      execute: !!company,
-      onData({
-        projectsEnabled: enabled,
-        projects: activeProjects,
-        tasks: activeTasks,
-        initValues,
-      }) {
-        if (initValues?.startTime) {
-          setStartTime(initValues.startTime);
-          originalStartTime.current = initValues.startTime;
-        }
-        if (initValues?.endTime) setEndTime(initValues.endTime);
-        if (initValues?.note != null) setNote(initValues.note);
-
-        if (enabled) {
-          setProjects(activeProjects);
-          const proj =
-            (initValues?.projectId
-              ? activeProjects.find(
-                  (p) => String(p.id) === initValues.projectId,
-                )
-              : undefined) ?? activeProjects[0];
-          if (proj) {
-            if (initValues?.taskId) pendingTaskId.current = initValues.taskId;
-            setSelectedProjectId(String(proj.id));
-            const projTasks = proj.tasks.filter((t) => !t.archived);
-            setTasks(projTasks);
-            const task =
-              (initValues?.taskId
-                ? projTasks.find((t) => String(t.id) === initValues.taskId)
-                : undefined) ?? projTasks[0];
-            if (task) setSelectedTaskId(String(task.id));
-          }
+        if (comp.projects_enabled) {
+          const allProjects = await client.getProjects();
+          result.projects = allProjects.filter((p) => !p.archived);
         } else {
-          setTasks(activeTasks);
-          const task =
-            (initValues?.taskId
-              ? activeTasks.find((t) => String(t.id) === initValues.taskId)
-              : undefined) ?? activeTasks[0];
-          if (task) setSelectedTaskId(String(task.id));
+          const allTasks = await client.getTasks();
+          result.tasks = allTasks.filter((t) => !t.archived);
         }
+
+        return result;
       },
-      onError(error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load data",
-          message: error.message,
-        });
+      [company!],
+      {
+        execute: !!company,
+        onData({
+          projectsEnabled,
+          projects: activeProjects,
+          tasks: activeTasks,
+        }) {
+          if (!projectsEnabled) {
+            setTasks(activeTasks);
+            const task =
+              (initialTaskId
+                ? activeTasks.find((t) => t.id === initialTaskId)
+                : undefined) ?? activeTasks[0];
+            if (task) setSelectedTaskId(String(task.id));
+            return;
+          }
+
+          if (!activeProjects?.length) {
+            return;
+          }
+
+          setProjects(activeProjects);
+          const selectedProject = initialProjectId
+            ? activeProjects.find((p) => p.id === initialProjectId)
+            : undefined;
+
+          if (!selectedProject) {
+            const fallbackProject = activeProjects[0];
+            setSelectedProjectId(String(fallbackProject.id));
+            const activeProjectTasks = fallbackProject.tasks.filter(
+              (t) => !t.archived,
+            );
+            setTasks(activeProjectTasks);
+
+            const fallbackTask = activeProjectTasks[0];
+            if (fallbackTask) {
+              setSelectedTaskId(String(fallbackTask.id));
+            }
+
+            return;
+          }
+
+          setSelectedProjectId(String(selectedProject.id));
+          const activeProjectTasks = selectedProject.tasks.filter(
+            (t) => !t.archived,
+          );
+          setTasks(activeProjectTasks);
+
+          const initialProjectTask =
+            (initialTaskId
+              ? activeProjectTasks.find((t) => t.id == initialTaskId)
+              : undefined) ?? activeProjectTasks[0];
+          if (initialProjectTask) {
+            setSelectedTaskId(String(initialProjectTask.id));
+          }
+
+          firstFieldRef.current?.focus();
+        },
+        onError(error) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: `Failed to load ${projectsEnabled ? "projects" : "tasks"}`,
+            message: error.message,
+          });
+        },
       },
-    },
-  );
+    );
+
+  const refreshAll = () => {
+    mutateTimer();
+    mutateCompany();
+    mutateProjectsOrTasks();
+    mutateEntries();
+  };
+
+  const isLoading =
+    isLoadingTimer ||
+    isLoadingCompany ||
+    isProjectsOrTasksLoading ||
+    isLoadingEntries;
 
   const selectedProject = useMemo(() => {
     return projects.find((p) => String(p.id) === selectedProjectId);
@@ -286,89 +276,99 @@ export default function TimerForm({
     return undefined;
   }, [selectedProject]);
 
-  const isLoading = companyLoading || dataLoading;
-
-  useEffect(() => {
-    if (!isLoading) {
-      firstFieldRef.current?.focus();
-    }
-  }, [isLoading]);
-
   function handleProjectChange(projectId: string) {
+    setProjectTaskHistory({
+      ...projectTaskHistory,
+      [selectedProjectId]: selectedTaskId,
+    });
+
+    const projectIdNr = Number(projectId);
+
     setSelectedProjectId(projectId);
-    const project = projects.find((p) => String(p.id) === projectId);
-    if (project) {
-      const activeTasks = project.tasks.filter((t) => !t.archived);
-      setTasks(activeTasks);
-      const pending = pendingTaskId.current;
-      pendingTaskId.current = null;
-      const match = pending
-        ? activeTasks.find((t) => String(t.id) === pending)
-        : undefined;
-      setSelectedTaskId(
-        match
-          ? String(match.id)
-          : activeTasks.length > 0
-            ? String(activeTasks[0].id)
-            : "",
-      );
+    const project = projects.find((p) => p.id === projectIdNr);
+    if (!project) {
+      setTasks([]);
+      return;
     }
+
+    const activeTasks = project.tasks.filter((t) => !t.archived);
+    setTasks(activeTasks);
+    if (!activeTasks?.length) {
+      return;
+    }
+
+    const historicTaskId =
+      projectId in projectTaskHistory
+        ? projectTaskHistory[projectIdNr]
+        : initialProjectId === projectIdNr
+          ? initialTaskId
+          : undefined;
+
+    if (historicTaskId && activeTasks.find((t) => t.id === historicTaskId)) {
+      setSelectedTaskId(String(projectTaskHistory[projectIdNr]));
+      return;
+    }
+
+    setSelectedTaskId(String(activeTasks[0].id));
+    return;
   }
 
   const [formErrors, setFormErrors] = useState<
     Record<string, string | undefined>
   >({});
 
-  const computedSubmitTitle = useMemo(() => {
-    if (endTime) return "Save Entry";
-    if (mode === "entry") return "Start Timer";
-    return timerDate ? "Update Timer" : "Start Timer";
-  }, [endTime, mode, timerDate]);
-  const submitTitle = submitLabel ?? computedSubmitTitle;
+  const submitTitle = useMemo(() => {
+    if (endTime && initialEntryId) return "Update Entry";
+    if (endTime && timer) return "End Timer";
+    if (endTime) return "Create Entry";
 
-  async function handleSubmit() {
+    if (timer) return "Update Timer";
+    return "Start Timer";
+  }, [endTime, initialEntryId, timer]);
+
+  function editingCurrentTimer() {
+    return (
+      timer &&
+      initialTaskId === timer.task?.id &&
+      initialStartTime === timer.start_time &&
+      (projectsEnabled ? timer.project?.id === initialProjectId : true)
+    );
+  }
+
+  function validate() {
     const errors: Record<string, string> = {};
     if (projectsEnabled && !selectedProjectId)
       errors.projectId = "Project is required";
     if (!selectedTaskId) errors.taskId = "Task is required";
     if (!startTime) {
       errors.startTime = "Start time is required";
-    } else if (!parseTime(startTime)) {
+    } else if (!formatTime(startTime)) {
       errors.startTime = "Invalid time (e.g. 09:30)";
-    }
-    if (endTimeRequired && !endTime) {
-      errors.endTime = "End time is required";
-    } else if (endTime && !parseTime(endTime)) {
-      const m = parseInt(
-        endTime.trim().replace(/[.,;]/g, ":").split(":")[1] ?? "",
-        10,
-      );
-      errors.endTime =
-        !isNaN(m) && m > 60
-          ? "Minutes cannot exceed 60"
-          : "Invalid time (e.g. 17:30)";
-    }
-    if (
-      entryDate &&
-      runningTimer &&
-      runningTimer.date === entryDate &&
-      !errors.startTime &&
-      !errors.endTime
+    } else if (
+      lastEntryEndTime &&
+      !endTime &&
+      compareTime(parseTime(startTime), parseTime(lastEntryEndTime)) < 0
     ) {
-      const timerStart = parseTime(runningTimer.start_time.slice(0, 5));
+      errors.startTime = `Overlap, previous ends ${lastEntryEndTime}`;
+    }
+    if (endTime && !formatTime(endTime)) {
+      errors.endTime = "Invalid time (e.g. 17:45)";
+    }
+    if (timer && !errors.startTime && !errors.endTime) {
+      const timerStart = formatTime(timer.start_time.slice(0, 5));
       if (timerStart) {
         const [th, tm] = timerStart.split(":").map(Number);
         const timerStartMins = th * 60 + tm;
-        const pStart = parseTime(startTime);
-        if (pStart) {
+        const pStart = formatTime(startTime);
+        if (!editingCurrentTimer() && pStart) {
           const [sh, sm] = pStart.split(":").map(Number);
           if (sh * 60 + sm >= timerStartMins) {
             errors.startTime = `Must be before running timer (started ${timerStart})`;
           }
         }
         if (!errors.startTime) {
-          const pEnd = parseTime(endTime);
-          if (pEnd) {
+          const pEnd = formatTime(endTime);
+          if (pEnd && !editingCurrentTimer()) {
             const [eh, em] = pEnd.split(":").map(Number);
             if (eh * 60 + em > timerStartMins) {
               errors.endTime = `Must end by ${timerStart} (timer is running)`;
@@ -379,16 +379,89 @@ export default function TimerForm({
     }
     if (Object.keys(errors).length > 0) {
       setFormErrors(errors);
-      return;
+      return false;
     }
     setFormErrors({});
-    await onSubmit({
-      taskId: selectedTaskId,
-      projectId: projectsEnabled ? selectedProjectId || undefined : undefined,
-      startTime: parseTime(startTime) ?? undefined,
-      endTime: parseTime(endTime) ?? undefined,
-      note,
-    });
+    return true;
+  }
+
+  async function handleSubmit() {
+    if (!validate()) {
+      return;
+    }
+
+    const formattedStartTime = formatTime(startTime)!;
+    setStartTime(formattedStartTime);
+    const formattedEndTime = formatTime(endTime) ?? "";
+    setEndTime(formattedEndTime);
+    const formattedDate = formatDate(date ?? new Date())!;
+
+    if (endTime) {
+      if (initialEntryId) {
+        // "Update Entry"
+        await client.updateTimeEntry(
+          initialEntryId,
+          Number(selectedTaskId),
+          projectsEnabled ? Number(selectedProjectId) : undefined,
+          formattedDate,
+          formattedStartTime,
+          formattedEndTime,
+          note,
+        );
+        await showToast({ style: Toast.Style.Success, title: "Entry Updated" });
+        popToRoot();
+        return;
+      }
+
+      if (timer) {
+        // "End Timer"
+        await client.deleteTimer();
+      }
+
+      // "Create Entry"
+      await client.createTimeEntry(
+        Number(selectedTaskId),
+        projectsEnabled ? Number(selectedProjectId) : undefined,
+        formattedDate,
+        formattedStartTime,
+        formattedEndTime,
+        note,
+      );
+      await showToast({ style: Toast.Style.Success, title: "Entry Created" });
+      popToRoot();
+      return;
+    }
+
+    if (timer) {
+      // "Update Timer"
+      await client.deleteTimer();
+    }
+
+    if (startTime && date !== new Date()) {
+      await client.createTimeEntry(
+        Number(selectedTaskId),
+        projectsEnabled ? Number(selectedProjectId) : undefined,
+        formattedDate,
+        formattedStartTime,
+        null,
+        note,
+      );
+    } else {
+      await client.startTimer(
+        Number(selectedTaskId),
+        projectsEnabled ? Number(selectedProjectId) : undefined,
+        formattedStartTime,
+        note,
+      );
+    }
+
+    if (timer) {
+      await showToast({ style: Toast.Style.Success, title: "Timer Updated" });
+    } else {
+      await showToast({ style: Toast.Style.Success, title: "Timer Started" });
+    }
+    popToRoot();
+    return;
   }
 
   return (
@@ -403,12 +476,63 @@ export default function TimerForm({
       actions={
         <ActionPanel>
           <Action.SubmitForm title={submitTitle} onSubmit={handleSubmit} />
+          <Action
+            title="Refresh"
+            shortcut={Keyboard.Shortcut.Common.Refresh}
+            onAction={refreshAll}
+          />
           <Action.OpenInBrowser
             title="Open in Browser"
             url="https://app.hakuna.ch"
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.Open}
           />
-          {extraActions}
+          {timer && (
+            <>
+              <Action
+                title="Stop Timer"
+                icon={Icon.Stop}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "backspace" },
+                  Windows: { modifiers: ["ctrl"], key: "delete" },
+                }}
+                onAction={async () => {
+                  const stopped = await client.stopTimer();
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: `Timer stopped at ${stopped.end_time} after ${stopped.duration}`,
+                  });
+                  popToRoot();
+                }}
+              />
+              <Action
+                title="Cancel Timer"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={{
+                  macOS: { modifiers: ["cmd", "shift"], key: "backspace" },
+                  Windows: { modifiers: ["ctrl", "shift"], key: "delete" },
+                }}
+                onAction={async () => {
+                  const confirmed = await confirmAlert({
+                    title: "Cancel Timer",
+                    message:
+                      "Please confirm to cancel the current timer. This cannot be undone.",
+                    primaryAction: {
+                      title: "Cancel Timer",
+                      style: Alert.ActionStyle.Destructive,
+                    },
+                  });
+                  if (!confirmed) return;
+                  await client.deleteTimer();
+                  await showToast({
+                    style: Toast.Style.Success,
+                    title: "Timer cancelled",
+                  });
+                  popToRoot();
+                }}
+              />
+            </>
+          )}
         </ActionPanel>
       }
     >
@@ -417,8 +541,7 @@ export default function TimerForm({
           id="projectId"
           title="Project"
           ref={firstFieldRef}
-          storeValue={true}
-          value={selectedProjectId}
+          value={projects.length && selectedProjectId ? selectedProjectId : ""}
           onChange={handleProjectChange}
           info={projectBudgetInfo}
           error={formErrors.projectId}
@@ -440,8 +563,7 @@ export default function TimerForm({
         id="taskId"
         title="Task"
         ref={projectsEnabled ? undefined : firstFieldRef}
-        storeValue={true}
-        value={selectedTaskId}
+        value={tasks.length && selectedTaskId ? selectedTaskId : ""}
         onChange={setSelectedTaskId}
         error={formErrors.taskId}
       >
@@ -449,17 +571,30 @@ export default function TimerForm({
           <Form.Dropdown.Item key={t.id} value={String(t.id)} title={t.name} />
         ))}
       </Form.Dropdown>
+      <Form.Separator />
+      <Form.DatePicker
+        id="date"
+        title="Date"
+        value={date}
+        onChange={setDate}
+        onBlur={() => {
+          setDate(date ?? new Date());
+        }}
+        error={formErrors.date}
+        type={Form.DatePicker.Type.Date}
+      />
       <Form.TextField
         id="startTime"
         title="Start Time"
         placeholder="HH:MM"
-        value={startTime}
+        value={startTime || lastEntryEndTime || ""}
         onChange={setStartTime}
         onBlur={() => {
-          const normalized = parseTime(startTime);
+          const normalized = formatTime(startTime);
           if (normalized) setStartTime(normalized);
         }}
         error={formErrors.startTime}
+        info={lastEntryEndTime ? `End of last: ${lastEntryEndTime}` : undefined}
       />
       <Form.TextField
         id="endTime"
@@ -468,12 +603,13 @@ export default function TimerForm({
         value={endTime}
         onChange={setEndTime}
         onBlur={() => {
-          const normalized = parseTime(endTime);
+          const normalized = formatTime(endTime);
           if (normalized) setEndTime(normalized);
         }}
         error={formErrors.endTime}
       />
       {duration && <Form.Description title="Duration" text={duration} />}
+      <Form.Separator />
       <Form.TextArea
         id="note"
         title="Notes"

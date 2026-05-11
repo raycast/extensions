@@ -3,20 +3,21 @@ import {
   ActionPanel,
   Color,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useState } from "react";
-import { HakunaClient, Project, Task } from "./hakuna-api";
+import { HakunaClient, ProjectResponse, TaskResponse } from "./hakuna-api";
 import { getSettings } from "./settings";
-import StartTimer from "./start-timer";
 import TimeEntry from "./time-entry";
+import Timer from "./timer";
 
 interface TaskItemProps {
-  task: Task;
-  projectId?: string;
+  task: TaskResponse;
+  projectId?: number;
   enableTimerActions?: boolean;
 }
 
@@ -43,18 +44,17 @@ function TaskItem({ task, projectId, enableTimerActions }: TaskItemProps) {
             <Action.Push
               title="Start Timer"
               icon={Icon.Play}
-              shortcut={{ modifiers: ["cmd"], key: "t" }}
-              target={
-                <StartTimer projectId={projectId} taskId={String(task.id)} />
-              }
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "t" },
+                Windows: { modifiers: ["ctrl"], key: "t" },
+              }}
+              target={<Timer projectId={projectId} taskId={task.id} />}
             />
             <Action.Push
               title="Add Entry"
               icon={Icon.Plus}
-              shortcut={{ modifiers: ["cmd"], key: "n" }}
-              target={
-                <TimeEntry projectId={projectId} taskId={String(task.id)} />
-              }
+              shortcut={Keyboard.Shortcut.Common.New}
+              target={<TimeEntry projectId={projectId} taskId={task.id} />}
             />
           </ActionPanel>
         ) : undefined
@@ -83,12 +83,12 @@ function TaskFilterDropdown({
   );
 }
 
-export function ProjectTasks({ project }: { project: Project }) {
+export function ProjectTasks({ project }: { project: ProjectResponse }) {
   const [filter, setFilter] = useState<"active" | "archived" | "all">("active");
 
   const tasks = project.tasks.filter((t) => {
     if (filter === "active") return !t.archived;
-    if (filter === "archived") return t.archived;
+    if (filter === "archived") return t.archived === true;
     return true;
   });
 
@@ -100,7 +100,7 @@ export function ProjectTasks({ project }: { project: Project }) {
       }
     >
       {tasks.map((t) => (
-        <TaskItem key={t.id} task={t} projectId={String(project.id)} />
+        <TaskItem key={t.id} task={t} projectId={project.id} />
       ))}
     </List>
   );
@@ -112,10 +112,10 @@ export default function Command() {
 
   const { data, isLoading } = useCachedPromise(
     async (token: string) => {
-      const api = new HakunaClient(token);
+      const client = new HakunaClient(token);
       const [company, allTasks] = await Promise.all([
-        api.getCompany(),
-        api.getTasks(),
+        client.getCompany(),
+        client.getTasks(),
       ]);
       return { projectsEnabled: company.projects_enabled, tasks: allTasks };
     },

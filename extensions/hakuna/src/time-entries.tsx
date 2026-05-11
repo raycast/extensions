@@ -5,6 +5,7 @@ import {
   Color,
   confirmAlert,
   Icon,
+  Keyboard,
   List,
   showToast,
   Toast,
@@ -12,13 +13,26 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
-import { HakunaClient, TimerResponse } from "./hakuna-api";
+import {
+  ClientStub,
+  HakunaClient,
+  TimeEntryResponse,
+  TimerResponse,
+} from "./hakuna-api";
 import { parseDurationToSeconds, formatDuration } from "./duration";
 import { ProjectsList } from "./projects";
 import { getSettings } from "./settings";
 import Timer from "./timer";
 import TimeEntry from "./time-entry";
-import StartTimer from "./start-timer";
+import { todayLocalDate } from "./duration";
+
+function clientFromProject(client?: string | ClientStub): string | undefined {
+  if (!client) {
+    return undefined;
+  }
+
+  return typeof client === "object" ? client?.name : client;
+}
 
 function formatTime(time: string): string {
   return time.slice(0, 5);
@@ -27,11 +41,14 @@ function formatTime(time: string): string {
 function offsetDate(date: string, days: number): string {
   const d = new Date(date + "T00:00:00");
   d.setDate(d.getDate() + days);
-  return d.toISOString().split("T")[0];
+  const y = d.getFullYear();
+  const mo = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${mo}-${day}`;
 }
 
 function sumDurations(
-  entries: TimerResponse[],
+  entries: TimeEntryResponse[],
   timerElapsed: number,
   durationFormat: string,
 ): string {
@@ -56,7 +73,7 @@ function EntryDetail({
   entry,
   durationFormat,
 }: {
-  entry: TimerResponse;
+  entry: TimeEntryResponse;
   durationFormat: string;
 }) {
   const { push } = useNavigation();
@@ -90,9 +107,13 @@ function EntryDetail({
               />
               <List.Item.Detail.Metadata.TagList title="Customer">
                 <List.Item.Detail.Metadata.TagList.Item
-                  text={entry.project.client}
+                  text={clientFromProject(entry.project.client)}
                   onAction={() =>
-                    push(<ProjectsList initialClient={entry.project!.client} />)
+                    push(
+                      <ProjectsList
+                        initialClient={clientFromProject(entry.project!.client)}
+                      />,
+                    )
                   }
                 />
               </List.Item.Detail.Metadata.TagList>
@@ -130,31 +151,46 @@ function NavSection({
       <Action
         title="Previous Day"
         icon={Icon.ArrowLeft}
-        shortcut={{ modifiers: ["cmd"], key: "h" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "h" },
+          Windows: { modifiers: ["ctrl"], key: "h" },
+        }}
         onAction={onPrevDay}
       />
       <Action
         title="Next Day"
         icon={Icon.ArrowRight}
-        shortcut={{ modifiers: ["cmd"], key: "l" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "l" },
+          Windows: { modifiers: ["ctrl"], key: "l" },
+        }}
         onAction={onNextDay}
       />
       <Action
         title="Previous Week"
         icon={Icon.ArrowLeft}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "h" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "h" },
+        }}
         onAction={onPrevWeek}
       />
       <Action
         title="Next Week"
         icon={Icon.ArrowRight}
-        shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "l" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "l" },
+        }}
         onAction={onNextWeek}
       />
       <Action
         title="Go to Today"
         icon={Icon.Calendar}
-        shortcut={{ modifiers: ["cmd"], key: "0" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd"], key: "0" },
+          Windows: { modifiers: ["ctrl"], key: "0" },
+        }}
         onAction={onToday}
       />
     </ActionPanel.Section>
@@ -165,13 +201,11 @@ function EntryItem({
   entry,
   durationFormat,
   onDelete,
-  onUpdate,
   ...nav
 }: {
-  entry: TimerResponse;
+  entry: TimeEntryResponse;
   durationFormat: string;
   onDelete: (id: number) => Promise<void>;
-  onUpdate: (updated: TimerResponse) => void;
 } & NavProps) {
   const { push } = useNavigation();
   const title = entry.task?.name ?? "No task";
@@ -187,47 +221,31 @@ function EntryItem({
           <Action
             title="Edit Entry"
             icon={Icon.Pencil}
-            onAction={() =>
-              push(<TimeEntry entry={entry} onUpdate={onUpdate} />)
-            }
+            onAction={() => push(<TimeEntry timeEntry={entry} />)}
           />
           <Action
             title="Add Entry"
             icon={Icon.Plus}
-            shortcut={{ modifiers: ["cmd"], key: "n" }}
-            onAction={() =>
-              push(
-                <TimeEntry
-                  projectId={
-                    entry.project ? String(entry.project.id) : undefined
-                  }
-                  taskId={entry.task ? String(entry.task.id) : undefined}
-                  note={entry.note ?? undefined}
-                />,
-              )
-            }
+            shortcut={Keyboard.Shortcut.Common.New}
+            onAction={() => push(<TimeEntry timeEntry={entry} clone={true} />)}
           />
           <Action
             title="Start Timer"
             icon={Icon.Clock}
-            shortcut={{ modifiers: ["cmd"], key: "t" }}
-            onAction={() =>
-              push(
-                <StartTimer
-                  projectId={
-                    entry.project ? String(entry.project.id) : undefined
-                  }
-                  taskId={entry.task ? String(entry.task.id) : undefined}
-                  note={entry.note ?? undefined}
-                />,
-              )
-            }
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "t" },
+              Windows: { modifiers: ["ctrl"], key: "t" },
+            }}
+            onAction={() => push(<Timer timer={entry} />)}
           />
           <Action
             title="Delete Entry"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "backspace" },
+              Windows: { modifiers: ["ctrl"], key: "delete" },
+            }}
             onAction={async () => {
               const confirmed = await confirmAlert({
                 title: "Delete Time Entry",
@@ -306,7 +324,7 @@ function TimerItem({
                   />
                   <List.Item.Detail.Metadata.Label
                     title="Customer"
-                    text={timer.project.client}
+                    text={clientFromProject(timer.project?.client)}
                   />
                 </>
               )}
@@ -333,14 +351,20 @@ function TimerItem({
           <Action
             title="Stop Timer"
             icon={Icon.Stop}
-            shortcut={{ modifiers: ["cmd"], key: "return" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "return" },
+              Windows: { modifiers: ["ctrl"], key: "return" },
+            }}
             onAction={onStop}
           />
           <Action
             title="Cancel Timer"
             icon={Icon.Trash}
             style={Action.Style.Destructive}
-            shortcut={{ modifiers: ["cmd"], key: "backspace" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "backspace" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "delete" },
+            }}
             onAction={async () => {
               const confirmed = await confirmAlert({
                 title: "Cancel Timer",
@@ -403,30 +427,22 @@ function TimerSection({
 
 export default function Command() {
   const { push } = useNavigation();
-  const [todayStr, setTodayStr] = useState(
-    () => new Date().toISOString().split("T")[0],
-  );
+  const [todayStr, setTodayStr] = useState(() => todayLocalDate());
   const [date, setDate] = useState(todayStr);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(
-      () => setTodayStr(new Date().toISOString().split("T")[0]),
-      60_000,
-    );
+    const interval = setInterval(() => setTodayStr(todayLocalDate()), 60_000);
     return () => clearInterval(interval);
   }, []);
 
   const [isLoading, setIsLoading] = useState(true);
-  const [entries, setEntries] = useState<TimerResponse[]>([]);
+  const [entries, setEntries] = useState<TimeEntryResponse[]>([]);
   const [runningTimer, setRunningTimer] = useState<TimerResponse | null>(null);
   const [timerElapsed, setTimerElapsed] = useState(0);
   const { apiToken } = getSettings();
-  const api = new HakunaClient(apiToken);
-  const { data: company } = useCachedPromise(
-    (token: string) => new HakunaClient(token).getCompany(),
-    [apiToken],
-  );
+  const client = new HakunaClient(apiToken);
+  const { data: company } = useCachedPromise(() => client.getCompany(), []);
   const durationFormat = company?.duration_format ?? "hhmm";
 
   useEffect(() => {
@@ -436,8 +452,8 @@ export default function Command() {
     (async () => {
       try {
         const [fetchedEntries, fetchedTimer] = await Promise.all([
-          api.getTimeEntries(date),
-          api.getTimer(),
+          client.getTimeEntries(date),
+          client.getTimer(),
         ]);
         setEntries(fetchedEntries);
         setRunningTimer(fetchedTimer);
@@ -465,7 +481,7 @@ export default function Command() {
     tick();
     const interval = setInterval(tick, 500);
     return () => clearInterval(interval);
-  }, [runningTimer?.id]);
+  }, [runningTimer]);
 
   function reload() {
     setReloadKey((k) => k + 1);
@@ -489,7 +505,7 @@ export default function Command() {
 
   async function handleDelete(id: number) {
     try {
-      await api.deleteTimeEntry(id);
+      await client.deleteTimeEntry(id);
       setEntries((prev) => prev.filter((e) => e.id !== id));
       await showToast({ style: Toast.Style.Success, title: "Entry deleted" });
     } catch (error) {
@@ -501,13 +517,9 @@ export default function Command() {
     }
   }
 
-  function handleUpdate(updated: TimerResponse) {
-    setEntries((prev) => prev.map((e) => (e.id === updated.id ? updated : e)));
-  }
-
   async function handleStopTimer() {
     try {
-      const stopped = await api.stopTimer();
+      const stopped = await client.stopTimer();
       await showToast({
         style: Toast.Style.Success,
         title: `Timer stopped after ${stopped.duration}`,
@@ -524,7 +536,7 @@ export default function Command() {
 
   async function handleCancelTimer() {
     try {
-      await api.deleteTimer();
+      await client.deleteTimer();
       await showToast({ style: Toast.Style.Success, title: "Timer cancelled" });
       reload();
     } catch (error) {
@@ -564,7 +576,10 @@ export default function Command() {
               <Action
                 title="Start Timer"
                 icon={Icon.Clock}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={{
+                  macOS: { modifiers: ["cmd"], key: "t" },
+                  Windows: { modifiers: ["ctrl"], key: "t" },
+                }}
                 onAction={() => push(<Timer />)}
               />
               <NavSection {...nav} />
@@ -597,7 +612,6 @@ export default function Command() {
               entry={entry}
               durationFormat={durationFormat}
               onDelete={handleDelete}
-              onUpdate={handleUpdate}
               {...nav}
             />
           ))}
