@@ -22,7 +22,6 @@ import {
   Color,
   showInFinder,
   Form,
-  LocalStorage,
   useNavigation,
 } from "@raycast/api";
 import MessageComponent from "./message";
@@ -86,7 +85,7 @@ function NewCustomEmail({ update }) {
                 }
 
                 if (values.expiresNever) {
-                  await LocalStorage.setItem("expiry_time", null);
+                  await setNewExpiry(null);
                 }
                 showToast({
                   style: Toast.Style.Success,

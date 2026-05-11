@@ -42,9 +42,23 @@ export async function preprocessHtmlImages(html: string): Promise<PreprocessResu
       const base = Buffer.from(url).toString("base64").replace(/[/+=]/g, "_").slice(0, 80);
       try {
         let ext = extFromUrl(url);
-        const provisional = `${dir}/${base}${ext}`;
+        let cachedPath: string | undefined;
+        if (ext) {
+          const candidate = `${dir}/${base}${ext}`;
+          if (fs.existsSync(candidate)) cachedPath = candidate;
+        } else {
+          for (const knownExt of Object.values(CONTENT_TYPE_EXT)) {
+            const candidate = `${dir}/${base}${knownExt}`;
+            if (fs.existsSync(candidate)) {
+              cachedPath = candidate;
+              break;
+            }
+          }
+        }
 
-        if (!fs.existsSync(provisional)) {
+        if (cachedPath) {
+          urlToPath.set(url, cachedPath);
+        } else {
           const response = await axios.get(url, {
             responseType: "arraybuffer",
             timeout: 10000,
@@ -60,8 +74,6 @@ export async function preprocessHtmlImages(html: string): Promise<PreprocessResu
           const filePath = `${dir}/${base}${ext}`;
           fs.writeFileSync(filePath, Buffer.from(response.data));
           urlToPath.set(url, filePath);
-        } else {
-          urlToPath.set(url, provisional);
         }
       } catch {
         // download failed — original URL stays in the HTML as-is

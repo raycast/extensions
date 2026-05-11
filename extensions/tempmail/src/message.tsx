@@ -235,7 +235,8 @@ export default function MessageComponent({ id }: { id: string }) {
         const originalUrl = localToOriginal.get(fileUri);
         const escapedOriginal = originalUrl ? originalUrl.replace(/'/g, "\\'") : "";
         const fallback = originalUrl ? ` onerror="this.onerror=null;this.src='${escapedOriginal}'"` : "";
-        return `<img src="${fileUri}" alt="${alt}"${fallback} />`;
+        const escapedAlt = alt.replace(/"/g, "&quot;");
+        return `<img src="${fileUri}" alt="${escapedAlt}"${fallback} />`;
       });
 
       // replace inline attachments with images
