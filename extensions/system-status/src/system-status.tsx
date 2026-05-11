@@ -14,28 +14,9 @@ const execFileAsync = promisify(execFile);
 const REFRESH_INTERVAL_MS = 15_000;
 const CLOCK_TICK_MS = 1_000;
 
-type TimeFormat = "12h" | "24h-short" | "24h-long";
-type DateFormat =
-  | "D/MM/YYYY"
-  | "D/MM/YY"
-  | "D/M/YY"
-  | "D/M/YYYY"
-  | "DD/MM/YY"
-  | "DD/MM/YYYY"
-  | "DD-Mth-YY"
-  | "DD-Month-YYYY"
-  | "YYYY-MM-DD"
-  | "YY/MM/DD"
-  | "YYYY/MM/DD";
-type DateDetailFormat = "Day, D Month YYYY" | "D Month YYYY";
-
-type Preferences = {
-  showSeconds?: boolean;
-  detailViewMode?: "inline" | "subpage";
-  timeFormat?: TimeFormat;
-  dateFormat?: DateFormat;
-  dateDetailFormat?: DateDetailFormat;
-};
+type TimeFormat = Preferences["timeFormat"];
+type DateFormat = Preferences["dateFormat"];
+type DateDetailFormat = Preferences["dateDetailFormat"];
 
 type SystemSnapshot = {
   network: {
@@ -641,15 +622,15 @@ function pad(value: number, length = 2) {
 }
 
 function monthShort(now: Date) {
-  return new Intl.DateTimeFormat(undefined, { month: "short" }).format(now);
+  return new Intl.DateTimeFormat("en-US", { month: "short" }).format(now);
 }
 
 function monthLong(now: Date) {
-  return new Intl.DateTimeFormat(undefined, { month: "long" }).format(now);
+  return new Intl.DateTimeFormat("en-US", { month: "long" }).format(now);
 }
 
 function weekdayLong(now: Date) {
-  return new Intl.DateTimeFormat(undefined, { weekday: "long" }).format(now);
+  return new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(now);
 }
 
 function withTick(markdown: string, now: Date) {
@@ -801,7 +782,7 @@ function buildInternetDetail(snapshot: SystemSnapshot) {
 **Status:** Internet Access  
 **Type:** ${snapshot.network.type ?? "Unknown"}  
 **Gateway:** ${snapshot.network.gateway ?? "Unknown"}  
-**Signal Quality:** ${snapshot.network.signalQuality ?? "Unavailable"}%
+**Signal Quality:** ${snapshot.network.signalQuality != null ? `${snapshot.network.signalQuality}%` : "Unavailable"}
 
 ## Adapter
 ${snapshot.network.description ?? "Unknown"}
@@ -892,7 +873,7 @@ function LiveTimeDetailPage(props: { timeFormat: TimeFormat }) {
 }
 
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.SystemStatus>();
   const [snapshot, setSnapshot] = useState<SystemSnapshot | null>(null);
   const [now, setNow] = useState(() => new Date());
   const [isLoading, setIsLoading] = useState(true);
