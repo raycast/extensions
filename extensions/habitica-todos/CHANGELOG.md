@@ -1,11 +1,6 @@
 # Habitica Todos Changelog
 
-## [Create project and implement basic functionality] - 2026-04-01
-
-- Implement "View Todos" command
-- Implement "Create Todo" command
-
-## [Add more commands and improve UI] - 2026-05-12
+## [Add more commands and improve UI] - {PR_MERGE_DATE}
 
 - Add "View Dailies" command
 - Add "View Habits" command
@@ -13,3 +8,8 @@
 - Add "View Inventory" command
 - Add "View Shop" command
 - Improve UI with better icons and layouts
+
+## [Create project and implement basic functionality] - 2026-04-01
+
+- Implement "View Todos" command
+- Implement "Create Todo" command
