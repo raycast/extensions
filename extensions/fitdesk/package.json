@@ -4,8 +4,12 @@
   "description": "Micro-workouts to stay active while working",
   "icon": "extension-icon.png",
   "author": "rasheed_s",
+  "contributors": [
+    "pernielsentikaer"
+  ],
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Productivity",
