@@ -1,13 +1,14 @@
 import { showHUD, showToast, Toast } from "@raycast/api";
-import { getStatus, pauseSync } from "./lib/icloud";
+import { getStatusWithPid, pauseSync } from "./lib/icloud";
 
 export default async function Command() {
   try {
-    if ((await getStatus()) === "paused") {
+    const { status, pid } = await getStatusWithPid();
+    if (status === "paused") {
       await showHUD("iCloud sync already paused");
       return;
     }
-    await pauseSync();
+    await pauseSync(pid);
     await showHUD("iCloud sync paused");
   } catch (error) {
     await showToast({

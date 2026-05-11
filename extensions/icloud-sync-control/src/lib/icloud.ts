@@ -18,18 +18,17 @@ async function getBirdPid(): Promise<number> {
   }
 }
 
-export async function getStatus(): Promise<SyncStatus> {
+export async function getStatusWithPid(): Promise<{ status: SyncStatus; pid: number }> {
   const pid = await getBirdPid();
   const { stdout } = await execFileAsync("ps", ["-p", String(pid), "-o", "state="]);
-  return stdout.trim().startsWith("T") ? "paused" : "running";
+  const status: SyncStatus = stdout.trim().startsWith("T") ? "paused" : "running";
+  return { status, pid };
 }
 
-export async function pauseSync(): Promise<void> {
-  const pid = await getBirdPid();
+export async function pauseSync(pid: number): Promise<void> {
   process.kill(pid, "SIGSTOP");
 }
 
-export async function resumeSync(): Promise<void> {
-  const pid = await getBirdPid();
+export async function resumeSync(pid: number): Promise<void> {
   process.kill(pid, "SIGCONT");
 }
