@@ -226,7 +226,7 @@ export default function MessageComponent({ id }: { id: string }): React.ReactNod
         const attachmentID = attachmentString.substring(11);
         const attachment = new_data.attachments.find((attch) => attch.id == attachmentID);
 
-        return `${environment.supportPath}/temp/attachments/${attachment.id}_${attachment.filename}`.replace(
+        return `${environment.supportPath}/temp/attachments/${attachment.id}_${attachment.filename}`.replaceAll(
           " ",
           "%20"
         );
