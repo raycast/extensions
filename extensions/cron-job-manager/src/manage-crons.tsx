@@ -216,11 +216,11 @@ export default function ManageCrons() {
           title="Active Jobs"
           subtitle={`${enabledJobs.length} job${enabledJobs.length !== 1 ? "s" : ""}`}
         >
-          {enabledJobs.map((job, i) => {
+          {enabledJobs.map((job) => {
             const key = jobKey(job.schedule, job.command);
             return (
               <CronJobItem
-                key={i}
+                key={key}
                 job={job}
                 runState={runState[key]}
                 onDelete={handleDelete}
@@ -234,9 +234,9 @@ export default function ManageCrons() {
 
       {disabledJobs.length > 0 && (
         <List.Section title="Disabled Jobs" subtitle={`${disabledJobs.length}`}>
-          {disabledJobs.map((job, i) => (
+          {disabledJobs.map((job) => (
             <CronJobItem
-              key={i}
+              key={`disabled-${jobKey(job.schedule, job.command)}`}
               job={job}
               runState={undefined}
               onDelete={handleDelete}
@@ -252,9 +252,9 @@ export default function ManageCrons() {
           title="Environment Variables"
           subtitle={`${envVars.length}`}
         >
-          {envVars.map((job, i) => (
+          {envVars.map((job) => (
             <CronJobItem
-              key={i}
+              key={`env-${job.raw}`}
               job={job}
               runState={undefined}
               onDelete={handleDelete}

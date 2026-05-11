@@ -101,7 +101,7 @@ async function writeCrontab(lines: string[]): Promise<void> {
   // Remove trailing empty lines then add a newline at end
   const content = lines.join("\n").trimEnd() + "\n";
   const escaped = content.replace(/'/g, "'\\''");
-  await execAsync(`echo '${escaped}' | crontab -`);
+  await execAsync(`printf '%s' '${escaped}' | crontab -`);
 }
 
 export async function addCronJob(
@@ -118,6 +118,11 @@ export async function editCronJob(
   updated: Omit<CronJob, "raw" | "lineIndex" | "type" | "disabled">,
 ): Promise<void> {
   const lines = await getRawCrontab();
+  if (lines[original.lineIndex] !== original.raw) {
+    throw new Error(
+      "Crontab was modified externally — please refresh and try again",
+    );
+  }
   const newLine = buildLine(updated);
   lines[original.lineIndex] = newLine;
   await writeCrontab(lines);
@@ -125,6 +130,11 @@ export async function editCronJob(
 
 export async function deleteCronJob(job: CronJob): Promise<void> {
   const lines = await getRawCrontab();
+  if (lines[job.lineIndex] !== job.raw) {
+    throw new Error(
+      "Crontab was modified externally — please refresh and try again",
+    );
+  }
   lines.splice(job.lineIndex, 1);
   await writeCrontab(lines);
 }
