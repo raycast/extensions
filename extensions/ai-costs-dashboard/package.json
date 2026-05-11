@@ -1,0 +1,62 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-costs-dashboard",
+  "title": "AI Costs Dashboard",
+  "description": "Track local AI coding spend across Claude Code, Codex, and AMP — daily costs, model breakdowns, and budget at a glance.",
+  "icon": "icon.png",
+  "author": "dawidmatyjasik",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Data",
+    "Finance"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "claudeCostsDashboard",
+      "title": "Claude Costs",
+      "description": "Show Claude Code spending — daily costs, totals, and current billing block",
+      "mode": "view"
+    },
+    {
+      "name": "codexCostsDashboard",
+      "title": "Codex Costs",
+      "description": "Show Codex spending — daily costs and totals",
+      "mode": "view"
+    },
+    {
+      "name": "ampCostsDashboard",
+      "title": "AMP Costs",
+      "description": "Show AMP spending — daily costs and totals",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@ccusage/amp": "^18.0.11",
+    "@ccusage/codex": "^18.0.11",
+    "@raycast/api": "^1.104.15",
+    "@tanstack/react-query": "^5.100.9",
+    "@tanstack/react-query-persist-client": "^5.100.9",
+    "ccusage": "^18.0.11"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.5"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "prepare-ccusage-cli": "node scripts/prepare-ccusage-cli.mjs",
+    "build": "node scripts/prepare-ccusage-cli.mjs && ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  }
+}
