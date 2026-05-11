@@ -3,7 +3,11 @@ import { runAppleScript } from "@raycast/utils";
 
 export default async function command() {
   const { delay } = getPreferenceValues<Preferences.SendToPhotoMechanic>();
-  const delaySeconds = Math.min(30, Math.max(0.3, parseFloat(delay) || 0.7));
+  const parsed = parseFloat(delay);
+  const delaySeconds = Math.min(
+    30,
+    Math.max(0.3, isNaN(parsed) ? 0.7 : parsed),
+  );
 
   await showToast({
     style: Toast.Style.Animated,
