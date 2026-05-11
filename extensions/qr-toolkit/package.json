@@ -10,30 +10,6 @@
     "Productivity"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "language",
-      "title": "Language / 语言",
-      "description": "Display language for the extension",
-      "type": "dropdown",
-      "required": false,
-      "default": "auto",
-      "data": [
-        {
-          "title": "Auto Detect / 自动检测",
-          "value": "auto"
-        },
-        {
-          "title": "English",
-          "value": "en"
-        },
-        {
-          "title": "中文",
-          "value": "zh"
-        }
-      ]
-    }
-  ],
   "commands": [
     {
       "name": "decode",

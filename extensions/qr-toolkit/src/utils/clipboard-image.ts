@@ -13,6 +13,20 @@ import * as path from "path";
  * 2. Raw image pixel data (screenshots, "Copy Image" from browser) —
  *    extracted via AppleScript and written to a temp PNG.
  */
+const tmpFiles: string[] = [];
+
+/** Remove all temp files created by this module. */
+export function cleanupClipboardTempFiles(): void {
+  for (const f of tmpFiles) {
+    try {
+      fs.unlinkSync(f);
+    } catch {
+      // already removed
+    }
+  }
+  tmpFiles.length = 0;
+}
+
 export async function getClipboardImagePath(): Promise<string | null> {
   // Case 1: clipboard holds a file reference
   try {
@@ -48,6 +62,7 @@ export async function getClipboardImagePath(): Promise<string | null> {
     fs.writeFileSync(scriptFile, script);
     const result = execFileSync("osascript", [scriptFile], { encoding: "utf8" }).trim();
     if (result === "ok" && fs.existsSync(tmpImg)) {
+      tmpFiles.push(tmpImg);
       return tmpImg;
     }
   } catch {

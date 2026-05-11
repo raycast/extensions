@@ -120,14 +120,20 @@ function QRPreview({ params }: { params: QRParams }) {
   const markdown = `![QR Code](data:image/svg+xml;base64,${svgBase64})`;
 
   async function copyPNG() {
+    const tmpFile = path.join(os.tmpdir(), `qr-${Date.now()}.png`);
     try {
       const buf = await generatePNG(params.text, params.options);
-      const tmpFile = path.join(os.tmpdir(), `qr-${Date.now()}.png`);
       fs.writeFileSync(tmpFile, buf);
       await Clipboard.copy({ file: tmpFile });
       showHUD(t("generate_copied"));
     } catch (err) {
       showToast({ style: Toast.Style.Failure, title: t("generate_copy_failed"), message: String(err) });
+    } finally {
+      try {
+        fs.unlinkSync(tmpFile);
+      } catch {
+        // already removed
+      }
     }
   }
 

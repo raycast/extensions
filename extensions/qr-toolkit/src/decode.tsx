@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Form, Icon, open, showToast, Toast, useNavigation } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { getClipboardImagePath } from "./utils/clipboard-image";
+import { cleanupClipboardTempFiles, getClipboardImagePath } from "./utils/clipboard-image";
 import { decodeQR } from "./utils/decode-image";
 import { detectContent, QRContent, QRContentType } from "./utils/detect-content";
 import { t } from "./utils/i18n";
@@ -179,7 +179,10 @@ export default function DecodeCommand() {
           }
         });
       })
-      .finally(() => setIsLoading(false));
+      .finally(() => {
+        cleanupClipboardTempFiles();
+        setIsLoading(false);
+      });
   }, []);
 
   function handleSubmit() {
