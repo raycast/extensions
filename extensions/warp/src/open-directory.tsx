@@ -46,7 +46,10 @@ export default function Command() {
       }
 
       if (isWindows) {
+        setResults([]);
+        const thisAbort = abortable.current;
         const windowsResults = await searchDirectoriesWindows(searchText, maxResults);
+        if (thisAbort?.signal.aborted) return;
         setResults(windowsResults);
       } else {
         const spotlight = (await import("node-spotlight")).default;
