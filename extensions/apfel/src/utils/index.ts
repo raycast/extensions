@@ -12,4 +12,4 @@ export function chatTransformer(chat: Chat[]): Message[] {
   return messages;
 }
 
-export const escapeForShell = (s: string) => s.replace(/['"`]/g, "");
+export const escapeForShell = (s: string) => s.replace(/\\/g, "\\\\").replace(/'/g, "'\\''").replace(/["`]/g, "");

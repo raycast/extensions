@@ -16,6 +16,7 @@ export function useSavedChat(): SavedChatHook {
       }
 
       setLoading(false);
+      hasLoadedRef.current = true;
     })();
   }, []);
 

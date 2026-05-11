@@ -6,8 +6,8 @@ import { runAppleScript } from "@raycast/utils";
 export async function askApfel(prompt: string, model?: Model): Promise<string> {
   const args = [
     model?.prompt ? `-s '${escapeForShell(model.prompt)}'` : "",
-    model?.temperature ? `--temperature ${model.temperature}` : "",
-    model?.max_tokens ? `--max-tokens ${model.max_tokens}` : "",
+    model?.temperature ? `--temperature '${escapeForShell(model.temperature)}'` : "",
+    model?.max_tokens ? `--max-tokens '${escapeForShell(model.max_tokens)}'` : "",
     `'${escapeForShell(prompt)}'`,
   ].filter(Boolean);
 
