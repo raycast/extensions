@@ -7,11 +7,6 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 
-interface Preferences {
-  token: string;
-  username: string;
-}
-
 interface ContributionDay {
   date: string;
   contributionCount: number;
@@ -153,7 +148,7 @@ function calculateStreak(
 }
 
 export default function CommitStreak() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<Preferences.CommitStreak>();
   const [streak, setStreak] = useState<StreakResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
