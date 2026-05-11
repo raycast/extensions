@@ -10,6 +10,7 @@ import {
   Alert,
   useNavigation,
 } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
 import {
   countWorkflows,
   batchCancelWorkflows,
@@ -51,12 +52,17 @@ export default function BatchOperations() {
   const [reason, setReason] = useState("Batch operation via Raycast");
   const [previewCount, setPreviewCount] = useState<number | null>(null);
   const [queryError, setQueryError] = useState<string | undefined>();
+  const [initialized, setInitialized] = useState(false);
 
-  // Get clusters from preferences
-  const clusters = getClusters();
+  // Load clusters from storage
+  const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
+    keepPreviousData: true,
+  });
 
   // Fetch namespaces on mount and when cluster changes
   useEffect(() => {
+    if (clusters.length === 0) return;
+
     async function init() {
       // Initialize cluster
       const storedCluster = await getSelectedCluster();
@@ -83,9 +89,11 @@ export default function BatchOperations() {
       } catch {
         setNamespaces([{ name: cluster?.namespace || "default", state: "Registered" }]);
       }
+
+      setInitialized(true);
     }
     init();
-  }, []);
+  }, [clusters]);
 
   // Handle cluster change
   const handleClusterChange = useCallback(
@@ -258,7 +266,7 @@ export default function BatchOperations() {
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || clustersLoading || !initialized}
       navigationTitle="Batch Operations"
       actions={
         <ActionPanel>

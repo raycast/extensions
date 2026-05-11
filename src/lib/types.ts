@@ -10,29 +10,6 @@ export interface ClusterConfig {
   apiKey?: string; // Optional API key (for Temporal Cloud)
 }
 
-/**
- * Extension preferences
- */
-export interface Preferences {
-  clusters: string; // JSON array of ClusterConfig
-}
-
-/**
- * Parse clusters JSON from preferences
- */
-export function parseClusters(clustersJson: string): ClusterConfig[] {
-  try {
-    const clusters = JSON.parse(clustersJson) as ClusterConfig[];
-    // Validate and filter valid clusters
-    return clusters.filter(
-      (c) => c && typeof c.name === "string" && typeof c.url === "string" && c.name && c.url
-    );
-  } catch {
-    // Return default cluster if parsing fails
-    return [{ name: "Local", url: "http://localhost:8080", namespace: "default" }];
-  }
-}
-
 export type WorkflowStatus =
   | "RUNNING"
   | "COMPLETED"

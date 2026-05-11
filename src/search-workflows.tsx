@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { List, Icon, showToast, Toast } from "@raycast/api";
+import { List, Icon, Action, ActionPanel, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
   listWorkflows,
@@ -30,6 +30,7 @@ import {
   RecentWorkflow,
 } from "./lib/storage";
 import WorkflowActions from "./components/workflow-actions";
+import ManageConnections from "./manage-connections";
 
 const STATUS_FILTERS: { value: string; title: string }[] = [
   { value: "all", title: "All Statuses" },
@@ -48,11 +49,15 @@ export default function SearchWorkflows() {
   const [selectedNamespace, setSelectedNamespaceState] = useState<string>("");
   const [recentWorkflows, setRecentWorkflows] = useState<RecentWorkflow[]>([]);
 
-  // Get clusters from preferences
-  const clusters = getClusters();
+  // Load clusters from storage
+  const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
+    keepPreviousData: true,
+  });
 
   // Initialize cluster and namespace from storage
   useEffect(() => {
+    if (clusters.length === 0) return;
+
     async function init() {
       // Get stored cluster or use first one
       const storedCluster = await getSelectedCluster();
@@ -72,7 +77,7 @@ export default function SearchWorkflows() {
       setCurrentNamespace(ns);
     }
     init();
-  }, []);
+  }, [clusters]);
 
   // Fetch namespaces for selected cluster
   const {
@@ -192,7 +197,11 @@ export default function SearchWorkflows() {
   );
 
   const isLoading =
-    workflowsLoading || namespacesLoading || !selectedNamespace || !selectedClusterName;
+    clustersLoading ||
+    workflowsLoading ||
+    namespacesLoading ||
+    !selectedNamespace ||
+    !selectedClusterName;
 
   // Show recent workflows when search is empty and no status filter
   const showRecents = !searchText && statusFilter === "all" && recentWorkflows.length > 0;
@@ -222,6 +231,15 @@ export default function SearchWorkflows() {
           icon={Icon.ExclamationMark}
           title="Connection Error"
           description={`Could not connect to Temporal at ${getCurrentCluster().url}. Please check your settings.`}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Manage Connections"
+                icon={Icon.Gear}
+                target={<ManageConnections />}
+              />
+            </ActionPanel>
+          }
         />
       ) : !isLoading && workflows?.length === 0 && !showRecents ? (
         <List.EmptyView

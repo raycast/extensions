@@ -7,10 +7,7 @@
 
 /* eslint-disable @typescript-eslint/ban-types */
 
-type ExtensionPreferences = {
-  /** Clusters Configuration - JSON array of cluster configurations. Each cluster: {"name": "Display Name", "url": "http://localhost:8080", "namespace": "default", "apiKey": "optional-api-key"} */
-  "clusters": string
-}
+type ExtensionPreferences = {}
 
 /** Preferences accessible in all the extension's commands */
 declare type Preferences = ExtensionPreferences
@@ -28,6 +25,8 @@ declare namespace Preferences {
   export type SearchAttributes = ExtensionPreferences & {}
   /** Preferences accessible in the `batch-operations` command */
   export type BatchOperations = ExtensionPreferences & {}
+  /** Preferences accessible in the `manage-connections` command */
+  export type ManageConnections = ExtensionPreferences & {}
 }
 
 declare namespace Arguments {
@@ -43,5 +42,7 @@ declare namespace Arguments {
   export type SearchAttributes = {}
   /** Arguments passed to the `batch-operations` command */
   export type BatchOperations = {}
+  /** Arguments passed to the `manage-connections` command */
+  export type ManageConnections = {}
 }
 

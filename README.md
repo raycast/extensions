@@ -62,6 +62,12 @@ Search, view, and manage Temporal workflows directly from Raycast.
 - **Preview Count** - See how many workflows match before executing
 - **Example Queries** - Pre-built query templates for common operations
 
+### Manage Connections
+- **Add Connection** - Add new Temporal server connections with a form
+- **Edit Connection** - Modify existing connection settings
+- **Delete Connection** - Remove connections you no longer need
+- **Test Connection** - Verify connectivity and see available namespaces
+
 ## Commands
 
 | Command | Description |
@@ -72,76 +78,40 @@ Search, view, and manage Temporal workflows directly from Raycast.
 | Schedules | View and manage Temporal schedules |
 | Search Attributes | View system and custom search attributes |
 | Batch Operations | Cancel or terminate multiple workflows at once |
+| Manage Connections | Add, edit, and remove Temporal server connections |
 
 ## Configuration
 
-The extension uses a JSON array to configure one or more Temporal clusters. Each cluster can have:
+### Getting Started
+
+On first launch, a default "Local" connection is created pointing to `http://localhost:8080`. This works out of the box if you're running Temporal locally via Docker or the dev server.
+
+To configure your connections, use the **Manage Connections** command:
+
+1. Open Raycast and search for "Manage Connections"
+2. Add, edit, or remove Temporal server connections
+3. Test connections to verify they work
+
+### Connection Settings
+
+Each connection has the following fields:
 
 | Field | Required | Description |
 |-------|----------|-------------|
-| `name` | Yes | Display name for the cluster |
-| `url` | Yes | Temporal Web UI URL (used for API access) |
-| `namespace` | Yes | Default namespace for this cluster |
-| `apiKey` | No | API key for Temporal Cloud authentication |
+| Name | Yes | Display name (e.g., "Local Dev", "Production") |
+| URL | Yes | Temporal Web UI URL (used for API access) |
+| Namespace | Yes | Default namespace for this connection |
+| API Key | No | API key for Temporal Cloud authentication |
 
-### Single Cluster (Default)
+### Example URLs
 
-For a single local Temporal instance, use the default configuration:
+- **Docker (docker-compose):** `http://localhost:8080`
+- **Dev Server (`temporal server start-dev`):** `http://localhost:8233`
+- **Temporal Cloud:** `https://cloud.temporal.io`
 
-```json
-[{"name": "Local", "url": "http://localhost:8080", "namespace": "default"}]
-```
+### Multiple Connections
 
-### Multiple Clusters
-
-To connect to multiple Temporal environments:
-
-```json
-[
-  {"name": "Local Dev", "url": "http://localhost:8080", "namespace": "default"},
-  {"name": "Staging", "url": "https://staging.temporal.example.com", "namespace": "staging"},
-  {"name": "Production", "url": "https://prod.tmprl.cloud", "namespace": "prod.acme", "apiKey": "your-api-key"}
-]
-```
-
-When multiple clusters are configured, a cluster switcher appears in the dropdown menu.
-
-## Setup Examples
-
-### Docker (docker-compose)
-
-If you're running Temporal via Docker Compose:
-
-```json
-[{"name": "Docker", "url": "http://localhost:8080", "namespace": "default"}]
-```
-
-### Local Dev Server
-
-If you're using `temporal server start-dev`:
-
-```json
-[{"name": "Dev Server", "url": "http://localhost:8233", "namespace": "default"}]
-```
-
-### Temporal Cloud
-
-For Temporal Cloud:
-
-```json
-[{"name": "Cloud", "url": "https://cloud.temporal.io", "namespace": "your-namespace.your-account", "apiKey": "your-api-key"}]
-```
-
-### Mixed Environment (Local + Cloud)
-
-Common setup with both local development and cloud production:
-
-```json
-[
-  {"name": "Local", "url": "http://localhost:8080", "namespace": "default"},
-  {"name": "Production", "url": "https://cloud.temporal.io", "namespace": "prod.acme", "apiKey": "your-prod-api-key"}
-]
-```
+When you have multiple connections configured, a cluster switcher appears in the dropdown menu of all commands. You can quickly switch between Local, Staging, and Production environments.
 
 ## Keyboard Shortcuts
 

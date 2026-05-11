@@ -1,14 +1,13 @@
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { showToast, Toast } from "@raycast/api";
 import {
   ClusterConfig,
   HistoryEvent,
   NamespaceInfo,
-  parseClusters,
-  Preferences,
   ScheduleInfo,
   WorkflowInfo,
   WorkflowStatus,
 } from "./types";
+import { getClustersFromStorage } from "./storage";
 
 // Current cluster override (set by cluster switcher)
 let currentClusterOverride: ClusterConfig | null = null;
@@ -16,12 +15,26 @@ let currentClusterOverride: ClusterConfig | null = null;
 // Current namespace override (set by namespace switcher)
 let currentNamespaceOverride: string | null = null;
 
+// Cached clusters (loaded once per session)
+let cachedClusters: ClusterConfig[] | null = null;
+
 /**
- * Get all configured clusters from preferences
+ * Get all configured clusters
+ * Uses cache to avoid repeated LocalStorage reads
  */
-export function getClusters(): ClusterConfig[] {
-  const prefs = getPreferenceValues<Preferences>();
-  return parseClusters(prefs.clusters);
+export async function getClusters(): Promise<ClusterConfig[]> {
+  if (cachedClusters) {
+    return cachedClusters;
+  }
+  cachedClusters = await getClustersFromStorage();
+  return cachedClusters;
+}
+
+/**
+ * Invalidate clusters cache (call after add/edit/delete)
+ */
+export function invalidateClustersCache(): void {
+  cachedClusters = null;
 }
 
 /**
@@ -34,14 +47,18 @@ export function setCurrentCluster(cluster: ClusterConfig | null): void {
 }
 
 /**
- * Get the current cluster
+ * Get the current cluster (sync version using cache/override)
  */
 export function getCurrentCluster(): ClusterConfig {
   if (currentClusterOverride) {
     return currentClusterOverride;
   }
-  const clusters = getClusters();
-  return clusters[0] || { name: "Local", url: "http://localhost:8080", namespace: "default" };
+  // Use cached clusters if available
+  if (cachedClusters && cachedClusters.length > 0) {
+    return cachedClusters[0];
+  }
+  // Fallback default
+  return { name: "Local", url: "http://localhost:8080", namespace: "default" };
 }
 
 /**

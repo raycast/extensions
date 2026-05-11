@@ -70,11 +70,15 @@ export default function Dashboard() {
   const [selectedNamespace, setSelectedNamespaceState] = useState<string>("");
   const [timeRange, setTimeRange] = useState("24h");
 
-  // Get clusters from preferences
-  const clusters = getClusters();
+  // Load clusters from storage
+  const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
+    keepPreviousData: true,
+  });
 
   // Initialize cluster and namespace from storage
   useEffect(() => {
+    if (clusters.length === 0) return;
+
     async function init() {
       const storedCluster = await getSelectedCluster();
       const clusterName =
@@ -92,7 +96,7 @@ export default function Dashboard() {
       setCurrentNamespace(ns);
     }
     init();
-  }, []);
+  }, [clusters]);
 
   // Fetch namespaces for selected cluster
   const {
@@ -207,7 +211,11 @@ export default function Dashboard() {
   }, [revalidate]);
 
   const isLoading =
-    countsLoading || namespacesLoading || !selectedNamespace || !selectedClusterName;
+    clustersLoading ||
+    countsLoading ||
+    namespacesLoading ||
+    !selectedNamespace ||
+    !selectedClusterName;
   const total = counts
     ? counts.running +
       counts.completed +

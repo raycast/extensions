@@ -47,11 +47,15 @@ export default function SearchAttributes() {
   const [selectedNamespace, setSelectedNamespaceState] = useState<string>("");
   const [filter, setFilter] = useState<"all" | "system" | "custom">("all");
 
-  // Get clusters from preferences
-  const clusters = getClusters();
+  // Load clusters from storage
+  const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
+    keepPreviousData: true,
+  });
 
   // Initialize cluster and namespace from storage
   useEffect(() => {
+    if (clusters.length === 0) return;
+
     async function init() {
       const storedCluster = await getSelectedCluster();
       const clusterName =
@@ -69,7 +73,7 @@ export default function SearchAttributes() {
       setCurrentNamespace(ns);
     }
     init();
-  }, []);
+  }, [clusters]);
 
   // Fetch namespaces for selected cluster
   const {
@@ -146,7 +150,11 @@ export default function SearchAttributes() {
   );
 
   const isLoading =
-    attributesLoading || namespacesLoading || !selectedNamespace || !selectedClusterName;
+    clustersLoading ||
+    attributesLoading ||
+    namespacesLoading ||
+    !selectedNamespace ||
+    !selectedClusterName;
 
   const systemAttrs = attributes?.system || [];
   const customAttrs = attributes?.custom || [];

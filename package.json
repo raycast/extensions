@@ -44,16 +44,12 @@
       "title": "Batch Operations",
       "description": "Cancel or terminate multiple workflows at once",
       "mode": "view"
-    }
-  ],
-  "preferences": [
+    },
     {
-      "name": "clusters",
-      "title": "Clusters Configuration",
-      "description": "JSON array of cluster configurations. Each cluster: {\"name\": \"Display Name\", \"url\": \"http://localhost:8080\", \"namespace\": \"default\", \"apiKey\": \"optional-api-key\"}",
-      "type": "textfield",
-      "required": true,
-      "default": "[{\"name\": \"Local\", \"url\": \"http://localhost:8080\", \"namespace\": \"default\"}]"
+      "name": "manage-connections",
+      "title": "Manage Connections",
+      "description": "Add, edit, and remove Temporal server connections",
+      "mode": "view"
     }
   ],
   "dependencies": {

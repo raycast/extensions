@@ -38,11 +38,15 @@ export default function Schedules() {
   const [selectedClusterName, setSelectedClusterName] = useState<string>("");
   const [selectedNamespaceState, setSelectedNamespaceState] = useState<string>("");
 
-  // Get clusters from preferences
-  const clusters = getClusters();
+  // Load clusters from storage
+  const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
+    keepPreviousData: true,
+  });
 
   // Initialize cluster and namespace from storage
   useEffect(() => {
+    if (clusters.length === 0) return;
+
     async function init() {
       const storedCluster = await getSelectedCluster();
       const clusterName =
@@ -60,7 +64,7 @@ export default function Schedules() {
       setCurrentNamespace(ns);
     }
     init();
-  }, []);
+  }, [clusters]);
 
   // Fetch namespaces for selected cluster
   const {
@@ -146,7 +150,11 @@ export default function Schedules() {
   }, [revalidate]);
 
   const isLoading =
-    schedulesLoading || namespacesLoading || !selectedClusterName || !selectedNamespaceState;
+    clustersLoading ||
+    schedulesLoading ||
+    namespacesLoading ||
+    !selectedClusterName ||
+    !selectedNamespaceState;
   const namespace = getCurrentNamespace();
 
   return (

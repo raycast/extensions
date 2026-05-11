@@ -9,6 +9,7 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import {
   startWorkflow,
   getCurrentNamespace,
@@ -36,11 +37,15 @@ export default function StartWorkflow() {
   const [inputError, setInputError] = useState<string | undefined>();
   const [initialized, setInitialized] = useState(false);
 
-  // Get clusters from preferences
-  const clusters = getClusters();
+  // Load clusters from storage
+  const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
+    keepPreviousData: true,
+  });
 
   // Initialize cluster and namespace, then load last config
   useEffect(() => {
+    if (clusters.length === 0) return;
+
     async function init() {
       // Initialize cluster
       const storedCluster = await getSelectedCluster();
@@ -71,7 +76,7 @@ export default function StartWorkflow() {
       setInitialized(true);
     }
     init();
-  }, []);
+  }, [clusters]);
 
   const validateInput = (value: string) => {
     if (!value.trim()) {
@@ -173,7 +178,7 @@ export default function StartWorkflow() {
 
   return (
     <Form
-      isLoading={isLoading || !initialized}
+      isLoading={isLoading || clustersLoading || !initialized}
       navigationTitle="Start Workflow"
       actions={
         <ActionPanel>
