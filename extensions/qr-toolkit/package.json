@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "qr-toolkit",
+  "title": "QR Code Toolkit",
+  "description": "Decode QR codes from images and generate QR codes from text",
+  "icon": "extension-icon.png",
+  "author": "damon_lucas",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language / 语言",
+      "description": "Display language for the extension",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto Detect / 自动检测",
+          "value": "auto"
+        },
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "中文",
+          "value": "zh"
+        }
+      ]
+    }
+  ],
+  "commands": [
+    {
+      "name": "decode",
+      "title": "Decode QR Code",
+      "subtitle": "QR Toolkit",
+      "description": "Read QR code content from an image file or clipboard",
+      "mode": "view",
+      "keywords": ["scan", "read", "qr", "barcode", "image"]
+    },
+    {
+      "name": "generate",
+      "title": "Generate QR Code",
+      "subtitle": "QR Toolkit",
+      "description": "Create a QR code from text or URL",
+      "mode": "view",
+      "keywords": ["create", "make", "qr", "barcode", "encode"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "jimp": "^0.22.12",
+    "jsqr": "^1.4.0",
+    "qrcode": "^1.5.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.x",
+    "@types/qrcode": "^1.5.5",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, you can remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
