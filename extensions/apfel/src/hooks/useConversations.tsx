@@ -12,8 +12,9 @@ export function useConversations(): ConversationsHook {
 
       if (storedConversations) {
         setData((previous) => [...previous, ...JSON.parse(storedConversations)]);
-        setLoading(false);
       }
+
+      setLoading(false);
     })();
   }, []);
 

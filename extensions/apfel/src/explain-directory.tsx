@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Detail, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { execSync } from "child_process";
+import { spawnSync } from "child_process";
 import { readdirSync, statSync } from "fs";
 import { basename } from "path";
 import { v4 as uuidv4 } from "uuid";
@@ -46,8 +46,8 @@ function ExplainDirectory() {
     let gitBranch: string | null = null;
     let gitCommit: string | null = null;
     try {
-      gitBranch = execSync(`git -C "${path}" branch --show-current 2>/dev/null`, { encoding: "utf8" }).trim();
-      gitCommit = execSync(`git -C "${path}" log --oneline -1 2>/dev/null`, { encoding: "utf8" }).trim();
+      gitBranch = spawnSync("git", ["-C", path, "branch", "--show-current"], { encoding: "utf8" }).stdout.trim();
+      gitCommit = spawnSync("git", ["-C", path, "log", "--oneline", "-1"], { encoding: "utf8" }).stdout.trim();
     } catch {
       // ignore errors
     }
