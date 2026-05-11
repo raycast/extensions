@@ -31,7 +31,7 @@ function Translate() {
 
   const { isLoading, data: translated } = usePromise(
     async (text: string, from: string, to: string) => {
-      if (!text.trim()) return "";
+      if (!text.trim() || !to.trim()) return "";
 
       await showToast({ style: Toast.Style.Animated, title: "Getting your translation..." });
 
