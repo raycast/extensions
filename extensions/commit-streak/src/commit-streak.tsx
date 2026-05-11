@@ -16,6 +16,7 @@ interface StreakResult {
   hasCommitToday: boolean;
   streakAlive: boolean;
   count: number;
+  capped: boolean;
   todayCount: number;
   totalLastWeek: number;
 }
@@ -67,16 +68,6 @@ const CONTRIBUTIONS_QUERY = `
   }
 `;
 
-function getDateRange() {
-  const to = new Date();
-  const from = new Date();
-  from.setDate(from.getDate() - 364);
-  return {
-    from: from.toISOString(),
-    to: to.toISOString(),
-  };
-}
-
 function calculateStreak(
   weeks: { contributionDays: ContributionDay[] }[],
 ): StreakResult {
@@ -110,10 +101,12 @@ function calculateStreak(
       if (day.contributionCount > 0) streak++;
       else break;
     }
+    const capped = streak === allDays.length;
     return {
       hasCommitToday: true,
       streakAlive: true,
       count: streak,
+      capped,
       todayCount,
       totalLastWeek,
     };
@@ -124,10 +117,12 @@ function calculateStreak(
       if (day.contributionCount > 0) streak++;
       else break;
     }
+    const capped = streak === allDays.length - 1;
     return {
       hasCommitToday: false,
       streakAlive: true,
       count: streak,
+      capped,
       todayCount,
       totalLastWeek,
     };
@@ -141,6 +136,7 @@ function calculateStreak(
       hasCommitToday: false,
       streakAlive: false,
       count: snowflakeDays,
+      capped: false,
       todayCount,
       totalLastWeek,
     };
@@ -153,55 +149,71 @@ export default function CommitStreak() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  async function fetchYear(
+    from: Date,
+    to: Date,
+  ): Promise<{ contributionDays: ContributionDay[] }[]> {
+    const response = await fetch("https://api.github.com/graphql", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${preferences.token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        query: CONTRIBUTIONS_QUERY,
+        variables: {
+          username: preferences.username,
+          from: from.toISOString(),
+          to: to.toISOString(),
+        },
+      }),
+    });
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    const data = (await response.json()) as {
+      errors?: { message: string }[];
+      data?: {
+        user?: {
+          contributionsCollection?: {
+            contributionCalendar?: {
+              weeks: { contributionDays: ContributionDay[] }[];
+            };
+          };
+        };
+      };
+    };
+    if (data.errors)
+      throw new Error(data.errors[0]?.message ?? "Unknown error");
+    const weeks =
+      data.data?.user?.contributionsCollection?.contributionCalendar?.weeks;
+    if (!weeks)
+      throw new Error("Could not read contribution data. Check your username.");
+    return weeks;
+  }
+
   async function fetchContributions() {
     setIsLoading(true);
     setError(null);
 
     try {
-      const { from, to } = getDateRange();
+      let to = new Date();
+      let from = new Date();
+      from.setDate(from.getDate() - 364);
 
-      const response = await fetch("https://api.github.com/graphql", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${preferences.token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          query: CONTRIBUTIONS_QUERY,
-          variables: { username: preferences.username, from, to },
-        }),
-      });
+      let allWeeks = await fetchYear(from, to);
+      let result = calculateStreak(allWeeks);
 
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
+      while (result.capped) {
+        to = new Date(from);
+        to.setDate(to.getDate() - 1);
+        from = new Date(to);
+        from.setDate(from.getDate() - 364);
+        const prevWeeks = await fetchYear(from, to);
+        if (prevWeeks.length === 0) break;
+        allWeeks = [...prevWeeks, ...allWeeks];
+        result = calculateStreak(allWeeks);
       }
 
-      const data = (await response.json()) as {
-        errors?: { message: string }[];
-        data?: {
-          user?: {
-            contributionsCollection?: {
-              contributionCalendar?: {
-                weeks: { contributionDays: ContributionDay[] }[];
-              };
-            };
-          };
-        };
-      };
-
-      if (data.errors) {
-        throw new Error(data.errors[0]?.message ?? "Unknown error");
-      }
-
-      const weeks =
-        data.data?.user?.contributionsCollection?.contributionCalendar?.weeks;
-      if (!weeks) {
-        throw new Error(
-          "Could not read contribution data. Check your username.",
-        );
-      }
-
-      setStreak(calculateStreak(weeks));
+      setStreak(result);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
