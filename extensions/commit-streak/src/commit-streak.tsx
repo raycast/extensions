@@ -135,7 +135,7 @@ function calculateStreak(
     return {
       hasCommitToday: false,
       streakAlive: false,
-      count: snowflakeDays,
+      count: Math.max(snowflakeDays, 1),
       capped: false,
       todayCount,
       totalLastWeek,
