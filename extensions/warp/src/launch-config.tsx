@@ -35,7 +35,7 @@ const configFilePattern = isWindows ? /\.toml$/i : /\.ya?ml$/i;
 
 function parseConfigName(contents: string, filePath: string): string | null {
   if (isWindows) {
-    const match = contents.match(/^name\s*=\s*"(.+)"/m);
+    const match = contents.match(/^name\s*=\s*["'](.+?)["']/m);
     return match ? match[1] : null;
   }
   const yaml = YAML.parse(contents);
