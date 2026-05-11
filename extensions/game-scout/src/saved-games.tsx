@@ -583,11 +583,16 @@ function GameDetail({
               signal: abort.signal,
             },
           ),
-          fetch(
-            `https://api.isthereanydeal.com/games/history/v2?key=${API_KEY}&id=${gameId}&country=${COUNTRY}`,
-            { signal: abort.signal },
-          ),
         ];
+
+        if (SHOW_CHART) {
+          fetchPromises.push(
+            fetch(
+              `https://api.isthereanydeal.com/games/history/v2?key=${API_KEY}&id=${gameId}&country=${COUNTRY}`,
+              { signal: abort.signal },
+            ),
+          );
+        }
         const jsons = await Promise.all(
           (await Promise.all(fetchPromises)).map((r) => r.json()),
         );
