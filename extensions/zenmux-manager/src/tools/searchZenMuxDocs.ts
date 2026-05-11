@@ -227,7 +227,10 @@ async function fetchRuntimeDoc(
 
     const body = stripFrontmatter(await response.text()).trim();
     const fetchedAt = new Date().toISOString();
-    cache.set(cacheKey, JSON.stringify({ body, fetchedAt } satisfies CachedDoc));
+    cache.set(
+      cacheKey,
+      JSON.stringify({ body, fetchedAt } satisfies CachedDoc),
+    );
     return { ...doc, body, fetchedAt, source: "live" };
   } catch (error) {
     const cached = readCachedDoc(cacheKey);
@@ -309,7 +312,8 @@ function excerptBody(body: string): string {
   }
   const slice = body.slice(0, MAX_BODY_CHARS);
   const lastNewline = slice.lastIndexOf("\n");
-  const safeSlice = lastNewline > MAX_BODY_CHARS - 400 ? slice.slice(0, lastNewline) : slice;
+  const safeSlice =
+    lastNewline > MAX_BODY_CHARS - 400 ? slice.slice(0, lastNewline) : slice;
   return `${safeSlice}\n\n[... truncated; read full doc at the Source URL above ...]`;
 }
 

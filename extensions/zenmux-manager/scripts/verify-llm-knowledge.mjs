@@ -95,9 +95,9 @@ const docContracts = [
   {
     title: "Claude Code Integration",
     requires: [
-      'ANTHROPIC_BASE_URL=\\"https://zenmux.ai/api/anthropic\\"',
+      'ANTHROPIC_BASE_URL="https://zenmux.ai/api/anthropic"',
       "ANTHROPIC_AUTH_TOKEN",
-      'ANTHROPIC_API_KEY=\\"\\"',
+      'ANTHROPIC_API_KEY=""',
       "claude-sonnet-4-6",
       "/status",
       "v2.0.7x",
@@ -107,7 +107,7 @@ const docContracts = [
     title: "Codex Integration",
     requires: [
       "~/.codex/config.toml",
-      'wire_api = \\"responses\\"',
+      'wire_api = "responses"',
       "ZENMUX_API_KEY",
       "https://zenmux.ai/api/v1",
       "openai/gpt-5.2-codex",

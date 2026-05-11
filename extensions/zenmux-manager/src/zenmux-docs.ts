@@ -231,7 +231,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "Set a fallback model globally in the console or per request via `provider.fallback`. ZenMux retries with the fallback when the primary model returns 5xx, 401/403, 404, rate-limit, or timeout errors. Per-request configuration overrides the global setting.",
     url: "https://docs.zenmux.ai/guide/advanced/fallback",
     facts: [
-      "Per-request field: `provider.fallback: \"<model_slug>\"`.",
+      'Per-request field: `provider.fallback: "<model_slug>"`.',
       "Global setting: https://zenmux.ai/settings/strategy → Default Fallback Model.",
       "Trigger conditions: 5xx, timeouts, 401/403, 429 rate limits, 404 model not found, or all routing candidates failing.",
       "Only one level of fallback is applied; if the fallback model also fails, the error is returned.",
@@ -332,12 +332,12 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "sdk",
     ],
     summary:
-      "OpenAI-compatible Chat Completions endpoint. Use the OpenAI SDK with `base_url=\"https://zenmux.ai/api/v1\"` and any ZenMux model slug.",
+      'OpenAI-compatible Chat Completions endpoint. Use the OpenAI SDK with `base_url="https://zenmux.ai/api/v1"` and any ZenMux model slug.',
     url: "https://docs.zenmux.ai/api/openai/create-chat-completion",
     facts: [
       "Endpoint: `POST https://zenmux.ai/api/v1/chat/completions`.",
       "Auth header: `Authorization: Bearer $ZENMUX_API_KEY`.",
-      "OpenAI SDK config: `base_url=\"https://zenmux.ai/api/v1\"`, `api_key=\"<ZENMUX_API_KEY>\"`.",
+      'OpenAI SDK config: `base_url="https://zenmux.ai/api/v1"`, `api_key="<ZENMUX_API_KEY>"`.',
       "The `model` field takes a ZenMux slug, e.g. `openai/gpt-5.2`, `anthropic/claude-sonnet-4.5`, `google/gemini-2.5-pro`.",
     ],
     snippet: {
@@ -382,7 +382,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
     facts: [
       "Endpoint: `POST https://zenmux.ai/api/anthropic/v1/messages`.",
       "Auth header (raw HTTP): `x-api-key: $ZENMUX_API_KEY` and `anthropic-version: 2023-06-01`.",
-      "Anthropic SDK config: `base_url=\"https://zenmux.ai/api/anthropic\"`, `api_key=\"<ZENMUX_API_KEY>\"`.",
+      'Anthropic SDK config: `base_url="https://zenmux.ai/api/anthropic"`, `api_key="<ZENMUX_API_KEY>"`.',
       "Filter Anthropic-compatible models at https://zenmux.ai/models with the `Anthropic API Compatible` filter.",
     ],
   },
@@ -540,11 +540,11 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "Claude Code uses ZenMux's Anthropic-compatible endpoint via three shell-profile environment variables. Use a model API key (Subscription `sk-ss-v1-...` or PAYG `sk-ai-v1-...`), never a Platform/Management API key. Verify with `/status` inside Claude Code.",
     url: "https://docs.zenmux.ai/best-practices/claude-code",
     facts: [
-      "Required env: `ANTHROPIC_BASE_URL=\"https://zenmux.ai/api/anthropic\"`.",
-      "Required env: `ANTHROPIC_AUTH_TOKEN=\"sk-ss-v1-xxx\"` (Subscription) or `\"sk-ai-v1-xxx\"` (PAYG).",
-      "Required env: `ANTHROPIC_API_KEY=\"\"` (clear it to avoid conflict with prior Anthropic configs).",
-      "Optional model aliases: `ANTHROPIC_DEFAULT_HAIKU_MODEL=\"claude-haiku-4-5\"`, `ANTHROPIC_DEFAULT_SONNET_MODEL=\"claude-sonnet-4-6\"`, `ANTHROPIC_DEFAULT_OPUS_MODEL=\"claude-opus-4-7\"`. Using these alias forms (not `anthropic/claude-...`) is what enables 1M context and `effort` controls.",
-      "Optional tweaks: `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC=\"1\"`, `API_TIMEOUT_MS=\"30000000\"`.",
+      'Required env: `ANTHROPIC_BASE_URL="https://zenmux.ai/api/anthropic"`.',
+      'Required env: `ANTHROPIC_AUTH_TOKEN="sk-ss-v1-xxx"` (Subscription) or `"sk-ai-v1-xxx"` (PAYG).',
+      'Required env: `ANTHROPIC_API_KEY=""` (clear it to avoid conflict with prior Anthropic configs).',
+      'Optional model aliases: `ANTHROPIC_DEFAULT_HAIKU_MODEL="claude-haiku-4-5"`, `ANTHROPIC_DEFAULT_SONNET_MODEL="claude-sonnet-4-6"`, `ANTHROPIC_DEFAULT_OPUS_MODEL="claude-opus-4-7"`. Using these alias forms (not `anthropic/claude-...`) is what enables 1M context and `effort` controls.',
+      'Optional tweaks: `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC="1"`, `API_TIMEOUT_MS="30000000"`.',
       "Verify after launching: `/status` in Claude Code should show `Auth token: ANTHROPIC_AUTH_TOKEN` and `Anthropic base URL: https://zenmux.ai/api/anthropic`.",
       "As of Claude Code v2.0.7x, set the env vars in the shell profile (`~/.zshrc` or `~/.bashrc`); the `env` block in `~/.claude/settings.json` is not reliably read on first login or after logout.",
     ],
@@ -583,13 +583,13 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
     facts: [
       "Config file path: `~/.codex/config.toml` (create the directory with `mkdir -p ~/.codex` if missing).",
       "Env var name: `ZENMUX_API_KEY` (set in `~/.zshrc` or `~/.bashrc`). Do not use `OPENAI_API_KEY`.",
-      "Wire protocol: `wire_api = \"responses\"` (not Chat Completions).",
-      "Base URL: `base_url = \"https://zenmux.ai/api/v1\"`.",
+      'Wire protocol: `wire_api = "responses"` (not Chat Completions).',
+      'Base URL: `base_url = "https://zenmux.ai/api/v1"`.',
       "Recommended models for coding: `openai/gpt-5.2-codex`, `anthropic/claude-sonnet-4.5`, `x-ai/grok-code-fast-1`. Full list at https://zenmux.ai/models?sort=newest&supported_protocol=responses.",
     ],
     steps: [
       "Install Codex CLI: `pnpm install -g @openai/codex` (or `npm install -g @openai/codex`).",
-      "Add `export ZENMUX_API_KEY=\"sk-ai-v1-xxx\"` to your shell profile and reload it.",
+      'Add `export ZENMUX_API_KEY="sk-ai-v1-xxx"` to your shell profile and reload it.',
       "Create `~/.codex/config.toml` with the snippet below.",
       "Run `codex` in a project directory.",
     ],
@@ -598,7 +598,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       code: 'model_provider = "zenmux"\nmodel = "openai/gpt-5.2-codex"\n\n[model_providers.zenmux]\nname = "ZenMux"\nbase_url = "https://zenmux.ai/api/v1"\nenv_key = "ZENMUX_API_KEY"\nwire_api = "responses"',
     },
     warnings: [
-      "Do not set `wire_api = \"chat\"`; Codex requires the Responses protocol on ZenMux.",
+      'Do not set `wire_api = "chat"`; Codex requires the Responses protocol on ZenMux.',
       "Do not use a Platform/Management API key; account endpoints reject Codex traffic.",
     ],
   },
