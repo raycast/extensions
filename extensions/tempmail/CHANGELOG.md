@@ -1,6 +1,6 @@
 # TempMail Changelog
 
-## [Bug Fixes] - 2026-05-10
+## [Bug Fixes] - {PR_MERGE_DATE}
 
 - Fixed React hook violation that caused crashes for 694+ users when viewing emails (React errors #300/#310)
 - Fixed `quoted-printable` encoding error when downloading email attachments
