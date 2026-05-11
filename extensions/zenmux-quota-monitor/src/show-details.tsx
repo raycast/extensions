@@ -240,24 +240,28 @@ export default function Command() {
       <List.Section title="ZenMux Links">
         <ConsoleLinkItem
           title="Subscription Console"
+          icon={Icon.CreditCard}
           url="https://zenmux.ai/platform/subscription"
           snapshot={snapshot}
           onRefresh={() => void refresh(true)}
         />
         <ConsoleLinkItem
           title="PAYG Console"
+          icon={Icon.Wallet}
           url="https://zenmux.ai/platform/pay-as-you-go"
           snapshot={snapshot}
           onRefresh={() => void refresh(true)}
         />
         <ConsoleLinkItem
           title="Logs Console"
+          icon={Icon.List}
           url="https://zenmux.ai/platform/logs"
           snapshot={snapshot}
           onRefresh={() => void refresh(true)}
         />
         <ConsoleLinkItem
           title="Platform API Key"
+          icon={Icon.Key}
           url="https://zenmux.ai/platform/management"
           snapshot={snapshot}
           onRefresh={() => void refresh(true)}
@@ -305,12 +309,13 @@ function buildQuotaItem(
 function ConsoleLinkItem(props: {
   title: string;
   url: string;
+  icon: Icon;
   snapshot?: AccountSnapshot;
   onRefresh: () => void;
 }) {
   return (
     <List.Item
-      icon={Icon.Globe}
+      icon={props.icon}
       title={props.title}
       subtitle={props.url}
       accessories={[{ icon: Icon.ArrowNe }]}
@@ -340,39 +345,47 @@ function UsageActions(props: {
           url={props.primaryUrl}
         />
       ) : null}
-      <Action
-        title="Refresh"
-        icon={Icon.ArrowClockwise}
-        onAction={props.onRefresh}
-      />
-      <Action.CopyToClipboard
-        title="Copy Snapshot JSON"
-        icon={Icon.CopyClipboard}
-        content={JSON.stringify(props.snapshot ?? {}, null, 2)}
-      />
-      <ActionPanel.Section title="ZenMux">
+      <ActionPanel.Section title="Actions">
+        <Action
+          title="Refresh"
+          icon={Icon.ArrowClockwise}
+          onAction={props.onRefresh}
+        />
+        <Action.CopyToClipboard
+          title="Copy Snapshot JSON"
+          icon={Icon.CopyClipboard}
+          content={JSON.stringify(props.snapshot ?? {}, null, 2)}
+        />
+      </ActionPanel.Section>
+      <ActionPanel.Section title="ZenMux Console">
         <Action.OpenInBrowser
           title="Open Subscription Console"
+          icon={Icon.CreditCard}
           url="https://zenmux.ai/platform/subscription"
         />
         <Action.OpenInBrowser
           title="Open PAYG Console"
+          icon={Icon.Wallet}
           url="https://zenmux.ai/platform/pay-as-you-go"
         />
         <Action.OpenInBrowser
           title="Open Logs Console"
+          icon={Icon.List}
           url="https://zenmux.ai/platform/logs"
         />
         <Action.OpenInBrowser
           title="Open Platform API Console"
+          icon={Icon.Key}
           url="https://zenmux.ai/platform/management"
         />
       </ActionPanel.Section>
-      <Action
-        title="Configure Platform API Key"
-        icon={Icon.Gear}
-        onAction={() => void openExtensionPreferences()}
-      />
+      <ActionPanel.Section title="Settings">
+        <Action
+          title="Configure Platform API Key"
+          icon={Icon.Gear}
+          onAction={() => void openExtensionPreferences()}
+        />
+      </ActionPanel.Section>
     </ActionPanel>
   );
 }

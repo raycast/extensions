@@ -169,21 +169,27 @@ export default function Command() {
           onAction={() => void refresh(true)}
           shortcut={{ modifiers: ["cmd"], key: "r" }}
         />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section title="ZenMux Console">
         <MenuBarExtra.Item
           title="Open Subscription Console"
-          icon={Icon.Globe}
+          icon={Icon.CreditCard}
           onAction={() => void open("https://zenmux.ai/platform/subscription")}
         />
         <MenuBarExtra.Item
           title="Open PAYG Console"
-          icon={Icon.Globe}
+          icon={Icon.Wallet}
           onAction={() => void open("https://zenmux.ai/platform/pay-as-you-go")}
         />
         <MenuBarExtra.Item
           title="Open Logs Console"
-          icon={Icon.Globe}
+          icon={Icon.List}
           onAction={() => void open("https://zenmux.ai/platform/logs")}
         />
+      </MenuBarExtra.Section>
+
+      <MenuBarExtra.Section title="Settings">
         <MenuBarExtra.Submenu title="Menu Bar Display" icon={Icon.Gear}>
           <MenuBarDisplayItem
             title="5-hour Used"
@@ -212,7 +218,7 @@ export default function Command() {
         </MenuBarExtra.Submenu>
         <MenuBarExtra.Item
           title="Configure Platform API Key"
-          icon={Icon.Gear}
+          icon={Icon.Key}
           onAction={() => void openExtensionPreferences()}
         />
       </MenuBarExtra.Section>
