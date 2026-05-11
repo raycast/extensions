@@ -1,14 +1,11 @@
-import { getDefaultApplication, showToast, Toast, open } from "@raycast/api";
+import { getDefaultApplication, open } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 export default async function Command() {
   try {
     const browser = await getDefaultApplication("https://raycast.com");
     await open(browser.path);
   } catch (error) {
-    await showToast({
-      style: Toast.Style.Failure,
-      title: "Could not open browser",
-      message: String(error),
-    });
+    await showFailureToast(error, { title: "Could not open browser" });
   }
 }
