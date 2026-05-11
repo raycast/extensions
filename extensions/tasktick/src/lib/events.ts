@@ -58,7 +58,10 @@ export class EventsStream extends EventEmitter {
       }
     });
 
-    this.proc.on("exit", () => {
+    // Listen on "close" rather than "exit": when spawn itself fails
+    // (ENOENT, EACCES), Node emits "error" followed by "close" but NOT
+    // "exit", so the auto-reconnect timer would never arm for that case.
+    this.proc.on("close", () => {
       this.proc = null;
       if (this.killed) return;
       const backoff = Math.min(
