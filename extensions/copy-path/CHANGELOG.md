@@ -1,6 +1,6 @@
 # Copy Path Changelog
 
-## [Support QSpace Pro] - {PR_MERGE_DATE}
+## [Support QSpace Pro] - 2026-05-11
 
 - Support copying selected item paths and the current location from QSpace Pro.
 
