@@ -1,5 +1,9 @@
 # Google Calendar Changelog
 
+## [1.4.2] - 2026-04-09
+
+- Fix timezone offset calculation for half-hour timezones (e.g. IST +05:30) that caused events to be scheduled one hour off
+
 ## [1.4.1] - 2026-02-13
 
 - Add new command: create-quick-event – create Google Calendar events using a rule-based natural language parser (no AI setup required)

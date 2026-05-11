@@ -1,5 +1,29 @@
 # GitHub Changelog
 
+## [Download Repository Command] - 2026-04-28
+
+- Added "Download Repository" command to download an entire repository, a specific sub-directory, or a single file from a GitHub URL.
+- Reuses existing GitHub authentication for private repository access.
+- Streams the archive to disk and extracts only the requested directory for memory efficiency.
+
+## [Updated contributors list] - 2026-04-24
+
+- Added new contributor to the GitHub extension
+
+## [Add My GitHub Stats Menu Bar] - 2026-04-23
+
+- Added a new `My GitHub Stats Menu Bar` command that surfaces profile stats (Followers, Following, Stars Received, Forks Received, PRs Authored/Merged/Open, Issues Authored/Open, Commits in the last year, Public Repos, Organizations) directly in the macOS menu bar
+- Added a `Menu Bar Title` preference to choose which metric is shown next to the icon: Followers (default), Stars Received, Open PRs, Open Issues, or Icon only
+- Each item opens the relevant GitHub page (profile tabs, search queries, organizations) on click
+
+## [Fix PR List Accessories Alignment] - 2026-04-13
+
+- Pull Requests: Always show comment count (zero shown as dimmed) to prevent accessories from shifting
+- Pull Requests: Replace variable-length relative date with fixed `MMM dd` format (e.g. "Mar 30")
+- Pull Requests: Replace review decision text badges with compact icons to prevent truncation on long titles
+- Pull Requests: Add placeholder icon for rows without a review decision to keep CI check column aligned
+- Pull Requests: Add `showAuthor` prop to show author icon in Search and Repository views
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
@@ -21,8 +45,8 @@
 
 ## [Fix "Clone and Open" action when repository doesn't exist] - 2025-12-17
 
-* Fix the clone command to append the target directory only when it exists
-* Always show the "Clone with Options" action instead of conditionally
+- Fix the clone command to append the target directory only when it exists
+- Always show the "Clone with Options" action instead of conditionally
 
 ## [Moved Contributor] - 2025-12-10
 

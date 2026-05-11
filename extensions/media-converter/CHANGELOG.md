@@ -1,5 +1,54 @@
 # Media Converter Changelog
 
+## [1.6.1] - 2026-04-28
+
+### Fixed
+
+- **Convert Media** now reliably pre-fills the file picker with files selected in Finder, even when Raycast provides the Finder selection after the form initially renders. The same delayed prefill handling also applies to **Merge Media**.
+
+## [1.6.0] - 2026-04-27
+
+### Added
+
+- New command **Merge Media** to concatenate multiple video or audio files into a single file. Automatically uses fast FFmpeg stream-copy when all inputs share codec/resolution/fps/sample-rate; falls back to a full re-encode via the concat filter otherwise. A "Force re-encode" toggle is available.
+- New command **View Conversion History** showing your recent conversions grouped by day, with actions: Open file, Show in Finder, Re-run with same settings, Copy FFmpeg command, Remove, Clear all.
+- New command **Manage Presets** for browsing/creating/editing/deleting conversion presets. Ships with curated built-in presets: Web Image (WebP 80), Web Image (JPG 80), Email-friendly Video (MP4), WhatsApp Video (MP4), Podcast (MP3 192 VBR), Lossless Audio (FLAC), Twitter/X GIF, Voice Memo (M4A 96k).
+- In the Convert Media form:
+  - **Preset** dropdown (built-in + user presets filtered to the current file type) with a "Save Settings as Preset…" action (⌘S) that captures the current form state.
+  - **Trim** fields (Start / End) accepting `HH:MM:SS[.mmm]` or bare seconds, with validation and live preview of the resulting duration.
+  - **Save to** dropdown: same folder as input (default), preferences custom folder, or a per-run override folder.
+  - **Strip metadata** checkbox that wires `-map_metadata -1` through for video/audio/image (and a best-effort strip for HEIC via `sips`).
+  - Live progress percentage and ETA in the toast while converting videos or GIFs.
+  - Success toast now reports size savings, e.g. "saved 42.3 MB (58%)".
+- **Video → GIF** output. Select `.gif` when converting a video and choose fps, width, and loop behaviour. Uses FFmpeg's `palettegen` + `paletteuse` pipeline for clean, low-size GIFs.
+- New AI tool **Merge Media** (`merge-media`) and extended `convert-media` tool with `outputDir`, `stripMetadata`, `trimStart`, `trimEnd`, `presetId`, `gifFps`, `gifWidth`, `gifLoop` parameters.
+- New extension preferences:
+  - `Default GIF FPS`
+  - `Default GIF Width`
+  - `Default Output Location` (`Same folder as input` / `Custom folder`)
+  - `Custom Output Folder`
+  - `Strip Metadata By Default`
+
+### API Changes
+
+- `convertMedia` now takes an options bag as its fourth argument (`{ returnCommandString?, outputDir?, stripMetadata?, trim?, onProgress? }`) instead of a boolean. The simple 3-argument form still works with the same defaults.
+- Added `src/utils/ffmpegRun.ts` with `runFFmpegWithProgress` (spawns FFmpeg and streams `-progress pipe:1` updates back) and `probeDurationSec` (parses `ffmpeg -i` stderr).
+- Added `src/utils/convertBatch.ts` — shared batch orchestrator that owns history logging, size tracking, progress reporting, and the success summary toast. Consumed by both the Convert Media form and future programmatic callers.
+- Added `src/utils/history.ts`, `src/utils/presets.ts`, `src/utils/merge.ts`, `src/utils/time.ts`, `src/utils/format.ts`.
+- Extended `types/media.ts` with `GifQuality`, `TrimOptions`, `Preset`, `OutputGifExtension`, `OutputCategory`, and `getOutputCategory()`.
+- Built-in presets live in `src/config/built-in-presets.json`.
+
+### Fixed
+
+- **Audio-only merges** via the concat filter failed with `Stream specifier ':v:0' matches no streams` because the filter graph always requested a video stream, even for WAV/MP3/FLAC inputs. The re-encode merge now emits an audio-only filter graph when the output format is audio.
+
+### Tests
+
+- Added unit tests (Node's built-in test runner via `tsx`) covering time parsing, byte/size formatting, FFmpeg stdout/stderr parsers, merge stream-info helpers, media type helpers, and built-in preset validation.
+- Added `npm run test:smoke` — generates tiny fixtures with FFmpeg itself and exercises `convertMedia`/`mergeMedia` end-to-end (webm, GIF, trim, strip-metadata, stream-copy merge, re-encode merge, audio merge, progress callbacks).
+- Added `TESTING.md` with the manual UI checklist for every command.
+- Extended `ai.evals` with cases covering GIF parameters, trim, strip-metadata, audio merge, video merge, and the `forceReencode` flag.
+
 ## [1.5.4] - 2026-03-05
 
 ### Added

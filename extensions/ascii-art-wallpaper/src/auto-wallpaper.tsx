@@ -1,8 +1,8 @@
-import { ActionPanel, Action, Form, showToast, Toast, Icon, LocalStorage } from "@raycast/api";
-import { useState, useEffect } from "react";
-import { STORAGE_KEY, DEFAULTS, type AutoWallpaperSettings } from "./auto-settings";
+import { Action, ActionPanel, Form, Icon, LocalStorage, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
 import { fetchFeatured, getImageUrl } from "./api";
-import { imageToAscii, generateWallpaper, computeFillRows, getScreenResolution } from "./ascii";
+import { computeFillRows, generateWallpaper, getScreenResolution, imageToAscii } from "./ascii";
+import { type AutoWallpaperSettings, DEFAULTS, STORAGE_KEY, setAutoSettings } from "./auto-settings";
 import { setWallpaper } from "./wallpaper";
 
 export default function AutoWallpaper() {
@@ -38,7 +38,7 @@ export default function AutoWallpaper() {
       density: values.density,
     };
 
-    await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(newSettings));
+    await setAutoSettings(newSettings);
 
     const toast = await showToast({
       style: Toast.Style.Animated,

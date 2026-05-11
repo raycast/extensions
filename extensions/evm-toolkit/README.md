@@ -1,8 +1,19 @@
 # EVM Toolkit
 
-A [Raycast](https://raycast.com) extension for EVM power users. Copy an address, transaction hash, or block number into your clipboard and instantly open block explorers, read contract source code, check portfolio balances, look up wallet analytics, or simulate transactions across 24+ networks.
+A [Raycast](https://raycast.com) extension for EVM power users. Copy an address, transaction hash, or block number into your clipboard and instantly open block explorers, read contract source code, check portfolio balances, look up wallet analytics, or simulate transactions across 24+ networks. The **Open Commands** hub is the recommended entrypoint: pin it once and launch any tool in the extension from a single searchable list.
 
 ## Commands
+
+### Open Commands
+
+Opens a searchable list of every command in the extension, grouped by purpose (Explore, Intel, Profiles, Tools, Reference). This is the recommended entrypoint if you'd rather pin one command than a handful.
+
+1. Pin or favorite **Open Commands** in Raycast
+2. Trigger it and pick any command from the list
+3. Commands with a network selection open a form with an input field pre-filled from your clipboard (when it matches the expected format) and a network dropdown defaulting to your preferred network
+4. Commands without a network selection launch directly and read from your clipboard as usual
+
+The hub does not replace the individual commands. Every command is still available at the Raycast root. You can disable the ones you don't want in the root search via Extension preferences and keep the hub as your single entrypoint.
 
 ### Open Explorer
 
@@ -32,25 +43,57 @@ Opens a smart contract's source code in a web IDE via [deth.net](https://ethersc
 
 Only addresses are accepted (tx hashes and block numbers are rejected). Available on networks supported by deth.net: Mainnet, Base, Arbitrum, Polygon, Optimism, BSC, Avalanche, Gnosis, Blast, Sonic.
 
-### Open Profile
+### Open DeBank Profile
 
-Opens an account's portfolio page on [DeBank](https://debank.com/).
+Opens an address's portfolio page on [DeBank](https://debank.com/).
 
 1. Copy an address
-2. Trigger **Open Profile** in Raycast
+2. Trigger **Open DeBank Profile** in Raycast
 3. Press Enter
 
 Only addresses are accepted. Network-agnostic: DeBank covers all EVM chains automatically.
 
-### Open Intel
+### Open Zerion Profile
+
+Opens an address's portfolio page on [Zerion](https://zerion.io/).
+
+1. Copy an address
+2. Trigger **Open Zerion Profile** in Raycast
+3. Press Enter
+
+Only addresses are accepted. Network-agnostic: Zerion covers all EVM chains automatically.
+
+### Open Arkham Intel
 
 Opens an address's blockchain analytics on [Arkham Intel](https://intel.arkm.com/).
 
 1. Copy an address
-2. Trigger **Open Intel** in Raycast
+2. Trigger **Open Arkham Intel** in Raycast
 3. Press Enter
 
 Only addresses are accepted. Network-agnostic: Arkham covers all EVM chains automatically.
+
+### Open MetaSleuth Intel
+
+Opens an address's fund flow analysis on [MetaSleuth](https://metasleuth.io/).
+
+1. Copy an address
+2. Trigger **Open MetaSleuth Intel** in Raycast
+3. Optionally pick a network (defaults to Mainnet)
+4. Press Enter
+
+Only addresses are accepted. Supported networks: Mainnet, BSC, Arbitrum, Polygon, Optimism, Base, Linea, Avalanche, Mantle.
+
+### Open Bubblemaps Intel
+
+Opens a token's holder visualization on [Bubblemaps](https://bubblemaps.io/).
+
+1. Copy a token contract address
+2. Trigger **Open Bubblemaps Intel** in Raycast
+3. Optionally pick a network (defaults to Mainnet)
+4. Press Enter
+
+Only addresses are accepted. Supported networks: Mainnet, Base, BSC, Polygon, Avalanche.
 
 ### Open EIP
 

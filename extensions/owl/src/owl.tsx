@@ -17,6 +17,7 @@ import { callbackLaunchCommand, LaunchOptions } from "raycast-cross-extension";
 import { useCallback, useEffect, useMemo } from "react";
 import { ViewOWLAction } from "./components/ViewOWLAction";
 import { useCurrentLanguage } from "./hooks/languages";
+import { useInitializeOWLs } from "./hooks/useInitializeOWLs";
 import { OWL } from "./types/owl";
 import { UseOWLs, useOWLs } from "./utils/owl";
 
@@ -105,6 +106,8 @@ export default function OWLCommand({
   }>
 >) {
   const { callbackLaunchOptions } = launchContext;
+
+  useInitializeOWLs();
 
   const { value: currentLanguage, isLoading } = useCurrentLanguage();
   const { owls, pushHistory } = useOWLs();

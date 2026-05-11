@@ -1,0 +1,184 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bhagavad-gita-quotes",
+  "title": "Bhagavad Gita Quotes",
+  "version": "1.0.0",
+  "description": "Read and search Bhagavad Gita quotes (AI features require Raycast AI).",
+  "icon": "command-icon.png",
+  "author": "swayam_mehta",
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Read Quotes",
+      "subtitle": "Bhagavad Gita",
+      "description": "Read and search quotes from the Bhagavad Gita",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "colorScheme",
+      "type": "dropdown",
+      "required": false,
+      "title": "Color Scheme",
+      "description": "Choose your preferred color scheme for icons",
+      "default": "orange",
+      "data": [
+        {
+          "title": "Blue",
+          "value": "blue"
+        },
+        {
+          "title": "Green",
+          "value": "green"
+        },
+        {
+          "title": "Purple",
+          "value": "purple"
+        },
+        {
+          "title": "Orange (Default)",
+          "value": "orange"
+        },
+        {
+          "title": "Red",
+          "value": "red"
+        }
+      ]
+    },
+    {
+      "name": "showSanskrit",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show Sanskrit",
+      "description": "Display original Sanskrit verses when available",
+      "default": true,
+      "label": "Show Sanskrit verses"
+    },
+    {
+      "name": "apiSource",
+      "type": "dropdown",
+      "required": false,
+      "title": "API Source",
+      "description": "Select the source for Bhagavad Gita data",
+      "default": "vedic",
+      "data": [
+        {
+          "title": "Vedic Scriptures (No API Key Required)",
+          "value": "vedic"
+        },
+        {
+          "title": "RapidAPI (API Key Required)",
+          "value": "gita"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "RapidAPI Key",
+      "description": "Required only if using RapidAPI source"
+    },
+    {
+      "name": "translationLanguage",
+      "type": "dropdown",
+      "required": false,
+      "title": "AI Target Language",
+      "description": "Select the language for AI translations and explanations",
+      "default": "English",
+      "data": [
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Hindi",
+          "value": "Hindi"
+        },
+        {
+          "title": "Arabic",
+          "value": "Arabic"
+        },
+        {
+          "title": "Dutch",
+          "value": "Dutch"
+        },
+        {
+          "title": "Turkish",
+          "value": "Turkish"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.84.0",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.1.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "keywords": [
+    "bhagavad-gita",
+    "gita",
+    "quotes",
+    "spirituality",
+    "hinduism",
+    "verses"
+  ],
+  "categories": [
+    "Other"
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

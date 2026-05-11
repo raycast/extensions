@@ -6,6 +6,9 @@
   "description": "Privacy-first web analytics and link shortener. View websites, track visitors, and manage short links — all from Raycast.",
   "icon": "extension-icon.png",
   "author": "izadoesdev",
+  "contributors": [
+    "dominikdev"
+  ],
   "platforms": [
     "macOS",
     "Windows"

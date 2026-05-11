@@ -1,6 +1,10 @@
 # Zen Changelog
 
-## [Add Kagi Search Engine] - {PR-MERGE-DATE}
+## [Fix Bookmark and History Search When Zen Is Running] - {PR-MERGE-DATE}
+
+- Bumped `@raycast/utils` from `^2.2.0` to `^2.2.3` to pick up the fix for `useSQL` not falling back to a DB copy when `node:sqlite` reports `errcode: 5` ("database is locked"). Previously, searching bookmarks or history while Zen was running surfaced "Cannot query the data — database is locked" because the lock detector only matched error message text containing `(5)`/`(14)`, which the native `node:sqlite` path does not produce.
+
+## [Add Kagi Search Engine] - 2026-04-23
 
 - Added Kagi as a search engine option in the extension preferences.
 

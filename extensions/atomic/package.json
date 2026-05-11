@@ -44,5 +44,8 @@
       "placeholder": "e.g. https://atomicdata.dev",
       "default": "https://atomicdata.dev"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

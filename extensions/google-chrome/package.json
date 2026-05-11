@@ -420,7 +420,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/utils": "^2.2.4",
     "run-applescript": "^7.1.0",
     "sql.js": "^1.13.0"
   },

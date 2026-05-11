@@ -1,5 +1,11 @@
 # Google Chrome Profiles Changelog
 
+## [Feature] - 2026-04-08
+
+- Add "New Window" action to open a new Chrome window for a profile
+- Available from the profile list via `⌘ ⇧ ↵` or from within a profile's bookmarks view
+- Opens directly via CLI without focusing existing windows (tiling WM friendly)
+
 ## [Feature] - 2026-03-12
 
 - Add Google Chrome Canary support via a new Browser preference dropdown

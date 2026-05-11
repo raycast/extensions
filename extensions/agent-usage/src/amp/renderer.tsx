@@ -12,6 +12,22 @@ import {
 
 type Preferences = Preferences.AgentUsage;
 
+function getReplenishInfo(usage: AmpUsage): { timeText: string; hoursUntil: number } | null {
+  if (!usage.ampFree.replenishRate) return null;
+  const replenishValue = parseFloat(usage.ampFree.replenishRate.replace(/[^0-9.]/g, ""));
+  if (replenishValue <= 0) return null;
+  const remainingToFull = usage.ampFree.total - (usage.ampFree.total - usage.ampFree.used);
+  if (remainingToFull <= 0) return null;
+  const hoursToFull = remainingToFull / replenishValue;
+  const totalMinutes = Math.ceil(hoursToFull * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  let timeText = "";
+  if (hours > 0) timeText += `${hours}h `;
+  if (minutes > 0 || hours === 0) timeText += `${minutes}m`;
+  return { timeText: timeText.trim(), hoursUntil: hoursToFull };
+}
+
 export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | null): string {
   const fallback = formatErrorOrNoData("Amp", usage, error);
   if (fallback !== null) return fallback;
@@ -26,19 +42,9 @@ export function formatAmpUsageText(usage: AmpUsage | null, error: AmpError | nul
   text += `\n${generateAsciiBar(ampFreePercent)}`;
   if (ampFree.replenishRate) {
     text += `\nReplenish Rate: +${ampFree.replenishRate}`;
-    const replenishValue = parseFloat(ampFree.replenishRate.replace(/[^0-9.]/g, ""));
-    if (replenishValue > 0) {
-      const remainingToFull = ampFree.total - ampFreeRemaining;
-      if (remainingToFull > 0) {
-        const hoursToFull = remainingToFull / replenishValue;
-        const totalMinutes = Math.ceil(hoursToFull * 60);
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        let timeText = "";
-        if (hours > 0) timeText += `${hours}h `;
-        if (minutes > 0 || hours === 0) timeText += `${minutes}m`;
-        text += `\nResets In: ${timeText.trim()}`;
-      }
+    const replenishInfo = getReplenishInfo(u);
+    if (replenishInfo) {
+      text += `\nResets In: ${replenishInfo.timeText}`;
     }
   }
   if (ampFree.bonus) text += `\nBonus: ${ampFree.bonus.replace(/\s+more\s+days?/, "d")}`;
@@ -68,18 +74,9 @@ export function renderAmpDetail(usage: AmpUsage | null, error: AmpError | null):
         <List.Item.Detail.Metadata.Label title="Replenish Rate" text={`+${ampFree.replenishRate}`} />
       )}
       {(() => {
-        const replenishValue = ampFree.replenishRate ? parseFloat(ampFree.replenishRate.replace(/[^0-9.]/g, "")) : 0;
-        if (replenishValue <= 0) return null;
-        const remainingToFull = ampFree.total - ampFreeRemaining;
-        if (remainingToFull <= 0) return null;
-        const hoursToFull = remainingToFull / replenishValue;
-        const totalMinutes = Math.ceil(hoursToFull * 60);
-        const hours = Math.floor(totalMinutes / 60);
-        const minutes = totalMinutes % 60;
-        let timeText = "";
-        if (hours > 0) timeText += `${hours}h `;
-        if (minutes > 0 || hours === 0) timeText += `${minutes}m`;
-        return <List.Item.Detail.Metadata.Label title="Resets In" text={timeText.trim()} />;
+        const replenishInfo = getReplenishInfo(u);
+        if (!replenishInfo) return null;
+        return <List.Item.Detail.Metadata.Label title="Resets In" text={replenishInfo.timeText} />;
       })()}
       {ampFree.bonus && (
         <List.Item.Detail.Metadata.Label title="Bonus" text={ampFree.bonus.replace(/\s+more\s+days?/, "d")} />

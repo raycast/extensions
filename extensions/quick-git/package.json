@@ -44,10 +44,12 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/utils": "^2.2.2",
+    "ini": "^6.0.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
+    "@types/ini": "^4.1.1",
     "@types/node": "22.14.0",
     "@types/react": "19.1.10",
     "eslint": "^9.39.2",

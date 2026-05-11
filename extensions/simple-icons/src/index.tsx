@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import process from "node:process";
 import { setTimeout } from "node:timers/promises";
 import {
   Action,
@@ -173,12 +172,7 @@ export default function Command({ launchContext }: LaunchProps<{ launchContext?:
                       title="See Detail"
                       target={
                         <Detail
-                          markdown={
-                            process.platform === "darwin"
-                              ? `<img src="${fileLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${icon.hex}" />`
-                              : // [TODO] Windows does not support tinting images via URL parameters
-                                `<img src="${fileLink}?raycast-width=325&raycast-height=325" />`
-                          }
+                          markdown={`<img src="${fileLink}?raycast-width=325&raycast-height=325&raycast-tint-color=${encodeURIComponent(`#${icon.hex}`)}" />`}
                           navigationTitle={icon.title}
                           metadata={
                             <Detail.Metadata>

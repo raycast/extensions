@@ -1,5 +1,11 @@
 # Clockify Changelog
 
+## [Enhanced Menu Bar Features] - 2026-04-10
+
+- Added quick timer restart from up to 5 recent unique entries when no timer is active
+- Added today's total tracked time display per project while a timer is running
+- Updated time interval type to support active timers
+
 ## [Add menu bar timer] - 2026-01-16
 
 - Added a menu bar command that shows the current timer counting up.

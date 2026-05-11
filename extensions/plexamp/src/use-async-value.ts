@@ -28,12 +28,10 @@ interface AsyncValueState<T> {
 }
 
 export function useAsyncValue<T>(loader: () => Promise<T>, dependencyKey: string, initialValue: T, cacheKey?: string) {
-  const cached = cacheKey ? readCache<T>(cacheKey) : undefined;
-
-  const [state, setState] = useState<AsyncValueState<T>>({
+  const [state, setState] = useState<AsyncValueState<T>>(() => ({
     isLoading: true,
-    value: cached ?? initialValue,
-  });
+    value: (cacheKey ? readCache<T>(cacheKey) : undefined) ?? initialValue,
+  }));
   const loaderRef = useRef(loader);
   const initialValueRef = useRef(initialValue);
   const cacheKeyRef = useRef(cacheKey);

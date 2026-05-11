@@ -1,7 +1,7 @@
 import { List } from "@raycast/api";
 import { CodexUsage, CodexError } from "./types";
 import type { Accessory } from "../agents/types";
-import { formatDuration } from "./fetcher";
+import { formatDuration } from "../agents/format";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,

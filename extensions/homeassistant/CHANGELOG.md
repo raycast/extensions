@@ -1,5 +1,9 @@
 # Home Assistant Changelog
 
+## [Update] - 2026-04-20
+
+- Add custom headers on all request
+
 ## [Update] - 2026-03-24
 
 - Show entity area/room names as subtitles in entity lists

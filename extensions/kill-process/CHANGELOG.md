@@ -1,5 +1,9 @@
 # Kill Process Changelog
 
+## [Added Restart Action] - 2026-04-08
+
+- Added `Restart` and `Force Restart` actions for restartable processes
+
 ## [Added Kill All action] - 2026-04-01
 
 - Added action to kill all processes with the same name

@@ -12,21 +12,25 @@ import {
 } from "@raycast/api";
 
 import path from "path";
+import { platform } from "os";
 import { useState } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { GetInstalledBrowsers } from "get-installed-browsers";
-import { GitRepo, tildifyPath, GitRepoService, GitRepoType } from "./utils";
+import { GitRepo, tildifyPath, GitRepoService, GitRepoType, Platform } from "./utils";
 import { useUsageBasedSort } from "./hooks/useUsageBasedSort";
 
-const installedBrowsers = GetInstalledBrowsers().map(
-  // Safari gets found in /Applications here but actually exists in
+const installedBrowsers = GetInstalledBrowsers().map((browser) => {
+  if (platform() === Platform.Windows) {
+    return path.basename(browser.path);
+  }
+  // On macOS, Safari gets found in /Applications here but actually exists in
   // /System/Volumes/Preboot/Cryptexes/App/System/Applications, so strip the
-  // rest of the path for all browsers
-  (browser) => path.basename(path.dirname(path.dirname(path.dirname(browser.path)))),
-);
+  // rest of the path for all browsers to get the .app bundle name
+  return path.basename(path.dirname(path.dirname(path.dirname(browser.path))));
+});
 
 export default function Command() {
-  const preferences = getPreferenceValues<ExtensionPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const gitReposState = useCachedPromise(GitRepoService.gitRepos);
   const favoriteGitReposState = useCachedPromise(GitRepoService.favorites);
 
@@ -80,7 +84,7 @@ export default function Command() {
 }
 
 function GitRepoListItem(props: {
-  preferences: ExtensionPreferences;
+  preferences: Preferences;
   repo: GitRepo;
   isFavorite: boolean;
   revalidate: () => void;
@@ -151,8 +155,8 @@ function GitRepoListItem(props: {
               onAction={() => {
                 // checking for app != null to not open in default app
                 function openIn(application?: Application) {
-                  if (application?.bundleId) {
-                    open(getTarget(repo, application), application.bundleId);
+                  if (application) {
+                    open(getTarget(repo, application), application);
                   }
                 }
                 // awaiting all opens doesn't seem to work
@@ -315,7 +319,7 @@ function GitRepoOpenAction(props: {
       title={`Open in ${props.openWith.name}`}
       icon={{ fileIcon: props.openWith.path }}
       target={`${getTarget(props.repo, props.openWith)}`}
-      application={props.openWith.bundleId}
+      application={props.openWith}
       shortcut={props.shortcut}
       onOpen={() => props.recordUsageHook?.(props.repo.name)}
     />

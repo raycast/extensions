@@ -6,13 +6,18 @@ import { useSortedSpaces } from "../hooks/use-sorted-spaces.hook";
 import { useEnabledSpaces } from "../hooks/use-enabled-spaces.hook";
 import { useMe } from "../hooks/use-me.hook";
 import { trpc } from "../utils/trpc.util";
+import { useCachedState } from "@raycast/utils";
+import { CACHED_KEY_SESSION_TOKEN } from "../utils/constants.util";
 
 function Body() {
+  const [sessionToken] = useCachedState(CACHED_KEY_SESSION_TOKEN, "");
   const { data, isFetching, refetch: refetchMe, isLoading } = useMe();
   const spaces = useSortedSpaces(data?.associatedSpaces);
   const { enabledSpaceIds, confirmAndToggleEnableDisableSpace } = useEnabledSpaces();
   const { data: authenticatedSpaceIds, refetch: refetchAuthenticatedSpaceIds } =
-    trpc.spaceAuth.listAuthenticatedSpaceIds.useQuery();
+    trpc.spaceAuth.listAuthenticatedSpaceIds.useQuery(undefined, {
+      enabled: !!sessionToken,
+    });
 
   const refetch = async () => {
     await Promise.all([refetchMe(), refetchAuthenticatedSpaceIds()]);

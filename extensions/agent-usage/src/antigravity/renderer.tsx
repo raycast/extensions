@@ -46,10 +46,28 @@ export function renderAntigravityDetail(
       <List.Item.Detail.Metadata.Label title="Plan" text={u.accountPlan || "Unknown"} />
       <List.Item.Detail.Metadata.Separator />
       {renderModelMetadata("Primary", u.primaryModel)}
-      <List.Item.Detail.Metadata.Separator />
-      {renderModelMetadata("Secondary", u.secondaryModel)}
-      <List.Item.Detail.Metadata.Separator />
-      {renderModelMetadata("Tertiary", u.tertiaryModel)}
+      {u.secondaryModel != null && (
+        <>
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Secondary Model" text={u.secondaryModel.label} />
+          <List.Item.Detail.Metadata.Label
+            title="Remaining"
+            text={`${generateAsciiBar(u.secondaryModel.percentLeft)} ${u.secondaryModel.percentLeft}% remaining`}
+          />
+          <List.Item.Detail.Metadata.Label title="Resets In" text={u.secondaryModel.resetsIn} />
+        </>
+      )}
+      {u.tertiaryModel != null && (
+        <>
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Tertiary Model" text={u.tertiaryModel.label} />
+          <List.Item.Detail.Metadata.Label
+            title="Remaining"
+            text={`${generateAsciiBar(u.tertiaryModel.percentLeft)} ${u.tertiaryModel.percentLeft}% remaining`}
+          />
+          <List.Item.Detail.Metadata.Label title="Resets In" text={u.tertiaryModel.resetsIn} />
+        </>
+      )}
     </List.Item.Detail.Metadata>
   );
 }

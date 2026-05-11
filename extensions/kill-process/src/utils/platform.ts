@@ -7,6 +7,7 @@ import { Process } from "../types";
 export const platform = process.platform;
 export const isMac = platform === "darwin";
 export const isWindows = platform === "win32";
+type ProcessAction = "kill" | "restart";
 
 /**
  * Encode a PowerShell script to Base64 for safe execution via -EncodedCommand
@@ -14,6 +15,14 @@ export const isWindows = platform === "win32";
  */
 function encodePowerShellCommand(script: string): string {
   return Buffer.from(script, "utf16le").toString("base64");
+}
+
+function quotePosixShellArgument(value: string): string {
+  return `'${value.replace(/'/g, "'\\''")}'`;
+}
+
+function escapePowerShellSingleQuotedString(value: string): string {
+  return value.replace(/'/g, "''");
 }
 
 /**
@@ -84,6 +93,28 @@ export function getKillCommand(pid: number, force = false): string {
   return force ? `zsh -c 'sudo kill -9 ${pid}'` : `kill -9 ${pid}`;
 }
 
+export function getKillTreeCommand(pid: number, force = false): string {
+  if (isWindows) {
+    return force ? `taskkill /F /T /PID ${pid}` : `taskkill /T /PID ${pid}`;
+  }
+
+  const signal = force ? "-9" : "-TERM";
+  const killCommand = force ? "sudo kill" : "kill";
+  const script = `
+kill_tree() {
+  local target_pid="$1"
+  local child_pid
+  for child_pid in $(pgrep -P "$target_pid"); do
+    kill_tree "$child_pid"
+  done
+  ${killCommand} ${signal} "$target_pid" 2>/dev/null || true
+}
+kill_tree ${pid}
+`;
+
+  return `zsh -c ${quotePosixShellArgument(script)}`;
+}
+
 /**
  * Get command to kill all processes matching a name.
  *
@@ -103,6 +134,91 @@ export function getKillAllCommand(processName: string, force = false): string {
   }
   const escaped = processName.replace(/'/g, "'\\''");
   return force ? `PROC_NAME='${escaped}' zsh -c 'sudo killall "$PROC_NAME"'` : `killall '${escaped}'`;
+}
+
+function getMacBundlePath(path: string, extension: ".app" | ".prefPane"): string | null {
+  const bundlePath = path.match(new RegExp(`(.+\\${extension})(?:\\/.*)?$`))?.[1];
+  return bundlePath ?? null;
+}
+
+export function getRestartLaunchPath(process: Process): string | null {
+  const path = process.path.trim();
+  if (!path || path === "-") {
+    return null;
+  }
+
+  if (isMac) {
+    if (process.type === "app" || process.type === "aggregatedApp") {
+      return getMacBundlePath(path, ".app") ?? path;
+    }
+
+    if (process.type === "prefPane") {
+      return getMacBundlePath(path, ".prefPane") ?? path;
+    }
+
+    return path.startsWith("/") ? path : null;
+  }
+
+  if (isWindows) {
+    return path;
+  }
+
+  return null;
+}
+
+export function hasRestartLaunchPath(process: Process): boolean {
+  return getRestartLaunchPath(process) !== null;
+}
+
+export function getRestartCommand(process: Process): string | null {
+  const launchPath = getRestartLaunchPath(process);
+  if (!launchPath) {
+    return null;
+  }
+
+  if (isMac) {
+    if (process.type === "app" || process.type === "aggregatedApp" || process.type === "prefPane") {
+      return `open ${quotePosixShellArgument(launchPath)}`;
+    }
+
+    return `nohup ${quotePosixShellArgument(launchPath)} >/dev/null 2>&1 &`;
+  }
+
+  if (isWindows) {
+    const escapedPath = escapePowerShellSingleQuotedString(launchPath);
+    const script = `
+$path = '${escapedPath}'
+if (-not (Test-Path -LiteralPath $path)) {
+  throw "Launch path not found: $path"
+}
+$workingDirectory = Split-Path -LiteralPath $path -Parent
+if ([string]::IsNullOrWhiteSpace($workingDirectory)) {
+  Start-Process -FilePath $path
+} else {
+  Start-Process -FilePath $path -WorkingDirectory $workingDirectory
+}
+`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(script)}`;
+  }
+
+  return null;
+}
+
+export function getProcessRunningCheckCommand(pid: number): string {
+  if (isWindows) {
+    const script = `
+$process = Get-Process -Id ${pid} -ErrorAction SilentlyContinue
+if ($null -eq $process) { exit 1 }
+exit 0
+`;
+    return `powershell -NoLogo -NoProfile -EncodedCommand ${encodePowerShellCommand(script)}`;
+  }
+
+  if (isMac) {
+    return `ps -p ${pid} >/dev/null 2>&1`;
+  }
+
+  return `kill -0 ${pid}`;
 }
 
 /**
@@ -228,30 +344,39 @@ export function getFileIcon(process: Process): Image.ImageLike {
 }
 
 /**
- * Get error help message for failed kill attempts
+ * Get platform-specific error help for kill and restart actions.
  */
-export function getPlatformSpecificErrorHelp(isForceKill: boolean): {
+export function getPlatformSpecificErrorHelp(
+  action: ProcessAction,
+  isForceAction: boolean,
+): {
   title: string;
   message?: string;
   helpUrl?: string;
 } {
-  if (isMac && isForceKill) {
+  const actionLabel = action === "restart" ? "Restart" : "Kill";
+  const baseFailureMessage =
+    action === "restart"
+      ? "The process could not be restarted. It may have already exited or require elevated privileges."
+      : "The process could not be terminated. It may have already exited or require elevated privileges.";
+
+  if (isMac && isForceAction) {
     return {
-      title: "Failed to Force Kill Process",
+      title: `Failed to Force ${actionLabel} Process`,
       message: "Please ensure that touch ID/password prompt is enabled for sudo",
       helpUrl: "https://dev.to/siddhantkcode/enable-touch-id-authentication-for-sudo-on-macos-sonoma-14x-4d28",
     };
   }
 
-  if (isWindows && isForceKill) {
+  if (isWindows && isForceAction) {
     return {
-      title: "Failed to Force Kill Process",
+      title: `Failed to Force ${actionLabel} Process`,
       message: "Administrative privileges may be required. Try running as administrator.",
     };
   }
 
   return {
-    title: "Failed to Kill Process",
-    message: "The process could not be terminated. It may have already exited or require elevated privileges.",
+    title: `Failed to ${actionLabel} Process`,
+    message: baseFailureMessage,
   };
 }

@@ -3,6 +3,8 @@
  * This consolidates all date/time formatting logic into a single source of truth
  */
 
+import { getClockFormat } from "../clock";
+
 /**
  * Common date formatting options used throughout the application
  */
@@ -71,6 +73,33 @@ export const TIME_FORMATS = {
 } as const;
 
 /**
+ * Format a Date object as a local YYYY-MM-DD string.
+ * Avoids UTC conversion artifacts from toISOString().
+ */
+export function toLocalDateString(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Parse a YYYY-MM-DD string as local midnight.
+ * Avoids Date constructor UTC parsing for date-only strings.
+ */
+export function parseLocalDateString(dateStr: string): Date {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateStr);
+  if (!match) {
+    throw new Error(`Invalid local date string: ${dateStr}`);
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  return new Date(year, month - 1, day);
+}
+
+/**
  * Format a date using predefined format options
  */
 export function formatDate(date: Date | string, format: keyof typeof DATE_FORMATS): string {
@@ -80,10 +109,22 @@ export function formatDate(date: Date | string, format: keyof typeof DATE_FORMAT
 
 /**
  * Format a time using predefined format options
+ * Respects user's clock format preference (12h/24h)
  */
 export function formatTime(date: Date | string, format: keyof typeof TIME_FORMATS): string {
   const dateObj = typeof date === "string" ? new Date(date) : date;
-  return dateObj.toLocaleTimeString(undefined, TIME_FORMATS[format]);
+  const clockFormat = getClockFormat();
+
+  // Get the base format options
+  const formatOptions = { ...TIME_FORMATS[format] };
+
+  // Override hour12 based on user preference for user-facing time formats.
+  // HOUR_ONLY stays compact for graph axes and similar dense labels.
+  if (format === "STANDARD" || format === "MILITARY") {
+    (formatOptions as Intl.DateTimeFormatOptions).hour12 = clockFormat === "12h";
+  }
+
+  return dateObj.toLocaleTimeString(undefined, formatOptions);
 }
 
 /**
@@ -151,6 +192,7 @@ export function getRelativeDateString(date: Date | string): string {
 
 /**
  * Format time range between two dates
+ * Respects user's clock format preference (12h/24h)
  */
 export function formatTimeRange(
   start: Date | string,
@@ -160,4 +202,37 @@ export function formatTimeRange(
   const startTime = formatTime(start, timeFormat);
   const endTime = formatTime(end, timeFormat);
   return `${startTime} - ${endTime}`;
+}
+
+/**
+ * Format a timestamp for "last updated" display
+ * Shows relative time if recent (e.g., "5 minutes ago") or formatted date/time if older
+ */
+export function formatLastUpdated(timestamp: string | Date): string {
+  const date = typeof timestamp === "string" ? new Date(timestamp) : timestamp;
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+  const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+  // Show relative time for recent updates (using abbreviations)
+  if (diffMinutes < 1) return "now";
+  if (diffMinutes < 60) return `${diffMinutes} min${diffMinutes === 1 ? "" : "s"} ago`;
+  if (diffHours < 24) return `${diffHours} hr${diffHours === 1 ? "" : "s"} ago`;
+  if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+
+  // For older updates, show formatted date and time
+  const clockFormat = getClockFormat();
+  const timeFormat = clockFormat === "12h" ? "STANDARD" : "MILITARY";
+  const timeStr = formatTime(date, timeFormat);
+
+  if (isToday(date)) {
+    return `Today at ${timeStr}`;
+  } else if (isTomorrow(date)) {
+    return `Tomorrow at ${timeStr}`;
+  } else {
+    const dateStr = formatDate(date, "SHORT_DAY");
+    return `${dateStr} at ${timeStr}`;
+  }
 }

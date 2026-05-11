@@ -84,10 +84,9 @@ export class McpClientMultiServer {
         /* Get Tools */
         if (this._client.has(name)) {
           try {
-            const tools = await this._client
-              .get(name)!
-              .GetTools(false)
-              .then((t) => this._renameToolsFunctionName(name, t));
+            const client = this._client.get(name);
+            if (!client) return undefined;
+            const tools = await client.GetTools(false).then((t) => this._renameToolsFunctionName(name, t));
 
             if (tools.length > 0) {
               /* Save Tools on cache */
@@ -124,7 +123,8 @@ export class McpClientMultiServer {
     const tasks = await Promise.all(
       server.map(async (name): Promise<OllamaApiTool[] | undefined> => {
         /* Get Tools from cacheToolsOllama if defined and cache is enabled */
-        if (use_cache && this._cacheToolsOllama.has(name)) return this._cacheToolsOllama.get(name)!;
+        const cachedOllama = this._cacheToolsOllama.get(name);
+        if (use_cache && cachedOllama) return cachedOllama;
 
         /* Get Tools from Mcp Server and save on cache */
         const t = ConvertMcpToolsToOllamaTools(await this.GetTools(use_cache, [name]));
@@ -175,8 +175,8 @@ export class McpClientMultiServer {
    * @param tools - Tools Call on Ollama Format,
    * @returns Tools call results array.
    */
-  async CallToolsForOllama(tools: OllamaApiChatMessageToolCall[]): Promise<any[]> {
-    let results: any[] = [];
+  async CallToolsForOllama(tools: OllamaApiChatMessageToolCall[]): Promise<unknown[]> {
+    let results: unknown[] = [];
 
     /* Aggregate tool call by mcp server */
     const toolsMap = new Map<string, OllamaApiChatMessageToolCall[]>();
@@ -186,18 +186,25 @@ export class McpClientMultiServer {
       if (!name) return;
 
       /* Add tool to toolsMap */
-      toolsMap.has(name) ? toolsMap.get(name)!.push(tool) : toolsMap.set(name, [tool]);
+      const existingTools = toolsMap.get(name);
+      if (existingTools) {
+        existingTools.push(tool);
+      } else {
+        toolsMap.set(name, [tool]);
+      }
     });
 
     const tasks = await Promise.all(
-      [...toolsMap.keys()].map(async (name): Promise<any[] | undefined> => {
+      [...toolsMap.keys()].map(async (name): Promise<unknown[] | undefined> => {
         /* Get Mcp Client and Tools */
-        const client = this._client.get(name)!;
-        const tools = this._restoreToolsFunctionName(name, toolsMap.get(name)!);
+        const client = this._client.get(name);
+        const toolList = toolsMap.get(name);
+        if (!client || !toolList) return undefined;
+        const restoredTools = this._restoreToolsFunctionName(name, toolList);
 
         /* Call Tools */
         try {
-          return await client.CallToolsForOllama(tools);
+          return await client.CallToolsForOllama(restoredTools);
         } catch (e) {
           console.error(`[ERROR] Mcp Client - Server Name: "${name}" - Error: "${e}"`);
         }
@@ -310,7 +317,7 @@ export class McpClient {
         return {
           name: tool.name,
           description: tool.description,
-          inputSchema: tool.inputSchema,
+          inputSchema: tool.inputSchema as McpServerTool["inputSchema"],
         };
       });
       return this._tools;
@@ -334,12 +341,12 @@ export class McpClient {
    * Call Tools on Mcp Server.
    * @param tools - Ollama Message Tool Calls.
    */
-  async CallToolsForOllama(tools: OllamaApiChatMessageToolCall[]): Promise<any[]> {
+  async CallToolsForOllama(tools: OllamaApiChatMessageToolCall[]): Promise<unknown[]> {
     await this._connect();
 
     try {
       return await Promise.all(
-        tools.map(async (tool): Promise<any> => {
+        tools.map(async (tool): Promise<unknown> => {
           const result = await this._client.callTool(tool.function);
           return result.content;
         })

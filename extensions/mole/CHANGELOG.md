@@ -1,5 +1,21 @@
 # Mole Changelog
 
+## [Stability Improvements] - 2026-04-23
+
+- Fixed System Status crashes when Mole returns null values for optional status arrays
+- Improved Analyze Disk startup flow to avoid scanning the full home directory automatically
+- Added safer Analyze Disk error handling, process cancellation, timeouts, and result limits
+- Reduced Clean System preview memory usage by parsing only relevant scan output
+- Added Clean System timeout and non-zero exit handling for failed previews
+
+## [Health Menu Bar] - 2026-04-12
+
+- Added Health Monitor menu bar command showing health score with color-coded heart icon (green ≥90, yellow ≥70, orange ≥50, red <50)
+- Added dropdown summary with CPU, RAM, disk, and battery metrics on click
+- Added "Open System Status" action in dropdown for quick access to the full dashboard
+- Added configurable refresh interval preference (30s, 1m, 5m, 10m, 30m; default 1m)
+- Menu bar item hides automatically when Mole CLI is unavailable
+
 ## [Friendly Install Screen] - 2026-03-23
 
 - Added MoleNotInstalled component with multiple install options when Mole CLI is not found

@@ -6,8 +6,8 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 
 ## Requirements
 
-- [Wispr Flow](https://wisprflow.ai) must be installed on your Mac.
-- macOS Full Disk Access may be required to read the Wispr Flow database.
+- [Wispr Flow](https://wisprflow.ai) must be installed on your computer.
+- On macOS, Full Disk Access may be required to read the Wispr Flow database.
 
 ## Commands
 
@@ -16,6 +16,7 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 | **Search Transcripts** | Browse and search your full voice transcription history |
 | **Add Word to Dictionary** | Teach Wispr Flow new words, names, or technical terms |
 | **Manage Dictionary** | View, edit, search, and delete dictionary entries |
+| **Toggle Recording** | Toggle voice dictation on/off with a single hotkey |
 | **Start Recording** | Begin voice dictation instantly |
 | **Stop Recording** | End voice dictation |
 | **Paste Last Transcript** | Paste your latest unarchived transcript into the active app |
@@ -51,6 +52,7 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 
 ## Voice Control
 
+- **Toggle Recording** — start or stop dictation with a single command, ideal for binding to one hotkey
 - **Start/Stop Recording** — trigger Wispr Flow dictation via Raycast with no-view commands
 - **Install detection** — commands gracefully handle Wispr Flow not being installed
 
@@ -64,4 +66,4 @@ The all-in-one [Wispr Flow](https://wisprflow.ai) companion for Raycast. Search 
 
 ## How It Works
 
-Wispr Flow stores your transcription history and dictionary in a local SQLite database on your Mac. This extension reads that database locally — no network requests are made. Modifications are limited to archiving transcripts and managing dictionary entries, mirroring Wispr Flow's own functionality.
+Wispr Flow stores your transcription history and dictionary in a local SQLite database on your computer. This extension reads that database locally on macOS and Windows with no network requests. Modifications are limited to archiving transcripts and managing dictionary entries, mirroring Wispr Flow's own functionality.

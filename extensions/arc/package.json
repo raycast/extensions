@@ -43,7 +43,8 @@
     "gdsmith",
     "tama_harrison",
     "pavelas",
-    "mchoun"
+    "mchoun",
+    "yoann_aubineau"
   ],
   "pastContributors": [
     "pomdtr",
@@ -482,6 +483,14 @@
       "title": "Open New Easel",
       "subtitle": "Arc",
       "description": "Open a new easel",
+      "mode": "no-view",
+      "disabledByDefault": true
+    },
+    {
+      "name": "reset-space-tabs",
+      "title": "Reset All Tabs in Current Space",
+      "subtitle": "Arc",
+      "description": "Reset all tabs in the currently active space",
       "mode": "no-view",
       "disabledByDefault": true
     }

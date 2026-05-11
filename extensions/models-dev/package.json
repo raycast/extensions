@@ -110,6 +110,28 @@
       ]
     },
     {
+      "name": "new-models",
+      "title": "New AI Models",
+      "subtitle": "Models Dev",
+      "description": "Browse AI models released recently",
+      "mode": "view",
+      "keywords": [
+        "recent",
+        "new",
+        "latest"
+      ],
+      "preferences": [
+        {
+          "name": "lookbackPeriod",
+          "title": "Lookback period (Days)",
+          "description": "Number of days to consider as recent",
+          "type": "textfield",
+          "default": "7",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "background-sync",
       "title": "Background Sync",
       "subtitle": "Models Dev",

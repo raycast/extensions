@@ -1,5 +1,9 @@
 # Spotify Player Changelog
 
+## [Fix OAuth PKCE invalid_grant] - 2026-04-04
+
+- Clear corrupted tokens on invalid_grant error so the user is prompted to re-authenticate instead of being stuck
+
 ## [Reduce API Rate Limiting] - 2026-03-18
 
 - Added tiered API-level caching (short/medium/long TTL) to reduce redundant Spotify API calls

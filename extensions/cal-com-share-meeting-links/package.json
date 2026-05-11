@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cal-com-share-meeting-links",
-  "title": "Cal.com - Share Meeting Links",
-  "description": "Quickly share your Cal.com meeting links",
+  "title": "Cal.com",
+  "description": "Manage your Cal.com schedules, bookings, out-of-office, and meeting links from Raycast",
   "icon": "logo.png",
   "author": "eluce2",
   "owner": "cal",
@@ -17,7 +17,8 @@
     "pernielsentikaer",
     "alexs",
     "stelo",
-    "runofthemilgeek"
+    "runofthemilgeek",
+    "andrewbenson"
   ],
   "commands": [
     {
@@ -33,6 +34,27 @@
       "subtitle": "Cal.com",
       "description": "View your upcoming Cal.com bookings",
       "mode": "view"
+    },
+    {
+      "name": "view-availability",
+      "title": "View Availability",
+      "subtitle": "Cal.com",
+      "description": "View and manage your Cal.com availability schedules",
+      "mode": "view"
+    },
+    {
+      "name": "out-of-office",
+      "title": "Out of Office",
+      "subtitle": "Cal.com",
+      "description": "View and manage your Cal.com out-of-office entries",
+      "mode": "view"
+    },
+    {
+      "name": "create-out-of-office",
+      "title": "Create Out of Office",
+      "subtitle": "Cal.com",
+      "description": "Schedule a new out-of-office entry (with draft support)",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -47,15 +69,15 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.79.1",
-    "@raycast/utils": "^1.16.1",
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.3",
     "axios": "^1.8.4",
     "dayjs": "^1.11.11",
     "moment": "^2.30.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.9",
-    "@types/react": "^18.3.3",
+    "@types/react": "^19.0.10",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.14.1",
     "eslint": "^8.57.0",

@@ -24,7 +24,10 @@ import {
 import { PRIORITY_MAP } from "./helpers/priorities";
 
 export default function CreateTask(
-  props: LaunchProps<{ arguments: Arguments.CreateTask }>,
+  props: LaunchProps<{
+    arguments: Arguments.CreateTask;
+    launchContext?: { projectId?: number };
+  }>,
 ) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [labels, setLabels] = useState<Label[]>([]);
@@ -32,6 +35,11 @@ export default function CreateTask(
   const argTitle = props.arguments.title?.trim() ?? "";
   const [prefillTitle, setPrefillTitle] = useState(argTitle);
   const [prefillReady, setPrefillReady] = useState(!!argTitle);
+  // Prefer projectId passed as a command argument, fallback to launch context if present
+  const argProjectId = props.arguments.projectId?.trim();
+  const contextProjectId = argProjectId
+    ? parseInt(argProjectId)
+    : props.launchContext?.projectId;
 
   useEffect(() => {
     async function loadData() {
@@ -175,7 +183,17 @@ export default function CreateTask(
             title="Description"
             placeholder="Optional description"
           />
-          <Form.Dropdown id="projectId" title="Project">
+          <Form.Dropdown
+            id="projectId"
+            title="Project"
+            defaultValue={
+              props.arguments.projectId
+                ? String(props.arguments.projectId)
+                : contextProjectId
+                  ? String(contextProjectId)
+                  : undefined
+            }
+          >
             {projects.map((project) => (
               <Form.Dropdown.Item
                 key={project.id}

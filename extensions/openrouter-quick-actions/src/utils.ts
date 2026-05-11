@@ -18,3 +18,16 @@ export const getModelName = (modelOverride: string) => {
   }
   return modelOverride;
 };
+
+export const formatAPIError = (error: unknown): string => {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.includes("404") && message.includes("No endpoints found")) {
+    const match = message.match(/No endpoints found for (.+)\./);
+    const modelId = match ? match[1] : "the selected model";
+    return `Model "${modelId}" not found on OpenRouter. Check your model settings in Raycast preferences.`;
+  }
+  if (message.includes("405")) {
+    return `Provider rejected the request (405). Try a different provider sort or model.`;
+  }
+  return message;
+};

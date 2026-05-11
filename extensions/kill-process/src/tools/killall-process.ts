@@ -29,7 +29,7 @@ export default async function killAllProcesses(input: Input) {
 
     exec(command, (err) => {
       if (err) {
-        const errorHelp = getPlatformSpecificErrorHelp(input.force ?? false);
+        const errorHelp = getPlatformSpecificErrorHelp("kill", input.force ?? false);
         reject(new Error(`${errorHelp.title}: ${err.message}`));
         return;
       }

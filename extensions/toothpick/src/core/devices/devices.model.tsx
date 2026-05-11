@@ -4,6 +4,7 @@ import { DevicesMap } from "src/core/devices/constants/specifications";
 import { DeviceBatteryLevels } from "./devices.types";
 import { disconnectDevice } from "src/core/devices/handlers/disconnect-device";
 import { connectDevice } from "./handlers/connect-device";
+import { refreshDevice } from "./handlers/refresh-device";
 
 export class Device {
   name: string;
@@ -86,6 +87,7 @@ export class Device {
         icon={Icon.Pencil}
         shortcut={Keyboard.Shortcut.Common.CopyName}
       />,
+      <Action title="Refresh" key="refresh-action" onAction={() => refreshDevice(this)} icon={Icon.ArrowClockwise} />,
       ...additionalActions,
     ];
   }

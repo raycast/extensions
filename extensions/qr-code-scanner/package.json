@@ -5,8 +5,12 @@
   "description": "Simple on-screen QR code scanner. (\"Screen recording\" permission is required)",
   "icon": "command-icon.png",
   "author": "StevenRCE0",
+  "categories": [
+    "Productivity"
+  ],
   "contributors": [
-    "MoienTajik"
+    "MoienTajik",
+    "0xdhrv"
   ],
   "license": "MIT",
   "commands": [
@@ -49,10 +53,10 @@
       "name": "openUrlAfterScan",
       "title": "Open URL After Scan",
       "label": "Open URL Automatically",
-      "description": "Open decoded URLs automatically after scanning. Disable to only copy to clipboard.",
+      "description": "Open decoded URLs automatically after scanning. Disable to copy or inspect links first.",
       "type": "checkbox",
       "required": false,
-      "default": true
+      "default": false
     }
   ],
   "dependencies": {

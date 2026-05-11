@@ -114,10 +114,10 @@ export interface OllamaApiShowResponse {
   details?: OllamaApiShowDetail;
   messages?: OllamaApiChatMessage[];
   model_info?: {
-    [name: string]: any;
+    [name: string]: unknown;
   };
   projector_info?: {
-    [name: string]: any;
+    [name: string]: unknown;
   };
   tensors?: OllamaApiTensor[];
   capabilities?: Enum.OllamaApiModelCapability[];
@@ -205,7 +205,7 @@ export interface OllamaApiChatMessageToolCall {
     index?: number;
     name: string;
     arguments: {
-      [key: string]: any;
+      [key: string]: unknown;
     };
   };
 }

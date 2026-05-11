@@ -13,8 +13,9 @@ import {
   Image,
   LaunchType,
   launchCommand,
+  Clipboard,
 } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
 import { RepositoryDirectoryActions, RepositoryQuickLinkAction } from "./components/actions/RepositoryDirectoryActions";
 import OpenRepository from "./open-repository";
@@ -32,6 +33,7 @@ import { existsSync } from "fs";
 import { RemoteWebPageAction } from "./components/actions/RemoteActions";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { CopyToClipboardMenuAction } from "./components/actions/CopyToClipboardMenuAction";
+import { validateGitUrl } from "./utils/url-utils";
 
 export default function ManageRepositories() {
   const {
@@ -228,6 +230,15 @@ function RepositoryListItem({
 }
 
 function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath: string) => void }) {
+  const copiedUrl = useCallback(async () => {
+    const text = await Clipboard.readText();
+    const trimmed = text?.trim();
+    if (trimmed && validateGitUrl(trimmed) === undefined) {
+      return trimmed;
+    }
+    return "";
+  }, []);
+
   return (
     <ActionPanel.Submenu title="Add Repository" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }}>
       <Action.Push
@@ -242,13 +253,15 @@ function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath:
       />
       <Action
         title="Clone Repository"
-        onAction={async () =>
+        onAction={async () => {
+          const defaultUrl = await copiedUrl();
+
           await launchCommand({
             name: "clone-repository",
             type: LaunchType.UserInitiated,
-            arguments: { url: "" },
-          })
-        }
+            arguments: { url: defaultUrl },
+          });
+        }}
         icon={Icon.Download}
       />
     </ActionPanel.Submenu>

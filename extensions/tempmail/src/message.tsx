@@ -25,7 +25,7 @@ enum EmailViewMedium {
   Finder,
 }
 
-function FullscreenDetails(data: Message): React.ReactNode {
+function FullscreenDetails(data: Message): JSX.Element {
   return (
     <List>
       <List.Section title="Received">
@@ -103,16 +103,14 @@ function FullscreenDetails(data: Message): React.ReactNode {
 
 function AttachmentItem({ attachment }) {
   const abortable = useRef<AbortController>();
-  const { isLoading, data, revalidate } = useCachedPromise(downloadAttachment, [attachment], {
+  const { isLoading, data } = useCachedPromise(downloadAttachment, [attachment], {
     abortable,
     onError: (e) => {
-      if (e.message == "Token Expired") revalidate();
-      else
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Something went wrong",
-          message: e.message,
-        });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong",
+        message: e.message,
+      });
     },
   });
 
@@ -141,7 +139,7 @@ function AttachmentItem({ attachment }) {
   );
 }
 
-function FullscreenAttachments(data): React.ReactNode {
+function FullscreenAttachments(data): JSX.Element {
   return (
     <Grid>
       {data.attachments.map((attachment) => (
@@ -151,15 +149,11 @@ function FullscreenAttachments(data): React.ReactNode {
   );
 }
 
-export default function MessageComponent({ id }: { id: string }): React.ReactNode {
+export default function MessageComponent({ id }: { id: string }): JSX.Element {
   const [bodyMarkdown, updateBodyMarkdown] = useState<string>();
 
   const abortable = useRef<AbortController>();
-  const {
-    isLoading,
-    data: message,
-    revalidate,
-  } = useCachedPromise(getMessage, [id], {
+  const { isLoading, data: message } = useCachedPromise(getMessage, [id], {
     abortable,
     keepPreviousData: true,
     onData: (data) => {
@@ -179,13 +173,11 @@ export default function MessageComponent({ id }: { id: string }): React.ReactNod
       }
     },
     onError: (e) => {
-      if (e.message == "Token Expired") revalidate();
-      else
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Something went wrong",
-          message: e.message,
-        });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong",
+        message: e.message,
+      });
     },
   });
 
@@ -201,13 +193,11 @@ export default function MessageComponent({ id }: { id: string }): React.ReactNod
         open(htmlPath);
       }
     } catch (e) {
-      if (e.message == "Token Expired") revalidate();
-      else
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Something went wrong",
-          message: e.message,
-        });
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Something went wrong",
+        message: e.message,
+      });
     }
   };
 
@@ -232,7 +222,7 @@ export default function MessageComponent({ id }: { id: string }): React.ReactNod
         const attachmentID = attachmentString.substring(11);
         const attachment = new_data.attachments.find((attch) => attch.id == attachmentID);
 
-        return `${environment.supportPath}/temp/attachments/${attachment.id}_${attachment.filename}`.replace(
+        return `${environment.supportPath}/temp/attachments/${attachment.id}_${attachment.filename}`.replaceAll(
           " ",
           "%20"
         );

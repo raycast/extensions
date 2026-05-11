@@ -1,7 +1,7 @@
 import { List, Action, ActionPanel, Icon, LaunchProps } from "@raycast/api";
 import { getFavicon, usePromise } from "@raycast/utils";
 import { useState, useRef } from "react";
-import { getBrowserTabs, isBrowserExtensionAvailable } from "./utils/browser";
+import { getBrowserTabs } from "./utils/browser";
 import { useHistorySearch } from "./utils/history";
 import { useSuggestions, getSearchEngineName } from "./utils/suggestions";
 import { normalizeURL, extractDomain } from "./utils/url";
@@ -14,25 +14,16 @@ import {
   CopyUrlAction,
   CopyAsMarkdownAction,
   CreateQuicklinkAction,
+  DeduplicateTabsAction,
+  ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 
 export default function SearchWeb(props: LaunchProps) {
   const [searchText, setSearchText] = useState(props.fallbackText ?? "");
 
-  // Fetch tabs if browser extension is available
-  const hasBrowserExtension = isBrowserExtensionAvailable();
-  const {
-    data: tabs,
-    isLoading: isLoadingTabs,
-    mutate,
-  } = usePromise(async () => {
-    if (!hasBrowserExtension) {
-      return [];
-    }
-    return getBrowserTabs();
-  });
-  const deletedTabIdsRef = useRef(new Set<number>());
+  const { data: tabs, isLoading: isLoadingTabs, mutate, revalidate } = usePromise(getBrowserTabs);
+  const pendingCloseIdsRef = useRef(new Set<string>());
 
   // Fetch history - will show recent history when no search text for debugging
   const { data: history, isLoading: isLoadingHistory, permissionView } = useHistorySearch(searchText, 25);
@@ -45,11 +36,11 @@ export default function SearchWeb(props: LaunchProps) {
     return permissionView;
   }
 
-  // Filter out deleted tabs first (tabs that are being closed but might still appear in fetched data)
-  const tabsWithoutDeleted = tabs ? tabs.filter((t) => !deletedTabIdsRef.current.has(t.id)) : [];
+  // Keep tabs hidden while their close request is still in flight.
+  const tabsWithoutPendingClose = tabs ? tabs.filter((t) => !pendingCloseIdsRef.current.has(t.id)) : [];
 
   // Then filter by search text
-  const filteredTabs = tabsWithoutDeleted ? filterSearchable(tabsWithoutDeleted, searchText) : [];
+  const filteredTabs = tabsWithoutPendingClose ? filterSearchable(tabsWithoutPendingClose, searchText) : [];
 
   // Separate URL suggestions from search suggestions
   const urlSuggestions = suggestions.filter((s) => s.type === "url");
@@ -88,10 +79,17 @@ export default function SearchWeb(props: LaunchProps) {
       )}
 
       {/* Open Tabs Section */}
-      {hasBrowserExtension && filteredTabs.length > 0 && (
+      {filteredTabs.length > 0 && (
         <List.Section title="Open Tabs" subtitle={`${filteredTabs.length} tab${filteredTabs.length !== 1 ? "s" : ""}`}>
           {filteredTabs.map((tab) => (
-            <TabListItem key={tab.id} tab={tab} mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
+            <TabListItem
+              key={tab.id}
+              tab={tab}
+              tabs={tabsWithoutPendingClose}
+              mutate={mutate}
+              revalidate={revalidate}
+              pendingCloseIdsRef={pendingCloseIdsRef}
+            />
           ))}
         </List.Section>
       )}
@@ -125,31 +123,43 @@ export default function SearchWeb(props: LaunchProps) {
  */
 function TabListItem({
   tab,
+  tabs,
   mutate,
-  deletedTabIdsRef,
+  revalidate,
+  pendingCloseIdsRef,
 }: {
   tab: Tab;
+  tabs: Tab[];
   mutate: import("@raycast/utils").MutatePromise<Tab[], undefined>;
-  deletedTabIdsRef: React.MutableRefObject<Set<number>>;
+  revalidate: () => Promise<Tab[]>;
+  pendingCloseIdsRef: React.MutableRefObject<Set<string>>;
 }) {
   const domain = extractDomain(tab.url);
 
   return (
     <List.Item
+      id={tab.id}
       title={tab.title || "Untitled"}
       subtitle={domain}
       keywords={[tab.url, tab.title || ""]}
-      icon={getFavicon(tab.url)}
+      icon={tab.favicon || getFavicon(tab.url, { fallback: Icon.Globe })}
       accessories={[{ text: "Tab", tooltip: tab.url }]}
       actions={
         <ActionPanel>
           <SwitchToTabAction tab={tab} />
           <OpenNewTabAction />
-          <CloseTabAction tab={tab} mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
+          <CloseTabAction tab={tab} mutate={mutate} revalidate={revalidate} pendingCloseIdsRef={pendingCloseIdsRef} />
           <OpenInNewTabAction tab={tab} />
           <CopyUrlAction tab={tab} />
           <CopyAsMarkdownAction tab={tab} />
           <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
+          <ReloadAction subject="Tabs" revalidate={revalidate} />
+          <DeduplicateTabsAction
+            tabs={tabs}
+            mutate={mutate}
+            revalidate={revalidate}
+            pendingCloseIdsRef={pendingCloseIdsRef}
+          />
         </ActionPanel>
       }
     />

@@ -1,5 +1,10 @@
 # FreeAgent Changelog
 
+## [Fix timeslip date display] - 2026-04-15
+
+- Changed timeslip list to show day-level relative dates (Today, Yesterday, 3 days ago) instead of hour-level (14 hours ago)
+- Timeslips in FreeAgent are day-level, so hour-level precision was misleading
+
 ## [Fix time parsing in Create Timeslip] - 2026-01-08
 
 - Fixed bug where entering time in HH:MM format (e.g., `4:30`) would only record the hours portion

@@ -10,12 +10,13 @@ import {
   closeMainWindow,
   popToRoot,
 } from "@raycast/api";
-import { runAppleScript } from "@raycast/utils";
 import { useState } from "react";
 import { useFileSelection, usePreview } from "./lib/hooks";
 import { RenameRule } from "./lib/rules";
 import AddRuleForm from "./components/AddRuleForm";
-import fs from "fs";
+import { batchRename, checkConflicts } from "./lib/batch";
+import { getUserFriendlyErrorMessage } from "./lib/errors";
+import type { RenameOperation } from "./types";
 import path from "path";
 
 export default function AdvancedRenameCommand() {
@@ -63,36 +64,27 @@ export default function AdvancedRenameCommand() {
       })
     ) {
       try {
-        let successCount = 0;
-        const errors: string[] = [];
+        const operations: RenameOperation[] = filesToRename
+          .filter((f) => f.newName)
+          .map((file) => ({
+            oldPath: file.originalPath,
+            newName: file.newName!,
+            newPath: path.join(path.dirname(file.originalPath), file.newName!),
+          }));
 
-        for (const file of filesToRename) {
-          if (file.newName) {
-            const oldPath = file.originalPath;
-            const dir = path.dirname(oldPath);
-            const newPath = path.join(dir, file.newName);
-
-            if (fs.existsSync(newPath)) {
-              errors.push(`Conflict: ${file.newName} already exists.`);
-              continue;
-            }
-
-            const escapedFilePath = oldPath.replaceAll('"', '\\"');
-            const escapedNewName = file.newName.replaceAll('"', '\\"');
-
-            try {
-              await runAppleScript(`
-                tell application "Finder"
-                  set theItem to POSIX file "${escapedFilePath}" as alias
-                  set name of theItem to "${escapedNewName}"
-                end tell
-              `);
-              successCount++;
-            } catch (err) {
-              errors.push(`Error renaming ${file.name}: ${(err as Error).message}`);
-            }
-          }
+        const conflicts = await checkConflicts(operations);
+        if (conflicts.length > 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Conflicts detected",
+            message: conflicts[0],
+          });
+          return;
         }
+
+        const results = await batchRename(operations);
+        const successCount = results.filter((r) => r.success).length;
+        const errors = results.filter((r) => !r.success).map((r) => `${path.basename(r.oldPath)}: ${r.error}`);
 
         if (errors.length > 0) {
           await showToast({
@@ -109,7 +101,7 @@ export default function AdvancedRenameCommand() {
         await showToast({
           style: Toast.Style.Failure,
           title: "Rename Failed",
-          message: e instanceof Error ? e.message : "Unknown error",
+          message: getUserFriendlyErrorMessage(e),
         });
       }
     }

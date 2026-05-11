@@ -3,11 +3,16 @@ import { confirmAlert, Icon } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { BrowserConfig } from "./types";
 
-export type ChromeTarget = { action: "focus" } | { action: "newTab" } | { action: "openUrl"; url: string };
+export type ChromeTarget =
+  | { action: "focus" }
+  | { action: "newTab" }
+  | { action: "newWindow" }
+  | { action: "openUrl"; url: string };
 
 export const ChromeAction = {
   Focus: { action: "focus" } as ChromeTarget,
   NewTab: { action: "newTab" } as ChromeTarget,
+  NewWindow: { action: "newWindow" } as ChromeTarget,
   openUrl: (url: string): ChromeTarget => ({ action: "openUrl", url }),
 };
 
@@ -186,6 +191,40 @@ export const openGoogleChrome = async (
   const action = target.action;
   const url = action === "openUrl" ? target.url : undefined;
 
+  const fallbackScript = (action: ChromeTarget["action"]): string => {
+    const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
+    const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
+
+    if (action === "newWindow") {
+      return `
+        set theAppPath to quoted form of "${escapedBinaryPath}"
+        set theProfile to quoted form of "${escapedProfileDirectory}"
+        do shell script theAppPath & " --profile-directory=" & theProfile & " --new-window"
+      `;
+    }
+
+    const fallbackUrl = action === "focus" ? "about:blank" : url || "about:blank";
+    const escapedFallbackUrl = escapeAppleScriptString(fallbackUrl);
+
+    return `
+      set theAppPath to quoted form of "${escapedBinaryPath}"
+      set theProfile to quoted form of "${escapedProfileDirectory}"
+      set theLink to quoted form of "${escapedFallbackUrl}"
+      do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
+    `;
+  };
+
+  // For newWindow, launch Chrome directly via CLI to avoid focusing an existing window first
+  if (action === "newWindow") {
+    try {
+      await willOpen();
+      await runAppleScript(fallbackScript(action));
+    } catch (error) {
+      // Handle errors silently
+    }
+    return;
+  }
+
   // Escape all user-controlled input to prevent AppleScript injection
   const escapedProfileName = escapeAppleScriptString(profile.name);
   const escapedUrl = url ? escapeAppleScriptString(url) : undefined;
@@ -275,20 +314,9 @@ export const openGoogleChrome = async (
   }
 
   // Fallback: use shell script to open Chrome with profile directory
-  const fallbackUrl = action === "focus" ? "about:blank" : url || "about:blank";
-  const escapedProfileDirectory = escapeAppleScriptString(profile.directory);
-  const escapedFallbackUrl = escapeAppleScriptString(fallbackUrl);
-  const escapedBinaryPath = escapeAppleScriptString(browser.binaryPath);
-  const fallbackScript = `
-    set theAppPath to quoted form of "${escapedBinaryPath}"
-    set theProfile to quoted form of "${escapedProfileDirectory}"
-    set theLink to quoted form of "${escapedFallbackUrl}"
-    do shell script theAppPath & " --profile-directory=" & theProfile & " " & theLink
-  `;
-
   try {
     await willOpen();
-    await runAppleScript(fallbackScript);
+    await runAppleScript(fallbackScript(action));
   } catch (fallbackError) {
     console.error("Fallback shell script failed:", fallbackError);
 

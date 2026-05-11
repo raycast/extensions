@@ -14,7 +14,7 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import TimeAgo from "javascript-time-ago";
 import en from "javascript-time-ago/locale/en.json";
-import { nanoid } from "nanoid";
+import { randomUUID } from "crypto";
 import { NodeHtmlMarkdown } from "node-html-markdown";
 import React from "react";
 import Parser from "rss-parser";
@@ -152,7 +152,7 @@ function CopyStory(props: { item: Story }) {
 function ItemToStory(item: Parser.Item, feed: Feed, lastViewed: number) {
   const date = item.pubDate ? Date.parse(item.pubDate) : 0;
   return {
-    guid: item.guid || nanoid(),
+    guid: item.guid || randomUUID(),
     title: item.title || "No title",
     subtitle: feed.title,
     link: item.link,
@@ -266,7 +266,9 @@ export function StoriesList(props: { feeds?: Feed[] }) {
           if (filter === "unread") return !story.lastRead;
           return filter === "all" || story.fromFeed === filter;
         })
-        .map((story) => <StoryListItem key={story.guid} item={story} refresh={revalidate} />)}
+        .map((story) => (
+          <StoryListItem key={story.guid} item={story} refresh={revalidate} />
+        ))}
     </List>
   );
 }

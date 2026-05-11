@@ -1,25 +1,14 @@
-import {
-  getPreferenceValues,
-  getApplications,
-  open,
-  showToast,
-  Toast,
-} from "@raycast/api";
-import { execFileSync } from "child_process";
+import { getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import { existsSync } from "fs";
-import { homedir } from "os";
-import { resolve } from "path";
+import { platform } from "./platform";
 
-export const WISPR_FLOW_BUNDLE_ID = "com.electron.wispr-flow";
-
-const DEFAULT_DB = resolve(
-  homedir(),
-  "Library/Application Support/Wispr Flow/flow.sqlite",
-);
+export { WISPR_FLOW_BUNDLE_ID } from "./platform";
 
 export function getDbPath(): string {
   const { databasePath } = getPreferenceValues<Preferences>();
-  return databasePath && databasePath.trim() !== "" ? databasePath : DEFAULT_DB;
+  return databasePath && databasePath.trim() !== ""
+    ? databasePath
+    : platform.getDefaultDbPath();
 }
 
 export function dbExists(): boolean {
@@ -27,8 +16,7 @@ export function dbExists(): boolean {
 }
 
 export async function isWisprFlowInstalled(): Promise<boolean> {
-  const applications = await getApplications();
-  return applications.some(({ bundleId }) => bundleId === WISPR_FLOW_BUNDLE_ID);
+  return platform.isWisprFlowInstalled();
 }
 
 export async function ensureWisprFlowInstalled(): Promise<boolean> {
@@ -48,6 +36,10 @@ export async function ensureWisprFlowInstalled(): Promise<boolean> {
     });
   }
   return installed;
+}
+
+export async function openWisprFlow(url: string): Promise<void> {
+  return platform.openWisprFlow(url);
 }
 
 /**
@@ -72,23 +64,51 @@ export function validateUUID(id: string): string {
 }
 
 /**
- * executeSQL from @raycast/utils opens the database read-only.
- * Use this for INSERT/UPDATE/DELETE operations via the sqlite3 CLI.
+ * Executes a write SQL statement (INSERT/UPDATE/DELETE).
  */
-export function writeSQL(sql: string): void {
-  const dbPath = getDbPath();
+export async function writeSQL(sql: string): Promise<void> {
   try {
-    execFileSync("sqlite3", [dbPath], {
-      input: sql,
-      encoding: "utf-8",
-      timeout: 5000,
-    });
-  } catch (error) {
-    if (error instanceof Error && error.message.includes("ENOENT")) {
-      throw new Error(
-        "sqlite3 not found. macOS should include it by default. Please ensure sqlite3 is installed and in your PATH.",
-      );
+    const { DatabaseSync } = await import("node:sqlite");
+    const db = new DatabaseSync(getDbPath());
+    try {
+      db.exec(sql);
+    } finally {
+      db.close();
     }
-    throw error;
+  } catch (error) {
+    const message = error instanceof Error ? error.message.toLowerCase() : "";
+    const shouldUseCliFallback =
+      message.includes("node:sqlite") ||
+      message.includes("databasesync is not a constructor") ||
+      message.includes("unknown built-in module");
+
+    if (!shouldUseCliFallback) {
+      throw error;
+    }
+
+    const { execFile } = await import("node:child_process");
+
+    try {
+      await new Promise<void>((resolve, reject) => {
+        const child = execFile("sqlite3", [getDbPath()], (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
+        child.stdin?.end(sql);
+      });
+    } catch (cliError) {
+      if (
+        typeof cliError === "object" &&
+        cliError !== null &&
+        "code" in cliError &&
+        cliError.code === "ENOENT"
+      ) {
+        throw new Error(
+          "Unable to write to the Wispr Flow database because the sqlite3 command line tool is not installed.",
+        );
+      }
+
+      throw cliError;
+    }
   }
 }

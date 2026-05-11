@@ -26,6 +26,25 @@ function extractMetadataContent(
   const rawMetadata = lines.slice(1, metadataEndIndex).join("\n").replace(/\t/g, "    ");
   const content = lines.slice(contentStartIndex).join("\n").trim();
 
+  // Find the start and end of the code block
+  let codeBlockStart = -1;
+  let codeBlockEnd = -1;
+  for (let i = contentStartIndex; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (line.startsWith("```")) {
+      if (codeBlockStart === -1) {
+        codeBlockStart = i + 1;
+      } else {
+        codeBlockEnd = i;
+        break;
+      }
+    }
+  }
+
+  // Extract the first code block content
+  const firstCodeBlock =
+    codeBlockStart !== -1 && codeBlockEnd !== -1 ? lines.slice(codeBlockStart, codeBlockEnd).join("\n").trim() : "";
+
   let metadata;
   let tags: string[] = [];
   let error = null;
@@ -52,6 +71,7 @@ function extractMetadataContent(
     description: metadata?.[descriptionKey],
     tags: tags,
     content: content,
+    firstCodeBlock: firstCodeBlock,
     rawMetadata: rawMetadata,
   };
   return { content: snippetContent, error: error };

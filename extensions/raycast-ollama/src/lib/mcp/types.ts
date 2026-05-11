@@ -10,10 +10,22 @@ export interface McpServerParams {
   [name: string]: StdioServerParameters;
 }
 
+export interface McpServerToolInputSchema {
+  type: string;
+  properties?: {
+    [key: string]: {
+      type: string;
+      description?: string;
+      items?: { enum?: string[] };
+    };
+  };
+  required?: string[];
+}
+
 export interface McpServerTool {
   name: string;
   description?: string;
-  inputSchema: any;
+  inputSchema: McpServerToolInputSchema;
 }
 
 export interface McpToolInfo {
@@ -23,6 +35,6 @@ export interface McpToolInfo {
   function: string;
   /* Arguments */
   arguments: {
-    [name: string]: any;
+    [name: string]: unknown;
   };
 }

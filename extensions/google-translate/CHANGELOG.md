@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Feature] - 2026-04-15
+
+ - Added pronunciation text to quick translate command
+
 ## [Cross Platform Shortcuts + Modernize] - 2025-12-24
 
 - Make `Shortcut`s cross-platform

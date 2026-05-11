@@ -1,5 +1,17 @@
 # `Easydict` Changelog
 
+## [v2.11.2] - 2026-04-13
+
+### 💎 Improvement
+
+- Remove `crypto-js` and `qs` dependencies, and simplify Volcano translation
+- Replace `lint-staged` with `nano-staged`
+- Update dependencies and improve stability
+
+### 🐞 Fixed
+
+- Support `max_completion_tokens` for OpenAI reasoning models
+
 ## [v2.11.1] - 2026-02-16
 
 ### 💎 Improvement

@@ -35,7 +35,8 @@
   "icon": "icon.png",
   "author": "david_nakhapetian",
   "contributors": [
-    "0xdhrv"
+    "0xdhrv",
+    "dylan_penney"
   ],
   "platforms": [
     "macOS",

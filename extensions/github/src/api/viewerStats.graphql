@@ -1,0 +1,62 @@
+query getViewerStats($repositoriesCount: Int = 100) {
+  viewer {
+    ...UserFields
+    bio
+    company
+    location
+    url
+    websiteUrl
+    createdAt
+    followers {
+      totalCount
+    }
+    following {
+      totalCount
+    }
+    starredRepositories {
+      totalCount
+    }
+    pullRequestsAuthored: pullRequests {
+      totalCount
+    }
+    pullRequestsMerged: pullRequests(states: [MERGED]) {
+      totalCount
+    }
+    pullRequestsOpen: pullRequests(states: [OPEN]) {
+      totalCount
+    }
+    issuesAuthored: issues {
+      totalCount
+    }
+    issuesOpen: issues(states: [OPEN]) {
+      totalCount
+    }
+    contributionsCollection {
+      totalCommitContributions
+    }
+    publicRepos: repositories(ownerAffiliations: OWNER, privacy: PUBLIC) {
+      totalCount
+    }
+    ownedRepositories: repositories(
+      first: $repositoriesCount
+      ownerAffiliations: OWNER
+      orderBy: { field: STARGAZERS, direction: DESC }
+    ) {
+      totalCount
+      nodes {
+        stargazerCount
+        forkCount
+      }
+    }
+    organizations(first: 20) {
+      totalCount
+      nodes {
+        id
+        login
+        name
+        avatarUrl
+        url
+      }
+    }
+  }
+}

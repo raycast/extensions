@@ -17,7 +17,8 @@
     "alexandercato",
     "ViGeng",
     "ridemountainpig",
-    "chrismessina"
+    "chrismessina",
+    "clins1994"
   ],
   "license": "MIT",
   "icon": "icon.png",
@@ -35,6 +36,14 @@
       "subtitle": "Brew",
       "description": "Search brew formulae & casks",
       "mode": "view",
+      "arguments": [
+        {
+          "name": "search",
+          "placeholder": "Query",
+          "type": "text",
+          "required": false
+        }
+      ],
       "preferences": [
         {
           "name": "showMetadataPanel",

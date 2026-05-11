@@ -8,25 +8,29 @@ export interface Server {
 export interface Vm {
   server: string;
   summary: VMSummary;
-  vm_info: VMInfo | undefined;
-  interfaces_info: VmGuestNetworkingInterfacesInfo[] | undefined;
-  storage_policy_info: VmStoragePolicyInfo | undefined;
-  storage_policy_compliance_info: VMStoragePolicyComplianceInfo | undefined;
+  vm_info?: VMInfo;
+  cache_expiration?: number;
+  interfaces_info?: VmGuestNetworkingInterfacesInfo[];
+  storage_policy_info?: VmStoragePolicyInfo;
+  storage_policy_compliance_info?: VMStoragePolicyComplianceInfo;
 }
 
 export interface Host {
   server: string;
   summary: HostSummary;
+  cache_expiration?: number;
 }
 
 export interface Network {
   server: string;
   summary: NetworkSummary;
+  cache_expiration?: number;
 }
 
 export interface Datastore {
   server: string;
   summary: DatastoreSummary;
+  cache_expiration?: number;
 }
 
 export interface VMSummary {

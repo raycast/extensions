@@ -1,0 +1,122 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wrap-unwrap",
+  "title": "Wrap Unwrap",
+  "description": "Wrap and unwrap text using Markdown-aware reflow.",
+  "license": "MIT",
+  "author": "chrismessina",
+  "icon": "extension-icon.png",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "keywords": ["markdown", "reflow", "wrap", "unwrap", "format", "text", "prose", "fold"],
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "test": "tsx --test test/*.test.ts",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "tsx": "^4.20.0",
+    "typescript": "^5.8.2"
+  },
+  "preferences": [
+    {
+      "name": "source",
+      "title": "Preferred Source",
+      "description": "Choose a preferred text source. If no text is found there, the other is used.",
+      "type": "dropdown",
+      "required": false,
+      "default": "selection",
+      "data": [
+        { "title": "Selected Text", "value": "selection" },
+        { "title": "Clipboard", "value": "clipboard" }
+      ]
+    },
+    {
+      "name": "action",
+      "title": "Primary Action",
+      "description": "Choose whether the primary action should copy or paste the output.",
+      "type": "dropdown",
+      "required": false,
+      "default": "paste",
+      "data": [
+        { "title": "Paste", "value": "paste" },
+        { "title": "Copy", "value": "copy" }
+      ]
+    },
+    {
+      "name": "hideHUD",
+      "title": "HUD",
+      "description": "Suppress the success HUD after the action completes.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Hide HUD"
+    },
+    {
+      "name": "popToRoot",
+      "title": "After Action",
+      "description": "Return to Raycast root after completing the action. No-op when launched via hotkey with no Raycast UI visible.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Pop to Root After Action"
+    }
+  ],
+  "commands": [
+    {
+      "name": "wrap-text",
+      "title": "Wrap Text",
+      "description": "Wrap text at a configurable column width.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "width",
+          "title": "Wrap Column",
+          "description": "Wrap lines at this column. Must be a positive integer; falls back to 80 on invalid input.",
+          "type": "textfield",
+          "required": false,
+          "default": "80",
+          "placeholder": "80"
+        }
+      ]
+    },
+    {
+      "name": "unwrap-text",
+      "title": "Unwrap Text",
+      "description": "Reflow wrapped text into continuous paragraphs while preserving Markdown structure.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "hyphenation",
+          "title": "Hyphenation",
+          "description": "When joining lines, remove a trailing hyphen if it appears to be a soft line-break hyphen (e.g., `inter-` + `esting` becomes `interesting`).",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Strip Soft Hyphens"
+        },
+        {
+          "name": "keepBlankLines",
+          "title": "Blank Lines",
+          "description": "Preserve blank lines between paragraphs instead of collapsing runs.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Keep Blank Lines"
+        }
+      ]
+    }
+  ]
+}
