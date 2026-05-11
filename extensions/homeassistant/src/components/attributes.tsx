@@ -1,9 +1,9 @@
+import { getChartMarkdownAsync } from "@components/charts/chart";
 import { State } from "@lib/haapi";
 import { formatToHumanDateTime, stringToDate } from "@lib/utils";
 import { Action, ActionPanel, List } from "@raycast/api";
-import { useState } from "react";
-import { getChartMarkdownAsync } from "@components/charts/chart";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
 
 function ListDetail(props: { state: State; k: string }) {
   const { isLoading, data } = useCachedPromise(getChartMarkdownAsync, [props.state], {

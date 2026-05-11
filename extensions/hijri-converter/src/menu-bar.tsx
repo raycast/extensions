@@ -102,6 +102,18 @@ export default function Command() {
             }
           }}
         />
+        <MenuBarExtra.Item
+          title="Show Today's Date"
+          icon={Icon.Calendar}
+          shortcut={{ modifiers: ["cmd"], key: "t" }}
+          onAction={async () => {
+            try {
+              await launchCommand({ name: "show-today", type: LaunchType.UserInitiated });
+            } catch {
+              await showHUD("Failed to open today view");
+            }
+          }}
+        />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>

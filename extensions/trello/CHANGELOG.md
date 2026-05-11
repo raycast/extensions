@@ -1,5 +1,13 @@
 # Trello Changelog
 
+## [Update] - 2026-03-25
+
+- Rebuilt extension with Trello REST client
+- Added commands: Fetch Board filtered Cards
+- Card detail views show descriptions, attachments, checklists, and members
+- Forms use list-scoped search for move/delete to avoid mismatches
+- Rename "Todo" to "Card"
+
 ## [Update] - 2025-10-01
 
 Update dependencies and allow for multiple card assignees.

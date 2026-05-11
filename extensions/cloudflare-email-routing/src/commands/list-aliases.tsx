@@ -1,5 +1,17 @@
 import { useState } from "react";
-import { List, ActionPanel, Action, Icon, showToast, Toast, Alert, confirmAlert, Color, Keyboard } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+  Alert,
+  confirmAlert,
+  Color,
+  Keyboard,
+  useNavigation,
+} from "@raycast/api";
 import { useAliases } from "../hooks/useAliases";
 import { AliasDetail } from "../components/AliasDetail";
 import { AliasRule } from "../types";
@@ -10,11 +22,14 @@ export default function ListAliases() {
   const { aliases, isLoading, revalidate } = useAliases();
   const [showingDetail, setShowingDetail] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const { push } = useNavigation();
 
   const handleDelete = async (alias: AliasRule) => {
     const confirmed = await confirmAlert({
       title: "Delete Email Alias",
-      message: `Are you sure you want to delete the alias "${alias.email}"?`,
+      message: alias.isManaged
+        ? `Are you sure you want to delete the alias "${alias.email}"?`
+        : `This alias was not created by the extension. Deleting it will remove the Cloudflare routing rule for "${alias.email}".`,
       primaryAction: {
         title: "Delete",
         style: Alert.ActionStyle.Destructive,
@@ -42,6 +57,25 @@ export default function ListAliases() {
 
   const handleToggleDetail = () => {
     setShowingDetail(!showingDetail);
+  };
+
+  const handleEdit = async (alias: AliasRule) => {
+    if (!alias.isManaged) {
+      const confirmed = await confirmAlert({
+        title: "Edit Non-Managed Alias",
+        message:
+          "This alias was not created by the extension. Editing it will convert the rule name to the extension's managed format.",
+        primaryAction: {
+          title: "Continue",
+          style: Alert.ActionStyle.Default,
+        },
+      });
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    push(<CreateAlias alias={alias} />);
   };
 
   const getColorForTag = (label: string): Color => {
@@ -108,69 +142,76 @@ export default function ListAliases() {
           icon={Icon.Envelope}
         />
       ) : (
-        filteredAliases.map((alias) => (
-          <List.Item
-            key={alias.id}
-            title={alias.email}
-            subtitle={alias.name.description || "No description"}
-            accessories={[
-              {
-                tag: {
-                  value: alias.name.label || "Unlabeled",
-                  color: getColorForTag(alias.name.label || "Unlabeled"),
-                },
+        filteredAliases.map((alias) => {
+          const accessories: List.Item.Accessory[] = [
+            {
+              tag: {
+                value: alias.name.label || "Unlabeled",
+                color: getColorForTag(alias.name.label || "Unlabeled"),
               },
-              {
-                text: alias.createdAt.toLocaleDateString(),
-                icon: Icon.Calendar,
-              },
-            ]}
-            icon={{
-              source: Icon.Envelope,
-              tintColor: alias.enabled ? Color.Green : Color.Orange,
-            }}
-            detail={showingDetail ? <AliasDetail alias={alias} /> : undefined}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Email Address"
-                  content={alias.email}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
-                />
-                <Action.Push
-                  title="Edit Alias"
-                  icon={Icon.Pencil}
-                  target={<CreateAlias alias={alias} />}
-                  shortcut={{ modifiers: ["cmd"], key: "e" }}
-                />
-                <Action
-                  title="Delete Alias"
-                  icon={Icon.Trash}
-                  style={Action.Style.Destructive}
-                  onAction={() => handleDelete(alias)}
-                  shortcut={Keyboard.Shortcut.Common.Remove}
-                />
-                <Action
-                  title="Toggle Detail"
-                  icon={Icon.Sidebar}
-                  onAction={handleToggleDetail}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
-                />
-                <Action.CopyToClipboard
-                  title="Copy Forwarding Address"
-                  content={alias.forwardsToEmail}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-                />
-                <Action
-                  title="Refresh"
-                  icon={Icon.RotateClockwise}
-                  onAction={revalidate}
-                  shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
-                />
-              </ActionPanel>
-            }
-          />
-        ))
+            },
+          ];
+
+          if (alias.createdAt) {
+            accessories.push({
+              text: alias.createdAt.toLocaleDateString(),
+              icon: Icon.Calendar,
+            });
+          }
+
+          return (
+            <List.Item
+              key={alias.id}
+              title={alias.email}
+              subtitle={alias.name.description || "No description"}
+              accessories={accessories}
+              icon={{
+                source: Icon.Envelope,
+                tintColor: alias.enabled ? Color.Green : Color.Orange,
+              }}
+              detail={showingDetail ? <AliasDetail alias={alias} /> : undefined}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Email Address"
+                    content={alias.email}
+                    shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  />
+                  <Action
+                    title="Edit Alias"
+                    icon={Icon.Pencil}
+                    onAction={() => handleEdit(alias)}
+                    shortcut={{ modifiers: ["cmd"], key: "e" }}
+                  />
+                  <Action
+                    title="Delete Alias"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => handleDelete(alias)}
+                    shortcut={Keyboard.Shortcut.Common.Remove}
+                  />
+                  <Action
+                    title="Toggle Detail"
+                    icon={Icon.Sidebar}
+                    onAction={handleToggleDetail}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Forwarding Address"
+                    content={alias.forwardsToEmail}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                  />
+                  <Action
+                    title="Refresh"
+                    icon={Icon.RotateClockwise}
+                    onAction={revalidate}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })
       )}
     </List>
   );

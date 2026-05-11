@@ -35,9 +35,19 @@ export const {
   githubToken,
   releaseVersion,
   shuffleOnStart,
+  usePasteInsteadOfCopy,
 } = getPreferenceValues<ExtensionPreferences>();
 
 export const hasAccessToAi = environment.canAccess(AI);
+
+export const copyOrPaste = async (content: string | number | Clipboard.Content) => {
+  if (usePasteInsteadOfCopy) {
+    Clipboard.paste(content);
+  } else {
+    Clipboard.copy(content);
+    await showHUD("Copied to Clipboard");
+  }
+};
 
 export const buildDeeplinkParameters = (launchContext?: LaunchContext) => {
   if (!launchContext) return "";
@@ -159,8 +169,7 @@ export const copySvg = async ({ version, icon, pathOnly }: { version: string; ic
   });
   if (pathOnly) svg = svg.replace(/^.+ d="([^"]+)".+$/, "$1");
   toast.style = Toast.Style.Success;
-  Clipboard.copy(svg);
-  await showHUD("Copied to Clipboard");
+  copyOrPaste(svg);
 };
 
 export const cleanAssetPack = async () => {

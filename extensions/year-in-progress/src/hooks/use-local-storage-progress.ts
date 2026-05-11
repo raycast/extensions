@@ -98,6 +98,7 @@ export function useLocalStorageProgress(): [
   }, []);
 
   useEffect(() => {
+    if (state.isLoading) return;
     LocalStorage.setItem(
       STORAGE_KEY,
       JSON.stringify({ allProgress: state.allProgress, currMenubarProgressTitle: state.currMenubarProgressTitle })

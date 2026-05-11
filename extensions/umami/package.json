@@ -100,5 +100,8 @@
   "platforms": [
     "macOS",
     "Windows"
-  ]
+  ],
+  "overrides": {
+    "next": "15.5.10"
+  }
 }

@@ -124,11 +124,18 @@ export async function getCredentials(): Promise<CredentialWithAccounts[]> {
 /**
  * Get transactions for a date range
  */
-export async function getTransactions(
-  startDate: Date,
-  endDate: Date,
-  accountId?: number,
-): Promise<TransactionsResponse> {
+/**
+ * Get a single page of transactions
+ */
+export async function getTransactionPage(options: {
+  startDate: Date;
+  endDate: Date;
+  page?: number;
+  accountId?: number;
+  search?: string;
+}): Promise<TransactionsResponse> {
+  const { startDate, endDate, page = 1, accountId, search } = options;
+
   // Format dates as MM/DD/YYYY
   const formatDate = (date: Date): string => {
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -137,30 +144,37 @@ export async function getTransactions(
     return `${month}/${day}/${year}`;
   };
 
-  const params = new URLSearchParams({
+  const params: Record<string, string> = {
     start_date: formatDate(startDate),
     end_date: formatDate(endDate),
     exclude_corporate: "true",
     locale: "en",
     show_transactions_details: "true",
     transaction: "{}",
-  });
+    page: String(page),
+    per_page: "25",
+  };
 
   if (accountId) {
-    params.append("account_id", String(accountId));
+    params.account_id = String(accountId);
   }
 
-  const dateRange = `${formatDate(startDate)} to ${formatDate(endDate)}`;
+  if (search) {
+    params.search = search;
+  }
+
+  const searchParams = new URLSearchParams(params);
   console.debug(
-    `[API] getTransactions() - Fetching transactions${accountId ? ` for account ${accountId}` : ""} (${dateRange})`,
+    `[API] getTransactionPage() - page=${page}${search ? ` search="${search}"` : ""} (${formatDate(startDate)} to ${formatDate(endDate)})`,
   );
 
-  const response = await apiRequest<TransactionsResponse>(`/web/presenter/transactions.json?${params.toString()}`, {
-    method: "GET",
-  });
+  const response = await apiRequest<TransactionsResponse>(
+    `/web/presenter/transactions.json?${searchParams.toString()}`,
+    { method: "GET" },
+  );
 
   console.debug(
-    `[API] getTransactions() - Received ${response.transactions.length} transactions (total: ${response.transactions_details.transactions_total})`,
+    `[API] getTransactionPage() - Page ${page}: ${response.transactions.length} transactions (total: ${response.transactions_details.transactions_count})`,
   );
   return response;
 }

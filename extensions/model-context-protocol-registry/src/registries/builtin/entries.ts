@@ -301,6 +301,24 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
     },
   },
   {
+    name: "razuna",
+    title: "Razuna",
+    description:
+      "AI-powered digital asset management for teams. Connect your AI assistant to Razuna's platform to search, organize, and manage your files using natural language commands.",
+    icon: {
+      source: {
+        light:
+          "https://app.razuna.com/file/remote?i=6959b8cf1e1400a2cce596fc&f=t&dl=t&c=a0f49bf3ea58a5c444af4cc489e27dcf&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiIvZmlsZS9yZW1vdGU_aT02OTU5YjhjZjFlMTQwMGEyY2NlNTk2ZmMmZj10JmRsPXQmYz1hMGY0OWJmM2VhNThhNWM0NDRhZjRjYzQ4OWUyN2RjZiIsInR5cGUiOiJkaXJlY3QifQ.usKNeusn0MmM9xu7gi2OyWBoZ9fOEVeMPiXDrP0zMwo",
+        dark: "https://app.razuna.com/file/remote?i=6959b8cf1e1400a2cce596fc&f=t&dl=t&c=a0f49bf3ea58a5c444af4cc489e27dcf&token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1cmwiOiIvZmlsZS9yZW1vdGU_aT02OTU5YjhjZjFlMTQwMGEyY2NlNTk2ZmMmZj10JmRsPXQmYz1hMGY0OWJmM2VhNThhNWM0NDRhZjRjYzQ4OWUyN2RjZiIsInR5cGUiOiJkaXJlY3QifQ.usKNeusn0MmM9xu7gi2OyWBoZ9fOEVeMPiXDrP0zMwo",
+      },
+    },
+    homepage: "https://help.razuna.com/p/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.razuna.YOUR_REGION/sse?access-token=YOUR_ACCESS_TOKEN"],
+    },
+  },
+  {
     name: "Rube",
     title: "Rube - by Composio",
     description:
@@ -313,6 +331,17 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       env: {
         npm_config_yes: "true",
       },
+    },
+  },
+  {
+    name: "sanity",
+    title: "Sanity",
+    description: "Direct access to your Sanity projects (content, datasets, releases, schemas) and agent rules.",
+    icon: "sanity.svg",
+    homepage: "https://www.sanity.io/docs/ai/mcp-server",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://mcp.sanity.io", "--transport", "http-only"],
     },
   },
   {
@@ -644,6 +673,21 @@ export const OFFICIAL_ENTRIES: RegistryEntry[] = [
       args: ["-y", "mcp-remote", "https://mcp.linear.app/sse"],
     },
   },
+  {
+    name: "routemesh",
+    title: "RouteMesh",
+    description:
+      "Query multiple EVM blockchain chains from one MCP server. Pull on-chain data including blocks, transactions, logs, balances, and fees with RouteMesh routing and failover.",
+    icon: "https://routeme.sh/icon.png",
+    homepage: "https://github.com/routemesh/routemesh-mcp",
+    configuration: {
+      command: "npx",
+      args: ["-y", "@routemesh/mcp"],
+      env: {
+        ROUTEMESH_API_KEY: "YOUR_API_KEY_HERE",
+      },
+    },
+  },
 ];
 
 export const COMMUNITY_ENTRIES: RegistryEntry[] = [
@@ -683,6 +727,18 @@ export const COMMUNITY_ENTRIES: RegistryEntry[] = [
       env: {
         AIRTABLE_API_KEY: "YOUR_API_KEY_HERE",
       },
+    },
+  },
+  {
+    name: "alai",
+    title: "Alai",
+    description:
+      "Generate, edit, and export high-quality AI presentations to PDF, PPTX, or a shareable link. Supports themes, vibes, and creative slide variants.",
+    icon: "https://storage.getalai.com/Alai%20Logo%20-%20Gradient%20BG.png",
+    homepage: "https://getalai.com",
+    configuration: {
+      command: "npx",
+      args: ["-y", "mcp-remote", "https://slides-api.getalai.com/mcp/"],
     },
   },
   {

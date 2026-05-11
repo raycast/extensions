@@ -1,7 +1,11 @@
 import { Color, Icon, Image } from "@raycast/api";
 import { Remote, RemoteProvider } from "../../types/git-types";
 
-export function RemoteHostIcon(remoteHost: Remote): Image.ImageLike {
+export function RemoteHostIcon(remoteHost: Remote | undefined): Image.ImageLike {
+  if (!remoteHost) {
+    return { source: Icon.Globe, tintColor: Color.SecondaryText };
+  }
+
   if (remoteHost.avatarUrl) {
     return {
       source: remoteHost.avatarUrl,
@@ -13,7 +17,11 @@ export function RemoteHostIcon(remoteHost: Remote): Image.ImageLike {
   return RemoteHostProviderIcon(remoteHost.provider);
 }
 
-export function RemoteHostProviderIcon(provider: RemoteProvider): Image.ImageLike {
+export function RemoteHostProviderIcon(provider: RemoteProvider | undefined): Image.ImageLike {
+  if (!provider) {
+    return { source: Icon.Globe, tintColor: Color.SecondaryText };
+  }
+
   switch (provider) {
     case "GitHub":
       return { source: "github.svg", tintColor: Color.PrimaryText };

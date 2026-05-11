@@ -17,11 +17,71 @@
     "Security"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "region",
+      "type": "dropdown",
+      "title": "Data centre region",
+      "description": "Secrets are stored only in the region you select. Accounts and API tokens are separate per region — use the same region here as on onetimesecret.com when you create your account and API token.",
+      "required": false,
+      "default": "uk",
+      "data": [
+        {
+          "title": "Canada (Toronto)",
+          "value": "ca"
+        },
+        {
+          "title": "European Union (Nuremberg)",
+          "value": "eu"
+        },
+        {
+          "title": "Aotearoa New Zealand (Porirua)",
+          "value": "nz"
+        },
+        {
+          "title": "United Kingdom (London)",
+          "value": "uk"
+        },
+        {
+          "title": "United States (Oregon)",
+          "value": "us"
+        }
+      ]
+    },
+    {
+      "name": "username",
+      "type": "textfield",
+      "title": "Username",
+      "description": "Your Onetime Secret login name for this region. Optional — leave blank to create secrets anonymously. Required (with API token) for Recent Secrets.",
+      "required": false,
+      "placeholder": "Account username"
+    },
+    {
+      "name": "apiToken",
+      "type": "password",
+      "title": "API token",
+      "description": "Create an API token in your account on the regional site (e.g. uk.onetimesecret.com) and paste it here. Must match the selected region. Username and token are sent as HTTP Basic Auth — not stored by the extension beyond Raycast preferences.",
+      "required": false,
+      "placeholder": "API token from account settings"
+    }
+  ],
   "commands": [
     {
       "name": "index",
       "title": "Send One-Time Secret",
       "description": "Stores a secret on One-Time Secret and gives back the shareable URL.",
+      "mode": "view"
+    },
+    {
+      "name": "send-from-clipboard",
+      "title": "Send from Clipboard",
+      "description": "Creates a one-time secret from the clipboard (3h lifetime, no passphrase) and copies the link.",
+      "mode": "no-view"
+    },
+    {
+      "name": "recent-secrets",
+      "title": "Recent Secrets",
+      "description": "Lists recent secrets for your account (requires username and API token in preferences).",
       "mode": "view"
     }
   ],
@@ -35,19 +95,19 @@
   "ai": {
     "evals": [
       {
-        "input" : "@one-time-secret store \"santa is real\" for 1 week. passcode: \"christmas\"",
-        "mocks" : {
-          "send-one-time-secret" : "https://onetimesecret.com/secret/2uim0qy8e88vxm3saw4hceg3v0boaa6"
+        "input": "@one-time-secret store \"santa is real\" for 1 week. passcode: \"christmas\"",
+        "mocks": {
+          "send-one-time-secret": "https://uk.onetimesecret.com/secret/2uim0qy8e88vxm3saw4hceg3v0boaa6"
         },
-        "expected" : [
+        "expected": [
           {
-            "callsTool" : {
-              "arguments" : {
-                "lifetime" : "604800",
-                "passphrase" : "christmas",
-                "secret" : "santa is real"
+            "callsTool": {
+              "arguments": {
+                "lifetime": "604800",
+                "passphrase": "christmas",
+                "secret": "santa is real"
               },
-              "name" : "send-one-time-secret"
+              "name": "send-one-time-secret"
             }
           }
         ]
@@ -70,7 +130,7 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }
 }

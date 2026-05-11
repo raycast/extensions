@@ -1,5 +1,5 @@
 import { List, Icon, Color } from "@raycast/api";
-import { getProgressIcon } from "@raycast/utils";
+import { getFavicon, getProgressIcon } from "@raycast/utils";
 import { DiggerResult } from "../types";
 import { Actions } from "../actions";
 import { formatBytes, getStatusText } from "../utils/formatters";
@@ -12,9 +12,10 @@ interface OverviewProps {
 }
 
 export function Overview({ data, onRefresh, overallProgress }: OverviewProps) {
-  // Show progress icon until ALL fetches are complete (overallProgress = 1)
-  const isStillLoading = overallProgress < 1;
-  const progressIcon = isStillLoading ? getProgressIcon(overallProgress, Color.Blue) : Icon.Globe;
+  // Show favicon once data is available, otherwise show progress
+  const isStillLoading = !data;
+  const favicon = data?.url ? getFavicon(data.url) : null;
+  const progressIcon = isStillLoading ? getProgressIcon(overallProgress, Color.Blue) : (favicon ?? Icon.Globe);
 
   if (!data) {
     return (

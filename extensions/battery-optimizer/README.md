@@ -17,9 +17,9 @@ The purpose of limiting the battery's max charge is to prolong battery health an
  - `Battery Optimizer Menu Bar` shows the current battery charging threshold and enable/disable the Battery Optimizer in the menu bar.
 
 ## Preferences
- - Select your preferred battery management tool (BCLM or BATT) based on your macOS version
+ - Select your preferred battery management tool (BCLM or batt) based on your macOS version
    - For macOS versions before 15.0 (Sequoia), use BCLM
-   - For macOS 15.0 (Sequoia) and later, use BATT
+   - For macOS 15.0 (Sequoia) and later, use batt
  - Provide custom paths to the battery tool executables if needed
  - Configure whether battery optimization settings persist through extension's preferences screen
 ![battery-optimizer-3.png](media/battery-optimizer-3.png)
@@ -32,7 +32,7 @@ The purpose of limiting the battery's max charge is to prolong battery health an
 - When charging while system is shut down or sleeping, the charging can go beyond set value more than average 3%
 - Not compatible with macOS 15+ due to removal of the CHWA SMC key
 
-### BATT
+### batt
 - Fully compatible with macOS 15+ (Sequoia)
 - Supports limiting charging to any value between 0-100%
 - Provides more detailed battery status information
@@ -41,12 +41,12 @@ Note that in order to write values, both tools require root/administrator privil
 
 ## Installation Requirements
 
-To use this extension, you'll need to install either BCLM or BATT based on your macOS version:
+To use this extension, you'll need to install either BCLM or batt based on your macOS version:
 
 - BCLM: `brew install bclm` or visit [https://github.com/zackelia/bclm](https://github.com/zackelia/bclm)
-- BATT: `brew install batt` or visit [https://github.com/charlie0129/batt](https://github.com/charlie0129/batt) for installation instructions
+- batt: `brew install batt` or visit [https://github.com/charlie0129/batt](https://github.com/charlie0129/batt) for installation instructions
 
 # Acknowledgments
 - [BCLM](https://github.com/zackelia/bclm) - macOS command-line utility to limit max battery charge.
-- [BATT](https://github.com/charlie0129/batt) - macOS utility for battery limit management.
-- [battery-batt-optimizer](https://github.com/VatsalSy/battery-batt-control) - standalone Raycast extension that only supports Batt.
+- [batt](https://github.com/charlie0129/batt) - macOS utility for battery limit management.
+- [battery-batt-optimizer](https://github.com/VatsalSy/battery-batt-control) - standalone Raycast extension that only supports batt.

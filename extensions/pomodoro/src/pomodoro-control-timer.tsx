@@ -134,8 +134,8 @@ const handleQuote = (): string => {
   return `> ${quote.content} \n>\n> &dash; ${quote.author}`;
 };
 
-const EndOfInterval = () => {
-  let markdownContent = "# Interval Completed \n\n";
+const EndOfInterval = ({ intervalType }: { intervalType?: Interval["type"] }) => {
+  let markdownContent = `# ${intervalType === "focus" ? "Focus" : "Break"} Completed \n\n`;
   let usingGiphy = false;
 
   if (preferences.enableConfetti) {
@@ -154,6 +154,17 @@ const EndOfInterval = () => {
 
   if (preferences.enableQuote) {
     markdownContent += handleQuote() + "\n\n";
+  }
+
+  if (preferences.randomRewards && intervalType === "focus") {
+    const rewards = preferences.randomRewards
+      .split(",")
+      .map((s: string) => s.trim())
+      .filter(Boolean);
+    if (rewards.length > 0) {
+      const reward = rewards[Math.floor(Math.random() * rewards.length)];
+      markdownContent += `**Your reward:** ${reward}\n\n`;
+    }
   }
 
   if (preferences.enableImage) {
@@ -219,5 +230,9 @@ const EndOfInterval = () => {
 };
 
 export default function Command(props: { launchContext?: { currentInterval?: Interval } }) {
-  return props.launchContext?.currentInterval ? <EndOfInterval /> : <ActionsList />;
+  return props.launchContext?.currentInterval ? (
+    <EndOfInterval intervalType={props.launchContext.currentInterval.type} />
+  ) : (
+    <ActionsList />
+  );
 }

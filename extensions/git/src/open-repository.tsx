@@ -1,4 +1,4 @@
-import { Icon, List } from "@raycast/api";
+import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useGitRepository } from "./hooks/useGitRepository";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
@@ -12,16 +12,32 @@ import { useGitBranches } from "./hooks/useGitBranches";
 import { useGitCommits } from "./hooks/useGitCommits";
 import { useGitStash } from "./hooks/useGitStash";
 import { useGitStatus } from "./hooks/useGitStatus";
-import { GitView, BranchesState, StatusState, Stash, Commit, ListPagination, DetachedHead, Tag } from "./types";
+import {
+  GitView,
+  BranchesState,
+  StatusState,
+  Stash,
+  Commit,
+  ListPagination,
+  DetachedHead,
+  Tag,
+  Submodule,
+  Branch,
+  Remote,
+  Preferences,
+} from "./types";
 import { useGitRemotes } from "./hooks/useGitRemotes";
 import RemotesView from "./components/views/RemotesView";
 import TagsView from "./components/views/TagsView";
-import { Branch, Remote } from "./types";
+import { useGitSubmodules } from "./hooks/useGitSubmodules";
 import { GitManager } from "./utils/git-manager";
 import { useGitTags } from "./hooks/useGitTags";
+import SubmodulesView from "./components/views/SubmodulesView";
 
 interface Arguments {
   path: string;
+  currentView?: GitView;
+  shouldSaveVisit?: boolean;
 }
 
 export type BranchFilter =
@@ -72,6 +88,12 @@ export type RepositoryContext = {
     error: Error | undefined;
     revalidate: () => void;
   };
+  submodules: {
+    data: Submodule[];
+    isLoading: boolean;
+    error: Error | undefined;
+    revalidate: () => void;
+  };
 };
 
 export type NavigationContext = {
@@ -81,7 +103,13 @@ export type NavigationContext = {
 };
 
 export default function OpenRepository({ arguments: args }: { arguments: Arguments }) {
-  const [currentView, setCurrentView] = useCachedState<GitView>("git-current-view", "branches");
+  const preferences = getPreferenceValues<Preferences>();
+  const [currentView, setCurrentView] = args.currentView
+    ? useState<GitView>(args.currentView)
+    : preferences.initialTab === "recent"
+      ? useCachedState<GitView>("git-current-view", "branches")
+      : useState<GitView>(preferences.initialTab as GitView);
+
   const [repositoryPath, setRepositoryPath] = useState<string>(args.path);
 
   // Hook for working with a Git repository (synchronous validation)
@@ -92,10 +120,10 @@ export default function OpenRepository({ arguments: args }: { arguments: Argumen
 
   // Add repository to recent cache when successfully opened
   useEffect(() => {
-    if (gitManager && repositoryPath) {
+    if (gitManager && repositoryPath && args.shouldSaveVisit !== false) {
       visitRepository(repositoryPath);
     }
-  }, [repositoryPath, visitRepository]);
+  }, [repositoryPath, visitRepository, args.shouldSaveVisit]);
 
   // Validation error state
   if (error || !gitManager) {
@@ -112,6 +140,7 @@ export default function OpenRepository({ arguments: args }: { arguments: Argumen
 
   // Shared data hooks lifted to the top-level to persist across view switches
   const remotesContext = useGitRemotes(gitManager);
+  const submodulesContext = useGitSubmodules(gitManager);
   const branchesContext = useGitBranches(gitManager);
   const tagsContext = useGitTags(gitManager);
   const commitsContext = useGitCommits(gitManager, branchesContext.data);
@@ -121,6 +150,7 @@ export default function OpenRepository({ arguments: args }: { arguments: Argumen
   const rootContext: RepositoryContext & NavigationContext = {
     gitManager,
     remotes: remotesContext,
+    submodules: submodulesContext,
     branches: branchesContext,
     commits: commitsContext,
     stashes: stashesContext,
@@ -143,6 +173,8 @@ export default function OpenRepository({ arguments: args }: { arguments: Argumen
       return <TagsView {...rootContext} />;
     case "remotes":
       return <RemotesView {...rootContext} />;
+    case "submodules":
+      return <SubmodulesView {...rootContext} />;
     case "stashes":
       return <StashesView {...rootContext} />;
     case "files":

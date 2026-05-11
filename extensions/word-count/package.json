@@ -9,7 +9,8 @@
   "contributors": [
     "koayon",
     "chrismessina",
-    "litomore"
+    "litomore",
+    "aryan_thatte"
   ],
   "pastContributors": [
     "danulqua"
@@ -53,6 +54,20 @@
         "sentence",
         "paragraph",
         "capture"
+      ]
+    },
+    {
+      "name": "count-overlay",
+      "title": "Word Count in Overlay",
+      "subtitle": "Word Count",
+      "description": "Show word count in an overlay on top of other applications.",
+      "mode": "no-view",
+      "keywords": [
+        "overlay",
+        "word",
+        "character",
+        "sentence",
+        "paragraph"
       ]
     }
   ],

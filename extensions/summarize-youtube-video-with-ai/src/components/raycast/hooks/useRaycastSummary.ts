@@ -11,7 +11,6 @@ type GetRaycastSummaryProps = {
 };
 
 export const useRaycastSummary = ({ transcript, setSummaryIsLoading, setSummary }: GetRaycastSummaryProps) => {
-  const abortController = new AbortController();
   const preferences = getPreferenceValues() as RaycastPreferences;
   const { creativity, language } = preferences;
 
@@ -25,9 +24,10 @@ export const useRaycastSummary = ({ transcript, setSummaryIsLoading, setSummary 
     return;
   }
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: `abortController ` in dependencies will lead to an error
   useEffect(() => {
     if (!transcript) return;
+
+    const abortController = new AbortController();
 
     const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
 

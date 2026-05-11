@@ -1,4 +1,4 @@
-import { Action, ActionPanel, closeMainWindow, Icon, Image, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
 import { getFavicon, showFailureToast } from "@raycast/utils";
 import { focusTab, type Tab } from "../dia";
 import { getAccessories, getSubtitle } from "../utils";
@@ -9,7 +9,48 @@ interface TabListItemProps {
   onTabAction?: () => void;
 }
 
+interface Preferences {
+  defaultTabAction: "focus" | "open";
+}
+
 export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) {
+  const { defaultTabAction } = getPreferenceValues<Preferences>();
+
+  const focusAction = (
+    <Action
+      icon={Icon.ArrowRight}
+      title="Focus Existing Tab"
+      shortcut={defaultTabAction === "focus" ? undefined : { modifiers: ["cmd"], key: "return" }}
+      onAction={async () => {
+        try {
+          await focusTab(tab);
+          await closeMainWindow();
+          onTabAction?.();
+        } catch (error) {
+          await showFailureToast(error, {
+            title: "Failed focusing tab",
+          });
+        }
+      }}
+    />
+  );
+
+  const openAction = tab.url ? (
+    <Action.Open
+      icon={Icon.Globe}
+      title="Open in New Tab"
+      target={tab.url}
+      application="company.thebrowser.dia"
+      shortcut={defaultTabAction === "open" ? undefined : { modifiers: ["cmd"], key: "return" }}
+      onOpen={() => {
+        onTabAction?.();
+      }}
+    />
+  ) : null;
+
+  const primaryAction = defaultTabAction === "focus" ? focusAction : openAction;
+  const secondaryAction = defaultTabAction === "focus" ? openAction : focusAction;
+
   return (
     <List.Item
       icon={tab.url ? getFavicon(tab.url, { mask: Image.Mask.Circle }) : Icon.Globe}
@@ -18,30 +59,8 @@ export function TabListItem({ tab, searchText, onTabAction }: TabListItemProps) 
       accessories={getAccessories(tab)}
       actions={
         <ActionPanel>
-          <Action
-            icon={Icon.ArrowRight}
-            title="Focus Tab"
-            onAction={async () => {
-              try {
-                await focusTab(tab);
-                await closeMainWindow();
-                onTabAction?.();
-              } catch (error) {
-                await showFailureToast(error, {
-                  title: "Failed focusing tab",
-                });
-              }
-            }}
-          />
-          {tab.url && (
-            <Action.OpenInBrowser
-              title="Open URL in New Tab"
-              url={tab.url}
-              onOpen={() => {
-                onTabAction?.();
-              }}
-            />
-          )}
+          {primaryAction}
+          {secondaryAction}
           {searchText && (
             <Action.OpenInBrowser
               title="Search Google"

@@ -2,11 +2,11 @@ import { getPreferenceValues, MenuBarExtra, open, openCommandPreferences } from 
 import { dirname } from "node:path";
 import tildify from "./vendor/tildify";
 import { useRepos, useHasApplication } from "./hooks";
-import { FORK_BUNDLE_ID, REPO_FILE_PATHS } from "./constants";
+import { FORK_APP_IDENTIFIER, REPO_FILE_PATHS } from "./constants";
 
 const icon = { source: { light: "icon.png", dark: "icon@dark.png" } };
 const Command = () => {
-  const [hasFork, isHasForkLoading] = useHasApplication(FORK_BUNDLE_ID);
+  const [hasFork, isHasForkLoading] = useHasApplication(FORK_APP_IDENTIFIER);
   const [repos, isReposLoading] = useRepos(REPO_FILE_PATHS);
 
   const isLoading = isHasForkLoading || isReposLoading;
@@ -15,7 +15,7 @@ const Command = () => {
     return (
       <MenuBarExtra icon={icon}>
         <MenuBarExtra.Section>
-          <MenuBarExtra.Item title={`Fork.app not found`} />
+          <MenuBarExtra.Item title="Fork not found" />
           <MenuBarExtra.Item
             title="Click here to download it"
             onAction={async () => {

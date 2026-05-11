@@ -5,6 +5,13 @@ import { Deployment, DeploymentState, Team } from "../../types";
 import InspectDeployment from "../inspect-deployment";
 import SearchBarAccessory from "../search-projects/team-switch-search-accessory";
 import { FetchHeaders, getDeploymentURL, getFetchDeploymentsURL } from "../../vercel";
+import {
+  getDeploymentId,
+  isDeploymentCancellable,
+  runCancelDeployment,
+  CANCEL_DEPLOYMENT_ACTION,
+  CANCEL_DEPLOYMENT_SHORTCUT,
+} from "../../deployment";
 import { useFetch } from "@raycast/utils";
 
 const DeploymentsList = ({ projectId }: { projectId?: string }) => {
@@ -58,17 +65,27 @@ const DeploymentsList = ({ projectId }: { projectId?: string }) => {
                 {user && (
                   <Action.OpenInBrowser
                     title={`Visit on Vercel`}
-                    url={getDeploymentURL(
-                      team?.slug || user.username,
-                      deployment.name,
-                      /* @ts-expect-error Property id does not exist on type Deployment */
-                      deployment.id || deployment.uid,
-                    )}
+                    url={getDeploymentURL(team?.slug || user.username, deployment.name, getDeploymentId(deployment))}
                     icon={Icon.Link}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "opt"], key: "v" },
                       Windows: { modifiers: ["ctrl", "opt"], key: "v" },
                     }}
+                  />
+                )}
+                {isDeploymentCancellable(deployment) && (
+                  <Action
+                    title={CANCEL_DEPLOYMENT_ACTION.title}
+                    icon={Icon.Stop}
+                    style={Action.Style.Destructive}
+                    shortcut={CANCEL_DEPLOYMENT_SHORTCUT}
+                    onAction={() =>
+                      runCancelDeployment({
+                        deployment,
+                        teamId: selectedTeam || undefined,
+                        onSuccess: revalidate,
+                      })
+                    }
                   />
                 )}
                 <Action.CopyToClipboard

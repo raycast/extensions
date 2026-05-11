@@ -15,7 +15,7 @@ type StandardActionsProps = {
 export function StandardActions({ customActions, externalLinks }: StandardActionsProps) {
   return (
     <ActionPanel>
-      <Action.CopyToClipboard title="Copy Ccusage Command" content={getCCUsageCommand()} icon={Icon.Clipboard} />
+      <Action.CopyToClipboard title="Copy ccusage Command" content={getCCUsageCommand()} icon={Icon.Clipboard} />
       <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
 
       {customActions}

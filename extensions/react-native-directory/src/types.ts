@@ -2,12 +2,14 @@ export type QueryOrder =
   | "relevance"
   | "updated"
   | "added"
-  | "recommended"
+  | "released"
   | "quality"
   | "popularity"
   | "issues"
   | "downloads"
-  | "stars";
+  | "stars"
+  | "dependencies"
+  | "size";
 
 export type QueryOrderDirection = "descending" | "ascending";
 
@@ -19,6 +21,8 @@ export type Query = {
   fireos?: string;
   tvos?: string;
   visionos?: string;
+  vegaos?: string;
+  horizon?: string;
   web?: string;
   windows?: string;
   order?: QueryOrder;
@@ -30,6 +34,7 @@ export type Query = {
   hasImage?: string;
   hasTypes?: string;
   hasNativeCode?: string;
+  configPlugin?: string;
   isMaintained?: string;
   isPopular?: string;
   isRecommended?: string;
@@ -37,6 +42,13 @@ export type Query = {
   minPopularity?: string | number;
   minMonthlyDownloads?: string | number;
   newArchitecture?: string;
+  skipLibs?: string;
+  skipTools?: string;
+  skipTemplates?: string;
+  expoModule?: string;
+  nitroModule?: string;
+  turboModule?: string;
+  nightlyProgram?: string;
 };
 
 export type LibraryDataEntryType = {
@@ -48,24 +60,35 @@ export type LibraryDataEntryType = {
   windows?: boolean;
   macos?: boolean;
   fireos?: boolean;
+  horizon?: boolean;
   tvos?: boolean;
   visionos?: boolean;
-  unmaintained?: boolean | string;
+  vegaos?: boolean | string;
+  unmaintained?: boolean;
   dev?: boolean;
   template?: boolean;
   newArchitecture?: boolean | "new-arch-only";
   newArchitectureNote?: string;
+  configPlugin?: boolean | string;
   alternatives?: string[];
   npmPkg?: string;
   examples?: string[];
   images?: string[];
 };
 
+export type LibraryLicenseType = {
+  key: string;
+  name: string;
+  spdxId: string;
+  url: string;
+  id: string;
+};
+
 export type LibraryType = LibraryDataEntryType & {
   github: {
     name: string;
     fullName: string;
-    description: string;
+    description?: string;
     registry?: string;
     topics?: string[];
     hasTypes?: boolean;
@@ -73,6 +96,9 @@ export type LibraryType = LibraryDataEntryType & {
     isArchived?: boolean;
     isPrivate?: boolean;
     hasNativeCode: boolean;
+    hasReadme?: boolean;
+    configPlugin?: boolean;
+    moduleType?: "expo" | "nitro" | "turbo";
     urls: {
       repo: string;
       homepage?: string | null;
@@ -80,7 +106,10 @@ export type LibraryType = LibraryDataEntryType & {
     stats: {
       hasIssues: boolean;
       hasWiki: boolean;
+      hasProjects: boolean;
       hasSponsorships: boolean;
+      hasDiscussions: boolean;
+      hasVulnerabilityAlerts: boolean;
       hasTopics?: boolean;
       updatedAt: Date | string;
       createdAt: Date | string;
@@ -89,32 +118,24 @@ export type LibraryType = LibraryDataEntryType & {
       subscribers: number;
       stars: number;
       forks: number;
-      dependencies: number;
+      dependencies?: number;
     };
-    license: {
-      key: string;
-      name: string;
-      spdxId: string;
-      url: string;
-      id: string;
-    };
-    lastRelease?: {
-      name: string;
-      tagName: string;
-      createdAt: Date | string;
-      publishedAt: Date | string;
-      isPrerelease: boolean;
-    };
+    license: LibraryLicenseType;
   };
   npm?: {
     downloads?: number;
     weekDownloads?: number;
     size?: number;
+    versionsCount?: number;
+    latestRelease?: string;
+    latestReleaseDate?: string;
+    hasReadme?: boolean;
   };
   npmPkg: string;
   score: number;
   matchingScoreModifiers: string[];
   topicSearchString: string;
   popularity?: number;
-  matchScore: number;
+  matchScore?: number;
+  nightlyProgram?: boolean;
 };

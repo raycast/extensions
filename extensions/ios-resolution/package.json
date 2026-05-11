@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "ios-resolution",
   "title": "iOS Resolution",
-  "description": "Display properties of every iPhone, iPad, iPod touch and Apple Watch Apple ever made",
+  "description": "Display properties of every iPhone, MacBook, iPad, iPod touch and Apple Watch Apple ever made",
   "icon": "extension-icon.png",
   "author": "ertem_biyik",
+  "contributors": [
+    "kemar.christie"
+  ],
   "platforms": [
     "macOS",
     "Windows"

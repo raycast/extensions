@@ -1,5 +1,9 @@
 # Remove Paywall Changelog
 
+## [12ft.io removal] - 2026-02-04
+
+- Removed 12ft.io integration as the service is no longer operational
+
 ## [Dia browser support] - 2026-01-26
 
 - Added support for Dia browser in "Remove Paywall from Current Tab" command

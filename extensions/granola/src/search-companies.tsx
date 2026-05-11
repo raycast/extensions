@@ -1,4 +1,4 @@
-import { List, Action, ActionPanel, Icon, Color } from "@raycast/api";
+import { List, Action, ActionPanel, Icon } from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
 import { usePeople } from "./utils/usePeople";
 import { Company, Document, Doc } from "./utils/types";
@@ -7,6 +7,7 @@ import { getDocumentsByIds } from "./utils/fetchData";
 import { NoteListItem } from "./components/NoteComponents";
 import { useFavicon } from "./utils/toolHelpers";
 import { formatCompanyMeetingDate, sortCompanies, type CompanySortOption } from "./utils/searchUtils";
+import { mapColorToHex } from "./utils/iconMapper";
 
 export default function Command() {
   const { companies, isLoading, hasError } = usePeople();
@@ -137,7 +138,7 @@ function CompanyMeetingsList({ company }: { company: Company }) {
     >
       {meetings.length === 0 ? (
         <List.EmptyView
-          icon={{ source: Icon.Document, tintColor: Color.Blue }}
+          icon={{ source: Icon.Document, tintColor: mapColorToHex("default") }}
           title="No Meetings Found"
           description={`No meetings found for ${company.name}.`}
         />
@@ -188,7 +189,7 @@ function CompanyListItem({ company }: { company: Company }) {
     <List.Item
       title={displayTitle}
       subtitle={subtitle}
-      icon={favicon || { source: Icon.Building, tintColor: Color.Blue }}
+      icon={favicon || { source: Icon.Building, tintColor: mapColorToHex("default") }}
       accessories={accessories}
       detail={
         <List.Item.Detail

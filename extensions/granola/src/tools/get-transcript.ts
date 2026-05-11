@@ -1,4 +1,4 @@
-import { getTranscript } from "../utils/fetchData";
+import { getTranscriptSegments, formatDurationVerbose, calculateDurationFromSegments } from "../utils/fetchData";
 import { findDocumentById } from "../utils/toolHelpers";
 import { showFailureToast } from "@raycast/utils";
 import { toError } from "../utils/errorUtils";
@@ -23,6 +23,10 @@ type Output = {
    * The date when the note was created
    */
   date: string;
+  /**
+   * Meeting duration (e.g., "45 minutes", "1 hour 23 minutes"), or null if unavailable
+   */
+  duration: string | null;
 };
 
 /**
@@ -35,40 +39,57 @@ export default async function tool(input: Input): Promise<Output> {
       transcript: "",
       title: "Error: No note ID provided. Use list-meetings first to get a meeting ID.",
       date: new Date().toISOString(),
+      duration: null,
     };
   }
 
   try {
     const document = await findDocumentById(input.noteId);
+    const segments = await getTranscriptSegments(input.noteId);
 
-    const transcript = await getTranscript(input.noteId);
+    let transcript = "";
+    if (segments.length === 0) {
+      transcript = "Transcript not available for this note.";
+    } else {
+      segments.forEach((segment) => {
+        if (segment.source === "microphone") {
+          transcript += `**Me:** ${segment.text}\n\n`;
+        } else if (segment.source === "system") {
+          transcript += `**System:** ${segment.text}\n\n`;
+        } else {
+          transcript += `${segment.text}\n\n`;
+        }
+      });
+      transcript = transcript.trim();
+    }
 
-    // Defensive check for created_at date
+    const durationMs = calculateDurationFromSegments(segments);
+    const duration = durationMs ? formatDurationVerbose(durationMs) : null;
+
     let formattedDate: string;
     try {
       if (document.created_at && !isNaN(new Date(document.created_at).getTime())) {
         formattedDate = new Date(document.created_at).toISOString();
       } else {
-        // Fallback to current date if created_at is invalid or missing
         formattedDate = new Date().toISOString();
       }
-    } catch (dateError) {
-      // Fallback to current date if date parsing fails
+    } catch {
       formattedDate = new Date().toISOString();
     }
 
     return {
       transcript,
-      title: document.title || "Untitled Note",
+      title: document.title || "New note",
       date: formattedDate,
+      duration,
     };
   } catch (error) {
     showFailureToast(toError(error), { title: "Failed to fetch transcript" });
-    // Return a fallback response instead of throwing to avoid duplicate error handling
     return {
       transcript: "",
       title: "Error loading note",
       date: new Date().toISOString(),
+      duration: null,
     };
   }
 }

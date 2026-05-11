@@ -1,5 +1,26 @@
 # Things Changelog
 
+## [Quick Find] - 2026-03-17
+
+- Added a new command "Quick Find" to search across all areas, projects, and to-dos.
+
+## [Tag Filtering and Grouping] - 2026-02-23
+
+- Added tag filter dropdown to list views (matches Things native behavior)
+- Tag filtering supports full inheritance: todo → project → area tags
+- Tag filtering supports hierarchy: selecting a parent tag matches all descendants
+- Tags display with hierarchy indicator (e.g., "Work › Design")
+- Added "No Tag" filter option for untagged todos
+- Area tags and tag hierarchy are fetched inline with existing JXA calls, deferred until the list renders
+- Added preference to toggle grouping by project or area
+
+## [Reduce JXA Latency for List Fetching] - 2026-02-09
+
+- Todo list views and the menu bar command now fetch tags and lists in a single JXA call instead of two
+- The menu bar command and `get-lists` tool no longer fetch tags unnecessarily
+- The "Add New Project" form fetches tags and areas in a single JXA call instead of two
+- Consolidated collection-fetching functions into a single `getCollections` API
+
 ## [JXA Performance Optimization] - 2026-01-12
 
 - Reduced JXA fetch times by ~75% using `properties()` batching to minimize Apple Event overhead

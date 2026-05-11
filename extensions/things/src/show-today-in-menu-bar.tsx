@@ -11,7 +11,7 @@ import {
 } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 
-import { getListTodos, getLists, setTodoProperty, updateTodo, handleError, updateProject } from './api';
+import { getListTodos, getCollections, setTodoProperty, updateTodo, handleError, updateProject } from './api';
 import { listItems, menuBarStatusIcons } from './helpers';
 import { Todo } from './types';
 
@@ -20,7 +20,8 @@ const TASK_NAME_LENGTH_LIMIT = 30;
 export default function ShowTodayInMenuBar() {
   const { shouldShowShortcuts, displayTodo } = getPreferenceValues<Preferences.ShowTodayInMenuBar>();
   const { data: todos, isLoading, mutate } = useCachedPromise(() => getListTodos('today'));
-  const { data: lists } = useCachedPromise(() => getLists());
+  const { data } = useCachedPromise(() => getCollections('lists'));
+  const lists = data?.lists;
 
   const firstIncompleteTodo = todos?.find((item) => item.status === 'open');
   const tooltip = firstIncompleteTodo?.name || '';

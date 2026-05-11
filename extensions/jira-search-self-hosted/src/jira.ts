@@ -1,9 +1,8 @@
-import { getPreferenceValues } from "@raycast/api";
 import fetch, { FetchError, Response } from "node-fetch";
 import { ErrorText, PresentableError } from "./exception";
 import * as https from "https";
+import { prefs } from "./preferences";
 
-const prefs: { domain: string; token: string; unsafeHTTPS: boolean } = getPreferenceValues();
 export const jiraUrl = `https://${prefs.domain}`;
 
 const headers = {

@@ -7,7 +7,8 @@
   "author": "nchudleigh",
   "contributors": [
     "stelo",
-    "nagauta"
+    "nagauta",
+    "Aayush9029"
   ],
   "categories": [
     "Productivity"
@@ -28,7 +29,73 @@
       "subtitle": "superwhisper",
       "description": "Search through your recording history",
       "mode": "view",
-      "icon": "superwhisper-light-icon.png"
+      "icon": "superwhisper-light-icon.png",
+      "preferences": [
+        {
+          "name": "recordingDir",
+          "title": "Recording Directory",
+          "description": "Directory configured to store recording files",
+          "type": "directory",
+          "required": false,
+          "default": "~/Documents/superwhisper/recordings"
+        }
+      ]
+    },
+    {
+      "name": "copy-last-history",
+      "title": "Copy Last History",
+      "subtitle": "superwhisper",
+      "description": "Copy the most recent Superwhisper transcript to clipboard",
+      "mode": "no-view",
+      "icon": "superwhisper-light-icon.png",
+      "preferences": [
+        {
+          "name": "transcriptVariant",
+          "title": "Transcript Variant",
+          "description": "Transcript variant to copy",
+          "type": "dropdown",
+          "required": true,
+          "default": "processed",
+          "data": [
+            {
+              "title": "AI Processed",
+              "value": "processed"
+            },
+            {
+              "title": "Unprocessed",
+              "value": "unprocessed"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "paste-last-history",
+      "title": "Paste Last History",
+      "subtitle": "superwhisper",
+      "description": "Paste the most recent Superwhisper transcript into the active app",
+      "mode": "no-view",
+      "icon": "superwhisper-light-icon.png",
+      "preferences": [
+        {
+          "name": "transcriptVariant",
+          "title": "Transcript Variant",
+          "description": "Transcript variant to paste",
+          "type": "dropdown",
+          "required": true,
+          "default": "processed",
+          "data": [
+            {
+              "title": "AI Processed",
+              "value": "processed"
+            },
+            {
+              "title": "Unprocessed",
+              "value": "unprocessed"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "select-mode",
@@ -58,14 +125,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.64.4",
+    "@raycast/api": "^1.103.0",
     "@raycast/utils": "^1.16.1",
     "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^20.8.10",
-    "@types/react": "^18.2.27",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
     "eslint": "^8.51.0",
     "prettier": "^3.1.1",
     "typescript": "^5.2.2"
@@ -82,5 +149,8 @@
     "extends": [
       "@raycast"
     ]
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

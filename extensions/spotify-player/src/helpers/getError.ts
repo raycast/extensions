@@ -1,5 +1,11 @@
 import { HttpError } from "oazapfts";
 
+export function isRateLimitError(error: unknown): boolean {
+  if (error instanceof HttpError && error.status === 429) return true;
+  if (error instanceof Error && error.message.includes("API rate limit exceeded")) return true;
+  return false;
+}
+
 type ErrorObj = {
   status: number;
   message: string;

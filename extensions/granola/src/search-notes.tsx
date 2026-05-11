@@ -1,4 +1,4 @@
-import { List, Icon, Color } from "@raycast/api";
+import { List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
 import { useGranolaData } from "./utils/useGranolaData";
@@ -6,8 +6,7 @@ import { useFolders } from "./utils/useFolders";
 import { getFoldersFromAPI } from "./utils/folderHelpers";
 import { Doc } from "./utils/types";
 import Unresponsive from "./templates/unresponsive";
-import { sortNotesByDate, NoteListItem } from "./components/NoteComponents";
-import { mapIconToHeroicon, mapColorToHex, getDefaultIconUrl } from "./utils/iconMapper";
+import { sortNotesByDate, NoteListItem, FolderFilterDropdown } from "./components/NoteComponents";
 import { toError } from "./utils/errorUtils";
 import { getFolderNoteResults } from "./utils/searchUtils";
 
@@ -58,7 +57,7 @@ export default function Command() {
   const activeFolders = foldersWithIds.length > 0 ? foldersWithIds : folders;
 
   // Optimized memoization: compute only what's needed, reuse arrays where possible
-  const { filteredNotes, notesNotInFolders, folderNoteCounts } = useMemo(() => {
+  const { filteredNotes, folderNoteCounts } = useMemo(() => {
     const allNotes = noteData?.data?.docs || [];
     const foldersToProcess = activeFolders.length > 0 ? activeFolders : folders;
     return getFolderNoteResults(allNotes, foldersToProcess, selectedFolder);
@@ -72,7 +71,7 @@ export default function Command() {
     return <Unresponsive />;
   }
 
-  const untitledNoteTitle = "Untitled Note";
+  const untitledNoteTitle = "New note";
 
   if (noteData?.data) {
     return (
@@ -81,41 +80,20 @@ export default function Command() {
         searchBarPlaceholder={
           selectedFolder === "all"
             ? "Search all notes..."
-            : selectedFolder === "orphans"
-              ? "Search notes not in folders..."
-              : `Search notes in ${folders.find((f) => f.id === selectedFolder)?.title || "folder"}...`
+            : selectedFolder === "my-notes"
+              ? "Search notes..."
+              : selectedFolder === "shared"
+                ? "Search shared notes..."
+                : `Search notes in ${folders.find((f) => f.id === selectedFolder)?.title || "folder"}...`
         }
         searchBarAccessory={
-          <List.Dropdown tooltip="Filter by Folder" storeValue={true} onChange={setSelectedFolder}>
-            <List.Dropdown.Section title="All Notes">
-              <List.Dropdown.Item title="All Folders" value="all" icon={Icon.Folder} />
-              {notesNotInFolders.length > 0 && (
-                <List.Dropdown.Item
-                  title={`Notes Not in Folders (${notesNotInFolders.length})`}
-                  value="orphans"
-                  icon={{ source: Icon.Document, tintColor: Color.SecondaryText }}
-                />
-              )}
-            </List.Dropdown.Section>
-
-            {!foldersLoading && folders.length > 0 && (
-              <List.Dropdown.Section title="Folders">
-                {folders
-                  .sort((a, b) => a.title.localeCompare(b.title)) // Sort alphabetically
-                  .map((folder) => (
-                    <List.Dropdown.Item
-                      key={folder.id}
-                      title={`${folder.title} (${folderNoteCounts[folder.id] ?? "..."})`}
-                      value={folder.id}
-                      icon={{
-                        source: folder.icon ? mapIconToHeroicon(folder.icon.value) : getDefaultIconUrl(),
-                        tintColor: folder.icon ? mapColorToHex(folder.icon.color) : Color.Blue,
-                      }}
-                    />
-                  ))}
-              </List.Dropdown.Section>
-            )}
-          </List.Dropdown>
+          <FolderFilterDropdown
+            folders={folders}
+            foldersLoading={foldersLoading}
+            folderNoteCounts={folderNoteCounts}
+            onChange={setSelectedFolder}
+            variant="search"
+          />
         }
       >
         {sortNotesByDate(filteredNotes).map((doc: Doc) => (

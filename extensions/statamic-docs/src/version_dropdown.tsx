@@ -7,6 +7,10 @@ export function VersionDropdown(props: { versions: Version[]; id: string; onChan
       return `${version.branch}-alpha`;
     }
 
+    if (version.beta) {
+      return `${version.branch}-beta`;
+    }
+
     return version.branch;
   };
 

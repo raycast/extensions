@@ -1,6 +1,10 @@
 # Fork Repositories Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-01-28
+
+- Added Windows support with platform-specific Fork data paths and app detection
+
+## [Bug Fix] - 2026-01-26
 
 - Added support for Fork's `repositories.toml` file with fallback to `repositories.json`.
 

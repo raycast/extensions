@@ -1,5 +1,19 @@
 # letterboxd Changelog
 
+## [Fix] - 2026-04-23
+
+- Fixed the issue with the rating histogram not working
+
+## [Fix] - 2026-04-06
+
+- Fixed genre tag color for better visibility in light mode
+
+## [Maintenance] - 2026-02-07
+
+- Add support for Windows platform
+- Bump all dependencies to the latest
+- Update to use fetch instead of got
+
 ## [Fix search movies not working] - 2025-09-15
 
 - Fix the issue with the search movies not working

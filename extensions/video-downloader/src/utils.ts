@@ -160,6 +160,21 @@ const hasCodec = ({ vcodec, acodec }: Format) => {
   };
 };
 
+export const MP3_FORMAT_ID = "bestaudio#mp3";
+
+const mp3Format: Format = {
+  format_id: "bestaudio",
+  ext: "mp3",
+  video_ext: "none",
+  protocol: "https",
+  resolution: "audio only",
+  vcodec: "none",
+  acodec: "mp3",
+  tbr: null,
+  filesize: undefined,
+  filesize_approx: undefined,
+};
+
 export const getFormats = (video?: Video) => {
   const videoKey = "Video";
   const audioOnlyKey = "Audio Only";
@@ -167,6 +182,8 @@ export const getFormats = (video?: Video) => {
   const audioOnly: Format[] = [];
 
   if (!video) return { [videoKey]: videoWithAudio, [audioOnlyKey]: audioOnly };
+
+  audioOnly.push(mp3Format);
 
   for (const format of video.formats.slice().reverse()) {
     const { hasAcodec, hasVcodec } = hasCodec(format);

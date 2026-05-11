@@ -9,8 +9,7 @@ If you just installed an app and it's not showing up in the list, try restarting
 
 
 ### Why is my uninstaller app not supported?
-This script supports AppCleaner, Pearcleaner, TrashMe 3, and App Cleaner & Uninstaller. If you have an uninstaller app that you would like to see supported, please open an issue [here](https://github.com/tborychowski/raycast-appcleaner/issues).
-
+You can now pick any app as your uninstaller from the extension preferences. Make sure the selected app supports receiving an app path as an argument (e.g. via `open -a <uninstaller> <app-path>`). Apps like AppCleaner, Pearcleaner, TrashMe 3, and App Cleaner & Uninstaller are known to work well.
 
 
 ## Acknowledgements

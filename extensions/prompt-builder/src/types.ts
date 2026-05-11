@@ -10,10 +10,10 @@ export const tones = [
   "Persuasive",
   "Empathetic",
 ] as const;
-type Tone = (typeof tones)[number];
+export type Tone = (typeof tones)[number];
 
-export const creativity = ["None", "Low", "Medium", "High"];
-type Creativity = (typeof creativity)[number];
+export const creativity = ["None", "Low", "Medium", "High"] as const;
+export type Creativity = (typeof creativity)[number];
 
 export interface FormValues {
   role?: string;

@@ -238,7 +238,7 @@ export function useSearchFiles() {
 
       setIsLoading(true);
       try {
-        const result = await searchFiles(searchText, currentDrive?.id, sortConfig.field);
+        const result = await searchFiles(searchText, currentDrive?.id, currentFolder?.id, sortConfig.field);
         if (isCancelled) return;
         setItems(result.items);
         setNextLink(result.nextLink);

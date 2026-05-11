@@ -1,11 +1,12 @@
-import { Action } from "@raycast/api";
+import { Action, getPreferenceValues } from "@raycast/api";
 
 import { getPageName, Page } from "../../utils/notion";
 import { urlForPreferredMethod } from "../../utils/openPage";
 
 export default function ActionCreateQuicklink({ page }: { page: Page }) {
   if (!page.url) return null;
-  const link = urlForPreferredMethod(page.url);
+  const open_in = getPreferenceValues<Preferences>().open_in;
+  const link = urlForPreferredMethod(page.url, open_in);
 
   return (
     <Action.CreateQuicklink

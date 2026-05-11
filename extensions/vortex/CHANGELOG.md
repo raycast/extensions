@@ -1,5 +1,12 @@
 # Alby Changelog
 
+## [Fixes] - 2026-02-17
+
+- Renamed "Recent Transactions" command to "Transactions".
+- Updated Transactions command icon to PNG format for CI icon validation.
+- Removed incompatible flat ESLint config to use the existing ESLint 8 setup.
+- Fixed Cashu redeem import path to unblock extension build output.
+
 ## [Features] - 2025-01-26
 
 - Added Support for creating invoices in fiat.

@@ -50,7 +50,8 @@ export default function Command() {
       .filter((result: SearchResult | undefined) => !!result)
       .filter((result: SearchResult) => {
         return !removedKeys.includes(result.key);
-      });
+      })
+      .slice(0, 500);
   }, [fzfResults, removedKeys]);
 
   return (

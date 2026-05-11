@@ -3,7 +3,7 @@ import { MutatePromise, showFailureToast, useForm } from "@raycast/utils";
 import { formatRFC3339 } from "date-fns";
 import { useEffect, useMemo, useState } from "react";
 import { updateObject } from "../../api";
-import { useMembers, useSearch, useSpaces, useTagsMap, useTypes } from "../../hooks";
+import { useSpaces, useTagsMap, useTypes } from "../../hooks";
 import {
   IconFormat,
   ObjectIcon,
@@ -22,8 +22,8 @@ import {
   fetchTypeKeysForLists,
   getNumberFieldValidations,
   isEmoji,
-  memberMatchesSearch,
 } from "../../utils";
+import { ObjectPropertyDropdown } from "../ObjectPropertyDropdown";
 
 interface UpdateObjectFormValues {
   name?: string;
@@ -44,12 +44,9 @@ interface UpdateObjectFormProps {
 export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject }: UpdateObjectFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
-  const [objectSearchText, setObjectSearchText] = useState("");
   const [typeKeysForLists, setTypeKeysForLists] = useState<string[]>([]);
   const [selectedTypeKey, setSelectedTypeKey] = useState(object.type?.key ?? "");
 
-  const { objects, objectsError, isLoadingObjects } = useSearch(spaceId, objectSearchText, []);
-  const { members, membersError, isLoadingMembers } = useMembers(spaceId, objectSearchText);
   const { spaces, spacesError, isLoadingSpaces } = useSpaces();
   const { types, typesError, isLoadingTypes } = useTypes(spaceId);
 
@@ -63,21 +60,13 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
       .map((prop) => prop.id),
   );
 
-  const filteredMembers = useMemo(() => {
-    return members.filter((member) => memberMatchesSearch(member, objectSearchText));
-  }, [members, objectSearchText]);
-
-  const combinedObjects = useMemo(() => {
-    return [...(objects || []), ...filteredMembers];
-  }, [objects, filteredMembers]);
-
   useEffect(() => {
-    if (objectsError || tagsError || membersError || spacesError || typesError) {
-      showFailureToast(objectsError || tagsError || membersError || spacesError || typesError, {
+    if (tagsError || spacesError || typesError) {
+      showFailureToast(tagsError || spacesError || typesError, {
         title: "Failed to load data",
       });
     }
-  }, [objectsError, tagsError, membersError, spacesError, typesError]);
+  }, [tagsError, spacesError, typesError]);
 
   useEffect(() => {
     const fetchTypesForLists = async () => {
@@ -260,9 +249,7 @@ export function UpdateObjectForm({ spaceId, object, mutateObjects, mutateObject 
   return (
     <Form
       navigationTitle={`Edit ${object.type?.name ?? "Object"}`}
-      isLoading={
-        isLoading || isLoadingObjects || isLoadingTags || isLoadingMembers || isLoadingTypes || isLoadingSpaces
-      }
+      isLoading={isLoading || isLoadingTags || isLoadingTypes || isLoadingSpaces}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Changes" icon={Icon.Check} onSubmit={handleSubmit} />
@@ -426,29 +413,15 @@ It supports:
             );
           case PropertyFormat.Objects:
             return (
-              <Form.Dropdown
+              <ObjectPropertyDropdown
                 key={property.id}
-                {...restItemProps}
+                propertyKey={property.key}
                 title={property.name}
                 value={String(value ?? "")}
-                onSearchTextChange={setObjectSearchText}
-                throttle={true}
-                placeholder="Select object"
-              >
-                {!objectSearchText && (
-                  <Form.Dropdown.Item
-                    key="none"
-                    value=""
-                    title="No Object"
-                    icon={{ source: "icons/type/document.svg", tintColor: defaultTintColor }}
-                  />
-                )}
-                {combinedObjects
-                  .filter((candidate) => candidate.id !== object.id)
-                  .map((object) => (
-                    <Form.Dropdown.Item key={object.id} value={object.id} title={object.name} icon={object.icon} />
-                  ))}
-              </Form.Dropdown>
+                spaceId={spaceId}
+                excludeObjectId={object.id}
+                restItemProps={restItemProps}
+              />
             );
 
           default:

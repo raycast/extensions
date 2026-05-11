@@ -81,6 +81,7 @@ const ProjectItem = (props: { project: project }) => {
       icon={{ source: icon }}
       title={props.project.name}
       subtitle={props.project.company?.name}
+      accessories={[{ text: props.project.projectKey }]}
       actions={<Actions projectID={props.project.id} isBillable={props.project.isBillableByDefault} />}
     />
   );

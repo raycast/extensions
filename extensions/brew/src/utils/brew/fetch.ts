@@ -6,29 +6,33 @@
  * Performance optimization: Uses a two-phase loading strategy:
  * 1. Fast initial load with `brew list --versions` (returns minimal data quickly)
  * 2. Background fetch with `brew info --json=v2 --installed` for full metadata
- *
- * When `useInternalApi` preference is enabled, uses Homebrew's internal API:
- * - Formula: ~1 MB vs ~30 MB (96% smaller, much faster)
- * - Cask: Similar size but in JWS format
  */
 
 import * as fs from "fs/promises";
-import { execSync } from "child_process";
 import {
   Cask,
   Formula,
   InstallableResults,
   InstalledMap,
   OutdatedResults,
-  Remote,
   DownloadProgressCallback,
+  ChunkedRemote,
+  CacheIndex,
+  IndexEntry,
 } from "../types";
-import { cachePath, fetchRemote } from "../cache";
+import {
+  cachePath,
+  downloadRemoteToCache,
+  getChunkedCacheConfig,
+  isChunkedCacheValid,
+  buildChunkedCache,
+  loadIndex,
+  loadItemsFromChunks,
+  IndexExtractor,
+} from "../cache";
 import { brewPath } from "./paths";
 import { execBrew } from "./commands";
 import { brewLogger, cacheLogger } from "../logger";
-import { preferences } from "../preferences";
-import { downloadAndCacheInternalFormulae, logInternalApiConfig } from "./internal-api";
 
 /// Cache Paths
 
@@ -41,8 +45,41 @@ const caskCachePath = cachePath("cask.json");
 const formulaURL = "https://formulae.brew.sh/api/formula.json";
 const caskURL = "https://formulae.brew.sh/api/cask.json";
 
-const formulaRemote: Remote<Formula> = { url: formulaURL, cachePath: formulaCachePath };
-const caskRemote: Remote<Cask> = { url: caskURL, cachePath: caskCachePath };
+const formulaRemote: ChunkedRemote<Formula> = {
+  url: formulaURL,
+  cachePath: formulaCachePath,
+  chunkedConfig: getChunkedCacheConfig("formula"),
+};
+
+const caskRemote: ChunkedRemote<Cask> = {
+  url: caskURL,
+  cachePath: caskCachePath,
+  chunkedConfig: getChunkedCacheConfig("cask"),
+};
+
+/** Extract index entry from a Formula */
+const extractFormulaIndex: IndexExtractor<Formula> = (item, chunkNumber, indexInChunk): IndexEntry => {
+  return {
+    id: item.name,
+    n: item.name.toLowerCase(),
+    d: item.desc?.toLowerCase().slice(0, 100),
+    a: item.aliases?.length > 0 ? item.aliases.map((a) => a.toLowerCase()) : undefined,
+    c: chunkNumber,
+    i: indexInChunk,
+  };
+};
+
+/** Extract index entry from a Cask */
+const extractCaskIndex: IndexExtractor<Cask> = (item, chunkNumber, indexInChunk): IndexEntry => {
+  return {
+    id: item.token,
+    n: item.token.toLowerCase(),
+    d: item.desc?.toLowerCase().slice(0, 100),
+    a: item.name?.length > 0 ? item.name.map((n) => n.toLowerCase()) : undefined,
+    c: chunkNumber,
+    i: indexInChunk,
+  };
+};
 
 /**
  * Check if the search cache files exist (formula.json and cask.json).
@@ -259,7 +296,6 @@ async function brewFetchInstallableResults(
         durationMs: duration,
         responseSizeBytes,
         responseSizeKb: `${responseSizeKb} KB`,
-        usingInternalApi: preferences.useInternalApi,
       });
     } catch (err) {
       cacheLogger.error("Failed to write installed cache", {
@@ -383,150 +419,201 @@ export async function brewUpdate(cancel?: AbortSignal): Promise<void> {
   brewLogger.log("Brew update completed");
 }
 
-// Track if we've logged internal API config (only log once per session)
-let hasLoggedInternalApiConfig = false;
+/// Chunked Cache Functions
 
-// Mutex to prevent concurrent internal API cache updates
-// This prevents memory exhaustion when multiple search calls happen simultaneously
-let formulaeCacheUpdateInProgress: Promise<void> | null = null;
+// Mutex to prevent concurrent chunked cache builds
+let formulaeChunkedBuildInProgress: Promise<void> | null = null;
+let casksChunkedBuildInProgress: Promise<void> | null = null;
 
 /**
- * Check if the internal API cache needs updating.
- * Uses HEAD request to check Last-Modified header.
+ * Ensure chunked cache exists and is valid.
+ * Downloads source JSON to disk (without parsing) and builds chunks.
  */
-async function needsInternalApiCacheUpdate(internalApiUrl: string, localCachePath: string): Promise<boolean> {
+async function ensureChunkedCache<T>(
+  remote: ChunkedRemote<T>,
+  extractIndex: IndexExtractor<T>,
+  onProgress?: DownloadProgressCallback,
+  signal?: AbortSignal,
+): Promise<void> {
+  const isValid = await isChunkedCacheValid(remote.chunkedConfig, remote.url, signal);
+  if (isValid) {
+    return;
+  }
+
+  // Check if stale cache exists (for fallback on failure)
+  let hasStaleCacheIndex = false;
   try {
-    const stats = await fs.stat(localCachePath);
-    if (stats.size === 0) return true;
+    await fs.stat(remote.chunkedConfig.indexPath);
+    await fs.stat(remote.chunkedConfig.metaPath);
+    hasStaleCacheIndex = true;
+  } catch {
+    // No stale cache available
+  }
 
-    const response = await fetch(internalApiUrl, { method: "HEAD" });
-    const lastModified = Date.parse(response.headers.get("last-modified") ?? "");
+  try {
+    // Need to rebuild - download source JSON to disk WITHOUT parsing into memory
+    // This is critical to avoid heap exhaustion on initial load
+    brewLogger.log("Building chunked cache", { type: remote.chunkedConfig.type });
 
-    if (lastModified > stats.mtimeMs) {
-      cacheLogger.log("Internal API cache outdated", {
-        cachePath: localCachePath,
-        cacheTime: stats.mtimeMs,
-        remoteTime: lastModified,
+    // Download to disk only (no parsing)
+    await downloadRemoteToCache(remote.url, remote.cachePath, onProgress, signal);
+
+    // Now build the chunked cache from the downloaded file
+    // This streams through the file and writes chunks incrementally
+    await buildChunkedCache(remote.cachePath, remote.url, remote.chunkedConfig, extractIndex, onProgress, signal);
+  } catch (err) {
+    // Always re-throw abort errors - the caller handles these
+    if (err instanceof Error && err.name === "AbortError") throw err;
+
+    // For other errors, fall back to stale cache if available
+    if (hasStaleCacheIndex) {
+      brewLogger.warn("Chunked cache rebuild failed, using stale cache", {
+        type: remote.chunkedConfig.type,
+        error: err instanceof Error ? err.message : String(err),
       });
-      return true;
+      return;
     }
 
-    cacheLogger.log("Internal API cache up to date", {
-      cachePath: localCachePath,
-      cacheAgeMs: Date.now() - stats.mtimeMs,
-    });
-    return false;
-  } catch {
-    // Cache doesn't exist or error checking
-    return true;
+    // No stale cache to fall back to
+    throw err;
   }
 }
 
 /**
- * Fetch all formulae from the remote API.
- * Uses internal API when `useInternalApi` preference is enabled.
- * Falls back to public API if internal API fails.
- *
- * Hybrid approach (when useInternalApi is enabled):
- * 1. Downloads smaller internal API (~1 MB vs ~30 MB)
- * 2. Converts to standard array format and writes to cache
- * 3. Uses existing stream-json parsing for memory-efficient reading
- *
- * Internal API benefits:
- * - ~1 MB download vs ~30 MB (96% smaller)
- * - Much faster initial load
- * - Note: No description field (search by name only)
+ * Fetch the chunked index for formulae.
+ * Builds chunked cache if it doesn't exist or is stale.
  */
-export async function brewFetchFormulae(onProgress?: DownloadProgressCallback): Promise<Formula[]> {
-  if (preferences.useInternalApi) {
-    if (!hasLoggedInternalApiConfig) {
-      logInternalApiConfig();
-      hasLoggedInternalApiConfig = true;
-    }
+export async function fetchFormulaIndex(
+  onProgress?: DownloadProgressCallback,
+  signal?: AbortSignal,
+): Promise<CacheIndex> {
+  // Check if already cached in memory
+  if (formulaRemote.index) {
+    return formulaRemote.index;
+  }
+
+  // Check if fetch is already in progress (deduplication)
+  if (formulaRemote.indexFetch) {
+    // Don't pass our signal to the existing build - just await it
     try {
-      // Check if we need to update the cache from internal API
-      const internalApiUrl = "https://formulae.brew.sh/api/internal/formula." + getSystemTagForCache() + ".jws.json";
-      const needsUpdate = await needsInternalApiCacheUpdate(internalApiUrl, formulaCachePath);
-
-      if (needsUpdate) {
-        // Use mutex to prevent concurrent cache updates (memory exhaustion)
-        if (formulaeCacheUpdateInProgress) {
-          brewLogger.log("Waiting for existing formulae cache update to complete");
-          await formulaeCacheUpdateInProgress;
-        } else {
-          // Download internal API and write to standard cache format
-          brewLogger.log("Updating formulae cache from internal API");
-          formulaeCacheUpdateInProgress = downloadAndCacheInternalFormulae(formulaCachePath, onProgress);
-          try {
-            await formulaeCacheUpdateInProgress;
-          } finally {
-            formulaeCacheUpdateInProgress = null;
-          }
-        }
+      const result = await formulaRemote.indexFetch;
+      // Check abort after awaiting another caller's build
+      if (signal?.aborted) {
+        const error = new Error("Aborted");
+        error.name = "AbortError";
+        throw error;
       }
-
-      // Now use the standard fetchRemote path which uses stream-json
-      // The cache file is already populated, so this will just read it
-      return await fetchRemote(formulaRemote, onProgress);
-    } catch (error) {
-      // Internal API failed, fall back to public API
-      brewLogger.warn("Internal formulae API failed, falling back to public API", {
-        error: error instanceof Error ? error.message : String(error),
-      });
-      return await fetchRemote(formulaRemote, onProgress);
+      return result;
+    } catch (err) {
+      // If the existing build was aborted but OUR signal is still active, retry
+      if (err instanceof Error && err.name === "AbortError" && !signal?.aborted) {
+        return fetchFormulaIndex(onProgress, signal);
+      }
+      throw err;
     }
   }
-  return await fetchRemote(formulaRemote, onProgress);
-}
 
-/**
- * Fetch all casks from the remote API.
- * Always uses the public API with stream-json parsing for memory efficiency.
- *
- * Note: The internal API for casks is ~13 MB (vs ~30 MB public) but requires
- * complex JWS parsing that adds memory pressure. The public API's stream-json
- * parsing is more memory-efficient overall, so we use it exclusively for casks.
- *
- * The internal API is only used for formulae where the size difference is
- * significant (~1 MB vs ~30 MB, 96% smaller).
- */
-export async function brewFetchCasks(onProgress?: DownloadProgressCallback): Promise<Cask[]> {
-  // Always use public API for casks - stream-json parsing is more memory-efficient
-  // than the JWS parsing overhead of the internal API
-  return await fetchRemote(caskRemote, onProgress);
-}
+  // Start fetch with deduplication
+  formulaRemote.indexFetch = (async () => {
+    // Use mutex to prevent concurrent builds
+    if (formulaeChunkedBuildInProgress) {
+      brewLogger.log("Waiting for existing formula chunked cache build");
+      await formulaeChunkedBuildInProgress;
+    } else {
+      formulaeChunkedBuildInProgress = ensureChunkedCache(formulaRemote, extractFormulaIndex, onProgress, signal);
+      try {
+        await formulaeChunkedBuildInProgress;
+      } finally {
+        formulaeChunkedBuildInProgress = null;
+      }
+    }
 
-/**
- * Get the system tag for internal API URLs.
- * This is a local helper to avoid circular imports.
- */
-function getSystemTagForCache(): string {
-  // Use the same logic as internal-api.ts
-  const arch = process.arch === "arm64" ? "arm64" : "x86_64";
+    // Load index
+    const index = await loadIndex(formulaRemote.chunkedConfig);
+    formulaRemote.index = index;
+    return index;
+  })();
 
-  // Get macOS version name
-  let osVersion = "sequoia"; // default
   try {
-    const swVersOutput = execSync("sw_vers -productVersion", {
-      encoding: "utf8",
-      timeout: 5000,
-      stdio: ["pipe", "pipe", "pipe"],
-    }).trim();
-    const majorVersion = parseInt(swVersOutput.split(".")[0], 10);
+    return await formulaRemote.indexFetch;
+  } finally {
+    formulaRemote.indexFetch = undefined;
+  }
+}
 
-    const versionNames: Record<number, string> = {
-      15: "sequoia",
-      14: "sonoma",
-      13: "ventura",
-      12: "monterey",
-      11: "big_sur",
-    };
-    osVersion = versionNames[majorVersion] || "sequoia";
-  } catch {
-    // Use default
+/**
+ * Fetch the chunked index for casks.
+ * Builds chunked cache if it doesn't exist or is stale.
+ */
+export async function fetchCaskIndex(onProgress?: DownloadProgressCallback, signal?: AbortSignal): Promise<CacheIndex> {
+  // Check if already cached in memory
+  if (caskRemote.index) {
+    return caskRemote.index;
   }
 
-  return `${arch}_${osVersion}`;
+  // Check if fetch is already in progress (deduplication)
+  if (caskRemote.indexFetch) {
+    // Don't pass our signal to the existing build - just await it
+    try {
+      const result = await caskRemote.indexFetch;
+      // Check abort after awaiting another caller's build
+      if (signal?.aborted) {
+        const error = new Error("Aborted");
+        error.name = "AbortError";
+        throw error;
+      }
+      return result;
+    } catch (err) {
+      // If the existing build was aborted but OUR signal is still active, retry
+      if (err instanceof Error && err.name === "AbortError" && !signal?.aborted) {
+        return fetchCaskIndex(onProgress, signal);
+      }
+      throw err;
+    }
+  }
+
+  // Start fetch with deduplication
+  caskRemote.indexFetch = (async () => {
+    // Use mutex to prevent concurrent builds
+    if (casksChunkedBuildInProgress) {
+      brewLogger.log("Waiting for existing cask chunked cache build");
+      await casksChunkedBuildInProgress;
+    } else {
+      casksChunkedBuildInProgress = ensureChunkedCache(caskRemote, extractCaskIndex, onProgress, signal);
+      try {
+        await casksChunkedBuildInProgress;
+      } finally {
+        casksChunkedBuildInProgress = null;
+      }
+    }
+
+    // Load index
+    const index = await loadIndex(caskRemote.chunkedConfig);
+    caskRemote.index = index;
+    return index;
+  })();
+
+  try {
+    return await caskRemote.indexFetch;
+  } finally {
+    caskRemote.indexFetch = undefined;
+  }
+}
+
+/**
+ * Fetch specific formulae by their index entries.
+ * Only loads the chunks containing the requested items.
+ */
+export async function fetchFormulaItems(entries: IndexEntry[]): Promise<Formula[]> {
+  return loadItemsFromChunks<Formula>(formulaRemote.chunkedConfig, entries);
+}
+
+/**
+ * Fetch specific casks by their index entries.
+ * Only loads the chunks containing the requested items.
+ */
+export async function fetchCaskItems(entries: IndexEntry[]): Promise<Cask[]> {
+  return loadItemsFromChunks<Cask>(caskRemote.chunkedConfig, entries);
 }
 
 /**

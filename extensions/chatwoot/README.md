@@ -38,6 +38,7 @@ This is a Raycast extension for [Chatwoot](https://chatwoot.com/) - _The modern,
 ## 🧪 Tested On
 
 - **v4.6.0** _Build 7ab60d9_ (self-hosted via **Coolify**)
+- **v4.0.3** _Build 8f39e6257092dece3898ad13f20ebfd135af126f_ (self-hosted via **Dokploy**)
 
 ## ➕ More
 

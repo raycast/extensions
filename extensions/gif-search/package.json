@@ -17,7 +17,8 @@
     "spookywy",
     "seanparkross",
     "YourMCGeek",
-    "thomas"
+    "thomas",
+    "tim_gailey"
   ],
   "license": "MIT",
   "categories": [
@@ -29,6 +30,7 @@
     "Tenor",
     "Giphy",
     "Finer",
+    "Klipy",
     "clips"
   ],
   "commands": [
@@ -111,6 +113,10 @@
         {
           "title": "Copy GIF Link",
           "value": "copyGifUrl"
+        },
+        {
+          "title": "Paste GIF Link",
+          "value": "pasteGifUrl"
         },
         {
           "title": "Copy GIF Markdown",
@@ -487,6 +493,63 @@
         {
           "title": "Vietnamese",
           "value": "vi"
+        }
+      ]
+    },
+    {
+      "name": "klipyApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Klipy API Key",
+      "description": "API key for Klipy service. Get your key at partner.klipy.com"
+    },
+    {
+      "name": "klipyLocale",
+      "type": "dropdown",
+      "required": false,
+      "title": "Klipy Locale",
+      "description": "Select the locale for the Klipy API",
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Chinese Simplified",
+          "value": "zh-CN"
+        },
+        {
+          "title": "Chinese Traditional",
+          "value": "zh-TW"
         }
       ]
     }

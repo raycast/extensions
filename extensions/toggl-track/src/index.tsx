@@ -1,13 +1,16 @@
-import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
+import { useEffect, useRef } from "react";
 
+import { liteModeSync, isLiteModeColdStart, isLiteModeSyncDue } from "@/api";
 import { removeTimeEntry } from "@/api/timeEntries";
 import TimeEntryForm from "@/components/CreateTimeEntryForm";
 import RunningTimeEntry from "@/components/RunningTimeEntry";
 import UpdateTimeEntryForm from "@/components/UpdateTimeEntryForm";
 import { ExtensionContextProvider } from "@/context/ExtensionContext";
 import { formatSeconds } from "@/helpers/formatSeconds";
+import { liteMode } from "@/helpers/preferences";
 import Shortcut from "@/helpers/shortcuts";
 import { Verb, withToast } from "@/helpers/withToast";
 import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
@@ -15,6 +18,38 @@ import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
 import { useTotalDurationToday } from "@/hooks/useTotalDurationToday";
 
 dayjs.extend(duration);
+
+function SyncAction({
+  revalidateRunningTimeEntry,
+  revalidateTimeEntries,
+}: {
+  revalidateRunningTimeEntry: () => void;
+  revalidateTimeEntries: () => void;
+}) {
+  if (!liteMode) return null;
+  return (
+    <Action
+      title="Sync from Toggl"
+      icon={Icon.ArrowClockwise}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      onAction={async () => {
+        await showToast({ style: Toast.Style.Animated, title: "Syncing from Toggl..." });
+        try {
+          await liteModeSync();
+          revalidateRunningTimeEntry();
+          revalidateTimeEntries();
+          await showToast({ style: Toast.Style.Success, title: "Sync complete" });
+        } catch (e) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Sync failed",
+            message: e instanceof Error ? e.message : String(e),
+          });
+        }
+      }}
+    />
+  );
+}
 
 function ListView() {
   const {
@@ -29,6 +64,51 @@ function ListView() {
 
   const totalDurationToday = useTotalDurationToday(timeEntries, runningTimeEntry);
   const { resumeTimeEntry } = useTimeEntryActions(revalidateRunningTimeEntry, revalidateTimeEntries);
+
+  // Lite mode: seed cache on first launch or when critical keys are missing
+  const coldStartDone = useRef(false);
+  useEffect(() => {
+    if (!liteMode || coldStartDone.current) return;
+    if (!isLiteModeColdStart()) return;
+    coldStartDone.current = true;
+    (async () => {
+      await showToast({ style: Toast.Style.Animated, title: "Syncing from Toggl..." });
+      try {
+        await liteModeSync();
+        revalidateRunningTimeEntry();
+        revalidateTimeEntries();
+        await showToast({ style: Toast.Style.Success, title: "Sync complete" });
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cache empty — sync when rate limit resets",
+          message: "Use ⌘⇧R to sync manually",
+        });
+      }
+    })();
+  }, []);
+
+  // Low data mode: check every 10 minutes if an hourly sync is due
+  const syncingRef = useRef(false);
+  useEffect(() => {
+    if (!liteMode) return;
+    const check = () => {
+      if (syncingRef.current || isLiteModeColdStart() || !isLiteModeSyncDue()) return;
+      syncingRef.current = true;
+      liteModeSync()
+        .then(() => {
+          revalidateRunningTimeEntry();
+          revalidateTimeEntries();
+        })
+        .catch(() => {})
+        .finally(() => {
+          syncingRef.current = false;
+        });
+    };
+    check();
+    const id = setInterval(check, 600_000); // 10 minutes
+    return () => clearInterval(id);
+  }, [revalidateRunningTimeEntry, revalidateTimeEntries]);
 
   return (
     <List
@@ -61,6 +141,10 @@ function ListView() {
                   </ExtensionContextProvider>
                 }
               />
+              <SyncAction
+                revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                revalidateTimeEntries={revalidateTimeEntries}
+              />
             </ActionPanel>
           }
         />
@@ -91,7 +175,11 @@ function ListView() {
                     icon={Icon.Pencil}
                     target={
                       <ExtensionContextProvider>
-                        <UpdateTimeEntryForm timeEntry={timeEntry} revalidateTimeEntries={revalidateTimeEntries} />
+                        <UpdateTimeEntryForm
+                          timeEntry={timeEntry}
+                          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                          revalidateTimeEntries={revalidateTimeEntries}
+                        />
                       </ExtensionContextProvider>
                     }
                   />
@@ -110,6 +198,10 @@ function ListView() {
                     }
                   />
                   <ActionPanel.Section>
+                    <SyncAction
+                      revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                      revalidateTimeEntries={revalidateTimeEntries}
+                    />
                     <Action
                       title="Delete Time Entry"
                       icon={Icon.Trash}

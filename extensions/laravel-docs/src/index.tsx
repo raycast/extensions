@@ -1,37 +1,21 @@
-import { ActionPanel, List, Action, showToast, Toast } from "@raycast/api";
+import { ActionPanel, List, Action, showToast, Toast, environment } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import algoliasearch from "algoliasearch/lite";
 import striptags from "striptags";
 import { VersionDropdown } from "./version_dropdown";
-/* eslint-disable @typescript-eslint/no-var-requires */
-const glob = require("glob"); // No ES version is provided.
-/* eslint-enable @typescript-eslint/no-var-requires */
+import path from "path";
+import fs from "fs";
 
-type docList = {
-  [key: string]: {
-    url: string;
-    title: string;
-  }[];
-};
+const docsPath = path.join(environment.assetsPath, "documentation");
 
-const DOCS: { [key: string]: docList } = Object.fromEntries(
-  glob
-    .sync(__dirname + "/assets/documentation/*.json")
-    // only keep the version from the path as key, result: [['master', {...}], ['10.x', {...}]]
-    .map((path: string) => [/(?<version>[^/]+)\.json/.exec(path)?.groups?.version, require(path)])
-    // Sort these putting non-numeric "versions" first.
-    .sort(function (a: [string], b: [string]) {
-      const aVersion: RegExpMatchArray | null = a[0].match(/\d+/);
-      const bVersion: RegExpMatchArray | null = b[0].match(/\d+/);
-      if (aVersion === null) {
-        return -1;
-      }
-
-      if (bVersion === null) {
-        return 1;
-      }
-
-      return (bVersion[0] as unknown as number) - (aVersion[0] as unknown as number);
+const DOCS = Object.fromEntries(
+  fs
+    .readdirSync(docsPath)
+    .filter((file) => file.endsWith(".json"))
+    .map((file) => {
+      const version = file.replace(".json", "");
+      const content = JSON.parse(fs.readFileSync(path.join(docsPath, file), "utf-8"));
+      return [version, content];
     })
 );
 
@@ -66,6 +50,15 @@ type LaravelDocsHit = {
   };
 };
 
+type DocsItem = {
+  url: string;
+  title: string;
+};
+
+type DocsSection = {
+  [section: string]: DocsItem[];
+};
+
 export default function main() {
   const algoliaClient = useMemo(() => {
     return algoliasearch(APPID, APIKEY);
@@ -75,7 +68,7 @@ export default function main() {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
 
-  const [searchResults, setSearchResults] = useState<any[] | undefined>();
+  const [searchResults, setSearchResults] = useState<LaravelDocsHit[] | undefined>();
   const [version, setVersion] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -100,6 +93,29 @@ export default function main() {
     return hierarchy.join(" > ");
   };
 
+  const sortedVersions = Object.keys(DOCS).sort((a, b) => {
+    if (!/\d/.test(a)) return -1;
+    if (!/\d/.test(b)) return 1;
+
+    const parse = (v: string) =>
+      v
+        .match(/\d+(\.\d+)?/g)?.[0]
+        .split(".")
+        .map(Number) ?? [];
+
+    const av = parse(a);
+    const bv = parse(b);
+
+    const length = Math.max(av.length, bv.length);
+
+    for (let i = 0; i < length; i++) {
+      const diff = (bv[i] ?? 0) - (av[i] ?? 0);
+      if (diff !== 0) return diff;
+    }
+
+    return 0;
+  });
+
   const search = async (query = "") => {
     if (query === "") {
       return;
@@ -113,12 +129,12 @@ export default function main() {
       })
       .then((res) => {
         setIsLoading(false);
-        return res.hits;
+        return res.hits as LaravelDocsHit[];
       })
       .catch((err) => {
         setIsLoading(false);
         showToast(Toast.Style.Failure, "Error searching Laravel Documentation", err.message);
-        return [];
+        return [] as LaravelDocsHit[];
       });
   };
 
@@ -130,7 +146,7 @@ export default function main() {
     return (
       <List
         isLoading={isLoading}
-        searchBarAccessory={<VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />}
+        searchBarAccessory={<VersionDropdown id="version" versions={sortedVersions} onChange={setVersion} />}
       />
     );
   }
@@ -146,7 +162,7 @@ export default function main() {
       throttle={false}
       isLoading={isLoading}
       onSearchTextChange={async (query) => setSearchResults(await search(query))}
-      searchBarAccessory={<VersionDropdown id="version" versions={Object.keys(DOCS)} onChange={setVersion} />}
+      searchBarAccessory={<VersionDropdown id="version" versions={sortedVersions} onChange={setVersion} />}
     >
       {searchResults?.map((hit: LaravelDocsHit) => {
         return (
@@ -164,10 +180,10 @@ export default function main() {
           />
         );
       }) ||
-        Object.entries(currentDocs).map(([section, items]: Array<any>) => {
+        Object.entries(currentDocs as DocsSection).map(([section, items]) => {
           return (
             <List.Section title={section} key={section}>
-              {items.map((item: any) => {
+              {items.map((item: DocsItem) => {
                 return (
                   <List.Item
                     key={item.url}

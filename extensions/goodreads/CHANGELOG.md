@@ -1,5 +1,13 @@
 # goodreads Changelog
 
+## [Windows Support] - 2026-03-01
+
+- Add Windows platform support
+
+## [Security Fixes] - 2026-01-23
+
+- Fix security vulnerabilities in dependencies
+
 ## [Recently Viewed Feature] - 2025-08-06
 
 - Add recently viewed book functionality

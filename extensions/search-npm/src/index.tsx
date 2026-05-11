@@ -10,32 +10,35 @@ import { HistoryListItem } from "@/components/HistoryListItem";
 import { PackageListItem } from "@/components/PackagListItem";
 import type { ExtensionPreferences } from "@/types";
 
-const API_PATH = "https://registry.npmjs.org/-/v1/search?text=";
+const API_PATH = "https://registry.npmjs.org/-/v1/search";
 
 export default function PackageList() {
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState<string>("");
   const [history, setHistory] = useCachedState<HistoryItem[]>("history", []);
   const [favorites, fetchFavorites] = useFavorites();
   const { historyCount, showLinkToSearchResultsInListView } = getPreferenceValues<ExtensionPreferences>();
 
-  const { isLoading, data, revalidate } = useFetch<FetchResponseObject[]>(
-    `${API_PATH}${searchTerm.replace(/\s/g, "+")}`,
-    {
-      execute: !!searchTerm,
-      onError: (error) => {
-        if (searchTerm) {
-          console.error(error);
-          showToast(Toast.Style.Failure, "Could not fetch packages");
-        }
-      },
-      parseResponse: async (response) => {
-        return ((await response.json()) as NpmFetchResponse).objects;
-      },
-      keepPreviousData: true,
-    },
-  );
+  const url = `${API_PATH}?${new URLSearchParams({ text: debouncedSearchTerm })}`;
 
-  const debounced = useDebouncedCallback(
+  // If the search term is empty or only 1 character - the request will always result in 'Bad Request' error, so there's no reason to make it
+  const canSearch = Boolean(debouncedSearchTerm) && debouncedSearchTerm.length > 1;
+
+  const { isLoading, data } = useFetch<FetchResponseObject[]>(url, {
+    execute: canSearch,
+    onError: (error: unknown) => {
+      if (debouncedSearchTerm) {
+        console.error(error);
+        showToast(Toast.Style.Failure, "Could not fetch packages");
+      }
+    },
+    parseResponse: async (response) => {
+      return ((await response.json()) as NpmFetchResponse).objects;
+    },
+    keepPreviousData: true,
+  });
+
+  const debouncedUpdateHistory = useDebouncedCallback(
     async (value) => {
       const history = await addToHistory({ term: value, type: "search" });
       setHistory(history);
@@ -44,11 +47,21 @@ export default function PackageList() {
     { debounceOnServer: true },
   );
 
+  const debouncedUpdateSearchTerm = useDebouncedCallback(
+    (value: string) => {
+      setDebouncedSearchTerm(value.trim());
+    },
+    500,
+    { debounceOnServer: true },
+  );
+
   useEffect(() => {
+    debouncedUpdateSearchTerm(searchTerm);
     if (searchTerm) {
-      debounced(searchTerm);
+      debouncedUpdateHistory(searchTerm);
     } else {
-      revalidate();
+      debouncedUpdateHistory.cancel();
+      debouncedUpdateSearchTerm.cancel();
     }
   }, [searchTerm]);
 

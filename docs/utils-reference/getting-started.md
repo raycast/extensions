@@ -16,6 +16,14 @@ npm install --save @raycast/utils
 
 ## Changelog
 
+### v2.2.4
+
+- Fixed an issue where an avatar's initials wouldn't be centered
+
+### v2.2.3
+
+- Fixed an issue with `useSQL` on Windows where the query would refuse to be executed because the database is locked
+
 ### v2.2.2
 
 - Fix `useCachedState` to preserve Date objects more precisely.

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "grpcui",
+  "preferences": [
+    {
+      "name": "terminal",
+      "title": "Terminal",
+      "description": "Which terminal to use for launching gRPC UI",
+      "type": "dropdown",
+      "required": false,
+      "default": "Terminal",
+      "data": [
+        {
+          "title": "Terminal",
+          "value": "Terminal"
+        },
+        {
+          "title": "iTerm",
+          "value": "iTerm"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
+        }
+      ]
+    }
+  ],
+  "title": "gRPC UI",
+  "description": "Quickly launch gRPC UI for your saved services directly from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "loqa-s",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-services",
+      "title": "Search Services",
+      "description": "Browse and launch your saved gRPC services",
+      "mode": "view"
+    },
+    {
+      "name": "add-service",
+      "title": "Add Service",
+      "description": "Add a new gRPC service to your list",
+      "mode": "view"
+    },
+    {
+      "name": "import-services",
+      "title": "Import Services",
+      "description": "Import multiple gRPC services from a JSON file",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.5",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

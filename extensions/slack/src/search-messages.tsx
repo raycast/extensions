@@ -164,7 +164,7 @@ function Search() {
 
                 <ActionPanel.Section>
                   <ActionPanel.Submenu
-                    title="Sort By"
+                    title="Sort by"
                     icon={Icon.ArrowUp}
                     shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   >

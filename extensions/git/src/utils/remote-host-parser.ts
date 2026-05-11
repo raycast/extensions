@@ -44,16 +44,19 @@ export function remoteHostParser(url: string): RemoteHostParserResult {
 function githubParser(_url: string, parsed: URLComponents): RemoteHostParserResult {
   const { protocol: scheme, hostname, path } = parsed;
 
+  const organizationName = (() => {
+    const match = path.match(/^([^/]+)/);
+    return match ? match[1] : undefined;
+  })();
+  const repositoryName = (() => {
+    const match = path.match(/\/([^/]+)$/);
+    return match ? match[1] : undefined;
+  })();
+
   return {
     provider: "GitHub" as RemoteProvider,
-    organizationName: (() => {
-      const match = path.match(/^([^/]+)/);
-      return match ? match[1] : undefined;
-    })(),
-    repositoryName: (() => {
-      const match = path.match(/\/([^/]+)$/);
-      return match ? match[1] : undefined;
-    })(),
+    organizationName,
+    repositoryName,
     get avatarUrl() {
       return this.organizationName ? `${scheme}://${hostname}/${this.organizationName}.png?size=64` : undefined;
     },
@@ -151,6 +154,17 @@ function githubParser(_url: string, parsed: URLComponents): RemoteHostParserResu
             url: `${scheme}://${hostname}/${path}/actions`,
             icon: Icon.Play,
             shortcut: { modifiers: ["cmd"], key: "b" },
+          },
+          {
+            title: "Deployments",
+            url: `${scheme}://${hostname}/${path}/deployments`,
+            icon: Icon.Rocket,
+            shortcut: { modifiers: ["cmd"], key: "d" },
+          },
+          {
+            title: "GitHub Page",
+            url: `${scheme}://${organizationName}.github.io/${repositoryName}/`,
+            icon: Icon.Globe,
           },
           {
             title: "Projects",

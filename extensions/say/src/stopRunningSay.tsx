@@ -1,5 +1,5 @@
 import { closeMainWindow } from "@raycast/api";
-import { killRunningSay } from "mac-say";
+import { killRunningSay } from "./speech.js";
 
 export default async function StopRunningSay() {
   try {

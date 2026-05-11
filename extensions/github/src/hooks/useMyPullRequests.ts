@@ -8,7 +8,7 @@ import { PullRequestFieldsFragment } from "../generated/graphql";
 import { pluralize } from "../helpers";
 import { getRepositoryFilter } from "../helpers/repository";
 
-enum SectionType {
+export enum SectionType {
   Open = "Open",
   Assigned = "Assigned",
   Mentioned = "Mentioned",

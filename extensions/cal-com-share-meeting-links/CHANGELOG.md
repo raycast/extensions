@@ -1,5 +1,39 @@
 # Cal.com Share Meeting Links Changelog
 
+## [Fix + improve View Bookings] - 2026-04-14
+
+- Fix a bug where View Bookings only showed the first 100 bookings (hiding all recent + upcoming bookings for users with longer histories)
+- Group bookings into Pending Confirmation, Upcoming, Past, and Cancelled sections
+- Pending Confirmation appears at the top so bookings awaiting your response don't get missed
+- Past bookings now lazy-load on scroll (50 per page)
+- Cancelled bookings hidden by default; toggle with ⌘ H
+
+## [Add: Manage Out of Office] - 2026-04-14
+
+- Adds a new "Out of Office" command
+- Lists current and upcoming OOO entries with reason-tinted icons and date ranges
+- Create, edit, and delete OOO entries (date range, reason, optional notes)
+- Set a redirect target by picking a teammate from a searchable dropdown (with avatars)
+- Quick links to the Out of Office and General Account settings on cal.com (covers scheduled timezone change, which has no public API)
+
+## [Add: View and manage availability schedules] - 2026-04-14
+
+- Adds a new "View Availability" command
+- List all schedules; each shows working hours, timezone, and default status
+- Edit working hours per day (up to 3 time ranges)
+- Add, edit, and delete date overrides (including full-day "Unavailable")
+- Change a schedule's timezone or name
+- Set any schedule as the default
+
+## [Fix: Migrate to Cal.com API v2] - 2026-04-14
+
+- Migrate all API calls from Cal.com API v1 to v2 (v1 was permanently shut down on April 8, 2026)
+- Update authentication from query parameter to Bearer token header
+- Add required `cal-api-version` headers for all endpoints
+- Replace booking status update with separate confirm/decline endpoints (removes "Pending" option which is no longer supported)
+- Update cancel booking from DELETE to POST with request body
+- Use v2 field names (`meetingUrl`, `location`, `lengthInMinutes`, `recurrence`, etc.)
+
 ## [Generate private links] - 2025-10-28
 
 - Adds an action inside "Share Meeting Link" to generate and copy a one-time use private link (⌘ + S).

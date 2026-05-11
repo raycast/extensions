@@ -1,0 +1,180 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "letta",
+  "title": "Letta Agents",
+  "description": "Chat with Letta stateful agents that remember and learn over time",
+  "icon": "icon.png",
+  "author": "wesseljt",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Letta",
+      "description": "Chat with Letta stateful agents that remember and learn",
+      "mode": "view",
+      "keywords": [
+        "letta",
+        "chat",
+        "agent",
+        "ai",
+        "memory"
+      ]
+    },
+    {
+      "name": "agents",
+      "title": "Manage Agents",
+      "description": "View, search, and manage your Letta agents",
+      "mode": "view",
+      "keywords": [
+        "agents",
+        "manage",
+        "list"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "project1Name",
+      "title": "Project 1 Name",
+      "description": "Name for your first Letta project (e.g., 'Work', 'Personal')",
+      "type": "textfield",
+      "required": true,
+      "default": "Default"
+    },
+    {
+      "name": "project1ApiKey",
+      "title": "Project 1 API Key",
+      "description": "API key for Project 1 - get from Letta dashboard",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "project1BaseUrl",
+      "title": "Project 1 Base URL",
+      "description": "Optional. Custom URL for self-hosted Letta (e.g., http://localhost:8283)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "project2Name",
+      "title": "Project 2 Name",
+      "description": "Name for your second Letta project",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "project2ApiKey",
+      "title": "Project 2 API Key",
+      "description": "API key for Project 2",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "project2BaseUrl",
+      "title": "Project 2 Base URL",
+      "description": "Optional custom URL for Project 2",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "project3Name",
+      "title": "Project 3 Name",
+      "description": "Name for your third Letta project",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "project3ApiKey",
+      "title": "Project 3 API Key",
+      "description": "API key for Project 3",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "project3BaseUrl",
+      "title": "Project 3 Base URL",
+      "description": "Optional custom URL for Project 3",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "project4Name",
+      "title": "Project 4 Name",
+      "description": "Name for your fourth Letta project",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "project4ApiKey",
+      "title": "Project 4 API Key",
+      "description": "API key for Project 4",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "project4BaseUrl",
+      "title": "Project 4 Base URL",
+      "description": "Optional custom URL for Project 4",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "project5Name",
+      "title": "Project 5 Name",
+      "description": "Name for your fifth Letta project",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "project5ApiKey",
+      "title": "Project 5 API Key",
+      "description": "API key for Project 5",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "project5BaseUrl",
+      "title": "Project 5 Base URL",
+      "description": "Optional custom URL for Project 5",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "showReasoning",
+      "title": "Show Agent Reasoning",
+      "description": "Display the agent's internal thoughts and tool usage",
+      "type": "checkbox",
+      "label": "Show reasoning and tool events in chat",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@letta-ai/letta-client": "^1.6.5",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

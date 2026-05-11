@@ -75,11 +75,35 @@
       "title": "My Inbox",
       "description": "Notifications from all subscribed inboxes",
       "mode": "view"
+    },
+    {
+      "name": "settings",
+      "title": "Settings",
+      "description": "Canned Responses, Teams and more",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "view",
+          "placeholder": "View",
+          "type": "dropdown",
+          "required": true,
+          "data": [
+            {
+              "title": "Canned Responses",
+              "value": "canned_responses"
+            },
+            {
+              "title": "Teams",
+              "value": "teams"
+            }
+          ]
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.4",
-    "@raycast/utils": "^2.2.1",
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^2.2.2",
     "date-fns": "^4.1.0"
   },
   "devDependencies": {

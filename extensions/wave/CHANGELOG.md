@@ -1,5 +1,10 @@
 # Wave Changelog
 
+## [Last Sent, Last Viewed in Invoice] - 2026-01-29
+
+- In **Invoices**, Show "Last Sent" and "Last Viewed"
+
+
 ## [More Invoice Enhancements] - 2026-01-21
 
 - In **Invoices**, Show Customer Name, Invoice Date, Invoice Due Date and Amount Due
