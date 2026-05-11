@@ -4,10 +4,6 @@ const API_BASE_URL = "https://zenmux.ai/api/v1/management";
 const CACHE_KEY = "zenmux-account-snapshot";
 const cache = new Cache();
 
-type Preferences = {
-  managementApiKey: string;
-};
-
 type ApiEnvelope<T> = {
   success?: boolean;
   data?: T;
