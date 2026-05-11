@@ -251,7 +251,13 @@ export default function Command() {
           onRefresh={() => void refresh(true)}
         />
         <ConsoleLinkItem
-          title="Management API Keys"
+          title="Logs Console"
+          url="https://zenmux.ai/platform/logs"
+          snapshot={snapshot}
+          onRefresh={() => void refresh(true)}
+        />
+        <ConsoleLinkItem
+          title="Platform API Key"
           url="https://zenmux.ai/platform/management"
           snapshot={snapshot}
           onRefresh={() => void refresh(true)}
@@ -354,12 +360,16 @@ function UsageActions(props: {
           url="https://zenmux.ai/platform/pay-as-you-go"
         />
         <Action.OpenInBrowser
-          title="Open Management Console"
+          title="Open Logs Console"
+          url="https://zenmux.ai/platform/logs"
+        />
+        <Action.OpenInBrowser
+          title="Open Platform API Console"
           url="https://zenmux.ai/platform/management"
         />
       </ActionPanel.Section>
       <Action
-        title="Configure API Key"
+        title="Configure Platform API Key"
         icon={Icon.Gear}
         onAction={() => void openExtensionPreferences()}
       />

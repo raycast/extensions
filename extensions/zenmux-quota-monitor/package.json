@@ -27,11 +27,11 @@
   "preferences": [
     {
       "name": "managementApiKey",
-      "title": "Management API Key",
-      "description": "Create one from ZenMux Console > Management. Standard API keys are not accepted by the account endpoints.",
+      "title": "Platform API Key",
+      "description": "Create one from ZenMux Console > Platform API. Standard API keys are not accepted by the account endpoints.",
       "type": "password",
       "required": true,
-      "placeholder": "Your ZenMux Management API key"
+      "placeholder": "Your ZenMux Platform API key"
     }
   ],
   "commands": [

@@ -7,6 +7,7 @@ import {
   openExtensionPreferences,
   showToast,
 } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   AccountSnapshot,
@@ -25,8 +26,18 @@ import {
   readCachedSnapshot,
 } from "./zenmux";
 
+type MenuBarPercentage =
+  | "5h-used"
+  | "5h-remaining"
+  | "weekly-used"
+  | "weekly-remaining";
+
+const MENU_BAR_PERCENTAGE_KEY = "menu-bar-percentage";
+
 export default function Command() {
   const initialSnapshot = useMemo(() => readCachedSnapshot(), []);
+  const [menuBarPercentage, setMenuBarPercentage] =
+    useCachedState<MenuBarPercentage>(MENU_BAR_PERCENTAGE_KEY, "5h-used");
   const [snapshot, setSnapshot] = useState<AccountSnapshot | undefined>(
     initialSnapshot,
   );
@@ -65,10 +76,17 @@ export default function Command() {
     void refresh(false);
   }, [refresh]);
 
+  const updateMenuBarPercentage = useCallback(
+    (value: MenuBarPercentage) => {
+      setMenuBarPercentage(value);
+    },
+    [setMenuBarPercentage],
+  );
+
   return (
     <MenuBarExtra
       isLoading={isLoading}
-      title={getMenuBarTitle(snapshot, failure)}
+      title={getMenuBarTitle(snapshot, failure, menuBarPercentage)}
       tooltip="ZenMux quota and PAYG balance"
     >
       {failure ? (
@@ -137,6 +155,11 @@ export default function Command() {
           subtitle={snapshot ? formatDateTime(snapshot.fetchedAt) : "Never"}
           icon={Icon.ArrowClockwise}
         />
+        <MenuBarExtra.Item
+          title="Menu Bar Display"
+          subtitle={formatMenuBarPreference(menuBarPercentage)}
+          icon={Icon.AppWindow}
+        />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Actions">
@@ -157,7 +180,38 @@ export default function Command() {
           onAction={() => void open("https://zenmux.ai/platform/pay-as-you-go")}
         />
         <MenuBarExtra.Item
-          title="Configure Management API Key"
+          title="Open Logs Console"
+          icon={Icon.Globe}
+          onAction={() => void open("https://zenmux.ai/platform/logs")}
+        />
+        <MenuBarExtra.Submenu title="Menu Bar Display" icon={Icon.Gear}>
+          <MenuBarDisplayItem
+            title="5-hour Used"
+            value="5h-used"
+            selectedValue={menuBarPercentage}
+            onSelect={updateMenuBarPercentage}
+          />
+          <MenuBarDisplayItem
+            title="5-hour Remaining"
+            value="5h-remaining"
+            selectedValue={menuBarPercentage}
+            onSelect={updateMenuBarPercentage}
+          />
+          <MenuBarDisplayItem
+            title="Weekly Used"
+            value="weekly-used"
+            selectedValue={menuBarPercentage}
+            onSelect={updateMenuBarPercentage}
+          />
+          <MenuBarDisplayItem
+            title="Weekly Remaining"
+            value="weekly-remaining"
+            selectedValue={menuBarPercentage}
+            onSelect={updateMenuBarPercentage}
+          />
+        </MenuBarExtra.Submenu>
+        <MenuBarExtra.Item
+          title="Configure Platform API Key"
           icon={Icon.Gear}
           onAction={() => void openExtensionPreferences()}
         />
@@ -188,7 +242,29 @@ function QuotaMenuSection(props: { title: string; quota?: QuotaWindow }) {
   );
 }
 
-function getMenuBarTitle(snapshot?: AccountSnapshot, failure?: string): string {
+function MenuBarDisplayItem(props: {
+  title: string;
+  value: MenuBarPercentage;
+  selectedValue: MenuBarPercentage;
+  onSelect: (value: MenuBarPercentage) => void;
+}) {
+  const isSelected = props.value === props.selectedValue;
+
+  return (
+    <MenuBarExtra.Item
+      title={props.title}
+      subtitle={isSelected ? "Selected" : undefined}
+      icon={isSelected ? Icon.CheckCircle : Icon.Circle}
+      onAction={() => void props.onSelect(props.value)}
+    />
+  );
+}
+
+function getMenuBarTitle(
+  snapshot: AccountSnapshot | undefined,
+  failure: string | undefined,
+  menuBarPercentage: MenuBarPercentage,
+): string {
   if (failure && !snapshot) {
     return "ZenMux error";
   }
@@ -197,13 +273,61 @@ function getMenuBarTitle(snapshot?: AccountSnapshot, failure?: string): string {
     return "ZenMux";
   }
 
-  const fiveHourUsage = snapshot.subscription?.quota_5_hour
-    ? getUsagePercentage(snapshot.subscription.quota_5_hour)
-    : undefined;
+  const metric = getMenuBarMetric(snapshot, menuBarPercentage);
   const balance = formatCurrency(
     snapshot.payg?.total_credits,
     snapshot.payg?.currency,
   );
 
-  return `5h ${formatPercentage(fiveHourUsage)} · ${balance}`;
+  return `${metric.label} ${formatPercentage(metric.value)} ${metric.kind} · ${balance}`;
+}
+
+function getMenuBarMetric(
+  snapshot: AccountSnapshot,
+  metric: MenuBarPercentage,
+): { label: string; value?: number; kind: "used" | "left" } {
+  const fiveHourUsage = snapshot.subscription?.quota_5_hour
+    ? getUsagePercentage(snapshot.subscription.quota_5_hour)
+    : undefined;
+  const weeklyUsage = snapshot.subscription?.quota_7_day
+    ? getUsagePercentage(snapshot.subscription.quota_7_day)
+    : undefined;
+
+  switch (metric) {
+    case "5h-remaining":
+      return {
+        label: "5h",
+        value: getRemainingPercentage(fiveHourUsage),
+        kind: "left",
+      };
+    case "weekly-used":
+      return { label: "7d", value: weeklyUsage, kind: "used" };
+    case "weekly-remaining":
+      return {
+        label: "7d",
+        value: getRemainingPercentage(weeklyUsage),
+        kind: "left",
+      };
+    case "5h-used":
+    default:
+      return { label: "5h", value: fiveHourUsage, kind: "used" };
+  }
+}
+
+function getRemainingPercentage(value?: number): number | undefined {
+  return typeof value === "number" ? 1 - value : undefined;
+}
+
+function formatMenuBarPreference(value: MenuBarPercentage): string {
+  switch (value) {
+    case "5h-remaining":
+      return "5-hour Remaining";
+    case "weekly-used":
+      return "Weekly Used";
+    case "weekly-remaining":
+      return "Weekly Remaining";
+    case "5h-used":
+    default:
+      return "5-hour Used";
+  }
 }

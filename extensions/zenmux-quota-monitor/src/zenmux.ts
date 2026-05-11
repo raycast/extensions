@@ -71,7 +71,7 @@ export async function fetchAccountSnapshot(): Promise<AccountSnapshot> {
 
   if (!apiKey) {
     throw new Error(
-      "Set your ZenMux Management API key in extension preferences.",
+      "Set your ZenMux Platform API key in extension preferences.",
     );
   }
 
