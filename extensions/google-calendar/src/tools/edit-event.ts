@@ -138,7 +138,7 @@ const tool = async (input: Input) => {
     end: {
       dateTime: toISO8601WithTimezoneOffset(endDate),
     },
-    attendees: input.attendees ? attendeeEmails.map((email) => ({ email })) : existingEvent.data.attendees,
+    attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : existingEvent.data.attendees,
     location: input.conferencingProvider ?? existingEvent.data.location ?? "",
   };
 
