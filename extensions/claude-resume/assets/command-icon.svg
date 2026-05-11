@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E89372"/>
+      <stop offset="100%" stop-color="#D97757"/>
+    </linearGradient>
+  </defs>
+  <!-- Rounded square background -->
+  <rect x="32" y="32" width="448" height="448" rx="96" ry="96" fill="url(#bgGrad)"/>
+  <!-- Chat bubble outline -->
+  <path d="M 128 168
+           L 384 168
+           Q 416 168 416 200
+           L 416 320
+           Q 416 352 384 352
+           L 240 352
+           L 176 408
+           L 176 352
+           L 128 352
+           Q 96 352 96 320
+           L 96 200
+           Q 96 168 128 168 Z"
+        fill="#FFFFFF" stroke="#FFFFFF" stroke-width="0"/>
+  <!-- Caret prompt > inside bubble -->
+  <path d="M 168 224 L 216 260 L 168 296"
+        fill="none" stroke="#D97757" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Underscore "cursor" -->
+  <rect x="240" y="288" width="96" height="14" rx="7" fill="#D97757"/>
+</svg>

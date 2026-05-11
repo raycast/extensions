@@ -1,0 +1,83 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "claude-resume",
+  "title": "Claude Resume",
+  "description": "Browse every Claude Code session by its actual first prompt, then resume any one in iTerm2 or Terminal with a single keystroke. Reads the JSONL conversation logs under ~/.claude/projects directly, so every session shows up — not just the project directories.",
+  "icon": "command-icon.png",
+  "author": "gbechtold",
+  "license": "MIT",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "browse-sessions",
+      "title": "Browse and Resume",
+      "subtitle": "Claude Resume",
+      "description": "List every Claude Code session and resume the one you pick in iTerm or Terminal.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "terminalApp",
+      "title": "Terminal App",
+      "description": "Which terminal app to open when resuming a session.",
+      "type": "dropdown",
+      "required": false,
+      "default": "iterm2",
+      "data": [
+        {
+          "title": "iTerm2",
+          "value": "iterm2"
+        },
+        {
+          "title": "Terminal.app",
+          "value": "terminal"
+        }
+      ]
+    },
+    {
+      "name": "sessionLimit",
+      "title": "Session Limit",
+      "description": "Maximum number of sessions to load (10–500).",
+      "type": "textfield",
+      "required": false,
+      "default": "50"
+    },
+    {
+      "name": "jsonlRootPath",
+      "title": "JSONL Root Path",
+      "description": "Where to look for Claude Code session JSONLs. Default: ~/.claude/projects.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/.claude/projects"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.85.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.0",
+    "@types/react": "^18.3.28",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "@types/react": "^18.3.28"
+  }
+}
