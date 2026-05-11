@@ -4,7 +4,7 @@
   "title": "iCloud Sync Control",
   "description": "Pause and resume iCloud Drive syncing without disabling iCloud entirely.",
   "icon": "icon.png",
-  "author": "dustchambers",
+  "author": "dustintchambers",
   "categories": ["System", "Productivity"],
   "license": "MIT",
   "commands": [
