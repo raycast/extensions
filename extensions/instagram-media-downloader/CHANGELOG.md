@@ -1,6 +1,6 @@
 # Instagram Media Downloader Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-05-11
 
 - Fix gallery (carousel) posts intermittently failing with `401 Unauthorized` or "No media found" by retrying the GraphQL request with exponential backoff (up to 3 attempts) when Instagram rate-limits an unauthenticated caller. Also adds the `X-IG-App-ID` header and a post-specific `Referer`, both of which Instagram's web client sends.
 - Add an "Open in Browser" action to the failure toast for media downloads. Loading the post in a browser first often clears Instagram's transient rate limit so that retrying the download succeeds.
