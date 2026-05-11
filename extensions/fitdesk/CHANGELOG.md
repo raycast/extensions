@@ -1,5 +1,9 @@
 # FitDesk Changelog
 
+## [1.0.1] - {PR_MERGE_DATE}
+
+Added Windows support
+
 ## [1.0.0] - 2026-02-03
 
 ### Added
