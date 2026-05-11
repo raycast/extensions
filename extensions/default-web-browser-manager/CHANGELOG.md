@@ -1,6 +1,6 @@
 # Default Web Browser Manager Changelog
 
-## [Add Open Default Browser Command] - {PR_MERGE_DATE}
+## [Add Open Default Browser Command] - 2026-05-11
 
 - Add "Open Default Browser" command to quickly open the current default browser
 
