@@ -25,7 +25,7 @@ enum EmailViewMedium {
   Finder,
 }
 
-function FullscreenDetails(data: Message): React.ReactNode {
+function FullscreenDetails(data: Message): JSX.Element {
   return (
     <List>
       <List.Section title="Received">
@@ -103,7 +103,7 @@ function FullscreenDetails(data: Message): React.ReactNode {
 
 function AttachmentItem({ attachment }) {
   const abortable = useRef<AbortController>();
-  const { isLoading, data, revalidate } = useCachedPromise(downloadAttachment, [attachment], {
+  const { isLoading, data } = useCachedPromise(downloadAttachment, [attachment], {
     abortable,
     onError: (e) => {
       showToast({
@@ -139,7 +139,7 @@ function AttachmentItem({ attachment }) {
   );
 }
 
-function FullscreenAttachments(data): React.ReactNode {
+function FullscreenAttachments(data): JSX.Element {
   return (
     <Grid>
       {data.attachments.map((attachment) => (
@@ -149,15 +149,11 @@ function FullscreenAttachments(data): React.ReactNode {
   );
 }
 
-export default function MessageComponent({ id }: { id: string }): React.ReactNode {
+export default function MessageComponent({ id }: { id: string }): JSX.Element {
   const [bodyMarkdown, updateBodyMarkdown] = useState<string>();
 
   const abortable = useRef<AbortController>();
-  const {
-    isLoading,
-    data: message,
-    revalidate,
-  } = useCachedPromise(getMessage, [id], {
+  const { isLoading, data: message } = useCachedPromise(getMessage, [id], {
     abortable,
     keepPreviousData: true,
     onData: (data) => {
