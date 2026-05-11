@@ -198,7 +198,6 @@ ${installCommand}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="Open on skills.sh"
             url={skillUrl}
             icon={Icon.Globe}
