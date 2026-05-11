@@ -5,7 +5,10 @@ export default async function command() {
   const { delay } = getPreferenceValues<Preferences.SendToPhotoMechanic>();
   const delaySeconds = Math.min(30, Math.max(0.3, parseFloat(delay) || 0.7));
 
-  await showToast({ style: Toast.Style.Animated, title: "Sending to Photo Mechanic…" });
+  await showToast({
+    style: Toast.Style.Animated,
+    title: "Sending to Photo Mechanic…",
+  });
 
   try {
     await runAppleScript(`
@@ -59,7 +62,10 @@ export default async function command() {
       end if
     `);
 
-    await showToast({ style: Toast.Style.Success, title: "Opened in Photo Mechanic" });
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Opened in Photo Mechanic",
+    });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
