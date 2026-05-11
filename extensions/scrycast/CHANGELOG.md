@@ -1,4 +1,4 @@
-## [Unreleased] - {PR_MERGE_DATE}
+## [Unreleased] - 2026-05-11
 
 ### Added
 - Search My Collection command — import your ManaBox CSV and browse or search your personal card collection
