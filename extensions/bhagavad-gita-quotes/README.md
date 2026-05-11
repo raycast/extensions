@@ -12,16 +12,22 @@ A Raycast extension that lets you read, search, and understand quotes from the B
   - Summarize chapters in your preferred language.
   - Philosophically explain verses and discuss modern-day applications.
   - Translate verses directly into your preferred language.
+  - Find a comparable quote for the currently viewed Bhagavad Gita verse from a selected scripture:
+    - Bible
+    - Quran
+    - Torah
+    - Dhammapada
 - **Customization**: 
   - Choose your preferred target language for AI features.
   - Customize the theme color of the extension's icons.
 
 ## Raycast AI Requirements (Important)
 
-This extension can be used fully without AI (read/browse/search). The AI actions (Summarize / Explain / Translate) use the Raycast AI API.
+This extension can be used fully without AI (read/browse/search). The AI actions (Summarize / Explain / Translate / Comparable Quote) use the Raycast AI API.
 
 - **If you don’t have Raycast AI** (for example: no Pro subscription, or AI isn’t available on your platform), those actions will show an in-app message explaining that AI isn’t available.
 - **No external AI API key is required** for these AI actions (they use Raycast AI).
+- **Accuracy notice**: AI-generated comparable scripture matches may not be 100% accurate; verify with primary scripture sources.
 
 ## Preferences
 

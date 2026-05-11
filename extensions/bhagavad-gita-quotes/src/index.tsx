@@ -13,6 +13,7 @@ import {
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { AIExplanation } from "./components/AIExplanation";
+import { ComparableQuote } from "./components/ComparableQuote";
 import { getErrorMessage, getThemeColor } from "./utils";
 
 interface VedicChapter {
@@ -344,6 +345,64 @@ function VersesList({ chapterNumber, versesCount }: { chapterNumber: number; ver
                       />
                     }
                   />
+                  <ActionPanel.Section title="Comparable Quote In">
+                    <Action.Push
+                      title="Bible"
+                      icon={Icon.Book}
+                      target={
+                        <ComparableQuote
+                          chapter={v.chapter}
+                          verse={v.verse}
+                          sanskrit={v.sanskrit}
+                          translation={v.translation}
+                          language={preferences.translationLanguage}
+                          targetScripture="Bible"
+                        />
+                      }
+                    />
+                    <Action.Push
+                      title="Quran"
+                      icon={Icon.Book}
+                      target={
+                        <ComparableQuote
+                          chapter={v.chapter}
+                          verse={v.verse}
+                          sanskrit={v.sanskrit}
+                          translation={v.translation}
+                          language={preferences.translationLanguage}
+                          targetScripture="Quran"
+                        />
+                      }
+                    />
+                    <Action.Push
+                      title="Torah"
+                      icon={Icon.Book}
+                      target={
+                        <ComparableQuote
+                          chapter={v.chapter}
+                          verse={v.verse}
+                          sanskrit={v.sanskrit}
+                          translation={v.translation}
+                          language={preferences.translationLanguage}
+                          targetScripture="Torah"
+                        />
+                      }
+                    />
+                    <Action.Push
+                      title="Dhammapada"
+                      icon={Icon.Book}
+                      target={
+                        <ComparableQuote
+                          chapter={v.chapter}
+                          verse={v.verse}
+                          sanskrit={v.sanskrit}
+                          translation={v.translation}
+                          language={preferences.translationLanguage}
+                          targetScripture="Dhammapada"
+                        />
+                      }
+                    />
+                  </ActionPanel.Section>
                 </>
               ) : (
                 <Action.OpenInBrowser
