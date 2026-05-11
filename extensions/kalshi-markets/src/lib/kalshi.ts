@@ -194,36 +194,6 @@ export function rankSeries(series: KalshiSeries[]): KalshiSeries[] {
   );
 }
 
-export async function fetchSearchMarketsLegacy(
-  query: string,
-): Promise<KalshiMarket[]> {
-  const params = new URLSearchParams({
-    query: filterSearchQuery(query),
-    order_by: "querymatch",
-    page_size: "50",
-    fuzzy_threshold: "4",
-    with_milestones: "true",
-  });
-  const response = await fetch(
-    `${SEARCH_API_BASE}/search/series?${params.toString()}`,
-    {
-      headers: {
-        Accept: "application/json",
-      },
-    },
-  );
-
-  if (!response.ok) {
-    throw new Error(`Kalshi search API returned ${response.status}`);
-  }
-
-  const json = (await response.json()) as KalshiSeriesSearchResponse;
-  const markets = (json.current_page ?? []).flatMap((series) =>
-    seriesToMarkets(series),
-  );
-  return rankMarkets(markets);
-}
-
 export async function fetchMarketBundle(
   market: KalshiMarket,
 ): Promise<MarketBundle> {

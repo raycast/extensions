@@ -44,10 +44,6 @@ import {
 } from "./lib/kalshi";
 import type { KalshiMarket } from "./types/kalshi";
 
-type Preferences = {
-  favoriteTopics?: string;
-};
-
 export default function Command() {
   return <SearchMarketsCommand />;
 }
@@ -66,7 +62,7 @@ class SearchMarketsCommand extends Component<
   Record<string, never>,
   CommandState
 > {
-  private preferences = getPreferenceValues<Preferences>();
+  private preferences = getPreferenceValues<Preferences.SearchMarkets>();
   private seriesRequestId = 0;
 
   state: CommandState = {

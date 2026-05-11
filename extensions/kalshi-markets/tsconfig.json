@@ -13,5 +13,5 @@
     "strict": true,
     "target": "ES2023"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }
