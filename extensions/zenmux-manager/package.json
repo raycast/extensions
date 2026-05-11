@@ -1,0 +1,77 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zenmux-manager",
+  "description": "Monitor ZenMux usage, manage account links, and ask Raycast AI about ZenMux.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "preferences": [
+    {
+      "name": "managementApiKey",
+      "title": "Platform API Key",
+      "description": "Create one from ZenMux Console > Platform API. Standard API keys are not accepted by the account endpoints.",
+      "type": "password",
+      "required": true,
+      "placeholder": "Your ZenMux Platform API key"
+    }
+  ],
+  "commands": [
+    {
+      "name": "show-details",
+      "title": "Show ZenMux Usage",
+      "description": "Monitor ZenMux subscription quota and PAYG credit balance.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "ZenMux Usage Menu Bar",
+      "description": "Show ZenMux quota and PAYG balance in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "2m"
+    }
+  ],
+  "tools": [
+    {
+      "name": "getZenMuxAccount",
+      "title": "Get ZenMux Account",
+      "description": "Get the user's current ZenMux account status, subscription quota, PAYG balance, Flow rate, and useful ZenMux links.",
+      "confirmation": false
+    },
+    {
+      "name": "searchZenMuxDocs",
+      "title": "Search ZenMux Docs",
+      "description": "Search curated ZenMux documentation for product features, API usage, integration setup, routing, billing, observability, and troubleshooting.",
+      "confirmation": false
+    }
+  ],
+  "ai": {
+    "instructions": "You are a ZenMux technical assistant. Help users understand ZenMux account status, quota usage, PAYG balance, Flow rate, setup, API usage, routing, billing, observability, request logs, and tool integrations. Use Get ZenMux Account whenever the user asks about current quota, balance, subscription status, Flow rate, reset times, Platform API setup, billing, usage, or request logs. Use Search ZenMux Docs whenever the user asks how ZenMux works, how to configure a tool, how to call an API, how routing/fallback/streaming/tool calling/structured output works, or where to find relevant documentation. Do not invent ZenMux API endpoints, pricing, or product behavior. If the tools do not provide enough information, say so and point users to the official ZenMux docs or console links returned by the tools."
+  },
+  "title": "ZenMux Manager",
+  "author": "abnershang",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ]
+}
