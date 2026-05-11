@@ -1,0 +1,43 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "cron-job",
+  "title": "Cron Job Manager",
+  "description": "Manage your macOS cron jobs — view, add, edit, delete, and see next run times",
+  "icon": "extension-icon.png",
+  "author": "whoismukunzi",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "manage-crons",
+      "title": "Manage Cron Jobs",
+      "subtitle": "crontab",
+      "description": "Full cron job manager with next-run preview",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "cron-parser": "^4.9.0",
+    "cronstrue": "^2.50.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo 'Run `ray publish` to publish your extension'"
+  }
+}
