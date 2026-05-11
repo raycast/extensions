@@ -1,11 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { HabiticaTask, HabiticaUser, HabiticaContent, HabiticaTag, CreateTaskBody, UpdateTaskBody } from "./types";
 
-interface Preferences {
-  apiUserId: string;
-  apiToken: string;
-}
-
 const HABITICA_API_URL = "https://habitica.com";
 
 // ---------------------------------------------------------------------------
@@ -14,6 +9,7 @@ const HABITICA_API_URL = "https://habitica.com";
 
 const TASKS_TTL_MS = 30_000;
 const USER_TTL_MS = 30_000;
+const TAGS_TTL_MS = 30_000;
 
 interface CacheEntry<T> {
   data: T;
@@ -37,6 +33,9 @@ export function invalidateTasksCache(): void {
 }
 export function invalidateUserCache(): void {
   cache.user = null;
+}
+export function invalidateTagsCache(): void {
+  cache.tags = null;
 }
 
 // ---------------------------------------------------------------------------
@@ -81,13 +80,14 @@ export async function getTasks(type?: string): Promise<HabiticaTask[]> {
 export async function getTags(): Promise<HabiticaTag[]> {
   if (isFresh(cache.tags)) return cache.tags.data;
   const data = await habiticaFetch<HabiticaTag[]>("/api/v3/tags");
-  cache.tags = { data, expiresAt: 0 };
+  cache.tags = { data, expiresAt: Date.now() + TAGS_TTL_MS };
   return data;
 }
 
 export async function scoreTask(taskId: string, direction: "up" | "down"): Promise<void> {
   await habiticaFetch(`/api/v3/tasks/${taskId}/score/${direction}`, { method: "POST" });
   invalidateTasksCache();
+  invalidateTagsCache();
   invalidateUserCache();
 }
 
@@ -97,17 +97,20 @@ export async function updateTask(taskId: string, body: UpdateTaskBody): Promise<
     body: JSON.stringify(body),
   });
   invalidateTasksCache();
+  invalidateTagsCache();
   return result;
 }
 
 export async function createTask(body: CreateTaskBody): Promise<void> {
   await habiticaFetch("/api/v3/tasks/user", { method: "POST", body: JSON.stringify(body) });
   invalidateTasksCache();
+  invalidateTagsCache();
 }
 
 export async function deleteTask(taskId: string): Promise<void> {
   await habiticaFetch(`/api/v3/tasks/${taskId}`, { method: "DELETE" });
   invalidateTasksCache();
+  invalidateTagsCache();
 }
 
 export async function getUser(): Promise<HabiticaUser> {

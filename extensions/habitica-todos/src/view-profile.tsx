@@ -1,4 +1,4 @@
-import { ActionPanel, Action, Icon, Detail, showToast, Toast, Color } from "@raycast/api";
+import { ActionPanel, Action, Icon, Detail, showToast, Toast, Color, confirmAlert, Alert } from "@raycast/api";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { getUser, forceCompleteQuest, acceptQuest, abortQuest } from "./api";
 import { getAvatarSvg } from "./avatar";
@@ -138,6 +138,26 @@ export default function Command() {
   );
 
   async function handleQuestAction(action: "accept" | "abort" | "force-complete") {
+    if (action === "abort") {
+      const confirmed = await confirmAlert({
+        title: "Abort Quest",
+        message: "Abort the active quest for your party? This erases all party quest progress and cannot be undone.",
+        primaryAction: { title: "Abort Quest", style: Alert.ActionStyle.Destructive },
+      });
+
+      if (!confirmed) return;
+    }
+
+    if (action === "force-complete") {
+      const confirmed = await confirmAlert({
+        title: "Force Complete Quest",
+        message: "Force complete the active quest for your party? This affects all party members and cannot be undone.",
+        primaryAction: { title: "Force Complete", style: Alert.ActionStyle.Destructive },
+      });
+
+      if (!confirmed) return;
+    }
+
     try {
       await showToast({ style: Toast.Style.Animated, title: "Processing…" });
       if (action === "accept") await acceptQuest();
