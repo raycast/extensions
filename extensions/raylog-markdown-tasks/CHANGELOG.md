@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-05-11
 
 - Manage focused local tasks from Raycast with a single markdown-backed note.
 - Create, edit, log work, and move tasks through `To Do`, `In Progress`, `Done`,
