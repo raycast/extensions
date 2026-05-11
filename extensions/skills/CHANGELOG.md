@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Fix Support Directory Initialization] - {PR_MERGE_DATE}
+## [Fix Support Directory Initialization] - 2026-05-11
 
 - Ensure the extension support directory exists before cached hooks run, preventing "Could not create extension support directory" errors on first launch
 
