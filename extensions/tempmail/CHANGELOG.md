@@ -1,6 +1,6 @@
 # TempMail Changelog
 
-## [Bug Fixes & Improvements] - {PR_MERGE_DATE}
+## [Bug Fixes & Improvements] - 2026-05-11
 
 - Fixed images not loading in email preview — external images are now downloaded and cached locally with a fallback to the original URL
 - Fixed "expires never" not properly clearing the expiry timer
