@@ -18,6 +18,8 @@ import {
   formatFlows,
   formatPercentage,
   formatPlan,
+  formatProgressBar,
+  formatRelativeDuration,
   getErrorMessage,
   getUsagePercentage,
   readCachedSnapshot,
@@ -93,18 +95,29 @@ export default function Command() {
         />
       </MenuBarExtra.Section>
 
-      <MenuBarExtra.Section title="Subscription Quota">
-        <QuotaMenuItem
-          title="5-hour Quota"
-          quota={snapshot?.subscription?.quota_5_hour}
-        />
-        <QuotaMenuItem
-          title="Weekly Quota"
-          quota={snapshot?.subscription?.quota_7_day}
+      <QuotaMenuSection
+        title="5-hour Quota"
+        quota={snapshot?.subscription?.quota_5_hour}
+      />
+
+      <QuotaMenuSection
+        title="Weekly Quota"
+        quota={snapshot?.subscription?.quota_7_day}
+      />
+
+      <MenuBarExtra.Section title="Monthly Quota">
+        <MenuBarExtra.Item
+          title="Cap"
+          subtitle={formatFlows(
+            snapshot?.subscription?.quota_monthly?.max_flows,
+          )}
         />
         <MenuBarExtra.Item
-          title="Monthly Quota"
-          subtitle={`${formatFlows(snapshot?.subscription?.quota_monthly?.max_flows)} cap`}
+          title="USD Value"
+          subtitle={formatCurrency(
+            snapshot?.subscription?.quota_monthly?.max_value_usd,
+            snapshot?.subscription?.currency,
+          )}
         />
       </MenuBarExtra.Section>
 
@@ -153,14 +166,25 @@ export default function Command() {
   );
 }
 
-function QuotaMenuItem(props: { title: string; quota?: QuotaWindow }) {
+function QuotaMenuSection(props: { title: string; quota?: QuotaWindow }) {
   const usage = props.quota ? getUsagePercentage(props.quota) : undefined;
+  const remaining = typeof usage === "number" ? 1 - usage : undefined;
 
   return (
-    <MenuBarExtra.Item
-      title={props.title}
-      subtitle={`${formatPercentage(usage)} used`}
-    />
+    <MenuBarExtra.Section title={props.title}>
+      <MenuBarExtra.Item
+        title="Remaining"
+        subtitle={formatPercentage(remaining)}
+      />
+      <MenuBarExtra.Item
+        title="Progress"
+        subtitle={formatProgressBar(remaining)}
+      />
+      <MenuBarExtra.Item
+        title="Resets In"
+        subtitle={formatRelativeDuration(props.quota?.resets_at)}
+      />
+    </MenuBarExtra.Section>
   );
 }
 

@@ -20,6 +20,7 @@ import {
   formatFlows,
   formatPercentage,
   formatPlan,
+  formatRelativeDuration,
   formatStatus,
   getErrorMessage,
   getStatusColor,
@@ -268,18 +269,18 @@ function buildQuotaItem(
 ) {
   const usage = quota ? getUsagePercentage(quota) : undefined;
   const color = getUsageColor(usage);
-  const remaining = formatFlows(quota?.remaining_flows);
+  const remaining = typeof usage === "number" ? 1 - usage : undefined;
 
   return (
     <List.Item
       key={title}
       icon={quota ? getProgressIcon(usage ?? 0, color) : Icon.CircleDisabled}
       title={title}
-      subtitle={`Resets ${formatDateTime(quota?.resets_at)}`}
+      subtitle={`Resets in ${formatRelativeDuration(quota?.resets_at)}`}
       accessories={[
         {
           tag: {
-            value: `${remaining} left`,
+            value: `${formatPercentage(remaining)} left`,
             color,
           },
         },

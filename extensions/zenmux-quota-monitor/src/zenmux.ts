@@ -263,6 +263,17 @@ export function formatPercentage(value?: number): string {
   }).format(value);
 }
 
+export function formatProgressBar(value?: number): string {
+  if (!isFiniteNumber(value)) {
+    return "□□□□□□□□□□□□";
+  }
+
+  const width = 12;
+  const clamped = Math.min(1, Math.max(0, value));
+  const filled = Math.round(clamped * width);
+  return `${"▰".repeat(filled)}${"▱".repeat(width - filled)}`;
+}
+
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: value < 10 ? 2 : 1,
@@ -283,6 +294,37 @@ export function formatDateTime(value?: string | null): string {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(date);
+}
+
+export function formatRelativeDuration(value?: string | null): string {
+  if (!value) {
+    return "-";
+  }
+
+  const target = new Date(value).getTime();
+  if (Number.isNaN(target)) {
+    return formatDateTime(value);
+  }
+
+  const remainingMs = target - Date.now();
+  if (remainingMs <= 0) {
+    return "now";
+  }
+
+  const minutes = Math.ceil(remainingMs / 60000);
+  const days = Math.floor(minutes / 1440);
+  const hours = Math.floor((minutes % 1440) / 60);
+  const mins = minutes % 60;
+
+  if (days > 0) {
+    return hours > 0 ? `${days}d ${hours}h` : `${days}d`;
+  }
+
+  if (hours > 0) {
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+  }
+
+  return `${mins}m`;
 }
 
 function isFiniteNumber(value?: number): value is number {
