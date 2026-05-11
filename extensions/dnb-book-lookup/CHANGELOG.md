@@ -1,6 +1,6 @@
 # DNB Book Lookup Changelog
 
-## Initial release — {PR_MERGE_DATE}
+## Initial release — 2026-05-11
 
 ### Added
 
