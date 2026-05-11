@@ -60,7 +60,7 @@ export default function Command() {
         weight: Date.now(),
       }));
     },
-    [state.drupalWebsites, setState]
+    [state.drupalWebsites, setState],
   );
 
   const handleWeight = (drupalWebsite: DrupalWebsite) => {
@@ -78,7 +78,7 @@ export default function Command() {
         await showHUD("Drupal Website record deleted.");
       }
     },
-    [state.drupalWebsites, setState]
+    [state.drupalWebsites, setState],
   );
 
   const filterDrupalWebsites = useCallback(() => {

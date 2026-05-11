@@ -1,31 +1,51 @@
 import { List as RayCastList } from '@raycast/api';
-import { Fragment } from 'react';
-import { ListProps } from '../types';
-import ListItem from './ListItem';
+import { Dispatch, SetStateAction, useMemo } from 'react';
+import { ListItem } from './ListItem';
+import { BaseItem } from '../data/fetchList';
 
-const List = ({ data, isLoading, onSearch, search }: ListProps) => {
+interface ListProps {
+  data: BaseItem[] | undefined;
+  isLoading: boolean;
+  onSearch: Dispatch<SetStateAction<string>>;
+  search: string;
+  showType?: boolean;
+}
+export const List = ({
+  data,
+  isLoading,
+  onSearch,
+  search,
+  showType,
+}: ListProps) => {
+  const content = useMemo(() => {
+    if (isLoading || data === undefined) {
+      return null;
+    }
+
+    if (search === '' && data.length === 0) {
+      return (
+        <RayCastList.EmptyView title="Type to get started" icon="icon.png" />
+      );
+    }
+
+    return (
+      <>
+        {data.map((item) => (
+          <ListItem key={item.imdbID} item={item} showType={showType} />
+        ))}
+      </>
+    );
+  }, [isLoading, data, search]);
+
   return (
     <RayCastList
       throttle
       isLoading={isLoading}
+      searchText={search}
       onSearchTextChange={onSearch}
       searchBarPlaceholder="Search by title..."
     >
-      {search === '' && (
-        <RayCastList.EmptyView
-          title="Type to get started"
-          icon="popcorn-small.png"
-        />
-      )}
-      {!isLoading && !!data ? (
-        <Fragment>
-          {data.map((item) => (
-            <ListItem key={item.imdbID} item={item} />
-          ))}
-        </Fragment>
-      ) : null}
+      {content}
     </RayCastList>
   );
 };
-
-export default List;

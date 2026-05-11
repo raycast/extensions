@@ -1,5 +1,8 @@
 # Brew Services Changelog
 
+## [Add All Service Actions] - 2024-09-30
+- Added actions to start, stop, and restart all services
+
 ## [More Icons] - 2023-09-07
 
 - Updated code to work with the latest dependencies

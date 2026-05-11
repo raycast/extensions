@@ -13,14 +13,19 @@ import {
   HEXtoRGB,
   HEXtoHSLA,
   HEXtoHSL,
+  HEXtoOKLCH,
   RGBtoHEX,
   RGBtoHEXA,
   RGBtoHSL,
   RGBtoHSLA,
+  RGBtoOKLCH,
   HSLtoHEX,
   HSLtoHEXA,
   HSLtoRGB,
   HSLtoRGBA,
+  OKLCHtoRGB,
+  OKLCHtoHEX,
+  OKLCHtoHSL,
 } from "./conversions";
 import { PXtoTailwindSpacing, REMtoTailwindSpacing } from "./spacings";
 
@@ -38,6 +43,7 @@ export default function Command() {
   const [rgba, setRGBA] = useState<number[] | null>(null);
   const [hsl, setHSL] = useState<number[] | null>(null);
   const [hsla, setHSLA] = useState<number[] | null>(null);
+  const [oklch, setOKLCH] = useState<number[] | null>(null);
   const [tailwind, setTailwind] = useState<string | null>(null);
   const [closestColor, setClosestColor] = useState<{ name: string; hex: string } | null>(null);
   const [input, setInput] = useState("");
@@ -52,6 +58,7 @@ export default function Command() {
     setRGBA(null);
     setHSL(null);
     setHSLA(null);
+    setOKLCH(null);
     setClosestColor(null);
     setTailwind(null);
     if (value === "") return;
@@ -98,13 +105,14 @@ export default function Command() {
         const hexToRgbResult = HEXtoRGB(value);
         setRGB(hexToRgbResult);
         setHSL(HEXtoHSL(value));
+        setOKLCH(HEXtoOKLCH(value));
         setClosestColor(findClosestColor(hexToRgbResult[0], hexToRgbResult[1], hexToRgbResult[2]));
       }
     }
 
     // check if input is rgb color
     const rgbMatch = value.match(
-      /^rgb(a)?\((\d{1,3}),(\s)?(\d{1,3}),(\s)?(\d{1,3})(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i
+      /^rgb(a)?\((\d{1,3}),(\s)?(\d{1,3}),(\s)?(\d{1,3})(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i,
     );
     if (rgbMatch) {
       console.log("its a rgb");
@@ -117,13 +125,14 @@ export default function Command() {
       } else {
         setHEX(RGBtoHEX([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
         setHSL(RGBtoHSL([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
+        setOKLCH(RGBtoOKLCH([+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]]));
         setClosestColor(findClosestColor(+rgbMatch[2], +rgbMatch[4], +rgbMatch[6]));
       }
     }
 
     // check if input is hsl color
     const hslMatch = value.match(
-      /^hsl(a)?\((\d{1,3}),(\s)?(\d{1,3})(%)?,(\s)?(\d{1,3})(%)?(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i
+      /^hsl(a)?\((\d{1,3}),(\s)?(\d{1,3})(%)?,(\s)?(\d{1,3})(%)?(,(\s)?(?<alpha>\d+\.\d+|\.\d+))?\)$/i,
     );
     if (hslMatch) {
       console.log("its a hsl");
@@ -136,9 +145,31 @@ export default function Command() {
       } else {
         const hslToRgbResult = HSLtoRGB([+hslMatch[2], +hslMatch[4], +hslMatch[7]]);
         setHEX(HSLtoHEX([+hslMatch[2], +hslMatch[4], +hslMatch[7]]));
+        setHSL([+hslMatch[2], +hslMatch[4], +hslMatch[7]]);
         setRGB(hslToRgbResult);
+        setOKLCH(RGBtoOKLCH(hslToRgbResult));
         setClosestColor(findClosestColor(hslToRgbResult[0], hslToRgbResult[1], hslToRgbResult[2]));
       }
+    }
+
+    // check if input is oklch color
+    const oklchMatch = value.match(/^oklch\(\s*([\d.]+)(%)?\s+([\d.]+)\s+([\d.]+)\s*\)$/i);
+    if (oklchMatch) {
+      console.log("its an oklch");
+      // Parse L, C, H values
+      let l = parseFloat(oklchMatch[1]);
+      // If L has %, convert from percentage to 0-1 range
+      if (oklchMatch[2] === "%") {
+        l = l / 100;
+      }
+      const c = parseFloat(oklchMatch[3]);
+      const h = parseFloat(oklchMatch[4]);
+
+      const oklchToRgbResult = OKLCHtoRGB([l, c, h]);
+      setHEX(OKLCHtoHEX([l, c, h]));
+      setRGB(oklchToRgbResult);
+      setHSL(OKLCHtoHSL([l, c, h]));
+      setClosestColor(findClosestColor(oklchToRgbResult[0], oklchToRgbResult[1], oklchToRgbResult[2]));
     }
   };
 
@@ -256,6 +287,21 @@ export default function Command() {
             actions={
               <ActionPanel title="Copy">
                 <Action.CopyToClipboard content={`hsla(${hsla[0]}, ${hsla[1]}%, ${hsla[2]}%, ${hsla[3]})`} />
+              </ActionPanel>
+            }
+          />
+        )}
+        {oklch && (
+          <List.Item
+            title={`oklch(${oklch[0]} ${oklch[1]} ${oklch[2]})`}
+            icon={{
+              source: Icon.CircleFilled,
+              tintColor: disableAdjustContrast(`hsl(${hsl?.[0] ?? 0}, ${hsl?.[1] ?? 0}%, ${hsl?.[2] ?? 0}%)`),
+            }}
+            accessories={[{ text: "to oklch" }]}
+            actions={
+              <ActionPanel title="Copy">
+                <Action.CopyToClipboard content={`oklch(${oklch[0]} ${oklch[1]} ${oklch[2]})`} />
               </ActionPanel>
             }
           />

@@ -1,11 +1,11 @@
 import { spawn } from "child_process";
 
-import { Icon, LocalStorage } from "@raycast/api";
+import { Icon } from "@raycast/api";
 
-import { runAppleScript } from "run-applescript";
 import { v4 as uuid } from "uuid";
 
-import { Preferences, Color, ModifierMap, IconMap, Space } from "./types";
+import { Color, ModifierMap, IconMap, Space } from "./types";
+import { runAppleScript } from "@raycast/utils";
 
 // start with 140 cross-browser-friendly named colors
 const colors: Color = {
@@ -159,27 +159,6 @@ const modifierMap: ModifierMap = {
 
 const iconMap: IconMap = Icon;
 
-const namespacesPreferences = {
-  load: async (): Promise<Preferences> => {
-    let preferences = { spaces: undefined };
-
-    try {
-      const maybePreferences: string | undefined = await LocalStorage.getItem("namespaces");
-
-      if (maybePreferences) {
-        preferences = JSON.parse(maybePreferences);
-      }
-    } catch (_) {
-      // noop
-    }
-
-    return preferences;
-  },
-  save: async (preferences: Preferences) => {
-    await LocalStorage.setItem("namespaces", JSON.stringify(preferences));
-  },
-};
-
 const generateConfigurableSpace = () => {
   return {
     id: uuid(),
@@ -205,4 +184,4 @@ const confetti = async () => {
   return spawn(`open raycast://confetti`, { shell: true });
 };
 
-export { colors, modifierMap, iconMap, namespacesPreferences, generateConfigurableSpace, switchToSpace, confetti };
+export { colors, modifierMap, iconMap, generateConfigurableSpace, switchToSpace, confetti };

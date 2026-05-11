@@ -1,12 +1,58 @@
-import { closeMainWindow } from "@raycast/api";
+import { closeMainWindow, showHUD } from "@raycast/api";
 import { runJSInYouTubeMusicTab } from "./utils";
 
+export const previousTrack = `(function() {
+    const isYouTubeMusic = window.location.hostname.includes("music.youtube.com");
+    const video = document.querySelector("video");
+
+    if (!video) return "no-video";
+
+    // ---- YouTube Music ----
+    if (isYouTubeMusic) {
+      const previousBtn = document.querySelector("ytmusic-player-bar .previous-button #button");
+      if (previousBtn) {
+        previousBtn.click();
+        return "ytmusic-prev";
+      }
+      return "ytmusic-fail";
+    }
+
+    // ---- YouTube (normal) ----
+    if (video.currentTime > 2) {
+      video.currentTime = 0;
+      return "youtube-restart";
+    } else {
+      history.back();
+      return "youtube-back";
+    }
+  })();
+`;
 export default async () => {
-  if (
-    await runJSInYouTubeMusicTab(
-      "document.querySelector('#left-controls > div > tp-yt-paper-icon-button.previous-button.style-scope.ytmusic-player-bar').click();"
-    )
-  ) {
+  try {
+    const result = await runJSInYouTubeMusicTab(previousTrack);
+
+    // Feedback based on result
+    switch (result) {
+      case "ytmusic-prev":
+        await showHUD("⏮️ Previous Song (YT Music)");
+        break;
+      case "youtube-restart":
+        await showHUD("🔁 Restarted Video");
+        break;
+      case "youtube-back":
+        await showHUD("⬅️ Back to Previous Video");
+        break;
+      case "ytmusic-fail":
+        await showHUD("❌ No previous button found (YT Music)");
+        break;
+      case "no-video":
+        await showHUD("❌ No video element found");
+        break;
+      default:
+        await showHUD("❌ Unknown state");
+    }
     await closeMainWindow();
+  } catch (error) {
+    // do nothing if error is thrown because it will be handled by the toast
   }
 };

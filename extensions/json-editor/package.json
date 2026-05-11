@@ -5,6 +5,9 @@
   "description": "All JSON operations in one editor.",
   "icon": "command-icon.png",
   "author": "HerbertLu",
+  "contributors": [
+    "jvrbnjak89"
+  ],
   "categories": [
     "Productivity",
     "Developer Tools"
@@ -16,6 +19,40 @@
       "title": "Edit JSON",
       "description": "Edit JSON object like filtering fields",
       "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "flow",
+      "description": "Output types in Flow format",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "title": "Typescript Definition - Flow",
+      "label": "Flow format"
+    },
+    {
+      "name": "namespace",
+      "description": "If provided, interfaces will be wrapped in a namespace",
+      "type": "textfield",
+      "required": false,
+      "title": "Typescript Definition - Namespace"
+    },
+    {
+      "name": "prefix",
+      "description": "Override the I prefix on interface names",
+      "type": "textfield",
+      "required": false,
+      "default": "I",
+      "title": "Typescript Definition - Prefix"
+    },
+    {
+      "name": "rootName",
+      "description": "Override the RootObject name of the top-level interface",
+      "type": "textfield",
+      "required": false,
+      "default": "RootObject",
+      "title": "Typescript Definition - Root name"
     }
   ],
   "dependencies": {
@@ -39,5 +76,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

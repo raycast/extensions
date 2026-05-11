@@ -1,0 +1,202 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lavinprognoser",
+  "title": "Lavinprognoser",
+  "description": "Swedish Avalanche forecast from Naturvårdsverket",
+  "icon": "i.png",
+  "author": "samuelkraft",
+  "categories": [
+    "Data"
+  ],
+  "tags": [
+    "avalanche",
+    "forecast",
+    "naturvårdsverket",
+    "weather",
+    "snow",
+    "warning"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-avalanche-forecast",
+      "title": "Show Avalanche Forecast",
+      "subtitle": "Lavinprognoser",
+      "description": "Show the avalanche forecast overview of all areas",
+      "mode": "view"
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-forecast-overview",
+      "title": "Get Avalanche Forecast Overview",
+      "description": "Get an overview of the avalanche forecast for all areas"
+    },
+    {
+      "name": "get-forecast-for-area",
+      "title": "Get Avalanche Forecast for Area",
+      "description": "Get the detailed avalanche forecast for a specific area, including weather and snow information"
+    }
+  ],
+  "ai": {
+    "instructions": "When asked about reports for a specific area, call the 'get-forecast-for-area' tool to get the detailed forecast for that area. Before calling the 'get-forecast-for-area' tool, call the 'get-forecast-overview' tool to get the slug for all areas. Any urls should be relative to the base url 'https://lavinprognoser.se'",
+    "evals": [
+      {
+        "input": "@lavinprognoser which area has the least risk for avalanches right now?",
+        "mocks": {
+          "get-forecast-overview": {
+            "forecastAreas": [
+              {
+                "areaName": "Abisko/Riksgränsfjällen",
+                "riskText": "Måttlig",
+                "slug": "abisko_riksgransfjallen"
+              },
+              {
+                "areaName": "Kebnekaisefjällen",
+                "riskText": "Ej bedömd",
+                "slug": "kebnekaisefjallen"
+              },
+              {
+                "areaName": "Västra Vindelfjällen",
+                "riskText": "Måttlig",
+                "slug": "vastra_vindelfjallen"
+              },
+              {
+                "areaName": "Södra Lapplandsfjällen",
+                "riskText": "Liten",
+                "slug": "sodra_lapplandsfjallen"
+              },
+              {
+                "areaName": "Södra Jämtlandsfjällen",
+                "riskText": "Måttlig",
+                "slug": "sodra_jamtlandsfjallen"
+              },
+              {
+                "areaName": "Västra Härjedalsfjällen",
+                "riskText": "Måttlig",
+                "slug": "vastra_harjedalsfjallen"
+              }
+            ],
+            "forecastValidity": "2025-02-21 kl. 18:00"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-forecast-overview"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@lavinprognoser get the detailed avalanche report for härjedalen",
+        "mocks": {
+          "get-forecast-overview": {
+            "forecastAreas": [
+              {
+                "areaName": "Abisko/Riksgränsfjällen",
+                "riskText": "Måttlig",
+                "slug": "abisko_riksgransfjallen"
+              },
+              {
+                "areaName": "Kebnekaisefjällen",
+                "riskText": "Ej bedömd",
+                "slug": "kebnekaisefjallen"
+              },
+              {
+                "areaName": "Västra Vindelfjällen",
+                "riskText": "Måttlig",
+                "slug": "vastra_vindelfjallen"
+              },
+              {
+                "areaName": "Södra Lapplandsfjällen",
+                "riskText": "Liten",
+                "slug": "sodra_lapplandsfjallen"
+              },
+              {
+                "areaName": "Södra Jämtlandsfjällen",
+                "riskText": "Måttlig",
+                "slug": "sodra_jamtlandsfjallen"
+              },
+              {
+                "areaName": "Västra Härjedalsfjällen",
+                "riskText": "Måttlig",
+                "slug": "vastra_harjedalsfjallen"
+              }
+            ],
+            "forecastValidity": "2025-02-21 kl. 18:00"
+          },
+          "get-forecast-for-area": {
+            "areaId": 7,
+            "areaName": "Västra Härjedalsfjällen",
+            "areas": "Funäsdalen, Ramundberget, Ljungdalen, Helags",
+            "avalancheHazardText": "Lavinfara",
+            "forecast": {
+              "anchorLinkPrefix": "Aktuella lavinproblem",
+              "assessmentContent": "<span>Snödrevet fortsätter så länge det finns lös snö att flytta. Lavinfaran finns i lässluttningar där vinden samlat snön. Branta, släta snöfält bör betraktas som potentiellt lavinfarliga, även om vädret klarnar. Särskilt utsatta områden är de där planare terräng med tunt snötäcke övergår i brantare med djupare snö, exempelvis nedanför hängdrivor eller krön. Välj flackare terräng för att minska risken.<br><span><span><!--EndFragment--></span></span></span>",
+              "assessmentHeading": "Blåsten fortsätter och lavinfaran kvarstår",
+              "assessmentSubtitle": "Lavinprognos för fredag 21 februari"
+            }
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-forecast-overview"
+            }
+          },
+          {
+            "callsTool": {
+              "name": "get-forecast-for-area",
+              "arguments": {
+                "areaSlug": "vastra_harjedalsfjallen"
+              }
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "preferences": [
+    {
+      "name": "language",
+      "required": true,
+      "title": "Forecast Language",
+      "type": "dropdown",
+      "label": "Forecast Language",
+      "description": "The language of the forecast. Note that the Swedish forecast is more detailed.",
+      "default": "se",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Swedish",
+          "value": "se"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.92.0",
+    "@raycast/utils": "^1.17.0",
+    "node-html-markdown": "^1.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

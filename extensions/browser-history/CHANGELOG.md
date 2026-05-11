@@ -1,5 +1,29 @@
 # Browser History Changelog
 
+## [Add Dia, Comet and ChatGPT Atlas browser support] - 2025-11-08
+
+- Added Dia history search support.
+- Added Comet history search support.
+- Added ChatGPT Atlas history search support.
+- Update new tab action to use native `open` command instead of AppleScript.
+
+## [Enhancement] - 2025-03-31
+
+- Add a `search in browser` action when no search history is available.
+- Update dependencies.
+
+## [Fix for Safari] - 2024-12-05
+
+- Fixed Safari history search.
+
+## [Add Searching by URL and Title] - 2024-10-18
+
+- Added support for searching history by URL, alongside the existing title.
+
+## [Add Sidekick browser] - 2024-02-10
+
+- Added Sidekick history search support.
+
 ## [Enhancement] - 2023-04-19
 
 - Make it possible to force historic links to open in the originating browser as opposed to forcing either the default or a specific one.

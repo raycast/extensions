@@ -1,7 +1,10 @@
 import { Action, Clipboard, Icon, Toast, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { SENSITIVE_VALUE_PLACEHOLDER } from "@/constants";
 import { useCurrentApplicationContext } from "@/context/current-application";
+import { usePasswordContext } from "@/context/passwords";
+import { getErrorAction } from "@/helper/error";
 import { getPassword } from "@/lib/dcli";
 import { VaultCredential } from "@/types/dcli";
 
@@ -11,9 +14,16 @@ type Props = {
 
 export default function PasswordActions({ item }: Props) {
   const { currentApplication } = useCurrentApplicationContext();
+  const { visitItem } = usePasswordContext();
 
-  const copyPassword = () => copy(item);
-  const pastePassword = () => paste(item);
+  const copyPassword = () => {
+    copy(item);
+    visitItem(item);
+  };
+  const pastePassword = () => {
+    paste(item);
+    visitItem(item);
+  };
 
   return (
     <>
@@ -42,8 +52,9 @@ async function copy(item: VaultCredential) {
     toast.message = "Copied password to clipboard";
     toast.style = Toast.Style.Success;
   } catch (error) {
-    toast.message = "Failed to get password";
-    toast.style = Toast.Style.Failure;
+    await showFailureToast(error, {
+      primaryAction: getErrorAction(error),
+    });
   }
 }
 
@@ -53,12 +64,13 @@ async function paste(item: VaultCredential) {
     return;
   }
 
-  const toast = await showToast(Toast.Style.Animated, "Getting password");
+  await showToast(Toast.Style.Animated, "Getting password");
   try {
     const password = await getPassword(item.id);
     await Clipboard.paste(password);
   } catch (error) {
-    toast.message = "Failed to get TOTP";
-    toast.style = Toast.Style.Failure;
+    await showFailureToast(error, {
+      primaryAction: getErrorAction(error),
+    });
   }
 }

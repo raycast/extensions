@@ -5,6 +5,10 @@
   "description": "Open WhatsApp chats",
   "icon": "whatsapp.png",
   "author": "vimtor",
+  "contributors": [
+    "xmok",
+    "pankaj_gurbani"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -29,33 +33,137 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "add-new-whatsapp-chat",
+      "title": "Add new WhatsApp chat",
+      "description": "Adds a new WhatsApp chat."
+    },
+    {
+      "name": "add-whatsapp-group",
+      "title": "Add WhatsApp Group",
+      "description": "Adds an existing WhatsApp group."
+    },
+    {
+      "name": "open-chat",
+      "title": "Open Chat",
+      "description": "Opens a chat in WhatsApp"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@whatsapp Add John Smith with phone number +15551234567",
+        "mocks": {
+          "add-new-whatsapp-chat": "undefined"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-new-whatsapp-chat",
+              "arguments": {
+                "name": "John Smith",
+                "phone": "+15551234567"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that John Smith has been added"
+          }
+        ]
+      },
+      {
+        "input": "@whatsapp Add WhatsApp group Raycasters with code AbcdefgHijklmnop",
+        "mocks": {
+          "add-whatsapp-group": "undefined"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "add-whatsapp-group",
+              "arguments": {
+                "name": "Raycasters",
+                "groupCode": "AbcdefgHijklmnop"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that the WhatsApp group Raycasters has been added"
+          }
+        ]
+      },
+      {
+        "input": "@whatsapp Open chat with John",
+        "mocks": {
+          "open-chat": "undefined"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-chat",
+              "arguments": {
+                "name": "John"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that the chat with John has been opened"
+          }
+        ]
+      },
+      {
+        "input": "@whatsapp Send a message to John: Hey John, how are you?",
+        "mocks": {
+          "open-chat": "undefined"
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "open-chat",
+              "arguments": {
+                "name": "John",
+                "message": "Hey John, how are you?"
+              }
+            }
+          },
+          {
+            "meetsCriteria": "Tells that the message has been sent to John"
+          }
+        ]
+      }
+    ]
+  },
   "categories": [
     "Applications",
     "Communication",
     "Productivity"
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.8",
-    "@raycast/utils": "^1.5.2",
-    "nanoid": "^4.0.1",
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0",
     "fromnow": "^3.0.1",
+    "nanoid": "^4.0.1",
     "phone": "^3.1.35"
   },
   "devDependencies": {
-    "@types/node": "^18.15.0",
-    "@types/react": "^18.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "react-devtools": "^4.19.2",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

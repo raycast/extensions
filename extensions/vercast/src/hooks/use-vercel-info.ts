@@ -41,7 +41,7 @@ const useVercel = () => {
   }, []);
 
   const updateSelectedTeam = async (teamIdOrUsername: string) => {
-    const teamIfExists = teams?.find((team) => team.id === teamIdOrUsername);
+    const teamIfExists = teams?.find((team: Team) => team.id === teamIdOrUsername);
     if (teamIfExists) {
       setSelectedTeamId(teamIfExists.id);
       await LocalStorage.setItem("selectedTeamId", teamIfExists.id);

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, Image, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, List, environment } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 
 import { usePasswordContext } from "@/context/passwords";
@@ -14,11 +14,13 @@ type Props = {
 };
 
 export const ListItemPassword = ({ item }: Props) => {
-  const { isInitialLoaded } = usePasswordContext();
+  const { isInitialLoaded, visitItem, resetRanking } = usePasswordContext();
   const itemName = item.title ?? item.url;
-  const username = isInitialLoaded ? item.email ?? item.login ?? item.secondaryLogin : undefined;
+  const username = isInitialLoaded ? (item.email ?? item.login ?? item.secondaryLogin) : undefined;
 
   const keywords = [item.title, item.url, item.email, item.login, item.secondaryLogin].filter(Boolean);
+
+  if (!itemName) return null;
 
   return (
     <List.Item
@@ -41,28 +43,42 @@ export const ListItemPassword = ({ item }: Props) => {
               content={username}
               icon={Icon.Person}
               shortcut={{ modifiers: ["cmd"], key: "u" }}
+              onCopy={() => visitItem(item)}
             />
           )}
 
-          <Action.OpenInBrowser url={item.url} shortcut={{ modifiers: ["cmd"], key: "o" }} />
+          {item.url && (
+            <Action.OpenInBrowser
+              url={item.url}
+              shortcut={{ modifiers: ["cmd"], key: "o" }}
+              onOpen={() => visitItem(item)}
+            />
+          )}
           <ShowNoteAction item={item} />
           <ActionPanel.Section title="Item Actions">
             <FavoriteActions item={item} />
+            <Action title="Reset Ranking" icon={Icon.ArrowCounterClockwise} onAction={() => resetRanking(item)} />
           </ActionPanel.Section>
           <SyncAction />
+          {environment.isDevelopment && (
+            <ActionPanel.Section title="Development">
+              <Action.CopyToClipboard title="Copy ID" content={item.id} />
+              <Action title="Print to Console" icon={Icon.Terminal} onAction={() => console.log(item)} />
+            </ActionPanel.Section>
+          )}
         </ActionPanel>
       }
     />
   );
 };
 
-function isValidURL(url?: string) {
+function isValidURL(url?: string): url is string {
   if (!url) return false;
 
   try {
     new URL(url);
     return true;
-  } catch (error) {
+  } catch {
     return false;
   }
 }
@@ -93,5 +109,17 @@ function getAccessories(item: VaultCredential) {
     });
   }
 
+  accessories.push({
+    icon: { source: Icon.Dot, tintColor: getStrengthColor(item.strength) },
+    tooltip: "Strength",
+  });
+
   return accessories;
+}
+
+function getStrengthColor(strength: number): Color {
+  if (strength < 25) return Color.Red;
+  if (strength < 50) return Color.Orange;
+  if (strength < 75) return Color.Yellow;
+  return Color.Green;
 }

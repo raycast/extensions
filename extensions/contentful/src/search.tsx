@@ -1,70 +1,20 @@
 import { useState, FC, useMemo } from "react";
-import {
-  List,
-  ActionPanel,
-  Action,
-  Detail,
-  openExtensionPreferences,
-  getPreferenceValues,
-  Icon,
-  Color,
-} from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { List, ActionPanel, Action, Icon, Color } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { CONTENTFUL } from "./lib/contentful";
+import { ContentType, EntryProps, KeyValueMap, QueryOptions } from "contentful-management";
+import { CONTENTFUL_APP_URL, CONTENTFUL_LOCALE, CONTENTFUL_SPACE } from "./lib/config";
+import OpenInContentful from "./lib/components/open-in-contentful";
 
-const api = "https://api.contentful.com";
-
-interface ContentfulResponse<T = never> {
-  items: Array<T>;
-}
-
-interface ContentfulContentType {
-  sys: {
-    id: string;
-  };
-  displayField: string;
-  name: string;
-}
-
-interface ContentfulContentEntry {
-  sys: {
-    id: string;
-    type: string;
-    contentType: {
-      sys: {
-        id: string;
-      };
-    };
-    publishedCounter: number;
-    updatedAt: string;
-    publishedAt: string;
-    createdBy: {
-      sys: {
-        id: string;
-      };
-    };
-    publishedBy: {
-      sys: {
-        id: string;
-      };
-    };
-    archivedVersion: number;
-  };
-  fields: Record<string, { "en-US": any }>;
-}
-
-export type ContentfulEntryStatus = "archived" | "published" | "draft" | "changed";
+type ContentfulContentEntry = EntryProps<KeyValueMap>;
+type ContentfulEntryStatus = "archived" | "published" | "draft" | "changed";
 
 function getEntryStatus(entry: ContentfulContentEntry): ContentfulEntryStatus {
-  const isChanged =
-    entry.sys.updatedAt && entry.sys.publishedAt && Date.parse(entry.sys.updatedAt) > Date.parse(entry.sys.publishedAt);
-
-  return entry.sys.archivedVersion
-    ? "archived"
-    : isChanged
-    ? "changed"
-    : entry.sys.publishedCounter > 0
-    ? "published"
-    : "draft";
+  // reference: https://www.contentful.com/developers/docs/tutorials/general/determine-entry-asset-state/
+  if (!entry.sys.publishedVersion) return "draft";
+  if (entry.sys.archivedVersion) return "archived";
+  if (!!entry.sys.publishedVersion && entry.sys.version >= entry.sys.publishedVersion + 2) return "changed";
+  return "published";
 }
 
 export const ColorMapping: Record<ContentfulEntryStatus, Color> = {
@@ -75,9 +25,7 @@ export const ColorMapping: Record<ContentfulEntryStatus, Color> = {
 };
 
 export default function ContentfulSearch() {
-  const preferences = getPreferenceValues();
-  const { token, space } = preferences;
-  const environment = preferences.environment || "master";
+  const space = CONTENTFUL_SPACE;
 
   const [contentType, setContentType] = useState<string>("__all__");
 
@@ -85,50 +33,44 @@ export default function ContentfulSearch() {
   const [showDetail, setShowDetail] = useState(false);
   const toggleDetail = () => setShowDetail((s) => !s);
 
-  const { isLoading: contentTypesLoading, data: contentTypes } = useFetch<ContentfulResponse<ContentfulContentType>>(
-    `${api}/spaces/${space}/environments/${environment}/content_types`,
+  const { isLoading: contentTypesLoading, data: contentTypes } = useCachedPromise(
+    async () => {
+      const response = await CONTENTFUL.contentType.getMany({});
+      return response;
+    },
+    [],
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+      keepPreviousData: true,
+    },
   );
 
-  const contentTypesDict: Record<string, ContentfulContentType> = useMemo(
+  const contentTypesDict: Record<string, ContentType> = useMemo(
     () =>
       contentTypes?.items.reduce(
         (dict, item) => ({
           ...dict,
           [item.sys.id]: item,
         }),
-        {}
+        {},
       ) || {},
-    [contentTypes]
+    [contentTypes],
   );
 
-  const { isLoading, data: entries } = useFetch<ContentfulResponse<ContentfulContentEntry>>(
-    `${api}/spaces/${space}/environments/${environment}/entries?${
-      contentType && contentType !== "__all__" ? `content_type=${contentType}` : ""
-    }&query=${searchText}`,
+  const { isLoading, data: entries } = useCachedPromise(
+    async (content_type: string, query_text: string) => {
+      const query: QueryOptions = {
+        content_type,
+        query: query_text,
+      };
+      if (!content_type || content_type === "__all__") delete query.content_type;
+      const response = await CONTENTFUL.entry.getMany({ query });
+      return response;
+    },
+    [contentType, searchText],
     {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }
+      keepPreviousData: true,
+    },
   );
-
-  if (!token || !space) {
-    return (
-      <Detail
-        markdown="Missing Contentful credentials. Please update it in extension preferences and try again."
-        actions={
-          <ActionPanel>
-            <Action title="Open Extension Preferences" onAction={openExtensionPreferences} />
-          </ActionPanel>
-        }
-      />
-    );
-  }
 
   return (
     <List
@@ -137,6 +79,7 @@ export default function ContentfulSearch() {
       onSearchTextChange={setSearchText}
       throttle
       isShowingDetail={showDetail}
+      searchBarPlaceholder="Search content"
       searchBarAccessory={
         <List.Dropdown tooltip="Content Type" isLoading={contentTypesLoading} onChange={setContentType}>
           <List.Dropdown.Item icon={Icon.Layers} title="All" value="__all__" />
@@ -153,8 +96,8 @@ export default function ContentfulSearch() {
       }
     >
       {entries?.items.map((entry) => {
-        const titleField = entry.fields[contentTypesDict[entry.sys.contentType.sys.id]?.displayField];
-        const title = titleField ? titleField["en-US"] : "title";
+        const titleField = entry.fields[contentTypesDict[entry.sys.contentType.sys.id].displayField];
+        const title = titleField[CONTENTFUL_LOCALE] ?? "title";
         return (
           <ContentfulContentEntryItem
             key={entry.sys.id}
@@ -188,7 +131,7 @@ export const ContentfulContentEntryItem: FC<ContentfulContentEntryItemProps> = (
   showDetail,
   toggleDetail,
 }) => {
-  const entryUrl = `https://app.contentful.com/spaces/${space}/entries/${entry.sys.id}`;
+  const entryUrl = `${CONTENTFUL_APP_URL}spaces/${space}/entries/${entry.sys.id}`;
   const status = getEntryStatus(entry);
   const statusColor = ColorMapping[status];
 
@@ -199,7 +142,7 @@ export const ContentfulContentEntryItem: FC<ContentfulContentEntryItemProps> = (
       title={title}
       actions={
         <ActionPanel>
-          <Action.OpenInBrowser url={entryUrl} />
+          <OpenInContentful url={entryUrl} />
           <Action
             title={showDetail ? "Hide Detail" : "Show Detail"}
             icon={Icon.AppWindowSidebarLeft}
@@ -257,7 +200,7 @@ export const ContentfulContentEntryDetail: FC<ContentfulContentEntryDetailProps>
 
           <List.Item.Detail.Metadata.Label title="Fields" />
           {Object.keys(entry.fields).map((key) => {
-            const field = entry.fields[key]["en-US"];
+            const field = entry.fields[key][CONTENTFUL_LOCALE];
             return (
               <List.Item.Detail.Metadata.Label
                 key={key}

@@ -95,13 +95,7 @@ export function handleError(error: FetchError) {
       primaryAction: {
         title: "Open Anybox",
         onAction: async (toast) => {
-          const installedApplications = await getApplications();
-          const app = installedApplications.filter((application) => application.bundleId == "ltd.anybox.Anybox-setapp");
-          if (app.length > 0) {
-            open("open", "ltd.anybox.Anybox-setapp");
-          } else {
-            open("open", "cc.anybox.Anybox");
-          }
+          open("anybox://show");
           toast.hide();
         },
       },

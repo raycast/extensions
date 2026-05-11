@@ -1,5 +1,6 @@
-import { chain } from "lodash";
 import { useCachedPromise } from "@raycast/utils";
+import { chain } from "lodash";
+
 import { getNotifications } from "../api/getNotifications";
 
 export default function useNotifications() {

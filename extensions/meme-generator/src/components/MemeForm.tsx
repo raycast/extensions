@@ -1,21 +1,25 @@
-import { ActionPanel, Action, Form, showToast, Toast, closeMainWindow, showHUD, useNavigation } from "@raycast/api";
+import { ActionPanel, Action, Form, showToast, Toast, useNavigation, Icon, closeMainWindow } from "@raycast/api";
 import { useState } from "react";
-import { generateMeme } from "../api";
-import { ImgflipCaptionImageBox } from "../api/types";
+import { ImgflipCaptionImageBox } from "../api/imgflip/types";
+import { ApiModule, Meme } from "../api/types";
+import MemePreview from "./MemePreview";
 import copyFileToClipboard from "../lib/copyFileToClipboard";
-import { Meme } from "../types";
 
 interface FormValues {
   capitalize: string;
   [text: string]: string;
 }
 
-export default function MemeForm({ id, title, boxCount }: Meme) {
+interface MemeFormProps extends Meme {
+  apiModule: ApiModule;
+}
+
+export default function MemeForm({ id, title, boxCount, apiModule }: MemeFormProps) {
   const [textBoxError, setTextBoxError] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(false);
-  const { pop } = useNavigation();
+  const { push } = useNavigation();
 
-  async function onSubmit(values: FormValues) {
+  async function onSubmit(values: FormValues, preview: boolean) {
     const boxes = boxesFromFormValues(values);
 
     if (!boxes.some((box) => !!box.text)) {
@@ -23,29 +27,32 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
       return;
     }
 
-    showToast({
+    const generatingToast = await showToast({
       style: Toast.Style.Animated,
       title: "Generating...",
-    }).then((toast) => {
-      setIsLoading(true);
-
-      generateMeme({ id, boxes })
-        .then(async (results) => {
-          copyFileToClipboard(results.url, `${title}.jpg`).then((file) => {
-            toast.hide();
-            showHUD(`Meme "${file}" copied to clipboard`);
-            closeMainWindow();
-            pop();
-          });
-        })
-        .catch((error) => {
-          console.log(error);
-          showToast(Toast.Style.Failure, "Something went wrong", error.message);
-        })
-        .finally(() => {
-          setIsLoading(false);
-        });
     });
+
+    setIsLoading(true);
+
+    apiModule
+      .generateMeme({ id, boxes })
+      .then(async (results) => {
+        if (preview) {
+          push(<MemePreview title={title} url={results.url} />);
+        } else {
+          await copyFileToClipboard(results.url, `${title}.jpg`);
+          await generatingToast.hide();
+          await closeMainWindow();
+          await showToast(Toast.Style.Success, `Meme "${title}" copied to clipboard`);
+        }
+      })
+      .catch(async (error) => {
+        showToast(Toast.Style.Failure, "Something went wrong", error.message);
+      })
+      .finally(async () => {
+        setIsLoading(false);
+        await generatingToast.hide();
+      });
   }
 
   return (
@@ -54,7 +61,16 @@ export default function MemeForm({ id, title, boxCount }: Meme) {
       navigationTitle={`Generate meme "${title}"`}
       actions={
         <ActionPanel>
-          <Action.SubmitForm onSubmit={onSubmit} />
+          <Action.SubmitForm
+            icon={Icon.Clipboard}
+            onSubmit={(values: FormValues) => onSubmit(values, false)}
+            title="Generate"
+          />
+          <Action.SubmitForm
+            icon={Icon.Eye}
+            onSubmit={(values: FormValues) => onSubmit(values, true)}
+            title="Preview"
+          />
         </ActionPanel>
       }
     >

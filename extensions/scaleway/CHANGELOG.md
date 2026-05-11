@@ -1,5 +1,20 @@
 # Scaleway Changelog
 
+## [Improvement] - 2025-11-11
+
+- Update SDK Scaleway and dependencies.
+
+## [Improvement] - 2024-04-09
+
+- Update SDK Scaleway and dependencies.
+- Add Ipam Product.
+- Use new secret endpoint
+- Remove Private Network entrypoint which is a duplicate of VPC
+
+## [Chore] - 2023-12-20
+
+- Update header used by the client, update dependencies
+
 ## [Improvement] - 2023-10-24
 
 - Added block storage product entry

@@ -10,7 +10,7 @@ interface Props {
   onProfileSelected?: (profile: string) => void;
 }
 
-async function loadChromeProfiles(): Promise<ChromeProfile[]> {
+export async function loadChromeProfiles(): Promise<ChromeProfile[]> {
   const path = getLocalStatePath();
   if (!existsSync(path)) {
     return [{ name: "Default", id: "Default" }];
@@ -35,7 +35,11 @@ export default function ChromeProfileDropDown({ onProfileSelected }: Props) {
     if (loadedProfiles) {
       setProfiles(loadedProfiles);
       if (!selectedProfile) {
-        setSelectedProfile(profiles[0].id);
+        if (loadedProfiles.length > 0) {
+          setSelectedProfile(loadedProfiles[0].id);
+        } else {
+          setSelectedProfile(DEFAULT_CHROME_PROFILE_ID);
+        }
       }
     }
   }, [loadedProfiles]);

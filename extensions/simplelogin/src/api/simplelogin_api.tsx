@@ -1,7 +1,7 @@
 import load_preferences from "../utils/preferences";
 import axios from "axios";
 import { Options } from "../models/alias_options";
-import { Mailboxes, MailboxesResponse } from "../models/mailboxes";
+import { Mailboxes } from "../models/mailboxes";
 import { showToast, Toast } from "@raycast/api";
 import { ParamNewAlias } from "../models/alias_options";
 import { AliasResponse, LoadAllAliasResponse } from "../models/alias";
@@ -95,31 +95,21 @@ export async function createAlias(values: ParamNewAlias): Promise<AliasResponse 
     });
 }
 
-export async function createRandomAlias(): Promise<AliasResponse | null> {
+export async function createRandomAlias(note: string): Promise<AliasResponse> {
   const api_token = preferences.api_token;
   const app_url = preferences.app_url;
   const mode = preferences.mode;
 
+  const endpoint_url = `${app_url}/api/alias/random/new?mode=${mode}`;
+
   return axios
-    .post(
-      app_url + "/api/alias/random/new?mode=" + mode,
-      {},
-      {
-        headers: {
-          Authentication: api_token,
-        },
-      }
-    )
+    .post(endpoint_url, note !== "" ? { note } : {}, {
+      headers: {
+        Authentication: api_token,
+      },
+    })
     .then((response) => {
       return response.data as AliasResponse;
-    })
-    .catch((error) => {
-      showToast({
-        style: Toast.Style.Failure,
-        title: error.response.data.error,
-      });
-      console.log(error.response.data.error);
-      return null;
     });
 }
 
@@ -160,7 +150,7 @@ async function loadAliasesPage(page: number): Promise<LoadAllAliasResponse | nul
     .then((response) => {
       return response.data as LoadAllAliasResponse;
     })
-    .catch((error) => {
+    .catch(() => {
       return null;
     });
 }
@@ -177,12 +167,12 @@ export async function updateAliasPinnedStatus(alias_id: number, pinned: boolean)
         headers: {
           Authentication: api_token,
         },
-      }
+      },
     )
-    .then((response) => {
+    .then(() => {
       return true;
     })
-    .catch((error) => {
+    .catch(() => {
       return false;
     });
 }
@@ -197,10 +187,10 @@ export async function deleteAlias(alias_id: number): Promise<boolean> {
         Authentication: api_token,
       },
     })
-    .then((response) => {
+    .then(() => {
       return true;
     })
-    .catch((error) => {
+    .catch(() => {
       return false;
     });
 }
@@ -217,12 +207,12 @@ export async function toggleAliasState(alias_id: number, enabled: boolean): Prom
         headers: {
           Authentication: api_token,
         },
-      }
+      },
     )
-    .then((response) => {
+    .then(() => {
       return true;
     })
-    .catch((error) => {
+    .catch(() => {
       return false;
     });
 }

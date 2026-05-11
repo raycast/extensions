@@ -1,52 +1,47 @@
-import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
-import { useState, useEffect } from "react";
 import { useGetCurrentUser } from "./useGetCurrentUser";
 
 import { Project, User, APIErrorResponse } from "../types";
+import { usePromise } from "@raycast/utils";
 
 export function useGetProjects() {
-  const { currentUser } = useGetCurrentUser();
+  const { isLoading: isLoadingUser, currentUser } = useGetCurrentUser();
 
-  const [state, setState] = useState<{
-    projects?: Project[];
-    isLoading: boolean;
-  }>({
-    projects: undefined,
-    isLoading: true,
+  const {
+    isLoading,
+    data: projects,
+    mutate,
+  } = usePromise(getProjects, [], {
+    execute: !isLoadingUser && !!currentUser,
+    failureToastOptions: {
+      title: "Could not fetch projects",
+    },
   });
 
-  useEffect(() => {
-    async function fetch() {
-      const projects = await getProjects();
-
-      setState((oldState) => ({
-        ...oldState,
-        projects: projects,
-        isLoading: false,
-      }));
+  async function leaveProject(project: Project) {
+    const toast = await showToast(Toast.Style.Animated, "Leaving project", project.name);
+    try {
+      await mutate(removeUserFromProject(project, currentUser), {
+        optimisticUpdate(data) {
+          const updatedProjects = (data ?? []).filter((p) => p.id !== project.id);
+          return updatedProjects;
+        },
+        shouldRevalidateAfter: false,
+      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Succesfully left the project";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Could not leave project";
     }
-    fetch();
-  }, []);
-
-  function leaveProject(project: Project) {
-    removeUserFromProject(project, currentUser)
-      .then(() => {
-        const updatedProjects = (state.projects || []).filter((p) => p.id !== project.id);
-        setState((oldState) => ({
-          ...oldState,
-          projects: updatedProjects,
-        }));
-      })
-      .then(() => showToast(ToastStyle.Success, "Succesfully left the project"))
-      .catch((error) => showToast(ToastStyle.Failure, error.message));
   }
 
-  return { projects: state.projects, isLoading: state.isLoading, leaveProject };
+  return { projects, isLoading: isLoadingUser || isLoading, leaveProject };
 }
 
 async function getProjects(): Promise<Project[]> {
-  const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
+  const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues<Preferences>();
 
   const limit = 100;
   let offset = 0;
@@ -54,31 +49,26 @@ async function getProjects(): Promise<Project[]> {
   let projects: Project[] = [];
 
   while (hasMore) {
-    try {
-      const response = await fetch(`https://api.zeplin.dev/v1/projects?status=active&limit=${limit}&offset=${offset}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${PERSONAL_ACCESS_TOKEN}`,
-        },
-      });
+    const response = await fetch(`https://api.zeplin.dev/v1/projects?status=active&limit=${limit}&offset=${offset}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${PERSONAL_ACCESS_TOKEN}`,
+      },
+    });
 
-      if (!response.ok) {
-        const result = (await response.json()) as APIErrorResponse;
-        throw new Error(result.message);
-      }
+    if (!response.ok) {
+      const result = (await response.json()) as APIErrorResponse;
+      throw new Error(result.message);
+    }
 
-      const result = (await response.json()) as Project[];
-      projects = projects.concat(result);
+    const result = (await response.json()) as Project[];
+    projects = projects.concat(result);
 
-      if (result.length < limit) {
-        hasMore = false;
-      } else {
-        offset += limit;
-      }
-    } catch (error) {
-      console.error(error);
-      showToast(ToastStyle.Failure, "Could not fetch projects");
+    if (result.length < limit) {
+      hasMore = false;
+    } else {
+      offset += limit;
     }
   }
 
@@ -91,21 +81,16 @@ async function removeUserFromProject(project: Project, member?: User) {
   }
 
   const { PERSONAL_ACCESS_TOKEN } = getPreferenceValues();
-  try {
-    const response = await fetch(`https://api.zeplin.dev/v1/projects/${project.id}/members/${member.id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${PERSONAL_ACCESS_TOKEN}`,
-      },
-    });
+  const response = await fetch(`https://api.zeplin.dev/v1/projects/${project.id}/members/${member.id}`, {
+    method: "DELETE",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${PERSONAL_ACCESS_TOKEN}`,
+    },
+  });
 
-    if (!response.ok) {
-      const result = (await response.json()) as APIErrorResponse;
-      throw new Error(result.message);
-    }
-  } catch (error) {
-    console.error(error);
-    throw error;
+  if (!response.ok) {
+    const result = (await response.json()) as APIErrorResponse;
+    throw new Error(result.message);
   }
 }

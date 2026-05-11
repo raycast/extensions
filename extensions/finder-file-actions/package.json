@@ -1,0 +1,144 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "finder-file-actions",
+  "title": "Finder File Actions",
+  "description": "Perform actions (move, copy, create) on selected Finder files and folders",
+  "icon": "finder-file-actions.png",
+  "keywords": [
+    "finder",
+    "files",
+    "folders",
+    "move",
+    "copy",
+    "create",
+    "new",
+    "text",
+    "wrap"
+  ],
+  "author": "pa1ar",
+  "contributors": [],
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "move-to-folder",
+      "title": "Move to Folder",
+      "subtitle": "Finder File Actions",
+      "description": "Move selected Finder files to a destination folder",
+      "mode": "view",
+      "path": "src/move-to-folder.tsx",
+      "icon": "move-to-folder.png"
+    },
+    {
+      "name": "copy-to-folder",
+      "title": "Copy to Folder",
+      "subtitle": "Finder File Actions",
+      "description": "Copy selected Finder files to a destination folder",
+      "mode": "view",
+      "path": "src/copy-to-folder.tsx",
+      "icon": "copy-to-folder.png"
+    },
+    {
+      "name": "create-folder",
+      "title": "Create Folder",
+      "subtitle": "Finder File Actions",
+      "description": "Create a new folder in the current Finder directory",
+      "mode": "no-view",
+      "path": "src/create-folder.tsx",
+      "icon": "create-folder.png",
+      "arguments": [
+        {
+          "name": "folderName",
+          "placeholder": "untitled folder",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "wrap-in-folder",
+      "title": "Wrap in Folder",
+      "subtitle": "Finder File Actions",
+      "description": "Create a new folder and move selected Finder files into it",
+      "mode": "no-view",
+      "path": "src/wrap-in-folder.tsx",
+      "icon": "wrap-in-folder.png",
+      "arguments": [
+        {
+          "name": "folderName",
+          "placeholder": "untitled folder",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create-text-file",
+      "title": "Create Text File",
+      "subtitle": "Finder File Actions",
+      "description": "Create a text file with optional clipboard content",
+      "mode": "no-view",
+      "path": "src/create-text-file.tsx",
+      "icon": "create-text-file.png",
+      "arguments": [
+        {
+          "name": "extension",
+          "placeholder": "txt",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "default": "250",
+      "description": "The maximum number of search results that should be returned",
+      "name": "maxResults",
+      "required": false,
+      "title": "Maximum Results",
+      "type": "textfield"
+    },
+    {
+      "default": "10",
+      "description": "The maximum number of recent folders to remember",
+      "name": "maxRecentFolders",
+      "required": false,
+      "title": "Recent Folders Count",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3",
+    "binary-split": "^1.0.5",
+    "fs-extra": "^11.3.4",
+    "run-applescript": "^7.1.0",
+    "through2-map": "^4.0.0"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.3.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/fs-extra": "^11.0.4",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.1",
+    "react": "^19.2.4",
+    "typescript": "^6.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "bun test"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

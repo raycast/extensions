@@ -21,6 +21,7 @@ function PasswordsComponent() {
   const { passwords, isLoading } = usePasswordContext();
   const { favoriteItems, nonFavoriteItems } = useSeparateFavoriteItems(passwords ?? []);
   const isEmpty = !isLoading && passwords && passwords.length === 0;
+  const isError = !isLoading && passwords === undefined;
 
   return (
     <List isLoading={isLoading} navigationTitle="Search Passwords" searchBarPlaceholder="Search your passwords">
@@ -40,7 +41,7 @@ function PasswordsComponent() {
       ) : (
         nonFavoriteItems.map((item) => <ListItemPassword key={item.id} item={item} />)
       )}
-      <EmptyView isEmpty={isEmpty} isLoading={isLoading} syncAction={<SyncAction />} />
+      <EmptyView isEmpty={isEmpty} isError={isError} isLoading={isLoading} syncAction={<SyncAction />} />
     </List>
   );
 }

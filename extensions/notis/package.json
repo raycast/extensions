@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "notis",
+  "title": "Ask Notis",
+  "description": "Capture, organize, and find anything for you in your Notion workspace.",
+  "icon": "icon.png",
+  "author": "mindtheflo",
+  "categories": [
+    "Productivity",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "send-message",
+      "title": "Send Messages to Notis",
+      "subtitle": "Notis",
+      "description": "Send a message to Notis",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "input",
+          "placeholder": "Enter your message...",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "history",
+      "title": "View Notis Messages History",
+      "subtitle": "Notis",
+      "description": "See your past messages to Notis",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar-command",
+      "title": "Notis Menu Bar",
+      "subtitle": "Notis",
+      "description": "Monitor Notis answer in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10m"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Ask Notis for your API key and enter it here",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "autoPlayAudio",
+      "title": "Auto-play Audio Responses",
+      "label": "Auto-play Audio Responses",
+      "description": "You'll need FFmpeg installed to use this feature.",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "enablesPreferences": [
+        "ffmpegPath"
+      ]
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "FFmpeg Path",
+      "description": "Custom path to FFmpeg executable if it's not in your system PATH. Leave empty to use default system installation.",
+      "type": "textfield",
+      "placeholder": "/usr/local/bin/ffmpeg",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^2.7.0",
+    "react": "^18.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/node-fetch": "^2.6.12",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

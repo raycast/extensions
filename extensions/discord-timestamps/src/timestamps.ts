@@ -1,9 +1,11 @@
-export type TimestampType = "t" | "T" | "d" | "D" | "f" | "F" | "R" | "E";
+export type TimestampType = "t" | "T" | "d" | "D" | "f" | "F" | "R" | "E" | "I";
 
 export const generateTimestamp = (timestamp: Date, type: TimestampType): string => {
   switch (type) {
     case "E":
       return `${timestamp.valueOf()}`;
+    case "I":
+      return `${timestamp.toISOString()}`;
     default:
       return `<t:${Math.floor(timestamp.valueOf() / 1000)}:${type}>`;
   }
@@ -37,6 +39,8 @@ export const prettyPreview = (timestamp: Date, type: TimestampType): string => {
       return `${timeSince(timestamp)}`;
     case "E":
       return `${timestamp.valueOf()}`;
+    case "I":
+      return `${timestamp.toISOString()}`;
   }
 };
 
@@ -49,7 +53,7 @@ const ensureTwoDigits = (num: number) => {
 };
 
 const amPm = (hour: number) => {
-  if (hour > 12) {
+  if (hour >= 12) {
     return "PM";
   } else {
     return "AM";

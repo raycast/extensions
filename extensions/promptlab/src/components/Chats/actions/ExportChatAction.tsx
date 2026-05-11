@@ -1,9 +1,10 @@
 import { Action, Icon, Toast, confirmAlert, getPreferenceValues, showInFinder, showToast } from "@raycast/api";
-import { Chat, ChatManager, ExtensionPreferences } from "../../../utils/types";
+import { Chat, ChatManager } from "../../../lib/chats/types";
+import { ExtensionPreferences } from "../../../lib/preferences/types";
 import path from "path";
 import * as fs from "fs";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
-import { getActionShortcut } from "../../../utils/action-utils";
+import { getActionShortcut } from "../../../lib/actions";
 
 /**
  * Action to export a chat to a JSON file.
@@ -68,7 +69,7 @@ export const ExportChatAction = (props: {
           const statsJSON = JSON.stringify(chats.calculateStats(chat.name));
           try {
             fs.writeFileSync(path.resolve(dirPath, chat.name + "-stats.json"), statsJSON);
-          } catch (err) {
+          } catch {
             failedExports.push("Stats");
           }
 

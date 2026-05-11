@@ -1,0 +1,164 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "bmw",
+  "title": "BMW",
+  "description": "Control and view your BMW",
+  "icon": "icon.png",
+  "author": "aesign",
+  "categories": [
+    "Data",
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-car",
+      "title": "View Car",
+      "subtitle": "BMW",
+      "description": "View information about your BMW",
+      "mode": "view"
+    },
+    {
+      "name": "door-unlock",
+      "title": "Unlock Door",
+      "subtitle": "BMW",
+      "description": "Unlock your BMW",
+      "mode": "view"
+    },
+    {
+      "name": "door-lock",
+      "title": "Lock Door",
+      "subtitle": "BMW",
+      "description": "Lock your BMW",
+      "mode": "view"
+    },
+    {
+      "name": "climate-now",
+      "title": "Turn Climate On",
+      "subtitle": "BMW",
+      "description": "Turn your AC on",
+      "mode": "view"
+    },
+    {
+      "name": "horn-blow",
+      "title": "Honk",
+      "subtitle": "BMW",
+      "description": "Honk the horn",
+      "mode": "view"
+    },
+    {
+      "name": "light-flash",
+      "title": "Flash Lights",
+      "subtitle": "BMW",
+      "description": "Flash the lights",
+      "mode": "view"
+    },
+    {
+      "name": "charge-start",
+      "title": "Charge Start",
+      "subtitle": "BMW",
+      "description": "Start charging your BMW",
+      "mode": "view"
+    },
+    {
+      "name": "charge-stop",
+      "title": "Charge Stop",
+      "subtitle": "BMW",
+      "description": "Stop charging your BMW",
+      "mode": "view"
+    },
+    {
+      "name": "tires",
+      "title": "Tire Pressure",
+      "subtitle": "BMW",
+      "description": "Get the pressure for your tires",
+      "mode": "view"
+    },
+    {
+      "name": "services",
+      "title": "Services",
+      "subtitle": "BMW",
+      "description": "Check the due dates for your next services",
+      "mode": "view"
+    },
+    {
+      "name": "change-image",
+      "title": "Change Car Image",
+      "subtitle": "BMW",
+      "description": "Change the car image displayed",
+      "mode": "view"
+    },
+    {
+      "name": "car-overview",
+      "title": "Car Overview",
+      "subtitle": "BMW",
+      "description": "View your car at a glance",
+      "mode": "menu-bar"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "username",
+      "type": "textfield",
+      "required": true,
+      "title": "Username",
+      "description": "Your username",
+      "placeholder": "Enter your username"
+    },
+    {
+      "name": "password",
+      "type": "password",
+      "required": true,
+      "title": "Passoword",
+      "description": "Your password",
+      "placeholder": "Enter your password"
+    },
+    {
+      "name": "region",
+      "type": "dropdown",
+      "required": true,
+      "title": "Region",
+      "description": "Your region",
+      "data": [
+        {
+          "title": "North America",
+          "value": "NorthAmerica"
+        },
+        {
+          "title": "Rest of World",
+          "value": "RestOfWorld"
+        },
+        {
+          "title": "China",
+          "value": "China"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.4",
+    "@raycast/utils": "^1.9.1",
+    "axios": "^1.8.4",
+    "bmw-connected-drive": "^2.1.0",
+    "javascript-time-ago": "^2.5.9",
+    "moment": "^2.29.4",
+    "node-fetch": "^3.3.2",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "18.18.4",
+    "@types/react": "18.2.36",
+    "@types/uuid": "^9.0.7",
+    "eslint": "^8.53.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

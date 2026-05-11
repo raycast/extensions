@@ -1,13 +1,4 @@
-import childProcess from "node:child_process";
+import child_process from "child_process";
+import { promisify } from "util";
 
-export async function exec(command: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    childProcess.exec(command, (error, stdout, stderr) => {
-      if (error !== null) {
-        reject(stderr);
-      } else {
-        resolve(stdout);
-      }
-    });
-  });
-}
+export const exec = promisify(child_process.exec);

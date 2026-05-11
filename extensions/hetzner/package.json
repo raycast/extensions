@@ -5,6 +5,13 @@
   "description": "Provides different actions via the Hetzner API",
   "icon": "hetzner-icon.png",
   "author": "alex-w0",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "contributors": [
+    "yonn"
+  ],
   "categories": [
     "Applications",
     "Productivity",
@@ -34,7 +41,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.62.0",
-    "axios": "^1.6.0"
+    "axios": "^1.8.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",

@@ -1,0 +1,13 @@
+# Create new extension
+npx create-raycast-extension@latest adguard-home-control -t view
+
+# When prompted, select:
+# - Language: "TypeScript"
+# - UI Framework: "React"
+
+# Then navigate to the directory and install dependencies
+cd adguard-home-control
+npm install node-fetch @types/node-fetch 
+
+# Import to Raycast and start development mode
+npm run dev 

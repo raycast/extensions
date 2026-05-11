@@ -13,7 +13,7 @@ export interface CalendarAccount {
   unique: boolean;
   lastSynced: string;
   switchToMainURI?: string;
-  repairURI: any;
+  repairURI: unknown;
   connectedCalendars: Array<{
     name: string;
     id: number;

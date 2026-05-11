@@ -5,6 +5,9 @@
   "description": "Search for Swift Packages via https://swiftpackageindex.com",
   "icon": "command-icon.png",
   "author": "maximkrouk",
+  "contributors": [
+    "japanese-goblinn"
+  ],
   "categories": [
     "Developer Tools"
   ],

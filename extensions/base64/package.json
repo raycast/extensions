@@ -6,7 +6,14 @@
   "icon": "command-icon.png",
   "author": "DanielSinclair",
   "contributors": [
-    "sammarks"
+    "stelo",
+    "sammarks",
+    "ridemountainpig",
+    "luisafk"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
@@ -29,6 +36,18 @@
       "mode": "no-view"
     }
   ],
+  "tools": [
+    {
+      "name": "base64-encode",
+      "title": "Base64 Encode",
+      "description": "Encode a given payload into base64."
+    },
+    {
+      "name": "base64-decode",
+      "title": "Base64 Decode",
+      "description": "Decode the given base64 payload."
+    }
+  ],
   "preferences": [
     {
       "name": "defaultAction",
@@ -38,29 +57,40 @@
       "title": "Default Action",
       "default": "copyToClipboard",
       "data": [
-        { "value": "copyToClipboard", "title": "Copy to Clipboard" },
-        { "value": "pasteInApp", "title": "Paste in App" },
-        { "value": "openInBrowser", "title": "Open in Browser" }
+        {
+          "value": "copyToClipboard",
+          "title": "Copy to Clipboard"
+        },
+        {
+          "value": "pasteInApp",
+          "title": "Paste in App"
+        },
+        {
+          "value": "openInBrowser",
+          "title": "Open in Browser"
+        }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "1.44.0",
-    "js-base64": "3.7.2",
-    "run-applescript": "6.0.0"
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
+    "js-base64": "^3.7.8"
   },
   "devDependencies": {
-    "@types/node": "16.11.7",
-    "@types/react": "17.0.34",
-    "@typescript-eslint/eslint-plugin": "5.3.1",
-    "@typescript-eslint/parser": "5.3.1",
-    "eslint": "8.2.0",
-    "eslint-config-prettier": "8.3.0",
-    "react-devtools": "4.21.0",
-    "typescript": "4.4.4"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.2.14",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "@typescript-eslint/parser": "^8.56.0",
+    "eslint": "^10.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
-    "dev": "ray develop"
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
   }
 }

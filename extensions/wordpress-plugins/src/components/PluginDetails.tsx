@@ -42,10 +42,16 @@ export function PluginDetails({ data }: IPluginDetails) {
             target={<Versions versions={data.versions} slug={data.slug} />}
             icon={Icon.Tag}
           />
+          <Action.CopyToClipboard
+            content={`wpackagist-plugin/${data.slug}`}
+            shortcut={{ modifiers: ["cmd"], key: "." }}
+            title="Copy Composer Package Name"
+          />
           <Action.OpenInBrowser
             url={`${data.download_link}`}
             title={`Download Latest Version - ${data.version}`}
             icon={Icon.Download}
+            shortcut={{ modifiers: ["cmd"], key: "s" }}
           />
         </ActionPanel>
       }

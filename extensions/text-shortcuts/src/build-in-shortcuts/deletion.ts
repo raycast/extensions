@@ -36,4 +36,5 @@ export const deletions = [
     ],
   },
 ];
+
 export const DELETIONS_SHORTCUTS = JSON.stringify(deletions);

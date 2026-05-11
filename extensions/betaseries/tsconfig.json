@@ -1,0 +1,26 @@
+{
+    "compilerOptions": {
+        "module": "es2022",
+        "target": "es2022",
+        "lib": [
+            "es2022",
+            "dom"
+        ],
+        "moduleResolution": "node",
+        "strict": true,
+        "esModuleInterop": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "jsx": "react-jsx",
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "src/*"
+            ]
+        }
+    },
+    "include": [
+        "src/**/*",
+        "raycast-env.d.ts"
+    ]
+}

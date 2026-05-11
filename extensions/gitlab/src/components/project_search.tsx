@@ -1,87 +1,19 @@
-import { ActionPanel, Color, Icon, List } from "@raycast/api";
+import { List, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { gitlab } from "../common";
 import { Project } from "../gitlabapi";
-import { getErrorMessage, projectIcon, showErrorToast } from "../utils";
-import {
-  CloneProjectInGitPod,
-  CloneProjectInVSCodeAction,
-  CopyProjectIDToClipboardAction,
-  CopyCloneUrlToClipboardAction,
-  CreateNewProjectIssuePushAction,
-  OpenProjectBranchesPushAction,
-  OpenProjectIssuesPushAction,
-  OpenProjectLabelsInBrowserAction,
-  OpenProjectMergeRequestsPushAction,
-  OpenProjectMilestonesPushAction,
-  OpenProjectPipelinesPushAction,
-  OpenProjectSecurityComplianceInBrowserAction,
-  OpenProjectSettingsInBrowserAction,
-  OpenProjectWikiInBrowserAction,
-  ProjectDefaultActions,
-  ShowProjectLabels,
-} from "./project_actions";
-import { CacheActionPanelSection } from "./cache_actions";
-import { ProjectListEmptyView } from "./project";
+import { getErrorMessage, showErrorToast } from "../utils";
+import { ProjectListEmptyView, ProjectListItem, ProjectScope } from "./project";
 
-export function ProjectListItem(props: { project: Project }): JSX.Element {
-  const project = props.project;
-  const accessories = [];
-  if (project.archived) {
-    accessories.push({ tooltip: "Archived", icon: { source: Icon.ExclamationMark, tintColor: Color.Yellow } });
-  }
-  accessories.push({
-    text: project.star_count.toString(),
-    icon: {
-      source: Icon.Star,
-      tintColor: project.star_count > 0 ? Color.Yellow : null,
-    },
-    tooltip: `Number of stars: ${project.star_count}`,
-  });
-  return (
-    <List.Item
-      id={project.id.toString()}
-      title={project.name_with_namespace}
-      accessories={accessories}
-      icon={projectIcon(project)}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section title={project.name_with_namespace}>
-            <ProjectDefaultActions project={project} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <CopyProjectIDToClipboardAction project={project} />
-            <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
-          </ActionPanel.Section>
-          <ActionPanel.Section>
-            <OpenProjectIssuesPushAction project={project} />
-            <OpenProjectMergeRequestsPushAction project={project} />
-            <OpenProjectBranchesPushAction project={project} />
-            <OpenProjectPipelinesPushAction project={project} />
-            <OpenProjectMilestonesPushAction project={project} />
-            <OpenProjectWikiInBrowserAction project={project} />
-            <ShowProjectLabels project={props.project} shortcut={{ modifiers: ["cmd"], key: "l" }} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="Open in Browser">
-            <CreateNewProjectIssuePushAction project={project} />
-            <OpenProjectLabelsInBrowserAction project={project} />
-            <OpenProjectSecurityComplianceInBrowserAction project={project} />
-            <OpenProjectSettingsInBrowserAction project={project} />
-          </ActionPanel.Section>
-          <ActionPanel.Section title="IDE">
-            <CloneProjectInVSCodeAction shortcut={{ modifiers: ["cmd", "shift"], key: "c" }} project={project} />
-            <CloneProjectInGitPod shortcut={{ modifiers: ["cmd", "shift"], key: "g" }} project={project} />
-          </ActionPanel.Section>
-          <CacheActionPanelSection />
-        </ActionPanel>
-      }
-    />
-  );
+function activeProjects(): boolean {
+  const prefs = getPreferenceValues();
+  return (prefs.active as boolean) || false;
 }
 
-export function ProjectSearchList(): JSX.Element {
+export function ProjectSearchList() {
   const [searchText, setSearchText] = useState<string>();
-  const { projects, error, isLoading } = useSearch(searchText);
+  const [scope, setScope] = useState<string>(ProjectScope.membership);
+  const { projects, error, isLoading } = useSearch(searchText, scope);
 
   if (error) {
     showErrorToast(error, "Cannot search Project");
@@ -93,6 +25,12 @@ export function ProjectSearchList(): JSX.Element {
       onSearchTextChange={setSearchText}
       isLoading={isLoading}
       throttle={true}
+      searchBarAccessory={
+        <List.Dropdown tooltip="Scope" onChange={setScope} storeValue>
+          <List.Dropdown.Item title="My Projects" value={ProjectScope.membership} />
+          <List.Dropdown.Item title="All" value={ProjectScope.all} />
+        </List.Dropdown>
+      }
     >
       <List.Section title="Projects" subtitle={`${projects?.length}`}>
         {projects?.map((project) => (
@@ -104,7 +42,10 @@ export function ProjectSearchList(): JSX.Element {
   );
 }
 
-export function useSearch(query: string | undefined): {
+export function useSearch(
+  query: string | undefined,
+  scope: string,
+): {
   projects?: Project[];
   error?: string;
   isLoading: boolean;
@@ -112,6 +53,7 @@ export function useSearch(query: string | undefined): {
   const [projects, setProjects] = useState<Project[]>();
   const [error, setError] = useState<string>();
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const active = activeProjects();
 
   useEffect(() => {
     // FIXME In the future version, we don't need didUnmount checking
@@ -127,7 +69,8 @@ export function useSearch(query: string | undefined): {
       setError(undefined);
 
       try {
-        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title" });
+        const membership = scope === ProjectScope.membership ? "true" : "false";
+        const glProjects = await gitlab.getProjects({ searchText: query || "", searchIn: "title", membership, active });
 
         if (!didUnmount) {
           setProjects(glProjects);
@@ -148,7 +91,7 @@ export function useSearch(query: string | undefined): {
     return () => {
       didUnmount = true;
     };
-  }, [query]);
+  }, [query, scope, active]);
 
   return { projects, error, isLoading };
 }

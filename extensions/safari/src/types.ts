@@ -5,7 +5,7 @@ export interface Bookmark {
     title: string;
   };
   ReadingListNonSync: {
-    Title: string;
+    Title?: string;
   };
   WebBookmarkUUID: string;
   WebBookmarkType: string;
@@ -24,7 +24,7 @@ export interface BookmarkPListResult {
     {
       Title: string;
       Children: Bookmark[] | BookmarkPListResult;
-    }
+    },
   ];
 }
 
@@ -46,12 +46,18 @@ export interface ReadingListBookmark {
   description: string;
 }
 
-// Tabs
-
-export interface Tab {
+/**
+ * search method in `utils.ts` has been used by many places.\
+ * using a loose type can avoid incompatible types.
+ */
+export interface LooseTab {
   uuid: string;
   title: string;
   url: string;
+}
+
+// Tabs
+export interface Tab extends LooseTab {
   is_local: boolean;
 }
 
@@ -79,3 +85,7 @@ export interface HistoryItem {
   url: string;
   lastVisited: string;
 }
+
+// Preferences
+
+export type FallbackSearchType = "search" | "searchHistory";

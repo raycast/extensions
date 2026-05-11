@@ -51,7 +51,7 @@ ${gameData.short_description}
       actions={
         error ? null : (
           <ActionPanel>
-            <LaunchActions appid={game?.appid} />
+            <LaunchActions name={game.name} appid={game?.appid} />
           </ActionPanel>
         )
       }

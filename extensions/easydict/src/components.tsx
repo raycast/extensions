@@ -28,7 +28,6 @@ import { myPreferences, preferredLanguage1, preferredLanguage2 } from "./prefere
 import ReleaseNotesPage from "./releaseVersion/releaseNotePage";
 import { Easydict } from "./releaseVersion/versionInfo";
 import { openInEudic } from "./scripts";
-import { getVolcanoWebTranslateURL } from "./translation/volcano/volcanoAPI";
 import {
   ActionListPanelProps,
   DictionaryType,
@@ -44,6 +43,7 @@ const queryWebItemTypes = [
   DictionaryType.Linguee,
   DictionaryType.Eudic,
   TranslationType.DeepL,
+  TranslationType.DeepLX,
   TranslationType.Google,
   TranslationType.Baidu,
   TranslationType.Volcano,
@@ -445,12 +445,13 @@ function getWebQueryItem(queryType: QueryType, wordInfo: QueryWordInfo): WebQuer
       webUrl = getDeepLWebTranslateURL(wordInfo);
       break;
     }
-    case TranslationType.Baidu: {
-      webUrl = getBaiduWebTranslateURL(wordInfo);
+    case TranslationType.DeepLX: {
+      // DeepLX uses the same web interface as DeepL
+      webUrl = getDeepLWebTranslateURL(wordInfo);
       break;
     }
-    case TranslationType.Volcano: {
-      webUrl = getVolcanoWebTranslateURL(wordInfo);
+    case TranslationType.Baidu: {
+      webUrl = getBaiduWebTranslateURL(wordInfo);
       break;
     }
     case DictionaryType.Linguee: {

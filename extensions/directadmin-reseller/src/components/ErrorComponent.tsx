@@ -2,9 +2,11 @@ import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@ra
 import { ErrorResponse } from "../types";
 
 type ErrorComponentProps = {
-  errorResponse: ErrorResponse;
+  errorResponse: ErrorResponse | Error;
 };
 export default function ErrorComponent({ errorResponse }: ErrorComponentProps) {
+  const text = "text" in errorResponse ? errorResponse.text : "";
+  const details = "text" in errorResponse ? errorResponse.details : errorResponse.message;
   return (
     <Detail
       actions={
@@ -12,9 +14,9 @@ export default function ErrorComponent({ errorResponse }: ErrorComponentProps) {
           <Action title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
-      markdown={`## ERROR - ${errorResponse.text || ""}
+      markdown={`## ERROR - ${text}
     
-${errorResponse.details}`}
+${details}`}
     />
   );
 }

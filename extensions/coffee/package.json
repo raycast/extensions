@@ -8,7 +8,16 @@
   "contributors": [
     "bibixx",
     "GastroGeek",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "oasaleh",
+    "xilopaint",
+    "ridemountainpig",
+    "zakj",
+    "Visual-Studio-Coder",
+    "Katsuba"
+  ],
+  "platforms": [
+    "macOS"
   ],
   "license": "MIT",
   "commands": [
@@ -39,7 +48,18 @@
       "subtitle": "Coffee",
       "description": "Get the status of the current caffeination in your menu bar",
       "mode": "menu-bar",
-      "interval": "1m"
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "hidenWhenDecaffeinated",
+          "description": "Hide the icon when decaffeinated",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "title": "When Decaffeinated",
+          "label": "Hide the icon"
+        }
+      ]
     },
     {
       "name": "caffeinateToggle",
@@ -50,18 +70,91 @@
     },
     {
       "name": "caffeinateFor",
-      "title": "Caffeinate For",
+      "title": "Caffeinate for ...",
       "subtitle": "Coffee",
       "description": "Prevent your Mac from sleeping for a certain time",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "hours",
+          "placeholder": "Hours",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "minutes",
+          "placeholder": "Minutes",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "seconds",
+          "placeholder": "Seconds",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "caffeinateUntil",
+      "title": "Caffeinate Until",
+      "subtitle": "Coffee",
+      "description": "Prevent your Mac from sleeping until a certain time",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "time",
+          "placeholder": "Time",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "addSchedule",
+      "title": "Schedule Caffeination",
+      "description": "Schedule caffeination",
       "mode": "view"
     },
     {
-        "name": "status",
-        "title": "Caffeinate Status",
-        "description": "Show the current caffeination status",
-        "mode": "no-view",
-        "interval": "1m"
-      }
+      "name": "status",
+      "title": "Caffeinate Status",
+      "description": "Show the current caffeination status",
+      "mode": "no-view",
+      "interval": "15s"
+    }
+  ],
+  "tools": [
+    {
+      "name": "caffeinate-for",
+      "title": "Caffeinate for Duration",
+      "description": "Keeps your Mac awake for a specified duration"
+    },
+    {
+      "name": "caffeinate",
+      "title": "Caffeinate",
+      "description": "Keep Mac awake for unspecified duration."
+    },
+    {
+      "name": "check-caffeination-status",
+      "title": "Check Caffeination Status",
+      "description": "Check if your Mac is currently caffeinated or not."
+    },
+    {
+      "name": "decaffeinate",
+      "title": "Decaffeinate",
+      "description": "Turn off your Mac's sleep prevention."
+    },
+    {
+      "name": "schedule-caffeination",
+      "title": "Schedule Caffeination",
+      "description": "Add a schedule for your caffeination using AI."
+    },
+    {
+      "name": "caffeinate-while-app-is-running",
+      "title": "Caffeinate While App Is Running",
+      "description": "While an app is running, turn on caffeination."
+    }
   ],
   "preferences": [
     {
@@ -71,7 +164,7 @@
       "required": false,
       "default": true,
       "title": "Options",
-      "label": "Prevent Display Sleep"
+      "label": "Prevent display sleep"
     },
     {
       "name": "preventSystem",
@@ -79,7 +172,7 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "label": "Prevent System Sleep"
+      "label": "Prevent system sleep"
     },
     {
       "name": "preventDisk",
@@ -87,20 +180,46 @@
       "type": "checkbox",
       "required": false,
       "default": true,
-      "label": "Prevent Disk Sleep"
+      "label": "Prevent disk sleep"
+    },
+    {
+      "name": "icon",
+      "description": "Select icon set for Menu Bar",
+      "type": "dropdown",
+      "required": false,
+      "default": "pot",
+      "title": "Menu Bar Icon",
+      "data": [
+        {
+          "title": "Pot",
+          "value": "pot"
+        },
+        {
+          "title": "Mug",
+          "value": "mug"
+        },
+        {
+          "title": "Cup",
+          "value": "cup"
+        },
+        {
+          "title": "Paper Cup",
+          "value": "paper-cup"
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.62.2",
-    "@raycast/utils": "^1.10.1"
+    "@raycast/api": "^1.91.0",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.10.0",
-    "@types/react": "18.2.38",
-    "eslint": "^8.54.0",
-    "prettier": "^3.1.0",
-    "typescript": "^5.3.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",

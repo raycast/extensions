@@ -4,19 +4,15 @@ import { ReactElement, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 import BookmarkItem from "./components/BookmarkItem";
 import CollectionsDropdown from "./components/CollectionsDropdown";
-import { Bookmark, Preferences } from "./types";
+import { Bookmark } from "./types";
 import { useRequest } from "./hooks/useRequest";
 import { useLastUsedCollection } from "./hooks/useLastUsedCollection";
 
 export default function Main(): ReactElement {
-  const preferences: Preferences = getPreferenceValues();
-  const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>(
-    "last-used-collection",
-    "0"
-  );
+  const preferences = getPreferenceValues();
+  const [lastUsedCollection, setLastUsedCollection] = useCachedState<string>("last-used-collection", "0");
 
-  const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } =
-    useLastUsedCollection();
+  const { getLastUsedCollection, setLastUsedCollection: setNextCollectionToUse } = useLastUsedCollection();
 
   useEffect(() => {
     const fetchLastUsedCollection = async () => {
@@ -29,10 +25,7 @@ export default function Main(): ReactElement {
   const defaultCollection = preferences.useLastCollection ? lastUsedCollection : "0";
 
   const [searchText, setSearchText] = useState<string>("");
-  const [collection, setCollection] = useCachedState<string>(
-    "selected-collection",
-    defaultCollection
-  );
+  const [collection, setCollection] = useCachedState<string>("selected-collection", defaultCollection);
 
   const { isLoading, bookmarks, collections, revalidate } = useRequest({
     collection,
@@ -43,6 +36,15 @@ export default function Main(): ReactElement {
     if (collection !== value) {
       setCollection(value);
       setNextCollectionToUse(value);
+    }
+  };
+
+  const onSearch = (value: string) => {
+    if (value !== searchText) {
+      if (preferences.titleOnly) {
+        value = `title:"${value}"`;
+      }
+      setSearchText(value);
     }
   };
 
@@ -58,7 +60,7 @@ export default function Main(): ReactElement {
           defaultValue={collection}
         />
       }
-      onSearchTextChange={setSearchText}
+      onSearchTextChange={onSearch}
       isLoading={isLoading}
       throttle
     >

@@ -5,7 +5,15 @@
   "description": "Collection of utils for Ethereum and EVM-compatible chain development",
   "icon": "icon.png",
   "author": "destiner",
-  "categories": ["Data", "Developer Tools", "Web"],
+  "contributors": [
+    "jeremyhd",
+    "Phillip-Kemper"
+  ],
+  "categories": [
+    "Data",
+    "Developer Tools",
+    "Web"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -56,28 +64,43 @@
       "subtitle": "Ethereum (EVM) Utils",
       "description": "Encodes a constructor, function, or event using given ABI",
       "mode": "view"
+    },
+    {
+      "name": "resolve-name",
+      "title": "Resolve Name",
+      "subtitle": "Ethereum (EVM) Utils",
+      "description": "Resolves decentralized naming service (e.g. ENS) records",
+      "mode": "view"
+    },
+    {
+      "name": "etherscan",
+      "title": "Search on Etherscan",
+      "subtitle": "Ethereum (EVM) Utils",
+      "description": "Search Address, Transaction, or Token on Etherscan",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.28.0",
-    "abi-coder": "^2.0.3",
-    "axios": "^0.24.0",
-    "ethers": "^5.5.2"
+    "@raycast/api": "^1.69.3",
+    "@raycast/utils": "^1.16.1",
+    "abi-coder": "^5.0.0",
+    "axios": "^1.8.4",
+    "ethers": "^6.11.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/node": "^20.11.30",
+    "@types/react": "^18.2.67",
+    "@typescript-eslint/eslint-plugin": "^7.3.1",
+    "@typescript-eslint/parser": "^7.3.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

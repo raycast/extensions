@@ -1,5 +1,5 @@
 import { List } from '@raycast/api'
-import { getPreferenceUser } from 'providers'
+import { getPreferenceUser } from 'helpers/getPreferenceUser'
 import { useReducer } from 'react'
 import { ServerAction } from './ServerAction'
 import { ServerDetail } from './ServerDetail'
@@ -10,7 +10,7 @@ export const Servers = () => {
   const clientSetting = getPreferenceUser()
   const [isDetailOpen, toggleIsDetailOpen] = useReducer((state) => !state, true)
 
-  const { data: servers = [], isLoading } = useAllZoneServersQuery({
+  const { data: servers, isLoading } = useAllZoneServersQuery({
     orderBy: 'created_at_desc',
     organizationId: clientSetting.defaultOrganizationId,
   })
@@ -23,7 +23,7 @@ export const Servers = () => {
       isShowingDetail={isDetailOpen}
       searchBarPlaceholder="Search Servers …"
     >
-      {servers.map((server) => (
+      {servers?.map((server) => (
         <List.Item
           key={server.id}
           title={server.name}

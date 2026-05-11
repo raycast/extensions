@@ -1,16 +1,18 @@
-import { Action, ActionPanel, Form, Icon, launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
-import { useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { ApiProduct } from "../../api/product";
-import useVatRates from "../../hooks/useVatRates";
-import { CreateProductFormValues, CreateProductPayload } from "../../types/product";
-import { formatPrice } from "../../utils/formatters";
+
+import { Action, ActionPanel, Form, Icon, LaunchType, Toast, launchCommand, showToast } from "@raycast/api";
+import { useForm } from "@raycast/utils";
+
+import { ApiProduct } from "@/api/product";
+import { useVatRates } from "@/hooks/useVatRates";
+import { CreateProductFormValues, CreateProductPayload } from "@/types/product";
+import { formatPrice } from "@/utils/formatters";
 
 type Props = {
   draftValues?: CreateProductFormValues;
 };
 
-export default function CreateProduct({ draftValues }: Props) {
+export function CreateProduct({ draftValues }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [taxPrice, setTaxPrice] = useState("0");
   const [grossPrice, setGrossPrice] = useState("0");
@@ -138,9 +140,7 @@ export default function CreateProduct({ draftValues }: Props) {
       <Form.TextField title="Quantity" placeholder="Enter the quantity of product" {...itemProps.quantity} />
 
       <Form.Dropdown title="Tax Symbol" {...itemProps.tax_symbol}>
-        {vatRatesData?.map((vat) => (
-          <Form.Dropdown.Item key={vat.id} value={vat.symbol} title={vat.name} />
-        ))}
+        {vatRatesData?.map((vat) => <Form.Dropdown.Item key={vat.id} value={vat.symbol} title={vat.name} />)}
       </Form.Dropdown>
 
       <Form.TextField title="Net Price" placeholder="Enter the net price of product" {...itemProps.net_price} />

@@ -5,21 +5,127 @@
   "description": "Super cool unicode text magic. Use 𝐛𝐨𝐥𝐝, 𝒊𝒕𝒂𝒍𝒊𝒄𝒔, and 🅜🅞🅡🅔 🄲🅁🄰🅉🅈 𝔩𝔬𝔬𝔨𝔦𝔫𝔤 fonts on Facebook, Twitter, and everywhere else.",
   "icon": "text-decorator.png",
   "author": "koinzhang",
+  "contributors": [
+    "xmok"
+  ],
   "categories": [
     "Design Tools",
     "Fun"
+  ],
+  "keywords": [
+    "yaytext",
+    "text",
+    "decorator",
+    "font",
+    "unicode",
+    "convert"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "decorate-text",
       "title": "Decorate Text",
+      "subtitle": "With Font",
       "description": "Decorate text from selection or clipboard.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "font",
+          "type": "dropdown",
+          "required": false,
+          "placeholder": "With Font",
+          "data": [
+            {
+              "title": "Bold serif",
+              "value": "bold_serif"
+            },
+            {
+              "title": "Italic serif",
+              "value": "italic_serif"
+            },
+            {
+              "title": "Bold italic serif",
+              "value": "bold_italic_serif"
+            },
+            {
+              "title": "Script",
+              "value": "script"
+            },
+            {
+              "title": "Bold script",
+              "value": "bold_script"
+            },
+            {
+              "title": "Fraktur",
+              "value": "fraktur"
+            },
+            {
+              "title": "Bold fraktur",
+              "value": "bold_fraktur"
+            },
+            {
+              "title": "Double struck",
+              "value": "double_struck"
+            },
+            {
+              "title": "Sans serif",
+              "value": "sans_serif"
+            },
+            {
+              "title": "Bold sans serif",
+              "value": "bold_sans_serif"
+            },
+            {
+              "title": "Italic sans serif",
+              "value": "italic_sans_serif"
+            },
+            {
+              "title": "Bold italic sans serif",
+              "value": "bold_italic_sans_serif"
+            },
+            {
+              "title": "Monospace",
+              "value": "monospace"
+            },
+            {
+              "title": "Regional indicator",
+              "value": "regional_indicator"
+            },
+            {
+              "title": "Circle",
+              "value": "circle"
+            },
+            {
+              "title": "Black circle",
+              "value": "black_circle"
+            },
+            {
+              "title": "Square",
+              "value": "square"
+            },
+            {
+              "title": "Parenthesized",
+              "value": "parenthesized"
+            },
+            {
+              "title": "Fullwidth",
+              "value": "fullwidth"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "undecorate-text",
+      "title": "Undecorate Text",
+      "icon": "text-undecorator.png",
+      "description": "Undecorate text from selection or clipboard.",
       "mode": "no-view"
     },
     {
       "name": "decorate-text-with-font",
-      "title": "Decorate Text With Font",
+      "title": "Decorate Text with Font",
+      "icon": "text-decorator-with-font.png",
       "description": "Decorate text with specific font and set font of Decorate Text command.",
       "mode": "view",
       "preferences": [
@@ -27,7 +133,7 @@
           "name": "itemLayout",
           "type": "dropdown",
           "description": "Set the layout of the font items.",
-          "required": true,
+          "required": false,
           "title": "Font Layout",
           "default": "Grid",
           "data": [
@@ -46,8 +152,8 @@
           "type": "dropdown",
           "description": "Set the number of columns of the font items. (Only works with Grid layout)",
           "required": false,
-          "title": "Font Item Coloums",
-          "default": "8",
+          "title": "Font Item Columns",
+          "default": "7",
           "data": [
             {
               "title": "1",
@@ -88,9 +194,18 @@
   ],
   "preferences": [
     {
+      "name": "fontFallback",
+      "type": "checkbox",
+      "required": false,
+      "label": "Fallback to Unsupported Fonts",
+      "title": "Font Fallback",
+      "description": "Even with the fallback mode, unexisting characters (non-ASCII like ó ) will be ignored.",
+      "default": true
+    },
+    {
       "name": "actionAfterDecoration",
       "type": "dropdown",
-      "required": true,
+      "required": false,
       "title": "Action After Decoration",
       "description": "Paste the result or copy the result to the clipboard after decorating text.",
       "default": "Paste",
@@ -107,23 +222,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "unicode-text-decorator": "^0.1.1"
+    "@raycast/api": "^1.104.3",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

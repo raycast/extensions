@@ -1,10 +1,10 @@
 import { Icon, List } from '@raycast/api'
-import type { Redis } from '@scaleway/sdk'
+import type { Redisv1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 import { getClusterStatusIcon } from './status'
 
 type ClusterProps = {
-  cluster: Redis.v1.Cluster
+  cluster: Redisv1.Cluster
 }
 
 export const ClusterDetail = ({ cluster }: ClusterProps) => (

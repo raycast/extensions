@@ -1,5 +1,5 @@
-import { Clipboard, closeMainWindow, showHUD } from "@raycast/api";
-import { recognizeText } from "./utils";
+import { Clipboard, closeMainWindow } from "@raycast/api";
+import { recognizeText, showSuccessToast, showFailureToast } from "./utils";
 
 export default async function command() {
   await closeMainWindow();
@@ -8,13 +8,14 @@ export default async function command() {
     const recognizedText = await recognizeText(true);
 
     if (!recognizedText) {
-      return await showHUD("❌ No text detected!");
+      await showFailureToast("No text detected", { title: "No text detected" });
+      return;
     }
 
     await Clipboard.copy(recognizedText);
-    await showHUD("✅ Copied text to clipboard");
+    await showSuccessToast("Copied text to clipboard");
   } catch (e) {
     console.error(e);
-    await showHUD("❌ Failed detecting text");
+    await showFailureToast(e, { title: "Failed detecting text" });
   }
 }

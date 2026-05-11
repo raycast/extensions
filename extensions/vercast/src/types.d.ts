@@ -1023,3 +1023,62 @@ type Check = {
   status: "registered" | "running" | "completed";
   updatedAt: number;
 };
+
+export interface Domain {
+  boughtAt: number | null;
+  createdAt: number;
+  expiresAt: number | null;
+  id: string;
+  name: string;
+  serviceType: "zeit.world" | "external" | "na";
+  transferredAt: number | null;
+  userId: string;
+  teamId: string | null;
+  cdnEnabled: boolean;
+  verified: boolean;
+  nameservers: string[];
+  intendedNameservers: string[];
+  creator: {
+    id: string;
+    customerId: string | null;
+    email: string;
+    username: string;
+    name: string;
+  };
+  zone: boolean;
+  configVerifiedAt: number | null;
+  txtVerifiedAt: number | null;
+  nsVerifiedAt: number | null;
+  verificationRecord: string;
+  customNameservers?: string[];
+  orderedAt?: number;
+  renew?: boolean;
+  transferStartedAt?: number;
+}
+
+export interface AIGatewayLogItem {
+  timestamp: string;
+  projectId: string;
+  keyId: string;
+  environment: string;
+  deploymentId: string;
+  aiGatewayModelId: string;
+  aiModel: string;
+  aiModelType: string;
+  aiProvider: string;
+  httpStatus: number;
+  cost: number;
+  marketCost: number;
+  inputTokens: number;
+  outputTokens: number;
+  cachedInputTokens: number;
+  cacheCreationInputTokens: number;
+  reasoningTokens: number;
+  aiRequestDurationMs: number;
+  timeToFirstTokenMs: number;
+  tokensPerSecond: number;
+}
+
+export interface AICreditsBalance {
+  cumulativeBalance: string;
+}

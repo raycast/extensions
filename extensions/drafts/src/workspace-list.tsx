@@ -14,7 +14,7 @@ import {
 import { useState } from "react";
 import { checkAppInstallation } from "./utils/ApplicationInstalledCheck";
 import { CallbackUrl } from "./utils/CallbackUrlUtils";
-import { CallbackBasUrls } from "./utils/Defines";
+import { CallbackBaseUrls } from "./utils/Defines";
 import Style = Toast.Style;
 
 interface DraftsWorkspace {
@@ -22,7 +22,14 @@ interface DraftsWorkspace {
 }
 
 function AddWorkspaceAction(props: { defaultTitle?: string; onCreate: (workspace: DraftsWorkspace) => void }) {
-  return <Action.Push icon={Icon.Plus} title="Add Workspace" target={<AddWorkspaceForm onCreate={props.onCreate} />} />;
+  return (
+    <Action.Push
+      icon={Icon.Plus}
+      title="Add Workspace"
+      shortcut={{ modifiers: ["opt"], key: "a" }}
+      target={<AddWorkspaceForm onCreate={props.onCreate} />}
+    />
+  );
 }
 
 function OpenWorkspaceAction(props: { onOpen: () => void }) {
@@ -30,7 +37,14 @@ function OpenWorkspaceAction(props: { onOpen: () => void }) {
 }
 
 function RemoveWorkspaceAction(props: { onDelete: () => void }) {
-  return <Action icon={Icon.Trash} title="Remove Workspace" onAction={props.onDelete} />;
+  return (
+    <Action
+      icon={Icon.Trash}
+      title="Remove Workspace"
+      shortcut={{ modifiers: ["opt"], key: "d" }}
+      onAction={props.onDelete}
+    />
+  );
 }
 
 function AddWorkspaceForm(props: { onCreate: (workspace: DraftsWorkspace) => void }) {
@@ -105,7 +119,7 @@ export default function Command() {
   }
 
   async function handleOpenWorkspace(values: { workspaceName: string }) {
-    const callbackUrl = new CallbackUrl(CallbackBasUrls.OPEN_WORKSPACE);
+    const callbackUrl = new CallbackUrl(CallbackBaseUrls.OPEN_WORKSPACE);
     callbackUrl.addParam({ name: "name", value: values.workspaceName });
     await callbackUrl.openCallbackUrl();
     await popToRoot({ clearSearchBar: true });
@@ -142,6 +156,11 @@ export default function Command() {
         description="Configure Workspaces you want to open from Raycast"
         icon="⚙️"
       />
+      <List.Item
+        title="Deprecated Command"
+        subtitle="Please use the Command 'Find Workspace' instead."
+        icon={Icon.Warning}
+      />
       {workspaces.map((workspace, index) => (
         <List.Item
           key={index}
@@ -153,7 +172,7 @@ export default function Command() {
                 <OpenWorkspaceAction onOpen={() => handleOpenWorkspace(workspace)} />
                 <Action.CreateQuicklink
                   quicklink={{
-                    link: CallbackBasUrls.OPEN_WORKSPACE + "name=" + encodeURIComponent(workspace.workspaceName),
+                    link: CallbackBaseUrls.OPEN_WORKSPACE + "name=" + encodeURIComponent(workspace.workspaceName),
                   }}
                   icon={Icon.Link}
                   title={'Create Quicklink to open Workspace "' + workspace.workspaceName + '"'}

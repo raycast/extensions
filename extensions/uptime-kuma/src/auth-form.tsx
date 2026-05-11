@@ -64,7 +64,7 @@ export function AuthForm(props: { onSave: (url: string) => void }) {
         </ActionPanel>
       }
     >
-      <Form.TextField placeholder={"https://uptime.example.com"} title="Kuma url" {...itemProps.kuma_url} />
+      <Form.TextField placeholder={"https://uptime.example.com"} title="Kuma URL" {...itemProps.kuma_url} />
       <Form.TextField placeholder={"Your kuma username"} title="Kuma Username" {...itemProps.kuma_username} />
       <Form.PasswordField placeholder={"Your kuma password"} title="Kuma Password" {...itemProps.kuma_password} />
       <Form.TextField

@@ -1,42 +1,26 @@
-import { Action, ActionPanel, Icon, Image, List, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { isEqual } from "lodash";
 import { useEffect, useState } from "react";
+import { convertSlackEmojiToUnicode } from "./shared/utils";
 
-import {
-  CacheProvider,
-  Message,
-  onApiError,
-  SlackClient,
-  useChannels,
-  useGroups,
-  useUnreadConversations,
-  useUsers,
-} from "./shared/client";
-import { UpdatesModal } from "./shared/UpdatesModal";
-import { openChannel, timeDifference } from "./shared/utils";
+import { Message, SlackClient, useChannels, User, useUnreadConversations } from "./shared/client";
+import { withSlackClient } from "./shared/withSlackClient";
+import { handleError, timeDifference } from "./shared/utils";
+import { OpenChannelInSlack, useSlackApp } from "./shared/OpenInSlack";
 
 const conversationsStorageKey = "$unread-messages$selected-conversations";
 
-export default function Command() {
-  return (
-    <CacheProvider>
-      <UpdatesModal>
-        <UnreadMessagesOverview />
-      </UpdatesModal>
-    </CacheProvider>
-  );
-}
-
-function UnreadMessagesOverview() {
+function UnreadMessages() {
   const [selectedConversations, setSelectedConversations] = useState<string[]>();
 
-  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
-  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
-  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
+  const { isAppInstalled, isLoading } = useSlackApp();
+  const { data, isLoading: isLoadingChannels, error: channelsError } = useChannels();
+
+  const [users, channels, groups] = data ?? [];
+
   const {
     data: unreadConversations,
-    error: unreadConversationsError,
-    isValidating: isValidatingUnreadConversations,
+    isLoading: isLoadingUnreadConversations,
     mutate,
   } = useUnreadConversations(selectedConversations);
 
@@ -45,12 +29,12 @@ function UnreadMessagesOverview() {
     let conversations = item ? (JSON.parse(item as string) as string[]).sort() : [];
 
     // unselect conversations that don't exist anymore
-    if (users && channels && groups && !usersError && !channelsError && !groupsError) {
+    if (users && channels && groups && !channelsError) {
       conversations = conversations.filter(
         (id: string) =>
           !!users.find((user) => user.conversationId === id) ||
           !!channels.find((channel) => channel.id === id) ||
-          !!groups.find((group) => group.id === id)
+          !!groups.find((group) => group.id === id),
       );
 
       await LocalStorage.setItem(conversationsStorageKey, JSON.stringify(conversations));
@@ -61,38 +45,22 @@ function UnreadMessagesOverview() {
     }
   };
 
+  const refreshConversations = async () => {
+    await setConversations();
+    await mutate();
+  };
+
   useEffect(() => {
     setConversations();
   }, []);
 
-  useEffect(() => {
-    // needed to update selectedConversations after returning from configuration view
-    const interval = setInterval(
-      setConversations,
-      !selectedConversations || selectedConversations.length < 5
-        ? 500
-        : selectedConversations.length < 10
-        ? 10000
-        : 30000
-    );
-    return () => clearInterval(interval);
-  }, [selectedConversations]);
-
-  if (
-    (usersError &&
-      channelsError &&
-      groupsError &&
-      !isValidatingUsers &&
-      !isValidatingChannels &&
-      !isValidatingGroups) ||
-    (unreadConversationsError && !isValidatingUnreadConversations)
-  ) {
-    onApiError({ exitExtension: true });
-  }
-
   const markConversationAsRead = async (conversationId: string, actionTriggeredManually?: boolean): Promise<void> => {
     try {
-      await SlackClient.markAsRead(conversationId);
+      await mutate(SlackClient.markAsRead(conversationId), {
+        optimisticUpdate(data) {
+          return data?.filter((c) => c.conversationId !== conversationId);
+        },
+      });
 
       if (actionTriggeredManually) {
         showToast({
@@ -100,27 +68,25 @@ function UnreadMessagesOverview() {
           title: `Marked as read`,
         });
       }
-
-      // optimistic rendering: mark conversation as read
-      mutate(
-        unreadConversations?.filter((c) => c.conversationId !== conversationId),
-        { revalidate: false, populateCache: true }
-      );
-    } catch {
+    } catch (error) {
       if (actionTriggeredManually) {
-        onApiError();
+        await handleError(error, "Could not mark conversation as read");
       }
     }
   };
 
   return (
-    <List isLoading={!selectedConversations || isValidatingUnreadConversations}>
+    <List isLoading={!selectedConversations || isLoadingUnreadConversations || isLoadingChannels || isLoading}>
       {selectedConversations && selectedConversations.length === 0 && (
         <List.EmptyView
           icon={Icon.Gear}
           actions={
             <ActionPanel>
-              <Action.Push title="Configure" target={<ConfigurationWrapper />} />
+              <Action.Push
+                icon={Icon.Gear}
+                title="Configure"
+                target={<Configuration data={data} refreshConversations={refreshConversations} />}
+              />
             </ActionPanel>
           }
           title="Select Conversations"
@@ -134,7 +100,11 @@ function UnreadMessagesOverview() {
           <List.EmptyView
             actions={
               <ActionPanel>
-                <Action.Push title="Configure" target={<ConfigurationWrapper />} />
+                <Action.Push
+                  icon={Icon.Gear}
+                  title="Configure"
+                  target={<Configuration data={data} refreshConversations={refreshConversations} />}
+                />
               </ActionPanel>
             }
             title="No Unread Messages Found"
@@ -154,8 +124,8 @@ function UnreadMessagesOverview() {
               <List.Item
                 key={unreadConversation.conversationId}
                 title={conversation?.name ?? ""}
-                subtitle={unreadConversation.messageHistory[0].message}
-                icon={conversation ? { source: conversation.icon, mask: Image.Mask.Circle } : undefined}
+                subtitle={convertSlackEmojiToUnicode(unreadConversation.messageHistory[0].message)}
+                icon={conversation?.icon}
                 accessories={[
                   { text: timeDifference(new Date(unreadConversation.messageHistory[0].receivedAt)) },
                   { icon: Icon.Message, text: `${unreadConversation.messageHistory.length}` },
@@ -164,35 +134,37 @@ function UnreadMessagesOverview() {
                   <ActionPanel>
                     {conversation && (
                       <>
-                        <Action
-                          title="Open in Slack"
-                          onAction={() => {
-                            markConversationAsRead(unreadConversation.conversationId);
-                            openChannel(conversation.teamId, conversation.id);
-                          }}
+                        <OpenChannelInSlack
+                          workspaceId={conversation.teamId}
+                          channelId={unreadConversation.conversationId}
+                          isAppInstalled={isAppInstalled}
+                          onAction={() => markConversationAsRead(unreadConversation.conversationId)}
                         />
                         <Action
-                          title="Mark as read"
+                          shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                          title="Mark as Read"
+                          icon={Icon.Checkmark}
                           onAction={() => markConversationAsRead(unreadConversation.conversationId, true)}
                         />
                       </>
                     )}
                     <Action.Push
-                      title="Show unread messages"
+                      title="Show Unread Messages"
+                      icon={Icon.Sidebar}
                       shortcut={{ modifiers: ["cmd"], key: "m" }}
                       target={
-                        <CacheProvider>
-                          <UnreadMessagesConversation
-                            conversationName={conversation?.name ?? ""}
-                            messageHistory={unreadConversation.messageHistory}
-                          />
-                        </CacheProvider>
+                        <UnreadMessagesConversation
+                          conversationName={conversation?.name ?? ""}
+                          messageHistory={unreadConversation.messageHistory}
+                          users={users}
+                        />
                       }
                     />
                     <Action.Push
                       title="Configure Command"
+                      icon={Icon.Gear}
                       shortcut={{ modifiers: ["opt"], key: "c" }}
-                      target={<ConfigurationWrapper />}
+                      target={<Configuration data={data} refreshConversations={refreshConversations} />}
                     />
                   </ActionPanel>
                 }
@@ -208,27 +180,23 @@ function UnreadMessagesOverview() {
 function UnreadMessagesConversation({
   conversationName,
   messageHistory,
+  users,
 }: {
   conversationName: string;
   messageHistory: Message[];
+  users?: User[];
 }) {
-  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
-
-  if (usersError && !isValidatingUsers) {
-    onApiError({ exitExtension: true });
-  }
-
   return (
-    <List navigationTitle={`Unread Messages - ${conversationName}`} isLoading={isValidatingUsers} isShowingDetail>
+    <List navigationTitle={`Unread Messages — ${conversationName}`} isShowingDetail>
       {messageHistory.map((message, index) => {
         const user = users?.find((u) => u.id === message.senderId);
         return (
           <List.Item
             key={index}
-            icon={{ source: user?.icon ?? Icon.Person, mask: Image.Mask.Circle }}
+            icon={user?.icon}
             title={user?.name ?? ""}
             subtitle={timeDifference(new Date(message.receivedAt))}
-            detail={<List.Item.Detail markdown={message.message} />}
+            detail={<List.Item.Detail markdown={convertSlackEmojiToUnicode(message.message)} />}
           />
         );
       })}
@@ -236,19 +204,14 @@ function UnreadMessagesConversation({
   );
 }
 
-function ConfigurationWrapper() {
-  return (
-    <CacheProvider>
-      <Configuration />
-    </CacheProvider>
-  );
-}
+type ConfigurationProps = {
+  data: ReturnType<typeof useChannels>["data"];
+  refreshConversations: () => void;
+};
 
-function Configuration() {
+function Configuration({ data, refreshConversations }: ConfigurationProps) {
   const [selectedConversations, setSelectedConversations] = useState<string[]>([]);
-  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
-  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
-  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
+  const [users, channels, groups] = data ?? [];
 
   useEffect(() => {
     LocalStorage.getItem(conversationsStorageKey).then((item) => {
@@ -275,90 +238,67 @@ function Configuration() {
     if (updatedSelectedConversations) {
       setSelectedConversations(updatedSelectedConversations);
       LocalStorage.setItem(conversationsStorageKey, JSON.stringify(updatedSelectedConversations));
+      refreshConversations();
     }
   };
 
-  if (
-    usersError &&
-    channelsError &&
-    groupsError &&
-    !isValidatingUsers &&
-    !isValidatingChannels &&
-    !isValidatingGroups
-  ) {
-    onApiError({ exitExtension: true });
-  }
+  const sections = [
+    { title: "Channels", conversations: channels },
+    { title: "Groups", conversations: groups },
+  ];
 
   return (
-    <List
-      navigationTitle="Unread Messages - Configuration"
-      isLoading={!selectedConversations || isValidatingUsers || isValidatingChannels || isValidatingGroups}
-    >
+    <List navigationTitle="Unread Messages — Configuration">
       <List.Section title="Direct Messages">
-        {users
-          ?.filter(({ conversationId }) => !!conversationId)
-          .map(({ name, conversationId, icon }) => {
-            const isConversationSelected = selectedConversations.includes(conversationId!);
+        {users?.map(({ name, icon, conversationId }) => {
+          if (!conversationId) return;
+          const isConversationSelected = selectedConversations.includes(conversationId);
+          return (
+            <List.Item
+              key={conversationId}
+              title={name}
+              icon={isConversationSelected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+              accessories={[{ icon }]}
+              actions={
+                <ActionPanel>
+                  <Action
+                    icon={Icon.Eye}
+                    title={isConversationSelected ? "Unselect" : "Observe Conversation"}
+                    onAction={() => toggleConversation(conversationId)}
+                  />
+                </ActionPanel>
+              }
+            />
+          );
+        })}
+      </List.Section>
+
+      {sections.map(({ title, conversations }) => (
+        <List.Section key={title} title={title}>
+          {conversations?.map(({ id, name, icon }) => {
+            const isConversationSelected = selectedConversations.includes(id);
             return (
               <List.Item
-                key={conversationId}
+                key={id}
                 title={name}
-                icon={isConversationSelected ? Icon.Checkmark : Icon.Circle}
-                accessories={[{ icon: { source: icon, mask: Image.Mask.Circle } }]}
+                icon={isConversationSelected ? { source: Icon.Checkmark, tintColor: Color.Green } : Icon.Circle}
+                accessories={[{ icon }]}
                 actions={
                   <ActionPanel>
                     <Action
+                      icon={Icon.Eye}
                       title={isConversationSelected ? "Unselect" : "Observe Conversation"}
-                      onAction={() => toggleConversation(conversationId!)}
+                      onAction={() => toggleConversation(id)}
                     />
                   </ActionPanel>
                 }
               />
             );
           })}
-      </List.Section>
-      <List.Section title="Channels">
-        {channels?.map(({ name, id, icon }) => {
-          const isConversationSelected = selectedConversations.includes(id);
-          return (
-            <List.Item
-              key={id}
-              title={name}
-              icon={isConversationSelected ? Icon.Checkmark : Icon.Circle}
-              accessories={[{ icon }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title={isConversationSelected ? "Unselect" : "Observe Conversation"}
-                    onAction={() => toggleConversation(id)}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
-      <List.Section title="Groups">
-        {groups?.map(({ name, id, icon }) => {
-          const isConversationSelected = selectedConversations.includes(id);
-          return (
-            <List.Item
-              key={id}
-              title={name}
-              icon={isConversationSelected ? Icon.Checkmark : Icon.Circle}
-              accessories={[{ icon }]}
-              actions={
-                <ActionPanel>
-                  <Action
-                    title={isConversationSelected ? "Unselect" : "Observe Conversation"}
-                    onAction={() => toggleConversation(id)}
-                  />
-                </ActionPanel>
-              }
-            />
-          );
-        })}
-      </List.Section>
+        </List.Section>
+      ))}
     </List>
   );
 }
+
+export default withSlackClient(UnreadMessages);

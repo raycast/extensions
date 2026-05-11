@@ -8,6 +8,4 @@ export function ReportedIssues() {
   return <StatusIssueList issues={issues} isLoading={isLoading} mutate={mutate} />;
 }
 
-export default function Command() {
-  return withJiraCredentials(<ReportedIssues />);
-}
+export default withJiraCredentials(ReportedIssues);

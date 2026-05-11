@@ -1,21 +1,13 @@
-import { List, ActionPanel, Action, Icon, getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { List, ActionPanel, Action, Icon, Color, getPreferenceValues, confirmAlert, Alert } from "@raycast/api";
 import moment from "moment";
-import { pluralize } from "./utils";
+import { refreshCommands, pluralize, getEffectiveDate, getRepeatLabel } from "./utils";
 import { Item, ListItems, Preferences } from "./types";
 import { EditForm } from "./editForm";
 import { getItems, saveItems } from "./storage";
+import { useCachedPromise } from "@raycast/utils";
 
 export default function Command() {
-  const [connectionsList, setConnectionsList] = useState<ListItems[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    (async () => {
-      setConnectionsList(await getFormattedList());
-      setLoading(false);
-    })();
-  }, []);
+  const { data: datesList, isLoading, mutate } = useCachedPromise(getFormattedList, []);
 
   async function handleCreate(item: Item) {
     let items: Item[] = await getItems();
@@ -23,7 +15,8 @@ export default function Command() {
     items.push(item);
 
     await saveItems(items);
-    setConnectionsList(await getFormattedList());
+    await mutate(getFormattedList());
+    await refreshCommands();
   }
 
   async function removeItem(item: Item) {
@@ -31,13 +24,14 @@ export default function Command() {
     items = items.filter((i) => i.id !== item.id);
 
     await saveItems(items);
-    setConnectionsList(await getFormattedList());
+    await mutate(getFormattedList());
+    await refreshCommands();
   }
 
   return (
-    <List isLoading={loading}>
+    <List isLoading={isLoading}>
       <List.EmptyView title="No dates added" description="Add a date to get started" />
-      {connectionsList.map((section) => {
+      {datesList?.map((section) => {
         return (
           <List.Section
             title={section.title}
@@ -47,7 +41,7 @@ export default function Command() {
             {section.items.map((item: Item) => (
               <List.Item
                 id={item.id}
-                key={item.name}
+                key={item.id}
                 icon={{ source: item.icon, tintColor: item.color }}
                 title={item.name}
                 subtitle={item.subtitle}
@@ -64,14 +58,25 @@ export default function Command() {
 
 function Accessories(item: Item) {
   const preferences = getPreferenceValues<Preferences>();
-  const { showDate } = preferences;
+  const { showDate, showCountdownByDay } = preferences;
   const items = [];
+  const effectiveDate = getEffectiveDate(item);
 
-  if (showDate) {
-    items.push({ text: moment(item.date).format("YYYY-MM-DD"), icon: Icon.Calendar });
+  if (item.repeat && item.repeat !== "none") {
+    items.push({
+      tag: { value: getRepeatLabel(item.repeat), color: Color.Blue },
+    });
   }
 
-  items.push({ text: moment(item.date).fromNow(), icon: Icon.Clock });
+  if (showDate) {
+    items.push({ text: effectiveDate.format("YYYY-MM-DD"), icon: Icon.Calendar });
+  }
+
+  if (showCountdownByDay) {
+    items.push({ text: effectiveDate.diff(moment().startOf("day"), "days") + " days", icon: Icon.Clock });
+  } else {
+    items.push({ text: effectiveDate.fromNow(), icon: Icon.Clock });
+  }
 
   return items;
 }
@@ -112,20 +117,36 @@ function Actions({
   );
 }
 
-async function getFormattedList() {
+export async function getFormattedList() {
   const items: Item[] = await getItems();
-  const now = new Date().getTime();
+  const now = moment().startOf("day");
   const dates = [];
 
-  const futureDates = items.filter((item) => Date.parse(item.date) > now);
-  futureDates.sort(function (a, b) {
-    return a.date > b.date ? 1 : a.date < b.date ? -1 : 0;
+  // Pre-compute effective date once per item to avoid redundant calls during filter/sort
+  const effectiveDateMap = new Map<string, moment.Moment>();
+  for (const item of items) {
+    effectiveDateMap.set(item.id, getEffectiveDate(item));
+  }
+
+  const futureDates = items.filter((item) => {
+    const effective = effectiveDateMap.get(item.id)!;
+    return effective.isSameOrAfter(now);
+  });
+  futureDates.sort((a, b) => {
+    const aDate = effectiveDateMap.get(a.id)!;
+    const bDate = effectiveDateMap.get(b.id)!;
+    return aDate.diff(bDate);
   });
   dates.push({ title: "Upcoming Dates", items: futureDates } as ListItems);
 
-  const pastDates = items.filter((item) => Date.parse(item.date) < now);
-  pastDates.sort(function (a, b) {
-    return a.date < b.date ? 1 : a.date > b.date ? -1 : 0;
+  const pastDates = items.filter((item) => {
+    const effective = effectiveDateMap.get(item.id)!;
+    return effective.isBefore(now);
+  });
+  pastDates.sort((a, b) => {
+    const aDate = effectiveDateMap.get(a.id)!;
+    const bDate = effectiveDateMap.get(b.id)!;
+    return bDate.diff(aDate);
   });
 
   dates.push({ title: "Past Dates", items: pastDates } as ListItems);

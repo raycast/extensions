@@ -1,0 +1,288 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lol-esports",
+  "title": "LoL Esports",
+  "description": "Search League of Legends esports schedules and standings.",
+  "icon": "extension-icon.png",
+  "author": "vimtor",
+  "categories": [
+    "Data",
+    "Media",
+    "News",
+    "Other"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "show-schedule",
+      "title": "Show Schedule",
+      "subtitle": "LoL Esports",
+      "description": "Show LoL esports schedule",
+      "mode": "view",
+      "keywords": [
+        "lol",
+        "esports",
+        "league",
+        "legends",
+        "matches"
+      ]
+    },
+    {
+      "name": "show-standings",
+      "title": "Show Standings",
+      "subtitle": "LoL Esports",
+      "description": "Show LoL esports standings",
+      "mode": "view",
+      "keywords": [
+        "lol",
+        "esports",
+        "league",
+        "legends",
+        "ranking"
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "get-leagues",
+      "title": "Get Leagues",
+      "description": "Get available Leagues"
+    },
+    {
+      "name": "get-schedule",
+      "title": "Get Schedule",
+      "description": "Get a league schedule and matches"
+    },
+    {
+      "name": "get-standings",
+      "title": "Get Standings",
+      "description": "Get a league current standings"
+    }
+  ],
+  "ai": {
+    "evals": [
+      {
+        "input": "@lol-esports Who is first in the LCK?",
+        "mocks": {
+          "get-leagues": {
+            "leagues": [
+              {
+                "id": "98767991302996019",
+                "name": "LEC"
+              },
+              {
+                "id": "98767991310872058",
+                "name": "LCK"
+              }
+            ]
+          },
+          "get-standings": {
+            "rankings": [
+              {
+                "position": 1,
+                "team": {
+                  "code": "GEN",
+                  "id": "100205573495116443",
+                  "name": "Gen.G Esports",
+                  "record": {
+                    "losses": 0,
+                    "ties": 0,
+                    "wins": 10
+                  }
+                }
+              },
+              {
+                "position": 2,
+                "team": {
+                  "code": "HLE",
+                  "id": "100205573496804586",
+                  "name": "Hanwha Life Esports",
+                  "record": {
+                    "losses": 1,
+                    "ties": 0,
+                    "wins": 9
+                  }
+                }
+              },
+              {
+                "position": 3,
+                "team": {
+                  "code": "NS",
+                  "id": "102747101565183056",
+                  "name": "NONGSHIM RED FORCE",
+                  "record": {
+                    "losses": 4,
+                    "ties": 0,
+                    "wins": 6
+                  }
+                }
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-leagues"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "leagueId": "98767991310872058"
+              },
+              "name": "get-standings"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@lol-esports When is the next LEC match?",
+        "mocks": {
+          "get-leagues": {
+            "leagues": [
+              {
+                "id": "98767991302996019",
+                "name": "LEC"
+              },
+              {
+                "id": "98767991310872058",
+                "name": "LCK"
+              },
+              {
+                "id": "98767991314006698",
+                "name": "LPL"
+              }
+            ]
+          },
+          "get-schedule": {
+            "events": [
+              {
+                "blockName": "Week 7",
+                "match": {
+                  "id": "113487475359259657",
+                  "strategy": {
+                    "count": 3,
+                    "type": "bestOf"
+                  },
+                  "teams": [
+                    {
+                      "code": "TH",
+                      "name": "Team Heretics",
+                      "record": {
+                        "losses": 3,
+                        "wins": 4
+                      },
+                      "result": {
+                        "gameWins": 0,
+                        "outcome": null
+                      }
+                    },
+                    {
+                      "code": "GX",
+                      "name": "GIANTX",
+                      "record": {
+                        "losses": 5,
+                        "wins": 2
+                      },
+                      "result": {
+                        "gameWins": 0,
+                        "outcome": null
+                      }
+                    }
+                  ]
+                },
+                "startTime": "2025-05-12T15:00:00Z",
+                "state": "unstarted",
+                "type": "match"
+              },
+              {
+                "blockName": "Week 7",
+                "match": {
+                  "id": "113487475359325233",
+                  "strategy": {
+                    "count": 3,
+                    "type": "bestOf"
+                  },
+                  "teams": [
+                    {
+                      "code": "MKOI",
+                      "name": "Movistar KOI",
+                      "record": {
+                        "losses": 3,
+                        "wins": 4
+                      },
+                      "result": {
+                        "gameWins": 0,
+                        "outcome": null
+                      }
+                    },
+                    {
+                      "code": "RGE",
+                      "name": "Rogue",
+                      "record": {
+                        "losses": 5,
+                        "wins": 2
+                      },
+                      "result": {
+                        "gameWins": 0,
+                        "outcome": null
+                      }
+                    }
+                  ]
+                },
+                "startTime": "2025-05-12T17:00:00Z",
+                "state": "unstarted",
+                "type": "match"
+              }
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {},
+              "name": "get-leagues"
+            }
+          },
+          {
+            "callsTool": {
+              "arguments": {
+                "leagueId": "98767991302996019"
+              },
+              "name": "get-schedule"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0",
+    "date-fns": "^3.3.1",
+    "p-min-delay": "^4.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/lodash": "^4.14.202",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "lodash": "^4.17.21",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}

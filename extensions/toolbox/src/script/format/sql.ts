@@ -2,7 +2,7 @@ import { Script } from "../type";
 import { format } from "sql-formatter";
 import vkbeautify from "vkbeautify";
 
-export const foramtSql: Script = {
+export const formatSql: Script = {
   info: {
     title: "Format SQL",
     desc: "Format SQL queries",
@@ -13,9 +13,10 @@ export const foramtSql: Script = {
   run(input) {
     try {
       return format(input, {
-        uppercase: true,
+        keywordCase: "upper",
+        tabWidth: 2,
       });
-    } catch (error) {
+    } catch {
       throw Error("Invalid SQL");
     }
   },
@@ -31,7 +32,7 @@ export const minifySql: Script = {
   run(input) {
     try {
       return vkbeautify.sqlmin(input);
-    } catch (error) {
+    } catch {
       throw Error("Invalid SQL");
     }
   },

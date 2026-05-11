@@ -1,9 +1,9 @@
 import { List } from '@raycast/api'
-import type { Secret } from '@scaleway/sdk'
+import type { Secretv1beta1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../helpers/locality'
 
 type SecretDetailProps = {
-  secret: Secret.v1alpha1.Secret
+  secret: Secretv1beta1.Secret
 }
 
 export const SecretDetail = ({ secret }: SecretDetailProps) => (
@@ -19,10 +19,8 @@ export const SecretDetail = ({ secret }: SecretDetailProps) => (
           text={secret.region}
           icon={{ source: getIconFromLocality(secret.region) }}
         />
-        <List.Item.Detail.Metadata.Label
-          title="Secret Versions"
-          text={String(secret.versionCount)}
-        />
+        <List.Item.Detail.Metadata.Label title="Type" text={String(secret.versionCount)} />
+        <List.Item.Detail.Metadata.Label title="Secret Versions" text={String(secret.type)} />
 
         <List.Item.Detail.Metadata.Separator />
 

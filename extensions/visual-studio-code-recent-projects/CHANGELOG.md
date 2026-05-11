@@ -1,4 +1,115 @@
-# Visual Studio Code Search Recent Projects Changelog
+# Visual Studio Code Changelog
+
+## [Fix: Windows app path resolution] - 2026-05-11
+
+- Fixed `product.json` resolution for Windows builds that use VS Code's versioned resources layout.
+
+## [Fix: Shared Storage Support] - 2026-05-07
+
+- Added Shared Storage support for new version of VS Code
+
+## [Update] - 2026-04-07
+
+- Added support for Qoder.
+
+## [Update] - 2026-03-30
+
+- Added support for Lingma.
+
+## [Fix: Windows Support] - 2026-01-08
+
+- Resolved `setLocale` warnings in bash by clearing environment variables.
+- "Commands" command now supports Windows.
+- "Open With VSCode" command now works on Windows.
+- "Open New VSCode" command now supports Windows.
+- Updated Dependencies
+
+## [Update] - 2025-12-12
+
+- Added Windows support
+
+## [Update] - 2025-11-25
+
+- Added support for Antigravity.
+
+## [Enhancements] - 2025-11-19
+
+- Improved `Search Recent Projects` for remote workspaces by fuzzy matching remote authorities.
+
+## [Update] - 2025-08-04
+
+- Added support for Kiro.
+
+## [Update] - 2025-03-05
+
+- Added support for Trae CN.
+
+## [Update] - 2025-03-03
+
+- Fixed support for VSCodium - Insiders.
+- Sorted the list of builds in alphabetical order within the extension settings.
+
+## [Update] - 2025-03-02
+
+- Adds support for Positron as an option in the extension settings.
+
+## [Performance] - 2025-03-02
+
+- Fixed performance issue in ⁠Search Recent Projects command by implementing caching for application data retrieval. This significantly improves responsiveness when displaying many recent projects and eliminates rendering loop warnings.
+
+## [Improvements] - 2025-02-27
+
+- Improved UI by showing the actual editor name and icon (Windsurf, VSCodium, Cursor, etc.) in both `Search Recent Projects` and `Show Installed Extensions` commands.
+- Improved the `Uninstall Extension` action by adopting a destructive style, adding a shortcut, and enhancing the user experience by displaying the extension name in the confirmation dialog.
+- Added support for VSCodium - Insiders.
+
+## [Update] - 2025-02-22
+
+- Adds support for Trae as an option in the extension settings.
+
+## [Fix] - 2025-01-02
+
+- Fix the issue where users cannot open a new window when using a language pack.
+
+## [Update] - 2024-12-04
+
+- Adds support to customize the color for git branch tag (default is green). Inspired by [#15693](https://github.com/raycast/extensions/issues/15693).
+
+## [Fix] - 2024-12-05
+
+- Improved error handling for ambiguous git HEAD argument.
+
+## [Update] - 2024-12-02
+
+- Adds support to see Git branch in `Search Recent Projects`. Inspired by [#15626](https://github.com/raycast/extensions/issues/15626).
+
+## [Update] - 2024-11-17
+
+- Adds support for Windsurf as an option in the extension settings.
+
+## [Chore] - 2024-09-02
+
+- Added missing contributor
+
+## [Update] - 2024-05-31
+
+- Add keywords for VSCodium and Cursor
+
+## [Fix] - 2023-12-27
+
+- Fix crash when there is no `metadata` in an extension manifest
+
+## [Update] - 2023-12-09
+
+- Add `Open New Window` command
+
+## [Update] - 2023-12-06
+
+- Add actions to remove one or all entries from the recent projects list
+
+## [Enhancements] - 2023-12-07
+
+- Added Open and close other windows action
 
 ## [Fix] - 2023-11-28
 

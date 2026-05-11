@@ -18,6 +18,7 @@ function NotesComponent() {
   const { notes, isLoading } = useNotesContext();
   const { favoriteItems, nonFavoriteItems } = useSeparateFavoriteItems(notes ?? []);
   const isEmpty = !isLoading && notes && notes.length === 0;
+  const isError = !isLoading && notes === undefined;
 
   return (
     <List isLoading={isLoading} navigationTitle="Search Notes" searchBarPlaceholder="Search your notes" isShowingDetail>
@@ -37,7 +38,7 @@ function NotesComponent() {
       ) : (
         nonFavoriteItems.map((item) => <ListItemNote key={item.id} note={item} />)
       )}
-      <EmptyView isLoading={isLoading} isEmpty={isEmpty} syncAction={<SyncAction />} />
+      <EmptyView isLoading={isLoading} isEmpty={isEmpty} isError={isError} syncAction={<SyncAction />} />
     </List>
   );
 }

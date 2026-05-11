@@ -1,4 +1,4 @@
-import { SENSITIVE_VALUE_PLACEHOLDER as SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
+import { SENSITIVE_VALUE_PLACEHOLDER } from "~/constants/general";
 import { Folder, IdentityTitle, Item } from "~/types/vault";
 
 export function prepareItemsForCache(items: Item[]): Item[] {
@@ -23,6 +23,7 @@ export function prepareItemsForCache(items: Item[]): Item[] {
     card: cleanCard(item.card),
     passwordHistory: cleanPasswordHistory(item.passwordHistory),
     notes: hideIfDefined(item.notes),
+    sshKey: cleanSshKey(item.sshKey),
   }));
 }
 
@@ -91,6 +92,15 @@ function cleanPasswordHistory(passwordHistoryItems: Item["passwordHistory"]): It
     password: hideIfDefined(passwordHistory.password),
     lastUsedDate: hideIfDefined(passwordHistory.lastUsedDate),
   }));
+}
+
+function cleanSshKey(sshKey: Item["sshKey"]): Item["sshKey"] {
+  if (!sshKey) return undefined;
+  return {
+    publicKey: sshKey.publicKey,
+    keyFingerprint: sshKey.keyFingerprint,
+    privateKey: hideIfDefined(sshKey.privateKey),
+  };
 }
 
 function hideIfDefined<T>(value: T) {

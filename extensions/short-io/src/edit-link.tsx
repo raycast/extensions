@@ -1,14 +1,15 @@
 import { Action, ActionPanel, Form, Icon, showToast, Toast, useNavigation } from "@raycast/api";
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { useState } from "react";
 import { UpdateShortLink } from "./utils/axios-utils";
 import { isEmpty } from "./utils/common-utils";
 import { ActionOpenPreferences } from "./components/action-open-preferences";
 import { ActionGoShortIo } from "./components/action-go-short-io";
 import { ShortLink } from "./types/types";
+import { MutatePromise } from "@raycast/utils";
 import Style = Toast.Style;
 
-export default function EditLink(props: { shortLink: ShortLink; setRefresh: Dispatch<SetStateAction<number>> }) {
-  const { shortLink, setRefresh } = props;
+export default function EditLink(props: { shortLink: ShortLink; mutate: MutatePromise<ShortLink[]> }) {
+  const { shortLink, mutate } = props;
   const [slug, setSlug] = useState<string>(shortLink.path);
   const [title, setTitle] = useState<string>(isEmpty(shortLink.title) ? "" : shortLink.title + "");
   const [originalLink, setOriginalLink] = useState<string>(shortLink.originalURL);
@@ -29,7 +30,7 @@ export default function EditLink(props: { shortLink: ShortLink; setRefresh: Disp
               await showToast(Style.Animated, "Updating...");
               const updateResult = await UpdateShortLink(shortLink.idString, originalLink, slug, title);
               if (updateResult.success) {
-                setRefresh(Date.now());
+                await mutate();
                 pop();
                 await showToast(Style.Success, "Success.", "Link updated.");
               } else {

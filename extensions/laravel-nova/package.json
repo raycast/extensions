@@ -4,7 +4,7 @@
   "title": "Laravel Nova",
   "description": "Laravel Nova Docs",
   "icon": "command-icon.png",
-  "author": "plank",
+  "author": "plank-dev",
   "license": "MIT",
   "commands": [
     {
@@ -15,31 +15,31 @@
       "mode": "view",
       "preferences": [
         {
-        "name": "novaVersion",
-        "type": "dropdown",
-        "required": false,
-        "title": "Default Nova Version",
-        "description": "Specify the default Laravel Nova version to search docs for.",
-        "default": "3.0.0",
-        "data": [
-          {
-            "title": "4.0",
-            "value": "4.0.0"
-          },
-          {
-            "title": "3.0",
-            "value": "3.0.0"
-          },
-          {
-            "title": "2.0",
-            "value": "2.0.0"
-          },
-          {
-            "title": "1.0",
-            "value": "1.0.0"
-          }
-        ]
-      },
+          "name": "novaVersion",
+          "type": "dropdown",
+          "required": false,
+          "title": "Default Nova Version",
+          "description": "Specify the default Laravel Nova version to search docs for.",
+          "default": "3.0.0",
+          "data": [
+            {
+              "title": "4.0",
+              "value": "4.0.0"
+            },
+            {
+              "title": "3.0",
+              "value": "3.0.0"
+            },
+            {
+              "title": "2.0",
+              "value": "2.0.0"
+            },
+            {
+              "title": "1.0",
+              "value": "1.0.0"
+            }
+          ]
+        },
         {
           "name": "hitLimit",
           "description": "Indicate the number of results to display from your queries. Minimum of 1 and maximum of 100.",
@@ -48,7 +48,7 @@
           "title": "Number of results to display (1–100)",
           "default": "20"
         }
-    ]
+      ]
     }
   ],
   "dependencies": {
@@ -66,7 +66,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {

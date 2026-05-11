@@ -2,9 +2,14 @@ import plist from "plist";
 import { execp } from ".";
 
 export const getBatteryState = async () => {
-  const ioregOutput = await (await execp("/usr/sbin/ioreg -arn AppleSmartBattery")).stdout.trim();
+  const [ioregOutput, pmsetOutput] = await Promise.all([
+    execp("/usr/sbin/ioreg -arn AppleSmartBattery").then((r) => r.stdout.trim()),
+    execp("/usr/bin/pmset -g").then((r) => r.stdout.trim()),
+  ]);
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [batt] = plist.parse(ioregOutput) as any;
+  const isLowPowerMode = /lowpowermode\s+1/i.test(pmsetOutput.toLowerCase().trim());
 
   const voltage = batt.Voltage;
   const amperage = batt.Amperage;
@@ -14,9 +19,25 @@ export const getBatteryState = async () => {
   const capacity = batt.CurrentCapacity / 100;
   const cycles = batt.CycleCount;
   const health = (batt.AppleRawMaxCapacity / batt.DesignCapacity) * 100;
-  // if there's no time remaining, then probably we switched from battery to AC power
   const watts = timeRemaining != null && voltage && amperage ? (voltage / 1000) * (amperage / 1000) : null;
   const temperature = batt.Temperature;
+
+  const isCharging = batt.IsCharging === true || batt.IsCharging === "Yes";
+  const isFullyCharged = batt.FullyCharged === true || batt.FullyCharged === "Yes";
+
+  let chargingStatus: "on hold" | "fully charged" | "charging" | "discharging" | "unknown";
+
+  if (isFullyCharged) {
+    chargingStatus = "fully charged";
+  } else if (connected && !isCharging) {
+    chargingStatus = "on hold";
+  } else if (isCharging) {
+    chargingStatus = "charging";
+  } else if (!connected) {
+    chargingStatus = "discharging";
+  } else {
+    chargingStatus = "unknown";
+  }
 
   const state = {
     time: Date.now(),
@@ -29,9 +50,12 @@ export const getBatteryState = async () => {
     minutesRemaining: timeRemaining != null ? timeRemaining % 60 : null,
     temperature,
     connected,
-    charging: connected,
+    isCharging, // New: Actual charging status
+    isFullyCharged, // New: Whether fully charged
+    chargingStatus, // New: Charging status string
     cycles,
     health,
+    lowPowerMode: isLowPowerMode,
   };
   return state;
 };

@@ -4,7 +4,7 @@
   "title": "Markdown Table Generator",
   "description": "Specify your width and height, and receive a markdown table that you can input your own values into.",
   "icon": "command-icon.png",
-  "author": "Vaibhav-Satishkumar",
+  "author": "Visual-Studio-Coder",
   "categories": [
     "Developer Tools"
   ],

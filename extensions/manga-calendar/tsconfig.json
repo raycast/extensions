@@ -12,6 +12,13 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "jsx": "react-jsx",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "paths": {
+      "@components/*":["./src/components/*"],
+      "@commands/*":["./src/commands/*"],
+      "@utils/*":["./src/utils/*"],
+      "@types":["./src/types"],
+      "@data":["./src/data"],
+    }
   }
 }

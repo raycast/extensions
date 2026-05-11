@@ -1,6 +1,15 @@
 # Link Cleaner
 
-Quickly remove tracking parameters in URLs from clipboard.
+Quickly remove tracking parameters in URLs.
+
+Supported:
+
+1. Google Search
+2. Baidu Search
+3. Bing Search
+4. Netease Music
+5. Youtube
+6. Instagram
 
 ## Example
 

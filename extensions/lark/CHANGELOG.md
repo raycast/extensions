@@ -1,5 +1,22 @@
 # Lark Changelog
 
+## [Update] - 2026-01-20
+
+- Support for parent folder display
+- Update project dependencies
+
+## [Update] - 2024-07-04
+
+- Support emoji icon
+
+## [Update] - 2024-02-15
+
+- Support search Lark Minutes
+
+## [Update] - 2024-02-06
+
+- Remove user fields due to security reasons
+
 ## [Update] - 2023-11-06
 
 - Fix "read properties of undefined"

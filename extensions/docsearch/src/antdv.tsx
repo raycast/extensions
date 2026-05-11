@@ -1,5 +1,6 @@
 import { SearchDocumentation } from "./components";
+import { DocID } from "./data/apis";
 
 export default function Command(props: { arguments: { search?: string } }) {
-  return <SearchDocumentation id="43cd38be-82b8-4d54-9764-349fa2b7d6a3" quickSearch={props.arguments?.search} />;
+  return <SearchDocumentation id={DocID.Antdv} quickSearch={props.arguments?.search} />;
 }

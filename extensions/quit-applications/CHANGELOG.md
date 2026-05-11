@@ -1,5 +1,38 @@
 # Quit Applications Changelog
 
+## [Bug fix] - 2026-04-04
+
+- Fixed error when a foreground process has no file property (error -1728)
+
+## [Bug fix] - 2025-10-09
+
+- Fixed Apple Events authorization error (-1743) by adding fallback to `ps` command when System Events permission is not granted
+
+## [Bug fix] - 2025-05-27
+
+- Fixed issue where excluded applications still appeared in the list when multiple windows were open
+
+## [Update] - 2025-04-25
+
+- Added `Quit All Applications` to quit all applications at once
+
+## [Update] - 2024-09-03
+
+- Transitions component to from a class component to a function component
+- Fixes issue where quitting an app takes you back to the first element in list
+
+## [Enhancement] - 2024-04-11
+
+- Added clearSearchBar after quitting an app.
+
+## [Enhancement] - 2024-04-05
+
+- Fixed a bug where some of the apps (e.g. Steam) were not quitting
+
+## [Performance Improvements] - 2024-01-19
+
+- Improve icon fetching performance by using the API provided by Raycast
+
 ## [Deeplinks Support] - 2023-10-21
 
 - Added Deeplink Support

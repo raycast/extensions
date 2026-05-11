@@ -254,6 +254,104 @@ export const HSLtoRGBA = (hsl: number[]): number[] => {
   return [Math.round(255 * f(0)), Math.round(255 * f(8)), Math.round(255 * f(4)), hsl[3]];
 };
 
+// OKLCH Color Conversions
+const linearToSRGB = (c: number): number => {
+  return c <= 0.0031308 ? 12.92 * c : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+};
+
+const sRGBToLinear = (c: number): number => {
+  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+};
+
+// Convert RGB to OKLCH
+export const RGBtoOKLCH = (rgb: number[]): number[] => {
+  // Normalize RGB to 0-1
+  const r = rgb[0] / 255;
+  const g = rgb[1] / 255;
+  const b = rgb[2] / 255;
+
+  // Convert sRGB to linear RGB
+  const linearR = sRGBToLinear(r);
+  const linearG = sRGBToLinear(g);
+  const linearB = sRGBToLinear(b);
+
+  // Convert linear RGB to OKLab
+  const l_ = 0.4122214708 * linearR + 0.5363325363 * linearG + 0.0514459929 * linearB;
+  const m_ = 0.2119034982 * linearR + 0.6806995451 * linearG + 0.1073969566 * linearB;
+  const s_ = 0.0883024619 * linearR + 0.2817188376 * linearG + 0.6299787005 * linearB;
+
+  const l_cubed = Math.cbrt(l_);
+  const m_cubed = Math.cbrt(m_);
+  const s_cubed = Math.cbrt(s_);
+
+  const L = 0.2104542553 * l_cubed + 0.793617785 * m_cubed - 0.0040720468 * s_cubed;
+  const a = 1.9779984951 * l_cubed - 2.428592205 * m_cubed + 0.4505937099 * s_cubed;
+  const bOklab = 0.0259040371 * l_cubed + 0.7827717662 * m_cubed - 0.808675766 * s_cubed;
+
+  // Convert OKLab to OKLCH
+  const C = Math.sqrt(a * a + bOklab * bOklab);
+  let H = Math.atan2(bOklab, a) * (180 / Math.PI);
+  if (H < 0) H += 360;
+
+  return [Math.round(L * 1000) / 1000, Math.round(C * 1000) / 1000, Math.round(H * 10) / 10];
+};
+
+// Convert OKLCH to RGB
+export const OKLCHtoRGB = (oklch: number[]): number[] => {
+  const L = oklch[0];
+  const C = oklch[1];
+  const H = oklch[2];
+
+  // Convert OKLCH to OKLab
+  const hRad = (H * Math.PI) / 180;
+  const a = C * Math.cos(hRad);
+  const b = C * Math.sin(hRad);
+
+  // Convert OKLab to linear RGB via LMS
+  const l_ = L + 0.3963377774 * a + 0.2158037573 * b;
+  const m_ = L - 0.1055613458 * a - 0.0638541728 * b;
+  const s_ = L - 0.0894841775 * a - 1.291485548 * b;
+
+  const l = l_ * l_ * l_;
+  const m = m_ * m_ * m_;
+  const s = s_ * s_ * s_;
+
+  const linearR = 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s;
+  const linearG = -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s;
+  const linearB = -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s;
+
+  // Convert linear RGB to sRGB and clamp
+  const r = Math.round(Math.min(Math.max(linearToSRGB(linearR), 0), 1) * 255);
+  const g = Math.round(Math.min(Math.max(linearToSRGB(linearG), 0), 1) * 255);
+  const bRgb = Math.round(Math.min(Math.max(linearToSRGB(linearB), 0), 1) * 255);
+
+  return [r, g, bRgb];
+};
+
+// Convert HEX to OKLCH
+export const HEXtoOKLCH = (hex: string): number[] => {
+  const rgb = HEXtoRGB(hex);
+  return RGBtoOKLCH(rgb);
+};
+
+// Convert HSL to OKLCH
+export const HSLtoOKLCH = (hsl: number[]): number[] => {
+  const rgb = HSLtoRGB(hsl);
+  return RGBtoOKLCH(rgb);
+};
+
+// Convert OKLCH to HEX
+export const OKLCHtoHEX = (oklch: number[]): string => {
+  const rgb = OKLCHtoRGB(oklch);
+  return RGBtoHEX(rgb);
+};
+
+// Convert OKLCH to HSL
+export const OKLCHtoHSL = (oklch: number[]): number[] => {
+  const rgb = OKLCHtoRGB(oklch);
+  return RGBtoHSL(rgb);
+};
+
 export const Base64toDecode = (base64: string): string => {
   const buff = Buffer.from(base64, "base64");
   return buff.toString("ascii");

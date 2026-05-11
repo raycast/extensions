@@ -1,3 +1,4 @@
+import { getHAWSConnection } from "@lib/common";
 import { State } from "@lib/haapi";
 
 export interface Forecast {
@@ -9,7 +10,7 @@ export interface Forecast {
   wind_speed?: number;
 }
 
-export function isDailyForecast(forecast: Forecast[] | undefined): boolean {
+export function isDailyForecast(forecast: Forecast[] | undefined | null) {
   if (forecast && forecast.length > 1) {
     const t1 = new Date(forecast[0].datetime);
     const t2 = new Date(forecast[1].datetime);
@@ -21,7 +22,7 @@ export function isDailyForecast(forecast: Forecast[] | undefined): boolean {
   return false;
 }
 
-export function getWindspeedFromState(state: State | undefined): string | undefined {
+export function getWindspeedFromState(state: State | undefined) {
   if (!state) {
     return undefined;
   }
@@ -33,7 +34,7 @@ export function getWindspeedFromState(state: State | undefined): string | undefi
   }
 }
 
-export function getPressureFromState(state: State | undefined): string | undefined {
+export function getPressureFromState(state: State | undefined) {
   if (!state) {
     return undefined;
   }
@@ -45,9 +46,13 @@ export function getPressureFromState(state: State | undefined): string | undefin
   }
 }
 
-export function getHumidityFromState(state: State | undefined): string | undefined {
+export function getHumidityFromState(state: State | undefined) {
   if (!state) {
     return undefined;
+  }
+  if (state.attributes.device_class === "humidity") {
+    const unit = state.attributes.unit_of_measurement as string | undefined;
+    return unit && unit.length > 0 ? `${state.state} ${unit}` : `${state.state}`;
   }
   const humidity = state.attributes.humidity as number | undefined;
   if (humidity !== undefined) {
@@ -55,10 +60,15 @@ export function getHumidityFromState(state: State | undefined): string | undefin
   }
 }
 
-export function getTemperatureFromState(state: State | undefined): string | undefined {
+export function getTemperatureFromState(state: State | undefined) {
   if (!state) {
     return undefined;
   }
+  if (state.attributes.device_class === "temperature") {
+    const unit = state.attributes.unit_of_measurement;
+    return unit ? `${state.state} ${unit}` : `${state.state}`;
+  }
+
   const temp = state.attributes.temperature as number | undefined;
   if (temp !== undefined) {
     const unit = state.attributes.temperature_unit as string | undefined;
@@ -84,7 +94,7 @@ export const weatherStatusToIcon: Record<string, string> = {
   "windy-variant": "💨",
 };
 
-export function weatherConditionToIcon(condition: string): string {
+export function weatherConditionToIcon(condition: string) {
   return weatherStatusToIcon[condition] || "✨";
 }
 
@@ -105,6 +115,44 @@ const weatherStatusToText: Record<string, string> = {
   "windy-variant": "Windy Variant",
 };
 
-export function weatherConditionToText(condition: string): string {
+export function weatherConditionToText(condition: string) {
   return weatherStatusToText[condition] || "❓";
+}
+
+interface WeatherForecastResponse {
+  forecast: Array<Forecast> | undefined;
+}
+
+interface WeatherForecastRoot {
+  response: Record<string, WeatherForecastResponse>;
+}
+
+export enum WeatherForecastType {
+  Daily = "daily",
+  Hourly = "hourly",
+}
+
+export async function getWeatherForecast(entityID: string, options: { type: WeatherForecastType }) {
+  const con = await getHAWSConnection();
+  const rc: WeatherForecastRoot | undefined = await con?.sendMessagePromise({
+    type: "execute_script",
+    sequence: [
+      {
+        service: "weather.get_forecasts",
+        data: {
+          type: options.type,
+        },
+        target: {
+          entity_id: entityID,
+        },
+        response_variable: "service_result",
+      },
+      {
+        stop: "done",
+        response_variable: "service_result",
+      },
+    ],
+  });
+  const forecast = rc?.response[entityID].forecast;
+  return forecast;
 }

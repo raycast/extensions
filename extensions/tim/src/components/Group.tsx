@@ -7,11 +7,7 @@ const Group: React.FC<{ id: UUID; tagFilter?: UUID }> = ({ id, tagFilter }) => {
   const { group, tasks } = useGroup(id, tagFilter);
 
   return (
-    <List.Section title={group?.title ?? ""}>
-      {tasks?.map((task) => (
-        <Task id={task.id} key={task.id} />
-      ))}
-    </List.Section>
+    <List.Section title={group?.title ?? ""}>{tasks?.map((task) => <Task id={task.id} key={task.id} />)}</List.Section>
   );
 };
 

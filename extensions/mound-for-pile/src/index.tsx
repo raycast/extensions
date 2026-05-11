@@ -6,7 +6,7 @@ import { existsSync } from "fs";
 import snarkdown from "snarkdown";
 import { join } from "path";
 import PileOperations from "./utils/fileOperations";
-import { HighlightI, NoteI, PilePost, PileSettings, PostHightlightsI } from "./utils/types";
+import { HighlightI, NoteI, PilePost, PileSettings } from "./utils/types";
 
 import rehypeParse from "rehype-parse";
 import rehypeRemark from "rehype-remark";
@@ -22,7 +22,7 @@ const defaultPost = {
     title: "",
     createdAt: null,
     updatedAt: null,
-    highlight: PostHightlightsI.None,
+    highlight: null,
     highlightColor: "transparent",
     tags: [],
     replies: [],
@@ -140,7 +140,6 @@ export default function Command() {
     setState((previous) => ({
       ...previous,
       posts: [
-        ...previous.posts,
         {
           content,
           data: {
@@ -149,6 +148,7 @@ export default function Command() {
           },
           excerpt: content,
         },
+        ...previous.posts,
       ],
       searchText: "",
     }));
@@ -203,7 +203,7 @@ export default function Command() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         highlight: highlight.highlight,
-        highlightColor: highlight.highlightColor,
+        highlightColor: highlight.highlightColor === "transparent" ? null : highlight.highlightColor,
       };
 
       savePost({ content, data }, state.filter?.path);

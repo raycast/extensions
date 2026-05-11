@@ -30,8 +30,8 @@ export function useSearch() {
 
   // Static result and filter history
   useEffect(() => {
-    const lowerSearchText = searchText.toLowerCase();
-    setHistoryResults(history.filter((item) => item.query.toLowerCase().includes(lowerSearchText)));
+    const lowerSearchText = searchText?.toLowerCase();
+    setHistoryResults(history.filter((item) => item.query?.toLowerCase().includes(lowerSearchText)));
   }, [searchText, history]);
 
   // Autosuggestions
@@ -67,7 +67,7 @@ export function useSearch() {
   // Combine all results
   useEffect(() => {
     const combinedResults = [...staticResults, ...historyResults, ...autoResults].filter(
-      (value, index, self) => index === self.findIndex((t) => t.id === value.id)
+      (value, index, self) => index === self.findIndex((t) => t.id === value.id),
     );
 
     setResults(combinedResults);

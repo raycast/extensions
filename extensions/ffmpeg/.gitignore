@@ -10,3 +10,6 @@ raycast-env.d.ts
 .DS_Store
 .vscode
 demo
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift

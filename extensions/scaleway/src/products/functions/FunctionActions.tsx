@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Icon } from '@raycast/api'
-import type { Function } from '@scaleway/sdk'
-import { useAPI } from 'providers'
+import type { Functionv1beta1 } from '@scaleway/sdk'
+import { useAPI } from 'helpers/useAPI'
 import { deployFunction } from './actions'
-import { FunctionLogs } from './pages'
+// import { FunctionLogs } from './pages'
 import { getFunctionUrl } from './urls'
 
 type FunctionActionsProps = {
-  serverlessFunction: Function.v1beta1.Function
+  serverlessFunction: Functionv1beta1.Function
   toggleIsDetailOpen: () => void
   reloadContainers: () => Promise<void>
 }
@@ -24,12 +24,12 @@ export const FunctionActions = ({
       <Action.OpenInBrowser url={getFunctionUrl(serverlessFunction)} />
       <Action.CopyToClipboard content={getFunctionUrl(serverlessFunction)} />
 
-      <Action.Push
+      {/* <Action.Push
         title="See Logs"
         icon={Icon.Terminal}
         shortcut={{ modifiers: ['cmd'], key: 'l' }}
         target={<FunctionLogs serverlessFunction={serverlessFunction} />}
-      />
+      /> */}
 
       <Action
         title="Deploy Function"

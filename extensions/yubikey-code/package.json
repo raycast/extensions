@@ -45,16 +45,21 @@
         }
       ],
       "description": "Set the default action for codes"
+    },
+    {
+      "name": "iconPackPath",
+      "type": "directory",
+      "required": false,
+      "title": "Icon Pack Path",
+      "description": "Icon Pack Path"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.47.3"
+    "@raycast/api": "^1.102.4"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
     "typescript": "^4.4.3"
   },

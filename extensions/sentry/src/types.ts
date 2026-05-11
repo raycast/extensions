@@ -11,6 +11,7 @@ export type Project = {
   slug: string;
   color: string;
   dateCreated: string;
+  baseUrl?: string;
 };
 
 export type Issue = {
@@ -31,6 +32,7 @@ export type Issue = {
   culprit: string;
   firstSeen: string;
   tags: string[];
+  baseUrl?: string;
 };
 
 export type Tag = {
@@ -240,4 +242,21 @@ export type User = {
 export type Team = {
   type: "team";
   name: string;
+};
+
+export type Release = {
+  version: string;
+  shortVersion: string;
+  dateCreated: string;
+  dateReleased: string | null;
+  newGroups: number;
+  projects: {
+    slug: string;
+    name: string;
+    healthData?: {
+      crashFreeUsers?: number;
+      crashFreeSessions?: number;
+    };
+  }[];
+  baseUrl?: string;
 };

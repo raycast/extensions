@@ -1,0 +1,445 @@
+// src/constants.ts
+import type { ProjectEntry } from "./types";
+
+/**
+ * Converts bytes to kilobytes.
+ * @param bytes Size in bytes.
+ * @param defaultValue Default value if bytes is undefined.
+ * @returns Size in kilobytes.
+ */
+export function bytesToKB(bytes: number | undefined, defaultValue = 0): number {
+  return bytes !== undefined ? bytes / 1024 : defaultValue;
+}
+
+/**
+ * Converts bytes to megabytes.
+ * @param bytes Size in bytes.
+ * @param defaultValue Default value if bytes is undefined.
+ * @returns Size in megabytes.
+ */
+export function bytesToMB(bytes: number | undefined, defaultValue = 0): number {
+  return bytes !== undefined ? bytes / (1024 * 1024) : defaultValue;
+}
+
+/**
+ * Formats a file size in kilobytes with fixed precision.
+ * @param bytes Size in bytes.
+ * @param precision Number of decimal places (default: 1).
+ * @returns Formatted string with KB unit.
+ */
+export function formatFileSizeKB(bytes: number | undefined, precision = 1): string {
+  return `${bytesToKB(bytes).toFixed(precision)} KB`;
+}
+
+/**
+ * Default maximum file size in bytes for including content.
+ * Files larger than this will have their content omitted.
+ * (1 MB by default)
+ */
+export const DEFAULT_MAX_FILE_SIZE_BYTES = 1 * 1024 * 1024;
+
+/**
+ * Minimum allowed value for max file size setting in MB.
+ */
+export const MIN_MAX_FILE_SIZE_MB = 0.1; // 100KB
+
+/**
+ * Maximum allowed value for max file size setting in MB.
+ */
+export const MAX_MAX_FILE_SIZE_MB = 50; // 50MB, to prevent accidental excessive memory usage
+
+/**
+ * Safety limits to prevent extension crashes with large directories.
+ * With chunk-based streaming, we can handle much larger projects.
+ */
+export const SAFETY_LIMITS = {
+  /** Maximum number of files to process before stopping */
+  MAX_FILES: 10000, // Increased from 3000 - streaming allows more files
+  /** Maximum directory scan time in milliseconds */
+  MAX_SCAN_TIME_MS: 120000, // 2 minutes - increased for large projects
+  /** Maximum total size of all included files in bytes */
+  MAX_TOTAL_SIZE_BYTES: 2 * 1024 * 1024 * 1024, // 2GB - streaming allows much larger projects
+  /** Show warning after this many files */
+  FILES_WARNING_THRESHOLD: 1000, // Increased from 500
+  /** Batch size for processing files to reduce memory usage */
+  BATCH_SIZE: 100, // Process files in batches of 100
+} as const;
+
+/**
+ * Chunk size for writing to file stream in bytes.
+ * Used to control memory usage during file writing operations.
+ */
+export const CHUNK_WRITE_SIZE = 64 * 1024; // 64KB
+
+/**
+ * Threshold for considering a project "large" in bytes.
+ * Projects above this size will trigger Large Project Mode optimizations.
+ */
+export const LARGE_PROJECT_THRESHOLD = 50 * 1024 * 1024; // 50MB
+
+/**
+ * Maximum number of files to scan for preview statistics.
+ */
+export const PREVIEW_MAX_FILES = 1000;
+
+/**
+ * Maximum number of paths to process for preview statistics.
+ */
+export const PREVIEW_MAX_PATHS = 50;
+
+/**
+ * Threshold in bytes for considering a file "large" and using streaming read.
+ * Files larger than this will use streaming instead of loading into memory.
+ */
+export const LARGE_FILE_THRESHOLD_BYTES = 10 * 1024 * 1024; // 10MB
+
+/**
+ * Threshold in bytes for using direct streaming to output stream.
+ * Files larger than this will be written directly to stream without buffering.
+ */
+export const STREAMING_FILE_THRESHOLD_BYTES = 5 * 1024 * 1024; // 5MB
+
+/**
+ * Maximum file size in bytes that can be copied to clipboard.
+ * Files larger than this will skip clipboard copy to prevent memory issues.
+ */
+export const CLIPBOARD_MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
+
+/**
+ * Chunk size for buffer operations in bytes.
+ * Used when reading/writing data in chunks to control memory usage.
+ */
+export const BUFFER_CHUNK_SIZE = 64 * 1024; // 64KB
+
+/**
+ * Maximum buffer size in bytes before forcing a write.
+ * Prevents buffer from growing too large in memory.
+ */
+export const MAX_BUFFER_SIZE = 128 * 1024; // 128KB
+
+// Re-export ignore patterns from config file
+export { HARDCODED_BASE_IGNORE_PATTERNS } from "./config/default-ignores";
+
+/**
+ * MIME type prefixes that are generally considered non-textual or binary.
+ * Files matching these will have their content omitted.
+ */
+export const NON_TEXT_MIME_TYPE_PREFIXES: readonly string[] = [
+  "image/",
+  "audio/",
+  "video/",
+  "application/octet-stream",
+  "application/zip",
+  "application/gzip",
+  "application/pdf",
+  "application/vnd.ms-excel",
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "application/vnd.ms-powerpoint",
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+  "application/java-archive", // .jar
+  "application/x-sqlite3",
+  "application/wasm",
+  "application/x-font-ttf",
+  "application/font-woff",
+  "application/font-woff2",
+  "application/vnd.ms-fontobject", // .eot
+  "application/x-apple-diskimage", // .dmg
+  "application/x-iso9660-image", // .iso
+];
+
+/**
+ * File extensions that are almost always text-based and safe to attempt reading,
+ * even if their MIME type is ambiguous or not detected.
+ * This acts as a fallback or override for MIME type detection.
+ */
+export const ALWAYS_TEXT_EXTENSIONS: readonly string[] = [
+  ".txt",
+  ".md",
+  ".markdown",
+  ".json",
+  ".xml",
+  ".yaml",
+  ".yml",
+  ".toml",
+  ".ini",
+  ".cfg",
+  ".conf",
+  ".html",
+  ".htm",
+  ".css",
+  ".scss",
+  ".sass",
+  ".less",
+  ".js",
+  ".jsx",
+  ".ts",
+  ".tsx",
+  ".mjs",
+  ".cjs",
+  ".py",
+  ".rb",
+  ".php",
+  ".java",
+  ".c",
+  ".cpp",
+  ".h",
+  ".hpp",
+  ".cs",
+  ".go",
+  ".rs",
+  ".swift",
+  ".kt",
+  ".kts",
+  ".dart",
+  ".lua",
+  ".pl",
+  ".sh",
+  ".bash",
+  ".zsh",
+  ".fish",
+  ".ps1",
+  ".bat",
+  ".cmd",
+  ".sql",
+  ".graphql",
+  ".gql",
+  ".vue",
+  ".svelte",
+  ".astro",
+  ".erb",
+  ".mustache",
+  ".hbs",
+  ".ejs",
+  ".jinja",
+  ".twig",
+  ".tf",
+  ".tfvars",
+  ".hcl", // Terraform
+  ".dockerfile",
+  "Dockerfile", // Also filename
+  ".gitignore",
+  ".gitattributes",
+  ".gitmodules",
+  ".editorconfig",
+  ".babelrc",
+  ".eslintrc",
+  ".prettierrc",
+  ".stylelintrc",
+  "LICENSE",
+  "README",
+  "CONTRIBUTING",
+  "CHANGELOG",
+  "Makefile",
+  "CMakeLists.txt", // Common project files without extensions
+  ".csv",
+  ".tsv", // Can be large, but are text. Size limit will handle content.
+  ".rst", // reStructuredText
+  ".tex", // LaTeX
+  ".proto", // Protocol Buffers
+  ".fbs", // FlatBuffers
+  ".gd", // GDScript (Godot Engine)
+  ".glsl",
+  ".wgsl", // Shading Languages
+  ".ex",
+  ".exs", // Elixir
+  ".erl",
+  ".hrl", // Erlang
+  ".clj",
+  ".cljs",
+  ".cljc", // Clojure
+  ".hs",
+  ".lhs", // Haskell
+  ".fs",
+  ".fsi",
+  ".fsx", // F#
+  ".r", // R language
+  ".scala",
+  ".sbt", // Scala
+  ".groovy", // Groovy
+  ".tcl", // TCL
+  ".ada", // Ada
+  ".vb", // VB.NET
+  ".pde", // Processing
+  ".svg", // SVG is XML-based, often code-like or useful for UI analysis
+  ".gp", // Gnuplot script
+  ".psd1",
+  ".psm1", // PowerShell module files
+  ".trigger", // Salesforce Apex Trigger
+  ".cls", // Salesforce Apex Class
+];
+
+/**
+ * Maps file extensions to common language identifiers for syntax highlighting hints.
+ */
+export const LANGUAGE_EXTENSION_MAP: Readonly<Record<string, string>> = {
+  ".py": "python",
+  ".js": "javascript",
+  ".jsx": "jsx",
+  ".ts": "typescript",
+  ".tsx": "tsx",
+  ".html": "html",
+  ".htm": "html",
+  ".css": "css",
+  ".scss": "scss",
+  ".sass": "sass",
+  ".less": "less",
+  ".php": "php",
+  ".java": "java",
+  ".c": "c",
+  ".cpp": "cpp",
+  ".h": "c",
+  ".hpp": "cpp",
+  ".go": "go",
+  ".rs": "rust",
+  ".rb": "ruby",
+  ".sh": "bash",
+  ".md": "markdown",
+  ".json": "json",
+  ".yml": "yaml",
+  ".yaml": "yaml",
+  ".xml": "xml",
+  ".sql": "sql",
+  ".swift": "swift",
+  ".kt": "kotlin",
+  ".kts": "kotlin",
+  ".dart": "dart",
+  ".vue": "vue",
+  ".svelte": "svelte",
+  ".cs": "csharp",
+  ".fs": "fsharp",
+  ".fsi": "fsharp",
+  ".fsx": "fsharp",
+  ".ex": "elixir",
+  ".exs": "elixir",
+  ".erl": "erlang",
+  ".hrl": "erlang",
+  ".hs": "haskell",
+  ".lhs": "haskell",
+  ".lua": "lua",
+  ".pl": "perl",
+  ".pm": "perl",
+  ".r": "r",
+  ".scala": "scala",
+  ".sbt": "scala",
+  ".groovy": "groovy",
+  ".clj": "clojure",
+  ".cljs": "clojure",
+  ".cljc": "clojure",
+  ".tf": "terraform",
+  ".tfvars": "terraform",
+  ".hcl": "hcl",
+  ".proto": "protobuf",
+  ".toml": "toml",
+  ".ini": "ini",
+  ".cfg": "ini",
+  ".conf": "ini",
+  ".bat": "batch",
+  ".cmd": "batch",
+  ".ps1": "powershell",
+  ".psd1": "powershell",
+  ".psm1": "powershell",
+  ".dockerfile": "dockerfile",
+  dockerfile: "dockerfile", // Filename matching
+  ".graphql": "graphql",
+  ".gql": "graphql",
+  ".gd": "gdscript",
+  ".glsl": "glsl",
+  ".wgsl": "wgsl",
+  ".tex": "latex",
+  ".rst": "rst",
+  ".svg": "xml", // SVG is XML
+  ".gp": "gnuplot",
+  ".tcl": "tcl",
+  ".ada": "ada",
+  ".vb": "vbnet",
+  ".pde": "processing",
+  ".trigger": "apex", // Salesforce Apex Trigger
+  ".cls": "apex", // Salesforce Apex Class
+  license: "text",
+  readme: "markdown",
+  contributing: "markdown",
+  changelog: "markdown",
+  makefile: "makefile",
+  "cmakelists.txt": "cmake",
+};
+
+/**
+ * Content for the `<ai_instruction>` tag.
+ */
+export const AI_INSTRUCTION_CONTENT = `This is a complete code listing of the project. Use this document for:
+- Analyzing project structure and module organization.
+- Understanding relationships and dependencies between files.
+- Identifying architectural patterns, design choices, and potential anti-patterns.
+- Grasping the main functionality and business logic.
+- Suggesting improvements, optimizations, or refactoring opportunities.
+- Answering specific questions about the codebase.
+Pay close attention to the document structure: first comes the file tree, then the content of each file, properly delimited.
+File paths are relative to the project root.
+`;
+
+/**
+ * Content for the `<ai_analysis_guide>` tag.
+ */
+export const AI_ANALYSIS_GUIDE_CONTENT = `When analyzing the code, pay attention to:
+1.  **Overall Architecture:** Identify the main architectural style (e.g., MVC, microservices, layered).
+2.  **Key Components/Modules:** What are the core building blocks and their responsibilities?
+3.  **Data Flow:** How does data move through the system?
+4.  **Control Flow:** Understand the primary execution paths and decision points.
+5.  **External Dependencies:** Note any significant libraries, frameworks, or services used.
+6.  **Code Quality Indicators:** Look for code smells, complexity, duplication, and adherence to best practices.
+7.  **Potential Issues:** Identify possible bugs, performance bottlenecks, security vulnerabilities, or maintainability concerns.
+8.  **Business Logic:** Try to understand the core purpose and functionality the code implements.
+9.  **Configuration and Environment:** How is the application configured? Are there different environment settings?
+10. **Testing Strategy:** (If test files are included) What kind of tests are present? How comprehensive is the coverage?
+`;
+
+/**
+ * Generates the file header part of the output string.
+ * @param projectRoot The absolute path to the project root.
+ * @param maxFileSizeBytes The maximum file size for content inclusion.
+ * @param gitignoreUsed Whether a .gitignore file was found and used.
+ * @returns The formatted header string.
+ */
+export function generateOutputHeader(projectRoot: string, maxFileSizeBytes: number, gitignoreUsed: boolean): string {
+  return (
+    `<ai_instruction>\n${AI_INSTRUCTION_CONTENT}</ai_instruction>\n\n` +
+    `<metadata>\n` +
+    `  Date created: ${new Date().toISOString()}\n` +
+    `  Project root: ${projectRoot}\n` +
+    `  Max file size for content: ${bytesToMB(maxFileSizeBytes).toFixed(2)} MB\n` +
+    `  .gitignore used: ${gitignoreUsed ? "Yes" : "No"}\n` +
+    `</metadata>\n\n`
+  );
+}
+
+/**
+ * Generates the file footer part of the output string.
+ * @returns The formatted footer string.
+ */
+export function generateOutputFooter(): string {
+  return `\n<ai_analysis_guide>\n${AI_ANALYSIS_GUIDE_CONTENT}</ai_analysis_guide>\n`;
+}
+
+/**
+ * Formats the project structure (file tree) into a string.
+ * Only formats directory structure and file metadata, not file contents.
+ * File contents are handled separately in streaming processing to reduce memory usage.
+ * @param entries An array of ProjectEntry objects representing the project structure.
+ * @param level The current indentation level.
+ * @returns A string representation of the file tree.
+ */
+export function formatProjectStructure(entries: readonly ProjectEntry[], level = 0): string {
+  let structure = "";
+  for (const entry of entries) {
+    const prefix = "  ".repeat(level);
+    const icon = entry.type === "directory" ? "📁" : "📄";
+    const sizeInfo = entry.type === "file" && entry.size !== undefined ? ` (${formatFileSizeKB(entry.size)})` : "";
+    structure += `${prefix}${icon} ${entry.name}${sizeInfo}\n`;
+    if (entry.type === "directory" && entry.children && entry.children.length > 0) {
+      structure += formatProjectStructure(entry.children, level + 1);
+    }
+  }
+  return structure;
+}

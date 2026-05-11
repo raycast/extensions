@@ -1,10 +1,13 @@
-export interface CaffeinateFormValues {
-  hours: string;
-  minutes: string;
-  seconds: string;
-  [key: string]: string;
+export interface Schedule {
+  day: string;
+  from: string;
+  to: string;
+  IsManuallyDecafed: boolean;
+  IsRunning: boolean;
 }
 
-export interface Process {
-  [key: string]: string;
+export interface ParsedSchedule {
+  days: string[];
+  from: string;
+  to: string;
 }

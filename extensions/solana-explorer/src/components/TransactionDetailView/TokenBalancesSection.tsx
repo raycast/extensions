@@ -37,8 +37,8 @@ export const TokenBalancesSection: FC<ITokenBalancesSectionProps> = ({ meta, acc
                             change === 0
                               ? Icon.CircleFilled
                               : change > 0
-                              ? Icon.ArrowUpCircleFilled
-                              : Icon.ArrowDownCircleFilled,
+                                ? Icon.ArrowUpCircleFilled
+                                : Icon.ArrowDownCircleFilled,
                           tintColor: change === 0 ? Color.Blue : change > 0 ? Color.Green : Color.Red,
                         }}
                       />

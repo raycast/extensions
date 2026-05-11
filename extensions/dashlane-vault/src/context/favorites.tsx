@@ -74,24 +74,28 @@ export function useFavoritesContext() {
   return context;
 }
 
-export function useSeparateFavoriteItems<T extends { id: string }>(items: T[]) {
-  const { favorites } = useFavoritesContext();
+export function useSeparateFavoriteItems<T extends { id: string }>(
+  items: T[],
+): { favoriteItems: T[]; nonFavoriteItems: T[] } {
+  const { favorites = [] } = useFavoritesContext();
 
   return useMemo(() => {
-    const favoriteItems: T[] = [];
+    if (favorites.length === 0) return { favoriteItems: [], nonFavoriteItems: items };
+
+    const favoriteItemsMap: Record<string, T> = {};
     const nonFavoriteItems: T[] = [];
 
     for (const item of items) {
-      if (favorites?.includes(item.id)) {
-        favoriteItems.push(item);
+      if (favorites.includes(item.id)) {
+        favoriteItemsMap[item.id] = item;
       } else {
         nonFavoriteItems.push(item);
       }
     }
 
-    const sortedFavoriteItems = favorites?.map((id) => items.find((item) => item.id === id) as T) ?? [];
+    const favoriteItems = favorites.map((id) => favoriteItemsMap[id]).filter(Boolean);
     return {
-      favoriteItems: sortedFavoriteItems,
+      favoriteItems,
       nonFavoriteItems,
     };
   }, [favorites, items]);

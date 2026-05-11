@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 
 type Props = {
-  error: string;
+  error: Error | string;
 };
 export default function ErrorComponent({ error }: Props) {
   return (

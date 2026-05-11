@@ -47,7 +47,7 @@ export default function Command() {
             <AnimatedToast />
           </ActionPanel.Section>
           <ActionPanel.Section>
-            <Action title="Show HUD" onAction={() => showHUD("Showed HUD")} />
+            <Action title="Show Hud" onAction={() => showHUD("Showed HUD")} />
           </ActionPanel.Section>
         </ActionPanel>
       }

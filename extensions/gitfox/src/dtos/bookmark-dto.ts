@@ -26,9 +26,15 @@ export default class Bookmark {
     return this.folder ? this.folder.replace("file://", "").replaceAll("&", "&").replaceAll("%20", " ") : "";
   }
 
-  get getBranch() {
-    const branch = getCurrentBranchName(this.getPath);
-
-    return branch.length > 32 ? `${branch.slice(0, 32)}...` : branch;
+  get getBranch(): { name: string; unknowBranch: boolean } {
+    try {
+      const branch = getCurrentBranchName(this.getPath);
+      return {
+        name: branch.length > 32 ? `${branch.slice(0, 32)}...` : branch,
+        unknowBranch: false,
+      };
+    } catch {
+      return { name: "Unknow branch", unknowBranch: true };
+    }
   }
 }

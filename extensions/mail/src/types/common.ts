@@ -11,7 +11,7 @@ export type Account = {
   name: string;
   userName: string;
   fullName: string;
-  email: string;
+  emails: string[];
   numUnread: number;
   mailboxes: Mailbox[];
   messages?: Message[];
@@ -76,7 +76,7 @@ export type OutgoingMessageForm = {
 };
 
 export type OutgoingMessage = {
-  account: string;
+  from: string;
   to: string[];
   cc: string[];
   bcc: string[];
@@ -90,11 +90,4 @@ export type Attachment = {
   name: string;
   size: string;
   type?: string;
-};
-
-export type Preferences = {
-  primaryAction: string;
-  saveDirectory: string;
-  messageLimit: string;
-  plainTextMode: boolean;
 };

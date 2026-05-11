@@ -1,0 +1,13 @@
+cmake @3.31.3 (devel)
+Sub-ports:            cmake-gui, cmake-docs
+Variants:             universal
+
+Description:          An extensible, open-source system that manages the build process in an operating system and compiler independent manner. Unlike many cross-platform systems, CMake is designed to be used in conjunction with the native build environment. The cmake release port is updated roughly every few months.
+Homepage:             https://cmake.org
+
+Library Dependencies: libcxx, curl, expat, zlib, bzip2, libarchive, ncurses
+Conflicts with:       cmake-devel
+Platforms:            darwin, freebsd
+License:              BSD
+Maintainers:          Email: michaelld@macports.org, GitHub: michaelld
+Email: mascguy@macports.org, GitHub: mascguy

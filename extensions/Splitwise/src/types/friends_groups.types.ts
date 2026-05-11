@@ -1,6 +1,16 @@
 export type Entity = Friend | Group;
 
-export type FriendOrGroupProps = { friend: Friend; group?: never } | { friend?: never; group: Group };
+export type FriendOrGroupProps =
+  | {
+      friend: Friend;
+      group?: never;
+      revalidateFriends: () => void;
+    }
+  | {
+      friend?: never;
+      group: Group;
+      revalidateGroups: () => void;
+    };
 
 export type GetFriends = {
   friends: Friend[];
@@ -40,21 +50,7 @@ export type Picture = {
   large: string;
 };
 
-export type ExpenseParams = {
-  input: string;
-  friend_id?: number;
-  group_id?: number;
-  autosave: boolean;
-};
-
-export type Expense = {
-  description: string;
-  cost: number;
-  currency_code: string;
-  errors?: { [key: string]: string };
-};
-
 export type Body = {
   valid: boolean;
-  expense: Expense;
+  expense: import("./get_expenses.types").Expense;
 };

@@ -4,7 +4,7 @@ import { getIcon } from "../lib/icons";
 import { useRecentApplications } from "../lib/LocalData";
 import { openPin } from "../lib/Pins";
 import { ExtensionPreferences } from "../lib/preferences";
-import OpenAllMenuItem from "./OpenAllMenuItem";
+import OpenAllMenuItem from "./menu-items/OpenAllMenuItem";
 
 /**
  * A list of recent applications as menu bar extra items (default) or list items (in the 'View Pins' command).

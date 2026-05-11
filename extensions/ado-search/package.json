@@ -1,0 +1,108 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ado-search",
+  "title": "Azure DevOps Repositories Search",
+  "description": "Search through Azure DevOps git repositories and find open Pull Requests",
+  "icon": "Azure-DevOps.png",
+  "author": "willem_van_lent",
+  "contributors": [
+    "fschaal",
+    "Olivier-OG"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-ado-repos",
+      "title": "Azure DevOps Repositories Search",
+      "description": "Search and open Azure DevOps Repositories",
+      "mode": "view"
+    },
+    {
+      "name": "search-ado-pipelines",
+      "title": "Azure DevOps Pipelines Search",
+      "description": "Search and open Azure DevOps Pipelines",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
+      "name": "search-my-pull-requests",
+      "title": "Azure DevOps My Open Pull Requests",
+      "description": "Search and open my Azure DevOps Open Pull Requests",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
+      "name": "search-my-pbis",
+      "title": "Azure DevOps My Open PBIs",
+      "description": "Search and open my Azure DevOps PBIs",
+      "subtitle": "Azure DevOps",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Azure DevOps Open Pull Requests",
+      "description": "Open Azure DevOps Open Pull Requests",
+      "mode": "menu-bar",
+      "subtitle": "Open Pull Requests",
+      "interval": "15m"
+    }
+  ],
+  "preferences": [
+    {
+      "description": "The organization name of the Azure DevOps account which you will search through",
+      "name": "organizationName",
+      "placeholder": "myorg",
+      "required": true,
+      "title": "The organization name",
+      "type": "textfield"
+    },
+    {
+      "description": "The project name of the Azure DevOps account which you will search through",
+      "name": "projectName",
+      "placeholder": "myproject",
+      "required": true,
+      "title": "The project name",
+      "type": "textfield"
+    },
+    {
+      "description": "The personal access token for the given Azure DevOps account. Don't base64 encode it, just paste it as is.",
+      "name": "personalAccessToken",
+      "placeholder": "urbyvbv....",
+      "required": true,
+      "title": "Azure DevOps PAT",
+      "type": "password"
+    },
+    {
+      "description": "The email address of your Azure DevOps account",
+      "name": "email",
+      "placeholder": "example@test.com",
+      "required": true,
+      "title": "Azure DevOps Email",
+      "type": "textfield"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3",
+    "@raycast/utils": "^1.13.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "pull": "npx @raycast/api@latest pull-contributions",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

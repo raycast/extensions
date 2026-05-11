@@ -5,10 +5,8 @@ import { ActionOpenCommandPreferences } from "./action-open-command-preferences"
 export function ListEmptyView() {
   return (
     <List.EmptyView
-      key={`empty-localDirectory`}
       title={"No Hidden Files"}
-      icon={{ source: { light: "empty-view-icon.png", dark: "empty-view-icon@dark.png" } }}
-      description={`You can hide files via the "Hide Files" command`}
+      icon={{ source: "empty-view-icon.png" }}
       actions={
         <ActionPanel>
           <ActionOpenCommandPreferences />

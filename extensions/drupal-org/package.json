@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "drupal-org",
   "title": "Drupal.org",
-  "description": "Get change records from drupal.org",
+  "description": "Get information from drupal.org",
   "icon": "drop-icon.png",
   "author": "hussainweb",
+  "contributors": [
+    "BossElijah"
+  ],
   "categories": [
     "Developer Tools",
     "Documentation"
@@ -17,21 +20,34 @@
       "subtitle": "Drupal",
       "description": "Search for changes in Drupal versions pulled from change records",
       "mode": "view"
+    },
+    {
+      "name": "search-api",
+      "title": "Search Drupal API",
+      "subtitle": "Drupal",
+      "description": "Search Drupal API documentation",
+      "mode": "view"
+    },
+    {
+      "name": "search-projects",
+      "title": "Search Projects",
+      "subtitle": "Drupal",
+      "description": "Search for Drupal projects (modules, themes, etc)",
+      "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
+    "@raycast/api": "^1.72.0",
     "cheerio": "^1.0.0-rc.12",
     "got": "^12.5.3"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
     "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
+    "react": "^18.2.0",
     "typescript": "^4.4.3"
   },
   "scripts": {

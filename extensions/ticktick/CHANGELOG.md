@@ -1,5 +1,25 @@
 # TickTick Changelog
 
+## [Improve] - 2025-05-12
+
+- support AI Extension
+
+## [Improve] - 2024-11-21
+
+- `Add Task` command support selecting task priority.
+
+## [Improve] - 2024-04-18
+
+- `Add Task` command support create all-day task
+
+## [Fixed] - 2024-01-22
+
+- Resolve the issue of the 'Auto Fill with AI' executing too frequently.
+
+## [Added] - 2024-01-09
+
+- Add `dueDate` and `startDate` to task detail view.
+
 ## [Fixed spelling error] - 2023-11-27
 
 ## [Added] - 2023-11-14

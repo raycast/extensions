@@ -1,6 +1,6 @@
 import { List } from "@raycast/api";
 import ResponseActions from "./actions/ResponseActions";
-import { CommandOptions } from "../../utils/types";
+import { CommandOptions } from "../../lib/commands/types";
 import { useSpeech } from "../../hooks/useSpeech";
 
 export default function CommandListView(props: {
@@ -30,6 +30,7 @@ export default function CommandListView(props: {
           cancel={cancel}
           files={selectedFiles}
           speaking={speaking}
+          // @ts-expect-error: To keep to original code
           stopSpeech={stopSpeech}
           restartSpeech={restartSpeech}
         />
@@ -56,6 +57,7 @@ export default function CommandListView(props: {
                 files={selectedFiles}
                 listItem={item.trim()}
                 speaking={speaking}
+                // @ts-expect-error: To keep to original code
                 stopSpeech={stopSpeech}
                 restartSpeech={restartSpeech}
               />

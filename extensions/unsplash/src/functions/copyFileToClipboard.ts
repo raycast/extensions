@@ -1,5 +1,5 @@
 import { showToast, Toast, environment } from "@raycast/api";
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 import { existsSync } from "fs";
 
 interface CopyFileToClipboardProps {

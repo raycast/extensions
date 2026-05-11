@@ -1,26 +1,5 @@
-import { LocalStorage } from "@raycast/api";
 import { exec, execSync } from "child_process";
 import { runAppleScript } from "@raycast/utils";
-
-/**
- * Sets the value of a local storage key.
- * @param key The key to set the value of.
- * @param value The string value to set the key to.
- */
-export const setStorage = async (key: string, value: unknown) => {
-  await LocalStorage.setItem(key, JSON.stringify(value));
-};
-
-/**
- * Gets the value of a local storage key.
- * @param key The key to get the value of.
- * @returns The JSON-parsed value of the key.
- */
-export const getStorage = async (key: string) => {
-  const localStorage = await LocalStorage.getItem<string>(key);
-  const storageString = typeof localStorage === "undefined" ? "" : localStorage;
-  return storageString == "" ? [] : JSON.parse(storageString);
-};
 
 /**
  * Runs a terminal command asynchronously.
@@ -59,12 +38,15 @@ export const runCommandSync = (command: string) => {
  * @returns A promise resolving to the output of the command as a string.
  */
 export const runCommandInTerminal = async (command: string): Promise<string> => {
-  const output = await runAppleScript(`tell application "Terminal"
+  const output = await runAppleScript(
+    `tell application "Terminal"
     try
       activate
       do script "${command.replaceAll('"', '\\"')}"
     end try
-  end tell`);
+  end tell`,
+    { timeout: 0 },
+  );
   return output;
 };
 
@@ -76,4 +58,45 @@ export const runCommandInTerminal = async (command: string): Promise<string> => 
  */
 export const cutoff = (str: string, cutoff: number) => {
   return `${str.substring(0, cutoff)}${str.length > cutoff ? "..." : ""}`;
+};
+
+/**
+ * Pluralizes a string based on a count.
+ * @param str The string to pluralize.
+ * @param count The count to base the pluralization on.
+ * @returns The pluralized string.
+ */
+export const pluralize = (str: string, count: number) => {
+  return `${str}${count === 1 ? "" : "s"}`;
+};
+
+/**
+ * Checks if a value is nullish.
+ *
+ * A nullish value is a value that is either null, undefined, an empty string, an empty array, or an empty object.
+ *
+ * @param value The value to check.
+ * @returns True if the value is nullish, false otherwise.
+ */
+export const isNullish = (value: unknown): value is null | undefined => {
+  if (typeof value == "string") {
+    return value != "";
+  }
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+  if (typeof value == "object") {
+    return value !== null && Object.keys(value).length > 0;
+  }
+  return value !== null && value !== undefined;
+};
+
+/**
+ * Returns a new object with all nullish values removed.
+ * @param obj The object to remove nullish values from.
+ * @returns A new object with all nullish values removed.
+ */
+export const objectFromNonNullableEntriesOfObject = <T extends Record<string, unknown>>(obj: T): T => {
+  const entries = Object.entries(obj);
+  return Object.fromEntries(entries.filter(([, value]) => isNullish(value))) as T;
 };

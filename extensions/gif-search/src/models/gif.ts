@@ -9,7 +9,8 @@ export interface IGif {
   slug: string;
   download_url: string;
   download_name: string;
-  preview_gif_url: string;
+  small_preview_gif_url: string;
+  large_preview_gif_url?: string;
   gif_url: string;
   metadata?: {
     width?: number;
@@ -30,11 +31,11 @@ export interface IGif {
   video?: GiphyGif["video"];
 }
 
-export type APIOpt = { offset?: number; limit?: number; abort?: AbortController };
+export type APIOpt = { offset?: number; limit?: number; next?: string };
 
 export interface IGifAPI {
-  search: (term: string, opt?: APIOpt) => Promise<IGif[]>;
-  trending: (opt?: APIOpt) => Promise<IGif[]>;
+  search: (term: string, opt?: APIOpt) => Promise<{ results: IGif[]; next?: string }>;
+  trending: (opt?: APIOpt) => Promise<{ results: IGif[]; next?: string }>;
   gifs: (id: string[]) => Promise<IGif[]>;
 }
 

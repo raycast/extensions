@@ -1,7 +1,6 @@
-import { closeMainWindow, getSelectedFinderItems, showHUD } from "@raycast/api";
+import { closeMainWindow, getSelectedFinderItems, showToast, Toast } from "@raycast/api";
 import { scriptExtractArchives } from "./utils/applescript-utils";
-import { betterZipInstalled } from "./utils/common-utils";
-import { betterZipNotInstallDialog } from "./hooks/hooks";
+import { betterZipInstalled, betterZipNotInstallDialog } from "./utils/common-utils";
 import path from "path";
 import { archiveFormat } from "./utils/constants";
 
@@ -14,7 +13,7 @@ export default async () => {
     await closeMainWindow({ clearRootSearch: false });
     const fileSystemItems = await getSelectedFinderItems();
     if (fileSystemItems.length === 0) {
-      await showHUD("No archives selected");
+      await showToast({ title: "No archives selected", style: Toast.Style.Failure });
       return;
     }
     const filePaths: string[] = [];
@@ -25,12 +24,12 @@ export default async () => {
       }
     });
     if (filePaths.length === 0) {
-      await showHUD("No archives selected");
+      await showToast({ title: "No archives selected", style: Toast.Style.Failure });
       return;
     }
     await scriptExtractArchives(filePaths);
   } catch (e) {
     console.error(String(e));
-    await showHUD(String(e));
+    await showToast({ title: String(e), style: Toast.Style.Failure });
   }
 };

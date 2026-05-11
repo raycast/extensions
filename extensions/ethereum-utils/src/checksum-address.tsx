@@ -7,21 +7,17 @@ import {
   Clipboard,
   Toast,
 } from '@raycast/api';
-import { utils } from 'ethers';
+import { getAddress } from 'ethers';
 
 interface Values {
   address: string;
-}
-
-interface EthersError {
-  reason?: string;
 }
 
 export default function Command() {
   function handleSubmit(values: Values) {
     const { address } = values;
     try {
-      const checksumAddress = utils.getAddress(address);
+      const checksumAddress = getAddress(address);
       if (address === checksumAddress) {
         showToast({
           style: Toast.Style.Success,
@@ -32,15 +28,15 @@ export default function Command() {
       Clipboard.copy(checksumAddress);
       showHUD('Copied to clipboard');
     } catch (e) {
-      const reason = (e as EthersError).reason;
-      if (reason === 'invalid address') {
+      const msg = (e as TypeError).message;
+      if (msg.startsWith('invalid address')) {
         showToast({
           style: Toast.Style.Failure,
           title: 'Invalid input (not an address)',
         });
         return;
       }
-      if (reason === 'bad address checksum') {
+      if (msg.startsWith('bad address checksum')) {
         showToast({
           style: Toast.Style.Failure,
           title: 'Invalid address (wrong checksum)',

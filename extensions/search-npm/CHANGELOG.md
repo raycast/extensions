@@ -1,5 +1,68 @@
 # Search npm Changelog
 
+## [Improvements] - 2026-03-30
+
+- Moved the package version to the subtitle to prevent truncation in the accessories
+
+## [API usage optimization] - 2026-03-25
+
+- Debounce search API calls to avoid unnecessary requests while the user is typing.
+- Do not make API calls when the search term is empty or too short.
+
+## [Fix keywords] - 2026-02-10
+
+- Fix intermittent `keywords` issue
+
+## [Added npmx] - 2026-02-05
+
+- Add ability to open package page in npmx.dev
+
+## [Update] - 2025-11-06
+
+- Add support for Bun, implemented suggestion from [#22693](https://github.com/raycast/extensions/issues/22693)
+
+## [Improvements and Fix] - 2025-10-14
+
+- Fix broken search link, implemented suggestion from [#21972](https://github.com/raycast/extensions/issues/21972)
+- Update dependencies to the latest
+- Refactor codebase for better readability and maintainability
+
+## [Fixes] - 2025-02-05
+
+- Fix URL parsing issue
+
+## [Added a shortcut] - 2025-01-22
+
+- Added a shortcut to copy the package version
+
+## [Chore & Fixes] - 2025-01-13
+
+- Hide toast when `historyCount` is zero
+- Suppress errors when search term is empty
+- Use Raycast's auto-generated type definitions
+- Bump all dependencies to the latest
+
+## [Update] - 2024-12-14
+
+- Fixed another issue with git url parsing
+- Added more detail to the history view. If there's a package there, it will be displayed like in the package list which means it is much quicker to access the package you previously searched for.
+
+## [Update] - 2024-12-13
+
+- Added a Git URL parser for the repository URL in the open repository action
+
+## [Updates] - 2024-10-07
+
+- Hide history list when `historyCount` is zero
+- Bump all dependencies to the latest
+
+## [Refactoring] - 2024-02-03
+
+- Bump dependecies
+- Refactored readme to hook
+- Cleanup code, removed library
+- Add link to esm.sh
+
 ## [Added a link to npm search results page] - 2023-11-23
 
 - Added a link to npm search results page when searching for a package & add a preference to show or hide this link

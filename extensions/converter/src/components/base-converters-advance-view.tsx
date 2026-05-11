@@ -1,40 +1,60 @@
 import { Form } from "@raycast/api";
-import { isEmpty } from "../utils/common-utils";
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useMemo, useRef } from "react";
+import { buildBases } from "../utils/base-converter-utils";
+import { BaseConverter } from "../hooks/use-base-converter";
 
-export function BaseConvertersAdvanceView(props: {
-  bases: { title: string; value: string }[];
-  output: string;
-  inputUseState: [string, Dispatch<SetStateAction<string>>];
-  fromBaseUseState: [string, Dispatch<SetStateAction<string>>];
-  toBaseUseState: [string, Dispatch<SetStateAction<string>>];
+type State = [number, Dispatch<SetStateAction<number>>];
+
+export function BaseConvertersAdvanceView({
+  converter,
+  fromBaseState: [fromBase, setFromBase],
+  toBaseState: [toBase, setToBase],
+  setFocused,
+}: {
+  converter: BaseConverter;
+  fromBaseState: State;
+  toBaseState: State;
+  setFocused: (v: { base: number; id: number }) => void;
 }) {
-  const { bases, output } = props;
-  const [input, setInput] = props.inputUseState;
-  const [fromBase, setFromBase] = props.fromBaseUseState;
-  const [toBase, setToBase] = props.toBaseUseState;
+  const bases = useMemo(buildBases, []);
+
+  const inputRef = useRef<Form.TextField>(null);
+  converter.ref.current[36] = useMemo(
+    () => ({
+      focus: () => {
+        setFromBase(36);
+        inputRef.current?.focus();
+      },
+    }),
+    [],
+  );
+
   return (
     <>
-      <Form.Dropdown id={"fromBase"} title={"From Base"} value={fromBase} onChange={setFromBase}>
-        {bases.map((value) => {
-          return <Form.DropdownItem key={"fromBase" + value.value} value={value.value} title={value.title} />;
-        })}
+      <Form.Dropdown
+        id="fromBase"
+        title="From Base"
+        value={fromBase.toString()}
+        onChange={(v) => setFromBase(parseInt(v))}
+      >
+        {bases.map((base) => (
+          <Form.Dropdown.Item key={base} value={base} title={base} />
+        ))}
       </Form.Dropdown>
-      <Form.Dropdown id={"toBase"} title={"To Base"} value={toBase} onChange={setToBase}>
-        {bases.map((value) => {
-          return <Form.DropdownItem key={"toBase" + value.value} value={value.value} title={value.title} />;
-        })}
+      <Form.Dropdown id="toBase" title="To Base" value={toBase.toString()} onChange={(v) => setToBase(parseInt(v))}>
+        {bases.map((base) => (
+          <Form.Dropdown.Item key={base} value={base} title={base} />
+        ))}
       </Form.Dropdown>
       <Form.TextField
-        id={"input"}
+        id="input"
         title="Input"
-        value={input}
-        onChange={(newValue) => {
-          if (isEmpty(newValue)) return;
-          setInput(newValue.trim());
-        }}
+        value={converter.get(fromBase, 1)}
+        ref={inputRef}
+        onChange={(v) => converter.set(fromBase, v, undefined, 1)}
+        onFocus={() => setFocused({ base: fromBase, id: 1 })}
       />
-      <Form.Description title="Output" text={output + "\n"} />
+      <Form.Description title="Output" text={converter.get(toBase, 1) + "\n"} />
     </>
   );
 }

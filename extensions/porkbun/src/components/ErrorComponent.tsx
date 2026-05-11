@@ -2,10 +2,9 @@ import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@ra
 import { ErrorResponse } from "../utils/types";
 
 type ErrorComponentProps = {
-  error: ErrorResponse;
+  error: ErrorResponse | Error;
 };
 export default function ErrorComponent({ error }: ErrorComponentProps) {
-  const code = "code" in error ? ` | code: ${error.code}` : "";
   return (
     <Detail
       actions={
@@ -15,7 +14,7 @@ export default function ErrorComponent({ error }: ErrorComponentProps) {
           )}
         </ActionPanel>
       }
-      markdown={`# ${error.status}${code}
+      markdown={`# ERROR
     
 ${error.message}`}
     />

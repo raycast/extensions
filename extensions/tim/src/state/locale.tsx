@@ -1,6 +1,5 @@
-import { useCachedPromise } from "@raycast/utils";
+import { runAppleScript, useCachedPromise } from "@raycast/utils";
 import { createContext, useContext } from "react";
-import { runAppleScript } from "run-applescript";
 
 const DEFAULT_LOCALE = "en-US";
 const LocaleContext = createContext<string>(DEFAULT_LOCALE);

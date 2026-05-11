@@ -107,7 +107,7 @@ export function xyBriToRgb({ x, y }: Xy, brightness = 100): Rgb {
 
   const [r, g, b] = chroma
     .rgb(Math.round(red * 255), Math.round(green * 255), Math.round(blue * 255))
-    .darken(1 - brightness / 100)
+    .darken(1 - (brightness ?? 100) / 100)
     .rgb();
 
   // Round the values to the nearest integer and divide by the brightness
@@ -135,7 +135,7 @@ export function miredToRgb(mireds: number, brightness = 100): Rgb {
   const color = chroma.temperature(hecTemp);
   const [r, g, b] = color
     .set("hsl.h", color.get("hsl.h") + CT_HUE_ADJUSTMENT)
-    .darken(1 - brightness / 100)
+    .darken(1 - (brightness ?? 100) / 100)
     .rgb();
 
   return { r, g, b };

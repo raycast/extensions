@@ -1,5 +1,31 @@
 # MyIP Changelog
 
+## [Update] - 2025-09-15
+
+- Add Windows support
+- Typescript fixes
+- Display IPV4 details even when using IPV6
+- Bump deps
+- Use newest eslint config
+
+## [Update] - 2025-02-21
+
+- Redesigned the icon to be more consistent with the Raycast style and better looking
+
+## [Update] - 2024-12-06
+
+- Updated metadata images
+
+## [Update] - 2024-11-25
+
+- Add display multiple local IPs with index in accessories
+
+## [Update & refactor]
+
+- Remove `axios`, rewritten fetch using `node-fetch` & `@raycast/utils`
+- Bugfix where ip lookup was not working properly (#11290)
+- Updated dependencies
+
 ## [Update] - 2023-03-11
 
 - Fixed IP Lookup not working

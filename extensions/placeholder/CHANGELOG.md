@@ -1,5 +1,26 @@
 # Placeholder Changelog
 
+## [Cross-Platform Keyboard Shortcuts] - 2026-02-23
+
+- Make `Keyboard` shortcuts cross-platform
+
+## [Updates] - 2025-12-16
+
+- Add Windows support
+- Update dependencies
+- Remove applescript, use `Clipboard.copy` to copy file to clipboard
+- Remove 'node-fetch', use `fetch` instead
+
+## [Refactoring] - 2024-07-23
+
+- Refactoring codebase, updated code style
+- Updated dependencies
+- Removed `axios` in favor of `node-fetch`
+
+## [Simplify Command] - 2024-06-11
+
+- Simplifying the Random Placeholder Image Command
+
 ## [Update Raycast API] - 2022-12-05
 
 - Update Raycast API version to 1.44.0

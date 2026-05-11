@@ -15,11 +15,10 @@ export async function callUpdateInstallService(state: State, options?: { backup?
     const backup = options?.backup === false ? false : true;
     if (
       await confirmAlert({
-        title: `Installing Update ${state.attributes.title || ""}?
-        `,
+        title: `Installing ${state.attributes.title || ""} update?`,
         message: backup
-          ? "A Backup will be generated before. If the integration don't support backups an error will be thrown."
-          : "No Backup will be generated before! It is recommended to do this manually before starting the update.",
+          ? "A backup will be generated beforehand. If the integration doesn't support backups, an error will be thrown."
+          : "No backup will be generated beforehand. It is recommended to do this manually before starting the update.",
       })
     )
       await ha.callService("update", "install", { entity_id: state.entity_id, backup: backup });

@@ -1,6 +1,7 @@
-import { Cache as RaycastCache, getPreferenceValues } from "@raycast/api";
+import { Cache as RaycastCache } from "@raycast/api";
 
-import { Account, Message, Preferences } from "../types";
+import { Account, Message } from "../types";
+import { messageLimit } from "./common";
 
 export enum ExpirationTime {
   Minute = 60 * 1000,
@@ -9,8 +10,7 @@ export enum ExpirationTime {
   Week = 7 * Day,
 }
 
-const preferences: Preferences = getPreferenceValues();
-const messageLimit = preferences.messageLimit ? parseInt(preferences.messageLimit) : 10;
+const CACHE_VERSION = 1;
 
 const isCacheExpired = (time: number, limit = ExpirationTime.Day): boolean => {
   return Date.now() - time > limit;
@@ -26,8 +26,8 @@ const getAccounts = (): Account[] | undefined => {
   if (accounts.has("accounts")) {
     const response = accounts.get("accounts");
     if (response) {
-      const { time, data } = JSON.parse(response);
-      if (!isCacheExpired(time)) {
+      const { time, data, version } = JSON.parse(response);
+      if (!isCacheExpired(time) && version === CACHE_VERSION) {
         return data;
       }
     }
@@ -41,7 +41,7 @@ const getAccount = (idOrName: string): Account | undefined => {
 };
 
 const setAccounts = (data: Account[]) => {
-  accounts.set("accounts", JSON.stringify({ time: Date.now(), data: data }));
+  accounts.set("accounts", JSON.stringify({ time: Date.now(), data: data, version: CACHE_VERSION }));
 };
 
 const messages = new RaycastCache();
@@ -55,8 +55,8 @@ const getMessages = (account: string, mailbox: string): Message[] => {
   if (messages.has(key)) {
     const response = messages.get(key);
     if (response) {
-      const { time, data } = JSON.parse(response);
-      if (!isCacheExpired(time)) {
+      const { time, data, version } = JSON.parse(response);
+      if (!isCacheExpired(time) && version === CACHE_VERSION) {
         return data.slice(0, messageLimit);
       }
     }
@@ -67,7 +67,7 @@ const getMessages = (account: string, mailbox: string): Message[] => {
 
 const setMessages = (data: Message[], account: string, mailbox: string) => {
   const key = `${account}-${mailbox}`;
-  messages.set(key, JSON.stringify({ time: Date.now(), data: data }));
+  messages.set(key, JSON.stringify({ time: Date.now(), data: data, version: CACHE_VERSION }));
 };
 
 const addMessage = (data: Message, account: string, mailbox: string) => {
@@ -97,9 +97,34 @@ const deleteMessage = (id: string, account: string, mailbox: string) => {
   setMessages(nextMessages, account, mailbox);
 };
 
+const defaultAccount = new RaycastCache();
+
+const getDefaultAccount = (): Account | undefined => {
+  const accounts = getAccounts();
+
+  if (!accounts || accounts.length === 0) {
+    return undefined;
+  }
+
+  const defaultAccountId = defaultAccount.get("default-account-id");
+
+  if (defaultAccountId) {
+    const account = accounts.find((account) => account.id === defaultAccountId);
+    if (account) return account;
+  }
+
+  return accounts[0];
+};
+
+const setDefaultAccount = (id: string) => {
+  defaultAccount.set("default-account-id", id);
+};
+
 export const Cache = Object.freeze({
   getAccounts,
   setAccounts,
+  getDefaultAccount,
+  setDefaultAccount,
   getAccount,
   invalidateAccounts,
   getMessages,

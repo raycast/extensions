@@ -1,3 +1,38 @@
+export interface Server {
+  name: string;
+  server: string;
+  username: string;
+  password: string;
+}
+
+export interface Vm {
+  server: string;
+  summary: VMSummary;
+  vm_info?: VMInfo;
+  cache_expiration?: number;
+  interfaces_info?: VmGuestNetworkingInterfacesInfo[];
+  storage_policy_info?: VmStoragePolicyInfo;
+  storage_policy_compliance_info?: VMStoragePolicyComplianceInfo;
+}
+
+export interface Host {
+  server: string;
+  summary: HostSummary;
+  cache_expiration?: number;
+}
+
+export interface Network {
+  server: string;
+  summary: NetworkSummary;
+  cache_expiration?: number;
+}
+
+export interface Datastore {
+  server: string;
+  summary: DatastoreSummary;
+  cache_expiration?: number;
+}
+
 export interface VMSummary {
   name: string;
   power_state: VmPowerState;
@@ -319,6 +354,14 @@ export interface StdNestedLocalizableMessage {
   params?: { [key: string]: StdLocalizationParam };
 }
 
+export interface VmConsoleTicketsCreateSpec {
+  type: VmConsoleTicketsType;
+}
+
+export interface VmConsoleTicketsSummary {
+  ticket: string;
+}
+
 export enum VmGuestNetworkingInterfacesIpAddressOrigin {
   OTHER = "OTHER",
   MANUAL = "MANUAL",
@@ -529,4 +572,9 @@ export enum VMPowerAction {
   START = "start",
   STOP = "stop",
   SUSPEND = "suspend",
+}
+
+export enum VmConsoleTicketsType {
+  VMRC = "VMRC",
+  WEBMKS = "WEBMKS",
 }

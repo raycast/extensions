@@ -1,5 +1,5 @@
-import { runAppleScript } from "run-applescript";
 import { closeMainWindow } from "@raycast/api";
+import { runAppleScript } from "@raycast/utils";
 
 /**
  * Builds AppleScript to ensure Tim is running and then wraps the passed command(s).
@@ -9,20 +9,20 @@ import { closeMainWindow } from "@raycast/api";
  */
 export function buildScriptEnsuringTimIsRunning(commandsToRunAfterTimIsRunning: string): string {
   return `
-    tell application "Tim"
-      if not application "Tim" is running then
-        activate
+tell application "Tim"
+  if not application "Tim" is running then
+    activate
 
-        set _maxOpenWaitTimeInSeconds to 5
-        set _openCounter to 1
-        repeat until application "Tim" is running
-          delay 1
-          set _openCounter to _openCounter + 1
-          if _openCounter > _maxOpenWaitTimeInSeconds then exit repeat
-        end repeat
-      end if
-      ${commandsToRunAfterTimIsRunning}
-    end tell`;
+    set _maxOpenWaitTimeInSeconds to 5
+    set _openCounter to 1
+    repeat until application "Tim" is running
+      delay 1
+      set _openCounter to _openCounter + 1
+      if _openCounter > _maxOpenWaitTimeInSeconds then exit repeat
+    end repeat
+  end if
+  ${commandsToRunAfterTimIsRunning}
+end tell`;
 }
 
 /**

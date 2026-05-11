@@ -16,7 +16,7 @@ function GrabUrlAction() {
     open(
       `bear://x-callback-url/grab-url?url=${encodeURIComponent(url)}&tags=${encodeURIComponent(tags)}&pin=${
         pin ? "yes" : "no"
-      }`
+      }`,
     );
 
     await popToRoot({ clearSearchBar: true });
@@ -35,7 +35,7 @@ export default function GrabUrl() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="url" title="URL" placeholder="URL of web page to capture (eg. http://raycast.com)" />
+      <Form.TextField id="url" title="URL" placeholder="URL of web page to capture (eg. https://raycast.com)" />
       <Form.TextField id="tags" title="Tags" placeholder="comma,separated,tags" />
       <Form.Checkbox id="pin" label="Pin note to top of note list" />
     </Form>

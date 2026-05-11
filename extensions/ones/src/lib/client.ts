@@ -1,4 +1,9 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosRequestHeaders } from "axios";
+import axios, {
+  type AxiosInstance,
+  type AxiosRequestConfig,
+  type AxiosRequestHeaders,
+  type GenericAbortSignal,
+} from "axios";
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
 import { login } from "./api";
 import { Preferences } from "./type";
@@ -42,7 +47,7 @@ export class Client {
         }
       }
       url = `${this.baseAPI}/${product}/team/${this.teamUUID}/${url}`;
-      return this.httpClient?.get(url, { params, signal });
+      return this.httpClient?.get(url, { params, signal: signal as GenericAbortSignal });
     } catch (err) {
       return Promise.reject(err);
     }
@@ -57,7 +62,7 @@ export class Client {
         }
       }
       url = `${this.baseAPI}/${product}/team/${this.teamUUID}/${url}`;
-      return this.httpClient.post(url, data, { signal });
+      return this.httpClient.post(url, data, { signal: signal as GenericAbortSignal });
     } catch (err) {
       return Promise.reject(err);
     }
@@ -164,7 +169,7 @@ export class Client {
       },
       function (err) {
         return Promise.reject(err);
-      }
+      },
     );
     this.httpClient.interceptors.response.use(
       (response) => {
@@ -175,7 +180,7 @@ export class Client {
       },
       (err) => {
         return Promise.reject(err);
-      }
+      },
     );
   }
 }

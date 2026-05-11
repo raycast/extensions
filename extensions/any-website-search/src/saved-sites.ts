@@ -30,7 +30,7 @@ export function getSavedSitesFromDisk() {
   try {
     const contents = readFileSync(SAVED_SITES_FILEPATH, { encoding: "utf8" });
     return JSON.parse(contents) as SavedSites;
-  } catch (_) {
+  } catch {
     return { items: [] };
   }
 }
@@ -65,7 +65,7 @@ function sortItemsInPlace(items: SavedSite[]) {
 function editSavedSiteAtIndex(
   savedSites: SavedSites,
   index: number,
-  { title, url, wasOldDefault, isNewDefault }: SavedSite & { wasOldDefault: boolean; isNewDefault: boolean }
+  { title, url, wasOldDefault, isNewDefault }: SavedSite & { wasOldDefault: boolean; isNewDefault: boolean },
 ): SavedSites {
   const defaultSiteTitle = (() => {
     if (isNewDefault) {
@@ -131,7 +131,7 @@ function savedSitesReducer(savedSites: SavedSites, action: SavedSitesAction) {
 
 export function updateSavedSites(
   { savedSites: oldSavedSites, setSavedSites }: SavedSitesState,
-  action?: SavedSitesAction
+  action?: SavedSitesAction,
 ) {
   const savedSites = action !== undefined ? savedSitesReducer(oldSavedSites, action) : { ...oldSavedSites };
   writeSavedSitesToDisk(savedSites);

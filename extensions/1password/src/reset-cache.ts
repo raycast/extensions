@@ -1,5 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
-import { clearCache, op } from "./v8/utils";
+
+import { op } from "./v8/utils";
 
 export default async function resetCache() {
   const toast = await showToast({
@@ -8,7 +9,6 @@ export default async function resetCache() {
   });
 
   try {
-    clearCache();
     op(["signout", "--all"]);
     toast.style = Toast.Style.Success;
     toast.title = "Cleared cache";

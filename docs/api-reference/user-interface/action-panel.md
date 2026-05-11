@@ -1,6 +1,6 @@
 # Action Panel
 
-![](../../.gitbook/assets/action-panel.png)
+![](../../.gitbook/assets/action-panel.webp)
 
 ## API Reference
 

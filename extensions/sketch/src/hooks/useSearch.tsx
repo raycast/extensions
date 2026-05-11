@@ -8,7 +8,7 @@ export default function useSearch(
   token: string | undefined,
   selectedWorkspace: SelectedWorkspace | undefined,
   query: string | undefined,
-  shortId?: string
+  shortId?: string,
 ): {
   data: Record<"shares", Share[] | EntriesEntity[]> | undefined;
   error?: string;
@@ -47,7 +47,7 @@ export default function useSearch(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error) {
         if (!cancel) {
-          setError((error as ErrorEvent).message);
+          setError((error as Error).message);
         }
       } finally {
         if (!cancel) {

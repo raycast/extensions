@@ -1,21 +1,16 @@
-import { showHUD, Clipboard, getPreferenceValues, showToast, Toast } from "@raycast/api";
-import { uuidv7 } from "uuidv7";
+import { showHUD, Clipboard, getPreferenceValues, showToast, Toast, LaunchProps } from "@raycast/api";
+import { typeid } from "typeid-js";
+import { v7 as uuidV7 } from "uuid";
 
-interface UUIDV7Arguments {
-  numberOfUUIDsToGenerate: string;
-}
-
-interface Preferences {
-  upperCaseLetters: boolean;
-  defaultAction: string;
-}
+import { generateUuids } from "./utils/uuidUtils";
+import { UUIDType } from "./uuidHistory";
 
 // don't want to cause a heap error, so cap it 😱
 const UUID_MAX_NUMBER = 10000;
 
-export default async (props: { arguments: UUIDV7Arguments }) => {
+export default async (props: LaunchProps<{ arguments: Arguments.GenerateV7 }>) => {
   let { numberOfUUIDsToGenerate } = props.arguments;
-  const { upperCaseLetters, defaultAction } = getPreferenceValues<Preferences>();
+  const { upperCaseLetters, defaultAction, base32Encoding } = getPreferenceValues<Preferences.GenerateV7>();
 
   if (!numberOfUUIDsToGenerate) {
     numberOfUUIDsToGenerate = "1";
@@ -30,10 +25,8 @@ export default async (props: { arguments: UUIDV7Arguments }) => {
 
     // safe?
     if (parseableNumber <= UUID_MAX_NUMBER) {
-      let uuids = Array.from(Array(parseableNumber)).map(() => uuidv7());
-      if (upperCaseLetters) {
-        uuids = uuids.map((element) => element.toUpperCase());
-      }
+      const generator = base32Encoding ? () => typeid("").toString() : uuidV7;
+      const uuids = await generateUuids(generator, parseableNumber, upperCaseLetters, UUIDType.UUIDV7);
 
       if (defaultAction === "copy") {
         await Clipboard.copy(uuids.join("\r\n"));

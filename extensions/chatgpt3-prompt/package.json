@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "denizyoldas",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "husniadil"
   ],
   "categories": [
     "Data"
@@ -42,7 +43,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.47.3",
-    "axios": "^1.3.3",
+    "axios": "^1.8.4",
     "csv-parse": "^5.3.5"
   },
   "devDependencies": {

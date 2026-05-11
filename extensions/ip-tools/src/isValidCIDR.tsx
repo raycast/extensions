@@ -23,7 +23,7 @@ export default function Command(props: { arguments: { keywork: string } }) {
       {!isEmpty ? (
         <List.EmptyView
           icon={{ source: icon, tintColor: isValid ? Color.Green : Color.Red }}
-          title={`This ${version} CIDR is ${isValid ? "valid" : "invalid"}！}`}
+          title={`This ${version} CIDR is ${isValid ? "valid" : "invalid"}！`}
         />
       ) : (
         <List.EmptyView

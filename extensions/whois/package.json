@@ -7,7 +7,9 @@
   "author": "zavbala",
   "contributors": [
     "snilan",
-    "solid-pixel"
+    "solid-pixel",
+    "j3lte",
+    "sebdanielsson"
   ],
   "categories": [
     "Web",
@@ -34,23 +36,28 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.49.0",
-    "@raycast/utils": "^1.9.0",
-    "axios": "^1.3.4"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
+    "@types/node": "^22.17.0",
+    "@types/react": "^19.1.9",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "~5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

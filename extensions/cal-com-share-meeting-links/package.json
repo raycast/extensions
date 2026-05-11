@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "cal-com-share-meeting-links",
-  "title": "Cal.com - Share Meeting Links",
-  "description": "Quickly share your Cal.com meeting links",
+  "title": "Cal.com",
+  "description": "Manage your Cal.com schedules, bookings, out-of-office, and meeting links from Raycast",
   "icon": "logo.png",
   "author": "eluce2",
   "owner": "cal",
@@ -15,7 +15,10 @@
   "contributors": [
     "peduarte",
     "pernielsentikaer",
-    "alexs"
+    "alexs",
+    "stelo",
+    "runofthemilgeek",
+    "andrewbenson"
   ],
   "commands": [
     {
@@ -23,6 +26,34 @@
       "title": "Share Meeting Link",
       "subtitle": "Cal.com",
       "description": "Copy Meeting URL",
+      "mode": "view"
+    },
+    {
+      "name": "view-bookings",
+      "title": "View Bookings",
+      "subtitle": "Cal.com",
+      "description": "View your upcoming Cal.com bookings",
+      "mode": "view"
+    },
+    {
+      "name": "view-availability",
+      "title": "View Availability",
+      "subtitle": "Cal.com",
+      "description": "View and manage your Cal.com availability schedules",
+      "mode": "view"
+    },
+    {
+      "name": "out-of-office",
+      "title": "Out of Office",
+      "subtitle": "Cal.com",
+      "description": "View and manage your Cal.com out-of-office entries",
+      "mode": "view"
+    },
+    {
+      "name": "create-out-of-office",
+      "title": "Create Out of Office",
+      "subtitle": "Cal.com",
+      "description": "Schedule a new out-of-office entry (with draft support)",
       "mode": "view"
     }
   ],
@@ -38,25 +69,30 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
-    "@raycast/utils": "^1.3.1",
-    "axios": "^0.27.2",
-    "dayjs": "^1.11.3"
+    "@raycast/api": "^1.104.12",
+    "@raycast/utils": "^2.2.3",
+    "axios": "^1.8.4",
+    "dayjs": "^1.11.11",
+    "moment": "^2.30.1"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "^20.14.9",
+    "@types/react": "^19.0.10",
+    "@typescript-eslint/eslint-plugin": "^7.14.1",
+    "@typescript-eslint/parser": "^7.14.1",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
-  }
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

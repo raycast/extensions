@@ -1,62 +1,114 @@
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import dayjs from "dayjs";
 import duration from "dayjs/plugin/duration";
-import { AppContextProvider, useAppContext } from "./context";
-import RunningTimeEntry from "./components/RunningTimeEntry";
-import { ActionPanel, clearSearchBar, Icon, List, Action, showToast, Toast } from "@raycast/api";
-import { TimeEntry } from "./toggl/types";
-import toggl from "./toggl";
-import { storage, refreshStorage } from "./storage";
-import ProjectListItem from "./components/ProjectListItem";
-import CreateTimeEntryForm from "./components/CreateTimeEntryForm";
+import { useEffect, useRef } from "react";
+
+import { liteModeSync, isLiteModeColdStart, isLiteModeSyncDue } from "@/api";
+import { removeTimeEntry } from "@/api/timeEntries";
+import TimeEntryForm from "@/components/CreateTimeEntryForm";
+import RunningTimeEntry from "@/components/RunningTimeEntry";
+import UpdateTimeEntryForm from "@/components/UpdateTimeEntryForm";
+import { ExtensionContextProvider } from "@/context/ExtensionContext";
+import { formatSeconds } from "@/helpers/formatSeconds";
+import { liteMode } from "@/helpers/preferences";
+import Shortcut from "@/helpers/shortcuts";
+import { Verb, withToast } from "@/helpers/withToast";
+import { useProcessedTimeEntries } from "@/hooks/useProcessedTimeEntries";
+import { useTimeEntryActions } from "@/hooks/useTimeEntryActions";
+import { useTotalDurationToday } from "@/hooks/useTotalDurationToday";
 
 dayjs.extend(duration);
 
+function SyncAction({
+  revalidateRunningTimeEntry,
+  revalidateTimeEntries,
+}: {
+  revalidateRunningTimeEntry: () => void;
+  revalidateTimeEntries: () => void;
+}) {
+  if (!liteMode) return null;
+  return (
+    <Action
+      title="Sync from Toggl"
+      icon={Icon.ArrowClockwise}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
+      onAction={async () => {
+        await showToast({ style: Toast.Style.Animated, title: "Syncing from Toggl..." });
+        try {
+          await liteModeSync();
+          revalidateRunningTimeEntry();
+          revalidateTimeEntries();
+          await showToast({ style: Toast.Style.Success, title: "Sync complete" });
+        } catch (e) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Sync failed",
+            message: e instanceof Error ? e.message : String(e),
+          });
+        }
+      }}
+    />
+  );
+}
+
 function ListView() {
-  const { isLoading, isValidToken, projectGroups, runningTimeEntry, timeEntries, projects } = useAppContext();
-  const getProjectById = (id: number) => projects.find((p) => p.id === id);
+  const {
+    isLoading,
+    mutateTimeEntries,
+    revalidateRunningTimeEntry,
+    revalidateTimeEntries,
+    runningTimeEntry,
+    timeEntries,
+    timeEntriesWithUniqueProjectAndDescription,
+  } = useProcessedTimeEntries();
 
-  const timeEntriesWithUniqueProjectAndDescription = timeEntries
-    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
-    .reduce(
-      (acc, timeEntry) =>
-        acc.find((t) => t.description === timeEntry.description && t.project_id === timeEntry.project_id)
-          ? acc
-          : [...acc, timeEntry],
-      [] as TimeEntry[],
-    );
+  const totalDurationToday = useTotalDurationToday(timeEntries, runningTimeEntry);
+  const { resumeTimeEntry } = useTimeEntryActions(revalidateRunningTimeEntry, revalidateTimeEntries);
 
-  const totalDurationToday =
-    timeEntries
-      .filter((timeEntry) => dayjs(timeEntry.start).isSame(dayjs(), "day"))
-      .reduce((acc, timeEntry) => acc + timeEntry.duration, 0) +
-    (runningTimeEntry ? dayjs().diff(runningTimeEntry.start, "second") : 0);
+  // Lite mode: seed cache on first launch or when critical keys are missing
+  const coldStartDone = useRef(false);
+  useEffect(() => {
+    if (!liteMode || coldStartDone.current) return;
+    if (!isLiteModeColdStart()) return;
+    coldStartDone.current = true;
+    (async () => {
+      await showToast({ style: Toast.Style.Animated, title: "Syncing from Toggl..." });
+      try {
+        await liteModeSync();
+        revalidateRunningTimeEntry();
+        revalidateTimeEntries();
+        await showToast({ style: Toast.Style.Success, title: "Sync complete" });
+      } catch {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Cache empty — sync when rate limit resets",
+          message: "Use ⌘⇧R to sync manually",
+        });
+      }
+    })();
+  }, []);
 
-  function formatSeconds(seconds: number) {
-    const h = Math.floor(seconds / 3600);
-    seconds %= 3600;
-    const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
-
-    return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`;
-  }
-
-  async function resumeTimeEntry(timeEntry: TimeEntry) {
-    await showToast(Toast.Style.Animated, "Starting timer...");
-    try {
-      await toggl.createTimeEntry({
-        projectId: timeEntry.project_id,
-        workspaceId: timeEntry.workspace_id,
-        description: timeEntry.description,
-        tags: timeEntry.tags,
-        billable: timeEntry.billable,
-      });
-      await storage.runningTimeEntry.refresh();
-      await showToast(Toast.Style.Success, "Time entry resumed");
-      await clearSearchBar({ forceScrollToTop: true });
-    } catch (e) {
-      await showToast(Toast.Style.Failure, "Failed to resume time entry");
-    }
-  }
+  // Low data mode: check every 10 minutes if an hourly sync is due
+  const syncingRef = useRef(false);
+  useEffect(() => {
+    if (!liteMode) return;
+    const check = () => {
+      if (syncingRef.current || isLiteModeColdStart() || !isLiteModeSyncDue()) return;
+      syncingRef.current = true;
+      liteModeSync()
+        .then(() => {
+          revalidateRunningTimeEntry();
+          revalidateTimeEntries();
+        })
+        .catch(() => {})
+        .finally(() => {
+          syncingRef.current = false;
+        });
+    };
+    check();
+    const id = setInterval(check, 600_000); // 10 minutes
+    return () => clearInterval(id);
+  }, [revalidateRunningTimeEntry, revalidateTimeEntries]);
 
   return (
     <List
@@ -64,87 +116,127 @@ function ListView() {
       throttle
       navigationTitle={isLoading ? undefined : `Today: ${formatSeconds(totalDurationToday)}`}
     >
-      {isValidToken ? (
-        !isLoading && (
-          <>
-            {runningTimeEntry && <RunningTimeEntry runningTimeEntry={runningTimeEntry} />}
-            <List.Section title="Actions">
-              <List.Item
-                title="Create a new time entry"
-                icon={"command-icon.png"}
-                actions={
-                  <ActionPanel>
-                    <Action.Push
-                      title="Create Time Entry"
-                      icon={{ source: Icon.Clock }}
-                      target={
-                        <AppContextProvider>
-                          <CreateTimeEntryForm />
-                        </AppContextProvider>
-                      }
+      {runningTimeEntry && (
+        <RunningTimeEntry
+          runningTimeEntry={runningTimeEntry}
+          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+          revalidateTimeEntries={revalidateTimeEntries}
+        />
+      )}
+      <List.Section title="Actions">
+        <List.Item
+          title="Create a new time entry"
+          icon={"command-icon.png"}
+          actions={
+            <ActionPanel>
+              <Action.Push
+                title="Create Time Entry"
+                icon={{ source: Icon.Clock }}
+                target={
+                  <ExtensionContextProvider>
+                    <TimeEntryForm
+                      revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                      revalidateTimeEntries={revalidateTimeEntries}
                     />
-                    <ActionPanel.Section>
-                      <Action.SubmitForm
-                        title="Refresh"
-                        icon={{ source: Icon.RotateClockwise }}
-                        shortcut={{ modifiers: ["cmd"], key: "r" }}
-                        onSubmit={refreshStorage}
-                      />
-                    </ActionPanel.Section>
-                  </ActionPanel>
+                  </ExtensionContextProvider>
                 }
               />
-            </List.Section>
-            {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
-              <List.Section title="Resume recent time entry">
-                {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
-                  <List.Item
-                    key={timeEntry.id}
-                    keywords={[timeEntry.description, getProjectById(timeEntry.project_id)?.name || ""]}
-                    title={timeEntry.description || "No description"}
-                    subtitle={timeEntry.billable ? "$" : ""}
-                    accessoryTitle={getProjectById(timeEntry?.project_id)?.name}
-                    accessoryIcon={{ source: Icon.Dot, tintColor: getProjectById(timeEntry?.project_id)?.color }}
-                    icon={{ source: Icon.Circle, tintColor: getProjectById(timeEntry?.project_id)?.color }}
-                    actions={
-                      <ActionPanel>
-                        <Action.SubmitForm
-                          title="Resume Time Entry"
-                          onSubmit={() => resumeTimeEntry(timeEntry)}
-                          icon={{ source: Icon.Clock }}
+              <SyncAction
+                revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                revalidateTimeEntries={revalidateTimeEntries}
+              />
+            </ActionPanel>
+          }
+        />
+      </List.Section>
+      {timeEntriesWithUniqueProjectAndDescription.length > 0 && (
+        <List.Section title="Recent time entries">
+          {timeEntriesWithUniqueProjectAndDescription.map((timeEntry) => (
+            <List.Item
+              key={timeEntry.id}
+              keywords={[timeEntry.description, timeEntry.project_name || "", timeEntry.client_name || ""]}
+              title={timeEntry.description || "No description"}
+              subtitle={(timeEntry.client_name ? timeEntry.client_name + " | " : "") + (timeEntry.project_name ?? "")}
+              accessories={[
+                ...timeEntry.tags.map((tag) => ({ tag })),
+                timeEntry.billable ? { tag: { value: "$" } } : {},
+                { text: formatSeconds(timeEntry.duration) },
+              ]}
+              icon={{ source: Icon.Circle, tintColor: timeEntry.project_color }}
+              actions={
+                <ActionPanel>
+                  <Action.SubmitForm
+                    title="Resume Time Entry"
+                    onSubmit={() => resumeTimeEntry(timeEntry)}
+                    icon={{ source: Icon.Clock }}
+                  />
+                  <Action.Push
+                    title="Edit Time Entry"
+                    icon={Icon.Pencil}
+                    target={
+                      <ExtensionContextProvider>
+                        <UpdateTimeEntryForm
+                          timeEntry={timeEntry}
+                          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                          revalidateTimeEntries={revalidateTimeEntries}
                         />
-                        <Action.SubmitForm
-                          title="Refresh"
-                          icon={{ source: Icon.RotateClockwise }}
-                          onSubmit={refreshStorage}
-                        />
-                      </ActionPanel>
+                      </ExtensionContextProvider>
                     }
                   />
-                ))}
-              </List.Section>
-            )}
-            <List.Section title="Projects">
-              {projectGroups &&
-                projectGroups.map((group) =>
-                  group.projects.map((project) => (
-                    <ProjectListItem
-                      key={project.id}
-                      project={project}
-                      subtitle={group.client?.name}
-                      accessoryTitle={group.workspace.name}
+                  <Action.Push
+                    title="Create Similar Time Entry"
+                    icon={{ source: Icon.Plus }}
+                    shortcut={Shortcut.Duplicate}
+                    target={
+                      <ExtensionContextProvider>
+                        <TimeEntryForm
+                          initialValues={timeEntry}
+                          revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                          revalidateTimeEntries={revalidateTimeEntries}
+                        />
+                      </ExtensionContextProvider>
+                    }
+                  />
+                  <ActionPanel.Section>
+                    <SyncAction
+                      revalidateRunningTimeEntry={revalidateRunningTimeEntry}
+                      revalidateTimeEntries={revalidateTimeEntries}
                     />
-                  )),
-                )}
-            </List.Section>
-          </>
-        )
-      ) : (
-        <List.Item
-          icon={Icon.ExclamationMark}
-          title="Invalid API Key Detected"
-          accessoryTitle={`Go to Extensions → Toggl Track`}
-        />
+                    <Action
+                      title="Delete Time Entry"
+                      icon={Icon.Trash}
+                      style={Action.Style.Destructive}
+                      shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                      onAction={async () => {
+                        await confirmAlert({
+                          title: "Delete Time Entry",
+                          message: "Are you sure you want to delete this time entry?",
+                          icon: {
+                            source: Icon.Trash,
+                            tintColor: Color.Red,
+                          },
+                          primaryAction: {
+                            title: "Delete",
+                            style: Alert.ActionStyle.Destructive,
+                            onAction: () => {
+                              withToast({
+                                noun: "Time Entry",
+                                verb: Verb.Delete,
+                                action: async () => {
+                                  await mutateTimeEntries(removeTimeEntry(timeEntry.workspace_id, timeEntry.id));
+                                },
+                              });
+                            },
+                          },
+                        });
+                      }}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
       )}
     </List>
   );
@@ -152,8 +244,8 @@ function ListView() {
 
 export default function Command() {
   return (
-    <AppContextProvider>
+    <ExtensionContextProvider>
       <ListView />
-    </AppContextProvider>
+    </ExtensionContextProvider>
   );
 }

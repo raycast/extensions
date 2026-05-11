@@ -31,7 +31,7 @@ export default function Command() {
       fit={Grid.Fit.Fill}
       isLoading={isLoading}
       columns={5}
-      navigationTitle={`Now Playing — Page ${page}`}
+      navigationTitle={`Top Rated — Page ${page}`}
       searchBarPlaceholder={placeholder}
       searchBarAccessory={
         <Grid.Dropdown tooltip="Media Type" onChange={setType} storeValue>

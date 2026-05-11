@@ -3,10 +3,12 @@
   "name": "wayback-machine",
   "title": "Wayback Machine",
   "description": "Quickly open and save webpages in Wayback Machine",
-  "icon": "518x0w.png",
+  "icon": "wayback-icon.png",
   "author": "pernielsentikaer",
   "contributors": [
-    "andreaselia"
+    "andreaselia",
+    "j3lte",
+    "chrismessina"
   ],
   "categories": [
     "Web",
@@ -29,6 +31,12 @@
       ]
     },
     {
+      "name": "browser",
+      "title": "Open Current Tab in Wayback Machine",
+      "description": "Open the current tab in Wayback Machine",
+      "mode": "no-view"
+    },
+    {
       "name": "save",
       "title": "Save to Wayback Machine",
       "description": "Save a webpage to Wayback Machine",
@@ -49,18 +57,66 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultView",
+      "title": "Default View",
+      "description": "Choose which view to open in the Wayback Machine",
+      "type": "dropdown",
+      "default": "snapshot",
+      "data": [
+        {
+          "title": "Latest Snapshot",
+          "value": "snapshot"
+        },
+        {
+          "title": "Calendar",
+          "value": "web/*"
+        },
+        {
+          "title": "Collections",
+          "value": "web/collections/*"
+        },
+        {
+          "title": "Changes",
+          "value": "web/changes"
+        },
+        {
+          "title": "Summary",
+          "value": "details"
+        },
+        {
+          "title": "Site Map",
+          "value": "web/sitemap"
+        },
+        {
+          "title": "URLs",
+          "value": "web/urls"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "checkForSnapshots",
+      "title": "Check for Snapshots?",
+      "label": "Enable",
+      "description": "Check if an archived snapshot exists before opening. Disable for faster performance.",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    }
+  ],
   "dependencies": {
-    "@raycast/api": "^1.59.0",
-    "@raycast/utils": "^1.10.0",
-    "cross-fetch": "^3.1.5"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^3.0.2",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

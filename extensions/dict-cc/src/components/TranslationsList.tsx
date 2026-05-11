@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 
-import { Action, ActionPanel, Icon, List, showToast, Clipboard } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, showToast, Clipboard, getSelectedText } from "@raycast/api";
 
 import translate, { Languages, Translations } from "dictcc";
 import { createInputFromSearchTerm, getListSubtitle, joinStringsWithDelimiter, playAudio } from "../utils";
@@ -9,9 +9,10 @@ import { ListWithEmptyView } from "./ListWithEmptyView";
 
 interface ITranslationsListProps {
   isSearchFromClipboard?: boolean;
+  isSearchFromSelection?: boolean;
 }
 
-export function TranslationsList({ isSearchFromClipboard }: ITranslationsListProps) {
+export function TranslationsList({ isSearchFromClipboard, isSearchFromSelection }: ITranslationsListProps) {
   const [translations, setTranslations] = useState<Translations[] | undefined>();
   const [url, setUrl] = useState<string | undefined>();
   const [languages, setLanguages] = useState<[/* source */ Languages, /* target */ Languages] | undefined>();
@@ -46,7 +47,7 @@ export function TranslationsList({ isSearchFromClipboard }: ITranslationsListPro
 
       setLoading(false);
     },
-    [setTranslations, setUrl, setLanguages, setLoading]
+    [setTranslations, setUrl, setLanguages, setLoading],
   );
 
   useEffect(() => {
@@ -59,7 +60,16 @@ export function TranslationsList({ isSearchFromClipboard }: ITranslationsListPro
         }
       })();
     }
-  }, [isSearchFromClipboard, fetchTranslations, searchText]);
+    if (isSearchFromSelection) {
+      (async () => {
+        const selectedText = await getSelectedText();
+
+        if (selectedText && selectedText !== searchText) {
+          fetchTranslations(selectedText);
+        }
+      })();
+    }
+  }, [isSearchFromClipboard, isSearchFromSelection, fetchTranslations, searchText]);
 
   return (
     <List
@@ -91,7 +101,7 @@ export function TranslationsList({ isSearchFromClipboard }: ITranslationsListPro
                   shortcut={{ modifiers: ["cmd"], key: "." }}
                 />
                 <Action
-                  title="Play audio"
+                  title="Play Audio"
                   icon={Icon.Play}
                   onAction={() => playAudio(translation.targetTranslationAudioUrl)}
                 />

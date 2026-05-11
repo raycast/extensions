@@ -1,5 +1,5 @@
 import { useFetch } from "@raycast/utils";
-import type { CharacterEntity } from "crossbell.js";
+import type { CharacterEntity } from "crossbell";
 
 export function useCharacter(characterId?: number) {
   const { isLoading, data } = useFetch<CharacterEntity>(`https://indexer.crossbell.io/v1/characters/${characterId}`, {

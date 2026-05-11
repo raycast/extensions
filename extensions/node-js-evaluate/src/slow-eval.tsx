@@ -16,7 +16,7 @@ export function SlowEval() {
       {(state?.query?.length ?? 0) === 0 ? null : (
         <List.Item
           title={`Evaluate: ${state?.query}`}
-          accessories={[{text: "⏎  to evaluate"}]}
+          accessories={[{ text: "⏎  to evaluate" }]}
           actions={
             <ActionPanel title="Evaluation result">
               <Action.Push title="Show Evaluation" icon="command-icon.png" target={<EvalResult state={state} />} />

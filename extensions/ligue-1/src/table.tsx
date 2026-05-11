@@ -1,31 +1,25 @@
-import { List, Icon, Image, Color, ActionPanel, Action } from "@raycast/api";
-import { useEffect, useState } from "react";
-import SeasonDropdown from "./components/season_dropdown";
+import { Color, Icon, Image, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
+import { useState } from "react";
 import { getTable } from "./api";
-import { Standing } from "./types";
+import SeasonDropdown from "./components/season_dropdown";
 
 export default function GetTables() {
-  const [table, setTable] = useState<Standing[]>();
   const [competition, setCompetition] = useState<string>("");
-  const [showStats, setShowStats] = useState<boolean>(false);
 
-  useEffect(() => {
-    if (competition) {
-      setTable(undefined);
-      getTable(competition).then((data) => {
-        setTable(data);
-      });
-    }
-  }, [competition]);
+  const { data: table, isLoading } = usePromise(
+    async (competition) => (competition ? await getTable(competition) : []),
+    [competition],
+  );
 
   return (
     <List
       throttle
-      isLoading={!table}
+      isLoading={isLoading}
       searchBarAccessory={
         <SeasonDropdown selected={competition} onSelect={setCompetition} />
       }
-      isShowingDetail={showStats}
+      isShowingDetail={true}
     >
       {table?.map((team) => {
         let icon: Image.ImageLike = {
@@ -33,12 +27,12 @@ export default function GetTables() {
           tintColor: Color.SecondaryText,
         };
 
-        if (team.ranking === "up") {
+        if (team.rank < team.gameWeekStartingRank) {
           icon = {
             source: Icon.ChevronUpSmall,
             tintColor: Color.Green,
           };
-        } else if (team.ranking === "down") {
+        } else if (team.rank > team.gameWeekStartingRank) {
           icon = {
             source: Icon.ChevronDownSmall,
             tintColor: Color.Red,
@@ -49,103 +43,78 @@ export default function GetTables() {
           {
             text: {
               color: Color.PrimaryText,
-              value: team.points,
+              value: team.points.toString(),
             },
-            icon,
             tooltip: "Points",
+          },
+          {
+            icon,
           },
         ];
 
-        if (!showStats) {
-          team.forms.reverse().forEach((form) => {
-            let tintColor = Color.SecondaryText;
-            if (form === "win") {
-              tintColor = Color.Green;
-            } else if (form === "lose") {
-              tintColor = Color.Red;
-            }
-
-            accessories.unshift({
-              icon: {
-                source: Icon.CircleFilled,
-                tintColor,
-              },
-            });
-          });
-
-          accessories.unshift(
-            {
-              icon: Icon.SoccerBall,
-              text: team.played,
-              tooltip: "Played",
-            },
-            {
-              icon: Icon.Goal,
-              text: `${team.goals_for} - ${team.goals_against}`,
-              tooltip: "Goals For - Goals Against",
-            },
-          );
-        }
-
         return (
           <List.Item
-            key={team.position}
-            icon={team.logo}
-            title={team.position}
-            subtitle={team.name}
-            keywords={[team.name]}
+            key={team.rank}
+            icon={team.clubIdentity.assets.logo.small}
+            title={team.clubIdentity.name}
+            // subtitle={team.name}
+            keywords={[team.clubIdentity.name, team.clubIdentity.shortName]}
             accessories={accessories}
             detail={
               <List.Item.Detail
                 metadata={
                   <List.Item.Detail.Metadata>
-                    <List.Item.Detail.Metadata.Label title="Stats" />
-                    {/* <List.Item.Detail.Metadata.Label
-                      title="Previous Position"
-                      text={team.previous_position}
-                    /> */}
                     <List.Item.Detail.Metadata.Label
                       title="Played"
-                      text={team.played}
+                      text={team.played.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Won"
-                      text={team.won}
+                      text={team.wins.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Drawn"
-                      text={team.drawn}
+                      text={team.draws.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Lost"
-                      text={team.lost}
+                      text={team.losses.toString()}
                     />
+                    <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
                       title="Goals For"
-                      text={team.goals_for}
+                      text={team.forGoals.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Goals Against"
-                      text={team.goals_against}
+                      text={team.againstGoals.toString()}
                     />
                     <List.Item.Detail.Metadata.Label
                       title="Goal Difference"
-                      text={team.goal_difference}
+                      text={team.goalsDifference.toString()}
                     />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.TagList title="Form">
+                      {team.seasonResults.map((result, idx) => {
+                        let color = Color.SecondaryText;
+                        if (result.resultLetter === "l") {
+                          color = Color.Red;
+                        } else if (result.resultLetter === "w") {
+                          color = Color.Green;
+                        }
+
+                        return (
+                          <List.Item.Detail.Metadata.TagList.Item
+                            key={idx}
+                            text={result.resultLetter.toUpperCase()}
+                            color={color}
+                          />
+                        );
+                      })}
+                    </List.Item.Detail.Metadata.TagList>
                   </List.Item.Detail.Metadata>
                 }
               />
-            }
-            actions={
-              <ActionPanel>
-                <Action
-                  title="Show Stats"
-                  icon={Icon.Sidebar}
-                  onAction={() => {
-                    setShowStats(!showStats);
-                  }}
-                />
-              </ActionPanel>
             }
           />
         );

@@ -1,12 +1,14 @@
-import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, useNavigation, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Image, Toast, showToast, useNavigation } from "@raycast/api";
 import { FormValidation, useCachedPromise, useForm } from "@raycast/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import PullRequestDetail from "./components/PullRequestDetail";
-import View from "./components/View";
+import { PullRequestMergeMethod } from "./generated/graphql";
 import { getErrorMessage } from "./helpers/errors";
+import { getMergeMethodTitle } from "./helpers/pull-request";
 import { getGitHubUser } from "./helpers/users";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { withGitHubClient } from "./helpers/withGithubClient";
 import { useMyRepositories } from "./hooks/useRepositories";
 
 type PullRequestFormValues = {
@@ -14,6 +16,8 @@ type PullRequestFormValues = {
   from: string;
   into: string;
   draft: boolean;
+  autoMerge: boolean;
+  autoMergeMethod: string;
   title: string;
   description: string;
   reviewers: string[];
@@ -27,10 +31,57 @@ type PullRequestFormProps = {
   draftValues?: PullRequestFormValues;
 };
 
+type BranchOption = {
+  id: string;
+  name: string;
+};
+
+type BranchNodesInput = ReadonlyArray<{ id?: string; name?: string | null } | null> | null | undefined;
+
+const normalizeBranches = (nodes: BranchNodesInput): BranchOption[] => {
+  if (!nodes) {
+    return [];
+  }
+
+  return nodes.reduce<BranchOption[]>((acc, node) => {
+    if (node?.id && node?.name) {
+      acc.push({ id: node.id, name: node.name });
+    }
+
+    return acc;
+  }, []);
+};
+
+const ensureBranchPresence = (
+  branches: BranchOption[],
+  fallbackBranches: BranchOption[],
+  currentValue: string,
+): BranchOption[] => {
+  if (!currentValue) {
+    return branches;
+  }
+
+  const alreadyPresent = branches.some((branch) => branch.name === currentValue);
+
+  if (alreadyPresent) {
+    return branches;
+  }
+
+  const fallbackBranch = fallbackBranches.find((branch) => branch.name === currentValue);
+
+  if (fallbackBranch) {
+    return [...branches, fallbackBranch];
+  }
+
+  return [...branches, { id: `virtual-${currentValue}`, name: currentValue }];
+};
+
 export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const { push } = useNavigation();
   const { data: repositories } = useMyRepositories();
   const { github } = getGitHubClient();
+  const [fromQuery, setFromQuery] = useState("");
+  const [intoQuery, setIntoQuery] = useState("");
 
   const { handleSubmit, itemProps, values, setValue, reset, focus } = useForm<PullRequestFormValues>({
     async onSubmit(values) {
@@ -67,6 +118,19 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           toast.style = Toast.Style.Success;
           toast.title = "Created pull request";
 
+          if (values.autoMerge) {
+            try {
+              await github.enablePullRequestAutoMerge({
+                nodeId: pullRequestId,
+                mergeMethod: (values.autoMergeMethod as PullRequestMergeMethod) || allowedMergeMethods[0],
+              });
+            } catch (error) {
+              toast.style = Toast.Style.Success;
+              toast.title = "Created pull request, but auto-merge failed";
+              toast.message = getErrorMessage(error);
+            }
+          }
+
           if (pullRequest) {
             toast.primaryAction = {
               title: "Open Pull Request",
@@ -87,6 +151,8 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           from: "",
           into: "",
           draft: false,
+          autoMerge: false,
+          autoMergeMethod: "",
           description: "",
           reviewers: [],
           assignees: [],
@@ -107,6 +173,8 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       from: draftValues?.from ?? "",
       into: draftValues?.into ?? "",
       draft: draftValues?.draft ?? false,
+      autoMerge: draftValues?.autoMerge ?? false,
+      autoMergeMethod: draftValues?.autoMergeMethod ?? "",
       title: draftValues?.title ?? "",
       description: draftValues?.description ?? "",
       reviewers: draftValues?.reviewers ?? [],
@@ -137,11 +205,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
     { execute: !!values.repository },
   );
 
+  const selectedRepository = repositories?.find((r) => r.id === values.repository);
+  const autoMergeAllowed = selectedRepository?.autoMergeAllowed ?? false;
+  const allowedMergeMethods = [
+    selectedRepository?.mergeCommitAllowed && PullRequestMergeMethod.Merge,
+    selectedRepository?.squashMergeAllowed && PullRequestMergeMethod.Squash,
+    selectedRepository?.rebaseMergeAllowed && PullRequestMergeMethod.Rebase,
+  ].filter(Boolean) as PullRequestMergeMethod[];
+
   const defaultBranch = data?.repository?.defaultBranchRef;
-
-  const fromBranches = data?.repository?.refs?.nodes?.filter((node) => defaultBranch?.id !== node?.id && !!node?.name);
-
-  const intoBranches = data?.repository?.refs?.nodes?.filter((node) => node?.name !== values.from);
+  const defaultBranchName = defaultBranch?.name ?? "";
 
   const collaborators = data?.repository?.collaborators?.nodes;
 
@@ -152,6 +225,44 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   const projects = data?.repository?.projectsV2?.nodes;
 
   const milestones = data?.repository?.milestones?.nodes;
+
+  const searchRepoBranches = (repo: string, query: string) => {
+    const selectedRepository = repositories?.find((r) => r.id === repo);
+
+    if (!selectedRepository) {
+      return Promise.resolve(null);
+    }
+
+    return github.searchRepositoryBranches({
+      owner: selectedRepository.owner.login,
+      name: selectedRepository.name,
+      query: query.trim(),
+    });
+  };
+
+  const { data: fromData, isLoading: isLoadingFrom } = useCachedPromise(
+    searchRepoBranches,
+    [values.repository, fromQuery],
+    { execute: !!values.repository && fromQuery.trim().length > 0 },
+  );
+
+  const { data: intoData, isLoading: isLoadingInto } = useCachedPromise(
+    searchRepoBranches,
+    [values.repository, intoQuery],
+    { execute: !!values.repository && intoQuery.trim().length > 0 },
+  );
+
+  const repositoryBranches = normalizeBranches(data?.repository?.refs?.nodes);
+
+  const fromBranchResults = normalizeBranches(fromData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes);
+  const fromBranches = ensureBranchPresence(fromBranchResults, repositoryBranches, values.from);
+
+  const intoBranchResults = normalizeBranches(intoData?.repository?.refs?.nodes ?? data?.repository?.refs?.nodes);
+  const intoBranches = ensureBranchPresence(
+    intoBranchResults.filter((branch) => branch.name !== values.from),
+    repositoryBranches,
+    values.into,
+  );
 
   useEffect(() => {
     const template = data?.repository?.pullRequestTemplates?.[0];
@@ -166,9 +277,18 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   }, [data]);
 
   useEffect(() => {
+    if (values.from && values.into && values.from === values.into) {
+      if (defaultBranchName && defaultBranchName !== values.from) {
+        setValue("into", defaultBranchName);
+      } else {
+        setValue("into", "");
+      }
+    }
+  }, [values.from, values.into, defaultBranchName]);
+
+  useEffect(() => {
     setValue("from", "");
     setValue("into", "");
-    setValue("title", "");
     setValue("description", "");
     setValue("reviewers", []);
     setValue("assignees", []);
@@ -200,7 +320,13 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
         })}
       </Form.Dropdown>
 
-      <Form.Dropdown {...itemProps.from} title="From">
+      <Form.Dropdown
+        {...itemProps.from}
+        title="From"
+        isLoading={isLoadingFrom}
+        throttle
+        onSearchTextChange={setFromQuery}
+      >
         {fromBranches
           ? fromBranches.map((branch) => {
               if (!branch) {
@@ -212,7 +338,14 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
           : null}
       </Form.Dropdown>
 
-      <Form.Dropdown {...itemProps.into} title="Into" storeValue>
+      <Form.Dropdown
+        {...itemProps.into}
+        title="Into"
+        storeValue
+        isLoading={isLoadingInto}
+        throttle
+        onSearchTextChange={setIntoQuery}
+      >
         {intoBranches
           ? intoBranches.map((branch) => {
               if (!branch) {
@@ -225,6 +358,16 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
       </Form.Dropdown>
 
       <Form.Checkbox {...itemProps.draft} label="As draft" />
+
+      {autoMergeAllowed && <Form.Checkbox {...itemProps.autoMerge} label="Enable auto-merge" />}
+
+      {autoMergeAllowed && values.autoMerge && allowedMergeMethods.length > 1 && (
+        <Form.Dropdown {...itemProps.autoMergeMethod} title="Auto-merge Method">
+          {allowedMergeMethods.map((method) => (
+            <Form.Dropdown.Item key={method} title={getMergeMethodTitle(method)} value={method} />
+          ))}
+        </Form.Dropdown>
+      )}
 
       <Form.Separator />
 
@@ -305,10 +448,4 @@ export function PullRequestForm({ draftValues }: PullRequestFormProps) {
   );
 }
 
-export default function Command(props: { draftValues?: PullRequestFormValues }) {
-  return (
-    <View>
-      <PullRequestForm draftValues={props.draftValues} />
-    </View>
-  );
-}
+export default withGitHubClient(PullRequestForm);

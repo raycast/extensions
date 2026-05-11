@@ -1,16 +1,55 @@
 # File Manager Changelog
 
+## [Fixes] - 2026-04-04
+
+- Improved sorting to use natural numeric order.
+- Added broken symlink detection and display.
+- Added more error handling.
+- Fixed gitignore and hidden file filters not reapplying after refresh.
+
+## [Update] - 2025-05-22
+
+- Added a preferences to enable search by file permissions
+
+## [Fixes] - 2025-01-30
+
+- Fixed shell command errors caused by filenames containing single quotes.
+
+## [Fixes] - 2025-01-29
+
+- Fixed issue with show hidden files preference.
+
+## [Features] - 2025-01-28
+
+- Added the preference to show hidden files.
+
+## [Gitignore and Rayignore] - 2024-07-24
+
+- Added support respecting `.gitignore` and `.rayignore` files.
+
+## [Features] - 2023-02-22
+
+- Added `iCloud Drive` to the start directory.
+
+## [Features] - 2023-12-18
+
+- Added `Set Wallpaper` action for images.
+
+## [Fixes] - 2023-12-01
+
+- Resolved an issue with deleting non-empty folders.
+
 ## [Fixes] - 2023-10-09
 
 - When a ~ was in the middle of the Start Directory preference value, it would incorrectly expand it.
-- Preferences were fetched for every single item, now its only fetched once per directory
+- Preferences were fetched for every single item, now it's only fetched once per directory
 
 ## [Update] - 2023-09-12
 
 - Removed dedicated code for symlink file and directories, and instead pass it on to DirectoryItem or SymlinkItem
 - Added sections to actions
 - Added toggle quick look action to everything
-fix showFileSize showing just icon when the preference is disabled
+- Fixed showFileSize showing just an icon when the preference is disabled
 
 ## [Update] - 2023-09-08
 

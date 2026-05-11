@@ -15,6 +15,7 @@ import { useState, useEffect } from "react";
 import { compress, ensureBinary, processingAlert } from "./common/utils";
 import { ICompressPreferences } from "./common/types";
 import { CompressFormat, COMPRESS_FORMAT_METADATA } from "./common/const";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const preferences: ICompressPreferences = getPreferenceValues<ICompressPreferences>();
@@ -29,7 +30,9 @@ export default function Command() {
 
   async function init() {
     updateLoadingState(true);
-    preferences.defaultCompressSelected && (await getFinderItems());
+    if (preferences.defaultCompressSelected) {
+      await getFinderItems();
+    }
     updateLoadingState(false);
   }
 
@@ -41,7 +44,7 @@ export default function Command() {
       }
       updateFilesState(selectedFinderItems.map((item) => item.path));
       // eslint-disable-next-line no-empty
-    } catch (error) {}
+    } catch {}
   }
 
   return (
@@ -66,7 +69,7 @@ export default function Command() {
                   showHUD("🎉 Compress successfully");
                   popToRoot();
                 } catch (error) {
-                  showHUD("❌ Failed to compress...");
+                  showFailureToast(error, { title: "Failed to compress" });
                 } finally {
                   updateLoadingState(false);
                 }

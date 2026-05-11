@@ -5,6 +5,9 @@
   "description": "Control Just Focus via Raycast.",
   "icon": "extension-icon.png",
   "author": "koinzhang",
+  "contributors": [
+    "jiengup"
+  ],
   "categories": [
     "Applications",
     "Productivity"
@@ -41,16 +44,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
-    "run-applescript": "^6.0.0"
+    "@raycast/api": "^1.79.1",
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.14.9",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2",
+    "typescript": "^5.5.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -58,5 +61,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

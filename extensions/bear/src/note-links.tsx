@@ -32,7 +32,7 @@ export default function NoteLinks({ note }: { note: Note }) {
             icon={{ source: "command-icon.png" }}
             keywords={[note.id]}
             actions={<NoteActions isNotePreview={false} note={note} />}
-            accessoryTitle={`edited ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`}
+            accessories={[{ text: `edited ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}` }]}
           />
         ))}
       </List.Section>
@@ -45,7 +45,7 @@ export default function NoteLinks({ note }: { note: Note }) {
             icon={{ source: "command-icon.png" }}
             keywords={[note.id]}
             actions={<NoteActions isNotePreview={false} note={note} />}
-            accessoryTitle={`edited ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}`}
+            accessories={[{ text: `edited ${formatDistanceToNowStrict(note.modifiedAt, { addSuffix: true })}` }]}
           />
         ))}
       </List.Section>

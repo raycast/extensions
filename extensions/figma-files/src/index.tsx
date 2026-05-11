@@ -1,74 +1,65 @@
-import { Application, getApplications, Grid } from "@raycast/api";
-import FileGridItem from "./components/FileGridItem";
-import { ErrorView } from "./components/ErrorView";
-import { useVisitedFiles } from "./hooks/useVisitedFiles";
-import { resolveAllFiles } from "./components/fetchFigmaData";
+import { Grid, type LaunchProps, getPreferenceValues } from "@raycast/api";
+import { withAccessToken } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { useCachedPromise } from "@raycast/utils";
-import { getPreferenceValues } from "@raycast/api";
+import { ErrorView } from "./components/ErrorView";
+import FileGridItem from "./components/FileGridItem";
+import { useFigmaData } from "./hooks/useFigmaData";
+import { figma } from "./oauth";
+import {
+  FILTER_TYPES,
+  parseFilterValue,
+  filterTeamsByName,
+  filterToSpecificProject,
+  createTeamFilter,
+  createProjectFilter,
+} from "./lib/filterUtils";
 import type { TeamFiles } from "./types";
-import { loadStarredFiles } from "./components/starFiles";
 
-export default function Command() {
-  const { data, isLoading, error } = useCachedPromise(
-    async () => {
-      const results = await resolveAllFiles();
-      return results;
-    },
-    [],
-    {
-      keepPreviousData: true,
-    },
-  );
-
+function Command({ launchContext }: Readonly<LaunchProps<{ launchContext: { query: string } }>>) {
   const {
-    data: starredFiles,
-    isLoading: isLoadingStarredFiles,
-    error: starredFilesError,
-    revalidate: revalidateStarredFiles,
-  } = useCachedPromise(async () => {
-    const results = await loadStarredFiles();
-    return results;
-  }, []);
+    allFiles,
+    starredFiles,
+    visitedFiles,
+    isLoading,
+    error,
+    revalidateAllFiles,
+    revalidateStarredFiles,
+    revalidateVisitedFiles,
+    visitFile,
+    desktopApp,
+  } = useFigmaData();
 
-  const { files: visitedFiles, visitFile, isLoading: isLoadingVisitedFiles } = useVisitedFiles();
-  const isLoadingBlock = isLoading || isLoadingVisitedFiles || isLoadingStarredFiles;
-  const [filteredFiles, setFilteredFiles] = useState(data);
+  const [filteredFiles, setFilteredFiles] = useState(allFiles);
   const [isFiltered, setIsFiltered] = useState(false);
-  const [desktopApp, setDesktopApp] = useState<Application>();
+  const [searchText, setSearchText] = useState<string>(launchContext?.query ?? "");
 
   useEffect(() => {
-    getApplications()
-      .then((apps) => apps.find((a) => a.bundleId === "com.figma.Desktop"))
-      .then(setDesktopApp);
-  }, []);
+    setFilteredFiles(allFiles);
+  }, [allFiles]);
 
-  useEffect(() => {
-    setFilteredFiles(data);
-  }, [data]);
-
-  if (error || starredFilesError) {
+  if (error) {
     return <ErrorView />;
   }
 
   function handleDropdownChange(value: string) {
-    if (data && !isLoading) {
-      if (value === "All") {
-        setFilteredFiles(data);
-        setIsFiltered(false);
-      } else if (value.includes("team=")) {
-        setFilteredFiles(data.filter((team) => team.name === value.split("=")[1]));
-        setIsFiltered(true);
-      } else {
-        setFilteredFiles([
-          {
-            name: value.split("&$%")[0],
-            files: data
-              .filter((team) => team.name === value.split("&$%")[0])[0]
-              .files.filter((project) => project.name === value.split("&$%")[1]),
-          } as TeamFiles,
-        ]);
-        setIsFiltered(true);
+    if (allFiles && !isLoading) {
+      const filter = parseFilterValue(value);
+
+      switch (filter.type) {
+        case "all":
+          setFilteredFiles(allFiles);
+          setIsFiltered(false);
+          break;
+
+        case "team":
+          setFilteredFiles(filterTeamsByName(allFiles, filter.teamName!));
+          setIsFiltered(true);
+          break;
+
+        case "project":
+          setFilteredFiles(filterToSpecificProject(allFiles, filter.teamName!, filter.projectName!));
+          setIsFiltered(true);
+          break;
       }
     }
   }
@@ -81,19 +72,19 @@ export default function Command() {
       defaultValue="All"
       onChange={handleDropdownChange}
     >
-      <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value="All" />
+      <Grid.Dropdown.Item key="all" title={teamID.length > 1 ? "All teams" : "All projects"} value={FILTER_TYPES.ALL} />
       {teamID.length > 1 &&
-        data?.map((team) => (
-          <Grid.Dropdown.Item key={team.name} title={team.name} value={`team=${team.name}`} icon="team.svg" />
+        allFiles?.map((team: TeamFiles) => (
+          <Grid.Dropdown.Item key={team.name} title={team.name} value={createTeamFilter(team.name)} icon="team.svg" />
         ))}
 
-      {data?.map((team) => (
+      {allFiles?.map((team: TeamFiles) => (
         <Grid.Dropdown.Section title={team.name} key={team.name}>
           {team.files.map((project) => (
             <Grid.Dropdown.Item
               key={project.name}
               title={project.name}
-              value={`${team.name}&$%${project.name}`}
+              value={createProjectFilter(team.name, project.name)}
               icon="project.svg"
             />
           ))}
@@ -104,8 +95,11 @@ export default function Command() {
 
   return (
     <Grid
-      isLoading={isLoadingBlock}
+      isLoading={isLoading}
       searchBarPlaceholder="Filter files by name..."
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      filtering={true}
       searchBarAccessory={filterDropdown()}
     >
       {!isFiltered && (
@@ -116,7 +110,9 @@ export default function Command() {
               file={file}
               desktopApp={desktopApp}
               extraKey={file.key + "-starred-file-item"}
-              revalidate={revalidateStarredFiles}
+              revalidateStarredFiles={revalidateStarredFiles}
+              revalidateVisitedFiles={revalidateVisitedFiles}
+              revalidateAllFiles={revalidateAllFiles}
               onVisit={visitFile}
               starredFiles={starredFiles || []}
               starredFilesCount={starredFiles.length || 0}
@@ -133,16 +129,18 @@ export default function Command() {
               file={file}
               desktopApp={desktopApp}
               extraKey={file.key + "-recent-file-item"}
-              revalidate={revalidateStarredFiles}
+              revalidateStarredFiles={revalidateStarredFiles}
+              revalidateVisitedFiles={revalidateVisitedFiles}
+              revalidateAllFiles={revalidateAllFiles}
               onVisit={visitFile}
-              starredFiles={starredFiles || []}
-              starredFilesCount={starredFiles?.length || 0}
+              starredFiles={starredFiles ?? []}
+              starredFilesCount={starredFiles?.length ?? 0}
             />
           ))}
         </Grid.Section>
       )}
 
-      {filteredFiles?.map((team) =>
+      {filteredFiles?.map((team: TeamFiles) =>
         team.files.map((project) =>
           project.files?.length != 0 ? (
             <Grid.Section
@@ -158,12 +156,14 @@ export default function Command() {
                 <FileGridItem
                   key={file.key + "-file"}
                   searchkeywords={project.name}
-                  revalidate={revalidateStarredFiles}
+                  revalidateStarredFiles={revalidateStarredFiles}
+                  revalidateVisitedFiles={revalidateVisitedFiles}
+                  revalidateAllFiles={revalidateAllFiles}
                   file={file}
                   desktopApp={desktopApp}
                   onVisit={visitFile}
-                  starredFiles={starredFiles || []}
-                  starredFilesCount={starredFiles?.length || 0}
+                  starredFiles={starredFiles ?? []}
+                  starredFilesCount={starredFiles?.length ?? 0}
                 />
               ))}
             </Grid.Section>
@@ -182,3 +182,5 @@ export default function Command() {
     </Grid>
   );
 }
+
+export default withAccessToken(figma)(Command);

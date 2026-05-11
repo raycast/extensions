@@ -12,6 +12,7 @@ function parseDate(date?: string) {
 
 export async function fetchHydratedPopularFeed(site: Site): Promise<Content[]> {
   const popularContent = (await fetchPopularFeed(site)) as PopularResponse;
+  if (!popularContent.nodes.length) return [];
   const contentIds = popularContent.nodes.map((i: any) => i.id);
   const cql = `content in (${contentIds.join(",")})`;
   const expand = "content.metadata.currentuser.viewed,content.metadata.likes,content.children.comment,content.history";
@@ -65,7 +66,7 @@ interface CqlResponse {
 export async function fetchPopularFeed(site: Site, limit = 25) {
   await apiAuthorize();
   return get(
-    `https://api.atlassian.com/ex/confluence/${site.id}/analytics/rest/cloud/${site.id}/feed/popular?first=${limit}`
+    `https://api.atlassian.com/ex/confluence/${site.id}/analytics/rest/cloud/${site.id}/feed/popular?first=${limit}`,
   );
 }
 
@@ -111,8 +112,11 @@ function withCQLSpace(search: string, spaceKey?: string, sort?: string): string 
 }
 
 export async function fetchSearchByText(searchOptions: SearchOptions, signal?: AbortSignal) {
-  const { site, spaceKey, text, includeAttachments = false, sort } = searchOptions;
-  const types = includeAttachments ? "blogpost,page,attachment" : "blogpost,page";
+  const { site, spaceKey, text, includeAttachments = false, includeWhiteboards = false, sort } = searchOptions;
+  const typeList: string[] = ["blogpost", "page"];
+  if (includeAttachments) typeList.push("attachment");
+  if (includeWhiteboards) typeList.push("whiteboard");
+  const types = typeList.join(",");
   const cql = withCQLSpace(`type IN (${types}) and siteSearch ~ "${escCql(text)}"`, spaceKey, sort);
   return fetchSearchByCql(site, cql, signal, SEARCH_EXPAND);
 }
@@ -233,6 +237,7 @@ export interface SearchOptions {
   site: Site;
   text: string;
   includeAttachments?: boolean;
+  includeWhiteboards?: boolean;
   spaceKey?: string;
   sort?: string;
 }

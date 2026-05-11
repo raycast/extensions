@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, Image, List, showToast, Toast } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { AirtableBaseMetadata, Field, Table, View } from "./types";
 import * as api from "./metadata-api";
 import { Fragment } from "react";
+import { AirtableBaseRecordsList } from "./BaseRecordsList";
 
 export function AirtableBaseSchemaTableListView(props: { baseMetadata: AirtableBaseMetadata }) {
   const { baseMetadata } = props;
@@ -83,12 +84,35 @@ function AirtableTableListItem(props: { baseMetadata: AirtableBaseMetadata; tabl
             }
             shortcut={{ modifiers: ["cmd"], key: "f" }}
           />
+          <Action.Push
+            title="Continue to Records"
+            icon={Icon.List}
+            target={<AirtableBaseRecordsList baseId={baseMetadata.id} tableId={table.id} fields={table.fields} />}
+            shortcut={{ modifiers: ["cmd"], key: "v" }}
+          />
           <Action.CopyToClipboard title={`Copy Table ID (${table.id})`} content={table.id} />
         </ActionPanel>
       }
     />
   );
 }
+
+const FIELD_TYPE_ICONS: Record<string, Image.ImageLike> = {
+  checkbox: Icon.CheckCircle,
+  createdTime: Icon.Clock,
+  date: { source: Icon.Calendar, mask: Image.Mask.Circle },
+  dateTime: Icon.Calendar,
+  email: Icon.AtSymbol,
+  formula: Icon.Code,
+  multilineText: Icon.Paragraph,
+  multipleAttachments: Icon.Paperclip,
+  multipleRecordLinks: Icon.ArrowNe,
+  multipleSelects: Icon.Tag,
+  number: Icon.NumberList,
+  singleLineText: Icon.ShortParagraph,
+  singleSelect: Icon.Circle,
+  url: Icon.Link,
+};
 
 export function AirtableBaseSchemaFieldsList(props: {
   baseMetadata: AirtableBaseMetadata;
@@ -110,6 +134,7 @@ export function AirtableBaseSchemaFieldsList(props: {
               return (
                 <List.Item
                   key={field.id}
+                  icon={FIELD_TYPE_ICONS[field.type] || Icon.QuestionMark}
                   title={field.name}
                   subtitle={field.description ? field.description : undefined}
                   accessories={[{ text: `${field.type}` }]}

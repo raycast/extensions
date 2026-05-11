@@ -3,3 +3,5 @@ export interface DecorationFont {
   value: string;
   icon: string;
 }
+
+export type DecoratorArguments = Arguments.DecorateText;

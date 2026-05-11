@@ -3,10 +3,11 @@
   <h1 align="center">DouTu Extension for Raycast</h1>
 </p>
 
-🌟 A picture fight during working hours
+🌟 A picture fight during working hours. Summon your friends with quirky pictures and a variety of GIF image!
 
 ## Features
 
+- Support GIF Image
 - Support for quick search of emoji packs
 - Support enter key to copy to clipboard
 - Support toggle image sources
@@ -19,7 +20,11 @@
 
 ## Preview
 
-<img src="metadata/dou-tu-1.png">
-<img src="metadata/dou-tu-2.png">
-<img src="metadata/dou-tu-3.png">
-<img src="metadata/dou-tu-4.png">
+<img src="metadata/doutu-1.png">
+<img src="metadata/doutu-2.png">
+<img src="metadata/doutu-3.png">
+<img src="metadata/doutu-4.png">
+
+## Portal
+
+- [Raycast DouTu](https://github.com/raycast/extensions/tree/main/extensions/doutu)

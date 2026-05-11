@@ -1,81 +1,198 @@
-import { Action, ActionPanel, Icon, Image, List } from "@raycast/api";
+// This filename should be named `switch-to-channel.tsx` or something similar
+// but it's kept as `search.tsx` as changing the command's name will cause users to lose their keywords and aliases
+import { ActionPanel, Action, Icon, List, getPreferenceValues } from "@raycast/api";
+import { useState } from "react";
+import { User, useChannels } from "./shared/client";
+import { withSlackClient } from "./shared/withSlackClient";
+import { useFrecencySorting } from "@raycast/utils";
+import { OpenChannelInSlack, OpenChatInSlack, useSlackApp } from "./shared/OpenInSlack";
+import { convertSlackEmojiToUnicode } from "./shared/utils";
+import { toZonedTime } from "date-fns-tz";
+import { differenceInMinutes } from "date-fns";
+import SendMessage from "./send-message";
 
-import { CacheProvider, onApiError, useChannels, useGroups, useUsers } from "./shared/client";
-import { UpdatesModal } from "./shared/UpdatesModal";
-import { openChannel, openChat } from "./shared/utils";
+const { displayExtraMetadata } = getPreferenceValues<Preferences.Search>();
 
-export default function Command() {
+function getCoworkerTime(coworkerTimeZone: string): string {
+  const localTime = new Date();
+  const coworkerTime = toZonedTime(localTime, coworkerTimeZone);
+
+  const diffInMinutes = differenceInMinutes(coworkerTime, localTime);
+  const diffInHours = diffInMinutes / 60;
+  return `${diffInMinutes >= 0 ? "+" : "-"}${Math.abs(diffInHours) % 1 === 0 ? Math.abs(diffInHours) : Math.abs(diffInHours).toFixed(1)}h`;
+}
+
+function searchItemAccessories(
+  statusEmoji: string | undefined,
+  statusText: string | undefined,
+  statusExpiration: string | null,
+  timezone: string,
+) {
+  const searchMetadata: Array<{ icon: string | Icon; text: string; tooltip?: string | null | undefined }> = [
+    {
+      icon: convertSlackEmojiToUnicode(statusEmoji ?? ""),
+      text: statusText ?? "",
+      tooltip: statusExpiration ? String(statusExpiration) : undefined,
+    },
+  ];
+
+  if (displayExtraMetadata) {
+    searchMetadata.push({ icon: Icon.Globe, text: timezone.split("/")[1].replace(/_/g, " ") });
+
+    if (getCoworkerTime(timezone) !== "+0h") {
+      searchMetadata.push({ icon: Icon.Clock, text: getCoworkerTime(timezone) });
+    }
+  }
+
+  return searchMetadata;
+}
+
+function foldForSearch(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
+function matchesAllWords(text: string, searchText: string): boolean {
+  if (!searchText.trim()) return true;
+  const words = foldForSearch(searchText).split(/\s+/).filter(Boolean);
+  const folded = foldForSearch(text);
+  return words.every((word) => folded.includes(word));
+}
+
+function CopyIdAction({ id }: { id: string }) {
   return (
-    <CacheProvider>
-      <UpdatesModal>
-        <SlackList />
-      </UpdatesModal>
-    </CacheProvider>
+    <Action.CopyToClipboard
+      title="Copy ID to Clipboard"
+      content={id}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "shift"], key: "c" },
+        Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+      }}
+    />
   );
 }
 
-function SlackList() {
-  const { data: users, error: usersError, isValidating: isValidatingUsers } = useUsers();
-  const { data: channels, error: channelsError, isValidating: isValidatingChannels } = useChannels();
-  const { data: groups, error: groupsError, isValidating: isValidatingGroups } = useGroups();
+function Search() {
+  const [searchText, setSearchText] = useState("");
+  const { isAppInstalled, isLoading } = useSlackApp();
+  const { data, isLoading: isLoadingChannels } = useChannels();
 
-  if (
-    usersError &&
-    channelsError &&
-    groupsError &&
-    !isValidatingUsers &&
-    !isValidatingChannels &&
-    !isValidatingGroups
-  ) {
-    onApiError({ exitExtension: true });
-  }
+  const channels = data?.flat();
+
+  const { data: recents, visitItem, resetRanking } = useFrecencySorting(channels, { key: (item) => item.id });
+
+  const filteredRecents = recents.filter((item) => matchesAllWords(item.name, searchText));
 
   return (
-    <List isLoading={isValidatingUsers || isValidatingGroups || isValidatingChannels}>
-      <List.Section title="Users">
-        {users?.map(({ name, id, teamId, icon }) => (
-          <List.Item
-            key={id}
-            title={name}
-            icon={icon ? { source: icon, mask: Image.Mask.Circle } : Icon.Person}
-            actions={
-              <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChat(teamId, id)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+    <List isLoading={isLoading || isLoadingChannels} filtering={false} onSearchTextChange={setSearchText}>
+      {filteredRecents.map((item) => {
+        const isUser = item.id.startsWith("U");
 
-      <List.Section title="Channels">
-        {channels?.map(({ name, id, teamId, icon }) => (
-          <List.Item
-            key={id}
-            title={name}
-            icon={icon}
-            actions={
-              <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+        if (isUser) {
+          const {
+            id: userId,
+            name,
+            icon,
+            title,
+            statusEmoji,
+            statusText,
+            statusExpiration,
+            teamId: workspaceId,
+            conversationId,
+            timezone,
+          } = item as User;
+          return (
+            <List.Item
+              key={userId}
+              title={name}
+              subtitle={displayExtraMetadata ? title : undefined}
+              icon={icon}
+              accessories={searchItemAccessories(statusEmoji, statusText, statusExpiration, timezone)}
+              actions={
+                <ActionPanel>
+                  <OpenChatInSlack
+                    {...{ workspaceId, userId, isAppInstalled, conversationId, onAction: () => visitItem(item) }}
+                  />
 
-      <List.Section title="Groups">
-        {groups?.map(({ name, id, teamId, icon }) => (
-          <List.Item
-            key={id}
-            title={name}
-            icon={icon}
-            actions={
-              <ActionPanel>
-                <Action title="Open in Slack" onAction={() => openChannel(teamId, id)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+                  <Action.Push
+                    title="Send Message"
+                    icon={Icon.Message}
+                    target={<SendMessage recipient={userId} />}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+                  />
+
+                  <Action.CreateQuicklink
+                    quicklink={{
+                      name: `Open Chat with ${name}`,
+                      ...(isAppInstalled
+                        ? { link: `slack://user?team=${workspaceId}&id=${userId}`, application: "Slack" }
+                        : { link: `https://app.slack.com/client/${workspaceId}/${conversationId}` }),
+                    }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  />
+
+                  <Action.CopyToClipboard
+                    title="Copy Huddle Link"
+                    content={`https://app.slack.com/huddle/${workspaceId}/${conversationId}`}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
+                  />
+
+                  <CopyIdAction id={userId} />
+
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.ArrowCounterClockwise}
+                      title="Reset Ranking"
+                      onAction={() => resetRanking(item)}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        } else {
+          const { id: channelId, name, icon, teamId: workspaceId } = item;
+
+          return (
+            <List.Item
+              key={channelId}
+              title={name}
+              icon={icon}
+              actions={
+                <ActionPanel>
+                  <OpenChannelInSlack
+                    {...{ workspaceId, channelId, isAppInstalled, onAction: () => visitItem(item) }}
+                  />
+
+                  <Action.CreateQuicklink
+                    quicklink={{
+                      name: `Open #${name} Channel`,
+                      ...(isAppInstalled
+                        ? { link: `slack://channel?team=${workspaceId}&id=${channelId}`, application: "Slack" }
+                        : { link: `https://app.slack.com/client/${workspaceId}/${channelId}` }),
+                    }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "l" }}
+                  />
+
+                  <CopyIdAction id={channelId} />
+
+                  <ActionPanel.Section>
+                    <Action
+                      icon={Icon.ArrowCounterClockwise}
+                      title="Reset Ranking"
+                      onAction={() => resetRanking(item)}
+                    />
+                  </ActionPanel.Section>
+                </ActionPanel>
+              }
+            />
+          );
+        }
+      })}
     </List>
   );
 }
+
+export default withSlackClient(Search);

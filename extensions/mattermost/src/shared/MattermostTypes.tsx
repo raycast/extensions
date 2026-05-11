@@ -120,7 +120,7 @@ export declare type ChannelCategory = {
 export declare type $ID<
   E extends {
     id: string;
-  }
+  },
 > = E["id"];
 
 export declare type ChannelCategoryType = "favorites" | "channels" | "direct_messages" | "custom";

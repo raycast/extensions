@@ -5,10 +5,10 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 11:54:14
- * Last modified  : 2023-07-06 16:47:11
+ * Last modified  : 2024-06-26 21:37:46
  */
 
-import { runAppleScript } from "run-applescript";
+import { runAppleScript } from "@raycast/utils";
 
 import { Generator, GeneratorKey } from "./types";
 
@@ -64,7 +64,8 @@ export const generatePlaceholder = async (width: number, height: number, destina
  * @returns A promise that resolves with the data URL of the generated preview.
  */
 export const generatePreview = async (CIFilterName: string, inputs: { [key: string]: unknown }) => {
-  return runAppleScript(`use framework "Foundation"
+  return runAppleScript(
+    `use framework "Foundation"
       use framework "Quartz"
       use scripting additions
       
@@ -95,7 +96,11 @@ export const generatePreview = async (CIFilterName: string, inputs: { [key: stri
       set theResultData to theBitmapImageRep's representationUsingType:(current application's NSPNGFileType) |properties|:(missing value)
       set theBase64String to (theResultData's base64EncodedStringWithOptions:0) as text
       return "data:image/png;base64," & theBase64String
-  `);
+  `,
+    {
+      timeout: 0,
+    },
+  );
 };
 
 /**
@@ -113,7 +118,7 @@ export const generate = async (
   CIFilterName: string,
   width: number,
   height: number,
-  inputs: { [key: string]: unknown }
+  inputs: { [key: string]: unknown },
 ) => {
   return runAppleScript(`use framework "Foundation"
     use framework "Quartz"
@@ -216,7 +221,8 @@ export const getCheckerboardOptions = (
   redValues: number[],
   greenValues: number[],
   blueValues: number[],
-  alphaValues: number[]
+  alphaValues: number[],
+  customSize?: number,
 ) => [
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[0] / 255} green:${
@@ -225,7 +231,7 @@ export const getCheckerboardOptions = (
     inputColor1: `current application's CIColor's colorWithRed:${redValues[1] / 255} green:${
       greenValues[1] / 255
     } blue:${blueValues[1] / 255} alpha:${alphaValues[1] / 255}`,
-    inputWidth: "imgWidth / 4",
+    inputWidth: `imgWidth / ${customSize || 4}`,
   },
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[2] / 255} green:${
@@ -269,7 +275,8 @@ export const getStripeOptions = (
   redValues: number[],
   greenValues: number[],
   blueValues: number[],
-  alphaValues: number[]
+  alphaValues: number[],
+  customSize?: number,
 ) => [
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[0] / 255} green:${
@@ -278,7 +285,7 @@ export const getStripeOptions = (
     inputColor1: `current application's CIColor's colorWithRed:${redValues[1] / 255} green:${
       greenValues[1] / 255
     } blue:${blueValues[1] / 255} alpha:${alphaValues[1] / 255}`,
-    inputWidth: "imgWidth / 4",
+    inputWidth: `imgWidth / ${customSize || 4}`,
   },
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[2] / 255} green:${
@@ -331,7 +338,7 @@ export const getLinearGradientOptions = (
   redValues: number[],
   greenValues: number[],
   blueValues: number[],
-  alphaValues: number[]
+  alphaValues: number[],
 ) => [
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[0] / 255} green:${
@@ -389,7 +396,7 @@ export const getRadialGradientOptions = (
   redValues: number[],
   greenValues: number[],
   blueValues: number[],
-  alphaValues: number[]
+  alphaValues: number[],
 ) => [
   {
     inputColor0: `current application's CIColor's colorWithRed:${redValues[0] / 255} green:${
@@ -452,7 +459,7 @@ export const getStarShineOptions = (
   redValues: number[],
   greenValues: number[],
   blueValues: number[],
-  alphaValues: number[]
+  alphaValues: number[],
 ) => ({
   inputColor: `current application's CIColor's colorWithRed:${redValues[0] / 255} green:${greenValues[0] / 255} blue:${
     blueValues[0] / 255
@@ -470,7 +477,7 @@ export const getLenticularHaloOptions = (
   redValues: number[],
   greenValues: number[],
   blueValues: number[],
-  alphaValues: number[]
+  alphaValues: number[],
 ) => ({
   inputColor: `current application's CIColor's colorWithRed:${redValues[0] / 255} green:${greenValues[0] / 255} blue:${
     blueValues[0] / 255
@@ -488,7 +495,7 @@ export const getSunbeamsOptions = (
   redValues: number[],
   greenValues: number[],
   blueValues: number[],
-  alphaValues: number[]
+  alphaValues: number[],
 ) => ({
   inputColor: `current application's CIColor's colorWithRed:${redValues[0] / 255} green:${greenValues[0] / 255} blue:${
     blueValues[0] / 255

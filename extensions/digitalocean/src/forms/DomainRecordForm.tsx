@@ -24,6 +24,7 @@ export default function DomainRecordForm({ domain, type }: { domain: string; typ
       }
       isLoading={isLoading}
     >
+      <Form.Description title="Domain" text={domain} />
       <Form.TextField id="name" title="Hostname (non-qualified)" />
       <Form.TextField
         id="data"

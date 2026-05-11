@@ -1,0 +1,209 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "servicenow",
+  "title": "ServiceNow",
+  "description": "Search and explore content across your ServiceNow instances",
+  "icon": "servicenow.png",
+  "author": "robertoalvarezalonso",
+  "categories": [
+    "Productivity",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Search in ServiceNow, preview search results, and browse your search history.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-instance-profiles",
+      "title": "Manage Instance Profiles",
+      "description": "Configure and mange profiles for your ServiceNow instances.",
+      "mode": "view"
+    },
+    {
+      "name": "quick-search",
+      "title": "Quick Search",
+      "description": "Quickly search within a specific ServiceNow instance profile by entering a search term. If no instance name or alias is provided, it will use the selected instance profile.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-all-instances",
+      "title": "Open All Instances",
+      "description": "Open all configured ServiceNow instances in the browser.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-instance",
+      "title": "Open Instance",
+      "description": "Open a ServiceNow instance in the browser. If an instance name or alias is provided, it will open that instance; otherwise, it will open the currently selected instance.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-current-page-instance",
+      "title": "Open Current Page in Instance",
+      "description": "Open the current ServiceNow page in any instance defined in your instance profiles. If no instance name or alias is provided, it will open the page in the selected instance profile.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "add-instance-profile",
+      "title": "Add Instance Profile",
+      "description": "Add a new instance profile.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-tables",
+      "title": "Explore Tables",
+      "description": "Browse and explore the tables of the platform.",
+      "mode": "view"
+    },
+    {
+      "name": "search-resources",
+      "title": "Search Resources",
+      "description": "Search across various ServiceNow resources, including documentation, blogs, guides, learning materials, and more.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "login-to-instance",
+      "title": "Login to Instance",
+      "description": "Log in to the selected instance using the credentials from the selected profile.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "explore-navigation-history",
+      "title": "Explore Navigation History",
+      "description": "Browse the list of pages and modules you've visited.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-favorites",
+      "title": "Manage Favorites",
+      "description": "View and manage your favorite items and groups.",
+      "mode": "view"
+    },
+    {
+      "name": "explore-navigation-menu",
+      "title": "Explore Navigation Menu",
+      "description": "Browse the list of application menus and their modules.",
+      "mode": "view"
+    },
+    {
+      "name": "search-sysid",
+      "title": "Search sys_id",
+      "description": "Search for a sys_id. Admins only",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "sys_id",
+          "placeholder": "sys_id",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "openMode",
+      "type": "dropdown",
+      "required": true,
+      "title": "Open content using",
+      "description": "Select how you prefer to open ServiceNow pages and content (direct link, nav_to/Polaris, or SOW view).",
+      "default": "direct",
+      "data": [
+        {
+          "title": "Direct",
+          "value": "direct"
+        },
+        {
+          "title": "Navigate",
+          "value": "navigate"
+        },
+        {
+          "title": "Service Operations Workspace",
+          "value": "sow"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.19.1",
+    "date-fns": "^4.1.0",
+    "debug": "^4.4.0",
+    "javascript-time-ago": "^2.5.11",
+    "lodash": "^4.17.21",
+    "node-fetch": "^3.3.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/lodash": "^4.17.16",
+    "@types/node": "22.14.1",
+    "@types/react": "19.1.2",
+    "eslint": "^9.25.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

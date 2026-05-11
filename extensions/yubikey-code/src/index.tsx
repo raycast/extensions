@@ -1,25 +1,14 @@
-import {
-  ActionPanel,
-  Detail,
-  List,
-  Action,
-  Clipboard,
-  closeMainWindow,
-  Icon,
-  popToRoot,
-  showToast,
-  Toast,
-  Cache,
-  getPreferenceValues,
-  showHUD,
-} from "@raycast/api";
-import { cpus } from "os";
-import { join as path_join } from "path";
-import { execFile, ExecFileException } from "child_process";
-import { useState, useEffect } from "react";
+import { Action, ActionPanel, Cache, getPreferenceValues, Icon, List, showToast, Toast } from "@raycast/api";
+import { ExecFileException } from "child_process";
+import React, { useState } from "react";
+import { getAccountIcon, getIconOverrides, getIconPack, IconSubmenu } from "./icons";
+import { AccountDetail, executeCodeCommand, getAccountList, ykmanExecutable } from "./accounts";
+import { getActiveApp, getUsageData, makeUsageSorter, updateUsage } from "./usage";
+import { PasswordForm, testAuthentication, rememberPassword, setSessionPassword, forgetPassword } from "./auth";
 
 interface Preference {
   ykmanPath: string;
+  iconPackPath: string;
   primaryAction: string;
 }
 
@@ -29,35 +18,74 @@ export enum ActionType {
   Reveal = "reveal",
 }
 
-const preferences: Preference = getPreferenceValues();
-const isCopyPrimary = preferences.primaryAction === ActionType.Copy;
+export const preferences: Preference = getPreferenceValues();
+export const cache = new Cache();
+export const isCopyPrimary = preferences.primaryAction === ActionType.Copy;
+
 const primaryActionType = isCopyPrimary ? ActionType.Copy : ActionType.Paste;
 const secondaryActionType = isCopyPrimary ? ActionType.Paste : ActionType.Copy;
-const regex = /(.*)((\d{6,8})|(\[Requires Touch\]))/;
-const cache = new Cache();
-
-export interface Account {
-  name: string;
-  details: string;
-  key: string;
-  requiresTouch: boolean;
-}
 
 export default function Command() {
-  let results: Account[] = [];
+  const { iconPack, iconPackIsLoading, iconPackError } = getIconPack();
+  const iconPackResult = getCachedData("iconPack", iconPackIsLoading, iconPackError, iconPack);
 
-  // get fresh list of available accounts
-  const { isLoading, error, accounts } = getAccountList();
+  const [overrides, setOverrides] = useState<number>(0);
+  const iconOverrides = getIconOverrides(overrides);
 
-  if (cache.has("accounts") && (isLoading || error)) {
-    // if we have cached items, use them while waiting for fresh ones
-    results = JSON.parse(cache.get("accounts") || "[]");
-  } else {
-    // once the fresh accounts have successfully loaded, update the results
-    results = accounts;
+  const [usages, setUsages] = useState<number>(0);
+  const usageData = getUsageData(usages);
+  const activeApp = getActiveApp();
+
+  const [showPasswordForm, setShowPasswordForm] = useState<boolean>(false);
+  const [authLoading, setAuthLoading] = useState<boolean>(false);
+  const [authError, setAuthError] = useState<string>("");
+  const [refreshAccounts, setRefreshAccounts] = useState<number>(0);
+
+  const { isLoading, error, accounts, requiresAuth } = getAccountList(refreshAccounts);
+  const accountResults = getCachedData("accounts", isLoading, error, accounts);
+
+  if (requiresAuth || showPasswordForm) {
+    return (
+      <PasswordForm
+        isLoading={authLoading}
+        error={authError}
+        onPasswordSubmit={async (password: string, remember: boolean) => {
+          setAuthLoading(true);
+          setAuthError("");
+
+          try {
+            const authResult = await testAuthentication(password);
+            if (authResult.success) {
+              setSessionPassword(password);
+
+              if (remember) {
+                const rememberResult = await rememberPassword(password);
+                if (!rememberResult.success) {
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Failed to save password",
+                    message: rememberResult.error || "Unknown error",
+                  });
+                }
+              }
+
+              setShowPasswordForm(false);
+              setRefreshAccounts((n) => n + 1);
+              showToast({ style: Toast.Style.Success, title: "Authentication successful" });
+            } else {
+              setAuthError(authResult.error || "Authentication failed");
+            }
+          } catch {
+            setAuthError("Authentication failed");
+          } finally {
+            setAuthLoading(false);
+          }
+        }}
+      />
+    );
   }
 
-  if (!isLoading && results.length === 0) {
+  if (!isLoading && accountResults.length === 0) {
     const description = error
       ? "The ykman command failed to list your accounts."
       : "You don't currently have any accounts. Add some using ykman or the Yubico Authenticator.";
@@ -71,44 +99,93 @@ export default function Command() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search Accounts">
-      {results.map((account, index) => {
-        const { name, details, requiresTouch, key } = account;
+      {!isLoading &&
+        accountResults
+          .map((account) => {
+            const { name, details, requiresTouch, key } = account;
 
-        return (
-          <List.Item
-            icon={isCopyPrimary ? Icon.CopyClipboard : Icon.Document}
-            title={name}
-            subtitle={details}
-            key={index}
-            accessories={[
-              {
-                icon: requiresTouch ? Icon.Fingerprint : Icon.LockUnlocked,
-                tooltip: requiresTouch ? "Touch Required" : "No Touch Required",
-              },
-            ]}
-            actions={
-              <ActionPanel>
-                <PrimaryAction accountKey={key} requiresTouch={requiresTouch} />
-                <SecondaryAction accountKey={key} requiresTouch={requiresTouch} />
-                <Action.Push
-                  title="Reveal Code"
-                  icon={Icon.Eye}
-                  shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-                  target={
-                    <AccountDetail accountKey={key} actionType={ActionType.Reveal} requiresTouch={requiresTouch} />
-                  }
-                />
-              </ActionPanel>
-            }
-          />
-        );
-      })}
+            const usageCallback = () => {
+              updateUsage(key, activeApp);
+              setUsages((n) => n + 1);
+            };
+
+            return (
+              <List.Item
+                icon={getAccountIcon(iconPackResult, iconOverrides, account)}
+                title={name}
+                subtitle={details}
+                key={key}
+                accessories={[
+                  {
+                    icon: requiresTouch ? Icon.Fingerprint : Icon.LockUnlocked,
+                    tooltip: requiresTouch ? "Touch Required" : "No Touch Required",
+                  },
+                ]}
+                actions={
+                  <ActionPanel>
+                    <PrimaryAction
+                      accountKey={key}
+                      requiresTouch={requiresTouch}
+                      usageCallback={usageCallback}
+                      onRequiresAuth={() => setShowPasswordForm(true)}
+                    />
+                    <SecondaryAction
+                      accountKey={key}
+                      requiresTouch={requiresTouch}
+                      usageCallback={usageCallback}
+                      onRequiresAuth={() => setShowPasswordForm(true)}
+                    />
+                    <Action.Push
+                      title="Reveal Code"
+                      icon={Icon.Eye}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+                      target={
+                        <AccountDetail
+                          accountKey={key}
+                          actionType={ActionType.Reveal}
+                          requiresTouch={requiresTouch}
+                          usageCallback={usageCallback}
+                          onRequiresAuth={() => setShowPasswordForm(true)}
+                        />
+                      }
+                    />
+                    <IconSubmenu accountKey={key} iconPack={iconPack} onOverride={() => setOverrides((n) => n + 1)} />
+                    <Action
+                      title="Clear Saved Password"
+                      icon={Icon.Trash}
+                      shortcut={{ modifiers: ["cmd", "shift"], key: "delete" }}
+                      onAction={async () => {
+                        const result = await forgetPassword();
+                        if (result.success) {
+                          showToast({ style: Toast.Style.Success, title: "Password cleared" });
+                          setShowPasswordForm(false);
+                          setRefreshAccounts((n) => n + 1);
+                        } else {
+                          showToast({
+                            style: Toast.Style.Failure,
+                            title: "Failed to clear password",
+                            message: result.error,
+                          });
+                        }
+                      }}
+                    />
+                  </ActionPanel>
+                }
+              />
+            );
+          })
+          .sort(makeUsageSorter(usageData, activeApp))}
     </List>
   );
 }
 
-function PrimaryAction(props: { accountKey: string; requiresTouch: boolean }): JSX.Element {
-  const { accountKey, requiresTouch } = props;
+function PrimaryAction(props: {
+  accountKey: string;
+  requiresTouch: boolean;
+  usageCallback: () => void;
+  onRequiresAuth?: () => void;
+}): React.JSX.Element {
+  const { accountKey, requiresTouch, usageCallback, onRequiresAuth } = props;
   const title = isCopyPrimary ? "Copy Code" : "Paste Code";
   const icon = isCopyPrimary ? Icon.CopyClipboard : Icon.Document;
 
@@ -116,15 +193,42 @@ function PrimaryAction(props: { accountKey: string; requiresTouch: boolean }): J
     <Action.Push
       title={title}
       icon={icon}
-      target={<AccountDetail accountKey={accountKey} actionType={primaryActionType} requiresTouch={requiresTouch} />}
+      target={
+        <AccountDetail
+          accountKey={accountKey}
+          actionType={primaryActionType}
+          requiresTouch={requiresTouch}
+          usageCallback={usageCallback}
+          onRequiresAuth={onRequiresAuth}
+        />
+      }
     />
   ) : (
-    <Action title={title} icon={icon} onAction={() => executeCodeCommand(accountKey, primaryActionType)} />
+    <Action
+      title={title}
+      icon={icon}
+      onAction={async () => {
+        await executeCodeCommand(
+          accountKey,
+          primaryActionType,
+          () => {},
+          () => {},
+          () => {},
+          usageCallback,
+          onRequiresAuth || (() => {})
+        );
+      }}
+    />
   );
 }
 
-function SecondaryAction(props: { accountKey: string; requiresTouch: boolean }): JSX.Element {
-  const { accountKey, requiresTouch } = props;
+function SecondaryAction(props: {
+  accountKey: string;
+  requiresTouch: boolean;
+  usageCallback: () => void;
+  onRequiresAuth?: () => void;
+}): React.JSX.Element {
+  const { accountKey, requiresTouch, usageCallback, onRequiresAuth } = props;
   const title = isCopyPrimary ? "Paste Code" : "Copy Code";
   const icon = isCopyPrimary ? Icon.Document : Icon.CopyClipboard;
 
@@ -132,123 +236,47 @@ function SecondaryAction(props: { accountKey: string; requiresTouch: boolean }):
     <Action.Push
       title={title}
       icon={icon}
-      target={<AccountDetail accountKey={accountKey} actionType={secondaryActionType} requiresTouch={requiresTouch} />}
+      target={
+        <AccountDetail
+          accountKey={accountKey}
+          actionType={secondaryActionType}
+          requiresTouch={requiresTouch}
+          usageCallback={usageCallback}
+          onRequiresAuth={onRequiresAuth}
+        />
+      }
     />
   ) : (
-    <Action title={title} icon={icon} onAction={() => executeCodeCommand(accountKey, secondaryActionType)} />
+    <Action
+      title={title}
+      icon={icon}
+      onAction={async () => {
+        await executeCodeCommand(
+          accountKey,
+          secondaryActionType,
+          () => {},
+          () => {},
+          () => {},
+          usageCallback,
+          onRequiresAuth || (() => {})
+        );
+      }}
+    />
   );
 }
 
-function AccountDetail(props: { accountKey: string; actionType: ActionType; requiresTouch: boolean }): JSX.Element {
-  const { accountKey, actionType, requiresTouch } = props;
-  const { isLoading, result } = processAccountCode(accountKey, actionType);
-  const displayText = requiresTouch && isLoading ? "Touch your YubiKey..." : result;
-
-  return <Detail isLoading={isLoading} markdown={displayText} />;
-}
-
-function processAccountCode(key: string, actionType: ActionType) {
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [result, setResult] = useState<string>("");
-
-  useEffect(() => {
-    executeCodeCommand(key, actionType, setError, setIsLoading, setResult);
-  }, []);
-
-  return { error, isLoading, result };
-}
-
-function executeCodeCommand(
-  key: string,
-  actionType: ActionType,
-  errorCallback: (error: string) => void = () => null,
-  isLoadingCallback: (isLoading: boolean) => void = () => null,
-  resultCallback: (result: string) => void = () => null
-) {
-  execFile(ykmanExecutable(), ["oath", "accounts", "code", key, "-s"], (error, stdout) => {
-    if (error) {
-      handleError(error, "Failed to get code", errorCallback, isLoadingCallback);
-      return;
-    }
-
-    isLoadingCallback(false);
-
-    switch (actionType) {
-      case ActionType.Copy:
-        Clipboard.copy(stdout.trim());
-        showHUD("Copied to clipboard");
-        popToRoot({ clearSearchBar: true });
-        break;
-      case ActionType.Paste:
-        Clipboard.paste(stdout.trim());
-        closeMainWindow();
-        popToRoot({ clearSearchBar: true });
-        break;
-      case ActionType.Reveal:
-        resultCallback(`# ${stdout}`);
-        break;
-    }
-  });
-}
-
-function getAccountList(): {
-  accounts: Account[];
-  isLoading: boolean;
-  error: string | undefined;
-} {
-  const [error, setError] = useState<string>();
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [accounts, setAccounts] = useState<Account[]>([]);
-
-  useEffect(() => {
-    execFile(ykmanExecutable(), ["oath", "accounts", "code"], (error, stdout) => {
-      if (error) {
-        handleError(error, "Failed to list accounts", setError, setIsLoading);
-        return;
-      }
-
-      const accountResults = stdout
-        .split("\n")
-        .filter((account) => account.trim().length > 0)
-        .map((accountDetails) => {
-          const matches = accountDetails.match(regex);
-
-          if (matches == null) {
-            return { name: "error parsing account" } as Account;
-          }
-
-          const [, accountMatch, code] = matches;
-          const account = accountMatch.trim();
-          const [name, ...details] = account.split(":");
-          return {
-            name,
-            details: details.join(":"),
-            key: account,
-            requiresTouch: code === "[Requires Touch]",
-          } as Account;
-        });
-
-      cache.set("accounts", JSON.stringify(accountResults));
-      setAccounts(accountResults);
-      setIsLoading(false);
-    });
-  }, []);
-
-  return { accounts, isLoading, error };
-}
-
-function ykmanExecutable(): string {
-  if (preferences.ykmanPath && preferences.ykmanPath.length > 0) {
-    return preferences.ykmanPath;
+function getCachedData<T>(cacheKey: string, isLoading: boolean, error: string | undefined, result: T): T {
+  if (cache.has(cacheKey) && (isLoading || error)) {
+    // if we have cached items, use them while waiting for fresh ones
+    return JSON.parse(cache.get(cacheKey) || "");
   } else {
-    const brewPrefix = cpus()[0].model.includes("Apple") ? "/opt/homebrew" : "/usr/local";
-    return path_join(brewPrefix, "bin/ykman");
+    // once the fresh items have successfully loaded, return the results
+    return result;
   }
 }
 
-function handleError(
-  error: ExecFileException,
+export function handleError(
+  error: ExecFileException | NodeJS.ErrnoException,
   contextMessage: string,
   errorCallback: (error: string) => void,
   isLoadingCallback: (isLoading: boolean) => void
@@ -262,9 +290,5 @@ function handleError(
     errorMessage = "ykman doesn't exist at " + ykmanExecutable();
   }
 
-  showToast({
-    style: Toast.Style.Failure,
-    title: contextMessage,
-    message: errorMessage,
-  });
+  showToast({ style: Toast.Style.Failure, title: contextMessage, message: errorMessage });
 }

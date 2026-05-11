@@ -1,6 +1,7 @@
 export interface PortInfo {
   host: string;
   port: number;
+  name?: string;
 }
 
 export interface ProcessInfo {

@@ -1,8 +1,8 @@
-import { runAppleScript } from "run-applescript";
-import { existsSync, statSync, readdirSync } from "fs";
+import { runAppleScript } from "@raycast/utils";
+import { existsSync, readdirSync, statSync } from "fs";
 import { readdir, stat } from "fs/promises";
-import { join } from "path";
 import mime from "mime-types";
+import { join } from "path";
 
 const isHidden = (item: string) => {
   return item === "Icon\r" || /(^|\/)\.[^/.]/g.test(item);

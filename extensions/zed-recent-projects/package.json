@@ -5,14 +5,27 @@
   "description": "Search and open recent projects from Zed",
   "icon": "icon.png",
   "author": "ewgenius",
+  "contributors": [
+    "tleo19",
+    "jylamont",
+    "pernielsentikaer",
+    "tm.wrnr",
+    "true-real-michael",
+    "xmorse",
+    "ivens_joris"
+  ],
   "categories": [
     "Developer Tools"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [
     {
       "name": "open",
-      "title": "Open With Zed",
+      "title": "Open with Zed",
       "subtitle": "Zed",
       "description": "Opens the currently selected Finder item with Zed",
       "mode": "no-view"
@@ -25,31 +38,96 @@
       "mode": "view"
     },
     {
-      "name": "import",
-      "title": "Import VS Code Projects",
+      "name": "open-new-window",
+      "title": "Open New Window",
       "subtitle": "Zed",
-      "description": "Search for recent Visual Studio Code projects and import in Zed",
-      "mode": "view"
+      "description": "Opens a new Zed window.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "Zed",
+      "description": "Select which build of Zed to use",
+      "data": [
+        {
+          "value": "Zed",
+          "title": "Zed"
+        },
+        {
+          "value": "Zed Preview",
+          "title": "Zed Preview"
+        },
+        {
+          "value": "Zed Dev",
+          "title": "Zed Dev"
+        }
+      ]
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "title": "Git Integration",
+      "required": false,
+      "label": "Show Git Branch",
+      "default": true,
+      "description": "Display the current Git branch for files and folders in Git repositories"
+    },
+    {
+      "name": "projectIconStyle",
+      "type": "dropdown",
+      "title": "Visual Customization",
+      "required": false,
+      "default": "icon",
+      "description": "Choose how project icons are displayed",
+      "data": [
+        {
+          "value": "icon",
+          "title": "Icons"
+        },
+        {
+          "value": "colored-dot",
+          "title": "Colored Dots"
+        }
+      ]
+    },
+    {
+      "name": "showOpenStatus",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Open Status",
+      "default": false,
+      "description": "Display an 'Open' tag for projects currently open in Zed"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.9",
-    "@raycast/utils": "^1.5.2",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "color-hash": "^2.0.2",
     "tildify": "^3.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "2.0.4",
+    "@types/color-hash": "^2.0.0",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.6"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
+    "create-fixtures": "./scripts/create-fixtures.sh",
+    "create-fixtures:ts": "node --experimental-transform-types scripts/create-fixtures.ts",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest"
   }
 }

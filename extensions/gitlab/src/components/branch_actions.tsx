@@ -4,7 +4,7 @@ import { GitLabIcons } from "../icons";
 import { ProjectCommitList } from "./commits/list";
 import { MRCreateForm } from "./mr_create";
 
-export function CreateMRAction(props: { project: Project; branch: Branch }): JSX.Element | null {
+export function CreateMRAction(props: { project: Project; branch: Branch }) {
   if (props.project.default_branch !== props.branch.name) {
     return (
       <Action.Push
@@ -18,7 +18,7 @@ export function CreateMRAction(props: { project: Project; branch: Branch }): JSX
   }
 }
 
-export function ShowBranchCommitsAction(props: { projectID: number; branch: Branch }): JSX.Element {
+export function ShowBranchCommitsAction(props: { projectID: number; branch: Branch }) {
   return (
     <Action.Push
       title="Show Commits"

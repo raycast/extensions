@@ -5,15 +5,28 @@
  * @author Stephen Kaplan <skaplanofficial@gmail.com>
  *
  * Created at     : 2023-07-06 14:53:50
- * Last modified  : 2023-07-06 16:48:08
+ * Last modified  : 2024-06-26 21:37:46
  */
 
-import { Color, Grid } from "@raycast/api";
+import { Color, Grid, LaunchProps, useNavigation } from "@raycast/api";
+import { useEffect, useRef } from "react";
 
-import { standardDimensions } from "./utilities/generators";
+import ImagePatternGrid from "./components/ImagePatternGrid";
 import SizeSelectionActionPanel from "./components/SizeSelectionActionPanel";
+import { standardDimensions } from "./utilities/generators";
 
-export default function Command() {
+export default function Command(props: LaunchProps) {
+  const viewRef = useRef(false);
+  const { push } = useNavigation();
+
+  useEffect(() => {
+    if (props.launchContext && !viewRef.current) {
+      viewRef.current = true;
+      const { imageWidth, imageHeight, imagePattern } = props.launchContext;
+      push(<ImagePatternGrid width={imageWidth} height={imageHeight} pattern={imagePattern} />);
+    }
+  }, [props.launchContext]);
+
   const squareOptions = standardDimensions.map((width) =>
     standardDimensions
       .filter((height) => width == height)
@@ -26,7 +39,7 @@ export default function Command() {
             actions={<SizeSelectionActionPanel width={width} height={height} />}
           />
         );
-      })
+      }),
   );
 
   const wideOptions = standardDimensions.map((width) =>
@@ -37,11 +50,14 @@ export default function Command() {
           <Grid.Item
             title={`${width}x${height}`}
             key={`${width}x${height}`}
-            content={{ source: `thumbnails/${width}x${height}.webp`, tintColor: Color.Red }}
+            content={{
+              source: `thumbnails/${width}x${height}.webp`,
+              tintColor: Color.Red,
+            }}
             actions={<SizeSelectionActionPanel width={width} height={height} />}
           />
         );
-      })
+      }),
   );
 
   const tallOptions = standardDimensions.map((width) =>
@@ -52,11 +68,14 @@ export default function Command() {
           <Grid.Item
             title={`${width}x${height}`}
             key={`${width}x${height}`}
-            content={{ source: `thumbnails/${width}x${height}.webp`, tintColor: Color.Green }}
+            content={{
+              source: `thumbnails/${width}x${height}.webp`,
+              tintColor: Color.Green,
+            }}
             actions={<SizeSelectionActionPanel width={width} height={height} />}
           />
         );
-      })
+      }),
   );
 
   const extremeOptions = standardDimensions.map((width) =>
@@ -67,11 +86,14 @@ export default function Command() {
           <Grid.Item
             title={`${width}x${height}`}
             key={`${width}x${height}`}
-            content={{ source: `thumbnails/${width}x${height}.webp`, tintColor: Color.Blue }}
+            content={{
+              source: `thumbnails/${width}x${height}.webp`,
+              tintColor: Color.Blue,
+            }}
             actions={<SizeSelectionActionPanel width={width} height={height} />}
           />
         );
-      })
+      }),
   );
 
   return (

@@ -23,7 +23,7 @@ export function AccountListItem({
       name: "prices",
       shouldShowToast: hasBaseCurrencyChanged,
     },
-    [account, baseCurrency]
+    [account, baseCurrency],
   );
 
   useEffect(() => {

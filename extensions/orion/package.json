@@ -6,7 +6,7 @@
   "icon": "orion-icon.png",
   "author": "plonq",
   "contributors": [
-      "erics118"
+    "erics118"
   ],
   "categories": [
     "Web"
@@ -76,5 +76,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

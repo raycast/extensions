@@ -22,6 +22,7 @@ export default async function Command() {
     await skipToNext();
     await showHUD("Skipped to next");
   } catch (error) {
+    console.error(error);
     await showHUD("Nothing is currently playing");
   }
 }

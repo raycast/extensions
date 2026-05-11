@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { CommandOptions } from "../utils/types";
-import { execScript } from "../utils/scripts";
+import { CommandOptions } from "../lib/commands/types";
+import { execScript } from "../lib/scripts";
 import path from "path";
 import { environment } from "@raycast/api";
 
 export const useSpeech = (options: CommandOptions, isLoading: boolean, response: string) => {
   const [speaking, setSpeaking] = useState<boolean>(false);
   const [spokenResponse, setSpokenResponse] = useState<boolean>(false);
-  const sendContent = useRef<(message: string) => void>();
-  const stopSpeech = useRef<() => void>();
+  const sendContent = useRef<(message: string) => void>(null);
+  const stopSpeech = useRef<() => void>(null);
   const [restartSpeech, setRestartSpeech] = useState<boolean>(false);
   const startedLoading = useRef<boolean>(false);
 

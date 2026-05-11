@@ -15,6 +15,7 @@ import { TextTranslateResponse } from "tencentcloud-sdk-nodejs-tmt/tencentcloud/
 import { LanguageDetectType } from "./detectLanguage/types";
 import { IcibaDictionaryResult } from "./dictionary/iciba/interface";
 import { LingueeDictionaryResult, LingueeListItemType } from "./dictionary/linguee/types";
+import { YoudaoTranslateResponse } from "./dictionary/youdao/translate.type";
 import {
   QueryWordInfo,
   YoudaoDictionaryFormatResult,
@@ -39,10 +40,12 @@ export enum TranslationType {
   Caiyun = "Caiyun Translate",
   Apple = "Apple Translate",
   DeepL = "DeepL Translate",
+  DeepLX = "DeepLX Translate",
   Google = "Google Translate",
   Bing = "Bing Translate",
   Volcano = "Volcano Translate",
   OpenAI = "OpenAI Translate",
+  Gemini = "Gemini Translate",
 }
 
 export enum DictionaryType {
@@ -83,7 +86,9 @@ export type QueryResponse =
   | VolcanoTranslateResult
   | VolcanoDetectResult
   | GoogleTranslateResult
-  | OpenAITranslateResult;
+  | OpenAITranslateResult
+  | GeminiTranslateResult
+  | YoudaoTranslateResponse;
 
 export interface RequestErrorInfo {
   type: RequestType;
@@ -143,6 +148,10 @@ export interface AppleTranslateResult {
 }
 
 export interface OpenAITranslateResult {
+  translatedText: string;
+}
+
+export interface GeminiTranslateResult {
   translatedText: string;
 }
 
@@ -211,3 +220,4 @@ export interface AbortObject {
   abortController?: AbortController;
   childProcess?: ChildProcess;
 }
+export type { QueryWordInfo };

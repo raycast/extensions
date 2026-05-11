@@ -1,18 +1,16 @@
-import { ActionPanel, List, LocalStorage, confirmAlert, Icon, Alert, Action } from "@raycast/api";
+import { ActionPanel, List, LocalStorage, confirmAlert, Icon, Alert } from "@raycast/api";
 import { useCallback, useEffect, useState } from "react";
 import { Checklist } from "./types";
-import CreateQuestAction from "./actions/createChecklist";
-import DeleteQuestAction from "./actions/deleteChecklist";
-import StartQuestAction from "./actions/startChecklist";
-import EditQuestAction from "./actions/editChecklist";
-import CloseQuestAction from "./actions/closeChecklist";
-import ShareQuestAction from "./actions/shareChecklistAction";
-import EmptyView from "./components/emptyView";
-import { nanoid } from "nanoid";
+import { CreateChecklistAction } from "./actions/create-checklist";
+import { DeleteChecklistAction } from "./actions/delete-checklist";
+import { StartChecklistAction } from "./actions/start-checklist";
+import { EditChecklistAction } from "./actions/edit-checklist";
+import { CloseChecklistAction } from "./actions/close-checklist";
+import { ShareChecklistAction } from "./actions/share-checklist-action";
+import { EmptyView } from "./components/empty-view";
 import { environment } from "@raycast/api";
-import exampleChecklists from "./fixtures/exampleChecklists";
+import exampleChecklists from "./fixtures/example-checklists";
 import { getProgressIcon } from "@raycast/utils";
-import { shareableChecklist } from "./lib/util";
 
 type State = {
   isLoading: boolean;
@@ -56,9 +54,15 @@ export default function Command() {
   }, [checklists]);
 
   const handleCreate = useCallback(
-    ({ title, tasks }: Omit<Checklist, "id" | "isStarted">) => {
-      const newChecklists = [...checklists, { id: nanoid(), title, tasks, isStarted: false, progress: 0 }];
-      setChecklists(newChecklists);
+    (checklist: Checklist) => {
+      const index = checklists.findIndex((item) => item.id === checklist.id);
+      if (index !== -1) {
+        // Update existing object
+        setChecklists(checklists.map((item, idx) => (idx === index ? checklist : item)));
+      } else {
+        // Add new object
+        setChecklists([...checklists, checklist]);
+      }
     },
     [checklists, setChecklists]
   );
@@ -99,20 +103,20 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title="Progress">
-                    <StartQuestAction
+                    <StartChecklistAction
                       checklist={checklist}
                       checklists={[checklists, setChecklists]}
-                      title="Resume Quest"
+                      title="Resume Checklist"
                     />
-                    <CloseQuestAction checklist={checklist} checklists={[checklists, setChecklists]} />
+                    <CloseChecklistAction checklist={checklist} checklists={[checklists, setChecklists]} />
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Checklist">
-                    <EditQuestAction onCreate={handleCreate} checklist={checklist} />
-                    <ShareQuestAction checklist={checklist} />
-                    <DeleteQuestAction onDelete={() => handleDelete(checklist)} />
+                    <EditChecklistAction onCreate={handleCreate} checklist={checklist} />
+                    <ShareChecklistAction checklist={checklist} />
+                    <DeleteChecklistAction onDelete={() => handleDelete(checklist)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
-                    <CreateQuestAction onCreate={handleCreate} />
+                    <CreateChecklistAction onCreate={handleCreate} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }
@@ -130,19 +134,19 @@ export default function Command() {
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title="Progress">
-                    <StartQuestAction
+                    <StartChecklistAction
                       checklist={checklist}
                       checklists={[checklists, setChecklists]}
                       title="Start Checklist"
                     />
                   </ActionPanel.Section>
                   <ActionPanel.Section title="Checklist">
-                    <EditQuestAction onCreate={handleCreate} checklist={checklist} />
-                    <ShareQuestAction checklist={checklist} />
-                    <DeleteQuestAction onDelete={() => handleDelete(checklist)} />
+                    <EditChecklistAction onCreate={handleCreate} checklist={checklist} />
+                    <ShareChecklistAction checklist={checklist} />
+                    <DeleteChecklistAction onDelete={() => handleDelete(checklist)} />
                   </ActionPanel.Section>
                   <ActionPanel.Section>
-                    <CreateQuestAction onCreate={handleCreate} />
+                    <CreateChecklistAction onCreate={handleCreate} />
                   </ActionPanel.Section>
                 </ActionPanel>
               }

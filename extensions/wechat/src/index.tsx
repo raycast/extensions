@@ -1,198 +1,239 @@
-import { ActionPanel, Action, List, Icon, closeMainWindow } from "@raycast/api"
-import { useState, useEffect, useRef, useCallback } from "react"
-import fetch, { AbortError } from "node-fetch"
-import { URLSearchParams } from "url"
-import { isWeChatInstalled } from "./util/isWeChatInstalled"
-import { isWeChatInstalledAlertDialog } from "./util/isWeChatInstalledAlert"
-import { isWeChatTweakInstalled } from "./util/isWeChatTweakInstalled"
-import { isWeChatTweakInstalledAlertDialog } from "./util/isWeChatTweakInstalledAlert"
-import { isWeChatRunning } from "./util/isWeChatRunning"
-
-const [SEARCHURL, STARTURL] = [
-  "http://localhost:48065/wechat/search",
-  "http://localhost:48065/wechat/start"
-]
+import { confirmAlert, launchCommand, LaunchType, List, showToast, Toast } from "@raycast/api";
+import { useEffect, useState } from "react";
+import { SearchListItem } from "./components/searchListltem";
+import { useSearch } from "./hooks/useSearch";
+import { storageService } from "./services/storageService";
+import { SearchResult } from "./types";
+import { WeChatManager } from "./utils/wechatManager";
 
 export default function Command() {
-  async function isWeChatInstalledCheck() {
-    if (!isWeChatInstalled()) {
-      await isWeChatInstalledAlertDialog()
-      return
-    }
-  }
-  isWeChatInstalledCheck()
+  const [isInitializing, setIsInitializing] = useState(true);
+  const [environmentReady, setEnvironmentReady] = useState(false);
+  const { state, search, clearRecentContacts } = useSearch();
+  const [pinnedContacts, setPinnedContacts] = useState<SearchResult[]>([]);
 
-  async function isWeChatTweakInstalledCheck() {
-    if (!isWeChatTweakInstalled()) {
-      await isWeChatTweakInstalledAlertDialog()
-      return
-    }
-  }
-  isWeChatTweakInstalledCheck()
+  useEffect(() => {
+    checkRequirements();
+    loadPinnedContacts();
+  }, []);
 
-  const { state, search } = useSearch()
+  const openManageTweak = async () => {
+    try {
+      await launchCommand({
+        name: "manageTweak",
+        type: LaunchType.UserInitiated,
+      });
+    } catch (error) {
+      console.error("Failed to launch manageTweak:", error);
+
+      // If it cannot be opened automatically, display a prompt
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to open WeChatTweak Manager",
+        message: "Please open WeChatTweak Manager manually",
+      });
+    }
+  };
+
+  const checkRequirements = async () => {
+    try {
+      let requirementsMessage = "";
+      let shouldOpenManager = false;
+
+      // Check if WeChat is installed
+      const isWeChatInstalled = WeChatManager.isWeChatInstalled();
+      if (!isWeChatInstalled) {
+        requirementsMessage = "WeChat is not installed. Would you like to open WeChatTweak Manager to install it?";
+        shouldOpenManager = true;
+      }
+      // Check if WeChat is running
+      else if (!WeChatManager.isWeChatRunning()) {
+        requirementsMessage = "WeChat is not running. Would you like to open WeChatTweak Manager to start it?";
+        shouldOpenManager = true;
+      }
+      // Check if WeChatTweak is installed
+      else if (!WeChatManager.isWeChatTweakInstalled()) {
+        requirementsMessage = "WeChatTweak is not installed. Would you like to open WeChatTweak Manager to install it?";
+        shouldOpenManager = true;
+      }
+      // Check if WeChatTweak is installed
+      else {
+        try {
+          const isServiceRunning = await WeChatManager.isWeChatServiceRunning();
+          if (!isServiceRunning) {
+            requirementsMessage =
+              "WeChat service is not running. Would you like to open WeChatTweak Manager to fix this issue?";
+            shouldOpenManager = true;
+          }
+        } catch (serviceError) {
+          console.error("Error checking WeChat service:", serviceError);
+          requirementsMessage =
+            "Failed to check WeChat service. Would you like to open WeChatTweak Manager to fix this issue?";
+          shouldOpenManager = true;
+        }
+      }
+
+      if (shouldOpenManager) {
+        // Display confirmation dialog box if environment is not satisfied
+        setIsInitializing(false);
+        setEnvironmentReady(false);
+
+        // Use confirmAlert and handle the return value
+        const confirmed = await confirmAlert({
+          title: "Environment Not Ready",
+          message: requirementsMessage,
+          primaryAction: {
+            title: "Open WeChatTweak Manager",
+          },
+          dismissAction: {
+            title: "Cancel",
+          },
+        });
+
+        // If the user clicks the primary action button, open the Manage WeChatTweak command
+        if (confirmed) {
+          await openManageTweak();
+        }
+
+        return;
+      }
+
+      // All conditions are met
+      setEnvironmentReady(true);
+      setIsInitializing(false);
+    } catch (error) {
+      console.error("Error checking requirements:", error);
+      setIsInitializing(false);
+      setEnvironmentReady(false);
+
+      // Displays an error message and provides an option to open the management interface
+      const confirmed = await confirmAlert({
+        title: "Error Checking Requirements",
+        message: `An error occurred while checking requirements: ${error}. Would you like to open WeChatTweak Manager to fix this issue?`,
+        primaryAction: {
+          title: "Open WeChatTweak Manager",
+        },
+        dismissAction: {
+          title: "Cancel",
+        },
+      });
+
+      if (confirmed) {
+        await openManageTweak();
+      }
+    }
+  };
+
+  const loadPinnedContacts = async () => {
+    try {
+      const contacts = await storageService.getPinnedContacts();
+      setPinnedContacts(contacts);
+    } catch (error) {
+      console.error("Error loading pinned contacts:", error);
+    }
+  };
+
+  if (isInitializing) {
+    return (
+      <List isLoading={true}>
+        <List.EmptyView
+          title="Checking requirements..."
+          description="Please wait while we check WeChat and WeChatTweak installation."
+        />
+      </List>
+    );
+  }
+
+  if (!environmentReady) {
+    return (
+      <List>
+        <List.EmptyView
+          title="Environment not ready"
+          description="WeChat or WeChatTweak is not properly set up. Please use the WeChatTweak Manager to fix this issue."
+          actions={
+            <ActionPanel>
+              <ActionPanel.Item title="Open WeChatTweak Manager" onAction={openManageTweak} />
+            </ActionPanel>
+          }
+        />
+      </List>
+    );
+  }
+
   return (
     <List
       isLoading={state.isLoading}
       onSearchTextChange={search}
-      searchBarPlaceholder="Search WeChat Contact..."
+      searchBarPlaceholder="Search WeChat contacts (supports Chinese, Pinyin, mixed search)..."
       throttle
     >
-      <List.Section title="Contacts:" subtitle={state.items.length + ""}>
-        {state.items.map((searchResult) => (
-          <SearchListItem
-            key={searchResult.title}
-            searchResult={searchResult}
-          />
-        ))}
+      {pinnedContacts.length > 0 && (
+        <List.Section title="Pinned Contacts" subtitle={String(pinnedContacts.length)}>
+          {pinnedContacts.map((contact) => (
+            <SearchListItem
+              key={`pinned-${contact.arg}`}
+              searchResult={contact}
+              isPinned={true}
+              onTogglePin={async () => {
+                const newPinnedContacts = pinnedContacts.filter((c) => c.arg !== contact.arg);
+                setPinnedContacts(newPinnedContacts);
+                await storageService.setPinnedContacts(newPinnedContacts);
+              }}
+              onClearHistory={clearRecentContacts}
+            />
+          ))}
+        </List.Section>
+      )}
+
+      {state.recentContacts.length > 0 && state.searchText === "" && (
+        <List.Section title="Recent Contacts" subtitle={String(state.recentContacts.length)}>
+          {state.recentContacts.map((contact) => {
+            const isAlreadyPinned = pinnedContacts.some((pinned) => pinned.arg === contact.arg);
+            if (isAlreadyPinned) {
+              return null;
+            }
+
+            return (
+              <SearchListItem
+                key={`recent-${contact.arg}`}
+                searchResult={contact}
+                isPinned={false}
+                onTogglePin={async () => {
+                  const newPinnedContacts = [...pinnedContacts, contact];
+                  setPinnedContacts(newPinnedContacts);
+                  await storageService.setPinnedContacts(newPinnedContacts);
+                }}
+                onClearHistory={clearRecentContacts}
+              />
+            );
+          })}
+        </List.Section>
+      )}
+
+      <List.Section title="Contacts" subtitle={String(state.items.length)}>
+        {state.items.map((searchResult) => {
+          const isAlreadyPinned = pinnedContacts.some((contact) => contact.arg === searchResult.arg);
+          if (isAlreadyPinned) {
+            return null;
+          }
+
+          return (
+            <SearchListItem
+              key={searchResult.arg}
+              searchResult={searchResult}
+              isPinned={false}
+              onTogglePin={async () => {
+                const newPinnedContacts = [...pinnedContacts, searchResult];
+                setPinnedContacts(newPinnedContacts);
+                await storageService.setPinnedContacts(newPinnedContacts);
+              }}
+              onClearHistory={clearRecentContacts}
+            />
+          );
+        })}
       </List.Section>
     </List>
-  )
+  );
 }
 
-function SearchListItem({ searchResult }: { searchResult: SearchResult }) {
-  async function startWeChat() {
-    await fetch(searchResult.url)
-    await closeMainWindow({ clearRootSearch: true })
-  }
-  const title = searchResult.title || searchResult.subtitle || searchResult.arg
-  return (
-    <List.Item
-      title={title}
-      subtitle={searchResult.subtitle}
-      accessoryTitle={searchResult.arg}
-      icon={searchResult.icon.path}
-      actions={
-        <ActionPanel>
-          <ActionPanel.Section>
-            <Action icon={Icon.Message} title="Chat" onAction={startWeChat} />
-            <Action.CopyToClipboard
-              icon={Icon.Clipboard}
-              title="Copy WeChat ID"
-              content={searchResult.arg}
-              shortcut={{ modifiers: ["cmd"], key: "c" }}
-            />
-            <Action.OpenInBrowser
-              title="Feature Request"
-              url="https://github.com/raffeyang/wechat"
-              shortcut={{ modifiers: ["cmd"], key: "h" }}
-            />
-          </ActionPanel.Section>
-        </ActionPanel>
-      }
-    />
-  )
-}
-
-function useSearch() {
-  const [state, setState] = useState<SearchState>({
-    items: [],
-    isLoading: true
-  })
-  const cancelRef = useRef<AbortController | null>(null)
-
-  const search = useCallback(
-    async function search(searchText: string) {
-      cancelRef.current?.abort()
-      cancelRef.current = new AbortController()
-      setState((oldState) => ({
-        ...oldState,
-        isLoading: true
-      }))
-      try {
-        const items = await performSearch(searchText, cancelRef.current.signal)
-        setState((oldState) => ({
-          ...oldState,
-          items: items,
-          isLoading: false
-        }))
-      } catch (error) {
-        setState((oldState) => ({
-          ...oldState,
-          isLoading: false
-        }))
-
-        if (error instanceof AbortError) {
-          return
-        }
-        isWeChatRunning()
-      }
-    },
-    [cancelRef, setState]
-  )
-
-  useEffect(() => {
-    search("")
-    return () => {
-      cancelRef.current?.abort()
-    }
-  }, [])
-
-  return {
-    state: state,
-    search: search
-  }
-}
-
-async function performSearch(
-  searchText: string,
-  signal: AbortSignal
-): Promise<SearchResult[]> {
-  const params = new URLSearchParams()
-  params.append(
-    "keyword",
-    searchText.length === 0 ? "@raycast/api" : searchText
-  )
-
-  const response = await fetch(SEARCHURL + "?" + params.toString(), {
-    method: "get",
-    signal: signal
-  })
-
-  const start = STARTURL + "?" + "session" + "="
-
-  const json = (await response.json()) as
-    | {
-        items: {
-          icon: { path: string }
-          title: string
-          subtitle: string
-          arg: string
-          valid: number
-          url: string
-        }[]
-      }
-    | {
-        code: string
-        message: string
-      }
-
-  if (!response.ok || "message" in json) {
-    throw new Error("message" in json ? json.message : response.statusText)
-  }
-
-  return json.items.map((result) => {
-    return {
-      icon: { path: result.icon.path },
-      title: result.title,
-      subtitle: result.subtitle,
-      arg: result.arg,
-      valid: result.valid,
-      url: start + result.arg
-    }
-  })
-}
-
-interface SearchState {
-  items: SearchResult[]
-  isLoading: boolean
-}
-
-interface SearchResult {
-  icon: { path: string }
-  title: string
-  subtitle: string
-  arg: string
-  valid: number
-  url: string
-}
+import { ActionPanel } from "@raycast/api";

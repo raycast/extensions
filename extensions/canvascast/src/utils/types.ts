@@ -6,6 +6,7 @@ export interface course {
   id: number;
   color: Color;
   assignments: assignment[];
+  announcements: announcement[];
 }
 
 export interface assignment {
@@ -63,10 +64,9 @@ export interface moduleitem {
   id: string;
   name: string;
   type: string;
-  url: string;
+  url?: string;
   passcode?: string;
   content_id?: string;
-  download?: string;
 }
 
 export interface Preferences {
@@ -106,4 +106,32 @@ export interface submission {
   missing: boolean;
   needs_grading: boolean;
   with_feedback: boolean;
+}
+
+export interface apiAnnouncement {
+  title: string;
+  message: string;
+  created_at: string;
+}
+
+export interface apiAssignment {
+  name: string;
+  description: string;
+  points_possible: number;
+  submission?: {
+    submitted_at: string;
+    graded_at: string;
+    score: number;
+    grade: string;
+  };
+}
+
+export interface apiQuiz {
+  title: string;
+  description: string;
+  points_possible: number;
+  quiz_submissions?: Array<{
+    kept_score: number;
+    quiz_points_possible: number;
+  }>;
 }

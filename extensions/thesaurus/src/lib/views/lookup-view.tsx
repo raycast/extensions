@@ -1,6 +1,6 @@
-import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { shallow } from "zustand/shallow";
+import { useShallow } from "zustand/shallow";
 import wordCacheHandler from "../cache";
 import scraper from "../scraper";
 import useStore from "../store";
@@ -22,17 +22,15 @@ const tagColor = (word: { strength: number }) => {
   };
 };
 
+const copyWord = async (word: string) => {
+  await Clipboard.copy(word);
+  await showToast({ style: Toast.Style.Success, title: "Copied to Clipboard", message: word });
+};
+
 const LookUpContent = ({ word }: { word: string }) => {
-  const { results, setWord } = useStore(
-    (state) => ({
-      results: state.results,
-      setWord: state.setWord,
-    }),
-    shallow
-  );
+  const { results, setWord } = useStore(useShallow((state) => ({ results: state.results, setWord: state.setWord })));
   const renderables = useMemo(() => {
     if (!results) return <List.EmptyView title="Type to begin searching!" icon={{ source: "icon.png" }} />;
-
     if (results.status === "ERROR")
       return (
         <List.EmptyView
@@ -121,7 +119,12 @@ const LookUpContent = ({ word }: { word: string }) => {
                           <List.Item.Detail.Metadata.Label title="Synonyms:" />
                           <Detail.Metadata.TagList title="">
                             {value.synonyms.map((synonym, index) => (
-                              <Detail.Metadata.TagList.Item key={index} text={synonym.word} color={tagColor(synonym)} />
+                              <Detail.Metadata.TagList.Item
+                                key={index}
+                                text={synonym.word}
+                                color={tagColor(synonym)}
+                                onAction={() => copyWord(synonym.word)}
+                              />
                             ))}
                           </Detail.Metadata.TagList>
                         </>
@@ -131,7 +134,12 @@ const LookUpContent = ({ word }: { word: string }) => {
                           <List.Item.Detail.Metadata.Label title="Antonyms:" />
                           <Detail.Metadata.TagList title="">
                             {value.antonyms.map((antonym, index) => (
-                              <Detail.Metadata.TagList.Item key={index} text={antonym.word} color={tagColor(antonym)} />
+                              <Detail.Metadata.TagList.Item
+                                key={index}
+                                text={antonym.word}
+                                color={tagColor(antonym)}
+                                onAction={() => copyWord(antonym.word)}
+                              />
                             ))}
                           </Detail.Metadata.TagList>
                         </>
@@ -151,20 +159,36 @@ const LookUpContent = ({ word }: { word: string }) => {
 
 const { has, get, set } = wordCacheHandler();
 
-const LookUpView = () => {
+interface LookupViewProps {
+  selectedWord?: string;
+}
+
+const LookUpView = ({ selectedWord }: LookupViewProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const { word, setWord, setResults, isOK } = useStore(
-    (state) => ({
+    useShallow((state) => ({
       word: state.word,
       setWord: state.setWord,
       setResults: state.setResults,
       isOK: state.results?.status === "OK",
-    }),
-    shallow
+    })),
   );
 
-  const handleChange = useCallback((e: string) => setWord(e), []);
+  useEffect(() => {
+    if (selectedWord && selectedWord !== word) {
+      setWord(selectedWord);
+    }
+  }, [selectedWord, setWord]);
+
+  const handleChange = useCallback(
+    (e: string) => {
+      if (e !== word) {
+        setWord(e);
+      }
+    },
+    [setWord, word],
+  );
 
   useEffect(() => {
     if (!word) {

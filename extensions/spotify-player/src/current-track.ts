@@ -3,8 +3,9 @@ import { EpisodeObject, TrackObject } from "./helpers/spotify.api";
 import { getSpotifyClient, setSpotifyClient } from "./helpers/withSpotifyClient";
 import { containsMySavedTracks } from "./api/containsMySavedTrack";
 
-async function getIsLiked(id: string) {
-  return await containsMySavedTracks({ trackIds: [id] });
+async function getIsLiked(id: string): Promise<boolean> {
+  const res = await containsMySavedTracks({ trackIds: [id] });
+  return res[0];
 }
 
 async function getItem() {

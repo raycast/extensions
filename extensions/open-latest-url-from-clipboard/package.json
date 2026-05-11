@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "open-latest-url-from-clipboard",
+  "title": "Open Latest URL from Clipboard",
+  "description": "Opens the latest URL from Clipboard if one is found in the latest 6 entries",
+  "icon": "icon.png",
+  "author": "pernielsentikaer",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-latest-url-from-clipboard",
+      "title": "Open Latest URL from Clipboard",
+      "description": "Opens the latest URL from your clipboard history",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "allowHttp",
+          "type": "checkbox",
+          "required": false,
+          "title": "Protocols to open",
+          "label": "HTTP",
+          "description": "Allow opening HTTP URLs",
+          "default": true
+        },
+        {
+          "name": "allowHttps",
+          "type": "checkbox",
+          "required": false,
+          "label": "HTTPS",
+          "description": "Allow opening HTTPS URLs",
+          "default": true
+        },
+        {
+          "name": "allowFtp",
+          "type": "checkbox",
+          "required": false,
+          "label": "FTP",
+          "description": "Allow opening FTP URLs",
+          "default": true
+        },
+        {
+          "name": "allowFile",
+          "type": "checkbox",
+          "required": false,
+          "label": "File",
+          "description": "Allow opening File URLs",
+          "default": true
+        },
+        {
+          "name": "allowMailto",
+          "type": "checkbox",
+          "required": false,
+          "label": "Mailto",
+          "description": "Allow opening Mailto URLs",
+          "default": true
+        },
+        {
+          "name": "allowTel",
+          "type": "checkbox",
+          "required": false,
+          "label": "Tel",
+          "description": "Allow opening Tel URLs",
+          "default": true
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.99.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

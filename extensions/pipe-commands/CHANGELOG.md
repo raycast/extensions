@@ -1,5 +1,26 @@
 # Pipe Commands Changelog
 
+## [Added new commands] - 2026-03-05
+
+- Added Format as String Literal command
+- Added TSV to CSV command
+- Added Format as Quoted Array command
+
+## [Added new commands] - 2024-03-15
+
+- Copy plain text to rich text clipboard
+- Remove blank lines in a string
+- Add url decode
+
+## [Added new dedicated clipboard command] - 2024-03-07
+
+BREAKING CHANGE: the text command no longer falls back to the clipboard contents. Now, there is a dedicated clipboard
+command to pipe clipboard input.
+
+## [Added new pipe command] - 2024-03-05
+
+- Added "Add bulletpoint to newline" command
+
 ## [Added new pipe command] - 2023-11-28
 
 - Add remove smart quotes command (helpful for some LLM prompting)

@@ -40,3 +40,8 @@ export async function resetTimer() {
 export async function quitFlow() {
   await runAppleScript('tell application "Flow" to quit');
 }
+
+export async function setSessionTitle(title: string) {
+  const safeTitle = title.replace(/"/g, '\\"'); // escape double quote titles
+  await runAppleScript(`tell application "Flow" to setTitle to "${safeTitle}"`);
+}

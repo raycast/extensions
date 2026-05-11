@@ -8,7 +8,7 @@ import { XcodeSimulatorApplicationGroup } from "../../models/xcode-simulator/xco
 /**
  * Xcode Simulator Application List
  */
-export function XcodeSimulatorApplicationList(props: { simulator?: XcodeSimulator }): JSX.Element {
+export function XcodeSimulatorApplicationList(props: { simulator?: XcodeSimulator }) {
   const xcodeSimulatorApplicationGroups = useCachedPromise(
     XcodeSimulatorApplicationService.xcodeSimulatorApplicationGroups
   );

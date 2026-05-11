@@ -1,5 +1,23 @@
 # Single Disk Eject Changelog
 
+## [Windows Ejection Rework] - 2026-04-20
+
+- Replaced deprecated `wmic` command with PowerShell/CIM cmdlets that should work on all modern Windows versions
+- Overhauled the ejection logic to better align with native Windows hardware removal behavior
+- Improved compatibility across a wider range of removable devices, like SD cards and Docks
+
+## [Dependency update] - 2026-03-08
+
+- Updated dependencies
+  - Updated to Node.js 22 and latest Raycast API (v1.103.10)
+  - Migrated to new Toast and Action APIs
+- Minor error handling improvements
+
+## [Windows Support] 2026-01-09
+
+- Added windows support with a C# helper (compiles at runtime) and PowerShell
+
+
 ## [Bug Fix] 2023-11-10
 
 - Fixed bug that incorrectly reported a disk as ejected when it was not.

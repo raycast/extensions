@@ -23,8 +23,8 @@ const parseRepositoryItem = (data: any) => {
       const page_icon = !hasObjectProp(other_data[`${item.id}`]["value"], "format")
         ? ""
         : hasStringProp(other_data[`${item.id}`]["value"]["format"], "page_icon")
-        ? `${other_data[`${item.id}`]["value"]["format"]["page_icon"]}`
-        : "";
+          ? `${other_data[`${item.id}`]["value"]["format"]["page_icon"]}`
+          : "";
       const acc_title = hasStringProp(item.highlight, "pathText")
         ? `${item.highlight.pathText}`
             .replace(/<\/gzkNfoUU>/g, "")
@@ -34,8 +34,8 @@ const parseRepositoryItem = (data: any) => {
       const reg_title = hasObjectProp(other_data[`${item.id}`]["value"], "properties")
         ? other_data[`${item.id}`]["value"]["properties"]["title"]["0"]["0"]
         : hasStringProp(item.highlight, "text")
-        ? `${item.highlight.text}`.replace(/<gzkNfoUU>/g, "").replace(/<\/gzkNfoUU>/g, "")
-        : acc_title;
+          ? `${item.highlight.text}`.replace(/<gzkNfoUU>/g, "").replace(/<\/gzkNfoUU>/g, "")
+          : acc_title;
       return {
         id: `${item.id}`,
         title: `${reg_title}`,

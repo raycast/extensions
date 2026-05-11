@@ -1,5 +1,9 @@
 # SM.MS Changelog
 
+## [Copy markdown link] - 2024-04-18
+
+- Now you can copy the image link in Markdown form
+
 ## [Upload images from clipboard] - 2023-02-02
 
 - Images can now be uploaded from the clipboard (must be a file copied in the finder or link to an image)

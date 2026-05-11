@@ -1,32 +1,40 @@
-import { useEffect, useState } from "react";
-import { showToast, ToastStyle } from "@raycast/api";
-import { ClickUpClient } from "../utils/clickUpClient";
-import type { TaskItem, TasksResponse } from "../types/tasks.dt";
+import { useCachedPromise } from "@raycast/utils";
+import { UseCachedPromiseReturnType } from "@raycast/utils/dist/types";
+import { getClickUpClient } from "../api/clickup";
+import { ClickUpTask } from "../types/clickup";
 
-function useTasks(listId: string) {
-  const [tasks, setTasks] = useState<TaskItem[] | undefined>(undefined);
+type FetchTasksResult = ClickUpTask[];
 
-  useEffect(() => {
-    async function getTeams() {
-      try {
-        const response = await ClickUpClient<TasksResponse>(`/list/${listId}/task?archived=false`);
-        setTasks(response.data?.tasks ?? []);
-      } catch (error: any) {
-        setTasks([]);
-        error?.response?.data
-          ? await showToast(
-              ToastStyle.Failure,
-              "Something went wrong",
-              `${error?.response?.data?.err} - ${error?.response?.data?.ECODE}`
-            )
-          : await showToast(ToastStyle.Failure, "Something went wrong");
-      }
-    }
+type UseTasksResult = Pick<UseCachedPromiseReturnType<FetchTasksResult, never[]>, "error" | "isLoading"> & {
+  tasks: ClickUpTask[];
+};
 
-    getTeams().then((r) => r);
-  }, [listId]);
-
-  return tasks;
+interface UseTasksOptions {
+  includeSubtasks?: boolean;
+  listId: string;
 }
 
-export { useTasks };
+/**
+ * Hook to fetch tasks from a specific list with pagination
+ */
+export function useTasks({ includeSubtasks = true, listId }: UseTasksOptions): UseTasksResult {
+  const { data, error, isLoading } = useCachedPromise(
+    async (id: string, withSubtasks: boolean): Promise<FetchTasksResult> => {
+      const client = getClickUpClient();
+
+      if (withSubtasks) {
+        return client.getAllTasksFromListRecursively(id, { archived: false });
+      }
+
+      return client.getAllTasksFromList(id, { archived: false });
+    },
+    [listId, includeSubtasks],
+    { initialData: [] },
+  );
+
+  return {
+    error,
+    isLoading,
+    tasks: data || [],
+  };
+}

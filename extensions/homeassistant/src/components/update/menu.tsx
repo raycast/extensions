@@ -1,18 +1,18 @@
-import { Icon, MenuBarExtra } from "@raycast/api";
+import { MenuBarSubmenu, OpenInMenubarItem } from "@components/menu";
+import { CopyEntityIDToClipboard } from "@components/state/menu";
+import { getIcon, getStateValue } from "@components/state/utils";
+import { ha } from "@lib/common";
 import { State } from "@lib/haapi";
 import { getFriendlyName } from "@lib/utils";
-import { getIcon, getStateValue } from "@components/state/utils";
-import { MenuBarSubmenu, OpenInBrowserMenubarItem } from "@components/menu";
-import { CopyEntityIDToClipboard } from "@components/state/menu";
+import { Icon, MenuBarExtra } from "@raycast/api";
 import { HACSRepo, callUpdateInstallService, callUpdateSkipService, getHACSRepositories } from "./utils";
-import { ha } from "@lib/common";
 
 function UpdateOpenReleaseUrlMenubarItem(props: { state: State }) {
   const url = props.state.attributes.release_url;
   if (!url) {
     return null;
   }
-  return <OpenInBrowserMenubarItem title="Open Release Notes" url={url} />;
+  return <OpenInMenubarItem title="Open Release Notes" url={url} />;
 }
 
 function UpdateInstallMenubarItem(props: { state: State; backup?: boolean }) {
@@ -67,7 +67,7 @@ function HACSMenubarItem(props: { repo: HACSRepo | undefined; state: State }) {
       subtitle={`${r.installed_version} => ${r.available_version}`}
       icon="hacs.svg"
     >
-      <OpenInBrowserMenubarItem title="Open HACS in Browser" url={ha.urlJoin("hacs/entry")} />
+      <OpenInMenubarItem action="Open HACS In" url={ha.navigateUrl("hacs/entry")} />
       <CopyEntityIDToClipboard state={props.state} />
     </MenuBarSubmenu>
   );
@@ -85,7 +85,13 @@ export function HACSMenubarItems(props: { state: State | undefined }) {
   if (!repos || repos.length <= 0) {
     return null;
   }
-  return <>{repos?.map((r, i) => <HACSMenubarItem key={i} repo={r} state={s} />)}</>;
+  return (
+    <>
+      {repos?.map((r, i) => (
+        <HACSMenubarItem key={i} repo={r} state={s} />
+      ))}
+    </>
+  );
 }
 
 export function UpdatesMenubarSection(props: { updates: State[] | undefined; hacs?: State }) {
@@ -100,7 +106,9 @@ export function UpdatesMenubarSection(props: { updates: State[] | undefined; hac
   }
   return (
     <MenuBarExtra.Section title="Updates">
-      {updates?.map((b) => <UpdateMenubarItem key={b.entity_id} state={b} />)}
+      {updates?.map((b) => (
+        <UpdateMenubarItem key={b.entity_id} state={b} />
+      ))}
       <HACSMenubarItems state={props.hacs} />
     </MenuBarExtra.Section>
   );

@@ -21,3 +21,10 @@
 /assets/svgs/thin
 
 /src/icons.json
+
+raycast-env.d.ts
+
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+*.code-workspace

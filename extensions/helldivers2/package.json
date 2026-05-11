@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "helldivers2",
+  "title": "Helldivers 2",
+  "description": "View Galactic War Status from Helldivers II",
+  "icon": "command-icon.png",
+  "author": "alexstrnik",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Fun",
+    "Applications"
+  ],
+  "contributors": [
+    "litomore"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "major-orders",
+      "title": "View Major Order",
+      "description": "Shows current major order if any",
+      "mode": "view"
+    },
+    {
+      "name": "active-planets",
+      "title": "View Active Planets",
+      "description": "Lists active campaigns",
+      "mode": "view"
+    },
+    {
+      "name": "dispatches",
+      "title": "View Dispatches",
+      "description": "Lists dispatch history",
+      "mode": "view"
+    },
+    {
+      "name": "open-map",
+      "title": "Open Galactic Map",
+      "description": "Opens Galactic Map",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.3.0",
+    "@types/react": "19.2.14",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

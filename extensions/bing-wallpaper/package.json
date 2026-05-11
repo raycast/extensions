@@ -15,7 +15,7 @@
       "name": "layout",
       "type": "dropdown",
       "description": "Set the layout of the wallpaper items.",
-      "required": true,
+      "required": false,
       "title": "Wallpaper Layout",
       "default": "Grid",
       "data": [
@@ -92,10 +92,9 @@
     {
       "name": "downloadDirectory",
       "title": "Download Directory",
-      "description": "The directory of wallpaper to download. Path format: /Users/Username/Downloads or ~/Downloads.",
-      "type": "textfield",
-      "required": true,
-      "placeholder": "~/Pictures/BingWallpaper",
+      "description": "Directory of files to download wallpapers",
+      "type": "directory",
+      "required": false,
       "default": "~/Downloads"
     },
     {
@@ -130,15 +129,15 @@
       "label": "Auto Download Wallpapers",
       "description": "Automatically download all wallpapers to directory (default is /Users/Username/Downloads) when you enter the extension.",
       "type": "checkbox",
-      "required": true,
-      "default": true
+      "required": false,
+      "default": false
     },
     {
       "name": "includeDownloadedWallpapers",
       "label": "Include Downloaded Wallpapers",
       "description": "Include downloaded wallpapers in the Set Bing Wallpaper and Random Bing Wallpaper command.",
       "type": "checkbox",
-      "required": true,
+      "required": false,
       "default": true
     }
   ],
@@ -154,9 +153,65 @@
       "name": "auto-random-bing-wallpaper",
       "icon": "random-wallpaper-icon.png",
       "title": "Auto Random Bing Wallpaper",
-      "description": "Auto-switch random Bing wallpapers to desktop every 30 minutes.",
+      "description": "Auto-switch random Bing wallpapers to desktop intervally.",
       "mode": "no-view",
-      "interval": "30m"
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "refreshInterval",
+          "type": "dropdown",
+          "description": "Set the refresh interval for the random wallpaper.",
+          "required": false,
+          "title": "Wallpaper Item Coloums",
+          "default": "30",
+          "data": [
+            {
+              "title": "5m",
+              "value": "5"
+            },
+            {
+              "title": "10m",
+              "value": "10"
+            },
+            {
+              "title": "30m",
+              "value": "30"
+            },
+            {
+              "title": "1h",
+              "value": "60"
+            },
+            {
+              "title": "2h",
+              "value": "120"
+            },
+            {
+              "title": "3h",
+              "value": "180"
+            },
+            {
+              "title": "6h",
+              "value": "360"
+            },
+            {
+              "title": "9h",
+              "value": "540"
+            },
+            {
+              "title": "12h",
+              "value": "720"
+            },
+            {
+              "title": "18h",
+              "value": "1080"
+            },
+            {
+              "title": "24h",
+              "value": "1440"
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "auto-switch-bing-wallpaper",
@@ -164,27 +219,24 @@
       "title": "Auto Switch Bing Wallpaper",
       "description": "Auto-switch latest Bing wallpapers to desktop every day (refresh every 3 hours).",
       "mode": "no-view",
-      "interval": "4h"
+      "interval": "30m"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.41.1",
-    "fs-extra": "^10.1.0",
-    "node-fetch": "^3.2.10",
-    "run-applescript": "^6.0.0",
-    "file-url": "^4.0.0"
+    "@raycast/api": "^1.100.3",
+    "file-url": "^4.0.0",
+    "fs-extra": "^11.3.0",
+    "node-fetch": "^3.3.2",
+    "run-applescript": "^7.0.0"
   },
   "devDependencies": {
-    "@types/fs-extra": "^9.0.13",
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
-    "typescript": "^4.4.3"
+    "@types/fs-extra": "^11.0.4",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.0.10",
+    "@types/react": "19.1.8",
+    "eslint": "^9.30.1",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

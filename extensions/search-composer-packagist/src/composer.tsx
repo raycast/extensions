@@ -1,14 +1,7 @@
-import {
-  ActionPanel,
-  CopyToClipboardAction,
-  Icon,
-  List,
-  OpenInBrowserAction,
-  showToast,
-  ToastStyle,
-} from "@raycast/api";
+import { ActionPanel, Icon, List, Action, Color } from "@raycast/api";
 import { useMemo, useState } from "react";
 import algoliaSearch from "algoliasearch/lite";
+import { useCachedPromise } from "@raycast/utils";
 
 const APPID = "M58222SH95";
 const APIKEY = "5ae4d03c98685bd7364c2e0fd819af05";
@@ -34,6 +27,7 @@ type PackagistHit = {
   popularity: number;
   meta: PackagistHitMeta;
   tags: string[];
+  abandoned: boolean;
 };
 
 function getComposerRequireCommand(hit: PackagistHit) {
@@ -57,57 +51,85 @@ export default function SearchDocumentation() {
     return algoliaClient.initIndex(INDEX);
   }, [algoliaClient, INDEX]);
 
-  const [searchResults, setSearchResults] = useState<PackagistHit[] | undefined>();
-  const [isLoading, setIsLoading] = useState(false);
+  const [searchText, setSearchText] = useState("");
 
-  const search = async (query = "") => {
-    setIsLoading(true);
-    if (query == "") {
-      setSearchResults([]);
-      setIsLoading(false);
-      return;
-    }
-    try {
+  const {
+    isLoading,
+    data: searchResults,
+    pagination,
+  } = useCachedPromise(
+    (query: string) => async (options: { page: number }) => {
+      if (!query)
+        return {
+          data: [],
+          hasMore: false,
+        };
       const res = await algoliaIndex.search<PackagistHit>(query, {
         hitsPerPage: 30,
+        page: options.page,
         facets: ["tags", "type", "type"],
       });
-      setSearchResults(res.hits);
-      setIsLoading(false);
-    } catch (err: any) {
-      setSearchResults([]);
-      await showToast(ToastStyle.Failure, "Error Searching Composer Packagist.", err.message);
-      setIsLoading(false);
-    }
-  };
+      return { data: res.hits, hasMore: res.page < res.nbPages };
+    },
+    [searchText],
+    {
+      failureToastOptions: {
+        title: "Error Searching Composer Packagist.",
+      },
+      initialData: [],
+    },
+  );
+
   return (
-    <List throttle={true} isLoading={isLoading} onSearchTextChange={search}>
-      {searchResults?.map((hit: PackagistHit) => {
+    <List
+      searchBarPlaceholder="Search packages"
+      throttle={true}
+      isLoading={isLoading}
+      onSearchTextChange={setSearchText}
+      pagination={pagination}
+    >
+      {searchResults.map((hit: PackagistHit) => {
         return (
           <List.Item
             key={hit.id}
             title={hit.name}
+            accessories={[
+              ...(hit.abandoned
+                ? [
+                    {
+                      icon: {
+                        source: Icon.Warning,
+                        tintColor: Color.Yellow,
+                      },
+                      tooltip: "Abandoned",
+                    },
+                  ]
+                : []),
+              {
+                icon: Icon.Star,
+                text: hit.meta?.favers_formatted,
+                tooltip: hit.meta?.favers_formatted,
+              },
+            ]}
             subtitle={hit.description}
             icon="composer-icon.png"
-            accessoryIcon={Icon.Star}
-            accessoryTitle={hit.meta?.favers_formatted}
             actions={
               <ActionPanel title={hit.name}>
-                <CopyToClipboardAction
+                <Action.CopyToClipboard
                   content={getComposerRequireCommand(hit)}
                   title={"Copy Composer Require Command"}
                 />
-                <CopyToClipboardAction
+                <Action.CopyToClipboard
                   content={getComposerRequireDevCommand(hit)}
                   title={"Copy Composer Require Dev Command"}
                 />
-                <CopyToClipboardAction content={hit.name} title={"Copy Package Name"} />
-                <OpenInBrowserAction
+                <Action.CopyToClipboard content={hit.name} title={"Copy Package Name"} />
+                <Action.OpenInBrowser
                   url={hit.repository}
                   title="Open Repository URL in Browser"
                   shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
                 />
-                <OpenInBrowserAction
+                <Action.OpenInBrowser
                   url={getPackagistPageURL(hit)}
                   title="Open Packagist Page in Browser"
                   shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "return" }}

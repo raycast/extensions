@@ -1,190 +1,78 @@
-import { Action, ActionPanel, Detail, Icon, List, showToast, Toast } from "@raycast/api";
-import axios from "axios";
-import { useEffect, useState } from "react";
-import urljoin from "url-join";
-import { useFetch } from "@raycast/utils";
+import { useCallback, useMemo, useState } from "react";
+
+import { List, getPreferenceValues } from "@raycast/api";
+
+import { ResultItem } from "@/components/ResultItem";
+import { useSearch } from "@/hooks/use-search";
+import { SUPPORTED_LANGUAGES, isSupportedLanguage } from "@/lib/mdn";
+import type { SupportedLanguage } from "@/lib/mdn";
+
+const LANGUAGE_LABELS: Record<SupportedLanguage, string> = {
+  "en-US": "English (US)",
+  es: "Español",
+  fr: "Français",
+  ja: "日本語",
+  ko: "한국어",
+  "pt-BR": "Português (Brasil)",
+  ru: "Русский",
+  "zh-CN": "简体中文",
+  "zh-TW": "繁體中文",
+};
 
 export default function MDNSearchResultsList() {
-  const [query, setQuery] = useState<null | string>(null);
-  const [state, setState] = useState<Result[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [locale, setLocale] = useState<string>("en-us");
+  const [query, setQuery] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetch() {
-      if (!query) {
-        setState([]);
-        return;
-      }
-      setIsLoading(true);
-      const results = await searchMDNByQuery(query, locale);
-      setState(results);
-      setIsLoading(false);
+  const preferences = getPreferenceValues<Preferences.Index>();
+  const preferredAction = preferences.defaultAction === "open" ? "open" : "preview";
+  const defaultLanguage = isSupportedLanguage(preferences.language) ? preferences.language : "en-US";
+  const [language, setLanguage] = useState<SupportedLanguage>(defaultLanguage);
+
+  const { data, isLoading, revalidate } = useSearch(query, language);
+
+  const selectedResult = useMemo(() => {
+    return data.find((item) => item.id === selectedId) ?? data[0];
+  }, [data, selectedId]);
+
+  const handleReloadSearchResults = useCallback(() => {
+    void revalidate();
+  }, [revalidate]);
+
+  const handleLanguageChange = useCallback((value: string) => {
+    if (!isSupportedLanguage(value)) {
+      return;
     }
-    fetch();
-  }, [query, locale]);
+
+    setLanguage(value);
+  }, []);
 
   return (
     <List
       isLoading={isLoading}
-      searchBarPlaceholder="Type to search MDN..."
-      onSearchTextChange={(text) => setQuery(text)}
-      throttle
+      isShowingDetail
+      filtering={false}
+      searchBarPlaceholder="Search MDN..."
+      onSearchTextChange={setQuery}
+      onSelectionChange={setSelectedId}
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Select Locale"
-          storeValue={true}
-          onChange={(newValue) => {
-            setLocale(newValue);
-          }}
-        >
-          {locales.map((loc) => (
-            <List.Dropdown.Item key={loc.value} title={loc.title} value={loc.value} keywords={[loc.title, loc.value]} />
+        <List.Dropdown tooltip="Language" value={language} onChange={handleLanguageChange}>
+          {SUPPORTED_LANGUAGES.map((locale) => (
+            <List.Dropdown.Item key={locale} title={LANGUAGE_LABELS[locale]} value={locale} />
           ))}
         </List.Dropdown>
       }
+      throttle
     >
-      {state.map((result, idx) => (
-        <List.Item
-          key={idx}
-          title={result.title}
-          icon="icon.png"
-          subtitle={result.summary}
-          actions={
-            <ActionPanel>
-              <Action.Push
-                icon={Icon.Document}
-                title="Read Document"
-                target={<Details result={result} locale={locale} />}
-              />
-              <Action.OpenInBrowser url={result.url} />
-              <Action.CopyToClipboard content={result.url} shortcut={{ modifiers: ["cmd"], key: "." }} />
-            </ActionPanel>
-          }
+      {data.map((result) => (
+        <ResultItem
+          key={result.id}
+          result={result}
+          locale={language}
+          preferredAction={preferredAction}
+          selected={result.id === selectedResult?.id}
+          onReloadSearchResults={handleReloadSearchResults}
         />
       ))}
     </List>
   );
-}
-
-const locales = [
-  {
-    value: "en-US",
-    title: "English (US)",
-  },
-  {
-    value: "es",
-    title: "Español",
-  },
-  {
-    value: "fr",
-    title: "Français",
-  },
-  {
-    value: "ja",
-    title: "日本語",
-  },
-  {
-    value: "ko",
-    title: "한국어",
-  },
-  {
-    value: "pt-BR",
-    title: "Português (do Brasil)",
-  },
-  {
-    value: "ru",
-    title: "Русский",
-  },
-  {
-    value: "zh-CN",
-    title: "中文 (简体)",
-  },
-  {
-    value: "zh-TW",
-    title: "正體中文 (繁體)",
-  },
-];
-
-interface Content {
-  content: string;
-  encoding: string;
-}
-
-const contentApiURL = "https://api.github.com/repos/mdn/content/contents";
-const translatedContentApiURL = "https://api.github.com/repos/mdn/translated-content/contents";
-
-const contentBlobURL = "https://github.com/mdn/content/blob/main";
-const translatedContentBlobURL = "https://github.com/mdn/translated-content/blob/main";
-
-const Details = (props: { result: Result; locale: string }) => {
-  const file = "/files" + props.result.mdn_url.toLowerCase().replace("/docs/", "/") + "/index.md";
-  const isEn = props.locale === "en-US";
-  const url = `${isEn ? contentApiURL : translatedContentApiURL}${file}`;
-
-  const { isLoading, data, revalidate } = useFetch<Content>(url);
-  let content = Buffer.from(data?.content ?? "", (data?.encoding ?? "base64") as BufferEncoding).toString();
-
-  // Remove markdown metadata on the top
-  const sepIdx = content.indexOf("\n---\n", 3);
-  if (sepIdx !== -1) {
-    content = content.slice(sepIdx + 4, -1);
-  }
-
-  return (
-    <Detail
-      navigationTitle={`Search Web Docs - ${props.result.title}`}
-      isLoading={isLoading}
-      markdown={content}
-      actions={
-        <ActionPanel>
-          <Action.OpenInBrowser url={props.result.url} />
-          <Action.OpenInBrowser
-            title="Source on GitHub"
-            url={`${isEn ? contentBlobURL : translatedContentBlobURL}${file}`}
-          />
-          <Action
-            icon={Icon.ArrowClockwise}
-            title="Reload"
-            onAction={() => revalidate()}
-            shortcut={{ modifiers: ["cmd"], key: "r" }}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-};
-
-type MDNResponse = {
-  documents: Array<Result>;
-};
-
-type Result = {
-  title: string;
-  url: string;
-  summary: string;
-  mdn_url: string;
-};
-
-async function searchMDNByQuery(query: string, locale: string): Promise<Result[]> {
-  try {
-    const api = "https://developer.mozilla.org/api/v1/search";
-    const params = {
-      q: query,
-      sort: "best",
-      locale: locale,
-    };
-    const resp = await axios.get<MDNResponse>(api, { params });
-    return resp.data.documents.map((document) => {
-      document.url = urljoin("https://developer.mozilla.org", document.mdn_url);
-      return document;
-    });
-  } catch (err) {
-    showToast({
-      style: Toast.Style.Failure,
-      title: `Could not load MDN results`,
-      message: String(err),
-    });
-    return Promise.resolve([]);
-  }
 }

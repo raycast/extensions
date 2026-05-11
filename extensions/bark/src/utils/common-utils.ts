@@ -30,7 +30,6 @@ export const getSelectedMessage = async () => {
     } else {
       message = selectedText;
     }
-    console.debug(`message: ${message}`);
     return message.trim().replaceAll("\n", " ");
   } catch (e) {
     console.error(e);
@@ -49,10 +48,7 @@ export const createNewAuthToken = () => {
     token: authToken,
     createAt: Date.now(),
   };
-  LocalStorage.setItem(CacheKey.AUTHENTICATION_TOKEN, JSON.stringify(cacheAuthToken)).then(() => {
-    console.debug("set token success");
-  });
-  console.debug(`New Token: ${authToken}`);
+  LocalStorage.setItem(CacheKey.AUTHENTICATION_TOKEN, JSON.stringify(cacheAuthToken)).then(() => {});
   return authToken;
 };
 
@@ -66,7 +62,6 @@ export const getCacheAuthToken = async () => {
     if (tokenLiveTime > EXPIRE_TIME) {
       return createNewAuthToken();
     }
-    console.debug(`Cache Token: ${token}`);
     return token;
   }
 };
@@ -74,7 +69,6 @@ export const getCacheAuthToken = async () => {
 export const getSound = () => {
   const cache = new Cache();
   const soundStr = cache.get(CacheKey.SOUND);
-  console.debug(`soundStr: ${soundStr}`);
   if (typeof soundStr === "undefined") {
     return "silence.caf";
   } else {
@@ -84,7 +78,6 @@ export const getSound = () => {
 export const getIcon = () => {
   const cache = new Cache();
   const iconStr = cache.get(CacheKey.ICON);
-  console.debug(`iconStr: ${iconStr}`);
   if (typeof iconStr === "undefined") {
     return "";
   } else {
@@ -97,7 +90,7 @@ export const sendMessage = async (
   title: string,
   subTitle: string,
   badge: number,
-  autoCloseWindow: boolean
+  autoCloseWindow: boolean,
 ) => {
   let promptMessage;
   try {
@@ -126,13 +119,18 @@ export const sendMessage = async (
 }' --http2 https://${APNS_HOST_NAME}/3/device/${DEVICE_TOKEN}`;
     exec(script);
     promptMessage = "Message Sent";
+    if (autoCloseWindow) {
+      await showHUD(`📩 ${message}`);
+    } else {
+      await showToast(Toast.Style.Success, isEmpty(title) ? "Message Sent!" : title, message);
+    }
   } catch (e) {
     console.error(e);
     promptMessage = "Error: " + e;
-  }
-  if (autoCloseWindow) {
-    await showHUD(promptMessage);
-  } else {
-    await showToast(Toast.Style.Success, promptMessage);
+    if (autoCloseWindow) {
+      await showHUD(`🚨 ${promptMessage}`);
+    } else {
+      await showToast(Toast.Style.Failure, promptMessage + "!");
+    }
   }
 };

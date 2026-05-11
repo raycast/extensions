@@ -148,7 +148,7 @@ function Actions({
         />
         <Action
           title="Move Down"
-          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+          shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
           icon={Icon.ChevronDown}
           onAction={async () => {
             const index = items.findIndex((i) => i.id === item.id);

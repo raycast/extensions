@@ -15,11 +15,11 @@ export function AddToPlaylistAction({ playlists, meData, uri }: AddToPlaylistAct
   return (
     <ActionPanel.Submenu icon={Icon.List} title="Add to Playlist">
       {playlists
-        ?.filter((playlist) => playlist.owner?.id === meData?.id || playlist.collaborative)
-        .map((playlist) => {
+        ?.filter((playlist) => playlist.owner?.id === meData?.id)
+        .map((playlist, index) => {
           return (
             <Action
-              key={playlist.id}
+              key={`${playlist.id}-${index}`}
               title={playlist.name as string}
               onAction={async () => {
                 try {

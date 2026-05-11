@@ -1,30 +1,32 @@
-import { List } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { Color, List } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import { getMatchComments } from "../api";
-import { MatchCommentary } from "../types";
 
 export default function MatchComments(props: { slug: string; name: string }) {
-  const [comments, setComments] = useState<MatchCommentary[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    setLoading(true);
-    setComments([]);
-
-    getMatchComments(props.slug).then((data) => {
-      setComments(data);
-      setLoading(false);
-    });
-  }, [props.slug]);
+  const {
+    data: comments,
+    isLoading,
+    pagination,
+  } = usePromise(
+    (slug) =>
+      ({ page = 0 }) =>
+        getMatchComments(slug, page),
+    [props.slug],
+  );
 
   return (
-    <List navigationTitle={`Comments | ${props.name}`} isLoading={loading}>
-      {comments.map((comment) => {
+    <List navigationTitle={`${props.name} | Comments`} isLoading={isLoading} pagination={pagination}>
+      {comments?.map((comment) => {
         return (
           <List.Item
             key={comment.id}
-            title={comment.time === 0 ? "-" : comment.minute.toString()}
+            title={comment.time === 0 ? "-" : `${comment.time}'`}
             subtitle={comment.content}
+            keywords={[comment.content]}
+            icon={{
+              source: `icons/${comment.match_comment_kind.id}.svg`,
+              tintColor: Color.PrimaryText,
+            }}
           />
         );
       })}

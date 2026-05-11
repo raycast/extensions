@@ -42,7 +42,7 @@ function ClassesAction({ selector, classes }: { selector: string; classes: strin
           <Action.CopyToClipboard
             title="Copy Class Name"
             content={selector.replace(".", "")}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
           />
         </ActionPanel>
       );
@@ -54,7 +54,7 @@ function ClassesAction({ selector, classes }: { selector: string; classes: strin
           <Action.CopyToClipboard
             title="Copy Class Name"
             content={selector.replace(".", "")}
-            shortcut={{ modifiers: ["cmd"], key: "." }}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
           />
         </ActionPanel>
       );
@@ -63,7 +63,11 @@ function ClassesAction({ selector, classes }: { selector: string; classes: strin
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Class Name" content={selector.replace(".", "")} />
           <Action.CopyToClipboard title="Copy Selector" content={selector} />
-          <Action.CopyToClipboard title="Copy CSS" content={classes} shortcut={{ modifiers: ["cmd"], key: "." }} />
+          <Action.CopyToClipboard
+            title="Copy CSS"
+            content={classes}
+            shortcut={{ macOS: { modifiers: ["cmd"], key: "." }, Windows: { modifiers: ["ctrl"], key: "." } }}
+          />
         </ActionPanel>
       );
   }

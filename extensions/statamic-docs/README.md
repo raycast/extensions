@@ -1,6 +1,6 @@
 # Statamic Docs
 
-This extension allows you to search through the Statamic docs directly from Raycast.
+This extension allows you to search the [Statamic Documentation](https://statamic.dev) directly from Raycast.
 
 ## Credits
 

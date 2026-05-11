@@ -1,14 +1,27 @@
-import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
-import { addDays, differenceInHours, endOfDay, formatDistance, isWithinInterval, startOfDay } from "date-fns";
+import "./initSentry";
+
+import { LaunchType, MenuBarExtra, getPreferenceValues, launchCommand, open } from "@raycast/api";
+import {
+  addDays,
+  differenceInMinutes,
+  differenceInHours,
+  endOfDay,
+  formatDistance,
+  isWithinInterval,
+  startOfDay,
+} from "date-fns";
 import { useMemo } from "react";
-import { useEvent } from "./hooks/useEvent";
+import { MenuBarEventSection } from "./components/MenuBarEventSection";
+import { useCallbackSafeRef } from "./hooks/useCallbackSafeRef";
+import { useEvents } from "./hooks/useEvent";
 import { useMoment } from "./hooks/useMoment";
 import { useUser } from "./hooks/useUser";
 import { Event } from "./types/event";
 import { NativePreferences } from "./types/preferences";
 import { miniDuration } from "./utils/dates";
-import { eventColors, getOriginalEventIDFromSyncEvent, truncateEventSize } from "./utils/events";
-import { parseEmojiField } from "./utils/string";
+import { getOriginalEventIDFromSyncEvent, truncateEventSize } from "./utils/events";
+import { stripPlannerEmojis } from "./utils/string";
+import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
 
@@ -19,96 +32,65 @@ type TitleInfo = {
   nowOrNext: "NOW" | "NEXT" | "NONE";
 };
 
-const ActionOptionsWithContext = ({ event }: { event: Event }) => {
-  const { getEventActions } = useEvent();
+function Command() {
+  /********************/
+  /*   custom hooks   */
+  /********************/
 
-  return (
-    <>
-      {getEventActions(event).map((action) => (
-        <MenuBarExtra.Item key={action.title} title={action.title} onAction={action.action} />
-      ))}
-    </>
-  );
-};
-
-const EventsSection = ({ events, sectionTitle }: { events: Event[]; sectionTitle: string }) => {
-  const { showFormattedEventTitle } = useEvent();
-
-  return (
-    <>
-      <MenuBarExtra.Section title={sectionTitle} />
-      {events.map((event) => (
-        <MenuBarExtra.Submenu
-          key={event.eventId}
-          icon={{
-            source: Icon.Dot,
-            tintColor: eventColors[event.color],
-          }}
-          title={showFormattedEventTitle(event, true)}
-        >
-          <ActionOptionsWithContext event={event} />
-        </MenuBarExtra.Submenu>
-      ))}
-    </>
-  );
-};
-
-export default function Command() {
   const { upcomingEventsCount } = getPreferenceValues<NativePreferences>();
 
   const { currentUser } = useUser();
 
-  const NUMBER_OF_EVENTS = Number(upcomingEventsCount) || 5;
-
   const now = new Date();
 
-  const { useFetchEvents } = useEvent();
-
-  const { data: eventData, isLoading: isLoadingEvents } = useFetchEvents({
+  const { events, isLoading: isLoadingEvents } = useEvents({
     start: startOfDay(now),
     end: addDays(now, 2),
   });
 
-  const { useFetchNext } = useMoment();
+  const { momentData, isLoading: isLoadingMoment } = useMoment();
 
-  const { data: eventMomentData, isLoading: isLoadingMoment } = useFetchNext();
+  /********************/
+  /* useMemo & consts */
+  /********************/
 
-  // if the events returned my moment/next are synced events then return the original event from the events call if it exists
+  const NUMBER_OF_EVENTS = Number(upcomingEventsCount) || 5;
+
+  // if the events returned by moment/next are synced events then return the original event from the events call if it exists
   const eventMoment = useMemo(() => {
-    if (!eventMomentData) return eventMomentData;
+    if (!momentData) return momentData;
 
     const findEvent = (event: Event | undefined | null) => {
-      if (!event || !eventData || eventData.length === 0) return event;
+      if (!event || !events || events.length === 0) return event;
 
       const originalEventID = getOriginalEventIDFromSyncEvent(event);
       if (!originalEventID) return event;
 
-      return eventData.find((e) => e.eventId === originalEventID) ?? event;
+      return events.find((e) => e.eventId === originalEventID) ?? event;
     };
 
-    const { event, nextEvent } = eventMomentData;
+    const { event } = momentData;
 
     return {
       event: findEvent(event),
-      nextEvent: findEvent(nextEvent),
     };
-  }, [eventMomentData, eventData]);
+  }, [momentData, events]);
 
   const showDeclinedEvents = useMemo(() => {
     return !!currentUser?.settings.showDeclinedEvents;
   }, [currentUser]);
 
-  const events = useMemo<EventSection[]>(() => {
-    if (!eventData) return [];
+  const eventSections = useMemo<EventSection[]>(() => {
+    if (!events) return [];
 
     const now = new Date();
     const today = startOfDay(now);
 
-    const events: EventSection[] = [
+    const eventSectionsUnfiltered: EventSection[] = [
       {
         section: "NOW",
         sectionTitle: "Now",
-        events: eventData
+        events: events
           .filter((event) => {
             return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
           })
@@ -127,7 +109,7 @@ export default function Command() {
       {
         section: "TODAY",
         sectionTitle: "Upcoming events",
-        events: eventData
+        events: events
           .filter((event) => {
             return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
           })
@@ -145,20 +127,32 @@ export default function Command() {
       },
     ];
 
-    return events.filter((event) => event.events.length > 0);
-  }, [eventData, showDeclinedEvents]);
-
-  const handleOpenReclaim = () => {
-    open("https://app.reclaim.ai");
-  };
-
-  const handleOpenRaycast = async () => {
-    await launchCommand({ name: "my-calendar", type: LaunchType.UserInitiated });
-  };
+    return eventSectionsUnfiltered.filter((event) => event.events.length > 0);
+  }, [events, showDeclinedEvents]);
 
   const titleInfo = useMemo<TitleInfo>(() => {
     const now = new Date();
-    const eventNextNow = eventMoment?.event;
+    let eventNextNow;
+    const showNowEvent = getPreferenceValues()["showNowEvent"];
+    if (showNowEvent) {
+      const nowEvent = events?.filter((event) => {
+        const start = new Date(event.eventStart);
+        const end = new Date(event.eventEnd);
+        return isWithinInterval(now, { start, end });
+      });
+
+      const recentNowEvent = nowEvent?.find((event) => differenceInMinutes(now, new Date(event.eventStart)) <= 5);
+
+      if (recentNowEvent) {
+        eventNextNow = recentNowEvent;
+      } else if (eventMoment?.event) {
+        eventNextNow = eventMoment.event;
+      } else if (nowEvent?.length) {
+        eventNextNow = nowEvent[0];
+      }
+    } else {
+      eventNextNow = eventMoment?.event;
+    }
 
     if (eventNextNow) {
       const realEventTitle = eventNextNow.sourceDetails?.title || eventNextNow.title;
@@ -167,8 +161,8 @@ export default function Command() {
 
       const isNow = isWithinInterval(new Date(), { start: eventStart, end: eventEnd });
 
-      const miniEventString = truncateEventSize(parseEmojiField(realEventTitle).textWithoutEmoji);
-      const eventString = parseEmojiField(realEventTitle).textWithoutEmoji;
+      const eventString = stripPlannerEmojis(realEventTitle);
+      const miniEventString = truncateEventSize(eventString);
 
       const distanceString = miniDuration(
         formatDistance(new Date(eventStart), now, {
@@ -197,7 +191,23 @@ export default function Command() {
       nowOrNext: "NONE",
       event: null,
     };
-  }, [eventMoment]);
+  }, [eventMoment, events]);
+
+  /********************/
+  /*    useCallback   */
+  /********************/
+
+  const handleOpenReclaim = useCallbackSafeRef(() => {
+    open("https://app.reclaim.ai");
+  });
+
+  const handleOpenRaycast = useCallbackSafeRef(async () => {
+    await launchCommand({ name: "my-calendar", type: LaunchType.UserInitiated });
+  });
+
+  /********************/
+  /*       JSX        */
+  /********************/
 
   return (
     <MenuBarExtra
@@ -206,8 +216,8 @@ export default function Command() {
       title={titleInfo.minTitle}
       tooltip={titleInfo.fullTitle}
     >
-      {events.map((eventSection) => (
-        <EventsSection
+      {eventSections.map((eventSection) => (
+        <MenuBarEventSection
           key={eventSection.section}
           events={eventSection.events}
           sectionTitle={eventSection.sectionTitle}
@@ -219,3 +229,5 @@ export default function Command() {
     </MenuBarExtra>
   );
 }
+
+export default withRAIErrorBoundary(Command);

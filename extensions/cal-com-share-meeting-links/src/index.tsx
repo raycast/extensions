@@ -1,56 +1,103 @@
-import { ActionPanel, Action, List, showToast, Toast, openCommandPreferences, Icon } from "@raycast/api";
-import { CalEventType, useCurrentUser, useEventTypes } from "./services/cal.com";
-import { URL } from "url";
+import {
+  Action,
+  ActionPanel,
+  Clipboard,
+  Color,
+  Icon,
+  List,
+  openCommandPreferences,
+  showHUD,
+  showToast,
+  Toast,
+} from "@raycast/api";
+import {
+  CalEventType,
+  createPrivateLinkForEventType,
+  formatCurrency,
+  useCurrentUser,
+  useEventTypes,
+} from "@api/cal.com";
+import { CanceledError, isAxiosError } from "axios";
+import { showFailureToast } from "@raycast/utils";
+import { MutableRefObject, useRef } from "react";
 
 export default function Command() {
-  const { data: user, error: userError } = useCurrentUser();
-  const { data: items, isLoading, error } = useEventTypes();
+  const generatePrivateLinkAborter = useRef<AbortController>(new AbortController());
 
-  if (error) {
-    showToast({
-      title: "Unable to load your events",
-      message: "Check your API key",
-      style: Toast.Style.Failure,
-      primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
-    });
-  }
-  if (userError) {
-    showToast({
-      title: "Unable to load your username",
-      message: "Check your API key",
-      style: Toast.Style.Failure,
-      primaryAction: { onAction: openCommandPreferences, title: "Open Preferences" },
-    });
-  }
+  const { data: user, error: userError, isLoading: isLoadingUser } = useCurrentUser();
+  const { data: items, isLoading: isLoadingEvents, error: eventsError } = useEventTypes();
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoadingUser || isLoadingEvents} searchBarPlaceholder={"Search by duration"}>
+      {(eventsError || userError) && (
+        <List.EmptyView
+          title={eventsError ? "Unable to load your events" : "Unable to load your username"}
+          description={"Check your API key"}
+          icon={{ source: Icon.Warning, tintColor: Color.Red }}
+          actions={
+            <ActionPanel>
+              <Action title="Open Preferences" onAction={openCommandPreferences} icon={Icon.Gear} />
+            </ActionPanel>
+          }
+        />
+      )}
       {items?.map((item) => (
         <List.Item
           key={item.id}
           title={item.title}
-          accessories={getAccessories(item)}
+          accessories={[
+            ...(item.price
+              ? [
+                  {
+                    icon: { source: Icon.CreditCard, tintColor: Color.Green },
+                    text: formatCurrency(item.price, item.currency),
+                  },
+                ]
+              : []),
+            ...(item.hidden
+              ? [{ icon: { source: Icon.EyeDisabled, tintColor: Color.Orange }, tooltip: "Hidden" }]
+              : []),
+            ...(item.recurrence
+              ? [
+                  {
+                    icon: { source: Icon.Repeat, tintColor: Color.Purple },
+                    text: String(item.recurrence.occurrences),
+                    tooltip: `Repeats up to ${item.recurrence.occurrences} times`,
+                  },
+                ]
+              : []),
+            ...(item.confirmationPolicy
+              ? [
+                  {
+                    icon: { source: Icon.QuestionMarkCircle, tintColor: Color.Yellow },
+                    tooltip: "Requires confirmation",
+                  },
+                ]
+              : []),
+            { icon: { source: Icon.Clock, tintColor: Color.Blue }, text: `${item.lengthInMinutes} min` },
+          ]}
+          keywords={item.lengthInMinutes ? [item.lengthInMinutes.toString()] : []}
           actions={
             <ActionPanel>
-              <Action.CopyToClipboard
-                content={new URL(`${user?.username}/${item.slug}`, "https://cal.com").toString()}
-                icon={Icon.Link}
-              />
-              <Action.OpenInBrowser
-                url={new URL(`${user?.username}/${item.slug}`, "https://cal.com").toString()}
-                title="Preview URL"
-              />
+              <Action.CopyToClipboard content={item.bookingUrl} icon={Icon.Link} />
+              <Action.OpenInBrowser url={item.bookingUrl} title="Preview URL" />
               <ActionPanel.Section title="Quick Links">
                 <Action.OpenInBrowser
                   title="Open Dashboard"
                   shortcut={{ modifiers: ["cmd"], key: "d" }}
                   url="https://app.cal.com"
                 />
+                <Action.OpenInBrowser
+                  title="Open Availability Troubleshooter"
+                  shortcut={{ modifiers: ["cmd"], key: "t" }}
+                  url={`https://app.cal.com/availability/troubleshoot?eventType=${item.slug}`}
+                />
                 <Action.CopyToClipboard
                   title="Copy My Link"
                   shortcut={{ modifiers: ["cmd"], key: "m" }}
                   content={`https://cal.com/${user?.username}`}
                 />
+                <GeneratePrivateLinkCommand item={item} aborter={generatePrivateLinkAborter} />
               </ActionPanel.Section>
             </ActionPanel>
           }
@@ -60,21 +107,63 @@ export default function Command() {
   );
 }
 
-function getAccessories(item: CalEventType): List.Item.Accessory[] {
-  const accessories: List.Item.Accessory[] = [];
-  if (item.hidden) {
-    accessories.push({ icon: Icon.EyeDisabled, text: "Hidden" });
+function GeneratePrivateLinkCommand({
+  item,
+  aborter,
+}: {
+  item: CalEventType;
+  aborter: MutableRefObject<AbortController>;
+}) {
+  async function handleGeneratePrivateLink(item: CalEventType) {
+    aborter.current.abort();
+
+    const currAborter = new AbortController();
+    aborter.current = currAborter;
+
+    try {
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Generating private link",
+        primaryAction: {
+          title: "Cancel",
+          onAction: () => currAborter.abort(),
+        },
+      });
+      const response = await createPrivateLinkForEventType(item.id, currAborter.signal);
+      // TODO: As per cal.com docs (https://cal.com/docs/api-reference/v2/event-types-private-links/create-a-private-link-for-an-event-type),
+      // `bookingUrl` should have a full and working URL but it doesn't and whatever it returns 404s. Appending `/<slug>` fixes it. Change this
+      // back to just copy `response.bookingUrl` once that's fixed.
+      await Clipboard.copy(`${response.bookingUrl}/${item.slug}`);
+      await toast.hide();
+      await showHUD(`Private link for event "${item.title}" generated and copied to clipboard`);
+    } catch (error: unknown) {
+      if (error instanceof CanceledError) {
+        showToast({
+          style: Toast.Style.Success,
+          title: "Cancelled",
+        });
+        return;
+      }
+
+      if (isAxiosError(error) && error.response) {
+        await showFailureToast(error, {
+          title: `Could not generate private link (HTTP ${error.response.status})`,
+        });
+        return;
+      }
+
+      await showFailureToast(error, {
+        title: `Could not generate private link`,
+      });
+    }
   }
 
-  if (item.recurringEvent) {
-    accessories.push({ icon: Icon.Repeat, text: `Repeats up to ${item.recurringEvent.count} times` });
-  }
-
-  if (item.requiresConfirmation) {
-    accessories.push({ icon: Icon.QuestionMarkCircle, text: "Requires confirmation" });
-  }
-
-  accessories.push({ icon: Icon.Clock, text: `${item.length} min` });
-
-  return accessories;
+  return (
+    <Action
+      title="Generate and copy private link"
+      icon={Icon.EyeDisabled}
+      onAction={() => handleGeneratePrivateLink(item)}
+      shortcut={{ modifiers: ["cmd"], key: "s" }}
+    />
+  );
 }

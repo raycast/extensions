@@ -48,4 +48,5 @@ export const ITEM_TYPE_TO_LABEL: Record<ItemType, string> = {
   [ItemType.CARD]: "Card",
   [ItemType.IDENTITY]: "Identity",
   [ItemType.NOTE]: "Secure Note",
+  [ItemType.SSH_KEY]: "SSH Key",
 };

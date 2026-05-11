@@ -1,13 +1,27 @@
-import { Action, Icon, showToast, Toast } from "@raycast/api";
+import { Action, Icon, Keyboard, showToast, Toast } from "@raycast/api";
 import { prefs } from "./preferences";
 
-export function OpenUrlAction({ url }: { url: string }) {
+export function OpenUrlAction({
+  url,
+  title,
+  callback,
+  icon,
+  shortcut,
+}: {
+  url: string;
+  title?: string;
+  callback?: () => void;
+  icon?: Icon;
+  shortcut?: Keyboard.Shortcut;
+}) {
   const desktop = prefs.urlTarget === "desktop";
   return (
     <Action.OpenInBrowser
-      title={desktop ? "Open in App" : "Open in Browser"}
-      icon={desktop ? Icon.AppWindow : Icon.Globe}
+      title={title ? title : desktop ? "Open in App" : "Open in Browser"}
+      icon={icon ? icon : desktop ? Icon.AppWindow : Icon.Globe}
       url={desktop ? url.replace(/^https:/, "msteams:") : url}
+      onOpen={callback}
+      shortcut={shortcut}
     />
   );
 }

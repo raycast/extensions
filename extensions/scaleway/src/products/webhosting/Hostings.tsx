@@ -1,5 +1,5 @@
 import { List } from '@raycast/api'
-import { getPreferenceUser } from 'providers'
+import { getPreferenceUser } from 'helpers/getPreferenceUser'
 import { useReducer } from 'react'
 import { POLLING_INTERVAL } from '../../constants'
 import { HostingAction } from './HostingAction'
@@ -33,7 +33,7 @@ export const Hostings = () => {
       {hostings.map((hosting) => (
         <List.Item
           key={hosting.id}
-          title={hosting.domain}
+          title={hosting.domainInfo?.subdomain ?? hosting.domainInfo?.customDomain?.domain ?? ''}
           icon={{
             source: {
               dark: 'icons/webhosting-hosting@dark.svg',

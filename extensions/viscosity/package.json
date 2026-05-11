@@ -1,0 +1,59 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "viscosity",
+  "type": "module",
+  "title": "Viscosity",
+  "description": "Manage your Viscosity VPN connections directly from Raycast: list, connect, and disconnect with ease.",
+  "icon": "extension-icon.png",
+  "author": "yigitefe",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Security",
+    "System",
+    "Communication"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "list-connections",
+      "title": "List Connections",
+      "description": "List and manage your VPN connections.",
+      "mode": "view"
+    },
+    {
+      "name": "disconnect-all",
+      "title": "Disconnect All",
+      "description": "Disconnect all active VPN sessions.",
+      "mode": "no-view"
+    },
+    {
+      "name": "quick-connect",
+      "title": "Quick Connect",
+      "description": "Instantly connect to your preferred VPN.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.3",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

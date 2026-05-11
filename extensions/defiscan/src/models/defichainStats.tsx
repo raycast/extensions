@@ -6,4 +6,5 @@ export type DefichainStats = {
   amountAuctions: number;
   amountVaults: number;
   masternode: Masternode;
+  difficulty: string;
 };

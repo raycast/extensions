@@ -1,33 +1,33 @@
-import React, { useState } from 'react';
-import { Action, Icon, List, showToast, Toast } from '@raycast/api';
-import { useCachedState } from '@raycast/utils';
-import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { SpaceListItem } from './components/space-list-item';
-import { withAuth } from './features/with-auth';
-import { withQuery } from './features/with-query';
+import React, { useState } from "react";
+import { Action, Icon, List, showToast, Toast } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { SpaceListItem } from "./components/space-list-item";
+import { withAuth } from "./features/with-auth";
+import { withQuery } from "./features/with-query";
 import {
-  fetchRecentList,
+  fetchRecentDocsList,
   searchDocs,
   removeRecentDocument,
-  RecentListResponse as RecentList,
+  RecentDocsListResponse as RecentList,
   SearchDocsResponse as SearchResults,
-} from './services/space';
-import { StorageKey } from './utils/storage';
-import { preference } from './utils/config';
+} from "./services/space";
+import { StorageKey } from "./utils/storage";
+import { preference } from "./utils/config";
 
-const SearchDocsView: React.FC = () => {
+function SearchDocsView() {
   const [cachedRecentList, setCachedRecentList] = useCachedState<RecentList | null>(StorageKey.DocsRecentList, null);
-  const [searchKeywords, setSearchKeywords] = useState('');
+  const [searchKeywords, setSearchKeywords] = useState("");
   const {
     isFetching,
     data: documentList,
     refetch,
   } = useQuery<SearchResults | RecentList | null>({
-    queryKey: ['SearchDocsView', searchKeywords],
+    queryKey: ["SearchDocsView", searchKeywords],
     queryFn: ({ signal }) =>
       searchKeywords
         ? searchDocs({ query: searchKeywords }, signal)
-        : fetchRecentList(preference.recentListCount, signal).then((data) => {
+        : fetchRecentDocsList(preference.recentListCount, signal).then((data) => {
             setCachedRecentList(data);
             return data;
           }),
@@ -35,9 +35,10 @@ const SearchDocsView: React.FC = () => {
   });
 
   const handleRemoveRecent = async (objToken: string) => {
+    showToast({ title: "Removing", style: Toast.Style.Animated });
     const result = await removeRecentDocument(objToken);
     if (result) {
-      showToast(Toast.Style.Success, 'Removed successfully');
+      showToast(Toast.Style.Success, "Removed successfully");
       refetch();
     }
   };
@@ -58,16 +59,13 @@ const SearchDocsView: React.FC = () => {
       ) : null}
     </List>
   );
-};
+}
 
 const isRecentList = (list: RecentList | SearchResults): list is RecentList => {
-  return 'nodes' in list.entities;
+  return "nodes" in list.entities;
 };
 
-const RecentDocumentsView: React.FC<{
-  list: RecentList;
-  onRemove?: (objToken: string) => void;
-}> = ({ list, onRemove }) => {
+function RecentDocumentsView({ list, onRemove }: { list: RecentList; onRemove?: (objToken: string) => void }) {
   return (
     <List.Section title="Recent Documents" subtitle={`${list.node_list.length}`}>
       {list.node_list.map((nodeId) => {
@@ -80,23 +78,21 @@ const RecentDocumentsView: React.FC<{
             node={nodeEntity}
             owner={ownerEntity}
             actions={
-              <>
-                <Action
-                  icon={Icon.Trash}
-                  title="Remove From Recent Documents"
-                  shortcut={{ key: 'x', modifiers: ['ctrl'] }}
-                  onAction={() => onRemove?.(nodeId)}
-                />
-              </>
+              <Action
+                icon={Icon.Trash}
+                title="Remove from Recent Documents"
+                shortcut={{ key: "x", modifiers: ["ctrl"] }}
+                onAction={() => onRemove?.(nodeId)}
+              />
             }
           />
         );
       })}
     </List.Section>
   );
-};
+}
 
-const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
+function SearchResultView({ list }: { list: SearchResults }) {
   return (
     <List.Section title="Search Results" subtitle={`${list.tokens.length}`}>
       {list.tokens.map((nodeId) => {
@@ -107,6 +103,6 @@ const SearchResultView: React.FC<{ list: SearchResults }> = ({ list }) => {
       })}
     </List.Section>
   );
-};
+}
 
 export default withAuth(withQuery(SearchDocsView));

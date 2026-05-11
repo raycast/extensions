@@ -6,13 +6,18 @@
   "icon": "command-icon.png",
   "author": "theshadowdev",
   "contributors": [
-    "feyli"
+    "feyli",
+    "hrueger"
   ],
   "categories": [
     "Communication",
     "Developer Tools"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "timestamp",

@@ -17,7 +17,7 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID })
   const [projects, setProjects] = useState<Project[]>([]);
   const [selectedProjectID, setSelectedProjectID] = useState<string>("0");
   const [taskProjectID, setTaskProjectID] = useState<number | null>(
-    projectID ? projectID : task ? task.projectID : null
+    projectID ? projectID : task ? task.projectID : null,
   );
   const [taskID, setTaskID] = useState<number | null>(task ? task.id : null);
 
@@ -84,7 +84,7 @@ export const ActivityStart: React.FC<ActivityStartProps> = ({ task, projectID })
         onChange={dropDescriptionErrorIfNeeded}
         onBlur={(event) => {
           if (event.target.value?.length == 0) {
-            setDescriptionError("The field should't be empty!");
+            setDescriptionError("The field shouldn't be empty!");
           } else {
             dropDescriptionErrorIfNeeded();
           }

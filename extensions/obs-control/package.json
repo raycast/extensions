@@ -5,6 +5,10 @@
   "description": "Control OBS Studio with websocket API",
   "icon": "obs-control.png",
   "author": "Yukai",
+  "contributors": [
+    "j3lte",
+    "cyrusyip"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -30,6 +34,41 @@
       "subtitle": "OBS Control",
       "description": "Toggle Virtual Camera",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-recording",
+      "title": "Toggle Recording",
+      "subtitle": "OBS Control",
+      "description": "Toggle Recording",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-pause-recording",
+      "title": "Toggle Pause Recording",
+      "subtitle": "OBS Control",
+      "description": "Toggle Pause Recording",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-studio-mode",
+      "title": "Toggle Studio Mode",
+      "subtitle": "OBS Control",
+      "description": "Toggle Studio Mode",
+      "mode": "no-view"
+    },
+    {
+      "name": "toggle-scene-items",
+      "title": "Toggle Scene Items",
+      "subtitle": "OBS Control",
+      "description": "Toggle Scene Items",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-replay-buffer",
+      "title": "Toggle Replay Buffer",
+      "subtitle": "OBS Control",
+      "description": "Toggle Replay Buffer",
+      "mode": "no-view"
     }
   ],
   "preferences": [
@@ -51,24 +90,26 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.36.1",
-    "obs-websocket-js": "^5.0.0-beta.1",
+    "@raycast/api": "^1.79.1",
+    "@raycast/utils": "^1.16.3",
+    "obs-websocket-js": "^5.0.5",
     "swr": "^1.3.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@trivago/prettier-plugin-sort-imports": "^4.3.0",
+    "@types/node": "20.12.7",
+    "@types/react": "18.2.79",
+    "eslint": "^8.51.0",
+    "prettier": "^3.3.1",
+    "typescript": "^5.4.5"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx -y @raycast/api@latest publish"
   }
 }

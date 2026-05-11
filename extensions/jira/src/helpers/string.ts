@@ -9,7 +9,7 @@ export const slugify = (str: string) =>
 export const replaceAsync = async (
   text: string,
   searchValue: string | RegExp,
-  asyncReplacer: (match: string, ...args: string[]) => Promise<string>
+  asyncReplacer: (match: string, ...args: string[]) => Promise<string>,
 ) => {
   const promises: Promise<string>[] = [];
   text.replace(searchValue, (match, ...args) => {

@@ -24,6 +24,7 @@ import {
 import path from "node:path";
 import { IExtractPreferences, IFileInfo } from "./common/types";
 import { PRE_PWD_CHECK_THRESHOLD } from "./common/const";
+import { showFailureToast } from "@raycast/utils";
 
 export default function Command() {
   const preferences: IExtractPreferences = getPreferenceValues<IExtractPreferences>();
@@ -35,7 +36,9 @@ export default function Command() {
 
   useEffect(() => {
     ensureBinary();
-    preferences.defaultExtractSelected && getFinderItem();
+    if (preferences.defaultExtractSelected) {
+      getFinderItem();
+    }
   }, []);
 
   async function getFinderItem() {
@@ -64,7 +67,7 @@ export default function Command() {
       }
       updatePwdErrorState(undefined);
       // eslint-disable-next-line no-empty
-    } catch (error) {
+    } catch {
     } finally {
       updateLoadingState(false);
     }
@@ -107,8 +110,8 @@ export default function Command() {
                   await showInFinder(path);
                   showHUD("🎉 Extract successfully");
                   popToRoot();
-                } catch (error) {
-                  showHUD("❌ Failed to extract...");
+                } catch {
+                  showFailureToast(new Error("Failed to Extract..."));
                 } finally {
                   updateLoadingState(false);
                 }
@@ -157,7 +160,7 @@ export default function Command() {
               updateNeedPwdState(isNeedPwdOnExtract(file.path, file.format));
               updatePwdCheckedState(true);
             }
-          } catch (error) {
+          } catch {
             showToast({ title: "Sorry! Something went wrong...", style: Toast.Style.Failure });
           } finally {
             updateLoadingState(false);

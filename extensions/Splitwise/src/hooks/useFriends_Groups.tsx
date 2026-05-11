@@ -1,6 +1,7 @@
 import { useFetch } from "@raycast/utils";
 import { HEADER } from "./userPreferences";
-import { GetFriends, GetGroups, Friend, Group, ExpenseParams } from "../types/friends_groups.types";
+import { GetFriends, GetGroups, Friend, Group } from "../types/friends_groups.types";
+import { ExpenseParams } from "../types/get_expenses.types";
 import axios from "axios";
 import { showToast, Toast } from "@raycast/api";
 
@@ -36,7 +37,7 @@ export function getGroups(): [Group[], boolean, any] {
   const groups = data?.groups.filter((group) => group.id !== 0) || [];
 
   if (error) {
-    console.error(`Error while fetching friends: \n ${error}`);
+    console.error(`Error while fetching groups: \n ${error}`);
   }
 
   return [groups, isLoading, revalidate];
@@ -47,22 +48,24 @@ export async function postExpense(paramsJson: ExpenseParams) {
   try {
     const responseSubmit = await axios({
       method: "post",
-      url: `https://secure.splitwise.com/api/v3.0/parse_sentence`,
+      url: `https://secure.splitwise.com/api/v3.0/create_expense`,
       ...HEADER,
       data: paramsJson,
     });
 
-    if (responseSubmit.data.valid === true) {
-      showToast({
-        style: Toast.Style.Success,
-        title: "Yay!",
-        message: `Added "${responseSubmit.data.expense.description}" worth ${responseSubmit.data.expense.cost} ${responseSubmit.data.expense.currency_code}!`,
-      });
-    } else {
+    if (Object.keys(responseSubmit.data.errors).length) {
       showToast({
         style: Toast.Style.Failure,
         title: "D'oh! Invalid input!",
-        message: Object.entries(responseSubmit.data.expense.errors).join("\n"),
+        message: Object.entries(responseSubmit.data.errors).join("\n"),
+      });
+    } else {
+      showToast({
+        style: Toast.Style.Success,
+        title: "Yay!",
+        message: `Added "${responseSubmit.data.expenses[0].description}" worth ${Number(
+          responseSubmit.data.expenses[0].cost
+        ).toFixed(2)} ${responseSubmit.data.expenses[0].currency_code}!`,
       });
     }
   } catch (error: any) {

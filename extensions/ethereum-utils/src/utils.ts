@@ -1,4 +1,4 @@
-import { JsonFragment } from '@ethersproject/abi';
+import { JsonFragment } from 'ethers';
 
 export function isSignature(signature: string): boolean {
   const signaturePattern = new RegExp('^[0-9a-f]{8}$');

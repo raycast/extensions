@@ -1,5 +1,24 @@
 # Sentry Changelog
 
+## [List Latest Releases] - 2026-03-31
+
+- Added new command to list latest releases per project.
+- Shows version, release date, new issues count, and crash-free session rate.
+- Color-coded crash-free rate indicators (green/yellow/red).
+- Open releases in Sentry or copy version.
+
+## [Show issues for Sentry orgs stored in Europe] - 2025-05-15
+
+- Show issues for Sentry orgs stored in both US and Europe, previously it was showing only projects in the US.
+- Give more space to the issue title in the issues list view.
+
+## [Fix command when user has multiple orgs and projects with same name] - 2024-07-25
+
+## [Added pagination] - 2024-03-27
+
+- Added pagination support.
+- Updated `@raycast/api` and `@raycast/utils` to latest versions.
+
 ## [Added custom URL] - 2023-03-06
 
 - Replaced the hardcoded Sentry URL (sentry.io) with a dynamic URL that can be selected from the extension settings, allowing users to connect to a self-hosted Sentry instance of their choice.

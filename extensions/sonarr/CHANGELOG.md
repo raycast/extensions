@@ -1,5 +1,37 @@
 # Sonarr Changelog
 
+## [Update] - 2026-02-21
+
+- Removed an unused command entirely
+- Simplified **Search Series** rows to title/year with compact metadata
+- Added lightweight genre and status tags in **Search Series** while keeping library check indicators
+- Fixed the episode and season search action flow by handling Sonarr command responses more safely
+- Improved series search reliability to avoid stale results while typing
+- Added **History** command to inspect recent grabs/imports/failures
+- Added **Blocklist** command to review blocked releases
+- Improved API error messages to surface Sonarr responses in Raycast toasts
+
+## [Update] - 2025-11-26
+
+- Added fuzzy search filtering (e.g., "simps" finds "The Simpsons")
+- Created Instance Status with health monitoring
+- Updated dependencies to latest versions
+- Improved image display and default actions
+
+### New Commands
+
+- **Search Series** - Search and add new TV series to your library
+- **Series Library** - Browse entire series collection with filters
+- **Download Queue** - Monitor active downloads and manage queue
+- **Missing Episodes** - View monitored episodes without files
+- **Unmonitored Series** - View series not being monitored
+- **Instance Status** - Connection status, system health, and quick actions
+
+## [Update] - 2024-04-26
+
+- Updated dependencies
+- Changed url to v3 of the api
+
 ## [1.1] - 2023-01-10
 
 - Added support for HTTPS configuration

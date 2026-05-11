@@ -1,4 +1,14 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast, Clipboard, useNavigation } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  Icon,
+  showToast,
+  Toast,
+  Clipboard,
+  useNavigation,
+  getPreferenceValues,
+} from "@raycast/api";
 import { FormValidation, useCachedPromise, useCachedState, useForm } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 
@@ -17,6 +27,7 @@ import { getUsers } from "../api/users";
 import { getProjectAvatar } from "../helpers/avatars";
 import { getErrorMessage } from "../helpers/errors";
 import { CustomFieldSchema, getCustomFieldsForCreateIssue } from "../helpers/issues";
+import { getIssueUrl } from "../helpers/urls";
 
 import FormParentDropdown from "./FormParentDropdown";
 import FormUserDropdown from "./FormUserDropdown";
@@ -27,15 +38,15 @@ export type IssueFormValues = {
   projectId: string;
   issueTypeId: string;
   summary: string;
-  description: string;
-  parent: string;
-  assigneeId: string;
-  priorityId: string;
+  description?: string;
+  parent?: string;
+  assigneeId?: string;
+  priorityId?: string;
   labels?: string[];
   components?: string[];
   fixVersions?: string[];
   dueDate?: Date | null;
-  attachments: string[];
+  attachments?: string[];
 } & Record<string, unknown>;
 
 type CreateIssueFormProps = {
@@ -44,13 +55,14 @@ type CreateIssueFormProps = {
 };
 
 export default function CreateIssueForm({ draftValues, enableDrafts = true }: CreateIssueFormProps) {
+  const { copyURLtoClipboard } = getPreferenceValues<Preferences.CreateIssue>();
   const { push } = useNavigation();
 
   const [projectQuery, setProjectQuery] = useState("");
   const { data: projects, isLoading: isLoadingProjects } = useCachedPromise(
     (query) => getProjects(query),
     [projectQuery],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   const { data: users } = useCachedPromise(() => getUsers());
@@ -67,12 +79,16 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
     async onSubmit(values) {
       const toast = await showToast({ style: Toast.Style.Animated, title: "Creating issue" });
 
+      function getNewIssueURL(key: string) {
+        return getIssueUrl(key);
+      }
+
       try {
         const issue = await createIssue(values, { customFields: selectedIssueType?.fields });
 
         if (issue) {
           toast.style = Toast.Style.Success;
-          toast.title = `Created issue • ${issue.key}`;
+          toast.title = `Created issue • ${issue.key} ` + (copyURLtoClipboard ? "(URL copied)" : "");
           toast.primaryAction = {
             title: "Open Issue",
             shortcut: { modifiers: ["shift", "cmd"], key: "o" },
@@ -86,6 +102,9 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
               showToast({ style: Toast.Style.Success, title: "Copied to clipboard", message: issue.key });
             },
           };
+          if (copyURLtoClipboard) {
+            await Clipboard.copy(getNewIssueURL(issue.key));
+          }
 
           reset({
             projectId: values.projectId,
@@ -105,7 +124,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
 
           focus("summary");
 
-          if (values.attachments.length > 0) {
+          if (values.attachments && values.attachments.length > 0) {
             const attachmentWord = values.attachments.length === 1 ? "attachment" : "attachments";
             try {
               toast.message = `Uploading ${attachmentWord}…`;
@@ -150,7 +169,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const { data: issueMetadataSummary } = useCachedPromise(
     (projectId) => getCreateIssueMetadataSummary(projectId),
     [values.projectId],
-    { execute: !!values.projectId }
+    { execute: !!values.projectId },
   );
 
   const selectedProject = projects?.find((project) => project.id === values.projectId);
@@ -162,7 +181,7 @@ export default function CreateIssueForm({ draftValues, enableDrafts = true }: Cr
   const { data: issueMetadata } = useCachedPromise(
     (projectId, issueTypeId) => getCreateIssueMetadata(projectId, issueTypeId),
     [values.projectId, values.issueTypeId],
-    { execute: !!values.projectId && !!values.issueTypeId }
+    { execute: !!values.projectId && !!values.issueTypeId },
   );
 
   const issueTypes = issueMetadata?.[0]?.issuetypes;

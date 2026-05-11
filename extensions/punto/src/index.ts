@@ -1,9 +1,34 @@
-import { showHUD, Clipboard, getSelectedText, environment } from "@raycast/api";
-import { en_ru, ru_en } from "./Dict";
-import { exec as Exec } from "child_process";
-import { promisify } from "util";
+import {
+  showHUD,
+  Clipboard,
+  getSelectedText,
+  getPreferenceValues,
+} from "@raycast/api";
+import {
+  en_ru,
+  ru_en,
+  ru_en_phonetic,
+  en_ru_phonetic,
+  en_uk,
+  uk_en,
+  uk_en_phonetic,
+  en_uk_phonetic,
+} from "./Dict";
+import {
+  getAvailableInputSourceIds,
+  selectInputSource,
+} from "swift:../swift/Punto";
 
-const exec = promisify(Exec);
+interface Preferences {
+  latLayoutID: string;
+  cyrLayoutID: string;
+  showSuccessHUD: boolean;
+}
+
+enum Layout {
+  LAT = "LAT",
+  CYR = "CYR",
+}
 
 export default async function main() {
   // genMap();
@@ -12,65 +37,87 @@ export default async function main() {
   try {
     input = await getSelectedText();
   } catch (error) {
-    console.log("unable to get selected text");
+    console.log("unable to get selected text", error);
   }
 
-  const buf = Buffer.from(input, "utf8");
-  const encodedInput = buf.toString("base64");
-  // console.log(encodedInput);
-
-  if (input === "" || encodedInput === "Cg==") {
+  if (input === "" || input.trim() === "") {
     await showHUD("Nothing to switch");
     return;
   }
-  const switched = switchStringLayout(input);
-  switchLayout(detectLayout(switched));
-  // console.log(switched);
-  // await Clipboard.copy(switched);
-  await Clipboard.paste(switched);
-  await showHUD("Layout switched!");
+
+  const preferences = getPreferenceValues<Preferences>();
+  const switchedText = switchStringLayout(input, preferences);
+  // console.log(switchedText);
+  await Clipboard.paste(switchedText);
+
+  await switchKeyboardLayout(preferences, detectLayout(switchedText));
 }
 
-function switchStringLayout(string: string): string {
+function switchStringLayout(string: string, preferences: Preferences): string {
   const chars: string[] = string.split("");
-  return chars.map((ch) => switchCharacterLayout(ch)).join("");
+  return chars.map((ch) => switchCharacterLayout(ch, preferences)).join("");
 }
 
-// supports ABC, Russian
-async function switchLayout(target: string): Promise<void> {
-  await exec(`/bin/chmod u+x ${environment.assetsPath}/keyboardSwitcher`);
-  const result = await exec(
-    `${environment.assetsPath}/keyboardSwitcher select '${target}'`
-  );
-  result.stdout.split("\n")[1];
-  // console.log(result.stdout);
+async function switchKeyboardLayout(
+  preferences: Preferences,
+  targetLayout: Layout,
+): Promise<void> {
+  const languageIds =
+    (await getAvailableInputSourceIds()) as unknown as string[];
+  // console.log("installed layout names are " + languageIds.join(", "));
+  // console.log("target layout is " + targetLayout);
 
-  // exec(`${environment.assetsPath}/keyboardSwitcher json`),
-  // exec(`${environment.assetsPath}/keyboardSwitcher get`),
-}
+  const targetLayoutID =
+    targetLayout === Layout.LAT
+      ? preferences.latLayoutID
+      : preferences.cyrLayoutID;
 
-function detectLayout(input: string): string {
-  const array = input.split("");
-  const enChars = array.filter((c) => en_ru.has(c)).length;
-  const ruChars = array.filter((c) => ru_en.has(c)).length;
-  let targetLayout = "";
-  if (enChars > ruChars) {
-    targetLayout = "ABC";
-  } else {
-    targetLayout = "Russian";
+  if (!languageIds.includes(targetLayoutID)) {
+    await showHUD(
+      "Layout " +
+        targetLayoutID +
+        " is not installed. Please install it or update the preferences." +
+        `Available layouts include: ${languageIds.join(", ")}`,
+    );
+    return;
   }
-  // console.log("Layout detected: " + targetLayout);
-  return targetLayout;
+
+  // console.log("switching to " + targetLayoutID);
+
+  await selectInputSource(targetLayoutID);
 }
 
-function switchCharacterLayout(char: string): string {
-  if (en_ru.has(char)) {
+function detectLayout(input: string): Layout {
+  const array = input.split("");
+
+  const latChars = array.filter((c) => /[a-zA-Z]/.test(c)).length;
+  const cyrChars = array.filter((c) => /[а-яА-ЯёЁіІїЇєЄґҐ]/.test(c)).length;
+
+  return latChars > cyrChars ? Layout.LAT : Layout.CYR;
+}
+
+function switchCharacterLayout(char: string, preferences: Preferences): string {
+  let cyrToLatMap = ru_en;
+  let latToCyrMap = en_ru;
+
+  if (preferences.cyrLayoutID === "com.apple.keylayout.Russian-Phonetic") {
+    cyrToLatMap = ru_en_phonetic;
+    latToCyrMap = en_ru_phonetic;
+  } else if (
+    preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-QWERTY"
+  ) {
+    cyrToLatMap = uk_en_phonetic;
+    latToCyrMap = en_uk_phonetic;
+  } else if (preferences.cyrLayoutID === "com.apple.keylayout.Ukrainian-PC") {
+    cyrToLatMap = uk_en;
+    latToCyrMap = en_uk;
+  }
+
+  if (latToCyrMap.has(char)) {
     // console.log(char + " detected in en dict")
-    switchLayout("Russian");
-    return en_ru.get(char) ?? char;
+    return latToCyrMap.get(char) ?? char;
   } else {
-    // console.log(char + " is probably detected in ru dict")
-    switchLayout("ABC");
-    return ru_en.get(char) ?? char;
+    // console.log(char + " is probably detected in ru dict"),
+    return cyrToLatMap.get(char) ?? char;
   }
 }

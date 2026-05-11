@@ -25,8 +25,6 @@ const JwtView = () => {
   const claims = useClaims();
   const [{ showLogo, showMetadata }, { update }] = usePreferences({ showLogo: false, showMetadata: false });
   const { ready, clipboard } = useClipboard();
-  // const [showLogo, setShowLogo] = useState<boolean>(false);
-  // const [showMetadata, setShowMetadata] = useState<boolean>(false);
 
   if (ready === false || clipboard === undefined || clipboard.length === 0) {
     return <PleaseCopy ready={ready} />;
@@ -38,7 +36,7 @@ const JwtView = () => {
     const headItems = ListFromObject(header, claims);
     const dataItems = ListFromObject(data, claims);
 
-    const tokenImg = `<img alt="view token" width="720" src="data:image/svg+xml,${encodeURI(
+    const tokenImg = `<img alt="view token" width="720" src="data:image/svg+xml,${encodeURIComponent(
       renderToString(
         <TokenSvg
           {...{
@@ -47,8 +45,8 @@ const JwtView = () => {
             showLogo: !!showLogo,
             showDetail: true,
           }}
-        />
-      )
+        />,
+      ),
     )}"/>`;
 
     const metadata = showMetadata && (
@@ -78,7 +76,7 @@ const JwtView = () => {
                 onAction={() => update("showMetadata", !showMetadata)}
               />
               <Action
-                icon={showLogo ? Icon.EyeSlash : Icon.Eye}
+                icon={showLogo ? Icon.EyeDisabled : Icon.Eye}
                 title={`${showLogo ? "Hide" : "Show"} Logo`}
                 onAction={() => update("showLogo", !showLogo)}
               />
@@ -94,7 +92,7 @@ const JwtView = () => {
             </ActionPanel.Section>
             <ActionPanel.Section title={"HEADER:DATA"}>
               {headItems.map((item) => (
-                <Action.CopyToClipboard key={item.key} title={`Copy ${item.key} value`} content={item.value} />
+                <Action.CopyToClipboard key={item.key} title={`Copy ${item.key} Value`} content={item.value} />
               ))}
             </ActionPanel.Section>
           </ActionPanel>

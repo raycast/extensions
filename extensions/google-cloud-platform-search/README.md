@@ -20,3 +20,6 @@ To correctly use _Search Projects_, you need to:
 
 - Install `gcloud` locally: https://cloud.google.com/sdk
 - Save the authentication locally: `gcloud auth application-default login`
+
+### Skip 'sys-' prefixed projects
+If you want to skip projects with a 'sys-' prefix, which are automatically generated with a new App Script project in Google Workspace, you can enable this option in the extension settings.

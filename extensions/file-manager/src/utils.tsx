@@ -12,13 +12,15 @@ import {
 } from "@raycast/api";
 import { filesize } from "filesize";
 import fs from "node:fs";
-import { basename, dirname, resolve } from "node:path";
+import { basename, dirname, join, resolve } from "node:path";
 import { homedir } from "node:os";
 import { useState } from "react";
 import { DirectoryItem } from "./components/directory-item";
 import { FileItem } from "./components/file-item";
 import { SymlinkItem } from "./components/symlink-item";
 import { FileDataType, FileType } from "./types";
+import { runAppleScript } from "@raycast/utils";
+import { GitIgnoreHelper } from "@gerhobbelt/gitignore-parser";
 
 export async function deleteFile(filePath: string, fileName: string, refresh: () => void) {
   const options: Alert.Options = {
@@ -29,9 +31,13 @@ export async function deleteFile(filePath: string, fileName: string, refresh: ()
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        fs.rmSync(filePath);
-        refresh();
-        showToast(Toast.Style.Success, "File Deleted", `${fileName}`);
+        try {
+          fs.rmSync(filePath);
+          refresh();
+          showToast(Toast.Style.Success, "File Deleted", `${fileName}`);
+        } catch (e) {
+          showToast(Toast.Style.Failure, "Failed to Delete", e instanceof Error ? e.message : String(e));
+        }
       },
     },
   };
@@ -48,9 +54,13 @@ export async function deleteDirectory(folderPath: string, folderName: string, re
       title: "Delete",
       style: Alert.ActionStyle.Destructive,
       onAction: async () => {
-        fs.rmdirSync(folderPath);
-        refresh();
-        showToast(Toast.Style.Success, "Directory Deleted", `${folderName}`);
+        try {
+          fs.rmSync(folderPath, { recursive: true, force: true });
+          refresh();
+          showToast(Toast.Style.Success, "Directory Deleted", `${folderName}`);
+        } catch (e) {
+          showToast(Toast.Style.Failure, "Failed to Delete", e instanceof Error ? e.message : String(e));
+        }
       },
     },
   };
@@ -65,19 +75,28 @@ export function getFileSize(fileData: FileDataType): string {
 export function getStartDirectory(): string {
   let { startDirectory } = getPreferenceValues();
   if (startDirectory.startsWith("~")) {
-    startDirectory = startDirectory.replace("~", homedir());
+    startDirectory = homedir() + startDirectory.slice(1);
   }
   return resolve(startDirectory);
 }
 
-export function createItem(fileData: FileDataType, refresh: () => void, preferences: Preferences) {
-  const filePath = `${fileData.path}/${fileData.name}`;
+export function createItem(
+  fileData: FileDataType,
+  refresh: () => void,
+  preferences: Preferences,
+  ignores: GitIgnoreHelper[],
+) {
+  const filePath = join(fileData.path, fileData.name);
   if (fileData.type === "directory") {
-    return <DirectoryItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
+    return (
+      <DirectoryItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} ignores={ignores} />
+    );
   } else if (fileData.type === "file") {
     return <FileItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
   } else if (fileData.type === "symlink") {
-    return <SymlinkItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} />;
+    return (
+      <SymlinkItem fileData={fileData} key={filePath} refresh={refresh} preferences={preferences} ignores={ignores} />
+    );
   } else {
     showToast(Toast.Style.Failure, "Unsupported file type", `File type: ${fileData.type}`);
   }
@@ -90,17 +109,17 @@ export function getDirectoryData(path: string): FileDataType[] {
     files = files.filter((file) => !file.startsWith("."));
   }
   if (!preferences.caseSensitive) {
-    files = files.sort((a: string, b: string) => {
-      if (a.toLowerCase() < b.toLowerCase()) return -1;
-      if (a.toLowerCase() > b.toLowerCase()) return 1;
-      else return 0;
-    });
+    files = files.sort((a: string, b: string) =>
+      a.toLowerCase().localeCompare(b.toLowerCase(), undefined, { numeric: true }),
+    );
+  } else {
+    files = files.sort((a: string, b: string) => a.localeCompare(b, undefined, { numeric: true }));
   }
 
   const data: FileDataType[] = [];
 
   for (const file of files) {
-    const fileData = fs.lstatSync(`${path}/${file}`);
+    const fileData = fs.lstatSync(join(path, file));
     let fileType: FileType = "other";
     if (fileData.isDirectory()) fileType = "directory";
     if (fileData.isFile()) fileType = "file";
@@ -129,12 +148,16 @@ export function RenameForm(props: { filePath: string; refresh: () => void; typeN
   const { pop } = useNavigation();
 
   function renameItem() {
-    const newFilePath = `${dirname(props.filePath)}/${itemName}`;
+    const newFilePath = join(dirname(props.filePath), itemName);
     if (props.filePath !== newFilePath) {
-      fs.renameSync(props.filePath, newFilePath);
-      showToast(Toast.Style.Success, `${props.typeName} Renamed`, `${basename(props.filePath)} -> ${itemName}`);
-      props.refresh();
-      pop();
+      try {
+        fs.renameSync(props.filePath, newFilePath);
+        showToast(Toast.Style.Success, `${props.typeName} Renamed`, `${basename(props.filePath)} -> ${itemName}`);
+        props.refresh();
+        pop();
+      } catch (e) {
+        showToast(Toast.Style.Failure, "Failed to Rename", e instanceof Error ? e.message : String(e));
+      }
     }
   }
 
@@ -143,18 +166,41 @@ export function RenameForm(props: { filePath: string; refresh: () => void; typeN
       navigationTitle={basename(props.filePath)}
       actions={
         <ActionPanel>
-          <Action title={`RenameForm ${props.typeName}`} onAction={renameItem} icon={Icon.Pencil} />
+          <Action title={`Rename ${props.typeName}`} onAction={renameItem} icon={Icon.Pencil} />
           <Action title="Cancel" shortcut={{ modifiers: ["cmd"], key: "." }} onAction={pop} icon={Icon.Undo} />
         </ActionPanel>
       }
     >
       <Form.TextField
         id="itemName"
-        title={`RenameForm ${props.typeName}`}
+        title={`Rename ${props.typeName}`}
         placeholder="Enter new name"
         value={itemName}
         onChange={setItemName}
       />
     </Form>
   );
+}
+
+export function isImageFile(file: FileDataType) {
+  const imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "tiff", "webp", "heic", "heif"];
+  const extension = file.name.split(".").pop()?.toLowerCase();
+  return extension && imageExtensions.includes(extension);
+}
+
+export async function handleSetWallpaper(filePath: string) {
+  await runAppleScript(
+    `tell application "System Events" to tell every desktop to set picture to "${filePath.replace(
+      /(["\\])/g,
+      "\\$1",
+    )}" as POSIX file`,
+  );
+}
+
+export function iCloudDrivePath(): string {
+  return join(homedir(), "Library/Mobile Documents/com~apple~CloudDocs");
+}
+
+export function escapeShellArg(arg: string): string {
+  return `'${arg.replace(/'/g, "'\\''")}'`;
 }

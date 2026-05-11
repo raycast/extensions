@@ -6,7 +6,7 @@ import { NOT_INSTALLED_MESSAGE } from "../constants";
 import { NotInstalledError, UnknownError } from "../components";
 
 export function useTabSearch(query?: string): SearchResult<Tab> {
-  const { useOriginalFavicon } = getPreferenceValues<{ useOriginalFavicon: boolean }>();
+  const { useOriginalFavicon } = getPreferenceValues<ExtensionPreferences>();
   const [data, setData] = useState<Tab[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [errorView, setErrorView] = useState<ReactNode | undefined>();

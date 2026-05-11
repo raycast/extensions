@@ -6,7 +6,9 @@
   "icon": "hide-icon.png",
   "author": "peduarte",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "andrewsardone",
+    "hayden_barnes"
   ],
   "categories": [
     "System"
@@ -49,5 +51,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

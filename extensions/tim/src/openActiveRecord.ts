@@ -1,4 +1,5 @@
-import { Toast, showToast } from "@raycast/api";
+import { Toast, captureException, showToast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 import { getActiveTask, installedWrapper, openActiveRecord } from "./lib/tim";
 
@@ -14,9 +15,7 @@ export default installedWrapper(async () => {
 
     await openActiveRecord();
   } catch (error) {
-    showToast({
-      title: "Active record could be opened",
-      style: Toast.Style.Failure,
-    });
+    captureException(error);
+    await showFailureToast(error, { title: "Failed to open active record" });
   }
 });

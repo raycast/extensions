@@ -16,7 +16,10 @@ export function PlaylistActionPanel({ title, playlist }: PlaylistActionPanelProp
       <Action.Push
         icon={Icon.AppWindowList}
         title="Show Songs"
-        shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "a" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "a" },
+        }}
         target={<TracksList playlist={playlist} />}
       />
       <FooterAction url={playlist?.external_urls?.spotify} uri={playlist.uri} title={title} />

@@ -62,21 +62,13 @@
       "required": true,
       "description": "Path to store pictures in repo.",
       "default": "gh-pic"
-    },
-    {
-      "name": "pngpastePath",
-      "title": "Full Path to pngpaste",
-      "type": "textfield",
-      "required": true,
-      "description": "Full Path to pngpaste",
-      "default": "/opt/homebrew/bin/pngpaste"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.39.1",
     "@octokit/core": "^4.0.5",
+    "@raycast/api": "^1.69.0",
     "dayjs": "^1.11.5",
-    "execa": "^6.1.0"
+    "file-type": "^19.0.0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.0.0",

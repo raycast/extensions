@@ -1,13 +1,15 @@
-import { ActionPanel, getPreferenceValues, List, Action, Icon, Color } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
 import moment from "moment";
 import React, { ReactElement, useState } from "react";
 import { WeatherIcons, getWeatherCodeIcon } from "../icons";
 import { getTemperatureUnit, getWttrTemperaturePostfix } from "../unit";
+import { convertToRelativeDate } from "../utils";
 import {
   Area,
   Weather,
   WeatherConditions,
   WeatherData,
+  convertToTimeString,
   getAreaValues,
   getCurrentCloudCover,
   getCurrentFeelLikeTemperature,
@@ -24,7 +26,6 @@ import {
 } from "../wttr";
 import { DayList } from "./day";
 import { useWeather } from "./hooks";
-import { convertToRelativeDate, getUVIndexIcon } from "../utils";
 
 export interface WttrDay {
   date: string;
@@ -75,7 +76,7 @@ export function getDayWeatherIcon(day: WeatherData): string {
   return getWeatherCodeIcon(code || "");
 }
 
-export function DayListItem(props: { day: WeatherData; title: string }): JSX.Element {
+export function DayListItem(props: { day: WeatherData; title: string }): React.ReactElement {
   const data = props.day;
   const wd = getWeekday(data.date);
   const weatherCodes = data.hourly.map((h) => h.weatherCode);
@@ -87,11 +88,11 @@ export function DayListItem(props: { day: WeatherData; title: string }): JSX.Ele
     <List.Item
       key={data.date}
       title={wd}
-      icon={getWeatherCodeIcon(weatherCode || "")}
+      icon={{ source: getWeatherCodeIcon(weatherCode || ""), tintColor: Color.PrimaryText }}
       accessories={[
         {
           text: data.sunHour ? `${data.sunHour} h` : undefined,
-          icon: data.sunHour ? WeatherIcons.Sunrise : undefined,
+          icon: { source: WeatherIcons.Sun, tintColor: Color.SecondaryText },
           tooltip: data.sunHour ? `Sun Hours: ${data.sunHour} h` : undefined,
         },
         {
@@ -104,7 +105,11 @@ export function DayListItem(props: { day: WeatherData; title: string }): JSX.Ele
       ]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Details" target={<DayList day={data} title={`${props.title} - ${wd}`} />} />
+          <Action.Push
+            title="Show Details"
+            icon={Icon.List}
+            target={<DayList day={data} title={`${props.title} - ${wd}`} />}
+          />
         </ActionPanel>
       }
     />
@@ -116,6 +121,24 @@ export function getWeekday(date: string): string {
   return d.locale("en").format("dddd");
 }
 
+function formatRequestQuery(query: string | undefined): string | undefined {
+  if (!query) {
+    return undefined;
+  }
+  const match = query.match(/Lat\s+([-\d.]+)\s+and\s+Lon\s+([-\d.]+)/i);
+  if (!match) {
+    return query;
+  }
+  const lat = parseFloat(match[1]);
+  const lon = parseFloat(match[2]);
+  if (Number.isNaN(lat) || Number.isNaN(lon)) {
+    return query;
+  }
+  const latDir = lat >= 0 ? "N" : "S";
+  const lonDir = lon >= 0 ? "E" : "W";
+  return `${Math.abs(lat).toFixed(2)}°${latDir}, ${Math.abs(lon).toFixed(2)}°${lonDir}`;
+}
+
 export function getMetaData(data: Weather | undefined): {
   title: string;
   curcon: WeatherConditions | undefined;
@@ -125,15 +148,16 @@ export function getMetaData(data: Weather | undefined): {
   if (!data) {
     return { title: "?", curcon: undefined, weatherDesc: undefined, area: undefined };
   }
-  const area = data.nearest_area[0];
-  const curcon = data.current_condition[0];
+  const area = data.nearest_area?.[0];
+  const curcon = data.current_condition?.[0];
 
-  const names = [area.areaName[0].value, area.region[0].value, area.country[0].value];
-  const title = names
-    .filter((n) => n && n.trim().length > 0)
+  const names = [area?.areaName?.[0]?.value, area?.region?.[0]?.value, area?.country?.[0]?.value];
+  const areaTitle = names
+    .filter((n): n is string => n != null && n.trim().length > 0)
     .map((n) => n.trim())
     .join(", ");
-  const weatherDesc = curcon ? curcon.weatherDesc[0].value : undefined;
+  const title = areaTitle || formatRequestQuery(data.request?.[0]?.query) || "?";
+  const weatherDesc = curcon?.weatherDesc?.[0]?.value;
   return { title, curcon, weatherDesc, area };
 }
 
@@ -158,7 +182,11 @@ function FeelsLikeItem(props: { curcon: WeatherConditions | undefined }) {
     return null;
   }
   return (
-    <List.Item title="Feels Like" icon={WeatherIcons.FeelsLike} accessories={[{ text: feelsLike.valueAndUnit }]} />
+    <List.Item
+      title="Feels Like"
+      icon={{ source: WeatherIcons.FeelsLike, tintColor: Color.PrimaryText }}
+      accessories={[{ text: feelsLike.valueAndUnit }]}
+    />
   );
 }
 
@@ -167,7 +195,13 @@ function UVIndexItem(props: { curcon: WeatherConditions | undefined }) {
   if (!uvIndex) {
     return null;
   }
-  return <List.Item title="UV Index" icon={getUVIndexIcon(uvIndex)} accessories={[{ text: uvIndex }]} />;
+  return (
+    <List.Item
+      title="UV Index"
+      icon={{ source: WeatherIcons.UVIndex, tintColor: Color.PrimaryText }}
+      accessories={[{ text: uvIndex }]}
+    />
+  );
 }
 
 function VisibilityItem(props: { curcon: WeatherConditions | undefined }) {
@@ -175,7 +209,13 @@ function VisibilityItem(props: { curcon: WeatherConditions | undefined }) {
   if (!vis) {
     return null;
   }
-  return <List.Item title="Visibility" icon={WeatherIcons.Visibility} accessories={[{ text: vis.distanceAndUnit }]} />;
+  return (
+    <List.Item
+      title="Visibility"
+      icon={{ source: WeatherIcons.Visibility, tintColor: Color.PrimaryText }}
+      accessories={[{ text: vis.distanceAndUnit }]}
+    />
+  );
 }
 
 function PressureItem(props: { curcon: WeatherConditions | undefined }) {
@@ -183,7 +223,13 @@ function PressureItem(props: { curcon: WeatherConditions | undefined }) {
   if (!p) {
     return null;
   }
-  return <List.Item title="Pressure" icon={WeatherIcons.Pressure} accessories={[{ text: p.valueAndUnit }]} />;
+  return (
+    <List.Item
+      title="Pressure"
+      icon={{ source: WeatherIcons.Pressure, tintColor: Color.PrimaryText }}
+      accessories={[{ text: p.valueAndUnit }]}
+    />
+  );
 }
 
 function LocationItem(props: { area: Area | undefined }) {
@@ -197,8 +243,8 @@ function LocationItem(props: { area: Area | undefined }) {
   }
   return (
     <List.Item
-      title="Location Coordinates"
-      icon={WeatherIcons.Coordinate}
+      title="Coordinates"
+      icon={{ source: WeatherIcons.Coordinates, tintColor: Color.PrimaryText }}
       accessories={[
         {
           text: coords,
@@ -217,10 +263,18 @@ function SunItem(props: { data: Weather | undefined }) {
   return (
     <List.Item
       title="Sun"
-      icon={WeatherIcons.Sunrise}
+      icon={{ source: WeatherIcons.Sun, tintColor: Color.PrimaryText }}
       accessories={[
-        { icon: WeatherIcons.Sunrise, text: s.sunrise, tooltip: `Sunrise ${s.sunrise}` },
-        { icon: WeatherIcons.Sunset, text: s.sunset, tooltip: `Sunset ${s.sunset}` },
+        {
+          icon: { source: WeatherIcons.Sunrise, tintColor: Color.PrimaryText },
+          text: convertToTimeString(s.sunrise),
+          tooltip: `Sunrise ${convertToTimeString(s.sunrise)}`,
+        },
+        {
+          icon: { source: WeatherIcons.Sunset, tintColor: Color.PrimaryText },
+          text: convertToTimeString(s.sunset),
+          tooltip: `Sunset ${convertToTimeString(s.sunset)}`,
+        },
       ]}
     />
   );
@@ -235,12 +289,16 @@ function MoonItem(props: { data: Weather | undefined }) {
     <List.Item
       title="Moon"
       subtitle={m.moonPhase}
-      icon={WeatherIcons.Moon}
+      icon={{ source: WeatherIcons.Moon, tintColor: Color.PrimaryText }}
       accessories={[
-        { icon: WeatherIcons.Moonrise, text: m.moonrise, tooltip: `Moonrise ${m.moonrise}` },
+        {
+          icon: { source: WeatherIcons.Moonrise, tintColor: Color.SecondaryText },
+          text: convertToTimeString(m.moonrise),
+          tooltip: `Moonrise ${convertToTimeString(m.moonrise)}`,
+        },
         {
           icon: { source: WeatherIcons.Moonset, tintColor: Color.SecondaryText },
-          text: m.moonset,
+          text: convertToTimeString(m.moonset),
           tooltip: `Moonset ${m.moonset}`,
         },
       ]}
@@ -264,25 +322,25 @@ function WeatherCurrentListItemFragment(props: { data: Weather | undefined }): R
 
   return (
     <>
-      <List.Section title={`Weather Report (${title}) ${observationRelative ? " - " + observationRelative : ""}`}>
+      <List.Section title={`Weather Report • ${title} ${observationRelative ? "• " + observationRelative : ""}`}>
         <List.Item
           title={getCurrentTemperature(curcon) || ""}
           subtitle={weatherDesc}
-          icon={{ value: getWeatherCodeIcon(curcon?.weatherCode), tooltip: weatherDesc || "" }}
+          icon={{ source: getWeatherCodeIcon(curcon?.weatherCode), tintColor: Color.PrimaryText }}
           accessories={[
             {
               text: sun ? sun.valueAndUnit : undefined,
-              icon: sun ? WeatherIcons.Sunrise : undefined,
+              icon: { source: WeatherIcons.Sunrise, tintColor: Color.SecondaryText },
               tooltip: sun ? `Sun Hours: ${sun.valueAndUnit}` : undefined,
             },
             {
               text: cloud ? cloud.valueAndUnit : undefined,
-              icon: cloud ? WeatherIcons.Cloud : undefined,
+              icon: { source: WeatherIcons.Cloud, tintColor: Color.SecondaryText },
               tooltip: cloud ? `Cloud Cover ${cloud.valueAndUnit}` : undefined,
             },
             {
               text: rain && rain.value > 0 ? rain.valueAndUnit : undefined,
-              icon: rain && rain.value > 0 ? WeatherIcons.Rain : undefined,
+              icon: rain && rain.value > 0 ? { source: WeatherIcons.Rain, tintColor: Color.SecondaryText } : "",
             },
             {
               icon: { source: WeatherIcons.Humidity, tintColor: Color.SecondaryText },
@@ -316,12 +374,14 @@ function WeatherDailyForecastFragment(props: { data: Weather | undefined }): Rea
   const { title } = getMetaData(data);
   return (
     <List.Section title="Daily Forecast">
-      {data?.weather?.map((d) => <DayListItem key={d.date} day={d} title={title} />)}
+      {data?.weather?.map((d) => (
+        <DayListItem key={d.date} day={d} title={title} />
+      ))}
     </List.Section>
   );
 }
 
-export function WeatherListOrDay(props: { day?: WttrDay }): JSX.Element {
+export function WeatherListOrDay(props: { day?: WttrDay }): React.ReactElement {
   const [query, setQuery] = useState<string>("");
   const { data, error, isLoading } = useWeather(query);
   if (props.day) {

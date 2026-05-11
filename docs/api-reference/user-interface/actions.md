@@ -128,10 +128,10 @@ export default function Command() {
 
 ### Action.OpenWith
 
-Action that opens a file or folder with a specific application.
+Action that opens a file or URL with a specific application.
 
-The action opens a sub-menu with all applications that can open the file or folder.
-The main window is closed after the file is opened in the specified application.
+The action opens a sub-menu with all applications that can open the file or URL.
+The main window is closed after the item is opened in the specified application.
 
 #### Example
 
@@ -384,7 +384,7 @@ export default function Command() {
         quickLook={{ path: "~/Downloads/Raycast.dmg", name: "Some file" }}
         actions={
           <ActionPanel>
-            <Action.ToggleQuickLook shortcut={{ modifiers: ["cmd"], key: "y" }} />
+            <Action.ToggleQuickLook />
           </ActionPanel>
         }
       />

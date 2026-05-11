@@ -1,8 +1,3 @@
-export interface PasswordHistory {
-  lastUsedDate: string;
-  password: string;
-}
-
 export type PasswordType = "password" | "passphrase";
 
 export interface PasswordOptions {
@@ -15,12 +10,16 @@ export interface PasswordOptions {
   /** Include special characters */
   special?: boolean;
   /** Length of the password */
-  length?: number;
+  length?: string;
+  /** Minimum number of numeric characters */
+  minNumber?: string;
+  /** Minimum number of special characters */
+  minSpecial?: string;
 }
 
 export interface PassphraseOptions {
   /** Number of words */
-  words?: number;
+  words?: string;
   /** Word separator */
   separator?: string;
   /** Title case passphrase */
@@ -33,12 +32,3 @@ export type PasswordGeneratorOptions = {
   passphrase?: boolean;
 } & PasswordOptions &
   PassphraseOptions;
-
-export interface PasswordOptionField {
-  label: string;
-  hint?: string;
-  type: "boolean" | "number" | "string";
-  errorMessage?: string;
-}
-
-export type PasswordOptionsToFieldEntries = [keyof PasswordGeneratorOptions, PasswordOptionField];

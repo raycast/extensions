@@ -22,7 +22,7 @@ export default function SearchEntries() {
         isLoading={state.isLoading}
         onSearchTextChange={setSearchText}
         navigationTitle="Search entries"
-        searchBarPlaceholder="Search from your miniflux feeds"
+        searchBarPlaceholder="Search from your Miniflux feeds"
         searchBarAccessory={<FilterDropdown handleFilter={setFilterValue} filter="status" />}
         throttle
       >

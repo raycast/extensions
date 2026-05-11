@@ -2,7 +2,8 @@ import { Action, ActionPanel, Clipboard, closeMainWindow, Icon, List, showHUD, s
 import { useEffect, useState } from "react";
 import gopass from "./gopass";
 import { humanize, isValidUrl } from "./utils";
-import { copyPassword, pastePassword, copyOTP, pasteOTP } from "./index";
+import { copyPassword, pastePassword, copyOTP, pasteOTP, removePassword } from "./index";
+import CreateEditPassword from "./create-edit";
 
 async function copy(key: string, value: string): Promise<void> {
   await Clipboard.copy(value);
@@ -23,7 +24,7 @@ export default function ({ entry }: { entry: string }): JSX.Element {
   useEffect((): void => {
     gopass
       .show(entry)
-      .then(setDetails)
+      .then((value) => setDetails(value.attributes))
       .catch(async (error) => {
         console.error(error);
         await showToast({ title: "Could not load passwords", style: Toast.Style.Failure });
@@ -42,6 +43,12 @@ export default function ({ entry }: { entry: string }): JSX.Element {
               <ActionPanel>
                 <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyPassword(entry)} />
                 <Action title="Paste to Active App" icon={Icon.Document} onAction={() => pastePassword(entry)} />
+                <Action.Push
+                  title="Edit Password"
+                  icon={Icon.EditShape}
+                  target={<CreateEditPassword inputPassword={entry} />}
+                />
+                <Action title="Delete Password" icon={Icon.DeleteDocument} onAction={() => removePassword(entry)} />
               </ActionPanel>
             }
           />
@@ -59,6 +66,12 @@ export default function ({ entry }: { entry: string }): JSX.Element {
                   <ActionPanel>
                     <Action title="Copy to Clipboard" icon={Icon.Clipboard} onAction={() => copyOTP(entry)} />
                     <Action title="Paste to Active App" icon={Icon.Document} onAction={() => pasteOTP(entry)} />
+                    <Action.Push
+                      title="Edit Password"
+                      icon={Icon.EditShape}
+                      target={<CreateEditPassword inputPassword={entry} />}
+                    />
+                    <Action title="Delete Password" icon={Icon.DeleteDocument} onAction={() => removePassword(entry)} />
                   </ActionPanel>
                 }
               />

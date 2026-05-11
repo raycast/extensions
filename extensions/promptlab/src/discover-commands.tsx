@@ -1,8 +1,8 @@
 import { ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { StoreCommand } from "./utils/types";
+import { StoreCommand } from "./lib/commands/types";
 import { useCachedState, useFetch } from "@raycast/utils";
-import { STORE_ENDPOINT, STORE_KEY } from "./utils/constants";
+import { STORE_ENDPOINT, STORE_KEY } from "./lib/common/constants";
 import CategoryDropdown from "./components/CategoryDropdown";
 import { useCommands } from "./hooks/useCommands";
 import CommandListDetail from "./components/Commands/CommandListDetail";
@@ -44,12 +44,7 @@ export default function Discover() {
         detail={<CommandListDetail command={command} />}
         actions={
           <ActionPanel>
-            <InstallCommandAction
-              command={command}
-              commands={myCommands}
-              setCommands={setMyCommands}
-              settings={advancedSettings}
-            />
+            <InstallCommandAction command={command} setCommands={setMyCommands} settings={advancedSettings} />
             {command.setupConfig?.length ? null : <RunCommandAction command={command} settings={advancedSettings} />}
             <CopyCommandActionsSection command={command} settings={advancedSettings} />
             <CommandControlsActionsSection

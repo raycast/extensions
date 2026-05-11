@@ -1,17 +1,20 @@
 import { useEffect, useState } from "react";
-import { Command, Device, Platform } from "./types";
-import { getCommands, getDevices } from "./actions";
-import { sortDevices } from "./utils";
 import { LocalStorage } from "@raycast/api";
 
-const useDevices = (platform: Platform) => {
+import { sortDevices } from "./utils";
+import { getCommands, getDevices } from "./actions";
+import { Command, Device, DeviceType, Platform } from "./types";
+
+const useDevices = (platform: Platform, deviceType: DeviceType) => {
   const [devices, setDevices] = useState<Device[]>([]);
   const [commands, setCommands] = useState<Command[]>([]);
   const [isError, setIsError] = useState(false);
 
   useEffect(() => {
     const fetchDevices = async () => {
-      const cached = await LocalStorage.getItem(platform);
+      const localStorageKey = `${platform}-${deviceType}`;
+
+      const cached = await LocalStorage.getItem(localStorageKey);
       const { devices: cachedDevices, commands: cachedCommands } =
         typeof cached === "string" ? JSON.parse(cached) : { commands: [], devices: [] };
 
@@ -19,18 +22,21 @@ const useDevices = (platform: Platform) => {
         setDevices(cachedDevices);
         setCommands(cachedCommands);
       }
-      const [newDevices, newCommands] = await Promise.all([getDevices(platform), getCommands(platform)]);
+      const [newDevices, newCommands] = await Promise.all([
+        getDevices(platform, deviceType),
+        getCommands(platform, deviceType),
+      ]);
 
       setDevices(newDevices?.sort(sortDevices));
       setCommands(newCommands);
-      LocalStorage.setItem(platform, JSON.stringify({ devices: newDevices, commands: newCommands }));
+      LocalStorage.setItem(localStorageKey, JSON.stringify({ devices: newDevices, commands: newCommands }));
     };
 
     fetchDevices().catch((e) => {
       console.error(e);
       setIsError(true);
     });
-  }, []);
+  }, [platform, deviceType]);
 
   return { devices, commands, isError };
 };

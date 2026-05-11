@@ -5,9 +5,13 @@ Created by [@FlohGro](https://social.lol/@flohgro) ([Website](https://flohgro.co
 
 It supports the following features as commands:
 
-## Create Draft
+## Create Draft in Background / Create and Open Draft
 
-create drafts in a Raycast form with tags.
+Create drafts in a Raycast form with tags (either with opening it afterwards or in the background).
+
+## Capture Draft
+
+Quickly capture content from command argument into a new draft in the background.
 
 ## Append/Prepend to Draft
 
@@ -55,6 +59,12 @@ This is a helper command to easily create additional Raycast Quicklinks to perfo
 - search in the Action list
 - capture text with Drafts capture window
 - open the dictation window
+
+## Create Open Draft Quicklink
+
+Create a Raycast Quicklink to open a Draft by passing a title and the UUID of the Draft.
+
+Tip: Use it together with the corresponding [Drafts Action](https://directory.getdrafts.com/a/2RC) to easily create Quicklinks for currently open Drafts.
 
 ## Support Development
 

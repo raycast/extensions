@@ -1,5 +1,27 @@
 import path from "path";
-import { DEFAULT_BRAVE_PROFILE_ID, defaultBraveProfilePath, defaultBraveStatePath } from "../constants";
+import {
+  DEFAULT_BRAVE_PROFILE_ID,
+  defaultBraveProfilePath,
+  defaultBraveBetaProfilePath,
+  defaultBraveNightlyProfilePath,
+  defaultBraveStatePath,
+} from "../constants";
+import { getPreferenceValues } from "@raycast/api";
+
+const { browserOption } = getPreferenceValues<Preferences>();
+
+let prefProfile: string[];
+
+switch (browserOption) {
+  case "Brave Browser Beta":
+    prefProfile = defaultBraveBetaProfilePath;
+    break;
+  case "Brave Browser Nightly":
+    prefProfile = defaultBraveNightlyProfilePath;
+    break;
+  default:
+    prefProfile = defaultBraveProfilePath;
+}
 
 const userLibraryDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -10,9 +32,9 @@ const userLibraryDirectoryPath = () => {
 };
 
 export const getHistoryDbPath = (profile?: string) =>
-  path.join(userLibraryDirectoryPath(), ...defaultBraveProfilePath, profile ?? DEFAULT_BRAVE_PROFILE_ID, "History");
+  path.join(userLibraryDirectoryPath(), ...prefProfile, profile ?? DEFAULT_BRAVE_PROFILE_ID, "History");
 
 export const getLocalStatePath = () => path.join(userLibraryDirectoryPath(), ...defaultBraveStatePath);
 
 export const getBookmarksFilePath = (profile?: string) =>
-  path.join(userLibraryDirectoryPath(), ...defaultBraveProfilePath, profile ?? DEFAULT_BRAVE_PROFILE_ID, "Bookmarks");
+  path.join(userLibraryDirectoryPath(), ...prefProfile, profile ?? DEFAULT_BRAVE_PROFILE_ID, "Bookmarks");

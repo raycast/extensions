@@ -10,8 +10,8 @@ import { useAsyncEffect } from "~/utils/hooks/useAsyncEffect";
 type FavoritesContext = {
   favoriteOrder: string[];
   setFavoriteOrder: Dispatch<SetStateAction<string[] | undefined>>;
-  toggleFavorite: (item: Item) => Promise<void>;
-  moveFavorite: (item: Item, direction: "up" | "down") => Promise<void>;
+  toggleFavorite: (item: Item) => void;
+  moveFavorite: (item: Item, direction: "up" | "down") => void;
 };
 
 const FavoritesContext = createContext<FavoritesContext>({} as FavoritesContext);
@@ -48,14 +48,14 @@ export function FavoritesProvider({ children }: FavoritesProviderProps) {
     void persistFavoriteOrder(favoriteOrder);
   }, [favoriteOrder]);
 
-  const toggleFavorite = async (item: Item) => {
+  const toggleFavorite = (item: Item) => {
     setFavoriteOrder((order = []) => {
       if (!favoriteOrder?.includes(item.id)) return [item.id, ...order];
       return order.filter((fid) => fid !== item.id);
     });
   };
 
-  const moveFavorite = async ({ id }: Item, direction: "up" | "down") => {
+  const moveFavorite = ({ id }: Item, direction: "up" | "down") => {
     if (!favoriteOrder) return;
     const currentPosition = favoriteOrder.indexOf(id);
     if (currentPosition === -1) return;

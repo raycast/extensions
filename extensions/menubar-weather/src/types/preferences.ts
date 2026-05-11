@@ -1,8 +1,8 @@
 export interface Preferences {
   iconStyle: string;
   cityName: string;
-  longitude: string;
   latitude: string;
+  longitude: string;
   tempUnits: string;
   windSpeedUnits: string;
   precipitationUnits: string;

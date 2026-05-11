@@ -5,7 +5,7 @@ import ErrorComponent from "./components/ErrorComponent";
 import { getPostalCodeLocationInformation } from "./utils/api";
 
 export default function GetPostalCodeLocationInformation(
-  props: LaunchProps<{ arguments: Arguments.GetPostalCodeLocationInformation }>
+  props: LaunchProps<{ arguments: Arguments.GetPostalCodeLocationInformation }>,
 ) {
   const { codes, country } = props.arguments;
 
@@ -63,7 +63,7 @@ export default function GetPostalCodeLocationInformation(
                             />
                             {key === "province_code" && <List.Item.Detail.Metadata.Separator />}
                           </Fragment>
-                        ))
+                        )),
                       )}
                     </List.Item.Detail.Metadata>
                   }

@@ -1,6 +1,6 @@
 import { useFetch } from "@raycast/utils";
 import { itemsPerPage, scoreThreshold } from "@ts/constants";
-import { TGalleryPage, THistoryFilter, THistoryPage } from "@ts/types";
+import { TGalleryPage, THistoryFilter } from "@ts/types";
 
 export default function useHistory({
   search,
@@ -11,9 +11,9 @@ export default function useHistory({
   token: string | undefined;
   filter: THistoryFilter;
 }): {
-  historyPage: TGalleryPage | undefined;
-  historyPageError: Error | undefined;
-  isLoadingHistoryPage: boolean;
+  page: TGalleryPage | undefined;
+  pageError: Error | undefined;
+  isLoadingPage: boolean;
 } {
   const endpoint = "https://api.stablecog.com/v1/image/generation/outputs";
   const url = new URL(endpoint);
@@ -26,35 +26,15 @@ export default function useHistory({
   if (filter === "favorites") {
     url.searchParams.append("is_favorited", "true");
   }
-  const { data, error, isLoading } = useFetch<THistoryPage>(url.toString(), {
+  const { data, error, isLoading } = useFetch<TGalleryPage>(url.toString(), {
     method: "GET",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
+    execute: token !== undefined,
   });
-  let dataAsGalleryPage: TGalleryPage | undefined;
-  if (data) {
-    dataAsGalleryPage = {
-      next: data.next,
-      hits: data.outputs.map((output) => ({
-        width: output.generation.width,
-        height: output.generation.height,
-        id: output.id,
-        image_url: output.image_url,
-        upscaled_image_url: output.upscaled_image_url,
-        prompt_text: output.generation.prompt.text,
-        guidance_scale: output.generation.guidance_scale,
-        inference_steps: output.generation.inference_steps,
-        model_id: output.generation.model_id,
-        scheduler_id: output.generation.scheduler_id,
-      })),
-    };
-  } else {
-    dataAsGalleryPage = undefined;
-  }
   if (!token) {
-    return { historyPage: undefined, historyPageError: undefined, isLoadingHistoryPage: true };
+    return { page: undefined, pageError: undefined, isLoadingPage: true };
   }
-  return { historyPage: dataAsGalleryPage, historyPageError: error, isLoadingHistoryPage: isLoading };
+  return { page: data, pageError: error, isLoadingPage: isLoading };
 }

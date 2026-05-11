@@ -1,12 +1,12 @@
-import { Detail, environment, MenuBarExtra } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { Detail, environment, LaunchType, MenuBarExtra } from "@raycast/api";
+import { useMemo, useState, ReactElement } from "react";
 import { getAuthorizedGmailClient } from "./gmail";
 import { gmail_v1 } from "@googleapis/gmail";
 import { showFailureToast } from "@raycast/utils";
 
 let gmail: gmail_v1.Gmail | null = null;
 
-export function withGmailClient(component: JSX.Element) {
+export function withGmailClient(component: ReactElement) {
   const [x, forceRerender] = useState(0);
 
   useMemo(() => {
@@ -14,7 +14,11 @@ export function withGmailClient(component: JSX.Element) {
       try {
         gmail = await getAuthorizedGmailClient();
       } catch (error) {
-        showFailureToast(error);
+        if (environment.launchType === LaunchType.Background) {
+          console.error(error);
+        } else {
+          showFailureToast(error);
+        }
       }
 
       forceRerender(x + 1);

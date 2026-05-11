@@ -1,4 +1,7 @@
+import { Application } from "@raycast/api";
+
 export interface ProjectEntry {
+  id: string;
   name: string;
   rootPath: string;
   tags: string[];
@@ -13,14 +16,9 @@ export interface CachedProjectEntry {
 export interface Preferences {
   projectManagerDataPath: string;
   groupProjectsByTag: boolean;
-  terminalAppPath: string;
-  gitClientAppPath: string;
-  build: VSCodeBuild;
+  terminalApp: Application;
+  gitClientApp: Application;
+  vscodeApp: Application;
   hideProjectsWithoutTag: boolean;
-}
-
-export enum VSCodeBuild {
-  Code = "Code",
-  Insiders = "Code - Insiders",
-  VSCodium = "VSCodium",
+  hideProjectsNotEnabled: boolean;
 }

@@ -10,6 +10,17 @@
     "Media"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "isShowHUD",
+      "label": "Enable",
+      "description": "Show compact message when keys are triggered.",
+      "type": "checkbox",
+      "title": "Show HUD",
+      "default": false,
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "play",

@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "universal-inbox",
+  "title": "Universal Inbox",
+  "description": "Manage your notifications in a single Universal Inbox",
+  "icon": "ui-logo-transparent.png",
+  "author": "dax42",
+  "version": "0.2.0",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "apiKey",
+      "description": "Your Universal Inbox key",
+      "type": "password",
+      "required": true,
+      "title": "Universal Inbox API Key",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxx"
+    },
+    {
+      "name": "universalInboxBaseUrl",
+      "description": "The Universal Inbox instance URL to use",
+      "type": "textfield",
+      "required": true,
+      "title": "Universal Inbox instance URL",
+      "placeholder": "https://app.universal-inbox.com"
+    }
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "List Notifications",
+      "description": "List Universal Inbox notifications",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.65.1",
+    "@raycast/utils": "^1.10.1",
+    "dayjs": "^1.11.10",
+    "node-fetch": "^3.3.2",
+    "ts-pattern": "^5.0.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "@typescript-eslint/parser": "^7.2.0",
+    "eslint": "^8.56.0",
+    "eslint-import-resolver-typescript": "^3.6.1",
+    "eslint-plugin-import": "^2.29.1",
+    "prettier": "^3.0.3",
+    "prettier-plugin-sort-imports": "^1.8.3",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "format": "prettier --write --list-different --ignore-unknown src",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

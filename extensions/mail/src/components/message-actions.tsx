@@ -13,24 +13,25 @@ import {
 import { AttachmentList } from "./attachment-list";
 import { ComposeMessage } from "./compose-message";
 import { MessageDetail } from "./message-detail";
-import { MessageProps, OutgoingMessageAction, Preferences } from "../types";
+import { MessageProps, OutgoingMessageAction } from "../types";
 import {
   openMessage,
   toggleMessageRead,
   moveMessageToJunk,
   moveMessageToTrash,
   deleteMessage,
+  moveMessageToArchive,
 } from "../scripts/messages";
 import { saveAllAttachments, saveAttachment } from "../scripts/attachments";
-import { isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
+import { isArchiveMailbox, isJunkMailbox, isTrashMailbox } from "../utils/mailbox";
 import { MailIcon, OutgoingMessageIcon } from "../utils/presets";
 
-const { primaryAction }: Preferences = getPreferenceValues();
+const { primaryAction } = getPreferenceValues<Preferences>();
 
-export type MessageActionsProps = MessageProps & { inMessageView?: boolean };
+export type MessageActionsProps = MessageProps & { inMessageView?: boolean; onRefresh?: () => void };
 
 export const MessageActions = (props: MessageActionsProps) => {
-  const { mailbox, account, message, inMessageView, onAction } = props;
+  const { mailbox, account, message, inMessageView, onAction, onRefresh } = props;
 
   const navigation = useNavigation();
 
@@ -80,8 +81,8 @@ export const MessageActions = (props: MessageActionsProps) => {
         <SeeInMail />
       ) : (
         <>
-          {primaryAction === "seeInMail" ? <SeeInMail /> : <SeeMessage />}
-          {primaryAction === "seeInMail" ? <SeeMessage /> : <SeeInMail />}
+          {primaryAction === "openMessage" ? <SeeInMail /> : <SeeMessage />}
+          {primaryAction === "openMessage" ? <SeeMessage /> : <SeeInMail />}
         </>
       )}
       <ActionPanel.Section>
@@ -159,6 +160,25 @@ export const MessageActions = (props: MessageActionsProps) => {
           </>
         )}
 
+        {!isArchiveMailbox(mailbox) && (
+          <Action
+            title={"Move to Archive"}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
+            icon={MailIcon.Archive}
+            onAction={async () => {
+              const action = async () => {
+                await moveMessageToArchive(message, account, mailbox);
+                if (inMessageView) navigation.pop();
+              };
+
+              const actionPayload = { account, message };
+              const invokeAction = onAction ? () => onAction(action, actionPayload) : action;
+
+              invokeAction();
+            }}
+          />
+        )}
+
         {!isJunkMailbox(mailbox) && (
           <Action
             title={"Move to Junk"}
@@ -222,6 +242,16 @@ export const MessageActions = (props: MessageActionsProps) => {
           />
         )}
       </ActionPanel.Section>
+      {onRefresh && (
+        <ActionPanel.Section>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["opt", "shift"], key: "r" }}
+            onAction={onRefresh}
+          />
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
 };

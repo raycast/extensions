@@ -1,5 +1,27 @@
 # Hypersonic Changelog
 
+## [2.1.1] - 2025-08-04
+
+#### New
+
+- Added an option to update the title of a task
+
+#### Updated
+
+- Moved all icon files to assets/icons/ for better organization
+
+## [2.1.0] - 2024-04-29
+
+#### New
+
+- Use `/` to set the status for a new TODO item during creation
+
+## [2.0.5] - 2024-02-13
+
+### Updated
+
+- Fixed a bug that caused extension to crash if menu bar action was disabled
+
 ## [2.0.4] - 2023-09-04
 
 #### Updated

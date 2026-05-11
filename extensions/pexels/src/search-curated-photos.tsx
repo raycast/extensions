@@ -1,24 +1,19 @@
-import { getPreferenceValues } from "@raycast/api";
-import React, { useState } from "react";
-import { getCuratedPhotos } from "./hooks/hooks";
-import { Preferences } from "./types/preferences";
+import { useMemo } from "react";
 import { CuratedPhotosList } from "./components/curated-photos-list";
 import { CuratedPhotosGrid } from "./components/curated-photos-grid";
+import { useCuratedPhotos } from "./hooks/useCuratedPhotos";
+import { layout } from "./types/preferences";
 
 export default function SearchCuratedPhotos() {
-  const preferences = getPreferenceValues<Preferences>();
-  const [page, setPage] = useState<number>(1);
-  const { pexelsPhotos, loading } = getCuratedPhotos(page);
+  const { data: photosData, isLoading, pagination } = useCuratedPhotos();
 
-  return preferences.layout === "List" ? (
-    <CuratedPhotosList pexelsPhotos={pexelsPhotos} loading={loading} page={page} setPage={setPage} />
+  const photos = useMemo(() => {
+    return photosData || [];
+  }, [photosData]);
+
+  return layout === "List" ? (
+    <CuratedPhotosList photos={photos} isLoading={isLoading} pagination={pagination} />
   ) : (
-    <CuratedPhotosGrid
-      preferences={preferences}
-      pexelsPhotos={pexelsPhotos}
-      loading={loading}
-      page={page}
-      setPage={setPage}
-    />
+    <CuratedPhotosGrid photos={photos} isLoading={isLoading} pagination={pagination} />
   );
 }

@@ -1,5 +1,5 @@
 import { Alert, Icon, Toast, confirmAlert, showToast } from '@raycast/api'
-import type { Instance } from '@scaleway/sdk'
+import type { Instancev1 } from '@scaleway/sdk'
 import ActionStyle = Alert.ActionStyle
 import Style = Toast.Style
 
@@ -10,8 +10,8 @@ export const getErrorMessage = (e: unknown) => {
 }
 
 type ActionProps = {
-  api: Instance.v1.API
-  server: Instance.v1.Server
+  api: Instancev1.API
+  server: Instancev1.Server
   onSuccess: () => Promise<void> | void
 }
 

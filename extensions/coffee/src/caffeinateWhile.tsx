@@ -1,13 +1,18 @@
-import { Form, ActionPanel, popToRoot, Action } from "@raycast/api";
+import { Action, ActionPanel, Form, popToRoot } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { Process } from "./interfaces";
 import { startCaffeinate } from "./utils";
+
+interface Process {
+  [key: string]: string;
+}
 
 export default function Command() {
   const [loading, setLoading] = useState(true);
   const [processes, setProcesses] = useState<Process[]>([]);
   useEffect(() => {
+    let isMounted = true;
+
     (async () => {
       const ids = (
         await runAppleScript(
@@ -19,10 +24,17 @@ export default function Command() {
           `tell application "System Events" to get the name of every process whose background only is false`,
         )
       ).split(", ");
+
+      if (!isMounted) return;
+
       const arr: Process[] = names.map((value, index) => ({ [value]: ids[index] }));
       setProcesses(arr);
       setLoading(false);
     })();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -32,8 +44,12 @@ export default function Command() {
         <ActionPanel>
           <Action.SubmitForm
             title="Caffeinate"
-            onSubmit={async () => {
-              await startCaffeinate({ menubar: true, status: true });
+            onSubmit={async (data) => {
+              await startCaffeinate(
+                { menubar: true, status: true },
+                "Caffeinate process started",
+                `-w ${data.process}`,
+              );
               popToRoot();
             }}
           />

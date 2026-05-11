@@ -10,16 +10,20 @@ import {
   Image,
   confirmAlert,
   Alert,
+  Keyboard,
 } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { StoriesList } from "./stories";
 import AddFeedForm from "./subscription-form";
+import RenameFeedForm from "./rename-form";
+import DuplicateFeedForm from "./duplicate-form";
 
 export interface Feed {
   url: string;
   title: string;
   link?: string;
   icon: Image.ImageLike;
+  originalTitle?: string;
 }
 
 function FeedsList() {
@@ -39,12 +43,14 @@ function FeedsList() {
     revalidate();
   };
 
-  const moveFeed = (index: number, change: number) => {
-    if (index + change < 0 || index + change > feeds.length - 1) {
+  const moveFeed = async (index: number, change: number) => {
+    const newIndex = index + change;
+    if (newIndex < 0 || newIndex >= feeds.length) {
       return;
     }
     const feedItems = [...feeds] as Feed[];
-    [feedItems[index], feedItems[index + change]] = [feedItems[index + change], feedItems[index]];
+    [feedItems[index], feedItems[newIndex]] = [feedItems[newIndex], feedItems[index]];
+    await LocalStorage.setItem("feeds", JSON.stringify(feedItems));
     revalidate();
   };
 
@@ -83,12 +89,13 @@ function FeedsList() {
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                 />
                 <Action
+                  style={Action.Style.Destructive}
                   title="Remove Feed"
                   onAction={async () => {
                     confirmAlert({
                       title: "Delete Feed?",
                       message: `Warning: This operation cannot be undone.`,
-                      icon: Icon.Trash,
+                      icon: { source: Icon.Trash, tintColor: Color.Red },
                       primaryAction: {
                         title: "Delete",
                         onAction: () => removeFeed(index),
@@ -99,12 +106,24 @@ function FeedsList() {
                   icon={{ source: Icon.Trash, tintColor: Color.Red }}
                   shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
                 />
+                <Action.Push
+                  icon={Icon.Pencil}
+                  title="Rename Feed"
+                  target={<RenameFeedForm feed={item} feeds={feeds} onRename={revalidate} />}
+                  shortcut={Keyboard.Shortcut.Common.Edit}
+                />
+                <Action.Push
+                  icon={Icon.Duplicate}
+                  title="Duplicate Feed"
+                  target={<DuplicateFeedForm feed={item} />}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
+                />
               </ActionPanel.Section>
               {feeds.length > 1 && (
                 <ActionPanel.Section>
                   {index != 0 && (
                     <Action
-                      title="Move Up in List"
+                      title="Move up in List"
                       onAction={() => moveFeed(index, -1)}
                       icon={{ source: Icon.ChevronUp }}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "arrowUp" }}

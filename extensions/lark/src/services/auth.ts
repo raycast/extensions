@@ -1,6 +1,6 @@
-import { showToast, Toast } from '@raycast/api';
-import got from 'got';
-import { GENERAL_DOMAIN, getDomain } from '../utils/config';
+import { showToast, Toast } from "@raycast/api";
+import got from "got";
+import { GENERAL_DOMAIN, getDomain } from "../utils/config";
 
 export enum QRCodeStatus {
   Init = 0,
@@ -12,8 +12,8 @@ export enum QRCodeStatus {
 }
 
 export enum NextStep {
-  Polling = 'qr_login_polling',
-  EnterApp = 'enter_app',
+  Polling = "qr_login_polling",
+  EnterApp = "enter_app",
 }
 
 type QRCodeAPIWrapper<T> = {
@@ -22,35 +22,10 @@ type QRCodeAPIWrapper<T> = {
   data: T;
 };
 
-export interface User {
-  id: string;
-  name: string;
-  i18n_names: {
-    en_us: string;
-    ja_jp: string;
-    zh_cn: string;
-  };
+export interface QRCodeUser {
   status: number;
-  tenant: {
-    id: string;
-    name: string;
-    icon_url: string;
-    icon_key: string;
-    tenant_tag: number;
-    tenant_brand: string;
-    encrypted_tenant_key: string;
-    tenant_domain: string;
-    tenant_full_domain: string;
-  };
   avatar_url: string;
   avatar_key: string;
-  create_time: number;
-  last_login_time: number;
-  login_credential_id: string;
-  encrypted_role: string;
-  unit: string;
-  geo: string;
-  exclude_login: boolean;
 }
 
 export interface InitQRCodeResponse {
@@ -67,19 +42,19 @@ export interface PollingQRCodeResponse {
   step_info: {
     status: QRCodeStatus;
     token: string;
-    user: null | User;
+    user: null | QRCodeUser;
   };
 }
 
 const client = got.extend({
-  prefixUrl: getDomain('login'),
-  responseType: 'json',
+  prefixUrl: getDomain("login"),
+  responseType: "json",
   headers: {
-    'x-api-version': '1.0.8',
-    'x-app-id': '2',
-    'x-device-info': 'device_id=0;device_name=Raycast;device_os=Mac',
-    'x-locale': 'en-US',
-    'x-terminal-type': '2',
+    "x-api-version": "1.0.8",
+    "x-app-id": "2",
+    "x-device-info": "device_id=0;device_name=Raycast;device_os=Mac",
+    "x-locale": "en-US",
+    "x-terminal-type": "2",
   },
 });
 
@@ -87,12 +62,12 @@ export async function initQRCode(): Promise<
   | false
   | {
       token: string;
-      polling: () => Promise<{ next_step: NextStep; status: QRCodeStatus; user: null | User; cookie?: string[] }>;
+      polling: () => Promise<{ next_step: NextStep; status: QRCodeStatus; user: null | QRCodeUser; cookie?: string[] }>;
     }
 > {
   try {
     const { body, headers: initHeaders } = await client.post<QRCodeAPIWrapper<InitQRCodeResponse>>(
-      'accounts/qrlogin/init',
+      "accounts/qrlogin/init",
       { json: { biz_type: null, redirect_uri: GENERAL_DOMAIN } },
     );
 
@@ -102,19 +77,19 @@ export async function initQRCode(): Promise<
       token,
       async polling() {
         const { body, headers } = await client.post<QRCodeAPIWrapper<PollingQRCodeResponse>>(
-          'accounts/qrlogin/polling',
+          "accounts/qrlogin/polling",
           {
             json: { biz_type: null },
-            headers: { 'x-flow-key': initHeaders['x-flow-key'] },
+            headers: { "x-flow-key": initHeaders["x-flow-key"] },
           },
         );
-        return { ...body.data.step_info, next_step: body.data.next_step, cookie: headers['set-cookie'] };
+        return { ...body.data.step_info, next_step: body.data.next_step, cookie: headers["set-cookie"] };
       },
     };
   } catch (error) {
-    let errorMessage = 'Load QR Code failed';
+    let errorMessage = "Load QR Code failed";
     if (error instanceof Error) {
-      errorMessage = `${errorMessage} (${error.message})`;
+      errorMessage = `${errorMessage}${error.message ? ` (${error.message})` : ""}`;
     }
 
     showToast(Toast.Style.Failure, errorMessage);

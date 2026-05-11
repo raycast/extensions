@@ -6,7 +6,8 @@
   "icon": "svgo.png",
   "author": "kaichi",
   "contributors": [
-    "kgrhartlage"
+    "kgrhartlage",
+    "dangkhoipro"
   ],
   "keywords": [
     "optimize",
@@ -19,6 +20,12 @@
   ],
   "license": "MIT",
   "commands": [
+    {
+      "name": "index",
+      "title": "Configure SVGO",
+      "description": "Configure SVGO for all commands",
+      "mode": "view"
+    },
     {
       "name": "optimize-string",
       "title": "Optimize SVG String",
@@ -45,9 +52,9 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.51.3",
+    "@raycast/api": "^1.94.3",
     "is-svg": "^5.0.0",
-    "svgo": "^3.0.2"
+    "svgo": "^3.3.2"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^5.59.6",

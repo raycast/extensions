@@ -15,5 +15,6 @@ Only thing you have to do is to set desired user's username and you'll be able t
 
 - List series with episode numbers and images
 - List movies and images
-- Play YouTube Trailer's of the selected title
+- Play YouTube Trailers of the selected title
 - Copy name or URL to clipboard
+- View large poster

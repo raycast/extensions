@@ -2,6 +2,7 @@ name: 🧩 🐞 Extension Bug Report
 description: Report a reproducible bug or regression related to extension(s) published in the Store
 title: "[Extension Name] ..."
 labels: [extension, bug]
+type: "Bug"
 body:
   - type: markdown
     attributes:
@@ -19,6 +20,23 @@ body:
       placeholder: ex. https://raycast.com/author/extension
     validations:
       required: true
+  - type: input
+    id: raycast-version
+    attributes:
+      label: Raycast Version
+      description: |
+        Please provide the version of Raycast you are using.
+        You can find it in the Raycast menu > About Raycast.
+      placeholder: ex. 1.73.2
+    validations:
+      required: true
+  - type: input
+    id: os-version
+    attributes:
+      label: OS Version
+      description: |
+        Please provide the version of macOS or Windows you are using.
+      placeholder: ex. 14.4.1
   - type: textarea
     id: description
     attributes:

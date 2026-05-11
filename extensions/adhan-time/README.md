@@ -1,6 +1,6 @@
 # Adhan Time
 
-This extension helps you to view adhan time for any location in the world with different calculation methods (calenders) using [Aladhan.com api](https://aladhan.com/).
+This extension helps you to view adhan time for any location in the world with different calculation methods (calenders) using [Aladhan.com API](https://aladhan.com/).
 
 ## Steps
 - Add country name

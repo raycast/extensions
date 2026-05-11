@@ -3,7 +3,7 @@ import { getPreferenceValues, Icon, List } from "@raycast/api";
 import { useHistorySearch } from "./hooks/useHistorySearch";
 import { BraveActions, BraveListItems } from "./components";
 import { useTabSearch } from "./hooks/useTabSearch";
-import { BraveProfile, HistoryEntry, Preferences, SearchResult } from "./interfaces";
+import { BraveProfile, HistoryEntry, SearchResult } from "./interfaces";
 import { useCachedState } from "@raycast/utils";
 import { BRAVE_PROFILE_KEY, BRAVE_PROFILES_KEY, DEFAULT_BRAVE_PROFILE_ID } from "./constants";
 import BraveProfileDropDown from "./components/BraveProfileDropdown";

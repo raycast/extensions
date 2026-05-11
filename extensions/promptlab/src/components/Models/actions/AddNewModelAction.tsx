@@ -1,7 +1,7 @@
 import { Action, Icon } from "@raycast/api";
 import ModelForm from "../ModelForm";
-import { ModelManager } from "../../../utils/types";
-import { getActionShortcut, isActionEnabled } from "../../../utils/action-utils";
+import { ModelManager } from "../../../lib/models/types";
+import { getActionShortcut, isActionEnabled } from "../../../lib/actions";
 import { defaultAdvancedSettings } from "../../../data/default-advanced-settings";
 
 /**

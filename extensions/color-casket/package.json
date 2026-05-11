@@ -4,11 +4,11 @@
   "title": "Color Casket",
   "description": "Handy Color Utilities",
   "icon": "command-icon.png",
-  "author": "slava.razum",
+  "author": "slavarazum",
   "contributors": [
     "fe9lix",
     "pernielsentikaer",
-    "tzfeng"
+    "fengtianze"
   ],
   "categories": [
     "Design Tools",
@@ -90,7 +90,6 @@
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^4.4.3"
   },
   "scripts": {
@@ -98,5 +97,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

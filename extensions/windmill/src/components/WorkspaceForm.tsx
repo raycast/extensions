@@ -1,37 +1,10 @@
-import { Form, ActionPanel, Action, useNavigation, Icon } from "@raycast/api";
+import { Form, ActionPanel, Action, useNavigation, Icon, showToast, Toast, Color, Alert } from "@raycast/api";
 import { saveWorkspace, removeWorkspace, fetchWorkspaces } from "../hooks/useFetchWorkspaces";
 import { WorkspaceConfig } from "../types";
 import { confirmAlert } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
-import fetch from "node-fetch";
-
-async function validateWorkspace(workspace: WorkspaceConfig): Promise<true | [keyof WorkspaceConfig, string]> {
-  try {
-    const response = await fetch(`${workspace.remoteURL}api/workspaces/exists`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${workspace.workspaceToken}`,
-      },
-      body: JSON.stringify({ id: workspace.workspaceId }),
-    });
-    if (response.status === 401) {
-      return ["workspaceToken", "Invalid Token"];
-    } else if (response.status !== 200) {
-      return ["remoteURL", "Invalid URL"];
-    } else {
-      const textResponse = await response.text();
-      console.log("textResponse", textResponse);
-      if (textResponse === "true") {
-        return true;
-      } else {
-        return ["workspaceId", "Invalid Workspace"];
-      }
-    }
-  } catch (_) {
-    return ["remoteURL", "Invalid URL"];
-  }
-}
+import { validateWorkspace } from "../utils/validateWorkspace";
+import { useState } from "react";
 
 async function workspaceExists(workspace: WorkspaceConfig) {
   const workspaces = await fetchWorkspaces();
@@ -50,6 +23,7 @@ export function WorkspaceForm({
   onDelete?: () => void;
 }) {
   const { pop } = useNavigation();
+  const [isLoading, setIsLoading] = useState(false);
 
   let workspaceId = currentWorkspace?.workspaceId;
   let workspaceName = currentWorkspace?.workspaceName;
@@ -64,6 +38,7 @@ export function WorkspaceForm({
 
   const { handleSubmit, itemProps, setValidationError } = useForm<WorkspaceConfig>({
     async onSubmit(values) {
+      setIsLoading(true);
       const newWorkspace = { ...values };
       if (currentWorkspace?.id) {
         newWorkspace.id = currentWorkspace.id;
@@ -72,6 +47,7 @@ export function WorkspaceForm({
       if (!currentWorkspace?.id) {
         if (await workspaceExists(newWorkspace)) {
           setValidationError("workspaceId", "Workspace already exists");
+          setIsLoading(false);
           return;
         }
       }
@@ -79,6 +55,7 @@ export function WorkspaceForm({
       const isValid = await validateWorkspace(newWorkspace);
       if (isValid !== true) {
         setValidationError(...isValid);
+        setIsLoading(false);
         return;
       }
       // if(!await validateWorkspace(newWorkspace)){
@@ -91,6 +68,9 @@ export function WorkspaceForm({
 
       await saveWorkspace(newWorkspace);
       // Call the onCreate function if it exists
+      const title = currentWorkspace ? "Workspace edited" : "Workspace saved";
+      await showToast(Toast.Style.Success, title, newWorkspace.workspaceName);
+      setIsLoading(false);
       if (onCreate) {
         onCreate();
       }
@@ -130,30 +110,51 @@ export function WorkspaceForm({
     if (
       currentWorkspace?.id &&
       (await confirmAlert({
+        icon: { source: Icon.Trash, tintColor: Color.Red },
         title: `You are about to remove the "${currentWorkspace?.workspaceName}" workspace from Raycast`,
+        primaryAction: {
+          title: "Confirm",
+          style: Alert.ActionStyle.Destructive,
+        },
       }))
     ) {
+      setIsLoading(true);
       await removeWorkspace(currentWorkspace?.id);
+
+      await showToast(Toast.Style.Success, "Workspace removed", currentWorkspace.workspaceName);
       if (onDelete) {
         onDelete();
       }
       pop();
     }
+    setIsLoading(false);
   };
 
   return (
     <Form
+      isLoading={isLoading}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Workspace" icon={Icon.Pencil} onSubmit={handleSubmit} />
-          {currentWorkspace?.id && <Action title="Delete Workspace" icon={Icon.Trash} onAction={handleDelete} />}
+          {currentWorkspace?.id && (
+            <Action
+              style={Action.Style.Destructive}
+              title="Delete Workspace"
+              icon={Icon.Trash}
+              onAction={handleDelete}
+            />
+          )}
         </ActionPanel>
       }
     >
-      <Form.TextField title="Workspace Name" {...itemProps.workspaceName} />
-      <Form.TextField title="Workspace Id" {...itemProps.workspaceId} />
-      <Form.TextField title="Workspace Remote URL" {...itemProps.remoteURL} />
-      <Form.PasswordField title="Workspace Token" {...itemProps.workspaceToken} />
+      <Form.TextField title="Workspace Name" placeholder="Displayable name" {...itemProps.workspaceName} />
+      <Form.TextField
+        title="Workspace Id"
+        placeholder="Slug to uniquely identify your workspace"
+        {...itemProps.workspaceId}
+      />
+      <Form.TextField title="Workspace Remote URL" placeholder="https://app.windmill.dev/" {...itemProps.remoteURL} />
+      <Form.PasswordField title="Workspace Token" placeholder="xXX...xxx" {...itemProps.workspaceToken} />
     </Form>
   );
 }

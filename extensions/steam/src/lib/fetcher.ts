@@ -1,4 +1,3 @@
-import fetch from "node-fetch";
 import useSWR, { useSWRConfig } from "swr";
 import { fakeGameData, fakeGameDataSimpleMany, fakeGames, isFakeData } from "./fake";
 import { GameData, GameDataResponse, GameDataSimple, GameDataSimpleResponse, GameSimple } from "../types";
@@ -56,7 +55,7 @@ async function fetcherWithAuth(url: string) {
 export const useGamesSearch = ({ term = "", cacheKey = 0, execute = true }) => {
   const { data, error, isValidating } = useSWR<GameSimple[]>(
     execute ? `https://steam-search.vercel.app/api/games?cacheKey=${cacheKey}&search=${term}` : null,
-    isFakeData ? () => fakeGames(30) : fetchGames
+    isFakeData ? () => fakeGames(30) : fetchGames,
   );
   return {
     data,
@@ -80,7 +79,7 @@ export const useGameData = <T>({ appid = 0, execute = true }) => {
       revalidateOnReconnect: false,
       refreshInterval: 600_000, // 10 minutes
       dedupingInterval: 600_000, // 10 minutes
-    }
+    },
   );
 
   // Slightly hacky way to grab something from swr cache
@@ -109,7 +108,7 @@ const useGetOwnedGames = (type: string) => {
       revalidateOnReconnect: false,
       refreshInterval: 600_000, // 10 minutes
       dedupingInterval: 600_000, // 10 minutes
-    }
+    },
   );
 
   return {

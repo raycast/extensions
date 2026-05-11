@@ -5,6 +5,9 @@
   "description": "Mange your SimpleLogin Account, view and create aliases",
   "icon": "simplelogin_logo.png",
   "author": "adrian-schnell",
+  "contributors": [
+    "marcelruhf"
+  ],
   "categories": [
     "Productivity"
   ],
@@ -59,7 +62,18 @@
       "title": "Create Random Alias",
       "subtitle": "SimpleLogin",
       "description": "Shield your inbox with a new email alias.",
-      "mode": "no-view"
+      "mode": "view",
+      "preferences": [
+        {
+          "title": "Prefill Alias Description",
+          "name": "prefill_alias_note",
+          "label": "Prefill Alias Description",
+          "description": "Prefill the alias description based on the hostname of the currently active tab in your browser.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
     },
     {
       "name": "list_alias",
@@ -70,20 +84,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.2",
-    "@raycast/utils": "^1.4.14",
-    "axios": "^1.2.2",
+    "@raycast/api": "^1.76.0",
+    "@raycast/utils": "^1.15.0",
+    "axios": "^1.8.4",
     "moment": "^2.29.4"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.27",
+    "@raycast/eslint-config": "^1.0.6",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

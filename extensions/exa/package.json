@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "exa-search",
+  "title": "Exa Search",
+  "description": "AI-powered search that understands your queries and delivers precise, context-aware results quickly",
+  "icon": "icon.png",
+  "author": "thomas",
+  "owner": "exa_ai",
+  "access": "public",
+  "categories": [
+    "Data"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-in-browser",
+      "title": "Open in Browser",
+      "description": "Opens the Exa Search in your browser.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Query",
+          "type": "text",
+          "description": "The query to search for."
+        }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "search",
+      "title": "Search",
+      "description": "Perform an Exa search given an input query and retrieve a list of relevant results as links, including a summary of the content."
+    },
+    {
+      "name": "find-similar",
+      "title": "Find Similar",
+      "description": "Find a list of similar results based on a webpage's URL, including a summary of each result."
+    },
+    {
+      "name": "get-contents",
+      "title": "Get Contents",
+      "description": "Retrieves the full text of a webpage given its URL."
+    },
+    {
+      "name": "get-answer",
+      "title": "Get Answer",
+      "description": "Get an answer to a question informed by Exa search results."
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "type": "password",
+      "required": false,
+      "description": "Your Exa API key."
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.90.0",
+    "@raycast/utils": "^1.17.0",
+    "exa-js": "^1.4.8"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,5 +1,9 @@
 # Chinese Character Changelog
 
+## [Command optimisation] - 2024-06-10
+
+- Now supports direct text input and conversion
+
 ## [Quotation mark Conversion] - 2023-05-08
 
 - Add the conversion of quotation marks between simplified and traditional Chinese

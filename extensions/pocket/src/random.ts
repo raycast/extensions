@@ -1,38 +1,9 @@
-import { open, Toast } from "@raycast/api";
-import { fetchBookmarks } from "./utils/api";
-import { HTTPError } from "got";
-import { ReadState } from "./utils/types";
+import { showToast, Toast } from "@raycast/api";
 
-export default async function () {
-  const toast = new Toast({
-    title: "Searching bookmarks",
-    style: Toast.Style.Animated,
+export default async function openRandomBookmark() {
+  await showToast({
+    title: "Pocket is no longer available",
+    style: Toast.Style.Failure,
+    message: "You can uninstall from Preferences",
   });
-
-  toast.show();
-
-  try {
-    const bookmarks = await fetchBookmarks({ state: ReadState.Unread });
-
-    if (bookmarks.length === 0) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "No bookmarks found";
-    } else {
-      const bookmark = bookmarks[Math.floor(Math.random() * bookmarks.length)];
-      await open(bookmark.pocketUrl);
-    }
-  } catch (error) {
-    toast.style = Toast.Style.Failure;
-
-    if (error instanceof HTTPError) {
-      if (error.response.statusCode === 401 || error.response.statusCode === 403) {
-        toast.title = "Invalid Credentials";
-        toast.message = "Check you Pocket extension preferences";
-      } else {
-        throw error;
-      }
-    } else {
-      throw error;
-    }
-  }
 }

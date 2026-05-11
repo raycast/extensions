@@ -1,9 +1,9 @@
-import { runAppleScript } from "run-applescript";
 import { PopToRootType, closeMainWindow, popToRoot } from "@raycast/api";
 import { SettingsProfileOpenBehaviour, Tab } from "../types/interfaces";
 import { getApplicationName } from "../utils/appUtils";
 import { geNotInstalledMessage } from "../utils/messageUtils";
 import { DEFAULT_PROFILE_ID } from "../constants";
+import { runAppleScript } from "@raycast/utils";
 
 export async function getOpenTabs(): Promise<Tab[]> {
   await validateAppIsInstalled();
@@ -19,10 +19,10 @@ export async function getOpenTabs(): Promise<Tab[]> {
             set _url to get URL of t
             set _favicon to ""
             set _output to (_output & _title & "${Tab.TAB_CONTENTS_SEPARATOR}" & _url & "${
-    Tab.TAB_CONTENTS_SEPARATOR
-  }" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${
-    Tab.TAB_CONTENTS_SEPARATOR
-  }" & _tab_index & "\\n")
+              Tab.TAB_CONTENTS_SEPARATOR
+            }" & _favicon & "${Tab.TAB_CONTENTS_SEPARATOR}" & _window_index & "${
+              Tab.TAB_CONTENTS_SEPARATOR
+            }" & _tab_index & "\\n")
             set _tab_index to _tab_index + 1
           end repeat
           set _window_index to _window_index + 1
@@ -135,3 +135,13 @@ export const validateAppIsInstalled = async () => {
     throw new Error(geNotInstalledMessage());
   }
 };
+
+export async function getActiveTabUrl(): Promise<string> {
+  await validateAppIsInstalled();
+
+  const activeTabUrl = await runAppleScript(
+    `tell application "${getApplicationName()}" to return URL of active tab of front window`,
+  );
+
+  return activeTabUrl;
+}

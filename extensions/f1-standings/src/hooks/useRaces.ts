@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import fetch from "node-fetch";
+import fetch, { AbortError } from "node-fetch";
 import { popToRoot, showToast, Toast } from "@raycast/api";
-import { Race } from "../types";
+import { Race, ScheduleResponse } from "../types";
+import { BASE_API_URL } from "../constants";
 
 const isUpcoming = (race: Race) => {
   const today = new Date();
@@ -31,12 +32,11 @@ const useRaces = (season: string | null): [{ [round: string]: Race }, { [round: 
         isShowingDetail: false,
       }));
       try {
-        const res = await fetch(`https://ergast.com/api/f1/${season}.json`, {
+        const res = await fetch(`${BASE_API_URL}/f1/${season}.json`, {
           method: "get",
           signal: cancelRef.current.signal,
         });
-        const data = (await res.json()) as any;
-
+        const data = (await res.json()) as ScheduleResponse;
         const upcomingRaces: { [round: string]: Race } = {};
         const pastRaces: { [round: string]: Race } = {};
 
@@ -55,6 +55,9 @@ const useRaces = (season: string | null): [{ [round: string]: Race }, { [round: 
           isLoading: false,
         }));
       } catch (error) {
+        if (error instanceof AbortError) {
+          return;
+        }
         await showToast({
           style: Toast.Style.Failure,
           title: "Error",

@@ -1,24 +1,25 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, showToast, Toast } from "@raycast/api";
 import GithubOcto from "../Octokit";
 import { TreeType, TopicType } from "../types/GithubType";
 import path from "path";
+
+// Last Updated: 2026-01-13
+const TREE_SHA = "782cf20ba81055f4ffbee45a1346245dc69d3b9c";
 
 /**
  * Make an api call to Github to fetch all documentation filenames.
  */
 export async function getPagesFromGithub() {
+  await showToast(Toast.Style.Animated, "Fetching from GitHub");
   const octokit = new GithubOcto();
-  const { data } = await octokit.request(
-    "GET /repos/vercel/next.js/git/trees/86651d4c4f53e8a2882e22339fb78d0aa2879562",
-    {
-      recursive: true,
-    }
-  );
+  const { data } = await octokit.request(`GET /repos/vercel/next.js/git/trees/${TREE_SHA}`, {
+    recursive: true,
+  });
 
   if (!data || !data.tree) throw new Error("Please visit https://nextjs.org/");
   const results = data.tree
     .filter((file: TreeType) => file.type == "blob")
-    .map((file: TopicType) => {
+    .map((file: TreeType) => {
       const item: TopicType = {
         type: "",
         path: "",
@@ -39,10 +40,16 @@ export async function getPagesFromGithub() {
         .replace(/(^\w{1})|(\s+\w{1})/g, (letter) => letter.toUpperCase());
 
       item.filepath = `${filepath.dir}/${filepath.name}`;
+      item.filepath = item.filepath
+        .split("/")
+        .map((doc) => doc.slice(doc.indexOf("-") + 1))
+        .join("/")
+        .replace(".mdx", "");
       return item;
     });
-  LocalStorage.setItem("topics", JSON.stringify(results));
-  LocalStorage.setItem("updated_at", Date.now());
+  await LocalStorage.setItem("topics", JSON.stringify(results));
+  await LocalStorage.setItem("updated_at", Date.now());
+  await LocalStorage.setItem("current_sha", TREE_SHA);
   return JSON.stringify(results);
 }
 
@@ -50,26 +57,30 @@ export async function getPagesFromGithub() {
  * Get the topics from cache or make an api call
  * @returns Promise
  */
-export async function getPagesFromCache(): Promise<string> {
+export async function getPagesFromCache(): Promise<string | undefined> {
+  await showToast(Toast.Style.Animated, "Fetching from Cache");
   const topics: string | undefined = await LocalStorage.getItem("topics");
-  return topics !== undefined ? topics : undefined;
+  return topics;
 }
 
 /**
  * Fetch fresh data from Github is 24hours have been passed.
  * @returns Promise
  */
-export async function checkForUpdates(): Promise<string | null> {
-  const last_updated: string = await LocalStorage.getItem("updated_at");
+export async function checkForUpdates(): Promise<string | undefined> {
+  await showToast(Toast.Style.Animated, "Checking for Updates");
+  const last_updated: string | undefined = await LocalStorage.getItem("updated_at");
 
-  const last_updated_date = new Date(last_updated).setHours(0, 0, 0, 0);
+  const last_updated_date = new Date(last_updated || "").setHours(0, 0, 0, 0);
   const today = new Date().setHours(0, 0, 0, 0);
+  const current_sha = await LocalStorage.getItem<string>("current_sha");
 
   // If the data is older than 24hours, fetch it from Github
-  if (last_updated === undefined || today > last_updated_date) {
+  //  OR if the SHA is different i.e. SHA was updated but extension is using old SHA
+  if (last_updated === undefined || today > last_updated_date || current_sha !== TREE_SHA) {
     await getPagesFromGithub();
     return await getPagesFromCache();
   }
 
-  return null;
+  return undefined;
 }

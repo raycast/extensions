@@ -1,6 +1,6 @@
 import { Action } from "@raycast/api";
 
-const CopyTitleAction = (props: { title?: string }) => {
+export default function CopyTitleAction(props: { title?: string }) {
   return props.title ? (
     <Action.CopyToClipboard
       title="Copy Title"
@@ -8,6 +8,4 @@ const CopyTitleAction = (props: { title?: string }) => {
       shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
     />
   ) : null;
-};
-
-export default CopyTitleAction;
+}

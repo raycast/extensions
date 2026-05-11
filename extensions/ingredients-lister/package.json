@@ -4,7 +4,7 @@
   "title": "Ingredients Lister",
   "description": "After getting the contents of an entire website using selected text, you will receive a list of every single ingredient necessary in your recipe from online followed by it's quantities. You will also be able to add this ingredients list to a new notes document to be used as a shopping list.",
   "icon": "command-icon.png",
-  "author": "Vaibhav-Satishkumar",
+  "author": "Visual-Studio-Coder",
   "categories": [
     "Fun",
     "Productivity",

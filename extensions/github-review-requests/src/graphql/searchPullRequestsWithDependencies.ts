@@ -15,7 +15,20 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
               return null;
             }
 
-            const { id, url, author, reviewRequests, reviews, number, title, comments, createdAt, updatedAt } = node;
+            const {
+              id,
+              url,
+              author,
+              reviewRequests,
+              reviews,
+              number,
+              title,
+              comments,
+              createdAt,
+              updatedAt,
+              repository,
+              reviewDecision,
+            } = node;
 
             return {
               id,
@@ -25,8 +38,9 @@ const searchPullRequestsWithDependencies = (query: string): Promise<PullRequestS
               url,
               createdAt,
               updatedAt,
-
-              myIcon: "",
+              reviewDecision,
+              repo: repository?.name,
+              owner: { login: repository?.owner?.login, avatarUrl: repository?.owner?.avatarUrl },
 
               reviews: (reviews?.nodes || [])
                 .map(node =>

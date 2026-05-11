@@ -138,7 +138,7 @@ export default function DeleteDNSRecord(props: LaunchProps<{ launchContext: { do
           <Form.Dropdown
             title="Type"
             info={`The type of record being deleted. Valid types are: ${DNS_RECORD_TYPES.map(
-              (record) => record.type
+              (record) => record.type,
             ).join(", ")}`}
             {...itemProps.type}
           >

@@ -22,9 +22,7 @@ const HistoryList = () => {
 
       {events
         ?.filter((e) => e.type === "transfer_completed" || e.type === "file_shared")
-        .map((event) => (
-          <HistoryListItem key={event.id} event={event} />
-        ))}
+        .map((event) => <HistoryListItem key={event.id} event={event} />)}
     </List>
   );
 };

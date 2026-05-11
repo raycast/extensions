@@ -1,15 +1,15 @@
 import { List, getPreferenceValues } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
+import { useEffect, useMemo, useState } from "react";
 
+import { getGitHubClient } from "./api/githubClient";
 import { getBoundedPreferenceNumber } from "./components/Menu";
 import RepositoryListEmptyView from "./components/RepositoryListEmptyView";
 import RepositoryListItem from "./components/RepositoryListItem";
 import SearchRepositoryDropdown from "./components/SearchRepositoryDropdown";
-import View from "./components/View";
 import { ExtendedRepositoryFieldsFragment } from "./generated/graphql";
-import { useHistory } from "./helpers/repository";
-import { getGitHubClient } from "./helpers/withGithubClient";
+import { REPO_DEFAULT_SORT_QUERY, REPO_SORT_TYPES_TO_QUERIES, useHistory } from "./helpers/repository";
+import { withGitHubClient } from "./helpers/withGithubClient";
 
 function SearchRepositories() {
   const { github } = getGitHubClient();
@@ -18,14 +18,18 @@ function SearchRepositories() {
 
   const [searchText, setSearchText] = useState("");
   const [searchFilter, setSearchFilter] = useState<string | null>(null);
+  const [sortQuery, setSortQuery] = useCachedState<string>("sort-query", REPO_DEFAULT_SORT_QUERY, {
+    cacheNamespace: "github-search-repo",
+  });
+  const sortTypesData = REPO_SORT_TYPES_TO_QUERIES;
 
   const { data: history, visitRepository } = useHistory(searchText, searchFilter);
   const query = useMemo(
     () =>
-      `${searchFilter} ${searchText} sort:updated-desc fork:${preferences.includeForks} ${
+      `${searchFilter} ${searchText} ${sortQuery} fork:${preferences.includeForks} ${
         preferences.includeArchived ? "" : "archived:false"
       }`,
-    [searchText, searchFilter],
+    [searchText, searchFilter, sortQuery, preferences.includeForks, preferences.includeArchived],
   );
 
   const {
@@ -45,9 +49,19 @@ function SearchRepositories() {
     { keepPreviousData: true },
   );
 
-  const foundRepositories = useMemo(
-    () => data?.filter((repository) => !history.find((r) => r.id === repository.id)),
+  useEffect(
+    () => history.forEach((repository) => data?.find((r) => r.id === repository.id && visitRepository(r))),
     [data],
+  );
+
+  const validHistory = useMemo(
+    () => history.filter((repository) => data?.find((r) => r.id === repository.id)),
+    [data, history],
+  );
+
+  const foundRepositories = useMemo(
+    () => data?.filter((repository) => !validHistory.find((r) => r.id === repository.id)),
+    [data, validHistory],
   );
 
   return (
@@ -58,13 +72,16 @@ function SearchRepositories() {
       searchBarAccessory={<SearchRepositoryDropdown onFilterChange={setSearchFilter} />}
       throttle
     >
-      <List.Section title="Visited Repositories" subtitle={history ? String(history.length) : undefined}>
-        {history.map((repository) => (
+      <List.Section title="Visited Repositories" subtitle={validHistory ? String(validHistory.length) : undefined}>
+        {validHistory.map((repository) => (
           <RepositoryListItem
             key={repository.id}
             repository={repository}
             onVisit={visitRepository}
             mutateList={mutateList}
+            sortQuery={sortQuery}
+            setSortQuery={setSortQuery}
+            sortTypesData={sortTypesData}
           />
         ))}
       </List.Section>
@@ -74,16 +91,17 @@ function SearchRepositories() {
           title={searchText ? "Search Results" : "Found Repositories"}
           subtitle={`${foundRepositories.length}`}
         >
-          {foundRepositories.map((repository) => {
-            return (
-              <RepositoryListItem
-                key={repository.id}
-                repository={repository}
-                mutateList={mutateList}
-                onVisit={visitRepository}
-              />
-            );
-          })}
+          {foundRepositories.map((repository) => (
+            <RepositoryListItem
+              key={repository.id}
+              repository={repository}
+              onVisit={visitRepository}
+              mutateList={mutateList}
+              sortQuery={sortQuery}
+              setSortQuery={setSortQuery}
+              sortTypesData={sortTypesData}
+            />
+          ))}
         </List.Section>
       ) : null}
 
@@ -92,10 +110,4 @@ function SearchRepositories() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <SearchRepositories />
-    </View>
-  );
-}
+export default withGitHubClient(SearchRepositories);

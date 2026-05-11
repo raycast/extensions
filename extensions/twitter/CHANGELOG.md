@@ -1,5 +1,16 @@
 # Twitter Changelog
 
+## [Modernize] - 2025-10-13
+
+- Remove `node-fetch`
+- Modernize extension to use latest configuration
+
+## [Add Windows Support] - 2025-09-03
+
+## [X compatible] - 2023-01-21
+
+- Restore Twitter features in X
+
 ## [Add v2 support] - 2022-06-28
 
 - Add OAuth support

@@ -1,16 +1,24 @@
-import { useEffect } from "react";
 import { useCachedPromise } from "@raycast/utils";
+import { fetch } from "cross-fetch";
 import { decode } from "iconv-lite";
 import { nanoid } from "nanoid";
-import { fetch } from "cross-fetch";
-import { Suggestion, SearchConfigs } from "./types";
+import { useEffect } from "react";
 import { searchArcPreferences } from "./preferences";
+import {
+  EcosiaSuggestionParser,
+  GoogleSuggestionParser,
+  KagiSuggestionParser,
+  SearchConfigs,
+  Suggestion,
+} from "./types";
+import { isURL } from "./utils";
 
 const config: SearchConfigs = {
   google: {
     search: "https://www.google.com/search?q=",
     suggestions: "https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=",
-    suggestionParser: (json: any, suggestions: Suggestion[]) => {
+    suggestionParser: (json: GoogleSuggestionParser, suggestions: Suggestion[]) => {
+      console.log(json);
       json[1].map((item: string, i: number) => {
         const type = json[4]["google:suggesttype"][i];
         const description = json[2][i];
@@ -51,8 +59,9 @@ const config: SearchConfigs = {
   ecosia: {
     search: "https://www.ecosia.org/search?q=",
     suggestions: "https://ac.ecosia.org?type=list&q=",
-    suggestionParser: (json: any, suggestions: Suggestion[]) => {
-      json[1].map((item: string, i: number) => {
+    suggestionParser: (json: EcosiaSuggestionParser, suggestions: Suggestion[]) => {
+      console.log(json);
+      json[1].map((item: string) => {
         suggestions.push({
           id: nanoid(),
           query: item,
@@ -60,6 +69,25 @@ const config: SearchConfigs = {
         });
       });
     },
+  },
+  kagi: {
+    search: "https://kagi.com/search?q=",
+    suggestions: "https://kagi.com/api/autosuggest?q=",
+    suggestionParser: (json: KagiSuggestionParser, suggestions: Suggestion[]) => {
+      console.log(json);
+      json[1].map((item: string) => {
+        suggestions.push({
+          id: nanoid(),
+          query: item,
+          url: `https://kagi.com/search?q=${encodeURIComponent(item)}`,
+        });
+      });
+    },
+  },
+  unduck: {
+    search: "https://unduck.link?q=",
+    suggestions: null,
+    suggestionParser: null,
   },
 };
 
@@ -70,6 +98,8 @@ async function parseResponse(response: Response) {
 
   const buffer = await response.arrayBuffer();
   const text = decode(Buffer.from(buffer), "iso-8859-1");
+
+  if (!text) return [];
   const json = JSON.parse(text);
 
   const suggestions: Suggestion[] = [];
@@ -85,7 +115,17 @@ function getDefaultSuggestions(searchText?: string): Suggestion[] {
   if (!searchText) {
     return [];
   }
+  const openUrl = isURL(searchText)
+    ? [
+        {
+          id: nanoid(),
+          query: `Open URL ${searchText}`,
+          url: searchText,
+        },
+      ]
+    : [];
   return [
+    ...openUrl,
     {
       id: nanoid(),
       query: searchText,
@@ -112,7 +152,7 @@ export function useSuggestions(searchText: string) {
       return [...getDefaultSuggestions(searchText), ...parsed];
     },
     [],
-    { keepPreviousData: true }
+    { keepPreviousData: true },
   );
 
   useEffect(() => {

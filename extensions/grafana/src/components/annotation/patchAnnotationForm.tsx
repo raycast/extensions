@@ -1,4 +1,6 @@
-import { ActionPanel, showToast, ToastStyle, Form, SubmitFormAction, popToRoot } from "@raycast/api";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// TODO: remove any types and be fully-type safe
+import { ActionPanel, showToast, Toast, Form, SubmitFormAction, popToRoot } from "@raycast/api";
 import { getErrorMessage } from "../../utils";
 
 import { annotationPatchQuery } from "./queries";
@@ -26,13 +28,13 @@ async function handleSubmit(values: Values, annotationId: number) {
       {
         text: values.text,
       },
-      annotationId
+      annotationId,
     );
-    await showToast(ToastStyle.Success, "Annotation updated", "Annotation update successful");
+    await showToast(Toast.Style.Success, "Annotation updated", "Annotation update successful");
 
     popToRoot();
   } catch (err) {
-    await showToast(ToastStyle.Failure, "Error", getErrorMessage(err));
+    await showToast(Toast.Style.Failure, "Error", getErrorMessage(err));
   }
 }
 

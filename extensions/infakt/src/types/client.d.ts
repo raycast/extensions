@@ -1,4 +1,4 @@
-import { PaymentMethod, BusinessActivityKind } from "./utils";
+import { BusinessActivityKind, PaymentMethod } from "@/types/utils";
 
 export interface ClientObject {
   id: number;

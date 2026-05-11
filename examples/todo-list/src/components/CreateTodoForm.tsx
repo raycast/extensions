@@ -1,23 +1,20 @@
-import { useCallback } from "react";
 import { Form, Action, ActionPanel, useNavigation } from "@raycast/api";
 
-function CreateTodoForm(props: { defaultTitle?: string; onCreate: (title: string) => void }) {
+export function CreateTodoForm(props: { defaultTitle?: string; onCreate: (title: string) => void }) {
   const { onCreate, defaultTitle = "" } = props;
   const { pop } = useNavigation();
-
-  const handleSubmit = useCallback(
-    (values: { title: string }) => {
-      onCreate(values.title);
-      pop();
-    },
-    [onCreate, pop]
-  );
 
   return (
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Todo" onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Create Todo"
+            onSubmit={(values: { title: string }) => {
+              onCreate(values.title);
+              pop();
+            }}
+          />
         </ActionPanel>
       }
     >
@@ -25,5 +22,3 @@ function CreateTodoForm(props: { defaultTitle?: string; onCreate: (title: string
     </Form>
   );
 }
-
-export default CreateTodoForm;

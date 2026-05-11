@@ -10,7 +10,7 @@ interface HelpTextDetailProps {
   toolbox: Application | undefined;
 }
 
-export function HelpTextDetail({ message, toolbox }: HelpTextDetailProps): JSX.Element {
+export function HelpTextDetail({ message, toolbox }: HelpTextDetailProps): React.JSX.Element {
   return (
     <Detail
       markdown={message.join("\n\n")}
@@ -18,7 +18,7 @@ export function HelpTextDetail({ message, toolbox }: HelpTextDetailProps): JSX.E
         <ActionPanel>
           {toolbox && <OpenJetBrainsToolbox app={toolbox} />}
           <Action.OpenInBrowser title="Open Toolbox Website" url={tbUrl} icon={JetBrainsIcon} />
-          <Action.OpenInBrowser title="Open Toolbox FAQ" url={`${tbUrl}-faq`} icon={Icon.QuestionMark} />
+          <Action.OpenInBrowser title="Open Toolbox Faq" url={`${tbUrl}-faq`} icon={Icon.QuestionMark} />
         </ActionPanel>
       }
     />

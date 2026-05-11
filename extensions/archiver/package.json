@@ -5,6 +5,10 @@
   "description": "An archive tool for compressing or extracting, supporting multiple formats.",
   "icon": "archiver-icon.png",
   "author": "JinShi",
+  "contributors": [
+    "3llomi",
+    "ridemountainpig"
+  ],
   "categories": [
     "Data",
     "Productivity"
@@ -21,6 +25,42 @@
     "unzip",
     "tar",
     "gzip"
+  ],
+  "preferences": [
+    {
+      "name": "deleteAfterCompression",
+      "type": "checkbox",
+      "required": false,
+      "title": "Compression",
+      "description": "Delete file(s) after compression",
+      "label": "Delete File(s) after Compression",
+      "default": false
+    },
+    {
+      "name": "locationSaveCompressed",
+      "type": "directory",
+      "required": false,
+      "title": "Location to Save Compressed",
+      "description": "Please select location, default is next to original",
+      "placeholder": "Select Location to Save Compressed"
+    },
+    {
+      "name": "useOriginalNameWhenSingle",
+      "type": "checkbox",
+      "required": false,
+      "title": "Name of New File",
+      "description": "Use original file name when compressing single file",
+      "label": "Use Original File Name When A Single",
+      "default": true
+    },
+    {
+      "name": "useParentFolderNameWhenMultiple",
+      "type": "checkbox",
+      "required": false,
+      "description": "Use parent folder name when compressing multiple files",
+      "label": "Use Parent Folder Name When Multiple",
+      "default": true
+    }
   ],
   "commands": [
     {
@@ -44,23 +84,6 @@
           "description": "Compress Finder selected by default",
           "label": "Compress Finder Selected by Default",
           "default": true
-        },
-        {
-          "name": "deleteAfterCompression",
-          "type": "checkbox",
-          "required": false,
-          "title": "",
-          "description": "Delete file(s) after compression",
-          "label": "Delete File(s) after Compression",
-          "default": false
-        },
-        {
-          "name": "locationSaveCompressed",
-          "type": "directory",
-          "required": false,
-          "title": "Location to Save Compressed",
-          "description": "Please select location, default is next to original",
-          "placeholder": "Select Location to Save Compressed"
         },
         {
           "name": "defaultCompressionFormat",
@@ -92,23 +115,48 @@
               "value": "GZIP"
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "name": "quick-compress",
+      "title": "Quick Compress Files",
+      "subtitle": "Archiver",
+      "description": "Quickly compress files without options",
+      "mode": "no-view",
+      "keywords": [
+        "archiver",
+        "archive",
+        "compress",
+        "zip"
+      ],
+      "preferences": [
         {
-          "name": "useOriginalNameWhenSingle",
-          "type": "checkbox",
+          "name": "defaultCompressionFormat",
+          "type": "dropdown",
           "required": false,
-          "title": "Name of New File",
-          "description": "Use original file name when compressing single file",
-          "label": "Use Original File Name When A Single",
-          "default": true
-        },
-        {
-          "name": "useParentFolderNameWhenMultiple",
-          "type": "checkbox",
-          "required": false,
-          "description": "Use parent folder name when compressing multiple files",
-          "label": "Use Parent Folder Name When Multiple",
-          "default": true
+          "title": "Quick Compression Format",
+          "description": "Default compression format for quick compress",
+          "placeholder": "Select Compression Format",
+          "default": "ZIP",
+          "data": [
+            {
+              "title": "7Z",
+              "value": "7Z"
+            },
+            {
+              "title": "ZIP",
+              "value": "ZIP"
+            },
+            {
+              "title": "TAR",
+              "value": "TAR"
+            },
+            {
+              "title": "GZIP",
+              "value": "GZIP"
+            }
+          ]
         }
       ]
     },
@@ -152,21 +200,34 @@
           "placeholder": "Select Location to Save Extracted"
         }
       ]
+    },
+    {
+      "name": "preview",
+      "title": "Preview Zip File",
+      "subtitle": "Archiver",
+      "description": "Preview Contents of a Zip File",
+      "mode": "view",
+      "keywords": [
+        "archiver",
+        "archive",
+        "compress",
+        "zip"
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.44.0",
+    "@raycast/api": "^1.96.0",
+    "@raycast/utils": "^1.17.0",
+    "@zip.js/zip.js": "^2.7.60",
     "execa": "^6.1.0"
   },
   "devDependencies": {
-    "@types/node": "16.10.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -174,5 +235,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

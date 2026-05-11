@@ -1,4 +1,4 @@
-import { List } from "@raycast/api";
+import { Icon, List } from "@raycast/api";
 import { Model } from "../../type";
 
 export const ModelListView = ({
@@ -10,7 +10,7 @@ export const ModelListView = ({
   title: string;
   models: Model[];
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
+  actionPanel: (model: Model) => React.JSX.Element;
 }) => (
   <List.Section title={title} subtitle={models.length.toLocaleString()}>
     {models.map((model) => (
@@ -26,7 +26,7 @@ export const ModelListItem = ({
 }: {
   model: Model;
   selectedModel: string | null;
-  actionPanel: (model: Model) => JSX.Element;
+  actionPanel: (model: Model) => React.JSX.Element;
 }) => {
   return (
     <List.Item
@@ -42,6 +42,8 @@ export const ModelListItem = ({
 
 const ModelDetailView = (props: { model: Model; markdown?: string | null | undefined }) => {
   const { model, markdown } = props;
+  const icons = [Icon.StackedBars1, Icon.StackedBars2, Icon.StackedBars3, Icon.StackedBars4];
+  const t = Number.parseFloat((model.temperature ?? "0").toString());
 
   return (
     <List.Item.Detail
@@ -51,7 +53,16 @@ const ModelDetailView = (props: { model: Model; markdown?: string | null | undef
           <List.Item.Detail.Metadata.TagList title="Model">
             <List.Item.Detail.Metadata.TagList.Item text={model.option} />
           </List.Item.Detail.Metadata.TagList>
-          <List.Item.Detail.Metadata.Label title="Temperature" text={model.temperature.toLocaleString()} />
+          <List.Item.Detail.Metadata.Label
+            title="Temperature"
+            text={model.temperature.toLocaleString()}
+            icon={icons[Math.min(Math.floor(t / 0.5), 3)]}
+          />
+          <List.Item.Detail.Metadata.Label
+            title="Reasoning"
+            text={model.enableReasoningEffortChange ? model.reasoningEffort : "disabled"}
+          />
+          <List.Item.Detail.Metadata.Label title="Vision capabilities" text={model.vision ? "Enable" : "Disable"} />
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label title="ID" text={model.id} />
           <List.Item.Detail.Metadata.Label title="Updated at" text={new Date(model.updated_at ?? 0).toLocaleString()} />

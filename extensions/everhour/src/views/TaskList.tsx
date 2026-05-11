@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { List, Icon, showToast, ToastStyle } from "@raycast/api";
+import { List, Icon, showToast, Toast } from "@raycast/api";
 import { TaskListItem } from "../components";
 import { getCurrentTimer, getTasks } from "../api";
 import { createResolvedToast } from "../utils";
@@ -23,13 +23,16 @@ export function TaskList({
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const refreshActiveTimer = async () => {
-    const toast = await showToast(ToastStyle.Animated, "Refreshing tasks");
+    const toast = await showToast({
+      style: Toast.Style.Animated,
+      title: "Refreshing Tasks",
+    });
     try {
       const activeTimer = await getCurrentTimer();
       setActiveTimerTaskId(activeTimer);
-      createResolvedToast(toast, "Tasks refreshed").success();
+      createResolvedToast(toast, "Tasks Refreshed").success();
     } catch (error) {
-      createResolvedToast(toast, "Failed to refresh tasks").error();
+      createResolvedToast(toast, "Failed to Refresh Tasks").error();
     }
   };
 
@@ -41,14 +44,17 @@ export function TaskList({
 
   useEffect(() => {
     async function fetch() {
-      const toast = await showToast(ToastStyle.Animated, "Fetching tasks");
+      const toast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Fetching Tasks",
+      });
       try {
         await fetchTasks();
         setIsLoading(false);
-        createResolvedToast(toast, "Tasks fetched").success();
+        createResolvedToast(toast, "Tasks Fetched").success();
       } catch (error) {
         const message = (error as { message: string }).message;
-        createResolvedToast(toast, message || "Failed to fetch projects").error();
+        createResolvedToast(toast, message || "Failed to Fetch Projects").error();
         setIsLoading(false);
       }
     }
@@ -63,23 +69,27 @@ export function TaskList({
 
   const renderTasks = () => {
     if (tasks[0]) {
-      return tasks.map((task) => (
-        <TaskListItem
-          key={task.id}
-          recentTimeRecords={recentTimeRecords}
-          refreshRecords={() => {
-            fetchTasks();
-            return refreshRecords();
-          }}
-          refreshActiveTimer={refreshActiveTimer}
-          task={task}
-          hasActiveTimer={task.id === activeTimerTaskId}
-        />
-      ));
+      return (
+        <List.Section title={`Projects / ${projectId} / Tasks`}>
+          {tasks.map((task) => (
+            <TaskListItem
+              key={task.id}
+              recentTimeRecords={recentTimeRecords}
+              refreshRecords={() => {
+                fetchTasks();
+                return refreshRecords();
+              }}
+              refreshActiveTimer={refreshActiveTimer}
+              task={task}
+              hasActiveTimer={task.id === activeTimerTaskId}
+            />
+          ))}
+        </List.Section>
+      );
     }
 
     if (!isLoading && tasks[0]) {
-      return <List.Item title="No tasks found" icon={Icon.XmarkCircle} />;
+      return <List.Item title="No tasks found" icon={Icon.XMarkCircle} />;
     }
   };
 

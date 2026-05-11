@@ -1,5 +1,8 @@
+import { withGoogleAuth } from "./components/withGoogleAuth";
 import { createDocFromUrl } from "./helpers/docs";
 
-export default async function Command(props: { arguments: Arguments.CreateGooglePresentation }) {
+async function Command(props: { arguments: Arguments.CreateGooglePresentation }) {
   await createDocFromUrl("presentation", props.arguments.title);
 }
+
+export default withGoogleAuth(Command);

@@ -24,20 +24,20 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.45.1",
-    "@raycast/utils": "^1.4.14",
-    "inpost": "^0.2.0",
+    "@raycast/api": "^1.58.1",
+    "@raycast/utils": "^1.10.0",
+    "inpost": "^1.0.1",
     "uk-postcode-validator": "^1.1.1"
   },
   "devDependencies": {
-    "@types/node": "18.11.17",
-    "@types/react": "18.0.26",
-    "@typescript-eslint/eslint-plugin": "^5.47.0",
-    "@typescript-eslint/parser": "^5.47.0",
-    "eslint": "^8.30.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.8.1",
-    "typescript": "^4.9.4"
+    "@types/node": "20.10.5",
+    "@types/react": "18.2.20",
+    "@typescript-eslint/eslint-plugin": "^6.16.0",
+    "@typescript-eslint/parser": "^6.7.3",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.1.1",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "build": "ray build -e dist",

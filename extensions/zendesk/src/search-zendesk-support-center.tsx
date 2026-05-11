@@ -1,22 +1,21 @@
 // React imports
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 // Library imports
 import { NodeHtmlMarkdown } from "node-html-markdown";
 
 // Raycast imports
-import { Action, ActionPanel, getPreferenceValues, List, Icon, showToast, Toast } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { Action, ActionPanel, getPreferenceValues, List, Icon } from "@raycast/api";
+import { showFailureToast, useFetch } from "@raycast/utils";
 
 // interface/type definitions
-import { Preferences, ArticleFetchRes, FilteredArticle, LocaleFetchRes, FilteredLocale } from "./types";
+import { ArticleFetchRes, FilteredArticle, LocaleFetchRes, FilteredLocale } from "./types";
 
 // get user Prefs
-const { supportCenter }: Preferences = getPreferenceValues();
+const { supportCenter } = getPreferenceValues<Preferences>();
 
 export default function ZendeskSearch() {
   const [query, setQuery] = useState("");
-  const [locales, setLocales] = useState<FilteredLocale[]>([]);
   const [selectedLocale, setSelectedLocale] = useState<FilteredLocale>();
 
   const LocaleDropdown = () => (
@@ -35,57 +34,58 @@ export default function ZendeskSearch() {
     </List.Dropdown>
   );
 
-  const { data }: LocaleFetchRes = useFetch(`https://${supportCenter}/api/v2/locales/`, {
-    keepPreviousData: true,
-    onData: (data) => {
-      if (data) {
-        return setLocales(
-          data.locales.map((locale) => ({
-            name: locale.name,
-            locale: locale.locale,
-          }))
-        );
-      }
+  const { data: locales } = useFetch(`https://${supportCenter}/api/v2/locales/`, {
+    mapResult(result: LocaleFetchRes) {
+      const results: FilteredLocale[] = result.locales.map((locale) => ({
+        name: locale.name,
+        locale: locale.locale,
+      }));
+      return {
+        data: results,
+      };
     },
+    onData(data) {
+      setSelectedLocale(data[0]);
+    },
+    keepPreviousData: true,
+    initialData: [],
   });
-
-  useEffect(() => {
-    setSelectedLocale(locales[0]);
-  }, [locales]);
 
   const {
     isLoading,
-    data: articles,
+    data: searchResult,
     error,
-  }: ArticleFetchRes = useFetch(
-    `https://${supportCenter}/api/v2/help_center/articles/search.json?query=${query}&locale=${
-      selectedLocale?.locale ? selectedLocale?.locale : ""
-    }`,
+    pagination,
+  } = useFetch(
+    (options) =>
+      `https://${supportCenter}/api/v2/help_center/articles/search.json?query=${query}&page=${
+        options.page + 1
+      }&locale=${selectedLocale?.locale ? selectedLocale?.locale : ""}`,
     {
       keepPreviousData: true,
-      onError: (error) => {
+      mapResult(result: ArticleFetchRes) {
+        const results: FilteredArticle[] = result.results.map((item) => ({
+          url: item.html_url,
+          html_url: item.html_url,
+          title: item.title,
+          id: item.id,
+          section: item.section_id,
+          body: NodeHtmlMarkdown.translate(item?.body || "<p>Article has no text.</p>"),
+        }));
+        return {
+          data: results,
+          hasMore: !!result.next_page,
+        };
+      },
+      initialData: [],
+      onError: async (error) => {
         if (error.message === "Bad Request") {
           return;
         }
-        showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
+        await showFailureToast(error, { title: "Error" });
       },
     }
   );
-
-  const [searchResult, setSearchResult] = useState<FilteredArticle[] | undefined>(undefined);
-
-  useEffect(() => {
-    if (articles && articles.results.length > 0) {
-      const results = articles.results.map((item) => ({
-        url: item.html_url,
-        title: item.title,
-        id: item.id,
-        section: item.section_id,
-        body: NodeHtmlMarkdown.translate(item?.body || "<p>Article has no text.</p>"),
-      }));
-      setSearchResult(results);
-    }
-  }, [articles]);
 
   function getEmptyViewText() {
     if (isLoading) {
@@ -97,17 +97,20 @@ export default function ZendeskSearch() {
     return "No Results";
   }
 
+  const isShowingDetail = !error && query !== "";
+
   return (
     <List
       isLoading={isLoading}
       searchText={query}
       onSearchTextChange={setQuery}
       searchBarPlaceholder="Search for an article..."
-      isShowingDetail={!error && query !== ""}
-      searchBarAccessory={locales && <LocaleDropdown />}
+      isShowingDetail={isShowingDetail}
+      searchBarAccessory={<LocaleDropdown />}
       throttle={true}
+      pagination={pagination}
     >
-      {searchResult ? (
+      {searchResult.length && isShowingDetail ? (
         searchResult.map((item) => {
           if (item.url === undefined) {
             return null;

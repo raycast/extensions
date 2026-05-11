@@ -21,7 +21,7 @@ export function ManageSavedSites(props: SavedSitesState) {
   return (
     <List
       onSelectionChange={(newTitle) => {
-        if (newTitle !== undefined) {
+        if (newTitle) {
           setSelectedSiteTitle(newTitle);
         }
       }}
@@ -57,7 +57,7 @@ export function ManageSavedSites(props: SavedSitesState) {
                   target={
                     <EditSavedSites savedSites={savedSites} setSavedSites={setSavedSites} operation={{ type: "add" }} />
                   }
-                  title="Add new site"
+                  title="Add New Site"
                   icon={Icon.Plus}
                 />
                 <Action

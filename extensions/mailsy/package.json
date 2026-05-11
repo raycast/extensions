@@ -5,59 +5,51 @@
   "description": "Quickly Generate Disposable Email Address and view received mails.",
   "icon": "send.png",
   "author": "BalliAsghar",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Communication",
     "Web"
   ],
+  "keywords": [
+    "mailsy",
+    "mails",
+    "email",
+    "disposable",
+    "disposable email",
+    "temporary email",
+    "temporary",
+    "temp"
+  ],
   "license": "MIT",
   "commands": [
     {
-      "name": "gen",
-      "title": "Create Account",
-      "subtitle": "Mailsy",
-      "description": "Create a new email address",
-      "mode": "no-view"
-    },
-    {
-      "name": "mails",
-      "title": "Fetch Mails",
-      "subtitle": "Mailsy",
-      "description": "Fetch all emails",
-      "mode": "view"
-    },
-    {
-      "name": "delete",
-      "title": "Delete Account",
-      "subtitle": "Mailsy",
-      "description": "Delete a email address",
-      "mode": "no-view"
-    },
-    {
-      "name": "info",
-      "title": "About",
-      "subtitle": "Mailsy",
-      "description": "About Temporary Email",
+      "title": "Mailsy",
+      "description": "View & Manage Mailsy",
+      "name": "mailsy",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.35.2",
-    "axios": "^0.27.2"
+    "@raycast/api": "^1.104.10",
+    "axios": "^1.13.6",
+    "node-html-markdown": "^2.0.0"
   },
   "devDependencies": {
-    "@types/node": "~16.10.0",
-    "@types/react": "^17.0.28",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.5.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.38.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "ray publish"
   }
 }

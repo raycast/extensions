@@ -1,9 +1,9 @@
-import { Action, Icon, List } from "@raycast/api";
+import { Action, Color, Icon, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 import { format } from "date-fns";
 import { useMemo } from "react";
 
-import { MyPullRequestsQuery, PullRequestFieldsFragment, UserFieldsFragment } from "../generated/graphql";
+import { PullRequestFieldsFragment, UserFieldsFragment } from "../generated/graphql";
 import {
   getCheckStateAccessory,
   getNumberOfComments,
@@ -11,44 +11,55 @@ import {
   getPullRequestStatus,
   getReviewDecision,
 } from "../helpers/pull-request";
+import { useMyPullRequests } from "../hooks/useMyPullRequests";
 
 import PullRequestActions from "./PullRequestActions";
 import PullRequestDetail from "./PullRequestDetail";
+import { SortActionProps } from "./SortAction";
 
 type PullRequestListItemProps = {
   pullRequest: PullRequestFieldsFragment;
   viewer?: UserFieldsFragment;
-  mutateList: MutatePromise<MyPullRequestsQuery | undefined> | MutatePromise<PullRequestFieldsFragment[] | undefined>;
+  mutateList?: MutatePromise<PullRequestFieldsFragment[] | undefined> | ReturnType<typeof useMyPullRequests>["mutate"];
+  showAuthor?: boolean;
 };
 
-export default function PullRequestListItem({ pullRequest, viewer, mutateList }: PullRequestListItemProps) {
+export default function PullRequestListItem({
+  pullRequest,
+  viewer,
+  mutateList,
+  sortQuery,
+  setSortQuery,
+  showAuthor = false,
+}: PullRequestListItemProps & SortActionProps) {
   const updatedAt = new Date(pullRequest.updatedAt);
 
-  const numberOfComments = useMemo(() => getNumberOfComments(pullRequest), []);
-  const author = getPullRequestAuthor(pullRequest);
+  const numberOfComments = useMemo(() => getNumberOfComments(pullRequest), [pullRequest]);
+  const author = showAuthor ? getPullRequestAuthor(pullRequest) : null;
   const status = getPullRequestStatus(pullRequest);
   const reviewDecision = getReviewDecision(pullRequest.reviewDecision);
 
   const accessories: List.Item.Accessory[] = [
     {
-      date: updatedAt,
+      text: format(updatedAt, "MMM dd"),
       tooltip: `Updated: ${format(updatedAt, "EEEE d MMMM yyyy 'at' HH:mm")}`,
-    },
-    {
-      icon: author.icon,
-      tooltip: `Author: ${author.text}`,
     },
   ];
 
-  if (reviewDecision) {
-    accessories.unshift(reviewDecision);
-  }
+  accessories.unshift({
+    text: {
+      value: `${numberOfComments}`,
+      color: numberOfComments > 0 ? Color.PrimaryText : Color.SecondaryText,
+    },
+    icon: Icon.Bubble,
+  });
 
-  if (numberOfComments > 0) {
-    accessories.unshift({
-      text: `${numberOfComments}`,
-      icon: Icon.Bubble,
-    });
+  accessories.unshift(
+    reviewDecision ?? { icon: { source: Icon.Circle, tintColor: Color.SecondaryText }, tooltip: "No review requested" },
+  );
+
+  if (pullRequest.repository.autoMergeAllowed && pullRequest.autoMergeRequest) {
+    accessories.unshift({ tag: { value: "Auto-merge", color: Color.Yellow } });
   }
 
   if (pullRequest.commits.nodes) {
@@ -58,6 +69,13 @@ export default function PullRequestListItem({ pullRequest, viewer, mutateList }:
     if (checkStateAccessory) {
       accessories.unshift(checkStateAccessory);
     }
+  }
+
+  if (author) {
+    accessories.splice(accessories.length - 1, 0, {
+      icon: author.icon,
+      tooltip: `Author: ${author.text}`,
+    });
   }
 
   const keywords = [`${pullRequest.number}`];
@@ -75,7 +93,7 @@ export default function PullRequestListItem({ pullRequest, viewer, mutateList }:
       keywords={keywords}
       accessories={accessories}
       actions={
-        <PullRequestActions pullRequest={pullRequest} viewer={viewer} mutateList={mutateList}>
+        <PullRequestActions {...{ pullRequest, viewer, mutateList, sortQuery, setSortQuery }}>
           <Action.Push
             title="Show Details"
             icon={Icon.Sidebar}

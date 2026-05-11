@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80px" height="40px" viewBox="0 0 80 40" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>Graphic</title>
+    <g id="Graphic" stroke="none" fill="none" fill-rule="evenodd" stroke-width="1">
+        <g id="Group" fill="#FF1313">
+            <polyline id="Path" fill-rule="nonzero" points="25.4 14.7 33.9 14.7 33.9 39.8 46.3 39.8 46.3 14.7 54.8 14.7 40.1 0 25.4 14.7"></polyline>
+            <polyline id="Path" fill-rule="nonzero" points="50.6 40 80 40 65.2 25.4 50.6 40"></polyline>
+            <polyline id="Path" fill-rule="nonzero" points="0 40 29.4 40 14.7 25.4 0 40"></polyline>
+        </g>
+    </g>
+</svg>

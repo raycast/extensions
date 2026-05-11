@@ -44,9 +44,9 @@ export default function PlaySelected() {
         flow(
           parseResult<Playlist>(),
           (data) => A.groupBy<Playlist>((playlist) => playlist.kind?.split(" ")?.[0] ?? "Other")(data),
-          setPlaylists
-        )
-      )
+          setPlaylists,
+        ),
+      ),
     )();
   }, [playlistKind]);
 
@@ -102,7 +102,7 @@ function Actions({ playlist: { name, id }, pop }: ActionsProps) {
       id,
       music.playlists.playById(shuffle),
       TE.map(() => closeMainWindow()),
-      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this playlist"))
+      TE.mapLeft(() => showToast(Toast.Style.Failure, "Could not play this playlist")),
     )();
 
     pop();

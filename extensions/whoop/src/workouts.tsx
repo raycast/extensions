@@ -3,10 +3,9 @@ import { Color, List, Toast, getPreferenceValues, showToast } from "@raycast/api
 import { getProgressIcon, useCachedPromise } from "@raycast/utils";
 import { getWorkoutCollection } from "./api/client";
 import { View } from "./components/View";
-import { Workout } from "./helpers/whoop.api";
+import { WorkoutV2 } from "./helpers/whoop.api";
 import { WhoopColor } from "./helpers/constants";
 import { calcCals, formatDate, formatHeartRate, formatMillis, formatStrain } from "./helpers/formats";
-import { getSportName } from "./helpers/workouts";
 
 enum Units {
   metric = "metric",
@@ -17,21 +16,19 @@ interface Preferences {
   units: Units;
 }
 
-function CycleListItem({ workout, isLoading, units }: { workout: Workout; isLoading: boolean; units: Units }) {
+function CycleListItem({ workout, isLoading, units }: { workout: WorkoutV2; isLoading: boolean; units: Units }) {
   // WORKOUT STUFF
-  const sportName = getSportName(workout.sport_id);
-
   const strain = formatStrain(workout.score?.strain);
   const averageHeartRate = formatHeartRate(workout.score?.average_heart_rate);
   const maxHeartRate = formatHeartRate(workout.score?.max_heart_rate);
   const cals = calcCals(workout.score?.kilojoule);
 
-  const zoneFiveMilli = workout.score?.zone_duration.zone_five_milli || 0;
-  const zoneFourMilli = workout.score?.zone_duration.zone_four_milli || 0;
-  const zoneThreeMilli = workout.score?.zone_duration.zone_three_milli || 0;
-  const zoneTwoMilli = workout.score?.zone_duration.zone_two_milli || 0;
-  const zoneOneMilli = workout.score?.zone_duration.zone_one_milli || 0;
-  const zoneZeroMilli = workout.score?.zone_duration.zone_zero_milli || 0;
+  const zoneFiveMilli = workout.score?.zone_durations?.zone_five_milli ?? 0;
+  const zoneFourMilli = workout.score?.zone_durations?.zone_four_milli ?? 0;
+  const zoneThreeMilli = workout.score?.zone_durations?.zone_three_milli ?? 0;
+  const zoneTwoMilli = workout.score?.zone_durations?.zone_two_milli ?? 0;
+  const zoneOneMilli = workout.score?.zone_durations?.zone_one_milli ?? 0;
+  const zoneZeroMilli = workout.score?.zone_durations?.zone_zero_milli ?? 0;
 
   const durationMilli = new Date(workout.end).getTime() - new Date(workout.start).getTime();
 
@@ -63,7 +60,7 @@ function CycleListItem({ workout, isLoading, units }: { workout: Workout; isLoad
 
   return (
     <List.Item
-      title={`${formatDate(workout.created_at, "MMM d", true)}  ·  ${sportName}`}
+      title={`${formatDate(workout.created_at, "MMM d", true)}  ·  ${workout.sport_name}`}
       accessories={[{ icon: getProgressIcon(strain / 21, WhoopColor.strain) }]}
       detail={
         <List.Item.Detail
@@ -71,7 +68,7 @@ function CycleListItem({ workout, isLoading, units }: { workout: Workout; isLoad
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label
-                title={sportName}
+                title={workout.sport_name}
                 text={`${formatDate(workout.start, "HH:ss")} -> ${formatDate(workout.end, "HH:ss")}`}
               />
               <List.Item.Detail.Metadata.Separator />
@@ -153,7 +150,7 @@ function WorkoutsCommand() {
       throttle={true}
       isShowingDetail
     >
-      {workouts?.records?.map((workout: Workout) => {
+      {workouts?.records?.map((workout: WorkoutV2) => {
         return <CycleListItem key={workout.id} workout={workout} isLoading={isLoading} units={preferences.units} />;
       })}
     </List>

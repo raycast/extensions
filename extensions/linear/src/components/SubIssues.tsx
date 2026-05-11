@@ -2,11 +2,10 @@ import { Action, ActionPanel, List } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
 
 import { getSubIssues, IssueResult } from "../api/getIssues";
-
 import useIssues from "../hooks/useIssues";
-import usePriorities from "../hooks/usePriorities";
 import useMe from "../hooks/useMe";
-import useUsers from "../hooks/useUsers";
+import usePriorities from "../hooks/usePriorities";
+
 import CreateIssueForm from "./CreateIssueForm";
 import IssueListItem from "./IssueListItem";
 
@@ -24,11 +23,10 @@ export default function SubIssues({ issue, mutateList }: SubIssuesProps) {
 
   const { priorities, isLoadingPriorities } = usePriorities();
   const { me, isLoadingMe } = useMe();
-  const { users, isLoadingUsers } = useUsers();
 
   return (
     <List
-      isLoading={isLoadingIssues || isLoadingMe || isLoadingPriorities || isLoadingMe || isLoadingUsers}
+      isLoading={isLoadingIssues || isLoadingMe || isLoadingPriorities || isLoadingMe}
       navigationTitle={`${issue.identifier} • Sub-issues`}
     >
       <List.EmptyView
@@ -41,7 +39,6 @@ export default function SubIssues({ issue, mutateList }: SubIssuesProps) {
               target={
                 <CreateIssueForm
                   priorities={priorities}
-                  users={users}
                   me={me}
                   parentId={issue.id}
                   projectId={issue.project?.id}
@@ -61,7 +58,6 @@ export default function SubIssues({ issue, mutateList }: SubIssuesProps) {
           mutateList={mutateList}
           mutateSubIssues={mutateSubIssues}
           priorities={priorities}
-          users={users}
           me={me}
         />
       ))}

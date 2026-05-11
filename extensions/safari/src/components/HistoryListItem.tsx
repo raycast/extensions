@@ -1,4 +1,4 @@
-import { ActionPanel, List, Action } from "@raycast/api";
+import { Action, ActionPanel, List } from "@raycast/api";
 import { getFavicon } from "@raycast/utils";
 import { HistoryItem } from "../types";
 import { getUrlDomain } from "../utils";
@@ -12,7 +12,7 @@ const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
     <ActionPanel>
       <ActionPanel.Section>
         <Action.OpenInBrowser url={props.entry.url} />
-        <SearchInBrowserAction searchText={props.searchText} />
+        <SearchInBrowserAction searchText={props.searchText} fallbackSearchType="search" />
       </ActionPanel.Section>
       <ActionPanel.Section>
         <CopyUrlAction url={props.entry.url} />
@@ -29,7 +29,7 @@ const Actions = (props: { entry: HistoryItem; searchText?: string }) => {
   );
 };
 
-const HistoryListItem = (props: { entry: HistoryItem; searchText?: string }) => {
+export default function HistoryListItem(props: { entry: HistoryItem; searchText?: string }) {
   return props.entry.title ? (
     <List.Item
       title={props.entry.title}
@@ -43,6 +43,4 @@ const HistoryListItem = (props: { entry: HistoryItem; searchText?: string }) => 
       ]}
     />
   ) : null;
-};
-
-export default HistoryListItem;
+}

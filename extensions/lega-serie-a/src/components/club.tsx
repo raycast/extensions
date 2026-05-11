@@ -1,34 +1,23 @@
 import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
+import { usePromise } from "@raycast/utils";
 import json2md from "json2md";
-import { Club } from "../types";
-import ClubSquad from "./squad";
-import { useEffect, useState } from "react";
 import { getClub } from "../api";
+import ClubSquad from "./squad";
 
 export default function ClubDetails(props: {
   url: string;
   season: string;
   team_name: string;
 }) {
-  const [club, setClub] = useState<Club>();
-  const [loading, setLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    setClub(undefined);
-    setLoading(true);
-
-    getClub(props.url.replace("/team/", "")).then((data) => {
-      if (data) {
-        setClub(data);
-      }
-      setLoading(false);
-    });
-  }, [props.url]);
+  const { data: club, isLoading } = usePromise(
+    (url) => getClub(url.replace("/team/", "")),
+    [props.url],
+  );
 
   return club ? (
     <Detail
       navigationTitle={`${club.name} | Club`}
-      isLoading={loading}
+      isLoading={isLoading}
       markdown={json2md([
         { h1: club.business_name },
         { p: club.address || "" },
@@ -84,8 +73,8 @@ export default function ClubDetails(props: {
         <ActionPanel>
           <Action.Push
             title="Squad"
-            icon={Icon.Person}
-            target={<ClubSquad {...props} />}
+            icon={Icon.TwoPeople}
+            target={<ClubSquad {...props} netco_id={club.netco_id} />}
           />
           <Action.OpenInBrowser title="Website" url={club.website} />
           <Action.OpenInBrowser

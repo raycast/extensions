@@ -1,5 +1,6 @@
 import { Notification } from "@linear/sdk";
-import { getLinearClient } from "../helpers/withLinearClient";
+
+import { getLinearClient } from "../api/linearClient";
 
 export type UpdateNotificationPayload = {
   id: Notification["id"];

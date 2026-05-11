@@ -87,7 +87,7 @@ const MerchantTransaction: FC<TransactionProps> = ({ transaction }) => {
         transaction.merchant.address.address,
         transaction.merchant.address.city,
         transaction.merchant.address.country,
-      ]}
+      ].filter(Boolean)}
       icon={icon}
       accessories={[getAccessory(transaction)]}
       detail={
@@ -132,7 +132,12 @@ const PotTransaction: FC<TransactionProps> = ({ transaction }) => {
   return (
     <List.Item
       title={name}
-      keywords={[transaction.currency, isIFTTT ? "ifttt" : "", "pot", category]}
+      keywords={[
+        transaction.currency,
+        isIFTTT ? "ifttt" : "",
+        "pot",
+        category,
+      ].filter(Boolean)}
       icon={{ source: Icon.Coins, tintColor: Color.Yellow }}
       accessories={[getAccessory(transaction)]}
       detail={
@@ -160,7 +165,11 @@ const FasterPaymentsTransaction: FC<TransactionProps> = ({ transaction }) => {
   return (
     <List.Item
       title={counterparty.name}
-      keywords={[transaction.currency, counterparty.name, transaction.category]}
+      keywords={[
+        transaction.currency,
+        counterparty.name,
+        transaction.category,
+      ].filter(Boolean)}
       icon={{
         source: Icon.ArrowNe,
         tintColor: transaction.amount < 0 ? Color.Yellow : Color.Green,
@@ -198,7 +207,7 @@ const P2PTransaction: FC<TransactionProps> = ({ transaction }) => {
         counterparty.preferred_name,
         notes,
         reaction,
-      ]}
+      ].filter(Boolean)}
       icon={{
         source: Icon.TwoPeople,
         tintColor: transaction.amount < 0 ? Color.Yellow : Color.Green,

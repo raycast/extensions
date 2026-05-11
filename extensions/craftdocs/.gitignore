@@ -5,3 +5,25 @@
 
 # misc
 .DS_Store
+
+# Development
+/dist
+/references
+*.log
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Personal development files
+/personal-features/
+.env.local
+/experiments/
+AGENTS.md
+
+# Raycast
+.raycast/
+raycast-env.d.ts

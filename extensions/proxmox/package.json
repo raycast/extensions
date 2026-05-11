@@ -1,0 +1,90 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "proxmox",
+  "title": "Proxmox",
+  "description": "Manage your Proxmox server from Raycast",
+  "icon": "icon.png",
+  "author": "CzBiX",
+  "contributors": [
+    "xmok",
+    "j3lte"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Manage VMs",
+      "subtitle": "Proxmox",
+      "description": "Manage your Proxmox VMs from Raycast",
+      "mode": "view",
+      "keywords": [
+        "pve"
+      ]
+    },
+    {
+      "name": "storage",
+      "title": "Manage Storage",
+      "subtitle": "Proxmox",
+      "description": "Manage your Proxmox storage from Raycast",
+      "mode": "view",
+      "keywords": [
+        "pve",
+        "storage"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "description": "The URL of your Proxmox server",
+      "type": "textfield",
+      "required": true,
+      "title": "Server URL",
+      "placeholder": "https://pve.local:8006"
+    },
+    {
+      "name": "tokenId",
+      "description": "The token ID of your Proxmox server",
+      "type": "textfield",
+      "required": true,
+      "title": "Token ID",
+      "placeholder": "root@pam!raycast"
+    },
+    {
+      "name": "tokenSecret",
+      "description": "The token secret of your Proxmox server",
+      "type": "password",
+      "required": true,
+      "title": "Token Secret",
+      "placeholder": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.9",
+    "@raycast/utils": "^2.2.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.39.1",
+    "prettier": "^3.7.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
+}

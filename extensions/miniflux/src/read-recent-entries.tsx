@@ -1,5 +1,6 @@
 import { List, showToast, Toast, Cache } from "@raycast/api";
 import apiServer from "./utils/api";
+import { MinifluxEntry } from "./utils/types";
 import { useEffect, useState, useMemo } from "react";
 import { MinifluxEntries, MinifluxApiError, State } from "./utils/types";
 import ControlActions from "./components/ControlActions";
@@ -27,23 +28,23 @@ export default function readRecentEntries() {
     [filterValue, state.entries]
   );
 
+  const fetchData = async () => {
+    try {
+      showToast(Toast.Style.Animated, "Fetching latest entries...");
+
+      const { entries }: MinifluxEntries = await apiServer.getRecentEntries();
+
+      cache.set("latest-entries", JSON.stringify(entries));
+      setState({ entries, isLoading: false });
+
+      showToast(Toast.Style.Success, "Latest entries have been loaded");
+    } catch (error) {
+      handleError(error as MinifluxApiError);
+      setState((oldState) => ({ ...oldState, isLoading: false }));
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        showToast(Toast.Style.Animated, "Fetching latest entries...");
-
-        const { entries }: MinifluxEntries = await apiServer.getRecentEntries();
-
-        setState({ entries, isLoading: false });
-
-        showToast(Toast.Style.Success, "Latest entries has been loaded !");
-        cache.set("latest-entries", JSON.stringify(entries));
-      } catch (error) {
-        handleError(error as MinifluxApiError);
-        setState((oldState) => ({ ...oldState, isLoading: false }));
-      }
-    };
-
     fetchData();
   }, []);
 
@@ -53,19 +54,35 @@ export default function readRecentEntries() {
       isLoading={state.isLoading}
       throttle={true}
       navigationTitle="Search entries"
-      searchBarPlaceholder="Search from your miniflux feeds"
+      searchBarPlaceholder="Search from your Miniflux feeds"
       searchBarAccessory={<FilterDropdown handleFilter={setFilterValue} filter="categories" />}
     >
       {filteredEntries.map((entry) => (
-        <List.Item
-          key={entry.id}
-          title={entry.title}
-          keywords={[...entry.title]}
-          detail={<List.Item.Detail markdown={nhm.translate(`<h2>${entry.title}</h2>${entry.content}`)} />}
-          actions={<ControlActions entry={entry} />}
-          icon={useEntryIcon(entry)}
-        />
+        <ListItem key={entry.id} entry={entry} onRefresh={fetchData} entries={filteredEntries} />
       ))}
     </List>
   );
 }
+
+const ListItem = ({
+  entry,
+  onRefresh,
+  entries,
+}: {
+  entry: MinifluxEntry;
+  onRefresh: () => Promise<void>;
+  entries: MinifluxEntry[];
+}) => {
+  const icon = useEntryIcon(entry);
+
+  return (
+    <List.Item
+      key={entry.id}
+      title={entry.title}
+      keywords={[...entry.title]}
+      detail={<List.Item.Detail markdown={nhm.translate(`<h2>${entry.title}</h2>${entry.content}`)} />}
+      actions={<ControlActions entry={entry} onRefresh={onRefresh} entries={entries} />}
+      icon={icon}
+    />
+  );
+};

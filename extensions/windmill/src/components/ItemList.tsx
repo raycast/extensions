@@ -1,4 +1,4 @@
-import { ActionPanel, Detail, List, Action, Icon, launchCommand, LaunchType } from "@raycast/api";
+import { ActionPanel, List, Action, Icon, launchCommand, LaunchType } from "@raycast/api";
 import { ScriptFlowForm } from "./ScriptFlowForm";
 import { StarAction } from "./StarAction";
 import { WorkspaceConfig, Kind, ExtendedWindmillWorkspacePair } from "../types";

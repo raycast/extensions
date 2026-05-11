@@ -1,27 +1,50 @@
-import { List, ActionPanel, Action } from "@raycast/api";
-import dataJSON from "./data.json";
-import { getComponentUrl } from "./utils";
+import { List, ActionPanel, Action, getPreferenceValues, environment } from "@raycast/api";
+import dataEnUs from "./data.en-US.json";
+import dataZhCn from "./data.zh-CN.json";
 
-type dataType = {
-  type: string;
+type DataItem = {
   title: string;
-  children: { category: string; title: string; type: string; filename: string; subtitle?: string; cover?: string }[];
+  items: {
+    title: string;
+    subtitle?: string;
+    description: string;
+    cover: string;
+    coverDark?: string;
+    documentation: string;
+  }[];
 };
-const list: dataType[] = dataJSON;
 
-export default function Command() {
+export default Command;
+function Command() {
+  const { language } = getPreferenceValues<{
+    language?: "en-US" | "zh-CN";
+  }>();
+
+  console.log({ language });
+
+  const list: DataItem[] = language === "en-US" ? dataEnUs : dataZhCn;
+
   return (
     <List isShowingDetail>
-      {list.map((item) => (
-        <List.Section key={item.title} title={item.title}>
-          {item.children.map((child) => (
+      {list.map(({ title: groupTitle, items }) => (
+        <List.Section key={groupTitle} title={groupTitle}>
+          {items.map(({ title, cover, coverDark, subtitle, description, documentation }) => (
             <List.Item
-              title={`${child.title} ${child.subtitle || ""}`}
-              key={child.title}
-              detail={child.cover && <List.Item.Detail markdown={`![Illustration](${child.cover})`} />}
+              title={title}
+              key={title}
+              subtitle={subtitle}
+              detail={
+                cover && (
+                  <List.Item.Detail
+                    markdown={`![Illustration](${
+                      environment.appearance === "dark" ? coverDark : cover
+                    })\n\n${description}`}
+                  />
+                )
+              }
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser url={getComponentUrl(child.filename)} />
+                  <Action.OpenInBrowser url={documentation} />
                 </ActionPanel>
               }
             />

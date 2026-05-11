@@ -10,7 +10,8 @@
     "Productivity"
   ],
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "benkates"
   ],
   "license": "MIT",
   "commands": [
@@ -21,6 +22,21 @@
       "mode": "no-view"
     },
     {
+      "name": "session-start-new-form",
+      "title": "Start Custom Session",
+      "description": "Starts a focus session in Session app with a form input. Supply a semi-colon separated list of categories in order to choose from one of them in the form (ie: \"Personal;Work;Play\" will create three dropdown options).",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "categoryList",
+          "title": "Category List",
+          "required": false,
+          "description": "Semi-colon separated list of categories to choose from in the dropdown.",
+          "type": "textfield"
+        }
+      ]
+    },
+    {
       "name": "session-start-previous",
       "title": "Start Previous Session",
       "description": "Starts a focus session in Session app with the previous intent and duration",
@@ -28,8 +44,8 @@
     },
     {
       "name": "session-pause",
-      "title": "Pause Session",
-      "description": "Pauses a focus session in Session app",
+      "title": "Pause/Resume Session",
+      "description": "Pauses or resumes a focus session in Session app, based on current playing state",
       "mode": "no-view"
     },
     {

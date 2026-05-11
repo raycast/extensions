@@ -8,7 +8,15 @@
   "contributors": [
     "Calvein",
     "pernielsentikaer",
-    "vimtor"
+    "vimtor",
+    "j3lte",
+    "stefanmatar",
+    "YourMCGeek",
+    "xilopaint"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "categories": [
@@ -32,30 +40,49 @@
       "mode": "no-view"
     }
   ],
+  "preferences": [
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "data": [
+        {
+          "title": "Copy to Clipboard",
+          "value": "copy"
+        },
+        {
+          "title": "Paste in Active App",
+          "value": "paste"
+        }
+      ],
+      "title": "Default Action",
+      "description": "Choose the default action for the generated data.",
+      "required": false,
+      "default": "copy",
+      "value": "copy"
+    }
+  ],
   "dependencies": {
-    "@bugsnag/cuid": "^3.0.2",
-    "@faker-js/faker": "^7.6.0",
-    "@raycast/api": "^1.60.1",
+    "@faker-js/faker": "^10.2.0",
+    "@raycast/api": "^1.104.1",
     "is-url": "^1.2.4",
     "lodash": "^4.17.21"
   },
   "devDependencies": {
-    "@types/bugsnag__cuid": "^3.0.1",
-    "@types/is-url": "^1.2.30",
-    "@types/lodash": "^4.14.186",
-    "@types/node": "^18.11.0",
-    "@types/react": "^18.0.21",
-    "@typescript-eslint/eslint-plugin": "^5.40.0",
-    "@typescript-eslint/parser": "^5.40.0",
-    "eslint": "^8.25.0",
-    "eslint-config-prettier": "^8.5.0",
-    "react-devtools": "^4.26.1",
-    "typescript": "^4.8.4"
+    "@raycast/eslint-config": "^2.1.1",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@types/is-url": "^1.2.32",
+    "@types/lodash": "^4.17.20",
+    "@types/node": "^24.9.1",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   }
 }

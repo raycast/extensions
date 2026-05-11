@@ -1,9 +1,10 @@
-import { getApplications, showToast, Toast } from "@raycast/api";
+import { getApplications, showToast, Toast, captureException } from "@raycast/api";
+import { runAppleScript, showFailureToast } from "@raycast/utils";
 import { exec } from "child_process";
-import { runAppleScript } from "run-applescript";
 
 import { Data, UUID } from "../types/tim";
 import { buildScriptEnsuringTimIsRunning, runAppleScriptSilently } from "./apple-script";
+import { isNoActiveTaskError } from "../helpers/error";
 
 export async function installedWrapper<T extends () => void>(cb: T) {
   const timAvailable = await checkIfTimInstalled();
@@ -27,7 +28,9 @@ export async function getActiveTask(): Promise<UUID | undefined> {
     const script = buildScriptEnsuringTimIsRunning("getActiveTask");
     return await runAppleScript(script);
   } catch (error) {
-    return undefined;
+    if (isNoActiveTaskError(error)) return undefined;
+
+    captureException(error);
   }
 }
 
@@ -59,14 +62,6 @@ export async function openTaskManager() {
   await runAppleScriptSilently(script);
 }
 
-export async function openNewTask() {
-  const script = buildScriptEnsuringTimIsRunning(`opennewtask`);
-  await runAppleScriptSilently(script);
-}
-export async function openNavigator() {
-  const script = buildScriptEnsuringTimIsRunning(`opennavigator`);
-  await runAppleScriptSilently(script);
-}
 export async function openActiveRecord() {
   const script = buildScriptEnsuringTimIsRunning(`openactiverecord`);
   await runAppleScriptSilently(script);
@@ -83,8 +78,14 @@ export async function exportData() {
 }
 
 export async function getData(): Promise<Data> {
-  const jsonString = await exportData();
-  return JSON.parse(jsonString);
+  try {
+    const jsonString = await exportData();
+    return JSON.parse(jsonString);
+  } catch (error) {
+    captureException(error);
+    showFailureToast(error);
+    throw error;
+  }
 }
 
 export async function hasData(): Promise<boolean> {

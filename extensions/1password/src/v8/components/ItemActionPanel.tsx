@@ -1,67 +1,65 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { CopyToClipboard } from "./ActionCopyToClipboard";
+
+import resetCache from "../../reset-cache";
 import { Item, User } from "../types";
 import { ActionID, hrefToOpenInBrowser } from "../utils";
-import resetCache from "../../reset-cache";
+import { CopyToClipboard } from "./ActionCopyToClipboard";
+import { ShareItem } from "./ActionShareItem";
+import { SwitchAccount } from "./ActionSwitchAccount";
 
-export function ItemActionPanel({ account, item, actions }: { account: User; item: Item; actions: ActionID[] }) {
+export function ItemActionPanel({
+  account,
+  actions,
+  item,
+}: {
+  account: undefined | User;
+  actions: ActionID[];
+  item: Item;
+}) {
   return (
     <ActionPanel>
       {actions.map((actionId) => {
         switch (actionId) {
+          case "copy-one-time-password":
+            return CopyOneTimePassword(item);
+          case "copy-password":
+            return CopyPassword(item);
+          case "copy-username":
+            return CopyUsername(item);
           case "open-in-1password":
             return OpenIn1Password(account, item);
           case "open-in-browser":
             return OpenInBrowser(item);
-          case "copy-username":
-            return CopyUsername(item);
-          case "copy-password":
-            return CopyPassword(item);
+          case "paste-one-time-password":
+            return PasteOneTimePassword(item);
+          case "paste-password":
+            return PastePassword(item);
+          case "paste-username":
+            return PasteUsername(item);
+          case "share-item":
+            return CopyShareItem(item);
         }
       })}
       <ActionPanel.Section>
-        <Action title="Reset Cache" icon={Icon.Trash} onAction={() => resetCache()}></Action>
+        {SwitchAccount()}
+        <Action icon={Icon.Trash} onAction={() => resetCache()} title="Reset Cache"></Action>
       </ActionPanel.Section>
     </ActionPanel>
   );
 }
 
-function OpenIn1Password(account: User, item: Item) {
-  return (
-    <Action.Open
-      key="open-in-1password"
-      title="Open In 1Password"
-      target={`onepassword://view-item/?a=${account.account_uuid}&v=${item.vault.id}&i=${item.id}`}
-      application="com.1password.1password"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
-    />
-  );
-}
-
-function OpenInBrowser(item: Item) {
-  const href = hrefToOpenInBrowser(item);
-  if (href) {
-    return (
-      <Action.OpenInBrowser
-        key="open-in-browser"
-        title="Open In Browser"
-        url={href}
-        shortcut={{ modifiers: ["opt"], key: "return" }}
-      />
-    );
-  } else {
-    return null;
-  }
-}
-
-function CopyUsername(item: Item) {
+function CopyOneTimePassword(item: Item) {
   return (
     <CopyToClipboard
+      attribute="otp"
+      field="one-time password"
       id={item.id}
-      key="copy-username"
+      key="copy-one-time-password"
+      shortcut={{
+        macOS: { key: "c", modifiers: ["cmd", "ctrl"] },
+        Windows: { key: "c", modifiers: ["ctrl", "shift", "opt"] },
+      }}
       vault_id={item.vault.id}
-      field="username"
-      shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
     />
   );
 }
@@ -69,11 +67,121 @@ function CopyUsername(item: Item) {
 function CopyPassword(item: Item) {
   return (
     <CopyToClipboard
+      field="password"
       id={item.id}
       key="copy-password"
+      shortcut={{ macOS: { key: "c", modifiers: ["cmd", "opt"] }, Windows: { key: "c", modifiers: ["ctrl", "opt"] } }}
       vault_id={item.vault.id}
+    />
+  );
+}
+
+function CopyShareItem(item: Item) {
+  return (
+    <ShareItem
+      id={item.id}
+      key="share-item"
+      shortcut={{
+        macOS: { key: "s", modifiers: ["cmd", "shift"] },
+        Windows: { key: "s", modifiers: ["ctrl", "shift"] },
+      }}
+      title={item.title}
+    />
+  );
+}
+
+function CopyUsername(item: Item) {
+  return (
+    <CopyToClipboard
+      field="username"
+      id={item.id}
+      key="copy-username"
+      shortcut={{
+        macOS: { key: "c", modifiers: ["cmd", "shift"] },
+        Windows: { key: "c", modifiers: ["ctrl", "shift"] },
+      }}
+      vault_id={item.vault.id}
+    />
+  );
+}
+
+function OpenIn1Password(account: undefined | User, item: Item) {
+  if (account) {
+    return (
+      <Action.Open
+        key="open-in-1password"
+        shortcut={{
+          macOS: { key: "o", modifiers: ["cmd", "shift"] },
+          Windows: { key: "o", modifiers: ["ctrl", "shift"] },
+        }}
+        target={`onepassword://view-item/?a=${account.account_uuid}&v=${item.vault.id}&i=${item.id}`}
+        title="Open in 1Password"
+      />
+    );
+  }
+
+  return null;
+}
+
+function OpenInBrowser(item: Item) {
+  const href = hrefToOpenInBrowser(item);
+
+  if (href) {
+    return (
+      <Action.OpenInBrowser
+        key="open-in-browser"
+        shortcut={{ key: "return", modifiers: ["opt"] }}
+        title="Open in Browser"
+        url={href}
+      />
+    );
+  }
+
+  return null;
+}
+
+function PasteOneTimePassword(item: Item) {
+  return (
+    <CopyToClipboard
+      attribute="otp"
+      field="one-time password"
+      id={item.id}
+      isPasteAction
+      key="paste-one-time-password"
+      shortcut={{
+        macOS: { key: "v", modifiers: ["cmd", "ctrl"] },
+        Windows: { key: "v", modifiers: ["ctrl", "shift", "opt"] },
+      }}
+      vault_id={item.vault.id}
+    />
+  );
+}
+
+function PastePassword(item: Item) {
+  return (
+    <CopyToClipboard
       field="password"
-      shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+      id={item.id}
+      isPasteAction
+      key="paste-password"
+      shortcut={{ macOS: { key: "v", modifiers: ["cmd", "opt"] }, Windows: { key: "v", modifiers: ["ctrl", "opt"] } }}
+      vault_id={item.vault.id}
+    />
+  );
+}
+
+function PasteUsername(item: Item) {
+  return (
+    <CopyToClipboard
+      field="username"
+      id={item.id}
+      isPasteAction
+      key="paste-username"
+      shortcut={{
+        macOS: { key: "v", modifiers: ["cmd", "shift"] },
+        Windows: { key: "v", modifiers: ["ctrl", "shift"] },
+      }}
+      vault_id={item.vault.id}
     />
   );
 }

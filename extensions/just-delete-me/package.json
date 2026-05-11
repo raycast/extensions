@@ -6,7 +6,8 @@
   "icon": "command-icon.png",
   "author": "andreaselia",
   "contributors": [
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "xmok"
   ],
   "categories": [
     "Data",
@@ -25,18 +26,17 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.48.5",
-    "@raycast/utils": "^1.5.2"
+    "@raycast/api": "^1.78.0",
+    "@raycast/utils": "^1.16.2"
   },
   "devDependencies": {
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "@typescript-eslint/eslint-plugin": "^5.0.0",
-    "@typescript-eslint/parser": "^5.0.0",
-    "eslint": "^7.32.0",
-    "eslint-config-prettier": "^8.3.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.3.3",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "react": "^18.2.0",
+    "typescript": "^5.2.2"
   },
   "scripts": {
     "build": "ray build -e dist",

@@ -1,4 +1,4 @@
-import { MatchFixture } from "../team-detail";
+import type { MatchFixture } from "../team-detail";
 
 export type MatchDayResponse = {
   leagues: MatchDayLeague[];

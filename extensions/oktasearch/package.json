@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "oktasearch",
+  "title": "Okta Search",
+  "description": "Serach Okta users and groups by name.",
+  "icon": "okta.png",
+  "author": "damian_zachwieja",
+  "categories": [
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Users and Groups",
+      "description": "Search for users and groups in your Okta account.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "oktaApiKey",
+      "title": "Okta API Key",
+      "description": "Your Okta API Key",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "oktaDomain",
+      "title": "Okta Domain",
+      "description": "Your Okta domain (e.g., your-domain.okta.com)",
+      "type": "textfield",
+      "required": true
+    },
+    {
+      "name": "oktaAdminUrl",
+      "title": "Okta Admin URL",
+      "description": "Your Okta admin URL (e.g., your-domain-admin.okta.com)",
+      "type": "textfield",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.55.2",
+    "axios": "^1.8.4",
+    "node-fetch": "^3.3.1",
+    "ray": "^0.0.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^20.4.6",
+    "@types/react": "^18.2.18",
+    "eslint": "^8.46.0",
+    "prettier": "^3.0.1",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

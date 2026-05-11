@@ -1,4 +1,4 @@
-export interface Manga {
+export interface GraphicPublication {
   id: string;
   name: string;
   volume: string;
@@ -9,8 +9,8 @@ export interface Manga {
   frontImageUrl: string;
 }
 
-export interface MangaList {
-  [key: string]: Manga[];
+export interface GraphicPublicationList {
+  [key: string]: GraphicPublication[];
 }
 
 export interface Collection {

@@ -119,7 +119,7 @@ export default function Command(props: { scope?: string | undefined }) {
 
           return kinds;
         }, [])
-        .sort((a, b) => a?.localeCompare(b))
+        .sort((a, b) => a?.localeCompare(b)),
     );
   }, [loading]);
 
@@ -172,13 +172,13 @@ export default function Command(props: { scope?: string | undefined }) {
                 />
                 <Action.ShowInFinder
                   icon={Icon.Finder}
-                  title="Show In Finder"
+                  title="Show in Finder"
                   path={kMDItemPath}
                   onShow={() => popToRoot({ clearSearchBar: true })}
                 />
                 <Action.ToggleQuickLook title="Quick Look" shortcut={{ modifiers: ["cmd"], key: "y" }} />
                 <Action.OpenWith
-                  title="Open With..."
+                  title="Open with…"
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                   path={kMDItemPath}
                   onOpen={() => popToRoot({ clearSearchBar: true })}
@@ -206,6 +206,11 @@ export default function Command(props: { scope?: string | undefined }) {
                     title="Copy Path"
                     shortcut={{ modifiers: ["cmd", "shift"], key: "," }}
                     content={kMDItemPath}
+                  />
+                  <Action.Paste
+                    title={`Paste ${kMDItemKind}`}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                    content={{ file: kMDItemPath }}
                   />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

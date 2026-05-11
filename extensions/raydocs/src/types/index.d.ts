@@ -4,6 +4,7 @@ export type Link = {
   sectionTitle?: string;
   url: {
     path: string;
+    markdown: string;
     external: boolean;
   };
 };

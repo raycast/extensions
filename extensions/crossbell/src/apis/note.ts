@@ -1,10 +1,10 @@
 import { useFetch } from "@raycast/utils";
-import type { ListResponse, NoteEntity } from "crossbell.js";
+import type { ListResponse, NoteEntity } from "crossbell";
 
 export function useNotes(characterId?: number) {
   const { isLoading, data } = useFetch<ListResponse<NoteEntity>>(
     `https://indexer.crossbell.io/v1/characters/${characterId}/notes?limit=20`,
-    { execute: Boolean(characterId) }
+    { execute: Boolean(characterId) },
   );
 
   return {

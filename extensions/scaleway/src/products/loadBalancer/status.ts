@@ -1,7 +1,7 @@
 import { Color, Icon } from '@raycast/api'
-import { LB } from '@scaleway/sdk'
+import { Lbv1 } from '@scaleway/sdk'
 
-export const LOAD_BALANCER_STATUSES = LB.v1.LB_TRANSIENT_STATUSES.reduce(
+export const LOAD_BALANCER_STATUSES = Lbv1.LB_TRANSIENT_STATUSES.reduce(
   (acc, transientStatus) => ({
     ...acc,
     [transientStatus]: {
@@ -25,4 +25,4 @@ export const LOAD_BALANCER_STATUSES = LB.v1.LB_TRANSIENT_STATUSES.reduce(
   }
 )
 
-export const getLoadBalancerStatusIcon = (lb: LB.v1.Lb) => LOAD_BALANCER_STATUSES[lb.status]
+export const getLoadBalancerStatusIcon = (lb: Lbv1.Lb) => LOAD_BALANCER_STATUSES[lb.status]

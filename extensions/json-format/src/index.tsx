@@ -1,16 +1,30 @@
-import { ActionPanel, Icon, Form, Action } from '@raycast/api';
-import { useState } from 'react';
+import { ActionPanel, Icon, Form, Action, useNavigation } from "@raycast/api";
 
-import { copyFormattedJs, formatJS } from './utils';
+import { copyFormattedJs, formatJS } from "./utils";
+import { useForm } from "@raycast/utils";
+import { FormattedJsonDetail } from "./formattedJsonDetail";
 
 interface FormInput {
   input: string;
-  result: string;
+  action: "format" | "view";
 }
 
 export default function main() {
-  const [input, setInput] = useState<string>('');
-  const [result, setResult] = useState<string>('');
+  const { push } = useNavigation();
+  const { values, itemProps, handleSubmit } = useForm<FormInput>({
+    onSubmit: async ({ input, action }) => {
+      const output = await formatJS(input);
+
+      if (output) {
+        if (action === "format") {
+          await copyFormattedJs(output);
+        } else {
+          push(<FormattedJsonDetail json={output} />);
+        }
+      }
+    },
+    initialValues: { input: "" },
+  });
 
   return (
     <Form
@@ -19,42 +33,18 @@ export default function main() {
           <Action.SubmitForm
             title="Format"
             icon={Icon.Clipboard}
-            onSubmit={async (values: FormInput) => {
-              const output = formatJS(values.input);
-
-              if (output) {
-                await copyFormattedJs(output);
-              }
-            }}
+            onSubmit={() => handleSubmit({ ...values, action: "format" })}
           />
           <Action.SubmitForm
             title="View Result"
-            icon={Icon.Checkmark}
-            onSubmit={async (values: FormInput) => {
-              const output = formatJS(values.input);
-
-              if (output) {
-                setResult(output);
-              }
-            }}
+            icon={Icon.Eye}
+            onSubmit={() => handleSubmit({ ...values, action: "view" })}
           />
         </ActionPanel>
       }
     >
-      <Form.TextArea
-        id="input"
-        title="Input"
-        placeholder="Paste JSON here…"
-        value={input}
-        onChange={setInput}
-      />
-      <Form.TextArea
-        id="result"
-        title="Result"
-        placeholder="Command + Shift + Enter to view result..."
-        value={result}
-        onChange={setResult}
-      />
+      <Form.TextArea title="Input" placeholder="Paste JSON here…" {...itemProps.input} />
+      <Form.Description text="Press Command + Shift + Enter to view result." />
     </Form>
   );
 }

@@ -8,10 +8,7 @@ import { EpicListItem, includeGroupAncestorPreference } from "./epics";
 import { GroupInfo, useMyGroups } from "./groups";
 import { getTextIcon } from "../icons";
 
-function GroupListDropDown(props: {
-  groupsInfo?: GroupInfo;
-  onChange?: (newValue: string) => void;
-}): JSX.Element | null {
+function GroupListDropDown(props: { groupsInfo?: GroupInfo; onChange?: (newValue: string) => void }) {
   const gi = props.groupsInfo;
   if (!gi || !gi.groups) {
     return null;
@@ -33,7 +30,7 @@ function GroupListDropDown(props: {
   );
 }
 
-export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.Element {
+export function MyEpicList(props: { scope: EpicScope; state: EpicState }) {
   const [searchText, setSearchText] = useState<string>();
   const { groupsinfo } = useMyGroups();
   const [selectedGroupID, setSelectedGroupID] = useState<string>("");
@@ -56,7 +53,7 @@ export function MyEpicList(props: { scope: EpicScope; state: EpicState }): JSX.E
       onFilter: async (epics) => {
         return searchData<Epic>(epics, { search: searchText || "", keys: ["title"], limit: 50 });
       },
-    }
+    },
   );
 
   if (error) {

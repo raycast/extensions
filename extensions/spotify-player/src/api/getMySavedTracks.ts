@@ -1,10 +1,11 @@
+import { withCache } from "../helpers/apiCache";
 import { getErrorMessage } from "../helpers/getError";
 import { SimplifiedTrackObject } from "../helpers/spotify.api";
 import { getSpotifyClient } from "../helpers/withSpotifyClient";
 
 type GetMySavedTracksProps = { limit?: number };
 
-export async function getMySavedTracks({ limit = 50 }: GetMySavedTracksProps = {}) {
+async function _getMySavedTracks({ limit = 50 }: GetMySavedTracksProps = {}) {
   const { spotifyClient } = getSpotifyClient();
 
   try {
@@ -18,10 +19,12 @@ export async function getMySavedTracks({ limit = 50 }: GetMySavedTracksProps = {
       };
     });
 
-    return { items: tracks as SimplifiedTrackObject[] };
+    return { items: tracks as SimplifiedTrackObject[], total: response?.total ?? 0 };
   } catch (err) {
     const error = getErrorMessage(err);
     console.log("getMySavedTracks.ts Error:", error);
     throw new Error(error);
   }
 }
+
+export const getMySavedTracks = withCache("api:library:tracks", 300000, _getMySavedTracks);

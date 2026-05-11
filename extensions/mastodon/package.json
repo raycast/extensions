@@ -5,6 +5,10 @@
   "description": "Publish status from Raycast to Mastodon, and view your bookmarked status",
   "icon": "mastodon-icon.png",
   "author": "SevicheCC",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "categories": [
     "Communication",
     "News",
@@ -12,7 +16,8 @@
   ],
   "contributors": [
     "basix",
-    "pernielsentikaer"
+    "pernielsentikaer",
+    "litomore"
   ],
   "license": "MIT",
   "commands": [
@@ -80,6 +85,23 @@
           "placeholder": "default value : 20"
         }
       ]
+    },
+    {
+      "name": "menu-bar-notifications",
+      "title": "Menu Bar Notifications",
+      "subtitle": "Mastodon",
+      "description": "Menu Bar notifications",
+      "mode": "menu-bar",
+      "interval": "5m",
+      "preferences": [
+        {
+          "name": "openNotificationWith",
+          "type": "appPicker",
+          "required": false,
+          "title": "Open notification with",
+          "description": "Choose the app to open the notification with, default to your default browser"
+        }
+      ]
     }
   ],
   "preferences": [
@@ -88,7 +110,7 @@
       "type": "textfield",
       "required": true,
       "title": "Instance's URL",
-      "description": "Your Mastodon  instance's URL",
+      "description": "Your Mastodon instance's URL",
       "placeholder": "such as: mastodon.social"
     },
     {
@@ -125,18 +147,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.54.1",
-    "@raycast/utils": "^1.8.0",
-    "node-fetch": "^3.3.1",
+    "@raycast/api": "^1.100.3",
+    "@raycast/utils": "^2.2.0",
+    "node-fetch": "^3.3.2",
     "node-html-markdown": "^1.3.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.8.8",
-    "typescript": "^4.9.5"
+    "@raycast/eslint-config": "2.0.4",
+    "@types/node": "24.0.14",
+    "@types/react": "19.1.8",
+    "eslint": "^9.31.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.3"
   },
   "scripts": {
     "build": "ray build -e dist",

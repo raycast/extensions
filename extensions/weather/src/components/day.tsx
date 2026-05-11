@@ -1,22 +1,29 @@
 import { Color, List } from "@raycast/api";
+import React from "react";
 import { WeatherIcons, getWeatherCodeIcon, getWindDirectionIcon } from "../icons";
-import { getWindUnit, getTemperatureUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
+import { getTemperatureUnit, getWindUnit, getWttrTemperaturePostfix, getWttrWindPostfix } from "../unit";
+import { clockFormat } from "../utils";
 import { Hourly, WeatherData, getHourlyCloudCover, getHourlyRain, getHourlyThunder } from "../wttr";
-import { getUVIndexIcon } from "../utils";
 
 function getTime(time: string): string {
-  const h = parseInt(time) / 100.0;
-  const postfix = h < 12 ? "AM" : "PM";
-  return `${h} ${postfix}`;
+  const t = parseInt(time);
+  const h = t / 100.0;
+  const m = t % 100;
+  if (clockFormat() === "24h") {
+    return new Date(2000, 1, 1, h, m).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  } else {
+    const postfix = h < 12 ? "AM" : "PM";
+    return `${h} ${postfix}`;
+  }
 }
 
-export function DayList(props: { day: WeatherData; title: string; isLoading?: boolean }): JSX.Element {
+export function DayList(props: { day: WeatherData; title: string; isLoading?: boolean }): React.ReactElement {
   const day = props.day;
 
   const getWeatherDesc = (hour: Hourly): string => {
     try {
       return hour.weatherDesc[0].value;
-    } catch (e: unknown) {
+    } catch {
       return "?";
     }
   };
@@ -88,7 +95,7 @@ export function DayList(props: { day: WeatherData; title: string; isLoading?: bo
                   tooltip: cloudCover ? `Cloud Cover: ${cloudCover.valueAndUnit}` : undefined,
                 },
                 {
-                  icon: day.uvIndex ? getUVIndexIcon(day.uvIndex) : undefined,
+                  icon: day.uvIndex ? WeatherIcons.UVIndex : undefined,
                   tooltip: day.uvIndex ? `UV Index: ${day.uvIndex}` : undefined,
                 },
                 {

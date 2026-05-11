@@ -40,7 +40,7 @@ export const play =
   (name: string): TE.TaskEither<ScriptError, string> =>
     pipe(
       general.setShuffle(shuffle),
-      TE.chain(() => tell("Music", `play playlist "${name.trim()}"`))
+      TE.chain(() => tell("Music", `play playlist "${name.trim()}"`)),
     );
 
 export const playById =
@@ -48,7 +48,7 @@ export const playById =
   (id: string) =>
     pipe(
       general.setShuffle(shuffle),
-      TE.chain(() => tell("Music", `play (every playlist whose id is "${id}")`))
+      TE.chain(() => tell("Music", `play (every playlist whose id is "${id}")`)),
     );
 
 export const getPlaylistId = (name: string) => tell("Music", `get id of playlist "${name}"`);

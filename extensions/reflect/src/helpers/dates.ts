@@ -8,12 +8,16 @@ export function getTodaysDateAsISOString() {
 interface Preferences {
   prependTimestamp?: boolean;
   timestampFormat?: "12" | "24";
+  isTask?: boolean;
 }
 
-export function prependTimestampIfSelected(text: string, preferences: Preferences) {
+export function prependNote(text: string, preferences: Preferences) {
   if (preferences.prependTimestamp) {
     const timestamp = format(new Date(), preferences.timestampFormat === "24" ? "HH:mm" : "h:mmaaa");
     text = `${timestamp} ${text}`;
+  }
+  if (preferences.isTask) {
+    text = `+ ${text}`;
   }
   return text;
 }

@@ -3,7 +3,7 @@ import CreateArticle from "../create-article";
 import { Article } from "../types/articles";
 import { preference } from "../utils/functions";
 
-export function ArticleAction({ article }: { article: Article }) {
+export function ArticleAction({ article, onRevalidate }: { article: Article; onRevalidate: () => void }) {
   const { body_markdown, url, published } = article;
   return (
     <>
@@ -30,7 +30,7 @@ export function ArticleAction({ article }: { article: Article }) {
           title={"Edit Article"}
           icon={Icon.Pencil}
           shortcut={{ modifiers: ["cmd"], key: "e" }}
-          target={<CreateArticle article={article} />}
+          target={<CreateArticle article={article} onEdit={onRevalidate} />}
         />
       </ActionPanel.Section>
 

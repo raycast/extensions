@@ -17,6 +17,30 @@ import { currencyCode2Name, currencyCode2CountryAndRegion } from "./currency";
 const STORAGE_KEY_FROM_CURRENCY_CODE = "fromCurrencyCode";
 const STORAGE_KEY_PINNED_CURRENCY_CODE = "pinnedCurrencyCode";
 
+type Provider = "exchangerate-api" | "unirate";
+
+const PROVIDER_LABELS: Record<Provider, string> = {
+  "exchangerate-api": "exchangerate-api.com",
+  unirate: "unirateapi.com",
+};
+
+function getProvider(): Provider {
+  const { provider } = getPreferenceValues<Preferences>();
+  return provider === "unirate" ? "unirate" : "exchangerate-api";
+}
+
+const PROVIDER_DOC_URLS: Record<Provider, string> = {
+  "exchangerate-api": "https://www.exchangerate-api.com/docs/standard-requests",
+  unirate: "https://unirateapi.com/docs",
+};
+
+function cacheKey(provider: Provider, historyDate: Date | null): string {
+  const dateSuffix = historyDate
+    ? `${historyDate.getFullYear()}-${historyDate.getMonth() + 1}-${historyDate.getDate()}`
+    : "";
+  return `${provider}-currency${dateSuffix}`;
+}
+
 export default function Command() {
   const { searchText, state, setState, setSearchTextAndExchange } = useSearchText();
 
@@ -97,9 +121,10 @@ function Exchange({
   setSearchText: (amountExpression: string) => void;
 }) {
   if (currencyResult.result !== "success") {
+    const provider = getProvider();
     const errorMessage = `
     * error code: ${currencyResult.result}.
-    * you can find all error code in here. (https://www.exchangerate-api.com/docs/standard-requests)`;
+    * for ${PROVIDER_LABELS[provider]} see ${PROVIDER_DOC_URLS[provider]}`;
     showToast({
       style: Toast.Style.Failure,
       title: "Exchange Error",
@@ -111,7 +136,7 @@ function Exchange({
       {currencyResult.conversion_rate_exchanged ? (
         <>
           <List.Section
-            title={`Pinned Exchange from ${state.amount ? parseFloat(state.amount.toFixed(4)) : 0} ${
+            title={`Pinned Exchange from ${state.amount ? formatCurrency(state.amount, state.fromCurrencyCode) : 0} ${
               currencyCode2Name[state.fromCurrencyCode]
             }`}
           >
@@ -119,7 +144,9 @@ function Exchange({
               <List.Item
                 key={index}
                 title={item.code}
-                subtitle={item.value !== Number.POSITIVE_INFINITY ? item.value.toFixed(4) : "No Currency"}
+                subtitle={
+                  item.value !== Number.POSITIVE_INFINITY ? formatCurrency(item.value, item.code) : "No Currency"
+                }
                 accessories={[{ text: currencyCode2Name[item.code], icon: Icon.Pin }]}
                 icon={{ source: getFlagEmoji(item.code.substring(0, 2)) }}
                 actions={
@@ -135,7 +162,7 @@ function Exchange({
             ))}
           </List.Section>
           <List.Section
-            title={`Exchange from ${state.amount ? parseFloat(state.amount.toFixed(4)) : 0} ${
+            title={`Exchange from ${state.amount ? formatCurrency(state.amount, state.fromCurrencyCode) : 0} ${
               currencyCode2Name[state.fromCurrencyCode]
             }`}
             subtitle={
@@ -148,7 +175,7 @@ function Exchange({
               <List.Item
                 key={index}
                 title={item.code}
-                subtitle={item.value !== Number.POSITIVE_INFINITY ? item.value.toFixed(4) : "∞"}
+                subtitle={item.value !== Number.POSITIVE_INFINITY ? formatCurrency(item.value, item.code) : "∞"}
                 accessories={[{ text: currencyCode2Name[item.code] }]}
                 icon={{ source: getFlagEmoji(item.code.substring(0, 2)) }}
                 actions={
@@ -295,7 +322,7 @@ function useExchange() {
           cancelRef.current.signal,
           filter,
           historyDate,
-          state.pinnedCurrencyCodes
+          state.pinnedCurrencyCodes,
         );
         console.log(result?.conversion_rate_exchanged?.at(0));
         setState((oldState) => ({
@@ -322,7 +349,7 @@ function useExchange() {
         });
       }
     },
-    [cancelRef, state.fromCurrencyCode, state.pinnedCurrencyCodes]
+    [cancelRef, state.fromCurrencyCode, state.pinnedCurrencyCodes],
   );
 
   useEffect(() => {
@@ -345,16 +372,14 @@ async function performExchange(
   signal: AbortSignal,
   filter: string,
   historyDate: Date | null,
-  pinned?: Array<string>
+  pinned?: Array<string>,
 ): Promise<CurrencyResult | undefined> {
   console.log(`start to exchange | ${fromCode} |${amount}|`);
   if (amount > 0) {
+    const provider = getProvider();
+    const key = cacheKey(provider, historyDate);
     // check if there's available cache for currency
-    return LocalStorage.getItem<string>(
-      `currency${
-        historyDate ? historyDate.getFullYear() + "-" + (historyDate.getMonth() + 1) + "-" + historyDate.getDate() : ""
-      }`
-    )
+    return LocalStorage.getItem<string>(key)
       .then((content) => {
         if (content) {
           const cachedData = JSON.parse(content) as CurrencyResult;
@@ -374,14 +399,7 @@ async function performExchange(
 
             const result = responseJson as CurrencyResult;
             if (result.result === "success") {
-              LocalStorage.setItem(
-                `currency${
-                  historyDate
-                    ? historyDate.getFullYear() + "-" + (historyDate.getMonth() + 1) + "-" + historyDate.getDate()
-                    : ""
-                }`,
-                JSON.stringify(responseJson)
-              );
+              LocalStorage.setItem(key, JSON.stringify(responseJson));
               return result;
             } else {
               console.log(responseJson);
@@ -391,7 +409,7 @@ async function performExchange(
               ) {
                 throw Error("Invalid API Key, please check!");
               }
-              throw Error(`exchangerate-api.com: ${result["error-type"]}`);
+              throw Error(`${PROVIDER_LABELS[provider]}: ${result["error-type"]}`);
             }
           })
           .catch((error: Error) => {
@@ -413,27 +431,122 @@ async function performExchange(
 }
 
 function currencyAPI(historyDate: Date | null, signal: AbortSignal): Promise<Response> {
-  const { api_key } = getPreferenceValues();
+  const provider = getProvider();
+  if (provider === "unirate") {
+    return uniRateAPI(historyDate, signal);
+  }
+  return exchangeRateAPI(historyDate, signal);
+}
 
-  console.log(
-    `make API call to https://v6.exchangerate-api.com/v6/${api_key}/${historyDate ? "history" : "latest"}/USD${
-      historyDate
-        ? "/" + historyDate.getFullYear() + "/" + (historyDate.getMonth() + 1) + "/" + historyDate.getDate()
-        : ""
-    }`
-  );
-  return fetch(
-    `https://v6.exchangerate-api.com/v6/${api_key}/${historyDate ? "history" : "latest"}/USD${
-      historyDate
-        ? "/" + historyDate.getFullYear() + "/" + (historyDate.getMonth() + 1) + "/" + historyDate.getDate()
-        : ""
-    }`,
-    {
-      signal: signal,
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
+function exchangeRateAPI(historyDate: Date | null, signal: AbortSignal): Promise<Response> {
+  const { api_key } = getPreferenceValues<Preferences>();
+
+  const url = `https://v6.exchangerate-api.com/v6/${api_key}/${historyDate ? "history" : "latest"}/USD${
+    historyDate
+      ? "/" + historyDate.getFullYear() + "/" + (historyDate.getMonth() + 1) + "/" + historyDate.getDate()
+      : ""
+  }`;
+  console.log(`make API call to ${url}`);
+  return fetch(url, {
+    signal: signal,
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+}
+
+interface UniRateRatesResponse {
+  base?: string;
+  rates?: { [key: string]: number | string };
+  error?: string;
+  message?: string;
+}
+
+async function uniRateAPI(historyDate: Date | null, signal: AbortSignal): Promise<Response> {
+  const { api_key } = getPreferenceValues<Preferences>();
+
+  const path = historyDate ? "historical/rates" : "rates";
+  const dateParam = historyDate
+    ? `&date=${historyDate.getFullYear()}-${String(historyDate.getMonth() + 1).padStart(2, "0")}-${String(
+        historyDate.getDate(),
+      ).padStart(2, "0")}`
+    : "";
+  const url = `https://api.unirateapi.com/api/${path}?from=USD${dateParam}&api_key=${encodeURIComponent(api_key)}`;
+  console.log(`make API call to https://api.unirateapi.com/api/${path}?from=USD${dateParam}&api_key=***`);
+
+  const upstream = await fetch(url, {
+    signal: signal,
+    method: "GET",
+    headers: { Accept: "application/json" },
+  });
+
+  let upstreamJson: UniRateRatesResponse;
+  try {
+    upstreamJson = (await upstream.json()) as UniRateRatesResponse;
+  } catch {
+    upstreamJson = { error: `HTTP ${upstream.status}` };
+  }
+
+  let mapped: CurrencyResult;
+  if (!upstream.ok) {
+    if (upstream.status === 401) {
+      mapped = {
+        base_code: "USD",
+        result: "error",
+        ["error-type"]: "invalid-key",
+        conversion_rates: {},
+      };
+    } else {
+      const detail = upstreamJson.message || upstreamJson.error || `HTTP ${upstream.status}`;
+      mapped = {
+        base_code: "USD",
+        result: "error",
+        ["error-type"]: detail,
+        conversion_rates: {},
+      };
     }
-  );
+  } else if (!upstreamJson.rates) {
+    mapped = {
+      base_code: "USD",
+      result: "error",
+      ["error-type"]: upstreamJson.error || "missing rates in response",
+      conversion_rates: {},
+    };
+  } else {
+    const conversion_rates: { [key: string]: number } = {};
+    for (const [code, value] of Object.entries(upstreamJson.rates)) {
+      const n = typeof value === "number" ? value : Number(value);
+      if (!Number.isNaN(n)) {
+        conversion_rates[code] = n;
+      }
+    }
+    if (historyDate) {
+      mapped = {
+        base_code: upstreamJson.base ?? "USD",
+        result: "success",
+        ["error-type"]: "",
+        conversion_rates,
+        year: historyDate.getFullYear(),
+        month: historyDate.getMonth() + 1,
+        day: historyDate.getDate(),
+      };
+    } else {
+      const nowSec = Math.round(Date.now() / 1000);
+      mapped = {
+        base_code: upstreamJson.base ?? "USD",
+        result: "success",
+        ["error-type"]: "",
+        conversion_rates,
+        time_last_update_unix: nowSec,
+        time_next_update_unix: nowSec + 86400,
+        time_last_update_utc: new Date().toUTCString(),
+      };
+    }
+  }
+
+  return new Response(JSON.stringify(mapped), {
+    status: 200,
+    headers: { "Content-Type": "application/json" },
+  });
 }
 
 function enrichExchangeData(
@@ -441,7 +554,7 @@ function enrichExchangeData(
   amount: number,
   fromCode: string,
   filter: string,
-  pinned?: Array<string>
+  pinned?: Array<string>,
 ): CurrencyResult {
   const base = currencyData.conversion_rates[fromCode] || 0;
   console.log("filter: ", filter);
@@ -455,7 +568,7 @@ function enrichExchangeData(
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2CountryAndRegion[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
-          currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0)
+          currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0),
     )
     .map<ConversionRate>((key: string) => ({
       code: key,
@@ -470,7 +583,7 @@ function enrichExchangeData(
         it !== fromCode &&
         (it.toLocaleLowerCase().indexOf(filter) >= 0 ||
           currencyCode2CountryAndRegion[it].toLocaleLowerCase().indexOf(filter) >= 0 ||
-          currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0)
+          currencyCode2Name[it].toLocaleLowerCase().indexOf(filter) >= 0),
     )
     .map<ConversionRate>((key: string) => ({
       code: key,
@@ -507,7 +620,7 @@ function SetCurrencyDateForm(props: {
               amountExpression && historyDate
                 ? setSearchText(
                     amountExpression.replace(regex, "") +
-                      ` at ${historyDate.getFullYear()}/${historyDate.getMonth() + 1}/${historyDate.getDate()}`
+                      ` at ${historyDate.getFullYear()}/${historyDate.getMonth() + 1}/${historyDate.getDate()}`,
                   )
                 : null;
               pop();
@@ -534,6 +647,20 @@ function getFlagEmoji(countryAndRegionCode: string): string {
   let v = countryAndRegionCode.startsWith("X") ? "🇺🇳" : String.fromCodePoint(...codePoints) || "🇺🇳";
   v = countryAndRegionCode === "AN" ? "🇺🇳" : v;
   return v;
+}
+
+function formatCurrency(amount: number, currencyCode: string): string {
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 4,
+    }).format(amount);
+  } catch (error) {
+    console.error(`Error formatting currency: ${error}`);
+    return amount.toString();
+  }
 }
 
 interface ExchangeState {

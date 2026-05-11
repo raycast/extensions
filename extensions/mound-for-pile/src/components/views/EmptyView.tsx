@@ -20,8 +20,8 @@ export function EmptyView({
     return (
       <List.EmptyView
         icon="📚"
-        title="No Piles found"
-        description="Create a new pile to get started"
+        title="Welcome to Mound!"
+        description="Press ↵ to get started with a pile"
         actions={
           <ActionPanel>
             <CreatePileAction onCreate={onPileCreate} />

@@ -28,7 +28,7 @@ function WordListItem({ wordResult }: { wordResult: WordResult }) {
 
           return `【${parsedPoses.join("・")}】${sense.glosses.join("; ")}`;
         })
-        .join("")
+        .join(""),
     );
   }, [setAccessoryTitle]);
 

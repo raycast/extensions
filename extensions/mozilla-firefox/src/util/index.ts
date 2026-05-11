@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { getPreferenceValues } from "@raycast/api";
 
 const userDataDirectoryPath = () => {
   if (!process.env.HOME) {
@@ -9,19 +10,48 @@ const userDataDirectoryPath = () => {
   return path.join(process.env.HOME, "Library", "Application Support", "Firefox", "Profiles");
 };
 
-const getProfileName = (userDirectoryPath: string) => {
-  const profiles = fs.readdirSync(userDirectoryPath);
+const NON_PROFILE_ENTRIES = new Set(["Crash Reports", "Pending Pings", "installs.ini", "profiles.ini"]);
 
+const getProfileName = (userDirectoryPath: string) => {
+  let profiles: string[];
+  try {
+    profiles = fs.readdirSync(userDirectoryPath);
+  } catch {
+    return "";
+  }
+
+  const preferences = getPreferenceValues<Preferences>();
+
+  const customProfile = profiles.filter((profile) => profile.endsWith(preferences.profileDirectorySuffix))[0];
   const releaseProfile = profiles.filter((profile) => profile.endsWith(".default-release"))[0];
   const nightlyProfile = profiles.filter((profile) => profile.endsWith(".default-nightly"))[0];
+  const esrProfile = profiles.filter((profile) => profile.endsWith(".default-esr"))[0];
+  const defaultProfile = profiles.filter((profile) => profile.endsWith(".default"))[0];
 
-  if (releaseProfile) {
+  if (customProfile) {
+    return customProfile;
+  } else if (releaseProfile) {
     return releaseProfile;
   } else if (nightlyProfile) {
     return nightlyProfile;
-  } else {
-    return "";
+  } else if (esrProfile) {
+    return esrProfile;
+  } else if (defaultProfile) {
+    return defaultProfile;
   }
+
+  const fallback = profiles
+    .filter((entry) => !NON_PROFILE_ENTRIES.has(entry))
+    .filter((entry) => {
+      try {
+        return fs.statSync(path.join(userDirectoryPath, entry)).isDirectory();
+      } catch {
+        return false;
+      }
+    })
+    .sort();
+
+  return fallback[0] ?? "";
 };
 
 export const getHistoryDbPath = (): string => {
@@ -42,7 +72,7 @@ export const getSessionManagerExtensionPath = (extensionId: string) => {
     "storage",
     "default",
     `moz-extension+++${extensionId}`,
-    "idb"
+    "idb",
   );
 };
 
@@ -57,7 +87,7 @@ export const getSessionActivePath = async () => {
     userDirectoryPath,
     await getProfileName(userDirectoryPath),
     "sessionstore-backups",
-    "recovery.jsonlz4"
+    "recovery.jsonlz4",
   );
 };
 
@@ -76,7 +106,7 @@ export function decodeLZ4(buffer: Buffer) {
   return JSON.parse(data.toString());
 }
 
-function decodeBlock(input: any, output: any, sIdx?: any, eIdx?: any) {
+function decodeBlock(input: Buffer, output: Buffer, sIdx?: number, eIdx?: number) {
   sIdx = sIdx || 0;
   eIdx = eIdx || input.length - sIdx;
   let a;

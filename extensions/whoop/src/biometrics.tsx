@@ -6,7 +6,7 @@ import { View } from "./components/View";
 import {
   Cycle,
   PaginatedCycleResponse,
-  PaginatedRecoveryResponse,
+  RecoveryCollection,
   PaginatedSleepResponse,
   Recovery,
   Sleep,
@@ -27,8 +27,8 @@ function CycleListItem({
   isLoading: boolean;
 }) {
   // CYCLE STUFF
-  const strain = formatStrain(cycle?.score?.strain);
-  const kilojoule = cycle?.score?.kilojoule;
+  const strain = formatStrain(cycle.score?.strain);
+  const kilojoule = cycle.score?.kilojoule;
   const kilocalories = calcCals(kilojoule);
 
   // SLEEP STUFF
@@ -66,7 +66,7 @@ function CycleListItem({
 
   return (
     <List.Item
-      title={formatDate(cycle.created_at, "MMM d", true)}
+      title={formatDate(cycle.created_at, "MMM d", true) || "n/a"}
       accessories={[
         { icon: getProgressIcon(recoveryScore / 100, getRecoveryColor(recoveryScore)) },
         { icon: getProgressIcon(strain / 21, WhoopColor.strain) },
@@ -191,7 +191,7 @@ function BiometricsCommand() {
   );
 
   let cycleCollection: PaginatedCycleResponse | undefined;
-  let recoveryCollection: PaginatedRecoveryResponse | undefined;
+  let recoveryCollection: RecoveryCollection | undefined;
   let sleepCollection: PaginatedSleepResponse | undefined;
 
   if (data) {
@@ -212,8 +212,9 @@ function BiometricsCommand() {
     return recoveryCollection?.records?.find((recovery) => recovery.cycle_id === cycleId);
   };
 
-  const findSleepForRecovery = (sleepId: number) => {
-    return sleepCollection?.records?.find((sleep) => sleep.id === sleepId);
+  const findSleepForRecovery = (sleepId: string) => {
+    // Be tolerant of legacy numeric IDs (V1) vs V2 string IDs.
+    return sleepCollection?.records?.find((sleep: Sleep) => String(sleep.id) === String(sleepId));
   };
 
   return (

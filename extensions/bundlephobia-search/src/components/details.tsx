@@ -1,5 +1,5 @@
 import React from "react";
-import { Action, ActionPanel, Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon } from "@raycast/api";
 import { Package } from "../types";
 import { getBundlephobiaLink, getReadableFileSize } from "../utils";
 import { useSizeData, useToastError } from "../hooks";
@@ -36,6 +36,7 @@ export function Details({ name, description, version, links }: Package) {
               text={`${name} repo`}
             />
           )}
+
           {!!links.npm && (
             <Detail.Metadata.Link
               title="Npm"
@@ -43,6 +44,7 @@ export function Details({ name, description, version, links }: Package) {
               text={`${name} npm`}
             />
           )}
+
           {!!links.homepage && (
             <Detail.Metadata.Link
               title="Homepage"
@@ -50,18 +52,30 @@ export function Details({ name, description, version, links }: Package) {
               text={`${name} homepage`}
             />
           )}
-          {state.status === "success" ? (
+
+          {state.status === "success" && (
             <>
+              <Detail.Metadata.Label
+                title="Tree shakeable"
+                text={state.data.hasJSModule ? "Yes" : "No"}
+                icon={Icon.Tree}
+              />
+
               <Detail.Metadata.Label
                 title="Side effects"
                 text={state.data.hasSideEffects ? "Yes" : "No"}
+                icon={
+                  state.data.hasSideEffects ? Icon.Warning : Icon.CheckCircle
+                }
               />
+
               <Detail.Metadata.Label
                 title="Dependencies"
                 text={state.data.dependencyCount.toString()}
+                icon={Icon.Box}
               />
             </>
-          ) : null}
+          )}
         </Detail.Metadata>
       }
       actions={

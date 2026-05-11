@@ -10,4 +10,4 @@
 
 ## Setup
 
-Go to your [Clockify user settings](https://clockify.me/user/settings) and generate a new **API Key**.
+Go to your [Clockify user advanced preferences](https://app.clockify.me/user/preferences#advanced) and generate a new **API Key**.

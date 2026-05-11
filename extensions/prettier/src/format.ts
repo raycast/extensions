@@ -1,21 +1,26 @@
 import { Clipboard, getPreferenceValues, showHUD, closeMainWindow } from "@raycast/api";
 import { homedir } from "os";
 import { format, resolveConfig } from "prettier";
-import { Preferences } from "./types";
 
 const decorateMarkdown = (parser: string, formatted: string) => {
   let codeExt = "jsx";
   switch (parser) {
-    case "babel" || "flow":
+    case "babel":
+    case "flow":
       codeExt = "jsx";
       break;
-    case "typescript" || "babel-ts":
+    case "babel-ts":
+    case "typescript":
       codeExt = "ts";
       break;
-    case "css" || "scss" || "less":
+    case "css":
+    case "scss":
+    case "less":
       codeExt = "css";
       break;
-    case "json" || "json5" || "json-stringify":
+    case "json":
+    case "json5":
+    case "json-stringify":
       codeExt = "json";
       break;
     case "html":

@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+build/
+*.tsbuildinfo
+
+# Runtime files
+.raycast-swift-bridge/
+.raycast/
+
+# Development
+.DS_Store
+.env*
+.idea/
+.vscode/
+*.log
+*.lock
+coverage/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+raycast-env.d.ts

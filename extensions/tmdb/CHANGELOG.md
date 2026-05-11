@@ -1,5 +1,27 @@
 # TMDB Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Add Seasons, Episodes View for TV Shows] - 2024-06-27
+
+- Added new "Get Episode Info" command that can go into seasons and episodes for a show.
+- Added a Recent Searches hook for the above search command that could be integrated with the rest of commands.
+- Added the ability to set a season of a current show that is being watched to preferences, so it can be quickly jumped to from the above command.
+
+## [Add Backdrops and Posters] - 2024-03-14
+
+- Added new "Show Posters" and "Show Backdrops" functions for Movies and TV Shows.
+- Use the dropdown filter to filter by language.
+- Type in the search field within Posters or Backdrops to filter the results by dimensions.
+- Open the image with `⏎`, or copy the image URL with `⌘` + `.`.
+- Added "Open Homepage" action to TV Show and Movie details pages.
+
+## [Copy Movie/TV Show ID] - 2023-12-01
+
+- Add the ability to copy the TMDB ID of a movie or TV show to the clipboard.
+
 ## [Many improvements] - 2023-11-17
 
 - Combine the "Search Movies" and "Search TV Shows" commands into a unified "Search" command.

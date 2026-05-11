@@ -1,5 +1,5 @@
-import { Application, Action } from "@raycast/api";
-import { Branch, File } from "../types";
+import { Action, type Application } from "@raycast/api";
+import type { Branch, File } from "../types";
 export function OpenBranchAction(props: { branch: Branch; file: File; desktopApp: Application | undefined }) {
   const { branch, file, desktopApp } = props;
   return desktopApp ? (

@@ -5,6 +5,10 @@
   "description": "Language translation extension using Papago",
   "icon": "command-icon.png",
   "author": "rita_mordio",
+  "contributors": [
+    "jaeyeonling",
+    "hongmono"
+  ],
   "categories": [
     "Applications"
   ],
@@ -97,7 +101,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.58.1",
-    "axios": "^1.5.0",
+    "axios": "^1.8.4",
     "moment": "^2.29.4"
   },
   "devDependencies": {
@@ -115,5 +119,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { operationWithUserFeedback } from "../../shared/operation-with-user-feedback";
 import { XcodeSimulatorService } from "../../services/xcode-simulator.service";
 
-export function XcodeSimulatorOpenUrlForm(props: { simulator: XcodeSimulator }): JSX.Element {
+export function XcodeSimulatorOpenUrlForm(props: { simulator: XcodeSimulator }) {
   const [url, setUrl] = useState<string>("");
   useEffect(() => {
     Clipboard.readText().then((url) => (url && XcodeSimulatorService.isValidUrl(url) ? setUrl(url) : undefined));
@@ -20,7 +20,7 @@ export function XcodeSimulatorOpenUrlForm(props: { simulator: XcodeSimulator }):
                 "Opening URL in Simulator",
                 "URL successfully opened in simulator",
                 "An error occurred while trying to open the url",
-                () => XcodeSimulatorService.openUrl(url, props.simulator)
+                () => XcodeSimulatorService.openUrl(url, props.simulator.udid)
               ).then()
             }
           />

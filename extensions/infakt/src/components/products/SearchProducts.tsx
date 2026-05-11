@@ -1,27 +1,29 @@
+import { useEffect, useState } from "react";
+
 import {
   Action,
   ActionPanel,
   Alert,
   Color,
-  confirmAlert,
   Icon,
-  launchCommand,
   LaunchType,
   List,
-  showToast,
   Toast,
+  confirmAlert,
+  launchCommand,
+  showToast,
   useNavigation,
 } from "@raycast/api";
 import { MutatePromise } from "@raycast/utils";
-import { useEffect, useState } from "react";
-import { ApiProduct } from "../../api/product";
-import useProducts from "../../hooks/useProducts";
-import { ProductObject } from "../../types/product";
-import { ApiPaginatedResponse } from "../../types/utils";
-import { formatPrice } from "../../utils/formatters";
-import UpdateProduct from "./UpdateProduct";
 
-export default function SearchProducts() {
+import { ApiProduct } from "@/api/product";
+import { UpdateProduct } from "@/components/products/UpdateProduct";
+import { useProducts } from "@/hooks/useProducts";
+import { ProductObject } from "@/types/product";
+import { ApiPaginatedResponse } from "@/types/utils";
+import { formatPrice } from "@/utils/formatters";
+
+export function SearchProducts() {
   const [searchText, setSearchText] = useState("");
   const [filteredProducts, filterProducts] = useState<ProductObject[]>([]);
 
@@ -31,7 +33,7 @@ export default function SearchProducts() {
     if (!productsData) return;
 
     filterProducts(
-      productsData.filter((product) => product?.name?.toLowerCase().includes(searchText?.toLowerCase())) ?? []
+      productsData.filter((product) => product?.name?.toLowerCase().includes(searchText?.toLowerCase())) ?? [],
     );
   }, [productsData, searchText]);
 

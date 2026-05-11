@@ -1,5 +1,4 @@
 import { Action, ActionPanel, Icon } from "@raycast/api";
-import { getLastRefreshTime, timeStampToDate } from "../utils/common-utils";
 import { PreferenceActions } from "./preference-actions";
 
 export function TrendActions(props: { url: string; name: string }) {
@@ -10,16 +9,15 @@ export function TrendActions(props: { url: string; name: string }) {
       <Action.CopyToClipboard
         icon={Icon.Clipboard}
         title={"Copy Trend Title"}
-        shortcut={{ modifiers: ["cmd"], key: "t" }}
+        shortcut={{ modifiers: ["shift", "cmd"], key: "c" }}
         content={name}
       />
       <Action.CopyToClipboard
         icon={Icon.Link}
         title={"Copy Trend Link"}
-        shortcut={{ modifiers: ["cmd"], key: "l" }}
+        shortcut={{ modifiers: ["opt", "cmd"], key: "c" }}
         content={url}
       />
-      <Action icon={Icon.Repeat} title={`Last refresh at ${timeStampToDate(getLastRefreshTime())}`} />
       <PreferenceActions />
     </ActionPanel>
   );

@@ -3,18 +3,18 @@ import { useMemo } from "react";
 
 import ProjectForm from "./components/ProjectForm";
 import ProjectListItem from "./components/ProjectListItem";
-import View from "./components/View";
-import useCachedData from "./hooks/useCachedData";
+import { withTodoistApi } from "./helpers/withTodoistApi";
+import useSyncData from "./hooks/useSyncData";
 
 function Projects() {
-  const [data, setData] = useCachedData();
+  const { data, setData, isLoading } = useSyncData();
 
   const projects = useMemo(() => {
     return data?.projects.filter((p) => !p.inbox_project) ?? [];
   }, [data]);
 
   return (
-    <List searchBarPlaceholder="Filter projects by name">
+    <List searchBarPlaceholder="Filter projects by name" isLoading={isLoading}>
       {projects.map((project) => {
         return <ProjectListItem key={project.id} project={project} data={data} setData={setData} />;
       })}
@@ -31,10 +31,4 @@ function Projects() {
   );
 }
 
-export default function Command() {
-  return (
-    <View>
-      <Projects />
-    </View>
-  );
-}
+export default withTodoistApi(Projects);

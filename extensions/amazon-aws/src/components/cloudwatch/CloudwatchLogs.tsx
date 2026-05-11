@@ -1,8 +1,9 @@
 import { ActionPanel, Detail } from "@raycast/api";
 import { fetchLogs } from "../../actions";
 import { usePromise } from "@raycast/utils";
-import { getActionOpenInBrowser, getExportResponse, resourceToConsoleLink } from "../../util";
+import { resourceToConsoleLink } from "../../util";
 import { LogStartTimes } from "../../interfaces";
+import { AwsAction } from "../common/action";
 
 function CloudwatchLogs({
   logGroupName,
@@ -21,7 +22,6 @@ function CloudwatchLogs({
     logGroupStreamPrefix,
     logGroupStreamName ? [logGroupStreamName] : undefined,
   ]);
-  ``;
 
   return (
     <Detail
@@ -32,8 +32,10 @@ function CloudwatchLogs({
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          {getActionOpenInBrowser(resourceToConsoleLink(logGroupName, "AWS::Logs::LogGroup"))}
-          <ActionPanel.Section title="Copy">{getExportResponse(logs)}</ActionPanel.Section>
+          <AwsAction.Console url={resourceToConsoleLink(logGroupName, "AWS::Logs::LogGroup")} />
+          <ActionPanel.Section title="Copy">
+            <AwsAction.ExportResponse response={logs} />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />

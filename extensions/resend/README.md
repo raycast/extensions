@@ -1,47 +1,48 @@
-# <img src="./assets/resend.png" width="20" height="20" /> Resend Raycast Extension
+<p align="center">
+  <img src="./assets/resend-extension_icon@dark.png" width="150" height="150" />
+</p>
 
-This is a Raycast extension for [Resend](https://resend.com/). With this extension, you can Manage API Keys and Domains, and Send Emails using Resend.
+# <img src="./assets/resend-extension_icon@dark.png" width="20" height="20" /> Resend Raycast Extension
+
+This is a Raycast extension for [Resend](https://resend.com/) - _Email for developers_. With this extension, you can Manage API Keys, Audiences & Contacts, Domains, Emails and Send Emails using **Resend**.
 
 ## 🚀 Getting Started
 
-1. **Install extensions**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/resend)
+1. **Install extension**: Click the `Install Extension` button in the top right of [this page](https://www.raycast.com/xmok/resend)
 
 2. **Get your API Key**: The first time you use the extension, you'll need to enter your Resend API key:
 
-    a. `Sign in to your Resend Dashboard` at [this link](https://resend.com/login) OR `Create an account` at [this link](https://resend.com/signup)
+   a. `Sign in` to your Resend Dashboard at [this link](https://resend.com/login) OR `Create an account` at [this link](https://resend.com/signup)
 
-    b. `Navigate` to [API Keys](https://resend.com/api-keys)
-    
-    c. `Create API Key` with **Permission** as "*Full access*""
-    <img src="./assets/resend-create-api-key.png" alt="Create API Key" />
-    
-    d. `Copy` the once shown **API Key**
-    <img src="./assets/resend-view-api-key.png" alt="View API Key" />
-  
-    d. Enter `API Key` in Preferences OR at first prompt
+   b. `Navigate` to [API Keys](https://resend.com/api-keys)
 
-## 🗒️ Notes
-* Currently, Resend API does not allow you to fetch ALL sent emails. As a workaround, when you send a new email using the extension, it is **logged** locally for your convenience. You can choose to keep or delete logged emails from log (they can still be viewed in your Resend Dashboard at [this link](https://resend.com/emails))
+   c. `Create` API Key with **Permission** as "_Full access_""
+   <img src="./assets/resend-create-api-key.png" alt="Create API Key" />
+
+   d. `Copy` the once shown **API Key**
+   <img src="./assets/resend-view-api-key.png" alt="View API Key" />
+
+   e. `Enter` API Key in Preferences OR at first prompt
 
 ## 🔧 Commands
 
 This extension provides the following commands:
 
 - API Keys
-    - View API Keys
-    - Create API Key
-- Emails
-    - View Logged Emails
-    - Send New Email
+  - View API Keys
+  - Create API Key
+- Contacts
+  - View Contacts
+  - Create, Update And Delete Contacts
 - Domains
-    - View Domains
-    - Add New Domain
+  - View Domains
+  - Add New Domain
+- Emails
+  - View Sent Emails
+  - Send New Email
 
-## 🛠️ Installation
+Additionally, this extension supports ✨[AI tools](https://youtu.be/sHIlFKKaq0A)✨, so you can use it with natural language by mentioning `@resend`.
 
-To install this extension from the source code, follow these steps:
-
-1.  Clone this repository.
-2.  Run `npm install` to install the dependencies.
-3.  Run `npm run build` to build the extension.
-4.  Run `npm run publish` to publish the extension to Raycast store.
+---
+<br />
+<img src="./assets/resend-wordmark-white.svg" />

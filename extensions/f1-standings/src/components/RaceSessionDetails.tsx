@@ -1,6 +1,6 @@
 import { Fragment } from "react";
 import { Color, List } from "@raycast/api";
-import { formatDate } from "../utils";
+import { formatDateTime } from "../utils";
 
 function RaceSessionDetails({ title, raceDates }: { title: string; raceDates: [string, Date][] }) {
   return (
@@ -13,7 +13,7 @@ function RaceSessionDetails({ title, raceDates }: { title: string; raceDates: [s
             <Fragment key={index}>
               <List.Item.Detail.Metadata.Label
                 title={title}
-                text={formatDate(date)}
+                text={formatDateTime(date)}
                 icon={
                   index + 1 === raceDates.length ? { source: "flag-checkered.png", tintColor: Color.PrimaryText } : null
                 }

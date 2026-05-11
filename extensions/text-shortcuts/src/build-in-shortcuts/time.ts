@@ -44,4 +44,5 @@ export const times = [
     tactions: [{ type: "Transform", content: ["Stamp to time"] }],
   },
 ];
+
 export const TIMES_SHORTCUTS = JSON.stringify(times);
