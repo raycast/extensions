@@ -8,14 +8,8 @@
 /* eslint-disable @typescript-eslint/ban-types */
 
 type ExtensionPreferences = {
-  /** Connection Type - Choose between self-hosted/local Temporal or Temporal Cloud */
-  "connectionType": "local" | "cloud",
-  /** Namespace - Temporal namespace to connect to */
-  "namespace": string,
-  /** API Key - Temporal Cloud API key (required for Cloud connection) */
-  "apiKey"?: string,
-  /** Temporal UI URL - URL to Temporal Web UI - also used for API access (e.g., http://localhost:8080 for Docker, http://localhost:8233 for dev server) */
-  "temporalUiUrl": string
+  /** Clusters Configuration - JSON array of cluster configurations. Each cluster: {"name": "Display Name", "url": "http://localhost:8080", "namespace": "default", "apiKey": "optional-api-key"} */
+  "clusters": string
 }
 
 /** Preferences accessible in all the extension's commands */

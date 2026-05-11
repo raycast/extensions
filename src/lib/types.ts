@@ -1,10 +1,36 @@
 import { Color, Icon } from "@raycast/api";
 
+/**
+ * Configuration for a single Temporal cluster
+ */
+export interface ClusterConfig {
+  name: string; // Display name for the cluster
+  url: string; // Temporal UI URL (e.g., http://localhost:8080)
+  namespace: string; // Default namespace for this cluster
+  apiKey?: string; // Optional API key (for Temporal Cloud)
+}
+
+/**
+ * Extension preferences
+ */
 export interface Preferences {
-  connectionType: "local" | "cloud";
-  namespace: string;
-  apiKey?: string;
-  temporalUiUrl: string;
+  clusters: string; // JSON array of ClusterConfig
+}
+
+/**
+ * Parse clusters JSON from preferences
+ */
+export function parseClusters(clustersJson: string): ClusterConfig[] {
+  try {
+    const clusters = JSON.parse(clustersJson) as ClusterConfig[];
+    // Validate and filter valid clusters
+    return clusters.filter(
+      (c) => c && typeof c.name === "string" && typeof c.url === "string" && c.name && c.url
+    );
+  } catch {
+    // Return default cluster if parsing fails
+    return [{ name: "Local", url: "http://localhost:8080", namespace: "default" }];
+  }
 }
 
 export type WorkflowStatus =

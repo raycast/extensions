@@ -48,47 +48,12 @@
   ],
   "preferences": [
     {
-      "name": "connectionType",
-      "title": "Connection Type",
-      "description": "Choose between self-hosted/local Temporal or Temporal Cloud",
-      "type": "dropdown",
-      "required": true,
-      "default": "local",
-      "data": [
-        {
-          "value": "local",
-          "title": "Self-Hosted / Local"
-        },
-        {
-          "value": "cloud",
-          "title": "Temporal Cloud"
-        }
-      ]
-    },
-
-    {
-      "name": "namespace",
-      "title": "Namespace",
-      "description": "Temporal namespace to connect to",
+      "name": "clusters",
+      "title": "Clusters Configuration",
+      "description": "JSON array of cluster configurations. Each cluster: {\"name\": \"Display Name\", \"url\": \"http://localhost:8080\", \"namespace\": \"default\", \"apiKey\": \"optional-api-key\"}",
       "type": "textfield",
       "required": true,
-      "default": "default"
-    },
-    {
-      "name": "apiKey",
-      "title": "API Key",
-      "description": "Temporal Cloud API key (required for Cloud connection)",
-      "type": "password",
-      "required": false
-    },
-
-    {
-      "name": "temporalUiUrl",
-      "title": "Temporal UI URL",
-      "description": "URL to Temporal Web UI - also used for API access (e.g., http://localhost:8080 for Docker, http://localhost:8233 for dev server)",
-      "type": "textfield",
-      "required": true,
-      "default": "http://localhost:8080"
+      "default": "[{\"name\": \"Local\", \"url\": \"http://localhost:8080\", \"namespace\": \"default\"}]"
     }
   ],
   "dependencies": {

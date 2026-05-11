@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import {
   List,
   Icon,
@@ -13,30 +13,123 @@ import {
 import { useCachedPromise } from "@raycast/utils";
 import {
   listSchedules,
+  listNamespaces,
   pauseSchedule,
   unpauseSchedule,
   triggerSchedule,
   deleteSchedule,
   showConnectionError,
   getCurrentNamespace,
+  setCurrentCluster,
+  setCurrentNamespace,
+  getClusters,
 } from "./lib/temporal-client";
-import { ScheduleInfo } from "./lib/types";
+import { ScheduleInfo, NamespaceInfo, ClusterConfig } from "./lib/types";
 import { formatRelativeTime, formatDateTime } from "./lib/utils";
 import ScheduleDetails from "./components/schedule-details";
+import {
+  getSelectedCluster,
+  setSelectedCluster,
+  getSelectedNamespace,
+  setSelectedNamespace,
+} from "./lib/storage";
 
 export default function Schedules() {
-  const namespace = getCurrentNamespace();
+  const [selectedClusterName, setSelectedClusterName] = useState<string>("");
+  const [selectedNamespaceState, setSelectedNamespaceState] = useState<string>("");
+
+  // Get clusters from preferences
+  const clusters = getClusters();
+
+  // Initialize cluster and namespace from storage
+  useEffect(() => {
+    async function init() {
+      const storedCluster = await getSelectedCluster();
+      const clusterName =
+        storedCluster && clusters.find((c) => c.name === storedCluster)
+          ? storedCluster
+          : clusters[0]?.name || "Local";
+
+      const cluster = clusters.find((c) => c.name === clusterName) || clusters[0];
+      setSelectedClusterName(clusterName);
+      setCurrentCluster(cluster);
+
+      const storedNamespace = await getSelectedNamespace();
+      const ns = storedNamespace || cluster?.namespace || "default";
+      setSelectedNamespaceState(ns);
+      setCurrentNamespace(ns);
+    }
+    init();
+  }, []);
+
+  // Fetch namespaces for selected cluster
+  const {
+    data: namespaces,
+    isLoading: namespacesLoading,
+    revalidate: revalidateNamespaces,
+  } = useCachedPromise(
+    async (clusterName: string) => {
+      if (!clusterName) return [];
+      try {
+        return await listNamespaces();
+      } catch {
+        const cluster = clusters.find((c) => c.name === clusterName);
+        return [{ name: cluster?.namespace || "default", state: "Registered" }] as NamespaceInfo[];
+      }
+    },
+    [selectedClusterName],
+    { keepPreviousData: true }
+  );
+
+  // Handle cluster change
+  const handleClusterChange = useCallback(
+    async (clusterName: string) => {
+      const cluster = clusters.find((c) => c.name === clusterName);
+      if (!cluster) return;
+
+      setSelectedClusterName(clusterName);
+      setCurrentCluster(cluster);
+      await setSelectedCluster(clusterName);
+
+      const ns = cluster.namespace || "default";
+      setSelectedNamespaceState(ns);
+      setCurrentNamespace(ns);
+      await setSelectedNamespace(ns);
+
+      revalidateNamespaces();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Cluster Changed",
+        message: `${clusterName} / ${ns}`,
+      });
+    },
+    [clusters, revalidateNamespaces]
+  );
+
+  // Handle namespace change
+  const handleNamespaceChange = useCallback(async (namespace: string) => {
+    setSelectedNamespaceState(namespace);
+    setCurrentNamespace(namespace);
+    await setSelectedNamespace(namespace);
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Namespace Changed",
+      message: namespace,
+    });
+  }, []);
 
   const {
     data: schedules,
-    isLoading,
+    isLoading: schedulesLoading,
     error,
     revalidate,
   } = useCachedPromise(
-    async () => {
+    async (clusterName: string, namespace: string) => {
+      if (!clusterName || !namespace) return [];
       return listSchedules();
     },
-    [],
+    [selectedClusterName, selectedNamespaceState],
     {
       keepPreviousData: true,
       onError: showConnectionError,
@@ -52,11 +145,25 @@ export default function Schedules() {
     return () => clearInterval(interval);
   }, [revalidate]);
 
+  const isLoading =
+    schedulesLoading || namespacesLoading || !selectedClusterName || !selectedNamespaceState;
+  const namespace = getCurrentNamespace();
+
   return (
     <List
       isLoading={isLoading}
       navigationTitle="Schedules"
       searchBarPlaceholder="Search schedules..."
+      searchBarAccessory={
+        <SchedulesDropdown
+          clusters={clusters}
+          selectedCluster={selectedClusterName}
+          namespaces={namespaces || []}
+          selectedNamespace={selectedNamespaceState}
+          onClusterChange={handleClusterChange}
+          onNamespaceChange={handleNamespaceChange}
+        />
+      }
     >
       {error && !schedules ? (
         <List.EmptyView
@@ -147,6 +254,85 @@ interface ScheduleActionsProps {
   schedule: ScheduleInfo;
   onRefresh: () => void;
 }
+
+// ============================================================================
+// Dropdown
+// ============================================================================
+
+interface SchedulesDropdownProps {
+  clusters: ClusterConfig[];
+  selectedCluster: string;
+  namespaces: NamespaceInfo[];
+  selectedNamespace: string;
+  onClusterChange: (clusterName: string) => void;
+  onNamespaceChange: (namespace: string) => void;
+}
+
+function SchedulesDropdown({
+  clusters,
+  selectedCluster,
+  namespaces,
+  selectedNamespace,
+  onClusterChange,
+  onNamespaceChange,
+}: SchedulesDropdownProps) {
+  const combinedValue = `${selectedCluster}|${selectedNamespace}`;
+
+  const handleChange = (value: string) => {
+    const [cluster, ns] = value.split("|");
+    if (cluster !== selectedCluster) {
+      onClusterChange(cluster);
+      return;
+    }
+    if (ns !== selectedNamespace) {
+      onNamespaceChange(ns);
+    }
+  };
+
+  const hasMultipleClusters = clusters.length > 1;
+
+  if (hasMultipleClusters) {
+    return (
+      <List.Dropdown tooltip="Cluster / Namespace" value={combinedValue} onChange={handleChange}>
+        {clusters.map((cluster) => (
+          <List.Dropdown.Section key={cluster.name} title={`📍 ${cluster.name}`}>
+            {cluster.name === selectedCluster ? (
+              namespaces.map((ns) => (
+                <List.Dropdown.Item
+                  key={`${cluster.name}|${ns.name}`}
+                  title={`  ${ns.name}`}
+                  value={`${cluster.name}|${ns.name}`}
+                />
+              ))
+            ) : (
+              <List.Dropdown.Item
+                key={`${cluster.name}|switch`}
+                title="  Switch to this cluster..."
+                value={`${cluster.name}|${cluster.namespace || "default"}`}
+              />
+            )}
+          </List.Dropdown.Section>
+        ))}
+      </List.Dropdown>
+    );
+  }
+
+  return (
+    <List.Dropdown tooltip="Namespace" value={combinedValue} onChange={handleChange}>
+      {namespaces.map((ns) => (
+        <List.Dropdown.Item
+          key={`${selectedCluster}|${ns.name}`}
+          title={ns.name}
+          value={`${selectedCluster}|${ns.name}`}
+        />
+      ))}
+    </List.Dropdown>
+  );
+}
+
+// ============================================================================
+// Schedule Actions
+// ============================================================================
 
 function ScheduleActions({ schedule, onRefresh }: ScheduleActionsProps) {
   const handlePause = useCallback(async () => {

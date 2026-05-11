@@ -1,13 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
-import { List, Icon, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { List, Icon, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
   listWorkflows,
   listNamespaces,
   showConnectionError,
   setCurrentNamespace,
+  setCurrentCluster,
+  getClusters,
+  getCurrentCluster,
 } from "./lib/temporal-client";
-import { Preferences, WorkflowInfo, NamespaceInfo } from "./lib/types";
+import { WorkflowInfo, NamespaceInfo, ClusterConfig } from "./lib/types";
 import {
   buildSearchQuery,
   formatRelativeTime,
@@ -22,6 +25,8 @@ import {
   addRecentWorkflow,
   getSelectedNamespace,
   setSelectedNamespace,
+  getSelectedCluster,
+  setSelectedCluster,
   RecentWorkflow,
 } from "./lib/storage";
 import WorkflowActions from "./components/workflow-actions";
@@ -39,47 +44,98 @@ const STATUS_FILTERS: { value: string; title: string }[] = [
 export default function SearchWorkflows() {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedClusterName, setSelectedClusterName] = useState<string>("");
   const [selectedNamespace, setSelectedNamespaceState] = useState<string>("");
   const [recentWorkflows, setRecentWorkflows] = useState<RecentWorkflow[]>([]);
-  const prefs = getPreferenceValues<Preferences>();
 
-  // Fetch namespaces
-  const { data: namespaces, isLoading: namespacesLoading } = useCachedPromise(
-    async () => {
-      try {
-        return await listNamespaces();
-      } catch {
-        // If we can't list namespaces, return just the default one
-        return [{ name: prefs.namespace, state: "Registered" }] as NamespaceInfo[];
-      }
-    },
-    [],
-    { keepPreviousData: true }
-  );
+  // Get clusters from preferences
+  const clusters = getClusters();
 
-  // Initialize namespace from storage or preferences
+  // Initialize cluster and namespace from storage
   useEffect(() => {
-    async function initNamespace() {
-      const stored = await getSelectedNamespace();
-      const ns = stored || prefs.namespace;
+    async function init() {
+      // Get stored cluster or use first one
+      const storedCluster = await getSelectedCluster();
+      const clusterName =
+        storedCluster && clusters.find((c) => c.name === storedCluster)
+          ? storedCluster
+          : clusters[0]?.name || "Local";
+
+      const cluster = clusters.find((c) => c.name === clusterName) || clusters[0];
+      setSelectedClusterName(clusterName);
+      setCurrentCluster(cluster);
+
+      // Get stored namespace or use cluster default
+      const storedNamespace = await getSelectedNamespace();
+      const ns = storedNamespace || cluster?.namespace || "default";
       setSelectedNamespaceState(ns);
       setCurrentNamespace(ns);
     }
-    initNamespace();
-  }, [prefs.namespace]);
+    init();
+  }, []);
 
-  // Load recent workflows
+  // Fetch namespaces for selected cluster
+  const {
+    data: namespaces,
+    isLoading: namespacesLoading,
+    revalidate: revalidateNamespaces,
+  } = useCachedPromise(
+    async (clusterName: string) => {
+      if (!clusterName) return [];
+      try {
+        return await listNamespaces();
+      } catch {
+        // If we can't list namespaces, return just the cluster default
+        const cluster = clusters.find((c) => c.name === clusterName);
+        return [{ name: cluster?.namespace || "default", state: "Registered" }] as NamespaceInfo[];
+      }
+    },
+    [selectedClusterName],
+    { keepPreviousData: true }
+  );
+
+  // Load recent workflows for current cluster and namespace
   useEffect(() => {
     async function loadRecents() {
       const recents = await getRecentWorkflows();
-      // Filter to only show recents from current namespace
-      const filtered = recents.filter((r) => r.namespace === selectedNamespace);
+      // Filter to only show recents from current cluster and namespace
+      const filtered = recents.filter(
+        (r) => r.cluster === selectedClusterName && r.namespace === selectedNamespace
+      );
       setRecentWorkflows(filtered);
     }
-    if (selectedNamespace) {
+    if (selectedClusterName && selectedNamespace) {
       loadRecents();
     }
-  }, [selectedNamespace]);
+  }, [selectedClusterName, selectedNamespace]);
+
+  // Handle cluster change
+  const handleClusterChange = useCallback(
+    async (clusterName: string) => {
+      const cluster = clusters.find((c) => c.name === clusterName);
+      if (!cluster) return;
+
+      setSelectedClusterName(clusterName);
+      setCurrentCluster(cluster);
+      await setSelectedCluster(clusterName);
+
+      // Reset namespace to cluster default
+      const ns = cluster.namespace || "default";
+      setSelectedNamespaceState(ns);
+      setCurrentNamespace(ns);
+      await setSelectedNamespace(ns);
+
+      // Refresh namespaces for new cluster
+      revalidateNamespaces();
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Cluster Changed",
+        message: `${clusterName} / ${ns}`,
+      });
+    },
+    [clusters, revalidateNamespaces]
+  );
 
   // Handle namespace change
   const handleNamespaceChange = useCallback(async (namespace: string) => {
@@ -124,16 +180,19 @@ export default function SearchWorkflows() {
   // Track workflow views for recents
   const handleWorkflowView = useCallback(
     async (workflow: WorkflowInfo) => {
-      await addRecentWorkflow(workflow, selectedNamespace);
+      await addRecentWorkflow(workflow, selectedNamespace, selectedClusterName);
       // Refresh recents list
       const recents = await getRecentWorkflows();
-      const filtered = recents.filter((r) => r.namespace === selectedNamespace);
+      const filtered = recents.filter(
+        (r) => r.cluster === selectedClusterName && r.namespace === selectedNamespace
+      );
       setRecentWorkflows(filtered);
     },
-    [selectedNamespace]
+    [selectedNamespace, selectedClusterName]
   );
 
-  const isLoading = workflowsLoading || namespacesLoading || !selectedNamespace;
+  const isLoading =
+    workflowsLoading || namespacesLoading || !selectedNamespace || !selectedClusterName;
 
   // Show recent workflows when search is empty and no status filter
   const showRecents = !searchText && statusFilter === "all" && recentWorkflows.length > 0;
@@ -145,10 +204,13 @@ export default function SearchWorkflows() {
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search by workflow ID or type..."
       searchBarAccessory={
-        <NamespaceDropdown
+        <CombinedDropdown
+          clusters={clusters}
+          selectedCluster={selectedClusterName}
           namespaces={namespaces || []}
           selectedNamespace={selectedNamespace}
           statusFilter={statusFilter}
+          onClusterChange={handleClusterChange}
           onNamespaceChange={handleNamespaceChange}
           onStatusChange={setStatusFilter}
         />
@@ -159,7 +221,7 @@ export default function SearchWorkflows() {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Connection Error"
-          description={`Could not connect to Temporal at ${prefs.temporalUiUrl}. Please check your settings.`}
+          description={`Could not connect to Temporal at ${getCurrentCluster().url}. Please check your settings.`}
         />
       ) : !isLoading && workflows?.length === 0 && !showRecents ? (
         <List.EmptyView
@@ -189,7 +251,11 @@ export default function SearchWorkflows() {
 
           {/* All Workflows - chronologically sorted (newest first) */}
           <List.Section
-            title={statusFilter !== "all" ? `${getStatusFilterLabel(statusFilter)} Workflows` : "Workflows"}
+            title={
+              statusFilter !== "all"
+                ? `${getStatusFilterLabel(statusFilter)} Workflows`
+                : "Workflows"
+            }
             subtitle={String(workflows?.length || 0)}
           >
             {workflows?.map((workflow) => (
@@ -211,26 +277,37 @@ export default function SearchWorkflows() {
 // Components
 // ============================================================================
 
-interface NamespaceDropdownProps {
+interface CombinedDropdownProps {
+  clusters: ClusterConfig[];
+  selectedCluster: string;
   namespaces: NamespaceInfo[];
   selectedNamespace: string;
   statusFilter: string;
+  onClusterChange: (clusterName: string) => void;
   onNamespaceChange: (namespace: string) => void;
   onStatusChange: (status: string) => void;
 }
 
-function NamespaceDropdown({
+function CombinedDropdown({
+  clusters,
+  selectedCluster,
   namespaces,
   selectedNamespace,
   statusFilter,
+  onClusterChange,
   onNamespaceChange,
   onStatusChange,
-}: NamespaceDropdownProps) {
-  // Combined dropdown value: "namespace:status"
-  const combinedValue = `${selectedNamespace}:${statusFilter}`;
+}: CombinedDropdownProps) {
+  // Combined dropdown value: "cluster|namespace|status"
+  const combinedValue = `${selectedCluster}|${selectedNamespace}|${statusFilter}`;
 
   const handleChange = (value: string) => {
-    const [ns, status] = value.split(":");
+    const [cluster, ns, status] = value.split("|");
+    if (cluster !== selectedCluster) {
+      onClusterChange(cluster);
+      // Don't process namespace/status changes - cluster change resets them
+      return;
+    }
     if (ns !== selectedNamespace) {
       onNamespaceChange(ns);
     }
@@ -239,20 +316,55 @@ function NamespaceDropdown({
     }
   };
 
+  // Show clusters as top-level sections if multiple clusters
+  const hasMultipleClusters = clusters.length > 1;
+
+  if (hasMultipleClusters) {
+    return (
+      <List.Dropdown
+        tooltip="Cluster / Namespace / Status"
+        value={combinedValue}
+        onChange={handleChange}
+      >
+        {clusters.map((cluster) => (
+          <List.Dropdown.Section key={cluster.name} title={`📍 ${cluster.name}`}>
+            {cluster.name === selectedCluster ? (
+              // Show namespaces and statuses for selected cluster
+              namespaces.map((ns) => (
+                <List.Dropdown.Section key={`${cluster.name}-${ns.name}`} title={`  ${ns.name}`}>
+                  {STATUS_FILTERS.map((filter) => (
+                    <List.Dropdown.Item
+                      key={`${cluster.name}|${ns.name}|${filter.value}`}
+                      title={`    ${filter.title}`}
+                      value={`${cluster.name}|${ns.name}|${filter.value}`}
+                    />
+                  ))}
+                </List.Dropdown.Section>
+              ))
+            ) : (
+              // Just show a switch option for other clusters
+              <List.Dropdown.Item
+                key={`${cluster.name}|switch`}
+                title="  Switch to this cluster..."
+                value={`${cluster.name}|${cluster.namespace || "default"}|all`}
+              />
+            )}
+          </List.Dropdown.Section>
+        ))}
+      </List.Dropdown>
+    );
+  }
+
+  // Single cluster - simpler dropdown with just namespace/status
   return (
     <List.Dropdown tooltip="Namespace & Status" value={combinedValue} onChange={handleChange}>
       {namespaces.map((ns) => (
         <List.Dropdown.Section key={ns.name} title={ns.name}>
           {STATUS_FILTERS.map((filter) => (
             <List.Dropdown.Item
-              key={`${ns.name}:${filter.value}`}
+              key={`${selectedCluster}|${ns.name}|${filter.value}`}
               title={filter.title}
-              value={`${ns.name}:${filter.value}`}
-              icon={
-                ns.name === selectedNamespace && filter.value === statusFilter
-                  ? Icon.CheckCircle
-                  : undefined
-              }
+              value={`${selectedCluster}|${ns.name}|${filter.value}`}
             />
           ))}
         </List.Dropdown.Section>

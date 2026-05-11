@@ -75,37 +75,73 @@ Search, view, and manage Temporal workflows directly from Raycast.
 
 ## Configuration
 
-| Setting | Description | Example |
-|---------|-------------|---------|
-| Connection Type | Self-Hosted/Local or Temporal Cloud | `Self-Hosted / Local` |
-| Namespace | Default Temporal namespace | `default` |
-| API Key | Required for Temporal Cloud authentication | |
-| Temporal UI URL | URL to Temporal Web UI (used for API access) | `http://localhost:8080` |
+The extension uses a JSON array to configure one or more Temporal clusters. Each cluster can have:
 
-## Setup
+| Field | Required | Description |
+|-------|----------|-------------|
+| `name` | Yes | Display name for the cluster |
+| `url` | Yes | Temporal Web UI URL (used for API access) |
+| `namespace` | Yes | Default namespace for this cluster |
+| `apiKey` | No | API key for Temporal Cloud authentication |
+
+### Single Cluster (Default)
+
+For a single local Temporal instance, use the default configuration:
+
+```json
+[{"name": "Local", "url": "http://localhost:8080", "namespace": "default"}]
+```
+
+### Multiple Clusters
+
+To connect to multiple Temporal environments:
+
+```json
+[
+  {"name": "Local Dev", "url": "http://localhost:8080", "namespace": "default"},
+  {"name": "Staging", "url": "https://staging.temporal.example.com", "namespace": "staging"},
+  {"name": "Production", "url": "https://prod.tmprl.cloud", "namespace": "prod.acme", "apiKey": "your-api-key"}
+]
+```
+
+When multiple clusters are configured, a cluster switcher appears in the dropdown menu.
+
+## Setup Examples
 
 ### Docker (docker-compose)
 
 If you're running Temporal via Docker Compose:
 
-- **Temporal UI URL**: `http://localhost:8080`
-- **Namespace**: `default` (or your configured namespace)
+```json
+[{"name": "Docker", "url": "http://localhost:8080", "namespace": "default"}]
+```
 
 ### Local Dev Server
 
 If you're using `temporal server start-dev`:
 
-- **Temporal UI URL**: `http://localhost:8233`
-- **Namespace**: `default`
+```json
+[{"name": "Dev Server", "url": "http://localhost:8233", "namespace": "default"}]
+```
 
 ### Temporal Cloud
 
 For Temporal Cloud:
 
-- **Connection Type**: `Temporal Cloud`
-- **Temporal UI URL**: `https://cloud.temporal.io`
-- **API Key**: Generate from Temporal Cloud settings
-- **Namespace**: Your cloud namespace (e.g., `your-namespace.your-account`)
+```json
+[{"name": "Cloud", "url": "https://cloud.temporal.io", "namespace": "your-namespace.your-account", "apiKey": "your-api-key"}]
+```
+
+### Mixed Environment (Local + Cloud)
+
+Common setup with both local development and cloud production:
+
+```json
+[
+  {"name": "Local", "url": "http://localhost:8080", "namespace": "default"},
+  {"name": "Production", "url": "https://cloud.temporal.io", "namespace": "prod.acme", "apiKey": "your-prod-api-key"}
+]
+```
 
 ## Keyboard Shortcuts
 

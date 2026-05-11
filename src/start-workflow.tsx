@@ -9,7 +9,15 @@ import {
   LocalStorage,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { startWorkflow, getCurrentNamespace } from "./lib/temporal-client";
+import {
+  startWorkflow,
+  getCurrentNamespace,
+  getCurrentCluster,
+  getClusters,
+  setCurrentCluster,
+  setCurrentNamespace,
+} from "./lib/temporal-client";
+import { getSelectedCluster, getSelectedNamespace } from "./lib/storage";
 
 const LAST_WORKFLOW_CONFIG_KEY = "lastWorkflowConfig";
 
@@ -26,10 +34,29 @@ export default function StartWorkflow() {
   const [taskQueue, setTaskQueue] = useState("");
   const [input, setInput] = useState("");
   const [inputError, setInputError] = useState<string | undefined>();
+  const [initialized, setInitialized] = useState(false);
 
-  // Load last used config
+  // Get clusters from preferences
+  const clusters = getClusters();
+
+  // Initialize cluster and namespace, then load last config
   useEffect(() => {
-    async function loadLastConfig() {
+    async function init() {
+      // Initialize cluster
+      const storedCluster = await getSelectedCluster();
+      const clusterName =
+        storedCluster && clusters.find((c) => c.name === storedCluster)
+          ? storedCluster
+          : clusters[0]?.name || "Local";
+      const cluster = clusters.find((c) => c.name === clusterName) || clusters[0];
+      setCurrentCluster(cluster);
+
+      // Initialize namespace
+      const storedNamespace = await getSelectedNamespace();
+      const ns = storedNamespace || cluster?.namespace || "default";
+      setCurrentNamespace(ns);
+
+      // Load last used config
       const stored = await LocalStorage.getItem<string>(LAST_WORKFLOW_CONFIG_KEY);
       if (stored) {
         try {
@@ -40,8 +67,10 @@ export default function StartWorkflow() {
           // Ignore parse errors
         }
       }
+
+      setInitialized(true);
     }
-    loadLastConfig();
+    init();
   }, []);
 
   const validateInput = (value: string) => {
@@ -138,11 +167,13 @@ export default function StartWorkflow() {
     }
   };
 
+  const cluster = getCurrentCluster();
   const namespace = getCurrentNamespace();
+  const clusterInfo = clusters.length > 1 ? `${cluster.name} / ${namespace}` : namespace;
 
   return (
     <Form
-      isLoading={isLoading}
+      isLoading={isLoading || !initialized}
       navigationTitle="Start Workflow"
       actions={
         <ActionPanel>
@@ -150,7 +181,10 @@ export default function StartWorkflow() {
         </ActionPanel>
       }
     >
-      <Form.Description title="Namespace" text={namespace} />
+      <Form.Description
+        title={clusters.length > 1 ? "Cluster / Namespace" : "Namespace"}
+        text={clusterInfo}
+      />
 
       <Form.Separator />
 

@@ -1,32 +1,65 @@
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import {
+  ClusterConfig,
   HistoryEvent,
   NamespaceInfo,
+  parseClusters,
   Preferences,
   ScheduleInfo,
   WorkflowInfo,
   WorkflowStatus,
 } from "./types";
 
+// Current cluster override (set by cluster switcher)
+let currentClusterOverride: ClusterConfig | null = null;
+
 // Current namespace override (set by namespace switcher)
 let currentNamespaceOverride: string | null = null;
 
 /**
- * Set the current namespace (overrides preferences)
+ * Get all configured clusters from preferences
+ */
+export function getClusters(): ClusterConfig[] {
+  const prefs = getPreferenceValues<Preferences>();
+  return parseClusters(prefs.clusters);
+}
+
+/**
+ * Set the current cluster (overrides default)
+ */
+export function setCurrentCluster(cluster: ClusterConfig | null): void {
+  currentClusterOverride = cluster;
+  // Reset namespace override when cluster changes
+  currentNamespaceOverride = null;
+}
+
+/**
+ * Get the current cluster
+ */
+export function getCurrentCluster(): ClusterConfig {
+  if (currentClusterOverride) {
+    return currentClusterOverride;
+  }
+  const clusters = getClusters();
+  return clusters[0] || { name: "Local", url: "http://localhost:8080", namespace: "default" };
+}
+
+/**
+ * Set the current namespace (overrides cluster default)
  */
 export function setCurrentNamespace(namespace: string | null): void {
   currentNamespaceOverride = namespace;
 }
 
 /**
- * Get the current namespace (from override or preferences)
+ * Get the current namespace (from override or cluster default)
  */
 export function getCurrentNamespace(): string {
   if (currentNamespaceOverride) {
     return currentNamespaceOverride;
   }
-  const prefs = getPreferenceValues<Preferences>();
-  return prefs.namespace;
+  const cluster = getCurrentCluster();
+  return cluster.namespace || "default";
 }
 
 /**
@@ -34,25 +67,23 @@ export function getCurrentNamespace(): string {
  * Uses the Temporal UI URL since it proxies API requests
  */
 function getBaseUrl(): string {
-  const prefs = getPreferenceValues<Preferences>();
-
+  const cluster = getCurrentCluster();
   // The Temporal UI service proxies API requests, so we use the UI URL
   // This works for both Docker setups (port 8080) and dev server (port 8233)
-  const uiUrl = prefs.temporalUiUrl || "http://localhost:8080";
-  return uiUrl.replace(/\/$/, ""); // Remove trailing slash if present
+  return cluster.url.replace(/\/$/, ""); // Remove trailing slash if present
 }
 
 /**
  * Get headers for API requests
  */
 function getHeaders(): HeadersInit {
-  const prefs = getPreferenceValues<Preferences>();
+  const cluster = getCurrentCluster();
   const headers: HeadersInit = {
     "Content-Type": "application/json",
   };
 
-  if (prefs.apiKey) {
-    headers["Authorization"] = `Bearer ${prefs.apiKey}`;
+  if (cluster.apiKey) {
+    headers["Authorization"] = `Bearer ${cluster.apiKey}`;
   }
 
   return headers;

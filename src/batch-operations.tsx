@@ -8,7 +8,6 @@ import {
   Icon,
   confirmAlert,
   Alert,
-  getPreferenceValues,
   useNavigation,
 } from "@raycast/api";
 import {
@@ -17,9 +16,16 @@ import {
   batchTerminateWorkflows,
   listNamespaces,
   setCurrentNamespace,
+  setCurrentCluster,
+  getClusters,
 } from "./lib/temporal-client";
-import { Preferences, NamespaceInfo } from "./lib/types";
-import { getSelectedNamespace, setSelectedNamespace } from "./lib/storage";
+import { NamespaceInfo } from "./lib/types";
+import {
+  getSelectedNamespace,
+  setSelectedNamespace,
+  getSelectedCluster,
+  setSelectedCluster,
+} from "./lib/storage";
 
 type BatchOperation = "cancel" | "terminate";
 
@@ -38,31 +44,81 @@ export default function BatchOperations() {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [namespaces, setNamespaces] = useState<NamespaceInfo[]>([]);
+  const [selectedClusterName, setSelectedClusterName] = useState<string>("");
   const [selectedNamespace, setSelectedNamespaceState] = useState<string>("");
   const [operation, setOperation] = useState<BatchOperation>("cancel");
   const [query, setQuery] = useState('ExecutionStatus = "Running"');
   const [reason, setReason] = useState("Batch operation via Raycast");
   const [previewCount, setPreviewCount] = useState<number | null>(null);
   const [queryError, setQueryError] = useState<string | undefined>();
-  const prefs = getPreferenceValues<Preferences>();
 
-  // Fetch namespaces on mount
+  // Get clusters from preferences
+  const clusters = getClusters();
+
+  // Fetch namespaces on mount and when cluster changes
   useEffect(() => {
     async function init() {
-      try {
-        const ns = await listNamespaces();
-        setNamespaces(ns.length > 0 ? ns : [{ name: prefs.namespace, state: "Registered" }]);
-      } catch {
-        setNamespaces([{ name: prefs.namespace, state: "Registered" }]);
-      }
+      // Initialize cluster
+      const storedCluster = await getSelectedCluster();
+      const clusterName =
+        storedCluster && clusters.find((c) => c.name === storedCluster)
+          ? storedCluster
+          : clusters[0]?.name || "Local";
+      const cluster = clusters.find((c) => c.name === clusterName) || clusters[0];
+      setSelectedClusterName(clusterName);
+      setCurrentCluster(cluster);
 
-      const stored = await getSelectedNamespace();
-      const namespace = stored || prefs.namespace;
+      // Initialize namespace
+      const storedNamespace = await getSelectedNamespace();
+      const namespace = storedNamespace || cluster?.namespace || "default";
       setSelectedNamespaceState(namespace);
       setCurrentNamespace(namespace);
+
+      // Fetch namespaces for this cluster
+      try {
+        const ns = await listNamespaces();
+        setNamespaces(
+          ns.length > 0 ? ns : [{ name: cluster?.namespace || "default", state: "Registered" }]
+        );
+      } catch {
+        setNamespaces([{ name: cluster?.namespace || "default", state: "Registered" }]);
+      }
     }
     init();
-  }, [prefs.namespace]);
+  }, []);
+
+  // Handle cluster change
+  const handleClusterChange = useCallback(
+    async (clusterName: string) => {
+      const cluster = clusters.find((c) => c.name === clusterName);
+      if (!cluster) return;
+
+      setSelectedClusterName(clusterName);
+      setCurrentCluster(cluster);
+      await setSelectedCluster(clusterName);
+
+      const ns = cluster.namespace || "default";
+      setSelectedNamespaceState(ns);
+      setCurrentNamespace(ns);
+      await setSelectedNamespace(ns);
+      setPreviewCount(null);
+
+      // Fetch namespaces for new cluster
+      try {
+        const nsList = await listNamespaces();
+        setNamespaces(nsList.length > 0 ? nsList : [{ name: ns, state: "Registered" }]);
+      } catch {
+        setNamespaces([{ name: ns, state: "Registered" }]);
+      }
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Cluster Changed",
+        message: `${clusterName} / ${ns}`,
+      });
+    },
+    [clusters]
+  );
 
   // Handle namespace change
   const handleNamespaceChange = useCallback(async (namespace: string) => {
@@ -220,6 +276,19 @@ export default function BatchOperations() {
         </ActionPanel>
       }
     >
+      {clusters.length > 1 && (
+        <Form.Dropdown
+          id="cluster"
+          title="Cluster"
+          value={selectedClusterName}
+          onChange={handleClusterChange}
+        >
+          {clusters.map((cluster) => (
+            <Form.Dropdown.Item key={cluster.name} value={cluster.name} title={cluster.name} />
+          ))}
+        </Form.Dropdown>
+      )}
+
       <Form.Dropdown
         id="namespace"
         title="Namespace"

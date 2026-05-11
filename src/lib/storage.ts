@@ -3,6 +3,7 @@ import { WorkflowInfo } from "./types";
 
 const RECENT_WORKFLOWS_KEY = "recentWorkflows";
 const SELECTED_NAMESPACE_KEY = "selectedNamespace";
+const SELECTED_CLUSTER_KEY = "selectedCluster";
 const MAX_RECENT_WORKFLOWS = 10;
 
 /**
@@ -13,6 +14,7 @@ export interface RecentWorkflow {
   runId: string;
   type: string;
   namespace: string;
+  cluster: string; // Cluster name
   viewedAt: number; // timestamp
 }
 
@@ -33,7 +35,11 @@ export async function getRecentWorkflows(): Promise<RecentWorkflow[]> {
 /**
  * Add a workflow to recent workflows
  */
-export async function addRecentWorkflow(workflow: WorkflowInfo, namespace: string): Promise<void> {
+export async function addRecentWorkflow(
+  workflow: WorkflowInfo,
+  namespace: string,
+  cluster: string
+): Promise<void> {
   const recents = await getRecentWorkflows();
 
   // Remove if already exists (will re-add at top)
@@ -47,6 +53,7 @@ export async function addRecentWorkflow(workflow: WorkflowInfo, namespace: strin
     runId: workflow.runId,
     type: workflow.type,
     namespace,
+    cluster,
     viewedAt: Date.now(),
   };
 
@@ -74,4 +81,18 @@ export async function getSelectedNamespace(): Promise<string | undefined> {
  */
 export async function setSelectedNamespace(namespace: string): Promise<void> {
   await LocalStorage.setItem(SELECTED_NAMESPACE_KEY, namespace);
+}
+
+/**
+ * Get the selected cluster (if any)
+ */
+export async function getSelectedCluster(): Promise<string | undefined> {
+  return LocalStorage.getItem<string>(SELECTED_CLUSTER_KEY);
+}
+
+/**
+ * Set the selected cluster
+ */
+export async function setSelectedCluster(clusterName: string): Promise<void> {
+  await LocalStorage.setItem(SELECTED_CLUSTER_KEY, clusterName);
 }
