@@ -61,7 +61,7 @@ export default function Command(props: LaunchProps<{ arguments: SendPushArgument
       content: (value) => {
         if (!value?.trim()) return "Enter text or a URL to send.";
         if (value.length > InputLimits.PUSH_CONTENT)
-          return `Content must be ${InputLimits.PUSH_CONTENT.toLocaleString("en-US")} characters or fewer.`;
+          return `Content must be ${InputLimits.PUSH_CONTENT.toLocaleString()} characters or fewer.`;
       },
       title: (value) => {
         if (value && value.length > InputLimits.PUSH_TITLE)
@@ -81,9 +81,7 @@ export default function Command(props: LaunchProps<{ arguments: SendPushArgument
       <Form.TextArea
         title="Content"
         placeholder="Type text or paste a URL"
-        info={`${(values.content ?? "").length.toLocaleString("en-US")} / ${InputLimits.PUSH_CONTENT.toLocaleString(
-          "en-US",
-        )}`}
+        info={`${(values.content ?? "").length.toLocaleString()} / ${InputLimits.PUSH_CONTENT.toLocaleString()}`}
         {...itemProps.content}
       />
       <Form.TextField
@@ -91,9 +89,7 @@ export default function Command(props: LaunchProps<{ arguments: SendPushArgument
         placeholder="Optional"
         info={
           (values.title ?? "").length > 0
-            ? `${(values.title ?? "").length.toLocaleString("en-US")} / ${InputLimits.PUSH_TITLE.toLocaleString(
-                "en-US",
-              )}`
+            ? `${(values.title ?? "").length.toLocaleString()} / ${InputLimits.PUSH_TITLE.toLocaleString()}`
             : undefined
         }
         {...itemProps.title}

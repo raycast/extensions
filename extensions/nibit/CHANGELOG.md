@@ -1,6 +1,6 @@
 # Nibit Raycast Extension Changelog
 
-## [Initial Release] - 2026-05-03
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Encrypted push inbox with background sync and realtime updates
 - Send encrypted text, URLs, and files to your Nibit devices
