@@ -1,10 +1,11 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Chat, SavedChat, SavedChatHook } from "../type";
 
 export function useSavedChat(): SavedChatHook {
   const [data, setData] = useState<SavedChat[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -19,6 +20,8 @@ export function useSavedChat(): SavedChatHook {
   }, []);
 
   useEffect(() => {
+    if (!hasLoadedRef.current) return;
+
     LocalStorage.setItem("savedChats", JSON.stringify(data));
   }, [data]);
 

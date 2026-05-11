@@ -1,10 +1,11 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Chat, HistoryHook } from "../type";
 
 export function useHistory(): HistoryHook {
   const [data, setData] = useState<Chat[]>([]);
   const [isLoading, setLoading] = useState<boolean>(true);
+  const hasLoadedRef = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -15,10 +16,13 @@ export function useHistory(): HistoryHook {
       }
 
       setLoading(false);
+      hasLoadedRef.current = true;
     })();
   }, []);
 
   useEffect(() => {
+    if (!hasLoadedRef.current) return;
+
     LocalStorage.setItem("history", JSON.stringify(data));
   }, [data]);
 
