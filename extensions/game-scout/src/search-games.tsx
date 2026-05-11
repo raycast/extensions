@@ -31,19 +31,7 @@ const detailCache = new Cache({ namespace: "search_detail" });
 const DETAIL_CACHE_TTL = 6 * 60 * 60 * 1000;
 const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
 
-import { formatPrice, isStoreAllowed } from "./utils";
-
-const cleanBundleUrl = (url?: string) => {
-  if (!url) return "";
-  if (url.includes("u=http")) {
-    try {
-      return decodeURIComponent(url.split("u=")[1].split("&")[0]);
-    } catch {
-      return url;
-    }
-  }
-  return url;
-};
+import { formatPrice, isStoreAllowed, buildBundleMap } from "./utils";
 
 export default function Command() {
   const [apiError, setApiError] = useState(false);
@@ -163,30 +151,8 @@ export default function Command() {
   );
 
   const bundleCounts = useMemo(() => {
-    const counts: Record<string, number> = {};
-    const now = Date.now();
-
-    if (priceData) {
-      const bundles = (Array.isArray(priceData) ? priceData : []).filter(
-        (item: any) => {
-          const hasTiers = Array.isArray(item.tiers);
-          const isNotExpired =
-            !item.expiry || new Date(item.expiry).getTime() > now;
-          return hasTiers && isNotExpired;
-        },
-      );
-
-      bundles.forEach((b: any) => {
-        b.tiers?.forEach((t: any) => {
-          t.games?.forEach((gm: any) => {
-            if (gm.id) {
-              counts[gm.id] = (counts[gm.id] || 0) + 1;
-            }
-          });
-        });
-      });
-    }
-    return counts;
+    if (!priceData) return {};
+    return buildBundleMap(priceData);
   }, [priceData]);
 
   const filteredData = searchData.filter((game: any) => {
@@ -294,7 +260,7 @@ export default function Command() {
 
             if (
               typeof bundleCounts !== "undefined" &&
-              bundleCounts[game.id] > 0
+              bundleCounts[String(game.id)] > 0
             ) {
               accessories.push({
                 icon: { source: Icon.Box, tintColor: Color.Purple },
@@ -634,10 +600,6 @@ function GameDetail({
       const month = lastBundleDate.toLocaleString("en-US", { month: "short" });
       const year = lastBundleDate.getFullYear();
       state = `Last bundled ${month} ${year}`;
-      icon = Icon.Clock;
-      color = Color.SecondaryText;
-    } else if (totalBundles > 0) {
-      state = `Bundled ${totalBundles} times`;
       icon = Icon.Clock;
       color = Color.SecondaryText;
     }
@@ -1145,9 +1107,9 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
           {bundleValue?.tier && bundleValue?.bundle && (
             <Detail.Metadata.Link
               title="Bundle Tier"
-              target={cleanBundleUrl(
-                bundleValue.bundle.url || bundleValue.bundle.details,
-              )}
+              target={
+                bundleValue.bundle.url || bundleValue.bundle.details || ""
+              }
               text={
                 bundleValue.tier.price
                   ? `${bundleValue.bundle.page?.name || "Bundle"} · ${formatPrice(bundleValue.tier.price.amount, bundleValue.tier.price.currency || hCurrency)}`
@@ -1160,7 +1122,9 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
           <Detail.Metadata.Label
             title="Price Sources"
             text={
-              selectedStores.length === 0 || selectedStores.length >= 23
+              selectedStores.includes("all") ||
+              selectedStores.length === 0 ||
+              selectedStores.length >= 23
                 ? "All Stores"
                 : `${selectedStores.length} Selected`
             }
@@ -1313,9 +1277,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
 }
 
 function BundleContentViewer({ bundles, gameTitle }: any) {
-  const firstBundleUrl = cleanBundleUrl(
-    bundles?.[0]?.url || bundles?.[0]?.details,
-  );
+  const firstBundleUrl = bundles?.[0]?.url || bundles?.[0]?.details;
 
   let markdown = `# 📦 Bundle Contents for ${gameTitle}\n\n`;
   bundles.forEach((b: any, i: number) => {

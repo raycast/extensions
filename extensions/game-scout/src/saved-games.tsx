@@ -32,19 +32,7 @@ const CACHE_TTL =
 const DETAIL_CACHE_TTL = 6 * 60 * 60 * 1000;
 const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
 
-import { formatPrice, isStoreAllowed } from "./utils";
-
-const cleanBundleUrl = (url?: string) => {
-  if (!url) return "";
-  if (url.includes("u=http")) {
-    try {
-      return decodeURIComponent(url.split("u=")[1].split("&")[0]);
-    } catch {
-      return url;
-    }
-  }
-  return url;
-};
+import { formatPrice, isStoreAllowed, buildBundleMap } from "./utils";
 
 export default function SavedGames() {
   const isApiKeyValid = API_KEY.length > 0;
@@ -129,52 +117,53 @@ export default function SavedGames() {
           },
         ),
       ]);
+
       const [pJson, oJson] = await Promise.all([pRes.json(), oRes.json()]);
 
-      const rMap: any = {};
-      const newLastSeen: Record<string, number> = {};
+      const priceMap: Record<string, any[]> = {};
+      const lastSeenPrices: Record<string, number> = {};
 
       (Array.isArray(pJson) ? pJson : Object.values(pJson)).forEach(
         (it: any) => {
-          rMap[it.id] = it.deals || [];
-          const bestDeal = it.deals?.find((d: any) =>
+          if (it.id == null) return;
+          const id = String(it.id);
+
+          priceMap[id] = it.deals || [];
+
+          const validDeals = it.deals?.filter((d: any) =>
             isStoreAllowed(d.shop?.name || "", selectedStores),
           );
+
+          const bestDeal = validDeals?.reduce((min: any, d: any) => {
+            if (!min) return d;
+            return d.price?.amount < min.price?.amount ? d : min;
+          }, null);
+
           if (bestDeal?.price?.amount != null) {
-            newLastSeen[it.id] = bestDeal.price.amount;
+            lastSeenPrices[id] = bestDeal.price.amount;
           }
         },
       );
 
-      const now = Date.now();
-      const bMap: any = {};
-      gameIds.forEach((id) => {
-        bMap[id] = (oJson.bundles || []).filter((b: any) => {
-          const isNotExpired = !b.expiry || new Date(b.expiry).getTime() > now;
-          return (
-            isNotExpired &&
-            b.tiers?.some((t: any) => t.games?.some((gm: any) => gm.id === id))
-          );
-        }).length;
-      });
+      const newBundleCounts = buildBundleMap(oJson);
 
-      setRawPrices(rMap);
-      setBundleCounts(bMap);
+      setRawPrices(priceMap);
+      setBundleCounts(newBundleCounts);
 
-      if (Object.keys(rMap).length > 0) {
+      if (Object.keys(priceMap).length > 0) {
         cache.set(
           CACHE_KEY,
           JSON.stringify({
             timestamp: Date.now(),
-            rawPrices: rMap,
-            bundleCounts: bMap,
+            rawPrices: priceMap,
+            bundleCounts: newBundleCounts,
           }),
         );
       }
 
       const existing = await LocalStorage.getItem<string>("last_seen_prices");
       const parsed = existing ? JSON.parse(existing) : {};
-      const merged = { ...parsed, ...newLastSeen };
+      const merged = { ...parsed, ...lastSeenPrices };
 
       await LocalStorage.setItem("last_seen_prices", JSON.stringify(merged));
     } catch (e: any) {
@@ -190,16 +179,22 @@ export default function SavedGames() {
   }, [savedGames]);
 
   const prices = useMemo(() => {
-    const map: any = {};
-    Object.keys(rawPrices).forEach((id) => {
+    const map: Record<string, any> = {};
+    Object.keys(rawPrices).forEach((rawId) => {
+      const id = String(rawId);
       if (!rawPrices[id] || !Array.isArray(rawPrices[id])) {
         map[id] = null;
         return;
       }
-      map[id] =
-        rawPrices[id].filter((d: any) =>
-          isStoreAllowed(d.shop?.name || "", selectedStores),
-        )[0] || null;
+
+      const validDeals = rawPrices[id].filter((d: any) =>
+        isStoreAllowed(d.shop?.name || "", selectedStores),
+      );
+
+      map[id] = validDeals.reduce((min: any, d: any) => {
+        if (!min) return d;
+        return d.price?.amount < min.price?.amount ? d : min;
+      }, null);
     });
     return map;
   }, [rawPrices, selectedStores]);
@@ -383,7 +378,7 @@ export default function SavedGames() {
                 }
               }
 
-              if (bundleCounts[game.id] > 0) {
+              if (bundleCounts[String(game.id)] > 0) {
                 acc.push({
                   icon: { source: Icon.Box, tintColor: Color.Purple },
                   tooltip: "Available in a Bundle",
@@ -716,10 +711,6 @@ function GameDetail({
       const month = lastBundleDate.toLocaleString("en-US", { month: "short" });
       const year = lastBundleDate.getFullYear();
       state = `Last bundled ${month} ${year}`;
-      icon = Icon.Clock;
-      color = Color.SecondaryText;
-    } else if (totalBundles > 0) {
-      state = `Bundled ${totalBundles} times`;
       icon = Icon.Clock;
       color = Color.SecondaryText;
     }
@@ -1206,9 +1197,9 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
           {bundleValue?.tier && bundleValue?.bundle && (
             <Detail.Metadata.Link
               title="Bundle Tier"
-              target={cleanBundleUrl(
-                bundleValue.bundle.url || bundleValue.bundle.details,
-              )}
+              target={
+                bundleValue.bundle.url || bundleValue.bundle.details || ""
+              }
               text={
                 bundleValue.tier.price
                   ? `${bundleValue.bundle.page?.name || "Bundle"} · ${formatPrice(bundleValue.tier.price.amount, bundleValue.tier.price.currency || hCurrency)}`
@@ -1221,7 +1212,9 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
           <Detail.Metadata.Label
             title="Price Sources"
             text={
-              selectedStores.length === 0 || selectedStores.length >= 23
+              selectedStores.includes("all") ||
+              selectedStores.length === 0 ||
+              selectedStores.length >= 23
                 ? "All Stores"
                 : `${selectedStores.length} Selected`
             }
@@ -1360,9 +1353,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
 }
 
 function BundleContentViewer({ bundles, gameTitle }: any) {
-  const firstBundleUrl = cleanBundleUrl(
-    bundles?.[0]?.url || bundles?.[0]?.details,
-  );
+  const firstBundleUrl = bundles?.[0]?.url || bundles?.[0]?.details;
 
   let markdown = `# 📦 Bundle Contents for ${gameTitle}\n\n`;
   bundles.forEach((b: any, i: number) => {

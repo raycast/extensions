@@ -89,6 +89,36 @@ export function formatPrice(
   return `${symbol}${noDecimals.includes(curr) ? Math.round(amount) : amount.toFixed(2)}`;
 }
 
+export function buildBundleMap(oJson: any): Record<string, number> {
+  const bundleCounts: Record<string, number> = {};
+  const now = Date.now();
+
+  const overviewArray = Array.isArray(oJson)
+    ? oJson
+    : Object.values(oJson || {}).flatMap((v: any) =>
+        Array.isArray(v) ? v : [v],
+      );
+
+  overviewArray.forEach((item: any) => {
+    const expiryTime = item.expiry ? new Date(item.expiry).getTime() : NaN;
+    const isNotExpired =
+      !item.expiry || Number.isNaN(expiryTime) || expiryTime > now;
+
+    if (Array.isArray(item.tiers) && isNotExpired) {
+      item.tiers.forEach((t: any) => {
+        t.games?.forEach((gm: any) => {
+          if (gm.id != null) {
+            const id = String(gm.id);
+            bundleCounts[id] = (bundleCounts[id] || 0) + 1;
+          }
+        });
+      });
+    }
+  });
+
+  return bundleCounts;
+}
+
 export function isStoreAllowed(
   shopName: string,
   selectedStores: string[],
