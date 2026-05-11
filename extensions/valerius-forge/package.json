@@ -1,0 +1,79 @@
+{
+  "name": "valerius-forge",
+  "title": "Valerius Forge",
+  "description": "Forge AI-ready agent prompts and project briefs",
+  "icon": "valerius.png",
+  "author": "fratresmedai",
+  "license": "MIT",
+  "version": "0.1.0",
+  "commands": [
+    {
+      "name": "forge",
+      "title": "Forge Prompt",
+      "description": "Forge an AI agent prompt or project brief",
+      "mode": "view"
+    },
+    {
+      "name": "forge-selection",
+      "title": "Forge Selection",
+      "description": "Forge a prompt from your current selection",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "title": "LLM Provider",
+      "description": "Your AI provider",
+      "type": "dropdown",
+      "required": true,
+      "default": "openai",
+      "data": [
+        { "title": "OpenAI", "value": "openai" },
+        { "title": "Anthropic (Claude)", "value": "anthropic" },
+        { "title": "Google (Gemini)", "value": "google" },
+        { "title": "xAI (Grok)", "value": "xai" },
+        { "title": "OpenRouter", "value": "openrouter" },
+        { "title": "Local (Ollama / LM Studio)", "value": "local" }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your API key for the selected provider",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Model to use (e.g. gpt-4o, claude-opus-4-5, gemini-2.0-flash)",
+      "type": "textfield",
+      "required": false,
+      "default": "gpt-4o"
+    },
+    {
+      "name": "baseUrl",
+      "title": "Base URL (Local only)",
+      "description": "Only needed for local LLMs like Ollama",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:11434/v1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.0",
+    "@raycast/utils": "^1.16.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "typescript": "^5.6.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "npx eslint src --ext .ts,.tsx --fix",
+    "lint": "npx eslint src --ext .ts,.tsx",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
