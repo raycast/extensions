@@ -271,6 +271,9 @@ async function runFainder(args: string[]): Promise<string> {
       return await exec(binary, args);
     } catch (error) {
       lastError = error;
+      if (!isFileNotFound(error)) {
+        throw error;
+      }
     }
   }
   throw lastError;
@@ -290,13 +293,27 @@ function exec(file: string, args: string[]): Promise<string> {
       },
       (error, stdout, stderr) => {
         if (error) {
-          reject(new Error(stderr.trim() || error.message));
+          const nextError = new Error(
+            stderr.trim() || error.message,
+          ) as NodeJS.ErrnoException;
+          nextError.code =
+            typeof error.code === "string" ? error.code : undefined;
+          reject(nextError);
           return;
         }
         resolve(stdout);
       },
     );
   });
+}
+
+function isFileNotFound(error: unknown): boolean {
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as NodeJS.ErrnoException).code === "ENOENT"
+  );
 }
 
 function escapeAppleScript(value: string): string {
