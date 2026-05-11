@@ -10,19 +10,19 @@ Hakuna Extention to start and stop a timer at hakuna.ch
 - Render times in tenant's format (`hh:mm` vs `hh.hh`)
 - Sensible keyboard shortcuts and default actions
 - Menu Bar for quick access
-- Usage of [Raycast Cache][raycast-cache]
+- Usage of [Raycast Cache][raycast-cache] for API responses to comply with Hakuna API request limits
 
 ## Impressions
 
-![Entries Overview](./metadata/hakuna-3.png)
+![Entries Overview](./media/hakuna-3.png)
 
-![Profile Overview](./metadata/hakuna-4.png)
+![Profile Overview](./media/hakuna-4.png)
 
-![Add new Entry](./metadata/hakuna-5.png)
+![Add new Entry](./media/hakuna-5.png)
 
-![Tasks Overview](./metadata/hakuna-6.png)
+![Tasks Overview](./media/hakuna-6.png)
 
-![Projects Overview](./metadata/hakuna-7.png)
+![Projects Overview](./media/hakuna-7.png)
 
 ## Get your personal API Token
 
