@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fitdesk",
   "title": "FitDesk",
   "description": "Micro-workouts to stay active while working",
@@ -12,8 +13,7 @@
     "Windows"
   ],
   "categories": [
-    "Productivity",
-    "Other"
+    "Productivity"
   ],
   "license": "MIT",
   "commands": [
