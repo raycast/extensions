@@ -26,7 +26,7 @@ import {
 import type { Exchanger } from "../api/types";
 
 export default function Exchangers() {
-  const { data: exchangers, isLoading, revalidate } = useExchangers();
+  const { data: exchangers, isLoading, error, revalidate } = useExchangers();
   const { data: favExchangers, revalidate: revalidateFavs } =
     useFavoriteExchangers();
   const { data: blacklist, revalidate: revalidateBlacklist } =
@@ -238,6 +238,17 @@ export default function Exchangers() {
       isShowingDetail
       searchBarPlaceholder="Search exchangers..."
     >
+      {error && !isLoading ? (
+        <List.EmptyView
+          title="Could not load exchangers"
+          description={
+            error instanceof Error
+              ? error.message
+              : "Please try refreshing the command."
+          }
+          icon={Icon.XMarkCircle}
+        />
+      ) : null}
       <List.Section title="Active" subtitle={`${active.length}`}>
         {active.map(renderExchanger)}
       </List.Section>

@@ -2,11 +2,25 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "kurslog",
   "title": "Kurslog",
-  "description": "Compare crypto exchange rates from 100+ exchangers in Ukraine and 100+ countries. Best rates for USDT, BTC, ETH to fiat, cash, Payoneer, and more.",
+  "description": "Compare crypto exchange rates from 100+ exchangers in Ukraine and 100+ countries with best rates for USDT, BTC, ETH to fiat, cash, Payoneer, and more.",
   "icon": "extension-icon.png",
   "author": "kurslog",
-  "categories": ["Finance"],
-  "keywords": ["crypto", "exchange", "rates", "USDT", "BTC", "ETH", "currency", "converter", "Ukraine", "aggregator", "kurslog"],
+  "categories": [
+    "Finance"
+  ],
+  "keywords": [
+    "crypto",
+    "exchange",
+    "rates",
+    "USDT",
+    "BTC",
+    "ETH",
+    "currency",
+    "converter",
+    "Ukraine",
+    "aggregator",
+    "kurslog"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -46,16 +60,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.95.0",
-    "@raycast/utils": "^1.19.0"
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "22.14.0",
-    "@types/react": "19.0.8",
-    "eslint": "^8.57.0",
-    "prettier": "^3.4.2",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -63,5 +77,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

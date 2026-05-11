@@ -21,11 +21,13 @@ import type { PopularDirection } from "../api/types";
 import DirectionView from "./direction";
 
 export default function QuickSearch() {
-  const { data: directions, isLoading } = useCachedPromise(
-    fetchPopularDirections,
-    [100],
-    { keepPreviousData: true },
-  );
+  const {
+    data: directions,
+    isLoading,
+    error,
+  } = useCachedPromise(fetchPopularDirections, [100], {
+    keepPreviousData: true,
+  });
   const { data: favDirections, revalidate: revalidateFavs } =
     useFavoriteDirections();
   const favs = favDirections || [];
@@ -48,6 +50,17 @@ export default function QuickSearch() {
       searchBarPlaceholder="e.g.: usdt trc20 monobank"
       throttle
     >
+      {error && !isLoading ? (
+        <List.EmptyView
+          title="Could not load exchange rates"
+          description={
+            error instanceof Error
+              ? error.message
+              : "Please try again in a moment."
+          }
+          icon={Icon.XMarkCircle}
+        />
+      ) : null}
       {(directions || []).map((dir) => {
         const fromName = dir.from_name_en || dir.from_currency;
         const toName = dir.to_name_en || dir.to_currency;

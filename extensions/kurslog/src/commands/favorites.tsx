@@ -30,13 +30,24 @@ import {
 import DirectionView from "./direction";
 
 export default function Favorites() {
-  const { data: favDirs, revalidate: revalidateFavDirs } =
-    useFavoriteDirections();
+  const {
+    data: favDirs,
+    error: favDirsError,
+    revalidate: revalidateFavDirs,
+  } = useFavoriteDirections();
   const { data: favExchangerUrls, revalidate: revalidateFavEx } =
     useFavoriteExchangers();
-  const { data: directions, isLoading: dirsLoading } =
-    usePopularDirections(100);
-  const { data: exchangers, isLoading: exLoading } = useExchangers();
+  const {
+    data: directions,
+    error: directionsError,
+    isLoading: dirsLoading,
+  } = usePopularDirections(100);
+  const {
+    data: exchangers,
+    error: exchangersError,
+    isLoading: exLoading,
+  } = useExchangers();
+  const loadError = favDirsError || directionsError || exchangersError;
 
   const favDirections = useMemo(() => {
     if (!favDirs || !directions) return [];
@@ -75,6 +86,17 @@ export default function Favorites() {
       isLoading={dirsLoading || exLoading}
       searchBarPlaceholder="Search favorites..."
     >
+      {loadError && !dirsLoading && !exLoading ? (
+        <List.EmptyView
+          title="Could not load favorites"
+          description={
+            loadError instanceof Error
+              ? loadError.message
+              : "Please try again in a moment."
+          }
+          icon={Icon.XMarkCircle}
+        />
+      ) : null}
       {isEmpty && !dirsLoading && !exLoading && (
         <List.EmptyView
           title="Favorites"

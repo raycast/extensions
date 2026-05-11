@@ -56,7 +56,12 @@ export default function DirectionView({
   amount: initialAmount,
   cityUrl,
 }: DirectionViewProps) {
-  const { data: rates, isLoading, revalidate } = useAllRates(from, to, cityUrl);
+  const {
+    data: rates,
+    isLoading,
+    error,
+    revalidate,
+  } = useAllRates(from, to, cityUrl);
   const { data: favExchangers, revalidate: revalidateFavs } =
     useFavoriteExchangers();
   const { data: blacklist, revalidate: revalidateBlacklist } =
@@ -252,7 +257,18 @@ export default function DirectionView({
         </List.Dropdown>
       }
     >
-      {sortedRates.length === 0 && !isLoading && (
+      {error && !isLoading ? (
+        <List.EmptyView
+          title="Could not load rates"
+          description={
+            error instanceof Error
+              ? error.message
+              : "Please try refreshing the command."
+          }
+          icon={Icon.XMarkCircle}
+        />
+      ) : null}
+      {sortedRates.length === 0 && !isLoading && !error && (
         <List.EmptyView title="No rates available" icon={Icon.XMarkCircle} />
       )}
       {sortedRates.map((rate, rateIndex) => {

@@ -21,7 +21,12 @@ import type { PopularDirection, Tag } from "../api/types";
 import DirectionView from "./direction";
 
 export default function ExchangeRates() {
-  const { data: directions, isLoading, revalidate } = usePopularDirections();
+  const {
+    data: directions,
+    isLoading,
+    error,
+    revalidate,
+  } = usePopularDirections();
   const { data: favDirections, revalidate: revalidateFavs } =
     useFavoriteDirections();
   const [selectedTag, setSelectedTag] = useState("all");
@@ -180,6 +185,17 @@ export default function ExchangeRates() {
         </List.Dropdown>
       }
     >
+      {error && !isLoading ? (
+        <List.EmptyView
+          title="Could not load directions"
+          description={
+            error instanceof Error
+              ? error.message
+              : "Please try refreshing the command."
+          }
+          icon={Icon.XMarkCircle}
+        />
+      ) : null}
       {favoriteDirections.length > 0 && (
         <List.Section title="Favorites">
           {favoriteDirections.map((dir) => renderItem(dir, true))}
