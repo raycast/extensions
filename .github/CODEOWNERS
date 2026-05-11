@@ -107,6 +107,7 @@
 /extensions/apple-devices                                           @madza91
 /extensions/apple-maps-search                                       @djpowers @ratoru @sebdanielsson
 /extensions/apple-notes                                             @tumispro @ron-myers @mathieudutour @StevenRCE0 @SKaplanOfficial @tylerwince @xilopaint @ridemountainpig @teemusuvinen @saldanaj97 @andreaselia @fanhefeng @charlesharries
+/extensions/apple-passwords                                         @alecharmon
 /extensions/apple-photos                                            @wesbaker
 /extensions/apple-reminders                                         @thomaslombart @tmwrnr @irangarcia @jondelga @phil1995 @michalzuch @ridemountainpig @maxnyby @vmrjnvc @ramith123 @ScH01ar @0xdhrv @kendaniels
 /extensions/apple-stocks-search                                     @haydencbarnes
@@ -786,7 +787,7 @@
 /extensions/firefly-iii                                             @xmok
 /extensions/firefox-tabs                                            @toshi38
 /extensions/fisher                                                  @MatheusChein
-/extensions/fitdesk                                                 @rasheed-code
+/extensions/fitdesk                                                 @rasheed-code @pernielsentikaer
 /extensions/fix-helper                                              @tianwg
 /extensions/fix-language                                            @hiiamtin
 /extensions/fix-link-embeds                                         @eggsy

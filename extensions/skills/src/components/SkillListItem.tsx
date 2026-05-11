@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { buildInstallCommand, formatInstalls, type Skill, SKILLS_BASE_URL } from "../shared";
+import { buildInstallCommand, buildSkillUrl, formatInstalls, type Skill } from "../shared";
 import { type InstalledSkillMatch } from "../hooks/useInstalledSkillMatches";
 import { InstallSkillAction } from "./actions/InstallSkillAction";
 import { SkillDetailView } from "./SkillDetailView";
@@ -23,6 +23,7 @@ export function SkillListItem({
   const isInstalled = installedMatch.type === "exact";
   const hasSourceConflict = installedMatch.type === "conflict";
   const installedSource = installedMatch.type === "conflict" ? (installedMatch.source ?? "Unknown source") : undefined;
+  const skillUrl = buildSkillUrl(skill.source, skill.skillId);
 
   const iconValue = isInstalled
     ? { source: Icon.CheckCircle, tintColor: Color.Green }
@@ -64,16 +65,16 @@ export function SkillListItem({
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.OpenInBrowser
+            title="Open on skills.sh"
+            url={skillUrl}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.Open}
+          />
+          <Action.OpenInBrowser
             title="Open Repository"
             url={`https://github.com/${skill.source}`}
             icon={Icon.Globe}
             shortcut={Keyboard.Shortcut.Common.OpenWith}
-          />
-          <Action.OpenInBrowser
-            title="Open Skills"
-            url={`${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`}
-            icon={Icon.Link}
-            shortcut={Keyboard.Shortcut.Common.Open}
           />
         </ActionPanel>
       }

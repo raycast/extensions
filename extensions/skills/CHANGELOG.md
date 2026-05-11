@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Standardize Open Actions] - {PR_MERGE_DATE}
+
+- Standardize **Open on skills.sh** and **Open Repository** actions across Search Skills and Manage Skills
+
 ## [Fix Support Directory Initialization] - 2026-05-11
 
 - Ensure the extension support directory exists before cached hooks run, preventing "Could not create extension support directory" errors on first launch
