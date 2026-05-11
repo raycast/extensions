@@ -38,7 +38,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
       setData((prev) => prev.map((c) => (c.id === chat.id ? { ...c, answer } : c)));
       setSelectedChatId(chat.id);
 
-      history.add(chat);
+      history.add({ ...chat, answer });
 
       toast.title = "Got your answer!";
       toast.style = Toast.Style.Success;
