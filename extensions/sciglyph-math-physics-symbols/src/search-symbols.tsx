@@ -62,7 +62,13 @@ export default function Command() {
 }
 
 function SymbolListItem({ symbol }: { symbol: SymbolEntry }) {
-  const keywords = [symbol.value, symbol.name, symbol.category, symbol.latex ?? "", ...symbol.aliases];
+  const keywords = [
+    symbol.value,
+    symbol.name,
+    symbol.category,
+    ...(symbol.latex ? [symbol.latex] : []),
+    ...symbol.aliases,
+  ];
   const unicodeCodePoints = getUnicodeCodePoints(symbol.value);
 
   return (
