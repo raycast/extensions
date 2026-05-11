@@ -1,5 +1,5 @@
 import TaskList from "./components/TaskList";
 
 export default function Command() {
-  return <TaskList type="todos" navigationTitle="Habitica To-Dos" />;
+  return <TaskList type="habits" navigationTitle="Habitica Habits" />;
 }
