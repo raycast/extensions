@@ -695,11 +695,12 @@ function WorkItemView({
 
   const [fileAttachments, setFileAttachments] = useState<ProcessedImage[]>([]);
   const [loadingFiles, setLoadingFiles] = useState(false);
+  const rawAttachmentsKey = (rawAttachments ?? []).map((a) => a.url).join("|");
   useEffect(() => {
     let cancelled = false;
-    setFileAttachments([]);
     const list = rawAttachments ?? [];
     if (list.length === 0) {
+      setFileAttachments((prev) => (prev.length === 0 ? prev : []));
       setLoadingFiles(false);
       return;
     }
@@ -721,7 +722,7 @@ function WorkItemView({
     return () => {
       cancelled = true;
     };
-  }, [rawAttachments]);
+  }, [rawAttachmentsKey]);
 
   const childList = children ?? [];
   const typeAcc = getTypeAccessory(current.workItemType);
