@@ -1,6 +1,13 @@
 // src/views/logs-detail.tsx
 import React from "react";
-import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import {
+  Detail,
+  ActionPanel,
+  Action,
+  Icon,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useEffect, useState } from "react";
 import { tasktick, CliError } from "../lib/tasktick";
 import type { ExecutionLog } from "../lib/types";
@@ -79,10 +86,24 @@ export function LogsDetail({ cliPath, taskId, taskName, format }: Props) {
               }
             />
           )}
-          <Action.OpenInBrowser
+          <Action
             title="Reveal Task in TaskTick"
-            url={`tasktick://reveal?id=${taskId}`}
             icon={Icon.Window}
+            onAction={async () => {
+              // Go through the CLI so behaviour matches tasks-list (URL
+              // schemes fail silently if the OS registration is missing;
+              // CLI errors surface as toasts).
+              try {
+                await tasktick.reveal(cliPath, taskId);
+              } catch (err) {
+                const msg = err instanceof CliError ? err.message : String(err);
+                await showToast({
+                  style: Toast.Style.Failure,
+                  title: "Reveal failed",
+                  message: msg,
+                });
+              }
+            }}
           />
         </ActionPanel>
       }
