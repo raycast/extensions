@@ -1,6 +1,6 @@
 # Sidecar Connect Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-11
 
 - Manage Sidecar: browse available devices, connect or disconnect, and manage favorites
 - Toggle Sidecar: connect or disconnect your preferred device
