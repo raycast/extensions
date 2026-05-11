@@ -1,6 +1,6 @@
 # com.matbrady.pantheon Changelog
 
-## [Latest Changes] - {PR_MERGE_DATE}
+## [Latest Changes] - 2026-05-11
 
 ### Added
 
