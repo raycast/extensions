@@ -154,7 +154,7 @@ export default function Command(props: LaunchProps) {
     >
       {isLoading ? null : (
         <>
-          {localCaffeinateStatus && <MenuBarExtra.Item title="Deactivate" onAction={handleDeactivate} />}
+          {localCaffeinateStatus && <MenuBarExtra.Item title="Decaffeinate" onAction={handleDeactivate} />}
           <MenuBarExtra.Section title="Caffeinate">
             <MenuBarExtra.Item
               title="Indefinitely"
