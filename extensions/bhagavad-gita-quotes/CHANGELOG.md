@@ -3,7 +3,7 @@ Copyright © 2026 Sam Analytic Solutions
 All rights reserved.
 -->
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-05-12
 
 - Added comparable scripture quote feature for verses, with user-selectable target scripture (Bible, Quran, Torah, or Dhammapada).
 - Added in-app AI accuracy disclaimer for comparable scripture results.
