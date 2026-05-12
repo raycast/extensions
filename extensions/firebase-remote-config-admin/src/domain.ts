@@ -64,11 +64,15 @@ export function parseRemoteConfigValue(
     case "float":
       return { raw, semanticType, parsed: Number.parseFloat(raw) };
     case "json":
-      return {
-        raw,
-        semanticType,
-        parsed: JSON.parse(raw) as unknown[] | Record<string, unknown>,
-      };
+      try {
+        return {
+          raw,
+          semanticType,
+          parsed: JSON.parse(raw) as unknown[] | Record<string, unknown>,
+        };
+      } catch {
+        return { raw, semanticType: "string", parsed: raw };
+      }
     default:
       return { raw, semanticType, parsed: raw };
   }

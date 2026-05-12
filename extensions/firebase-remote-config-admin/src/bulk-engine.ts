@@ -39,8 +39,6 @@ function normalizeTemplate(
       left.localeCompare(right),
     ),
   );
-  nextTemplate.conditions = sortConditions(nextTemplate.conditions ?? []);
-
   for (const parameter of Object.values(nextTemplate.parameters ?? {})) {
     if (parameter.conditionalValues) {
       parameter.conditionalValues = sortConditionalValues(
