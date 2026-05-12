@@ -146,7 +146,7 @@ class EventTap {
 
     private func formatModifiers(control: Bool, option: Bool, shift: Bool, command: Bool) -> String {
         if isHyper(control: control, option: option, shift: shift, command: command) {
-            return "✦"
+            return shift ? "✦⇧" : "✦"
         }
 
         var modifiers = ""

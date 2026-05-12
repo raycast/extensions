@@ -146,7 +146,7 @@ export async function startOverlay(config: {
 
   // Launch helper as a fully independent background process
   try {
-    const out = fs.openSync(LOG_FILE, "a");
+    const out = fs.openSync(LOG_FILE, "w");
     const child = spawn(
       helperPath,
       ["--config", CONFIG_FILE, "--pid", PID_FILE, "--log", LOG_FILE],
