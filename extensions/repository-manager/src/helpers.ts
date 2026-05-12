@@ -13,23 +13,7 @@ const execFileAsync = promisify(execFile)
 
 export type PrimaryAction = 'start-development' | 'open-in-editor' | 'open-in-terminal' | 'open-url' | 'open-git-remotes'
 
-interface Preferences {
-    projectsPath: string
-    primaryAction: PrimaryAction
-    maxScanningLevels: number
-    enableProjectsCaching: boolean
-    enableProjectsGrouping: boolean
-    showRecentlyOpenedInList: boolean
-    showGitInfoInList: boolean
-    editorApp?: Application
-    terminalApp?: Application
-    browserApp?: Application
-    localProjectUrlTemplate: string
-    resizeEditorWindowAfterLaunch: boolean
-    windowResizeMode: string
-}
-
-export const preferences = getPreferenceValues<Preferences>()
+export const preferences = getPreferenceValues<ExtensionPreferences>()
 
 const WINDOW_RESIZE_DELAY = 1200
 const DEFAULT_MAX_SCANNING_LEVELS = 3
@@ -123,15 +107,11 @@ async function directoryExists(dirPath: string): Promise<boolean> {
     }
 }
 
-const getDirectories = async (searchPath: string, depth = 0): Promise<ProjectList> => {
+const getDirectories = async (searchPath: string): Promise<ProjectList> => {
     const maxDepth = getNormalizedMaxScanningLevels()
     const resolvedSearchPath = resolveUserPath(searchPath)
     const projects: ProjectList = []
-    const queue = [{ dirPath: resolvedSearchPath, depth }]
-
-    if (depth > maxDepth) {
-        return []
-    }
+    const queue = [{ dirPath: resolvedSearchPath, depth: 0 }]
 
     const scanNextDirectory = async () => {
         while (queue.length > 0) {

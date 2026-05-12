@@ -21,7 +21,6 @@ const tokeiArgs = ['.', '--compact', '--exclude', 'node_modules', '--exclude', '
 
 export default function GitStatisticsDetail({ project }: GitStatisticsDetailProps) {
     const { push, pop } = useNavigation()
-    const [shouldLoadTokei, setShouldLoadTokei] = useState(true)
     const [tokeiAvailable, setTokeiAvailable] = useState<boolean | null>(null)
 
     const { isLoading: isLoadingCommits, data: totalCommits } = useExec('git', ['rev-list', '--all', '--count'], { cwd: project.fullPath })
@@ -34,7 +33,6 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
         error: tokeiCheckError,
         revalidate: revalidateTokeiCheck,
     } = useExec('which', ['tokei'], {
-        execute: shouldLoadTokei,
         env: {
             ...process.env,
             PATH: commandPath,
@@ -51,7 +49,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
     // Only run tokei if we confirmed it's available
     const { isLoading: isLoadingTokei, data: tokeiData } = useExec('tokei', tokeiArgs, {
         cwd: project.fullPath,
-        execute: shouldLoadTokei && tokeiAvailable === true,
+        execute: tokeiAvailable === true,
         timeout: 30000, // 30 second timeout
         env: {
             ...process.env,
@@ -67,23 +65,19 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
 
     // Set tokei as unavailable if the version check failed
     useEffect(() => {
-        if (shouldLoadTokei && tokeiCheckError && tokeiAvailable !== false) {
+        if (tokeiCheckError && tokeiAvailable !== false) {
             setTokeiAvailable(false)
         }
-    }, [shouldLoadTokei, tokeiCheckError, tokeiAvailable])
+    }, [tokeiCheckError, tokeiAvailable])
 
     // Handle tokei errors
     useEffect(() => {
-        if (!shouldLoadTokei) {
-            return
-        }
-
         if (tokeiAvailable === false) {
             showFailureToast('Code Statistics Error', { title: 'tokei command not found' })
         } else if (tokeiAvailable === true && !isLoadingTokei && (!tokeiData || tokeiData.trim().length === 0)) {
             showFailureToast('Code Statistics Error', { title: 'tokei command failed to generate statistics' })
         }
-    }, [shouldLoadTokei, tokeiAvailable, isLoadingTokei, tokeiData])
+    }, [tokeiAvailable, isLoadingTokei, tokeiData])
 
     const { isLoading: isLoadingCommitsByPerson, data: commitsByPerson } = useExec('git', ['shortlog', '-s', '-n', '--all'], {
         cwd: project.fullPath,
@@ -132,7 +126,6 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
     const isLoading = isLoadingCommits || isLoadingBranches || isLoadingTags || isLoadingCommitsByPerson
 
     const refreshCodeStatistics = () => {
-        setShouldLoadTokei(true)
         setTokeiAvailable(null)
         revalidateTokeiCheck()
     }
@@ -179,10 +172,6 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
     }
 
     const getTokeiSection = () => {
-        if (!shouldLoadTokei) {
-            return 'Code statistics are not loaded yet. Use the "Refresh Code Statistics" action to run tokei for this repository.'
-        }
-
         if (isCheckingTokei) {
             return 'Checking if tokei is available...'
         }
