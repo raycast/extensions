@@ -1,5 +1,5 @@
 {
-  "instructions": "You are an AI assistant that helps users discover and understand agent skills from the skills.sh marketplace.\n\n### Rules\n- **Search first**: Never guess or assume skill names. Always call `search-skills` before anything else.\n- **Read before describing**: If the user asks what a skill does or how it works, call `read-skill` after finding it via `search-skills`.\n- **Always show the install command**: Include the `installCommand` from search results whenever recommending a skill.\n- **Be concise**: Present the top 3–5 most relevant results unless the user asks for more.\n- **Installed skills**: If the user asks what skills they have or what is installed, call `list-installed-skills`.\n- **Install confirmation**: Always confirm with the user before calling `install-skill`. Never install without explicit approval.\n- **Agent selection**: Before installing, ask which agents the user wants to install for (e.g. Claude Code, Cursor). Pass the answer as `agents`. Only omit `agents` if the user explicitly says \"all\".",
+  "instructions": "You are an AI assistant that helps users discover and understand agent skills from the skills.sh marketplace.\n\n### Rules\n- **Search first**: Never guess or assume skill names. Always call `search-skills` before anything else.\n- **Read before describing**: If the user asks what a skill does or how it works, call `read-skill` after finding it via `search-skills`.\n- **Always show the install command**: Include the `installCommand` from search results whenever recommending a skill.\n- **Be concise**: Present the top 3–5 most relevant results unless the user asks for more.\n- **Installed skills**: If the user asks what skills they have or what is installed, call `list-installed-skills`.\n- **Install confirmation**: Always confirm with the user before calling `install-skill`. Never install without explicit approval.\n- **Agent selection**: Before installing or removing, ask which agents the user wants to target (e.g. Claude Code, Cursor). Pass the answer as `agents`. Only omit `agents` if the user explicitly says \"all\".\n- **Remove confirmation**: Always confirm with the user before calling `remove-skill`. Use `list-installed-skills` first if the user seems unsure of the exact skill name.",
   "evals": [
     {
       "input": "@skills what skills are available for GraphQL?",
@@ -163,6 +163,41 @@
         "install-skill": {
           "success": true,
           "installedSkill": "Apollo Client",
+          "agents": ["Claude Code"]
+        }
+      }
+    },
+    {
+      "input": "@skills remove apollo-client",
+      "expected": [
+        {
+          "callsTool": {
+            "name": "remove-skill",
+            "arguments": {
+              "skillName": "apollo-client",
+              "agents": "Claude Code"
+            }
+          }
+        },
+        {
+          "includes": "apollo-client"
+        }
+      ],
+      "mocks": {
+        "list-installed-skills": {
+          "skills": [
+            {
+              "name": "apollo-client",
+              "path": "~/.agents/skills/apollo-client",
+              "agents": ["Claude Code"],
+              "agentCount": 1,
+              "source": "apollographql/skills"
+            }
+          ]
+        },
+        "remove-skill": {
+          "success": true,
+          "removedSkill": "apollo-client",
           "agents": ["Claude Code"]
         }
       }

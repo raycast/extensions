@@ -58,6 +58,11 @@
       "name": "install-skill",
       "title": "Install Skill",
       "description": "Install a skill from the skills.sh marketplace. Only call after the user has confirmed."
+    },
+    {
+      "name": "remove-skill",
+      "title": "Remove Skill",
+      "description": "Remove an installed skill. Only call after the user has confirmed."
     }
   ],
   "preferences": [
