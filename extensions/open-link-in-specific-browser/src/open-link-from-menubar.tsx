@@ -7,10 +7,12 @@ import { useItemInput } from "./hooks/useItemInput";
 import { useBrowsers } from "./hooks/useBrowsers";
 import { truncate } from "./utils/common-utils";
 import { unsupportedBrowsers } from "./utils/constants";
+import { useHiddenBrowsers } from "./hooks/useHiddenBrowsers";
 
 export default function OpenLinkInSpecificBrowser() {
   const { data: itemInputRaw } = useItemInput();
   const { data: browsersRaw, isLoading } = useBrowsers();
+  const { hiddenBundleIds } = useHiddenBrowsers();
 
   const itemInput = useMemo(() => {
     if (!itemInputRaw) return new ItemInput();
@@ -19,8 +21,13 @@ export default function OpenLinkInSpecificBrowser() {
 
   const browsers = useMemo(() => {
     if (!browsersRaw) return [];
-    return browsersRaw.filter((browser) => browser.bundleId && unsupportedBrowsers.indexOf(browser.bundleId) === -1);
-  }, [browsersRaw]);
+    return browsersRaw.filter(
+      (browser) =>
+        browser.bundleId &&
+        unsupportedBrowsers.indexOf(browser.bundleId) === -1 &&
+        !hiddenBundleIds.includes(browser.bundleId),
+    );
+  }, [browsersRaw, hiddenBundleIds]);
 
   const { data: sortedBrowsers, visitItem } = useFrecencySorting(browsers, { key: (browsers) => browsers.path });
 
