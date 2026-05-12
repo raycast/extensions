@@ -146,6 +146,9 @@ export async function reverseGeocode(lat: number, lon: number, granularity: Loca
   try {
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&addressdetails=1`;
     const raw = await httpsGet(url);
+    // Rate limit: Nominatim requires max 1 req/sec. Sleep AFTER each real HTTP call,
+    // not on cache hits (handled by reverseGeocodeCached).
+    await new Promise((r) => setTimeout(r, 1100));
     const data = JSON.parse(raw) as {
       address?: {
         city?: string;
@@ -225,9 +228,6 @@ export async function scanFolder(
     }
 
     const location = await reverseGeocodeCached(gps.lat, gps.lon, granularity);
-
-    // Rate limit: Nominatim requires max 1 req/sec
-    await new Promise((r) => setTimeout(r, 1100));
 
     results.push({ fileName, lat: gps.lat, lon: gps.lon, location });
   }

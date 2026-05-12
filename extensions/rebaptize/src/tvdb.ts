@@ -1,10 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import https from "https";
 
-interface Preferences {
-  tvdbApiKey?: string;
-}
-
 export interface ShowInfo {
   id: number;
   name: string;

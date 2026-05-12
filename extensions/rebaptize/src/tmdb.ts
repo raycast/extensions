@@ -1,10 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import https from "https";
 
-interface Preferences {
-  tmdbApiKey?: string;
-}
-
 export interface ShowInfo {
   id: number;
   name: string;

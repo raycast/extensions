@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "rebaptize",
-  "title": "Rebaptize",
+  "title": "Rebaptize - Rename",
   "description": "Give your files a new name. Bulk rename, smart episode organizing, sort by date or GPS location",
   "icon": "icon.png",
   "author": "miguel_caetano_dias",
@@ -59,231 +59,198 @@
     {
       "name": "preset-tv-show",
       "title": "Rename as TV Show",
-      "subtitle": "Rebaptize",
       "description": "Rename files into TV show format (Show Name S01E01)",
       "mode": "view"
     },
     {
       "name": "preset-anime",
       "title": "Rename as Anime",
-      "subtitle": "Rebaptize",
       "description": "Rename files into anime fansub format ([Group] Name - 01 [Quality])",
       "mode": "view"
     },
     {
       "name": "preset-movie",
       "title": "Rename as Movie",
-      "subtitle": "Rebaptize",
       "description": "Rename files into movie format (Name Year Quality)",
       "mode": "view"
     },
     {
       "name": "preset-date-based",
       "title": "Rename by Date",
-      "subtitle": "Rebaptize",
       "description": "Rename files using their creation date",
       "mode": "view"
     },
     {
       "name": "preset-change-case",
       "title": "Change Filename Case",
-      "subtitle": "Rebaptize",
       "description": "Convert filenames to UPPERCASE, lowercase, Title Case, or Sentence case",
       "mode": "view"
     },
     {
       "name": "preset-swap-delimiter",
       "title": "Swap Filename Delimiter",
-      "subtitle": "Rebaptize",
       "description": "Replace dots, underscores, dashes, or any delimiter in filenames with another",
       "mode": "view"
     },
     {
       "name": "preset-auto-enumerate",
       "title": "Auto Enumerate Files",
-      "subtitle": "Rebaptize",
       "description": "Number files sequentially, optionally sorted by creation or modification date",
       "mode": "view"
     },
     {
       "name": "preset-change-extension",
       "title": "Change File Extension",
-      "subtitle": "Rebaptize",
       "description": "Bulk change file extensions (e.g. .jpeg to .jpg)",
       "mode": "view"
     },
     {
       "name": "instant-uppercase",
       "title": "Uppercase All Filenames",
-      "subtitle": "Rebaptize",
       "description": "Instantly convert all filenames in the current Finder folder to UPPERCASE",
       "mode": "no-view"
     },
     {
       "name": "instant-lowercase",
       "title": "Lowercase All Filenames",
-      "subtitle": "Rebaptize",
       "description": "Instantly convert all filenames in the current Finder folder to lowercase",
       "mode": "no-view"
     },
     {
       "name": "instant-titlecase",
       "title": "Title Case All Filenames",
-      "subtitle": "Rebaptize",
       "description": "Instantly capitalize the first letter of every word in filenames",
       "mode": "no-view"
     },
     {
       "name": "instant-sentencecase",
       "title": "Sentence Case All Filenames",
-      "subtitle": "Rebaptize",
       "description": "Instantly capitalize only the first letter of each filename",
       "mode": "no-view"
     },
     {
       "name": "instant-dots-to-spaces",
       "title": "Replace Dots with Spaces",
-      "subtitle": "Rebaptize",
       "description": "Instantly replace all dots in filenames with spaces",
       "mode": "no-view"
     },
     {
       "name": "instant-spaces-to-dots",
       "title": "Replace Spaces with Dots",
-      "subtitle": "Rebaptize",
       "description": "Instantly replace all spaces in filenames with dots",
       "mode": "no-view"
     },
     {
       "name": "instant-underscores-to-spaces",
       "title": "Replace Underscores with Spaces",
-      "subtitle": "Rebaptize",
       "description": "Instantly replace all underscores in filenames with spaces",
       "mode": "no-view"
     },
     {
       "name": "instant-spaces-to-underscores",
       "title": "Replace Spaces with Underscores",
-      "subtitle": "Rebaptize",
       "description": "Instantly replace all spaces in filenames with underscores",
       "mode": "no-view"
     },
     {
       "name": "instant-dashes-to-spaces",
       "title": "Replace Dashes with Spaces",
-      "subtitle": "Rebaptize",
       "description": "Instantly replace all dashes in filenames with spaces",
       "mode": "no-view"
     },
     {
       "name": "instant-spaces-to-dashes",
       "title": "Replace Spaces with Dashes",
-      "subtitle": "Rebaptize",
       "description": "Instantly replace all spaces in filenames with dashes",
       "mode": "no-view"
     },
     {
       "name": "instant-collapse-spaces",
       "title": "Collapse Multiple Spaces",
-      "subtitle": "Rebaptize",
       "description": "Instantly collapse double/triple/etc spaces into single spaces in filenames",
       "mode": "no-view"
     },
     {
       "name": "instant-enumerate-by-name",
       "title": "Enumerate Files by Name",
-      "subtitle": "Rebaptize",
       "description": "Instantly number files 001, 002, 003... sorted alphabetically by name",
       "mode": "no-view"
     },
     {
       "name": "instant-enumerate-by-date",
       "title": "Enumerate Files by Date Created",
-      "subtitle": "Rebaptize",
       "description": "Instantly number files 001, 002, 003... sorted by creation date (oldest first)",
       "mode": "no-view"
     },
     {
       "name": "instant-undo",
       "title": "Undo Last Rename",
-      "subtitle": "Rebaptize",
       "description": "Revert the last instant rename command (available for 5 minutes after execution)",
       "mode": "no-view"
     },
     {
       "name": "instant-remove-accents",
       "title": "Remove Accents from Filenames",
-      "subtitle": "Rebaptize",
       "description": "Remove diacritics and accents: café → cafe, über → uber",
       "mode": "no-view"
     },
     {
       "name": "instant-strip-digits",
       "title": "Strip Digits from Filenames",
-      "subtitle": "Rebaptize",
       "description": "Remove all digits from filenames",
       "mode": "no-view"
     },
     {
       "name": "instant-strip-special",
       "title": "Strip Special Characters",
-      "subtitle": "Rebaptize",
       "description": "Remove brackets, symbols, and special characters from filenames",
       "mode": "no-view"
     },
     {
       "name": "instant-trim",
       "title": "Trim Filenames",
-      "subtitle": "Rebaptize",
       "description": "Remove leading and trailing spaces, dashes, dots, and underscores from filenames",
       "mode": "no-view"
     },
     {
       "name": "instant-pad-numbers",
       "title": "Add Zero Padding to Numbers",
-      "subtitle": "Rebaptize",
       "description": "Pad numbers in filenames to 3 digits: file1 → file001",
       "mode": "no-view"
     },
     {
       "name": "instant-unpad-numbers",
       "title": "Remove Zero Padding from Numbers",
-      "subtitle": "Rebaptize",
       "description": "Remove leading zeros from numbers: file001 → file1",
       "mode": "no-view"
     },
     {
       "name": "instant-parent-folder",
       "title": "Prepend Parent Folder Name",
-      "subtitle": "Rebaptize",
       "description": "Add the parent folder name before each filename: NYC/img.jpg → NYC - img.jpg",
       "mode": "no-view"
     },
     {
       "name": "instant-swap-parts",
       "title": "Swap Filename Parts",
-      "subtitle": "Rebaptize",
       "description": "Swap two parts of a filename around \" - \" separator: Artist - Song → Song - Artist",
       "mode": "no-view"
     },
     {
       "name": "instant-transliterate",
       "title": "Transliterate to Latin",
-      "subtitle": "Rebaptize",
       "description": "Convert Cyrillic, accented, and non-Latin characters to ASCII equivalents",
       "mode": "no-view"
     },
     {
       "name": "exif-rename",
       "title": "Rename Photos by EXIF",
-      "subtitle": "Rebaptize",
       "description": "Rename photos using EXIF metadata: date taken, camera model, ISO, focal length",
       "mode": "view"
     },
     {
       "name": "rename-from-csv",
       "title": "Rename from CSV",
-      "subtitle": "Rebaptize",
       "description": "Rename files using a CSV mapping of old names to new names",
       "mode": "view"
     }
@@ -306,9 +273,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.11",
-    "@raycast/utils": "^2.2.3",
-    "exif-reader": "^2.0.3",
-    "node-fetch": "^2.7.0"
+    "exif-reader": "^2.0.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
