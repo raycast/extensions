@@ -147,11 +147,19 @@ function Command(props: LaunchProps) {
     if (b === "Today") return 1;
     if (a === "Tomorrow") return -1;
     if (b === "Tomorrow") return 1;
+    if (a === "Next Week") return -1;
+    if (b === "Next Week") return 1;
 
     // Compare month/year sections
     const dateA = new Date(a);
     const dateB = new Date(b);
-    return dateA.getTime() - dateB.getTime();
+    const timeA = dateA.getTime();
+    const timeB = dateB.getTime();
+
+    if (Number.isNaN(timeA) && Number.isNaN(timeB)) return a.localeCompare(b);
+    if (Number.isNaN(timeA)) return -1;
+    if (Number.isNaN(timeB)) return 1;
+    return timeA - timeB;
   });
 
   const formatEventTime = (event: calendar_v3.Schema$Event, section: string) => {
