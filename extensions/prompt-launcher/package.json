@@ -1,0 +1,177 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "prompt-launcher",
+  "title": "Prompt Launcher",
+  "description": "Find Markdown prompts from your folders and copy or open them quickly.",
+  "icon": "icon.png",
+  "author": "uchimanajet7",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "prompt",
+    "prompts",
+    "ai",
+    "markdown",
+    "clipboard",
+    "snippet"
+  ],
+  "commands": [
+    {
+      "name": "prompt-set-1",
+      "title": "Prompt Set 1",
+      "description": "Browse Markdown prompts from Prompt Set 1.",
+      "mode": "view"
+    },
+    {
+      "name": "prompt-set-2",
+      "title": "Prompt Set 2",
+      "description": "Browse Markdown prompts from Prompt Set 2.",
+      "mode": "view"
+    },
+    {
+      "name": "prompt-set-3",
+      "title": "Prompt Set 3",
+      "description": "Browse Markdown prompts from Prompt Set 3.",
+      "mode": "view"
+    },
+    {
+      "name": "all-prompt-sets",
+      "title": "All Prompt Sets",
+      "description": "Search Markdown prompts across all enabled prompt sets.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "folder1Enabled",
+      "title": "Prompt Set 1",
+      "label": "Enable Prompt Set 1",
+      "description": "Include Prompt Set 1 in its command and All Prompt Sets.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "folder1Directory",
+      "title": "Prompt Set 1 Folder",
+      "description": "Folder that Prompt Set 1 reads Markdown prompts from.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "folder1DisplayName",
+      "title": "Prompt Set 1 Name",
+      "description": "Display name for Prompt Set 1. The folder name is used when this is empty.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "folder2Enabled",
+      "title": "Prompt Set 2",
+      "label": "Enable Prompt Set 2",
+      "description": "Include Prompt Set 2 in its command and All Prompt Sets.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "folder2Directory",
+      "title": "Prompt Set 2 Folder",
+      "description": "Folder that Prompt Set 2 reads Markdown prompts from.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "folder2DisplayName",
+      "title": "Prompt Set 2 Name",
+      "description": "Display name for Prompt Set 2. The folder name is used when this is empty.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "folder3Enabled",
+      "title": "Prompt Set 3",
+      "label": "Enable Prompt Set 3",
+      "description": "Include Prompt Set 3 in its command and All Prompt Sets.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "folder3Directory",
+      "title": "Prompt Set 3 Folder",
+      "description": "Folder that Prompt Set 3 reads Markdown prompts from.",
+      "type": "directory",
+      "required": false
+    },
+    {
+      "name": "folder3DisplayName",
+      "title": "Prompt Set 3 Name",
+      "description": "Display name for Prompt Set 3. The folder name is used when this is empty.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "editor",
+      "title": "Editor",
+      "description": "Editor used to open Markdown prompt files.",
+      "type": "appPicker",
+      "required": false
+    },
+    {
+      "name": "previewLineCount",
+      "title": "Preview Line Count",
+      "description": "Number of leading lines to show in the preview.",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "previewMaxCharacters",
+      "title": "Preview Max Characters",
+      "description": "Maximum number of characters to show in the preview.",
+      "type": "textfield",
+      "required": false,
+      "default": "4000"
+    }
+  ],
+  "scripts": {
+    "check": "npm run check:type && npm run lint:local && npm run check:local",
+    "check:type": "tsc -p tsconfig.json --noEmit",
+    "check:lint": "eslint src/**",
+    "check:format": "prettier --check \"src/**/*.{ts,tsx}\" \"scripts/*.mjs\" \"README.md\" \"README.ja.md\" \"CHANGELOG.md\" \"docs/**/*.md\" \"package.json\" \"tsconfig.json\" \"eslint.config.js\" \".prettierrc\" \".github/dependabot.yml\" \".github/workflows/*.yml\" \".github/release-manifest.json\" \".github/release-changelog/*.md\"",
+    "check:local": "node scripts/local-verification.mjs",
+    "update:dependencies": "node scripts/update-dependencies.mjs",
+    "dev": "ray develop",
+    "demo:setup": "node scripts/demo-prompts.mjs setup",
+    "demo:clean": "node scripts/demo-prompts.mjs clean",
+    "sync:readme-media": "node scripts/sync-readme-media.mjs",
+    "icon:generate": "node scripts/generate-icon.mjs",
+    "build": "ray build -e dist",
+    "lint:local": "npm run check:lint && npm run check:format",
+    "lint": "ray lint",
+    "fix-lint": "eslint src/** --fix && prettier --write \"src/**/*.{ts,tsx}\" \"scripts/*.mjs\" \"README.md\" \"README.ja.md\" \"CHANGELOG.md\" \"docs/**/*.md\" \"package.json\" \"tsconfig.json\" \"eslint.config.js\" \".prettierrc\" \".github/dependabot.yml\" \".github/workflows/*.yml\" \".github/release-manifest.json\" \".github/release-changelog/*.md\"",
+    "migrate": "npx --yes @raycast/migration@latest .",
+    "publish": "npx @raycast/api@latest publish",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\" \"scripts/*.mjs\" \"README.md\" \"README.ja.md\" \"CHANGELOG.md\" \"docs/**/*.md\" \"package.json\" \"tsconfig.json\" \"eslint.config.js\" \".prettierrc\" \".github/dependabot.yml\" \".github/workflows/*.yml\" \".github/release-manifest.json\" \".github/release-changelog/*.md\""
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.16",
+    "react": "^19.2.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.14",
+    "esbuild": "^0.28.0",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  }
+}
