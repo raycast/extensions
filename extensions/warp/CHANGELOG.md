@@ -1,6 +1,6 @@
 # Warp Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-05-12
 
 - Added Windows platform support.
 - Directory search uses PowerShell on Windows (Spotlight on macOS).
