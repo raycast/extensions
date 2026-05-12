@@ -1,6 +1,6 @@
 # Open Link in Specific Browser Changelog
 
-## [Hide Specific Browsers] - {PR_MERGE_DATE}
+## [Hide Specific Browsers] - 2026-05-12
 
 - Add the ability to hide specific browsers from the list and the menu bar
 
