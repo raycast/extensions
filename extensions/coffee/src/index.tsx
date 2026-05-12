@@ -155,7 +155,7 @@ export default function Command(props: LaunchProps) {
       {isLoading ? null : (
         <>
           {localCaffeinateStatus && <MenuBarExtra.Item title="Deactivate" onAction={handleDeactivate} />}
-          <MenuBarExtra.Section title="Keep this Mac awake">
+          <MenuBarExtra.Section title="Caffeinate">
             <MenuBarExtra.Item
               title="Indefinitely"
               icon={indefinitelyActive ? Icon.Checkmark : undefined}
