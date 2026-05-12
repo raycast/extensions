@@ -19,6 +19,10 @@ const searchTool = fs.readFileSync(
   path.join(root, "src", "tools", "searchZenMuxDocs.ts"),
   "utf8",
 );
+const accountSource = fs.readFileSync(
+  path.join(root, "src", "zenmux.ts"),
+  "utf8",
+);
 const routingPath = path.join(root, "src", "zenmux-doc-routing.ts");
 
 const routing = fs.existsSync(routingPath)
@@ -57,7 +61,7 @@ const docContracts = [
       "https://zenmux.ai/api/vertex-ai",
       "sk-ss-v1",
       "sk-ai-v1",
-      "Management API Key",
+      "Platform API Key",
       "OpenAI Responses",
       "Anthropic Messages",
     ],
@@ -148,7 +152,7 @@ const docContracts = [
     title: "Platform API: Subscription Detail",
     requires: [
       "/api/v1/management/subscription/detail",
-      "ZENMUX_MANAGEMENT_API_KEY",
+      "ZENMUX_PLATFORM_API_KEY",
       "quota_5_hour",
       "quota_7_day",
       "quota_monthly",
@@ -160,7 +164,7 @@ const docContracts = [
     title: "Platform API: PAYG Balance",
     requires: [
       "/api/v1/management/payg/balance",
-      "ZENMUX_MANAGEMENT_API_KEY",
+      "ZENMUX_PLATFORM_API_KEY",
       "total_credits",
       "bonus_credits",
     ],
@@ -169,7 +173,7 @@ const docContracts = [
     title: "Platform API: Generation Detail",
     requires: [
       "/api/v1/management/generation",
-      "ZENMUX_MANAGEMENT_API_KEY",
+      "ZENMUX_PLATFORM_API_KEY",
       "3-5 minute",
     ],
   },
@@ -259,7 +263,7 @@ const aiChecks = [
   {
     name: "AI instructions distinguish model API keys from Platform API keys",
     passed: ai.includes(
-      "Never tell users to use a Platform/Management API Key for Cursor",
+      "Never tell users to use a Platform API Key for Cursor",
     ),
   },
   {
@@ -294,6 +298,25 @@ checks.push({
     "Platform API keys are only for account and usage management endpoints",
   ),
 });
+
+checks.push(
+  {
+    name: "Platform API key preference keeps stable stored key",
+    passed:
+      packageJson.preferences.some(
+        (preference) =>
+          preference.name === "managementApiKey" &&
+          preference.type === "password" &&
+          preference.required === true,
+      ) &&
+      accountSource.includes("managementApiKey: platformApiKey") &&
+      accountSource.includes("getPreferenceValues<Preferences>()"),
+  },
+  {
+    name: "Account fetching does not read Platform API keys from environment variables",
+    passed: !accountSource.includes("process.env"),
+  },
+);
 
 // ---------- routing manifest ----------
 

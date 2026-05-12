@@ -260,7 +260,7 @@ export const DOC_ROUTING_RULES: readonly DocRoutingRule[] = [
     paths: ["api/overview.md"],
   },
 
-  // --- Platform / Management API ---
+  // --- Platform API ---
   {
     triggers: ["platform api", "management api", "subscription detail"],
     paths: ["api/platform/subscription-detail.md"],

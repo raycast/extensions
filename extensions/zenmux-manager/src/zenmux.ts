@@ -62,8 +62,9 @@ export type AccountSnapshot = {
 };
 
 export async function fetchAccountSnapshot(): Promise<AccountSnapshot> {
-  const { managementApiKey } = getPreferenceValues<Preferences>();
-  const apiKey = managementApiKey?.trim();
+  const { managementApiKey: platformApiKey } =
+    getPreferenceValues<Preferences>();
+  const apiKey = platformApiKey?.trim();
 
   if (!apiKey) {
     throw new Error(

@@ -59,7 +59,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "protocol",
     ],
     summary:
-      "ZenMux supports four wire protocols. Pick one, point its base URL at ZenMux, and pass a ZenMux API key. There are two model API key formats (subscription `sk-ss-v1-`, PAYG `sk-ai-v1-`) plus a separate Management API Key for Platform APIs.",
+      "ZenMux supports four wire protocols. Pick one, point its base URL at ZenMux, and pass a ZenMux API key. There are two model API key formats (subscription `sk-ss-v1-`, PAYG `sk-ai-v1-`) plus a separate Platform API Key for Platform APIs.",
     url: "https://docs.zenmux.ai/guide/quickstart",
     facts: [
       "OpenAI Chat Completions base URL: `https://zenmux.ai/api/v1` (OpenAI SDK).",
@@ -68,7 +68,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "Google Gemini / Vertex AI base URL: `https://zenmux.ai/api/vertex-ai` (Google GenAI SDK with `vertexai=True`).",
       "Subscription API key format: `sk-ss-v1-...` (Builder plans, personal use).",
       "Pay As You Go API key format: `sk-ai-v1-...` (production, no rate limits).",
-      "Platform / Management API key is separate; create it at https://zenmux.ai/platform/management and use it only for `/api/v1/management/*` endpoints.",
+      "Platform API key is separate; create it at https://zenmux.ai/platform/management and use it only for `/api/v1/management/*` endpoints.",
       "Auth header for OpenAI/Vertex/Anthropic protocols: `Authorization: Bearer $ZENMUX_API_KEY` (Anthropic SDK uses `x-api-key` automatically).",
     ],
     snippet: {
@@ -77,7 +77,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
     },
     warnings: [
       "Do not call `https://zenmux.ai/v1` or `https://api.zenmux.ai/v1`; those are wrong. Use `https://zenmux.ai/api/v1`.",
-      "Do not use a Platform/Management API key for chat or model traffic; it only works on `/api/v1/management/*`.",
+      "Do not use a Platform API key for chat or model traffic; it only works on `/api/v1/management/*`.",
     ],
   },
   {
@@ -313,7 +313,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "Common ZenMux API errors map to standard HTTP status codes. 401/403 means auth or permission, 404 means model not found, 429 means rate limited, 5xx means upstream provider issue.",
     url: "https://docs.zenmux.ai/guide/advanced/error-codes",
     facts: [
-      "401 / 403: invalid or unauthorized API key. Confirm key prefix (`sk-ss-v1-`, `sk-ai-v1-`, or Management key) matches the endpoint.",
+      "401 / 403: invalid or unauthorized API key. Confirm key prefix (`sk-ss-v1-`, `sk-ai-v1-`, or Platform key) matches the endpoint.",
       "400 `invalid_params`: wrong request body shape (e.g. Responses-style body sent to Chat Completions).",
       "404: model slug is misspelled or temporarily offline; check https://zenmux.ai/models.",
       "429: rate limit hit on the upstream provider; consider provider routing or fallback.",
@@ -422,11 +422,11 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "account status",
     ],
     summary:
-      "Returns plan tier, account status, Flow rate (base + effective), and the three quota windows. Requires the Management API Key. Monthly quota exposes only the cap, not real-time usage.",
+      "Returns plan tier, account status, Flow rate (base + effective), and the three quota windows. Requires the Platform API Key. Monthly quota exposes only the cap, not real-time usage.",
     url: "https://docs.zenmux.ai/api/platform/subscription-detail",
     facts: [
       "Endpoint: `GET https://zenmux.ai/api/v1/management/subscription/detail`.",
-      "Auth header: `Authorization: Bearer $ZENMUX_MANAGEMENT_API_KEY` (Management API Key only).",
+      "Auth header: `Authorization: Bearer $ZENMUX_PLATFORM_API_KEY` (Platform API Key only).",
       "`data.plan.tier` enum: `free` | `pro` | `max` | `ultra`.",
       "`data.account_status` enum: `healthy` | `monitored` | `abusive` | `suspended` | `banned`.",
       "Two Flow rate fields: `data.base_usd_per_flow` (platform base) and `data.effective_usd_per_flow` (account-specific, may be higher if anomalies are detected).",
@@ -434,7 +434,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "`data.quota_monthly` is cap-only: `max_flows` and `max_value_usd` only.",
     ],
     warnings: [
-      "Do not use a regular subscription or PAYG API key here; account endpoints require a Management API Key.",
+      "Do not use a regular subscription or PAYG API key here; account endpoints require a Platform API Key.",
       "Do not invent a monthly usage percentage; the API does not return monthly usage values.",
     ],
   },
@@ -450,11 +450,11 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "wallet",
     ],
     summary:
-      "Returns the wallet balance for the Pay As You Go account. Requires the Management API Key.",
+      "Returns the wallet balance for the Pay As You Go account. Requires the Platform API Key.",
     url: "https://docs.zenmux.ai/api/platform/payg-balance",
     facts: [
       "Endpoint: `GET https://zenmux.ai/api/v1/management/payg/balance`.",
-      "Auth header: `Authorization: Bearer $ZENMUX_MANAGEMENT_API_KEY`.",
+      "Auth header: `Authorization: Bearer $ZENMUX_PLATFORM_API_KEY`.",
       "Response fields: `data.total_credits`, `data.top_up_credits`, `data.bonus_credits`, `data.currency`.",
     ],
   },
@@ -470,11 +470,11 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "request detail",
     ],
     summary:
-      "Look up token usage, latency, cost, finish reason, and provider for a single generation by ID. Requires the Management API Key. Billing fields appear after a 3-5 minute delay.",
+      "Look up token usage, latency, cost, finish reason, and provider for a single generation by ID. Requires the Platform API Key. Billing fields appear after a 3-5 minute delay.",
     url: "https://docs.zenmux.ai/api/platform/get-generation",
     facts: [
       "Endpoint: `GET https://zenmux.ai/api/v1/management/generation?id=<generation_id>`.",
-      "Auth header: `Authorization: Bearer $ZENMUX_MANAGEMENT_API_KEY`.",
+      "Auth header: `Authorization: Bearer $ZENMUX_PLATFORM_API_KEY`.",
       "Each chat/completion response includes a `generation_id`; pass that as the `id` query parameter.",
       "Billing fields (`usage`, `ratingResponses`) have a 3-5 minute delay after the original request.",
       "Subscription-plan keys (`sk-ss-v1-...`) get metering data only; cost/billing fields are not populated for them.",
@@ -516,7 +516,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
     ],
     warnings: [
       "Do not use the Anthropic endpoint here; Cursor's Custom Models flow is OpenAI-compatible only.",
-      "Do not use a Platform/Management API key; that key is account-only.",
+      "Do not use a Platform API key; that key is account-only.",
     ],
   },
   {
@@ -537,7 +537,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "not openai-compatible mode",
     ],
     summary:
-      "Claude Code uses ZenMux's Anthropic-compatible endpoint via three shell-profile environment variables. Use a model API key (Subscription `sk-ss-v1-...` or PAYG `sk-ai-v1-...`), never a Platform/Management API key. Verify with `/status` inside Claude Code.",
+      "Claude Code uses ZenMux's Anthropic-compatible endpoint via three shell-profile environment variables. Use a model API key (Subscription `sk-ss-v1-...` or PAYG `sk-ai-v1-...`), never a Platform API key. Verify with `/status` inside Claude Code.",
     url: "https://docs.zenmux.ai/best-practices/claude-code",
     facts: [
       'Required env: `ANTHROPIC_BASE_URL="https://zenmux.ai/api/anthropic"`.',
@@ -561,7 +561,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
     },
     warnings: [
       "Do not put Claude Code in OpenAI-compatible mode; use the Anthropic endpoint.",
-      "Do not use a Platform/Management API Key here; it is only for `/api/v1/management/*` endpoints and will fail Claude Code authentication.",
+      "Do not use a Platform API Key here; it is only for `/api/v1/management/*` endpoints and will fail Claude Code authentication.",
       "Do not use the `anthropic/claude-...` slug form for the default model env vars; that disables 1M context and `effort` because Claude Code matches against the alias names.",
     ],
   },
@@ -599,7 +599,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
     },
     warnings: [
       'Do not set `wire_api = "chat"`; Codex requires the Responses protocol on ZenMux.',
-      "Do not use a Platform/Management API key; account endpoints reject Codex traffic.",
+      "Do not use a Platform API key; account endpoints reject Codex traffic.",
     ],
   },
   {
