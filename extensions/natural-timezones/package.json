@@ -1,0 +1,70 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "natural-timezones",
+  "version": "1.0.0",
+  "title": "Natural Timezones",
+  "description": "Natural-language timezone lookup powered by the Time parser.",
+  "icon": "icon.png",
+  "author": "yurymol",
+  "categories": ["Productivity"],
+  "platforms": ["macOS", "Windows"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-time",
+      "title": "Search Natural Timezones",
+      "description": "Convert and compare timezones with natural language.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "localZone",
+          "title": "Local Timezone",
+          "description": "Optional override for the timezone used as 'you' in relative comparisons.",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Europe/Lisbon, nyc, UTC"
+        },
+        {
+          "name": "hourFormat",
+          "title": "Hour Format",
+          "description": "Controls how times are displayed in Raycast results.",
+          "type": "dropdown",
+          "required": false,
+          "default": "auto",
+          "data": [
+            {
+              "title": "Automatic",
+              "value": "auto"
+            },
+            {
+              "title": "12-hour",
+              "value": "12"
+            },
+            {
+              "title": "24-hour",
+              "value": "24"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish",
+    "smoke": "tsx scripts/smoke.ts",
+    "update-data": "TIME_APP_ROOT=../time node scripts/generate-data.mjs"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.16"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.15.17",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
