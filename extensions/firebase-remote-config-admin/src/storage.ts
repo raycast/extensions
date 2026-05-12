@@ -251,6 +251,12 @@ export async function resolveProjectsForTool(input?: {
   const groups = await getGroups();
 
   if (!input) return projects;
+  const hasScopeFilter =
+    Boolean(input.groupId) ||
+    Boolean(input.groupName?.trim()) ||
+    (input.projectIds?.length ?? 0) > 0 ||
+    (input.projectRefs?.length ?? 0) > 0;
+  if (!hasScopeFilter) return projects;
 
   const resolved = new Set<string>();
   if (input.groupId) {

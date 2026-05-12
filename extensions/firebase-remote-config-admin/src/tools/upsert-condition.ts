@@ -3,7 +3,7 @@ import {
   publishPreparedBulkOperation,
 } from "../bulk-engine";
 import { resolveProjectsForTool } from "../storage";
-import { parseProjectRefs } from "./input-helpers";
+import { hasProjectScopeFilter, parseProjectRefs } from "./input-helpers";
 import { formatPublishResults } from "./write-helpers";
 
 type Input = {
@@ -33,12 +33,16 @@ type Input = {
  * Create or update a Remote Config condition across selected Firebase projects. Requires user confirmation before publishing.
  */
 export default async function tool(input: Input): Promise<string> {
+  const projectRefs = parseProjectRefs(input.projectRefs);
   const projects = await resolveProjectsForTool({
     groupName: input.groupName,
-    projectRefs: parseProjectRefs(input.projectRefs),
+    projectRefs,
   });
 
   if (projects.length === 0) {
+    if (hasProjectScopeFilter({ groupName: input.groupName, projectRefs })) {
+      return "No projects matched the provided scope. Check the group name or project references and try again.";
+    }
     return "No enabled projects found. Add and enable Firebase projects in 'Manage Projects' first.";
   }
 
