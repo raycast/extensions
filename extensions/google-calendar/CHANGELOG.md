@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [1.4.3] - {PR_MERGE_DATE}
+## [1.4.3] - 2026-05-12
 
 - Fix Google OAuth authentication by using Raycast's built-in Google OAuth flow ([#26572](https://github.com/raycast/extensions/issues/26572))
 - Fix Google Meet link creation by generating unique conference request IDs ([#27788](https://github.com/raycast/extensions/issues/27788#issuecomment-4419054403))
