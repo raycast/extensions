@@ -84,7 +84,7 @@ function calculateStreak(
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
   const sevenDaysAgoStr = sevenDaysAgo.toLocaleDateString("sv");
   const totalLastWeek = allDays
-    .filter((d) => d.date >= sevenDaysAgoStr)
+    .filter((d) => d.date >= sevenDaysAgoStr && d.date <= today)
     .reduce((sum, d) => sum + d.contributionCount, 0);
 
   const yesterday = new Date();
@@ -97,11 +97,16 @@ function calculateStreak(
 
   if (hasCommitToday) {
     let streak = 0;
+    let skipped = 0;
     for (const day of allDays) {
+      if (day.date > today) {
+        skipped++;
+        continue;
+      }
       if (day.contributionCount > 0) streak++;
       else break;
     }
-    const capped = streak === allDays.length;
+    const capped = streak === allDays.length - skipped;
     return {
       hasCommitToday: true,
       streakAlive: true,
@@ -112,12 +117,16 @@ function calculateStreak(
     };
   } else if (hadCommitYesterday) {
     let streak = 0;
+    let skipped = 0;
     for (const day of allDays) {
-      if (day.date === today) continue;
+      if (day.date >= today) {
+        skipped++;
+        continue;
+      }
       if (day.contributionCount > 0) streak++;
       else break;
     }
-    const capped = streak === allDays.length - 1;
+    const capped = streak === allDays.length - skipped;
     return {
       hasCommitToday: false,
       streakAlive: true,
@@ -129,6 +138,7 @@ function calculateStreak(
   } else {
     let snowflakeDays = 0;
     for (const day of allDays) {
+      if (day.date > today) continue;
       if (day.contributionCount === 0) snowflakeDays++;
       else break;
     }
