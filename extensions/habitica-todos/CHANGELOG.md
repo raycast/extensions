@@ -1,6 +1,6 @@
 # Habitica Todos Changelog
 
-## [Add more commands and improve UI] - {PR_MERGE_DATE}
+## [Add more commands and improve UI] - 2026-05-12
 
 - Add "View Dailies" command
 - Add "View Habits" command
