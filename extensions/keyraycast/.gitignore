@@ -1,7 +1,6 @@
 .DS_Store
 raycast-env.d.ts
-# Produced by `npm run build` / `npm run build-helper` (not committed)
-assets/KeyraycastHelper
+# Produced by `npm run build` / `npm run build-helper`
 node_modules/
 dist/
 .build/

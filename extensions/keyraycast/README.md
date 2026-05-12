@@ -62,7 +62,7 @@ The Raycast extension launches a native Swift helper binary that runs independen
 
 The overlay runs in a separate long-lived Swift process (`KeyraycastHelper`) with its own `NSApplication` loop, so **`swift/keyraycast-helper/`** is a plain SPM executable. The directory layout (`swift/<target>/`) follows extensions like [color-picker](https://github.com/raycast/extensions/tree/HEAD/extensions/color-picker/swift), but we don't link `extensions-swift-tools`/`@raycast` macros — they're meant for short-lived Swift functions called via `swift:` imports, which would add a heavy `swift-syntax` build for no benefit here.
 
-`KeyraycastHelper` is **not** committed to git. Build it with:
+`KeyraycastHelper` is committed under `assets/` because Raycast packages runtime assets from that folder into the installed extension. Rebuild it after changing the Swift sources with:
 
 - `npm run build-helper` — fast, host arch only (good for `npm run dev`, runs automatically before it).
 - `npm run build-helper-universal` — universal `arm64 + x86_64`, used by `npm run build` for distribution.
