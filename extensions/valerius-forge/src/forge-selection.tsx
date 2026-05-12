@@ -13,15 +13,8 @@ import { streamForge } from "./llm";
 import { evaluateContent } from "./contentGate";
 import { META_SYSTEM_PROMPT } from "./metaPrompt";
 
-interface Preferences {
-  provider: string;
-  apiKey: string;
-  model?: string;
-  baseUrl?: string;
-}
-
 export default function ForgeSelectionCommand() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.ForgeSelection>();
   const [output, setOutput] = useState("");
   const [isForging, setIsForging] = useState(true);
   const [error, setError] = useState("");
@@ -103,7 +96,9 @@ export default function ForgeSelectionCommand() {
       }
       actions={
         <ActionPanel>
-          <Action title="Copy Result" onAction={() => Clipboard.copy(output)} />
+          {output ? (
+            <Action title="Copy Result" onAction={() => Clipboard.copy(output)} />
+          ) : null}
         </ActionPanel>
       }
     />
