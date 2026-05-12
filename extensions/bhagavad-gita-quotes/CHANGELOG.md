@@ -1,7 +1,8 @@
-<!--
-Copyright © 2026 Sam Analytic Solutions
-All rights reserved.
--->
+# Bhagvad Gita Quotes Changelog
+
+## [Fix] - {PR_MERGE_DATE}
+
+- Fix eslint config error
 
 ## [Update] - 2026-05-12
 
