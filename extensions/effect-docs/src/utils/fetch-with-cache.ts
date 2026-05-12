@@ -5,11 +5,7 @@ type CachedText = {
 	timestamp: number;
 };
 
-export async function fetchTextWithCache(
-	url: string,
-	cacheKey: string,
-	cacheTtl: number,
-): Promise<string> {
+export async function fetchTextWithCache(url: string, cacheKey: string, cacheTtl: number): Promise<string> {
 	const cachedJson = await LocalStorage.getItem<string>(cacheKey);
 	if (cachedJson) {
 		try {
@@ -26,20 +22,14 @@ export async function fetchTextWithCache(
 	return refreshCachedText(url, cacheKey);
 }
 
-async function refreshCachedText(
-	url: string,
-	cacheKey: string,
-): Promise<string> {
+async function refreshCachedText(url: string, cacheKey: string): Promise<string> {
 	const response = await fetch(url);
 	if (!response.ok) {
 		throw new Error(`Failed to fetch ${url}: ${response.status}`);
 	}
 
 	const data = await response.text();
-	await LocalStorage.setItem(
-		cacheKey,
-		JSON.stringify({ data, timestamp: Date.now() }),
-	);
+	await LocalStorage.setItem(cacheKey, JSON.stringify({ data, timestamp: Date.now() }));
 
 	return data;
 }

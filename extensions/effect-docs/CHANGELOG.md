@@ -1,6 +1,6 @@
 # Effect Docs Changelog
 
-## [1.0.0] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release
 - Search Effect guides and API reference from Raycast

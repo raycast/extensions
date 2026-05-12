@@ -25,10 +25,7 @@ export default async function tool(input: Input) {
 		}));
 	} catch (error: unknown) {
 		return {
-			error:
-				error instanceof Error
-					? error.message
-					: "Failed to search guides",
+			error: error instanceof Error ? error.message : "Failed to search guides",
 		};
 	}
 }

@@ -9,7 +9,7 @@ const CACHE_TTL = 3600000; // 1 hour
 
 export async function fetchApiIndex(): Promise<ApiItem[]> {
 	const data = await fetchTextWithCache(API_REF_URL, CACHE_KEY, CACHE_TTL);
-	return sortApiItems(parseApiRef(data));
+	return sortApiItems(parseApiRef(data, API_REF_URL));
 }
 
 function sortApiItems(items: ApiItem[]): ApiItem[] {
@@ -37,12 +37,7 @@ export function searchApiItems(items: ApiItem[], query: string): ApiItem[] {
 				score: scores.length > 0 ? Math.min(...scores) : undefined,
 			};
 		})
-		.filter(
-			(
-				result,
-			): result is { item: ApiItem; index: number; score: number } =>
-				result.score !== undefined,
-		)
+		.filter((result): result is { item: ApiItem; index: number; score: number } => result.score !== undefined)
 		.sort((a, b) => a.score - b.score || a.index - b.index)
 		.map(({ item }) => item);
 }

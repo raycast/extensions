@@ -22,16 +22,8 @@ export default function Command() {
 	const [guideLimit, setGuideLimit] = useState(GUIDE_PAGE_SIZE);
 	const [apiLimit, setApiLimit] = useState(API_PAGE_SIZE);
 
-	const {
-		items: guideItems,
-		isLoading: guideLoading,
-		error: guideError,
-	} = useGuideSearch();
-	const {
-		items: apiItems,
-		isLoading: apiLoading,
-		error: apiError,
-	} = useApiSearch();
+	const { items: guideItems, isLoading: guideLoading, error: guideError } = useGuideSearch();
+	const { items: apiItems, isLoading: apiLoading, error: apiError } = useApiSearch();
 
 	const isLoading = guideLoading || apiLoading;
 	const hasError = guideError || apiError;
@@ -44,14 +36,8 @@ export default function Command() {
 	const showApi = filter === "all" || filter === "api";
 	const query = searchText.trim();
 
-	const matchingGuideItems = useMemo(
-		() => searchGuideItems(guideItems, query),
-		[guideItems, query],
-	);
-	const matchingApiItems = useMemo(
-		() => searchApiItems(apiItems, query),
-		[apiItems, query],
-	);
+	const matchingGuideItems = useMemo(() => searchGuideItems(guideItems, query), [guideItems, query]);
+	const matchingApiItems = useMemo(() => searchApiItems(apiItems, query), [apiItems, query]);
 	const visibleGuideItems = matchingGuideItems.slice(0, guideLimit);
 	const visibleApiItems = matchingApiItems.slice(0, apiLimit);
 
@@ -60,13 +46,9 @@ export default function Command() {
 		setApiLimit(API_PAGE_SIZE);
 	}, [filter, query]);
 
-	const hasResults =
-		(showGuide && visibleGuideItems.length > 0) ||
-		(showApi && visibleApiItems.length > 0);
-	const hasMoreGuideResults =
-		showGuide && visibleGuideItems.length < matchingGuideItems.length;
-	const hasMoreApiResults =
-		showApi && visibleApiItems.length < matchingApiItems.length;
+	const hasResults = (showGuide && visibleGuideItems.length > 0) || (showApi && visibleApiItems.length > 0);
+	const hasMoreGuideResults = showGuide && visibleGuideItems.length < matchingGuideItems.length;
+	const hasMoreApiResults = showApi && visibleApiItems.length < matchingApiItems.length;
 	const hasMore = hasMoreGuideResults || hasMoreApiResults;
 
 	function loadMoreResults() {
@@ -87,35 +69,15 @@ export default function Command() {
 			}}
 			searchBarPlaceholder="Search Effect guides and API reference..."
 			searchBarAccessory={
-				<List.Dropdown
-					tooltip="Search scope"
-					value={filter}
-					onChange={(v) => setFilter(v as Filter)}
-				>
-					<List.Dropdown.Item
-						title="All"
-						value="all"
-						icon={Icon.AppWindowGrid3x3}
-					/>
-					<List.Dropdown.Item
-						title="Guide"
-						value="guide"
-						icon={Icon.Book}
-					/>
-					<List.Dropdown.Item
-						title="API Reference"
-						value="api"
-						icon={Icon.Code}
-					/>
+				<List.Dropdown tooltip="Search scope" value={filter} onChange={(v) => setFilter(v as Filter)}>
+					<List.Dropdown.Item title="All" value="all" icon={Icon.AppWindowGrid3x3} />
+					<List.Dropdown.Item title="Guide" value="guide" icon={Icon.Book} />
+					<List.Dropdown.Item title="API Reference" value="api" icon={Icon.Code} />
 				</List.Dropdown>
 			}
 		>
 			{hasError ? (
-				<List.EmptyView
-					icon={Icon.Warning}
-					title="Failed to load docs"
-					description={errorDescription}
-				/>
+				<List.EmptyView icon={Icon.Warning} title="Failed to load docs" description={errorDescription} />
 			) : !hasResults && !isLoading ? (
 				<List.EmptyView
 					icon={Icon.MagnifyingGlass}
@@ -125,24 +87,18 @@ export default function Command() {
 			) : (
 				<>
 					{showGuide && visibleGuideItems.length > 0 && (
-						<List.Section
-							title={`Guide (${visibleGuideItems.length} of ${matchingGuideItems.length})`}
-						>
+						<List.Section title={`Guide (${visibleGuideItems.length} of ${matchingGuideItems.length})`}>
 							{visibleGuideItems.map((item) => (
 								<List.Item
 									key={item.url}
 									title={item.title}
 									subtitle={item.description}
-									keywords={
-										item.section ? [item.section] : []
-									}
+									keywords={item.section ? [item.section] : []}
 									icon={Icon.Book}
 									actions={
 										<ActionPanel>
 											<ActionPanel.Section>
-												<Action.OpenInBrowser
-													url={item.url}
-												/>
+												<Action.OpenInBrowser url={item.url} />
 												<Action.Push
 													title="Explain with AI"
 													icon={Icon.Stars}
@@ -153,27 +109,19 @@ export default function Command() {
 														/>
 													}
 													shortcut={{
-														modifiers: [
-															"cmd",
-															"shift",
-														],
+														modifiers: ["cmd", "shift"],
 														key: "e",
 													}}
 												/>
 											</ActionPanel.Section>
 											<ActionPanel.Section>
-												<Action.CopyToClipboard
-													title="Copy URL"
-													content={item.url}
-												/>
+												<Action.CopyToClipboard title="Copy URL" content={item.url} />
 											</ActionPanel.Section>
 											<ActionPanel.Section>
 												<Action
 													title="Show All Results"
 													icon={Icon.AppWindowGrid3x3}
-													onAction={() =>
-														setFilter("all")
-													}
+													onAction={() => setFilter("all")}
 													shortcut={{
 														modifiers: ["cmd"],
 														key: "1",
@@ -182,9 +130,7 @@ export default function Command() {
 												<Action
 													title="Show Guides"
 													icon={Icon.Book}
-													onAction={() =>
-														setFilter("guide")
-													}
+													onAction={() => setFilter("guide")}
 													shortcut={{
 														modifiers: ["cmd"],
 														key: "2",
@@ -193,9 +139,7 @@ export default function Command() {
 												<Action
 													title="Show API Reference"
 													icon={Icon.Code}
-													onAction={() =>
-														setFilter("api")
-													}
+													onAction={() => setFilter("api")}
 													shortcut={{
 														modifiers: ["cmd"],
 														key: "3",
@@ -210,25 +154,18 @@ export default function Command() {
 					)}
 
 					{showApi && visibleApiItems.length > 0 && (
-						<List.Section
-							title={`API Reference (${visibleApiItems.length} of ${matchingApiItems.length})`}
-						>
+						<List.Section title={`API Reference (${visibleApiItems.length} of ${matchingApiItems.length})`}>
 							{visibleApiItems.map((item) => (
 								<List.Item
 									key={`${item.module}.${item.name}`}
 									title={item.name}
 									subtitle={item.module}
-									keywords={[
-										`${item.module}.${item.name}`,
-										item.module,
-									]}
+									keywords={[`${item.module}.${item.name}`, item.module]}
 									icon={Icon.Code}
 									actions={
 										<ActionPanel>
 											<ActionPanel.Section>
-												<Action.OpenInBrowser
-													url={item.url}
-												/>
+												<Action.OpenInBrowser url={item.url} />
 												<Action.Push
 													title="Explain with AI"
 													icon={Icon.Stars}
@@ -239,10 +176,7 @@ export default function Command() {
 														/>
 													}
 													shortcut={{
-														modifiers: [
-															"cmd",
-															"shift",
-														],
+														modifiers: ["cmd", "shift"],
 														key: "e",
 													}}
 												/>
@@ -250,26 +184,19 @@ export default function Command() {
 											<ActionPanel.Section>
 												<Action.CopyToClipboard
 													title="Copy Module Import"
-													content={getModuleImportStatement(
-														item.module,
-													)}
+													content={getModuleImportStatement(item.module)}
 													shortcut={{
 														modifiers: ["cmd"],
 														key: "i",
 													}}
 												/>
-												<Action.CopyToClipboard
-													title="Copy URL"
-													content={item.url}
-												/>
+												<Action.CopyToClipboard title="Copy URL" content={item.url} />
 											</ActionPanel.Section>
 											<ActionPanel.Section>
 												<Action
 													title="Show All Results"
 													icon={Icon.AppWindowGrid3x3}
-													onAction={() =>
-														setFilter("all")
-													}
+													onAction={() => setFilter("all")}
 													shortcut={{
 														modifiers: ["cmd"],
 														key: "1",
@@ -278,9 +205,7 @@ export default function Command() {
 												<Action
 													title="Show Guides"
 													icon={Icon.Book}
-													onAction={() =>
-														setFilter("guide")
-													}
+													onAction={() => setFilter("guide")}
 													shortcut={{
 														modifiers: ["cmd"],
 														key: "2",
@@ -289,9 +214,7 @@ export default function Command() {
 												<Action
 													title="Show API Reference"
 													icon={Icon.Code}
-													onAction={() =>
-														setFilter("api")
-													}
+													onAction={() => setFilter("api")}
 													shortcut={{
 														modifiers: ["cmd"],
 														key: "3",

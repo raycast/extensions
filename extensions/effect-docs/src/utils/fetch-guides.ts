@@ -20,12 +20,7 @@ export function searchGuideItems(items: DocItem[], query: string): DocItem[] {
 			index,
 			score: scoreSearch(item.title, query),
 		}))
-		.filter(
-			(
-				result,
-			): result is { item: DocItem; index: number; score: number } =>
-				result.score !== undefined,
-		)
+		.filter((result): result is { item: DocItem; index: number; score: number } => result.score !== undefined)
 		.sort((a, b) => a.score - b.score || a.index - b.index)
 		.map(({ item }) => item);
 }

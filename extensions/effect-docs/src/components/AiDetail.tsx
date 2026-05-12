@@ -23,20 +23,9 @@ Sorry, the AI assistant requires **Raycast Pro**.
 You can upgrade your Raycast plan to get access to AI features, or ask your question in the [Effect Discord](${DISCORD_URL}).`}
 				actions={
 					<ActionPanel>
-						{onAskAnother && (
-							<Action
-								title="Ask Another Question"
-								onAction={onAskAnother}
-							/>
-						)}
-						<Action.OpenInBrowser
-							title="Open Effect Discord"
-							url={DISCORD_URL}
-						/>
-						<Action.CopyToClipboard
-							title="Copy Discord URL"
-							content={DISCORD_URL}
-						/>
+						{onAskAnother && <Action title="Ask Another Question" onAction={onAskAnother} />}
+						<Action.OpenInBrowser title="Open Effect Discord" url={DISCORD_URL} />
+						<Action.CopyToClipboard title="Copy Discord URL" content={DISCORD_URL} />
 					</ActionPanel>
 				}
 			/>
@@ -55,27 +44,15 @@ You can upgrade your Raycast plan to get access to AI features, or ask your ques
 				markdown={`# Effect AI Assistant\n\nFailed to generate a response.\n\n**Error:** ${error.message}`}
 				actions={
 					<ActionPanel>
-						{onAskAnother && (
-							<Action
-								title="Ask Another Question"
-								onAction={onAskAnother}
-							/>
-						)}
-						<Action.CopyToClipboard
-							title="Copy Error"
-							content={error.message}
-						/>
+						{onAskAnother && <Action title="Ask Another Question" onAction={onAskAnother} />}
+						<Action.CopyToClipboard title="Copy Error" content={error.message} />
 					</ActionPanel>
 				}
 			/>
 		);
 	}
 
-	const markdown = data
-		? data
-		: isLoading
-			? "Thinking..."
-			: "No response returned.";
+	const markdown = data ? data : isLoading ? "Thinking..." : "No response returned.";
 
 	return (
 		<Detail
@@ -86,18 +63,12 @@ You can upgrade your Raycast plan to get access to AI features, or ask your ques
 				<ActionPanel>
 					{onAskAnother && (
 						<ActionPanel.Section>
-							<Action
-								title="Ask Another Question"
-								onAction={onAskAnother}
-							/>
+							<Action title="Ask Another Question" onAction={onAskAnother} />
 						</ActionPanel.Section>
 					)}
 					{data && (
 						<ActionPanel.Section>
-							<Action.CopyToClipboard
-								title="Copy Response"
-								content={data}
-							/>
+							<Action.CopyToClipboard title="Copy Response" content={data} />
 						</ActionPanel.Section>
 					)}
 				</ActionPanel>

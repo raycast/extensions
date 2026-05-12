@@ -23,10 +23,7 @@ export default function Command() {
 			<Form
 				actions={
 					<ActionPanel>
-						<Action.SubmitForm
-							title="Ask AI"
-							onSubmit={handleSubmit}
-						/>
+						<Action.SubmitForm title="Ask AI" onSubmit={handleSubmit} />
 					</ActionPanel>
 				}
 			>
@@ -48,11 +45,5 @@ If you are uncertain about an API or behavior, say so and suggest checking the o
 
 Question: ${question}`;
 
-	return (
-		<AiDetail
-			prompt={prompt}
-			title={question}
-			onAskAnother={() => setQuestion(null)}
-		/>
-	);
+	return <AiDetail prompt={prompt} title={question} onAskAnother={() => setQuestion(null)} />;
 }
