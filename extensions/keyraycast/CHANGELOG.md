@@ -1,6 +1,6 @@
 # Keystroke Visualizer Extension Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-05-12
 
 - Fixed helper startup failures after installing the extension ([#27817](https://github.com/raycast/extensions/issues/27817)).
 - Fixed cases where toggling the overlay off could leave the helper process running.
