@@ -11,6 +11,7 @@ import type {
   RemoteConfigCondition,
   RemoteConfigParameter,
   RemoteConfigTemplate,
+  RemoteConfigValue,
 } from "./types";
 
 function sortConditions(
@@ -22,8 +23,8 @@ function sortConditions(
 }
 
 function sortConditionalValues(
-  values: Record<string, { value: string; useInAppDefault?: boolean }>,
-): Record<string, { value: string; useInAppDefault?: boolean }> {
+  values: Record<string, RemoteConfigValue>,
+): Record<string, RemoteConfigValue> {
   return Object.fromEntries(
     Object.entries(values).sort(([left], [right]) => left.localeCompare(right)),
   );

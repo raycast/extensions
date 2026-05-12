@@ -168,6 +168,22 @@ function usesCondition(operationType: OperationType): boolean {
   ].includes(operationType);
 }
 
+function usesConditionCrudName(operationType: OperationType): boolean {
+  return ["upsert-condition", "delete-condition"].includes(operationType);
+}
+
+function usesRawValue(operationType: OperationType): boolean {
+  return ["upsert-parameter", "set-conditional-value"].includes(operationType);
+}
+
+function usesDescription(operationType: OperationType): boolean {
+  return ["upsert-parameter", "set-conditional-value"].includes(operationType);
+}
+
+function usesCloneSource(operationType: OperationType): boolean {
+  return operationType === "clone-parameter";
+}
+
 export function BulkOperationForm({
   availableProjects,
   groups,
@@ -295,76 +311,96 @@ export function BulkOperationForm({
         <Form.Dropdown.Item value="delete-condition" title="Delete Condition" />
       </Form.Dropdown>
 
-      <Form.TextField
-        id="key"
-        title="Parameter Key"
-        defaultValue={initial?.key}
-        placeholder="feature_flag_key"
-      />
-      <Form.TextField
-        id="sourceKey"
-        title="Source Key"
-        defaultValue={initial?.sourceKey}
-        placeholder="legacy_flag"
-      />
-      <Form.TextField
-        id="targetKey"
-        title="Target Key"
-        defaultValue={initial?.targetKey}
-        placeholder="new_flag"
-      />
-      <Form.TextField
-        id="conditionName"
-        title="Condition Name"
-        defaultValue={initial?.conditionName}
-        placeholder="iOS"
-      />
-      <Form.TextField
-        id="name"
-        title="Condition Name (CRUD)"
-        defaultValue={initial?.name}
-        placeholder="Android Beta"
-      />
-      <Form.Dropdown
-        id="firebaseValueType"
-        title="Firebase Value Type"
-        defaultValue={initial?.firebaseValueType ?? "STRING"}
-      >
-        <Form.Dropdown.Item value="STRING" title="STRING" />
-        <Form.Dropdown.Item value="BOOLEAN" title="BOOLEAN" />
-        <Form.Dropdown.Item value="NUMBER" title="NUMBER" />
-        <Form.Dropdown.Item value="JSON" title="JSON" />
-      </Form.Dropdown>
-      <Form.TextArea
-        id="rawValue"
-        title="Raw Value"
-        defaultValue={initial?.rawValue}
-        placeholder='true | 42 | {"foo":"bar"}'
-      />
-      <Form.TextField
-        id="description"
-        title="Description"
-        defaultValue={initial?.description}
-        placeholder="Optional parameter description"
-      />
-      <Form.TextArea
-        id="expression"
-        title="Condition Expression"
-        defaultValue={initial?.expression}
-        placeholder="app.id == '...'"
-      />
-      <Form.TextField
-        id="tagColor"
-        title="Condition Tag Color"
-        defaultValue={initial?.tagColor}
-        placeholder="BLUE"
-      />
-      <Form.Checkbox
-        id="deleteSource"
-        title="Delete Source After Clone"
-        label="Delete source parameter after clone"
-        defaultValue={false}
-      />
+      {usesParameter(operationType) && !usesCloneSource(operationType) ? (
+        <Form.TextField
+          id="key"
+          title="Parameter Key"
+          defaultValue={initial?.key}
+          placeholder="feature_flag_key"
+        />
+      ) : null}
+      {usesCloneSource(operationType) ? (
+        <>
+          <Form.TextField
+            id="sourceKey"
+            title="Source Key"
+            defaultValue={initial?.sourceKey}
+            placeholder="legacy_flag"
+          />
+          <Form.TextField
+            id="targetKey"
+            title="Target Key"
+            defaultValue={initial?.targetKey}
+            placeholder="new_flag"
+          />
+        </>
+      ) : null}
+      {usesCondition(operationType) ? (
+        <Form.TextField
+          id={usesConditionCrudName(operationType) ? "name" : "conditionName"}
+          title="Condition Name"
+          defaultValue={
+            usesConditionCrudName(operationType)
+              ? initial?.name
+              : initial?.conditionName
+          }
+          placeholder={
+            usesConditionCrudName(operationType) ? "Android Beta" : "iOS"
+          }
+        />
+      ) : null}
+      {usesRawValue(operationType) ? (
+        <>
+          <Form.Dropdown
+            id="firebaseValueType"
+            title="Firebase Value Type"
+            defaultValue={initial?.firebaseValueType ?? "STRING"}
+          >
+            <Form.Dropdown.Item value="STRING" title="STRING" />
+            <Form.Dropdown.Item value="BOOLEAN" title="BOOLEAN" />
+            <Form.Dropdown.Item value="NUMBER" title="NUMBER" />
+            <Form.Dropdown.Item value="JSON" title="JSON" />
+          </Form.Dropdown>
+          <Form.TextArea
+            id="rawValue"
+            title="Raw Value"
+            defaultValue={initial?.rawValue}
+            placeholder='true | 42 | {"foo":"bar"}'
+          />
+        </>
+      ) : null}
+      {usesDescription(operationType) ? (
+        <Form.TextField
+          id="description"
+          title="Description"
+          defaultValue={initial?.description}
+          placeholder="Optional parameter description"
+        />
+      ) : null}
+      {operationType === "upsert-condition" ? (
+        <>
+          <Form.TextArea
+            id="expression"
+            title="Condition Expression"
+            defaultValue={initial?.expression}
+            placeholder="app.id == '...'"
+          />
+          <Form.TextField
+            id="tagColor"
+            title="Condition Tag Color"
+            defaultValue={initial?.tagColor}
+            placeholder="BLUE"
+          />
+        </>
+      ) : null}
+      {usesCloneSource(operationType) ? (
+        <Form.Checkbox
+          id="deleteSource"
+          title="Delete Source After Clone"
+          label="Delete source parameter after clone"
+          defaultValue={false}
+        />
+      ) : null}
       <Form.Description
         text={[
           usesParameter(operationType)
@@ -453,7 +489,7 @@ export function OperationPreview({
                       message: `This will publish changes to ${readyCount} project(s).`,
                       primaryAction: {
                         title: "Publish",
-                        style: Alert.ActionStyle.Default,
+                        style: Alert.ActionStyle.Destructive,
                       },
                     });
                     if (!confirmed) return;
@@ -517,7 +553,6 @@ export function OperationPreview({
               markdown={buildPreparedOperationMarkdown(prepared)}
             />
           }
-          actions={<ActionPanel />}
         />
       </List.Section>
     </List>

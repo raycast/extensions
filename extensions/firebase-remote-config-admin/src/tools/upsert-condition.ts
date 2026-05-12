@@ -3,6 +3,7 @@ import {
   publishPreparedBulkOperation,
 } from "../bulk-engine";
 import { resolveProjectsForTool } from "../storage";
+import { parseProjectRefs } from "./input-helpers";
 import { formatPublishResults } from "./write-helpers";
 
 type Input = {
@@ -23,9 +24,9 @@ type Input = {
    */
   groupName?: string;
   /**
-   * Optional list of project references. Each item can be a local id, Firebase projectId, or display name.
+   * Optional comma-separated project references. Each item can be a local id, Firebase projectId, or display name.
    */
-  projectRefs?: string[];
+  projectRefs?: string;
 };
 
 /**
@@ -34,7 +35,7 @@ type Input = {
 export default async function tool(input: Input): Promise<string> {
   const projects = await resolveProjectsForTool({
     groupName: input.groupName,
-    projectRefs: input.projectRefs,
+    projectRefs: parseProjectRefs(input.projectRefs),
   });
 
   if (projects.length === 0) {

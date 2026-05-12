@@ -1,4 +1,4 @@
-import { createSign, randomUUID } from "node:crypto";
+import { createSign } from "node:crypto";
 import { readFile, rm } from "node:fs/promises";
 import { homedir } from "node:os";
 import path from "node:path";
@@ -301,18 +301,4 @@ export async function getGoogleAccessToken(): Promise<string> {
         : "Could not obtain an access token via Application Default Credentials. Run `gcloud auth application-default login` and try again.",
     );
   }
-}
-
-export function createImportedProject(
-  projectId: string,
-  displayName?: string,
-): ProjectConfig {
-  return {
-    id: randomUUID(),
-    projectId,
-    displayName: displayName?.trim() || projectId,
-    tags: [],
-    enabled: true,
-    source: "google-import",
-  };
 }

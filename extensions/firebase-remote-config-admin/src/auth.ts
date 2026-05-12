@@ -1,6 +1,5 @@
 import {
   getAdcAccessToken,
-  getGoogleAccessToken,
   getServiceAccountAccessToken,
   hasAdcCredentials,
 } from "./google-auth";
@@ -30,21 +29,9 @@ export async function getAccessTokenContext(
     };
   }
 
-  try {
-    return {
-      accessToken: await getGoogleAccessToken(),
-      authMethod: "oauth",
-    };
-  } catch (oauthError) {
-    try {
-      return {
-        accessToken: await getServiceAccountAccessToken(project),
-        authMethod: "service-account",
-      };
-    } catch {
-      throw oauthError;
-    }
-  }
+  throw new Error(
+    "No Firebase credentials found. Configure a service account JSON path or run `gcloud auth application-default login`.",
+  );
 }
 
 export async function getAccessToken(project: ProjectConfig): Promise<string> {

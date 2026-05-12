@@ -43,13 +43,13 @@ If all your projects share the same service account, set the **Shared Service Ac
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| **Browse Remote Config** | Inspect parameters and conditions across multiple projects |
-| **Manage Projects** | Add, edit, delete, and import Firebase projects. Organize projects into groups. Test connections. |
-| **Bulk Operations** | Preview and publish parameter or condition changes across projects |
-| **Versions & Rollback** | List published versions and roll back a project template |
-| **Export Defaults** | Download Remote Config defaults in JSON, PLIST, or XML |
+| Command                  | Description                                                                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| **Browse Remote Config** | Inspect parameters and conditions across multiple projects                                        |
+| **Manage Projects**      | Add, edit, delete, and import Firebase projects. Organize projects into groups. Test connections. |
+| **Bulk Operations**      | Preview and publish parameter or condition changes across projects                                |
+| **Versions & Rollback**  | List published versions and roll back a project template                                          |
+| **Export Defaults**      | Download Remote Config defaults in JSON, PLIST, or XML                                            |
 
 ![All Commands](media/commands.png)
 
@@ -62,6 +62,7 @@ If all your projects share the same service account, set the **Shared Service Ac
 This extension integrates with Raycast AI Chat via `@firebase-remote-config-admin`. You can ask questions in natural language:
 
 **Read operations:**
+
 - "List all configured projects"
 - "Which projects have the flag `checkout_v2` enabled?"
 - "Search for parameters containing `ocr`"
@@ -70,6 +71,7 @@ This extension integrates with Raycast AI Chat via `@firebase-remote-config-admi
 - "Does the condition `ios_users` exist in every project?"
 
 **Write operations (require confirmation):**
+
 - "Set `ocr_enabled` to `true` in all projects"
 - "Delete the parameter `legacy_checkout` from the shopping group"
 - "Create a condition `android_beta` with expression `device.os == 'android'`"
@@ -79,10 +81,10 @@ All write operations show a confirmation prompt before executing.
 
 ## Extension Preferences
 
-| Preference | Required | Description |
-|---|---|---|
-| **Shared Service Account JSON Path** | No | Fallback path to a Firebase service account JSON file, used by projects that don't have their own. |
-| **Request Timeout (ms)** | No | HTTP timeout for Firebase API requests. Defaults to 20000 (20 seconds). |
+| Preference                           | Required | Description                                                                                        |
+| ------------------------------------ | -------- | -------------------------------------------------------------------------------------------------- |
+| **Shared Service Account JSON Path** | No       | Fallback path to a Firebase service account JSON file, used by projects that don't have their own. |
+| **Request Timeout (ms)**             | No       | HTTP timeout for Firebase API requests. Defaults to 20000 (20 seconds).                            |
 
 ## How It Works
 

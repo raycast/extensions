@@ -1,6 +1,7 @@
 import { loadProjectSnapshots } from "../data";
 import { aggregateParameters, formatParsedValue } from "../domain";
 import { resolveProjectsForTool } from "../storage";
+import { parseProjectRefs } from "./input-helpers";
 
 type Input = {
   /**
@@ -12,9 +13,9 @@ type Input = {
    */
   groupName?: string;
   /**
-   * Optional list of project references. Each item can be a local id, Firebase projectId, or display name.
+   * Optional comma-separated project references. Each item can be a local id, Firebase projectId, or display name.
    */
-  projectRefs?: string[];
+  projectRefs?: string;
 };
 
 /**
@@ -23,7 +24,7 @@ type Input = {
 export default async function tool(input: Input): Promise<string> {
   const projects = await resolveProjectsForTool({
     groupName: input.groupName,
-    projectRefs: input.projectRefs,
+    projectRefs: parseProjectRefs(input.projectRefs),
   });
   const snapshots = await loadProjectSnapshots(projects);
   const row = aggregateParameters(snapshots).find(
