@@ -1,5 +1,10 @@
 # Brew Changelog
 
+## [Add Keyboard Shortcuts] - {PR_MERGE_DATE}
+
+- Added keyboard shortcuts to common Brew actions, including opening package pages, opening homepages, copying URLs, and running terminal commands.
+- Standardized shortcut usage with Raycast common shortcuts where appropriate.
+
 ## [Bug Fix & Launch Argument] - {PR_MERGE_DATE}
 
 - Added launch argument to Search command for pre-filling the search query before opening
