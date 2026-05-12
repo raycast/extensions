@@ -15,11 +15,19 @@ export async function fetchGuideIndex(): Promise<DocItem[]> {
 export function searchGuideItems(items: DocItem[], query: string): DocItem[] {
 	if (!query.trim()) return items;
 	return items
-		.map((item, index) => ({
-			item,
-			index,
-			score: scoreSearch(item.title, query),
-		}))
+		.map((item, index) => {
+			const scores = [
+				scoreSearch(item.title, query),
+				item.description ? scoreSearch(item.description, query) : undefined,
+				item.section ? scoreSearch(item.section, query) : undefined,
+			].filter((score): score is number => score !== undefined);
+
+			return {
+				item,
+				index,
+				score: scores.length > 0 ? Math.min(...scores) : undefined,
+			};
+		})
 		.filter((result): result is { item: DocItem; index: number; score: number } => result.score !== undefined)
 		.sort((a, b) => a.score - b.score || a.index - b.index)
 		.map(({ item }) => item);

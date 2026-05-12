@@ -1,15 +1,45 @@
+import { LocalStorage } from "@raycast/api";
 import type { ApiItem } from "../types";
-import { fetchTextWithCache } from "./fetch-with-cache";
 import { parseApiRef } from "./parse-api-ref";
 import { scoreSearch } from "./search";
 
 const API_REF_URL = "https://tim-smart.github.io/effect-io-ai/";
-const CACHE_KEY = "effect-api-ref-v2";
+const CACHE_KEY = "effect-api-index-v1";
 const CACHE_TTL = 3600000; // 1 hour
 
+type CachedApiItems = {
+	data: ApiItem[];
+	timestamp: number;
+};
+
 export async function fetchApiIndex(): Promise<ApiItem[]> {
-	const data = await fetchTextWithCache(API_REF_URL, CACHE_KEY, CACHE_TTL);
-	return sortApiItems(parseApiRef(data, API_REF_URL));
+	const cachedJson = await LocalStorage.getItem<string>(CACHE_KEY);
+	if (cachedJson) {
+		try {
+			const cached = JSON.parse(cachedJson) as CachedApiItems;
+			if (Date.now() - cached.timestamp < CACHE_TTL) return cached.data;
+
+			void refreshApiIndex().catch(() => undefined);
+			return cached.data;
+		} catch {
+			// Ignore malformed cache entries and refresh from the source.
+		}
+	}
+
+	return refreshApiIndex();
+}
+
+async function refreshApiIndex(): Promise<ApiItem[]> {
+	const response = await fetch(API_REF_URL);
+	if (!response.ok) {
+		throw new Error(`Failed to fetch ${API_REF_URL}: ${response.status}`);
+	}
+
+	const data = await response.text();
+	const items = sortApiItems(parseApiRef(data, API_REF_URL));
+	await LocalStorage.setItem(CACHE_KEY, JSON.stringify({ data: items, timestamp: Date.now() }));
+
+	return items;
 }
 
 function sortApiItems(items: ApiItem[]): ApiItem[] {
