@@ -5,6 +5,8 @@ type Input = {
   skillId: string;
 };
 
+const MAX_CHARS = 50_000;
+
 /** Fetch the full SKILL.md content for a specific skill. Use after search-skills to understand what a skill does. */
 export default async function tool(input: Input) {
   const { source, skillId } = input;
@@ -14,7 +16,11 @@ export default async function tool(input: Input) {
   ];
   for (const url of candidates) {
     const res = await fetch(url);
-    if (res.ok) return { content: await res.text() };
+    if (res.ok) {
+      const text = await res.text();
+      const truncated = text.length > MAX_CHARS;
+      return { content: truncated ? text.slice(0, MAX_CHARS) + "\n\n[...truncated]" : text };
+    }
   }
   throw new Error(`Could not fetch SKILL.md for ${source}@${skillId}. The skill may use a non-standard repo layout.`);
 }
