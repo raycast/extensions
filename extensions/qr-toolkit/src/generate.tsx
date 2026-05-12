@@ -235,11 +235,15 @@ export default function GenerateCommand() {
 
   // Pre-fill from clipboard text
   useEffect(() => {
-    Clipboard.readText().then((clipText) => {
-      if (clipText && clipText.trim()) {
-        setText(clipText.trim());
-      }
-    });
+    Clipboard.readText()
+      .then((clipText) => {
+        if (clipText && clipText.trim()) {
+          setText(clipText.trim());
+        }
+      })
+      .catch(() => {
+        // clipboard access denied
+      });
   }, []);
   const [darkColor, setDarkColor] = useState(DEFAULT_QR_OPTIONS.darkColor);
   const [lightColor, setLightColor] = useState(DEFAULT_QR_OPTIONS.lightColor);

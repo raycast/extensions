@@ -8,4 +8,3 @@
 - Generate QR codes from text or URL with real-time preview
 - Customizable error correction level, colors, and margin
 - Export as PNG (clipboard or desktop) or SVG
-- Bilingual support (English / Chinese)
