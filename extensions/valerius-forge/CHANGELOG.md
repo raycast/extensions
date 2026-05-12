@@ -1,6 +1,6 @@
 # Valerius Forge Changelog
 
-## [Initial Release] - 2026-05-11
+## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
 - **Forge Prompt** command — type a brief and forge a production-grade AI agent system prompt or full project spec, streamed token-by-token from your own API key
