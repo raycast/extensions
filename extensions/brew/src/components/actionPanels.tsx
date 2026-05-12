@@ -350,7 +350,7 @@ export function OutdatedActionPanel(props: {
         <Action.CopyToClipboard
           title="Copy Uninstall Command"
           content={brewUninstallCommand(outdated)}
-          shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          shortcut={{ modifiers: ["cmd", "shift", "opt"], key: "c" }}
         />
         <Action
           title={`Run Uninstall in ${terminalName}`}
