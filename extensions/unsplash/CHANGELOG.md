@@ -1,6 +1,6 @@
 # Unsplash Changelog
 
-## [Keyboard Shortcut Updates] - {PR_MERGE_DATE}
+## [Keyboard Shortcut Updates] - 2026-05-12
 
 - Added Raycast common keyboard shortcuts
 - Ignored `node_modules`
