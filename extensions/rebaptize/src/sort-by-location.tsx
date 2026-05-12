@@ -53,11 +53,22 @@ function PreviewGroups({
 
     try {
       await showToast({ style: Toast.Style.Animated, title: `${actionVerb.replace(/e$/, "")}ing files...` });
-      const { count, changes } = await organizeByLocation(folderPath, groupsToOrganize, action);
+      const { count, changes, error } = await organizeByLocation(folderPath, groupsToOrganize, action);
+
+      // Always save undo state for any completed moves, even if the run was partial.
       if (changes.length > 0) {
         await saveUndoState({ folderPath, changes, actionName: "Sort Photos by Location", timestamp: Date.now() });
       }
-      await showToast({ style: Toast.Style.Success, title: "Done!", message: `${count} files organized` });
+
+      if (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Partial: ${count}/${fileCount} processed`,
+          message: `${error.message}${changes.length > 0 ? '. Run "Undo Last Rename" to revert.' : ""}`,
+        });
+      } else {
+        await showToast({ style: Toast.Style.Success, title: "Done!", message: `${count} files organized` });
+      }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,

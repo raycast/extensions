@@ -59,10 +59,21 @@ export async function getFinderFiles(): Promise<{ folderPath: string; files: str
 /**
  * Run an instant rename: apply transform, execute immediately, save undo state.
  * No confirmation dialog, no UI — runs instantly and shows a HUD.
+ *
+ * Partial failure handling: renames are tracked incrementally. If a rename
+ * fails mid-batch (e.g. name conflict or permission error), undo state is still
+ * saved for the renames that completed, and the HUD tells the user how many
+ * succeeded and that they can revert via "Undo Last Rename".
  */
 export async function runInstantRename(transform: (fileName: string) => string, actionName: string): Promise<void> {
+  let folderPath: string | null = null;
+  let totalToRename = 0;
+  const completed: RenameResult[] = [];
+
   try {
-    const { folderPath, files } = await getFinderFiles();
+    const finderFiles = await getFinderFiles();
+    folderPath = finderFiles.folderPath;
+    const { files } = finderFiles;
 
     const results: RenameResult[] = files.map((f) => ({
       original: f,
@@ -70,27 +81,50 @@ export async function runInstantRename(transform: (fileName: string) => string, 
     }));
 
     const changed = results.filter((r) => r.original !== r.renamed);
+    totalToRename = changed.length;
 
     if (changed.length === 0) {
       await showHUD("No changes needed");
       return;
     }
 
-    // Execute renames
+    // Execute renames, tracking each completion so partial failures still record undo state
     for (const r of changed) {
       await fsRename(join(folderPath, r.original), join(folderPath, r.renamed));
+      completed.push(r);
     }
 
-    // Save undo state to disk
     await saveUndoState({
       folderPath,
-      changes: changed,
+      changes: completed,
       actionName,
       timestamp: Date.now(),
     });
 
-    await showHUD(`${actionName}: ${changed.length} files renamed — run "Undo Last Rename" to revert`);
+    await showHUD(`${actionName}: ${completed.length} files renamed — run "Undo Last Rename" to revert`);
   } catch (error) {
-    await showHUD(error instanceof Error ? error.message : String(error));
+    // If we already completed some renames before the failure, persist undo state for the
+    // partial work so the user can roll it back via "Undo Last Rename".
+    if (folderPath && completed.length > 0) {
+      try {
+        await saveUndoState({
+          folderPath,
+          changes: completed,
+          actionName,
+          timestamp: Date.now(),
+        });
+      } catch {
+        // best-effort: if saveUndoState also fails, fall through to the error HUD below
+      }
+    }
+
+    const errMsg = error instanceof Error ? error.message : String(error);
+    if (completed.length > 0) {
+      await showHUD(
+        `${actionName}: ${completed.length}/${totalToRename} renamed before error — ${errMsg}. Run "Undo Last Rename" to revert.`,
+      );
+    } else {
+      await showHUD(errMsg);
+    }
   }
 }

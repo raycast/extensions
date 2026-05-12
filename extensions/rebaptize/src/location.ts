@@ -255,34 +255,42 @@ export function groupByLocation(results: LocationResult[]): LocationGroup[] {
 
 /**
  * Organize files into location-named subfolders.
+ *
+ * Partial failure handling: completed moves/copies are tracked incrementally. If an
+ * operation fails mid-batch (e.g. permission error, disk full), the function returns
+ * the partial `changes` plus an `error` field rather than throwing. The caller can
+ * then save undo state for the work that did complete.
  */
 export async function organizeByLocation(
   folderPath: string,
   groups: LocationGroup[],
   action: FileAction,
-): Promise<{ count: number; changes: { original: string; renamed: string }[] }> {
+): Promise<{ count: number; changes: { original: string; renamed: string }[]; error?: Error }> {
   let count = 0;
   const changes: { original: string; renamed: string }[] = [];
 
-  for (const group of groups) {
-    const safeName = group.location.replace(/[/\\:*?"<>|]/g, "_").trim();
-    const targetDir = join(folderPath, safeName);
+  try {
+    for (const group of groups) {
+      const safeName = group.location.replace(/[/\\:*?"<>|]/g, "_").trim();
+      const targetDir = join(folderPath, safeName);
 
-    await mkdir(targetDir, { recursive: true });
+      await mkdir(targetDir, { recursive: true });
 
-    for (const fileName of group.files) {
-      const src = join(folderPath, fileName);
-      const dest = join(targetDir, fileName);
+      for (const fileName of group.files) {
+        const src = join(folderPath, fileName);
+        const dest = join(targetDir, fileName);
 
-      if (action === "copy") {
-        await copyFile(src, dest);
-      } else {
-        await fsRename(src, dest);
-        changes.push({ original: fileName, renamed: join(safeName, fileName) });
+        if (action === "copy") {
+          await copyFile(src, dest);
+        } else {
+          await fsRename(src, dest);
+          changes.push({ original: fileName, renamed: join(safeName, fileName) });
+        }
+        count++;
       }
-      count++;
     }
+    return { count, changes };
+  } catch (error) {
+    return { count, changes, error: error instanceof Error ? error : new Error(String(error)) };
   }
-
-  return { count, changes };
 }

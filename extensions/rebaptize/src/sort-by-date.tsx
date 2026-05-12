@@ -71,28 +71,35 @@ async function organizeByDate(
   groups: DateGroup[],
   granularity: DateGranularity,
   action: FileAction,
-): Promise<{ count: number; changes: { original: string; renamed: string }[] }> {
+): Promise<{ count: number; changes: { original: string; renamed: string }[]; error?: Error }> {
   let count = 0;
   const changes: { original: string; renamed: string }[] = [];
 
-  for (const group of groups) {
-    const safeName = group.label.replace(/[/\\:*?"<>|]/g, "_").trim();
-    const targetDir = join(folderPath, safeName);
-    await mkdir(targetDir, { recursive: true });
+  // Track completed moves/copies incrementally so a partial failure mid-batch
+  // (permission error, disk full, etc) can still report what was done — the caller
+  // saves undo state for the `changes` collected before the error.
+  try {
+    for (const group of groups) {
+      const safeName = group.label.replace(/[/\\:*?"<>|]/g, "_").trim();
+      const targetDir = join(folderPath, safeName);
+      await mkdir(targetDir, { recursive: true });
 
-    for (const fileName of group.files) {
-      const src = join(folderPath, fileName);
-      const dest = join(targetDir, fileName);
-      if (action === "copy") {
-        await copyFile(src, dest);
-      } else {
-        await fsRename(src, dest);
-        changes.push({ original: fileName, renamed: join(safeName, fileName) });
+      for (const fileName of group.files) {
+        const src = join(folderPath, fileName);
+        const dest = join(targetDir, fileName);
+        if (action === "copy") {
+          await copyFile(src, dest);
+        } else {
+          await fsRename(src, dest);
+          changes.push({ original: fileName, renamed: join(safeName, fileName) });
+        }
+        count++;
       }
-      count++;
     }
+    return { count, changes };
+  } catch (error) {
+    return { count, changes, error: error instanceof Error ? error : new Error(String(error)) };
   }
-  return { count, changes };
 }
 
 function PreviewGroups({
@@ -122,11 +129,22 @@ function PreviewGroups({
 
     try {
       await showToast({ style: Toast.Style.Animated, title: `${actionVerb.replace(/e$/, "")}ing files...` });
-      const { count, changes } = await organizeByDate(folderPath, groups, granularity, action);
+      const { count, changes, error } = await organizeByDate(folderPath, groups, granularity, action);
+
+      // Always save undo state for any completed moves, even if the run was partial.
       if (changes.length > 0) {
         await saveUndoState({ folderPath, changes, actionName: "Sort Files by Date", timestamp: Date.now() });
       }
-      await showToast({ style: Toast.Style.Success, title: "Done!", message: `${count} files organized` });
+
+      if (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Partial: ${count}/${totalFiles} processed`,
+          message: `${error.message}${changes.length > 0 ? '. Run "Undo Last Rename" to revert.' : ""}`,
+        });
+      } else {
+        await showToast({ style: Toast.Style.Success, title: "Done!", message: `${count} files organized` });
+      }
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
