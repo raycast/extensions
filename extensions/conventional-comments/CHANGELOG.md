@@ -1,6 +1,6 @@
 # Conventional Comments Changelog
 
-## [AI Tools and Platform Update] - {PR_MERGE_DATE}
+## [AI Tools and Platform Update] - 2026-05-12
 
 - Added AI tools to generate conventional review comments and conventional commit messages directly from natural language prompts.
 - Improved conventional commit generation with stronger input validation, better formatting support, and clear breaking-change handling.
