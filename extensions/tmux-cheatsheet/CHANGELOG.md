@@ -1,5 +1,11 @@
 # Tmux Cheatsheet Changelog
 
+## [Updated shortcuts and dependencies] - 2026-05-08
+
+- Update/add shortcuts for copying commands from the list and detail views
+- Update Raycast, React, TypeScript, Prettier, and linting-related dependencies
+- Use the Raycast ESLint config package in `.eslintrc.json`
+
 ## [Detect prefix and bindings via tmux CLI] - 2026-04-17
 
 - Detect the prefix and keybindings by shelling out to `tmux show-options` and `tmux list-keys` instead of parsing config files

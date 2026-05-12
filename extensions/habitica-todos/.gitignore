@@ -15,3 +15,9 @@ compiled_raycast_rust
 bun.lock
 
 .agent/
+
+.env
+
+test/
+out.json
+user.json

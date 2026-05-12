@@ -6,7 +6,7 @@
 
 <p align="center">
   <strong>Discover, resume, and automate Claude Code sessions</strong><br>
-  Deep full-text search, one-keystroke resume, agentic loops, usage analytics, and quick prompts &mdash; bridging Claude Code's powerful agentic CLI with Raycast's instant-access UI.
+  Deep full-text search, one-keystroke resume, agentic loops, usage analytics, and quick prompts. Bridges Claude Code's agentic CLI with Raycast's instant-access UI.
 </p>
 
 ![ClaudeCast Main Menu](metadata/claudecast-10.png)
@@ -24,14 +24,23 @@ Fast project switching for Claude Code. Browse all your projects with favorites,
 - Open in VS Code or Finder
 - Manage favorites
 
+### Deep Search Sessions
+Full-text search across every Claude Code conversation on disk.
+
+- Streams JSONL files incrementally so results appear as they are found
+- Match snippets show ~15 words of context around the query, with the match bolded
+- Debounced search with cancellation when the query changes
+- Resume, fork, or delete any matched session in place
+- Cleans `<local-command-*>` and short slash-only prompts out of the result list
+
 ### Browse Sessions
 Find and resume any Claude Code conversation across all projects.
 
-- Search sessions by content
 - Filter by project
-- View conversation preview
+- Inline conversation preview with the most recent 20 messages and a "Showing last N of M messages" notice for long sessions
 - Resume, fork, or delete sessions
 - See cost and token usage per session
+- Restores the original permission mode and model on resume
 
 ### Agentic Workflows
 Curated collection of production-tested prompts with variable substitution.
@@ -116,12 +125,13 @@ Real-time Claude Code status in your menu bar.
 - Quick access to all commands
 
 ### Usage Dashboard
-Detailed cost and usage metrics.
+Detailed cost and usage metrics with a live SVG bar chart.
 
-- Daily/weekly/monthly trends
-- Cost breakdown by project
-- Top expensive sessions
-- ASCII cost charts
+- Range tabs adapt the chart granularity: Today/Week (daily bars), Month (weekly), All Time (up to 12 monthly bars)
+- Per-range totals, token breakdown (input, output, cache read, cache write)
+- Top projects as colored tags; "Cost by Project" and "Top Sessions" tables
+- Streaming-chunk dedup so cumulative usage reports match Anthropic's actual billing
+- Per-model pricing including Opus 4.7, Opus 4.1, and the Sonnet 200K-token tier
 
 ## Installation
 
@@ -166,9 +176,10 @@ Some features (Ask Claude Code, Transform Selection, Git Actions) require an OAu
 Open Raycast preferences and configure ClaudeCast:
 
 - **Default Model**: Choose between Sonnet (balanced), Opus (most capable), or Haiku (fastest)
-- **Terminal Application**: Select your preferred terminal (Terminal, iTerm, Warp, Kitty, Ghostty)
+- **Terminal Application**: Pick from Terminal, iTerm, Warp, kitty, Ghostty, or cmux. Each launcher uses the terminal's native AppleScript or CLI for reliable launches.
+- **Open In**: Choose New Window or New Tab. Honored by Terminal, iTerm, kitty, Ghostty, and cmux. Warp always opens a new window.
 - **Claude Code Path**: Optionally specify a custom path to the Claude CLI binary
-- **OAuth Token**: Long-lived token from `claude setup-token` (required for API features)
+- **Anthropic API Key / OAuth Token**: For API features (Ask Claude Code, Git Actions, Transform Selection, Agentic Workflows). Either preference works. The auth gate also accepts `ANTHROPIC_API_KEY`, `ANTHROPIC_AUTH_TOKEN`, or `CLAUDE_CODE_OAUTH_TOKEN` env vars, or existing `claude auth login` credentials.
 
 ## Usage
 
@@ -218,23 +229,25 @@ npm run fix-lint
 ```
 claude-cast/
 ├── src/
-│   ├── ask-claude.tsx          # Quick Prompt command
-│   ├── browse-sessions.tsx     # Session Browser
-│   ├── launch-project.tsx      # Project Launcher
-│   ├── quick-continue.tsx      # Quick Continue
-│   ├── git-actions.tsx         # Git Actions
-│   ├── prompt-library.tsx      # Agentic Workflows
-│   ├── transform-selection.tsx # Transform Selection
-│   ├── menu-bar-monitor.tsx    # Menu Bar Monitor
-│   ├── usage-dashboard.tsx     # Usage Dashboard
+│   ├── ask-claude.tsx            # Quick Prompt command
+│   ├── browse-sessions.tsx       # Session Browser
+│   ├── deep-search-sessions.tsx  # Full-text Deep Search
+│   ├── launch-project.tsx        # Project Launcher
+│   ├── quick-continue.tsx        # Quick Continue
+│   ├── git-actions.tsx           # Git Actions
+│   ├── prompt-library.tsx        # Agentic Workflows
+│   ├── transform-selection.tsx   # Transform Selection
+│   ├── menu-bar-monitor.tsx      # Menu Bar Monitor
+│   ├── usage-dashboard.tsx       # Usage Dashboard
 │   └── lib/
-│       ├── claude-cli.ts       # Claude CLI integration
-│       ├── session-parser.ts   # JSONL session parsing
-│       ├── project-discovery.ts # Project detection
-│       ├── context-capture.ts  # VS Code context capture
-│       ├── terminal.ts         # Terminal launch utilities
-│       ├── prompts.ts          # Built-in prompts
-│       └── usage-stats.ts      # Usage statistics
+│       ├── claude-cli.ts         # Claude CLI integration and auth gate
+│       ├── session-parser.ts     # JSONL session parsing and streaming usage scanner
+│       ├── project-discovery.ts  # Project detection
+│       ├── context-capture.ts    # VS Code context capture
+│       ├── terminal.ts           # Terminal launch utilities (Terminal, iTerm, Warp, kitty, Ghostty, cmux)
+│       ├── svg-chart.ts          # SVG bar chart for the Usage Dashboard
+│       ├── prompts.ts            # Built-in prompts
+│       └── usage-stats.ts        # Usage statistics
 ├── assets/
 │   └── command-icon.png        # Extension icon
 ├── package.json

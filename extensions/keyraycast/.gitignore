@@ -1,0 +1,12 @@
+.DS_Store
+raycast-env.d.ts
+# Produced by `npm run build` / `npm run build-helper` (not committed)
+assets/KeyraycastHelper
+node_modules/
+dist/
+.build/
+.swiftpm/
+.raycast-swift-build/
+swift/keyraycast-helper/.build/
+swift/keyraycast-helper/.swiftpm/
+.gstack/

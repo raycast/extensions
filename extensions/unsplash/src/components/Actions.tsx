@@ -1,4 +1,4 @@
-import { ActionPanel, Icon, getPreferenceValues, Action } from "@raycast/api";
+import { ActionPanel, Icon, Keyboard, getPreferenceValues, Action } from "@raycast/api";
 import { likeOrDislike } from "@/functions/utils";
 import { useState } from "react";
 
@@ -55,13 +55,15 @@ export const Sections = ({ details = false, item, unlike }: BaseProps) => {
           onAction={handleLike}
         />
 
-        {item.links?.html && <Action.OpenInBrowser url={item.links.html} title="Open Original" />}
+        {item.links?.html && (
+          <Action.OpenInBrowser url={item.links.html} title="Open Original" shortcut={Keyboard.Shortcut.Common.Open} />
+        )}
 
         {item.user?.links?.html && (
           <Action.OpenInBrowser
             url={item.user.links.html}
             icon={Icon.Person}
-            shortcut={{ modifiers: ["cmd"], key: "o" }}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
             title="Open Author"
           />
         )}
@@ -73,14 +75,14 @@ export const Sections = ({ details = false, item, unlike }: BaseProps) => {
             <Action
               title="Copy to Clipboard"
               icon={Icon.Clipboard}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+              shortcut={Keyboard.Shortcut.Common.Copy}
               onAction={() => copyFileToClipboard(clipboardCopyUrl)}
             />
 
             <Action
               title="Download Image"
               icon={Icon.Desktop}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={Keyboard.Shortcut.Common.Save}
               onAction={() => saveImage({ url: imageUrl, id: String(item.id) })}
             />
           </ActionPanel.Section>
@@ -105,11 +107,21 @@ export const Sections = ({ details = false, item, unlike }: BaseProps) => {
 
       <ActionPanel.Section title="Links">
         {item.links?.html && (
-          <Action.CopyToClipboard content={item.links.html} title="Copy URL to Clipboard" icon={Icon.Clipboard} />
+          <Action.CopyToClipboard
+            content={item.links.html}
+            title="Copy URL to Clipboard"
+            icon={Icon.Clipboard}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+          />
         )}
 
         {imageUrl && (
-          <Action.CopyToClipboard content={imageUrl} title="Copy Image URL to Clipboard" icon={Icon.Clipboard} />
+          <Action.CopyToClipboard
+            content={imageUrl}
+            title="Copy Image URL to Clipboard"
+            icon={Icon.Clipboard}
+            shortcut={Keyboard.Shortcut.Common.CopyPath}
+          />
         )}
 
         {item.user?.links?.html && (
@@ -117,6 +129,7 @@ export const Sections = ({ details = false, item, unlike }: BaseProps) => {
             content={item.user.links.html}
             title="Copy Author URL to Clipboard"
             icon={Icon.Clipboard}
+            shortcut={Keyboard.Shortcut.Common.CopyName}
           />
         )}
       </ActionPanel.Section>

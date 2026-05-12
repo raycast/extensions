@@ -1,5 +1,10 @@
 # GIF Search Changelog
 
+## [Add Paste GIF Link action] - 2026-05-06
+
+- Added a new action to paste a GIF link into the front-most application
+- Added Windows shortcut support
+
 ## [Fix] - 2026-04-23
 
 - Sort Recents by most recently visited first, and move an already-recent GIF back to the top when it's visited again

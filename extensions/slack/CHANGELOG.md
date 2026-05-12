@@ -1,5 +1,9 @@
 # Slack Changelog
 
+## [Accent-insensitive search] - 2026-05-07
+
+- "Open Channel" and "Send Message" now match channel and user names regardless of diacritics, so typing `Angeles` finds `Ángeles` (and the same for any accented characters).
+
 ## [Add Direct command for setting slack status] - 2026-02-23
 
 - Merged slack-status Extension into the main Slack extension, enabling users to view, set, update, AI-generate, and clear their status in one place.

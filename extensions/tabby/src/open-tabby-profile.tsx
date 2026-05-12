@@ -1,10 +1,27 @@
-import { Action, ActionPanel, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
+import { existsSync } from "fs";
+import { homedir } from "os";
+import { join } from "path";
 import { getTabbyProfiles, getProfileGroups, TabbyProfile } from "./utils/get-tabby-profiles";
 
-const TABBY_CLI = "/Applications/Tabby.app/Contents/MacOS/Tabby";
+function resolveTabbyCli(): string {
+  const { tabbyPath } = getPreferenceValues<Preferences>();
+  if (tabbyPath && tabbyPath.trim().length > 0) {
+    return tabbyPath;
+  }
+
+  if (process.platform === "win32") {
+    const localAppData = process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local");
+    const programFiles = process.env["ProgramFiles"] ?? "C:\\Program Files";
+    const candidates = [join(localAppData, "Programs", "Tabby", "Tabby.exe"), join(programFiles, "Tabby", "Tabby.exe")];
+    return candidates.find((p) => existsSync(p)) ?? candidates[0];
+  }
+
+  return "/Applications/Tabby.app/Contents/MacOS/Tabby";
+}
 
 function getProfileIcon(type: string): Icon {
   switch (type) {
@@ -34,8 +51,9 @@ export default function Command() {
 
   const openProfile = async (profile: TabbyProfile) => {
     try {
+      const cli = resolveTabbyCli();
       // Use Tabby CLI to open profile by name
-      execSync(`"${TABBY_CLI}" profile "${profile.name}"`, { encoding: "utf-8" });
+      execFileSync(cli, ["profile", profile.name], { encoding: "utf-8" });
     } catch (error) {
       await showFailureToast(error, { title: `Cannot open profile "${profile.name}"` });
     }

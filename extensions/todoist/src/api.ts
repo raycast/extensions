@@ -372,7 +372,7 @@ export async function updateTask(
   mergeIntoCachedData(cachedData.setData, (prev) => ({
     ...prev,
     items: prev.items.map((i) => (i.id === args.id ? updatedData.items[0] : i)),
-    ...(syncReminders ? { reminders: syncReminders } : {}),
+    ...(syncReminders !== undefined ? { reminders: mergeSyncedReminders(prev.reminders, syncReminders) } : {}),
   }));
   onSynced?.({ syncReminders, updatedTask });
   return true;
@@ -402,7 +402,9 @@ export async function closeTask(id: string, { setData }: CachedDataParams) {
         : prev.items.filter((i) => i.id !== id);
     return {
       ...prev,
-      ...(Array.isArray(updatedData.reminders) ? { reminders: updatedData.reminders } : {}),
+      ...(Array.isArray(updatedData.reminders)
+        ? { reminders: mergeSyncedReminders(prev.reminders, updatedData.reminders) }
+        : {}),
       items,
     };
   });
@@ -487,6 +489,23 @@ export type Reminder = {
   is_deleted: number; // 1 for deleted, 0 for not deleted
 };
 
+/**
+ * Todoist Sync returns incremental `reminders` rows, not the full list. Merge into cache by id
+ * (upsert active rows, drop when `is_deleted === 1`). Empty `incoming` leaves `prev` unchanged.
+ */
+function mergeSyncedReminders(prev: Reminder[], incoming: Reminder[]): Reminder[] {
+  if (incoming.length === 0) return prev;
+  const byId = new Map(prev.map((r) => [r.id, r]));
+  for (const r of incoming) {
+    if (r.is_deleted === 1) {
+      byId.delete(r.id);
+    } else {
+      byId.set(r.id, r);
+    }
+  }
+  return [...byId.values()];
+}
+
 export type AddReminderArgs = {
   item_id: string;
   type: "relative" | "absolute" | "location";
@@ -518,7 +537,8 @@ export async function addReminder(args: AddReminderArgs, { setData }: CachedData
 
   mergeIntoCachedData(setData, (prev) => ({
     ...prev,
-    reminders: updatedData.reminders,
+    // Full sync token: response reminders are the full active set for this resource, so replace the cache.
+    reminders: Array.isArray(updatedData.reminders) ? updatedData.reminders : prev.reminders,
   }));
 
   return updatedData.temp_id_mapping ? updatedData.temp_id_mapping[temp_id] : null;

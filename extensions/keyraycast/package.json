@@ -1,0 +1,221 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keyraycast",
+  "title": "KeyRaycast",
+  "description": "Show keystrokes on screen — a modern KeyCastr alternative as a Raycast extension",
+  "icon": "command-icon.png",
+  "author": "benostein",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "toggle",
+      "title": "Toggle Keystroke Overlay",
+      "subtitle": "KeyRaycast",
+      "description": "Start or stop the keystroke overlay. Toggle off then on to apply settings changes.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "displayMode",
+      "title": "Display Mode",
+      "description": "Which keystrokes to show",
+      "type": "dropdown",
+      "required": false,
+      "default": "allKeys",
+      "data": [
+        {
+          "title": "All Keys",
+          "value": "allKeys"
+        },
+        {
+          "title": "All Modified Keys",
+          "value": "allModified"
+        },
+        {
+          "title": "Command Keys Only",
+          "value": "commandKeys"
+        }
+      ]
+    },
+    {
+      "name": "displayDuration",
+      "title": "Display Duration",
+      "description": "How long keystrokes stay visible",
+      "type": "dropdown",
+      "required": false,
+      "default": "2.0",
+      "data": [
+        {
+          "title": "0.5 seconds",
+          "value": "0.5"
+        },
+        {
+          "title": "1.0 seconds",
+          "value": "1.0"
+        },
+        {
+          "title": "1.5 seconds",
+          "value": "1.5"
+        },
+        {
+          "title": "2.0 seconds",
+          "value": "2.0"
+        },
+        {
+          "title": "3.0 seconds",
+          "value": "3.0"
+        },
+        {
+          "title": "5.0 seconds",
+          "value": "5.0"
+        }
+      ]
+    },
+    {
+      "name": "appearance",
+      "title": "Appearance",
+      "description": "Color theme for the overlay pills",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto (match system)",
+          "value": "auto"
+        },
+        {
+          "title": "Glass (macOS 26+)",
+          "value": "glass"
+        },
+        {
+          "title": "Dark",
+          "value": "dark"
+        },
+        {
+          "title": "Light",
+          "value": "light"
+        }
+      ]
+    },
+    {
+      "name": "fontSize",
+      "title": "Font Size",
+      "description": "Size of the keystroke text",
+      "type": "dropdown",
+      "required": false,
+      "default": "medium",
+      "data": [
+        {
+          "title": "Extra Small",
+          "value": "xsmall"
+        },
+        {
+          "title": "Small",
+          "value": "small"
+        },
+        {
+          "title": "Medium",
+          "value": "medium"
+        },
+        {
+          "title": "Large",
+          "value": "large"
+        },
+        {
+          "title": "Extra Large",
+          "value": "xlarge"
+        }
+      ]
+    },
+    {
+      "name": "position",
+      "title": "Position",
+      "description": "Where to show the overlay on screen",
+      "type": "dropdown",
+      "required": false,
+      "default": "bottomCenter",
+      "data": [
+        {
+          "title": "Bottom Center",
+          "value": "bottomCenter"
+        },
+        {
+          "title": "Bottom Left",
+          "value": "bottomLeft"
+        },
+        {
+          "title": "Bottom Right",
+          "value": "bottomRight"
+        },
+        {
+          "title": "Top Center",
+          "value": "topCenter"
+        },
+        {
+          "title": "Top Left",
+          "value": "topLeft"
+        },
+        {
+          "title": "Top Right",
+          "value": "topRight"
+        }
+      ]
+    },
+    {
+      "name": "uppercaseKeys",
+      "title": "Advanced",
+      "description": "Show all typed characters in uppercase. When off, typing shows as-is (hello not HELLO). Shortcuts like ⌘S are always uppercase.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Force Uppercase"
+    },
+    {
+      "name": "showSpaceSymbol",
+      "title": "",
+      "description": "Show ␣ symbol for space key instead of a blank space",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Show Space Symbol"
+    },
+    {
+      "name": "showMouseClicks",
+      "title": "",
+      "description": "Show modifier+clicks and right-clicks in the overlay",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Show Mouse Clicks"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.12"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.6.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.2.1",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "npm run build-helper-universal && ray build -e dist",
+    "build-helper": "cd swift/keyraycast-helper && swift build -c release && cp .build/release/KeyraycastHelper ../../assets/KeyraycastHelper",
+    "build-helper-universal": "cd swift/keyraycast-helper && swift build -c release --arch arm64 --arch x86_64 && cp .build/apple/Products/Release/KeyraycastHelper ../../assets/KeyraycastHelper",
+    "predev": "npm run build-helper",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

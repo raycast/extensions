@@ -343,6 +343,119 @@ function extractCellContentWithoutBold(cell: HTMLTableCellElement): string {
 }
 
 /**
+ * Detects whether a table is used for layout rather than tabular data.
+ * Email HTML heavily uses tables for visual layout (columns, spacing, wrappers)
+ * rather than for presenting data. These should be unwrapped so their text
+ * content is preserved during HTML→Markdown conversion.
+ *
+ * Note: Uses querySelectorAll instead of table.rows/row.cells for linkedom
+ * compatibility — linkedom doesn't implement the HTMLTableElement interface.
+ * Role checks use hasAttribute+getAttribute because linkedom's getAttribute
+ * returns the string "null" instead of null for missing attributes.
+ */
+function isLayoutTable(table: HTMLTableElement): boolean {
+  // Explicit WAI-ARIA presentation role on the table itself
+  if (table.hasAttribute("role") && table.getAttribute("role") === "presentation") {
+    return true;
+  }
+
+  // Use querySelectorAll for linkedom compatibility (no table.rows)
+  const rows = Array.from(table.querySelectorAll(":scope > tbody > tr, :scope > tr"));
+
+  // Any row with role="presentation" → layout table
+  if (rows.some((r) => r.hasAttribute("role") && r.getAttribute("role") === "presentation")) {
+    return true;
+  }
+
+  // border="0" + nested tables → email layout container
+  if (table.getAttribute("border") === "0" && table.querySelector("table")) {
+    return true;
+  }
+
+  // <th> cells containing block-level content aren't real data headers
+  const ths = Array.from(table.querySelectorAll("th"));
+  if (ths.length > 0 && ths.some((th) => th.querySelector("table, div, p, h1, h2, h3, h4, h5, h6"))) {
+    return true;
+  }
+
+  // Single-row, single-cell table whose cell contains block elements → wrapper
+  const cells = Array.from(rows[0]?.querySelectorAll(":scope > td, :scope > th") ?? []);
+  if (rows.length === 1 && cells.length === 1) {
+    if (cells[0].querySelector("div, p, table, h1, h2, h3, h4, h5, h6")) {
+      return true;
+    }
+  }
+
+  // Canonical email-layout reset: border="0" + cellpadding="0" + cellspacing="0"
+  // on a single-row table with no semantic header. Real data tables almost
+  // never set all three reset attributes; this trio is the de facto signature
+  // of HTML-email layout containers (Gmail, Outlook, MJML, etc.).
+  if (
+    table.getAttribute("border") === "0" &&
+    table.getAttribute("cellpadding") === "0" &&
+    table.getAttribute("cellspacing") === "0" &&
+    rows.length === 1 &&
+    !table.querySelector("th, thead")
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Unwraps layout tables by replacing them with their cell contents.
+ * Processes from innermost tables outward so nested layout tables are
+ * all flattened. Preserves inline content (text, links, images) while
+ * removing the table structure used purely for visual layout.
+ *
+ * Note: Uses querySelectorAll instead of table.rows/row.cells for
+ * linkedom compatibility.
+ */
+function unwrapLayoutTables(doc: Document): void {
+  // Repeatedly process until no more layout tables remain,
+  // since unwrapping an outer table may reveal inner ones
+  let maxPasses = 10;
+  while (maxPasses-- > 0) {
+    const tables = Array.from(doc.body.querySelectorAll("table")) as HTMLTableElement[];
+
+    const layoutTables = tables.filter((t) => isLayoutTable(t));
+    if (layoutTables.length === 0) {
+      break;
+    }
+
+    // Process deepest-nested first
+    layoutTables.sort((a, b) => {
+      let depthA = 0;
+      let depthB = 0;
+      for (let el: Element | null = a; el; el = el.parentElement) depthA++;
+      for (let el: Element | null = b; el; el = el.parentElement) depthB++;
+      return depthB - depthA;
+    });
+
+    for (const table of layoutTables) {
+      if (!doc.body.contains(table)) {
+        continue;
+      }
+
+      const fragment = doc.createDocumentFragment();
+      const tableRows = Array.from(
+        table.querySelectorAll(":scope > thead > tr, :scope > tbody > tr, :scope > tfoot > tr, :scope > tr"),
+      );
+      for (const row of tableRows) {
+        const rowCells = Array.from(row.querySelectorAll(":scope > td, :scope > th"));
+        for (const cell of rowCells) {
+          while (cell.firstChild) {
+            fragment.appendChild(cell.firstChild);
+          }
+        }
+      }
+      table.replaceWith(fragment);
+    }
+  }
+}
+
+/**
  * Promotes styled table header rows to semantic <th> elements.
  * Tables from Word/Google Docs often lack proper <thead>/<th> structure,
  * using bold styling instead. This normalization allows turndown-plugin-gfm
@@ -897,10 +1010,7 @@ function convertLegacyWordParagraphLists(doc: Document) {
   const defaultView = doc.defaultView;
   const commentNodeType = defaultView?.Node?.COMMENT_NODE ?? 8;
   const children = Array.from(doc.body.children);
-  let currentList: {
-    element: HTMLUListElement | HTMLOListElement;
-    type: "ul" | "ol";
-  } | null = null;
+  let currentList: { element: HTMLUListElement | HTMLOListElement; type: "ul" | "ol" } | null = null;
 
   for (const child of children) {
     const paragraph = child as HTMLElement;
@@ -1296,6 +1406,7 @@ function normalizeWordHtml(html: string, context: ConversionContext): string {
     replaceOfficeParagraphNodes(doc);
     convertInlineBoundarySpacesToNbsp(doc);
     promoteWordHeadingsInPlace(doc);
+    unwrapLayoutTables(doc);
     normalizeTableHeaders(doc);
     simplifyTableCells(doc);
     transformMonospaceBlocks(doc);
