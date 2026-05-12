@@ -1,6 +1,6 @@
 # One-Time Secret Changelog
 
-## [Longer lifetimes and configurable clipboard default] - {PR_MERGE_DATE}
+## [Longer lifetimes and configurable clipboard default] - 2026-05-12
 
 - **Send One-Time Secret** now offers **1 minute** and **30 days** in addition to the existing lifetimes.
 - **Send from Clipboard** exposes a **Default Lifetime** command preference (defaults to **1 hour**, previously fixed at 3 hours) and offers the same full list of lifetimes as the form.
