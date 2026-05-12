@@ -1,5 +1,12 @@
 # Coffee Changelog
 
+## [Enhancement] - {PR_MERGED_AT}
+
+- Redesigned the menu bar dropdown: quick-pick durations (10m, 30m, 1h, 2h, 4h, 8h, 12h) and `Indefinitely`, each with a checkmark and live countdown when active.
+- Added `Until…` to the menu bar dropdown, which opens a date/time picker form.
+- Merged the picker form into the existing `Caffeinate Until` command; the typed time argument is now optional (leave empty to use the picker).
+- Clicking an active menu item now deactivates caffeination.
+
 ## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Added a Toggle shortcut for pausing and resuming caffeination schedules.
