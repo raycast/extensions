@@ -32,6 +32,10 @@ You can upgrade your Raycast plan to get access to AI features, or ask your ques
 		);
 	}
 
+	return <AiResponse prompt={prompt} title={title} onAskAnother={onAskAnother} />;
+}
+
+function AiResponse({ prompt, title, onAskAnother }: Props) {
 	const { data, isLoading, error } = useAI(prompt, {
 		model: AI.Model["OpenAI_GPT-5_mini"],
 		creativity: "low",
