@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <clipPath id="rounded">
+      <rect x="0" y="0" width="512" height="512" rx="112" ry="112"/>
+    </clipPath>
+  </defs>
+
+  <g clip-path="url(#rounded)">
+    <rect width="512" height="512" fill="#0A0A0A"/>
+
+    <rect x="0.5" y="0.5" width="511" height="511" rx="111.5" ry="111.5"
+          fill="none" stroke="#262626" stroke-width="1"/>
+
+    <g font-weight="700" text-anchor="middle">
+      <text x="178" y="328" font-size="280"
+            font-family="ui-monospace, 'SF Mono', Menlo, monospace"
+            fill="#FAFAFA" letter-spacing="-10">K</text>
+
+      <text x="346" y="332" font-size="260"
+            font-family="'IBM Plex Sans Arabic', 'Geeza Pro', 'Arial', system-ui, sans-serif"
+            fill="#7C5CFF">ك</text>
+    </g>
+
+    <rect x="96" y="404" width="320" height="3" rx="1.5" fill="#7C5CFF"/>
+  </g>
+</svg>

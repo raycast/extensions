@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "keymap-fix",
+  "title": "KeyMap Fix",
+  "description": "Convert mis-typed text between Arabic, English, and French (AZERTY) keyboard layouts. One hotkey.",
+  "icon": "icon.png",
+  "author": "firas_latrach",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert Keyboard Layout",
+      "description": "Convert mis-typed text between layouts (AR ↔ EN, FR ↔ EN).",
+      "mode": "view"
+    },
+    {
+      "name": "convert-clipboard",
+      "title": "Convert Clipboard",
+      "description": "Convert the clipboard contents using the default direction.",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultDirection",
+      "title": "Default Direction",
+      "description": "Direction used by the Convert Clipboard command.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        { "title": "Auto detect", "value": "auto" },
+        { "title": "English → Arabic", "value": "en2ar" },
+        { "title": "Arabic → English", "value": "ar2en" },
+        { "title": "English (QWERTY) → French (AZERTY)", "value": "en2fr" },
+        { "title": "French (AZERTY) → English (QWERTY)", "value": "fr2en" }
+      ]
+    },
+    {
+      "name": "azerty",
+      "title": "AZERTY support",
+      "description": "Enable French AZERTY conversion in the picker.",
+      "type": "checkbox",
+      "label": "Show AZERTY direction options",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "toast",
+      "title": "Notifications",
+      "description": "Show a toast confirming the conversion direction.",
+      "type": "checkbox",
+      "label": "Show toast after conversion",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.82.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.11.30",
+    "@types/react": "18.3.3",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
