@@ -121,10 +121,12 @@ export default function Command(props: LaunchProps) {
     return liveRemaining ? `${targetLabel} — ${liveRemaining}` : targetLabel;
   })();
 
-  const handleStartFor = async (seconds: number | null) => {
+  const handleStartFor = async (seconds: number | null, durationLabel: string) => {
     setLocalCaffeinateStatus(true);
     const additionalArgs = seconds === null ? undefined : `-t ${seconds}`;
-    await mutate(startCaffeinate({ menubar: true, status: true }, undefined, additionalArgs), {
+    const hudMessage =
+      seconds === null ? `Caffeinating your Mac ${durationLabel}` : `Caffeinating your Mac for ${durationLabel}`;
+    await mutate(startCaffeinate({ menubar: true, status: true }, hudMessage, additionalArgs), {
       optimisticUpdate: () => ({ isRunning: true, totalSeconds: seconds, startTime: Date.now() }),
     });
   };
@@ -159,7 +161,7 @@ export default function Command(props: LaunchProps) {
             <MenuBarExtra.Item
               title="Indefinitely"
               icon={indefinitelyActive ? Icon.Checkmark : undefined}
-              onAction={indefinitelyActive ? handleDeactivate : () => handleStartFor(null)}
+              onAction={indefinitelyActive ? handleDeactivate : () => handleStartFor(null, "indefinitely")}
             />
             {DURATION_PRESETS.map(({ label, seconds }) => {
               const isActive = localCaffeinateStatus && data.totalSeconds === seconds;
@@ -169,7 +171,7 @@ export default function Command(props: LaunchProps) {
                   title={label}
                   subtitle={isActive ? (liveRemaining ?? undefined) : undefined}
                   icon={isActive ? Icon.Checkmark : undefined}
-                  onAction={isActive ? handleDeactivate : () => handleStartFor(seconds)}
+                  onAction={isActive ? handleDeactivate : () => handleStartFor(seconds, label.toLowerCase())}
                 />
               );
             })}
