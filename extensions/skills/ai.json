@@ -171,6 +171,9 @@
       "input": "@skills remove apollo-client",
       "expected": [
         {
+          "callsTool": "list-installed-skills"
+        },
+        {
           "callsTool": {
             "name": "remove-skill",
             "arguments": {
