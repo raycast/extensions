@@ -1,5 +1,9 @@
 # Tuya Smart Changelog
 
+## [Fix] - {PR_MERGE_DATE}
+
+Fixed a bug that caused the extension to crash when no older devices were listed
+
 ## [Enhancement] - 2026-01-15
 
 - Added switches in root search
