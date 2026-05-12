@@ -68,7 +68,7 @@ interface OpenAICompatibleStreamChunk {
 const TRANSLATION_TEMPERATURE = 0;
 const EVENT_STREAM_CONTENT_TYPE = "text/event-stream";
 
-function buildHeaders(config: OpenAICompatibleConfig): HeadersInit {
+function buildHeaders(config: OpenAICompatibleConfig): Record<string, string> {
   return {
     Authorization: `Bearer ${config.apiKey}`,
     "Content-Type": "application/json",

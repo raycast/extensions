@@ -5,6 +5,10 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+
+interface TranslatorPreferences {
+  defaultTargetLanguage: string;
+}
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ErrorView,
@@ -51,7 +55,7 @@ function parseDefaultTargetLanguage(value: string): SupportedLanguage {
 }
 
 async function loadRuntime(): Promise<LoadedRuntime> {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<TranslatorPreferences>();
   const defaultTargetLanguage = parseDefaultTargetLanguage(
     preferences.defaultTargetLanguage,
   );

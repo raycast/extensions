@@ -106,10 +106,17 @@ function buildProfileSubtitle(profile: ApiProfile): string {
   return `${profile.model} · ${profile.baseUrl} · ${profileState}`;
 }
 
-function getProfileIcon(isDefault: boolean): {
+function getProfileIcon(
+  isDefault: boolean,
+  isEnabled: boolean,
+): {
   source: Icon;
   tintColor?: string;
 } {
+  if (!isEnabled) {
+    return { source: Icon.CircleDisabled, tintColor: "#888888" };
+  }
+
   if (isDefault) {
     return { source: Icon.Star, tintColor: "#f5c542" };
   }
@@ -124,6 +131,9 @@ function buildAccessories(
   const accessories: List.Item.Accessory[] = [
     { text: maskApiKey(profile.apiKey) },
   ];
+  if (!profile.enabled) {
+    accessories.unshift({ tag: "Disabled" });
+  }
   if (isDefault) {
     accessories.unshift({ tag: "Default" });
   }
@@ -294,7 +304,7 @@ function ProfileListItem(props: {
   const enableTitle = profile.enabled ? "Disable Profile" : "Enable Profile";
   return (
     <List.Item
-      icon={getProfileIcon(isDefault)}
+      icon={getProfileIcon(isDefault, profile.enabled)}
       title={profile.name}
       subtitle={buildProfileSubtitle(profile)}
       accessories={buildAccessories(profile, isDefault)}
@@ -325,18 +335,20 @@ function ProfileListItem(props: {
             icon={Icon.Checkmark}
             onAction={() => props.onToggleEnabled(profile.id)}
           />
-          <Action
-            title="Move Profile up"
-            icon={Icon.ArrowUp}
-            onAction={() => props.onMove(profile.id, -1)}
-            disabled={index === 0}
-          />
-          <Action
-            title="Move Profile Down"
-            icon={Icon.ArrowDown}
-            onAction={() => props.onMove(profile.id, 1)}
-            disabled={index === total - 1}
-          />
+          {index > 0 && (
+            <Action
+              title="Move Profile up"
+              icon={Icon.ArrowUp}
+              onAction={() => props.onMove(profile.id, -1)}
+            />
+          )}
+          {index < total - 1 && (
+            <Action
+              title="Move Profile Down"
+              icon={Icon.ArrowDown}
+              onAction={() => props.onMove(profile.id, 1)}
+            />
+          )}
           <Action
             title="Delete Profile"
             style={Action.Style.Destructive}
