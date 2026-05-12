@@ -13,17 +13,16 @@ import { streamForge } from "./llm";
 import { evaluateContent } from "./contentGate";
 import { META_SYSTEM_PROMPT } from "./metaPrompt";
 
-interface Preferences {
-  provider: string;
-  apiKey: string;
-  model?: string;
-  baseUrl?: string;
-}
-
 type Mode = "auto" | "agent" | "project";
 
+function buildUserPrompt(brief: string, mode: Mode): string {
+  if (mode === "agent") return `[AGENT PROMPT MODE] ${brief}`;
+  if (mode === "project") return `[FULL PROJECT MODE] ${brief}`;
+  return brief;
+}
+
 export default function ForgeCommand() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.Forge>();
   const [brief, setBrief] = useState("");
   const [mode, setMode] = useState<Mode>("auto");
   const [output, setOutput] = useState("");
@@ -71,7 +70,7 @@ export default function ForgeCommand() {
           baseUrl: prefs.baseUrl,
         },
         systemPrompt: META_SYSTEM_PROMPT,
-        userPrompt: brief,
+        userPrompt: buildUserPrompt(brief, mode),
         signal: abortRef.current.signal,
         onToken: (chunk) => {
           acc += chunk;
