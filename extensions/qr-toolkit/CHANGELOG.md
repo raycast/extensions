@@ -1,6 +1,6 @@
 # QR Code Toolkit Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Decode QR codes from image files or clipboard
 - Auto-detect clipboard images and decode on launch
