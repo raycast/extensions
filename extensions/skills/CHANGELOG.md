@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Fix Stale Search Results] - {PR_MERGE_DATE}
+
+- Clear stale search results when the current search fails or is superseded by a newer query
+
 ## [Standardize Open Actions] - {PR_MERGE_DATE}
 
 - Standardize **Open on skills.sh** and **Open Repository** actions across Search Skills and Manage Skills
