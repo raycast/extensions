@@ -145,8 +145,9 @@ export async function startOverlay(config: {
   fs.writeFileSync(CONFIG_FILE, JSON.stringify(config));
 
   // Launch helper as a fully independent background process
+  let out: number | null = null;
   try {
-    const out = fs.openSync(LOG_FILE, "w");
+    out = fs.openSync(LOG_FILE, "w");
     const child = spawn(
       helperPath,
       ["--config", CONFIG_FILE, "--pid", PID_FILE, "--log", LOG_FILE],
@@ -156,12 +157,13 @@ export async function startOverlay(config: {
       },
     );
     child.unref();
-    fs.closeSync(out);
   } catch (error) {
     return {
       success: false,
       error: `Helper failed to launch: ${error instanceof Error ? error.message : String(error)}`,
     };
+  } finally {
+    if (out !== null) fs.closeSync(out);
   }
 
   // Poll for helper to start and write its PID (check every 100ms, timeout after 3s)
