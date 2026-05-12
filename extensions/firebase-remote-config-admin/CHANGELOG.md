@@ -1,6 +1,6 @@
 # Firebase - Remote Config Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-05-12
 
 - Browse Remote Config parameters and conditions across multiple Firebase projects
 - Bulk operations (upsert/delete) for parameters and conditions across projects
