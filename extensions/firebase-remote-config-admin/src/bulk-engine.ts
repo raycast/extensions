@@ -220,7 +220,7 @@ export async function prepareBulkOperation(
           template,
           operation,
         );
-        if (compareJson(template, updatedTemplate)) {
+        if (compareJson(normalizeTemplate(template), updatedTemplate)) {
           return {
             project,
             status: "no-op",
