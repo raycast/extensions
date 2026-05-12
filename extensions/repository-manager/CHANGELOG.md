@@ -1,6 +1,6 @@
 # Repository Manager Changelog
 
-## [Repository Workflow, Tags, and AI Briefs] - {PR_MERGE_DATE}
+## [Repository Workflow, Tags, and AI Briefs] - 2026-05-12
 - **Repository Tags**: Add custom tags to repositories, show them in the list, and filter by tag from the main repository filter dropdown
 - **Unified Filters**: Combine directory, health, recent, favorite, and tag filters in the upper-right list filter with clearly labeled sections
 - **AI Repo Briefs**: Generate a concise Raycast AI brief from repository metadata, Git status, recent commits, tracked diffs, and readable untracked files
