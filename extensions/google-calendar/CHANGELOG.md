@@ -1,5 +1,13 @@
 # Google Calendar Changelog
 
+## [1.4.3] - 2026-05-12
+
+- Fix Google OAuth authentication by using Raycast's built-in Google OAuth flow ([#26572](https://github.com/raycast/extensions/issues/26572))
+- Fix Google Meet link creation by generating unique conference request IDs ([#27788](https://github.com/raycast/extensions/issues/27788#issuecomment-4419054403))
+- Fix event duration parsing for shorthand values like `1h`, `30m`, and plain minute values ([#27788](https://github.com/raycast/extensions/issues/27788#issuecomment-4419054403))
+- Validate attendee email input when creating, editing, and checking availability for events
+- Fix "Next Week" event grouping to use the next calendar week ([#25595](https://github.com/raycast/extensions/issues/25595))
+
 ## [1.4.2] - 2026-04-09
 
 - Fix timezone offset calculation for half-hour timezones (e.g. IST +05:30) that caused events to be scheduled one hour off

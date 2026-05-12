@@ -138,12 +138,37 @@ class EventTap {
     private var activeModifiers: CGEventFlags = []
     private var pendingModifierID: UInt64 = 0  // increments to cancel stale modifier displays
 
+    private func isHyper(control: Bool, option: Bool, shift: Bool, command: Bool) -> Bool {
+        // Raycast can emit Hyper as Ctrl+Opt+Cmd, with Shift optional depending on the user's Hyper Key setup.
+        _ = shift
+        return control && option && command
+    }
+
+    private func formatModifiers(control: Bool, option: Bool, shift: Bool, command: Bool) -> String {
+        if isHyper(control: control, option: option, shift: shift, command: command) {
+            return shift ? "✦⇧" : "✦"
+        }
+
+        var modifiers = ""
+        if control { modifiers += "⌃" }
+        if option { modifiers += "⌥" }
+        if shift { modifiers += "⇧" }
+        if command { modifiers += "⌘" }
+        return modifiers
+    }
+
     private func handleEvent(type: CGEventType, event: CGEvent) {
         let flags = event.flags
 
         if type == .flagsChanged {
             let newMods = flags.intersection([.maskCommand, .maskControl, .maskAlternate, .maskShift, .maskSecondaryFn])
             let prevMods = activeModifiers
+            let isHyperNow = isHyper(
+                control: newMods.contains(.maskControl),
+                option: newMods.contains(.maskAlternate),
+                shift: newMods.contains(.maskShift),
+                command: newMods.contains(.maskCommand)
+            )
 
             var pressed: [String] = []
             if newMods.contains(.maskControl) && !prevMods.contains(.maskControl) { pressed.append("⌃") }
@@ -154,10 +179,17 @@ class EventTap {
 
             activeModifiers = newMods
 
-            if !pressed.isEmpty && displayMode == .allKeys {
+            // Show modifier-only events in allKeys mode.
+            // Hyper is a meaningful standalone chord, so always show it.
+            if !pressed.isEmpty && (displayMode == .allKeys || isHyperNow) {
                 pendingModifierID &+= 1
                 let thisID = pendingModifierID
-                let modText = pressed.joined()
+                let modText = formatModifiers(
+                    control: newMods.contains(.maskControl),
+                    option: newMods.contains(.maskAlternate),
+                    shift: newMods.contains(.maskShift),
+                    command: newMods.contains(.maskCommand)
+                )
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) { [weak self] in
                     // Only show if no keyDown cancelled this
                     if self?.pendingModifierID == thisID {
@@ -179,11 +211,7 @@ class EventTap {
             // Only show clicks that have modifiers (plain clicks are too noisy)
             // Exception: right-click is always shown since it's intentional
             if hasAnyModifier || type == .rightMouseDown {
-                var mods = ""
-                if hasControl { mods += "⌃" }
-                if hasOption { mods += "⌥" }
-                if hasShift { mods += "⇧" }
-                if hasCommand { mods += "⌘" }
+                let mods = formatModifiers(control: hasControl, option: hasOption, shift: hasShift, command: hasCommand)
 
                 let clickName: String
                 if type == .rightMouseDown { clickName = "Right Click" }
@@ -234,12 +262,14 @@ class EventTap {
         let keyString = keyCodeToString(keyCode: keyCode, event: event, withShift: shiftForTranslate, uppercase: shouldUppercase)
         guard !keyString.isEmpty else { return }
 
-        var modifiers = ""
-        if hasControl { modifiers += "⌃" }
-        if hasOption { modifiers += "⌥" }
         // Omit ⇧ when shift is already reflected in the translated character (allKeys / shift-only allModified).
-        if hasShift && !shiftForTranslate && (hasModifier || displayMode != .allKeys) { modifiers += "⇧" }
-        if hasCommand { modifiers += "⌘" }
+        let shouldShowShiftModifier = hasShift && !shiftForTranslate && (hasModifier || displayMode != .allKeys)
+        let modifiers = formatModifiers(
+            control: hasControl,
+            option: hasOption,
+            shift: shouldShowShiftModifier,
+            command: hasCommand
+        )
 
         let isCommand = hasCommand || hasControl
         let displayText = modifiers.isEmpty ? keyString : "\(modifiers)\(keyString)"

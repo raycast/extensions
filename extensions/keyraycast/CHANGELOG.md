@@ -1,3 +1,13 @@
+# Keystroke Visualizer Extension Changelog
+
+## [Fixes] - 2026-05-12
+
+- Fixed helper startup failures after installing the extension ([#27817](https://github.com/raycast/extensions/issues/27817)).
+- Fixed cases where toggling the overlay off could leave the helper process running.
+- Added checks for the packaged helper binary so missing or non-executable helper files now show a clear error.
+- Improved helper launch behavior by starting the native helper directly instead of through a shell command.
+- Added HyperKey display support so Hyper shortcuts render as ✦ in the overlay.
+
 ## [Initial Release] - 2026-05-11
 
 - Shows keystrokes on screen with floating overlay pills.

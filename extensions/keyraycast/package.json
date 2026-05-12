@@ -5,6 +5,9 @@
   "description": "Show keystrokes on screen — a modern KeyCastr alternative as a Raycast extension",
   "icon": "command-icon.png",
   "author": "benostein",
+  "contributors": [
+    "0xdhrv"
+  ],
   "license": "MIT",
   "categories": [
     "Productivity",
@@ -210,8 +213,8 @@
   },
   "scripts": {
     "build": "npm run build-helper-universal && ray build -e dist",
-    "build-helper": "cd swift/keyraycast-helper && swift build -c release && cp .build/release/KeyraycastHelper ../../assets/KeyraycastHelper",
-    "build-helper-universal": "cd swift/keyraycast-helper && swift build -c release --arch arm64 --arch x86_64 && cp .build/apple/Products/Release/KeyraycastHelper ../../assets/KeyraycastHelper",
+    "build-helper": "cd swift/keyraycast-helper && swift build -c release --scratch-path ../../.raycast-swift-build/keyraycast-helper && cp ../../.raycast-swift-build/keyraycast-helper/release/KeyraycastHelper ../../assets/KeyraycastHelper",
+    "build-helper-universal": "cd swift/keyraycast-helper && swift build -c release --arch arm64 --arch x86_64 --scratch-path ../../.raycast-swift-build/keyraycast-helper && cp ../../.raycast-swift-build/keyraycast-helper/apple/Products/Release/KeyraycastHelper ../../assets/KeyraycastHelper",
     "predev": "npm run build-helper",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",

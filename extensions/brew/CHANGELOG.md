@@ -1,6 +1,11 @@
 # Brew Changelog
 
-## [Bug Fix & Launch Argument] - {PR_MERGE_DATE}
+## [Add Keyboard Shortcuts] - 2026-05-12
+
+- Added keyboard shortcuts to common Brew actions, including opening package pages, opening homepages, copying URLs, and running terminal commands.
+- Standardized shortcut usage with Raycast common shortcuts where appropriate.
+
+## [Bug Fix & Launch Argument] - 2026-05-12
 
 - Added launch argument to Search command for pre-filling the search query before opening
 - Fixed search not working while the formulae/cask index is being downloaded on cold start

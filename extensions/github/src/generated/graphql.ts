@@ -7183,7 +7183,7 @@ export enum EnterpriseAllowPrivateRepositoryForkingPolicyValue {
   EnterpriseOrganizations = "ENTERPRISE_ORGANIZATIONS",
   /** Members can fork a repository to their enterprise-managed user account or an organization inside this enterprise. */
   EnterpriseOrganizationsUserAccounts = "ENTERPRISE_ORGANIZATIONS_USER_ACCOUNTS",
-  /** Members can fork a repository to their user account or an organization, either inside or outside of this enterprise. */
+  /** Members can fork a repository to their user account or an organization, either inside or outside of this enterprise. Internal repositories can only be forked inside of this enterprise. */
   Everywhere = "EVERYWHERE",
   /** Members can fork a repository only within the same organization (intra-org). */
   SameOrganization = "SAME_ORGANIZATION",
@@ -28648,7 +28648,7 @@ export type RepositoryRulesetRulesArgs = {
   type?: InputMaybe<RepositoryRuleType>;
 };
 
-/** A team or app that has the ability to bypass a rules defined on a ruleset */
+/** A team, app or user that has the ability to bypass rules defined on a ruleset */
 export type RepositoryRulesetBypassActor = Node & {
   __typename?: "RepositoryRulesetBypassActor";
   /** The actor that can bypass rules. */
@@ -28659,6 +28659,8 @@ export type RepositoryRulesetBypassActor = Node & {
   deployKey: Scalars["Boolean"]["output"];
   /** This actor represents the ability for an enterprise owner to bypass */
   enterpriseOwner: Scalars["Boolean"]["output"];
+  /** This actor represents the ability for an enterprise role to bypass */
+  enterpriseRole: Scalars["Boolean"]["output"];
   /** The Node ID of the RepositoryRulesetBypassActor object */
   id: Scalars["ID"]["output"];
   /** This actor represents the ability for an organization owner to bypass */
@@ -28705,7 +28707,7 @@ export type RepositoryRulesetBypassActorEdge = {
 
 /** Specifies the attributes for a new or updated ruleset bypass actor. Only one of `actor_id`, `repository_role_database_id`, `organization_admin`, or `deploy_key` should be specified. */
 export type RepositoryRulesetBypassActorInput = {
-  /** For Team and Integration bypasses, the Team or Integration ID */
+  /** For Team, Integration and User bypasses, the Team, Integration, or User ID */
   actorId?: InputMaybe<Scalars["ID"]["input"]>;
   /** The bypass mode for this actor. */
   bypassMode: RepositoryRulesetBypassActorBypassMode;
@@ -28713,6 +28715,8 @@ export type RepositoryRulesetBypassActorInput = {
   deployKey?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** For enterprise owner bypasses, true */
   enterpriseOwner?: InputMaybe<Scalars["Boolean"]["input"]>;
+  /** For enterprise role bypasses, true. NOTE: This bypass actor is in beta. */
+  enterpriseRole?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** For organization owner bypasses, true */
   organizationAdmin?: InputMaybe<Scalars["Boolean"]["input"]>;
   /** For role bypasses, the role database ID */
@@ -30038,6 +30042,8 @@ export enum SecurityAdvisorySeverity {
   Low = "LOW",
   /** Moderate. */
   Moderate = "MODERATE",
+  /** Unknown. */
+  Unknown = "UNKNOWN",
 }
 
 /** An individual vulnerability within an Advisory */
@@ -32138,7 +32144,8 @@ export type TagNamePatternParametersInput = {
 /** A team of users in an organization. */
 export type Team = MemberStatusable &
   Node &
-  Subscribable & {
+  Subscribable &
+  TeamReviewRequestable & {
     __typename?: "Team";
     /** A list of teams that are ancestors of this team. */
     ancestors: TeamConnection;
@@ -33085,6 +33092,16 @@ export enum TeamReviewAssignmentAlgorithm {
   /** Alternate reviews between each team member */
   RoundRobin = "ROUND_ROBIN",
 }
+
+/** Represents a team that can be requested to review a pull request. */
+export type TeamReviewRequestable = {
+  /** The Node ID of the TeamReviewRequestable object */
+  id: Scalars["ID"]["output"];
+  /** The name of the team. */
+  name: Scalars["String"]["output"];
+  /** A unique, human-readable identifier for the team. */
+  slug: Scalars["String"]["output"];
+};
 
 /** The role of a user on a team. */
 export enum TeamRole {
@@ -40333,12 +40350,65 @@ export type GetViewerStatsQuery = {
     pullRequestsOpen: { __typename?: "PullRequestConnection"; totalCount: number };
     issuesAuthored: { __typename?: "IssueConnection"; totalCount: number };
     issuesOpen: { __typename?: "IssueConnection"; totalCount: number };
+    recentPullRequests: {
+      __typename?: "PullRequestConnection";
+      nodes?: Array<{
+        __typename?: "PullRequest";
+        id: string;
+        number: number;
+        title: string;
+        url: any;
+        state: PullRequestState;
+        repository: { __typename?: "Repository"; nameWithOwner: string };
+      } | null> | null;
+    };
+    recentOpenPullRequests: {
+      __typename?: "PullRequestConnection";
+      nodes?: Array<{
+        __typename?: "PullRequest";
+        id: string;
+        number: number;
+        title: string;
+        url: any;
+        repository: { __typename?: "Repository"; nameWithOwner: string };
+      } | null> | null;
+    };
+    recentIssues: {
+      __typename?: "IssueConnection";
+      nodes?: Array<{
+        __typename?: "Issue";
+        id: string;
+        number: number;
+        title: string;
+        url: any;
+        state: IssueState;
+        repository: { __typename?: "Repository"; nameWithOwner: string };
+      } | null> | null;
+    };
+    recentOpenIssues: {
+      __typename?: "IssueConnection";
+      nodes?: Array<{
+        __typename?: "Issue";
+        id: string;
+        number: number;
+        title: string;
+        url: any;
+        repository: { __typename?: "Repository"; nameWithOwner: string };
+      } | null> | null;
+    };
     contributionsCollection: { __typename?: "ContributionsCollection"; totalCommitContributions: number };
     publicRepos: { __typename?: "RepositoryConnection"; totalCount: number };
     ownedRepositories: {
       __typename?: "RepositoryConnection";
       totalCount: number;
-      nodes?: Array<{ __typename?: "Repository"; stargazerCount: number; forkCount: number } | null> | null;
+      nodes?: Array<{
+        __typename?: "Repository";
+        id: string;
+        nameWithOwner: string;
+        url: any;
+        stargazerCount: number;
+        forkCount: number;
+      } | null> | null;
     };
     organizations: {
       __typename?: "OrganizationConnection";
@@ -40353,6 +40423,7 @@ export type GetViewerStatsQuery = {
       } | null> | null;
     };
   };
+  rateLimit?: { __typename?: "RateLimit"; remaining: number; limit: number; used: number; resetAt: any } | null;
 };
 
 export const ShortRepositoryFieldsFragmentDoc = gql`
@@ -41558,6 +41629,52 @@ export const GetViewerStatsDocument = gql`
       issuesOpen: issues(states: [OPEN]) {
         totalCount
       }
+      recentPullRequests: pullRequests(first: 5, orderBy: { field: UPDATED_AT, direction: DESC }) {
+        nodes {
+          id
+          number
+          title
+          url
+          state
+          repository {
+            nameWithOwner
+          }
+        }
+      }
+      recentOpenPullRequests: pullRequests(first: 5, states: [OPEN], orderBy: { field: UPDATED_AT, direction: DESC }) {
+        nodes {
+          id
+          number
+          title
+          url
+          repository {
+            nameWithOwner
+          }
+        }
+      }
+      recentIssues: issues(first: 5, orderBy: { field: UPDATED_AT, direction: DESC }) {
+        nodes {
+          id
+          number
+          title
+          url
+          state
+          repository {
+            nameWithOwner
+          }
+        }
+      }
+      recentOpenIssues: issues(first: 5, states: [OPEN], orderBy: { field: UPDATED_AT, direction: DESC }) {
+        nodes {
+          id
+          number
+          title
+          url
+          repository {
+            nameWithOwner
+          }
+        }
+      }
       contributionsCollection {
         totalCommitContributions
       }
@@ -41571,6 +41688,9 @@ export const GetViewerStatsDocument = gql`
       ) {
         totalCount
         nodes {
+          id
+          nameWithOwner
+          url
           stargazerCount
           forkCount
         }
@@ -41585,6 +41705,12 @@ export const GetViewerStatsDocument = gql`
           url
         }
       }
+    }
+    rateLimit {
+      remaining
+      limit
+      used
+      resetAt
     }
   }
   ${UserFieldsFragmentDoc}
