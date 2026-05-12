@@ -1,7 +1,16 @@
 import { Color, getPreferenceValues, Icon, Image, open } from "@raycast/api";
+import { formatDistanceToNowStrict } from "date-fns";
 
-import { MenuBarItem, MenuBarItemConfigureCommand, MenuBarRoot, MenuBarSection } from "./components/Menu";
+import {
+  MenuBarItem,
+  MenuBarItemConfigureCommand,
+  MenuBarRoot,
+  MenuBarSection,
+  MenuBarSubmenu,
+} from "./components/Menu";
+import { IssueState, PullRequestState } from "./generated/graphql";
 import { withGitHubClient } from "./helpers/withGithubClient";
+import { useStarsTracker } from "./hooks/useStarsTracker";
 import { useViewerStats } from "./hooks/useViewerStats";
 
 type TitleMetric = "followers" | "stars" | "prsOpen" | "issuesOpen" | "none";
@@ -10,9 +19,41 @@ function formatNumber(value: number): string {
   return value.toLocaleString();
 }
 
+function formatResetAt(resetAt: string): string {
+  const date = new Date(resetAt);
+  if (Number.isNaN(date.getTime())) return "soon";
+  const diffMs = date.getTime() - Date.now();
+  if (diffMs <= 0) return "now";
+  return `in ${formatDistanceToNowStrict(date)}`;
+}
+
+function prStateIcon(state: PullRequestState): Image.ImageLike {
+  switch (state) {
+    case PullRequestState.Open:
+      return { source: "pull-request-open.svg", tintColor: Color.Green };
+    case PullRequestState.Merged:
+      return { source: "pull-request-merged.svg", tintColor: Color.Purple };
+    case PullRequestState.Closed:
+      return { source: "pull-request-closed.svg", tintColor: Color.Red };
+  }
+}
+
+function issueStateIcon(state: IssueState): Image.ImageLike {
+  switch (state) {
+    case IssueState.Open:
+      return { source: "issue-open.svg", tintColor: Color.Green };
+    case IssueState.Closed:
+      return { source: "issue-closed.svg", tintColor: Color.Red };
+  }
+}
+
 function MyStatsMenu() {
-  const { titleMetric, useAvatarAsIcon } = getPreferenceValues<Preferences.MyStatsMenu>();
+  const { titleMetric, useAvatarAsIcon, notifyOnNewStars } = getPreferenceValues<Preferences.MyStatsMenu>();
   const { data, isLoading, error } = useViewerStats();
+  const { totalNewStars, perRepoNew, markRepoSeen, markAllSeen } = useStarsTracker(
+    data?.ownedReposBreakdown,
+    notifyOnNewStars,
+  );
 
   const metricValue = (metric: TitleMetric): number | undefined => {
     if (!data) return undefined;
@@ -25,13 +66,13 @@ function MyStatsMenu() {
         return data.activity.prsOpen;
       case "issuesOpen":
         return data.activity.issuesOpen;
-      default:
+      case "none":
         return undefined;
     }
   };
 
   const title = (() => {
-    if (titleMetric === "none") return undefined;
+    if (notifyOnNewStars && totalNewStars > 0) return `★+${totalNewStars}`;
     const value = metricValue(titleMetric);
     return value === undefined ? undefined : formatNumber(value);
   })();
@@ -67,6 +108,29 @@ function MyStatsMenu() {
             />
           </MenuBarSection>
 
+          {notifyOnNewStars && perRepoNew.length > 0 && (
+            <MenuBarSection title={`What's New · +${totalNewStars} ★`}>
+              {perRepoNew.map((repo) => (
+                <MenuBarItem
+                  key={repo.id}
+                  title={repo.nameWithOwner}
+                  subtitle={`+${repo.delta} ★ (now ${formatNumber(repo.current)})`}
+                  icon={{ source: Icon.Star, tintColor: Color.Yellow }}
+                  onAction={async () => {
+                    await open(`${repo.url}/stargazers`);
+                    await markRepoSeen(repo.id);
+                  }}
+                />
+              ))}
+              <MenuBarItem
+                title="Mark All as Seen"
+                icon={Icon.Check}
+                shortcut={{ modifiers: ["cmd"], key: "k" }}
+                onAction={markAllSeen}
+              />
+            </MenuBarSection>
+          )}
+
           <MenuBarSection title="Social">
             <MenuBarItem
               title="Followers"
@@ -100,12 +164,30 @@ function MyStatsMenu() {
           </MenuBarSection>
 
           <MenuBarSection title="Activity">
-            <MenuBarItem
+            <MenuBarSubmenu
               title="PRs Authored"
               subtitle={formatNumber(data.activity.prsAuthored)}
               icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
-              onAction={() => open(searchUrl("pullrequests", `is:pr author:${data.profile.login}`))}
-            />
+            >
+              {data.recent?.pullRequests && data.recent.pullRequests.length > 0 ? (
+                data.recent.pullRequests.map((pr) => (
+                  <MenuBarItem
+                    key={pr.id}
+                    title={`#${pr.number} ${pr.title}`}
+                    subtitle={pr.repository.nameWithOwner}
+                    icon={prStateIcon(pr.state)}
+                    onAction={() => open(pr.url)}
+                  />
+                ))
+              ) : (
+                <MenuBarItem title="No recent pull requests" icon={Icon.Info} />
+              )}
+              <MenuBarItem
+                title="View All Authored PRs"
+                icon={Icon.MagnifyingGlass}
+                onAction={() => open(searchUrl("pullrequests", `is:pr author:${data.profile.login}`))}
+              />
+            </MenuBarSubmenu>
             <MenuBarItem
               title="PRs Merged"
               subtitle={`${formatNumber(data.activity.prsMerged)} (${data.activity.mergeRate}%)`}
@@ -113,12 +195,30 @@ function MyStatsMenu() {
               tooltip={`${data.activity.mergeRate}% of authored PRs were merged`}
               onAction={() => open(searchUrl("pullrequests", `is:pr is:merged author:${data.profile.login}`))}
             />
-            <MenuBarItem
+            <MenuBarSubmenu
               title="Issues Authored"
               subtitle={formatNumber(data.activity.issuesAuthored)}
               icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
-              onAction={() => open(searchUrl("issues", `is:issue author:${data.profile.login}`))}
-            />
+            >
+              {data.recent?.issues && data.recent.issues.length > 0 ? (
+                data.recent.issues.map((issue) => (
+                  <MenuBarItem
+                    key={issue.id}
+                    title={`#${issue.number} ${issue.title}`}
+                    subtitle={issue.repository.nameWithOwner}
+                    icon={issueStateIcon(issue.state)}
+                    onAction={() => open(issue.url)}
+                  />
+                ))
+              ) : (
+                <MenuBarItem title="No recent issues" icon={Icon.Info} />
+              )}
+              <MenuBarItem
+                title="View All Authored Issues"
+                icon={Icon.MagnifyingGlass}
+                onAction={() => open(searchUrl("issues", `is:issue author:${data.profile.login}`))}
+              />
+            </MenuBarSubmenu>
             <MenuBarItem
               title="Commits (last year)"
               subtitle={formatNumber(data.activity.commitsYear)}
@@ -145,31 +245,99 @@ function MyStatsMenu() {
               tooltip={data.social.ownedReposPartial ? partialTooltip : undefined}
               onAction={() => open(`${profileUrl}?tab=repositories`)}
             />
-            <MenuBarItem
+            <MenuBarSubmenu
               title="Open PRs"
               subtitle={formatNumber(data.activity.prsOpen)}
-              icon={{ source: "pull-request-open.svg", tintColor: Color.PrimaryText }}
-              onAction={() => open(searchUrl("pullrequests", `is:pr is:open author:${data.profile.login}`))}
-            />
-            <MenuBarItem
+              icon={{ source: "pull-request-open.svg", tintColor: Color.Green }}
+            >
+              {data.recent?.openPullRequests && data.recent.openPullRequests.length > 0 ? (
+                data.recent.openPullRequests.map((pr) => (
+                  <MenuBarItem
+                    key={pr.id}
+                    title={`#${pr.number} ${pr.title}`}
+                    subtitle={pr.repository.nameWithOwner}
+                    icon={{ source: "pull-request-open.svg", tintColor: Color.Green }}
+                    onAction={() => open(pr.url)}
+                  />
+                ))
+              ) : (
+                <MenuBarItem title="No open pull requests" icon={Icon.Info} />
+              )}
+              <MenuBarItem
+                title="View All Open PRs"
+                icon={Icon.MagnifyingGlass}
+                onAction={() => open(searchUrl("pullrequests", `is:pr is:open author:${data.profile.login}`))}
+              />
+            </MenuBarSubmenu>
+            <MenuBarSubmenu
               title="Open Issues"
               subtitle={formatNumber(data.activity.issuesOpen)}
-              icon={{ source: "issue-open.svg", tintColor: Color.PrimaryText }}
-              onAction={() => open(searchUrl("issues", `is:issue is:open author:${data.profile.login}`))}
-            />
+              icon={{ source: "issue-open.svg", tintColor: Color.Green }}
+            >
+              {data.recent?.openIssues && data.recent.openIssues.length > 0 ? (
+                data.recent.openIssues.map((issue) => (
+                  <MenuBarItem
+                    key={issue.id}
+                    title={`#${issue.number} ${issue.title}`}
+                    subtitle={issue.repository.nameWithOwner}
+                    icon={{ source: "issue-open.svg", tintColor: Color.Green }}
+                    onAction={() => open(issue.url)}
+                  />
+                ))
+              ) : (
+                <MenuBarItem title="No open issues" icon={Icon.Info} />
+              )}
+              <MenuBarItem
+                title="View All Open Issues"
+                icon={Icon.MagnifyingGlass}
+                onAction={() => open(searchUrl("issues", `is:issue is:open author:${data.profile.login}`))}
+              />
+            </MenuBarSubmenu>
           </MenuBarSection>
 
           {data.organizations.length > 0 && (
             <MenuBarSection title="Organizations">
               {data.organizations.map((org) => (
-                <MenuBarItem
+                <MenuBarSubmenu
                   key={org.id}
                   title={org.name ?? org.login}
-                  subtitle={org.name ? `@${org.login}` : undefined}
                   icon={{ source: org.avatarUrl, mask: Image.Mask.Circle }}
-                  onAction={() => open(org.url)}
-                />
+                >
+                  <MenuBarItem
+                    title="Open Profile"
+                    subtitle={`@${org.login}`}
+                    icon={Icon.Globe}
+                    onAction={() => open(org.url)}
+                  />
+                  <MenuBarItem
+                    title="Repositories"
+                    icon={Icon.Folder}
+                    onAction={() => open(`https://github.com/orgs/${org.login}/repositories`)}
+                  />
+                  <MenuBarItem
+                    title="People"
+                    icon={Icon.PersonCircle}
+                    onAction={() => open(`https://github.com/orgs/${org.login}/people`)}
+                  />
+                  <MenuBarItem
+                    title="Projects"
+                    icon={Icon.Goal}
+                    onAction={() => open(`https://github.com/orgs/${org.login}/projects`)}
+                  />
+                </MenuBarSubmenu>
               ))}
+            </MenuBarSection>
+          )}
+
+          {data.rateLimit && (
+            <MenuBarSection title="API">
+              <MenuBarItem
+                title="Rate Limit"
+                subtitle={`${formatNumber(data.rateLimit.remaining)} / ${formatNumber(data.rateLimit.limit)}`}
+                icon={Icon.Gauge}
+                tooltip={`Resets ${formatResetAt(data.rateLimit.resetAt)}`}
+                onAction={() => open("https://docs.github.com/en/rest/rate-limit")}
+              />
             </MenuBarSection>
           )}
         </>

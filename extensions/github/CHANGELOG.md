@@ -1,5 +1,15 @@
 # GitHub Changelog
 
+## [My Stats Menu Bar Enhancements] - 2026-05-12
+
+- Added a `What's New` section to the **My GitHub Stats Menu Bar** that surfaces repositories which received new stars since the last visit.
+- The menu bar title shows a `★+N` badge when there are unseen new stars, replacing the configured metric until the user marks them as seen.
+- Added a `Notify on new stars` preference (default on) to opt out of the notification.
+- Added an `API` section showing the current GitHub API rate limit (remaining / total, with reset time tooltip).
+- Added a `Refresh Frequency` preference (15 minutes / 30 minutes / 1 hour / 2 hours, default 30 minutes) so users can balance freshness against GitHub API quota usage.
+- Each organization is now a submenu with quick access to **Open Profile**, **Repositories**, **People** and **Projects** instead of just opening the organization homepage.
+- `PRs Authored`, `Issues Authored`, `Open PRs` and `Open Issues` are now submenus listing the 5 most recently updated items (each clickable to jump straight to GitHub), with a `View All` shortcut at the bottom. This is intentionally a thin convenience for users who keep only the *Stats* menu bar enabled — the dedicated *My Pull Requests Menu Bar* and *My Issues Menu Bar* commands remain the recommended surfaces when you need filters, sorting, or full PR/Issue triage workflow (see the README).
+
 ## [Download Repository Command] - 2026-04-28
 
 - Added "Download Repository" command to download an entire repository, a specific sub-directory, or a single file from a GitHub URL.
