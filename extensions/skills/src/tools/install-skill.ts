@@ -13,9 +13,20 @@ type Input = {
 
 /** Install a skill from the skills.sh marketplace. Only call this after the user has confirmed they want to install. Ask which agents to install for unless the user said "all". */
 export default async function tool(input: Input) {
-  const agents = input.agents ? input.agents.split(",").map((a) => a.trim()).filter(Boolean) : undefined;
+  const agents = input.agents
+    ? input.agents
+        .split(",")
+        .map((a) => a.trim())
+        .filter(Boolean)
+    : undefined;
   await installSkill(
-    { id: `${input.source}@${input.skillId}`, name: input.name, skillId: input.skillId, source: input.source, installs: 0 },
+    {
+      id: `${input.source}@${input.skillId}`,
+      name: input.name,
+      skillId: input.skillId,
+      source: input.source,
+      installs: 0,
+    },
     agents,
   );
   return { success: true, installedSkill: input.name, agents: agents ?? "all" };

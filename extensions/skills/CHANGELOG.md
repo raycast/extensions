@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Ask Skills AI Extension] - {PR_MERGE_DATE}
+
+- Add `@skills` support in Raycast AI Chat with five tools: search the marketplace by query, read a skill's full instructions, list installed skills, install a skill for specific agents, and remove a skill
+
 ## [Fix Stale Search Results] - 2026-05-12
 
 - Clear stale search results when the current search fails or is superseded by a newer query

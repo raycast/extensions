@@ -112,7 +112,7 @@
             {
               "name": "graphql-schema",
               "path": "~/.agents/skills/graphql-schema",
-              "agents": "Claude Code",
+              "agents": ["Claude Code"],
               "agentCount": 1,
               "source": "apollographql/skills",
               "installedAt": "2025-03-15T08:30:00Z",
@@ -123,7 +123,7 @@
       }
     },
     {
-      "input": "@skills install apollo-client for me",
+      "input": "@skills install apollo-client for me, I confirm for Claude Code",
       "expected": [
         {
           "callsTool": {
