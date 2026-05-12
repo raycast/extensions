@@ -60,32 +60,56 @@ function PreviewList({ folderPath, files }: { folderPath: string; files: Organiz
     });
     if (!confirmed) return;
 
-    try {
-      await showToast({ style: Toast.Style.Animated, title: "Organizing..." });
+    await showToast({ style: Toast.Style.Animated, title: "Organizing..." });
+    // Track each completed move so partial failures (permission errors, name conflicts, etc.)
+    // still record undo state for the work that did complete.
+    const completed: { original: string; renamed: string }[] = [];
 
-      const changes: { original: string; renamed: string }[] = [];
+    try {
       for (const f of files) {
         const targetDir = join(folderPath, f.folder);
         await mkdir(targetDir, { recursive: true });
         await fsRename(join(folderPath, f.original), join(targetDir, f.newName));
         // Store relative paths for undo: original was in root, now in subfolder
-        changes.push({ original: f.original, renamed: join(f.folder, f.newName) });
+        completed.push({ original: f.original, renamed: join(f.folder, f.newName) });
       }
 
       await saveUndoState({
         folderPath,
-        changes,
+        changes: completed,
         actionName: "Smart Organize Episodes",
         timestamp: Date.now(),
       });
 
-      await showToast({ style: Toast.Style.Success, title: "Done!", message: `${files.length} episodes organized` });
-    } catch (error) {
       await showToast({
-        style: Toast.Style.Failure,
-        title: "Failed",
-        message: error instanceof Error ? error.message : String(error),
+        style: Toast.Style.Success,
+        title: "Done!",
+        message: `${completed.length} episodes organized`,
       });
+    } catch (error) {
+      if (completed.length > 0) {
+        try {
+          await saveUndoState({
+            folderPath,
+            changes: completed,
+            actionName: "Smart Organize Episodes",
+            timestamp: Date.now(),
+          });
+        } catch {
+          // best-effort: fall through to the failure toast below
+        }
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Partial: ${completed.length}/${files.length} organized`,
+          message: `${error instanceof Error ? error.message : String(error)}. Run "Undo Last Rename" to revert.`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
   }
 
@@ -255,8 +279,30 @@ export default function SmartOrganize() {
         return;
       }
 
-      // Determine season/episode mapping
-      let episodeMap: Map<number, { season: number; episode: number; name?: string }>;
+      // Determine season/episode mapping.
+      //
+      // Keys are strings so we can disambiguate by scheme:
+      //   - "abs:N"  → absolute episode N (file numbered 001, 002, ... across all seasons)
+      //   - "S-E"    → season S, episode E (file already labelled with S##E##)
+      // We store BOTH keys for entries when we have full season+episode metadata (TMDB /
+      // TVDB and manual+assignSeasons paths), so lookups work regardless of the file's
+      // own naming scheme. The buggy path was the manual+hasSeasons branch, where a
+      // numeric key collided across seasons (e.g. S01E05 and S02E05 both have
+      // episodeNumber=5). The compound "S-E" key fixes that.
+      let episodeMap: Map<string, { season: number; episode: number; name?: string }>;
+
+      function keyForFile(p: { seasonNumber: number | null; episodeNumber: number }): string {
+        return p.seasonNumber !== null ? `${p.seasonNumber}-${p.episodeNumber}` : `abs:${p.episodeNumber}`;
+      }
+
+      function setBothKeys(
+        map: Map<string, { season: number; episode: number; name?: string }>,
+        absEp: number,
+        value: { season: number; episode: number; name?: string },
+      ) {
+        map.set(`abs:${absEp}`, value);
+        map.set(`${value.season}-${value.episode}`, value);
+      }
 
       if (metadataSource !== "none" && !selectedShowId) {
         await showToast({
@@ -276,7 +322,7 @@ export default function SmartOrganize() {
           const remoteMap = await buildFn(parseInt(selectedShowId));
           episodeMap = new Map();
           for (const [absEp, info] of remoteMap) {
-            episodeMap.set(absEp, { season: info.season, episode: info.episode, name: info.name });
+            setBothKeys(episodeMap, absEp, { season: info.season, episode: info.episode, name: info.name });
           }
         } catch (error) {
           await showToast({
@@ -290,7 +336,7 @@ export default function SmartOrganize() {
           const seasonMap = assignSeasons(epNumbers, counts);
           episodeMap = new Map();
           for (const [ep, info] of seasonMap) {
-            episodeMap.set(ep, { season: info.season, episode: info.episodeInSeason });
+            setBothKeys(episodeMap, ep, { season: info.season, episode: info.episodeInSeason });
           }
         }
       } else {
@@ -298,10 +344,13 @@ export default function SmartOrganize() {
         const hasSeasons = parsed.some((p) => p.seasonNumber !== null);
 
         if (hasSeasons) {
+          // Files already have S##E## info from the filename. Use compound key so that
+          // S01E05 and S02E05 don't collide.
           episodeMap = new Map();
           for (const p of parsed) {
-            episodeMap.set(p.episodeNumber, {
-              season: p.seasonNumber ?? 1,
+            const season = p.seasonNumber ?? 1;
+            episodeMap.set(`${season}-${p.episodeNumber}`, {
+              season,
               episode: p.episodeNumber,
             });
           }
@@ -311,7 +360,7 @@ export default function SmartOrganize() {
           const seasonMap = assignSeasons(epNumbers, counts);
           episodeMap = new Map();
           for (const [ep, info] of seasonMap) {
-            episodeMap.set(ep, { season: info.season, episode: info.episodeInSeason });
+            setBothKeys(episodeMap, ep, { season: info.season, episode: info.episodeInSeason });
           }
         }
       }
@@ -322,7 +371,7 @@ export default function SmartOrganize() {
       const organized: OrganizedFile[] = [];
 
       for (const p of parsed) {
-        const mapping = episodeMap.get(p.episodeNumber);
+        const mapping = episodeMap.get(keyForFile(p));
         if (!mapping) continue;
 
         const ext = extname(p.fileName);

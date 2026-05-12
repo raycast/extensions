@@ -100,22 +100,48 @@ function PreviewList({ folderPath, previews }: { folderPath: string; previews: R
     });
     if (!confirmed) return;
 
+    await showToast({ style: Toast.Style.Animated, title: "Renaming files..." });
+    // Track each successful rename so partial failures still record undo state for the
+    // work that did complete.
+    const completed: { original: string; renamed: string }[] = [];
+
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Renaming files..." });
-      const changes: { original: string; renamed: string }[] = [];
       for (const p of previews) {
         if (!p.changed) continue;
         await fsRename(join(folderPath, p.original), join(folderPath, p.renamed));
-        changes.push({ original: p.original, renamed: p.renamed });
+        completed.push({ original: p.original, renamed: p.renamed });
       }
-      await saveUndoState({ folderPath, changes, actionName: "Smart Find & Replace", timestamp: Date.now() });
-      await showToast({ style: Toast.Style.Success, title: "Done!", message: `${changes.length} files renamed` });
-    } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Rename failed",
-        message: error instanceof Error ? error.message : String(error),
+      await saveUndoState({
+        folderPath,
+        changes: completed,
+        actionName: "Smart Find & Replace",
+        timestamp: Date.now(),
       });
+      await showToast({ style: Toast.Style.Success, title: "Done!", message: `${completed.length} files renamed` });
+    } catch (error) {
+      if (completed.length > 0) {
+        try {
+          await saveUndoState({
+            folderPath,
+            changes: completed,
+            actionName: "Smart Find & Replace",
+            timestamp: Date.now(),
+          });
+        } catch {
+          // best-effort: fall through to the failure toast below
+        }
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Partial: ${completed.length}/${changedCount} renamed`,
+          message: `${error instanceof Error ? error.message : String(error)}. Run "Undo Last Rename" to revert.`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Rename failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
   }
 

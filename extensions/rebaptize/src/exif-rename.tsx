@@ -157,16 +157,34 @@ function PreviewList({ folderPath, previews }: { folderPath: string; previews: P
     });
     if (!confirmed) return;
 
+    const changes = previews.filter((p) => p.original !== p.renamed);
+    // Track each successful rename so partial failures (name conflict, permission error, etc.)
+    // still record undo state for the work that did complete.
+    const completed: Preview[] = [];
+
     try {
-      const changes = previews.filter((p) => p.original !== p.renamed);
       for (const p of changes) {
         await fsRename(join(folderPath, p.original), join(folderPath, p.renamed));
+        completed.push(p);
       }
-      await saveUndoState({ folderPath, changes, actionName: "EXIF Rename", timestamp: Date.now() });
-      await showToast({ style: Toast.Style.Success, title: `Renamed ${changes.length} files` });
+      await saveUndoState({ folderPath, changes: completed, actionName: "EXIF Rename", timestamp: Date.now() });
+      await showToast({ style: Toast.Style.Success, title: `Renamed ${completed.length} files` });
       pop();
     } catch (error) {
-      await showToast({ style: Toast.Style.Failure, title: String(error) });
+      if (completed.length > 0) {
+        try {
+          await saveUndoState({ folderPath, changes: completed, actionName: "EXIF Rename", timestamp: Date.now() });
+        } catch {
+          // best-effort: fall through to the toast below
+        }
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Partial: ${completed.length}/${changes.length} renamed`,
+          message: `${error instanceof Error ? error.message : String(error)}. Run "Undo Last Rename" to revert.`,
+        });
+      } else {
+        await showToast({ style: Toast.Style.Failure, title: String(error) });
+      }
     }
   }
 

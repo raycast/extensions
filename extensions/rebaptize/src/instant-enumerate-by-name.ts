@@ -1,7 +1,6 @@
 import { showHUD } from "@raycast/api";
-import { rename as fsRename } from "fs/promises";
-import { join, extname } from "path";
-import { getFinderFiles, saveUndoState } from "./instant-runner";
+import { extname } from "path";
+import { getFinderFiles, executeRenames } from "./instant-runner";
 
 export default async function () {
   try {
@@ -17,17 +16,7 @@ export default async function () {
     });
 
     const changed = results.filter((r) => r.original !== r.renamed);
-    if (changed.length === 0) {
-      await showHUD("No changes needed");
-      return;
-    }
-
-    for (const r of changed) {
-      await fsRename(join(folderPath, r.original), join(folderPath, r.renamed));
-    }
-
-    await saveUndoState({ folderPath, changes: changed, actionName: "Enumerate by Name", timestamp: Date.now() });
-    await showHUD(`Enumerated ${changed.length} files — run "Undo Last Rename" to revert`);
+    await executeRenames(folderPath, changed, "Enumerate by Name");
   } catch (error) {
     await showHUD(error instanceof Error ? error.message : String(error));
   }

@@ -50,27 +50,49 @@ function PreviewAndRun({
     });
     if (!confirmed) return;
 
-    try {
-      await showToast({ style: Toast.Style.Animated, title: "Renaming..." });
+    await showToast({ style: Toast.Style.Animated, title: "Renaming..." });
+    // Track each successful rename so partial failures still record undo state for the
+    // work that did complete.
+    const completed: { original: string; renamed: string }[] = [];
 
+    try {
       for (const r of changed) {
         await fsRename(join(folderPath, r.original), join(folderPath, r.renamed));
+        completed.push({ original: r.original, renamed: r.renamed });
       }
 
       await saveUndoState({
         folderPath,
-        changes: changed.map((r) => ({ original: r.original, renamed: r.renamed })),
+        changes: completed,
         actionName: `Script: ${script.name}`,
         timestamp: Date.now(),
       });
 
-      await showHUD(`"${script.name}" renamed ${changed.length} files`);
+      await showHUD(`"${script.name}" renamed ${completed.length} files`);
     } catch (error) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "Rename failed",
-        message: error instanceof Error ? error.message : String(error),
-      });
+      if (completed.length > 0) {
+        try {
+          await saveUndoState({
+            folderPath,
+            changes: completed,
+            actionName: `Script: ${script.name}`,
+            timestamp: Date.now(),
+          });
+        } catch {
+          // best-effort: fall through to the failure toast below
+        }
+        await showToast({
+          style: Toast.Style.Failure,
+          title: `Partial: ${completed.length}/${changed.length} renamed`,
+          message: `${error instanceof Error ? error.message : String(error)}. Run "Undo Last Rename" to revert.`,
+        });
+      } else {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Rename failed",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
     }
   }
 

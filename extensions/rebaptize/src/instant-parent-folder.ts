@@ -1,7 +1,6 @@
 import { showHUD } from "@raycast/api";
-import { rename as fsRename } from "fs/promises";
-import { join, basename } from "path";
-import { getFinderFiles, saveUndoState } from "./instant-runner";
+import { basename } from "path";
+import { getFinderFiles, executeRenames } from "./instant-runner";
 import { prependParentFolder } from "./rename";
 
 export default async function () {
@@ -15,17 +14,7 @@ export default async function () {
     }));
 
     const changed = results.filter((r) => r.original !== r.renamed);
-    if (changed.length === 0) {
-      await showHUD("No changes needed");
-      return;
-    }
-
-    for (const r of changed) {
-      await fsRename(join(folderPath, r.original), join(folderPath, r.renamed));
-    }
-
-    await saveUndoState({ folderPath, changes: changed, actionName: "Prepend Parent Folder", timestamp: Date.now() });
-    await showHUD(`Prepended "${parentName}" to ${changed.length} files — run "Undo Last Rename" to revert`);
+    await executeRenames(folderPath, changed, "Prepend Parent Folder");
   } catch (error) {
     await showHUD(error instanceof Error ? error.message : String(error));
   }

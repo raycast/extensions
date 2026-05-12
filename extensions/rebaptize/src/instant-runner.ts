@@ -57,38 +57,26 @@ export async function getFinderFiles(): Promise<{ folderPath: string; files: str
 }
 
 /**
- * Run an instant rename: apply transform, execute immediately, save undo state.
- * No confirmation dialog, no UI — runs instantly and shows a HUD.
+ * Execute a list of pre-computed rename operations, persisting undo state along
+ * the way. Shared by `runInstantRename` and the standalone instant commands that
+ * compute their `changed` set from file metadata (date, enumeration index, etc.)
+ * before delegating here.
  *
  * Partial failure handling: renames are tracked incrementally. If a rename
  * fails mid-batch (e.g. name conflict or permission error), undo state is still
- * saved for the renames that completed, and the HUD tells the user how many
- * succeeded and that they can revert via "Undo Last Rename".
+ * saved for the renames that completed, and the HUD reports how many succeeded
+ * and that the user can revert via "Undo Last Rename".
  */
-export async function runInstantRename(transform: (fileName: string) => string, actionName: string): Promise<void> {
-  let folderPath: string | null = null;
-  let totalToRename = 0;
+export async function executeRenames(folderPath: string, changed: RenameResult[], actionName: string): Promise<void> {
+  if (changed.length === 0) {
+    await showHUD("No changes needed");
+    return;
+  }
+
+  const totalToRename = changed.length;
   const completed: RenameResult[] = [];
 
   try {
-    const finderFiles = await getFinderFiles();
-    folderPath = finderFiles.folderPath;
-    const { files } = finderFiles;
-
-    const results: RenameResult[] = files.map((f) => ({
-      original: f,
-      renamed: transform(f),
-    }));
-
-    const changed = results.filter((r) => r.original !== r.renamed);
-    totalToRename = changed.length;
-
-    if (changed.length === 0) {
-      await showHUD("No changes needed");
-      return;
-    }
-
-    // Execute renames, tracking each completion so partial failures still record undo state
     for (const r of changed) {
       await fsRename(join(folderPath, r.original), join(folderPath, r.renamed));
       completed.push(r);
@@ -103,9 +91,9 @@ export async function runInstantRename(transform: (fileName: string) => string, 
 
     await showHUD(`${actionName}: ${completed.length} files renamed — run "Undo Last Rename" to revert`);
   } catch (error) {
-    // If we already completed some renames before the failure, persist undo state for the
-    // partial work so the user can roll it back via "Undo Last Rename".
-    if (folderPath && completed.length > 0) {
+    // Persist undo state for the work that did complete before the failure, so the user
+    // can roll back the partial run via "Undo Last Rename".
+    if (completed.length > 0) {
       try {
         await saveUndoState({
           folderPath,
@@ -126,5 +114,27 @@ export async function runInstantRename(transform: (fileName: string) => string, 
     } else {
       await showHUD(errMsg);
     }
+  }
+}
+
+/**
+ * Run an instant rename: apply transform, execute immediately, save undo state.
+ * No confirmation dialog, no UI — runs instantly and shows a HUD.
+ */
+export async function runInstantRename(transform: (fileName: string) => string, actionName: string): Promise<void> {
+  try {
+    const { folderPath, files } = await getFinderFiles();
+
+    const results: RenameResult[] = files.map((f) => ({
+      original: f,
+      renamed: transform(f),
+    }));
+
+    const changed = results.filter((r) => r.original !== r.renamed);
+    await executeRenames(folderPath, changed, actionName);
+  } catch (error) {
+    // Errors from getFinderFiles or the transform — no rename has been attempted yet,
+    // so there's nothing to record in undo state.
+    await showHUD(error instanceof Error ? error.message : String(error));
   }
 }
