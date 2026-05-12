@@ -4,7 +4,7 @@
 
 # Rebaptize
 
-Bulk rename and organize files directly from Raycast. 30 commands covering everything from instant one-shot case conversion to smart TV show episode organization with metadata from TMDB and TheTVDB.
+Bulk rename and organize files directly from Raycast. 40 commands covering everything from instant one-shot case conversion to smart TV show episode organization with metadata from TMDB and TheTVDB.
 
 Every function is its own Raycast command — assign aliases and hotkeys to the ones you use most. All commands auto-detect the current Finder folder.
 
@@ -437,7 +437,7 @@ Build reusable rename pipelines that combine a file filter with a sequence of re
    - **File Filter** — glob pattern to target specific files (e.g. `*.mkv`, leave empty for all files)
 3. Add steps to the pipeline — each step transforms the filename and passes the result to the next step
 
-**Available step types (24):**
+**Available step types (23):**
 
 | Category      | Step Types                                                                                                                                                                |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

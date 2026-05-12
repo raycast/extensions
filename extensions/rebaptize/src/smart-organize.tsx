@@ -344,12 +344,17 @@ export default function SmartOrganize() {
         const hasSeasons = parsed.some((p) => p.seasonNumber !== null);
 
         if (hasSeasons) {
-          // Files already have S##E## info from the filename. Use compound key so that
-          // S01E05 and S02E05 don't collide.
+          // At least one file has S##E## info. Key each entry with the same `keyForFile`
+          // we use at lookup time, so set/lookup keys derive identically:
+          //   - files with explicit season info → "S-E" key
+          //   - files without season info (mixed-naming folder) → "abs:N" key
+          // This keeps S01E05 + S02E05 distinct (the original collision case) AND prevents
+          // absolute-numbered files from being silently dropped because their lookup key
+          // ("abs:N") doesn't exist in the map.
           episodeMap = new Map();
           for (const p of parsed) {
             const season = p.seasonNumber ?? 1;
-            episodeMap.set(`${season}-${p.episodeNumber}`, {
+            episodeMap.set(keyForFile(p), {
               season,
               episode: p.episodeNumber,
             });
