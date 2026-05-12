@@ -212,7 +212,8 @@
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "npm run build-helper-universal && ray build -e dist",
+    "prebuild": "npm run build-helper-universal && test -f assets/KeyraycastHelper",
+    "build": "ray build -e dist",
     "build-helper": "cd swift/keyraycast-helper && swift build -c release --scratch-path ../../.raycast-swift-build/keyraycast-helper && cp ../../.raycast-swift-build/keyraycast-helper/release/KeyraycastHelper ../../assets/KeyraycastHelper",
     "build-helper-universal": "cd swift/keyraycast-helper && swift build -c release --arch arm64 --arch x86_64 --scratch-path ../../.raycast-swift-build/keyraycast-helper && cp ../../.raycast-swift-build/keyraycast-helper/apple/Products/Release/KeyraycastHelper ../../assets/KeyraycastHelper",
     "predev": "npm run build-helper",
