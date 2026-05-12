@@ -13,7 +13,7 @@ export function parseApiRef(content: string, baseUrl: string): ApiItem[] {
 
 		const module = text.slice(0, dashIdx);
 		const name = text.slice(dashIdx + 1);
-		const key = `${module}.${name}`;
+		const key = path;
 
 		if (seen.has(key)) continue;
 		seen.add(key);
