@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [My Stats Menu Bar Enhancements] - {PR_MERGE_DATE}
+## [My Stats Menu Bar Enhancements] - 2026-05-12
 
 - Added a `What's New` section to the **My GitHub Stats Menu Bar** that surfaces repositories which received new stars since the last visit.
 - The menu bar title shows a `★+N` badge when there are unseen new stars, replacing the configured metric until the user marks them as seen.
