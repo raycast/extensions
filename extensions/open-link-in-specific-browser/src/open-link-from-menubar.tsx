@@ -11,8 +11,9 @@ import { useHiddenBrowsers } from "./hooks/useHiddenBrowsers";
 
 export default function OpenLinkInSpecificBrowser() {
   const { data: itemInputRaw } = useItemInput();
-  const { data: browsersRaw, isLoading } = useBrowsers();
-  const { hiddenBundleIds } = useHiddenBrowsers();
+  const { data: browsersRaw, isLoading: isBrowsersLoading } = useBrowsers();
+  const { hiddenBundleIds, isLoading: isHiddenLoading } = useHiddenBrowsers();
+  const isLoading = isBrowsersLoading || isHiddenLoading;
 
   const itemInput = useMemo(() => {
     if (!itemInputRaw) return new ItemInput();
