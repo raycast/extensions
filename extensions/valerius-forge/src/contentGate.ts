@@ -75,10 +75,10 @@ const PATTERNS: PatternRule[] = [
     category: "account_compromise",
     re: /\b(authenticates?|authenticating|accesses?|accessing|scrapes?|scraping|crawls?|crawling|fetches?|fetching|automates?|automating)\b[\s\S]{0,40}\b(bank(?:ing)?|brokerage|broker|fidelity|schwab|vanguard|robinhood|coinbase|binance|kraken|chase|wells fargo|bank of america|citibank|capital one|paypal|venmo|cash app|zelle|investment account|retirement account|401k|trading account)\b/i,
   },
-  {
-    category: "account_compromise",
-    re: /\b(script|tool|bot|agent|program|code|automation)\b[\s\S]{0,40}\b(?:logs?|logging|signs?|signing)\s+in(?:to)?\b/i,
-  },
+  // Note: the broad (script|bot|agent|automation)+login pattern was removed —
+  // it caused false positives for legitimate enterprise automation prompts,
+  // which is the extension's primary use case. Financial-institution-specific
+  // patterns above already cover the actual high-risk cases.
   {
     category: "account_compromise",
     re: /\b(?:logs?|logging|signs?|signing)\s+in(?:to)?\b[\s\S]{0,30}\bsomeone(?:'s)?\b/i,
