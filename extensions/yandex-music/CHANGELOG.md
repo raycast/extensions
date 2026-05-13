@@ -1,6 +1,6 @@
 # Yandex Music Changelog
 
-## [Fix commands] - {PR_MERGE_DATE}
+## [Fix commands] - 2026-05-13
 
 Fixed following commands:
 
