@@ -131,9 +131,9 @@ export default async function tool(input: Input = {}) {
 
           const label =
             period === "weekly"
-              ? `Week of ${periodStart.toLocaleDateString("en-US")}`
+              ? `Week ${i + 1}: ${periodStart.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`
               : period === "monthly"
-                ? `${periodStart.toLocaleDateString("en-US", { month: "short", year: "numeric" })}`
+                ? `Period ${i + 1}: ${periodStart.toLocaleDateString("en-US", { month: "short", year: "numeric" })}`
                 : period === "quarterly"
                   ? `Q${Math.ceil((periodStart.getMonth() + 1) / 3)} ${periodStart.getFullYear()}`
                   : `${periodStart.getFullYear()}`;

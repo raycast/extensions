@@ -35,12 +35,17 @@ export default async function tool(input: Input = {}) {
       return "📊 No bank accounts found in your FreeAgent account.";
     }
 
+    const daysBack = input.days || 30;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - daysBack);
+    const fromDateStr = cutoffDate.toISOString().split("T")[0];
+
     let allTransactions: BankTransaction[] = [];
 
-    // Fetch transactions from all accounts
+    // Fetch transactions from all accounts, filtering server-side by date.
     for (const account of bankAccounts) {
       try {
-        const transactions = await fetchBankTransactions(token, account.url);
+        const transactions = await fetchBankTransactions(token, account.url, undefined, fromDateStr);
         allTransactions = allTransactions.concat(transactions.map((t) => ({ ...t, account_name: account.name })));
       } catch (error) {
         console.warn(`Failed to fetch transactions for ${account.name}:`, error);
@@ -51,14 +56,7 @@ export default async function tool(input: Input = {}) {
       return "📊 No bank transactions found across your accounts.";
     }
 
-    // Filter by date range if specified
-    const daysBack = input.days || 30;
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - daysBack);
-
-    const recentTransactions = allTransactions.filter((transaction) => {
-      return new Date(transaction.dated_on) >= cutoffDate;
-    });
+    const recentTransactions = allTransactions;
 
     let analysis = `💳 **Bank Transaction Analysis**\n\n`;
 

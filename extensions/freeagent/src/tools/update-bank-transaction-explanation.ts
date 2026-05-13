@@ -167,7 +167,7 @@ export default async function tool(input: Input) {
     }
 
     result += `\n💡 **Next Steps**:\n`;
-    result += `• The explanation has been updated and should no longer be marked for review\n`;
+    result += `• The explanation has been updated, but the transaction is still flagged for review — call update-bank-transaction with markedForReview=false to clear that flag\n`;
     result += `• You can view the updated explanation in your FreeAgent account\n`;
     result += `• Use the upload-attachment tool to add receipts or supporting documents\n`;
     result += `• Use list-categories tool to find appropriate category URLs\n`;

@@ -172,13 +172,14 @@ export default async function tool(input: Input = {}) {
 
     if (input.analysisType === "top-clients" || !input.analysisType) {
       analysis += `🏆 **Top Clients by Revenue**\n`;
+      const totalClientRevenue = clients.reduce((sum, c) => sum + c.totalValue, 0);
       clients
         .sort((a, b) => b.totalValue - a.totalValue)
         .slice(0, 10)
         .forEach((client, index) => {
           const clientName =
             client.contact.organisation_name || `${client.contact.first_name} ${client.contact.last_name}`;
-          const percentage = (client.totalValue / clients.reduce((sum, c) => sum + c.totalValue, 0)) * 100;
+          const percentage = totalClientRevenue > 0 ? (client.totalValue / totalClientRevenue) * 100 : 0;
 
           analysis += `${index + 1}. **${clientName}**\n`;
           analysis += `   • Revenue: ${formatCurrencyAmount(currency, client.totalValue)} (${percentage.toFixed(1)}%)\n`;
