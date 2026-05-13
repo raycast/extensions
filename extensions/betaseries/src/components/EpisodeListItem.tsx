@@ -12,7 +12,9 @@ export function EpisodeListItem({
   onMarkAsWatched,
   onLogout,
 }: EpisodeListItemProps) {
-  const title = `S${String(episode.season).padStart(2, "0")}E${String(episode.episode).padStart(2, "0")} - ${episode.title}`;
+  const episodeCode = `S${String(episode.season).padStart(2, "0")}E${String(episode.episode).padStart(2, "0")}`;
+  const title = `${episodeCode} - ${episode.title}`;
+  const copyTitle = `${episode.show.title} ${episodeCode}`;
   const formattedDate = episode.date
     ? new Date(episode.date).toLocaleDateString()
     : "";
@@ -32,6 +34,13 @@ export function EpisodeListItem({
               onAction={() => onMarkAsWatched(episode.id)}
             />
           )}
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard
+              title="Copy Show and Episode Number"
+              content={copyTitle}
+              shortcut={{ modifiers: ["opt"], key: "c" }}
+            />
+          </ActionPanel.Section>
           <Action.OpenInBrowser
             url={episode.resource_url}
             shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
