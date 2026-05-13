@@ -7,7 +7,7 @@ type Input = {
   /**
    * Time period for cash flow analysis
    */
-  period?: "weekly" | "monthly" | "quarterly" | "yearly" | "custom";
+  period?: "weekly" | "monthly" | "quarterly" | "yearly";
   /**
    * Number of periods to analyze (e.g., last 3 months, last 12 weeks)
    */

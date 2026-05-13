@@ -12,6 +12,8 @@
 - `search-explained-transactions` filters by date server-side instead of after fetching every explained transaction
 - `create-invoice-ai` defaults `sendEmail` to `false` so brand-new invoices (which still need line items) are never auto-emailed
 - `upload-attachment` performs proper base64 validation (the previous `Buffer.from` check never threw)
+- `cash-flow-summary` no longer advertises an unimplemented `"custom"` period that produced corrupted output
+- `match-file-to-transaction` invoice lookup now succeeds when only one of `fileAmount` or `fileDate` is provided (previously required both)
 
 ## [Add AI tools for managing projects, tasks, and timeslips] - {PR_MERGE_DATE}
 

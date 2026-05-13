@@ -451,30 +451,32 @@ function findMatchingInvoice(
   const transactionAmount = Math.abs(parseFloat(transaction.amount));
 
   for (const invoice of invoices) {
-    let match = false;
+    // Each provided criterion must individually pass. A missing criterion is not
+    // considered — the early-return above guarantees at least one was supplied.
+    let amountOk: boolean | null = null;
+    let dateOk: boolean | null = null;
 
-    // Check amount match
     if (input.fileAmount) {
       const invoiceAmount = parseFloat(invoice.net_value || invoice.total_value || "0");
       if (invoiceAmount > 0) {
         const amountDiff = Math.abs(transactionAmount - invoiceAmount) / invoiceAmount;
-        if (amountDiff < 0.05) {
-          // 5% tolerance
-          match = true;
-        }
+        amountOk = amountDiff < 0.05; // 5% tolerance
+      } else {
+        amountOk = false;
       }
     }
 
-    // Check date proximity
-    if (input.fileDate && match) {
+    if (input.fileDate) {
       const invoiceDate = new Date(invoice.dated_on);
       const fileDate = new Date(input.fileDate);
       const daysDiff = Math.abs((invoiceDate.getTime() - fileDate.getTime()) / (1000 * 60 * 60 * 24));
+      dateOk = daysDiff <= 30; // Within 30 days
+    }
 
-      if (daysDiff <= 30) {
-        // Within 30 days
-        return invoice;
-      }
+    const allProvidedPass = (amountOk === null || amountOk) && (dateOk === null || dateOk);
+    const anyProvided = amountOk !== null || dateOk !== null;
+    if (anyProvided && allProvidedPass) {
+      return invoice;
     }
   }
 
