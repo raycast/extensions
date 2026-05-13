@@ -74,7 +74,7 @@ async function makeRequest<T>(endpoint: string, accessToken: string, options?: R
     throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
   }
 
-  if (response.status === 204 || response.headers.get("content-length") === "0") {
+  if (response.status === 204) {
     return undefined as T;
   }
 
