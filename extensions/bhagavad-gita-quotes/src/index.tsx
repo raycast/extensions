@@ -87,11 +87,11 @@ export default function Command() {
   const { isLoading, data, error } = useFetch<VedicChapter[] | RapidChapter[]>(url, {
     ...options,
     execute: isVedic || !!preferences.apiKey,
-    onError: (err) => {
+    onError: (err: Error) => {
       showToast({
         style: Toast.Style.Failure,
         title: "Failed to fetch chapters",
-        message: err.message,
+        message: getErrorMessage(err),
       });
     },
   });
@@ -219,7 +219,7 @@ function VersesList({ chapterNumber, versesCount }: { chapterNumber: number; ver
             for (let i = start; i <= end; i++) {
               batch.push(
                 fetch(`https://vedicscriptures.github.io/slok/${chapterNumber}/${i}`).then(
-                  (r) => r.json() as Promise<VedicSlokResponse>,
+                  (r: Response) => r.json() as Promise<VedicSlokResponse>,
                 ),
               );
             }

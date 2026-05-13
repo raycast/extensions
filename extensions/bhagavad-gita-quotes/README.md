@@ -17,7 +17,7 @@ A Raycast extension that lets you read, search, and understand quotes from the B
     - Quran
     - Torah
     - Dhammapada
-- **Customization**: 
+- **Customization**:
   - Choose your preferred target language for AI features.
   - Customize the theme color of the extension's icons.
 

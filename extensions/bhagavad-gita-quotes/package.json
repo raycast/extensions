@@ -89,34 +89,76 @@
       "description": "Select the language for AI translations and explanations",
       "default": "English",
       "data": [
-        { "title": "English", "value": "English" },
-        { "title": "Spanish", "value": "Spanish" },
-        { "title": "French", "value": "French" },
-        { "title": "German", "value": "German" },
-        { "title": "Italian", "value": "Italian" },
-        { "title": "Portuguese", "value": "Portuguese" },
-        { "title": "Russian", "value": "Russian" },
-        { "title": "Chinese", "value": "Chinese" },
-        { "title": "Japanese", "value": "Japanese" },
-        { "title": "Korean", "value": "Korean" },
-        { "title": "Hindi", "value": "Hindi" },
-        { "title": "Arabic", "value": "Arabic" },
-        { "title": "Dutch", "value": "Dutch" },
-        { "title": "Turkish", "value": "Turkish" }
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "Spanish",
+          "value": "Spanish"
+        },
+        {
+          "title": "French",
+          "value": "French"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        },
+        {
+          "title": "Italian",
+          "value": "Italian"
+        },
+        {
+          "title": "Portuguese",
+          "value": "Portuguese"
+        },
+        {
+          "title": "Russian",
+          "value": "Russian"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "Japanese",
+          "value": "Japanese"
+        },
+        {
+          "title": "Korean",
+          "value": "Korean"
+        },
+        {
+          "title": "Hindi",
+          "value": "Hindi"
+        },
+        {
+          "title": "Arabic",
+          "value": "Arabic"
+        },
+        {
+          "title": "Dutch",
+          "value": "Dutch"
+        },
+        {
+          "title": "Turkish",
+          "value": "Turkish"
+        }
       ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.84.0",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "^20.8.10",
-    "@types/react": "^19.1.10",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.7.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.3.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build -e dist",
