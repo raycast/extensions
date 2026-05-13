@@ -245,7 +245,7 @@ export default async function tool(input: Input = {}) {
       analysis += `• Total Revenue: ${formatCurrencyAmount(currency, totalRevenue)}\n`;
       analysis += `• Total Paid: ${formatCurrencyAmount(currency, totalPaid)}\n`;
       analysis += `• Total Overdue: ${formatCurrencyAmount(currency, totalOverdue)}\n`;
-      analysis += `• Collection Rate: ${((totalPaid / totalRevenue) * 100).toFixed(1)}%\n`;
+      analysis += `• Collection Rate: ${totalRevenue > 0 ? ((totalPaid / totalRevenue) * 100).toFixed(1) : "N/A"}%\n`;
     }
 
     return analysis;
