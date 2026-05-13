@@ -142,8 +142,3 @@ export async function loadContacts(force = false): Promise<Contact[]> {
   await LocalStorage.setItem(CACHE_TIMESTAMP_KEY, String(Date.now()));
   return fresh;
 }
-
-export async function clearContactsCache(): Promise<void> {
-  await LocalStorage.removeItem(CACHE_KEY);
-  await LocalStorage.removeItem(CACHE_TIMESTAMP_KEY);
-}

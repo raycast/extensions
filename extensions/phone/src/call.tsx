@@ -12,7 +12,7 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Contact, clearContactsCache, loadContacts } from "./contacts";
+import { Contact, loadContacts } from "./contacts";
 import { formatDisplay, getCountryFlag } from "./format";
 import { frecencyScore, getFrecency, recordCall } from "./frecency";
 
@@ -159,7 +159,6 @@ export default function Command(
       title: "Refreshing contacts…",
     });
     try {
-      await clearContactsCache();
       await loadContacts(true);
       revalidate();
       setFrecency(await getFrecency());
