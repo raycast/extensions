@@ -1,4 +1,4 @@
-# Bhagvad Gita Quotes Changelog
+# Bhagavad Gita Quotes Changelog
 
 ## [Fix] - {PR_MERGE_DATE}
 
