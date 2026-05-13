@@ -1,0 +1,252 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ai-shell-smith",
+  "version": "0.0.1",
+  "title": "AI Shell Smith",
+  "description": "Create shell commands from natural language descriptions, grounded in your cwd, git context, and live docs.",
+  "icon": "command-icon.png",
+  "author": "jebraat",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "AI Shell Smith",
+      "subtitle": "Convert text to shell commands",
+      "description": "Create shell commands from natural language descriptions",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "prompt",
+          "placeholder": "Create a new Next.js project...",
+          "type": "text",
+          "required": false
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "provider",
+      "type": "dropdown",
+      "required": false,
+      "title": "Provider",
+      "description": "AI provider to use",
+      "default": "openai",
+      "data": [
+        {
+          "title": "OpenAI",
+          "value": "openai"
+        },
+        {
+          "title": "Perplexity",
+          "value": "perplexity"
+        },
+        {
+          "title": "Ollama",
+          "value": "ollama"
+        }
+      ]
+    },
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "OpenAI API Key",
+      "description": "Required for OpenAI models. Get yours at https://platform.openai.com/api-keys",
+      "placeholder": "sk-..."
+    },
+    {
+      "name": "perplexityApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Perplexity API Key",
+      "description": "Required for Perplexity. Get yours at https://www.perplexity.ai/api-platform",
+      "placeholder": "pplx-..."
+    },
+    {
+      "name": "context7ApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Context7 API Key",
+      "description": "Optional. Fetches up-to-date documentation for better command generation. Get yours at https://context7.com/dashboard",
+      "placeholder": "ctx7sk-..."
+    },
+    {
+      "name": "webSearch",
+      "type": "checkbox",
+      "required": false,
+      "title": "Web Search",
+      "label": "Use GPT-5 Search (OpenAI only)",
+      "description": "Enable web search (uses GPT-5 Search, only for OpenAI)",
+      "default": false
+    },
+    {
+      "name": "openaiModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "OpenAI Model",
+      "description": "Model to use when OpenAI is selected as provider",
+      "default": "gpt-5.4-nano",
+      "data": [
+        {
+          "title": "GPT-5.4 Nano (Fastest)",
+          "value": "gpt-5.4-nano"
+        },
+        {
+          "title": "GPT-5.4 Mini (Fast)",
+          "value": "gpt-5.4-mini"
+        }
+      ]
+    },
+    {
+      "name": "openaiUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "OpenAI URL",
+      "description": "Base URL for OpenAI-compatible endpoints (leave empty for api.openai.com)",
+      "placeholder": "https://api.openai.com/v1"
+    },
+    {
+      "name": "openaiModelCustom",
+      "type": "textfield",
+      "required": false,
+      "title": "OpenAI Custom Model",
+      "description": "Override model name when using custom OpenAI-compatible endpoints — takes priority if OpenAI URL is set",
+      "placeholder": "e.g. mistral-7b, llama3, deepseek-coder"
+    },
+    {
+      "name": "ollamaModel",
+      "type": "dropdown",
+      "required": false,
+      "title": "Ollama Model",
+      "description": "Model to use when Ollama is selected as provider",
+      "default": "gpt-oss:20b-cloud",
+      "data": [
+        {
+          "title": "GPT-OSS-20B",
+          "value": "gpt-oss:20b-cloud"
+        },
+        {
+          "title": "GPT-OSS-120B",
+          "value": "gpt-oss:120b-cloud"
+        }
+      ]
+    },
+    {
+      "name": "ollamaUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Ollama URL",
+      "description": "Base URL for Ollama API — with or without /v1",
+      "default": "http://localhost:11434",
+      "placeholder": "http://localhost:11434"
+    },
+    {
+      "name": "ollamaApiKey",
+      "type": "password",
+      "required": false,
+      "title": "Ollama API Key",
+      "description": "Optional API key for authenticated Ollama instances",
+      "placeholder": "Leave empty if not required"
+    },
+    {
+      "name": "terminal",
+      "type": "dropdown",
+      "required": false,
+      "title": "Terminal Application",
+      "description": "Leave empty to auto-detect your default terminal",
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto-detect (recommended)",
+          "value": "auto"
+        },
+        {
+          "title": "Warp",
+          "value": "Warp"
+        },
+        {
+          "title": "iTerm2",
+          "value": "iTerm2"
+        },
+        {
+          "title": "Ghostty",
+          "value": "Ghostty"
+        },
+        {
+          "title": "WezTerm",
+          "value": "WezTerm"
+        },
+        {
+          "title": "Alacritty",
+          "value": "Alacritty"
+        },
+        {
+          "title": "Kitty",
+          "value": "Kitty"
+        },
+        {
+          "title": "cmux",
+          "value": "cmux"
+        },
+        {
+          "title": "Terminal.app",
+          "value": "Terminal"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "openai": "^4.104.0",
+    "raycast-toolkit": "^1.0.6",
+    "run-applescript": "^6.0.0"
+  },
+  "optionalDependencies": {
+    "ctx7": "^1.0.0"
+  },
+  "screenshots": [
+    {
+      "path": "metadata/screen1.png",
+      "caption": "Initial state with provider and model settings"
+    },
+    {
+      "path": "metadata/screen2.png",
+      "caption": "Command history with generated command"
+    },
+    {
+      "path": "metadata/screen3.png",
+      "caption": "Actions panel with all available commands"
+    }
+  ],
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.0.0",
+    "@typescript-eslint/parser": "^5.0.0",
+    "eslint": "^7.32.0",
+    "eslint-config-prettier": "^8.3.0",
+    "prettier": "^2.5.1",
+    "typescript": "^4.4.3"
+  },
+  "bin": {
+    "aishellsmith": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "build:cli": "tsc src/cli.ts --outDir dist --declaration",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "playground": "bun run playground/index.ts",
+    "format": "prettier --write src test"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

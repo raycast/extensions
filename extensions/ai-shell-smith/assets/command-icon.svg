@@ -1,0 +1,28 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="sparkGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="40%" stop-color="#A6FFF0" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#14E5C5" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="96" ry="96" fill="#0A0F14"/>
+
+  <!-- Chevron `>` (shell prompt, bold) -->
+  <polyline points="150,128 330,256 150,384"
+            stroke="#14E5C5" stroke-width="56"
+            fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Anvil bar -->
+  <rect x="140" y="424" width="232" height="34" rx="12" fill="#14E5C5"/>
+
+  <!-- Forge spark at chevron tip (glow + bright core) -->
+  <circle cx="330" cy="256" r="80" fill="url(#sparkGlow)"/>
+  <circle cx="330" cy="256" r="18" fill="#FFFFFF"/>
+
+  <!-- Four directional sparks -->
+  <line x1="358" y1="228" x2="386" y2="200" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+  <line x1="358" y1="284" x2="386" y2="312" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+  <line x1="368" y1="256" x2="402" y2="256" stroke="#FFFFFF" stroke-width="8" stroke-linecap="round"/>
+</svg>
