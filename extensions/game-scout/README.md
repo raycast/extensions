@@ -4,14 +4,14 @@ The ultimate gaming companion for Raycast. Search across multiple storefronts, t
 
 ## Features
 
-* **Smart Recommendation Engine:** Heuristic scoring evaluates current prices against All-Time Lows (ATL), medians, and active bundles to generate actionable verdicts (👍 STRONG OPPORTUNITY, 🟢 GOOD OPPORTUNITY, 🟡 AVERAGE TIMING, 🟠 WEAK OPPORTUNITY, ❌ POOR OPPORTUNITY) along with special overrides (🎁 FREE TO CLAIM, 📦 CHEAPER IN BUNDLE).
-* **Price History Charts:** Visual price trend graphs (3-month, 6-month, 1-year ranges) generated directly in the detail view. *(Note: Can be toggled off in preferences to save API limits).*
-* **Bundle Content Viewer:** Drill down into active bundles to inspect pricing tiers, expiration dates, and included games.
 * **Search Games:** Quickly look up any game, see its current price, all-time low, and active bundles (via **IsThereAnyDeal API**).
-* **Saved Games:** Add games to your personal watchlist. Features advanced filtering (Only Deals, Biggest Discount, Best Opportunities) and a dynamic 🔥 Price Drops section.
+* **Smart Recommendation Engine:** Get instant verdicts (👍 STRONG OPPORTUNITY, 🟢 GOOD OPPORTUNITY, 🟡 AVERAGE TIMING, 🟠 WEAK OPPORTUNITY, ❌ POOR OPPORTUNITY) plus overrides (🎁 FREE TO CLAIM, 📦 CHEAPER IN BUNDLE) based on historical lows and bundle value analysis.
+* **Price History Charts:** Visual price trend graphs (3-month, 6-month, 1-year ranges) generated directly in the detail view (via **QuickChart.io**). *(Note: Can be toggled off in preferences to save API limits).*
+* **Bundle Content Viewer:** Inspect active bundle tiers, prices, and included games without leaving the extension (via **IsThereAnyDeal API**).
+* **Manage Stores:** Globally filter Search, Saved Games, and Top Deals to only show prices from your preferred storefronts.
+* **Saved Games:** Add games to your personal watchlist. Features advanced filtering (Only Deals, Biggest Discount, Best Opportunities) and a dynamic 🔥 Price Drops section. (via **IsThereAnyDeal API**).
 * **Top Deals:** Discover the highest-rated game deals across 30+ official stores, powered by the CheapShark Deal Rating algorithm (via **CheapShark API** - No API key required).
-* **Free Games:** Never miss a 100% free game or DLC giveaway across PC, PlayStation, Xbox, VR, and Mobile platforms (via **GamerPower API** - No API key required).
-* **Manage Stores:** Globally filter results across the extension so you only see prices from the storefronts you actually use.
+* **Free Games:** Never miss a 100% free game or DLC giveaway across PC, PlayStation, Xbox, VR and Mobile platforms (via **GamerPower API** - No API key required).
 
 ## Setup
 
