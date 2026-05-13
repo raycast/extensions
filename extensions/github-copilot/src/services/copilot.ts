@@ -305,7 +305,7 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
   const tasksWithoutPRs = retrievedTasks.filter(
     (task) => !task.artifacts.some((artifact) => artifact.data.type === "pull"),
   );
-  const uniqueRepoIds = Array.from(new Set(tasksWithoutPRs.map((task) => task.repository?.id).filter(Boolean)));
+  const uniqueRepoIds = Array.from(new Set(tasksWithoutPRs.map((task) => task.repository.id)));
 
   const repoResults = await Promise.allSettled(
     uniqueRepoIds.map(async (repoId) => {
@@ -330,7 +330,7 @@ const fetchTasks = async (): Promise<TaskWithPullRequest[]> => {
 
     const prGlobalId = pullArtifact?.data.global_id;
     const premiumRequests = prGlobalId ? premiumByGlobalId[prGlobalId] || 0 : 0;
-    const repository = pullRequest?.repository ?? repositories.find((r) => r.repoId === task.repository?.id) ?? null;
+    const repository = pullRequest?.repository ?? repositories.find((r) => r.repoId === task.repository.id) ?? null;
 
     return {
       task,
