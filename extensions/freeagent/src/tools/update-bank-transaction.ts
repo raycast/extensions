@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { updateBankTransaction, FreeAgentError } from "../services/freeagent";
 import { provider } from "../oauth";
 
@@ -14,6 +15,17 @@ type Input = {
    * Optional: Update the transaction description
    */
   description?: string;
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const info: { name: string; value: string }[] = [{ name: "Transaction URL", value: input.transactionUrl }];
+  if (input.markedForReview !== undefined) {
+    info.push({ name: "Marked for Review", value: input.markedForReview ? "Yes" : "No (clear flag)" });
+  }
+  if (input.description !== undefined) {
+    info.push({ name: "Description", value: input.description });
+  }
+  return { message: "Update this bank transaction?", info };
 };
 
 /**
@@ -39,7 +51,7 @@ export default async function tool(input: Input) {
     if (markedForReview !== undefined) {
       updateData.marked_for_review = markedForReview;
     }
-    if (description) {
+    if (description !== undefined) {
       updateData.description = description;
     }
 

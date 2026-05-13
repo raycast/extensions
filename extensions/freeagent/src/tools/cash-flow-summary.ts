@@ -162,14 +162,13 @@ export default async function tool(input: Input = {}) {
         }
 
         transactionAnalysis += `📊 **Cash Flow Trends (${period})**\n`;
-        Object.entries(periodData)
-          .reverse() // Show most recent first
-          .forEach(([periodName, data]) => {
-            const netEmoji = data.net >= 0 ? "📈" : "📉";
-            transactionAnalysis += `• ${periodName}: ${netEmoji} ${formatCurrencyAmount(currency, Math.abs(data.net))}\n`;
-            transactionAnalysis += `  - In: ${formatCurrencyAmount(currency, data.incoming)}\n`;
-            transactionAnalysis += `  - Out: ${formatCurrencyAmount(currency, data.outgoing)}\n`;
-          });
+        // periodData is built most-recent-first, so iterate in natural order.
+        Object.entries(periodData).forEach(([periodName, data]) => {
+          const netEmoji = data.net >= 0 ? "📈" : "📉";
+          transactionAnalysis += `• ${periodName}: ${netEmoji} ${formatCurrencyAmount(currency, Math.abs(data.net))}\n`;
+          transactionAnalysis += `  - In: ${formatCurrencyAmount(currency, data.incoming)}\n`;
+          transactionAnalysis += `  - Out: ${formatCurrencyAmount(currency, data.outgoing)}\n`;
+        });
 
         // Calculate averages
         const totalPeriods = Object.values(periodData).length;
@@ -177,7 +176,13 @@ export default async function tool(input: Input = {}) {
         const avgOutgoing = Object.values(periodData).reduce((sum, p) => sum + p.outgoing, 0) / totalPeriods;
         const avgNet = avgIncoming - avgOutgoing;
 
-        transactionAnalysis += `\n📈 **Averages per ${period.slice(0, -2)}**\n`;
+        const periodSingular: Record<string, string> = {
+          weekly: "week",
+          monthly: "month",
+          quarterly: "quarter",
+          yearly: "year",
+        };
+        transactionAnalysis += `\n📈 **Averages per ${periodSingular[period] || period}**\n`;
         transactionAnalysis += `• Incoming: ${formatCurrencyAmount(currency, avgIncoming)}\n`;
         transactionAnalysis += `• Outgoing: ${formatCurrencyAmount(currency, avgOutgoing)}\n`;
         transactionAnalysis += `• Net: ${formatCurrencyAmount(currency, avgNet)}\n\n`;
@@ -189,11 +194,6 @@ export default async function tool(input: Input = {}) {
     // Projections
     if (input.includeProjections !== false && invoices.length > 0) {
       analysis += `🔮 **Cash Flow Projections**\n`;
-
-      // Simple projection based on outstanding invoices and recent patterns
-      invoices
-        .filter((inv) => inv.status === "sent" || inv.status === "draft")
-        .reduce((sum, inv) => sum + parseFloat(inv.due_value || inv.total_value), 0);
 
       // Group outstanding invoices by expected payment month
       const projectedIncoming: { [month: string]: number } = {};

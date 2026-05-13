@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { updateBankTransactionExplanation, getBankTransactionExplanation } from "../services/freeagent";
 import { provider } from "../oauth";
 import { BankTransactionExplanationUpdateData } from "../types";
@@ -37,6 +38,18 @@ type Input = {
   attachmentUrl?: string;
 };
 
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const changes: { name: string; value: string }[] = [{ name: "Explanation URL", value: input.explanationUrl }];
+  if (input.description !== undefined) changes.push({ name: "Description", value: input.description });
+  if (input.categoryUrl !== undefined) changes.push({ name: "Category", value: input.categoryUrl });
+  if (input.grossValue !== undefined) changes.push({ name: "Gross Value", value: input.grossValue });
+  if (input.projectUrl !== undefined) changes.push({ name: "Project", value: input.projectUrl });
+  if (input.salesTaxStatus !== undefined) changes.push({ name: "Tax Status", value: input.salesTaxStatus });
+  if (input.salesTaxRate !== undefined) changes.push({ name: "Tax Rate", value: `${input.salesTaxRate}%` });
+  if (input.attachmentUrl !== undefined) changes.push({ name: "Attachment", value: input.attachmentUrl });
+  return { message: "Update this bank transaction explanation?", info: changes };
+};
+
 /**
  * Update an existing bank transaction explanation in FreeAgent.
  * This is used for transactions that already have an explanation but need changes.
@@ -57,19 +70,19 @@ export default async function tool(input: Input) {
     const urlParts = input.explanationUrl.split("/");
     const explanationId = urlParts[urlParts.length - 1];
 
-    if (!explanationId || !explanationId.match(/^\d+$/) || explanationId.length > 10) {
-      return "❌ Invalid explanation URL format or ID. Expected format: https://api.freeagent.com/v2/bank_transaction_explanations/{id}, where {id} is a numeric ID with up to 10 digits.";
+    if (!explanationId || !explanationId.match(/^\d+$/)) {
+      return "❌ Invalid explanation URL format or ID. Expected format: https://api.freeagent.com/v2/bank_transaction_explanations/{id}, where {id} is a numeric ID.";
     }
 
     // Check if any update fields are provided
     const hasUpdates =
-      input.description ||
-      input.categoryUrl ||
-      input.grossValue ||
-      input.projectUrl ||
-      input.salesTaxStatus ||
-      input.salesTaxRate ||
-      input.attachmentUrl;
+      input.description !== undefined ||
+      input.categoryUrl !== undefined ||
+      input.grossValue !== undefined ||
+      input.projectUrl !== undefined ||
+      input.salesTaxStatus !== undefined ||
+      input.salesTaxRate !== undefined ||
+      input.attachmentUrl !== undefined;
 
     if (!hasUpdates) {
       return "❌ At least one field must be provided to update. Available fields: description, categoryUrl, grossValue, projectUrl, salesTaxStatus, salesTaxRate, attachmentUrl";
@@ -86,31 +99,31 @@ export default async function tool(input: Input) {
     // Prepare update data
     const updateData: BankTransactionExplanationUpdateData = {};
 
-    if (input.description) {
+    if (input.description !== undefined) {
       updateData.description = input.description;
     }
 
-    if (input.categoryUrl) {
+    if (input.categoryUrl !== undefined) {
       updateData.category = input.categoryUrl;
     }
 
-    if (input.grossValue) {
+    if (input.grossValue !== undefined) {
       updateData.gross_value = input.grossValue;
     }
 
-    if (input.projectUrl) {
+    if (input.projectUrl !== undefined) {
       updateData.project = input.projectUrl;
     }
 
-    if (input.salesTaxStatus) {
+    if (input.salesTaxStatus !== undefined) {
       updateData.sales_tax_status = input.salesTaxStatus;
     }
 
-    if (input.salesTaxRate) {
+    if (input.salesTaxRate !== undefined) {
       updateData.sales_tax_rate = input.salesTaxRate;
     }
 
-    if (input.attachmentUrl) {
+    if (input.attachmentUrl !== undefined) {
       updateData.attachment = input.attachmentUrl;
     }
 
@@ -122,27 +135,27 @@ export default async function tool(input: Input) {
 
     result += `📝 **Changes Made**:\n`;
 
-    if (input.description) {
+    if (input.description !== undefined) {
       result += `• **Description**: "${currentExplanation.description}" → "${updatedExplanation.description}"\n`;
     }
 
-    if (input.grossValue) {
+    if (input.grossValue !== undefined) {
       result += `• **Amount**: ${currentExplanation.gross_value} → ${updatedExplanation.gross_value}\n`;
     }
 
-    if (input.categoryUrl) {
+    if (input.categoryUrl !== undefined) {
       result += `• **Category**: Updated to ${updatedExplanation.category || "new category"}\n`;
     }
 
-    if (input.salesTaxStatus) {
+    if (input.salesTaxStatus !== undefined) {
       result += `• **Tax Status**: ${currentExplanation.sales_tax_status || "none"} → ${updatedExplanation.sales_tax_status}\n`;
     }
 
-    if (input.salesTaxRate) {
+    if (input.salesTaxRate !== undefined) {
       result += `• **Tax Rate**: ${currentExplanation.sales_tax_rate || "0"}% → ${updatedExplanation.sales_tax_rate}%\n`;
     }
 
-    if (input.attachmentUrl) {
+    if (input.attachmentUrl !== undefined) {
       result += `• **Attachment**: Added new attachment\n`;
     }
 

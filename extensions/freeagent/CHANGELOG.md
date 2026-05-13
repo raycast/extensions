@@ -1,5 +1,18 @@
 # FreeAgent Changelog
 
+## [Fix review feedback for AI tools] - {PR_MERGE_DATE}
+
+- `add-bank-transaction-explanation`, `update-bank-transaction-explanation`, `update-bank-transaction`, and `upload-attachment` now require explicit confirmation before writing
+- `add-bank-transaction-explanation` now validates that `bankAccountUrl` is provided and no longer accepts a non-functional `attachmentUrl` parameter (use `upload-attachment` + `update-bank-transaction-explanation` instead)
+- `update-bank-transaction-explanation` no longer rejects valid 11+ digit explanation IDs and treats explicitly-passed empty strings/zero values as intentional updates
+- `get-all-bank-transactions` summary totals are now computed across the full result, not just the displayed slice
+- `cash-flow-summary` shows trend periods most-recent first (was reversed), uses a proper singular-period label, and drops a dead `.reduce(...)` call
+- `analyze-financials` no longer hides the "Financial Overview" section when `analysisType="overview"` is requested
+- `match-file-to-transaction` guards against division by zero when the file or invoice amount is `0`
+- `search-explained-transactions` filters by date server-side instead of after fetching every explained transaction
+- `create-invoice-ai` defaults `sendEmail` to `false` so brand-new invoices (which still need line items) are never auto-emailed
+- `upload-attachment` performs proper base64 validation (the previous `Buffer.from` check never threw)
+
 ## [Add AI tools for managing projects, tasks, and timeslips] - {PR_MERGE_DATE}
 
 - Added `list-projects`, `create-project`, and `delete-project` AI tools (create/delete require confirmation)

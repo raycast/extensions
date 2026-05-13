@@ -1,6 +1,15 @@
+import { Tool } from "@raycast/api";
 import { uploadAttachment } from "../services/freeagent";
 import { provider } from "../oauth";
 import { AttachmentUploadData } from "../types";
+
+function isValidBase64(data: string): boolean {
+  // Strip optional data: URL prefix and surrounding whitespace
+  const trimmed = data.replace(/^data:[^;]+;base64,/, "").trim();
+  if (trimmed.length === 0 || trimmed.length % 4 !== 0) return false;
+  // Allowed chars: A-Z a-z 0-9 + / =, with = padding only at the end (max 2)
+  return /^[A-Za-z0-9+/]+={0,2}$/.test(trimmed);
+}
 
 type Input = {
   /**
@@ -20,6 +29,15 @@ type Input = {
    */
   description?: string;
 };
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => ({
+  message: `Upload "${input.fileName}" to FreeAgent?`,
+  info: [
+    { name: "File Name", value: input.fileName },
+    { name: "Content Type", value: input.contentType },
+    ...(input.description ? [{ name: "Description", value: input.description }] : []),
+  ],
+});
 
 /**
  * Upload a file attachment to FreeAgent that can be associated with bank transaction explanations.
@@ -68,11 +86,9 @@ export default async function tool(input: Input) {
       return `❌ Unsupported content type: ${input.contentType}. Supported types: ${validContentTypes.join(", ")}`;
     }
 
-    // Validate base64 data
-    try {
-      // Attempt to decode the base64 string to ensure it is valid
-      Buffer.from(input.fileData, "base64");
-    } catch {
+    // Validate base64 data (Buffer.from(..., "base64") silently drops bad chars,
+    // so we check the character set + padding length explicitly).
+    if (!isValidBase64(input.fileData)) {
       return "❌ Invalid file data format. Please provide valid base64 encoded content.";
     }
 

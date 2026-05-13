@@ -272,10 +272,13 @@ function calculateMatchConfidence(
   if (input.fileAmount) {
     const transactionAmount = Math.abs(parseFloat(transaction.amount));
     const fileAmount = Math.abs(input.fileAmount);
-    const amountDiff = Math.abs(transactionAmount - fileAmount) / fileAmount;
 
-    if (amountDiff <= amountTolerance / 100) {
-      confidence += 40 * (1 - amountDiff * (100 / amountTolerance));
+    if (fileAmount > 0) {
+      const amountDiff = Math.abs(transactionAmount - fileAmount) / fileAmount;
+
+      if (amountDiff <= amountTolerance / 100) {
+        confidence += 40 * (1 - amountDiff * (100 / amountTolerance));
+      }
     }
   }
 
@@ -346,13 +349,16 @@ function getMatchReasons(
   if (input.fileAmount) {
     const transactionAmount = Math.abs(parseFloat(transaction.amount));
     const fileAmount = Math.abs(input.fileAmount);
-    const amountDiff = Math.abs(transactionAmount - fileAmount) / fileAmount;
 
-    if (amountDiff <= amountTolerance / 100) {
-      if (amountDiff < 0.01) {
-        reasons.push("Exact amount match");
-      } else {
-        reasons.push(`Amount match within ${Math.round(amountDiff * 100)}% tolerance`);
+    if (fileAmount > 0) {
+      const amountDiff = Math.abs(transactionAmount - fileAmount) / fileAmount;
+
+      if (amountDiff <= amountTolerance / 100) {
+        if (amountDiff < 0.01) {
+          reasons.push("Exact amount match");
+        } else {
+          reasons.push(`Amount match within ${Math.round(amountDiff * 100)}% tolerance`);
+        }
       }
     }
   }
@@ -450,10 +456,12 @@ function findMatchingInvoice(
     // Check amount match
     if (input.fileAmount) {
       const invoiceAmount = parseFloat(invoice.net_value || invoice.total_value || "0");
-      const amountDiff = Math.abs(transactionAmount - invoiceAmount) / invoiceAmount;
-      if (amountDiff < 0.05) {
-        // 5% tolerance
-        match = true;
+      if (invoiceAmount > 0) {
+        const amountDiff = Math.abs(transactionAmount - invoiceAmount) / invoiceAmount;
+        if (amountDiff < 0.05) {
+          // 5% tolerance
+          match = true;
+        }
       }
     }
 

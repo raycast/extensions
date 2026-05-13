@@ -43,12 +43,18 @@ export default async function tool(input: Input = {}) {
       return "📊 No bank accounts found in your FreeAgent account.";
     }
 
+    // Derive the date range up front so the server filters out older transactions.
+    const searchDays = input.searchDays || 180;
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - searchDays);
+    const fromDateStr = cutoffDate.toISOString().split("T")[0];
+
     let explainedTransactions: (BankTransaction & { account_name: string })[] = [];
 
-    // Fetch explained transactions from all accounts
+    // Fetch explained transactions from all accounts within the search window
     for (const account of bankAccounts) {
       try {
-        const transactions = await fetchBankTransactions(token, account.url, "explained");
+        const transactions = await fetchBankTransactions(token, account.url, "explained", fromDateStr);
         explainedTransactions = explainedTransactions.concat(
           transactions.map((t) => ({ ...t, account_name: account.name })),
         );
@@ -61,14 +67,7 @@ export default async function tool(input: Input = {}) {
       return "📊 No explained transactions found in your FreeAgent accounts.";
     }
 
-    // Filter by date range
-    const searchDays = input.searchDays || 180;
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - searchDays);
-
-    let filteredTransactions = explainedTransactions.filter((transaction) => {
-      return new Date(transaction.dated_on) >= cutoffDate;
-    });
+    let filteredTransactions = explainedTransactions;
 
     // Apply search filters
     if (input.searchQuery) {

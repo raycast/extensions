@@ -39,7 +39,7 @@ export default async function tool(input: Input = {}) {
 
     let analysis = "";
 
-    if (input.analysisType === "overdue" || !input.analysisType) {
+    if (input.analysisType === "overview" || !input.analysisType) {
       analysis += `📊 **Financial Overview**\n\n`;
       analysis += `💰 **Total Invoice Value**: ${formatCurrencyAmount(invoices[0]?.currency || "GBP", totalInvoiceValue)}\n`;
       analysis += `✅ **Paid Amount**: ${formatCurrencyAmount(invoices[0]?.currency || "GBP", paidValue)}\n`;

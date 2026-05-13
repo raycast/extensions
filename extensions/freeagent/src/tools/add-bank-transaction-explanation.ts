@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { createBankTransactionExplanation } from "../services/freeagent";
 import { provider } from "../oauth";
 import { BankTransactionExplanationCreateData } from "../types";
@@ -35,11 +36,21 @@ type Input = {
    * Optional sales tax rate (e.g., "20.0" for 20%)
    */
   salesTaxRate?: string;
-  /**
-   * Optional URL of an uploaded attachment (use upload-attachment tool first)
-   */
-  attachmentUrl?: string;
 };
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => ({
+  message: "Add explanation to this bank transaction?",
+  info: [
+    { name: "Transaction URL", value: input.bankTransactionUrl },
+    { name: "Bank Account URL", value: input.bankAccountUrl },
+    { name: "Description", value: input.description },
+    { name: "Gross Value", value: input.grossValue },
+    { name: "Date", value: input.datedOn },
+    ...(input.categoryUrl ? [{ name: "Category", value: input.categoryUrl }] : []),
+    ...(input.salesTaxStatus ? [{ name: "Tax Status", value: input.salesTaxStatus }] : []),
+    ...(input.salesTaxRate ? [{ name: "Tax Rate", value: `${input.salesTaxRate}%` }] : []),
+  ],
+});
 
 /**
  * Add an explanation to a bank transaction in FreeAgent.
@@ -63,6 +74,10 @@ export default async function tool(input: Input) {
     // Validate required inputs
     if (!input.bankTransactionUrl) {
       return "❌ Bank transaction URL is required. Use the list-unexplained-transactions tool to get transaction URLs.";
+    }
+
+    if (!input.bankAccountUrl) {
+      return "❌ Bank account URL is required. Get it from the transaction's `bank_account` field or from the list of bank accounts.";
     }
 
     if (!input.description) {
@@ -121,19 +136,11 @@ export default async function tool(input: Input) {
 
     result += `\n🔗 **Explanation URL**: ${explanation.url}\n`;
 
-    // If an attachment was provided, try to add it to the explanation
-    if (input.attachmentUrl && explanation.url) {
-      result += `\n📎 **Attachment**: Adding attachment to explanation...\n`;
-      result += `💡 To add the attachment, use the update-bank-transaction-explanation tool with:\n`;
-      result += `   • explanationUrl: ${explanation.url}\n`;
-      result += `   • attachmentUrl: ${input.attachmentUrl}\n`;
-    }
-
     result += `\n💡 **Next Steps**:\n`;
     result += `• The transaction has been marked as explained in FreeAgent\n`;
     result += `• You can view and edit this explanation in your FreeAgent account\n`;
     result += `• Use the list-categories tool to find category URLs for future explanations\n`;
-    result += `• Use the upload-attachment tool to add receipts or supporting documents\n`;
+    result += `• To attach a receipt, upload it with upload-attachment then call update-bank-transaction-explanation with the resulting attachmentUrl\n`;
 
     return result;
   } catch (error) {

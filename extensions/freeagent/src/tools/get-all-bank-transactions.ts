@@ -82,6 +82,16 @@ export default async function tool(input: Input = {}) {
           continue;
         }
 
+        // Count totals across all transactions (not just the displayed slice)
+        for (const t of transactions) {
+          if (t.unexplained_amount && parseFloat(t.unexplained_amount) > 0) {
+            totalUnexplained++;
+          }
+          if (t.marked_for_review) {
+            totalMarkedForReview++;
+          }
+        }
+
         result += `   📊 Total: ${transactions.length} transactions\n\n`;
 
         // Display transactions (limited by maxTransactions)
@@ -95,7 +105,6 @@ export default async function tool(input: Input = {}) {
           if (transaction.unexplained_amount && parseFloat(transaction.unexplained_amount) > 0) {
             statusIcon = "❗";
             statusText = " (Unexplained)";
-            totalUnexplained++;
           }
           if (transaction.is_manual) {
             statusIcon = "✏️";
@@ -104,7 +113,6 @@ export default async function tool(input: Input = {}) {
           if (transaction.marked_for_review) {
             statusIcon = "🔍";
             statusText += " (Marked for Review)";
-            totalMarkedForReview++;
           }
 
           result += `   ${statusIcon} **${transaction.description}**${statusText}\n`;

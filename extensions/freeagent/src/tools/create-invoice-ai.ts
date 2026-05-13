@@ -21,7 +21,9 @@ type Input = {
    */
   reference?: string;
   /**
-   * Whether to send email notification to client
+   * Whether to send email notification to the client. Defaults to false because this tool
+   * creates the invoice without line items — sending immediately would email a blank
+   * invoice. Set to true only after the invoice has been populated with line items.
    */
   sendEmail?: boolean;
 };
@@ -54,7 +56,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
         { name: "Details", value: input.invoiceDetails },
         { name: "Payment Terms", value: `${input.paymentTerms || 30} days` },
         { name: "Reference", value: input.reference || "Auto-generated" },
-        { name: "Send Email", value: input.sendEmail ? "Yes" : "No" },
+        { name: "Send Email", value: input.sendEmail === true ? "Yes" : "No (invoice has no line items)" },
       ],
     };
   } catch {
@@ -126,7 +128,7 @@ export default async function tool(input: Input) {
       contact: selectedContact.url,
       dated_on: new Date().toISOString().split("T")[0], // Today's date
       payment_terms_in_days: input.paymentTerms || 30,
-      send_new_invoice_emails: input.sendEmail !== false, // Default to true
+      send_new_invoice_emails: input.sendEmail === true, // Default to false — invoice has no line items yet
       reference: input.reference,
     };
 
