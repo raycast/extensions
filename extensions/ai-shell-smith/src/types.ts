@@ -1,7 +1,3 @@
-export type ShellBuddyArguments = {
-  prompt?: string;
-};
-
 export type CommandHistoryItem = {
   prompt: string;
   command: string;

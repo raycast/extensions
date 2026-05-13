@@ -68,6 +68,12 @@ describe("BuildContext", () => {
     expect(ctx.cwd.length).toBeGreaterThan(0);
     expect(ctx.shell.length).toBeGreaterThan(0);
   });
+
+  test("extension mode omits git resolution (Raycast host cwd is not the project)", () => {
+    const ctx = BuildContext({ useProcessWorkspace: false });
+    expect(ctx.repoRoot).toBe("");
+    expect(ctx.cwd).toBeDefined();
+  });
 });
 
 describe("history.parseHistoryLine", () => {

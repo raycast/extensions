@@ -23,6 +23,8 @@ export interface EngineOptions {
   customModels?: {
     openai?: string;
   };
+  /** Raycast host: do not treat process cwd/git as the user's project. */
+  extensionHost?: boolean;
 }
 
 export interface EngineResult {
@@ -302,6 +304,7 @@ export async function convertPrompt(
     apiKeys = {},
     urls = {},
     customModels = {},
+    extensionHost = false,
   } = options;
 
   const isOllama = provider === "ollama";
@@ -329,8 +332,8 @@ export async function convertPrompt(
   }
 
   try {
-    const cwd = process.cwd();
-    const cacheKey = cwd + "\x00" + prompt;
+    const cacheKey =
+      (extensionHost ? "raycast" : process.cwd()) + "\x00" + prompt;
     const cached = globalCache.get(cacheKey);
     if (cached) {
       return {
@@ -365,7 +368,9 @@ export async function convertPrompt(
       baseURL: resolvedBaseURL,
     });
 
-    const context = BuildContext();
+    const context = BuildContext({
+      useProcessWorkspace: !extensionHost,
+    });
     const contextualSystemPrompt = await buildContextualSystemPrompt(
       "",
       context.repoRoot,

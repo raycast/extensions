@@ -26,7 +26,7 @@ import {
   type ModelOption,
 } from "./config";
 import { globalCache } from "./cache";
-import type { ShellBuddyArguments, CommandHistoryItem } from "./types";
+import type { CommandHistoryItem } from "./types";
 
 const PROVIDERS: ReadonlyArray<{ title: string; value: Provider }> = [
   { title: "OpenAI", value: "openai" },
@@ -41,7 +41,7 @@ const DEBOUNCE_MS = 1200;
 const modelsFor = (provider: Provider): ReadonlyArray<ModelOption> =>
   MODELS_BY_PROVIDER[provider];
 
-export default function Command(props: { arguments: ShellBuddyArguments }) {
+export default function Command(props: { arguments: Arguments.Index }) {
   const { prompt: defaultPrompt } = props.arguments;
   const preferences = getPreferenceValues<Preferences>();
   const {
@@ -128,6 +128,7 @@ export default function Command(props: { arguments: ShellBuddyArguments }) {
       model,
       provider,
       webSearch,
+      extensionHost: true,
       apiKeys: {
         openai: apiKey,
         perplexity: perplexityApiKey,

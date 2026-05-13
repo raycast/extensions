@@ -142,4 +142,4 @@ AI_SHELLSMITH_LIVE_TESTS=1 OPENAI_API_KEY="sk-..." bun test     # also runs live
 - **Context7 hits**: ~500–1000 ms (CLI execution + parsing).
 - **AI generation**: ~1–3 s (network + token processing).
 
-Cache key: `cwd + "\x00" + prompt` — same prompt in the same directory returns instantly.
+Cache key: CLI uses `cwd + "\x00" + prompt`; the Raycast extension uses a stable `raycast + "\x00" + prompt` (host cwd is not the user's project).

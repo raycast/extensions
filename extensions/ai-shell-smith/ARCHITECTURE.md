@@ -174,7 +174,7 @@ Small, focused files (`cache`, `context`, `history`, `validator`) that can be un
 
 - **Context7 first**: documentation lookup (fastest, most accurate).
 - **AI fallback**: when Context7 returns nothing usable.
-- **Cache**: 60 s TTL, LRU eviction at 128 entries, keyed by `cwd + "\x00" + prompt`.
+- **Cache**: 60 s TTL, LRU eviction at 128 entries — CLI: `cwd + "\x00" + prompt`; Raycast host: `raycast + "\x00" + prompt`.
 
 ### Multi-Provider
 

@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { execSync, execFileSync } from "child_process";
+import { execSync, execFileSync, spawn } from "child_process";
 import { existsSync } from "fs";
 import type { KnownPrompts } from "./types";
 
@@ -132,6 +132,26 @@ async function runInWezTerm(command: string): Promise<void> {
   `);
 }
 
+async function runInAlacritty(command: string): Promise<void> {
+  const bin = "/Applications/Alacritty.app/Contents/MacOS/alacritty";
+  if (!existsSync(bin)) return runInTerminal(command);
+  const child = spawn(bin, ["-e", "sh", "-c", command], {
+    stdio: "ignore",
+    detached: true,
+  });
+  child.unref();
+}
+
+async function runInKitty(command: string): Promise<void> {
+  const bin = "/Applications/Kitty.app/Contents/MacOS/kitty";
+  if (!existsSync(bin)) return runInTerminal(command);
+  const child = spawn(bin, ["-e", "sh", "-c", command], {
+    stdio: "ignore",
+    detached: true,
+  });
+  child.unref();
+}
+
 async function runInCmux(command: string): Promise<void> {
   // If cmux session exists, send command to it
   // Otherwise, execute in new cmux environment
@@ -182,6 +202,10 @@ export async function runCommandInDefaultTerminal(
       return runInGhostty(command);
     case "WezTerm":
       return runInWezTerm(command);
+    case "Alacritty":
+      return runInAlacritty(command);
+    case "Kitty":
+      return runInKitty(command);
     case "cmux":
       return runInCmux(command);
     case "Terminal":

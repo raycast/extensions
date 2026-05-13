@@ -3,7 +3,7 @@
   "name": "ai-shell-smith",
   "version": "0.0.1",
   "title": "AI Shell Smith",
-  "description": "Create shell commands from natural language descriptions, grounded in your cwd, git context, and live docs.",
+  "description": "Create shell commands from natural language. Optional docs via Context7, multi-provider AI, and shell history hints.",
   "icon": "command-icon.png",
   "author": "jebraat",
   "categories": [
@@ -243,7 +243,6 @@
     "publish": "ray publish",
     "typecheck": "tsc --noEmit",
     "test": "bun test",
-    "playground": "bun run playground/index.ts",
     "format": "prettier --write src test"
   },
   "platforms": [
