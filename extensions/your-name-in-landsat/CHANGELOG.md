@@ -1,6 +1,6 @@
 # Your Name in Landsat Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-13
 
 - Generate Landsat satellite imagery from a name (up to 16 letters)
 - Detail view with tile metadata and links to NASA sources
