@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "portless-bar",
+  "title": "Portless",
+  "description": "Search and manage active Portless routes from Raycast.",
+  "icon": "icon.png",
+  "author": "valentino",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "portless",
+    "localhost",
+    "routes",
+    "ports",
+    "developer tools"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Search Portless",
+      "description": "Search active Portless routes.",
+      "mode": "view",
+      "keywords": [
+        "routes",
+        "ports",
+        "localhost"
+      ]
+    },
+    {
+      "name": "portless-menu-bar",
+      "title": "Menu Bar Portless",
+      "description": "Show active Portless routes in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1m"
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.16",
+    "portless": "^0.13.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0",
+    "typescript": "^6.0.3"
+  }
+}
