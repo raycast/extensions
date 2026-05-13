@@ -154,17 +154,22 @@ export default function Command(
   const ranked = filtered;
 
   async function refresh() {
-    await showToast({
+    const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Refreshing contacts…",
     });
-    await clearContactsCache();
-    await revalidate();
-    setFrecency(await getFrecency());
-    await showToast({
-      style: Toast.Style.Success,
-      title: "Contacts refreshed",
-    });
+    try {
+      await clearContactsCache();
+      await loadContacts(true);
+      revalidate();
+      setFrecency(await getFrecency());
+      toast.style = Toast.Style.Success;
+      toast.title = "Contacts refreshed";
+    } catch (err) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Refresh failed";
+      toast.message = err instanceof Error ? err.message : String(err);
+    }
   }
 
   return (
