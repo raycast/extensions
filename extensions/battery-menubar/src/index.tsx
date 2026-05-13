@@ -19,7 +19,7 @@ type SystemState = {
   time: number;
 };
 
-const cacheKey = "SystemState-V2";
+const cacheKey = "SystemState-V3";
 
 function getDeviceSubtitle(device: BluetoothBatteryDevice): string {
   if (device.batteryLevel != null) return `${device.batteryLevel}%`;
@@ -27,6 +27,12 @@ function getDeviceSubtitle(device: BluetoothBatteryDevice): string {
     return `L ${device.batteryLeft}% • R ${device.batteryRight}%${
       device.batteryCase != null ? ` • Case ${device.batteryCase}%` : ""
     }`;
+  }
+  if (device.batteryLeft != null) {
+    return `L ${device.batteryLeft}%${device.batteryCase != null ? ` • Case ${device.batteryCase}%` : ""}`;
+  }
+  if (device.batteryRight != null) {
+    return `R ${device.batteryRight}%${device.batteryCase != null ? ` • Case ${device.batteryCase}%` : ""}`;
   }
   if (device.batteryCase != null) return `Case ${device.batteryCase}%`;
   if (!device.isConnected) return "Not connected";
