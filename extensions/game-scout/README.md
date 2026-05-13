@@ -4,7 +4,7 @@ The ultimate gaming companion for Raycast. Search across multiple storefronts, t
 
 ## Features
 
-* **Smart Recommendation Engine:** Heuristic scoring evaluates current prices against All-Time Lows (ATL), medians, and active bundles to generate actionable verdicts (🔥 GREAT DEAL, 👍 GOOD DEAL, 🟡 FAIR PRICE, 🔴 HIGH PRICE).
+* **Smart Recommendation Engine:** Heuristic scoring evaluates current prices against All-Time Lows (ATL), medians, and active bundles to generate actionable verdicts (👍 STRONG OPPORTUNITY, 🟢 GOOD OPPORTUNITY, 🟡 AVERAGE TIMING, 🟠 WEAK OPPORTUNITY, ❌ POOR OPPORTUNITY) along with special overrides (🎁 FREE TO CLAIM, 📦 CHEAPER IN BUNDLE).
 * **Price History Charts:** Visual price trend graphs (3-month, 6-month, 1-year ranges) generated directly in the detail view. *(Note: Can be toggled off in preferences to save API limits).*
 * **Bundle Content Viewer:** Drill down into active bundles to inspect pricing tiers, expiration dates, and included games.
 * **Search Games:** Quickly look up any game, see its current price, all-time low, and active bundles (via **IsThereAnyDeal API**).

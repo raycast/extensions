@@ -29,10 +29,16 @@ const cache = new Cache();
 const CACHE_KEY = `itad_saved_prices_v1_${COUNTRY}`;
 const CACHE_TTL =
   parseInt(preferences.refreshFrequency || "12") * 60 * 60 * 1000;
+const detailCache = new Cache({ namespace: "search_detail" });
 const DETAIL_CACHE_TTL = 6 * 60 * 60 * 1000;
 const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
 
-import { formatPrice, isStoreAllowed, buildBundleMap } from "./utils";
+import {
+  formatPrice,
+  isStoreAllowed,
+  buildBundleMap,
+  computeGameInsight,
+} from "./utils";
 
 export default function SavedGames() {
   const isApiKeyValid = API_KEY.length > 0;
@@ -145,7 +151,10 @@ export default function SavedGames() {
         },
       );
 
-      const newBundleCounts = buildBundleMap(oJson);
+      const oFlat = Array.isArray(oJson)
+        ? oJson
+        : Object.values(oJson as Record<string, any[]>).flat();
+      const newBundleCounts = buildBundleMap(oFlat);
 
       setRawPrices(priceMap);
       setBundleCounts(newBundleCounts);
@@ -202,17 +211,16 @@ export default function SavedGames() {
   const scoreGame = (id: string) => {
     const deal = prices[id];
     if (!deal) return -999;
-    const price = deal.price?.amount ?? 999;
     const cut = deal.cut ?? 0;
     const bundle = bundleCounts[id] ?? 0;
-    const normDiscount = cut / 100;
-    const normPrice = 1 - Math.min(price / 60, 1);
-    const bundleBonus = bundle > 0 ? 0.15 : 0;
-    return normDiscount * 0.5 + normPrice * 0.35 + bundleBonus;
+    return cut + (bundle > 0 ? 20 : 0); // higher weight for bundles
   };
 
   const sortedAndFilteredGames = useMemo(() => {
     let list = [...savedGames];
+    if (filterMode === "default" || !filterMode) {
+      list.reverse(); // most recently saved first
+    }
     if (filterMode === "deals") {
       list = list.filter((g) => prices[g.id] && prices[g.id].cut > 0);
     } else if (filterMode === "discount") {
@@ -239,7 +247,7 @@ export default function SavedGames() {
   const majorDrops = savedGames.filter((game) => {
     const last = referencePrices[game.id];
     const current = prices[game.id]?.price?.amount;
-    if (!last || !current) return false;
+    if (last == null || current == null || last === 0) return false;
     const diff = ((current - last) / last) * 100;
     return diff <= -10;
   });
@@ -317,163 +325,178 @@ export default function SavedGames() {
                 })}
             </List.Section>
           )}
-          {sortedAndFilteredGames
-            .filter(
-              (g) =>
-                filterMode !== "default" ||
-                !majorDrops.some((d) => d.id === g.id),
-            )
-            .map((game) => {
-              const deal = prices[game.id];
-              const acc = [];
+          <List.Section
+            title={
+              majorDrops.length > 0 && filterMode === "default"
+                ? "Other Saved Games"
+                : undefined
+            }
+          >
+            {sortedAndFilteredGames
+              .filter(
+                (g) =>
+                  filterMode !== "default" ||
+                  !majorDrops.some((d) => d.id === g.id),
+              )
+              .map((game) => {
+                const deal = prices[game.id];
+                const acc = [];
 
-              if (!deal && isLoading) {
-                acc.push({
-                  icon: Icon.Clock,
-                  tooltip: "Loading price...",
-                  tintColor: Color.SecondaryText,
-                });
-              } else if (deal) {
-                const currentPrice = deal.price?.amount;
-                const lastPrice = referencePrices[game.id];
-
-                if (lastPrice && currentPrice !== lastPrice) {
-                  const diffAbs = currentPrice - lastPrice;
-                  const diffPct = (diffAbs / lastPrice) * 100;
-
-                  if (Math.abs(diffPct) >= 3) {
-                    let label = "";
-                    if (diffPct <= -10) label = "🔥 DROP";
-                    else if (diffPct < 0) label = "⬇ DOWN";
-                    else if (diffPct >= 10) label = "⚠️ SPIKE";
-                    else label = "⬆ UP";
-
+                if (!deal && isLoading) {
+                  acc.push({
+                    icon: Icon.Clock,
+                    tooltip: "Loading price...",
+                    tintColor: Color.SecondaryText,
+                  });
+                } else if (deal) {
+                  const currentPrice = deal.price?.amount;
+                  if (bundleCounts[String(game.id)] > 0) {
                     acc.push({
-                      tag: {
-                        value: `${label} ${diffPct > 0 ? "+" : ""}${diffPct.toFixed(0)}%`,
-                        color: diffPct > 0 ? Color.Red : Color.Green,
-                      },
+                      icon: { source: Icon.Box, tintColor: Color.Purple },
+                      tooltip: "Available in a Bundle",
+                    });
+                  }
+                  const lastPrice = referencePrices[game.id];
+
+                  if (lastPrice != null && currentPrice !== lastPrice) {
+                    const diffAbs = currentPrice - lastPrice;
+                    const diffPct =
+                      lastPrice === 0 ? 100 : (diffAbs / lastPrice) * 100;
+
+                    if (Math.abs(diffPct) >= 3) {
+                      let label = "";
+                      if (diffPct <= -10) label = "🔥 DROP";
+                      else if (diffPct < 0) label = "⬇ DOWN";
+                      else if (diffPct >= 10) label = "⚠️ SPIKE";
+                      else label = "⬆ UP";
+
+                      acc.push({
+                        tag: {
+                          value: `${label} ${diffPct > 0 ? "+" : ""}${diffPct.toFixed(0)}%`,
+                          color: diffPct > 0 ? Color.Red : Color.Green,
+                        },
+                      });
+                    }
+                  }
+
+                  const regularPrice = deal.regular?.amount;
+                  const currency = deal.price?.currency;
+                  const cut = deal.cut || 0;
+
+                  if (
+                    cut > 0 &&
+                    regularPrice != null &&
+                    regularPrice > currentPrice
+                  ) {
+                    acc.push({
+                      text: `${formatPrice(regularPrice, currency)} → ${formatPrice(currentPrice, currency)}`,
+                    });
+                  } else {
+                    acc.push({ text: formatPrice(currentPrice, currency) });
+                  }
+
+                  if (cut > 0) {
+                    acc.push({
+                      tag: { value: `-${cut}%`, color: Color.Green },
                     });
                   }
                 }
+                const isMusic =
+                  (!game.type ||
+                    game.type === "dlc" ||
+                    game.type === "OTHER") &&
+                  (game.title?.toLowerCase().endsWith(" ost") ||
+                    game.title?.toLowerCase().includes("soundtrack"));
+                const cleanType = isMusic
+                  ? "SOUNDTRACK"
+                  : game.type === "game" || game.type === "base"
+                    ? undefined
+                    : game.type?.toUpperCase() || undefined;
 
-                const regularPrice = deal.regular?.amount;
-                const currency = deal.price?.currency;
-                const cut = deal.cut || 0;
-
-                if (
-                  cut > 0 &&
-                  regularPrice != null &&
-                  regularPrice > currentPrice
-                ) {
-                  acc.push({
-                    text: `${formatPrice(regularPrice, currency)} → ${formatPrice(currentPrice, currency)}`,
-                  });
-                } else {
-                  acc.push({ text: formatPrice(currentPrice, currency) });
-                }
-
-                if (cut > 0) {
-                  acc.push({ tag: { value: `-${cut}%`, color: Color.Green } });
-                }
-              }
-
-              if (bundleCounts[String(game.id)] > 0) {
-                acc.push({
-                  icon: { source: Icon.Box, tintColor: Color.Purple },
-                  tooltip: "Available in a Bundle",
-                });
-              }
-              const isMusic =
-                (!game.type || game.type === "dlc" || game.type === "OTHER") &&
-                (game.title?.toLowerCase().endsWith(" ost") ||
-                  game.title?.toLowerCase().includes("soundtrack"));
-              const cleanType = isMusic
-                ? "SOUNDTRACK"
-                : game.type === "game" || game.type === "base"
-                  ? undefined
-                  : game.type?.toUpperCase() || undefined;
-
-              let listIcon: any = Icon.Star;
-              if (deal?.cut >= 80) {
-                listIcon = { source: Icon.Star, tintColor: Color.Red };
-              } else if (deal?.cut >= 50) {
-                listIcon = { source: Icon.Star, tintColor: Color.Orange };
-              } else if (deal?.cut > 0) {
-                listIcon = { source: Icon.Star, tintColor: Color.Green };
-              }
-
-              return (
-                <List.Item
-                  key={game.id}
-                  title={game.title}
-                  icon={listIcon}
-                  subtitle={cleanType}
-                  accessories={acc}
-                  actions={
-                    <ActionPanel>
-                      <ActionPanel.Section>
-                        <Action.Push
-                          title="View Game Details"
-                          target={
-                            <GameDetail
-                              gameId={game.id}
-                              gameTitle={game.title}
-                              gameSlug={game.slug}
-                              gameType={game.type || "OTHER"}
-                              removeGame={() => removeGame(game.id)}
-                            />
-                          }
-                          icon={Icon.Sidebar}
-                        />
-                        {deal?.url && (
-                          <Action.OpenInBrowser
-                            title="Open Best Deal"
-                            url={deal.url}
-                            icon={Icon.Cart}
-                          />
-                        )}
-                      </ActionPanel.Section>
-                      <ActionPanel.Section>
-                        <Action
-                          title="Remove from Saved"
-                          onAction={() => removeGame(game.id)}
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          shortcut={{
-                            Windows: { modifiers: ["ctrl"], key: "s" },
-                            macOS: { modifiers: ["cmd"], key: "s" },
-                          }}
-                        />
-                        <Action
-                          title="Clear All Saved Games"
-                          onAction={async () => {
-                            setSavedGames([]);
-                            await LocalStorage.setItem(
-                              "saved_itad_games",
-                              JSON.stringify([]),
-                            );
-                            cache.remove(CACHE_KEY);
-                          }}
-                          icon={Icon.Trash}
-                          style={Action.Style.Destructive}
-                          shortcut={{
-                            Windows: {
-                              modifiers: ["ctrl", "shift"],
-                              key: "backspace",
-                            },
-                            macOS: {
-                              modifiers: ["cmd", "shift"],
-                              key: "backspace",
-                            },
-                          }}
-                        />
-                      </ActionPanel.Section>
-                    </ActionPanel>
+                let listIcon: any = {
+                  source: Icon.Star,
+                  tintColor: Color.Yellow,
+                };
+                if (deal?.cut > 0) {
+                  if (deal.cut >= 70) {
+                    listIcon = { source: Icon.Star, tintColor: Color.Red };
+                  } else {
+                    listIcon = { source: Icon.Star, tintColor: Color.Orange };
                   }
-                />
-              );
-            })}
+                }
+
+                return (
+                  <List.Item
+                    key={game.id}
+                    title={game.title}
+                    icon={listIcon}
+                    subtitle={cleanType}
+                    accessories={acc}
+                    actions={
+                      <ActionPanel>
+                        <ActionPanel.Section>
+                          <Action.Push
+                            title="View Game Details"
+                            target={
+                              <GameDetail
+                                gameId={game.id}
+                                gameTitle={game.title}
+                                gameSlug={game.slug}
+                                gameType={game.type || "OTHER"}
+                                removeGame={() => removeGame(game.id)}
+                              />
+                            }
+                            icon={Icon.Sidebar}
+                          />
+                          {deal?.url && (
+                            <Action.OpenInBrowser
+                              title="Open Best Deal"
+                              url={deal.url}
+                              icon={Icon.Cart}
+                            />
+                          )}
+                        </ActionPanel.Section>
+                        <ActionPanel.Section>
+                          <Action
+                            title="Remove from Saved"
+                            onAction={() => removeGame(game.id)}
+                            icon={Icon.Trash}
+                            style={Action.Style.Destructive}
+                            shortcut={{
+                              Windows: { modifiers: ["ctrl"], key: "s" },
+                              macOS: { modifiers: ["cmd"], key: "s" },
+                            }}
+                          />
+                          <Action
+                            title="Clear All Saved Games"
+                            onAction={async () => {
+                              setSavedGames([]);
+                              await LocalStorage.setItem(
+                                "saved_itad_games",
+                                JSON.stringify([]),
+                              );
+                              cache.remove(CACHE_KEY);
+                            }}
+                            icon={Icon.Trash}
+                            style={Action.Style.Destructive}
+                            shortcut={{
+                              Windows: {
+                                modifiers: ["ctrl", "shift"],
+                                key: "backspace",
+                              },
+                              macOS: {
+                                modifiers: ["cmd", "shift"],
+                                key: "backspace",
+                              },
+                            }}
+                          />
+                        </ActionPanel.Section>
+                      </ActionPanel>
+                    }
+                  />
+                );
+              })}
+          </List.Section>
         </>
       )}
     </List>
@@ -506,9 +529,14 @@ function GameDetail({
     LocalStorage.getItem<string>("selected_stores").then((s) =>
       setSelectedStores(s ? JSON.parse(s) : ["all"]),
     );
-    LocalStorage.getItem<string>("preferred_chart_range").then(
-      (s) => s && setRange(s as any),
-    );
+    LocalStorage.getItem<string>("preferred_chart_range").then((saved) => {
+      if (saved === "3m" || saved === "6m" || saved === "1y") {
+        setRange(saved);
+      } else {
+        setRange("1y");
+        LocalStorage.setItem("preferred_chart_range", "1y");
+      }
+    });
   }, [refreshKey]);
 
   const handleSetRange = (r: "3m" | "6m" | "1y") => {
@@ -522,7 +550,7 @@ function GameDetail({
     const detailCacheKey = `search_detail_${gameId}_${COUNTRY}_v1`;
     const fetchDetailData = async () => {
       setIsLoading(true);
-      const cached = cache.get(detailCacheKey);
+      const cached = detailCache.get(detailCacheKey);
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Date.now() - parsed.timestamp < DETAIL_CACHE_TTL) {
@@ -539,10 +567,22 @@ function GameDetail({
           { signal: abort.signal },
         );
         const searchJson = await searchRes.json();
-        const targetItem =
-          searchJson?.items?.find(
-            (i: any) => i.name.toLowerCase() === gameTitle.toLowerCase(),
-          ) || searchJson?.items?.[0];
+        let targetItem = searchJson?.items?.find(
+          (item: any) => item.name.toLowerCase() === gameTitle.toLowerCase(),
+        );
+        if (!targetItem) {
+          targetItem = searchJson?.items?.find((item: any) => {
+            const sName = item.name.toLowerCase();
+            const iName = gameTitle.toLowerCase();
+            if (sName.includes(iName) || iName.includes(sName)) {
+              const sNums = sName.match(/\b\d+\b/g) || [];
+              const iNums = iName.match(/\b\d+\b/g) || [];
+              return sNums.every((n: string) => iNums.includes(n));
+            }
+            return false;
+          });
+        }
+        if (!targetItem) targetItem = searchJson?.items?.[0];
         let steamData = null;
         if (targetItem?.id) {
           const detailRes = await fetch(
@@ -586,9 +626,14 @@ function GameDetail({
         ];
 
         if (SHOW_CHART) {
+          const rawDate = new Date(
+            Date.now() - 400 * 24 * 60 * 60 * 1000,
+          ).toISOString();
+          const historySince = encodeURIComponent(rawDate.split(".")[0] + "Z");
+
           fetchPromises.push(
             fetch(
-              `https://api.isthereanydeal.com/games/history/v2?key=${API_KEY}&id=${gameId}&country=${COUNTRY}`,
+              `https://api.isthereanydeal.com/games/history/v2?key=${API_KEY}&id=${gameId}&country=${COUNTRY}&since=${historySince}`,
               { signal: abort.signal },
             ),
           );
@@ -613,7 +658,7 @@ function GameDetail({
           historyChart: Array.isArray(jsons[4]) ? jsons[4] : [],
         };
         if (isMounted) {
-          cache.set(
+          detailCache.set(
             detailCacheKey,
             JSON.stringify({ timestamp: Date.now(), data: combined }),
           );
@@ -684,9 +729,6 @@ function GameDetail({
     const lastBundleTs =
       timestamps.length > 0 ? Math.max(...timestamps) : undefined;
     const lastBundleDate = lastBundleTs ? new Date(lastBundleTs) : null;
-    const lastBundleAgo = lastBundleTs ? now - lastBundleTs : Infinity;
-
-    const ONE_YEAR = 365 * 24 * 60 * 60 * 1000;
 
     let state: string | null = null;
     let icon: Image.ImageLike | undefined = undefined;
@@ -700,24 +742,26 @@ function GameDetail({
       state = "Never Bundled";
       icon = Icon.XMarkCircle;
       color = Color.SecondaryText;
-    } else if (recentBundles.length >= 4 && lastBundleAgo < ONE_YEAR) {
-      state = "Frequent";
-      icon = Icon.Repeat;
-      color = Color.Orange;
-    } else if (totalBundles >= 2 && lastBundleAgo < ONE_YEAR) {
-      state = "Occasional";
-      icon = Icon.Circle;
-      color = Color.SecondaryText;
-    } else if (totalBundles === 1 && lastBundleAgo < ONE_YEAR) {
-      state = "Bundled recently";
-      icon = Icon.Circle;
-      color = Color.SecondaryText;
     } else if (lastBundleDate) {
       const month = lastBundleDate.toLocaleString("en-US", { month: "short" });
       const year = lastBundleDate.getFullYear();
-      state = `Last bundled ${month} ${year}`;
-      icon = Icon.Clock;
-      color = Color.SecondaryText;
+      const dateStr = `${month} ${year}`;
+
+      if (totalBundles === 1) {
+        state = `Once • ${dateStr}`;
+        icon = Icon.Circle;
+        color = Color.SecondaryText;
+      } else {
+        state = `${totalBundles}× • Last ${dateStr}`;
+
+        if (recentBundles.length >= 4) {
+          icon = Icon.Repeat;
+          color = Color.Orange;
+        } else {
+          icon = Icon.Box;
+          color = Color.SecondaryText;
+        }
+      }
     }
 
     const getLowestPrice = (bundle: any) => {
@@ -841,154 +885,31 @@ function GameDetail({
   const hCurrency =
     historyLow?.price?.currency ?? historyLow?.currency ?? "USD";
 
-  // 🧮 SCORE DOMAIN: Untouched heuristic engine
+  // --- signal & insight system ---
   const twelveMonthTime = now - 365 * 24 * 60 * 60 * 1000;
-  const statsPrices = allowedHistory
-    .filter((pt: any) => new Date(pt.timestamp).getTime() >= twelveMonthTime)
-    .map((pt: any) => pt.deal.price.amount);
-
-  let typicalMin: number | null = null;
-  let typicalMax: number | null = null;
-  let median: number | null = null;
-
-  if (statsPrices.length > 0) {
-    const sorted = [...statsPrices].sort((a, b) => a - b);
-    const filtered = sorted.slice(
-      Math.floor(sorted.length * 0.1),
-      Math.floor(sorted.length * 0.9) + 1,
-    );
-    if (filtered.length > 0) {
-      typicalMin = Math.min(...filtered);
-      typicalMax = Math.max(...filtered);
-      const mid = Math.floor(filtered.length / 2);
-      median =
-        filtered.length % 2 !== 0
-          ? filtered[mid]
-          : (filtered[mid - 1] + filtered[mid]) / 2;
-    }
-  }
-
-  const cut = currentBest?.cut || 0;
-  let verdict = "";
-  let reason: string | undefined;
-  let recommendation = "";
-
-  const mapUI = (v: string) => {
-    switch (v) {
-      case "Free":
-        return { badge: "free", color: Color.Blue, icon: Icon.Gift };
-      case "Strong deal":
-        return { badge: "best", color: Color.Green, icon: Icon.Star };
-      case "Good deal":
-        return { badge: "good", color: Color.Green, icon: Icon.ThumbsUp };
-      case "Fair price":
-        return {
-          badge: "neutral",
-          color: Color.SecondaryText,
-          icon: Icon.Minus,
-        };
-      case "Not great":
-      case "Not ideal":
-        return { badge: "weak", color: Color.Orange, icon: Icon.Clock };
-      case "Overpriced":
-        return { badge: "bad", color: Color.Red, icon: Icon.XMarkCircle };
-      default:
-        return {
-          badge: "neutral",
-          color: Color.SecondaryText,
-          icon: Icon.Minus,
-        };
-    }
-  };
-
-  if (currentPrice === 0 || cut === 100) {
-    recommendation = "🆓 FREE";
-    verdict = "Free";
-    reason = "Free to claim";
-  } else if (bundle.activeCount > 0 && bundleValue?.type === "better") {
-    recommendation = "🔴 HIGH PRICE";
-    verdict = "Overpriced";
-    reason = bundleValue.message;
-  } else if (bundle.activeCount > 0 && bundleValue?.type === "value") {
-    recommendation = "🟡 FAIR PRICE";
-    verdict = "Not ideal";
-    reason = bundleValue.message;
-  } else if (currentPrice != null) {
-    let score = 0;
-    const safeATL =
-      allTimeLow && allTimeLow > 0 ? allTimeLow : currentPrice || 1;
-    const ratioATL = currentPrice / safeATL;
-
-    if (ratioATL <= 0.95) score += 0.35;
-    else if (ratioATL <= 1.05) score += 0.25;
-    else if (ratioATL <= 1.2) score += 0.1;
-    else if (ratioATL >= 2) score -= 0.2;
-
-    if (median != null && median > 0) {
-      const ratioMedian = currentPrice / median;
-      if (ratioMedian <= 0.75) score += 0.25;
-      else if (ratioMedian <= 0.9) score += 0.15;
-      else if (ratioMedian >= 1.25) score -= 0.2;
-    }
-
-    if (cut >= 75 && ratioATL <= 1.2) score += 0.4;
-    else if (cut >= 75) score += 0.3;
-    else if (cut >= 50) score += 0.2;
-    else if (cut >= 25) score += 0.1;
-    else if (cut > 0) score += 0.05;
-
-    score = Math.max(0, Math.min(1, score));
-
-    // Recommendation thresholds
-    if (score >= 0.7) recommendation = "🔥 GREAT DEAL";
-    else if (score >= 0.5) recommendation = "👍 GOOD DEAL";
-    else if (score >= 0.35) recommendation = "🟡 FAIR PRICE";
-    else recommendation = "🔴 HIGH PRICE";
-
-    const isATL = currentPrice <= safeATL;
-    const isNearATL = currentPrice <= safeATL * 1.05;
-    const isBelowAvg = median && currentPrice < median * 0.85;
-    const isAtTypical = median && currentPrice <= median * 1.05;
-
-    if (score < 0.35) {
-      if (cut === 0 && (!median || isAtTypical)) {
-        verdict = "Fair price";
-        reason = "Typical price for this game";
-        recommendation = "🟡 FAIR PRICE";
-      } else {
-        verdict = cut > 0 ? "Not ideal" : "Overpriced";
-        reason =
-          cut > 0 ? "Discounted, but still high" : "Above usual price range";
-      }
-    } else if (score < 0.5) {
-      verdict = "Not ideal";
-      if (bundle.state === "Frequent") reason = "Frequently bundled, wait";
-      else if (cut >= 70) reason = "Big discount, not lowest";
-      else
-        reason = cut > 0 ? "Small discount, better wait" : "No discount, wait";
-    } else {
-      if (isATL) {
-        verdict = score >= 0.7 ? "Strong deal" : "Good deal";
-        reason = cut > 0 ? "At all-time low price" : "Lowest recorded price";
-      } else if (isNearATL) {
-        verdict = "Good deal";
-        reason = "Near all-time low price";
-      } else if (cut >= 75) {
-        verdict = "Good deal";
-        reason = "Large discount applied";
-      } else if (isBelowAvg) {
-        verdict = "Good deal";
-        reason = "Well below usual price";
-      } else {
-        verdict = "Fair price";
-        reason = "Decent price, not the lowest";
-      }
-    }
-  }
-
-  if (!reason) {
-    reason = "Typical pricing";
-  }
+  const {
+    signalText,
+    signalIcon,
+    signalColor,
+    primaryInsight,
+    secondaryInsight,
+    medianSale,
+    primaryIsPositive,
+    secondaryIsPositive,
+    primaryIsNeutral,
+    secondaryIsNeutral,
+  } = computeGameInsight({
+    currentPrice,
+    statsPrices: allowedHistory
+      .filter((pt: any) => new Date(pt.timestamp).getTime() >= twelveMonthTime)
+      .map((pt: any) => pt.deal.price.amount),
+    allTimeLow,
+    currentBest,
+    bundleValue,
+    dataMonths: 0,
+    range,
+    isLoading,
+  });
 
   const plotData: any[] = [];
   const cutoffTime =
@@ -1028,9 +949,9 @@ function GameDetail({
       },
     ];
 
-    if (median !== null) {
+    if (medianSale !== null) {
       datasets.push({
-        data: plotData.map((p) => ({ x: p.x, y: median })),
+        data: plotData.map((p) => ({ x: p.x, y: medianSale })),
         borderColor: "rgba(255, 255, 255, 0.2)",
         borderWidth: 1,
         borderDash: [5, 5],
@@ -1065,6 +986,32 @@ function GameDetail({
             },
           ],
         },
+        annotation: {
+          annotations: [
+            {
+              type: "line",
+              mode: "horizontal",
+              scaleID: "y-axis-0",
+              value: minY,
+              borderColor: "rgba(231, 76, 60, 0.8)",
+              borderWidth: 1,
+              borderDash: [2, 2],
+              label: {
+                enabled: true,
+                content:
+                  range === "1y"
+                    ? "1Y Low"
+                    : range === "6m"
+                      ? "6M Low"
+                      : "3M Low",
+                position: "right",
+                backgroundColor: "rgba(231, 76, 60, 0.8)",
+                fontSize: 8,
+                yAdjust: 6,
+              },
+            },
+          ],
+        },
       },
     };
     chartUrl = `https://quickchart.io/chart?c=${encodeURIComponent(JSON.stringify(config))}&w=250&h=110&devicePixelRatio=2&bkg=transparent`;
@@ -1072,15 +1019,48 @@ function GameDetail({
 
   const isDiscounted = currentBest && currentBest.cut > 0;
   let saleTagText = "";
+  let saleTagColor = Color.Green;
   if (isDiscounted) {
-    if (currentBest.cut >= 70) saleTagText = "MEGA SALE";
-    else if (currentBest.cut >= 40) saleTagText = "ON SALE";
-    else saleTagText = "DISCOUNT";
+    if (currentBest.cut >= 70) {
+      saleTagText = "MEGA SALE";
+      saleTagColor = Color.Green;
+    } else if (currentBest.cut >= 40) {
+      saleTagText = "ON SALE";
+      saleTagColor = Color.Green;
+    } else if (currentBest.cut >= 20) {
+      saleTagText = "DISCOUNT";
+      saleTagColor = Color.SecondaryText;
+    } else {
+      saleTagText = "LOW DISCOUNT";
+      saleTagColor = Color.SecondaryText;
+    }
   }
+
+  const signalEmoji =
+    signalText === "STRONG OPPORTUNITY"
+      ? "👍"
+      : signalText === "GOOD OPPORTUNITY"
+        ? "🟢"
+        : signalText === "AVERAGE TIMING"
+          ? "🟡"
+          : signalText === "WEAK OPPORTUNITY"
+            ? "🟠"
+            : signalText === "POOR OPPORTUNITY"
+              ? "❌"
+              : signalText === "CHEAPER IN BUNDLE"
+                ? "📦"
+                : signalText === "FREE TO CLAIM"
+                  ? "🎁"
+                  : signalText === "FREE TO PLAY"
+                    ? "🆓"
+                    : signalText === "NEVER ON SALE" ||
+                        signalText === "NO RECENT DISCOUNTS"
+                      ? "⏱️"
+                      : "";
 
   const heroSection =
     currentBest && currentPrice != null
-      ? `<h2 align="center">${recommendation || "Price Details"}</h2>\n<h3 align="center">${formatPrice(currentPrice, currentBest.price?.currency)} ${isDiscounted ? `<code>-${currentBest.cut}%</code>` : ""} · ${currentBest.shop?.name}</h3>\n\n---\n\n`
+      ? `<h2 align="center">${signalText !== "INSUFFICIENT DATA" ? `${signalEmoji} ${signalText}` : ""}</h2>\n<h3 align="center">${formatPrice(currentPrice, currentBest.price?.currency)} ${isDiscounted ? `<code>-${currentBest.cut}%</code>` : ""} · ${currentBest.shop?.name}</h3>\n\n---\n\n`
       : "";
 
   const markdown = `
@@ -1093,7 +1073,7 @@ ${
         .slice(0, 2)
         .join(
           ", ",
-        )}*${steamData?.release_date?.date ? ` · ${new Date(steamData.release_date.date).getFullYear()}` : ""}`
+        )}*${steamData?.release_date?.date ? ` · ${Number.isNaN(new Date(steamData.release_date.date).getFullYear()) ? steamData.release_date.date : new Date(steamData.release_date.date).getFullYear()}` : ""}`
     : ""
 }
 
@@ -1109,6 +1089,13 @@ ${filteredDeals?.length ? filteredDeals.map((p: any) => `| ${p.url ? `[${p.shop?
 ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === "6m" ? "6 Months" : "3 Months"}**\n\n![Price History](${chartUrl})\n` : ""}
 `;
 
+  const tinyPlusGreen =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M11 9h4M13 7v4" stroke="%232ecc71" stroke-width="2" stroke-linecap="round"/></svg>';
+  const tinyMinusRed =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path d="M11 9h4" stroke="%23e74c3c" stroke-width="2" stroke-linecap="round"/></svg>';
+  const tinyNeutralGrey =
+    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><circle cx="13" cy="9" r="2" fill="%23888888"/></svg>';
+
   return (
     <Detail
       isLoading={isLoading}
@@ -1116,29 +1103,37 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
       navigationTitle={gameTitle}
       metadata={
         <Detail.Metadata>
-          {recommendation && (
+          {signalText && (
             <Detail.Metadata.Label
-              title="Recommendation"
-              text={recommendation}
+              title="Signal"
+              text={signalText}
+              icon={{ source: signalIcon, tintColor: signalColor }}
             />
           )}
-          {verdict &&
-            ["🔥 GREAT DEAL", "👍 GOOD DEAL", "🆓 FREE"].includes(
-              recommendation,
-            ) && (
-              <Detail.Metadata.Label
-                title="Verdict"
-                text={verdict}
-                icon={{
-                  source: mapUI(verdict).icon,
-                  tintColor: mapUI(verdict).color,
-                }}
-              />
-            )}
-          {reason && (
+          {primaryInsight && (
             <Detail.Metadata.Label
-              title="Why"
-              text={reason.length > 28 ? reason.slice(0, 25) + "..." : reason}
+              title=""
+              text={primaryInsight}
+              icon={
+                primaryIsPositive
+                  ? tinyPlusGreen
+                  : primaryIsNeutral
+                    ? tinyNeutralGrey
+                    : tinyMinusRed
+              }
+            />
+          )}
+          {secondaryInsight && (
+            <Detail.Metadata.Label
+              title=""
+              text={secondaryInsight}
+              icon={
+                secondaryIsPositive
+                  ? tinyPlusGreen
+                  : secondaryIsNeutral
+                    ? tinyNeutralGrey
+                    : tinyMinusRed
+              }
             />
           )}
           {(isDiscounted || bundle.activeCount > 0) && (
@@ -1148,7 +1143,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
                 {isDiscounted && (
                   <Detail.Metadata.TagList.Item
                     text={saleTagText}
-                    color={Color.Green}
+                    color={saleTagColor}
                   />
                 )}
                 {bundle.activeCount > 0 && (
@@ -1174,29 +1169,32 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
                 : Icon.XMarkCircle
             }
           />
-          {typicalMin !== null &&
-            typicalMax !== null &&
-            typicalMin !== typicalMax && (
-              <Detail.Metadata.Label
-                title="Typical Price"
-                text={`${formatPrice(typicalMin, hCurrency)} - ${formatPrice(typicalMax, hCurrency)}`}
-              />
-            )}
-          {median !== null && (
+
+          {medianSale !== null && (
             <Detail.Metadata.Label
-              title="Median Price"
-              text={formatPrice(median, hCurrency)}
+              title="Median Price (1Y)"
+              text={formatPrice(medianSale, hCurrency)}
             />
           )}
 
           {bundle.state && (
             <>
               <Detail.Metadata.Separator />
-              <Detail.Metadata.Label
-                title="Bundle Status"
-                text={bundle.state}
-                icon={{ source: bundle.icon!, tintColor: bundle.color! }}
-              />
+              {bundle.icon ? (
+                <Detail.Metadata.Label
+                  title="Bundle Status"
+                  text={bundle.state}
+                  icon={{
+                    source: bundle.icon as Icon,
+                    tintColor: bundle.color,
+                  }}
+                />
+              ) : (
+                <Detail.Metadata.Label
+                  title="Bundle Status"
+                  text={bundle.state}
+                />
+              )}
             </>
           )}
           {bundleValue?.tier && bundleValue?.bundle && (
@@ -1316,8 +1314,7 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
                 macOS: { modifiers: ["cmd"], key: "r" },
               }}
               onAction={() => {
-                const c = new Cache();
-                c.remove(`search_detail_${gameId}_${COUNTRY}_v1`);
+                detailCache.remove(`search_detail_${gameId}_${COUNTRY}_v1`);
                 setIsLoading(true);
                 setRefreshKey((k) => k + 1);
               }}
