@@ -259,7 +259,7 @@ function SetDueDateForm({
 }) {
   const { pop } = useNavigation();
   const [dueDate, setDueDate] = useState<Date | null>(
-    invoice.dueDate ? new Date(invoice.dueDate) : null,
+    invoice.dueDate ? new Date(invoice.dueDate + "T00:00:00") : null,
   );
   const [isLoading, setIsLoading] = useState(false);
 
@@ -420,7 +420,7 @@ function EditInvoiceForm({
 
   const [note, setNote] = useState(() => parsed?.note ?? "");
   const [dueDate, setDueDate] = useState<Date | null>(
-    invoice.dueDate ? new Date(invoice.dueDate) : null,
+    invoice.dueDate ? new Date(invoice.dueDate + "T00:00:00") : null,
   );
   const [taxPercent, setTaxPercent] = useState(() => parsed?.taxPercent ?? "");
   const [taxName, setTaxName] = useState(() => parsed?.taxName ?? "");
