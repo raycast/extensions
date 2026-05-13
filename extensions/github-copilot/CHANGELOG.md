@@ -1,6 +1,6 @@
 # GitHub Copilot Changelog
 
-## [Fix tasks without an associated pull request] - {PR_MERGE_DATE}
+## [Fix tasks without an associated pull request] - 2026-05-13
 
 - Handle tasks returned by the Copilot API that don't have an associated pull request
 - Show "Open in Browser" for tasks without a pull request
