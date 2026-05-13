@@ -1,5 +1,12 @@
 # FreeAgent Changelog
 
+## [Add AI tools for managing projects, tasks, and timeslips] - {PR_MERGE_DATE}
+
+- Added `list-projects`, `create-project`, and `delete-project` AI tools (create/delete require confirmation)
+- Added `list-tasks`, `create-task-ai`, `update-task`, and `delete-task` AI tools, all with confirmation for mutations
+- Added `list-timeslips-ai`, `create-timeslip-ai`, `update-timeslip`, and `delete-timeslip` AI tools, including the ability to switch a timeslip to a different task
+- Updated the AI instructions with a workflow for "clean up tasks and recreate from a structure"
+
 ## [Fix timeslip date display] - 2026-04-15
 
 - Changed timeslip list to show day-level relative dates (Today, Yesterday, 3 days ago) instead of hour-level (14 hours ago)
