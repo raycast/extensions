@@ -158,7 +158,12 @@ export default function MenuBarCommand() {
         icon: "opencode-go-icon.png",
         visible: isOpencodeGoVisible,
         isLoading: opencodegoState.isLoading,
-        accessory: getOpencodegoAccessory(opencodegoState.usage, opencodegoState.error, opencodegoState.isLoading),
+        accessory: getOpencodegoAccessory(
+          opencodegoState.usage,
+          opencodegoState.error,
+          opencodegoState.isLoading,
+          true,
+        ),
         revalidate: opencodegoState.revalidate,
       },
     ],

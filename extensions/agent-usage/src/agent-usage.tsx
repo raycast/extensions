@@ -311,6 +311,14 @@ function createAgentView<TUsage, TError extends ErrorLike>(
   };
 }
 
+function getOpenCodeGoListAccessory(
+  usage: OpencodegoUsage | null,
+  error: OpencodegoError | null,
+  isLoading: boolean,
+): Accessory {
+  return getOpencodegoAccessory(usage, error, isLoading, true);
+}
+
 function createAccountedViews<TUsage, TError extends { type: string; message: string }>(
   agentId: AgentId,
   providerName: string,
@@ -371,7 +379,14 @@ export default function Command(props: LaunchProps<{ launchContext: CommandLaunc
     gemini: createAgentView(AGENT_REGISTRY.gemini, geminiState, Boolean(prefs.showGemini)),
     antigravity: createAgentView(AGENT_REGISTRY.antigravity, antigravityState, Boolean(prefs.showAntigravity)),
     minimax: createAgentView(AGENT_REGISTRY.minimax, minimaxState, Boolean(prefs.showMinimax)),
-    "opencode-go": createAgentView(AGENT_REGISTRY["opencode-go"], opencodegoState, Boolean(prefs.showOpencodeGo)),
+    "opencode-go": createAgentView(
+      {
+        ...AGENT_REGISTRY["opencode-go"],
+        getAccessory: getOpenCodeGoListAccessory,
+      },
+      opencodegoState,
+      Boolean(prefs.showOpencodeGo),
+    ),
   };
 
   const kimiAccountedViews = createAccountedViews(
