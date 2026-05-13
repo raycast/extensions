@@ -18,9 +18,6 @@ import { frecencyScore, getFrecency, recordCall } from "./frecency";
 
 type FrecencyMap = Awaited<ReturnType<typeof getFrecency>>;
 type DialScheme = "tel" | "facetime-audio" | "facetime";
-type Prefs = { defaultAction: DialScheme };
-
-type CallArgs = { name?: string };
 
 function matchesQuery(contact: Contact, query: string): boolean {
   if (!query) return true;
@@ -86,8 +83,10 @@ const ACTION_ICON: Record<DialScheme, Icon> = {
   facetime: Icon.Video,
 };
 
-export default function Command(props: LaunchProps<{ arguments: CallArgs }>) {
-  const prefs = getPreferenceValues<Prefs>();
+export default function Command(
+  props: LaunchProps<{ arguments: Arguments.Call }>,
+) {
+  const prefs = getPreferenceValues<Preferences>();
   const defaultScheme: DialScheme = prefs.defaultAction ?? "tel";
   const initialQuery = props.arguments?.name?.trim() ?? "";
   const [searchText, setSearchText] = useState(initialQuery);
