@@ -1,8 +1,13 @@
 import { getApplications, showToast, Toast } from "@raycast/api";
+import fs from "fs";
+import { BETA_DB_PATH } from "./constants";
 
 async function isAntinoteInstalled() {
   const applications = await getApplications();
-  if (applications.some((app) => app.bundleId === "com.chabomakers.Antinote")) {
+  if (applications.some((app) => {console.log(app); return app.bundleId === "com.chabomakers.Antinote"})) {
+    if (fs.existsSync(BETA_DB_PATH)) {
+      return { installed: true, version: "beta" };
+    }
     return { installed: true, version: "standalone" };
   }
 
