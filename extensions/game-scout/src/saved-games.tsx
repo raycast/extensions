@@ -33,32 +33,10 @@ const detailCache = new Cache({ namespace: "search_detail" });
 const DETAIL_CACHE_TTL = 6 * 60 * 60 * 1000;
 const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
 
-import {
-  formatPrice,
-  isStoreAllowed,
-  buildBundleMap,
-  computeGameInsight,
-} from "./utils";
+import { formatPrice, isStoreAllowed, computeGameInsight } from "./utils";
 
 export default function SavedGames() {
   const isApiKeyValid = API_KEY.length > 0;
-  if (!isApiKeyValid)
-    return (
-      <List>
-        <List.EmptyView
-          title="API Key Required"
-          icon={Icon.Key}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Open Preferences"
-                onAction={openExtensionPreferences}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
 
   const [savedGames, setSavedGames] = useState<
     { id: string; title: string; slug: string; type?: string }[]
@@ -154,7 +132,17 @@ export default function SavedGames() {
       const oFlat = Array.isArray(oJson)
         ? oJson
         : Object.values(oJson as Record<string, any[]>).flat();
-      const newBundleCounts = buildBundleMap(oFlat);
+
+      const newBundleCounts: Record<string, number> = {};
+      oFlat.forEach((item: any) => {
+        const count =
+          typeof item.bundles === "number"
+            ? item.bundles
+            : item.bundles?.count || 0;
+        if (item?.id && count > 0) {
+          newBundleCounts[String(item.id)] = count;
+        }
+      });
 
       setRawPrices(priceMap);
       setBundleCounts(newBundleCounts);
@@ -266,7 +254,20 @@ export default function SavedGames() {
         </List.Dropdown>
       }
     >
-      {savedGames.length === 0 && !isLoading ? (
+      {!isApiKeyValid ? (
+        <List.EmptyView
+          title="API Key Required"
+          icon={Icon.Key}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Preferences"
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : savedGames.length === 0 && !isLoading ? (
         <List.EmptyView
           title="No saved games yet"
           description="Search games and save them for tracking."

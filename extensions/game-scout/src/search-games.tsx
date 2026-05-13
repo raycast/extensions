@@ -31,38 +31,12 @@ const detailCache = new Cache({ namespace: "search_detail" });
 const DETAIL_CACHE_TTL = 6 * 60 * 60 * 1000;
 const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
 
-import {
-  formatPrice,
-  isStoreAllowed,
-  buildBundleMap,
-  computeGameInsight,
-} from "./utils";
+import { formatPrice, isStoreAllowed, computeGameInsight } from "./utils";
 
 export default function Command() {
   const [apiError, setApiError] = useState(false);
   const isApiKeyValid = API_KEY.length > 0;
   const isCountryValid = COUNTRY.length === 2;
-
-  if (!isApiKeyValid || !isCountryValid) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={!isApiKeyValid ? Icon.Key : Icon.Globe}
-          title={!isApiKeyValid ? "API Key Required" : "Region Setup Required"}
-          description="Please enter your API Key and select a Region in preferences."
-          actions={
-            <ActionPanel>
-              <Action
-                title="Open Preferences"
-                icon={Icon.Gear}
-                onAction={openExtensionPreferences}
-              />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
 
   const [searchText, setSearchText] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -155,11 +129,6 @@ export default function Command() {
     },
   );
 
-  const bundleCounts = useMemo(() => {
-    if (!priceData) return {};
-    return buildBundleMap(priceData);
-  }, [priceData]);
-
   const filteredData = searchData.filter((game: any) => {
     if (!preferences.showMature && game.mature) return false;
     if (!preferences.showDLCGameSearch && game.type === "dlc") return false;
@@ -178,7 +147,22 @@ export default function Command() {
       }}
       searchBarPlaceholder="Search games (e.g. Elden Ring)..."
     >
-      {apiError ? (
+      {!isApiKeyValid || !isCountryValid ? (
+        <List.EmptyView
+          icon={!isApiKeyValid ? Icon.Key : Icon.Globe}
+          title={!isApiKeyValid ? "API Key Required" : "Region Setup Required"}
+          description="Please enter your API Key and select a Region in preferences."
+          actions={
+            <ActionPanel>
+              <Action
+                title="Open Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : apiError ? (
         <List.EmptyView
           title="Invalid API Key"
           icon={Icon.Warning}
@@ -245,10 +229,11 @@ export default function Command() {
           } else if (deal) {
             const currentAmount = deal.price?.amount;
             const regularAmount = deal.regular?.amount;
-            if (
-              typeof bundleCounts !== "undefined" &&
-              bundleCounts[String(game.id)] > 0
-            ) {
+            const bundleCount =
+              typeof overview?.bundles === "number"
+                ? overview.bundles
+                : overview?.bundles?.count || 0;
+            if (bundleCount > 0) {
               accessories.push({
                 icon: { source: Icon.Box, tintColor: Color.Purple },
                 tooltip: "Available in a Bundle",

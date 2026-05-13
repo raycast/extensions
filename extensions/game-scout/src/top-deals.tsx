@@ -77,7 +77,7 @@ export default function TopDeals() {
 
   const preferences = getPreferenceValues();
   const minDiscount = preferences.minDiscount || "0";
-  const maxPrice = preferences.maxPrice || "50";
+  const maxPrice = preferences.maxPrice || "9999";
 
   useEffect(() => {
     LocalStorage.getItem<string>("selected_stores").then((stored) => {
