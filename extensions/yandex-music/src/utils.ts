@@ -18,7 +18,7 @@ function runJS(browser: SupportedBrowsers | string, code: string): string {
 }
 
 export function wrapJS(code: string): string {
-  return `(function() { ${code} })()`;
+  return `(function() { ${code.replace(/\s+/g, " ")} })()`;
 }
 
 export async function runJSInYandexMusicTab(code: string) {
