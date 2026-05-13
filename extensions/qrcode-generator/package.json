@@ -77,11 +77,20 @@
       "subtitle": "QR Code Generator",
       "description": "Generate a QR code from selection content",
       "mode": "view"
+    },
+    {
+      "name": "read",
+      "title": "Read QR Code",
+      "subtitle": "QR Code Generator",
+      "description": "Read a QR code from an image, screenshot, or clipboard",
+      "mode": "view"
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.103.10",
     "@raycast/utils": "^2.2.2",
+    "jimp": "^1.6.1",
+    "jsqr": "^1.4.0",
     "qrcode": "^1.5.4"
   },
   "devDependencies": {
