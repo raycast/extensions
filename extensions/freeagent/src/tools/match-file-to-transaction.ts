@@ -242,11 +242,20 @@ function findMatchingTransactions(
   const dateTolerance = input.dateTolerance || 7; // days
   const amountTolerance = input.amountTolerance || 5; // percentage
 
+  // Threshold scales with the inputs supplied so callers passing only
+  // description/file-type can still surface matches. Each signal contributes
+  // its own maximum: amount 40, date 30, description 20, file-type 10.
+  let maxConfidence = 0;
+  if (input.fileAmount) maxConfidence += 40;
+  if (input.fileDate) maxConfidence += 30;
+  if (input.fileDescription || input.fileName) maxConfidence += 20;
+  if (input.fileType) maxConfidence += 10;
+  const threshold = maxConfidence * 0.3;
+
   for (const transaction of transactions) {
     const confidence = calculateMatchConfidence(transaction, input, dateTolerance, amountTolerance);
 
-    if (confidence > 30) {
-      // Minimum 30% confidence to be considered a match
+    if (confidence > threshold) {
       const reasons = getMatchReasons(transaction, input, dateTolerance, amountTolerance);
       matches.push({
         ...transaction,

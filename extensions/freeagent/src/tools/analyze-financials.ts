@@ -4,9 +4,10 @@ import { provider } from "../oauth";
 
 type Input = {
   /**
-   * The type of financial analysis to perform
+   * The type of financial analysis to perform. For cash-flow analysis, use
+   * the dedicated `cash-flow-summary` tool instead.
    */
-  analysisType?: "overview" | "invoices" | "cash-flow" | "overdue";
+  analysisType?: "overview" | "invoices" | "overdue";
   /**
    * Time period for analysis (e.g., "last 30 days", "this month", "this year")
    */
