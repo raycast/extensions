@@ -83,14 +83,14 @@ function RouteActions(props: { entry: PortlessEntry; onRefresh: () => void }) {
 
   return (
     <ActionPanel>
-      <Action.OpenInBrowser title="Open URL" url={entry.url} />
+      <Action.OpenInBrowser title="Open in Browser" url={entry.url} />
       <Action.CopyToClipboard title="Copy Route" content={entry.title} />
       <Action.CopyToClipboard title="Copy URL" content={entry.url} />
       <Action.CopyToClipboard title="Copy Hostname" content={entry.hostname} />
       <Action.CopyToClipboard title="Copy Details" content={entry.raw} />
       {entry.pid !== 0 ? (
         <Action
-          title="Kill Port"
+          title="Kill Process"
           icon={Icon.XMarkCircle}
           style={Action.Style.Destructive}
           onAction={() => killEntry(entry, onRefresh)}
@@ -106,7 +106,7 @@ async function killEntry(entry: PortlessEntry, onRefresh: () => void) {
     title: `Kill ${entry.title}?`,
     message: `This sends SIGTERM to pid ${entry.pid} and removes ${entry.hostname} from Portless routes.`,
     primaryAction: {
-      title: "Kill Port",
+      title: "Kill Process",
       style: Alert.ActionStyle.Destructive,
     },
   });

@@ -1,4 +1,4 @@
-# Portless for Raycast
+# Portless Manager for Raycast
 
 Search and manage active [Portless](https://portless.sh) routes from Raycast.
 

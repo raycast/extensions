@@ -1,10 +1,10 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "portless-bar",
-  "title": "Portless",
+  "name": "portless-manager",
+  "title": "Portless Manager",
   "description": "Search and manage active Portless routes from Raycast.",
   "icon": "icon.png",
-  "author": "valentino",
+  "author": "valentino_espinoza",
   "platforms": [
     "macOS"
   ],
