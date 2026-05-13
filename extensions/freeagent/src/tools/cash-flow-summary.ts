@@ -122,14 +122,14 @@ export default async function tool(input: Input = {}) {
         };
 
         const periodLength = periodMs[period as keyof typeof periodMs] || periodMs.monthly;
-        const periodData: { [key: string]: { incoming: number; outgoing: number; net: number; count: number } } = {};
+        const periodData: { label: string; incoming: number; outgoing: number; net: number; count: number }[] = [];
 
         // Calculate period buckets
         for (let i = 0; i < periods; i++) {
           const periodEnd = new Date(Date.now() - i * periodLength);
           const periodStart = new Date(periodEnd.getTime() - periodLength);
 
-          const periodKey =
+          const label =
             period === "weekly"
               ? `Week of ${periodStart.toLocaleDateString("en-US")}`
               : period === "monthly"
@@ -153,27 +153,28 @@ export default async function tool(input: Input = {}) {
               .reduce((sum, t) => sum + parseFloat(t.amount), 0),
           );
 
-          periodData[periodKey] = {
+          periodData.push({
+            label,
             incoming,
             outgoing,
             net: incoming - outgoing,
             count: periodTransactions.length,
-          };
+          });
         }
 
         transactionAnalysis += `📊 **Cash Flow Trends (${period})**\n`;
         // periodData is built most-recent-first, so iterate in natural order.
-        Object.entries(periodData).forEach(([periodName, data]) => {
+        periodData.forEach((data) => {
           const netEmoji = data.net >= 0 ? "📈" : "📉";
-          transactionAnalysis += `• ${periodName}: ${netEmoji} ${formatCurrencyAmount(currency, Math.abs(data.net))}\n`;
+          transactionAnalysis += `• ${data.label}: ${netEmoji} ${formatCurrencyAmount(currency, Math.abs(data.net))}\n`;
           transactionAnalysis += `  - In: ${formatCurrencyAmount(currency, data.incoming)}\n`;
           transactionAnalysis += `  - Out: ${formatCurrencyAmount(currency, data.outgoing)}\n`;
         });
 
         // Calculate averages
-        const totalPeriods = Object.values(periodData).length;
-        const avgIncoming = Object.values(periodData).reduce((sum, p) => sum + p.incoming, 0) / totalPeriods;
-        const avgOutgoing = Object.values(periodData).reduce((sum, p) => sum + p.outgoing, 0) / totalPeriods;
+        const totalPeriods = periodData.length;
+        const avgIncoming = periodData.reduce((sum, p) => sum + p.incoming, 0) / totalPeriods;
+        const avgOutgoing = periodData.reduce((sum, p) => sum + p.outgoing, 0) / totalPeriods;
         const avgNet = avgIncoming - avgOutgoing;
 
         const periodSingular: Record<string, string> = {
