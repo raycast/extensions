@@ -11,6 +11,7 @@
 ## [Close Other Tabs] - 2026-05-13
 
 - Add "Close Other Tabs" action to `Search Tabs` to close every tab in the same window except the selected one (shortcut: `cmd+opt+w`)
+- Note: Pinned tabs are also closed because Chrome's AppleScript interface does not expose the pinned state, so the action cannot distinguish them. This differs from Chrome's built-in "Close other tabs" behavior.
 
 ## [Fixes] - 2026-01-05
 
