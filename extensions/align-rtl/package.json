@@ -1,7 +1,7 @@
 {
   "name": "align-rtl",
   "title": "Align RTL",
-  "description": "Transform selected text or clipboard content into forced right-to-left text and paste it back into the active app.",
+  "description": "Paste selected text as right-aligned rich RTL content in editors that need paragraph-level RTL alignment.",
   "icon": "align-rtl-icon.png",
   "author": "jberrebi",
   "categories": [
@@ -12,8 +12,8 @@
     {
       "name": "index",
       "title": "Align RTL",
-      "subtitle": "Force right-to-left embedding for selected text",
-      "description": "Wrap the selected text or clipboard content with RTL Unicode embedding characters and paste it into the active app.",
+      "subtitle": "Paste right-aligned rich RTL content",
+      "description": "Paste selected text or clipboard content with a rich HTML RTL payload for paragraph-level right alignment.",
       "mode": "no-view",
       "icon": "align-rtl-icon.png"
     }
