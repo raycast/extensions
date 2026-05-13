@@ -1,7 +1,7 @@
 import { Tool } from "@raycast/api";
-import { fetchTask, fetchTimeslip, updateTimeslip } from "../services/freeagent";
+import { fetchProject, fetchTask, fetchTimeslip, updateTimeslip } from "../services/freeagent";
 import { provider } from "../oauth";
-import { Project, Task, TimeslipUpdateData } from "../types";
+import { TimeslipUpdateData } from "../types";
 
 type Input = {
   /**
@@ -37,6 +37,11 @@ function extractTaskId(url: string): string | null {
   return m ? m[1] : null;
 }
 
+function extractProjectId(url: string): string | null {
+  const m = url.match(/\/projects\/(\d+)/);
+  return m ? m[1] : null;
+}
+
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const id = extractTimeslipId(input.timeslipUrl);
   if (!id) return { message: `Invalid timeslip URL: ${input.timeslipUrl}` };
@@ -47,8 +52,14 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     const token = await provider.authorize();
     if (token) {
       const ts = await fetchTimeslip(token, id);
-      const currentTaskName = typeof ts.task === "object" ? (ts.task as Task).name : ts.task;
-      const currentProjectName = typeof ts.project === "object" ? (ts.project as Project).name : ts.project;
+      const taskId = typeof ts.task === "string" ? extractTaskId(ts.task) : null;
+      const projectId = typeof ts.project === "string" ? extractProjectId(ts.project) : null;
+      const [task, project] = await Promise.all([
+        taskId ? fetchTask(token, taskId).catch(() => null) : null,
+        projectId ? fetchProject(token, projectId).catch(() => null) : null,
+      ]);
+      const currentTaskName = task?.name ?? ts.task;
+      const currentProjectName = project?.name ?? ts.project;
       info.push({
         name: "Current",
         value: `${ts.hours}h on ${ts.dated_on} — ${currentTaskName} (${currentProjectName})`,

@@ -1,7 +1,6 @@
 import { Tool } from "@raycast/api";
-import { deleteTimeslip, fetchTimeslip } from "../services/freeagent";
+import { deleteTimeslip, fetchProject, fetchTask, fetchTimeslip } from "../services/freeagent";
 import { provider } from "../oauth";
-import { Project, Task } from "../types";
 
 type Input = {
   /**
@@ -15,6 +14,12 @@ function extractId(url: string): string | null {
   return m ? m[1] : null;
 }
 
+function extractIdFrom(url: string | undefined, segment: string): string | null {
+  if (!url) return null;
+  const m = url.match(new RegExp(`/${segment}/(\\d+)`));
+  return m ? m[1] : null;
+}
+
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const id = extractId(input.timeslipUrl);
   if (!id) return { message: `Invalid timeslip URL: ${input.timeslipUrl}` };
@@ -22,8 +27,14 @@ export const confirmation: Tool.Confirmation<Input> = async (input) => {
     const token = await provider.authorize();
     if (!token) return { message: "Authentication required." };
     const ts = await fetchTimeslip(token, id);
-    const taskName = typeof ts.task === "object" ? (ts.task as Task).name : ts.task;
-    const projectName = typeof ts.project === "object" ? (ts.project as Project).name : ts.project;
+    const taskId = extractIdFrom(typeof ts.task === "string" ? ts.task : undefined, "tasks");
+    const projectId = extractIdFrom(typeof ts.project === "string" ? ts.project : undefined, "projects");
+    const [task, project] = await Promise.all([
+      taskId ? fetchTask(token, taskId).catch(() => null) : null,
+      projectId ? fetchProject(token, projectId).catch(() => null) : null,
+    ]);
+    const taskName = task?.name ?? ts.task;
+    const projectName = project?.name ?? ts.project;
     return {
       message: `Delete this timeslip? This cannot be undone.`,
       info: [
