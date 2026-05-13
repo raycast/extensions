@@ -1,6 +1,6 @@
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import OpenAI from "openai";
-import { SYSTEM_PROMPT } from "./config";
+import { SYSTEM_PROMPT, SYSTEM_PROMPT_WITH_WEB_SEARCH } from "./config";
 import { getShellHistory } from "./history";
 import { BuildContext } from "./context";
 import { globalCache } from "./cache";
@@ -166,10 +166,10 @@ function getContext7Answer(
 
   let libraryResult: string;
   try {
-    libraryResult = execSync(
-      `npx ctx7 library "${libraryQuery}" "${query}"`,
-      execOpts
-    );
+    libraryResult = execFileSync("npx", ["ctx7", "library", libraryQuery, query], {
+      ...execOpts,
+      shell: false,
+    }) as string;
   } catch {
     return null;
   }
@@ -185,7 +185,10 @@ function getContext7Answer(
 
   let docs: string;
   try {
-    docs = execSync(`npx ctx7 docs "${best.id}" "${query}"`, execOpts);
+    docs = execFileSync("npx", ["ctx7", "docs", best.id, query], {
+      ...execOpts,
+      shell: false,
+    }) as string;
   } catch {
     return null;
   }
@@ -258,11 +261,14 @@ function looksLikeSolidAnswer(answer: string | null): answer is string {
 }
 
 async function buildContextualSystemPrompt(
-  basePrompt: string,
+  _basePrompt: string,
   repoRoot?: string,
-  shell?: string
+  shell?: string,
+  webSearch?: boolean
 ): Promise<string> {
-  let prompt = basePrompt;
+  let prompt = webSearch
+    ? SYSTEM_PROMPT_WITH_WEB_SEARCH
+    : SYSTEM_PROMPT;
 
   if (repoRoot) {
     prompt += ` You are in a git repository at ${repoRoot}. Consider the repository context when suggesting commands.`;
@@ -314,7 +320,7 @@ export async function convertPrompt(
     : isPerplexity
     ? apiKeys.perplexity
     : apiKeys.ollama;
-  if (!apiKey) {
+  if (!apiKey && !isOllama) {
     return {
       success: false,
       title: "API key not configured",
@@ -355,15 +361,16 @@ export async function convertPrompt(
       : undefined;
 
     const client = new OpenAI({
-      apiKey: apiKey.trim(),
+      apiKey: isOllama ? (apiKey?.trim() || "ollama") : (apiKey as string).trim(),
       baseURL: resolvedBaseURL,
     });
 
     const context = BuildContext();
     const contextualSystemPrompt = await buildContextualSystemPrompt(
-      SYSTEM_PROMPT,
+      "",
       context.repoRoot,
-      context.shell
+      context.shell,
+      webSearch
     );
 
     const response = await client.chat.completions.create({

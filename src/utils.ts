@@ -1,6 +1,6 @@
 import { LocalStorage } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
-import { execSync } from "child_process";
+import { execSync, execFileSync } from "child_process";
 import { existsSync } from "fs";
 import type { KnownPrompts } from "./types";
 
@@ -11,7 +11,8 @@ type TerminalApp =
   | "WezTerm"
   | "Alacritty"
   | "Kitty"
-  | "cmux";
+  | "cmux"
+  | "Terminal";
 
 export async function getKnownPrompts(): Promise<KnownPrompts> {
   const knownPrompts = await LocalStorage.getItem<string>("known-prompts");
@@ -39,6 +40,7 @@ function isTerminalInstalled(terminal: TerminalApp): boolean {
     Alacritty: ["/Applications/Alacritty.app"],
     Kitty: ["/Applications/Kitty.app"],
     cmux: ["/usr/local/bin/cmux", "/opt/homebrew/bin/cmux"],
+    Terminal: [],
   };
   return paths[terminal].some((path) => existsSync(path));
 }
@@ -69,7 +71,7 @@ function detectDefaultTerminal(): TerminalApp {
   }
 
   // Fallback to Terminal.app (always available on macOS)
-  return "iTerm2";
+  return "Terminal";
 }
 
 async function runInWarp(command: string): Promise<void> {
@@ -134,15 +136,13 @@ async function runInCmux(command: string): Promise<void> {
   // If cmux session exists, send command to it
   // Otherwise, execute in new cmux environment
   try {
-    const escaped = command.replace(/'/g, "'\\''");
-    execSync(`cmux -e "${escaped}"`, {
+    execFileSync("cmux", ["-e", command], {
       stdio: "ignore",
-      encoding: "utf-8",
     });
   } catch {
     // Fallback: try alternative cmux syntax
     try {
-      execSync(`cmux '${command.replace(/'/g, "'\\''")}' `, {
+      execFileSync("cmux", [command], {
         stdio: "ignore",
       });
     } catch {
@@ -184,6 +184,8 @@ export async function runCommandInDefaultTerminal(
       return runInWezTerm(command);
     case "cmux":
       return runInCmux(command);
+    case "Terminal":
+      return runInTerminal(command);
     default:
       return runInTerminal(command);
   }

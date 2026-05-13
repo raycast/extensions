@@ -211,15 +211,15 @@
   },
   "screenshots": [
     {
-      "path": "media/screen1.png",
+      "path": "metadata/screen1.png",
       "caption": "Initial state with provider and model settings"
     },
     {
-      "path": "media/screen2.png",
+      "path": "metadata/screen2.png",
       "caption": "Command history with generated command"
     },
     {
-      "path": "media/screen3.png",
+      "path": "metadata/screen3.png",
       "caption": "Actions panel with all available commands"
     }
   ],

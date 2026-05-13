@@ -34,14 +34,14 @@ AI Shellsmith has a **separated architecture** where the core conversion engine 
 │                                  │                              │
 │          ┌───────────────────────┼───────────────────────┐     │
 │          │                       │                       │     │
-│  ┌───────▼──────┐  ┌────────────▼───┐  ┌───────────────▼──┐  │
-│  │  Cache       │  │  Context       │  │  Validator      │  │
-│  │ (cache.ts)   │  │ (context.ts)   │  │ (validator.ts)  │  │
-│  │              │  │                │  │                 │  │
-│  │ • LRU        │  │ • Git Context  │  │ • Shell         │  │
-│  │ • 60s TTL    │  │ • Shell Info   │  │   Validation    │  │
-│  │ • 128 max    │  │ • CWD          │  │                 │  │
-│  └──────────────┘  └────────────────┘  └─────────────────┘  │
+│  ┌───────▼──────┐  ┌────────────▼───┐  │
+│  │  Cache       │  │  Context       │  │
+│  │ (cache.ts)   │  │ (context.ts)   │  │
+│  │              │  │                │  │
+│  │ • LRU        │  │ • Git Context  │  │
+│  │ • 60s TTL    │  │ • Shell Info   │  │
+│  │ • 128 max    │  │ • CWD          │  │
+│  └──────────────┘  └────────────────┘  │
 │          ┌──────────────────────┐      ┌────────────────┐    │
 │          │ History              │      │ Config         │    │
 │          │ (history.ts)         │      │ (config.ts)    │    │
@@ -63,7 +63,6 @@ src/
 ├── cache.ts            In-memory LRU cache
 ├── context.ts          Environment context extraction
 ├── history.ts          Shell history parsing
-├── validator.ts        Command validation
 ├── config.ts           Configuration & constants
 ├── types.ts            Shared TypeScript types
 ├── utils.ts            Raycast-only helpers (LocalStorage, AppleScript)
@@ -71,7 +70,7 @@ src/
 
 test/
 ├── engine.test.ts      Engine smoke tests (live API)
-└── integration.test.ts Unit tests for cache / context / history / validator
+└── integration.test.ts Unit tests for cache / context / history
 
 README.md               Project overview
 ARCHITECTURE.md         This file
@@ -191,7 +190,6 @@ Small, focused files (`cache`, `context`, `history`, `validator`) that can be un
 | Context7 hit      | 500–1000 ms   | `npx ctx7` exec + parsing      |
 | AI query          | 1–3 s         | Network + token processing     |
 | Context extraction| 50–200 ms     | `git` + shell history          |
-| Validation        | 100–300 ms    | `command -v` check             |
 
 ## Extending the Engine
 
@@ -203,7 +201,7 @@ To add a new provider:
 
 ## Testing Strategy
 
-- **Unit tests** (`test/integration.test.ts`) — cover cache, context extraction, history parsing, validator.
+- **Unit tests** (`test/integration.test.ts`) — cover cache, context extraction, history parsing.
 - **Engine smoke tests** (`test/engine.test.ts`) — live API calls; skipped unless `OPENAI_API_KEY` is set.
 
 ## Future Enhancements

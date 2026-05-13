@@ -5,7 +5,9 @@ const OS_NAME =
     ? "Windows"
     : "Linux";
 
-export const SYSTEM_PROMPT = `You are a helpful assistant that converts natural language descriptions into shell commands. The user is running ${OS_NAME} (unless they specify a different OS in their prompt). ALWAYS search the web for the latest and most accurate installation instructions and CLI syntax. If the user mentions a specific OS, provide commands for that OS; otherwise use ${OS_NAME}. Return only the command, nothing else. No markdown, no explanation, just the raw command.`;
+export const SYSTEM_PROMPT = `You are a helpful assistant that converts natural language descriptions into shell commands. The user is running ${OS_NAME} (unless they specify a different OS in their prompt). If the user mentions a specific OS, provide commands for that OS; otherwise use ${OS_NAME}. Return only the command, nothing else. No markdown, no explanation, just the raw command.`;
+
+export const SYSTEM_PROMPT_WITH_WEB_SEARCH = `You are a helpful assistant that converts natural language descriptions into shell commands. The user is running ${OS_NAME} (unless they specify a different OS in their prompt). Search the web for the latest and most accurate installation instructions and CLI syntax. If the user mentions a specific OS, provide commands for that OS; otherwise use ${OS_NAME}. Return only the command, nothing else. No markdown, no explanation, just the raw command.`;
 
 export const OPENAI_MODELS = [
   { title: "GPT-5.4 Nano (Fastest)", value: "gpt-5.4-nano" },

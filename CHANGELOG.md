@@ -1,6 +1,6 @@
 # AI Shell Smith Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Convert natural language prompts into shell commands via Raycast
 - Multi-provider support: OpenAI (gpt-5.4-nano, gpt-5.4-mini), Perplexity (sonar-pro), Ollama (gpt-oss:20b-cloud, gpt-oss:120b-cloud)

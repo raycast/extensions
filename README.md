@@ -1,70 +1,103 @@
-# AI Shell Smith
+# ⚡️ AI Shell Smith
 
-Create shell commands from natural language descriptions. Supports OpenAI, Perplexity, and Ollama, with optional Context7 integration for up-to-date documentation. Ships as both a Raycast extension and a standalone CLI.
+> Describe what you want in plain English — get a shell command worth running.
 
-## How it works
+**AI Shell Smith** is a sharp little bridge between fuzzy intent and runnable CLI. Plug in OpenAI, Perplexity, or local Ollama; optionally pull live docs via Context7 — then grab the command from **Raycast** or pipe the same brain through the **standalone CLI**.
 
-1. Type a natural language prompt: `rename a docker volume to hello`
-2. AI Shell Smith generates the corresponding shell command
-3. Copy to clipboard (`Cmd+Return`) or execute in Terminal (`Cmd+T`)
+🧠 Natural language → shell · 🔄 Smart cache · 📜 Persistent history · 🖥 Multiple terminals  
 
-**⚠️ Always verify commands before executing — especially destructive ones.**
+---
 
-## Setup (Raycast)
+## ✨ Why bother?
 
-### Quick Start
+| You type… | You get… |
+|-----------|----------|
+| *“Show disk usage sorted by folder”* | A real `du` / `dust` command, ready to tweak |
+| *“Bump version in package.json”* | A focused one-liner, not ten tabs of Stack Overflow |
 
-1. Install the extension from [Raycast Store](https://raycast.com) or build from source
-2. Open preferences (`Cmd+,` → AI Shell Smith)
-3. Add API key for your preferred provider
+It’s opinionated toward **actually useful terminal work** — git, npm, Docker, macOS quirks, the usual suspects.
 
-### Provider Setup
+---
 
-- **OpenAI**: Get key at [platform.openai.com/api-keys](https://platform.openai.com/api-keys)
-- **Perplexity**: Get key at [perplexity.ai/api](https://www.perplexity.ai/api)
-- **Ollama**: Run locally at `http://localhost:11434` or configure custom URL
-- **Context7** (optional): Enhanced documentation lookup at [context7.com](https://context7.com)
+## 🚀 Raycast (recommended)
 
-## Features
+1. Install from the **Raycast Store** (when published) or build with `npm run build` / `ray build`
+2. Open **Preferences** → **AI Shell Smith**
+3. Pick a provider and drop in the right key
 
-- **Multiple Providers**: OpenAI (gpt-5.4-nano, gpt-5.4-mini, gpt-5-search), Perplexity (sonar-pro), Ollama (gpt-oss-20b, gpt-oss-120b)
-- **Smart Caching**: In-memory LRU with 60s TTL — repeated prompts return instantly
-- **Command History**: Persisted locally with keyboard shortcuts
-- **Web Search**: Optional real-time web search via GPT-5 (OpenAI only)
-- **Documentation Lookup**: Optional Context7 integration fetches latest docs before generation
-- **Custom Endpoints**: Support for OpenAI-compatible APIs and self-hosted Ollama
+**Providers**
 
-## Keyboard Shortcuts
+- 🤖 **OpenAI** — fast models + optional **GPT-5 Search** for web-grounded answers  
+- 🔮 **Perplexity** — `sonar-pro` out of the box  
+- 🦙 **Ollama** — local / self-hosted; API key optional  
+- 📚 **Context7** *(optional)* — fresher library docs before it answers [`context7.com`](https://context7.com)
 
-| Action | Shortcut |
-|--------|----------|
-| Copy Command | `Cmd+Return` |
-| Execute in Terminal | `Cmd+T` |
-| Delete from History | `Cmd+Shift+X` |
-| Change Provider | `Cmd+L` |
+**Power moves**
 
-## CLI Usage
+- ⌘↩ **Copy** the command  
+- ⌘**T** **Run** in your favorite terminal (Warp, iTerm, Terminal.app, …)  
+- ⌘⌥**X** **Drop** a line from history  
+- ⌘**L** **Jump** to preferences  
 
-For programmatic use or shell integration, AI Shell Smith includes a CLI:
+---
+
+## 🛡️ Safety (read this once)
+
+AI suggests text; **you** decide what runs. Glance at anything involving `rm`, `sudo`, `DROP`, `curl | sh`, or mass renames before you hit Enter. Execution only happens when **you** choose it — nothing auto-runs in the background.
+
+---
+
+## 🧰 CLI
+
+For scripts, aliases, or “just give me the command in the terminal”:
 
 ```bash
-OPENAI_API_KEY=sk-... bun run src/cli.ts "list files in current directory"
+OPENAI_API_KEY=sk-... bun run src/cli.ts "list the 10 largest files here"
 ```
 
-See [ENGINE.md](./ENGINE.md) for detailed CLI documentation and library integration.
+More options and env vars → **[ENGINE.md](./ENGINE.md)**
 
-## Architecture
+---
 
-- **engine.ts**: Core LLM integration and prompt conversion
-- **cache.ts**: In-memory result caching
-- **history.ts**: Command history management
-- **context.ts**: System context detection
+## 🧱 What’s inside
 
-See [ARCHITECTURE.md](./ARCHITECTURE.md) for deep dive.
+| Piece | Role |
+|-------|------|
+| `engine.ts` | Providers, Context7 path, cache, LLM calls |
+| `cache.ts` | In-memory LRU + short TTL (snappy repeats) |
+| `history.ts` | Shell history parsing (zsh / bash / fish) |
+| `context.ts` | CWD, git root, shell flavor |
+| `utils.ts` | Raycast storage + AppleScript terminal dispatch |
 
-## Notes
+Full map → **[ARCHITECTURE.md](./ARCHITECTURE.md)**
 
-- Minimum prompt length: 2 characters
-- All API calls consume your provider's token quota
-- History is stored locally in Raycast's storage
-- Works on macOS only (uses AppleScript for Terminal integration)
+---
+
+## 🔧 Dev quick start
+
+```bash
+bun install   # or npm install
+bun test
+bun run typecheck
+ray develop   # from the extension root when using Raycast tooling
+```
+
+**Platform:** macOS (Terminal integration uses AppleScript).
+
+---
+
+## 🌿 Git remotes (this repo)
+
+| Remote | Points to |
+|--------|-----------|
+| `origin` | Your canonical app repo → `LivioGama/ai-shell-smith` |
+| `upstream` | Official Raycast extensions monorepo → `raycast/extensions` |
+| `raycast-fork` | Your fork for Store PRs → `LivioGama/raycast-extensions` |
+
+Example: `git fetch raycast-fork` then work on branch `ext/ai-shell-smith` over there for PRs to [`raycast/extensions`](https://github.com/raycast/extensions).
+
+---
+
+## 📄 License
+
+MIT — do fun things, own the consequences of the commands you run.

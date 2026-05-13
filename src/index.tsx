@@ -26,11 +26,7 @@ import {
   type ModelOption,
 } from "./config";
 import { globalCache } from "./cache";
-import type {
-  ShellBuddyArguments,
-  CommandHistoryItem,
-  CommandPreferences,
-} from "./types";
+import type { ShellBuddyArguments, CommandHistoryItem } from "./types";
 
 const PROVIDERS: ReadonlyArray<{ title: string; value: Provider }> = [
   { title: "OpenAI", value: "openai" },
@@ -47,7 +43,7 @@ const modelsFor = (provider: Provider): ReadonlyArray<ModelOption> =>
 
 export default function Command(props: { arguments: ShellBuddyArguments }) {
   const { prompt: defaultPrompt } = props.arguments;
-  const preferences = getPreferenceValues<CommandPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const {
     provider: defaultProvider = "openai",
     openaiModel = OPENAI_MODELS[0].value,
@@ -178,7 +174,7 @@ export default function Command(props: { arguments: ShellBuddyArguments }) {
     return () => {
       if (debounceTimer.current) clearTimeout(debounceTimer.current);
     };
-  }, [prompt, webSearch]);
+  }, [prompt, webSearch, provider, model]);
 
   const renderSearchBarAccessory = () => {
     if (prompt) return null;
@@ -193,6 +189,9 @@ export default function Command(props: { arguments: ShellBuddyArguments }) {
             const [mode, prov] = val.split(":");
             if (mode === "search") {
               setWebSearch(true);
+              setProvider(prov as Provider);
+            } else if (mode === "regular") {
+              setWebSearch(false);
               setProvider(prov as Provider);
             }
           }}

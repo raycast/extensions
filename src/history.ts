@@ -19,8 +19,10 @@ export function parseHistoryLine(line: string, shell: string): string {
   if (!trimmed) return "";
 
   if (shell.includes("zsh")) {
-    const parts = trimmed.split(";");
-    return parts.length >= 2 ? parts[1].trim() : trimmed;
+    const firstSemicolonIndex = trimmed.indexOf(";");
+    return firstSemicolonIndex !== -1
+      ? trimmed.slice(firstSemicolonIndex + 1).trim()
+      : trimmed;
   }
   if (shell.includes("fish")) {
     return trimmed.startsWith("- cmd:")

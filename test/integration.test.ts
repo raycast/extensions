@@ -75,6 +75,12 @@ describe("history.parseHistoryLine", () => {
     expect(parseHistoryLine(": 1700000000:0;ls -la", "zsh")).toBe("ls -la");
   });
 
+  test("zsh format preserves semicolons inside commands", () => {
+    expect(parseHistoryLine(": 1700000000:0;echo a; echo b", "zsh")).toBe(
+      "echo a; echo b"
+    );
+  });
+
   test("zsh line without timestamp returns trimmed input", () => {
     expect(parseHistoryLine("ls -la", "zsh")).toBe("ls -la");
   });
