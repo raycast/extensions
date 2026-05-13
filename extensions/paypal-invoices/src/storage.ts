@@ -101,3 +101,39 @@ export async function saveListPreferences(
 ): Promise<void> {
   await LocalStorage.setItem(PREFS_KEY, JSON.stringify(prefs));
 }
+
+const INVOICE_DETAILS_KEY = "paypal-invoice-details";
+
+export async function loadAllInvoiceDetails(): Promise<
+  Record<string, unknown>
+> {
+  const raw = await LocalStorage.getItem<string>(INVOICE_DETAILS_KEY);
+  if (!raw) return {};
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return typeof parsed === "object" && parsed !== null ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export async function saveAllInvoiceDetails(
+  details: Record<string, unknown>,
+): Promise<void> {
+  await LocalStorage.setItem(INVOICE_DETAILS_KEY, JSON.stringify(details));
+}
+
+export async function saveInvoiceDetail(
+  invoiceId: string,
+  data: unknown,
+): Promise<void> {
+  const existing = await loadAllInvoiceDetails();
+  existing[invoiceId] = data;
+  await LocalStorage.setItem(INVOICE_DETAILS_KEY, JSON.stringify(existing));
+}
+
+export async function deleteInvoiceDetail(invoiceId: string): Promise<void> {
+  const existing = await loadAllInvoiceDetails();
+  delete existing[invoiceId];
+  await LocalStorage.setItem(INVOICE_DETAILS_KEY, JSON.stringify(existing));
+}

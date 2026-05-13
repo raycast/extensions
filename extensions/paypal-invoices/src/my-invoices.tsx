@@ -21,6 +21,9 @@ import {
   deleteInvoice,
   loadInvoices,
   loadListPreferences,
+  loadAllInvoiceDetails,
+  saveAllInvoiceDetails,
+  deleteInvoiceDetail,
   saveListPreferences,
   updateInvoiceRecord,
   updateInvoiceStatus,
@@ -349,6 +352,55 @@ function calcTotal(items: EditLineItem[], taxPercent: string): number {
   return subtotal + tax;
 }
 
+type ResolvedInvoice = Awaited<ReturnType<typeof getFullInvoice>>;
+
+type ParsedInvoiceFormData = {
+  note: string;
+  taxPercent: string;
+  taxName: string;
+  allowTip: boolean;
+  allowPartialPayment: boolean;
+  items: EditLineItem[];
+};
+
+function parseInvoiceFormData(data: ResolvedInvoice): ParsedInvoiceFormData {
+  const detail = data.detail as { note?: string } | undefined;
+  const rawItems = data.items as
+    | Array<{
+        name?: string;
+        description?: string;
+        quantity?: string;
+        unit_amount?: { value?: string };
+        tax?: { percent?: string; name?: string };
+      }>
+    | undefined;
+  const firstTax = rawItems?.[0]?.tax;
+  const config = data.configuration as
+    | {
+        allow_tip?: boolean;
+        partial_payment?: { allow_partial_payment?: boolean };
+      }
+    | undefined;
+  return {
+    note: detail?.note ?? "",
+    taxPercent: firstTax?.percent ?? "",
+    taxName: firstTax?.name ?? "",
+    allowTip: config?.allow_tip ?? false,
+    allowPartialPayment:
+      config?.partial_payment?.allow_partial_payment ?? false,
+    items:
+      rawItems && rawItems.length > 0
+        ? rawItems.map((item) => ({
+            id: String(++editItemCounter),
+            name: item.name ?? "",
+            description: item.description ?? "",
+            quantity: item.quantity ?? "1",
+            price: item.unit_amount?.value ?? "",
+          }))
+        : [newEditItem()],
+  };
+}
+
 function EditInvoiceForm({
   invoice,
   onUpdate,
@@ -358,42 +410,50 @@ function EditInvoiceForm({
 }) {
   const { pop } = useNavigation();
 
-  const [note, setNote] = useState("");
+  // Read directly from module-level cache at mount time (lazy initializer).
+  // This always reflects the freshest cached value, even if the parent
+  // rendered before the background fetch completed.
+  const [parsed] = useState<ParsedInvoiceFormData | null>(() => {
+    const cached = prefetchCache.get(invoice.invoiceId);
+    return cached ? parseInvoiceFormData(cached) : null;
+  });
+
+  const [note, setNote] = useState(() => parsed?.note ?? "");
   const [dueDate, setDueDate] = useState<Date | null>(
     invoice.dueDate ? new Date(invoice.dueDate) : null,
   );
-  const [taxPercent, setTaxPercent] = useState("");
-  const [taxName, setTaxName] = useState("");
-  const [allowTip, setAllowTip] = useState(false);
-  const [allowPartialPayment, setAllowPartialPayment] = useState(false);
+  const [taxPercent, setTaxPercent] = useState(() => parsed?.taxPercent ?? "");
+  const [taxName, setTaxName] = useState(() => parsed?.taxName ?? "");
+  const [allowTip, setAllowTip] = useState(() => parsed?.allowTip ?? false);
+  const [allowPartialPayment, setAllowPartialPayment] = useState(
+    () => parsed?.allowPartialPayment ?? false,
+  );
   const [notifyRecipient, setNotifyRecipient] = useState(false);
-  const [items, setItems] = useState<EditLineItem[]>([newEditItem()]);
+  const [items, setItems] = useState<EditLineItem[]>(
+    () => parsed?.items ?? [newEditItem()],
+  );
   const [itemErrors, setItemErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(
+    () => !prefetchCache.has(invoice.invoiceId),
+  );
 
   useEffect(() => {
+    if (prefetchCache.has(invoice.invoiceId)) return;
     getFullInvoice(invoice.invoiceId)
       .then((data) => {
-        const detail = data.detail as { note?: string } | undefined;
-        setNote(detail?.note ?? "");
-        const rawItems = data.items as
-          | Array<{ tax?: { percent?: string; name?: string } }>
-          | undefined;
-        const firstTax = rawItems?.[0]?.tax;
-        if (firstTax?.percent) setTaxPercent(firstTax.percent);
-        if (firstTax?.name) setTaxName(firstTax.name);
-        const config = data.configuration as
-          | {
-              allow_tip?: boolean;
-              partial_payment?: { allow_partial_payment?: boolean };
-            }
-          | undefined;
-        if (config?.allow_tip != null) setAllowTip(config.allow_tip);
-        if (config?.partial_payment?.allow_partial_payment != null)
-          setAllowPartialPayment(config.partial_payment.allow_partial_payment);
+        const p = parseInvoiceFormData(data);
+        setNote(p.note);
+        setTaxPercent(p.taxPercent);
+        setTaxName(p.taxName);
+        setAllowTip(p.allowTip);
+        setAllowPartialPayment(p.allowPartialPayment);
+        setItems(p.items);
       })
       .catch(() => {
         /* ignore, form starts with blank defaults */
+      })
+      .finally(() => {
+        setIsLoading(false);
       });
   }, []);
 
@@ -470,6 +530,10 @@ function EditInvoiceForm({
       };
 
       await updateInvoice(params);
+      prefetchCache.delete(invoice.invoiceId);
+      deleteInvoiceDetail(invoice.invoiceId).catch(() => {
+        /* ignore */
+      });
       await updateInvoiceRecord(invoice.invoiceId, {
         total: newTotal,
         dueDate: dueDateStr,
@@ -657,6 +721,9 @@ function EditInvoiceForm({
 
 // ── Main command ────────────────────────────────────────────────────────────
 
+// Module-level cache so it survives component remounts during navigation.
+const prefetchCache = new Map<string, ResolvedInvoice>();
+
 export default function MyInvoicesCommand() {
   const [invoices, setInvoices] = useState<InvoiceRecord[]>([]);
   const [prefs, setPrefs] = useState<ListPreferences>({
@@ -671,13 +738,47 @@ export default function MyInvoicesCommand() {
   useEffect(() => {
     async function load() {
       setIsLoading(true);
-      const [records, savedPrefs] = await Promise.all([
+      const [records, savedPrefs, storedDetails] = await Promise.all([
         loadInvoices(),
         loadListPreferences(),
+        loadAllInvoiceDetails(),
       ]);
       setInvoices(records);
       setPrefs(savedPrefs);
       setIsLoading(false);
+
+      // Seed memory cache instantly from LocalStorage — Edit form opens with zero delay.
+      for (const record of records) {
+        if (
+          storedDetails[record.invoiceId] &&
+          !prefetchCache.has(record.invoiceId)
+        ) {
+          prefetchCache.set(
+            record.invoiceId,
+            storedDetails[record.invoiceId] as ResolvedInvoice,
+          );
+        }
+      }
+
+      // Background-refresh all invoices from the API.
+      // Collect all results first, then write LocalStorage in one shot
+      // to avoid parallel read-modify-write races overwriting each other.
+      const freshDetails: Record<string, unknown> = { ...storedDetails };
+      const fetchPromises = records.map((record) =>
+        getFullInvoice(record.invoiceId)
+          .then((data) => {
+            prefetchCache.set(record.invoiceId, data);
+            freshDetails[record.invoiceId] = data;
+          })
+          .catch(() => {
+            /* silently ignore */
+          }),
+      );
+      Promise.all(fetchPromises)
+        .then(() => saveAllInvoiceDetails(freshDetails))
+        .catch(() => {
+          /* ignore */
+        });
 
       const toRefresh = records.filter(
         (r) =>
@@ -893,11 +994,23 @@ export default function MyInvoicesCommand() {
     </List.Dropdown>
   );
 
+  function handleSelectionChange(id: string | null) {
+    if (!id || prefetchCache.has(id)) return;
+    getFullInvoice(id)
+      .then((data) => {
+        prefetchCache.set(id, data);
+      })
+      .catch(() => {
+        /* silently ignore prefetch failures */
+      });
+  }
+
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search invoices…"
       searchBarAccessory={filterDropdown}
+      onSelectionChange={handleSelectionChange}
     >
       {Object.entries(grouped).map(([groupKey, records]) => (
         <List.Section
@@ -908,6 +1021,7 @@ export default function MyInvoicesCommand() {
           {records.map((invoice) => (
             <List.Item
               key={invoice.invoiceId}
+              id={invoice.invoiceId}
               icon={{
                 source: STATUS_ICON[invoice.status],
                 tintColor: STATUS_COLOR[invoice.status],
