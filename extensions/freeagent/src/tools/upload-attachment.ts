@@ -86,9 +86,11 @@ export default async function tool(input: Input) {
       return `❌ Unsupported content type: ${input.contentType}. Supported types: ${validContentTypes.join(", ")}`;
     }
 
-    // Validate base64 data (Buffer.from(..., "base64") silently drops bad chars,
-    // so we check the character set + padding length explicitly).
-    if (!isValidBase64(input.fileData)) {
+    // Strip any data: URI prefix so the API always receives raw base64 (and to keep
+    // validation aligned with what we actually send). Buffer.from(..., "base64")
+    // silently drops bad chars, so we check the character set + padding explicitly.
+    const rawBase64 = input.fileData.replace(/^data:[^;]+;base64,/, "").trim();
+    if (!isValidBase64(rawBase64)) {
       return "❌ Invalid file data format. Please provide valid base64 encoded content.";
     }
 
@@ -96,7 +98,7 @@ export default async function tool(input: Input) {
     const attachmentData: AttachmentUploadData = {
       file_name: input.fileName,
       content_type: input.contentType,
-      data: input.fileData,
+      data: rawBase64,
     };
 
     if (input.description) {
