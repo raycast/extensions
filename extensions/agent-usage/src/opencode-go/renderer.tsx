@@ -14,9 +14,9 @@ import {
 function formatQuotaText(quota: OpencodegoQuota): string {
   const remaining = quota.limit - quota.used;
   const percent = Math.round(getRemainingPercent(remaining, quota.limit));
-  const remainingStr = quota.unit ? `${remaining} ${quota.unit}` : `${remaining}`;
+  const usedStr = quota.unit ? `${quota.used} ${quota.unit}` : `${quota.used}`;
   const limitStr = quota.unit ? `${quota.limit} ${quota.unit}` : `${quota.limit}`;
-  return `${remainingStr}/${limitStr} (${percent}% remaining)`;
+  return `${usedStr}/${limitStr} (${percent}% remaining)`;
 }
 
 export function formatOpencodegoUsageText(usage: OpencodegoUsage | null, error: OpencodegoError | null): string {
@@ -90,7 +90,6 @@ export function getOpencodegoAccessory(
   usage: OpencodegoUsage | null,
   error: OpencodegoError | null,
   isLoading: boolean,
-  useRollingAsPrimary = false,
 ): Accessory {
   if (isLoading) return getLoadingAccessory("OpenCode Go");
 
@@ -103,14 +102,10 @@ export function getOpencodegoAccessory(
 
   if (!usage) return getNoDataAccessory();
 
-  // Use Rolling as primary display for List view, Monthly for menubar
-  const rollingQuota = usage.quotas.find((q) => q.label === "Rolling (2h)");
-  const displayQuota = useRollingAsPrimary && rollingQuota ? rollingQuota : usage.primary;
+  const remaining = usage.primary.limit - usage.primary.used;
+  const percent = Math.round(getRemainingPercent(remaining, usage.primary.limit));
 
-  const remaining = displayQuota.limit - displayQuota.used;
-  const percent = Math.round(getRemainingPercent(remaining, displayQuota.limit));
-
-  const tooltipParts = [usage.primary, ...usage.quotas].map((q) => {
+  const tooltipParts = usage.quotas.map((q) => {
     const r = q.limit - q.used;
     const pct = Math.round(getRemainingPercent(r, q.limit));
     return `${q.label}: ${pct}%`;

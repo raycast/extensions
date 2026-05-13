@@ -52,12 +52,10 @@ export function parseOpencodegoHtml(html: string): { usage: OpencodegoUsage | nu
     // Rolling usage (2-hour window)
     if (data.usage?.rollingUsage) {
       const ru = data.usage.rollingUsage;
-      // usagePercent is percent REMAINING (not used)
-      const remaining = ru.usagePercent;
-      const used = 100 - remaining;
+      // usagePercent is percent USED
       quotas.push({
         label: "Rolling (2h)",
-        used,
+        used: ru.usagePercent,
         limit: 100,
         unit: "%",
       });
@@ -66,12 +64,9 @@ export function parseOpencodegoHtml(html: string): { usage: OpencodegoUsage | nu
     // Weekly usage
     if (data.usage?.weeklyUsage) {
       const wu = data.usage.weeklyUsage;
-      // usagePercent is percent REMAINING
-      const remaining = wu.usagePercent;
-      const used = 100 - remaining;
       quotas.push({
         label: "Weekly",
-        used,
+        used: wu.usagePercent,
         limit: 100,
         unit: "%",
       });
@@ -80,11 +75,9 @@ export function parseOpencodegoHtml(html: string): { usage: OpencodegoUsage | nu
     // Monthly usage - this is the primary quota, don't add to quotas array
     if (data.usage?.monthlyUsage) {
       const mu = data.usage.monthlyUsage;
-      // usagePercent is percent REMAINING
-      const remaining = mu.usagePercent;
-      const used = 100 - remaining;
+      // Monthly is the primary quota (not added to quotas to avoid duplication)
       primary.label = "Monthly";
-      primary.used = used;
+      primary.used = mu.usagePercent;
     }
 
     if (quotas.length === 0) {
