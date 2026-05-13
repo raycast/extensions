@@ -117,8 +117,10 @@ function InlineDetail({ skill, isSelected, skillDetailPageUrl, audits }: InlineD
     ),
   ];
 
+  const sourceAudits = skill.source ? audits : undefined;
+  const shouldShowAuditScopeWarning = skill.hasUpdate && sourceAudits;
   const agentAuditsDetailsSection: MetadataSection = [
-    skill.hasUpdate && audits && (
+    shouldShowAuditScopeWarning && (
       <List.Item.Detail.Metadata.Label
         key="agent-audits-scope"
         title="Audit Scope"
@@ -126,10 +128,9 @@ function InlineDetail({ skill, isSelected, skillDetailPageUrl, audits }: InlineD
         icon={Icon.Warning}
       />
     ),
-    skill.source &&
-      audits &&
-      (audits.results.length > 0 ? (
-        audits.results.map((audit) =>
+    sourceAudits &&
+      (sourceAudits.results.length > 0 ? (
+        sourceAudits.results.map((audit) =>
           audit.url ? (
             <List.Item.Detail.Metadata.Link
               key={`agent-audits-${audit.provider}`}
@@ -149,7 +150,7 @@ function InlineDetail({ skill, isSelected, skillDetailPageUrl, audits }: InlineD
         <List.Item.Detail.Metadata.Label
           key="agent-audits-fallback"
           title="Security Audits"
-          text={getAuditFallbackText(audits.isLoading, audits.availabilityState)}
+          text={getAuditFallbackText(sourceAudits.isLoading, sourceAudits.availabilityState)}
         />
       )),
   ];
