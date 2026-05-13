@@ -2,7 +2,7 @@
 
 Call anyone in your Contacts through your iPhone in two keystrokes — from Raycast, via macOS Continuity.
 
-![Phone screenshot](metadata/phone-1.png)
+![Phone screenshot](media/preview.png)
 
 ## How it works
 
