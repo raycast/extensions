@@ -55,6 +55,7 @@ export default async function tool(input: Input) {
     if (!input.taskUrl) return "❌ Task URL is required (use list-tasks).";
     if (!input.datedOn) return "❌ Date (YYYY-MM-DD) is required.";
     if (input.hours === undefined || input.hours === null) return "❌ Hours is required.";
+    if (input.hours <= 0) return "❌ Hours must be a positive number.";
 
     const taskId = extractTaskId(input.taskUrl);
     if (!taskId) return "❌ Invalid task URL.";

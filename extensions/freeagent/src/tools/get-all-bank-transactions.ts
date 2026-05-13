@@ -69,6 +69,7 @@ export default async function tool(input: Input = {}) {
     let totalTransactions = 0;
     let totalUnexplained = 0;
     let totalMarkedForReview = 0;
+    let anyAccountTruncated = false;
 
     for (const account of accountsToCheck) {
       try {
@@ -138,6 +139,7 @@ export default async function tool(input: Input = {}) {
 
         if (transactions.length > maxTransactions) {
           result += `   ... and ${transactions.length - maxTransactions} more transactions\n\n`;
+          anyAccountTruncated = true;
         }
 
         totalTransactions += transactions.length;
@@ -165,7 +167,7 @@ export default async function tool(input: Input = {}) {
     result += `• Use **upload-attachment** to attach receipts or documents\n`;
     result += `• Use **update-bank-transaction** to mark transactions for review\n`;
 
-    if (totalTransactions > maxTransactions) {
+    if (anyAccountTruncated) {
       result += `\n⚠️ **Note**: Only showing first ${maxTransactions} transactions per account. Use maxTransactions parameter to adjust this limit.\n`;
     }
 
