@@ -144,6 +144,26 @@ export async function closeActiveTab(tab: Tab): Promise<void> {
   `);
 }
 
+export async function closeOtherTabs(tab: Tab): Promise<void> {
+  // Close every tab in the same window except the given tab.
+  // Iterate from the end so closing earlier tabs doesn't shift the remaining indices.
+  await runAppleScript(`
+    tell application "Google Chrome"
+      activate
+      set _wnd to first window where id is ${tab.windowsId}
+      set index of _wnd to 1
+      set _count to count of tabs of _wnd
+      repeat with i from _count to 1 by -1
+        if i is not ${tab.tabIndex} then
+          close tab i of _wnd
+        end if
+      end repeat
+      set active tab index of _wnd to 1
+    end tell
+    return true
+  `);
+}
+
 export async function reloadTab(tab: Tab): Promise<void> {
   await runAppleScript(`
     tell application "Google Chrome"

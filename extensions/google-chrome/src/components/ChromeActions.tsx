@@ -1,6 +1,13 @@
 import { ReactElement } from "react";
 import { Action, ActionPanel, closeMainWindow, getPreferenceValues, Icon } from "@raycast/api";
-import { closeActiveTab, openNewTab, reloadTab, setActiveTab, createNewGuestWindowToWebsite } from "../actions";
+import {
+  closeActiveTab,
+  closeOtherTabs,
+  openNewTab,
+  reloadTab,
+  setActiveTab,
+  createNewGuestWindowToWebsite,
+} from "../actions";
 import { Preferences, SettingsProfileOpenBehaviour, Tab } from "../interfaces";
 import { useCachedState } from "@raycast/utils";
 import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "../constants";
@@ -54,6 +61,7 @@ function TabListItemActions({ tab, onTabClosed }: { tab: Tab; onTabClosed?: () =
         shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
       />
       <CloseTab tab={tab} onTabClosed={onTabClosed} />
+      <CloseOtherTabs tab={tab} onTabClosed={onTabClosed} />
       <ActionPanel.Section>
         <Action.CreateQuicklink
           quicklink={{ link: tab.url, name: tab.title, application: "Google Chrome" }}
@@ -146,6 +154,23 @@ function CloseTab(props: { tab: Tab; onTabClosed?: () => void }) {
       icon={{ source: Icon.XMarkCircle }}
       onAction={handleAction}
       shortcut={{ modifiers: ["cmd", "shift"], key: "w" }}
+    />
+  );
+}
+
+function CloseOtherTabs(props: { tab: Tab; onTabClosed?: () => void }) {
+  async function handleAction() {
+    await closeOtherTabs(props.tab);
+    await closeMainWindow();
+    props.onTabClosed?.();
+  }
+
+  return (
+    <Action
+      title="Close Other Tabs"
+      icon={{ source: Icon.XMarkCircleFilled }}
+      onAction={handleAction}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "w" }}
     />
   );
 }

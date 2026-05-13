@@ -8,6 +8,10 @@
 
 - Add Name Window command to name the currently active Google Chrome window.
 
+## [Close Other Tabs] - 2026-05-13
+
+- Add "Close Other Tabs" action to `Search Tabs` to close every tab in the same window except the selected one (shortcut: `cmd+opt+w`)
+
 ## [Fixes] - 2026-01-05
 
 - Fix infinite rendering with depth bug in new tab `Action`
