@@ -116,17 +116,24 @@ export default function Command(
     contactId: string,
     phoneValue: string,
     scheme: DialScheme,
-  ) {
+  ): Promise<boolean> {
     try {
       await open(`${scheme}:${phoneValue}`);
-      await recordCall(contactId, phoneValue);
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Could not start call",
-        message: String(err),
+        message: err instanceof Error ? err.message : String(err),
       });
+      return false;
     }
+    // Frecency write is best-effort — call has already started.
+    try {
+      await recordCall(contactId, phoneValue);
+    } catch {
+      // non-fatal
+    }
+    return true;
   }
 
   const filtered = useMemo(() => {
@@ -146,8 +153,8 @@ export default function Command(
     const primary = target.phones[0];
     autoDialedRef.current = true;
     (async () => {
-      await dial(target.id, primary.value, defaultScheme);
-      await popToRoot();
+      const ok = await dial(target.id, primary.value, defaultScheme);
+      if (ok) await popToRoot();
     })();
   }, [initialQuery, isLoading, filtered]);
 
