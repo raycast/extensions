@@ -1,6 +1,6 @@
 # Bhagavad Gita Quotes Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-05-13
 
 - Fix eslint config error
 
