@@ -6,6 +6,7 @@ import { useFinderTags, useTagItems, copyItem, moveItem } from "$lib/ray-fb";
 import { isNavigableDirectory } from "$lib/item-behavior";
 import { resolveSymlink } from "$lib/symlink-resolve";
 import { DirectoryBrowser } from "$lib/pages/directory-browser";
+import { SessionViewProvider } from "$lib/pages/directory-browser/session-view-context";
 import { ItemDetail } from "$lib/pages/item-detail";
 import { ItemEdit } from "$lib/pages/item-edit";
 import type { FinderTag } from "$lib/types";
@@ -88,14 +89,16 @@ function TagContents({
     const files = tagItems.filter((entry) => !isNavigableDirectory(entry));
 
     const browserTarget = (dirPath: string) => (
-      <DirectoryBrowser
-        path={dirPath}
-        initialView={view}
-        initialSort={sort}
-        gridColumns={gridColumns}
-        enabledAccessories={enabledAccessories}
-        enterAction={enterAction}
-      />
+      <SessionViewProvider initialView={view} initialSort={sort}>
+        <DirectoryBrowser
+          path={dirPath}
+          initialView={view}
+          initialSort={sort}
+          gridColumns={gridColumns}
+          enabledAccessories={enabledAccessories}
+          enterAction={enterAction}
+        />
+      </SessionViewProvider>
     );
 
     const buildItem = (entry: (typeof tagItems)[number]) => {

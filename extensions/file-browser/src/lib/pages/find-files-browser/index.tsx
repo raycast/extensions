@@ -14,6 +14,7 @@ import { resolveSymlink } from "$lib/symlink-resolve";
 import type { FindFilesSearchArtifact } from "$lib/pages/find-files-browser/logic/types";
 import type { Item } from "$lib/types";
 import { DirectoryBrowser } from "../directory-browser";
+import { SessionViewProvider } from "../directory-browser/session-view-context";
 import { EditSearchForm } from "./edit-search-form";
 import type { FindFilesBrowserProps } from "./types";
 
@@ -243,14 +244,16 @@ export function FindFilesBrowser({
 
   const createDirectoryTarget = useCallback(
     (dirPath: string) => (
-      <DirectoryBrowser
-        path={dirPath}
-        initialView={view}
-        initialSort={sort}
-        gridColumns={gridColumns}
-        enabledAccessories={enabledAccessories}
-        enterAction={enterAction}
-      />
+      <SessionViewProvider initialView={view} initialSort={sort}>
+        <DirectoryBrowser
+          path={dirPath}
+          initialView={view}
+          initialSort={sort}
+          gridColumns={gridColumns}
+          enabledAccessories={enabledAccessories}
+          enterAction={enterAction}
+        />
+      </SessionViewProvider>
     ),
     [view, sort, gridColumns, enabledAccessories, enterAction],
   );
