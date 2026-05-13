@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import AddFilterCommand from "./add-filter";
 import FilterForm from "./filter-form";
 import { deleteFilter, DomainFilter, listFilters } from "./filters";
-import { ExportSkillForm } from "./skill-transfer";
+import { ExportAllSkillsForm, ExportSkillForm, ImportAllSkillsForm } from "./skill-transfer";
 
 export default function MyFiltersCommand() {
   const [filters, setFilters] = useState<DomainFilter[]>([]);
@@ -53,6 +53,12 @@ export default function MyFiltersCommand() {
               icon={Icon.Plus}
               target={<AddFilterCommand shouldPop onSaved={loadFilters} />}
             />
+            <Action.Push
+              title="Import All Skills JSON"
+              icon={Icon.Download}
+              shortcut={{ modifiers: ["opt"], key: "i" }}
+              target={<ImportAllSkillsForm onImported={loadFilters} />}
+            />
           </ActionPanel>
         }
       />
@@ -91,6 +97,12 @@ export default function MyFiltersCommand() {
                 target={<AddFilterCommand shouldPop onSaved={loadFilters} />}
               />
               <Action.Push
+                title="Import All Skills JSON"
+                icon={Icon.Download}
+                shortcut={{ modifiers: ["opt"], key: "i" }}
+                target={<ImportAllSkillsForm onImported={loadFilters} />}
+              />
+              <Action.Push
                 title="Export Skill JSON"
                 icon={Icon.Upload}
                 target={
@@ -102,6 +114,12 @@ export default function MyFiltersCommand() {
                     }}
                   />
                 }
+              />
+              <Action.Push
+                title="Export All Skills JSON"
+                icon={Icon.Upload}
+                shortcut={{ modifiers: ["opt"], key: "e" }}
+                target={<ExportAllSkillsForm filters={filters} />}
               />
             </ActionPanel>
           }
