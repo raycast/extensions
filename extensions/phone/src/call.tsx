@@ -117,9 +117,9 @@ export default function Command(
     phoneValue: string,
     scheme: DialScheme,
   ) {
-    await recordCall(contactId, phoneValue);
     try {
       await open(`${scheme}:${phoneValue}`);
+      await recordCall(contactId, phoneValue);
     } catch (err) {
       await showToast({
         style: Toast.Style.Failure,
