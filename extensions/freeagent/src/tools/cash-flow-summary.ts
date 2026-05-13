@@ -131,7 +131,7 @@ export default async function tool(input: Input = {}) {
 
           const periodKey =
             period === "weekly"
-              ? `Week of ${periodStart.toLocaleDateString()}`
+              ? `Week of ${periodStart.toLocaleDateString("en-US")}`
               : period === "monthly"
                 ? `${periodStart.toLocaleDateString("en-US", { month: "short", year: "numeric" })}`
                 : period === "quarterly"

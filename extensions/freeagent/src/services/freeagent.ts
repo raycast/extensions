@@ -74,6 +74,10 @@ async function makeRequest<T>(endpoint: string, accessToken: string, options?: R
     throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
   }
 
+  if (response.status === 204 || response.headers.get("content-length") === "0") {
+    return undefined as T;
+  }
+
   return response.json();
 }
 
@@ -303,17 +307,7 @@ export async function updateProject(
 }
 
 export async function deleteProject(accessToken: string, projectId: string): Promise<void> {
-  const url = `${BASE_URL}/projects/${projectId}`;
-  const response = await fetch(url, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "User-Agent": USER_AGENT,
-    },
-  });
-  if (!response.ok) {
-    throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
-  }
+  await makeRequest<void>(`/projects/${projectId}`, accessToken, { method: "DELETE" });
 }
 
 export async function fetchTask(accessToken: string, taskId: string): Promise<Task> {
@@ -330,17 +324,7 @@ export async function updateTask(accessToken: string, taskId: string, taskData: 
 }
 
 export async function deleteTask(accessToken: string, taskId: string): Promise<void> {
-  const url = `${BASE_URL}/tasks/${taskId}`;
-  const response = await fetch(url, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "User-Agent": USER_AGENT,
-    },
-  });
-  if (!response.ok) {
-    throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
-  }
+  await makeRequest<void>(`/tasks/${taskId}`, accessToken, { method: "DELETE" });
 }
 
 export async function fetchTimeslip(accessToken: string, timeslipId: string): Promise<Timeslip> {
@@ -361,17 +345,7 @@ export async function updateTimeslip(
 }
 
 export async function deleteTimeslip(accessToken: string, timeslipId: string): Promise<void> {
-  const url = `${BASE_URL}/timeslips/${timeslipId}`;
-  const response = await fetch(url, {
-    method: "DELETE",
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      "User-Agent": USER_AGENT,
-    },
-  });
-  if (!response.ok) {
-    throw new FreeAgentError(`HTTP error! status: ${response.status}`, response.status);
-  }
+  await makeRequest<void>(`/timeslips/${timeslipId}`, accessToken, { method: "DELETE" });
 }
 
 export async function fetchTimeslipsFiltered(
