@@ -116,13 +116,6 @@ export default async function tool(input: Input) {
 
     const selectedContact = matchingContacts[0];
 
-    // Extract amount from invoice details if possible
-    const amountMatch = input.invoiceDetails.match(/[£$€]?(\d+(?:,\d{3})*(?:\.\d{2})?)/);
-
-    if (!amountMatch) {
-      return `❌ Unable to determine invoice amount from "${input.invoiceDetails}". Please include the amount (e.g., "£150.00 for web design services").`;
-    }
-
     // Prepare invoice data
     const invoiceData: InvoiceCreateData = {
       contact: selectedContact.url,
