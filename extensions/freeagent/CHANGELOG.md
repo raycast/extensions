@@ -1,6 +1,6 @@
 # FreeAgent Changelog
 
-## [Fix review feedback for AI tools] - {PR_MERGE_DATE}
+## [Fix review feedback for AI tools] - 2026-05-14
 
 - `add-bank-transaction-explanation`, `update-bank-transaction-explanation`, `update-bank-transaction`, and `upload-attachment` now require explicit confirmation before writing
 - `add-bank-transaction-explanation` now validates that `bankAccountUrl` is provided and no longer accepts a non-functional `attachmentUrl` parameter (use `upload-attachment` + `update-bank-transaction-explanation` instead)
@@ -15,7 +15,7 @@
 - `cash-flow-summary` no longer advertises an unimplemented `"custom"` period that produced corrupted output
 - `match-file-to-transaction` invoice lookup now succeeds when only one of `fileAmount` or `fileDate` is provided (previously required both)
 
-## [Add AI tools for managing projects, tasks, and timeslips] - {PR_MERGE_DATE}
+## [Add AI tools for managing projects, tasks, and timeslips] - 2026-05-14
 
 - Added `list-projects`, `create-project`, and `delete-project` AI tools (create/delete require confirmation)
 - Added `list-tasks`, `create-task-ai`, `update-task`, and `delete-task` AI tools, all with confirmation for mutations
