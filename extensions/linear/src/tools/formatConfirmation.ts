@@ -54,7 +54,11 @@ export function formatConfirmation({ name, value }: { name: string; value: undef
     if (Array.isArray(value)) {
       return { name, value };
     }
-    if (typeof value === "undefined") {
+    // Treat empty strings and null the same as undefined. AI tool callers often pass
+    // `""` for optional ID fields, which would otherwise trigger a doomed entity
+    // lookup (e.g. `workflowState("")` → "Entity not found: WorkflowState") and
+    // surface a confusing error before the actual create/update mutation even runs.
+    if (typeof value === "undefined" || value === "" || value === null) {
       return { name, value: "-" };
     }
     /* eslint-disable @typescript-eslint/no-unused-vars */
