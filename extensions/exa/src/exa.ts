@@ -55,11 +55,21 @@ type SearchResultWithText = SearchTextResponse["results"][number];
 type SearchResultWithHighlights = SearchHighlightsResponse["results"][number];
 
 const preferences: ExtensionPreferences = getPreferenceValues();
+const exaBaseUrl = !preferences.apiKey ? "https://extensions-api-proxy.raycast.com/exa" : "https://api.exa.ai";
 const exa = new Exa(
   preferences.apiKey || "no-api-key",
-  !preferences.apiKey ? "https://extensions-api-proxy.raycast.com/exa" : "https://api.exa.ai",
+  exaBaseUrl,
 );
 (exa as unknown as { headers?: Headers }).headers?.set("x-exa-integration", "raycast-exa");
+
+function isCodeContextResponse(value: unknown): value is CodeContextResponse {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  return typeof candidate.query === "string" && typeof candidate.response === "string";
+}
 
 function cleanArray(values?: string[]) {
   const cleaned = values?.map((value) => value.trim()).filter(Boolean);
@@ -188,10 +198,29 @@ export function compactHighlightContentsResponse(response: SearchHighlightsRespo
 }
 
 export async function getCodeContext(query: string, tokensNum: CodeContextTokens = "dynamic") {
-  return exa.request<CodeContextResponse>("/context", "POST", {
-    query,
-    tokensNum,
+  const response = await fetch(`${exaBaseUrl}/context`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-api-key": preferences.apiKey || "no-api-key",
+      "x-exa-integration": "raycast-exa",
+    },
+    body: JSON.stringify({
+      query,
+      tokensNum,
+    }),
   });
+
+  if (!response.ok) {
+    throw new Error(await response.text());
+  }
+
+  const data: unknown = await response.json();
+  if (!isCodeContextResponse(data)) {
+    throw new Error("Unexpected response shape from Exa context endpoint.");
+  }
+
+  return data;
 }
 
 export default exa;
