@@ -47,6 +47,7 @@ export async function translateWithProvider(config: ProviderConfig, request: Tra
   if (!config.apiKey) {
     throw new MissingAPIKeyError(`${config.title} API key is not configured.`);
   }
+  validateProviderConfig(config);
 
   if (config.id === "gemini") {
     return translateWithGemini(config, request);
@@ -199,6 +200,25 @@ async function postJson<T>(url: string, timeoutMs: number, headers: Record<strin
   }
 }
 
+function validateProviderConfig(config: ProviderConfig): void {
+  if (!config.model) {
+    throw new Error(`${config.title} model is not configured. Choose Fast/Pro or set a custom model in Preferences.`);
+  }
+
+  if (!config.baseURL) {
+    throw new Error(`${config.title} base URL is not configured.`);
+  }
+
+  try {
+    const url = new URL(config.baseURL);
+    if (url.protocol !== "https:" && url.protocol !== "http:") {
+      throw new Error("invalid protocol");
+    }
+  } catch {
+    throw new Error(`${config.title} base URL is invalid: ${config.baseURL}`);
+  }
+}
+
 function chatCompletionsUrl(baseURL: string): string {
   const trimmed = baseURL.replace(/\/+$/, "");
   return trimmed.endsWith("/chat/completions") ? trimmed : `${trimmed}/chat/completions`;
@@ -233,5 +253,5 @@ function extractErrorMessage(value: unknown): string | undefined {
 }
 
 function cleanModelOutput(content: string): string {
-  return content.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
+  return content.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, "").trim();
 }

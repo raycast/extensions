@@ -70,9 +70,11 @@ export default function Command() {
   const [isLoading, setIsLoading] = useState(true);
   const [ocrDone, setOcrDone] = useState(false);
   const [ocrFailed, setOcrFailed] = useState(false);
+  const [ocrError, setOcrError] = useState<string>();
   const [runtimeSettings, setRuntimeSettings] = useState<RuntimeSettings>();
   const [manualRunId, setManualRunId] = useState(0);
   const requestSequence = useRef(0);
+  const captureSequence = useRef(0);
 
   useEffect(() => {
     void loadRuntimeSettings().then(setRuntimeSettings);
@@ -83,13 +85,24 @@ export default function Command() {
   }, []);
 
   async function captureScreenshot() {
+    const captureId = ++captureSequence.current;
+    requestSequence.current += 1;
     setOcrFailed(false);
+    setOcrError(undefined);
+    setOcrDone(false);
+    setSourceText("");
+    setResults([]);
+    setIsLoading(true);
+
     try {
       await closeMainWindow({ popToRootType: PopToRootType.Suspended });
       const text = await recognizeScreenshotText(preferences);
 
+      if (captureId !== captureSequence.current) return;
+
       if (!text) {
         setOcrFailed(true);
+        setOcrError(undefined);
         setIsLoading(false);
         return;
       }
@@ -97,13 +110,18 @@ export default function Command() {
       setSourceText(text);
       setOcrDone(true);
     } catch (error) {
+      if (captureId !== captureSequence.current) return;
+
       const message = error instanceof Error ? error.message : String(error);
-      if (message.includes("cancel") || message.includes("abort")) {
+      const lowerMessage = message.toLowerCase();
+      if (lowerMessage.includes("cancel") || lowerMessage.includes("abort")) {
         setOcrFailed(true);
+        setOcrError(undefined);
         setIsLoading(false);
         return;
       }
       setOcrFailed(true);
+      setOcrError(message);
       setIsLoading(false);
       await showToast({ style: Toast.Style.Failure, title: "OCR Failed", message });
     }
@@ -175,21 +193,20 @@ export default function Command() {
   }
 
   async function retake() {
-    setSourceText("");
-    setResults([]);
-    setOcrDone(false);
-    setIsLoading(true);
     await captureScreenshot();
   }
 
   async function switchTier(tier: ModelTier) {
     setRuntimeSettings(await updateRuntimeSetting("modelTier", tier));
+    await showToast({ style: Toast.Style.Success, title: `Model: ${getTierLabel(tier)}` });
   }
   async function switchProfile(profile: PromptProfile) {
     setRuntimeSettings(await updateRuntimeSetting("promptProfile", profile));
+    await showToast({ style: Toast.Style.Success, title: `Profile: ${PROMPT_PROFILE_LABELS[profile]}` });
   }
   async function switchStyle(style: TranslationStyle) {
     setRuntimeSettings(await updateRuntimeSetting("translationStyle", style));
+    await showToast({ style: Toast.Style.Success, title: `Style: ${STYLE_LABELS[style]}` });
   }
 
   const currentTier = runtimeSettings?.modelTier ?? "fast";
@@ -223,7 +240,7 @@ export default function Command() {
         <List.EmptyView
           icon={Icon.XMarkCircle}
           title="No text captured"
-          description="Screenshot was cancelled or no text was detected."
+          description={ocrError ?? "Screenshot was cancelled or no text was detected."}
           actions={
             <ActionPanel>
               <Action
@@ -235,6 +252,7 @@ export default function Command() {
                   void captureScreenshot();
                 }}
               />
+              <Action icon={Icon.Gear} title="Extension Preferences" onAction={openExtensionPreferences} />
             </ActionPanel>
           }
         />
@@ -411,6 +429,11 @@ function ItemActions(p: {
         ))}
       </ActionPanel.Submenu>
       <ActionPanel.Section title="Settings">
+        <Action
+          icon={Icon.Gear}
+          title="Translation Settings"
+          onAction={() => launchCommand({ name: "translation-settings", type: LaunchType.UserInitiated })}
+        />
         <Action icon={Icon.Gear} title="Extension Preferences" onAction={openExtensionPreferences} />
       </ActionPanel.Section>
     </ActionPanel>

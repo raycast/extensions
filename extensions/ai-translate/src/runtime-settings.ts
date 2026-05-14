@@ -45,6 +45,10 @@ export async function loadRuntimeSettings(): Promise<RuntimeSettings> {
   }
 }
 
+export function getDefaultRuntimeSettings(): RuntimeSettings {
+  return getDefaults();
+}
+
 export async function saveRuntimeSettings(settings: RuntimeSettings): Promise<void> {
   await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
 }

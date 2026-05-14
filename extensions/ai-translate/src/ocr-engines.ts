@@ -38,7 +38,10 @@ export async function recognizeScreenshotText(preferences: ExtensionPreferences)
     } catch (error) {
       if (preferences.ocrEngine !== "local" && preferences.ocrFallbackToLocal) {
         const text = await recognizeText(imagePath);
-        return formatOCRText(text ?? "", preferences) || undefined;
+        const formatted = formatOCRText(text ?? "", preferences);
+        if (formatted) {
+          return formatted;
+        }
       }
       throw error;
     }
@@ -140,7 +143,7 @@ async function getBaiduAccessToken(apiKey: string, secretKey: string, timeoutMs:
   const cacheKey = `baidu-token-${hashText(`${apiKey}:${secretKey}`)}`;
   const cached = tokenCache.get(cacheKey);
   if (cached) {
-    const parsed = JSON.parse(cached) as { accessToken?: string; expiresAt?: number };
+    const parsed = safeParseCachedToken(cached);
     if (parsed.accessToken && parsed.expiresAt && parsed.expiresAt > Date.now()) {
       return parsed.accessToken;
     }
@@ -236,6 +239,18 @@ function safeParseJson(text: string): unknown {
   }
 }
 
+function safeParseCachedToken(text: string): { accessToken?: string; expiresAt?: number } {
+  try {
+    const value = JSON.parse(text) as { accessToken?: unknown; expiresAt?: unknown };
+    return {
+      accessToken: typeof value.accessToken === "string" ? value.accessToken : undefined,
+      expiresAt: typeof value.expiresAt === "number" ? value.expiresAt : undefined,
+    };
+  } catch {
+    return {};
+  }
+}
+
 function isRawResponse(value: unknown): value is { raw: string } {
   return (
     value !== null &&
@@ -301,8 +316,7 @@ export function autoParagraph(text: string): string {
       continue;
     }
 
-    const endPunct = ".!?;:。！？；：…—”“」』）>]";
-    const endsWithPunctuation = new RegExp(`[${endPunct}]$`).test(buffer.trim());
+    const endsWithPunctuation = endsWithSentencePunctuation(buffer);
     const startsWithCapitalOrNumber = /^[A-Z0-9（「『【(]/.test(trimmed);
     const isShortLine = buffer.length > 0 && buffer.length < 40;
 
@@ -316,4 +330,9 @@ export function autoParagraph(text: string): string {
 
   if (buffer) paragraphs.push(buffer.trim());
   return paragraphs.join("\n\n");
+}
+
+function endsWithSentencePunctuation(text: string): boolean {
+  const lastChar = text.trim().at(-1);
+  return Boolean(lastChar && ".!?;:。！？；：…—”“」』）>]".includes(lastChar));
 }

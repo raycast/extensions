@@ -1,6 +1,6 @@
 import { environment, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
-import { mkdirSync, writeFileSync } from "fs";
+import { execFile } from "child_process";
+import { mkdirSync, unlink, writeFileSync } from "fs";
 import { join } from "path";
 
 const TTS_MODEL = "gemini-3.1-flash-tts-preview";
@@ -44,11 +44,10 @@ export async function speakText(text: string): Promise<void> {
   if (!trimmed) return;
 
   const toast = await showToast({ style: Toast.Style.Animated, title: "Reading aloud..." });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
 
   try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30_000);
-
     const response = await fetch(`${TTS_BASE_URL}/models/${TTS_MODEL}:generateContent`, {
       method: "POST",
       headers: {
@@ -67,15 +66,15 @@ export async function speakText(text: string): Promise<void> {
       signal: controller.signal,
     });
 
-    clearTimeout(timeout);
-    const data = (await response.json()) as GeminiTTSResponse;
+    const responseText = await response.text();
+    const data = parseGeminiTTSResponse(responseText);
 
     if (!response.ok || data.error?.message) {
       toast.hide();
       await showToast({
         style: Toast.Style.Failure,
         title: "TTS Error",
-        message: data.error?.message?.slice(0, 100) ?? `HTTP ${response.status}`,
+        message: data.error?.message?.slice(0, 100) ?? `HTTP ${response.status}: ${responseText.slice(0, 100)}`,
       });
       return;
     }
@@ -91,10 +90,11 @@ export async function speakText(text: string): Promise<void> {
     const wavData = wrapPCMInWAV(pcmData);
 
     mkdirSync(environment.supportPath, { recursive: true });
-    const audioPath = join(environment.supportPath, "tts-output.wav");
+    const audioPath = join(environment.supportPath, `tts-${Date.now()}-${Math.random().toString(16).slice(2)}.wav`);
     writeFileSync(audioPath, wavData);
 
-    exec(`afplay "${audioPath}"`, (error) => {
+    execFile("/usr/bin/afplay", [audioPath], (error) => {
+      unlink(audioPath, () => undefined);
       if (error && !error.killed) {
         void showHUD(`Playback error: ${error.message.slice(0, 60)}`);
       }
@@ -109,6 +109,16 @@ export async function speakText(text: string): Promise<void> {
     }
     const msg = error instanceof Error ? error.message : String(error);
     await showToast({ style: Toast.Style.Failure, title: "TTS Failed", message: msg.slice(0, 100) });
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function parseGeminiTTSResponse(text: string): GeminiTTSResponse {
+  try {
+    return JSON.parse(text) as GeminiTTSResponse;
+  } catch {
+    return { error: { message: text ? `Invalid response: ${text.slice(0, 100)}` : "Empty response" } };
   }
 }
 

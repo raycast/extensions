@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Form, Icon, popToRoot, Toast, showToast } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { loadRuntimeSettings, saveRuntimeSettings } from "./runtime-settings";
+import { getDefaultRuntimeSettings, loadRuntimeSettings, saveRuntimeSettings } from "./runtime-settings";
 import { ModelTier, PromptProfile, RuntimeSettings, TranslationStyle } from "./types";
 
 export default function Command() {
@@ -34,12 +34,7 @@ export default function Command() {
   }
 
   async function handleReset() {
-    const defaults: RuntimeSettings = {
-      modelTier: "fast",
-      promptProfile: "general",
-      translationStyle: "balanced",
-      customPromptInstructions: "",
-    };
+    const defaults = getDefaultRuntimeSettings();
     await saveRuntimeSettings(defaults);
     setSettings(defaults);
     setFormKey((k) => k + 1);

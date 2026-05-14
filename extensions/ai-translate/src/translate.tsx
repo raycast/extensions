@@ -70,6 +70,7 @@ export default function Command(props: LaunchProps) {
   const [manualRunId, setManualRunId] = useState(0);
   const [runtimeSettings, setRuntimeSettings] = useState<RuntimeSettings>();
   const requestSequence = useRef(0);
+  const userEditedInput = useRef(false);
 
   useEffect(() => {
     void loadRuntimeSettings().then(setRuntimeSettings);
@@ -87,9 +88,9 @@ export default function Command(props: LaunchProps) {
 
       try {
         const selectedText = normalizeInputText(await getSelectedText());
-        if (isMounted) setInputText(selectedText);
+        if (isMounted && !userEditedInput.current) setInputText(selectedText);
       } catch {
-        if (isMounted) setInputText("");
+        if (isMounted && !userEditedInput.current) setInputText("");
       }
     }
 
@@ -184,6 +185,11 @@ export default function Command(props: LaunchProps) {
     setManualRunId((v) => v + 1);
   }
 
+  function handleSearchTextChange(text: string) {
+    userEditedInput.current = true;
+    setInputText(text);
+  }
+
   async function switchModelTier(tier: ModelTier) {
     const updated = await updateRuntimeSetting("modelTier", tier);
     setRuntimeSettings(updated);
@@ -214,7 +220,7 @@ export default function Command(props: LaunchProps) {
       isLoading={isLoading}
       isShowingDetail={results.length > 0}
       navigationTitle={`AI Translate · ${getTierLabel(currentTier)} · ${PROMPT_PROFILE_LABELS[currentProfile]}`}
-      onSearchTextChange={setInputText}
+      onSearchTextChange={handleSearchTextChange}
       searchBarAccessory={
         <List.Dropdown tooltip="Target Language" value={targetLanguage} onChange={setTargetLanguage}>
           {LANGUAGE_CHOICES.map((lang) => (
