@@ -10,6 +10,7 @@ import type {
   GeminiExpressiveness,
   GeminiLanguageMode,
   GeminiReadingExperience,
+  GeminiSpeakerMode,
   GeminiTTSModel,
   GeminiTTSRequest,
   GeminiTTSResponse,
@@ -22,8 +23,11 @@ const REQUEST_TIMEOUT_MS = 60_000;
 const MAX_ATTEMPTS = 3;
 const DEFAULT_MODEL: GeminiTTSModel = "gemini-3.1-flash-tts-preview";
 const FALLBACK_MODEL: GeminiTTSModel = "gemini-2.5-flash-preview-tts";
+const PRO_MODEL: GeminiTTSModel = "gemini-2.5-pro-preview-tts";
 const DEFAULT_SAMPLE_RATE = 24000;
+const DEFAULT_SECONDARY_VOICE_ID = "Puck";
 const BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models";
+const SYNTHESIS_CANCELLED_CODE = -8;
 
 const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
 
@@ -33,17 +37,23 @@ const RETRYABLE_STATUS_CODES = new Set([429, 500, 502, 503, 504]);
 // needed — earlier code passed `agent:` but undici only honors
 // `dispatcher:`, so that field was a no-op.
 
-export async function synthesizeSpeech(text: string, options: TTSOptions): Promise<SynthesisResult> {
+export async function synthesizeSpeech(
+  text: string,
+  options: TTSOptions,
+  signal?: AbortSignal,
+): Promise<SynthesisResult> {
   const trimmedText = text.trim();
   if (!trimmedText) {
     throw new Error("Text cannot be empty");
   }
+  throwIfCancelled(signal);
 
   const cacheKey = hashSynthesisRequest(trimmedText, options);
   const cachedPath = lookupCache(cacheKey);
   if (cachedPath) {
     return { wavPath: cachedPath, managed: false, cacheHit: true };
   }
+  throwIfCancelled(signal);
 
   const apiKey = resolveApiKey();
   const requestBody: GeminiTTSRequest = {
@@ -55,13 +65,7 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
     contents: [{ parts: [{ text: buildTtsPrompt(trimmedText, options) }] }],
     generationConfig: {
       responseModalities: ["AUDIO"],
-      speechConfig: {
-        voiceConfig: {
-          prebuiltVoiceConfig: {
-            voiceName: options.voiceId,
-          },
-        },
-      },
+      speechConfig: buildSpeechConfig(trimmedText, options),
     },
   };
 
@@ -69,7 +73,7 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
     try {
-      const wavBuffer = await generateSpeechOnce(apiKey, options.model, requestBody, options.sampleRate);
+      const wavBuffer = await generateSpeechOnce(apiKey, options.model, requestBody, options.sampleRate, signal);
       const cachedWritePath = storeCache(cacheKey, wavBuffer);
       if (cachedWritePath) {
         return { wavPath: cachedWritePath, managed: false, cacheHit: false };
@@ -82,7 +86,7 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
       if (!shouldRetry(error) || attempt === MAX_ATTEMPTS) {
         break;
       }
-      await delay(250 * attempt * attempt);
+      await delay(250 * attempt * attempt, signal);
     }
   }
 
@@ -95,7 +99,7 @@ export async function listVoices(): Promise<VoiceConfig[]> {
 
 export function buildOptionsFromPrefs(voiceOverride?: string): TTSOptions {
   const prefs = getPreferenceValues<Preferences>();
-  const voiceId = voiceOverride || prefs.defaultVoice || DEFAULT_VOICE_ID;
+  const voiceId = parseVoiceId(voiceOverride || prefs.defaultVoice);
 
   return {
     voiceId,
@@ -104,6 +108,8 @@ export function buildOptionsFromPrefs(voiceOverride?: string): TTSOptions {
     readingExperience: parseReadingExperience(prefs.readingExperience),
     expressiveness: parseExpressiveness(prefs.expressiveness),
     audioTagMode: parseAudioTagMode(prefs.audioTagMode),
+    speakerMode: parseSpeakerMode(prefs.speakerMode),
+    secondaryVoiceId: parseVoiceId(prefs.secondaryVoiceId, DEFAULT_SECONDARY_VOICE_ID),
     speed: parseSpeechRate(prefs.speechRate),
     directorNotes: prefs.directorNotes?.trim() || "",
     sampleRate: DEFAULT_SAMPLE_RATE,
@@ -118,7 +124,11 @@ export function resolveOptionsForText(options: TTSOptions, text: string): TTSOpt
 }
 
 export function isSupportedModel(model: string): model is GeminiTTSModel {
-  return model === DEFAULT_MODEL || model === FALLBACK_MODEL;
+  return model === DEFAULT_MODEL || model === FALLBACK_MODEL || model === PRO_MODEL;
+}
+
+export function isSynthesisCancelled(error: unknown): boolean {
+  return error instanceof TTSApiError && error.code === SYNTHESIS_CANCELLED_CODE;
 }
 
 async function generateSpeechOnce(
@@ -126,9 +136,13 @@ async function generateSpeechOnce(
   model: GeminiTTSModel,
   requestBody: GeminiTTSRequest,
   sampleRate: number,
+  externalSignal?: AbortSignal,
 ): Promise<Buffer> {
+  throwIfCancelled(externalSignal);
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  const abortFromExternal = () => controller.abort();
+  externalSignal?.addEventListener("abort", abortFromExternal, { once: true });
 
   try {
     const response = await fetch(`${BASE_URL}/${model}:generateContent`, {
@@ -170,12 +184,16 @@ async function generateSpeechOnce(
 
     return ensureWaveAudio(pcmBuffer, sampleRate);
   } catch (err) {
+    if (externalSignal?.aborted) {
+      throw new TTSApiError("Synthesis cancelled", SYNTHESIS_CANCELLED_CODE);
+    }
     if (err instanceof Error && err.name === "AbortError") {
       throw new TTSApiError("Request timeout after 60 seconds", -2);
     }
     throw err;
   } finally {
     clearTimeout(timeoutId);
+    externalSignal?.removeEventListener("abort", abortFromExternal);
   }
 }
 
@@ -187,6 +205,7 @@ function buildTtsPrompt(text: string, options: TTSOptions): string {
   const expressiveness = getExpressivenessInstruction(options.expressiveness);
   const audioTagInstruction = getAudioTagInstruction(options.audioTagMode);
   const voiceInstruction = getVoiceInstruction(options.voiceId);
+  const speakerInstruction = getSpeakerInstruction(text, options);
   const customNotes = options.directorNotes ? [`Additional notes: ${options.directorNotes}`] : [];
 
   return [
@@ -198,6 +217,7 @@ function buildTtsPrompt(text: string, options: TTSOptions): string {
     "### DIRECTOR'S NOTES",
     `Language: ${languageInstruction}`,
     `Voice fit: ${voiceInstruction}`,
+    `Speaker mode: ${speakerInstruction}`,
     `Style: ${profile.style}`,
     `Expressiveness: ${expressiveness}`,
     `Pacing: ${profile.pacing}`,
@@ -208,6 +228,39 @@ function buildTtsPrompt(text: string, options: TTSOptions): string {
     "#### TRANSCRIPT",
     transcript,
   ].join("\n\n");
+}
+
+function buildSpeechConfig(text: string, options: TTSOptions): GeminiTTSRequest["generationConfig"]["speechConfig"] {
+  const speakers = options.speakerMode === "auto-two-speaker" ? detectTwoSpeakers(text) : null;
+  if (!speakers) {
+    return {
+      voiceConfig: {
+        prebuiltVoiceConfig: {
+          voiceName: options.voiceId,
+        },
+      },
+    };
+  }
+
+  return {
+    multiSpeakerVoiceConfig: {
+      speakerVoiceConfigs: [
+        buildSpeakerVoiceConfig(speakers[0], options.voiceId),
+        buildSpeakerVoiceConfig(speakers[1], options.secondaryVoiceId),
+      ],
+    },
+  };
+}
+
+function buildSpeakerVoiceConfig(speaker: string, voiceName: string) {
+  return {
+    speaker,
+    voiceConfig: {
+      prebuiltVoiceConfig: {
+        voiceName,
+      },
+    },
+  };
 }
 
 function ensureWaveAudio(audioBuffer: Buffer, sampleRate: number): Buffer {
@@ -249,6 +302,15 @@ function resolveApiKey(): string {
 
 function parseModel(model: string | undefined): GeminiTTSModel {
   return model && isSupportedModel(model) ? model : DEFAULT_MODEL;
+}
+
+function parseVoiceId(voiceId: string | undefined, fallback = DEFAULT_VOICE_ID): string {
+  const trimmed = voiceId?.trim();
+  return trimmed && getVoiceById(trimmed) ? trimmed : fallback;
+}
+
+function parseSpeakerMode(speakerMode: string | undefined): GeminiSpeakerMode {
+  return speakerMode === "auto-two-speaker" ? "auto-two-speaker" : "single";
 }
 
 function parseLanguageMode(languageMode: string | undefined): GeminiLanguageMode {
@@ -495,6 +557,36 @@ function getVoiceInstruction(voiceId: string): string {
   return `Use the selected Gemini prebuilt voice "${voiceId}" naturally.${descriptor} Keep the director notes aligned with this voice instead of forcing an incompatible character, age, or emotional register.`;
 }
 
+function getSpeakerInstruction(text: string, options: TTSOptions): string {
+  if (options.speakerMode !== "auto-two-speaker") {
+    return "Single speaker narration.";
+  }
+
+  const speakers = detectTwoSpeakers(text);
+  if (!speakers) {
+    return "Single speaker narration. Auto two-speaker mode is enabled, but this transcript does not contain exactly two clear speaker labels.";
+  }
+
+  return `Two-speaker dialogue. Treat "${speakers[0]}:" and "${speakers[1]}:" as speaker-turn labels, not narration to read aloud. "${speakers[0]}" uses Gemini voice "${options.voiceId}" and "${speakers[1]}" uses Gemini voice "${options.secondaryVoiceId}".`;
+}
+
+function detectTwoSpeakers(text: string): [string, string] | null {
+  const speakers: string[] = [];
+  for (const line of text.split(/\n+/).slice(0, 200)) {
+    const match = line.match(/^\s*([\p{L}\p{N}_ .'\-·]{1,32}|[甲乙丙丁戊己庚辛壬癸])\s*[:：]/u);
+    const speaker = match?.[1]?.trim().replace(/\s+/g, " ");
+    if (!speaker) continue;
+    if (!speakers.includes(speaker)) {
+      speakers.push(speaker);
+    }
+    if (speakers.length > 2) {
+      return null;
+    }
+  }
+
+  return speakers.length === 2 ? [speakers[0], speakers[1]] : null;
+}
+
 function getLanguageInstruction(languageMode: GeminiLanguageMode): string {
   switch (languageMode) {
     case "cmn":
@@ -515,8 +607,25 @@ function shouldRetry(error: unknown): boolean {
   return error.code === -4 || RETRYABLE_STATUS_CODES.has(error.code);
 }
 
-function delay(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function throwIfCancelled(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new TTSApiError("Synthesis cancelled", SYNTHESIS_CANCELLED_CODE);
+  }
+}
+
+function delay(ms: number, signal?: AbortSignal): Promise<void> {
+  throwIfCancelled(signal);
+  return new Promise((resolve, reject) => {
+    const timeoutId = setTimeout(() => {
+      signal?.removeEventListener("abort", abort);
+      resolve();
+    }, ms);
+    const abort = () => {
+      clearTimeout(timeoutId);
+      reject(new TTSApiError("Synthesis cancelled", SYNTHESIS_CANCELLED_CODE));
+    };
+    signal?.addEventListener("abort", abort, { once: true });
+  });
 }
 
 export class TTSApiError extends Error {

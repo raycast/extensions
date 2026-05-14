@@ -1,4 +1,7 @@
-export type GeminiTTSModel = "gemini-3.1-flash-tts-preview" | "gemini-2.5-flash-preview-tts";
+export type GeminiTTSModel =
+  | "gemini-3.1-flash-tts-preview"
+  | "gemini-2.5-flash-preview-tts"
+  | "gemini-2.5-pro-preview-tts";
 export type GeminiLanguageMode = "auto" | "cmn" | "en" | "mixed-cmn-en";
 export type GeminiReadingExperience =
   | "auto"
@@ -11,6 +14,7 @@ export type GeminiReadingExperience =
   | "neutral";
 export type GeminiExpressiveness = "subtle" | "balanced" | "expressive";
 export type GeminiAudioTagMode = "off" | "preserve" | "paragraph-pauses" | "smart-pauses";
+export type GeminiSpeakerMode = "single" | "auto-two-speaker";
 
 export interface GeminiTTSRequest {
   systemInstruction?: {
@@ -26,10 +30,20 @@ export interface GeminiTTSRequest {
   generationConfig: {
     responseModalities: ["AUDIO"];
     speechConfig: {
-      voiceConfig: {
+      voiceConfig?: {
         prebuiltVoiceConfig: {
           voiceName: string;
         };
+      };
+      multiSpeakerVoiceConfig?: {
+        speakerVoiceConfigs: Array<{
+          speaker: string;
+          voiceConfig: {
+            prebuiltVoiceConfig: {
+              voiceName: string;
+            };
+          };
+        }>;
       };
     };
   };
@@ -71,6 +85,8 @@ export interface TTSOptions {
   readingExperience: GeminiReadingExperience;
   expressiveness: GeminiExpressiveness;
   audioTagMode: GeminiAudioTagMode;
+  speakerMode: GeminiSpeakerMode;
+  secondaryVoiceId: string;
   speed: number;
   directorNotes: string;
   sampleRate: number;

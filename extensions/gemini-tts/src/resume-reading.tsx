@@ -1,6 +1,6 @@
 import { showHUD } from "@raycast/api";
 import { clearExternalStopRequest, stopExternalPlayback } from "./utils/audio-player";
-import { getLastReadingSession, updateReadingProgress } from "./utils/reading-session";
+import { getLastReadingSession } from "./utils/reading-session";
 import { playReadingSession } from "./utils/reading-runner";
 import { presentCommandError } from "./utils/errors";
 import { clearPlaybackState } from "./utils/playback-state";
@@ -13,14 +13,15 @@ export default async function ResumeReading() {
   await clearPlaybackState();
 
   try {
-    let session = await getLastReadingSession();
+    const session = await getLastReadingSession();
     if (!session) {
       await showHUD("No previous reading");
       return;
     }
 
     if (session.nextChunkIndex >= session.chunks.length) {
-      session = await updateReadingProgress(session, 0);
+      await showHUD("Nothing to resume. Use Restart Last Reading to replay.");
+      return;
     }
 
     await playReadingSession(session, session.nextChunkIndex > 0);

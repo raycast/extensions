@@ -1,5 +1,5 @@
 import { LaunchType, launchCommand, showHUD } from "@raycast/api";
-import { synthesizeSpeech } from "../api/gemini-tts";
+import { isSynthesisCancelled, synthesizeSpeech } from "../api/gemini-tts";
 import type { SynthesisResult, TTSOptions } from "../api/types";
 import { AudioPlayer, hasExternalStopRequest } from "./audio-player";
 import { formatTextSource } from "./text-source";
@@ -37,6 +37,12 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
 
   let currentSpeed = clampSpeed(activeSession.options.speed);
   await writePlaybackSpeed(currentSpeed);
+  const synthesisController = new AbortController();
+  const stopPoll = setInterval(() => {
+    if ((player.isStopped() || hasExternalStopRequest()) && !synthesisController.signal.aborted) {
+      synthesisController.abort();
+    }
+  }, 100);
 
   // Prefetch buffer: fire up to PREFETCH_AHEAD synthesis requests in
   // parallel so audio is ready before playback catches up. Each entry
@@ -45,7 +51,7 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
 
   function firePrefetch(idx: number): void {
     if (idx >= chunkCount || prefetchBuffer.has(idx)) return;
-    const p = startSynth(activeSession.options, activeSession.chunks[idx]);
+    const p = startSynth(activeSession.options, activeSession.chunks[idx], synthesisController.signal);
     p.catch(() => undefined);
     prefetchBuffer.set(idx, p);
   }
@@ -90,7 +96,13 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
 
       let audio: SynthesisResult;
       try {
-        audio = await (prefetchBuffer.get(i) ?? startSynth(activeSession.options, activeSession.chunks[i]));
+        audio = await (prefetchBuffer.get(i) ??
+          startSynth(activeSession.options, activeSession.chunks[i], synthesisController.signal));
+      } catch (error) {
+        if (isSynthesisCancelled(error) && (player.isStopped() || hasExternalStopRequest())) {
+          break;
+        }
+        throw error;
       } finally {
         prefetchBuffer.delete(i);
       }
@@ -158,6 +170,8 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
       requestMenuRefresh();
     }
   } finally {
+    synthesisController.abort();
+    clearInterval(stopPoll);
     for (const p of prefetchBuffer.values()) {
       p.catch(() => undefined);
     }
@@ -167,11 +181,11 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
   }
 }
 
-function startSynth(sessionOptions: TTSOptions, chunkText: string): Promise<SynthesisResult> {
+function startSynth(sessionOptions: TTSOptions, chunkText: string, signal: AbortSignal): Promise<SynthesisResult> {
   // Speed is intentionally not part of the synthesis cache key (afplay
   // applies it at playback). Pass the raw options unchanged so we hit
   // the cache regardless of current speed.
-  return synthesizeSpeech(chunkText, sessionOptions);
+  return synthesizeSpeech(chunkText, sessionOptions, signal);
 }
 
 async function writeStateAndMaybeRefresh(state: PlaybackState, lastPhase: PlaybackPhase | null): Promise<void> {

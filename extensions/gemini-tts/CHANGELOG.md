@@ -15,9 +15,10 @@
 ### Performance
 
 - Lead-chunk synthesis: the first audio segment is intentionally short (~60-260 chars at the nearest sentence boundary) so playback starts in roughly 1-2 seconds instead of waiting for a full 1400-char chunk.
-- Deep prefetch pipeline: up to 3 chunks are synthesized in parallel ahead of playback (previously only 1), virtually eliminating inter-chunk silence for paid API users.
+- Producer/consumer pipeline: chunk N+1 begins synthesizing in parallel with playback of chunk N, eliminating the silent gap between chunks.
 - Disk audio cache keyed on text + voice + experience preset: replays, restarts, voice previews, and re-reads of the same paragraph become instant, with an LRU sweep capped at 200 MB inside the extension's support directory.
 - Menu-bar status refreshes within ~1 second of a phase transition via background `launchCommand`, instead of waiting for the 1-minute interval tick.
+- Stop, voice switching, and preview switching now abort in-flight Gemini synthesis requests instead of waiting for stale network calls to finish.
 
 ### Fixes
 
@@ -26,6 +27,9 @@
 - Menu-bar status no longer fires a redundant background launch on every elapsed-time tick — only on actual synthesizing/playing/stopped/completed transitions.
 - Quick Read's "Nothing to read" hint now points users at Resume only when a paused reading actually exists, instead of advertising a non-existent option.
 - Reverted the `systemInstruction` split: Gemini's TTS preview models reject it with `HTTP 400 — Developer instruction is not enabled for this model`. The director profile is back inline in `contents`. Verified directly against `gemini-3.1-flash-tts-preview` (HTTP 200, audio returned).
+- Invalid stored voice preferences fall back to the built-in default voice before hitting the Gemini API.
+- Resume Last Reading now reports when the previous text is already complete instead of silently restarting from the beginning.
+- Removed unreachable MiniMax-era "Model Not Available" error branches.
 
 ### Menu Bar
 
@@ -36,10 +40,12 @@
 - Direct Gemini REST API integration with `x-goog-api-key` authentication.
 - Supports `gemini-3.1-flash-tts-preview`.
 - Supports `gemini-2.5-flash-preview-tts`.
+- Supports `gemini-2.5-pro-preview-tts`.
 - Wraps Gemini's base64 PCM response into a 24 kHz mono WAV file for `afplay`.
 - Retries transient Gemini TTS failures, including occasional text-instead-of-audio responses.
 - Reading Experience presets that generate Gemini-friendly Audio Profile, Scene, Director's Notes, and Transcript prompts.
 - Smart Auto Reading Experience that infers Legal Text Mode, English Paper Reader, Mandarin Lecture, or Bilingual Academic Reader from selected text.
+- Optional Auto Two-Speaker Dialogue mode uses Gemini `multiSpeakerVoiceConfig` when the selected text contains exactly two speaker labels.
 - Expressiveness preference for subtle, balanced, or expressive delivery.
 - Audio Tags preference for Smart Academic Pauses, exact text, respecting existing tags, or adding paragraph pauses.
 - Custom Director Notes for advanced tone, accent, pacing, pronunciation, or role guidance.

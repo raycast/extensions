@@ -52,6 +52,8 @@ export function hashSynthesisRequest(text: string, options: TTSOptions): string 
     readingExperience: options.readingExperience,
     expressiveness: options.expressiveness,
     audioTagMode: options.audioTagMode,
+    speakerMode: options.speakerMode,
+    secondaryVoiceId: options.secondaryVoiceId,
     directorNotes: options.directorNotes,
     sampleRate: options.sampleRate,
   });

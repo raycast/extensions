@@ -1,14 +1,14 @@
 import { LaunchType, Toast, launchCommand, openExtensionPreferences, showToast } from "@raycast/api";
 import { TTSApiError } from "../api/gemini-tts";
 
-const CONFIG_ERROR_CODES = new Set([-1, -6]);
+const CONFIG_ERROR_CODES = new Set([-1]);
 
 export async function presentCommandError(error: unknown, fallbackTitle = "Gemini TTS Error"): Promise<void> {
   if (error instanceof TTSApiError) {
     if (CONFIG_ERROR_CODES.has(error.code)) {
       await showToast({
         style: Toast.Style.Failure,
-        title: error.code === -1 ? "Configuration Required" : "Model Not Available",
+        title: "Configuration Required",
         message: error.message,
         primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
       });

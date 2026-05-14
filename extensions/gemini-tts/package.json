@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "gemini-tts",
   "title": "Gemini TTS",
-  "description": "Read selected text aloud with Gemini TTS. Supports Gemini 3.1 Flash TTS Preview and Gemini 2.5 Flash Preview TTS.",
+  "description": "Read selected text aloud with Gemini TTS. Supports Gemini 3.1 Flash TTS Preview plus Gemini 2.5 Flash and Pro Preview TTS.",
   "icon": "command-icon.png",
   "author": "xianwei_zhang",
   "categories": [
@@ -103,6 +103,10 @@
         {
           "title": "Gemini 2.5 Flash Preview TTS (Lower Cost)",
           "value": "gemini-2.5-flash-preview-tts"
+        },
+        {
+          "title": "Gemini 2.5 Pro Preview TTS (Studio Quality)",
+          "value": "gemini-2.5-pro-preview-tts"
         }
       ]
     },
@@ -235,6 +239,32 @@
           "value": "Achernar"
         }
       ]
+    },
+    {
+      "name": "speakerMode",
+      "type": "dropdown",
+      "required": false,
+      "title": "Speaker Mode",
+      "description": "Use Gemini's multi-speaker TTS only when a transcript has exactly two clear speaker labels",
+      "default": "single",
+      "data": [
+        {
+          "title": "Single Speaker (Recommended)",
+          "value": "single"
+        },
+        {
+          "title": "Auto Two-Speaker Dialogue",
+          "value": "auto-two-speaker"
+        }
+      ]
+    },
+    {
+      "name": "secondaryVoiceId",
+      "type": "textfield",
+      "required": false,
+      "title": "Second Dialogue Voice",
+      "description": "Gemini prebuilt voice for the second speaker when Auto Two-Speaker Dialogue is enabled",
+      "placeholder": "Puck"
     },
     {
       "name": "readingExperience",

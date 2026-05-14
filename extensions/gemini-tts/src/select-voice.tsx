@@ -13,13 +13,19 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   synthesizeSpeech,
   buildOptionsFromPrefs,
+  isSynthesisCancelled,
   listVoices,
   resolveOptionsForText,
   TTSApiError,
 } from "./api/gemini-tts";
 import { FALLBACK_VOICES, groupVoicesByCategory, isAcademicRecommendedVoice } from "./constants/voices";
 import type { VoiceConfig } from "./api/types";
-import { AudioPlayer, clearExternalStopRequest, hasExternalStopRequest } from "./utils/audio-player";
+import {
+  AudioPlayer,
+  clearExternalStopRequest,
+  hasExternalStopRequest,
+  stopExternalPlayback,
+} from "./utils/audio-player";
 import { getReadableText } from "./utils/text-source";
 import {
   clearQuickReadVoiceOverride,
@@ -27,7 +33,7 @@ import {
   setQuickReadVoiceOverride,
 } from "./utils/voice-preferences";
 import { buildTextPreview, clearPlaybackState, writePlaybackState } from "./utils/playback-state";
-import { acquireSessionLock, releaseSessionLock } from "./utils/session-lock";
+import { acquireSessionLock, releaseSessionLock, waitForSessionLockRelease } from "./utils/session-lock";
 
 const PREVIEW_FALLBACK_TEXT = "这是一段 Gemini TTS 音色试听。";
 const PREVIEW_CHAR_LIMIT = 180;
@@ -46,6 +52,7 @@ export default function SelectVoice() {
   const [previewingVoiceId, setPreviewingVoiceId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const playerRef = useRef(new AudioPlayer());
+  const synthesisAbortRef = useRef<AbortController | null>(null);
 
   const configStatus = useMemo(() => buildConfigStatus(), []);
 
@@ -98,7 +105,20 @@ export default function SelectVoice() {
   }, []);
 
   const handlePreviewVoice = useCallback(async (voice: VoiceConfig) => {
+    synthesisAbortRef.current?.abort();
     playerRef.current.stopPlayback();
+    const stoppedExisting = stopExternalPlayback();
+    if (stoppedExisting) {
+      const released = await waitForSessionLockRelease();
+      if (!released) {
+        await showToast({
+          style: Toast.Style.Animated,
+          title: "Stopping previous preview",
+          message: "Try again in a moment if the previous Gemini request is still winding down.",
+        });
+        return;
+      }
+    }
     clearExternalStopRequest();
     if (!acquireSessionLock()) {
       await showToast({
@@ -110,6 +130,13 @@ export default function SelectVoice() {
     }
     const player = new AudioPlayer();
     playerRef.current = player;
+    const synthesisController = new AbortController();
+    synthesisAbortRef.current = synthesisController;
+    const stopPoll = setInterval(() => {
+      if ((player.isStopped() || hasExternalStopRequest()) && !synthesisController.signal.aborted) {
+        synthesisController.abort();
+      }
+    }, 100);
     setPreviewingVoiceId(voice.id);
 
     try {
@@ -132,7 +159,7 @@ export default function SelectVoice() {
         updatedAt: new Date().toISOString(),
       });
 
-      const audio = await synthesizeSpeech(previewText, options);
+      const audio = await synthesizeSpeech(previewText, options, synthesisController.signal);
       if (player.isStopped() || hasExternalStopRequest()) {
         await clearPlaybackState();
         return;
@@ -154,11 +181,15 @@ export default function SelectVoice() {
       await clearPlaybackState();
     } catch (error) {
       await clearPlaybackState();
+      if (isSynthesisCancelled(error)) {
+        clearExternalStopRequest();
+        return;
+      }
       if (error instanceof TTSApiError) {
-        if (error.code === -1 || error.code === -6) {
+        if (error.code === -1) {
           await showToast({
             style: Toast.Style.Failure,
-            title: error.code === -1 ? "Configuration Required" : "Model Not Available",
+            title: "Configuration Required",
             message: error.message,
             primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
           });
@@ -173,13 +204,20 @@ export default function SelectVoice() {
         });
       }
     } finally {
+      synthesisController.abort();
+      clearInterval(stopPoll);
+      if (synthesisAbortRef.current === synthesisController) {
+        synthesisAbortRef.current = null;
+      }
       setPreviewingVoiceId((current) => (current === voice.id ? null : current));
       releaseSessionLock();
     }
   }, []);
 
   const handleStopPreview = useCallback(async () => {
+    synthesisAbortRef.current?.abort();
     playerRef.current.stopPlayback();
+    stopExternalPlayback();
     setPreviewingVoiceId(null);
     await clearPlaybackState();
   }, []);

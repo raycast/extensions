@@ -14,16 +14,22 @@ import { FALLBACK_VOICES, groupVoicesByCategory, isAcademicRecommendedVoice } fr
 import {
   synthesizeSpeech,
   buildOptionsFromPrefs,
+  isSynthesisCancelled,
   listVoices,
   resolveOptionsForText,
   TTSApiError,
 } from "./api/gemini-tts";
 import { chunkText } from "./utils/text-chunker";
-import { AudioPlayer, clearExternalStopRequest, hasExternalStopRequest } from "./utils/audio-player";
+import {
+  AudioPlayer,
+  clearExternalStopRequest,
+  hasExternalStopRequest,
+  stopExternalPlayback,
+} from "./utils/audio-player";
 import { getQuickReadVoiceOverride, setQuickReadVoiceOverride } from "./utils/voice-preferences";
 import { buildTextPreview, clearPlaybackState, writePlaybackState } from "./utils/playback-state";
 import { clampSpeed, clearPlaybackSpeed, readPlaybackSpeed, writePlaybackSpeed } from "./utils/playback-speed";
-import { acquireSessionLock, releaseSessionLock } from "./utils/session-lock";
+import { acquireSessionLock, releaseSessionLock, waitForSessionLockRelease } from "./utils/session-lock";
 import type { SynthesisResult, TTSOptions, VoiceConfig } from "./api/types";
 
 type RowPhase = "synthesizing" | "playing";
@@ -41,6 +47,7 @@ export default function ReadWithVoice() {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState<RowProgress | null>(null);
   const playerRef = useRef(new AudioPlayer());
+  const synthesisAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -86,8 +93,21 @@ export default function ReadWithVoice() {
         return;
       }
 
-      // Stop any prior in-component playback before kicking off a new one.
+      // Stop any prior playback before kicking off a new one.
+      synthesisAbortRef.current?.abort();
       playerRef.current.stopPlayback();
+      const stoppedExisting = stopExternalPlayback();
+      if (stoppedExisting) {
+        const released = await waitForSessionLockRelease();
+        if (!released) {
+          await showToast({
+            style: Toast.Style.Animated,
+            title: "Stopping previous reading",
+            message: "Try again in a moment if the previous Gemini request is still winding down.",
+          });
+          return;
+        }
+      }
       clearExternalStopRequest();
       // Acquire session lock so a Quick Read or Resume triggered while
       // this in-component reader is running can stop us cleanly. The
@@ -102,6 +122,13 @@ export default function ReadWithVoice() {
       }
       const player = new AudioPlayer();
       playerRef.current = player;
+      const synthesisController = new AbortController();
+      synthesisAbortRef.current = synthesisController;
+      const stopPoll = setInterval(() => {
+        if ((player.isStopped() || hasExternalStopRequest()) && !synthesisController.signal.aborted) {
+          synthesisController.abort();
+        }
+      }, 100);
 
       const chunks = chunkText(text);
       const total = chunks.length;
@@ -118,7 +145,7 @@ export default function ReadWithVoice() {
         // chunk i+1 while playing chunk i so the user only ever waits
         // for the lead chunk.
         const startSynth = (chunkText: string): Promise<SynthesisResult> =>
-          synthesizeSpeech(chunkText, options as TTSOptions);
+          synthesizeSpeech(chunkText, options as TTSOptions, synthesisController.signal);
 
         let pending: Promise<SynthesisResult> | null = total > 0 ? startSynth(chunks[0]) : null;
         pending?.catch(() => undefined);
@@ -188,11 +215,15 @@ export default function ReadWithVoice() {
       } catch (error) {
         await clearPlaybackState();
         await clearPlaybackSpeed();
+        if (isSynthesisCancelled(error)) {
+          clearExternalStopRequest();
+          return;
+        }
         if (error instanceof TTSApiError) {
-          if (error.code === -1 || error.code === -6) {
+          if (error.code === -1) {
             await showToast({
               style: Toast.Style.Failure,
-              title: error.code === -1 ? "Configuration Required" : "Model Not Available",
+              title: "Configuration Required",
               message: error.message,
               primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
             });
@@ -207,6 +238,11 @@ export default function ReadWithVoice() {
           });
         }
       } finally {
+        synthesisController.abort();
+        clearInterval(stopPoll);
+        if (synthesisAbortRef.current === synthesisController) {
+          synthesisAbortRef.current = null;
+        }
         setProgress((current) => (current?.voiceId === voice.id ? null : current));
         releaseSessionLock();
       }
@@ -215,7 +251,9 @@ export default function ReadWithVoice() {
   );
 
   const handleStop = useCallback(async () => {
+    synthesisAbortRef.current?.abort();
     playerRef.current.stopPlayback();
+    stopExternalPlayback();
     setProgress(null);
     await clearPlaybackState();
     await clearPlaybackSpeed();

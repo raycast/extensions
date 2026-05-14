@@ -58,6 +58,17 @@ export function hasActiveSession(): boolean {
   return true;
 }
 
+export async function waitForSessionLockRelease(timeoutMs = 1500, intervalMs = 50): Promise<boolean> {
+  const startedAt = Date.now();
+  while (hasActiveSession()) {
+    if (Date.now() - startedAt >= timeoutMs) {
+      return false;
+    }
+    await delay(intervalMs);
+  }
+  return true;
+}
+
 function readSessionLockPid(): number | null {
   try {
     const raw = readFileSync(SESSION_LOCK_FILE, "utf8").trim();
@@ -84,4 +95,8 @@ function safeRemove(): void {
   } catch {
     // ignore
   }
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
