@@ -1,12 +1,6 @@
 import { Action, ActionPanel, Form, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
 import { CodeLanguage, Daytona, DaytonaError } from "@daytona/sdk";
 
-type Preferences = {
-  apiKey: string;
-  apiUrl?: string;
-  target?: string;
-};
-
 type FormValues = {
   name: string;
   language: string;

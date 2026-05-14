@@ -1,12 +1,6 @@
 import { Clipboard, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
 import { Daytona, DaytonaError } from "@daytona/sdk";
 
-type Preferences = {
-  apiKey: string;
-  apiUrl?: string;
-  target?: string;
-};
-
 export default async function InstantSandboxCommand() {
   const preferences = getPreferenceValues<Preferences>();
   const target = preferences.target && preferences.target !== "auto" ? preferences.target : undefined;

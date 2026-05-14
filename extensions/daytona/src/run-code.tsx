@@ -2,12 +2,6 @@ import { Action, ActionPanel, Detail, Form, Toast, getPreferenceValues, showToas
 import { CodeLanguage, Daytona, DaytonaError } from "@daytona/sdk";
 import { useState } from "react";
 
-type Preferences = {
-  apiKey: string;
-  apiUrl?: string;
-  target?: string;
-};
-
 type FormValues = {
   code: string;
 };
