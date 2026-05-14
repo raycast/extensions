@@ -1,11 +1,22 @@
-import { getApplications, showToast, Toast } from "@raycast/api";
+import { getApplications, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import fs from "fs";
 import { BETA_DB_PATH } from "./constants";
 
+type Preferences = {
+  preferBeta?: "true" | "false" | boolean;
+};
+
+export function getPreferBetaPreference() {
+  const { preferBeta = "true" } = getPreferenceValues<Preferences>();
+  return preferBeta === true || preferBeta === "true";
+}
+
 async function isAntinoteInstalled() {
   const applications = await getApplications();
-  if (applications.some((app) => {console.log(app); return app.bundleId === "com.chabomakers.Antinote"})) {
-    if (fs.existsSync(BETA_DB_PATH)) {
+  const preferBeta = getPreferBetaPreference();
+
+  if (applications.some((app) => app.bundleId === "com.chabomakers.Antinote")) {
+    if (preferBeta && fs.existsSync(BETA_DB_PATH)) {
       return { installed: true, version: "beta" };
     }
     return { installed: true, version: "standalone" };
@@ -19,16 +30,16 @@ async function isAntinoteInstalled() {
 }
 
 export async function checkAntinoteInstalled() {
-  const isInstalled = await isAntinoteInstalled();
-  if (!isInstalled) {
+  const installation = await isAntinoteInstalled();
+  if (!installation.installed) {
     const options: Toast.Options = {
       style: Toast.Style.Failure,
       title: "Antinote is not installed",
       message: "Please install Antinote from Antinote.io",
       primaryAction: {
         title: "Go to https://antinote.io",
-        onAction: (toast) => {
-          open("https://antinote.io");
+        onAction: async (toast) => {
+          await open("https://antinote.io");
           toast.hide();
         },
       },
@@ -36,5 +47,5 @@ export async function checkAntinoteInstalled() {
 
     await showToast(options);
   }
-  return isInstalled;
+  return installation;
 }

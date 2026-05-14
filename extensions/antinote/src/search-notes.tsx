@@ -61,7 +61,7 @@ async function openInAntinote(noteId: string) {
 }
 
 function resolveDb(version: string | null) {
-  console.log('version', version);
+  console.log("version", version);
   switch (version) {
     case "setapp":
       return useSQL<Note>(SETAPP_DB_PATH, query);
@@ -69,7 +69,6 @@ function resolveDb(version: string | null) {
       return useSQL<Note>(BETA_DB_PATH, beta_query);
     default:
       return useSQL<Note>(STABLE_DB_PATH, query);
-
   }
 }
 
@@ -77,14 +76,9 @@ export default function Command() {
   const [isInstalled, setIsInstalled] = useState<boolean | null>(null);
   const [version, setVersion] = useState<string | null>(null);
 
-  const {
-    isLoading,
-    data: notes,
-    permissionView,
-  } = resolveDb(version);
+  const { isLoading, data: notes, permissionView } = resolveDb(version);
 
   console.log(notes);
-;
   useEffect(() => {
     async function checkInstallation() {
       const { installed, version } = await checkAntinoteInstalled();
