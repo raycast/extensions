@@ -211,7 +211,11 @@ export async function fetchDomainDates(domainName: string): Promise<DomainDates 
         if (!registrar && rdapData.registrar) registrar = rdapData.registrar;
         if (!registrantName && rdapData.registrantName) registrantName = rdapData.registrantName;
         if (!lastUpdateDate && rdapData.lastUpdateDate) lastUpdateDate = rdapData.lastUpdateDate;
-        if (rdapData.isAvailable) isAvailable = true;
+        // Only trust the RDAP availability signal when WHOIS produced no
+        // registration evidence at all; a 404 from a wrong fallback server
+        // (e.g. Identity Digital for a TLD it doesn't manage) must not
+        // override data already extracted from WHOIS.
+        if (rdapData.isAvailable && !registrationDate && !expirationDate) isAvailable = true;
         rdapData.nameservers?.forEach((n) => nameservers.add(n.toLowerCase()));
       }
     }
