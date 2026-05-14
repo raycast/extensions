@@ -290,6 +290,24 @@
       "description": "Your Parcel API key generated from web.parcelapp.net",
       "type": "password",
       "required": true
+    },
+    {
+      "name": "ambiguousDotDateOrder",
+      "title": "Ambiguous Dotted Dates (e.g. 06.07.2025)",
+      "description": "Some carriers send dates where both numbers could be month or day. Choose how to interpret them.",
+      "type": "dropdown",
+      "required": false,
+      "default": "month_day",
+      "data": [
+        {
+          "title": "MM.DD — common in US",
+          "value": "month_day"
+        },
+        {
+          "title": "DD.MM — common in EU/GB",
+          "value": "day_month"
+        }
+      ]
     }
   ],
   "dependencies": {

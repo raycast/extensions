@@ -230,7 +230,7 @@ async function fetchMovieStats(letterboxdId: string): Promise<MovieStatistics> {
 async function fetchRatingHistogram(
   letterboxdId: string,
 ): Promise<MovieRatingHistogram> {
-  const ratingUrl = `${LETTERBOXD_URL_BASE}/csi/film/${letterboxdId}/ratings-summary/`;
+  const ratingUrl = `${LETTERBOXD_URL_BASE}/csi/film/${letterboxdId}/rating-histogram/`;
   const ratingResponse = await fetchWithRetry(ratingUrl);
   return parse(ratingResponse, {
     histogram: [

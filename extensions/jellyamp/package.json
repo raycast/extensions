@@ -1,0 +1,127 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jellyamp",
+  "title": "Jellyamp",
+  "description": "Search and play music from your Jellyfin server",
+  "icon": "icon.png",
+  "author": "opkelde",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Media"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-music",
+      "title": "Search Music",
+      "subtitle": "Jellyamp",
+      "description": "Search tracks, albums, and artists on your Jellyfin server",
+      "mode": "view",
+      "keywords": [
+        "jellyfin",
+        "music",
+        "audio",
+        "song",
+        "track",
+        "album",
+        "artist"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "serverUrl",
+      "title": "Server URL",
+      "description": "Your Jellyfin server URL (e.g. http://192.168.1.10:8096). You can also set this inside the extension on first run.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "http://localhost:8096"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Jellyfin API key. Generate one in Jellyfin: Administration → API Keys → + New Key",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "userId",
+      "title": "User ID",
+      "description": "Your Jellyfin User ID. Find it in Administration → Users → click your user → copy the ID from the URL",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+    },
+    {
+      "name": "username",
+      "title": "Username",
+      "description": "Your Jellyfin username (used if no API Key is provided)",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "admin"
+    },
+    {
+      "name": "password",
+      "title": "Password",
+      "description": "Your Jellyfin password (used if no API Key is provided)",
+      "type": "password",
+      "required": false
+    },
+    {
+      "name": "mediaPlayerPath",
+      "title": "Media Player Executable (Advanced)",
+      "description": "Optional: full path to a specific media player (e.g. C:\\Program Files\\DAUM\\PotPlayer\\PotPlayer64.exe). Leave blank to use your OS default for .m3u playlist files.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "Leave blank for automatic (uses OS default media player)"
+    },
+    {
+      "name": "audioCodec",
+      "title": "Stream Audio Codec",
+      "description": "Preferred audio codec for streaming. 'copy' streams the original format.",
+      "type": "dropdown",
+      "required": false,
+      "default": "copy",
+      "data": [
+        {
+          "title": "Copy (original format)",
+          "value": "copy"
+        },
+        {
+          "title": "MP3",
+          "value": "mp3"
+        },
+        {
+          "title": "AAC",
+          "value": "aac"
+        },
+        {
+          "title": "Opus",
+          "value": "opus"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.10"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.21.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

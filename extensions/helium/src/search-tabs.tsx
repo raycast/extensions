@@ -1,7 +1,7 @@
-import { List, ActionPanel, Icon, Action } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { List, ActionPanel, Icon } from "@raycast/api";
+import { getFavicon, usePromise } from "@raycast/utils";
 import { useState, useRef } from "react";
-import { getBrowserTabs, isBrowserExtensionAvailable } from "./utils/browser";
+import { getBrowserTabs } from "./utils/browser";
 import {
   SwitchToTabAction,
   OpenNewTabAction,
@@ -10,37 +10,21 @@ import {
   CopyUrlAction,
   CopyTitleAction,
   CreateQuicklinkAction,
+  DeduplicateTabsAction,
+  ReloadAction,
 } from "./utils/actions";
 import { filterSearchable } from "./utils/search";
 
 export default function SearchTabs() {
   const [searchText, setSearchText] = useState("");
-  const { data: tabs, isLoading, mutate } = usePromise(getBrowserTabs);
-  const deletedTabIdsRef = useRef(new Set<number>());
+  const { data: tabs, isLoading, mutate, revalidate } = usePromise(getBrowserTabs);
+  const pendingCloseIdsRef = useRef(new Set<string>());
 
-  // Check if Browser Extension is available
-  if (!isBrowserExtensionAvailable()) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.XMarkCircle}
-          title="Browser Extension Required"
-          description="Please install the Raycast Browser Extension to use this command"
-          actions={
-            <ActionPanel>
-              <Action.OpenInBrowser title="Install Browser Extension" url="https://www.raycast.com/browser-extension" />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  }
-
-  // Filter out deleted tabs first (tabs that are being closed but might still appear in fetched data)
-  const tabsWithoutDeleted = tabs ? tabs.filter((t) => !deletedTabIdsRef.current.has(t.id)) : [];
+  // Keep tabs hidden while their close request is still in flight.
+  const tabsWithoutPendingClose = tabs ? tabs.filter((t) => !pendingCloseIdsRef.current.has(t.id)) : [];
 
   // Then filter by search text
-  const filteredTabs = tabsWithoutDeleted ? filterSearchable(tabsWithoutDeleted, searchText) : [];
+  const filteredTabs = tabsWithoutPendingClose ? filterSearchable(tabsWithoutPendingClose, searchText) : [];
 
   return (
     <List
@@ -58,20 +42,33 @@ export default function SearchTabs() {
       )}
       {filteredTabs.map((tab) => (
         <List.Item
+          id={tab.id}
           key={tab.id}
           title={tab.title || "Untitled"}
           subtitle={tab.url}
           keywords={[tab.url, tab.title || ""]}
-          icon={tab.favicon || Icon.Globe}
+          icon={tab.favicon || getFavicon(tab.url, { fallback: Icon.Globe })}
           actions={
             <ActionPanel>
               <SwitchToTabAction tab={tab} />
               <OpenNewTabAction />
-              <CloseTabAction tab={tab} mutate={mutate} deletedTabIdsRef={deletedTabIdsRef} />
+              <CloseTabAction
+                tab={tab}
+                mutate={mutate}
+                revalidate={revalidate}
+                pendingCloseIdsRef={pendingCloseIdsRef}
+              />
               <OpenInNewTabAction tab={tab} />
               <CopyUrlAction tab={tab} />
               <CopyTitleAction tab={tab} />
               <CreateQuicklinkAction url={tab.url} name={tab.title || "Untitled"} />
+              <ReloadAction subject="Tabs" revalidate={revalidate} />
+              <DeduplicateTabsAction
+                tabs={tabsWithoutPendingClose}
+                mutate={mutate}
+                revalidate={revalidate}
+                pendingCloseIdsRef={pendingCloseIdsRef}
+              />
             </ActionPanel>
           }
         />

@@ -1,5 +1,11 @@
 # Changelog
 
+## [Fix Empty Assistant Message] - 2026-03-03
+
+### Fixed
+
+- Empty assistant message no longer sent to Kimi API when starting a new chat, preventing `Invalid request` errors on first message
+
 ## [Initial Release] - 2026-02-09
 
 - Interact with Moonshot AI's Kimi directly from Raycast

@@ -1,5 +1,98 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.3.2] - 2026-04-24
+
+### Added
+
+- Menu bar command now auto-refreshes every 5 minutes in the background, so usage data stays up to date without requiring a manual click
+
+## [v2.3.1] - 2026-04-23
+
+### Fixed
+
+- CLI data (daily, monthly, total, session) now auto-refreshes on the configured interval instead of only updating on manual revalidation
+
+## [v2.3.0] - 2026-03-23
+
+### Added
+
+- Rate Limits section restructured: each limit on a single row with inline progress bar in the title and percentage + reset time in the subtitle
+- Progress bars use `▰▱` glyphs for cleaner, more uniform rendering
+- Section header shows mode: `Rate Limits · Remaining` or `Rate Limits · Consumed`
+- Per-model usage limit tracking for Sonnet and Opus in the Rate Limits section
+- Working Time section in menu bar showing today's active coding duration vs. yesterday
+- Rate limit backoff: automatically pauses API polling for 5 minutes after a 429 response
+- Graceful handling when rate-limited: shows countdown to next retry (e.g. "Rate limited — retry in 4m 32s")
+- Persistent cache for usage data — previous state is shown immediately on Raycast restart while fresh data loads in background
+- Rate limits section shows countdown to next automatic refresh
+- Day-over-day cost and token comparison in Today's Usage menu bar section
+- Menu bar icon restored to full-color extension icon; today's usage shown as text next to it
+- Menu bar command-specific preferences (via "Configure Command" item at bottom of dropdown):
+  - **Menu Bar Status**: choose what appears next to the icon — Today's Usage (Cost + Tokens), Today's Cost, Monthly Cost, Today's Tokens, 5-Hour Limit %, 7-Day Limit %, Highest Utilization, or None
+  - **Progress Bar Mode**: Remaining or Consumed
+  - **Progress Bar Style**: Solid (`█░`), Blocks (`▰▱`), or ASCII (`#-`)
+- Rate Limits section is hidden when authenticated via API key — it is only meaningful for OAuth (Claude Max plan) users
+- "Configure Command" item at the bottom of the menu bar dropdown opens command preferences directly
+
+### Fixed
+
+- Menu bar no longer hides all usage data when a transient refresh error occurs
+- Stale data warning no longer flashes on every Raycast restart — only shown after a fetch completes and data is genuinely old (rate-limited or error state)
+- Fixed `extra_usage` schema validation failing when `used_credits` or `monthly_limit` are null
+- Fixed optional limit windows (`seven_day_opus`, `seven_day_sonnet`) failing Zod validation when API returns explicit `null` instead of omitting the field
+- `formatDuration` no longer shows seconds alongside minutes (e.g. "4m" not "4m 43s")
+
+## [Fixed JSON parsing on first run] - 2026-03-21
+
+- Added `extractJSON` helper to strip npx stdout noise (e.g. npm warnings) before parsing JSON
+- Fixes "No output received from ccusage daily command" error on first run or cache refresh
+
+## [v2.2.4] - 2026-03-16
+
+### Changed
+
+- Usage Limits errors now open a dedicated detail view with clearer fetch/parse diagnostics and a quick action to copy the error log
+- Usage limit refresh failures now show actionable toasts with retry and copy-log actions while keeping previously fetched data available when possible
+
+### Fixed
+
+- Prevent runtime errors when the Claude usage limits API returns a `null` `resets_at` value
+- Improved consistency of usage limit error handling across the UI and the `get-usage-limits` too
+
+## [v2.2.3] - 2026-03-16
+
+### Fixed
+
+- Persisted usage limits availability between refreshes so the "Usage Limits" section does not flicker or disappear while OAuth authentication is being rechecked
+
+## [v2.2.2] - 2026-03-04
+
+### Fixed
+
+- Hide "Usage Limits" details for setups of Claude Code that are not authenticated via OAuth
+
+## [v2.2.1] - 2026-03-04
+
+### Fixed
+
+- `npx` path resolution for XDG-based `fnm` installs by detecting `fnm` in both legacy `~/.fnm` and `${XDG_DATA_HOME:-~/.local/share}/fnm` locations
+
+## [v2.2.0] - 2026-02-18
+
+### Added
+
+- New "Claude Code Stats" background command that updates Raycast command subtitle with usage data every 5 minutes
+- Configurable subtitle template with placeholders:
+  - `{dailyCost}` - Today's cost (e.g., "$1.23")
+  - `{dailyTokens}` - Today's total tokens (e.g., "2.34 MTok")
+  - `{dailyInputTokens}` - Today's input tokens
+  - `{dailyOutputTokens}` - Today's output tokens
+  - `{dailyRatio}` - Today's output/input token ratio (e.g., "1.23x")
+  - `{monthlyCost}` - This month's cost
+  - `{monthlyTokens}` - This month's total tokens
+  - `{monthlyRatio}` - This month's output/input token ratio
+  - `{usageLimit}` - 5-hour API usage limit percentage (e.g., "30%")
+
 ## [v2.1.2] - 2026-02-02
 
 ### Fixed

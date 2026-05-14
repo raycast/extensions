@@ -1,7 +1,45 @@
-import { Form } from "@raycast/api";
-import { useCachedState } from "@raycast/utils";
+import { Cache, Form } from "@raycast/api";
 import { useState, useEffect } from "react";
 import { Repository, useSearchRepositories } from "../hooks/useRepositorySearch";
+
+const PREVIOUS_REPOSITORIES_CACHE_KEY = "previousRepositories";
+const MAX_PREVIOUS_REPOSITORIES = 15;
+const cache = new Cache();
+
+function readCachedRepositories(): Repository[] {
+  const raw = cache.get(PREVIOUS_REPOSITORIES_CACHE_KEY);
+  return raw ? JSON.parse(raw) : [];
+}
+
+function writeCachedRepositories(repos: Repository[]) {
+  cache.set(PREVIOUS_REPOSITORIES_CACHE_KEY, JSON.stringify(repos.slice(0, MAX_PREVIOUS_REPOSITORIES)));
+}
+
+/**
+ * Cache a repository as "recently used". Call this on successful form
+ * submission rather than on dropdown selection to avoid caching auto-selected repos.
+ */
+export function cacheRepository(nameWithOwner: string) {
+  const previous = readCachedRepositories();
+
+  const existing = previous.find((r) => r.nameWithOwner === nameWithOwner);
+
+  let updated: Repository[];
+  if (existing) {
+    updated = [existing, ...previous.filter((r) => r.nameWithOwner !== nameWithOwner)];
+  } else {
+    const [owner, name] = nameWithOwner.split("/");
+    const newRepo: Repository = {
+      id: nameWithOwner,
+      name,
+      nameWithOwner,
+      owner: { login: owner, avatarUrl: "" },
+    };
+    updated = [newRepo, ...previous];
+  }
+
+  writeCachedRepositories(updated);
+}
 
 export function RepositoryDropdown(
   props: Readonly<{
@@ -11,7 +49,7 @@ export function RepositoryDropdown(
   }>,
 ) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [previousRepositories, setPreviousRepositories] = useCachedState<Repository[]>("previousRepositories", []);
+  const [previousRepositories] = useState<Repository[]>(readCachedRepositories);
   const { data, isLoading } = useSearchRepositories({
     searchQuery,
     organizations: props.organizations,
@@ -39,21 +77,18 @@ export function RepositoryDropdown(
       onSearchTextChange={setSearchQuery}
       onChange={(value) => {
         onChange?.(value);
-
-        const repository = data?.nodes?.find((repository) => repository.nameWithOwner === value);
-        if (repository) {
-          setPreviousRepositories([
-            repository,
-            ...previousRepositories.filter((prevRepo) => prevRepo.id !== repository.id),
-          ]);
-        }
       }}
       value={value}
       {...restItemProps}
       throttle
     >
       <Form.Dropdown.Section title="Recently Used">
-        {previousRepositories.map((repository) => (
+        {(searchQuery
+          ? previousRepositories.filter((repository) =>
+              repository.nameWithOwner.toLowerCase().includes(searchQuery.toLowerCase()),
+            )
+          : previousRepositories
+        ).map((repository) => (
           <Form.Dropdown.Item
             key={`${repository.id}-recent`}
             value={repository.nameWithOwner}
@@ -63,7 +98,10 @@ export function RepositoryDropdown(
       </Form.Dropdown.Section>
       <Form.Dropdown.Section title="All">
         {data?.nodes
-          ?.filter((repository) => !previousRepositories.some((prevRepo) => prevRepo.id === repository.id))
+          ?.filter(
+            (repository) =>
+              !previousRepositories.some((prevRepo) => prevRepo.nameWithOwner === repository.nameWithOwner),
+          )
           .map((repository) => (
             <Form.Dropdown.Item key={repository.id} value={repository.nameWithOwner} title={repository.nameWithOwner} />
           ))}

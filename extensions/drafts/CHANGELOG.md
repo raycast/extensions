@@ -1,9 +1,8 @@
 # Drafts Changelog
 
-## [Security Maintenance] - {PR_MERGE_DATE}
+## [Security Maintenance] - 2026-02-13
 
-- Added a dependency override to resolve transitive `tar` usage to `7.5.7`.
-- Updated dependencies to address reported `tar` security advisories in nested install paths.
+- Update transitive `tar` dependency to 7.5.11 to address hardlink path traversal CVE
 
 ## [Add Find Features and AI Extension Support] - 2025-04-10
 

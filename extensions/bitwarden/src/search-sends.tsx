@@ -206,8 +206,8 @@ function SearchSendsCommandContent() {
   function onSync(isPeriodic: boolean) {
     return queueOperation("sync", async () => {
       const toast = await showToast({
-        title: "Syncing Vault...",
-        message: isPeriodic ? "Background Task" : undefined,
+        title: "Syncing vault...",
+        message: isPeriodic ? "Background task" : undefined,
         style: Toast.Style.Animated,
       });
       try {

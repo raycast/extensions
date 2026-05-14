@@ -1,9 +1,9 @@
-type Gifts = {
+export type Gifts = {
   name: string;
   image: string;
 };
 
-type Character = {
+export type Character = {
   name: string;
   birthday: string;
   loves: Gifts[];
@@ -11,3 +11,7 @@ type Character = {
   hates: Gifts[];
   dislikes: Gifts[];
 };
+
+export interface GiftData {
+  characters: Character[];
+}

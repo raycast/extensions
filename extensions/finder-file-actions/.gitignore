@@ -12,5 +12,4 @@ raycast-env.d.ts
 compiled_raycast_swift
 
 # lock files
-package-lock.json
 bun.lock

@@ -1,4 +1,5 @@
 import { List, Icon, ActionPanel, Action } from "@raycast/api";
+import { useMemo } from "react";
 import { Provider, Model } from "../lib/types";
 import { getProviderCapabilityAccessories } from "../lib/accessories";
 
@@ -9,13 +10,14 @@ interface ProviderListItemProps {
 }
 
 export function ProviderListItem({ provider, providerModels, onSelect }: ProviderListItemProps) {
-  // Capability indicators
-  const accessories: List.Item.Accessory[] = getProviderCapabilityAccessories(providerModels);
-
-  // Model count
-  accessories.push({
-    text: `${provider.modelCount} model${provider.modelCount !== 1 ? "s" : ""}`,
-  });
+  // Capability indicators and model count
+  const accessories = useMemo(() => {
+    const acc = getProviderCapabilityAccessories(providerModels);
+    acc.push({
+      text: `${provider.modelCount} model${provider.modelCount !== 1 ? "s" : ""}`,
+    });
+    return acc;
+  }, [providerModels, provider.modelCount]);
 
   return (
     <List.Item

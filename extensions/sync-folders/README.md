@@ -16,12 +16,16 @@ This mod provides a command to sync folders with the `rsync` command. It provide
 
 ## Features
 
-- **Sync Folders**: Sync folders between two locations.
-- **Sync Finder Selection**: Sync the selected folders in Finder.
-- **Create Sync Folders**: Create a new Sync folders preset.
-- **Edit Sync Folders**: Edit an existing Sync folders preset.
-- **My Sync Folders**: List all the Sync Folders presets.
-- **Menu bar commands**: Quickly access the list of Sync Folders presets from the menu bar.
+- **Sync Folders**: Sync folders between two locations using rsync
+- **Sync Finder Selection**: Sync the selected folders in Finder
+- **Create Sync Folders**: Create a new sync folders preset with exclude patterns
+- **Edit Sync Folders**: Edit an existing sync folders preset
+- **My Sync Folders**: List all presets with Dry Run preview and AI advice
+- **Sync History**: View the history of all synchronizations with timing and status
+- **Menu bar commands**: Quickly access presets from the menu bar
+- **Dry Run** (⌘D): Preview changes without syncing — shows new, updated, and deleted files
+- **AI Advice** (⌘⇧A): AI-powered safety analysis of sync operations (requires Raycast Pro)
+- **Exclude Patterns**: Skip files matching patterns (e.g. `.DS_Store, *.tmp, node_modules`)
 
 ## Author
 

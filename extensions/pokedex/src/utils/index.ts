@@ -1,30 +1,88 @@
 import { Detail, getPreferenceValues } from "@raycast/api";
-import { PokemonFormType, PokemonType, TypeChartType } from "../types";
+import { Name, PokemonType, TypeChartType } from "../types";
 
-const { artwork } = getPreferenceValues();
+type SpriteMode = "bw" | "sv" | "official";
+
+type PokemonFormRef = {
+  form_name?: string;
+  pokemon_id?: number;
+  idx?: number;
+  variety?: boolean;
+};
+
+const { artwork, shiny } = getPreferenceValues();
 
 export const nationalDexNumber = (id: number) => {
   return `#${id.toString().padStart(4, "0")}`;
 };
 
-const getPixelArtImg = (id: number) => {
-  return `https://raw.githubusercontent.com/PokeAPI/sprites/refs/heads/master/sprites/pokemon/${id}.png`;
-};
+const getImageId = (id: number, form?: PokemonFormRef) => {
+  const pokemonId = form?.pokemon_id || id;
 
-export const getOfficialArtworkImg = (id: number, order?: number) => {
-  const name = order
-    ? `${id.toString().padStart(3, "0")}_f${order + 1}`
-    : id.toString().padStart(3, "0");
-  return `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/detail/${name}.png`;
-};
+  let name = form?.variety ? `${id}-${form.form_name}` : pokemonId.toString();
 
-export const getContentImg = (id: number, order?: number) => {
-  switch (artwork) {
-    case "pixel":
-      return getPixelArtImg(id);
-    default:
-      return getOfficialArtworkImg(id, order);
+  if (artwork === "official" && !shiny) {
+    name = form?.idx
+      ? `${id.toString().padStart(3, "0")}_f${form.idx + 1}`
+      : id.toString().padStart(3, "0");
   }
+
+  if (artwork === "sv" && form?.form_name) {
+    name = form.idx === 0 ? id.toString() : `${id}-${form.form_name}`;
+  }
+
+  return name;
+};
+
+const getBlackWhiteSprite = (id: number, form?: PokemonFormRef) => {
+  const name =
+    form?.form_name === "female" ? `female/${id}` : getImageId(id, form);
+
+  return shiny
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/refs/heads/master/sprites/pokemon/shiny/${name}.png`
+    : `https://raw.githubusercontent.com/PokeAPI/sprites/refs/heads/master/sprites/pokemon/${name}.png`;
+};
+
+const getScarletVioletSprite = (id: number, form?: PokemonFormRef) => {
+  const name = getImageId(id, form);
+
+  return `https://raw.githubusercontent.com/anhthang/sv-sprites/refs/heads/main/sprites/${name}.png`;
+};
+
+const getOfficialArtwork = (id: number, form?: PokemonFormRef) => {
+  const name = getImageId(id, form);
+
+  return shiny
+    ? `https://raw.githubusercontent.com/PokeAPI/sprites/refs/heads/master/sprites/pokemon/other/official-artwork/shiny/${name}.png`
+    : // Use the "full" artwork URL instead of "detail" because the detail endpoint has incorrect images for some Pokémon (e.g. #676).
+      `https://www.pokemon.com/static-assets/content-assets/cms2/img/pokedex/full/${name}.png`;
+};
+
+export const getPokemonImage = (id: number, form?: PokemonFormRef) => {
+  switch (artwork) {
+    case "bw":
+      return getBlackWhiteSprite(id, form);
+    case "sv":
+      return getScarletVioletSprite(id, form);
+    case "official":
+    default:
+      return getOfficialArtwork(id, form);
+  }
+};
+
+const spriteSize: Record<SpriteMode, number> = {
+  bw: 96,
+  sv: 128,
+  official: 144,
+};
+
+const getSpriteSize = (mode: SpriteMode) => spriteSize[mode];
+
+export const getPokemonImageTag = (id: number, form?: PokemonFormRef) => {
+  const src = getPokemonImage(id, form);
+  const width = getSpriteSize(artwork);
+
+  return `<img src="${src}" alt="${id}" width="${width}" height="${width}" />`;
 };
 
 export const typeColor: Record<string, string> = {
@@ -48,10 +106,17 @@ export const typeColor: Record<string, string> = {
   fairy: "#dab4d4",
 };
 
+export const getLocalizedName = (
+  names: Name[] | undefined,
+  fallbackName: string,
+) => {
+  return names?.[0]?.name || fallbackName;
+};
+
 export const calculateEffectiveness = (
   types: PokemonType[],
   allTypes: TypeChartType[],
-) => {
+): Record<string, Detail.Metadata.TagList.Item.Props[]> => {
   const effectivenessMap = new Map<string, number>();
   const typeNameMap = new Map<string, string>();
 
@@ -71,7 +136,7 @@ export const calculateEffectiveness = (
       effectivenessMap.set(relationName, factor);
       typeNameMap.set(
         relationName,
-        attacker.typenames[0]?.name || attacker.name,
+        getLocalizedName(attacker.typenames, attacker.name),
       );
     }
   });
@@ -112,118 +177,13 @@ export const localeName = (
     : pokemon.name;
 };
 
-export const filterPokemonForms = <
-  T extends { name: string; pokemonforms: PokemonFormType[] },
->(
-  id: number,
-  pokemons: T[],
-): T[] => {
-  // removes Pokemon forms without official images on pokemon.com
-  let formNames: string[] = [];
-  let varieties: string[] = [];
-  switch (id) {
-    case 25:
-      formNames = ["pikachu", "pikachu-gmax"];
-      break;
-    case 445:
-      formNames = ["garchomp", "garchomp-mega"];
-      break;
-    case 555:
-      formNames = ["darmanitan-standard", "darmanitan-galar-standard"];
-      break;
-    case 658:
-      formNames = ["greninja", "greninja-ash", "greninja-mega"];
-      break;
-    case 666:
-      varieties = [
-        "meadow",
-        "continental",
-        "garden",
-        "elegant",
-        "marine",
-        "high-plains",
-        "river",
-        "fancy",
-      ];
-      break;
-    // case 668:
-    //   // male, female
-    //   break
-    case 671:
-      varieties = ["red"];
-      break;
-    case 676:
-      varieties = ["natural", "heart", "star", "diamond"];
-      break;
-    case 718:
-      formNames = [
-        "zygarde-10-power-construct",
-        "zygarde-50-power-construct",
-        "zygarde-complete",
-        "zygarde-mega",
-      ];
-      break;
-    case 744:
-      formNames = ["rockruff"];
-      break;
-    case 774:
-      formNames = ["minior-red-meteor", "minior-red"];
-      break;
-    case 778:
-      formNames = ["mimikyu-disguised"];
-      break;
-    case 801:
-      formNames = ["magearna", "magearna-mega"];
-      break;
-    case 845:
-      formNames = ["cramorant"];
-      break;
-    case 849:
-      formNames = [
-        "toxtricity-amped",
-        "toxtricity-low-key",
-        "toxtricity-amped-gmax",
-      ];
-      break;
-    case 875:
-      // eiscue-noice available in Zukan, but not in pokemon.com at the moment
-      formNames = ["eiscue-ice"];
-      break;
-    case 893:
-      formNames = ["zarude-dada"];
-      break;
-    case 1007:
-      formNames = ["koraidon"];
-      break;
-    case 1008:
-      formNames = ["miraidon"];
-      break;
-    default:
-      break;
-  }
+export const fixFlavorText = (raw?: string) => {
+  return raw?.split("\n").join(" ").split("").join(" ") || "";
+};
 
-  if (formNames.length) {
-    pokemons = pokemons.filter((p) => formNames.includes(p.name));
-  }
-
-  const forms: T[] = [];
-
-  pokemons.forEach((p) => {
-    if (varieties.length) {
-      varieties.forEach((variety) => {
-        const pokemonforms = p.pokemonforms.filter(
-          (f) => f.form_name === variety,
-        );
-
-        forms.push({
-          ...p,
-          pokemonforms: pokemonforms,
-        } as T);
-      });
-    } else {
-      forms.push(p);
-    }
-  });
-
-  return forms;
+export const fixItemEffectText = (raw: string) => {
+  return raw
+    .replaceAll("\n:", ":\n")
+    .replaceAll("\n\n", "\n")
+    .replaceAll("    ", "");
 };

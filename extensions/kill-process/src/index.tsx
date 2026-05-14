@@ -15,15 +15,21 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { exec } from "child_process";
 import prettyBytes from "pretty-bytes";
 import { useEffect, useState } from "react";
 import useInterval from "./hooks/use-interval";
 import { Process } from "./types";
-import { getFileIcon, getKillCommand, getPlatformSpecificErrorHelp, isWindows } from "./utils/platform";
-import { fetchProcessPerformance, fetchRunningProcesses } from "./utils/process";
+import { getFileIcon, getPlatformSpecificErrorHelp, hasRestartLaunchPath, isWindows } from "./utils/platform";
+import {
+  fetchProcessPerformance,
+  fetchRunningProcesses,
+  restartProcess as restartSelectedProcess,
+  terminateProcess,
+  terminateProcessesByName,
+} from "./utils/process";
 
 type SortBy = "cpu" | "memory";
+type VisibleProcess = Process & { canRestartProcess: boolean };
 
 const APP_GROUPING_STORAGE_KEY = "kill-process.app-grouping-enabled";
 const SORT_BY_DROPDOWN_ID = "kill-process.sort-by";
@@ -48,7 +54,7 @@ const isSortBy = (value: unknown): value is SortBy => {
 
 export default function ProcessList() {
   const [fetchResult, setFetchResult] = useState<Process[]>([]);
-  const [state, setState] = useState<Process[]>([]);
+  const [visibleProcesses, setVisibleProcesses] = useState<VisibleProcess[]>([]);
   const [query, setQuery] = useState<string>("");
 
   const preferences = getPreferenceValues<Preferences>();
@@ -130,10 +136,11 @@ export default function ProcessList() {
 
   useInterval(fetchProcesses, refreshDuration);
   useEffect(() => {
-    let processes = fetchResult;
+    let processes = [...fetchResult];
     if (isAppGroupingEnabled) {
       processes = aggregate(processes);
     }
+
     processes.sort((a, b) => {
       if (sortBy === "memory") {
         return a.mem > b.mem ? -1 : 1;
@@ -141,11 +148,51 @@ export default function ProcessList() {
         return a.cpu > b.cpu ? -1 : 1;
       }
     });
-    setState(processes);
+
+    setVisibleProcesses(
+      processes.map((process) => ({
+        ...process,
+        canRestartProcess: hasRestartLaunchPath(process),
+      })),
+    );
   }, [fetchResult, sortBy, isAppGroupingEnabled]);
 
   const fileIcon = (process: Process) => {
     return getFileIcon(process);
+  };
+
+  const handleKillError = (force: boolean) => {
+    const errorHelp = getPlatformSpecificErrorHelp("kill", force);
+    if (force && errorHelp.helpUrl) {
+      confirmAlert({
+        title: errorHelp.title,
+        message: errorHelp.message,
+        primaryAction: {
+          title: "Open Help",
+          onAction: () => open(errorHelp.helpUrl!),
+        },
+      });
+    } else {
+      showToast({
+        title: errorHelp.title,
+        message: errorHelp.message,
+        style: Toast.Style.Failure,
+      });
+    }
+  };
+
+  const handleRestartError = (processName: string, error: unknown) => {
+    showToast({
+      title: `Failed to Restart ${processName}`,
+      message: error instanceof Error ? error.message : "Unknown error",
+      style: Toast.Style.Failure,
+    });
+  };
+
+  const performPostKillActions = () => {
+    if (closeWindowAfterKill) closeMainWindow();
+    if (goToRootAfterKill) popToRoot({ clearSearchBar: clearSearchBarAfterKill });
+    if (clearSearchBarAfterKill) clearSearchBar({ forceScrollToTop: true });
   };
 
   const killProcess = async (process: Process, force: boolean = false) => {
@@ -165,45 +212,90 @@ export default function ProcessList() {
       }
     }
 
-    const command = getKillCommand(process.id, force);
-    exec(command, (error) => {
-      if (error) {
-        const errorHelp = getPlatformSpecificErrorHelp(force);
-
-        if (force && errorHelp.helpUrl) {
-          confirmAlert({
-            title: errorHelp.title,
-            message: errorHelp.message,
-            primaryAction: {
-              title: "Open Help",
-              onAction: () => open(errorHelp.helpUrl!),
-            },
-          });
-        } else {
-          showToast({
-            title: errorHelp.title,
-            message: errorHelp.message,
-            style: Toast.Style.Failure,
-          });
-        }
-        return;
-      }
-
+    try {
+      await terminateProcess(process.id, force);
       showToast({
         title: `Killed ${processName}`,
         style: Toast.Style.Success,
       });
-    });
 
-    setFetchResult(state.filter((p) => p.id !== process.id));
-    if (closeWindowAfterKill) {
-      closeMainWindow();
+      setFetchResult((prev) => prev.filter((p) => p.id !== process.id));
+      performPostKillActions();
+    } catch {
+      handleKillError(force);
     }
-    if (goToRootAfterKill) {
-      popToRoot({ clearSearchBar: clearSearchBarAfterKill });
+  };
+
+  const killAllProcesses = async (process: Process, force: boolean = false) => {
+    const processName = process.processName;
+    if (processName === "-") {
+      showToast({
+        title: "Cannot Kill All for unnamed processes",
+        style: Toast.Style.Failure,
+      });
+      return;
     }
-    if (clearSearchBarAfterKill) {
-      clearSearchBar({ forceScrollToTop: true });
+
+    if (!skipConfirmation) {
+      if (
+        !(await confirmAlert({
+          title: `${force ? "Force " : ""}Kill all "${processName}" processes?`,
+          rememberUserChoice: true,
+        }))
+      ) {
+        showToast({
+          title: `Cancelled Kill All ${processName}`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
+    }
+
+    try {
+      await terminateProcessesByName(processName, force);
+      showToast({
+        title: `Killed all "${processName}" processes`,
+        style: Toast.Style.Success,
+      });
+
+      setFetchResult((prev) => prev.filter((p) => p.processName !== processName));
+      performPostKillActions();
+    } catch {
+      handleKillError(force);
+    }
+  };
+
+  const restartProcess = async (process: Process, force: boolean = false) => {
+    const processName = process.processName === "-" ? `process ${process.id}` : process.processName;
+    if (!hasRestartLaunchPath(process)) {
+      handleRestartError(processName, new Error("A launchable executable or app bundle path is required."));
+      return;
+    }
+
+    if (!skipConfirmation) {
+      if (
+        !(await confirmAlert({
+          title: `${force ? "Force " : ""}Restart ${processName}?`,
+          rememberUserChoice: true,
+        }))
+      ) {
+        showToast({
+          title: `Cancelled Restarting ${processName}`,
+          style: Toast.Style.Failure,
+        });
+        return;
+      }
+    }
+
+    try {
+      await restartSelectedProcess(process, force);
+      showToast({
+        title: `Restarted ${processName}`,
+        style: Toast.Style.Success,
+      });
+      fetchProcesses();
+    } catch (error) {
+      handleRestartError(processName, error);
     }
   };
 
@@ -332,11 +424,11 @@ export default function ProcessList() {
     await showToast({ title: `${nextValue ? "Enabled" : "Disabled"} App Grouping` });
   };
 
-  const processCount = state.length;
+  const processCount = visibleProcesses.length;
 
   return (
     <List
-      isLoading={state.length === 0}
+      isLoading={visibleProcesses.length === 0}
       searchBarPlaceholder="Filter by name"
       onSearchTextChange={(query) => setQuery(query)}
       searchBarAccessory={
@@ -360,7 +452,7 @@ export default function ProcessList() {
       }
     >
       <List.Section title="Processes" subtitle={`${processCount} running`}>
-        {state
+        {visibleProcesses
           .filter((process) => {
             if (query === "") {
               return true;
@@ -416,6 +508,34 @@ export default function ProcessList() {
                   <ActionPanel>
                     <Action title="Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process)} />
                     <Action title="Force Kill" icon={Icon.XMarkCircle} onAction={() => killProcess(process, true)} />
+                    {process.canRestartProcess ? (
+                      <Action
+                        title="Restart"
+                        icon={Icon.RotateAntiClockwise}
+                        shortcut={{ modifiers: ["cmd", "opt"], key: "r" }}
+                        onAction={() => restartProcess(process)}
+                      />
+                    ) : null}
+                    {process.canRestartProcess ? (
+                      <Action
+                        title="Force Restart"
+                        icon={Icon.RotateAntiClockwise}
+                        shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "r" }}
+                        onAction={() => restartProcess(process, true)}
+                      />
+                    ) : null}
+                    <Action
+                      title="Kill All"
+                      icon={Icon.XMarkCircleFilled}
+                      shortcut={{ modifiers: ["opt"], key: "return" }}
+                      onAction={() => killAllProcesses(process)}
+                    />
+                    <Action
+                      title="Force Kill All"
+                      icon={Icon.XMarkCircleFilled}
+                      shortcut={{ modifiers: ["opt", "shift"], key: "return" }}
+                      onAction={() => killAllProcesses(process, true)}
+                    />
                     {process.path == null ? null : (
                       <Action.CopyToClipboard
                         title="Copy Path"

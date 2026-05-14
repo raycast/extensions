@@ -21,7 +21,8 @@
     "litomore",
     "ridemountainpig",
     "meganpearson",
-    "alastair_scheuermann"
+    "alastair_scheuermann",
+    "dangkhoipro"
   ],
   "keywords": [
     "pomodoro",
@@ -498,6 +499,15 @@
       ]
     },
     {
+      "name": "randomRewards",
+      "type": "textfield",
+      "required": false,
+      "title": "Random Rewards",
+      "description": "Random rewards tap into variable ratio reinforcement — the same psychology behind slot machines. Surprising yourself with a random treat after focused work boosts motivation and makes habits stick.",
+      "default": "",
+      "placeholder": "coffee, walk outside, chocolate, YouTube video"
+    },
+    {
       "name": "enableConfetti",
       "type": "checkbox",
       "required": false,
@@ -621,5 +631,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

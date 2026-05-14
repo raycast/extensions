@@ -11,7 +11,12 @@
   "contributors": [
     "pernielsentikaer",
     "j3lte",
+    "icebrick",
     "xmok"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "license": "MIT",
   "commands": [

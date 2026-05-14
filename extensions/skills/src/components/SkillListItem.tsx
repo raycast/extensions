@@ -1,14 +1,45 @@
 import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
-import { Skill, buildInstallCommand, formatInstalls } from "../shared";
-import { SkillDetail } from "./SkillDetail";
+import { buildInstallCommand, buildSkillUrl, formatInstalls, type Skill } from "../shared";
+import { type InstalledSkillMatch } from "../hooks/useInstalledSkillMatches";
+import { InstallSkillAction } from "./actions/InstallSkillAction";
+import { SkillDetailView } from "./SkillDetailView";
 
-export function SkillListItem({ skill, rank }: { skill: Skill; rank?: number }) {
-  const title = rank != null ? `#${rank} ${skill.name}` : skill.name;
+interface SkillListItemProps {
+  skill: Skill;
+  rank?: number;
+  installedMatch: InstalledSkillMatch;
+  onViewedSkillChange: (skillId: string) => void;
+  onSkillInstalled?: () => void | Promise<void>;
+}
 
-  const icon =
-    rank != null
-      ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
-      : { source: Icon.Hammer };
+export function SkillListItem({
+  skill,
+  rank,
+  installedMatch,
+  onViewedSkillChange,
+  onSkillInstalled,
+}: SkillListItemProps) {
+  const title = rank !== undefined && rank !== null ? `#${rank} ${skill.name}` : skill.name;
+  const isInstalled = installedMatch.type === "exact";
+  const hasSourceConflict = installedMatch.type === "conflict";
+  const installedSource = installedMatch.type === "conflict" ? (installedMatch.source ?? "Unknown source") : undefined;
+  const skillUrl = buildSkillUrl(skill.source, skill.skillId);
+
+  const iconValue = isInstalled
+    ? { source: Icon.CheckCircle, tintColor: Color.Green }
+    : hasSourceConflict
+      ? { source: Icon.Warning, tintColor: Color.Orange }
+      : rank !== undefined && rank !== null
+        ? { source: Icon.Trophy, tintColor: rank <= 3 ? Color.Yellow : Color.SecondaryText }
+        : { source: Icon.Hammer, tintColor: Color.SecondaryText };
+  const iconTooltip = isInstalled
+    ? "Installed"
+    : hasSourceConflict
+      ? `Installed from source "${installedSource}"`
+      : undefined;
+  const icon = iconTooltip ? { value: iconValue, tooltip: iconTooltip } : iconValue;
+
+  const accessories: List.Item.Accessory[] = [{ text: formatInstalls(skill.installs), icon: Icon.Download }];
 
   return (
     <List.Item
@@ -16,22 +47,34 @@ export function SkillListItem({ skill, rank }: { skill: Skill; rank?: number }) 
       subtitle={skill.source}
       keywords={[skill.name, skill.source, skill.id]}
       icon={icon}
-      accessories={[{ text: formatInstalls(skill.installs), icon: Icon.Download }]}
+      accessories={accessories}
+      id={skill.id}
       actions={
         <ActionPanel>
-          <Action.Push title="View Details" icon={Icon.Eye} target={<SkillDetail skill={skill} />} />
+          <Action.Push
+            title="View Details"
+            icon={Icon.Sidebar}
+            target={<SkillDetailView skill={skill} onSkillInstalled={onSkillInstalled} />}
+            onPush={() => onViewedSkillChange(skill.id)}
+          />
+          <InstallSkillAction skill={skill} installedMatch={installedMatch} onSkillInstalled={onSkillInstalled} />
           <Action.CopyToClipboard
             title="Copy Install Command"
             content={buildInstallCommand(skill)}
             icon={Icon.Terminal}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
-          <Action.OpenInBrowser title="Open Repository" url={`https://github.com/${skill.source}`} icon={Icon.Globe} />
           <Action.OpenInBrowser
-            title="Open Skills"
-            url={`https://skills.sh/${skill.source}/${skill.skillId}`}
-            icon={Icon.Link}
+            title="Open on skills.sh"
+            url={skillUrl}
+            icon={Icon.Globe}
             shortcut={Keyboard.Shortcut.Common.Open}
+          />
+          <Action.OpenInBrowser
+            title="Open Repository"
+            url={`https://github.com/${skill.source}`}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
         </ActionPanel>
       }

@@ -465,7 +465,10 @@ export function ObjectActions({
         {isDetailView && (
           <Action.CopyToClipboard
             title={`Copy Markdown`}
-            shortcut={{ modifiers: ["cmd"], key: "c" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "c" },
+              Windows: { modifiers: ["ctrl"], key: "c" },
+            }}
             content={(object as SpaceObjectWithBody)?.markdown}
           />
         )}
@@ -491,7 +494,10 @@ export function ObjectActions({
             <Action
               icon={isPinned ? Icon.StarDisabled : Icon.Star}
               title={isPinned ? `Unpin ${getContextLabel()}` : `Pin ${getContextLabel()}`}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "f" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "f" },
+              }}
               onAction={handlePin}
             />
             {isPinned && (
@@ -499,13 +505,19 @@ export function ObjectActions({
                 <Action
                   icon={Icon.ArrowUp}
                   title="Move Up in Pinned"
-                  shortcut={{ modifiers: ["opt", "cmd"], key: "arrowUp" }}
+                  shortcut={{
+                    macOS: { modifiers: ["opt", "cmd"], key: "arrowUp" },
+                    Windows: { modifiers: ["alt", "ctrl"], key: "arrowUp" },
+                  }}
                   onAction={handleMoveUpInFavorites}
                 />
                 <Action
                   icon={Icon.ArrowDown}
                   title="Move Down in Pinned"
-                  shortcut={{ modifiers: ["opt", "cmd"], key: "arrowDown" }}
+                  shortcut={{
+                    macOS: { modifiers: ["opt", "cmd"], key: "arrowDown" },
+                    Windows: { modifiers: ["alt", "ctrl"], key: "arrowDown" },
+                  }}
                   onAction={handleMoveDownInFavorites}
                 />
               </>
@@ -558,7 +570,10 @@ export function ObjectActions({
           <Action
             icon={shouldShowSidebar ? Icon.EyeDisabled : Icon.Eye}
             title={shouldShowSidebar ? "Hide Sidebar" : "Show Sidebar"}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd", "shift"], key: "d" },
+              Windows: { modifiers: ["ctrl", "shift"], key: "d" },
+            }}
             onAction={onToggleSidebar}
           />
         )}

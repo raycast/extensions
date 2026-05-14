@@ -1,0 +1,97 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "send-to-kindle",
+  "title": "Send to Kindle",
+  "description": "Send article to Kindle",
+  "icon": "extension-icon.png",
+  "author": "lemikeone",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "shareEpubCover",
+      "title": "EPUB Cover",
+      "description": "Include a cover image in generated EPUB files.",
+      "type": "checkbox",
+      "label": "Share EPUB cover image",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "disableArticleLinks",
+      "title": "",
+      "description": "Remove all links from article content before sending to Kindle.",
+      "type": "checkbox",
+      "label": "Disable article links",
+      "required": false,
+      "default": false
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "send-to-kindle",
+      "title": "Send to Kindle",
+      "description": "Send article to Kindle directly",
+      "mode": "no-view"
+    },
+    {
+      "name": "preview-and-send-to-kindle",
+      "title": "Preview and Send to Kindle",
+      "description": "Preview article before sending to Kindle",
+      "mode": "view"
+    },
+    {
+      "name": "add-filter",
+      "title": "Add a Skill",
+      "description": "Add a CSS filter for the active domain",
+      "mode": "view"
+    },
+    {
+      "name": "my-filters",
+      "title": "My Skills",
+      "description": "View and manage CSS filters",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Send to Kindle History",
+      "description": "View history of sent articles",
+      "mode": "view"
+    },
+    {
+      "name": "set-change-sending-method",
+      "title": "Set / Change Sending Method",
+      "description": "Choose and validate your Kindle delivery method",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@mozilla/readability": "^0.5.0",
+    "@raycast/api": "^1.104.4",
+    "@raycast/utils": "^1.17.0",
+    "linkedom": "^0.18.12",
+    "turndown": "^7.1.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

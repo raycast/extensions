@@ -2,6 +2,9 @@ import { execSync } from "node:child_process";
 import { Clipboard, getPreferenceValues, showHUD } from "@raycast/api";
 import TurndownService from "turndown";
 import { gfm } from "@joplin/turndown-plugin-gfm";
+import { readPasteboardType } from "./clipboard";
+import { parseWebCustomData } from "./parseWebCustomData";
+import { quillDeltaToMarkdown } from "./quillDeltaToMarkdown";
 
 async function getClipboardHTML(): Promise<string> {
   // Helper function to get HTML from clipboard using AppleScript as @raycast/api clipboard does not read HTML from the clipboard properly
@@ -15,15 +18,6 @@ async function getClipboardHTML(): Promise<string> {
     clipboardContent = result.trim();
   } catch (error) {
     console.error("Failed to get HTML via AppleScript:", error);
-  }
-
-  // Fallback: Get plain text from the clipboard
-  if (clipboardContent === "") {
-    try {
-      clipboardContent = (await Clipboard.readText()) ?? "";
-    } catch (error) {
-      console.error("Failed to get plain text from clipboard:", error);
-    }
   }
 
   return clipboardContent;
@@ -52,27 +46,49 @@ export default async function Command() {
     turndownService.use(gfm);
 
     console.debug("Trying to get HTML...");
+    let markdown: string | undefined;
     const html = await getClipboardHTML();
     if (html.trim() !== "") {
       console.debug("Found HTML:", html.substring(0, 100) + "...");
-    } else {
-      await showHUD("Clipboard does not contain formattable content.");
-      return;
+      try {
+        markdown = turndownService.turndown(html);
+      } catch (error) {
+        console.error("Failed to convert HTML to Markdown:", error);
+      }
     }
 
-    // Perform the conversion
-    let markdown;
-    try {
-      markdown = turndownService.turndown(html);
-    } catch (error) {
-      console.error("Failed to convert HTML to Markdown:", error);
-      await showHUD("Error: Could not convert HTML content.");
-      return;
+    // Try Slack's Quill Delta from Chromium web-custom-data
+    if (!markdown) {
+      try {
+        const blob = readPasteboardType("org.chromium.web-custom-data");
+        if (blob) {
+          const entries = parseWebCustomData(blob);
+          const slackTexty = entries?.get("slack/texty");
+          if (slackTexty) {
+            markdown = quillDeltaToMarkdown(JSON.parse(slackTexty), {
+              strongDelimiter: preferences.strongDelimiter,
+              emDelimiter: preferences.emDelimiter,
+              bulletListMarker: preferences.bulletListMarker,
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to parse Slack clipboard data:", error);
+      }
+    }
+
+    // Fallback: plain text from clipboard
+    if (!markdown) {
+      try {
+        markdown = (await Clipboard.readText()) ?? "";
+      } catch (error) {
+        console.error("Failed to get plain text from clipboard:", error);
+      }
     }
 
     // Check if conversion resulted in meaningful content
     if (!markdown || markdown.trim() === "") {
-      await showHUD("Conversion resulted in empty content.");
+      await showHUD("Clipboard does not contain formattable content.");
       return;
     }
 

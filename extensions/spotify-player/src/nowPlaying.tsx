@@ -26,7 +26,6 @@ import { transferMyPlayback } from "./api/transferMyPlayback";
 import { useMyPlaylists } from "./hooks/useMyPlaylists";
 import { useMe } from "./hooks/useMe";
 import { useContainsMyLikedTracks } from "./hooks/useContainsMyLikedTracks";
-import { usePlaybackState } from "./hooks/usePlaybackState";
 import { formatMs } from "./helpers/formatMs";
 import { TracksList } from "./components/TracksList";
 import { AddToPlaylistAction } from "./components/AddToPlaylistAction";
@@ -39,17 +38,21 @@ import { triggerMenuBarRefresh } from "./helpers/triggerMenuBarRefresh";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
-  const { playbackStateData, playbackStateIsLoading, playbackStateRevalidate } = usePlaybackState();
-  const { myDevicesData } = useMyDevices();
-  const { myPlaylistsData } = useMyPlaylists();
-  const { meData } = useMe();
+
+  // Defer secondary API calls until primary data is loaded.
+  // On initial mount only currentlyPlaying fires (1 API call).
+  // Devices, playlists, and user profile load on next render once we have track data.
+  const hasTrackData = !!currentlyPlayingData?.item;
+  const { myDevicesData } = useMyDevices({ options: { execute: hasTrackData } });
+  const { myPlaylistsData } = useMyPlaylists({ options: { execute: hasTrackData } });
+  const { meData } = useMe({ options: { execute: hasTrackData } });
   const { containsMySavedTracksData, containsMySavedTracksRevalidate } = useContainsMyLikedTracks({
     trackIds: currentlyPlayingData?.item?.id ? [currentlyPlayingData?.item?.id] : [],
   });
   const { closeWindowOnAction } = getPreferenceValues<{ closeWindowOnAction?: boolean }>();
 
   const trackAlreadyLiked = containsMySavedTracksData?.[0];
-  const isPlaying = playbackStateData?.is_playing;
+  const isPlaying = currentlyPlayingData?.is_playing;
   const isTrack = currentlyPlayingData?.currently_playing_type !== "episode";
 
   if (!currentlyPlayingData || !currentlyPlayingData.item) {
@@ -203,7 +206,7 @@ function NowPlayingCommand() {
           onAction={async () => {
             try {
               await skipToNext();
-              await triggerMenuBarRefresh();
+              triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to next");
                 await popToRoot();
@@ -233,7 +236,7 @@ function NowPlayingCommand() {
           onAction={async () => {
             try {
               await skipToPrevious();
-              await triggerMenuBarRefresh();
+              triggerMenuBarRefresh();
               if (closeWindowOnAction) {
                 await showHUD("Skipped to previous");
                 await popToRoot();
@@ -288,11 +291,11 @@ function NowPlayingCommand() {
     <Detail
       markdown={markdown}
       metadata={metadata}
-      isLoading={currentlyPlayingIsLoading || playbackStateIsLoading}
+      isLoading={currentlyPlayingIsLoading}
       actions={
         <ActionPanel>
-          {isPlaying && <PauseAction onPause={() => playbackStateRevalidate()} />}
-          {!isPlaying && <PlayAction onPlay={() => playbackStateRevalidate()} />}
+          {isPlaying && <PauseAction onPause={() => currentlyPlayingRevalidate()} />}
+          {!isPlaying && <PlayAction onPlay={() => currentlyPlayingRevalidate()} />}
           {trackOrEpisodeActions}
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />

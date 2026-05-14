@@ -1,5 +1,23 @@
 # Coffee Changelog
 
+## [Fix] - 2026-03-24
+
+- Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref
+- Folded the `-u` flag into the main caffeinate process, eliminating periodic `caffeinate -u -t 1` spawning
+- Removed stale process filter in menu bar status
+
+## [Fix] - 2026-03-22
+
+- Prevent zombie caffeinate child processes by keeping the spawned process referenced until exit.
+
+## [Fix] - 2026-03-19
+
+- Fixed zombie process accumulation caused by unreaped `caffeinate -u` child processes in the status command.
+
+## [Fix] - 2026-03-17
+
+- Fixed caffeination not preventing display sleep on macOS 26+ when running on battery power.
+
 ## [Fix] - 2026-01-27
 
 - Fixed memory leak caused by zombie processes when starting caffeination.

@@ -1,64 +1,28 @@
 import { Cache } from "@raycast/api";
-import { withCache } from "@raycast/utils";
 import { RawApiResponse, RawModel, Model, Provider, ModelsData, InputModality, OutputModality } from "./types";
 
 export const API_URL = "https://models.dev/api.json";
 export const LOGO_BASE_URL = "https://models.dev/logos";
 
-// Cache for transformed data (skips both network AND parsing/transform)
-const cache = new Cache();
-const CACHE_KEY = "models-data";
-
-interface CachedData {
-  data: ModelsData;
-  timestamp: number;
-}
-
-export function getCachedData(): ModelsData | null {
-  const cached = cache.get(CACHE_KEY);
-  if (!cached) return null;
-
-  try {
-    const parsed = JSON.parse(cached) as CachedData;
-    return parsed.data;
-  } catch {
-    return null;
-  }
-}
+// Lightweight timestamp-only cache — stores a single small string, not the full dataset
+const timestampCache = new Cache();
+const TIMESTAMP_KEY = "models-data-timestamp";
 
 export function getCacheTimestamp(): number | null {
-  const cached = cache.get(CACHE_KEY);
-  if (!cached) return null;
+  const ts = timestampCache.get(TIMESTAMP_KEY);
+  return ts ? Number(ts) : null;
+}
 
-  try {
-    const parsed = JSON.parse(cached) as CachedData;
-    return parsed.timestamp;
-  } catch {
-    return null;
+export async function fetchModelsData(): Promise<ModelsData> {
+  const response = await fetch(API_URL);
+  if (!response.ok) {
+    throw new Error(`Models.dev request failed (${response.status})`);
   }
+  const raw = (await response.json()) as RawApiResponse;
+  const transformed = transformApiResponse(raw);
+  timestampCache.set(TIMESTAMP_KEY, String(Date.now()));
+  return transformed;
 }
-
-export function setCachedData(data: ModelsData): void {
-  const cacheEntry: CachedData = {
-    data,
-    timestamp: Date.now(),
-  };
-  cache.set(CACHE_KEY, JSON.stringify(cacheEntry));
-}
-
-export const fetchModelsData = withCache(
-  async () => {
-    const response = await fetch(API_URL);
-    if (!response.ok) {
-      throw new Error(`Models.dev request failed (${response.status})`);
-    }
-    const raw = (await response.json()) as RawApiResponse;
-    const transformed = transformApiResponse(raw);
-    setCachedData(transformed);
-    return transformed;
-  },
-  { maxAge: 5 * 60 * 1000 },
-);
 
 export function getProviderLogoUrl(providerId: string): string {
   return `${LOGO_BASE_URL}/${providerId}.svg`;

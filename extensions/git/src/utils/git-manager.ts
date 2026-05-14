@@ -10,7 +10,7 @@ import {
   simpleGit,
   SimpleGit,
 } from "simple-git";
-import { showToast, Toast, getPreferenceValues, Alert, confirmAlert } from "@raycast/api";
+import { showToast, Toast, getPreferenceValues, Alert, confirmAlert, environment } from "@raycast/api";
 import { readFileSync, writeFileSync, mkdtempSync, chmodSync, rmSync, existsSync } from "fs";
 import { tmpdir } from "os";
 import {
@@ -29,14 +29,18 @@ import {
   PatchScope,
   RepositoryCloningProcess,
   RepositoryCloningState,
+  Submodule,
   Tag,
   StatusMode,
   StashScope,
+  GitLocalConfig,
+  GitLocalConfigUpdates,
 } from "../types";
+import { GitConfigScope } from "simple-git";
 import { basename, join } from "path";
 import { promises as fs } from "fs";
 import { showFailureToast } from "@raycast/utils";
-import { exec } from "child_process";
+import { exec, spawn } from "child_process";
 import { shellEnvironmentVariables } from "./environment-utils";
 
 /**
@@ -50,6 +54,7 @@ export class GitManager {
   constructor(repoPath: string) {
     this.repoPath = repoPath;
     this.git = simpleGit(repoPath, {
+      binary: getPreferenceValues<Preferences>().binaryPath,
       errors: (error, _result) => {
         if (error) {
           showFailureToast(error, { title: `Error running command` });
@@ -69,6 +74,21 @@ export class GitManager {
    */
   get repoName(): string {
     return basename(this.repoPath) || "Unknown Repository";
+  }
+
+  get gitignorePath(): string {
+    return join(this.repoPath, ".gitignore");
+  }
+
+  /**
+   * Gets the path to the git config file.
+   */
+  get localConfigPath(): string {
+    return join(this.repoPath, ".git", "config");
+  }
+
+  get globalConfigPath(): string {
+    return join(process.env.HOME || process.env.USERPROFILE || "", ".gitconfig");
   }
 
   static validateDirectory(repoPath: string) {
@@ -628,7 +648,6 @@ export class GitManager {
     const log = await this.git.log([
       `--max-count=${commitsPerPage}`,
       `--skip=${page * commitsPerPage}`,
-      "--name-status",
       "--first-parent",
       ...(branch ? [branch] : ["--all"]),
       "--decorate=full",
@@ -645,7 +664,6 @@ export class GitManager {
         refs?: string;
         diff?: DiffResult;
       }) => {
-        const changedFiles = this.parseCommitChangedFiles(commit.diff!);
         const parsedRefs = this.parseCommitRefs(commit.refs);
 
         return {
@@ -660,8 +678,7 @@ export class GitManager {
           remoteBranches: parsedRefs.remoteBranches,
           tags: parsedRefs.tags,
           currentBranchName: parsedRefs.currentBranchName,
-          changedFiles,
-        };
+        } as Commit;
       },
     );
   }
@@ -1096,6 +1113,8 @@ __REBASE_TODO__
     const pullArgs = ["--prune", "--tags"];
     if (rebase) {
       pullArgs.push("--rebase");
+    } else {
+      pullArgs.push("--no-rebase");
     }
     await this.git.pull(undefined, undefined, pullArgs);
   }
@@ -1485,6 +1504,117 @@ __REBASE_TODO__
   }
 
   /**
+   * Gets a list of all submodules in the repository.
+   * Parses output of `git submodule status` (format: [mode][hash][path]).
+   */
+  async getSubmodules(): Promise<Submodule[]> {
+    const raw = await this.git.subModule(["status"]);
+    return raw
+      .trim()
+      .split("\n")
+      .filter((line) => !!line.trim())
+      .map((line) => {
+        // Matches lines like "23ad236b39dc90ea56572297bf266ad16de5a44e Submodules/ABTool (2.1.1)"
+        const match = line.trim().match(/^[0-9a-f]{40}\s+(?<path>.+)$/);
+        if (!match || !match.groups) return null;
+        let path = match.groups.path.trim();
+        const parenIdx = path.indexOf(" (");
+        if (parenIdx >= 0) path = path.slice(0, parenIdx).trim();
+
+        return {
+          name: basename(path),
+          relativePath: path,
+          fullPath: join(this.repoPath, path),
+        } as Submodule;
+      })
+      .filter((s): s is Submodule => s !== null);
+  }
+
+  /**
+   * Updates a submodule to the commit recorded in the superproject.
+   * Uses --init --recursive to initialize and update nested submodules.
+   */
+  async updateSubmodule(path: string): Promise<void> {
+    await this.git.subModule(["update", "--init", "--recursive", path]);
+  }
+
+  /**
+   * Updates all submodules to the commit recorded in the superproject.
+   * Uses --init --recursive to initialize and update all nested submodules.
+   */
+  async updateAllSubmodules(): Promise<void> {
+    await this.git.subModule(["update", "--init", "--recursive"]);
+  }
+
+  /**
+   * Adds a new submodule to the repository.
+   * @param url - Repository URL to add as submodule.
+   * @param path - Relative path where the submodule will be placed (e.g. "libs/foo").
+   */
+  async addSubmodule(url: string, path: string): Promise<void> {
+    await this.git.submoduleAdd(url, path);
+  }
+
+  /**
+   * Removes a submodule from the repository.
+   * Deinitializes the submodule first, then removes it from the index (Git 1.9.3+).
+   */
+  async deleteSubmodule(path: string): Promise<void> {
+    await this.git.subModule(["deinit", "--force", path]);
+    await this.git.raw(["rm", "--force", path]);
+
+    const modulesPath = join(this.repoPath, ".git", "modules", path);
+    if (existsSync(modulesPath)) {
+      rmSync(modulesPath, { recursive: true, force: true });
+    }
+  }
+
+  /**
+   * Reads all local git config values.
+   * Only returns values present in the local config; does not read inherited (global/system) values.
+   */
+  async getConfig(): Promise<GitLocalConfig> {
+    const list = await this.git.listConfig();
+
+    const result: GitLocalConfig = {
+      global: {},
+      local: {},
+    };
+    for (const fileName in list.values) {
+      for (const [key, value] of Object.entries(list.values[fileName])) {
+        if (Array.isArray(value)) continue;
+
+        if (fileName.endsWith(".git/config")) {
+          result.local[key] = value;
+        } else if (fileName.endsWith(".gitconfig")) {
+          result.global[key] = value;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Updates local git config with the given values.
+   * Empty string removes (unsets) the respective config key.
+   * On error, reverts all applied changes.
+   * @param config - Map of key to string value; empty string = unset.
+   */
+  async updateLocalConfig(config: GitLocalConfigUpdates): Promise<void> {
+    for (const [key, value] of Object.entries(config)) {
+      if (value === undefined) {
+        const existing = await this.git.getConfig(key, GitConfigScope.local);
+        if (existing.value !== undefined && existing.value !== null) {
+          await this.git.raw(["config", "--local", "--unset", key]);
+        }
+      } else {
+        await this.git.raw(["config", "--local", key, value]);
+      }
+    }
+  }
+
+  /**
    * Returns a single commit by hash with parsed metadata and changed files.
    */
   async getCommitByHash(commitHash: string): Promise<Commit | null> {
@@ -1556,6 +1686,97 @@ __REBASE_TODO__
    */
   async getTrackedFilePaths(): Promise<string[]> {
     return (await this.git.raw(["ls-files"])).trim().split("\n");
+  }
+
+  /**
+   * Checks which files would be ignored by a given pattern.
+   * Temporarily adds the pattern to .gitignore for checking.
+   */
+  async checkIgnorePattern(filePaths: string[]): Promise<string[]> {
+    const ignored = await this.git.raw([
+      "ls-files",
+      "--cached",
+      "--others",
+      "--exclude-standard",
+      ...filePaths.map((pattern) => pattern),
+    ]);
+
+    return ignored.trim().split("\n").filter(Boolean);
+  }
+
+  /**
+   * Adds a pattern to .gitignore.
+   */
+  async addToGitignore(patterns: string[]): Promise<void> {
+    const originalContent = existsSync(this.gitignorePath) ? readFileSync(this.gitignorePath, "utf-8") : "";
+    const tempContent =
+      originalContent +
+      (originalContent.endsWith("\n") || originalContent === "" ? "" : "\n") +
+      patterns.join("\n") +
+      "\n";
+    await fs.writeFile(this.gitignorePath, tempContent, { encoding: "utf-8" });
+
+    // Remove all tracked files that match the patterns
+    await this.git.raw(["rm", "--cached", "--ignore-unmatch", ...patterns]);
+  }
+
+  /**
+   * Checks if Git LFS filters are setup.
+   */
+  async checkLFSFilters(): Promise<boolean> {
+    try {
+      const filters = await this.git.raw(["config", "--get-regexp", "filter.lfs"]);
+      return filters.trim().length > 0;
+    } catch {
+      return false;
+    }
+  }
+
+  /**
+   * Sets up Git LFS filters.
+   */
+  async setupLFSFilters(): Promise<void> {
+    await this.git.raw(["lfs", "install", "--local"]);
+  }
+
+  /**
+   * Checks which files would be tracked by Git LFS for given patterns.
+   */
+  async checkLFSPattern(filePaths: string[]): Promise<string[]> {
+    const tracked = await this.git.raw([
+      "ls-files",
+      "--cached",
+      "--others",
+      "--exclude-standard",
+      ...filePaths.map((pattern) => pattern),
+    ]);
+
+    return tracked.trim().split("\n").filter(Boolean);
+  }
+
+  /**
+   * Adds patterns to .gitattributes for Git LFS tracking.
+   */
+  async addToGitLFS(patterns: string[], updateIndex: boolean): Promise<void> {
+    const gitattributesPath = join(this.repoPath, ".gitattributes");
+    const originalContent = existsSync(gitattributesPath) ? readFileSync(gitattributesPath, "utf-8") : "";
+
+    const lfsRules = patterns.map((pattern) => `${pattern} filter=lfs diff=lfs merge=lfs -text`);
+    const nextContent =
+      originalContent +
+      (originalContent.endsWith("\n") || originalContent === "" ? "" : "\n") +
+      lfsRules.join("\n") +
+      "\n";
+    await fs.writeFile(gitattributesPath, nextContent, { encoding: "utf-8" });
+
+    if (updateIndex) {
+      await this.git.raw(["rm", "--cached", "--ignore-unmatch", "--", ...patterns]);
+      try {
+        await this.git.raw(["add", "--", ...patterns]);
+      } catch {
+        /* Ignore error when no files are found */
+      }
+    }
   }
 
   /**
@@ -1704,7 +1925,9 @@ __REBASE_TODO__
     await gitManager.initRepository(url);
 
     // Create temp tracking directory and files outside of the repo dir
-    const tempDir = await fs.mkdtemp(join(tmpdir(), "raycast-git-clone-"));
+    const tempDir = environment.isDevelopment
+      ? join(targetPath, "temp")
+      : await fs.mkdtemp(join(tmpdir(), "raycast-git-clone-"));
     await fs.mkdir(tempDir, { recursive: true });
 
     const stderrPath = join(tempDir, ".git-clone-stderr.log");
@@ -1717,7 +1940,6 @@ __REBASE_TODO__
 
     // Detached bash script: fetch with progress, set default branch, checkout
     const bashScript = `#!/bin/zsh
-
 echo $$ > "${pidPath}"
 export PATH="${shellEnvironmentVariables.PATH}"
 cd "${targetPath}"
@@ -1742,9 +1964,17 @@ rm -f "${scriptPath}"
     await fs.writeFile(scriptPath, bashScript, { encoding: "utf-8" });
     // Set executable permissions for the script: 0o755 means rwxr-xr-x (owner can read/write/execute, group and others can read/execute)
     chmodSync(scriptPath, 0o755);
-
-    // Run script detached so it survives the parent process
-    exec(`nohup "${scriptPath}" > /dev/null 2>&1 &`, { shell: "/bin/zsh" });
+    // Run script detached so it survives Raycast extension process termination
+    const child = spawn(scriptPath, [], {
+      detached: true,
+      stdio: "ignore",
+      cwd: targetPath,
+      env: { ...process.env, PATH: shellEnvironmentVariables.PATH },
+    });
+    child.on("error", (err) => {
+      showFailureToast(err instanceof Error ? err.message : "Failed to start clone script");
+    });
+    child.unref();
 
     return { url, stderrPath, pidPath, exitCodePath, scriptPath };
   }

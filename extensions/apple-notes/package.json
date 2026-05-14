@@ -143,7 +143,7 @@
     }
   ],
   "ai": {
-    "instructions": "- Always format note titles as Markdown links using the note's URL.\\n- If you can't access the Apple Notes database, tell the user he needs to give Raycast the full disk access permission in the system settings. Be detailed about the steps.",
+    "instructions": "- Always format note titles as Markdown links using the note's URL.\\n- If you can't access the Apple Notes database, tell the user he needs to give Raycast the full disk access permission in the system settings. Be detailed about the steps.\\n- When calling get-note-content or update-note from search-notes results, use the note's id field and not UUID.",
     "evals": [
       {
         "input": "@apple-notes what's on my grocery list",
@@ -449,22 +449,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.89.0",
-    "@raycast/utils": "^1.18.1",
-    "date-fns": "^3.6.0",
-    "lodash": "^4.17.21",
-    "node-html-markdown": "^1.3.0",
-    "pinyin-pro": "^3.26.0"
+    "@raycast/api": "^1.104.6",
+    "@raycast/utils": "^2.2.2",
+    "date-fns": "^4.1.0",
+    "lodash": "^4.17.23",
+    "node-html-markdown": "^2.0.0",
+    "pinyin-pro": "^3.28.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
-    "@types/lodash": "^4.17.4",
-    "@types/node": "^20.12.12",
-    "@types/react": "^18.3.2",
+    "@types/lodash": "^4.17.24",
+    "@types/node": "^22.19.11",
+    "@types/react": "^19.2.14",
     "eslint": "^8.57.0",
     "eslint-plugin-import": "^2.29.1",
-    "prettier": "3.2.5",
-    "react": "^18.3.1",
+    "prettier": "^3.2.5",
+    "react": "^19.0.0",
     "typescript": "^5.4.5"
   },
   "scripts": {

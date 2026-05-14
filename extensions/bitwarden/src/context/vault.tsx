@@ -24,7 +24,7 @@ export type VaultContextType = VaultState & {
   updateState: (next: React.SetStateAction<VaultState>) => void;
 };
 
-const VaultContext = createContext<VaultContextType | null>(null);
+export const VaultContext = createContext<VaultContextType | null>(null);
 
 function getInitialState(): VaultState {
   return { items: [], folders: [], isLoading: true };
@@ -91,8 +91,8 @@ export function VaultProvider(props: VaultProviderProps) {
     const { isInitial = false } = props ?? {};
 
     const toast = await showToast({
-      title: "Syncing Vault...",
-      message: isInitial ? "Background Task" : undefined,
+      title: "Syncing vault...",
+      message: isInitial ? "Background task" : undefined,
       style: Toast.Style.Animated,
     });
     try {

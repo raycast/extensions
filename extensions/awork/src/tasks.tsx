@@ -4,7 +4,12 @@ import { useState } from "react";
 import { getProjects, getTasks, task } from "./composables/FetchData";
 import { getTokens } from "./composables/WebClient";
 
-const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: string | undefined }) => {
+const Actions = (props: {
+  taskId: string;
+  taskKey: string | undefined;
+  projectId: string;
+  typeOfWorkId: string | undefined;
+}) => {
   const { data: BaseUrl } = useCachedPromise(() => LocalStorage.getItem<string>("URL"));
 
   return (
@@ -13,7 +18,7 @@ const Actions = (props: { taskId: string; projectId: string; typeOfWorkId: strin
       <Action.CopyToClipboard title={"Copy URL to Clipboard"} content={`${BaseUrl}/tasks/${props.taskId}`} />
       <Action.CopyToClipboard
         title={"Copy Task ID"}
-        content={props.taskId}
+        content={props.taskKey ? props.taskKey : props.taskId}
         shortcut={{ modifiers: ["ctrl"], key: "i" }}
       />
       <Action
@@ -70,8 +75,14 @@ const TaskItem = (props: { task: task }) => {
       title={props.task.name}
       subtitle={props.task.project.name}
       keywords={[props.task.project.name, props.task.id]}
+      accessories={[{ text: props.task.taskIdentifier }]}
       actions={
-        <Actions taskId={props.task.id} projectId={props.task.projectId} typeOfWorkId={props.task.typeOfWorkId} />
+        <Actions
+          taskId={props.task.id}
+          projectId={props.task.projectId}
+          typeOfWorkId={props.task.typeOfWorkId}
+          taskKey={props.task.taskIdentifier}
+        />
       }
     />
   );

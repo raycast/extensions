@@ -5,6 +5,7 @@ export interface ParsedPreferences {
   activeIntervalSeconds: number;
   activeIntervalMinutes: number;
   idleThresholdSeconds: number;
+  confettiEmojis: string;
 }
 
 /**
@@ -18,10 +19,12 @@ export function getParsedPreferences(): ParsedPreferences {
 
   const activeIntervalMinutes = Number.parseInt(preferences.activeInterval, 10) || DEFAULTS.ACTIVE_INTERVAL_MINUTES;
   const idleThresholdSeconds = Number.parseInt(preferences.idleThreshold, 10) || DEFAULTS.IDLE_THRESHOLD_SECONDS;
+  const confettiEmojis = preferences.confettiEmojis || DEFAULTS.CONFETTI_EMOJIS;
 
   return {
     activeIntervalSeconds: activeIntervalMinutes * 60,
     activeIntervalMinutes,
     idleThresholdSeconds,
+    confettiEmojis,
   };
 }

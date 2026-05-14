@@ -426,7 +426,8 @@
     "tane_van_wifferen",
     "1weiho",
     "pnowy",
-    "ridemountainpig"
+    "ridemountainpig",
+    "j3lte"
   ],
   "dependencies": {
     "@apollo/client": "^3.4.8",

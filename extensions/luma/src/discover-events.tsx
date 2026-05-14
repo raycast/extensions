@@ -2,6 +2,7 @@ import { useState } from "react";
 import { ActionPanel, Action, List, Icon, Image } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { BootstrapResponse, PlaceEntry, CONTINENT_NAMES, CONTINENT_ORDER } from "./types";
+import { API_URLS } from "./utils";
 import EventsList from "./events-list";
 
 function AreaDropdown(props: { onAreaChange: (newValue: string) => void }) {
@@ -19,7 +20,7 @@ function AreaDropdown(props: { onAreaChange: (newValue: string) => void }) {
 
 export default function DiscoverEvents() {
   const [selectedArea, setSelectedArea] = useState<string>("all");
-  const { isLoading, data, error } = useFetch<BootstrapResponse>("https://api2.luma.com/discover/bootstrap-page");
+  const { isLoading, data, error } = useFetch<BootstrapResponse>(API_URLS.BOOTSTRAP);
 
   // Group places by continent
   const placesByContinent = new Map<string, PlaceEntry[]>();
@@ -74,10 +75,7 @@ export default function DiscoverEvents() {
                       icon={Icon.Calendar}
                       target={<EventsList slug={entry.place.slug} placeName={entry.place.name} />}
                     />
-                    <Action.OpenInBrowser
-                      title="Open in Browser"
-                      url={`https://luma.com/discover/${entry.place.slug}`}
-                    />
+                    <Action.OpenInBrowser title="Open in Browser" url={API_URLS.DISCOVER_URL(entry.place.slug)} />
                   </ActionPanel>
                 }
               />

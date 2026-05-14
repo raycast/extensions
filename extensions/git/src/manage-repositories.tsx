@@ -13,10 +13,11 @@ import {
   Image,
   LaunchType,
   launchCommand,
+  Clipboard,
 } from "@raycast/api";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRepositoriesList } from "./hooks/useRepositoriesList";
-import { RepositoryDirectoryActions } from "./components/actions/RepositoryDirectoryActions";
+import { RepositoryDirectoryActions, RepositoryQuickLinkAction } from "./components/actions/RepositoryDirectoryActions";
 import OpenRepository from "./open-repository";
 import { Repository, RepositoryCloningState, RepositoryCloningProcess, Remote } from "./types";
 import { useRepositoriesView } from "./hooks/useRepositoriesView";
@@ -32,6 +33,7 @@ import { existsSync } from "fs";
 import { RemoteWebPageAction } from "./components/actions/RemoteActions";
 import { showFailureToast, useCachedState } from "@raycast/utils";
 import { CopyToClipboardMenuAction } from "./components/actions/CopyToClipboardMenuAction";
+import { validateGitUrl } from "./utils/url-utils";
 
 export default function ManageRepositories() {
   const {
@@ -137,7 +139,7 @@ function RepositoryListItem({
     }
 
     return result;
-  }, [repo.languageStats, remotes]);
+  }, [remotes]);
 
   const icon: Image.ImageLike = useMemo(() => {
     if (repo.languageStats && repo.languageStats.length > 0 && repo.languageStats[0].color) {
@@ -203,15 +205,7 @@ function RepositoryListItem({
               ]}
             />
             <RepositoryAttachedLinksAction remotes={remotes} />
-            <Action.CreateQuicklink
-              title="Create Quicklink"
-              quicklink={{
-                link: `raycast://extensions/ernest0n/git/open-repository?arguments=${encodeURIComponent(
-                  JSON.stringify({ path: repo.path }),
-                )}`,
-                name: `Show ${repo.name} in Git`,
-              }}
-            />
+            <RepositoryQuickLinkAction repositoryPath={repo.path} />
             <Action
               title="Remove from List"
               onAction={handleRemove}
@@ -219,7 +213,7 @@ function RepositoryListItem({
               style={Action.Style.Destructive}
               shortcut={{ modifiers: ["ctrl"], key: "x" }}
             />
-            <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
+            <Action.Trash paths={[repo.path]} onTrash={onRemove} />
           </ActionPanel.Section>
 
           <RepositoryDirectoryActions repositoryPath={repo.path} onOpen={onOpen} />
@@ -236,6 +230,15 @@ function RepositoryListItem({
 }
 
 function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath: string) => void }) {
+  const copiedUrl = useCallback(async () => {
+    const text = await Clipboard.readText();
+    const trimmed = text?.trim();
+    if (trimmed && validateGitUrl(trimmed) === undefined) {
+      return trimmed;
+    }
+    return "";
+  }, []);
+
   return (
     <ActionPanel.Submenu title="Add Repository" icon={Icon.Plus} shortcut={{ modifiers: ["cmd"], key: "n" }}>
       <Action.Push
@@ -250,13 +253,15 @@ function AddRepositoryActions({ onAddRepository }: { onAddRepository: (repoPath:
       />
       <Action
         title="Clone Repository"
-        onAction={async () =>
+        onAction={async () => {
+          const defaultUrl = await copiedUrl();
+
           await launchCommand({
             name: "clone-repository",
             type: LaunchType.UserInitiated,
-            arguments: { url: "" },
-          })
-        }
+            arguments: { url: defaultUrl },
+          });
+        }}
         icon={Icon.Download}
       />
     </ActionPanel.Submenu>
@@ -520,7 +525,7 @@ function CloningRepositoryListItem({
                 onAction={onRemove}
                 shortcut={{ modifiers: ["ctrl"], key: "x" }}
               />
-              <Action.Trash title="Delete Folder" paths={[repo.path]} onTrash={onRemove} />
+              <Action.Trash paths={[repo.path]} onTrash={onRemove} />
             </>
           ) : (
             <>

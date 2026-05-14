@@ -59,6 +59,25 @@
       "required": false,
       "default": false,
       "label": "Certificate Validation Enabled"
+    },
+    {
+      "name": "ollamaApiKey",
+      "description": "Ollama API Key used by Web Search Tools",
+      "type": "password",
+      "required": false,
+      "title": "Ollama API Key"
+    }
+  ],
+  "tools": [
+    {
+      "name": "ollama-web-fetch",
+      "title": "Web Fetch",
+      "description": "Fetches a single web page by URL and returns its content."
+    },
+    {
+      "name": "ollama-web-search",
+      "title": "Web Search",
+      "description": "Performs a web search for a single query and returns relevant results."
     }
   ],
   "commands": [
@@ -1826,12 +1845,12 @@
               "value": "Burmese (my)"
             },
             {
-              "title": "Norwegian Bokm\u00e5l (nb)",
-              "value": "Norwegian Bokm\u00e5l (nb)"
+              "title": "Norwegian Bokmål (nb)",
+              "value": "Norwegian Bokmål (nb)"
             },
             {
-              "title": "Norwegian Bokm\u00e5l (nb-SJ)",
-              "value": "Norwegian Bokm\u00e5l (nb-SJ)"
+              "title": "Norwegian Bokmål (nb-SJ)",
+              "value": "Norwegian Bokmål (nb-SJ)"
             },
             {
               "title": "North Ndebele (nd)",
@@ -2406,8 +2425,8 @@
               "value": "Vietnamese (vi-VN)"
             },
             {
-              "title": "Volap\u00fck (vo)",
-              "value": "Volap\u00fck (vo)"
+              "title": "Volapük (vo)",
+              "value": "Volapük (vo)"
             },
             {
               "title": "Walloon (wa)",
@@ -4158,12 +4177,12 @@
               "value": "Burmese (my)"
             },
             {
-              "title": "Norwegian Bokm\u00e5l (nb)",
-              "value": "Norwegian Bokm\u00e5l (nb)"
+              "title": "Norwegian Bokmål (nb)",
+              "value": "Norwegian Bokmål (nb)"
             },
             {
-              "title": "Norwegian Bokm\u00e5l (nb-SJ)",
-              "value": "Norwegian Bokm\u00e5l (nb-SJ)"
+              "title": "Norwegian Bokmål (nb-SJ)",
+              "value": "Norwegian Bokmål (nb-SJ)"
             },
             {
               "title": "North Ndebele (nd)",
@@ -4738,8 +4757,8 @@
               "value": "Vietnamese (vi-VN)"
             },
             {
-              "title": "Volap\u00fck (vo)",
-              "value": "Volap\u00fck (vo)"
+              "title": "Volapük (vo)",
+              "value": "Volapük (vo)"
             },
             {
               "title": "Walloon (wa)",
@@ -4890,17 +4909,17 @@
     },
     {
       "name": "ollama-mcp-server",
-      "title": "Manage Mcp Server",
+      "title": "Manage MCP Server",
       "subtitle": "Ollama",
-      "description": "Manage configured Mcp Server",
+      "description": "Manage configured MCP Server",
       "mode": "view"
     }
   ],
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.8.0",
+    "@modelcontextprotocol/sdk": "^1.26.0",
     "@raycast/api": "^1.103.7",
     "@raycast/utils": "^2.2.2",
-    "file-type": "^19.0.0",
+    "file-type": "^21.3.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {

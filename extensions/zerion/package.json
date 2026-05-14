@@ -286,7 +286,7 @@
     "@raycast/utils": "^1.18.1",
     "bignumber.js": "^9.1.2",
     "dayjs": "^1.11.13",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "uuid": "^9.0.1"
   },
   "devDependencies": {

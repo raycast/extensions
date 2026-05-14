@@ -36,7 +36,7 @@ async function getChannelIdByChannelName(channelName?: string) {
     }
 
     if (response.channels) {
-      for (let i = 0; i < response.channels?.length ?? 0; i++) {
+      for (let i = 0; i < response.channels?.length; i++) {
         const channel = response.channels[i];
         if (channel.id && channel.name) {
           if (channel.name === channelName) {

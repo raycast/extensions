@@ -114,3 +114,19 @@ export function formatDisplayAmount(amount: number, currency: string): string {
 
   return formatCurrency(absAmount, currency);
 }
+
+/** Parse optional `extraJson` for AI tools; empty string omits. */
+export function parseExtraJsonForTool(
+  raw: string | undefined,
+): { ok: true; value?: Record<string, unknown> } | { ok: false; message: string } {
+  if (raw === undefined || raw.trim() === "") return { ok: true, value: undefined };
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (parsed !== null && typeof parsed === "object" && !Array.isArray(parsed)) {
+      return { ok: true, value: parsed as Record<string, unknown> };
+    }
+    return { ok: false, message: "extraJson must be a JSON object (not an array or primitive)." };
+  } catch {
+    return { ok: false, message: "extraJson is not valid JSON." };
+  }
+}

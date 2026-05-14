@@ -1,5 +1,10 @@
 # Raycast Zoxide Changelog
 
+## [Fixed Memory Limit Crash] - 2026-03-24
+
+- Fixed "JS heap out of memory" crash for users with large zoxide databases by capping rendered results to 500
+- Updated to latest versions of dependency packages
+
 ## [Added Additional Open With Action] - 2026-01-31
 
 - Added "Open With" action to the actions pane that allows opening the directory in a different app not set in the Zoxide settings.

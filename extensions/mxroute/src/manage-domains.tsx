@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Color,
   Form,
+  getPreferenceValues,
   Icon,
   Keyboard,
   List,
@@ -17,7 +18,9 @@ import EmailAccounts from "./email-accounts";
 import EmailForwarders from "./email-forwarders";
 import Advanced from "./advanced";
 import DNSInfo from "./dns-info";
-import { DomainVerificationKey } from "./types";
+import { Domain, DomainVerificationKey } from "./types";
+
+const { server } = getPreferenceValues<Preferences>();
 
 export default function ManageDomains() {
   const {
@@ -36,14 +39,34 @@ export default function ManageDomains() {
     },
   );
 
+  const toggleMailHostingStatus = async (domain: Domain) => {
+    const toast = await showToast(Toast.Style.Animated, "Toggling");
+    try {
+      const enabled = !domain.mail_hosting;
+      await mutate(mxroute.domains.setMailHostingStatus(domain.domain, { enabled }), {
+        optimisticUpdate(data) {
+          return data.map((d) => (d.domain === domain.domain ? { ...d, mail_hosting: enabled } : d));
+        },
+        shouldRevalidateAfter: false,
+      });
+      toast.style = Toast.Style.Success;
+      toast.title = "Toggled";
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = `${error}`;
+    }
+  };
+
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Filter domains">
       {domains.map((domain) => (
         <List.Item
           key={domain.domain}
           title={domain.domain}
           icon={getFavicon(`https://${domain.domain}`, { fallback: Icon.Globe })}
           accessories={[
+            { tag: { value: !domain.mail_hosting ? "EXTERNAL MAIL" : undefined, color: Color.Yellow } },
             { icon: Icon[`Number${String(domain.pointers.length).padStart(2, "0")}` as keyof typeof Icon] },
             { tag: { value: "Mail", color: domain.mail_hosting ? Color.Green : Color.Red } },
             { tag: { value: "SSL", color: domain.ssl_enabled ? Color.Green : Color.Red } },
@@ -62,6 +85,21 @@ export default function ManageDomains() {
               />
               <Action.Push icon={Icon.Gear} title="Advanced" target={<Advanced selectedDomainName={domain.domain} />} />
               <Action.Push icon={Icon.Monitor} title="DNS" target={<DNSInfo domain={domain.domain} />} />
+              <ActionPanel.Submenu icon={Icon.Info} title="Set Mail Hosting Status">
+                <Action
+                  icon={domain.mail_hosting ? Icon.CheckCircle : Icon.Circle}
+                  title="Host Mail on This Server"
+                  onAction={() => toggleMailHostingStatus(domain)}
+                />
+                <Action
+                  icon={!domain.mail_hosting ? Icon.CheckCircle : Icon.Circle}
+                  title="Mail Hosted Elsewhere"
+                  onAction={() => toggleMailHostingStatus(domain)}
+                />
+              </ActionPanel.Submenu>
+              <ActionPanel.Submenu icon={Icon.Window} title="Email Clients">
+                <Action.OpenInBrowser title="Webmail (No DNS Required)" url={`https://${server}/webmail`} />
+              </ActionPanel.Submenu>
               <Action.Push
                 icon={Icon.Plus}
                 title="Add New Domain"

@@ -1,0 +1,237 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "vocabuilder",
+  "title": "VocaBuilder",
+  "description": "Translate words between languages and build your vocabulary",
+  "icon": "extension-icon.png",
+  "author": "AngryBeaver",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate a word or text to your target language",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "Translation History",
+      "subtitle": "VocaBuilder",
+      "description": "Browse your saved translations",
+      "mode": "view"
+    },
+    {
+      "name": "flashcards",
+      "title": "View Flashcards",
+      "subtitle": "VocaBuilder",
+      "description": "Review saved words with spaced repetition",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "geminiApiKey",
+      "type": "password",
+      "required": true,
+      "title": "Gemini API Key",
+      "description": "Get a free key at aistudio.google.com",
+      "placeholder": "AIza..."
+    },
+    {
+      "name": "sourceLanguage",
+      "type": "dropdown",
+      "required": true,
+      "title": "Source Language",
+      "description": "The language you want to translate from",
+      "default": "en",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Belarusian",
+          "value": "be"
+        }
+      ]
+    },
+    {
+      "name": "targetLanguage",
+      "type": "dropdown",
+      "required": true,
+      "title": "Target Language",
+      "description": "The language you want to translate to",
+      "default": "uk",
+      "data": [
+        {
+          "title": "English",
+          "value": "en"
+        },
+        {
+          "title": "Ukrainian",
+          "value": "uk"
+        },
+        {
+          "title": "Polish",
+          "value": "pl"
+        },
+        {
+          "title": "German",
+          "value": "de"
+        },
+        {
+          "title": "French",
+          "value": "fr"
+        },
+        {
+          "title": "Spanish",
+          "value": "es"
+        },
+        {
+          "title": "Italian",
+          "value": "it"
+        },
+        {
+          "title": "Portuguese",
+          "value": "pt"
+        },
+        {
+          "title": "Dutch",
+          "value": "nl"
+        },
+        {
+          "title": "Czech",
+          "value": "cs"
+        },
+        {
+          "title": "Swedish",
+          "value": "sv"
+        },
+        {
+          "title": "Japanese",
+          "value": "ja"
+        },
+        {
+          "title": "Korean",
+          "value": "ko"
+        },
+        {
+          "title": "Chinese",
+          "value": "zh"
+        },
+        {
+          "title": "Turkish",
+          "value": "tr"
+        },
+        {
+          "title": "Russian",
+          "value": "ru"
+        },
+        {
+          "title": "Belarusian",
+          "value": "be"
+        }
+      ]
+    },
+    {
+      "name": "readClipboardOnOpen",
+      "type": "checkbox",
+      "required": false,
+      "title": "Read Clipboard on Open",
+      "label": "Enable",
+      "description": "If enabled, prefill a suggestion only when clipboard content is a safe single word"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.7",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "husky": "^9.1.7",
+    "prettier": "^3.8.1",
+    "typescript": "^5.8.2",
+    "vitest": "^4.0.18"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepare": "husky"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

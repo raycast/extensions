@@ -2,9 +2,10 @@ import { getPreferenceValues, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import {
   getOpenedBrowserScript,
-  getOpenedUrlForArc,
+  getOpenedUrlForBrowserCompany,
   getOpenedUrlForFirefox,
   getOpenedUrlsScript,
+  getSwitchToPreviousAppScript,
   supportedBrowsers,
 } from "./utils/scripts";
 
@@ -34,8 +35,8 @@ export function sleep(ms: number): Promise<void> {
 async function getOpenTabs(): Promise<string> {
   const browserName = await getOpenedBrowser();
 
-  if (browserName === "Arc") {
-    return await runAppleScript(getOpenedUrlForArc());
+  if (browserName === "Arc" || browserName === "Dia") {
+    return await runAppleScript(getOpenedUrlForBrowserCompany(browserName));
   }
 
   if (browserName === "Firefox" || browserName === "Firefox Developer Edition" || browserName === "Zen") {
@@ -77,6 +78,10 @@ export async function openMeetTabDefaultProfile(): Promise<void> {
   const preferredBrowser = getPreferredBrowser();
 
   await open(openMeetTabUrl, preferredBrowser?.name);
+}
+
+export async function switchToPreviousApp(): Promise<void> {
+  await runAppleScript(getSwitchToPreviousAppScript());
 }
 
 export async function openMeetTabSelectedProfile(profile: string): Promise<void> {

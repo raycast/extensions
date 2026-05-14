@@ -15,3 +15,5 @@ compiled_raycast_rust
 .windsurf
 .claude
 .github/.private
+.agents/
+CLAUDE.md

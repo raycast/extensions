@@ -40,79 +40,54 @@ const MAX_RETRIES = 1;
  */
 export default async function Command() {
   try {
-    // Step 1: Check if Figma is frontmost or at least running
-    const figmaIsActive = await isFigmaFrontmost();
-    const figmaIsRunning = figmaIsActive || (await isFigmaRunning());
-
-    // Step 2: Get current clipboard to detect changes later
+    // Step 1: Check clipboard FIRST (no AppleScript needed)
     const clipboardBefore = await Clipboard.readText();
 
-    // Step 3: If Figma is running, copy the selection link
-    if (figmaIsRunning) {
-      const needsFocus = !figmaIsActive;
-      const success = await tryCopyFromFigma(clipboardBefore, needsFocus);
-      if (!success) {
-        // tryCopyFromFigma shows its own error toast
-        return;
-      }
-    }
-
-    // Step 4: Read the clipboard (may have been updated by Figma)
-    const clipboardText = await Clipboard.readText();
-
-    // Step 5: Check if we have a Figma URL
-    if (!clipboardText || !isFigmaUrl(clipboardText)) {
-      // Different message depending on whether Figma was running
-      if (figmaIsRunning) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "No Figma link found",
-          message: "Try selecting a layer or frame first",
-        });
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "No Figma link in clipboard",
-          message: "Copy a Figma link first, or use this from Figma",
-        });
-      }
+    // Step 2: If clipboard already has a Figma URL, just clean it (skip AppleScript entirely)
+    if (clipboardBefore && isFigmaUrl(clipboardBefore)) {
+      // Great! We have a Figma URL - just clean it, no need to interact with Figma
+      await cleanAndCopyUrl(clipboardBefore);
       return;
     }
 
-    // Step 6: Clean the URL
-    const cleanResult = cleanFigmaUrl(clipboardText);
+    // Step 3: No Figma URL in clipboard - try to get one from Figma app
+    // This is the only path that requires AppleScript
+    const figmaIsActive = await isFigmaFrontmost();
+    const figmaIsRunning = figmaIsActive || (await isFigmaRunning());
 
-    // Step 7: Try to shorten (if enabled in preferences)
-    const shortenResult = await tryShortenUrl(cleanResult.cleanedUrl);
-
-    // Step 8: Copy final URL to clipboard
-    await Clipboard.copy(shortenResult.finalUrl);
-
-    // Step 9: Show success toast
-    if (shortenResult.wasShortened) {
-      // Shortened successfully
+    if (!figmaIsRunning) {
+      // No Figma URL in clipboard and Figma isn't running
       await showToast({
-        style: Toast.Style.Success,
-        title: "Short link copied",
-        message: shortenResult.message,
+        style: Toast.Style.Failure,
+        title: "No Figma link in clipboard",
+        message: "Copy a Figma link first, or use this from Figma",
       });
-    } else if (isShortenerEnabled() && !shortenResult.wasShortened) {
-      // Shortening was enabled but failed - show cleaned URL with warning
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Cleaned link copied",
-        message: `${cleanResult.summary} (shortening unavailable)`,
-      });
-    } else {
-      // Shortening disabled - just show cleaned result
-      await showToast({
-        style: Toast.Style.Success,
-        title: cleanResult.wasModified
-          ? "Cleaned Figma link copied"
-          : "Figma link copied",
-        message: cleanResult.summary,
-      });
+      return;
     }
+
+    // Step 4: Figma is running, try to copy selection link
+    const needsFocus = !figmaIsActive;
+    const success = await tryCopyFromFigma(clipboardBefore, needsFocus);
+    if (!success) {
+      // tryCopyFromFigma shows its own error toast
+      return;
+    }
+
+    // Step 5: Read the clipboard (should have been updated by Figma)
+    const clipboardText = await Clipboard.readText();
+
+    // Step 6: Check if we got a Figma URL
+    if (!clipboardText || !isFigmaUrl(clipboardText)) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No Figma link found",
+        message: "Try selecting a layer or frame first",
+      });
+      return;
+    }
+
+    // Step 7: Clean and copy the URL
+    await cleanAndCopyUrl(clipboardText);
   } catch (error) {
     // Handle known error types
     if (error instanceof AccessibilityPermissionError) {
@@ -120,7 +95,7 @@ export default async function Command() {
         style: Toast.Style.Failure,
         title: "Accessibility permission required",
         message:
-          "System Settings → Privacy & Security → Accessibility → Enable Raycast",
+          "Enable Raycast in System Settings → Accessibility. If already on, toggle OFF/ON and restart Raycast.",
       });
       return;
     }
@@ -131,6 +106,45 @@ export default async function Command() {
       style: Toast.Style.Failure,
       title: "Failed to clean link",
       message: message,
+    });
+  }
+}
+
+/**
+ * Cleans a Figma URL, optionally shortens it, and copies to clipboard.
+ */
+async function cleanAndCopyUrl(figmaUrl: string): Promise<void> {
+  // Clean the URL
+  const cleanResult = cleanFigmaUrl(figmaUrl);
+
+  // Try to shorten (if enabled in preferences)
+  const shortenResult = await tryShortenUrl(cleanResult.cleanedUrl);
+
+  // Copy the final URL to clipboard
+  await Clipboard.copy(shortenResult.finalUrl);
+
+  // Show appropriate success toast
+  if (shortenResult.wasShortened) {
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Shortened link copied",
+      message: shortenResult.message,
+    });
+  } else if (isShortenerEnabled() && !shortenResult.wasShortened) {
+    // Shortening was enabled but failed
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Cleaned link copied",
+      message: `${cleanResult.summary} (shortening unavailable)`,
+    });
+  } else {
+    // Shortening disabled
+    await showToast({
+      style: Toast.Style.Success,
+      title: cleanResult.wasModified
+        ? "Cleaned Figma link copied"
+        : "Figma link copied",
+      message: cleanResult.summary,
     });
   }
 }
