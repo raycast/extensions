@@ -26,7 +26,11 @@ function formatPublishedDate(publishedDate?: string) {
   return date.toLocaleDateString();
 }
 
-function buildAnswerMarkdown(query: string, answer: string, citations: { title: string; url: string; publishedDate?: string }[]) {
+function buildAnswerMarkdown(
+  query: string,
+  answer: string,
+  citations: { title: string; url: string; publishedDate?: string }[],
+) {
   const citationsSection =
     citations.length > 0
       ? citations
@@ -129,7 +133,11 @@ function AskExaDetail({ query }: AskExaDetailProps) {
         <ActionPanel>
           {answer ? <Action.CopyToClipboard title="Copy Answer" content={answer} /> : null}
           {sourceLinksMarkdown ? (
-            <Action.CopyToClipboard title="Copy Sources" content={sourceLinksMarkdown} shortcut={{ modifiers: ["cmd"], key: "." }} />
+            <Action.CopyToClipboard
+              title="Copy Sources"
+              content={sourceLinksMarkdown}
+              shortcut={{ modifiers: ["cmd"], key: "." }}
+            />
           ) : null}
           <Action title="Retry" icon={Icon.RotateClockwise} onAction={() => setRefreshKey((current) => current + 1)} />
         </ActionPanel>

@@ -43,7 +43,7 @@ export default async function (input: Input) {
             ...input,
             excludeDomains: undefined,
           }
-      : input;
+        : input;
 
   return compactSearchResults(await searchHighlights(normalizedInput)).map((result) => ({
     title: result.title,
