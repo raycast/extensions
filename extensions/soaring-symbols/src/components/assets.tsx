@@ -51,9 +51,17 @@ export default function AirlineAssets(airline: AirlineMeta) {
                     title="Copy SVG"
                     icon={Icon.CopyClipboard}
                     onAction={async () => {
-                      const svg = await getSVGContent(source, monochrome);
-                      await Clipboard.copy(svg);
-                      await showToast({ style: Toast.Style.Success, title: "SVG copied to clipboard" });
+                      try {
+                        const svg = await getSVGContent(source, monochrome);
+                        await Clipboard.copy(svg);
+                        await showToast({ style: Toast.Style.Success, title: "SVG copied to clipboard" });
+                      } catch (err) {
+                        await showToast({
+                          style: Toast.Style.Failure,
+                          title: "Failed to copy SVG",
+                          message: (err as Error)?.message ?? "Unknown error",
+                        });
+                      }
                     }}
                   />
                   <Action
