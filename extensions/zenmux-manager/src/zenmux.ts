@@ -84,12 +84,20 @@ export async function fetchAccountSnapshot(): Promise<AccountSnapshot> {
   };
 
   if (subscriptionResult.status === "fulfilled") {
-    snapshot.subscription = subscriptionResult.value;
+    if (hasSubscriptionData(subscriptionResult.value)) {
+      snapshot.subscription = subscriptionResult.value;
+    }
   } else {
-    warnings.push({
-      title: "Subscription",
-      message: getErrorMessage(subscriptionResult.reason),
-    });
+    const message = getErrorMessage(subscriptionResult.reason);
+    if (
+      !isMissingSubscriptionError(message) ||
+      paygResult.status !== "fulfilled"
+    ) {
+      warnings.push({
+        title: "Subscription",
+        message,
+      });
+    }
   }
 
   if (paygResult.status === "fulfilled") {
@@ -174,25 +182,32 @@ export function formatAccountSnapshotForAI(snapshot?: AccountSnapshot): string {
   const sections = [
     `Fetched at: ${formatDateTime(snapshot.fetchedAt)}`,
     "",
-    "Subscription:",
-    `- Plan: ${formatPlan(subscription?.plan)}`,
-    `- Account status: ${formatStatus(subscription?.account_status)}`,
-    `- Flow rate: ${formatCurrency(subscription?.effective_usd_per_flow, subscription?.currency)}/Flow`,
-    `- Subscription expires: ${formatDateTime(subscription?.plan?.expires_at)}`,
-    "",
-    "Quota:",
-    formatQuotaForAI("5-hour quota", subscription?.quota_5_hour),
-    formatQuotaForAI("7-day quota", subscription?.quota_7_day),
-    `- Monthly cap: ${formatFlows(subscription?.quota_monthly?.max_flows)} (${formatCurrency(
-      subscription?.quota_monthly?.max_value_usd,
-      subscription?.currency,
-    )})`,
-    "",
     "PAYG:",
     `- Total balance: ${formatCurrency(payg?.total_credits, payg?.currency)}`,
     `- Top-up credits: ${formatCurrency(payg?.top_up_credits, payg?.currency)}`,
     `- Bonus credits: ${formatCurrency(payg?.bonus_credits, payg?.currency)}`,
   ];
+
+  if (hasSubscriptionData(subscription)) {
+    sections.splice(
+      2,
+      0,
+      "Subscription:",
+      `- Plan: ${formatPlan(subscription.plan)}`,
+      `- Account status: ${formatStatus(subscription.account_status)}`,
+      `- Flow rate: ${formatCurrency(subscription.effective_usd_per_flow, subscription.currency)}/Flow`,
+      `- Subscription expires: ${formatDateTime(subscription.plan?.expires_at)}`,
+      "",
+      "Quota:",
+      formatQuotaForAI("5-hour quota", subscription.quota_5_hour),
+      formatQuotaForAI("7-day quota", subscription.quota_7_day),
+      `- Monthly cap: ${formatFlows(subscription.quota_monthly?.max_flows)} (${formatCurrency(
+        subscription.quota_monthly?.max_value_usd,
+        subscription.currency,
+      )})`,
+      "",
+    );
+  }
 
   if (snapshot.warnings.length > 0) {
     sections.push(
@@ -205,6 +220,24 @@ export function formatAccountSnapshotForAI(snapshot?: AccountSnapshot): string {
   }
 
   return sections.join("\n");
+}
+
+export function hasSubscriptionData(
+  subscription?: SubscriptionDetail,
+): subscription is SubscriptionDetail {
+  return Boolean(
+    subscription?.plan?.tier ||
+    subscription?.account_status ||
+    subscription?.quota_5_hour ||
+    subscription?.quota_7_day ||
+    subscription?.quota_monthly,
+  );
+}
+
+function isMissingSubscriptionError(message: string): boolean {
+  return /(?:404|not found|no subscription|without subscription|subscription.*missing)/i.test(
+    message,
+  );
 }
 
 function formatQuotaForAI(label: string, quota?: QuotaWindow): string {

@@ -26,6 +26,7 @@ import {
   getStatusColor,
   getUsageColor,
   getUsagePercentage,
+  hasSubscriptionData,
   readCachedSnapshot,
 } from "./zenmux";
 
@@ -69,6 +70,8 @@ export default function Command() {
     void refresh(false);
   }, [refresh]);
 
+  const showSubscription = hasSubscriptionData(snapshot?.subscription);
+
   return (
     <List
       isLoading={isLoading}
@@ -111,25 +114,27 @@ export default function Command() {
       ) : null}
 
       <List.Section title="Overview">
-        <List.Item
-          icon={Icon.Gauge}
-          title="Plan"
-          subtitle={formatPlan(snapshot?.subscription?.plan)}
-          accessories={[
-            {
-              tag: {
-                value: formatStatus(snapshot?.subscription?.account_status),
-                color: getStatusColor(snapshot?.subscription?.account_status),
+        {showSubscription ? (
+          <List.Item
+            icon={Icon.Gauge}
+            title="Plan"
+            subtitle={formatPlan(snapshot?.subscription?.plan)}
+            accessories={[
+              {
+                tag: {
+                  value: formatStatus(snapshot?.subscription?.account_status),
+                  color: getStatusColor(snapshot?.subscription?.account_status),
+                },
               },
-            },
-          ]}
-          actions={
-            <UsageActions
-              snapshot={snapshot}
-              onRefresh={() => void refresh(true)}
-            />
-          }
-        />
+            ]}
+            actions={
+              <UsageActions
+                snapshot={snapshot}
+                onRefresh={() => void refresh(true)}
+              />
+            }
+          />
+        ) : null}
         <List.Item
           icon={Icon.Wallet}
           title="PAYG Balance"
@@ -155,75 +160,81 @@ export default function Command() {
             />
           }
         />
-        <List.Item
-          icon={Icon.Coin}
-          title="Flow Rate"
-          subtitle="Effective USD value per Flow"
-          accessories={[
-            {
-              text: `${formatCurrency(snapshot?.subscription?.effective_usd_per_flow, snapshot?.subscription?.currency)}/Flow`,
-            },
-          ]}
-          actions={
-            <UsageActions
-              snapshot={snapshot}
-              onRefresh={() => void refresh(true)}
-            />
-          }
-        />
+        {showSubscription ? (
+          <List.Item
+            icon={Icon.Coin}
+            title="Flow Rate"
+            subtitle="Effective USD value per Flow"
+            accessories={[
+              {
+                text: `${formatCurrency(snapshot?.subscription?.effective_usd_per_flow, snapshot?.subscription?.currency)}/Flow`,
+              },
+            ]}
+            actions={
+              <UsageActions
+                snapshot={snapshot}
+                onRefresh={() => void refresh(true)}
+              />
+            }
+          />
+        ) : null}
       </List.Section>
 
-      <List.Section title="Subscription Quota">
-        {buildQuotaItem(
-          "5-hour Quota",
-          snapshot?.subscription?.quota_5_hour,
-          snapshot,
-          () => void refresh(true),
-        )}
-        {buildQuotaItem(
-          "7-day Quota",
-          snapshot?.subscription?.quota_7_day,
-          snapshot,
-          () => void refresh(true),
-        )}
-        <List.Item
-          icon={Icon.Calendar}
-          title="Monthly Quota"
-          subtitle="Billing cycle cap"
-          accessories={[
-            {
-              text: formatFlows(
-                snapshot?.subscription?.quota_monthly?.max_flows,
-              ),
-            },
-            {
-              text: formatCurrency(
-                snapshot?.subscription?.quota_monthly?.max_value_usd,
-                snapshot?.subscription?.currency,
-              ),
-            },
-          ]}
-          actions={
-            <UsageActions
-              snapshot={snapshot}
-              onRefresh={() => void refresh(true)}
-            />
-          }
-        />
-      </List.Section>
+      {showSubscription ? (
+        <List.Section title="Subscription Quota">
+          {buildQuotaItem(
+            "5-hour Quota",
+            snapshot?.subscription?.quota_5_hour,
+            snapshot,
+            () => void refresh(true),
+          )}
+          {buildQuotaItem(
+            "7-day Quota",
+            snapshot?.subscription?.quota_7_day,
+            snapshot,
+            () => void refresh(true),
+          )}
+          <List.Item
+            icon={Icon.Calendar}
+            title="Monthly Quota"
+            subtitle="Billing cycle cap"
+            accessories={[
+              {
+                text: formatFlows(
+                  snapshot?.subscription?.quota_monthly?.max_flows,
+                ),
+              },
+              {
+                text: formatCurrency(
+                  snapshot?.subscription?.quota_monthly?.max_value_usd,
+                  snapshot?.subscription?.currency,
+                ),
+              },
+            ]}
+            actions={
+              <UsageActions
+                snapshot={snapshot}
+                onRefresh={() => void refresh(true)}
+              />
+            }
+          />
+        </List.Section>
+      ) : null}
 
       <List.Section title="Account">
-        <List.Item
-          icon={Icon.Clock}
-          title="Subscription Expires"
-          subtitle={formatDateTime(snapshot?.subscription?.plan?.expires_at)}
-          actions={
-            <UsageActions
-              snapshot={snapshot}
-              onRefresh={() => void refresh(true)}
-            />
-          }
-        />
+        {showSubscription ? (
+          <List.Item
+            icon={Icon.Clock}
+            title="Subscription Expires"
+            subtitle={formatDateTime(snapshot?.subscription?.plan?.expires_at)}
+            actions={
+              <UsageActions
+                snapshot={snapshot}
+                onRefresh={() => void refresh(true)}
+              />
+            }
+          />
+        ) : null}
         <List.Item
           icon={Icon.ArrowClockwise}
           title="Last Updated"
@@ -238,13 +249,15 @@ export default function Command() {
       </List.Section>
 
       <List.Section title="ZenMux Links">
-        <ConsoleLinkItem
-          title="Subscription Console"
-          icon={Icon.CreditCard}
-          url="https://zenmux.ai/platform/subscription"
-          snapshot={snapshot}
-          onRefresh={() => void refresh(true)}
-        />
+        {showSubscription ? (
+          <ConsoleLinkItem
+            title="Subscription Console"
+            icon={Icon.CreditCard}
+            url="https://zenmux.ai/platform/subscription"
+            snapshot={snapshot}
+            onRefresh={() => void refresh(true)}
+          />
+        ) : null}
         <ConsoleLinkItem
           title="PAYG Console"
           icon={Icon.Wallet}
@@ -358,11 +371,13 @@ function UsageActions(props: {
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="ZenMux Console">
-        <Action.OpenInBrowser
-          title="Open Subscription Console"
-          icon={Icon.CreditCard}
-          url="https://zenmux.ai/platform/subscription"
-        />
+        {hasSubscriptionData(props.snapshot?.subscription) ? (
+          <Action.OpenInBrowser
+            title="Open Subscription Console"
+            icon={Icon.CreditCard}
+            url="https://zenmux.ai/platform/subscription"
+          />
+        ) : null}
         <Action.OpenInBrowser
           title="Open PAYG Console"
           icon={Icon.Wallet}

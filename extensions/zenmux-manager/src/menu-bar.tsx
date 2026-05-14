@@ -23,6 +23,7 @@ import {
   formatRelativeDuration,
   getErrorMessage,
   getUsagePercentage,
+  hasSubscriptionData,
   readCachedSnapshot,
 } from "./zenmux";
 
@@ -87,7 +88,7 @@ export default function Command() {
     <MenuBarExtra
       isLoading={isLoading}
       title={getMenuBarTitle(snapshot, failure, menuBarPercentage)}
-      tooltip="ZenMux quota and PAYG balance"
+      tooltip="ZenMux usage"
     >
       {failure ? (
         <MenuBarExtra.Item
@@ -98,11 +99,13 @@ export default function Command() {
       ) : null}
 
       <MenuBarExtra.Section title="Overview">
-        <MenuBarExtra.Item
-          title="Plan"
-          subtitle={formatPlan(snapshot?.subscription?.plan)}
-          icon={Icon.Gauge}
-        />
+        {hasSubscriptionData(snapshot?.subscription) ? (
+          <MenuBarExtra.Item
+            title="Plan"
+            subtitle={formatPlan(snapshot?.subscription?.plan)}
+            icon={Icon.Gauge}
+          />
+        ) : null}
         <MenuBarExtra.Item
           title="PAYG Balance"
           subtitle={formatCurrency(
@@ -113,53 +116,65 @@ export default function Command() {
         />
       </MenuBarExtra.Section>
 
-      <QuotaMenuSection
-        title="5-hour Quota"
-        quota={snapshot?.subscription?.quota_5_hour}
-      />
+      {hasSubscriptionData(snapshot?.subscription) ? (
+        <>
+          <QuotaMenuSection
+            title="5-hour Quota"
+            quota={snapshot?.subscription?.quota_5_hour}
+          />
 
-      <QuotaMenuSection
-        title="Weekly Quota"
-        quota={snapshot?.subscription?.quota_7_day}
-      />
+          <QuotaMenuSection
+            title="7-day Quota"
+            quota={snapshot?.subscription?.quota_7_day}
+          />
 
-      <MenuBarExtra.Section title="Monthly Quota">
-        <MenuBarExtra.Item
-          title="Cap"
-          subtitle={formatFlows(
-            snapshot?.subscription?.quota_monthly?.max_flows,
-          )}
-        />
-        <MenuBarExtra.Item
-          title="USD Value"
-          subtitle={formatCurrency(
-            snapshot?.subscription?.quota_monthly?.max_value_usd,
-            snapshot?.subscription?.currency,
-          )}
-        />
-      </MenuBarExtra.Section>
+          <MenuBarExtra.Section title="Monthly Quota">
+            <MenuBarExtra.Item
+              title="Cap"
+              subtitle={formatFlows(
+                snapshot?.subscription?.quota_monthly?.max_flows,
+              )}
+            />
+            <MenuBarExtra.Item
+              title="USD Value"
+              subtitle={formatCurrency(
+                snapshot?.subscription?.quota_monthly?.max_value_usd,
+                snapshot?.subscription?.currency,
+              )}
+            />
+          </MenuBarExtra.Section>
+        </>
+      ) : null}
 
       <MenuBarExtra.Section title="Details">
-        <MenuBarExtra.Item
-          title="Flow Rate"
-          subtitle={`${formatCurrency(snapshot?.subscription?.effective_usd_per_flow, snapshot?.subscription?.currency)}/Flow`}
-          icon={Icon.Coin}
-        />
-        <MenuBarExtra.Item
-          title="Subscription Expires"
-          subtitle={formatDateTime(snapshot?.subscription?.plan?.expires_at)}
-          icon={Icon.Clock}
-        />
+        {hasSubscriptionData(snapshot?.subscription) ? (
+          <>
+            <MenuBarExtra.Item
+              title="Flow Rate"
+              subtitle={`${formatCurrency(snapshot?.subscription?.effective_usd_per_flow, snapshot?.subscription?.currency)}/Flow`}
+              icon={Icon.Coin}
+            />
+            <MenuBarExtra.Item
+              title="Subscription Expires"
+              subtitle={formatDateTime(
+                snapshot?.subscription?.plan?.expires_at,
+              )}
+              icon={Icon.Clock}
+            />
+          </>
+        ) : null}
         <MenuBarExtra.Item
           title="Last Updated"
           subtitle={snapshot ? formatDateTime(snapshot.fetchedAt) : "Never"}
           icon={Icon.ArrowClockwise}
         />
-        <MenuBarExtra.Item
-          title="Menu Bar Display"
-          subtitle={formatMenuBarPreference(menuBarPercentage)}
-          icon={Icon.AppWindow}
-        />
+        {hasSubscriptionData(snapshot?.subscription) ? (
+          <MenuBarExtra.Item
+            title="Menu Bar Display"
+            subtitle={formatMenuBarPreference(menuBarPercentage)}
+            icon={Icon.AppWindow}
+          />
+        ) : null}
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Actions">
@@ -172,11 +187,15 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="ZenMux Console">
-        <MenuBarExtra.Item
-          title="Open Subscription Console"
-          icon={Icon.CreditCard}
-          onAction={() => void open("https://zenmux.ai/platform/subscription")}
-        />
+        {hasSubscriptionData(snapshot?.subscription) ? (
+          <MenuBarExtra.Item
+            title="Open Subscription Console"
+            icon={Icon.CreditCard}
+            onAction={() =>
+              void open("https://zenmux.ai/platform/subscription")
+            }
+          />
+        ) : null}
         <MenuBarExtra.Item
           title="Open PAYG Console"
           icon={Icon.Wallet}
@@ -190,32 +209,34 @@ export default function Command() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Settings">
-        <MenuBarExtra.Submenu title="Menu Bar Display" icon={Icon.Gear}>
-          <MenuBarDisplayItem
-            title="5-hour Used"
-            value="5h-used"
-            selectedValue={menuBarPercentage}
-            onSelect={updateMenuBarPercentage}
-          />
-          <MenuBarDisplayItem
-            title="5-hour Remaining"
-            value="5h-remaining"
-            selectedValue={menuBarPercentage}
-            onSelect={updateMenuBarPercentage}
-          />
-          <MenuBarDisplayItem
-            title="Weekly Used"
-            value="weekly-used"
-            selectedValue={menuBarPercentage}
-            onSelect={updateMenuBarPercentage}
-          />
-          <MenuBarDisplayItem
-            title="Weekly Remaining"
-            value="weekly-remaining"
-            selectedValue={menuBarPercentage}
-            onSelect={updateMenuBarPercentage}
-          />
-        </MenuBarExtra.Submenu>
+        {hasSubscriptionData(snapshot?.subscription) ? (
+          <MenuBarExtra.Submenu title="Menu Bar Display" icon={Icon.Gear}>
+            <MenuBarDisplayItem
+              title="5-hour Used"
+              value="5h-used"
+              selectedValue={menuBarPercentage}
+              onSelect={updateMenuBarPercentage}
+            />
+            <MenuBarDisplayItem
+              title="5-hour Remaining"
+              value="5h-remaining"
+              selectedValue={menuBarPercentage}
+              onSelect={updateMenuBarPercentage}
+            />
+            <MenuBarDisplayItem
+              title="7-day Used"
+              value="weekly-used"
+              selectedValue={menuBarPercentage}
+              onSelect={updateMenuBarPercentage}
+            />
+            <MenuBarDisplayItem
+              title="7-day Remaining"
+              value="weekly-remaining"
+              selectedValue={menuBarPercentage}
+              onSelect={updateMenuBarPercentage}
+            />
+          </MenuBarExtra.Submenu>
+        ) : null}
         <MenuBarExtra.Item
           title="Configure Platform API Key"
           icon={Icon.Key}
@@ -279,12 +300,16 @@ function getMenuBarTitle(
     return "ZenMux";
   }
 
-  const metric = getMenuBarMetric(snapshot, menuBarPercentage);
   const balance = formatCurrency(
     snapshot.payg?.total_credits,
     snapshot.payg?.currency,
   );
 
+  if (!hasSubscriptionData(snapshot.subscription)) {
+    return balance === "-" ? "ZenMux" : balance;
+  }
+
+  const metric = getMenuBarMetric(snapshot, menuBarPercentage);
   return `${metric.label} ${formatPercentage(metric.value)} ${metric.kind} · ${balance}`;
 }
 
