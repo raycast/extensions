@@ -1,21 +1,37 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "exa-search",
-  "title": "Exa Search",
-  "description": "AI-powered search that understands your queries and delivers precise, context-aware results quickly",
+  "title": "Exa",
+  "description": "AI-powered search for precise, context-aware results",
   "icon": "icon.png",
   "author": "thomas",
   "owner": "exa_ai",
   "access": "public",
   "categories": [
-    "Data"
+    "Developer Tools",
+    "Web"
   ],
   "license": "MIT",
   "commands": [
     {
+      "name": "ask-exa",
+      "title": "Answer with Exa",
+      "description": "Get a grounded answer from Exa with compact citations.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Question",
+          "type": "text",
+          "required": false,
+          "description": "The question to answer with Exa."
+        }
+      ]
+    },
+    {
       "name": "open-in-browser",
-      "title": "Open in Browser",
-      "description": "Opens the Exa Search in your browser.",
+      "title": "Exa Search Engine",
+      "description": "Open Exa's search engine in your browser.",
       "mode": "no-view",
       "arguments": [
         {
@@ -31,22 +47,30 @@
     {
       "name": "search",
       "title": "Search",
-      "description": "Perform an Exa search given an input query and retrieve a list of relevant results as links, including a summary of the content."
-    },
-    {
-      "name": "find-similar",
-      "title": "Find Similar",
-      "description": "Find a list of similar results based on a webpage's URL, including a summary of each result."
-    },
-    {
-      "name": "get-contents",
-      "title": "Get Contents",
-      "description": "Retrieves the full text of a webpage given its URL."
+      "description": "Search the live web with Exa and return compact result highlights.",
+      "icon": "icon.png",
+      "keywords": ["web", "search", "fresh", "links", "results", "research", "news"]
     },
     {
       "name": "get-answer",
       "title": "Get Answer",
-      "description": "Get an answer to a question informed by Exa search results."
+      "description": "Get a grounded answer from Exa with compact citations.",
+      "icon": "icon.png",
+      "keywords": ["answer", "question", "grounded", "citations", "sources", "research"]
+    },
+    {
+      "name": "get-contents",
+      "title": "Get Contents",
+      "description": "Extract text or highlights from known URLs, together with per-URL statuses.",
+      "icon": "icon.png",
+      "keywords": ["url", "page", "contents", "extract", "webpage", "text", "highlights"]
+    },
+    {
+      "name": "get-code-context",
+      "title": "Get Code Context",
+      "description": "Retrieve code-focused context from Exa for framework, docs, and library questions.",
+      "icon": "icon.png",
+      "keywords": ["code", "context", "docs", "framework", "library", "technical", "developer"]
     }
   ],
   "preferences": [
@@ -61,7 +85,7 @@
   "dependencies": {
     "@raycast/api": "^1.90.0",
     "@raycast/utils": "^1.17.0",
-    "exa-js": "^1.4.8"
+    "exa-js": "^2.13.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
