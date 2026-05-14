@@ -79,14 +79,16 @@ export default function Command() {
 
       return {
         data: rawItems.map((item) => ({
+          season: item.season || 0,
+          episode: item.episode || 0,
           date: item.date || "",
           episode_id: item.id || item.episode_id || 0,
           show_id: item.show?.id || item.show_id || 0,
           show_title: item.show?.title || item.show_title || "Unknown Show",
-          season: item.season || 0,
-          episode: item.episode || 0,
           title: item.title || "",
-          code: item.code || `S${item.season || 0}E${item.episode || 0}`,
+          code:
+            item.code ||
+            `S${String(item.season || 0).padStart(2, "0")}E${String(item.episode || 0).padStart(2, "0")}`,
         })),
       };
     },
@@ -144,9 +146,7 @@ export default function Command() {
       {items
         .filter((item) => isUpcomingOrToday(item.date))
         .map((item) => {
-          const episodeCode =
-            item.code ||
-            `S${String(item.season).padStart(2, "0")}E${String(item.episode).padStart(2, "0")}`;
+          const episodeCode = item.code;
 
           return (
             <List.Item

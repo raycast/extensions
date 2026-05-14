@@ -34,13 +34,6 @@ export function EpisodeListItem({
               onAction={() => onMarkAsWatched(episode.id)}
             />
           )}
-          <ActionPanel.Section title="Copy">
-            <Action.CopyToClipboard
-              title="Copy Show and Episode Number"
-              content={copyTitle}
-              shortcut={{ modifiers: ["opt"], key: "c" }}
-            />
-          </ActionPanel.Section>
           <Action.OpenInBrowser
             url={episode.resource_url}
             shortcut={{ modifiers: ["cmd", "shift"], key: "o" }}
@@ -52,6 +45,13 @@ export function EpisodeListItem({
               onAction={onLogout}
             />
           )}
+          <ActionPanel.Section title="Copy">
+            <Action.CopyToClipboard
+              title="Copy Show and Episode Number"
+              content={copyTitle}
+              shortcut={{ modifiers: ["opt"], key: "c" }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     />
