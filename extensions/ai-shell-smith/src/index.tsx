@@ -217,7 +217,9 @@ export default function Command(props: { arguments: Arguments.Index }) {
         tooltip="Provider / Model"
         value={`${provider}:${model}`}
         onChange={(val) => {
-          const [prov, mod] = val.split(":");
+          const colonIdx = val.indexOf(":");
+          const prov = val.slice(0, colonIdx);
+          const mod = val.slice(colonIdx + 1);
           setProvider(prov as Provider);
           setModel(mod);
         }}
