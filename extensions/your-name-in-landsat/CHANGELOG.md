@@ -1,5 +1,12 @@
 # Your Name in Landsat Changelog
 
+## [Improved Generation Flow] - {PR_MERGE_DATE}
+
+- Added optional spacing input for generation via command arguments and in-app edit form
+- Updated image composition to honor custom inter-letter spacing in both display and export outputs
+- Switched tile variant selection to deterministic picking for stable, repeatable results
+- Wired spacing through history-triggered generation so relaunches preserve user input
+
 ## [Initial Version] - 2026-05-13
 
 - Generate Landsat satellite imagery from a name (up to 16 letters)

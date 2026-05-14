@@ -4,14 +4,17 @@ import { countLetters, MAX_LETTERS } from "./compose";
 
 type Props = {
   initialName?: string;
-  onSubmit: (name: string) => void | Promise<void>;
+  initialSpacing?: number;
+  onSubmit: (values: { name: string; spacing: number }) => void | Promise<void>;
   submitTitle?: string;
 };
 
-export function NameForm({ initialName = "", onSubmit, submitTitle = "Generate" }: Props) {
+export function NameForm({ initialName = "", initialSpacing = 0, onSubmit, submitTitle = "Generate" }: Props) {
   const { pop } = useNavigation();
   const [value, setValue] = useState(initialName);
+  const [spacing, setSpacing] = useState(String(initialSpacing));
   const [nameError, setNameError] = useState<string | undefined>();
+  const [spacingError, setSpacingError] = useState<string | undefined>();
 
   return (
     <Form
@@ -30,7 +33,12 @@ export function NameForm({ initialName = "", onSubmit, submitTitle = "Generate" 
                 setNameError(`Max ${MAX_LETTERS} letters`);
                 return;
               }
-              await onSubmit(value);
+              const parsedSpacing = Number.parseInt(spacing || "0", 10);
+              if (!Number.isFinite(parsedSpacing) || parsedSpacing < 0) {
+                setSpacingError("Spacing must be a non-negative number");
+                return;
+              }
+              await onSubmit({ name: value, spacing: parsedSpacing });
               pop();
             }}
           />
@@ -46,6 +54,17 @@ export function NameForm({ initialName = "", onSubmit, submitTitle = "Generate" 
         onChange={(v) => {
           setValue(v);
           if (nameError) setNameError(undefined);
+        }}
+      />
+      <Form.TextField
+        id="spacing"
+        title="Image Spacing (px)"
+        placeholder="0"
+        value={spacing}
+        error={spacingError}
+        onChange={(v) => {
+          setSpacing(v);
+          if (spacingError) setSpacingError(undefined);
         }}
       />
     </Form>

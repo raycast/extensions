@@ -46,12 +46,12 @@ export default function Command() {
                 icon={Icon.Stars}
                 target={
                   <NameForm
-                    onSubmit={async (name) => {
+                    onSubmit={async ({ name, spacing }) => {
                       try {
                         await launchCommand({
                           name: "generate-name",
                           type: LaunchType.UserInitiated,
-                          arguments: { name },
+                          arguments: { name, spacing: String(spacing) },
                         });
                       } catch (e) {
                         await showFailureToast(e, { title: "Could not open Generate Name" });

@@ -5,6 +5,9 @@
   "description": "Generate your name in Landsat using Raycast",
   "icon": "extension-icon.png",
   "author": "clins1994",
+  "contributors": [
+    "0xdhrv"
+  ],
   "platforms": [
     "macOS",
     "Windows"
@@ -25,6 +28,12 @@
           "placeholder": "Name",
           "type": "text",
           "required": true
+        },
+        {
+          "name": "spacing",
+          "placeholder": "Spacing in pixels (optional)",
+          "type": "text",
+          "required": false
         }
       ]
     },

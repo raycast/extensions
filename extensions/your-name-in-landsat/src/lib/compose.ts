@@ -12,8 +12,12 @@ const ROW_GAP_RATIO = 0.06;
 const GAP_WIDTH = Math.round(TILE_WIDTH * GAP_RATIO);
 const SPACE_WIDTH = Math.round(TILE_WIDTH * SPACE_RATIO);
 const ROW_GAP = Math.round(TILE_HEIGHT * ROW_GAP_RATIO);
+const MIN_SPACING = 0;
 
 export type LetterPick = { letter: string; variant: number } | { space: true };
+export type GenerateOptions = {
+  spacing?: number;
+};
 
 export function normalizeName(raw: string): string {
   return raw.replace(/[^a-zA-Z ]/g, "").toLowerCase();
@@ -25,26 +29,19 @@ export function countLetters(name: string): number {
 
 export function pickLetters(name: string): LetterPick[] {
   const normalized = normalizeName(name);
-  const available: Record<string, number[]> = {};
-  for (const [letter, count] of Object.entries(VARIANT_COUNTS)) {
-    available[letter] = Array.from({ length: count }, (_, i) => i);
-  }
   const picks: LetterPick[] = [];
+  let letterIndex = 0;
   for (const ch of normalized) {
     if (ch === " ") {
       picks.push({ space: true });
       continue;
     }
-    let pool = available[ch];
-    if (!pool) continue;
-    if (pool.length === 0) {
-      pool = Array.from({ length: VARIANT_COUNTS[ch] }, (_, i) => i);
-      available[ch] = pool;
-    }
-    const idx = Math.floor(Math.random() * pool.length);
-    const variant = pool[idx];
-    pool.splice(idx, 1);
+    const variantCount = VARIANT_COUNTS[ch];
+    if (!variantCount) continue;
+    // Keep tile selection stable for a given input, matching the old extension behavior.
+    const variant = (letterIndex + ch.charCodeAt(0)) % variantCount;
     picks.push({ letter: ch, variant });
+    letterIndex++;
   }
   return picks;
 }
@@ -106,6 +103,7 @@ type Segment = { kind: "letter" | "space"; width: number; image?: LoadedImage };
 function rowSegments(
   picks: LetterPick[],
   tileImagesIter: Iterator<LoadedImage>,
+  spacing: number,
 ): { segments: Segment[]; width: number } {
   const segments: Segment[] = [];
   let totalWidth = 0;
@@ -119,15 +117,15 @@ function rowSegments(
       segments.push({ kind: "letter", width: TILE_WIDTH, image: tileImagesIter.next().value });
       totalWidth += TILE_WIDTH;
       const next = picks[i + 1];
-      if (next && !("space" in next)) totalWidth += GAP_WIDTH;
+      if (next && !("space" in next)) totalWidth += spacing;
     }
   }
   return { segments, width: totalWidth };
 }
 
-async function composeRows(rows: LetterPick[][], tileImages: LoadedImage[]): Promise<Buffer> {
+async function composeRows(rows: LetterPick[][], tileImages: LoadedImage[], spacing: number): Promise<Buffer> {
   const iter = tileImages[Symbol.iterator]();
-  const rowData = rows.map((row) => rowSegments(row, iter));
+  const rowData = rows.map((row) => rowSegments(row, iter, spacing));
 
   const canvasWidth = Math.max(...rowData.map((r) => r.width));
   const canvasHeight = rowData.length * TILE_HEIGHT + (rowData.length - 1) * ROW_GAP;
@@ -142,7 +140,7 @@ async function composeRows(rows: LetterPick[][], tileImages: LoadedImage[]): Pro
         canvas.composite(seg.image, x, y);
         x += seg.width;
         const next = row.segments[i + 1];
-        if (next && next.kind === "letter") x += GAP_WIDTH;
+        if (next && next.kind === "letter") x += spacing;
       } else {
         x += seg.width;
       }
@@ -153,13 +151,26 @@ async function composeRows(rows: LetterPick[][], tileImages: LoadedImage[]): Pro
   return canvas.getBuffer("image/png");
 }
 
-async function composeFromPicks(name: string, picks: LetterPick[], tileIds: string[]): Promise<ComposeResult> {
+function parseSpacing(spacing: number | undefined): number {
+  if (spacing === undefined) return GAP_WIDTH;
+  if (!Number.isFinite(spacing)) throw new Error("Spacing must be a number");
+  if (spacing < MIN_SPACING) throw new Error("Spacing must be non-negative");
+  return Math.round(spacing);
+}
+
+async function composeFromPicks(
+  name: string,
+  picks: LetterPick[],
+  tileIds: string[],
+  options?: GenerateOptions,
+): Promise<ComposeResult> {
+  const spacing = parseSpacing(options?.spacing);
   const tileBuffers = await Promise.all(tileIds.map((id) => fetchBuffer(`${TILE_BASE_URL}/${id}.jpg`)));
   const tileImages = await Promise.all(tileBuffers.map((buf) => Jimp.read(buf)));
 
   const [displayBuffer, exportBuffer] = await Promise.all([
-    composeRows(splitRows(picks), tileImages),
-    composeRows([picks], tileImages),
+    composeRows(splitRows(picks), tileImages, spacing),
+    composeRows([picks], tileImages, spacing),
   ]);
 
   const dir = path.join(environment.supportPath, "generations");
@@ -173,10 +184,10 @@ async function composeFromPicks(name: string, picks: LetterPick[], tileIds: stri
   return { filePath, exportFilePath, tileIds };
 }
 
-export async function generate(name: string): Promise<ComposeResult> {
+export async function generate(name: string, options?: GenerateOptions): Promise<ComposeResult> {
   const picks = pickLetters(name);
   const tileIds = pickTiles(picks);
   if (tileIds.length === 0) throw new Error("Name must contain at least one letter");
   if (tileIds.length > MAX_LETTERS) throw new Error(`Name too long (max ${MAX_LETTERS} letters)`);
-  return composeFromPicks(name, picks, tileIds);
+  return composeFromPicks(name, picks, tileIds, options);
 }

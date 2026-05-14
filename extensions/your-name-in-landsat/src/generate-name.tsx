@@ -19,18 +19,33 @@ import { LandsatDetail } from "./lib/detail";
 import { TileActions } from "./lib/actions";
 import { NameForm } from "./lib/name-form";
 
-export default function Command(props: LaunchProps<{ arguments: { name: string } }>) {
+type CommandArgs = {
+  name?: string;
+  spacing?: string;
+};
+
+type GenerateRequest = {
+  name: string;
+  spacing: number;
+};
+
+export default function Command(props: LaunchProps<{ arguments: CommandArgs }>) {
   const initial = (props.arguments?.name ?? "").trim();
-  const [name, setName] = useState(initial);
-  return <GenerateView name={name} onEdit={setName} />;
+  const initialSpacing = Number.parseInt(props.arguments?.spacing ?? "0", 10);
+  const [request, setRequest] = useState<GenerateRequest>({
+    name: initial,
+    spacing: Number.isFinite(initialSpacing) && initialSpacing >= 0 ? initialSpacing : 0,
+  });
+  return <GenerateView request={request} onEdit={setRequest} />;
 }
 
-function GenerateView({ name, onEdit }: { name: string; onEdit: (next: string) => void }) {
+function GenerateView({ request, onEdit }: { request: GenerateRequest; onEdit: (next: GenerateRequest) => void }) {
   const { push } = useNavigation();
   const [result, setResult] = useState<ComposeResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [nonce, setNonce] = useState(0);
+  const { name, spacing } = request;
   const displayName = normalizeName(name).toUpperCase().trim();
 
   useEffect(() => {
@@ -53,7 +68,7 @@ function GenerateView({ name, onEdit }: { name: string; onEdit: (next: string) =
 
     (async () => {
       try {
-        const r = await generate(name);
+        const r = await generate(name, { spacing });
         if (cancelled) return;
         setResult(r);
         await pushHistory({ name, filePath: r.filePath, exportFilePath: r.exportFilePath, tileIds: r.tileIds });
@@ -67,7 +82,7 @@ function GenerateView({ name, onEdit }: { name: string; onEdit: (next: string) =
     return () => {
       cancelled = true;
     };
-  }, [name, nonce]);
+  }, [name, nonce, spacing]);
 
   return (
     <LandsatDetail
@@ -89,7 +104,17 @@ function GenerateView({ name, onEdit }: { name: string; onEdit: (next: string) =
             title="Edit Name"
             icon={Icon.Pencil}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
-            onAction={() => push(<NameForm initialName={name} onSubmit={onEdit} />)}
+            onAction={() =>
+              push(
+                <NameForm
+                  initialName={name}
+                  initialSpacing={spacing}
+                  onSubmit={({ name: nextName, spacing: nextSpacing }) =>
+                    onEdit({ name: nextName, spacing: nextSpacing })
+                  }
+                />,
+              )
+            }
           />
           {result && (
             <TileActions
