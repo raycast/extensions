@@ -135,14 +135,18 @@ export async function createMeeting(refocus: boolean): Promise<void> {
       if (url.startsWith(MEETING_PREFIX)) {
         await Clipboard.copy(url);
         if (previousApp) {
-          await refocusApp(previousApp);
+          try {
+            await refocusApp(previousApp);
+          } catch {
+            // refocus failed (e.g. app was closed) — continue to show success
+          }
         }
         await toast.hide();
         await showHUD("✓ Meeting created — URL copied to clipboard");
         return;
       }
     } catch {
-      // ignore
+      // ignore URL-polling errors
     }
   }
 
