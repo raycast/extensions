@@ -10,7 +10,7 @@ export function formatNodeId(id: string): string {
   return id;
 }
 
-export function parseNodeId(nid: string): { prefix: string; pubkey: string } | undefined {
+function parseNodeId(nid: string): { prefix: string; pubkey: string } | undefined {
   const match = /^(did:key:)?(z[a-zA-Z0-9]+)$/.exec(nid);
   if (match) {
     const hex = bs58.decode(match[2].substring(1));
@@ -26,14 +26,12 @@ export function parseNodeId(nid: string): { prefix: string; pubkey: string } | u
   return undefined;
 }
 
-export function truncateId(pubkey: string): string {
+function truncateId(pubkey: string): string {
   return `${pubkey.substring(0, 6)}…${pubkey.slice(-6)}`;
 }
 
-export const pluralRules = {
+const pluralRules = {
   Delegate: "Delegates",
-  Patch: "Patches",
-  Issue: "Issues",
 } as const;
 
 export function pluralize(singular: keyof typeof pluralRules, count: number): string {

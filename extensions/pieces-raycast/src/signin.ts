@@ -6,15 +6,15 @@ import {
 } from "@raycast/api";
 import ConnectorSingleton from "./connection/ConnectorSingleton";
 import Notifications from "./ui/Notifications";
-import piecesHealthCheck from "./connection/health/piecesHealthCheck";
+import PiecesPreflightService, {
+  piecesHealthOnlyCheck,
+} from "./connection/health/piecesPreflightCheck";
 
-export default async function Comand() {
-  const healthy = await piecesHealthCheck();
+export default async function Command() {
+  const healthy = await piecesHealthOnlyCheck();
   if (!healthy) return;
 
-  const user = await ConnectorSingleton.getInstance().userApi.userSnapshot();
-
-  if (user.user) {
+  if (PiecesPreflightService.getInstance().user) {
     return await Notifications.getInstance().errorToast(
       "You are already logged in!",
     );

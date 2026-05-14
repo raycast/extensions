@@ -1,5 +1,111 @@
 # Todoist Changelog
 
+## [Filter completion UI and incremental reminder sync] - 2026-05-04
+
+- **Duplicate “at task time” reminders on hourly repeat**: Applying the **same** hourly recurrence twice (when the task already had a timed due and a relative-at-task reminder) no longer queues a second identical reminder; the extension now trusts the merged cache whenever Sync returns an empty `reminders` delta, not only when the field was omitted entirely.
+- **Filter views after completing a task**: Filter results are merged with cached items by id only; tasks no longer present in sync cache (for example a completed non-recurring task) are omitted instead of falling back to stale filter API rows, so the list updates immediately without reopening the extension.
+- **Merge incremental Sync reminder updates**: Todoist’s Sync API often returns **partial** `reminders` arrays on incremental sync. The extension now merges those deltas into the local cache (`mergeSyncedReminders` in `updateTask` and `closeTask`) instead of replacing the whole list, so editing one task’s schedule or reminders no longer clears other tasks’ alarm accessories until a full reload. **`addReminder`** still uses `sync_token: "*"` for the requested resource type, so its `reminders` response remains a **full replace** of the cached list (avoids stale rows after deletes elsewhere).
+
+## [Fix filter task freshness and recurrence reminder guard] - 2026-05-01
+
+- **Filter task typing + freshness**: Typed filter sections in `FilterTasks` and resolve each displayed task against the latest cached item by id, preventing stale task state in filter views after updates.
+- **Filter project accessory**: Tasks shown in filter views now include the project/section accessory tag (like Today view), making project context visible directly in filter results.
+- **Recurrence update correctness**: In task actions, repeat updates now build from the latest cached task snapshot when available, reducing stale due payload issues.
+- **Hourly reminder safety**: The follow-up "at time of task" reminder check for hourly recurrence now runs only when the synced task due value is a datetime (contains time), avoiding incorrect reminder handling for all-day dates.
+- **Update callback context**: Extended the `updateTask` sync callback context to include `updatedTask`, allowing post-update logic to use the server-synced task shape safely.
+
+## [Scheduling, repeat options, and sync reliability] - 2026-04-30
+
+- **Set Repeat** in task actions: presets plus search (e.g. `every 2 days`), and an option to clear repeat.
+- **Pick date**: when you set a **due time** (not an all-day date), the extension can add Todoist’s **“at time of task”** relative reminder if you don’t already have one; **hourly** repeat rules get the same treatment.
+- **Accurate list after edits**: Todoist sync results merge onto the **latest** cached data so chained updates (e.g. due then reminder) don’t leave wrong or missing icons until you restart.
+- **Clear due date**: clearing the due date also applies **reminder** changes from the server so the alarm accessory matches Todoist.
+- **Complete recurring tasks**: completing uses the sync response so the **next occurrence** appears instead of the task vanishing until a full reload.
+- **Task details**: shows **Repeat** details when the task is recurring.
+
+## [Fix group and sort actions in filter views] - 2026-04-27
+
+- In **My Tasks**, when a custom Todoist filter is selected, **Group tasks by** and **Sort tasks by** now update the list (they were previously no-ops because the UI ignored grouped/sorted output for filters).
+- Filters whose query is comma-separated (multiple sub-queries) still show one section per sub-query when **Group tasks by** is **Default**; sort order applies within that layout.
+
+## [Show deadline as how many days remains] - 2026-03-31
+- The task deadlines are shown as "in X days" instead of a specific date, like the todoist app.
+
+## [Fix reminders and Create Task NLP parsing] - 2026-03-06
+- Enabled Todoist auto_reminder in Quick Add and added a fallback reminder creation path when Todoist does not create it automatically.
+- Fixed Create Task natural-language token cleanup and due-time parsing edge cases.
+
+## [Fixing Todoist PR updates] - 2026-02-11
+- Fixed a crash in the syncRequest caused by the Todoist API returning an empty sync_status object, which led to a TypeError when reading error properties from an undefined value.
+
+## [Set Due Date to Everyday for Existing Tasks] - 2025-10-10
+- **Add Option To Schedule "Everyday" for existing tasks**: Now on the homepage you can set schedule the due date of tasks to repeat everyday. Useful to setting tasks to recurring events.
+
+## [Improved Due Time Handling] - 2025-09-04
+
+- **Preserved Due Time on Date Conversion**: Ensured that the time component of a due date is preserved by using `toISOString()` during date-to-string conversions
+- **Fixed Due Time Getting Overriden By Current Time**: Set the time from parsedData whenever there's updates from nlp
+- **Enhanced NLP Robustness**: Resolved `TypeError: Cannot read properties of undefined (reading 'matchAll'` that occurred if users interacted with other form fields before entering a task title
+
+## [Fixed Create Task TypeError] - 2025-09-01
+
+- **Fixed TypeError on Task Creation**: Resolved `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form by adding defensive checks for undefined arrays
+
+## [Fixed Create Task Form Initialization Error] - 2025-08-25
+
+- **Fixed TypeError on Task Creation**: Resolved intermittent `TypeError: Cannot read properties of undefined (reading 'length')` error when submitting the Create Task form
+
+## [Fixed Create Task Project and Assignee Assignment] - 2025-08-22
+
+- **Fixed Create Task API Issue**: Switched from `quickAddTask` to `addTask` API to use structured parameters instead of relying on server-side NLP parsing
+- **Direct Parameter Passing**: Form selections (project, assignee, labels, priority, dates) are now passed directly to the API instead of being embedded in text content
+- **Content Cleaning**: Automatically removes embedded project references (like "#ProjectName") from task content when projects are selected via dropdown, preventing duplication and keeping task titles clean
+- **Fixed Date Handling**: Resolved timezone issue where selected dates were shifting to the wrong day by using local date format instead of UTC conversion
+- **Maintained NLP Fallback**: Natural language parsing still works when users type project names and assignees in the content field
+- **Resolved Issue #21076**: Tasks created through Raycast now properly assign to selected projects and assignees instead of ending up in Inbox with "#ProjectName" appended to titles
+
+## [Fix Today view showing tomorrow's tasks] - 2025-08-19
+
+- **Fixed Today view filtering**: Resolved an issue where recurring tasks due tomorrow were incorrectly appearing in the Today view
+- **Improved date comparison logic**: Enhanced the date filtering algorithm to properly handle timezone differences and recurring task dates
+- **Fixed task grouping**: Ensured that filtered tasks are properly grouped without including unfiltered future tasks
+- **Better timezone handling**: Tasks are now compared at midnight in local timezone to avoid time-of-day confusion
+
+## [Enhanced Natural Language Task Creation] - 2025-08-13
+
+- **Smart NLP Parsing**: Added comprehensive natural language parsing for task creation with real-time form updates
+- **Bidirectional Sync**: Type parameters in the title OR use dropdowns - both update each other seamlessly
+- **Priority Support**: Use p1-p4 notation (p1=urgent, p2=high, p3=medium, p4=low) that maps to Todoist priority values
+- **Project Recognition**: Support for #ProjectName or #"Project Name" (with quotes for spaces) with smart shortest-first matching
+- **Label Detection**: Support for @label or @"Label Name" (with quotes for spaces) with intelligent case-insensitive matching
+- **Natural Date Parsing**: Advanced date recognition using chrono-node library supporting patterns like:
+  - Simple dates: "tomorrow", "next monday", "march 15"
+  - Times: "tomorrow at 3pm", "monday at 12:30"
+  - Relative: "in 3 days", "in 2 weeks"
+  - Complex: "next friday at 2pm", "monday morning"
+- **Deadline Support**: Use {date} notation for deadline parsing (e.g., {march 30}, {next month})
+- **Tiered Matching System**: Advanced matching algorithm with 4-tier priority:
+  1. Exact match (case-sensitive, with emojis)
+  2. Case-insensitive match (with emojis)
+  3. Emoji-insensitive match (case-sensitive)
+  4. Fully normalized match (case-insensitive, no emojis)
+- **Conflict Resolution**: "Last action wins" timestamp-based resolution for competing updates
+- **Smart Text Preservation**: Precise parameter replacement that maintains original text structure
+- **Todoist-Style API**: Always uses quickAddTask API for consistent behavior with native Todoist
+- **Enhanced User Experience**: Updated info message with clear examples and emoji-enhanced formatting
+
+## [Windows support] - 2025-07-24
+
+- Added Windows support
+
+## [Add task priority mapping for Todoist API] - 2025-06-12
+
+- Add a priority mapping function to ensure the user-selected priority aligns with the priority value used in the backend.
+
+## [Use confetti when completing tasks] - 2025-05-28
+
+- Add option to use the Raycast confetti command when completing tasks.
+
 ## [Automatically create labels on quick add command] - 2025-05-09
 
 - Add option to automatically crete labels in the quick add command

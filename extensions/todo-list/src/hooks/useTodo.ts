@@ -71,7 +71,8 @@ export const useTodo = ({ item, idx, sectionKey }: { item: TodoItem; idx: number
   };
 
   const toggleTodo = () => {
-    item.completed ? markTodo() : markCompleted();
+    if (item.completed) markTodo();
+    else markCompleted();
   };
 
   const deleteTodo = () => {

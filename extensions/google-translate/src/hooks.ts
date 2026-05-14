@@ -2,7 +2,7 @@ import { getPreferenceValues, getSelectedText } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import React from "react";
 import { LanguageCode } from "./languages";
-import { LanguageCodeSet, TranslatePreferences } from "./types";
+import { LanguageCodeSet } from "./types";
 import { AUTO_DETECT } from "./simple-translate";
 
 type _LegacySingleLanguageCodeSet = {
@@ -20,7 +20,7 @@ const unifyLegacyLanguageSet = (legacy: _StoredLanguageCodeSet): LanguageCodeSet
 };
 
 export const usePreferences = () => {
-  return React.useMemo(() => getPreferenceValues<TranslatePreferences>(), []);
+  return React.useMemo(() => getPreferenceValues<Preferences.Translate>(), []);
 };
 
 export const useTextState = () => {

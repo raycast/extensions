@@ -1,5 +1,15 @@
 # Raycast Wallpaper Changelog
 
+## [Update default setting] - 2025-06-24
+
+- Update default setting of `Respect System Appearance` to `false` for "Set Raycast Wallpaper" command.
+
+## [More Auto Switch Interval] - 2025-06-23
+
+- Auto Switch Raycast Wallpaper command supports more intervals
+- Set Raycast Wallpaper command respects the system appearance
+- Optimize extension icons for macOS Tahoe
+
 ## [Respect system appearance] - 2025-04-30
 
 - Support to set whether the wallpaper is Light or Dark appearance wallpaper.

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ActionPanel, Detail, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Detail, Icon, popToRoot, showToast, Toast } from "@raycast/api";
 import { execSync } from "child_process";
 import { DEFAULT_ERROR_TITLE, DownloadText } from "../../constants";
 import { cpus } from "os";
@@ -33,33 +33,32 @@ function execBrew(cask: string) {
 }
 
 export function NotInstalledError() {
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   return (
     <Detail
+      isLoading={isLoading}
       actions={
         <ActionPanel>
-          {isLoading && (
-            <ActionPanel.Item
+          {!isLoading && (
+            <Action
+              icon={Icon.MugSteam}
               title="Install with Homebrew"
               onAction={async () => {
-                if (!isLoading) return;
-                const toast = new Toast({ style: Toast.Style.Animated, title: "Installing..." });
-                await toast.show();
+                if (isLoading) return;
+                setIsLoading(true);
+                const toast = await showToast({ style: Toast.Style.Animated, title: "Installing..." });
                 try {
                   execBrew("opera");
-                  await toast.hide();
-                } catch (e) {
-                  await toast.hide();
-                  await showToast(
-                    Toast.Style.Failure,
-                    DEFAULT_ERROR_TITLE,
-                    "An unknown error occurred while trying to install"
-                  );
+                  toast.style = Toast.Style.Success;
+                  toast.title = "Installed! Please go back and try again.";
+                  await popToRoot();
+                } catch {
+                  toast.style = Toast.Style.Failure;
+                  toast.title = DEFAULT_ERROR_TITLE;
+                  toast.message = "An unknown error occurred while trying to install";
+                } finally {
+                  setIsLoading(false);
                 }
-                toast.title = "Installed! Please go back and try again.";
-                toast.style = Toast.Style.Success;
-                await toast.show();
-                setIsLoading(false);
               }}
             />
           )}

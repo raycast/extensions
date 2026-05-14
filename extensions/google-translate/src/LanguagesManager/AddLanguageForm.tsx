@@ -1,10 +1,10 @@
 import React from "react";
 import { Action, ActionPanel, Toast, Form, showToast } from "@raycast/api";
-import { getLanguageFlag, LanguageCode, languages } from "../languages";
+import { LanguageCode, languages } from "../languages";
 import { AUTO_DETECT } from "../simple-translate";
 import { LanguageCodeSet } from "../types";
 
-export const AddLanguageForm: React.VFC<{
+export const AddLanguageForm: React.FC<{
   onAddLanguage: (data: LanguageCodeSet) => void;
 }> = ({ onAddLanguage }) => {
   const [targetLanguages, setTargetLanguages] = React.useState<LanguageCode[]>(["en"]);
@@ -14,7 +14,7 @@ export const AddLanguageForm: React.VFC<{
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title="Add language set"
+            title="Add Language Set"
             onSubmit={(values: LanguageCodeSet) => {
               const filteredTargetLanguages = targetLanguages.filter((lang) => !!lang);
               if (!filteredTargetLanguages.length) {
@@ -36,7 +36,7 @@ export const AddLanguageForm: React.VFC<{
     >
       <Form.Dropdown id="langFrom" title="Source Language">
         {languages.map((lang) => (
-          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={getLanguageFlag(lang)} />
+          <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} />
         ))}
       </Form.Dropdown>
       {targetLanguages.map((_, index) => {
@@ -57,7 +57,7 @@ export const AddLanguageForm: React.VFC<{
             {languages
               .filter((lang) => lang.code !== AUTO_DETECT)
               .map((lang) => (
-                <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={getLanguageFlag(lang)} />
+                <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} />
               ))}
           </Form.Dropdown>
         );
@@ -78,7 +78,7 @@ export const AddLanguageForm: React.VFC<{
           {languages
             .filter((lang) => lang.code !== AUTO_DETECT)
             .map((lang) => (
-              <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} icon={getLanguageFlag(lang)} />
+              <Form.Dropdown.Item key={lang.code} value={lang.code} title={lang.name} />
             ))}
         </Form.Dropdown>
       )}

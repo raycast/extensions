@@ -1,0 +1,82 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "openhue",
+  "title": "OpenHue",
+  "description": "Control your Philips Hue lightning system from Raycast",
+  "icon": "extension-icon.png",
+  "author": "thibauult",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "lights",
+      "title": "Control Lights",
+      "description": "View and control individual Hue lights",
+      "mode": "view"
+    },
+    {
+      "name": "rooms",
+      "title": "Control Rooms",
+      "description": "View and control Hue rooms",
+      "mode": "view"
+    },
+    {
+      "name": "scenes",
+      "title": "Activate Scenes",
+      "description": "Browse and activate Hue scenes",
+      "mode": "view"
+    },
+    {
+      "name": "setup",
+      "title": "Setup Hue Bridge",
+      "description": "Connect to your Philips Hue Bridge",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "bridgeIP",
+      "title": "Bridge IP Address",
+      "description": "IP address of your Hue Bridge (leave empty to auto-discover)",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "applicationKey",
+      "title": "Application Key",
+      "description": "Hue application key (obtained during setup)",
+      "type": "password",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "yaml": "^2.8.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "generate-code": "curl -s https://api.redocly.com/registry/bundle/openhue/openhue/v2/openapi.yaml?branch=main -o openapi.yaml && npx @openapitools/openapi-generator-cli generate -c openapi-generator-config.yaml && npm run generate-code:indexes && npm run fix-lint",
+    "generate-code:indexes": "node -e \"const fs=require('fs');const apis=fs.readdirSync('src/api/generated/src/apis').filter(f=>f.endsWith('.ts')&&f!=='index.ts').map(f=>'export * from \\\"./'+f.replace('.ts','')+'\\\"');fs.writeFileSync('src/api/generated/src/apis/index.ts','// Export all API classes\\n'+apis.join(';\\n')+';\\n');const models=fs.readdirSync('src/api/generated/src/models').filter(f=>f.endsWith('.ts')&&f!=='index.ts').map(f=>'export * from \\\"./'+f.replace('.ts','')+'\\\"');fs.writeFileSync('src/api/generated/src/models/index.ts','// Export all models\\n'+models.join(';\\n')+';\\n')\"",
+    "generate:api": "npx @openapitools/openapi-generator-cli generate -c openapi-generator-config.yaml",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

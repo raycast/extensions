@@ -1,5 +1,22 @@
 # JSR Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
+## [Improvements] - 2025-11-06
+
+- Add link to search page (open in browser action)
+- Add option to copy a [esm/sh](https://esm.sh/) import command
+
+## [Improvements] - 2025-10-29
+
+- Refactored components, make the code more maintainable
+- Enabled for Windows platform
+- Improved search functionality, better sorting and scoped search
+- Added ability to search for packages in a specific scope and runtime compatibility (see [here](https://jsr.io/docs/faq#can-i-filter-packages-by-compatible-runtime-in-the-search))
+- Update dependencies and cleanup linting issues
+
 ## [Updates] - 2024-12-04
 
 - Update API Search key retrieval (search was showing empty results)

@@ -46,4 +46,19 @@ type CobaltResponse =
 
 type FormValues = Pick<CobaltRequest, "url" | "downloadMode" | "youtubeVideoCodec" | "videoQuality" | "audioFormat">;
 
-export type { CobaltRequest, CobaltResponse, FormValues };
+type HistoryEntry = {
+  id: string;
+  url: string;
+  filename: string;
+  downloadPath: string;
+  timestamp: number;
+  service: string;
+  downloadMode: string;
+  videoQuality?: string;
+  audioFormat?: string;
+  status: "completed" | "failed";
+  errorMessage?: string;
+  thumbnailUrl: string | null;
+};
+
+export type { CobaltRequest, CobaltResponse, FormValues, HistoryEntry };

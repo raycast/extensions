@@ -1,5 +1,13 @@
 # Adhan time Changelog
 
+## [Update] - 2025-11-06
+
+- Added Windows support
+
+## [Update] - 2025-08-12
+
+- Added the calculation time for Morocco
+
 ## [Update] - 2025-04-10
 
 - UI: Added indication for current prayer time using colored icon
@@ -19,9 +27,11 @@
 - UI: Updated placeholders to be more descriptive
 
 ## [Update] - 2022-11-09
+
 - Added hanfi school calculation as an optional preference
 
 ## [Update] - 2022-11-08
+
 - Added a view mode for the extension
 - Refactored the code to be more less repetitive `Object.entries`
 - Extracted types into a separate file

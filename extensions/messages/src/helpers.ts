@@ -200,8 +200,7 @@ export type Contact = {
   givenName: string;
   familyName: string;
   phoneNumbers: { number: string; countryCode: string | null }[];
-  emailAddresses: string[];
-  imageData?: string;
+  imageData: string | null;
 };
 
 export type ChatOrMessageInfo = {

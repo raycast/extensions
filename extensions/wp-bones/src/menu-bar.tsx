@@ -14,19 +14,12 @@ export default function Command() {
 
   useEffect(() => {
     if (error) {
-      setIconMenu({
-        source: Icon.ExclamationMark,
-        tintColor: Color.Red,
-      });
+      setIconMenu({ source: Icon.ExclamationMark, tintColor: Color.Red });
       setTitleMenu("Error fetching version");
-    }
-
-    if (isLoading) {
+    } else if (isLoading) {
       setIconMenu("loading.svg");
-      setTitleMenu("Loading version");
-    }
-
-    if (isThereNewVersion) {
+      setTitleMenu("Loading...");
+    } else if (isThereNewVersion) {
       setIconMenu("menu-bar-updates.svg");
       setTitleMenu(`New version available: ${version}`);
     } else {
@@ -78,15 +71,6 @@ export default function Command() {
                 />
               ),
             )}
-          <MenuBarExtra.Section>
-            <MenuBarExtra.Item
-              title="Complete Demo"
-              icon="box.svg"
-              onAction={() => {
-                open(`https://github.com/new?template_name=WPKirk&template_owner=wpbones`);
-              }}
-            />
-          </MenuBarExtra.Section>
         </MenuBarExtra.Submenu>
 
         <MenuBarExtra.Submenu icon="github-white.png" title="Create a WP Bones Repository">
@@ -104,15 +88,6 @@ export default function Command() {
                 />
               ),
             )}
-          <MenuBarExtra.Section>
-            <MenuBarExtra.Item
-              title="Complete Demo"
-              icon="box.svg"
-              onAction={() => {
-                open(`https://github.com/new?template_name=WPKirk&template_owner=wpbones`);
-              }}
-            />
-          </MenuBarExtra.Section>
         </MenuBarExtra.Submenu>
 
         <MenuBarExtra.Item

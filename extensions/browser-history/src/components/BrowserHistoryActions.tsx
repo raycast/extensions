@@ -1,5 +1,5 @@
 import { Action, ActionPanel, getPreferenceValues, Icon, openCommandPreferences } from "@raycast/api";
-import { openNewArcTab, openNewFirefoxTab, openNewTab } from "../actions";
+import { openNewTab } from "../actions";
 import { HistoryEntry, Preferences, SupportedBrowsers } from "../interfaces";
 
 export class BrowserHistoryActions {
@@ -23,7 +23,7 @@ function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry })
         title={"Open in Firefox"}
         icon={"firefox-logo.png"}
         shortcut={{ modifiers: ["cmd"], key: "f" }}
-        onAction={() => openNewFirefoxTab(url)}
+        onAction={() => openNewTab(SupportedBrowsers.Firefox, url)}
       />
     ),
     [SupportedBrowsers.Safari]: (
@@ -63,7 +63,7 @@ function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry })
         title={"Open in Arc"}
         icon={"arc-logo.svg"}
         shortcut={{ modifiers: ["cmd", "shift"], key: "a" }}
-        onAction={() => openNewArcTab(url)}
+        onAction={() => openNewTab(SupportedBrowsers.Arc, url)}
       />
     ),
     [SupportedBrowsers.Opera]: (
@@ -98,6 +98,30 @@ function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry })
         onAction={() => openNewTab(SupportedBrowsers.Sidekick, url)}
       />
     ),
+    [SupportedBrowsers.Dia]: (
+      <Action
+        title={"Open in Dia"}
+        icon={"dia-logo.png"}
+        shortcut={{ modifiers: ["cmd"], key: "d" }}
+        onAction={() => openNewTab(SupportedBrowsers.Dia, url)}
+      />
+    ),
+    [SupportedBrowsers.Comet]: (
+      <Action
+        title={"Open in Comet"}
+        icon={"comet-logo.png"}
+        shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        onAction={() => openNewTab(SupportedBrowsers.Comet, url)}
+      />
+    ),
+    [SupportedBrowsers.ChatGPTAtlas]: (
+      <Action
+        title={"Open in Chatgpt Atlas"}
+        icon={"chatgpt-atlas-logo.png"}
+        shortcut={{ modifiers: ["cmd"], key: "g" }}
+        onAction={() => openNewTab(SupportedBrowsers.ChatGPTAtlas, url)}
+      />
+    ),
   };
   return (
     <ActionPanel>
@@ -126,6 +150,9 @@ function HistoryItemAction({ entry: { url, browser } }: { entry: HistoryEntry })
         {actions[SupportedBrowsers.Iridium]}
         {actions[SupportedBrowsers.Orion]}
         {actions[SupportedBrowsers.Sidekick]}
+        {actions[SupportedBrowsers.Dia]}
+        {actions[SupportedBrowsers.Comet]}
+        {actions[SupportedBrowsers.ChatGPTAtlas]}
       </ActionPanel.Section>
     </ActionPanel>
   );

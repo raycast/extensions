@@ -1,9 +1,9 @@
 import { List } from '@raycast/api'
-import type { Registry } from '@scaleway/sdk'
+import type { Registryv1 } from '@scaleway/sdk'
 import { getIconFromLocality } from '../../../../helpers/locality'
 
 type NamespaceDetailProps = {
-  namespace: Registry.v1.Namespace
+  namespace: Registryv1.Namespace
 }
 
 export const NamespaceDetail = ({ namespace }: NamespaceDetailProps) => (

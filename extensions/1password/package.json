@@ -14,7 +14,9 @@
     "superwhys",
     "lukah",
     "litomore",
-    "vimtor"
+    "vimtor",
+    "pavelas",
+    "Logan-8f"
   ],
   "past_contributors": [
     "Davidwalser",
@@ -115,6 +117,18 @@
         {
           "title": "Copy One-time Password",
           "value": "copy-one-time-password"
+        },
+        {
+          "title": "Paste Username",
+          "value": "paste-username"
+        },
+        {
+          "title": "Paste Password",
+          "value": "paste-password"
+        },
+        {
+          "title": "Paste One-time Password",
+          "value": "paste-one-time-password"
         }
       ],
       "default": "open-in-1password",
@@ -145,6 +159,18 @@
         {
           "title": "Copy One-time Password",
           "value": "copy-one-time-password"
+        },
+        {
+          "title": "Paste Username",
+          "value": "paste-username"
+        },
+        {
+          "title": "Paste Password",
+          "value": "paste-password"
+        },
+        {
+          "title": "Paste One-time Password",
+          "value": "paste-one-time-password"
         }
       ],
       "default": "open-in-browser",
@@ -171,34 +197,39 @@
       "type": "textfield"
     },
     {
-      "description": "Enter your ZSH binary path",
+      "description": "Enter your shell binary path (macOS only, e.g., /bin/zsh)",
       "name": "zshPath",
       "placeholder": "e.g., /bin/zsh",
       "required": false,
-      "title": "1Password SHELL path",
+      "title": "1Password SHELL path (macOS)",
       "type": "textfield",
       "default": "/bin/zsh"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.89.0",
-    "@raycast/utils": "^1.18.1",
+    "@1password/sdk": "^0.4.0",
+    "@raycast/api": "^1.103.6",
+    "@raycast/utils": "^2.2.2",
     "fast-glob": "^3.3.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^22.10.7",
-    "@types/react": "18.3.12",
-    "eslint": "^8.57.1",
-    "prettier": "^3.4.2",
-    "react": "^18.3.1",
-    "typescript": "^5.7.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
-  }
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

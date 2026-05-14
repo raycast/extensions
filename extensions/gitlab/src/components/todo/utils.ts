@@ -6,7 +6,7 @@ import { daysInSeconds } from "../../utils";
 
 export function useTodos(
   search?: string,
-  project?: Project | undefined
+  project?: Project | undefined,
 ): {
   todos: Todo[];
   error?: string;
@@ -25,7 +25,7 @@ export function useTodos(
       deps: [],
       secondsToRefetch: 1,
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   useEffect(() => {
     const todosFiltered = project

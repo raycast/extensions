@@ -1,5 +1,5 @@
 import { z } from 'zod';
-export declare const userRouter: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+export declare const userRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import(".prisma/client").PrismaClient<{
             log: "error"[];
@@ -11,27 +11,26 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
             deviceName: string;
         } | undefined;
         headers: Headers;
-        accessToken: string;
-        refreshToken: string;
-        iat: number;
-        exp: number;
+        jti: string;
     };
     meta: object;
     errorShape: {
         data: {
             zodError: z.typeToFlattenedError<any, string> | null;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+            code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
             httpStatus: number;
             path?: string;
             stack?: string;
         };
         message: string;
-        code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
     };
     transformer: true;
-}, {
+}, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
     me: import("@trpc/server").TRPCQueryProcedure<{
-        input: void;
+        input: {
+            device?: string | undefined;
+        } | undefined;
         output: {
             associatedSpaces: {
                 myTags: string[];
@@ -65,6 +64,7 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
             updatedAt: Date;
             image: string | null;
         };
+        meta: object;
     }>;
     listBySpaceId: import("@trpc/server").TRPCQueryProcedure<{
         input: string;
@@ -88,6 +88,7 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
             authEmail: string | null;
             role: import(".prisma/client").$Enums.TeamRole;
         })[];
+        meta: object;
     }>;
     inviteMembers: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -95,6 +96,7 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
             emails: string[];
         };
         output: void;
+        meta: object;
     }>;
     subscribeTag: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -102,6 +104,7 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
             tagName: string;
         };
         output: void;
+        meta: object;
     }>;
     unsubscribeTag: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -109,11 +112,13 @@ export declare const userRouter: import("@trpc/server/unstable-core-do-not-impor
             tagName: string;
         };
         output: void;
+        meta: object;
     }>;
     updateName: import("@trpc/server").TRPCMutationProcedure<{
         input: {
             name: string;
         };
         output: void;
+        meta: object;
     }>;
-}>;
+}>>;

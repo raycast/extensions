@@ -2,7 +2,7 @@ import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 
 import Details from "../detail";
 import { capitalize } from "../utils/capitalize";
-import { CSS, FIGMA, FRAMER, FRAMER_CUSTOM } from "../utils/constants";
+import { CSS, FIGMA, MOTION, MOTION_CUSTOM } from "../utils/constants";
 
 export const gridItem = (type: string, i?: string, o?: string) => {
   return (
@@ -21,13 +21,13 @@ export const gridItem = (type: string, i?: string, o?: string) => {
             shortcut={{ modifiers: ["cmd"], key: "f" }}
           />
           <Action.CopyToClipboard
-            title="Copy Framer Motion Basic Value"
-            content={FRAMER("ease" + capitalize(i || "") + capitalize(o || "") + capitalize(type))}
+            title="Copy Motion Basic Value"
+            content={MOTION("ease" + capitalize(i || "") + capitalize(o || "") + capitalize(type))}
             shortcut={{ modifiers: ["cmd"], key: "m" }}
           />
           <Action.CopyToClipboard
-            title="Copy Framer Motion Custom Value"
-            content={FRAMER_CUSTOM("ease" + capitalize(i || "") + capitalize(o || "") + capitalize(type))}
+            title="Copy Motion Custom Value"
+            content={MOTION_CUSTOM("ease" + capitalize(i || "") + capitalize(o || "") + capitalize(type))}
             shortcut={{ modifiers: ["cmd"], key: "c" }}
           />
           <Action.Push

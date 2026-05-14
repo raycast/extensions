@@ -57,7 +57,7 @@ export const OpenChatInSlack = ({
           onOpen={async () => {
             await onAction?.();
             await closeMainWindow();
-            if (closeRightSidebar) {
+            if (closeRightSidebar && process.platform !== "win32") {
               await runAppleScript(
                 buildScriptEnsuringSlackIsRunning(
                   `tell application "System Events" to tell process "Slack" to key code 47 using {command down}`,

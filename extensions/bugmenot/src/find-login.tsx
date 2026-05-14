@@ -22,7 +22,7 @@ const useMergeState = <T extends object>(initialState: T, callback?: (state: T) 
       }));
       if (callback) callback(state);
     },
-    [state, callback]
+    [state, callback],
   );
   return [state, setMergedState] as [T, typeof setMergedState];
 };

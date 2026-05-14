@@ -1,8 +1,15 @@
+interface SpringValues {
+  stiffness: string;
+  damping: string;
+  mass: string;
+}
+
 interface Easing {
   id: string;
   title: string;
   type: string;
-  value: string;
+  value: string | SpringValues;
+  valueType: string;
 }
 
 type State = {
@@ -10,4 +17,4 @@ type State = {
   easings: Easing[];
 };
 
-export type { Easing, State };
+export type { Easing, State, SpringValues };

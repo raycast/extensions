@@ -3,11 +3,12 @@
   "name": "wayback-machine",
   "title": "Wayback Machine",
   "description": "Quickly open and save webpages in Wayback Machine",
-  "icon": "518x0w.png",
+  "icon": "wayback-icon.png",
   "author": "pernielsentikaer",
   "contributors": [
     "andreaselia",
-    "j3lte"
+    "j3lte",
+    "chrismessina"
   ],
   "categories": [
     "Web",
@@ -31,8 +32,8 @@
     },
     {
       "name": "browser",
-      "title": "Open in Wayback Machine (Browser Extension)",
-      "description": "Open a webpage in Wayback Machine using the browser extension",
+      "title": "Open Current Tab in Wayback Machine",
+      "description": "Open the current tab in Wayback Machine",
       "mode": "no-view"
     },
     {
@@ -58,27 +59,64 @@
   ],
   "preferences": [
     {
-      "title": "Open in Wayback Machine",
-      "description": "Whether to open the overview page instead of the latest snapshot, when opening a page in Wayback Machine",
+      "name": "defaultView",
+      "title": "Default View",
+      "description": "Choose which view to open in the Wayback Machine",
+      "type": "dropdown",
+      "default": "snapshot",
+      "data": [
+        {
+          "title": "Latest Snapshot",
+          "value": "snapshot"
+        },
+        {
+          "title": "Calendar",
+          "value": "web/*"
+        },
+        {
+          "title": "Collections",
+          "value": "web/collections/*"
+        },
+        {
+          "title": "Changes",
+          "value": "web/changes"
+        },
+        {
+          "title": "Summary",
+          "value": "details"
+        },
+        {
+          "title": "Site Map",
+          "value": "web/sitemap"
+        },
+        {
+          "title": "URLs",
+          "value": "web/urls"
+        }
+      ],
+      "required": false
+    },
+    {
+      "name": "checkForSnapshots",
+      "title": "Check for Snapshots?",
+      "label": "Enable",
+      "description": "Check if an archived snapshot exists before opening. Disable for faster performance.",
       "type": "checkbox",
       "default": false,
-      "label": "Open Overview instead of the latest snapshot",
-      "name": "openOverview",
       "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.88.4",
-    "@raycast/utils": "^1.18.1",
-    "cross-fetch": "^4.0.0"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.18.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.12.7",
-    "@types/react": "18.2.79",
-    "eslint": "^8.51.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.0.3",
+    "@types/react": "^19.2.7",
+    "eslint": "^9.39.1",
     "prettier": "^3.4.2",
-    "typescript": "^5.7.2"
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",

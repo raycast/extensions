@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "pastefy",
   "title": "Pastefy",
-  "description": "Use Pastefy in Raycast to create and list pastes",
+  "description": "Use Pastefy in Raycast to create, list and delete pastes",
   "icon": "extension-icon.png",
   "author": "julian_gojani",
+  "contributors": [
+    "xmok"
+  ],
   "owner": "interaapps",
   "access": "public",
   "categories": [
@@ -18,7 +21,44 @@
       "name": "pastefy",
       "title": "Paste to Pastefy",
       "description": "Create a paste",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "rememberVisibility",
+          "label": "Remember Visibility",
+          "description": "Remember Visibility on Create",
+          "type": "checkbox",
+          "title": "Create",
+          "required": false,
+          "default": false
+        },
+        {
+          "name": "afterCreate",
+          "title": "After Create",
+          "description": "Action on Create",
+          "type": "dropdown",
+          "data": [
+            {
+              "title": "Copy & Open in Browser",
+              "value": "copyAndOpen"
+            },
+            {
+              "title": "Open in Browser Only",
+              "value": "openOnly"
+            },
+            {
+              "title": "Copy to Clipboard Only",
+              "value": "copyOnly"
+            },
+            {
+              "title": "Do Nothing",
+              "value": "nothing"
+            }
+          ],
+          "required": false,
+          "default": "copyAndOpen"
+        }
+      ]
     },
     {
       "name": "pastefy-list",
@@ -34,23 +74,23 @@
       "description": "Enter your personal Pastefy Key (pastefy.app/apikeys)",
       "type": "password",
       "title": "API Key",
-      "required": false
+      "required": false,
+      "placeholder": "xx...XX"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.5",
-    "@raycast/utils": "^1.16.3",
-    "axios": "^1.8.4",
+    "@raycast/api": "^1.103.5",
+    "@raycast/utils": "^2.2.2",
     "crypto-js": "^4.0.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
+    "@raycast/eslint-config": "^2.0.4",
     "@types/crypto-js": "^4.2.2",
-    "@types/node": "20.8.10",
-    "@types/react": "18.3.3",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
   },
   "scripts": {
     "build": "ray build -e dist -o dist",
@@ -59,5 +99,9 @@
     "lint": "ray lint",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

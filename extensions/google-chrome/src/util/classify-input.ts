@@ -23,7 +23,7 @@ export function classifyInput(input: string): ClassifiedInput {
     try {
       new URL(trimmedInput);
       return { type: "url", value: trimmedInput };
-    } catch (e) {
+    } catch {
       return { type: "search", value: trimmedInput };
     }
   }

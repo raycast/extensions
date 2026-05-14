@@ -83,7 +83,7 @@ async function cachePicture(title: string, url: string) {
   });
   if (res) {
     const buffer = await res.arrayBuffer();
-    fse.writeFile(buildCachePath(title), Buffer.from(buffer), async (error) => {
+    fse.writeFile(buildCachePath(title), Buffer.from(buffer), async (error: unknown) => {
       if (error != null) {
         await showToast(Toast.Style.Failure, String(error));
       }

@@ -4,23 +4,7 @@ import path from "path";
 import { promisify } from "util";
 
 const fsAccess = promisify(fs.access);
-const fsMkdir = promisify(fs.mkdir);
 const fsStat = promisify(fs.stat);
-
-export async function ensureDirectoryExists(dirPath: string): Promise<void> {
-  try {
-    await fsAccess(dirPath, fs.constants.F_OK);
-  } catch (error) {
-    try {
-      await fsMkdir(dirPath, { recursive: true });
-    } catch (mkdirError: unknown) {
-      console.error(`Error creating directory: ${dirPath}`, mkdirError);
-      throw new Error(
-        `Failed to create directory: ${mkdirError instanceof Error ? mkdirError.message : String(mkdirError)}`,
-      );
-    }
-  }
-}
 
 export function formatFileSize(bytes: number): string {
   if (bytes === 0) return "0 Bytes";
@@ -132,7 +116,7 @@ export function formatTimestamp(timestamp: string): string {
   if (!timestamp) return "Unknown";
   try {
     return new Date(timestamp).toLocaleString();
-  } catch (e) {
+  } catch {
     return timestamp;
   }
 }
@@ -179,7 +163,7 @@ export function calculateAge(timestamp: string): string {
 
     const years = Math.floor(months / 12);
     return `${years} year${years !== 1 ? "s" : ""}`;
-  } catch (e) {
+  } catch {
     return "Unknown";
   }
 }

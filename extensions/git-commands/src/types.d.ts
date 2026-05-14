@@ -7,6 +7,7 @@ export type Alias = {
   description: string;
   pin?: boolean;
   recent?: boolean;
+  keywords?: string[];
 };
 
 /**

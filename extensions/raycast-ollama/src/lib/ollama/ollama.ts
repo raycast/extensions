@@ -561,26 +561,34 @@ export class Ollama {
           }
 
           const e = new EventEmitter();
+          let part = "";
 
           body?.on("data", (chunk) => {
             if (chunk !== undefined) {
-              let json: Types.OllamaApiPullResponse | Types.OllamaErrorResponse | undefined;
               const buffer = Buffer.from(chunk);
-              try {
-                json = JSON.parse(buffer.toString());
-              } catch (err) {
-                console.error(err);
-              }
-              if (json)
-                if ("total" in json && json.total && "completed" in json && json.completed) {
-                  e.emit("downloading", json.completed / json.total);
-                } else if ("status" in json && json.status === "success") {
-                  e.emit("done", "Download completed");
-                } else if ("error" in json) {
-                  e.emit("error", json.error);
-                } else {
-                  e.emit("message", json.status);
+              const jsonStr = part + buffer.toString();
+              const lines = jsonStr.split("\n");
+              part = lines.pop() || "";
+
+              for (const j of lines) {
+                if (j.trim() === "") continue;
+                let json: Types.OllamaApiPullResponse | Types.OllamaErrorResponse | undefined;
+                try {
+                  json = JSON.parse(j);
+                } catch (err) {
+                  console.error(err);
                 }
+                if (json && typeof json === "object")
+                  if ("total" in json && json.total && "completed" in json && json.completed) {
+                    e.emit("downloading", json.completed / json.total);
+                  } else if ("status" in json && json.status === "success") {
+                    e.emit("done", "Download completed");
+                  } else if ("error" in json) {
+                    e.emit("error", json.error);
+                  } else {
+                    e.emit("message", json.status);
+                  }
+              }
             }
           });
 
@@ -650,18 +658,17 @@ export class Ollama {
           body?.on("data", (chunk) => {
             if (chunk !== undefined) {
               const buffer = Buffer.from(chunk);
-              let jsonStr = buffer.toString();
-              if (part !== "") {
-                jsonStr = part + jsonStr;
-              }
-              for (const j of jsonStr.split("\n").filter((p) => p !== "")) {
+              const jsonStr = part + buffer.toString();
+              const lines = jsonStr.split("\n");
+              part = lines.pop() || "";
+
+              for (const j of lines) {
+                if (j.trim() === "") continue;
                 try {
                   const json = JSON.parse(j);
                   emitContent(json);
-                  part = "";
                 } catch (err) {
                   console.error(err);
-                  part += j;
                 }
               }
             }

@@ -1,0 +1,42 @@
+```fortran
+subroutine srotmg (
+        real sd1,
+        real sd2,
+        real sx1,
+        real sy1,
+        real, dimension(5) sparam
+)
+```
+
+CONSTRUCT THE MODIFIED GIVENS TRANSFORMATION MATRIX H WHICH ZEROS
+THE SECOND COMPONENT OF THE 2-VECTOR  (SQRT(SD1)\*SX1,SQRT(SD2)\*>    SY2)\*\*T.
+WITH SPARAM(1)=SFLAG, H HAS ONE OF THE FOLLOWING FORMS..
+
+SFLAG=-1.E0     SFLAG=0.E0        SFLAG=1.E0     SFLAG=-2.E0
+
+(SH11  SH12)    (1.E0  SH12)    (SH11  1.E0)    (1.E0  0.E0)
+H=(          )    (          )    (          )    (          )
+(SH21  SH22),   (SH21  1.E0),   (-1.E0 SH22),   (0.E0  1.E0).
+LOCATIONS 2-4 OF SPARAM CONTAIN SH11,SH21,SH12, AND SH22
+RESPECTIVELY. (VALUES OF 1.E0, -1.E0, OR 0.E0 IMPLIED BY THE
+VALUE OF SPARAM(1) ARE NOT STORED IN SPARAM.)
+
+THE VALUES OF GAMSQ AND RGAMSQ SET IN THE DATA STATEMENT MAY BE
+INEXACT.  THIS IS OK AS THEY ARE ONLY USED FOR TESTING THE SIZE
+OF SD1 AND SD2.  ALL ACTUAL SCALING OF DATA IS DONE USING GAM.
+
+## Parameters
+SD1 : REAL [in,out]
+
+SD2 : REAL [in,out]
+
+SX1 : REAL [in,out]
+
+SY1 : REAL [in]
+
+SPARAM : REAL array, dimension (5) [out]
+> SPARAM(1)=SFLAG
+> SPARAM(2)=SH11
+> SPARAM(3)=SH21
+> SPARAM(4)=SH12
+> SPARAM(5)=SH22

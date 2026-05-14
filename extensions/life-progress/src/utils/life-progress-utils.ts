@@ -1,5 +1,5 @@
 import { getLiftProgressCanvas } from "./common-utils";
-import { CountdownDate, LifeProgress } from "../types/types";
+import { CountdownDate, LifeProgressType } from "../types/types";
 import { SectionTitle, SYMBOL_NUM } from "./constants";
 import { birthday, weekStart } from "../types/preferences";
 
@@ -131,7 +131,7 @@ export const getDaysLeftThisYear = () => {
 };
 
 export const getLifeProgress = (countdownDates: CountdownDate[]) => {
-  const lifeProgresses: LifeProgress[] = [];
+  const lifeProgresses: LifeProgressType[] = [];
 
   const timeIcon12 = ["🕚", "🕙", "🕘", "🕗", "🕖", "🕕", "🕔", "🕓", "🕒", "🕑", "🕐", "🕛"];
   const timeIcon24 = [...timeIcon12, ...timeIcon12];

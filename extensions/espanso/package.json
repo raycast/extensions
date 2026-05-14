@@ -3,6 +3,7 @@
   "name": "espanso",
   "title": "Espanso",
   "description": "The Raycast version of Espanso Search Bar",
+  "type": "module",
   "icon": "espanso-logo.png",
   "author": "kud",
   "contributors": [
@@ -13,6 +14,7 @@
     "System",
     "Productivity"
   ],
+  "version": "1.1.0",
   "license": "MIT",
   "commands": [
     {
@@ -52,25 +54,50 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.61.1",
-    "@raycast/utils": "^1.10.0",
+    "@raycast/api": "1.104.12",
+    "@raycast/utils": "2.2.3",
     "change-case": "5.4.4",
-    "fs-extra": "^11.1.1",
-    "zx": "7.2.3"
+    "fs-extra": "11.3.4",
+    "yaml": "2.8.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.34",
-    "eslint": "^8.53.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "2.1.1",
+    "@types/fs-extra": "11.0.4",
+    "@types/node": "25.6.0",
+    "@types/react": "19.2.14",
+    "@types/yaml": "1.9.7",
+    "eslint": "10.2.0",
+    "prettier": "3.8.3",
+    "typescript": "6.0.2",
+    "vitest": "4.1.4"
   },
+  "preferences": [
+    {
+      "name": "espansoPath",
+      "type": "textfield",
+      "title": "Espanso Binary Path",
+      "description": "Full path to the espanso binary. Leave empty to use the default (espanso in PATH).",
+      "required": false
+    },
+    {
+      "name": "breadcrumbSeparator",
+      "type": "textfield",
+      "title": "Breadcrumb Separator",
+      "description": "Character(s) to use for separating category levels (e.g., · / > →)",
+      "default": "·",
+      "required": false
+    }
+  ],
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "npx @raycast/api@latest publish"
-  }
+    "publish": "npx @raycast/api@latest publish",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

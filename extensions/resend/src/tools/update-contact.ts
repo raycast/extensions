@@ -1,9 +1,5 @@
-import { Resend } from "resend";
-import { API_KEY } from "../utils/constants";
 import { Tool } from "@raycast/api";
-import "cross-fetch/polyfill";
-
-const resend = new Resend(API_KEY);
+import { resend } from "../lib/resend";
 
 type Input = {
   /**
@@ -48,10 +44,9 @@ type Input = {
 const tool = async (input: Input) => {
   const { data, error } = await resend.contacts.update({
     audienceId: input.audienceId,
-    id: input.contactId,
     ...(input.firstName !== undefined && { firstName: input.firstName }),
     ...(input.lastName !== undefined && { lastName: input.lastName }),
-    ...(input.email !== undefined && { email: input.email }),
+    ...(input.email !== undefined ? { email: input.email } : { id: input.contactId }),
     ...(input.unsubscribed !== undefined && { unsubscribed: input.unsubscribed }),
   });
 

@@ -1,5 +1,5 @@
 import { z } from "zod";
-export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-import").BuiltRouter<{
+export declare const spaceRouter: import("@trpc/server").TRPCBuiltRouter<{
     ctx: {
         db: import(".prisma/client").PrismaClient<{
             log: "error"[];
@@ -11,25 +11,22 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             deviceName: string;
         } | undefined;
         headers: Headers;
-        accessToken: string;
-        refreshToken: string;
-        iat: number;
-        exp: number;
+        jti: string;
     };
     meta: object;
     errorShape: {
         data: {
             zodError: z.typeToFlattenedError<any, string> | null;
-            code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_KEY;
+            code: import("@trpc/server").TRPC_ERROR_CODE_KEY;
             httpStatus: number;
             path?: string;
             stack?: string;
         };
         message: string;
-        code: import("@trpc/server/unstable-core-do-not-import").TRPC_ERROR_CODE_NUMBER;
+        code: import("@trpc/server").TRPC_ERROR_CODE_NUMBER;
     };
     transformer: true;
-}, {
+}, import("@trpc/server").TRPCDecorateCreateRouterOptions<{
     create: import("@trpc/server").TRPCMutationProcedure<{
         input: {
             name: string;
@@ -37,22 +34,44 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             description?: string | undefined;
         };
         output: void;
+        meta: object;
     }>;
     leave: import("@trpc/server").TRPCMutationProcedure<{
         input: {
             spaceId: string;
         };
         output: void;
+        meta: object;
     }>;
     get: import("@trpc/server").TRPCQueryProcedure<{
         input: {
             spaceId: string;
         };
         output: ({
+            users: {
+                status: import(".prisma/client").$Enums.TeamMemberStatus;
+                spaceId: string;
+                createdAt: Date;
+                email: string;
+                tags: string[];
+                updatedAt: Date;
+                image: string | null;
+                nickname: string | null;
+                authEmail: string | null;
+                role: import(".prisma/client").$Enums.TeamRole;
+            }[];
+            memberAuthPolicies: {
+                spaceId: string;
+                createdAt: Date;
+                updatedAt: Date;
+                emailPattern: string;
+                authCheckIntervalSec: number;
+            }[];
             _count: {
                 tags: number;
                 bookmarks: number;
                 users: number;
+                memberAuthPolicies: number;
             };
         } & {
             type: import(".prisma/client").$Enums.SpaceType;
@@ -64,6 +83,7 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             updatedAt: Date;
             image: string | null;
         }) | null;
+        meta: object;
     }>;
     update: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -71,8 +91,11 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             description?: string | undefined;
             name?: string | undefined;
             image?: string | undefined;
+            myNickname?: string | undefined;
+            myImage?: string | undefined;
         };
         output: void;
+        meta: object;
     }>;
     removeUser: import("@trpc/server").TRPCMutationProcedure<{
         input: {
@@ -80,5 +103,6 @@ export declare const spaceRouter: import("@trpc/server/unstable-core-do-not-impo
             targetEmail: string;
         };
         output: void;
+        meta: object;
     }>;
-}>;
+}>>;

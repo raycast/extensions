@@ -75,4 +75,38 @@ export const QUERIES = {
             }
         }
     }`,
+  getCurrencies: `
+        query {
+            currencies {
+                ${OBJECTS.Currency}
+            }
+        }
+    `,
+  getCountries: `
+        query {
+            countries {
+                code
+                name
+            }
+        }
+    `,
+  getValidIncomeAccounts: `
+        query ($businessId: ID!, $subtypes: [AccountSubtypeValue!]) {
+            business(id: $businessId) {
+                id
+                accounts(subtypes: $subtypes) {
+                    edges {
+                        node {
+                            id
+                            name
+                            subtype {
+                                name
+                                value
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    `,
 };

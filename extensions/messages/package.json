@@ -10,12 +10,40 @@
     "ramsay",
     "thomas",
     "aeorge",
-    "hayden_barnes"
+    "hayden_barnes",
+    "micha_van_eijk",
+    "islamtayeb"
   ],
   "keywords": [
     "2fa"
   ],
   "license": "MIT",
+  "preferences": [
+    {
+      "name": "filterSpam",
+      "type": "checkbox",
+      "label": "Filter Out Spam",
+      "description": "When enabled, messages labeled as spam will not be shown.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "filterUnknownSenders",
+      "type": "checkbox",
+      "label": "Filter Out Unknown Senders",
+      "description": "When enabled, messages from unknown senders will not be shown.",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "loadContactPhotos",
+      "type": "checkbox",
+      "label": "Load Contact Photos",
+      "description": "When enabled, contact photos will be displayed. Disabling this significantly improves performance (~3s faster).",
+      "default": true,
+      "required": false
+    }
+  ],
   "commands": [
     {
       "name": "open-chat",
@@ -353,7 +381,7 @@
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.7.4",
-    "@types/react": "18.3.10",
+    "@types/react": "19.0.10",
     "eslint": "^8.57.1",
     "eslint-plugin-import": "^2.30.0",
     "eslint-plugin-react-hooks": "^4.6.2",

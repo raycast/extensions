@@ -12,7 +12,7 @@ export const compare = (a: TodoItem, b: TodoItem) => {
 export const insertIntoSection = (
   currentSection: TodoItem[],
   newItem: TodoItem,
-  cmp: (a: TodoItem, b: TodoItem) => number
+  cmp: (a: TodoItem, b: TodoItem) => number,
 ) => {
   let low = -1;
   let high = currentSection.length - 1;

@@ -1,6 +1,7 @@
 import crypto from "crypto";
 
 import { sync_token, syncRequest } from "../api";
+import { mapPriority } from "../helpers/priorities";
 import { withTodoistApi } from "../helpers/withTodoistApi";
 
 type Input = {
@@ -92,7 +93,7 @@ type Input = {
     amount: number;
   };
   /**
-   * The priority of the task (1-4, where 4 is very urgent and 1 is natural)
+   * The priority of the task (1-4, where 1 is highest priotiy and 4 is the lowest priority).
    */
   priority?: number;
   /**
@@ -141,6 +142,7 @@ type Input = {
 
 export default withTodoistApi(async function (input: Input) {
   const temp_id = crypto.randomUUID();
+  input.priority = mapPriority(input.priority);
 
   return syncRequest({
     sync_token,

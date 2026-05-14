@@ -79,7 +79,7 @@ export default function Command() {
 
     try {
       const paths = selectedFiles.join("|");
-      let url = `compressx://open?path=${paths}&quality=${values.quality}`;
+      let url = `compresto://open?path=${paths}&quality=${values.quality}`;
 
       // Add format parameters if they exist
       if (values.videoFormat && fileTypes.has("video")) {
@@ -102,7 +102,7 @@ export default function Command() {
 
       await showToast({
         style: Toast.Style.Success,
-        title: "Sent to CompressX for compressing",
+        title: "Sent to Compresto for compressing",
         message: `${selectedFiles.length} files selected`,
       });
       await popToRoot();
@@ -124,11 +124,11 @@ export default function Command() {
       <Form
         actions={
           <ActionPanel>
-            <Action.OpenInBrowser title="Install CompressX" url="https://compressx.app" />
+            <Action.OpenInBrowser title="Install Compresto" url="https://compresto.app" />
           </ActionPanel>
         }
       >
-        <Form.Description text="CompressX is not installed. Please install it to use this extension." />
+        <Form.Description text="Compresto is not installed. Please install it to use this extension." />
       </Form>
     );
   }

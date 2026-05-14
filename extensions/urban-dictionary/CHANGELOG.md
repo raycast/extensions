@@ -1,8 +1,12 @@
 # Urban Dictionary Changelog
 
+## [Windows support] - 2026-01-01
+
+- Added Windows support
+
 ## [Fix] - 2024-08-19
 
-- Fix capitalization in metadata label titles.
+- Fixed capitalization in metadata label titles
 
 ## [Bug fix] - 2023-03-24
 

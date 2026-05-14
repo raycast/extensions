@@ -1,12 +1,11 @@
-import type { UsableLocale } from "@faker-js/faker";
 import _ from "lodash";
 
 import { Clipboard, Toast, showHUD, showToast } from "@raycast/api";
 
-import faker from "@/faker";
+import fakerClient from "@/faker";
 
 export default async function openQuicklink(options: {
-  arguments: { id?: string; section?: string; mode?: "copy" | "paste"; locale?: UsableLocale };
+  arguments: { id?: string; section?: string; mode?: "copy" | "paste"; locale?: string };
 }) {
   const { id, section, mode, locale } = options.arguments;
 
@@ -19,8 +18,8 @@ export default async function openQuicklink(options: {
     return;
   }
 
-  faker.locale = locale;
-  const value = (_.get(faker, `${section}.${id}`) as unknown as () => string | number)();
+  fakerClient.setLocale(locale);
+  const value = (_.get(fakerClient.faker, `${section}.${id}`) as unknown as () => string | number)();
 
   if (mode === "copy") {
     await Clipboard.copy(value);

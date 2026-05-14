@@ -116,6 +116,7 @@ export interface Login {
   totp: string | null;
   passwordRevisionDate: string | null;
   uris?: Uris[];
+  fido2Credentials?: Fido2Credential[];
 }
 
 export enum UriMatch {
@@ -130,6 +131,22 @@ export enum UriMatch {
 export interface Uris {
   match: UriMatch | null;
   uri: string | null;
+}
+
+interface Fido2Credential {
+  credentialId: string;
+  keyType: string;
+  keyAlgorithm: string;
+  keyCurve: string;
+  keyValue: string;
+  rpId: string;
+  userHandle: string;
+  userName: string;
+  counter: string;
+  rpName: string;
+  userDisplayName: string;
+  discoverable: string;
+  creationDate: string;
 }
 
 export interface PasswordHistory {

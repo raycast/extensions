@@ -9,7 +9,7 @@ import { CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID } from "./constants";
 export default function Command() {
   const [searchText, setSearchText] = useState<string>();
   const [profile] = useCachedState(CHROME_PROFILE_KEY, DEFAULT_CHROME_PROFILE_ID);
-  const { data, isLoading, errorView, revalidate } = useBookmarkSearch(searchText);
+  const { data, isLoading, errorView, revalidate } = useBookmarkSearch(profile, searchText);
 
   if (errorView) {
     return errorView;

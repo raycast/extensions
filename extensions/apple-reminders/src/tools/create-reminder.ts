@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { createReminder } from "swift:../../swift/AppleReminders";
 
 import { Frequency } from "../create-reminder";
@@ -12,7 +13,7 @@ type Input = {
    */
   notes?: string;
   /**
-   * The due date. Can either be a full day date (YYYY-MM-DD) or an ISO date if the time is specified (YYYY-MM-DDTHH:mm:ss.sssZ). Use sensible defaults for common timeframes (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. If the user didn't include a specific time, assume it's a full day reminder.
+   * The due date. Must include a calendar date. Use YYYY-MM-DD for full-day reminders or ISO with time (YYYY-MM-DDTHH:mm:ss.sssZ). Time-only values (e.g. "10:00:00") are invalid and will fail. Use sensible defaults for common timeframes (e.g "8am" for "morning", "1pm" for "afternoon", "6pm" for "evening"). A number with "a" or "p" appended (e.g. "1p" or "8a") should be treated as AM or PM. If the user didn't include a specific time, assume it's a full day reminder.
    */
   dueDate?: string;
   /**
@@ -37,10 +38,11 @@ type Input = {
   radius?: number;
   /**
    * The recurrence settings.
+   * Only include this when the user explicitly asks for a repeating reminder (for example: "every day", "weekly", "monthly", "yearly", "weekdays", or "weekends").
    */
   recurrence?: {
     /**
-     * Recurrence frequency. Only pick the value from this list: "daily", "weekly", "monthly", "yearly".
+     * Recurrence frequency. Only pick the value from this list: "daily", "weekdays", "weekends", "weekly", "monthly", "yearly".
      */
     frequency: Frequency;
     /**
@@ -51,6 +53,22 @@ type Input = {
      * Recurrence end date. A full day date (YYYY-MM-DD). If no end date is specified, the recurrence will repeat forever.
      */
     endDate?: string;
+  };
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  if (!input.recurrence) {
+    return undefined;
+  }
+
+  return {
+    message: `Create a recurring reminder for "${input.title}"?`,
+    info: [
+      { name: "Frequency", value: input.recurrence.frequency },
+      { name: "Interval", value: String(input.recurrence.interval) },
+      { name: "Due Date", value: input.dueDate },
+      { name: "Recurrence End Date", value: input.recurrence.endDate },
+    ],
   };
 };
 

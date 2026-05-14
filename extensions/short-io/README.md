@@ -9,8 +9,8 @@ Shorten and search links with your own domain via [Short.io](https://short.io)
 
 **Get your secret API key [here](https://app.short.io/settings/integrations/api-key)**:
 
-- Click "Create API key".
-- Add a Secret key.
+- `Click` "Create API key".
+- `Add` a Secret key.
 - Do not turn on the _Public key_ switch, this extension does not support public key.
 
 <img src="https://files.readme.io/b70e76c-Screen_Shot_2021-08-11_at_2.57.06_PM.png" height="150">

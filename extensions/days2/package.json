@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "days2",
+  "title": "Days 2 - Google Calendar Countdown",
+  "description": "Countdown to all-day events from Google Calendar — see how many days until your next birthday, holiday, deadline, or milestone.",
+  "icon": "icon.png",
+  "author": "datboi",
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "days2",
+      "title": "Days 2",
+      "description": "View countdown to upcoming all-day events",
+      "mode": "view"
+    },
+    {
+      "name": "manage-calendars",
+      "title": "Manage Calendars",
+      "description": "Select which Google Calendars to display",
+      "mode": "view"
+    },
+    {
+      "name": "background-refresh",
+      "title": "Days 2",
+      "description": "Updates the nearest event subtitle in Raycast root search",
+      "mode": "no-view",
+      "interval": "1h"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "displayMode",
+      "title": "Default Display Mode",
+      "description": "How to display the countdown by default",
+      "type": "dropdown",
+      "required": false,
+      "default": "days",
+      "data": [
+        {
+          "title": "Days",
+          "value": "days"
+        },
+        {
+          "title": "Weeks + Days",
+          "value": "weeks"
+        },
+        {
+          "title": "Months + Days",
+          "value": "months"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.8",
+    "@raycast/utils": "^2.2.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "typescript": "^5.7.0",
+    "@types/node": "~22.13.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.57.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

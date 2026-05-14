@@ -2,7 +2,7 @@
 
 
 <div align="center">
-  <img src="./media/extension-icon.png" alt="Expo Logo" width="200" />
+  <img src="./assets/extension-icon.png" alt="Expo Logo" width="200" />
 </div>
 
 ## Overview

@@ -1,5 +1,13 @@
 # Google Search Changelog
 
+## [Update] - 2026-01-26
+
+- Fix issue with search text containing special characters
+
+## [Windows] - 2025-11-06
+
+- Release extension for Windows
+
 ## [Update] - 2025-02-22
 
 - Add clipboard fallback preference for selected text searches

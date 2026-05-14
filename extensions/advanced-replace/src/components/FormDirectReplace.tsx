@@ -46,6 +46,7 @@ export default function FormDirectReplace({ initialValues, isNew, children }: Fo
           ...values,
           id: nanoid(),
           type: "directReplace",
+          lastUsed: new Date(),
           regexItems,
         });
       } else {

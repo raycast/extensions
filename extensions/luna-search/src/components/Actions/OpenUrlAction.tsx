@@ -1,4 +1,6 @@
 import { Action, Image } from "@raycast/api";
+import { JSX } from "react";
+
 import { openUrl } from "../../utilities";
 
 /**

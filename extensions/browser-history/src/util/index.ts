@@ -1,6 +1,7 @@
-import fs from "fs";
-import path from "path";
-import { Preferences, SupportedBrowsers } from "../interfaces";
+import fs, { readFileSync } from "fs";
+import path, { resolve } from "path";
+import { homedir } from "os";
+import { ChatGPTAtlasLocalState, Preferences, SupportedBrowsers } from "../interfaces";
 import { getPreferenceValues } from "@raycast/api";
 import {
   defaultProfilePathArc,
@@ -14,6 +15,9 @@ import {
   defaultProfilePathVivaldi,
   defaultProfilePathOrion,
   defaultProfilePathSidekick,
+  defaultProfilePathDia,
+  defaultProfilePathComet,
+  defaultProfilePathChatGPTAtlas,
 } from "../constants";
 
 const userLibraryDirectoryPath = () => {
@@ -48,6 +52,9 @@ export const getHistoryDbPath = (browser: SupportedBrowsers) => {
     profilePathIridium,
     profilePathOrion,
     profilePathSidekick,
+    profilePathDia,
+    profilePathComet,
+    profilePathChatGPTAtlas,
   } = getPreferenceValues<Preferences>();
   const userDataDirectory = userLibraryDirectoryPath();
   let profilePath, profileName;
@@ -102,6 +109,35 @@ export const getHistoryDbPath = (browser: SupportedBrowsers) => {
       return profilePathSidekick
         ? path.join(profilePathSidekick, "History")
         : path.join(userDataDirectory, ...defaultProfilePathSidekick);
+    case SupportedBrowsers.Dia:
+      return profilePathDia
+        ? path.join(profilePathDia, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathDia);
+    case SupportedBrowsers.Comet:
+      return profilePathComet
+        ? path.join(profilePathComet, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathComet);
+    case SupportedBrowsers.ChatGPTAtlas: {
+      const localStatePath = resolve(
+        homedir(),
+        "Library/Application Support/com.openai.atlas/browser-data/host/Local State",
+      );
+
+      let lastUsedProfile = "Default";
+      try {
+        const fileContent = readFileSync(localStatePath, "utf-8");
+        const localState: ChatGPTAtlasLocalState = JSON.parse(fileContent);
+
+        // Get the last used profile
+        lastUsedProfile = localState.profile.last_used;
+      } catch (error) {
+        console.error("Error reading local state file:", error);
+      }
+
+      return profilePathChatGPTAtlas
+        ? path.join(profilePathChatGPTAtlas, "History")
+        : path.join(userDataDirectory, ...defaultProfilePathChatGPTAtlas).replace("Default", lastUsedProfile);
+    }
     default:
       throw new Error("Unsupported browser.");
   }

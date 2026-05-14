@@ -12,7 +12,6 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { execa } from "execa";
 import React, { useEffect, useMemo, useState } from "react";
 import * as scripts from "./script";
 import { Category, Info, Result, Run, RunType, Script } from "./script/type";
@@ -119,7 +118,6 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
   return (
     <List.Item
       title={info.title}
-      accessoryTitle={info.desc}
       keywords={keyword}
       icon={info.icon}
       actions={
@@ -157,6 +155,11 @@ const ListItem = React.memo(function ListItem(props: { item: Script }) {
           })}
         </ActionPanel>
       }
+      accessories={[
+        {
+          text: info.desc,
+        },
+      ]}
     />
   );
 });
@@ -179,18 +182,23 @@ const useScriptHook = () => {
 
   async function startScript() {
     if (content.query.length > 0) {
-      isLive && setContent((prev) => ({ ...prev, isLoading: true }));
+      if (isLive) {
+        setContent((prev) => ({ ...prev, isLoading: true }));
+      }
 
       const scriptResult = await runScript(content.query);
-      isLive &&
+      if (isLive) {
         setContent((prev) => ({
           ...prev,
           result: scriptResult.result,
           isLoading: false,
           isError: !scriptResult.isSuccess,
         }));
+      }
     } else {
-      isLive && setContent((prev) => ({ ...prev, result: "", isError: false }));
+      if (isLive) {
+        setContent((prev) => ({ ...prev, result: "", isError: false }));
+      }
     }
   }
 
@@ -263,9 +271,21 @@ function InputListView(props: { info: Info }) {
         title={content.result}
         actions={ResultActionView({ content, info })}
         subtitle={content.query.length <= 0 ? "Result" : ""}
-        accessoryTitle={content.query.length <= 0 ? "Waiting for query" : content.isError ? "Error" : "Success"}
+        accessories={[
+          {
+            text: content.query.length <= 0 ? "Waiting for query" : content.isError ? "Error" : "Success",
+          },
+        ]}
       />
-      <List.Item title="" subtitle={"Example"} accessoryTitle={info.example} />
+      <List.Item
+        title=""
+        subtitle={"Example"}
+        accessories={[
+          {
+            text: info.example,
+          },
+        ]}
+      />
     </List>
   );
 }
@@ -298,11 +318,11 @@ function InputFormView(props: { info: Info }) {
 }
 
 async function isClipboardContent() {
-  const { stdout } = await execa("pbpaste");
-  if (stdout.length === 0) {
+  const clipboardText = await Clipboard.readText();
+  if (!clipboardText || clipboardText.length === 0) {
     return false;
   }
-  return stdout;
+  return clipboardText;
 }
 
 async function runScript(query: string): Promise<{ result: string; isSuccess: boolean }> {

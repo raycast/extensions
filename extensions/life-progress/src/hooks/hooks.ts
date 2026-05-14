@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useState } from "react";
 import { Alert, confirmAlert, Icon, LocalStorage } from "@raycast/api";
-import { CountdownDate, LifeProgress } from "../types/types";
+import { CountdownDate, LifeProgressType } from "../types/types";
 import { getLifeProgress } from "../utils/life-progress-utils";
 import { LocalStorageKey } from "../utils/constants";
 import { updateCommandSubtitle } from "../utils/common-utils";
 
 export const getLifeProgressInfo = (refresh: number) => {
-  const [lifeProgresses, setLifeProgresses] = useState<LifeProgress[]>([]);
+  const [lifeProgresses, setLifeProgresses] = useState<LifeProgressType[]>([]);
   const [countdownDates, setCountdownDates] = useState<CountdownDate[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -19,7 +19,7 @@ export const getLifeProgressInfo = (refresh: number) => {
     setLifeProgresses(lifeProgresses);
     setCountdownDates(localCountdownDates);
     setLoading(false);
-    await updateCommandSubtitle(lifeProgresses);
+    await updateCommandSubtitle();
   }, [refresh]);
 
   useEffect(() => {

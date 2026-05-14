@@ -15,6 +15,15 @@ function getIcon(item: FileItem): Image.ImageLike {
     default:
       break;
   }
+  if (item.mimetype === "image/x-generic") return { source: Icon.Image, tintColor: Color.Green };
+  switch (item.rawmimetype) {
+    case "text/css":
+    case "text/html":
+    case "text/x-log":
+      return { source: Icon.CodeBlock, tintColor: Color.Blue };
+    default:
+      break;
+  }
   switch (item.type) {
     case "dir":
       return { source: Icon.Folder, tintColor: Color.Yellow };

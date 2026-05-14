@@ -1,5 +1,4 @@
 import { Alert, Cache, confirmAlert } from "@raycast/api";
-import fetch from "node-fetch";
 import { z } from "zod";
 
 import { clientId, getTokens } from "./oauth";
@@ -42,9 +41,16 @@ const extendedAnimeBody = animeBody.extend({
       season: z.string(),
     })
     .optional(),
+  broadcast: z
+    .object({
+      day_of_the_week: z.string(),
+      start_time: z.string().optional(),
+    })
+    .optional(),
+  source: z.string().optional(),
   average_episode_duration: z.number(),
   rating: z.string().optional(),
-  studios: z.array(z.any()),
+  studios: z.array(z.object({ id: z.number(), name: z.string() })),
 });
 
 const animelistBody = z.object({
@@ -52,7 +58,7 @@ const animelistBody = z.object({
     .array(
       z.object({
         node: animeBody,
-      })
+      }),
     )
     .optional(),
 });
@@ -62,7 +68,7 @@ const animeSearchBody = z.object({
     .array(
       z.object({
         node: extendedAnimeBody,
-      })
+      }),
     )
     .optional(),
 });
@@ -171,8 +177,8 @@ export async function request(
   body: string | URLSearchParams | undefined = undefined,
   method: "GET" | "PUT" | "POST" | "DELETE" = "GET",
   headers: Record<string, string> = {},
-  opts: fetch.RequestInit = {}
-): Promise<fetch.Response> {
+  opts: RequestInit = {},
+): Promise<Response> {
   const accessToken = (await getTokens())?.accessToken;
   if (!accessToken) throw new Error("Not signed in");
 
@@ -193,8 +199,8 @@ export async function request_anon(
   body: string | URLSearchParams | undefined = undefined,
   method: "GET" | "PUT" | "POST" | "DELETE" = "GET",
   headers: Record<string, string> = {},
-  opts: fetch.RequestInit = {}
-): Promise<fetch.Response> {
+  opts: RequestInit = {},
+): Promise<Response> {
   return fetch(url, {
     body,
     method,
@@ -214,7 +220,7 @@ type SearchAnimeOptions = {
 
 export async function fetchAnimes(
   search: string,
-  { nsfw, anon }: SearchAnimeOptions
+  { nsfw, anon }: SearchAnimeOptions,
 ): Promise<ExtendedAnime[] | undefined> {
   try {
     const params = new URLSearchParams();
@@ -253,7 +259,7 @@ export async function fetchSuggestions({ nsfw, anon }: SearchAnimeOptions): Prom
     const response = await (anon ? request_anon : request)(
       anon
         ? `https://api.myanimelist.net/v2/anime/season/${year}/${season}?${params}` // If the user is not signed in, get the current seasonal animes
-        : `https://api.myanimelist.net/v2/anime/suggestions?${params}` // If the user is signed in, get their usual suggestions
+        : `https://api.myanimelist.net/v2/anime/suggestions?${params}`, // If the user is signed in, get their usual suggestions
     );
 
     const json = await response.json();
@@ -335,7 +341,7 @@ export async function getAnimeEpisodesWatched(anime: Anime, allowCache: boolean 
   }
 
   const json = await res.json();
-  const episodes = json.num_episodes_watched ?? 0;
+  const episodes = z.object({ num_episodes_watched: z.number() }).safeParse(json).data?.num_episodes_watched ?? 0;
 
   // Cache for 5 minutes
   if (allowCache) cacheSet(cacheKey, episodes, 1000 * 60 * 5);
@@ -410,7 +416,7 @@ export async function getAnimeWatchlist(status?: AnimeStatus, limit = 30, offset
 export async function getDetailedWatchlist(
   statuses: AnimeStatus[],
   limit = 30,
-  offset = 0
+  offset = 0,
 ): Promise<(ExtendedAnime & { status: string })[]> {
   const getStatusCategory = async (status: AnimeStatus) => {
     const list = await getAnimeWatchlist(status, limit, offset);
@@ -419,7 +425,7 @@ export async function getDetailedWatchlist(
       list.map(async (anime) => ({
         ...(await getAnimeDetails(anime)),
         status,
-      }))
+      })),
     );
 
     return animes;

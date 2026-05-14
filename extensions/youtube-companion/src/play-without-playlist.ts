@@ -16,6 +16,7 @@ export default async function main() {
         await showHUD(messages.invalidYouTubeURL);
       }
     } catch (error) {
+      console.error(error);
       await showHUD(messages.invalidURL);
     }
   } else {

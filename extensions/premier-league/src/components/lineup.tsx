@@ -1,74 +1,52 @@
 import { Color, List } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
-import groupBy from "lodash.groupby";
+import { getAvatarIcon, usePromise } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { getFixture } from "../api";
-import { Fixture, FixtureEvent } from "../types";
+import { getMatchEvents, getMatchLineups } from "../api";
+import { Fixture, MatchEvent, Player } from "../types";
 import { getClubLogo, getProfileImg } from "../utils";
+import groupBy from "lodash.groupby";
 
-const lineMap: Record<number, string> = {
-  0: "Goalkeeper",
-  1: "Defenders",
-  2: "Midfielders",
-  3: "Forwards",
+const positions = ["Goalkeeper", "Defenders", "Midfielders", "Forwards"];
+
+const cardMap: Record<string, string> = {
+  Yellow: "match/card-yellow.svg",
+  Red: "match/card-red.svg",
+  SecondYellow: "match/card-yellow-red.svg",
 };
 
-function getAccessories(events: FixtureEvent[] = []) {
+function getAccessories(events: MatchEvent[] = []) {
   const accessories: List.Item.Accessory[] = [];
 
   events.forEach((event) => {
-    const tag = event.clock?.label?.replace("'00", "'");
+    const tag = `${event.time}'`;
 
-    switch (event.type) {
-      case "B":
-        {
-          let icon;
-          if (event.description === "Y") {
-            icon = "match/card-yellow.svg";
-          } else if (event.description === "R") {
-            icon = "match/card-red.svg";
-          } else if (event.description === "YR") {
-            icon = "match/card-yellow-red.svg";
-          }
+    if (event.type) {
+      accessories.push({ icon: cardMap[event.type], tag });
+    }
 
-          accessories.push({ icon, tag });
-        }
-        break;
-      case "G":
+    if (event.goalType) {
+      accessories.push({
+        icon: {
+          source: "match/goal.svg",
+          tintColor: event.goalType === "Own" ? Color.Red : Color.PrimaryText,
+        },
+        tooltip: event.goalType,
+        tag,
+      });
+    }
+
+    if (event.playerOnId) {
+      if (event.playerId === event.playerOnId) {
         accessories.push({
-          icon: {
-            source: "match/goal.svg",
-            tintColor: Color.PrimaryText,
-          },
+          icon: `match/sub-on.svg`,
           tag,
         });
-        break;
-      case "O":
+      } else if (event.playerId === event.playerOffId) {
         accessories.push({
-          icon: {
-            source: "match/goal.svg",
-            tintColor: Color.Red,
-          },
+          icon: "match/sub-off.svg",
           tag,
         });
-        break;
-      case "P":
-        accessories.push({
-          icon: {
-            source: "match/goal.svg",
-            tintColor: Color.PrimaryText,
-          },
-          tag: `${tag} (pen)`,
-        });
-        break;
-      case "S":
-        accessories.push({
-          icon: `match/sub-${event.description.toLowerCase()}.svg`,
-          tag,
-        });
-        break;
-      default:
-        break;
+      }
     }
   });
 
@@ -76,80 +54,154 @@ function getAccessories(events: FixtureEvent[] = []) {
 }
 
 export default function MatchLineups(props: { match: Fixture; title: string }) {
-  const { data, isLoading } = usePromise(getFixture, [props.match.id]);
+  const { match, title } = props;
 
-  const [teamId, setTeamId] = useState<string>(String(data?.teams[0]?.team.id));
-  const teamLists = useMemo(
-    () => data?.teamLists.find((t) => t?.teamId.toString() === teamId),
-    [teamId],
+  const { data, isLoading } = usePromise(getMatchLineups, [match.matchId]);
+  const { data: matchEvents } = usePromise(getMatchEvents, [match.matchId]);
+
+  const [teamId, setTeamId] = useState<string>(match.homeTeam.id);
+
+  const teamLineup = useMemo(() => {
+    return data?.home_team.teamId === teamId ? data.home_team : data?.away_team;
+  }, [teamId, data]);
+
+  const getDisplayName = (player: Player) => {
+    return player.knownName || `${player.firstName} ${player.lastName}`;
+  };
+
+  const subs = matchEvents?.homeTeam.subs
+    .concat(matchEvents?.awayTeam.subs)
+    .map((sub) => {
+      return [
+        {
+          ...sub,
+          playerId: sub.playerOnId,
+        },
+        {
+          ...sub,
+          playerId: sub.playerOffId,
+        },
+      ];
+    })
+    .flat();
+
+  const events = matchEvents?.homeTeam.cards
+    .concat(matchEvents?.homeTeam.goals)
+    .concat(matchEvents?.awayTeam.cards, matchEvents?.awayTeam.goals)
+    .concat(subs || []);
+
+  const eventMap = groupBy(
+    events?.sort((a, b) => Number(a.time) - Number(b.time)),
+    "playerId",
   );
 
-  const eventMap = groupBy(data?.events, "personId");
+  const children = (players: Player[] = []) => {
+    return players.map((player) => {
+      const accessories = getAccessories(eventMap[player.id.toString()]);
+      if (player.isCaptain) {
+        accessories.unshift({
+          icon: getAvatarIcon("C"),
+        });
+      }
+
+      return (
+        <List.Item
+          key={player.id}
+          icon={{
+            source: getProfileImg(player.id),
+            fallback: "player-missing.png",
+          }}
+          title={String(player.shirtNum)}
+          subtitle={getDisplayName(player)}
+          accessories={accessories}
+        />
+      );
+    });
+  };
 
   return (
     <List
       throttle
       isLoading={isLoading}
-      navigationTitle={`${props.title} | Match Line-ups`}
+      navigationTitle={`${title} | Match Lineups`}
       searchBarAccessory={
         <List.Dropdown tooltip="Change Team" onChange={setTeamId}>
-          {data?.teams.map((team) => {
+          {[match.homeTeam, match.awayTeam].map((team) => {
             return (
               <List.Dropdown.Item
-                key={team.team.id}
-                value={team.team.id.toString()}
-                title={team.team.club.name}
-                icon={getClubLogo(team.team.altIds.opta)}
+                key={team.id}
+                value={team.id}
+                title={team.name}
+                icon={{
+                  source: getClubLogo(team.id),
+                  fallback: "default.png",
+                }}
               />
             );
           })}
         </List.Dropdown>
       }
     >
-      {teamLists?.formation.players.map((group, idx) => {
-        const players = teamLists.lineup.filter((p) => group.includes(p.id));
-        return (
-          <List.Section key={idx} title={lineMap[idx]}>
-            {players.map((player) => {
-              const accessories = getAccessories(eventMap[player.id]);
-              if (player.captain) {
-                accessories.unshift({
-                  tag: {
-                    value: "C",
-                    color: Color.Purple,
-                  },
-                });
-              }
+      {teamLineup ? (
+        <List.Section title="Manager">
+          <List.Item
+            title={
+              teamLineup.managers[0]
+                ? getDisplayName(teamLineup.managers[0])
+                : "Manager"
+            }
+            accessories={[
+              { text: teamLineup.formation.formation, tooltip: "Formation" },
+            ]}
+            icon={{
+              source: getProfileImg(teamLineup.managers[0]?.id),
+              fallback: "default.png",
+            }}
+          />
+        </List.Section>
+      ) : (
+        <List.EmptyView
+          icon="premier-league.svg"
+          title="No pitch view available yet"
+        />
+      )}
 
-              return (
-                <List.Item
-                  key={player.id}
-                  icon={getProfileImg(player.altIds.opta)}
-                  title={player.matchShirtNumber.toString()}
-                  subtitle={player.name.display}
-                  accessories={accessories}
-                  keywords={[player.name.display]}
-                />
-              );
-            })}
-          </List.Section>
-        );
-      })}
-      <List.Section title="Substitutes">
-        {teamLists?.substitutes.map((player) => {
-          return (
-            <List.Item
-              key={player.id}
-              icon={getProfileImg(player.altIds.opta)}
-              title={player.matchShirtNumber.toString()}
-              subtitle={player.name.display}
-              accessories={getAccessories(eventMap[player.id])}
-              keywords={[player.name.display]}
-            />
-          );
-        })}
-      </List.Section>
-      {!teamLists && <List.EmptyView title="No pitch view available yet" />}
+      {teamLineup && teamLineup.formation
+        ? teamLineup.formation.lineup.map((group, idx) => {
+            const players = teamLineup?.players.filter((p) =>
+              group.includes(p.id),
+            );
+
+            return (
+              <List.Section
+                key={idx}
+                title={players?.[0]?.position || "Unknown"}
+                children={children(players)}
+              />
+            );
+          })
+        : positions.map((position) => {
+            const players = teamLineup?.players.filter(
+              (p) => p.position === position,
+            );
+
+            return (
+              <List.Section
+                key={position}
+                title={position}
+                children={children(players)}
+              />
+            );
+          })}
+
+      <List.Section
+        title="Substitutes"
+        children={children(
+          teamLineup?.players.filter((p) =>
+            teamLineup?.formation.subs.includes(p.id),
+          ),
+        )}
+      />
     </List>
   );
 }

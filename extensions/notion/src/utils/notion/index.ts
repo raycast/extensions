@@ -1,7 +1,13 @@
-import { Client } from "@notionhq/client";
+import type {
+  BlockObjectRequest,
+  PageObjectResponse,
+  PartialPageObjectResponse,
+  DataSourceObjectResponse,
+  PartialDataSourceObjectResponse,
+  DatabaseObjectResponse,
+  PartialDatabaseObjectResponse,
+} from "@notionhq/client/build/src/api-endpoints";
 import { Color, Icon } from "@raycast/api";
-
-import { UnwrapArray, UnwrapPromise } from "../types";
 
 import { DatabaseProperty } from "./database/property";
 import { PageProperty } from "./page";
@@ -10,7 +16,19 @@ export * from "./database";
 export * from "./page";
 export * from "./user";
 
-export type NotionObject = UnwrapArray<UnwrapPromise<ReturnType<Client["search"]>>["results"]>;
+export type NotionObject =
+  | PageObjectResponse
+  | PartialPageObjectResponse
+  | DataSourceObjectResponse
+  | PartialDataSourceObjectResponse
+  | DatabaseObjectResponse
+  | PartialDatabaseObjectResponse;
+
+type Markdown = string;
+export type PageContent = Markdown | BlockObjectRequest[];
+export function isMarkdownPageContent(content: PageContent): content is Markdown {
+  return typeof content === "string";
+}
 
 // prettier-ignore
 const readablePropertyTypes = ["title", "number", "rich_text", "url", "email", "phone_number", "date", "checkbox", "select", "multi_select", "formula", "people", "relation", "status"] as const

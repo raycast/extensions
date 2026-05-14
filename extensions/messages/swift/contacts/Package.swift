@@ -8,7 +8,7 @@ let package = Package(
     .macOS(.v12)
   ],
   dependencies: [
-    .package(url: "https://github.com/raycast/extensions-swift-tools", from: "1.0.4"),
+    .package(url: "https://github.com/raycast/extensions-swift-tools", from: "1.0.5"),
     .package(url: "https://github.com/stephencelis/SQLite.swift.git", from: "0.12.2"),
   ],
   targets: [

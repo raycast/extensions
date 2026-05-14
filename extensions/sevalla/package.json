@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sevalla",
+  "title": "Sevalla",
+  "description": "Cloud Application Platform. Deploy Apps in Minutes.",
+  "icon": "sevalla-orange.png",
+  "author": "xmok",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "api_key",
+      "title": "API Key",
+      "placeholder": "62d95fa846aacfeb65d2c114a816f542e69408c46ebd1f29f960a2f7d5b15cf2",
+      "type": "password",
+      "required": true,
+      "description": "API Key from Sevalla Dashboard"
+    },
+    {
+      "name": "company_id",
+      "title": "Company ID",
+      "placeholder": "4775e4a2-xxxx-xxxx-xxxx-dd1bbecd25ea",
+      "type": "textfield",
+      "required": true,
+      "description": "Company ID from Sevalla Dashboard"
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-databases",
+      "title": "Search Databases",
+      "description": "Search Databases, View Details and More",
+      "mode": "view"
+    },
+    {
+      "name": "search-static-sites",
+      "title": "Search Static Sites",
+      "description": "Search Static Sites, View Details and More",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.3",
+    "@raycast/utils": "^2.2.1",
+    "dayjs": "^1.11.18"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

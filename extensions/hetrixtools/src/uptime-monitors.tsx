@@ -32,7 +32,7 @@ export default function UptimeMonitors() {
         const markdown = `
 | Location | Uptime Status | Response Time | Last Check |
 |----------|---------------|---------------|------------|
-${Object.entries(monitor.locations)
+${Object.entries(monitor.locations ?? {})
   .filter(([, val]) => !!val)
   .map(
     ([location, val]) =>

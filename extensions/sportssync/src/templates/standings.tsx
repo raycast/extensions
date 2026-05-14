@@ -1,6 +1,9 @@
 import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import getTeamStandings from "../utils/getStandings";
 import sportInfo from "../utils/getSportInfo";
+import RosterDetail from "../views/roster";
+import TeamSchedule from "../views/teamSchedule";
+import TeamDetail from "../views/teamDetail";
 
 export default function DisplayTeamStandings() {
   const { standingsLoading, standingsData, standingsRevalidate } = getTeamStandings();
@@ -252,10 +255,23 @@ export default function DisplayTeamStandings() {
         actions={
           <ActionPanel>
             {currentLeague !== "f1" && (
-              <Action.OpenInBrowser
-                title={`View ${team1?.team?.displayName ?? "Team"} Details on ESPN`}
-                url={`${team1?.team?.links?.[0]?.href ?? `https://www.espn.com/${currentLeague}`}`}
-              />
+              <>
+                <Action.Push
+                  title={`View ${team1?.team?.displayName ?? "Team"} Details`}
+                  icon={Icon.List}
+                  target={<TeamDetail teamId={team1?.team?.id} />}
+                />
+                <Action.Push
+                  title={`View ${team1?.team?.displayName ?? "Team"} Roster`}
+                  icon={Icon.TwoPeople}
+                  target={<RosterDetail teamId={team1?.team?.id} />}
+                />
+                <Action.Push
+                  title={`View ${team1?.team?.displayName ?? "Team"} Schedule`}
+                  icon={Icon.Calendar}
+                  target={<TeamSchedule teamId={team1?.team?.id} />}
+                />
+              </>
             )}
 
             {currentLeague === "f1" && (
@@ -486,10 +502,23 @@ export default function DisplayTeamStandings() {
         actions={
           <ActionPanel>
             {currentLeague !== "f1" && (
-              <Action.OpenInBrowser
-                title={`View ${team2?.team?.displayName ?? "Team"} Details on ESPN`}
-                url={`${team2?.team?.links?.[0]?.href ?? `https://www.espn.com/${currentLeague}`}`}
-              />
+              <>
+                <Action.Push
+                  title={`View ${team2?.team?.displayName ?? "Team"} Details`}
+                  icon={Icon.List}
+                  target={<TeamDetail teamId={team2?.team?.id} />}
+                />
+                <Action.Push
+                  title={`View ${team2?.team?.displayName ?? "Team"} Roster`}
+                  icon={Icon.TwoPeople}
+                  target={<RosterDetail teamId={team2?.team?.id} />}
+                />
+                <Action.Push
+                  title={`View ${team2?.team?.displayName ?? "Team"} Schedule`}
+                  icon={Icon.Calendar}
+                  target={<TeamSchedule teamId={team2?.team?.id} />}
+                />
+              </>
             )}
 
             {currentLeague === "f1" && (

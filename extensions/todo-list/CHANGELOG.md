@@ -1,5 +1,25 @@
 # Todo List Changelog
 
+## [Clear search bar not text after adding todo on Windows] - 2026-03-19
+
+- When pressing enter to add a todo, clear the search bar text (text was not cleared on Windows)
+
+## [Added: Add Todo button in menubar] - 2026-02-24
+
+- Add Todo in the menu bar now launches the main todo command for quick access to add new todos.
+
+## [Auto-assign active tag on create] - 2026-02-04
+
+- When creating a new todo while filtered by a tag, the todo inherits the active tag automatically (ref: [Issue #24930](https://github.com/raycast/extensions/issues/24930)).
+
+## [Added Tooltip to Title] - 2025-09-29
+
+- Added `tooltip` to to-do list items so longer titles easier to read (ref: [Issue #21807](https://github.com/raycast/extensions/issues/21807)).
+- Added `metadata` images.
+- Modernized to use latest Raycast config.
+
+## [Added Windows Support] - 2025-06-18
+
 ## [Chore: Moved contributor] - 2025-03-18
 
 ## [Chore: Moved contributor] - 2025-03-17

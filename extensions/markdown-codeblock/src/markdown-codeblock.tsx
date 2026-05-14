@@ -1,11 +1,14 @@
 import {
-  ActionPanel,
   Action,
-  List,
+  ActionPanel,
+  Application,
   Clipboard,
+  getFrontmostApplication,
+  getPreferenceValues,
+  getSelectedText,
+  List,
   LocalStorage,
   popToRoot,
-  getSelectedText,
   showToast,
   Toast,
 } from "@raycast/api";
@@ -15,7 +18,7 @@ import { LIST_ITEMS } from "./constants";
 type Item = {
   title: string;
   icon: string;
-  keywords: string[];
+  keywords?: string[];
 };
 
 async function paste(item: Item, text?: string) {
@@ -24,8 +27,11 @@ async function paste(item: Item, text?: string) {
     return;
   }
 
-  const [codeblockTag = ""] = item.keywords;
-  const codeblock = `\`\`\`${codeblockTag}\n${text}\n\`\`\``;
+  const { isNewLinePrefix, isNewLineSuffix } = getPreferenceValues<Preferences.MarkdownCodeblock>();
+  const [codeblockTag = ""] = item.keywords ?? [];
+  const prefix = `${isNewLinePrefix ? "\n" : ""}`;
+  const suffix = `${isNewLineSuffix ? "\n" : ""}`;
+  const codeblock = `${prefix}\`\`\`${codeblockTag}\n${text}\n\`\`\`${suffix}`;
   await Clipboard.paste(codeblock);
   await updateLastUsed(item);
   await popToRoot({ clearSearchBar: true });
@@ -46,20 +52,20 @@ function sortBySearchRelevance(items: Item[], searchText: string) {
     const aKeywords = a.keywords;
     const bKeywords = b.keywords;
 
-    const aHasExactMatch = aKeywords.includes(searchLower);
-    const bHasExactMatch = bKeywords.includes(searchLower);
+    const aHasExactMatch = aKeywords?.includes(searchLower);
+    const bHasExactMatch = bKeywords?.includes(searchLower);
 
     if (aHasExactMatch && !bHasExactMatch) return -1;
     if (bHasExactMatch && !aHasExactMatch) return 1;
 
-    const aHasStartsWith = aKeywords.some((k) => k.startsWith(searchLower));
-    const bHasStartsWith = bKeywords.some((k) => k.startsWith(searchLower));
+    const aHasStartsWith = aKeywords?.some((k) => k.startsWith(searchLower));
+    const bHasStartsWith = bKeywords?.some((k) => k.startsWith(searchLower));
 
     if (aHasStartsWith && !bHasStartsWith) return -1;
     if (bHasStartsWith && !aHasStartsWith) return 1;
 
-    const aHasContains = aKeywords.some((k) => k.includes(searchLower));
-    const bHasContains = bKeywords.some((k) => k.includes(searchLower));
+    const aHasContains = aKeywords?.some((k) => k.includes(searchLower));
+    const bHasContains = bKeywords?.some((k) => k.includes(searchLower));
 
     if (aHasContains && !bHasContains) return -1;
     if (bHasContains && !aHasContains) return 1;
@@ -72,6 +78,7 @@ export default function Command() {
   const [items, setItems] = useState<Item[]>([]);
   const [recentlyUsed, setRecentlyUsed] = useState<Record<string, number> | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [activeApp, setActiveApp] = useState<Application | null>(null);
 
   useEffect(() => {
     async function loadRecentlyUsed() {
@@ -79,7 +86,13 @@ export default function Command() {
       setRecentlyUsed(recentData ? JSON.parse(recentData) : {});
     }
 
+    async function loadActiveApp() {
+      const app = await getFrontmostApplication();
+      setActiveApp(app);
+    }
+
     loadRecentlyUsed();
+    loadActiveApp();
   }, []);
 
   useEffect(() => {
@@ -97,7 +110,7 @@ export default function Command() {
   function handleFiltering(searchText: string) {
     const filteredItems = LIST_ITEMS.filter(
       (item) =>
-        item.keywords.some((keyword) => keyword.includes(searchText.toLowerCase())) ||
+        item.keywords?.some((keyword) => keyword.includes(searchText.toLowerCase())) ||
         item.title.toLowerCase().includes(searchText.toLowerCase()),
     );
     const sortedItems = sortBySearchRelevance(filteredItems, searchText);
@@ -111,18 +124,20 @@ export default function Command() {
           key={`${item.title}-${i}`}
           icon={{ source: item.icon }}
           title={item.title}
-          subtitle={item.keywords.join(", ")}
+          subtitle={item.keywords?.join(", ")}
           keywords={item.keywords}
           actions={
             <ActionPanel>
               <Action
-                title="Paste Clipboard in Active App"
+                title={`Paste to ${activeApp?.name || "Active App"}`}
+                icon={activeApp?.path ? { fileIcon: activeApp.path } : undefined}
                 onAction={async () => {
                   await paste(item, await Clipboard.readText());
                 }}
               />
               <Action
-                title="Paste Selected Text in Active App"
+                title={`Paste Selected Text to ${activeApp?.name || "Active App"}`}
+                icon={activeApp?.path ? { fileIcon: activeApp.path } : undefined}
                 onAction={async () => {
                   await paste(item, await getSelectedText().catch(() => ""));
                 }}

@@ -1,6 +1,6 @@
 import { Action, Icon, Keyboard } from "@raycast/api";
 import TrackNewDeliveryView from "./TrackNewDeliveryView";
-import { Delivery } from "../delivery";
+import { Delivery } from "../types/delivery";
 
 export default function TrackNewDeliveryAction({
   deliveries,

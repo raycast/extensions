@@ -26,7 +26,7 @@ export function AirtableBaseRecordsList(props: { baseId: string; tableId: string
                 await toast.hide();
               },
             },
-          }
+          },
         );
       } else showFailureToast(error);
     },
@@ -84,7 +84,7 @@ function UpdateRecord(props: {
     .filter((field) => field.type === "singleLineText" || field.type === "multilineText")
     .map((field) => field.name);
   const onlyStrings = Object.fromEntries(
-    Object.entries(record.fields).filter(([key]) => stringFieldKeys.includes(key))
+    Object.entries(record.fields).filter(([key]) => stringFieldKeys.includes(key)),
   ) as Record<string, string>; // only get the string fields of a record
 
   const { handleSubmit, itemProps } = useForm<Record<string, string>>({

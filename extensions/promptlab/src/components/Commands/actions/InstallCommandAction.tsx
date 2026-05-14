@@ -9,13 +9,12 @@ import { commandFromStoreCommand } from "../../../lib/commands";
  * @param props.command The command to install.
  * @param props.commands The list of installed commands.
  * @param props.setCommands The function to update the list of installed commands.
- * @returns {JSX.Element} The action component.
  */
 export default function InstallCommandAction(props: {
   command: StoreCommand;
   setCommands: (commands: Command[]) => void;
   settings: typeof defaultAdvancedSettings;
-}): JSX.Element | null {
+}) {
   const { command, setCommands, settings } = props;
 
   if (!isActionEnabled("InstallCommandAction", settings)) {

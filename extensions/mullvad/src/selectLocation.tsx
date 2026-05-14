@@ -36,7 +36,6 @@ const cityRegex = /^(?<city>.+)\s\((?<cityCode>.+)\)/;
 const serverRegex = /^(?<server>.+?)\s/;
 
 function parseRelayList(rawRelayList: string): Location[] {
-  /* eslint-disable @typescript-eslint/no-non-null-assertion */
   const locations: Location[] = [];
   let currentCountry;
   let currentCountryCode;
@@ -81,7 +80,7 @@ function parseRelayList(rawRelayList: string): Location[] {
       i++;
     }
   }
-  /* eslint-enable @typescript-eslint/no-non-null-assertion */
+
   return locations;
 }
 
@@ -168,7 +167,7 @@ function ServerList({
 }
 
 export default function Command() {
-  const isMullvadInstalled = useExec("mullvad", ["version"]);
+  const isMullvadInstalled = useExec("mullvad", ["--version"]);
   const rawRelayList = useExec("mullvad", ["relay", "list"], { execute: !!isMullvadInstalled.data });
 
   const locations = rawRelayList.data ? parseRelayList(rawRelayList.data) : [];

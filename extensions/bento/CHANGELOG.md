@@ -1,5 +1,9 @@
 # Bento Email Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Type safety] - 2024-10-18
 
 Ensure all types are safe 

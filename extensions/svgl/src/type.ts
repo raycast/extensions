@@ -27,11 +27,13 @@ export type SvgActionKey =
   | "copySvg"
   | "copySvgFile"
   | "copySvgWordmark"
+  | "copyShadcnRegistry"
   | "copyReactComponent"
   | "copyVueComponent"
   | "copySvelteComponent"
   | "copyAngularComponent"
   | "copySvgUrl"
   | "copySvgWordmarkUrl"
+  | "copyAstroComponent"
   | "operation"
   | "svgInfo";

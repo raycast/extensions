@@ -150,6 +150,10 @@ export const gameStrings = {
     default: "Faceoff Winning Percentage",
     fr: "Pourcentage de Victoire de Mise au Jeu",
   },
+  faceoffWins: {
+    default: "Faceoff Wins",
+    fr: "Victoires de Mise au Jeu",
+  },
   powerPlay: {
     default: "Power Play",
     fr: "Avantage Numérique",

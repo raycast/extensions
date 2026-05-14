@@ -22,25 +22,23 @@ export type CategoryName =
   | "SOFTWARE_LICENSE"
   | "SSH_KEY"
   | "WIRELESS_ROUTER";
-
-export type V7Item = {
-  uuid: string;
-  profileUUID: string;
-  vaultUUID: string;
-  categoryUUID: string;
-  itemTitle: string;
-  itemDescription: string;
-  websiteURLs?: string[];
-  accountName?: string;
-  vaultName: string;
-  categoryPluralName: string;
-  categorySingularName: string;
-  modifiedAt: number;
-  createdAt: number;
-};
-
 export type V7Category = {
   id: string;
-  name: string;
   items: V7Item[];
+  name: string;
+};
+export type V7Item = {
+  accountName?: string;
+  categoryPluralName: string;
+  categorySingularName: string;
+  categoryUUID: string;
+  createdAt: number;
+  itemDescription: string;
+  itemTitle: string;
+  modifiedAt: number;
+  profileUUID: string;
+  uuid: string;
+  vaultName: string;
+  vaultUUID: string;
+  websiteURLs?: string[];
 };

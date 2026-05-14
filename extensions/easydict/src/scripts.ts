@@ -27,7 +27,7 @@ const execCommandTimeout = 10000; // 10s
 export function appleTranslate(
   queryTextInfo: QueryWordInfo,
   abortController?: AbortController,
-  timeout = execCommandTimeout
+  timeout = execCommandTimeout,
 ): Promise<string | undefined> {
   console.log(`---> start Apple translate`);
 
@@ -79,7 +79,7 @@ export function appleTranslate(
 
   // I don't know why, sometimes this exec command will block the thread for 0.4s 😓
   return new Promise((resolve, reject) => {
-    execa("osascript", ["-e", appleScript], { signal: abortController?.signal })
+    execa("osascript", ["-e", appleScript], { cancelSignal: abortController?.signal })
       .then((result) => {
         const translateText = result.stdout.trim(); // execa don't have to trim()
         console.warn(`Apple translate: ${translateText}, cost: ${new Date().getTime() - startTime} ms`);
@@ -116,7 +116,7 @@ export function appleTranslate(
 export function appleLanguageDetect(
   text: string,
   abortController?: AbortController,
-  timeout = execCommandTimeout
+  timeout = execCommandTimeout,
 ): Promise<DetectedLangModel> {
   console.log(`start apple detect: ${text}`);
   const startTime = new Date().getTime();
@@ -129,7 +129,7 @@ export function appleLanguageDetect(
 
   return new Promise((resolve, reject) => {
     // * This code is synchronous, it will cost ~0.4s
-    execa("osascript", ["-e", appleScript], { signal: abortController?.signal })
+    execa("osascript", ["-e", appleScript], { cancelSignal: abortController?.signal })
       .then((result) => {
         const appleLangCode = result.stdout.trim(); // will be "" when detect language is not support, eg. ꯅꯨꯄꯤꯃꯆꯥ
         console.warn(`apple detect language: ${appleLangCode}, cost: ${new Date().getTime() - startTime} ms`);

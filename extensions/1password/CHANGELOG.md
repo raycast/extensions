@@ -1,5 +1,35 @@
 # 1Password Changelog
 
+## [Enhancements] - 2026-04-16
+
+- Improved search: queries now match across all item fields (title, username/email, URLs, vault name). For example, searching "m@ goo" now finds a Google login with email "m@example.com".
+
+## [Added Windows Support] - 2026-04-06
+
+- Added Windows platform support
+- Added Windows-compatible 1Password CLI path detection
+- Updated keyboard shortcuts for cross-platform compatibility
+- Updated setup guide for Windows (Windows Hello instead of Touch ID)
+
+## [Chore] - 2025-11-15
+
+- Add stricter, opinionated eslint rules for clarity
+
+## [Chore] - 2025-10-14
+
+- Adopt the latest available extension template
+- Fix lints
+
+## [Enhancements] - 2025-10-01
+
+- Added Paste actions for Login items: Paste Username, Paste Password, Paste One-time Password.
+- Paste actions now show the app's icon and name (e.g., "Paste Password to Safari").
+- Preferences updated to allow selecting Paste actions as Primary/Secondary actions.
+
+## [Enhancements] - 2025-08-25
+
+- Fixed "Enter Vault" misleading icon
+
 ## [Moved contributor] - 2025-02-24
 
 ## [Moved contributor] - 2025-02-03

@@ -69,7 +69,9 @@ export const getActionShortcut = (
 
   const shortcut = defaultActionSettings[actionName]
     ? {
+        // @ts-expect-error: To keep to original code
         modifiers: defaultActionSettings[actionName].shortcut.modifiers,
+        // @ts-expect-error: To keep to original code
         key: defaultActionSettings[actionName].shortcut.key,
       }
     : undefined;
@@ -80,7 +82,9 @@ export const getActionShortcut = (
     shortcut &&
     customActionSettings[actionName]?.shortcut
   ) {
+    // @ts-expect-error: To keep to original code
     shortcut.modifiers = customActionSettings[actionName].shortcut.modifiers ?? shortcut.modifiers;
+    // @ts-expect-error: To keep to original code
     shortcut.key = customActionSettings[actionName].shortcut.key ?? shortcut.key;
   }
   return shortcut;

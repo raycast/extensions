@@ -8,7 +8,10 @@
   "contributors": [
     "AmmarCodes",
     "thewinger",
-    "LightQuantum"
+    "LightQuantum",
+    "Mmehdi06",
+    "abhiy13",
+    "kim-raaschou-nielsen"
   ],
   "categories": [
     "Productivity",
@@ -16,17 +19,6 @@
     "System"
   ],
   "license": "MIT",
-  "preferences": [
-    {
-      "name": "configPath",
-      "type": "textfield",
-      "placeholder": "path/to/config",
-      "default": "~/.aerospace.toml",
-      "title": "Config File",
-      "required": false,
-      "description": "Specify the config file path for aerospace"
-    }
-  ],
   "commands": [
     {
       "name": "showShortcuts",
@@ -38,6 +30,12 @@
       "name": "showConfig",
       "title": "Show Aerospace Config",
       "description": "Show config of the aerospace",
+      "mode": "view"
+    },
+    {
+      "name": "goToWorkspace",
+      "title": "Go to Workspace",
+      "description": "Switch to an Aerospace workspace",
       "mode": "view"
     },
     {
@@ -102,7 +100,6 @@
     "@types/react": "18.2.27",
     "eslint": "^8.51.0",
     "prettier": "^3.0.3",
-    "react-devtools": "^4.28.4",
     "typescript": "^5.2.2"
   },
   "scripts": {
@@ -111,5 +108,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

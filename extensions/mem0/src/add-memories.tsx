@@ -1,6 +1,5 @@
 import { Clipboard, List, ActionPanel, Action, Form, getPreferenceValues } from "@raycast/api";
 import { useEffect, useState } from "react";
-import fetch from "node-fetch";
 import { showFailureToast } from "@raycast/utils";
 
 const API_BASE_URL = "https://api.mem0.ai/v1/memories/";
@@ -9,20 +8,20 @@ interface MemoryResult {
   memory: string;
   event: string;
 }
-
-interface ApiResponse {
-  results?: MemoryResult[];
+interface PendingResult {
+  message: string;
+  status: "PENDING";
+  event_id: string;
 }
 
-interface Preferences {
-  mem0ApiKey: string;
-  defaultUserId: string;
+interface ApiResponse {
+  results?: MemoryResult[] | PendingResult[];
 }
 
 export default function Command() {
   const { mem0ApiKey, defaultUserId } = getPreferenceValues<Preferences>();
   const [clipboardText, setClipboardText] = useState<string>("");
-  const [results, setResults] = useState<MemoryResult[]>([]);
+  const [results, setResults] = useState<MemoryResult[] | PendingResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -35,7 +34,7 @@ export default function Command() {
         } else {
           setClipboardText("Clipboard is empty");
         }
-      } catch (error) {
+      } catch {
         setClipboardText("Failed to read clipboard");
       } finally {
         setIsLoading(false);
@@ -71,7 +70,7 @@ export default function Command() {
       const data = (await response.json()) as ApiResponse;
       setResults(data.results || []);
       setIsEditing(false);
-    } catch (error) {
+    } catch {
       showFailureToast("Failed to store in Mem0", {
         primaryAction: {
           title: "Retry",
@@ -91,11 +90,7 @@ export default function Command() {
               title="Save to Mem0"
               onSubmit={(values: { text: string }) => handleAddMemory(values.text)}
             />
-            <Action
-              title="Cancel"
-              onAction={() => setIsEditing(false)}
-              shortcut={{ modifiers: ["cmd"], key: "escape" }}
-            />
+            <Action title="Cancel" onAction={() => setIsEditing(false)} />
           </ActionPanel>
         }
       >
@@ -112,19 +107,19 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Add to Mem0" onAction={() => handleAddMemory(clipboardText)} />
-              <Action
-                title="Edit Text"
-                onAction={() => setIsEditing(true)}
-                shortcut={{ modifiers: ["cmd"], key: "e" }}
-              />
+              <Action title="Edit Text" onAction={() => setIsEditing(true)} />
             </ActionPanel>
           }
         />
       </List.Section>
       <List.Section title="Extracted Memories">
-        {results.map((result, index) => (
-          <List.Item key={index} title={result.memory} accessories={[{ text: result.event }]} />
-        ))}
+        {results.map((result, index) =>
+          "memory" in result ? (
+            <List.Item key={index} title={result.memory} accessories={[{ text: result.event }]} />
+          ) : (
+            <List.Item key={index} title="" subtitle={result.status} />
+          ),
+        )}
       </List.Section>
     </List>
   );

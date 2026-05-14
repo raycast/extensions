@@ -12,6 +12,7 @@ import {
   AccountConfiguration,
   Usage,
   FTPAccountWithDiskInformation,
+  APIToken,
 } from "./types";
 import { showFailureToast, useFetch } from "@raycast/utils";
 
@@ -102,3 +103,6 @@ export const usGetFileContent = (dir: string, file: string) =>
 // FTP
 export const useListFTPAccountsWithDiskInformation = () =>
   useUAPI<FTPAccountWithDiskInformation[]>("Ftp", "list_ftp_with_disk");
+
+// API
+export const useListAPITokens = () => useUAPI<APIToken[]>("Tokens", "list");

@@ -1,5 +1,32 @@
 # Search npm Changelog
 
+## [Improvements] - 2026-03-30
+
+- Moved the package version to the subtitle to prevent truncation in the accessories
+
+## [API usage optimization] - 2026-03-25
+
+- Debounce search API calls to avoid unnecessary requests while the user is typing.
+- Do not make API calls when the search term is empty or too short.
+
+## [Fix keywords] - 2026-02-10
+
+- Fix intermittent `keywords` issue
+
+## [Added npmx] - 2026-02-05
+
+- Add ability to open package page in npmx.dev
+
+## [Update] - 2025-11-06
+
+- Add support for Bun, implemented suggestion from [#22693](https://github.com/raycast/extensions/issues/22693)
+
+## [Improvements and Fix] - 2025-10-14
+
+- Fix broken search link, implemented suggestion from [#21972](https://github.com/raycast/extensions/issues/21972)
+- Update dependencies to the latest
+- Refactor codebase for better readability and maintainability
+
 ## [Fixes] - 2025-02-05
 
 - Fix URL parsing issue

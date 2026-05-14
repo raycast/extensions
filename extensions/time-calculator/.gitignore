@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Raycast
+.raycast/
+
+# System files
+.DS_Store
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# Environment variables
+.env
+.env.local
+
+# Temporary files
+*.tmp
+*.temp
+
+# Icon creation files (not needed in repo)
+icon-*.html
+create-*.py
+*.sh
+CREATE_ICON.md
+ICON_GUIDE.md
+COMPLIANCE_REPORT.md
+NEXT_STEPS.md
+push-to-github.sh
+github-setup.sh

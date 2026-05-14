@@ -1,50 +1,94 @@
 import { List } from "@raycast/api";
-import moment from "moment";
-import useSWR from "swr";
-import { fetcher, Holiday } from "./api";
+import { usePromise } from "@raycast/utils";
+import {
+  format,
+  formatDistanceToNow,
+  startOfDay,
+  endOfDay,
+  endOfYear,
+  addMonths,
+  addYears,
+  isBefore,
+  isAfter,
+} from "date-fns";
+import { getHolidays, Holiday } from "./api";
+
+export type DateRange = "next_1_month" | "next_3_months" | "next_6_months" | "this_year" | "next_year";
 
 const buildMarkdown = (holidays: Holiday[] | undefined) => {
-  const markdown = holidays
-    ?.map((holiday) => {
-      const { date, name } = holiday;
-      return `
-### ${name}
+  if (!holidays || holidays.length === 0) return "";
 
-${moment(date).format("dddd, MMMM Do")} (${moment(date).fromNow()})
+  const parts = holidays.map((holiday) => {
+    const { date, name } = holiday;
+    // Avoid leading indentation so markdown doesn't render as a code block
+    return `### ${name}\n\n${format(date, "EEEE, MMMM do")} (${formatDistanceToNow(date, {
+      addSuffix: true,
+    })})`;
+  });
 
-`;
-    })
-    .join("\n\n");
-  return markdown;
+  return parts.join("\n\n");
 };
 
-export const CountryDetail = ({ countryCode }: { countryCode: string }) => {
-  const { data, error } = useSWR(countryCode, fetcher);
+export const CountryDetail = ({ countryCode, dateRange }: { countryCode: string; dateRange?: DateRange }) => {
+  const { data, error, isLoading } = usePromise((code: string) => getHolidays(code), [countryCode]);
 
-  if (error || data?.length === 0) {
+  if (error) {
+    return <List.Item.Detail markdown={"No upcoming holidays known"} />;
+  } else if (!isLoading && data?.length === 0) {
     return <List.Item.Detail markdown={"No upcoming holidays known"} />;
   } else {
-    return <List.Item.Detail isLoading={!data} markdown={buildMarkdown(data)} />;
+    const start = startOfDay(new Date());
+    let end = endOfDay(addMonths(new Date(), 3));
+    switch (dateRange) {
+      case "next_1_month":
+        end = endOfDay(addMonths(new Date(), 1));
+        break;
+      case "next_3_months":
+        end = endOfDay(addMonths(new Date(), 3));
+        break;
+      case "next_6_months":
+        end = endOfDay(addMonths(new Date(), 6));
+        break;
+      case "this_year":
+        end = endOfYear(new Date());
+        break;
+      case "next_year":
+        end = endOfYear(addYears(new Date(), 1));
+        break;
+      default:
+        break;
+    }
+
+    const filtered = data?.filter((h) => {
+      const d = h.date as Date;
+      // inclusive between start and end
+      return !isBefore(d, start) && !isAfter(d, end);
+    });
+
+    if (!isLoading && (!filtered || filtered.length === 0)) {
+      return <List.Item.Detail markdown={"No upcoming holidays known"} />;
+    }
+
+    return <List.Item.Detail isLoading={isLoading} markdown={buildMarkdown(filtered)} />;
   }
 };
 
-// Because this is not imported by country-locale-map
 export interface Country {
   name: string;
   alpha2: string;
-  alpha3: string;
-  numeric: string;
-  locales: string[];
-  default_locale: string;
-  currency: string;
-  currency_name: string;
-  languages: string[];
-  capital: string;
   emoji: string;
-  emojiU: string;
-  fips: string;
-  internet: string;
-  continent: string;
-  region: string;
+  alpha3?: string;
+  numeric?: string;
+  locales?: string[];
+  default_locale?: string;
+  currency?: string;
+  currency_name?: string;
+  languages?: string[];
+  capital?: string;
+  emojiU?: string;
+  fips?: string;
+  internet?: string;
+  continent?: string;
+  region?: string;
   alternate_names?: string[];
 }

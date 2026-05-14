@@ -1,9 +1,14 @@
 import * as cheerio from "cheerio";
+import { LocalStorage } from "@raycast/api";
 import { cleanText, sanitizeJsonString } from "../util/textUtils";
 import { Product, Topic, User, Shoutout } from "../types";
 import { processImageUrl, ImgixFit } from "./imgix";
 import { fetchSvgAsBase64 } from "../util/imageUtils";
 import { HOST_URL } from "../constants";
+import { configureFromRaycastPreferences, getLogger } from "../util/logger";
+
+configureFromRaycastPreferences();
+const log = getLogger("scraper");
 
 // Interface for Apollo event data
 interface ApolloEvent {
@@ -49,7 +54,9 @@ interface ApolloPostItem {
   description?: string;
   slug: string;
   thumbnailImageUuid?: string;
-  votesCount: number;
+  votesCount?: number; // Legacy field, may not be present in newer API responses
+  latestScore?: number; // New field for vote count in current API
+  launchDayScore?: number; // Alternative vote count field
   commentsCount: number;
   createdAt: string;
   user?: {
@@ -173,125 +180,323 @@ function normalizeThumbnailUrl(url: string): string {
   return url;
 }
 
-// Parse RSS feed from Product Hunt
-export async function getFrontpageProducts(): Promise<{ products: Product[]; error?: string }> {
-  try {
-    const response = await fetch(HOST_URL);
+// Helper: fetch a page with browser-like headers to avoid bot/minimal responses
+async function fetchPage(url: string): Promise<string> {
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/********* Safari/537.36",
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+      "Accept-Language": "en-US,en;q=0.9",
+      "Cache-Control": "no-cache",
+      Pragma: "no-cache",
+    },
+  });
+  if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+  return await res.text();
+}
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+// Types for Apollo push payload parsing (avoid `any`)
+type JsonObject = Record<string, unknown>;
+interface RehydrateValue {
+  data?: unknown;
+  result?: { data?: unknown };
+}
+interface PushPayload {
+  rehydrate?: Record<string, RehydrateValue>;
+}
+
+// Parse new ApolloSSRDataTransport push({ rehydrate: {...} }) blobs and extract Post-like items
+function extractApolloPushPayloads(html: string): PushPayload[] {
+  const $ = cheerio.load(html);
+  const scripts = $("script").toArray();
+  const pushPayloads: PushPayload[] = [];
+
+  function extractObjectFromPush(content: string, pushIndex: number): string | null {
+    const braceStart = content.indexOf("{", pushIndex);
+    if (braceStart === -1) return null;
+
+    let i = braceStart;
+    let depth = 0;
+    let inString: false | '"' | "'" | "`" = false;
+    let escaped = false;
+
+    for (; i < content.length; i++) {
+      const ch = content[i];
+      if (inString) {
+        if (escaped) {
+          escaped = false;
+        } else if (ch === "\\") {
+          escaped = true;
+        } else if (ch === inString) {
+          inString = false;
+        }
+        continue;
+      }
+      if (ch === '"' || ch === "'" || ch === "`") {
+        inString = ch as '"' | "'" | "`";
+        continue;
+      }
+      if (ch === "{") depth++;
+      else if (ch === "}") {
+        depth--;
+        if (depth === 0) return content.slice(braceStart, i + 1);
+      }
     }
+    return null;
+  }
 
-    const html = await response.text();
-    const $ = cheerio.load(html);
+  for (const s of scripts) {
+    const content = $(s).html() || "";
+    if (!content.includes("ApolloSSRDataTransport") || !content.includes(".push(")) continue;
 
-    // Find the Apollo state data embedded in the script tag
-    const scriptContent = $('script:contains("ApolloSSRDataTransport")').text();
-    const apolloDataMatch = scriptContent.match(/"events":(\[.+\])\}\)/)?.[1];
-
-    if (!apolloDataMatch) {
-      throw new Error("Could not extract Apollo data from the page");
-    }
-
-    const sanitizedData = sanitizeJsonString(apolloDataMatch);
-
-    if (!sanitizedData) {
-      throw new Error("Failed to sanitize Apollo data");
-    }
-
-    let apolloData;
-    try {
-      apolloData = JSON.parse(sanitizedData) as ApolloEvent[];
-    } catch (parseError) {
-      console.error("JSON parse error:", parseError);
-      throw new Error(
-        `Failed to parse Apollo data: ${parseError instanceof Error ? parseError.message : "Unknown error"}`,
-      );
-    }
-
-    // Find the homefeed data
-    const homefeedEvent = apolloData.find((event) => event.type === "data" && event.result.data.homefeed);
-
-    if (!homefeedEvent) {
-      throw new Error("Could not find homefeed data");
-    }
-
-    // Get the featured products
-    const featuredEdge = homefeedEvent.result.data.homefeed?.edges.find((edge) => edge.node.id === "FEATURED-0");
-
-    if (!featuredEdge) {
-      throw new Error("Could not find featured products");
-    }
-
-    // Extract product data
-    const productItems = featuredEdge.node.items.filter((item) => item.__typename === "Post");
-
-    // Log the leaderboard data for debugging
-    console.log(`\n--- LEADERBOARD DATA (${new Date().toISOString()}) ---`);
-    console.log(`Found ${productItems.length} featured products in Apollo data`);
-
-    // Check if we need to attempt DOM-based extraction as a fallback
-    const needsDomFallback = productItems.some((item) => item.votesCount === undefined || item.votesCount === null);
-
-    // If we need DOM fallback, try to extract vote counts from the page
-    const domVoteCounts = new Map<string, number>();
-    if (needsDomFallback) {
-      console.log("Some products missing vote counts in Apollo data, attempting DOM extraction...");
+    let searchFrom = 0;
+    while (true) {
+      const idx = content.indexOf(".push(", searchFrom);
+      if (idx === -1) break;
+      searchFrom = idx + 6;
+      const objStr = extractObjectFromPush(content, idx);
+      if (!objStr) continue;
       try {
-        // Try various selector patterns that might contain vote counts
-        const selectorPatterns = [
-          '[data-test="vote-button"]',
-          'button[data-test="vote-button"] > div > div',
-          'button:contains("▲")',
-          'div[class*="pt-header"] div[class*="flex-col"] div:nth-child(1) section:nth-child(2) button div div',
-        ];
+        const sanitized = objStr.replace(/:undefined/g, ":null").replace(/\bundefined\b/g, "null");
+        const parsed = JSON.parse(sanitized) as unknown;
+        // Best-effort cast; structure validated at use sites
+        pushPayloads.push(parsed as PushPayload);
+      } catch {
+        void 0;
+      }
+    }
+  }
 
-        // For each product, try to find its vote count in the DOM
-        for (const item of productItems) {
-          if (item.votesCount === undefined || item.votesCount === null) {
-            const productSlug = item.slug;
-            const productSelectors = selectorPatterns.map(
-              (selector) =>
-                `a[href="/posts/${productSlug}"] ~ ${selector}, a[href^="/posts/${productSlug}"] ~ ${selector}`,
-            );
+  if (pushPayloads.length === 0) log.debug("apollo_push:count", "No push payloads found");
+  else log.debug("apollo_push:count", undefined, { count: pushPayloads.length });
+  return pushPayloads;
+}
 
-            // Try each selector
-            for (const selector of productSelectors) {
-              const voteElement = $(selector).first();
-              if (voteElement.length > 0) {
-                const voteText = voteElement.text().trim();
-                const voteCount = parseInt(voteText.replace(/[^0-9]/g, ""));
-                if (!isNaN(voteCount)) {
-                  domVoteCounts.set(item.id, voteCount);
-                  console.log(`Found DOM vote count for ${item.name}: ${voteCount}`);
-                  break;
-                }
+function collectPostItemsFromApolloPush(html: string): ApolloPostItem[] {
+  const results: ApolloPostItem[] = [];
+  const seen = new Set<string>();
+  const pushPayloads = extractApolloPushPayloads(html);
+
+  const visit = (val: unknown) => {
+    if (!val) return;
+    if (Array.isArray(val)) {
+      for (const item of val) visit(item);
+      return;
+    }
+    if (typeof val === "object") {
+      const obj = val as Record<string, unknown>;
+      const postLike = obj as Record<string, unknown>;
+      if (
+        typeof postLike.__typename === "string" &&
+        postLike.__typename === "Post" &&
+        typeof postLike.slug === "string" &&
+        typeof postLike.name === "string"
+      ) {
+        const id = typeof postLike.id === "string" ? (postLike.id as string) : (postLike.slug as string);
+        if (!seen.has(id)) {
+          seen.add(id);
+          results.push(postLike as unknown as ApolloPostItem);
+        }
+      }
+      for (const key of Object.keys(obj)) visit(obj[key]);
+    }
+  };
+
+  for (const payload of pushPayloads) {
+    const rehydrate = payload?.rehydrate;
+    if (rehydrate && typeof rehydrate === "object") {
+      for (const value of Object.values(rehydrate)) {
+        const data = value?.data ?? value?.result?.data;
+        if (data) visit(data);
+      }
+    }
+  }
+  return results;
+}
+
+function collectHomefeedByIdsFromApolloPush(html: string, ids: string[]): ApolloPostItem[] {
+  const pushPayloads = extractApolloPushPayloads(html);
+  const posts: ApolloPostItem[] = [];
+  const seen = new Set<string>();
+  for (const payload of pushPayloads) {
+    const rehydrate = payload?.rehydrate;
+    if (!rehydrate || typeof rehydrate !== "object") continue;
+
+    for (const value of Object.values(rehydrate)) {
+      const data = value?.data ?? value?.result?.data;
+      const homefeed =
+        typeof data === "object" && data ? ((data as JsonObject)["homefeed"] as JsonObject | undefined) : undefined;
+      const edges = typeof homefeed === "object" && homefeed ? (homefeed as JsonObject)["edges"] : undefined;
+      if (!Array.isArray(edges)) continue;
+
+      for (const edge of edges as unknown[]) {
+        const edgeObj = typeof edge === "object" && edge ? (edge as JsonObject) : undefined;
+        const node = edgeObj ? (edgeObj["node"] as JsonObject | undefined) : undefined;
+        if (!node) continue;
+        const nodeId = node["id"] as string | undefined;
+        const nodeTitle = node["title"] as string | undefined;
+        if (nodeId && (ids.includes(nodeId) || (ids.includes("FEATURED-0") && nodeTitle?.includes("Top Products")))) {
+          const items = (node["items"] as unknown[]) || [];
+          for (const it of items) {
+            const itObj = typeof it === "object" && it ? (it as JsonObject) : undefined;
+            if (itObj && itObj["__typename"] === "Post" && itObj["slug"] && itObj["name"]) {
+              const itId = typeof itObj["id"] === "string" ? (itObj["id"] as string) : (itObj["slug"] as string);
+              if (!seen.has(itId)) {
+                seen.add(itId);
+                posts.push(itObj as unknown as ApolloPostItem);
               }
             }
           }
         }
-      } catch (error) {
-        console.error("Error extracting DOM vote counts:", error);
       }
     }
+  }
+  return posts;
+}
 
-    // Log the product data, including any DOM-extracted vote counts
-    productItems.forEach((item, index) => {
-      const domVoteCount = domVoteCounts.get(item.id);
-      const effectiveVoteCount = item.votesCount ?? domVoteCount ?? 0;
-
-      console.log(`Product ${index + 1}: ${cleanText(item.name)}`);
-      console.log(`- URL: ${HOST_URL}posts/${item.slug}`);
-      console.log(`- Votes: ${effectiveVoteCount}${domVoteCount ? " (DOM extracted)" : ""}`);
-      console.log(`- Comments: ${item.commentsCount || 0}`);
-
-      // Update the item's vote count if we found it in the DOM
-      if (domVoteCount !== undefined && (item.votesCount === undefined || item.votesCount === null)) {
-        item.votesCount = domVoteCount;
-      }
+function extractPostsFromDom($: cheerio.Root): ApolloPostItem[] {
+  const posts: ApolloPostItem[] = [];
+  const seen = new Set<string>();
+  $('a[href^="/posts/"]').each((_, el) => {
+    const href = $(el).attr("href") || "";
+    const m = href.match(/^\/posts\/([^/?#]+)/);
+    if (!m) return;
+    const slug = m[1];
+    if (seen.has(slug)) return;
+    const nameRaw = $(el).text().trim();
+    const name = cleanText(nameRaw || slug);
+    const container = $(el).closest("article, li, div");
+    let tagline = "";
+    const taglineCandidate = container
+      .find('p, .text-gray-600, .text-dark-gray, [data-test="post-tagline"]')
+      .first()
+      .text()
+      .trim();
+    if (taglineCandidate) tagline = cleanText(taglineCandidate);
+    let thumbnailImageUuid: string | undefined;
+    const imgSrc = container.find("img").first().attr("src") || "";
+    const uuidMatch = imgSrc.match(/ph-files\.imgix\.net\/([^/?#]+)/);
+    if (uuidMatch) thumbnailImageUuid = uuidMatch[1];
+    let votesCount: number | undefined;
+    let commentsCount: number | undefined;
+    const voteText = container
+      .find('[data-test="vote-button"], button:contains("▲"), [data-test="post-votes"]')
+      .first()
+      .text();
+    const voteNum = parseInt((voteText || "").replace(/[^0-9]/g, ""), 10);
+    if (!isNaN(voteNum)) votesCount = voteNum;
+    const commentsText = container
+      .find(':contains("comment")')
+      .filter((_, n) => /comment/i.test($(n).text()))
+      .first()
+      .text();
+    const commentsNum = parseInt((commentsText || "").replace(/[^0-9]/g, ""), 10);
+    if (!isNaN(commentsNum)) commentsCount = commentsNum;
+    posts.push({
+      __typename: "Post",
+      id: slug,
+      name,
+      tagline,
+      slug,
+      thumbnailImageUuid,
+      votesCount: votesCount ?? 0,
+      commentsCount: commentsCount ?? 0,
+      createdAt: new Date().toISOString(),
     });
+    seen.add(slug);
+  });
+  return posts;
+}
 
-    // Transform to our Product type
+// Cache + Apollo push + DOM + RSS fallbacks
+export async function getFrontpageProducts(): Promise<{ products: Product[]; error?: string }> {
+  try {
+    const cacheKey = "frontpage_cache_v1";
+    const ttlMs = 60 * 1000;
+    const now = Date.now();
+    try {
+      const cachedRaw = await LocalStorage.getItem<string>(cacheKey);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw) as { ts: number; products: Product[] };
+        if (cached.ts && now - cached.ts < ttlMs && Array.isArray(cached.products) && cached.products.length > 0) {
+          return { products: cached.products };
+        }
+      }
+    } catch {
+      void 0;
+    }
+
+    const html = await fetchPage(HOST_URL);
+    const $ = cheerio.load(html);
+
+    const debugBlob: { ts: string; url: string; strategy: string; counts: Record<string, unknown> } = {
+      ts: new Date().toISOString(),
+      url: HOST_URL,
+      strategy: "",
+      counts: {},
+    };
+
+    let productItems: ApolloPostItem[] = collectHomefeedByIdsFromApolloPush(html, ["FEATURED-0"]);
+    log.debug("frontpage:featured_items", undefined, { count: productItems.length });
+    if (!productItems.length) {
+      productItems = collectPostItemsFromApolloPush(html);
+      log.debug("frontpage:generic_post_traversal", undefined, { count: productItems.length });
+    }
+
+    if (!productItems.length) {
+      log.warn("frontpage:fallback_dom_notice", "SSR data missing; using DOM fallback");
+      await log.toast("fallback-ssr-missing", "Using DOM fallback", "SSR data missing; parsing DOM");
+    }
+
+    if (!productItems.length) {
+      productItems = extractPostsFromDom($);
+      debugBlob.strategy = "dom";
+    } else {
+      debugBlob.strategy = debugBlob.strategy || (productItems.length ? "apollo" : "");
+    }
+
+    if (!productItems.length) {
+      const rssProducts = await (async () => {
+        try {
+          const rssUrl = `${HOST_URL}feed`;
+          const xml = await fetchPage(rssUrl);
+          const entries = Array.from(
+            xml.matchAll(
+              /<entry>[\s\S]*?<title>([\s\S]*?)<\/title>[\s\S]*?<link rel="alternate" type="text\/html" href="([^"]+)"\/>/g,
+            ),
+          );
+          return entries.slice(0, 30).map((m) => {
+            const title = cleanText(m[1] || "");
+            const link = m[2] || "";
+            const slugMatch = link.match(/\/posts\/([^/?#]+)/);
+            const slug = slugMatch ? slugMatch[1] : title.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+            return {
+              id: slug,
+              name: title,
+              tagline: "",
+              description: "",
+              url: link,
+              thumbnail: "",
+              votesCount: 0,
+              commentsCount: 0,
+              createdAt: new Date().toISOString(),
+              topics: [],
+            } as Product;
+          });
+        } catch {
+          return [] as Product[];
+        }
+      })();
+      if (rssProducts.length) {
+        log.warn("frontpage:fallback_rss", "Falling back to RSS feed for frontpage products");
+        debugBlob.strategy = "rss";
+        await log.blobSet("debug:last_frontpage", { ...debugBlob, counts: { items: rssProducts.length } });
+        return { products: rssProducts };
+      }
+      throw new Error("Could not find any posts in Apollo data or DOM");
+    }
+
     const products = productItems.map((item) => ({
       id: item.id,
       name: cleanText(item.name),
@@ -299,9 +504,10 @@ export async function getFrontpageProducts(): Promise<{ products: Product[]; err
       description: cleanText(item.description || ""),
       url: `${HOST_URL}posts/${item.slug}`,
       thumbnail: item.thumbnailImageUuid ? `https://ph-files.imgix.net/${item.thumbnailImageUuid}` : "",
-      votesCount: item.votesCount || 0,
-      commentsCount: item.commentsCount || 0,
-      createdAt: item.createdAt,
+      // Use latestScore or launchDayScore (new API fields), fallback to votesCount (legacy)
+      votesCount: item.latestScore ?? item.launchDayScore ?? item.votesCount ?? 0,
+      commentsCount: typeof item.commentsCount === "number" ? item.commentsCount : 0,
+      createdAt: item.createdAt || new Date().toISOString(),
       maker: item.user
         ? {
             id: item.user.id,
@@ -319,9 +525,21 @@ export async function getFrontpageProducts(): Promise<{ products: Product[]; err
         })) || [],
     }));
 
+    try {
+      await LocalStorage.setItem(cacheKey, JSON.stringify({ ts: now, products }));
+    } catch {
+      void 0;
+    }
+    try {
+      debugBlob.counts = { ...debugBlob.counts, items: products.length };
+      await log.blobSet("debug:last_frontpage", debugBlob);
+    } catch {
+      /* ignore */
+    }
+
     return { products };
   } catch (error) {
-    console.error("Error fetching frontpage products:", error);
+    log.error("frontpage:error", error);
     return { products: [], error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
@@ -330,12 +548,8 @@ export async function getFrontpageProducts(): Promise<{ products: Product[]; err
 // Scrape detailed product information from a Product Hunt page
 async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
   try {
-    const response = await fetch(product.url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const html = await response.text();
+    // Use fetchPage with browser-like headers to avoid Cloudflare blocking
+    const html = await fetchPage(product.url);
     const $ = cheerio.load(html);
 
     // Extract canonical URL if available
@@ -404,7 +618,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
             }
           }
         } catch (parseError) {
-          console.error("Error parsing Apollo data:", parseError);
+          log.error("apollo:parse_error", parseError, { context: "scrapeDetailedProductInfo" });
         }
       }
     }
@@ -418,7 +632,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
 
     if (aboutLaunchSection.length > 0) {
       const aboutText = aboutLaunchSection.text();
-      console.log("About launch text:", aboutText);
+      log.debug("scraper:about_section", "Found about launch section", { textLength: aboutText.length });
 
       // Store this critical text in the product object for future use
       // This contains the "Made by" attribution information
@@ -449,7 +663,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
           };
 
           foundHunterSection = true;
-          console.log("Found hunter using regex:", hunterName, "with URL:", hunterUrl, "username:", username);
+          log.debug("scraper:hunter_found", "Found hunter using regex", { hunterName, hunterUrl, username });
         } else {
           // Second pass: Scan all links and look for ones that appear right after "hunted by" text
           allLinks.each((i, el) => {
@@ -470,7 +684,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
                 beforeLink = aboutHtmlContent.substring(0, linkPosition);
               }
             } catch (error) {
-              console.error("Error getting HTML before link:", error);
+              log.debug("hunter:html_parse_error", "Error getting HTML before link", { error: String(error) });
             }
 
             // Check if "hunted by" appears right before this link
@@ -488,14 +702,14 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
               };
 
               foundHunterSection = true;
-              console.log("Found hunter by proximity:", linkText, "with URL:", hunterUrl);
+              log.debug("scraper:hunter_found", "Found hunter by proximity", { hunterName: linkText, hunterUrl });
               return false; // Break the loop
             }
           });
         }
 
         if (!foundHunterSection) {
-          console.log("Could not find hunter in the about section");
+          log.debug("scraper:hunter_not_found", "Could not find hunter in the about section");
         }
       } else {
         foundHunterSection = true;
@@ -538,13 +752,10 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
               const explicitlyListedAsMaker = makerSection.includes(`Made by ${makerName}`);
 
               if (hunter && username === hunter.username && !explicitlyListedAsMaker) {
-                console.log(
-                  "Skipping hunter from makers list since they're not explicitly listed as maker:",
-                  makerName,
-                );
+                log.debug("scraper:maker_skip", "Skipping hunter from makers list", { makerName });
                 continue;
               } else if (hunter && username === hunter.username && explicitlyListedAsMaker) {
-                console.log("Keeping hunter in makers list because they are explicitly listed as maker:", makerName);
+                log.debug("scraper:maker_keep", "Keeping hunter in makers list", { makerName });
               }
 
               // Skip if no username or if this is a duplicate
@@ -560,13 +771,13 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
                 profileUrl: makerUrl.startsWith("http") ? makerUrl : `${HOST_URL}${makerUrl}`,
               });
 
-              console.log("Found maker:", makerName, "with URL:", makerUrl);
+              log.debug("scraper:maker_found", "Found maker", { makerName, makerUrl });
             }
           }
         }
 
         if (!foundMakerSection) {
-          console.log("No makers section found, or no makers in this product");
+          log.debug("scraper:makers_not_found", "No makers section found");
         }
       }
     }
@@ -589,7 +800,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
         }
       }
     } catch (e) {
-      console.error("Error getting Apollo post data:", e);
+      log.error("apollo:post_data_error", e);
     }
 
     // Only use Apollo data as a fallback for hunter
@@ -653,7 +864,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
     }
 
     // 2. Extract gallery images
-    console.log('Looking for gallery images with data-sentry-component="Gallery"');
+    log.debug("gallery:search", "Looking for gallery images");
 
     // First try to find the gallery component by data-sentry-component attribute
     const galleryContainer = $('[data-sentry-component="Gallery"]');
@@ -663,10 +874,10 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
       '[class*="gallery" i], [id*="gallery" i], [class*="carousel" i], [id*="carousel" i]',
     );
 
-    console.log(`Found ${galleryClassElements.length} elements with gallery/carousel in class or id`);
+    log.debug("gallery:elements", "Found gallery elements", { count: galleryClassElements.length });
 
     if (galleryContainer.length > 0) {
-      console.log('Found gallery container with data-sentry-component="Gallery"');
+      log.debug("gallery:container", "Found gallery container with data-sentry-component");
 
       // Find all images within the gallery container
       galleryContainer.find("img").each((i, el) => {
@@ -678,19 +889,17 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
         }
       });
     } else if (galleryClassElements.length > 0) {
-      console.log("Found elements with gallery/carousel in class or id");
+      log.debug("gallery:class_elements", "Found elements with gallery/carousel in class or id");
 
       // Find all images within these elements
       galleryClassElements.find("img").each((i, el) => {
         const imgSrc = $(el).attr("src");
-        console.log(`Found gallery image: ${imgSrc}`);
-
         if (imgSrc && !galleryImages.includes(imgSrc)) {
           galleryImages.push(normalizeImageUrl(imgSrc));
         }
       });
     } else {
-      console.log("No gallery containers found, falling back to class selectors");
+      log.debug("gallery:fallback", "No gallery containers found, falling back to class selectors");
 
       // Fallback to the old selectors if the gallery component isn't found
       $(".styles_imageContainer__Hm_9x img, .styles_image__wG8b_ img").each((i, el) => {
@@ -711,7 +920,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
 
     // If no gallery images found yet, try to extract them from the Apollo data
     if (galleryImages.length === 0 && apolloDataMatch) {
-      console.log("Trying to extract gallery images from Apollo data");
+      log.debug("gallery:apollo_fallback", "Trying to extract gallery images from Apollo data");
       try {
         const sanitizedData = sanitizeJsonString(apolloDataMatch);
 
@@ -726,17 +935,15 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
 
             // Look for media or gallery fields in the Apollo data
             if (postData.media && Array.isArray(postData.media)) {
-              console.log(`Found ${postData.media.length} media items in Apollo data`);
+              log.debug("gallery:apollo_media", "Found media items in Apollo data", { count: postData.media.length });
               // Using 'any' as Apollo state structure can be complex/variable
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               postData.media.forEach((mediaItem: any) => {
                 if (mediaItem.url && !galleryImages.includes(mediaItem.url)) {
-                  console.log(`Adding media item from Apollo data: ${mediaItem.url}`);
                   galleryImages.push(mediaItem.url);
                 } else if (mediaItem.imageUuid) {
                   const imgUrl = `https://ph-files.imgix.net/${mediaItem.imageUuid}`;
                   if (!galleryImages.includes(imgUrl)) {
-                    console.log(`Adding gallery item with imageUuid from Apollo data: ${imgUrl}`);
                     galleryImages.push(imgUrl);
                   }
                 }
@@ -745,17 +952,17 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
 
             // Look for gallery field
             if (postData.gallery && Array.isArray(postData.gallery)) {
-              console.log(`Found ${postData.gallery.length} gallery items in Apollo data`);
+              log.debug("gallery:apollo_gallery", "Found gallery items in Apollo data", {
+                count: postData.gallery.length,
+              });
               // Using 'any' as Apollo state structure can be complex/variable
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
               postData.gallery.forEach((galleryItem: any) => {
                 if (galleryItem.url && !galleryImages.includes(galleryItem.url)) {
-                  console.log(`Adding gallery item from Apollo data: ${galleryItem.url}`);
                   galleryImages.push(galleryItem.url);
                 } else if (galleryItem.imageUuid) {
                   const imgUrl = `https://ph-files.imgix.net/${galleryItem.imageUuid}`;
                   if (!galleryImages.includes(imgUrl)) {
-                    console.log(`Adding gallery item with imageUuid from Apollo data: ${imgUrl}`);
                     galleryImages.push(imgUrl);
                   }
                 }
@@ -764,11 +971,11 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
           }
         }
       } catch (error) {
-        console.error("Error extracting gallery images from Apollo data:", error);
+        log.error("gallery:apollo_extract_error", error);
       }
     }
 
-    console.log(`Found ${galleryImages.length} gallery images total`);
+    log.debug("gallery:total", "Gallery images found", { count: galleryImages.length });
 
     // 3. Extract shoutouts (built with)
     $('.styles_builtWithContainer__hMCFG a, [data-test="built-with-item"]').each((i, el) => {
@@ -830,14 +1037,18 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
             const postData = postEvent.result.data.post;
 
             // Update vote and comment counts with more accurate data
-            if (postData.votesCount !== undefined) {
+            // Use latestScore or launchDayScore (new API fields), fallback to votesCount (legacy)
+            const newVotesCount = postData.latestScore ?? postData.launchDayScore ?? postData.votesCount;
+            if (newVotesCount !== undefined) {
               // Log any discrepancies in vote counts for debugging
-              if (product.votesCount !== postData.votesCount) {
-                console.log(`Points count discrepancy for ${product.name}:`);
-                console.log(`- Original: ${product.votesCount}`);
-                console.log(`- Updated: ${postData.votesCount}`);
+              if (product.votesCount !== newVotesCount) {
+                log.debug("scraper:votes_discrepancy", "Points count discrepancy", {
+                  productName: product.name,
+                  original: product.votesCount,
+                  updated: newVotesCount,
+                });
               }
-              product.votesCount = postData.votesCount;
+              product.votesCount = newVotesCount;
             }
 
             if (postData.commentsCount !== undefined) {
@@ -845,18 +1056,17 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
             }
 
             // Log detailed product data for debugging
-            console.log(`\n--- PRODUCT DETAIL DATA (${new Date().toISOString()}) ---`);
-            console.log(`Product: ${cleanText(product.name)}`);
-            console.log(`- URL: ${product.url}`);
-            console.log(`- Points: ${product.votesCount}`);
-            console.log(`- Comments: ${product.commentsCount}`);
-            console.log(`- Previous Launches: ${previousLaunches || 0}`);
-            if (hunter) console.log(`- Hunter: ${hunter.name}`);
-            if (makers.length > 0) console.log(`- Makers: ${makers.map((m) => m.name).join(", ")}`);
-            if (product.topics.length > 0) console.log(`- Topics: ${product.topics.map((t) => t.name).join(", ")}`);
-            if (galleryImages.length > 0) console.log(`- Gallery Images: ${galleryImages.length}`);
-            console.log(`- Timestamp: ${new Date().toISOString()}`);
-            console.log(`------------------------------------`);
+            log.debug("scraper:product_detail", "Product detail data", {
+              productName: cleanText(product.name),
+              url: product.url,
+              points: product.votesCount,
+              comments: product.commentsCount,
+              previousLaunches: previousLaunches || 0,
+              hunter: hunter?.name,
+              makersCount: makers.length,
+              topicsCount: product.topics.length,
+              galleryImagesCount: galleryImages.length,
+            });
 
             // Extract additional maker information if available
             if (postData.user && makers.length === 0) {
@@ -871,7 +1081,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
             }
           }
         } catch (parseError) {
-          console.error("Error parsing Apollo data:", parseError);
+          log.error("apollo:parse_error", parseError, { context: "enhanceProductWithMetadata" });
         }
       }
     }
@@ -889,7 +1099,7 @@ async function scrapeDetailedProductInfo(product: Product): Promise<Product> {
       previousLaunches,
     };
   } catch (error) {
-    console.error(`Error scraping detailed product info for ${product.id}:`, error);
+    log.error("scraper:detailed_info_error", error, { productId: product.id });
     return product;
   }
 }
@@ -912,20 +1122,17 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
     if ((!thumbnailUrl || thumbnailUrl === "") && slug) {
       // Try to fetch the product page to find image references
       try {
-        const response = await fetch(product.url);
-        if (response.ok) {
-          const html = await response.text();
-          const $ = cheerio.load(html);
+        const html = await fetchPage(product.url);
+        const $ = cheerio.load(html);
 
-          // Look for image references in the page
-          const ogImage = $('meta[property="og:image"]').attr("content");
-          const twitterImage = $('meta[name="twitter:image"]').attr("content");
+        // Look for image references in the page
+        const ogImage = $('meta[property="og:image"]').attr("content");
+        const twitterImage = $('meta[name="twitter:image"]').attr("content");
 
-          // Use the first available image
-          thumbnailUrl = ogImage || twitterImage || thumbnailUrl;
-        }
+        // Use the first available image
+        thumbnailUrl = ogImage || twitterImage || thumbnailUrl;
       } catch (error) {
-        console.error(`Error fetching product page for ${slug}:`, error);
+        log.debug("thumbnail:fetch_error", "Error fetching product page for thumbnail", { slug, error: String(error) });
       }
 
       // If we still don't have a valid thumbnail, use a fallback
@@ -956,7 +1163,7 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
         const base64Thumbnail = await fetchSvgAsBase64(thumbnailUrl);
         thumbnailUrl = base64Thumbnail;
       } catch (error) {
-        console.error(`Error converting SVG to base64: ${error}`);
+        log.debug("svg:base64_error", "Error converting SVG to base64", { error: String(error) });
         // Fall back to the original URL if base64 conversion fails
       }
     }
@@ -969,7 +1176,7 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
             try {
               return await fetchSvgAsBase64(imgUrl);
             } catch (error) {
-              console.error(`Error converting gallery SVG to base64: ${error}`);
+              log.debug("gallery:svg_base64_error", "Error converting gallery SVG to base64", { error: String(error) });
               return imgUrl; // Fall back to original URL
             }
           }
@@ -983,8 +1190,10 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
     const featuredImage = metadata.image || undefined;
 
     // Make sure we preserve the hunter and makers information
-    console.log("Enhanced product hunter:", enhancedProduct.hunter);
-    console.log("Enhanced product makers:", enhancedProduct.makers);
+    log.debug("enhance:hunter_makers", "Enhanced product data", {
+      hunter: enhancedProduct.hunter?.name,
+      makersCount: enhancedProduct.makers?.length ?? 0,
+    });
 
     // Before returning the enhanced product, ensure the hunter is not incorrectly in the makers list
     // EXCEPT if the hunter is explicitly listed as a maker ("Made by Hunter")
@@ -1002,7 +1211,7 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
       // First, get the complete page text which typically contains the "Made by" attribution
       // We'll use the product description, which should include the "About this launch" section
       const aboutLaunchText = product.description || "";
-      console.log(`Complete about launch text: "${aboutLaunchText.substring(0, 300)}..."`);
+      log.debug("enhance:about_text", "About launch text", { textLength: aboutLaunchText.length });
 
       // Look for the definitive "Made by [hunterName]" pattern
       // This is the most reliable indicator that someone is marked as a maker
@@ -1011,7 +1220,7 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
 
       // Single check for the pattern - the regex is already case-insensitive
       if (aboutLaunchText.match(madeByHunterPattern)) {
-        console.log(`Found "Made by ${hunterName}" pattern - definitive maker attribution`);
+        log.debug("enhance:hunter_is_maker", "Found Made by pattern", { hunterName });
         hunterIsMaker = true;
       }
 
@@ -1020,7 +1229,7 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
         const productInfo = [product.name || "", product.tagline || "", enhancedProduct.description || ""].join(" ");
 
         if (productInfo.includes(`Made by ${hunterName}`)) {
-          console.log(`Found "Made by ${hunterName}" in other product text`);
+          log.debug("enhance:hunter_is_maker", "Found Made by in product text", { hunterName });
           hunterIsMaker = true;
         }
       }
@@ -1055,11 +1264,10 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
       }
 
       // Log the decision and reasoning
-      if (hunterIsMaker) {
-        console.log(`Hunter "${hunterName}" is determined to be a maker based on pattern: ${matchedPattern}`);
-      } else {
-        console.log(`Hunter "${hunterName}" is not explicitly identified as a maker in product text`);
-      }
+      log.debug("enhance:hunter_decision", hunterIsMaker ? "Hunter is maker" : "Hunter is not maker", {
+        hunterName,
+        matchedPattern: matchedPattern || "none",
+      });
 
       // Make the final decision - keep or remove the hunter from makers list
       if (!hunterIsMaker) {
@@ -1071,12 +1279,10 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
         });
 
         if (originalLength !== enhancedProduct.makers.length) {
-          console.log(
-            `Filtered out hunter "${hunterName}" from makers list as they aren't explicitly listed as a maker`,
-          );
+          log.debug("enhance:hunter_filtered", "Filtered hunter from makers list", { hunterName });
         }
       } else {
-        console.log(`Keeping hunter "${hunterName}" in makers list because they are explicitly listed as maker`);
+        log.debug("enhance:hunter_kept", "Keeping hunter in makers list", { hunterName });
       }
     }
 
@@ -1091,12 +1297,14 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
       makers: enhancedProduct.makers || product.makers,
     };
 
-    console.log("Final product hunter:", finalProduct.hunter);
-    console.log("Final product makers:", finalProduct.makers);
+    log.debug("enhance:final", "Final product data", {
+      hunter: finalProduct.hunter?.name,
+      makersCount: finalProduct.makers?.length ?? 0,
+    });
 
     return finalProduct;
   } catch (error) {
-    console.error(`Error enhancing product ${product.id} with metadata:`, error);
+    log.error("enhance:metadata_error", error, { productId: product.id });
     return product;
   }
 }
@@ -1104,13 +1312,8 @@ export async function enhanceProductWithMetadata(product: Product): Promise<Prod
 // Scrape Open Graph metadata from a URL
 export async function scrapeOpenGraphMetadata(url: string): Promise<OpenGraphMetadata> {
   try {
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const html = await response.text();
+    // Use fetchPage with browser-like headers to avoid Cloudflare blocking
+    const html = await fetchPage(url);
     const $ = cheerio.load(html);
     const metadata: OpenGraphMetadata = {};
 
@@ -1146,7 +1349,7 @@ export async function scrapeOpenGraphMetadata(url: string): Promise<OpenGraphMet
 
     return metadata;
   } catch (error) {
-    console.error("Error scraping Open Graph metadata:", error);
+    log.error("og:scrape_error", error);
     return {};
   }
 }
@@ -1155,13 +1358,8 @@ export async function scrapeOpenGraphMetadata(url: string): Promise<OpenGraphMet
 export async function getProductDetails(productId: string): Promise<{ product?: Product; error?: string }> {
   try {
     const url = `${HOST_URL}posts/${productId}`;
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const html = await response.text();
+    // Use fetchPage with browser-like headers to avoid Cloudflare blocking
+    const html = await fetchPage(url);
     const $ = cheerio.load(html);
 
     // Extract canonical URL if available
@@ -1185,7 +1383,7 @@ export async function getProductDetails(productId: string): Promise<{ product?: 
     try {
       apolloData = JSON.parse(sanitizedData) as ApolloEvent[];
     } catch (parseError) {
-      console.error("JSON parse error:", parseError);
+      log.error("apollo:json_parse_error", parseError, { context: "getProductDetails" });
       throw new Error(
         `Failed to parse Apollo data: ${parseError instanceof Error ? parseError.message : "Unknown error"}`,
       );
@@ -1208,7 +1406,8 @@ export async function getProductDetails(productId: string): Promise<{ product?: 
       description: cleanText(postData.description || ""),
       url: canonicalUrl || `${HOST_URL}posts/${postData.slug}`,
       thumbnail: postData.thumbnailImageUuid ? `https://ph-files.imgix.net/${postData.thumbnailImageUuid}` : "",
-      votesCount: postData.votesCount || 0,
+      // Use latestScore or launchDayScore (new API fields), fallback to votesCount (legacy)
+      votesCount: postData.latestScore ?? postData.launchDayScore ?? postData.votesCount ?? 0,
       commentsCount: postData.commentsCount || 0,
       createdAt: postData.createdAt,
       maker: postData.user
@@ -1233,12 +1432,12 @@ export async function getProductDetails(productId: string): Promise<{ product?: 
       const enhancedProduct = await enhanceProductWithMetadata(product);
       return { product: enhancedProduct };
     } catch (enhanceError) {
-      console.error("Error enhancing product with metadata:", enhanceError);
+      log.error("product:enhance_error", enhanceError, { productId });
       // If enhancement fails, return the basic product
       return { product };
     }
   } catch (error) {
-    console.error("Error fetching product details:", error);
+    log.error("product:fetch_error", error, { productId });
     return { error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
@@ -1246,13 +1445,8 @@ export async function getProductDetails(productId: string): Promise<{ product?: 
 // Scrape trending products
 export async function getTrendingProducts(): Promise<{ products: Product[]; error?: string }> {
   try {
-    const response = await fetch(HOST_URL);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const html = await response.text();
+    // Use fetchPage with browser-like headers to avoid Cloudflare blocking
+    const html = await fetchPage(HOST_URL);
     const $ = cheerio.load(html);
 
     // Find the Apollo state data embedded in the script tag
@@ -1273,7 +1467,7 @@ export async function getTrendingProducts(): Promise<{ products: Product[]; erro
     try {
       apolloData = JSON.parse(sanitizedData) as ApolloEvent[];
     } catch (parseError) {
-      console.error("JSON parse error:", parseError);
+      log.error("apollo:json_parse_error", parseError, { context: "getTrendingProducts" });
       throw new Error(
         `Failed to parse Apollo data: ${parseError instanceof Error ? parseError.message : "Unknown error"}`,
       );
@@ -1306,7 +1500,8 @@ export async function getTrendingProducts(): Promise<{ products: Product[]; erro
       description: cleanText(item.description || ""),
       url: `${HOST_URL}posts/${item.slug}`,
       thumbnail: item.thumbnailImageUuid ? `https://ph-files.imgix.net/${item.thumbnailImageUuid}` : "",
-      votesCount: item.votesCount || 0,
+      // Use latestScore or launchDayScore (new API fields), fallback to votesCount (legacy)
+      votesCount: item.latestScore ?? item.launchDayScore ?? item.votesCount ?? 0,
       commentsCount: item.commentsCount || 0,
       createdAt: item.createdAt,
       maker: item.user
@@ -1328,7 +1523,7 @@ export async function getTrendingProducts(): Promise<{ products: Product[]; erro
 
     return { products };
   } catch (error) {
-    console.error("Error fetching trending products:", error);
+    log.error("trending:fetch_error", error);
     return { products: [], error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
@@ -1336,13 +1531,8 @@ export async function getTrendingProducts(): Promise<{ products: Product[]; erro
 // Scrape topics
 export async function getTopics(): Promise<{ topics: Topic[]; error?: string }> {
   try {
-    const response = await fetch(`${HOST_URL}topics`);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const html = await response.text();
+    // Use fetchPage with browser-like headers to avoid Cloudflare blocking
+    const html = await fetchPage(`${HOST_URL}topics`);
     const $ = cheerio.load(html);
 
     // Find the Apollo state data embedded in the script tag
@@ -1363,7 +1553,7 @@ export async function getTopics(): Promise<{ topics: Topic[]; error?: string }> 
     try {
       apolloData = JSON.parse(sanitizedData) as ApolloEvent[];
     } catch (parseError) {
-      console.error("JSON parse error:", parseError);
+      log.error("apollo:json_parse_error", parseError, { context: "getTopics" });
       throw new Error(
         `Failed to parse Apollo data: ${parseError instanceof Error ? parseError.message : "Unknown error"}`,
       );
@@ -1391,7 +1581,7 @@ export async function getTopics(): Promise<{ topics: Topic[]; error?: string }> 
 
     return { topics };
   } catch (error) {
-    console.error("Error fetching topics:", error);
+    log.error("topics:fetch_error", error);
     return { topics: [], error: error instanceof Error ? error.message : "Unknown error" };
   }
 }
@@ -1402,13 +1592,8 @@ export async function searchProducts(query: string): Promise<{ products: Product
     const encodedQuery = encodeURIComponent(query);
     const url = `${HOST_URL}search?q=${encodedQuery}`;
 
-    const response = await fetch(url);
-
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
-    const html = await response.text();
+    // Use fetchPage with browser-like headers to avoid Cloudflare blocking
+    const html = await fetchPage(url);
     const $ = cheerio.load(html);
 
     // Find the Apollo state data embedded in the script tag
@@ -1429,7 +1614,7 @@ export async function searchProducts(query: string): Promise<{ products: Product
     try {
       apolloData = JSON.parse(sanitizedData) as ApolloEvent[];
     } catch (parseError) {
-      console.error("JSON parse error:", parseError);
+      log.error("apollo:json_parse_error", parseError, { context: "searchProducts" });
       throw new Error(
         `Failed to parse Apollo data: ${parseError instanceof Error ? parseError.message : "Unknown error"}`,
       );
@@ -1455,7 +1640,8 @@ export async function searchProducts(query: string): Promise<{ products: Product
       description: cleanText(item.description || ""),
       url: `${HOST_URL}posts/${item.slug}`,
       thumbnail: item.thumbnailImageUuid ? `https://ph-files.imgix.net/${item.thumbnailImageUuid}` : "",
-      votesCount: item.votesCount || 0,
+      // Use latestScore or launchDayScore (new API fields), fallback to votesCount (legacy)
+      votesCount: item.latestScore ?? item.launchDayScore ?? item.votesCount ?? 0,
       commentsCount: item.commentsCount || 0,
       createdAt: item.createdAt,
       maker: item.user
@@ -1477,7 +1663,7 @@ export async function searchProducts(query: string): Promise<{ products: Product
 
     return { products };
   } catch (error) {
-    console.error("Error searching products:", error);
+    log.error("search:fetch_error", error, { query });
     return { products: [], error: error instanceof Error ? error.message : "Unknown error" };
   }
 }

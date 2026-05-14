@@ -3,21 +3,21 @@ import { useMemo } from "react";
 import { getTags } from "../api";
 import { apiLimit } from "../utils";
 
-export function useTags(spaceId: string, propertyId: string) {
+export function useTags(spaceId: string, propertyId: string, searchText?: string, config?: { execute?: boolean }) {
   const { data, error, isLoading, mutate, pagination } = useCachedPromise(
-    (spaceId: string, propertyId: string) => async (options: { page: number }) => {
+    (spaceId: string, propertyId: string, searchText?: string) => async (options: { page: number }) => {
       const offset = options.page * apiLimit;
-      const response = await getTags(spaceId, propertyId, { offset, limit: apiLimit });
+      const response = await getTags(spaceId, propertyId, { offset, limit: apiLimit, name: searchText });
 
       return {
         data: response.tags,
         hasMore: response.pagination.has_more,
       };
     },
-    [spaceId, propertyId],
+    [spaceId, propertyId, searchText],
     {
       keepPreviousData: true,
-      execute: !!spaceId && !!propertyId,
+      execute: !!spaceId && !!propertyId && config?.execute !== false,
     },
   );
 

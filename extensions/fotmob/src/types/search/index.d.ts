@@ -94,7 +94,7 @@ export type SearchResultSection = {
 
 export type SearchResultItem = {
   title: string;
-  iamgeUrl: string;
+  imageUrl: string;
   subtitle: string;
   accessories: List.Item.Accessory[];
   raw: unknown;

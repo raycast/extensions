@@ -6,7 +6,10 @@ import { BASE_URL } from "./scira";
 // Define Message type to match what the API expects
 type Message = {
   role: "user";
-  content: string;
+  parts: {
+    type: "text";
+    text: string;
+  }[];
 };
 
 // Form values interface
@@ -34,7 +37,12 @@ async function searchScira(query: string, group?: string): Promise<string> {
     messages: [
       {
         role: "user",
-        content: query,
+        parts: [
+          {
+            type: "text",
+            text: query,
+          },
+        ],
       },
     ],
     model: "scira-default",

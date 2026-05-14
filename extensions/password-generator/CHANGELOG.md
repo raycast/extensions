@@ -1,5 +1,25 @@
 # Password Generator Changelog
 
+## [Remember numbers and characters] - 2026-01-08
+
+- Added `README.md`
+- Added `Preference` to remember the last used settings for "Use numbers?" and "Use special characters?" in `Generate Random Password` (ref: [Issue #24199](https://github.com/raycast/extensions/issues/24199))
+
+## [Windows Support & Dependency Updates] - 2025-09-02
+
+- Added support for Raycast on Windows.
+- Updated dependencies to their latest versions:
+  - `@raycast/api`
+  - `@raycast/eslint-config`
+  - `@types/react`
+  - `prettier`
+  - `react`
+  - `typescript`
+
+## [Guarantee presence of special characters] - 2025-08-20
+
+If "Use numbers?" and/or "Use special characters?" are selected, the password is guaranteed to have at least one of each of those characters.
+
 ## [Generate memorable passwords] - 2024-09-23
 
 There's now a command called "Generate Memorable Password". It will create an easier-to-type-and-remember password and can be fully customized.

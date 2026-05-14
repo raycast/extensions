@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tasklink",
-  "title": "TaskLink",
+  "title": "Tasklink",
   "description": "Converts issue tracker Ids into clickable links",
   "icon": "command-icon.png",
   "author": "jrodalo",
@@ -9,16 +9,20 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "commands": [
     {
       "name": "issue_id_to_html_link",
-      "title": "Convert Issue Ids Into Clickable HTML Links",
+      "title": "Convert Issue Ids into Clickable HTML Links",
       "description": "Converts issue tracker IDs into HTML links",
       "mode": "no-view"
     },
     {
       "name": "issue_id_to_markdown_link",
-      "title": "Convert Issue Ids Into Clickable Markdown Links",
+      "title": "Convert Issue Ids into Clickable Markdown Links",
       "description": "Converts issue tracker IDs into Markdown links",
       "mode": "no-view"
     }
@@ -51,19 +55,21 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.67.1"
+    "@raycast/api": "^1.104.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.6",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.1.0",
+    "@types/react": "19.2.10",
+    "eslint": "^9.39.2",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
   },
   "scripts": {
     "build": "ray build -e dist",
     "dev": "ray develop",
+    "test": "vitest",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"

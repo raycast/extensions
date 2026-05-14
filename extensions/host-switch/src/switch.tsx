@@ -1,6 +1,6 @@
 import { type FC, useCallback, useEffect, useMemo, useState } from "react";
-import { List, ActionPanel, Action, Icon, closeMainWindow, PopToRootType, Color, Image } from "@raycast/api";
-import { getFavicon } from "@raycast/utils";
+import { List, ActionPanel, Action, Icon, closeMainWindow, PopToRootType, Color, Image, Detail } from "@raycast/api";
+import { getFavicon, showFailureToast } from "@raycast/utils";
 import type { Host } from "./types";
 import { withBrowser, useBrowser } from "./lib/withBrowser";
 import { useCachedHosts } from "./hooks/useCachedHosts";
@@ -12,30 +12,38 @@ export const Switch: FC = () => {
   const { query, filter, setQuery } = useDebouncedQuery();
   const [currentHost, setCurrentHost] = useState<string | undefined>();
   const isLoading = !currentHost;
+  const [error, setError] = useState<Error>();
 
   const filteredHosts = useMemo(
     () =>
       Object.keys(hosts)
         .filter((h) => !currentHost?.startsWith(h) && h.includes(query))
         .map((h) => hosts[h]),
-    [hosts, filter, currentHost]
+    [hosts, filter, currentHost],
   );
 
   useEffect(() => {
-    browser &&
-      browser.getCurrentTabUrl().then((url) => {
-        if (url) {
-          const currentUrl = new URL(url);
-          const host =
-            currentUrl.protocol + "//" + currentUrl.hostname + (currentUrl.port ? `:${currentUrl.port}` : "");
+    if (browser) {
+      browser
+        .getCurrentTabUrl()
+        .then((url) => {
+          if (url) {
+            const currentUrl = new URL(url);
+            const host =
+              currentUrl.protocol + "//" + currentUrl.hostname + (currentUrl.port ? `:${currentUrl.port}` : "");
 
-          setCurrentHost(host);
+            setCurrentHost(host);
 
-          if (!hosts[host]) {
-            addHost(host);
+            if (!hosts[host]) {
+              addHost(host);
+            }
           }
-        }
-      });
+        })
+        .catch((err) => {
+          setError(err);
+          showFailureToast(err);
+        });
+    }
   }, [browser]);
 
   const switchHost = async (host: Host) => {
@@ -52,6 +60,8 @@ export const Switch: FC = () => {
       });
     }
   };
+
+  if (error) return <Detail markdown={`# ERROR \n\n ${error.message}`} />;
 
   return (
     <List searchBarPlaceholder="Host Url" isLoading={isLoading} searchText={query} onSearchTextChange={setQuery}>
@@ -80,7 +90,7 @@ export const HostItem = ({ host, onSwitch, onDelete }: HostItemProps) => {
   const switchHost = useCallback(() => onSwitch(host), [host]);
   const deleteAction = useCallback(() => onDelete && onDelete(host), [host]);
   const openInNewTab = useCallback(async () => {
-    browser.openUrl(host.host);
+    await browser.openUrl(host.host);
     await closeMainWindow({
       popToRootType: PopToRootType.Immediate,
       clearRootSearch: true,

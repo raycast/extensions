@@ -10,7 +10,7 @@
   ],
   "contributors": [
     "bgnfu7re",
-    "miao_cai"
+    "philly_cai"
   ],
   "license": "MIT",
   "commands": [
@@ -68,7 +68,6 @@
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^8.3.0",
     "prettier": "^2.5.1",
-    "react-devtools": "^4.19.2",
     "typescript": "^5.4.2"
   },
   "scripts": {

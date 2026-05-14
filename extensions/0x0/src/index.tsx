@@ -1,9 +1,7 @@
 import { Form, ActionPanel, Action, Toast, showToast, open, Clipboard, Icon } from "@raycast/api";
-import fs from "fs";
+import fs from "node:fs";
 import { useState } from "react";
-import fetch from "node-fetch";
-import FormData from "form-data";
-import path from "path";
+import path from "node:path";
 import { FormValidation, useForm } from "@raycast/utils";
 
 interface UploadFormValues {
@@ -12,7 +10,7 @@ interface UploadFormValues {
 
 export default function Command() {
   const [uploading, setUploading] = useState(false);
-  const { handleSubmit, itemProps, reset } = useForm<UploadFormValues>({
+  const { handleSubmit, itemProps } = useForm<UploadFormValues>({
     async onSubmit(values) {
       const uploadToast = await showToast(Toast.Style.Animated, "Uploading", "Please wait...");
       setUploading(true);
@@ -21,20 +19,28 @@ export default function Command() {
         const formData = new FormData();
         const filePath = values.file[0];
         const fileBuffer = fs.readFileSync(filePath);
-        formData.append("file", fileBuffer, {
-          filename: path.basename(filePath),
-        });
+        const fileName = path.basename(filePath);
+        const blob = new Blob([fileBuffer]);
+        formData.append("file", blob, fileName);
 
         const response = await fetch(url, {
           method: "POST",
-          headers: formData.getHeaders(),
+          headers: {
+            "User-Agent": "0x0-raycast/1.0",
+          },
           body: formData,
         });
+
         if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          const errorText = await response.text();
+          throw new Error(`HTTP error! Status: ${response.status}${errorText ? ` - ${errorText}` : ""}`);
         }
 
         const result = (await response.text()).trim();
+        if (!result) {
+          throw new Error("Empty response from server");
+        }
+
         uploadToast.style = Toast.Style.Success;
         uploadToast.title = "Upload successful";
         uploadToast.message = "Link copied to clipboard";
@@ -47,9 +53,11 @@ export default function Command() {
           },
         };
         setUploading(false);
-        reset();
       } catch (error) {
         setUploading(false);
+        uploadToast.style = Toast.Style.Failure;
+        uploadToast.title = "Upload failed";
+        uploadToast.message = error instanceof Error ? error.message : "Unknown error occurred";
       }
     },
     validation: {

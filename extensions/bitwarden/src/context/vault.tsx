@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { createContext, ReactNode, useContext, useMemo, useReducer } from "react";
 import { useVaultItemPublisher } from "~/components/searchVault/context/vaultListeners";
 import { useBitwarden } from "~/context/bitwarden";
@@ -24,19 +24,20 @@ export type VaultContextType = VaultState & {
   updateState: (next: React.SetStateAction<VaultState>) => void;
 };
 
-const VaultContext = createContext<VaultContextType | null>(null);
+export const VaultContext = createContext<VaultContextType | null>(null);
 
-function getInitialState(fetchOnMount = true): VaultState {
-  return { items: [], folders: [], isLoading: fetchOnMount };
+function getInitialState(): VaultState {
+  return { items: [], folders: [], isLoading: true };
 }
 
 export type VaultProviderProps = {
   children: ReactNode;
-  fetchOnMount?: boolean;
 };
 
+const { syncOnLaunch } = getPreferenceValues<AllPreferences>();
+
 export function VaultProvider(props: VaultProviderProps) {
-  const { children, fetchOnMount = true } = props;
+  const { children } = props;
 
   const session = useSession();
   const bitwarden = useBitwarden();
@@ -46,12 +47,16 @@ export function VaultProvider(props: VaultProviderProps) {
   const [currentFolderId, setCurrentFolderId] = useCachedState<Nullable<string>>(CACHE_KEYS.CURRENT_FOLDER_ID, null);
   const [state, setState] = useReducer(
     (previous: VaultState, next: Partial<VaultState>) => ({ ...previous, ...next }),
-    { ...getInitialState(fetchOnMount), ...getCachedVault() }
+    { ...getInitialState(), ...getCachedVault() }
   );
 
   useOnceEffect(() => {
-    void loadItems();
-  }, fetchOnMount && session.active && session.token);
+    if (syncOnLaunch) {
+      void syncItems({ isInitial: true });
+    } else {
+      void loadItems();
+    }
+  }, session.active && session.token);
 
   async function loadItems() {
     try {
@@ -82,8 +87,14 @@ export function VaultProvider(props: VaultProviderProps) {
     }
   }
 
-  async function syncItems() {
-    const toast = await showToast(Toast.Style.Animated, "Syncing Items...");
+  async function syncItems(props?: { isInitial?: boolean }) {
+    const { isInitial = false } = props ?? {};
+
+    const toast = await showToast({
+      title: "Syncing vault...",
+      message: isInitial ? "Background task" : undefined,
+      style: Toast.Style.Animated,
+    });
     try {
       await bitwarden.sync();
       await loadItems();
@@ -91,7 +102,7 @@ export function VaultProvider(props: VaultProviderProps) {
     } catch (error) {
       await bitwarden.logout();
       toast.style = Toast.Style.Failure;
-      toast.title = "Failed to sync. Please try logging in again.";
+      toast.title = "Failed to sync vault";
       toast.message = getDisplayableErrorMessage(error);
     }
   }

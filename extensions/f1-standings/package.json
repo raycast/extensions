@@ -75,6 +75,24 @@
             }
           ],
           "default": "MM/dd/yyyy"
+        },
+        {
+          "required": false,
+          "description": "Choose time format",
+          "type": "dropdown",
+          "title": "Time Format",
+          "name": "timeFormat",
+          "data": [
+            {
+              "title": "24-Hour Time (eg 16:00)",
+              "value": "HH:mm"
+            },
+            {
+              "title": "12-Hour Time (eg 4:00 PM)",
+              "value": "h:mm a"
+            }
+          ],
+          "default": "HH:mm"
         }
       ]
     }

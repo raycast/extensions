@@ -7,7 +7,7 @@ import { toPascalCase } from "../utils";
 import { LoadingAnimation } from "./LoadingAnimation";
 
 export function IconGrid() {
-  const preferences = getPreferenceValues();
+  const { primaryAction, pascalCaseName } = getPreferenceValues();
   const { data: allIcons, isLoading: isLoadingIcons } = useFetchIcons();
   const [colorName, setColorName] = useState<string>("PrimaryText");
   const [searchText, setSearchText] = useState("");
@@ -72,33 +72,62 @@ export function IconGrid() {
               keywords={icon.keywords}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard
-                    title="Copy Name"
-                    content={
-                      preferences.pascalCaseName
-                        ? icon.name
-                            .split("-")
-                            .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                            .join("")
-                        : icon.name
-                    }
-                  />
-                  <Action.CopyToClipboard title="Copy SVG" content={icon.content} />
-                  <Action.CopyToClipboard
-                    title="Copy Component"
-                    content={`<${toPascalCase(icon.name)} />`}
-                    shortcut={{
-                      modifiers: ["shift", "cmd"],
-                      key: "enter",
-                    }}
-                  />
-                  <Action.OpenInBrowser
-                    url={icon.path}
-                    shortcut={{
-                      modifiers: ["cmd"],
-                      key: "o",
-                    }}
-                  />
+                  {[
+                    {
+                      id: "copy-name",
+                      component: (
+                        <Action.CopyToClipboard
+                          key="copy-name"
+                          title="Copy Name"
+                          content={
+                            pascalCaseName
+                              ? icon.name
+                                  .split("-")
+                                  .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+                                  .join("")
+                              : icon.name
+                          }
+                        />
+                      ),
+                    },
+                    {
+                      id: "copy-svg",
+                      component: <Action.CopyToClipboard key="copy-svg" title="Copy SVG" content={icon.content} />,
+                    },
+                    {
+                      id: "paste-svg",
+                      component: <Action.Paste key="paste-svg" title="Paste SVG" content={icon.content} />,
+                    },
+                    {
+                      id: "copy-component",
+                      component: (
+                        <Action.CopyToClipboard
+                          key="copy-component"
+                          title="Copy Component"
+                          content={`<${toPascalCase(icon.name)} />`}
+                          shortcut={{
+                            modifiers: ["shift", "cmd"],
+                            key: "enter",
+                          }}
+                        />
+                      ),
+                    },
+                    {
+                      id: "open-in-browser",
+                      component: (
+                        <Action.OpenInBrowser
+                          key="open-in-browser"
+                          url={icon.path}
+                          shortcut={{
+                            modifiers: ["cmd"],
+                            key: "o",
+                          }}
+                        />
+                      ),
+                    },
+                  ]
+                    .sort((a, b) => (a.id === primaryAction ? -1 : b.id === primaryAction ? 1 : 0))
+                    .map((action) => action.component)}
                   <ActionPanel.Section>
                     {environment.canAccess(AI) && (
                       <Action

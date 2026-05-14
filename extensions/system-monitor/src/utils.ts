@@ -1,5 +1,15 @@
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
+
+const execFileP = promisify(execFile);
+
+/** Shell-free command execution. Uses execFile() instead of exec() to spawn
+ *  binaries directly without /bin/sh, preventing zombie process accumulation.
+ *  See: https://github.com/raycast/extensions/issues/26480 */
+export const execf = async (file: string, args: string[] = [], maxBuffer?: number): Promise<string> => {
+  const { stdout } = await execFileP(file, args, maxBuffer ? { maxBuffer } : undefined);
+  return String(stdout).trim();
+};
 
 export const formatBytes = (bytes: number): string => {
   const decimals = 2;
@@ -22,13 +32,6 @@ export const isObjectEmpty = (obj: object): boolean => {
   }
 
   return true;
-};
-
-export const execp = async (command: string): Promise<string> => {
-  const execp = promisify(exec);
-  const output = await execp(command);
-
-  return output.stdout.trim();
 };
 
 export const convertMsToTime = (milliseconds: number): string => {
@@ -61,13 +64,20 @@ export const openActivityMonitorAppleScript = (radioButtonNumber?: number | null
   return `
   tell application "Activity Monitor"
     activate
-    tell application "System Events"
-      tell process "Activity Monitor"
-        tell window 1
-          tell group 1 of toolbar 1
-            tell radio group 1
-              click radio button ${radioButtonNumber}
-            end tell
+  end tell
+
+  tell application "System Events"
+    repeat until exists (window 1 of process "Activity Monitor")
+      delay 0.1
+    end repeat
+
+    set frontmost of process "Activity Monitor" to true
+
+    tell process "Activity Monitor"
+      tell window 1
+        tell group 1 of toolbar 1
+          tell radio group 1
+            click radio button ${radioButtonNumber}
           end tell
         end tell
       end tell

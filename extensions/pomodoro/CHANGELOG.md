@@ -1,5 +1,14 @@
 # Pomodoro Changelog
 
+## [Improvement] - 2026-03-08
+
+- Add session label to end of interval notification
+- Add random rewards preference
+
+## [Fixes] - 2025-08-04
+
+- Fixed typo ("cycless" to "cycles") in the `View Pomodoro Stats` command
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Improvement] - 2025-01-07

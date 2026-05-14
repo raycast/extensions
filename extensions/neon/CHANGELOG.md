@@ -1,5 +1,16 @@
 # Neon Changelog
 
+## [Create PSQL 18 + New Logo] - 2026-01-19
+
+- Create a Project with Postgres 18
+- Updated logo to match Neon's new brand
+
+## [Create & Delete Project + Modernize] - 2025-07-14
+
+- Create Project
+- Delete Existing Project
+- Modernize to use latest Raycast configuration
+
 ## [Roles & Databases + Compute] - 2025-02-20
 
 - Update Project (basic): Edit a few fields of an existing project

@@ -7,7 +7,6 @@ import {
   defaultBraveStatePath,
 } from "../constants";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "../interfaces";
 
 const { browserOption } = getPreferenceValues<Preferences>();
 

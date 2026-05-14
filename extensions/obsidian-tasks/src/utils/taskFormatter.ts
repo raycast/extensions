@@ -30,10 +30,6 @@ export const formatTask = (task: Task): string => {
   try {
     let taskText = `${task.indentation}- [${task.completed ? "x" : " "}] `;
 
-    if (task.priority) {
-      taskText += getPriorityMarker(task.priority);
-    }
-
     taskText += task.description.trim();
 
     const cleanDescription = task.description;
@@ -42,6 +38,10 @@ export const formatTask = (task: Task): string => {
     const ensureSpace = (text: string) => {
       return text.endsWith(" ") ? text : text + " ";
     };
+
+    if (task.priority) {
+      taskText += getPriorityMarker(task.priority);
+    }
 
     if (task.dueDate && !cleanDescription.includes(ICONS.DATE.DUE)) {
       taskText = ensureSpace(taskText) + getDueDateMarker(task.dueDate);

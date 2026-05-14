@@ -2,8 +2,11 @@ import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { ISSHConnection } from "./types";
 import * as fs from "fs";
 
-const preferences = getPreferenceValues();
-const sshConfig = preferences.sshConfig.replace("~", process.env.HOME);
+const preferences = getPreferenceValues<Preferences>();
+const sshConfig =
+  preferences.sshConfig === "localStorage"
+    ? "localStorage"
+    : preferences.sshConfigFile || preferences.sshConfig.replace("~", process.env.HOME || ""); // if sshConfig, try the sshConfigFile otherwise default to ~/.ssh/config
 
 function parseSSHConfig(configFilePath: string): ISSHConnection[] {
   const configData = fs.readFileSync(configFilePath, "utf8");

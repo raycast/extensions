@@ -15,15 +15,13 @@
       "title": "Show All Incidents",
       "subtitle": "Incident.io",
       "description": "Displays all incidents from Incident.io.",
-      "mode": "view",
-      "path": "src/incident.tsx"
+      "mode": "view"
     },
     {
       "name": "oncall",
       "title": "Show Who Is Currently On-Call",
       "description": "Displays who is currently on call from Incident.io.",
-      "mode": "view",
-      "path": "src/oncall.tsx"
+      "mode": "view"
     },
     {
       "name": "live-incidents",
@@ -31,8 +29,14 @@
       "subtitle": "Incident.io",
       "description": "Displays live incidents from Incident.io.",
       "mode": "menu-bar",
-      "path": "src/live-incidents.tsx",
       "interval": "1m"
+    },
+    {
+      "name": "ai-incident-search",
+      "title": "Search Incidents with AI",
+      "subtitle": "Incident.io",
+      "description": "Search incidents using natural language powered by AI",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -47,6 +51,7 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.75.2",
+    "@raycast/utils": "^1.19.1",
     "axios": "^1.8.4"
   },
   "devDependencies": {

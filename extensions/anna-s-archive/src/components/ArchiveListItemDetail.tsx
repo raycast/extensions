@@ -1,12 +1,10 @@
-import { memo, useMemo } from "react";
-
+import { type ComponentType, memo, useMemo } from "react";
 import { List } from "@raycast/api";
+import type { ArchiveItem } from "@/api";
 
-import type { ArchiveItem } from "@/api/archive";
-
-interface ArchiveListItemDetailProps {
+type ArchiveListItemDetailProps = {
   item: ArchiveItem;
-}
+};
 
 const ArchiveListItemDetailF = ({ item }: ArchiveListItemDetailProps) => {
   const markdown = useMemo(() => {
@@ -38,6 +36,4 @@ const ArchiveListItemDetailF = ({ item }: ArchiveListItemDetailProps) => {
   );
 };
 
-const ArchiveListItemDetail = memo(ArchiveListItemDetailF);
-
-export default ArchiveListItemDetail;
+export const ArchiveListItemDetail = memo(ArchiveListItemDetailF) as ComponentType<ArchiveListItemDetailProps>;

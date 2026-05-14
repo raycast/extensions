@@ -1,5 +1,9 @@
 # YubiKey Code Changelog
 
+## [New Feature] - 2025-08-14
+
+- Add support for YubiKeys with passcodes
+
 ## [Bug Fix] - 2025-04-28
 
 - Fix issue [#18826](https://github.com/raycast/extensions/issues/18826) which caused the extension to require a Pro subscription

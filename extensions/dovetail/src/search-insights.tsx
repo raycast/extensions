@@ -1,18 +1,18 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
-import { Insight } from "./types/dovetail";
-import { formatRelativeDate, formatFullDate } from "./utils/formatting";
 import { useSearch } from "./hooks/useSearch";
-import { getInsights } from "./api/client";
+import { formatFullDate, formatRelativeDate } from "./utils/formatting";
+import { endpoints } from "./api/endpoints";
 
 export default function SearchInsights() {
-  const { data, isLoading, onSearchTextChange, numberOfResults } = useSearch<Insight>(getInsights);
+  const { data, isLoading, onQueryChange, numberOfResults, pagination } = useSearch(endpoints.insights);
 
   return (
     <List
       isLoading={isLoading}
-      onSearchTextChange={onSearchTextChange}
+      onSearchTextChange={onQueryChange}
       throttle
       searchBarPlaceholder="Search for insights in any project..."
+      pagination={pagination}
     >
       <List.Section title="Most relevant" subtitle={numberOfResults}>
         {data.map((item) => (

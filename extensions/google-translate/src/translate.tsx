@@ -1,19 +1,65 @@
 import React, { ReactElement, useState } from "react";
-import { List, showToast, Toast, Action, Icon, ActionPanel } from "@raycast/api";
+import { List, showToast, Toast, Action, Icon, ActionPanel, Keyboard } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useDebouncedValue, usePreferences, useSelectedLanguagesSet, useTextState } from "./hooks";
-import { getLanguageFlag, supportedLanguagesByCode } from "./languages";
+import {
+  useAllLanguageSets,
+  useDebouncedValue,
+  usePreferences,
+  usePreferencesLanguageSet,
+  useSelectedLanguagesSet,
+  useTextState,
+} from "./hooks";
+import { supportedLanguagesByCode } from "./languages";
 import { LanguageManagerListDropdown } from "./LanguagesManager";
 import { doubleWayTranslate, simpleTranslate, playTTS } from "./simple-translate";
 import { ConfigurableCopyPasteActions, OpenOnGoogleTranslateWebsiteAction, ToggleFullTextAction } from "./actions";
 import { LanguageCodeSet } from "./types";
 
+const QuickLanguageSetShifterActions = () => {
+  const [selectedLanguageSet, setSelectedLanguageSet] = useSelectedLanguagesSet();
+  const preferencesLanguageSet = usePreferencesLanguageSet();
+  const [languages] = useAllLanguageSets();
+  const allLanguages = React.useMemo(() => [preferencesLanguageSet, ...languages], [preferencesLanguageSet, languages]);
+  const selectedLanguageSetIndex = React.useMemo(
+    () => allLanguages.findIndex((langSet) => JSON.stringify(langSet) === JSON.stringify(selectedLanguageSet)),
+    [allLanguages, selectedLanguageSet],
+  );
+
+  return (
+    <ActionPanel.Section title="Language Set">
+      <Action
+        title="Go to Previous Language Set"
+        icon={Icon.ArrowUp}
+        shortcut={Keyboard.Shortcut.Common.MoveUp}
+        onAction={() => {
+          if (selectedLanguageSetIndex <= 0) {
+            setSelectedLanguageSet(allLanguages[allLanguages.length - 1]);
+          } else {
+            setSelectedLanguageSet(allLanguages[selectedLanguageSetIndex - 1]);
+          }
+        }}
+      />
+      <Action
+        title="Go to Next Language Set"
+        icon={Icon.ArrowDown}
+        shortcut={Keyboard.Shortcut.Common.MoveDown}
+        onAction={() => {
+          if (selectedLanguageSetIndex >= allLanguages.length - 1) {
+            setSelectedLanguageSet(allLanguages[0]);
+          } else {
+            setSelectedLanguageSet(allLanguages[selectedLanguageSetIndex + 1]);
+          }
+        }}
+      />
+    </ActionPanel.Section>
+  );
+};
 const DoubleWayTranslateItem: React.FC<{
   value: string;
   selectedLanguageSet: LanguageCodeSet;
   toggleShowingDetail: () => void;
 }> = ({ toggleShowingDetail, value, selectedLanguageSet }) => {
-  const { data: results } = usePromise(doubleWayTranslate, [value, selectedLanguageSet], {
+  const { data: results, isLoading } = usePromise(doubleWayTranslate, [value, selectedLanguageSet], {
     onError(error) {
       showToast({
         style: Toast.Style.Failure,
@@ -23,13 +69,17 @@ const DoubleWayTranslateItem: React.FC<{
     },
   });
 
+  if (isLoading) {
+    return <List.EmptyView icon={Icon.Hourglass} title="Translating..." />;
+  }
+
   return (
     <>
       {results?.map((r, index) => {
         const langFrom = supportedLanguagesByCode[r.langFrom];
         const langTo = supportedLanguagesByCode[r.langTo];
-        const languages = `${getLanguageFlag(langFrom, langFrom?.code)} -> ${getLanguageFlag(langTo, langTo?.code)}`;
-        const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
+        const languages = `${langFrom.name} -> ${langTo.name}`;
+        const tooltip = `${langFrom?.name} -> ${langTo?.name}`;
         return (
           <React.Fragment key={index}>
             <List.Item
@@ -44,11 +94,12 @@ const DoubleWayTranslateItem: React.FC<{
                     <Action
                       title="Play Text-To-Speech"
                       icon={Icon.Play}
-                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                       onAction={() => playTTS(r.translatedText, r.langTo)}
                     />
                     <OpenOnGoogleTranslateWebsiteAction translationText={value} translation={r} />
                   </ActionPanel.Section>
+                  <QuickLanguageSetShifterActions />
                 </ActionPanel>
               }
             />
@@ -64,6 +115,7 @@ const DoubleWayTranslateItem: React.FC<{
                       <ToggleFullTextAction onAction={() => toggleShowingDetail()} />
                       <OpenOnGoogleTranslateWebsiteAction translationText={value} translation={r} />
                     </ActionPanel.Section>
+                    <QuickLanguageSetShifterActions />
                   </ActionPanel>
                 }
               />
@@ -95,8 +147,8 @@ const TranslateItem: React.FC<{
 
   const langFrom = supportedLanguagesByCode[langFromCode];
   const langTo = supportedLanguagesByCode[langToCode];
-  const languages = `${getLanguageFlag(langFrom, langFrom?.code)} -> ${getLanguageFlag(langTo, langTo?.code)}`;
-  const tooltip = `${langFrom?.name ?? langFrom?.code} -> ${langTo?.name ?? langTo?.code}`;
+  const languages = `${langFrom.name} -> ${langTo.name}`;
+  const tooltip = `${langFrom?.name} -> ${langTo?.name}`;
 
   return (
     <List.Item
@@ -113,12 +165,13 @@ const TranslateItem: React.FC<{
               <Action
                 title="Play Text-To-Speech"
                 icon={Icon.Play}
-                shortcut={{ modifiers: ["cmd"], key: "t" }}
+                shortcut={{ macOS: { modifiers: ["cmd"], key: "t" }, Windows: { modifiers: ["ctrl"], key: "t" } }}
                 onAction={() => playTTS(result.translatedText, langToCode)}
               />
             )}
             {result && <OpenOnGoogleTranslateWebsiteAction translationText={value} translation={result} />}
           </ActionPanel.Section>
+          <QuickLanguageSetShifterActions />
         </ActionPanel>
       }
     />
@@ -139,11 +192,16 @@ export default function Translate(): ReactElement {
       onSearchTextChange={setText}
       isShowingDetail={isShowingDetail}
       searchBarAccessory={<LanguageManagerListDropdown />}
+      actions={
+        <ActionPanel>
+          <QuickLanguageSetShifterActions />
+        </ActionPanel>
+      }
     >
       {selectedLanguageSet.langTo.length === 1 ? (
         <DoubleWayTranslateItem
           value={debouncedValue}
-          selectedLanguageSet={selectedLanguageSet}
+          selectedLanguageSet={{ langFrom: selectedLanguageSet.langFrom, langTo: selectedLanguageSet.langTo, proxy }}
           toggleShowingDetail={() => setIsShowingDetail(!isShowingDetail)}
         />
       ) : (

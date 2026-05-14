@@ -5,7 +5,7 @@ import { AnswerView } from "./lib/ui/AnswerView/main";
 const p = getPreferenceValues<Preferences>();
 if (!p.ollamaCertificateValidation) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
-const listErrorLegacyArguments: JSX.Element = (
+const listErrorLegacyArguments: React.JSX.Element = (
   <List>
     <List.EmptyView
       icon={Icon.ExclamationMark}
@@ -15,18 +15,18 @@ const listErrorLegacyArguments: JSX.Element = (
   </List>
 );
 
-export default function Command(props: RaycastArgumentsOllamaCommandCustom): JSX.Element {
+export default function Command(props: RaycastArgumentsOllamaCommandCustom): React.JSX.Element {
   let server: string;
   let model: string;
-  let parameters: any;
+  let parameters: { creativity?: number; keep_alive?: string };
   try {
     const modelIndex = props.arguments.model.indexOf(":");
     server = props.arguments.model.substring(0, modelIndex);
     model = props.arguments.model.substring(modelIndex + 1);
     parameters = JSON.parse(props.arguments.parameters);
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error(e);
-    showToast({ style: Toast.Style.Failure, title: "Error", message: e.message });
+    showToast({ style: Toast.Style.Failure, title: "Error", message: e instanceof Error ? e.message : String(e) });
     return listErrorLegacyArguments;
   }
   return (

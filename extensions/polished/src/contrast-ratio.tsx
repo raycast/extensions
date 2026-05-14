@@ -19,7 +19,7 @@ export default function ContrastRatio() {
       showToast(
         ToastStyle.Failure,
         "Couldn't parse the color string",
-        "Please provide the colors in a valid input format."
+        "Please provide the colors in a valid input format.",
       );
       return;
     }

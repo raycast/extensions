@@ -1,267 +1,190 @@
-import { ActionPanel, List, Action, Icon, Color, Image, showToast, Toast } from "@raycast/api";
+import { List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { match, P } from "ts-pattern";
-import * as lunchMoney from "./lunchmoney";
-import { EditTransactionForm } from "./transactions_form";
-import { useMemo, useState } from "react";
-import { compareDesc, eachMonthOfInterval, endOfMonth, format, parse, startOfMonth, startOfYear } from "date-fns";
-import { alphabetical, group, sift, sort } from "radash";
-import { getFormatedAmount } from "./format";
+import { useState, useMemo } from "react";
+import { type Transaction, type Category, type Tag, useLunchMoney } from "./api";
+import { TransactionListItem, getDateRangeForFilter, DateRangeDropdown } from "./components";
+import { formatCurrency, buildLunchMoneyUrl, formatTransactionsAsText } from "./format";
 
-export const getTransactionIcon = (transaction: lunchMoney.Transaction) =>
-  match(transaction)
-    .returnType<Image>()
-    .with({ status: lunchMoney.TransactionStatus.CLEARED, recurring_type: P.nullish }, () => ({
-      source: Icon.CheckCircle,
-      tintColor: Color.Green,
-    }))
-    .with(
-      { status: lunchMoney.TransactionStatus.CLEARED, recurring_type: lunchMoney.ReccuringTransactionType.CLEARED },
-      () => ({
-        source: Icon.RotateClockwise,
-        tintColor: Color.Blue,
-      }),
-    )
-    .with({ status: lunchMoney.TransactionStatus.UNCLEARED }, () => ({
-      source: Icon.CircleProgress50,
-      tintColor: Color.Yellow,
-    }))
-    .with({ status: lunchMoney.TransactionStatus.PENDING }, () => ({
-      source: Icon.Stopwatch,
-    }))
-    .otherwise(() => ({ source: Icon.Circle }));
+function filterTransactions(
+  transactions: Transaction[],
+  searchText: string,
+  categories: Category[],
+  tags: Tag[],
+): Transaction[] {
+  if (!searchText) return transactions;
 
-export const getTransactionSubtitle = (transaction: lunchMoney.Transaction) =>
-  match(transaction)
-    .returnType<string>()
-    .with(
-      { recurring_payee: P.string.select(), recurring_type: lunchMoney.ReccuringTransactionType.CLEARED },
-      (payee) => payee,
-    )
-    .otherwise(() => transaction.payee);
+  const lowerSearch = searchText.toLowerCase();
+  return transactions.filter((t) => {
+    const category = categories.find((c) => c.id === t.category_id);
+    const isIncome = category?.is_income ?? false;
+    const transactionTags = (t.tag_ids || [])
+      .map((tagId) => tags.find((tag) => tag.id === tagId))
+      .filter((tag): tag is Tag => tag !== undefined);
 
-function TransactionListItem({
-  transaction,
-  onValidate,
-  onEdit,
-}: {
-  transaction: lunchMoney.Transaction;
-  onValidate: (transaction: lunchMoney.Transaction) => void;
-  onEdit: (transaction: lunchMoney.Transaction, update: lunchMoney.TransactionUpdate) => void;
-}) {
-  const validate = async () => {
-    onValidate(transaction);
-  };
-
-  return (
-    <List.Item
-      title={getFormatedAmount(transaction)}
-      subtitle={getTransactionSubtitle(transaction)}
-      icon={getTransactionIcon(transaction)}
-      accessories={sift([
-        { text: transaction.account_display_name },
-        transaction.is_group ? { icon: Icon.Folder, tooltip: "Group" } : undefined,
-        ...(transaction.tags?.map((tag) => ({ tag: tag.name })) ?? []),
-        transaction.category_name ? { tag: transaction.category_name, icon: Icon.Tag } : undefined,
-      ])}
-      keywords={sift([
-        transaction.status,
-        transaction.payee,
-        transaction.recurring_payee,
-        transaction.notes,
-        transaction.display_note,
-      ])}
-      actions={
-        <ActionPanel>
-          {transaction.status != lunchMoney.TransactionStatus.CLEARED && !transaction.is_pending && (
-            <Action title="Validate" icon={Icon.CheckCircle} onAction={validate} />
-          )}
-          <Action.Push
-            title="Edit Transaction"
-            shortcut={{ modifiers: [], key: "arrowRight" }}
-            icon={Icon.Pencil}
-            target={<EditTransactionForm transaction={transaction} onEdit={onEdit} />}
-          />
-          <Action.OpenInBrowser
-            title="View Payee in Lunch Money"
-            url={`https://my.lunchmoney.app/transactions/${format(transaction.date, "yyyy/MM")}?match=all&payee_exact=${encodeURIComponent(transaction.payee)}&time=month`}
-          />
-        </ActionPanel>
-      }
-    />
-  );
-}
-
-/// Sorts transactions by date, then by to_base
-const groupAndSortTransactionsByBase = (transactions: lunchMoney.Transaction[]) => {
-  const transactionsByDay = group(transactions, (t) => t.date);
-
-  const sortedTransactions: lunchMoney.Transaction[] = [];
-  const days = alphabetical(Object.keys(transactionsByDay), (k) => k, "desc");
-
-  for (const day of days) {
-    const transactions = transactionsByDay[day];
-    if (transactions != null) {
-      sortedTransactions.push(...sort(transactions, (t) => t.to_base, true));
-    }
-  }
-  return sortedTransactions;
-};
-
-/// Sorts transactions by date, then by created_at
-const groupAndSortTransactionsByCreatedAt = (
-  transactions: lunchMoney.Transaction[],
-): Record<string, lunchMoney.Transaction[]> => {
-  const transactionsByDay = group(transactions, (t) => t.date);
-
-  const sortedTransactions: Record<string, lunchMoney.Transaction[]> = {};
-  const days = alphabetical(Object.keys(transactionsByDay), (k) => k, "desc");
-
-  for (const day of days) {
-    const transactions = transactionsByDay[day];
-    if (transactions != null) {
-      sortedTransactions[day] = transactions.toSorted((a, b) => compareDesc(a.created_at, b.created_at));
-    }
-  }
-  return sortedTransactions;
-};
-
-function TransactionsDropdown({ value, onChange }: { value: string; onChange: (value: string) => void }) {
-  const months = eachMonthOfInterval({
-    start: startOfYear(new Date()),
-    end: new Date(),
-  }).reverse();
-
-  return (
-    <List.Dropdown tooltip="Choose a month" value={value} onChange={onChange}>
-      <List.Dropdown.Section title="Month">
-        {months.map((month) => (
-          <List.Dropdown.Item
-            key={format(month, "yyyy-MM")}
-            title={format(month, "MMM yyyy")}
-            value={format(month, "yyyy-MM-dd")}
-          />
-        ))}
-      </List.Dropdown.Section>
-    </List.Dropdown>
-  );
+    return (
+      t.payee?.toLowerCase().includes(lowerSearch) ||
+      t.notes?.toLowerCase().includes(lowerSearch) ||
+      t.status?.toLowerCase().includes(lowerSearch) ||
+      category?.name?.toLowerCase().includes(lowerSearch) ||
+      (isIncome ? "income" : "expense").includes(lowerSearch) ||
+      transactionTags.some((tag) => tag.name.toLowerCase().includes(lowerSearch))
+    );
+  });
 }
 
 export default function Command() {
-  const [month, setMonth] = useState(() => format(startOfMonth(new Date()), "yyyy-MM-dd"));
-  const { data, isLoading, mutate } = useCachedPromise(lunchMoney.getTransactions, [
-    { start_date: month, end_date: format(endOfMonth(parse(month, "yyyy-MM-dd", new Date())), "yyyy-MM-dd") },
-  ]);
+  const client = useLunchMoney();
+  const [selectedMonth, setSelectedMonth] = useState<string>("thisMonth");
+  const [searchText, setSearchText] = useState<string>("");
+  const { start, end } = useMemo(() => getDateRangeForFilter(selectedMonth), [selectedMonth]);
 
-  const [pendingTransactions, transactionsGroups] = useMemo(() => {
-    const [pendingTransactions, transactions] = (data ?? []).reduce(
-      function groupTransactions(acc, transaction) {
-        if (transaction.status === lunchMoney.TransactionStatus.PENDING || transaction.is_pending) {
-          acc[0].push(transaction);
-        } else if (transaction.group_id == null) {
-          acc[1].push(transaction);
+  const { isLoading, data, revalidate } = useCachedPromise(
+    async (startDate: string, endDate: string) => {
+      const allTransactions: Transaction[] = [];
+      let offset = 0;
+      let hasMore = true;
+
+      while (hasMore) {
+        const { data, error } = await client.GET("/transactions", {
+          params: { query: { start_date: startDate, end_date: endDate, offset } },
+        });
+        if (error) {
+          console.error("Transactions fetch error:", error);
+          throw new Error(JSON.stringify(error));
         }
-        return acc;
-      },
-      [[], []] as [lunchMoney.Transaction[], lunchMoney.Transaction[]],
-    );
-
-    return [groupAndSortTransactionsByBase(pendingTransactions), groupAndSortTransactionsByCreatedAt(transactions)];
-  }, [data]);
-
-  const onValidate = async (transaction: lunchMoney.Transaction) => {
-    const toast = await showToast({
-      title: "Validating",
-      style: Toast.Style.Animated,
-    });
-
-    try {
-      await mutate(
-        lunchMoney.updateTransaction(transaction.id, {
-          status: lunchMoney.TransactionStatus.CLEARED,
-        }),
-        {
-          optimisticUpdate: (data) => {
-            if (data == null) return data;
-            return data.map((t) => {
-              if (t.id === transaction.id) {
-                t.status = lunchMoney.TransactionStatus.CLEARED;
-              }
-              return t;
-            });
-          },
-        },
-      );
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Validated";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to validate";
-      if (error instanceof Error) {
-        toast.message = error.message;
+        allTransactions.push(...(data?.transactions || []));
+        hasMore = data?.has_more ?? false;
+        offset += data?.transactions?.length ?? 0;
       }
+
+      return allTransactions;
+    },
+    [start, end],
+  );
+
+  const { data: categoriesData } = useCachedPromise(async () => {
+    const { data, error } = await client.GET("/categories");
+    if (error) {
+      console.error("Categories fetch error:", error);
+      throw new Error(JSON.stringify(error));
     }
-  };
+    return data?.categories || [];
+  });
 
-  const onEdit = async (transaction: lunchMoney.Transaction, update: lunchMoney.TransactionUpdate) => {
-    const toast = await showToast({
-      title: "Updating Transaction",
-      style: Toast.Style.Animated,
-    });
-
-    try {
-      await mutate(lunchMoney.updateTransaction(transaction.id, update), {
-        optimisticUpdate: (currentData) => {
-          if (!currentData) return currentData;
-          return currentData.map((tx) => {
-            if (tx.id === transaction.id) {
-              tx.payee = update.payee ? update.payee : transaction.payee;
-              tx.status = update.status ? update.status : transaction.status;
-              tx.notes = update.notes ? update.notes : transaction.notes;
-              tx.category_id = update.category_id ? update.category_id : transaction.category_id;
-              tx.date = update.date ? update.date : transaction.date;
-            }
-            return tx;
-          });
-        },
-      });
-
-      toast.style = Toast.Style.Success;
-      toast.title = "Transaction updated";
-    } catch (error) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Failed to update transaction";
-      if (error instanceof Error) {
-        toast.message = error.message;
-      }
+  const { data: tagsData } = useCachedPromise(async () => {
+    const { data, error } = await client.GET("/tags");
+    if (error) {
+      console.error("Tags fetch error:", error);
+      throw new Error(JSON.stringify(error));
     }
-  };
+    return data?.tags || [];
+  });
+
+  const transactions = (data ?? []).sort((a: Transaction, b: Transaction) => {
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
+  });
+
+  const categories = categoriesData ?? [];
+  const tags = tagsData ?? [];
+
+  // Filter transactions based on search text
+  const filteredTransactions = useMemo(
+    () => filterTransactions(transactions, searchText, categories, tags),
+    [transactions, searchText, categories, tags],
+  );
+
+  const pendingTransactions = filteredTransactions.filter((t: Transaction) => t.is_pending);
+  const nonPendingTransactions = filteredTransactions.filter((t: Transaction) => !t.is_pending);
+
+  const allTransactionsText = useMemo(
+    () => formatTransactionsAsText(filteredTransactions, categories),
+    [filteredTransactions, categories],
+  );
+
+  // Calculate total for filtered transactions
+  const totalAmount = useMemo(() => {
+    return filteredTransactions.reduce((sum, t) => {
+      const category = categories.find((c) => c.id === t.category_id);
+      const isIncome = category?.is_income ?? false;
+      const amount = Math.abs(parseFloat(t.amount));
+      return sum + (isIncome ? amount : -amount);
+    }, 0);
+  }, [filteredTransactions, categories]);
+
+  // Calculate total for pending transactions
+  const pendingTotal = useMemo(() => {
+    return pendingTransactions.reduce((sum, t) => {
+      const category = categories.find((c) => c.id === t.category_id);
+      const isIncome = category?.is_income ?? false;
+      const amount = Math.abs(parseFloat(t.amount));
+      return sum + (isIncome ? amount : -amount);
+    }, 0);
+  }, [pendingTransactions, categories]);
+
+  // Calculate total for non-pending transactions
+  const nonPendingTotal = useMemo(() => {
+    return nonPendingTransactions.reduce((sum, t) => {
+      const category = categories.find((c) => c.id === t.category_id);
+      const isIncome = category?.is_income ?? false;
+      const amount = Math.abs(parseFloat(t.amount));
+      return sum + (isIncome ? amount : -amount);
+    }, 0);
+  }, [nonPendingTransactions, categories]);
 
   return (
-    <List isLoading={isLoading} searchBarAccessory={<TransactionsDropdown value={month} onChange={setMonth} />}>
-      <List.Section title="Pending Transactions">
-        {pendingTransactions.map((transaction) => (
-          <TransactionListItem
-            key={String(transaction.id)}
-            transaction={transaction}
-            onValidate={onValidate}
-            onEdit={onEdit}
-          />
-        ))}
-      </List.Section>
-      {Object.entries(transactionsGroups).map(([month, transactions]) => (
-        <List.Section key={month} title={format(new Date(month), "PP")}>
-          {transactions.map((transaction) => (
-            <TransactionListItem
-              key={String(transaction.id)}
-              transaction={transaction}
-              onValidate={onValidate}
-              onEdit={onEdit}
-            />
-          ))}
+    <List
+      isLoading={isLoading}
+      searchBarPlaceholder="Search transactions..."
+      searchBarAccessory={<DateRangeDropdown value={selectedMonth} onChange={setSelectedMonth} />}
+      filtering={false}
+      onSearchTextChange={setSearchText}
+    >
+      <List.Section
+        title="Summary"
+        subtitle={`${filteredTransactions.length} transaction${filteredTransactions.length === 1 ? "" : "s"} • Total: ${formatCurrency(Math.abs(totalAmount))}${totalAmount > 0 ? " income" : " spent"}`}
+      />
+      {pendingTransactions.length > 0 && (
+        <List.Section
+          title="Pending"
+          subtitle={`${pendingTransactions.length} transaction${pendingTransactions.length === 1 ? "" : "s"} • ${formatCurrency(Math.abs(pendingTotal))}${pendingTotal > 0 ? " income" : " spent"}`}
+        >
+          {pendingTransactions.map((transaction: Transaction) => {
+            const lunchMoneyUrl = buildLunchMoneyUrl({ transaction, start, end });
+
+            return (
+              <TransactionListItem
+                key={transaction.id}
+                transaction={transaction}
+                categories={categories}
+                tags={tags}
+                onRevalidate={revalidate}
+                lunchMoneyUrl={lunchMoneyUrl}
+                copyAllText={allTransactionsText}
+              />
+            );
+          })}
         </List.Section>
-      ))}
+      )}
+      <List.Section
+        title="Transactions"
+        subtitle={`${nonPendingTransactions.length} transaction${nonPendingTransactions.length === 1 ? "" : "s"} • ${formatCurrency(Math.abs(nonPendingTotal))}${nonPendingTotal > 0 ? " income" : " spent"}`}
+      >
+        {nonPendingTransactions.map((transaction: Transaction) => {
+          const lunchMoneyUrl = buildLunchMoneyUrl({ transaction, start, end });
+
+          return (
+            <TransactionListItem
+              key={transaction.id}
+              transaction={transaction}
+              categories={categories}
+              tags={tags}
+              onRevalidate={revalidate}
+              lunchMoneyUrl={lunchMoneyUrl}
+              copyAllText={allTransactionsText}
+            />
+          );
+        })}
+      </List.Section>
     </List>
   );
 }

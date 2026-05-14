@@ -1,11 +1,11 @@
 import { List } from '@raycast/api'
-import type { IAM } from '@scaleway/sdk'
+import type { Iamv1alpha1 } from '@scaleway/sdk'
 
 type SelectOrderProps = {
   setOrderBy: (newValue: string) => void
 }
 
-const orderByList: IAM.v1alpha1.ListAPIKeysRequestOrderBy[] = [
+const orderByList: Iamv1alpha1.ListAPIKeysRequestOrderBy[] = [
   'access_key_asc',
   'access_key_desc',
   'created_at_asc',

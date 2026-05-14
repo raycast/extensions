@@ -3,7 +3,7 @@ import { Domain, SimpleDomain } from "../types/types";
 import { DOMAINS_API } from "../utils/constants";
 import axios from "axios";
 import { apiKey } from "../types/preferences";
-import { saveDefaultDomain } from "../utils/common-utils";
+import { getDefaultDomain, saveDefaultDomain } from "../utils/common-utils";
 
 export const useDefaultDomain = (defaultDomain: Domain | undefined) => {
   return useCachedPromise(
@@ -18,6 +18,8 @@ const getDefaultDomains = async (defaultDomain: Domain | undefined) => {
     await saveDefaultDomain(defaultDomain);
     return { hostname: defaultDomain.hostname, id: -1 };
   }
+  const stored = await getDefaultDomain();
+  if (stored) return stored;
   const domainResponse = await axios.get(DOMAINS_API, {
     headers: {
       accept: "application/json",

@@ -507,7 +507,8 @@ export const sendMessage = async (
       set theBccs to {"${outgoingMessage.bcc.join(`", "`)}"}
       set theAttachments to {"${attachments.join(`", "`)}"}
       set newMessage to ${actionScript}
-      set properties of newMessage to {sender: "${outgoingMessage.account}", subject: "${
+      set senderValue to "${outgoingMessage.from}"
+      set properties of newMessage to {sender: senderValue, subject: "${
         outgoingMessage.subject
       }", content: "${outgoingMessage.content}", visible: false}
       tell newMessage

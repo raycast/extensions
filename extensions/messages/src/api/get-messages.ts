@@ -67,7 +67,7 @@ export async function getMessages(searchText?: string, chatIdentifier?: string):
   if (!rawData) return [];
 
   const uniqueChatIdentifiers = [...new Set(rawData.map((m) => m.chat_identifier))];
-  const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers);
+  const contacts = await fetchContactsForPhoneNumbers(uniqueChatIdentifiers, false);
   const contactMap = createContactMap(contacts);
 
   const messages = rawData.map((m) => {

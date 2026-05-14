@@ -2,6 +2,7 @@ import { useFetch } from "@raycast/utils";
 import sportInfo from "./getSportInfo";
 
 interface Article {
+  id: string;
   headline: string;
   published: string;
   byline?: string;

@@ -7,7 +7,8 @@
   "author": "pablopunk",
   "contributors": [
     "mlz11",
-    "tonypinkevych"
+    "tonypinkevych",
+    "bulutfatih"
   ],
   "categories": [
     "Productivity",
@@ -108,6 +109,32 @@
       "title": "Stabilize",
       "description": "The command allows to stabilize video",
       "mode": "no-view"
+    },
+    {
+      "name": "trim",
+      "title": "Trim",
+      "description": "Trim video by specifying start time and either end time or duration. Time format: seconds (e.g., '10') or HH:MM:SS (e.g., '00:00:10').",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "startTime",
+          "placeholder": "Start time (hh:mm:ss or ss)",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "endTime",
+          "placeholder": "End time (hh:mm:ss or ss)",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "duration",
+          "placeholder": "Duration (seconds)",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
@@ -139,5 +166,8 @@
       "default": "/opt/homebrew/bin/ffmpeg",
       "placeholder": "/opt/homebrew/bin/ffmpeg"
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }

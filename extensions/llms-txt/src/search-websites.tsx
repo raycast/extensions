@@ -1,7 +1,7 @@
 /* eslint-disable @raycast/prefer-title-case */
 import { List, ActionPanel, Action, Icon, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
-import type { Website, Category, ActionType } from "./types";
+import { useState } from "react";
+import type { Website, Category } from "./types";
 import {
   fetchWebsitesData,
   getCategoryIcon,
@@ -11,15 +11,10 @@ import {
   DEFAULT_ACTION,
   shouldShowViewLlmsAction,
 } from "./utils";
-
-interface Preferences {
-  primaryAction: ActionType;
-  defaultCategory: Category;
-  showDescriptions: boolean;
-}
+import { usePromise } from "@raycast/utils";
 
 // Category filter type including "all"
-type CategoryFilter = Category | "all";
+type CategoryFilter = Preferences["defaultCategory"];
 
 function getUniqueKey(website: Website, index: number): string {
   // Combine multiple fields to create a unique key
@@ -165,26 +160,10 @@ const categories: Category[] = [
 ];
 
 export default function SearchWebsites() {
-  const [isLoading, setIsLoading] = useState(true);
-  const [websites, setWebsites] = useState<Website[]>([]);
-  const [error, setError] = useState<Error | null>(null);
   const preferences = getPreferenceValues<Preferences>();
   const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>(preferences.defaultCategory);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const data = await fetchWebsitesData();
-        setWebsites(data);
-      } catch (e) {
-        setError(e instanceof Error ? e : new Error("An error occurred"));
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
+  const { isLoading, data: websites = [], error } = usePromise(fetchWebsitesData);
 
   const filteredWebsites =
     categoryFilter === "all" ? websites : websites.filter((website) => website.category === categoryFilter);

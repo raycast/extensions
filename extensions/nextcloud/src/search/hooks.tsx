@@ -2,6 +2,8 @@ import path from "path";
 import { useCallback, useState } from "react";
 import { useQuery, webdavRequest } from "../nextcloud";
 import { getPreferences } from "../preferences";
+import { getPreferenceValues } from "@raycast/api";
+const { files_owner } = getPreferenceValues<Preferences.Search>();
 
 type propStat = {
   "d:prop": { "oc:fileid": number; "d:getcontenttype": string; "oc:size": number };
@@ -37,7 +39,7 @@ function makeBodyForSearch({ username, query, scope = "" }: { username: string; 
     </d:select>
     <d:from>
       <d:scope>
-        <d:href>/files/${encodeURIComponent(username)}/${scope.replace(/^\/+/, "")}</d:href>
+        <d:href>/files/${encodeURIComponent(files_owner || username)}/${scope.replace(/^\/+/, "")}</d:href>
         <d:depth>infinity</d:depth>
       </d:scope>
     </d:from>

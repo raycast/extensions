@@ -21,6 +21,7 @@ import {
   ShowProjectLabels,
   CopyProjectUrlToClipboardAction,
   CreateNewProjectIssuePushAction,
+  ShowProjectReadmeAction,
 } from "./project_actions";
 import { GitLabIcons, getTextIcon, useImage } from "../icons";
 import { useCache } from "../cache";
@@ -35,7 +36,7 @@ function getProjectTextIcon(project: Project): Image.ImageLike | undefined {
   return getTextIcon((project.name ? getFirstChar(project.name) : "?").toUpperCase());
 }
 
-export function ProjectListItem(props: { project: Project; nameOnly?: boolean }): JSX.Element {
+export function ProjectListItem(props: { project: Project; nameOnly?: boolean }) {
   const project = props.project;
   const { localFilepath: localImageFilepath } = useImage(projectIconUrl(project));
   const accessories = [];
@@ -66,6 +67,7 @@ export function ProjectListItem(props: { project: Project; nameOnly?: boolean })
             <CopyCloneUrlToClipboardAction shortcut={{ modifiers: ["cmd"], key: "u" }} project={project} />
           </ActionPanel.Section>
           <ActionPanel.Section>
+            <ShowProjectReadmeAction project={project} />
             <OpenProjectIssuesPushAction project={project} />
             <OpenProjectMergeRequestsPushAction project={project} />
             <OpenProjectBranchesPushAction project={project} />
@@ -96,11 +98,11 @@ interface ProjectListProps {
   starred?: boolean;
 }
 
-export function ProjectListEmptyView(): JSX.Element {
+export function ProjectListEmptyView() {
   return <List.EmptyView title="No Projects" icon={{ source: GitLabIcons.project, tintColor: Color.PrimaryText }} />;
 }
 
-export function ProjectList({ membership = true, starred = false }: ProjectListProps): JSX.Element {
+export function ProjectList({ membership = true, starred = false }: ProjectListProps) {
   const [searchText, setSearchText] = useState<string>();
   const { data, error, isLoading } = useCache<Project[]>(
     hashRecord({ membership: membership, starred: starred }, "projects"),
@@ -125,7 +127,7 @@ export function ProjectList({ membership = true, starred = false }: ProjectListP
         });
       },
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
 
   if (error) {
@@ -176,12 +178,12 @@ export function useMyProjects(): { projects: Project[] | undefined; error?: stri
     {
       deps: [],
       secondsToInvalid: daysInSeconds(7),
-    }
+    },
   );
   return { projects, error, isLoading };
 }
 
-function MyProjectsDropdownItem(props: { project: Project }): JSX.Element {
+function MyProjectsDropdownItem(props: { project: Project }) {
   const pro = props.project;
   const { localFilepath } = useImage(projectIconUrl(pro));
   return (
@@ -193,12 +195,16 @@ function MyProjectsDropdownItem(props: { project: Project }): JSX.Element {
   );
 }
 
-export function MyProjectsDropdown(props: { onChange: (pro: Project | undefined) => void }): JSX.Element | null {
+export function MyProjectsDropdown(props: {
+  onChange: (pro: Project | undefined) => void;
+  storeValue?: boolean;
+}): React.ReactNode | null {
   const { projects: myprojects } = useMyProjects();
   if (myprojects) {
     return (
       <List.Dropdown
         tooltip="Select Project"
+        storeValue={props.storeValue}
         onChange={(newValue) => {
           const pro = myprojects.find((p) => `${p.id}` === newValue);
           props.onChange(pro);

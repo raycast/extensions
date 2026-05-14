@@ -6,11 +6,13 @@ export function encodeQueryParams(params: Record<string, number | string | strin
 
   for (const key in params) {
     const value = params[key];
-    if (value !== undefined) {
+    if (value !== undefined && value !== "") {
       if (Array.isArray(value)) {
         // Encode array values as multiple query parameters with the same key
         value.forEach((item) => {
-          queryParams.push(`${encodeURIComponent(key)}=${encodeURIComponent(item)}`);
+          if (item !== "") {
+            queryParams.push(`${encodeURIComponent(key)}=${encodeURIComponent(item)}`);
+          }
         });
       } else {
         // Encode single values as a single query parameter

@@ -5,6 +5,9 @@
   "description": "Home automation with Tuya Smart",
   "icon": "command-icon.png",
   "author": "andresmorelos",
+  "contributors": [
+    "anwarulislam"
+  ],
   "categories": [
     "Productivity",
     "Other"
@@ -91,5 +94,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "ray publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

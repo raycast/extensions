@@ -1,5 +1,23 @@
 # Prusa Printer Control Changelog
 
+## [Improvements] - 2026-03-04
+
+- Added Prusa Connect dashboard integration: configure your printer UUID in preferences to open the dashboard from the status view, menu bar, or as a standalone command
+- Changed icon when status is `ATTENTION`
+
+## [Bug Fix] - 2026-02-23
+
+- Fixed NaN appearing in time displays when printer doesn't have time estimates; time displays now show "Starting..." at the beginning of a print instead of invalid values
+- Fixed double error icons when there's an error
+
+## [Bug Fix] - 2026-01-31
+
+Fixed error when accessing job progress while printer is idle
+
+## [Menu Bar Progress] - 2026-01-30
+
+Added menu bar command to display real-time print progress and time remaining
+
 ## [Initial Version] - 2025-03-03
 
 ### Added

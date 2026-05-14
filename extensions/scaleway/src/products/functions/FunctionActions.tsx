@@ -1,12 +1,12 @@
 import { Action, ActionPanel, Icon } from '@raycast/api'
-import type { Function } from '@scaleway/sdk'
+import type { Functionv1beta1 } from '@scaleway/sdk'
 import { useAPI } from 'helpers/useAPI'
 import { deployFunction } from './actions'
 // import { FunctionLogs } from './pages'
 import { getFunctionUrl } from './urls'
 
 type FunctionActionsProps = {
-  serverlessFunction: Function.v1beta1.Function
+  serverlessFunction: Functionv1beta1.Function
   toggleIsDetailOpen: () => void
   reloadContainers: () => Promise<void>
 }

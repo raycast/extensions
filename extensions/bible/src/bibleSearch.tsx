@@ -3,7 +3,7 @@ import {
   ActionPanel,
   getPreferenceValues,
   getSelectedText,
-  Icon,
+  Keyboard,
   LaunchProps,
   List,
   showToast,
@@ -11,168 +11,196 @@ import {
 } from "@raycast/api";
 import * as React from "react";
 import { versions as bibleVersions } from "../assets/bible-versions.json";
-import { ReferenceSearchResult, search } from "./bibleGatewayApi";
+import { FormattingOptions, ReferenceSearchResult } from "./types";
+import { useBibleSearch } from "./useBibleSearch";
+import { DEFAULT_BIBLE_VERSION, useBibleVersion } from "./useBibleVersion";
 
 type Preferences = Preferences.BibleSearch;
 
-export default function Command(props: LaunchProps<{ arguments: Arguments.BibleSearch }>) {
-  const prefs = getPreferenceValues<Preferences>();
-  const { ref = "", version = prefs.defaultBibleVersion } = props.arguments;
-  const [query, setQuery] = React.useState({ search: ref, version: version.trim().toUpperCase() });
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [searchResult, setSearchResult] = React.useState<ReferenceSearchResult | undefined>(undefined);
+export default function Command(props: LaunchProps<{ arguments: Partial<Arguments.BibleSearch> }>) {
+  const { includeCopyright, includeVerseNumbers, includeReferences, oneVersePerLine, separatePassages } =
+    getPreferenceValues<Preferences>();
+
+  const { ref: initialRef, version: initialVersion } = props.arguments;
+  const parsedVersion = initialVersion ? versionFromAbbrev(initialVersion, bibleVersions) : undefined;
+
+  const [ref, setRef] = React.useState(initialRef ?? "");
+  const [version, setVersion] = useBibleVersion(parsedVersion?.id);
+
+  const { data: searchResult, isLoading, error } = useBibleSearch({ search: ref, version: version });
 
   React.useEffect(() => {
-    async function setSelectedTextAsQuery() {
-      try {
-        const selectedText = await getSelectedText();
-        if (selectedText) {
-          const { ref, version } = parseReference(selectedText);
-          setQuery((old) => ({ ...old, search: ref, version: version || old.version }));
-        }
-      } catch (error) {
-        /* empty */
-      }
+    // If opened with a hotkey, the arguments will be undefined
+    const isHotkeyLaunch = initialRef === undefined && initialVersion === undefined;
+    // If not launched with a hotkey, but provided no arguments (user triggers command without typing anything),
+    // the arguments will be empty strings
+    const launchedWithNoArguments = initialRef === "" && initialVersion === "";
+    // In either of these cases, try to get the selected text and use that as the search query
+    if (isHotkeyLaunch || launchedWithNoArguments) {
+      getSelectedText()
+        .then((selectedText) => {
+          if (selectedText.trim()) {
+            const parsed = parseReference(selectedText);
+            setRef(parsed.ref);
+            if (parsed.version) {
+              setVersion(parsed.version);
+            }
+          }
+        })
+        .catch(() => {
+          // No text is selected – do nothing
+        });
     }
-
-    const isArgsEmpty =
-      Object.keys(props.arguments).length === 0 || (props.arguments.ref === "" && props.arguments.version === "");
-    if (isArgsEmpty) {
-      setSelectedTextAsQuery();
-    }
-  }, []);
-
-  const performSearch = React.useCallback(async () => {
-    if (query.search === "") {
-      setSearchResult(undefined);
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const result = await search(query.search, query.version, { includeVerseNumbers: prefs.includeVerseNumbers });
-      setSearchResult(result);
-    } catch (error) {
-      if (error instanceof Error) {
-        showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
-      }
-    } finally {
-      setIsLoading(false);
-    }
-  }, [prefs.includeVerseNumbers, query.search, query.version]);
+  }, [initialRef, initialVersion]);
 
   React.useEffect(() => {
-    // Don't search when query changes if the user only wants to search when they press enter.
-    if (!prefs.enterToSearch) {
-      performSearch();
+    if (error) {
+      showToast({ title: "Error", message: error.message, style: Toast.Style.Failure });
     }
-  }, [performSearch, prefs.enterToSearch]);
+  }, [error]);
 
-  const detailContent = React.useMemo(() => {
-    if (!searchResult?.passages.length) return null;
-    return { markdown: createMarkdown(prefs, searchResult), clipboardText: createClipboardText(prefs, searchResult) };
-  }, [prefs, searchResult]);
-
-  function getEmptyViewText() {
-    if (isLoading) {
-      return "Searching...";
-    } else if (prefs.enterToSearch && searchResult === undefined) {
-      return "Press Enter to Search";
-    } else if (query.search === "") {
-      return "Start Typing to Search";
-    } else {
-      return "No Results";
+  function renderSearchResults() {
+    if (!searchResult || searchResult.passages.length === 0) {
+      return (
+        <List.EmptyView
+          title={isLoading ? "Searching..." : ref === "" ? "Start Typing to Search" : "No Results"}
+          icon="../assets/extension-icon-64.png"
+        />
+      );
     }
+    const formattingOptions: FormattingOptions = {
+      includeCopyright,
+      includeVerseNumbers,
+      includeReferences,
+      oneVersePerLine,
+    };
+    const copyShortcut: Keyboard.Shortcut = {
+      macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+      windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+    };
+    if (!separatePassages) {
+      const markdown = createMarkdown(formattingOptions, searchResult);
+      const clipboardText = createClipboardText(formattingOptions, searchResult);
+      return (
+        <List.Item
+          title={searchResult.passages.map((p) => p.reference).join("; ")}
+          detail={<List.Item.Detail markdown={markdown} />}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard content={clipboardText} />
+              <Action.Paste content={clipboardText} shortcut={copyShortcut} />
+              {searchResult.url && (
+                <Action.OpenInBrowser
+                  title={`Open at ${searchResult.url.hostname}`}
+                  url={searchResult.url.toString()}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
+              )}
+            </ActionPanel>
+          }
+        />
+      );
+    }
+    return searchResult.passages.map((passage) => {
+      // Create a temporary search result with just this passage
+      const passageUrl = searchResult.url ? new URL(searchResult.url) : undefined;
+      passageUrl?.searchParams.set("search", passage.reference);
+      const passageResult = { ...searchResult, passages: [passage], url: passageUrl };
+
+      const markdown = createMarkdown(formattingOptions, passageResult);
+      const clipboardText = createClipboardText(formattingOptions, passageResult);
+      return (
+        <List.Item
+          key={passage.reference}
+          title={passage.reference}
+          detail={<List.Item.Detail markdown={markdown} />}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard content={clipboardText} />
+              <Action.Paste content={clipboardText} shortcut={copyShortcut} />
+              {passageResult.url && (
+                <Action.OpenInBrowser
+                  title={`Open at ${passageResult.url.hostname}`}
+                  url={passageResult.url.toString()}
+                  shortcut={Keyboard.Shortcut.Common.Open}
+                />
+              )}
+            </ActionPanel>
+          }
+        />
+      );
+    });
   }
 
-  const searchAction = <Action title="Search" icon={Icon.Binoculars} onAction={performSearch} />;
   return (
     <List
       isLoading={isLoading}
       isShowingDetail={searchResult && searchResult.passages.length > 0}
-      searchText={query.search}
+      searchText={ref}
       throttle={true}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Select Bible Version"
-          onChange={(version) => setQuery((old) => ({ ...old, version }))}
-          value={query.version || undefined}
-          defaultValue={prefs.defaultBibleVersion}
+          onChange={(version) => setVersion(version)}
+          value={version ?? DEFAULT_BIBLE_VERSION}
         >
-          {bibleVersions.map(([name, abbreviation]) => (
-            <List.Dropdown.Item title={name} value={abbreviation} key={abbreviation} />
+          {bibleVersions.map(({ id, name, abbrev }) => (
+            <List.Dropdown.Item title={`${name} (${abbrev})`} value={id} key={id} />
           ))}
         </List.Dropdown>
       }
-      onSearchTextChange={(newQuery) => setQuery((old) => ({ ...old, search: newQuery }))}
+      onSearchTextChange={(search) => setRef(search)}
     >
-      {searchResult && searchResult.passages.length > 0 && detailContent ? (
-        <List.Item
-          title={createReferenceList(searchResult)}
-          detail={<List.Item.Detail markdown={detailContent.markdown} />}
-          actions={
-            <ActionPanel>
-              {prefs.enterToSearch && searchAction}
-              <Action.CopyToClipboard content={detailContent.clipboardText} />
-              <Action.Paste
-                content={detailContent.clipboardText}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-              />
-              <Action.OpenInBrowser
-                title="Open at BibleGateway.com"
-                url={searchResult.url}
-                shortcut={{ modifiers: ["cmd"], key: "o" }}
-              />
-            </ActionPanel>
-          }
-        />
-      ) : (
-        <List.EmptyView
-          title={getEmptyViewText()}
-          icon="../assets/extension-icon-64.png"
-          actions={<ActionPanel>{prefs.enterToSearch && searchAction}</ActionPanel>}
-        />
-      )}
+      {renderSearchResults()}
     </List>
   );
 }
 
-function createMarkdown(prefs: Preferences, searchResult: ReferenceSearchResult) {
-  const copyright = prefs.includeCopyright ? `\n\n---\n\n*${searchResult.copyright}*` : "";
+function createMarkdown(prefs: FormattingOptions, searchResult: ReferenceSearchResult) {
+  const { includeCopyright, includeReferences, includeVerseNumbers, oneVersePerLine } = prefs;
 
-  return (
-    searchResult.passages
-      .map((p) => {
-        const passageText = p.verses.join(prefs.oneVersePerLine ? "  \n" : " ");
-        const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        const reference = prefs.includeReferences ? `  \n${p.reference} (${versionAbbr})` : "";
+  const formattedPassages = searchResult.passages
+    .map((passage) => {
+      const verses =
+        typeof passage.verses == "string"
+          ? passage.verses
+          : passage.verses
+              .map((v) => (includeVerseNumbers ? `[${v.verse}] ${v.text}` : v.text))
+              .join(oneVersePerLine ? "  \n" : " ");
+      if (includeReferences) {
+        const reference = `${passage.reference} (${getContentsOfLastParenthesis(searchResult.version)})`;
+        return `${verses}  \n${reference}`;
+      }
+      return verses;
+    })
+    .join("\n\n");
 
-        return passageText + reference;
-      })
-      .join("\n\n") + copyright
-  );
+  if (includeCopyright) {
+    return `${formattedPassages}\n\n---\n\n*${searchResult.copyright}*`;
+  }
+  return formattedPassages.trim();
 }
 
-function createClipboardText(prefs: Preferences, searchResult: ReferenceSearchResult) {
-  const copyright = prefs.includeCopyright ? `\n\n${searchResult.copyright}` : "";
+function createClipboardText(prefs: FormattingOptions, searchResult: ReferenceSearchResult) {
+  const { includeReferences, includeVerseNumbers, oneVersePerLine } = prefs;
 
-  return (
-    searchResult.passages
-      .map((p) => {
-        const passageText = p.verses.join(prefs.oneVersePerLine ? "\n" : " ");
-        const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-        const reference = prefs.includeReferences ? `\n${p.reference} (${versionAbbr})` : "";
+  const formattedPassages = searchResult.passages
+    .map((p) => {
+      const verses =
+        typeof p.verses == "string"
+          ? p.verses
+          : p.verses
+              .map((v) => (includeVerseNumbers ? `[${v.verse}] ${v.text}` : v.text))
+              .join(oneVersePerLine ? "\n" : " ");
+      if (includeReferences) {
+        const reference = `${p.reference} (${getContentsOfLastParenthesis(searchResult.version)})`;
+        return `${verses}\n${reference}`;
+      }
+      return verses;
+    })
+    .join("\n\n");
 
-        return passageText + reference;
-      })
-      .join("\n\n") + copyright
-  );
-}
-
-function createReferenceList(searchResult: ReferenceSearchResult) {
-  const refList = searchResult.passages.map((p) => p.reference).join("; ");
-  const versionAbbr = getContentsOfLastParenthesis(searchResult.version);
-  return `${refList} (${versionAbbr})`;
+  return formattedPassages.trim();
 }
 
 /**
@@ -201,16 +229,16 @@ function getContentsOfLastParenthesis(version: string): string {
  */
 function parseReference(reference: string): { ref: string; version: string | undefined } {
   const trimmedReference = reference.trim();
-  const lastWord = trimmedReference.split(" ").pop();
-  const version = lastWord ? parseVersionAbbreviation(lastWord, bibleVersions) : undefined;
-  const refWithoutVersion = lastWord && version ? trimmedReference.slice(0, -lastWord.length).trim() : trimmedReference;
-  return { ref: refWithoutVersion, version };
+  const parts = trimmedReference.split(" ");
+  const lastWord = parts.pop();
+  const version = lastWord ? versionFromAbbrev(lastWord, bibleVersions) : undefined;
+  const refWithoutVersion = lastWord && version ? parts.join(" ") : trimmedReference;
+  return { ref: refWithoutVersion, version: version?.id };
 }
 
-function parseVersionAbbreviation(maybeVersionAbbrev: string, validVersions: typeof bibleVersions): string | undefined {
+function versionFromAbbrev(maybeVersionAbbrev: string, validVersions: typeof bibleVersions) {
   maybeVersionAbbrev = maybeVersionAbbrev
     .replace(/[()[\]]/gi, "") // remove brackets and parentheses
     .toUpperCase();
-  const isVersion = validVersions.some(([, abbreviation]) => abbreviation === maybeVersionAbbrev);
-  return isVersion ? maybeVersionAbbrev : undefined;
+  return validVersions.find(({ abbrev }) => abbrev === maybeVersionAbbrev);
 }

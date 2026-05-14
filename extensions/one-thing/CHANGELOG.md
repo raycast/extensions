@@ -1,5 +1,8 @@
 # One Thing Changelog
 
+## [Update Credits] - 2025-05-21
+- Added Ek217 as contributor for the One Thing extension
+
 ## [✨ AI Enhancements] - 2025-02-21
 
 ## [Enhancement] - 2024-03-21

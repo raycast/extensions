@@ -1,11 +1,9 @@
 import {
   Action,
   ActionPanel,
-  Alert,
   Color,
-  confirmAlert,
+  Detail,
   Form,
-  getPreferenceValues,
   Icon,
   Keyboard,
   List,
@@ -13,43 +11,17 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import { getFavicon, useCachedState, useFetch, useForm } from "@raycast/utils";
-import {
-  DomainInfo,
-  ErrorResult,
-  SuccessResult,
-  ResourceRecord,
-  DomainClientEPPStatus,
-  ResourceRecordsListCreateOrUpdateItem,
-} from "./types";
+import { getFavicon, useCachedState, useForm } from "@raycast/utils";
+import { DomainInfo, DomainClientEPPStatus, DomainAuthCode } from "./types";
+import ManageDNSRecords from "./manage-dns-records";
+import { API_HEADERS, API_URL, parseResponse, useSpaceship } from "./spaceship";
+import dayjs from "dayjs";
 import { useState } from "react";
 
-const { apiKey, apiSecret } = getPreferenceValues<Preferences>();
-const API_URL = "https://spaceship.dev/api/v1/";
-const API_HEADERS = {
-  "X-Api-Key": apiKey,
-  "X-Api-Secret": apiSecret,
-  "Content-Type": "application/json",
-};
-function useSpaceship<T>(endpoint: string) {
-  const { isLoading, data, mutate, revalidate } = useFetch(`${API_URL}${endpoint}?take=20&skip=0`, {
-    headers: API_HEADERS,
-    async parseResponse(response) {
-      if (!response.ok) {
-        const res: ErrorResult = await response.json();
-        throw new Error(res.detail);
-      }
-      const res: SuccessResult<T> = await response.json();
-      return res.items;
-    },
-    initialData: [],
-  });
-  return { isLoading, data, mutate, revalidate };
-}
-
 export default function ManageDomains() {
+  const { push } = useNavigation();
   const [isShowingDetail, setIsShowingDetail] = useCachedState("show-details-domains", false);
-  const { isLoading, data: domains } = useSpaceship<DomainInfo>("domains");
+  const { isLoading, data: domains, mutate } = useSpaceship<DomainInfo>("domains");
 
   function formatDate(date: string) {
     const options: Intl.DateTimeFormatOptions = { year: "numeric", month: "short", day: "numeric" };
@@ -57,14 +29,63 @@ export default function ManageDomains() {
     return formattedDate;
   }
 
+  function isLocked(domain: DomainInfo) {
+    return domain.eppStatuses.includes(DomainClientEPPStatus.clientTransferProhibited);
+  }
+
   function generateAccessories(domain: DomainInfo) {
-    const accessories: List.Item.Accessory[] = [
-      { tag: domain.privacyProtection.level === "high" ? "Private" : "Public", tooltip: "Privacy" },
-    ];
+    const accessories: List.Item.Accessory[] = [];
+
+    const expiration = dayjs(domain.expirationDate);
+    const today = dayjs();
+    switch (domain.lifecycleStatus) {
+      case "grace1": {
+        const days = expiration.add(7, "day").diff(today, "day");
+        const tooltip = `❗ Expired domain will go offline in ${days <= 1 ? "a day" : `${days} days`}.`;
+        accessories.push(
+          !isShowingDetail
+            ? { tag: { value: "GRACE", color: Color.Red }, tooltip }
+            : { icon: { source: Icon.Warning, tintColor: Color.Red }, tooltip },
+        );
+        break;
+      }
+      case "grace2": {
+        const days = expiration.add(30, "day").diff(today, "day");
+        const tooltip = `❗ Expired domain will be removed in ${days} days.`;
+        accessories.push(
+          !isShowingDetail
+            ? { tag: { value: "GRACE", color: Color.Red }, tooltip }
+            : { icon: { source: Icon.Warning, tintColor: Color.Red }, tooltip },
+        );
+        break;
+      }
+      case "redemption": {
+        const tooltip = `❗ Expired domain will be removed soon.`;
+        accessories.push(
+          !isShowingDetail
+            ? { tag: { value: "REDEMPTION", color: Color.Red }, tooltip }
+            : { icon: { source: Icon.Warning, tintColor: Color.Red }, tooltip },
+        );
+        break;
+      }
+      case "registered": {
+        const differenceInDays = expiration.diff(today, "day");
+        const is30DaysOrLess = differenceInDays <= 30;
+        const tooltip = `⚠️ Expires in ${differenceInDays} days.`;
+        if (is30DaysOrLess)
+          accessories.push(
+            !isShowingDetail
+              ? { tag: { value: "EXPIRING", color: Color.Yellow }, tooltip }
+              : { icon: { source: Icon.Warning, tintColor: Color.Yellow }, tooltip },
+          );
+        break;
+      }
+    }
+    if (isShowingDetail) return accessories;
+
+    accessories.push({ tag: domain.privacyProtection.level === "high" ? "Private" : "Public", tooltip: "Privacy" });
     accessories.push({
-      tag: domain.eppStatuses.includes(DomainClientEPPStatus.clientTransferProhibited)
-        ? { value: "LOCKED", color: Color.Green }
-        : { value: "UNLOCKED", color: Color.Red },
+      tag: isLocked(domain) ? { value: "LOCKED", color: Color.Green } : { value: "UNLOCKED", color: Color.Red },
       tooltip: "Transfer lock",
     });
     accessories.push({
@@ -74,6 +95,63 @@ export default function ManageDomains() {
     return accessories;
   }
 
+  async function getDomainAuthCode(domain: DomainInfo) {
+    const toast = await showToast(Toast.Style.Animated, "Fetching Auth Code", domain.name);
+    try {
+      const response = await fetch(`${API_URL}domains/${domain.name}/transfer/auth-code`, {
+        headers: API_HEADERS,
+      });
+      const result = (await parseResponse(response)) as DomainAuthCode;
+      toast.style = Toast.Style.Success;
+      toast.title = "Fetched Auth Code";
+      push(
+        <Detail
+          markdown={`# ${domain.name} \n---\n Auth Code: ${result.authCode} \n\n Expires: ${result.expires || "N/A"}`}
+          actions={
+            <ActionPanel>
+              <Action.CopyToClipboard title="Copy Auth Code to Clipboard" content={result.authCode} />
+            </ActionPanel>
+          }
+        />,
+      );
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = `${error}`;
+    }
+  }
+
+  async function updateDomainTransferLock(domain: DomainInfo, action: "Lock" | "Unlock") {
+    const toast = await showToast(Toast.Style.Animated, `${action}ing`, domain.name);
+    try {
+      await mutate(
+        fetch(`${API_URL}domains/${domain.name}/transfer/lock`, {
+          method: "PUT",
+          headers: API_HEADERS,
+          body: JSON.stringify({
+            isLocked: action === "Lock",
+          }),
+        }).then(parseResponse),
+        {
+          optimisticUpdate(data) {
+            const eppStatuses =
+              action === "Lock"
+                ? [...domain.eppStatuses, DomainClientEPPStatus.clientTransferProhibited]
+                : domain.eppStatuses.filter((status) => status !== DomainClientEPPStatus.clientTransferProhibited);
+            return data.map((d) => (d.name === domain.name ? { ...d, eppStatuses } : d));
+          },
+          shouldRevalidateAfter: false,
+        },
+      );
+      toast.style = Toast.Style.Success;
+      toast.title = `${action}ed`;
+    } catch (error) {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Failed";
+      toast.message = `${error}`;
+    }
+  }
+
   return (
     <List isLoading={isLoading} isShowingDetail={isShowingDetail}>
       {domains.map((domain) => (
@@ -81,7 +159,7 @@ export default function ManageDomains() {
           key={domain.name}
           icon={getFavicon(`https://${domain.name}`, { fallback: Icon.Globe })}
           title={domain.name}
-          accessories={isShowingDetail ? undefined : generateAccessories(domain)}
+          accessories={generateAccessories(domain)}
           actions={
             <ActionPanel>
               <Action
@@ -89,14 +167,44 @@ export default function ManageDomains() {
                 title="Toggle Details"
                 onAction={() => setIsShowingDetail((show) => !show)}
               />
-              {/* eslint-disable-next-line @raycast/prefer-title-case */}
-              <Action.Push icon={Icon.Store} title="Manage DNS Records" target={<ManageDNSRecords domain={domain} />} />
+              {["grace1", "registered"].includes(domain.lifecycleStatus) && (
+                <>
+                  <Action.Push
+                    icon={Icon.Store}
+                    // eslint-disable-next-line @raycast/prefer-title-case
+                    title="Manage DNS Records"
+                    target={<ManageDNSRecords domain={domain} />}
+                  />
+                  <Action.Push
+                    icon={Icon.Pencil}
+                    title="Change Nameservers"
+                    target={<ChangeNameservers domain={domain} />}
+                    onPop={mutate}
+                  />
+                </>
+              )}
               <Action.OpenInBrowser
                 icon={getFavicon(`https://${domain.name}`, { fallback: Icon.Globe })}
                 title={`Go to ${domain.name}`}
                 url={`https://${domain.name}`}
                 shortcut={Keyboard.Shortcut.Common.Open}
               />
+              <ActionPanel.Section>
+                <Action icon={Icon.Shield} title="Get Auth Code" onAction={() => getDomainAuthCode(domain)} />
+                {isLocked(domain) ? (
+                  <Action
+                    icon={{ source: Icon.LockUnlocked, tintColor: Color.Red }}
+                    title="Unlock Domain"
+                    onAction={() => updateDomainTransferLock(domain, "Unlock")}
+                  />
+                ) : (
+                  <Action
+                    icon={{ source: Icon.Lock, tintColor: Color.Green }}
+                    title="Lock Domain"
+                    onAction={() => updateDomainTransferLock(domain, "Lock")}
+                  />
+                )}
+              </ActionPanel.Section>
             </ActionPanel>
           }
           detail={
@@ -110,266 +218,111 @@ export default function ManageDomains() {
   );
 }
 
-function ManageDNSRecords({ domain }: { domain: DomainInfo }) {
-  const { isLoading, data: records, mutate, revalidate } = useSpaceship<ResourceRecord>(`dns/records/${domain.name}`);
-
-  function generateAccessories(record: ResourceRecord) {
-    const accessories: List.Item.Accessory[] = [{ tag: record.type, tooltip: "Type" }];
-
-    if (record.ttl)
-      accessories.unshift({
-        icon: Icon.Clock,
-        text: `${record.ttl / 60} min`,
-        tooltip: "Time To Live",
-      });
-    if (record.address) accessories.unshift({ icon: Icon.Text, text: record.address, tooltip: "Address" });
-    else if (record.value) accessories.unshift({ icon: Icon.Text, text: record.value, tooltip: "Value" });
-    else if (record.exchange) accessories.unshift({ icon: Icon.Text, text: record.exchange, tooltip: "Exchange" });
-
-    return accessories;
-  }
-
-  async function deleteRecord(record: ResourceRecord, index: number) {
-    const options: Alert.Options = {
-      title: `Delete ${record.type} record`,
-      message:
-        "Deleting DNS records might affect the correct working of this domain. This change might also take a while to propagate.",
-      primaryAction: {
-        title: "Yes, delete record",
-        style: Alert.ActionStyle.Destructive,
-      },
-      rememberUserChoice: true,
-    };
-    if (await confirmAlert(options)) {
-      const toast = await showToast(Toast.Style.Animated, "Deleting record");
-      try {
-        await mutate(
-          fetch(`${API_URL}dns/records/${domain.name}`, {
-            method: "DELETE",
-            headers: API_HEADERS,
-            body: JSON.stringify([record]),
-          }).then(async (response) => {
-            if (!response.ok) {
-              const res: ErrorResult = await response.json();
-              throw new Error(res.detail);
-            }
-          }),
-          {
-            optimisticUpdate(data) {
-              return data.filter((_, i) => i !== index);
-            },
-            shouldRevalidateAfter: false,
-          },
-        );
-        toast.style = Toast.Style.Success;
-        toast.title = "Deleted record";
-      } catch (error) {
-        toast.style = Toast.Style.Failure;
-        toast.title = "Could not delete record";
-        toast.message = `${error}`;
-      }
-    }
-  }
-
-  return (
-    <List isLoading={isLoading}>
-      {domain.nameservers.provider === "custom" && (
-        <List.EmptyView
-          icon={Icon.Store}
-          title="Managed with Custom DNS"
-          description="To manage your records here, change nameservers back to Spaceship DNS. You can even choose to see your inactive records and prepare them before changing back."
-        />
-      )}
-      <List.Section title={domain.nameservers.provider === "custom" ? "Inactive records" : "Active records"}>
-        {records.map((record, index) => (
-          <List.Item
-            key={index}
-            icon={Icon.Store}
-            title={record.name}
-            subtitle={`.${domain.name}`}
-            accessories={generateAccessories(record)}
-            actions={
-              <ActionPanel>
-                <Action.Push
-                  icon={Icon.Plus}
-                  title="Add Record"
-                  target={<CreateDNSRecord domain={domain} onRecordAdded={revalidate} />}
-                />
-                <Action
-                  icon={Icon.Trash}
-                  title={`Delete ${record.type} Record`}
-                  onAction={() => deleteRecord(record, index)}
-                  style={Action.Style.Destructive}
-                />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
-    </List>
-  );
-}
-
-function CreateDNSRecord({ domain, onRecordAdded }: { domain: DomainInfo; onRecordAdded: () => void }) {
+function ChangeNameservers({ domain }: { domain: DomainInfo }) {
   const [isLoading, setIsLoading] = useState(false);
   const { pop } = useNavigation();
   const { handleSubmit, itemProps, values } = useForm<{
-    type: string;
-    name: string;
-    value: string;
-    ttl: string;
-    force: boolean;
-    // MX
-    preference: string;
+    provider: string;
+    host1: string;
+    host2: string;
+    host3: string;
+    host4: string;
+    host5: string;
+    host6: string;
+    host7: string;
+    host8: string;
+    host9: string;
+    host10: string;
+    host11: string;
+    host12: string;
   }>({
     async onSubmit(values) {
       setIsLoading(true);
-      const toast = await showToast(Toast.Style.Animated, "Adding record");
-      let item: ResourceRecordsListCreateOrUpdateItem | undefined;
-      switch (values.type) {
-        case "A":
-          item = {
-            type: "A",
-            address: values.value,
-            name: values.name,
-            ttl: +values.ttl,
-          };
-          break;
-        case "MX":
-          item = {
-            type: "MX",
-            exchange: values.value,
-            name: values.name,
-            preference: +values.preference,
-            ttl: +values.ttl,
-          };
-          break;
-        case "TXT":
-          item = {
-            type: "TXT",
-            value: values.value,
-            name: values.name,
-            ttl: +values.ttl,
-          };
-          break;
-      }
-
+      const toast = await showToast(Toast.Style.Animated, "Changing");
+      const { provider, ...rest } = values;
+      const hosts = Object.values(rest).filter((host) => !!host);
+      const body = provider === "basic" ? { provider } : { provider, hosts };
       try {
-        const response = await fetch(`${API_URL}dns/records/${domain.name}`, {
+        await fetch(`${API_URL}domains/${domain.name}/nameservers`, {
           method: "PUT",
           headers: API_HEADERS,
-          body: JSON.stringify({
-            force: values.force,
-            items: [item],
-          }),
-        });
-        if (!response.ok) {
-          const res: ErrorResult = await response.json();
-          throw new Error(res.data ? res.data[0].details : res.detail);
-        }
+          body: JSON.stringify(body),
+        }).then(parseResponse);
         toast.style = Toast.Style.Success;
-        toast.title = "Added record";
-        onRecordAdded();
+        toast.title = "Changed";
         pop();
       } catch (error) {
         toast.style = Toast.Style.Failure;
-        toast.title = "Could not add record";
+        toast.title = "Failed";
         toast.message = `${error}`;
       } finally {
         setIsLoading(false);
       }
     },
     initialValues: {
-      type: "A",
-      ttl: "1800",
-      force: false,
+      provider: domain.nameservers.provider,
+      host1: domain.nameservers.hosts[0],
+      host2: domain.nameservers.hosts[1],
+      host3: domain.nameservers.hosts[2],
+      host4: domain.nameservers.hosts[3],
+      host5: domain.nameservers.hosts[4],
+      host6: domain.nameservers.hosts[5],
+      host7: domain.nameservers.hosts[6],
+      host8: domain.nameservers.hosts[7],
+      host9: domain.nameservers.hosts[8],
+      host10: domain.nameservers.hosts[9],
+      host11: domain.nameservers.hosts[10],
+      host12: domain.nameservers.hosts[11],
     },
     validation: {
-      name(value) {
-        if (!value) return "Invalid host value";
+      host1(value) {
+        if (values.provider === "custom" && !value) return "The item is required";
       },
-      value(value) {
-        if (["A", "MX", "TXT"].includes(values.type) && !value) return "The item is required";
-      },
-      preference(value) {
-        if (values.type === "MX" && (!value || !Number(value) || +value < 0 || +value > 65535))
-          return "Enter a value between 0 and 65535, only integer";
+      host2(value) {
+        if (values.provider === "custom" && !value) return "The item is required";
       },
     },
   });
-
-  const TYPE_SPECIFIC_FIELDS: { [type: string]: { value: { title: string; placeholder: string; info: string } } } = {
-    A: {
-      value: {
-        title: "Address",
-        placeholder: "IP V4 Address",
-        info: "IPv4 address",
-      },
-    },
-    MX: {
-      value: {
-        title: "Exchange",
-        placeholder: "mail exchange server",
-        info: "Mail server that accepts mail",
-      },
-    },
-    TXT: {
-      value: {
-        title: "Value",
-        placeholder: "text data value",
-        info: "Text value",
-      },
-    },
-  };
-
   return (
     <Form
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm icon={Icon.Plus} title="Add" onSubmit={handleSubmit} />
+          <Action.SubmitForm icon={Icon.Check} title="Save" onSubmit={handleSubmit} />
         </ActionPanel>
       }
     >
-      <Form.Dropdown title="Type" {...itemProps.type}>
-        <Form.Dropdown.Item title="A" value="A" />
-        <Form.Dropdown.Item title="MX" value="MX" />
-        <Form.Dropdown.Item title="TXT" value="TXT" />
+      <Form.Description text="Select either Spaceship or custom DNS for your nameserver location." />
+      <Form.Dropdown title="Provider" {...itemProps.provider}>
+        <Form.Dropdown.Item title="Spaceship nameservers" value="basic" />
+        <Form.Dropdown.Item title="Custom nameservers" value="custom" />
       </Form.Dropdown>
+      <Form.Description
+        text={
+          values.provider === "basic"
+            ? "Using Spaceship nameservers ensures that any connected products are automatically updated and can be customized with advanced DNS settings."
+            : "Using custom nameservers means you manage your DNS setup at your external provider."
+        }
+      />
       <Form.Separator />
-      <Form.TextField
-        title="Host"
-        placeholder="@"
-        info="Enter @ to create a record for yourdomain.com. Enter blog to create a record for blog.yourdomain.com."
-        {...itemProps.name}
-      />
-      <Form.TextField
-        title={TYPE_SPECIFIC_FIELDS[values.type].value.title}
-        placeholder={TYPE_SPECIFIC_FIELDS[values.type].value.placeholder}
-        info={TYPE_SPECIFIC_FIELDS[values.type].value.info}
-        {...itemProps.value}
-      />
-      {values.type === "MX" && (
-        <Form.TextField
-          title="Preference"
-          placeholder="0 - 65535"
-          info="Preference (distance) number of mail server"
-          {...itemProps.preference}
-        />
+      {values.provider === "basic" ? (
+        <Form.Description title="Nameservers" text={`launch1.spaceship.net\nlaunch2.spaceship.net`} />
+      ) : (
+        <>
+          <Form.TextField title="" placeholder="ns1.example.com" {...itemProps.host1} />
+          <Form.TextField title="" placeholder="ns2.example.com" {...itemProps.host2} />
+          <Form.TextField title="" placeholder="ns3.example.com" {...itemProps.host3} />
+          <Form.TextField title="" placeholder="ns4.example.com" {...itemProps.host4} />
+          <Form.TextField title="" placeholder="ns5.example.com" {...itemProps.host5} />
+          <Form.TextField title="" placeholder="ns6.example.com" {...itemProps.host6} />
+          <Form.TextField title="" placeholder="ns7.example.com" {...itemProps.host7} />
+          <Form.TextField title="" placeholder="ns8.example.com" {...itemProps.host8} />
+          <Form.TextField title="" placeholder="ns9.example.com" {...itemProps.host9} />
+          <Form.TextField title="" placeholder="ns10.example.com" {...itemProps.host10} />
+          <Form.TextField title="" placeholder="ns11.example.com" {...itemProps.host11} />
+          <Form.TextField title="" placeholder="ns12.example.com" {...itemProps.host12} />
+        </>
       )}
-      <Form.Dropdown
-        title="Time To Live (TTL)"
-        info="Specifies the amount of time in seconds that a DNS record should be cached by a resolver or a caching server before it expires and needs to be refreshed from the authoritative DNS servers"
-        {...itemProps.ttl}
-      >
-        <Form.Dropdown.Item title="60 min" value="3600" />
-        <Form.Dropdown.Item title="30 min" value="1800" />
-        <Form.Dropdown.Item title="20 min" value="1200" />
-        <Form.Dropdown.Item title="5 min" value="300" />
-        <Form.Dropdown.Item title="1 min" value="60" />
-      </Form.Dropdown>
-      <Form.Separator />
-      <Form.Checkbox label="Turn-off conflicts resolution checker and force zone update" {...itemProps.force} />
     </Form>
   );
 }

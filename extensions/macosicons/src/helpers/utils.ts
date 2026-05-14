@@ -10,7 +10,7 @@ export const execPromise = promisify(exec);
 async function getModifiableApplications() {
   try {
     const { stdout } = await execPromise(
-      `mdfind -onlyin /Applications 'kMDItemContentType == "com.apple.application-bundle" && kMDItemAppStoreIsAppleSigned != 1' -attr kMDItemFSName -attr kMDItemCFBundleIdentifier`,
+      `mdfind -onlyin /Applications -onlyin ~/Applications 'kMDItemContentType == "com.apple.application-bundle" && kMDItemAppStoreIsAppleSigned != 1' -attr kMDItemFSName -attr kMDItemCFBundleIdentifier`,
     );
 
     return stdout
@@ -48,7 +48,9 @@ export function useModifiableApplications(search?: string) {
       });
       const objects = results.map((r) => r.obj);
 
-      const otherApplications = (apps || []).filter((app) => !objects.includes(app));
+      const otherApplications = (apps || []).filter(
+        (app) => !objects.includes(app),
+      );
 
       return [...objects, ...otherApplications];
     },

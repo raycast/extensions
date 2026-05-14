@@ -1,11 +1,10 @@
 import { Toast, getPreferenceValues, showToast } from "@raycast/api";
-import OpenAI from "openai";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { OPENAI_MODEL } from "../../../const/defaults";
 import { ALERT, SUCCESS_SUMMARIZING_VIDEO, SUMMARIZING_VIDEO } from "../../../const/toast_messages";
-
-import { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
+import type { OpenAIPreferences } from "../../../summarizeVideoWithOpenAI";
 import { getAiInstructionSnippet } from "../../../utils/getAiInstructionSnippets";
+import { getOpenAIClient } from "../../../utils/sdkClients";
 
 type GetOpenAISummaryProps = {
   transcript?: string;
@@ -13,8 +12,7 @@ type GetOpenAISummaryProps = {
   setSummary: React.Dispatch<React.SetStateAction<string | undefined>>;
 };
 
-export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSummary }: GetOpenAISummaryProps) => {
-  const abortController = new AbortController();
+export const useOpenAISummary = ({ transcript, setSummaryIsLoading, setSummary }: GetOpenAISummaryProps) => {
   const preferences = getPreferenceValues() as OpenAIPreferences;
   const { creativity, openaiApiToken, language, openaiEndpoint, openaiModel } = preferences;
 
@@ -30,15 +28,10 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
   useEffect(() => {
     if (!transcript) return;
 
+    const abortController = new AbortController();
+
     const aiInstructions = getAiInstructionSnippet(language, transcript, transcript);
-
-    const openai = new OpenAI({
-      apiKey: openaiApiToken,
-    });
-
-    if (openaiEndpoint !== "") {
-      openai.baseURL = openaiEndpoint;
-    }
+    const openai = getOpenAIClient(openaiApiToken, openaiEndpoint || undefined);
 
     setSummaryIsLoading(true);
 
@@ -48,9 +41,8 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
       message: SUMMARIZING_VIDEO.message,
     });
 
-    const stream = openai.beta.chat.completions.stream({
+    const stream = openai.chat.completions.stream({
       model: openaiModel || OPENAI_MODEL,
-      temperature: parseInt(creativity),
       messages: [{ role: "user", content: aiInstructions }],
       stream: true,
     });
@@ -84,5 +76,5 @@ export const useOpenAISummary = async ({ transcript, setSummaryIsLoading, setSum
     return () => {
       abortController.abort();
     };
-  }, [transcript]);
+  }, [creativity, language, openaiApiToken, openaiEndpoint, openaiModel, setSummary, setSummaryIsLoading, transcript]);
 };

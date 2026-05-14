@@ -4,7 +4,7 @@ export const getDataModelWithFieldsSchema = z.object({
   data: z.object({
     object: z.object({
       id: z.string(),
-      dataSourceId: z.string(),
+      dataSourceId: z.string().optional(),
       nameSingular: z.string(),
       namePlural: z.string(),
       labelSingular: z.string(),

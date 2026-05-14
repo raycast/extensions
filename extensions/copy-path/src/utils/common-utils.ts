@@ -3,7 +3,9 @@ import {
   copySafariWebAppPath,
   getChromiumBrowserPath,
   getFocusFinderPath,
+  getFocusWindowPath,
   getFocusWindowTitle,
+  getQSpacePathUrls,
   getWebkitBrowserPath,
 } from "./applescript-utils";
 import {
@@ -48,6 +50,50 @@ const copyFinerFilesPath = async (fileSystemItems: FileSystemItem[]) => {
   };
 };
 
+const qSpaceUrlToPath = (url: string) => {
+  if (!url.startsWith("file://")) {
+    return url;
+  }
+
+  try {
+    return decodeURIComponent(new URL(url).pathname);
+  } catch {
+    try {
+      return decodeURIComponent(url.replace(/^file:\/\/(?:localhost)?/, ""));
+    } catch {
+      return url;
+    }
+  }
+};
+
+export const copyQSpacePath = async () => {
+  const { useTildeForHome } = await getPreferenceValues();
+  const urls = await getQSpacePathUrls();
+  const paths = urls
+    .split(/\r?\n/)
+    .map((url) => url.trim())
+    .filter(Boolean)
+    .map(qSpaceUrlToPath);
+
+  if (paths.length === 0) {
+    await showFailureHUD({ title: "Nothing to Copy", style: Toast.Style.Failure });
+    return "";
+  }
+
+  let path = paths.join(multiPathSeparator);
+  let hud = (paths.length > 1 ? "📑 " : "📂 ") + paths[0];
+
+  if (useTildeForHome) {
+    path = path.replace(os.homedir(), "~");
+    hud = hud.replace(os.homedir(), "~");
+  }
+
+  await Clipboard.copy(path);
+  await showSuccessHUD(hud);
+  await customUpdateCommandMetadata(path.replace(os.homedir(), "~"));
+  return path;
+};
+
 export const copyFinderPath = async () => {
   const { useTildeForHome } = await getPreferenceValues();
   // get finder path
@@ -69,6 +115,20 @@ export const copyFinderPath = async () => {
   } catch (e) {
     console.error(String(e));
   }
+};
+
+export const copyWindowPath = async (app: Application) => {
+  const { useTildeForHome } = await getPreferenceValues();
+  let path = await getFocusWindowPath(app);
+  if (useTildeForHome) {
+    path = path.replace(os.homedir(), "~");
+  }
+  if (!isEmpty(path)) {
+    await Clipboard.copy(path);
+    await showSuccessHUD("📂 " + path);
+    await customUpdateCommandMetadata(path);
+  }
+  return path;
 };
 
 const tryCopyBrowserUrl = async (app: Application) => {

@@ -12,7 +12,7 @@ interface OpenInJetBrainsAppActionProps {
 export function openInApp(
   tool: AppHistory,
   recent: recentEntry | null,
-  visit: entryAppAction | null
+  visit: entryAppAction | null,
 ): () => Promise<Toast | undefined> {
   const cmd = tool.tool ? `"${tool.tool}" "${recent?.path ?? ""}"` : `open ${tool.url}${recent?.title ?? ""}`;
   const toOpen = tool.app?.path ?? "";
@@ -57,7 +57,7 @@ export function openInApp(
     }
     showHUD(`Opening ${recent ? recent.title : tool.title}`)
       .then(() => visit && recent && visit(recent, tool))
-      .then(() => recent !== null && execPromise(cmd) && null)
+      .then(() => (recent !== null ? execPromise(cmd) : null))
       .then(() => popToRoot())
       .catch((err) => showToast(Toast.Style.Failure, "Failed", err.message).then(() => captureException(err)));
   };

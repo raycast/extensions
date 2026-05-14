@@ -28,10 +28,10 @@ import { MailIcon, OutgoingMessageIcon } from "../utils/presets";
 
 const { primaryAction } = getPreferenceValues<Preferences>();
 
-export type MessageActionsProps = MessageProps & { inMessageView?: boolean };
+export type MessageActionsProps = MessageProps & { inMessageView?: boolean; onRefresh?: () => void };
 
 export const MessageActions = (props: MessageActionsProps) => {
-  const { mailbox, account, message, inMessageView, onAction } = props;
+  const { mailbox, account, message, inMessageView, onAction, onRefresh } = props;
 
   const navigation = useNavigation();
 
@@ -242,6 +242,16 @@ export const MessageActions = (props: MessageActionsProps) => {
           />
         )}
       </ActionPanel.Section>
+      {onRefresh && (
+        <ActionPanel.Section>
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{ modifiers: ["opt", "shift"], key: "r" }}
+            onAction={onRefresh}
+          />
+        </ActionPanel.Section>
+      )}
     </ActionPanel>
   );
 };

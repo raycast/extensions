@@ -1,4 +1,4 @@
-export const defaultOperaProfilePath = ["Application Support", "com.operasoftware.Opera"];
+export const defaultOperaProfilePath = ["Application Support", "com.operasoftware.Opera", "Default"];
 
 export const DownloadText = `
 # 🚨Error: Opera browser is not installed

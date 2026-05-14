@@ -14,7 +14,7 @@ export function StatusForm(props: {
   submitTitle: string;
   onSubmit: (values: Form.Values) => Promise<void>;
   existingStatus?: Status | undefined;
-}): JSX.Element {
+}) {
   const es = props.existingStatus;
   const emoji = es?.emoji;
   const message = es?.message;
@@ -34,7 +34,7 @@ export function StatusForm(props: {
   );
 }
 
-function StatusDurationDropDown(props: { id: string; defaultValue: string | undefined }): JSX.Element {
+function StatusDurationDropDown(props: { id: string; defaultValue: string | undefined }) {
   return (
     <Form.Dropdown id={props.id} title="Duration" defaultValue={props.defaultValue}>
       {Object.keys(clearDurations).map((k) => (
@@ -44,7 +44,7 @@ function StatusDurationDropDown(props: { id: string; defaultValue: string | unde
   );
 }
 
-function StatusEmojiDropDown(props: { id: string; title: string; defaultValue?: string | undefined }): JSX.Element {
+function StatusEmojiDropDown(props: { id: string; title: string; defaultValue?: string | undefined }) {
   return (
     <Form.Dropdown id={props.id} title={props.title} defaultValue={props.defaultValue}>
       <Form.Dropdown.Item key="-" title="-" value="" />
@@ -55,9 +55,7 @@ function StatusEmojiDropDown(props: { id: string; title: string; defaultValue?: 
   );
 }
 
-export function StatusFormSet(props: {
-  setCurrentStatus?: React.Dispatch<React.SetStateAction<Status | undefined>>;
-}): JSX.Element {
+export function StatusFormSet(props: { setCurrentStatus?: React.Dispatch<React.SetStateAction<Status | undefined>> }) {
   const { pop } = useNavigation();
   const handle = async (values: Form.Values) => {
     try {
@@ -91,7 +89,7 @@ export function StatusFormPresetCreate(props: {
   presets: Status[] | undefined;
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   onFinish: (status: Status) => Promise<void>;
-}): JSX.Element {
+}) {
   const handle = async (values: Form.Values) => {
     try {
       const status = getValidStatusFromFormValue(values);
@@ -108,7 +106,7 @@ export function StatusFormPresetEdit(props: {
   presets: Status[] | undefined;
   setPresets: React.Dispatch<React.SetStateAction<Status[]>>;
   onFinish: (status: Status) => Promise<void>;
-}): JSX.Element {
+}) {
   const handle = async (values: Form.Values) => {
     try {
       const status = getValidStatusFromFormValue(values);

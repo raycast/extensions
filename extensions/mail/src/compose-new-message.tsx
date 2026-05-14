@@ -1,5 +1,5 @@
-import { OutgoingMessageForm } from "./types";
 import { ComposeMessage } from "./components";
+import { OutgoingMessageForm } from "./types";
 
 export type ComposeNewMessageProps = {
   draftValues?: OutgoingMessageForm;

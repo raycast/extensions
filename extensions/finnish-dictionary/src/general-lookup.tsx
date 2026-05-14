@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, List, showToast, Toast } from "@raycast/api";
-import WordDictionary from "./word-dictionary";
+import { Action, ActionPanel, Icon, List, showToast, Toast } from "@raycast/api";
+import WordDictionary from "@/components/word-dictionary";
 
 const languages: Record<string, string> = {
   Hungarian: "hun",
@@ -79,22 +79,26 @@ export default function Command() {
     <List
       searchText={searchText}
       onSearchTextChange={setSearchText}
-      searchBarPlaceholder="Select languages"
-      isLoading={!filteredList.length}
+      searchBarPlaceholder="Search for a language..."
+      isLoading={searchText.length > 0 && filteredList.length === 0}
     >
-      <List.Section title={`Define ${langs != "" ? langs : "..."} word to...`}>
-        {filteredList.map((item) => (
-          <List.Item
-            key={item}
-            title={item}
-            actions={
-              <ActionPanel>
-                <Action title="Select" onAction={() => selectLanguage(item)} />
-              </ActionPanel>
-            }
-          />
-        ))}
-      </List.Section>
+      {searchText.length > 0 && filteredList.length === 0 ? (
+        <List.EmptyView icon={Icon.Globe} title="No languages found" />
+      ) : (
+        <List.Section title={`Define ${langs !== "" ? langs : "..."} word to...`}>
+          {filteredList.map((item) => (
+            <List.Item
+              key={item}
+              title={item}
+              actions={
+                <ActionPanel>
+                  <Action title="Select Language" onAction={() => selectLanguage(item)} />
+                </ActionPanel>
+              }
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   ) : (
     <WordDictionary from={langs.split("-")[0]} to={langs.split("-")[1]} />

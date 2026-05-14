@@ -24,26 +24,27 @@ export interface FileGeneralMetadata {
   updatedAt: string;
 }
 
-export interface Preferences {
-  musicDir: string;
-}
-
 export const DEFAULT_MUSIC_DIR = `${homedir()}/Music`;
 
 /**
- * Retrieves the music directory path.
- * If the music directory is not set in the preferences, the default music directory is used.
- * If the music directory starts with "~", it is replaced with the user's home directory.
+ * Retrieves user preferences for the music directory and Finder selection usage.
  *
- * @returns The resolved music directory path.
+ * - If the music directory is not set in preferences, the default music directory (`~/Music`) is used.
+ * - If the music directory path starts with `"~"`, it is expanded to the user's home directory.
+ * - The returned `musicDir` is an absolute, resolved path.
+ *
+ * @returns An object containing:
+ *   - `musicDir`: The resolved absolute path to the music directory.
+ *   - `useFinderSelection`: Boolean indicating whether to use Finder selection on launch.
  */
-export function getMusicDir() {
-  let { musicDir = DEFAULT_MUSIC_DIR } = getPreferenceValues<Preferences>();
-  if (musicDir.startsWith("~")) {
-    musicDir = musicDir.replace("~", homedir());
+export function getPreferences() {
+  const { musicDir = DEFAULT_MUSIC_DIR, useFinderSelection } = getPreferenceValues<Preferences>();
+  let dir = musicDir;
+  if (dir.startsWith("~")) {
+    dir = dir.replace("~", homedir());
   }
 
-  return resolve(musicDir);
+  return { musicDir: resolve(dir), useFinderSelection };
 }
 
 /**
@@ -58,16 +59,20 @@ export function getDirData(path: string) {
 
   for (const file of files) {
     if (file.startsWith(".")) continue;
+    if (file.endsWith(".DS_Store")) continue;
+    if (file.endsWith(".musiclibrary")) continue;
+
     const fileData = lstatSync(`${path}/${file}`);
 
     let fileType: FileType = "other";
     if (fileData.isDirectory()) fileType = "directory";
+
     if (fileData.isFile() && mime.getType(file)?.startsWith("audio")) fileType = "audio";
     if (fileType === "other") continue;
 
     const size = fileData.size;
 
-    const d: FileDataType = {
+    const element: FileDataType = {
       id: fileData.ino,
       isDir: fileType === "directory",
       name: file,
@@ -75,7 +80,7 @@ export function getDirData(path: string) {
       path,
     };
 
-    data.push(d);
+    data.push(element);
   }
 
   const sortedData = data.sort((a, b) => {
@@ -99,6 +104,16 @@ export function getParentDir(path: string) {
 }
 
 /**
+ * Retrieves the file name from a given path.
+ * @param path - The path to the file.
+ * @returns The file name.
+ */
+export function getFileNameFromPath(path: string) {
+  const pathArray = path.split("/");
+  return pathArray.pop() || "";
+}
+
+/**
  * Retrieves general metadata for a file.
  * @param path - The path of the file.
  * @returns An object containing the size, creation date, and last modified date of the file.
@@ -113,6 +128,32 @@ export function getFileGeneralMetadata(path: string) {
   };
 }
 
+/**
+ * Formats a Date object into a human-readable string.
+ * @param date - The Date object to format.
+ * @returns A formatted date string in the format "dd MMM yyyy, HH:mm:ss".
+ */
 function formatDateTime(date: Date) {
   return format(date, "dd MMM yyyy, HH:mm:ss", { locale: enUS });
+}
+
+/**
+ * Normalizes a file name by removing the ".localized" suffix.
+ * @param fileName - The file name to normalize.
+ * @returns The normalized file name.
+ */
+export function normalizeFileName(fileName: string) {
+  return fileName.replace(".localized", "");
+}
+
+/**
+ * Normalizes a path segments by removing the ".localized" suffix from each segment.
+ * @param path - The path to normalize.
+ * @returns The normalized path.
+ */
+export function normalizePathSegments(path: string): string {
+  return path
+    .split("/")
+    .map((segment) => normalizeFileName(segment))
+    .join("/");
 }

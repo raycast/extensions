@@ -2,10 +2,14 @@ import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import { useForm, FormValidation, withAccessToken } from "@raycast/utils";
 
 import { CreateNotepadParams, getFabricClient, oauthService } from "./api/fabricClient";
+import { CreationMetadata } from "./components/CreationMetadata";
 
 type CreationValues = {
   name: string;
   content: string;
+  tagsNew: string;
+  tagsExisting: string[];
+  parentId: string;
 };
 
 function CreateNote() {
@@ -23,6 +27,9 @@ function CreateNote() {
         reset({
           name: "",
           content: "",
+          tagsNew: "",
+          parentId: "@alias::inbox",
+          tagsExisting: [],
         });
 
         toast.style = Toast.Style.Success;
@@ -54,6 +61,7 @@ function CreateNote() {
         enableMarkdown={true}
         {...itemProps.content}
       />
+      <CreationMetadata<CreationValues> itemProps={itemProps} />
     </Form>
   );
 }

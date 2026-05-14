@@ -1,5 +1,23 @@
 # Ray.so Changelog
 
+## [Chore: Added partner themes] - 2026-04-05
+
+- Added 12 missing partner themes to Generate Image settings (OpenAI, Mintlify, Prisma, Clerk, ElevenLabs, Resend, Trigger.dev, Browserbase, Cloudflare, Gemini, Stripe, Firecrawl)
+
+## [New theme] - 2025-11-07
+
+- Added Nuxt theme
+
+## [Maintenance] - 2025-08-25
+
+- Added Windows support
+- Migrated to the new ESLint configuration format
+- Updated dependencies
+- Replaced the js-base64 library with the native Buffer for base64 encoding
+- Linting fixes (one contributor not found)
+- Removed some unused dependencies
+- Changed to open method from @raycast/api instead of the open library for opening URLs.
+
 ## [Fix submitting form] - 2024-12-29
 
 - Submitted form now is passing data that user sees.

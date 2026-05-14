@@ -6,13 +6,13 @@ export async function updateTag(
   spaceId: string,
   propertyId: string,
   tagId: string,
-  data: UpdateTagRequest,
+  request: UpdateTagRequest,
 ): Promise<{ tag: Tag }> {
   const { url, method } = apiEndpoints.updateTag(spaceId, propertyId, tagId);
 
   const response = await apiFetch<{ tag: RawTag }>(url, {
     method: method,
-    body: JSON.stringify(data),
+    body: JSON.stringify(request),
   });
 
   return { tag: mapTag(response.payload.tag) };

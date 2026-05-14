@@ -1,5 +1,27 @@
 # Safari Changelog
 
+## [Fix] - 2026-05-06
+
+- Fix `Search History` command failing with `no such column: "%...%"` by using single-quoted string literals for search terms in the SQL query.
+
+## [Fix] - 2026-04-28
+
+- Fix `Search History` command failing with `no such column: "unixepoch"` by using single-quoted string literals in the SQL query.
+
+## [Performance] - 2026-01-12
+
+- Significantly improved `Search Tabs` loading speed by replacing JXA with native Swift ScriptingBridge (˜4x faster load). 
+
+## [Update] - 2025-06-19
+
+- Fixes for `Search Tabs` command:
+  - allows the components that display the tab list to re-render when device data changes.
+  - allows the obtention of the local tabs even when the `areRemoteTabsUsed` ("iCloud devices" option) is set to `false`.
+
+## [Update] - 2025-05-19
+
+- Added a command to close all other tabs, leaving the current tab open.
+
 ## [Update] - 2025-03-18
 
 - Fix for `Copy Title as Link to Clipboard` command: Prevent profile or tab group name being added to the start of the page title

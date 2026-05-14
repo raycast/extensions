@@ -4,13 +4,14 @@ import * as O from "fp-ts/Option";
 import * as S from "fp-ts/string";
 import * as T from "fp-ts/Task";
 import * as TE from "fp-ts/TaskEither";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { Album, Track } from "./util/models";
 import { fromEmptyOrNullable } from "./util/option";
 import { parseResult } from "./util/parser";
 import * as music from "./util/scripts";
 import { handleTaskEitherError } from "./util/utils";
+import { usePromise } from "@raycast/utils";
 
 const EMPTY_TEXT = " "; // Visually empty but non-empty to prevent jumping around
 
@@ -34,20 +35,18 @@ export default function PlayLibraryAlbum() {
     ),
   );
 
-  useEffect(() => {
-    loadAll();
-  }, []);
+  const { isLoading: isLoadingAll, revalidate: revalidateAll } = usePromise(loadAll);
 
-  useEffect(() => {
-    pipe(music.currentTrack.getCurrentTrack(), TE.map(setCurrentTrack))();
-  }, []);
+  const { isLoading: isLoadingCurrentTrack } = usePromise(() =>
+    pipe(music.currentTrack.getCurrentTrack(), TE.map(setCurrentTrack))(),
+  );
 
   const onSearch = async (next: string) => {
     setAlbums(null); // start loading
 
     if (!next || next?.length < 1) {
       setAlbums(null);
-      await loadAll();
+      await revalidateAll();
       return;
     }
 
@@ -75,7 +74,7 @@ export default function PlayLibraryAlbum() {
 
   return (
     <List
-      isLoading={albums === null || currentTrack === null}
+      isLoading={isLoadingAll || isLoadingCurrentTrack}
       searchBarPlaceholder="Search A Song By Album Or Artist"
       onSearchTextChange={onSearch}
       throttle

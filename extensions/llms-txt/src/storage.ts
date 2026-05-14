@@ -1,4 +1,4 @@
-import type { Website, HistoryEntry, ActionType, Preferences } from "./types";
+import type { Website, HistoryEntry, ActionType } from "./types";
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 
 const HISTORY_KEY = "history";

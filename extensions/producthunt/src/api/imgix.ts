@@ -106,7 +106,16 @@ export function processImageUrl(url: string, options: ImgixOptions = {}): string
 
     return parsedUrl.toString();
   } catch (error) {
-    console.error("Error processing image URL:", error);
+    try {
+      import("../util/logger")
+        .then(({ getLogger }) => {
+          const log = getLogger("imgix");
+          log.error("imgix:process_error", error, { url });
+        })
+        .catch(() => void 0);
+    } catch {
+      // ignore
+    }
     return url;
   }
 }
@@ -150,7 +159,16 @@ export function processThumbnail(url: string, options: { isDetailView?: boolean 
       ...(quality !== undefined ? { quality } : {}),
     });
   } catch (error) {
-    console.error(`Error processing ${isDetailView ? "detail" : "list"} thumbnail:`, error);
+    try {
+      import("../util/logger")
+        .then(({ getLogger }) => {
+          const log = getLogger("imgix");
+          log.error("imgix:thumbnail_error", error, { url, isDetailView });
+        })
+        .catch(() => void 0);
+    } catch {
+      // ignore
+    }
     return url;
   }
 }

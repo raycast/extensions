@@ -56,7 +56,7 @@ export default function ClientListItem({ workspace, client, revalidateClients, S
               />
               {workspace.business_ws &&
                 (client.archived ? (
-                  <ActionPanel.Submenu title="Restore Client..." icon={Icon.Undo} shortcut={Shortcut.Archive}>
+                  <ActionPanel.Submenu title="Restore Client…" icon={Icon.Undo} shortcut={Shortcut.Archive}>
                     <Action
                       title={`Restore Client and Projects`}
                       onAction={() =>

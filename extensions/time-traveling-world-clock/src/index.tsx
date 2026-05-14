@@ -13,11 +13,6 @@ import { CityData, findFromCityStateProvince } from "city-timezones";
 import getUnicodeFlagIcon from "country-flag-icons/unicode";
 import { useEffect, useState, useMemo } from "react";
 
-interface Preferences {
-  showUtc: boolean;
-  twentyFourFormat: boolean;
-}
-
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
   month: "short",
   day: "numeric",
@@ -227,7 +222,7 @@ export default function Command() {
         return (
           <List.Item
             key={c.city}
-            title={c.city + " " + getUnicodeFlagIcon(c.iso2)}
+            title={c.city + (preferences.showFlags ? " " + getUnicodeFlagIcon(c.iso2) : "")}
             subtitle={subtitle}
             icon={getIconForTime(date)}
             actions={actions({ time: subtitle, city: c })}
@@ -277,6 +272,6 @@ async function getJSON(k: string) {
   return r;
 }
 
-async function setJSON(k: string, v: any) {
+async function setJSON(k: string, v: unknown) {
   await LocalStorage.setItem(k, JSON.stringify(v));
 }

@@ -1,4 +1,4 @@
-export interface LifeProgress {
+export interface LifeProgressType {
   section: string;
   icon: string;
   title: string;

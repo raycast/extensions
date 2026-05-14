@@ -25,6 +25,17 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "reuseTab",
+      "title": "Reuse open GitHub search tab by default",
+      "description": "Use browser tab that already has https://github.com/search open. Works only with Google Chrome and Safari.",
+      "type": "checkbox",
+      "default": true,
+      "required": false,
+      "label": "Enabled"
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.89.1",
     "@raycast/utils": "^1.18.1",

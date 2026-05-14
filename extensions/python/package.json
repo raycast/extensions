@@ -8,6 +8,9 @@
   "categories": [
     "Developer Tools"
   ],
+  "contributors": [
+    "muhammadrizo"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -25,18 +28,17 @@
   ],
   "tools": [],
   "dependencies": {
-    "@raycast/api": "^1.91.2",
-    "@raycast/utils": "^1.18.1",
-    "node-fetch": "^3.3.2",
-    "use-debounce": "^10.0.4"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "use-debounce": "^10.0.6"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.27",
-    "eslint": "^8.51.0",
-    "prettier": "^3.5.1",
-    "typescript": "^5.7.3"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.0.3",
+    "@types/react": "19.2.7",
+    "eslint": "^9.39.2",
+    "prettier": "^3.7.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build -e dist",
@@ -47,6 +49,7 @@
     "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

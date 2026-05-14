@@ -86,7 +86,7 @@ export default function Command() {
 
 Before submitting data, it is important to ensure all required form controls are filled out, in the correct format.
 
-In Raycast, validation can be fully controlled from the API. To keep the same behavior as we have natively, the proper way of usage is to validate a `value` in the `onBlur` callback, update the `error` of the item and keep track of updates with the `onChange` callback to drop the `error` value. The [useForm](../utils-reference/react-hooks/useForm.md) utils hook nicely wraps this behaviour and is the recommended way to do deal with validations.
+In Raycast, validation can be fully controlled from the API. To keep the same behavior as we have natively, the proper way of usage is to validate a `value` in the `onBlur` callback, update the `error` of the item and keep track of updates with the `onChange` callback to drop the `error` value. The [useForm](../utils-reference/react-hooks/useForm.md) utils hook nicely wraps this behavior and is the recommended way to do deal with validations.
 
 ![](../.gitbook/assets/form-validation.webp)
 

@@ -36,7 +36,7 @@ export const rgbToHex: Script = {
       rgbArray.forEach((c) => {
         hex += parseInt(c).toString(16);
       });
-    } catch (error) {
+    } catch {
       throw Error("Invalid RGB value");
     }
 

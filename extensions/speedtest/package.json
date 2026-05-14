@@ -28,6 +28,7 @@
   "dependencies": {
     "@raycast/api": "^1.77.1",
     "axios": "^1.8.4",
+    "extract-zip": "^2.0.1",
     "sha256-file": "^1.0.0",
     "tar": "^7.2.0"
   },
@@ -47,5 +48,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

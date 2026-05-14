@@ -1,5 +1,5 @@
-import { SingleNote } from "@hackmd/api/dist/type";
-import { Tool } from "@raycast/api";
+import type { SingleNote } from "@hackmd/api/dist/type";
+import type { Tool } from "@raycast/api";
 import api from "../lib/api";
 
 type CreateNoteArgs = {
@@ -40,7 +40,6 @@ export default async function tool(args: CreateNoteArgs): Promise<SingleNote> {
   // If teamPath is provided, create a team note, otherwise create a personal note
   if (teamPath) {
     return api.createTeamNote(teamPath, noteData);
-  } else {
-    return api.createNote(noteData);
   }
+  return api.createNote(noteData);
 }

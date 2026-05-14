@@ -2,14 +2,16 @@ import { formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
 
 import type { Color } from "@raycast/api";
-import { Detail, Icon, List, open } from "@raycast/api";
+import { Detail, Icon, List, open, useNavigation } from "@raycast/api";
 import { getProgressIcon, showFailureToast } from "@raycast/utils";
 
 import type { SearchResultDocument } from "@/types";
 
 import { compatIcons } from "@/lib/compat";
 
-import { useDependencies, useDependents, usePackage } from "@/hooks/useJSRAPI";
+import { useDependencies, useDependents, usePackage, usePackages } from "@/hooks/jsrApi";
+
+import Search from "@/components/Search";
 
 const ItemDetails = ({
   item,
@@ -20,9 +22,11 @@ const ItemDetails = ({
   progress: number;
   iconColor: Color;
 }) => {
+  const { push } = useNavigation();
   const icons = compatIcons(item);
   const { data, isLoading, error } = usePackage(item);
 
+  const { data: scopePackages, isLoading: scopePackagesIsLoading } = usePackages(item.scope);
   const { data: dependentsData, isLoading: dependentsIsLoading } = useDependents(isLoading ? null : (data ?? null));
   const { data: dependenciesData, isLoading: dependenciesIsLoading } = useDependencies(
     isLoading ? null : (data ?? null),
@@ -41,12 +45,22 @@ const ItemDetails = ({
 
   return (
     <List.Item.Detail
-      isLoading={isLoading || dependentsIsLoading || dependenciesIsLoading}
+      isLoading={isLoading || dependentsIsLoading || dependenciesIsLoading || scopePackagesIsLoading}
       markdown={[`## ${item.id}`, item.description].join("\n")}
       metadata={
         <Detail.Metadata>
           {data ? (
             <>
+              <Detail.Metadata.TagList title="Scope">
+                <Detail.Metadata.TagList.Item text={`@${item.scope}`} />
+                {typeof scopePackages?.total === "number" && scopePackages?.total > 1 ? (
+                  <Detail.Metadata.TagList.Item
+                    text={`${scopePackages?.items.length}`}
+                    icon={Icon.Box}
+                    onAction={() => push(<Search scope={item.scope} />)}
+                  />
+                ) : null}
+              </Detail.Metadata.TagList>
               <Detail.Metadata.Label
                 title="Last Updated"
                 text={data.updatedAt ? formatDistanceToNow(new Date(data.updatedAt), { addSuffix: true }) : "unknown"}
@@ -74,6 +88,7 @@ const ItemDetails = ({
               <Detail.Metadata.TagList title="Dependencies">
                 {dependenciesData?.map((dep) => (
                   <Detail.Metadata.TagList.Item
+                    icon={dep.kind === "jsr" ? "jsr.svg" : dep.kind === "npm" ? "npm.svg" : undefined}
                     key={`${dep.kind}:${dep.name}${dep.path ? `/${dep.path}` : ""}`}
                     text={`${dep.kind}:${dep.name}${dep.path ? `/${dep.path}` : ""}`}
                     onAction={() => {
@@ -94,8 +109,9 @@ const ItemDetails = ({
               <Detail.Metadata.TagList title="Dependents">
                 {dependentsData?.items.map((dep) => (
                   <Detail.Metadata.TagList.Item
-                    key={`@${dep.scope}/${dep.package}`}
-                    text={`@${dep.scope}/${dep.package}`}
+                    icon="jsr.svg"
+                    key={dep.key}
+                    text={`jsr:@${dep.scope}/${dep.package}`}
                     onAction={() => {
                       open(`https://jsr.io/@${dep.scope}/${dep.package}`);
                     }}

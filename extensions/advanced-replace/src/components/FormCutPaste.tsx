@@ -54,6 +54,7 @@ export default function FormCutPaste({ initialValues, isNew, children }: FormCut
           ...values,
           id: initialValues.id,
           type: "cutPaste",
+          lastUsed: new Date(),
           regexItems,
         };
       }

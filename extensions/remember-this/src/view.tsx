@@ -12,7 +12,7 @@ let fileExists = false;
 try {
   fs.accessSync(REMEMBERING_FILE);
   fileExists = true;
-} catch (error) {
+} catch {
   console.log("File does not exist. Creating a new file...");
 }
 
@@ -45,9 +45,7 @@ function readRememberedItems(): RememberedItem[] {
     const fileContents = fs.readFileSync(REMEMBERING_FILE, "utf8");
     const lines = fileContents.trim().split("\n");
     const validLines = lines.filter((line) => {
-      const [dateString, testlol] = line.split(",");
-      const delimiter = "||&|"; // Remove unnecessary escape characters
-      const content = testlol.replace(delimiter, ",");
+      const [dateString] = line.split(",");
 
       const expirationDate = new Date(dateString);
       return expirationDate > now;
@@ -64,7 +62,7 @@ function readRememberedItems(): RememberedItem[] {
         content,
       };
     });
-  } catch (error) {
+  } catch {
     return [];
   }
 }
@@ -147,7 +145,7 @@ function getExpirationString(expirationDate: Date): string {
 
 export default function Command() {
   const [items, setItems] = useState(filterValidItems(readRememberedItems(), ""));
-  const [query, setQuery] = useState("");
+  const [, setQuery] = useState("");
 
   const deleteItem = (index: number) => {
     const filePath = path.join(environment.supportPath, "remembering.csv");
@@ -159,7 +157,7 @@ export default function Command() {
     const lines = fileContents.trim().split("\n");
 
     // Remove the line at the specified index
-    const deletedLine = lines.splice(index, 1)[0];
+    lines.splice(index, 1);
 
     // Join the remaining lines back into a single string
     const newFileContents = lines.join("\n");
@@ -199,7 +197,6 @@ export default function Command() {
                     onAction={() => {
                       launchCommand({ name: "index", type: LaunchType.UserInitiated });
                     }}
-                    shortcut={{ modifiers: ["cmd"], key: "enter" }}
                   />
                   <ActionPanel.Item
                     title="Copy Item"
@@ -236,7 +233,6 @@ export default function Command() {
                 onAction={() => {
                   launchCommand({ name: "index", type: LaunchType.UserInitiated });
                 }}
-                shortcut={{ modifiers: ["cmd"], key: "enter" }}
               />
             </ActionPanel>
           }

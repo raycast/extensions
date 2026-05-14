@@ -11,19 +11,19 @@ export const useSearch = <T extends "collections" | "photos">(query: string, typ
           hasMore: false,
         };
 
-      const { errors, results, total_pages } = await performSearch({
+      const page = options.page + 1;
+      const { results, total_pages } = await performSearch({
         searchText,
         options: {
-          page: options.page + 1,
+          page,
           orientation,
           type: type || "photos",
         },
       });
-      if (errors?.length) throw new Error();
 
       return {
         data: results,
-        hasMore: options.page < total_pages,
+        hasMore: page < total_pages,
       };
     },
     [query, orientation],
@@ -57,7 +57,7 @@ type SearchOrCollectionResult<T extends PerformSearchProps> = T extends { option
 export const performSearch = async <T extends PerformSearchProps>({
   searchText,
   options,
-}: PerformSearchProps): Promise<{ errors?: string[]; results: SearchOrCollectionResult<T>; total_pages: number }> => {
+}: PerformSearchProps): Promise<{ results: SearchOrCollectionResult<T>; total_pages: number }> => {
   const searchParams = new URLSearchParams({
     page: options.page.toString(),
     query: searchText,
@@ -66,8 +66,7 @@ export const performSearch = async <T extends PerformSearchProps>({
 
   if (options.orientation !== "all") searchParams.append("orientation", options.orientation);
 
-  const { errors, results, total_pages } = await apiRequest<{
-    errors?: string[];
+  const { results, total_pages } = await apiRequest<{
     results: SearchOrCollectionResult<T>;
     total_pages: number;
   }>(`/search/${options.type}?${searchParams.toString()}`);
@@ -75,7 +74,6 @@ export const performSearch = async <T extends PerformSearchProps>({
   return {
     results,
     total_pages,
-    errors,
   };
 };
 

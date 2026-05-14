@@ -9,7 +9,9 @@ export const ClientDropdown = forwardRef<Form.ItemReference, Form.Dropdown.Props
 
   return (
     <Form.Dropdown ref={ref} title="Client" isLoading={clients.isLoading} {...props}>
-      {clients.data?.map((client) => <Form.Dropdown.Item key={client.id} value={client.id} title={client.name} />)}
+      {clients.data?.map((client) => (
+        <Form.Dropdown.Item key={client.id} value={client.id} title={client.name} />
+      ))}
     </Form.Dropdown>
   );
 });

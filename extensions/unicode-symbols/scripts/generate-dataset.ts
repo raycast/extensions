@@ -16,6 +16,11 @@ const FilteredBlocks = [
   CharacterSetType.Latin_1_Supplement,
   CharacterSetType.Latin_Extended_A,
   CharacterSetType.Latin_Extended_B,
+  CharacterSetType.Latin_Extended_C,
+  CharacterSetType.Latin_Extended_D,
+  CharacterSetType.Latin_Extended_E,
+  CharacterSetType.Latin_Extended_F,
+  CharacterSetType.Latin_Extended_G,
   CharacterSetType.Latin_Extended_Additional,
   CharacterSetType.IPA_Extensions,
   CharacterSetType.Spacing_Modifier_Letters,
@@ -72,10 +77,19 @@ const allCharactersByCode = allCharacters.reduce<{ [charCode: string]: Character
 const mapCodeToName = (char: Character): Character => {
   const unicodeToNameMap: Record<number, string> = { 63743: "APPLE LOGO" };
 
-  return {
-    ...char,
-    name: unicodeToNameMap[char.code] || char.name,
-  };
+  return { ...char, name: unicodeToNameMap[char.code] || char.name };
+};
+
+// This is a mapping to map some control codes to their proper character (We were missing Tab)
+const specialMappings: Record<number, JSONCharacter> = {
+  9: {
+    v: "\t",
+    c: 9,
+    n: "CHARACTER TABULATION",
+    o: "",
+    a: [],
+    u: "1.1",
+  },
 };
 
 function mapCharacterToDatasetItem(char: Character): JSONCharacter | undefined {
@@ -89,13 +103,20 @@ function mapCharacterToDatasetItem(char: Character): JSONCharacter | undefined {
 
   const aliases = charCodeToAliases[char.code] ? charCodeToAliases[char.code] : [];
 
+  if (specialMappings[char.code]) {
+    return specialMappings[char.code];
+  }
+
   if (char.code)
     return {
       v: String.fromCodePoint(char.code), // value
       c: char.code, // code
       n: char.name, // name
       o: char.oldName || "", // old name
+      u: char.age, // unicode version
+      m: char.mirrorCode, // mirror code
       a: aliases,
+      nn: char.num, // number
     };
 }
 
@@ -120,6 +141,9 @@ function getCharactersByCodeRange(startCode: number, endCode: number): JSONChara
     .filter((char) => char && char.n !== "<control>" && char.c !== 57344) as JSONCharacter[]; // Exclude invisible control characters and private use area character
 }
 
+// Extra characters to add to the dataset.
+const extraCharacters: JSONCharacter[] = [];
+
 // Run the dataset generation.
 const generateDataset = async (sets: CharacterSetType[], fileName: string) => {
   const blocks = getCharacterBaseSet(sets) as BlockExtra[];
@@ -131,10 +155,7 @@ const generateDataset = async (sets: CharacterSetType[], fileName: string) => {
     return getCharactersByCodeRange(block.startCode, block.endCode);
   });
 
-  const dataset = {
-    blocks: allBlocks,
-    characters,
-  };
+  const dataset = { blocks: allBlocks, characters: [...extraCharacters, ...characters] };
 
   const datasetOutputPath = path.resolve(__dirname, `../assets/${fileName}.json`);
   await fs.writeFile(datasetOutputPath, JSON.stringify(dataset));

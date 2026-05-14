@@ -68,7 +68,7 @@ export default function BuildList({ app }: BuildListProps) {
   useEffect(() => {
     if (pagination) {
       if (pagination.hasMore) {
-        pagination.onLoadMore(-1);
+        pagination.onLoadMore();
       }
     }
   }, [pagination]);

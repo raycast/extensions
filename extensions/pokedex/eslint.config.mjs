@@ -1,7 +1,4 @@
-import eslint from '@eslint/js';
-import tseslint from 'typescript-eslint';
+import { defineConfig } from "eslint/config";
+import raycastConfig from "@raycast/eslint-config";
 
-export default tseslint.config(
-  eslint.configs.recommended,
-  ...tseslint.configs.recommended,
-);
+export default defineConfig([...raycastConfig]);

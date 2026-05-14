@@ -30,12 +30,34 @@
       "title": "API Key",
       "description": "Account API key",
       "placeholder": "rnd_xxxx..xxx"
+    },
+    {
+      "name": "defaultAction",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Action",
+      "description": "Select the default action when pressing Enter on a service",
+      "default": "showDetails",
+      "data": [
+        {
+          "title": "Show Details",
+          "value": "showDetails"
+        },
+        {
+          "title": "Show Deploys",
+          "value": "showDeploys"
+        },
+        {
+          "title": "Open in Render",
+          "value": "openInRender"
+        }
+      ]
     }
   ],
   "dependencies": {
     "@raycast/api": "^1.79.0",
     "@raycast/utils": "^1.16.3",
-    "axios": "^0.24.0"
+    "axios": "^0.30.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.8",
@@ -52,5 +74,8 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

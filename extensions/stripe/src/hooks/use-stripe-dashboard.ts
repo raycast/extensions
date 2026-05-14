@@ -1,4 +1,4 @@
-import { useEnvContext } from "./use-env-context";
+import { useProfileContext } from "@src/hooks/use-profile-context";
 
 const BASE_URL = "https://dashboard.stripe.com";
 
@@ -7,8 +7,8 @@ type StripeDashboard = {
 };
 
 export const useStripeDashboard = (): StripeDashboard => {
-  const { environment } = useEnvContext();
+  const { activeEnvironment } = useProfileContext();
 
-  const dashboardUrl = `${BASE_URL}${environment === "test" ? "/test" : ""}`;
+  const dashboardUrl = `${BASE_URL}${activeEnvironment === "test" ? "/test" : ""}`;
   return { dashboardUrl };
 };

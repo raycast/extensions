@@ -4,7 +4,6 @@ import { Task } from "./types";
 import { EditTaskForm } from "./components/EditTaskForm";
 import { useTasks } from "./hooks/useTasks";
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
 import { priorityToIcon } from "./utils/priority";
 
 export default function Command(props: LaunchProps<{ arguments: { taskId: string } }>) {

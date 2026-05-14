@@ -1,9 +1,7 @@
-import { Cache } from "@raycast/api";
 import * as util from "util";
 import { exec as execcb } from "child_process";
 
 const exec = util.promisify(execcb);
-const cache = new Cache();
 
 export function executeCommand(cwd: string, command: string): Promise<string | null> {
   return getFromCommand(cwd, command);
@@ -29,28 +27,13 @@ function getFromCommand(cwd: string, command: string): Promise<string | null> {
     // immediately as desired
     setTimeout(() => {
       exec(command, { cwd })
-        .then((r: any) => {
+        .then((r) => {
           const result = r.stdout.trim();
-          storeInCache(cwd, command, result);
           resolve(result);
         })
-        .catch((e: any) => {
+        .catch(() => {
           resolve(null);
         });
     }, 100);
   });
-}
-
-function getFromCache(cwd: string, command: string): Promise<string | null> {
-  const result = cache.get(`${cwd}#${command}`);
-
-  if (result) {
-    return Promise.resolve(result);
-  }
-
-  return Promise.resolve(null);
-}
-
-function storeInCache(cwd: string, command: string, result: string) {
-  cache.set(`${cwd}#${command}`, result);
 }

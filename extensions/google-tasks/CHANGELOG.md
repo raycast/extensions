@@ -1,6 +1,20 @@
 # Google Tasks Changelog
 
+## [Fix] - 2026-03-31
+
+- Fix due date timezone shift for UTC+ users
+
+## [Update] - 2025-12-07
+
+- Add "Create Task" command for quick task creation
+
+## [Maintenance] - 2025-10-27
+
+- Add support for Windows platform.
+- Bump all dependencies to the latest.
+
 ## [Update] - 2025-03-11
+
 - Sort completed tasks by completion date
 
 ## [Update] - 2024-11-05

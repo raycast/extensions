@@ -2,7 +2,7 @@ import { environment, getPreferenceValues } from "@raycast/api";
 
 const SIGNATURE = "Created with <a href='https://raycast.com'>Raycast</a>";
 
-const preferences: Preferences.CreateEvent = getPreferenceValues();
+const preferences = getPreferenceValues();
 
 export function roundUpTime(date = new Date(), roundMins = 15) {
   const ms = 1000 * 60 * roundMins;
@@ -107,8 +107,20 @@ export function formatRecurrence(recurrence: string[]): string {
   return rules.join("\n");
 }
 
-export function isInternal() {
-  return environment.supportPath.includes("com.raycast.macos.internal");
+function isInternal() {
+  return environment.supportPath.includes("internal");
+}
+
+export function getClientId() {
+  if (environment.raycastVersion.split(".").length === 4) {
+    return isInternal()
+      ? "690234628480-ic526rvseca4983uujs693rnqh49kgjh.apps.googleusercontent.com"
+      : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
+  } else {
+    return isInternal()
+      ? "690234628480-4h8a6h78482ks82g3s1ghrqa0ce8qgo3.apps.googleusercontent.com"
+      : "690234628480-bhl8vft6dp81bkv4bq0lf9l6vv7nerq4.apps.googleusercontent.com";
+  }
 }
 
 export function toISO8601WithTimezoneOffset(date = new Date()) {
@@ -120,7 +132,7 @@ export function toISO8601WithTimezoneOffset(date = new Date()) {
   const seconds = date.getSeconds().toString().padStart(2, "0");
 
   const offset = date.getTimezoneOffset();
-  const offsetHours = Math.abs(Math.floor(offset / 60))
+  const offsetHours = Math.floor(Math.abs(offset) / 60)
     .toString()
     .padStart(2, "0");
   const offsetMinutes = Math.abs(offset % 60)
@@ -141,4 +153,103 @@ export function toHumanReadableTime(date = new Date()) {
     second: "2-digit",
     timeZoneName: "short",
   });
+}
+
+const BASIC_EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const ANGLE_BRACKET_EMAIL_REGEX = /<([^<>\s@]+@[^\s@<>]+)>/;
+
+function normalizeAttendeeToken(token: string): string {
+  return token.trim().replace(/^[,;]+|[,;]+$/g, "");
+}
+
+function extractEmailAddress(value: string): string {
+  const angleBracketMatch = value.match(ANGLE_BRACKET_EMAIL_REGEX);
+  if (angleBracketMatch?.[1]) {
+    return angleBracketMatch[1].trim();
+  }
+
+  return value;
+}
+
+export function parseAttendeeEmails(attendees?: string | string[] | null): {
+  emails: string[];
+  invalidEntries: string[];
+} {
+  if (attendees === undefined || attendees === null) {
+    return { emails: [], invalidEntries: [] };
+  }
+
+  const rawEntries = Array.isArray(attendees) ? attendees : attendees.split(/[,\n;]/);
+  const normalizedEntries = rawEntries
+    .map((entry) => normalizeAttendeeToken(entry))
+    .map((entry) => extractEmailAddress(entry))
+    .filter((entry) => entry.length > 0);
+
+  const emails: string[] = [];
+  const invalidEntries: string[] = [];
+
+  for (const entry of normalizedEntries) {
+    if (BASIC_EMAIL_REGEX.test(entry)) {
+      emails.push(entry);
+    } else {
+      invalidEntries.push(entry);
+    }
+  }
+
+  return { emails, invalidEntries };
+}
+
+const DURATION_SEGMENT_REGEX =
+  /(\d+(?:\.\d+)?)\s*(milliseconds?|ms|seconds?|secs?|sec|s|minutes?|mins?|min|m|hours?|hrs?|hr|h|days?|d|weeks?|w)/gi;
+
+export function parseDurationMs(input?: string): number | undefined {
+  if (input === undefined) {
+    return undefined;
+  }
+
+  const trimmed = input.trim();
+  if (trimmed.length === 0) {
+    return undefined;
+  }
+
+  if (/^\d+$/.test(trimmed)) {
+    return Number(trimmed) * 60 * 1000;
+  }
+
+  let total = 0;
+  let matchCount = 0;
+  let consumed = "";
+
+  for (const match of trimmed.matchAll(DURATION_SEGMENT_REGEX)) {
+    const amount = Number(match[1]);
+    const unit = match[2].toLowerCase();
+    consumed += match[0];
+    matchCount += 1;
+
+    if (unit === "ms" || unit.startsWith("millisecond")) {
+      total += amount;
+    } else if (unit === "s" || unit.startsWith("sec")) {
+      total += amount * 1000;
+    } else if (unit === "m" || unit.startsWith("min")) {
+      total += amount * 60 * 1000;
+    } else if (unit === "h" || unit.startsWith("hr") || unit.startsWith("hour")) {
+      total += amount * 60 * 60 * 1000;
+    } else if (unit === "d" || unit.startsWith("day")) {
+      total += amount * 24 * 60 * 60 * 1000;
+    } else if (unit === "w" || unit.startsWith("week")) {
+      total += amount * 7 * 24 * 60 * 60 * 1000;
+    } else {
+      return undefined;
+    }
+  }
+
+  if (matchCount === 0) {
+    return undefined;
+  }
+
+  if (consumed.replace(/\s+/g, "") !== trimmed.replace(/\s+/g, "")) {
+    return undefined;
+  }
+
+  return total;
 }

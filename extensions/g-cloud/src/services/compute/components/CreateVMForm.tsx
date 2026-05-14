@@ -9,7 +9,6 @@ import {
   getImageFamiliesByProject,
   diskTypes,
 } from "../../../utils/computeResources";
-import { showFailureToast } from "@raycast/utils";
 
 interface CreateVMFormProps {
   projectId: string;
@@ -81,9 +80,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       } catch (error: unknown) {
         console.error("Error loading resources:", error);
         toast.hide();
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to load resources",
-          message: error instanceof Error ? error.message : "An unknown error occurred",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
 
         setIsLoading(false);
@@ -121,7 +121,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
 
   const fetchServiceAccounts = async (): Promise<string[]> => {
     try {
-      const result = await executeGcloudCommand(gcloudPath, "iam service-accounts list", projectId);
+      const result = await executeGcloudCommand(gcloudPath, ["iam", "service-accounts", "list"], projectId);
       const serviceAccounts = result as ServiceAccountResponse[];
       return serviceAccounts.map((sa) => sa.email);
     } catch (error) {
@@ -179,14 +179,15 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     return true;
   };
 
-  const validateCustomMachineType = (values: Record<string, string>): boolean => {
+  const validateCustomMachineType = async (values: Record<string, string>): Promise<boolean> => {
     if (values.machineType !== "custom") {
       return true;
     }
 
     const cores = parseInt(values.customCores || "0", 10);
     if (isNaN(cores) || cores < 1 || cores > 96) {
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid CPU Cores",
         message: "CPU cores must be between 1 and 96",
       });
@@ -195,7 +196,8 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
 
     const memory = parseInt(values.customMemory || "0", 10);
     if (isNaN(memory) || memory < 256 || memory % 256 !== 0) {
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Invalid Memory",
         message: "Memory must be a multiple of 256 MiB",
       });
@@ -210,7 +212,7 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       return;
     }
 
-    if (!validateCustomMachineType(values)) {
+    if (!(await validateCustomMachineType(values))) {
       return;
     }
 
@@ -248,81 +250,86 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
     try {
       const network = values.network === "null" || !values.network ? "default" : values.network;
       const subnet = values.subnet === "null" ? "" : values.subnet;
-
-      let command = `compute instances create ${values.name} --zone=${values.zone} --machine-type=${values.machineType}`;
-
-      command += ` --image-project=${values.imageProject} --image-family=${values.imageFamily}`;
-
-      command += ` --network=${network}`;
+      const commandArgs = [
+        "compute",
+        "instances",
+        "create",
+        values.name,
+        `--zone=${values.zone}`,
+        `--machine-type=${values.machineType}`,
+        `--image-project=${values.imageProject}`,
+        `--image-family=${values.imageFamily}`,
+        `--network=${network}`,
+      ];
       if (subnet) {
-        command += ` --subnet=${subnet}`;
+        commandArgs.push(`--subnet=${subnet}`);
       }
 
       if (values.externalIP === "none") {
-        command += " --no-address";
+        commandArgs.push("--no-address");
       }
 
       if (values.bootDiskType) {
-        command += ` --boot-disk-type=${values.bootDiskType}`;
+        commandArgs.push(`--boot-disk-type=${values.bootDiskType}`);
       }
 
       if (values.bootDiskSize) {
-        command += ` --boot-disk-size=${values.bootDiskSize}GB`;
+        commandArgs.push(`--boot-disk-size=${values.bootDiskSize}GB`);
       }
 
       if (values.serviceAccount) {
-        command += ` --service-account=${values.serviceAccount}`;
+        commandArgs.push(`--service-account=${values.serviceAccount}`);
       }
 
       if (values.metadata) {
-        command += ` --metadata=${values.metadata}`;
+        commandArgs.push(`--metadata=${values.metadata}`);
       }
 
       if (advancedMode) {
         if (values.tags) {
-          command += ` --tags=${values.tags}`;
+          commandArgs.push(`--tags=${values.tags}`);
         }
 
         if (values.customCores && values.customMemory && values.machineType === "custom") {
           const cores = parseInt(values.customCores, 10);
           const memory = parseInt(values.customMemory, 10);
-          command += ` --custom-cpu=${cores} --custom-memory=${memory}`;
+          commandArgs.push(`--custom-cpu=${cores}`, `--custom-memory=${memory}`);
         }
 
         if (values.preemptible === "true") {
-          command += " --preemptible";
+          commandArgs.push("--preemptible");
         }
 
         if (values.spot === "true") {
-          command += " --spot";
+          commandArgs.push("--spot");
         }
 
         if (values.onHostMaintenance) {
-          command += ` --maintenance-policy=${values.onHostMaintenance}`;
+          commandArgs.push(`--maintenance-policy=${values.onHostMaintenance}`);
         }
 
         if (values.bootDiskAutoDelete === "false") {
-          command += " --no-boot-disk-auto-delete";
+          commandArgs.push("--no-boot-disk-auto-delete");
         }
 
         if (values.minCpuPlatform) {
-          command += ` --min-cpu-platform=${values.minCpuPlatform}`;
+          commandArgs.push(`--min-cpu-platform=${values.minCpuPlatform}`);
         }
 
         if (values.scopes) {
-          command += ` --scopes=${values.scopes}`;
+          commandArgs.push(`--scopes=${values.scopes}`);
         }
 
         if (values.startupScript) {
-          command += ` --metadata-from-file startup-script=${values.startupScript}`;
+          commandArgs.push(`--metadata-from-file=startup-script=${values.startupScript}`);
         }
 
         if (values.reservation) {
-          command += ` --reservation=${values.reservation}`;
+          commandArgs.push(`--reservation=${values.reservation}`);
         }
       }
 
-      await executeGcloudCommand(gcloudPath, command, projectId, {
+      await executeGcloudCommand(gcloudPath, commandArgs, projectId, {
         skipCache: true,
         timeout: 120000,
       });
@@ -339,9 +346,10 @@ export default function CreateVMForm({ projectId, gcloudPath, onVMCreated }: Cre
       pop();
     } catch (error: unknown) {
       toast.hide();
-      showFailureToast({
+      showToast({
+        style: Toast.Style.Failure,
         title: "Failed to create VM instance",
-        message: error instanceof Error ? error.message : "An unknown error occurred",
+        message: error instanceof Error ? error.message : "Unknown error",
       });
     }
   };

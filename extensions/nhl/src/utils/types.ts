@@ -670,6 +670,7 @@ export type GameStringCategory =
   | "linescore"
   | "sog"
   | "faceoffWinningPctg"
+  | "faceoffWins"
   | "powerPlay"
   | "powerPlayPctg"
   | "takeaways"

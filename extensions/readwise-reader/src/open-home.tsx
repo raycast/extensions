@@ -1,6 +1,6 @@
 import { open } from "@raycast/api";
-import { BASE_URL } from "./utils";
+import { getOpenUrl } from "./utils";
 
 export default async function Home() {
-  await open(BASE_URL + "home");
+  await open(getOpenUrl("home"));
 }

@@ -201,7 +201,7 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
             shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
           />
           <Action
-            title="HTML"
+            title="Html"
             onAction={() => copyNoteContent(getNoteBody)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
           />
@@ -301,7 +301,7 @@ Return the output as a JSON array containing only the UUIDs of the related notes
 ["8743E9E4-CDB6-4026-8D62-0D2FD0B410F6","D75A980D-C5C4-4354-9216-4BA3B7C0F35F","11533A9C-9633-4424-A2C1-3E5FF6CE2A81"]
 
 Only return a minified JSON array that is parsable, nothing else. Try to find between 3 to 10 related notes, even if they are not perfect matches.`;
-      const result = await AI.ask(prompt, { model: "anthropic-claude-haiku" });
+      const result = await AI.ask(prompt, { model: AI.Model["Anthropic_Claude_4.5_Haiku"] });
       // Because the AI can be dumb sometimes, let's use a regex to extract a JSON array from the response
       const jsonRegex = /\[.*\]/;
       const match = result.match(jsonRegex)?.[0];

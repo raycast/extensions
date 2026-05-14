@@ -1,5 +1,25 @@
 # Product Hunt Changelog
 
+## [2.3] - 2025-12-07
+
+- Fix scraper to use `latestScore`/`launchDayScore` fields for vote counts (Product Hunt API changed from `votesCount`)
+- Use browser-like headers for all fetch requests to avoid Cloudflare blocking
+- Implement custom structured logger with emoji-prefixed output
+- Update dependencies
+- Removed .eslintrc.json in favor of eslint.config.mjs
+
+## [2.2] - 2025-09-12
+
+### Added
+- Raycast-only structured logger with optional toasts (controlled by new "Verbose Logging" preference)
+- Lightweight session-start instrumentation on the frontpage command
+
+### Changed
+- Scraper now prefers Apollo push(rehydrate) parsing, with DOM fallbacks and last-resort RSS fallback
+- Added short-lived LocalStorage cache to reduce repeated network fetches
+- Improved error handling and logging in image utilities and imgix helpers
+- Non-error logs routed to console.log/console.warn to avoid Raycast error overlay
+
 ## [2.1] - 2025-04-09
 
 ### Added

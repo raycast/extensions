@@ -21,6 +21,7 @@ import { DOMAIN_LOG_LINES } from "../constants";
 import { ListUserIPsResponse } from "../types";
 import { ListDatabasesResponse } from "../types/databases";
 import { ListMailDomainsResponse } from "../types/mail-domains";
+import { ListCronJobsResponse } from "../types/cron-jobs";
 
 // USERS
 export function getUsers() {
@@ -111,4 +112,9 @@ export function getMailDomains(user: string) {
 // DATABASES
 export function getUserDatabases(user: string) {
   return useHestia<ListDatabasesResponse>("v-list-databases", "Fetching Databases", { body: [user] });
+}
+
+// CRON
+export function getCronJobs(user: string) {
+  return useHestia<ListCronJobsResponse>("v-list-cron-jobs", "Fetching Cron Jobs", { body: [user] });
 }

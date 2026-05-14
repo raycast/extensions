@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { execa } from "execa";
 import path from "path";
 import os from "os";
+import fs from "fs";
 
 interface CloudStatus {
   id: string;
@@ -106,6 +107,7 @@ export default function Command() {
   const runCommand = async (
     cmd: string,
     args: string[],
+    envVars?: Record<string, string>,
   ): Promise<{ success: boolean; message: string; stdout: string }> => {
     try {
       const cmdPath = await execa("which", [cmd], {
@@ -117,7 +119,7 @@ export default function Command() {
       console.log(`Running ${cmdPath} with args: ${args.join(" ")}`);
 
       const result = await execa(cmdPath, args, {
-        env: { PATH: getEnhancedPath() },
+        env: { PATH: getEnhancedPath(), ...(envVars || {}) },
         reject: false,
       });
 
@@ -135,16 +137,45 @@ export default function Command() {
 
   const checkAwsStatus = async () => {
     try {
-      const result = await runCommand("aws", ["sts", "get-caller-identity"]);
-      let account = "";
+      // First try: Standard credentials check
+      let result = await runCommand("aws", ["sts", "get-caller-identity"]);
+      let profileName = "default";
 
-      if (result.success && result.stdout) {
+      // If failed, try with available profiles
+      if (!result.success) {
         try {
-          const data = JSON.parse(result.stdout);
-          account = data.Arn || data.Account || "";
-        } catch {
-          account = result.stdout.split("\n")[0];
+          // Get list of available profiles
+          const profilesResult = await runCommand("aws", ["configure", "list-profiles"]);
+
+          if (profilesResult.success && profilesResult.stdout.trim()) {
+            const profiles = profilesResult.stdout.trim().split("\n");
+
+            // Try each profile until one works
+            for (const profile of profiles) {
+              const trimmedProfile = profile.trim();
+              if (trimmedProfile) {
+                console.log(`Trying AWS profile: ${trimmedProfile}`);
+                const profileResult = await runCommand("aws", ["sts", "get-caller-identity"], {
+                  AWS_PROFILE: trimmedProfile,
+                });
+
+                if (profileResult.success) {
+                  console.log(`Successfully authenticated with profile: ${trimmedProfile}`);
+                  result = profileResult;
+                  profileName = trimmedProfile;
+                  break; // Stop after finding first working profile
+                }
+              }
+            }
+          }
+        } catch (error) {
+          console.error("Error checking AWS profiles:", error);
         }
+      }
+
+      let account = "";
+      if (result.success && result.stdout) {
+        account = profileName;
       }
 
       updateStatus("aws", result.success, result.message, account);
@@ -155,13 +186,32 @@ export default function Command() {
 
   const checkGcloudStatus = async () => {
     try {
+      // First try: Standard auth list
       const result = await runCommand("gcloud", ["auth", "list", "--filter=status:ACTIVE", "--format=value(account)"]);
-      updateStatus(
-        "gcloud",
-        result.success && result.stdout.trim().length > 0,
-        result.message,
-        result.stdout.trim().split("\n")[0],
-      );
+      let isLoggedIn = result.success && result.stdout.trim().length > 0;
+      let account = result.stdout.trim().split("\n")[0];
+
+      // If not logged in via standard auth, check application-default credentials
+      if (!isLoggedIn) {
+        try {
+          // Check if application-default credentials file exists
+          const adcPath = path.join(os.homedir(), ".config/gcloud/application_default_credentials.json");
+          const adcExists = fs.existsSync(adcPath);
+
+          if (adcExists) {
+            // Try to get token to verify the credentials work
+            const tokenResult = await runCommand("gcloud", ["auth", "application-default", "print-access-token"]);
+            if (tokenResult.success && tokenResult.stdout.trim()) {
+              isLoggedIn = true;
+              account = "Application Default Credentials";
+            }
+          }
+        } catch (error) {
+          console.error("Error checking GCloud application-default credentials:", error);
+        }
+      }
+
+      updateStatus("gcloud", isLoggedIn, result.message, account);
     } catch (error) {
       updateStatus("gcloud", false, String(error));
     }

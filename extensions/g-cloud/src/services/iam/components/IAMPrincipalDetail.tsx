@@ -1,7 +1,6 @@
 import { ActionPanel, Action, Detail, Icon, confirmAlert, showToast, Toast, Alert } from "@raycast/api";
 import { IAMPrincipal, IAMService } from "../IAMService";
 import { formatRoleName } from "../../../utils/iamRoles";
-import { showFailureToast } from "@raycast/utils";
 
 interface IAMPrincipalDetailProps {
   principal: IAMPrincipal;
@@ -49,9 +48,10 @@ export default function IAMPrincipalDetail({ principal, iamService, onRoleRemove
         onRoleRemoved();
       } catch (error: unknown) {
         console.error("Error removing role:", error);
-        showFailureToast({
+        showToast({
+          style: Toast.Style.Failure,
           title: "Failed to Remove Role",
-          message: error instanceof Error ? error.message : "An unknown error occurred",
+          message: error instanceof Error ? error.message : "Unknown error",
         });
       }
     }

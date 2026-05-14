@@ -1,5 +1,9 @@
 # Android Changelog
 
+## [Feature Update] - 2026-03-24
+
+- Add "Start (Cold Boot)" emulator action
+
 ## [Feature Update] - 2025-01-14
 
 - Add shake emulator action

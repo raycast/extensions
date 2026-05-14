@@ -1,6 +1,7 @@
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { Model, ModelHook } from "../type";
+import { useGrokAPI, fetchModels } from "./useGrokAPI";
 
 // Debug logging utility
 function debugLog<T>(message: string, data?: T) {
@@ -52,58 +53,139 @@ const ADDITIONAL_MODELS: Model[] = [
   },
 ];
 
+const CACHE_KEY = "models-cache";
+const CACHE_TTL_KEY = "models-cache-ttl";
+const CACHE_DURATION = 1000 * 60 * 60; // 1 hour
+
 export function useModel(): ModelHook {
   const [data, setData] = useState<Record<string, Model>>({});
   const [isLoading, setLoading] = useState<boolean>(true);
-  const [isFetching] = useState<boolean>(false);
-  const [option, setOption] = useState<Model["option"][]>([
-    "grok-3-mini-fast-beta",
-    "grok-3-beta",
-    "grok-3-mini-beta",
-    "grok-2",
-  ]);
+  const [isFetching, setIsFetching] = useState<boolean>(false);
+  const [option, setOption] = useState<Model["option"][]>([]);
   const isInitialMount = useRef(true);
+  const { apiKey } = useGrokAPI();
+
+  // Helper function to convert API models to local Model format
+  const convertAPIModelToLocal = (apiModel: { id: string; owned_by?: string }): Model => {
+    // Map common model names to friendly names
+    const modelNameMap: Record<string, string> = {
+      "grok-3-mini-fast-beta": "Grok 3 Fast Mini",
+      "grok-3-mini-beta": "Grok 3 Mini Beta",
+      "grok-3-beta": "Grok 3 Beta",
+      "grok-2": "Grok 2",
+      "grok-4": "Grok 4",
+    };
+
+    return {
+      id: apiModel.id,
+      name: modelNameMap[apiModel.id] || apiModel.id,
+      option: apiModel.id,
+      prompt: `You are ${modelNameMap[apiModel.id] || apiModel.id}, an AI assistant created by xAI.`,
+      temperature: "1",
+      pinned: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+  };
+
+  // Helper function to get default models
+  const getDefaultModels = (): Record<string, Model> => {
+    return {
+      [DEFAULT_MODEL.id]: DEFAULT_MODEL,
+      ...ADDITIONAL_MODELS.reduce((acc, model) => ({ ...acc, [model.id]: model }), {}),
+    };
+  };
 
   useEffect(() => {
     (async () => {
-      debugLog("Loading models from storage");
-      const storedModels: Model[] | Record<string, Model> = JSON.parse(
-        (await LocalStorage.getItem<string>("models")) || "{}",
-      );
-      const storedModelsLength = ((models: Record<string, Model> | Model[]): number =>
-        Array.isArray(models) ? models.length : Object.keys(models).length)(storedModels);
+      debugLog("Loading models");
+      setIsFetching(true);
 
-      let modelsById: Record<string, Model> = {};
-      if (storedModelsLength === 0) {
-        debugLog("No stored models, initializing defaults");
-        modelsById = {
-          [DEFAULT_MODEL.id]: DEFAULT_MODEL,
-          ...ADDITIONAL_MODELS.reduce((acc, model) => ({ ...acc, [model.id]: model }), {}),
-        };
-      } else {
-        debugLog("Processing stored models", { storedModelsLength });
-        if (Array.isArray(storedModels)) {
-          modelsById = storedModels.reduce((acc, model) => ({ ...acc, [model.id]: model }), {});
-        } else {
-          modelsById = storedModels;
-        }
-        // Ensure defaults are included
-        if (!modelsById[DEFAULT_MODEL.id]) {
-          modelsById[DEFAULT_MODEL.id] = DEFAULT_MODEL;
-        }
-        ADDITIONAL_MODELS.forEach((model) => {
-          if (!modelsById[model.id]) {
-            modelsById[model.id] = model;
+      try {
+        // Check cache first
+        const cachedModels = await LocalStorage.getItem<string>(CACHE_KEY);
+        const cacheTTL = await LocalStorage.getItem<string>(CACHE_TTL_KEY);
+        const now = Date.now();
+
+        let apiModels: Record<string, Model> = {};
+        let needsFetch = true;
+
+        if (cachedModels && cacheTTL && now < parseInt(cacheTTL)) {
+          debugLog("Using cached API models");
+          try {
+            apiModels = JSON.parse(cachedModels);
+            needsFetch = false;
+          } catch (error) {
+            debugLog("Failed to parse cached models, will fetch fresh", error);
+            needsFetch = true;
           }
-        });
-      }
+        }
 
-      debugLog("Setting model data", { modelIds: Object.keys(modelsById) });
-      setData(modelsById);
-      setLoading(false);
-      isInitialMount.current = false;
+        if (needsFetch && apiKey) {
+          debugLog("Fetching models from API");
+          try {
+            const fetchedModels = await fetchModels(apiKey);
+            apiModels = fetchedModels.reduce(
+              (acc, model) => {
+                const localModel = convertAPIModelToLocal(model);
+                return { ...acc, [localModel.id]: localModel };
+              },
+              {} as Record<string, Model>,
+            );
+
+            // Cache the fetched models
+            await LocalStorage.setItem(CACHE_KEY, JSON.stringify(apiModels));
+            await LocalStorage.setItem(CACHE_TTL_KEY, String(now + CACHE_DURATION));
+            debugLog("Models cached", { count: Object.keys(apiModels).length });
+          } catch (error) {
+            debugLog("Failed to fetch models from API, using defaults", error);
+            apiModels = getDefaultModels();
+          }
+        } else if (!apiKey) {
+          debugLog("No API key available, using defaults");
+          apiModels = getDefaultModels();
+        }
+
+        // Load user's custom models
+        let storedModels: Model[] | Record<string, Model> = {};
+        try {
+          storedModels = JSON.parse((await LocalStorage.getItem<string>("models")) || "{}");
+        } catch (error) {
+          debugLog("Failed to parse stored models, using empty object", error);
+          storedModels = {};
+        }
+
+        let customModels: Record<string, Model> = {};
+        if (Array.isArray(storedModels)) {
+          customModels = storedModels.reduce((acc, model) => ({ ...acc, [model.id]: model }), {});
+        } else if (typeof storedModels === "object" && storedModels !== null) {
+          customModels = storedModels;
+        }
+
+        // Merge API models with custom models (custom models take precedence)
+        const allModels = { ...apiModels, ...customModels };
+
+        debugLog("Setting model data", {
+          apiModelCount: Object.keys(apiModels).length,
+          customModelCount: Object.keys(customModels).length,
+          totalModelCount: Object.keys(allModels).length,
+        });
+
+        setData(allModels);
+        setOption([...new Set(Object.values(allModels).map((m) => m.option))]);
+      } catch (error) {
+        debugLog("Error loading models", error);
+        // Fallback to defaults on any error
+        const defaultModels = getDefaultModels();
+        setData(defaultModels);
+        setOption(Object.values(defaultModels).map((m) => m.option));
+      } finally {
+        setLoading(false);
+        setIsFetching(false);
+        isInitialMount.current = false;
+      }
     })();
-  }, []);
+  }, [apiKey]);
 
   useEffect(() => {
     if (isInitialMount.current) {
@@ -183,12 +265,9 @@ export function useModel(): ModelHook {
       title: "Clearing your Grok models...",
       style: Toast.Style.Animated,
     });
-    const defaultModels = {
-      [DEFAULT_MODEL.id]: DEFAULT_MODEL,
-      ...ADDITIONAL_MODELS.reduce((acc, model) => ({ ...acc, [model.id]: model }), {}),
-    };
+    const defaultModels = getDefaultModels();
     setData(defaultModels);
-    setOption(["grok-3-mini-fast-beta", "grok-3-fast-beta", "grok-3-beta", "grok-3-mini-beta"]);
+    setOption(Object.values(defaultModels).map((m) => m.option));
     await showToast({
       title: "Grok models cleared!",
       style: Toast.Style.Success,

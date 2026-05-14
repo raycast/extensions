@@ -1,9 +1,9 @@
 import { List } from '@raycast/api'
-import type { Domain } from '@scaleway/sdk'
+import type { Domainv2beta1 } from '@scaleway/sdk'
 import { getDomainStatusIcon } from './status'
 
 type DomainProps = {
-  domain: Domain.v2beta1.DomainSummary
+  domain: Domainv2beta1.DomainSummary
 }
 
 export const DomainDetail = ({ domain }: DomainProps) => (

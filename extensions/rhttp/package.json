@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
+  "name": "rhttp",
+  "title": "rhttp",
+  "version": "1.0.0",
+  "description": "Full-featured HTTP client with environments, variables, and request chaining",
+  "icon": "icon.png",
+  "author": "SebastianJarsve",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "http",
+    "api",
+    "rest",
+    "graphql",
+    "postman",
+    "insomnia",
+    "curl",
+    "request",
+    "developer"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "HTTP Client",
+      "description": "Create and run HTTP requests with advanced features",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "preferredEditor",
+      "title": "Preferred Editor",
+      "description": "The name of the application to open JSON responses in (e.g., 'Visual Studio Code', 'Zed'). Leave blank to use the system default.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "disableSSLVerification",
+      "title": "Disable SSL Verification",
+      "description": "⚠️ Disable SSL certificate verification. Only use for local development or trusted networks. This makes requests vulnerable to man-in-the-middle attacks.",
+      "label": "Disable SSL verification for all requests",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@nanostores/react": "^1.0.0",
+    "@nozbe/microfuzz": "^1.0.0",
+    "@raycast/api": "^1.103.2",
+    "@raycast/utils": "^2.2.1",
+    "axios": "^1.12.2",
+    "form-data": "^4.0.4",
+    "fuse.js": "^7.1.0",
+    "https": "^1.0.0",
+    "nanostores": "^1.0.1",
+    "zod": "^4.1.9",
+    "zod-persist": "^1.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "24.5.2",
+    "@types/react": "^19.2.2",
+    "eslint": "^9.35.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.2"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "macOS"
+  ]
+}

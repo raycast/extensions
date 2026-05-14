@@ -1,5 +1,7 @@
 import WikipediaPage from "./components/wikipedia-page";
+import { useLanguage } from "./utils/language";
 
 export default function OpenPage(props: { arguments: { title: string } }) {
-  return <WikipediaPage title={props.arguments.title} />;
+  const [language] = useLanguage();
+  return <WikipediaPage title={props.arguments.title} language={language} />;
 }

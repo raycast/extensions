@@ -1,4 +1,4 @@
-import { SingleNote } from "@hackmd/api/dist/type";
+import type { SingleNote } from "@hackmd/api/dist/type";
 import api from "../lib/api";
 
 type ViewNoteArgs = {

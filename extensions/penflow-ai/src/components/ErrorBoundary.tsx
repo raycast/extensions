@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { List, Icon } from "@raycast/api";
+import { logger } from "../utils/logger";
 
 interface Props {
   children: ReactNode;
@@ -20,7 +21,7 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Error details:", error, errorInfo);
+    logger.error("Error details:", error, errorInfo);
   }
 
   public render() {

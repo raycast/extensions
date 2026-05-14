@@ -33,6 +33,7 @@ export default function ManageModels() {
 
   const [favorites, otherModels] = models.models.reduce(
     (acc, model) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
       model.favorited ? acc[0].push(model) : acc[1].push(model);
       return acc;
     },

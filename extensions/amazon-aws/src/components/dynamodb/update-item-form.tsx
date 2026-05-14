@@ -139,7 +139,7 @@ export const UpdateItemForm = ({
           }
           try {
             JSON.parse(value!);
-          } catch (err) {
+          } catch (_err) {
             return "Expression Attribute Names must be valid JSON";
           }
         }
@@ -152,7 +152,7 @@ export const UpdateItemForm = ({
           try {
             const json = JSON.parse(value!);
             marshall(json, { removeUndefinedValues: true });
-          } catch (err) {
+          } catch (_err) {
             return "Expression Attribute Values must be JSON that can be marshalled to DynamoDB";
           }
         }

@@ -5,6 +5,9 @@
   "description": "Change the default browser quickly!",
   "icon": "defbro_icon.png",
   "author": "fernando_barrios",
+  "contributors": [
+    "william_morland"
+  ],
   "categories": [
     "Applications",
     "Productivity",

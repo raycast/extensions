@@ -1,28 +1,30 @@
-import React, { createContext, useContext, useState, ReactNode, useMemo } from "react";
 import {
   Action,
   ActionPanel,
+  Clipboard,
   closeMainWindow,
+  environment,
   Form,
   Icon,
   List,
   open,
-  Clipboard,
   PopToRootType,
   showToast,
   Toast,
-  environment,
 } from "@raycast/api";
+import React, { createContext, ReactNode, useContext, useEffect, useState } from "react";
+
 import {
   checkZsh,
-  errorRegex,
-  getSignInStatus,
   CommandLineMissingError,
-  ZshMissingError,
-  ZSH_PATH,
+  errorRegex,
+  getCliPath,
+  getSignInStatus,
+  isWindows,
   signIn,
   useAccounts,
-  getCliPath,
+  ZSH_PATH,
+  ZshMissingError,
 } from "../utils";
 import { Error as ErrorGuide } from "./Error";
 import { Guide } from "./Guide";
@@ -50,7 +52,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const { data, error, isLoading } = useAccounts(!accountSelected);
   const raycastProtocol = environment.raycastVersion.includes("alpha") ? "raycastinternal://" : "raycast://";
-
   const onSubmit = async (values: Form.Values) => {
     const toast = await showToast({
       style: Toast.Style.Animated,
@@ -70,29 +71,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (error instanceof Error) {
         toast.message = error.message;
         toast.primaryAction = {
-          title: "Copy logs",
           onAction: async (toast) => {
             await Clipboard.copy((error as Error).message);
             toast.hide();
           },
+          title: "Copy logs",
         };
       }
     }
   };
-
   const authenticate = async () => {
-    await closeMainWindow({ popToRootType: PopToRootType.Suspended });
+    if (!isWindows) {
+      await closeMainWindow({ popToRootType: PopToRootType.Suspended });
+    }
     const toast = await showToast({
       style: Toast.Style.Animated,
       title: "Authenticating...",
     });
+
     try {
-      if (!ZSH_PATH) {
+      if (!isWindows && !ZSH_PATH) {
         throw new ZshMissingError("Zsh Binary Path Missing!");
       }
+
       if (!getCliPath()) {
         throw new CommandLineMissingError("1Password CLI is missing! Please install it before use.");
       }
+
       signIn();
       setIsAuthenticated(true);
       setAccountSelected(true);
@@ -108,6 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       const errorMessageMatches = err.message.match(errorRegex);
+
       if (errorMessageMatches && errorMessageMatches[1]) {
         setErrorMessage(errorMessageMatches[1]);
       } else {
@@ -122,23 +128,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  useMemo(async () => {
+  useEffect(() => {
     if (!isAuthenticated && !zshMissing) {
       authenticate();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, zshMissing]);
 
   if (!accountSelected) {
     return (
       <Form
-        isLoading={isLoading}
         actions={
           <ActionPanel>
-            <Action.SubmitForm title="Sign In" icon={Icon.Key} onSubmit={onSubmit} />
+            <Action.SubmitForm icon={Icon.Key} onSubmit={onSubmit} title="Sign in" />
           </ActionPanel>
         }
+        isLoading={isLoading}
       >
-        <Form.Dropdown id="account" title="Account" autoFocus>
+        <Form.Dropdown autoFocus id="account" title="Account">
           {(data && !error ? data : []).map((account) => (
             <Form.Dropdown.Item
               key={account.account_uuid}
@@ -150,31 +156,33 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       </Form>
     );
   }
+
   if (zshMissing) return <ErrorGuide />;
 
   if (!isAuthenticated)
     return (
       <List>
         <List.EmptyView
-          title={"Authentication Required"}
-          description={errorMessage || "Please authenticate using the requested method to proceed."}
-          icon={Icon.Key}
           actions={
             <ActionPanel>
-              <Action key="reload-view" title="Reload" icon={Icon.Repeat} onAction={() => authenticate()} />
+              <Action icon={Icon.Repeat} key="reload-view" onAction={() => authenticate()} title="Reload" />
             </ActionPanel>
           }
+          description={errorMessage || "Please authenticate using the requested method to proceed."}
+          icon={Icon.Key}
+          title={"Authentication Required"}
         />
       </List>
     );
 
   return <AuthContext.Provider value={{ isAuthenticated }}>{children}</AuthContext.Provider>;
 };
-
 export const useAuth = (): AuthContextType => {
   const context = useContext(AuthContext);
+
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
+
   return context;
 };

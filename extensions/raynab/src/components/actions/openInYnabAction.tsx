@@ -1,4 +1,4 @@
-import { Action } from '@raycast/api';
+import { Action, Icon } from '@raycast/api';
 import { Shortcuts, URLs } from '@constants';
 import { useLocalStorage } from '@raycast/utils';
 
@@ -23,8 +23,9 @@ export function OpenInYnabAction(props: OpenInYnabActionProps) {
 
   return (
     <Action.OpenInBrowser
-      title={`Open ${props.accounts ? `Account${props.accountId ? '' : 's'}` : 'Budget'} In YNAB`}
+      title="Open in Ynab"
       url={constructUrl(activeBudgetId, props)}
+      icon={Icon.Globe}
       shortcut={Shortcuts.ViewInBrowser}
     />
   );

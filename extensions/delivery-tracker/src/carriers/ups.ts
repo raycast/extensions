@@ -1,8 +1,8 @@
-import { Package, packagesFromOfflineCarrier } from "../package";
+import { packagesFromOfflineCarrier } from "../package";
 import { getPreferenceValues, Cache } from "@raycast/api";
-import fetch from "node-fetch";
-import { randomUUID } from "node:crypto";
-import { Delivery } from "../delivery";
+import { randomUUID } from "crypto";
+import { Package } from "../types/package";
+import { Delivery } from "../types/delivery";
 
 const cache = new Cache();
 const cacheKey = "upsLogin";
@@ -113,7 +113,7 @@ interface UpsTrackingInfo {
       inquiryNumber: string;
       package: {
         trackingNumber: string;
-        deliveryDate: {
+        deliveryDate?: {
           type: string;
           date: string;
         }[];
@@ -159,9 +159,9 @@ function convertUpsTrackingToPackages(upsTrackingInfo: UpsTrackingInfo): Package
   return upsTrackingInfo.trackResponse.shipment
     .flatMap((shipment) => shipment.package)
     .map((aPackage) => {
-      const deliveryDate = aPackage.deliveryDate.find((deliveryDate) => deliveryDate.type === "DEL")?.date;
-      const rescheduledDeliveryDate = aPackage.deliveryDate.find((deliveryDate) => deliveryDate.type === "RDD")?.date;
-      const scheduledDeliveryDate = aPackage.deliveryDate.find((deliveryDate) => deliveryDate.type === "SDD")?.date;
+      const deliveryDate = aPackage.deliveryDate?.find((deliveryDate) => deliveryDate.type === "DEL")?.date;
+      const rescheduledDeliveryDate = aPackage.deliveryDate?.find((deliveryDate) => deliveryDate.type === "RDD")?.date;
+      const scheduledDeliveryDate = aPackage.deliveryDate?.find((deliveryDate) => deliveryDate.type === "SDD")?.date;
 
       return {
         delivered: aPackage.currentStatus.code === deliveredStatusCode,

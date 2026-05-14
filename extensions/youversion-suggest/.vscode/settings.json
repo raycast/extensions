@@ -5,5 +5,7 @@
     "editor.codeActionsOnSave": {
       "source.organizeImports": "explicit"
     }
-  }
+  },
+  "markdown.validate.fileLinks.enabled": "ignore",
+  "markdown.validate.referenceLinks.enabled": "ignore"
 }

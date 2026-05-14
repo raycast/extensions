@@ -1,5 +1,13 @@
 # Genius Lyrics Changelog
 
+## [Add Metadata Details] - 2026-01-05
+- Add artist, album, release date, producers, and writers metadata about the currently displayed lyrics.
+- Add Windows support.
+
+## [Improve Lyric Formatting] - 2025-10-01
+
+- Use markdown headers to create separation between verses.
+
 ## [Lyric Page Bug Fix] - 2025-04-22
 
 - Fixed lyric page including more text than it should.

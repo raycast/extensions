@@ -1,6 +1,5 @@
-import { List, Action, ActionPanel, Icon, getPreferenceValues } from "@raycast/api";
-import { useEffect, useState } from "react";
-import fetch from "node-fetch";
+import { List, Action, ActionPanel, Icon, getPreferenceValues, Keyboard } from "@raycast/api";
+import { useCachedState, useFetch } from "@raycast/utils";
 
 const API_BASE_URL = "https://api.mem0.ai/v1";
 
@@ -23,51 +22,32 @@ interface ApiResponse {
   results: Memory[];
 }
 
-interface Preferences {
-  mem0ApiKey: string;
-  defaultUserId: string;
-}
-
 export default function Command() {
   const { mem0ApiKey, defaultUserId } = getPreferenceValues<Preferences>();
-  const [memories, setMemories] = useState<Memory[]>([]);
-  const [totalCount, setTotalCount] = useState<number>(0);
-  const [nextPage, setNextPage] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [totalCount, setTotalCount] = useCachedState<number>("MEM0-TOTAL-COUNT", 0);
 
-  useEffect(() => {
-    async function fetchMemories() {
-      try {
-        const response = await fetch(`${API_BASE_URL}/memories/?user_id=${defaultUserId}&page=1&page_size=50`, {
-          method: "GET",
-          headers: {
-            Authorization: `Token ${mem0ApiKey}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = (await response.json()) as ApiResponse;
-        setMemories(data.results || []);
-        setTotalCount(data.count || 0);
-        setNextPage(data.next || null);
-      } catch (error) {
-        console.error("Failed to fetch memories:", error);
-        setError(error instanceof Error ? error.message : "An error occurred");
-        setMemories([]);
-        setTotalCount(0);
-        setNextPage(null);
-      } finally {
-        setIsLoading(false);
-      }
-    }
-
-    fetchMemories();
-  }, [mem0ApiKey, defaultUserId]);
+  const {
+    isLoading,
+    data: memories,
+    error,
+  } = useFetch(
+    (options) => `${API_BASE_URL}/memories/?user_id=${defaultUserId}&page=${options.page + 1}&page_size=50`,
+    {
+      headers: {
+        Authorization: `Token ${mem0ApiKey}`,
+        "Content-Type": "application/json",
+      },
+      mapResult(result) {
+        const data = result as ApiResponse;
+        setTotalCount(data.count);
+        return {
+          data: data.results,
+          hasMore: data.next !== null,
+        };
+      },
+      initialData: [],
+    },
+  );
 
   if (error) {
     return (
@@ -93,15 +73,12 @@ export default function Command() {
               <Action.CopyToClipboard
                 title="Copy Memory"
                 content={memory.memory}
-                shortcut={{ modifiers: ["cmd"], key: "c" }}
+                shortcut={Keyboard.Shortcut.Common.Copy}
               />
             </ActionPanel>
           }
         />
       ))}
-      {nextPage && (
-        <List.Item icon="⏩" title="Load Next Page" subtitle={`${memories.length} of ${totalCount} memories loaded`} />
-      )}
     </List>
   );
 }

@@ -57,7 +57,7 @@ const emptyState: SearchState = {
  */
 export function useSearch(src: Sourcegraph, maxResults: number) {
   const [state, setState] = useState<SearchState>(emptyState);
-  const lastSearchRef = useRef<{ search: string; pattern: PatternType }>();
+  const lastSearchRef = useRef<{ search: string; pattern: PatternType }>({ search: "", pattern: "standard" });
   const cancelRef = useRef<AbortController | null>(null);
   const { push } = useNavigation();
 
@@ -92,10 +92,7 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
           isPreviousResults: true,
         };
       }
-      return {
-        ...emptyState,
-        isLoading: true,
-      };
+      return { ...emptyState, isLoading: true };
     });
 
     // Search is starting - track current search as the last search.
@@ -158,10 +155,7 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
             if (oldState.isPreviousResults && durationMs > 1000) {
               oldState.results = [];
             }
-            return {
-              ...oldState,
-              summary: `Found ${results} results in ${duration}`,
-            };
+            return { ...oldState, summary: `Found ${results} results in ${duration}` };
           });
         },
         onDone: () => {
@@ -186,8 +180,5 @@ export function useSearch(src: Sourcegraph, maxResults: number) {
     }
   }
 
-  return {
-    state: state,
-    search: search,
-  };
+  return { state: state, search: search };
 }

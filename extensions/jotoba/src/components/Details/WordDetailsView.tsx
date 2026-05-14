@@ -52,7 +52,7 @@ function WordDetailsView({ wordResult }: { wordResult: WordResult }) {
 
           return `### ${posName}\n${glossesList}`;
         })
-        .join(`\n`)
+        .join(`\n`),
     );
 
     if (pitch)
@@ -63,7 +63,7 @@ function WordDetailsView({ wordResult }: { wordResult: WordResult }) {
           if (high) return acc + `↗${part}↘`;
 
           return acc + part;
-        }, "")
+        }, ""),
       );
   }, [setParsedPitch, setParsedSenses]);
 
@@ -83,7 +83,7 @@ function WordDetailsView({ wordResult }: { wordResult: WordResult }) {
         setSentences((prevState) =>
           resultSentences.sentences
             .map((sentence: JotobaSentence) => `- ${sentence.content} → ${sentence.translation}`)
-            .join("\n")
+            .join("\n"),
         );
       } catch (err) {
         console.error(err);

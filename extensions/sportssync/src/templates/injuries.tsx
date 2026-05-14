@@ -1,6 +1,7 @@
 import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
 import getInjuries from "../utils/getInjuries";
 import sportInfo from "../utils/getSportInfo";
+import TeamDetail from "../views/teamDetail";
 
 export default function DisplayInjuries() {
   const { injuryData, injuryLoading, injuryRevalidate } = getInjuries();
@@ -61,9 +62,10 @@ export default function DisplayInjuries() {
               title={`View ${injury?.athlete?.displayName ?? "Unknown"} Profile on ESPN`}
               url={`${injury?.athlete?.links?.[0]?.href ?? `https://www.espn.com/${currentLeague}`}`}
             />
-            <Action.OpenInBrowser
-              title={`View ${injury?.athlete?.team?.displayName ?? "Unknown"} Details on ESPN`}
-              url={`${injury?.athlete?.team?.links?.[0]?.href ?? `https://www.espn.com/${currentLeague}`}`}
+            <Action.Push
+              title={`View ${injury?.athlete?.team?.displayName ?? "Team"} Details`}
+              icon={Icon.List}
+              target={<TeamDetail teamId={injury?.athlete?.team?.id ?? ""} />}
             />
             <Action
               title="Refresh"

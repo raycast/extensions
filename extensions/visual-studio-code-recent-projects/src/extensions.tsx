@@ -4,19 +4,11 @@ import {
   OpenExtensionByIDInBrowserAction,
   OpenExtensionByIDInVSCodeAction,
   UninstallExtensionByIDAction,
-} from "./extension-actions";
+} from "./lib/extension-actions";
 import { Extension, getLocalExtensions } from "./lib/vscode";
-import { getErrorMessage } from "./utils";
+import { getErrorMessage } from "./lib/utils";
 
-function OpenExtensionInVSCodeAction(props: { extension: Extension }): JSX.Element {
-  return <OpenExtensionByIDInVSCodeAction extensionID={props.extension.id} />;
-}
-
-function OpenExtensionInBrowserAction(props: { extension: Extension }): JSX.Element {
-  return <OpenExtensionByIDInBrowserAction extensionID={props.extension.id} />;
-}
-
-function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }): JSX.Element {
+function ExtensionListItem(props: { extension: Extension; reloadExtension: () => void }) {
   const e = props.extension;
   return (
     <List.Item
@@ -33,13 +25,12 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
       actions={
         <ActionPanel>
           <ActionPanel.Section>
-            <OpenExtensionInVSCodeAction extension={e} />
-            <OpenExtensionInBrowserAction extension={e} />
+            <OpenExtensionByIDInVSCodeAction extensionID={e.id} />
+            <OpenExtensionByIDInBrowserAction extensionID={e.id} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard
               content={e.id}
-              // eslint-disable-next-line @raycast/prefer-title-case
               title="Copy Extension ID"
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
@@ -69,7 +60,7 @@ function ExtensionListItem(props: { extension: Extension; reloadExtension: () =>
   );
 }
 
-export default function ExtensionsRootCommand(): JSX.Element {
+export default function ExtensionsRootCommand() {
   const { extensions, isLoading, error, refresh } = useLocalExtensions();
   if (error) {
     showToast({ style: Toast.Style.Failure, title: "Error", message: error });

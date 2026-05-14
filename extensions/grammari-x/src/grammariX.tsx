@@ -108,9 +108,12 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Gramma
     setState((previous) => ({ ...previous, toneType }));
   }
 
-  function getEnumKeyByEnumValue(myEnum: any, enumValue: string): CommandType | null {
+  function getEnumKeyByEnumValue(
+    myEnum: Record<string, string | number>,
+    enumValue: string | number
+  ): CommandType | null {
     const keys = Object.keys(myEnum).filter((x) => myEnum[x] == enumValue);
-    return keys.length > 0 ? myEnum[keys[0]] : null;
+    return keys.length > 0 ? (myEnum[keys[0]] as CommandType) : null;
   }
   if (isValidKey) {
     return (

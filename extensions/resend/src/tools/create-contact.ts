@@ -1,9 +1,5 @@
-import { Resend } from "resend";
-import { API_KEY } from "../utils/constants";
 import { Tool } from "@raycast/api";
-import "cross-fetch/polyfill";
-
-const resend = new Resend(API_KEY);
+import { resend } from "../lib/resend";
 
 type Input = {
   /**
@@ -52,7 +48,7 @@ export const confirmation: Tool.Confirmation<Input> = async (input: Input) => {
   infoItems.push(
     { name: "First Name", value: input.firstName },
     { name: "Last Name", value: input.lastName },
-    { name: "Email", value: input.email }
+    { name: "Email", value: input.email },
   );
 
   return {

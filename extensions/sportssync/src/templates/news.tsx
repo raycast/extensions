@@ -1,4 +1,5 @@
 import { Detail, List, Color, Icon, Action, ActionPanel } from "@raycast/api";
+import ArticleDetail from "../views/articleDetail";
 import getArticles from "../utils/getArticles";
 import sportInfo from "../utils/getSportInfo";
 
@@ -50,8 +51,9 @@ export default function DisplayNews() {
         ]}
         actions={
           <ActionPanel>
+            <Action.Push title="View Article" icon={Icon.Book} target={<ArticleDetail articleId={article.id} />} />
             <Action.OpenInBrowser
-              title="View Article on ESPN"
+              title="Read Article on ESPN"
               url={`${article?.links?.web?.href ?? `https://www.espn.com/${currentLeague}`}`}
             />
             <Action.CopyToClipboard

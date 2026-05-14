@@ -1,5 +1,30 @@
 # GIF Search Changelog
 
+## [Add Paste GIF Link action] - 2026-05-06
+
+- Added a new action to paste a GIF link into the front-most application
+- Added Windows shortcut support
+
+## [Fix] - 2026-04-23
+
+- Sort Recents by most recently visited first, and move an already-recent GIF back to the top when it's visited again
+
+## [Add Klipy support] - 2026-02-05
+
+- Add Klipy support
+
+## [Faster Thumbnails] - 2025-12-17
+
+- Speed up loading of thumbnails in large grid items
+
+## [Enhancement] - 2025-09-29
+
+- Add a new action to paste a GIF into the front-most application
+
+## [Fix] - 2025-07-10
+
+- Expanded Tenor URL detection in ⁠getServiceFromUrl.ts to ensure GIFs from ⁠tenor.com, ⁠c.tenor.com, and ⁠media.tenor.com are added to the "Recent" list in GIF Search.
+
 ## [Refactor] - 2025-04-14
 
 - Refactored `copyFileToClipboard` to use Raycast APIs instead of relying on AppleScript.

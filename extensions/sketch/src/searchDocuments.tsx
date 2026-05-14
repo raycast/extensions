@@ -82,8 +82,8 @@ export default function DocumentsList(props: { projectName?: string; shortId?: s
         await setLocalStorageItem("allWorkspaces", JSON.stringify(fetchedWorkspaces?.data.me));
         console.log("✓ storing all workspace names and identifiers");
       } catch (error) {
-        console.error((error as ErrorEvent).message);
-        showToast(ToastStyle.Failure, (error as ErrorEvent).message);
+        console.error((error as Error).message);
+        showToast(ToastStyle.Failure, (error as Error).message);
       }
     }
     otherThings();
@@ -99,7 +99,7 @@ export default function DocumentsList(props: { projectName?: string; shortId?: s
       console.log("caching...");
       await setLocalStorageItem(
         "cachedData",
-        JSON.stringify({ identifier: selectedWorkspace?.identifier, shares: data?.shares })
+        JSON.stringify({ identifier: selectedWorkspace?.identifier, shares: data?.shares }),
       );
       console.log("caching done");
     }
@@ -149,8 +149,8 @@ export default function DocumentsList(props: { projectName?: string; shortId?: s
         setToken(fetchedToken);
         console.log("✓ logged in");
       } catch (error) {
-        console.log((error as ErrorEvent).message);
-        setLoginError((error as ErrorEvent).message);
+        console.log((error as Error).message);
+        setLoginError((error as Error).message);
       }
     }
     fetch();

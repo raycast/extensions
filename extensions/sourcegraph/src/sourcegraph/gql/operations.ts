@@ -128,6 +128,40 @@ export enum BatchChangeState {
   Open = "OPEN",
 }
 
+/** This enum declares all supported sorting orders for batch changes. */
+export enum BatchChangesSortOrder {
+  /** Sort alphabetically in ascending order. */
+  AlphabeticalAscending = "ALPHABETICAL_ASCENDING",
+  /** Sort alphabetically in descending order. */
+  AlphabeticalDescending = "ALPHABETICAL_DESCENDING",
+  /** Sort by id in descending order (newest first). */
+  NewestFirst = "NEWEST_FIRST",
+  /** Sort by id in ascending order (oldest first). */
+  OldestFirst = "OLDEST_FIRST",
+}
+
+/** Enum for filtering batch spec library records by type. */
+export enum BatchSpecLibraryRecordType {
+  /** Records that don't have library variables (examples). */
+  Example = "EXAMPLE",
+  /** Records that have library variables (templates). */
+  Template = "TEMPLATE",
+}
+
+/** Input type for creating or updating a batch spec library variable. */
+export type BatchSpecLibraryVariableInput = {
+  /** The description of the library variable. */
+  description: Scalars["String"]["input"];
+  /** The display name of the library variable. The frontend will show the value of `name` if displayName is omitted. */
+  displayName?: InputMaybe<Scalars["String"]["input"]>;
+  /** If the variable is mandatory when filling out values. */
+  mandatory: Scalars["Boolean"]["input"];
+  /** The name of the library variable. */
+  name: Scalars["String"]["input"];
+  /** The regex pattern to match against in the batch spec. */
+  pattern: Scalars["String"]["input"];
+};
+
 /** The possible sources of a batch spec. */
 export enum BatchSpecSource {
   /** The spec was created from the local src-cli workflow. */
@@ -156,6 +190,14 @@ export enum BatchSpecState {
   /** This spec is queued to be processed. */
   Queued = "QUEUED",
 }
+
+/** Input for the renderBatchSpecTemplateWithVariables query. */
+export type BatchSpecTemplateVariableInput = {
+  /** The ID of the variable. */
+  id: Scalars["ID"]["input"];
+  /** The value of the variable. */
+  value: Scalars["String"]["input"];
+};
 
 /** State of the workspace resolution. */
 export enum BatchSpecWorkspaceResolutionState {
@@ -206,6 +248,8 @@ export enum BulkOperationState {
 
 /** The available types of jobs that can be run over a batch change. */
 export enum BulkOperationType {
+  /** Enable auto-merge for changesets (experimental, GitHub only). */
+  AutoMerge = "AUTO_MERGE",
   /** Bulk close changesets. */
   Close = "CLOSE",
   /** Bulk post comments over all involved changesets. */
@@ -218,6 +262,10 @@ export enum BulkOperationType {
   Merge = "MERGE",
   /** Bulk publish changesets. */
   Publish = "PUBLISH",
+  /** Push code to a code host without making a merge request. */
+  PushOnly = "PUSH_ONLY",
+  /** Rebase changesets. */
+  Rebase = "REBASE",
   /** Bulk reenqueue failed changesets. */
   Reenqueue = "REENQUEUE",
 }
@@ -234,6 +282,7 @@ export enum ChangesetCheckState {
   Failed = "FAILED",
   Passed = "PASSED",
   Pending = "PENDING",
+  Unavailable = "UNAVAILABLE",
 }
 
 /** The state of a changeset on the code host on which it's hosted. */
@@ -246,7 +295,7 @@ export enum ChangesetExternalState {
   Readonly = "READONLY",
 }
 
-/** The publication state of a changeset on Sourcegraph */
+/** The publication state of a changeset on Sourcegraph as represented in the `frontend` database's `changesets` table. */
 export enum ChangesetPublicationState {
   /** The changeset has been created on the code host. */
   Published = "PUBLISHED",
@@ -286,6 +335,7 @@ export enum ChangesetReviewState {
   ChangesRequested = "CHANGES_REQUESTED",
   Commented = "COMMENTED",
   Dismissed = "DISMISSED",
+  NotApplicable = "NOT_APPLICABLE",
   Pending = "PENDING",
 }
 
@@ -293,6 +343,8 @@ export enum ChangesetReviewState {
 export enum ChangesetSpecOperation {
   /** The changeset is kept in the batch change, but it's marked as archived. */
   Archive = "ARCHIVE",
+  /** Enable auto-merge on the changeset (experimental, GitHub only). */
+  AutoMerge = "AUTO_MERGE",
   /** Close the changeset on the codehost. */
   Close = "CLOSE",
   /** The changeset is removed from some of the associated batch changes. */
@@ -305,8 +357,12 @@ export enum ChangesetSpecOperation {
   PublishDraft = "PUBLISH_DRAFT",
   /** Push a new commit to the code host. */
   Push = "PUSH",
+  /** Push code to code host on new branch, but do not start a merge request. */
+  PushedOnly = "PUSHED_ONLY",
   /** The changeset is re-added to the batch change. */
   Reattach = "REATTACH",
+  /** The changeset is rebased on top of the latest changes on the target branch. */
+  Rebase = "REBASE",
   /** Reopen the changeset on the codehost. */
   Reopen = "REOPEN",
   /** Internal operation to get around slow code host updates. */
@@ -341,7 +397,7 @@ export enum ChangesetSpecType {
   Existing = "EXISTING",
 }
 
-/** The visual state a changeset is currently in. */
+/** The state a changeset is currently in, when viewed in the UI. In the frontend React app, this corresponds to a changeset's ChangesetSpecPublicationStateInput.publicationState value. */
 export enum ChangesetState {
   /** The changeset is published, not being reconciled and closed on the code host. */
   Closed = "CLOSED",
@@ -364,6 +420,8 @@ export enum ChangesetState {
    * changeset on the code host and on Sourcegraph to the desired state.
    */
   Processing = "PROCESSING",
+  /** The changeset has not been published, but code has been pushed to a branch on the code host. Note: this is NOT an *operation*, this is the state of code on the code host. */
+  PushedOnly = "PUSHED_ONLY",
   /**
    * The changeset is published, and is now read-only, most likely due to the
    * repository being archived.
@@ -380,12 +438,49 @@ export enum ChangesetState {
   Unpublished = "UNPUBLISHED",
 }
 
+/** This enum declares all supported sorting orders for changesets. */
+export enum ChangesetsSortOrder {
+  /** Sort by id in ascending order (oldest first). */
+  OldestFirst = "OLDEST_FIRST",
+  /** Sort by repository name in ascending order (A-Z). */
+  RepoAscending = "REPO_ASCENDING",
+  /** Sort by repository name in desscending order (Z-A). */
+  RepoDescending = "REPO_DESCENDING",
+  /** Sort by changeset spec title in ascending order (A-Z). */
+  TitleAscending = "TITLE_ASCENDING",
+  /** Sort by changeset spec title in desscending order (Z-A). */
+  TitleDescending = "TITLE_DESCENDING",
+}
+
 /** The clone status of a repository. */
 export enum CloneStatus {
   Cloned = "CLONED",
   Cloning = "CLONING",
   NotCloned = "NOT_CLONED",
 }
+
+/** Input type for resetting policies */
+export type CodeGraphConfigurationPolicyInput = {
+  /**
+   * The maximum age of a commit to be considered for precise auto-indexing
+   * or syntactic indexing.
+   */
+  indexCommitMaxAgeHours?: InputMaybe<Scalars["Int"]["input"]>;
+  /** Does this policy enable precise auto-indexing? */
+  indexingEnabled: Scalars["Boolean"]["input"];
+  /** Name of the managed policy */
+  name: Scalars["String"]["input"];
+  /** Glob pattern matching the name of the matching Git object */
+  pattern: Scalars["String"]["input"];
+  /** Retention duration (only used if retentionEnabled is true) */
+  retentionDurationHours?: InputMaybe<Scalars["Int"]["input"]>;
+  /** Describes whether this policy specifies a retention duration or not */
+  retentionEnabled: Scalars["Boolean"]["input"];
+  /** Does this policy enable syntactic indexing? */
+  syntacticIndexingEnabled: Scalars["Boolean"]["input"];
+  /** Describes which type of git objects this policy applies to */
+  type: GitObjectType;
+};
 
 /** EXPERIMENTAL: This type may change in a backwards-incompatible way. */
 export type CodeGraphDataFilter = {
@@ -448,20 +543,10 @@ export enum CodyContextFiltersVersion {
   V1 = "V1",
 }
 
-/** A plan for cody subscription. */
-export enum CodySubscriptionPlan {
-  Free = "FREE",
-  Pro = "PRO",
-}
-
-/** A status for cody subscription. */
-export enum CodySubscriptionStatus {
-  Active = "ACTIVE",
-  Canceled = "CANCELED",
-  Other = "OTHER",
-  PastDue = "PAST_DUE",
-  Trialing = "TRIALING",
-  Unpaid = "UNPAID",
+/** The commit signing method used for a credential. */
+export enum CommitSigningMethod {
+  /** Generates an SSH key for commit signing. */
+  Ssh = "SSH",
 }
 
 /** Input wrapper for completions */
@@ -489,6 +574,20 @@ export type ConfigurationEdit = {
   value?: InputMaybe<Scalars["JSONValue"]["input"]>;
   /** DEPRECATED */
   valueIsJSONCEncodedString?: InputMaybe<Scalars["Boolean"]["input"]>;
+};
+
+/** Input for creating a batch change with a complete batch spec. */
+export type CreateBatchChangeWithSpecInput = {
+  /** The name of the batch change to create. */
+  name: Scalars["String"]["input"];
+  /** The namespace (either a user or organization) that this batch change should belong to. */
+  namespace: Scalars["ID"]["input"];
+  /**
+   * The raw batch spec as YAML (or the equivalent JSON). See
+   * https://sourcegraph.com/github.com/sourcegraph/artifacts/-/blob/schemas/batch_spec.schema.json
+   * for the JSON Schema that describes the structure of this input.
+   */
+  rawSpec: Scalars["String"]["input"];
 };
 
 /** CreateFileBlockInput contains the information necessary to create a file block. */
@@ -563,6 +662,16 @@ export type CreateSymbolBlockInput = {
 };
 
 /**
+ * Denotes information about relationships as in SCIP, but
+ * optimized for debugging rather than downstream usability.
+ */
+export enum DebugScipRelationshipKind {
+  IsDefinedBy = "IS_DEFINED_BY",
+  IsImplementation = "IS_IMPLEMENTATION",
+  IsReference = "IS_REFERENCE",
+}
+
+/**
  * A repository to pass to the deleteCodeownersFiles mutation. Either repoID or repoName
  * must be provided.
  */
@@ -589,6 +698,17 @@ export enum DiffHunkLineType {
   Deleted = "DELETED",
   /** Unchanged line. */
   Unchanged = "UNCHANGED",
+}
+
+/** EntitlementType represents the available types of entitlements. */
+export enum EntitlementType {
+  CompletionCredits = "COMPLETION_CREDITS",
+}
+
+/** EntitlementWindow represents the available time periods for entitlement enforcement. */
+export enum EntitlementWindow {
+  OneDay = "ONE_DAY",
+  SevenDays = "SEVEN_DAYS",
 }
 
 /** A description of a user event. */
@@ -621,8 +741,6 @@ export type Event = {
   eventID?: InputMaybe<Scalars["Int"]["input"]>;
   /** The first sourcegraph URL visited by the user, stored in a browser cookie. */
   firstSourceURL?: InputMaybe<Scalars["String"]["input"]>;
-  /** The connected site's license key, hashed using sha256. Used for uniquely identifying the site. */
-  hashedLicenseKey?: InputMaybe<Scalars["String"]["input"]>;
   /**
    * Insert ID used to deduplicate events that re-occur in the event of retries or
    * backfills in Amplitude analytics. See https://developers.amplitude.com/docs/http-api-v2#optional-keys.
@@ -662,8 +780,6 @@ export enum EventBillingId {
   CodyChat = "CodyChat",
   /** A billable Cody completion (aka suggestion or autocomplete) event. */
   CodyCompletion = "CodyCompletion",
-  /** A billable Cody embedding/code graph creation or search event. */
-  CodyEmbedding = "CodyEmbedding",
 }
 
 /** The product categories for events, used for billing purposes. */
@@ -761,16 +877,10 @@ export enum ExternalServiceKind {
   Github = "GITHUB",
   Gitlab = "GITLAB",
   Gitolite = "GITOLITE",
-  Gomodules = "GOMODULES",
-  Jvmpackages = "JVMPACKAGES",
-  Npmpackages = "NPMPACKAGES",
   Other = "OTHER",
   Pagure = "PAGURE",
   Perforce = "PERFORCE",
   Phabricator = "PHABRICATOR",
-  Pythonpackages = "PYTHONPACKAGES",
-  Rubypackages = "RUBYPACKAGES",
-  Rustpackages = "RUSTPACKAGES",
 }
 
 /** The possible states of an external service sync job. */
@@ -802,14 +912,18 @@ export type FetchPermissionsOptions = {
 
 /** GitHubAppDomain enumerates the domains in which GitHub Apps can be used. */
 export enum GitHubAppDomain {
+  /** GitHub Apps that are configured for code review agents. */
+  AgentsReview = "AGENTS_REVIEW",
   /** GitHub Apps that are configured for batch changes commit signing. */
   Batches = "BATCHES",
   /** GitHub Apps that are configured for repository syncing. */
   Repos = "REPOS",
 }
 
-/** GitHubAppKind enumerates the domains in which GitHub Apps can be used. */
+/** GitHubAppKind enumerates the purposes of GitHub Apps. */
 export enum GitHubAppKind {
+  /** GitHub Apps that are configured for code review agents. */
+  AgentsReview = "AGENTS_REVIEW",
   /** GitHub Apps that are configured for commit signing. */
   CommitSigning = "COMMIT_SIGNING",
   /** GitHub Apps that are configured for repo syncing. */
@@ -834,6 +948,14 @@ export enum GitObjectType {
   GitUnknown = "GIT_UNKNOWN",
 }
 
+/** Optimization strategies that can be used for repository optimization */
+export enum GitOptimizationStrategy {
+  /** Eager strategy forces a full optimization regardless of current state */
+  Eager = "EAGER",
+  /** Heuristic strategy optimizes only what Git determines needs optimization */
+  Heuristic = "HEURISTIC",
+}
+
 /** All possible types of Git refs. */
 export enum GitRefType {
   /** A Git branch (in refs/heads/). */
@@ -844,7 +966,7 @@ export enum GitRefType {
   GitTag = "GIT_TAG",
 }
 
-/** Fields that can be grouped on for compute powered insights. */
+/** Fields that can be grouped on for compute powered or repo stats (LANG and REPO only) insights. */
 export enum GroupByField {
   Author = "AUTHOR",
   Date = "DATE",
@@ -923,6 +1045,64 @@ export type InsightsPermissionGrantsInput = {
   users?: InputMaybe<Array<Scalars["ID"]["input"]>>;
 };
 
+/** Input for a repository statistics insight. */
+export type InventoryStatsInsightInput = {
+  /** The dashboard IDs with which to associate this insight once created. */
+  dashboards?: InputMaybe<Array<Scalars["ID"]["input"]>>;
+  /** Options for this chart. */
+  options: LineChartOptionsInput;
+  /** The scope of repositories. */
+  repositoryScope: RepositoryScopeInput;
+  /** The series metrics to track (max 3: one of each metric type). */
+  series: Array<InventoryStatsSeriesInput>;
+  /** The scope of time. If provided here it will apply to all series unless overwritten. */
+  timeScope?: InputMaybe<TimeScopeInput>;
+  /** The default values for filters and aggregates for this chart. */
+  viewControls?: InputMaybe<InsightViewControlsInput>;
+};
+
+/** Metric types for repository statistics insights. */
+export enum InventoryStatsMetric {
+  Bytes = "BYTES",
+  FileCount = "FILE_COUNT",
+  LinesOfCode = "LINES_OF_CODE",
+}
+
+/** Required input to generate a preview for a repository statistics insight. */
+export type InventoryStatsPreviewInput = {
+  /** The scope of repositories. */
+  repositoryScope: RepositoryScopeInput;
+  /** The series to generate previews for */
+  series: Array<InventoryStatsSeriesPreviewInput>;
+  /** The scope of time. */
+  timeScope: TimeScopeInput;
+};
+
+/** Input for a repository statistics insight data series. */
+export type InventoryStatsSeriesInput = {
+  /** Group by repo or language (optional). */
+  groupBy?: InputMaybe<GroupByField>;
+  /** The metric to track for this series. */
+  metric: InventoryStatsMetric;
+  /** Options for this data series. Not used if the metrics will be grouped (labels and colors will be automatically generated). */
+  options?: InputMaybe<LineChartDataSeriesOptionsInput>;
+  /**
+   * The scope of time. This time scope can also be provided at the InventoryStatsInsightInput level.
+   * If the scope is provided here it will take priority over any other scope provided at a higher level in the input.
+   */
+  timeScope?: InputMaybe<TimeScopeInput>;
+};
+
+/** Required input to generate a live preview for a repository statistics series. */
+export type InventoryStatsSeriesPreviewInput = {
+  /** Group by repo or language (optional). */
+  groupBy?: InputMaybe<GroupByField>;
+  /** A label for the series. Not used if the metrics will be grouped (labels will be automatically generated). */
+  label?: InputMaybe<Scalars["String"]["input"]>;
+  /** The metric to track for this series. */
+  metric: InventoryStatsMetric;
+};
+
 /**
  * A segment of a key path that locates a nested JSON value in a root JSON value. Exactly one field in each
  * KeyPathSegment must be non-null.
@@ -994,6 +1174,16 @@ export type MarkdownOptions = {
   /** A dummy null value (empty input types are not allowed yet). */
   alwaysNil?: InputMaybe<Scalars["String"]["input"]>;
 };
+
+/** The merge method to use when auto-merging changesets. */
+export enum MergeMethod {
+  /** Create a merge commit when merging the changeset. */
+  Merge = "MERGE",
+  /** Rebase and merge the changeset commits individually. */
+  Rebase = "REBASE",
+  /** Squash the changeset's commits into one commit and merge it. */
+  Squash = "SQUASH",
+}
 
 /** Message to or from the LLM */
 export type Message = {
@@ -1244,49 +1434,6 @@ export enum OwnershipReasonType {
   RecentViewOwnershipSignal = "RECENT_VIEW_OWNERSHIP_SIGNAL",
 }
 
-/** Whether a package repo reference filter is part of the allowlist or blocklist */
-export enum PackageMatchBehaviour {
-  /** Allows a package repo reference to be synced. */
-  Allow = "ALLOW",
-  /** Blocks a package repo reference from syncing. */
-  Block = "BLOCK",
-}
-
-/** A package repo reference filter that matches names. */
-export type PackageNameFilterInput = {
-  /** Glob string to match names. */
-  packageGlob: Scalars["String"]["input"];
-};
-
-/**
- * A kind of package repo reference.
- * ExternalServiceKind, with a more specific set of values.
- */
-export enum PackageRepoReferenceKind {
-  Gomodules = "GOMODULES",
-  Jvmpackages = "JVMPACKAGES",
-  Npmpackages = "NPMPACKAGES",
-  Pythonpackages = "PYTHONPACKAGES",
-  Rubypackages = "RUBYPACKAGES",
-  Rustpackages = "RUSTPACKAGES",
-}
-
-/** A package repo reference filter that matches versions for a specific name. */
-export type PackageVersionFilterInput = {
-  /** Exact package name to match. */
-  packageName: Scalars["String"]["input"];
-  /** Glob string to match versions. */
-  versionGlob: Scalars["String"]["input"];
-};
-
-/** A name or version matching filter for. One of either nameFilter or versionFilter must be provided. */
-export type PackageVersionOrNameFilterInput = {
-  /** Optional name-matching filter. */
-  nameFilter?: InputMaybe<PackageNameFilterInput>;
-  /** Optional package-specific version-matching filter. */
-  versionFilter?: InputMaybe<PackageVersionFilterInput>;
-};
-
 /**
  * A namespace represents a distinct context within which permission policies
  * are defined and enforced.
@@ -1296,20 +1443,30 @@ export enum PermissionNamespace {
   BatchChanges = "BATCH_CHANGES",
   /** This represents the Cody namespace. */
   Cody = "CODY",
+  /** Permissions related to deep search functionality. */
+  DeepSearch = "DEEP_SEARCH",
   /** Permissions related to exported telemetry. */
   ExportedTelemetry = "EXPORTED_TELEMETRY",
+  /** Permissions related to managing IdP clients. */
+  IdpClients = "IDP_CLIENTS",
+  /** Permissions related to the prompts and saved searches library. */
+  Library = "LIBRARY",
   /**
    * Code ownership namespace used for permitting to assign ownership
    * within Sourcegraph.
    */
   Ownership = "OWNERSHIP",
-  /** ❗ Product subscriptions are only available in Sourcegraph.com */
-  ProductSubscriptions = "PRODUCT_SUBSCRIPTIONS",
   /**
    * Repo Metadata namespace used for permitting to edit repository
    * key-value pair metadata.
    */
   RepoMetadata = "REPO_METADATA",
+  /** Permissions related to managing repository permissions. */
+  RepoPermissions = "REPO_PERMISSIONS",
+  /** Permissions related to SCIP index management. */
+  Scip = "SCIP",
+  /** Permissions related to user external accounts. */
+  UserExternalAccounts = "USER_EXTERNAL_ACCOUNTS",
   /** Permissions related to workspace repo administration. */
   WorkspaceRepositories = "WORKSPACE_REPOSITORIES",
 }
@@ -1389,6 +1546,12 @@ export enum PermissionsSyncJobsSearchType {
   User = "USER",
 }
 
+/** The configured user attribute used to map permissions. */
+export enum PermissionsUserMappingBindId {
+  Email = "EMAIL",
+  Username = "USERNAME",
+}
+
 /** Options for a pie chart */
 export type PieChartOptionsInput = {
   /**
@@ -1466,6 +1629,8 @@ export type PromptInput = {
   owner: Scalars["ID"]["input"];
   /** Whether the prompt is recommended. */
   recommended?: InputMaybe<Scalars["Boolean"]["input"]>;
+  /** The tags for the prompt. */
+  tags?: InputMaybe<Array<Scalars["ID"]["input"]>>;
   /** The visibility state for the prompt. */
   visibility: PromptVisibility;
 };
@@ -1478,6 +1643,23 @@ export enum PromptMode {
   Edit = "EDIT",
   /** Execute the prompt in insert mode. */
   Insert = "INSERT",
+}
+
+/** The input that describes a prompt tag to create. */
+export type PromptTagCreateInput = {
+  /** The name of the prompt tag. */
+  name: Scalars["String"]["input"];
+};
+
+/** The input that describes a prompt tag to update. */
+export type PromptTagUpdateInput = {
+  /** The name of the prompt tag. */
+  name: Scalars["String"]["input"];
+};
+
+/** The ways that a list of prompt tags can be ordered. */
+export enum PromptTagsOrderBy {
+  PromptTagName = "PROMPT_TAG_NAME",
 }
 
 /** The input that describes an edit to a prompt template. */
@@ -1496,6 +1678,8 @@ export type PromptUpdateInput = {
   name: Scalars["String"]["input"];
   /** Whether the prompt is recommended. */
   recommended?: InputMaybe<Scalars["Boolean"]["input"]>;
+  /** The new tags delete and override any existing tags. */
+  tags?: InputMaybe<Array<Scalars["ID"]["input"]>>;
 };
 
 /** The visibility states for a prompt. */
@@ -1513,6 +1697,7 @@ export enum PromptVisibility {
 export enum PromptsOrderBy {
   PromptNameWithOwner = "PROMPT_NAME_WITH_OWNER",
   PromptRecommended = "PROMPT_RECOMMENDED",
+  PromptRelevance = "PROMPT_RELEVANCE",
   PromptUpdatedAt = "PROMPT_UPDATED_AT",
 }
 
@@ -1552,22 +1737,6 @@ export type RemoveInsightViewFromDashboardInput = {
   insightViewId: Scalars["ID"]["input"];
 };
 
-/** State types of repo embedding sync jobs. */
-export enum RepoEmbeddingJobState {
-  Canceled = "CANCELED",
-  Completed = "COMPLETED",
-  Errored = "ERRORED",
-  Failed = "FAILED",
-  Processing = "PROCESSING",
-  Queued = "QUEUED",
-}
-
-/** EXPERIMENTAL: This type may make backwards-incompatible changes in the future. */
-export type RepositoryFilter = {
-  /** Compare the repository by name. */
-  name: StringComparator;
-};
-
 /** RepositoryOrderBy enumerates the ways a repositories list can be ordered. */
 export enum RepositoryOrderBy {
   /** deprecated (use the equivalent REPOSITORY_CREATED_AT) */
@@ -1581,6 +1750,14 @@ export enum RepositoryOrderBy {
 export enum RepositoryPermission {
   Read = "READ",
 }
+
+/** Input type for repository permission specification - either a specific repository or unrestricted access. */
+export type RepositoryPermissionInput = {
+  /** The repository ID to grant permission for. Mutually exclusive with wildcard. */
+  repository?: InputMaybe<Scalars["ID"]["input"]>;
+  /** Whether to grant unrestricted access to all repositories. Mutually exclusive with repository. */
+  wildcard?: InputMaybe<Scalars["Boolean"]["input"]>;
+};
 
 /** A custom repository scope for an insight data series. */
 export type RepositoryScopeInput = {
@@ -1927,9 +2104,9 @@ export enum SiteUserOrderBy {
   EventsCount = "EVENTS_COUNT",
   /** The last event_log datetime. */
   LastActiveAt = "LAST_ACTIVE_AT",
-  /** Whether the user is site admin or not. */
-  SiteAdmin = "SITE_ADMIN",
   Username = "USERNAME",
+  /** User type (site admin, service account, regular user). */
+  UserType = "USER_TYPE",
 }
 
 /** SiteUsersDateRangeInput argument to filter based on date range or date equals to null */
@@ -1957,12 +2134,6 @@ export enum SpeakerType {
   Assistant = "ASSISTANT",
   Human = "HUMAN",
 }
-
-/** EXPERIMENTAL: This type may make backwards-incompatible changes in the future. */
-export type StringComparator = {
-  /** Checks for exact equality. */
-  equals?: InputMaybe<Scalars["String"]["input"]>;
-};
 
 /** EXPERIMENTAL: This type may make backwards-incompatible changes in the future. */
 export type SurroundingLines = {
@@ -2423,6 +2594,20 @@ export type UpdateInsightsDashboardInput = {
   title?: InputMaybe<Scalars["String"]["input"]>;
 };
 
+/** Input for updating a repository statistics insight. */
+export type UpdateInventoryStatsInsightInput = {
+  /** The complete list of series metrics to track (max 3). */
+  dataSeries: Array<InventoryStatsSeriesInput>;
+  /** Options for this chart. */
+  presentationOptions: LineChartOptionsInput;
+  /** The scope of repositories. */
+  repositoryScope?: InputMaybe<RepositoryScopeInput>;
+  /** The scope of time. */
+  timeScope?: InputMaybe<TimeScopeInput>;
+  /** The default values for filters and aggregates for this chart. */
+  viewControls: InsightViewControlsInput;
+};
+
 /** Input for updating a line chart search insight. */
 export type UpdateLineChartSearchInsightInput = {
   /** The complete list of data series on this line chart. Note: excluding a data series will remove it. */
@@ -2451,29 +2636,6 @@ export type UpdatePieChartSearchInsightInput = {
 export type UpdateSignalConfigurationsInput = {
   /** The signal configuration updates. */
   configs: Array<OwnSignalConfigurationUpdate>;
-};
-
-/**
- * An empty filter allows all kinds of usages for all paths in all repositories.
- *
- * However, if the symbol used for lookup is a file-local symbol or a
- * repository-local symbol, then usages will automatically be limited to the
- * same file or same repository respectively.
- *
- * EXPERIMENTAL: This type may make backwards-incompatible changes in the future.
- */
-export type UsagesFilter = {
-  /**
-   * Negate another UsageFilter. For example, this can be used to find matches
-   * outside of a specific repository.
-   */
-  not?: InputMaybe<UsagesFilter>;
-  /**
-   * Filter for limiting which repositories to find the usages in.
-   * For cross-repository symbols as well as search-based results,
-   * an empty value will find results across the Sourcegraph instance.
-   */
-  repository?: InputMaybe<RepositoryFilter>;
 };
 
 /** A period of time in which a set of users have been active. */
@@ -2732,87 +2894,6 @@ export type GetFileContentsQuery = {
   } | null;
 };
 
-export type SearchNotebookFragment = {
-  __typename?: "Notebook";
-  id: string;
-  title: string;
-  viewerHasStarred: boolean;
-  public: boolean;
-  createdAt: any;
-  updatedAt: any;
-  stars: { __typename?: "NotebookStarConnection"; totalCount: number };
-  creator?: { __typename?: "User"; username: string; displayName?: string | null; url: string } | null;
-  namespace?:
-    | { __typename?: "Org"; namespaceName: string; url: string }
-    | { __typename?: "User"; namespaceName: string; url: string }
-    | null;
-  blocks: Array<
-    | {
-        __typename: "FileBlock";
-        fileInput: { __typename?: "FileBlockInput"; repositoryName: string; filePath: string };
-      }
-    | { __typename: "MarkdownBlock"; markdownInput: string }
-    | { __typename: "QueryBlock"; queryInput: string }
-    | {
-        __typename: "SymbolBlock";
-        symbolInput: {
-          __typename?: "SymbolBlockInput";
-          repositoryName: string;
-          filePath: string;
-          symbolName: string;
-          symbolContainerName: string;
-          symbolKind: SymbolKind;
-        };
-      }
-  >;
-};
-
-export type GetNotebooksQueryVariables = Exact<{
-  query: Scalars["String"]["input"];
-  orderBy?: InputMaybe<NotebooksOrderBy>;
-}>;
-
-export type GetNotebooksQuery = {
-  __typename?: "Query";
-  notebooks: {
-    __typename?: "NotebookConnection";
-    nodes: Array<{
-      __typename?: "Notebook";
-      id: string;
-      title: string;
-      viewerHasStarred: boolean;
-      public: boolean;
-      createdAt: any;
-      updatedAt: any;
-      stars: { __typename?: "NotebookStarConnection"; totalCount: number };
-      creator?: { __typename?: "User"; username: string; displayName?: string | null; url: string } | null;
-      namespace?:
-        | { __typename?: "Org"; namespaceName: string; url: string }
-        | { __typename?: "User"; namespaceName: string; url: string }
-        | null;
-      blocks: Array<
-        | {
-            __typename: "FileBlock";
-            fileInput: { __typename?: "FileBlockInput"; repositoryName: string; filePath: string };
-          }
-        | { __typename: "MarkdownBlock"; markdownInput: string }
-        | { __typename: "QueryBlock"; queryInput: string }
-        | {
-            __typename: "SymbolBlock";
-            symbolInput: {
-              __typename?: "SymbolBlockInput";
-              repositoryName: string;
-              filePath: string;
-              symbolName: string;
-              symbolContainerName: string;
-              symbolKind: SymbolKind;
-            };
-          }
-      >;
-    }>;
-  };
-};
-
 export type RecordEventsMutationVariables = Exact<{
   events: Array<TelemetryEventInput> | TelemetryEventInput;
 }>;
@@ -2889,52 +2970,6 @@ export const BlobContentsFragmentDoc = gql`
     content
     binary
     byteSize
-  }
-`;
-export const SearchNotebookFragmentDoc = gql`
-  fragment SearchNotebook on Notebook {
-    id
-    title
-    viewerHasStarred
-    public
-    stars {
-      totalCount
-    }
-    creator {
-      username
-      displayName
-      url
-    }
-    namespace {
-      namespaceName
-      url
-    }
-    blocks {
-      __typename
-      ... on MarkdownBlock {
-        markdownInput
-      }
-      ... on QueryBlock {
-        queryInput
-      }
-      ... on FileBlock {
-        fileInput {
-          repositoryName
-          filePath
-        }
-      }
-      ... on SymbolBlock {
-        symbolInput {
-          repositoryName
-          filePath
-          symbolName
-          symbolContainerName
-          symbolKind
-        }
-      }
-    }
-    createdAt
-    updatedAt
   }
 `;
 export const PublishChangesetDocument = gql`
@@ -3226,57 +3261,6 @@ export type GetFileContentsQueryHookResult = ReturnType<typeof useGetFileContent
 export type GetFileContentsLazyQueryHookResult = ReturnType<typeof useGetFileContentsLazyQuery>;
 export type GetFileContentsSuspenseQueryHookResult = ReturnType<typeof useGetFileContentsSuspenseQuery>;
 export type GetFileContentsQueryResult = Apollo.QueryResult<GetFileContentsQuery, GetFileContentsQueryVariables>;
-export const GetNotebooksDocument = gql`
-  query GetNotebooks($query: String!, $orderBy: NotebooksOrderBy) {
-    notebooks(query: $query, orderBy: $orderBy, descending: true) {
-      nodes {
-        ...SearchNotebook
-      }
-    }
-  }
-  ${SearchNotebookFragmentDoc}
-`;
-
-/**
- * __useGetNotebooksQuery__
- *
- * To run a query within a React component, call `useGetNotebooksQuery` and pass it any options that fit your needs.
- * When your component renders, `useGetNotebooksQuery` returns an object from Apollo Client that contains loading, error, and data properties
- * you can use to render your UI.
- *
- * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
- *
- * @example
- * const { data, loading, error } = useGetNotebooksQuery({
- *   variables: {
- *      query: // value for 'query'
- *      orderBy: // value for 'orderBy'
- *   },
- * });
- */
-export function useGetNotebooksQuery(
-  baseOptions: Apollo.QueryHookOptions<GetNotebooksQuery, GetNotebooksQueryVariables> &
-    ({ variables: GetNotebooksQueryVariables; skip?: boolean } | { skip: boolean }),
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useQuery<GetNotebooksQuery, GetNotebooksQueryVariables>(GetNotebooksDocument, options);
-}
-export function useGetNotebooksLazyQuery(
-  baseOptions?: Apollo.LazyQueryHookOptions<GetNotebooksQuery, GetNotebooksQueryVariables>,
-) {
-  const options = { ...defaultOptions, ...baseOptions };
-  return Apollo.useLazyQuery<GetNotebooksQuery, GetNotebooksQueryVariables>(GetNotebooksDocument, options);
-}
-export function useGetNotebooksSuspenseQuery(
-  baseOptions?: Apollo.SkipToken | Apollo.SuspenseQueryHookOptions<GetNotebooksQuery, GetNotebooksQueryVariables>,
-) {
-  const options = baseOptions === Apollo.skipToken ? baseOptions : { ...defaultOptions, ...baseOptions };
-  return Apollo.useSuspenseQuery<GetNotebooksQuery, GetNotebooksQueryVariables>(GetNotebooksDocument, options);
-}
-export type GetNotebooksQueryHookResult = ReturnType<typeof useGetNotebooksQuery>;
-export type GetNotebooksLazyQueryHookResult = ReturnType<typeof useGetNotebooksLazyQuery>;
-export type GetNotebooksSuspenseQueryHookResult = ReturnType<typeof useGetNotebooksSuspenseQuery>;
-export type GetNotebooksQueryResult = Apollo.QueryResult<GetNotebooksQuery, GetNotebooksQueryVariables>;
 export const RecordEventsDocument = gql`
   mutation RecordEvents($events: [TelemetryEventInput!]!) {
     telemetry {
@@ -3340,8 +3324,9 @@ const result: PossibleTypesResultData = {
       "PermissionsInfoRepositoriesConnection",
       "PermissionsInfoUsersConnection",
       "PermissionsSyncJobsConnection",
+      "PromptTagsConnection",
+      "PromptToTagsConnection",
       "PromptsConnection",
-      "RepoEmbeddingJobsConnection",
       "SavedSearchesConnection",
       "SiteConfigurationChangeConnection",
     ],
@@ -3361,7 +3346,7 @@ const result: PossibleTypesResultData = {
       "HiddenApplyPreviewTargetsUpdate",
     ],
     IncompleteDatapointAlert: ["GenericIncompleteDatapointAlert", "TimeoutDatapointAlert"],
-    InsightDataSeriesDefinition: ["SearchInsightDataSeriesDefinition"],
+    InsightDataSeriesDefinition: ["InventoryStatsDataSeriesDefinition", "SearchInsightDataSeriesDefinition"],
     InsightPresentation: ["LineChartInsightViewPresentation", "PieChartInsightViewPresentation"],
     InsightRepositoryDefinition: ["InsightRepositoryScope", "RepositorySearchScope"],
     InsightTimeScope: ["InsightIntervalTimeScope"],
@@ -3396,9 +3381,11 @@ const result: PossibleTypesResultData = {
       "HiddenBatchSpecWorkspace",
       "HiddenChangesetSpec",
       "HiddenExternalChangeset",
+      "IDPClient",
       "IndexedSearchInstance",
       "InsightView",
       "InsightsDashboard",
+      "M2MCredential",
       "Monitor",
       "MonitorActionEvent",
       "MonitorEmail",
@@ -3416,7 +3403,7 @@ const result: PossibleTypesResultData = {
       "PermissionsSyncJob",
       "PreciseIndex",
       "Prompt",
-      "RepoEmbeddingJob",
+      "PromptTag",
       "Repository",
       "Role",
       "SavedSearch",
@@ -3425,6 +3412,7 @@ const result: PossibleTypesResultData = {
       "SiteConfigurationChange",
       "Team",
       "User",
+      "UserConsentedIDPClient",
       "VisibleBatchSpecWorkspace",
       "VisibleChangesetSpec",
       "Webhook",
@@ -3439,7 +3427,6 @@ const result: PossibleTypesResultData = {
       "RecentContributorOwnershipSignal",
       "RecentViewOwnershipSignal",
     ],
-    PackageRepoOrVersionConnection: ["PackageRepoReferenceConnection", "PackageRepoReferenceVersionConnection"],
     PermissionsSyncJobSubject: ["Repository", "User"],
     RepositoryComparisonInterface: ["PreviewRepositoryComparison", "RepositoryComparison"],
     RepositoryRedirect: ["Redirect", "Repository"],

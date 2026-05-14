@@ -91,7 +91,7 @@
     },
     {
       "name": "listtransactions",
-      "title": "Recent Transactions",
+      "title": "Transactions",
       "keywords": [
         "wallet",
         "payments",
@@ -99,7 +99,7 @@
         "transactions"
       ],
       "description": "Show recent transactions",
-      "icon": "vortex.png",
+      "icon": "transactions.png",
       "mode": "view",
       "script": "src/ListTransactions.tsx"
     },
@@ -157,5 +157,8 @@
   },
   "version": "1.0.0",
   "main": "src/index.js",
-  "keywords": []
+  "keywords": [],
+  "platforms": [
+    "macOS"
+  ]
 }

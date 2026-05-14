@@ -1,5 +1,26 @@
 # Rename Changelog
 
+## [Security Fix] - 2026-04-06
+
+- Replace AppleScript-based renaming with native Node.js `fs.rename()` to fix shell injection vulnerability
+- Add per-file error handling with individual success/failure tracking
+- Add conflict detection to prevent overwriting existing files
+- Add filename validation for macOS compatibility
+
+## [New Feature] - 2026-03-05
+
+### Added
+
+- Added "Advanced Batch Rename" command with a rule-based engine.
+- Supports stacking multiple rules: Find & Replace (Regex), Change Case, Add Text, Sequential Numbering, and Extension Management.
+- Real-time "Will Rename" preview with conflict detection.
+- Rule reordering and editing support.
+
+## [Enhancement] - 2025-09-15
+
+- Fix the bug that cause rename incorrect issue.
+- Improve the rename script with better file/directory detection and special character handling.
+
 ## [New feature] - 2024-12-02
 
 - Add a new `Replace File(s) Characters` command to change characters in file names.

@@ -7,6 +7,7 @@
   "license": "MIT",
   "contributors": [
     "emanguy",
+    "theherk",
     "LunaticMuch",
     "pernielsentikaer",
     "perat"
@@ -45,6 +46,13 @@
       "title": "My Pull Requests",
       "subtitle": "GitHub Enterprise",
       "description": "GitHub actions",
+      "mode": "view"
+    },
+    {
+      "name": "search-repositories",
+      "title": "Search Repositories",
+      "subtitle": "GitHub Enterprise",
+      "description": "Search repositories by name.",
       "mode": "view"
     },
     {
@@ -155,7 +163,6 @@
     "eslint-config-next": "^13.4.10",
     "eslint-config-prettier": "^8.8.0",
     "prettier": "^3.0.0",
-    "react-devtools": "^4.28.0",
     "typescript": "^5.1.6"
   },
   "scripts": {
@@ -165,5 +172,8 @@
     "lint": "ray lint",
     "publish": "ray publish",
     "generate": "graphql-codegen --config codegen.ts"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }

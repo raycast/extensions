@@ -24,7 +24,18 @@
     "scottlovegrove",
     "henningmu",
     "FlohGro",
-    "dedalusj"
+    "dedalusj",
+    "william_sault",
+    "aditya_pethkar",
+    "alanwill",
+    "erayack",
+    "chialiyun",
+    "jakoss",
+    "yashpatel21"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
   ],
   "commands": [
     {
@@ -598,6 +609,29 @@
             }
           }
         ]
+      },
+      {
+        "input": "@todoist Update the priority of task Task 1 to priority 1",
+        "mocks": {
+          "get-tasks": [
+            {
+              "id": "Task 1",
+              "priority": 4
+            }
+          ],
+          "update-task": "Successfully called \"update-task\""
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "id": "Task 1",
+                "priority": 1
+              },
+              "name": "update-task"
+            }
+          }
+        ]
       }
     ]
   },
@@ -617,12 +651,21 @@
       "title": "Focus Label",
       "description": "Shared label name to apply to your focused task. No label will be applied if left empty.",
       "placeholder": "raycast-focus"
+    },
+    {
+      "name": "useConfetti",
+      "type": "checkbox",
+      "label": "Use confetti to celebrate task completion",
+      "description": "When enabled, completing a task will trigger a confetti celebration.",
+      "default": false,
+      "required": false
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.95.0",
+    "@raycast/api": "^1.100.0",
     "@raycast/utils": "^1.19.1",
     "axios": "^1.8.4",
+    "chrono-node": "^2.7.9",
     "date-fns": "^4.1.0",
     "form-data": "^4.0.2",
     "lodash": "^4.17.21",
