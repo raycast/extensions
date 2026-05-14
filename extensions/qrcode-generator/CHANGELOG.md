@@ -1,5 +1,11 @@
 # QR Code Generator Changelog
 
+## [Add Read QR Code] - 2026-05-13
+
+- Added [Read QR Code] command that decodes QR codes from a picked image, a captured screenshot, or an image in the clipboard
+- Uses the native screen-capture tool on each platform (`screencapture -i` on macOS, `ms-screenclip:` on Windows) and `jimp` + `jsqr` for decoding
+- Result view shows the source image plus the decoded content, with Copy to Clipboard and Open in Browser actions
+
 ## [Improve UX] - 2025-12-27
 
 - Persist the selected format in the dropdown
