@@ -1,6 +1,6 @@
 # Your Name in Landsat Changelog
 
-## [Improved Generation Flow] - {PR_MERGE_DATE}
+## [Improved Generation Flow] - 2026-05-14
 
 - Added optional spacing input for generation via command arguments and in-app edit form
 - Updated image composition to honor custom inter-letter spacing in both display and export outputs
