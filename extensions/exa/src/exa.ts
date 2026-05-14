@@ -59,6 +59,7 @@ const exa = new Exa(
   preferences.apiKey || "no-api-key",
   !preferences.apiKey ? "https://extensions-api-proxy.raycast.com/exa" : "https://api.exa.ai",
 );
+(exa as unknown as { headers?: Headers }).headers?.set("x-exa-integration", "raycast-exa");
 
 function cleanArray(values?: string[]) {
   const cleaned = values?.map((value) => value.trim()).filter(Boolean);
