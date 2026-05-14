@@ -87,8 +87,9 @@ export async function createMeeting(refocus: boolean): Promise<void> {
   await open(TELEMOST_URL, preferredBrowserApp ?? undefined);
   await sleep(2000);
 
-  // For AppleScript we need the app name — detect from frontmost after open()
-  const browser = await getFrontmostApp();
+  // For AppleScript we need the app name — use the configured browser when available,
+  // otherwise detect from frontmost after open()
+  const browser = preferredBrowserApp?.name ?? (await getFrontmostApp());
   const family = BROWSERS[browser];
 
   if (!family) {
