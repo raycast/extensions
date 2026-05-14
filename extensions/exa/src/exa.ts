@@ -56,10 +56,7 @@ type SearchResultWithHighlights = SearchHighlightsResponse["results"][number];
 
 const preferences: ExtensionPreferences = getPreferenceValues();
 const exaBaseUrl = !preferences.apiKey ? "https://extensions-api-proxy.raycast.com/exa" : "https://api.exa.ai";
-const exa = new Exa(
-  preferences.apiKey || "no-api-key",
-  exaBaseUrl,
-);
+const exa = new Exa(preferences.apiKey || "no-api-key", exaBaseUrl);
 (exa as unknown as { headers?: Headers }).headers?.set("x-exa-integration", "raycast-exa");
 
 function isCodeContextResponse(value: unknown): value is CodeContextResponse {
