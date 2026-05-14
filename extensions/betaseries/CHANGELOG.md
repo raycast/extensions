@@ -1,6 +1,6 @@
 # Betaseries Changelog
 
-## [Episode Copy Action and Menu Bar Removal] - {PR_MERGE_DATE}
+## [Episode Copy Action and Menu Bar Removal] - 2026-05-14
 
 - Added an action to copy the show title together with the season and episode number directly from an episode.
 - Removed the **New Episodes Menu Bar** command for now because its episode update behavior was not reliable enough.
