@@ -8,6 +8,7 @@ import Actions from "./Actions";
 import { Data, Field, Record } from "../types";
 import useInstances from "../hooks/useInstances";
 import FavoriteForm from "./FavoriteForm";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 export default function SearchResultListItem({
   result,
@@ -32,7 +33,7 @@ export default function SearchResultListItem({
 }) {
   const { selectedInstance } = useInstances();
 
-  const instanceUrl = `https://${selectedInstance?.name}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: selectedInstance?.name ?? "" });
 
   const dataKeys = keys(result.data);
   const accessories: List.Item.Accessory[] = [];

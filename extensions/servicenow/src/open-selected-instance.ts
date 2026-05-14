@@ -1,5 +1,6 @@
 import { open, LocalStorage, showToast, Toast } from "@raycast/api";
 import { Instance } from "./types";
+import { getInstanceBaseUrl } from "./utils/instanceUrl";
 
 export default async () => {
   const instance = await LocalStorage.getItem<string>("selected-instance");
@@ -9,5 +10,5 @@ export default async () => {
   }
 
   const instanceProfile = JSON.parse(instance) as Instance;
-  open(`https://${instanceProfile.name}.service-now.com`);
+  open(getInstanceBaseUrl(instanceProfile));
 };

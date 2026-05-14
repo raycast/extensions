@@ -4,6 +4,7 @@ import InstanceForm from "./InstanceForm";
 
 import useInstances from "../hooks/useInstances";
 import { useEffect, useState } from "react";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 export default function InstancesList() {
   const [selectedId, setSelectedId] = useState("");
@@ -91,13 +92,13 @@ export default function InstancesList() {
                     icon={{ source: "servicenow.svg" }}
                     title={"Open Instance"}
                     shortcut={Keyboard.Shortcut.Common.Open}
-                    url={`https://${instanceName}.service-now.com`}
+                    url={getInstanceBaseUrl({ name: instanceName })}
                   />
                   <Action.OpenInBrowser
                     icon={{ source: "servicenow.svg" }}
                     title="Login to ServiceNow Instance"
                     shortcut={{ modifiers: ["cmd"], key: "l" }}
-                    url={`https://${instanceName}.service-now.com/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
+                    url={`${getInstanceBaseUrl({ name: instanceName })}/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`}
                   />
                 </List.Dropdown.Section>
                 <List.Dropdown.Section title="Instance Profiles">

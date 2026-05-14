@@ -9,13 +9,14 @@ import crypto from "crypto";
 import { Favorite, FavoriteRecord, FavoritesResponse, Module } from "../types";
 import { extractPathAndParam } from "../utils/extractPathAndParam";
 import useInstances from "./useInstances";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 const useFavorites = () => {
   const { selectedInstance, userId } = useInstances();
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
 
-  const { name: instanceName = "", username = "", password = "" } = selectedInstance || {};
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const { username = "", password = "" } = selectedInstance || {};
+  const instanceUrl = getInstanceBaseUrl({ name: selectedInstance?.name ?? "" });
 
   const {
     data: favorites,

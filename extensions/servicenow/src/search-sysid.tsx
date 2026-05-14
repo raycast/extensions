@@ -1,6 +1,7 @@
 import { LaunchProps, LocalStorage, showToast, Toast, open } from "@raycast/api";
 import { Instance } from "./types";
 import { findSysID } from "./utils/snSnippets";
+import { getInstanceBaseUrl } from "./utils/instanceUrl";
 
 export default async (props: LaunchProps) => {
   const { sys_id, instanceName } = props.arguments;
@@ -48,7 +49,7 @@ export default async (props: LaunchProps) => {
     else if (answer != null && answer[1]) {
       const table = answer[1].split("^")[0];
       const path = table + ".do?sys_id=" + sys_id;
-      open(`https://${instance.name}.service-now.com/${path}`);
+      open(`${getInstanceBaseUrl(instance)}/${path}`);
     } else {
       showToast(Toast.Style.Failure, `sys_id not found on ${instance.alias}`);
     }
@@ -71,7 +72,7 @@ class ServiceNowClient {
   }
 
   async authenticate() {
-    const url = `https://${this.instance.name}.service-now.com/sn_devstudio_/v1/get_publish_info`;
+    const url = `${getInstanceBaseUrl(this.instance)}/sn_devstudio_/v1/get_publish_info`;
 
     try {
       const response = await fetch(url, {
@@ -130,7 +131,7 @@ class ServiceNowClient {
 
   async startBackgroundScript(script: string, callback: (data: string) => void) {
     if (!this.sessionData) throw new Error("Not authenticated");
-    const url = `https://${this.instance.name}.service-now.com/sys.scripts.do`;
+    const url = `${getInstanceBaseUrl(this.instance)}/sys.scripts.do`;
 
     const body = { script: script, runscript: "Run script" };
 

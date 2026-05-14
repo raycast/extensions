@@ -13,6 +13,7 @@ import InstanceForm from "./InstanceForm";
 import { GlobalSearchResponse, Record, SearchResult } from "../types";
 import useFavorites from "../hooks/useFavorites";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 export default function ({ searchTerm }: { searchTerm: string }) {
   const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
@@ -26,7 +27,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
   const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const { alias = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
   const { isLoading, data, revalidate } = useFetch(
     `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${searchTerm}`,

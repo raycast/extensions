@@ -10,6 +10,7 @@ import Actions from "./Actions";
 
 import useInstances from "../hooks/useInstances";
 import { HistoryResponse, HistoryResult, Instance } from "../types";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 export default function SearchList() {
   const {
@@ -33,7 +34,7 @@ export default function SearchList() {
     full,
   } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
   const { isLoading, data, mutate, revalidate } = useFetch(
     `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,

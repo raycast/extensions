@@ -8,6 +8,7 @@ import fetch from "node-fetch";
 import { useLocalStorage } from "./useLocalStorage";
 
 import { Instance } from "../types";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 const compareInstances = (a: Instance, b: Instance): number => {
   const nameA = a.alias ? a.alias : a.name;
@@ -56,7 +57,7 @@ export default function useInstances() {
 
       try {
         const response = await fetch(
-          `https://${instanceName}.service-now.com/api/now/table/sys_user?sysparm_query=user_name=${username}`,
+          `${getInstanceBaseUrl(selectedInstance)}/api/now/table/sys_user?sysparm_query=user_name=${username}`,
           {
             method: "GET",
             headers: {

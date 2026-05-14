@@ -1,5 +1,12 @@
 # ServiceNow Extension Changelog
 
+## [FedRAMP and on-prem support] - 2026-05-14
+
+- Added support for FedRAMP ServiceNow instances (`*.servicenowservices.com`) and on-prem deployments with custom hostnames. The **Instance URL** field in instance profiles now accepts either a subdomain (cloud) or a full URL.
+- Centralized URL construction through a new helper, eliminating ~25 hardcoded references to `.service-now.com`.
+- Tightened browser-tab detection to parse the hostname instead of substring matching, fixing a minor spoofing edge case.
+- Added a one-click action in the instance profile form to download this extension's Update Set from ServiceNow Share (`⌘U`).
+
 ## [Fix] - 2025-05-14
 
 Fixed an issue where the Search by Sys_ID command stopped working after publishing, due to function name minification during the build process.

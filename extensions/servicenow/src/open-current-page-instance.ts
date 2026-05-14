@@ -1,6 +1,7 @@
 import { LaunchProps, LocalStorage, showToast, Toast, open } from "@raycast/api";
 import { Instance } from "./types";
 import { getURL } from "./utils/browserScripts";
+import { getInstanceBaseUrl, isServiceNowUrl } from "./utils/instanceUrl";
 
 export default async (props: LaunchProps) => {
   const { instanceName } = props.arguments;
@@ -12,9 +13,9 @@ export default async (props: LaunchProps) => {
     return;
   }
 
+  const instanceProfiles = JSON.parse(item) as Instance[];
   let instance;
   if (instanceName) {
-    const instanceProfiles = JSON.parse(item) as Instance[];
     instance = instanceProfiles.find(
       (i: Instance) =>
         i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
@@ -40,9 +41,9 @@ export default async (props: LaunchProps) => {
     return;
   }
 
-  if (url.includes(".service-now.com")) {
+  if (isServiceNowUrl(url, instanceProfiles)) {
     const urlObject = new URL(url);
-    open(`https://${instance.name}.service-now.com${urlObject.pathname + urlObject.search}`);
+    open(`${getInstanceBaseUrl(instance)}${urlObject.pathname + urlObject.search}`);
   } else {
     showToast(Toast.Style.Failure, "The current tab is not a ServiceNow instance");
   }

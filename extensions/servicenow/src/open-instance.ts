@@ -1,6 +1,7 @@
 import { open, LocalStorage, showToast, Toast, LaunchProps } from "@raycast/api";
 import { Instance } from "./types";
 import { showFailureToast } from "@raycast/utils";
+import { getInstanceBaseUrl } from "./utils/instanceUrl";
 
 export default async (props: LaunchProps) => {
   try {
@@ -35,7 +36,7 @@ export default async (props: LaunchProps) => {
       return;
     }
 
-    await open(`https://${instance.name}.service-now.com`);
+    await open(getInstanceBaseUrl(instance));
   } catch (error) {
     showFailureToast(error);
   }

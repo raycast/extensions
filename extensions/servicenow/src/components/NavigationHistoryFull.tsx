@@ -15,6 +15,7 @@ import useFavorites from "../hooks/useFavorites";
 import FavoriteForm from "./FavoriteForm";
 import { getSectionTitle } from "../utils/getSectionTitle";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 export default function NavigationHistoryFull() {
   const {
@@ -31,7 +32,7 @@ export default function NavigationHistoryFull() {
 
   const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
   const { isLoading, data, revalidate, pagination } = useFetch(
     (options) => {

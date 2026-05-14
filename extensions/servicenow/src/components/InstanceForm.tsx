@@ -18,7 +18,10 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
 
   const { itemProps, handleSubmit } = useForm<InstanceFormValues>({
     async onSubmit(values) {
-      instance ? await onSubmit({ ...instance, ...values }) : await onSubmit({ ...values, id: crypto.randomUUID() });
+      const normalized = { ...values, name: values.name.trim().replace(/\/+$/, "") };
+      instance
+        ? await onSubmit({ ...instance, ...normalized })
+        : await onSubmit({ ...normalized, id: crypto.randomUUID() });
       pop();
     },
     initialValues: {
@@ -77,14 +80,22 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
               }
             />
           </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.OpenInBrowser
+              title="Download Extension Update Set"
+              icon={Icon.Download}
+              url="https://developer.servicenow.com/connect.do#!/share/contents/3108109_servicenow_raycast_extension"
+              shortcut={{ modifiers: ["cmd"], key: "u" }}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
       <Form.TextField
         {...itemProps.name}
-        title="Name"
-        placeholder="Enter the instance name"
-        info={`The name is the unique identifier of your ServiceNow instance\nhttps://<name>.service-now.com`}
+        title="Instance URL"
+        placeholder="acme or https://sn.internal.corp"
+        info={`Enter the subdomain for a commercial cloud instance (e.g. "acme" → https://acme.service-now.com), or a full URL for FedRAMP, on-prem, or custom domains (e.g. https://gov.servicenowservices.com, https://sn.internal.corp).`}
       />
       <Form.TextField
         {...itemProps.alias}
@@ -109,11 +120,11 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
       <Form.Separator />
       <Form.Description
         title="Full Version"
-        text={`If this is an admin account or the instance has the UpdateSet of this extension installed, then you can use the full version of this extension.`}
+        text={`Enable the full version if this is an admin account or the instance has this extension's Update Set installed. Press ⌘U to download the Update Set.`}
       />
       <Form.Dropdown
         {...itemProps.full}
-        info={`Full Version includes:\n- Manage your Favorites.\n- See your Search History.\n- See all your Navigation History, otherwise limited.`}
+        info={`Full version includes:\n- Manage your Favorites\n- View your Search History\n- View your full Navigation History (limited otherwise)`}
       >
         <Form.Dropdown.Item
           key="yes"

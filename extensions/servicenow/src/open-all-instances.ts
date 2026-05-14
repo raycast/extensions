@@ -1,6 +1,7 @@
 import { open, LocalStorage, showToast, Toast } from "@raycast/api";
 import { uniqBy } from "lodash";
 import { Instance } from "./types";
+import { getInstanceBaseUrl } from "./utils/instanceUrl";
 
 export default async () => {
   const item = await LocalStorage.getItem<string>("saved-instances");
@@ -11,5 +12,5 @@ export default async () => {
 
   const instanceProfiles = JSON.parse(item) as Instance[];
   const instances = uniqBy(instanceProfiles, "name");
-  instances.forEach((i: Instance) => open(`https://${i.name}.service-now.com`));
+  instances.forEach((i: Instance) => open(getInstanceBaseUrl(i)));
 };

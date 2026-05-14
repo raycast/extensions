@@ -7,6 +7,7 @@ import { Field, Record, Data } from "../types";
 import useInstances from "../hooks/useInstances";
 import useFavorites from "../hooks/useFavorites";
 import FavoriteForm from "./FavoriteForm";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 export default function ResultDetail({ result, fields }: { result: Record; fields: Field[] }) {
   const { commandName } = environment;
@@ -16,7 +17,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
 
   const { alias = "", name: instanceName = "" } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
   let markdown = "";
   if (result.metadata.thumbnailURL) markdown += `![Illustration](${instanceUrl}/${result.metadata.thumbnailURL})\n\n`;

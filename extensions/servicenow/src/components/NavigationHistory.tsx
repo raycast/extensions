@@ -13,6 +13,7 @@ import { getTableIconAndColor } from "../utils/getTableIconAndColor";
 import { groupBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
 import { getSectionTitle } from "../utils/getSectionTitle";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 export default function NavigationHistory() {
   const {
@@ -29,7 +30,7 @@ export default function NavigationHistory() {
 
   const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
   const { isLoading, data, revalidate, pagination } = useFetch(`${instanceUrl}/api/now/ui/history`, {
     headers: {

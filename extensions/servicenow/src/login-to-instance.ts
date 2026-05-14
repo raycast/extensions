@@ -1,6 +1,7 @@
 import { LaunchProps, LocalStorage, open, showToast, Toast } from "@raycast/api";
 import { Instance } from "./types";
 import { showFailureToast } from "@raycast/utils";
+import { getInstanceBaseUrl } from "./utils/instanceUrl";
 
 export default async (props: LaunchProps) => {
   const { instanceName } = props.arguments;
@@ -48,6 +49,6 @@ export default async (props: LaunchProps) => {
   }
 
   open(
-    `https://${instance.name}.service-now.com/login.do?user_name=${instance.username}&user_password=${instance.password}&sys_action=sysverb_login`,
+    `${getInstanceBaseUrl(instance)}/login.do?user_name=${instance.username}&user_password=${instance.password}&sys_action=sysverb_login`,
   );
 };

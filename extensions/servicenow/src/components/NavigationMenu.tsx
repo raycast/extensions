@@ -13,6 +13,7 @@ import { filter } from "lodash";
 import { getIconForModules } from "../utils/getIconForModules";
 import FavoriteForm from "./FavoriteForm";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
+import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 export default function NavigationMenu(props: { groupId?: string }) {
   const { groupId = "" } = props;
@@ -37,7 +38,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
 
   const { id: instanceId = "", name: instanceName = "", username = "", password = "", full } = selectedInstance || {};
 
-  const instanceUrl = `https://${instanceName}.service-now.com`;
+  const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
   const { isLoading, data, revalidate } = useFetch(
     () => {

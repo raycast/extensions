@@ -21,6 +21,7 @@ The **ServiceNow Raycast Extension** allows you to easily search and explore con
 Before using the extension, you'll need to configure your ServiceNow instance profiles. To do this:
 
 - Use the **Manage Instance Profiles** command to add your ServiceNow instance name and credentials.
+- In the **Instance URL** field, enter the subdomain for a commercial cloud instance (e.g. `acme` → `https://acme.service-now.com`), or the full URL for FedRAMP, on-prem, or custom domains (e.g. `https://gov.servicenowservices.com`, `https://sn.internal.corp`).
 - You can add multiple instance profiles and switch between them as needed (⌘+I).
 
 ### 2. Enabling User Access to Search Terms
