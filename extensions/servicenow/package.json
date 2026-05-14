@@ -137,13 +137,13 @@
     },
     {
       "name": "search-sysid",
-      "title": "Search sys_id",
-      "description": "Search for a sys_id. Admins only",
+      "title": "Search Sys ID",
+      "description": "Search for a Sys ID. Admins only",
       "mode": "no-view",
       "arguments": [
         {
           "name": "sys_id",
-          "placeholder": "sys_id",
+          "placeholder": "Sys ID",
           "type": "text",
           "required": true
         },
