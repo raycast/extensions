@@ -48,18 +48,25 @@ export function formatConfirmation({ name, value }: { name: string; value: undef
   };
 
   if (name in formatters) {
+    // Treat empty strings, null, and empty arrays the same as undefined. AI tool
+    // callers often pass `""` (or `[]`) for optional ID fields, which would
+    // otherwise trigger a doomed entity lookup (e.g. `workflowState("")` →
+    // "Entity not found: WorkflowState") or, for `labelIds: ""`, a TypeError
+    // when `Promise.all("".map(...))` is attempted on a non-array value. Both
+    // surface confusing errors before the actual mutation runs.
+    if (
+      typeof value === "undefined" ||
+      value === null ||
+      value === "" ||
+      (Array.isArray(value) && value.length === 0)
+    ) {
+      return { name, value: "-" };
+    }
     if (name === "labelIds") {
       return formatters["labelIds"](value as string[]);
     }
     if (Array.isArray(value)) {
       return { name, value };
-    }
-    // Treat empty strings and null the same as undefined. AI tool callers often pass
-    // `""` for optional ID fields, which would otherwise trigger a doomed entity
-    // lookup (e.g. `workflowState("")` → "Entity not found: WorkflowState") and
-    // surface a confusing error before the actual create/update mutation even runs.
-    if (typeof value === "undefined" || value === "" || value === null) {
-      return { name, value: "-" };
     }
     /* eslint-disable @typescript-eslint/no-unused-vars */
     const { labelIds, ...stringFormatters } = formatters;
