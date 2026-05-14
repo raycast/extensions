@@ -156,6 +156,38 @@
       ]
     },
     {
+      "name": "find-references",
+      "title": "Find Record References",
+      "description": "Find tables and columns where a record is referenced. Requires an admin profile (uses /sys.scripts.do).",
+      "mode": "view",
+      "keywords": [
+        "reference",
+        "references",
+        "where-used",
+        "sys_dictionary"
+      ],
+      "arguments": [
+        {
+          "name": "table",
+          "placeholder": "Table",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "sysId",
+          "placeholder": "Sys ID",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "cancel-my-transactions",
       "title": "Cancel My Transactions",
       "description": "Stop a long-running transaction that has locked you out of your ServiceNow session, without opening a new browser or private window. If no instance name or alias is provided, uses the currently selected instance.",
