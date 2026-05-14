@@ -1,4 +1,4 @@
-import { Action, Icon, closeMainWindow } from "@raycast/api";
+import { Action, closeMainWindow, Icon } from "@raycast/api";
 import { captureScreenshot } from "../../services/captureScreenshot";
 import { captureScreenshotWindows } from "../../services/captureScreenshotWindows";
 import type { DecodeAction } from "../../types";
@@ -8,9 +8,17 @@ interface Props {
   onDecode: DecodeAction;
 }
 
+let isCapturing = false;
+
 async function handleCapture(onDecode: DecodeAction, capture: () => Promise<string>) {
-  await closeMainWindow();
-  await runOrToast(capture, onDecode, "screenshot");
+  if (isCapturing) return;
+  isCapturing = true;
+  try {
+    await closeMainWindow();
+    await runOrToast(capture, onDecode, "screenshot");
+  } finally {
+    isCapturing = false;
+  }
 }
 
 export default function CaptureAction({ onDecode }: Props) {

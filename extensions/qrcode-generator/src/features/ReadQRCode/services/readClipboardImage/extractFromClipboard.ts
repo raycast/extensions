@@ -1,8 +1,7 @@
 import { execFile } from "child_process";
+import { existsSync, statSync } from "fs";
 import { promisify } from "util";
-import { tmpdir } from "os";
-import { join } from "path";
-import { existsSync, statSync, unlinkSync } from "fs";
+import { safeUnlink, tempPath } from "../tempFiles";
 
 const run = promisify(execFile);
 
@@ -29,11 +28,11 @@ const MAC_SCRIPT = (out: string) => [
 
 const WIN_SCRIPT = (out: string) =>
   `$ErrorActionPreference='Stop'; $img = Get-Clipboard -Format Image; ` +
-  `if ($img -eq $null) { exit 1 }; ` +
+  `if ($null -eq $img) { exit 1 }; ` +
   `$img.Save('${out.replace(/'/g, "''")}')`;
 
 export async function extractRawImageFromClipboard(): Promise<string> {
-  const out = join(tmpdir(), `qrcode-clip-${Date.now()}.png`);
+  const out = tempPath("clip", "png");
   if (process.platform === "darwin") {
     await run("osascript", MAC_SCRIPT(out));
   } else if (process.platform === "win32") {
@@ -42,11 +41,7 @@ export async function extractRawImageFromClipboard(): Promise<string> {
     throw new Error("Reading raw clipboard image is not supported on this platform");
   }
   if (!existsSync(out) || statSync(out).size === 0) {
-    try {
-      unlinkSync(out);
-    } catch {
-      /* noop */
-    }
+    safeUnlink(out);
     throw new Error("No image data in clipboard");
   }
   return out;

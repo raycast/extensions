@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Form, Icon } from "@raycast/api";
-import { useState } from "react";
+import { useRef } from "react";
 import { readClipboardImage } from "../../services/readClipboardImage";
 import type { DecodeAction } from "../../types";
 import CaptureAction from "./CaptureAction";
@@ -10,12 +10,13 @@ interface Props {
 }
 
 export default function ReadForm({ onDecode }: Props) {
-  const [pickerKey, setPickerKey] = useState(0);
+  const filePickerRef = useRef<Form.FilePicker>(null);
 
   const handleChange = async (files: string[]) => {
     if (files[0]) {
-      await onDecode(files[0], "file");
-      setPickerKey((k) => k + 1);
+      const file = files[0];
+      filePickerRef.current?.reset();
+      await onDecode(file, "file");
     }
   };
 
@@ -34,7 +35,7 @@ export default function ReadForm({ onDecode }: Props) {
       }
     >
       <Form.FilePicker
-        key={pickerKey}
+        ref={filePickerRef}
         id="image"
         title="Image"
         allowMultipleSelection={false}

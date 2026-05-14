@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { showHUD } from "@raycast/api";
 import type { DecodeAction, ImageSource } from "../../types";
 
 const FAILURE_TITLES: Record<Exclude<ImageSource, "file">, string> = {
@@ -6,11 +6,11 @@ const FAILURE_TITLES: Record<Exclude<ImageSource, "file">, string> = {
   clipboard: "Clipboard read failed",
 };
 
-async function safeFailureToast(title: string, message: string) {
+async function safeFailure(title: string, message: string) {
   try {
-    await showToast({ style: Toast.Style.Failure, title, message });
+    await showHUD(`${title}: ${message}`);
   } catch {
-    /* swallow secondary toast errors */
+    /* swallow secondary errors */
   }
 }
 
@@ -24,6 +24,6 @@ export async function runOrToast(
     await onDecode(filePath, source);
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    await safeFailureToast(FAILURE_TITLES[source], message);
+    await safeFailure(FAILURE_TITLES[source], message);
   }
 }

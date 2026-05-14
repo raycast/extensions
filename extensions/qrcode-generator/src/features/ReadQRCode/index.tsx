@@ -1,14 +1,19 @@
 import { showHUD, showToast, Toast, useNavigation } from "@raycast/api";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import ReadForm from "./components/ReadForm";
 import ResultView from "./components/ResultView";
 import { decodeImage } from "./services/decodeImage";
+import { cleanupStaleTempFiles } from "./services/tempFiles";
 import type { DecodeAction, DecodeResult, ImageSource } from "./types";
 
 const shouldNotify = (source: ImageSource) => source === "screenshot" && process.platform === "win32";
 
 export default function ReadQRCode() {
   const { push } = useNavigation();
+
+  useEffect(() => {
+    cleanupStaleTempFiles();
+  }, []);
 
   const showResult = useCallback(
     (r: DecodeResult) => push(<ResultView text={r.text} imagePath={r.imagePath} />),

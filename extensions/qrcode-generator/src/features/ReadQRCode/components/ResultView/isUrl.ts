@@ -1,7 +1,8 @@
+const LINKABLE_PROTOCOLS = new Set(["http:", "https:", "mailto:", "tel:", "sms:", "ftp:", "ftps:"]);
+
 export function isUrl(text: string): boolean {
   try {
-    const url = new URL(text);
-    return url.protocol === "http:" || url.protocol === "https:";
+    return LINKABLE_PROTOCOLS.has(new URL(text).protocol);
   } catch {
     return false;
   }

@@ -1,39 +1,43 @@
 import { showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
-import { existsSync, unlinkSync, writeFileSync } from "fs";
-import { tmpdir } from "os";
-import { join } from "path";
+import { existsSync, statSync, writeFileSync } from "fs";
 import { promisify } from "util";
 import { launchSnipTool } from "../launchSnipTool";
+import { safeUnlink, tempPath } from "../tempFiles";
 import { buildPollScript } from "./pollScript";
 
 const run = promisify(execFile);
 
-function safeUnlink(p: string) {
+async function safeHide(toast: Toast) {
   try {
-    unlinkSync(p);
+    await toast.hide();
   } catch {
-    /* noop */
+    /* ignore */
   }
 }
 
 export async function captureScreenshotWindows(): Promise<string> {
-  const out = join(tmpdir(), `qrcode-shot-${Date.now()}.png`);
-  const scriptPath = join(tmpdir(), `qrcode-poll-${Date.now()}.ps1`);
+  const out = tempPath("shot", "png");
+  const scriptPath = tempPath("poll", "ps1");
   writeFileSync(scriptPath, buildPollScript(out), "utf8");
-  await launchSnipTool();
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Waiting for snip…" });
+  let toast: Toast | undefined;
   try {
-    await run("powershell.exe", ["-Sta", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath], {
-      timeout: 95_000,
-      maxBuffer: 1 << 20,
-    });
-  } catch {
-    /* timeout or non-zero exit, handled by file check */
+    await launchSnipTool();
+    toast = await showToast({ style: Toast.Style.Animated, title: "Waiting for snip…" });
+    try {
+      await run("powershell.exe", ["-Sta", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath], {
+        timeout: 95_000,
+        maxBuffer: 1 << 20,
+      });
+    } catch {
+      /* timeout or non-zero exit handled by file check */
+    }
+  } finally {
+    if (toast) await safeHide(toast);
+    safeUnlink(scriptPath);
   }
-  await toast.hide();
-  safeUnlink(scriptPath);
-  if (!existsSync(out)) {
+  if (!existsSync(out) || statSync(out).size === 0) {
+    safeUnlink(out);
     throw new Error("Snip timed out or was cancelled");
   }
   return out;
