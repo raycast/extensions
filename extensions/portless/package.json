@@ -21,6 +21,15 @@
       "mode": "view"
     }
   ],
+  "preferences": [
+    {
+      "name": "customPortlessPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom Portless Executable Path",
+      "description": "Set this if your portless executable is in a non-standard location (e.g. installed via a Node version manager like fnm, volta, asdf, or mise). Run `which portless` in your terminal to find the path."
+    }
+  ],
   "dependencies": {
     "@raycast/api": "^1.104.10",
     "@raycast/utils": "^1.17.0"

@@ -1,7 +1,11 @@
 import { existsSync, readdirSync } from "fs";
 import { join } from "path";
-import { ActionPanel, Action, Icon, List } from "@raycast/api";
+import { ActionPanel, Action, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useExec } from "@raycast/utils";
+
+interface Preferences {
+  customPortlessPath?: string;
+}
 
 function parsePortlessListOutput(stdout: string): string[] {
   const urls: string[] = [];
@@ -48,7 +52,10 @@ function getExtendedPath(): string {
 }
 
 export default function Command() {
-  const { data, isLoading } = useExec("portless", ["list"], {
+  const { customPortlessPath } = getPreferenceValues<Preferences>();
+  const binary = customPortlessPath?.trim() || "portless";
+
+  const { data, isLoading } = useExec(binary, ["list"], {
     env: { PATH: getExtendedPath() },
     parseOutput: ({ stdout, error }) => (error ? [] : parsePortlessListOutput(stdout)),
   });
