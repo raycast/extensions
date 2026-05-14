@@ -1,5 +1,10 @@
 # Raycast Store Updates Changelog
 
+## [Add platform filter shortcuts] - 2026-04-30
+
+- Add keyboard shortcuts for toggling macOS-only and Windows-only extension filters
+- Add keyboard shortcut for opening extensions in the Raycast Store
+
 ## [Detect and display removed extensions] - 2026-02-27
 
 - Detect extension removal PRs using the `no-review` label, removal-pattern titles, and package.json 404 confirmation

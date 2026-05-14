@@ -27,6 +27,7 @@ import {
 import {
   executePrompt,
   ClaudeResponse,
+  ensureClaudeApiAuth,
   ensureClaudeInstalled,
 } from "./lib/claude-cli";
 import { captureContext, getCodeContext } from "./lib/context-capture";
@@ -708,9 +709,13 @@ function ExecutingPromptView({
 
     async function execute() {
       try {
-        // Check if Claude is installed first
         if (!(await ensureClaudeInstalled())) {
           setError("Claude Code not installed");
+          setIsLoading(false);
+          return;
+        }
+        if (!(await ensureClaudeApiAuth())) {
+          setError("Claude authentication missing");
           setIsLoading(false);
           return;
         }

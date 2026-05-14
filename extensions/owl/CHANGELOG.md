@@ -1,5 +1,11 @@
 # OWL Changelog
 
+## [Filter Keyboards] - 2026-04-23
+
+- Added filter for keyboards to show only those that match the languages.
+- Added default OWLs when initializing and actions to reload that configuration.
+- Added actions to delete multiple owls at a time.
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

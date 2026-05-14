@@ -1,5 +1,15 @@
 # Jira Changelog
 
+## [Open Issues sprint/backlog split config] - 2026-04-16
+
+- Added new `Open Issues` checkboxes to choose which sections to show: `Active Sprint`, `All Sprints`, and `Backlog`.
+- Updated the `All Sprints` view in `Open Issues` to split issues by sprint name instead of showing a single combined section.
+- Kept original `Open Issues` behavior as the implicit default when no section checkbox is enabled.
+- Removed the separate `Open Issues in Active Sprint` command since equivalent behavior is now configurable in `Open Issues`.
+- Included project dropdown filtering with persisted selection to match the existing active sprint workflow.
+- Added a friendlier fallback error for Jira OAuth `invalid_grant` failures, prompting users to reconnect Jira in extension preferences.
+- Improved extension and `Open Issues` preference descriptions for clearer in-app configuration guidance.
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)

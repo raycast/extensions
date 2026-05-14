@@ -35,6 +35,41 @@
       "description": "Quickly create a new Habitica task",
       "mode": "view",
       "subtitle": "Habitica"
+    },
+    {
+      "name": "view-dailies",
+      "title": "View Dailies",
+      "description": "View, check, and edit your Habitica dailies",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "view-habits",
+      "title": "View Habits",
+      "description": "View, score, and edit your Habitica habits",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "view-profile",
+      "title": "View Profile",
+      "description": "View your Habitica stats and quests",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "view-inventory",
+      "title": "View Inventory",
+      "description": "View your Habitica eggs, potions, and food",
+      "mode": "view",
+      "subtitle": "Habitica"
+    },
+    {
+      "name": "view-shop",
+      "title": "View Shop",
+      "description": "View and purchase custom rewards and in-game items",
+      "mode": "view",
+      "subtitle": "Habitica"
     }
   ],
   "dependencies": {

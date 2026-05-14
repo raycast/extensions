@@ -1,5 +1,6 @@
 import { getPreferenceValues, open } from "@raycast/api";
 import * as child_process from "child_process";
+import * as fs from "fs";
 import * as afs from "fs/promises";
 import * as os from "os";
 import path from "path";
@@ -117,6 +118,94 @@ export function getVSCodeCLIFilename(): string {
     return cliPathsMac.Code;
   }
   return name;
+}
+
+function programPaths(): Record<string, string> {
+  let programPaths: Record<string, string> = {};
+
+  if (isWin) {
+    const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
+    programPaths = {
+      Antigravity: path.join(programsFolder, "Antigravity"),
+      Code: path.join(programsFolder, "Microsoft VS Code"),
+      "Code - Insiders": path.join(programsFolder, "Microsoft VS Code Insiders"),
+      Cursor: path.join(programsFolder, "cursor"),
+      Kiro: path.join(programsFolder, "Kiro"),
+      Positron: path.join(programsFolder, "Positron"),
+      Qoder: path.join(programsFolder, "Qoder"),
+      Trae: path.join(programsFolder, "Trae"),
+      "Trae CN": path.join(programsFolder, "Trae CN"),
+      VSCodium: path.join(programsFolder, "VSCodium"),
+      "VSCodium - Insiders": path.join(programsFolder, "VSCodium Insiders"),
+      Windsurf: path.join(programsFolder, "Windsurf"),
+      Lingma: path.join(programsFolder, "Lingma"),
+    };
+  }
+
+  if (isMac) {
+    programPaths = {
+      Antigravity: "/Applications/Antigravity.app/Contents/Resources/app",
+      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app",
+      "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app",
+      Cursor: "/Applications/Cursor.app/Contents/Resources/app",
+      Kiro: "/Applications/Kiro.app/Contents/Resources/app",
+      Positron: "/Applications/Positron.app/Contents/Resources/app",
+      Qoder: "/Applications/Qoder.app/Contents/Resources/app",
+      Trae: "/Applications/Trae.app/Contents/Resources/app",
+      "Trae CN": "/Applications/Trae CN.app/Contents/Resources/app",
+      VSCodium: "/Applications/VSCodium.app/Contents/Resources/app",
+      "VSCodium - Insiders": "/Applications/VSCodium - Insiders.app/Contents/Resources/app",
+      Windsurf: "/Applications/Windsurf.app/Contents/Resources/app",
+      Lingma: "/Applications/Lingma.app/Contents/Resources/app",
+    };
+  }
+
+  return programPaths;
+}
+
+function resolveWindowsProductJSONPath(installDir: string): string {
+  const defaultProductJSONPath = path.join(installDir, "resources", "app", "product.json");
+
+  if (fs.existsSync(defaultProductJSONPath)) {
+    return defaultProductJSONPath;
+  }
+
+  try {
+    // VS Code's Windows versioned resources folder is commit.substring(0, 10).
+    // https://github.com/microsoft/vscode/blob/8cc98deb3ce25f83f2fd240507e682da0b6dad41/build/gulpfile.vscode.win32.ts#L76
+    const versionedResourcesDirs = fs
+      .readdirSync(installDir, { withFileTypes: true })
+      .filter((dirent) => dirent.isDirectory() && /^[0-9a-f]{10}$/i.test(dirent.name));
+
+    const versionedResourcesDir =
+      versionedResourcesDirs.length <= 1
+        ? versionedResourcesDirs[0]?.name
+        : versionedResourcesDirs
+            .map(({ name }) => ({
+              name,
+              stats: fs.statSync(path.join(installDir, name)),
+            }))
+            .sort((a, b) => b.stats.mtimeMs - a.stats.mtimeMs)[0]?.name;
+
+    const productJSONPath = versionedResourcesDir
+      ? path.join(installDir, versionedResourcesDir, "resources", "app", "product.json")
+      : undefined;
+
+    return productJSONPath && fs.existsSync(productJSONPath) ? productJSONPath : defaultProductJSONPath;
+  } catch {
+    return defaultProductJSONPath;
+  }
+}
+
+export function getProductJSONPath(): string {
+  const programPathsForPlatform = programPaths();
+  const programPath = programPathsForPlatform[getBuildNamePreference()] || programPathsForPlatform.Code;
+
+  if (isWin) {
+    return resolveWindowsProductJSONPath(programPath);
+  }
+
+  return path.join(programPath, "product.json");
 }
 
 export class VSCodeCLI {

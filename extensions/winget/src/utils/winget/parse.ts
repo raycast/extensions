@@ -40,6 +40,17 @@ export function parseTable(output: string): Record<string, string>[] {
 
   if (columns.length === 0) return [];
 
+  // Winget localizes table headers based on OS / Store language settings.
+  // To keep parsing language-agnostic, map columns to canonical keys by position.
+  // Common shapes:
+  // - search/list:   Name | Id | Version | Source
+  // - upgrade:       Name | Id | Version | Available | Source
+  const canonicalByCount: Record<number, string[]> = {
+    4: ["Name", "Id", "Version", "Source"],
+    5: ["Name", "Id", "Version", "Available", "Source"],
+  };
+  const canonical = canonicalByCount[columns.length];
+
   const results: Record<string, string>[] = [];
 
   for (const line of lines.slice(sepIdx + 1)) {
@@ -54,7 +65,7 @@ export function parseTable(output: string): Record<string, string>[] {
       const start = columns[i].start;
       const end = i < columns.length - 1 ? columns[i + 1].start : undefined;
       const value = end !== undefined ? line.slice(start, end).trim() : line.slice(start).trim();
-      row[columns[i].name] = value;
+      row[canonical?.[i] ?? columns[i].name] = value;
     }
 
     results.push(row);
@@ -74,9 +85,10 @@ export function parseKeyValue(output: string): Record<string, string> {
   const lines = output.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
   const result: Record<string, string> = {};
 
-  // First non-empty line: "Found <Name> [<Id>]"
-  const firstLine = lines.find((l) => l.trim().length > 0) ?? "";
-  const foundMatch = firstLine.match(/^Found (.+?) \[(.+?)\]/);
+  // Scan all lines for "Found <Name> [<Id>]" — it may not be the first line
+  // due to spinner/progress output preceding it.
+  const foundLine = lines.find((l) => /^Found .+ \[.+\]/.test(l.trim())) ?? "";
+  const foundMatch = foundLine.trim().match(/^Found (.+?) \[(.+?)\]/);
   if (foundMatch) {
     result["_name"] = foundMatch[1].trim();
     result["_id"] = foundMatch[2].trim();

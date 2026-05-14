@@ -115,6 +115,10 @@
           "value": "copyGifUrl"
         },
         {
+          "title": "Paste GIF Link",
+          "value": "pasteGifUrl"
+        },
+        {
           "title": "Copy GIF Markdown",
           "value": "copyGifMarkdown"
         },

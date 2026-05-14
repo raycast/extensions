@@ -32,3 +32,7 @@ Leave this field empty to use the system default.
 ### Run in Background (Install / Upgrade)
 
 When enabled, Raycast closes immediately after starting an install or upgrade. The operation continues in the background and a notification appears when it finishes. When disabled (default), Raycast stays open and shows a progress toast.
+
+### Hide Unmanaged Packages (Installed Packages)
+
+When enabled, the Installed Packages list hides packages without a known source (not installed via WinGet or Microsoft Store). Note that some WinGet-installed packages may temporarily appear without a source immediately after installation.

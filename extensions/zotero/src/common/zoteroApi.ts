@@ -12,6 +12,7 @@ export interface Preferences {
   bibtex_path?: string;
   csl_style?: string;
   cache_period?: string;
+  quote_pdf_path?: boolean;
 }
 
 export interface RefData {

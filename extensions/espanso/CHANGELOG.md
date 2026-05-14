@@ -1,5 +1,12 @@
 # Espanso Changelog
 
+## [1.1.0] - 2026-04-16
+
+### What's Changed
+
+- Added "Edit Match" action (⌘E) to edit existing matches directly from Search Matches via a pre-populated form
+- Replacement text is now searchable in addition to triggers and labels
+
 ## [Patch] - 2026-04-09
 
 ### Bug Fixes

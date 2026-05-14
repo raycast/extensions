@@ -102,11 +102,11 @@ const BinDownloadLogger = (() => {
 })();
 
 export const cliInfo = {
-  version: "2026.2.0",
+  version: "2026.3.0",
   get sha256() {
-    if (platform === "windows") return "6e7fe65ef0d0401af20bb739cb81469a0c001d9ee249ceea4a86974ae27a4c46";
-    if (process.arch === "arm64") return "63c736b74620280e422ce238bdbcbc267689a0ff831168959ef2124588fcc1e5";
-    return "60cc5109b1cdad560231e02098f1ab2d16efa821d51c6ec089cb5c3cc351b2e5";
+    if (platform === "windows") return "3f129e6d15ae950b5840d20ce9bcf99c2248ce5330f4d4c70e859512d5992371";
+    if (process.arch === "arm64") return "d935e9885ed215ecb0de9a7e7251487012b007a74fedbaaec6074d299fef3e02";
+    return "015ed86b1f9e23a366e0c7937a5b5cfcd26348505608e5e446890cd83a00b1d2";
   },
   downloadPage: "https://github.com/bitwarden/clients/releases",
   path: {
@@ -772,13 +772,7 @@ export class Bitwarden {
     }
     if (/Invalid session token/i.test(errorContent)) {
       if (!skipInvalidSessionTokenLogout) {
-        // Avoid running the full logout lifecycle here (which fires logout listeners).
-        // Clear the session token and mark the vault as unauthenticated so callers
-        // can perform an explicit `bitwarden.logout()` when they want the full
-        // logout side-effects (listeners, storage updates, etc.). This prevents
-        // duplicate listener invocations.
-        this.clearSessionToken();
-        await this.saveLastVaultStatus("handleCommonErrors:InvalidSessionToken", "unauthenticated");
+        await this.logout({ reason: "Invalid session token", immediate: true });
       }
       return { error: new InvalidSessionTokenError() };
     }

@@ -175,6 +175,15 @@
           "value": "vancouver"
         }
       ]
+    },
+    {
+      "name": "quote_pdf_path",
+      "type": "checkbox",
+      "title": "PDF Path Copy",
+      "required": false,
+      "default": false,
+      "label": "Wrap PDF Path in Quotes",
+      "description": "Wrap the copied PDF path in quotation marks"
     }
   ],
   "dependencies": {

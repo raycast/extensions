@@ -120,6 +120,12 @@
       "title": "Delete Latest Download",
       "description": "Delete the last downloaded file or folder",
       "mode": "no-view"
+    },
+    {
+      "name": "toggle-deletion-behavior",
+      "title": "Toggle Deletion Behavior",
+      "description": "Toggle between moving downloads to Trash and permanently deleting them",
+      "mode": "no-view"
     }
   ],
   "preferences": [

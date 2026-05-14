@@ -1,5 +1,19 @@
 # WinGet Changelog
 
+## [Fix localized upgrade parsing] - 2026-04-23
+
+- Fix winget table parsing on localized outputs by mapping table columns by position
+
+## [Reliability & Details Improvements] - 2026-04-21
+
+- Improve install and upgrade reliability by respecting winget exit codes (no false success toasts)
+- Show clear feedback for no-op installs (already installed / no newer version available)
+- Align Installed Packages “Upgrades Available” with the Upgrade Packages view
+- Add preference to hide packages without a known source in Installed Packages
+- Improve package details: show source tags, hide Unknown version, and render license URLs as links
+- Provide a friendly details view for unmanaged packages (no winget metadata available)
+- Standardize action shortcuts and fix duplicate key warnings in lists
+
 ## [Initial Release] - 2026-04-12
 
 - Search packages in the winget repository and install them
@@ -13,3 +27,4 @@
 - Copy package ID and command shortcuts to clipboard
 - Configurable winget executable path preference
 - Graceful error messages when winget executable is not found
+

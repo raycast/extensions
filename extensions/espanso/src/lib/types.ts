@@ -46,7 +46,12 @@ type BaseMatch = Replacement & (SingleTrigger | MultiTrigger | RegexTrigger);
 
 export type EspansoMatch = BaseMatch & Label & Form & { vars?: EspansoVar[] };
 
-export type NormalizedEspansoMatch = EspansoMatch & MultiTrigger & FilePath & { category?: string };
+export type NormalizedEspansoMatch = EspansoMatch &
+  MultiTrigger &
+  FilePath & {
+    category?: string;
+    isRegex?: boolean;
+  };
 
 export type EspansoConfig = {
   config: string;

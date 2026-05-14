@@ -1,9 +1,22 @@
 # Bitwarden Changelog
 
+## [Update packages] - 2026-04-24
+
+- Update Raycast packages to the latest version
+
+## [CLI update & Fix] - 2026-04-23
+
+- Logout whenever there is a "Invalid session token" error
+
+## [Fix] - 2026-04-20
+
+- 🐛 Fix infinite retry loop when unlocking vault with invalid session token
+
 ## [Fix] - 2026-04-03
 
 - Update bundled Bitwarden CLI from v2025.11.0 to v2026.2.0 to fix "Invalid session token" error caused by server-side KDF upgrades
 - Fix incorrect vault status saved after API key login
+
 ## [Fix] - 2026-04-02
 
 - Catch Invalid session token error

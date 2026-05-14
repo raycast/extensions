@@ -1,36 +1,44 @@
-import { Action, Icon, confirmAlert, Alert, showToast, Toast } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
-import { updateAllSkills } from "../../utils/skills-cli";
+import { Action, Alert, Icon } from "@raycast/api";
+import { updateAllSkills, updateSkill } from "../../utils/skills-cli";
+import { withSkillAction } from "../../utils/with-skill-action";
+import type { MutateSkills } from "../../hooks/useInstalledSkills";
 
 interface UpdateSkillActionProps {
-  onUpdate: () => void;
+  skillName?: string;
+  mutate: MutateSkills;
 }
 
-export function UpdateSkillAction({ onUpdate }: UpdateSkillActionProps) {
+export function UpdateSkillAction({ skillName, mutate }: UpdateSkillActionProps) {
+  const isSingle = skillName !== undefined;
+
   return (
     <Action
-      title="Update All Skills"
+      title={isSingle ? "Update Skill" : "Update All Skills"}
       icon={Icon.ArrowClockwise}
       shortcut={{ modifiers: ["cmd", "shift"], key: "u" }}
-      onAction={async () => {
-        const confirmed = await confirmAlert({
-          title: "Update All Skills?",
-          message: "This will update all installed skills to the latest version.",
-          primaryAction: { title: "Update", style: Alert.ActionStyle.Default },
-        });
-        if (!confirmed) return;
-
-        const toast = await showToast({ style: Toast.Style.Animated, title: "Updating skills..." });
-        try {
-          await updateAllSkills();
-          toast.style = Toast.Style.Success;
-          toast.title = "All skills updated";
-          onUpdate();
-        } catch (error) {
-          await toast.hide();
-          await showFailureToast(error, { title: "Failed to update skills" });
-        }
-      }}
+      onAction={() =>
+        withSkillAction({
+          confirm: {
+            title: isSingle ? `Update "${skillName}"?` : "Update All Skills?",
+            message: isSingle
+              ? `This will update "${skillName}" to the latest version.`
+              : "This will update all installed skills to the latest version.",
+            primaryAction: { title: "Update", style: Alert.ActionStyle.Default },
+          },
+          toast: {
+            animatedTitle: isSingle ? "Updating skill..." : "Updating skills...",
+            successTitle: isSingle ? "Skill updated" : "All skills updated",
+            failureTitle: isSingle ? "Failed to update skill" : "Failed to update skills",
+          },
+          operation: () =>
+            mutate(isSingle ? updateSkill(skillName) : updateAllSkills(), {
+              optimisticUpdate: (skills) => {
+                if (!skills) return [];
+                return skills.map((s) => (!isSingle || s.name === skillName ? { ...s, hasUpdate: false } : s));
+              },
+            }),
+        })
+      }
     />
   );
 }

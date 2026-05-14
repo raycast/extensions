@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useShallow } from "zustand/shallow";
 import wordCacheHandler from "../cache";
@@ -20,6 +20,11 @@ const tagColor = (word: { strength: number }) => {
     dark: strengthColor(word.strength),
     light: strengthColor(word.strength),
   };
+};
+
+const copyWord = async (word: string) => {
+  await Clipboard.copy(word);
+  await showToast({ style: Toast.Style.Success, title: "Copied to Clipboard", message: word });
 };
 
 const LookUpContent = ({ word }: { word: string }) => {
@@ -114,7 +119,12 @@ const LookUpContent = ({ word }: { word: string }) => {
                           <List.Item.Detail.Metadata.Label title="Synonyms:" />
                           <Detail.Metadata.TagList title="">
                             {value.synonyms.map((synonym, index) => (
-                              <Detail.Metadata.TagList.Item key={index} text={synonym.word} color={tagColor(synonym)} />
+                              <Detail.Metadata.TagList.Item
+                                key={index}
+                                text={synonym.word}
+                                color={tagColor(synonym)}
+                                onAction={() => copyWord(synonym.word)}
+                              />
                             ))}
                           </Detail.Metadata.TagList>
                         </>
@@ -124,7 +134,12 @@ const LookUpContent = ({ word }: { word: string }) => {
                           <List.Item.Detail.Metadata.Label title="Antonyms:" />
                           <Detail.Metadata.TagList title="">
                             {value.antonyms.map((antonym, index) => (
-                              <Detail.Metadata.TagList.Item key={index} text={antonym.word} color={tagColor(antonym)} />
+                              <Detail.Metadata.TagList.Item
+                                key={index}
+                                text={antonym.word}
+                                color={tagColor(antonym)}
+                                onAction={() => copyWord(antonym.word)}
+                              />
                             ))}
                           </Detail.Metadata.TagList>
                         </>

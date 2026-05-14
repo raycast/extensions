@@ -43,10 +43,6 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
-            },
-            {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
             },
@@ -103,10 +99,6 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
-            },
-            {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
             },
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -167,10 +159,6 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
-            },
-            {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
             },
@@ -227,10 +215,6 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
-            },
-            {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
             },
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -291,10 +275,6 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
-            },
-            {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
             },
@@ -351,10 +331,6 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
-            },
-            {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
             },
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -429,10 +405,6 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
-            },
-            {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
             },
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -510,10 +482,6 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
-            },
-            {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
             },
@@ -571,10 +539,6 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
-            },
-            {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
             },
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -636,10 +600,6 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
-            },
-            {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
             },
@@ -697,10 +657,6 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
-            },
-            {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
             },
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -762,10 +718,6 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
-            },
-            {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
             },
@@ -823,10 +775,6 @@
             {
               "value": "openai/gpt-oss-20b",
               "title": "GPT OSS 20B 131k"
-            },
-            {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
             },
             {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
@@ -888,10 +836,6 @@
               "title": "GPT OSS 20B 131k"
             },
             {
-              "value": "moonshotai/kimi-k2-instruct-0905",
-              "title": "Kimi K2 0905 263k"
-            },
-            {
               "value": "meta-llama/llama-4-maverick-17b-128e-instruct",
               "title": "Llama 4 Maverick 131k"
             },
@@ -931,7 +875,7 @@
       "description": "LLM model to use for all your commands.",
       "type": "dropdown",
       "required": true,
-      "default": "llama-3.3-70b-versatile",
+      "default": "openai/gpt-oss-120b",
       "data": [
         {
           "value": "openai/gpt-oss-120b",
@@ -940,10 +884,6 @@
         {
           "value": "openai/gpt-oss-20b",
           "title": "GPT OSS 20B 131k"
-        },
-        {
-          "value": "moonshotai/kimi-k2-instruct-0905",
-          "title": "Kimi K2 0905 263k"
         },
         {
           "value": "meta-llama/llama-4-maverick-17b-128e-instruct",

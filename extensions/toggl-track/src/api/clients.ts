@@ -2,10 +2,15 @@ import { getMeWithRelatedData } from "@/api/me";
 import { post, put, remove } from "@/api/togglClient";
 import type { ToggleItem } from "@/api/types";
 import { cacheHelper } from "@/helpers/cache-helper";
+import { liteMode } from "@/helpers/preferences";
 
 export async function getMyClients(): Promise<Client[]> {
   const cached = cacheHelper.get<Client[]>("clients");
   if (cached) return cached;
+  if (liteMode) {
+    const stale = cacheHelper.getRaw<Client[]>("clients");
+    if (stale) return stale;
+  }
   const data = await getMeWithRelatedData();
   return cacheHelper.get<Client[]>("clients") || data.clients || [];
 }
@@ -31,7 +36,7 @@ export async function deleteClient(workspaceId: number, clientId: number) {
 export async function archiveClient(workspaceId: number, clientId: number) {
   await post(`/workspaces/${workspaceId}/clients/${clientId}/archive`);
 
-  const cacheClients = cacheHelper.get<Client[]>("clients");
+  const cacheClients = cacheHelper.get<Client[]>("clients") ?? cacheHelper.getRaw<Client[]>("clients");
   if (cacheClients) {
     const updatedClients = cacheClients.map((client) =>
       client.id === clientId ? { ...client, archived: true } : client,
@@ -43,7 +48,7 @@ export async function archiveClient(workspaceId: number, clientId: number) {
 export async function restoreClient(workspaceId: number, clientId: number, restoreAllProjects: boolean) {
   await post(`/workspaces/${workspaceId}/clients/${clientId}/restore`, { restore_all_projects: restoreAllProjects });
 
-  const cacheClients = cacheHelper.get<Client[]>("clients");
+  const cacheClients = cacheHelper.get<Client[]>("clients") ?? cacheHelper.getRaw<Client[]>("clients");
   if (cacheClients) {
     const updatedClients = cacheClients.map((client) =>
       client.id === clientId ? { ...client, archived: false } : client,

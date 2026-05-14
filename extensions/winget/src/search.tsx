@@ -4,6 +4,10 @@ import { useWingetSearch } from "./hooks/useWingetSearch";
 import { useWingetInstalled } from "./hooks/useWingetInstalled";
 import { SearchActionPanel } from "./components/actionPanels";
 
+function isMsStore(source: string): boolean {
+  return source.toLowerCase() === "msstore";
+}
+
 export default function SearchCommand() {
   const [searchText, setSearchText] = useState("");
   const [removedIds, setRemovedIds] = useState<Set<string>>(new Set());
@@ -36,22 +40,27 @@ export default function SearchCommand() {
       searchBarPlaceholder="Search winget packages…"
       throttle
     >
-      {pkgList.length === 0 && !searchLoading && searchText.trim().length > 0 ? (
-        <List.EmptyView title="No packages found" description={`No results for "${searchText}"`} />
-      ) : pkgList.length === 0 && searchText.trim().length === 0 ? (
+      {pkgList.length === 0 && searchText.trim().length < 2 ? (
         <List.EmptyView
           title="Search for a package"
-          description="Type a package name to search the winget repository"
+          description="Type at least 2 characters to search the winget repository"
         />
+      ) : pkgList.length === 0 && !searchLoading ? (
+        <List.EmptyView title="No packages found" description={`No results for "${searchText}"`} />
       ) : (
-        pkgList.map((pkg) => {
+        pkgList.map((pkg, index) => {
           const isInstalled = installedIds.has(pkg.id.toLowerCase());
           return (
             <List.Item
-              key={pkg.id}
+              key={index}
               title={pkg.name}
               subtitle={pkg.id}
-              accessories={[isInstalled ? { tag: { value: "Installed", color: Color.Green } } : { text: pkg.version }]}
+              accessories={[
+                ...(isInstalled ? [{ tag: { value: "Installed", color: Color.Green } }] : []),
+                ...(!isInstalled && isMsStore(pkg.source)
+                  ? [{ tag: { value: "Microsoft Store", color: Color.Blue } }]
+                  : []),
+              ]}
               actions={
                 <SearchActionPanel
                   pkg={pkg}
