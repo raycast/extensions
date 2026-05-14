@@ -48,6 +48,8 @@ interface FormValues {
 
 interface CitationResult {
   citation: string;
+  citationHtml: string;
+  citationMarkdown: string;
   metadata: CitationMetadata;
   sourceType: "DOI" | "Web Page";
   sourceLabel: string;
@@ -163,34 +165,52 @@ export default function ConvertUrlToMla() {
         metadata={buildResultMetadata(result)}
         actions={
           <ActionPanel>
-            <Action.CopyToClipboard
-              title="Copy Citation"
-              content={result.citation}
-              icon={{ source: Icon.Clipboard, tintColor: Color.Green }}
-            />
-            <Action.Paste
-              title="Paste Citation"
-              content={result.citation}
-              icon={{ source: Icon.TextCursor, tintColor: Color.Blue }}
-            />
-            {result.metadata.url ? (
-              <Action.OpenInBrowser
-                title="Open Source"
-                url={result.metadata.url}
-                icon={{ source: Icon.Globe, tintColor: Color.Purple }}
+            <ActionPanel.Section title="Citation">
+              <Action.CopyToClipboard
+                title="Copy Citation"
+                content={{
+                  html: result.citationHtml,
+                  text: result.citation,
+                }}
+                icon={{ source: Icon.Clipboard, tintColor: Color.Green }}
               />
-            ) : null}
-            <Action
-              title="Convert Another"
-              onAction={() => {
-                setResult(null);
-                setInput("");
-              }}
-              icon={{
-                source: Icon.ArrowCounterClockwise,
-                tintColor: Color.Orange,
-              }}
-            />
+              <Action.Paste
+                title="Paste Citation"
+                content={{
+                  html: result.citationHtml,
+                  text: result.citation,
+                }}
+                icon={{ source: Icon.TextCursor, tintColor: Color.Blue }}
+              />
+              <Action.CopyToClipboard
+                title="Copy as Plain Text"
+                content={result.citation}
+                shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                icon={{ source: Icon.Text, tintColor: Color.SecondaryText }}
+              />
+            </ActionPanel.Section>
+            <ActionPanel.Section>
+              {result.metadata.url ? (
+                <Action.OpenInBrowser
+                  title="Open Source"
+                  url={result.metadata.url}
+                  shortcut={{ modifiers: ["cmd"], key: "o" }}
+                  icon={{ source: Icon.Globe, tintColor: Color.Purple }}
+                />
+              ) : null}
+              <Action
+                title="New Citation"
+                onAction={() => {
+                  setResult(null);
+                  setInput("");
+                }}
+                shortcut={{ modifiers: ["cmd"], key: "n" }}
+                icon={{
+                  source: Icon.ArrowCounterClockwise,
+                  tintColor: Color.Orange,
+                }}
+              />
+            </ActionPanel.Section>
           </ActionPanel>
         }
       />
@@ -212,14 +232,14 @@ export default function ConvertUrlToMla() {
     >
       <Form.Description
         title="QuickCite"
-        text="Generate a clean MLA citation from a URL or DOI. DOI inputs use trusted DOI metadata only."
+        text="Paste a URL or DOI to generate an MLA 9th edition citation with proper formatting."
       />
 
       <Form.TextField
         id="url"
-        title="Source"
-        placeholder="https://example.com/article or 10.1038/s41586-020-2649-2"
-        info="Paste a webpage URL, DOI URL, or bare DOI. QuickCite will detect the source type automatically."
+        title="URL or DOI"
+        placeholder="Paste a link or DOI..."
+        info="Accepts full URLs, bare domains, DOI URLs (doi.org/...), or bare DOIs (10.xxxx/...)."
         value={input}
         onChange={setInput}
         autoFocus
@@ -271,8 +291,11 @@ async function generateCitationForInput(
       );
     }
 
+    const doiCitation = buildMlaCitation(metadata);
     return {
-      citation: buildMlaCitation(metadata),
+      citation: doiCitation.text,
+      citationHtml: doiCitation.html,
+      citationMarkdown: doiCitation.markdown,
       metadata,
       sourceType: "DOI",
       sourceLabel: doi,
@@ -289,18 +312,21 @@ async function generateCitationForInput(
   const web = await fetchWebMetadata(cleanedUrl);
   const host = hostnameFromUrl(cleanedUrl);
 
+  const siteName = cleanText(web.siteName) || host;
   const metadata: CitationMetadata = {
     url: cleanedUrl,
     accessDate: new Date(),
-    siteName: cleanText(web.siteName) || host,
-    title:
-      cleanTitle(web.title || titleFromUrl(cleanedUrl)) || "[MISSING TITLE]",
-    author: cleanText(web.author || "") || host,
+    siteName,
+    title: cleanTitle(web.title || titleFromUrl(cleanedUrl), siteName),
+    author: cleanText(web.author || "") || undefined,
     publishedDate: web.publishedDate,
   };
 
+  const webCitation = buildMlaCitation(metadata);
   return {
-    citation: buildMlaCitation(metadata),
+    citation: webCitation.text,
+    citationHtml: webCitation.html,
+    citationMarkdown: webCitation.markdown,
     metadata,
     sourceType: "Web Page",
     sourceLabel: host,
@@ -310,10 +336,14 @@ async function generateCitationForInput(
 /**
  * MLA Citation Builder
  */
-function buildMlaCitation(metadata: CitationMetadata): string {
+function buildMlaCitation(metadata: CitationMetadata): {
+  text: string;
+  html: string;
+  markdown: string;
+} {
   let author = formatAuthor(metadata.author || "");
-  const title = cleanTitle(metadata.title || "") || "[MISSING TITLE]";
-  const siteName = cleanText(metadata.siteName) || "[MISSING WEBSITE]";
+  const title = cleanTitle(metadata.title || "", metadata.siteName);
+  const siteName = cleanText(metadata.siteName) || "";
   const publishedDate = formatPublicationDate(metadata.publishedDate);
   const url = formatUrlForCitation(metadata.url || "");
   const accessDate = formatAccessDate(metadata.accessDate || new Date());
@@ -321,118 +351,139 @@ function buildMlaCitation(metadata: CitationMetadata): string {
   const normAuthor = normalizeForCompare(author);
   const normSite = normalizeForCompare(siteName);
 
-  // MLA style: if author and website/container are the same, do not repeat author.
-  if (normAuthor && normAuthor === normSite) {
+  if (normAuthor && normSite && normAuthor === normSite) {
     author = "";
   }
 
-  const parts: string[] = [];
+  const textParts: string[] = [];
+  const htmlParts: string[] = [];
+  const mdParts: string[] = [];
 
   if (author) {
-    parts.push(withTerminalPunctuation(author));
+    const authorPart = withTerminalPunctuation(author);
+    textParts.push(authorPart);
+    htmlParts.push(escapeHtml(authorPart));
+    mdParts.push(escapeMarkdown(authorPart));
   }
 
-  parts.push(`"${withTerminalPunctuation(title)}"`);
+  if (title) {
+    const titleText = withTerminalPunctuation(title);
+    textParts.push(`"${titleText}"`);
+    htmlParts.push(`"${escapeHtml(titleText)}"`);
+    mdParts.push(`"${escapeMarkdown(titleText)}"`);
+  }
 
-  let container = `${siteName},`;
-
+  const textContainerParts: string[] = [];
+  const htmlContainerParts: string[] = [];
+  const mdContainerParts: string[] = [];
+  if (siteName) {
+    textContainerParts.push(siteName);
+    htmlContainerParts.push(`<i>${escapeHtml(siteName)}</i>`);
+    mdContainerParts.push(`*${escapeMarkdown(siteName)}*`);
+  }
   if (publishedDate) {
-    container += ` ${publishedDate},`;
-  } else {
-    container += ` [MISSING DATE],`;
+    textContainerParts.push(publishedDate);
+    htmlContainerParts.push(escapeHtml(publishedDate));
+    mdContainerParts.push(escapeMarkdown(publishedDate));
   }
-
   if (url) {
-    container += ` ${url}.`;
+    textContainerParts.push(url);
+    htmlContainerParts.push(escapeHtml(url));
+    mdContainerParts.push(escapeMarkdown(url));
   }
 
-  parts.push(container);
-  parts.push(`Accessed ${accessDate}.`);
+  if (textContainerParts.length > 0) {
+    textParts.push(textContainerParts.join(", ") + ".");
+    htmlParts.push(htmlContainerParts.join(", ") + ".");
+    mdParts.push(mdContainerParts.join(", ") + ".");
+  }
 
-  return parts
-    .join(" ")
-    .replace(/\s+/g, " ")
-    .replace(/\s+,/g, ",")
-    .replace(/\.\./g, ".")
-    .replace(/,\s*\./g, ".")
-    .trim();
+  const accessPart = `Accessed ${accessDate}.`;
+  textParts.push(accessPart);
+  htmlParts.push(escapeHtml(accessPart));
+  mdParts.push(escapeMarkdown(accessPart));
+
+  const cleanUp = (s: string) =>
+    s.replace(/\s+/g, " ").replace(/\.\./g, ".").trim();
+
+  return {
+    text: cleanUp(textParts.join(" ")),
+    html: cleanUp(htmlParts.join(" ")),
+    markdown: cleanUp(mdParts.join(" ")),
+  };
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 function buildResultMarkdown(result: CitationResult): string {
-  const title = cleanTitle(result.metadata.title || "") || "Untitled Source";
+  const title =
+    cleanTitle(result.metadata.title || "", result.metadata.siteName) ||
+    "Untitled Source";
 
-  return `# Citation Ready
+  return `# ${escapeMarkdown(title)}
 
-**${result.sourceType} source:** ${escapeMarkdown(title)}
-
-## MLA Citation
-
-\`\`\`
-${result.citation}
-\`\`\`
+${result.sourceType} source
 
 ---
 
-Use **Copy Citation** or **Paste Citation** from the action panel.`;
+> ${result.citationMarkdown}
+
+---
+
+**⌘ Enter** to copy  ·  **⌘ ⇧ Enter** to paste`;
 }
 
 function buildResultMetadata(result: CitationResult) {
   const metadata = result.metadata;
-  const title = cleanTitle(metadata.title || "") || "Missing title";
-  const author = cleanText(metadata.author || "") || "Not found";
-  const siteName = cleanText(metadata.siteName || "") || "Not found";
-  const publishedDate =
-    formatPublicationDate(metadata.publishedDate) || "Missing date";
+  const author = cleanText(metadata.author || "");
+  const siteName = cleanText(metadata.siteName || "");
+  const publishedDate = formatPublicationDate(metadata.publishedDate);
   const accessDate = formatAccessDate(metadata.accessDate || new Date());
   const sourceColor = result.sourceType === "DOI" ? Color.Purple : Color.Blue;
 
   return (
     <Detail.Metadata>
-      <Detail.Metadata.TagList title="Source">
+      <Detail.Metadata.TagList title="Format">
         <Detail.Metadata.TagList.Item
           text={result.sourceType}
           color={sourceColor}
-          icon={{ source: Icon.Circle, tintColor: sourceColor }}
         />
-        <Detail.Metadata.TagList.Item
-          text="MLA"
-          color={Color.Green}
-          icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
-        />
+        <Detail.Metadata.TagList.Item text="MLA 9" color={Color.Green} />
       </Detail.Metadata.TagList>
       <Detail.Metadata.Separator />
       <Detail.Metadata.Label
-        title="Detected"
-        text={result.sourceLabel}
-        icon={{ source: Icon.Tag, tintColor: sourceColor }}
-      />
-      <Detail.Metadata.Label
-        title="Title"
-        text={title}
-        icon={{ source: Icon.Text, tintColor: Color.PrimaryText }}
-      />
-      <Detail.Metadata.Label
         title="Author"
-        text={author}
-        icon={{ source: Icon.Person, tintColor: Color.Orange }}
+        text={author || "Not found"}
+        icon={{
+          source: Icon.Person,
+          tintColor: author ? Color.PrimaryText : Color.SecondaryText,
+        }}
       />
       <Detail.Metadata.Label
         title="Container"
-        text={siteName}
-        icon={{ source: Icon.Book, tintColor: Color.Blue }}
+        text={siteName || "Not found"}
+        icon={{
+          source: Icon.Book,
+          tintColor: siteName ? Color.PrimaryText : Color.SecondaryText,
+        }}
       />
       <Detail.Metadata.Label
         title="Published"
-        text={{
-          value: publishedDate,
-          color: publishedDate === "Missing date" ? Color.Yellow : Color.Green,
+        text={publishedDate || "Not found"}
+        icon={{
+          source: Icon.Calendar,
+          tintColor: publishedDate ? Color.PrimaryText : Color.SecondaryText,
         }}
-        icon={{ source: Icon.Calendar, tintColor: Color.Green }}
       />
       <Detail.Metadata.Label
         title="Accessed"
         text={accessDate}
-        icon={{ source: Icon.Clock, tintColor: Color.Purple }}
+        icon={{ source: Icon.Clock, tintColor: Color.PrimaryText }}
       />
       <Detail.Metadata.Separator />
       {metadata.url ? (
@@ -441,13 +492,7 @@ function buildResultMetadata(result: CitationResult) {
           text={formatUrlForCitation(metadata.url)}
           target={metadata.url}
         />
-      ) : (
-        <Detail.Metadata.Label
-          title="Source Link"
-          text="Not found"
-          icon={{ source: Icon.Link, tintColor: Color.SecondaryText }}
-        />
-      )}
+      ) : null}
     </Detail.Metadata>
   );
 }
@@ -833,7 +878,7 @@ function formatPublicationDate(dateValue: string | undefined): string {
 }
 
 function formatAccessDate(date: Date): string {
-  return `${date.getUTCDate()} ${MONTHS[date.getUTCMonth()]} ${date.getUTCFullYear()}`;
+  return `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
 }
 
 function parseDateFlexible(value: string): Date | null {
@@ -1070,17 +1115,48 @@ function cleanText(value: string | undefined | null): string {
     .trim();
 }
 
-function cleanTitle(title: string): string {
+function cleanTitle(title: string, siteName?: string): string {
   let cleaned = cleanText(title);
 
   if (!cleaned) return "";
 
-  // Remove common SEO suffixes:
-  // "JavaScript | MDN" -> "JavaScript"
-  // "Learn React – React" -> "Learn React"
-  cleaned = cleaned.split(/\s+[|–—]\s+/)[0].trim();
+  const separatorPattern = /\s+[|–—]\s+/g;
+  let lastSepIndex = -1;
+  let lastSepLength = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = separatorPattern.exec(cleaned)) !== null) {
+    lastSepIndex = match.index;
+    lastSepLength = match[0].length;
+  }
+
+  if (lastSepIndex !== -1) {
+    const beforeSep = cleaned.substring(0, lastSepIndex).trim();
+    const afterSep = cleaned.substring(lastSepIndex + lastSepLength).trim();
+
+    if (beforeSep && looksLikeSiteNameSuffix(afterSep, siteName)) {
+      cleaned = beforeSep;
+    }
+  }
 
   return cleaned.replace(/\s+/g, " ");
+}
+
+function looksLikeSiteNameSuffix(segment: string, siteName?: string): boolean {
+  const cleaned = cleanText(segment);
+  if (!cleaned) return false;
+
+  if (siteName) {
+    const normSegment = normalizeForCompare(cleaned);
+    const normSite = normalizeForCompare(siteName);
+    if (normSegment && normSite && normSegment === normSite) return true;
+  }
+
+  if (/^[a-z0-9-]+\.[a-z]{2,}$/i.test(cleaned)) return true;
+
+  return /^(Home|Homepage|Official Site|Official Website|Blog|News|Opinion|Video|YouTube|Wikipedia|Reddit|Medium|Substack|GitHub|MDN|MDN Web Docs|BBC|CNN|NPR|Reuters|AP News|The (?:New York Times|Washington Post|Guardian|Atlantic|Verge|Wall Street Journal|Economist|Independent|Telegraph|Observer|Intercept|Hill|Cut|Ringer))$/i.test(
+    cleaned,
+  );
 }
 
 function cleanPersonName(name: string): string {
