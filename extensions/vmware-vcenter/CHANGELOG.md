@@ -1,6 +1,6 @@
 # VMware vCenter Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-05-14
 
 - Fixed the error when trying to configure the first server.
 
