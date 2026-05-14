@@ -1,0 +1,146 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mactile",
+  "title": "MacTile",
+  "description": "Resize focused macOS windows with editable layout presets and Raycast hotkeys.",
+  "icon": "icon.png",
+  "author": "nik",
+  "license": "MIT",
+  "categories": ["Productivity"],
+  "keywords": ["window", "layout", "preset", "resize", "tile", "tiling", "window manager"],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Create Layout",
+      "subtitle": "MacTile",
+      "description": "Create a custom window layout with size and placement.",
+      "mode": "view",
+      "icon": "icon.png",
+      "keywords": [
+        "window",
+        "resize",
+        "preset",
+        "tile"
+      ]
+    },
+    {
+      "name": "layouts",
+      "title": "Manage Layouts",
+      "subtitle": "MacTile",
+      "description": "Manage, test, and tune MacTile layout presets.",
+      "mode": "view",
+      "icon": "icon.png",
+      "keywords": [
+        "window",
+        "resize",
+        "preset",
+        "tile"
+      ]
+    },
+    {
+      "name": "apply-layout",
+      "title": "Apply Layout",
+      "subtitle": "MacTile",
+      "description": "Apply a saved layout by name with forgiving matching.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": ["window", "resize", "preset", "tile", "custom"],
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Layout Name",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "fill",
+      "title": "Almost Maximize",
+      "subtitle": "MacTile",
+      "description": "Almost maximize the focused window while keeping macOS margins.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": ["window", "resize", "preset", "tile", "maximize", "fill"]
+    },
+    {
+      "name": "large",
+      "title": "Large",
+      "subtitle": "MacTile",
+      "description": "Make the focused window large without fully maximizing it.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": ["window", "resize", "preset", "tile"]
+    },
+    {
+      "name": "medium",
+      "title": "Medium",
+      "subtitle": "MacTile",
+      "description": "Resize the focused window to a balanced working size.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": ["window", "resize", "preset", "tile"]
+    },
+    {
+      "name": "small",
+      "title": "Small",
+      "subtitle": "MacTile",
+      "description": "Resize the focused window to a compact focused size.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": ["window", "resize", "preset", "tile"]
+    },
+    {
+      "name": "custom-1",
+      "title": "Layout Preset 1",
+      "subtitle": "MacTile",
+      "description": "Apply the first optional editable layout preset.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "disabledByDefault": true,
+      "keywords": ["window", "resize", "preset", "tile"]
+    },
+    {
+      "name": "custom-2",
+      "title": "Layout Preset 2",
+      "subtitle": "MacTile",
+      "description": "Apply the second optional editable layout preset.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "disabledByDefault": true,
+      "keywords": ["window", "resize", "preset", "tile"]
+    },
+    {
+      "name": "custom-3",
+      "title": "Layout Preset 3",
+      "subtitle": "MacTile",
+      "description": "Apply the third optional editable layout preset.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "disabledByDefault": true,
+      "keywords": ["window", "resize", "preset", "tile"]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "eslint": "^8.57.1",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}

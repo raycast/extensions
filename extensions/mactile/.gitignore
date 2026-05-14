@@ -1,0 +1,9 @@
+# macOS
+.DS_Store
+
+# Raycast / Node
+node_modules/
+dist/
+
+# Logs
+*.log
