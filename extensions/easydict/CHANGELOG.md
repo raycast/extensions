@@ -1,5 +1,16 @@
 # `Easydict` Changelog
 
+## [v2.11.3] - {PR_MERGE_DATE}
+
+### 💎 Improvement
+
+- Improve type safety.
+- Update dependencies and improve stability
+
+### 🐞 Fixed
+
+- Remove default values for password fields to prevent runtime type mismatch.
+
 ## [v2.11.2] - 2026-04-13
 
 ### 💎 Improvement
