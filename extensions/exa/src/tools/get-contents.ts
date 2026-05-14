@@ -7,7 +7,7 @@ type Input = {
   urls: string[];
   /**
    * Which content view to return for each URL.
-   * @default "text"
+   * @default "highlights"
    */
   mode?: "text" | "highlights";
 };
@@ -16,7 +16,7 @@ type Input = {
  * Retrieves the contents of webpages, together with per-URL statuses.
  */
 export default async function (input: Input) {
-  const mode = input.mode ?? "text";
+  const mode = input.mode ?? "highlights";
 
   if (mode === "highlights") {
     return compactHighlightContentsResponse(await getPageContents(input.urls, "highlights"));

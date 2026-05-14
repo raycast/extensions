@@ -151,7 +151,7 @@ export function compactAnswerResponse(response: AnswerResponse) {
 
 export async function getPageContents(urls: string[], mode: "text"): Promise<SearchTextResponse>;
 export async function getPageContents(urls: string[], mode: "highlights"): Promise<SearchHighlightsResponse>;
-export async function getPageContents(urls: string[], mode: ContentMode = "text") {
+export async function getPageContents(urls: string[], mode: ContentMode = "highlights") {
   const cleanedUrls = urls.map((url) => url.trim()).filter(Boolean);
   if (cleanedUrls.length === 0) {
     throw new Error("Must provide at least one URL.");
