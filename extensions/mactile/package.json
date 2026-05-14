@@ -14,7 +14,7 @@
   "commands": [
     {
       "name": "index",
-      "title": "Create Layout",
+      "title": "Create Window Layout",
       "subtitle": "MacTile",
       "description": "Create a custom window layout with size and placement.",
       "mode": "view",
@@ -28,7 +28,7 @@
     },
     {
       "name": "layouts",
-      "title": "Manage Layouts",
+      "title": "Manage Window Layouts",
       "subtitle": "MacTile",
       "description": "Manage, test, and tune MacTile layout presets.",
       "mode": "view",
@@ -42,7 +42,7 @@
     },
     {
       "name": "apply-layout",
-      "title": "Apply Layout",
+      "title": "Apply Window Layout",
       "subtitle": "MacTile",
       "description": "Apply a saved layout by name with forgiving matching.",
       "mode": "no-view",
@@ -51,7 +51,7 @@
       "arguments": [
         {
           "name": "query",
-          "placeholder": "Layout Name",
+          "placeholder": "Window Layout Name",
           "type": "text",
           "required": true
         }
@@ -59,16 +59,16 @@
     },
     {
       "name": "fill",
-      "title": "Almost Maximize",
+      "title": "Almost Maximise Window",
       "subtitle": "MacTile",
-      "description": "Almost maximize the focused window while keeping macOS margins.",
+      "description": "Almost maximise the focused window while keeping macOS margins.",
       "mode": "no-view",
       "icon": "icon.png",
       "keywords": ["window", "resize", "preset", "tile", "maximize", "fill"]
     },
     {
       "name": "large",
-      "title": "Large",
+      "title": "Large Window",
       "subtitle": "MacTile",
       "description": "Make the focused window large without fully maximizing it.",
       "mode": "no-view",
@@ -77,7 +77,7 @@
     },
     {
       "name": "medium",
-      "title": "Medium",
+      "title": "Medium Window",
       "subtitle": "MacTile",
       "description": "Resize the focused window to a balanced working size.",
       "mode": "no-view",
@@ -86,7 +86,7 @@
     },
     {
       "name": "small",
-      "title": "Small",
+      "title": "Small Window",
       "subtitle": "MacTile",
       "description": "Resize the focused window to a compact focused size.",
       "mode": "no-view",
@@ -95,7 +95,7 @@
     },
     {
       "name": "custom-1",
-      "title": "Layout Preset 1",
+      "title": "Window Layout Preset 1",
       "subtitle": "MacTile",
       "description": "Apply the first optional editable layout preset.",
       "mode": "no-view",
@@ -105,7 +105,7 @@
     },
     {
       "name": "custom-2",
-      "title": "Layout Preset 2",
+      "title": "Window Layout Preset 2",
       "subtitle": "MacTile",
       "description": "Apply the second optional editable layout preset.",
       "mode": "no-view",
@@ -115,7 +115,7 @@
     },
     {
       "name": "custom-3",
-      "title": "Layout Preset 3",
+      "title": "Window Layout Preset 3",
       "subtitle": "MacTile",
       "description": "Apply the third optional editable layout preset.",
       "mode": "no-view",
@@ -125,8 +125,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.93.2",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.93.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

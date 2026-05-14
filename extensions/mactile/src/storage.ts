@@ -60,7 +60,14 @@ function mergeDefaultLayout(defaultLayout: LayoutPreset, savedLayout?: LayoutPre
     savedLayout.name === "Custom Layout 1" ||
     savedLayout.name === "Custom Layout 2" ||
     savedLayout.name === "Custom Layout 3" ||
-    savedLayout.name === "Fill";
+    savedLayout.name === "Fill" ||
+    savedLayout.name === "Almost Maximize" ||
+    savedLayout.name === "Large" ||
+    savedLayout.name === "Medium" ||
+    savedLayout.name === "Small" ||
+    savedLayout.name === "Layout Preset 1" ||
+    savedLayout.name === "Layout Preset 2" ||
+    savedLayout.name === "Layout Preset 3";
 
   return {
     ...defaultLayout,

@@ -87,11 +87,11 @@ export function LayoutForm({ layout, onSave }: Props) {
 
   return (
     <Form
-      navigationTitle={isEditing ? "Edit Layout" : "Create Layout"}
+      navigationTitle={isEditing ? "Edit Window Layout" : "Create Window Layout"}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={isEditing ? "Save Changes" : "Save Layout"}
+            title={isEditing ? "Save Changes" : "Save Window Layout"}
             icon={Icon.CheckCircle}
             onSubmit={handleSubmit}
           />

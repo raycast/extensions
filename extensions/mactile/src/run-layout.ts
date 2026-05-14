@@ -20,7 +20,7 @@ export async function runLayout(layoutId: string) {
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Could Not Apply Layout",
+      title: "Could Not Apply Window Layout",
       message: error instanceof Error ? error.message : "Unknown error",
     });
   }
@@ -51,7 +51,7 @@ async function applyLayout(layout: LayoutPreset, successMessage: string) {
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Could Not Apply Layout",
+      title: "Could Not Apply Window Layout",
       message: error instanceof Error ? error.message : "Unknown error",
     });
   }

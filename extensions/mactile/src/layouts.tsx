@@ -39,11 +39,11 @@ export default function Command() {
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search saved layouts..."
-      navigationTitle="Manage Layouts"
+      navigationTitle="Manage Window Layouts"
       actions={
         <ActionPanel>
           <Action
-            title="Create Layout"
+            title="Create Window Layout"
             icon={Icon.Plus}
             onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
           />
@@ -57,7 +57,7 @@ export default function Command() {
         actions={
           <ActionPanel>
             <Action
-              title="Create Layout"
+              title="Create Window Layout"
               icon={Icon.Plus}
               onAction={() => launchCommand({ name: "index", type: LaunchType.UserInitiated })}
             />
@@ -119,7 +119,7 @@ export default function Command() {
 
     const confirmed = await confirmAlert({
       title: `Delete ${layout.name}?`,
-      message: "This layout will be removed from Mactile.",
+      message: "This layout will be removed from MacTile.",
       primaryAction: {
         title: "Delete Layout",
         style: Alert.ActionStyle.Destructive,
@@ -153,9 +153,9 @@ function LayoutListItem({ layout, onEdit, onDuplicate, onDelete }: LayoutListIte
       accessories={[{ text: getPlacementTitle(layout.placement) }]}
       actions={
         <ActionPanel>
-          <Action title="Apply Layout" icon={Icon.Window} onAction={() => runLayout(layout.id)} />
+          <Action title="Apply Window Layout" icon={Icon.Window} onAction={() => runLayout(layout.id)} />
           <Action
-            title="Edit Layout"
+            title="Edit Window Layout"
             icon={Icon.Pencil}
             shortcut={{ modifiers: ["cmd"], key: "e" }}
             onAction={() => onEdit(layout)}
