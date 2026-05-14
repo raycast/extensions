@@ -1,10 +1,196 @@
 import { getPreferenceValues } from "@raycast/api";
-import Exa from "exa-js";
+import Exa, { type AnswerResponse, type SearchResponse, type Status } from "exa-js";
+
+export const SEARCH_CATEGORIES = [
+  "company",
+  "people",
+  "research paper",
+  "news",
+  "personal site",
+  "financial report",
+] as const;
+
+export type SearchCategory = (typeof SEARCH_CATEGORIES)[number];
+export type ContentMode = "text" | "highlights";
+export type CodeContextTokens = "dynamic" | number;
+
+export type SearchToolInput = {
+  query: string;
+  numResults?: number;
+  category?: SearchCategory;
+  includeDomains?: string[];
+  excludeDomains?: string[];
+};
+
+export type CompactSearchResult = {
+  title: string;
+  url: string;
+  domain: string;
+  highlights: string[];
+  publishedDate?: string;
+  author?: string;
+  favicon?: string;
+};
+
+export type CompactCitation = {
+  title: string;
+  url: string;
+  publishedDate?: string;
+};
+
+export type CompactStatus = Pick<Status, "id" | "status" | "source">;
+
+export type CodeContextResponse = {
+  query: string;
+  response: string;
+  requestId?: string;
+  resultsCount?: number;
+  outputTokens?: number;
+  searchTime?: number;
+};
+
+type SearchHighlightsResponse = SearchResponse<{ highlights: true }>;
+type SearchTextResponse = SearchResponse<{ text: true }>;
+type SearchResultWithText = SearchTextResponse["results"][number];
+type SearchResultWithHighlights = SearchHighlightsResponse["results"][number];
 
 const preferences: ExtensionPreferences = getPreferenceValues();
 const exa = new Exa(
   preferences.apiKey || "no-api-key",
   !preferences.apiKey ? "https://extensions-api-proxy.raycast.com/exa" : "https://api.exa.ai",
 );
+
+function cleanArray(values?: string[]) {
+  const cleaned = values?.map((value) => value.trim()).filter(Boolean);
+  return cleaned && cleaned.length > 0 ? cleaned : undefined;
+}
+
+function fallbackTitle(url: string) {
+  return getHostname(url);
+}
+
+export function getHostname(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return url;
+  }
+}
+
+export function getExaSearchUrl(query?: string) {
+  const trimmedQuery = query?.trim();
+  if (!trimmedQuery) {
+    return "https://exa.ai/search";
+  }
+
+  return `https://exa.ai/search?q=${encodeURIComponent(trimmedQuery)}`;
+}
+
+export function formatExaError(error: unknown) {
+  if (error instanceof Error) {
+    return error.message;
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return "Something went wrong while talking to Exa.";
+}
+
+export function compactStatuses(statuses?: Status[]): CompactStatus[] | undefined {
+  return statuses?.map(({ id, status, source }) => ({ id, status, source }));
+}
+
+export async function searchHighlights(input: SearchToolInput) {
+  const { query, numResults, category, includeDomains, excludeDomains } = input;
+
+  return exa.search(query, {
+    type: "auto",
+    numResults,
+    category,
+    includeDomains: cleanArray(includeDomains),
+    excludeDomains: cleanArray(excludeDomains),
+    contents: {
+      highlights: true,
+    },
+  });
+}
+
+export function compactSearchResults(response: SearchHighlightsResponse): CompactSearchResult[] {
+  return response.results.map((result) => ({
+    title: result.title ?? fallbackTitle(result.url),
+    url: result.url,
+    domain: getHostname(result.url),
+    highlights: result.highlights ?? [],
+    publishedDate: result.publishedDate,
+    author: result.author,
+    favicon: result.favicon,
+  }));
+}
+
+export async function getGroundedAnswer(query: string) {
+  return exa.answer(query, { model: "exa" });
+}
+
+export function streamGroundedAnswer(query: string) {
+  return exa.streamAnswer(query, { model: "exa" });
+}
+
+export function compactAnswerResponse(response: AnswerResponse) {
+  return {
+    answer: typeof response.answer === "string" ? response.answer : JSON.stringify(response.answer, null, 2),
+    citations: response.citations.map((citation) => ({
+      title: citation.title ?? fallbackTitle(citation.url),
+      url: citation.url,
+      publishedDate: citation.publishedDate,
+    })),
+    requestId: response.requestId,
+  };
+}
+
+export async function getPageContents(urls: string[], mode: "text"): Promise<SearchTextResponse>;
+export async function getPageContents(urls: string[], mode: "highlights"): Promise<SearchHighlightsResponse>;
+export async function getPageContents(urls: string[], mode: ContentMode = "text") {
+  const cleanedUrls = urls.map((url) => url.trim()).filter(Boolean);
+  if (cleanedUrls.length === 0) {
+    throw new Error("Must provide at least one URL.");
+  }
+
+  if (mode === "highlights") {
+    return exa.getContents(cleanedUrls, { highlights: true });
+  }
+
+  return exa.getContents(cleanedUrls, { text: true });
+}
+
+export function compactTextContentsResponse(response: SearchTextResponse) {
+  return {
+    results: response.results.map((result: SearchResultWithText) => ({
+      title: result.title ?? fallbackTitle(result.url),
+      url: result.url,
+      text: result.text,
+    })),
+    statuses: compactStatuses(response.statuses),
+  };
+}
+
+export function compactHighlightContentsResponse(response: SearchHighlightsResponse) {
+  return {
+    results: response.results.map((result: SearchResultWithHighlights) => ({
+      title: result.title ?? fallbackTitle(result.url),
+      url: result.url,
+      highlights: result.highlights ?? [],
+    })),
+    statuses: compactStatuses(response.statuses),
+  };
+}
+
+export async function getCodeContext(query: string, tokensNum: CodeContextTokens = "dynamic") {
+  return exa.request<CodeContextResponse>("/context", "POST", {
+    query,
+    tokensNum,
+  });
+}
 
 export default exa;

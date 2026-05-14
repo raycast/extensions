@@ -1,4 +1,4 @@
-import exa from "../exa";
+import { compactSearchResults, searchHighlights } from "../exa";
 
 type Input = {
   /**
@@ -11,46 +11,44 @@ type Input = {
    */
   numResults?: number;
   /**
-   * Results will only include links with a published date after this date.
-   * Must be specified in ISO 8601 format.
+   * Restrict results to the listed domains.
    */
-  startPublishedDate?: string;
+  includeDomains?: string[];
   /**
-   * Results will only include links with a published date before this date.
-   * Must be specified in ISO 8601 format.
+   * Exclude results from the listed domains.
    */
-  endPublishedDate?: string;
+  excludeDomains?: string[];
   /**
    * A data category to focus on when searching, with higher comprehensivity and data cleanliness.
    */
-  category?:
-    | "company"
-    | "research paper"
-    | "news"
-    | "pdf"
-    | "github"
-    | "tweet"
-    | "personal site"
-    | "linkedin profile"
-    | "financial report";
+  category?: "company" | "people" | "research paper" | "news" | "personal site" | "financial report";
 };
 
 /**
- * @returns The results of the search, including the title, url, and highlights of the content.
+ * @returns Compact search results with highlights and published dates when available.
  */
 export default async function (input: Input) {
-  const { query } = input;
+  const normalizedInput =
+    input.category === "people"
+      ? {
+          ...input,
+          includeDomains: input.includeDomains?.filter((domain) => {
+            const normalized = domain.trim().toLowerCase();
+            return normalized === "linkedin.com" || normalized.endsWith(".linkedin.com");
+          }),
+          excludeDomains: undefined,
+        }
+      : input.category === "company"
+        ? {
+            ...input,
+            excludeDomains: undefined,
+          }
+      : input;
 
-  const { results } = await exa.searchAndContents(query, {
-    ...input,
-    text: true,
-    summary: true,
-    useAutoprompt: true,
-  });
-
-  return results.map((result) => ({
+  return compactSearchResults(await searchHighlights(normalizedInput)).map((result) => ({
     title: result.title,
     url: result.url,
-    summary: result.summary,
+    highlights: result.highlights,
+    publishedDate: result.publishedDate,
   }));
 }

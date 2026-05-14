@@ -1,25 +1,26 @@
-import exa from "../exa";
+import { compactHighlightContentsResponse, compactTextContentsResponse, getPageContents } from "../exa";
 
 type Input = {
   /**
    * The URLs of the webpages to retrieve the contents of.
    */
   urls: string[];
+  /**
+   * Which content view to return for each URL.
+   * @default "text"
+   */
+  mode?: "text" | "highlights";
 };
 
 /**
- * Retrieves the full contents of the webpages.
- *
- * @returns The contents of the webpages, including the title, url, and text of the content of the similar results.
+ * Retrieves the contents of webpages, together with per-URL statuses.
  */
 export default async function (input: Input) {
-  const { urls } = input;
+  const mode = input.mode ?? "text";
 
-  const { results } = await exa.getContents(urls, { text: true, useAutoprompt: true });
+  if (mode === "highlights") {
+    return compactHighlightContentsResponse(await getPageContents(input.urls, "highlights"));
+  }
 
-  return results.map((result) => ({
-    title: result.title,
-    url: result.url,
-    text: result.text,
-  }));
+  return compactTextContentsResponse(await getPageContents(input.urls, "text"));
 }
