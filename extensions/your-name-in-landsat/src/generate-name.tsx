@@ -19,22 +19,21 @@ import { LandsatDetail } from "./lib/detail";
 import { TileActions } from "./lib/actions";
 import { NameForm } from "./lib/name-form";
 
-type CommandArgs = {
-  name?: string;
-  spacing?: string;
-};
-
 type GenerateRequest = {
   name: string;
-  spacing: number;
+  spacing?: number;
 };
 
-export default function Command(props: LaunchProps<{ arguments: CommandArgs }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.GenerateName }>) {
   const initial = (props.arguments?.name ?? "").trim();
-  const initialSpacing = Number.parseInt(props.arguments?.spacing ?? "0", 10);
+  const spacingArg = props.arguments?.spacing;
+  const parsedSpacingArg = spacingArg !== undefined && spacingArg !== "" ? Number.parseInt(spacingArg, 10) : undefined;
   const [request, setRequest] = useState<GenerateRequest>({
     name: initial,
-    spacing: Number.isFinite(initialSpacing) && initialSpacing >= 0 ? initialSpacing : 0,
+    spacing:
+      parsedSpacingArg !== undefined && Number.isFinite(parsedSpacingArg) && parsedSpacingArg >= 0
+        ? parsedSpacingArg
+        : undefined,
   });
   return <GenerateView request={request} onEdit={setRequest} />;
 }
