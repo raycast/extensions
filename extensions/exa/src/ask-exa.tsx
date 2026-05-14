@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { formatExaError, streamGroundedAnswer } from "./exa";
+import { formatExaError, getHostname, streamGroundedAnswer } from "./exa";
 
 type AskExaDetailProps = {
   query: string;
@@ -88,7 +88,7 @@ function AskExaDetail({ query }: AskExaDetailProps) {
                 if (!seen.has(citation.url)) {
                   seen.add(citation.url);
                   next.push({
-                    title: citation.title || new URL(citation.url).hostname.replace(/^www\./, ""),
+                    title: citation.title || getHostname(citation.url),
                     url: citation.url,
                     publishedDate: citation.publishedDate,
                   });
