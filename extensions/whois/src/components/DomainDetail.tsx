@@ -1,11 +1,6 @@
 import { Action, ActionPanel, Color, Detail, Icon, getPreferenceValues } from "@raycast/api";
 import type { DomainDates } from "@/utils/whois-domain";
 
-interface Preferences {
-  registrarName?: string;
-  registrarUrl?: string;
-}
-
 interface DomainDetailProps {
   domain: string;
   data: DomainDates | null | undefined;
