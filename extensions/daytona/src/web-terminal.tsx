@@ -82,7 +82,16 @@ export default function WebTerminalCommand() {
   }
 
   async function handleSubmit(values: FormValues) {
-    if (sandboxes.length === 0) {
+    if (isLoadingSandboxes) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Sandboxes are still loading",
+        message: "Wait for the list to finish loading, then try again.",
+      });
+      return;
+    }
+
+    if (!values.sandboxId) {
       await showToast({
         style: Toast.Style.Failure,
         title: "No sandboxes available",
