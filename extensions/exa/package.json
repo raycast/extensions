@@ -52,6 +52,13 @@
       "keywords": ["web", "search", "fresh", "links", "results", "research", "news"]
     },
     {
+      "name": "search-deep",
+      "title": "Search Deep",
+      "description": "Run a deeper Exa search with extra reasoning for research-heavy questions.",
+      "icon": "icon.png",
+      "keywords": ["deep", "research", "reasoning", "analysis", "investigate", "web"]
+    },
+    {
       "name": "get-answer",
       "title": "Get Answer",
       "description": "Get a grounded answer from Exa with compact citations.",

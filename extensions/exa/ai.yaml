@@ -6,13 +6,19 @@ instructions: |
   2. Use `get-answer` when the user asks a question and wants a direct, sourced answer.
   3. Use `get-code-context` for implementation help, library or framework usage, API docs, and code patterns.
   4. Use `search` when the user needs live web discovery, recent information, or ranked results.
-  5. You may combine tools. A common flow is `search` first, then `get-contents` for the most relevant URLs.
+  5. Use `search-deep` when the user wants deeper research, harder synthesis, or a more exhaustive investigation and higher latency is acceptable.
+  6. You may combine tools. A common flow is `search` or `search-deep` first, then `get-contents` for the most relevant URLs.
 
   When using `search`:
   - Write natural, specific queries.
   - Only set `category` when a documented category clearly applies.
   - If `category` is `people`, do not pass `includeDomains` or `excludeDomains`. Put constraints like LinkedIn, GitHub, or company names into the query itself.
   - If `category` is `company`, do not pass `excludeDomains`. Put any source preference into the query itself instead.
+  - Start with the returned highlights before pulling full page content.
+
+  When using `search-deep`:
+  - Reserve it for research-heavy requests where better reasoning is worth the extra latency.
+  - Use the same category restrictions as `search`.
   - Start with the returned highlights before pulling full page content.
 
   When answering:
@@ -30,6 +36,16 @@ evals:
             query:
               - includes: "battery"
               - includes: "EU"
+  - input: "@exa-search deeply research the AI browser automation market and key vendors"
+    mocks:
+      search-deep: []
+    expected:
+      - callsTool:
+          name: search-deep
+          arguments:
+            query:
+              - includes: "browser automation"
+              - includes: "vendors"
   - input: "@exa-search linkedin profiles of people who have both eng and design experience"
     expected:
       - callsTool:

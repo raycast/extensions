@@ -125,6 +125,21 @@ export async function searchHighlights(input: SearchToolInput) {
   });
 }
 
+export async function searchDeepReasoning(input: SearchToolInput) {
+  const { query, numResults, category, includeDomains, excludeDomains } = input;
+
+  return exa.search(query, {
+    type: "deep-reasoning",
+    numResults,
+    category,
+    includeDomains: cleanArray(includeDomains),
+    excludeDomains: cleanArray(excludeDomains),
+    contents: {
+      highlights: true,
+    },
+  });
+}
+
 export function compactSearchResults(response: SearchHighlightsResponse): CompactSearchResult[] {
   return response.results.map((result) => ({
     title: result.title ?? fallbackTitle(result.url),
