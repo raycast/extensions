@@ -7,17 +7,16 @@ type Input = {
   query: string;
   /**
    * Number of search results to return.
-   * @default 10
    */
   numResults?: number;
   /**
-   * Restrict results to the listed domains.
+   * Restrict results to these domains, separated by commas or new lines.
    */
-  includeDomains?: string[];
+  includeDomains?: string;
   /**
-   * Exclude results from the listed domains.
+   * Exclude results from these domains, separated by commas or new lines.
    */
-  excludeDomains?: string[];
+  excludeDomains?: string;
   /**
    * A data category to focus on when searching, with higher comprehensivity and data cleanliness.
    */
@@ -28,11 +27,17 @@ type Input = {
  * @returns Deep-reasoning search results with highlights and published dates when available.
  */
 export default async function (input: Input) {
+  const splitDomains = (domains?: string) =>
+    domains
+      ?.split(/[\n,]/)
+      .map((domain) => domain.trim())
+      .filter(Boolean);
+
   const normalizedInput =
     input.category === "people"
       ? {
           ...input,
-          includeDomains: input.includeDomains?.filter((domain) => {
+          includeDomains: splitDomains(input.includeDomains)?.filter((domain) => {
             const normalized = domain.trim().toLowerCase();
             return normalized === "linkedin.com" || normalized.endsWith(".linkedin.com");
           }),
@@ -41,9 +46,14 @@ export default async function (input: Input) {
       : input.category === "company"
         ? {
             ...input,
+            includeDomains: splitDomains(input.includeDomains),
             excludeDomains: undefined,
           }
-        : input;
+        : {
+            ...input,
+            includeDomains: splitDomains(input.includeDomains),
+            excludeDomains: splitDomains(input.excludeDomains),
+          };
 
   return compactSearchResults(await searchDeepReasoning(normalizedInput)).map((result) => ({
     title: result.title,

@@ -2,12 +2,11 @@ import { compactHighlightContentsResponse, compactTextContentsResponse, getPageC
 
 type Input = {
   /**
-   * The URLs of the webpages to retrieve the contents of.
+   * URLs of webpages to retrieve, separated by commas or new lines.
    */
-  urls: string[];
+  urls: string;
   /**
    * Which content view to return for each URL.
-   * @default "highlights"
    */
   mode?: "text" | "highlights";
 };
@@ -17,10 +16,14 @@ type Input = {
  */
 export default async function (input: Input) {
   const mode = input.mode ?? "highlights";
+  const urls = input.urls
+    .split(/[\n,]/)
+    .map((url) => url.trim())
+    .filter(Boolean);
 
   if (mode === "highlights") {
-    return compactHighlightContentsResponse(await getPageContents(input.urls, "highlights"));
+    return compactHighlightContentsResponse(await getPageContents(urls, "highlights"));
   }
 
-  return compactTextContentsResponse(await getPageContents(input.urls, "text"));
+  return compactTextContentsResponse(await getPageContents(urls, "text"));
 }
