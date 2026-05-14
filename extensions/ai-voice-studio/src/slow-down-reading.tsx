@@ -31,7 +31,7 @@ export default async function SlowDownReading() {
   const hasPausedSession = !isLiveOrPaused && isPausedSession(session);
 
   if (!isLiveOrPaused && !hasPausedSession) {
-    await showHUD("No active reading. Adjust the default speed in Configure Voice Providers.");
+    await showHUD("No active reading. Adjust the default speed in Setup Voice Defaults.");
     return;
   }
 

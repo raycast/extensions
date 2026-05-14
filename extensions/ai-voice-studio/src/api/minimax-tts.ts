@@ -2,7 +2,7 @@ import { readFile, stat } from "node:fs/promises";
 import { basename, extname } from "node:path";
 import { getPreferenceValues } from "@raycast/api";
 import { DEFAULT_VOICE_ID, normalizeVoiceList } from "../constants/voices";
-import { getMiniMaxSettings } from "../utils/provider-settings";
+import { getMiniMaxSettings, type MiniMaxProviderSettings } from "../utils/provider-settings";
 import type {
   MiniMaxFileUploadResponse,
   MiniMaxRegion,
@@ -32,9 +32,13 @@ function getBaseUrl(region: MiniMaxRegion): string {
   return region === "global" ? "https://api.minimax.io" : "https://api.minimaxi.com";
 }
 
-function resolveAuth(model?: string): { apiKey: string; mode: ResolvedAuthMode } {
+async function resolveAuth(
+  model?: string,
+  settings?: MiniMaxProviderSettings,
+): Promise<{ apiKey: string; mode: ResolvedAuthMode }> {
   const prefs = getPreferenceValues<Preferences>();
-  const authMode = parseAuthMode(prefs.authMode);
+  const minimaxSettings = settings ?? (await getMiniMaxSettings());
+  const authMode = parseAuthMode(minimaxSettings.authMode);
   const tokenPlanKey = prefs.tokenPlanKey?.trim();
   const openPlatformApiKey = prefs.openPlatformApiKey?.trim();
   const wantsTurboOnlyModel = !!model && !isTokenPlanCompatibleModel(model);
@@ -77,10 +81,14 @@ function resolveAuth(model?: string): { apiKey: string; mode: ResolvedAuthMode }
   throw new TTSApiError(getMissingKeyMessage(authMode), -1);
 }
 
-export async function synthesizeSpeech(text: string, options: TTSOptions): Promise<string> {
+export async function synthesizeSpeech(text: string, options: TTSOptions, signal?: AbortSignal): Promise<string> {
   const trimmedText = text.trim();
   if (!trimmedText) {
     throw new Error("Text cannot be empty");
+  }
+
+  if (signal?.aborted) {
+    throw new TTSApiError("TTS synthesis cancelled", -7);
   }
 
   const requestBody: MiniMaxTTSRequest = {
@@ -104,10 +112,16 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
   };
 
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  let timedOut = false;
+  const timeoutId = setTimeout(() => {
+    timedOut = true;
+    controller.abort();
+  }, REQUEST_TIMEOUT_MS);
+  const abortHandler = () => controller.abort();
+  signal?.addEventListener("abort", abortHandler, { once: true });
 
   try {
-    const { apiKey } = resolveAuth(options.model);
+    const { apiKey } = await resolveAuth(options.model);
     const response = await fetch(`${getBaseUrl(options.region)}/v1/t2a_v2`, {
       method: "POST",
       headers: {
@@ -146,23 +160,27 @@ export async function synthesizeSpeech(text: string, options: TTSOptions): Promi
     return audioBuffer.toString("base64");
   } catch (err) {
     if (err instanceof Error && err.name === "AbortError") {
+      if (signal?.aborted && !timedOut) {
+        throw new TTSApiError("TTS synthesis cancelled", -7);
+      }
       throw new TTSApiError("Request timeout after 45 seconds", -2);
     }
     throw err;
   } finally {
     clearTimeout(timeoutId);
+    signal?.removeEventListener("abort", abortHandler);
   }
 }
 
 export async function listVoices(): Promise<VoiceConfig[]> {
-  const prefs = getPreferenceValues<Preferences>();
-  const region = parseRegion(prefs.region);
+  const settings = await getMiniMaxSettings();
+  const { region } = settings;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const { apiKey } = resolveAuth();
+    const { apiKey } = await resolveAuth(undefined, settings);
     const response = await fetch(`${getBaseUrl(region)}/v1/get_voice`, {
       method: "POST",
       headers: {
@@ -200,8 +218,8 @@ export async function listVoices(): Promise<VoiceConfig[]> {
 }
 
 export async function uploadAudioFile(filePath: string, purpose: UploadPurpose): Promise<number> {
-  const prefs = getPreferenceValues<Preferences>();
-  const region = parseRegion(prefs.region);
+  const settings = await getMiniMaxSettings();
+  const { region } = settings;
   const normalizedPath = filePath.trim();
 
   await validateAudioUpload(normalizedPath);
@@ -210,7 +228,7 @@ export async function uploadAudioFile(filePath: string, purpose: UploadPurpose):
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const { apiKey } = resolveAuth();
+    const { apiKey } = await resolveAuth(undefined, settings);
     const fileBytes = await readFile(normalizedPath);
     const formData = new FormData();
     formData.append("purpose", purpose);
@@ -257,13 +275,13 @@ export async function uploadAudioFile(filePath: string, purpose: UploadPurpose):
 }
 
 export async function cloneVoice(payload: MiniMaxVoiceCloneRequest): Promise<MiniMaxVoiceCloneResponse> {
-  const prefs = getPreferenceValues<Preferences>();
-  const region = parseRegion(prefs.region);
+  const settings = await getMiniMaxSettings();
+  const { region } = settings;
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
   try {
-    const { apiKey } = resolveAuth(payload.model);
+    const { apiKey } = await resolveAuth(payload.model, settings);
     const response = await fetch(`${getBaseUrl(region)}/v1/voice_clone`, {
       method: "POST",
       headers: {
@@ -327,7 +345,6 @@ export async function downloadAudioAsBase64(audioUrl: string): Promise<string> {
 }
 
 export async function buildOptionsFromPrefs(voiceOverride?: string): Promise<TTSOptions> {
-  const prefs = getPreferenceValues<Preferences>();
   const settings = await getMiniMaxSettings();
   const voiceId = voiceOverride || settings.customDefaultVoice?.trim() || settings.defaultVoice || DEFAULT_VOICE_ID;
   const speed = parseSpeechRate(settings.speechRate);
@@ -337,15 +354,11 @@ export async function buildOptionsFromPrefs(voiceOverride?: string): Promise<TTS
     model: settings.model || DEFAULT_MODEL,
     speed,
     languageBoost: settings.languageBoost || "auto",
-    region: parseRegion(prefs.region),
+    region: settings.region,
     format: DEFAULT_AUDIO_FORMAT,
     sampleRate: DEFAULT_SAMPLE_RATE,
     bitrate: DEFAULT_BITRATE,
   };
-}
-
-function parseRegion(region: string | undefined): MiniMaxRegion {
-  return region === "global" ? "global" : "cn";
 }
 
 function parseAuthMode(rawMode: string | undefined): AuthMode {

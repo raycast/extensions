@@ -144,7 +144,7 @@ function buildOptionsFromSettings(
 
   if (!voiceConfig) {
     throw new TTSApiError(
-      `Unknown voice "${voice}". Pick an OpenAI voice in Configure Voice Providers or Set Quick Read Voice.`,
+      `Unknown voice "${voice}". Pick an OpenAI voice in Setup Voice Defaults or Set Quick Read Voice.`,
       -1,
     );
   }

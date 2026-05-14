@@ -1,5 +1,5 @@
 import { LaunchType, Toast, launchCommand, showHUD, showToast } from "@raycast/api";
-import { stopExternalPlayback } from "./utils/audio-player";
+import { requestExternalStop, stopExternalPlayback } from "./utils/audio-player";
 import { clearPlaybackState, readPlaybackState } from "./utils/playback-state";
 import { getLastReadingSession } from "./utils/reading-session";
 import {
@@ -14,8 +14,22 @@ import {
 } from "./utils/openai-playback-state";
 
 export default async function StopReading() {
-  const [mimoState, openAIState] = await Promise.all([getMimoNowPlaying(), getOpenAINowPlaying()]);
+  const [mimoState, openAIState, liveState, lastSession] = await Promise.all([
+    getMimoNowPlaying(),
+    getOpenAINowPlaying(),
+    readPlaybackState(),
+    getLastReadingSession(),
+  ]);
   await Promise.all([requestMimoPlaybackStop(), requestOpenAIPlaybackStop()]);
+
+  if (liveState?.phase === "synthesizing" || liveState?.phase === "playing") {
+    requestExternalStop();
+    stopExternalPlayback();
+    await Promise.all([clearPlaybackState(), clearMimoNowPlaying(), clearOpenAINowPlaying()]);
+    await showHUD("Playback stopped");
+    return;
+  }
+
   const stopped = stopExternalPlayback();
 
   if (stopped) {
@@ -38,8 +52,6 @@ export default async function StopReading() {
 
   // Nothing playing right now — try to surface a useful next action instead
   // of silently flashing "No active playback".
-  const [liveState, lastSession] = await Promise.all([readPlaybackState(), getLastReadingSession()]);
-
   const pausedAt =
     liveState && liveState.phase === "stopped"
       ? `${liveState.chunkIndex + 1}/${liveState.chunkTotal}`

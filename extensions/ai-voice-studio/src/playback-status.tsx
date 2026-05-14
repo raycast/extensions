@@ -1,9 +1,10 @@
-import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences, showHUD } from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { stopExternalPlayback } from "./utils/audio-player";
 import { clearPlaybackState, readPlaybackState, type PlaybackState } from "./utils/playback-state";
 import { getLastReadingSession, type ReadingSession } from "./utils/reading-session";
 import { formatSpeed, readPlaybackSpeed } from "./utils/playback-speed";
+import { openProviderSetupCommand } from "./utils/provider-setup-command";
 
 interface Snapshot {
   live: PlaybackState | null;
@@ -101,7 +102,7 @@ export default function PlaybackStatus() {
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section>
-        <MenuBarExtra.Item title="Open Preferences" icon={Icon.Gear} onAction={() => openExtensionPreferences()} />
+        <MenuBarExtra.Item title="Setup Voice Defaults" icon={Icon.Gauge} onAction={openProviderSetupCommand} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );
@@ -216,5 +217,5 @@ async function handleSlowDown() {
 }
 
 async function handleSpeedUnavailable() {
-  await showHUD("No active reading. Use Configure Voice Providers to change the default speed.");
+  await showHUD("No active reading. Use Setup Voice Defaults to change the default speed.");
 }

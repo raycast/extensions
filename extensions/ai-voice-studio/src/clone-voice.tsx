@@ -21,6 +21,8 @@ import { AudioPlayer } from "./utils/audio-player";
 import { setQuickReadVoiceOverride } from "./utils/voice-preferences";
 import { lookupUploadCache, rememberUploadCache } from "./utils/upload-cache";
 import { getMiniMaxSettings } from "./utils/provider-settings";
+import { OpenProviderSetupAction } from "./components/provider-setup-form";
+import { openProviderSetupCommand } from "./utils/provider-setup-command";
 
 const DEFAULT_PREVIEW_TEXT = "这是一个 MiniMax 克隆音色试听。";
 const MODEL_OPTIONS = [
@@ -226,7 +228,7 @@ export default function CloneVoiceCommand() {
               <Action.OpenInBrowser title="Open Preview Audio URL" url={result.demoAudioUrl} icon={Icon.Link} />
             )}
             <Action.CopyToClipboard
-              title="Copy Voice Id"
+              title="Copy Voice ID"
               content={result.voiceId}
               shortcut={{ modifiers: ["cmd", "shift"], key: "." }}
             />
@@ -236,7 +238,8 @@ export default function CloneVoiceCommand() {
               shortcut={{ modifiers: ["cmd"], key: "n" }}
               onAction={() => setResult(null)}
             />
-            <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+            <OpenProviderSetupAction provider="minimax" />
+            <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
           </ActionPanel>
         }
       />
@@ -254,7 +257,8 @@ export default function CloneVoiceCommand() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Create Cloned Voice" icon={Icon.Wand} onSubmit={handleSubmit} />
-          <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+          <OpenProviderSetupAction provider="minimax" />
+          <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
@@ -379,7 +383,7 @@ function buildResultMarkdown(result: CloneVoiceResult): string {
       ? "- Press **⏎** to play the MiniMax-generated preview clip."
       : "- Press **⏎** to set this voice as the Quick Read default.",
     "- **⌘⏎** sets this as your Quick Read default; trigger Quick Read to hear it.",
-    "- **⌘⇧.** copies the Voice ID for use in Configure Voice Providers.",
+    "- **⌘⇧.** copies the Voice ID for use in Setup Voice Defaults.",
     "",
   ];
 
@@ -409,7 +413,7 @@ async function getPreferenceDefaults(): Promise<PreferenceDefaults> {
   const prefs = getPreferenceValues<Preferences>();
   const settings = await getMiniMaxSettings();
   const preferTokenPlanModelsOnly =
-    prefs.authMode === "token-plan" || (!!prefs.tokenPlanKey?.trim() && !prefs.openPlatformApiKey?.trim());
+    settings.authMode === "token-plan" || (!!prefs.tokenPlanKey?.trim() && !prefs.openPlatformApiKey?.trim());
   const preferredModel =
     preferTokenPlanModelsOnly && !isTokenPlanCompatibleModel(settings.model || "speech-2.8-hd")
       ? "speech-2.8-hd"
@@ -429,7 +433,7 @@ async function presentError(error: unknown, title: string) {
         style: Toast.Style.Failure,
         title: error.code === -1 ? "Configuration Required" : "Model Not Available",
         message: error.message,
-        primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+        primaryAction: getConfigurationAction(error.message),
       });
       return;
     }
@@ -442,4 +446,14 @@ async function presentError(error: unknown, title: string) {
     title,
     message: error instanceof Error ? error.message : String(error),
   });
+}
+
+function getConfigurationAction(message: string) {
+  return isCredentialError(message)
+    ? { title: "Open API Key Preferences", onAction: openExtensionPreferences }
+    : { title: "Setup Voice Defaults", onAction: openProviderSetupCommand };
+}
+
+function isCredentialError(message: string): boolean {
+  return /\b(api\s*)?key\b/i.test(message);
 }

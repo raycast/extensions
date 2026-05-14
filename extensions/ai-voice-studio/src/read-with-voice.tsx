@@ -7,21 +7,27 @@ import {
   getSelectedText,
   Icon,
   Color,
-  LaunchType,
-  getPreferenceValues,
-  launchCommand,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { addCustomVoices, collectCustomVoiceIds, FALLBACK_VOICES, groupVoicesByCategory } from "./constants/voices";
-import { synthesizeSpeech, buildOptionsFromPrefs, listVoices, TTSApiError } from "./api/minimax-tts";
+import { buildOptionsFromPrefs, listVoices, TTSApiError } from "./api/minimax-tts";
 import { chunkText } from "./utils/text-chunker";
-import { AudioPlayer, clearExternalStopRequest, hasExternalStopRequest } from "./utils/audio-player";
+import {
+  clearExternalStopRequest,
+  requestExternalStop,
+  stopExternalPlayback,
+  waitForExternalStopPropagation,
+} from "./utils/audio-player";
 import { getQuickReadVoiceOverride, setQuickReadVoiceOverride } from "./utils/voice-preferences";
 import { readCachedVoices, writeCachedVoices } from "./utils/voice-cache";
-import { buildTextPreview, clearPlaybackState, writePlaybackState } from "./utils/playback-state";
-import { clampSpeed, clearPlaybackSpeed, readPlaybackSpeed, writePlaybackSpeed } from "./utils/playback-speed";
+import { clearPlaybackState, readPlaybackState } from "./utils/playback-state";
+import { clearPlaybackSpeed } from "./utils/playback-speed";
 import { getMiniMaxSettings } from "./utils/provider-settings";
+import { OpenProviderSetupAction } from "./components/provider-setup-form";
+import { openProviderSetupCommand } from "./utils/provider-setup-command";
+import { hashText, saveReadingSession, type ReadingSession } from "./utils/reading-session";
+import { playReadingSession } from "./utils/reading-runner";
 import type { VoiceConfig } from "./api/types";
 
 type RowPhase = "synthesizing" | "playing";
@@ -39,16 +45,14 @@ export default function ReadWithVoice() {
   const [isLoading, setIsLoading] = useState(true);
   const [progress, setProgress] = useState<RowProgress | null>(null);
   const [customDefaultVoiceId, setCustomDefaultVoiceId] = useState<string | null>(null);
-  const playerRef = useRef(new AudioPlayer());
 
   useEffect(() => {
     let mounted = true;
 
     async function load() {
-      const prefs = getPreferenceValues<Preferences>();
       const settings = await getMiniMaxSettings();
       if (mounted) setCustomDefaultVoiceId(settings.customDefaultVoice?.trim() || null);
-      const cacheKey = { region: prefs.region || "cn", authMode: prefs.authMode || "auto" };
+      const cacheKey = { region: settings.region, authMode: settings.authMode };
       const quickReadVoiceOverride = await getQuickReadVoiceOverride();
       const customVoiceIds = collectCustomVoiceIds(
         settings.customDefaultVoice,
@@ -94,10 +98,8 @@ export default function ReadWithVoice() {
 
     load();
 
-    // Note: intentionally do NOT call playerRef.current.cleanup() on unmount.
-    // We want playback to survive when the user dismisses the view, so they
-    // can keep reading in the background. The PID-file machinery keeps Stop
-    // Reading / menubar / Quick Read toggle in sync.
+    // Playback survives view dismissal. The shared runner, PID-file machinery,
+    // and Stop Reading command keep background playback in sync.
     return () => {
       mounted = false;
     };
@@ -111,69 +113,30 @@ export default function ReadWithVoice() {
         return;
       }
 
-      // Stop any prior in-component playback before kicking off a new one.
-      playerRef.current.stopPlayback();
+      requestExternalStop();
+      stopExternalPlayback();
+      await waitForExternalStopPropagation();
       clearExternalStopRequest();
-      const player = new AudioPlayer();
-      playerRef.current = player;
 
       const chunks = chunkText(text);
       const total = chunks.length;
-      const preview = buildTextPreview(text);
 
       setProgress({ voiceId: voice.id, phase: "synthesizing", chunkIndex: 0, chunkTotal: total });
 
       try {
         const options = await buildOptionsFromPrefs(voice.id);
-        let currentSpeed = clampSpeed(options.speed);
-        await writePlaybackSpeed(currentSpeed);
+        const session = await createVoiceReadingSession(text, chunks, options);
+        await playReadingSession(session, false, {
+          onChunkPhase: ({ phase, chunkIndex, chunkTotal }) => {
+            setProgress({ voiceId: voice.id, phase, chunkIndex, chunkTotal });
+          },
+        });
 
-        for (let i = 0; i < total; i++) {
-          if (player.isStopped() || hasExternalStopRequest()) break;
-
-          // Pick up any speed change made by Speed Up / Slow Down between chunks.
-          currentSpeed = (await readPlaybackSpeed()) ?? currentSpeed;
-
-          setProgress({ voiceId: voice.id, phase: "synthesizing", chunkIndex: i, chunkTotal: total });
-          await writePlaybackState({
-            phase: "synthesizing",
-            voiceId: voice.id,
-            source: "selection",
-            textPreview: preview,
-            totalChars: text.length,
-            chunkIndex: i,
-            chunkTotal: total,
-            speed: currentSpeed,
-            updatedAt: new Date().toISOString(),
-          });
-
-          const audio = await synthesizeSpeech(chunks[i], { ...options, speed: currentSpeed });
-          if (player.isStopped() || hasExternalStopRequest()) break;
-
-          setProgress({ voiceId: voice.id, phase: "playing", chunkIndex: i, chunkTotal: total });
-          await writePlaybackState({
-            phase: "playing",
-            voiceId: voice.id,
-            source: "selection",
-            textPreview: preview,
-            totalChars: text.length,
-            chunkIndex: i,
-            chunkTotal: total,
-            speed: currentSpeed,
-            updatedAt: new Date().toISOString(),
-          });
-
-          await player.playAudio(audio);
-        }
-
-        if (!player.isStopped() && !hasExternalStopRequest()) {
-          await clearPlaybackState();
-          await clearPlaybackSpeed();
+        const liveState = await readPlaybackState();
+        if (liveState?.phase === "stopped") {
+          await showToast({ style: Toast.Style.Success, title: "Playback stopped", message: voice.name });
+        } else {
           await showToast({ style: Toast.Style.Success, title: "Playback complete", message: voice.name });
-        } else if (hasExternalStopRequest()) {
-          await clearPlaybackState();
-          await clearPlaybackSpeed();
-          clearExternalStopRequest();
         }
       } catch (error) {
         await clearPlaybackState();
@@ -184,10 +147,7 @@ export default function ReadWithVoice() {
               style: Toast.Style.Failure,
               title: error.code === -1 ? "Configuration Required" : "Model Not Available",
               message: error.message,
-              primaryAction:
-                error.code === -6
-                  ? { title: "Configure Voice Providers", onAction: openProviderSettings }
-                  : { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+              primaryAction: getConfigurationAction(error.message),
             });
           } else {
             await showToast({ style: Toast.Style.Failure, title: "TTS Error", message: error.message });
@@ -207,10 +167,10 @@ export default function ReadWithVoice() {
   );
 
   const handleStop = useCallback(async () => {
-    playerRef.current.stopPlayback();
+    requestExternalStop();
+    stopExternalPlayback();
     setProgress(null);
     await clearPlaybackState();
-    await clearPlaybackSpeed();
     showToast({ style: Toast.Style.Success, title: "Playback stopped" });
   }, []);
 
@@ -247,8 +207,8 @@ export default function ReadWithVoice() {
                   onAction={handleStop}
                 />
               )}
-              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
-              <Action title="Open Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
+              <OpenProviderSetupAction provider="minimax" />
+              <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -290,9 +250,9 @@ export default function ReadWithVoice() {
                         onAction={handleStop}
                       />
                     )}
-                    <Action.CopyToClipboard title="Copy Voice Id" content={voice.id} />
-                    <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
-                    <Action title="Open Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
+                    <Action.CopyToClipboard title="Copy Voice ID" content={voice.id} />
+                    <OpenProviderSetupAction provider="minimax" />
+                    <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
                   </ActionPanel>
                 }
               />
@@ -305,7 +265,17 @@ export default function ReadWithVoice() {
 }
 
 function openProviderSettings() {
-  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
+  return openExtensionPreferences();
+}
+
+function getConfigurationAction(message: string) {
+  return isCredentialError(message)
+    ? { title: "Open API Key Preferences", onAction: openExtensionPreferences }
+    : { title: "Setup Voice Defaults", onAction: openProviderSetupCommand };
+}
+
+function isCredentialError(message: string): boolean {
+  return /\b(api\s*)?key\b/i.test(message);
 }
 
 function progressLabel(progress: RowProgress): string {
@@ -318,3 +288,25 @@ function progressLabel(progress: RowProgress): string {
 function phaseColor(phase: RowPhase): Color {
   return phase === "synthesizing" ? Color.Orange : Color.Blue;
 }
+
+async function createVoiceReadingSession(
+  text: string,
+  chunks: string[],
+  options: VoiceReadingOptions,
+): Promise<ReadingSession> {
+  const now = new Date().toISOString();
+  const session: ReadingSession = {
+    textHash: hashText(text),
+    text,
+    source: "selection",
+    chunks,
+    nextChunkIndex: 0,
+    options,
+    createdAt: now,
+    updatedAt: now,
+  };
+  await saveReadingSession(session);
+  return session;
+}
+
+type VoiceReadingOptions = Awaited<ReturnType<typeof buildOptionsFromPrefs>>;

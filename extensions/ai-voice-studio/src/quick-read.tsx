@@ -1,23 +1,32 @@
-import { showHUD } from "@raycast/api";
-import { clearExternalStopRequest, stopExternalPlayback } from "./utils/audio-player";
+import { LaunchType, launchCommand, showHUD } from "@raycast/api";
+import { clearExternalStopRequest, requestExternalStop, stopExternalPlayback } from "./utils/audio-player";
 import { getReadableText } from "./utils/text-source";
 import { prepareReadingSession } from "./utils/reading-session";
 import { playReadingSession } from "./utils/reading-runner";
 import { buildDefaultOptionsFromPrefs } from "./utils/voice-preferences";
 import { presentCommandError, showResumeSuggestion } from "./utils/errors";
 import { clearPlaybackState, readPlaybackState } from "./utils/playback-state";
-import { runMimoQuickRead } from "./mimo-quick-read";
-import { runOpenAIQuickRead } from "./openai-quick-read";
 import { getDefaultProvider } from "./utils/provider";
 
 export default async function QuickRead() {
   const provider = await getDefaultProvider();
   if (provider === "openai") {
-    await runOpenAIQuickRead();
+    await launchCommand({ name: "openai-quick-read", type: LaunchType.UserInitiated });
     return;
   }
   if (provider === "mimo") {
-    await runMimoQuickRead();
+    await launchCommand({ name: "mimo-quick-read", type: LaunchType.UserInitiated });
+    return;
+  }
+
+  const liveState = await readPlaybackState();
+  const hasActiveMiniMaxReading = liveState?.phase === "synthesizing" || liveState?.phase === "playing";
+
+  if (hasActiveMiniMaxReading) {
+    requestExternalStop();
+    stopExternalPlayback();
+    await clearPlaybackState();
+    await showHUD("Stopped");
     return;
   }
 
@@ -34,8 +43,7 @@ export default async function QuickRead() {
   try {
     const readableText = await getReadableText();
     if (!readableText) {
-      const lastState = await readPlaybackState();
-      const lastSessionAvailable = lastState && (lastState.phase === "stopped" || lastState.phase === "playing");
+      const lastSessionAvailable = liveState && (liveState.phase === "stopped" || liveState.phase === "playing");
 
       if (lastSessionAvailable) {
         await showResumeSuggestion(

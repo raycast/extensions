@@ -1,4 +1,4 @@
-import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, openExtensionPreferences, showHUD } from "@raycast/api";
+import { Color, Icon, LaunchType, MenuBarExtra, launchCommand, showHUD } from "@raycast/api";
 import { useEffect, useState } from "react";
 import { stopExternalPlayback } from "./utils/audio-player";
 import {
@@ -16,6 +16,7 @@ import {
   type NowPlayingState,
 } from "./utils/mimo-playback-state";
 import { getMimoSettings } from "./utils/provider-settings";
+import { openProviderSetupCommand } from "./utils/provider-setup-command";
 
 export default function MenuBarStatus() {
   const [prefRate, setPrefRate] = useState(1);
@@ -151,7 +152,7 @@ export default function MenuBarStatus() {
           onAction={launch("mimo-read-with-voice")}
         />
         <MenuBarExtra.Item title="Set MiMo Quick Read Voice" icon={Icon.Star} onAction={launch("mimo-select-voice")} />
-        <MenuBarExtra.Item title="Open Extension Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+        <MenuBarExtra.Item title="Setup Voice Defaults" icon={Icon.Gauge} onAction={openProviderSetupCommand} />
       </MenuBarExtra.Section>
     </MenuBarExtra>
   );

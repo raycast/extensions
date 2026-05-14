@@ -48,7 +48,7 @@ export async function synthesizeSpeech(text: string, options: TTSOptions, signal
   }
 
   const response = await postWithTimeout(
-    buildChatCompletionsUrl(prefs.mimoTokenPlanBaseUrl),
+    buildChatCompletionsUrl(options.tokenPlanBaseUrl),
     {
       model: options.model,
       messages: buildMessages(applyAssistantControls(trimmedText, options), options.stylePrompt),
@@ -207,7 +207,7 @@ function buildOptionsFromSettings(
 
   if (!voiceConfig) {
     throw new TTSApiError(
-      `Unknown voice "${voice}". Pick a MiMo voice in Configure Voice Providers or Set Quick Read Voice.`,
+      `Unknown voice "${voice}". Pick a MiMo voice in Setup Voice Defaults or Set Quick Read Voice.`,
       -1,
     );
   }
@@ -238,6 +238,7 @@ function buildOptionsFromSettings(
     audioEventTags: normalizeTags(overrides.audioEventTags),
     format: DEFAULT_AUDIO_FORMAT,
     playbackRate: rate,
+    tokenPlanBaseUrl: settings.tokenPlanBaseUrl,
   };
 }
 

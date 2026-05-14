@@ -101,6 +101,10 @@ export async function setSpeedOverride(rate: number): Promise<number> {
   return clamped;
 }
 
+export async function clearSpeedOverride(): Promise<void> {
+  await LocalStorage.removeItem(SPEED_OVERRIDE_KEY);
+}
+
 export async function adjustSpeed(delta: number, fallback: number): Promise<number> {
   const current = (await getSpeedOverride()) ?? fallback;
   return setSpeedOverride(current + delta);

@@ -7,8 +7,7 @@ import {
   List,
   Toast,
   getSelectedText,
-  LaunchType,
-  launchCommand,
+  openExtensionPreferences,
   showToast,
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -34,6 +33,7 @@ import {
   SPEED_STEP,
 } from "./utils/openai-playback-state";
 import { getOpenAISettings } from "./utils/provider-settings";
+import { OpenProviderSetupAction } from "./components/provider-setup-form";
 
 type SelectionSource = "selection" | "clipboard" | "none";
 
@@ -238,13 +238,13 @@ export default function ReadWithVoice() {
   const speedActions = (
     <>
       <Action
-        title="Increase Speed (+0.25x)"
+        title="Increase Speed"
         icon={Icon.Plus}
         shortcut={{ modifiers: ["cmd", "shift"], key: "=" }}
         onAction={handleSpeedUp}
       />
       <Action
-        title="Decrease Speed (-0.25x)"
+        title="Decrease Speed"
         icon={Icon.Minus}
         shortcut={{ modifiers: ["cmd", "shift"], key: "-" }}
         onAction={handleSpeedDown}
@@ -263,7 +263,7 @@ export default function ReadWithVoice() {
       <List.EmptyView
         icon={Icon.SpeakerOff}
         title="No voices found"
-        description={`Try another search term or change the model in Configure Voice Providers. Current model: ${MODEL_LABELS[currentModel]}`}
+        description={`Try another search term or change the model in Setup Voice Defaults. Current model: ${MODEL_LABELS[currentModel]}`}
       />
       <List.Section title="Current Text">
         <List.Item
@@ -298,7 +298,8 @@ export default function ReadWithVoice() {
               />
               {stopAction}
               {speedActions}
-              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
+              <OpenProviderSetupAction provider="openai" />
+              <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -343,7 +344,8 @@ export default function ReadWithVoice() {
                     onAction={loadFromClipboard}
                   />
                   <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
-                  <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
+                  <OpenProviderSetupAction provider="openai" />
+                  <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
                 </ActionPanel>
               }
             />
@@ -355,7 +357,7 @@ export default function ReadWithVoice() {
 }
 
 function openProviderSettings() {
-  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
+  return openExtensionPreferences();
 }
 
 function SelectionDetail({

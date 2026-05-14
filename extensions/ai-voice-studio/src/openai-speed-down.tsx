@@ -3,21 +3,18 @@ import {
   adjustSpeed,
   formatSpeed,
   getSpeedOverride,
-  parseRateString,
   SPEED_MIN,
+  SPEED_NORMAL,
   SPEED_STEP,
 } from "./utils/openai-playback-state";
-import { getOpenAISettings } from "./utils/provider-settings";
 
 export default async function SpeedDown() {
   await runOpenAISpeedDown();
 }
 
 export async function runOpenAISpeedDown() {
-  const settings = await getOpenAISettings();
-  const fallback = parseRateString(settings.playbackRate);
-  const before = (await getSpeedOverride()) ?? fallback;
-  const next = await adjustSpeed(-SPEED_STEP, fallback);
+  const before = (await getSpeedOverride()) ?? SPEED_NORMAL;
+  const next = await adjustSpeed(-SPEED_STEP, SPEED_NORMAL);
 
   if (Math.abs(next - before) < 0.001 && next <= SPEED_MIN) {
     await showHUD(`Already at minimum speed (${formatSpeed(SPEED_MIN)})`);

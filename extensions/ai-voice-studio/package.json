@@ -23,11 +23,18 @@
       "mode": "no-view"
     },
     {
-      "name": "configure-providers",
-      "title": "Configure Voice Providers",
+      "name": "setup-voice-defaults",
+      "title": "Setup Voice Defaults",
       "subtitle": "AI Voice Studio",
-      "description": "Configure the default provider plus MiniMax, MiMo, and OpenAI model, voice, speed, style, and format settings.",
+      "description": "Configure the default provider, model, voice, speed, and provider defaults in a focused Raycast form.",
       "mode": "view"
+    },
+    {
+      "name": "test-voice-setup",
+      "title": "Test Voice Setup",
+      "subtitle": "AI Voice Studio",
+      "description": "Synthesize and play a short sample with the current default provider to verify API access, latency, and playback.",
+      "mode": "no-view"
     },
     {
       "name": "resume-reading",
@@ -151,40 +158,17 @@
       "title": "MiMo Reading Status",
       "subtitle": "MiMo",
       "description": "Show MiMo playback status, speed, and controls in the menu bar.",
-      "icon": "mimo-icon.png",
       "mode": "menu-bar",
       "interval": "1m"
     }
   ],
   "preferences": [
     {
-      "name": "authMode",
-      "type": "dropdown",
-      "required": false,
-      "title": "MiniMax Authentication Mode",
-      "description": "Choose which MiniMax key type to use",
-      "default": "auto",
-      "data": [
-        {
-          "title": "Auto Detect (Recommended)",
-          "value": "auto"
-        },
-        {
-          "title": "Token Plan Key",
-          "value": "token-plan"
-        },
-        {
-          "title": "Open Platform API Key",
-          "value": "payg"
-        }
-      ]
-    },
-    {
       "name": "tokenPlanKey",
       "type": "password",
       "required": false,
       "title": "MiniMax Token Plan Key",
-      "description": "MiniMax Token Plan subscription key. Token Plan currently supports HD models only (Turbo requires the Open Platform key).",
+      "description": "MiniMax Token Plan key.",
       "placeholder": "sk-..."
     },
     {
@@ -192,58 +176,31 @@
       "type": "password",
       "required": false,
       "title": "MiniMax Open Platform API Key",
-      "description": "MiniMax pay-as-you-go API key",
+      "description": "MiniMax Open Platform key.",
       "placeholder": "sk-..."
-    },
-    {
-      "name": "region",
-      "type": "dropdown",
-      "required": false,
-      "title": "MiniMax Region",
-      "description": "MiniMax API region",
-      "default": "cn",
-      "data": [
-        {
-          "title": "China (api.minimaxi.com)",
-          "value": "cn"
-        },
-        {
-          "title": "Global (api.minimax.io)",
-          "value": "global"
-        }
-      ]
     },
     {
       "name": "mimoApiKey",
       "type": "password",
       "required": false,
       "title": "MiMo Token Plan API Key",
-      "description": "Your Xiaomi MiMo Token Plan API key. Starts with tp-.",
+      "description": "MiMo Token Plan key.",
       "placeholder": "tp-..."
-    },
-    {
-      "name": "mimoTokenPlanBaseUrl",
-      "type": "textfield",
-      "required": false,
-      "title": "MiMo Token Plan Base URL",
-      "description": "OpenAI-compatible Token Plan base URL from your MiMo subscription page.",
-      "placeholder": "https://token-plan-cn.xiaomimimo.com/v1",
-      "default": "https://token-plan-cn.xiaomimimo.com/v1"
     },
     {
       "name": "openaiApiKey",
       "type": "password",
       "required": false,
       "title": "OpenAI API Key",
-      "description": "Your OpenAI API key for the Speech API.",
+      "description": "OpenAI Speech API key.",
       "placeholder": "sk-..."
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6"
+    "@raycast/api": "^1.104.16"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^25.3.0",
     "@types/react": "^19.2.14",
     "eslint": "^8.57.0",
@@ -251,10 +208,25 @@
     "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build --skip-types -e dist -o dist",
+    "prebuild": "node scripts/clean-build-output.mjs",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "verify": "npm run verify:runtime && npm run verify:provider-settings && npm run verify:provider-env && npm run verify:fast-paths && npm run verify:provider-contracts && npm run verify:test-voice-setup && npm run verify:live-smoke-guardrails && npm run verify:pipeline-lookahead && npm run verify:audio-player && npm run build && npm run lint && tsc --noEmit && npm audit && node scripts/write-verification-evidence.mjs local-verify",
+    "verify:audio-player": "node scripts/verify-audio-player.mjs",
+    "verify:fast-paths": "node scripts/verify-fast-paths.mjs",
+    "verify:live-env": "node scripts/verify-live-env.mjs",
+    "verify:goal": "node scripts/verify-goal.mjs",
+    "verify:local-playback": "node scripts/verify-local-playback.mjs",
+    "verify:live-smoke": "node scripts/verify-live-smoke.mjs",
+    "verify:live-smoke-guardrails": "node scripts/verify-live-smoke-guardrails.mjs",
+    "verify:pipeline-lookahead": "node scripts/verify-pipeline-lookahead.mjs",
+    "verify:provider-env": "node scripts/verify-provider-env.mjs",
+    "verify:provider-settings": "node scripts/verify-provider-settings.mjs",
+    "verify:provider-contracts": "node scripts/verify-provider-contracts.mjs",
+    "verify:test-voice-setup": "node scripts/verify-test-voice-setup.mjs",
+    "verify:runtime": "node scripts/verify-runtime.mjs",
     "publish": "npx @raycast/api@latest publish"
   },
   "keywords": [

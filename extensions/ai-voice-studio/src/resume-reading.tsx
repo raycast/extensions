@@ -1,14 +1,26 @@
 import { showHUD } from "@raycast/api";
-import { clearExternalStopRequest, stopExternalPlayback } from "./utils/audio-player";
+import {
+  clearExternalStopRequest,
+  requestExternalStop,
+  stopExternalPlayback,
+  waitForExternalStopPropagation,
+} from "./utils/audio-player";
 import { getLastReadingSession, updateReadingProgress } from "./utils/reading-session";
 import { playReadingSession } from "./utils/reading-runner";
 import { presentCommandError } from "./utils/errors";
-import { clearPlaybackState } from "./utils/playback-state";
+import { clearPlaybackState, readPlaybackState } from "./utils/playback-state";
 
 export default async function ResumeReading() {
   // Resume always resumes. If something is already playing, stop it first
   // so the resumed playback can take over without a confusing "Stopped" toggle.
-  stopExternalPlayback();
+  const liveState = await readPlaybackState();
+  if (liveState?.phase === "synthesizing" || liveState?.phase === "playing") {
+    requestExternalStop();
+    stopExternalPlayback();
+    await waitForExternalStopPropagation();
+  } else {
+    stopExternalPlayback();
+  }
   clearExternalStopRequest();
   await clearPlaybackState();
 

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Color, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildOptionsAsync, getActiveModelAsync, getModelLabel, synthesizeSpeech } from "./api/openai-tts";
 import type { VoiceConfig } from "./api/openai-types";
@@ -18,6 +18,7 @@ import {
   getActiveQuickReadVoiceId,
   setQuickReadVoiceOverride,
 } from "./utils/openai-voice-preferences";
+import { OpenProviderSetupAction } from "./components/provider-setup-form";
 
 const PREVIEW_FALLBACK_TEXT = "This is a short OpenAI TTS voice preview.";
 const PREVIEW_CHAR_LIMIT = 180;
@@ -143,7 +144,8 @@ export default function SelectVoice() {
               {usesOverride && (
                 <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
               )}
-              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
+              <OpenProviderSetupAction provider="openai" />
+              <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -171,7 +173,8 @@ export default function SelectVoice() {
                     <Action title="Reset to Default Voice" icon={Icon.RotateClockwise} onAction={handleResetVoice} />
                   )}
                   <Action.CopyToClipboard title="Copy Voice Identifier" content={voice.id} />
-                  <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
+                  <OpenProviderSetupAction provider="openai" />
+                  <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
                 </ActionPanel>
               }
             />
@@ -183,7 +186,7 @@ export default function SelectVoice() {
 }
 
 function openProviderSettings() {
-  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
+  return openExtensionPreferences();
 }
 
 function CurrentVoiceDetail({
@@ -200,7 +203,7 @@ function CurrentVoiceDetail({
       markdown={
         voice
           ? `## ${escapeMarkdown(voice.name)}\n\n${escapeMarkdown(voice.description)}`
-          : "## Configured Default\n\nQuick Read will use the default voice from Configure Voice Providers."
+          : "## Configured Default\n\nQuick Read will use the default voice from Setup Voice Defaults."
       }
       metadata={
         <List.Item.Detail.Metadata>

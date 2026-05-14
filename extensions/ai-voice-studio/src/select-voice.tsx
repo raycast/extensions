@@ -3,10 +3,8 @@ import {
   ActionPanel,
   Color,
   Icon,
-  LaunchType,
   List,
   getPreferenceValues,
-  launchCommand,
   openExtensionPreferences,
   showToast,
   Toast,
@@ -30,6 +28,8 @@ import {
 } from "./utils/voice-preferences";
 import { readCachedVoices, writeCachedVoices } from "./utils/voice-cache";
 import { getMiniMaxSettings, type MiniMaxProviderSettings } from "./utils/provider-settings";
+import { OpenProviderSetupAction } from "./components/provider-setup-form";
+import { openProviderSetupCommand } from "./utils/provider-setup-command";
 
 const PREVIEW_FALLBACK_TEXT = "这是一段 MiniMax TTS 音色试听。";
 const PREVIEW_CHAR_LIMIT = 180;
@@ -55,13 +55,12 @@ export default function SelectVoice() {
     let mounted = true;
 
     async function load() {
-      const prefs = getPreferenceValues<Preferences>();
       const settings = await getMiniMaxSettings();
       if (mounted) {
         setConfigStatus(buildConfigStatus(settings));
         setCustomDefaultVoiceId(settings.customDefaultVoice?.trim() || null);
       }
-      const cacheKey = { region: prefs.region || "cn", authMode: prefs.authMode || "auto" };
+      const cacheKey = { region: settings.region, authMode: settings.authMode };
       const withCustomVoices = (voiceList: VoiceConfig[], extraVoiceId?: string) =>
         addCustomVoices(
           voiceList,
@@ -137,20 +136,20 @@ export default function SelectVoice() {
     try {
       const readableText = await getReadableText();
       const previewText = getPreviewText(readableText?.text || PREVIEW_FALLBACK_TEXT);
-      const audio = await synthesizeSpeech(previewText, await buildOptionsFromPrefs(voice.id));
+      const audio = await synthesizeSpeech(previewText, await buildOptionsFromPrefs(voice.id), player.signal);
       if (player.isStopped()) return;
       await player.playAudio(audio);
     } catch (error) {
+      if (player.isStopped() || (error instanceof TTSApiError && error.code === -7)) {
+        return;
+      }
       if (error instanceof TTSApiError) {
         if (error.code === -1 || error.code === -6) {
           await showToast({
             style: Toast.Style.Failure,
             title: error.code === -1 ? "Configuration Required" : "Model Not Available",
             message: error.message,
-            primaryAction:
-              error.code === -6
-                ? { title: "Configure Voice Providers", onAction: openProviderSettings }
-                : { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+            primaryAction: getConfigurationAction(error.message),
           });
         } else {
           await showToast({ style: Toast.Style.Failure, title: "Preview failed", message: error.message });
@@ -210,8 +209,8 @@ export default function SelectVoice() {
                   onAction={handleStopPreview}
                 />
               )}
-              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
-              <Action title="Open Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
+              <OpenProviderSetupAction provider="minimax" />
+              <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -231,8 +230,8 @@ export default function SelectVoice() {
           }
           actions={
             <ActionPanel>
-              <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <OpenProviderSetupAction provider="minimax" />
+              <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
             </ActionPanel>
           }
         />
@@ -275,9 +274,9 @@ export default function SelectVoice() {
                       onAction={handleResetVoice}
                     />
                   )}
-                  <Action.CopyToClipboard title="Copy Voice Id" content={voice.id} />
-                  <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
-                  <Action title="Open Preferences" icon={Icon.Key} onAction={openExtensionPreferences} />
+                  <Action.CopyToClipboard title="Copy Voice ID" content={voice.id} />
+                  <OpenProviderSetupAction provider="minimax" />
+                  <Action title="Open API Key Preferences" icon={Icon.Key} onAction={openProviderSettings} />
                 </ActionPanel>
               }
             />
@@ -289,7 +288,17 @@ export default function SelectVoice() {
 }
 
 function openProviderSettings() {
-  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
+  return openExtensionPreferences();
+}
+
+function getConfigurationAction(message: string) {
+  return isCredentialError(message)
+    ? { title: "Open API Key Preferences", onAction: openExtensionPreferences }
+    : { title: "Setup Voice Defaults", onAction: openProviderSetupCommand };
+}
+
+function isCredentialError(message: string): boolean {
+  return /\b(api\s*)?key\b/i.test(message);
 }
 
 function getPreviewText(text: string): string {
@@ -301,10 +310,10 @@ function buildConfigStatus(settings: MiniMaxProviderSettings): ConfigStatus {
   const tokenPlanKey = prefs.tokenPlanKey?.trim();
   const openPlatformApiKey = prefs.openPlatformApiKey?.trim();
   const model = settings.model || "speech-2.8-hd";
-  const authMode = prefs.authMode || "auto";
+  const authMode = settings.authMode;
 
   const tokenPlanCompatible = isTokenPlanCompatibleModel(model);
-  const regionLabel = prefs.region === "global" ? "Global" : "China";
+  const regionLabel = settings.region === "global" ? "Global" : "China";
   const modelLabel = model;
 
   let authLabel: string;

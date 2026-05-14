@@ -1,12 +1,31 @@
 import { showHUD } from "@raycast/api";
-import { synthesizeSpeech } from "../api/minimax-tts";
-import { AudioPlayer, hasExternalStopRequest } from "./audio-player";
+import { AudioPlayer, clearExternalStopRequest, hasExternalStopRequest } from "./audio-player";
 import { formatTextSource } from "./text-source";
 import { ReadingSession, saveReadingSession, updateReadingProgress } from "./reading-session";
 import { buildTextPreview, clearPlaybackState, writePlaybackState } from "./playback-state";
 import { clampSpeed, clearPlaybackSpeed, formatSpeed, readPlaybackSpeed, writePlaybackSpeed } from "./playback-speed";
+import { startMiniMaxSynthesisJob, synthesizeMiniMaxChunk, type MiniMaxSynthesisJob } from "./minimax-synthesis";
 
-export async function playReadingSession(session: ReadingSession, isResuming = false): Promise<void> {
+interface LookaheadJob {
+  index: number;
+  speed: number;
+  job: MiniMaxSynthesisJob;
+}
+
+export interface ReadingRunnerCallbacks {
+  onChunkPhase?: (progress: {
+    phase: "synthesizing" | "playing";
+    chunkIndex: number;
+    chunkTotal: number;
+    speed: number;
+  }) => Promise<void> | void;
+}
+
+export async function playReadingSession(
+  session: ReadingSession,
+  isResuming = false,
+  callbacks: ReadingRunnerCallbacks = {},
+): Promise<void> {
   const player = new AudioPlayer();
   let activeSession = session;
   const chunkCount = session.chunks.length;
@@ -23,6 +42,7 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
   // Seed the live speed value from the session so menubar / Speed Up / Slow
   // Down can read it back. A previously adjusted session keeps its speed.
   let currentSpeed = clampSpeed(activeSession.options.speed);
+  let lookahead: LookaheadJob | null = null;
   await writePlaybackSpeed(currentSpeed);
 
   try {
@@ -41,6 +61,17 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
       const speedChanged = desiredSpeed !== currentSpeed;
       currentSpeed = desiredSpeed;
 
+      const chunkOptions = { ...activeSession.options, speed: currentSpeed };
+      const audioPromise =
+        lookahead?.index === i && lookahead.speed === currentSpeed
+          ? lookahead.job.promise
+          : synthesizeMiniMaxChunk(activeSession.chunks[i], chunkOptions, player);
+
+      if (lookahead && (lookahead.index !== i || lookahead.speed !== currentSpeed)) {
+        lookahead.job.cancel();
+      }
+      lookahead = null;
+
       await writePlaybackState({
         phase: "synthesizing",
         voiceId: activeSession.options.voiceId,
@@ -52,10 +83,31 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
         speed: currentSpeed,
         updatedAt: new Date().toISOString(),
       });
+      await callbacks.onChunkPhase?.({
+        phase: "synthesizing",
+        chunkIndex: i,
+        chunkTotal: chunkCount,
+        speed: currentSpeed,
+      });
 
-      const chunkOptions = { ...activeSession.options, speed: currentSpeed };
-      const audio = await synthesizeSpeech(activeSession.chunks[i], chunkOptions);
+      const audio = await audioPromise;
+      if (!audio) break;
       if (player.isStopped() || hasExternalStopRequest()) break;
+
+      if (i + 1 < chunkCount) {
+        lookahead = {
+          index: i + 1,
+          speed: currentSpeed,
+          job: startMiniMaxSynthesisJob(
+            activeSession.chunks[i + 1],
+            { ...activeSession.options, speed: currentSpeed },
+            player,
+          ),
+        };
+        // Prevent an unhandled rejection if the next synthesis fails before
+        // the loop reaches that chunk; the original promise is still awaited.
+        lookahead.job.promise.catch(() => undefined);
+      }
 
       await writePlaybackState({
         phase: "playing",
@@ -67,6 +119,12 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
         chunkTotal: chunkCount,
         speed: currentSpeed,
         updatedAt: new Date().toISOString(),
+      });
+      await callbacks.onChunkPhase?.({
+        phase: "playing",
+        chunkIndex: i,
+        chunkTotal: chunkCount,
+        speed: currentSpeed,
       });
 
       await player.playAudio(audio);
@@ -80,6 +138,11 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
         };
         await saveReadingSession(activeSession);
       }
+
+      if (player.isStopped() || hasExternalStopRequest()) {
+        break;
+      }
+
       activeSession = await updateReadingProgress(activeSession, i + 1);
 
       if (hasExternalStopRequest()) {
@@ -107,11 +170,13 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
       });
       // Intentionally keep the live speed value so Resume Last Reading
       // picks up the user's adjusted pace.
+      clearExternalStopRequest();
     } else if (player.isStopped()) {
       await clearPlaybackState();
       // Same rationale: do not clear playback speed on a manual stop.
     }
   } finally {
+    lookahead?.job.cancel();
     player.cleanup();
   }
 }

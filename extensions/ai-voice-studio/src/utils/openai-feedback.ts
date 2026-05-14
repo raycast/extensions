@@ -1,5 +1,6 @@
 import { Clipboard, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { TTSApiError } from "../api/openai-tts";
+import { openProviderSetupCommand } from "./provider-setup-command";
 
 const CONFIG_ERROR_CODES = new Set([-1, 401, 403]);
 
@@ -25,7 +26,7 @@ export async function showTTSFailure(error: unknown, fallbackTitle = "OpenAI TTS
       style: Toast.Style.Failure,
       title: "Configuration Required",
       message: detail,
-      primaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+      primaryAction: getConfigurationAction(message),
       secondaryAction: { title: "Copy Error Details", onAction: copyDetail(detail) },
     });
     return;
@@ -36,6 +37,16 @@ export async function showTTSFailure(error: unknown, fallbackTitle = "OpenAI TTS
     title: fallbackTitle,
     message: detail,
     primaryAction: { title: "Copy Error Details", onAction: copyDetail(detail) },
-    secondaryAction: { title: "Open Preferences", onAction: () => openExtensionPreferences() },
+    secondaryAction: { title: "Setup Voice Defaults", onAction: openProviderSetupCommand },
   });
+}
+
+function getConfigurationAction(message: string) {
+  return isCredentialError(message)
+    ? { title: "Open API Key Preferences", onAction: openExtensionPreferences }
+    : { title: "Setup Voice Defaults", onAction: openProviderSetupCommand };
+}
+
+function isCredentialError(message: string): boolean {
+  return /\b(api\s*)?key\b/i.test(message);
 }

@@ -5,8 +5,8 @@ import { join } from "path";
 import { randomUUID } from "crypto";
 import { execSync } from "child_process";
 
-const PID_FILE = join(tmpdir(), "minimax-tts.pid");
-const STOP_FILE = join(tmpdir(), "minimax-tts.stop");
+const PID_FILE = join(tmpdir(), "ai-voice-studio.pid");
+const STOP_FILE = join(tmpdir(), "ai-voice-studio.stop");
 
 export class AudioPlayer {
   private currentProcess: ChildProcess | null = null;
@@ -25,6 +25,7 @@ export class AudioPlayer {
     if (this.stopped) return;
 
     const tempPath = this.saveTempFile(base64Audio, format);
+    const playbackStartedAt = Date.now();
 
     return new Promise<void>((resolve, reject) => {
       const proc = spawn("afplay", buildAfplayArgs(tempPath, playbackRate));
@@ -41,7 +42,7 @@ export class AudioPlayer {
         // External stop (SIGTERM via stopExternalPlayback) leaves a STOP_FILE
         // behind. Treat that as a graceful stop instead of throwing, so the
         // outer command doesn't surface a confusing "afplay exited with code N".
-        const externallyStopped = signal === "SIGTERM" || existsSync(STOP_FILE);
+        const externallyStopped = signal === "SIGTERM" || hasStopRequestSince(playbackStartedAt);
 
         if (this.stopped || code === 0 || code === null || externallyStopped) {
           resolve();
@@ -179,7 +180,6 @@ export function stopExternalPlayback(): boolean {
     if (!existsSync(PID_FILE)) {
       return false;
     }
-    writeStopRequest();
     const pidStr = readFileSync(PID_FILE, "utf8").trim();
     const pid = parseInt(pidStr, 10);
     if (isNaN(pid)) {
@@ -199,6 +199,7 @@ export function stopExternalPlayback(): boolean {
       return false;
     }
 
+    requestExternalStop();
     process.kill(pid, "SIGTERM");
     removePidFile();
     return true;
@@ -206,6 +207,10 @@ export function stopExternalPlayback(): boolean {
     removePidFile();
     return false;
   }
+}
+
+export function requestExternalStop(): void {
+  writeStopRequest();
 }
 
 export function clearExternalStopRequest(): void {
@@ -220,6 +225,21 @@ export function clearExternalStopRequest(): void {
 
 export function hasExternalStopRequest(): boolean {
   return existsSync(STOP_FILE);
+}
+
+export async function waitForExternalStopPropagation(delayMs = 250): Promise<void> {
+  await new Promise((resolve) => setTimeout(resolve, delayMs));
+}
+
+function hasStopRequestSince(timestamp: number): boolean {
+  try {
+    if (!existsSync(STOP_FILE)) return false;
+    const raw = readFileSync(STOP_FILE, "utf8").trim();
+    const stopRequestedAt = Number(raw);
+    return Number.isFinite(stopRequestedAt) && stopRequestedAt >= timestamp;
+  } catch {
+    return false;
+  }
 }
 
 function writeStopRequest(): void {

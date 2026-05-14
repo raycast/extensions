@@ -1,15 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  LaunchType,
-  Toast,
-  getSelectedText,
-  launchCommand,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, Toast, getSelectedText, showToast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { buildOptionsFromPrefs, getActiveModelAsync, getModelLabel } from "./api/mimo-tts";
 import { showTTSFailure } from "./utils/mimo-feedback";
@@ -49,6 +38,7 @@ import {
   SPEED_STEP,
 } from "./utils/mimo-playback-state";
 import { getMimoSettings } from "./utils/provider-settings";
+import { OpenProviderSetupAction } from "./components/provider-setup-form";
 
 interface ControlFormValues extends Form.Values {
   text: string;
@@ -265,13 +255,13 @@ export default function MiMoStudio() {
             onAction={handleClearText}
           />
           <Action
-            title="Increase Speed (+0.25x)"
+            title="Increase Speed"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd", "shift"], key: "=" }}
             onAction={handleSpeedUp}
           />
           <Action
-            title="Decrease Speed (-0.25x)"
+            title="Decrease Speed"
             icon={Icon.Minus}
             shortcut={{ modifiers: ["cmd", "shift"], key: "-" }}
             onAction={handleSpeedDown}
@@ -284,7 +274,7 @@ export default function MiMoStudio() {
               onAction={handleStop}
             />
           ) : null}
-          <Action title="Configure Voice Providers" icon={Icon.Gear} onAction={openProviderSettings} />
+          <OpenProviderSetupAction provider="mimo" />
         </ActionPanel>
       }
     >
@@ -391,10 +381,6 @@ async function loadInitialText(): Promise<string> {
   const selectedText = await getSelectedText().catch(() => "");
   if (selectedText.trim()) return selectedText;
   return "";
-}
-
-function openProviderSettings() {
-  return launchCommand({ name: "configure-providers", type: LaunchType.UserInitiated });
 }
 
 function selectedTags(tags: string[] | undefined): string[] {

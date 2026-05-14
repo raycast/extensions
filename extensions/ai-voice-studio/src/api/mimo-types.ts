@@ -6,6 +6,7 @@ export interface TTSOptions {
   audioEventTags?: string[];
   format: string;
   playbackRate: number;
+  tokenPlanBaseUrl?: string;
 }
 
 export interface TTSOptionOverrides {
