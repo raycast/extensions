@@ -154,6 +154,20 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "cancel-my-transactions",
+      "title": "Cancel My Transactions",
+      "description": "Stop a long-running transaction that has locked you out of your ServiceNow session, without opening a new browser or private window. If no instance name or alias is provided, uses the currently selected instance.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "instanceName",
+          "placeholder": "Instance name or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
     }
   ],
   "preferences": [

@@ -1,5 +1,9 @@
 # ServiceNow Extension Changelog
 
+## [New Command: Cancel My Transactions] - 2026-05-14
+
+- Added a new **Cancel My Transactions** command. When a long-running transaction (e.g. a runaway Background Script) locks you out of your ServiceNow session, this command opens `cancel_my_transaction.do`, which stops the transaction and unlocks the session — no need to open a new browser or private window. Accepts an optional instance name/alias; defaults to the currently selected instance.
+
 ## [FedRAMP and on-prem support] - 2026-05-14
 
 - Added support for FedRAMP ServiceNow instances (`*.servicenowservices.com`) and on-prem deployments with custom hostnames. The **Instance URL** field in instance profiles now accepts either a subdomain (cloud) or a full URL.
