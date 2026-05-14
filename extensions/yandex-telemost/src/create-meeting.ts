@@ -1,4 +1,4 @@
-import { Application, Clipboard, getPreferenceValues, open, showHUD, showToast, Toast } from "@raycast/api";
+import { Clipboard, getPreferenceValues, open, showHUD, showToast, Toast } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 const TELEMOST_URL = "https://telemost.yandex.ru";
@@ -33,10 +33,6 @@ const BROWSERS: Record<string, BrowserFamily> = {
   Safari: "safari",
   "Safari Technology Preview": "safari",
 };
-
-interface Preferences {
-  browser: Application;
-}
 
 function escapeForAppleScript(js: string): string {
   return js.replace(/\\/g, "\\\\").replace(/"/g, '\\"').replace(/\n/g, " ");

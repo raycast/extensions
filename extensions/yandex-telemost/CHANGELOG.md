@@ -1,4 +1,4 @@
-## [1.0.0] - 2026-05-15
+## [1.0.0] - {PR_MERGE_DATE}
 
 ### Added
 - New Meeting command — creates a Yandex Telemost meeting and copies the link to clipboard
