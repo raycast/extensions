@@ -8,10 +8,10 @@ import SearchBar from "./components/searchbar";
 
 export default function BrowseAirlines() {
   const { isLoading, data = [] } = usePromise(fetchAirlines);
-  const [alliance, setAlliance] = useState("All");
+  const [alliance, setAlliance] = useState("");
 
   const filteredAirlines = useMemo(() => {
-    if (alliance === "All") return data;
+    if (!alliance || alliance === "All") return data;
     return data.filter((a) => a.alliance === alliance);
   }, [alliance, data]);
 
@@ -36,7 +36,7 @@ export default function BrowseAirlines() {
             accessory={
               airline.flag_carrier
                 ? {
-                    icon: getFlagEmoji(airline.country.split(",")[0]),
+                    icon: getFlagEmoji(airline.country?.split(",")?.[0]),
                     tooltip: "Flag Carrier",
                   }
                 : undefined

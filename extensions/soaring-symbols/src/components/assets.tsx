@@ -34,7 +34,7 @@ export default function AirlineAssets(airline: AirlineMeta) {
       if (!Array.isArray(colors)) return [];
       const single = Array.isArray(colors) && colors.length === 1;
 
-      return variants.map(async (variant) => {
+      return variants.map((variant) => {
         const monochrome = single && variant.endsWith("-mono");
         const tintColor = monochrome ? Color.PrimaryText : undefined;
         const source = `https://raw.githubusercontent.com/anhthang/soaring-symbols/refs/heads/main/assets/${airline.slug}/${single ? category : variant}.svg`;
