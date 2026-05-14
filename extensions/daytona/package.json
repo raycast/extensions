@@ -1,0 +1,126 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "daytona",
+  "title": "Daytona",
+  "description": "Create Daytona sandboxes and run code directly from Raycast.",
+  "icon": "icon.png",
+  "author": "jurajstefanic",
+  "categories": [
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-sandbox",
+      "title": "Create Sandbox",
+      "description": "Create a new Daytona sandbox.",
+      "mode": "view"
+    },
+    {
+      "name": "run-code",
+      "title": "Run Code",
+      "description": "Run code in a Daytona sandbox.",
+      "mode": "view"
+    },
+    {
+      "name": "create-snapshot",
+      "title": "Create Snapshot",
+      "description": "Create a Daytona snapshot from a base image.",
+      "mode": "view"
+    },
+    {
+      "name": "instant-sandbox",
+      "title": "Instant Sandbox",
+      "description": "Instantly create a default Daytona sandbox.",
+      "mode": "no-view"
+    },
+    {
+      "name": "read-documentation",
+      "title": "Read Documentation",
+      "description": "Read Daytona documentation.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-dashboard",
+      "title": "Open Dashboard",
+      "description": "Open Daytona dashboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "web-terminal",
+      "title": "Web Terminal",
+      "description": "Open Daytona web terminal for a sandbox.",
+      "mode": "view"
+    },
+    {
+      "name": "manage-sandboxes",
+      "title": "Manage Sandboxes",
+      "description": "View and manage Daytona sandboxes.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Your Daytona API key.",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "Daytona API URL.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://app.daytona.io/api"
+    },
+    {
+      "name": "target",
+      "title": "Default Target",
+      "description": "Default region target for new sandboxes.",
+      "type": "dropdown",
+      "required": false,
+      "default": "auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "auto"
+        },
+        {
+          "title": "US",
+          "value": "us"
+        },
+        {
+          "title": "EU",
+          "value": "eu"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@daytona/sdk": "^0.175.0",
+    "@raycast/api": "^1.104.17"
+  },
+  "overrides": {
+    "protobufjs": "^8.3.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.6",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
