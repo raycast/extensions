@@ -13,7 +13,7 @@ export default function Whois(props: LaunchProps<{ arguments: Arguments.Whois }>
   const isDomain = !domainLoading && !!domainOrIp?.isDomain;
   const isIp = !domainLoading && !!domainOrIp?.isIp;
 
-  // For IPs: existing flow using ipwho.is
+  // For IPs: ip-api.com lookup
   const { data: ipWhoisData, isLoading: ipWhoisLoading } = useWhoisData(domainOrIp, isIp);
 
   // For domains: new flow using whoiser + RDAP
