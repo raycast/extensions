@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sensitivity-calculator",
+  "title": "Sensitivity Calculator",
+  "description": "Calculate the sensitivity or cm/360 for games",
+  "icon": "extension-icon.png",
+  "author": "charlie_rose",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Fun"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "sensitivity",
+      "title": "Calculate Sensitivity",
+      "subtitle": "Calculate in-game sensitivity",
+      "description": "Calculate the sensitivity given cm/360, dpi and game values",
+      "mode": "view"
+    },
+    {
+      "name": "cm-360",
+      "title": "Calculate Cm/360",
+      "subtitle": "Calculate cm/360",
+      "description": "Calculate the cm/360 given the sensitivity, dpi and game values",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^1.17.0"
+  },
+  "scripts": {
+    "build": "npx ray build",
+    "dev": "npx ray develop",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
