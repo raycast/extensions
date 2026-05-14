@@ -3,7 +3,7 @@
   "name": "kobbe",
   "title": "Kobbe",
   "description": "Inspect Kobbe analytics from Raycast.",
-  "icon": "kobbe.png",
+  "icon": "kobbe-icon.png",
   "author": "michael_Andreuzza",
   "license": "MIT",
   "categories": [
