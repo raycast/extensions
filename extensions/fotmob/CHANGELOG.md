@@ -1,6 +1,6 @@
 # Changelog
 
-## [Fixes] - {PR_MERGE_DATE}
+## [Fixes] - 2026-05-14
 
 - Fix Match Day, Match Detail, Team Detail, and League Table data fetching after FotMob endpoint changes
 
