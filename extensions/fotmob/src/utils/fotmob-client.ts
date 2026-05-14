@@ -1,7 +1,6 @@
 import { buildLeagueDetailUrl, buildTeamDetailUrl } from "@/utils/url-builder";
 
 const FOTMOB_BASE_URL = "https://www.fotmob.com";
-const DEFAULT_COUNTRY_CODE = "USA";
 
 export type JsonRecord = Record<string, unknown>;
 
@@ -81,10 +80,11 @@ export async function fetchMatchDayJson<T>(date: Date) {
   return fetchFotmobJson<T>("/api/data/matches", {
     date: formatFotmobDate(date),
     timezone: getTimezone(),
-    ccode3: DEFAULT_COUNTRY_CODE,
   });
 }
 
+// FotMob no longer exposes a usable public JSON API for these pages, so data is
+// read from the Next.js `__NEXT_DATA__` payload embedded in the page HTML.
 export async function fetchFotmobPageProps(pathOrUrl: string) {
   const response = await fetch(toFotmobUrl(pathOrUrl), { headers: getRequestHeaders() });
 
