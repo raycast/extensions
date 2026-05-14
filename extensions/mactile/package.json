@@ -4,7 +4,7 @@
   "title": "MacTile",
   "description": "Resize focused macOS windows with editable layout presets and Raycast hotkeys.",
   "icon": "icon.png",
-  "author": "nik",
+  "author": "nikgraphx",
   "license": "MIT",
   "categories": ["Productivity"],
   "keywords": ["window", "layout", "preset", "resize", "tile", "tiling", "window manager"],

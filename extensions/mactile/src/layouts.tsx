@@ -189,5 +189,5 @@ function LayoutListItem({ layout, onEdit, onDuplicate, onDelete }: LayoutListIte
 }
 
 function getLayoutDeeplink(commandName: string) {
-  return `raycast://extensions/nik/mactile/${commandName}`;
+  return `raycast://extensions/nikgraphx/mactile/${commandName}`;
 }
