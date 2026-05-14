@@ -5,6 +5,7 @@ Create and join [Yandex Telemost](https://telemost.yandex.ru) meetings directly 
 ## Commands
 
 - **New Meeting** — Opens Telemost, automatically clicks "Создать видеовстречу", and copies the meeting URL to your clipboard.
+- **New Meeting and Refocus** — Same as above, but returns focus to the previous app after copying the link.
 - **Join Meeting** — Enter a meeting link or code to open it instantly.
 
 ## Setup
