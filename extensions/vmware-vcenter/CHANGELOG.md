@@ -1,5 +1,9 @@
 # VMware vCenter Changelog
 
+## [Fix] - {PG_MERGE_DATE}
+
+- Fixed the error when trying to configure the first server.
+
 ## [Improvement] - 2026-04-12
 
 - Performance Improvement.
