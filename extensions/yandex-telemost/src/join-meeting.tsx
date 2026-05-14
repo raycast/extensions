@@ -46,6 +46,9 @@ export default function Command() {
         title="Meeting Link or Code"
         placeholder="https://telemost.yandex.ru/j/... or meeting code"
         autoFocus
+        validate={(value) => {
+          if (!value || !value.trim()) return "Please enter a meeting link or code";
+        }}
       />
     </Form>
   );
