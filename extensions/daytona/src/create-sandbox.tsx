@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
 import { CodeLanguage, Daytona, DaytonaError } from "@daytona/sdk";
+import { getDashboardUrl } from "./dashboard-url";
 
 type FormValues = {
   name: string;
@@ -47,7 +48,7 @@ export default function CreateSandboxCommand() {
       toast.message = `${sandbox.name} (${sandbox.id})`;
       toast.primaryAction = {
         title: "Open in Dashboard",
-        onAction: () => open(`https://app.daytona.io/dashboard/sandboxes?sandboxId=${sandbox.id}`),
+        onAction: () => open(getDashboardUrl(preferences.apiUrl, `sandboxes?sandboxId=${sandbox.id}`)),
       };
     } catch (error) {
       const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);

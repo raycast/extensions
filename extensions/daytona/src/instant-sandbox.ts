@@ -1,5 +1,6 @@
 import { Clipboard, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
 import { Daytona, DaytonaError } from "@daytona/sdk";
+import { getDashboardUrl } from "./dashboard-url";
 
 export default async function InstantSandboxCommand() {
   const preferences = getPreferenceValues<Preferences>();
@@ -27,7 +28,7 @@ export default async function InstantSandboxCommand() {
     toast.message = `ID copied: ${sandbox.id}`;
     toast.primaryAction = {
       title: "Open in Dashboard",
-      onAction: () => open(`https://app.daytona.io/dashboard/sandboxes?sandboxId=${sandbox.id}`),
+      onAction: () => open(getDashboardUrl(preferences.apiUrl, `sandboxes?sandboxId=${sandbox.id}`)),
     };
   } catch (error) {
     const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);

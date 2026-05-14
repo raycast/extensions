@@ -1,5 +1,7 @@
-import { open } from "@raycast/api";
+import { getPreferenceValues, open } from "@raycast/api";
+import { getDashboardBaseUrl } from "./dashboard-url";
 
 export default async function OpenDashboardCommand() {
-  await open("https://app.daytona.io/");
+  const preferences = getPreferenceValues<Preferences>();
+  await open(getDashboardBaseUrl(preferences.apiUrl));
 }

@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Form, Toast, getPreferenceValues, open, showToast } from "@raycast/api";
 import { Daytona, DaytonaError } from "@daytona/sdk";
+import { getDashboardUrl } from "./dashboard-url";
 
 type FormValues = {
   name?: string;
@@ -83,7 +84,7 @@ export default function CreateSnapshotCommand() {
       toast.message = `${snapshot.name} (${snapshot.id})`;
       toast.primaryAction = {
         title: "Open in Dashboard",
-        onAction: () => open(`https://app.daytona.io/dashboard/snapshots?snapshotId=${snapshot.id}`),
+        onAction: () => open(getDashboardUrl(preferences.apiUrl, `snapshots?snapshotId=${snapshot.id}`)),
       };
     } catch (error) {
       const message = error instanceof DaytonaError || error instanceof Error ? error.message : String(error);

@@ -13,6 +13,7 @@ import {
 } from "@raycast/api";
 import { Daytona, DaytonaError, Sandbox } from "@daytona/sdk";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getDashboardUrl } from "./dashboard-url";
 
 const WEB_TERMINAL_PORT = 22222;
 const WEB_TERMINAL_SIGNED_TTL_SECONDS = 3600;
@@ -271,7 +272,7 @@ export default function ManageSandboxesCommand() {
                 <Action
                   title="Open in Dashboard"
                   icon={Icon.Globe}
-                  onAction={() => open(`https://app.daytona.io/dashboard/sandboxes?sandboxId=${sandbox.id}`)}
+                  onAction={() => open(getDashboardUrl(preferences.apiUrl, `sandboxes?sandboxId=${sandbox.id}`))}
                   shortcut={{ modifiers: ["cmd"], key: "o" }}
                 />
                 <Action
