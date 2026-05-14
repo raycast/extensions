@@ -178,10 +178,10 @@ export function buildInstallCommand(skill: Skill): string {
   return `npx skills add ${skill.source}@${skill.skillId}`;
 }
 
-export function isPublishedInstalledSkill(
+export function isGithubBackedInstalledSkill(
   installedSkill: InstalledSkill,
 ): installedSkill is InstalledSkill & { source: string } {
-  return Boolean(installedSkill.source && installedSkill.sourceType !== "local" && !installedSkill.ref);
+  return Boolean(installedSkill.source && installedSkill.sourceType === "github" && !installedSkill.ref);
 }
 
 export function deduplicateSkills(skills: Skill[]): Skill[] {

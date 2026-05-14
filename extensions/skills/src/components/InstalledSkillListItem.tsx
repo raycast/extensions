@@ -8,7 +8,7 @@ import {
   type Skill,
   AUDIT_PROVIDER_LABELS,
   buildSkillUrl,
-  isPublishedInstalledSkill,
+  isGithubBackedInstalledSkill,
   parseFrontmatter,
 } from "../shared";
 import type { MutateSkills } from "../hooks/useInstalledSkills";
@@ -298,7 +298,7 @@ function SourceBackedInstalledSkillListItem(
 }
 
 export function InstalledSkillListItem({ skill, ...props }: InstalledSkillListItemProps) {
-  if (isPublishedInstalledSkill(skill)) {
+  if (isGithubBackedInstalledSkill(skill)) {
     return <SourceBackedInstalledSkillListItem {...props} skill={skill} />;
   }
 
