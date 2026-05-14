@@ -80,7 +80,7 @@ export function parseOpencodegoHtml(html: string): { usage: OpencodegoUsage | nu
       primary.used = mu.usagePercent;
     }
 
-    if (quotas.length === 0) {
+    if (quotas.length === 0 && primary.used === 0 && !data.usage?.monthlyUsage) {
       return {
         usage: null,
         error: { type: "parse_error", message: "No quota data found in response" },
