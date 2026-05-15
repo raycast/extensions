@@ -112,12 +112,10 @@ ${wallpaper.description || ""}
                     }}
                   />
                   <Action
-                    title="Learn More on Basalt"
+                    title="Learn More"
                     icon={Icon.Globe}
                     onAction={() =>
-                      open(
-                        `https://basalt.yevgenglukhov.com/art/${wallpaper.id}`,
-                      )
+                      open(`https://anotherboring.day/art/${wallpaper.id}`)
                     }
                   />
                 </ActionPanel.Section>
