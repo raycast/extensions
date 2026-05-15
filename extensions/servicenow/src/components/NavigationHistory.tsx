@@ -25,27 +25,23 @@ export default function NavigationHistory() {
     setSelectedInstance,
   } = useInstances();
   const { isInFavorites, revalidateFavorites } = useFavorites();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
-  const { isLoading, data, revalidate, pagination } = useFetch(`${instanceUrl}/api/now/ui/history`, {
+  const { isLoading, data, error, revalidate, pagination } = useFetch(`${instanceUrl}/api/now/ui/history`, {
     headers: {
       Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
     },
     execute: !!selectedInstance,
     onError: (error) => {
-      setErrorFetching(true);
       console.error(error);
       showToast(Toast.Style.Failure, "Could not fetch navigation history", error.message);
     },
 
     mapResult(response: NavigationHistoryResponse) {
-      setErrorFetching(false);
-
       return { data: response.result.list };
     },
     keepPreviousData: true,
@@ -97,7 +93,7 @@ export default function NavigationHistory() {
       }
     >
       {selectedInstance ? (
-        errorFetching ? (
+        error ? (
           <List.EmptyView
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             title="Could Not Fetch Results"

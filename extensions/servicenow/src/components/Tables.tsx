@@ -19,14 +19,13 @@ export default function Tables() {
     selectedInstance,
     setSelectedInstance,
   } = useInstances();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
-  const { isLoading, data, revalidate, pagination } = useFetch(
+  const { isLoading, data, error, revalidate, pagination } = useFetch(
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^labelLIKE${t}^ORnameLIKE${t}^ORsuper_class.labelLIKE${t}`).join("");
@@ -38,14 +37,11 @@ export default function Tables() {
       },
       execute: !!selectedInstance,
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch tables", error.message);
       },
 
       mapResult(response: DBObjectsResponse) {
-        setErrorFetching(false);
-
         return { data: response.result, hasMore: response.result.length > 0 };
       },
       keepPreviousData: true,
@@ -93,7 +89,7 @@ export default function Tables() {
       }
     >
       {selectedInstance ? (
-        errorFetching ? (
+        error ? (
           <List.EmptyView
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             title="Could Not Fetch Results"

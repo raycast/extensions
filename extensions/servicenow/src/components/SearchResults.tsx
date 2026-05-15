@@ -24,12 +24,11 @@ export default function ({ searchTerm }: { searchTerm: string }) {
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const [table] = useCachedState<string>("table", "all");
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const { alias = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
-  const { isLoading, data, revalidate } = useFetch(
+  const { isLoading, data, error, revalidate } = useFetch(
     `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${searchTerm}`,
     {
       headers: {
@@ -38,13 +37,11 @@ export default function ({ searchTerm }: { searchTerm: string }) {
       execute: !!selectedInstance,
 
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch results", error.message);
       },
 
       mapResult(response: GlobalSearchResponse) {
-        setErrorFetching(false);
         const recordsWithResults = filter(response.result?.groups, (r) => r.result_count > 0);
         const data = flattenDeep(map(recordsWithResults, (r) => filter(r.search_results, (x) => x.record_count > 0)));
         return { data };
@@ -63,7 +60,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
   }, [table, data]);
 
   useEffect(() => {
-    if (!selectedInstance || errorFetching) {
+    if (!selectedInstance || error) {
       setNavigationTitle(command);
       return;
     }
@@ -77,7 +74,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
     const count = sumBy(data, (r) => r.record_count);
     if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for ${searchTerm}`);
     else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for ${searchTerm}`);
-  }, [command, selectedInstance, errorFetching, isLoading, data, searchTerm, alias, instanceName]);
+  }, [command, selectedInstance, error, isLoading, data, searchTerm, alias, instanceName]);
 
   return (
     <List
@@ -87,7 +84,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
       searchBarAccessory={data ? <TableDropdown results={data} isLoading={isLoading} /> : undefined}
     >
       {selectedInstance ? (
-        errorFetching ? (
+        error ? (
           <List.EmptyView
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             title="Could Not Fetch Results"

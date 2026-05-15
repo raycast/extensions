@@ -33,14 +33,13 @@ export default function NavigationMenu(props: { groupId?: string }) {
     addModuleToFavorites,
     removeFromFavorites,
   } = useFavorites();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { id: instanceId = "", name: instanceName = "", username = "", password = "", full } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
-  const { isLoading, data, revalidate } = useFetch(
+  const { isLoading, data, error, revalidate } = useFetch(
     () => {
       return `${instanceUrl}/api/now/ui/navigator`;
     },
@@ -50,18 +49,14 @@ export default function NavigationMenu(props: { groupId?: string }) {
       },
       execute: selectedInstance && !groupId,
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch menu entries", error.message);
       },
 
       mapResult(response: NavigationMenuResponse) {
         if (response && response.result && response.result.length === 0) {
-          setErrorFetching(true);
-          showToast(Toast.Style.Failure, "Could not fetch menu entries");
-          return { data: [] };
+          throw new Error("Could not fetch menu entries");
         }
-        setErrorFetching(false);
         return { data: response.result };
       },
       keepPreviousData: true,
@@ -151,7 +146,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
       }
     >
       {selectedInstance ? (
-        errorFetching ? (
+        error ? (
           <List.EmptyView
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             title="Could Not Fetch Results"

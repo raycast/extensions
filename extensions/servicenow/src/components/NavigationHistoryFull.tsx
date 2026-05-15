@@ -27,14 +27,13 @@ export default function NavigationHistoryFull() {
     setSelectedInstance,
   } = useInstances();
   const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
-  const { isLoading, data, revalidate, pagination } = useFetch(
+  const { isLoading, data, error, revalidate, pagination } = useFetch(
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^titleLIKE${t}^ORdescriptionLIKE${t}^ORurlLIKE${t}`).join("");
@@ -46,14 +45,11 @@ export default function NavigationHistoryFull() {
       },
       execute: !!selectedInstance,
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch navigation history", error.message);
       },
 
       mapResult(response: FullNavigationHistoryResponse) {
-        setErrorFetching(false);
-
         return { data: response.result, hasMore: response.result.length > 0 };
       },
       keepPreviousData: true,
@@ -106,7 +102,7 @@ export default function NavigationHistoryFull() {
       }
     >
       {selectedInstance ? (
-        errorFetching ? (
+        error ? (
           <List.EmptyView
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             title="Could Not Fetch Results"

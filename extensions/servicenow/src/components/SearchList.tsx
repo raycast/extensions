@@ -24,7 +24,6 @@ export default function SearchList() {
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<HistoryResult[]>([]);
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
   const {
     id: instanceId = "",
     alias = "",
@@ -36,7 +35,7 @@ export default function SearchList() {
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
-  const { isLoading, data, mutate, revalidate } = useFetch(
+  const { isLoading, data, error, mutate, revalidate } = useFetch(
     `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
     {
       headers: {
@@ -44,14 +43,11 @@ export default function SearchList() {
       },
       execute: selectedInstance && full == "true",
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch history", error.message);
       },
 
       mapResult(response: HistoryResponse) {
-        setErrorFetching(false);
-
         return { data: response.result };
       },
       keepPreviousData: true,
@@ -241,7 +237,7 @@ export default function SearchList() {
             />
           )}
 
-          {errorFetching ? (
+          {error ? (
             <List.EmptyView
               icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
               title="Could Not Fetch History"

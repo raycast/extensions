@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
@@ -13,13 +13,13 @@ import { getInstanceBaseUrl } from "../utils/instanceUrl";
 
 const useFavorites = () => {
   const { selectedInstance, userId } = useInstances();
-  const [errorFetching, setErrorFetching] = useState<boolean>(false);
 
   const { username = "", password = "" } = selectedInstance || {};
   const instanceUrl = getInstanceBaseUrl({ name: selectedInstance?.name ?? "" });
 
   const {
     data: favorites,
+    error,
     revalidate: revalidateFavorites,
     isLoading,
     mutate,
@@ -33,19 +33,14 @@ const useFavorites = () => {
       },
       execute: !!selectedInstance,
       onError: (error) => {
-        setErrorFetching(true);
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
       },
 
       mapResult(response: { result: FavoritesResponse }) {
         if (response && response.result && Object.keys(response.result).length === 0) {
-          setErrorFetching(true);
-          showToast(Toast.Style.Failure, "Could not fetch favorites");
-          return { data: [] };
+          throw new Error("Could not fetch favorites");
         }
-
-        setErrorFetching(false);
         return { data: response.result.list };
       },
       keepPreviousData: true,
@@ -441,7 +436,7 @@ const useFavorites = () => {
     favorites,
     favoritesGroups,
     isLoading,
-    errorFetching,
+    errorFetching: !!error,
     isInFavorites,
     isMenuInFavorites,
     revalidateFavorites,
