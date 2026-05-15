@@ -2,7 +2,7 @@ import { getPreferenceValues, open } from "@raycast/api";
 import { runAppleScript } from "run-applescript";
 import {
   getOpenedBrowserScript,
-  getOpenedUrlForArc,
+  getOpenedUrlForBrowserCompany,
   getOpenedUrlForFirefox,
   getOpenedUrlsScript,
   getSwitchToPreviousAppScript,
@@ -35,16 +35,11 @@ export function sleep(ms: number): Promise<void> {
 async function getOpenTabs(): Promise<string> {
   const browserName = await getOpenedBrowser();
 
-  if (browserName === "Arc") {
-    return await runAppleScript(getOpenedUrlForArc());
+  if (browserName === "Arc" || browserName === "Dia") {
+    return await runAppleScript(getOpenedUrlForBrowserCompany(browserName));
   }
 
-  if (
-    browserName === "Firefox" ||
-    browserName === "Firefox Developer Edition" ||
-    browserName === "Zen" ||
-    browserName === "Dia"
-  ) {
+  if (browserName === "Firefox" || browserName === "Firefox Developer Edition" || browserName === "Zen") {
     return await runAppleScript(getOpenedUrlForFirefox(browserName));
   }
 

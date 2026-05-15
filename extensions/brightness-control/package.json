@@ -6,7 +6,9 @@
   "icon": "command-icon.png",
   "author": "cali",
   "contributors": [
-    "pavzagor"
+    "pavzagor",
+    "fatih_isaogullari",
+    "0xdhrv"
   ],
   "categories": [
     "System"
@@ -69,6 +71,7 @@
     "publish": "ray publish"
   },
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ]
 }

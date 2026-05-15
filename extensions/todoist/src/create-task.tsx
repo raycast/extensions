@@ -155,7 +155,7 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
         }
 
         // Use addTask API with structured parameters for reliable assignment
-        const taskData = await addTask(
+        const { id } = await addTask(
           {
             content: cleanContent,
             description: values.description || undefined,
@@ -178,8 +178,6 @@ function CreateTask({ fromProjectId, fromLabel, fromTodayEmptyView, draftValues 
           },
           { data, setData },
         );
-
-        const id = taskData.id;
 
         toast.style = Toast.Style.Success;
         toast.title = "Task created";

@@ -1,5 +1,9 @@
 # Model Context Protocol Registry Changelog
 
+## [Add Alai MCP Server] - 2026-04-30
+
+Add community Alai MCP Server to registry for AI-powered presentation generation (text-to-slides, exports to PDF, PPTX, or shareable link).
+
 ## [Add Sanity MCP Server] - 2026-03-07
 
 Add official Sanity MCP Server to registry for direct access to Sanity projects.

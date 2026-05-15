@@ -1,9 +1,12 @@
 import { List, Detail, Icon, ActionPanel, Action, Color, openExtensionPreferences } from "@raycast/api";
 import { useState } from "react";
+import { ensureSupportDir } from "./utils/ensure-support-dir";
 import { useInstalledSkills } from "./hooks/useInstalledSkills";
 import { isInvalidCustomNpxPathError, isNpxResolutionError } from "./utils/skills-cli";
 import { InstalledSkillListItem } from "./components/InstalledSkillListItem";
 import { UpdateSkillAction } from "./components/actions/UpdateSkillAction";
+
+ensureSupportDir();
 
 export default function Command() {
   const { skills, isLoading, error, revalidate, mutate } = useInstalledSkills();
@@ -25,12 +28,12 @@ export default function Command() {
         ? {
             errorTitle: "Unable to Load Installed Skills",
             errorDetails:
-              "This is an `npx` resolution issue in the local CLI runtime.\n\n1. Run `which npx` in Terminal.\n2. Open Extension Preferences (`Cmd+Shift+,`).\n3. Set **Custom npx Path** to the path from step 1, then retry.",
+              "This is a package runner resolution issue in the local CLI runtime.\n\n1. Install or repair Bun so `bunx` works.\n2. If you need to force Node/npm instead, run `which npx` in Terminal.\n3. Open Extension Preferences (`Cmd+Shift+,`) and set **Custom npx Path** to the path from step 2, then retry.",
           }
         : {
             errorTitle: "Unable to Load Installed Skills",
             errorDetails:
-              "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you use a non-standard Node.js setup.\n3. Run `npx -y skills@latest list -g` in Terminal to inspect the underlying CLI error.",
+              "This is a local Skills CLI execution failure.\n\n1. Retry the command.\n2. Open Extension Preferences and verify **Custom npx Path** if you force a non-standard Node.js setup.\n3. Run `bunx skills@latest list -g` (or `npx -y skills@latest list -g` if Bun is not installed) in Terminal to inspect the underlying CLI error.",
           };
 
     return (
@@ -84,7 +87,12 @@ export default function Command() {
           icon={Icon.Box}
           actions={
             <ActionPanel>
-              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+              <Action
+                title="Refresh"
+                onAction={revalidate}
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
             </ActionPanel>
           }
         />
@@ -95,7 +103,12 @@ export default function Command() {
           icon={Icon.Filter}
           actions={
             <ActionPanel>
-              <Action title="Refresh" onAction={revalidate} icon={Icon.RotateClockwise} />
+              <Action
+                title="Refresh"
+                onAction={revalidate}
+                icon={Icon.RotateClockwise}
+                shortcut={{ modifiers: ["cmd"], key: "r" }}
+              />
             </ActionPanel>
           }
         />
@@ -117,6 +130,12 @@ export default function Command() {
                 actions={
                   <ActionPanel>
                     <UpdateSkillAction mutate={mutate} />
+                    <Action
+                      title="Refresh Installed Skills"
+                      onAction={revalidate}
+                      icon={Icon.RotateClockwise}
+                      shortcut={{ modifiers: ["cmd"], key: "r" }}
+                    />
                   </ActionPanel>
                 }
               />
@@ -131,6 +150,7 @@ export default function Command() {
                 isShowingDetail={isShowingDetail}
                 mutate={mutate}
                 onToggleDetail={toggleDetail}
+                onRefresh={revalidate}
               />
             ))}
           </List.Section>

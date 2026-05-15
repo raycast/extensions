@@ -1,5 +1,11 @@
 # Unsplash Changelog
 
+## [Keyboard Shortcut Updates] - 2026-05-12
+
+- Added Raycast common keyboard shortcuts
+- Ignored `node_modules`
+- Bump Raycast dependencies
+
 ## [Error Handling Enhancements] - 2025-09-09
 
 - Fixed extension would crash when "Rate Limit" exceeded (ref: [Issue #21405](https://github.com/raycast/extensions/issues/21405))

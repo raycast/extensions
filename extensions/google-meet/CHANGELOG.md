@@ -1,5 +1,12 @@
 # Google Meet Changelog
 
+## [New Command & Bug Fix] - 2026-04-28
+
+- Add "Create Meet and Refocus with Specified Profile" command — creates a meeting using a selected profile, copies the link, and refocuses the previous app
+- A refocus failure (e.g. the keystroke can't be sent) no longer reports a clipboard failure when the link was already copied. Also aligned the profile-list failure toast with the one used by the refocus command for consistency.
+- Fix "Couldn't copy to clipboard" error on Dia browser. Dia's AppleScript dictionary rejects the flat `active tab of front window` form used for most Chromium browsers and throws a coercion error. Route Dia through the nested `tell front window` form (previously only used for Arc). Both browsers are from The Browser Company and share the same scripting quirk.
+- Fix frontmost-browser detection. The previous `lsappinfo metainfo | grep` approach returned the first supported-browser name found anywhere in the metadata dump, so a background Chrome process or an Electron app whose bundle path contains "Google Chrome Framework" would be reported as the frontmost browser even when a different browser was actually in use. Replaced with a System Events query for the actual frontmost process name.
+
 ## [New Command] - 2026-04-12
 
 - Add "Create Meet and Refocus" command that creates a meeting, copies the link, and switches back to your previous app

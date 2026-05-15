@@ -3,7 +3,7 @@
  */
 
 import React, { Component, ErrorInfo, ReactNode } from "react";
-import { Detail, ActionPanel, Action, Icon } from "@raycast/api";
+import { Detail, ActionPanel, Action, Icon, Keyboard } from "@raycast/api";
 import { uiLogger } from "../utils";
 
 interface Props {
@@ -71,9 +71,14 @@ export class ErrorBoundary extends Component<Props, State> {
               <Action
                 title="Reload"
                 icon={Icon.ArrowClockwise}
+                shortcut={Keyboard.Shortcut.Common.Refresh}
                 onAction={() => this.setState({ hasError: false, error: undefined, errorInfo: undefined })}
               />
-              <Action.CopyToClipboard title="Copy Error Details" content={errorDetails} />
+              <Action.CopyToClipboard
+                title="Copy Error Details"
+                content={errorDetails}
+                shortcut={Keyboard.Shortcut.Common.Copy}
+              />
             </ActionPanel>
           }
         />

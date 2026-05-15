@@ -33,6 +33,13 @@
       "subtitle": "Google Meet",
       "description": "Creates a new meeting room with your default browser and copy the link to your clipboard.",
       "mode": "view"
+    },
+    {
+      "name": "manual-profile-and-refocus",
+      "title": "Create Meet and Refocus with Specified Profile",
+      "subtitle": "Google Meet",
+      "description": "Creates a new meeting room using a selected profile, copies the link, and refocuses your previous app.",
+      "mode": "view"
     }
   ],
   "preferences": [

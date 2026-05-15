@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { homedir } from "node:os";
 import { sep } from "node:path";
 
-export const preferences = getPreferenceValues<Preferences>();
+const preferences = getPreferenceValues<Preferences>();
 
 export const getCustomNpxPath = (): string | undefined => {
   const customPath = preferences.customNpxPath?.trim();
@@ -18,3 +18,10 @@ export const getCustomNpxPath = (): string | undefined => {
 
   return customPath;
 };
+
+export const getGithubToken = (): string | undefined => {
+  const token = preferences.githubToken?.trim();
+  return token || undefined;
+};
+
+export const shouldDisableSkillsCliTelemetry = (): boolean => preferences.disableSkillsCliTelemetry === true;

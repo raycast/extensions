@@ -3,6 +3,7 @@ import type { RaycastCard } from "../lib/api";
 import { removeCardById, toTagQuery, upsertCard } from "../lib/cardListState";
 
 const makeCard = (id: string, isFavorited = false): RaycastCard => ({
+  appUrl: null,
   id,
   type: "text",
   content: `Card ${id}`,

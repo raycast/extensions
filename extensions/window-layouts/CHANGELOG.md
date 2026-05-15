@@ -1,5 +1,9 @@
 # Window Layouts Changelog
 
+## [Improvements] - 2026-05-06
+
+- Improved the error message shown when the Raycast `WindowManagement` API is not available, clarifying that the extension requires both Raycast Pro and Accessibility permission
+
 ## [New Features & Improvements] - 2026-04-11
 
 ### New Layouts

@@ -1,5 +1,11 @@
 # Google Translate Changelog
 
+## [Add Keyboard Shortcuts] - 2026-05-13
+
+- Added common Raycast keyboard shortcuts for language set management actions
+- Added common Raycast keyboard shortcuts for copy actions
+- Updated Raycast API and utils dependencies
+
 ## [Feature] - 2026-04-15
 
  - Added pronunciation text to quick translate command

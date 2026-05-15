@@ -1,5 +1,11 @@
 # Media Converter Changelog
 
+## [1.6.1] - 2026-04-28
+
+### Fixed
+
+- **Convert Media** now reliably pre-fills the file picker with files selected in Finder, even when Raycast provides the Finder selection after the form initially renders. The same delayed prefill handling also applies to **Merge Media**.
+
 ## [1.6.0] - 2026-04-27
 
 ### Added

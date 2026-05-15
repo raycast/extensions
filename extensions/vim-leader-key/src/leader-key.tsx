@@ -41,6 +41,8 @@ interface SearchResult {
   matchedOn: "label" | "value" | "key";
 }
 
+type NavigationPush = ReturnType<typeof useNavigation>["push"];
+
 function getTimeoutMs(): number | null {
   const prefs = getPreferenceValues<Preferences>();
 
@@ -830,7 +832,7 @@ function ItemRow({
   onConfigUpdate: (config: RootConfig) => void;
   onClearConfig: () => void;
   onEnterSearchMode: () => void;
-  push: (component: React.ReactNode) => void;
+  push: NavigationPush;
 }) {
   const isGroupItem = isGroup(item);
   const actionItem = item as ActionItem;

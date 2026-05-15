@@ -14,6 +14,8 @@ function QuestDetail({ quest }: { quest: Quest }) {
   const markdown = `
 # ${quest.name}
 
+${quest.image ? `![](${quest.image})\n` : ""}
+${quest.trader_name ? `**Trader:** ${quest.trader_name}\n` : ""}
 ## Objectives
 
 ${objectivesList}
@@ -63,6 +65,7 @@ ${quest.locations.map((loc) => `- ${loc.map}`).join("\n")}
           <Detail.Metadata.Label title="Objectives" text={`${quest.objectives.length} objective(s)`} />
           {quest.xp > 0 && <Detail.Metadata.Label title="XP" text={String(quest.xp)} />}
           <Detail.Metadata.Label title="Rewards" text={`${quest.rewards.length} item(s)`} />
+          {quest.trader_name && <Detail.Metadata.Label title="Trader" text={quest.trader_name} />}
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link
             title="MetaForge"
@@ -74,6 +77,9 @@ ${quest.locations.map((loc) => `- ${loc.map}`).join("\n")}
       actions={
         <ActionPanel>
           <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/quest/${quest.id}`} />
+          {quest.guide_links?.map((link) => (
+            <Action.OpenInBrowser key={link.url} title={link.label} url={link.url} />
+          ))}
           <Action.CopyToClipboard title="Copy Quest Name" content={quest.name} />
         </ActionPanel>
       }
@@ -145,6 +151,7 @@ export default function SearchQuests() {
           title={quest.name}
           subtitle={`${quest.objectives.length} objective(s)`}
           accessories={[
+            ...(quest.trader_name ? [{ icon: Icon.Person, text: quest.trader_name }] : []),
             {
               icon: Icon.Gift,
               text: `${quest.rewards.length} rewards`,
@@ -155,6 +162,9 @@ export default function SearchQuests() {
             <ActionPanel>
               <Action.Push title="View Details" icon={Icon.Eye} target={<QuestDetail quest={quest} />} />
               <Action.OpenInBrowser url={`https://metaforge.app/arc-raiders/database/quest/${quest.id}`} />
+              {quest.guide_links?.map((link) => (
+                <Action.OpenInBrowser key={link.url} title={link.label} url={link.url} />
+              ))}
               <Action.CopyToClipboard title="Copy Quest Name" content={quest.name} />
             </ActionPanel>
           }

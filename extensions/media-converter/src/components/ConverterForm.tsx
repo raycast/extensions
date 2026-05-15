@@ -10,7 +10,7 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import fs from "fs";
 import path from "path";
 import { convertMedia } from "../utils/converter";
@@ -90,9 +90,11 @@ export function ConverterForm({
 } = {}) {
   const preferences = getPreferenceValues<Preferences>();
   const prefill = launchContext?.prefill;
+  const initialInputFiles = prefill?.inputs ?? initialFiles ?? [];
+  const initialInputKey = initialInputFiles.join("\0");
 
   const [selectedFileType, setSelectedFileType] = useState<MediaType | null>(null);
-  const [currentFiles, setCurrentFiles] = useState<string[]>(prefill?.inputs ?? initialFiles ?? []);
+  const [currentFiles, setCurrentFiles] = useState<string[]>(initialInputFiles);
   const [outputFormat, setOutputFormat] = useState<AllOutputExtension | null>(prefill?.outputFormat ?? null);
   const [currentQualitySetting, setCurrentQualitySetting] = useState<QualitySettings | null>(prefill?.quality ?? null);
   const [simpleQuality, setSimpleQuality] = useState<QualityLevel>(DEFAULT_SIMPLE_QUALITY);
@@ -111,6 +113,8 @@ export function ConverterForm({
   const [customOutputFolderOverride, setCustomOutputFolderOverride] = useState<string>(prefill?.outputDir ?? "");
 
   const [isLoading, setIsLoading] = useState(true);
+  const appliedInitialInputKey = useRef<string | null>(null);
+  const hasUserSelectedFiles = useRef(false);
   const { push } = useNavigation();
 
   useEffect(() => {
@@ -125,18 +129,32 @@ export function ConverterForm({
   }, []);
 
   useEffect(() => {
-    if (currentFiles.length > 0) {
-      handleFileSelect(currentFiles);
-    } else {
+    if (initialInputFiles.length === 0) {
+      if (appliedInitialInputKey.current === null) {
+        appliedInitialInputKey.current = initialInputKey;
+        setCurrentFiles([]);
+      }
       setIsLoading(false);
+      return;
     }
-    // Intentionally run only on mount to process initial files once.
-  }, []);
 
-  const handleFileSelect = (files: string[]) => {
+    if (hasUserSelectedFiles.current || appliedInitialInputKey.current === initialInputKey) {
+      return;
+    }
+
+    appliedInitialInputKey.current = initialInputKey;
+    handleFileSelect(initialInputFiles);
+  }, [initialInputKey]);
+
+  const handleFileSelect = (files: string[], options: { markAsUserSelection?: boolean } = {}) => {
+    if (options.markAsUserSelection) {
+      hasUserSelectedFiles.current = true;
+    }
+
     if (files.length === 0) {
       setCurrentFiles([]);
       setSelectedFileType(null);
+      setIsLoading(false);
       return;
     }
 
@@ -170,6 +188,7 @@ export function ConverterForm({
         });
         setCurrentFiles([]);
         setSelectedFileType(null);
+        setIsLoading(false);
         return;
       }
 
@@ -427,7 +446,7 @@ export function ConverterForm({
         title="Select files"
         allowMultipleSelection={true}
         value={currentFiles}
-        onChange={(newFiles) => handleFileSelect(newFiles)}
+        onChange={(newFiles) => handleFileSelect(newFiles, { markAsUserSelection: true })}
       />
 
       {selectedFileType && presets.length > 0 && (

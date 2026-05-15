@@ -1,5 +1,10 @@
 # Browser Bookmarks Changelog
 
+## [Windows Support for Chromium Browsers] - 2026-04-30
+
+- Added Windows support for Chrome, Edge, and Brave bookmarks
+- Automatically refresh Chromium bookmarks when the selected profile changes on disk
+
 ## [Support for Perplexity Comet Browser] - 2026-03-04
 
 - Added support for `Perplexity Comet` browser
