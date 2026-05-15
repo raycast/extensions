@@ -14,6 +14,9 @@
     "Productivity"
   ],
   "license": "MIT",
+  "engines": {
+    "node": ">=22.13.0"
+  },
   "commands": [
     {
       "name": "current-desktop",
