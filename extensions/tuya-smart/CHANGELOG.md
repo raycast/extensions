@@ -1,6 +1,6 @@
 # Tuya Smart Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-05-15
 
 Fixed a bug that caused the extension to crash when no older devices were listed
 
