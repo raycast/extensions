@@ -1,5 +1,3 @@
-racast作者：czhyygmx
-
 # Clash Verge Rev Raycast Extension
 
 [中文](README.zh.md)
