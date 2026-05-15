@@ -9,21 +9,34 @@ export default function RenderQueue() {
   const [error, setError] = useState<Error>();
 
   useEffect(() => {
+    let timeout: NodeJS.Timeout | undefined;
+    let isDisposed = false;
+
     async function loadHistory() {
       try {
         const renderHistory = await getRenderHistory();
+        if (isDisposed) return;
+
         setHistory(renderHistory);
         setIsLoading(false);
+
+        const hasRunningRenders = renderHistory.some((render) => render.status === "running");
+        timeout = setTimeout(loadHistory, hasRunningRenders ? 2000 : 15000);
       } catch (err) {
+        if (isDisposed) return;
+
         setError(err instanceof Error ? err : new Error("Failed to load history"));
         setIsLoading(false);
+        timeout = setTimeout(loadHistory, 15000);
       }
     }
 
-    loadHistory();
+    void loadHistory();
 
-    const interval = setInterval(loadHistory, 2000);
-    return () => clearInterval(interval);
+    return () => {
+      isDisposed = true;
+      if (timeout) clearTimeout(timeout);
+    };
   }, []);
 
   useEffect(() => {
@@ -128,15 +141,12 @@ export default function RenderQueue() {
     return `${diffDays}d ago`;
   };
 
-  const getEncouragingMessage = (totalRenders: number): string => {
-    if (totalRenders === 0) return "No renders completed yet";
-    if (totalRenders === 1) return "Your first render! Welcome aboard!";
-    if (totalRenders < 5) return `${totalRenders} renders! You're getting the hang of it!`;
-    if (totalRenders < 10) return `${totalRenders} renders! You're on a roll!`;
-    if (totalRenders < 25) return `${totalRenders} renders! Incredible productivity!`;
-    if (totalRenders < 50) return `${totalRenders} renders! You're on fire!`;
-    if (totalRenders < 100) return `${totalRenders} renders! Legendary status!`;
-    return `${totalRenders} renders! You're a rendering master!`;
+  const getHistorySummary = (renders: RenderHistory[]): string => {
+    const completedCount = renders.filter((render) => render.status === "completed").length;
+    const runningCount = renders.filter((render) => render.status === "running").length;
+    const failedCount = renders.filter((render) => render.status === "failed").length;
+
+    return `${renders.length} total • ${completedCount} completed • ${runningCount} running • ${failedCount} failed`;
   };
 
   return (
@@ -148,15 +158,29 @@ export default function RenderQueue() {
           icon={Icon.Video}
         />
       ) : (
-        <List.Section
-          title="Render History"
-          subtitle={getEncouragingMessage(history.filter((h) => h.status === "completed").length)}
-        >
+        <List.Section title="Render History" subtitle={getHistorySummary(history)}>
           {history.map((render) => {
             const projectName = render.projectPath.split("/").pop() || "Unknown";
             const subtitle = render.duration
               ? `${formatDuration(render.duration)} • ${getRelativeTime(render.startTime)}`
               : getRelativeTime(render.startTime);
+            const accessories = [
+              ...(render.totalFrames
+                ? [
+                    {
+                      text: `${render.totalFrames} frames`,
+                      icon: Icon.BarChart,
+                    },
+                  ]
+                : []),
+              {
+                tag: {
+                  value: render.status,
+                  color:
+                    render.status === "completed" ? Color.Green : render.status === "running" ? Color.Blue : Color.Red,
+                },
+              },
+            ];
 
             return (
               <List.Item
@@ -164,25 +188,7 @@ export default function RenderQueue() {
                 icon={getStatusIcon(render.status)}
                 title={projectName}
                 subtitle={subtitle}
-                accessories={[
-                  render.totalFrames
-                    ? {
-                        text: `${render.totalFrames} frames`,
-                        icon: Icon.BarChart,
-                      }
-                    : {},
-                  {
-                    tag: {
-                      value: render.status,
-                      color:
-                        render.status === "completed"
-                          ? Color.Green
-                          : render.status === "running"
-                            ? Color.Blue
-                            : Color.Red,
-                    },
-                  },
-                ]}
+                accessories={accessories}
                 actions={
                   <ActionPanel>
                     <Action.ShowInFinder title="Show Project in Finder" path={render.projectPath} />

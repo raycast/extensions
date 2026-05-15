@@ -9,9 +9,10 @@ import { getCompletionMessage } from "./utils/ae-detector";
 interface RenderProgressProps {
   aerenderPath: string;
   projectPath: string;
+  aeVersionName: string;
 }
 
-export default function RenderProgress({ aerenderPath, projectPath }: RenderProgressProps) {
+export default function RenderProgress({ aerenderPath, projectPath, aeVersionName }: RenderProgressProps) {
   const [currentFrame, setCurrentFrame] = useState<string>("Initializing...");
   const [currentComp, setCurrentComp] = useState<string>("");
   const [status, setStatus] = useState<"starting" | "rendering" | "completed" | "failed">("starting");
@@ -24,7 +25,9 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
   const hasRenderedFramesRef = useRef(false);
   const outputRef = useRef<string[]>([]);
   const totalFramesRef = useRef<number | null>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const renderProcessRef = useRef<ReturnType<typeof spawn> | null>(null);
+  const historyPersistPromiseRef = useRef<Promise<void> | null>(null);
   const manuallyStoppedRef = useRef(false);
 
   const stopRender = async () => {
@@ -33,12 +36,16 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
 
       try {
         renderProcessRef.current.kill();
-      } catch (error) {
-        console.log("Process already exited:", error);
+      } catch {
+        // The process may already be gone; UI/history still needs to be updated.
       }
 
       setStatus("failed");
       setCurrentFrame("Render stopped by user");
+
+      if (historyPersistPromiseRef.current) {
+        await historyPersistPromiseRef.current;
+      }
 
       await updateRenderInHistory(renderId, {
         endTime: new Date(),
@@ -57,8 +64,6 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
   };
 
   useEffect(() => {
-    let interval: NodeJS.Timeout | undefined;
-    let renderProcess: ReturnType<typeof spawn> | undefined;
     const startTime = Date.now();
 
     try {
@@ -78,12 +83,11 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
       return;
     }
 
-    // eslint-disable-next-line prefer-const
-    renderProcess = spawn(aerenderPath, ["-project", projectPath, "-sound", "OFF"]);
+    const renderProcess = spawn(aerenderPath, ["-project", projectPath, "-sound", "OFF"], { detached: true });
+    renderProcess.unref();
     renderProcessRef.current = renderProcess;
 
     const commandStr = `"${aerenderPath}" -project "${projectPath}" -sound OFF`;
-    console.log("Running command:", commandStr);
 
     const initialOutput = [`Running: ${commandStr}\n`];
     setOutput(initialOutput);
@@ -93,15 +97,14 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
     const initialHistory: RenderHistory = {
       id: renderId,
       projectPath,
-      aeVersion: aerenderPath,
+      aeVersion: aeVersionName,
       startTime: new Date(),
       status: "running",
       pid: renderProcess.pid,
     };
-    addRenderToHistory(initialHistory);
+    historyPersistPromiseRef.current = addRenderToHistory(initialHistory);
 
-    // eslint-disable-next-line prefer-const
-    interval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       const elapsed = Math.floor((Date.now() - startTime) / 1000);
       setElapsedTime(elapsed);
     }, 1000);
@@ -182,12 +185,19 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
 
     // Handle completion
     renderProcess.on("close", async (code) => {
-      clearInterval(interval);
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
       const duration = Math.floor((Date.now() - startTime) / 1000);
 
       // If manually stopped, don't process as completion - already handled by stopRender()
       if (manuallyStoppedRef.current) {
         return;
+      }
+
+      if (historyPersistPromiseRef.current) {
+        await historyPersistPromiseRef.current;
       }
 
       // Check if render was successful based on output, not just exit code
@@ -307,23 +317,23 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
 
     // Cleanup
     return () => {
-      if (interval) clearInterval(interval);
-      if (renderProcess && !renderProcess.killed) {
-        renderProcess.kill();
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
       }
     };
-  }, [aerenderPath, projectPath, renderId]);
+  }, [aerenderPath, projectPath, renderId, aeVersionName]);
 
-  const getStatusEmoji = () => {
+  const getStatusIcon = () => {
     switch (status) {
       case "starting":
-        return "";
+        return Icon.Clock;
       case "rendering":
-        return "";
+        return Icon.Video;
       case "completed":
-        return "";
+        return Icon.CheckCircle;
       case "failed":
-        return "";
+        return Icon.XMarkCircle;
     }
   };
 
@@ -354,7 +364,7 @@ export default function RenderProgress({ aerenderPath, projectPath }: RenderProg
   };
 
   const markdown = `
-# ${getStatusEmoji()} ${getStatusText()}
+# ${getStatusText()}
 
 ${currentComp ? `## Rendering: ${currentComp}\n` : ""}
 
@@ -378,7 +388,7 @@ ${output.slice(-15).join("").trim() || "Waiting for output..."}
       metadata={
         <Detail.Metadata>
           <Detail.Metadata.TagList title="Status">
-            <Detail.Metadata.TagList.Item text={getStatusText()} color={getStatusColor()} icon={getStatusEmoji()} />
+            <Detail.Metadata.TagList.Item text={getStatusText()} color={getStatusColor()} icon={getStatusIcon()} />
           </Detail.Metadata.TagList>
 
           <Detail.Metadata.Separator />
@@ -399,16 +409,7 @@ ${output.slice(-15).join("").trim() || "Waiting for output..."}
             icon={Icon.Document}
           />
 
-          <Detail.Metadata.Label
-            title="AE Version"
-            text={
-              aerenderPath
-                .split("/")
-                .filter((p) => p.startsWith("Adobe After Effects"))
-                .pop() || "Unknown"
-            }
-            icon={Icon.AppWindow}
-          />
+          <Detail.Metadata.Label title="AE Version" text={aeVersionName} icon={Icon.AppWindow} />
         </Detail.Metadata>
       }
       actions={

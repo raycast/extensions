@@ -7,6 +7,7 @@ Render After Effects projects using aerender while you keep working on your next
 ### Features
 
 **Rendering**
+
 - Background rendering using aerender command-line engine
 - Auto-detect all installed After Effects versions
 - Live progress tracking with frame counter and elapsed time
@@ -15,12 +16,14 @@ Render After Effects projects using aerender while you keep working on your next
 - Smart completion detection
 
 **History & Management**
+
 - Render history with completion status
 - Track render duration and frame counts
 - Stop renders from history view
 - Auto-refresh running renders every 2 seconds
 
 **User Experience**
+
 - Native Raycast UI components
 - Project file picker with validation (.aep, .aepx)
 - Real-time progress sidebar with metadata
@@ -28,6 +31,7 @@ Render After Effects projects using aerender while you keep working on your next
 - Error handling and validation
 
 ### Technical
+
 - Process cleanup to prevent zombie processes
 - PID tracking for running renders
 - LocalStorage for history persistence

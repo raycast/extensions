@@ -65,12 +65,19 @@ export default function Command() {
       return;
     }
 
-    await showToast({
+    void showToast({
       style: Toast.Style.Animated,
       title: getRandomRenderMessage(),
     });
 
-    push(<RenderProgress aerenderPath={values.version} projectPath={selectedProject} />);
+    const selectedAeVersion = aeVersions.find((version) => version.aerenderPath === values.version);
+    push(
+      <RenderProgress
+        aerenderPath={values.version}
+        projectPath={selectedProject}
+        aeVersionName={selectedAeVersion?.name ?? "Unknown"}
+      />,
+    );
   }
 
   if (isLoading) {
