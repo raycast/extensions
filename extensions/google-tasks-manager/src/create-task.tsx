@@ -17,24 +17,7 @@ function CreateTask() {
   const [lists, setLists] = useState<TaskList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const fetched = await fetchTaskLists();
-        setLists(fetched);
-      } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load task lists",
-          message: String(error),
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, []);
-
-  const { handleSubmit, itemProps } = useForm<{
+  const { handleSubmit, itemProps, setValue } = useForm<{
     title: string;
     notes: string;
     due: Date | null;
@@ -63,8 +46,29 @@ function CreateTask() {
     },
     validation: {
       title: FormValidation.Required,
+      listId: FormValidation.Required,
     },
   });
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const fetched = await fetchTaskLists();
+        setLists(fetched);
+        if (fetched.length > 0) {
+          setValue("listId", fetched[0].id);
+        }
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load task lists",
+          message: String(error),
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    })();
+  }, []);
 
   return (
     <Form
@@ -90,11 +94,7 @@ function CreateTask() {
         placeholder="Optional notes..."
       />
       <Form.DatePicker {...itemProps.due} title="Due Date" />
-      <Form.Dropdown
-        {...itemProps.listId}
-        title="Task List"
-        defaultValue={lists[0]?.id}
-      >
+      <Form.Dropdown {...itemProps.listId} title="Task List">
         {lists.map((list) => (
           <Form.Dropdown.Item
             key={list.id}

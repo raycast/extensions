@@ -1,5 +1,11 @@
 # Google Tasks Changelog
 
+## [Fix Timezone and Form Bugs] - {PR_MERGE_DATE}
+
+- Fixed off-by-one day error in due date display for UTC- timezones
+- Fixed overdue comparison using UTC midnight instead of local midnight
+- Fixed task list dropdown submitting empty on first use in Create Task form
+
 ## [Address PR Review Feedback] - {PR_MERGE_DATE}
 
 - Fixed bug where clearing task notes on edit was silently ignored (empty string was dropped from PATCH body)

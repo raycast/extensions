@@ -28,9 +28,11 @@ function getTaskIcon(task: Task): { source: Icon; tintColor?: Color } {
   }
   if (task.due) {
     const dueDate = new Date(task.due);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (dueDate < today) {
+    const now = new Date();
+    const todayUTC = new Date(
+      Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
+    );
+    if (dueDate < todayUTC) {
       return { source: Icon.Circle, tintColor: Color.Red };
     }
   }
@@ -43,7 +45,7 @@ function getTaskSubtitle(task: Task): string {
   }
   if (task.due) {
     const date = new Date(task.due);
-    return `Due: ${date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
+    return `Due: ${date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric", timeZone: "UTC" })}`;
   }
   return "";
 }
