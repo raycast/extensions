@@ -1,0 +1,54 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mii-phonebook",
+  "title": "MII Phonebook",
+  "description": "Search the MITRE MII employee phonebook directory",
+  "icon": "extension-icon.png",
+  "author": "natelee",
+  "categories": ["Productivity", "Other"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search-phonebook",
+      "title": "Search Phonebook",
+      "subtitle": "MII",
+      "description": "Search the MITRE MII phonebook for employees by name, email, department, or employee ID",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "resetOnTeamsAction",
+      "type": "checkbox",
+      "required": false,
+      "title": "Behavior",
+      "label": "Close Raycast on Teams action",
+      "description": "Reset to the main Raycast search bar when launching MS Teams chat or call",
+      "default": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.64.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.45",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "resolutions": {
+    "@types/react": "18.2.45"
+  },
+  "overrides": {
+    "@types/react": "18.2.45"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
