@@ -160,17 +160,13 @@ export default function SearchBookmarks() {
             key={bookmark._id}
             id={String(bookmark._id)}
             title={bookmark.title}
-            subtitle={bookmark.domain || undefined}
+            subtitle={bookmark.note || bookmark.excerpt || undefined}
             icon={
               bookmark.cover || bookmark.highLevel?.cover
                 ? { source: bookmark.cover || bookmark.highLevel?.cover || "" }
                 : Icon.Globe
             }
-            accessories={[
-              ...(bookmark.tags.length > 0
-                ? [{ tag: bookmark.tags.slice(0, 2).join(", ") }]
-                : []),
-            ]}
+            accessories={bookmark.domain ? [{ text: bookmark.domain }] : []}
             actions={
               <ActionPanel>
                 <Action
