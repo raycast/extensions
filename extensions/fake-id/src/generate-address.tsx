@@ -61,10 +61,12 @@ function formatAddressLine(addr: Address): string {
 
 function AddressDetail({
   address,
-  onBack,
+  onRegenerate,
+  onChangeOptions,
 }: {
   address: Address;
-  onBack: () => void;
+  onRegenerate: () => void;
+  onChangeOptions: () => void;
 }) {
   const markdown = `# Generated Address\n\n${formatAddressBlock(address)}`;
 
@@ -98,13 +100,13 @@ function AddressDetail({
             title="Regenerate"
             icon={Icon.RotateClockwise}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={onBack}
+            onAction={onRegenerate}
           />
           <Action
             title="Change Options"
             icon={Icon.Gear}
             shortcut={{ modifiers: ["cmd"], key: "o" }}
-            onAction={onBack}
+            onAction={onChangeOptions}
           />
         </ActionPanel>
       }
@@ -115,19 +117,26 @@ function AddressDetail({
 export default function Command() {
   const [showDetail, setShowDetail] = useState(false);
   const [address, setAddress] = useState<Address | null>(null);
-  const [, setStateFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
 
   function handleGenerate(values: { state: string }) {
     const filter = values.state || "all";
     setStateFilter(filter);
-    const addr = generateAddress(filter);
-    setAddress(addr);
+    setAddress(generateAddress(filter));
     setShowDetail(true);
+  }
+
+  function handleRegenerate() {
+    setAddress(generateAddress(stateFilter));
   }
 
   if (showDetail && address) {
     return (
-      <AddressDetail address={address} onBack={() => setShowDetail(false)} />
+      <AddressDetail
+        address={address}
+        onRegenerate={handleRegenerate}
+        onChangeOptions={() => setShowDetail(false)}
+      />
     );
   }
 
