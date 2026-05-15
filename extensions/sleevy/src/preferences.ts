@@ -1,5 +1,4 @@
 import { getPreferenceValues } from "@raycast/api";
-import { Preferences } from "./types";
 
 export type SleevyPreferences = {
   readonly apiUrl: string;
@@ -8,7 +7,7 @@ export type SleevyPreferences = {
 };
 
 export function getSleevyPreferences(): SleevyPreferences {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
 
   return {
     apiUrl: preferences.apiUrl.trim().replace(/\/+$/, ""),
