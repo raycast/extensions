@@ -1,6 +1,6 @@
 # Toggl Track Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-05-15
 
 - Fixed "Resume Time Entry" on recent entries: use `Action` with `onAction` instead of `Action.SubmitForm`, which is for form submission and was incorrect in the list action panel
 
