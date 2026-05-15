@@ -13,7 +13,7 @@
   "commands": [
     {
       "name": "search",
-      "title": "Search",
+      "title": "Search Text",
       "description": "Search in ServiceNow, preview search results, and browse your search history.",
       "mode": "view"
     },
@@ -25,7 +25,7 @@
     },
     {
       "name": "quick-search",
-      "title": "Quick Search",
+      "title": "Quick Search Text",
       "description": "Quickly search within a specific ServiceNow instance profile by entering a search term. If no instance URL or alias is provided, it will use the selected instance profile.",
       "mode": "view",
       "arguments": [
@@ -65,7 +65,7 @@
     },
     {
       "name": "open-current-page-instance",
-      "title": "Open Current Page in Instance",
+      "title": "Open Current Page in Another Instance",
       "description": "Open the current ServiceNow page in any instance defined in your instance profiles. If no instance URL or alias is provided, it will open the page in the selected instance profile.",
       "mode": "no-view",
       "arguments": [
@@ -91,8 +91,8 @@
     },
     {
       "name": "search-resources",
-      "title": "Search Resources",
-      "description": "Search across various ServiceNow resources, including documentation, blogs, guides, learning materials, and more.",
+      "title": "Search Developer Portal",
+      "description": "Search the ServiceNow Developer Portal across documentation, API references, blogs, learning content, and Share apps.",
       "mode": "no-view",
       "arguments": [
         {
@@ -137,8 +137,8 @@
     },
     {
       "name": "search-sysid",
-      "title": "Search Sys ID",
-      "description": "Search for a Sys ID. Admins only",
+      "title": "Find Record by Sys ID",
+      "description": "Find the record that owns a given Sys ID and open it. Admins only.",
       "mode": "no-view",
       "arguments": [
         {
@@ -171,13 +171,13 @@
           "name": "table",
           "placeholder": "Table",
           "type": "text",
-          "required": true
+          "required": false
         },
         {
           "name": "sysId",
           "placeholder": "Sys ID",
           "type": "text",
-          "required": true
+          "required": false
         },
         {
           "name": "instanceName",

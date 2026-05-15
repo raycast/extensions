@@ -1,5 +1,15 @@
 # ServiceNow Extension Changelog
 
+## [Command title clean-up] - 2026-05-15
+
+- Renamed several command titles for clarity and to follow Raycast's `<verb> <noun>` convention. The underlying command IDs are unchanged, so existing user keyboard shortcuts and aliases keep working.
+  - **Search** → **Search Text** (anticipates a future Search Code command).
+  - **Quick Search** → **Quick Search Text**.
+  - **Search Sys ID** → **Find Record by Sys ID** (you have the ID; the command locates and opens the owning record).
+  - **Search Resources** → **Search Developer Portal** (the command targets developer.servicenow.com — docs, API references, blogs, learning, and Share — not your instance).
+  - **Open Current Page in Instance** → **Open Current Page in Another Instance**.
+- Removed six orphaned legacy command files left over from earlier refactors (`open-selected-instance`, `login-to-selected-instance`, `open-current-url`, `open-current-url-in-selected-instance`, `quickly-search`, `quickly-search-selected-instance`). They were not registered in `package.json` and had no remaining references.
+
 ## [New Command: Find Record References] - 2026-05-14
 
 - Added a new **Find Record References** command. Given a base table and a Sys ID, lists every column across the instance that references that record, with a one-click action to open the filtered list view in ServiceNow. Requires an admin profile, as it runs a background script through `/sys.scripts.do`.
