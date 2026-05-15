@@ -4,6 +4,7 @@ import {
   ActionPanel,
   Icon,
   List,
+  open,
   showToast,
   Toast,
   Clipboard,
@@ -174,9 +175,7 @@ export default function SearchBookmarks() {
                   icon={Icon.Globe}
                   onAction={async () => {
                     await handleOpen(bookmark);
-                    await import("@raycast/api").then((api) =>
-                      api.open(bookmark.link),
-                    );
+                    open(bookmark.link);
                   }}
                 />
                 <Action

@@ -139,6 +139,11 @@ export default function BrowseCollections() {
         setSelectedBookmark(bm ?? null);
       }}
     >
+      <List.EmptyView
+        title="No Bookmarks"
+        description="This collection is empty"
+        icon={Icon.Bookmark}
+      />
       {childCollections.length > 0 && (
         <List.Section title="Sub-collections">
           {childCollections.map((col) => (
@@ -165,15 +170,9 @@ export default function BrowseCollections() {
           ))}
         </List.Section>
       )}
-      <List.Section title="Bookmarks">
-        {bookmarks.length === 0 && !isLoadingBookmarks ? (
-          <List.EmptyView
-            title="No Bookmarks"
-            description="This collection is empty"
-            icon={Icon.Bookmark}
-          />
-        ) : (
-          bookmarks.map((bookmark) => (
+      {bookmarks.length > 0 && (
+        <List.Section title="Bookmarks">
+          {bookmarks.map((bookmark) => (
             <List.Item
               key={bookmark._id}
               id={String(bookmark._id)}
@@ -250,9 +249,9 @@ export default function BrowseCollections() {
                 </ActionPanel>
               }
             />
-          ))
-        )}
-      </List.Section>
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

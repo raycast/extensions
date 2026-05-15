@@ -40,7 +40,7 @@ export async function searchBookmarks(
   keyword: string,
 ): Promise<SearchResponse> {
   return request<SearchResponse>(
-    `/raindrops/0?sort=score&search=${keyword.replace(/ /g, "%20")}`,
+    `/raindrops/0?sort=score&search=${encodeURIComponent(keyword)}`,
   );
 }
 
