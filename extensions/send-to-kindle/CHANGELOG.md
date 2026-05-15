@@ -1,6 +1,6 @@
 # Send to Kindle Changelog
 
-## [Skills Import and Export] - {PR_MERGE_DATE}
+## [Skills Import and Export] - 2026-05-15
 
 - Added bulk skills import and export, so you can back up or restore all skills at once instead of managing them one by one.
 
