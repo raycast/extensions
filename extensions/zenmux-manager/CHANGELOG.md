@@ -6,9 +6,22 @@
 - Show PAYG credit balance cleanly in the usage dashboard, menu bar, and AI account summary for PAYG-only users.
 - Treat missing subscription details as expected partial data when PAYG balance is available.
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Preserve Platform API Key Preference Storage] - 2026-05-12
+
+- Preserve the existing Platform API key preference name so current users keep their saved configuration after updating.
+- Refresh curated ZenMux documentation references and verification coverage.
+
+## [Improve ZenMux AI Documentation Support] - 2026-05-11
+
+- Add richer ZenMux documentation search for setup, routing, billing, fallback, streaming, and integration questions.
+- Add an LLM knowledge verification script to keep AI extension answers aligned with curated ZenMux docs.
+- Refine usage dashboard and menu bar actions for faster refreshes, copying snapshots, and opening ZenMux consoles.
+- Polish quota display layout, progress indicators, metadata, and screenshots for the Raycast Store.
+
+## [Initial Version] - 2026-05-10
 
 - Add ZenMux subscription quota dashboard.
 - Add PAYG credit balance display.
 - Add macOS menu bar monitor.
 - Add quick links to ZenMux account consoles.
+- Add monthly quota cap display and rolling quota reset details.
