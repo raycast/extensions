@@ -53,6 +53,8 @@ export default function BrowseCollections() {
   const handleCollectionSelect = useCallback(
     async (collection: RaindropCollection) => {
       setSelectedCollection(collection);
+      setBookmarks([]);
+      setChildCollections([]);
       setIsLoadingBookmarks(true);
       try {
         const [raindropsRes, childrenRes] = await Promise.all([

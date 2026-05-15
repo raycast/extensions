@@ -175,7 +175,7 @@ export default function SearchBookmarks() {
                   icon={Icon.Globe}
                   onAction={async () => {
                     await handleOpen(bookmark);
-                    open(bookmark.link);
+                    await open(bookmark.link);
                   }}
                 />
                 <Action
