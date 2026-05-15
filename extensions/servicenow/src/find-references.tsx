@@ -3,6 +3,7 @@ import {
   Action,
   ActionPanel,
   Color,
+  Form,
   Icon,
   Keyboard,
   LaunchProps,
@@ -18,6 +19,9 @@ import useInstances from "./hooks/useInstances";
 import { findReferences } from "./utils/snSnippets";
 import { ServiceNowClient } from "./utils/serviceNowClient";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
+import { getURL } from "./utils/browserScripts";
+import { getInstanceBaseUrl, isServiceNowUrl } from "./utils/instanceUrl";
+import { extractRecordFromUrl } from "./utils/extractRecordFromUrl";
 
 type Reference = {
   table: string;
@@ -25,6 +29,8 @@ type Reference = {
   count: number;
   operator: string;
 };
+
+type Target = { table: string; sysId: string };
 
 function decodeHtmlEntities(str: string): string {
   return str
@@ -36,8 +42,11 @@ function decodeHtmlEntities(str: string): string {
 }
 
 export default function FindReferences(props: LaunchProps) {
-  const { table, sysId, instanceName } = props.arguments;
+  const { table: argTable, sysId: argSysId, instanceName } = props.arguments;
   const { instances, selectedInstance, setSelectedInstance, isLoading: isLoadingInstances } = useInstances();
+  const initialTarget: Target | null = argTable && argSysId ? { table: argTable, sysId: argSysId } : null;
+  const [target, setTarget] = useState<Target | null>(initialTarget);
+  const [detectionDone, setDetectionDone] = useState<boolean>(initialTarget !== null);
   const [references, setReferences] = useState<Reference[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorFetching, setErrorFetching] = useState(false);
@@ -69,7 +78,50 @@ export default function FindReferences(props: LaunchProps) {
   }, [isLoadingInstances]);
 
   useEffect(() => {
-    if (!selectedInstance) return;
+    if (isLoadingInstances || detectionDone || target || instances.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const url = await getURL();
+        if (cancelled) return;
+        if (!url || !isServiceNowUrl(url, instances)) {
+          setDetectionDone(true);
+          return;
+        }
+        const parsed = extractRecordFromUrl(url);
+        if (!parsed) {
+          setDetectionDone(true);
+          return;
+        }
+        try {
+          const hostname = new URL(url).hostname.toLowerCase();
+          const matched = instances.find((i) => {
+            try {
+              return new URL(getInstanceBaseUrl(i)).hostname.toLowerCase() === hostname;
+            } catch {
+              return false;
+            }
+          });
+          if (matched && matched.id !== selectedInstance?.id) {
+            setSelectedInstance(matched);
+            LocalStorage.setItem("selected-instance", JSON.stringify(matched));
+          }
+        } catch {
+          // ignore hostname errors
+        }
+        setTarget(parsed);
+        setDetectionDone(true);
+      } catch {
+        if (!cancelled) setDetectionDone(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isLoadingInstances]);
+
+  useEffect(() => {
+    if (!selectedInstance || !target) return;
     let cancelled = false;
     setIsLoading(true);
     setErrorFetching(false);
@@ -84,7 +136,7 @@ export default function FindReferences(props: LaunchProps) {
         setIsLoading(false);
         return;
       }
-      await client.startBackgroundScript(findReferences(table, sysId), (response) => {
+      await client.startBackgroundScript(findReferences(target.table, target.sysId), (response) => {
         if (cancelled) return;
         const match = response.match(/###([\s\S]*?)###/);
         if (!match || !match[1]) {
@@ -112,7 +164,7 @@ export default function FindReferences(props: LaunchProps) {
     return () => {
       cancelled = true;
     };
-  }, [selectedInstance?.id, table, sysId]);
+  }, [selectedInstance?.id, target?.table, target?.sysId]);
 
   const onInstanceChange = (newValue: string) => {
     const aux = instances.find((i) => i.id === newValue);
@@ -123,6 +175,58 @@ export default function FindReferences(props: LaunchProps) {
   };
 
   const instanceId = selectedInstance?.id ?? "";
+
+  if (!target && !detectionDone) {
+    return <List isLoading navigationTitle="Find Record References" />;
+  }
+
+  if (!target) {
+    return (
+      <Form
+        navigationTitle="Find Record References"
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Find References"
+              icon={Icon.MagnifyingGlass}
+              onSubmit={(values: { table?: string; sysId?: string }) => {
+                const t = values.table?.trim();
+                const s = values.sysId?.trim();
+                if (!t || !s) {
+                  showToast(Toast.Style.Failure, "Missing fields", "Please enter both a table and a sys_id");
+                  return;
+                }
+                setTarget({ table: t, sysId: s });
+              }}
+            />
+          </ActionPanel>
+        }
+      >
+        <Form.Description text="Could not detect a ServiceNow record from your browser. Enter the table and sys_id to search." />
+        <Form.TextField id="table" title="Table" placeholder="e.g. incident" />
+        <Form.TextField id="sysId" title="Sys ID" placeholder="32-character sys_id" />
+        <Form.Dropdown
+          id="instance"
+          title="Instance"
+          value={instanceId}
+          onChange={onInstanceChange}
+          isLoading={isLoadingInstances}
+        >
+          {instances.map((instance: Instance) => (
+            <Form.Dropdown.Item
+              key={instance.id}
+              title={instance.alias ? instance.alias : instance.name}
+              value={instance.id}
+              icon={{
+                source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
+                tintColor: instance.color,
+              }}
+            />
+          ))}
+        </Form.Dropdown>
+      </Form>
+    );
+  }
 
   return (
     <List
@@ -164,13 +268,13 @@ export default function FindReferences(props: LaunchProps) {
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No References Found"
-          description={`No table references the ${table} record with Sys ID ${sysId}.`}
+          description={`No table references the ${target.table} record with Sys ID ${target.sysId}.`}
         />
       ) : (
         references?.map((ref, idx) => {
           const url = buildServiceNowUrl(
             selectedInstance?.name ?? "",
-            `${ref.table}_list.do?sysparm_query=${ref.column}${ref.operator}${sysId}`,
+            `${ref.table}_list.do?sysparm_query=${ref.column}${ref.operator}${target.sysId}`,
           );
           return (
             <List.Item
