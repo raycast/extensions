@@ -1,6 +1,19 @@
-import { createDecipheriv, pbkdf2Sync, randomUUID } from "crypto";
-import { readFileSync } from "fs";
+import { createDecipheriv, createHash, pbkdf2Sync } from "crypto";
+import { readFileSync, statSync } from "fs";
 import type { VaultService } from "./vault";
+
+const MAX_IMPORT_BYTES = 5 * 1024 * 1024;
+
+function deriveServiceId(
+  issuer: string,
+  account: string,
+  secret: string,
+): string {
+  return createHash("sha256")
+    .update(`${issuer}\0${account}\0${secret}`)
+    .digest("hex")
+    .slice(0, 32);
+}
 
 interface TwoFASService {
   name: string;
@@ -74,11 +87,13 @@ function mapService(svc: TwoFASService): VaultService | null {
   if (tokenType !== "TOTP") return null;
   if (!svc.secret) return null;
 
+  const issuer = svc.otp.issuer || "";
+  const account = svc.otp.account || "";
   return {
-    id: randomUUID(),
+    id: deriveServiceId(issuer, account, svc.secret),
     name: svc.name,
-    issuer: svc.otp.issuer || "",
-    account: svc.otp.account || "",
+    issuer,
+    account,
     secret: svc.secret,
     algorithm: normalizeAlgorithm(svc.otp.algorithm),
     digits: svc.otp.digits || 6,
@@ -90,6 +105,15 @@ export function parse2FASExport(
   filePath: string,
   password?: string,
 ): VaultService[] {
+  let size: number;
+  try {
+    size = statSync(filePath).size;
+  } catch {
+    throw new InvalidFormatError("file not readable");
+  }
+  if (size > MAX_IMPORT_BYTES) {
+    throw new InvalidFormatError("file too large (max 5 MB)");
+  }
   const raw = readFileSync(filePath, "utf-8");
   let data: TwoFASExport;
   try {

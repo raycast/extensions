@@ -14,11 +14,7 @@ export interface TOTPCode {
   period: number;
 }
 
-const base32Cache = new Map<string, Buffer>();
-
 function decodeBase32(input: string): Buffer {
-  const cached = base32Cache.get(input);
-  if (cached) return cached;
   const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   const cleaned = input.replace(/[\s=-]/g, "").toUpperCase();
   let bits = "";
@@ -31,9 +27,7 @@ function decodeBase32(input: string): Buffer {
   for (let i = 0; i < bytes.length; i++) {
     bytes[i] = parseInt(bits.slice(i * 8, i * 8 + 8), 2);
   }
-  const buf = Buffer.from(bytes);
-  base32Cache.set(input, buf);
-  return buf;
+  return Buffer.from(bytes);
 }
 
 export function generateTOTP(params: TOTPParams, timestamp?: number): TOTPCode {

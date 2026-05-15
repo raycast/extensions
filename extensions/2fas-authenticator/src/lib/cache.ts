@@ -8,9 +8,19 @@ export interface CachedService {
 }
 
 const CACHE_KEY = "recent-services";
+const CACHE_SCHEMA_KEY = "cache-schema";
+const CACHE_SCHEMA_VERSION = 2;
 const MAX_RECENT = 100;
 
+async function ensureSchema(): Promise<void> {
+  const current = await LocalStorage.getItem<number>(CACHE_SCHEMA_KEY);
+  if (current === CACHE_SCHEMA_VERSION) return;
+  await LocalStorage.removeItem(CACHE_KEY);
+  await LocalStorage.setItem(CACHE_SCHEMA_KEY, CACHE_SCHEMA_VERSION);
+}
+
 export async function getCachedServices(): Promise<CachedService[]> {
+  await ensureSchema();
   const raw = await LocalStorage.getItem<string>(CACHE_KEY);
   if (!raw) return [];
   try {

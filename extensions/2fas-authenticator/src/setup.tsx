@@ -12,28 +12,36 @@ import {
   LaunchType,
   launchCommand,
 } from "@raycast/api";
-import { isVaultConfigured, deleteVault, loadVault } from "./lib/vault";
+import {
+  isVaultConfigured,
+  deleteVault,
+  loadVault,
+  lockVault,
+} from "./lib/vault";
+import { withVaultUnlock } from "./lib/vault-ui";
 
 export default function Setup() {
   const [vaultExists, setVaultExists] = useState(false);
   const [serviceCount, setServiceCount] = useState<number>();
   const [isLoading, setIsLoading] = useState(true);
 
-  const check = useCallback(() => {
+  const check = useCallback(async () => {
     setIsLoading(true);
     const configured = isVaultConfigured();
     setVaultExists(configured);
-    if (configured) {
-      try {
-        const services = loadVault();
-        setServiceCount(services.length);
-      } catch {
-        setServiceCount(undefined);
-      }
-    } else {
+    if (!configured) {
       setServiceCount(undefined);
+      setIsLoading(false);
+      return;
     }
-    setIsLoading(false);
+    try {
+      const services = await withVaultUnlock(() => loadVault());
+      setServiceCount(services.length);
+    } catch {
+      setServiceCount(undefined);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -52,6 +60,16 @@ export default function Setup() {
     await showToast({ style: Toast.Style.Success, title: "Vault deleted" });
     check();
   }, [check]);
+
+  const handleLock = useCallback(async () => {
+    lockVault();
+    await showToast({
+      style: Toast.Style.Success,
+      title: "Vault locked",
+      message:
+        "Next command launch will require Keychain auth (close any open Search/Recent views first)",
+    });
+  }, []);
 
   const statusIcon = (ok: boolean) =>
     ok
@@ -127,6 +145,20 @@ export default function Setup() {
                         type: LaunchType.UserInitiated,
                       })
                     }
+                  />
+                </ActionPanel>
+              }
+            />
+            <List.Item
+              icon={Icon.Lock}
+              title="Lock Vault Now"
+              subtitle="Clear in-memory cache; next code requires Keychain auth"
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Lock Vault"
+                    icon={Icon.Lock}
+                    onAction={handleLock}
                   />
                 </ActionPanel>
               }

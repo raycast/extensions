@@ -8,19 +8,27 @@ import {
   showToast,
   Toast,
   Clipboard,
+  closeMainWindow,
+  showHUD,
 } from "@raycast/api";
 import { loadVault, isVaultConfigured, type VaultService } from "./lib/vault";
 import { generateCodeForService, type TOTPCode } from "./lib/totp";
 import { addRecentService, togglePin } from "./lib/cache";
-import { KeychainAuthCancelled } from "./lib/keychain";
+import { withVaultUnlock, reportVaultLoadError } from "./lib/vault-ui";
 
 interface ServiceWithCode {
   service: VaultService;
   totp: TOTPCode;
 }
 
+interface SkippedService {
+  service: VaultService;
+  reason: string;
+}
+
 export default function SearchOTP() {
   const [items, setItems] = useState<ServiceWithCode[]>([]);
+  const [skipped, setSkipped] = useState<SkippedService[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [vaultReady, setVaultReady] = useState(false);
   const servicesRef = useRef<VaultService[]>([]);
@@ -29,14 +37,19 @@ export default function SearchOTP() {
   const refreshCodes = useCallback(() => {
     if (servicesRef.current.length === 0) return;
     const results: ServiceWithCode[] = [];
+    const failed: SkippedService[] = [];
     for (const service of servicesRef.current) {
       try {
         results.push({ service, totp: generateCodeForService(service) });
-      } catch {
-        // Skip services with invalid secrets
+      } catch (error) {
+        failed.push({
+          service,
+          reason: error instanceof Error ? error.message : "Unknown error",
+        });
       }
     }
     setItems(results);
+    setSkipped(failed);
   }, []);
 
   useEffect(() => {
@@ -44,26 +57,23 @@ export default function SearchOTP() {
       setIsLoading(false);
       return;
     }
-    try {
-      const services = loadVault();
-      servicesRef.current = services;
-      setVaultReady(true);
-      refreshCodes();
-    } catch (error) {
-      if (error instanceof KeychainAuthCancelled) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Authentication cancelled",
-        });
-      } else {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to load vault",
-        });
+    let cancelled = false;
+    (async () => {
+      try {
+        const services = await withVaultUnlock(() => loadVault());
+        if (cancelled) return;
+        servicesRef.current = services;
+        setVaultReady(true);
+        refreshCodes();
+      } catch (error) {
+        if (!cancelled) await reportVaultLoadError(error);
+      } finally {
+        if (!cancelled) setIsLoading(false);
       }
-    } finally {
-      setIsLoading(false);
-    }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, [refreshCodes]);
 
   useEffect(() => {
@@ -79,10 +89,22 @@ export default function SearchOTP() {
     await Clipboard.copy(fresh.code, { concealed: true });
     const label = item.service.issuer || item.service.name;
     await addRecentService(item.service.id, label);
-    await showToast({
-      style: Toast.Style.Success,
-      title: `Copied: ${fresh.code}`,
-    });
+    await closeMainWindow({ clearRootSearch: true });
+    await showHUD(`Copied OTP for ${label}`);
+  }, []);
+
+  const handleCopyAccount = useCallback(async (item: ServiceWithCode) => {
+    if (!item.service.account) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "No account on this service",
+      });
+      return;
+    }
+    const label = item.service.issuer || item.service.name;
+    await Clipboard.copy(item.service.account, { concealed: true });
+    await closeMainWindow({ clearRootSearch: true });
+    await showHUD(`Copied account for ${label}`);
   }, []);
 
   const handleTogglePin = useCallback(async (item: ServiceWithCode) => {
@@ -140,10 +162,11 @@ export default function SearchOTP() {
                   icon={Icon.Clipboard}
                   onAction={() => handleCopy(item)}
                 />
-                <Action.CopyToClipboard
+                <Action
                   title="Copy Account"
-                  content={item.service.account}
+                  icon={Icon.AtSymbol}
                   shortcut={{ modifiers: ["cmd"], key: "u" }}
+                  onAction={() => handleCopyAccount(item)}
                 />
                 <Action
                   title="Toggle Pin"
@@ -156,6 +179,19 @@ export default function SearchOTP() {
           />
         );
       })}
+      {skipped.length > 0 && (
+        <List.Section title={`Skipped (${skipped.length})`}>
+          {skipped.map((entry) => (
+            <List.Item
+              key={`skipped-${entry.service.id}`}
+              icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
+              title={entry.service.issuer || entry.service.name}
+              subtitle={entry.service.account}
+              accessories={[{ text: entry.reason }]}
+            />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

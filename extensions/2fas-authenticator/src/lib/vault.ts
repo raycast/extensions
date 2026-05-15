@@ -1,5 +1,11 @@
 import { randomBytes, createCipheriv, createDecipheriv } from "crypto";
-import { readFileSync, writeFileSync, unlinkSync, existsSync } from "fs";
+import {
+  readFileSync,
+  writeFileSync,
+  renameSync,
+  unlinkSync,
+  existsSync,
+} from "fs";
 import { join } from "path";
 import { environment } from "@raycast/api";
 import {
@@ -27,10 +33,18 @@ interface VaultFile {
   tag: string;
 }
 
+const VAULT_VERSION = 1;
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
 let cachedServices: VaultService[] | null = null;
+let cachedAt = 0;
 
 function vaultPath(): string {
   return join(environment.supportPath, "vault.enc");
+}
+
+function vaultStagingPath(): string {
+  return join(environment.supportPath, "vault.enc.new");
 }
 
 function encrypt(plaintext: Buffer, key: Buffer): VaultFile {
@@ -39,7 +53,7 @@ function encrypt(plaintext: Buffer, key: Buffer): VaultFile {
   const encrypted = Buffer.concat([cipher.update(plaintext), cipher.final()]);
   const tag = cipher.getAuthTag();
   return {
-    v: 1,
+    v: VAULT_VERSION,
     data: encrypted.toString("base64"),
     iv: iv.toString("base64"),
     tag: tag.toString("base64"),
@@ -55,32 +69,93 @@ function decrypt(vault: VaultFile, key: Buffer): Buffer {
   return Buffer.concat([decipher.update(data), decipher.final()]);
 }
 
-export function createVault(services: VaultService[]): void {
-  const key = randomBytes(32);
+function isValidVaultFile(input: unknown): input is VaultFile {
+  if (typeof input !== "object" || input === null) return false;
+  const v = input as Record<string, unknown>;
+  return (
+    v.v === VAULT_VERSION &&
+    typeof v.data === "string" &&
+    v.data.length > 0 &&
+    typeof v.iv === "string" &&
+    v.iv.length > 0 &&
+    typeof v.tag === "string" &&
+    v.tag.length > 0
+  );
+}
+
+function writeVaultAtomic(services: VaultService[], key: Buffer): void {
   const plaintext = Buffer.from(JSON.stringify(services), "utf-8");
   const vaultFile = encrypt(plaintext, key);
-  const path = vaultPath();
-  writeFileSync(path, JSON.stringify(vaultFile), {
+  const staging = vaultStagingPath();
+  const final = vaultPath();
+  writeFileSync(staging, JSON.stringify(vaultFile), {
     encoding: "utf-8",
     mode: 0o600,
   });
   try {
+    renameSync(staging, final);
+  } catch (error) {
+    try {
+      unlinkSync(staging);
+    } catch {
+      // staging may not exist
+    }
+    throw error;
+  }
+}
+
+function setVault(services: VaultService[], rollbackOnKeychainFail: boolean) {
+  const key = randomBytes(32);
+  writeVaultAtomic(services, key);
+  try {
     storeVaultKey(key);
   } catch (error) {
-    unlinkSync(path);
+    if (rollbackOnKeychainFail) {
+      try {
+        unlinkSync(vaultPath());
+      } catch {
+        // best effort
+      }
+    }
     throw error;
   }
   cachedServices = services;
+  cachedAt = Date.now();
+}
+
+export function createVault(services: VaultService[]): void {
+  setVault(services, true);
+}
+
+export function replaceVault(services: VaultService[]): void {
+  setVault(services, false);
 }
 
 export function loadVault(): VaultService[] {
-  if (cachedServices) return cachedServices;
+  if (cachedServices && Date.now() - cachedAt < CACHE_TTL_MS) {
+    return structuredClone(cachedServices);
+  }
+  cachedServices = null;
   const raw = readFileSync(vaultPath(), "utf-8");
-  const vaultFile: VaultFile = JSON.parse(raw);
+  const parsed: unknown = JSON.parse(raw);
+  if (!isValidVaultFile(parsed)) {
+    throw new Error("Unsupported or malformed vault file");
+  }
   const key = retrieveVaultKey();
-  const plaintext = decrypt(vaultFile, key);
-  cachedServices = JSON.parse(plaintext.toString("utf-8"));
-  return cachedServices!;
+  const plaintext = decrypt(parsed, key);
+  const services = JSON.parse(plaintext.toString("utf-8")) as VaultService[];
+  cachedServices = services;
+  cachedAt = Date.now();
+  return structuredClone(services);
+}
+
+export function lockVault(): void {
+  cachedServices = null;
+  cachedAt = 0;
+}
+
+export function isVaultCached(): boolean {
+  return cachedServices !== null && Date.now() - cachedAt < CACHE_TTL_MS;
 }
 
 export function isVaultConfigured(): boolean {
@@ -88,12 +163,15 @@ export function isVaultConfigured(): boolean {
 }
 
 export function deleteVault(): void {
-  const path = vaultPath();
-  if (existsSync(path)) unlinkSync(path);
+  try {
+    unlinkSync(vaultPath());
+  } catch {
+    // ENOENT — already gone
+  }
   try {
     deleteVaultKey();
   } catch {
     // Key may not exist
   }
-  cachedServices = null;
+  lockVault();
 }

@@ -1,16 +1,19 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import {
   List,
   ActionPanel,
   Action,
   Icon,
+  Color,
   showToast,
   Toast,
   Clipboard,
-  popToRoot,
+  closeMainWindow,
+  showHUD,
 } from "@raycast/api";
+type Accessory = List.Item.Accessory;
 import { loadVault, isVaultConfigured, type VaultService } from "./lib/vault";
-import { generateCodeForService } from "./lib/totp";
+import { generateCodeForService, type TOTPCode } from "./lib/totp";
 import {
   getCachedServices,
   removeService,
@@ -19,64 +22,136 @@ import {
   sortServices,
   type CachedService,
 } from "./lib/cache";
-import { KeychainAuthCancelled } from "./lib/keychain";
+import { withVaultUnlock, reportVaultLoadError } from "./lib/vault-ui";
+
+interface RecentRow {
+  entry: CachedService;
+  service: VaultService | null;
+  totp: TOTPCode | null;
+}
+
+function relativeTime(ts: number): string {
+  const diff = Date.now() - ts;
+  const minutes = Math.floor(diff / 60_000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days}d ago`;
+  return new Date(ts).toLocaleDateString();
+}
 
 export default function RecentOTP() {
-  const [entries, setEntries] = useState<CachedService[]>([]);
+  const [rows, setRows] = useState<RecentRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [vaultReady, setVaultReady] = useState(false);
+  const servicesRef = useRef<VaultService[]>([]);
+  const serviceMapRef = useRef<Map<string, VaultService>>(new Map());
+  const entriesRef = useRef<CachedService[]>([]);
+  const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  const setServices = useCallback((services: VaultService[]) => {
+    servicesRef.current = services;
+    serviceMapRef.current = new Map(services.map((s) => [s.id, s]));
+  }, []);
+
+  const buildRows = useCallback(() => {
+    const map = serviceMapRef.current;
+    const entries = entriesRef.current;
+    const next: RecentRow[] = entries.map((entry) => {
+      const service = map.get(entry.serviceId) ?? null;
+      let totp: TOTPCode | null = null;
+      if (service) {
+        try {
+          totp = generateCodeForService(service);
+        } catch {
+          totp = null;
+        }
+      }
+      return { entry, service, totp };
+    });
+    setRows(next);
+  }, []);
 
   const loadEntries = useCallback(async () => {
     const cached = await getCachedServices();
-    setEntries(sortServices(cached));
-    setIsLoading(false);
-  }, []);
+    entriesRef.current = sortServices(cached);
+    buildRows();
+  }, [buildRows]);
 
   useEffect(() => {
-    loadEntries();
-  }, [loadEntries]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const cached = await getCachedServices();
+        if (cancelled) return;
+        entriesRef.current = sortServices(cached);
+        if (isVaultConfigured()) {
+          try {
+            const services = await withVaultUnlock(() => loadVault());
+            if (cancelled) return;
+            setServices(services);
+            setVaultReady(true);
+          } catch (error) {
+            if (!cancelled) await reportVaultLoadError(error);
+          }
+        }
+        if (!cancelled) buildRows();
+      } finally {
+        if (!cancelled) setIsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [buildRows, setServices]);
 
-  const handleCopyOTP = useCallback(async (entry: CachedService) => {
-    if (!isVaultConfigured()) {
-      await showToast({
-        style: Toast.Style.Failure,
-        title: "No vault configured",
-      });
-      return;
-    }
-    try {
-      const services = loadVault();
-      const service = services.find(
-        (s: VaultService) => s.id === entry.serviceId,
-      );
+  useEffect(() => {
+    if (!vaultReady) return;
+    timerRef.current = setInterval(buildRows, 1000);
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, [vaultReady, buildRows]);
+
+  const handleCopy = useCallback(
+    async (row: RecentRow) => {
+      let service = row.service;
+      if (!service && isVaultConfigured() && servicesRef.current.length === 0) {
+        try {
+          const services = await withVaultUnlock(() => loadVault());
+          setServices(services);
+          setVaultReady(true);
+          service = serviceMapRef.current.get(row.entry.serviceId) ?? null;
+          buildRows();
+        } catch (error) {
+          await reportVaultLoadError(error);
+          return;
+        }
+      }
       if (!service) {
         await showToast({
           style: Toast.Style.Failure,
           title: "Service not found in vault",
+          message: "Re-import or remove from recents",
         });
         return;
       }
-      const totp = generateCodeForService(service);
-      await Clipboard.copy(totp.code, { concealed: true });
-      await addRecentService(service.id, service.issuer || service.name);
-      await showToast({
-        style: Toast.Style.Success,
-        title: `Copied: ${totp.code}`,
-      });
-      await popToRoot();
-    } catch (error) {
-      if (error instanceof KeychainAuthCancelled) {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Authentication cancelled",
-        });
-      } else {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Failed to generate OTP",
-        });
+      try {
+        const fresh = generateCodeForService(service);
+        const label = service.issuer || service.name;
+        await Clipboard.copy(fresh.code, { concealed: true });
+        await addRecentService(service.id, label);
+        await closeMainWindow({ clearRootSearch: true });
+        await showHUD(`Copied OTP for ${label}`);
+      } catch (error) {
+        await reportVaultLoadError(error);
       }
-    }
-  }, []);
+    },
+    [buildRows, setServices],
+  );
 
   const handleRemove = useCallback(
     async (serviceId: string) => {
@@ -95,7 +170,7 @@ export default function RecentOTP() {
     [loadEntries],
   );
 
-  if (entries.length === 0 && !isLoading) {
+  if (rows.length === 0 && !isLoading) {
     return (
       <List>
         <List.EmptyView
@@ -109,41 +184,57 @@ export default function RecentOTP() {
 
   return (
     <List isLoading={isLoading}>
-      {entries.map((entry) => (
-        <List.Item
-          key={entry.serviceId}
-          icon={entry.pinned ? Icon.Pin : Icon.Clock}
-          title={entry.displayName}
-          accessories={[
-            {
-              text: new Date(entry.lastUsed).toLocaleDateString(),
-              tooltip: "Last used",
-            },
-          ]}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Copy OTP"
-                icon={Icon.Clipboard}
-                onAction={() => handleCopyOTP(entry)}
-              />
-              <Action
-                title={entry.pinned ? "Unpin" : "Pin"}
-                icon={entry.pinned ? Icon.PinDisabled : Icon.Pin}
-                shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
-                onAction={() => handleTogglePin(entry.serviceId)}
-              />
-              <Action
-                title="Remove from Recents"
-                icon={Icon.Trash}
-                style={Action.Style.Destructive}
-                shortcut={{ modifiers: ["ctrl"], key: "x" }}
-                onAction={() => handleRemove(entry.serviceId)}
-              />
-            </ActionPanel>
-          }
-        />
-      ))}
+      {rows.map((row) => {
+        const expiring = row.totp ? row.totp.remaining <= 5 : false;
+        const codeColor = expiring ? Color.Red : Color.Green;
+        const accessories: Accessory[] = [];
+        if (row.totp) {
+          accessories.push({
+            tag: { value: row.totp.code, color: codeColor },
+          });
+          accessories.push({
+            tag: { value: `${row.totp.remaining}s`, color: codeColor },
+          });
+        } else if (!row.service) {
+          accessories.push({
+            tag: { value: "missing", color: Color.Orange },
+          });
+        }
+        accessories.push({
+          text: relativeTime(row.entry.lastUsed),
+          tooltip: "Last used",
+        });
+        return (
+          <List.Item
+            key={row.entry.serviceId}
+            icon={row.entry.pinned ? Icon.Pin : Icon.Clock}
+            title={row.entry.displayName}
+            accessories={accessories}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="Copy OTP"
+                  icon={Icon.Clipboard}
+                  onAction={() => handleCopy(row)}
+                />
+                <Action
+                  title={row.entry.pinned ? "Unpin" : "Pin"}
+                  icon={row.entry.pinned ? Icon.PinDisabled : Icon.Pin}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+                  onAction={() => handleTogglePin(row.entry.serviceId)}
+                />
+                <Action
+                  title="Remove from Recents"
+                  icon={Icon.Trash}
+                  style={Action.Style.Destructive}
+                  shortcut={{ modifiers: ["ctrl"], key: "x" }}
+                  onAction={() => handleRemove(row.entry.serviceId)}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 }
