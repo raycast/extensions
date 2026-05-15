@@ -1,16 +1,4 @@
-import { environment } from "@raycast/api";
-import * as fs from "fs";
-import * as path from "path";
 import { Color } from "@raycast/api";
-
-// ---------------------------------------------------------------------------
-// One-time cleanup of the now-orphaned file-based charts directory
-// ---------------------------------------------------------------------------
-
-(function cleanupLegacyChartsDir() {
-  const dir = path.join(environment.supportPath, "charts");
-  fs.promises.rm(dir, { recursive: true, force: true }).catch(() => {});
-})();
 
 export interface ChartOpts {
   width?: number;
