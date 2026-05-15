@@ -30,12 +30,14 @@ export default async (props: LaunchProps) => {
     showToast(
       Toast.Style.Failure,
       "Instance not found",
-      `No instance found with name or alias containing ${instanceName}`,
+      `No instance found with URL or alias containing ${instanceName}`,
     );
     return;
   }
 
-  showToast(Toast.Style.Animated, `Searching Sys ID in ${instance.alias}...`);
+  const instanceLabel = instance.alias || instance.name;
+
+  showToast(Toast.Style.Animated, `Searching Sys ID in ${instanceLabel}...`);
 
   const client = new ServiceNowClient(instance);
   const isAuthenticated = await client.init();
@@ -46,13 +48,14 @@ export default async (props: LaunchProps) => {
 
   const callBack = (response: string) => {
     const answer = response.match(/###(.*)###/);
-    if (response.length === 0) showToast(Toast.Style.Failure, "Could not search for Sys ID. (are you an Admin?)");
+    if (response.length === 0)
+      showToast(Toast.Style.Failure, "Could not search for Sys ID", "Admin access is required.");
     else if (answer != null && answer[1]) {
       const table = answer[1].split("^")[0];
       const path = table + ".do?sys_id=" + sys_id;
       open(`${getInstanceBaseUrl(instance)}/${path}`);
     } else {
-      showToast(Toast.Style.Failure, `Sys ID not found on ${instance.alias}`);
+      showToast(Toast.Style.Failure, `Sys ID not found on ${instance.alias}.`);
     }
   };
 

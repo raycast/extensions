@@ -2,12 +2,12 @@
 
 ## [New Command: Find Record References] - 2026-05-14
 
-- Added a new **Find Record References** command. Given a base table and a `sys_id`, lists every column across the instance that references that record (reference, document_id, glide_list, conditions fields, plus `sys_variable_value`), with a one-click action to open the filtered list view in ServiceNow. Requires an admin profile, as it runs a background script through `/sys.scripts.do`.
-- Extracted the shared `ServiceNowClient` helper used by both **Search sys_id** and **Find Record References** into `src/utils/serviceNowClient.ts`.
+- Added a new **Find Record References** command. Given a base table and a Sys ID, lists every column across the instance that references that record, with a one-click action to open the filtered list view in ServiceNow. Requires an admin profile, as it runs a background script through `/sys.scripts.do`.
+- Extracted the shared `ServiceNowClient` helper used by both **Search Sys ID** and **Find Record References** into `src/utils/serviceNowClient.ts`.
 
 ## [New Command: Cancel My Transactions] - 2026-05-14
 
-- Added a new **Cancel My Transactions** command. When a long-running transaction (e.g. a runaway Background Script) locks you out of your ServiceNow session, this command opens `cancel_my_transaction.do`, which stops the transaction and unlocks the session — no need to open a new browser or private window. Accepts an optional instance name/alias; defaults to the currently selected instance.
+- Added a new **Cancel My Transactions** command. When a long-running transaction (e.g. a runaway Background Script) locks you out of your ServiceNow session, this command opens `cancel_my_transaction.do`, which stops the transaction and unlocks the session — no need to open a new browser or private window. Accepts an optional instance URL or alias; defaults to the currently selected instance.
 
 ## [FedRAMP and on-prem support] - 2026-05-14
 
@@ -18,11 +18,11 @@
 
 ## [Fix] - 2025-05-14
 
-Fixed an issue where the Search by Sys_ID command stopped working after publishing, due to function name minification during the build process.
+Fixed an issue where the Search Sys ID command stopped working after publishing, due to function name minification during the build process.
 
 ## [Updates] - 2025-05-13
 
-- Added a new command for admins to **Search by Sys_ID**, allowing to search for a Sys_ID in the selected instance, or in any matching instance from the profiles if no instance is provided.
+- Added a new admin command, **Search Sys ID**, which searches for a Sys ID in the selected instance, or in any matching instance from the profiles if no instance is provided.
 - Added a new Open Mode preference to control how ServiceNow content is opened when using the extension.
 - Simplified the command structure by making the instance input optional, defaulting to the selected instance if none is provided, and eliminating the need for multiple commands for:
   - **Quick Search**
@@ -46,10 +46,10 @@ Fixed an issue where the Search by Sys_ID command stopped working after publishi
 
 ## [Fixes & Bits] - 2024-10-23
 
-- Documate pages now open directly in the editor
-- Improved search results filtering
-- Added **Login to Selected Instance** command
-- Added **Search Resources** command to help find ServiceNow resources
-- Removed unnecessary tooltips in the Instance Profile Form for a cleaner interface
+- Documate pages now open directly in the editor.
+- Improved search results filtering.
+- Added the **Login to Selected Instance** command.
+- Added the **Search Resources** command to help find ServiceNow resources.
+- Removed unnecessary tooltips in the Instance Profile Form for a cleaner interface.
 
 ## [Initial Version] - 2024-10-17

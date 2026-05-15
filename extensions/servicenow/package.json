@@ -20,13 +20,13 @@
     {
       "name": "manage-instance-profiles",
       "title": "Manage Instance Profiles",
-      "description": "Configure and mange profiles for your ServiceNow instances.",
+      "description": "Configure and manage profiles to connect to your ServiceNow instances.",
       "mode": "view"
     },
     {
       "name": "quick-search",
       "title": "Quick Search",
-      "description": "Quickly search within a specific ServiceNow instance profile by entering a search term. If no instance name or alias is provided, it will use the selected instance profile.",
+      "description": "Quickly search within a specific ServiceNow instance profile by entering a search term. If no instance URL or alias is provided, it will use the selected instance profile.",
       "mode": "view",
       "arguments": [
         {
@@ -37,7 +37,7 @@
         },
         {
           "name": "instanceName",
-          "placeholder": "Instance name or alias",
+          "placeholder": "Instance URL or alias",
           "type": "text",
           "required": false
         }
@@ -52,12 +52,12 @@
     {
       "name": "open-instance",
       "title": "Open Instance",
-      "description": "Open a ServiceNow instance in the browser. If an instance name or alias is provided, it will open that instance; otherwise, it will open the currently selected instance.",
+      "description": "Open a ServiceNow instance in the browser. If an instance URL or alias is provided, it will open that instance; otherwise, it will open the currently selected instance.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "instanceName",
-          "placeholder": "Instance name or alias",
+          "placeholder": "Instance URL or alias",
           "type": "text",
           "required": false
         }
@@ -66,12 +66,12 @@
     {
       "name": "open-current-page-instance",
       "title": "Open Current Page in Instance",
-      "description": "Open the current ServiceNow page in any instance defined in your instance profiles. If no instance name or alias is provided, it will open the page in the selected instance profile.",
+      "description": "Open the current ServiceNow page in any instance defined in your instance profiles. If no instance URL or alias is provided, it will open the page in the selected instance profile.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "instanceName",
-          "placeholder": "Instance name or alias",
+          "placeholder": "Instance URL or alias",
           "type": "text",
           "required": false
         }
@@ -111,7 +111,7 @@
       "arguments": [
         {
           "name": "instanceName",
-          "placeholder": "Instance name or alias",
+          "placeholder": "Instance URL or alias",
           "type": "text",
           "required": false
         }
@@ -149,7 +149,7 @@
         },
         {
           "name": "instanceName",
-          "placeholder": "Instance name or alias",
+          "placeholder": "Instance URL or alias",
           "type": "text",
           "required": false
         }
@@ -181,7 +181,7 @@
         },
         {
           "name": "instanceName",
-          "placeholder": "Instance name or alias",
+          "placeholder": "Instance URL or alias",
           "type": "text",
           "required": false
         }
@@ -190,12 +190,12 @@
     {
       "name": "cancel-my-transactions",
       "title": "Cancel My Transactions",
-      "description": "Stop a long-running transaction that has locked you out of your ServiceNow session, without opening a new browser or private window. If no instance name or alias is provided, uses the currently selected instance.",
+      "description": "Stop a long-running transaction that has locked you out of your ServiceNow session, without opening a new browser or private window. If no instance URL or alias is provided, uses the currently selected instance.",
       "mode": "no-view",
       "arguments": [
         {
           "name": "instanceName",
-          "placeholder": "Instance name or alias",
+          "placeholder": "Instance URL or alias",
           "type": "text",
           "required": false
         }

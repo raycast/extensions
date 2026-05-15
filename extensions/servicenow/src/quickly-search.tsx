@@ -24,7 +24,7 @@ export default function Search(props: LaunchProps) {
     showToast(
       Toast.Style.Failure,
       "Instance not found",
-      `No instance profile found with name or alias: ${instanceName}`,
+      `No instance found with URL or alias containing ${instanceName}`,
     );
     popToRoot();
     return;

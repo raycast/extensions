@@ -134,9 +134,9 @@ export default function SearchList() {
     _updateHistory(
       request,
       {
-        before: `Removing all items from history`,
-        success: `All terms removed from history`,
-        failure: "Failed removing all items from history",
+        before: "Removing all items from history",
+        success: "All items removed from history",
+        failure: "Failed to remove all items from history",
       },
       updateData,
     );
@@ -159,7 +159,7 @@ export default function SearchList() {
       {
         before: `Removing ${title} from history`,
         success: `${title} removed from history`,
-        failure: "Failed removing item from history",
+        failure: `Failed to remove ${title} from history`,
       },
       updateData,
     );

@@ -53,7 +53,8 @@ export default function useInstances() {
     }
 
     const fetchUserId = async () => {
-      const { name: instanceName = "", username = "", password = "" } = selectedInstance;
+      const { name = "", alias, username = "", password = "" } = selectedInstance;
+      const instanceLabel = alias || name;
 
       try {
         const response = await fetch(
@@ -74,7 +75,7 @@ export default function useInstances() {
         if (!jsonData.result) {
           showToast({
             style: Toast.Style.Failure,
-            title: `Could not connect to ${instanceName}`,
+            title: `Could not connect to ${instanceLabel}`,
             message: jsonData.error?.message,
           });
 
@@ -87,7 +88,7 @@ export default function useInstances() {
 
         showToast({
           style: Toast.Style.Failure,
-          title: `Could not connect to ${instanceName}`,
+          title: `Could not connect to ${instanceLabel}`,
           message: error instanceof Error ? error.message : "",
         });
       }

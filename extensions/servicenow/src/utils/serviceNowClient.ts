@@ -63,11 +63,11 @@ export class ServiceNowClient {
         cookies: jsessionid + ";" + glide_user_route + ";" + glide_session_store + ";" + BIGipServerpool,
       };
     } catch (error) {
-      console.error("Authentication Failed:", error);
+      console.error("Could not authenticate:", error);
       showToast(
         Toast.Style.Failure,
-        "Authentication Failed",
-        "This command requires admin access in ServiceNow. Please verify your credentials and permissions.",
+        "Could not authenticate",
+        "This command requires admin access. Verify your credentials and permissions.",
       );
       return null;
     }
@@ -93,8 +93,8 @@ export class ServiceNowClient {
       const data = await response.text();
       callback(data);
     } catch (error) {
-      console.error("Background Script failed:", error);
-      showToast(Toast.Style.Failure, "Background Script failed");
+      console.error("Could not run background script:", error);
+      showToast(Toast.Style.Failure, "Could not run background script");
     }
   }
 }

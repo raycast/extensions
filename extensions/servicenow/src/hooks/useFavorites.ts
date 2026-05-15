@@ -235,7 +235,7 @@ const useFavorites = () => {
       {
         before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
-        failure: "Failed adding favorite group",
+        failure: "Failed to add favorite group",
       },
       updateData,
     );
@@ -269,7 +269,7 @@ const useFavorites = () => {
       {
         before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
-        failure: "Failed adding favorite",
+        failure: "Failed to add favorite",
       },
       updateData,
     );
@@ -311,7 +311,7 @@ const useFavorites = () => {
       {
         before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
-        failure: "Failed adding favorite",
+        failure: "Failed to add favorite",
       },
       updateData,
       revalidate,
@@ -344,7 +344,7 @@ const useFavorites = () => {
       {
         before: `Adding ${title} to favorites`,
         success: `${title} added to favorites`,
-        failure: "Failed adding favorite group",
+        failure: "Failed to add favorite group",
       },
       updateData,
       revalidate,
@@ -375,7 +375,7 @@ const useFavorites = () => {
       {
         before: `Updating "${title}"`,
         success: `Favorites group updated`,
-        failure: "Failed updating favorites group",
+        failure: "Failed to update favorites group",
       },
       updateData,
       revalidate,
@@ -406,7 +406,7 @@ const useFavorites = () => {
       {
         before: `Updating "${title}"`,
         success: `Favorite updated`,
-        failure: "Failed updating favorite",
+        failure: "Failed to update favorite",
       },
       updateData,
       revalidate,
@@ -430,7 +430,7 @@ const useFavorites = () => {
       {
         before: `Removing ${title} from favorites`,
         success: `${title} removed from favorites`,
-        failure: "Failed removing favorite",
+        failure: `Failed to remove ${title} from favorites`,
       },
       updateData,
       revalidate,

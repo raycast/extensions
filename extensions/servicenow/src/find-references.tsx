@@ -62,7 +62,7 @@ export default function FindReferences(props: LaunchProps) {
         showToast(
           Toast.Style.Failure,
           "Instance not found",
-          `No instance profile found with name or alias: ${instanceName}`,
+          `No instance found with URL or alias containing ${instanceName}`,
         );
       }
     }
@@ -88,7 +88,11 @@ export default function FindReferences(props: LaunchProps) {
         if (cancelled) return;
         const match = response.match(/###([\s\S]*?)###/);
         if (!match || !match[1]) {
-          showToast(Toast.Style.Failure, "Could not search references", "Are you an admin? Check the table name.");
+          showToast(
+            Toast.Style.Failure,
+            "Could not search references",
+            "Check that you are an admin and the table name is correct.",
+          );
           setErrorFetching(true);
           setIsLoading(false);
           return;
@@ -160,7 +164,7 @@ export default function FindReferences(props: LaunchProps) {
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
           title="No References Found"
-          description={`No table references the ${table} record with sys_id ${sysId}.`}
+          description={`No table references the ${table} record with Sys ID ${sysId}.`}
         />
       ) : (
         references?.map((ref, idx) => {

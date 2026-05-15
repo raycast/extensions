@@ -20,7 +20,11 @@ export default async (props: LaunchProps) => {
   );
 
   if (!instance) {
-    showToast(Toast.Style.Failure, "Instance not found", `No instance found with name or alias: ${instanceName}`);
+    showToast(
+      Toast.Style.Failure,
+      "Instance not found",
+      `No instance found with URL or alias containing ${instanceName}`,
+    );
     return;
   }
 

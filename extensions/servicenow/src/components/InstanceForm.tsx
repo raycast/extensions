@@ -95,12 +95,12 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
         {...itemProps.name}
         title="Instance URL"
         placeholder="acme or https://sn.internal.corp"
-        info={`Enter the subdomain for a commercial cloud instance (e.g. "acme" → https://acme.service-now.com), or a full URL for FedRAMP, on-prem, or custom domains (e.g. https://gov.servicenowservices.com, https://sn.internal.corp).`}
+        info={`Subdomain (e.g. "acme") or full URL (e.g. https://acme.service-now.com, https://gov.servicenowservices.com, https://sn.internal.corp).`}
       />
       <Form.TextField
         {...itemProps.alias}
         title="Alias"
-        placeholder="Production, dev, sandbox, PDI, etc."
+        placeholder="Production"
         info="Use an alias to easily recognize your instance"
       />
       <Form.Dropdown {...itemProps.color} title="Color">
@@ -120,7 +120,7 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
       <Form.Separator />
       <Form.Description
         title="Full Version"
-        text={`Enable the full version if this is an admin account or the instance has this extension's Update Set installed. Press ⌘U to download the Update Set.`}
+        text={`Enable the full version if this is an admin account, or if the extension's Update Set is installed on the instance. Press ⌘U to download the Update Set.`}
       />
       <Form.Dropdown
         {...itemProps.full}

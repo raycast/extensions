@@ -43,7 +43,7 @@ export default async (props: LaunchProps) => {
     showToast(
       Toast.Style.Failure,
       "Instance not found",
-      `No instance found with name or alias containing ${instanceName}`,
+      `No instance found with URL or alias containing ${instanceName}`,
     );
     return;
   }
