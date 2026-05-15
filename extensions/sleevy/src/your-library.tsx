@@ -222,6 +222,10 @@ export default function Command() {
       );
 
       if (response.ok) {
+        await showToast({
+          style: Toast.Style.Success,
+          title: item.isRead ? "Marked as unread" : "Marked as read",
+        });
         revalidate();
       } else {
         throw new Error(`HTTP ${response.status}`);
