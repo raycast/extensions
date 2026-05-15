@@ -7,15 +7,16 @@ import CreateIssue from "./issue-create";
 import { getPullRequestIcon } from "./utils/icons";
 import type { Repository } from "./types/api";
 
-enum PullRequestCategory {
-  All = "all",
-  Created = "created",
-  Assigned = "assigned",
-  Mentioned = "mentioned",
-  ReviewRequested = "review_requested",
-  Reviewed = "reviewed",
-  OwnedRepositories = "owned_repositories",
-}
+const PullRequestCategory = {
+  All: "all",
+  Created: "created",
+  Assigned: "assigned",
+  Mentioned: "mentioned",
+  ReviewRequested: "review_requested",
+  Reviewed: "reviewed",
+  OwnedRepositories: "owned_repositories",
+} as const;
+type PullRequestCategory = (typeof PullRequestCategory)[keyof typeof PullRequestCategory];
 
 const categoryOptions = [
   { title: "All", value: PullRequestCategory.All },
@@ -72,7 +73,7 @@ export default function Command() {
     return [...items].sort((a, b) => {
       const byState = stateRank(a.state) - stateRank(b.state);
       if (byState !== 0) return byState;
-      return timeValue(a.updated_at) - timeValue(b.updated_at);
+      return timeValue(b.updated_at) - timeValue(a.updated_at);
     });
   }, [items]);
 
