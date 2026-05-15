@@ -67,6 +67,7 @@ export default function NavigationHistory() {
     <List
       searchText={searchTerm}
       onSearchTextChange={setSearchTerm}
+      searchBarPlaceholder="Filter by title, description, table..."
       isLoading={isLoading}
       pagination={pagination}
       throttle
