@@ -1,0 +1,65 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "fake-id",
+  "title": "FakeID",
+  "description": "Generate fake US addresses, identities, SSNs and more. Save to 1Password, copy to clipboard instantly.",
+  "icon": "icon.png",
+  "author": "shenye",
+  "categories": [
+    "Developer Tools",
+    "Productivity",
+    "Security"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-address",
+      "title": "Generate Address",
+      "subtitle": "FakeID",
+      "description": "Generate a fake US address with state selection, tax-free state option",
+      "mode": "view"
+    },
+    {
+      "name": "generate-identity",
+      "title": "Generate Identity",
+      "subtitle": "FakeID",
+      "description": "Generate a full fake identity: name, SSN, address, phone, email",
+      "mode": "view"
+    },
+    {
+      "name": "saved-items",
+      "title": "Saved Items",
+      "subtitle": "FakeID",
+      "description": "View, copy, and manage your saved fake identities",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "defaultState",
+      "title": "Default State",
+      "description": "Default US state for address generation",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "@raycast/api": "^1.59.0",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "eslint": "^8.50.0",
+    "prettier": "^3.0.0",
+    "typescript": "^5.2.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
