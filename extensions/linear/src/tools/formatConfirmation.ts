@@ -1,6 +1,12 @@
 import { getLinearClient } from "../api/linearClient";
 
-export function formatConfirmation({ name, value }: { name: string; value: undefined | number | string | string[] }) {
+export function formatConfirmation({
+  name,
+  value,
+}: {
+  name: string;
+  value: undefined | null | number | string | string[];
+}) {
   const { linearClient } = getLinearClient();
 
   const formatters = {
