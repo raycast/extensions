@@ -112,9 +112,9 @@ export async function editTask(
   taskId: string,
   updates: { title: string; notes?: string; due?: Date | null },
 ): Promise<void> {
-  const body: Record<string, string | undefined> = {
+  const body: Record<string, string | null | undefined> = {
     title: updates.title,
-    notes: updates.notes || undefined,
+    notes: updates.notes !== undefined ? updates.notes || null : undefined,
     due: serializeDueDate(updates.due),
   };
 

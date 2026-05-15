@@ -1,7 +1,7 @@
 import { OAuthService } from "@raycast/utils";
 import { getPreferenceValues } from "@raycast/api";
 
-const { clientId } = getPreferenceValues<{ clientId: string }>();
+const { clientId } = getPreferenceValues<Preferences>();
 
 export const google = OAuthService.google({
   clientId,

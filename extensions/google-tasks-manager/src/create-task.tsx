@@ -7,7 +7,7 @@ import {
   showToast,
   popToRoot,
 } from "@raycast/api";
-import { withAccessToken } from "@raycast/utils";
+import { withAccessToken, useForm, FormValidation } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { google } from "./oauth";
 import { fetchTaskLists, createTask } from "./api";
@@ -34,37 +34,37 @@ function CreateTask() {
     })();
   }, []);
 
-  async function handleSubmit(values: {
+  const { handleSubmit, itemProps } = useForm<{
     title: string;
     notes: string;
     due: Date | null;
     listId: string;
-  }) {
-    if (!values.title.trim()) {
-      showToast({ style: Toast.Style.Failure, title: "Title is required" });
-      return;
-    }
-
-    try {
-      await createTask(values.listId, {
-        title: values.title,
-        notes: values.notes || undefined,
-        due: values.due,
-      });
-      showToast({
-        style: Toast.Style.Success,
-        title: "Task created",
-        message: values.title,
-      });
-      popToRoot();
-    } catch (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Failed to create task",
-        message: String(error),
-      });
-    }
-  }
+  }>({
+    async onSubmit(values) {
+      try {
+        await createTask(values.listId, {
+          title: values.title,
+          notes: values.notes || undefined,
+          due: values.due,
+        });
+        showToast({
+          style: Toast.Style.Success,
+          title: "Task created",
+          message: values.title,
+        });
+        popToRoot();
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to create task",
+          message: String(error),
+        });
+      }
+    },
+    validation: {
+      title: FormValidation.Required,
+    },
+  });
 
   return (
     <Form
@@ -79,10 +79,22 @@ function CreateTask() {
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="Task title" />
-      <Form.TextArea id="notes" title="Notes" placeholder="Optional notes..." />
-      <Form.DatePicker id="due" title="Due Date" />
-      <Form.Dropdown id="listId" title="Task List" defaultValue={lists[0]?.id}>
+      <Form.TextField
+        {...itemProps.title}
+        title="Title"
+        placeholder="Task title"
+      />
+      <Form.TextArea
+        {...itemProps.notes}
+        title="Notes"
+        placeholder="Optional notes..."
+      />
+      <Form.DatePicker {...itemProps.due} title="Due Date" />
+      <Form.Dropdown
+        {...itemProps.listId}
+        title="Task List"
+        defaultValue={lists[0]?.id}
+      >
         {lists.map((list) => (
           <Form.Dropdown.Item
             key={list.id}

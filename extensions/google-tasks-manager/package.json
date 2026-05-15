@@ -27,7 +27,7 @@
       "type": "password",
       "required": true,
       "title": "OAuth Client ID",
-      "description": "Your Google OAuth client ID. Create one at https://console.developers.google.com/apis/credentials (iOS app type, Bundle ID: com.raycast)",
+      "description": "Your Google OAuth client ID (see README for setup). Create at console.cloud.google.com > Credentials > OAuth client ID (iOS type, Bundle ID: com.raycast)",
       "placeholder": "123456789-abc.apps.googleusercontent.com"
     }
   ],

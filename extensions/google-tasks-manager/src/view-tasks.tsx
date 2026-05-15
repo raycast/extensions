@@ -9,7 +9,7 @@ import {
   Form,
   useNavigation,
 } from "@raycast/api";
-import { withAccessToken } from "@raycast/utils";
+import { withAccessToken, useForm, FormValidation } from "@raycast/utils";
 import { useState, useEffect, useCallback } from "react";
 import { google } from "./oauth";
 import {
@@ -43,7 +43,7 @@ function getTaskSubtitle(task: Task): string {
   }
   if (task.due) {
     const date = new Date(task.due);
-    return `Due: ${date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}`;
+    return `Due: ${date.toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" })}`;
   }
   return "";
 }
@@ -58,6 +58,25 @@ function EditTaskForm(props: {
   const { pop } = useNavigation();
   const existingDue = props.task.due ? new Date(props.task.due) : null;
 
+  const { handleSubmit, itemProps } = useForm<{
+    title: string;
+    notes: string;
+    due: Date | null;
+  }>({
+    onSubmit(values) {
+      props.onEdit(values.title, values.notes, values.due);
+      pop();
+    },
+    initialValues: {
+      title: props.task.title,
+      notes: props.task.notes ?? "",
+      due: existingDue,
+    },
+    validation: {
+      title: FormValidation.Required,
+    },
+  });
+
   return (
     <Form
       actions={
@@ -65,36 +84,14 @@ function EditTaskForm(props: {
           <Action.SubmitForm
             title="Save Changes"
             icon={Icon.Check}
-            onSubmit={(values: {
-              title: string;
-              notes: string;
-              due: Date | null;
-            }) => {
-              if (!values.title.trim()) {
-                showToast({
-                  style: Toast.Style.Failure,
-                  title: "Title is required",
-                });
-                return;
-              }
-              props.onEdit(values.title, values.notes, values.due);
-              pop();
-            }}
+            onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField
-        id="title"
-        title="Title"
-        defaultValue={props.task.title}
-      />
-      <Form.TextArea
-        id="notes"
-        title="Notes"
-        defaultValue={props.task.notes ?? ""}
-      />
-      <Form.DatePicker id="due" title="Due Date" defaultValue={existingDue} />
+      <Form.TextField {...itemProps.title} title="Title" />
+      <Form.TextArea {...itemProps.notes} title="Notes" />
+      <Form.DatePicker {...itemProps.due} title="Due Date" />
     </Form>
   );
 }
@@ -107,6 +104,24 @@ function InlineCreateTaskForm(props: {
 }) {
   const { pop } = useNavigation();
 
+  const { handleSubmit, itemProps } = useForm<{
+    title: string;
+    notes: string;
+    due: Date | null;
+  }>({
+    onSubmit(values) {
+      props.onCreate({
+        title: values.title,
+        notes: values.notes,
+        due: values.due,
+      });
+      pop();
+    },
+    validation: {
+      title: FormValidation.Required,
+    },
+  });
+
   return (
     <Form
       actions={
@@ -114,32 +129,22 @@ function InlineCreateTaskForm(props: {
           <Action.SubmitForm
             title="Create Task"
             icon={Icon.Plus}
-            onSubmit={(values: {
-              title: string;
-              notes: string;
-              due: Date | null;
-            }) => {
-              if (!values.title.trim()) {
-                showToast({
-                  style: Toast.Style.Failure,
-                  title: "Title is required",
-                });
-                return;
-              }
-              props.onCreate({
-                title: values.title,
-                notes: values.notes,
-                due: values.due,
-              });
-              pop();
-            }}
+            onSubmit={handleSubmit}
           />
         </ActionPanel>
       }
     >
-      <Form.TextField id="title" title="Title" placeholder="Task title" />
-      <Form.TextArea id="notes" title="Notes" placeholder="Optional notes..." />
-      <Form.DatePicker id="due" title="Due Date" />
+      <Form.TextField
+        {...itemProps.title}
+        title="Title"
+        placeholder="Task title"
+      />
+      <Form.TextArea
+        {...itemProps.notes}
+        title="Notes"
+        placeholder="Optional notes..."
+      />
+      <Form.DatePicker {...itemProps.due} title="Due Date" />
     </Form>
   );
 }
@@ -384,22 +389,29 @@ function ViewTasks() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search task lists...">
-      {lists.map((list) => (
-        <List.Item
-          key={list.id}
-          title={list.title}
-          icon={Icon.List}
-          actions={
-            <ActionPanel>
-              <Action
-                title="View Tasks"
-                icon={Icon.ArrowRight}
-                onAction={() => push(<TaskListView list={list} />)}
-              />
-            </ActionPanel>
-          }
+      {lists.length === 0 && !isLoading ? (
+        <List.EmptyView
+          title="No Task Lists"
+          description="Create a task list at tasks.google.com to get started"
         />
-      ))}
+      ) : (
+        lists.map((list) => (
+          <List.Item
+            key={list.id}
+            title={list.title}
+            icon={Icon.List}
+            actions={
+              <ActionPanel>
+                <Action
+                  title="View Tasks"
+                  icon={Icon.ArrowRight}
+                  onAction={() => push(<TaskListView list={list} />)}
+                />
+              </ActionPanel>
+            }
+          />
+        ))
+      )}
     </List>
   );
 }
