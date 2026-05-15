@@ -30,6 +30,32 @@ export default function MenuBar() {
   const { data, stale, loading, missingToken, error, reload } =
     useMetrics<DailyMetricsRange>(fetcher);
 
+  // Sort the range and pick the most recent entry that has sleep data.
+  // These hooks must be above every early return (Rules of Hooks).
+  const sortedRange = useMemo(
+    () =>
+      data
+        ? [...data].sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
+        : [],
+    [data],
+  );
+  const sleepEntry = useMemo(
+    () => latestWithField(sortedRange, "sleep_score"),
+    [sortedRange],
+  );
+
+  const score = sleepEntry?.sleep_score;
+  const hasError = error != null;
+
+  // Native Moon icon tinted by status
+  const moonIcon = useMemo(() => {
+    if (hasError) {
+      return { source: Icon.Moon, tintColor: Color.Red };
+    }
+    const status = insightFor("sleep_score", score).status;
+    return { source: Icon.Moon, tintColor: statusColor(status) };
+  }, [score, hasError]);
+
   if (missingToken) {
     return (
       <MenuBarExtra
@@ -44,39 +70,14 @@ export default function MenuBar() {
     );
   }
 
-  // Sort the range and pick the most recent entry that has sleep data.
-  const sortedRange = useMemo(
-    () =>
-      data
-        ? [...data].sort((a, b) => (a.date ?? "").localeCompare(b.date ?? ""))
-        : [],
-    [data],
-  );
-  const sleepEntry = useMemo(
-    () => latestWithField(sortedRange, "sleep_score"),
-    [sortedRange],
-  );
-
   // Recovery/movement metrics always come from the last entry (today's).
   const latestEntry = sortedRange[sortedRange.length - 1] ?? null;
-
-  const score = sleepEntry?.sleep_score;
-  const hasError = error != null;
 
   // When the sleep entry isn't today's, show a subtle date hint in the section.
   const sleepDate = sleepEntry?.date;
   const sleepDateLabel = relativeDateLabel(sleepDate);
   const sleepIsYesterday =
     sleepDate != null && sleepDate !== todayDateKey() && sleepDateLabel != null;
-
-  // Native Moon icon tinted by status
-  const moonIcon = useMemo(() => {
-    if (hasError) {
-      return { source: Icon.Moon, tintColor: Color.Red };
-    }
-    const status = insightFor("sleep_score", score).status;
-    return { source: Icon.Moon, tintColor: statusColor(status) };
-  }, [score, hasError]);
 
   const title = hasError ? "⚠️" : score != null ? String(score) : "—";
 

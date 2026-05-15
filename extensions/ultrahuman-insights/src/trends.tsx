@@ -104,10 +104,7 @@ export default function Trends() {
     await reload();
   }, [range, reload]);
 
-  if (missingToken) {
-    return <ListStatus variant="missing-token" />;
-  }
-
+  // Must be above every early return (Rules of Hooks).
   const sorted = useMemo(
     () =>
       data
@@ -115,6 +112,10 @@ export default function Trends() {
         : [],
     [data],
   );
+
+  if (missingToken) {
+    return <ListStatus variant="missing-token" />;
+  }
 
   const metrics = Object.keys(METRIC_LABELS) as MetricName[];
 

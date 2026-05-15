@@ -124,10 +124,7 @@ export default function Today() {
     await reload();
   }, [range, reload]);
 
-  if (missingToken) {
-    return <ListStatus variant="missing-token" />;
-  }
-
+  // Must be above every early return (Rules of Hooks).
   const sorted = useMemo(
     () =>
       data
@@ -135,6 +132,10 @@ export default function Today() {
         : [],
     [data],
   );
+
+  if (missingToken) {
+    return <ListStatus variant="missing-token" />;
+  }
   // For non-sleep metrics: use the most-recent (today's) entry.
   // For sleep metrics: use the most recent entry that actually has the field
   // (yesterday's entry for early-morning queries before the Ring has synced).

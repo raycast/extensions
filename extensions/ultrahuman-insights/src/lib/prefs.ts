@@ -5,12 +5,8 @@ import {
   Toast,
 } from "@raycast/api";
 
-interface Prefs {
-  apiToken: string;
-}
-
 export function getApiToken(): string {
-  const { apiToken } = getPreferenceValues<Prefs>();
+  const { apiToken } = getPreferenceValues<Preferences>();
   return apiToken?.trim() ?? "";
 }
 

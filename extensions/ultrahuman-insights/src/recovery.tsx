@@ -134,10 +134,7 @@ export default function Recovery() {
     await reload();
   }, [range, reload]);
 
-  if (missingToken) {
-    return <ListStatus variant="missing-token" />;
-  }
-
+  // Must be above every early return (Rules of Hooks).
   const sorted = useMemo(
     () =>
       data
@@ -145,6 +142,10 @@ export default function Recovery() {
         : [],
     [data],
   );
+
+  if (missingToken) {
+    return <ListStatus variant="missing-token" />;
+  }
   const todayEntry = sorted[sorted.length - 1] ?? null;
 
   const shortLabels = sorted.map((r) => {
