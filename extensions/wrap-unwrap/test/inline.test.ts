@@ -47,6 +47,24 @@ test("protectInline handles multiple tokens in one string", () => {
   assert.equal(restoreInline(p, tokens), input);
 });
 
+test("restoreInline handles a token immediately followed by digits", () => {
+  // Regression: a greedy placeholder index regex would absorb the trailing
+  // digits ("042" parsed as index 42), dropping both the span and the digits.
+  const input = "`foo`42 and `bar`9";
+  const { protected: p, tokens } = protectInline(input);
+  assert.equal(tokens.length, 2);
+  assert.equal(restoreInline(p, tokens), input);
+});
+
+test("restoreInline handles ten-plus tokens with digits adjacent", () => {
+  // Two-digit indices must not be truncated by an adjacent literal digit.
+  const spans = Array.from({ length: 12 }, (_, n) => `\`s${n}\`${n}`);
+  const input = spans.join(" ");
+  const { protected: p, tokens } = protectInline(input);
+  assert.equal(tokens.length, 12);
+  assert.equal(restoreInline(p, tokens), input);
+});
+
 test("protected output contains no spaces from token bodies", () => {
   // This is the load-bearing property: a wrapper joining on whitespace
   // must never see a space that came from inside a token.

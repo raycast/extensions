@@ -115,6 +115,15 @@
           "required": false,
           "default": false,
           "label": "Keep Blank Lines"
+        },
+        {
+          "name": "flattenBullets",
+          "title": "Bullet Indentation",
+          "description": "Re-indent bullet and numbered lists to a fixed 2-space-per-level step, removing the leading spaces that pasted terminal or rich-text content adds in front of markers. Nesting depth is preserved by relative indent order.",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Strip Bullet Indentation"
         }
       ]
     }

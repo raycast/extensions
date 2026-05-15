@@ -2,7 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { unwrap } from "../src/lib/unwrap.js";
 
-const dflt = { hyphenation: true, keepBlankLines: false };
+const dflt = { hyphenation: true, keepBlankLines: false, flattenBullets: false };
 
 test("unwrap joins consecutive prose lines with a single space", () => {
   const input = "alpha\nbeta\ngamma";
@@ -111,4 +111,54 @@ test("unwrap preserves multi-space gap after list marker", () => {
   // A 3-space gap between marker and content is intentional alignment.
   const input = "-   item one\n-   item two";
   assert.equal(unwrap(input, dflt), "-   item one\n-   item two");
+});
+
+test("flattenBullets normalizes leading-space bullets to a 2-space step", () => {
+  // The Harvest-email case: top-level ordered items at col 0, sub-bullets
+  // pasted with 3 leading spaces. Without the option they round-trip
+  // verbatim; with it the sub-bullets normalize to depth 1 (2 spaces).
+  const input = "1. ITC details\n   - cost basis?\n   - pass-through?";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "1. ITC details\n  - cost basis?\n  - pass-through?",
+  );
+});
+
+test("flattenBullets is off by default (indentation preserved)", () => {
+  const input = "1. ITC details\n   - cost basis?";
+  assert.equal(unwrap(input, dflt), "1. ITC details\n   - cost basis?");
+});
+
+test("flattenBullets maps three indent levels to 0/2/4 spaces", () => {
+  const input = "- a\n   - b\n      - c";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "- a\n  - b\n    - c",
+  );
+});
+
+test("flattenBullets recomputes depth per contiguous list block", () => {
+  // Two blocks separated by a blank line; the second uses different raw
+  // indentation but its shallowest item must still land at column 0.
+  const input = "- a\n   - b\n\n     - c\n        - d";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "- a\n  - b\n\n- c\n  - d",
+  );
+});
+
+test("flattenBullets handles Unicode bullet markers", () => {
+  const input = "  • alpha\n  • beta";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "• alpha\n• beta",
+  );
+});
+
+test("flattenBullets flattens an over-indented single-level list to col 0", () => {
+  const input = "     - only\n     - level";
+  assert.equal(
+    unwrap(input, { ...dflt, flattenBullets: true }),
+    "- only\n- level",
+  );
 });

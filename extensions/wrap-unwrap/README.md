@@ -37,6 +37,7 @@ Both commands share **Preferred Source**, **Primary Action**, **Hide HUD**, and 
 | --- | --- | --- |
 | Strip Soft Hyphens | on | When joining lines, remove a trailing hyphen if it appears to be a soft line-break hyphen (e.g. `inter-` + `esting` → `interesting`). Compounds like `state-of-the-art` are preserved. |
 | Keep Blank Lines | off | Preserve blank lines between paragraphs instead of collapsing runs. |
+| Strip Bullet Indentation | off | Re-indent bullet and numbered lists to a fixed 2-space-per-level step, removing the leading spaces that pasted terminal or rich-text content adds in front of markers. Nesting depth is preserved by relative indent order, so pasting into an email client produces native bullets. Recognizes Unicode bullets (`•`, `‣`, `▪`, `▸`, `–`, `—`) too. |
 
 ## Suggested hotkeys
 
@@ -72,7 +73,7 @@ await launchCommand({
 
 The provider invokes your callback command with `context: { result: "..." }` containing the transformed text. When `callbackLaunchOptions` is present, the provider does not paste, copy, or show a HUD — it just hands the result back.
 
-`UnwrapContext` accepts `text`, `hyphenation`, `keepBlankLines`, and `callbackLaunchOptions`. `WrapContext` accepts `text`, `width`, and `callbackLaunchOptions`.
+`UnwrapContext` accepts `text`, `hyphenation`, `keepBlankLines`, `flattenBullets`, and `callbackLaunchOptions`. `WrapContext` accepts `text`, `width`, and `callbackLaunchOptions`.
 
 ## Acknowledgements
 
