@@ -14,7 +14,36 @@ export default function RenderQueue() {
 
     async function loadHistory() {
       try {
-        const renderHistory = await getRenderHistory();
+        let renderHistory = await getRenderHistory();
+        const staleRunningRenders = renderHistory.filter((render) => {
+          if (render.status !== "running") return false;
+          if (!render.pid) return true;
+
+          try {
+            process.kill(render.pid, 0);
+            return false;
+          } catch (checkError) {
+            return (checkError as NodeJS.ErrnoException).code === "ESRCH";
+          }
+        });
+
+        if (staleRunningRenders.length > 0) {
+          const now = new Date();
+          await Promise.all(
+            staleRunningRenders.map((render) =>
+              updateRenderInHistory(render.id, {
+                endTime: now,
+                duration: Math.floor((now.getTime() - render.startTime.getTime()) / 1000),
+                status: "terminated",
+                error: undefined,
+                pid: undefined,
+              }),
+            ),
+          );
+
+          renderHistory = await getRenderHistory();
+        }
+
         if (isDisposed) return;
 
         setHistory(renderHistory);
@@ -67,8 +96,8 @@ export default function RenderQueue() {
           await updateRenderInHistory(render.id, {
             endTime: new Date(),
             duration: Math.floor((new Date().getTime() - render.startTime.getTime()) / 1000),
-            status: "failed",
-            error: "Stopped by user from queue",
+            status: "terminated",
+            error: undefined,
             pid: undefined,
           });
 
@@ -77,8 +106,8 @@ export default function RenderQueue() {
 
           await showToast({
             style: Toast.Style.Success,
-            title: "Render Stopped",
-            message: "The render has been cancelled",
+            title: "Render Already Ended",
+            message: "Status updated from running",
           });
           return;
         }
@@ -125,6 +154,12 @@ export default function RenderQueue() {
         return { source: Icon.Clock, tintColor: Color.Blue };
       case "failed":
         return { source: Icon.XMarkCircle, tintColor: Color.Red };
+      case "terminated":
+        return { source: Icon.MinusCircle, tintColor: Color.SecondaryText };
+      default: {
+        const exhaustiveStatus: never = status;
+        return exhaustiveStatus;
+      }
     }
   };
 
@@ -145,8 +180,9 @@ export default function RenderQueue() {
     const completedCount = renders.filter((render) => render.status === "completed").length;
     const runningCount = renders.filter((render) => render.status === "running").length;
     const failedCount = renders.filter((render) => render.status === "failed").length;
+    const terminatedCount = renders.filter((render) => render.status === "terminated").length;
 
-    return `${renders.length} total • ${completedCount} completed • ${runningCount} running • ${failedCount} failed`;
+    return `${renders.length} total • ${completedCount} completed • ${runningCount} running • ${failedCount} failed • ${terminatedCount} ended`;
   };
 
   return (
@@ -177,7 +213,13 @@ export default function RenderQueue() {
                 tag: {
                   value: render.status,
                   color:
-                    render.status === "completed" ? Color.Green : render.status === "running" ? Color.Blue : Color.Red,
+                    render.status === "completed"
+                      ? Color.Green
+                      : render.status === "running"
+                        ? Color.Blue
+                        : render.status === "failed"
+                          ? Color.Red
+                          : Color.SecondaryText,
                 },
               },
             ];

@@ -8,7 +8,7 @@ export interface RenderHistory {
   endTime?: Date;
   totalFrames?: number;
   duration?: number;
-  status: "running" | "completed" | "failed";
+  status: "running" | "completed" | "failed" | "terminated";
   error?: string;
   pid?: number;
 }
