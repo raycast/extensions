@@ -97,12 +97,6 @@ export default function MyFiltersCommand() {
                 target={<AddFilterCommand shouldPop onSaved={loadFilters} />}
               />
               <Action.Push
-                title="Import All Skills JSON"
-                icon={Icon.Download}
-                shortcut={{ modifiers: ["opt"], key: "i" }}
-                target={<ImportAllSkillsForm onImported={loadFilters} />}
-              />
-              <Action.Push
                 title="Export Skill JSON"
                 icon={Icon.Upload}
                 target={
@@ -120,6 +114,12 @@ export default function MyFiltersCommand() {
                 icon={Icon.Upload}
                 shortcut={{ modifiers: ["opt"], key: "e" }}
                 target={<ExportAllSkillsForm filters={filters} />}
+              />
+              <Action.Push
+                title="Import All Skills JSON"
+                icon={Icon.Download}
+                shortcut={{ modifiers: ["opt"], key: "i" }}
+                target={<ImportAllSkillsForm onImported={loadFilters} />}
               />
             </ActionPanel>
           }
