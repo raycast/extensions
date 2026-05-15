@@ -1,5 +1,10 @@
 # GitHub Changelog
 
+## [Fix null pull request nodes crash] - {PR_MERGE_DATE}
+
+- Fixed `TypeError: Cannot read properties of null (reading 'id')` in **My Pull Requests** when the GitHub search API returns edges with a null `node` (e.g. PRs from repositories the user can no longer access).
+- Applied the same defensive null-filtering to **Search Pull Requests** and the per-repository pull request list to prevent the same crash from surfacing there.
+
 ## [My Stats Menu Bar Enhancements] - 2026-05-12
 
 - Added a `What's New` section to the **My GitHub Stats Menu Bar** that surfaces repositories which received new stars since the last visit.

@@ -26,7 +26,9 @@ export function RepositoryPullRequestList(props: { repo: string }): JSX.Element 
         query: `is:pr ${repoFilter} ${sortTxt} archived:false ${query}`,
         numberOfItems: 20,
       });
-      return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
+      return result.search.edges
+        ?.map((edge) => edge?.node as PullRequestFieldsFragment | null | undefined)
+        .filter((node): node is PullRequestFieldsFragment => node != null);
     },
     [query, sortQuery],
   );
