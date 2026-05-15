@@ -1,4 +1,5 @@
 import { Icon, Color } from "@raycast/api";
+import type { BundleValue, Deal } from "./types";
 
 export const STORE_MAP: Record<string, string[]> = {
   steam: ["Steam"],
@@ -91,36 +92,6 @@ export function formatPrice(
   return `${symbol}${noDecimals.includes(curr) ? Math.round(amount) : amount.toFixed(2)}`;
 }
 
-export function buildBundleMap(oJson: any): Record<string, number> {
-  const bundleCounts: Record<string, number> = {};
-  const now = Date.now();
-
-  const overviewArray = Array.isArray(oJson)
-    ? oJson
-    : Object.values(oJson || {}).flatMap((v: any) =>
-        Array.isArray(v) ? v : [v],
-      );
-
-  overviewArray.forEach((item: any) => {
-    const expiryTime = item.expiry ? new Date(item.expiry).getTime() : NaN;
-    const isNotExpired =
-      !item.expiry || Number.isNaN(expiryTime) || expiryTime > now;
-
-    if (Array.isArray(item.tiers) && isNotExpired) {
-      item.tiers.forEach((t: any) => {
-        t.games?.forEach((gm: any) => {
-          if (gm.id != null) {
-            const id = String(gm.id);
-            bundleCounts[id] = (bundleCounts[id] || 0) + 1;
-          }
-        });
-      });
-    }
-  });
-
-  return bundleCounts;
-}
-
 export function isStoreAllowed(
   shopName: string,
   selectedStores: string[],
@@ -133,21 +104,12 @@ export function isStoreAllowed(
   return selectedStores.includes(STORE_LOOKUP[shopName] || "other");
 }
 
-export function getTimeContext(timestamp: number): string {
-  const days = Math.floor((Date.now() - timestamp) / (1000 * 60 * 60 * 24));
-  if (days === 0) return "today";
-  if (days < 30) return `${days} days ago`;
-  const months = Math.floor(days / 30);
-  if (months < 12) return `${months} months ago`;
-  return `${(days / 365).toFixed(1)} years ago`;
-}
-
 export function computeGameInsight(params: {
   currentPrice: number | null;
   statsPrices: number[];
   allTimeLow: number | null;
-  currentBest: any;
-  bundleValue: any;
+  currentBest: Deal | null | undefined;
+  bundleValue: BundleValue | null;
   dataMonths: number;
   range: "1y" | "6m" | "3m";
   isLoading: boolean;
@@ -164,8 +126,8 @@ export function computeGameInsight(params: {
 
   // Defaults
   let signalText = "";
-  let signalIcon: any = null;
-  let signalColor: any = null;
+  let signalIcon: Icon | string = Icon.Circle;
+  let signalColor: Color = Color.SecondaryText;
   let primaryInsight = "";
   let secondaryInsight = "";
   let medianSale: number | null = null;

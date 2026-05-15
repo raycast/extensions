@@ -9,7 +9,7 @@ import {
   LocalStorage,
   getPreferenceValues,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { showFailureToast, useFetch } from "@raycast/utils";
 
 interface Giveaway {
   id: number;
@@ -77,7 +77,7 @@ function parsePlatformsAndStores(platformsString: string) {
     }
   });
 
-  const accessories: any[] = [];
+  const accessories: List.Item.Accessory[] = [];
 
   categories.stores.forEach((store) => {
     let tagColor = Color.SecondaryText;
@@ -132,8 +132,8 @@ function parsePlatformsAndStores(platformsString: string) {
 }
 
 export default function FreeGames() {
-  const preferences = getPreferenceValues();
-  const { isLoading, data } = useFetch<Giveaway[]>(
+  const preferences = getPreferenceValues<Preferences.FreeGames>();
+  const { isLoading, data, error } = useFetch<Giveaway[]>(
     "https://www.gamerpower.com/api/giveaways",
   );
 
@@ -145,6 +145,16 @@ export default function FreeGames() {
       if (storedIds) setIgnoredIds(JSON.parse(storedIds));
     });
   }, []);
+
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+
+    showFailureToast(error, {
+      title: "Failed to load giveaways",
+    });
+  }, [error]);
 
   const toggleIgnore = async (id: number) => {
     let newIds;

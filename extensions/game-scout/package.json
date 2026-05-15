@@ -1,4 +1,5 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "game-scout",
   "title": "Game Scout",
   "description": "The ultimate gaming companion to track prices, deals, and free giveaways.",
@@ -236,7 +237,7 @@
       "name": "showDLCGameSearch",
       "type": "checkbox",
       "required": false,
-      "title": "Content Filters",
+      "title": "",
       "label": "[Game Search] Show DLCs",
       "description": "Include downloadable content in game search results.",
       "default": true
@@ -321,14 +322,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.12",
-    "@raycast/utils": "^2.2.3"
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "^25.6.0",
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.8.0",
     "@types/react": "^19.2.14",
-    "eslint": "^8.57.0",
+    "eslint": "^10.3.0",
     "prettier": "^3.8.3",
     "typescript": "^6.0.3"
   },
@@ -356,10 +357,6 @@
     {
       "path": "metadata/6.png",
       "title": "Top Deals"
-    },
-    {
-      "path": "metadata/7.png",
-      "title": "Manage Stores"
     }
   ],
   "scripts": {
@@ -368,5 +365,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

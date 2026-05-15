@@ -9,6 +9,19 @@ import {
   getPreferenceValues,
   LocalStorage,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
+
+interface CheapSharkDeal {
+  dealID: string;
+  title: string;
+  storeID: string;
+  thumb: string;
+  normalPrice: string;
+  salePrice: string;
+  savings: string;
+  dealRating: string;
+  metacriticLink?: string;
+}
 
 const STORES: { [key: string]: { name: string; color: Color } } = {
   "1": { name: "Steam", color: Color.Blue },
@@ -71,11 +84,11 @@ const CHEAPSHARK_MAP: Record<string, string> = {
 
 const cache = new Cache();
 export default function TopDeals() {
-  const [deals, setDeals] = useState<any[]>([]);
+  const [deals, setDeals] = useState<CheapSharkDeal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedStores, setSelectedStores] = useState<string[] | null>(null);
 
-  const preferences = getPreferenceValues();
+  const preferences = getPreferenceValues<Preferences.TopDeals>();
   const minDiscount = preferences.minDiscount || "0";
   const maxPrice = preferences.maxPrice || "9999";
 
@@ -106,8 +119,8 @@ export default function TopDeals() {
         const response = await fetch(
           `https://www.cheapshark.com/api/1.0/deals?upperPrice=${maxPrice}&onSale=1&sortBy=Deal%20Rating`,
         );
-        const data = await response.json();
-        data.sort((a: any, b: any) => {
+        const data = (await response.json()) as CheapSharkDeal[];
+        data.sort((a, b) => {
           const ratingDiff =
             parseFloat(b.dealRating) - parseFloat(a.dealRating);
           if (ratingDiff !== 0) return ratingDiff;
@@ -116,7 +129,7 @@ export default function TopDeals() {
           return parseFloat(b.salePrice) - parseFloat(a.salePrice);
         });
         const filteredByDiscount = data.filter(
-          (deal: any) => parseFloat(deal.savings) >= parseFloat(minDiscount),
+          (deal) => parseFloat(deal.savings) >= parseFloat(minDiscount),
         );
 
         cache.set(
@@ -125,7 +138,9 @@ export default function TopDeals() {
         );
         setDeals(filteredByDiscount);
       } catch (error) {
-        console.error("Error fetching deals:", error);
+        await showFailureToast(error, {
+          title: "Failed to load top deals",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -134,7 +149,7 @@ export default function TopDeals() {
     fetchDeals();
   }, [minDiscount, maxPrice]);
 
-  const filteredDeals = deals.filter((deal: any) => {
+  const filteredDeals = deals.filter((deal) => {
     if (selectedStores === null) return false;
     if (selectedStores.includes("all")) return true;
     const mappedId = CHEAPSHARK_MAP[deal.storeID] || "other";

@@ -1,6 +1,7 @@
 // TODO: Add 24h timestamp to referencePrices for time-based price change tags
 
 import { useEffect, useState, useMemo } from "react";
+import { showFailureToast } from "@raycast/utils";
 import {
   List,
   ActionPanel,
@@ -15,12 +16,7 @@ import {
   Image,
 } from "@raycast/api";
 
-const preferences = getPreferenceValues<{
-  itadApiKey: string;
-  country: string;
-  refreshFrequency: string;
-  showPriceHistoryChart: boolean;
-}>();
+const preferences = getPreferenceValues<Preferences.SavedGames>();
 
 const API_KEY = (preferences.itadApiKey || "").trim();
 const COUNTRY = preferences.country;
@@ -34,17 +30,37 @@ const DETAIL_CACHE_TTL = 6 * 60 * 60 * 1000;
 const RECENT_BUNDLE_WINDOW = 2 * 365 * 24 * 60 * 60 * 1000;
 
 import { formatPrice, isStoreAllowed, computeGameInsight } from "./utils";
+import type {
+  BundleInfo,
+  Deal,
+  DetailData,
+  HistoryPoint,
+  OverviewResponse,
+  SavedGame,
+  SteamAppDetailsResponse,
+  SteamSearchItem,
+  SteamSearchResponse,
+} from "./types";
+import { flattenOverviewResponse } from "./types";
+
+const getBundleCount = (
+  bundles: BundleInfo[] | { count?: number } | number | undefined,
+) => {
+  if (typeof bundles === "number") {
+    return bundles;
+  }
+  if (Array.isArray(bundles)) {
+    return bundles.length;
+  }
+  return bundles?.count || 0;
+};
 
 export default function SavedGames() {
   const isApiKeyValid = API_KEY.length > 0;
 
-  const [savedGames, setSavedGames] = useState<
-    { id: string; title: string; slug: string; type?: string }[]
-  >([]);
-  const [rawPrices, setRawPrices] = useState<Record<string, any[]>>({});
+  const [savedGames, setSavedGames] = useState<SavedGame[]>([]);
+  const [rawPrices, setRawPrices] = useState<Record<string, Deal[]>>({});
   const [bundleCounts, setBundleCounts] = useState<Record<string, number>>({});
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [refreshKey, setRefreshKey] = useState(0);
   const [referencePrices, setReferencePrices] = useState<
     Record<string, number>
   >({});
@@ -62,9 +78,9 @@ export default function SavedGames() {
     LocalStorage.getItem<string>("last_seen_prices").then(
       (s) => s && setReferencePrices(JSON.parse(s)),
     );
-  }, [refreshKey]);
+  }, []);
 
-  const fetchPrices = async () => {
+  const fetchPrices = async (signal?: AbortSignal) => {
     if (savedGames.length === 0) {
       setIsLoading(false);
       return;
@@ -90,6 +106,7 @@ export default function SavedGames() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(gameIds),
+            signal,
           },
         ),
         fetch(
@@ -98,47 +115,48 @@ export default function SavedGames() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(gameIds),
+            signal,
           },
         ),
       ]);
 
       const [pJson, oJson] = await Promise.all([pRes.json(), oRes.json()]);
 
-      const priceMap: Record<string, any[]> = {};
+      const priceMap: Record<string, Deal[]> = {};
       const lastSeenPrices: Record<string, number> = {};
 
-      (Array.isArray(pJson) ? pJson : Object.values(pJson)).forEach(
-        (it: any) => {
-          if (it.id == null) return;
-          const id = String(it.id);
+      const priceEntries: Array<{ id?: string | number; deals?: Deal[] }> =
+        Array.isArray(pJson)
+          ? (pJson as Array<{ id?: string | number; deals?: Deal[] }>)
+          : Object.values(
+              pJson as Record<string, { id?: string | number; deals?: Deal[] }>,
+            );
 
-          priceMap[id] = it.deals || [];
+      priceEntries.forEach((it) => {
+        if (it.id == null) return;
+        const id = String(it.id);
 
-          const validDeals = it.deals?.filter((d: any) =>
-            isStoreAllowed(d.shop?.name || "", selectedStores),
-          );
+        priceMap[id] = it.deals || [];
 
-          const bestDeal = validDeals?.reduce((min: any, d: any) => {
-            if (!min) return d;
-            return d.price?.amount < min.price?.amount ? d : min;
-          }, null);
+        const validDeals = it.deals?.filter((d) =>
+          isStoreAllowed(d.shop?.name || "", selectedStores),
+        );
 
-          if (bestDeal?.price?.amount != null) {
-            lastSeenPrices[id] = bestDeal.price.amount;
-          }
-        },
-      );
+        const bestDeal = validDeals?.reduce<Deal | null>((min, d) => {
+          if (!min) return d;
+          return d.price.amount < min.price.amount ? d : min;
+        }, null);
 
-      const oFlat = Array.isArray(oJson)
-        ? oJson
-        : Object.values(oJson as Record<string, any[]>).flat();
+        if (bestDeal?.price.amount != null) {
+          lastSeenPrices[id] = bestDeal.price.amount;
+        }
+      });
+
+      const oFlat = flattenOverviewResponse(oJson as OverviewResponse);
 
       const newBundleCounts: Record<string, number> = {};
-      oFlat.forEach((item: any) => {
-        const count =
-          typeof item.bundles === "number"
-            ? item.bundles
-            : item.bundles?.count || 0;
+      oFlat.forEach((item) => {
+        const count = getBundleCount(item.bundles);
         if (item?.id && count > 0) {
           newBundleCounts[String(item.id)] = count;
         }
@@ -163,20 +181,29 @@ export default function SavedGames() {
       const merged = { ...parsed, ...lastSeenPrices };
 
       await LocalStorage.setItem("last_seen_prices", JSON.stringify(merged));
-    } catch (e: any) {
-      if (e.name !== "AbortError" && !e.message?.includes("aborted"))
-        console.error(e);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
+      await showFailureToast(error, {
+        title: "Failed to refresh saved game prices",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPrices();
-  }, [savedGames]);
+    const abort = new AbortController();
+    fetchPrices(abort.signal);
+
+    return () => {
+      abort.abort();
+    };
+  }, [savedGames, selectedStores]);
 
   const prices = useMemo(() => {
-    const map: Record<string, any> = {};
+    const map: Record<string, Deal | null> = {};
     Object.keys(rawPrices).forEach((rawId) => {
       const id = String(rawId);
       if (!rawPrices[id] || !Array.isArray(rawPrices[id])) {
@@ -184,13 +211,13 @@ export default function SavedGames() {
         return;
       }
 
-      const validDeals = rawPrices[id].filter((d: any) =>
+      const validDeals = rawPrices[id].filter((d) =>
         isStoreAllowed(d.shop?.name || "", selectedStores),
       );
 
-      map[id] = validDeals.reduce((min: any, d: any) => {
+      map[id] = validDeals.reduce<Deal | null>((min, d) => {
         if (!min) return d;
-        return d.price?.amount < min.price?.amount ? d : min;
+        return d.price.amount < min.price.amount ? d : min;
       }, null);
     });
     return map;
@@ -210,7 +237,7 @@ export default function SavedGames() {
       list.reverse(); // most recently saved first
     }
     if (filterMode === "deals") {
-      list = list.filter((g) => prices[g.id] && prices[g.id].cut > 0);
+      list = list.filter((g) => prices[g.id] && (prices[g.id]?.cut || 0) > 0);
     } else if (filterMode === "discount") {
       list.sort((a, b) => (prices[b.id]?.cut || 0) - (prices[a.id]?.cut || 0));
     } else if (filterMode === "opportunity") {
@@ -284,8 +311,12 @@ export default function SavedGames() {
                 .filter((g) => majorDrops.some((d) => d.id === g.id))
                 .map((game) => {
                   const deal = prices[game.id];
+                  if (!deal) {
+                    return null;
+                  }
+                  const currentAmount = deal.price?.amount ?? 0;
                   const diff =
-                    ((deal?.price?.amount - referencePrices[game.id]) /
+                    ((currentAmount - referencePrices[game.id]) /
                       referencePrices[game.id]) *
                     100;
                   return (
@@ -295,7 +326,7 @@ export default function SavedGames() {
                       icon={Icon.Star}
                       accessories={[
                         {
-                          text: `${formatPrice(deal.regular?.amount, deal.price?.currency)} → ${formatPrice(deal?.price?.amount, deal?.price?.currency)}`,
+                          text: `${formatPrice(deal.regular?.amount, deal.price?.currency)} → ${formatPrice(currentAmount, deal.price?.currency)}`,
                         },
                         {
                           tag: {
@@ -414,12 +445,12 @@ export default function SavedGames() {
                     ? undefined
                     : game.type?.toUpperCase() || undefined;
 
-                let listIcon: any = {
+                let listIcon: List.Item.Props["icon"] = {
                   source: Icon.Star,
                   tintColor: Color.Yellow,
                 };
-                if (deal?.cut > 0) {
-                  if (deal.cut >= 70) {
+                if ((deal?.cut || 0) > 0) {
+                  if ((deal?.cut || 0) >= 70) {
                     listIcon = { source: Icon.Star, tintColor: Color.Red };
                   } else {
                     listIcon = { source: Icon.Star, tintColor: Color.Orange };
@@ -504,14 +535,22 @@ export default function SavedGames() {
   );
 }
 
+interface GameDetailProps {
+  gameId: string;
+  gameTitle: string;
+  gameSlug: string;
+  gameType: string;
+  removeGame?: () => void;
+}
+
 function GameDetail({
   gameId,
   gameTitle,
   gameSlug,
   gameType,
   removeGame,
-}: any) {
-  const [data, setData] = useState<any>({
+}: GameDetailProps) {
+  const [data, setData] = useState<DetailData>({
     steamData: null,
     realBundles: [],
     deals: [],
@@ -548,7 +587,7 @@ function GameDetail({
   useEffect(() => {
     let isMounted = true;
     const abort = new AbortController();
-    const detailCacheKey = `search_detail_${gameId}_${COUNTRY}_v1`;
+    const detailCacheKey = `search_detail_${gameId}_${COUNTRY}_${SHOW_CHART ? "chart" : "nochart"}_v1`;
     const fetchDetailData = async () => {
       setIsLoading(true);
       const cached = detailCache.get(detailCacheKey);
@@ -564,20 +603,21 @@ function GameDetail({
       }
       try {
         const searchRes = await fetch(
-          `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(gameTitle)}&l=english&cc=US`,
+          `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(gameTitle)}&l=english&cc=${COUNTRY}`,
           { signal: abort.signal },
         );
-        const searchJson = await searchRes.json();
+        const searchJson = (await searchRes.json()) as SteamSearchResponse;
         let targetItem = searchJson?.items?.find(
-          (item: any) => item.name.toLowerCase() === gameTitle.toLowerCase(),
+          (item: SteamSearchItem) =>
+            item.name.toLowerCase() === gameTitle.toLowerCase(),
         );
         if (!targetItem) {
-          targetItem = searchJson?.items?.find((item: any) => {
+          targetItem = searchJson?.items?.find((item: SteamSearchItem) => {
             const sName = item.name.toLowerCase();
             const iName = gameTitle.toLowerCase();
             if (sName.includes(iName) || iName.includes(sName)) {
-              const sNums = sName.match(/\b\d+\b/g) || [];
-              const iNums = iName.match(/\b\d+\b/g) || [];
+              const sNums: string[] = sName.match(/\b\d+\b/g) || [];
+              const iNums: string[] = iName.match(/\b\d+\b/g) || [];
               return sNums.every((n: string) => iNums.includes(n));
             }
             return false;
@@ -590,7 +630,8 @@ function GameDetail({
             `https://store.steampowered.com/api/appdetails?appids=${targetItem.id}&l=english`,
             { signal: abort.signal },
           );
-          steamData = (await detailRes.json())?.[targetItem.id]?.data || null;
+          const steamJson = (await detailRes.json()) as SteamAppDetailsResponse;
+          steamData = steamJson?.[String(targetItem.id)]?.data || null;
         }
         const fetchPromises = [
           fetch(
@@ -665,9 +706,13 @@ function GameDetail({
           );
           setData({ ...combined, lastChecked: Date.now() });
         }
-      } catch (e: any) {
-        if (e.name !== "AbortError" && !e.message?.includes("aborted"))
-          console.error(e);
+      } catch (error) {
+        if (error instanceof Error && error.name === "AbortError") {
+          return;
+        }
+        await showFailureToast(error, {
+          title: `Failed to load details for ${gameTitle}`,
+        });
       } finally {
         if (isMounted) setIsLoading(false);
       }
@@ -694,7 +739,7 @@ function GameDetail({
 
   // 📦 BUNDLE DOMAIN: Single source of truth
   const bundle = useMemo(() => {
-    const isBundleActive = (b: any) => {
+    const isBundleActive = (b: BundleInfo) => {
       if (!b?.expiry) return true;
       const t = new Date(b.expiry).getTime();
       return Number.isFinite(t) && t > now;
@@ -703,7 +748,7 @@ function GameDetail({
     const activeBundles = realBundles.filter(isBundleActive);
     const activeCount = activeBundles.length;
 
-    const recentBundles = realBundles.filter((b: any) => {
+    const recentBundles = realBundles.filter((b: BundleInfo) => {
       const tsRaw = b.created ?? b.timestamp;
       const ts = tsRaw ? new Date(tsRaw).getTime() : null;
       return ts && ts < now && now - ts < RECENT_BUNDLE_WINDOW;
@@ -712,20 +757,18 @@ function GameDetail({
     const totalBundles =
       realBundles?.length > 0
         ? realBundles.length
-        : typeof overview?.bundles === "number"
-          ? overview.bundles
-          : overview?.bundles?.count || overview?.bundles?.length || 0;
+        : getBundleCount(overview?.bundles);
 
     const allBundlesForTs = Array.isArray(overview?.bundles)
       ? overview.bundles
       : realBundles;
 
     const timestamps = allBundlesForTs
-      .map((b: any) => {
+      .map((b: BundleInfo) => {
         const ts = b.created ?? b.timestamp ?? b.publish ?? b.expiry;
         return ts ? new Date(ts).getTime() : null;
       })
-      .filter((t: any) => t !== null && !isNaN(t));
+      .filter((t): t is number => t !== null && !isNaN(t));
 
     const lastBundleTs =
       timestamps.length > 0 ? Math.max(...timestamps) : undefined;
@@ -765,9 +808,9 @@ function GameDetail({
       }
     }
 
-    const getLowestPrice = (bundle: any) => {
+    const getLowestPrice = (bundle: BundleInfo) => {
       const prices = bundle.tiers
-        ?.map((t: any) => t.price?.amount)
+        ?.map((t) => t.price?.amount)
         .filter((p: number | undefined) => typeof p === "number");
       return prices?.length ? Math.min(...prices) : Infinity;
     };
@@ -775,7 +818,7 @@ function GameDetail({
     const featuredBundle =
       activeBundles.length > 0
         ? activeBundles.reduce(
-            (best: any, current: any) =>
+            (best: BundleInfo, current: BundleInfo) =>
               getLowestPrice(current) < getLowestPrice(best) ? current : best,
             activeBundles[0],
           )
@@ -785,14 +828,14 @@ function GameDetail({
       ? getLowestPrice(featuredBundle)
       : null;
 
-    const getGameTierPrice = (b: any) => {
-      const tiersWithGame = b.tiers?.filter((t: any) =>
-        t.games?.some((gm: any) => gm.id === gameId),
+    const getGameTierPrice = (b: BundleInfo) => {
+      const tiersWithGame = b.tiers?.filter((t) =>
+        t.games?.some((gm) => String(gm.id) === gameId),
       );
       if (tiersWithGame && tiersWithGame.length > 0) {
         const prices = tiersWithGame
-          .map((t: any) => t.price?.amount)
-          .filter((p: any) => typeof p === "number");
+          .map((t) => t.price?.amount)
+          .filter((p): p is number => typeof p === "number");
         return prices.length > 0 ? Math.min(...prices) : Infinity;
       }
       return Infinity;
@@ -825,13 +868,13 @@ function GameDetail({
 
   const allowedHistory = useMemo(() => {
     return (historyChart || []).filter(
-      (pt: any) =>
+      (pt: HistoryPoint) =>
         pt.deal?.price?.amount != null &&
         isStoreAllowed(pt.shop?.name || "", selectedStores),
     );
   }, [historyChart, selectedStores]);
 
-  const filteredDeals = deals.filter((d: any) =>
+  const filteredDeals = deals.filter((d: Deal) =>
     isStoreAllowed(d.shop?.name || "", selectedStores),
   );
   const currentBest = filteredDeals?.[0];
@@ -842,9 +885,11 @@ function GameDetail({
 
     for (const b of bundle.activeBundles) {
       let gameTierIndex = -1;
-      b.tiers?.forEach((t: any, i: number) => {
+      b.tiers?.forEach((t, i: number) => {
         if (
-          t.games?.some((gm: any) => gm.id === gameId || gm.name === gameTitle)
+          t.games?.some(
+            (gm) => String(gm.id) === gameId || gm.name === gameTitle,
+          )
         ) {
           gameTierIndex = i;
         }
@@ -857,7 +902,7 @@ function GameDetail({
 
       if (tierPrice < currentPrice) {
         return {
-          type: "better",
+          type: "better" as const,
           message: "Cheaper in active bundle",
           tier: b.tiers[gameTierIndex],
           bundle: b,
@@ -872,7 +917,7 @@ function GameDetail({
       const unitPrice = totalGames > 0 ? tierPrice / totalGames : tierPrice;
       if (unitPrice < currentPrice) {
         return {
-          type: "value",
+          type: "value" as const,
           message: "Better value in bundle",
           tier: b.tiers[gameTierIndex],
           bundle: b,
@@ -882,7 +927,7 @@ function GameDetail({
     return null;
   }, [bundle.activeBundles, currentPrice, gameId, gameTitle]);
 
-  const allTimeLow = historyLow?.price?.amount ?? historyLow?.amount;
+  const allTimeLow = historyLow?.price?.amount ?? historyLow?.amount ?? null;
   const hCurrency =
     historyLow?.price?.currency ?? historyLow?.currency ?? "USD";
 
@@ -902,8 +947,8 @@ function GameDetail({
   } = computeGameInsight({
     currentPrice,
     statsPrices: allowedHistory
-      .filter((pt: any) => new Date(pt.timestamp).getTime() >= twelveMonthTime)
-      .map((pt: any) => pt.deal.price.amount),
+      .filter((pt) => new Date(pt.timestamp).getTime() >= twelveMonthTime)
+      .map((pt) => pt.deal?.price?.amount ?? 0),
     allTimeLow,
     currentBest,
     bundleValue,
@@ -912,18 +957,22 @@ function GameDetail({
     isLoading,
   });
 
-  const plotData: any[] = [];
+  const plotData: Array<{ x: string; y: number }> = [];
   const cutoffTime =
     now -
     (range === "3m" ? 90 : range === "6m" ? 180 : 365) * 24 * 60 * 60 * 1000;
   if (allowedHistory.length > 0) {
     allowedHistory
-      .filter((pt: any) => new Date(pt.timestamp).getTime() >= cutoffTime)
+      .filter((pt) => new Date(pt.timestamp).getTime() >= cutoffTime)
       .reverse()
-      .forEach((pt: any) => {
+      .forEach((pt) => {
+        const amount = pt.deal?.price?.amount;
+        if (amount == null) {
+          return;
+        }
         plotData.push({
           x: new Date(pt.timestamp).toISOString().split("T")[0],
-          y: pt.deal.price.amount,
+          y: amount,
         });
       });
   }
@@ -931,7 +980,7 @@ function GameDetail({
   let chartUrl = "";
   if (SHOW_CHART && plotData.length > 0) {
     const minY = Math.min(...plotData.map((p) => p.y));
-    const datasets: any[] = [
+    const datasets: Array<Record<string, unknown>> = [
       {
         data: plotData,
         borderColor: "#2ecc71",
@@ -961,7 +1010,7 @@ function GameDetail({
       });
     }
 
-    const config: any = {
+    const config: Record<string, unknown> = {
       type: "line",
       data: { datasets },
       options: {
@@ -1070,7 +1119,7 @@ ${steamData?.header_image ? `<img src="${steamData.header_image}" width="280" />
 ${
   steamData?.genres
     ? `*${steamData.genres
-        .map((g: any) => g.description)
+        .map((g) => g.description)
         .slice(0, 2)
         .join(
           ", ",
@@ -1085,7 +1134,7 @@ ${heroSection}
 
 | Store | Price | RRP | Discount |
 | :--- | :--- | :--- | :--- |
-${filteredDeals?.length ? filteredDeals.map((p: any) => `| ${p.url ? `[${p.shop?.name}](${p.url})` : p.shop?.name} | **${formatPrice(p.price?.amount, p.price?.currency)}** | ${formatPrice(p.regular?.amount, p.price?.currency)} | ${p.cut > 0 ? "-" + p.cut + "%" : "-"} |`).join("\n") : "| No data found | - | - | - |"}
+${filteredDeals?.length ? filteredDeals.map((p) => `| ${p.url ? `[${p.shop?.name}](${p.url})` : p.shop?.name} | **${formatPrice(p.price?.amount, p.price?.currency)}** | ${formatPrice(p.regular?.amount, p.price?.currency)} | ${p.cut && p.cut > 0 ? "-" + p.cut + "%" : "-"} |`).join("\n") : "| No data found | - | - | - |"}
 
 ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === "6m" ? "6 Months" : "3 Months"}**\n\n![Price History](${chartUrl})\n` : ""}
 `;
@@ -1315,7 +1364,9 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
                 macOS: { modifiers: ["cmd"], key: "r" },
               }}
               onAction={() => {
-                detailCache.remove(`search_detail_${gameId}_${COUNTRY}_v1`);
+                detailCache.remove(
+                  `search_detail_${gameId}_${COUNTRY}_${SHOW_CHART ? "chart" : "nochart"}_v1`,
+                );
                 setIsLoading(true);
                 setRefreshKey((k) => k + 1);
               }}
@@ -1355,17 +1406,23 @@ ${chartUrl ? `\n---\n\n📈 **Trend: ${range === "1y" ? "12 Months" : range === 
   );
 }
 
-function BundleContentViewer({ bundles, gameTitle }: any) {
+function BundleContentViewer({
+  bundles,
+  gameTitle,
+}: {
+  bundles: BundleInfo[];
+  gameTitle: string;
+}) {
   const firstBundleUrl = bundles?.[0]?.url || bundles?.[0]?.details;
 
   let markdown = `# 📦 Bundle Contents for ${gameTitle}\n\n`;
-  bundles.forEach((b: any, i: number) => {
+  bundles.forEach((b, i: number) => {
     const active = b.expiry ? new Date(b.expiry) > new Date() : true;
     markdown += `## ${active ? "✅" : "❌"} ${b.title || `Bundle ${i + 1}`}\n**Page:** ${b.page?.name || "Unknown"}${b.expiry ? ` | **Expires:** ${new Date(b.expiry).toLocaleDateString("en-GB")}` : ""}\n${b.note ? `\n> ${b.note}` : ""}\n\n`;
-    b.tiers?.forEach((t: any, ti: number) => {
+    b.tiers?.forEach((t, ti: number) => {
       markdown += `### ${t.name || `Tier ${ti + 1}`} - **${t.price ? formatPrice(t.price.amount, t.price.currency) : "N/A"}**\n`;
       t.games?.forEach(
-        (g: any) => (markdown += `- ${g.title || g.name || g}\n`),
+        (g) => (markdown += `- ${g.title || g.name || String(g.id || "")}\n`),
       );
       markdown += `\n`;
     });
