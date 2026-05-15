@@ -1,0 +1,52 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "google-tasks-manager",
+  "title": "Google Tasks Manager",
+  "description": "A fast, lightweight way to manage your Google Tasks from Raycast.",
+  "icon": "google-tasks.png",
+  "author": "adrien",
+  "categories": ["Productivity"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "view-tasks",
+      "title": "View Tasks",
+      "description": "View and manage your Google Tasks",
+      "mode": "view"
+    },
+    {
+      "name": "create-task",
+      "title": "Create Task",
+      "description": "Quickly create a new Google Task",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "clientId",
+      "type": "password",
+      "required": true,
+      "title": "OAuth Client ID",
+      "description": "Your Google OAuth client ID. Create one at https://console.developers.google.com/apis/credentials (iOS app type, Bundle ID: com.raycast)",
+      "placeholder": "123456789-abc.apps.googleusercontent.com"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.4",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.x",
+    "eslint": "^9.38.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,56 @@
+---
+description: Core project conventions for this Raycast extension
+alwaysApply: true
+---
+
+# Google Tasks — Raycast Extension
+
+This is a **Raycast extension** built with `@raycast/api` and `@raycast/utils`. It uses React for UI and connects to the Google Tasks API v1 via OAuth.
+
+## Key Constraints
+
+- All UI must use Raycast components (`List`, `Form`, `ActionPanel`, `Action`, etc.) — no web or DOM APIs.
+- Authentication is handled by `withAccessToken(google)` wrapping command exports. Never manage tokens manually.
+- Commands are declared in `package.json` under `commands[]` and resolved by convention from `src/<name>.tsx`.
+
+## After Every Change
+
+1. Run `npm run lint` and fix any errors before finishing.
+2. Run `npm run build` to confirm the extension compiles.
+3. Update `CHANGELOG.md` with a summary of what changed.
+
+## Features to Preserve
+
+These are the core features — do not remove or break them:
+
+- **View Tasks**: browse task lists → drill into a list → filter by Open/Completed/All
+- **Create Task**: standalone form with title, notes, due date, and list picker
+- **Complete / Reopen**: toggle task status
+- **Edit Task**: update title, notes, and due date
+- **Delete Task**: remove a task
+- **Visual cues**: green checkmark (completed), red circle (overdue), due date accessory text
+
+## Raycast Store Rules
+
+Follow these conventions to stay store-compliant:
+
+- **Naming**: Extension and command titles use Title Case (Apple Style Guide). E.g. "View Tasks", "Create Task".
+- **Action Panel**: Action titles use Title Case with icons. Use ellipses `…` for actions with submenus.
+- **Navigation**: Use `useNavigation().push()` for sub-screens — never swap content in place.
+- **Empty states**: Always provide a `List.EmptyView` or `Grid.EmptyView` — never render an empty list.
+- **Search bar**: Always set `searchBarPlaceholder` — never leave it blank.
+- **No external analytics**.
+- **No Keychain access**.
+- **US English only**.
+- **CHANGELOG format**: Use `## [Title] - {PR_MERGE_DATE}` headers with bullet points underneath.
+- **Screenshots**: 2000×1250px PNG, stored in a top-level `metadata/` folder. Use Raycast Window Capture.
+
+## Code Structure
+
+| File | Responsibility |
+|------|---------------|
+| `src/view-tasks.tsx` | "View Tasks" command and inline forms |
+| `src/create-task.tsx` | "Create Task" command |
+| `src/api.ts` | Google Tasks REST client |
+| `src/oauth.ts` | OAuth configuration |
+| `src/types.ts` | Shared TypeScript types |
