@@ -82,7 +82,9 @@ export default function ManageStores() {
 
   const selectNone = () => {
     setSelectedIds([]);
-    // Don't save to the LocalStorage
+    // DESIGN CHOICE: We intentionally do not save an empty array to LocalStorage here.
+    // This simply clears the UI so the user can start fresh and individually toggle stores instead of toggling more than 20 stores off one by one.
+    // Saving an empty state would break searches elsewhere. If they navigate away, their previous valid config is kept.
   };
 
   return (

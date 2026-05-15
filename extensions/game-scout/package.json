@@ -315,9 +315,9 @@
       "name": "showPriceHistoryChart",
       "type": "checkbox",
       "required": false,
-      "title": "API & Performance",
-      "label": "[Game Details] Show Price History Chart",
-      "description": "Warning: Uses 1 extra API call per game to generate a 1-year price chart. Turn off if you check hundreds of games daily.",
+      "title": "",
+      "label": "Enable Price History & Recommendation Engine",
+      "description": "Displays the price trend chart and powers the Smart Recommendation Engine. Turn off to save API quota (disables insights).",
       "default": true
     }
   ],
