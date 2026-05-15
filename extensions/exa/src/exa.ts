@@ -95,15 +95,28 @@ export function getExaSearchUrl(query?: string) {
 }
 
 export function formatExaError(error: unknown) {
+  const fallback = "Something went wrong while talking to Exa.";
+
   if (error instanceof Error) {
-    return error.message;
+    const message = error.message.trim();
+    if (message.includes("Failed to fetch from Exa API")) {
+      return preferences.apiKey
+        ? "Failed to reach the Exa API. Check your internet connection and verify your API key is valid."
+        : "Failed to reach Exa through the Raycast proxy. Add your Exa API key in extension preferences or try again later.";
+    }
+    return message || fallback;
   }
 
   if (typeof error === "string") {
+    if (error.includes("Failed to fetch from Exa API")) {
+      return preferences.apiKey
+        ? "Failed to reach the Exa API. Check your internet connection and verify your API key is valid."
+        : "Failed to reach Exa through the Raycast proxy. Add your Exa API key in extension preferences or try again later.";
+    }
     return error;
   }
 
-  return "Something went wrong while talking to Exa.";
+  return fallback;
 }
 
 export function compactStatuses(statuses?: Status[]): CompactStatus[] | undefined {

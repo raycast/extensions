@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Detail, Form, Icon, LaunchProps, useNavigation } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
 import { useEffect, useState } from "react";
-import { formatExaError, getHostname, streamGroundedAnswer } from "./exa";
+import { formatExaError, getGroundedAnswer, getHostname, streamGroundedAnswer } from "./exa";
 
 type AskExaDetailProps = {
   query: string;
@@ -100,8 +100,28 @@ function AskExaDetail({ query }: AskExaDetailProps) {
           }
         }
       } catch (streamError) {
-        if (!cancelled) {
-          setError(streamError);
+        if (cancelled) {
+          return;
+        }
+
+        try {
+          const fallback = await getGroundedAnswer(query);
+          if (cancelled) {
+            return;
+          }
+
+          const fallbackAnswer =
+            typeof fallback.answer === "string" ? fallback.answer : JSON.stringify(fallback.answer, null, 2);
+          setAnswer(fallbackAnswer);
+          setCitations(
+            fallback.citations.map((citation) => ({
+              title: citation.title || getHostname(citation.url),
+              url: citation.url,
+              publishedDate: citation.publishedDate,
+            })),
+          );
+        } catch (fallbackError) {
+          setError(fallbackError ?? streamError);
         }
       } finally {
         if (!cancelled) {
