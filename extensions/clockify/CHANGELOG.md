@@ -1,6 +1,6 @@
 # Clockify Changelog
 
-## [Fix cached workspace data] - {PR_MERGE_DATE}
+## [Fix cached workspace data] - 2026-05-15
 
 - Fixed cached projects, tags, and tasks falling back incorrectly when Clockify returns no data.
 
