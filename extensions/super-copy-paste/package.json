@@ -1,0 +1,80 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "super-copy-paste",
+  "title": "Super Copy/Paste - Apply Regex Rules to Clean Copied Text",
+  "description": "Allows to perform Regex Cleanup before copying or pasting",
+  "icon": "extension-icon.png",
+  "author": "juan_manuel_ganancias",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "super-copy-1",
+      "title": "Super Copy 1",
+      "description": "Performs Regex cleanups (Profile 1) on selected text and copies to Clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "super-copy-2",
+      "title": "Super Copy 2",
+      "description": "Performs Regex cleanups (Profile 2) on selected text and copies to Clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "super-copy-3",
+      "title": "Super Copy 3",
+      "description": "Performs Regex cleanups (Profile 3) on selected text and copies to Clipboard",
+      "mode": "no-view"
+    },
+    {
+      "name": "super-paste-1",
+      "title": "Super Paste 1",
+      "description": "Performs Regex cleanups (Profile 1) on Clipboard text and pastes the result",
+      "mode": "no-view"
+    },
+    {
+      "name": "super-paste-2",
+      "title": "Super Paste 2",
+      "description": "Performs Regex cleanups (Profile 2) on Clipboard text and pastes the result",
+      "mode": "no-view"
+    },
+    {
+      "name": "super-paste-3",
+      "title": "Super Paste 3",
+      "description": "Performs Regex cleanups (Profile 3) on Clipboard text and pastes the result",
+      "mode": "no-view"
+    },
+    {
+      "name": "manage-rules",
+      "title": "Manage Rules",
+      "description": "Create and edit Regex rules for the Super Copy and Super Paste commands",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
