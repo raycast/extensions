@@ -36,6 +36,7 @@ On any card you can:
 - **Manage Spaces** (Cmd+Shift+S) — toggle the card in or out of any space.
 - **Manage Tags** (Cmd+Shift+T) — add new tags or deselect existing ones to remove.
 - **Manage Notes** (Cmd+Shift+N) — add, edit, or delete notes attached to the card.
+- **Manage Links** (Cmd+Shift+K) — browse manual + WikiLink-inferred links to other cards; link a new card via semantic search; unlink (manual links only).
 - **Copy as Markdown** (Cmd+Shift+M).
 - **Pin / Unpin** (Cmd+Shift+P / Cmd+Ctrl+P).
 - **Open in Browser** (Cmd+Enter) and **Open in mymind** (Cmd+Shift+Enter).

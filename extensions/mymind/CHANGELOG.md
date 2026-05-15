@@ -46,10 +46,15 @@ support.
 
 - Show Details (Enter) with metadata sidebar and the markdown body
   rendered inline. Surfaces summary as a blockquote above the body,
-  appends a Notes section after, and shows dominant color from
-  `blob.palette` as a tag.
+  appends a Notes section after, lists extracted `entities` as tags,
+  and shows dominant color from `blob.palette` as a tag.
 - Manage Notes (Cmd+Shift+N) — add (`POST`), edit (`PUT`), and delete
   (`DELETE`) notes via `/objects/:id/notes/:noteId`.
+- Manage Links (Cmd+Shift+K) — list the cards linked to this one via
+  the `/links` graph, link a new card via semantic-search pick, or
+  remove a manual link via `DELETE /links/:id`. WikiLinks are listed
+  read-only with an accessory tag (mymind requires editing the source
+  note's `[[…]]` reference to remove them).
 - Find Related (Cmd+Shift+R) — pushes a view of semantically related
   cards via `GET /objects?similarTo=:id` (one round-trip).
 - Edit Card (Cmd+E) — read existing content, edit title, summary,
@@ -85,8 +90,11 @@ support.
 - Browse Spaces uses `GET /objects?spaceId=…` (single request) and
   Find Related uses `GET /objects?similarTo=…`, replacing the previous
   search-then-hydrate two-step.
-- Object schema gains `summary`, `notes`, and `blob.palette`
-  (dominant color) fields exposed by mymind API v0.4.0.
+- Object schema gains `summary`, `notes`, `blob.palette` (dominant
+  color), and `entities` (extracted concepts; v0.5.0 renamed the
+  singular `entity` to `entities[]`).
+- New `src/api/links.ts` covering `GET /links`, `POST /links`, and
+  `DELETE /links/:id`, with `linkPeerId` / `isManualLink` helpers.
 - All JSON endpoints default to `Accept: application/json` (mymind
   content-negotiates and returns HTML otherwise).
 - Render-layer dedupe by id in every list/grid view.

@@ -2,7 +2,7 @@ import { getPreferenceValues } from "@raycast/api";
 import { createHmac } from "crypto";
 
 const BASE_URL = "https://api.mymind.com";
-const USER_AGENT = "raycast-mymind/2.3.0";
+const USER_AGENT = "raycast-mymind/2.4.0";
 const TOKEN_LIFETIME_SECONDS = 60;
 
 interface ApiPreferences {

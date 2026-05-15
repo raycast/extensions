@@ -16,6 +16,7 @@ import AddNote from "../add-a-new-note";
 import { safeHostname } from "../utils";
 import { ManageTagsForm } from "./ManageTagsForm";
 import { EditCardForm } from "./EditCardForm";
+import { ManageLinksView } from "./ManageLinksView";
 import { ManageNotesView } from "./ManageNotesView";
 import { ManageSpacesView } from "./ManageSpacesView";
 import { RelatedView } from "./RelatedView";
@@ -71,6 +72,19 @@ function CardDetail({ object, onChange }: { object: MyMindObject; onChange?: () 
           {object.tags.length > 0 && (
             <Detail.Metadata.TagList title="Tags">
               {Array.from(new Set(object.tags.map((t) => t.name))).map((name) => (
+                <Detail.Metadata.TagList.Item key={name} text={name} />
+              ))}
+            </Detail.Metadata.TagList>
+          )}
+          {object.entities.length > 0 && (
+            <Detail.Metadata.TagList title="Entities">
+              {Array.from(
+                new Map(
+                  object.entities
+                    .map((e) => [e.name?.trim() ?? e.id ?? "", e] as const)
+                    .filter(([key]) => key.length > 0),
+                ).keys(),
+              ).map((name) => (
                 <Detail.Metadata.TagList.Item key={name} text={name} />
               ))}
             </Detail.Metadata.TagList>
@@ -192,6 +206,12 @@ export function CardActions({
           icon={Icon.Document}
           target={<ManageNotesView object={object} onChange={onChange} />}
           shortcut={{ modifiers: ["cmd", "shift"], key: "n" }}
+        />
+        <Action.Push
+          title="Manage Links"
+          icon={Icon.Link}
+          target={<ManageLinksView object={object} onChange={onChange} />}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "k" }}
         />
         {object.source?.url && <Action.OpenInBrowser url={object.source.url} />}
         <Action.OpenInBrowser

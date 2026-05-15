@@ -60,6 +60,31 @@ export const BlobReferenceSchema = z
   .loose();
 export type BlobReference = z.infer<typeof BlobReferenceSchema>;
 
+export const ObjectEntitySchema = z
+  .object({
+    id: z.string().nullish(),
+    name: z.string().nullish(),
+    type: z.string().nullish(),
+  })
+  .loose();
+export type ObjectEntity = z.infer<typeof ObjectEntitySchema>;
+
+export const LinkEndpointSchema = z
+  .object({
+    id: z.string(),
+  })
+  .loose();
+
+export const LinkSchema = z
+  .object({
+    id: z.string(),
+    source: LinkEndpointSchema,
+    target: LinkEndpointSchema,
+    kind: z.string().nullish(),
+  })
+  .loose();
+export type Link = z.infer<typeof LinkSchema>;
+
 export const MyMindObjectSchema = z.object({
   id: z.string(),
   title: nullishString(),
@@ -76,6 +101,10 @@ export const MyMindObjectSchema = z.object({
     .transform((v) => v ?? []),
   notes: z
     .array(ObjectNoteSchema)
+    .nullish()
+    .transform((v) => v ?? []),
+  entities: z
+    .array(ObjectEntitySchema)
     .nullish()
     .transform((v) => v ?? []),
   source: ObjectSourceSchema.nullish(),
