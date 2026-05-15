@@ -200,7 +200,7 @@ function RuleForm({ initialRule, onSave }: { initialRule?: RegexRule; onSave: (r
             <ActionPanel.Section title="Locations">
               <Action title="Start of Line (^)" onAction={() => appendToFindPattern("^")} />
               <Action title="End of Line ($)" onAction={() => appendToFindPattern("$")} />
-              <Action title="Word Boundary (\B)" onAction={() => appendToFindPattern("\\b")} />
+              <Action title="Word Boundary (\b)" onAction={() => appendToFindPattern("\\b")} />
             </ActionPanel.Section>
             <ActionPanel.Section title="Quantities">
               <Action title="Zero or More (*)" onAction={() => appendToFindPattern("*")} />
