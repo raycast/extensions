@@ -104,18 +104,27 @@ function writeVaultAtomic(services: VaultService[], key: Buffer): void {
   }
 }
 
-function setVault(services: VaultService[], rollbackOnKeychainFail: boolean) {
+function setVault(services: VaultService[]): void {
   const key = randomBytes(32);
+  const path = vaultPath();
+  let oldBytes: Buffer | null = null;
+  try {
+    oldBytes = readFileSync(path);
+  } catch {
+    // No existing vault — first-time create
+  }
   writeVaultAtomic(services, key);
   try {
     storeVaultKey(key);
   } catch (error) {
-    if (rollbackOnKeychainFail) {
-      try {
-        unlinkSync(vaultPath());
-      } catch {
-        // best effort
+    try {
+      if (oldBytes !== null) {
+        writeFileSync(path, oldBytes, { mode: 0o600 });
+      } else {
+        unlinkSync(path);
       }
+    } catch {
+      // Best-effort rollback; original error still propagates
     }
     throw error;
   }
@@ -124,11 +133,11 @@ function setVault(services: VaultService[], rollbackOnKeychainFail: boolean) {
 }
 
 export function createVault(services: VaultService[]): void {
-  setVault(services, true);
+  setVault(services);
 }
 
 export function replaceVault(services: VaultService[]): void {
-  setVault(services, false);
+  setVault(services);
 }
 
 export function loadVault(): VaultService[] {

@@ -1,36 +1,30 @@
 # Changelog
 
-## 1.1.0 — 2026-05-14
+## [Initial Version] - {PR_MERGE_DATE}
+
+### Commands
+
+- Search OTP — browse all services with native Raycast filtering and a live TOTP countdown
+- Recent OTP — quick access to pinned and recently used services with live codes
+- Import Vault — import an encrypted `.2fas` export file
+- Setup — vault status, lock, re-import, and delete
 
 ### Security
 
-- Re-import is now atomic: a failed parse or wrong password leaves the existing vault and Keychain key untouched. Previously, a failed re-import could destroy the vault.
-- Vault file envelope is now version-checked and shape-validated before decryption.
-- Service IDs are now deterministic (derived from issuer + account + secret), so re-importing the same export preserves the recents cache.
-- Removed the module-level base32 secret cache that retained decoded secrets for the process lifetime.
-- Vault file size is capped at 5 MB during import.
-- Added an in-memory cache TTL (5 min) and a "Lock Vault Now" action in Setup.
-- New `SECURITY.md` documents the threat model.
-
-### Changed
-
-- Recents now show inline TOTP codes with a live countdown, matching Search OTP.
-- Recents show relative timestamps ("2h ago") instead of date-only.
-- Copying an OTP now closes Raycast and shows a HUD with the service label and code, so you can switch directly to the app you're authenticating to.
-- Search OTP surfaces services with malformed secrets in a "Skipped" section instead of silently dropping them.
-
-### Migration
-
-- The recents cache is wiped once on first launch after this update because service IDs changed shape. Recents will rebuild as you use Search OTP.
-
-## 1.0.0 — 2026-03-07
-
-### Added
-
-- Search OTP command with native Raycast filtering and live TOTP countdown
-- Recent OTP command with pinned and recently used services
-- Import Vault command for encrypted `.2fas` export files
-- Setup command for vault status and management
-- AES-256-GCM encrypted local vault with macOS Keychain key storage
+- AES-256-GCM encrypted local vault, key stored in the macOS login Keychain
+- Atomic re-import with rollback: a failed parse, wrong password, or Keychain write leaves the existing vault and Keychain key intact
+- Vault envelope is version-checked and shape-validated before decryption
+- Deterministic service IDs (derived from issuer + account + secret) keep the recents cache stable across re-imports of the same export
+- 5 MB cap on imported `.2fas` files
+- In-memory cache has a 5-minute idle TTL and can be cleared on demand via "Lock Vault Now" in Setup
 - Concealed clipboard copy (excluded from clipboard history)
-- RFC 6238 TOTP generation supporting SHA1, SHA256, SHA512
+- Copying an OTP closes the Raycast window and shows a HUD with the service label — the code itself is not displayed on screen
+- Zero network calls, zero external crypto dependencies (Node.js `crypto` only)
+- Full threat model documented in `SECURITY.md`
+
+### UX
+
+- Live TOTP countdown with red/green color on the last 5 seconds
+- Relative "last used" timestamps in Recent OTP ("2h ago", "yesterday")
+- Animated "Unlocking vault…" toast during Keychain authentication
+- Services with malformed secrets surface in a "Skipped" section instead of being silently dropped

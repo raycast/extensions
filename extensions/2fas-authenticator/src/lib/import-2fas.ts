@@ -135,7 +135,8 @@ export function parse2FASExport(
     try {
       const decrypted = decryptPayload(data.servicesEncrypted, password);
       services = JSON.parse(decrypted);
-    } catch {
+    } catch (err) {
+      if (err instanceof InvalidFormatError) throw err;
       throw new InvalidPasswordError();
     }
   } else if (data.services) {

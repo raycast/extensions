@@ -82,20 +82,18 @@ Setup process. Note that other already-open command windows
 (e.g. an active Search OTP view in another Raycast window) retain
 their own cache until you close them or until their TTL expires.
 
-### Keychain failure during re-import
+### Re-import is atomic with rollback
 
-`replaceVault` writes the new ciphertext to disk and atomically
-renames it into place *before* updating the Keychain entry. If the
-Keychain update itself fails (an unlikely failure mode of
-`/usr/bin/security add-generic-password -U`), the on-disk vault
-will hold the new ciphertext while the Keychain still holds the
-old key — the vault becomes unreadable until you re-run **Import
-Vault** with the same export.
+`setVault` snapshots the existing vault file bytes in memory,
+writes the new ciphertext via `vault.enc.new` + `rename`, attempts
+the Keychain update, and restores the prior bytes if the Keychain
+write fails. The outcome is binary: either both file and Keychain
+land on the new state, or both stay on the old state.
 
-This is intentional. The alternative ordering risks leaving a
-valid Keychain key with stale ciphertext on disk, which silently
-returns wrong data. Failing closed with a clear recovery path
-(re-import) is the safer choice.
+The only residual failure mode is a process kill in the tens-of-
+milliseconds window between the rename and the Keychain write.
+Recovery in that case is to re-run **Import Vault** with the same
+export.
 
 ### PBKDF2 iteration count is inherited
 
