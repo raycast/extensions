@@ -96,7 +96,7 @@ export default function Command() {
               />
               {index > 0 && (
                 <Action
-                  title="Move up"
+                  title="Move Up"
                   icon={Icon.ArrowUp}
                   onAction={() => handleMoveUp(index)}
                   shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
