@@ -1,6 +1,6 @@
 # Agent Usage Changelog
 
-## [Add OpenCode Go Provider] - {PR_MERGE_DATE}
+## [Add OpenCode Go Provider] - 2026-05-15
 
 - Add OpenCode Go plan usage display
 
