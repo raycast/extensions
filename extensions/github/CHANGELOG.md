@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix null pull request nodes crash] - {PR_MERGE_DATE}
+## [Fix null pull request nodes crash] - 2026-05-15
 
 - Fixed `TypeError: Cannot read properties of null (reading 'id')` in **My Pull Requests** when the GitHub search API returns edges with a null `node` (e.g. PRs from repositories the user can no longer access).
 - Applied the same defensive null-filtering to **Search Pull Requests** and the per-repository pull request list to prevent the same crash from surfacing there.
