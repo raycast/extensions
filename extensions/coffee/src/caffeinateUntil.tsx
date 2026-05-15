@@ -62,6 +62,7 @@ function defaultPickerTarget(): Date {
 
 export default function Command(props: { arguments: Arguments.CaffeinateUntil }) {
   const typedTime = props.arguments.time;
+  const typedTimeValid = typedTime ? parseTypedTime(typedTime) !== null : false;
   const [handled, setHandled] = useState(false);
 
   useEffect(() => {
@@ -74,6 +75,11 @@ export default function Command(props: { arguments: Arguments.CaffeinateUntil })
     }
     caffeinateUntilTarget(target).then(() => popToRoot());
   }, [typedTime, handled]);
+
+  // Hide the form when the typed argument parses cleanly so users on the
+  // keyboard path don't see a flash before popToRoot dismisses the view.
+  // Invalid input falls through to the form so the user can fix via picker.
+  if (typedTimeValid) return null;
 
   return (
     <Form
