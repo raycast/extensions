@@ -1,9 +1,9 @@
 import { Action, ActionPanel, Color, Detail, Icon, List, showToast, Toast } from "@raycast/api";
 import { usePromise, getProgressIcon } from "@raycast/utils";
-import { spawn } from "child_process";
-import { existsSync } from "fs";
-import { homedir } from "os";
-import { join } from "path";
+import { spawn } from "node:child_process";
+import { existsSync } from "node:fs";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 type RateLimitWindow = {
   usedPercent: number;
@@ -101,14 +101,12 @@ export default function Command() {
   const windows = data ? getCodexWindows(data.rateLimits) : [];
   const activity = data ? getRecentActivity(data.threads) : null;
   const skills = data?.skills ?? [];
+  const refresh = () => {
+    void revalidate();
+  };
 
   const refreshAction = (
-    <Action
-      title="Refresh"
-      icon={Icon.ArrowClockwise}
-      onAction={revalidate}
-      shortcut={{ modifiers: ["cmd"], key: "r" }}
-    />
+    <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} shortcut={{ modifiers: ["cmd"], key: "r" }} />
   );
 
   if (error) {
@@ -117,7 +115,7 @@ export default function Command() {
         markdown={`# Unable to load Codex usage\n\n${error.message}\n\nMake sure Codex is installed and signed in with \`codex login\`.`}
         actions={
           <ActionPanel>
-            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={revalidate} />
+            <Action title="Retry" icon={Icon.ArrowClockwise} onAction={refresh} />
           </ActionPanel>
         }
       />
