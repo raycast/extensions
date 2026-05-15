@@ -91,6 +91,7 @@ export default function Command(props: { arguments: Arguments.CaffeinateUntil })
         title="Caffeinate Until"
         type={Form.DatePicker.Type.DateTime}
         defaultValue={defaultPickerTarget()}
+        min={new Date(Date.now() + 60_000)}
       />
     </Form>
   );
