@@ -115,13 +115,17 @@ function formatAllText(id: Identity): string {
 export default function Command() {
   const [showDetail, setShowDetail] = useState(false);
   const [identity, setIdentity] = useState<Identity | null>(null);
-  const [, setStateFilter] = useState("all");
+  const [stateFilter, setStateFilter] = useState("all");
 
   function handleGenerate(values: { state: string }) {
     const filter = values.state || "all";
     setStateFilter(filter);
     setIdentity(generateIdentity(filter));
     setShowDetail(true);
+  }
+
+  function handleRegenerate() {
+    setIdentity(generateIdentity(stateFilter));
   }
 
   async function handleSave() {
@@ -170,7 +174,7 @@ export default function Command() {
               }}
             />
             <Action
-              title="Copy SSN"
+              title="Copy Ssn"
               icon={Icon.CopyClipboard}
               onAction={() => {
                 Clipboard.copy(identity.ssn);
@@ -213,7 +217,7 @@ export default function Command() {
               title="Regenerate"
               icon={Icon.RotateClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={() => setShowDetail(false)}
+              onAction={handleRegenerate}
             />
             <Action
               title="Change Options"
