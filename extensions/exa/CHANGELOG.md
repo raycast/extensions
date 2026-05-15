@@ -1,6 +1,6 @@
 # Exa Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-05-15
 
 - Added a new `Answer with Exa` command with streamed answers and citations
 - Refreshed the Exa AI tool surface, including grounded answers, code context, and improved search/content handling
