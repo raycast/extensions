@@ -2,7 +2,7 @@
 
 Super Copy/Paste is a Raycast extension that lets you apply regular expressions (Regex) sequentially to text when copying or pasting. 
 
-![Manage Rules](metadata/super-copy-paste-1.png)
+![Manage Rules]
 
 ## Features
 - **Super Copy**: Grabs your currently selected text, cleans it using your active regex rules, and copies the result directly to your clipboard.
@@ -24,6 +24,3 @@ Super Copy/Paste is a Raycast extension that lets you apply regular expressions 
 - **Clean Whitespace**: Remove trailing spaces or convert multiple newlines into single spaces.
 - **Format Code**: Strip comments from code snippets before pasting them into chat.
 
-## Screenshots
-![Super Copy in Action](metadata/super-copy-paste-2.png)
-![Super Paste in Action](metadata/super-copy-paste-3.png)
