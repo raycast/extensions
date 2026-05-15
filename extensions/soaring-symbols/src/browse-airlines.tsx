@@ -8,7 +8,7 @@ import SearchBar from "./components/searchbar";
 
 export default function BrowseAirlines() {
   const { isLoading, data = [] } = usePromise(fetchAirlines);
-  const [alliance, setAlliance] = useState("");
+  const [alliance, setAlliance] = useState("All");
 
   const filteredAirlines = useMemo(() => {
     if (!alliance || alliance === "All") return data;
@@ -26,7 +26,7 @@ export default function BrowseAirlines() {
       <Grid.Section title={alliance === "All" ? "All Airlines" : alliance}>
         {filteredAirlines.map((airline) => (
           <Grid.Item
-            key={airline.iata}
+            key={airline.slug}
             content={{
               source: `https://raw.githubusercontent.com/anhthang/soaring-symbols/refs/heads/main/assets/${airline.slug}/logo.svg`,
             }}
