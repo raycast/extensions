@@ -204,6 +204,11 @@ export default function Command() {
 
   async function handleToggleRead(item: SavedItem) {
     try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: item.isRead ? "Marking as unread..." : "Marking as read...",
+      });
+
       const response = await fetch(
         `${preferences.apiUrl}/v1/saved-items/${item.id}/read`,
         {

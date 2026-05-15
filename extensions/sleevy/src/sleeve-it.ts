@@ -75,7 +75,9 @@ export default async function main() {
       if (data.captureResult === "updated") {
         await showHUD("✅ Already in Sleevy (moved to top)");
       } else {
-        await showHUD("✅ Saved to Sleevy!");
+        await showHUD(
+          `❌ Unexpected response (HTTP 200, result: ${data.captureResult})`,
+        );
       }
     } else if (response.status === 400) {
       const error = (await response.json()) as { url: string };
