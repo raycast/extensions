@@ -6,13 +6,6 @@ import CreateIssue from "./issue-create";
 import { getIssueIcon } from "./utils/icons";
 import type { Repository } from "./types/api";
 
-type IssueCommandPreferences = {
-  includeCreated: boolean;
-  includeAssigned: boolean;
-  includeMentioned: boolean;
-  includeRecentlyClosed: boolean;
-};
-
 enum IssueCategory {
   All = "all",
   Created = "created",
@@ -28,7 +21,7 @@ const categoryOptions = [
 ];
 
 export default function Command() {
-  const prefs = getPreferenceValues<IssueCommandPreferences>();
+  const prefs = getPreferenceValues<Preferences.IssueMine>();
   const [selectedCategory, setSelectedCategory] = useCachedState<string>("issues-category-filter", IssueCategory.All);
 
   const effectiveFilters = useMemo(() => {

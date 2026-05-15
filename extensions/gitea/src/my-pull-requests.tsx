@@ -7,16 +7,6 @@ import CreateIssue from "./issue-create";
 import { getPullRequestIcon } from "./utils/icons";
 import type { Repository } from "./types/api";
 
-type PullRequestCommandPreferences = {
-  includeCreated: boolean;
-  includeAssigned: boolean;
-  includeMentioned: boolean;
-  includeReviewRequested: boolean;
-  includeReviewed: boolean;
-  includeRecentlyClosed: boolean;
-  includeOwnedRepositories: boolean;
-};
-
 enum PullRequestCategory {
   All = "all",
   Created = "created",
@@ -38,7 +28,7 @@ const categoryOptions = [
 ];
 
 export default function Command() {
-  const prefs = getPreferenceValues<PullRequestCommandPreferences>();
+  const prefs = getPreferenceValues<Preferences.MyPullRequests>();
   const [selectedCategory, setSelectedCategory] = useCachedState<string>(
     "pull-requests-category-filter",
     PullRequestCategory.All,

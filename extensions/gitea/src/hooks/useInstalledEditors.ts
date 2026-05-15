@@ -16,19 +16,10 @@ export interface EditorInfo {
   id: EditorId;
   name: string;
   icon: string;
-  prefKey: keyof EditorPreferences & string;
+  prefKey: keyof Preferences & string;
   bundleId: string;
   namePatterns: RegExp[];
   windowsPathPatterns?: RegExp[];
-}
-
-interface EditorPreferences {
-  editorVSCode: boolean;
-  editorCursor: boolean;
-  editorZed: boolean;
-  editorIntelliJ: boolean;
-  editorWebStorm: boolean;
-  editorPyCharm: boolean;
 }
 
 const EDITORS: EditorInfo[] = [
@@ -152,7 +143,7 @@ export function getEditorUrlScheme(editorId: EditorId, repoUrl: string): string 
 }
 
 export function useInstalledEditors() {
-  const prefs = getPreferenceValues<EditorPreferences>();
+  const prefs = getPreferenceValues<Preferences>();
 
   const { data: installedEditors = [], isLoading } = useCachedPromise(
     async (): Promise<EditorInfo[]> => {
