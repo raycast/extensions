@@ -46,6 +46,12 @@
       ]
     },
     {
+      "name": "reload-labels",
+      "title": "Reload Space Labels",
+      "description": "Force reload all space label overlay windows.",
+      "mode": "no-view"
+    },
+    {
       "name": "toggle-active-label-window",
       "title": "Toggle Active Label Window",
       "subtitle": "DesktopRenamer",
@@ -67,11 +73,40 @@
       "mode": "no-view"
     },
     {
+      "name": "list-windows",
+      "title": "List Windows",
+      "description": "List all windows grouped by desktop space and switch to one",
+      "mode": "view"
+    },
+    {
+      "name": "move-window",
+      "title": "Move Window",
+      "description": "List all desktops and move the active window to one",
+      "mode": "view"
+    },
+    {
       "name": "switch-to-desktop",
       "title": "Switch Desktop",
       "subtitle": "DesktopRenamer",
       "description": "List all desktops and switch to one",
       "mode": "view"
+    },
+    {
+      "name": "batch-move-windows",
+      "title": "Batch Move Windows",
+      "description": "Queue multiple window moves and execute them efficiently",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "returnToOriginalSpace",
+      "title": "Return to Original Space",
+      "label": "Enable automatic return",
+      "description": "Automatically return to your original desktop after moving windows to a different desktop.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
     }
   ],
   "dependencies": {

@@ -44,17 +44,6 @@ export default function Command() {
       });
   }
 
-  async function switchSpace(space: Space) {
-    try {
-      const sanitizedId = escapeAppleScriptString(space.id);
-      await runDesktopRenamerCommand(`switch to space "${sanitizedId}"`);
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      await revalidate();
-    } catch {
-      // Handled by utils
-    }
-  }
-
   async function moveWindow(space: Space) {
     try {
       const sanitizedId = escapeAppleScriptString(space.id);
@@ -88,19 +77,13 @@ export default function Command() {
                 title={space.name}
                 subtitle={`Space ${space.num}`}
                 icon={{
-                  source: Icon.Desktop,
+                  source: Icon.Window,
                   tintColor: isCurrent ? Color.Blue : undefined,
                 }}
                 accessories={isCurrent ? [{ tag: { value: "Current", color: Color.Blue } }] : []}
                 actions={
                   <ActionPanel>
-                    <Action title="Switch to Desktop" icon={Icon.Desktop} onAction={() => switchSpace(space)} />
-                    <Action
-                      title="Move Window"
-                      icon={Icon.Window}
-                      shortcut={{ modifiers: ["cmd"], key: "return" }}
-                      onAction={() => moveWindow(space)}
-                    />
+                    <Action title="Move Window" icon={Icon.Window} onAction={() => moveWindow(space)} />
                     <Action.Push
                       title="Rename Space"
                       shortcut={{ modifiers: ["cmd"], key: "r" }}
