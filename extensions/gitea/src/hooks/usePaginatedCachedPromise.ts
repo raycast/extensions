@@ -1,6 +1,5 @@
 import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
 import type { MutatePromise } from "@raycast/utils";
-import { useEffect } from "react";
 import type { PaginatedResult } from "../api/common";
 
 export type PaginatedCachedPromiseMutate<T> = MutatePromise<PaginatedResult<T>, PaginatedResult<T>>;
@@ -20,9 +19,10 @@ export function usePaginatedCachedPromise<T, Args extends readonly unknown[]>({
   args,
   fetchPage,
 }: UsePaginatedCachedPromiseOptions<T, Args>) {
-  const [items, setItems] = useCachedState<T[]>(cacheKey, []);
-  const [page, setPage] = useCachedState<number>(`${cacheKey}-page`, 1);
-  const [hasMore, setHasMore] = useCachedState<boolean>(`${cacheKey}-hasMore`, true);
+  const argsKey = JSON.stringify(args);
+  const [items, setItems] = useCachedState<T[]>(`${cacheKey}-items-${argsKey}`, []);
+  const [page, setPage] = useCachedState<number>(`${cacheKey}-page-${argsKey}`, 1);
+  const [hasMore, setHasMore] = useCachedState<boolean>(`${cacheKey}-hasMore-${argsKey}`, true);
   const initialData: PaginatedResult<T> = { items, hasMore };
 
   const { isLoading, revalidate, mutate } = useCachedPromise(
@@ -44,11 +44,6 @@ export function usePaginatedCachedPromise<T, Args extends readonly unknown[]>({
       },
     },
   );
-
-  useEffect(() => {
-    setPage(1);
-    setHasMore(true);
-  }, args);
 
   return {
     items,
