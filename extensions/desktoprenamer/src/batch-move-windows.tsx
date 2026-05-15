@@ -191,7 +191,7 @@ export default function Command() {
               title={move.window.title}
               subtitle={move.window.ownerName}
               icon={move.window.appPath ? { fileIcon: move.window.appPath } : Icon.Window}
-              accessories={[{ text: `→ ${move.targetSpace.name}`, color: Color.Green }]}
+              accessories={[{ tag: { value: `→ ${move.targetSpace.name}`, color: Color.Green } }]}
               actions={
                 <ActionPanel>
                   <Action
@@ -219,7 +219,7 @@ export default function Command() {
                 title={win.title}
                 subtitle={win.ownerName}
                 icon={win.appPath ? { fileIcon: win.appPath } : Icon.Window}
-                accessories={[{ text: win.space.name, color: Color.SecondaryText }]}
+                accessories={[{ tag: { value: win.space.name, color: Color.SecondaryText } }]}
                 actions={
                   <ActionPanel>
                     <ActionPanel.Submenu title="Stage Move to Desktop…" icon={Icon.ArrowRight}>

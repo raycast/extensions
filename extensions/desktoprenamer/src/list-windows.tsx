@@ -214,7 +214,6 @@ export default function Command() {
                               <Action
                                 key={targetSpace.id}
                                 title={targetSpace.name}
-                                subtitle={`${targetSpace.displayID} · Space ${targetSpace.num}`}
                                 onAction={() => moveToDesktop(entry, targetSpace)}
                               />
                             ))}
