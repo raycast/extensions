@@ -2,6 +2,7 @@ import { Action, ActionPanel, Clipboard, Detail, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
 import jsesc from "jsesc";
+import { sanitizeMarkdownFenceContent } from "./sanitize-markdown-code";
 
 export default function Command() {
   const { data, isLoading } = usePromise(async () => {
@@ -16,6 +17,7 @@ export default function Command() {
     minimal: true,
     json: jsonCompatible,
   });
+  const safeForMarkdown = sanitizeMarkdownFenceContent(escapedString);
 
   return (
     <Detail
@@ -24,19 +26,19 @@ export default function Command() {
           <Action.CopyToClipboard title="Copy Escaped String" content={escapedString} />
           <ActionPanel.Submenu title="Escape Options" icon={Icon.Code}>
             <Action
-              title={`Standard Escape`}
+              title="Standard Escape"
               icon={!jsonCompatible ? Icon.Check : undefined}
               onAction={() => setJsonCompatible(false)}
             />
             <Action
-              title={`JSON Compatible Escape`}
+              title="JSON Compatible Escape"
               icon={jsonCompatible ? Icon.Check : undefined}
               onAction={() => setJsonCompatible(true)}
             />
           </ActionPanel.Submenu>
         </ActionPanel>
       }
-      markdown={isLoading ? "Loading..." : `\`\`\`text\n${escapedString}\n\`\`\``}
+      markdown={isLoading ? "Loading..." : `\`\`\`text\n${safeForMarkdown}\n\`\`\``}
     />
   );
 }

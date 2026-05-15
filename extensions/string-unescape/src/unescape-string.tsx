@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Clipboard, Detail, Icon } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useState } from "react";
+import { sanitizeMarkdownFenceContent } from "./sanitize-markdown-code";
 
 // Snippet taken from https://github.com/gchq/CyberChef/blob/master/src/core/Utils.mjs#L221 and changed to support TypeScript
 function parseEscapedChars(str: string): string {
@@ -38,10 +39,10 @@ function parseEscapedChars(str: string): string {
         case "'":
           return "'";
         case "x":
-          return String.fromCharCode(parseInt(a.substr(1), 16));
+          return String.fromCharCode(parseInt(a.slice(1), 16));
         case "u":
           if (a[1] === "{") return String.fromCodePoint(parseInt(a.slice(2, -1), 16));
-          else return String.fromCharCode(parseInt(a.substr(1), 16));
+          else return String.fromCharCode(parseInt(a.slice(1), 16));
         default:
           return m; // If no match, return the original string
       }
@@ -57,6 +58,7 @@ export default function Command() {
     return clipboard;
   });
   const unescapedString = parseEscapedChars(data || "");
+  const safeForMarkdown = sanitizeMarkdownFenceContent(unescapedString);
   const [language, setLanguage] = useState("text");
   const [searchText, setSearchText] = useState("");
 
@@ -90,7 +92,7 @@ export default function Command() {
           </ActionPanel.Submenu>
         </ActionPanel>
       }
-      markdown={isLoading ? "Loading..." : `\`\`\`${language}\n${unescapedString}\n\`\`\``}
+      markdown={isLoading ? "Loading..." : `\`\`\`${language}\n${safeForMarkdown}\n\`\`\``}
     />
   );
 }

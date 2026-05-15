@@ -6,6 +6,7 @@
   "icon": "extension-icon.png",
   "author": "gkpln3",
   "license": "MIT",
+  "categories": ["Developer Tools"],
   "commands": [
     {
       "name": "unescape-string",
