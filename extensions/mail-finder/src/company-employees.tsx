@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Form, Icon, LaunchProps, List, showToast, Toast, useNavigation } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useState, useEffect, useRef } from "react";
 import { ResultsView } from "./mail-finder";
 import { AuthGate } from "./auth";
@@ -230,11 +231,14 @@ function EmployeeListView({
       }
 
       if (mappedEmployees.length > 0) {
+        const favicon = getFavicon(`https://${searchDomain}`);
+        const faviconSource =
+          typeof favicon === "object" && favicon && "source" in favicon ? favicon.source : undefined;
         const historyEntry = await addCompanySearchHistoryEntry({
           companyName: company?.name || searchDomain,
           domain: searchDomain,
           confidenceScore: company?.confidenceScore ?? 100,
-          logoUrl: company?.logoUrl || `https://www.google.com/s2/favicons?domain=${searchDomain}&sz=64`,
+          logoUrl: company?.logoUrl || (typeof faviconSource === "string" ? faviconSource : undefined),
           employees: mappedEmployees.map(toCachedEmployee),
           totalPages: response.pagination?.total_page ?? response.pagination?.total_pages ?? 1,
           currentPage: response.pagination?.current_page ?? response.pagination?.page ?? 1,
