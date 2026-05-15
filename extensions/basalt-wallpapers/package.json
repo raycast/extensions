@@ -4,6 +4,9 @@
   "description": "Hand-picked art, daily.",
   "icon": "basalt-icon.png",
   "author": "yevgen_glukhov",
+  "contributors": [
+    "alexi.build"
+  ],
   "categories": [
     "Design Tools",
     "Media"
@@ -26,8 +29,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.3",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

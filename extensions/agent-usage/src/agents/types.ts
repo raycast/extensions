@@ -10,7 +10,9 @@ export type AgentId =
   | "kimi"
   | "synthetic"
   | "antigravity"
-  | "zai";
+  | "zai"
+  | "minimax"
+  | "opencode-go";
 
 export interface AgentDefinition {
   id: AgentId;

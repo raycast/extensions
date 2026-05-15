@@ -42,7 +42,10 @@
     "brndnly",
     "oscmarb",
     "emergerrrd",
-    "ryo."
+    "ryo.",
+    "Undolog",
+    "wonbywondev",
+    "SandeepBaskaran"
   ],
   "pastContributors": [
     "Lemon",
@@ -369,6 +372,89 @@
       ]
     },
     {
+      "name": "my-stats-menu",
+      "title": "My GitHub Stats Menu Bar",
+      "description": "Display your GitHub profile stats (followers, stars received, PRs, issues, commits) in the Menu Bar",
+      "mode": "menu-bar",
+      "interval": "15m",
+      "preferences": [
+        {
+          "name": "useAvatarAsIcon",
+          "description": "Show your GitHub avatar as the menu bar icon instead of the GitHub logo",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Avatar",
+          "title": "Menu Bar Icon"
+        },
+        {
+          "name": "notifyOnNewStars",
+          "description": "Show a badge in the menu bar title and a 'What's New' section when your repositories receive new stars",
+          "type": "checkbox",
+          "required": false,
+          "default": true,
+          "label": "Notify on new stars",
+          "title": "New Stars Notification"
+        },
+        {
+          "name": "refreshFrequency",
+          "description": "How often to refresh stats in the background. Lower values keep the data fresher but use more GitHub API quota.",
+          "type": "dropdown",
+          "required": false,
+          "default": "30m",
+          "title": "Refresh Frequency",
+          "data": [
+            {
+              "title": "15 minutes",
+              "value": "15m"
+            },
+            {
+              "title": "30 minutes",
+              "value": "30m"
+            },
+            {
+              "title": "1 hour",
+              "value": "1h"
+            },
+            {
+              "title": "2 hours",
+              "value": "2h"
+            }
+          ]
+        },
+        {
+          "name": "titleMetric",
+          "description": "The metric shown next to the menu bar icon",
+          "type": "dropdown",
+          "required": false,
+          "default": "followers",
+          "title": "Menu Bar Title",
+          "data": [
+            {
+              "title": "Followers",
+              "value": "followers"
+            },
+            {
+              "title": "Stars Received",
+              "value": "stars"
+            },
+            {
+              "title": "Open PRs",
+              "value": "prsOpen"
+            },
+            {
+              "title": "Open Issues",
+              "value": "issuesOpen"
+            },
+            {
+              "title": "Icon Only",
+              "value": "none"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "my-pull-requests-menu",
       "title": "My Pull Requests Menu Bar",
       "description": "Display My Pull Requests in the Menu Bar",
@@ -450,6 +536,13 @@
           "placeholder": "5"
         }
       ]
+    },
+    {
+      "name": "download-repository",
+      "title": "Download Repository",
+      "subtitle": "GitHub",
+      "description": "Download an entire repo or a specific directory inside a repo",
+      "mode": "view"
     }
   ],
   "tools": [
@@ -475,12 +568,12 @@
     },
     {
       "name": "enable-auto-merge",
-      "title": "Enable Auto-Merge",
+      "title": "Enable Auto-merge",
       "description": "Enable auto-merge on a pull request"
     },
     {
       "name": "disable-auto-merge",
-      "title": "Disable Auto-Merge",
+      "title": "Disable Auto-merge",
       "description": "Disable auto-merge on a pull request"
     },
     {
@@ -990,7 +1083,8 @@
     "date-fns": "^3.6.0",
     "graphql-request": "^6.1.0",
     "lodash": "^4.17.23",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "yauzl": "^3.2.0"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "^5.0.2",
@@ -1002,6 +1096,7 @@
     "@types/lodash": "^4.17.5",
     "@types/node": "^22.1.0",
     "@types/react": "^18.3.3",
+    "@types/yauzl": "^2.10.3",
     "concurrently": "^8.2.2",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",

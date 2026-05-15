@@ -2,7 +2,7 @@ import { getPreferenceValues, Icon, Image, Keyboard, List } from "@raycast/api";
 import ColorJS from "colorjs.io";
 import { Colors, Palette } from "color-namer";
 import uniqBy from "lodash/uniqBy";
-import { HistoryColor, HistoryItem } from "./types";
+import { CopyColorsFormat, HistoryColor, HistoryItem } from "./types";
 import { ColorFormatType } from "./types";
 
 export const isMac = process.platform === "darwin";
@@ -139,4 +139,43 @@ export function getColorByProximity(colors?: Colors<Palette>) {
   return uniqBy(Object.values(colors ?? {}).flat(), (x) => x.name.toLowerCase()).sort(
     (a, b) => a.distance - b.distance,
   );
+}
+
+export const COPY_FORMATS: Array<{ format: CopyColorsFormat; title: string; icon: Icon }> = [
+  { format: "json", title: "Copy Colors as JSON", icon: Icon.CodeBlock },
+  { format: "css-classes", title: "Copy Colors as CSS Classes", icon: Icon.Brush },
+  { format: "css-variables", title: "Copy Colors as CSS Variables", icon: Icon.Gear },
+];
+
+export function getColor(item: HistoryItem | string): HistoryColor {
+  return typeof item === "string" ? item : item.color;
+}
+
+export function copyAsJSON(items: (HistoryItem | string)[]): string {
+  return JSON.stringify({ colors: items.map((item) => getFormattedColor(getColor(item))) }, null, 2);
+}
+
+export function copyAsCSSClasses(items: (HistoryItem | string)[]): string {
+  return items
+    .map((item, index) => {
+      const color = getFormattedColor(getColor(item));
+      return `.color-${index + 1} {\n  color: ${color};\n}`;
+    })
+    .join("\n\n");
+}
+
+export function copyAsCSSVariables(items: (HistoryItem | string)[]): string {
+  const lines = items.map((item, index) => `  --color-${index + 1}: ${getFormattedColor(getColor(item))};`);
+  return [":root {", ...lines, "}"].join("\n");
+}
+
+export function copySelectedColors(items: (HistoryItem | string)[], format: CopyColorsFormat): string {
+  switch (format) {
+    case "json":
+      return copyAsJSON(items);
+    case "css-classes":
+      return copyAsCSSClasses(items);
+    case "css-variables":
+      return copyAsCSSVariables(items);
+  }
 }

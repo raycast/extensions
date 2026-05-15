@@ -62,6 +62,15 @@
       "type": "checkbox",
       "required": false,
       "default": true
+    },
+    {
+      "name": "hideUnmanagedPackages",
+      "title": "Installed Packages",
+      "label": "Hide packages not installed via WinGet or Microsoft Store",
+      "description": "When enabled, packages without a known source are hidden from the Installed Packages list. Note: some WinGet-installed packages may temporarily appear without a source after installation.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
     }
   ],
   "dependencies": {

@@ -1,5 +1,5 @@
 import { Action, ActionPanel, Icon, LaunchProps, List, getPreferenceValues } from "@raycast/api";
-import { Windows, focusWindow, getWindows, pullWindowToCurrentWorkspace } from "./utils/appSwitcher";
+import { Windows, focusWindow, getWindows, pullWindowToCurrentWorkspace, setWindowTiling } from "./utils/appSwitcher";
 import { useEffect, useMemo, useState } from "react";
 import { useCachedState } from "@raycast/utils";
 
@@ -59,9 +59,14 @@ export default function Command(
       {Object.entries(groupedByWorkspace).map(([workspaceName, group]) => (
         <List.Section key={workspaceName} title={`Workspace ${workspaceName} - ${group.monitor}`}>
           {group.windows
-            .filter((window) =>
-              searchText ? window["app-name"].toLowerCase().startsWith(searchText?.toLowerCase()) : true,
-            )
+            .filter((window) => {
+              if (!searchText) return true;
+              const search = searchText.toLowerCase();
+              return (
+                window["app-name"].toLowerCase().includes(search) ||
+                (window["window-title"] ?? "").toLowerCase().includes(search)
+              );
+            })
             .map((window) => (
               <List.Item
                 key={window["window-id"]}
@@ -82,6 +87,14 @@ export default function Command(
                       shortcut={{ modifiers: ["shift"], key: "enter" }}
                       onAction={async () => {
                         await pullWindowToCurrentWorkspace(window["window-id"].toString());
+                      }}
+                    />
+                    <Action
+                      title="Set to Tiling"
+                      icon={Icon.AppWindowGrid3x3}
+                      shortcut={{ modifiers: ["cmd"], key: "t" }}
+                      onAction={async () => {
+                        await setWindowTiling(window["window-id"].toString());
                       }}
                     />
                   </ActionPanel>

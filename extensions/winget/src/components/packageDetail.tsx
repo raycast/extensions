@@ -1,15 +1,26 @@
-import { Detail, List } from "@raycast/api";
+import { Color, Detail, List } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { execWinget } from "../utils/winget/commands";
 import { parsePackageDetail } from "../utils/winget/parse";
 
 interface Props {
   packageId: string;
+  packageName?: string;
+  source?: string;
 }
 
-function usePackageDetail(packageId: string) {
+function sourceTag(source?: string): { value: string; color: Color } | null {
+  if (!source) return null;
+  const s = source.toLowerCase();
+  if (s === "msstore") return { value: "Microsoft Store", color: Color.Blue };
+  if (s === "winget") return { value: "WinGet", color: Color.Green };
+  return { value: source, color: Color.SecondaryText };
+}
+
+function usePackageDetail(packageId: string, skip = false) {
   return usePromise(
     async (id: string) => {
+      if (!id) return null;
       const output = await execWinget([
         "show",
         "--id",
@@ -21,6 +32,7 @@ function usePackageDetail(packageId: string) {
       return parsePackageDetail(output);
     },
     [packageId],
+    { execute: !skip },
   );
 }
 
@@ -33,8 +45,23 @@ function buildMarkdown(name: string, description?: string): string {
  * Sidebar detail panel used inside a `List.Item`.
  * Lazily fetches `winget show --id <packageId>` on first render.
  */
-export function PackageListDetail({ packageId }: Props) {
-  const { data, isLoading } = usePackageDetail(packageId);
+export function PackageListDetail({ packageId, packageName, source }: Props) {
+  const isUnmanaged = !source;
+  const { data, isLoading } = usePackageDetail(packageId, isUnmanaged);
+  const tag = sourceTag(source);
+
+  if (isUnmanaged) {
+    return (
+      <List.Item.Detail
+        markdown={`# ${packageName ?? packageId}\n\nThis package was not installed through WinGet or the Microsoft Store. No additional details are available.`}
+        metadata={
+          <List.Item.Detail.Metadata>
+            <List.Item.Detail.Metadata.Label title="ID" text={packageId || "—"} />
+          </List.Item.Detail.Metadata>
+        }
+      />
+    );
+  }
 
   return (
     <List.Item.Detail
@@ -44,7 +71,14 @@ export function PackageListDetail({ packageId }: Props) {
         data ? (
           <List.Item.Detail.Metadata>
             <List.Item.Detail.Metadata.Label title="ID" text={data.id} />
-            <List.Item.Detail.Metadata.Label title="Version" text={data.version} />
+            {tag && (
+              <List.Item.Detail.Metadata.TagList title="Source">
+                <List.Item.Detail.Metadata.TagList.Item text={tag.value} color={tag.color} />
+              </List.Item.Detail.Metadata.TagList>
+            )}
+            {data.version && data.version.toLowerCase() !== "unknown" && (
+              <List.Item.Detail.Metadata.Label title="Version" text={data.version} />
+            )}
             {data.publisher && <List.Item.Detail.Metadata.Label title="Publisher" text={data.publisher} />}
             {data.publisherUrl && (
               <List.Item.Detail.Metadata.Link
@@ -56,7 +90,16 @@ export function PackageListDetail({ packageId }: Props) {
             {data.homepage && (
               <List.Item.Detail.Metadata.Link title="Homepage" target={data.homepage} text={data.homepage} />
             )}
-            {data.license && <List.Item.Detail.Metadata.Label title="License" text={data.license} />}
+            {data.license &&
+              (data.licenseUrl || data.license.startsWith("http") ? (
+                <List.Item.Detail.Metadata.Link
+                  title="License"
+                  target={data.licenseUrl ?? data.license}
+                  text={data.license}
+                />
+              ) : (
+                <List.Item.Detail.Metadata.Label title="License" text={data.license} />
+              ))}
             {data.moniker && <List.Item.Detail.Metadata.Label title="Moniker" text={data.moniker} />}
             {data.installerType && <List.Item.Detail.Metadata.Label title="Installer Type" text={data.installerType} />}
             {data.tags && data.tags.length > 0 && (
@@ -79,8 +122,23 @@ export function PackageListDetail({ packageId }: Props) {
 /**
  * Full-screen detail push view. Used via `Action.Push` for a richer detail page.
  */
-export function PackageDetailView({ packageId }: Props) {
-  const { data, isLoading } = usePackageDetail(packageId);
+export function PackageDetailView({ packageId, packageName, source }: Props) {
+  const isUnmanaged = !source;
+  const { data, isLoading } = usePackageDetail(packageId, isUnmanaged);
+  const tag = sourceTag(source);
+
+  if (isUnmanaged) {
+    return (
+      <Detail
+        markdown={`# ${packageName ?? packageId}\n\nThis package was not installed through WinGet or the Microsoft Store. No additional details are available.`}
+        metadata={
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="ID" text={packageId || "—"} />
+          </Detail.Metadata>
+        }
+      />
+    );
+  }
 
   return (
     <Detail
@@ -90,13 +148,25 @@ export function PackageDetailView({ packageId }: Props) {
         data ? (
           <Detail.Metadata>
             <Detail.Metadata.Label title="ID" text={data.id} />
-            <Detail.Metadata.Label title="Version" text={data.version} />
+            {tag && (
+              <Detail.Metadata.TagList title="Source">
+                <Detail.Metadata.TagList.Item text={tag.value} color={tag.color} />
+              </Detail.Metadata.TagList>
+            )}
+            {data.version && data.version.toLowerCase() !== "unknown" && (
+              <Detail.Metadata.Label title="Version" text={data.version} />
+            )}
             {data.publisher && <Detail.Metadata.Label title="Publisher" text={data.publisher} />}
             {data.publisherUrl && (
               <Detail.Metadata.Link title="Publisher URL" target={data.publisherUrl} text={data.publisherUrl} />
             )}
             {data.homepage && <Detail.Metadata.Link title="Homepage" target={data.homepage} text={data.homepage} />}
-            {data.license && <Detail.Metadata.Label title="License" text={data.license} />}
+            {data.license &&
+              (data.licenseUrl || data.license.startsWith("http") ? (
+                <Detail.Metadata.Link title="License" target={data.licenseUrl ?? data.license} text={data.license} />
+              ) : (
+                <Detail.Metadata.Label title="License" text={data.license} />
+              ))}
             {data.moniker && <Detail.Metadata.Label title="Moniker" text={data.moniker} />}
             {data.installerType && <Detail.Metadata.Label title="Installer Type" text={data.installerType} />}
             {data.tags && data.tags.length > 0 && (
