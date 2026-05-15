@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Enhancement] - {PR_MERGED_AT}
+## [Enhancement] - {PR_MERGE_DATE}
 
 - Redesigned the menu bar dropdown: quick-pick durations (10m, 30m, 1h, 2h, 4h, 8h, 12h) and `Indefinitely`, each with a checkmark and live countdown when active.
 - Added `Until…` to the menu bar dropdown, which opens a date/time picker form.
