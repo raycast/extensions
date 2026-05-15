@@ -39,10 +39,17 @@ async function caffeinateUntilTarget(target: Date) {
     return;
   }
   const formattedTime = target.toLocaleTimeString([], { timeStyle: "short" });
-  const tomorrow = target.getDate() != now.getDate() ? "tomorrow at " : "";
+  const tomorrow = new Date(now);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const dayLabel =
+    target.toDateString() === now.toDateString()
+      ? ""
+      : target.toDateString() === tomorrow.toDateString()
+        ? "tomorrow at "
+        : `${target.toLocaleDateString([], { weekday: "short", month: "short", day: "numeric" })} at `;
   await startCaffeinate(
     { menubar: true, status: true },
-    `Caffeinating your Mac until ${tomorrow}${formattedTime}`,
+    `Caffeinating your Mac until ${dayLabel}${formattedTime}`,
     `-t ${totalSeconds}`,
   );
 }
