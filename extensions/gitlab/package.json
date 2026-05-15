@@ -107,7 +107,17 @@
       "title": "My Projects",
       "subtitle": "GitLab",
       "description": "My GitLab Projects",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "active",
+          "description": "Limit by projects that are not archived and not marked for deletion",
+          "type": "checkbox",
+          "required": false,
+          "label": "Search active projects only",
+          "default": false
+        }
+      ]
     },
     {
       "name": "group_my",
