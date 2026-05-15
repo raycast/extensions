@@ -76,7 +76,6 @@
       "title": "TTS Studio",
       "subtitle": "MiMo",
       "description": "Generate and play MiMo speech from typed, selected, or pasted text, with voice, emotion, and style controls.",
-      "icon": "mimo-icon.png",
       "mode": "view"
     },
     {
@@ -84,7 +83,6 @@
       "title": "Quick Read with MiMo",
       "subtitle": "MiMo",
       "description": "Read selected or clipboard text with your default MiMo voice. Run again to stop playback.",
-      "icon": "mimo-icon.png",
       "mode": "no-view"
     },
     {
@@ -92,7 +90,6 @@
       "title": "Read with MiMo Voice",
       "subtitle": "MiMo",
       "description": "Browse MiMo voices and read selected or clipboard text aloud.",
-      "icon": "mimo-icon.png",
       "mode": "view"
     },
     {
@@ -100,7 +97,6 @@
       "title": "Set MiMo Quick Read Voice",
       "subtitle": "MiMo",
       "description": "Choose and preview the MiMo voice used by Quick Read when MiMo is the default provider.",
-      "icon": "mimo-icon.png",
       "mode": "view"
     },
     {
