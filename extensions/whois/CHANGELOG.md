@@ -1,6 +1,6 @@
 # Whois Changelog
 
-## [WHOIS/RDAP Integration] - {PR_MERGE_DATE}
+## [WHOIS/RDAP Integration] - 2026-05-15
 
 - Added full WHOIS and RDAP domain lookup via `whoiser`.
 - Improved UI: Structured metadata panel and raw WHOIS output in the main view for domains.
