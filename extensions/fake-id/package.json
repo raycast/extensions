@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "fake-id",
   "title": "FakeID",
-  "description": "Generate fake US addresses, identities, SSNs and more. Save to 1Password, copy to clipboard instantly.",
+  "description": "Generate fake US addresses, identities, SSNs and more. Copy to clipboard instantly.",
   "icon": "icon.png",
   "author": "shenye",
   "categories": [
