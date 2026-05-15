@@ -80,11 +80,12 @@ type Input = {
     date?: string; // Available but string format is recommended
   };
   /**
-   * The deadline of the task in the format YYYY-MM-DD (RFC 3339)
+   * Optional paid Todoist deadline in the format YYYY-MM-DD (RFC 3339). Omit this field entirely unless the user
+   * explicitly asks for a deadline. Use `due` for ordinary due dates.
    */
   deadline?: { date: string };
   /**
-   * The duration of the task
+   * Optional paid Todoist task duration. Omit this field entirely unless the user explicitly asks for a task duration.
    * @property unit - The time unit ('minute' or 'day')
    * @property amount - Positive integer representing the amount of time
    */
@@ -140,9 +141,28 @@ type Input = {
   auto_parse_labels?: boolean;
 };
 
+function sanitizePaidFields(input: Input) {
+  const sanitizedInput = { ...input };
+
+  if (!sanitizedInput.deadline?.date?.trim()) {
+    delete sanitizedInput.deadline;
+  }
+
+  if (
+    sanitizedInput.duration === undefined ||
+    !Number.isFinite(sanitizedInput.duration.amount) ||
+    sanitizedInput.duration.amount <= 0
+  ) {
+    delete sanitizedInput.duration;
+  }
+
+  return sanitizedInput;
+}
+
 export default withTodoistApi(async function (input: Input) {
   const temp_id = crypto.randomUUID();
-  input.priority = mapPriority(input.priority);
+  const args = sanitizePaidFields(input);
+  args.priority = mapPriority(args.priority);
 
   return syncRequest({
     sync_token,
@@ -152,7 +172,7 @@ export default withTodoistApi(async function (input: Input) {
         type: "item_add",
         temp_id,
         uuid: crypto.randomUUID(),
-        args: input,
+        args,
       },
     ],
   });

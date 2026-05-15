@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Omit paid task fields unless requested] - 2026-05-15
+
+- **Create Task tool**: The AI tool now omits empty deadline and duration payloads, and its field descriptions clarify that those paid Todoist fields should only be sent when explicitly requested. Standard task creation with ordinary due dates remains compatible with Free plan accounts.
+
 ## [Filter completion UI and incremental reminder sync] - 2026-05-04
 
 - **Duplicate “at task time” reminders on hourly repeat**: Applying the **same** hourly recurrence twice (when the task already had a timed due and a relative-at-task reminder) no longer queues a second identical reminder; the extension now trusts the merged cache whenever Sync returns an empty `reminders` delta, not only when the field was omitted entirely.
