@@ -191,10 +191,10 @@ function RuleForm({ initialRule, onSave }: { initialRule?: RegexRule; onSave: (r
           >
             <ActionPanel.Section title="Types of Characters">
               <Action title="Any Character (.)" onAction={() => appendToFindPattern(".")} />
-              <Action title="Digit (\D)" onAction={() => appendToFindPattern("\\d")} />
-              <Action title="Word Character (\W)" onAction={() => appendToFindPattern("\\w")} />
-              <Action title="Whitespace (\S)" onAction={() => appendToFindPattern("\\s")} />
-              <Action title="Lowercase Letter ([A-Z])" onAction={() => appendToFindPattern("[a-z]")} />
+              <Action title="Digit (\d)" onAction={() => appendToFindPattern("\\d")} />
+              <Action title="Word Character (\w)" onAction={() => appendToFindPattern("\\w")} />
+              <Action title="Whitespace (\s)" onAction={() => appendToFindPattern("\\s")} />
+              <Action title="Lowercase Letter ([a-z])" onAction={() => appendToFindPattern("[a-z]")} />
               <Action title="Uppercase Letter ([A-Z])" onAction={() => appendToFindPattern("[A-Z]")} />
             </ActionPanel.Section>
             <ActionPanel.Section title="Locations">
