@@ -1,5 +1,6 @@
 import { Action, getPreferenceValues, Icon, popToRoot, showHUD, showToast, Toast } from "@raycast/api";
 import { pause } from "../api/pause";
+import { TogglePlayPause } from "../shortcuts/shortcuts";
 
 type PauseActionProps = {
   onPause?: () => void;
@@ -27,6 +28,7 @@ export function PauseAction({ onPause }: PauseActionProps) {
         toast.title = "Paused";
         toast.style = Toast.Style.Success;
       }}
+      shortcut={TogglePlayPause}
     />
   );
 }
