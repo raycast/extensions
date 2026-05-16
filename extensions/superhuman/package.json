@@ -15,12 +15,6 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "placeholder",
-      "title": "Placeholder",
-      "description": "Placeholder until extensions no longer require a command",
-      "mode": "no-view"
-    },
-    {
       "name": "browse-skills",
       "title": "Browse Superhuman Mail Skills",
       "description": "Browse and run Superhuman's curated workflow skills (Morning Briefing, EOD Wrap-Up, Meeting Scheduler, Deal Tracker, Batch Draft Writer). Skills are fetched live from Superhuman's upstream library with a bundled fallback for offline use.",
