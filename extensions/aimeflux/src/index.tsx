@@ -824,20 +824,27 @@ function HistoryBrowser() {
             />
           }
           actions={
-            <HistoryActions filters={filters} setFilters={setFilters}>
+            <HistoryActions
+              filters={filters}
+              setFilters={setFilters}
+              tailChildren={
+                <>
+                  <Action.CopyToClipboard
+                    title="Copy Text"
+                    content={item.summary}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy History ID"
+                    content={item.id}
+                  />
+                </>
+              }
+            >
               <Action.Paste title="Paste" content={item.summary} />
               <Action.Push
                 title="Reprocess"
                 icon={Icon.ArrowClockwise}
                 target={<ReprocessHistoryItemForm transcriptId={item.id} />}
-              />
-              <Action.CopyToClipboard
-                title="Copy Text"
-                content={item.summary}
-              />
-              <Action.CopyToClipboard
-                title="Copy History ID"
-                content={item.id}
               />
             </HistoryActions>
           }
@@ -1172,8 +1179,6 @@ function WatchBrowser() {
           }
           actions={
             <WatchActions>
-              <Action.CopyToClipboard title="Copy Watch ID" content={item.id} />
-              <Action.CopyToClipboard title="Copy Path" content={item.path} />
               <Action.Push
                 title="Process This Folder"
                 icon={Icon.ArrowClockwise}
@@ -1187,12 +1192,67 @@ function WatchBrowser() {
                   />
                 }
               />
+              <Action
+                title={
+                  item.enabled === "true"
+                    ? "Disable Processing"
+                    : "Enable Processing"
+                }
+                icon={item.enabled === "true" ? Icon.Pause : Icon.Play}
+                style={
+                  item.enabled === "true"
+                    ? Action.Style.Destructive
+                    : Action.Style.Regular
+                }
+                onAction={() => toggleWatchProcessing(item, setItems)}
+              />
+              <Action.CopyToClipboard title="Copy Watch ID" content={item.id} />
+              <Action.CopyToClipboard title="Copy Path" content={item.path} />
             </WatchActions>
           }
         />
       ))}
     </List>
   );
+}
+
+async function toggleWatchProcessing(
+  item: WatchItem,
+  setItems: Dispatch<SetStateAction<WatchItem[]>>,
+) {
+  const shouldDisable = item.enabled === "true";
+  const action = shouldDisable ? "disable" : "enable";
+  const result = await runAimeFlux({
+    label: shouldDisable ? "Disable Processing" : "Enable Processing",
+    args: ["watch", action, item.id],
+  });
+
+  if (result.exitCode !== 0) {
+    await showToast({
+      style: Toast.Style.Failure,
+      title: shouldDisable
+        ? "Failed to disable processing"
+        : "Failed to enable processing",
+      message:
+        firstMeaningfulLine(result.stderr || result.stdout) ||
+        `Exit code: ${result.exitCode}`,
+    });
+    return;
+  }
+
+  setItems((current) =>
+    current.map((candidate) =>
+      candidate.id === item.id
+        ? { ...candidate, enabled: shouldDisable ? "false" : "true" }
+        : candidate,
+    ),
+  );
+
+  await showToast({
+    style: Toast.Style.Success,
+    title: shouldDisable ? "Processing disabled" : "Processing enabled",
+    message: item.name,
+  });
 }
 
 function PackageBrowser({ kind }: { kind: PackageKind }) {
@@ -1419,6 +1479,7 @@ function PackageBrowser({ kind }: { kind: PackageKind }) {
                 <Action
                   title="Disable Package"
                   icon={Icon.XMarkCircle}
+                  style={Action.Style.Destructive}
                   onAction={() => togglePackage(item, "disable")}
                 />
               )}
@@ -1619,10 +1680,12 @@ function HistoryActions({
   filters,
   setFilters,
   children,
+  tailChildren,
 }: {
   filters: HistoryFilters;
   setFilters: Dispatch<SetStateAction<HistoryFilters>>;
   children?: ReactNode;
+  tailChildren?: ReactNode;
 }) {
   return (
     <ActionPanel>
@@ -1632,6 +1695,7 @@ function HistoryActions({
         icon={Icon.Filter}
         target={<HistoryFilterForm filters={filters} onSubmit={setFilters} />}
       />
+      {tailChildren}
       <Action
         title="Latest 20"
         icon={Icon.Clock}
@@ -2641,6 +2705,7 @@ function ExecutionView({
   const primaryCopyContent = hasFailed
     ? (state.result?.stderr ?? state.result?.stdout ?? "")
     : (state.result?.stdout ?? "");
+  const shouldPasteResult = !hasFailed && shouldPasteResultByDefault(request);
 
   return (
     <Detail
@@ -2649,6 +2714,9 @@ function ExecutionView({
       markdown={markdown}
       actions={
         <ActionPanel>
+          {shouldPasteResult ? (
+            <Action.Paste title="Paste Result" content={primaryCopyContent} />
+          ) : null}
           <Action.CopyToClipboard
             title={primaryCopyTitle}
             content={primaryCopyContent}
@@ -2663,6 +2731,10 @@ function ExecutionView({
       }
     />
   );
+}
+
+function shouldPasteResultByDefault(request: CommandRequest) {
+  return request.args[0] === "process" || request.args[0] === "import-text";
 }
 
 async function executeRequest(title: string, request: CommandRequest) {
