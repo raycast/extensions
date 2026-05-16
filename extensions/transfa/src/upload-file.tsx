@@ -1,25 +1,9 @@
-import {
-  Action,
-  ActionPanel,
-  Clipboard,
-  Form,
-  Icon,
-  getPreferenceValues,
-  open,
-  showHUD,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Form, Icon, getPreferenceValues, open, showToast, Toast } from "@raycast/api";
 import * as fs from "fs";
 import * as path from "path";
 import { useState } from "react";
 import { uploadFile } from "./api";
 import { formatBytes } from "./utils";
-
-interface Preferences {
-  apiKey: string;
-  defaultTtl: string;
-}
 
 interface FormValues {
   files: string[];
@@ -68,8 +52,6 @@ export default function UploadFileCommand() {
         title: "Copy Direct Download URL",
         onAction: () => Clipboard.copy(result.agent_link),
       };
-
-      await showHUD(`✓ ${filename} — link copied`);
     } catch (err) {
       toast.style = Toast.Style.Failure;
       toast.title = "Upload failed";
