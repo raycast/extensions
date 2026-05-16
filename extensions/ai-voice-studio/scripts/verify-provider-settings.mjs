@@ -28,18 +28,18 @@ const raycastApiStub = {
 const settings = loadTs("src/utils/provider-settings.ts");
 
 await verifyInvalidFallbacks();
-await verifyValidProviderSettings();
-await verifyTrimmedTextFields();
+await verifyLegacyPreferencesIgnored();
+await verifyTrimmedOverrideFields();
 await verifyQuickSetupOverrides();
 
 console.log(
   JSON.stringify(
     {
       checked: [
-        "invalid provider preferences fall back safely",
-        "valid provider preferences are preserved",
-        "text preferences are trimmed",
-        "quick setup overrides take precedence and can reset",
+        "invalid legacy provider preferences fall back safely",
+        "legacy provider preferences are ignored",
+        "text override fields are trimmed",
+        "quick setup overrides take precedence and can reset to defaults",
       ],
     },
     null,
@@ -96,7 +96,7 @@ async function verifyInvalidFallbacks() {
   assert(result.openai.instructions === "", "Blank OpenAI instructions should clear");
 }
 
-async function verifyValidProviderSettings() {
+async function verifyLegacyPreferencesIgnored() {
   storage.clear();
   preferences = {
     defaultProvider: "openai",
@@ -121,37 +121,48 @@ async function verifyValidProviderSettings() {
   };
 
   const result = await settings.getProviderSettings();
-  assert(result.defaultProvider === "openai", "Valid default provider should be preserved");
-  assert(result.minimax.authMode === "payg", "Valid MiniMax auth mode should be preserved");
-  assert(result.minimax.model === "speech-2.8-turbo", "Valid MiniMax model should be preserved");
-  assert(result.minimax.defaultVoice === "English_CalmWoman", "Valid MiniMax voice should be preserved");
-  assert(result.minimax.customDefaultVoice === "voice_custom", "Custom MiniMax voice should be preserved");
-  assert(result.minimax.customVoiceIds === "voice_a,voice_b", "Custom MiniMax voice list should be preserved");
-  assert(result.minimax.languageBoost === "English", "Valid MiniMax language boost should be preserved");
-  assert(result.minimax.speechRate === "1.25", "Valid MiniMax speech rate should be preserved");
-  assert(result.minimax.region === "global", "Valid MiniMax region should be preserved");
-  assert(result.mimo.model === "mimo-v2-tts", "Valid MiMo model should be preserved");
-  assert(result.mimo.defaultVoice === "default_en", "Valid MiMo voice should be preserved");
-  assert(result.mimo.speechRate === "25", "Valid MiMo speed should be preserved");
-  assert(result.mimo.stylePrompt === "Clear and brisk", "MiMo style prompt should be preserved");
-  assert(result.mimo.tokenPlanBaseUrl === "https://example.com/v1", "MiMo base URL should be normalized");
-  assert(result.openai.model === "tts-1-hd", "Valid OpenAI model should be preserved");
-  assert(result.openai.voice === "alloy", "Valid OpenAI voice should be preserved");
-  assert(result.openai.responseFormat === "wav", "Valid OpenAI format should be preserved");
-  assert(result.openai.playbackRate === "1.5", "Valid OpenAI rate should be preserved");
-  assert(result.openai.instructions === "Speak clearly", "OpenAI instructions should be preserved");
+  assert(result.defaultProvider === "minimax", "Legacy preference default provider should be ignored");
+  assert(result.minimax.authMode === "auto", "Legacy preference auth mode should be ignored");
+  assert(result.minimax.model === "speech-2.8-hd", "Legacy preference MiniMax model should be ignored");
+  assert(result.minimax.defaultVoice === "Chinese (Mandarin)_Radio_Host", "Legacy preference MiniMax voice should be ignored");
+  assert(result.minimax.customDefaultVoice === "", "Legacy preference custom MiniMax voice should be ignored");
+  assert(result.minimax.customVoiceIds === "", "Legacy preference custom MiniMax voice list should be ignored");
+  assert(result.minimax.languageBoost === "auto", "Legacy preference language boost should be ignored");
+  assert(result.minimax.speechRate === "1", "Legacy preference speech rate should be ignored");
+  assert(result.minimax.region === "cn", "Legacy preference region should be ignored");
+  assert(result.mimo.model === "mimo-v2.5-tts", "Legacy preference MiMo model should be ignored");
+  assert(result.mimo.defaultVoice === "mimo_default", "Legacy preference MiMo voice should be ignored");
+  assert(result.mimo.speechRate === "0", "Legacy preference MiMo speed should be ignored");
+  assert(result.mimo.stylePrompt === "", "Legacy preference MiMo style prompt should be ignored");
+  assert(
+    result.mimo.tokenPlanBaseUrl === "https://token-plan-cn.xiaomimimo.com/v1",
+    "Legacy preference MiMo base URL should be ignored",
+  );
+  assert(result.openai.model === "gpt-4o-mini-tts", "Legacy preference OpenAI model should be ignored");
+  assert(result.openai.voice === "cedar", "Legacy preference OpenAI voice should be ignored");
+  assert(result.openai.responseFormat === "mp3", "Legacy preference OpenAI format should be ignored");
+  assert(result.openai.playbackRate === "1", "Legacy preference OpenAI rate should be ignored");
+  assert(result.openai.instructions === "", "Legacy preference OpenAI instructions should be ignored");
 }
 
-async function verifyTrimmedTextFields() {
+async function verifyTrimmedOverrideFields() {
   storage.clear();
-  preferences = {
+  preferences = {};
+
+  await settings.saveProviderSettingsOverrides({
     defaultProvider: "mimo",
-    minimaxCustomDefaultVoice: "  custom_voice  ",
-    minimaxCustomVoiceIds: "  a,b  ",
-    mimoStylePrompt: "  natural  ",
-    mimoTokenPlanBaseUrl: "  https://example.com/v1/chat/completions  ",
-    openaiInstructions: "  warm  ",
-  };
+    minimax: {
+      customDefaultVoice: "  custom_voice  ",
+      customVoiceIds: "  a,b  ",
+    },
+    mimo: {
+      stylePrompt: "  natural  ",
+      tokenPlanBaseUrl: "  https://example.com/v1/chat/completions  ",
+    },
+    openai: {
+      instructions: "  warm  ",
+    },
+  });
 
   const result = await settings.getProviderSettings();
   assert(result.defaultProvider === "mimo", "MiMo default provider should be preserved");
@@ -164,19 +175,7 @@ async function verifyTrimmedTextFields() {
 
 async function verifyQuickSetupOverrides() {
   storage.clear();
-  preferences = {
-    defaultProvider: "minimax",
-    authMode: "auto",
-    minimaxModel: "speech-2.8-hd",
-    minimaxDefaultVoice: "Chinese (Mandarin)_Radio_Host",
-    minimaxSpeechRate: "1",
-    mimoModel: "mimo-v2.5-tts",
-    mimoDefaultVoice: "mimo_default",
-    mimoSpeechRate: "0",
-    openaiModel: "gpt-4o-mini-tts",
-    openaiVoice: "cedar",
-    openaiPlaybackRate: "1",
-  };
+  preferences = {};
 
   await settings.saveProviderSettingsOverrides({
     defaultProvider: "openai",
@@ -214,9 +213,9 @@ async function verifyQuickSetupOverrides() {
 
   await settings.clearProviderSettingsOverrides();
   const reset = await settings.getProviderSettings();
-  assert(reset.defaultProvider === "minimax", "Clearing quick setup should return to preferences");
-  assert(reset.minimax.authMode === "auto", "Clearing quick setup should restore preference auth mode");
-  assert(reset.openai.voice === "cedar", "Clearing quick setup should restore preference voice");
+  assert(reset.defaultProvider === "minimax", "Clearing quick setup should return to defaults");
+  assert(reset.minimax.authMode === "auto", "Clearing quick setup should restore default auth mode");
+  assert(reset.openai.voice === "cedar", "Clearing quick setup should restore default OpenAI voice");
 }
 
 function loadTs(relativePath) {

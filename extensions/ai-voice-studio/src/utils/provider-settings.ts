@@ -1,4 +1,4 @@
-import { LocalStorage, getPreferenceValues } from "@raycast/api";
+import { LocalStorage } from "@raycast/api";
 import { DEFAULT_VOICE_ID } from "../constants/voices";
 import { DEFAULT_MODEL as DEFAULT_MIMO_MODEL, DEFAULT_VOICE as DEFAULT_MIMO_VOICE } from "../constants/mimo-voices";
 import { DEFAULT_FORMAT, DEFAULT_MODEL, DEFAULT_VOICE } from "../constants/openai-voices";
@@ -80,63 +80,9 @@ export const DEFAULT_PROVIDER_SETTINGS: ProviderSettings = {
   },
 };
 
-interface ProviderPreferenceValues {
-  defaultProvider?: string;
-  authMode?: string;
-  minimaxModel?: string;
-  minimaxDefaultVoice?: string;
-  minimaxCustomDefaultVoice?: string;
-  minimaxCustomVoiceIds?: string;
-  minimaxLanguageBoost?: string;
-  minimaxSpeechRate?: string;
-  region?: string;
-  mimoModel?: string;
-  mimoDefaultVoice?: string;
-  mimoSpeechRate?: string;
-  mimoStylePrompt?: string;
-  mimoTokenPlanBaseUrl?: string;
-  openaiModel?: string;
-  openaiVoice?: string;
-  openaiResponseFormat?: string;
-  openaiPlaybackRate?: string;
-  openaiInstructions?: string;
-}
-
 export async function getProviderSettings(): Promise<ProviderSettings> {
-  const preferences = getProviderSettingsFromPreferences();
   const overrides = await getProviderSettingsOverrides();
-  return overrides ? normalizeSettings(mergeSettings(preferences, overrides)) : preferences;
-}
-
-function getProviderSettingsFromPreferences(): ProviderSettings {
-  const prefs = getPreferenceValues<ProviderPreferenceValues>();
-  return normalizeSettings({
-    defaultProvider: prefs.defaultProvider,
-    minimax: {
-      authMode: prefs.authMode as MiniMaxAuthMode | undefined,
-      model: prefs.minimaxModel,
-      defaultVoice: prefs.minimaxDefaultVoice,
-      customDefaultVoice: prefs.minimaxCustomDefaultVoice,
-      customVoiceIds: prefs.minimaxCustomVoiceIds,
-      languageBoost: prefs.minimaxLanguageBoost,
-      speechRate: prefs.minimaxSpeechRate,
-      region: prefs.region as MiniMaxRegion | undefined,
-    },
-    mimo: {
-      model: prefs.mimoModel as MimoTTSModel | undefined,
-      defaultVoice: prefs.mimoDefaultVoice,
-      speechRate: prefs.mimoSpeechRate,
-      stylePrompt: prefs.mimoStylePrompt,
-      tokenPlanBaseUrl: prefs.mimoTokenPlanBaseUrl,
-    },
-    openai: {
-      model: prefs.openaiModel as OpenAITTSModel | undefined,
-      voice: prefs.openaiVoice,
-      responseFormat: prefs.openaiResponseFormat as OpenAIResponseFormat | undefined,
-      playbackRate: prefs.openaiPlaybackRate,
-      instructions: prefs.openaiInstructions,
-    },
-  });
+  return overrides ? normalizeSettings(mergeSettings(DEFAULT_PROVIDER_SETTINGS, overrides)) : DEFAULT_PROVIDER_SETTINGS;
 }
 
 export async function getDefaultProviderSetting(): Promise<TTSProvider> {
