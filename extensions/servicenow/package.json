@@ -104,20 +104,6 @@
       ]
     },
     {
-      "name": "login-to-instance",
-      "title": "Login to Instance",
-      "description": "Log in to the selected instance using the credentials from the selected profile.",
-      "mode": "no-view",
-      "arguments": [
-        {
-          "name": "instanceName",
-          "placeholder": "Instance URL or alias",
-          "type": "text",
-          "required": false
-        }
-      ]
-    },
-    {
       "name": "explore-navigation-history",
       "title": "Explore Navigation History",
       "description": "Browse the list of pages and modules you've visited.",

@@ -1,47 +1,14 @@
 # ServiceNow Extension Changelog
 
-## [Split update set downloads] - 2026-05-15
+## [Unreleased] - {PR_MERGE_DATE}
 
-- Renamed the existing **Download Extension Update Set** action to **Download ACLs for Non-Admin Users** to match the corresponding ServiceNow Share entry. The update set unlocks full access to search history, favorites, and full navigation history for non-admin users.
-- Added a new **Download Default OAuth Client** action for downloading the `oauth_entity` XML (_Raycast Extension – Default OAuth Client_ on ServiceNow Share), kept as a separate Share entry to allow independent release cycles from the Raycast extension.
-
-## [OAuth polish: login command, auth status] - 2026-05-15
-
-- **Login to Instance** for OAuth profiles now re-runs the OAuth authorization flow (which authenticates the browser as a side-effect) and then opens the instance, matching the one-click experience Basic Auth profiles already had.
-- Auth failures are now surfaced as a red exclamation accessory in **Manage Instance Profiles**, with the error message in the tooltip. Updates when interacting with the instance (selection, API request, token refresh).
-- Unified the auth-method tooltips to describe the method consistently: `OAuth` / `Basic Auth` (instead of mixing state and method).
-
-## [OAuth 2.0 (PKCE) authentication] - 2026-05-15
-
-- Added OAuth 2.0 authentication with PKCE as an alternative to Basic Auth, selectable per instance profile. Tokens are stored locally and refreshed automatically using the refresh token.
-- Added a **Sign In / Re-authenticate** action in the instance list for OAuth profiles whose tokens have been revoked or whose refresh token has expired.
-- Centralized authorization-header construction into a single helper (`src/utils/auth.ts`); previously every API call built `Basic ${...}` inline.
-
-## [Command title clean-up] - 2026-05-15
-
-- Renamed several command titles for clarity and to follow Raycast's `<verb> <noun>` convention. The underlying command IDs are unchanged, so existing user keyboard shortcuts and aliases keep working.
-  - **Search** → **Search Text** (anticipates a future Search Code command).
-  - **Quick Search** → **Quick Search Text**.
-  - **Search Sys ID** → **Find Record by Sys ID** (you have the ID; the command locates and opens the owning record).
-  - **Search Resources** → **Search Developer Portal** (the command targets developer.servicenow.com — docs, API references, blogs, learning, and Share — not your instance).
-  - **Open Current Page in Instance** → **Open Current Page in Another Instance**.
-- Removed six orphaned legacy command files left over from earlier refactors (`open-selected-instance`, `login-to-selected-instance`, `open-current-url`, `open-current-url-in-selected-instance`, `quickly-search`, `quickly-search-selected-instance`). They were not registered in `package.json` and had no remaining references.
-
-## [New Command: Find Record References] - 2026-05-14
-
-- Added a new **Find Record References** command. Given a base table and a Sys ID, lists every column across the instance that references that record, with a one-click action to open the filtered list view in ServiceNow. Requires an admin profile, as it runs a background script through `/sys.scripts.do`.
-- Extracted the shared `ServiceNowClient` helper used by both **Search Sys ID** and **Find Record References** into `src/utils/serviceNowClient.ts`.
-
-## [New Command: Cancel My Transactions] - 2026-05-14
-
-- Added a new **Cancel My Transactions** command. When a long-running transaction (e.g. a runaway Background Script) locks you out of your ServiceNow session, this command opens `cancel_my_transaction.do`, which stops the transaction and unlocks the session — no need to open a new browser or private window. Accepts an optional instance URL or alias; defaults to the currently selected instance.
-
-## [FedRAMP and on-prem support] - 2026-05-14
-
-- Added support for FedRAMP ServiceNow instances (`*.servicenowservices.com`) and on-prem deployments with custom hostnames. The **Instance URL** field in instance profiles now accepts either a subdomain (cloud) or a full URL.
-- Centralized URL construction through a new helper, eliminating ~25 hardcoded references to `.service-now.com`.
-- Tightened browser-tab detection to parse the hostname instead of substring matching, fixing a minor spoofing edge case.
-- Added a one-click action in the instance profile form to download this extension's Update Set from ServiceNow Share (`⌘U`).
+- Added OAuth 2.0 (PKCE) as an alternative to Basic Auth, selectable per instance profile. Tokens refresh automatically; a **Sign In / Re-authenticate** action recovers profiles whose refresh token has expired. Auth failures are surfaced as a red exclamation accessory in **Manage Instance Profiles**.
+- Added support for FedRAMP instances (`*.servicenowservices.com`) and on-prem deployments. The **Instance URL** field now accepts a subdomain or a full URL.
+- Added a new **Cancel My Transactions** command to stop a runaway transaction (e.g. a stuck Background Script) and unlock your ServiceNow session without opening a new browser.
+- Added a new admin command, **Find Record References**, which lists every column across the instance that references a given record, with a one-click action to open the filtered list view.
+- Added one-click actions in the instance profile form to download the extension's update sets from ServiceNow Share: **ACLs for Non-Admin Users** (renamed from "Extension Update Set") and the new **Default OAuth Client**.
+- Renamed several commands to follow Raycast's `<verb> <noun>` convention: **Search** → **Search Text**, **Quick Search** → **Quick Search Text**, **Search Sys ID** → **Find Record by Sys ID**, **Search Resources** → **Search Developer Portal**, **Open Current Page in Instance** → **Open Current Page in Another Instance**. Command IDs are unchanged, so existing keyboard shortcuts keep working.
+- Removed the **Login to Instance** command. Basic Auth profiles can still be logged in via **Open Instance**; OAuth profiles use **Sign In / Re-authenticate** in **Manage Instance Profiles**.
 
 ## [Fix] - 2025-05-14
 
