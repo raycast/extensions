@@ -55,6 +55,7 @@ describe("run-skill", () => {
     // The extension prelude is appended after the body.
     expect(out.extension_prelude_applied).toBe(true);
     expect(out.prompt).toMatch(/Operating rules \(extension override\)/);
+    expect(out.prompt).toMatch(/MUST include a thread reference/i);
   });
 
   it("accepts a fuzzy title", async () => {

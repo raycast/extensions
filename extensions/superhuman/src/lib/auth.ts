@@ -60,10 +60,12 @@ async function discoverMetadata(): Promise<{ as: OAuthServerMetadata; resourceSc
   if (!authServer)
     throw new Error(`Superhuman protected-resource metadata did not advertise an authorization_servers entry.`);
 
-  // Try OAuth Authorization Server Metadata first, then OIDC configuration as fallback.
+  // Try OIDC configuration first (it's a strict superset of OAS that also
+  // advertises userinfo_endpoint), then fall back to OAuth Authorization
+  // Server Metadata for non-OIDC providers.
   const asCandidates = [
-    new URL("/.well-known/oauth-authorization-server", authServer).toString(),
     new URL("/.well-known/openid-configuration", authServer).toString(),
+    new URL("/.well-known/oauth-authorization-server", authServer).toString(),
   ];
   let lastError: unknown;
   for (const url of asCandidates) {
@@ -269,9 +271,23 @@ export async function signOut(): Promise<void> {
 /**
  * Returns the OIDC userinfo endpoint discovered during the OAuth flow,
  * or `null` if discovery hasn't run yet (no token) or the auth server
- * doesn't advertise one. Reads from the sidecar that `authorize()` saves.
+ * doesn't advertise one.
+ *
+ * For users with a legacy sidecar (saved when discovery tried OAS-only
+ * metadata first, which doesn't include `userinfo_endpoint`), this lazily
+ * re-discovers from OIDC config and updates the sidecar in place. The
+ * refresh happens once per missing-field; subsequent calls hit the cache.
  */
 export async function getUserInfoEndpoint(): Promise<string | null> {
-  const sidecar = await loadSidecar();
-  return sidecar?.meta?.userinfo_endpoint ?? null;
+  let sidecar = await loadSidecar();
+  if (sidecar?.meta?.userinfo_endpoint) return sidecar.meta.userinfo_endpoint;
+  if (!sidecar) return null;
+  try {
+    const { as: meta } = await discoverMetadata();
+    sidecar = { ...sidecar, meta };
+    await saveSidecar(sidecar);
+    return meta.userinfo_endpoint ?? null;
+  } catch {
+    return null;
+  }
 }

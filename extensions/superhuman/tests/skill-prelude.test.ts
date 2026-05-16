@@ -59,6 +59,10 @@ describe("SKILL_PRELUDE constant", () => {
     expect(SKILL_PRELUDE).toContain("16-character lowercase hex");
     expect(SKILL_PRELUDE).toContain("url");
     expect(SKILL_PRELUDE).toContain("mail.superhuman.com");
+    // Explicit MUST language and integration example must survive future edits.
+    expect(SKILL_PRELUDE).toMatch(/MUST include a thread reference/i);
+    expect(SKILL_PRELUDE).toContain("Integration with skill bodies");
+    expect(SKILL_PRELUDE).toMatch(/Urgent[\s\S]*needs a reply/);
   });
 });
 
