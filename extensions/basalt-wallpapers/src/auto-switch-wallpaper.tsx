@@ -9,11 +9,6 @@ import {
 } from "@raycast/api";
 import { API_RANDOM_URL, setDesktopWallpaper, Wallpaper } from "./utils";
 
-interface Preferences {
-  refreshIntervalSeconds: string;
-  notifyOnSwitch: boolean;
-}
-
 const CACHE_KEY_LAST_REFRESH_TIME = "lastRefreshTime";
 const CACHE_KEY_RECENT_IDS = "recentIds";
 const RECENT_IDS_CAP = 5;
@@ -63,7 +58,7 @@ async function pickWallpaperAvoidingRecents(): Promise<Wallpaper> {
 }
 
 export default async function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues();
   const refreshInterval = Number(preferences.refreshIntervalSeconds) || 3600;
   const isManual = environment.launchType === LaunchType.UserInitiated;
 

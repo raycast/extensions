@@ -43,9 +43,18 @@
           "required": false,
           "default": "3600",
           "data": [
-            { "title": "30 Minutes", "value": "1800" },
-            { "title": "1 Hour", "value": "3600" },
-            { "title": "1 Day", "value": "86400" }
+            {
+              "title": "30 Minutes",
+              "value": "1800"
+            },
+            {
+              "title": "1 Hour",
+              "value": "3600"
+            },
+            {
+              "title": "1 Day",
+              "value": "86400"
+            }
           ]
         },
         {
@@ -61,14 +70,14 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.15",
+    "@raycast/api": "^1.104.17",
     "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.0.10",
-    "@types/react": "19.2.9",
-    "typescript": "^5.9.3"
+    "@types/node": "25.8.0",
+    "@types/react": "19.2.14",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
