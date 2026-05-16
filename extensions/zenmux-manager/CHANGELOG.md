@@ -4,6 +4,7 @@
 
 - Make the extension available on both macOS and Windows.
 - Remove the macOS-only menu bar command from the published command set so the extension can support Windows.
+- Add an inline status command for quota and PAYG balance, refreshed every 2 minutes.
 - Keep the ZenMux usage dashboard and Raycast AI account tools available cross-platform.
 
 ## [Improve PAYG-Only Account Display] - {PR_MERGE_DATE}

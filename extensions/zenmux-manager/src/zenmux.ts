@@ -222,6 +222,41 @@ export function formatAccountSnapshotForAI(snapshot?: AccountSnapshot): string {
   return sections.join("\n");
 }
 
+export type StatusDisplay =
+  | "payg-both-left"
+  | "payg-both-used"
+  | "payg-5h-left"
+  | "payg-5h-used"
+  | "payg-7d-left"
+  | "payg-7d-used"
+  | "payg-only";
+
+export function formatCommandSubtitle(
+  snapshot?: AccountSnapshot,
+  display: StatusDisplay = "payg-both-left",
+): string {
+  if (!snapshot) {
+    return "ZenMux account data unavailable";
+  }
+
+  const parts = [
+    `PAYG ${formatCurrency(
+      snapshot.payg?.total_credits,
+      snapshot.payg?.currency,
+    )}`,
+  ];
+
+  if (hasSubscriptionData(snapshot.subscription)) {
+    parts.push(...buildQuotaSubtitleParts(snapshot.subscription, display));
+  }
+
+  if (snapshot.warnings.length > 0) {
+    parts.push("Partial data");
+  }
+
+  return parts.filter(Boolean).join(" · ");
+}
+
 export function hasSubscriptionData(
   subscription?: SubscriptionDetail,
 ): subscription is SubscriptionDetail {
@@ -271,6 +306,50 @@ export function getUsagePercentage(quota: QuotaWindow): number | undefined {
   }
 
   return undefined;
+}
+
+function buildQuotaSubtitleParts(
+  subscription: SubscriptionDetail,
+  display: StatusDisplay,
+): string[] {
+  switch (display) {
+    case "payg-both-used":
+      return [
+        formatQuotaSubtitleValue("5h", subscription.quota_5_hour, "used"),
+        formatQuotaSubtitleValue("7d", subscription.quota_7_day, "used"),
+      ];
+    case "payg-5h-left":
+      return [
+        formatQuotaSubtitleValue("5h", subscription.quota_5_hour, "left"),
+      ];
+    case "payg-5h-used":
+      return [
+        formatQuotaSubtitleValue("5h", subscription.quota_5_hour, "used"),
+      ];
+    case "payg-7d-left":
+      return [formatQuotaSubtitleValue("7d", subscription.quota_7_day, "left")];
+    case "payg-7d-used":
+      return [formatQuotaSubtitleValue("7d", subscription.quota_7_day, "used")];
+    case "payg-only":
+      return [];
+    case "payg-both-left":
+    default:
+      return [
+        formatQuotaSubtitleValue("5h", subscription.quota_5_hour, "left"),
+        formatQuotaSubtitleValue("7d", subscription.quota_7_day, "left"),
+      ];
+  }
+}
+
+function formatQuotaSubtitleValue(
+  label: string,
+  quota: QuotaWindow | undefined,
+  mode: "left" | "used",
+): string {
+  const usage = quota ? getUsagePercentage(quota) : undefined;
+  const value =
+    mode === "left" && typeof usage === "number" ? 1 - usage : usage;
+  return `${label} ${formatPercentage(value)} ${mode}`;
 }
 
 export function getUsageColor(value?: number): Color {

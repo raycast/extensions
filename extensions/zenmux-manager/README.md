@@ -23,6 +23,7 @@ Standard ZenMux API keys are not accepted by the account endpoints. This extensi
 
 ## Commands
 
+- **ZenMux Status**: Inline quota and PAYG balance in Raycast, refreshed every 2 minutes.
 - **Show ZenMux Usage**: Full account dashboard.
 
 ## Raycast AI

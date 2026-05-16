@@ -37,6 +37,53 @@
   ],
   "commands": [
     {
+      "name": "usage-status",
+      "title": "ZenMux Status",
+      "description": "Show ZenMux quota and PAYG balance inline in Raycast.",
+      "mode": "no-view",
+      "interval": "2m",
+      "preferences": [
+        {
+          "name": "statusDisplay",
+          "title": "Status Display",
+          "description": "Choose what the Raycast command subtitle should show. Quota options apply only to subscribed accounts.",
+          "type": "dropdown",
+          "required": true,
+          "default": "payg-both-left",
+          "data": [
+            {
+              "title": "PAYG + Both Quotas Left",
+              "value": "payg-both-left"
+            },
+            {
+              "title": "PAYG + Both Quotas Used",
+              "value": "payg-both-used"
+            },
+            {
+              "title": "PAYG + 5-hour Left",
+              "value": "payg-5h-left"
+            },
+            {
+              "title": "PAYG + 5-hour Used",
+              "value": "payg-5h-used"
+            },
+            {
+              "title": "PAYG + 7-day Left",
+              "value": "payg-7d-left"
+            },
+            {
+              "title": "PAYG + 7-day Used",
+              "value": "payg-7d-used"
+            },
+            {
+              "title": "PAYG Only",
+              "value": "payg-only"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "show-details",
       "title": "Show ZenMux Usage",
       "description": "Monitor ZenMux subscription quota and PAYG credit balance.",
