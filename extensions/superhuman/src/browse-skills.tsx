@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Color, Icon, List, Toast, open, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Color, Detail, Icon, List, Toast, open, showToast } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { isReadOnly } from "./lib/readonly";
 import { ResolvedSkill, SkillSource, listAvailableSkills, refreshAll } from "./lib/skill-source";
@@ -171,8 +171,24 @@ function SkillRow({
 }
 
 function ToolsDetail({ tools, skillName }: { tools: string[]; skillName: string }) {
-  const md = [`# Tools used by ${skillName}`, "", ...tools.map((t) => `- \`${t}\``)].join("\n");
-  return <List.Item.Detail markdown={md} />;
+  const md = [
+    `# Tools used by ${skillName}`,
+    "",
+    "MCP tool names the skill expects to chain. Each is exposed under the same name on `@superhuman` in Raycast AI.",
+    "",
+    ...tools.map((t) => `- \`${t}\``),
+  ].join("\n");
+  return (
+    <Detail
+      markdown={md}
+      navigationTitle={`${skillName} — Tools`}
+      actions={
+        <ActionPanel>
+          <Action.CopyToClipboard title="Copy Tool List" content={tools.join(", ")} />
+        </ActionPanel>
+      }
+    />
+  );
 }
 
 function titleCase(slug: string): string {
