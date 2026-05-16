@@ -1,6 +1,6 @@
 # Superhuman for Raycast
 
-Drive Superhuman from Raycast AI using Superhuman's official MCP server. Read, search, draft, send, and triage email; check availability and create calendar events — all via `@superhuman` in Quick AI and AI Chat, without leaving Raycast.
+Drive your inbox with Raycast AI. Draft, send, summarize, search, and triage email; check availability and create calendar events — all by mentioning `@superhuman` in Quick AI or AI Chat. Built on Superhuman's [official MCP server](https://help.superhuman.com/hc/en-us/articles/49810745762067-Superhuman-Mail-MCP-Server), no leaving Raycast.
 
 ## Setup
 
