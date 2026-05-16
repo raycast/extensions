@@ -1,25 +1,66 @@
-import { useFetch } from "@raycast/utils";
-import { INVENTORY_URL, transformInventoryResponse, type InventoryItem } from "../lib/inventory";
+import { getPreferenceValues } from "@raycast/api";
+import { useCallback, useEffect, useState } from "react";
+import { loadInventory, type ResolvedDocumentationSource } from "../lib/docs-source";
+import { type InventoryItem } from "../lib/inventory";
 
 interface UseInventoryResult {
   data?: InventoryItem[];
   isLoading: boolean;
   error?: Error;
+  source?: ResolvedDocumentationSource;
+  remoteError?: Error;
   revalidate: () => void;
 }
 
 export function useInventory(): UseInventoryResult {
-  const { data, isLoading, error, revalidate } = useFetch<InventoryItem[]>(INVENTORY_URL, {
-    keepPreviousData: true,
-    parseResponse: async (response) => {
-      if (!response.ok) {
-        throw new Error(`Failed to load Polars inventory: ${response.status} ${response.statusText}`);
+  const [data, setData] = useState<InventoryItem[] | undefined>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | undefined>();
+  const [source, setSource] = useState<ResolvedDocumentationSource | undefined>();
+  const [remoteError, setRemoteError] = useState<Error | undefined>();
+  const [reloadToken, setReloadToken] = useState(0);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function run() {
+      setIsLoading(true);
+      setError(undefined);
+
+      try {
+        const result = await loadInventory(getPreferenceValues<Preferences>());
+        if (isCancelled) {
+          return;
+        }
+
+        setData(result.items);
+        setSource(result.source);
+        setRemoteError(result.remoteError);
+      } catch (caughtError) {
+        if (isCancelled) {
+          return;
+        }
+
+        setError(caughtError instanceof Error ? caughtError : new Error(String(caughtError)));
+        setSource(undefined);
+        setRemoteError(undefined);
+      } finally {
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
+    }
 
-      const buffer = await response.arrayBuffer();
-      return transformInventoryResponse(buffer);
-    },
-  });
+    run();
 
-  return { data, isLoading, error, revalidate };
+    return () => {
+      isCancelled = true;
+    };
+  }, [reloadToken]);
+
+  const revalidate = useCallback(() => {
+    setReloadToken((current) => current + 1);
+  }, []);
+
+  return { data, isLoading, error, source, remoteError, revalidate };
 }
