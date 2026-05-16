@@ -10,5 +10,7 @@
 - Kept OpenAI and Gemini on their native API protocols.
 - Added prompt profiles and custom prompt instructions for reusable translation behavior.
 - Refined the default system prompt toward native, sense-for-sense translation instead of literal wording.
+- Added the Rewrite & Coach command: rewrite selected text into natural, idiomatic English, compare it with the original, read a Simplified Chinese explanation of why it sounds more natural, and hear either version aloud with Gemini TTS.
+- Defaulted the Gemini model and Fast/Pro tiers to Gemini 3.1.
 - Addressed review feedback for auto language detection, OCR API error parsing, provider cleanup, and search debounce latency.
 - Hardened OCR retry state, auto-paragraph formatting, TTS playback, and provider configuration error handling.

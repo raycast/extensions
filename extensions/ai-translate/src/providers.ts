@@ -60,6 +60,54 @@ export async function translateWithProvider(config: ProviderConfig, request: Tra
   return translateWithOpenAICompatible(config, request);
 }
 
+export async function generateWithGemini(
+  config: ProviderConfig,
+  prompt: { system: string; user: string },
+  timeoutMs: number,
+  maxOutputTokens: number,
+): Promise<string> {
+  if (!config.apiKey) {
+    throw new MissingAPIKeyError(`${config.title} API key is not configured.`);
+  }
+  validateProviderConfig(config);
+
+  const body = {
+    system_instruction: {
+      parts: [{ text: prompt.system }],
+    },
+    contents: [
+      {
+        role: "user",
+        parts: [{ text: prompt.user }],
+      },
+    ],
+    generationConfig: {
+      temperature: 0.3,
+      maxOutputTokens,
+    },
+  };
+
+  const response = await postJson<GeminiResponse>(
+    geminiGenerateContentUrl(config.baseURL, config.model),
+    timeoutMs,
+    {
+      "x-goog-api-key": config.apiKey,
+      "Content-Type": "application/json",
+    },
+    body,
+  );
+
+  const content = response.candidates?.[0]?.content?.parts
+    ?.map((part) => part.text ?? "")
+    .join("")
+    .trim();
+  if (!content) {
+    throw new Error(response.error?.message ?? `${config.title} returned an empty response.`);
+  }
+
+  return cleanModelOutput(content);
+}
+
 export class MissingAPIKeyError extends Error {
   constructor(message: string) {
     super(message);

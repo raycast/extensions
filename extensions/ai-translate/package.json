@@ -27,6 +27,25 @@
       ]
     },
     {
+      "name": "rewrite-coach",
+      "title": "Rewrite & Coach",
+      "subtitle": "AI Translate",
+      "description": "Rewrite selected text into natural, idiomatic English, learn why it sounds more natural, and hear it spoken aloud.",
+      "mode": "view",
+      "icon": "icon.png",
+      "keywords": [
+        "rewrite",
+        "coach",
+        "english",
+        "natural",
+        "idiomatic",
+        "polish",
+        "tts",
+        "pronunciation",
+        "gemini"
+      ]
+    },
+    {
       "name": "screenshot-translate",
       "title": "Screenshot Translate",
       "subtitle": "AI Translate",
@@ -548,8 +567,8 @@
       "name": "geminiModel",
       "type": "textfield",
       "required": false,
-      "description": "Gemini model name.",
-      "default": "gemini-2.5-flash"
+      "description": "Gemini model name. Options include gemini-3.1-flash-lite-preview, gemini-3.1-pro-preview, gemini-3-flash-preview, gemini-2.5-flash, and gemini-2.5-pro.",
+      "default": "gemini-3.1-flash-lite-preview"
     },
     {
       "title": "Kimi API Key",

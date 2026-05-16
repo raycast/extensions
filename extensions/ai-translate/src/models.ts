@@ -42,8 +42,8 @@ const MODEL_CATALOG: Record<ProviderId, ProviderModels> = {
     ],
   },
   gemini: {
-    fast: { id: "gemini-2.5-flash", title: "2.5 Flash" },
-    pro: { id: "gemini-2.5-pro", title: "2.5 Pro" },
+    fast: { id: "gemini-3.1-flash-lite-preview", title: "3.1 Flash Lite (Preview)" },
+    pro: { id: "gemini-3.1-pro-preview", title: "3.1 Pro (Preview)" },
     all: [
       { id: "gemini-3.1-flash-lite-preview", title: "3.1 Flash Lite (Preview)" },
       { id: "gemini-3-flash-preview", title: "3.0 Flash (Preview)" },
