@@ -118,7 +118,7 @@ function Command(props: LaunchProps) {
 
   const isMulti = selectedCalendarId === ALL_CALENDARS;
   const allCalendarIds = useMemo(() => {
-    return calendars?.selected?.map((cal) => cal.id) ?? [];
+    return calendars?.selected?.map((cal) => cal.id).filter((id): id is string => !!id) ?? [];
   }, [calendars]);
 
   const singleResult = useCalendarEvents(selectedCalendarId, !isMulti && !!selectedCalendarId);
