@@ -201,7 +201,7 @@ export function useCalendarsEvents(calendarIds: string[], execute = true) {
 
           if (results.some((r) => r.aborted)) {
             fetchingRef.current = false;
-            return { data: [], hasMore: false, cursor: undefined };
+            return { data: [], hasMore: true, cursor: undefined };
           }
 
           const { data, hasMore } = mergeCalendarEvents(
