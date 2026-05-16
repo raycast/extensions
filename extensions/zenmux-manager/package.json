@@ -41,13 +41,6 @@
       "title": "Show ZenMux Usage",
       "description": "Monitor ZenMux subscription quota and PAYG credit balance.",
       "mode": "view"
-    },
-    {
-      "name": "menu-bar",
-      "title": "ZenMux Usage Menu Bar",
-      "description": "Show ZenMux quota and PAYG balance in the menu bar.",
-      "mode": "menu-bar",
-      "interval": "2m"
     }
   ],
   "tools": [
@@ -70,7 +63,8 @@
   "title": "ZenMux Manager",
   "author": "abnershang",
   "platforms": [
-    "macOS"
+    "macOS",
+    "Windows"
   ],
   "categories": [
     "Developer Tools"

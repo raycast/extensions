@@ -8,7 +8,6 @@ ZenMux is an LLM API aggregation platform that provides unified access to models
 
 - View your ZenMux plan, account status, Flow rate, and PAYG balance.
 - Track 5-hour, weekly, and monthly subscription quota.
-- Show compact usage stats in the macOS menu bar.
 - Ask Raycast AI about your current ZenMux account and quota status.
 - Open the ZenMux subscription, PAYG, logs, and Platform API consoles from Raycast.
 
@@ -25,7 +24,6 @@ Standard ZenMux API keys are not accepted by the account endpoints. This extensi
 ## Commands
 
 - **Show ZenMux Usage**: Full account dashboard.
-- **ZenMux Usage Menu Bar**: Compact menu bar monitor, refreshed every 2 minutes.
 
 ## Raycast AI
 

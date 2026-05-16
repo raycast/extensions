@@ -1,5 +1,11 @@
 # ZenMux Manager Changelog
 
+## [Add Windows Support] - {PR_MERGE_DATE}
+
+- Make the extension available on both macOS and Windows.
+- Remove the macOS-only menu bar command from the published command set so the extension can support Windows.
+- Keep the ZenMux usage dashboard and Raycast AI account tools available cross-platform.
+
 ## [Improve PAYG-Only Account Display] - {PR_MERGE_DATE}
 
 - Hide subscription quota, plan, flow rate, and subscription console links when an account has no ZenMux subscription.
