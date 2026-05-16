@@ -58,15 +58,16 @@ function getCachedWallpaperPath(url: string, id?: string) {
 
 function pruneWallpaperCache(keepFilePath: string) {
   const maxFiles = 20;
+  type CacheFile = { filePath: string; stat: fs.Stats };
   const files = fs
     .readdirSync(environment.supportPath)
-    .map((file) => {
+    .map((file): CacheFile => {
       const filePath = path.join(environment.supportPath, file);
       const stat = fs.statSync(filePath);
       return { filePath, stat };
     })
     .filter(({ filePath, stat }) => filePath !== keepFilePath && stat.isFile())
-    .sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs)
+    .sort((a: CacheFile, b: CacheFile) => b.stat.mtimeMs - a.stat.mtimeMs)
     .map(({ filePath }) => filePath);
 
   for (const filePath of files.slice(maxFiles - 1)) {
