@@ -1,5 +1,9 @@
 # Surge Outbound Mode Switcher Changelog
 
+## [Chore] - {PR_MERGE_DATE}
+
+- Updated screenshots to new Raycast
+
 ## [Chore] - 2025-09-30
 
 - Fixed the screenshot in README
