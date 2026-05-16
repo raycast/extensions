@@ -1,6 +1,6 @@
 # Prusa Printer Control Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-16
 
 - Show printers that cannot be reached as offline instead of showing a generic network error
 - Added tests for offline printer error detection
