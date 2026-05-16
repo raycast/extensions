@@ -1,6 +1,6 @@
 # Toothpick Changelog
 
-## [Add Keyboard Shortcuts] - {PR_MERGE_DATE}
+## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Added the standard Refresh keyboard shortcut to the **Refresh** action in Manage Bluetooth Connections.
 
