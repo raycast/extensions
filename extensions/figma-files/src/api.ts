@@ -102,7 +102,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
               // Update TTL for successfully fetched project
               await updateProjectTTLs([project.id]);
 
-              return { name: project.name, files: result.files ?? [] };
+              return { id: project.id, name: project.name, files: result.files ?? [] };
             }),
           );
           return projects;
@@ -143,7 +143,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
               // Update TTL for successfully fetched project
               await updateProjectTTLs([project.id]);
 
-              return { name: project.name, files: result.files ?? [] };
+              return { id: project.id, name: project.name, files: result.files ?? [] };
             }),
         );
         return projects;
@@ -186,11 +186,14 @@ export async function resolveAllFiles(): Promise<TeamFiles[]> {
       return { name: teamName, files: projectFiles } as TeamFiles;
     }
 
-    // Keep refreshed projects + cached projects that weren't refreshed
+    // Keep refreshed projects + cached projects that weren't refreshed, deduplicating by ID when available
+    const refreshedProjectIds = new Set(projectFiles.map((p) => p.id).filter(Boolean));
     const refreshedProjectNames = new Set(projectFiles.map((p) => p.name));
     const mergedProjects = [
       ...projectFiles,
-      ...cachedTeam.files.filter((p) => !refreshedProjectNames.has(p.name)),
+      ...cachedTeam.files.filter((p) =>
+        p.id ? !refreshedProjectIds.has(p.id) : !refreshedProjectNames.has(p.name),
+      ),
     ];
 
     return { name: teamName, files: mergedProjects } as TeamFiles;
