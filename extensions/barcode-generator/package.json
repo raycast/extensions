@@ -1,0 +1,153 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "barcode-generator",
+  "title": "Barcode Generator",
+  "description": "Generate 1D and 2D barcodes",
+  "icon": "extension-icon.png",
+  "author": "zacharymatt5",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "preferences": [
+    {
+      "name": "scale1d",
+      "type": "textfield",
+      "required": false,
+      "title": "1D Scale",
+      "description": "Global bwip scale used for 1D barcode generation.",
+      "default": "3",
+      "placeholder": "3"
+    },
+    {
+      "name": "height1d",
+      "type": "textfield",
+      "required": false,
+      "title": "1D Height",
+      "description": "Global bwip bar height used for 1D barcode generation.",
+      "default": "12",
+      "placeholder": "12"
+    },
+    {
+      "name": "includeText1d",
+      "type": "checkbox",
+      "required": false,
+      "title": "Show 1D Text",
+      "description": "Display the encoded value beneath generated 1D barcodes.",
+      "default": true,
+      "label": "Include human-readable text"
+    },
+    {
+      "name": "scale2d",
+      "type": "textfield",
+      "required": false,
+      "title": "2D Scale",
+      "description": "Global bwip scale used for 2D barcode generation.",
+      "default": "4",
+      "placeholder": "4"
+    },
+    {
+      "name": "paddingWidth",
+      "type": "textfield",
+      "required": false,
+      "title": "Horizontal Padding",
+      "description": "Global bwip horizontal padding in pixels.",
+      "default": "2",
+      "placeholder": "2"
+    },
+    {
+      "name": "paddingHeight",
+      "type": "textfield",
+      "required": false,
+      "title": "Vertical Padding",
+      "description": "Global bwip vertical padding in pixels.",
+      "default": "2",
+      "placeholder": "2"
+    },
+    {
+      "name": "barColor",
+      "type": "textfield",
+      "required": false,
+      "title": "Bar Color",
+      "description": "Hex color used for the barcode itself, without the # symbol.",
+      "default": "000000",
+      "placeholder": "000000"
+    },
+    {
+      "name": "backgroundColor",
+      "type": "textfield",
+      "required": false,
+      "title": "Background Color",
+      "description": "Hex color used for the barcode background, without the # symbol.",
+      "default": "FFFFFF",
+      "placeholder": "FFFFFF"
+    },
+    {
+      "name": "hideSymbology",
+      "type": "checkbox",
+      "required": false,
+      "title": "Hide Symbology",
+      "description": "Hide the symbology field in barcode detail views.",
+      "default": true,
+      "label": "Hide symbology in previews"
+    }
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "generate-1d-barcode",
+      "title": "Generate 1D Barcode",
+      "description": "Generate 1D barcodes",
+      "mode": "view"
+    },
+    {
+      "name": "generate-2d-barcode",
+      "title": "Generate 2D Barcode",
+      "description": "Generate 2D barcodes",
+      "mode": "view"
+    },
+    {
+      "name": "barcode-generation-history",
+      "title": "Barcode Generation History",
+      "description": "View recently generated barcodes",
+      "mode": "view"
+    },
+    {
+      "name": "generate-last-used-barcode",
+      "title": "Generate Last Used Barcode",
+      "description": "Jump straight to the input form for the last barcode type used",
+      "mode": "view"
+    },
+    {
+      "name": "generate-favorited-barcode",
+      "title": "Generate Favorited Barcode",
+      "description": "Choose from favorited barcode types only",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@bwip-js/node": "^4.10.1",
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
