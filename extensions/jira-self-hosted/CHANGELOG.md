@@ -1,6 +1,6 @@
 # Jira (Self-Hosted) Changelog
 
-## [Jira 9+ API] - {PR_MERGE_DATE}
+## [Jira 9+ API] - 2026-05-16
 
 - **Open Issues**: optional sections for Active Sprint, All Sprints (by sprint name), and Backlog; project filter with persisted selection when sections are enabled. Uses classic `GET /rest/api/2/search` and Greenhopper sprint field metadata (no Cloud `/search/jql`).
 - **Search Issues**: safer project filter via JQL helpers; default `created >= -30d` when no project is selected; numeric-only query matches `issuekey IN (...)` across loaded projects when no project is chosen.
