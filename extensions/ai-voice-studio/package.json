@@ -20,6 +20,7 @@
       "title": "Quick Read",
       "subtitle": "AI Voice Studio",
       "description": "Read selected text, or clipboard text if no selection is available, with the default TTS provider. Trigger again to stop.",
+      "icon": "command-icon.png",
       "mode": "no-view"
     },
     {
@@ -27,6 +28,7 @@
       "title": "Setup Voice Defaults",
       "subtitle": "AI Voice Studio",
       "description": "Configure the default provider, model, voice, speed, and provider defaults in a focused Raycast form.",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -34,6 +36,7 @@
       "title": "Test Voice Setup",
       "subtitle": "AI Voice Studio",
       "description": "Synthesize and play a short sample with the current default provider to verify API access, latency, and playback.",
+      "icon": "command-icon.png",
       "mode": "no-view"
     },
     {
@@ -41,6 +44,7 @@
       "title": "Resume Last Reading",
       "subtitle": "MiniMax",
       "description": "Resume the previous MiniMax reading from the next unfinished chunk.",
+      "icon": "command-icon.png",
       "mode": "no-view"
     },
     {
@@ -48,6 +52,7 @@
       "title": "Restart Last Reading",
       "subtitle": "MiniMax",
       "description": "Restart the previous MiniMax reading from the beginning.",
+      "icon": "command-icon.png",
       "mode": "no-view"
     },
     {
@@ -55,6 +60,7 @@
       "title": "Read with MiniMax Voice",
       "subtitle": "MiniMax",
       "description": "Browse MiniMax voices and read selected text aloud.",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -62,6 +68,7 @@
       "title": "Set MiniMax Quick Read Voice",
       "subtitle": "MiniMax",
       "description": "Choose and preview the MiniMax voice used by Quick Read when MiniMax is the default provider.",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -69,6 +76,7 @@
       "title": "Clone MiniMax Voice",
       "subtitle": "MiniMax",
       "description": "Upload audio and create a cloned MiniMax voice.",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -76,6 +84,7 @@
       "title": "TTS Studio",
       "subtitle": "MiMo",
       "description": "Generate and play MiMo speech from typed, selected, or pasted text, with voice, emotion, and style controls.",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -83,6 +92,7 @@
       "title": "Quick Read with MiMo",
       "subtitle": "MiMo",
       "description": "Read selected or clipboard text with your default MiMo voice. Run again to stop playback.",
+      "icon": "command-icon.png",
       "mode": "no-view"
     },
     {
@@ -90,6 +100,7 @@
       "title": "Read with MiMo Voice",
       "subtitle": "MiMo",
       "description": "Browse MiMo voices and read selected or clipboard text aloud.",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -97,6 +108,7 @@
       "title": "Set MiMo Quick Read Voice",
       "subtitle": "MiMo",
       "description": "Choose and preview the MiMo voice used by Quick Read when MiMo is the default provider.",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -104,6 +116,7 @@
       "title": "Quick Read with OpenAI",
       "subtitle": "OpenAI",
       "description": "Read selected or clipboard text with your default OpenAI voice. Run again to stop playback.",
+      "icon": "command-icon.png",
       "mode": "no-view"
     },
     {
@@ -111,6 +124,7 @@
       "title": "Read with OpenAI Voice",
       "subtitle": "OpenAI",
       "description": "Browse OpenAI voices and read selected or clipboard text aloud.",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -118,6 +132,7 @@
       "title": "Set OpenAI Quick Read Voice",
       "subtitle": "OpenAI",
       "description": "Choose and preview the OpenAI voice used by Quick Read when OpenAI is the default provider.",
+      "icon": "command-icon.png",
       "mode": "view"
     },
     {
@@ -125,6 +140,7 @@
       "title": "Stop Reading",
       "subtitle": "AI Voice Studio",
       "description": "Stop the current TTS playback.",
+      "icon": "command-icon.png",
       "mode": "no-view"
     },
     {
@@ -132,6 +148,7 @@
       "title": "Increase Reading Speed",
       "subtitle": "AI Voice Studio",
       "description": "Increase reading speed by 0.25x for the default provider.",
+      "icon": "command-icon.png",
       "mode": "no-view"
     },
     {
@@ -139,6 +156,7 @@
       "title": "Decrease Reading Speed",
       "subtitle": "AI Voice Studio",
       "description": "Decrease reading speed by 0.25x for the default provider.",
+      "icon": "command-icon.png",
       "mode": "no-view"
     },
     {
@@ -146,6 +164,7 @@
       "title": "MiniMax Reading Status",
       "subtitle": "MiniMax",
       "description": "Menu-bar status of the current MiniMax reading with controls.",
+      "icon": "command-icon.png",
       "mode": "menu-bar",
       "interval": "1m"
     },
@@ -154,6 +173,7 @@
       "title": "MiMo Reading Status",
       "subtitle": "MiMo",
       "description": "Show MiMo playback status, speed, and controls in the menu bar.",
+      "icon": "command-icon.png",
       "mode": "menu-bar",
       "interval": "1m"
     }

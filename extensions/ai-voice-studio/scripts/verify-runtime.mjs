@@ -48,7 +48,11 @@ for (const entry of pkg.commands) {
   const tsx = path.join(root, "src", `${entry.name}.tsx`);
   const ts = path.join(root, "src", `${entry.name}.ts`);
   check(fs.existsSync(tsx) || fs.existsSync(ts), `Missing command entry point for ${entry.name}`);
+  check(entry.icon === pkg.icon, `${entry.name} should use the shared extension icon ${pkg.icon}`);
 }
+check(pkg.icon === "command-icon.png", "Extension should use the shared AI Voice Studio command icon");
+check(!fs.existsSync(path.join(root, "assets", "mimo-icon.png")), "Source assets should not include stale MiMo command icon");
+check(!fs.existsSync(path.join(root, "assets", "mimo-icon@dark.png")), "Source assets should not include stale MiMo dark command icon");
 
 for (const name of [
   "quick-read",
@@ -91,6 +95,10 @@ if (fs.existsSync(path.join(root, "dist"))) {
     .readdirSync(path.join(root, "dist"), { recursive: true })
     .filter((entry) => typeof entry === "string" && entry.includes("configure-providers"));
   check(staleDistFiles.length === 0, `dist contains stale configure-providers artifacts: ${staleDistFiles.join(", ")}`);
+  const staleMimoIconFiles = fs
+    .readdirSync(path.join(root, "dist"), { recursive: true })
+    .filter((entry) => typeof entry === "string" && entry.includes("mimo-icon"));
+  check(staleMimoIconFiles.length === 0, `dist contains stale MiMo icon artifacts: ${staleMimoIconFiles.join(", ")}`);
 }
 
 const extensionPrefs = new Set(pkg.preferences.map((pref) => pref.name));
