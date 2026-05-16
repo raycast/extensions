@@ -1,4 +1,4 @@
-# Art Wallpapers.
+# Art Wallpapers
 
 Another boring piece. Daily.
 
