@@ -1,6 +1,6 @@
 # Surge Outbound Mode Switcher Changelog
 
-## [Chore] - {PR_MERGE_DATE}
+## [Chore] - 2026-05-16
 
 - Updated screenshots to new Raycast
 
