@@ -1,11 +1,14 @@
 import { Color, Icon, LaunchProps, List } from "@raycast/api";
-import { useEvents, withGoogleAPIs } from "./lib/google";
+import { withGoogleAPIs } from "./lib/google";
 import { calendar_v3 } from "@googleapis/calendar";
 import { formatRecurrence } from "./lib/utils";
 import useCalendars from "./hooks/useCalendars";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import EventActions from "./components/EventActions";
 import CalendarSelector from "./components/CalendarSelector";
+import { useCalendarEvents } from "./hooks/useCalendarEvents";
+import { useCalendarsEvents } from "./hooks/useCalendarsEvents";
+import { ALL_CALENDARS } from "./lib/utils";
 
 function getAccessories(event: calendar_v3.Schema$Event) {
   const accessories = new Array<List.Item.Accessory>();
@@ -104,18 +107,28 @@ export function getEventSection(date: Date, now = new Date()) {
   } else if (date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()) {
     return `Rest of ${date.toLocaleString("default", { month: "long" })}`;
   } else {
-    // Group by month name
-    return date.toLocaleString("default", { month: "long" });
+    return date.toLocaleString("default", { month: "long", year: "numeric" });
   }
 }
 
 function Command(props: LaunchProps) {
   const { calendarId } = (props.launchContext ?? {}) as { calendarId?: string };
-  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(calendarId ?? null);
-  const { data, isLoading, pagination, revalidate } = useEvents(selectedCalendarId);
   const { data: calendars, isLoading: calendarsIsLoading, revalidate: revalidateCalendars } = useCalendars();
+  const [selectedCalendarId, setSelectedCalendarId] = useState<string | null>(calendarId ?? ALL_CALENDARS);
+
+  const isMulti = selectedCalendarId === ALL_CALENDARS;
+  const allCalendarIds = useMemo(() => {
+    return calendars?.selected?.map((cal) => cal.id) ?? [];
+  }, [calendars]);
+
+  const singleResult = useCalendarEvents(selectedCalendarId, !isMulti && !!selectedCalendarId);
+  const multiResult = useCalendarsEvents(allCalendarIds, isMulti && allCalendarIds.length > 0);
+  const { data, isLoading, pagination, revalidate } = isMulti ? multiResult : singleResult;
 
   const selectedCalendar = useMemo(() => {
+    if (selectedCalendarId === ALL_CALENDARS) {
+      return null;
+    }
     const allCalendars = [...(calendars?.selected ?? []), ...(calendars?.unselected ?? [])];
     const primaryCalendar = allCalendars.find((calendar) => calendar.primary);
     const selected =
@@ -127,10 +140,9 @@ function Command(props: LaunchProps) {
 
   const sections =
     data?.reduce(
-      (acc, event) => {
+      (acc: Record<string, calendar_v3.Schema$Event[]>, event: calendar_v3.Schema$Event) => {
         const date = new Date(event.start?.dateTime ?? event.start?.date ?? "");
-        const now = new Date();
-        const section = getEventSection(date, now);
+        const section = getEventSection(date);
 
         if (!acc[section]) {
           acc[section] = [];

@@ -1,5 +1,10 @@
 # Google Calendar Changelog
 
+## [1.4.3] - {PR_MERGE_DATE}
+
+- Add All calendars selector to view events across all calendars
+- Fix: Group future events by month and year in section headers
+
 ## [1.4.3] - 2026-05-12
 
 - Fix Google OAuth authentication by using Raycast's built-in Google OAuth flow ([#26572](https://github.com/raycast/extensions/issues/26572))

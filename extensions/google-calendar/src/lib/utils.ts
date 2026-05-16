@@ -2,6 +2,8 @@ import { environment, getPreferenceValues } from "@raycast/api";
 
 const SIGNATURE = "Created with <a href='https://raycast.com'>Raycast</a>";
 
+export const ALL_CALENDARS = "all";
+
 const preferences = getPreferenceValues();
 
 export function roundUpTime(date = new Date(), roundMins = 15) {

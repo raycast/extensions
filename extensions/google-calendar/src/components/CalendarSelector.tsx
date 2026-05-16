@@ -1,5 +1,6 @@
 import { List } from "@raycast/api";
 import { UseCalendarsData } from "../hooks/useCalendars";
+import { ALL_CALENDARS } from "../lib/utils";
 
 const CalendarSelector = ({
   calendars,
@@ -20,6 +21,7 @@ const CalendarSelector = ({
       defaultValue={defaultValue}
     >
       <List.Dropdown.Section title="Visible Calendars">
+        <List.Dropdown.Item value={ALL_CALENDARS} title="All" />
         {calendars.selected.map((calendar) => (
           <List.Dropdown.Item
             key={calendar.id}
