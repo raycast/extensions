@@ -1,6 +1,6 @@
 # Audio Device Changelog
 
-## [Add Keyboard Shortcuts] - {PR_MERGE_DATE}
+## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Add Save shortcut for creating device quicklinks
 - Add keyboard shortcuts for hiding and showing individual devices
