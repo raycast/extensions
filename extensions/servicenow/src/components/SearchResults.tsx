@@ -14,6 +14,7 @@ import { GlobalSearchResponse, Record, SearchResult } from "../types";
 import useFavorites from "../hooks/useFavorites";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function ({ searchTerm }: { searchTerm: string }) {
   const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
@@ -24,17 +25,16 @@ export default function ({ searchTerm }: { searchTerm: string }) {
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const [table] = useCachedState<string>("table", "all");
-  const { alias = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
+  const { alias = "", name: instanceName = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
 
   const { isLoading, data, error, revalidate } = useFetch(
     `${instanceUrl}/api/now/globalsearch/search?sysparm_search=${searchTerm}`,
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: !!selectedInstance,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && !!authHeader,
 
       onError: (error) => {
         console.error(error);

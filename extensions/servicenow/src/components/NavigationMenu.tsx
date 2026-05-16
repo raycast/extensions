@@ -14,6 +14,7 @@ import { getIconForModules } from "../utils/getIconForModules";
 import FavoriteForm from "./FavoriteForm";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function NavigationMenu(props: { groupId?: string }) {
   const { groupId = "" } = props;
@@ -35,19 +36,18 @@ export default function NavigationMenu(props: { groupId?: string }) {
   } = useFavorites();
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { id: instanceId = "", name: instanceName = "", username = "", password = "", full } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "", full } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
 
   const { isLoading, data, error, revalidate } = useFetch(
     () => {
       return `${instanceUrl}/api/now/ui/navigator`;
     },
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: selectedInstance && !groupId,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && !groupId && !!authHeader,
       onError: (error) => {
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch menu entries", error.message);

@@ -9,8 +9,10 @@ import InstanceForm from "./InstanceForm";
 import Actions from "./Actions";
 
 import useInstances from "../hooks/useInstances";
+import { useAuthHeader } from "../hooks/useAuthHeader";
 import { HistoryResponse, HistoryResult, Instance } from "../types";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { getAuthHeader } from "../utils/auth";
 
 export default function SearchList() {
   const {
@@ -20,28 +22,22 @@ export default function SearchList() {
     isLoading: isLoadingInstances,
     selectedInstance,
     setSelectedInstance,
+    userName,
   } = useInstances();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<HistoryResult[]>([]);
-  const {
-    id: instanceId = "",
-    alias = "",
-    name: instanceName = "",
-    username = "",
-    password = "",
-    full,
-  } = selectedInstance || {};
+  const { id: instanceId = "", alias = "", name: instanceName = "", username, full } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
+  const effectiveUserName = username || userName || "";
 
   const { isLoading, data, error, mutate, revalidate } = useFetch(
-    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${username}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
+    `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${effectiveUserName}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: selectedInstance && full == "true",
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && full == "true" && !!authHeader && !!effectiveUserName,
       onError: (error) => {
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch history", error.message);
@@ -62,11 +58,13 @@ export default function SearchList() {
   ) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: text.before });
     try {
+      if (!selectedInstance) throw new Error("No instance selected");
+      const authorization = await getAuthHeader(selectedInstance);
       const response = await mutate(
         fetch(`${instanceUrl}${request.endpoint}`, {
           method: request.method,
           headers: {
-            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+            Authorization: authorization,
             "Content-Type": "application/json",
           },
           body: request.body,

@@ -9,6 +9,7 @@ import { useLocalStorage } from "./useLocalStorage";
 
 import { Instance } from "../types";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { getAuthHeader, persistInstance } from "../utils/auth";
 
 const compareInstances = (a: Instance, b: Instance): number => {
   const nameA = a.alias ? a.alias : a.name;
@@ -19,6 +20,7 @@ const compareInstances = (a: Instance, b: Instance): number => {
 export default function useInstances() {
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
   const [userId, setUserId] = useCachedState<string>("user-id");
+  const [userName, setUserName] = useCachedState<string>("user-name");
 
   const { value, setValue, mutate, isLoading } = useLocalStorage<Instance[]>("saved-instances", []);
 
@@ -53,48 +55,56 @@ export default function useInstances() {
     }
 
     const fetchUserId = async () => {
-      const { name = "", alias, username = "", password = "" } = selectedInstance;
+      const { name = "", alias } = selectedInstance;
       const instanceLabel = alias || name;
 
       try {
-        const response = await fetch(
-          `${getInstanceBaseUrl(selectedInstance)}/api/now/table/sys_user?sysparm_query=user_name=${username}`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-            },
+        const authorization = await getAuthHeader(selectedInstance);
+        const response = await fetch(`${getInstanceBaseUrl(selectedInstance)}/api/now/ui/user/current_user`, {
+          method: "GET",
+          headers: {
+            Authorization: authorization,
           },
-        );
+        });
 
         const jsonData = (await response.json()) as {
-          result?: { sys_id: string }[];
+          result?: { user_sys_id?: string; user_name?: string };
           error?: { message: string };
         };
 
-        if (!jsonData.result) {
+        if (!jsonData.result?.user_sys_id) {
+          const message = jsonData.error?.message || `HTTP ${response.status}`;
           showToast({
             style: Toast.Style.Failure,
             title: `Could not connect to ${instanceLabel}`,
-            message: jsonData.error?.message,
+            message,
           });
-
-          return "";
+          await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
+          return undefined;
         }
 
-        return jsonData.result[0].sys_id;
+        if (selectedInstance.authError) {
+          await persistInstance({ ...selectedInstance, authError: undefined, authErrorAt: undefined });
+        }
+
+        return { sysId: jsonData.result.user_sys_id, userName: jsonData.result.user_name ?? "" };
       } catch (error) {
         console.error(error);
 
+        const message = error instanceof Error ? error.message : String(error);
         showToast({
           style: Toast.Style.Failure,
           title: `Could not connect to ${instanceLabel}`,
-          message: error instanceof Error ? error.message : "",
+          message,
         });
+        await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
       }
     };
-    fetchUserId().then((userId) => {
-      if (userId) setUserId(userId);
+    fetchUserId().then((result) => {
+      if (result) {
+        setUserId(result.sysId);
+        setUserName(result.userName);
+      }
     });
   }, [selectedInstance]);
 
@@ -108,5 +118,6 @@ export default function useInstances() {
     selectedInstance,
     setSelectedInstance,
     userId,
+    userName,
   };
 }

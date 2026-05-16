@@ -16,6 +16,7 @@ import FavoriteForm from "./FavoriteForm";
 import { getSectionTitle } from "../utils/getSectionTitle";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function NavigationHistoryFull() {
   const {
@@ -29,9 +30,10 @@ export default function NavigationHistoryFull() {
   const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
 
   const { isLoading, data, error, revalidate, pagination } = useFetch(
     (options) => {
@@ -40,10 +42,8 @@ export default function NavigationHistoryFull() {
       return `${instanceUrl}/api/now/table/sys_ui_navigator_history?sysparm_query=${query}^userDYNAMIC90d1921e5f510100a9ad2572f2b477fe^ORDERBYDESCsys_created_on&sysparm_fields=title,description,url,sys_created_on,sys_id&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
     },
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: !!selectedInstance,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && !!authHeader,
       onError: (error) => {
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch navigation history", error.message);

@@ -14,6 +14,7 @@ import { groupBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
 import { getSectionTitle } from "../utils/getSectionTitle";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function NavigationHistory() {
   const {
@@ -27,15 +28,14 @@ export default function NavigationHistory() {
   const { isInFavorites, revalidateFavorites } = useFavorites();
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
 
   const { isLoading, data, error, revalidate, pagination } = useFetch(`${instanceUrl}/api/now/ui/history`, {
-    headers: {
-      Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-    },
-    execute: !!selectedInstance,
+    headers: authHeader ? { Authorization: authHeader } : undefined,
+    execute: !!selectedInstance && !!authHeader,
     onError: (error) => {
       console.error(error);
       showToast(Toast.Style.Failure, "Could not fetch navigation history", error.message);

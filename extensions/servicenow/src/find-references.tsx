@@ -202,8 +202,8 @@ export default function FindReferences(props: LaunchProps) {
           </ActionPanel>
         }
       >
-        <Form.Description text="Could not detect a ServiceNow record from your browser. Enter the table and sys_id to search." />
-        <Form.TextField id="table" title="Table" placeholder="e.g. incident" />
+        <Form.Description text="Could not detect a ServiceNow record from your browser. Enter the table and Sys ID to search." />
+        <Form.TextField id="table" title="Table" placeholder="e.g. sys_user" />
         <Form.TextField id="sysId" title="Sys ID" placeholder="32-character sys_id" />
         <Form.Dropdown
           id="instance"

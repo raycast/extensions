@@ -1,5 +1,22 @@
 # ServiceNow Extension Changelog
 
+## [Split update set downloads] - 2026-05-15
+
+- Renamed the existing **Download Extension Update Set** action to **Download ACLs for Non-Admin Users** to match the corresponding ServiceNow Share entry. The update set unlocks full access to search history, favorites, and full navigation history for non-admin users.
+- Added a new **Download Default OAuth Client** action for downloading the `oauth_entity` XML (_Raycast Extension – Default OAuth Client_ on ServiceNow Share), kept as a separate Share entry to allow independent release cycles from the Raycast extension.
+
+## [OAuth polish: login command, auth status] - 2026-05-15
+
+- **Login to Instance** for OAuth profiles now re-runs the OAuth authorization flow (which authenticates the browser as a side-effect) and then opens the instance, matching the one-click experience Basic Auth profiles already had.
+- Auth failures are now surfaced as a red exclamation accessory in **Manage Instance Profiles**, with the error message in the tooltip. Updates when interacting with the instance (selection, API request, token refresh).
+- Unified the auth-method tooltips to describe the method consistently: `OAuth` / `Basic Auth` (instead of mixing state and method).
+
+## [OAuth 2.0 (PKCE) authentication] - 2026-05-15
+
+- Added OAuth 2.0 authentication with PKCE as an alternative to Basic Auth, selectable per instance profile. Tokens are stored locally and refreshed automatically using the refresh token.
+- Added a **Sign In / Re-authenticate** action in the instance list for OAuth profiles whose tokens have been revoked or whose refresh token has expired.
+- Centralized authorization-header construction into a single helper (`src/utils/auth.ts`); previously every API call built `Basic ${...}` inline.
+
 ## [Command title clean-up] - 2026-05-15
 
 - Renamed several command titles for clarity and to follow Raycast's `<verb> <noun>` convention. The underlying command IDs are unchanged, so existing user keyboard shortcuts and aliases keep working.

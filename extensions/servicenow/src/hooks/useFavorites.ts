@@ -10,11 +10,13 @@ import { Favorite, FavoriteRecord, FavoritesResponse, Module } from "../types";
 import { extractPathAndParam } from "../utils/extractPathAndParam";
 import useInstances from "./useInstances";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { getAuthHeader } from "../utils/auth";
+import { useAuthHeader } from "./useAuthHeader";
 
 const useFavorites = () => {
   const { selectedInstance, userId } = useInstances();
 
-  const { username = "", password = "" } = selectedInstance || {};
+  const authHeader = useAuthHeader(selectedInstance);
   const instanceUrl = getInstanceBaseUrl({ name: selectedInstance?.name ?? "" });
 
   const {
@@ -28,10 +30,8 @@ const useFavorites = () => {
       return `${instanceUrl}/api/now/ui/favorite`;
     },
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: !!selectedInstance,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && !!authHeader,
       onError: (error) => {
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
@@ -105,11 +105,13 @@ const useFavorites = () => {
   ) => {
     const toast = await showToast({ style: Toast.Style.Animated, title: text.before });
     try {
+      if (!selectedInstance) throw new Error("No instance selected");
+      const authorization = await getAuthHeader(selectedInstance);
       const response = await mutate(
         fetch(`${instanceUrl}${request.endpoint}`, {
           method: request.method,
           headers: {
-            Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
+            Authorization: authorization,
             "Content-Type": "application/json",
           },
           body: request.body,

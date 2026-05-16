@@ -93,14 +93,28 @@ export interface Table {
   optional_label?: string;
 }
 
+export type AuthMode = "basic" | "oauth";
+
 export interface Instance {
   id: string;
   name: string;
   alias?: string;
   color: string;
-  username: string;
-  password: string;
   full: string;
+
+  authMode?: AuthMode;
+
+  username?: string;
+  password?: string;
+
+  clientId?: string;
+  accessToken?: string;
+  refreshToken?: string;
+  tokenExpiresAt?: number;
+  oauthUserName?: string;
+
+  authError?: string;
+  authErrorAt?: number;
 }
 
 export interface DBObjectsResponse {

@@ -9,6 +9,7 @@ import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function Tables() {
   const {
@@ -21,9 +22,10 @@ export default function Tables() {
   } = useInstances();
   const [searchTerm, setSearchTerm] = useState<string>("");
 
-  const { id: instanceId = "", name: instanceName = "", username = "", password = "" } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
+  const authHeader = useAuthHeader(selectedInstance);
 
   const { isLoading, data, error, revalidate, pagination } = useFetch(
     (options) => {
@@ -32,10 +34,8 @@ export default function Tables() {
       return `${instanceUrl}/api/now/table/sys_db_object?sysparm_display_value=true&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_query=${query}^ORDERBYlabel&sysparm_fields=name,label,super_class&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
     },
     {
-      headers: {
-        Authorization: `Basic ${Buffer.from(username + ":" + password).toString("base64")}`,
-      },
-      execute: !!selectedInstance,
+      headers: authHeader ? { Authorization: authHeader } : undefined,
+      execute: !!selectedInstance && !!authHeader,
       onError: (error) => {
         console.error(error);
         showToast(Toast.Style.Failure, "Could not fetch tables", error.message);

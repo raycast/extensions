@@ -1,6 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { Instance } from "../types";
 import { getInstanceBaseUrl } from "./instanceUrl";
+import { getAuthHeader } from "./auth";
 
 export class ServiceNowClient {
   private instance: Instance;
@@ -19,9 +20,10 @@ export class ServiceNowClient {
     const url = `${getInstanceBaseUrl(this.instance)}/sn_devstudio_/v1/get_publish_info`;
 
     try {
+      const authorization = await getAuthHeader(this.instance);
       const response = await fetch(url, {
         headers: {
-          Authorization: `Basic ${Buffer.from(this.instance.username + ":" + this.instance.password).toString("base64")}`,
+          Authorization: authorization,
         },
       });
 
