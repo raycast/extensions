@@ -1,4 +1,4 @@
-import { OAuth } from "@raycast/api";
+import { LocalStorage, OAuth } from "@raycast/api";
 
 export const MCP_URL = "https://mcp.mail.superhuman.com/mcp";
 
@@ -155,21 +155,33 @@ async function refreshTokens(
   return (await res.json()) as TokenResponse;
 }
 
-function packExtra(meta: OAuthServerMetadata, registration: ClientRegistration): string {
-  return JSON.stringify({ meta, registration });
+// Auth-server metadata + DCR result are sidecar state for refresh; persist them
+// in LocalStorage so the OAuth `scope` field stays accurate to what was granted.
+const SIDECAR_KEY = "superhuman.oauth.sidecar.v1";
+
+interface OAuthSidecar {
+  meta: OAuthServerMetadata;
+  registration: ClientRegistration;
 }
 
-function unpackExtra(
-  scope: string | undefined,
-): { meta: OAuthServerMetadata; registration: ClientRegistration } | null {
-  if (!scope) return null;
+async function saveSidecar(sidecar: OAuthSidecar): Promise<void> {
+  await LocalStorage.setItem(SIDECAR_KEY, JSON.stringify(sidecar));
+}
+
+async function loadSidecar(): Promise<OAuthSidecar | null> {
+  const raw = await LocalStorage.getItem<string>(SIDECAR_KEY);
+  if (!raw) return null;
   try {
-    const parsed = JSON.parse(scope);
+    const parsed = JSON.parse(raw) as OAuthSidecar;
     if (parsed?.meta?.token_endpoint && parsed?.registration?.client_id) return parsed;
   } catch {
-    // Not our packed format; fall through.
+    // Corrupt or pre-migration payload; treat as missing.
   }
   return null;
+}
+
+async function clearSidecar(): Promise<void> {
+  await LocalStorage.removeItem(SIDECAR_KEY);
 }
 
 function pickScopes(asSupported?: string[], resourceSupported?: string[]): string {
@@ -208,11 +220,12 @@ async function authorize(): Promise<string> {
   const { authorizationCode } = await client.authorize(authRequest);
   const tokens = await exchangeCode(meta, registration, authorizationCode, authRequest.codeVerifier, redirectUri);
 
+  await saveSidecar({ meta, registration });
   await client.setTokens({
     accessToken: tokens.access_token,
     refreshToken: tokens.refresh_token,
     expiresIn: tokens.expires_in,
-    scope: packExtra(meta, registration),
+    scope: tokens.scope ?? scope,
   });
   return tokens.access_token;
 }
@@ -221,19 +234,19 @@ export async function getAccessToken(): Promise<string> {
   const tokenSet = await client.getTokens();
   if (!tokenSet) return authorize();
 
-  const packed = unpackExtra(tokenSet.scope);
-  if (!packed) return authorize();
+  const sidecar = await loadSidecar();
+  if (!sidecar) return authorize();
 
   if (!tokenSet.isExpired() && tokenSet.accessToken) return tokenSet.accessToken;
 
   if (tokenSet.refreshToken) {
     try {
-      const refreshed = await refreshTokens(packed.meta, packed.registration, tokenSet.refreshToken);
+      const refreshed = await refreshTokens(sidecar.meta, sidecar.registration, tokenSet.refreshToken);
       await client.setTokens({
         accessToken: refreshed.access_token,
         refreshToken: refreshed.refresh_token ?? tokenSet.refreshToken,
         expiresIn: refreshed.expires_in,
-        scope: packExtra(packed.meta, packed.registration),
+        scope: refreshed.scope ?? tokenSet.scope,
       });
       return refreshed.access_token;
     } catch {
@@ -245,4 +258,5 @@ export async function getAccessToken(): Promise<string> {
 
 export async function signOut(): Promise<void> {
   await client.removeTokens();
+  await clearSidecar();
 }

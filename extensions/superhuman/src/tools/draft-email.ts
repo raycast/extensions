@@ -1,10 +1,6 @@
 import { Tool, getPreferenceValues } from "@raycast/api";
 import { callMcpTool } from "../lib/mcp";
 
-interface Preferences {
-  enableDraftPreviews: boolean;
-}
-
 /**
  * Input parameters for the draft-email tool.
  * Use this ONLY for composing a new email or updating an existing draft, NOT for searching.

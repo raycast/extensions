@@ -20,7 +20,7 @@ interface McpToolResult {
 
 let nextId = 1;
 let sessionId: string | undefined;
-let initialized = false;
+let initPromise: Promise<void> | undefined;
 
 const PROTOCOL_VERSION = "2025-06-18";
 
@@ -93,8 +93,7 @@ class UnauthorizedError extends Error {
   }
 }
 
-async function ensureInitialized(accessToken: string): Promise<void> {
-  if (initialized) return;
+async function runInitialize(accessToken: string): Promise<void> {
   const init = await postJsonRpc(
     "initialize",
     {
@@ -121,12 +120,22 @@ async function ensureInitialized(accessToken: string): Promise<void> {
     headers,
     body: JSON.stringify({ jsonrpc: "2.0", method: "notifications/initialized", params: {} }),
   }).catch(() => undefined);
+}
 
-  initialized = true;
+// Collapses concurrent tool calls onto a single handshake. A rejected handshake
+// clears the cache so the next caller retries instead of inheriting the failure.
+function ensureInitialized(accessToken: string): Promise<void> {
+  if (!initPromise) {
+    initPromise = runInitialize(accessToken).catch((err) => {
+      initPromise = undefined;
+      throw err;
+    });
+  }
+  return initPromise;
 }
 
 function resetClient() {
-  initialized = false;
+  initPromise = undefined;
   sessionId = undefined;
 }
 

@@ -1,3 +1,4 @@
+import { Tool } from "@raycast/api";
 import { callMcpTool } from "../lib/mcp";
 
 /**
@@ -21,6 +22,20 @@ type Input = {
    * Default greeting/salutation (e.g. "Hi", "Hello").
    */
   greeting?: string;
+};
+
+export const confirmation: Tool.Confirmation<Input> = async (input) => {
+  const info: { name: string; value: string }[] = [];
+  if (input.fullName !== undefined) info.push({ name: "Full name", value: input.fullName });
+  if (input.signature !== undefined) info.push({ name: "Signature", value: input.signature });
+  if (input.voice !== undefined) info.push({ name: "Voice", value: input.voice });
+  if (input.greeting !== undefined) info.push({ name: "Greeting", value: input.greeting });
+  if (info.length === 0) return undefined;
+  return {
+    message: "Update Superhuman personalization? These defaults affect every email the AI composes for you.",
+    image: "✍️",
+    info,
+  };
 };
 
 export default async function tool(input: Input): Promise<unknown> {
