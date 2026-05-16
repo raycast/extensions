@@ -1,9 +1,9 @@
-import { execFile } from "node:child_process";
-import type { Dirent } from "node:fs";
-import fs from "node:fs/promises";
-import os from "node:os";
-import path from "node:path";
-import { promisify } from "node:util";
+import { execFile } from "child_process";
+import type { Dirent } from "fs";
+import fs from "fs/promises";
+import os from "os";
+import path from "path";
+import { promisify } from "util";
 
 export type Session = {
     name: string;
