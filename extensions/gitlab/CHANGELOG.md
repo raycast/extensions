@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Fix OOM crash in My Projects for large GitLab instances] - {PR_MERGE_DATE}
+## [Fix OOM crash in My Projects for large GitLab instances] - 2026-05-16
 
 - Fix out-of-memory crash when fetching thousands of projects by using parallel batch fetching with per-page mapping
 - Replace Fuse.js search with lightweight multi-term substring matching for the project list to reduce memory usage
