@@ -306,6 +306,7 @@ ${this.error || ""}`;
                 id: uuidv4(),
                 chats: this.chat.data,
                 model: { ...mapCommandToModel(this.command), option: this.displayModel },
+                codexThreadId: this.chat.codexThreadId,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString(),
                 pinned: false,

@@ -65,6 +65,7 @@ export const ChatView = ({
                 id: uuidv4(),
                 chats: [],
                 model: conversation.model,
+                codexThreadId: null,
                 pinned: false,
                 updated_at: "",
                 created_at: new Date().toISOString(),

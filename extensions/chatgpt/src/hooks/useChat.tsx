@@ -28,7 +28,7 @@ function hasUnsupportedReasoningEffortError(error: unknown): boolean {
   );
 }
 
-export function useChat<T extends Chat>(props: T[]): ChatHook {
+export function useChat<T extends Chat>(props: T[], initialCodexThreadId?: string | null): ChatHook {
   const [data, setData] = useState<Chat[]>(props);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -42,7 +42,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   const [streamData, setStreamData] = useState<Chat | undefined>();
   const abortControllerRef = useRef<AbortController | null>(null);
   const codexThreadRef = useRef<{ threadId: string | null; instructions: string }>({
-    threadId: null,
+    threadId: initialCodexThreadId ?? null,
     instructions: "",
   });
 
@@ -297,6 +297,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
   return useMemo(
     () => ({
       data,
+      codexThreadId: codexThreadRef.current.threadId,
       errorMsg,
       setData,
       isLoading,
@@ -312,6 +313,7 @@ export function useChat<T extends Chat>(props: T[]): ChatHook {
     }),
     [
       data,
+      codexThreadRef.current.threadId,
       errorMsg,
       setData,
       isLoading,

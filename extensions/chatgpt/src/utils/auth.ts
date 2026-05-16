@@ -1,4 +1,4 @@
-import { getPreferenceValues, open } from "@raycast/api";
+import { getPreferenceValues, LocalStorage, open } from "@raycast/api";
 import { CodexAppServerClient, withCodexAppServer } from "./codex-app-server";
 
 export type AuthProvider = "none" | "apiKey" | "chatgpt";
@@ -41,11 +41,13 @@ interface LoginCompletedNotification {
 }
 
 const AUTH_STATUS_CACHE_MS = 15 * 1000;
+const AUTH_STATUS_STORAGE_KEY = "chatgpt-auth-status-cache";
 
 let cachedChatGPTAccount: {
   account: ChatGPTAccount | null;
   expiresAt: number;
 } | null = null;
+let resolveAuthStatusPromise: Promise<AuthStatus> | null = null;
 
 export function getConfiguredApiKey(preferences?: Preferences): string {
   const config = preferences ?? getPreferenceValues<Preferences>();
@@ -67,24 +69,36 @@ export function getInitialAuthStatus(preferences?: Preferences): AuthStatus {
 }
 
 export async function resolveAuthStatus(preferences?: Preferences): Promise<AuthStatus> {
-  const config = preferences ?? getPreferenceValues<Preferences>();
-  const initial = getInitialAuthStatus(config);
-  const account = await readChatGPTAccountSafe();
-  const hasChatGPTSession = !!account;
+  if (resolveAuthStatusPromise) {
+    return resolveAuthStatusPromise;
+  }
 
-  return {
-    provider: initial.hasApiKey ? "apiKey" : hasChatGPTSession ? "chatgpt" : "none",
-    hasApiKey: initial.hasApiKey,
-    hasChatGPTSession,
-    apiKey: initial.apiKey,
-    session: account
-      ? {
-          email: account.email,
-          planType: account.planType ?? null,
-          updatedAt: new Date().toISOString(),
-        }
-      : null,
-  };
+  resolveAuthStatusPromise = (async () => {
+    const config = preferences ?? getPreferenceValues<Preferences>();
+    const initial = getInitialAuthStatus(config);
+    const account = (await readCachedChatGPTAccountFromStorage()) ?? (await readChatGPTAccountSafe());
+    const hasChatGPTSession = !!account;
+
+    return {
+      provider: initial.hasApiKey ? "apiKey" : hasChatGPTSession ? "chatgpt" : "none",
+      hasApiKey: initial.hasApiKey,
+      hasChatGPTSession,
+      apiKey: initial.apiKey,
+      session: account
+        ? {
+            email: account.email,
+            planType: account.planType ?? null,
+            updatedAt: new Date().toISOString(),
+          }
+        : null,
+    };
+  })();
+
+  try {
+    return await resolveAuthStatusPromise;
+  } finally {
+    resolveAuthStatusPromise = null;
+  }
 }
 
 export async function signInWithCodexAuth(): Promise<CodexAuthSession> {
@@ -125,6 +139,7 @@ export async function clearCodexAuthSession(): Promise<void> {
     await client.request("account/logout", {});
   });
   clearCachedChatGPTAccount();
+  await LocalStorage.removeItem(AUTH_STATUS_STORAGE_KEY);
 }
 
 async function readChatGPTAccountSafe(): Promise<ChatGPTAccount | null> {
@@ -159,8 +174,54 @@ function primeCachedChatGPTAccount(account: ChatGPTAccount | null): void {
     account,
     expiresAt: Date.now() + AUTH_STATUS_CACHE_MS,
   };
+
+  void LocalStorage.setItem(
+    AUTH_STATUS_STORAGE_KEY,
+    JSON.stringify({
+      account,
+      expiresAt: Date.now() + AUTH_STATUS_CACHE_MS,
+    }),
+  );
 }
 
 function clearCachedChatGPTAccount(): void {
   cachedChatGPTAccount = null;
+}
+
+async function readCachedChatGPTAccountFromStorage(): Promise<ChatGPTAccount | null> {
+  if (cachedChatGPTAccount && cachedChatGPTAccount.expiresAt > Date.now()) {
+    return cachedChatGPTAccount.account;
+  }
+
+  const raw = await LocalStorage.getItem<string>(AUTH_STATUS_STORAGE_KEY);
+  if (!raw) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as {
+      account?: ChatGPTAccount | null;
+      expiresAt?: number;
+    };
+
+    if (!parsed || typeof parsed.expiresAt !== "number" || parsed.expiresAt <= Date.now()) {
+      await LocalStorage.removeItem(AUTH_STATUS_STORAGE_KEY);
+      return null;
+    }
+
+    const account = parsed.account ?? null;
+    if (!account || account.type !== "chatgpt" || !account.email?.trim()) {
+      return null;
+    }
+
+    cachedChatGPTAccount = {
+      account,
+      expiresAt: parsed.expiresAt,
+    };
+
+    return account;
+  } catch {
+    await LocalStorage.removeItem(AUTH_STATUS_STORAGE_KEY);
+    return null;
+  }
 }

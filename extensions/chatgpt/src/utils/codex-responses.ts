@@ -22,6 +22,12 @@ interface ThreadStartResponse {
   };
 }
 
+interface ThreadResumeResponse {
+  thread: {
+    id: string;
+  };
+}
+
 interface TurnStartResponse {
   turn: {
     id: string;
@@ -126,6 +132,8 @@ async function runCodexTurn(options: {
   try {
     if (!threadId) {
       threadId = await startCodexThread(options.client, options.model, options.instructions, options.historyItems);
+    } else {
+      threadId = await resumeCodexThread(options.client, threadId, options.model);
     }
 
     const turn = await options.client.request<TurnStartResponse>("turn/start", {
@@ -188,7 +196,7 @@ async function startCodexThread(
     sandbox: "read-only",
     developerInstructions: instructions,
     serviceName: "raycast_chatgpt_extension",
-    ephemeral: true,
+    ephemeral: false,
     experimentalRawEvents: false,
     persistExtendedHistory: false,
   });
@@ -204,6 +212,15 @@ async function startCodexThread(
   return threadId;
 }
 
+async function resumeCodexThread(client: CodexAppServerClient, threadId: string, model: string): Promise<string> {
+  const response = await client.request<ThreadResumeResponse>("thread/resume", {
+    threadId,
+    model,
+  });
+
+  return response.thread.id;
+}
+
 function shouldRetryWithFreshThread(error: unknown): boolean {
   if (!(error instanceof Error)) {
     return false;
@@ -211,12 +228,13 @@ function shouldRetryWithFreshThread(error: unknown): boolean {
 
   const message = error.message.toLowerCase();
   return (
-    message.includes("thread") &&
+    (message.includes("thread") || message.includes("rollout")) &&
     (message.includes("not loaded") ||
       message.includes("not found") ||
       message.includes("unknown") ||
       message.includes("closed") ||
-      message.includes("unavailable"))
+      message.includes("unavailable") ||
+      message.includes("no rollout found"))
   );
 }
 

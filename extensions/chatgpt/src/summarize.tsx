@@ -131,6 +131,7 @@ function SummarizeView() {
                 id: uuidv4(),
                 chats: [],
                 model: chooseModel,
+                codexThreadId: null,
                 pinned: false,
                 updated_at: "",
                 created_at: new Date().toISOString(),

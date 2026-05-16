@@ -58,7 +58,7 @@ function AskContent(props: AskProps & { authProvider: AuthProvider }) {
   const models = useModel();
   const savedChats = useSavedChat();
   const isAutoSaveConversation = useAutoSaveConversation();
-  const chats = useChat<Chat>(props.conversation ? props.conversation.chats : []);
+  const chats = useChat<Chat>(props.conversation ? props.conversation.chats : [], props.conversation?.codexThreadId);
   const question = useQuestion({ initialQuestion: "", disableAutoLoad: !!props.conversation });
 
   const availableModels = useMemo(
@@ -79,6 +79,7 @@ function AskContent(props: AskProps & { authProvider: AuthProvider }) {
         id: uuidv4(),
         chats: [],
         model: DEFAULT_MODEL,
+        codexThreadId: null,
         pinned: false,
         updated_at: "",
         created_at: new Date().toISOString(),
@@ -192,9 +193,13 @@ function AskContent(props: AskProps & { authProvider: AuthProvider }) {
   }, [models.isLoading, availableModels, availableModelsMap]);
 
   useEffect(() => {
-    const updatedConversation = { ...conversation, chats: chats.data, updated_at: new Date().toISOString() };
-    setConversation(updatedConversation);
-  }, [chats.data]);
+    setConversation((previousConversation) => ({
+      ...previousConversation,
+      chats: chats.data,
+      codexThreadId: chats.codexThreadId,
+      updated_at: new Date().toISOString(),
+    }));
+  }, [chats.data, chats.codexThreadId]);
 
   useEffect(() => {
     if (models.isLoading) {

@@ -349,7 +349,6 @@
     "@raycast/api": "^1.103.0",
     "@raycast/utils": "^2.2.2",
     "@types/uuid": "^10.0.0",
-    "cross-fetch": "^4.1.0",
     "csv-parse": "^5.6.0",
     "image-meta": "^0.2.1",
     "moment": "^2.30.1",
