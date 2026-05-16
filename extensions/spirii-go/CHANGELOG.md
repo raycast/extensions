@@ -1,6 +1,6 @@
 # Spirii Go Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-16
 
 - Nearby Chargers command with live availability and distance sorting.
 - My Chargepoint command with current price, status, and upcoming price schedule.
