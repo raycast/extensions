@@ -1,6 +1,6 @@
 # Cursor Changelog
 
-## [Add Keyboard Shortcut and Missing Icon] - {PR_MERGE_DATE}
+## [Add Keyboard Shortcut and Missing Icon] - 2026-05-16
 
 - Add a dedicated Cursor icon asset for Raycast action icons
 - Use the shared icon asset for project open actions
