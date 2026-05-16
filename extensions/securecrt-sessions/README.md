@@ -1,10 +1,10 @@
-# SecureCRT
+# SecureCRT Sessions
 
 Open saved SecureCRT sessions from Raycast.
 
 ## Commands
 
-### SecureCRT Sessions
+### Open Sessions
 
 Lists saved SecureCRT sessions from your SecureCRT configuration folder. Select a session to open it in SecureCRT.
 

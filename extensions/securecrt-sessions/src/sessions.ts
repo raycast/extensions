@@ -70,7 +70,7 @@ export async function readSessionMetadata(filePath: string): Promise<Pick<Sessio
 
         return { hostname, protocol };
     } catch {
-        return {};
+        return { hostname: undefined, protocol: undefined };
     }
 }
 
@@ -127,7 +127,7 @@ async function walkSessionsDir(rootDir: string, readMetadata: boolean, currentDi
         });
     }
 
-    return sessions.sort((a, b) => a.sessionPath.localeCompare(b.sessionPath));
+    return sessions;
 }
 
 export async function loadSessions(configPathInput?: string, readMetadata = true): Promise<Session[]> {
@@ -142,5 +142,6 @@ export async function loadSessions(configPathInput?: string, readMetadata = true
         throw new Error(`Sessions folder not found: ${sessionsDir}`);
     }
 
-    return walkSessionsDir(sessionsDir, readMetadata);
+    const sessions = await walkSessionsDir(sessionsDir, readMetadata);
+    return sessions.sort((a, b) => a.sessionPath.localeCompare(b.sessionPath));
 }
