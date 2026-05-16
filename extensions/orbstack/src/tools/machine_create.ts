@@ -1,13 +1,14 @@
 import { Tool } from "@raycast/api";
-import { ORB_CTL, ISOLATED_MACHINES_VERSION } from "../orbstack";
+import { ORB_CTL, ISOLATED_MACHINES_VERSION, parseOrbctlVersion } from "../orbstack";
 import { execAsync, supportsIsolatedMachines } from "../utils";
 import { CreateArgs, validateCreateArgs } from "./types";
 
 async function assertIsolatedMachinesSupport(): Promise<void> {
   const { stdout } = await execAsync(`${ORB_CTL} version`, { timeout: 1000 * 10 }); // Let's wait at most 10 seconds to get the version.
   if (!stdout || !supportsIsolatedMachines(stdout)) {
+    const parsedVersion = stdout ? (parseOrbctlVersion(stdout) ?? "unknown") : "unknown";
     throw new Error(
-      `Isolated machines require orbctl ${ISOLATED_MACHINES_VERSION} or later. Current version: ${stdout || "unknown"}. Please upgrade OrbStack.`,
+      `Isolated machines require orbctl ${ISOLATED_MACHINES_VERSION} or later. Current version: ${parsedVersion}. Please upgrade OrbStack.`,
     );
   }
 }

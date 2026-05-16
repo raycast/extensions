@@ -1,6 +1,6 @@
 # OrbStack Changelog
 
-## [Enhancements] - 2026-05-02
+## [Enhancements] - {PR_MERGE_DATE}
 
 - Add support for isolated machines.
 
