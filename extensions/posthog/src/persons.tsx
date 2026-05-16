@@ -18,7 +18,7 @@ function Persons({ searchTerm }: { searchTerm: string }) {
     {
       execute: !!selectedId,
       keepPreviousData: true,
-      onError: (e) => showFailureToast(e, { title: "Couldn't search persons" }),
+      onError: (e) => void showFailureToast(e, { title: "Couldn't search persons" }),
     },
   );
 

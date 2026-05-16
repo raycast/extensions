@@ -21,7 +21,7 @@ function Events({ initial }: { initial: string }) {
     {
       execute: !!selectedId,
       keepPreviousData: true,
-      onError: (e) => showFailureToast(e, { title: "Couldn't load events" }),
+      onError: (e) => void showFailureToast(e, { title: "Couldn't load events" }),
     },
   );
 

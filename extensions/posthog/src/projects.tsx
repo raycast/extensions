@@ -7,7 +7,7 @@ import { getProject, listProjects, Project as ProjectType, ProjectDetail } from 
 export default function Command() {
   const { data, isLoading, error } = useCachedPromise(async () => (await listProjects()).results, [], {
     keepPreviousData: true,
-    onError: (e) => showFailureToast(e, { title: "Couldn't load PostHog projects" }),
+    onError: (e) => void showFailureToast(e, { title: "Couldn't load PostHog projects" }),
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [projectDetail, setProjectDetail] = useCachedState<{ [id: number]: ProjectDetail }>("project-details", {});
@@ -59,7 +59,7 @@ function ProjectRow({
   useCachedPromise((id: number) => getProject(id), [project.id], {
     execute: !detail && isSelected,
     onData: onDetailUpdated,
-    onError: (e) => showFailureToast(e, { title: `Couldn't load project ${project.name}` }),
+    onError: (e) => void showFailureToast(e, { title: `Couldn't load project ${project.name}` }),
   });
 
   return (

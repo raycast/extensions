@@ -14,7 +14,7 @@ function FeatureFlags() {
     {
       execute: !!selectedId,
       keepPreviousData: true,
-      onError: (e) => showFailureToast(e, { title: "Couldn't load feature flags" }),
+      onError: (e) => void showFailureToast(e, { title: "Couldn't load feature flags" }),
     },
   );
 

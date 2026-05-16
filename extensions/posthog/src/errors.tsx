@@ -15,7 +15,7 @@ function Errors() {
     {
       execute: !!selectedId,
       keepPreviousData: true,
-      onError: (e) => showFailureToast(e, { title: "Couldn't load errors" }),
+      onError: (e) => void showFailureToast(e, { title: "Couldn't load errors" }),
     },
   );
 

@@ -19,7 +19,7 @@ export const ProjectsContext = createContext<ProjectContextType>({
 export function WithProjects({ children }: { children: ReactNode }) {
   const { data, isLoading, error } = useCachedPromise(async () => (await listProjects()).results, [], {
     keepPreviousData: true,
-    onError: (e) => showFailureToast(e, { title: "Couldn't load PostHog projects" }),
+    onError: (e) => void showFailureToast(e, { title: "Couldn't load PostHog projects" }),
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 

@@ -15,7 +15,7 @@ function Insights() {
     {
       execute: !!selectedId,
       keepPreviousData: true,
-      onError: (e) => showFailureToast(e, { title: "Couldn't load insights" }),
+      onError: (e) => void showFailureToast(e, { title: "Couldn't load insights" }),
     },
   );
 

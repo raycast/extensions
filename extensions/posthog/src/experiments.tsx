@@ -21,7 +21,7 @@ function Experiments() {
     {
       execute: !!selectedId,
       keepPreviousData: true,
-      onError: (e) => showFailureToast(e, { title: "Couldn't load experiments" }),
+      onError: (e) => void showFailureToast(e, { title: "Couldn't load experiments" }),
     },
   );
 

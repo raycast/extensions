@@ -14,7 +14,7 @@ function Cohorts() {
     {
       execute: !!selectedId,
       keepPreviousData: true,
-      onError: (e) => showFailureToast(e, { title: "Couldn't load cohorts" }),
+      onError: (e) => void showFailureToast(e, { title: "Couldn't load cohorts" }),
     },
   );
 
