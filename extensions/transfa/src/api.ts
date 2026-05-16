@@ -50,6 +50,7 @@ function errorMessage(body: string, status: number): string {
 export async function uploadFile(filePath: string, opts: UploadOptions = {}): Promise<UploadResult> {
   const boundary = crypto.randomBytes(16).toString("hex");
   const filename = path.basename(filePath);
+  const escapedFilename = filename.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   const fileContent = fs.readFileSync(filePath);
 
   const parts: Buffer[] = [];
@@ -59,7 +60,7 @@ export async function uploadFile(filePath: string, opts: UploadOptions = {}): Pr
 
   parts.push(
     Buffer.from(
-      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${filename}"\r\nContent-Type: application/octet-stream\r\n\r\n`
+      `--${boundary}\r\nContent-Disposition: form-data; name="file"; filename="${escapedFilename}"\r\nContent-Type: application/octet-stream\r\n\r\n`
     )
   );
   parts.push(fileContent);
