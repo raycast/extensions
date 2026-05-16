@@ -229,6 +229,21 @@ export const QueryEmailAndCalendarInput = z.object({
 });
 export type QueryEmailAndCalendarInputType = z.infer<typeof QueryEmailAndCalendarInput>;
 
+// ───── run-skill ─────
+export const RunSkillInput = z.object({
+  skillName: z.string().min(1, "Provide a skill name (slug like 'morning-briefing' or title like 'Morning Briefing')."),
+  forceRefresh: z.boolean().optional(),
+});
+export type RunSkillInputType = z.infer<typeof RunSkillInput>;
+
+// ───── list-skills ─────
+export const ListSkillsInput = z
+  .object({
+    forceRefresh: z.boolean().optional(),
+  })
+  .optional();
+export type ListSkillsInputType = z.infer<typeof ListSkillsInput>;
+
 /**
  * Validate input against a schema and rethrow Zod errors as Error messages
  * the AI surface can render cleanly. Returns the parsed (possibly coerced)

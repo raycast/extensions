@@ -1,5 +1,18 @@
 # Superhuman Changelog
 
+## [Skills surface rework] - {PR_MERGE_DATE}
+
+### Fixed
+
+- **Skills now execute as part of Raycast AI** instead of asking users to copy a prompt into Quick AI. The five separate root commands (`skill-morning-briefing`, …) have been replaced with a single **Browse Superhuman Mail Skills** view command, plus two new AI tools (`run-skill`, `list-skills`) so the same library is reachable from `@superhuman` in AI Chat.
+- The Browse Skills view shows each skill with its description, the tools it chains, a read-only badge, and a source indicator (`bundled` / `cached` / `live`). Per-row actions: **Run with Raycast AI** (copies the prompt and opens AI Chat), **Copy Prompt**, **View Source on GitHub**, **View Tools Used**. Global actions: **Refresh from Upstream**, **Open Skills Repo**.
+
+### Added — live skill updates
+
+- New runtime resolver (`src/lib/skill-source.ts`) with a three-tier chain: LocalStorage cache (24h TTL) → GitHub upstream fetch (5s timeout) → bundled fallback. Updates to https://github.com/superhuman/mcp-mail/skills land for users without an extension release; the bundled fallback keeps the extension working offline and on first launch.
+- New AI tools `run-skill` and `list-skills` use the same resolver, so the AI surface also benefits from live updates. `run-skill` accepts a slug (`morning-briefing`), a title (`Morning Briefing`), or a partial match (`briefing`); it returns the skill prompt, the tools it expects to chain, and `read_only_blocked: true` when the user's read-only preference would block the skill's writes.
+- The existing build-time embed pipeline (`scripts/embed-skills.ts`) and upstream sync (`scripts/sync-skills.ts`) are unchanged — they're the bundled-fallback half of the equation.
+
 ## [Parity + Skills Library] - {PR_MERGE_DATE}
 
 ### Tool parity with the official MCP

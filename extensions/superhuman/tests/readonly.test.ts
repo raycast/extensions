@@ -1,5 +1,9 @@
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { __setReadOnly } from "./__mocks__/raycast-api";
 import { WRITE_TOOLS, assertWritable, isReadOnly, readOnlyConfirmation } from "../src/lib/readonly";
+
+beforeAll(() => __setReadOnly(true));
+afterAll(() => __setReadOnly(false));
 
 describe("read-only mode", () => {
   it("WRITE_TOOLS covers every known write tool", () => {

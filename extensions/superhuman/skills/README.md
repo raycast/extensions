@@ -8,11 +8,26 @@ Each skill is a self-contained `SKILL.md` with frontmatter declaring the tools i
 
 ### In Raycast
 
-Each skill is registered as a Raycast command (e.g. **Morning Briefing**, **End-of-Day Wrap-up**). Invoke from Raycast root; the command shows the skill prompt and a one-keystroke action to copy it to your clipboard so you can paste it into Quick AI alongside `@superhuman`.
+One root command — **Browse Superhuman Mail Skills** — opens a list of every skill with live previews, copy-prompt actions, links to the upstream source, and a refresh-from-upstream action.
+
+In Raycast AI Chat (`@superhuman …`), two AI tools expose the same library:
+
+- **`list-skills`** — returns the catalog (name, description, tools used, read-only flag, source provenance).
+- **`run-skill`** — accepts a slug (`morning-briefing`) or fuzzy title (`Morning Briefing`, `briefing`) and returns the skill's prompt plus the list of tools it expects to chain. The AI follows the returned instructions and calls the listed tools.
 
 ### In Claude Code / other MCP clients
 
 These `SKILL.md` files match Superhuman's official Skills Library format. Any MCP client that supports skills (Claude Code, Cursor, etc.) can load them directly from this directory.
+
+## Source resolution
+
+Skill content is resolved at runtime through a three-tier chain:
+
+1. **LocalStorage cache** — 24-hour TTL, per-skill, keyed by slug. Stored in Raycast's local storage.
+2. **GitHub upstream** — `superhuman/mcp-mail/skills/<name>/SKILL.md`. 5-second fetch timeout. Updates land for users without an extension release.
+3. **Bundled fallback** — `src/lib/skill-content.generated.ts`, written at build time by `scripts/embed-skills.ts`. Always present, so the extension works offline and on first launch.
+
+The Browse Skills view shows the source for each row (`bundled` / `cached` / `live`) and "updated N ago" so you can see what you're looking at.
 
 ## Bundled skills
 
@@ -26,10 +41,12 @@ These `SKILL.md` files match Superhuman's official Skills Library format. Any MC
 
 ## Read-only mode
 
-Skills with `read_only: false` in frontmatter check the extension's read-only-mode preference at runtime and surface a notice if write actions are blocked. This matches the per-tool gating used by `draft-email`, `send-draft`, etc.
+Skills with `read_only: false` in frontmatter check the extension's read-only-mode preference at runtime. `run-skill` returns `read_only_blocked: true` and a `notes` field instructing the AI to refuse the action. The Browse Skills view shows a red lock icon and a banner.
 
-## Upstream sync
+## Upstream sync (build-time)
 
-These skills are kept in sync with Superhuman's official upstream library at https://github.com/superhuman/mcp-mail/tree/main/skills. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the sync process.
+`scripts/sync-skills.ts` pulls the latest upstream content, diffs against the local copies, and surfaces any drift. `scripts/embed-skills.ts` regenerates `src/lib/skill-content.generated.ts` from the source `SKILL.md` files so the bundled fallback stays in sync.
 
-Run `npm run sync-skills` to pull the latest upstream content; a weekly GitHub Action does the same automatically.
+A weekly GitHub Action template at `scripts/sync-skills.workflow.yml` does the same in CI. See [CONTRIBUTING.md](./CONTRIBUTING.md) for the install path (the monorepo blocks per-extension `.github/`, so it needs to be copied to the monorepo root).
+
+The bundled fallback is the safety net. The runtime resolver is what users see day-to-day.

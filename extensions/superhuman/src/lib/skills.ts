@@ -63,21 +63,30 @@ function parseFrontmatter(raw: string): { frontmatter: SkillFrontmatter; body: s
   return { frontmatter, body };
 }
 
-export function loadSkill(name: string): Skill {
-  const raw = SKILL_FILES[name];
-  if (!raw) throw new Error(`Skill not found: ${name}. Did you run "npm run embed-skills"?`);
+/**
+ * Parse a raw `SKILL.md` string. Exported for the runtime resolver in
+ * `skill-source.ts` so cached/live content goes through the same parser as
+ * the bundled fallback.
+ */
+export function parseSkill(raw: string): Skill {
   const { frontmatter, body } = parseFrontmatter(raw);
   return { frontmatter, body, raw };
 }
 
+/** Bundled-only synchronous loader. Used by tests, the embed script, and as
+ * the fallback path inside the runtime resolver. */
+export function loadSkill(name: string): Skill {
+  const raw = SKILL_FILES[name];
+  if (!raw) throw new Error(`Skill not found: ${name}. Did you run "npm run embed-skills"?`);
+  return parseSkill(raw);
+}
+
+/** Bundled-only synchronous catalog. */
 export function listSkills(): Skill[] {
   return Object.keys(SKILL_FILES).map((name) => loadSkill(name));
 }
 
-/**
- * Build the Quick AI prompt for a skill. Caller decides whether to prepend
- * "@superhuman " — depends on whether the destination is Quick AI vs AI Chat.
- */
+/** Build the Quick AI prompt for a skill. */
 export function buildPrompt(skill: Skill): string {
   return skill.body.trim();
 }

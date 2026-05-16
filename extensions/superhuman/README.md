@@ -62,11 +62,16 @@ The first time you invoke any `@superhuman` tool, Raycast opens Superhuman's OAu
 
 ## Skills
 
-Five curated workflows that chain the tools above into named operations, ported from Superhuman's [official Skills Library](https://github.com/superhuman/mcp-mail/tree/main/skills). Each is a Raycast command (`Morning Briefing`, `End-of-Day Wrap-up`, `Meeting Scheduler`, `Deal Tracker`, `Batch Draft Writer`) that opens the skill prompt and one-shot copies it for Quick AI. Skills that write to your account honor the **Read-only mode** preference.
+Five curated workflows that chain the tools above into named operations, ported from Superhuman's [official Skills Library](https://github.com/superhuman/mcp-mail/tree/main/skills): **Morning Briefing**, **End-of-Day Wrap-Up**, **Meeting Scheduler**, **Deal Tracker**, **Batch Draft Writer**.
 
-The bundled `SKILL.md` files in `skills/` follow Superhuman's upstream format and are sync-able with `npm run sync-skills` (a weekly GitHub Action does the same).
+Two surfaces:
 
-See [`skills/README.md`](./skills/README.md) for the format and authoring guide.
+- **Browse Superhuman Mail Skills** — single root command. Lists every skill with descriptions, tools used, source provenance (`bundled` / `cached` / `live`), and per-skill actions (Run with Raycast AI, Copy Prompt, View Source, Refresh from Upstream).
+- **AI tools `list-skills` and `run-skill`** — exposed to `@superhuman` in AI Chat. Ask `@superhuman give me my morning briefing` and the AI chains `run-skill` → the skill's listed tools automatically. `run-skill` accepts a slug, title, or partial match.
+
+Skills are resolved at runtime from GitHub upstream with a 24h LocalStorage cache; the bundled `skills/` directory is the offline / first-launch fallback. See [`skills/README.md`](./skills/README.md) for the format and authoring guide.
+
+Skills that write to your account honor the **Read-only mode** preference and refuse to run when it's enabled.
 
 ## Example prompts
 

@@ -92,11 +92,12 @@ describe("skills", () => {
         }
       });
 
-      it("has a matching Raycast command in package.json", () => {
-        const commandName = `skill-${name}`;
+      it("is reachable via the unified browse-skills / run-skill surface", () => {
         const commands = (PACKAGE_JSON.commands ?? []) as Array<{ name: string }>;
-        const found = commands.find((c) => c.name === commandName);
-        expect(found, `package.json should declare command ${commandName}`).toBeTruthy();
+        const tools = (PACKAGE_JSON.tools ?? []) as Array<{ name: string }>;
+        expect(commands.find((c) => c.name === "browse-skills"), "browse-skills command").toBeTruthy();
+        expect(tools.find((t) => t.name === "list-skills"), "list-skills AI tool").toBeTruthy();
+        expect(tools.find((t) => t.name === "run-skill"), "run-skill AI tool").toBeTruthy();
       });
     });
   }

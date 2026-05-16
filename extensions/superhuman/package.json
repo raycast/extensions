@@ -21,37 +21,9 @@
       "mode": "no-view"
     },
     {
-      "name": "skill-morning-briefing",
-      "title": "Morning Briefing",
-      "description": "Overnight inbox triage plus today's calendar summary. Opens the skill prompt and copies it for Quick AI.",
-      "icon": "extension-icon.png",
-      "mode": "view"
-    },
-    {
-      "name": "skill-eod-wrapup",
-      "title": "End-Of-Day Wrap-Up",
-      "description": "End-of-day summary: emails sent, replies received, meetings held, plus a preview of tomorrow's calendar.",
-      "icon": "extension-icon.png",
-      "mode": "view"
-    },
-    {
-      "name": "skill-meeting-scheduler",
-      "title": "Meeting Scheduler",
-      "description": "Resolve participants, find a free slot for everyone, and create the calendar invite with a video link.",
-      "icon": "extension-icon.png",
-      "mode": "view"
-    },
-    {
-      "name": "skill-deal-tracker",
-      "title": "Deal Tracker",
-      "description": "Track deals across email and calendar by querying recent threads, replies, and meetings for a named deal or company.",
-      "icon": "extension-icon.png",
-      "mode": "view"
-    },
-    {
-      "name": "skill-batch-draft-writer",
-      "title": "Batch Draft Writer",
-      "description": "Generate drafts across many threads from a single set of instructions. Useful for templated follow-ups and backlog triage.",
+      "name": "browse-skills",
+      "title": "Browse Superhuman Mail Skills",
+      "description": "Browse and run Superhuman's curated workflow skills (Morning Briefing, EOD Wrap-Up, Meeting Scheduler, Deal Tracker, Batch Draft Writer). Skills are fetched live from Superhuman's upstream library with a bundled fallback for offline use.",
       "icon": "extension-icon.png",
       "mode": "view"
     }
@@ -312,6 +284,31 @@
         "meeting",
         "schedule"
       ]
+    },
+    {
+      "name": "list-skills",
+      "title": "List Skills",
+      "description": "List every available Superhuman workflow skill (Morning Briefing, Meeting Scheduler, Deal Tracker, etc.) with its description, tools it chains, and whether it writes to the account. Call this before run-skill if you don't know the exact skill name.",
+      "icon": "extension-icon.png",
+      "keywords": [
+        "skills",
+        "workflows",
+        "library",
+        "catalog"
+      ]
+    },
+    {
+      "name": "run-skill",
+      "title": "Run Skill",
+      "description": "Load a Superhuman workflow skill and return its instructions plus the tools it expects to chain. After calling this, follow the returned prompt step-by-step and call the listed tools as needed. Accepts a slug ('morning-briefing') or a fuzzy title ('Morning Briefing', 'briefing').",
+      "icon": "extension-icon.png",
+      "keywords": [
+        "skill",
+        "workflow",
+        "run",
+        "execute",
+        "briefing"
+      ]
     }
   ],
   "preferences": [
@@ -335,7 +332,7 @@
     }
   ],
   "ai": {
-    "instructions": "This extension drives Superhuman through Superhuman's official MCP server (https://mcp.mail.superhuman.com/mcp).\n\nGeneral rules:\n- For email composition use draft-email, NOT query-email-and-calendar / search-inbox.\n- Prefer the `instructions` field on draft-email (natural-language; Superhuman's AI writer composes in the user's voice). Only use `body` when you need a literal HTML body. Either is required; `type: forward` requires `body` (intro only — server appends the quoted message).\n- For replies / forwards / reply-alls, set `type` AND pass the source `threadId` and `messageId`.\n- Always pass full email addresses (e.g. \"alex@example.com\"), never just first names. If only a first name is given and no other context provides an address, append \"@example.com\".\n- When the user gives multiple \"To\" recipients, pass them all in `recipient` as a comma-separated list — NOT in cc/bcc.\n- Never produce Markdown links like [text](url). Provide complete URLs in plain text. Always include FULL meeting URLs (Zoom etc.) with all query parameters.\n- For send-draft, discard-draft, trash-thread, mark-spam, unsubscribe, update-personalization, draft-email, and create-or-update-event with attendees: a confirmation dialog is shown — present the user with what will happen.\n- send-draft scheduling options (`smartSend`, `sendAt`, `undoTimeout`) are MUTUALLY EXCLUSIVE — pass at most one. When `undoTimeout` (1–10 min) is set, the response includes an `undoToken` you can pass to undo-send.\n- After draft-email returns a draft id, chain send-draft if the user said to send.\n\nSearch and Q&A (query-email-and-calendar):\n- query-email-and-calendar is the flagship cross-source tool — use it for natural-language questions across email + calendar + contacts.\n- search-inbox still works; it delegates to query-email-and-calendar.\n- Use lowercase operators with NO space after the colon: from:john, subject:budget, has:attachment.\n- Do not wrap operator values in quotes.\n- For \"from John\" queries, format as \"from:john\".\n- For multi-word subjects, use \"subject:multi word\" without quotes.\n- Do not add scopes like in:inbox unless the user explicitly asks.\n\nReading and triage:\n- To answer questions about specific email, chain list-threads or query-email-and-calendar → get-thread (or get-message) so the AI can read actual content.\n- list-threads now supports a full filter set: from[], to[], subjectContains, bodyContains, labels[], split (name or id), startDate, endDate, isUnread, isStarred, hasAttachment.\n- For attachments, find the message via get-thread/get-message, then call get-attachment with the message id; pass `attachmentName` to pick a specific file.\n- update-thread uses `markDone`, `markRead`, `markStarred`, `markImportant`, `addLabels`, `removeLabels`, `moveToFolder`. Old field names (`archived`, `read`, `starred`) still work but are deprecated.\n- mark-spam can also `alsoBlockSender`, `alsoBlockDomain`, `alsoTrash` — surface these in the confirmation.\n\nCalendar:\n- create-or-update-event REQUIRES `timezone` (IANA, e.g. \"America/Los_Angeles\"). Pass `conference: true` to add a video link. Use `recurrence` (RRULE) and `reminders` for repeating events.\n- get-availability uses `participants` (names or emails — server resolves names), `timezone` (required), `startDate`/`endDate`, `durationMinutes`, `workingHoursOnly`.\n\nPersonalization:\n- update-personalization takes a single freeform `feedback` string. Example: \"I prefer 'Hey' over 'Dear'\" or \"My title is now VP Eng\". The server interprets the feedback and updates the relevant personalization model.\n\nRead-only mode:\n- The user can enable a \"Read-only mode\" preference that blocks every write tool. If the user asks for an action that requires writing while this is on, surface the blocking dialog and stop — do not try to bypass it.\n\nWhen combining with other Raycast AI extensions (Google Calendar, GitHub, Notion, Things), gather details first from the other extension, then call draft-email directly with the assembled information.",
+    "instructions": "This extension drives Superhuman through Superhuman's official MCP server (https://mcp.mail.superhuman.com/mcp).\n\nGeneral rules:\n- For email composition use draft-email, NOT query-email-and-calendar / search-inbox.\n- Prefer the `instructions` field on draft-email (natural-language; Superhuman's AI writer composes in the user's voice). Only use `body` when you need a literal HTML body. Either is required; `type: forward` requires `body` (intro only — server appends the quoted message).\n- For replies / forwards / reply-alls, set `type` AND pass the source `threadId` and `messageId`.\n- Always pass full email addresses (e.g. \"alex@example.com\"), never just first names. If only a first name is given and no other context provides an address, append \"@example.com\".\n- When the user gives multiple \"To\" recipients, pass them all in `recipient` as a comma-separated list — NOT in cc/bcc.\n- Never produce Markdown links like [text](url). Provide complete URLs in plain text. Always include FULL meeting URLs (Zoom etc.) with all query parameters.\n- For send-draft, discard-draft, trash-thread, mark-spam, unsubscribe, update-personalization, draft-email, and create-or-update-event with attendees: a confirmation dialog is shown — present the user with what will happen.\n- send-draft scheduling options (`smartSend`, `sendAt`, `undoTimeout`) are MUTUALLY EXCLUSIVE — pass at most one. When `undoTimeout` (1–10 min) is set, the response includes an `undoToken` you can pass to undo-send.\n- After draft-email returns a draft id, chain send-draft if the user said to send.\n\nSearch and Q&A (query-email-and-calendar):\n- query-email-and-calendar is the flagship cross-source tool — use it for natural-language questions across email + calendar + contacts.\n- search-inbox still works; it delegates to query-email-and-calendar.\n- Use lowercase operators with NO space after the colon: from:john, subject:budget, has:attachment.\n- Do not wrap operator values in quotes.\n- For \"from John\" queries, format as \"from:john\".\n- For multi-word subjects, use \"subject:multi word\" without quotes.\n- Do not add scopes like in:inbox unless the user explicitly asks.\n\nReading and triage:\n- To answer questions about specific email, chain list-threads or query-email-and-calendar → get-thread (or get-message) so the AI can read actual content.\n- list-threads now supports a full filter set: from[], to[], subjectContains, bodyContains, labels[], split (name or id), startDate, endDate, isUnread, isStarred, hasAttachment.\n- For attachments, find the message via get-thread/get-message, then call get-attachment with the message id; pass `attachmentName` to pick a specific file.\n- update-thread uses `markDone`, `markRead`, `markStarred`, `markImportant`, `addLabels`, `removeLabels`, `moveToFolder`. Old field names (`archived`, `read`, `starred`) still work but are deprecated.\n- mark-spam can also `alsoBlockSender`, `alsoBlockDomain`, `alsoTrash` — surface these in the confirmation.\n\nCalendar:\n- create-or-update-event REQUIRES `timezone` (IANA, e.g. \"America/Los_Angeles\"). Pass `conference: true` to add a video link. Use `recurrence` (RRULE) and `reminders` for repeating events.\n- get-availability uses `participants` (names or emails — server resolves names), `timezone` (required), `startDate`/`endDate`, `durationMinutes`, `workingHoursOnly`.\n\nPersonalization:\n- update-personalization takes a single freeform `feedback` string. Example: \"I prefer 'Hey' over 'Dear'\" or \"My title is now VP Eng\". The server interprets the feedback and updates the relevant personalization model.\n\nSkills (workflow prompts):\n- Superhuman ships curated multi-step workflow skills (Morning Briefing, End-of-Day Wrap-Up, Meeting Scheduler, Deal Tracker, Batch Draft Writer). When the user asks for one of these by name OR describes a request that matches a known skill, call run-skill with the skill name. The tool returns a prompt and a list of tools_used; follow the prompt step-by-step, calling the listed tools as needed.\n- If you don't know the skill name, call list-skills first to discover the catalog.\n- run-skill returns `read_only_blocked: true` when the user's read-only preference would block the skill's writes. In that case, refuse the action and ask the user to disable Read-only mode in extension preferences — do not attempt the writes anyway.\n\nRead-only mode:\n- The user can enable a \"Read-only mode\" preference that blocks every write tool. If the user asks for an action that requires writing while this is on, surface the blocking dialog and stop — do not try to bypass it.\n\nWhen combining with other Raycast AI extensions (Google Calendar, GitHub, Notion, Things), gather details first from the other extension, then call draft-email directly with the assembled information.",
     "evals": [
       {
         "input": "@superhuman Draft an email to sarah@example.com about our project meeting tomorrow",
@@ -893,6 +890,41 @@
           {
             "callsTool": {
               "name": "get-availability"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Give me my morning briefing",
+        "mocks": {
+          "run-skill": {
+            "skill_name": "morning-briefing",
+            "prompt": "...",
+            "tools_used": ["query_email_and_calendar", "list_threads"],
+            "read_only": true,
+            "read_only_blocked": false,
+            "source": "bundled"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "run-skill"
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman What skills do I have available?",
+        "mocks": {
+          "list-skills": {
+            "skills": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "list-skills"
             }
           }
         ]
