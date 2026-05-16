@@ -1,6 +1,6 @@
 # Coffee Changelog
 
-## [Add Keyboard Shortcuts] - {PR_MERGE_DATE}
+## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Added a Toggle shortcut for pausing and resuming caffeination schedules.
 
