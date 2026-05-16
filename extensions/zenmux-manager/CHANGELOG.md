@@ -7,7 +7,7 @@
 - Add an inline status command for quota and PAYG balance, refreshed every 2 minutes.
 - Keep the ZenMux usage dashboard and Raycast AI account tools available cross-platform.
 
-## [Improve PAYG-Only Account Display] - {PR_MERGE_DATE}
+## [Improve PAYG-Only Account Display] - 2026-05-14
 
 - Hide subscription quota, plan, flow rate, and subscription console links when an account has no ZenMux subscription.
 - Show PAYG credit balance cleanly in the usage dashboard, menu bar, and AI account summary for PAYG-only users.
