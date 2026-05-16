@@ -1,0 +1,84 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "transfa",
+  "title": "Transfa",
+  "description": "Upload files to transfa and copy the shareable link. No account required — works in guest mode.",
+  "icon": "extension-icon.png",
+  "author": "transfa",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "upload-file",
+      "title": "Upload File",
+      "description": "Upload a file to transfa and copy the shareable link to clipboard",
+      "mode": "view",
+      "icon": "upload-icon.png"
+    },
+    {
+      "name": "recent-uploads",
+      "title": "Recent Uploads",
+      "description": "Browse, copy links, and delete your recent transfa uploads",
+      "mode": "view",
+      "icon": "list-icon.png"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "type": "password",
+      "required": false,
+      "title": "API Key",
+      "description": "Your transfa API key (optional — guest mode works without one: 10 MB / 24h TTL). Get a free key at transfa.sh.",
+      "placeholder": "tf_..."
+    },
+    {
+      "name": "defaultTtl",
+      "type": "dropdown",
+      "required": false,
+      "title": "Default Expiry",
+      "description": "Default TTL for new uploads",
+      "default": "7d",
+      "data": [
+        {
+          "value": "1h",
+          "title": "1 hour"
+        },
+        {
+          "value": "24h",
+          "title": "24 hours"
+        },
+        {
+          "value": "7d",
+          "title": "7 days"
+        },
+        {
+          "value": "30d",
+          "title": "30 days"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.19.41",
+    "@types/react": "^18.3.28",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
