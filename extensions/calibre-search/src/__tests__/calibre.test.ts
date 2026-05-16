@@ -30,9 +30,15 @@ describe("mapRow", () => {
   });
 
   it("uses first author when multiple authors are concatenated", () => {
-    const row: BookRow = { ...baseRow, authors: "Author One,Author Two" };
+    const row: BookRow = { ...baseRow, authors: "Author One & Author Two" };
     const book = mapRow(row, LIBRARY);
     expect(book.author).toBe("Author One");
+  });
+
+  it("preserves Last, First author format without truncation", () => {
+    const row: BookRow = { ...baseRow, authors: "Tolkien, J.R.R." };
+    const book = mapRow(row, LIBRARY);
+    expect(book.author).toBe("Tolkien, J.R.R.");
   });
 
   it("uses Unknown Author when authors is null", () => {

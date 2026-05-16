@@ -1,6 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "calibre-search",
+  "name": "calibre-library",
   "title": "Calibre Library",
   "version": "1.0.0",
   "description": "Search your Calibre ebook library by title and author",

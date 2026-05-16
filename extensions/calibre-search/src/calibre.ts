@@ -15,7 +15,7 @@ export const ALL_BOOKS_QUERY = `
     b.series_index,
     b.path,
     b.has_cover,
-    GROUP_CONCAT(DISTINCT a.name) AS authors,
+    GROUP_CONCAT(a.name, ' & ') AS authors,
     p.name AS publisher,
     s.name AS series,
     c.text AS comments,
@@ -35,7 +35,7 @@ export const ALL_BOOKS_QUERY = `
 
 export function mapRow(row: BookRow, libraryPath: string): Book {
   const authors = row.authors ?? "";
-  const author = authors.split(",")[0].trim() || "Unknown Author";
+  const author = authors.split(" & ")[0].trim() || "Unknown Author";
 
   return {
     id: row.id,
