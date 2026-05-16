@@ -63,7 +63,9 @@ function emitGroup(g: Group): string {
 
 export function unwrap(text: string, opts: UnwrapOptions): string {
   if (text === "") return "";
-  const records = classify(text);
+  const records = classify(text, {
+    recognizeDashBullets: opts.flattenBullets,
+  });
 
   type Output =
     | { kind: "group"; group: Group }
