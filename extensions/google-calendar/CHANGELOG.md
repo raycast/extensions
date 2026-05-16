@@ -1,6 +1,6 @@
 # Google Calendar Changelog
 
-## [1.4.3] - {PR_MERGE_DATE}
+## [1.4.4] - {PR_MERGE_DATE}
 
 - Add All calendars selector to view events across all calendars
 - Fix: Group future events by month and year in section headers
