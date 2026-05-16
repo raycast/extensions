@@ -1,0 +1,46 @@
+name: Sync Superhuman Skills
+
+on:
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch: {}
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - working-directory: extensions/superhuman
+        run: npm ci
+      - working-directory: extensions/superhuman
+        id: sync
+        continue-on-error: true
+        run: npm run sync-skills
+      - name: Detect drift
+        id: status
+        working-directory: extensions/superhuman
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Open PR
+        if: steps.status.outputs.changed == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: superhuman/sync-skills
+          base: main
+          title: "chore(superhuman): sync skills from upstream"
+          body: |
+            Automated weekly sync from https://github.com/superhuman/mcp-mail/tree/main/skills.
+
+            Review the diffs before merging - content drift from upstream is intentional in some cases
+            (Raycast-specific adaptations), so do not blindly accept.
+          commit-message: "chore(superhuman): sync skills from upstream"
