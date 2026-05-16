@@ -1,7 +1,7 @@
 import { Tool } from "@raycast/api";
 
 import { createInsight } from "../api/insights";
-import { getActiveProjectId, projectUrl } from "./_shared";
+import { getActiveProjectId, parseJsonInput, projectUrl } from "./_shared";
 
 type Input = {
   /** Insight name. */
@@ -20,7 +20,7 @@ type Input = {
 
 export default async function (input: Input) {
   const projectId = await getActiveProjectId();
-  const query = JSON.parse(input.queryJson);
+  const query = parseJsonInput<Record<string, unknown>>(input.queryJson, "queryJson");
   const insight = await createInsight(projectId, {
     name: input.name,
     description: input.description ?? "",

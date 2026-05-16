@@ -1,10 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
 
-type Preferences = {
-  personalAPIKey: string;
-  dataRegionURL: string;
-};
-
 export class PostHogAPIError extends Error {
   status: number;
   body: unknown;

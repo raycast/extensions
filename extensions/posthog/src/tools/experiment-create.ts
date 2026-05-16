@@ -1,7 +1,7 @@
 import { Tool } from "@raycast/api";
 
 import { createExperiment } from "../api/experiments";
-import { getActiveProjectId, projectUrl } from "./_shared";
+import { getActiveProjectId, parseJsonInput, projectUrl } from "./_shared";
 
 type Input = {
   /** Experiment name. */
@@ -29,7 +29,7 @@ export default async function (input: Input) {
     description: input.description ?? "",
     feature_flag_key: input.feature_flag_key,
     start_date: input.start_date ?? null,
-    parameters: input.parametersJson ? JSON.parse(input.parametersJson) : {},
+    parameters: input.parametersJson ? parseJsonInput(input.parametersJson, "parametersJson") : {},
   });
   return { ...experiment, url: projectUrl(`experiments/${experiment.id}`) };
 }

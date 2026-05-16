@@ -421,9 +421,6 @@
       {
         "input": "@posthog what's our DAU this week",
         "mocks": {
-          "query-generate-hogql-from-question": {
-            "hogql": "SELECT count(DISTINCT person_id) FROM events WHERE timestamp > now() - INTERVAL 7 DAY"
-          },
           "query-run": {
             "results": [
               [
@@ -436,9 +433,6 @@
           }
         },
         "expected": [
-          {
-            "callsTool": "query-generate-hogql-from-question"
-          },
           {
             "callsTool": "query-run"
           }

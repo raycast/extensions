@@ -44,7 +44,7 @@ export async function setActiveOrgId(id: string) {
 }
 
 export function projectUrl(path: string) {
-  const { dataRegionURL } = getPreferenceValues<{ dataRegionURL: string }>();
+  const { dataRegionURL } = getPreferenceValues<Preferences>();
   return `${dataRegionURL}/${path.replace(/^\//, "")}`;
 }
 
@@ -52,4 +52,17 @@ export function projectUrl(path: string) {
 export function paginate<T>(items: T[], limit = 20) {
   if (items.length <= limit) return { items, truncated: false, total: items.length };
   return { items: items.slice(0, limit), truncated: true, total: items.length };
+}
+
+/**
+ * Parse a JSON string supplied as an AI tool input. AI models occasionally produce
+ * malformed JSON; wrap `JSON.parse` so the surfaced error tells the AI exactly which
+ * field failed and what it looked like, instead of bubbling up a bare `SyntaxError`.
+ */
+export function parseJsonInput<T = unknown>(value: string, fieldName: string): T {
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    throw new Error(`${fieldName} must be valid JSON — received: ${value}`);
+  }
 }

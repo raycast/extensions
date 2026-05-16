@@ -1,7 +1,7 @@
 import { Tool } from "@raycast/api";
 
 import { getInsight, updateInsight } from "../api/insights";
-import { getActiveProjectId, projectUrl } from "./_shared";
+import { getActiveProjectId, parseJsonInput, projectUrl } from "./_shared";
 
 type Input = {
   /** The numeric insight ID. Get this from `insights-get-all`. */
@@ -20,7 +20,7 @@ export default async function (input: Input) {
   const projectId = await getActiveProjectId();
   const { insightId, queryJson, ...patch } = input;
   const body: Record<string, unknown> = { ...patch };
-  if (queryJson) body.query = JSON.parse(queryJson);
+  if (queryJson) body.query = parseJsonInput<Record<string, unknown>>(queryJson, "queryJson");
   const insight = await updateInsight(projectId, insightId, body);
   return { ...insight, url: projectUrl(`insights/${insight.short_id}`) };
 }
