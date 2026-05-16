@@ -3,7 +3,6 @@ import { play } from "../api/play";
 import { SimplifiedTrackObject } from "../helpers/spotify.api";
 import { getErrorMessage } from "../helpers/getError";
 import { showFailureToast } from "@raycast/utils";
-import { TogglePlayPause } from "../shortcuts/shortcuts";
 
 type PlayActionProps = {
   id?: string;
@@ -56,5 +55,5 @@ export function PlayAction({ id, type, playingContext, onPlay, tracksToQueue }: 
     }
   };
 
-  return <Action icon={Icon.Play} title="Play" onAction={handlePlayAction} shortcut={TogglePlayPause} />;
+  return <Action icon={Icon.Play} title="Play" onAction={handlePlayAction} />;
 }

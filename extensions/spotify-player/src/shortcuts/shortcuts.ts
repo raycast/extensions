@@ -10,11 +10,6 @@ export const AddToPlaylist: Keyboard.Shortcut = {
   Windows: { modifiers: ["ctrl"], key: "a" },
 };
 
-export const TogglePlayPause: Keyboard.Shortcut = {
-  macOS: { modifiers: ["cmd"], key: "p" },
-  Windows: { modifiers: ["ctrl"], key: "p" },
-};
-
 export const Like: Keyboard.Shortcut = {
   macOS: { modifiers: ["cmd"], key: "l" },
   Windows: { modifiers: ["ctrl"], key: "l" },
