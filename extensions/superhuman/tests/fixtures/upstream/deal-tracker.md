@@ -1,13 +1,6 @@
 ---
 name: deal-tracker
-description: Track a named deal or company across email and calendar.
-tools_used:
-  - query_email_and_calendar
-  - list_threads
-  - get_read_status_feed
-read_only: true
-upstream: https://raw.githubusercontent.com/superhuman/mcp-mail/main/skills/deal-tracker/SKILL.md
-upstream_sha: "c40e5f2bfe07"
+description: Builds a relationship or deal summary using the Superhuman Mail MCP server — pulling together all email history, read receipts, and calendar interactions with a specific person or company to act as a lightweight CRM. Use this skill whenever someone asks to "show me all communication with [person/company]", "what's the status of my deal with [company]", "give me a relationship summary for [person]", "when did I last talk to [person]", "pull up everything about [company]", "track this deal", "who haven't I followed up with", "show me engagement on emails I sent to [person]", "CRM view of [person]", "what's my communication history with [person]", or any variation of wanting a consolidated view of a relationship or deal. Trigger broadly — if someone wants to understand the full picture of their interactions with a person or company, this skill should activate.
 ---
 
 # Deal & Relationship Tracker

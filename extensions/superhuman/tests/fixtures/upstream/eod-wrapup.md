@@ -1,13 +1,6 @@
 ---
 name: eod-wrapup
-description: End-of-day summary of activity and tomorrow's calendar.
-tools_used:
-  - query_email_and_calendar
-  - list_threads
-  - get_read_status_feed
-read_only: true
-upstream: https://raw.githubusercontent.com/superhuman/mcp-mail/main/skills/eod-wrapup/SKILL.md
-upstream_sha: "48859b852553"
+description: Generates an end-of-day wrap-up using the Superhuman Mail MCP server — identifies open loops, unanswered emails, and action items from your day so you can leave work with a clear head. Use this skill whenever someone asks to "wrap up my day", "what's still open in my inbox", "end of day summary", "what do I still need to do", "any emails I missed today", "open loops in my inbox", "summarize my day", "what didn't I respond to", "daily review", "close out my day", "what fell through the cracks", or any variation of wanting to know what's unfinished before signing off. Also trigger when someone says "before I log off", "anything I'm forgetting", "daily debrief", "what should I tackle tomorrow", or wants an accounting of their email activity for the day. Trigger broadly — if someone wants to review what happened and what's still pending at the end of their workday, this skill should activate.
 ---
 
 # End-of-Day Wrap-Up & Action Extractor

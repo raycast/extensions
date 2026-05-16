@@ -61,3 +61,30 @@ export function looksLikeCompose(query: string): boolean {
   const lower = query.toLowerCase();
   return COMPOSE_PHRASES.some((p) => lower.includes(p));
 }
+
+/**
+ * Truncate long text for display in compact UI affordances (list subtitles,
+ * tooltips). Cuts at the first sentence boundary (`.`, `!`, `?`) if one
+ * lands within `max` chars; otherwise hard-cuts at `max` with an ellipsis.
+ *
+ * Used for upstream skill `description` fields, which are intentionally
+ * verbose (trigger-phrase paragraphs) for AI intent matching but unsuitable
+ * as a compact subtitle.
+ */
+export function summarize(text: string | undefined | null, max = 120): string {
+  if (!text) return "";
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= max) return normalized;
+
+  // Prefer the latest sentence boundary in the window (most content kept),
+  // but skip absurdly short cuts like "A." → require ≥ 20 chars.
+  const window = normalized.slice(0, max);
+  const boundary = Math.max(window.lastIndexOf(". "), window.lastIndexOf("! "), window.lastIndexOf("? "));
+  if (boundary >= 20) {
+    return window.slice(0, boundary + 1);
+  }
+  // No usable sentence break — hard-truncate at the last word boundary.
+  const lastSpace = window.lastIndexOf(" ");
+  const cut = lastSpace > max * 0.6 ? lastSpace : max;
+  return window.slice(0, cut).trimEnd() + "…";
+}

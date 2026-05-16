@@ -8,6 +8,13 @@ export interface SkillFrontmatter {
   upstream?: string;
   upstream_sha?: string;
   deprecated?: boolean;
+  /**
+   * Opt out of the extension-injected routing prelude that `run-skill`
+   * normally appends to every skill body. Defaults to `false`. Set this
+   * only when a skill's body is already authoritative enough that the
+   * prelude would be redundant or contradictory.
+   */
+  skip_extension_prelude?: boolean;
 }
 
 /**
@@ -82,6 +89,9 @@ function parseFrontmatterRaw(raw: string): { fields: RawFrontmatter; body: strin
   if (typeof declared.upstream === "string") fields.upstream = declared.upstream;
   if (typeof declared.upstream_sha === "string") fields.upstream_sha = declared.upstream_sha;
   if (typeof declared.deprecated === "boolean") fields.deprecated = declared.deprecated;
+  if (typeof declared.skip_extension_prelude === "boolean") {
+    fields.skip_extension_prelude = declared.skip_extension_prelude;
+  }
 
   return { fields, body };
 }
@@ -95,6 +105,7 @@ function finalize(fields: RawFrontmatter): SkillFrontmatter {
     upstream: fields.upstream,
     upstream_sha: fields.upstream_sha,
     deprecated: fields.deprecated,
+    skip_extension_prelude: fields.skip_extension_prelude,
   };
 }
 
@@ -130,6 +141,7 @@ export function parseSkillWithBundledMetadata(rawUpstream: string, rawBundled: s
     upstream: upstream.fields.upstream ?? bundled.fields.upstream,
     upstream_sha: upstream.fields.upstream_sha ?? bundled.fields.upstream_sha,
     deprecated: upstream.fields.deprecated ?? bundled.fields.deprecated,
+    skip_extension_prelude: upstream.fields.skip_extension_prelude ?? bundled.fields.skip_extension_prelude,
   };
   const frontmatter = finalize(merged);
   if (!frontmatter.name) throw new Error("Skill frontmatter missing `name`.");

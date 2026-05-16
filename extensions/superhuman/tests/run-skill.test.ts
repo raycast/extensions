@@ -52,6 +52,9 @@ describe("run-skill", () => {
     expect(out.skill_name).toBe("morning-briefing");
     expect(out.prompt).toContain("Body.");
     expect(out.tools_used).toContain("query_email_and_calendar");
+    // The extension prelude is appended after the body.
+    expect(out.extension_prelude_applied).toBe(true);
+    expect(out.prompt).toMatch(/Operating rules \(extension override\)/);
   });
 
   it("accepts a fuzzy title", async () => {

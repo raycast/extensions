@@ -2,6 +2,7 @@ import { Action, ActionPanel, Clipboard, Color, Detail, Icon, List, Toast, open,
 import { useEffect, useMemo, useState } from "react";
 import { isReadOnly } from "./lib/readonly";
 import { ResolvedSkill, SkillSource, listAvailableSkills, refreshAll } from "./lib/skill-source";
+import { summarize } from "./lib/text";
 
 const REPO_URL = "https://github.com/superhuman/mcp-mail/tree/main/skills";
 const AI_CHAT_DEEPLINK = "raycast://extensions/raycast/raycast-ai/ai-chat";
@@ -87,7 +88,7 @@ function SkillRow({
   return (
     <List.Item
       title={titleCase(frontmatter.name)}
-      subtitle={frontmatter.description}
+      subtitle={summarize(frontmatter.description)}
       accessories={accessories}
       icon={blocked ? { source: Icon.Lock, tintColor: Color.Red } : Icon.Wand}
       detail={

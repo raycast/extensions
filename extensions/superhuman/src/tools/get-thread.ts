@@ -1,4 +1,5 @@
 import { callMcpTool } from "../lib/mcp";
+import { injectThreadUrls } from "../lib/user";
 import { GetThreadInput, validate } from "../lib/validation";
 
 /**
@@ -23,5 +24,6 @@ export default async function tool(input: Input): Promise<unknown> {
   if (parsed.includeComments !== undefined) args.include_comments = parsed.includeComments;
   if (parsed.includeDrafts !== undefined) args.include_drafts = parsed.includeDrafts;
   if (parsed.messageLimit !== undefined) args.message_limit = parsed.messageLimit;
-  return callMcpTool("get_thread", args);
+  const result = await callMcpTool("get_thread", args);
+  return injectThreadUrls(result);
 }

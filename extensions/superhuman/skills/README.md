@@ -15,6 +15,16 @@ In Raycast AI Chat (`@superhuman …`), two AI tools expose the same library:
 - **`list-skills`** — returns the catalog (name, description, tools used, read-only flag, source provenance).
 - **`run-skill`** — accepts a slug (`morning-briefing`) or fuzzy title (`Morning Briefing`, `briefing`) and returns the skill's prompt plus the list of tools it expects to chain. The AI follows the returned instructions and calls the listed tools.
 
+### Auto-injected routing prelude
+
+`run-skill` appends a short "Operating rules" prelude after every skill body it returns. The prelude:
+
+- Routes structured triage to `list-threads` (not `query-email-and-calendar`).
+- Tells the AI to format threads as clickable `[Sender — Subject](url)` Markdown links using the `url` field that `list-threads` / `get-thread` / `get-message` now inject into every response.
+- Standardizes the fallback when `url` is missing (bracketed 16-char hex thread ID, never a placeholder).
+
+Authors of upstream skills don't need to know about this — the extension wraps the body at run time. To opt a skill out (rare), set `skip_extension_prelude: true` in its frontmatter.
+
 ### In Claude Code / other MCP clients
 
 These `SKILL.md` files match Superhuman's official Skills Library format. Any MCP client that supports skills (Claude Code, Cursor, etc.) can load them directly from this directory.

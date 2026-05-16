@@ -1,13 +1,6 @@
 ---
 name: batch-draft-writer
-description: Generate drafts across many threads from one set of instructions.
-tools_used:
-  - list_threads
-  - query_email_and_calendar
-  - create_or_update_draft
-read_only: false
-upstream: https://raw.githubusercontent.com/superhuman/mcp-mail/main/skills/batch-draft-writer/SKILL.md
-upstream_sha: "89cb9deaa324"
+description: Drafts multiple email replies or follow-ups in batch using the Superhuman Mail MCP server — processing your inbox in bulk rather than one email at a time. Use this skill whenever someone asks to "draft replies to my unread emails", "respond to all my emails", "write follow-ups for my meetings this week", "batch draft responses", "draft emails for all threads that need a reply", "auto-draft my inbox", "help me respond to everything", "write follow-up emails based on my meetings", "process my inbox", "draft responses to these threads", or any variation of wanting multiple emails drafted at once. Also trigger when someone says "I have a bunch of emails to respond to", "help me get through my inbox", "draft a mail merge", "send personalized emails to these people", or wants to create multiple drafts from a single prompt. Trigger broadly — if someone wants more than one email drafted, this skill should activate.
 ---
 
 # Batch Draft & Follow-Up Writer

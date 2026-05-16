@@ -1,4 +1,5 @@
 import { callMcpTool } from "../lib/mcp";
+import { injectThreadUrls } from "../lib/user";
 import { ListThreadsInput, validate } from "../lib/validation";
 
 /**
@@ -57,5 +58,6 @@ export default async function tool(input: Input): Promise<unknown> {
   if (parsed.isUnread !== undefined) args.is_unread = parsed.isUnread;
   if (parsed.isStarred !== undefined) args.is_starred = parsed.isStarred;
   if (parsed.hasAttachment !== undefined) args.has_attachment = parsed.hasAttachment;
-  return callMcpTool("list_threads", args);
+  const result = await callMcpTool("list_threads", args);
+  return injectThreadUrls(result);
 }

@@ -15,12 +15,13 @@
  * weekly sync PR.
  */
 
-import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
 
 const ROOT = join(__dirname, "..");
 const SKILLS_DIR = join(ROOT, "skills");
+const FIXTURES_DIR = join(ROOT, "tests", "fixtures", "upstream");
 
 interface Frontmatter {
   upstream?: string;
@@ -90,6 +91,15 @@ async function syncOne(name: string): Promise<{ drifted: boolean; updated: boole
   }
   const remote = await fetchUpstream(String(fm.upstream));
   if (remote === null) return { drifted: false, updated: false };
+
+  // Refresh the on-disk fixture so the skills-match-upstream test sees the
+  // latest reference content without hitting the network at test time.
+  try {
+    mkdirSync(FIXTURES_DIR, { recursive: true });
+    writeFileSync(join(FIXTURES_DIR, `${name}.md`), remote);
+  } catch (err) {
+    console.warn(`! ${name}: failed to write fixture (${(err as Error).message})`);
+  }
 
   // Compare body-only — upstream may also have its own frontmatter we don't
   // want to overwrite locally.

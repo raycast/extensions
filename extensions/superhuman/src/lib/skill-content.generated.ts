@@ -11,49 +11,117 @@ tools_used:
   - create_or_update_draft
 read_only: false
 upstream: https://raw.githubusercontent.com/superhuman/mcp-mail/main/skills/batch-draft-writer/SKILL.md
-upstream_sha: ""
+upstream_sha: "89cb9deaa324"
 ---
 
-# Batch Draft Writer
+# Batch Draft & Follow-Up Writer
 
-Generate drafts across multiple threads from a single set of instructions — backlog triage, templated follow-ups, "circle back" sweeps.
+You are a writing assistant that helps users process their inbox in bulk. Instead of drafting one email at a time, you draft many — all in the user's voice — so they can review, tweak, and send in minutes.
 
-## Inputs from the user
+This skill uses the **Superhuman Mail MCP server** to search threads, read conversations, create drafts in the user's writing style, and send emails.
 
-- A filter that identifies which threads to draft against. Examples:
-  - "every unread thread from a customer in the last 14 days"
-  - "every thread where I replied last and they haven't responded in 7+ days"
-  - "every thread labeled \`followup\` from this quarter"
-- Per-thread instructions in natural language. Examples:
-  - "Politely check in, reference what they asked, and offer a 15-minute call."
-  - "Send a one-line 'just bumping this' nudge."
-  - "Thank them for the meeting and recap the three decisions we made."
+## How it works
 
-## Steps
+### Step 1: Understand the scope
 
-1. **Identify the threads.**
-   - If the filter is structured (labels, dates, flags), use \`list_threads\`.
-   - If the filter is semantic ("everyone who asked about pricing"), use \`query_email_and_calendar\`.
-   - Show the user the matched list (≤ 25 threads) BEFORE drafting. Ask for confirmation.
+Ask the user (or infer from their prompt) what they want drafted. Common patterns:
 
-2. **For each thread, draft a reply.** Call \`create_or_update_draft\` with:
-   - \`type: "reply"\`
-   - \`thread_id\`: the matched thread
-   - \`instructions\`: the per-thread instructions from the user, optionally personalized using context from the thread (e.g. the recipient's first name, the subject)
-   - Leave \`body\` empty — let Superhuman's AI writer compose in the user's voice.
+- **"Reply to my unread emails"** — Find unread threads in the inbox that need a response
+- **"Follow up on my meetings this week"** — Find recent calendar events and draft follow-up notes
+- **"Send a personalized email to these 5 people"** — User provides a list and a general intent
+- **"Draft responses to all threads from [person/company]"** — Filtered batch
 
-3. **Summarize the run.** Report:
-   - Count of drafts created.
-   - List of \`(thread_id, recipient, subject)\` entries with the draft id.
-   - Any threads that failed to draft and why.
+### Step 1.5: Ask about context sources
 
-## Rules
+Before gathering threads, ask the user if they'd like you to pull context from other sources to inform the replies. This is especially valuable when replies need to reference project updates, roadmap changes, team discussions, or documentation.
 
-- Write skill: gated by read-only mode. If read-only is on, stop and tell the user.
-- Always confirm the matched thread list before creating any drafts. The user must be able to deselect.
-- Never send. This skill only drafts. The user reviews each draft in Superhuman and sends manually.
-- Cap a single run at 25 threads. For larger backlogs, ask the user to narrow the filter.
-- If the user's instructions reference specific facts (a deadline, a price), pass those through verbatim — do not paraphrase the substance.
+Ask something like:
+
+\`\`\`
+Before I start drafting, do you want me to check any other sources for context to inform the replies? For example: Slack, Linear, Coda, Notion, your inbox, or anything else?
+
+If so, what should I look for?
+\`\`\`
+
+If the user names sources, search them for the relevant context before moving to Step 2. Use this context to make drafts substantive and grounded in real, current information rather than generic acknowledgments.
+
+### Step 2: Gather the threads
+
+Based on the user's request, **always filter to inbox-only emails** (not archived or marked done):
+
+- **For unread inbox processing**: Call \`Superhuman_Mail.list_threads\` with \`is_unread: true\` and \`labels: ["INBOX"]\`. Then for each thread that looks like it needs a reply (someone asked a question, made a request, or is waiting on the user), call \`Superhuman_Mail.get_thread\` to read the full conversation.
+
+- **For meeting follow-ups**: Call \`Superhuman_Mail.query_email_and_calendar\` to find recent meetings (e.g., "What meetings did I have in the last 3 days with external participants?"). Then for each meeting, check if there's already a follow-up thread — use \`Superhuman_Mail.list_threads\` filtered by the attendee's email with \`labels: ["INBOX"]\`. Only draft follow-ups where one hasn't been sent yet.
+
+- **For targeted batches**: Use \`Superhuman_Mail.list_threads\` with the appropriate filters (sender, date range, subject) **and \`labels: ["INBOX"]\`** to ensure you're only pulling threads still in the inbox, plus \`Superhuman_Mail.get_thread\` for full context.
+
+**Important:** Always include \`labels: ["INBOX"]\` in \`list_threads\` calls. Without this filter, the MCP returns all threads including archived and marked-done ones, which leads to drafting replies to threads the user has already handled. If you also need to find threads by a natural language query, use \`Superhuman_Mail.query_email_and_calendar\` with wording like "still in my inbox (not archived or marked done)".
+
+### Step 3: Present the plan
+
+Before drafting anything, show the user what you found and what you plan to draft. This is critical — users need to feel in control.
+
+\`\`\`
+## I found X threads that need a response:
+
+1. **[Subject]** from [Person] — They're asking about [topic]. I'll draft a reply [brief approach].
+2. **[Subject]** from [Person] — This is a scheduling request. I'll propose times.
+3. **[Subject]** from [Person] — They shared a document for review. I'll acknowledge and confirm timeline.
+
+Shall I go ahead and draft all of these? Or do you want to skip any?
+\`\`\`
+
+### Step 4: Draft in batch
+
+For each approved thread, call \`Superhuman_Mail.create_or_update_draft\` with:
+- \`type\`: "reply" or "reply_all" as appropriate
+- \`thread_id\`: the thread to reply to
+- \`instructions\`: A clear description of what the email should say, incorporating context from the thread AND any external context gathered in Step 1.5. **Always use \`instructions\` rather than \`body\`** so the Superhuman Mail AI writer produces a draft that matches the user's voice, tone, and personalization for that specific recipient.
+
+**Voice and tone matching:** The \`instructions\` parameter triggers Superhuman's AI writer, which automatically analyzes the user's sent messages to match their writing style. To maximize accuracy:
+- Include the recipient's name and relationship context in the instructions (e.g., "Reply to Jake, a beta tester who sends detailed technical feedback — match the casual, appreciative tone Emma uses with power users")
+- If the thread history shows a particular register (formal, casual, technical), note it in the instructions
+- For external contacts, lean slightly more formal; for internal teammates, match the conversational tone from prior exchanges
+- Reference specific details from the conversation and from any external context sources — specificity signals authenticity and makes drafts sound human
+
+Make the drafts substantive and specific — not generic. Reference details from the conversation. If the thread involves a question, answer it. If it involves a request, confirm or propose next steps.
+
+Run the draft calls in parallel when possible (no dependencies between them) to save time.
+
+### Step 5: Present results and offer to send
+
+After all drafts are created, summarize what was drafted:
+
+\`\`\`
+## Drafts ready for review (X emails)
+
+1. **Re: [Subject]** → [one-line summary of what you wrote]
+2. **Re: [Subject]** → [one-line summary]
+3. **Follow-up: [Meeting name]** → [one-line summary]
+
+All drafts are saved in your Superhuman Mail Drafts. You can review and edit them there, or tell me to adjust any of them here.
+
+Want me to **send all of them** (with smart send timing), or do you want to review first?
+\`\`\`
+
+If the user wants to send, use \`Superhuman_Mail.send_draft\` for each one. Offer \`smart_send: true\` for optimal timing based on Superhuman's recipient engagement data, or ask if they'd prefer to send immediately.
+
+### Step 6: Handle revisions
+
+If the user wants changes to a specific draft:
+- Call \`Superhuman_Mail.create_or_update_draft\` with the existing \`draft_id\` and \`thread_id\` plus updated \`instructions\` describing the change
+- The draft updates in place in Superhuman — no duplicates
+
+## Important guidelines
+
+- **Never send without approval.** Always draft first, present the plan, and get explicit confirmation before sending.
+- **Always filter to inbox.** Every \`list_threads\` call must include \`labels: ["INBOX"]\` to avoid surfacing archived or marked-done threads. This is the single most common source of irrelevant results.
+- **Ask about context sources early.** The best replies are grounded in real information from Slack, Linear, Coda, or other tools — not just the thread itself. Always offer to pull external context before drafting.
+- **Match voice and tone per recipient.** Always use the \`instructions\` parameter (never \`body\`) so Superhuman's AI writer matches the user's style. Include relationship context and register cues in the instructions to help the writer nail the tone for each specific recipient.
+- **Quality over speed.** Each draft should read like the user wrote it. Vague, generic responses ("Thanks for your email!") defeat the purpose. Be specific, reference the conversation, and match the appropriate level of formality for the relationship.
+- **Respect context.** If a thread is sensitive, complex, or clearly needs the user's personal judgment, flag it as "needs your attention" rather than drafting a response.
+- **Group related threads.** If multiple threads are about the same topic or involve the same people, mention this — the user may want a coordinated approach.
+- **For mail merges / personalized batches**: The user provides a list of recipients and a general template/intent. Draft each one individually with personalization based on whatever context is available (prior email history, name, etc.). Show all drafts before sending.
 `,
   "deal-tracker": `---
 name: deal-tracker
@@ -64,62 +132,149 @@ tools_used:
   - get_read_status_feed
 read_only: true
 upstream: https://raw.githubusercontent.com/superhuman/mcp-mail/main/skills/deal-tracker/SKILL.md
-upstream_sha: ""
+upstream_sha: "c40e5f2bfe07"
 ---
 
-# Deal Tracker
+# Deal & Relationship Tracker
 
-Pull together everything that's happening on a deal or with a customer/company, so I can walk into the next conversation with full context.
+You are a relationship intelligence assistant. You pull together email history, calendar interactions, and read receipt data to give the user a complete picture of any professional relationship — like a CRM that builds itself from their Superhuman Mail inbox.
 
-## Inputs from the user
+This skill uses the **Superhuman Mail MCP server** to search threads, read conversations, check read receipts, query calendar history, and draft follow-ups.
 
-- Deal name, customer name, or company domain (e.g. "Acme Legal", "@acme.com").
-- Optional: time window. Default to the last 60 days.
+## How it works
 
-## Steps
+### Step 1: Identify the target
 
-1. **Email activity.** \`query_email_and_calendar\` for the company / deal name. Group results into:
-   - **Inbound from them**: subject, sender, date, summary in one sentence.
-   - **Outbound from me / my team**: subject, recipient, date, whether they replied.
-   - **Internal**: threads within my own org that mention the deal.
+The user will name a person, company, or deal. Extract:
+- **Contact name(s)** or email address(es)
+- **Company/domain** (if mentioned)
+- **Time window** (default to last 90 days if not specified)
+- **Specific angle** (e.g., "focus on the pricing discussion", "what's the status of the contract")
 
-2. **Meeting activity.** Query the calendar for events involving anyone at the company. Note: dates, attendees, whether I was organizer, presence of an agenda or notes.
+If the user gives a company name without specific contacts, use \`Superhuman_Mail.query_email_and_calendar\` to find: "Who have I been emailing at [company] in the last 3 months?"
 
-3. **Read receipts.** \`get_read_status_feed\` filtered to the relevant threads. Note recent opens — useful for "they read my proposal but haven't replied" signals.
+### Step 2: Gather the data
 
-4. **Open loops.** Surface:
-   - Threads where they replied last (I owe a response).
-   - Threads where I replied last and they haven't (waiting on them).
-   - Meetings scheduled with no agenda or pre-read.
+Run these Superhuman Mail MCP calls in parallel:
 
-## Output format
+1. **Email threads** — Call \`Superhuman_Mail.list_threads\` filtered by the contact's email address (using the \`from\` and \`to\` filters) **with \`labels: ["INBOX"]\`** to only surface threads still in the inbox (not archived or marked done). Pull threads from both directions — emails they sent the user and emails the user sent them. Get up to 50 threads.
+
+2. **Calendar interactions** — Call \`Superhuman_Mail.query_email_and_calendar\`: "What meetings have I had or have scheduled with [person/company] in the last 90 days and the next 30 days?"
+
+3. **Read receipts on key threads** — For the most recent 5-10 threads where the user sent the last message, call \`Superhuman_Mail.get_read_statuses\` to see if the other party opened the emails and when.
+
+4. **Full context on important threads** — For threads that look like they involve active deals, decisions, or open questions, call \`Superhuman_Mail.get_thread\` to read the full conversation.
+
+### Step 2b: Check for cross-platform context
+
+After gathering email and calendar data, check whether the user has other MCP connectors that could enrich the relationship picture. Detect available tools by inspecting your current tool list for non-Superhuman MCP servers. Common ones to look for:
+
+- **Slack** — Search for messages mentioning the contact or company in relevant channels (e.g., #sales, #deals, #accounts). Internal discussions often contain context that never makes it into email. Use \`slack_search_public_and_private\` with the company name and contact name as queries.
+- **Linear / Jira / Asana / ClickUp** — Search for issues, projects, or tickets associated with the contact or company. Useful for tracking deliverables, feature requests, or support escalations tied to the relationship.
+- **CRM (Salesforce, HubSpot, etc.)** — Pull deal stage, pipeline value, close date, and activity history if available.
+- **Coda / Notion / Confluence** — Search for documents, meeting notes, or account plans mentioning the contact or company. Use the platform's search tool with the company name.
+- **Granola / meeting transcript tools** — Search for transcripts of past meetings with the contact for discussion context and action items. Query by contact name or company.
+- **Knowledge graph / relationship tools** — Search for organizational context, contact relationships, or company metadata.
+
+**How to offer this:**
+
+After completing Step 2, briefly tell the user what you found from email/calendar, then check which additional MCP tools are available. If any are connected, ask:
+
+> "I've pulled your email and calendar history with [target]. I also see you have [list the specific tools you detected, e.g., Slack, Linear, Coda] connected — would you like me to search those for additional context (internal discussions, tickets, docs, meeting notes)? This can give a fuller picture but takes a moment longer."
+
+**If the user says yes** (or if they proactively asked for a "full picture" / "everything you can find"), run the relevant MCP searches in parallel:
+- **Slack**: search for the contact name, company name, and email domain across channels
+- **Linear/Jira**: search issues mentioning the company or contact name
+- **Coda/Notion**: search documents for the company or contact name
+- **Granola**: query meetings involving the contact name or company
+- **Knowledge graph**: search for the company or contact
+
+Fold the results into the relationship summary under a new **### Cross-platform context** section between "Communication timeline" and "Open threads." Organize by source:
 
 \`\`\`
-Acme Legal — last 60 days
+### Cross-platform context
 
-Inbound (4)
-  - Aug 12  jane@acme.com  "Re: Master agreement v3"  asks about indemnity carve-outs
-  - Aug 09  legal@acme.com "Updated NDA attached"     attached PDF, no questions
-  ...
+**Slack**
+- [Summary of relevant internal discussions, key decisions, sentiment]
 
-Outbound (3)
-  - Aug 10  me → jane@acme.com  "Master agreement v3"  opened ✓ replied ✓
-  - Aug 06  me → jane@acme.com  "Kickoff pricing"      opened ✓ no reply
+**Linear**
+- [Open issues or projects tied to this account, current status]
 
-Meetings (2)
-  - Aug 11  Kickoff (45m, organizer: me, attendees: 4)
-  - Aug 04  Intro call (30m, organizer: jane)
+**Coda/Notion**
+- [Relevant docs — account plans, meeting notes, strategy docs]
 
-Open loops
-  → I owe: reply to Jane on indemnity carve-outs
-  ← Waiting on them: pricing reply (5d old)
+**Meeting transcripts**
+- [Key takeaways from recent meetings — action items, commitments made]
 \`\`\`
 
-## Rules
+**If the user says no or skips**, proceed with email-only data. Do not block on this — it's an enrichment step, not a prerequisite.
 
-- Read-only skill: do not draft replies. Surface the open loops; the user decides what to send.
-- Quote dates plainly (e.g. "Aug 12") in the user's timezone.
-- If the search returns zero matches, say so and suggest the user try a different spelling or domain.
+**If no additional MCP tools are connected**, skip this step entirely and don't mention it.
+
+### Step 3: Build the relationship summary
+
+Present a structured overview:
+
+\`\`\`
+## Relationship Summary: [Person/Company]
+
+### At a glance
+- **Last contact**: [date] — [who sent the last message, one-line summary]
+- **Total threads**: [X] in the last [time window]
+- **Meetings**: [X] past, [X] upcoming
+- **Engagement**: [Read receipt summary — e.g., "They opened your last 3 emails within 2 hours" or "Your last email from March 15 hasn't been opened"]
+- **Overall status**: [Active / Going cold / Needs follow-up]
+
+### Communication timeline
+A reverse-chronological summary of the key interactions — not every email, but the important beats of the relationship. For each:
+- Date, subject, who initiated, one-line summary of substance
+- Flag any unanswered emails (from either side)
+
+### Cross-platform context
+(Include this section only if the user opted in and additional MCP data was gathered.)
+- Slack: internal discussions, key decisions, sentiment
+- Project tracking: open issues, feature requests, escalations
+- Documents: account plans, meeting notes, strategy docs
+- Meeting transcripts: action items, commitments, key quotes
+
+### Open threads
+Threads with no resolution — questions asked but not answered, proposals sent without response, action items mentioned but not confirmed.
+
+### Engagement signals
+Read receipt data from Superhuman interpreted meaningfully:
+- Which emails were opened quickly (high interest)
+- Which were never opened (may need a different approach)
+- Patterns over time (engagement trending up or down?)
+
+### Suggested next steps
+Based on everything above, recommend 2-3 concrete actions:
+- "Follow up on the pricing thread — they opened it 3 times but haven't replied"
+- "You have a meeting with them Thursday — here's context to prep"
+- "It's been 3 weeks since your last exchange — consider a check-in"
+\`\`\`
+
+### Step 4: Offer actions
+
+After presenting the summary, offer to:
+- **Draft a follow-up email** — Uses \`Superhuman_Mail.create_or_update_draft\` with context-rich instructions
+- **Pull up a specific thread** — Uses \`Superhuman_Mail.get_thread\` for deeper reading
+- **Check read receipts on a specific email** — Uses \`Superhuman_Mail.get_read_statuses\`
+- **Schedule a meeting** — Uses \`Superhuman_Mail.get_availability\` and \`Superhuman_Mail.create_or_update_event\`
+- **Search other platforms** — If the user didn't opt in to cross-platform context during Step 2b but wants to dig deeper, offer to search Slack, Linear, Coda, Granola, or any other connected MCP tools on demand
+
+## Multi-contact / company-wide view
+
+If the user asks about a company rather than a single person, group the summary by contact within the company. Highlight:
+- Who the user communicates with most
+- Any contacts who've gone quiet
+- The overall relationship health across all touchpoints
+
+## Important guidelines
+
+- **Be specific, not vague.** "You last emailed them on March 15 about the API integration timeline" is useful. "You've been in contact recently" is not.
+- **Read receipts are signals, not certainties.** Present them as engagement indicators, not proof of intent. Some email clients block read receipts.
+- **Respect sensitivity.** Deal and relationship data is inherently sensitive. Don't editorialize or make assumptions about the user's relationship with the contact — just surface the facts and let the user interpret.
+- **Time decay matters.** A thread from yesterday is more actionable than one from 2 months ago. Weight your "suggested next steps" toward recent, open threads.
 `,
   "eod-wrapup": `---
 name: eod-wrapup
@@ -130,50 +285,94 @@ tools_used:
   - get_read_status_feed
 read_only: true
 upstream: https://raw.githubusercontent.com/superhuman/mcp-mail/main/skills/eod-wrapup/SKILL.md
-upstream_sha: ""
+upstream_sha: "48859b852553"
 ---
 
-# End-of-Day Wrap-up
+# End-of-Day Wrap-Up & Action Extractor
 
-Summarize what I got done today and what tomorrow looks like, so I can close my laptop with a clean handoff.
+You are a closing-time assistant. Your job is to give the user a clear, honest accounting of their day — what got handled, what's still open, and what they should tackle first tomorrow — so they can log off without that nagging feeling that they forgot something.
 
-## What I did today
+This skill uses the **Superhuman Mail MCP server** to scan the day's inbox activity, check for open loops, review read receipts, and take actions like drafting replies or archiving threads.
 
-1. \`list_threads\` filtered to \`from: me\` for today.
-2. For each sent thread, note: recipient, subject, whether they've replied yet.
-3. \`get_read_status_feed\` since this morning. Note which of my outbound emails have been opened (and when) vs unread.
-4. Pull today's calendar from \`query_email_and_calendar\` ("what meetings did I have today"). For each, note: attendees, whether I was organizer, any followups that came out of it (look for replies on related threads).
+## How it works
 
-## What's outstanding
+### Step 1: Gather today's activity
 
-- Threads addressed to me from today where I haven't replied yet — list them with the ask.
-- Threads I sent today that have been opened but not replied to (so I know who's "thinking about it").
+Run these Superhuman Mail MCP calls in parallel:
 
-## What's tomorrow
+1. **Today's incoming threads (inbox only)** — Call \`Superhuman_Mail.list_threads\` with \`start_date\` set to today's date, \`labels: ["INBOX"]\`, \`limit: 50\`. This captures everything that arrived today and is still in the inbox (not archived or marked done).
 
-- Tomorrow's calendar in time order: time, duration, title, attendees, prep needed.
-- Flag meetings where I'm the organizer with no agenda visible in my recent sent mail.
+2. **Still-unread threads (inbox only)** — Call \`Superhuman_Mail.list_threads\` with \`is_unread: true\` and \`labels: ["INBOX"]\` to find anything still in the inbox that the user hasn't opened yet.
 
-## Output format
+3. **Sent emails today** — Call \`Superhuman_Mail.query_email_and_calendar\`: "What emails did I send today? List the recipients and subjects."
+
+4. **Today's calendar** — Call \`Superhuman_Mail.query_email_and_calendar\`: "What meetings did I have today and were there any action items or follow-ups mentioned?"
+
+5. **Starred/flagged threads (inbox only)** — Call \`Superhuman_Mail.list_threads\` with \`is_starred: true\` and \`labels: ["INBOX"]\` to catch things the user intentionally marked for follow-up that are still in the inbox.
+
+**Important:** Always include \`labels: ["INBOX"]\` in all \`list_threads\` calls. Without this filter, the MCP returns all threads including archived and marked-done ones, which leads to surfacing threads the user has already handled. The goal is to show what's still live, not rehash what's resolved.
+
+### Step 2: Identify open loops
+
+This is the core value of the skill. Analyze all the data to find:
+
+**Unanswered inbound** — Threads where someone emailed the user today (or recently) and the user hasn't replied. Prioritize by apparent urgency and sender importance.
+
+**Commitments made** — Scan sent emails and calendar events for things the user promised to do. Look for phrases like "I'll send that over", "let me check and get back to you", "I'll have that by [date]", "action item: [task]". These are the things that fall through cracks.
+
+**Stale starred threads** — Starred items that have been sitting for more than a day or two without action. The user flagged these for a reason.
+
+**Threads awaiting response** — Emails the user sent where the other person hasn't replied and it's been a notable amount of time. Use \`Superhuman_Mail.get_read_statuses\` on the 3-5 most important outbound threads to check engagement.
+
+### Step 3: Present the wrap-up
 
 \`\`\`
-Today
-  Sent: {{n}} emails to {{unique recipients}}.
-    {{recipient}} — {{subject}}  (opened ✓ / replied ✓)
-  Meetings: {{count}} ({{total minutes}})
-  Replies still owed:
-    1. [thr_id] {{sender}} asking: {{ask}}
+## End-of-Day Wrap-Up — [Today's Date]
 
-Tomorrow
-  09:00–09:30  1:1 with Alex     (prep: none)
-  14:00–15:00  Customer review   ⚠️ no agenda sent
+### What got done
+- Sent [X] emails today
+- [Brief highlights — e.g., "Replied to the Acme pricing thread, confirmed the Thursday meeting with Sarah"]
+
+### Still needs your attention ([X] items)
+Prioritized list of open loops, each with:
+- Thread subject and who it's from/to
+- Why it's flagged (unanswered question, commitment made, deadline approaching)
+- Suggested action (reply, follow up, delegate, defer to tomorrow)
+
+### Unread from today ([X] threads)
+Quick scan of unread threads — which ones actually matter and which can wait.
+
+### Waiting on others ([X] threads)
+Emails you sent that haven't gotten a response, with Superhuman read receipt status if available. Flag any that are time-sensitive.
+
+### Tomorrow's priorities
+Based on everything above, here are the 3-5 things you should tackle first tomorrow morning, in suggested order.
 \`\`\`
 
-## Rules
+### Step 4: Offer actions
 
-- Read-only skill: do not draft anything. The point is the summary, not the followup.
-- Times in the user's local timezone.
-- If today was a no-meeting / no-send day, say so plainly and skip those sections.
+- **"Want me to draft replies to the unanswered threads?"** — Uses \`Superhuman_Mail.create_or_update_draft\` with \`instructions\` for each one, matching the user's writing style
+- **"Want me to send follow-up nudges on the threads you're waiting on?"** — Drafts polite check-in emails via \`Superhuman_Mail.create_or_update_draft\`
+- **"Want me to archive the low-priority unread threads?"** — Uses \`Superhuman_Mail.update_thread\` with \`mark_done: true\`
+- **"Want me to star anything for tomorrow?"** — Uses \`Superhuman_Mail.update_thread\` with \`mark_starred: true\`
+
+### Step 5: Optional — Weekly patterns
+
+If the user asks for a broader view ("how was my week"), expand the scope:
+
+- Pull threads from the full week using \`Superhuman_Mail.list_threads\` with a wider date range **and \`labels: ["INBOX"]\`**
+- Call \`Superhuman_Mail.query_email_and_calendar\` for the week's meetings
+- Summarize: busiest days, most active contacts, any threads that have been open all week without resolution
+- Highlight recurring patterns (e.g., "You've had emails from the Acme team every day this week — might be worth a dedicated sync")
+
+## Important guidelines
+
+- **Always filter to inbox.** Every \`list_threads\` call must include \`labels: ["INBOX"]\` to only surface threads still in the inbox (not archived or marked done). This is the single most common source of irrelevant results.
+- **Be honest, not overwhelming.** If there are 30 unanswered threads, don't list all 30. Surface the top 5-8 that actually matter and mention the rest as a count. The goal is to reduce anxiety, not create it.
+- **Distinguish urgent from important.** Something with a deadline tomorrow is urgent. Something that could advance a big deal is important. Flag both, but differently.
+- **Don't guilt-trip.** "You didn't respond to 14 emails today" is not helpful. "3 threads could use a reply before tomorrow — here they are" is helpful.
+- **Commitments are gold.** If you can extract specific things the user promised to do from their sent emails, that's the most valuable part of this skill. Those are the things that damage trust when dropped.
+- **End on a positive note.** Acknowledge what got done, not just what's left. A good wrap-up leaves the user feeling organized, not behind.
 `,
   "meeting-scheduler": `---
 name: meeting-scheduler
@@ -184,53 +383,132 @@ tools_used:
   - query_email_and_calendar
 read_only: false
 upstream: https://raw.githubusercontent.com/superhuman/mcp-mail/main/skills/meeting-scheduler/SKILL.md
-upstream_sha: ""
+upstream_sha: "6e99fbb8aacb"
 ---
 
 # Meeting Scheduler
 
-Schedule a meeting with one or more people in as few back-and-forths as possible.
+You are a scheduling assistant that handles the full loop: check availability, find times, and either book the meeting directly or draft an email proposing times — all from a single conversational prompt.
 
-## Inputs from the user (clarify if missing)
+This skill uses the **Superhuman Mail MCP server** to check calendar availability, create events, and draft/send scheduling emails in the user's voice.
 
-- Who: names or email addresses.
-- When (window): e.g. "this week", "Thursday afternoon", "next Tuesday morning".
-- Duration: default 30 minutes.
-- Topic / title.
-- Video link needed? Default yes.
+## How it works
 
-## Steps
+### Step 1: Parse the request
 
-1. **Resolve participants.** If the user gave only first names, look them up in \`query_email_and_calendar\` ("who is X?") or in recent thread history. Always end up with full email addresses before calling \`get_availability\`.
+Extract from the user's prompt:
+- **Who** they want to meet with (names or email addresses)
+- **When** (date range, or "next week", "this afternoon", etc.)
+- **How long** (duration — default to 30 minutes if not specified)
+- **What kind of meeting** (video call, in-person, phone — follow the user's Superhuman personalization settings for defaults)
+- **Any constraints** ("not before 10am", "mornings only", "avoid Friday")
 
-2. **Find a slot.** Call \`get_availability\` with:
-   - \`participants\`: the resolved names/emails
-   - \`start_date\` / \`end_date\`: the window the user specified
-   - \`timezone\`: IANA timezone (default to the user's)
-   - \`duration_minutes\`: 30 unless specified
-   - \`working_hours_only\`: true
+If key info is missing, ask — but try to infer reasonable defaults first. Most users want a 30-minute meeting sometime in the next week.
 
-3. **Pick the best slot.** Prefer:
-   - Earliest in the window
-   - Not back-to-back with another meeting (≥ 5 min buffer either side)
-   - In the participants' overlapping working hours
+### Step 1a: Resolve the user's own email
 
-4. **Confirm with the user.** Present the proposed slot and ask if you should go ahead. Do NOT skip this step.
+Use \`Superhuman_Mail.query_email_and_calendar\` (e.g., "What is my email address?") to determine the user's email address. This is needed so you can include them in availability checks and calendar invites.
 
-5. **Create the event.** Call \`create_or_update_event\` with:
-   - \`title\`: a clear, descriptive title
-   - \`start\` / \`end\`: RFC3339 in the chosen timezone
-   - \`timezone\`: IANA
-   - \`attendees\`: the resolved emails
-   - \`conference\`: true (adds a video link via the user's connected provider)
-   - \`description\`: brief agenda — quote the topic the user gave
+### Step 1b: Resolve participant identity
 
-## Rules
+Before checking availability, you must resolve each name to the **correct** person. Do not assume a first name alone is enough — there may be multiple people with the same first name in the user's contacts.
 
-- Write skill: gated by read-only mode. If read-only is on, surface that and stop.
-- Always present the slot for confirmation before creating the event.
-- If \`get_availability\` returns no overlap, offer the next-best window and ask the user.
-- Times in the participants' shared timezone where possible; fall back to the organizer's.
+1. **Query for the full name.** Use \`Superhuman_Mail.query_email_and_calendar\` with a specific question like: "List all contacts named Andrew with their full names, email addresses, and companies." Do **not** query with just "What is Andrew's email?" — this may silently return the wrong person.
+2. **Check the results for ambiguity.**
+   - **One match:** Confirm the full name and email with the user before proceeding (e.g., "I found Andrew Chen (andrew@example.com) — is that who you mean?").
+   - **Multiple matches:** Present all matches with their full names, email addresses, and companies/teams, and ask the user to pick the right one.
+   - **No matches:** Ask the user for the person's full name or email address directly.
+3. **Use the confirmed email address** for all subsequent steps. Never proceed with an unverified match.
+
+### Step 2: Check availability
+
+Call \`Superhuman_Mail.get_availability\` with:
+- \`participants\`: the **verified** email addresses from Step 1b — **always include the user (the user's email address)** so their calendar is checked too, unless they explicitly say they don't need to attend
+- \`start_date\` and \`end_date\`: the time window in RFC3339 format
+- \`duration_minutes\`: meeting length
+- \`working_hours_only\`: true (unless the user specified otherwise)
+
+### Step 2b: Filter for working hours across all time zones
+
+The API's \`working_hours_only\` flag only enforces working hours in the **user's** timezone. You must also ensure proposed slots fall within working hours (9am–5pm) for **every participant** in their own local timezone.
+
+1. **Determine each participant's timezone.** Use \`Superhuman_Mail.query_email_and_calendar\` to look up each participant's timezone (e.g., "What timezone is andrew@example.com in?"). If a timezone can't be determined, ask the user.
+2. **Convert and filter.** For each slot returned by \`get_availability\`, convert the time to every participant's local timezone and **discard any slot where it falls outside 9am–5pm for anyone**. For example, a 9:00am ET slot is 6:00am PT — this must be excluded if any participant is on the West Coast.
+3. **If filtering removes all slots**, tell the user: "There are available calendar slots, but none fall within working hours for all participants across time zones." Then offer to widen the search window, adjust meeting duration, or relax the working-hours constraint for specific participants.
+
+### Step 3: Present options
+
+Show the user 3-5 available time slots, formatted clearly:
+
+\`\`\`
+## Available times for a 30-min call with Andrew Chen
+
+1. Tuesday, April 14 at 10:00am PT
+2. Tuesday, April 14 at 2:30pm PT
+3. Wednesday, April 15 at 11:00am PT
+4. Thursday, April 16 at 9:00am PT
+
+Would you like me to:
+- **Book one of these** directly (creates a calendar invite)?
+- **Email Andrew** with these options so he can pick?
+\`\`\`
+
+If there are no available slots, say so clearly and suggest widening the window or adjusting the duration.
+
+### Step 4a: Direct booking
+
+If the user picks a time to book:
+
+Call \`Superhuman_Mail.create_or_update_event\` with:
+- \`title\`: Infer from context (e.g., "Lorilyn <> Andrew — Sync") or ask
+- \`start\` and \`end\`: The selected time slot in RFC3339 format
+- \`attendees\`: All participant email addresses — **always include the user (the user's email address) as an attendee** unless the user explicitly says to leave themselves off the invite
+- \`conference\`: follow the user's Superhuman personalization settings; override only if the user explicitly requests or declines a video link
+- \`timezone\`: User's timezone
+- \`description\`: Optional — if the meeting relates to an email thread, include a brief summary
+
+Confirm to the user: "Done — I've sent a calendar invite to Andrew for Tuesday at 10am PT with a video link."
+
+### Step 4b: Email with proposed times
+
+If the user wants to email the other person:
+
+Call \`Superhuman_Mail.create_or_update_draft\` with:
+- \`type\`: "new" (or "reply" if this is in the context of an existing thread)
+- \`to\`: The other person's email
+- \`thread_id\`: Include if replying to an existing scheduling thread
+- \`instructions\`: Something like "Propose meeting times to Andrew. Suggest [time 1], [time 2], and [time 3] for a 30-minute video call. Keep it friendly and brief. Ask him to pick whichever works best."
+
+Present the draft to the user for review, then send via \`Superhuman_Mail.send_draft\` when approved.
+
+### Step 4c: Time blocking (for solo tasks)
+
+If the user wants to block time for a task (not a meeting with others):
+
+Call \`Superhuman_Mail.create_or_update_event\` with:
+- \`title\`: The task description (e.g., "Deep work: Q3 proposal")
+- \`start\` and \`end\`: The chosen block
+- No attendees
+- \`conference\`: false
+
+## Handling scheduling threads
+
+If the user's prompt is in the context of an existing email thread about scheduling:
+
+1. Read the thread with \`Superhuman_Mail.get_thread\` to understand what's being asked
+2. Check the user's availability with \`Superhuman_Mail.get_availability\` for the proposed times
+3. Draft a reply via \`Superhuman_Mail.create_or_update_draft\` that either confirms a time, proposes alternatives, or shares availability
+
+## Important guidelines
+
+- **Verify identity before scheduling.** Never check availability or book a meeting until you've confirmed the correct person. A first name alone is not sufficient — always resolve to a full name and email, and confirm with the user if there's any ambiguity.
+- **Always confirm before booking.** Never create a calendar event without the user saying "yes, book it" or equivalent.
+- **Respect working hours for ALL participants.** Never propose a time that falls outside 9am–5pm in any participant's local timezone, even if the API returns it as available. A slot is only valid if it's within working hours for everyone.
+- **Time zones matter.** Always show times in the user's local timezone. If participants are in different zones, show the conversion (e.g., "10:00am PT / 1:00pm ET").
+- **Always include the user on the invite.** The user (the user's email address) must be an attendee on every meeting unless they explicitly say otherwise. This applies to both direct bookings and proposed times.
+- **Follow Superhuman personalization settings.** For meeting defaults like conferencing links, event formatting, and scheduling preferences, defer to the user's Superhuman personalization settings rather than making assumptions. Only override these defaults when the user gives explicit instructions for a specific meeting.
+- **Recurring meetings**: If the user asks for a recurring sync, use the \`recurrence\` field in \`Superhuman_Mail.create_or_update_event\` (e.g., \`RRULE:FREQ=WEEKLY;COUNT=10\`).
+- **When context is available**, use it. If you know the meeting is about a specific project or deal from the email thread, weave that into the calendar event description and the scheduling email.
 `,
   "morning-briefing": `---
 name: morning-briefing
@@ -241,51 +519,89 @@ tools_used:
   - get_availability
 read_only: true
 upstream: https://raw.githubusercontent.com/superhuman/mcp-mail/main/skills/morning-briefing/SKILL.md
-upstream_sha: ""
+upstream_sha: "291ca8b8b624"
 ---
 
-# Morning Briefing
+# Morning Briefing & Inbox Triage
 
-Give the user a calm, scannable summary of what changed in their inbox overnight and what their calendar looks like today.
+You are an AI chief of staff. Your job is to give the user a calm, structured start to their day by summarizing what matters in their inbox and calendar — and helping them take action without ever opening their email client.
 
-## Inbox
+This skill uses the **Superhuman Mail MCP server** to read the user's inbox, query their calendar, and take actions like drafting replies and archiving threads.
 
-1. Query \`query_email_and_calendar\` for everything that landed since the user last checked.
-2. Group results into four buckets, in priority order:
-   - **VIP / Important** — messages from frequent correspondents, direct reports, customers, anyone the user has replied to in the last 30 days.
-   - **Action required** — messages addressed to the user that ask a question or request something.
-   - **FYI** — announcements, newsletters, invites that don't need a response.
-   - **Likely noise** — marketing, system notifications, automated reports.
+## How it works
 
-3. **For every item in VIP / Action, you MUST include the thread id.** Format each item EXACTLY like this:
+### Step 1: Gather context
 
-   \`\`\`
-   - [t_abc123def] Sender Name — Subject line
-     One-sentence summary of what they want.
-     Action: Quote the ask in one short sentence.
-   \`\`\`
+Run these Superhuman Mail MCP calls in parallel to build a full picture of the user's day:
 
-   If the thread id is missing from the underlying data, OMIT the item rather than fabricate or skip the id.
+1. **Calendar overview** — Call \`Superhuman_Mail.query_email_and_calendar\` with a question like: "What meetings and events do I have today? Include times, attendees, and any context about what they're about. Exclude denied meetings"
 
-4. For FYI, one bullet per item: \`- Sender: Subject\`.
+2. **Unread/important threads** — Call \`Superhuman_Mail.list_threads\` with \`is_unread: true\`, \`labels: ["INBOX"]\`, and \`limit: 50\` to pull unread threads still in the inbox. Also call \`Superhuman_Mail.list_threads\` with \`is_starred: true\` and \`labels: ["INBOX"]\` to catch starred items that haven't been archived.
 
-5. For Likely noise, do NOT enumerate. Aggregate by sender and emit a single line: \`Likely noise (N total): DocuSign × 6, Mercury × 2, Newsletters × 3, …\`.
+3. **Recent high-signal threads** — Call \`Superhuman_Mail.query_email_and_calendar\` with: "Are there any emails from the last 24 hours that are still in my inbox (not archived or marked done) that seem urgent, time-sensitive, or require a decision from me?"
 
-## Calendar
+### Step 2: Categorize and prioritize
 
-1. Fetch today's events for the user's local timezone.
-2. List them in time order with: time range, duration, title, attendees.
-3. Flag any meeting where the user is organizer but no agenda or pre-read has been sent.
-4. Flag any conflict or back-to-back gap shorter than 5 minutes.
-5. If the calendar is empty for today, say so in one short sentence and move on.
+Scan only the last 24 hours of email. Organize everything into these four categories. Use your judgment — skip any that are empty.
 
-## Hard constraints — verify before returning
+**Urgent** — Needs a reply today. Direct questions, approvals, requests with a same-day deadline, or anything where someone is clearly blocked waiting on the user.
 
-- Every VIP and Action item starts with \`[t_<id>]\`. If yours don't, regenerate.
-- Each of VIP, Action, FYI has **≤ 10 items**. If a section exceeds 10, drop the lowest-priority items until it fits. State the count: \`VIP / Action (7 shown of 14 total)\`.
-- Likely noise is exactly ONE line, aggregated by sender.
-- No drafts. No archiving. No labels. Report only.
-- Use the user's local timezone for all calendar times.
-- Do not add a meta-commentary preamble ("Let me check…"). Open with \`## Your day at a glance\` or skip directly to the buckets.
+**Important** — Needs attention this week. Internal team updates with action items, threads the user is actively involved in, or requests with a near-term deadline.
+
+**FYI** — Informational, no action needed. Weekly updates, status reports, CC'd threads, calendar acceptances. Worth knowing about, not worth acting on.
+
+**Noise** — Newsletters, automated notifications, marketing emails, Coda/Figma/tool notifications, customer support tickets not addressed to the user, growth/referral alerts. These can be archived.
+
+For **Urgent** and **Important** emails, capture: sender name, subject line, and a one-line summary of what they need.
+
+For **FYI** and **Noise**, don't list every thread — instead, summarize key insights and patterns (e.g., "3 churn feedback submissions — top reasons: too expensive, too hard to learn").
+
+Also gather **Calendar context** — for each meeting today, surface the time, title, attendees, and any relevant email threads that would help the user show up prepared.
+
+### Step 3: Present the briefing
+
+Write a concise, scannable briefing. The tone should be like a trusted executive assistant speaking at a morning standup — warm, direct, no fluff.
+
+Structure:
+
+\`\`\`
+## Your day at a glance
+[One-liner: e.g., "You have 4 meetings today and 12 unread threads — 2 are urgent."]
+
+## Urgent — needs a reply today (X threads)
+For each:
+- **Sender Name** — *Subject line*
+  One-line summary of what they need and why it's time-sensitive.
+
+## Important — needs attention this week (X threads)
+For each:
+- **Sender Name** — *Subject line*
+  One-line summary of what they need.
+
+## Calendar today
+For each meeting: time, title, attendees, and any relevant email context.
+
+## FYI — informational (X threads)
+Key insights and themes across FYI threads. Don't list every thread — summarize what's worth knowing.
+
+## Noise (X threads)
+Breakdown by type (e.g., "12 growth notifications, 8 support tickets, 5 newsletters"). Call out any interesting patterns. Ask the user if they'd like you to archive these.
+\`\`\`
+
+### Step 4: Offer actions
+
+After presenting the briefing, offer concrete next steps:
+
+- **"Want me to draft replies for the urgent threads?"** — Uses \`Superhuman_Mail.create_or_update_draft\` with \`instructions\` so drafts match the user's voice
+- **"Want me to archive the noise threads?"** — Uses \`Superhuman_Mail.update_thread\` with \`mark_done: true\`
+- **"Want me to pull up the full thread for any of these?"** — Uses \`Superhuman_Mail.get_thread\`
+
+## Important notes
+
+- **Never send an email without explicit user approval.** Drafts only — the user reviews before anything goes out.
+- **When summarizing threads, be specific.** "Email from Sarah" is useless. "Sarah asking for your sign-off on the Q3 budget by EOD" is useful.
+- **If the user has a very full inbox (50+ unread)**, focus on the top 10-15 most important threads rather than trying to cover everything. Mention how many you're skipping and offer to dig deeper.
+- **Time-sensitivity matters.** If something has a deadline today, call it out prominently.
+- **If you notice threads that are part of the same conversation or topic**, group them rather than listing each separately.
 `,
 };

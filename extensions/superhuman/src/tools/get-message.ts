@@ -1,4 +1,5 @@
 import { callMcpTool } from "../lib/mcp";
+import { injectThreadUrls } from "../lib/user";
 import { GetMessageInput, validate } from "../lib/validation";
 
 /**
@@ -16,5 +17,6 @@ export default async function tool(input: Input): Promise<unknown> {
   const parsed = validate(GetMessageInput, input);
   const args: Record<string, unknown> = { message_id: parsed.messageId };
   if (parsed.includeRawHtml !== undefined) args.include_raw_html = parsed.includeRawHtml;
-  return callMcpTool("get_message", args);
+  const result = await callMcpTool("get_message", args);
+  return injectThreadUrls(result);
 }

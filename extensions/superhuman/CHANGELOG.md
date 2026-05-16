@@ -1,5 +1,17 @@
 # Superhuman Changelog
 
+## [Skills routing layer + upstream parity] - 2026-05-16
+
+Restores the upstream-parity invariant ("pull from `superhuman/mcp-mail`, never fork") that the prior "Skills polish" pass violated, and adds an extension-level routing layer that applies to every skill — current and future — without per-skill maintenance.
+
+- **Reverted** local skill body edits. All five bundled `skills/<name>/SKILL.md` bodies now match upstream verbatim; frontmatter retains Raycast-specific metadata (`tools_used`, `read_only`, `upstream`, `upstream_sha`).
+- **Added** an extension-injected routing prelude (`src/lib/skill-prelude.ts`) appended *after* every skill body returned by `run-skill`. Tells the AI to prefer `list-threads` over `query-email-and-calendar` for triage, surfaces the 16-char-hex thread ID format, and points at the new clickable `url` field. Position is intentional: recency-wins, so the prelude overrides any conflicting guidance in the upstream body. Opt-out via `skip_extension_prelude: true` in skill frontmatter (defaults false).
+- **Added** clickable Superhuman thread URLs. `list-threads`, `get-thread`, and `get-message` responses now include a `url` field on every thread (`https://mail.superhuman.com/<user>/thread/<id>#app`). The user's email is resolved via the OIDC userinfo endpoint and cached for 30 days. The AI formats threads as `[Sender — Subject](url)` Markdown links so users can one-click into Superhuman.
+- **Added** cross-cutting tool-routing guidance to `ai.instructions` — same rules as the prelude, so the AI sees them even outside a skill.
+- **UI**: Browse Skills view subtitle now uses a `summarize()` truncation helper so the long upstream descriptions (multi-sentence trigger-phrase paragraphs) display cleanly. Full description still visible in the detail metadata.
+- **Sync**: `scripts/sync-skills.ts` now writes upstream content to `tests/fixtures/upstream/<name>.md` on each run, so the new `skills-match-upstream` test stays offline.
+- **Tests**: 28 new tests — `tests/skill-prelude.test.ts` (4), `tests/user.test.ts` (11), `tests/text-summarize.test.ts` (7), `tests/skills-match-upstream.test.ts` (6). Deleted `tests/morning-briefing-contract.test.ts` (was asserting on the local fork rules that have been reverted). 98 total, all passing.
+
 ## [Skills polish] - 2026-05-16
 
 - **Fixed:** `tools_used` now flows through the cached / live resolver paths. The upstream `SKILL.md` frontmatter only declares `name` and `description`, so live and cached resolutions previously returned `tools_used: []`. The resolver now merges upstream content (body + declared fields) with the bundled SKILL.md's Raycast-specific metadata (`tools_used`, `read_only`, `upstream*`, `deprecated`), so `list-skills` and `run-skill` surface the real tool list regardless of source. The parser also accepts `tools` as an alias for `tools_used` and supports inline-array YAML (`[a, b]`).

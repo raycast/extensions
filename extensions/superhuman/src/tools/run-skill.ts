@@ -1,4 +1,5 @@
 import { isReadOnly } from "../lib/readonly";
+import { SKILL_PRELUDE } from "../lib/skill-prelude";
 import { getSkill, resolveSlug, listAvailableSkills } from "../lib/skill-source";
 import { RunSkillInput, validate } from "../lib/validation";
 
@@ -34,6 +35,14 @@ interface Output {
   upstream_sha?: string;
   fetched_at?: string;
   notes?: string;
+  /** Whether the extension's routing prelude was appended to `prompt`. */
+  extension_prelude_applied: boolean;
+}
+
+function composePrompt(body: string, skipPrelude: boolean): { prompt: string; applied: boolean } {
+  const trimmed = body.trim();
+  if (skipPrelude) return { prompt: trimmed, applied: false };
+  return { prompt: `${trimmed}\n\n---\n\n${SKILL_PRELUDE}`, applied: true };
 }
 
 export default async function tool(input: Input): Promise<Output> {
@@ -49,11 +58,12 @@ export default async function tool(input: Input): Promise<Output> {
   const resolved = await getSkill(slug, { forceRefresh: parsed.forceRefresh });
   const { frontmatter, body } = resolved.skill;
   const blocked = !frontmatter.read_only && isReadOnly();
+  const { prompt, applied } = composePrompt(body, frontmatter.skip_extension_prelude === true);
 
   return {
     skill_name: frontmatter.name,
     description: frontmatter.description,
-    prompt: body.trim(),
+    prompt,
     tools_used: frontmatter.tools_used,
     read_only: frontmatter.read_only,
     read_only_blocked: blocked,
@@ -64,5 +74,6 @@ export default async function tool(input: Input): Promise<Output> {
     notes: blocked
       ? "Read-only mode is on; this skill writes to the account. Refuse the request and ask the user to disable Read-only mode in extension preferences."
       : undefined,
+    extension_prelude_applied: applied,
   };
 }

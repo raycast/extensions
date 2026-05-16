@@ -73,6 +73,16 @@ Skills are resolved at runtime from GitHub upstream with a 24h LocalStorage cach
 
 Skills that write to your account honor the **Read-only mode** preference and refuse to run when it's enabled.
 
+## How skills work in this extension
+
+The extension never forks upstream skill content. Three layers compose at runtime:
+
+1. **Upstream skill body** — pulled verbatim from `superhuman/mcp-mail` (24h cache, live updates, bundled fallback).
+2. **Routing prelude** — appended after every skill body returned by `run-skill`. Tells the AI to prefer `list-threads` over `query-email-and-calendar` for triage; how thread IDs and clickable URLs are formatted; and that any conflict with the body resolves in favor of the prelude (recency wins).
+3. **`ai.instructions`** — the system prompt mirrors the same routing rules so the AI sees them even outside a skill.
+
+The bundled `skills/<name>/SKILL.md` files retain Raycast-specific frontmatter (`tools_used`, `read_only`, `upstream`, `upstream_sha`) on top of the upstream body. Future upstream changes flow through automatically; if upstream renames a tool, we update one constant in `src/lib/skill-prelude.ts` rather than touching N skills.
+
 ## Example prompts
 
 ### Compose, send, recall

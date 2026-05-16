@@ -17,6 +17,7 @@ interface OAuthServerMetadata {
   registration_endpoint?: string;
   scopes_supported?: string[];
   code_challenge_methods_supported?: string[];
+  userinfo_endpoint?: string;
 }
 
 interface ClientRegistration {
@@ -259,4 +260,18 @@ export async function getAccessToken(): Promise<string> {
 export async function signOut(): Promise<void> {
   await client.removeTokens();
   await clearSidecar();
+  // Clear the cached user email so a different account on next sign-in
+  // doesn't inherit the old identity. Key is duplicated from src/lib/user.ts
+  // to avoid a circular import.
+  await LocalStorage.removeItem("superhuman.user_email.v1");
+}
+
+/**
+ * Returns the OIDC userinfo endpoint discovered during the OAuth flow,
+ * or `null` if discovery hasn't run yet (no token) or the auth server
+ * doesn't advertise one. Reads from the sidecar that `authorize()` saves.
+ */
+export async function getUserInfoEndpoint(): Promise<string | null> {
+  const sidecar = await loadSidecar();
+  return sidecar?.meta?.userinfo_endpoint ?? null;
 }
