@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "posthog",
   "title": "PostHog",
-  "description": "Search insights, errors, experiments, surveys, feature flags, cohorts, and more \u2014 and put PostHog at the fingertips of Raycast AI.",
+  "description": "Bring PostHog product analytics into Raycast \u2014 talk to your data with AI, or quickly search insights, dashboards, feature flags, errors, experiments, and surveys.",
   "icon": "posthog-logo.png",
   "author": "david_newell",
   "owner": "posthog",
