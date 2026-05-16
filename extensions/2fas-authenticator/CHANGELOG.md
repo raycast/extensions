@@ -4,10 +4,10 @@
 
 ### Commands
 
-- Search OTP — browse all services with native Raycast filtering and a live TOTP countdown
-- Recent OTP — quick access to pinned and recently used services with live codes
-- Import Vault — import an encrypted `.2fas` export file
-- Setup — vault status, lock, re-import, and delete
+- Search OTP: browse all services with native Raycast filtering and a live TOTP countdown
+- Recent OTP: quick access to pinned and recently used services with live codes
+- Import Vault: import an encrypted `.2fas` export file
+- Setup: vault status, lock, re-import, and delete
 
 ### Security
 
@@ -18,7 +18,7 @@
 - 5 MB cap on imported `.2fas` files
 - In-memory cache has a 5-minute idle TTL and can be cleared on demand via "Lock Vault Now" in Setup
 - Concealed clipboard copy (excluded from clipboard history)
-- Copying an OTP closes the Raycast window and shows a HUD with the service label — the code itself is not displayed on screen
+- Copying an OTP closes the Raycast window and shows a HUD with the service label. The code itself is not displayed on screen.
 - Zero network calls, zero external crypto dependencies (Node.js `crypto` only)
 - Full threat model documented in `SECURITY.md`
 

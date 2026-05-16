@@ -12,7 +12,7 @@ export class KeychainAuthCancelled extends Error {
 
 export class VaultKeyCorrupted extends Error {
   constructor() {
-    super("Vault key has invalid length — Keychain entry may be corrupted");
+    super("Vault key has invalid length. Keychain entry may be corrupted.");
     this.name = "VaultKeyCorrupted";
   }
 }

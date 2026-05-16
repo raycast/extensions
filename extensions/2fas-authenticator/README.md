@@ -1,15 +1,15 @@
 # 2FAS Authenticator
 
-Search and copy TOTP codes from [2FAS](https://2fas.com) exports directly in Raycast. No cloud, no network calls — your secrets stay local in a Keychain-encrypted vault.
+Search and copy TOTP codes from [2FAS](https://2fas.com) exports directly in Raycast. No cloud, no network calls. Your secrets stay local in a Keychain-encrypted vault.
 
 <a href="https://www.raycast.com/Locke/2fas-authenticator"><img src="https://www.raycast.com/Locke/2fas-authenticator/install_button@2x.png" height="64" alt="Install 2FAS Authenticator" style="height: 64px;" /></a>
 
 ## Features
 
-- **Search OTP** — Browse all services with native Raycast filtering and live TOTP countdown
-- **Recent OTP** — Quick-access pinned and recently used services
-- **Import Vault** — Import encrypted `.2fas` export files
-- **Setup** — Check vault status, re-import, or delete
+- **Search OTP**: browse all services with native Raycast filtering and live TOTP countdown
+- **Recent OTP**: quick access to pinned and recently used services
+- **Import Vault**: import encrypted `.2fas` export files
+- **Setup**: check vault status, re-import, or delete
 
 ## Why
 
@@ -21,7 +21,7 @@ Search and copy TOTP codes from [2FAS](https://2fas.com) exports directly in Ray
 2. Go to **Settings > 2FAS Backup > Export** and set a password
 3. Transfer the `.2fas` file to your Mac (AirDrop, iCloud Drive, etc.)
 4. In Raycast, run **Import Vault** and select the file
-5. Enter your export password — done
+5. Enter your export password. Done.
 6. Run **Search OTP** to find and copy codes
 
 ## Commands
@@ -40,10 +40,10 @@ Search and copy TOTP codes from [2FAS](https://2fas.com) exports directly in Ray
 | Vault key | Random 256-bit key stored in macOS login Keychain via `/usr/bin/security` |
 | Vault file | AES-256-GCM encrypted at `~/Library/Application Support/Raycast/extensions/.../vault.enc` with `0600` permissions |
 | Import | Decrypts `.2fas` in memory (PBKDF2 + AES-256-GCM), re-encrypts into local vault |
-| Secrets at rest | No plaintext secrets on disk — secrets exist only in memory during runtime |
-| Network | Zero network calls — everything is offline |
-| Clipboard | Concealed copy — OTP codes are excluded from clipboard history |
-| Dependencies | Zero external crypto dependencies — Node.js `crypto` module only |
+| Secrets at rest | No plaintext secrets on disk. Secrets exist only in memory during runtime |
+| Network | Zero network calls. Everything is offline |
+| Clipboard | Concealed copy. OTP codes are excluded from clipboard history |
+| Dependencies | Zero external crypto dependencies. Node.js `crypto` module only |
 
 ### Known Limitations
 
@@ -82,7 +82,7 @@ npm run fix-lint
 1. Fork the repository and create your branch from `main`
 2. If you've added functionality, update the README if needed
 3. Make sure `npm run lint` passes
-4. Keep PRs focused — one feature or fix per PR
+4. Keep PRs focused. One feature or fix per PR.
 5. Write a clear description of what your change does and why
 
 ### Reporting Bugs

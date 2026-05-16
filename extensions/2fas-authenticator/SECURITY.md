@@ -17,7 +17,7 @@ defaults described below without requiring any of this knowledge.
   Import is bounded (5 MB), JSON-validated, and AES-GCM
   authenticated. Failed parses cannot corrupt or destroy an
   existing vault.
-- **User error** — wrong password, wrong file, accidental import.
+- **User error**: wrong password, wrong file, accidental import.
   Re-import is atomic: the existing vault is replaced only after
   the new export has been fully parsed and re-encrypted to a
   staging file and renamed into place.

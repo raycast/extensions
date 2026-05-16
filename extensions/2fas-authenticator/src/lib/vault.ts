@@ -111,7 +111,7 @@ function setVault(services: VaultService[]): void {
   try {
     oldBytes = readFileSync(path);
   } catch {
-    // No existing vault — first-time create
+    // No existing vault (first-time create)
   }
   writeVaultAtomic(services, key);
   try {
@@ -175,7 +175,7 @@ export function deleteVault(): void {
   try {
     unlinkSync(vaultPath());
   } catch {
-    // ENOENT — already gone
+    // ENOENT, already gone
   }
   try {
     deleteVaultKey();

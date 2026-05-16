@@ -72,7 +72,7 @@ export default function ImportVault() {
         if (!confirmed) {
           await showToast({
             style: Toast.Style.Success,
-            title: "Replace cancelled — existing vault unchanged",
+            title: "Replace cancelled. Existing vault unchanged.",
           });
           return;
         }
@@ -94,7 +94,7 @@ export default function ImportVault() {
       await showToast({
         style: Toast.Style.Success,
         title: replacing
-          ? `Replaced vault — ${services.length} services`
+          ? `Replaced vault (${services.length} services)`
           : `Imported ${services.length} services`,
       });
       await popToRoot();
