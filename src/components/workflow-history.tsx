@@ -323,14 +323,14 @@ function ActivityItem({ activity }: { activity: ActivityGroup }) {
             target={<ActivityDetail activity={activity} />}
           />
           <Action.CopyToClipboard title="Copy Activity Name" content={activity.name} />
-          {activity.scheduledEvent?.details?.input && (
+          {activity.scheduledEvent?.details?.input !== undefined && (
             <Action.CopyToClipboard
               title="Copy Input"
               content={formatPayload(activity.scheduledEvent.details.input)}
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
           )}
-          {activity.completedEvent?.details?.result && (
+          {activity.completedEvent?.details?.result !== undefined && (
             <Action.CopyToClipboard
               title="Copy Result"
               content={formatPayload(activity.completedEvent.details.result)}
@@ -611,21 +611,21 @@ function ActivityDetail({ activity }: { activity: ActivityGroup }) {
       actions={
         <ActionPanel>
           <Action.CopyToClipboard title="Copy Activity Name" content={activity.name} />
-          {input && (
+          {input !== undefined && (
             <Action.CopyToClipboard
               title="Copy Input"
               content={formatPayload(input)}
               shortcut={{ modifiers: ["cmd"], key: "i" }}
             />
           )}
-          {result && (
+          {result !== undefined && (
             <Action.CopyToClipboard
               title="Copy Result"
               content={formatPayload(result)}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
             />
           )}
-          {failure && (
+          {failure !== undefined && (
             <Action.CopyToClipboard
               title="Copy Failure"
               content={JSON.stringify(failure, null, 2)}

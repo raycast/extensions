@@ -1,6 +1,7 @@
 import { showToast, Toast } from "@raycast/api";
 import { Connection, Client } from "@temporalio/client";
 import { temporal } from "@temporalio/proto";
+import LongModule from "long";
 import {
   ClusterConfig,
   HistoryEvent,
@@ -274,8 +275,8 @@ export async function listWorkflows(query?: string): Promise<WorkflowInfo[]> {
       searchAttributes: decodeSearchAttributes(
         workflow.searchAttributes as Record<string, unknown> | undefined
       ),
-      parentWorkflowId: workflow.parentExecution?.workflowId,
-      parentRunId: workflow.parentExecution?.runId,
+      parentWorkflowId: workflow.parentExecution?.workflowId ?? undefined,
+      parentRunId: workflow.parentExecution?.runId ?? undefined,
     });
 
     count++;
@@ -318,8 +319,8 @@ export async function getWorkflowDetails(
       searchAttributes: decodeSearchAttributes(
         description.searchAttributes as Record<string, unknown> | undefined
       ),
-      parentWorkflowId: description.parentExecution?.workflowId,
-      parentRunId: description.parentExecution?.runId,
+      parentWorkflowId: description.parentExecution?.workflowId ?? undefined,
+      parentRunId: description.parentExecution?.runId ?? undefined,
     };
   } finally {
     // Restore original namespace
@@ -375,8 +376,8 @@ export async function testConnectionForCluster(
     const namespaceInfo: NamespaceInfo = {
       name: response.namespaceInfo?.name || namespace,
       state: response.namespaceInfo?.state?.toString() || "REGISTERED",
-      description: response.namespaceInfo?.description,
-    };
+      description: response.namespaceInfo?.description ?? undefined,
+    } as NamespaceInfo;
 
     return { success: true, namespace: namespaceInfo };
   } catch (error) {
@@ -458,7 +459,7 @@ export async function listNamespaces(): Promise<NamespaceInfo[]> {
         namespaces.push({
           name: ns.namespaceInfo.name,
           state: ns.namespaceInfo.state?.toString() || "unknown",
-          description: ns.namespaceInfo.description,
+          description: ns.namespaceInfo.description ?? undefined,
         });
       }
     }
@@ -479,7 +480,7 @@ export async function listNamespaces(): Promise<NamespaceInfo[]> {
           {
             name: response.namespaceInfo?.name || currentNamespace,
             state: response.namespaceInfo?.state?.toString() || "REGISTERED",
-            description: response.namespaceInfo?.description,
+            description: response.namespaceInfo?.description ?? undefined,
           },
         ];
       } catch {
@@ -537,7 +538,7 @@ export async function getWorkflowHistory(
       eventId: Number(event.eventId),
       eventTime: tsToDate(event.eventTime),
       eventType: formatEventType(event.eventType),
-      details: extractEventDetails(event),
+      details: extractEventDetails(event as unknown as Record<string, unknown>),
     });
   }
 
@@ -678,11 +679,11 @@ export async function listSchedules(): Promise<ScheduleInfo[]> {
       recentActions: (schedule.info?.recentActions || []).map((a) => ({
         scheduledAt: a.scheduledAt || new Date(),
         startedAt: a.takenAt || new Date(),
-        workflowId: a.action?.startWorkflow?.workflowId,
-        runId: a.action?.startWorkflow?.firstExecutionRunId,
+        workflowId: a.action?.workflow?.workflowId,
+        runId: a.action?.workflow?.firstExecutionRunId,
       })),
       workflowType: undefined, // Will be populated from describe if needed
-      createdAt: schedule.info?.createdAt,
+      createdAt: undefined, // Not available in list summary
       updatedAt: undefined,
     });
   }
@@ -716,18 +717,18 @@ export async function getScheduleDetails(scheduleId: string): Promise<{
       scheduleId,
       memo: description.memo as Record<string, unknown> | undefined,
       isPaused: description.state?.paused || false,
-      numActions: description.info?.numActions || 0,
+      numActions: description.info?.numActionsTaken || 0,
       numActionsSkipped: description.info?.numActionsMissedCatchupWindow || 0,
       nextActionTimes: description.info?.nextActionTimes || [],
       recentActions: (description.info?.recentActions || []).map((a) => ({
         scheduledAt: a.scheduledAt || new Date(),
         startedAt: a.takenAt || new Date(),
-        workflowId: a.action?.startWorkflow?.workflowId,
-        runId: a.action?.startWorkflow?.firstExecutionRunId,
+        workflowId: a.action?.workflow?.workflowId,
+        runId: a.action?.workflow?.firstExecutionRunId,
       })),
       workflowType: workflowAction?.workflowType,
       createdAt: description.info?.createdAt,
-      updatedAt: undefined,
+      updatedAt: description.info?.lastUpdatedAt,
     },
     workflowType: workflowAction?.workflowType,
     taskQueue: workflowAction?.taskQueue,
@@ -826,12 +827,12 @@ export async function resetWorkflow(params: {
       workflowId: params.workflowId,
       runId: params.runId,
     },
-    workflowTaskFinishEventId: params.workflowTaskFinishEventId,
+    workflowTaskFinishEventId: LongModule.fromNumber(params.workflowTaskFinishEventId),
     reason: params.reason,
     requestId: crypto.randomUUID(),
   });
 
-  return { runId: response.runId || "unknown" };
+  return { runId: response.runId ?? "unknown" };
 }
 
 // ============================================================================
