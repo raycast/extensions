@@ -12,31 +12,18 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
-import { useEffect, useState } from "react";
+import { useCachedPromise } from "@raycast/utils";
 import { UploadResult, deleteUpload, listUploads } from "./api";
 import { formatBytes, formatExpiry } from "./utils";
 
-interface Preferences {
-  apiKey: string;
-}
-
 export default function RecentUploadsCommand() {
   const { apiKey } = getPreferenceValues<Preferences>();
-  const [uploads, setUploads] = useState<UploadResult[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!apiKey) {
-      setError("API key required — add one in extension preferences to list uploads");
-      setIsLoading(false);
-      return;
-    }
-    listUploads(apiKey)
-      .then(setUploads)
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setIsLoading(false));
-  }, [apiKey]);
+  const { data: uploads, isLoading, error, revalidate } = useCachedPromise(
+    (key: string) => listUploads(key),
+    [apiKey],
+    { execute: !!apiKey }
+  );
 
   async function handleDelete(upload: UploadResult) {
     const confirmed = await confirmAlert({
@@ -48,11 +35,23 @@ export default function RecentUploadsCommand() {
 
     try {
       await deleteUpload(upload.id, apiKey);
-      setUploads((prev) => prev.filter((u) => u.id !== upload.id));
+      revalidate();
       await showToast({ style: Toast.Style.Success, title: "Deleted" });
     } catch (err) {
       await showToast({ style: Toast.Style.Failure, title: "Delete failed", message: String(err) });
     }
+  }
+
+  if (!apiKey) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={{ source: Icon.Key, tintColor: Color.Orange }}
+          title="API Key Required"
+          description="Add your transfa API key in Raycast Preferences → Extensions → Transfa"
+        />
+      </List>
+    );
   }
 
   if (error) {
@@ -61,7 +60,7 @@ export default function RecentUploadsCommand() {
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Error"
-          description={error}
+          description={error.message}
         />
       </List>
     );
@@ -69,14 +68,14 @@ export default function RecentUploadsCommand() {
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter uploads…">
-      {uploads.length === 0 && !isLoading ? (
+      {!uploads?.length && !isLoading ? (
         <List.EmptyView
           icon={Icon.Upload}
           title="No uploads yet"
           description="Use the 'Upload File' command to get started"
         />
       ) : (
-        uploads.map((upload) => {
+        (uploads ?? []).map((upload) => {
           const expiry = formatExpiry(upload.expires_at);
           const expired = expiry === "Expired";
           return (
