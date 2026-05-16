@@ -33,11 +33,11 @@ If neither is configured, the extension will prompt you — it won't fall back t
 
 ## Preferences
 
-| Name | Description |
-| --- | --- |
-| My Chargepoint ID | Used by the "My Chargepoint" command (e.g. `DK.SPI.Z000000*1`). |
-| Price Granularity | Hourly average or raw 15-minute buckets for the schedule. |
-| Latitude / Longitude | Optional manual overrides for location. |
+| Name                 | Description                                                     |
+| -------------------- | --------------------------------------------------------------- |
+| My Chargepoint ID    | Used by the "My Chargepoint" command (e.g. `DK.SPI.Z000000*1`). |
+| Price Granularity    | Hourly average or raw 15-minute buckets for the schedule.       |
+| Latitude / Longitude | Optional manual overrides for location.                         |
 
 ## Data source
 

@@ -6,7 +6,9 @@
   "icon": "extension-icon.png",
   "author": "alexandervarney",
   "license": "MIT",
-  "categories": ["Applications"],
+  "categories": [
+    "Applications"
+  ],
   "preferences": [
     {
       "name": "favoriteEvseId",
@@ -24,8 +26,14 @@
       "required": false,
       "default": "hour",
       "data": [
-        { "title": "Hourly (average)", "value": "hour" },
-        { "title": "15 minutes (raw)", "value": "15min" }
+        {
+          "title": "Hourly (average)",
+          "value": "hour"
+        },
+        {
+          "title": "15 minutes (raw)",
+          "value": "15min"
+        }
       ]
     },
     {
@@ -62,16 +70,16 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.82.0",
-    "@raycast/utils": "^1.17.0"
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.11",
-    "@types/node": "^20.8.10",
-    "@types/react": "^19.0.0",
-    "eslint": "^8.57.0",
-    "prettier": "^3.3.3",
-    "typescript": "^5.4.5"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.8.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",
@@ -79,5 +87,9 @@
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "publish": "npx @raycast/api@latest publish"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }
