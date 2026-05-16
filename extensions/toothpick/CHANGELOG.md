@@ -1,5 +1,9 @@
 # Toothpick Changelog
 
+## [Add Keyboard Shortcuts] - {PR_MERGE_DATE}
+
+- Added the standard Refresh keyboard shortcut to the **Refresh** action in Manage Bluetooth Connections.
+
 ## [Refresh Device and Refresh All Commands] - 2026-05-05
 
 - Added a **Refresh** action in Manage Bluetooth Connections which disconnects and reconnects a device.
