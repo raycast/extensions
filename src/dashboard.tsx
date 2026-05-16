@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { List, Icon, showToast, Toast, Color, ActionPanel, Action } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
@@ -69,15 +69,17 @@ export default function Dashboard() {
   const [selectedClusterName, setSelectedClusterName] = useState<string>("");
   const [selectedNamespace, setSelectedNamespaceState] = useState<string>("");
   const [timeRange, setTimeRange] = useState("24h");
+  const isInitializedRef = useRef(false);
 
   // Load clusters from storage
   const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
     keepPreviousData: true,
   });
 
-  // Initialize cluster and namespace from storage
+  // Initialize cluster and namespace from storage (only once)
   useEffect(() => {
-    if (clusters.length === 0) return;
+    if (clusters.length === 0 || isInitializedRef.current) return;
+    isInitializedRef.current = true;
 
     async function init() {
       const storedCluster = await getSelectedCluster();
@@ -99,11 +101,7 @@ export default function Dashboard() {
   }, [clusters]);
 
   // Fetch namespaces for selected cluster
-  const {
-    data: namespaces,
-    isLoading: namespacesLoading,
-    revalidate: revalidateNamespaces,
-  } = useCachedPromise(
+  const { data: namespaces, isLoading: namespacesLoading } = useCachedPromise(
     async (clusterName: string) => {
       if (!clusterName) return [];
       try {
@@ -119,36 +117,47 @@ export default function Dashboard() {
 
   // Handle cluster change
   const handleClusterChange = useCallback(
-    async (clusterName: string) => {
-      const cluster = clusters.find((c) => c.name === clusterName);
-      if (!cluster) return;
+    (clusterName: string) => {
+      try {
+        const cluster = clusters.find((c) => c.name === clusterName);
+        if (!cluster) return;
 
-      setSelectedClusterName(clusterName);
-      setCurrentCluster(cluster);
-      await setSelectedCluster(clusterName);
+        const ns = cluster.namespace || "default";
 
-      const ns = cluster.namespace || "default";
-      setSelectedNamespaceState(ns);
-      setCurrentNamespace(ns);
-      await setSelectedNamespace(ns);
+        // Update React state
+        setSelectedClusterName(clusterName);
+        setSelectedNamespaceState(ns);
 
-      revalidateNamespaces();
+        // Set module-level state
+        setCurrentCluster(cluster);
+        setCurrentNamespace(ns);
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Cluster Changed",
-        message: `${clusterName} / ${ns}`,
-      });
+        // Persist to storage (fire and forget)
+        setSelectedCluster(clusterName);
+        setSelectedNamespace(ns);
+
+        showToast({
+          style: Toast.Style.Success,
+          title: "Cluster Changed",
+          message: `${clusterName} / ${ns}`,
+        });
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to switch cluster",
+          message: String(error),
+        });
+      }
     },
-    [clusters, revalidateNamespaces]
+    [clusters]
   );
 
   // Handle namespace change
-  const handleNamespaceChange = useCallback(async (namespace: string) => {
+  const handleNamespaceChange = useCallback((namespace: string) => {
     setSelectedNamespaceState(namespace);
     setCurrentNamespace(namespace);
-    await setSelectedNamespace(namespace);
-    await showToast({
+    setSelectedNamespace(namespace);
+    showToast({
       style: Toast.Style.Success,
       title: "Namespace Changed",
       message: namespace,
@@ -163,8 +172,8 @@ export default function Dashboard() {
     isLoading: countsLoading,
     revalidate,
   } = useCachedPromise(
-    async (namespace: string, range: string) => {
-      if (!namespace) return null;
+    async (namespace: string, range: string, clusterName: string) => {
+      if (!namespace || !clusterName) return null;
 
       // Compute the time query with actual ISO timestamp
       const timeQuery = getTimeQuery(range);
@@ -195,7 +204,7 @@ export default function Dashboard() {
         continuedAsNew,
       } as WorkflowCounts;
     },
-    [selectedNamespace, timeRange],
+    [selectedNamespace, timeRange, selectedClusterName],
     {
       keepPreviousData: true,
       onError: showConnectionError,
@@ -407,6 +416,24 @@ function DashboardDropdown({
 
   const hasMultipleClusters = clusters.length > 1;
 
+  // Ensure we have at least the selected namespace in the list
+  const effectiveNamespaces = (() => {
+    if (namespaces.length === 0) {
+      const cluster = clusters.find((c) => c.name === selectedCluster);
+      return [
+        {
+          name: cluster?.namespace || selectedNamespace || "default",
+          state: "Registered",
+        } as NamespaceInfo,
+      ];
+    }
+    const nsSet = new Set(namespaces.map((ns) => ns.name));
+    if (selectedNamespace && !nsSet.has(selectedNamespace)) {
+      return [{ name: selectedNamespace, state: "Registered" } as NamespaceInfo, ...namespaces];
+    }
+    return namespaces;
+  })();
+
   if (hasMultipleClusters) {
     return (
       <List.Dropdown
@@ -414,46 +441,46 @@ function DashboardDropdown({
         value={combinedValue}
         onChange={handleChange}
       >
-        {clusters.map((cluster) => (
-          <List.Dropdown.Section key={cluster.name} title={`📍 ${cluster.name}`}>
-            {cluster.name === selectedCluster ? (
-              namespaces.map((ns) => (
-                <List.Dropdown.Section key={`${cluster.name}-${ns.name}`} title={`  ${ns.name}`}>
-                  {TIME_RANGES.map((range) => (
-                    <List.Dropdown.Item
-                      key={`${cluster.name}|${ns.name}|${range.value}`}
-                      title={`    ${range.title}`}
-                      value={`${cluster.name}|${ns.name}|${range.value}`}
-                    />
-                  ))}
-                </List.Dropdown.Section>
-              ))
-            ) : (
+        {/* Current cluster section */}
+        <List.Dropdown.Section title={`📍 ${selectedCluster}`}>
+          {effectiveNamespaces.flatMap((ns) =>
+            TIME_RANGES.map((range) => (
               <List.Dropdown.Item
-                key={`${cluster.name}|switch`}
-                title="  Switch to this cluster..."
-                value={`${cluster.name}|${cluster.namespace || "default"}|24h`}
+                key={`${selectedCluster}-${ns.name}-${range.value}`}
+                title={`${ns.name} / ${range.title}`}
+                value={`${selectedCluster}|${ns.name}|${range.value}`}
               />
-            )}
-          </List.Dropdown.Section>
-        ))}
+            ))
+          )}
+        </List.Dropdown.Section>
+
+        {/* Other clusters */}
+        {clusters
+          .filter((c) => c.name !== selectedCluster)
+          .map((cluster) => (
+            <List.Dropdown.Section key={`section-${cluster.name}`} title={`📍 ${cluster.name}`}>
+              <List.Dropdown.Item
+                key={`switch-${cluster.name}`}
+                title={`Switch to ${cluster.name}`}
+                value={`${cluster.name}|${cluster.namespace}|24h`}
+              />
+            </List.Dropdown.Section>
+          ))}
       </List.Dropdown>
     );
   }
 
   return (
     <List.Dropdown tooltip="Namespace & Time Range" value={combinedValue} onChange={handleChange}>
-      {namespaces.map((ns) => (
-        <List.Dropdown.Section key={ns.name} title={ns.name}>
-          {TIME_RANGES.map((range) => (
-            <List.Dropdown.Item
-              key={`${selectedCluster}|${ns.name}|${range.value}`}
-              title={range.title}
-              value={`${selectedCluster}|${ns.name}|${range.value}`}
-            />
-          ))}
-        </List.Dropdown.Section>
-      ))}
+      {effectiveNamespaces.flatMap((ns) =>
+        TIME_RANGES.map((range) => (
+          <List.Dropdown.Item
+            key={`${selectedCluster}-${ns.name}-${range.value}`}
+            title={`${ns.name} / ${range.title}`}
+            value={`${selectedCluster}|${ns.name}|${range.value}`}
+          />
+        ))
+      )}
     </List.Dropdown>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { List, Icon, showToast, Toast, ActionPanel, Action, Color } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
@@ -46,15 +46,17 @@ export default function SearchAttributes() {
   const [selectedClusterName, setSelectedClusterName] = useState<string>("");
   const [selectedNamespace, setSelectedNamespaceState] = useState<string>("");
   const [filter, setFilter] = useState<"all" | "system" | "custom">("all");
+  const isInitializedRef = useRef(false);
 
   // Load clusters from storage
   const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
     keepPreviousData: true,
   });
 
-  // Initialize cluster and namespace from storage
+  // Initialize cluster and namespace from storage (only once)
   useEffect(() => {
-    if (clusters.length === 0) return;
+    if (clusters.length === 0 || isInitializedRef.current) return;
+    isInitializedRef.current = true;
 
     async function init() {
       const storedCluster = await getSelectedCluster();
@@ -76,11 +78,7 @@ export default function SearchAttributes() {
   }, [clusters]);
 
   // Fetch namespaces for selected cluster
-  const {
-    data: namespaces,
-    isLoading: namespacesLoading,
-    revalidate: revalidateNamespaces,
-  } = useCachedPromise(
+  const { data: namespaces, isLoading: namespacesLoading } = useCachedPromise(
     async (clusterName: string) => {
       if (!clusterName) return [];
       try {
@@ -96,28 +94,39 @@ export default function SearchAttributes() {
 
   // Handle cluster change
   const handleClusterChange = useCallback(
-    async (clusterName: string) => {
-      const cluster = clusters.find((c) => c.name === clusterName);
-      if (!cluster) return;
+    (clusterName: string) => {
+      try {
+        const cluster = clusters.find((c) => c.name === clusterName);
+        if (!cluster) return;
 
-      setSelectedClusterName(clusterName);
-      setCurrentCluster(cluster);
-      await setSelectedCluster(clusterName);
+        const ns = cluster.namespace || "default";
 
-      const ns = cluster.namespace || "default";
-      setSelectedNamespaceState(ns);
-      setCurrentNamespace(ns);
-      await setSelectedNamespace(ns);
+        // Update React state
+        setSelectedClusterName(clusterName);
+        setSelectedNamespaceState(ns);
 
-      revalidateNamespaces();
+        // Set module-level state
+        setCurrentCluster(cluster);
+        setCurrentNamespace(ns);
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Cluster Changed",
-        message: `${clusterName} / ${ns}`,
-      });
+        // Persist to storage (fire and forget)
+        setSelectedCluster(clusterName);
+        setSelectedNamespace(ns);
+
+        showToast({
+          style: Toast.Style.Success,
+          title: "Cluster Changed",
+          message: `${clusterName} / ${ns}`,
+        });
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to switch cluster",
+          message: String(error),
+        });
+      }
     },
-    [clusters, revalidateNamespaces]
+    [clusters]
   );
 
   // Handle namespace change
@@ -138,11 +147,11 @@ export default function SearchAttributes() {
     isLoading: attributesLoading,
     revalidate,
   } = useCachedPromise(
-    async (namespace: string) => {
-      if (!namespace) return null;
+    async (namespace: string, clusterName: string) => {
+      if (!namespace || !clusterName) return null;
       return getSearchAttributes();
     },
-    [selectedNamespace],
+    [selectedNamespace, selectedClusterName],
     {
       keepPreviousData: true,
       onError: showConnectionError,
@@ -202,19 +211,35 @@ export default function SearchAttributes() {
 
       {showCustom && customAttrs.length === 0 && !isLoading && (
         <List.Section title="Custom Attributes">
-          <List.Item
-            title="No Custom Attributes"
-            subtitle="Add custom search attributes via temporal CLI"
-            icon={Icon.Info}
-            actions={
-              <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy Add Attribute Command"
-                  content={`temporal operator search-attribute create --namespace "${selectedNamespace}" --name "CustomAttribute" --type "Keyword"`}
-                />
-              </ActionPanel>
-            }
-          />
+          {clusters.find((c) => c.name === selectedClusterName)?.connectionType === "cloud" ? (
+            <List.Item
+              title="Custom Attributes Not Available"
+              subtitle="Cannot be discovered with namespace-scoped API keys"
+              icon={Icon.Info}
+              actions={
+                <ActionPanel>
+                  <Action.OpenInBrowser
+                    title="View in Temporal Cloud"
+                    url="https://cloud.temporal.io"
+                  />
+                </ActionPanel>
+              }
+            />
+          ) : (
+            <List.Item
+              title="No Custom Attributes"
+              subtitle="Add custom search attributes via temporal CLI"
+              icon={Icon.Info}
+              actions={
+                <ActionPanel>
+                  <Action.CopyToClipboard
+                    title="Copy Add Attribute Command"
+                    content={`temporal operator search-attribute create --namespace "${selectedNamespace}" --name "CustomAttribute" --type "Keyword"`}
+                  />
+                </ActionPanel>
+              }
+            />
+          )}
         </List.Section>
       )}
     </List>
@@ -270,6 +295,24 @@ function AttributesDropdown({
 
   const hasMultipleClusters = clusters.length > 1;
 
+  // Ensure we have at least the selected namespace in the list
+  const effectiveNamespaces = (() => {
+    if (namespaces.length === 0) {
+      const cluster = clusters.find((c) => c.name === selectedCluster);
+      return [
+        {
+          name: cluster?.namespace || selectedNamespace || "default",
+          state: "Registered",
+        } as NamespaceInfo,
+      ];
+    }
+    const nsSet = new Set(namespaces.map((ns) => ns.name));
+    if (selectedNamespace && !nsSet.has(selectedNamespace)) {
+      return [{ name: selectedNamespace, state: "Registered" } as NamespaceInfo, ...namespaces];
+    }
+    return namespaces;
+  })();
+
   if (hasMultipleClusters) {
     return (
       <List.Dropdown
@@ -277,46 +320,46 @@ function AttributesDropdown({
         value={combinedValue}
         onChange={handleChange}
       >
-        {clusters.map((cluster) => (
-          <List.Dropdown.Section key={cluster.name} title={`📍 ${cluster.name}`}>
-            {cluster.name === selectedCluster ? (
-              namespaces.map((ns) => (
-                <List.Dropdown.Section key={`${cluster.name}-${ns.name}`} title={`  ${ns.name}`}>
-                  {filters.map((f) => (
-                    <List.Dropdown.Item
-                      key={`${cluster.name}|${ns.name}|${f.value}`}
-                      title={`    ${f.title}`}
-                      value={`${cluster.name}|${ns.name}|${f.value}`}
-                    />
-                  ))}
-                </List.Dropdown.Section>
-              ))
-            ) : (
+        {/* Current cluster section */}
+        <List.Dropdown.Section title={`📍 ${selectedCluster}`}>
+          {effectiveNamespaces.flatMap((ns) =>
+            filters.map((f) => (
               <List.Dropdown.Item
-                key={`${cluster.name}|switch`}
-                title="  Switch to this cluster..."
-                value={`${cluster.name}|${cluster.namespace || "default"}|all`}
+                key={`${selectedCluster}-${ns.name}-${f.value}`}
+                title={`${ns.name} / ${f.title}`}
+                value={`${selectedCluster}|${ns.name}|${f.value}`}
               />
-            )}
-          </List.Dropdown.Section>
-        ))}
+            ))
+          )}
+        </List.Dropdown.Section>
+
+        {/* Other clusters */}
+        {clusters
+          .filter((c) => c.name !== selectedCluster)
+          .map((cluster) => (
+            <List.Dropdown.Section key={`section-${cluster.name}`} title={`📍 ${cluster.name}`}>
+              <List.Dropdown.Item
+                key={`switch-${cluster.name}`}
+                title={`Switch to ${cluster.name}`}
+                value={`${cluster.name}|${cluster.namespace}|all`}
+              />
+            </List.Dropdown.Section>
+          ))}
       </List.Dropdown>
     );
   }
 
   return (
     <List.Dropdown tooltip="Namespace & Filter" value={combinedValue} onChange={handleChange}>
-      {namespaces.map((ns) => (
-        <List.Dropdown.Section key={ns.name} title={ns.name}>
-          {filters.map((f) => (
-            <List.Dropdown.Item
-              key={`${selectedCluster}|${ns.name}|${f.value}`}
-              title={f.title}
-              value={`${selectedCluster}|${ns.name}|${f.value}`}
-            />
-          ))}
-        </List.Dropdown.Section>
-      ))}
+      {effectiveNamespaces.flatMap((ns) =>
+        filters.map((f) => (
+          <List.Dropdown.Item
+            key={`${selectedCluster}-${ns.name}-${f.value}`}
+            title={`${ns.name} / ${f.title}`}
+            value={`${selectedCluster}|${ns.name}|${f.value}`}
+          />
+        ))
+      )}
     </List.Dropdown>
   );
 }

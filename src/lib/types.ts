@@ -1,13 +1,22 @@
 import { Color, Icon } from "@raycast/api";
 
 /**
+ * Connection type for a Temporal cluster
+ * - "local": Self-hosted Temporal (connects via gRPC to localhost)
+ * - "cloud": Temporal Cloud (connects via gRPC with TLS and API key)
+ */
+export type ConnectionType = "local" | "cloud";
+
+/**
  * Configuration for a single Temporal cluster
  */
 export interface ClusterConfig {
   name: string; // Display name for the cluster
-  url: string; // Temporal UI URL (e.g., http://localhost:8080)
+  address: string; // gRPC address (e.g., localhost:7233 or namespace.account.tmprl.cloud:7233)
   namespace: string; // Default namespace for this cluster
-  apiKey?: string; // Optional API key (for Temporal Cloud)
+  apiKey?: string; // Optional API key (required for Temporal Cloud)
+  connectionType?: ConnectionType; // "local" or "cloud" (defaults to "local")
+  webUiUrl?: string; // Optional Web UI URL (e.g., http://localhost:8233 or https://cloud.temporal.io)
 }
 
 export type WorkflowStatus =

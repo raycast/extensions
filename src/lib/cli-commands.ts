@@ -11,30 +11,15 @@ import { getCurrentNamespace, getCurrentCluster } from "./temporal-client";
  */
 function getAddressFlag(): string {
   const cluster = getCurrentCluster();
-  const url = cluster.url;
+  const address = cluster.address;
 
-  // Extract host from URL
-  try {
-    const parsed = new URL(url);
-    const host = parsed.host;
-
-    // Skip address flag for localhost
-    if (host.startsWith("localhost") || host.startsWith("127.0.0.1")) {
-      return "";
-    }
-
-    // For Temporal Cloud, the CLI uses a different address format
-    // Cloud URLs look like: https://<namespace>.<accountId>.tmprl.cloud
-    // CLI address should be: <namespace>.<accountId>.tmprl.cloud:7233
-    if (host.includes("tmprl.cloud")) {
-      return ` --address "${host}:7233"`;
-    }
-
-    // For other remote servers, use the host with default gRPC port
-    return ` --address "${host}:7233"`;
-  } catch {
+  // Skip address flag for localhost
+  if (address.startsWith("localhost") || address.startsWith("127.0.0.1")) {
     return "";
   }
+
+  // Include address flag for remote servers (including Temporal Cloud)
+  return ` --address "${address}"`;
 }
 
 export function getDescribeCommand(workflowId: string, runId?: string): string {

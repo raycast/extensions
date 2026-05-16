@@ -4,7 +4,8 @@
   "title": "Temporal",
   "description": "Search, view, and manage Temporal workflows from Raycast",
   "icon": "icon.png",
-  "author": "nikolaykolibarov",
+  "author": "applauselab",
+  "contributors": ["nikolaykolibarov"],
   "license": "MIT",
   "platforms": ["macOS"],
   "categories": ["Developer Tools"],
@@ -16,15 +17,15 @@
       "mode": "view"
     },
     {
-      "name": "dashboard",
-      "title": "Dashboard",
-      "description": "View workflow counts and statistics",
-      "mode": "view"
-    },
-    {
       "name": "start-workflow",
       "title": "Start Workflow",
       "description": "Start a new Temporal workflow",
+      "mode": "view"
+    },
+    {
+      "name": "dashboard",
+      "title": "Dashboard",
+      "description": "View workflow counts and statistics",
       "mode": "view"
     },
     {
@@ -40,12 +41,6 @@
       "mode": "view"
     },
     {
-      "name": "batch-operations",
-      "title": "Batch Operations",
-      "description": "Cancel or terminate multiple workflows at once",
-      "mode": "view"
-    },
-    {
       "name": "manage-connections",
       "title": "Manage Connections",
       "description": "Add, edit, and remove Temporal server connections",
@@ -54,7 +49,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.87.0",
-    "@raycast/utils": "^1.18.0"
+    "@raycast/utils": "^1.18.0",
+    "@temporalio/client": "^1.11.7"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",

@@ -23,7 +23,7 @@
   - View workflow status, duration, task queue
   - Display memo and search attributes (properly decoded)
   - Show parent workflow information
-  - Direct link to Temporal UI
+  - Open workflow in Temporal Web UI (Cmd+O)
 
 - **Workflow History**
   - Grouped view by activities, timers, and signals
@@ -63,14 +63,9 @@
   - Filter by system or custom
   - Copy attribute names and example queries
 
-- **Batch Operations Command**
-  - Batch cancel workflows matching a visibility query
-  - Batch terminate workflows
-  - Preview count before executing
-  - Example query templates
-  - Confirmation dialog with workflow count
-
-- **Configuration**
-  - Support for self-hosted Temporal (Docker, local dev server)
-  - Support for Temporal Cloud (with API key authentication)
-  - Configurable namespace and UI URL
+- **Manage Connections Command**
+  - Add, edit, and delete Temporal server connections
+  - Test connection connectivity
+  - Support for multiple clusters (Local, Staging, Production)
+  - Support for self-hosted Temporal and Temporal Cloud
+  - Optional Web UI URL for opening workflows in browser

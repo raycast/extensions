@@ -14,8 +14,8 @@ import {
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { getClustersFromStorage, addCluster, updateCluster, deleteCluster } from "./lib/storage";
-import { ClusterConfig } from "./lib/types";
-import { invalidateClustersCache, listNamespaces, setCurrentCluster } from "./lib/temporal-client";
+import { ClusterConfig, ConnectionType } from "./lib/types";
+import { invalidateClustersCache, testConnectionForCluster } from "./lib/temporal-client";
 
 // ============================================================================
 // Main List View
@@ -74,14 +74,21 @@ interface ConnectionListItemProps {
 
 function ConnectionListItem({ cluster, onRefresh }: ConnectionListItemProps) {
   const hasApiKey = Boolean(cluster.apiKey);
+  const isCloud = cluster.connectionType === "cloud";
 
   return (
     <List.Item
       title={cluster.name}
-      subtitle={cluster.url}
-      icon={{ source: Icon.Globe, tintColor: Color.Blue }}
+      subtitle={cluster.address}
+      icon={{
+        source: isCloud ? Icon.Cloud : Icon.Globe,
+        tintColor: isCloud ? Color.Purple : Color.Blue,
+      }}
       accessories={[
         { text: cluster.namespace, tooltip: `Default namespace: ${cluster.namespace}` },
+        isCloud
+          ? { tag: { value: "Cloud", color: Color.Purple } }
+          : { tag: { value: "Local", color: Color.Blue } },
         hasApiKey ? { icon: Icon.Key, tooltip: "API key configured" } : {},
       ]}
       actions={
@@ -139,8 +146,8 @@ function ConnectionListItem({ cluster, onRefresh }: ConnectionListItemProps) {
 
           <ActionPanel.Section title="Copy">
             <Action.CopyToClipboard
-              title="Copy URL"
-              content={cluster.url}
+              title="Copy Address"
+              content={cluster.address}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />
             <Action.CopyToClipboard
@@ -167,29 +174,41 @@ function AddConnectionForm({ onSuccess }: AddConnectionFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [nameError, setNameError] = useState<string | undefined>();
-  const [urlError, setUrlError] = useState<string | undefined>();
+  const [addressError, setAddressError] = useState<string | undefined>();
+  const [connectionType, setConnectionType] = useState<ConnectionType>("local");
 
   const handleSubmit = async (values: {
     name: string;
-    url: string;
+    connectionType: ConnectionType;
+    address: string;
     namespace: string;
     apiKey: string;
+    webUiUrl: string;
   }) => {
     // Validation
     if (!values.name.trim()) {
       setNameError("Name is required");
       return;
     }
-    if (!values.url.trim()) {
-      setUrlError("URL is required");
+    if (!values.address.trim()) {
+      setAddressError("Address is required");
       return;
     }
 
-    // Validate URL format
-    try {
-      new URL(values.url);
-    } catch {
-      setUrlError("Invalid URL format");
+    // Validate address format (should be host:port)
+    const address = values.address.trim();
+    if (!address.includes(":") || address.startsWith("http")) {
+      setAddressError("Address should be in format host:port (e.g., localhost:7233)");
+      return;
+    }
+
+    // Cloud connections require API key
+    if (values.connectionType === "cloud" && !values.apiKey.trim()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "API Key Required",
+        message: "Temporal Cloud requires an API key",
+      });
       return;
     }
 
@@ -197,9 +216,11 @@ function AddConnectionForm({ onSuccess }: AddConnectionFormProps) {
 
     const cluster: ClusterConfig = {
       name: values.name.trim(),
-      url: values.url.trim().replace(/\/$/, ""), // Remove trailing slash
+      address: address,
       namespace: values.namespace.trim() || "default",
       apiKey: values.apiKey.trim() || undefined,
+      connectionType: values.connectionType,
+      webUiUrl: values.webUiUrl.trim() || undefined,
     };
 
     const error = await addCluster(cluster);
@@ -239,37 +260,77 @@ function AddConnectionForm({ onSuccess }: AddConnectionFormProps) {
         autoFocus
       />
 
+      <Form.Dropdown
+        id="connectionType"
+        title="Connection Type"
+        value={connectionType}
+        onChange={(value) => setConnectionType(value as ConnectionType)}
+      >
+        <Form.Dropdown.Item value="local" title="Local / Self-Hosted" icon={Icon.Globe} />
+        <Form.Dropdown.Item value="cloud" title="Temporal Cloud" icon={Icon.Cloud} />
+      </Form.Dropdown>
+
       <Form.TextField
-        id="url"
-        title="URL"
-        placeholder="http://localhost:8080"
-        info="Temporal Web UI URL (used for API access)"
-        error={urlError}
-        onChange={() => setUrlError(undefined)}
+        id="address"
+        title="gRPC Address"
+        placeholder={
+          connectionType === "cloud" ? "namespace.account.tmprl.cloud:7233" : "localhost:7233"
+        }
+        defaultValue={connectionType === "local" ? "localhost:7233" : ""}
+        info="Temporal gRPC endpoint (host:port)"
+        error={addressError}
+        onChange={() => setAddressError(undefined)}
       />
 
       <Form.TextField
         id="namespace"
         title="Namespace"
-        placeholder="default"
-        defaultValue="default"
+        placeholder={connectionType === "cloud" ? "your-namespace.your-account" : "default"}
+        defaultValue={connectionType === "local" ? "default" : ""}
         info="Default namespace for this connection"
       />
 
-      <Form.PasswordField
-        id="apiKey"
-        title="API Key"
-        placeholder="Optional - required for Temporal Cloud"
-        info="API key for authentication (Temporal Cloud)"
+      {connectionType === "cloud" && (
+        <Form.PasswordField
+          id="apiKey"
+          title="API Key"
+          placeholder="Required for Temporal Cloud"
+          info="Your Temporal Cloud API key"
+        />
+      )}
+
+      {connectionType === "local" && (
+        <Form.PasswordField
+          id="apiKey"
+          title="API Key"
+          placeholder="Optional"
+          info="API key if your self-hosted cluster requires authentication"
+        />
+      )}
+
+      <Form.TextField
+        id="webUiUrl"
+        title="Web UI URL"
+        placeholder={
+          connectionType === "cloud" ? "https://cloud.temporal.io" : "http://localhost:8233"
+        }
+        info="Optional: URL to open workflows in Temporal Web UI (Cmd+O)"
       />
 
       <Form.Description
         title="Examples"
-        text={`
-Local Docker: http://localhost:8080
-Dev Server: http://localhost:8233
-Temporal Cloud: https://cloud.temporal.io
-        `.trim()}
+        text={
+          connectionType === "cloud"
+            ? `
+Address: your-namespace.your-account.tmprl.cloud:7233
+Namespace: your-namespace.your-account
+        `.trim()
+            : `
+Local Docker: localhost:7233
+Dev Server: localhost:7233
+Self-hosted: temporal.mycompany.com:7233
+        `.trim()
+        }
       />
     </Form>
   );
@@ -288,29 +349,43 @@ function EditConnectionForm({ cluster, onSuccess }: EditConnectionFormProps) {
   const { pop } = useNavigation();
   const [isLoading, setIsLoading] = useState(false);
   const [nameError, setNameError] = useState<string | undefined>();
-  const [urlError, setUrlError] = useState<string | undefined>();
+  const [addressError, setAddressError] = useState<string | undefined>();
+  const [connectionType, setConnectionType] = useState<ConnectionType>(
+    cluster.connectionType || "local"
+  );
 
   const handleSubmit = async (values: {
     name: string;
-    url: string;
+    connectionType: ConnectionType;
+    address: string;
     namespace: string;
     apiKey: string;
+    webUiUrl: string;
   }) => {
     // Validation
     if (!values.name.trim()) {
       setNameError("Name is required");
       return;
     }
-    if (!values.url.trim()) {
-      setUrlError("URL is required");
+    if (!values.address.trim()) {
+      setAddressError("Address is required");
       return;
     }
 
-    // Validate URL format
-    try {
-      new URL(values.url);
-    } catch {
-      setUrlError("Invalid URL format");
+    // Validate address format (should be host:port)
+    const address = values.address.trim();
+    if (!address.includes(":") || address.startsWith("http")) {
+      setAddressError("Address should be in format host:port (e.g., localhost:7233)");
+      return;
+    }
+
+    // Cloud connections require API key
+    if (values.connectionType === "cloud" && !values.apiKey.trim()) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "API Key Required",
+        message: "Temporal Cloud requires an API key",
+      });
       return;
     }
 
@@ -318,9 +393,11 @@ function EditConnectionForm({ cluster, onSuccess }: EditConnectionFormProps) {
 
     const updatedCluster: ClusterConfig = {
       name: values.name.trim(),
-      url: values.url.trim().replace(/\/$/, ""),
+      address: address,
       namespace: values.namespace.trim() || "default",
       apiKey: values.apiKey.trim() || undefined,
+      connectionType: values.connectionType,
+      webUiUrl: values.webUiUrl.trim() || undefined,
     };
 
     const error = await updateCluster(cluster.name, updatedCluster);
@@ -360,13 +437,23 @@ function EditConnectionForm({ cluster, onSuccess }: EditConnectionFormProps) {
         autoFocus
       />
 
+      <Form.Dropdown
+        id="connectionType"
+        title="Connection Type"
+        value={connectionType}
+        onChange={(value) => setConnectionType(value as ConnectionType)}
+      >
+        <Form.Dropdown.Item value="local" title="Local / Self-Hosted" icon={Icon.Globe} />
+        <Form.Dropdown.Item value="cloud" title="Temporal Cloud" icon={Icon.Cloud} />
+      </Form.Dropdown>
+
       <Form.TextField
-        id="url"
-        title="URL"
-        defaultValue={cluster.url}
-        info="Temporal Web UI URL (used for API access)"
-        error={urlError}
-        onChange={() => setUrlError(undefined)}
+        id="address"
+        title="gRPC Address"
+        defaultValue={cluster.address}
+        info="Temporal gRPC endpoint (host:port)"
+        error={addressError}
+        onChange={() => setAddressError(undefined)}
       />
 
       <Form.TextField
@@ -380,8 +467,22 @@ function EditConnectionForm({ cluster, onSuccess }: EditConnectionFormProps) {
         id="apiKey"
         title="API Key"
         defaultValue={cluster.apiKey || ""}
-        placeholder="Optional - required for Temporal Cloud"
-        info="API key for authentication (Temporal Cloud)"
+        placeholder={connectionType === "cloud" ? "Required for Temporal Cloud" : "Optional"}
+        info={
+          connectionType === "cloud"
+            ? "Your Temporal Cloud API key"
+            : "API key if your cluster requires authentication"
+        }
+      />
+
+      <Form.TextField
+        id="webUiUrl"
+        title="Web UI URL"
+        defaultValue={cluster.webUiUrl || ""}
+        placeholder={
+          connectionType === "cloud" ? "https://cloud.temporal.io" : "http://localhost:8233"
+        }
+        info="Optional: URL to open workflows in Temporal Web UI (Cmd+O)"
       />
     </Form>
   );
@@ -400,10 +501,12 @@ function TestConnection({ cluster }: TestConnectionProps) {
 
   const { data, isLoading, error } = useCachedPromise(
     async (c: ClusterConfig) => {
-      // Temporarily set this cluster as current for the test
-      setCurrentCluster(c);
-      const namespaces = await listNamespaces();
-      return { success: true, namespaces };
+      // Use testConnectionForCluster which works with namespace-scoped API keys
+      const result = await testConnectionForCluster(c);
+      if (!result.success) {
+        throw new Error(result.error || "Connection failed");
+      }
+      return result;
     },
     [cluster],
     {
@@ -432,19 +535,28 @@ function TestConnection({ cluster }: TestConnectionProps) {
               icon={{ source: Icon.CheckCircle, tintColor: Color.Green }}
               accessories={[{ text: "Connected", icon: Icon.CheckCircle }]}
             />
-            <List.Item title="URL" icon={Icon.Globe} accessories={[{ text: cluster.url }]} />
+            <List.Item
+              title="Type"
+              icon={cluster.connectionType === "cloud" ? Icon.Cloud : Icon.Globe}
+              accessories={[
+                {
+                  text:
+                    cluster.connectionType === "cloud" ? "Temporal Cloud" : "Local / Self-Hosted",
+                },
+              ]}
+            />
+            <List.Item title="Address" icon={Icon.Link} accessories={[{ text: cluster.address }]} />
           </List.Section>
-          <List.Section title={`Namespaces (${data.namespaces.length})`}>
-            {data.namespaces.map((ns) => (
+          {data.namespace && (
+            <List.Section title="Namespace">
               <List.Item
-                key={ns.name}
-                title={ns.name}
-                subtitle={ns.description}
+                title={data.namespace.name}
+                subtitle={data.namespace.description}
                 icon={Icon.Folder}
-                accessories={[{ tag: ns.state }]}
+                accessories={[{ tag: data.namespace.state }]}
               />
-            ))}
-          </List.Section>
+            </List.Section>
+          )}
         </>
       ) : null}
     </List>

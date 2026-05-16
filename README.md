@@ -25,6 +25,7 @@ Search, view, and manage Temporal workflows directly from Raycast.
 ### Workflow History
 - **Grouped View** - Activities, timers, and signals grouped together
 - **Activity Status** - See scheduled, running, completed, and failed activities
+- **Activity Details** - View full activity input, output, failure details, and timeline
 - **Duration Tracking** - See how long each activity took
 
 ### Workflow Interactions
@@ -56,12 +57,6 @@ Search, view, and manage Temporal workflows directly from Raycast.
 - **Custom Attributes** - View your custom search attributes
 - **Copy Query Examples** - Get example queries for each attribute type
 
-### Batch Operations
-- **Batch Cancel** - Cancel multiple workflows matching a query
-- **Batch Terminate** - Terminate multiple workflows at once
-- **Preview Count** - See how many workflows match before executing
-- **Example Queries** - Pre-built query templates for common operations
-
 ### Manage Connections
 - **Add Connection** - Add new Temporal server connections with a form
 - **Edit Connection** - Modify existing connection settings
@@ -77,14 +72,13 @@ Search, view, and manage Temporal workflows directly from Raycast.
 | Start Workflow | Start a new Temporal workflow |
 | Schedules | View and manage Temporal schedules |
 | Search Attributes | View system and custom search attributes |
-| Batch Operations | Cancel or terminate multiple workflows at once |
 | Manage Connections | Add, edit, and remove Temporal server connections |
 
 ## Configuration
 
 ### Getting Started
 
-On first launch, a default "Local" connection is created pointing to `http://localhost:8080`. This works out of the box if you're running Temporal locally via Docker or the dev server.
+On first launch, a default "Local" connection is created pointing to `localhost:7233`. This works out of the box if you're running Temporal locally via Docker or the dev server.
 
 To configure your connections, use the **Manage Connections** command:
 
@@ -99,14 +93,24 @@ Each connection has the following fields:
 | Field | Required | Description |
 |-------|----------|-------------|
 | Name | Yes | Display name (e.g., "Local Dev", "Production") |
-| URL | Yes | Temporal Web UI URL (used for API access) |
+| Connection Type | Yes | "Local / Self-Hosted" or "Temporal Cloud" |
+| gRPC Address | Yes | Temporal gRPC address (e.g., `localhost:7233`) |
 | Namespace | Yes | Default namespace for this connection |
 | API Key | No | API key for Temporal Cloud authentication |
+| Web UI URL | No | URL to open workflows in browser (e.g., `http://localhost:8233`) |
 
-### Example URLs
+### Example Addresses
 
-- **Docker (docker-compose):** `http://localhost:8080`
-- **Dev Server (`temporal server start-dev`):** `http://localhost:8233`
+- **Local (Docker or dev server):** `localhost:7233`
+- **Self-hosted:** `temporal.mycompany.com:7233`
+- **Temporal Cloud:** `namespace.accountid.tmprl.cloud:7233`
+
+### Web UI URLs (Optional)
+
+Set a Web UI URL to enable "Open in Temporal UI" (Cmd+O) for workflows:
+
+- **Local dev server:** `http://localhost:8233`
+- **Docker compose:** `http://localhost:8080`
 - **Temporal Cloud:** `https://cloud.temporal.io`
 
 ### Multiple Connections
@@ -134,19 +138,18 @@ When you have multiple connections configured, a cluster switcher appears in the
 | Action | Shortcut |
 |--------|----------|
 | View Details | `Enter` |
+| Copy Schedule ID | `Cmd + .` |
 | Trigger Now | `Cmd + T` |
 | Pause | `Cmd + P` |
 | Unpause | `Cmd + U` |
 | Delete | `Cmd + Shift + Backspace` |
 | Refresh | `Cmd + R` |
 
-### Batch Operations
-| Action | Shortcut |
-|--------|----------|
-| Execute | `Enter` |
-| Preview Count | `Cmd + P` |
-
 ## Requirements
 
 - [Raycast](https://raycast.com/) for macOS
 - A running Temporal server (self-hosted, Docker, or Temporal Cloud)
+
+## Author
+
+Built by [Nikolay Kolibarov](https://github.com/nikolaykolibarov) at [Applause Lab](https://www.applauselab.ai).

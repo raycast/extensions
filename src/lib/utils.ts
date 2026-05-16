@@ -1,11 +1,17 @@
-import { Color, Icon, getPreferenceValues } from "@raycast/api";
-import { Preferences, WorkflowInfo, WorkflowStatus, WORKFLOW_STATUS_CONFIG } from "./types";
+import { Color, Icon } from "@raycast/api";
+import { WorkflowInfo, WorkflowStatus, WORKFLOW_STATUS_CONFIG } from "./types";
+import { getCurrentCluster, getCurrentNamespace } from "./temporal-client";
 
 /**
  * Format a duration in milliseconds to a human-readable string
  */
 export function formatDuration(ms: number): string {
-  if (ms < 0) return "0s";
+  if (ms < 0) return "0ms";
+
+  // Handle sub-second durations
+  if (ms < 1000) {
+    return `${Math.round(ms)}ms`;
+  }
 
   const seconds = Math.floor(ms / 1000);
   const minutes = Math.floor(seconds / 60);
@@ -125,13 +131,14 @@ function escapeQueryValue(value: string): string {
 
 /**
  * Build a URL to the Temporal UI for a workflow
+ * Uses the current cluster's webUiUrl and namespace
  */
 export function buildTemporalUiUrl(workflowId: string, runId?: string): string | undefined {
-  const prefs = getPreferenceValues<Preferences>();
-  if (!prefs.temporalUiUrl) return undefined;
+  const cluster = getCurrentCluster();
+  if (!cluster.webUiUrl) return undefined;
 
-  const baseUrl = prefs.temporalUiUrl.replace(/\/$/, "");
-  const namespace = prefs.namespace;
+  const baseUrl = cluster.webUiUrl.replace(/\/$/, "");
+  const namespace = getCurrentNamespace();
 
   // Format: {baseUrl}/namespaces/{namespace}/workflows/{workflowId}/{runId}
   let url = `${baseUrl}/namespaces/${encodeURIComponent(namespace)}/workflows/${encodeURIComponent(workflowId)}`;

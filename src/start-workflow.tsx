@@ -8,17 +8,22 @@ import {
   Icon,
   LocalStorage,
 } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import {
   startWorkflow,
-  getCurrentNamespace,
-  getCurrentCluster,
+  listNamespaces,
   getClusters,
   setCurrentCluster,
   setCurrentNamespace,
 } from "./lib/temporal-client";
-import { getSelectedCluster, getSelectedNamespace } from "./lib/storage";
+import {
+  getSelectedCluster,
+  getSelectedNamespace,
+  setSelectedCluster,
+  setSelectedNamespace,
+} from "./lib/storage";
+import { NamespaceInfo } from "./lib/types";
 
 const LAST_WORKFLOW_CONFIG_KEY = "lastWorkflowConfig";
 
@@ -36,11 +41,29 @@ export default function StartWorkflow() {
   const [input, setInput] = useState("");
   const [inputError, setInputError] = useState<string | undefined>();
   const [initialized, setInitialized] = useState(false);
+  const [selectedClusterName, setSelectedClusterName] = useState<string>("");
+  const [selectedNamespaceState, setSelectedNamespaceState] = useState<string>("");
 
   // Load clusters from storage
   const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
     keepPreviousData: true,
   });
+
+  // Fetch namespaces for selected cluster
+  const { data: namespaces = [], isLoading: namespacesLoading } = useCachedPromise(
+    async (clusterName: string) => {
+      if (!clusterName) return [];
+      try {
+        return await listNamespaces();
+      } catch {
+        // If we can't list namespaces, return just the cluster default
+        const cluster = clusters.find((c) => c.name === clusterName);
+        return [{ name: cluster?.namespace || "default", state: "Registered" }] as NamespaceInfo[];
+      }
+    },
+    [selectedClusterName],
+    { keepPreviousData: true }
+  );
 
   // Initialize cluster and namespace, then load last config
   useEffect(() => {
@@ -54,11 +77,13 @@ export default function StartWorkflow() {
           ? storedCluster
           : clusters[0]?.name || "Local";
       const cluster = clusters.find((c) => c.name === clusterName) || clusters[0];
+      setSelectedClusterName(clusterName);
       setCurrentCluster(cluster);
 
       // Initialize namespace
       const storedNamespace = await getSelectedNamespace();
       const ns = storedNamespace || cluster?.namespace || "default";
+      setSelectedNamespaceState(ns);
       setCurrentNamespace(ns);
 
       // Load last used config
@@ -77,6 +102,37 @@ export default function StartWorkflow() {
     }
     init();
   }, [clusters]);
+
+  // Handle cluster change
+  const handleClusterChange = useCallback(
+    (clusterName: string) => {
+      const cluster = clusters.find((c) => c.name === clusterName);
+      if (!cluster) return;
+
+      // Reset namespace to cluster default
+      const ns = cluster.namespace || "default";
+
+      // Update React state
+      setSelectedClusterName(clusterName);
+      setSelectedNamespaceState(ns);
+
+      // Set module-level state (invalidates client cache)
+      setCurrentCluster(cluster);
+      setCurrentNamespace(ns);
+
+      // Persist to storage
+      setSelectedCluster(clusterName);
+      setSelectedNamespace(ns);
+    },
+    [clusters]
+  );
+
+  // Handle namespace change
+  const handleNamespaceChange = useCallback((namespace: string) => {
+    setSelectedNamespaceState(namespace);
+    setCurrentNamespace(namespace);
+    setSelectedNamespace(namespace);
+  }, []);
 
   const validateInput = (value: string) => {
     if (!value.trim()) {
@@ -172,13 +228,30 @@ export default function StartWorkflow() {
     }
   };
 
-  const cluster = getCurrentCluster();
-  const namespace = getCurrentNamespace();
-  const clusterInfo = clusters.length > 1 ? `${cluster.name} / ${namespace}` : namespace;
+  // Ensure we have at least the selected namespace in the list
+  const effectiveNamespaces = (() => {
+    if (namespaces.length === 0) {
+      const cluster = clusters.find((c) => c.name === selectedClusterName);
+      return [
+        {
+          name: cluster?.namespace || selectedNamespaceState || "default",
+          state: "Registered",
+        } as NamespaceInfo,
+      ];
+    }
+    const nsSet = new Set(namespaces.map((ns) => ns.name));
+    if (selectedNamespaceState && !nsSet.has(selectedNamespaceState)) {
+      return [
+        { name: selectedNamespaceState, state: "Registered" } as NamespaceInfo,
+        ...namespaces,
+      ];
+    }
+    return namespaces;
+  })();
 
   return (
     <Form
-      isLoading={isLoading || clustersLoading || !initialized}
+      isLoading={isLoading || clustersLoading || namespacesLoading || !initialized}
       navigationTitle="Start Workflow"
       actions={
         <ActionPanel>
@@ -186,10 +259,34 @@ export default function StartWorkflow() {
         </ActionPanel>
       }
     >
-      <Form.Description
-        title={clusters.length > 1 ? "Cluster / Namespace" : "Namespace"}
-        text={clusterInfo}
-      />
+      {clusters.length > 1 && (
+        <Form.Dropdown
+          id="cluster"
+          title="Cluster"
+          value={selectedClusterName}
+          onChange={handleClusterChange}
+        >
+          {clusters.map((cluster) => (
+            <Form.Dropdown.Item
+              key={cluster.name}
+              value={cluster.name}
+              title={cluster.name}
+              icon={cluster.connectionType === "cloud" ? Icon.Cloud : Icon.Globe}
+            />
+          ))}
+        </Form.Dropdown>
+      )}
+
+      <Form.Dropdown
+        id="namespace"
+        title="Namespace"
+        value={selectedNamespaceState}
+        onChange={handleNamespaceChange}
+      >
+        {effectiveNamespaces.map((ns) => (
+          <Form.Dropdown.Item key={ns.name} value={ns.name} title={ns.name} />
+        ))}
+      </Form.Dropdown>
 
       <Form.Separator />
 

@@ -16,8 +16,10 @@ const MAX_RECENT_WORKFLOWS = 10;
  */
 const DEFAULT_CLUSTER: ClusterConfig = {
   name: "Local",
-  url: "http://localhost:8080",
+  address: "localhost:7233",
   namespace: "default",
+  connectionType: "local",
+  webUiUrl: "http://localhost:8233",
 };
 
 /**
@@ -35,14 +37,49 @@ export async function getClustersFromStorage(): Promise<ClusterConfig[]> {
 
   try {
     const clusters = JSON.parse(stored) as ClusterConfig[];
-    // Validate clusters have required fields
-    const valid = clusters.filter((c) => c && c.name && c.url && c.namespace);
-    if (valid.length === 0) {
+    // Validate and migrate clusters
+    const migrated = clusters
+      .filter((c) => c && c.name && c.namespace)
+      .map((c) => {
+        // Migrate old format (url) to new format (address)
+        if (!c.address && (c as { url?: string }).url) {
+          const oldUrl = (c as { url?: string }).url!;
+          // Extract host from URL, default to gRPC port
+          try {
+            const url = new URL(oldUrl);
+            return {
+              ...c,
+              address: `${url.hostname}:7233`,
+              connectionType: c.connectionType || "local",
+            } as ClusterConfig;
+          } catch {
+            return {
+              ...c,
+              address: "localhost:7233",
+              connectionType: "local",
+            } as ClusterConfig;
+          }
+        }
+        // Ensure connectionType has a default
+        return {
+          ...c,
+          connectionType: c.connectionType || "local",
+        } as ClusterConfig;
+      });
+
+    if (migrated.length === 0) {
       // Invalid data - reset to default
       await saveClustersToStorage([DEFAULT_CLUSTER]);
       return [DEFAULT_CLUSTER];
     }
-    return valid;
+
+    // Save migrated data if any migration occurred
+    const needsMigration = clusters.some((c) => !c.address && (c as { url?: string }).url);
+    if (needsMigration) {
+      await saveClustersToStorage(migrated);
+    }
+
+    return migrated;
   } catch {
     // Parse error - reset to default
     await saveClustersToStorage([DEFAULT_CLUSTER]);

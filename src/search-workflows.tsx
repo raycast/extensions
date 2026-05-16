@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { List, Icon, Action, ActionPanel, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
@@ -48,15 +48,17 @@ export default function SearchWorkflows() {
   const [selectedClusterName, setSelectedClusterName] = useState<string>("");
   const [selectedNamespace, setSelectedNamespaceState] = useState<string>("");
   const [recentWorkflows, setRecentWorkflows] = useState<RecentWorkflow[]>([]);
+  const isInitializedRef = useRef(false);
 
   // Load clusters from storage
   const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
     keepPreviousData: true,
   });
 
-  // Initialize cluster and namespace from storage
+  // Initialize cluster and namespace from storage (only once)
   useEffect(() => {
-    if (clusters.length === 0) return;
+    if (clusters.length === 0 || isInitializedRef.current) return;
+    isInitializedRef.current = true;
 
     async function init() {
       // Get stored cluster or use first one
@@ -80,11 +82,7 @@ export default function SearchWorkflows() {
   }, [clusters]);
 
   // Fetch namespaces for selected cluster
-  const {
-    data: namespaces,
-    isLoading: namespacesLoading,
-    revalidate: revalidateNamespaces,
-  } = useCachedPromise(
+  const { data: namespaces, isLoading: namespacesLoading } = useCachedPromise(
     async (clusterName: string) => {
       if (!clusterName) return [];
       try {
@@ -116,30 +114,42 @@ export default function SearchWorkflows() {
 
   // Handle cluster change
   const handleClusterChange = useCallback(
-    async (clusterName: string) => {
-      const cluster = clusters.find((c) => c.name === clusterName);
-      if (!cluster) return;
+    (clusterName: string) => {
+      try {
+        const cluster = clusters.find((c) => c.name === clusterName);
+        if (!cluster) {
+          return;
+        }
 
-      setSelectedClusterName(clusterName);
-      setCurrentCluster(cluster);
-      await setSelectedCluster(clusterName);
+        // Reset namespace to cluster default
+        const ns = cluster.namespace || "default";
 
-      // Reset namespace to cluster default
-      const ns = cluster.namespace || "default";
-      setSelectedNamespaceState(ns);
-      setCurrentNamespace(ns);
-      await setSelectedNamespace(ns);
+        // Update React state (triggers re-render)
+        setSelectedClusterName(clusterName);
+        setSelectedNamespaceState(ns);
 
-      // Refresh namespaces for new cluster
-      revalidateNamespaces();
+        // Set module-level state (invalidates client cache)
+        setCurrentCluster(cluster);
+        setCurrentNamespace(ns);
 
-      await showToast({
-        style: Toast.Style.Success,
-        title: "Cluster Changed",
-        message: `${clusterName} / ${ns}`,
-      });
+        // Persist to storage (fire and forget)
+        setSelectedCluster(clusterName);
+        setSelectedNamespace(ns);
+
+        showToast({
+          style: Toast.Style.Success,
+          title: "Cluster Changed",
+          message: `${clusterName} / ${ns}`,
+        });
+      } catch (error) {
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to switch cluster",
+          message: error instanceof Error ? error.message : String(error),
+        });
+      }
     },
-    [clusters, revalidateNamespaces]
+    [clusters]
   );
 
   // Handle namespace change
@@ -161,12 +171,12 @@ export default function SearchWorkflows() {
     error,
     revalidate,
   } = useCachedPromise(
-    async (query: string, status: string, namespace: string) => {
-      if (!namespace) return [];
+    async (clusterName: string, namespace: string, query: string, status: string) => {
+      if (!clusterName || !namespace) return [];
       const searchQuery = buildSearchQuery(query, status);
-      return listWorkflows(searchQuery, namespace);
+      return listWorkflows(searchQuery);
     },
-    [searchText, statusFilter, selectedNamespace],
+    [selectedClusterName, selectedNamespace, searchText, statusFilter],
     {
       keepPreviousData: true,
       onError: showConnectionError,
@@ -230,7 +240,7 @@ export default function SearchWorkflows() {
         <List.EmptyView
           icon={Icon.ExclamationMark}
           title="Connection Error"
-          description={`Could not connect to Temporal at ${getCurrentCluster().url}. Please check your settings.`}
+          description={`Could not connect to Temporal at ${getCurrentCluster().address}. Please check your settings.`}
           actions={
             <ActionPanel>
               <Action.Push
@@ -323,7 +333,6 @@ function CombinedDropdown({
     const [cluster, ns, status] = value.split("|");
     if (cluster !== selectedCluster) {
       onClusterChange(cluster);
-      // Don't process namespace/status changes - cluster change resets them
       return;
     }
     if (ns !== selectedNamespace) {
@@ -334,8 +343,25 @@ function CombinedDropdown({
     }
   };
 
-  // Show clusters as top-level sections if multiple clusters
   const hasMultipleClusters = clusters.length > 1;
+
+  // Ensure we have at least the selected namespace in the list
+  const effectiveNamespaces = (() => {
+    if (namespaces.length === 0) {
+      const cluster = clusters.find((c) => c.name === selectedCluster);
+      return [
+        {
+          name: cluster?.namespace || selectedNamespace || "default",
+          state: "Registered",
+        } as NamespaceInfo,
+      ];
+    }
+    const nsSet = new Set(namespaces.map((ns) => ns.name));
+    if (selectedNamespace && !nsSet.has(selectedNamespace)) {
+      return [{ name: selectedNamespace, state: "Registered" } as NamespaceInfo, ...namespaces];
+    }
+    return namespaces;
+  })();
 
   if (hasMultipleClusters) {
     return (
@@ -344,31 +370,31 @@ function CombinedDropdown({
         value={combinedValue}
         onChange={handleChange}
       >
-        {clusters.map((cluster) => (
-          <List.Dropdown.Section key={cluster.name} title={`📍 ${cluster.name}`}>
-            {cluster.name === selectedCluster ? (
-              // Show namespaces and statuses for selected cluster
-              namespaces.map((ns) => (
-                <List.Dropdown.Section key={`${cluster.name}-${ns.name}`} title={`  ${ns.name}`}>
-                  {STATUS_FILTERS.map((filter) => (
-                    <List.Dropdown.Item
-                      key={`${cluster.name}|${ns.name}|${filter.value}`}
-                      title={`    ${filter.title}`}
-                      value={`${cluster.name}|${ns.name}|${filter.value}`}
-                    />
-                  ))}
-                </List.Dropdown.Section>
-              ))
-            ) : (
-              // Just show a switch option for other clusters
+        {/* Current cluster section with namespaces and status filters */}
+        <List.Dropdown.Section title={`📍 ${selectedCluster}`}>
+          {effectiveNamespaces.flatMap((ns) =>
+            STATUS_FILTERS.map((filter) => (
               <List.Dropdown.Item
-                key={`${cluster.name}|switch`}
-                title="  Switch to this cluster..."
-                value={`${cluster.name}|${cluster.namespace || "default"}|all`}
+                key={`${selectedCluster}-${ns.name}-${filter.value}`}
+                title={`${ns.name} / ${filter.title}`}
+                value={`${selectedCluster}|${ns.name}|${filter.value}`}
               />
-            )}
-          </List.Dropdown.Section>
-        ))}
+            ))
+          )}
+        </List.Dropdown.Section>
+
+        {/* Other clusters - just switch option */}
+        {clusters
+          .filter((c) => c.name !== selectedCluster)
+          .map((cluster) => (
+            <List.Dropdown.Section key={`section-${cluster.name}`} title={`📍 ${cluster.name}`}>
+              <List.Dropdown.Item
+                key={`switch-${cluster.name}`}
+                title={`Switch to ${cluster.name}`}
+                value={`${cluster.name}|${cluster.namespace}|all`}
+              />
+            </List.Dropdown.Section>
+          ))}
       </List.Dropdown>
     );
   }
@@ -376,17 +402,15 @@ function CombinedDropdown({
   // Single cluster - simpler dropdown with just namespace/status
   return (
     <List.Dropdown tooltip="Namespace & Status" value={combinedValue} onChange={handleChange}>
-      {namespaces.map((ns) => (
-        <List.Dropdown.Section key={ns.name} title={ns.name}>
-          {STATUS_FILTERS.map((filter) => (
-            <List.Dropdown.Item
-              key={`${selectedCluster}|${ns.name}|${filter.value}`}
-              title={filter.title}
-              value={`${selectedCluster}|${ns.name}|${filter.value}`}
-            />
-          ))}
-        </List.Dropdown.Section>
-      ))}
+      {effectiveNamespaces.flatMap((ns) =>
+        STATUS_FILTERS.map((filter) => (
+          <List.Dropdown.Item
+            key={`${selectedCluster}-${ns.name}-${filter.value}`}
+            title={`${ns.name} / ${filter.title}`}
+            value={`${selectedCluster}|${ns.name}|${filter.value}`}
+          />
+        ))
+      )}
     </List.Dropdown>
   );
 }
@@ -407,7 +431,7 @@ function WorkflowListItem({ workflow, onRefresh, onView }: WorkflowListItemProps
   return (
     <List.Item
       title={workflow.type}
-      subtitle={truncate(workflow.workflowId, 40)}
+      subtitle={truncate(workflow.workflowId, 28)}
       icon={{ source: statusIcon, tintColor: statusColor }}
       accessories={[
         { text: duration, tooltip: `Duration: ${duration}` },
@@ -437,7 +461,7 @@ function RecentWorkflowItem({ recent, onRefresh, onView }: RecentWorkflowItemPro
   return (
     <List.Item
       title={recent.type}
-      subtitle={truncate(recent.workflowId, 40)}
+      subtitle={truncate(recent.workflowId, 28)}
       icon={Icon.Clock}
       accessories={[
         {
