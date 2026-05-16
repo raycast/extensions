@@ -1,6 +1,6 @@
 # GitHub Trending Changelog
 
-## [Improve README Rendering] - {PR_MERGE_DATE}
+## [Improve README Rendering] - 2026-05-16
 
 - Convert README HTML to Markdown for better rendering in Raycast
 
