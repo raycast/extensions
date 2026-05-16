@@ -1,22 +1,10 @@
-import { LaunchProps } from "@raycast/api";
-import { Action, ActionPanel, List } from "@raycast/api";
-import { usePostHogClient } from "../helpers/usePostHogClient";
-import { useUrl } from "../helpers/useUrl";
-import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
+import { Action, ActionPanel, LaunchProps, List } from "@raycast/api";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useContext } from "react";
 
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: Person[];
-};
-
-type Person = {
-  id: number;
-  name: string;
-  distinct_ids: string[];
-};
+import { ProjectSelector, ProjectsContext, WithProjects } from "../helpers/ProjectsContext";
+import { useUrl } from "../helpers/useUrl";
+import { Person, searchPersons } from "./api/persons";
 
 export type PersonsArguments = {
   term: string;
@@ -24,8 +12,14 @@ export type PersonsArguments = {
 
 function Persons({ searchTerm }: { searchTerm: string }) {
   const { selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>(
-    "projects/" + selectedId + "/persons?search=" + searchTerm
+  const { data, isLoading } = useCachedPromise(
+    (id: string, term: string) => searchPersons(id, term).then((r) => r.results),
+    [selectedId ?? "", searchTerm],
+    {
+      execute: !!selectedId,
+      keepPreviousData: true,
+      onError: (e) => showFailureToast(e, { title: "Couldn't search persons" }),
+    },
   );
 
   return (
@@ -37,8 +31,8 @@ function Persons({ searchTerm }: { searchTerm: string }) {
     >
       {data ? (
         <List.Section title="Results">
-          {data.results.map((person) => (
-            <ResultsListSection key={person.id} person={person} />
+          {data.map((person) => (
+            <PersonItem key={person.id} person={person} />
           ))}
         </List.Section>
       ) : null}
@@ -46,10 +40,9 @@ function Persons({ searchTerm }: { searchTerm: string }) {
   );
 }
 
-const ResultsListSection = ({ person }: { person: Person }) => {
+function PersonItem({ person }: { person: Person }) {
   const originalId = person.distinct_ids[person.distinct_ids.length - 1];
   const appUrl = useUrl(`person/${originalId}`);
-
   return (
     <List.Item
       key={person.id}
@@ -70,7 +63,7 @@ const ResultsListSection = ({ person }: { person: Person }) => {
       }
     />
   );
-};
+}
 
 export default function Command(props: LaunchProps<{ arguments: PersonsArguments }>) {
   return (

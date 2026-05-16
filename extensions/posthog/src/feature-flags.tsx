@@ -1,24 +1,22 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { usePostHogClient } from "../helpers/usePostHogClient";
-import { useUrl } from "../helpers/useUrl";
-import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useContext } from "react";
 
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: FeatureFlag[];
-};
-
-type FeatureFlag = {
-  id: number;
-  key: string;
-};
+import { ProjectSelector, ProjectsContext, WithProjects } from "../helpers/ProjectsContext";
+import { useUrl } from "../helpers/useUrl";
+import { FeatureFlag, listFeatureFlags } from "./api/flags";
 
 function FeatureFlags() {
   const { selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/feature_flags");
+  const { data, isLoading } = useCachedPromise(
+    (id: string) => listFeatureFlags(id).then((r) => r.results),
+    [selectedId ?? ""],
+    {
+      execute: !!selectedId,
+      keepPreviousData: true,
+      onError: (e) => showFailureToast(e, { title: "Couldn't load feature flags" }),
+    },
+  );
 
   return (
     <List
@@ -29,8 +27,8 @@ function FeatureFlags() {
     >
       {data ? (
         <List.Section title="Results">
-          {data.results.map((featureFlag) => (
-            <ResultsListSection key={featureFlag.id} featureFlag={featureFlag} />
+          {data.map((featureFlag) => (
+            <FeatureFlagItem key={featureFlag.id} featureFlag={featureFlag} />
           ))}
         </List.Section>
       ) : null}
@@ -38,9 +36,8 @@ function FeatureFlags() {
   );
 }
 
-const ResultsListSection = ({ featureFlag }: { featureFlag: FeatureFlag }) => {
+function FeatureFlagItem({ featureFlag }: { featureFlag: FeatureFlag }) {
   const appUrl = useUrl(`feature_flags/${featureFlag.id}`);
-
   return (
     <List.Item
       key={featureFlag.id}
@@ -61,7 +58,7 @@ const ResultsListSection = ({ featureFlag }: { featureFlag: FeatureFlag }) => {
       }
     />
   );
-};
+}
 
 export default function Command() {
   return (

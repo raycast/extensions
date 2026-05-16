@@ -1,21 +1,14 @@
-import { ReactNode, createContext, useContext, useState } from "react";
-import { usePostHogClient } from "./usePostHogClient";
 import { List } from "@raycast/api";
-import ErrorHandler from "../src/error-handler";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
+import { ReactNode, createContext, useContext, useState } from "react";
 
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: Project[];
+import { listProjects, Project } from "../src/api/projects";
+
+type ProjectContextType = {
+  projects: Project[];
+  selectedId: string | null;
+  setSelectedId: (id: string) => void;
 };
-
-type Project = {
-  id: number;
-  name: string;
-};
-
-type ProjectContextType = { projects: Project[]; selectedId: string | null; setSelectedId: (id: string) => void };
 
 export const ProjectsContext = createContext<ProjectContextType>({
   projects: [],
@@ -24,21 +17,26 @@ export const ProjectsContext = createContext<ProjectContextType>({
 });
 
 export function WithProjects({ children }: { children: ReactNode }) {
-  const { data, isLoading, error } = usePostHogClient<SearchResult>("projects");
+  const { data, isLoading, error } = useCachedPromise(async () => (await listProjects()).results, [], {
+    keepPreviousData: true,
+    onError: (e) => showFailureToast(e, { title: "Couldn't load PostHog projects" }),
+  });
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  if (!data && isLoading) {
-    return <List isLoading={true}></List>;
+  if (error) {
+    return (
+      <List>
+        <List.EmptyView title="Check your API key and data region" description={error.message} />
+      </List>
+    );
   }
 
+  if (!data && isLoading) return <List isLoading={true} />;
+
   return (
-    <ErrorHandler error={error}>
-      <ProjectsContext.Provider
-        value={{ projects: data?.results || [], selectedId, setSelectedId: (id) => setSelectedId(id) }}
-      >
-        {children}
-      </ProjectsContext.Provider>
-    </ErrorHandler>
+    <ProjectsContext.Provider value={{ projects: data ?? [], selectedId, setSelectedId }}>
+      {children}
+    </ProjectsContext.Provider>
   );
 }
 

@@ -1,45 +1,35 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { usePostHogClient } from "../helpers/usePostHogClient";
-import { useUrl } from "../helpers/useUrl";
-import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useContext } from "react";
 
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: Cohort[];
-};
-
-type Cohort = {
-  id: number;
-  name: string;
-  description: string;
-  count: number;
-  deleted: boolean;
-  last_calculation: string;
-  created_at: string;
-  created_by: {
-    email: string;
-  };
-};
+import { ProjectSelector, ProjectsContext, WithProjects } from "../helpers/ProjectsContext";
+import { useUrl } from "../helpers/useUrl";
+import { Cohort, listCohorts } from "./api/cohorts";
 
 function Cohorts() {
   const { selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/cohorts");
+  const { data, isLoading } = useCachedPromise(
+    (id: string) => listCohorts(id).then((r) => r.results),
+    [selectedId ?? ""],
+    {
+      execute: !!selectedId,
+      keepPreviousData: true,
+      onError: (e) => showFailureToast(e, { title: "Couldn't load cohorts" }),
+    },
+  );
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search cohorts..."
       searchBarAccessory={<ProjectSelector />}
-      isShowingDetail={true}
+      isShowingDetail
       throttle
     >
       {data ? (
         <List.Section title="Results">
-          {data.results.map((cohort) => (
-            <ResultsListSection key={cohort.id} cohort={cohort} />
+          {data.map((cohort) => (
+            <CohortItem key={cohort.id} cohort={cohort} />
           ))}
         </List.Section>
       ) : null}
@@ -47,9 +37,8 @@ function Cohorts() {
   );
 }
 
-const ResultsListSection = ({ cohort }: { cohort: Cohort }) => {
+function CohortItem({ cohort }: { cohort: Cohort }) {
   const appUrl = useUrl(`cohorts/${cohort.id}`);
-
   return (
     <List.Item
       key={cohort.id}
@@ -66,7 +55,7 @@ const ResultsListSection = ({ cohort }: { cohort: Cohort }) => {
                   <List.Item.Detail.Metadata.Separator />
                 </>
               )}
-              {cohort.count && (
+              {cohort.count != null && (
                 <>
                   <List.Item.Detail.Metadata.Label title="Count" text={cohort.count.toString()} />
                   <List.Item.Detail.Metadata.Separator />
@@ -103,7 +92,7 @@ const ResultsListSection = ({ cohort }: { cohort: Cohort }) => {
       }
     />
   );
-};
+}
 
 export default function Command() {
   return (

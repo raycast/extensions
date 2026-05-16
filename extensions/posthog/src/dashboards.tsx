@@ -1,45 +1,35 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { usePostHogClient } from "../helpers/usePostHogClient";
-import { useUrl } from "../helpers/useUrl";
-import { WithProjects, ProjectSelector, ProjectsContext } from "../helpers/ProjectsContext";
+import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { useContext } from "react";
 
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: Dashboard[];
-};
+import { ProjectSelector, ProjectsContext, WithProjects } from "../helpers/ProjectsContext";
+import { useUrl } from "../helpers/useUrl";
+import { Dashboard, listDashboards } from "./api/dashboards";
 
-type Dashboard = {
-  id: number;
-  name: string;
-  description: string;
-  pinned: boolean;
-  is_shared: boolean;
-  deleted: boolean;
-  created_at: string;
-  created_by: {
-    email: string;
-  };
-};
-
-function Cohorts() {
+function Dashboards() {
   const { selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/dashboards");
+  const { data, isLoading } = useCachedPromise(
+    (id: string) => listDashboards(id).then((r) => r.results),
+    [selectedId ?? ""],
+    {
+      execute: !!selectedId,
+      keepPreviousData: true,
+      onError: (e) => showFailureToast(e, { title: "Couldn't load dashboards" }),
+    },
+  );
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search dashboards..."
       searchBarAccessory={<ProjectSelector />}
-      isShowingDetail={true}
+      isShowingDetail
       throttle
     >
       {data ? (
         <List.Section title="Results">
-          {data.results.map((dashboard) => (
-            <ResultsListSection key={dashboard.id} dashboard={dashboard} />
+          {data.map((dashboard) => (
+            <DashboardItem key={dashboard.id} dashboard={dashboard} />
           ))}
         </List.Section>
       ) : null}
@@ -47,9 +37,8 @@ function Cohorts() {
   );
 }
 
-const ResultsListSection = ({ dashboard }: { dashboard: Dashboard }) => {
+function DashboardItem({ dashboard }: { dashboard: Dashboard }) {
   const appUrl = useUrl(`dashboard/${dashboard.id}`);
-
   return (
     <List.Item
       key={dashboard.id}
@@ -99,12 +88,12 @@ const ResultsListSection = ({ dashboard }: { dashboard: Dashboard }) => {
       }
     />
   );
-};
+}
 
 export default function Command() {
   return (
     <WithProjects>
-      <Cohorts />
+      <Dashboards />
     </WithProjects>
   );
 }

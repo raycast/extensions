@@ -2,7 +2,7 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "posthog",
   "title": "PostHog",
-  "description": "Open the web app, search for projects, persons, feature flags, and cohorts.",
+  "description": "Search insights, errors, experiments, surveys, feature flags, cohorts, and more \u2014 and put PostHog at the fingertips of Raycast AI.",
   "icon": "posthog-logo.png",
   "author": "david_newell",
   "owner": "posthog",
@@ -50,6 +50,44 @@
       "title": "Projects",
       "description": "List and open your projects.",
       "mode": "view"
+    },
+    {
+      "name": "insights",
+      "title": "Insights",
+      "description": "Search insights and open them in the web app.",
+      "mode": "view"
+    },
+    {
+      "name": "errors",
+      "title": "Errors",
+      "description": "Browse active error tracking issues.",
+      "mode": "view"
+    },
+    {
+      "name": "experiments",
+      "title": "Experiments",
+      "description": "List experiments and their status.",
+      "mode": "view"
+    },
+    {
+      "name": "surveys",
+      "title": "Surveys",
+      "description": "Browse surveys and open them in the web app.",
+      "mode": "view"
+    },
+    {
+      "name": "events",
+      "title": "Search Events",
+      "description": "Search event definitions in your project.",
+      "arguments": [
+        {
+          "name": "query",
+          "placeholder": "Event name...",
+          "type": "text",
+          "required": false
+        }
+      ],
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -70,35 +108,482 @@
       "description": "The region where your PostHog account is hosted.",
       "data": [
         {
-          "title": "US",
-          "value": "https://app.posthog.com"
+          "title": "US Cloud (us.posthog.com)",
+          "value": "https://us.posthog.com"
         },
         {
-          "title": "EU",
+          "title": "EU Cloud (eu.posthog.com)",
           "value": "https://eu.posthog.com"
+        },
+        {
+          "title": "Legacy US (app.posthog.com)",
+          "value": "https://app.posthog.com"
         }
       ],
       "placeholder": "Pick a region"
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.54.1",
-    "@raycast/utils": "^1.8.0",
-    "axios": "^1.8.4"
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "1.0.5",
-    "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
-    "eslint": "^7.32.0",
-    "prettier": "^2.5.1",
-    "typescript": "^4.4.3"
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "^22.14.1",
+    "@types/react": "^19.1.2",
+    "eslint": "^9.24.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
+  },
+  "tools": [
+    {
+      "name": "add-insight-to-dashboard",
+      "title": "Add Insight to Dashboard",
+      "description": "Add an existing insight to a dashboard."
+    },
+    {
+      "name": "create-feature-flag",
+      "title": "Create Feature Flag",
+      "description": "Creates a new feature flag in the project."
+    },
+    {
+      "name": "dashboard-create",
+      "title": "Create Dashboard",
+      "description": "Create a new dashboard in the project."
+    },
+    {
+      "name": "dashboard-delete",
+      "title": "Delete Dashboard",
+      "description": "Delete a dashboard by ID."
+    },
+    {
+      "name": "dashboard-get",
+      "title": "Get Dashboard",
+      "description": "Get a specific dashboard by ID, including insights that are on the dashboard."
+    },
+    {
+      "name": "dashboard-update",
+      "title": "Update Dashboard",
+      "description": "Update an existing dashboard by ID."
+    },
+    {
+      "name": "dashboards-get-all",
+      "title": "Get All Dashboards",
+      "description": "Get all dashboards in the project with optional filtering."
+    },
+    {
+      "name": "delete-feature-flag",
+      "title": "Delete Feature Flag",
+      "description": "Delete a feature flag in the project."
+    },
+    {
+      "name": "docs-search",
+      "title": "Search Docs",
+      "description": "Search the PostHog documentation for information."
+    },
+    {
+      "name": "error-details",
+      "title": "Get Error Details",
+      "description": "Get the details of an error in the project."
+    },
+    {
+      "name": "event-definitions-list",
+      "title": "List All Events",
+      "description": "List all event definitions in the project with optional filtering."
+    },
+    {
+      "name": "experiment-create",
+      "title": "Create Experiment",
+      "description": "Create A/B test experiment with guided metric and feature flag setup"
+    },
+    {
+      "name": "experiment-delete",
+      "title": "Delete Experiment",
+      "description": "Delete an experiment by ID."
+    },
+    {
+      "name": "experiment-get",
+      "title": "Get Experiment Details",
+      "description": "Get details of a specific experiment."
+    },
+    {
+      "name": "experiment-get-all",
+      "title": "Get All Experiments",
+      "description": "Get all experiments in the project."
+    },
+    {
+      "name": "experiment-results-get",
+      "title": "Get Experiment Results",
+      "description": "Get comprehensive experiment results including metrics and exposure data."
+    },
+    {
+      "name": "experiment-update",
+      "title": "Update Experiment",
+      "description": "Update an existing experiment with lifecycle management and restart capability."
+    },
+    {
+      "name": "feature-flag-get-all",
+      "title": "Get All Feature Flags",
+      "description": "Get all feature flags in the project."
+    },
+    {
+      "name": "feature-flag-get-definition",
+      "title": "Get Feature Flag Definition",
+      "description": "Get the definition of a feature flag."
+    },
+    {
+      "name": "get-llm-total-costs-for-project",
+      "title": "Get LLM Costs",
+      "description": "Fetches the total LLM daily costs for each model for a project over a given number of days."
+    },
+    {
+      "name": "insight-create-from-query",
+      "title": "Create Insight from Query",
+      "description": "Save a query as an insight."
+    },
+    {
+      "name": "insight-delete",
+      "title": "Delete Insight",
+      "description": "Delete an insight by ID."
+    },
+    {
+      "name": "insight-get",
+      "title": "Get Insight",
+      "description": "Get a specific insight by ID."
+    },
+    {
+      "name": "insight-query",
+      "title": "Query Insight",
+      "description": "Execute a query on an existing insight to get its results/data."
+    },
+    {
+      "name": "insight-update",
+      "title": "Update Insight",
+      "description": "Update an existing insight by ID."
+    },
+    {
+      "name": "insights-get-all",
+      "title": "Get All Insights",
+      "description": "Get all insights in the project with optional filtering."
+    },
+    {
+      "name": "list-errors",
+      "title": "List Errors",
+      "description": "List errors in the project."
+    },
+    {
+      "name": "organization-details-get",
+      "title": "Get Organization Details",
+      "description": "Get the details of the active organization."
+    },
+    {
+      "name": "organizations-get",
+      "title": "Get Organizations",
+      "description": "Get the organizations the user has access to."
+    },
+    {
+      "name": "projects-get",
+      "title": "Get Projects",
+      "description": "Fetches projects that the user has access to in the current organization."
+    },
+    {
+      "name": "properties-list",
+      "title": "Get Properties",
+      "description": "Get properties for events or persons."
+    },
+    {
+      "name": "property-definitions",
+      "title": "Get Property Definitions",
+      "description": "Get event and property definitions for the project."
+    },
+    {
+      "name": "query-generate-hogql-from-question",
+      "title": "Generate SQL",
+      "description": "Queries project's PostHog data based on a provided natural language question."
+    },
+    {
+      "name": "query-run",
+      "title": "Run Query",
+      "description": "Run a trend, funnel or HogQL query."
+    },
+    {
+      "name": "query-trend",
+      "title": "Run Trend Query",
+      "description": "Chart counts of a single event over time, optionally broken down by a property."
+    },
+    {
+      "name": "survey-create",
+      "title": "Create Survey",
+      "description": "Creates a new survey in the project."
+    },
+    {
+      "name": "survey-delete",
+      "title": "Delete Survey",
+      "description": "Delete a survey by ID."
+    },
+    {
+      "name": "survey-get",
+      "title": "Get Survey",
+      "description": "Get a specific survey by ID."
+    },
+    {
+      "name": "survey-stats",
+      "title": "Get Survey Response Stats",
+      "description": "Get response statistics for a specific survey."
+    },
+    {
+      "name": "survey-update",
+      "title": "Update Survey",
+      "description": "Update an existing survey by ID."
+    },
+    {
+      "name": "surveys-get-all",
+      "title": "Get All Surveys",
+      "description": "Get all surveys in the project with optional filtering."
+    },
+    {
+      "name": "surveys-global-stats",
+      "title": "Get All Survey Response Stats",
+      "description": "Get aggregated response statistics across all surveys."
+    },
+    {
+      "name": "switch-organization",
+      "title": "Switch Active Organization",
+      "description": "Change the active organization from the default organization."
+    },
+    {
+      "name": "switch-project",
+      "title": "Switch Active Project",
+      "description": "Change the active project from the default project."
+    },
+    {
+      "name": "update-feature-flag",
+      "title": "Update Feature Flag",
+      "description": "Update a feature flag in the project."
+    }
+  ],
+  "ai": {
+    "instructions": "You are exposing PostHog's analytics, feature flags, error tracking, experiments, surveys, insights, and data warehouse tools to Raycast users.\n\n- Always format insight, dashboard, flag, experiment, error, and survey names as markdown links to their PostHog URL (the tools return a `url` field).\n- Use IDs (not names) when calling tools that take IDs. Resolve names to IDs with the corresponding `*-get-all` tool first.\n- For analytics questions: pick the right query tool.\n  - For 'how many of event X over time' questions, use `query-trend` \u2014 pass `event`, optional `dateFrom` and `breakdown`.\n  - For everything else (counts of distinct users, GROUP BY, JOIN, aggregations), use `query-run` and write HogQL yourself. HogQL is ClickHouse-flavored SQL. The `events` table has columns `timestamp`, `event`, `person_id`, `distinct_id`, `properties` (JSON map \u2014 access via `properties.$browser`).\n  - `query-generate-hogql-from-question` exists but typically 403s on Cloud projects without Max AI. Don't bother \u2014 write the HogQL yourself.\n- Default a vague time range to the last 7 days.\n- The tools operate on a single active project. Call `switch-project` to change it.\n- Most list tools return a `truncated` boolean \u2014 mention to the user when results are truncated.\n- Do NOT call any `*-delete` tool unless the user has explicitly asked for the deletion.",
+    "evals": [
+      {
+        "input": "@posthog what are my active feature flags",
+        "mocks": {
+          "feature-flag-get-all": {
+            "truncated": false,
+            "total": 0,
+            "flags": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "feature-flag-get-all"
+          }
+        ]
+      },
+      {
+        "input": "@posthog list my dashboards",
+        "mocks": {
+          "dashboards-get-all": {
+            "truncated": false,
+            "total": 0,
+            "dashboards": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "dashboards-get-all"
+          }
+        ]
+      },
+      {
+        "input": "@posthog show me errors from today",
+        "mocks": {
+          "list-errors": {
+            "truncated": false,
+            "total": 0,
+            "issues": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "list-errors"
+          }
+        ]
+      },
+      {
+        "input": "@posthog what's our DAU this week",
+        "mocks": {
+          "query-generate-hogql-from-question": {
+            "hogql": "SELECT count(DISTINCT person_id) FROM events WHERE timestamp > now() - INTERVAL 7 DAY"
+          },
+          "query-run": {
+            "results": [
+              [
+                1234
+              ]
+            ],
+            "columns": [
+              "count"
+            ]
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "query-generate-hogql-from-question"
+          },
+          {
+            "callsTool": "query-run"
+          }
+        ]
+      },
+      {
+        "input": "@posthog disable the new-checkout flag",
+        "mocks": {
+          "feature-flag-get-all": {
+            "truncated": false,
+            "total": 1,
+            "flags": [
+              {
+                "id": 1,
+                "key": "new-checkout",
+                "active": true
+              }
+            ]
+          },
+          "update-feature-flag": {
+            "id": 1,
+            "key": "new-checkout",
+            "active": false
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "feature-flag-get-all"
+          },
+          {
+            "callsTool": "update-feature-flag"
+          }
+        ]
+      },
+      {
+        "input": "@posthog summarize survey responses for onboarding-v2",
+        "mocks": {
+          "surveys-get-all": {
+            "truncated": false,
+            "total": 1,
+            "surveys": [
+              {
+                "id": "abc",
+                "name": "onboarding-v2"
+              }
+            ]
+          },
+          "survey-stats": {
+            "responses": 42
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "surveys-get-all"
+          },
+          {
+            "callsTool": "survey-stats"
+          }
+        ]
+      },
+      {
+        "input": "@posthog how much have we spent on LLM calls this month",
+        "mocks": {
+          "get-llm-total-costs-for-project": {
+            "results": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "get-llm-total-costs-for-project"
+          }
+        ]
+      },
+      {
+        "input": "@posthog search the docs for setting up reverse proxy",
+        "mocks": {
+          "docs-search": {
+            "query": "reverse proxy",
+            "results": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "docs-search"
+          }
+        ]
+      },
+      {
+        "input": "@posthog what experiments are running",
+        "mocks": {
+          "experiment-get-all": {
+            "truncated": false,
+            "total": 0,
+            "experiments": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "experiment-get-all"
+          }
+        ]
+      },
+      {
+        "input": "@posthog list my insights",
+        "mocks": {
+          "insights-get-all": {
+            "truncated": false,
+            "total": 0,
+            "insights": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "insights-get-all"
+          }
+        ]
+      },
+      {
+        "input": "@posthog what events are most active in my project",
+        "mocks": {
+          "event-definitions-list": {
+            "truncated": false,
+            "total": 0,
+            "events": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "event-definitions-list"
+          }
+        ]
+      },
+      {
+        "input": "@posthog what organizations do I have access to",
+        "mocks": {
+          "organizations-get": {
+            "organizations": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": "organizations-get"
+          }
+        ]
+      }
+    ]
   }
 }
