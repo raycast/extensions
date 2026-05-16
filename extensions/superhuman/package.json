@@ -350,14 +350,14 @@
       {
         "input": "@superhuman Search for emails from John about the quarterly report",
         "mocks": {
-          "search-inbox": {
+          "query-email-and-calendar": {
             "results": []
           }
         },
         "expected": [
           {
             "callsTool": {
-              "name": "search-inbox",
+              "name": "query-email-and-calendar",
               "arguments": {
                 "query": "from:john subject:quarterly report"
               }
@@ -386,14 +386,14 @@
       {
         "input": "@superhuman Did John send me any emails about the budget proposal last week?",
         "mocks": {
-          "search-inbox": {
+          "query-email-and-calendar": {
             "results": []
           }
         },
         "expected": [
           {
             "callsTool": {
-              "name": "search-inbox"
+              "name": "query-email-and-calendar"
             }
           }
         ]
@@ -416,6 +416,24 @@
       {
         "input": "@superhuman Find all emails from marketing@company.com that have attachments",
         "mocks": {
+          "query-email-and-calendar": {
+            "results": []
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "query-email-and-calendar",
+              "arguments": {
+                "query": "from:marketing@company.com has:attachment"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Find all emails from marketing@company.com that have attachments (legacy alias regression test — must still route to the deprecated search-inbox name when the AI happens to pick it)",
+        "mocks": {
           "search-inbox": {
             "results": []
           }
@@ -423,10 +441,7 @@
         "expected": [
           {
             "callsTool": {
-              "name": "search-inbox",
-              "arguments": {
-                "query": "from:marketing@company.com has:attachment"
-              }
+              "name": "search-inbox"
             }
           }
         ]
@@ -473,14 +488,14 @@
       {
         "input": "@superhuman Find unread emails from the design team",
         "mocks": {
-          "search-inbox": {
+          "query-email-and-calendar": {
             "results": []
           }
         },
         "expected": [
           {
             "callsTool": {
-              "name": "search-inbox",
+              "name": "query-email-and-calendar",
               "arguments": {
                 "query": {
                   "and": [
@@ -681,7 +696,7 @@
         ]
       },
       {
-        "input": "@superhuman Grab attachment att_1 from message msg_1",
+        "input": "@superhuman Grab the report.pdf attachment from message msg_1",
         "mocks": {
           "get-attachment": {
             "ok": true
@@ -693,7 +708,7 @@
               "name": "get-attachment",
               "arguments": {
                 "messageId": "msg_1",
-                "attachmentId": "att_1"
+                "attachmentName": "report.pdf"
               }
             }
           }
@@ -781,8 +796,8 @@
               "name": "update-thread",
               "arguments": {
                 "threadId": "thr_10",
-                "archived": true,
-                "read": true
+                "markDone": true,
+                "markRead": true
               }
             }
           }
@@ -893,11 +908,27 @@
         "mocks": {
           "run-skill": {
             "skill_name": "morning-briefing",
-            "prompt": "...",
-            "tools_used": ["query_email_and_calendar", "list_threads"],
+            "prompt": "# Morning Briefing\n\nGroup the user's overnight email into VIP / Action / FYI / Likely noise.\n\nFor every VIP and Action item, you MUST format it like:\n\n- [t_abc123] Sender — Subject\n  One-line summary.\n  Action: the ask.\n\nIf a thread id is missing, OMIT the item. Each section ≤ 10 items. Likely noise is aggregated by sender on one line.",
+            "tools_used": ["query_email_and_calendar", "list_threads", "get_availability"],
             "read_only": true,
             "read_only_blocked": false,
             "source": "bundled"
+          },
+          "query-email-and-calendar": {
+            "results": [
+              {
+                "thread_id": "t_abc123",
+                "from": "mario@nintendo.com",
+                "subject": "Re: pipe maintenance schedule",
+                "snippet": "Wanted to confirm Friday morning works for the inspection."
+              },
+              {
+                "thread_id": "t_def456",
+                "from": "peach@castle.io",
+                "subject": "Quarterly castle review",
+                "snippet": "Reminder that the board deck is due Tuesday."
+              }
+            ]
           }
         },
         "expected": [
@@ -905,6 +936,9 @@
             "callsTool": {
               "name": "run-skill"
             }
+          },
+          {
+            "meetsCriteria": "The response contains at least one item formatted as `[t_<id>] Sender — Subject` (the literal substring `[t_` followed by an id and a closing bracket appears in the output). Items without thread IDs are omitted, not fabricated."
           }
         ]
       },
@@ -912,7 +946,22 @@
         "input": "@superhuman What skills do I have available?",
         "mocks": {
           "list-skills": {
-            "skills": []
+            "skills": [
+              {
+                "name": "morning-briefing",
+                "description": "Overnight inbox triage plus today's calendar summary.",
+                "tools_used": ["query_email_and_calendar", "list_threads", "get_availability"],
+                "read_only": true,
+                "source": "bundled"
+              },
+              {
+                "name": "meeting-scheduler",
+                "description": "Resolve participants, find availability, create the event.",
+                "tools_used": ["get_availability", "create_or_update_event", "query_email_and_calendar"],
+                "read_only": false,
+                "source": "bundled"
+              }
+            ]
           }
         },
         "expected": [

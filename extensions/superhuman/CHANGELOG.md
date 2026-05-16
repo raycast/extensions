@@ -1,6 +1,12 @@
 # Superhuman Changelog
 
-## [Skills surface rework] - {PR_MERGE_DATE}
+## [Skills polish] - 2026-05-16
+
+- **Fixed:** `tools_used` now flows through the cached / live resolver paths. The upstream `SKILL.md` frontmatter only declares `name` and `description`, so live and cached resolutions previously returned `tools_used: []`. The resolver now merges upstream content (body + declared fields) with the bundled SKILL.md's Raycast-specific metadata (`tools_used`, `read_only`, `upstream*`, `deprecated`), so `list-skills` and `run-skill` surface the real tool list regardless of source. The parser also accepts `tools` as an alias for `tools_used` and supports inline-array YAML (`[a, b]`).
+- **Tightened:** `morning-briefing` skill now enforces the literal `[t_<id>]` prefix on every VIP / Action item, capped per-section bullet counts (≤ 10), aggregated `Likely noise` on a single line, and a *verify-before-returning* checklist. A new Vitest contract test guards the SKILL.md against future edits that quietly drop these rules.
+- **Updated:** AI evals modernized for the post-parity tool schemas — `update-thread` uses `markDone` / `markRead`, `get-attachment` uses `attachmentName`, and the four free-text search evals now target `query-email-and-calendar`. One eval explicitly retained for the deprecated `search-inbox` alias as a backward-compat regression test. New eval pairs lock in non-empty `tools_used` on `list-skills` responses and the `[t_<id>]` format contract via `meetsCriteria`.
+
+## [Skills surface rework] - 2026-05-16
 
 ### Fixed
 
@@ -13,7 +19,7 @@
 - New AI tools `run-skill` and `list-skills` use the same resolver, so the AI surface also benefits from live updates. `run-skill` accepts a slug (`morning-briefing`), a title (`Morning Briefing`), or a partial match (`briefing`); it returns the skill prompt, the tools it expects to chain, and `read_only_blocked: true` when the user's read-only preference would block the skill's writes.
 - The existing build-time embed pipeline (`scripts/embed-skills.ts`) and upstream sync (`scripts/sync-skills.ts`) are unchanged — they're the bundled-fallback half of the equation.
 
-## [Parity + Skills Library] - {PR_MERGE_DATE}
+## [Parity + Skills Library] - 2026-05-16
 
 ### Tool parity with the official MCP
 

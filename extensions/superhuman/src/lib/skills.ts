@@ -10,6 +10,14 @@ export interface SkillFrontmatter {
   deprecated?: boolean;
 }
 
+/**
+ * "Raw" frontmatter — only fields actually declared in YAML are populated.
+ * Used by the runtime resolver to merge upstream content (which intentionally
+ * omits Raycast-specific metadata like `tools_used`/`read_only`) with the
+ * bundled SKILL.md (which always declares them).
+ */
+export type RawFrontmatter = Partial<SkillFrontmatter>;
+
 export interface Skill {
   frontmatter: SkillFrontmatter;
   body: string;
@@ -17,16 +25,16 @@ export interface Skill {
 }
 
 /**
- * Minimal YAML frontmatter parser. Skill frontmatter is intentionally
- * simple (scalars, lists of scalars, bool, string) — we don't pull in a
- * full YAML lib for the extension bundle.
+ * Minimal YAML frontmatter parser. Returns only the keys that appeared in
+ * the YAML — no defaults — so callers can detect "undeclared" vs "explicit
+ * false" / "explicit empty array".
  */
-function parseFrontmatter(raw: string): { frontmatter: SkillFrontmatter; body: string } {
+function parseFrontmatterRaw(raw: string): { fields: RawFrontmatter; body: string } {
   const match = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!match) throw new Error("Skill missing YAML frontmatter delimiters (`---`).");
   const [, yaml, body] = match;
   const lines = yaml.split(/\r?\n/);
-  const fm: Record<string, unknown> = {};
+  const declared: Record<string, unknown> = {};
   let currentList: string[] | null = null;
   for (const line of lines) {
     if (line.match(/^\s*-\s+/) && currentList) {
@@ -40,45 +48,105 @@ function parseFrontmatter(raw: string): { frontmatter: SkillFrontmatter; body: s
     currentList = null;
     if (value === "") {
       currentList = [];
-      fm[key] = currentList;
+      declared[key] = currentList;
+      continue;
+    }
+    // Inline JSON-style array: tools_used: [a, b, c]
+    if (value.startsWith("[") && value.endsWith("]")) {
+      const inner = value.slice(1, -1).trim();
+      const items = inner
+        ? inner
+            .split(",")
+            .map((s) => s.trim().replace(/^["']|["']$/g, ""))
+            .filter(Boolean)
+        : [];
+      declared[key] = items;
       continue;
     }
     if (value === "true" || value === "false") {
-      fm[key] = value === "true";
+      declared[key] = value === "true";
       continue;
     }
-    fm[key] = value.replace(/^["']|["']$/g, "");
+    declared[key] = value.replace(/^["']|["']$/g, "");
   }
-  const frontmatter: SkillFrontmatter = {
-    name: String(fm.name ?? ""),
-    description: String(fm.description ?? ""),
-    tools_used: Array.isArray(fm.tools_used) ? (fm.tools_used as string[]) : [],
-    read_only: fm.read_only === true,
-    upstream: fm.upstream ? String(fm.upstream) : undefined,
-    upstream_sha: fm.upstream_sha ? String(fm.upstream_sha) : undefined,
-    deprecated: fm.deprecated === true,
+
+  const fields: RawFrontmatter = {};
+  if (typeof declared.name === "string") fields.name = declared.name;
+  if (typeof declared.description === "string") fields.description = declared.description;
+  if (Array.isArray(declared.tools_used)) fields.tools_used = declared.tools_used as string[];
+  // Accept upstream alias `tools` as a synonym for tools_used.
+  if (Array.isArray(declared.tools) && !fields.tools_used) {
+    fields.tools_used = declared.tools as string[];
+  }
+  if (typeof declared.read_only === "boolean") fields.read_only = declared.read_only;
+  if (typeof declared.upstream === "string") fields.upstream = declared.upstream;
+  if (typeof declared.upstream_sha === "string") fields.upstream_sha = declared.upstream_sha;
+  if (typeof declared.deprecated === "boolean") fields.deprecated = declared.deprecated;
+
+  return { fields, body };
+}
+
+function finalize(fields: RawFrontmatter): SkillFrontmatter {
+  return {
+    name: fields.name ?? "",
+    description: fields.description ?? "",
+    tools_used: fields.tools_used ?? [],
+    read_only: fields.read_only ?? false,
+    upstream: fields.upstream,
+    upstream_sha: fields.upstream_sha,
+    deprecated: fields.deprecated,
   };
-  if (!frontmatter.name) throw new Error("Skill frontmatter missing `name`.");
-  if (!frontmatter.description) throw new Error("Skill frontmatter missing `description`.");
-  return { frontmatter, body };
 }
 
 /**
- * Parse a raw `SKILL.md` string. Exported for the runtime resolver in
- * `skill-source.ts` so cached/live content goes through the same parser as
- * the bundled fallback.
+ * Parse a raw `SKILL.md` string. Applies defaults: undeclared `tools_used`
+ * becomes `[]`, undeclared `read_only` becomes `false`.
  */
 export function parseSkill(raw: string): Skill {
-  const { frontmatter, body } = parseFrontmatter(raw);
+  const { fields, body } = parseFrontmatterRaw(raw);
+  const frontmatter = finalize(fields);
+  if (!frontmatter.name) throw new Error("Skill frontmatter missing `name`.");
+  if (!frontmatter.description) throw new Error("Skill frontmatter missing `description`.");
   return { frontmatter, body, raw };
 }
 
-/** Bundled-only synchronous loader. Used by tests, the embed script, and as
- * the fallback path inside the runtime resolver. */
+/**
+ * Parse upstream content while inheriting Raycast-specific metadata from a
+ * bundled SKILL.md. Upstream wins for body + any field it actually declares;
+ * bundled fills in `tools_used` / `read_only` / `upstream*` / `deprecated`
+ * when upstream omits them.
+ */
+export function parseSkillWithBundledMetadata(rawUpstream: string, rawBundled: string): Skill {
+  const upstream = parseFrontmatterRaw(rawUpstream);
+  const bundled = parseFrontmatterRaw(rawBundled);
+  const merged: RawFrontmatter = {
+    name: upstream.fields.name ?? bundled.fields.name,
+    description: upstream.fields.description ?? bundled.fields.description,
+    tools_used:
+      upstream.fields.tools_used && upstream.fields.tools_used.length > 0
+        ? upstream.fields.tools_used
+        : bundled.fields.tools_used,
+    read_only: upstream.fields.read_only ?? bundled.fields.read_only,
+    upstream: upstream.fields.upstream ?? bundled.fields.upstream,
+    upstream_sha: upstream.fields.upstream_sha ?? bundled.fields.upstream_sha,
+    deprecated: upstream.fields.deprecated ?? bundled.fields.deprecated,
+  };
+  const frontmatter = finalize(merged);
+  if (!frontmatter.name) throw new Error("Skill frontmatter missing `name`.");
+  if (!frontmatter.description) throw new Error("Skill frontmatter missing `description`.");
+  return { frontmatter, body: upstream.body, raw: rawUpstream };
+}
+
+/** Bundled-only synchronous loader. */
 export function loadSkill(name: string): Skill {
   const raw = SKILL_FILES[name];
   if (!raw) throw new Error(`Skill not found: ${name}. Did you run "npm run embed-skills"?`);
   return parseSkill(raw);
+}
+
+/** Returns the bundled raw `SKILL.md` content, or undefined if not bundled. */
+export function loadBundledRaw(name: string): string | undefined {
+  return SKILL_FILES[name];
 }
 
 /** Bundled-only synchronous catalog. */

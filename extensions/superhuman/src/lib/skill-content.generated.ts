@@ -246,52 +246,46 @@ upstream_sha: ""
 
 # Morning Briefing
 
-Give me a clear, scannable summary of what changed in my inbox overnight and what my calendar looks like today.
+Give the user a calm, scannable summary of what changed in their inbox overnight and what their calendar looks like today.
 
 ## Inbox
 
-1. Query \`query_email_and_calendar\` for everything that landed since I last checked.
-2. Group results into:
-   - **VIP / Important**: messages from people I correspond with frequently, my manager, my direct reports, customers, anyone I've replied to in the last 30 days.
-   - **Action required**: messages addressed to me that ask a question or request something. Quote the ask in one sentence.
-   - **FYI**: announcements, newsletters, calendar invites that don't need a response.
-   - **Likely noise**: marketing, system notifications, automated reports.
+1. Query \`query_email_and_calendar\` for everything that landed since the user last checked.
+2. Group results into four buckets, in priority order:
+   - **VIP / Important** — messages from frequent correspondents, direct reports, customers, anyone the user has replied to in the last 30 days.
+   - **Action required** — messages addressed to the user that ask a question or request something.
+   - **FYI** — announcements, newsletters, invites that don't need a response.
+   - **Likely noise** — marketing, system notifications, automated reports.
 
-For each VIP / Action thread, give me: sender, subject, one-sentence summary, and the thread id so I can pull it up.
+3. **For every item in VIP / Action, you MUST include the thread id.** Format each item EXACTLY like this:
+
+   \`\`\`
+   - [t_abc123def] Sender Name — Subject line
+     One-sentence summary of what they want.
+     Action: Quote the ask in one short sentence.
+   \`\`\`
+
+   If the thread id is missing from the underlying data, OMIT the item rather than fabricate or skip the id.
+
+4. For FYI, one bullet per item: \`- Sender: Subject\`.
+
+5. For Likely noise, do NOT enumerate. Aggregate by sender and emit a single line: \`Likely noise (N total): DocuSign × 6, Mercury × 2, Newsletters × 3, …\`.
 
 ## Calendar
 
-1. Fetch today's events.
-2. List them in time order with: time, duration, title, attendees.
-3. Flag any meeting where I'm the organizer but haven't sent an agenda or pre-read.
+1. Fetch today's events for the user's local timezone.
+2. List them in time order with: time range, duration, title, attendees.
+3. Flag any meeting where the user is organizer but no agenda or pre-read has been sent.
 4. Flag any conflict or back-to-back gap shorter than 5 minutes.
+5. If the calendar is empty for today, say so in one short sentence and move on.
 
-## Output format
+## Hard constraints — verify before returning
 
-\`\`\`
-Inbox (since {{last_check}})
-  VIP & Action ({{n}})
-    1. [thr_id] {{sender}} — {{subject}}
-       {{one-sentence summary}}
-       Action: {{what they're asking}}
-    ...
-  FYI ({{n}})
-    - {{sender}}: {{subject}}
-  Likely noise ({{n}})
-    {{count by sender}}
-
-Today's calendar
-  09:00–09:30  1:1 with Alex
-  10:00–11:00  Q3 planning  ⚠️ no agenda sent
-  ...
-\`\`\`
-
-Keep it tight. No more than 10 bullets total per section.
-
-## Rules
-
-- Read-only skill: do not draft, send, archive, or trash anything. Just report.
-- Use the user's local timezone for calendar times.
-- If the inbox is empty since last check, say so in one line and move on to the calendar.
+- Every VIP and Action item starts with \`[t_<id>]\`. If yours don't, regenerate.
+- Each of VIP, Action, FYI has **≤ 10 items**. If a section exceeds 10, drop the lowest-priority items until it fits. State the count: \`VIP / Action (7 shown of 14 total)\`.
+- Likely noise is exactly ONE line, aggregated by sender.
+- No drafts. No archiving. No labels. Report only.
+- Use the user's local timezone for all calendar times.
+- Do not add a meta-commentary preamble ("Let me check…"). Open with \`## Your day at a glance\` or skip directly to the buckets.
 `,
 };

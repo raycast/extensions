@@ -1,5 +1,12 @@
 import { LocalStorage } from "@raycast/api";
-import { Skill, listSkills as listBundled, loadSkill as loadBundled, parseSkill } from "./skills";
+import {
+  Skill,
+  listSkills as listBundled,
+  loadBundledRaw,
+  loadSkill as loadBundled,
+  parseSkill,
+  parseSkillWithBundledMetadata,
+} from "./skills";
 
 /**
  * Runtime skill resolver. Resolution chain:
@@ -101,8 +108,18 @@ async function fetchSkillRaw(name: string): Promise<{ raw: string; sha?: string 
 }
 
 function buildResolved(name: string, raw: string, source: SkillSource, fetchedAt: number, sha?: string): ResolvedSkill {
-  const skill = parseSkill(raw);
-  if (skill.frontmatter.name !== name) skill.frontmatter.name = name;
+  // Upstream's frontmatter intentionally omits Raycast-specific metadata
+  // (`tools_used`, `read_only`). When we have a bundled SKILL for the same
+  // slug, merge its metadata in so live/cached content still surfaces the
+  // right tool list and read-only flag.
+  const bundledRaw = source !== "bundled" ? loadBundledRaw(name) : undefined;
+  let skill: Skill;
+  try {
+    skill = bundledRaw ? parseSkillWithBundledMetadata(raw, bundledRaw) : parseSkill(raw);
+  } catch {
+    skill = parseSkill(raw);
+  }
+  if (!skill.frontmatter.name) skill.frontmatter.name = name;
   return { skill, source, fetchedAt, upstreamSha: sha };
 }
 
