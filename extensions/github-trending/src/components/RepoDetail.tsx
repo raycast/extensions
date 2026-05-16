@@ -17,8 +17,8 @@ export const RepoDetail = ({ repo }: { repo: RepoType }) => {
 
   const { data: README, isLoading } = useFetch(READMEUrl, { method: 'GET' })
   const markdown = useMemo(
-    () => formatReadmeMarkdown(README, { rawBaseUrl: readmeAssetBaseUrl }),
-    [README, readmeAssetBaseUrl],
+    () => (isLoading ? '' : formatReadmeMarkdown(README, { rawBaseUrl: readmeAssetBaseUrl })),
+    [README, isLoading, readmeAssetBaseUrl],
   )
 
   return (
