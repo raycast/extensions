@@ -25,16 +25,12 @@ import {
   type HistoryItem,
 } from "./lib/defuddle";
 
-type Arguments = {
-  url?: string;
-};
-
 type SuggestedInput = {
   source: "Argument" | "Selected Text" | "Clipboard";
   url: string;
 };
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.GetMarkdown }>) {
   const argumentUrl = normalizeUrl(props.arguments.url ?? "");
   const [searchText, setSearchText] = useState(argumentUrl ?? "");
   const [suggestedInputs, setSuggestedInputs] = useState<SuggestedInput[]>([]);

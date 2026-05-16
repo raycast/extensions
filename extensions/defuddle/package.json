@@ -37,7 +37,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.17",
-    "@raycast/utils": "^2.2.4",
     "defuddle": "^0.18.1",
     "linkedom": "^0.18.12"
   },

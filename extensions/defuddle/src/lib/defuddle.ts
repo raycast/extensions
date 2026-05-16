@@ -26,43 +26,50 @@ export type ExtractedMarkdown = Omit<HistoryItem, "id" | "createdAt">;
 
 export async function extractMarkdown(url: string): Promise<ExtractedMarkdown> {
   const toast = await showToast(Toast.Style.Animated, "Fetching page", url);
-  const response = await fetch(url, {
-    headers: {
-      "User-Agent": "Mozilla/5.0 (compatible; Raycast Defuddle Markdown Extension)",
-      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    },
-  });
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; Raycast Defuddle Markdown Extension)",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+      },
+    });
 
-  if (!response.ok) {
-    throw new Error(`Request failed with ${response.status} ${response.statusText}`);
+    if (!response.ok) {
+      throw new Error(`Request failed with ${response.status} ${response.statusText}`);
+    }
+
+    toast.title = "Extracting content";
+    const html = await response.text();
+    const parsed = parseHTML(html) as unknown as { document: Document };
+    const { document } = parsed;
+    const result = await Defuddle(document, url, { markdown: true });
+    const markdown = result.contentMarkdown || result.content;
+
+    if (!markdown.trim()) {
+      throw new Error("Defuddle did not find readable content on this page.");
+    }
+
+    const markdownWithoutInlineSvg = removeInlineSvgBlocks(markdown);
+    const sanitizedMarkdown = await removeBrokenImages(markdownWithoutInlineSvg, url);
+
+    toast.style = Toast.Style.Success;
+    toast.title = "Markdown extracted";
+    toast.message = result.title || url;
+
+    return {
+      url,
+      title: result.title || new URL(url).hostname,
+      markdown: sanitizedMarkdown,
+      author: result.author || undefined,
+      domain: result.domain || undefined,
+      wordCount: result.wordCount || undefined,
+    };
+  } catch (error) {
+    toast.style = Toast.Style.Failure;
+    toast.title = "Extraction failed";
+    toast.message = error instanceof Error ? error.message : String(error);
+    throw error;
   }
-
-  toast.title = "Extracting content";
-  const html = await response.text();
-  const parsed = parseHTML(html) as unknown as { document: Document };
-  const { document } = parsed;
-  const result = await Defuddle(document, url, { markdown: true });
-  const markdown = result.contentMarkdown || result.content;
-
-  if (!markdown.trim()) {
-    throw new Error("Defuddle did not find readable content on this page.");
-  }
-
-  const markdownWithoutInlineSvg = removeInlineSvgBlocks(markdown);
-  const sanitizedMarkdown = await removeBrokenImages(markdownWithoutInlineSvg, url);
-
-  toast.style = Toast.Style.Success;
-  toast.title = "Markdown extracted";
-  toast.message = result.title || url;
-
-  return {
-    url,
-    title: result.title || new URL(url).hostname,
-    markdown: sanitizedMarkdown,
-    author: result.author || undefined,
-    domain: result.domain || undefined,
-    wordCount: result.wordCount || undefined,
-  };
 }
 
 export async function copyMarkdown(markdown: string) {
