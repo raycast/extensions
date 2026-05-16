@@ -1,5 +1,10 @@
 # Todoist Changelog
 
+## [Add Keyboard Shortcuts] - {PR_MERGE_DATE}
+
+- Added a shortcut to create Raycast quicklinks from Todoist views.
+- Added the common new-item shortcut to create Todoist quicklinks from Todoist views.
+
 ## [Filter completion UI and incremental reminder sync] - 2026-05-04
 
 - **Duplicate “at task time” reminders on hourly repeat**: Applying the **same** hourly recurrence twice (when the task already had a timed due and a relative-at-task reminder) no longer queues a second identical reminder; the extension now trusts the merged cache whenever Sync returns an empty `reminders` delta, not only when the field was omitted entirely.
