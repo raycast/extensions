@@ -8,7 +8,7 @@ type Input = {
 
 export default async function (input: Input) {
   const projectId = await getActiveProjectId();
-  const { results } = await listFeatureFlags(projectId);
+  const { count, results } = await listFeatureFlags(projectId);
   const filtered = input.search
     ? results.filter(
         (f) =>
@@ -16,7 +16,8 @@ export default async function (input: Input) {
           (f.name ?? "").toLowerCase().includes(input.search!.toLowerCase()),
       )
     : results;
-  const { items, truncated, total } = paginate(filtered);
+  const total = input.search ? filtered.length : count;
+  const { items, truncated } = paginate(filtered, total);
   return {
     truncated,
     total,

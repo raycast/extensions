@@ -10,11 +10,11 @@ type Input = {
 
 export default async function (input: Input) {
   const projectId = await getActiveProjectId();
-  const { results } = await listEventDefinitions(projectId, {
+  const { count, results } = await listEventDefinitions(projectId, {
     search: input.search,
     limit: input.limit ?? 100,
   });
-  const { items, truncated, total } = paginate(results, input.limit ?? 20);
+  const { items, truncated, total } = paginate(results, count, input.limit ?? 20);
   return {
     truncated,
     total,

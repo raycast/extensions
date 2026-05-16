@@ -3,8 +3,8 @@ import { getActiveProjectId, paginate, projectUrl } from "./_shared";
 
 export default async function () {
   const projectId = await getActiveProjectId();
-  const { results } = await listExperiments(projectId);
-  const { items, truncated, total } = paginate(results);
+  const { count, results } = await listExperiments(projectId);
+  const { items, truncated, total } = paginate(results, count);
   return {
     truncated,
     total,

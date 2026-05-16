@@ -22,7 +22,9 @@ export default async function (input: Input) {
     dateFrom: input.dateFrom,
     dateTo: input.dateTo,
   });
-  const { items, truncated, total } = paginate(results, input.limit ?? 20);
+  // The query API returns the full matching set in one shot — no Paginated envelope — so
+  // results.length is the true total here, not a first-page count.
+  const { items, truncated, total } = paginate(results, results.length, input.limit ?? 20);
   return {
     truncated,
     total,

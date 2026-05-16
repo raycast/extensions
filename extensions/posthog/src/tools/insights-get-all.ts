@@ -8,8 +8,8 @@ type Input = {
 
 export default async function (input: Input) {
   const projectId = await getActiveProjectId();
-  const { results } = await listInsights(projectId, input.search ? { search: input.search } : undefined);
-  const { items, truncated, total } = paginate(results);
+  const { count, results } = await listInsights(projectId, input.search ? { search: input.search } : undefined);
+  const { items, truncated, total } = paginate(results, count);
   return {
     truncated,
     total,

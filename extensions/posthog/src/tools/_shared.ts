@@ -48,10 +48,19 @@ export function projectUrl(path: string) {
   return `${dataRegionURL}/${path.replace(/^\//, "")}`;
 }
 
-/** Truncate large list responses so AI doesn't drown in JSON. */
-export function paginate<T>(items: T[], limit = 20) {
-  if (items.length <= limit) return { items, truncated: false, total: items.length };
-  return { items: items.slice(0, limit), truncated: true, total: items.length };
+/**
+ * Truncate a list response so the AI doesn't drown in JSON.
+ *
+ * Pass `serverTotal` from the PostHog `Paginated<T>` envelope's `count` field — that's the
+ * true server-side total across all pages. Returning `items.length` here would lie to the AI
+ * about how much data exists, so it would stop searching after seeing the first page.
+ */
+export function paginate<T>(items: T[], serverTotal: number, limit = 20) {
+  return {
+    items: items.slice(0, limit),
+    truncated: items.length > limit || serverTotal > items.length,
+    total: serverTotal,
+  };
 }
 
 /**

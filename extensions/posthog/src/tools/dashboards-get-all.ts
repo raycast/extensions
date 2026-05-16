@@ -8,11 +8,13 @@ type Input = {
 
 export default async function (input: Input) {
   const projectId = await getActiveProjectId();
-  const { results } = await listDashboards(projectId);
+  const { count, results } = await listDashboards(projectId);
   const filtered = input.search
     ? results.filter((d) => d.name.toLowerCase().includes(input.search!.toLowerCase()))
     : results;
-  const { items, truncated, total } = paginate(filtered);
+  // When the user filters client-side, report the filter result count; otherwise the server count.
+  const total = input.search ? filtered.length : count;
+  const { items, truncated } = paginate(filtered, total);
   return {
     truncated,
     total,
