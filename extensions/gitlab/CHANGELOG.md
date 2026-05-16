@@ -1,5 +1,10 @@
 # GitLab Changelog
 
+## [Add option to hide archived projects in Menu Bar Commands] - {PR_MERGE_DATE}
+
+- Add "Hide Archived Projects" option to Issues Menu Bar settings
+- Add "Hide Archived Projects" option to Merge Requests Menu Bar settings
+
 ## [Fix OOM crash in My Projects for large GitLab instances] - 2026-05-16
 
 - Fix out-of-memory crash when fetching thousands of projects by using parallel batch fetching with per-page mapping
