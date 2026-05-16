@@ -31,10 +31,11 @@ export const confirmation: Tool.Confirmation<CreateArgs> = async (args) => {
 };
 
 /**
- * This tool runs `orbctl create [-a <arch>] [-u <user_name>] <distro>[:<version>] <machine_name>` in a shell and returns the output.
- * If the user did specify a distro or machine name, you NEED TO ASK them for both. These values are required.
+ * This tool runs `orbctl create [-a <arch>] [-u <user_name>] [--isolated] <distro>[:<version>] <machine_name>` in a shell and returns the output.
+ * If the user did NOT specify a distro or machine name, you NEED TO ASK them for both. These values are required.
+ * The --isolated flag creates an isolated machine and requires orbctl 2.1.0+.
  *
- * @param args machine to execute commands in
+ * @param args machine to create
  * @returns output of shell command
  */
 export default async function tool(args: CreateArgs): Promise<string> {
