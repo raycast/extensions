@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Add Keyboard Shortcuts] - {PR_MERGE_DATE}
+## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Added a shortcut to create Raycast quicklinks from Todoist views.
 - Added the common new-item shortcut to create Todoist quicklinks from Todoist views.
