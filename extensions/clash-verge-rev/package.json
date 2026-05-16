@@ -1,0 +1,153 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "clash-verge-rev",
+  "title": "Clash Verge Rev",
+  "description": "Manage Clash Verge Rev subscriptions, proxy groups, and proxy modes",
+  "icon": "verge.png",
+  "author": "zh_chen",
+  "license": "MIT",
+  "platforms": ["Windows"],
+  "categories": ["Developer Tools"],
+  "commands": [
+    {
+      "name": "manage-proxies",
+      "title": "Manage Proxies",
+      "subtitle": "Clash Proxy Groups",
+      "description": "View and switch proxy nodes in different rule groups",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Search",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "manage-profiles",
+      "title": "Manage Subscriptions",
+      "subtitle": "Clash Subscriptions",
+      "description": "View, switch, and update subscription profiles",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "shortcut",
+          "type": "text",
+          "placeholder": "Profile Shortcut",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "switch-mode",
+      "title": "Switch Mode",
+      "subtitle": "Clash Rule / Global / Direct",
+      "description": "Quickly switch between proxy modes",
+      "mode": "view"
+    },
+    {
+      "name": "view-logs",
+      "title": "View Logs",
+      "subtitle": "Clash Real-time Logs",
+      "description": "View Clash Verge Rev logs in real-time",
+      "mode": "view"
+    },
+    {
+      "name": "view-connections",
+      "title": "View Connections",
+      "subtitle": "Clash Active Connections",
+      "description": "View and manage active Clash connections",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "controllerPort",
+      "type": "textfield",
+      "required": false,
+      "default": "9090",
+      "title": "Controller Port",
+      "description": "Mihomo external controller port (default: 9090)",
+      "placeholder": "9090"
+    },
+    {
+      "name": "secret",
+      "type": "password",
+      "required": false,
+      "title": "API Secret",
+      "description": "Mihomo external controller secret (found in Clash Verge Rev settings)",
+      "placeholder": "Enter your API secret"
+    },
+    {
+      "name": "defaultSearchMode",
+      "type": "dropdown",
+      "required": false,
+      "default": "groups",
+      "title": "Default Search Mode",
+      "description": "Default search target in Manage Proxies. Use ':' prefix to search the other type.",
+      "data": [
+        {
+          "title": "Groups",
+          "value": "groups"
+        },
+        {
+          "title": "Nodes",
+          "value": "nodes"
+        }
+      ]
+    },
+    {
+      "name": "defaultSortOrder",
+      "type": "dropdown",
+      "required": false,
+      "default": "downSpeed",
+      "title": "Default Sort Order",
+      "description": "Default sorting method for View Connections.",
+      "data": [
+        {
+          "title": "Download Speed",
+          "value": "downSpeed"
+        },
+        {
+          "title": "Upload Speed",
+          "value": "upSpeed"
+        },
+        {
+          "title": "Total Download",
+          "value": "download"
+        },
+        {
+          "title": "Total Upload",
+          "value": "upload"
+        },
+        {
+          "title": "Start Time",
+          "value": "time"
+        },
+        {
+          "title": "Host Name",
+          "value": "host"
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.17.0",
+    "node-fetch": "^3.3.0",
+    "js-yaml": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^20.8.10",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
