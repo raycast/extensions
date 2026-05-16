@@ -4,7 +4,7 @@ Switch your full project context — browser profiles, apps, terminal environmen
 
 This extension is a companion to [ShiftPlus](https://shiftplus.app), a native macOS workspace switcher. It lets you trigger workspace switches and open quick links without leaving the Raycast launcher.
 
-![Switch Workspace command](metadata/shiftplus-1.png)
+![Switch Workspace command](metadata/shiftplus-2.png)
 
 ## Requirements
 
