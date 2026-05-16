@@ -13,6 +13,13 @@ const menuIcon = {
   },
 };
 
+function buildSubtitle(entry: recentEntry): string {
+  const branchSuffix = entry.branch ? `  ⎇ ${entry.branch}` : "";
+  const budget = maxTitleLength - entry.title.length - branchSuffix.length;
+  const truncatedParts = entry.parts.length < budget ? entry.parts : entry.parts.substring(0, budget - 2) + "…";
+  return `← ${truncatedParts}${branchSuffix}`;
+}
+
 export default function ProjectList(): React.JSX.Element {
   const { isLoading, toolboxApp, appHistory, myFavs, recent, visitActions } = useAppHistory();
   if (toolboxApp === undefined || toolboxApp === false) {
@@ -57,11 +64,7 @@ export default function ProjectList(): React.JSX.Element {
                   title={`Open ${
                     fav.title.length < maxTitleLength ? fav.title : fav.title.substring(0, maxTitleLength - 1) + "…"
                   }`}
-                  subtitle={`← ${
-                    fav.title.length + fav.parts.length < maxTitleLength
-                      ? fav.parts
-                      : fav.parts.substring(0, maxTitleLength - fav.title.length - 2) + "…"
-                  }`}
+                  subtitle={buildSubtitle(fav)}
                   onAction={openInApp(
                     appHistory.find((history) => history.title === fav.appName) || appHistory[0],
                     fav,
@@ -82,11 +85,7 @@ export default function ProjectList(): React.JSX.Element {
                       ? recent.title
                       : recent.title.substring(0, maxTitleLength - 1) + "…"
                   }`}
-                  subtitle={`← ${
-                    recent.title.length + recent.parts.length < maxTitleLength
-                      ? recent.parts
-                      : recent.parts.substring(0, maxTitleLength - recent.title.length - 2) + "…"
-                  }`}
+                  subtitle={buildSubtitle(recent)}
                   onAction={openInApp(
                     appHistory.find((history) => history.title === recent.appName) || appHistory[0],
                     recent,
@@ -125,11 +124,7 @@ export default function ProjectList(): React.JSX.Element {
                                     ? recent.title
                                     : recent.title.substring(0, maxTitleLength - 1) + "…"
                                 }`}
-                                subtitle={`← ${
-                                  recent.title.length + recent.parts.length < maxTitleLength
-                                    ? recent.parts
-                                    : recent.parts.substring(0, maxTitleLength - recent.title.length - 2) + "…"
-                                }`}
+                                subtitle={buildSubtitle(recent)}
                                 tooltip={`Open ${recent.path} in ${app.title}`}
                                 onAction={openInApp(app, recent, visitActions.visit)}
                               />
