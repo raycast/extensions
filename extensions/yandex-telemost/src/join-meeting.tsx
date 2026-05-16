@@ -1,36 +1,50 @@
-import { Action, ActionPanel, Form, open, showHUD, popToRoot } from "@raycast/api";
+import { Action, ActionPanel, Form, getPreferenceValues, open, showHUD, popToRoot } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 interface FormValues {
   link: string;
 }
 
+const TELEMOST_PREFIX = "https://telemost.yandex.ru/";
+const CODE_REGEX = /^[a-zA-Z0-9_-]+$/;
+
 function normalizeLink(input: string): string {
   const trimmed = input.trim();
 
   // Full URL already
-  if (trimmed.startsWith("https://telemost.yandex.ru/")) {
+  if (trimmed.startsWith(TELEMOST_PREFIX)) {
     return trimmed;
   }
 
-  // Just the meeting code (e.g. "j/abc123" or "abc123")
+  // Just the meeting code (e.g. "j/abc123")
   if (trimmed.startsWith("j/")) {
-    return `https://telemost.yandex.ru/${trimmed}`;
+    return `${TELEMOST_PREFIX}${trimmed}`;
   }
 
   // Bare code without "j/" prefix
-  if (/^[a-zA-Z0-9_-]+$/.test(trimmed)) {
-    return `https://telemost.yandex.ru/j/${trimmed}`;
+  if (CODE_REGEX.test(trimmed)) {
+    return `${TELEMOST_PREFIX}j/${trimmed}`;
   }
 
   return trimmed;
 }
 
+function isValidInput(value: string): boolean {
+  const t = value.trim();
+  return t.startsWith(TELEMOST_PREFIX) || t.startsWith("j/") || CODE_REGEX.test(t);
+}
+
 export default function Command() {
+  const { browser: preferredBrowserApp } = getPreferenceValues<Preferences>();
+
   async function handleSubmit(values: FormValues) {
     const url = normalizeLink(values.link);
-    await open(url);
-    await showHUD("Joining meeting...");
-    await popToRoot();
+    try {
+      // Open and pop in parallel — avoids the form lingering during the browser launch
+      await Promise.all([open(url, preferredBrowserApp ?? undefined), showHUD("Joining meeting…"), popToRoot()]);
+    } catch (e) {
+      await showFailureToast(e, { title: "Failed to open meeting" });
+    }
   }
 
   return (
@@ -48,9 +62,7 @@ export default function Command() {
         autoFocus
         validate={(value) => {
           if (!value || !value.trim()) return "Please enter a meeting link or code";
-          const t = value.trim();
-          const valid = t.startsWith("https://telemost.yandex.ru/") || t.startsWith("j/") || /^[a-zA-Z0-9_-]+$/.test(t);
-          if (!valid) return "Enter a Telemost link or meeting code";
+          if (!isValidInput(value)) return "Enter a Telemost link or meeting code";
         }}
       />
     </Form>
