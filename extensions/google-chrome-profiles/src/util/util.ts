@@ -209,7 +209,16 @@ export const escapeAppleScriptString = (str: string): string => {
  */
 const runDetachedAppleScript = (script: string): void => {
   const scriptPath = join(tmpdir(), `raycast-google-chrome-profiles-${randomUUID()}.applescript`);
-  writeFileSync(scriptPath, script);
+  try {
+    writeFileSync(scriptPath, script);
+  } catch (writeError) {
+    showToast({
+      style: Toast.Style.Failure,
+      title: "Could not write script file",
+      message: String(writeError),
+    });
+    return;
+  }
 
   let child;
   try {
