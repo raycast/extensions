@@ -1,6 +1,6 @@
 # Changelog
 
-## [Rebrand & Auto Switch] - {PR_MERGE_DATE}
+## [Rebrand & Auto Switch] - 2026-05-16
 
 - Rebranded extension as **Art Wallpapers. — Another boring piece. Daily.**
 - New command **Auto Switch Wallpaper**: rotate wallpapers automatically in the background with a 30-minute, 1-hour, or 1-day refresh interval, plus an optional HUD on every change.
