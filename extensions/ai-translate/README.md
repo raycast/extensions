@@ -13,10 +13,13 @@ The extension prioritizes cost-effective, high-quality model providers such as D
 - **Screenshot Translate**: capture a screen region, run OCR, review the source text, and translate with multiple providers side by side. Switch models and compare results without leaving the view.
 - **Screenshot OCR**: capture a screen region, edit the extracted text, strip line breaks, auto-paragraph, copy, or send to translate.
 - **Translate**: translate selected text from any app, or type text directly in the search bar.
-- **Rewrite & Coach**: rewrite selected text into natural, idiomatic English, view it next to the original, learn _why_ the new phrasing is more natural (explained in Chinese), and hear it read aloud with Gemini TTS.
+- **Translate Selection & Paste**: a no-window command that translates the selected text with your default provider and pastes it in place — ideal for a global hotkey.
+- **Rewrite & Coach**: rewrite selected text into natural, idiomatic English, view it next to the original, learn _why_ the new phrasing is more natural (explained in Chinese), and hear it read aloud with Gemini TTS. Edit the input inline, switch tone (Natural / Casual / Formal / Concise) with ⌘Y, and switch provider with ⌘M.
+- **Rewrite & Replace**: a no-window command that rewrites the selected text into natural English with your default provider and pastes it in place — ideal for a global hotkey.
+- **History**: browse recent translations and rewrites you copied or pasted, then replay copy, paste, or read aloud. Stored locally on your machine.
 - **Translation Settings**: configure model tier, prompt profile, translation style, and custom instructions from a dedicated settings form.
 - **Model tier system**: switch between Fast (flash/mini models) and Pro (best models) with one keystroke. Custom tier uses model IDs from preferences for new or unlisted models.
-- **TTS read-aloud**: hear translations and source text read aloud using Gemini 3.1 Flash TTS (requires Gemini API key).
+- **TTS read-aloud**: hear translations and source text read aloud using Gemini 3.1 Flash TTS (requires Gemini API key). Pick from eight voices in preferences, read slowly for language practice (⌘⌥S), and starting a new read stops the previous one.
 - **In-UI controls**: switch model tier (⌘M), prompt profile (⌘P), and translation style (⌘Y) without leaving the translate view. Changes take effect immediately and persist across sessions.
 - **Multi-provider comparison**: see translations from all enabled providers at once, with model name, duration, and status in each row.
 - **Baidu OCR**: language auto-detect, paragraph grouping, accurate or general endpoint, with local macOS Vision fallback.
@@ -24,13 +27,16 @@ The extension prioritizes cost-effective, high-quality model providers such as D
 
 ## Commands
 
-| Command                  | Mode | Purpose                                                                                                                                                                  |
-| ------------------------ | ---- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Translate**            | View | Translate selected text, typed text, or text passed from other commands. Compare providers, switch models, read aloud.                                                   |
-| **Rewrite & Coach**      | View | Rewrite selected text into natural, idiomatic English, compare it with the original, read a Chinese explanation of why it sounds more natural, and hear it spoken aloud. |
-| **Screenshot Translate** | View | Capture a screen region, OCR, review source text, and translate with all enabled providers.                                                                              |
-| **Screenshot OCR**       | View | Capture a screen region, edit the OCR result, strip line breaks, auto-paragraph, copy, or send to translate.                                                             |
-| **Translation Settings** | View | Configure model tier, prompt profile, translation style, and custom instructions in a dedicated form.                                                                    |
+| Command                         | Mode    | Purpose                                                                                                                                                                  |
+| ------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Translate**                   | View    | Translate selected text, typed text, or text passed from other commands. Compare providers, switch models, read aloud.                                                   |
+| **Translate Selection & Paste** | No-view | Translate the selected text with your default provider and paste it in place, no window. Great for a global hotkey.                                                      |
+| **Rewrite & Coach**             | View    | Rewrite selected text into natural, idiomatic English, compare it with the original, read a Chinese explanation of why it sounds more natural, and hear it spoken aloud. |
+| **Rewrite & Replace**           | No-view | Rewrite the selected text into natural English with your default provider and paste it in place, no window. Great for a global hotkey.                                   |
+| **Screenshot Translate**        | View    | Capture a screen region, OCR, review source text, and translate with all enabled providers.                                                                              |
+| **Screenshot OCR**              | View    | Capture a screen region, edit the OCR result, strip line breaks, auto-paragraph, copy, or send to translate.                                                             |
+| **History**                     | View    | Browse recent translations and rewrites you copied or pasted; replay copy, paste, or read aloud.                                                                         |
+| **Translation Settings**        | View    | Configure model tier, prompt profile, translation style, and custom instructions in a dedicated form.                                                                    |
 
 ## Model Tier System
 
@@ -42,7 +48,7 @@ Instead of manually typing model names, select a tier and every provider uses th
 | Xiaomi MiMo | `mimo-v2-flash`                 | `mimo-v2.5-pro`          |
 | MiniMax     | `MiniMax-M2.7-highspeed`        | `MiniMax-M2.7-highspeed` |
 | Gemini      | `gemini-3.1-flash-lite-preview` | `gemini-3.1-pro-preview` |
-| Kimi        | `kimi-k2.6`                     | `kimi-k2.6`              |
+| Kimi        | `kimi-for-coding`               | `kimi-for-coding`        |
 | OpenAI      | `gpt-4.1-mini`                  | `gpt-4.1`                |
 
 **Custom** tier uses model IDs from extension preferences, so newer models can be entered without updating the extension.
@@ -70,7 +76,7 @@ Switch profiles from the translate view with ⌘P, or set them in the **Translat
 | DeepSeek    | Anthropic-compatible Messages     | `https://api.deepseek.com/anthropic`               | `deepseek-v4-flash`             |
 | Xiaomi MiMo | Token Plan / Anthropic-compatible | `https://token-plan-cn.xiaomimimo.com/anthropic`   | `mimo-v2-flash`                 |
 | MiniMax     | Token Plan / Anthropic-compatible | `https://api.minimaxi.com/anthropic`               | `MiniMax-M2.7-highspeed`        |
-| Kimi        | Anthropic-compatible Coding       | `https://api.kimi.com/coding/`                     | `kimi-k2.6`                     |
+| Kimi        | Anthropic-compatible Coding       | `https://api.kimi.com/coding/`                     | `kimi-for-coding`               |
 | Gemini      | Native Gemini API                 | `https://generativelanguage.googleapis.com/v1beta` | `gemini-3.1-flash-lite-preview` |
 | OpenAI      | Native Chat Completions API       | `https://api.openai.com/v1`                        | `gpt-4.1-mini`                  |
 
@@ -82,7 +88,7 @@ Switch profiles from the translate view with ⌘P, or set them in the **Translat
 | Xiaomi MiMo | [Anthropic API Compatibility](https://platform.xiaomimimo.com/static/docs/api/chat/anthropic-api.md), [Token Plan Quick Access](https://platform.xiaomimimo.com/static/docs/tokenplan/quick-access.md) |
 | MiniMax     | [Anthropic API Compatibility](https://platform.minimaxi.com/docs/api-reference/text-anthropic-api), [Token Plan Quickstart](https://platform.minimaxi.com/docs/token-plan/quickstart)                  |
 | Gemini      | [Text Generation](https://ai.google.dev/gemini-api/docs/text-generation), [Speech Generation (TTS)](https://ai.google.dev/gemini-api/docs/speech-generation)                                           |
-| Kimi        | [Agent Integration](https://platform.kimi.ai/docs/guide/agent-support), [API Overview](https://platform.kimi.ai/docs/api/overview)                                                                     |
+| Kimi        | [Kimi Code Overview](https://www.kimi.com/code/docs/en/)                                                                                                                                               |
 | OpenAI      | [Chat Completions API Reference](https://platform.openai.com/docs/api-reference/chat/create)                                                                                                           |
 
 | OCR Engine    | Official documentation                                                                                                                            |
@@ -91,18 +97,19 @@ Switch profiles from the translate view with ⌘P, or set them in the **Translat
 
 ## Keyboard Shortcuts
 
-| Shortcut | Action                                      |
-| -------- | ------------------------------------------- |
-| ⌘M       | Switch model tier (Fast / Pro / Custom)     |
-| ⌘P       | Switch prompt profile                       |
-| ⌘Y       | Switch translation style                    |
-| ⌘S       | Read translation aloud (TTS)                |
-| ⌘⇧S      | Read source text aloud (TTS)                |
-| ⌘R       | Retry translation / Retake screenshot       |
-| ⌘⇧C      | Copy source text / Copy without line breaks |
-| ⌘L       | Strip line breaks (Screenshot OCR)          |
-| ⌘⇧P      | Auto paragraph (Screenshot OCR)             |
-| ⌘⏎       | Paste translation / Translate OCR text      |
+| Shortcut | Action                                            |
+| -------- | ------------------------------------------------- |
+| ⌘M       | Switch model tier / provider (Rewrite & Coach)    |
+| ⌘P       | Switch prompt profile                             |
+| ⌘Y       | Switch translation style / tone (Rewrite & Coach) |
+| ⌘S       | Read translation aloud (TTS)                      |
+| ⌘⌥S      | Read aloud slowly (TTS, language practice)        |
+| ⌘⇧S      | Read source text aloud (TTS)                      |
+| ⌘R       | Retry translation / Retake screenshot             |
+| ⌘⇧C      | Copy source text / Copy without line breaks       |
+| ⌘L       | Strip line breaks (Screenshot OCR)                |
+| ⌘⇧P      | Auto paragraph (Screenshot OCR)                   |
+| ⌘⏎       | Paste translation / Translate OCR text            |
 
 Raycast extensions cannot force global hotkeys from code. Open Raycast Settings > Extensions > AI Translate and assign your preferred hotkeys to each command.
 

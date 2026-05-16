@@ -59,10 +59,55 @@ async function captureScreenshotToFile(): Promise<string | undefined> {
       maxBuffer: 1024 * 1024,
     });
     return imagePath;
-  } catch {
+  } catch (error) {
     await unlink(imagePath).catch(() => undefined);
-    return undefined;
+    if (isScreenshotCancelled(error)) {
+      return undefined;
+    }
+
+    throw new Error(`Screenshot capture failed: ${execErrorMessage(error)}`);
   }
+}
+
+function isScreenshotCancelled(error: unknown): boolean {
+  const code = execErrorCode(error);
+  const stderr = execErrorStderr(error).trim();
+  const message = execErrorMessage(error).toLowerCase();
+
+  return message.includes("cancel") || (code === 1 && stderr.length === 0);
+}
+
+function execErrorCode(error: unknown): number | undefined {
+  if (error && typeof error === "object" && "code" in error) {
+    const code = (error as { code?: unknown }).code;
+    return typeof code === "number" ? code : undefined;
+  }
+
+  return undefined;
+}
+
+function execErrorStderr(error: unknown): string {
+  if (error && typeof error === "object" && "stderr" in error) {
+    const stderr = (error as { stderr?: unknown }).stderr;
+    if (typeof stderr === "string") return stderr;
+    if (Buffer.isBuffer(stderr)) return stderr.toString("utf8");
+  }
+
+  return "";
+}
+
+function execErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message.trim()) {
+    const stderr = execErrorStderr(error).trim();
+    return stderr || error.message;
+  }
+
+  const text = String(error).trim();
+  if (text) {
+    return text;
+  }
+
+  return "Unknown error";
 }
 
 async function recognizeImageWithEngine(

@@ -1,4 +1,4 @@
-import { TranslationRequest } from "./types";
+import { RewriteTone, TranslationRequest } from "./types";
 
 const defaultPromptProfile: TranslationRequest["promptProfile"] = "screenshot";
 
@@ -75,7 +75,17 @@ function nativeExpressionInstruction(targetLanguageTitle: string): string {
   return generalInstruction.join(" ");
 }
 
-export function buildRewriteCoachPrompt(text: string): { system: string; user: string } {
+const rewriteToneInstructions: Record<RewriteTone, string> = {
+  natural: "Aim for the default everyday register a native speaker would naturally use in this situation.",
+  casual:
+    "Make it noticeably more casual and conversational — relaxed and friendly, the way you'd talk to a friend or write a casual message. Avoid slang that would be hard to understand.",
+  formal:
+    "Make it more formal and professional — polished and appropriate for work emails, documents, or business settings, without sounding stiff, bureaucratic, or robotic.",
+  concise:
+    "Make it as concise and punchy as possible while keeping the original meaning and a natural tone — cut filler words and tighten the phrasing.",
+};
+
+export function buildRewriteCoachPrompt(text: string, tone: RewriteTone = "natural"): { system: string; user: string } {
   const system = [
     "You are a bilingual English writing coach for a Chinese native speaker who wants to sound like a natural English speaker.",
     "",
@@ -83,6 +93,7 @@ export function buildRewriteCoachPrompt(text: string): { system: string; user: s
     "Rewrite the selected text so it sounds natural, idiomatic, and conversational, like something a native English speaker would actually say.",
     "If the selected text is in English, rewrite it in natural, everyday English. Keep the original meaning, intent, and level of politeness. Prefer everyday wording over stiff, formal, or textbook phrasing. Do not add new information. If the text is already natural, make only minimal edits.",
     "If the selected text is in Chinese, render it as how a native English speaker would naturally express the same idea — not a literal or word-for-word translation, but the way someone would actually say it in English in real life. Match the tone, register, and politeness of the original. Do not add new information.",
+    `TONE: ${rewriteToneInstructions[tone]}`,
     "",
     "COACHING:",
     "After rewriting, explain in Simplified Chinese why your version sounds more natural than the original. Point out the specific changes — word choice, collocations, idioms, sentence rhythm, register — and name the typical Chinese-learner habit each change fixes. Quote the English snippets you discuss. Be concrete and concise: 2 to 5 short bullet points.",

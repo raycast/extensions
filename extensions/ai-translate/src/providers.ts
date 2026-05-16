@@ -60,7 +60,7 @@ export async function translateWithProvider(config: ProviderConfig, request: Tra
   return translateWithOpenAICompatible(config, request);
 }
 
-export async function generateWithGemini(
+export async function generateWithProvider(
   config: ProviderConfig,
   prompt: { system: string; user: string },
   timeoutMs: number,
@@ -71,22 +71,21 @@ export async function generateWithGemini(
   }
   validateProviderConfig(config);
 
-  const body = {
-    system_instruction: {
-      parts: [{ text: prompt.system }],
-    },
-    contents: [
-      {
-        role: "user",
-        parts: [{ text: prompt.user }],
-      },
-    ],
-    generationConfig: {
-      temperature: 0.3,
-      maxOutputTokens,
-    },
-  };
+  if (config.id === "gemini") {
+    return generateWithGeminiProtocol(config, prompt, timeoutMs, maxOutputTokens);
+  }
+  if (config.apiProtocol === "anthropic") {
+    return generateWithAnthropicProtocol(config, prompt, timeoutMs, maxOutputTokens);
+  }
+  return generateWithOpenAIProtocol(config, prompt, timeoutMs, maxOutputTokens);
+}
 
+async function generateWithGeminiProtocol(
+  config: ProviderConfig,
+  prompt: { system: string; user: string },
+  timeoutMs: number,
+  maxOutputTokens: number,
+): Promise<string> {
   const response = await postJson<GeminiResponse>(
     geminiGenerateContentUrl(config.baseURL, config.model),
     timeoutMs,
@@ -94,7 +93,11 @@ export async function generateWithGemini(
       "x-goog-api-key": config.apiKey,
       "Content-Type": "application/json",
     },
-    body,
+    {
+      system_instruction: { parts: [{ text: prompt.system }] },
+      contents: [{ role: "user", parts: [{ text: prompt.user }] }],
+      generationConfig: { temperature: 0.3, maxOutputTokens },
+    },
   );
 
   const content = response.candidates?.[0]?.content?.parts
@@ -103,6 +106,77 @@ export async function generateWithGemini(
     .trim();
   if (!content) {
     throw new Error(response.error?.message ?? `${config.title} returned an empty response.`);
+  }
+
+  return cleanModelOutput(content);
+}
+
+async function generateWithAnthropicProtocol(
+  config: ProviderConfig,
+  prompt: { system: string; user: string },
+  timeoutMs: number,
+  maxOutputTokens: number,
+): Promise<string> {
+  const response = await postJson<AnthropicCompatibleResponse>(
+    anthropicMessagesUrl(config.baseURL),
+    timeoutMs,
+    {
+      Authorization: `Bearer ${config.apiKey}`,
+      "x-api-key": config.apiKey,
+      "api-key": config.apiKey,
+      "anthropic-version": "2023-06-01",
+      "Content-Type": "application/json",
+    },
+    {
+      model: config.model,
+      system: prompt.system,
+      messages: [{ role: "user", content: prompt.user }],
+      max_tokens: maxOutputTokens,
+      temperature: 0.3,
+      stream: false,
+    },
+  );
+
+  const content = response.content
+    ?.filter((part) => part.type === "text" || part.text)
+    .map((part) => part.text ?? "")
+    .join("")
+    .trim();
+  if (!content) {
+    throw new Error(response.error?.message ?? `${config.title} returned an empty response.`);
+  }
+
+  return cleanModelOutput(content);
+}
+
+async function generateWithOpenAIProtocol(
+  config: ProviderConfig,
+  prompt: { system: string; user: string },
+  timeoutMs: number,
+  maxOutputTokens: number,
+): Promise<string> {
+  const response = await postJson<OpenAICompatibleResponse>(
+    chatCompletionsUrl(config.baseURL),
+    timeoutMs,
+    {
+      Authorization: `Bearer ${config.apiKey}`,
+      "Content-Type": "application/json",
+    },
+    {
+      model: config.model,
+      messages: [
+        { role: "system", content: prompt.system },
+        { role: "user", content: prompt.user },
+      ],
+      temperature: 0.3,
+      stream: false,
+      max_tokens: maxOutputTokens,
+    },
+  );
+
+  const content = response.choices?.[0]?.message?.content;
+  if (!content) {
+    throw new Error(extractErrorMessage(response) ?? `${config.title} returned an empty response.`);
   }
 
   return cleanModelOutput(content);

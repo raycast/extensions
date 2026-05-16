@@ -97,11 +97,11 @@ export function getProviderConfig(
 }
 
 export function getTimeoutMs(preferences: ExtensionPreferences): number {
-  return clampNumber(Number.parseInt(preferences.requestTimeoutSeconds ?? "45", 10), 5, 180) * 1000;
+  return clampNumber(parseInteger(preferences.requestTimeoutSeconds, 45), 5, 180) * 1000;
 }
 
 export function getMaxOutputTokens(preferences: ExtensionPreferences): number {
-  return clampNumber(Number.parseInt(preferences.maxOutputTokens ?? "4096", 10), 256, 32768);
+  return clampNumber(parseInteger(preferences.maxOutputTokens, 4096), 256, 32768);
 }
 
 function stringValue(value: unknown): string {
@@ -126,6 +126,11 @@ function moveDefaultProviderFirst(ids: ProviderId[], defaultProvider: ProviderId
   }
 
   return [defaultProvider, ...ids.filter((id) => id !== defaultProvider)];
+}
+
+function parseInteger(value: string | undefined, fallback: number): number {
+  const parsed = Number.parseInt(value ?? "", 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 function clampNumber(value: number, min: number, max: number): number {

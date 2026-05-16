@@ -8,6 +8,8 @@ export type PromptProfile = "screenshot" | "general" | "technical" | "academic" 
 
 export type ModelTier = "fast" | "pro" | "custom";
 
+export type RewriteTone = "natural" | "casual" | "formal" | "concise";
+
 export type OCREngine = "local" | "tesseract" | "baidu";
 
 export type OCRTextLayout = "formatted" | "compact";
@@ -59,6 +61,7 @@ export interface ExtensionPreferences {
   geminiAPIKey?: string;
   geminiBaseURL?: string;
   geminiModel?: string;
+  geminiTTSVoice?: string;
   kimiAPIKey?: string;
   kimiBaseURL?: string;
   kimiModel?: string;

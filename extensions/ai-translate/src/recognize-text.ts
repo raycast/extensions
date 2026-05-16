@@ -19,10 +19,20 @@ export async function recognizeText(imagePath?: string): Promise<string | undefi
     return text.length > 0 ? text : undefined;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (/screenshot cancelled|no image on pasteboard|Command failed/i.test(message)) {
+    const code = execErrorCode(error);
+    if (code === 2 || (!imagePath && /screenshot cancelled|no image on pasteboard/i.test(message))) {
       return undefined;
     }
 
     throw error;
   }
+}
+
+function execErrorCode(error: unknown): number | undefined {
+  if (error && typeof error === "object" && "code" in error) {
+    const code = (error as { code?: unknown }).code;
+    return typeof code === "number" ? code : undefined;
+  }
+
+  return undefined;
 }

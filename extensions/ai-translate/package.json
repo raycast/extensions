@@ -27,6 +27,22 @@
       ]
     },
     {
+      "name": "translate-paste",
+      "title": "Translate Selection & Paste",
+      "subtitle": "AI Translate",
+      "description": "Translate the selected text with your default provider and paste the result in place — no window.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "translate",
+        "paste",
+        "replace",
+        "selection",
+        "quick",
+        "inline"
+      ]
+    },
+    {
       "name": "rewrite-coach",
       "title": "Rewrite & Coach",
       "subtitle": "AI Translate",
@@ -43,6 +59,24 @@
         "tts",
         "pronunciation",
         "gemini"
+      ]
+    },
+    {
+      "name": "rewrite-replace",
+      "title": "Rewrite & Replace",
+      "subtitle": "AI Translate",
+      "description": "Rewrite the selected text into natural English with your default provider and paste it in place — no window.",
+      "mode": "no-view",
+      "icon": "icon.png",
+      "keywords": [
+        "rewrite",
+        "replace",
+        "paste",
+        "english",
+        "natural",
+        "polish",
+        "quick",
+        "inline"
       ]
     },
     {
@@ -75,6 +109,22 @@
         "copy",
         "text",
         "recognize"
+      ]
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "subtitle": "AI Translate",
+      "description": "Browse recent translations and rewrites you copied or pasted. Replay copy, paste, or read aloud.",
+      "mode": "view",
+      "icon": "icon.png",
+      "keywords": [
+        "history",
+        "recent",
+        "log",
+        "translate",
+        "rewrite",
+        "replay"
       ]
     },
     {
@@ -571,6 +621,48 @@
       "default": "gemini-3.1-flash-lite-preview"
     },
     {
+      "title": "Read Aloud Voice",
+      "name": "geminiTTSVoice",
+      "type": "dropdown",
+      "required": false,
+      "description": "Gemini voice used for Read Aloud (text-to-speech).",
+      "default": "Kore",
+      "data": [
+        {
+          "title": "Kore (balanced)",
+          "value": "Kore"
+        },
+        {
+          "title": "Zephyr (bright)",
+          "value": "Zephyr"
+        },
+        {
+          "title": "Puck (upbeat)",
+          "value": "Puck"
+        },
+        {
+          "title": "Charon (deep)",
+          "value": "Charon"
+        },
+        {
+          "title": "Fenrir (firm)",
+          "value": "Fenrir"
+        },
+        {
+          "title": "Leda (warm)",
+          "value": "Leda"
+        },
+        {
+          "title": "Orus (calm)",
+          "value": "Orus"
+        },
+        {
+          "title": "Aoede (smooth)",
+          "value": "Aoede"
+        }
+      ]
+    },
+    {
       "title": "Kimi API Key",
       "name": "kimiAPIKey",
       "type": "password",
@@ -591,8 +683,8 @@
       "name": "kimiModel",
       "type": "textfield",
       "required": false,
-      "description": "Kimi model name. Official current default is kimi-k2.6; other options include kimi-k2.5 and moonshot-v1-8k/32k/128k.",
-      "default": "kimi-k2.6"
+      "description": "Kimi Code model name for the Anthropic-compatible coding endpoint. Use kimi-for-coding unless you also change the base URL/protocol.",
+      "default": "kimi-for-coding"
     },
     {
       "title": "OpenAI API Key",

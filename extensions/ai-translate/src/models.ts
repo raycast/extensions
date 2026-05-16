@@ -54,11 +54,12 @@ const MODEL_CATALOG: Record<ProviderId, ProviderModels> = {
     ],
   },
   kimi: {
-    fast: { id: "kimi-k2.6", title: "K2.6" },
-    pro: { id: "kimi-k2.6", title: "K2.6" },
+    fast: { id: "kimi-for-coding", title: "Kimi for Coding" },
+    pro: { id: "kimi-for-coding", title: "Kimi for Coding" },
     all: [
-      { id: "kimi-k2.6", title: "K2.6" },
-      { id: "kimi-k2.5", title: "K2.5" },
+      { id: "kimi-for-coding", title: "Kimi for Coding" },
+      { id: "kimi-k2.6", title: "K2.6 (Custom endpoint)" },
+      { id: "kimi-k2.5", title: "K2.5 (Custom endpoint)" },
     ],
   },
   openai: {

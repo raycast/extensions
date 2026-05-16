@@ -1,14 +1,33 @@
 import { environment, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
-import { execFile } from "child_process";
+import { ChildProcess, execFile } from "child_process";
 import { mkdirSync, unlink, writeFileSync } from "fs";
 import { join } from "path";
 
 const TTS_MODEL = "gemini-3.1-flash-tts-preview";
 const TTS_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
+const DEFAULT_VOICE = "Kore";
 
 const SAMPLE_RATE = 24000;
 const NUM_CHANNELS = 1;
 const BITS_PER_SAMPLE = 16;
+
+interface SpeakOptions {
+  slow?: boolean;
+}
+
+let activePlayback: ChildProcess | undefined;
+let activeController: AbortController | undefined;
+
+export function stopSpeaking(): void {
+  if (activeController) {
+    activeController.abort();
+    activeController = undefined;
+  }
+  if (activePlayback) {
+    activePlayback.kill();
+    activePlayback = undefined;
+  }
+}
 
 interface GeminiTTSResponse {
   candidates?: Array<{
@@ -27,7 +46,7 @@ interface GeminiTTSResponse {
   };
 }
 
-export async function speakText(text: string): Promise<void> {
+export async function speakText(text: string, options: SpeakOptions = {}): Promise<void> {
   const preferences = getPreferenceValues<Preferences>();
   const apiKey = preferences.geminiAPIKey?.trim();
 
@@ -43,8 +62,19 @@ export async function speakText(text: string): Promise<void> {
   const trimmed = text.trim().slice(0, 5000);
   if (!trimmed) return;
 
-  const toast = await showToast({ style: Toast.Style.Animated, title: "Reading aloud..." });
+  stopSpeaking();
+
+  const voiceName = preferences.geminiTTSVoice?.trim() || DEFAULT_VOICE;
+  const spokenText = options.slow
+    ? `Read the following slowly and clearly, enunciating each word like a language teacher helping a learner: ${trimmed}`
+    : trimmed;
+
+  const toast = await showToast({
+    style: Toast.Style.Animated,
+    title: options.slow ? "Reading aloud (slow)..." : "Reading aloud...",
+  });
   const controller = new AbortController();
+  activeController = controller;
   const timeout = setTimeout(() => controller.abort(), 30_000);
 
   try {
@@ -55,11 +85,11 @@ export async function speakText(text: string): Promise<void> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        contents: [{ parts: [{ text: trimmed }] }],
+        contents: [{ parts: [{ text: spokenText }] }],
         generationConfig: {
           responseModalities: ["AUDIO"],
           speechConfig: {
-            voiceConfig: { prebuiltVoiceConfig: { voiceName: "Kore" } },
+            voiceConfig: { prebuiltVoiceConfig: { voiceName } },
           },
         },
       }),
@@ -93,17 +123,22 @@ export async function speakText(text: string): Promise<void> {
     const audioPath = join(environment.supportPath, `tts-${Date.now()}-${Math.random().toString(16).slice(2)}.wav`);
     writeFileSync(audioPath, wavData);
 
-    execFile("/usr/bin/afplay", [audioPath], (error) => {
+    const child = execFile("/usr/bin/afplay", [audioPath], (error) => {
       unlink(audioPath, () => undefined);
+      if (activePlayback === child) {
+        activePlayback = undefined;
+      }
       if (error && !error.killed) {
         void showHUD(`Playback error: ${error.message.slice(0, 60)}`);
       }
     });
+    activePlayback = child;
 
     toast.hide();
   } catch (error) {
     toast.hide();
     if (error instanceof Error && error.name === "AbortError") {
+      if (activeController !== controller) return;
       await showToast({ style: Toast.Style.Failure, title: "TTS Timeout", message: "Request took too long" });
       return;
     }
@@ -111,6 +146,9 @@ export async function speakText(text: string): Promise<void> {
     await showToast({ style: Toast.Style.Failure, title: "TTS Failed", message: msg.slice(0, 100) });
   } finally {
     clearTimeout(timeout);
+    if (activeController === controller) {
+      activeController = undefined;
+    }
   }
 }
 

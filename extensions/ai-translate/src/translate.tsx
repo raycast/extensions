@@ -13,6 +13,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { addHistoryEntry } from "./history-store";
 import { LANGUAGE_CHOICES, getLanguageTitle, resolveTargetLanguage } from "./languages";
 import { getTierLabel } from "./models";
 import {
@@ -302,15 +303,27 @@ function ResultActions({
 }) {
   const canUseTranslation = result.status === "success" && Boolean(result.translation);
 
+  function recordHistory() {
+    if (!canUseTranslation) return;
+    void addHistoryEntry({
+      kind: "translate",
+      source: sourceText,
+      output: result.translation ?? "",
+      provider: result.providerTitle,
+      model: result.modelName,
+    });
+  }
+
   return (
     <ActionPanel>
       {canUseTranslation && (
         <ActionPanel.Section>
-          <Action.CopyToClipboard content={result.translation ?? ""} title="Copy Translation" />
+          <Action.CopyToClipboard content={result.translation ?? ""} title="Copy Translation" onCopy={recordHistory} />
           <Action.Paste
             content={result.translation ?? ""}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             title="Paste Translation"
+            onPaste={recordHistory}
           />
           <Action
             icon={Icon.SpeakerOn}
