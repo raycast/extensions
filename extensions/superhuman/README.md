@@ -1,92 +1,98 @@
 # Superhuman for Raycast
 
-Boost your email workflow with powerful contextual Superhuman integration. Draft emails with context and search your inbox using Superhuman's advanced operators - all without leaving flow.
+Drive Superhuman from Raycast AI using Superhuman's official MCP server. Read, search, draft, send, and triage email; check availability and create calendar events — all via `@superhuman` in Quick AI and AI Chat, without leaving Raycast.
 
-## Features
+## Setup
 
-This extension gives you powerful tools to manage your Superhuman inbox directly from Raycast:
+The first time you invoke any `@superhuman` tool, Raycast opens Superhuman's OAuth page in your browser. Sign in, grant access, and Raycast stores the token in its secure keychain. You can revoke access at any time from Superhuman's account settings.
 
-- **Draft Emails**: Create perfectly formatted email drafts with full support for recipients, CC/BCC, subjects, and body content
-- **Search Inbox**: Use Superhuman's powerful search operators to quickly find exactly what you need
-- **Review Before Sending**: Optional preview functionality to ensure your email looks perfect before drafting
+> The extension talks to `https://mcp.mail.superhuman.com/mcp` over OAuth 2.1 + PKCE. If your organization is on a Superhuman plan that hasn't enabled MCP access yet, you'll see an error on first connect — contact Superhuman support to enable it.
 
-## Usage Examples
+## Tools
 
-### Drafting Emails
+| Tool | What it does |
+| --- | --- |
+| `draft-email` | Create or update a Superhuman draft. Returns a draft id you can pass to `send-draft`. |
+| `search-inbox` | Search email + calendar with Superhuman operators (`from:`, `subject:`, `has:attachment`, `is:unread`, `before:`, `after:`, etc.). |
+| `send-draft` | Send a draft by id. Confirms before sending. |
+| `discard-draft` | Discard a draft. Confirms first. |
+| `undo-send` | Recall the most recent send if within the undo window. |
+| `get-thread` | Fetch a full thread so the AI can read or summarize it. |
+| `get-message` | Fetch a single message. |
+| `list-threads` | List recent threads, optionally filtered by label or split. |
+| `list-labels` | List your labels. |
+| `list-splits` | List your inbox splits (Important, Other, News, Calendar, etc.). |
+| `get-attachment` | Retrieve an attachment from a message. |
+| `get-read-status-feed` | See who has opened your recent tracked emails. |
+| `mark-spam` | Mark a thread as spam. Confirms first. |
+| `trash-thread` | Move a thread to trash. Confirms first. |
+| `unsubscribe` | Unsubscribe from the sender of a thread. Confirms first. |
+| `update-thread` | Archive/unarchive, mark read/unread, star, add or remove labels. |
+| `update-personalization` | Update name, signature, voice/tone, and default greeting. |
+| `create-or-update-event` | Create or update a calendar event. Confirms when attendees are included. |
+| `get-availability` | Free/busy for the user and optional attendees over a time range. |
 
+## Example prompts
+
+### Compose, send, recall
 ```
-@superhuman Draft an email to john@example.com about tomorrow's meeting
+@superhuman Draft an email to sarah@example.com about tomorrow's project meeting
+@superhuman Send the draft I just made
+@superhuman Undo that send
 ```
 
+### Read and summarize
 ```
-@superhuman Create a thank you email to sarah@company.com for the presentation yesterday
-```
-
-### Searching Your Inbox  
-
-```
-@superhuman Search for unread messages with "quarterly report" in the subject line
+@superhuman Summarize the latest thread from Acme Legal
+@superhuman What unread emails do I have from this morning?
+@superhuman Grab the PDF attachment on the most recent thread with the contract
 ```
 
-## Integration with Other Raycast AI Extensions
+### Triage
+```
+@superhuman Archive every newsletter from last week
+@superhuman Mark this thread as spam
+@superhuman Unsubscribe from this sender
+```
 
-Combine this extension with other Raycast AI tools for a truly powerful workflow:
+### Calendar
+```
+@superhuman Am I free Thursday at 3pm for 30 minutes?
+@superhuman Create a 30-min meeting tomorrow at 10am with foo@bar.com about the launch plan
+```
 
-### Calendar + Superhuman
-Quickly check your schedule with  Calendar and draft follow-up emails:
+## Cross-extension workflows
+
+`@superhuman` shines when combined with other Raycast AI extensions.
 
 ```
 @calendar What meetings do I have today?
 @superhuman Email the attendees of my 2pm meeting about the updated agenda
-```
 
-### GitHub + Superhuman
-Review your pull requests and notify team members:
-
-```
 @github Show my open PRs
 @superhuman Draft an email to the team about the status of the frontend PR
-```
 
-### Things + Superhuman 
-Review your tasks and communicate updates:
-
-```
-@things Show my tasks due today
-@superhuman Email Sarah about the progress on the marketing task
-```
-
-### Notion + Superhuman
-Check project documentation and share information:
-
-```
 @notion Summarize the marketing strategy page
 @superhuman Draft an email to the marketing team with insights from our strategy document
 ```
 
-## Advanced Search Operators
+## Search operators
 
-When using the Search Superhuman tool, you can leverage these powerful operators:
+Pass these directly in a search query, lowercase, no space after the colon:
 
-- `from:name` → Find emails from a specific sender
-- `to:name` → Find emails sent to someone
-- `"exact phrase"` → Search for an exact phrase
-- `has:attachment` → Find emails with attachments
-- `subject:topic` → Search email subjects
-- `in:sent` → Search in Sent folder
-- `in:inbox` → Search in Inbox
-- `is:unread` → Find unread emails
-- `is:starred` → Find starred emails
-- `before:YYYY/MM/DD` → Emails before date
-- `after:YYYY/MM/DD` → Emails after date
-- `older_than:Xd` → Emails older than X days
-- `newer_than:Xm` → Emails newer than X months
+- `from:name` / `to:name`
+- `subject:topic` (multi-word values are OK; no quotes needed)
+- `"exact phrase"` for full-text phrases
+- `has:attachment`
+- `in:sent`, `in:inbox`, `-in:inbox`, `in:<label>`
+- `is:unread`, `is:starred`, `is:shared`
+- `before:YYYY/MM/DD`, `after:YYYY/MM/DD`
+- `older_than:Xd`, `newer_than:Xm`
 
+## Feedback
 
-## Feedback and Contributions
-
-Have ideas for improving this extension? Found a bug? We'd love to hear from you! Please file an issue/PR on the GitHub repository.
+Bugs and feature requests: file an issue on the [raycast/extensions](https://github.com/raycast/extensions) repo.
 
 ---
 
-Built with ❤️ for Raycast and Superhuman power users
+Built for Raycast and Superhuman power users.

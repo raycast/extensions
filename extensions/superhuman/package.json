@@ -2,9 +2,12 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "superhuman",
   "title": "Superhuman",
-  "description": "Boost your email workflow with powerful contextual Superhuman integration. Draft emails with context and search your inbox using Superhuman's advanced operators - all without leaving flow.",
+  "description": "Drive Superhuman from Raycast AI: read, search, draft, send, and triage email; check availability and create calendar events — all via Superhuman's official MCP server.",
   "icon": "extension-icon.png",
   "author": "jlokos",
+  "contributors": [
+    "andrewbenson"
+  ],
   "categories": [
     "Communication",
     "Productivity"
@@ -14,7 +17,7 @@
     {
       "name": "placeholder",
       "title": "Placeholder",
-      "description": "Placeholder until as extensions require a command",
+      "description": "Placeholder until extensions no longer require a command",
       "mode": "no-view"
     }
   ],
@@ -22,16 +25,135 @@
     {
       "name": "draft-email",
       "title": "Draft Email",
-      "description": "Create a new email draft in Superhuman with recipient, subject, and body.",
+      "description": "Create or update a Superhuman draft via the MCP create_or_update_draft tool. Supports recipient, cc, bcc, subject, and body. Always pass full email addresses.",
       "icon": "extension-icon.png",
-      "keywords": ["compose", "write", "new", "email", "mail", "message", "send", "draft", "create", "author", "prepare"]
+      "keywords": ["compose", "write", "new", "email", "mail", "message", "draft", "create", "author"]
     },
     {
       "name": "search-inbox",
-      "title": "Search Superhuman",
-      "description": "Search for emails within Superhuman using search operators like from:, to:, subject:, has:attachment. Supports complex queries to help find specific emails.",
+      "title": "Search Email & Calendar",
+      "description": "Search existing email and calendar via the MCP query_email_and_calendar tool. Supports Superhuman operators (from:, to:, subject:, has:attachment, is:unread, before:, after:, etc.).",
       "icon": "extension-icon.png",
-      "keywords": ["find", "search", "query", "emails", "messages", "filter", "locate", "discover", "inbox"]
+      "keywords": ["find", "search", "query", "emails", "calendar", "filter", "locate"]
+    },
+    {
+      "name": "send-draft",
+      "title": "Send Draft",
+      "description": "Send an existing Superhuman draft by id. Requires a confirmation before sending.",
+      "icon": "extension-icon.png",
+      "keywords": ["send", "deliver", "email", "draft"]
+    },
+    {
+      "name": "discard-draft",
+      "title": "Discard Draft",
+      "description": "Permanently discard a Superhuman draft. Requires confirmation.",
+      "icon": "extension-icon.png",
+      "keywords": ["discard", "delete", "trash", "draft", "remove"]
+    },
+    {
+      "name": "undo-send",
+      "title": "Undo Send",
+      "description": "Recall the most recently sent email if Superhuman's undo-send window has not elapsed.",
+      "icon": "extension-icon.png",
+      "keywords": ["undo", "recall", "unsend"]
+    },
+    {
+      "name": "get-thread",
+      "title": "Get Thread",
+      "description": "Fetch a full email thread (subject, participants, all messages) so the AI can summarize or read it.",
+      "icon": "extension-icon.png",
+      "keywords": ["thread", "conversation", "read", "fetch", "email"]
+    },
+    {
+      "name": "get-message",
+      "title": "Get Message",
+      "description": "Fetch a single email message by id (headers, body, attachment metadata).",
+      "icon": "extension-icon.png",
+      "keywords": ["message", "read", "fetch", "email"]
+    },
+    {
+      "name": "list-threads",
+      "title": "List Threads",
+      "description": "List recent email threads, optionally filtered by label or split. Use search-inbox for free-text queries.",
+      "icon": "extension-icon.png",
+      "keywords": ["inbox", "threads", "list", "recent", "unread"]
+    },
+    {
+      "name": "list-labels",
+      "title": "List Labels",
+      "description": "List all labels in the user's Superhuman account.",
+      "icon": "extension-icon.png",
+      "keywords": ["labels", "tags", "folders"]
+    },
+    {
+      "name": "list-splits",
+      "title": "List Splits",
+      "description": "List Superhuman inbox splits (e.g. Important, Other, News, Calendar) and their ids.",
+      "icon": "extension-icon.png",
+      "keywords": ["splits", "inbox", "categories"]
+    },
+    {
+      "name": "get-attachment",
+      "title": "Get Attachment",
+      "description": "Retrieve a message attachment by message and attachment id (returns metadata and/or content as provided by Superhuman).",
+      "icon": "extension-icon.png",
+      "keywords": ["attachment", "file", "download"]
+    },
+    {
+      "name": "get-read-status-feed",
+      "title": "Read Status Feed",
+      "description": "Get the Superhuman read-status feed: which recipients have opened recent tracked emails and when.",
+      "icon": "extension-icon.png",
+      "keywords": ["read", "tracking", "opened", "status"]
+    },
+    {
+      "name": "mark-spam",
+      "title": "Mark as Spam",
+      "description": "Mark a thread as spam. Requires confirmation.",
+      "icon": "extension-icon.png",
+      "keywords": ["spam", "junk", "block"]
+    },
+    {
+      "name": "trash-thread",
+      "title": "Trash Thread",
+      "description": "Move a thread to trash. Requires confirmation.",
+      "icon": "extension-icon.png",
+      "keywords": ["trash", "delete", "remove"]
+    },
+    {
+      "name": "unsubscribe",
+      "title": "Unsubscribe",
+      "description": "Unsubscribe from the mailing list that sent a given thread. Requires confirmation.",
+      "icon": "extension-icon.png",
+      "keywords": ["unsubscribe", "mailing list", "newsletter"]
+    },
+    {
+      "name": "update-thread",
+      "title": "Update Thread",
+      "description": "Update a thread: archive/unarchive, mark read/unread, star/unstar, add or remove labels.",
+      "icon": "extension-icon.png",
+      "keywords": ["archive", "read", "unread", "star", "label", "thread", "update"]
+    },
+    {
+      "name": "update-personalization",
+      "title": "Update Personalization",
+      "description": "Update Superhuman personalization (full name, signature, voice/tone, default greeting) used by the assistant when composing email.",
+      "icon": "extension-icon.png",
+      "keywords": ["personalization", "signature", "voice", "tone", "preferences"]
+    },
+    {
+      "name": "create-or-update-event",
+      "title": "Create or Update Event",
+      "description": "Create a new calendar event or update an existing one. Requires confirmation when attendees are set.",
+      "icon": "extension-icon.png",
+      "keywords": ["calendar", "event", "meeting", "schedule", "invite"]
+    },
+    {
+      "name": "get-availability",
+      "title": "Get Availability",
+      "description": "Get free/busy availability for the user (and optionally other attendees) over a time range.",
+      "icon": "extension-icon.png",
+      "keywords": ["availability", "free", "busy", "calendar", "meeting", "schedule"]
     }
   ],
   "preferences": [
@@ -39,14 +161,309 @@
       "name": "enableDraftPreviews",
       "title": "Draft Preferences",
       "label": "Enable Draft Previews",
-      "description": "Show a preview of the email before creating it, allowing you to review before opening in Superhuman",
+      "description": "Show a preview of the email before creating it, allowing you to review before the draft is created in Superhuman.",
       "type": "checkbox",
       "required": false,
       "default": true
     }
   ],
+  "ai": {
+    "instructions": "This extension drives Superhuman through Superhuman's official MCP server (https://mcp.mail.superhuman.com/mcp).\n\nGeneral rules:\n- For email composition use draft-email, NOT search-inbox.\n- Always pass full email addresses (e.g. \"alex@example.com\"), never just first names. If only a first name is given and no other context provides an address, append \"@example.com\".\n- When the user gives multiple \"To\" recipients, pass them all in `recipient` as a comma-separated list — NOT in cc/bcc.\n- Never produce Markdown links like [text](url). Provide complete URLs in plain text. Always include FULL meeting URLs (Zoom etc.) with all query parameters.\n- For send-draft, discard-draft, trash-thread, mark-spam, unsubscribe, and create-or-update-event with attendees: a confirmation dialog is shown — present the user with what will happen.\n- After draft-email returns a draft id, chain send-draft if the user said to send.\n\nSearch rules (search-inbox / query_email_and_calendar):\n- Use lowercase operators with NO space after the colon: from:john, subject:budget, has:attachment.\n- Do not wrap operator values in quotes.\n- For \"from John\" queries, format as \"from:john\".\n- For multi-word subjects, use \"subject:multi word\" without quotes.\n- Do not add scopes like in:inbox unless the user explicitly asks.\n\nReading and triage:\n- To answer questions about specific email, chain list-threads or search-inbox → get-thread (or get-message) so the AI can read actual content.\n- For attachments, find the message via get-thread/get-message, then call get-attachment with the message id and attachment id.\n\nCalendar:\n- For \"am I free…\" questions use get-availability with an ISO 8601 time range.\n- For \"schedule a meeting\" use create-or-update-event; if attendees are present a confirmation will fire.\n\nWhen combining with other Raycast AI extensions (Google Calendar, GitHub, Notion, Things), gather details first from the other extension, then call draft-email directly with the assembled information.",
+    "evals": [
+      {
+        "input": "@superhuman Draft an email to sarah@example.com about our project meeting tomorrow",
+        "mocks": {
+          "draft-email": { "draftId": "drf_001", "message": "Draft created for sarah@example.com" }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "draft-email",
+              "arguments": { "recipient": "sarah@example.com" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Search for emails from John about the quarterly report",
+        "mocks": {
+          "search-inbox": { "results": [] }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-inbox",
+              "arguments": { "query": "from:john subject:quarterly report" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman I need to email Alex about the Zoom meeting tomorrow. It's at 2pm and the Zoom link is https://zoom.us/j/123456789?pwd=abcdefg",
+        "mocks": {
+          "draft-email": { "draftId": "drf_002" }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "draft-email",
+              "arguments": { "recipient": "alex@example.com" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Did John send me any emails about the budget proposal last week?",
+        "mocks": {
+          "search-inbox": { "results": [] }
+        },
+        "expected": [
+          { "callsTool": { "name": "search-inbox" } }
+        ]
+      },
+      {
+        "input": "@superhuman Can you write an email to the entire team about the quarterly results? Include a link to our slide deck at https://docs.google.com/presentation/d/1AbCdEfGhIjKlMnOpQrStUvWxYz/edit",
+        "mocks": {
+          "draft-email": { "draftId": "drf_003" }
+        },
+        "expected": [
+          { "callsTool": { "name": "draft-email" } }
+        ]
+      },
+      {
+        "input": "@superhuman Find all emails from marketing@company.com that have attachments",
+        "mocks": {
+          "search-inbox": { "results": [] }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-inbox",
+              "arguments": { "query": "from:marketing@company.com has:attachment" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Send an email to john@example.com and alice@example.com about the upcoming team meeting",
+        "mocks": {
+          "draft-email": { "draftId": "drf_004" }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "draft-email",
+              "arguments": { "recipient": "john@example.com, alice@example.com" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Draft an email to dev@example.com with subject 'API Documentation Update', CC product@example.com, BCC manager@example.com, and include a link to our docs at https://docs.example.com/api",
+        "mocks": {
+          "draft-email": { "draftId": "drf_005" }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "draft-email",
+              "arguments": {
+                "recipient": "dev@example.com",
+                "cc": "product@example.com",
+                "bcc": "manager@example.com",
+                "subject": "API Documentation Update"
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Find unread emails from the design team",
+        "mocks": {
+          "search-inbox": { "results": [] }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "search-inbox",
+              "arguments": {
+                "query": {
+                  "and": [
+                    { "includes": "is:unread" },
+                    { "includes": "from:design" }
+                  ]
+                }
+              }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman I need to contact Jane about the client presentation",
+        "mocks": {
+          "draft-email": { "draftId": "drf_006" }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "draft-email",
+              "arguments": { "recipient": "jane@example.com" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Send an email to MARK about the project timeline",
+        "mocks": {
+          "draft-email": { "draftId": "drf_007" }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "draft-email",
+              "arguments": { "recipient": "mark@example.com" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman What unread threads do I have right now?",
+        "mocks": {
+          "list-threads": { "threads": [] }
+        },
+        "expected": [
+          { "callsTool": { "name": "list-threads" } }
+        ]
+      },
+      {
+        "input": "@superhuman Show me the most recent thread, then summarize it",
+        "mocks": {
+          "list-threads": { "threads": [{ "id": "thr_1", "subject": "Re: launch" }] },
+          "get-thread": { "id": "thr_1", "subject": "Re: launch", "messages": [] }
+        },
+        "expected": [
+          { "callsTool": { "name": "list-threads" } },
+          { "callsTool": { "name": "get-thread", "arguments": { "threadId": "thr_1" } } }
+        ]
+      },
+      {
+        "input": "@superhuman Send the draft I just made (id drf_009)",
+        "mocks": {
+          "send-draft": { "ok": true }
+        },
+        "expected": [
+          { "callsTool": { "name": "send-draft", "arguments": { "draftId": "drf_009" } } }
+        ]
+      },
+      {
+        "input": "@superhuman Discard draft drf_010",
+        "mocks": {
+          "discard-draft": { "ok": true }
+        },
+        "expected": [
+          { "callsTool": { "name": "discard-draft", "arguments": { "draftId": "drf_010" } } }
+        ]
+      },
+      {
+        "input": "@superhuman Undo the last send",
+        "mocks": { "undo-send": { "ok": true } },
+        "expected": [{ "callsTool": { "name": "undo-send" } }]
+      },
+      {
+        "input": "@superhuman Open message msg_42",
+        "mocks": { "get-message": { "id": "msg_42" } },
+        "expected": [{ "callsTool": { "name": "get-message", "arguments": { "messageId": "msg_42" } } }]
+      },
+      {
+        "input": "@superhuman List all my labels",
+        "mocks": { "list-labels": { "labels": [] } },
+        "expected": [{ "callsTool": { "name": "list-labels" } }]
+      },
+      {
+        "input": "@superhuman What splits do I have set up?",
+        "mocks": { "list-splits": { "splits": [] } },
+        "expected": [{ "callsTool": { "name": "list-splits" } }]
+      },
+      {
+        "input": "@superhuman Grab attachment att_1 from message msg_1",
+        "mocks": { "get-attachment": { "ok": true } },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "get-attachment",
+              "arguments": { "messageId": "msg_1", "attachmentId": "att_1" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Who has opened my recent tracked emails?",
+        "mocks": { "get-read-status-feed": { "events": [] } },
+        "expected": [{ "callsTool": { "name": "get-read-status-feed" } }]
+      },
+      {
+        "input": "@superhuman Mark thread thr_7 as spam",
+        "mocks": { "mark-spam": { "ok": true } },
+        "expected": [
+          { "callsTool": { "name": "mark-spam", "arguments": { "threadId": "thr_7" } } }
+        ]
+      },
+      {
+        "input": "@superhuman Trash thread thr_8",
+        "mocks": { "trash-thread": { "ok": true } },
+        "expected": [
+          { "callsTool": { "name": "trash-thread", "arguments": { "threadId": "thr_8" } } }
+        ]
+      },
+      {
+        "input": "@superhuman Unsubscribe from the sender of thread thr_9",
+        "mocks": { "unsubscribe": { "ok": true } },
+        "expected": [
+          { "callsTool": { "name": "unsubscribe", "arguments": { "threadId": "thr_9" } } }
+        ]
+      },
+      {
+        "input": "@superhuman Archive thread thr_10 and mark it read",
+        "mocks": { "update-thread": { "ok": true } },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-thread",
+              "arguments": { "threadId": "thr_10", "archived": true, "read": true }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Update my signature to 'Andrew Benson — andrew@hill.com'",
+        "mocks": { "update-personalization": { "ok": true } },
+        "expected": [
+          {
+            "callsTool": {
+              "name": "update-personalization",
+              "arguments": { "signature": "Andrew Benson — andrew@hill.com" }
+            }
+          }
+        ]
+      },
+      {
+        "input": "@superhuman Create a 30 minute meeting tomorrow at 10am with foo@bar.com",
+        "mocks": { "create-or-update-event": { "id": "evt_1" } },
+        "expected": [
+          { "callsTool": { "name": "create-or-update-event" } }
+        ]
+      },
+      {
+        "input": "@superhuman Am I free Thursday at 3pm for 30 minutes?",
+        "mocks": { "get-availability": { "free": true } },
+        "expected": [
+          { "callsTool": { "name": "get-availability" } }
+        ]
+      }
+    ]
+  },
   "dependencies": {
-    "@raycast/api": "^1.93.2",
+    "@raycast/api": "^1.104.1",
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {

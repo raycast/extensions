@@ -1,190 +1,108 @@
-import { open, getPreferenceValues } from "@raycast/api";
-import { Tool } from "@raycast/api";
+import { Tool, getPreferenceValues } from "@raycast/api";
+import { callMcpTool } from "../lib/mcp";
 
 interface Preferences {
   enableDraftPreviews: boolean;
 }
 
 /**
- * Input parameters for the draft-email tool
- * This tool is specifically for creating a new email draft with provided information,
- * NOT for searching emails. It assumes you already have the recipient information.
- * If the email contains markdown links, they will be converted to plain text and you must then convert to rich media.
+ * Input parameters for the draft-email tool.
+ * Use this ONLY for composing a new email or updating an existing draft, NOT for searching.
+ * Always pass full email addresses for recipients, never just first names.
+ * If body contains Markdown links, they are flattened to plain text URLs before sending to Superhuman.
  */
 type Input = {
   /**
-   * The email address of the recipient
+   * Existing draft id to update. Omit to create a new draft.
+   */
+  draftId?: string;
+  /**
+   * Comma-separated list of "To" email addresses (e.g. "alex@example.com, sam@example.com").
    */
   recipient?: string;
-
   /**
-   * Comma-separated list of CC recipients
+   * Comma-separated list of CC email addresses.
    */
   cc?: string;
-
   /**
-   * Comma-separated list of BCC recipients
+   * Comma-separated list of BCC email addresses.
    */
   bcc?: string;
-
   /**
-   * The subject line of the email
+   * The subject line of the email.
    */
   subject?: string;
-
   /**
-   * The body content of the email
+   * The body content of the email (plain text; Markdown links will be flattened).
    */
   body?: string;
 };
 
-/**
- * Optional confirmation before creating an email draft
- */
+interface DraftResponse {
+  draftId?: string;
+  draft_id?: string;
+  url?: string;
+  message?: string;
+}
+
 export const confirmation: Tool.Confirmation<Input> = async (input) => {
   const { enableDraftPreviews } = getPreferenceValues<Preferences>();
+  if (!enableDraftPreviews) return undefined;
 
-  // If draft previews are disabled, skip confirmation
-  if (!enableDraftPreviews) {
-    return undefined;
-  }
-
-  // Check if recipient is properly formatted as an email address
-  if (input.recipient && !hasValidEmailAddress(input.recipient)) {
+  if (input.recipient && !input.recipient.includes("@")) {
     return {
-      message: `⚠️ Warning: "${input.recipient}" does not appear to be a valid email address.
-Always use full email addresses (e.g., "name@example.com") rather than just names.
-      
-Please correct the recipient format before creating the draft.`,
+      message: `⚠️ "${input.recipient}" does not look like an email address.\nProvide a full address (e.g., "name@example.com") before drafting.`,
       image: "⚠️",
     };
   }
 
-  let message = "Create email draft";
-  const image = "✉️";
-
-  if (input.recipient) {
-    message += ` to: ${input.recipient}`;
-  }
-
-  if (input.subject) {
-    message += `\nSubject: ${input.subject}`;
-  }
-
-  // Create email preview content for confirmation dialog
-  const info = [];
-
-  if (input.recipient) {
-    info.push({ name: "To", value: input.recipient });
-  }
-
-  if (input.cc) {
-    info.push({ name: "CC", value: input.cc });
-  }
-
-  if (input.bcc) {
-    info.push({ name: "BCC", value: input.bcc });
-  }
-
-  if (input.subject) {
-    info.push({ name: "Subject", value: input.subject });
-  }
-
-  if (input.body) {
-    info.push({ name: "Body", value: input.body });
-  }
+  const info: { name: string; value: string }[] = [];
+  if (input.recipient) info.push({ name: "To", value: input.recipient });
+  if (input.cc) info.push({ name: "CC", value: input.cc });
+  if (input.bcc) info.push({ name: "BCC", value: input.bcc });
+  if (input.subject) info.push({ name: "Subject", value: input.subject });
+  if (input.body) info.push({ name: "Body", value: input.body });
 
   return {
-    message,
-    image,
+    message: input.draftId ? "Update email draft" : "Create email draft",
+    image: "✉️",
     info,
   };
 };
 
-/**
- * Checks if a recipient string contains a valid email address
- * @param recipient The recipient string to check
- * @returns Whether the recipient contains an @ symbol
- */
-function hasValidEmailAddress(recipient: string): boolean {
-  return recipient.includes("@");
+function flattenMarkdownLinks(text: string): string {
+  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (_m, label, url) => `${label}: ${url}`);
 }
 
-/**
- * Converts Markdown links to plain URLs to ensure they work in email clients
- * @param text The text that may contain Markdown links
- * @returns Text with Markdown links converted to plain URLs
- */
-function convertMarkdownLinksToPlainText(text: string): string {
-  if (!text) return text;
-
-  // Replace Markdown links [text](url) with formatted text (handles URL parameters better)
-  return text.replace(/\[([^\]]+)\]\(([^)]+)\)/g, (match, linkText, url) => {
-    // Make sure we don't lose any URL parameters by keeping the URL intact
-    return `${linkText}: ${url}`;
-  });
+function splitList(value?: string): string[] | undefined {
+  if (!value) return undefined;
+  const parts = value
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return parts.length ? parts : undefined;
 }
 
-/**
- * Ensures recipient has a proper email format
- * @param recipient The recipient string to check and format if needed
- * @returns A properly formatted email address
- */
-function ensureProperEmailFormat(recipient?: string): string | undefined {
-  if (!recipient) return undefined;
-
-  // If it already has an @ symbol, assume it's properly formatted
-  if (recipient.includes("@")) {
-    return recipient;
-  }
-
-  // Otherwise, append @example.com
-  return `${recipient.toLowerCase()}@example.com`;
-}
-
-/**
- * Creates a new email draft using Superhuman deeplinks.
- * This tool should be used for composing emails when you have recipient information,
- * not for searching emails.
- */
 export default async function tool(input: Input): Promise<string> {
-  try {
-    console.log(`Creating email draft in Superhuman`);
+  const body = input.body ? flattenMarkdownLinks(input.body) : undefined;
 
-    // Ensure recipient has proper email format
-    input.recipient = ensureProperEmailFormat(input.recipient);
+  const args: Record<string, unknown> = {};
+  if (input.draftId) args.draft_id = input.draftId;
+  const to = splitList(input.recipient);
+  if (to) args.to = to;
+  const cc = splitList(input.cc);
+  if (cc) args.cc = cc;
+  const bcc = splitList(input.bcc);
+  if (bcc) args.bcc = bcc;
+  if (input.subject) args.subject = input.subject;
+  if (body) args.body = body;
 
-    // Convert any Markdown links to plain text
-    if (input.body) {
-      const originalBody = input.body;
-      input.body = convertMarkdownLinksToPlainText(input.body);
-
-      if (originalBody !== input.body) {
-        console.log("Converted Markdown links to plain text in email body");
-        console.log("Original body:", originalBody);
-        console.log("Converted body:", input.body);
-      }
-    }
-
-    let url = "superhuman://~compose/mailto:";
-    const params: string[] = [];
-
-    if (input.recipient) params.push(`to=${encodeURIComponent(input.recipient)}`); // who to send to
-    if (input.cc) params.push(`cc=${encodeURIComponent(input.cc)}`); // cc
-    if (input.bcc) params.push(`bcc=${encodeURIComponent(input.bcc)}`); // bcc
-    if (input.subject) params.push(`subject=${encodeURIComponent(input.subject)}`); // subject
-    if (input.body) params.push(`body=${encodeURIComponent(input.body)}`); // body
-
-    if (params.length > 0) {
-      url += `?${params.join("&")}`;
-    }
-
-    console.log(`Opening Superhuman with URL: ${url}`); // open the url in superhuman
-    await open(url);
-
-    return `Email draft created successfully${input.recipient ? ` for ${input.recipient}` : ""}`; // return a success message
-  } catch (error) {
-    console.error("Failed to create email draft:", error);
-    return `Failed to create email draft: ${String(error)}. Please try again.`;
-  }
+  const result = await callMcpTool<DraftResponse>("create_or_update_draft", args);
+  const id = result?.draftId ?? result?.draft_id;
+  if (id)
+    return `Draft ${input.draftId ? "updated" : "created"} (id: ${id})${input.recipient ? ` for ${input.recipient}` : ""}.`;
+  return (
+    result?.message ??
+    `Draft ${input.draftId ? "updated" : "created"}${input.recipient ? ` for ${input.recipient}` : ""}.`
+  );
 }
