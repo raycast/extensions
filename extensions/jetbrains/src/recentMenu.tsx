@@ -16,6 +16,10 @@ const menuIcon = {
 function buildSubtitle(entry: recentEntry): string {
   const branchSuffix = entry.branch ? `  ⎇ ${entry.branch}` : "";
   const budget = maxTitleLength - entry.title.length - branchSuffix.length;
+  if (entry.branch && budget < 2) {
+    // Branch suffix would leave no room for the path — drop the branch instead.
+    return buildSubtitle({ ...entry, branch: undefined });
+  }
   const truncatedParts = entry.parts.length < budget ? entry.parts : entry.parts.substring(0, budget - 2) + "…";
   return `← ${truncatedParts}${branchSuffix}`;
 }
