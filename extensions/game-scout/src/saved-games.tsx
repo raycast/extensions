@@ -393,7 +393,11 @@ export default function SavedGames() {
                   if (lastPrice != null && currentPrice !== lastPrice) {
                     const diffAbs = currentPrice - lastPrice;
                     const diffPct =
-                      lastPrice === 0 ? 100 : (diffAbs / lastPrice) * 100;
+                      lastPrice === 0
+                        ? diffAbs > 0
+                          ? 100
+                          : 0
+                        : (diffAbs / lastPrice) * 100;
 
                     if (Math.abs(diffPct) >= 3) {
                       let label = "";
