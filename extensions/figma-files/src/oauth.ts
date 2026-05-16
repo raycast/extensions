@@ -22,11 +22,15 @@ export const figma = new OAuthService({
   scope: "file_content:read,file_metadata:read,file_versions:read,projects:read",
   personalAccessToken: PERSONAL_ACCESS_TOKEN,
   onAuthorize: async ({ token, type }) => {
-    const headers =
-      type === "oauth" ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": token };
-    const response = await fetch("https://api.figma.com/v1/me", { headers });
-    if (!response.ok) return;
-    const user = (await response.json()) as { handle: string; img_url: string };
-    setUserInfo({ name: user.handle, icon: user.img_url });
+    try {
+      const headers =
+        type === "oauth" ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": token };
+      const response = await fetch("https://api.figma.com/v1/me", { headers });
+      if (!response.ok) return;
+      const user = (await response.json()) as { handle: string; img_url: string };
+      setUserInfo({ name: user.handle, icon: user.img_url });
+    } catch {
+      // Non-critical: a transient failure here doesn't affect the OAuth handshake
+    }
   },
 });
