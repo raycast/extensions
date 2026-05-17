@@ -19,8 +19,6 @@ import {
 } from "./useGHRateLimit";
 import { getRefreshIntervalMs } from "./preferences";
 
-const DEFAULT_MENU_BAR_TEMPLATE = "GH {warning}{remaining}";
-
 function usageColor(pct: number): Color {
   if (pct >= 80) return Color.Red;
   if (pct >= 50) return Color.Yellow;
@@ -43,7 +41,7 @@ export default function MenuBarGHUsage() {
   const { data, isLoading, error, revalidate } = useGHRateLimit();
   const mbPrefs = getPreferenceValues<Preferences.MenubarGhUsage>();
   const resourceKey = mbPrefs.menuBarResource || "core";
-  const template = mbPrefs.menuBarTemplate || DEFAULT_MENU_BAR_TEMPLATE;
+  const template = mbPrefs.menuBarTemplate;
   const featuredResource =
     data?.resources[resourceKey as keyof typeof data.resources];
 

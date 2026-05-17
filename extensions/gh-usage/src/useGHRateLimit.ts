@@ -1,6 +1,6 @@
 import { useExec } from "@raycast/utils";
 import { useEffect } from "react";
-import { getGhCommand, getRefreshIntervalMs } from "./preferences";
+import { getGhCommand, getGhEnv, getRefreshIntervalMs } from "./preferences";
 import {
   RateLimitResponseSchema,
   type RateLimitResource,
@@ -16,6 +16,7 @@ export function useGHRateLimit() {
   const result = useExec(getGhCommand(), ["api", "rate_limit"], {
     keepPreviousData: true,
     parseOutput,
+    env: getGhEnv(),
   });
 
   const intervalMs = getRefreshIntervalMs();
