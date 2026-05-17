@@ -25,15 +25,6 @@ export function getWordCount(text: string) {
   return matches?.length ?? 0;
 }
 
-export function getCodeFence(text: string) {
-  const longestBacktickRun = Math.max(
-    2,
-    ...Array.from(text.matchAll(/`+/g), (match) => match[0].length),
-  );
-
-  return "`".repeat(longestBacktickRun + 1);
-}
-
 export function formatDictationMarkdown(text: string) {
   if (text.trim().length === 0) {
     return "_Empty dictation_";

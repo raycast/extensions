@@ -11,8 +11,8 @@ export default async function Command() {
       message: "Install or open Codex first, then try again.",
       primaryAction: {
         title: "Install Codex",
-        onAction: () => {
-          open(CODEX_APP_URL);
+        onAction: async () => {
+          await open(CODEX_APP_URL);
         },
       },
     });
