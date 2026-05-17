@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [v2.3.3] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Session usage now parses the singular `session` key emitted by ccusage v19 while keeping the previous `sessions` format working.
+
 ## [v2.3.2] - 2026-04-24
 
 ### Added

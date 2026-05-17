@@ -106,7 +106,7 @@ export const MonthlyUsageCommandResponseSchema = z.object({
   monthly: z.array(MonthlyUsageResponseSchema),
 });
 
-export const SessionUsageCommandResponseSchema = z.object({
+const SessionUsageCommandResponseBaseSchema = z.object({
   sessions: z.array(SessionResponseSchema),
   totals: z.object({
     inputTokens: z.number(),
@@ -117,6 +117,19 @@ export const SessionUsageCommandResponseSchema = z.object({
     totalTokens: z.number(),
   }),
 });
+
+export const SessionUsageCommandResponseSchema = z.preprocess((value) => {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return value;
+  }
+
+  const response = value as Record<string, unknown>;
+  if (!("sessions" in response) && Array.isArray(response.session)) {
+    return { ...response, sessions: response.session };
+  }
+
+  return value;
+}, SessionUsageCommandResponseBaseSchema);
 
 export const LimitWindowSchema = z.object({
   utilization: z.number(),
