@@ -10,6 +10,10 @@ const useOptionalSelection = (setContent: Dispatch<SetStateAction<string>>, disa
   const enabled = useSelectionSetting() && !disabled;
   const dataIsAlreadySet = useRef(false);
   const { isLoading, data } = usePromise(async () => {
+    if (!enabled) {
+      return "";
+    }
+
     try {
       return await getSelectedText();
     } catch (_error) {
