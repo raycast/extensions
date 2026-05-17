@@ -5,6 +5,9 @@
   "description": "Measure Distance Between Two Points",
   "icon": "icon.png",
   "author": "anwarulislam",
+  "contributors": [
+    "yusifaliyevpro"
+  ],
   "pastContributors": [
     "thomaslombart"
   ],
