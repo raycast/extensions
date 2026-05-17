@@ -142,15 +142,22 @@ export default function Command() {
         let overview = null;
 
         if (gameIds.length > 0) {
-          const oRes = await fetch(
-            `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
-            {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(gameIds),
-            },
-          );
-          overview = await oRes.json();
+          try {
+            const oRes = await fetch(
+              `https://api.isthereanydeal.com/games/overview/v2?key=${API_KEY}&country=${COUNTRY}&nondeals=true`,
+              {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(gameIds),
+              },
+            );
+
+            if (oRes.ok) {
+              overview = await oRes.json();
+            }
+          } catch {
+            // Silently catch overview failures to preserve search results
+          }
         }
 
         setSearchData(results);
