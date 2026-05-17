@@ -1,6 +1,6 @@
 # Spotify Player Changelog
 
-## [Add Keyboard Shortcuts] - {PR_MERGE_DATE}
+## [Add Keyboard Shortcuts] - 2026-05-17
 
 - Added shortcuts for opening Your Library and Search from Now Playing and Add Playing Song to Playlist
 - Added shortcuts for liking, disliking, adding to playlists, connecting devices, and showing related content
