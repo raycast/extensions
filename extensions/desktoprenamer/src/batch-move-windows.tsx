@@ -164,10 +164,8 @@ export default function Command() {
       toast.style = Toast.Style.Success;
       toast.title = `Successfully moved ${totalMoved} window${totalMoved === 1 ? "" : "s"}`;
       await popToRoot();
-    } catch (e) {
-      toast.style = Toast.Style.Failure;
-      toast.title = "Batch move failed";
-      toast.message = String(e);
+    } catch {
+      await toast.hide();
       setIsExecuting(false);
     }
   }
