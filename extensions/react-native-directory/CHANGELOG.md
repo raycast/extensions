@@ -1,6 +1,6 @@
 # React Native Directory Changelog
 
-## [Fixed] - {PR_MERGE_DATE}
+## [Fixed] - 2026-05-17
 
 - Fixed a Raycast Beta crash caused by list item subtitles with only tooltip text.
 - Hid library row descriptions when the detail pane is expanded.
