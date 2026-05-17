@@ -1,5 +1,9 @@
 # Audio Device Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Show a confirmation when manually running the enforce device commands.
+
 ## [Add Keyboard Shortcuts] - 2026-05-16
 
 - Add Save shortcut for creating device quicklinks
