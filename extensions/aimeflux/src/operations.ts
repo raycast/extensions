@@ -104,9 +104,7 @@ export const operations: Operation[] = [
       pushFlag(args, "--mode", textValue(values, "mode"));
       pushFlag(args, "--llm", textValue(values, "llm"));
 
-      return request("Process Text", args, {
-        requiresAppRunning: textValue(values, "llm") === "on",
-      });
+      return request("Process Text", args);
     },
   },
   {
@@ -149,6 +147,7 @@ export const operations: Operation[] = [
     fields: [
       optionalTextArea("text", "Text", "Paste the text to import"),
       optionalModeDropdown("mode", "Mode"),
+      dropdown("llm", "LLM Cleanup", llmOptions, "off"),
     ],
     validate: requireText("text", "Provide text to import."),
     buildRequest: (values) => {
@@ -156,6 +155,7 @@ export const operations: Operation[] = [
       const args = ["import-text", text];
 
       pushFlag(args, "--mode", textValue(values, "mode"));
+      pushFlag(args, "--llm", textValue(values, "llm"));
 
       return {
         label: "Import Text Into History",

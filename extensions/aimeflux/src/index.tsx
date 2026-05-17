@@ -34,6 +34,14 @@ import {
   runAimeFlux,
 } from "./cli";
 import { Operation, operations } from "./operations";
+import {
+  importedHistoryItemWasCreated,
+  parseHistoryItems,
+  parseImportedHistoryId,
+  parsePackageRecord,
+  type HistoryItem,
+  type PackageRecord,
+} from "./output-parsers";
 
 type ExecutionState = {
   isLoading: boolean;
@@ -53,15 +61,6 @@ type HistoryFilters = {
   query: string;
   source: string;
   range: string;
-};
-
-type HistoryItem = {
-  id: string;
-  timestamp: string;
-  mode: string;
-  source: string;
-  summary: string;
-  raw: string;
 };
 
 type ReplacementFilters = {
@@ -102,25 +101,6 @@ type PackageItem = {
   record?: PackageRecord;
 };
 
-type PackageRecord = {
-  id: string;
-  name: string;
-  author: string;
-  version: string;
-  description: string;
-  enabled: string;
-  modeId: string;
-  modeName: string;
-  language: string;
-  translate: string;
-  prompt: string;
-  vocabulary: string;
-  replacements: string;
-  appBindings: string;
-  metadata: Record<string, string>;
-  raw: string;
-};
-
 type ModeRecord = {
   id: string;
   name: string;
@@ -153,6 +133,7 @@ const reprocessLlmModeOptions: Option[] = [
   { title: "On", value: "on" },
   { title: "Off", value: "off" },
 ];
+const IMPORT_HISTORY_CHECK_LIMIT = 10;
 
 export function ControlCenterCommand() {
   const groupedOperations = useMemo(() => {
@@ -1042,6 +1023,11 @@ function WatchBrowser() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [searchText, setSearchText] = useState("");
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  const refresh = () => {
+    setRefreshToken((current) => current + 1);
+  };
 
   useEffect(() => {
     let active = true;
@@ -1092,7 +1078,7 @@ function WatchBrowser() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [refreshToken]);
 
   const visibleItems = useMemo(() => {
     const query = searchText.trim().toLowerCase();
@@ -1120,7 +1106,7 @@ function WatchBrowser() {
           title="Watch Folders Unavailable"
           subtitle={error}
           icon={Icon.ExclamationMark}
-          actions={<WatchActions />}
+          actions={<WatchActions onRefresh={refresh} />}
         />
       ) : null}
       {!error && visibleItems.length === 0 && !isLoading ? (
@@ -1128,7 +1114,7 @@ function WatchBrowser() {
           title="No Watch Folders"
           subtitle="Add a watch folder first."
           icon={Icon.Folder}
-          actions={<WatchActions />}
+          actions={<WatchActions onRefresh={refresh} />}
         />
       ) : null}
       {visibleItems.map((item, index) => (
@@ -1138,9 +1124,7 @@ function WatchBrowser() {
           title={item.name}
           subtitle={item.path}
           accessories={[
-            { text: item.mode },
-            { tag: item.llm === "true" ? "LLM" : "Raw" },
-            { tag: `#${item.id}` },
+            { tag: item.enabled === "true" ? "Enabled" : "Disabled" },
           ]}
           detail={
             <List.Item.Detail
@@ -1159,10 +1143,17 @@ function WatchBrowser() {
                     text={item.model}
                   />
                   <List.Item.Detail.Metadata.Separator />
-                  <List.Item.Detail.Metadata.Label
-                    title="LLM"
-                    text={item.llm}
-                  />
+                  <List.Item.Detail.Metadata.TagList title="LLM">
+                    <List.Item.Detail.Metadata.TagList.Item
+                      text={item.llm === "true" ? "Yes" : "No"}
+                    />
+                  </List.Item.Detail.Metadata.TagList>
+                  <List.Item.Detail.Metadata.Separator />
+                  <List.Item.Detail.Metadata.TagList title="Includes Subfolders">
+                    <List.Item.Detail.Metadata.TagList.Item
+                      text={item.subfolders === "true" ? "Yes" : "No"}
+                    />
+                  </List.Item.Detail.Metadata.TagList>
                   <List.Item.Detail.Metadata.Separator />
                   <List.Item.Detail.Metadata.Label
                     title="Formats"
@@ -1178,7 +1169,7 @@ function WatchBrowser() {
             />
           }
           actions={
-            <WatchActions>
+            <WatchActions onRefresh={refresh}>
               <Action.Push
                 title="Process This Folder"
                 icon={Icon.ArrowClockwise}
@@ -1287,38 +1278,16 @@ function PackageBrowser({ kind }: { kind: PackageKind }) {
         }
 
         const parsedItems = parsePackageItems(kind, result.stdout);
-        const hydratedItems = await Promise.all(
-          parsedItems.map(async (item) => {
-            try {
-              const detailResult = await runAimeFlux({
-                label: `Show ${item.name || item.id}`,
-                args: [kind, "show", item.id],
-              });
+        setItems(parsedItems);
+        setIsLoading(false);
 
-              if (detailResult.exitCode !== 0) {
-                return item;
-              }
+        void hydratePackageItems(kind, parsedItems).then((hydratedItems) => {
+          if (!active) {
+            return;
+          }
 
-              const record = parsePackageRecord(detailResult.stdout);
-              return {
-                ...item,
-                name: record.name || item.name,
-                enabled: record.enabled
-                  ? record.enabled === "true"
-                  : item.enabled,
-                record,
-              };
-            } catch {
-              return item;
-            }
-          }),
-        );
-
-        if (!active) {
-          return;
-        }
-
-        setItems(hydratedItems);
+          setItems(hydratedItems);
+        });
       } catch (loadError) {
         if (!active) {
           return;
@@ -1456,10 +1425,13 @@ function PackageBrowser({ kind }: { kind: PackageKind }) {
                     {item.record.translate ? (
                       <>
                         <List.Item.Detail.Metadata.Separator />
-                        <List.Item.Detail.Metadata.Label
-                          title="Translate"
-                          text={item.record.translate}
-                        />
+                        <List.Item.Detail.Metadata.TagList title="Translate">
+                          <List.Item.Detail.Metadata.TagList.Item
+                            text={
+                              item.record.translate === "true" ? "Yes" : "No"
+                            }
+                          />
+                        </List.Item.Detail.Metadata.TagList>
                       </>
                     ) : null}
                   </List.Item.Detail.Metadata>
@@ -1648,7 +1620,11 @@ function ModeDetailView({ modeId }: { modeId: string }) {
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label title="Language" text={record.language} />
             <Detail.Metadata.Separator />
-            <Detail.Metadata.Label title="Translate" text={record.translate} />
+            <Detail.Metadata.TagList title="Translate">
+              <Detail.Metadata.TagList.Item
+                text={record.translate === "true" ? "Yes" : "No"}
+              />
+            </Detail.Metadata.TagList>
             <Detail.Metadata.Separator />
             <Detail.Metadata.Label
               title="Vocabulary"
@@ -1748,13 +1724,19 @@ function ReplacementActions({
   );
 }
 
-function WatchActions({ children }: { children?: ReactNode }) {
+function WatchActions({
+  children,
+  onRefresh,
+}: {
+  children?: ReactNode;
+  onRefresh?: () => void;
+}) {
   return (
     <ActionPanel>
-      <Action.Push
+      <Action
         title="Refresh"
         icon={Icon.ArrowClockwise}
-        target={<WatchBrowser />}
+        onAction={() => onRefresh?.()}
       />
       {children}
     </ActionPanel>
@@ -2007,50 +1989,6 @@ function buildReplacementArgs(filters: ReplacementFilters) {
   return args;
 }
 
-function parseHistoryItems(output: string): HistoryItem[] {
-  const items: HistoryItem[] = [];
-
-  for (const rawLine of output.split("\n")) {
-    const line = rawLine.trim();
-    if (!line) {
-      continue;
-    }
-
-    const match = line.match(
-      /^#(?<id>\d+)\s+\[(?<timestamp>[^\]]+)\]\s+\((?<mode>.+?)\/(?<source>voice|text|transcribe)(?:\s+llm=(?<llmInline>[^\s)]+))?(?:\s+reprocessed=(?<reprocessedInline>[^\s)]+))?\)\s*(?:\[(?<extra>[^\]]+)\]\s*)?(?<summary>.*)$/,
-    );
-
-    if (!match?.groups) {
-      const lastItem = items[items.length - 1];
-      if (lastItem) {
-        lastItem.summary = [lastItem.summary, line].filter(Boolean).join("\n");
-        lastItem.raw = [lastItem.raw, line].filter(Boolean).join("\n");
-      } else {
-        items.push({
-          id: "unknown",
-          timestamp: "",
-          mode: "Unknown",
-          source: "unknown",
-          summary: line,
-          raw: line,
-        });
-      }
-      continue;
-    }
-
-    items.push({
-      id: match.groups.id,
-      timestamp: match.groups.timestamp,
-      mode: match.groups.mode,
-      source: match.groups.source,
-      summary: match.groups.summary,
-      raw: line,
-    });
-  }
-
-  return items;
-}
-
 async function loadLatestHistoryItem() {
   const result = await runAimeFlux({
     label: "Latest History Item",
@@ -2217,121 +2155,31 @@ function parsePackageItems(kind: PackageKind, output: string): PackageItem[] {
     });
 }
 
-function parsePackageRecord(output: string): PackageRecord {
-  const record: PackageRecord = {
-    id: "",
-    name: "",
-    author: "",
-    version: "",
-    description: "",
-    enabled: "",
-    modeId: "",
-    modeName: "",
-    language: "",
-    translate: "",
-    prompt: "",
-    vocabulary: "",
-    replacements: "",
-    appBindings: "",
-    metadata: {},
-    raw: output,
-  };
+async function hydratePackageItems(kind: PackageKind, items: PackageItem[]) {
+  return await Promise.all(
+    items.map(async (item) => {
+      try {
+        const detailResult = await runAimeFlux({
+          label: `Show ${item.name || item.id}`,
+          args: [kind, "show", item.id],
+        });
 
-  let currentKey = "";
+        if (detailResult.exitCode !== 0) {
+          return item;
+        }
 
-  for (const rawLine of output.split("\n")) {
-    if (/^\d{4}\//.test(rawLine)) {
-      continue;
-    }
-
-    const line = rawLine.trimEnd();
-    if (!line.trim()) {
-      continue;
-    }
-
-    const match = line.match(/^([^:]+):\s*(.*)$/);
-    if (match) {
-      const key = match[1].trim();
-      const value = match[2].trim().replace(/^"|"$/g, "");
-      currentKey = key;
-      record.metadata[key] = value;
-
-      switch (key) {
-        case "id":
-          record.id = value;
-          break;
-        case "name":
-          record.name = value;
-          break;
-        case "author":
-          record.author = value;
-          break;
-        case "version":
-          record.version = value;
-          break;
-        case "description":
-          record.description = value;
-          break;
-        case "enabled":
-          record.enabled = value;
-          break;
-        case "mode_id":
-          record.modeId = value;
-          break;
-        case "mode_name":
-          record.modeName = value;
-          break;
-        case "language":
-          record.language = value;
-          break;
-        case "translate":
-          record.translate = value;
-          break;
-        case "prompt":
-          record.prompt = value;
-          break;
-        case "vocabulary":
-          record.vocabulary = value;
-          break;
-        case "replacements":
-          record.replacements = value;
-          break;
-        case "app_bindings":
-          record.appBindings = value;
-          break;
-        default:
-          break;
+        const record = parsePackageRecord(detailResult.stdout);
+        return {
+          ...item,
+          name: record.name || item.name,
+          enabled: record.enabled ? record.enabled === "true" : item.enabled,
+          record,
+        };
+      } catch {
+        return item;
       }
-
-      continue;
-    }
-
-    if (currentKey) {
-      const appendedValue = [record.metadata[currentKey], line.trim()]
-        .filter(Boolean)
-        .join("\n");
-      record.metadata[currentKey] = appendedValue;
-
-      switch (currentKey) {
-        case "prompt":
-          record.prompt = appendedValue;
-          break;
-        case "description":
-          record.description = appendedValue;
-          break;
-        case "vocabulary":
-          record.vocabulary = appendedValue;
-          break;
-        case "replacements":
-          record.replacements = appendedValue;
-          break;
-        default:
-          break;
-      }
-    }
-  }
-
-  return record;
+    }),
+  );
 }
 
 function parseModeRecord(output: string): ModeRecord {
@@ -2701,11 +2549,26 @@ function ExecutionView({
   const markdown = useMemo(() => renderMarkdown(title, state), [title, state]);
   const hasFailed =
     state.result?.exitCode !== undefined && state.result.exitCode !== 0;
-  const primaryCopyTitle = hasFailed ? "Copy Error Output" : "Copy Result";
+  const primaryCopyTitle = hasFailed
+    ? state.result?.stderr
+      ? "Copy Error Output"
+      : "Copy Result Output"
+    : "Copy Result";
   const primaryCopyContent = hasFailed
     ? (state.result?.stderr ?? state.result?.stdout ?? "")
     : (state.result?.stdout ?? "");
   const shouldPasteResult = !hasFailed && shouldPasteResultByDefault(request);
+  const importHistoryId = useMemo(
+    () =>
+      isImportTextRequest(request)
+        ? parseImportedHistoryId(
+            [state.result?.stdout, state.result?.stderr]
+              .filter(Boolean)
+              .join("\n"),
+          )
+        : undefined,
+    [request, state.result?.stderr, state.result?.stdout],
+  );
 
   return (
     <Detail
@@ -2721,10 +2584,13 @@ function ExecutionView({
             title={primaryCopyTitle}
             content={primaryCopyContent}
           />
+          {importHistoryId ? (
+            <Action.CopyToClipboard title="Copy ID" content={importHistoryId} />
+          ) : null}
           {state.result?.stdout && hasFailed && state.result?.stderr ? (
             <Action.CopyToClipboard
-              title="Copy Error Output"
-              content={state.result.stderr}
+              title="Copy Standard Output"
+              content={state.result.stdout}
             />
           ) : null}
         </ActionPanel>
@@ -2734,19 +2600,27 @@ function ExecutionView({
 }
 
 function shouldPasteResultByDefault(request: CommandRequest) {
-  return request.args[0] === "process" || request.args[0] === "import-text";
+  return isProcessRequest(request) || isImportTextRequest(request);
+}
+
+function isProcessRequest(request: CommandRequest) {
+  return request.args[0] === "process";
+}
+
+function isImportTextRequest(request: CommandRequest) {
+  return request.args[0] === "import-text";
 }
 
 async function executeRequest(title: string, request: CommandRequest) {
   try {
-    const importBaselineId = shouldTrackImportHistory(request)
-      ? await getLatestRelevantHistoryId(request)
+    const importBaselineIds = shouldTrackImportHistory(request)
+      ? await getRelevantHistoryBaselineIds(request)
       : undefined;
     let result = await runAimeFlux(request);
 
     if (
       shouldTreatImportBusyAsSuccess(request, result) &&
-      (await verifyImportedHistoryItem(request, importBaselineId))
+      (await verifyImportedHistoryItem(request, importBaselineIds))
     ) {
       result = {
         ...result,
@@ -2794,7 +2668,7 @@ function shouldTreatImportBusyAsSuccess(
   request: CommandRequest,
   result: { exitCode: number; stdout: string; stderr: string },
 ) {
-  if (request.args[0] !== "import-text" || result.exitCode === 0) {
+  if (!isImportTextRequest(request) || result.exitCode === 0) {
     return false;
   }
 
@@ -2803,61 +2677,53 @@ function shouldTreatImportBusyAsSuccess(
 }
 
 function shouldTrackImportHistory(request: CommandRequest) {
-  return request.args[0] === "import-text";
+  return isImportTextRequest(request);
 }
 
-async function getLatestRelevantHistoryId(request: CommandRequest) {
+async function getRelevantHistoryBaselineIds(request: CommandRequest) {
   const verificationResult = await runAimeFlux({
     label: "Get Latest Relevant History Item",
-    args: buildImportHistoryCheckArgs(request, "1"),
+    args: buildImportHistoryCheckArgs(
+      request,
+      String(IMPORT_HISTORY_CHECK_LIMIT),
+    ),
   });
 
   if (verificationResult.exitCode !== 0) {
-    return undefined;
+    return [];
   }
 
-  return parseHistoryItems(verificationResult.stdout)[0]?.id;
+  return parseHistoryItems(verificationResult.stdout)
+    .map((item) => item.id)
+    .filter(Boolean);
 }
 
 async function verifyImportedHistoryItem(
   request: CommandRequest,
-  baselineId?: string,
+  baselineIds: string[] = [],
 ) {
   const importedText = request.args[1]?.trim();
-  if (!importedText && !baselineId) {
+  if (!importedText) {
     return false;
   }
 
   const verificationResult = await runAimeFlux({
     label: "Verify Imported History Item",
-    args: buildImportHistoryCheckArgs(request, "5"),
+    args: buildImportHistoryCheckArgs(
+      request,
+      String(IMPORT_HISTORY_CHECK_LIMIT),
+    ),
   });
 
   if (verificationResult.exitCode !== 0) {
     return false;
   }
 
-  const parsedItems = parseHistoryItems(verificationResult.stdout);
-  const latestId = parsedItems[0]?.id;
-  if (baselineId && latestId && latestId !== baselineId) {
-    return true;
-  }
-
-  if (!importedText) {
-    return false;
-  }
-
-  const normalizedImported = normalizeHistoryComparisonText(importedText);
-  const importedPrefix = normalizedImported.slice(0, 120);
-
-  return parsedItems.some((item) => {
-    const normalizedSummary = normalizeHistoryComparisonText(item.summary);
-    return (
-      normalizedSummary === normalizedImported ||
-      normalizedSummary.startsWith(importedPrefix) ||
-      importedPrefix.startsWith(normalizedSummary)
-    );
-  });
+  return importedHistoryItemWasCreated(
+    importedText,
+    parseHistoryItems(verificationResult.stdout),
+    baselineIds,
+  );
 }
 
 function buildImportHistoryCheckArgs(request: CommandRequest, limit: string) {
@@ -2867,10 +2733,6 @@ function buildImportHistoryCheckArgs(request: CommandRequest, limit: string) {
     args.push("--mode", request.args[modeIndex + 1]);
   }
   return args;
-}
-
-function normalizeHistoryComparisonText(value: string) {
-  return value.replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 function renderMarkdown(title: string, state: ExecutionState) {

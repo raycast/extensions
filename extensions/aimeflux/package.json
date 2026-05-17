@@ -129,6 +129,7 @@
   "scripts": {
     "dev": "ray develop",
     "build": "ray build",
+    "test": "tsc -p tsconfig.test.json && node --test dist-tests/tests/*.test.js",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix"
   },
