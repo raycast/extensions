@@ -75,7 +75,7 @@ export default function GHUsage() {
   const items = RESOURCE_ORDER.filter(
     (key) => resources && key in resources,
   ).map((key) => {
-    const resource = resources![key as keyof typeof resources];
+    const resource = resources![key as keyof NonNullable<typeof resources>];
     if (!resource) return null;
 
     const pct = usagePct(resource.used, resource.limit);
