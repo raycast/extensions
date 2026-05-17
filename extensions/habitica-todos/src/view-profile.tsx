@@ -170,7 +170,7 @@ export default function Command() {
               onAction={handleToggleSleep}
             />
           </ActionPanel.Section>
-          {userLevel >= 10 && skills.length > 0 && (
+          {skills.length > 0 && userLevel >= Math.min(...skills.map((s) => s.level)) && (
             <ActionPanel.Section title="Skills">
               {skills.map((skill) => {
                 const canCast = userLevel >= skill.level && userMp >= skill.mana;

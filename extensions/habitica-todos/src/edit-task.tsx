@@ -51,29 +51,43 @@ export default function EditTaskForm({ task, onUpdated }: EditTaskFormProps) {
       }
     }
 
+    await showToast({ style: Toast.Style.Animated, title: "Updating task…" });
+
     try {
-      await showToast({ style: Toast.Style.Animated, title: "Updating task…" });
       await updateTask(task.id, body);
-
-      const desired = new Set(values.tags ?? []);
-      const current = new Set(task.tags ?? []);
-      const toAdd = [...desired].filter((id) => !current.has(id));
-      const toRemove = [...current].filter((id) => !desired.has(id));
-      await Promise.all([
-        ...toAdd.map((id) => addTagToTask(task.id, id)),
-        ...toRemove.map((id) => removeTagFromTask(task.id, id)),
-      ]);
-
-      await showToast({ style: Toast.Style.Success, title: "Task updated!" });
-      onUpdated();
-      pop();
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
         title: "Failed to update task",
         message: String(error),
       });
+      return;
     }
+
+    const desired = new Set(values.tags ?? []);
+    const current = new Set(task.tags ?? []);
+    const toAdd = [...desired].filter((id) => !current.has(id));
+    const toRemove = [...current].filter((id) => !desired.has(id));
+
+    try {
+      await Promise.all([
+        ...toAdd.map((id) => addTagToTask(task.id, id)),
+        ...toRemove.map((id) => removeTagFromTask(task.id, id)),
+      ]);
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Task saved, but tag sync failed",
+        message: String(error),
+      });
+      onUpdated();
+      pop();
+      return;
+    }
+
+    await showToast({ style: Toast.Style.Success, title: "Task updated!" });
+    onUpdated();
+    pop();
   }
 
   return (

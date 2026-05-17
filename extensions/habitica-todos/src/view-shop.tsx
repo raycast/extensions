@@ -336,7 +336,7 @@ export default function Command() {
                       />
                       <Action.OpenInBrowser
                         title="Open Habitica Equipment"
-                        url="https://habitica.com/shops/market"
+                        url="https://habitica.com/inventory/equipment"
                         shortcut={{ modifiers: ["cmd"], key: "o" }}
                       />
                     </ActionPanel>
