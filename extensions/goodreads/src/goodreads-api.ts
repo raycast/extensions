@@ -18,6 +18,7 @@ const HEADERS = {
   "sec-fetch-dest": "document",
   "sec-fetch-mode": "navigate",
 };
+const JSON_HEADERS = { ...HEADERS, accept: "application/json" };
 const RETRY_BASE_DELAY = 1000;
 
 export const getCacheKey = (url: string): string => {
@@ -69,6 +70,14 @@ const getBookAutoCompleteUrl = (query: string) =>
 
 export const getDetailsPageUrl = (path: string) => `${GOODREADS_URL_BASE}${path}`;
 
+const getDetailsPagePath = (url: string) => {
+  if (url.startsWith(GOODREADS_URL_BASE)) {
+    return url.slice(GOODREADS_URL_BASE.length);
+  }
+
+  return url;
+};
+
 export const fetchBooksByTitle = async (title: string): Promise<ApiResponse<Book[]>> => {
   const url = getBookAutoCompleteUrl(title);
 
@@ -80,7 +89,7 @@ export const fetchBooksByTitle = async (title: string): Promise<ApiResponse<Book
       title: book.title,
       author: book.author?.name ?? "",
       rating: book.avgRating,
-      contentUrl: { detailsPage: book.bookUrl },
+      contentUrl: { detailsPage: getDetailsPagePath(book.bookUrl) },
     }));
 
     return { status: AsyncStatus.Success, data };
@@ -141,7 +150,7 @@ const fetchJsonWithRetry = async <T>(url: string, limit = 2): Promise<T> => {
 
   while (retryCount < limit) {
     try {
-      return await got(url, { retry: { limit }, headers: HEADERS }).json<T>();
+      return await got(url, { retry: { limit: 0 }, headers: JSON_HEADERS }).json<T>();
     } catch (error) {
       console.log(`Failed to fetch ${url}. ${error}`);
 
