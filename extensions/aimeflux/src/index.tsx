@@ -128,7 +128,7 @@ const defaultReplacementFilters: ReplacementFilters = {
   mode: "",
 };
 
-const reprocessLlmModeOptions: Option[] = [
+const reprocessLlmOptions: Option[] = [
   { title: "Original", value: "original" },
   { title: "On", value: "on" },
   { title: "Off", value: "off" },
@@ -827,6 +827,12 @@ function HistoryBrowser() {
                 icon={Icon.ArrowClockwise}
                 target={<ReprocessHistoryItemForm transcriptId={item.id} />}
               />
+              <Action
+                title="Delete"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                onAction={() => deleteHistoryItem(item, setItems)}
+              />
             </HistoryActions>
           }
         />
@@ -1246,6 +1252,24 @@ async function toggleWatchProcessing(
   });
 }
 
+async function deleteHistoryItem(
+  item: HistoryItem,
+  setItems: Dispatch<SetStateAction<HistoryItem[]>>,
+) {
+  const result = await executeRequest("Delete History Item", {
+    label: "Delete History Item",
+    args: ["history", "delete", item.id],
+  });
+
+  if (result?.exitCode !== 0) {
+    return;
+  }
+
+  setItems((current) =>
+    current.filter((candidate) => candidate.id !== item.id),
+  );
+}
+
 function PackageBrowser({ kind }: { kind: PackageKind }) {
   const [items, setItems] = useState<PackageItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -1504,7 +1528,7 @@ function ReprocessHistoryItemForm({ transcriptId }: { transcriptId: string }) {
   async function submit(values: FormValues) {
     const args = ["reprocess", transcriptId];
     const mode = values.mode ? String(values.mode).trim() : "";
-    const llmMode = values.llmMode ? String(values.llmMode).trim() : "original";
+    const llm = values.llm ? String(values.llm).trim() : "original";
 
     if (mode) {
       args.push("--mode", mode);
@@ -1514,8 +1538,8 @@ function ReprocessHistoryItemForm({ transcriptId }: { transcriptId: string }) {
       "current",
       "--replacement-source",
       "current",
-      "--llm-mode",
-      llmMode,
+      "--llm",
+      llm,
     );
 
     push(
@@ -1549,10 +1573,10 @@ function ReprocessHistoryItemForm({ transcriptId }: { transcriptId: string }) {
           />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="llmMode" title="LLM Mode" defaultValue="original">
-        {reprocessLlmModeOptions.map((option) => (
+      <Form.Dropdown id="llm" title="LLM" defaultValue="original">
+        {reprocessLlmOptions.map((option) => (
           <Form.Dropdown.Item
-            key={`reprocess-llm-mode-${option.value}`}
+            key={`reprocess-llm-${option.value}`}
             value={option.value}
             title={option.title}
           />

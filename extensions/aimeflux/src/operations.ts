@@ -26,11 +26,6 @@ const llmOptions = [
   { title: "On", value: "on" },
   { title: "Off", value: "off" },
 ];
-const llmModeOptions = [
-  { title: "Original", value: "original" },
-  { title: "On", value: "on" },
-  { title: "Off", value: "off" },
-];
 const sourceOptions = [
   blankOption,
   { title: "Voice", value: "voice" },
