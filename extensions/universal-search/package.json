@@ -1,0 +1,438 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "universal-search",
+  "title": "Universal Search",
+  "description": "Search Obsidian vault notes, apps, files, bookmarks, contacts, calendar events, scripts, and photos from one command with image, PDF, Office, Parquet, and Mermaid previews.",
+  "icon": "extension-icon.png",
+  "author": "fabian_erbach",
+  "license": "MIT",
+  "categories": [
+    "Productivity",
+    "System"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search",
+      "title": "Universal Search",
+      "description": "Universal Search",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "obsidianVaultPath",
+      "title": "Obsidian Vault Path",
+      "description": "Absolute path to your Obsidian vault (markdown notes are searched here and excluded from file results).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "enableObsidian",
+      "title": "Sources",
+      "label": "Obsidian Vault",
+      "description": "Search markdown notes inside the configured vault.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableFileContents",
+      "title": "",
+      "label": "File Contents",
+      "description": "Search inside file contents via Spotlight (excludes the Obsidian vault).",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableFileNames",
+      "title": "",
+      "label": "File Names",
+      "description": "Search files by name via Spotlight (excludes the Obsidian vault).",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableFolders",
+      "title": "",
+      "label": "Folders",
+      "description": "Search folders by name via Spotlight.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableApplications",
+      "title": "",
+      "label": "Applications",
+      "description": "Search installed macOS Applications (name / bundle ID). Launch with Enter.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableScriptCommands",
+      "title": "",
+      "label": "Script Commands",
+      "description": "Search Raycast-style Script Commands from the configured folder.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableBookmarks",
+      "title": "",
+      "label": "Safari Bookmarks",
+      "description": "Search Safari bookmarks by title or URL.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableContacts",
+      "title": "",
+      "label": "Contacts",
+      "description": "Search macOS Contacts (name / organisation / email / phone). Requires Raycast to be granted Contacts access in System Settings → Privacy & Security → Contacts.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enableEvents",
+      "title": "",
+      "label": "Calendar Events",
+      "description": "Search Calendar events (title / location / description). Requires Raycast to be granted Calendar access in System Settings → Privacy & Security → Calendars.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "enablePhotos",
+      "title": "",
+      "label": "Photos",
+      "description": "Search Photos.app assets by filename, media type, date, and dimensions. Requires Raycast Full Disk Access.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "photosLibraryPath",
+      "title": "Photos Library Path",
+      "description": "Path to the Photos library package. Universal Search reads its local database, so Raycast needs Full Disk Access.",
+      "type": "textfield",
+      "required": false,
+      "default": "~/Pictures/Photos Library.photoslibrary"
+    },
+    {
+      "name": "scriptCommandsPath",
+      "title": "Script Commands Path",
+      "description": "Folder containing Raycast-style Script Commands.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "eventLookbackDays",
+      "title": "Event Lookback (days)",
+      "description": "How many days into the past to include events from.",
+      "type": "textfield",
+      "required": false,
+      "default": "30"
+    },
+    {
+      "name": "eventLookaheadDays",
+      "title": "Event Lookahead (days)",
+      "description": "How many days into the future to include events from.",
+      "type": "textfield",
+      "required": false,
+      "default": "90"
+    },
+    {
+      "name": "maxPerSource",
+      "title": "Max Results per Source",
+      "description": "Fallback result cap for any source without its own limit below.",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "maxApplications",
+      "title": "Max Applications",
+      "description": "Optional result cap for Applications. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxScriptCommands",
+      "title": "Max Script Commands",
+      "description": "Optional result cap for Script Commands. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxFileContents",
+      "title": "Max File Contents",
+      "description": "Optional result cap for File Contents. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxFileNames",
+      "title": "Max File Names",
+      "description": "Optional result cap for File Names. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxFolders",
+      "title": "Max Folders",
+      "description": "Optional result cap for Folders. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxObsidian",
+      "title": "Max Obsidian Vault",
+      "description": "Optional result cap for Obsidian Vault. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxBookmarks",
+      "title": "Max Safari Bookmarks",
+      "description": "Optional result cap for Safari Bookmarks. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxContacts",
+      "title": "Max Contacts",
+      "description": "Optional result cap for Contacts. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxEvents",
+      "title": "Max Calendar Events",
+      "description": "Optional result cap for Calendar Events. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "maxPhotos",
+      "title": "Max Photos",
+      "description": "Optional result cap for Photos. Leave blank to use Max Results per Source.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "showRecentItems",
+      "title": "Recent Items",
+      "label": "Show recent items on empty search",
+      "description": "Show recently opened results when the search field is empty.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "recentItemsCount",
+      "title": "Recent Items Count",
+      "description": "How many recent results to show when opening Universal Search.",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "priorityApplications",
+      "title": "Applications Priority",
+      "description": "Applications priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "1"
+    },
+    {
+      "name": "priorityFileContents",
+      "title": "File Contents Priority",
+      "description": "File Contents priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "3"
+    },
+    {
+      "name": "priorityScriptCommands",
+      "title": "Script Commands Priority",
+      "description": "Script Commands priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "2"
+    },
+    {
+      "name": "priorityFileNames",
+      "title": "File Names Priority",
+      "description": "File Names priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "4"
+    },
+    {
+      "name": "priorityFolders",
+      "title": "Folders Priority",
+      "description": "Folders priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "5"
+    },
+    {
+      "name": "priorityObsidian",
+      "title": "Obsidian Vault Priority",
+      "description": "Obsidian Vault priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "6"
+    },
+    {
+      "name": "priorityBookmarks",
+      "title": "Safari Bookmarks Priority",
+      "description": "Safari Bookmarks priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "7"
+    },
+    {
+      "name": "priorityContacts",
+      "title": "Contacts Priority",
+      "description": "Contacts priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "8"
+    },
+    {
+      "name": "priorityEvents",
+      "title": "Calendar Events Priority",
+      "description": "Calendar Events priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "9"
+    },
+    {
+      "name": "priorityPhotos",
+      "title": "Photos Priority",
+      "description": "Photos priority. Lower numbers appear first and win cross-section deduplication ties.",
+      "type": "textfield",
+      "required": false,
+      "default": "10"
+    },
+    {
+      "name": "excludeGlobal",
+      "title": "Exclude — All Sources",
+      "description": "Comma-separated patterns applied to every source. Treated as path prefixes for files / folders / notes (supports ~) AND as URL substrings for bookmarks.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "excludeFileContents",
+      "title": "Exclude — File Contents",
+      "description": "Comma-separated list of path prefixes to exclude from File Contents results (supports ~).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "excludeFileNames",
+      "title": "Exclude — File Names",
+      "description": "Comma-separated list of path prefixes to exclude from File Names results (supports ~).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "excludeFolders",
+      "title": "Exclude — Folders",
+      "description": "Comma-separated list of path prefixes to exclude from Folder results (supports ~).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "excludeObsidian",
+      "title": "Exclude — Obsidian Vault",
+      "description": "Comma-separated list of path prefixes (inside the vault) to exclude from Note results (supports ~).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "excludeBookmarks",
+      "title": "Exclude — Safari Bookmarks",
+      "description": "Comma-separated list of URL substrings (case-insensitive) to exclude from Bookmark results.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "defaultEditor",
+      "title": "Default Editor",
+      "description": "Path or app name to open files with (⌘E). Accepts an absolute binary path (e.g. /opt/homebrew/bin/zed) or an .app bundle name (e.g. Zed).",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    },
+    {
+      "name": "showPreviewPath",
+      "title": "Preview Header",
+      "label": "Show path / URL",
+      "description": "Display the file path or bookmark URL at the top of the preview pane.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    },
+    {
+      "name": "showPreviewMetadata",
+      "title": "",
+      "label": "Show modified · size",
+      "description": "Display modified date and file size under the preview header.",
+      "type": "checkbox",
+      "required": false,
+      "default": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.80.0",
+    "@raycast/utils": "^1.17.0",
+    "dompurify": "^3.4.3",
+    "jsdom": "^29.1.1",
+    "mermaid": "^11.15.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.2.14",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "react": "^19.2.6",
+    "typescript": "^5.3.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}

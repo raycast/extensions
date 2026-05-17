@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.DS_Store
+*.log
+.vscode/
+.idea/
+.env*
+raycast-env.d.ts
+coverage/
