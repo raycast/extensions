@@ -38,6 +38,14 @@
       "mode": "view"
     },
     {
+      "name": "toggle-llm-cleanup",
+      "title": "Toggle LLM Cleanup",
+      "subtitle": "AimeFlux",
+      "description": "Toggle the global AimeFlux LLM cleanup setting.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
       "name": "process-text",
       "title": "Process Text",
       "subtitle": "AimeFlux",

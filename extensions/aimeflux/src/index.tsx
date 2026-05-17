@@ -241,6 +241,31 @@ function AutoRunOperation({ operation }: { operation: Operation }) {
           return;
         }
 
+        if (operation.id === "cleanup-toggle") {
+          const message = await toggleGlobalLlmCleanup();
+          if (!active) {
+            return;
+          }
+
+          if (operation.closeOnSuccess) {
+            await closeMainWindow({ clearRootSearch: true });
+            await showHUD(message);
+            return;
+          }
+
+          setState({
+            isLoading: false,
+            result: {
+              commandLine: "",
+              detached: false,
+              exitCode: 0,
+              stdout: message,
+              stderr: "",
+            },
+          });
+          return;
+        }
+
         const result = await executeRequest(operation.title, request);
         if (!active) {
           return;
@@ -303,6 +328,7 @@ function OperationActions({ operation }: { operation: Operation }) {
   const isLatestHistoryAction =
     operation.id === "history-copy-latest" ||
     operation.id === "history-paste-latest";
+  const isCleanupToggleAction = operation.id === "cleanup-toggle";
 
   return (
     <ActionPanel>
@@ -332,6 +358,16 @@ function OperationActions({ operation }: { operation: Operation }) {
             } else {
               await pasteLatestHistoryItem();
             }
+          }}
+        />
+      ) : isCleanupToggleAction ? (
+        <Action
+          title="Toggle LLM Cleanup"
+          icon={operation.icon}
+          onAction={async () => {
+            const message = await toggleGlobalLlmCleanup();
+            await closeMainWindow({ clearRootSearch: true });
+            await showHUD(message);
           }}
         />
       ) : operation.closeOnSuccess && request ? (
@@ -2049,6 +2085,58 @@ async function copyLatestHistoryItem() {
       message: error instanceof Error ? error.message : String(error),
     });
   }
+}
+
+async function toggleGlobalLlmCleanup() {
+  const before = await getGlobalLlmCleanupStatus();
+  const result = await executeRequest("Toggle LLM Cleanup", {
+    label: "Toggle LLM Cleanup",
+    args: ["cleanup", "toggle"],
+  });
+
+  if (result?.exitCode !== 0) {
+    throw new Error(
+      result?.stderr || result?.stdout || "Failed to toggle LLM cleanup.",
+    );
+  }
+
+  const after = await getGlobalLlmCleanupStatus();
+  const effectiveStatus =
+    after ?? (before === "on" ? "off" : before === "off" ? "on" : "unknown");
+
+  if (effectiveStatus === "on") {
+    return "LLM cleanup enabled";
+  }
+
+  if (effectiveStatus === "off") {
+    return "LLM cleanup disabled";
+  }
+
+  return "LLM cleanup toggled";
+}
+
+async function getGlobalLlmCleanupStatus() {
+  const result = await runAimeFlux({
+    label: "LLM Cleanup Status",
+    args: ["cleanup", "status"],
+  });
+
+  if (result.exitCode !== 0) {
+    throw new Error(
+      result.stderr || result.stdout || "Failed to read LLM cleanup status.",
+    );
+  }
+
+  const text = `${result.stdout}\n${result.stderr}`.trim().toLowerCase();
+  if (/\b(on|enabled|true|yes)\b/.test(text)) {
+    return "on";
+  }
+
+  if (/\b(off|disabled|false|no)\b/.test(text)) {
+    return "off";
+  }
+
+  return undefined;
 }
 
 async function pasteLatestHistoryItem() {

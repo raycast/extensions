@@ -73,6 +73,16 @@ export const operations: Operation[] = [
       }),
   },
   {
+    id: "cleanup-toggle",
+    title: "Toggle LLM Cleanup",
+    section: "Core",
+    description: "Toggle the global AimeFlux LLM cleanup setting.",
+    icon: Icon.Switch,
+    mode: "direct",
+    closeOnSuccess: true,
+    buildRequest: () => request("Toggle LLM Cleanup", ["cleanup", "toggle"]),
+  },
+  {
     id: "process",
     title: "Process Text",
     section: "Core",
