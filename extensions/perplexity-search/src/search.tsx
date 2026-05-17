@@ -7,19 +7,12 @@ import {
   getPreferenceValues,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useFetch } from "@raycast/utils";
+import { getFavicon, useFetch } from "@raycast/utils";
 import { useMemo, useState } from "react";
 import { version as extensionVersion } from "../package.json";
 
 const PERPLEXITY_SEARCH_URL = "https://api.perplexity.ai/search";
 const INTEGRATION_SLUG = "raycast";
-
-type Preferences = {
-  apiKey: string;
-  maxResults?: string;
-  country?: string;
-  recency?: "any" | "hour" | "day" | "week" | "month" | "year";
-};
 
 type SearchResult = {
   title: string;
@@ -33,10 +26,6 @@ type SearchResponse = {
   results: SearchResult[];
   id?: string;
   server_time?: string;
-};
-
-type Arguments = {
-  query?: string;
 };
 
 function clampMaxResults(raw: string | undefined): number {
@@ -55,8 +44,8 @@ function hostnameOf(url: string): string {
   }
 }
 
-export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
-  const preferences = getPreferenceValues<Preferences>();
+export default function Command(props: LaunchProps<{ arguments: Arguments.Search }>) {
+  const preferences = getPreferenceValues<Preferences.Search>();
   const initialQuery = props.arguments?.query ?? "";
   const [query, setQuery] = useState(initialQuery);
 
@@ -127,7 +116,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments }>) {
                 title={item.title || item.url}
                 subtitle={item.snippet}
                 accessories={[{ text: host }, ...(item.date ? [{ date: new Date(item.date) }] : [])]}
-                icon={{ source: `https://www.google.com/s2/favicons?domain=${host}&sz=64`, fallback: Icon.Globe }}
+                icon={getFavicon(item.url, { fallback: Icon.Globe })}
                 actions={
                   <ActionPanel>
                     <Action.OpenInBrowser url={item.url} />
