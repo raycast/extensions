@@ -1,0 +1,79 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "uttero",
+  "title": "Uttero",
+  "description": "Control Uttero voice dictation from Raycast — start dictation, switch styles, and more.",
+  "icon": "extension-icon.png",
+  "author": "daniel_gamrot",
+  "license": "MIT",
+  "categories": ["Productivity", "Applications"],
+  "commands": [
+    {
+      "name": "start-dictation",
+      "title": "Start Dictation",
+      "description": "Start voice dictation with the currently selected style.",
+      "mode": "no-view"
+    },
+    {
+      "name": "dictate-with-mode",
+      "title": "Dictate with Mode",
+      "description": "Pick a style and start dictating immediately.",
+      "mode": "view"
+    },
+    {
+      "name": "transcript-history",
+      "title": "Transcript History",
+      "description": "Browse and copy recent Uttero transcripts.",
+      "mode": "view"
+    },
+    {
+      "name": "copy-last-transcript",
+      "title": "Copy Last Transcript",
+      "description": "Copy the most recent Uttero transcript to the clipboard.",
+      "mode": "no-view"
+    },
+    {
+      "name": "insert-last-transcript",
+      "title": "Insert Last Transcript",
+      "description": "Insert the most recent dictation transcript at the cursor.",
+      "mode": "no-view"
+    },
+    {
+      "name": "select-style",
+      "title": "Search Styles",
+      "description": "Choose which Uttero style to use for the next dictation.",
+      "mode": "view"
+    },
+    {
+      "name": "toggle-offline",
+      "title": "Toggle Offline Mode",
+      "description": "Switch Uttero between online (cloud) and offline (on-device) transcription.",
+      "mode": "no-view"
+    },
+    {
+      "name": "menu-bar-status",
+      "title": "Uttero Status",
+      "description": "Show today's dictation stats in the menu bar.",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "open-settings",
+      "title": "Open Uttero Settings",
+      "description": "Open the Uttero settings window.",
+      "mode": "no-view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.21",
+    "@types/react": "^19.1.5",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

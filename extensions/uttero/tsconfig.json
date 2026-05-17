@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2023"],
+    "module": "CommonJS",
+    "target": "ES2022",
+    "jsx": "react-jsx",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "outDir": "dist"
+  }
+}
