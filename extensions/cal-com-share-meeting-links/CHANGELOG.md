@@ -1,6 +1,6 @@
 # Cal.com Share Meeting Links Changelog
 
-## [AI Tools + EU server support] - {PR_MERGE_DATE}
+## [AI Tools + EU server support] - 2026-05-17
 
 - **AI tools.** Adds 33 AI Extension tools so Raycast AI can read and manage your Cal.com account via `@cal` — full parity with Cal.com's MCP server surface (event types, bookings, schedules, availability, busy times, conferencing apps, routing forms, organizations). Destructive actions (create/update/delete/cancel/reschedule/etc.) require confirmation.
 - **EU server support.** Adds a "Server Region" preference (Global default, Europe option) so Cal.eu accounts can use the extension. Fixes #27697. All API and link URLs (api/app/public) now route via the selected region.
