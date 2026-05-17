@@ -59,8 +59,7 @@ export function getGMailMessageHeaderValue(msg: gmail_v1.Schema$Message | undefi
 }
 
 export function gmailWebUrlBase(currentProfile: gmail_v1.Schema$Profile | undefined) {
-  const address = currentProfile?.emailAddress;
-  return address ? `https://mail.google.com/mail/u/${address}` : undefined;
+  return currentProfile?.emailAddress ? "https://mail.google.com/mail/u/0" : undefined;
 }
 
 export function inlineNewMailWebUrl(currentProfile: gmail_v1.Schema$Profile) {
