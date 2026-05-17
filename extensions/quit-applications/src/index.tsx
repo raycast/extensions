@@ -14,6 +14,7 @@ import { runAppleScript } from "@raycast/utils";
 import { execSync } from "child_process";
 
 const APPLESCRIPT_TIMEOUT_MS = 5000;
+const RESTART_APPLESCRIPT_TIMEOUT_MS = 15000;
 
 function applicationNameFromPath(path: string): string {
   /* Example:
@@ -107,7 +108,7 @@ function restartApp(app: string) {
 	                          end repeat
 	                          activate
                         end tell`,
-    { timeout: APPLESCRIPT_TIMEOUT_MS },
+    { timeout: RESTART_APPLESCRIPT_TIMEOUT_MS },
   );
 }
 
@@ -295,7 +296,12 @@ export default function Command({ launchContext }: CommandProps) {
                   }
                 }}
               />
-              <Action title="Restart" onAction={() => restartAppWithToast(app.name)} />
+              <Action
+                title="Restart"
+                onAction={async () => {
+                  await restartAppWithToast(app.name);
+                }}
+              />
               <Action.CreateQuicklink
                 title="Create Quit Quicklink"
                 quicklink={{ link: getQuickLinkForApp(app.name, "quit"), name: `Quit ${app.name}` }}
