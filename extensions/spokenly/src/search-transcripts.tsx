@@ -1,6 +1,7 @@
 import {
   Action,
   ActionPanel,
+  Color,
   Icon,
   List,
   showToast,
@@ -114,7 +115,7 @@ export default function SearchTranscripts() {
               keywords={[entry.text, entry.modelId ?? ""].filter(Boolean)}
               icon={
                 entry.isError
-                  ? { source: Icon.ExclamationMark, tintColor: "red" }
+                  ? { source: Icon.ExclamationMark, tintColor: Color.Red }
                   : Icon.Waveform
               }
               accessories={accessories}

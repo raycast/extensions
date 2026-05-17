@@ -12,7 +12,7 @@ import {
 import { writeFileSync } from "fs";
 import { basename, extname, dirname, join } from "path";
 import { useState } from "react";
-import { SUPPORTED_FILE_EXTENSIONS } from "./lib/constants";
+import { DEFAULT_MCP_PORT, SUPPORTED_FILE_EXTENSIONS } from "./lib/constants";
 import { transcribeFile, TranscribeArgs } from "./lib/mcp-client";
 
 type Format = NonNullable<TranscribeArgs["format"]>;
@@ -34,7 +34,7 @@ interface FormValues {
 function getMcpPort(): number {
   const { mcpPort } = getPreferenceValues<Preferences>();
   const parsed = Number(mcpPort);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 51089;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MCP_PORT;
 }
 
 function ResultView({
