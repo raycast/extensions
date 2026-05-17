@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: macOS user Applications path] - {PR_MERGE_DATE}
+
+- Fixed `product.json` resolution when Visual Studio Code is installed in `~/Applications`.
+
 ## [Fix: Windows app path resolution] - 2026-05-11
 
 - Fixed `product.json` resolution for Windows builds that use VS Code's versioned resources layout.

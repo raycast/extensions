@@ -68,6 +68,16 @@ function getNLSVariable(text: string | undefined): string | undefined {
     return m[1];
   }
 }
+
+function macApplicationPath(appName: string, ...segments: string[]) {
+  const candidates = [
+    path.join("/Applications", appName, ...segments),
+    path.join(os.homedir(), "Applications", appName, ...segments),
+  ];
+
+  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
+}
+
 function cliPaths(): Record<string, string> {
   let cliPaths: Record<string, string> = {};
 
@@ -93,7 +103,7 @@ function cliPaths(): Record<string, string> {
   if (isMac) {
     cliPaths = {
       Antigravity: "/Applications/Antigravity.app/Contents/Resources/app/bin/antigravity",
-      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app/bin/code",
+      Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app", "bin", "code"),
       "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app/bin/code",
       Cursor: "/Applications/Cursor.app/Contents/Resources/app/bin/cursor", // it also has code, which is an alias
       Kiro: "/Applications/Kiro.app/Contents/Resources/app/bin/kiro",
@@ -145,7 +155,7 @@ function programPaths(): Record<string, string> {
   if (isMac) {
     programPaths = {
       Antigravity: "/Applications/Antigravity.app/Contents/Resources/app",
-      Code: "/Applications/Visual Studio Code.app/Contents/Resources/app",
+      Code: macApplicationPath("Visual Studio Code.app", "Contents", "Resources", "app"),
       "Code - Insiders": "/Applications/Visual Studio Code - Insiders.app/Contents/Resources/app",
       Cursor: "/Applications/Cursor.app/Contents/Resources/app",
       Kiro: "/Applications/Kiro.app/Contents/Resources/app",
