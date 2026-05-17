@@ -48,7 +48,7 @@ function InlineDetail({ skill, isSelected }: { skill: InstalledSkill; isSelected
           )}
           {skill.sourceUrl && (
             <List.Item.Detail.Metadata.Link
-              title="Source"
+              title="Repository"
               text={skill.source ?? skill.sourceUrl}
               target={skill.sourceUrl}
             />
@@ -125,10 +125,10 @@ export function InstalledSkillListItem({
             <Action.ShowInFinder path={skill.path} icon={Icon.Finder} />
             {skill.sourceUrl && (
               <Action.OpenInBrowser
-                title="Open on GitHub"
+                title="Open Repository"
                 url={skill.sourceUrl}
                 icon={Icon.Globe}
-                shortcut={{ modifiers: ["cmd"], key: "g" }}
+                shortcut={Keyboard.Shortcut.Common.OpenWith}
               />
             )}
           </ActionPanel.Section>

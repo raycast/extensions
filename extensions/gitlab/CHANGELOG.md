@@ -1,5 +1,14 @@
 # GitLab Changelog
 
+## [Fix OOM crash in My Projects for large GitLab instances] - 2026-05-16
+
+- Fix out-of-memory crash when fetching thousands of projects by using parallel batch fetching with per-page mapping
+- Replace Fuse.js search with lightweight multi-term substring matching for the project list to reduce memory usage
+- Cap rendered list items to 100 to prevent memory exhaustion from complex ActionPanels
+- Sort projects by last activity date so most relevant projects appear first
+- Add "Search active projects only" preference to My Projects command (consistent with Search Projects)
+- Set background cache refetch interval to 1 day (was 5 minutes)
+
 ## [Merged MR icon in todos] - 2026-04-15
 
 - Show purple merged icon for todos on merged merge requests

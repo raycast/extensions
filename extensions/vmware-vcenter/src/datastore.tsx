@@ -12,7 +12,7 @@ if (!pref.certificate) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 const cache = new Cache();
 
-export default function Command(): JSX.Element {
+export default function Command(): React.JSX.Element {
   const {
     data: ServerNames,
     revalidate: RevalidateServerNames,
@@ -21,7 +21,7 @@ export default function Command(): JSX.Element {
   const SelectedServerName = React.useRef<string>("");
 
   const [Datastores, SetDatastores]: [Datastore[], React.Dispatch<React.SetStateAction<Datastore[]>>] = React.useState(
-    [] as Datastore[]
+    [] as Datastore[],
   );
   const [IsLoadingDatastores, SetIsLoadingDatastores]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
@@ -165,7 +165,7 @@ export default function Command(): JSX.Element {
   /**
    * Search Bar Accessory
    */
-  function GetSearchBar(server: string[]): JSX.Element {
+  function GetSearchBar(server: string[]): React.JSX.Element {
     return (
       <List.Dropdown storeValue={true} tooltip="VMware Server" onChange={onChangeSelectedServerName}>
         {server.map((value) => (
@@ -188,9 +188,9 @@ export default function Command(): JSX.Element {
 
   /**
    * Datastore Action Menu.
-   * @returns {JSX.Element}
+   * @returns {React.JSX.Element}
    */
-  function GetDatastoreAction(): JSX.Element {
+  function GetDatastoreAction(): React.JSX.Element {
     return (
       <ActionPanel title="vCenter Datastore">
         <Action
@@ -237,9 +237,9 @@ export default function Command(): JSX.Element {
   /**
    * Datastore Detail Section.
    * @param {Datastore} datastore.
-   * @returns {JSX.Element}
+   * @returns {React.JSX.Element}
    */
-  function GetDatastoreDetail(datastore?: Datastore): JSX.Element {
+  function GetDatastoreDetail(datastore?: Datastore): React.JSX.Element {
     const capacity_tier: Map<string, number> = new Map([
       ["KB", 1e-3],
       ["MB", 1e-6],

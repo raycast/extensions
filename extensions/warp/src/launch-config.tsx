@@ -20,8 +20,27 @@ interface SearchResult {
   path: string;
 }
 
-const configPath = ".warp/launch_configurations";
-const fullPath = path.join(os.homedir(), configPath);
+const isWindows = process.platform === "win32";
+
+function getConfigDir(): string {
+  if (isWindows) {
+    const appData = process.env.APPDATA ?? path.join(os.homedir(), "AppData", "Roaming");
+    return path.join(appData, "Warp", "Warp", "data", "tab_configs");
+  }
+  return path.join(os.homedir(), ".warp", "launch_configurations");
+}
+
+const fullPath = getConfigDir();
+const configFilePattern = isWindows ? /\.toml$/i : /\.ya?ml$/i;
+
+function parseConfigName(contents: string, filePath: string): string | null {
+  if (isWindows) {
+    const match = contents.match(/^name\s*=\s*["'](.+?)["']/m);
+    return match ? match[1] : null;
+  }
+  const yaml = YAML.parse(contents);
+  return yaml?.name ?? path.basename(filePath, path.extname(filePath));
+}
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -48,7 +67,7 @@ export default function Command() {
     const exists = await fs.stat(fullPath).catch(() => false);
 
     if (exists === false) {
-      return showError("Launch Configuration directory missing", `~/${configPath} wasn't found on your computer!`);
+      return showError("Launch Configuration directory missing", `${fullPath} wasn't found on your computer!`);
     }
 
     const files = await fs.readdir(fullPath).catch(() => null);
@@ -60,16 +79,18 @@ export default function Command() {
       );
     }
 
-    const fileList = await Promise.all(
-      files
-        .filter((file) => file.match(/.y(a)?ml$/g))
-        .map(async (file) => {
-          const contents = await fs.readFile(path.join(fullPath, file), "utf-8");
-          const yaml = YAML.parse(contents);
+    const fileList = (
+      await Promise.all(
+        files
+          .filter((file) => configFilePattern.test(file))
+          .map(async (file) => {
+            const contents = await fs.readFile(path.join(fullPath, file), "utf-8");
+            const name = parseConfigName(contents, file);
 
-          return { name: yaml.name, path: path.join(fullPath, file) };
-        })
-    );
+            return name ? { name, path: path.join(fullPath, file) } : null;
+          })
+      )
+    ).filter((item): item is SearchResult => item !== null);
 
     if (fileList.length === 0) {
       return showError(NO_LAUNCH_CONFIGS_TITLE, NO_LAUNCH_CONFIGS_MESSAGE);
@@ -175,7 +196,7 @@ function SearchListItem({
   return (
     <List.Item
       title={searchResult.name}
-      subtitle={searchResult.path.replace(fullPath + "/", "")}
+      subtitle={searchResult.path.replace(fullPath + path.sep, "")}
       actions={
         <ActionPanel>
           <ActionPanel.Section>
@@ -187,7 +208,7 @@ function SearchListItem({
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.ShowInFinder
-              title="Reveal in Finder"
+              title={isWindows ? "Reveal in File Explorer" : "Reveal in Finder"}
               path={searchResult.path}
               shortcut={{ modifiers: ["cmd"], key: "." }}
             />

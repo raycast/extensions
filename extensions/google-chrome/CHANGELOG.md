@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Add History Open Action Shortcuts] - 2026-05-13
+
+- Add keyboard shortcuts for opening history items in the current or original profile.
+
 ## [Fix Chrome History Search When Chrome Is Running] - 2026-05-07
 
 - Fix searching Chrome history while Chrome keeps the history database locked.

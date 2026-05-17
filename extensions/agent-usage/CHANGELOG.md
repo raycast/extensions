@@ -1,5 +1,9 @@
 # Agent Usage Changelog
 
+## [Add OpenCode Go Provider] - 2026-05-15
+
+- Add OpenCode Go plan usage display
+
 ## [Add MiniMax Provider] - 2026-04-30
 
 ### New Features

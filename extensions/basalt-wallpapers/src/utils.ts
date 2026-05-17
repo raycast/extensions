@@ -5,9 +5,9 @@ import { environment } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 
 export const API_TRIPLE_URL =
-  "https://basalt-prod.up.railway.app/api/wallpapers/raycast-triple";
+  "https://service.anotherboring.day/api/wallpapers/raycast-triple";
 export const API_RANDOM_URL =
-  "https://basalt-prod.up.railway.app/api/wallpapers/random-human";
+  "https://service.anotherboring.day/api/wallpapers/random-human";
 
 export interface Wallpaper {
   id: string;
@@ -45,23 +45,29 @@ export function getThumbnailUrl(
   return url;
 }
 
+function sanitizeCacheKey(value: string) {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
 function getCachedWallpaperPath(url: string, id?: string) {
   const extension = path.extname(new URL(url).pathname) || ".jpg";
-  const cacheKey = id || crypto.createHash("sha1").update(url).digest("hex");
+  const rawKey = id || crypto.createHash("sha1").update(url).digest("hex");
+  const cacheKey = sanitizeCacheKey(rawKey);
   return path.join(environment.supportPath, `${cacheKey}${extension}`);
 }
 
 function pruneWallpaperCache(keepFilePath: string) {
   const maxFiles = 20;
+  type CacheFile = { filePath: string; stat: fs.Stats };
   const files = fs
     .readdirSync(environment.supportPath)
-    .map((file) => {
+    .map((file): CacheFile => {
       const filePath = path.join(environment.supportPath, file);
       const stat = fs.statSync(filePath);
       return { filePath, stat };
     })
     .filter(({ filePath, stat }) => filePath !== keepFilePath && stat.isFile())
-    .sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs)
+    .sort((a: CacheFile, b: CacheFile) => b.stat.mtimeMs - a.stat.mtimeMs)
     .map(({ filePath }) => filePath);
 
   for (const filePath of files.slice(maxFiles - 1)) {
@@ -110,7 +116,8 @@ export async function setDesktopWallpaper(url: string, id?: string) {
   fs.utimesSync(filePath, new Date(), new Date());
   pruneWallpaperCache(filePath);
 
-  const script = `tell application "System Events" to tell every desktop to set picture to "${filePath}"`;
+  const escapedPath = filePath.replace(/[\\"]/g, "\\$&");
+  const script = `tell application "System Events" to tell every desktop to set picture to "${escapedPath}"`;
   await runAppleScript(script);
 }
 
@@ -137,9 +144,8 @@ export async function downloadWallpaper(
     else extension = ".jpg"; // Fallback
   }
 
-  // Sanitize filename
   const safeName = name.replace(/[^a-z0-9]/gi, "_");
-  const fileName = id ? `${safeName}_${id}` : safeName;
+  const fileName = id ? `${safeName}_${sanitizeCacheKey(id)}` : safeName;
   const filePath = getAvailableDownloadPath(
     path.join(downloadsDir, `${fileName}${extension}`),
   );

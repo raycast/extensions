@@ -4,11 +4,11 @@ import {
   type AuditStatus,
   AUDIT_PROVIDER_LABELS,
   buildInstallCommand,
+  buildSkillUrl,
   formatInstalls,
   formatRelativeDate,
   normalizeAllowedTools,
   type Skill,
-  SKILLS_BASE_URL,
 } from "../shared";
 import { useRepoStats } from "../hooks/useRepoStats";
 import { useSkillAudits } from "../hooks/useSkillAudits";
@@ -53,6 +53,8 @@ export function SkillDetailView({ skill, onSkillInstalled }: SkillDetailViewProp
   const installCommand = buildInstallCommand(skill);
   const allowedTools = normalizeAllowedTools(frontmatter["allowed-tools"]);
   const shownErrorTimestampRef = useRef<string | undefined>(undefined);
+  const skillUrl = buildSkillUrl(skill.source, skill.skillId);
+
   const refreshSkillStatus = useCallback(async () => {
     await Promise.all([revalidateInstalledSkillMatches(), onSkillInstalled?.()]);
   }, [revalidateInstalledSkillMatches, onSkillInstalled]);
@@ -151,12 +153,8 @@ ${installCommand}
             </Detail.Metadata.TagList>
           )}
           <Detail.Metadata.Separator />
+          <Detail.Metadata.Link title="skills.sh" text={`${skill.source}/${skill.skillId}`} target={skillUrl} />
           <Detail.Metadata.Link title="Repository" text={skill.source} target={`https://github.com/${skill.source}`} />
-          <Detail.Metadata.Link
-            title="View on Skills"
-            text={`${skill.source}/${skill.skillId}`}
-            target={`${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`}
-          />
           <Detail.Metadata.Separator />
           {audits.results.length > 0 ? (
             audits.results.map((audit) =>
@@ -199,12 +197,17 @@ ${installCommand}
             icon={Icon.Terminal}
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
-          <Action.OpenInBrowser title="Open Repository" url={`https://github.com/${skill.source}`} icon={Icon.Globe} />
           <Action.OpenInBrowser
-            title="Open Skills"
-            url={`${SKILLS_BASE_URL}/${skill.source}/${skill.skillId}`}
-            icon={Icon.Link}
+            title="Open on skills.sh"
+            url={skillUrl}
+            icon={Icon.Globe}
             shortcut={Keyboard.Shortcut.Common.Open}
+          />
+          <Action.OpenInBrowser
+            title="Open Repository"
+            url={`https://github.com/${skill.source}`}
+            icon={Icon.Globe}
+            shortcut={Keyboard.Shortcut.Common.OpenWith}
           />
           <OpenSecurityAuditActions audits={audits.results} />
         </ActionPanel>

@@ -22,7 +22,8 @@
     "ChanningKuo",
     "likid",
     "xmok",
-    "brucemakes012"
+    "brucemakes012",
+    "alexi.build"
   ],
   "license": "MIT",
   "commands": [
@@ -2122,8 +2123,8 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.1",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.104.16",
+    "@raycast/utils": "^2.2.4",
     "google-tts-api": "^2.0.2",
     "https-proxy-agent": "^7.0.6",
     "undici": "^5.12.0"
