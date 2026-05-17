@@ -1,18 +1,24 @@
 import { spawnSync } from "child_process";
 
+function restartFinder() {
+  spawnSync("killall", ["Finder"]);
+}
+
 export function areDesktopIconsHidden() {
-  const { stdout } = spawnSync("defaults", ["read", "com.apple.WindowManager", "StandardHideDesktopIcons"], {
+  const { stdout } = spawnSync("defaults", ["read", "com.apple.finder", "CreateDesktop"], {
     encoding: "utf-8",
   });
   return stdout.trim() === "0";
 }
 
 export function hideDesktopIcons() {
-  spawnSync("defaults", ["write", "com.apple.WindowManager", "StandardHideDesktopIcons", "-bool", "true"]);
+  spawnSync("defaults", ["write", "com.apple.finder", "CreateDesktop", "-bool", "false"]);
+  restartFinder();
 }
 
 export function showDesktopIcons() {
-  spawnSync("defaults", ["write", "com.apple.WindowManager", "StandardHideDesktopIcons", "-bool", "false"]);
+  spawnSync("defaults", ["write", "com.apple.finder", "CreateDesktop", "-bool", "true"]);
+  restartFinder();
 }
 
 export function areDesktopWidgetsHidden() {
