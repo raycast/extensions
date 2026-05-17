@@ -1,6 +1,6 @@
 # Effect Docs Changelog
 
-## [Replace Removed llms.txt Source] - {PR_MERGE_DATE}
+## [Replace Removed llms.txt Source] - 2026-05-17
 
 - Switched guide source from `llms.txt` (removed by Effect) to the Starlight docs sidebar HTML
 - Added section/path subtitle to guide results so duplicate-named entries like Runtime are disambiguated
