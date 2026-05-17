@@ -106,7 +106,7 @@ export default function Command() {
     const toast = await showToast({ style: Toast.Style.Animated, title: "Executing batch move..." });
 
     try {
-      const prefs = getPreferenceValues<{ returnToOriginalSpace: boolean }>();
+      const prefs = getPreferenceValues<Preferences>();
       let originalSpaceId: string | null = null;
       if (prefs.returnToOriginalSpace) {
         const currentIdsRaw = await runDesktopRenamerCommand("get current space id");

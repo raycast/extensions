@@ -95,7 +95,7 @@ export default function Command() {
       // Remember where we are now.
       const currentIdsRaw = await runDesktopRenamerCommand("get current space id");
       const currentIds = currentIdsRaw.split(",").map((s: string) => s.trim());
-      if (currentIds.length === 0) {
+      if (!currentIds[0]) {
         await showToast({ style: Toast.Style.Failure, title: "Could not determine current desktop" });
         return;
       }
@@ -130,7 +130,7 @@ export default function Command() {
         return;
       }
 
-      const prefs = getPreferenceValues<{ returnToOriginalSpace: boolean }>();
+      const prefs = getPreferenceValues<Preferences>();
       let originalSpaceId: string | null = null;
       if (prefs.returnToOriginalSpace) {
         const currentIdsRaw = await runDesktopRenamerCommand("get current space id");
