@@ -1,6 +1,6 @@
 # Zed Recent Projects Changelog
 
-## [Fix Non-POSIX Shell Support] - {PR_MERGE_DATE}
+## [Fix Non-POSIX Shell Support] - 2026-05-17
 
 - Fix projects silently failing to open when the user's default shell is non-POSIX (nushell, elvish, xonsh, pwsh, ...) by falling back to `/bin/zsh` for the `env -i ... -lc` invocation. Previously only fish was handled this way.
 - Surface CLI launch failures via a toast in the single-folder open action so future regressions don't fail silently.
