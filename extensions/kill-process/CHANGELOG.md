@@ -1,5 +1,9 @@
 # Kill Process Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Prevented background refreshes from overlapping and surfacing timeout errors while the process list is left open.
+
 ## [Added Restart Action] - 2026-04-08
 
 - Added `Restart` and `Force Restart` actions for restartable processes
