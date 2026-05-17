@@ -1,5 +1,9 @@
 # Google Chrome Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Reset stale cached profile selections so history search does not show Chrome as missing.
+
 ## [Add History Open Action Shortcuts] - 2026-05-13
 
 - Add keyboard shortcuts for opening history items in the current or original profile.
