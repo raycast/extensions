@@ -18,7 +18,7 @@ export function areDesktopIconsHidden() {
   const { stdout } = spawnSync("defaults", ["read", "com.apple.finder", "CreateDesktop"], {
     encoding: "utf-8",
   });
-  return stdout.trim() === "0";
+  return stdout.trim() === "1";
 }
 
 export function hideDesktopIcons() {
