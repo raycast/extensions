@@ -5,6 +5,7 @@ import {
   MenuBarExtra,
   openCommandPreferences,
 } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import { RESOURCE_ICONS, RESOURCE_LABELS, RESOURCE_ORDER } from "./types";
 import type { RateLimitResource } from "./types";
@@ -41,11 +42,8 @@ function buildTitle(
 export default function MenuBarGHUsage() {
   const { data, isLoading, error, revalidate } = useGHRateLimit();
   const mbPrefs = getPreferenceValues<Preferences.MenubarGhUsage>();
-  const resourceKey =
-    (mbPrefs as Record<string, string>).menuBarResource || "core";
-  const template =
-    (mbPrefs as Record<string, string>).menuBarTemplate ||
-    DEFAULT_MENU_BAR_TEMPLATE;
+  const resourceKey = mbPrefs.menuBarResource || "core";
+  const template = mbPrefs.menuBarTemplate || DEFAULT_MENU_BAR_TEMPLATE;
   const featuredResource =
     data?.resources[resourceKey as keyof typeof data.resources];
 
@@ -76,10 +74,7 @@ export default function MenuBarGHUsage() {
   );
 
   return (
-    <MenuBarExtra
-      icon="https://github.githubassets.com/favicons/favicon.png"
-      title={title}
-    >
+    <MenuBarExtra icon={getFavicon("https://github.com")} title={title}>
       <MenuBarExtra.Section title="Rate Limits · Remaining">
         {error ? (
           <MenuBarExtra.Item

@@ -7,13 +7,10 @@ import { applyTemplate, buildSubstitutions } from "./useGHRateLimit";
 
 const execFileAsync = promisify(execFile);
 
-const DEFAULT_TEMPLATE = "Core: {coreRemaining} remaining · {corePct}% used";
-
 export default async function GHUsageStats() {
   try {
     const prefs = getPreferenceValues<Preferences.GhUsageStats>();
-    const template =
-      (prefs as Record<string, string>).subtitleTemplate || DEFAULT_TEMPLATE;
+    const template = prefs.subtitleTemplate;
     const { stdout } = await execFileAsync(
       getGhCommand(),
       ["api", "rate_limit"],
