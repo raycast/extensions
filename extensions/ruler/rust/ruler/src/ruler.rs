@@ -44,6 +44,20 @@ struct Pt {
     y: i32,
 }
 
+/// RAII guard that unregisters a window class on drop, even on `?` early returns.
+struct ClassGuard {
+    name: windows::core::PCWSTR,
+    hinstance: HINSTANCE,
+}
+
+impl Drop for ClassGuard {
+    fn drop(&mut self) {
+        unsafe {
+            let _ = UnregisterClassW(self.name, Some(self.hinstance));
+        }
+    }
+}
+
 static mut HWND_RULER: HWND = HWND(null_mut());
 static mut KB_HOOK: HHOOK = HHOOK(null_mut());
 static mut GDIP_TOKEN: usize = 0;
@@ -503,6 +517,8 @@ fn measure_distance(drag_mode: bool) -> std::result::Result<Option<String>, Stri
         if atom == 0 {
             return Err("Failed to register window class".to_string());
         }
+        // Ensure the class is unregistered on any return path (normal or `?`).
+        let _class_guard = ClassGuard { name: class_name, hinstance };
 
         let hwnd = CreateWindowExW(
             WS_EX_TOPMOST | WS_EX_LAYERED | WS_EX_TOOLWINDOW,
@@ -583,7 +599,7 @@ fn measure_distance(drag_mode: bool) -> std::result::Result<Option<String>, Stri
         let _ = DeleteObject(DIB_BMP.into());
         let _ = DeleteDC(DIB_DC);
         let _ = DestroyWindow(hwnd);
-        let _ = UnregisterClassW(class_name, Some(hinstance));
+        // Class is unregistered by `_class_guard` on scope exit.
 
         GdiplusShutdown(GDIP_TOKEN);
 

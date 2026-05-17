@@ -6,7 +6,7 @@ export default async function command() {
   await closeMainWindow();
 
   try {
-    const preferences = await getPreferenceValues();
+    const preferences = getPreferenceValues<Preferences>();
 
     let measureDistance: (dragMode: boolean) => Promise<string | null | undefined>;
     if (isMac) {
