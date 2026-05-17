@@ -14,8 +14,8 @@ export default async function tool(input: Input): Promise<unknown> {
   const orgId = assertId(input.organizationId, "organizationId");
   const formId = assertId(input.routingFormId, "routingFormId");
   const params: Record<string, unknown> = {};
-  if (input.take) params.take = input.take;
-  if (input.skip) params.skip = input.skip;
+  if (input.take !== undefined) params.take = input.take;
+  if (input.skip !== undefined) params.skip = input.skip;
   return calAPI({
     url: `/organizations/${orgId}/routing-forms/${formId}/responses`,
     headers: { "cal-api-version": "2024-08-13" },
