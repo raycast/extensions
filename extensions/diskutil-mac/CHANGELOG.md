@@ -1,6 +1,6 @@
 # Diskutil Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-17
 
 - Include ejectable external disks in the removable disk filter.
 
