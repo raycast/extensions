@@ -135,7 +135,7 @@ export default function Command() {
       if (prefs.returnToOriginalSpace) {
         const currentIdsRaw = await runDesktopRenamerCommand("get current space id");
         const currentIds = currentIdsRaw.split(",").map((s: string) => s.trim());
-        if (currentIds.length > 0) {
+        if (currentIds[0]) {
           originalSpaceId = currentIds[0];
         }
       }
