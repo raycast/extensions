@@ -58,6 +58,19 @@ impl Drop for ClassGuard {
     }
 }
 
+/// RAII guard that calls `GdiplusShutdown` on drop, even on `?` early returns.
+struct GdiplusGuard {
+    token: usize,
+}
+
+impl Drop for GdiplusGuard {
+    fn drop(&mut self) {
+        unsafe {
+            GdiplusShutdown(self.token);
+        }
+    }
+}
+
 static mut HWND_RULER: HWND = HWND(null_mut());
 static mut KB_HOOK: HHOOK = HHOOK(null_mut());
 static mut GDIP_TOKEN: usize = 0;
@@ -489,6 +502,8 @@ fn measure_distance(drag_mode: bool) -> std::result::Result<Option<String>, Stri
             ..Default::default()
         };
         GdiplusStartup(&mut GDIP_TOKEN, &gdip_input, std::ptr::null_mut());
+        // Ensure GdiplusShutdown runs on any return path (normal or `?`).
+        let _gdip_guard = GdiplusGuard { token: GDIP_TOKEN };
 
         DRAG_MODE = drag_mode;
         START = None;
@@ -604,9 +619,7 @@ fn measure_distance(drag_mode: bool) -> std::result::Result<Option<String>, Stri
         let _ = DeleteObject(DIB_BMP.into());
         let _ = DeleteDC(DIB_DC);
         let _ = DestroyWindow(hwnd);
-        // Class is unregistered by `_class_guard` on scope exit.
-
-        GdiplusShutdown(GDIP_TOKEN);
+        // Class is unregistered by `_class_guard` and GDI+ by `_gdip_guard` on scope exit.
 
         if CANCELLED {
             return Ok(None);
