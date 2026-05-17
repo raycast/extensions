@@ -5,6 +5,18 @@ import { SyncData, SyncResourceType, initialSync } from "../api";
 
 import useCachedData from "./useCachedData";
 
+const EMPTY_SYNC_DATA_FIELDS: Pick<
+  SyncData,
+  "collaborator_states" | "filters" | "locations" | "notes" | "reminders" | "sections"
+> = {
+  collaborator_states: [],
+  filters: [],
+  locations: [],
+  notes: [],
+  reminders: [],
+  sections: [],
+};
+
 export default function useSyncData(shouldSync = true, resourceTypes?: SyncResourceType[]) {
   const { data: syncData, ...rest } = usePromise(
     async (resourceTypes?: SyncResourceType[]) => {
@@ -21,7 +33,9 @@ export default function useSyncData(shouldSync = true, resourceTypes?: SyncResou
 
   useEffect(() => {
     if (syncData) {
-      setCachedData(syncData);
+      setCachedData((cachedData) =>
+        cachedData ? { ...cachedData, ...syncData } : ({ ...EMPTY_SYNC_DATA_FIELDS, ...syncData } as SyncData),
+      );
     }
   }, [syncData, setCachedData]);
 
