@@ -24,15 +24,12 @@ const useOptionalSelection = (setContent: Dispatch<SetStateAction<string>>, disa
   useEffect(() => {
     if (data && !isLoading && !dataIsAlreadySet.current) {
       dataIsAlreadySet.current = true;
-      if (!enabled) {
-        return;
-      }
       const trimmed = data.trim();
       if (trimmed && trimmed.length > 0) {
         setContent(trimmed);
       }
     }
-  }, [data, isLoading, setContent, enabled]);
+  }, [data, isLoading, setContent]);
 };
 
 export default useOptionalSelection;
