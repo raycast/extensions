@@ -97,6 +97,10 @@ export default function ProcessList() {
 
   const fetchProcesses = (showErrorToast = false) => {
     if (isFetchingProcesses.current) {
+      if (showErrorToast) {
+        showToast({ title: "Refresh already in progress", style: Toast.Style.Animated });
+      }
+
       return;
     }
 
