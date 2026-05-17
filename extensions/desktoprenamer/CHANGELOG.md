@@ -1,6 +1,6 @@
 # DesktopRenamer Changelog
 
-## [New Commands] - {PR_MERGE_DATE}
+## [New Commands] - 2026-05-17
 
 - Added `Move Window` command
 - Added `List Windows` command
