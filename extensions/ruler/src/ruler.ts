@@ -11,7 +11,7 @@ export default async function command() {
     let measureDistance: (dragMode: boolean) => Promise<string | null | undefined>;
     if (isMac) {
       const { measureDistance: measureDistanceSwift } = await import("swift:../swift/Ruler");
-      measureDistance = measureDistanceSwift;
+      measureDistance = measureDistanceSwift as unknown as (dragMode: boolean) => Promise<string | null | undefined>;
     } else {
       const { measure_distance: measureDistanceRust } = await import("rust:../rust/ruler");
       measureDistance = measureDistanceRust;

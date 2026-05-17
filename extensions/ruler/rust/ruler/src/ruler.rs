@@ -552,12 +552,17 @@ fn measure_distance(drag_mode: bool) -> std::result::Result<Option<String>, Stri
             ..Default::default()
         };
         let mut bits: *mut std::ffi::c_void = std::ptr::null_mut();
-        DIB_BMP = CreateDIBSection(Some(hdc_screen), &bi, DIB_RGB_COLORS, &mut bits, None, 0)
-            .map_err(|e| e.to_string())?;
-        DIB_BITS = bits as *mut u8;
+        let dib_result =
+            CreateDIBSection(Some(hdc_screen), &bi, DIB_RGB_COLORS, &mut bits, None, 0);
         DIB_DC = CreateCompatibleDC(Some(hdc_screen));
+        ReleaseDC(None, hdc_screen); // always release before any early return
+        DIB_BMP = dib_result.map_err(|e| {
+            let _ = DeleteDC(DIB_DC);
+            let _ = DestroyWindow(hwnd);
+            e.to_string()
+        })?;
+        DIB_BITS = bits as *mut u8;
         DIB_OLD = SelectObject(DIB_DC, DIB_BMP.into());
-        ReleaseDC(None, hdc_screen);
 
         // Exclude from screen capture to avoid feedback if user records
         let _ = SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE);
