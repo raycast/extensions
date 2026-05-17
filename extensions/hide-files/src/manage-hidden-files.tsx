@@ -85,6 +85,7 @@ export default function Command() {
                       title={`Unhide File`}
                       shortcut={{ modifiers: ["cmd"], key: "u" }}
                       onAction={async () => {
+                        showHiddenFiles(value.path);
                         const _localDirectory = [...localHiddenDirectory];
                         _localDirectory.splice(index, 1);
                         await LocalStorage.setItem(
@@ -92,7 +93,6 @@ export default function Command() {
                           JSON.stringify(_localDirectory),
                         );
                         setRefresh(refreshNumber());
-                        showHiddenFiles(value.path);
 
                         const options: Toast.Options = {
                           style: Toast.Style.Success,
