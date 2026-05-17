@@ -1,5 +1,9 @@
 # Visual Studio Code Changelog
 
+## [Fix: Recent projects on Windows] - 2026-05-17
+
+- Fixed shared storage lookup for recent projects on Windows.
+
 ## [Fix: Windows app path resolution] - 2026-05-11
 
 - Fixed `product.json` resolution for Windows builds that use VS Code's versioned resources layout.
