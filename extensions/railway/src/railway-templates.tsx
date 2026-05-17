@@ -34,8 +34,8 @@ export default function Command() {
   );
 
   const { data: readme } = useCachedPromise(
-    async (code: string | null) => (code && isShowingDetail ? fetchTemplateDetail(code) : null),
-    [selectedCode],
+    async (code: string | null, showDetail: boolean) => (code && showDetail ? fetchTemplateDetail(code) : null),
+    [selectedCode, isShowingDetail],
     {
       keepPreviousData: false,
       onError: (error) => {
