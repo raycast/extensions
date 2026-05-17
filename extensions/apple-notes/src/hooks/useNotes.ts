@@ -118,7 +118,8 @@ const tagsQuery = `
 
 export const useNotes = () => {
   const { data, ...rest } = useSQL<NoteItem>(NOTES_DB, query, {
-    permissionPriming: "This is required to search your Apple Notes.",
+    permissionPriming:
+      "Raycast needs Full Disk Access to search Apple Notes. Open System Settings > Privacy & Security > Full Disk Access and enable Raycast.",
   });
 
   // Split the query into two to avoid a SQL error if the zcinivitation table doesn't exist

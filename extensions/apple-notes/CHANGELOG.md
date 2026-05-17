@@ -1,5 +1,9 @@
 # Apple Notes Changelog
 
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Clarify that searching notes requires Full Disk Access when Raycast cannot open the Apple Notes database.
+
 ## [Bug Fix Update] - 2026-02-26
 
 - Fix `get-note-content` and `update-note` timing out when Notes is not already running by using a longer AppleScript timeout.
