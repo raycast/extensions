@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import {
   Action,
   ActionPanel,
+  Clipboard,
   Color,
   Form,
+  getSelectedText,
   Icon,
   Keyboard,
   LaunchProps,
@@ -31,6 +33,14 @@ type Reference = {
 };
 
 type Target = { table: string; sysId: string };
+type TargetSource = "args" | "tab" | "selection" | "clipboard" | "form";
+
+function sourceSuffix(source: TargetSource | null): string {
+  if (source === "tab") return " — from browser tab";
+  if (source === "selection") return " — from selection";
+  if (source === "clipboard") return " — from clipboard";
+  return "";
+}
 
 function decodeHtmlEntities(str: string): string {
   return str
@@ -44,9 +54,11 @@ function decodeHtmlEntities(str: string): string {
 export default function FindReferences(props: LaunchProps) {
   const { table: argTable, sysId: argSysId, instanceName } = props.arguments;
   const { instances, selectedInstance, setSelectedInstance, isLoading: isLoadingInstances } = useInstances();
+  const hasAnyArg = !!(argTable || argSysId || instanceName);
   const initialTarget: Target | null = argTable && argSysId ? { table: argTable, sysId: argSysId } : null;
   const [target, setTarget] = useState<Target | null>(initialTarget);
-  const [detectionDone, setDetectionDone] = useState<boolean>(initialTarget !== null);
+  const [targetSource, setTargetSource] = useState<TargetSource | null>(initialTarget ? "args" : null);
+  const [detectionDone, setDetectionDone] = useState<boolean>(initialTarget !== null || hasAnyArg);
   const [references, setReferences] = useState<Reference[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorFetching, setErrorFetching] = useState(false);
@@ -78,21 +90,57 @@ export default function FindReferences(props: LaunchProps) {
   }, [isLoadingInstances]);
 
   useEffect(() => {
-    if (isLoadingInstances || detectionDone || target || instances.length === 0) return;
+    if (isLoadingInstances || detectionDone || target || instances.length === 0 || hasAnyArg) return;
     let cancelled = false;
     (async () => {
       try {
-        const url = await getURL();
+        let url: string | undefined;
+        let parsed: { table: string; sysId: string } | null = null;
+        let source: TargetSource | null = null;
+
+        const tabUrl = await getURL();
         if (cancelled) return;
-        if (!url || !isServiceNowUrl(url, instances)) {
-          setDetectionDone(true);
-          return;
+        if (tabUrl && isServiceNowUrl(tabUrl, instances)) {
+          parsed = extractRecordFromUrl(tabUrl);
+          if (parsed) {
+            url = tabUrl;
+            source = "tab";
+          }
         }
-        const parsed = extractRecordFromUrl(url);
+
         if (!parsed) {
+          try {
+            const selection = (await getSelectedText())?.trim();
+            if (cancelled) return;
+            if (selection && isServiceNowUrl(selection, instances)) {
+              parsed = extractRecordFromUrl(selection);
+              if (parsed) {
+                url = selection;
+                source = "selection";
+              }
+            }
+          } catch {
+            // ignore selection errors (no selection / no permission)
+          }
+        }
+
+        if (!parsed) {
+          const clip = (await Clipboard.readText())?.trim();
+          if (cancelled) return;
+          if (clip && isServiceNowUrl(clip, instances)) {
+            parsed = extractRecordFromUrl(clip);
+            if (parsed) {
+              url = clip;
+              source = "clipboard";
+            }
+          }
+        }
+
+        if (!parsed || !url) {
           setDetectionDone(true);
           return;
         }
+
         try {
           const hostname = new URL(url).hostname.toLowerCase();
           const matched = instances.find((i) => {
@@ -110,6 +158,7 @@ export default function FindReferences(props: LaunchProps) {
           // ignore hostname errors
         }
         setTarget(parsed);
+        setTargetSource(source);
         setDetectionDone(true);
       } catch {
         if (!cancelled) setDetectionDone(true);
@@ -177,13 +226,13 @@ export default function FindReferences(props: LaunchProps) {
   const instanceId = selectedInstance?.id ?? "";
 
   if (!target && !detectionDone) {
-    return <List isLoading navigationTitle="Find Record References" />;
+    return <List isLoading navigationTitle={`Find Record References${sourceSuffix(targetSource)}`} />;
   }
 
   if (!target) {
     return (
       <Form
-        navigationTitle="Find Record References"
+        navigationTitle={`Find Record References${sourceSuffix(targetSource)}`}
         actions={
           <ActionPanel>
             <Action.SubmitForm
@@ -197,14 +246,15 @@ export default function FindReferences(props: LaunchProps) {
                   return;
                 }
                 setTarget({ table: t, sysId: s });
+                setTargetSource("form");
               }}
             />
           </ActionPanel>
         }
       >
-        <Form.Description text="Could not detect a ServiceNow record from your browser. Enter the table and Sys ID to search." />
-        <Form.TextField id="table" title="Table" placeholder="e.g. sys_user" />
-        <Form.TextField id="sysId" title="Sys ID" placeholder="32-character sys_id" />
+        <Form.Description text="Could not detect a ServiceNow record from your browser tab, selection, or clipboard. Enter the table and Sys ID to search." />
+        <Form.TextField id="table" title="Table" placeholder="e.g. sys_user" defaultValue={argTable} />
+        <Form.TextField id="sysId" title="Sys ID" placeholder="32-character sys_id" defaultValue={argSysId} />
         <Form.Dropdown
           id="instance"
           title="Instance"
@@ -231,7 +281,7 @@ export default function FindReferences(props: LaunchProps) {
   return (
     <List
       isLoading={isLoading || isLoadingInstances}
-      navigationTitle="Find Record References"
+      navigationTitle={`Find Record References${sourceSuffix(targetSource)}`}
       searchBarPlaceholder="Filter by table, column..."
       searchBarAccessory={
         <List.Dropdown

@@ -14,26 +14,14 @@
     {
       "name": "search",
       "title": "Search Text",
-      "description": "Search in ServiceNow, preview search results, and browse your search history.",
-      "mode": "view"
-    },
-    {
-      "name": "manage-instance-profiles",
-      "title": "Manage Instance Profiles",
-      "description": "Configure and manage profiles to connect to your ServiceNow instances.",
-      "mode": "view"
-    },
-    {
-      "name": "quick-search",
-      "title": "Quick Search Text",
-      "description": "Quickly search within a specific ServiceNow instance profile by entering a search term. If no instance URL or alias is provided, it will use the selected instance profile.",
+      "description": "Search in ServiceNow. Pass the text you want to search for (or copy it to the clipboard) to jump straight to results; otherwise browse your search history and search inline.",
       "mode": "view",
       "arguments": [
         {
           "name": "query",
           "placeholder": "Query",
           "type": "text",
-          "required": true
+          "required": false
         },
         {
           "name": "instanceName",
@@ -42,6 +30,12 @@
           "required": false
         }
       ]
+    },
+    {
+      "name": "manage-instance-profiles",
+      "title": "Manage Instance Profiles",
+      "description": "Configure and manage profiles to connect to your ServiceNow instances.",
+      "mode": "view"
     },
     {
       "name": "open-all-instances",
@@ -125,13 +119,13 @@
       "name": "search-sysid",
       "title": "Find Record by Sys ID",
       "description": "Find the record that owns a given Sys ID and open it. Admins only.",
-      "mode": "no-view",
+      "mode": "view",
       "arguments": [
         {
           "name": "sys_id",
           "placeholder": "Sys ID",
           "type": "text",
-          "required": true
+          "required": false
         },
         {
           "name": "instanceName",

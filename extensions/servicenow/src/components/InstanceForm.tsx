@@ -13,9 +13,10 @@ type InstanceFormValues = Omit<Instance, "id" | "authMode" | "accessToken" | "re
 type SetInstanceFormProps = {
   onSubmit: (value: Instance) => Promise<void>;
   instance?: Instance;
+  initialName?: string;
 };
 
-export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProps) {
+export default function InstanceForm({ onSubmit, instance, initialName }: SetInstanceFormProps) {
   const { pop } = useNavigation();
   const { deleteInstance } = useInstances();
 
@@ -64,7 +65,7 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
       pop();
     },
     initialValues: {
-      name: instance?.name,
+      name: instance?.name ?? initialName,
       alias: instance?.alias,
       color: instance?.color,
       authMode: instance?.authMode ?? "basic",
@@ -169,7 +170,7 @@ export default function InstanceForm({ onSubmit, instance }: SetInstanceFormProp
       <Form.Dropdown
         {...itemProps.authMode}
         title="Authentication"
-        info="Basic uses your username and password. OAuth 2.0 uses an OAuth client registered in your ServiceNow instance (Application Registry → Create an OAuth API endpoint for external clients, with PKCE enabled and the redirect URL set to https://raycast.com/redirect?packageName=Extension)."
+        info="Basic uses your username and password. OAuth 2.0 uses an OAuth client registered in your ServiceNow instance."
         onChange={(value) => {
           setAuthMode(value as AuthMode);
           itemProps.authMode.onChange?.(value);

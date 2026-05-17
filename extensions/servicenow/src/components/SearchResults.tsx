@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Color, environment, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { filter, flattenDeep, map, sumBy } from "lodash";
 
@@ -19,8 +19,7 @@ import { useAuthHeader } from "../hooks/useAuthHeader";
 export default function ({ searchTerm }: { searchTerm: string }) {
   const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
   const { addInstance, mutate: mutateInstances, selectedInstance } = useInstances();
-  const { commandName } = environment;
-  const command = commandName == "search" ? "Search" : "Quickly Search";
+  const command = "Search";
 
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
