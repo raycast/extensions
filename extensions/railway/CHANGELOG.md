@@ -1,6 +1,6 @@
 # Railway Changelog
 
-## [Add Template Search] - {PR_MERGE_DATE}
+## [Add Template Search] - 2026-05-17
 
 - Added a new `Search Templates` command to browse and search Railway templates
 - List shows template name, creator, image, deployment count, health score, and verified badge
