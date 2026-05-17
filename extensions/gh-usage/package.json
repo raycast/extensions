@@ -1,0 +1,117 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gh-usage",
+  "description": "Keeps your `gh` usage tracked",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "gh-usage",
+      "title": "GH Usage",
+      "description": "View your GitHub API rate limit usage",
+      "mode": "view"
+    },
+    {
+      "name": "gh-usage-stats",
+      "title": "GH Usage Stats",
+      "description": "Refresh GitHub API rate limit stats in the background",
+      "mode": "no-view",
+      "interval": "1m",
+      "preferences": [
+        {
+          "name": "subtitleTemplate",
+          "type": "textfield",
+          "required": false,
+          "title": "Subtitle Template",
+          "description": "Template for the launcher subtitle. Core: {coreRemaining}, {coreUsed}, {coreLimit}, {corePct}. GraphQL: {graphqlRemaining}, {graphqlUsed}, {graphqlLimit}, {graphqlPct}. Search: {searchRemaining}, {searchUsed}, {searchLimit}, {searchPct}. Code Search: {codeSearchRemaining}, {codeSearchUsed}, {codeSearchLimit}, {codeSearchPct}. Integration: {integrationRemaining}, {integrationUsed}, {integrationLimit}, {integrationPct}.",
+          "default": "Core: {coreRemaining} remaining · {corePct}% used",
+          "placeholder": "e.g. Core: {coreRemaining} · GraphQL: {graphqlRemaining}"
+        }
+      ]
+    },
+    {
+      "name": "menubar-gh-usage",
+      "title": "GH Usage Menu Bar",
+      "description": "Show GitHub API rate limits in the menu bar",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "menuBarResource",
+          "type": "dropdown",
+          "required": false,
+          "title": "Displayed Resource",
+          "description": "Which rate limit resource to show in the menu bar title",
+          "default": "core",
+          "data": [
+            { "title": "Core (REST API)", "value": "core" },
+            { "title": "GraphQL", "value": "graphql" },
+            { "title": "Search", "value": "search" }
+          ]
+        },
+        {
+          "name": "menuBarTemplate",
+          "type": "textfield",
+          "required": false,
+          "title": "Menu Bar Title Template",
+          "description": "Template for the menu bar title. Selected resource: {remaining}, {used}, {limit}, {pct}, {warning}. Core: {coreRemaining}, {coreUsed}, {coreLimit}, {corePct}. GraphQL: {graphqlRemaining}, {graphqlUsed}, {graphqlLimit}, {graphqlPct}. Search: {searchRemaining}, {searchUsed}, {searchLimit}, {searchPct}. Code Search: {codeSearchRemaining}, {codeSearchUsed}, {codeSearchLimit}, {codeSearchPct}. Integration: {integrationRemaining}, {integrationUsed}, {integrationLimit}, {integrationPct}.",
+          "default": "GH {warning}{remaining}",
+          "placeholder": "e.g. GH {remaining}/{limit}"
+        }
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "refreshInterval",
+      "type": "dropdown",
+      "required": false,
+      "title": "Refresh Interval",
+      "description": "How often to refresh rate limit data",
+      "default": "60",
+      "data": [
+        { "title": "30 seconds", "value": "30" },
+        { "title": "1 minute (Recommended)", "value": "60" },
+        { "title": "2 minutes", "value": "120" },
+        { "title": "5 minutes", "value": "300" },
+        { "title": "10 minutes", "value": "600" }
+      ]
+    },
+    {
+      "name": "customGhPath",
+      "type": "textfield",
+      "required": false,
+      "title": "Custom gh Path",
+      "description": "Override the path to the gh binary if it is not found automatically",
+      "placeholder": "e.g., /usr/local/bin/gh"
+    }
+  ],
+  "title": "GH Usage",
+  "author": "diceroll123",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ]
+}
