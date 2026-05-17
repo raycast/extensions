@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Monochrome menu bar icon] - 2026-05-17
+
+### Added
+
+- Added a menu bar preference to use a monochrome icon instead of the extension icon
+
 ## [v2.3.2] - 2026-04-24
 
 ### Added
