@@ -4,7 +4,7 @@
   "title": "ImgBed Uploader",
   "description": "Upload copied screenshots or copied image files to a configurable ImgBed endpoint.",
   "icon": "extension-icon.png",
-  "author": "andy",
+  "author": "thomas7725353",
   "license": "MIT",
   "categories": [
     "Media",
