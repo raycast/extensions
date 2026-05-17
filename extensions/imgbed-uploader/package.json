@@ -71,10 +71,10 @@
     "publish": "ray publish"
   },
   "dependencies": {
-    "@raycast/api": "latest"
+    "@raycast/api": "^1.104.17"
   },
   "devDependencies": {
-    "@types/node": "latest",
-    "typescript": "latest"
+    "@types/node": "22.19.17",
+    "typescript": "^5.9.3"
   }
 }

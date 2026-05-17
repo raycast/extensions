@@ -8,13 +8,6 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 
-type Preferences = {
-  baseUrl: string;
-  authCode: string;
-  uploadChannel: string;
-  autoRetry: boolean;
-};
-
 type ClipboardImage = {
   filePath: string;
   cleanupPath?: string;
