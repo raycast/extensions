@@ -68,7 +68,12 @@ async function getRunningAppsPaths(): Promise<string[]> {
     return result.split(", ").map((appPath: string) => appPath.trim());
   } catch (error: unknown) {
     const message = typeof error === "string" ? error : (error as Error)?.message ?? "";
-    if (message.includes("Not authorized to send Apple events") || message.includes("Timed out")) {
+    const isTimedOut =
+      typeof error === "object" &&
+      error !== null &&
+      "timedOut" in error &&
+      (error as { timedOut: unknown }).timedOut === true;
+    if (message.includes("Not authorized to send Apple events") || isTimedOut) {
       try {
         const fallbackPaths = getRunningAppsPathsWithPs();
         if (fallbackPaths.length > 0) {
