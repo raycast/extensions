@@ -1,7 +1,10 @@
 import { spawnSync } from "child_process";
 
 function restartFinder() {
-  spawnSync("killall", ["Finder"]);
+  const result = spawnSync("killall", ["Finder"]);
+  if (result.status !== 0) {
+    throw new Error(`Failed to restart Finder: ${result.stderr?.toString().trim() || "unknown error"}`);
+  }
 }
 
 export function areDesktopIconsHidden() {
