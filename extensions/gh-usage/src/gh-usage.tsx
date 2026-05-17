@@ -70,10 +70,12 @@ export default function GHUsage() {
     return () => clearInterval(interval);
   }, []);
 
-  const resources = data?.resources ?? {};
+  const resources = data?.resources;
 
-  const items = RESOURCE_ORDER.filter((key) => key in resources).map((key) => {
-    const resource = resources[key as keyof typeof resources];
+  const items = RESOURCE_ORDER.filter(
+    (key) => resources && key in resources,
+  ).map((key) => {
+    const resource = resources![key as keyof typeof resources];
     if (!resource) return null;
 
     const pct = usagePct(resource.used, resource.limit);
