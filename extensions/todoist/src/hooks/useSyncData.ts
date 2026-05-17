@@ -1,19 +1,19 @@
 import { usePromise } from "@raycast/utils";
 import { useEffect } from "react";
 
-import { SyncData, initialSync } from "../api";
+import { SyncData, SyncResourceType, initialSync } from "../api";
 
 import useCachedData from "./useCachedData";
 
-export default function useSyncData(shouldSync = true) {
+export default function useSyncData(shouldSync = true, resourceTypes?: SyncResourceType[]) {
   const { data: syncData, ...rest } = usePromise(
-    async () => {
+    async (resourceTypes?: SyncResourceType[]) => {
       if (shouldSync) {
-        const data = await initialSync();
+        const data = await initialSync(resourceTypes);
         return data as SyncData;
       }
     },
-    [],
+    [resourceTypes],
     { failureToastOptions: { title: "Unable to get Todoist data" } },
   );
 
