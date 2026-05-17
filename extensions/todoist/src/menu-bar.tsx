@@ -92,8 +92,7 @@ function MenuBar(props: MenuBarProps) {
     if (showNextTask) {
       const taskList = view !== "filter" ? tasks : filterTasks;
       if (taskList && taskList.length > 0) {
-        const nextTask = [...taskList].sort((a, b) => a.child_order - b.child_order)[0];
-        const content = truncateMiddle(nextTask.content, parseInt(taskWidth ?? "40"));
+        const content = truncateMiddle(taskList[0].content, parseInt(taskWidth ?? "40"));
         return removeMarkdown(content);
       }
     }
