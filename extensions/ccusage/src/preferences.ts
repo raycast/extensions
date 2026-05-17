@@ -32,7 +32,7 @@ export const getMenuBarTitle = ():
 export const getProgressBarStyle = (): ProgressBarStyle =>
   (menuBarPreferences.progressBarStyle as ProgressBarStyle) ?? "solid";
 
-export const getMenuBarIcon = (): Image.ImageLike =>
+export const getMenuBarIcon = (): Image.Source =>
   menuBarPreferences.menuBarIconStyle === "monochrome" ? Icon.BarChart : "extension-icon.png";
 
 export const getCustomNpxPath = (): string | undefined => {
