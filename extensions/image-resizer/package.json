@@ -1,0 +1,53 @@
+{
+  "name": "image-resizer",
+  "title": "Image Resizer",
+  "description": "Crop screenshots from the top to a full-width 16:10 PNG.",
+  "icon": "extension-icon.png",
+  "version": "0.0.1",
+  "author": "bramsuurdje",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "crop-top-16x10",
+      "title": "Crop Top 16:10",
+      "description": "Crop the selected Finder image from the top to a full-width 16:10 PNG.",
+      "mode": "no-view",
+      "keywords": [
+        "image",
+        "resize",
+        "crop",
+        "screenshot",
+        "16:10"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "1.103.0",
+    "@raycast/utils": "^1.19.1",
+    "jimp": "^1.6.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.5.4",
+    "@types/react": "19.0.10",
+    "@typescript-eslint/eslint-plugin": "7.18.0",
+    "@typescript-eslint/parser": "7.18.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "ray-publish": "ray publish"
+  }
+}
