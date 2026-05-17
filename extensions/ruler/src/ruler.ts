@@ -1,5 +1,6 @@
 import { Clipboard, Toast, closeMainWindow, showToast, getPreferenceValues } from "@raycast/api";
-import { measureDistance } from "swift:../swift/Ruler";
+
+const isMac = process.platform === "darwin";
 
 export default async function command() {
   await closeMainWindow();
@@ -7,7 +8,16 @@ export default async function command() {
   try {
     const preferences = await getPreferenceValues();
 
-    const distance = (await measureDistance(preferences.dragMode)) as unknown as string | undefined;
+    let measureDistance: (dragMode: boolean) => Promise<string | null | undefined>;
+    if (isMac) {
+      const { measureDistance: measureDistanceSwift } = await import("swift:../swift/Ruler");
+      measureDistance = measureDistanceSwift;
+    } else {
+      const { measure_distance: measureDistanceRust } = await import("rust:../rust/ruler");
+      measureDistance = measureDistanceRust;
+    }
+
+    const distance = await measureDistance(preferences.dragMode);
 
     if (!distance) {
       return;
