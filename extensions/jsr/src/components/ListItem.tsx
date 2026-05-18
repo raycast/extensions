@@ -1,9 +1,10 @@
-import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, getPreferenceValues } from "@raycast/api";
 
 import type { SearchResultDocument } from "@/types";
 
 import { compatIcons } from "@/lib/compat";
 import { jsrUrls } from "@/lib/jsrUrls";
+import { scoreColor } from "@/lib/ui-helpers";
 
 import CopyActions from "@/components/CopyActions";
 import ItemDetails from "@/components/ItemDetails";
@@ -19,7 +20,7 @@ const ListItem = ({ item }: ListItemProps) => {
   const ctx = useSearchContext();
   const isShowingDetails = ctx?.isShowingDetails ?? false;
   const progress = item.score ?? 0;
-  const iconColor = progress >= 80 ? Color.Green : progress >= 50 ? Color.Yellow : Color.Red;
+  const iconColor = scoreColor(progress);
   const icons = compatIcons(item);
 
   return (
@@ -32,7 +33,7 @@ const ListItem = ({ item }: ListItemProps) => {
           ? undefined
           : [...icons.map((ico) => ({ icon: ico.icon })), { tag: { value: `${progress}%`, color: iconColor } }]
       }
-      detail={isShowingDetails ? <ItemDetails item={item} progress={progress} iconColor={iconColor} /> : null}
+      detail={isShowingDetails ? <ItemDetails item={item} /> : null}
       actions={
         <ActionPanel>
           <ActionPanel.Section title="Main">

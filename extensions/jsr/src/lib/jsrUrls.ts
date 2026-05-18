@@ -19,6 +19,8 @@ export const jsrUrls = {
       `${API_BASE}/scopes/${scope}/packages/${name}/versions/${version}/dependencies?limit=${limit}`,
     /** All packages within a single scope. */
     scopePackages: (scope: string, limit = 100) => `${API_BASE}/scopes/${scope}/packages?limit=${limit}`,
+    /** Per-day download counts (~last 90 days) plus recent-version breakdowns. */
+    downloads: (scope: string, name: string) => `${API_BASE}/scopes/${scope}/packages/${name}/downloads`,
   },
   site: {
     /** jsr.io homepage — scraped for Orama Cloud credentials. */
@@ -27,6 +29,10 @@ export const jsrUrls = {
     package: (id: string) => `${SITE_BASE}/${id}`,
     /** Public package documentation page. */
     packageDocs: (id: string) => `${SITE_BASE}/${id}/doc`,
+    /** Public dependents listing page on jsr.io. */
+    packageDependents: (scope: string, name: string) => `${SITE_BASE}/@${scope}/${name}/dependents`,
+    /** Public dependencies listing page on jsr.io. */
+    packageDependencies: (scope: string, name: string) => `${SITE_BASE}/@${scope}/${name}/dependencies`,
     /** Public package page built from explicit scope + name. */
     scopePackage: (scope: string, name: string) => `${SITE_BASE}/@${scope}/${name}`,
     /** Public package page pinned to a specific version. */

@@ -7,6 +7,7 @@ import type {
   ApiResults,
   Dependency,
   Dependent,
+  DownloadsResponse,
   NameAndScope,
   Package,
   PackageScore,
@@ -172,6 +173,22 @@ export const useDependencies = (item: NameAndScope | null, version: string | nul
         ),
       };
     },
+  });
+};
+
+/**
+ * This hook is used to get the download stats for a package
+ * (per-day buckets for ~last 90 days, plus per-recent-version breakdowns).
+ *
+ * @param {NameAndScope | null} item - The package name and scope.
+ */
+export const useDownloads = (item: NameAndScope | null) => {
+  const url = item ? jsrUrls.api.downloads(item.scope, item.name) : "";
+  return useFetch<DownloadsResponse>(url, {
+    execute: !!item,
+    keepPreviousData: true,
+    onError: onErrorCapture,
+    failureToastOptions: { title: "Error fetching JSR download stats" },
   });
 };
 

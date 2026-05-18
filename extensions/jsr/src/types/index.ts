@@ -55,9 +55,12 @@ export type Package = NameAndScope &
     updatedAt: string | null;
     createdAt: string | null;
     versionCount: number | null;
+    dependencyCount: number | null;
+    dependentCount: number | null;
     score: number | null;
     latestVersion: string | null;
     whenFeatured: string | null;
+    isArchived: boolean | null;
   };
 
 export type VersionPackageBase = {
@@ -66,11 +69,28 @@ export type VersionPackageBase = {
   version: string;
   yanked: boolean;
   usesNpm: boolean;
-  newerVersionsCount: number;
-  lifetimeDownloadCount: number;
-  readmePath: string;
+  newerVersionsCount?: number;
+  readmePath: string | null;
   updatedAt: string;
   createdAt: string;
+};
+
+export type DownloadKind = "jsr_meta" | "npm_tarball";
+
+export type DownloadDataPoint = {
+  timeBucket: string;
+  kind: DownloadKind;
+  count: number;
+};
+
+export type RecentVersionDownloads = {
+  version: string;
+  downloads: DownloadDataPoint[];
+};
+
+export type DownloadsResponse = {
+  total: DownloadDataPoint[];
+  recentVersions: RecentVersionDownloads[];
 };
 
 export type VersionPackage = VersionPackageBase & {
