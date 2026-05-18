@@ -3,7 +3,7 @@ import fs from "fs";
 import https from "https";
 import crypto from "crypto";
 import { execa } from "execa";
-import { environment } from "@raycast/api";
+import { environment, showToast, Toast } from "@raycast/api";
 import type { PlatformAudioAPI, AudioDevice } from "./index";
 
 type WindowsAudioDevice = {
@@ -23,10 +23,17 @@ type WindowsAudioSwitchResult = {
   device: WindowsAudioDevice;
 };
 
-const WINDOWS_BINARY_URL = "https://github.com/Inovvia/go-win-audio-cli/releases/download/1.2.0/win-audio-cli.exe";
-const WINDOWS_BINARY_CHECKSUM = "14bf9816323ecc25557b66d3d8869f69fcf000159b5b49ce2235cbcbca179467";
+type WindowsAudioVolumeResult = {
+  type: "input" | "output";
+  volume: number;
+  device: WindowsAudioDevice;
+};
+
+const WINDOWS_BINARY_URL = "https://github.com/Inovvia/go-win-audio-cli/releases/download/1.3.1/win-audio-cli.exe";
+const WINDOWS_BINARY_CHECKSUM = "9bda285caea2477f5504a73b532d4102e5d8e37a63c16669faca1834ccfd2048";
 
 const binary = path.join(environment.supportPath, "win-audio-cli.exe");
+const binaryDownload = path.join(environment.supportPath, `win-audio-cli.${process.pid}.download`);
 let hasLoggedBinaryInfo = false;
 let isDownloading = false;
 let downloadPromise: Promise<void> | null = null;
@@ -108,20 +115,22 @@ function verifyChecksum(filePath: string, expectedChecksum: string): Promise<voi
 let hasVerifiedBinaryThisSession = false;
 
 async function ensureBinary() {
-  if (fs.existsSync(binary)) {
+  const binaryExists = fs.existsSync(binary);
+  let shouldDownload = !binaryExists;
+
+  if (binaryExists) {
     // Verify checksum at least once per session to catch corrupt binaries
     if (!hasVerifiedBinaryThisSession) {
       try {
         await verifyChecksum(binary, WINDOWS_BINARY_CHECKSUM);
         hasVerifiedBinaryThisSession = true;
       } catch (error) {
-        console.warn("Binary checksum verification failed, re-downloading...", error);
-        fs.unlinkSync(binary);
-        // Continue to download below
+        console.warn("Binary checksum verification failed, downloading replacement...", error);
+        shouldDownload = true;
       }
     }
 
-    if (fs.existsSync(binary)) {
+    if (!shouldDownload) {
       await logBinaryInfo();
       return;
     }
@@ -133,20 +142,47 @@ async function ensureBinary() {
 
   isDownloading = true;
   downloadPromise = (async () => {
+    let downloadToast: Toast | undefined;
+
     try {
       if (!fs.existsSync(environment.supportPath)) {
         fs.mkdirSync(environment.supportPath, { recursive: true });
       }
 
       console.log("Downloading Windows audio CLI binary...");
-      await downloadBinary(WINDOWS_BINARY_URL, binary);
-      await verifyChecksum(binary, WINDOWS_BINARY_CHECKSUM);
+      downloadToast = await showToast({
+        style: Toast.Style.Animated,
+        title: "Downloading Windows audio CLI",
+        message: "Preparing audio device support...",
+      });
+      try {
+        for (const file of fs.readdirSync(environment.supportPath)) {
+          if (/^win-audio-cli\.\d+\.download$/.test(file)) {
+            fs.unlinkSync(path.join(environment.supportPath, file));
+          }
+        }
+      } catch {
+        // Best-effort cleanup for temp files left by crashed processes.
+      }
+      await downloadBinary(WINDOWS_BINARY_URL, binaryDownload);
+      await verifyChecksum(binaryDownload, WINDOWS_BINARY_CHECKSUM);
+      fs.renameSync(binaryDownload, binary);
       hasVerifiedBinaryThisSession = true;
       console.log("Windows audio CLI binary downloaded and verified successfully");
+      if (downloadToast) {
+        downloadToast.style = Toast.Style.Success;
+        downloadToast.title = "Windows audio CLI ready";
+        downloadToast.message = "Audio device support was installed.";
+      }
       await logBinaryInfo();
     } catch (error) {
-      if (fs.existsSync(binary)) {
-        fs.unlinkSync(binary);
+      if (fs.existsSync(binaryDownload)) {
+        fs.unlinkSync(binaryDownload);
+      }
+      if (downloadToast) {
+        downloadToast.style = Toast.Style.Failure;
+        downloadToast.title = "Failed to download Windows audio CLI";
+        downloadToast.message = String(error);
       }
       throw error;
     } finally {
@@ -238,6 +274,23 @@ async function runBinary<T>(args: string[]): Promise<T> {
   return parseJson<T>(stdout);
 }
 
+async function getWindowsVolume(type: "input" | "output", deviceId: string): Promise<number | undefined> {
+  try {
+    const result = await runBinary<WindowsAudioVolumeResult>([
+      type === "output" ? "get-output-volume" : "get-input-volume",
+      "--id",
+      deviceId,
+    ]);
+    if (result.type !== type || String(result.device.id) !== String(deviceId)) {
+      return undefined;
+    }
+
+    return Math.max(0, Math.min(100, result.volume)) / 100;
+  } catch {
+    return undefined;
+  }
+}
+
 async function getDevices(): Promise<WindowsAudioList> {
   return runBinary<WindowsAudioList>(["list", "--json"]);
 }
@@ -295,5 +348,23 @@ export const windowsAudioAPI: PlatformAudioAPI = {
 
   async setDefaultCommunicationInputDevice(deviceId: string) {
     await runBinary<WindowsAudioSwitchResult>(["switch-input-communication", "--id", deviceId]);
+  },
+
+  async setOutputDeviceVolume(deviceId: string, volume: number) {
+    const level = Math.round(Math.max(0, Math.min(1, volume)) * 100);
+    await runBinary<WindowsAudioVolumeResult>(["set-output-volume", "--volume", `${level}`, "--id", deviceId]);
+  },
+
+  async getOutputDeviceVolume(deviceId: string) {
+    return getWindowsVolume("output", deviceId);
+  },
+
+  async setInputDeviceVolume(deviceId: string, volume: number) {
+    const level = Math.round(Math.max(0, Math.min(1, volume)) * 100);
+    await runBinary<WindowsAudioVolumeResult>(["set-input-volume", "--volume", `${level}`, "--id", deviceId]);
+  },
+
+  async getInputDeviceVolume(deviceId: string) {
+    return getWindowsVolume("input", deviceId);
   },
 };

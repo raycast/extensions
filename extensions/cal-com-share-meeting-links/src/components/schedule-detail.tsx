@@ -1,6 +1,6 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { updateSchedule, useSchedules } from "@api/cal.com";
+import { appBaseUrl, updateSchedule, useSchedules } from "@api/cal.com";
 import {
   formatDayRanges,
   formatOverrideDate,
@@ -104,7 +104,7 @@ export function ScheduleDetail({ scheduleId }: ScheduleDetailProps) {
   const openScheduleInBrowserAction = (
     <Action.OpenInBrowser
       title="Open Schedule in Browser"
-      url={`https://app.cal.com/availability/${schedule.id}`}
+      url={`${appBaseUrl}/availability/${schedule.id}`}
       shortcut={{ modifiers: ["cmd"], key: "return" }}
     />
   );

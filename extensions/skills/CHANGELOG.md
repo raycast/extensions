@@ -1,5 +1,35 @@
 # Skills Changelog
 
+## [Ask Skills AI Extension] - 2026-05-12
+
+- Add `@skills` support in Raycast AI Chat with five tools: search the marketplace by query, read a skill's full instructions, list installed skills, install a skill for specific agents, and remove a skill
+
+## [Fix Stale Search Results] - 2026-05-12
+
+- Clear stale search results when the current search fails or is superseded by a newer query
+
+## [Standardize Open Actions] - 2026-05-12
+
+- Standardize **Open on skills.sh** and **Open Repository** actions across Search Skills and Manage Skills
+
+## [Fix Support Directory Initialization] - 2026-05-11
+
+- Ensure the extension support directory exists before cached hooks run, preventing "Could not create extension support directory" errors on first launch
+
+## [Add Newly Supported Agents] - 2026-05-05
+
+- Add 11 agents supported by the Skills CLI: AiderDesk, Code Studio, CodeArts Agent, Codemaker, Devin for Terminal, Dexto, ForgeCode, IBM Bob, Rovo Dev, Tabnine CLI, and Universal
+
+## [Improve Installed Indicators, Source Matching & Refresh] - 2026-05-05
+
+- Replace the green "Installed" tag in "Search Skills" with a green check-circle indicator and green skill icon for installed skills
+- Show the skill source (`owner/repo`) as the subtitle in "Search Skills" and "Manage Skills" to better distinguish skills between them
+- Move "Search Skills" result details out of the side panel and into a full-screen detail view
+- Detect skills with the same `skillId` installed from different sources. Show a warning indicator and rename the "Install Skill" action to "Replace Installed Skill" for clarity on the outcome
+- Immediately refresh installed indicators in "Search Skills" after installing or replacing a skill
+- Add "Refresh Installed Skills" actions with Cmd+R in "Manage Skills"
+- Consolidate shared install, remove, and update action handling for more consistent confirmations, toasts, and error messages
+
 ## [Show Last Updated Date in Search Results] - 2026-04-30
 
 - Show the repository's last updated date in the skill detail panel, displayed as a relative time (e.g. "3 days ago")

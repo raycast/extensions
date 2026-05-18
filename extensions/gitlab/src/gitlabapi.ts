@@ -172,11 +172,6 @@ function paramString(params: { [key: string]: any }): string {
   return prefix + p.join("&");
 }
 
-function getNextPageNumber(page_response: Response): number | undefined {
-  const header = page_response.headers.get("x-next-page");
-  return header ? parseInt(header) : undefined;
-}
-
 export enum EpicState {
   opened = "opened",
   closed = "closed",
@@ -438,7 +433,12 @@ export class GitLab {
     return new URL(relativeUrl, this.url).href;
   }
 
-  public async fetch(url: string, params: { [key: string]: string } = {}, all = false): Promise<any> {
+  public async fetch(
+    url: string,
+    params: { [key: string]: string } = {},
+    all = false,
+    mapPage?: (items: any[]) => any[],
+  ): Promise<any> {
     const per_page = all ? 100 : 50;
     const fetchPage = async (page: number): Promise<Response> => {
       const pagedParams = { ...params, ...{ per_page: `${per_page}`, page: `${page}` } };
@@ -451,21 +451,47 @@ export class GitLab {
       });
       return response;
     };
+
+    const processPage = async (r: Response): Promise<any[]> => {
+      const items = await toJsonOrError(r);
+      return mapPage ? mapPage(items) : items;
+    };
+
     try {
       const response = await fetchPage(1);
-      let json = await toJsonOrError(response);
+      const json = await processPage(response);
       if (!all) {
         return json;
       }
 
-      let next_page = getNextPageNumber(response);
-      while (next_page) {
-        logAPI(next_page);
-        const page_response = await fetchPage(next_page);
-        const page_content = await toJsonOrError(page_response);
-        json = json.concat(page_content);
-        next_page = getNextPageNumber(page_response);
+      const totalPages = parseInt(response.headers.get("x-total-pages") || "1");
+
+      if (totalPages > 1) {
+        const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+        const BATCH_SIZE = 5;
+
+        for (let i = 0; i < remainingPages.length; i += BATCH_SIZE) {
+          const batch = remainingPages.slice(i, i + BATCH_SIZE);
+          const results = await Promise.all(
+            batch.map(async (page) => {
+              try {
+                return await processPage(await fetchPage(page));
+              } catch (firstError) {
+                logAPI(`page ${page} failed, retrying: ${firstError}`);
+                try {
+                  return await processPage(await fetchPage(page));
+                } catch (retryError) {
+                  throw Error(`page ${page} failed after retry: ${retryError} (original: ${firstError})`);
+                }
+              }
+            }),
+          );
+          for (const pageContent of results) {
+            json.push(...pageContent);
+          }
+        }
       }
+
       return json;
     } catch (error: any) {
       throw Error(error); // rethrow error, otherwise raycast could not catch the error
@@ -710,9 +736,12 @@ export class GitLab {
     if (!params.min_access_level) {
       params.min_access_level = "30";
     }
-    return await this.fetch("projects", params, all).then((projects: any[]) => {
-      return projects.map((p: any) => dataToProject(p));
-    });
+    if (!params.order_by) {
+      params.order_by = "last_activity_at";
+      params.sort = "desc";
+    }
+    const mapFn = (items: any[]) => items.map((p: any) => dataToProject(p));
+    return await this.fetch("projects", params, all, mapFn);
   }
 
   async getProjects(args = { searchText: "", searchIn: "", membership: "true", active: false }): Promise<Project[]> {
@@ -746,13 +775,11 @@ export class GitLab {
     if (args.searchIn && args.searchIn.length > 0) {
       params.searchIn = args.searchIn;
     }
+    params.order_by = "last_activity_at";
+    params.sort = "desc";
     const user = await this.getMyself();
-    const projects: Project[] = await this.fetch(`users/${user.id}/starred_projects`, params, all).then(
-      (projects: any[]) => {
-        return projects.map((p: any) => dataToProject(p));
-      },
-    );
-    return projects;
+    const mapFn = (items: any[]) => items.map((p: any) => dataToProject(p));
+    return await this.fetch(`users/${user.id}/starred_projects`, params, all, mapFn);
   }
 
   async getUsers(args = { searchText: "", searchIn: "" }): Promise<User[]> {

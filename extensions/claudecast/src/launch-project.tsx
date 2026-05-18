@@ -285,7 +285,7 @@ function ProjectItem({
             <Action.Push
               title="Continue with Prompt"
               icon={Icon.Message}
-              shortcut={{ modifiers: ["cmd"], key: "p" }}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
               target={<ContinueWithPromptForm project={project} />}
             />
           </ActionPanel.Section>

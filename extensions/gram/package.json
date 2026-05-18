@@ -1,0 +1,119 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "gram",
+  "title": "Gram",
+  "description": "Raycast Extension for Gram",
+  "icon": "icon.png",
+  "author": "justyt65",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open-new-window",
+      "title": "Open New Window",
+      "subtitle": "Gram",
+      "description": "Opens a new Gram window.",
+      "mode": "no-view"
+    },
+    {
+      "name": "open",
+      "title": "Open with Gram",
+      "subtitle": "Gram",
+      "description": "Opens the currently selected Finder item in Gram",
+      "mode": "no-view"
+    },
+    {
+      "name": "search",
+      "title": "Search Recent Projects",
+      "subtitle": "Gram",
+      "description": "Search and open recent projects in Gram",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "build",
+      "type": "dropdown",
+      "required": false,
+      "title": "Build",
+      "default": "Gram",
+      "description": "Select which build of Gram to use",
+      "data": [
+        {
+          "value": "Gram",
+          "title": "Gram"
+        },
+        {
+          "value": "Gram Dev",
+          "title": "Gram Dev"
+        }
+      ]
+    },
+    {
+      "name": "showGitBranch",
+      "type": "checkbox",
+      "title": "Git Integration",
+      "required": false,
+      "label": "Show Git Branch",
+      "default": true,
+      "description": "Display the current Git branch for files and folders in Git repositories"
+    },
+    {
+      "name": "projectIconStyle",
+      "type": "dropdown",
+      "title": "Visual Customization",
+      "required": false,
+      "default": "icon",
+      "description": "Choose how project icons are displayed",
+      "data": [
+        {
+          "value": "icon",
+          "title": "Icons"
+        },
+        {
+          "value": "colored-dot",
+          "title": "Colored Dots"
+        }
+      ]
+    },
+    {
+      "name": "showOpenStatus",
+      "type": "checkbox",
+      "required": false,
+      "label": "Show Open Status",
+      "default": false,
+      "description": "Display an 'Open' tag for projects currently open in Gram"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
+    "color-hash": "^2.0.2",
+    "tildify": "^3.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/color-hash": "^2.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "4.0.6"
+  },
+  "scripts": {
+    "build": "ray build",
+    "create-fixtures": "./scripts/create-fixtures.sh",
+    "create-fixtures:ts": "node --experimental-transform-types scripts/create-fixtures.ts",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest --reporter=verbose",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

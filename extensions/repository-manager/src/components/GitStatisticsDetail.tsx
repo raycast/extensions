@@ -15,37 +15,45 @@ type CommitStat = {
     name: string
 }
 
+const commandPath = ['/opt/homebrew/bin', '/usr/local/bin', process.env.HOME ? `${process.env.HOME}/.cargo/bin` : null, '/usr/bin', '/bin', process.env.PATH || null].filter((path): path is string => Boolean(path)).join(':')
+
+const tokeiArgs = ['.', '--compact', '--exclude', 'node_modules', '--exclude', 'vendor', '--exclude', '.git', '--exclude', 'dist', '--exclude', 'build', '--exclude', 'target', '--exclude', 'coverage', '--exclude', '.next', '--exclude', '.nuxt', '--exclude', '.turbo', '--exclude', '.cache', '--exclude', 'tmp', '--exclude', '*.lock', '--exclude', '*-lock.*', '--exclude', 'bun.lockb']
+
 export default function GitStatisticsDetail({ project }: GitStatisticsDetailProps) {
     const { push, pop } = useNavigation()
-    const [clocAvailable, setClocAvailable] = useState<boolean | null>(null)
+    const [tokeiAvailable, setTokeiAvailable] = useState<boolean | null>(null)
 
     const { isLoading: isLoadingCommits, data: totalCommits } = useExec('git', ['rev-list', '--all', '--count'], { cwd: project.fullPath })
     const { isLoading: isLoadingBranches, data: totalBranches } = useExec('git', ['branch', '-r'], { cwd: project.fullPath, parseOutput: (output) => output.stdout.split('\n').length - 1 })
     const { isLoading: isLoadingTags, data: totalTags } = useExec('git', ['tag'], { cwd: project.fullPath, parseOutput: (output) => output.stdout.split('\n').length - 1 })
 
-    // First check if cloc is available
-    const { isLoading: isCheckingCloc, error: clocCheckError } = useExec('which', ['cloc'], {
+    // First check if tokei is available
+    const {
+        isLoading: isCheckingTokei,
+        error: tokeiCheckError,
+        revalidate: revalidateTokeiCheck,
+    } = useExec('which', ['tokei'], {
         env: {
             ...process.env,
-            PATH: '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:' + (process.env.PATH || ''),
+            PATH: commandPath,
         },
         parseOutput: (output) => {
             if (output.stdout && output.stdout.trim().length > 0) {
-                setClocAvailable(true)
+                setTokeiAvailable(true)
                 return output.stdout.trim()
             }
             return null
         },
     })
 
-    // Only run cloc if we confirmed it's available
-    const { isLoading: isLoadingCloc, data: clocData } = useExec('cloc', ['.', '--exclude-dir=node_modules,vendor,.git,dist,build', '--git', '--exclude-ext=lock'], {
+    // Only run tokei if we confirmed it's available
+    const { isLoading: isLoadingTokei, data: tokeiData } = useExec('tokei', tokeiArgs, {
         cwd: project.fullPath,
-        execute: clocAvailable === true,
+        execute: tokeiAvailable === true,
         timeout: 30000, // 30 second timeout
         env: {
             ...process.env,
-            PATH: '/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:' + (process.env.PATH || ''),
+            PATH: commandPath,
         },
         parseOutput: (output) => {
             if (output.stdout && output.stdout.trim().length > 0) {
@@ -55,21 +63,21 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
         },
     })
 
-    // Set cloc as unavailable if the version check failed
+    // Set tokei as unavailable if the version check failed
     useEffect(() => {
-        if (clocCheckError && clocAvailable !== false) {
-            setClocAvailable(false)
+        if (tokeiCheckError && tokeiAvailable !== false) {
+            setTokeiAvailable(false)
         }
-    }, [clocCheckError, clocAvailable])
+    }, [tokeiCheckError, tokeiAvailable])
 
-    // Handle cloc errors
+    // Handle tokei errors
     useEffect(() => {
-        if (clocAvailable === false) {
-            showFailureToast('Code Statistics Error', { title: 'cloc command not found' })
-        } else if (clocAvailable === true && !isLoadingCloc && (!clocData || clocData.trim().length === 0)) {
-            showFailureToast('Code Statistics Error', { title: 'cloc command failed to generate statistics' })
+        if (tokeiAvailable === false) {
+            showFailureToast('Code Statistics Error', { title: 'tokei command not found' })
+        } else if (tokeiAvailable === true && !isLoadingTokei && (!tokeiData || tokeiData.trim().length === 0)) {
+            showFailureToast('Code Statistics Error', { title: 'tokei command failed to generate statistics' })
         }
-    }, [clocAvailable, isLoadingCloc, clocData])
+    }, [tokeiAvailable, isLoadingTokei, tokeiData])
 
     const { isLoading: isLoadingCommitsByPerson, data: commitsByPerson } = useExec('git', ['shortlog', '-s', '-n', '--all'], {
         cwd: project.fullPath,
@@ -115,14 +123,19 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
         },
     })
 
-    const isLoading = isLoadingCommits || isLoadingBranches || isLoadingTags || isLoadingCommitsByPerson || isCheckingCloc || (clocAvailable === true && isLoadingCloc)
+    const isLoading = isLoadingCommits || isLoadingBranches || isLoadingTags || isLoadingCommitsByPerson
 
-    const formatClocData = (clocData: string): string => {
-        const lines = clocData.trim().split('\n')
+    const refreshCodeStatistics = () => {
+        setTokeiAvailable(null)
+        revalidateTokeiCheck()
+    }
+
+    const formatTokeiData = (tokeiData: string): string => {
+        const lines = tokeiData.trim().split('\n')
 
         const headerIndex = lines.findIndex((line) => line.trim().startsWith('Language'))
         if (headerIndex === -1) {
-            return clocData
+            return tokeiData
         }
 
         const dataLines = lines.slice(headerIndex + 2) // Skip header and separator line
@@ -131,58 +144,52 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
 
         for (const line of dataLines) {
             const trimmedLine = line.trim()
-            if (/^-+$/.test(trimmedLine) || trimmedLine === '') {
+            if (/^-+$/.test(trimmedLine) || /^=+$/.test(trimmedLine) || trimmedLine === '') {
                 continue
             }
 
-            if (trimmedLine.startsWith('SUM:')) {
-                const sumParts = trimmedLine.replace('SUM:', '').trim().split(/\s+/).filter(Boolean)
-                if (sumParts.length === 4) {
-                    tableRows.push(`| *SUM* | *${sumParts[0]}* | *${sumParts[1]}* | *${sumParts[2]}* | *${sumParts[3]}* |`)
-                }
-                continue
-            }
-
-            const match = trimmedLine.match(/^(.*[^\s])\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/)
+            const match = trimmedLine.match(/^(.*[^\s])\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/)
             if (match) {
-                // match[1] is language, [2] is files, [3] is blank, [4] is comment, [5] is code
-                const language = match[1].replace(/\|/g, '\\|')
+                // match[1] is language, [2] is files, [3] is lines, [4] is code, [5] is comments, [6] is blanks
+                const isTotalRow = match[1] === 'Total'
+                const language = isTotalRow ? '**Total**' : match[1].replace(/\|/g, '\\|')
                 const files = match[2]
-                const blank = match[3]
-                const comment = match[4]
-                const code = match[5]
-                tableRows.push(`| ${language} | ${files} | ${blank} | ${comment} | ${code} |`)
+                const lines = match[3]
+                const code = match[4]
+                const comments = match[5]
+                const blanks = match[6]
+                tableRows.push(isTotalRow ? `| ${language} | **${files}** | **${lines}** | **${code}** | **${comments}** | **${blanks}** |` : `| ${language} | ${files} | ${lines} | ${code} | ${comments} | ${blanks} |`)
             }
         }
 
         if (tableRows.length === 0) {
-            return clocData
+            return tokeiData
         }
 
-        const markdownTable = ['| Language | Files | Blank | Comment | Code |', '|---|---|---|---|---|', ...tableRows].join('\n')
+        const markdownTable = ['| Language | Files | Lines | Code | Comments | Blank |', '|---|---|---|---|---|---|', ...tableRows].join('\n')
 
         return markdownTable
     }
 
-    const getClocSection = () => {
-        if (isCheckingCloc) {
-            return 'Checking if cloc is available...'
+    const getTokeiSection = () => {
+        if (isCheckingTokei) {
+            return 'Checking if tokei is available...'
         }
 
-        if (clocAvailable === true && isLoadingCloc) {
+        if (tokeiAvailable === true && isLoadingTokei) {
             return 'Generating code statistics...'
         }
 
-        if (clocAvailable === true && clocData && clocData.trim().length > 0) {
-            return formatClocData(clocData)
+        if (tokeiAvailable === true && tokeiData && tokeiData.trim().length > 0) {
+            return formatTokeiData(tokeiData)
         }
 
-        // Show installation instructions for any case where cloc is not working
-        return `**cloc not found** - Install [cloc](https://github.com/AlDanial/cloc) to get detailed code statistics including lines of code, comments, and blank lines by language.
+        // Show installation instructions for any case where tokei is not working
+        return `**tokei not found** - Install [tokei](https://github.com/XAMPPRocky/tokei) to get detailed code statistics including lines of code, comments, and blank lines by language.
 
 **Installation options:**
-- **macOS:** \`brew install cloc\`
-- **npm:** \`npm install -g cloc\``
+- **macOS:** \`brew install tokei\`
+- **Cargo:** \`cargo install tokei\``
     }
 
     const getRepoStats = () => {
@@ -229,7 +236,7 @@ export default function GitStatisticsDetail({ project }: GitStatisticsDetailProp
 ${generateStatsTable()}
 
 ## Code Statistics
-${getClocSection()}
+${getTokeiSection()}
 `
 
     return (
@@ -238,6 +245,12 @@ ${getClocSection()}
             markdown={markdown}
             actions={
                 <ActionPanel>
+                    <Action
+                        title="Refresh Code Statistics"
+                        icon={Icon.BarChart}
+                        shortcut={{ modifiers: ['cmd'], key: 'l' }}
+                        onAction={refreshCodeStatistics}
+                    />
                     <Action
                         title="Close"
                         icon={Icon.XMarkCircle}

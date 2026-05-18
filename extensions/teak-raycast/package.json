@@ -1,7 +1,7 @@
 {
   "name": "teak-raycast",
   "title": "Teak",
-  "version": "0.2.0",
+  "version": "1.0.30",
   "private": true,
   "license": "MIT",
   "description": "Save ideas fast, search your Teak cards, and access favorites directly from Raycast.",
@@ -31,6 +31,42 @@
       "mode": "view"
     },
     {
+      "name": "save-text",
+      "title": "Save to Teak",
+      "subtitle": "Capture text or links to Teak",
+      "description": "Save any text or URL to Teak. Works as a Raycast root-search fallback command.",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "content",
+          "placeholder": "Text or URL",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "save-clipboard-url",
+      "title": "Save Clipboard",
+      "subtitle": "Capture copied text or links to Teak",
+      "description": "Save the current clipboard contents to Teak in one step",
+      "mode": "no-view"
+    },
+    {
+      "name": "save-selected-text",
+      "title": "Save Selected Text",
+      "subtitle": "Capture highlighted text to Teak",
+      "description": "Save the text currently selected in any app to Teak",
+      "mode": "no-view"
+    },
+    {
+      "name": "save-current-browser-tab",
+      "title": "Save Current Browser Tab",
+      "subtitle": "Capture the active browser tab",
+      "description": "Save the current browser tab to Teak using Raycast Browser Extension",
+      "mode": "no-view"
+    },
+    {
       "name": "search-cards",
       "title": "Search Cards",
       "subtitle": "Find anything in your Teak vault",
@@ -43,8 +79,50 @@
       "subtitle": "Open your saved favorites fast",
       "description": "Browse and open your favorited Teak cards",
       "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Browse Tags",
+      "subtitle": "List your tags with card counts",
+      "description": "Browse every tag in your Teak vault with card counts and drill into any tag",
+      "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-cards",
+      "title": "Search Teak Cards",
+      "description": "Search Teak cards by text, type, tags, favorites, and sort order."
+    },
+    {
+      "name": "get-card",
+      "title": "Get Teak Card",
+      "description": "Fetch the full details of a specific Teak card by id."
+    },
+    {
+      "name": "get-recent",
+      "title": "Get Recent Teak Cards",
+      "description": "Fetch the newest Teak cards without a search query."
+    },
+    {
+      "name": "list-tags",
+      "title": "List Teak Tags",
+      "description": "List the user's Teak tags with per-tag card counts."
+    },
+    {
+      "name": "save-card",
+      "title": "Save to Teak",
+      "description": "Save a note or URL to the user's Teak library."
+    },
+    {
+      "name": "favorite-card",
+      "title": "Toggle Favorite",
+      "description": "Favorite or unfavorite a Teak card by id."
+    }
+  ],
+  "ai": {
+    "instructions": "Use search-cards or get-recent to find Teak cards, list-tags to discover the user's taxonomy, get-card for follow-up detail on a specific card, save-card when the user explicitly asks to save something, and favorite-card to toggle favorites. Always confirm mutating actions before running them."
+  },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
@@ -55,12 +133,12 @@
     "test": "bun test src/__tests__ --coverage --dots"
   },
   "dependencies": {
-    "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2"
+    "@raycast/api": "^1.104.15"
   },
   "devDependencies": {
-    "@types/node": "^25.3.0",
-    "@types/react": "19.2.10",
-    "typescript": "^5.9.3"
+    "@types/node": "^25.6.0",
+    "@types/react": "19.2.14",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.59.1"
   }
 }

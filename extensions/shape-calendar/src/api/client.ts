@@ -7,6 +7,8 @@ import {
   DeleteResponse,
   ListActivitiesParams,
   ListActivitiesResponse,
+  PairResponse,
+  UnpairResponse,
 } from "./types";
 
 const BASE_URL = "https://shapecalendar.com/api/v1";
@@ -58,6 +60,7 @@ export async function getActivities(
   if (params.completed) searchParams.set("completed", params.completed);
   if (params.limit) searchParams.set("limit", String(params.limit));
   if (params.offset) searchParams.set("offset", String(params.offset));
+  if (params.includePaired) searchParams.set("includePaired", "true");
 
   const query = searchParams.toString();
   return request<ListActivitiesResponse>(
@@ -120,5 +123,24 @@ export async function batchDeleteActivities(
   return request<BatchDeleteResponse>("/activities/batch", {
     method: "DELETE",
     body: JSON.stringify({ ids }),
+  });
+}
+
+export async function pairActivities(
+  completedActivityId: string,
+  plannedActivityId: string,
+): Promise<PairResponse> {
+  return request<PairResponse>("/activities/pair", {
+    method: "POST",
+    body: JSON.stringify({ completedActivityId, plannedActivityId }),
+  });
+}
+
+export async function unpairActivity(
+  activityId: string,
+): Promise<UnpairResponse> {
+  return request<UnpairResponse>("/activities/unpair", {
+    method: "POST",
+    body: JSON.stringify({ activityId }),
   });
 }

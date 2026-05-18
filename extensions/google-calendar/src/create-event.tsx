@@ -15,10 +15,10 @@ import { FormValidation, getFavicon, showFailureToast, useForm } from "@raycast/
 import { ConferenceProviderActions, useConferenceProviders } from "./conferencing";
 import { useCalendar, useGoogleAPIs, withGoogleAPIs } from "./lib/google";
 import useCalendars from "./hooks/useCalendars";
-import { addSignature, roundUpTime } from "./lib/utils";
+import { addSignature, parseAttendeeEmails, parseDurationMs, roundUpTime } from "./lib/utils";
 import { calendar_v3 } from "@googleapis/calendar";
 import { useMemo, useState } from "react";
-import parse from "parse-duration";
+import { randomUUID } from "node:crypto";
 
 type FormValues = {
   calendar: string;
@@ -43,12 +43,7 @@ function parseDurationAsMinutesForPlainNumbers(value: string | undefined): numbe
     return undefined;
   }
 
-  const isPlainIntegerString = /^\d+$/.test(trimmedValue);
-  if (isPlainIntegerString) {
-    return parse(`${trimmedValue}m`);
-  } else {
-    return parse(trimmedValue);
-  }
+  return parseDurationMs(trimmedValue) ?? null;
 }
 
 function Command(props: LaunchProps<{ launchContext: FormValues }>) {
@@ -113,6 +108,16 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         return;
       }
 
+      const { emails: attendeeEmails, invalidEntries } = parseAttendeeEmails(values.attendees);
+      if (invalidEntries.length > 0) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid Guest Email",
+          message: `Please check: ${invalidEntries.join(", ")}`,
+        });
+        return;
+      }
+
       const requestBody: calendar_v3.Schema$Event = {
         summary: values.title,
         description: addSignature(values.description),
@@ -122,7 +127,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
         end: {
           dateTime: new Date(startDate.getTime() + parsedMilliseconds).toISOString(),
         },
-        attendees: values.attendees ? values.attendees.split(",").map((email) => ({ email })) : undefined,
+        attendees: attendeeEmails.length > 0 ? attendeeEmails.map((email) => ({ email })) : undefined,
         location:
           values.conferencingProvider === "none" || values.conferencingProvider === "hangoutsMeet"
             ? undefined
@@ -134,7 +139,7 @@ function Command(props: LaunchProps<{ launchContext: FormValues }>) {
                   conferenceSolutionKey: {
                     type: "hangoutsMeet",
                   },
-                  requestId: values.conferencingProvider,
+                  requestId: randomUUID(),
                 },
               }
             : undefined,

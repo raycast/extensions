@@ -220,9 +220,17 @@ function OpenInZedAction({ entry, revalidate }: { entry: Entry; revalidate: () =
   // If CLI available, use it for consistency (handles revalidation)
   if (cliPath) {
     const openSingleFolder = async () => {
-      setTimeout(revalidate, 200);
-      await closeMainWindow();
-      await openWithZedCli(cliPath!, [entry.paths[0]]);
+      try {
+        setTimeout(revalidate, 200);
+        await closeMainWindow();
+        await openWithZedCli(cliPath!, [entry.paths[0]]);
+      } catch (error) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to open project",
+          message: String(error),
+        });
+      }
     };
     return <Action title="Open in Zed" icon={zedIcon} onAction={openSingleFolder} />;
   }
