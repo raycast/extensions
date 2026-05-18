@@ -198,7 +198,7 @@ async function baseGetFiles(params: StandardGetFilesParams | AIGetFilesParams) {
     );
   }
 
-  return { ...data, files: data.files };
+  return data as DriveFilesResponse & { files: File[] };
 }
 
 // Standard search using predefined query types
