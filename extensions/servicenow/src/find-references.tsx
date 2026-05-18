@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -64,6 +64,7 @@ export default function FindReferences(props: LaunchProps) {
   const [references, setReferences] = useState<Reference[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorFetching, setErrorFetching] = useState(false);
+  const detectionStarted = useRef(false);
 
   useEffect(() => {
     if (isLoadingInstances) return;
@@ -85,7 +86,8 @@ export default function FindReferences(props: LaunchProps) {
 
   useEffect(() => {
     if (isLoadingInstances || detectionDone || target || instances.length === 0 || hasAnyArg) return;
-    let cancelled = false;
+    if (detectionStarted.current) return;
+    detectionStarted.current = true;
     (async () => {
       try {
         let url: string | undefined;
@@ -93,7 +95,6 @@ export default function FindReferences(props: LaunchProps) {
         let source: TargetSource | null = null;
 
         const tabUrl = await getURL();
-        if (cancelled) return;
         if (tabUrl && isServiceNowUrl(tabUrl, instances)) {
           parsed = extractRecordFromUrl(tabUrl);
           if (parsed) {
@@ -105,7 +106,6 @@ export default function FindReferences(props: LaunchProps) {
         if (!parsed) {
           try {
             const selection = (await getSelectedText())?.trim();
-            if (cancelled) return;
             if (selection && isServiceNowUrl(selection, instances)) {
               parsed = extractRecordFromUrl(selection);
               if (parsed) {
@@ -143,12 +143,9 @@ export default function FindReferences(props: LaunchProps) {
         setTargetSource(source);
         setDetectionDone(true);
       } catch {
-        if (!cancelled) setDetectionDone(true);
+        setDetectionDone(true);
       }
     })();
-    return () => {
-      cancelled = true;
-    };
   }, [isLoadingInstances]);
 
   useEffect(() => {
@@ -319,7 +316,13 @@ export default function FindReferences(props: LaunchProps) {
               title={ref.table}
               subtitle={ref.column}
               keywords={expandKeywords(ref.table, ref.column)}
-              accessories={[{ text: `${ref.count} record${ref.count === 1 ? "" : "s"}` }]}
+              accessories={[
+                {
+                  icon: Icon.Hashtag,
+                  text: ref.count.toString(),
+                  tooltip: `${ref.count} record${ref.count === 1 ? "" : "s"}`,
+                },
+              ]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title={`${ref.table}.${ref.column}`}>

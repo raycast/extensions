@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
@@ -42,6 +42,7 @@ export default function SearchSysId(props: LaunchProps) {
   const [detectionDone, setDetectionDone] = useState<boolean>(argInitial !== null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const detectionStarted = useRef(false);
 
   useEffect(() => {
     if (isLoadingInstances) return;
@@ -62,12 +63,11 @@ export default function SearchSysId(props: LaunchProps) {
   }, [isLoadingInstances]);
 
   useEffect(() => {
-    if (detectionDone || sysId) return;
-    let cancelled = false;
+    if (detectionStarted.current || detectionDone || sysId) return;
+    detectionStarted.current = true;
     (async () => {
       try {
         const selection = (await getSelectedText())?.trim();
-        if (cancelled) return;
         if (selection && SYS_ID_RE.test(selection)) {
           setSysId(selection);
           setSysIdSource("selection");
@@ -75,12 +75,8 @@ export default function SearchSysId(props: LaunchProps) {
       } catch {
         // ignore selection errors (no selection / no permission)
       }
-
-      if (!cancelled) setDetectionDone(true);
+      setDetectionDone(true);
     })();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   useEffect(() => {
