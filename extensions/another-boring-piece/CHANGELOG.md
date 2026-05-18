@@ -1,6 +1,6 @@
 # Changelog
 
-## [Slug Rename & Title Polish] - 2026-05-16
+## [Slug Rename & Title Polish] - {PR_MERGE_DATE}
 
 - Renamed internal slug from `basalt-wallpapers` to `another-boring-piece` (the new brand). The Store listing remains continuous via Raycast-side redirect.
 - Dropped trailing period in Store title: `Art Wallpapers.` → `Art Wallpapers`.
