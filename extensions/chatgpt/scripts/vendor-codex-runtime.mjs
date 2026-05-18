@@ -25,7 +25,7 @@ async function main() {
     return;
   }
 
-  const archivePath = path.join(assetsDir, `${targetTriple}.tgz`);
+  const archivePath = path.join(assetsDir, `${targetTriple}-${CODEX_VERSION}.tgz`);
   if (await fileExists(archivePath)) {
     return;
   }

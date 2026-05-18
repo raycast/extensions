@@ -53,19 +53,71 @@ insert the result into the frontmost application or copy it to the clipboard.
 
 > Windows 11+ is supported. For vision commands, selected images are read from the active File Explorer window or from the clipboard (both platforms).
 
+# Authentication
+
+The extension supports two authentication modes:
+
+- `API key`: Uses the OpenAI API directly for chat, commands, summarize, and vision/image understanding commands.
+- `ChatGPT sign-in`: Uses OpenAI Codex `app-server` for authentication and text chat flows.
+
+### What happens during ChatGPT sign-in
+
+- The extension starts a local Codex `app-server` runtime.
+- It sends `account/login/start` and opens the returned browser URL.
+- After sign-in completes, the extension uses `account/read`, `thread/start`, `thread/resume`, and `turn/start` through the app-server.
+- Auth state is cached briefly to reduce repeated startup checks.
+
+### Bundled Codex runtime
+
+The release build bundles a Codex runtime archive inside the extension assets for the build platform. On first use, the extension extracts that runtime into Raycast's support directory and reuses it for later requests.
+
+If the bundled runtime asset is unavailable for a given install, the extension falls back to downloading the matching Codex runtime package once and stores it in the same support directory.
+
 # Models
 
-GPT-5 model supports vision capabilities, which can be enabled in the Models Command when creating or editing a model.
+The extension now exposes a fixed set of supported text models for both API key and ChatGPT sign-in:
+
+- `gpt-5.4`
+- `gpt-5.2-codex`
+- `gpt-5.1-codex-max`
+- `gpt-5.4-mini`
+- `gpt-5.3-codex`
+- `gpt-5.2`
+- `gpt-5.1-codex-mini`
+
+Default model: `gpt-5.4-mini`
+
 You can also enable per-model reasoning control in the model form and set the `Effort` (`none`, `low`, `medium`, `high`).
 By default, reasoning effort override is disabled. When it is enabled and set to anything except `none`, the extension sends `reasoning_effort` in Chat Completions requests.
+
+### Vision
+
+Image understanding commands remain available only with API key sign-in.
 
 ### Custom Models
 
 Modify the preferences properties to configure the API Endpoint and use custom models.
 
+# Conversations
+
+ChatGPT-backed conversations are mapped to Codex app-server threads.
+
+- Follow-up messages in the same conversation reuse the same thread.
+- Saved conversations persist the associated Codex thread id.
+- Reopening a saved conversation resumes the existing thread instead of rebuilding the full context from scratch.
+
+This reduces request overhead and makes continued conversations faster than starting a new thread for every prompt.
+
 # How to use
 
-This extension requires a valid `Secret Key` as your API Key from [OpenAI](https://platform.openai.com/account/api-keys) with a `pay-as-you-go` plan account (**you'll get a `429` error if you're on a `free-tier` account**).
+You can use the extension in either of these ways:
+
+1. Add an OpenAI API key from [OpenAI](https://platform.openai.com/account/api-keys).
+2. Or sign in with ChatGPT from the extension UI.
+
+If you use the API key path, standard OpenAI pricing and account limits apply.
+
+If you use ChatGPT sign-in, text chat requests go through the bundled Codex app-server flow and use your ChatGPT/Codex limits for that account.
 
 ![Initial set-up](metadata/6.png)
 
@@ -77,7 +129,7 @@ All preferences properties list that can be customize through `Raycast Settings 
 
 | Properties               | Label                  | Value                               | Required | Default | Description                                                                                                      |
 | ------------------------ | ---------------------- | ----------------------------------- | -------- | ------- | ---------------------------------------------------------------------------------------------------------------- |
-| `apiKey`                 | API Key                | `string`                            | `true`   | `empty` | Your personal OpenAI API key                                                                                     |
+| `apiKey`                 | API Key                | `string`                            | `false`  | `empty` | Your personal OpenAI API key. Optional when using ChatGPT sign-in for text chat.                                |
 | `useStream`              | Stream Completion      | `boolean`                           | `true`   | `true`  | Stream the completions of the generated answer                                                                   |
 | `isAutoSaveConversation` | Auto-save Conversation | `boolean`                           | `true`   | `true`  | Auto-save every conversation that you had with the model                                                         |
 | `isHistoryPaused`        | Pause History          | `boolean`                           | `false`  | `false` | Pause the history of the conversation                                                                            |
