@@ -29,21 +29,6 @@ import type { SourceProviderKey } from "./lib/types";
 import { UsageDetailsView } from "./usage-details";
 
 /* ------------------------------------------------------------------ */
-/*  Preferences                                                       */
-/* ------------------------------------------------------------------ */
-
-type Preferences = {
-  codexPath: string;
-  claudePath: string;
-  cursorPath: string;
-  claudeBudget: string;
-  codexBudget: string;
-  cursorBudget: string;
-  currency: string;
-  defaultSource: SourceProviderKey;
-};
-
-/* ------------------------------------------------------------------ */
 /*  Provider metadata (brand marks via assets/)                         */
 /* ------------------------------------------------------------------ */
 
@@ -385,6 +370,7 @@ export default function Command() {
                       <UsageDetailsView
                         period={period}
                         providerTitle={activeProvider.title}
+                        brandColor={activeProvider.brandColor}
                         currency={currency}
                         conversations={conversations}
                         unavailableReason={
