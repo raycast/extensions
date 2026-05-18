@@ -1,5 +1,11 @@
 # Changelog
 
+## [Metadata Screenshot Cleanup] - {PR_MERGE_DATE}
+
+- Converted metadata screenshots from JPG to PNG format.
+- Renamed metadata screenshots to `another-boring-piece-1.png`, `another-boring-piece-2.png`, and `another-boring-piece-3.png`.
+- Removed original JPG screenshot files from `metadata`.
+
 ## [Slug Rename & Title Polish] - 2026-05-18
 
 - Renamed internal slug from `basalt-wallpapers` to `another-boring-piece` (the new brand). The Store listing remains continuous via Raycast-side redirect.
