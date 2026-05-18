@@ -27,7 +27,7 @@ export async function getBridgeStatus(): Promise<{
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) throw new Error("Bridge not responding");
-    const health: BridgeHealth = await res.json();
+    const health = (await res.json()) as BridgeHealth;
 
     const servers: MCPServer[] = Object.entries(health.servers).map(
       ([name, status]) => ({
@@ -44,7 +44,7 @@ export async function getBridgeStatus(): Promise<{
     const toolsRes = await fetch(`${BRIDGE_URL}/tools`, {
       signal: AbortSignal.timeout(3000),
     });
-    const toolsData = await toolsRes.json();
+    const toolsData = (await toolsRes.json()) as { tools?: unknown[]; [key: string]: unknown };
     const toolList = toolsData.tools || toolsData;
 
     // Map tools back to servers
@@ -75,7 +75,7 @@ export async function getBridgeTools(): Promise<OllamaTool[]> {
       signal: AbortSignal.timeout(5000),
     });
     if (!res.ok) return [];
-    const tools: BridgeToolOpenAI[] = await res.json();
+    const tools = (await res.json()) as BridgeToolOpenAI[];
     return tools.map((t) => ({
       type: "function" as const,
       function: {
