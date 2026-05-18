@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Fixed issue details failing to load when descriptions include absolute Jira attachment image URLs
+
 ## [Bug Fix] - 2026-05-18
 
 - Loaded all saved filters in the My Filters command instead of stopping after the first 100 results
