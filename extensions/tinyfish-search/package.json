@@ -1,19 +1,36 @@
 {
+  "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "tinyfish-search",
   "title": "TinyFish Search",
   "description": "Search the web with TinyFish, open result URLs, and fetch clean page content.",
   "icon": "icon.png",
   "author": "pranav_janakiraman",
   "license": "MIT",
-  "categories": ["Developer Tools", "Productivity"],
-  "platforms": ["macOS"],
+  "categories": [
+    "Web"
+  ],
+  "platforms": [
+    "macOS"
+  ],
   "commands": [
     {
       "name": "search",
       "title": "Search Web",
       "description": "Search the web with TinyFish, browse result URLs, and fetch clean page content.",
       "mode": "view",
-      "keywords": ["tinyfish", "web", "search"]
+      "keywords": [
+        "tinyfish",
+        "web",
+        "search"
+      ],
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "Search query",
+          "required": true
+        }
+      ]
     }
   ],
   "preferences": [

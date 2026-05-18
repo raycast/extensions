@@ -3,18 +3,13 @@ import {
   ActionPanel,
   Detail,
   Icon,
+  LaunchProps,
   List,
   getPreferenceValues,
   showToast,
   Toast,
 } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
-
-type Preferences = {
-  apiKey: string;
-  location?: string;
-  language?: string;
-};
 
 type SearchResult = {
   position: number;
@@ -54,9 +49,14 @@ type FetchResponse = {
   errors: FetchError[];
 };
 
-export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
-  const [query, setQuery] = useState("");
+export default function Command(
+  props: LaunchProps<{ arguments: Arguments.Search }>,
+) {
+  const preferences = useMemo(
+    () => getPreferenceValues<Preferences.Search>(),
+    [],
+  );
+  const [query, setQuery] = useState(props.arguments.query ?? "");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -130,7 +130,12 @@ export default function Command() {
       controller.abort();
       clearTimeout(timeout);
     };
-  }, [preferences, trimmedQuery]);
+  }, [
+    preferences.apiKey,
+    preferences.language,
+    preferences.location,
+    trimmedQuery,
+  ]);
 
   return (
     <List
@@ -150,7 +155,7 @@ export default function Command() {
               icon={Icon.Globe}
               title={result.title}
               subtitle={result.site_name}
-              accessories={[{ text: new URL(result.url).hostname }]}
+              accessories={[{ text: getUrlAccessoryText(result.url) }]}
               detail={
                 <List.Item.Detail markdown={formatResultMarkdown(result)} />
               }
@@ -191,7 +196,7 @@ function FetchedContent({
   preferences,
 }: {
   result: SearchResult;
-  preferences: Preferences;
+  preferences: Preferences.Search;
 }) {
   const [page, setPage] = useState<FetchResult>();
   const [isLoading, setIsLoading] = useState(true);
@@ -240,7 +245,7 @@ function FetchedContent({
     fetchPage();
 
     return () => controller.abort();
-  }, [preferences, result.url]);
+  }, [preferences.apiKey, result.url]);
 
   const markdown = page
     ? formatFetchedContentMarkdown(page, result)
@@ -295,7 +300,7 @@ function FetchedContent({
 
 async function searchTinyFish(
   query: string,
-  preferences: Preferences,
+  preferences: Preferences.Search,
   signal: AbortSignal,
 ): Promise<SearchResponse> {
   const url = new URL("https://api.search.tinyfish.ai");
@@ -325,7 +330,7 @@ async function searchTinyFish(
 
 async function fetchTinyFishContent(
   url: string,
-  preferences: Preferences,
+  preferences: Preferences.Search,
   signal: AbortSignal,
 ): Promise<FetchResponse> {
   const response = await fetch("https://api.fetch.tinyfish.ai", {
@@ -355,6 +360,14 @@ function formatResultMarkdown(result: SearchResult) {
   const siteName = result.site_name ? `\n\n**Site:** ${result.site_name}` : "";
 
   return `# ${result.title}\n\n${result.url}${siteName}${snippet}`;
+}
+
+function getUrlAccessoryText(url: string) {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url || "Unknown URL";
+  }
 }
 
 function formatFetchedContentMarkdown(
