@@ -69,7 +69,7 @@ function run(argv) {
   const pasteboard = $.NSPasteboard.generalPasteboard;
   const htmlData = $(html).dataUsingEncoding($.NSUTF8StringEncoding);
 
-  pasteboard.clearContents;
+  pasteboard.clearContents();
   pasteboard.setDataForType(htmlData, $("public.html"));
   pasteboard.setDataForType(htmlData, $("Apple HTML pasteboard type"));
   pasteboard.setStringForType($(text), $("public.utf8-plain-text"));
