@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Updates] - {PR_MERGE_DATE}
+
+- Contributor updates
+
 ## [OAuth authentication] - 2026-05-18
 
 - Add OAuth (PKCE) authentication as an alternative to Personal Access Tokens.
