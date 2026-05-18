@@ -136,7 +136,7 @@ export async function listEntries(
   const preferences = getPreferenceValues<Preferences>();
   const cliSort = getCliSort(sortMode);
   const args = cliSort
-    ? [...buildBaseArgs(preferences), "-json", `-sort=${cliSort}`, "list", ""]
+    ? [...buildBaseArgs(preferences), "-json", `-sort=${cliSort}`, "list"]
     : [...buildBaseArgs(preferences), "-json", "-details", "search", ""];
   const output = await runCliCommand(getCliPath(preferences), args, pin);
   return normalizeEntries(parseJsonOutput(output)).filter(
@@ -149,11 +149,19 @@ export async function getEntryDetails(
   pin?: string,
 ): Promise<EnpassEntry> {
   const preferences = getPreferenceValues<Preferences>();
-  const args = [...buildBaseArgs(preferences), "-json", "show", entry.title];
+  const args = [
+    ...buildBaseArgs(preferences),
+    "-json",
+    "show",
+    entry.uuid ?? entry.title,
+  ];
   const output = await runCliCommand(getCliPath(preferences), args, pin);
   const matches = normalizeEntries(parseJsonOutput(output));
   const login = getDisplayLogin(entry);
   const exactMatch =
+    (entry.uuid
+      ? matches.find((candidate) => candidate.uuid === entry.uuid)
+      : undefined) ??
     matches.find(
       (candidate) =>
         candidate.title === entry.title &&
@@ -174,7 +182,7 @@ export async function getEntryDetails(
   return {
     ...entry,
     ...exactMatch,
-    uuid: entry.uuid,
+    uuid: exactMatch.uuid ?? entry.uuid,
   };
 }
 
