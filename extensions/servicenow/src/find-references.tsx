@@ -333,6 +333,7 @@ export default function FindReferences(props: LaunchProps) {
                       shortcut={Keyboard.Shortcut.Common.CopyPath}
                     />
                   </ActionPanel.Section>
+                  <Actions />
                 </ActionPanel>
               }
             />
