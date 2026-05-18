@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Color,
   Form,
   getSelectedText,
@@ -33,12 +32,11 @@ type Reference = {
 };
 
 type Target = { table: string; sysId: string };
-type TargetSource = "args" | "tab" | "selection" | "clipboard" | "form";
+type TargetSource = "args" | "tab" | "selection" | "form";
 
 function sourceSuffix(source: TargetSource | null): string {
   if (source === "tab") return " — from browser tab";
   if (source === "selection") return " — from selection";
-  if (source === "clipboard") return " — from clipboard";
   return "";
 }
 
@@ -121,18 +119,6 @@ export default function FindReferences(props: LaunchProps) {
             }
           } catch {
             // ignore selection errors (no selection / no permission)
-          }
-        }
-
-        if (!parsed) {
-          const clip = (await Clipboard.readText())?.trim();
-          if (cancelled) return;
-          if (clip && isServiceNowUrl(clip, instances)) {
-            parsed = extractRecordFromUrl(clip);
-            if (parsed) {
-              url = clip;
-              source = "clipboard";
-            }
           }
         }
 
@@ -252,7 +238,7 @@ export default function FindReferences(props: LaunchProps) {
           </ActionPanel>
         }
       >
-        <Form.Description text="Could not detect a ServiceNow record from your browser tab, selection, or clipboard. Enter the table and Sys ID to search." />
+        <Form.Description text="Could not detect a ServiceNow record from your browser tab or selection. Enter the table and Sys ID to search." />
         <Form.TextField id="table" title="Table" placeholder="e.g. sys_user" defaultValue={argTable} />
         <Form.TextField id="sysId" title="Sys ID" placeholder="32-character sys_id" defaultValue={argSysId} />
         <Form.Dropdown

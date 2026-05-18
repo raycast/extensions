@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import {
   Action,
   ActionPanel,
-  Clipboard,
   Color,
   Form,
   getSelectedText,
@@ -24,11 +23,10 @@ import { getInstanceBaseUrl } from "./utils/instanceUrl";
 
 const SYS_ID_RE = /^[0-9a-f]{32}$/i;
 
-type SysIdSource = "arg" | "selection" | "clipboard" | "form";
+type SysIdSource = "arg" | "selection" | "form";
 
 function sourceSuffix(source: SysIdSource | null): string {
   if (source === "selection") return " — from selection";
-  if (source === "clipboard") return " — from clipboard";
   return "";
 }
 
@@ -72,31 +70,15 @@ export default function SearchSysId(props: LaunchProps) {
     if (detectionDone || sysId) return;
     let cancelled = false;
     (async () => {
-      let resolved = false;
-
       try {
         const selection = (await getSelectedText())?.trim();
         if (cancelled) return;
         if (selection && SYS_ID_RE.test(selection)) {
           setSysId(selection);
           setSysIdSource("selection");
-          resolved = true;
         }
       } catch {
         // ignore selection errors (no selection / no permission)
-      }
-
-      if (!resolved) {
-        try {
-          const clip = (await Clipboard.readText())?.trim();
-          if (cancelled) return;
-          if (clip && SYS_ID_RE.test(clip)) {
-            setSysId(clip);
-            setSysIdSource("clipboard");
-          }
-        } catch {
-          // ignore clipboard errors
-        }
       }
 
       if (!cancelled) setDetectionDone(true);
@@ -188,7 +170,7 @@ export default function SearchSysId(props: LaunchProps) {
           </ActionPanel>
         }
       >
-        <Form.Description text="Enter the Sys ID of the record you want to open. Highlight a 32-character Sys ID or copy one to your clipboard before launching to skip this form." />
+        <Form.Description text="Enter the Sys ID of the record you want to open. Highlight a 32-character Sys ID before launching to skip this form." />
         <Form.TextField id="sysId" title="Sys ID" placeholder="32-character sys_id" />
         <Form.Dropdown
           id="instance"
