@@ -13,7 +13,6 @@ import type { ConversationUsageSummary } from "./lib/types";
 type UsageDetailsProps = {
   period: PeriodKey;
   providerTitle: string;
-  brandColor: string;
   currency: string;
   conversations: ConversationUsageSummary[];
   unavailableReason?: string;
@@ -54,7 +53,6 @@ function sortConversations(
 export function UsageDetailsView({
   period,
   providerTitle,
-  brandColor,
   currency,
   conversations,
   unavailableReason,
@@ -108,7 +106,6 @@ export function UsageDetailsView({
           <ConversationListItem
             key={chat.key}
             chat={chat}
-            brandColor={brandColor}
             currency={currency}
           />
         ))}
@@ -119,11 +116,9 @@ export function UsageDetailsView({
 
 function ConversationListItem({
   chat,
-  brandColor,
   currency,
 }: {
   chat: ConversationUsageSummary;
-  brandColor: string;
   currency: string;
 }) {
   const tokensStr = formatTokens(chat.totalTokens);
@@ -137,11 +132,7 @@ function ConversationListItem({
     <List.Item
       title={chat.title}
       accessories={[
-        {
-          text: tokensStr,
-          icon: { source: Icon.Dot, tintColor: brandColor },
-          tooltip: `${tokensStr} tokens`,
-        },
+        { text: tokensStr, tooltip: `${tokensStr} tokens` },
         ...(costStr
           ? [
               {

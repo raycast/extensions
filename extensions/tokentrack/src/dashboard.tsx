@@ -385,7 +385,6 @@ export default function Command() {
                       <UsageDetailsView
                         period={period}
                         providerTitle={activeProvider.title}
-                        brandColor={activeProvider.brandColor}
                         currency={currency}
                         conversations={conversations}
                         unavailableReason={
