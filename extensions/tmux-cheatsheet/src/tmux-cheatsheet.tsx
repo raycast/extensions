@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, getPreferenceValues, useNavigation } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, getPreferenceValues, useNavigation } from "@raycast/api";
 import { useMemo, useState, useEffect } from "react";
 import { usePromise } from "@raycast/utils";
 import Fuse from "fuse.js";
@@ -114,8 +114,12 @@ export default function Command() {
               icon={Icon.Eye}
               onAction={() => push(<CommandDetail command={cmd} prefix={prefix} />)}
             />
-            <Action.CopyToClipboard title="Copy Command" content={cmd.command} />
             <Action.Paste title="Paste to Terminal" content={cmd.command} />
+            <Action.CopyToClipboard
+              title="Copy Command"
+              content={cmd.command}
+              shortcut={Keyboard.Shortcut.Common.Copy}
+            />
           </ActionPanel>
         }
       />

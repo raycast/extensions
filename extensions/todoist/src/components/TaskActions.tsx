@@ -107,9 +107,9 @@ export default function TaskActions({
 
   /** Ensures Todoist relative reminder offset 0 when user sets a timed due / hourly repeat and none exists yet. */
   async function ensureAtTaskTimeReminder(itemId: string, syncReminders?: Reminder[]) {
-    const hasAtTimeInSync = syncReminders !== undefined && hasAtTaskTimeRelativeReminder(syncReminders, itemId);
+    // Sync batches are incremental; empty `[]` means "no reminder deltas" — still check merged cache via `data.reminders`.
     const hasAtTimeInCache = hasAtTaskTimeRelativeReminder(data?.reminders, itemId);
-    if (hasAtTimeInSync || (syncReminders === undefined && hasAtTimeInCache)) return;
+    if (hasAtTaskTimeRelativeReminder(syncReminders, itemId) || hasAtTimeInCache) return;
     try {
       await apiAddReminder({ item_id: itemId, type: "relative", minute_offset: 0 }, { data, setData });
     } catch (error) {

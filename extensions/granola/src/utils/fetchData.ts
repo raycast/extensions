@@ -42,10 +42,14 @@ export function fetchGranolaData(route: string) {
     let mounted = true;
     getAccessToken()
       .then((token) => {
-        if (mounted) setAccessToken(token);
+        if (mounted) {
+          setAccessToken(token);
+        }
       })
       .catch((err) => {
-        if (mounted) setError(new Error(`Failed to get access token, ${toErrorMessage(err)}`));
+        if (mounted) {
+          setError(new Error(`Failed to get access token, ${toErrorMessage(err)}`));
+        }
       });
     return () => {
       mounted = false;
@@ -139,8 +143,8 @@ const TRANSCRIPT_NOT_FOUND_MESSAGE = "Transcript not available for this note.";
  * Use this when you need access to timing information (start/end timestamps).
  */
 export async function getTranscriptSegments(docId: string): Promise<TranscriptSegment[]> {
-  const url = `https://api.granola.ai/v1/get-document-transcript`;
   try {
+    const url = `https://api.granola.ai/v1/get-document-transcript`;
     const token = await getAccessToken();
     const requestBody = { document_id: docId };
 
@@ -159,6 +163,7 @@ export async function getTranscriptSegments(docId: string): Promise<TranscriptSe
         const errorJson = JSON.parse(errorText);
         errorText = errorJson.message || errorText;
       } catch (e) {
+        void e;
         // Use raw text if parsing fails
       }
       throw new Error(`API request failed with status ${response.status}: ${errorText}`);
@@ -278,9 +283,8 @@ export async function getDocumentCreator(docId: string): Promise<string | null> 
 }
 
 export async function getFolders(signal?: AbortSignal): Promise<FoldersResponse> {
-  const url = `https://api.granola.ai/v1/get-document-lists-metadata`;
-
   try {
+    const url = `https://api.granola.ai/v1/get-document-lists-metadata`;
     const token = await getAccessToken();
     const requestBody = {
       include_document_ids: true,
@@ -325,8 +329,8 @@ export async function getFolders(signal?: AbortSignal): Promise<FoldersResponse>
  * Use this in tools and utilities where hooks are not available.
  */
 export async function getDocumentsList(): Promise<Document[]> {
-  const url = `https://api.granola.ai/v2/get-documents`;
   try {
+    const url = `https://api.granola.ai/v2/get-documents`;
     const token = await getAccessToken();
     const response = await fetch(url, {
       headers: {
@@ -347,7 +351,8 @@ export async function getDocumentsList(): Promise<Document[]> {
     }
 
     const result = (await response.json()) as GetDocumentsResponse;
-    return Array.isArray(result?.docs) ? (result.docs as Document[]) : [];
+    const docs = Array.isArray(result?.docs) ? (result.docs as Document[]) : [];
+    return docs;
   } catch (error) {
     if (isAbortError(error)) {
       throw error;
@@ -379,7 +384,6 @@ export async function getSharedDocuments(): Promise<Doc[]> {
       uniqueDocs.set(doc.id, doc);
     }
   }
-
   return Array.from(uniqueDocs.values());
 }
 
@@ -553,8 +557,8 @@ export async function getDocumentsListStripped(): Promise<Doc[]> {
  * Fetch recipes via API (user, shared, default) and normalize to a list result
  */
 export async function getRecipesFromApi(): Promise<RecipesListResult> {
-  const url = `https://api.granola.ai/v1/get-recipes`;
   try {
+    const url = `https://api.granola.ai/v1/get-recipes`;
     const token = await getAccessToken();
     const response = await fetch(url, {
       method: "POST",
@@ -584,6 +588,10 @@ export async function getRecipesFromApi(): Promise<RecipesListResult> {
     const userRecipes: Recipe[] = Array.isArray(payload.userRecipes) ? payload.userRecipes : [];
     const sharedRecipes: Recipe[] = Array.isArray(payload.sharedRecipes) ? payload.sharedRecipes : [];
     const unlistedRecipes: Recipe[] = Array.isArray(payload.unlistedRecipes) ? payload.unlistedRecipes : [];
+    const recipesUsage =
+      payload.recipesUsage && typeof payload.recipesUsage === "object" && !Array.isArray(payload.recipesUsage)
+        ? payload.recipesUsage
+        : undefined;
 
     let defaultRecipes: DefaultRecipe[] = [];
 
@@ -596,7 +604,8 @@ export async function getRecipesFromApi(): Promise<RecipesListResult> {
       defaultRecipes = payload.defaultRecipes;
     }
 
-    return { featureEnabled: true, userRecipes, defaultRecipes, sharedRecipes, unlistedRecipes };
+    const result = { featureEnabled: true, userRecipes, defaultRecipes, sharedRecipes, unlistedRecipes, recipesUsage };
+    return result;
   } catch (error) {
     if (isAbortError(error)) {
       throw error;

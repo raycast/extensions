@@ -2,11 +2,12 @@ import { Alert, Icon, Toast, confirmAlert, showToast } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import fs from "fs";
 import { homedir } from "os";
+import path from "path";
 import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
 import { isSameEntry, isWin } from "./utils";
 import { execFilePromise } from "../utils/exec";
-import { getBuildNamePreference } from "./vscode";
+import { getBuildNamePreference, getProductJSONPath } from "./vscode";
 
 export type RemoveMethods = {
   removeEntry: (entry: EntryLike) => Promise<void>;
@@ -84,11 +85,52 @@ export function useRecentEntries() {
 }
 
 function getPath() {
+  // Newer VS Code releases store history.recentlyOpenedPathsList in
+  // StorageScope.APPLICATION_SHARED instead of StorageScope.APPLICATION.
+  // The shared storage root is product-specific and is
+  // defined by product.json's sharedDataFolderName.
+  // https://github.com/microsoft/vscode/pull/311317
+  const sharedStoragePath = getSharedStoragePath();
+
+  if (sharedStoragePath && fs.existsSync(sharedStoragePath)) {
+    return sharedStoragePath;
+  }
+
+  return getGlobalStoragePath();
+}
+
+function getGlobalStoragePath() {
   const build = getBuildNamePreference();
   if (isWin) {
     return `${homedir()}\\AppData\\Roaming\\${build}\\User\\globalStorage\\state.vscdb`;
   }
   return `${homedir()}/Library/Application Support/${build}/User/globalStorage/state.vscdb`;
+}
+
+function getSharedStoragePath() {
+  const sharedDataFolderName = getSharedDataFolderName();
+
+  const sharedPath = sharedDataFolderName
+    ? path.join(homedir(), sharedDataFolderName, "sharedStorage", "state.vscdb")
+    : undefined;
+
+  return sharedPath;
+}
+
+function getSharedDataFolderName() {
+  const productJSONPath = getProductJSONPath();
+
+  if (productJSONPath && fs.existsSync(productJSONPath)) {
+    try {
+      const productJSONString = fs.readFileSync(productJSONPath, "utf-8");
+      const productJSON = JSON.parse(productJSONString) as { sharedDataFolderName?: string };
+      if (productJSON.sharedDataFolderName) return productJSON.sharedDataFolderName;
+    } catch {
+      // Ignore malformed product.json.
+    }
+  }
+
+  return undefined;
 }
 
 async function saveEntries(entries: EntryLike[]) {

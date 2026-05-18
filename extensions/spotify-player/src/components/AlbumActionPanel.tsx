@@ -1,4 +1,3 @@
-import React from "react";
 import { Action, ActionPanel, Icon, popToRoot, showHUD } from "@raycast/api";
 import { SimplifiedAlbumObject } from "../helpers/spotify.api";
 import { FooterAction } from "./FooterAction";
@@ -8,6 +7,7 @@ import { getErrorMessage } from "../helpers/getError";
 import { addToMySavedAlbums } from "../api/addToMySavedAlbums";
 import { removeFromMySavedAlbums } from "../api/removeFromMySavedAlbums";
 import { useContainsMySavedAlbum } from "../hooks/useContainsMySavedAlbum";
+import { ShowContent } from "../shortcuts/shortcuts";
 
 type AlbumActionPanelProps = { album: SimplifiedAlbumObject };
 
@@ -20,10 +20,7 @@ export function AlbumActionPanel({ album }: AlbumActionPanelProps) {
       <Action.Push
         icon={Icon.AppWindowList}
         title="Show Songs"
-        shortcut={{
-          macOS: { modifiers: ["cmd", "shift"], key: "a" },
-          Windows: { modifiers: ["ctrl", "shift"], key: "a" },
-        }}
+        shortcut={ShowContent}
         target={<TracksList album={album} showGoToAlbum={false} />}
       />
       <Action

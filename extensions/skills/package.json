@@ -38,6 +38,33 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search-skills",
+      "title": "Search Skills",
+      "description": "Search the skills.sh marketplace for agent skills matching a query."
+    },
+    {
+      "name": "read-skill",
+      "title": "Read Skill",
+      "description": "Fetch the full SKILL.md content for a specific skill to understand what it does."
+    },
+    {
+      "name": "list-installed-skills",
+      "title": "List Installed Skills",
+      "description": "List all locally installed skills with their agents, source, and install dates."
+    },
+    {
+      "name": "install-skill",
+      "title": "Install Skill",
+      "description": "Install a skill from the skills.sh marketplace. Only call after the user has confirmed."
+    },
+    {
+      "name": "remove-skill",
+      "title": "Remove Skill",
+      "description": "Remove an installed skill. Only call after the user has confirmed."
+    }
+  ],
   "preferences": [
     {
       "name": "customNpxPath",

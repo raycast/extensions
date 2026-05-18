@@ -1,5 +1,21 @@
 # Todoist Changelog
 
+## [Menu bar priority sorting] - 2026-05-18
+
+- **Sort menu bar tasks by priority**: Tasks shown in the menu bar (Today, Upcoming, Inbox, and Filter views) are now ordered by priority first (highest first), then by their existing default order, so the most important tasks surface at the top.
+- **Toggle from preferences**: A new **Sort tasks by priority** checkbox in the menu bar command preferences lets you turn priority sorting off and fall back to the previous default ordering. Enabled by default.
+
+## [Add Keyboard Shortcuts] - 2026-05-16
+
+- Added a shortcut to create Raycast quicklinks from Todoist views.
+- Added the common new-item shortcut to create Todoist quicklinks from Todoist views.
+
+## [Filter completion UI and incremental reminder sync] - 2026-05-04
+
+- **Duplicate “at task time” reminders on hourly repeat**: Applying the **same** hourly recurrence twice (when the task already had a timed due and a relative-at-task reminder) no longer queues a second identical reminder; the extension now trusts the merged cache whenever Sync returns an empty `reminders` delta, not only when the field was omitted entirely.
+- **Filter views after completing a task**: Filter results are merged with cached items by id only; tasks no longer present in sync cache (for example a completed non-recurring task) are omitted instead of falling back to stale filter API rows, so the list updates immediately without reopening the extension.
+- **Merge incremental Sync reminder updates**: Todoist’s Sync API often returns **partial** `reminders` arrays on incremental sync. The extension now merges those deltas into the local cache (`mergeSyncedReminders` in `updateTask` and `closeTask`) instead of replacing the whole list, so editing one task’s schedule or reminders no longer clears other tasks’ alarm accessories until a full reload. **`addReminder`** still uses `sync_token: "*"` for the requested resource type, so its `reminders` response remains a **full replace** of the cached list (avoids stale rows after deletes elsewhere).
+
 ## [Fix filter task freshness and recurrence reminder guard] - 2026-05-01
 
 - **Filter task typing + freshness**: Typed filter sections in `FilterTasks` and resolve each displayed task against the latest cached item by id, preventing stale task state in filter views after updates.

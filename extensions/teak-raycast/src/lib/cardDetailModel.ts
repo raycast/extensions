@@ -1,4 +1,5 @@
 import type { RaycastCard } from "./api";
+import { getTeakCardUrl } from "./constants";
 
 const IMAGE_EXTENSIONS = new Set([
   ".png",
@@ -34,8 +35,7 @@ const withMaxLength = (value: string, maxLength: number): string => {
 };
 
 const fallbackTitle = (card: RaycastCard): string => {
-  const suffix = card.id.slice(-6);
-  return `${card.type.toUpperCase()} Card • ${suffix}`;
+  return `${card.type.toUpperCase()} Card`;
 };
 
 export const getCardTitle = (card: RaycastCard, maxLength = 88): string => {
@@ -67,6 +67,23 @@ export const isHttpUrl = (value: string | null | undefined): boolean => {
 
 export const getOpenableUrl = (card: RaycastCard): string | null => {
   return isHttpUrl(card.url) ? card.url : null;
+};
+
+export const getCardDomain = (card: RaycastCard): string | null => {
+  const url = getOpenableUrl(card);
+  if (!url) {
+    return null;
+  }
+
+  try {
+    return new URL(url).hostname.replace(/^www\./, "");
+  } catch {
+    return null;
+  }
+};
+
+export const getTeakUrl = (card: RaycastCard): string => {
+  return card.appUrl ?? getTeakCardUrl(card.id);
 };
 
 const isRenderableImageUrl = (value: string | null | undefined): boolean => {

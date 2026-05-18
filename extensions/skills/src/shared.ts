@@ -171,6 +171,10 @@ export function buildInstallCommand(skill: Skill): string {
   return `npx skills add ${skill.source}@${skill.skillId}`;
 }
 
+export function buildSkillUrl(source: string, skillId: string): string {
+  return `${SKILLS_BASE_URL}/${source}/${skillId}`;
+}
+
 export function deduplicateSkills(skills: Skill[]): Skill[] {
   const seen = new Set<string>();
   return skills.filter((skill) => {

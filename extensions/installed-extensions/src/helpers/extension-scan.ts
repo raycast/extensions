@@ -49,8 +49,8 @@ export async function parsePackageJson(packageJsonPath: string): Promise<Extensi
 }
 
 export async function getPackageJsonFiles(): Promise<string[]> {
+  const extensionsDir = path.join(os.homedir(), ".config", isWindows ? "raycast-x" : "raycast", "extensions");
   try {
-    const extensionsDir = path.join(os.homedir(), ".config", isWindows ? "raycast-x" : "raycast", "extensions");
     const extensions = await fs.readdir(extensionsDir);
     const packageJsonFiles = await Promise.all(
       extensions.map(async (extension) => {
@@ -65,6 +65,9 @@ export async function getPackageJsonFiles(): Promise<string[]> {
     );
     return packageJsonFiles.filter((file) => file !== null) as string[];
   } catch (e) {
+    if ((e as NodeJS.ErrnoException)?.code === "ENOENT") {
+      return [];
+    }
     if (e instanceof Error) {
       showFailureToast(e.message);
       throw new Error(e.message);

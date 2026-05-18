@@ -1,0 +1,105 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "apfel",
+  "title": "Apfel",
+  "description": "Interact with Apfel CLI from Raycast!",
+  "author": "eggsy",
+  "contributors": [
+    "florisdobber"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "icon": "icon.png",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "apfel",
+    "ai",
+    "apple intelligence",
+    "apple ai"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "chat",
+      "title": "Chat",
+      "description": "Chat with Apfel AI",
+      "mode": "view"
+    },
+    {
+      "name": "saved",
+      "title": "Saved Answers",
+      "description": "Collection of your saved answers",
+      "mode": "view"
+    },
+    {
+      "name": "history",
+      "title": "History",
+      "description": "View your recent answers",
+      "mode": "view"
+    },
+    {
+      "name": "model",
+      "title": "Models",
+      "description": "Add or edit your models",
+      "mode": "view"
+    },
+    {
+      "name": "conversation",
+      "title": "Conversations",
+      "description": "Collection of your recent conversations",
+      "mode": "view"
+    },
+    {
+      "name": "translate",
+      "title": "Translate",
+      "description": "Translate text to supported languages using Apfel",
+      "mode": "view"
+    },
+    {
+      "name": "explain",
+      "title": "Explain Text",
+      "description": "Explain the selected text using Apfel",
+      "mode": "view"
+    },
+    {
+      "name": "explain-file",
+      "title": "Explain File",
+      "description": "Explain the file using Apfel",
+      "mode": "view"
+    },
+    {
+      "name": "explain-directory",
+      "title": "Explain Directory",
+      "description": "Explain the directory using Apfel",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.11",
+    "@raycast/utils": "^2.2.3",
+    "@types/uuid": "^11.0.0",
+    "uuid": "^13.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^18.8.3",
+    "@types/react": "^19.2.14",
+    "@typescript-eslint/eslint-plugin": "^8.58.0",
+    "@typescript-eslint/parser": "^8.58.0",
+    "eslint": "^10.2.0",
+    "eslint-config-prettier": "^9.1.2",
+    "prettier": "^3.8.1",
+    "typescript": "^6.0.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}

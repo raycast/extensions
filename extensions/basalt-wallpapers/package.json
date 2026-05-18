@@ -1,7 +1,7 @@
 {
   "name": "basalt-wallpapers",
-  "title": "Art Wallpapers. Basalt",
-  "description": "Hand-picked art, daily.",
+  "title": "Art Wallpapers.",
+  "description": "Another boring piece. Daily.",
   "icon": "basalt-icon.png",
   "author": "yevgen_glukhov",
   "contributors": [
@@ -16,27 +16,68 @@
     {
       "name": "index",
       "title": "Today's Wallpapers",
-      "description": "View and set today's Basalt wallpaper",
+      "description": "View and set today's wallpaper",
       "mode": "view",
       "icon": "basalt-icon.png"
     },
     {
       "name": "random-wallpaper",
       "title": "Set Random Wallpaper",
-      "description": "Set a random wallpaper from Basalt",
+      "description": "Set a random wallpaper",
       "mode": "no-view",
       "icon": "basalt-icon.png"
+    },
+    {
+      "name": "auto-switch-wallpaper",
+      "title": "Auto Switch Wallpaper",
+      "description": "Switch wallpapers automatically on a schedule",
+      "mode": "no-view",
+      "interval": "30m",
+      "icon": "basalt-icon.png",
+      "preferences": [
+        {
+          "name": "refreshIntervalSeconds",
+          "type": "dropdown",
+          "title": "Refresh Interval",
+          "description": "How often the wallpaper should change in the background.",
+          "required": false,
+          "default": "3600",
+          "data": [
+            {
+              "title": "30 Minutes",
+              "value": "1800"
+            },
+            {
+              "title": "1 Hour",
+              "value": "3600"
+            },
+            {
+              "title": "1 Day",
+              "value": "86400"
+            }
+          ]
+        },
+        {
+          "name": "notifyOnSwitch",
+          "type": "checkbox",
+          "title": "Notification",
+          "label": "Show HUD when wallpaper changes",
+          "description": "Display a brief on-screen notice with the artwork title each time the wallpaper changes in the background.",
+          "required": false,
+          "default": false
+        }
+      ]
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.15",
+    "@raycast/api": "^1.104.17",
     "@raycast/utils": "^2.2.4"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "25.0.10",
-    "@types/react": "19.2.9",
-    "typescript": "^5.9.3"
+    "@types/node": "25.8.0",
+    "@types/react": "19.2.14",
+    "typescript": "^6.0.3"
   },
   "scripts": {
     "build": "ray build",

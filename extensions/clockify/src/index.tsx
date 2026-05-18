@@ -266,9 +266,9 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
       ]);
 
       setProjects(projectsResponse.data || []);
-      LocalStorage.setItem("projects", JSON.stringify(projectsResponse.data));
+      LocalStorage.setItem("projects", JSON.stringify(projectsResponse.data || []));
       setTags(tagsResponse.data || []);
-      LocalStorage.setItem("tags", JSON.stringify(tagsResponse.data));
+      LocalStorage.setItem("tags", JSON.stringify(tagsResponse.data || []));
       setIsLoading(false);
     }
 
@@ -284,7 +284,7 @@ function NewEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) {
     const { data } = await fetcher(`/workspaces/${config.workspaceId}/projects/${projectId}/tasks?page-size=1000`);
 
     setTasks(data || []);
-    LocalStorage.setItem(`project[${projectId}]`, JSON.stringify(data));
+    LocalStorage.setItem(`project[${projectId}]`, JSON.stringify(data || []));
     setIsLoading(false);
   }
 
@@ -505,9 +505,9 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
       ]);
 
       setProjects(projectsResponse.data || []);
-      LocalStorage.setItem("projects", JSON.stringify(projectsResponse.data));
+      LocalStorage.setItem("projects", JSON.stringify(projectsResponse.data || []));
       setTags(tagsResponse.data || []);
-      LocalStorage.setItem("tags", JSON.stringify(tagsResponse.data));
+      LocalStorage.setItem("tags", JSON.stringify(tagsResponse.data || []));
       setIsLoading(false);
     }
 
@@ -523,7 +523,7 @@ function AddTimeEntry({ updateTimeEntries }: { updateTimeEntries: () => void }) 
     const { data } = await fetcher(`/workspaces/${config.workspaceId}/projects/${projectId}/tasks?page-size=1000`);
 
     setTasks(data || []);
-    LocalStorage.setItem(`project[${projectId}]`, JSON.stringify(data));
+    LocalStorage.setItem(`project[${projectId}]`, JSON.stringify(data || []));
     setIsLoading(false);
   }
 

@@ -67,6 +67,7 @@ export function FormulaUpgradeAllAction(props: { onAction: (result: boolean) => 
     <Action
       title="Upgrade All"
       icon={Icon.Hammer}
+      shortcut={{ modifiers: ["cmd", "opt"], key: "u" }}
       onAction={async () => {
         const result = await upgradeAll();
         props.onAction(result);

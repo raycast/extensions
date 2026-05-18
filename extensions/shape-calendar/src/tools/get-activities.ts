@@ -25,6 +25,10 @@ type Input = {
    * Filter by completion status: "true" for completed, "false" for planned
    */
   completed?: string;
+  /**
+   * Include planned activities that have been paired with a completed activity. By default these are hidden. Set to true when looking for the planned ID before unpairing.
+   */
+  includePaired?: boolean;
 };
 
 export default async function (input: Input) {
@@ -37,6 +41,7 @@ export default async function (input: Input) {
     to: input.to || today.toISOString().split("T")[0],
     sportType: input.sportType,
     completed: input.completed,
+    includePaired: input.includePaired,
     limit: 200,
   });
 

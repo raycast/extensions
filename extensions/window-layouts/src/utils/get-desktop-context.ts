@@ -9,8 +9,9 @@ export type DesktopContext = Readonly<{
 
 export async function getDesktopContext(): Promise<DesktopContext | null> {
   if (!environment.canAccess(WindowManagement)) {
-    await showFailureToast("Not Supported", {
-      message: "This command requires access to Raycast WindowManagement API.",
+    await showFailureToast("WindowManagement Not Available", {
+      message:
+        "Requires Raycast Pro and Accessibility permission. Grant access in System Settings → Privacy & Security → Accessibility, then restart Raycast.",
     });
     return null;
   }

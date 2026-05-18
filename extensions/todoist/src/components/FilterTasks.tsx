@@ -42,7 +42,10 @@ function FilterTasks({ name, quickLinkView }: FilterTasksProps) {
   const tasks = useMemo(() => {
     if (!cachedData) return sections.flatMap((section) => section.tasks);
     const byId = new Map(cachedData.items.map((item) => [item.id, item]));
-    return sections.flatMap((section) => section.tasks.map((task) => byId.get(task.id) ?? task));
+    // Omit ids missing from sync cache so completed/deleted tasks do not stick to stale filter API rows.
+    return sections.flatMap((section) =>
+      section.tasks.map((task) => byId.get(task.id)).filter((t): t is Task => t !== undefined),
+    );
   }, [sections, cachedData]);
 
   const {
