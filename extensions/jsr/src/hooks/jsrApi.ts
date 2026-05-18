@@ -89,7 +89,14 @@ export const usePackage = (item: NameAndScope | null) => {
  */
 export const useVersions = (item: NameAndScope | null) => {
   const url = item ? jsrUrls.api.versions(item.scope, item.name) : "";
-  return useFetch<VersionPackage[]>(url, { execute: !!item });
+  return useFetch<ApiResults<VersionPackage> | VersionPackage[], VersionPackage[], VersionPackage[]>(url, {
+    execute: !!item,
+    initialData: [] as VersionPackage[],
+    mapResult: (result) => {
+      const items = Array.isArray(result) ? result : (result?.items ?? []);
+      return { data: items };
+    },
+  });
 };
 
 /**

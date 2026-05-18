@@ -10,7 +10,7 @@ import { useSelectedPackage } from "@/hooks/useSelectedPackage";
 import ListItem from "@/components/ListItem";
 import OptionalActions from "@/components/OptionalActions";
 import StatsSections from "@/components/StatsSections";
-import { NavigationProvider } from "@/context/NavigationContext";
+import { SearchProvider } from "@/context/SearchContext";
 
 type SearchProps = {
   scope: string | null;
@@ -32,6 +32,10 @@ const Search = ({ scope }: SearchProps) => {
     [push],
   );
 
+  const toggleDetails = useCallback(() => {
+    setIsShowingDetails((state) => !state);
+  }, []);
+
   useEffect(() => {
     if (error) {
       captureException(error);
@@ -43,7 +47,13 @@ const Search = ({ scope }: SearchProps) => {
   }, [error]);
 
   return (
-    <NavigationProvider openScope={openScope}>
+    <SearchProvider
+      openScope={openScope}
+      searchQueryURL={searchQueryURL}
+      isShowingDetails={isShowingDetails}
+      toggleDetails={toggleDetails}
+      extraActions={<OptionalActions selectedPackageData={selectedPackageData} enabled={addExtraActions} />}
+    >
       <List
         filtering={false}
         isShowingDetail={isShowingDetails}
@@ -68,25 +78,9 @@ const Search = ({ scope }: SearchProps) => {
           ) : null
         }
       >
-        <StatsSections
-          statsData={statsData}
-          enabled={searchText === "" && scope === null}
-          setIsShowingDetails={setIsShowingDetails}
-          isShowingDetails={isShowingDetails}
-          searchQueryURL={searchQueryURL}
-          extraActions={<OptionalActions selectedPackageData={selectedPackageData} enabled={addExtraActions} />}
-        />
+        <StatsSections statsData={statsData} enabled={searchText === "" && scope === null} />
         {data?.map((result) => (
-          <ListItem
-            searchQueryURL={searchQueryURL}
-            key={result.id}
-            item={result.document}
-            toggleDetails={() => {
-              setIsShowingDetails((state) => !state);
-            }}
-            isShowingDetails={isShowingDetails}
-            extraActions={<OptionalActions selectedPackageData={selectedPackageData} enabled={addExtraActions} />}
-          />
+          <ListItem key={result.id} item={result.document} />
         ))}
         <List.EmptyView
           title={searchText === "" ? "Search JSR Packages" : "No results found"}
@@ -94,7 +88,7 @@ const Search = ({ scope }: SearchProps) => {
           icon={{ source: "jsr.svg" }}
         />
       </List>
-    </NavigationProvider>
+    </SearchProvider>
   );
 };
 

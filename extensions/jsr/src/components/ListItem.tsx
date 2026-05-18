@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@raycast/api";
 
 import type { SearchResultDocument } from "@/types";
@@ -10,17 +8,16 @@ import { jsrUrls } from "@/lib/jsrUrls";
 import CopyActions from "@/components/CopyActions";
 import ItemDetails from "@/components/ItemDetails";
 import { VersionList } from "@/components/VersionList";
+import { useSearchContext } from "@/context/SearchContext";
 
 type ListItemProps = {
   item: SearchResultDocument;
-  toggleDetails: () => void;
-  isShowingDetails: boolean;
-  extraActions?: ReactNode;
-  searchQueryURL?: string;
 };
 
-const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQueryURL }: ListItemProps) => {
+const ListItem = ({ item }: ListItemProps) => {
   const { openWebsiteByDefault } = getPreferenceValues<Preferences>();
+  const ctx = useSearchContext();
+  const isShowingDetails = ctx?.isShowingDetails ?? false;
   const progress = item.score ?? 0;
   const iconColor = progress >= 80 ? Color.Green : progress >= 50 ? Color.Yellow : Color.Red;
   const icons = compatIcons(item);
@@ -46,11 +43,11 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQ
                   icon={{ source: "jsr.svg" }}
                   url={jsrUrls.site.package(item.id)}
                 />
-                <Action title="Toggle Details" icon={Icon.AppWindowSidebarLeft} onAction={() => toggleDetails()} />
+                <Action title="Toggle Details" icon={Icon.AppWindowSidebarLeft} onAction={() => ctx?.toggleDetails()} />
               </>
             ) : (
               <>
-                <Action title="Toggle Details" onAction={() => toggleDetails()} icon={Icon.AppWindowSidebarLeft} />
+                <Action title="Toggle Details" onAction={() => ctx?.toggleDetails()} icon={Icon.AppWindowSidebarLeft} />
                 <Action.OpenInBrowser
                   title="Open Main Page (JSR)"
                   icon={{ source: "jsr.svg" }}
@@ -71,15 +68,15 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQ
               icon={{ source: Icon.List }}
               target={<VersionList scope={item.scope} name={item.name} />}
             />
-            {extraActions ? <>{extraActions}</> : null}
+            {ctx?.extraActions ? <>{ctx.extraActions}</> : null}
           </ActionPanel.Section>
           <CopyActions item={item} />
-          {searchQueryURL ? (
+          {ctx?.searchQueryURL ? (
             <ActionPanel.Section title="Search">
               <Action.OpenInBrowser
                 title="Open Search (JSR)"
                 icon={{ source: "jsr.svg" }}
-                url={searchQueryURL}
+                url={ctx.searchQueryURL}
                 shortcut={{ key: "w", modifiers: ["cmd", "shift"] }}
               />
             </ActionPanel.Section>

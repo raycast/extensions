@@ -12,7 +12,7 @@ import { jsrUrls } from "@/lib/jsrUrls";
 
 import { useDependencies, useDependents, usePackage, usePackages } from "@/hooks/jsrApi";
 
-import { useNavigationContext } from "@/context/NavigationContext";
+import { useSearchContext } from "@/context/SearchContext";
 
 const ItemDetails = ({
   item,
@@ -23,7 +23,7 @@ const ItemDetails = ({
   progress: number;
   iconColor: Color;
 }) => {
-  const nav = useNavigationContext();
+  const ctx = useSearchContext();
   const icons = compatIcons(item);
   const { data, isLoading, error } = usePackage(item);
 
@@ -58,7 +58,7 @@ const ItemDetails = ({
                   <Detail.Metadata.TagList.Item
                     text={`${scopePackages?.items.length}`}
                     icon={Icon.Box}
-                    onAction={() => nav?.openScope(item.scope)}
+                    onAction={() => ctx?.openScope(item.scope)}
                   />
                 ) : null}
               </Detail.Metadata.TagList>
