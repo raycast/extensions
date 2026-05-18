@@ -67,9 +67,8 @@ export function addToHistory(color: HistoryColor) {
 
   const serializedHistory = cache.get("history");
   const previousHistory = serializedHistory ? (JSON.parse(serializedHistory) as HistoryItem[]) : [];
-  const previousHistoryItem = previousHistory.find(
-    (item) => getFormattedColor(item.color) === getFormattedColor(color),
-  );
+  const colorKey = getFormattedColor(color);
+  const previousHistoryItem = previousHistory.find((item) => getFormattedColor(item.color) === colorKey);
 
   const historyItem: HistoryItem = {
     date: new Date().toISOString(),
@@ -77,10 +76,9 @@ export function addToHistory(color: HistoryColor) {
     title: previousHistoryItem?.title,
     isFavorite: previousHistoryItem?.isFavorite,
   };
-  const history = [
-    historyItem,
-    ...previousHistory.filter((item) => getFormattedColor(item.color) !== getFormattedColor(color)),
-  ];
+  const history = previousHistoryItem?.isFavorite
+    ? previousHistory.map((item) => (getFormattedColor(item.color) === colorKey ? historyItem : item))
+    : [historyItem, ...previousHistory.filter((item) => getFormattedColor(item.color) !== colorKey)];
   const persistentItemsCount = history.filter((item) => item.isFavorite).length;
   const maxRegularHistoryLength = Math.max(MAX_HISTORY_LENGTH - persistentItemsCount, 0);
   let regularHistoryCount = 0;
