@@ -244,24 +244,24 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6",
-    "@raycast/utils": "^2.2.2",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1",
     "dayjs": "^1.11.19",
     "openapi-fetch": "^0.17.0"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "25.2.3",
-    "@types/react": "19.2.14",
-    "eslint": "^10.0.0",
     "js-yaml": "^4.1.1",
-    "openapi-typescript": "^7.13.0",
-    "prettier": "^3.8.1",
-    "swagger2openapi": "^7.0.8",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3",
-    "vitest": "^4.1.6"
+    "vitest": "^4.1.6",
+    "swagger2openapi": "^7.0.8",
+    "openapi-typescript": "^7.13.0"
   },
   "scripts": {
     "build": "ray build",
