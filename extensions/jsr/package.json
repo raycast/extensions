@@ -26,6 +26,56 @@
       "name": "search",
       "title": "Search Packages",
       "description": "Search for packages on JSR.io"
+    },
+    {
+      "name": "get-package",
+      "title": "Get Package",
+      "description": "Fetch full metadata for a single JSR package"
+    },
+    {
+      "name": "get-readme",
+      "title": "Get README",
+      "description": "Fetch the README markdown for a JSR package version"
+    },
+    {
+      "name": "get-versions",
+      "title": "Get Versions",
+      "description": "List published versions for a JSR package"
+    },
+    {
+      "name": "get-dependencies",
+      "title": "Get Dependencies",
+      "description": "List the outgoing dependencies of a JSR package version"
+    },
+    {
+      "name": "get-dependents",
+      "title": "Get Dependents",
+      "description": "List packages that depend on a given JSR package"
+    },
+    {
+      "name": "get-downloads",
+      "title": "Get Downloads",
+      "description": "Fetch ~90-day download stats for a JSR package"
+    },
+    {
+      "name": "list-scope-packages",
+      "title": "List Scope Packages",
+      "description": "List all JSR packages within a given scope"
+    },
+    {
+      "name": "get-stats",
+      "title": "Get Stats",
+      "description": "Fetch the JSR landing-page stats (featured + newest packages)"
+    },
+    {
+      "name": "get-package-manifest",
+      "title": "Get Package Manifest",
+      "description": "Fetch the per-version manifest: total size, file count, and exports map"
+    },
+    {
+      "name": "get-score-breakdown",
+      "title": "Get Score Breakdown",
+      "description": "Fetch the JSR quality-score breakdown for a package"
     }
   ],
   "preferences": [
