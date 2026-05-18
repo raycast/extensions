@@ -46,30 +46,19 @@ const providersMeta: readonly {
     key: "claude",
     title: "Claude Code",
     brandColor: "#D97757",
-    dropdownIcon: {
-      source: "provider-claude.svg",
-      mask: Image.Mask.Circle,
-      tintColor: "#D97757",
-    },
+    dropdownIcon: "provider-claude.png",
   },
   {
     key: "codex",
     title: "Codex",
     brandColor: "#2D8EFF",
-    dropdownIcon: {
-      source: "provider-codex.svg",
-      mask: Image.Mask.Circle,
-      tintColor: "#2D8EFF",
-    },
+    dropdownIcon: "provider-codex.png",
   },
   {
     key: "cursor",
     title: "Cursor",
     brandColor: CURSOR_BRAND_HEX,
-    dropdownIcon: {
-      source: "provider-cursor.png",
-      mask: Image.Mask.Circle,
-    },
+    dropdownIcon: "provider-cursor.png",
   },
 ];
 
