@@ -87,12 +87,15 @@ async function runWithConcurrency<T>(
   worker: (item: T) => Promise<void>,
 ): Promise<void> {
   let cursor = 0;
-  const runners = Array.from({ length: Math.min(limit, items.length) }, async () => {
-    while (cursor < items.length) {
-      const index = cursor++;
-      await worker(items[index]);
-    }
-  });
+  const runners = Array.from(
+    { length: Math.min(limit, items.length) },
+    async () => {
+      while (cursor < items.length) {
+        const index = cursor++;
+        await worker(items[index]);
+      }
+    },
+  );
   await Promise.all(runners);
 }
 
@@ -184,7 +187,9 @@ function tryNoteClaudeSessionTitle(
 function truncateClaudeTitle(text: string): string {
   const t = text.replace(/\s+/g, " ").trim();
   if (!t) return "";
-  return t.length <= CLAUDE_TITLE_MAX ? t : `${t.slice(0, CLAUDE_TITLE_MAX - 1)}…`;
+  return t.length <= CLAUDE_TITLE_MAX
+    ? t
+    : `${t.slice(0, CLAUDE_TITLE_MAX - 1)}…`;
 }
 
 function pushClaudeLine(

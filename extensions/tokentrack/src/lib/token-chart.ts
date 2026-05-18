@@ -84,9 +84,7 @@ function compactBarLabelVertical(
 ): string | null {
   if (tokens <= 0 || availHeight < fontSize + 4) return null;
   const candidates = [
-    tokens >= 1_000_000
-      ? `${Math.round(tokens / 1_000_000)}M`
-      : null,
+    tokens >= 1_000_000 ? `${Math.round(tokens / 1_000_000)}M` : null,
     formatTokens(tokens),
     tokens >= 1_000 ? `${Math.round(tokens / 1_000)}K` : null,
   ].filter((c): c is string => c != null);
@@ -252,8 +250,7 @@ export function renderTokenUsageChartMarkdown(
       estimateSvgTextWidth(formatAxisTick(tv), axisTickSize),
     ),
   );
-  const plotLeft =
-    yTitleColumn + gapTitleTicks + yTickLabelMaxW + gapTicksPlot;
+  const plotLeft = yTitleColumn + gapTitleTicks + yTickLabelMaxW + gapTicksPlot;
   const yTickX = plotLeft - gapTicksPlot;
   const plotWActual = CHART_W - plotLeft - padR;
 

@@ -147,7 +147,9 @@ const NETWORK_FAILURE_COOLDOWN_MS = 15 * 60 * 1000;
 
 let networkBackoffUntil = 0;
 
-async function writeDiskCache(live: Record<string, ModelPricing>): Promise<void> {
+async function writeDiskCache(
+  live: Record<string, ModelPricing>,
+): Promise<void> {
   try {
     const payload: StoredPayload = { savedAt: Date.now(), live };
     await LocalStorage.setItem(STORAGE_KEY, JSON.stringify(payload));

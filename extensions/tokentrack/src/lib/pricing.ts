@@ -116,7 +116,9 @@ function rebuildMergedPricing(): void {
 
 rebuildMergedPricing();
 
-function setLivePricingOverlay(overlay: Record<string, ModelPricing> | null): void {
+function setLivePricingOverlay(
+  overlay: Record<string, ModelPricing> | null,
+): void {
   liveOverlay = overlay && Object.keys(overlay).length > 0 ? overlay : null;
   rebuildMergedPricing();
 }
@@ -218,7 +220,9 @@ function findPricing(model?: string) {
   return undefined;
 }
 
-function findPricingOneNormalized(normalized: string): ModelPricing | undefined {
+function findPricingOneNormalized(
+  normalized: string,
+): ModelPricing | undefined {
   if (cachedMerged[normalized]) return cachedMerged[normalized];
 
   for (const key of mergedKeysSorted) {

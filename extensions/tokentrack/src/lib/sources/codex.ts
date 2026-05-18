@@ -138,7 +138,9 @@ function newFileState(): FileState {
 function truncateCodexTitle(text: string): string {
   const t = text.replace(/\s+/g, " ").trim();
   if (!t) return "";
-  return t.length <= CODEX_TITLE_MAX ? t : `${t.slice(0, CODEX_TITLE_MAX - 1)}…`;
+  return t.length <= CODEX_TITLE_MAX
+    ? t
+    : `${t.slice(0, CODEX_TITLE_MAX - 1)}…`;
 }
 
 /** Regex-only title extraction — never JSON.parse session_meta (multi‑MB lines). */

@@ -53,10 +53,9 @@ export function deserializeConversation(
   };
 }
 
-function summarizePeriod(events: UsageEvent[]): Omit<
-  PeriodUsageSnapshot,
-  "buckets" | "conversations"
-> {
+function summarizePeriod(
+  events: UsageEvent[],
+): Omit<PeriodUsageSnapshot, "buckets" | "conversations"> {
   let totalTokens = 0;
   let estimatedCost = 0;
   let hasEstimatedTokens = false;
@@ -95,7 +94,9 @@ export function buildProviderUsageSnapshot(
     periods[period] = {
       ...summarizePeriod(filtered),
       buckets: buildUsageBuckets(period, range, filtered),
-      conversations: groupEventsByConversation(filtered).map(serializeConversation),
+      conversations: groupEventsByConversation(filtered).map(
+        serializeConversation,
+      ),
     };
   }
 

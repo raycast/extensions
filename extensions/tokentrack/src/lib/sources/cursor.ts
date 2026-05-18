@@ -193,7 +193,9 @@ const CURSOR_TITLE_MAX = 80;
 function truncateCursorTitle(text: string): string {
   const t = text.replace(/\s+/g, " ").trim();
   if (!t) return "";
-  return t.length <= CURSOR_TITLE_MAX ? t : `${t.slice(0, CURSOR_TITLE_MAX - 1)}…`;
+  return t.length <= CURSOR_TITLE_MAX
+    ? t
+    : `${t.slice(0, CURSOR_TITLE_MAX - 1)}…`;
 }
 
 const PAGE_SIZE = 200;
@@ -345,7 +347,8 @@ async function readLocalUsage(
       ["-json", uri, composerSql],
       { encoding: "utf8", maxBuffer: 1024 * 1024 * 20, timeout: 15000 },
     );
-    if (stdout.trim()) composerRows = JSON.parse(stdout.trim()) as ComposerRow[];
+    if (stdout.trim())
+      composerRows = JSON.parse(stdout.trim()) as ComposerRow[];
   } catch {
     errors.push("Cursor: composer read error");
     return { events: [], errors };

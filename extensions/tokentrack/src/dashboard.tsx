@@ -270,10 +270,11 @@ export default function Command() {
           const detailsAvailable = snapshot
             ? supportsConversationDetailsFromSnapshot(tab, snapshot)
             : false;
-          const conversations = summary.conversations.map(deserializeConversation);
+          const conversations = summary.conversations.map(
+            deserializeConversation,
+          );
 
-          const pct =
-            budget && budget > 0 ? summary.estimatedCost / budget : 0;
+          const pct = budget && budget > 0 ? summary.estimatedCost / budget : 0;
           const hasBudget = budget !== undefined && budget > 0;
 
           const spendStr = formatCurrencyMoney(summary.estimatedCost, currency);

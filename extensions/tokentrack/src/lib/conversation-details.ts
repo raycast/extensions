@@ -17,7 +17,9 @@ export function supportsConversationDetails(
   events: UsageEvent[],
 ): boolean {
   if (provider === "cursor") {
-    return events.some((e) => e.conversationKey && e.id.startsWith("cursor:local:"));
+    return events.some(
+      (e) => e.conversationKey && e.id.startsWith("cursor:local:"),
+    );
   }
   return events.some((e) => e.conversationKey);
 }
@@ -35,8 +37,7 @@ export function groupEventsByConversation(
       byKey.set(event.conversationKey, {
         key: event.conversationKey,
         title:
-          truncateTitle(event.conversationTitle ?? "") ||
-          fallbackTitle(event),
+          truncateTitle(event.conversationTitle ?? "") || fallbackTitle(event),
         totalTokens: event.totalTokens,
         estimatedCost: event.estimatedCost,
         eventCount: 1,
@@ -69,7 +70,9 @@ function fallbackTitle(event: UsageEvent): string {
     const base = event.sourcePath.split("/").pop() ?? event.sourcePath;
     const withoutExt = base.replace(/\.jsonl$/i, "");
     if (withoutExt.startsWith("rollout-")) {
-      return truncateTitle(withoutExt.replace(/^rollout-\d{4}-\d{2}-\d{2}T/, ""));
+      return truncateTitle(
+        withoutExt.replace(/^rollout-\d{4}-\d{2}-\d{2}T/, ""),
+      );
     }
     return truncateTitle(withoutExt);
   }
