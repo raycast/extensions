@@ -10,7 +10,7 @@ Starts recording from the default microphone, stops when you press **Stop and Tr
 
 ## Prerequisites
 
-Install Kesha Voice Kit 1.19.0 or newer and fetch the local engine + ASR models:
+Install Kesha Voice Kit 1.18.2 or newer and fetch the local engine + ASR models:
 
 ```bash
 bun add -g @drakulavich/kesha-voice-kit@latest
