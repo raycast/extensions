@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix repository search for many organizations] - {PR_MERGE_DATE}
+## [Fix repository search for many organizations] - 2026-05-18
 
 - Split My Repositories loading into smaller owner-specific searches to avoid GitHub 502 errors for users in many organizations.
 
