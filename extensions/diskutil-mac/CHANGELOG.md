@@ -1,22 +1,14 @@
 # Diskutil Changelog
 
+## [1.3.0] - Performance Improvements - {PR_MERGE_DATE}
+
+- Fix initialization timeout on systems with many disks (70+) by introducing a concurrency cap and per-call timeout with minimal impact on typical systems. (Feedback on performance and any edge cases is appreciated)
+- Upgraded to the current Raycast API, utils, and TypeScript toolchain.
+- DEV: added a mock override feature for more consistent testing. Start with `npm run mock:ls` _(unbundled from prod)_
+
 ## [Bugfix] - 2026-05-17
 
 - Include ejectable external disks in the removable disk filter.
-
-## [Initial Private Version] - 2023-05-11
-
-## [Public Release Version] - 2025-02-28
-
-- Initial public release
-- Check out all the initial features, to be worked on in the future
-
-## [Second Release] - 2025-10-21
-- Added support for filtering disks by type (internal/external)
-- Implemented size display in overview. Format can be toggled via shortcut `CMD+.` (feedback on format is welcome)
-- Backend now supports plist reading for more structured information, viewable as alternative detail view via `CMD+Shift+Enter`
-- Added summary display of disk information at the top of the details list
-- Minor bug fixes, code improvements, and refactoring
 
 ## [1.2.0] - 2026-01-16
 
@@ -24,3 +16,18 @@
 - Introduced progressive rendering for faster initialization performance. (Slightly chunked for performance - feedback welcome)
 - Improved filtering and used Removable/Fixed instead of Internal/External.
 - Refactored and modularized codebase
+
+## [Second Release] - 2025-10-21
+
+- Added support for filtering disks by type (internal/external)
+- Implemented size display in overview. Format can be toggled via shortcut `CMD+.` (feedback on format is welcome)
+- Backend now supports plist reading for more structured information, viewable as alternative detail view via `CMD+Shift+Enter`
+- Added summary display of disk information at the top of the details list
+- Minor bug fixes, code improvements, and refactoring
+
+## [Public Release Version] - 2025-02-28
+
+- Initial public release
+- Check out all the initial features, to be worked on in the future
+
+## [Initial Private Version] - 2023-05-11
