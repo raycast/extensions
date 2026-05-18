@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Increased the Safari bookmark plist parser limit so large bookmark libraries no longer fail with `maxObjectCount exceeded`
+
 ## [Windows Support for Chromium Browsers] - 2026-04-30
 
 - Added Windows support for Chrome, Edge, and Brave bookmarks
