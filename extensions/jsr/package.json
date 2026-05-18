@@ -32,18 +32,18 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.103.5",
-    "@raycast/utils": "^2.2.1",
-    "cheerio": "^1.1.2",
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4",
+    "cheerio": "^1.2.0",
     "date-fns": "^4.1.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "24.7.0",
     "@types/react": "19.2.2",
     "eslint": "^9.37.0",
-    "prettier": "^3.6.2",
+    "prettier": "^3.8.3",
     "typescript": "^5.9.3"
   },
   "scripts": {
