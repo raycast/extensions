@@ -206,7 +206,9 @@ export default function Command() {
     { keepPreviousData: false },
   );
 
-  const intervalRef = useRef<ReturnType<typeof setInterval>>();
+  const intervalRef = useRef<ReturnType<typeof setInterval> | undefined>(
+    undefined,
+  );
   useEffect(() => {
     intervalRef.current = setInterval(() => revalidate(), REFRESH_INTERVAL);
     return () => {
