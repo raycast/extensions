@@ -80,11 +80,13 @@ export default function useInstances() {
             message,
           });
           await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
+          await mutate();
           return undefined;
         }
 
         if (selectedInstance.authError) {
           await persistInstance({ ...selectedInstance, authError: undefined, authErrorAt: undefined });
+          await mutate();
         }
 
         return { sysId: jsonData.result.user_sys_id, userName: jsonData.result.user_name ?? "" };
@@ -98,6 +100,7 @@ export default function useInstances() {
           message,
         });
         await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
+        await mutate();
       }
     };
     fetchUserId().then((result) => {

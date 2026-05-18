@@ -81,7 +81,7 @@ export default function InstancesList() {
                   <Action.Push
                     icon={Icon.Pencil}
                     title="Edit"
-                    target={<InstanceForm onSubmit={editInstance} instance={instance} />}
+                    target={<InstanceForm onSubmit={editInstance} onDelete={deleteInstance} instance={instance} />}
                     shortcut={Keyboard.Shortcut.Common.Edit}
                     onPop={mutate}
                     onPush={() => setSelectedId(instance.id)}

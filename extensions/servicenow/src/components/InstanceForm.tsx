@@ -3,7 +3,6 @@ import { ActionPanel, Action, Form, Icon, useNavigation, Color, Keyboard, confir
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import crypto from "crypto";
 import { AuthMode, Instance } from "../types";
-import useInstances from "../hooks/useInstances";
 import { authorizeInstance } from "../utils/oauth";
 
 type InstanceFormValues = Omit<Instance, "id" | "authMode" | "accessToken" | "refreshToken" | "tokenExpiresAt"> & {
@@ -12,13 +11,13 @@ type InstanceFormValues = Omit<Instance, "id" | "authMode" | "accessToken" | "re
 
 type SetInstanceFormProps = {
   onSubmit: (value: Instance) => Promise<void>;
+  onDelete?: (instanceId: string) => Promise<void>;
   instance?: Instance;
   initialName?: string;
 };
 
-export default function InstanceForm({ onSubmit, instance, initialName }: SetInstanceFormProps) {
+export default function InstanceForm({ onSubmit, onDelete, instance, initialName }: SetInstanceFormProps) {
   const { pop } = useNavigation();
-  const { deleteInstance } = useInstances();
 
   const [authMode, setAuthMode] = useState<AuthMode>(instance?.authMode ?? "basic");
 
@@ -105,26 +104,28 @@ export default function InstanceForm({ onSubmit, instance, initialName }: SetIns
             title={`${instance?.alias ? instance.alias + " (" + instance.name + ")" : instance?.name}`}
           >
             <Action.SubmitForm onSubmit={handleSubmit} icon={Icon.SaveDocument} title={"Save"} />
-            <Action
-              title="Delete"
-              icon={Icon.Trash}
-              style={Action.Style.Destructive}
-              shortcut={Keyboard.Shortcut.Common.Remove}
-              onAction={() =>
-                confirmAlert({
-                  title: "Delete Instance Profile",
-                  message: `Are you sure you want to delete "${instance?.alias ? instance.alias + " (" + instance.name + ")" : instance?.name}"?`,
-                  primaryAction: {
-                    style: Alert.ActionStyle.Destructive,
-                    title: "Delete",
-                    onAction: () => {
-                      deleteInstance(instance?.id || "");
-                      pop();
+            {instance && onDelete && (
+              <Action
+                title="Delete"
+                icon={Icon.Trash}
+                style={Action.Style.Destructive}
+                shortcut={Keyboard.Shortcut.Common.Remove}
+                onAction={() =>
+                  confirmAlert({
+                    title: "Delete Instance Profile",
+                    message: `Are you sure you want to delete "${instance.alias ? instance.alias + " (" + instance.name + ")" : instance.name}"?`,
+                    primaryAction: {
+                      style: Alert.ActionStyle.Destructive,
+                      title: "Delete",
+                      onAction: async () => {
+                        await onDelete(instance.id);
+                        pop();
+                      },
                     },
-                  },
-                })
-              }
-            />
+                  })
+                }
+              />
+            )}
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.OpenInBrowser
