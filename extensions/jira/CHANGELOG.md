@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Kept Jira issue lists open when Jira returns an HTML error page while loading issue type icons.
+
 ## [Bug Fix] - 2026-05-18
 
 - Fixed issue details failing to load when descriptions include absolute Jira attachment image URLs
