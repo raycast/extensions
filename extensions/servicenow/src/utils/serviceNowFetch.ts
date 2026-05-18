@@ -18,10 +18,7 @@ export type ServiceNowFetchOptions = Omit<RequestInit, "headers"> & {
   noAuth?: boolean;
 };
 
-async function buildRequestInit(
-  instance: Instance,
-  options: ServiceNowFetchOptions | undefined,
-): Promise<RequestInit> {
+async function buildRequestInit(instance: Instance, options: ServiceNowFetchOptions | undefined): Promise<RequestInit> {
   const { noAuth, headers: extraHeaders, ...rest } = options ?? {};
   const headers: Record<string, string> = { ...extraHeaders };
   if (!noAuth && !headers["Authorization"]) {
@@ -54,7 +51,11 @@ export async function serviceNowFetch<T = unknown>(
   });
   if (!response.ok) {
     const body = await response.text();
-    throw new ServiceNowApiError(response.status, body, `Request failed (${response.status}): ${body || response.statusText}`);
+    throw new ServiceNowApiError(
+      response.status,
+      body,
+      `Request failed (${response.status}): ${body || response.statusText}`,
+    );
   }
   return (await response.json()) as T;
 }
