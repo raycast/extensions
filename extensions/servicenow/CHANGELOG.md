@@ -20,11 +20,11 @@
 
 ## [Fix] - 2025-05-14
 
-Fixed an issue where the Search Sys ID command stopped working after publishing, due to function name minification during the build process.
+Fixed an issue where the Search by Sys_ID command stopped working after publishing, due to function name minification during the build process.
 
 ## [Updates] - 2025-05-13
 
-- Added a new admin command, **Search Sys ID**, which searches for a Sys ID in the selected instance, or in any matching instance from the profiles if no instance is provided.
+- Added a new command for admins to **Search by Sys_ID**, allowing to search for a Sys_ID in the selected instance, or in any matching instance from the profiles if no instance is provided.
 - Added a new Open Mode preference to control how ServiceNow content is opened when using the extension.
 - Simplified the command structure by making the instance input optional, defaulting to the selected instance if none is provided, and eliminating the need for multiple commands for:
   - **Quick Search**
@@ -48,10 +48,10 @@ Fixed an issue where the Search Sys ID command stopped working after publishing,
 
 ## [Fixes & Bits] - 2024-10-23
 
-- Documate pages now open directly in the editor.
-- Improved search results filtering.
-- Added the **Login to Selected Instance** command.
-- Added the **Search Resources** command to help find ServiceNow resources.
-- Removed unnecessary tooltips in the Instance Profile Form for a cleaner interface.
+- Documate pages now open directly in the editor
+- Improved search results filtering
+- Added **Login to Selected Instance** command
+- Added **Search Resources** command to help find ServiceNow resources
+- Removed unnecessary tooltips in the Instance Profile Form for a cleaner interface
 
 ## [Initial Version] - 2024-10-17
