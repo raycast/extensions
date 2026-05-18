@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
 import Actions from "./Actions";
+import CodeSearchTableFilterDropdown, { TableFilterOption } from "./CodeSearchTableFilterDropdown";
 import SearchCodeTableSection from "./SearchCodeTableSection";
-import SearchGroupDropdown, { DEFAULT_SEARCH_GROUP_SCOPE } from "./SearchGroupDropdown";
 
 import useInstances from "../hooks/useInstances";
-import useSearchGroups from "../hooks/useSearchGroups";
+import useSearchGroups, { DEFAULT_SEARCH_GROUP_SCOPE } from "../hooks/useSearchGroups";
 import useCodeSearchTables from "../hooks/useCodeSearchTables";
 import InstanceForm from "./InstanceForm";
 import useFavorites from "../hooks/useFavorites";
@@ -56,22 +56,37 @@ export default function SearchCodeResults({ searchTerm }: { searchTerm: string }
   const CONCURRENCY = 3;
   const [tablesCompleted, setTablesCompleted] = useState(0);
   const [maxActiveIndex, setMaxActiveIndex] = useState(CONCURRENCY);
+  const [tableHits, setTableHits] = useState<Record<string, { label: string; count: number }>>({});
+  const [tableFilter, setTableFilter] = useCachedState<string>("search-code-table-filter", "all");
   const ready =
     !isLoadingGroups && !isLoadingTables && !!selectedInstance && !!authHeader && !!searchTerm && tables.length > 0;
 
-  // Reset the progress counter and the active window when the query changes so a
-  // new run starts at 0. Depend on `tables.length` rather than `tables` itself —
-  // useFetch reassigns the array reference whenever its cached state syncs, which
-  // would otherwise reset the counter on every render and freeze us at "1/N".
+  // Reset the progress counter, the active window, and the per-table hit map
+  // when the query changes so a new run starts at 0. Depend on `tables.length`
+  // rather than `tables` itself — useFetch reassigns the array reference
+  // whenever its cached state syncs, which would otherwise reset the counter on
+  // every render and freeze us at "1/N".
   useEffect(() => {
     setTablesCompleted(0);
     setMaxActiveIndex(CONCURRENCY);
+    setTableHits({});
   }, [searchTerm, groupScope, tables.length]);
 
-  const onTableComplete = useCallback(() => {
+  const onTableComplete = useCallback((table: string, hits: { label: string; count: number } | null) => {
     setTablesCompleted((prev) => prev + 1);
     setMaxActiveIndex((prev) => prev + 1);
+    if (hits) {
+      setTableHits((prev) => ({ ...prev, [table]: hits }));
+    }
   }, []);
+
+  const tableFilterOptions: TableFilterOption[] = useMemo(
+    () =>
+      Object.entries(tableHits)
+        .map(([table, info]) => ({ table, label: info.label, count: info.count }))
+        .sort((a, b) => a.label.localeCompare(b.label)),
+    [tableHits],
+  );
 
   const isSearching = isLoadingGroups || isLoadingTables || (ready && tablesCompleted < tables.length);
   const displayProgress = Math.min(tablesCompleted + 1, tables.length);
@@ -94,13 +109,20 @@ export default function SearchCodeResults({ searchTerm }: { searchTerm: string }
       setNavigationTitle(`${command} > ${aliasOrName} > Searching${progress} for ${searchTerm}...`);
       return;
     }
-    setNavigationTitle(`${command} > ${aliasOrName} > ${tablesCompleted} tables scanned for ${searchTerm}`);
+    const totalHits = Object.values(tableHits).reduce((sum, t) => sum + t.count, 0);
+    if (totalHits === 0) {
+      setNavigationTitle(`${command} > ${aliasOrName} > No results found for ${searchTerm}`);
+    } else {
+      setNavigationTitle(
+        `${command} > ${aliasOrName} > ${totalHits} result${totalHits === 1 ? "" : "s"} for ${searchTerm}`,
+      );
+    }
   }, [
     selectedInstance,
     isSearching,
     isLoadingGroups,
     isLoadingTables,
-    tablesCompleted,
+    tableHits,
     tables.length,
     displayProgress,
     searchTerm,
@@ -118,11 +140,11 @@ export default function SearchCodeResults({ searchTerm }: { searchTerm: string }
       searchBarPlaceholder="Filter by script name or table..."
       isLoading={isSearching}
       searchBarAccessory={
-        <SearchGroupDropdown
-          groups={fetchedGroups}
-          isLoading={isLoadingGroups}
-          value={groupScope}
-          onChange={setGroupScope}
+        <CodeSearchTableFilterDropdown
+          tables={tableFilterOptions}
+          value={tableFilter}
+          onChange={setTableFilter}
+          isLoading={isSearching}
         />
       }
     >
@@ -133,11 +155,14 @@ export default function SearchCodeResults({ searchTerm }: { searchTerm: string }
               <SearchCodeTableSection
                 key={`${runKey}|${table}`}
                 active={i < maxActiveIndex}
+                visible={tableFilter === "all" || tableFilter === table}
                 instanceName={instanceName}
                 instanceUrl={instanceUrl}
                 authHeader={authHeader!}
                 searchTerm={searchTerm}
                 groupScope={groupScope}
+                groups={fetchedGroups}
+                onGroupScopeChange={setGroupScope}
                 table={table}
                 onComplete={onTableComplete}
                 isInFavorites={isInFavorites}

@@ -3,8 +3,6 @@ import { useEffect } from "react";
 import { useCachedState } from "@raycast/utils";
 import { LocalStorage, showToast, Toast } from "@raycast/api";
 
-import fetch from "node-fetch";
-
 import { useLocalStorage } from "./useLocalStorage";
 
 import { Instance } from "../types";

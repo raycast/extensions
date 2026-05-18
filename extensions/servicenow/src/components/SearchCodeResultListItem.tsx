@@ -3,7 +3,9 @@ import { Action, ActionPanel, Color, Icon, Keyboard, List } from "@raycast/api";
 import CodeMatchDetail from "./CodeMatchDetail";
 import Actions from "./Actions";
 import FavoriteForm from "./FavoriteForm";
+import SearchGroupSubmenu from "./SearchGroupSubmenu";
 
+import { SearchGroupOption } from "../hooks/useSearchGroups";
 import { CodeSearchHit } from "../types";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getTableIconAndColor } from "../utils/getTableIconAndColor";
@@ -18,6 +20,9 @@ export default function SearchCodeResultListItem({
   addUrlToFavorites,
   removeFromFavorites,
   revalidateFavorites,
+  groupScope,
+  groups,
+  onGroupScopeChange,
 }: {
   hit: CodeSearchHit;
   tableLabel: string;
@@ -27,6 +32,9 @@ export default function SearchCodeResultListItem({
   addUrlToFavorites: (title: string, url: string, groupId?: string, revalidate?: () => void) => void;
   removeFromFavorites: (id: string, title: string, isGroup: boolean, revalidate?: () => void) => Promise<void>;
   revalidateFavorites: () => void;
+  groupScope: string;
+  groups: SearchGroupOption[];
+  onGroupScopeChange: (scope: string) => void;
 }) {
   const recordUrl = `/${hit.className}.do?sys_id=${hit.sysId}`;
   const url = buildServiceNowUrl(instanceName, recordUrl);
@@ -48,9 +56,17 @@ export default function SearchCodeResultListItem({
       tooltip: "Favorite",
     });
   }
+  for (const match of hit.matches) {
+    const count = match.count ?? 0;
+    accessories.push({
+      tag: { value: match.fieldLabel },
+      tooltip: `${count} match${count === 1 ? "" : "es"} in ${match.fieldLabel}`,
+    });
+  }
   accessories.push({
+    icon: Icon.Hashtag,
     text: totalLineMatches.toString(),
-    tooltip: `${totalLineMatches} match${totalLineMatches === 1 ? "" : "es"}`,
+    tooltip: `${totalLineMatches} match${totalLineMatches === 1 ? "" : "es"} total`,
   });
 
   return (
@@ -97,6 +113,7 @@ export default function SearchCodeResultListItem({
               />
             </>
           )}
+          <SearchGroupSubmenu groups={groups} value={groupScope} onChange={onGroupScopeChange} />
           <Actions
             revalidate={() => {
               revalidateFavorites();

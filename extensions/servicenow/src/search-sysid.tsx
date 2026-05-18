@@ -20,7 +20,7 @@ import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findSysID } from "./utils/snSnippets";
 import { ServiceNowClient } from "./utils/serviceNowClient";
-import { getInstanceBaseUrl } from "./utils/instanceUrl";
+import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { instanceLabel } from "./utils/instanceLabel";
 import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
 
@@ -111,7 +111,7 @@ export default function SearchSysId(props: LaunchProps) {
           setIsLoading(false);
         } else if (answer != null && answer[1]) {
           const table = answer[1].split("^")[0];
-          open(`${getInstanceBaseUrl(selectedInstance)}/${table}.do?sys_id=${sysId}`);
+          open(buildServiceNowUrl(selectedInstance.name, `${table}.do?sys_id=${sysId}`));
           popToRoot();
         } else {
           const label = instanceLabel(selectedInstance);

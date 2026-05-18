@@ -230,10 +230,8 @@
     "@raycast/api": "^1.104.17",
     "@raycast/utils": "^1.19.1",
     "date-fns": "^4.1.0",
-    "debug": "^4.4.3",
     "javascript-time-ago": "^2.6.4",
-    "lodash": "^4.18.1",
-    "node-fetch": "^3.3.2"
+    "lodash": "^4.18.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

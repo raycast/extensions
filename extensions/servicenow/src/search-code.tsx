@@ -15,9 +15,8 @@ import { useCachedState } from "@raycast/utils";
 
 import Actions from "./components/Actions";
 import SearchCodeResults from "./components/SearchCodeResults";
-import { DEFAULT_SEARCH_GROUP_SCOPE, mergeGroupOptions } from "./components/SearchGroupDropdown";
 import useInstances from "./hooks/useInstances";
-import useSearchGroups from "./hooks/useSearchGroups";
+import useSearchGroups, { DEFAULT_SEARCH_GROUP_SCOPE } from "./hooks/useSearchGroups";
 import { Instance } from "./types";
 import { instanceLabel } from "./utils/instanceLabel";
 import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
@@ -30,7 +29,6 @@ export default function SearchCode(props: LaunchProps) {
 
   const [groupScope, setGroupScope] = useCachedState<string>("search-code-group-scope", DEFAULT_SEARCH_GROUP_SCOPE);
   const { isLoading: isLoadingGroups, groups: fetchedGroups } = useSearchGroups(selectedInstance);
-  const groupOptions = mergeGroupOptions(fetchedGroups);
 
   useEffect(() => {
     if (isLoadingInstances) return;
@@ -104,7 +102,7 @@ export default function SearchCode(props: LaunchProps) {
         onChange={setGroupScope}
         isLoading={isLoadingGroups}
       >
-        {groupOptions.map((option) => (
+        {fetchedGroups.map((option) => (
           <Form.Dropdown.Item
             key={option.scope}
             title={option.label}

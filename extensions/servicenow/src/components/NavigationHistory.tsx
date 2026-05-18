@@ -14,6 +14,7 @@ import { groupBy } from "lodash";
 import useFavorites from "../hooks/useFavorites";
 import { getSectionTitle } from "../utils/getSectionTitle";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { instanceLabel } from "../utils/instanceLabel";
 import { useAuthHeader } from "../hooks/useAuthHeader";
 import { expandKeywords } from "../utils/expandKeywords";
@@ -124,7 +125,7 @@ export default function NavigationHistory() {
             >
               {sections[section].map((historyEntry) => {
                 const path = historyEntry.url.startsWith("/") ? historyEntry.url : `/${historyEntry.url}`;
-                const url = `${instanceUrl}${path}`;
+                const url = buildServiceNowUrl(instanceName, path);
                 const table = historyEntry.url.split(".do")[0];
                 const { icon: iconName, color: colorName } = getTableIconAndColor(table);
 

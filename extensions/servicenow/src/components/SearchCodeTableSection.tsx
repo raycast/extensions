@@ -4,17 +4,22 @@ import { memo, useRef } from "react";
 
 import Actions from "./Actions";
 import SearchCodeResultListItem from "./SearchCodeResultListItem";
+import SearchGroupSubmenu from "./SearchGroupSubmenu";
 
+import { SearchGroupOption } from "../hooks/useSearchGroups";
 import { CodeSearchTableResult } from "../types";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 function SearchCodeTableSection({
   active,
+  visible,
   instanceName,
   instanceUrl,
   authHeader,
   searchTerm,
   groupScope,
+  groups,
+  onGroupScopeChange,
   table,
   onComplete,
   isInFavorites,
@@ -23,13 +28,16 @@ function SearchCodeTableSection({
   removeFromFavorites,
 }: {
   active: boolean;
+  visible: boolean;
   instanceName: string;
   instanceUrl: string;
   authHeader: string;
   searchTerm: string;
   groupScope: string;
+  groups: SearchGroupOption[];
+  onGroupScopeChange: (scope: string) => void;
   table: string;
-  onComplete: () => void;
+  onComplete: (table: string, hits: { label: string; count: number } | null) => void;
   isInFavorites: (path: string) => string;
   revalidateFavorites: () => void;
   addUrlToFavorites: (title: string, url: string, groupId?: string, revalidate?: () => void) => void;
@@ -40,28 +48,31 @@ function SearchCodeTableSection({
     search_all_scopes: "true",
     current_app: groupScope,
     table,
-    limit: "100",
   });
 
   const url = `${instanceUrl}/api/sn_codesearch/code_search/search?${params.toString()}`;
 
   // Notify parent exactly once when the request completes (success or error) so it
-  // can advance the X/N progress counter.
+  // can advance the X/N progress counter and feed the table-filter dropdown.
   const reportedRef = useRef(false);
-  const reportComplete = () => {
+  const reportComplete = (hits: { label: string; count: number } | null) => {
     if (!reportedRef.current) {
       reportedRef.current = true;
-      onComplete();
+      onComplete(table, hits);
     }
   };
 
   const { data, revalidate } = useFetch(url, {
     headers: { Authorization: authHeader, Accept: "application/json" },
     execute: active,
-    onData: reportComplete,
+    onData: (mapped: CodeSearchTableResult[]) => {
+      const totalHits = mapped.reduce((sum, t) => sum + t.hits.length, 0);
+      const label = mapped[0]?.tableLabel ?? table;
+      reportComplete(totalHits > 0 ? { label, count: totalHits } : null);
+    },
     onError: (error) => {
       console.error(`code_search failed for table ${table}:`, error);
-      reportComplete();
+      reportComplete(null);
     },
     mapResult(response: { result?: CodeSearchTableResult | CodeSearchTableResult[] }) {
       // When `&table=<name>` is passed the API returns a single object; without it,
@@ -95,7 +106,7 @@ function SearchCodeTableSection({
     },
   });
 
-  if (!data || data.length === 0) return null;
+  if (!visible || !data || data.length === 0) return null;
 
   return (
     <>
@@ -120,6 +131,9 @@ function SearchCodeTableSection({
                 addUrlToFavorites={addUrlToFavorites}
                 removeFromFavorites={removeFromFavorites}
                 revalidateFavorites={revalidateFavorites}
+                groupScope={groupScope}
+                groups={groups}
+                onGroupScopeChange={onGroupScopeChange}
               />
             ))}
             <List.Item
@@ -136,6 +150,7 @@ function SearchCodeTableSection({
                     />
                     <Action.CopyToClipboard title="Copy URL" content={allResultsUrl} />
                   </ActionPanel.Section>
+                  <SearchGroupSubmenu groups={groups} value={groupScope} onChange={onGroupScopeChange} />
                   <Actions revalidate={revalidate} />
                 </ActionPanel>
               }

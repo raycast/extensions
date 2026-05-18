@@ -3,14 +3,13 @@ import { useCallback, useMemo } from "react";
 import { showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
-import fetch from "node-fetch";
 import crypto from "crypto";
 
 import { Favorite, FavoriteRecord, FavoritesResponse, Module } from "../types";
 import { extractPathAndParam } from "../utils/extractPathAndParam";
 import useInstances from "./useInstances";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
-import { getAuthHeader } from "../utils/auth";
+import { serviceNowFetchRaw } from "../utils/serviceNowFetch";
 import { useAuthHeader } from "./useAuthHeader";
 
 const useFavorites = () => {
@@ -106,14 +105,10 @@ const useFavorites = () => {
     const toast = await showToast({ style: Toast.Style.Animated, title: text.before });
     try {
       if (!selectedInstance) throw new Error("No instance selected");
-      const authorization = await getAuthHeader(selectedInstance);
       const response = await mutate(
-        fetch(`${instanceUrl}${request.endpoint}`, {
+        serviceNowFetchRaw(selectedInstance, request.endpoint, {
           method: request.method,
-          headers: {
-            Authorization: authorization,
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: request.body,
         }),
         {

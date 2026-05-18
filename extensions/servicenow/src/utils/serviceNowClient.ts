@@ -1,7 +1,6 @@
 import { showToast, Toast } from "@raycast/api";
 import { Instance } from "../types";
-import { getInstanceBaseUrl } from "./instanceUrl";
-import { getAuthHeader } from "./auth";
+import { serviceNowFetchRaw } from "./serviceNowFetch";
 
 export class ServiceNowClient {
   private instance: Instance;
@@ -17,17 +16,13 @@ export class ServiceNowClient {
   }
 
   async authenticate() {
-    const url = `${getInstanceBaseUrl(this.instance)}/sn_devstudio_/v1/get_publish_info`;
-
     try {
-      const authorization = await getAuthHeader(this.instance);
-      const response = await fetch(url, {
-        headers: {
-          Authorization: authorization,
-        },
-      });
+      const response = await serviceNowFetchRaw(this.instance, "/sn_devstudio_/v1/get_publish_info");
+      if (!response.ok) {
+        throw new Error(`Authentication request failed (${response.status})`);
+      }
 
-      const data = await response.json();
+      const data = (await response.json()) as { ck?: string };
       const cookies = response.headers.get("set-cookie");
 
       //extract cookies from response
@@ -60,30 +55,31 @@ export class ServiceNowClient {
         }
       }
 
+      if (!data.ck) throw new Error("Missing session token (ck) in authentication response");
+
       return {
         ck: data.ck,
         cookies: jsessionid + ";" + glide_user_route + ";" + glide_session_store + ";" + BIGipServerpool,
       };
     } catch (error) {
       console.error("Could not authenticate:", error);
-      showToast(
-        Toast.Style.Failure,
-        "Could not authenticate",
-        "This command requires admin access. Verify your credentials and permissions.",
-      );
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Could Not Authenticate",
+        message: "This command requires admin access. Verify your credentials and permissions.",
+      });
       return null;
     }
   }
 
   async startBackgroundScript(script: string, callback: (data: string) => void) {
     if (!this.sessionData) throw new Error("Not authenticated");
-    const url = `${getInstanceBaseUrl(this.instance)}/sys.scripts.do`;
-
     const body = { script: script, runscript: "Run script" };
 
     try {
-      const response = await fetch(url, {
+      const response = await serviceNowFetchRaw(this.instance, "/sys.scripts.do", {
         method: "POST",
+        noAuth: true,
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           Cookie: this.sessionData.cookies,

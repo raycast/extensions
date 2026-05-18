@@ -1,5 +1,4 @@
 import { LocalStorage } from "@raycast/api";
-import fetch from "node-fetch";
 
 import { Instance } from "../types";
 import { getInstanceBaseUrl } from "./instanceUrl";

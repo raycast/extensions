@@ -24,6 +24,10 @@
 ### Internals
 
 - Extracted the instance-lookup boilerplate shared by every no-view command into a single `resolveInstance` helper.
+- Introduced a unified `serviceNowFetch` / `serviceNowFetchRaw` helper used by the favorites and search-history mutations and by the admin background-script client, enforcing a consistent `response.ok` check and dropping the `node-fetch` dependency.
+- Routed two remaining ServiceNow URLs through `buildServiceNowUrl` so the **Open Mode** preference is honored consistently (Sys ID lookup result, navigation history actions, reference fields in search detail).
+- Removed the hard-coded fallback list of "OOB" code-search tables — Search Code now relies entirely on the `sn_codesearch_table` data returned by the instance, since the underlying `sn_codesearch` endpoint is unavailable anyway when the plugin is missing.
+- Removed the unused `node-fetch` and `debug` dependencies.
 
 ### UI Consistency
 

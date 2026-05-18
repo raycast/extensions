@@ -4,6 +4,8 @@ import { Instance } from "../types";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { useAuthHeader } from "./useAuthHeader";
 
+export const DEFAULT_SEARCH_GROUP_SCOPE = "sn_codesearch";
+
 export interface SearchGroupOption {
   sysId: string;
   scope: string;

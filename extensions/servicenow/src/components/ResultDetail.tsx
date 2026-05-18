@@ -9,6 +9,7 @@ import useFavorites from "../hooks/useFavorites";
 import FavoriteForm from "./FavoriteForm";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { instanceLabel } from "../utils/instanceLabel";
+import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 export default function ResultDetail({ result, fields }: { result: Record; fields: Field[] }) {
   const { commandName } = environment;
@@ -58,13 +59,13 @@ export default function ResultDetail({ result, fields }: { result: Record; field
                 );
 
               if (field.type == "reference") {
-                if (fieldData)
+                if (fieldData?.value && fieldData?.display)
                   return (
                     <Detail.Metadata.Link
                       key={field.name}
                       title={field.label}
                       text={fieldData.display}
-                      target={`${instanceUrl}/${field.reference}.do?sys_id=${fieldData.value}`}
+                      target={buildServiceNowUrl(instanceName, `${field.reference}.do?sys_id=${fieldData.value}`)}
                     />
                   );
                 else return <Detail.Metadata.Label key={field.name} title={field.label} text={""} />;

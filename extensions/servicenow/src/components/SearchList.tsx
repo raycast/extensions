@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { ActionPanel, Action, Icon, List, showToast, Toast, Color, LocalStorage, Keyboard } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
-import fetch from "node-fetch";
 import { filter } from "lodash";
 
 import SearchResults from "./SearchResults";
@@ -13,7 +12,7 @@ import { useAuthHeader } from "../hooks/useAuthHeader";
 import { HistoryResponse, HistoryResult, Instance } from "../types";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { instanceLabel } from "../utils/instanceLabel";
-import { getAuthHeader } from "../utils/auth";
+import { serviceNowFetchRaw } from "../utils/serviceNowFetch";
 
 export default function SearchList() {
   const {
@@ -60,14 +59,10 @@ export default function SearchList() {
     const toast = await showToast({ style: Toast.Style.Animated, title: text.before });
     try {
       if (!selectedInstance) throw new Error("No instance selected");
-      const authorization = await getAuthHeader(selectedInstance);
       const response = await mutate(
-        fetch(`${instanceUrl}${request.endpoint}`, {
+        serviceNowFetchRaw(selectedInstance, request.endpoint, {
           method: request.method,
-          headers: {
-            Authorization: authorization,
-            "Content-Type": "application/json",
-          },
+          headers: { "Content-Type": "application/json" },
           body: request.body,
         }),
         {

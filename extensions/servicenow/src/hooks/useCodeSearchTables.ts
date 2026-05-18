@@ -3,7 +3,6 @@ import { useFetch } from "@raycast/utils";
 import { Instance } from "../types";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { useAuthHeader } from "./useAuthHeader";
-import { FALLBACK_CODE_SEARCH_TABLES } from "../components/SearchGroupDropdown";
 
 interface TableRow {
   table: string;
@@ -36,6 +35,5 @@ export default function useCodeSearchTables(selectedInstance: Instance | undefin
     keepPreviousData: true,
   });
 
-  const tables = !searchGroupSysId ? FALLBACK_CODE_SEARCH_TABLES : (data ?? []);
-  return { isLoading: !!searchGroupSysId && isLoading, tables };
+  return { isLoading, tables: data ?? [] };
 }
