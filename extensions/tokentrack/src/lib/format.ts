@@ -51,10 +51,24 @@ export function formatNumber(value: number) {
   );
 }
 
+function isValidCurrencyCode(code: string): boolean {
+  if (!code || code.length !== 3) return false;
+  try {
+    new Intl.NumberFormat(undefined, { style: "currency", currency: code });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function safeCurrencyCode(currency: string): string {
+  return isValidCurrencyCode(currency) ? currency : "USD";
+}
+
 export function formatCurrency(value: number, currency: string) {
   const formatted = new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency: currency || "USD",
+    currency: safeCurrencyCode(currency),
     currencyDisplay: "narrowSymbol",
     maximumFractionDigits: value >= 10 ? 2 : 4,
   }).format(value);
@@ -65,7 +79,7 @@ export function formatCurrency(value: number, currency: string) {
 export function formatCurrencyMoney(value: number, currency: string) {
   const formatted = new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency: currency || "USD",
+    currency: safeCurrencyCode(currency),
     currencyDisplay: "narrowSymbol",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
