@@ -1,44 +1,22 @@
 # ServiceNow Extension Changelog
 
-## [OAuth, Flexible Instance URLs & New Admin Commands] - {PR_MERGE_DATE}
+## [OAuth, Windows Support & New Commands] - {PR_MERGE_DATE}
 
-- Added OAuth 2.0 (PKCE) as an alternative to Basic Auth, selectable per instance profile. Tokens refresh automatically; a **Sign In / Re-authenticate** action recovers profiles whose refresh token has expired. Auth failures are surfaced as a red exclamation accessory in **Manage Instance Profiles**.
-- Added support for FedRAMP instances (`*.servicenowservices.com`) and on-prem deployments. The **Instance URL** field now accepts a subdomain or a full URL.
-- Added a new **Cancel My Transactions** command to stop a runaway transaction (e.g. a stuck Background Script) and unlock your ServiceNow session without opening a new browser.
-- Added a new admin command, **Find Record References**, which lists every column across the instance that references a given record, with a one-click action to open the filtered list view.
-- Added one-click actions in the instance profile form to download the extension's update sets from ServiceNow Share: **ACLs for Non-Admin Users** (renamed from "Extension Update Set") and the new **Default OAuth Client**.
-- Renamed several commands to follow Raycast's `<verb> <noun>` convention: **Search** → **Search Text**, **Quick Search** → **Quick Search Text**, **Search Sys ID** → **Find Record by Sys ID**, **Search Resources** → **Search Developer Portal**, **Open Current Page in Instance** → **Open Current Page in Another Instance**. Command IDs are unchanged, so existing keyboard shortcuts keep working.
-- Removed the **Login to Instance** command. It passed Basic Auth credentials through the URL (visible in browser history and server logs)
-- Reworked **Search Code** to query the `sn_codesearch` endpoint once per table in the selected search group and render sections progressively as each response arrives, instead of one large request. This avoids the `ECONNRESET` errors that occurred against instances with many matching scripts.
+- Added OAuth 2.0 (PKCE) as an alternative to Basic Auth, selectable per instance profile. Tokens refresh automatically and a **Sign In / Re-authenticate** action recovers expired profiles; auth failures are flagged in **Manage Instance Profiles**.
+- Added Windows support. On macOS the extension keeps reading the frontmost browser tab via AppleScript; on Windows it falls back to the Raycast Browser Extension's `getTabs()` API.
+- Added support for FedRAMP (`*.servicenowservices.com`) and on-prem instances. The **Instance URL** field now accepts a subdomain or a full URL.
+- Added new commands: **Cancel My Transactions** (stop a runaway transaction and unlock a stuck session), **Find Record References** (list every column across the instance that references a record), and **Explore Records** (browse any table with search, pagination, and favorites — reachable from **Explore Tables** and **Find Record References**).
+- Added one-click actions in the instance profile form to download the extension's update sets from ServiceNow Share: **ACLs for Non-Admin Users** and the new **Default OAuth Client**.
+- Renamed several commands to follow Raycast's `<verb> <noun>` convention (e.g. **Search Text**, **Find Record by Sys ID**, **Search Developer Portal**, **Open Current Page in Another Instance**). Command IDs are unchanged, so existing keyboard shortcuts keep working.
+- Removed the **Login to Instance** command — it passed Basic Auth credentials through the URL (visible in browser history and server logs).
+- Reworked **Search Code** to query `sn_codesearch` once per table and render sections progressively as responses arrive, avoiding `ECONNRESET` errors against instances with many matching scripts.
 
 ### Fixes
 
-- Fix out-of-memory crash in **Explore Navigation Menu** on large instances by avoiding full-tree cloning per keystroke and throttling the search input.
-- Reduce peak memory usage in **Search Code** by no longer retaining the previous result set during revalidation.
+- Fix out-of-memory crash in **Explore Navigation Menu** on large instances and reduce peak memory in **Search Code** during revalidation.
 - Fix Edit Favorite form opening empty when invoked from search results, code search, navigation history, navigation menu and record details.
-- Strip paths from pasted **Instance URL** values (e.g. `https://acme.service-now.com/login.do` is now stored as `https://acme.service-now.com`) so generated links don't break.
-- Fix toast reading `containing undefined` when **Open Instance**, **Open Current Page in Another Instance**, or **Cancel My Transactions** is launched without an instance argument and no profile is selected.
-- Surface a toast (instead of crashing silently) in **Open All Instances** and **Open Current Page in Another Instance** when the stored instance list cannot be parsed.
-- Remove a duplicated query parameter in the **Explore Tables** request.
-
-### Internals
-
-- Extracted the instance-lookup boilerplate shared by every no-view command into a single `resolveInstance` helper.
-- Introduced a unified `serviceNowFetch` / `serviceNowFetchRaw` helper used by the favorites and search-history mutations and by the admin background-script client, enforcing a consistent `response.ok` check and dropping the `node-fetch` dependency.
-- Routed two remaining ServiceNow URLs through `buildServiceNowUrl` so the **Open Mode** preference is honored consistently (Sys ID lookup result, navigation history actions, reference fields in search detail).
-- Removed the hard-coded fallback list of "OOB" code-search tables — Search Code now relies entirely on the `sn_codesearch_table` data returned by the instance, since the underlying `sn_codesearch` endpoint is unavailable anyway when the plugin is missing.
-- Removed the unused `node-fetch` and `debug` dependencies.
-
-### UI Consistency
-
-- Standardized every `showToast` call site on the object form and switched caught errors to `showFailureToast`.
-- Normalized error toast titles to Title Case (`Could Not Fetch ...`, `Could Not Search ...`).
-- Aligned action names in **Manage Instance Profiles** (`Open in ServiceNow`, `Add Instance Profile`) with the rest of the extension and added the standard `Copy URL` shortcut in **Search Text**.
-- Made the empty-state copy in **Manage Instance Profiles** match the other commands.
-- Replaced the generic `The item is required` form-validation messages with field-specific ones (`Missing instance URL`, `Missing username`, `Missing password`).
-- Renamed the hook field `userName` to `currentUserName` to disambiguate it from `Instance.username` (the stored Basic-Auth credential).
-- Introduced an `instanceLabel(instance)` helper so every dropdown, section title, and breadcrumb resolves the alias/name choice the same way.
-- Added the shared **Manage Instance Profiles** / **Select Instance Profile** actions to the **Search Code**, **Find Record by Sys ID**, and **Find Record References** form ActionPanels so the ⌘M and ⌘I shortcuts work consistently across commands.
+- Strip paths from pasted **Instance URL** values so generated links don't break.
+- Surface a toast (instead of crashing silently) when an instance command is launched without a profile selected or the stored instance list cannot be parsed.
 
 ## [Fix] - 2025-05-14
 
