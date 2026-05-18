@@ -1,5 +1,11 @@
 # Bring Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Updated dependencies to latest versions
+- Added Windows platform support
+- Fixed toast notification getting stuck in loading state on network errors
+
 ## [Enhancements] - 2024-12-11
 
 - Updated the rendering logic of grid items to show non-added items only when the user enters a search term.
