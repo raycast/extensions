@@ -137,7 +137,7 @@ export default function SavedGames() {
       ]);
 
       const [pJson, oJson] = await Promise.all([
-        pRes.json(),
+        pRes.ok ? pRes.json() : Promise.resolve(null),
         oRes.ok ? oRes.json() : Promise.resolve(null),
       ]);
 
@@ -147,9 +147,14 @@ export default function SavedGames() {
       const priceEntries: Array<{ id?: string | number; deals?: Deal[] }> =
         Array.isArray(pJson)
           ? (pJson as Array<{ id?: string | number; deals?: Deal[] }>)
-          : Object.values(
-              pJson as Record<string, { id?: string | number; deals?: Deal[] }>,
-            );
+          : pJson && typeof pJson === "object"
+            ? Object.values(
+                pJson as Record<
+                  string,
+                  { id?: string | number; deals?: Deal[] }
+                >,
+              )
+            : [];
 
       priceEntries.forEach((it) => {
         if (it.id == null) return;
@@ -366,8 +371,25 @@ export default function SavedGames() {
 
   const removeGame = async (id: string) => {
     const newList = savedGames.filter((g) => g.id !== id);
+    const updatedSeenDrops = Object.fromEntries(
+      Object.entries(seenDrops).filter(([gameId]) => gameId !== id),
+    );
+    const updatedSeenPriceChanges = Object.fromEntries(
+      Object.entries(seenPriceChanges).filter(([gameId]) => gameId !== id),
+    );
+
     setSavedGames(newList);
-    await LocalStorage.setItem("saved_itad_games", JSON.stringify(newList));
+    setSeenDrops(updatedSeenDrops);
+    setSeenPriceChanges(updatedSeenPriceChanges);
+
+    await Promise.all([
+      LocalStorage.setItem("saved_itad_games", JSON.stringify(newList)),
+      LocalStorage.setItem("seen_drops", JSON.stringify(updatedSeenDrops)),
+      LocalStorage.setItem(
+        "seen_price_changes",
+        JSON.stringify(updatedSeenPriceChanges),
+      ),
+    ]);
     cache.remove(CACHE_KEY);
   };
 
