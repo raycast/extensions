@@ -136,7 +136,10 @@ export default function SavedGames() {
         ),
       ]);
 
-      const [pJson, oJson] = await Promise.all([pRes.json(), oRes.json()]);
+      const [pJson, oJson] = await Promise.all([
+        pRes.json(),
+        oRes.ok ? oRes.json() : Promise.resolve(null),
+      ]);
 
       const priceMap: Record<string, Deal[]> = {};
       const lastSeenPrices: Record<string, number> = {};
