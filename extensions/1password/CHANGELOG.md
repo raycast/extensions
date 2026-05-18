@@ -3,6 +3,7 @@
 ## [Bug Fix] - {PR_MERGE_DATE}
 
 - Reduce memory usage when loading large item lists by avoiding the full item payload until it is needed.
+- The item list now uses the summary payload, so username/email subtitles and username/email search are unavailable until full item details are fetched by an action.
 
 ## [Enhancements] - 2026-04-16
 
