@@ -19,11 +19,17 @@ type IssueDetailProps = {
 
 function resolveAuthenticatedImageUri(uri: string, baseUrl: string) {
   if (uri.startsWith("data:")) {
-    return uri;
+    return null;
   }
 
   if (uri.startsWith("http://") || uri.startsWith("https://")) {
     const url = new URL(uri);
+    const isAtlassianUrl = url.hostname === "api.atlassian.com" || url.hostname.endsWith(".atlassian.net");
+
+    if (!isAtlassianUrl) {
+      return null;
+    }
+
     const restPathIndex = url.pathname.indexOf("/rest/");
 
     if (baseUrl.includes("api.atlassian.com/ex/jira/") && restPathIndex >= 0) {
@@ -53,7 +59,12 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
       // Resolve all the image URLs to data URIs in the cached promise for better performance
       // Jira can return partial URLs or tenant URLs; OAuth requests must go through the API base.
       const resolvedDescription = await replaceAsync(description, /src="(.*?)"/g, async (_, uri) => {
-        const dataUri = await getAuthenticatedUri(resolveAuthenticatedImageUri(uri, baseUrl), "image/jpeg");
+        const authenticatedUri = resolveAuthenticatedImageUri(uri, baseUrl);
+        if (!authenticatedUri) {
+          return `src="${uri}"`;
+        }
+
+        const dataUri = await getAuthenticatedUri(authenticatedUri, "image/jpeg");
         return `src="${dataUri}"`;
       });
       issue.renderedFields.description = resolvedDescription;
