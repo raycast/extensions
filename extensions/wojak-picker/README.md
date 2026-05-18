@@ -26,8 +26,8 @@ Open Raycast and run `Search Wojaks`.
 
 ## Development Notes
 
-- Store users do not need to configure Supabase manually.
-- The extension uses baked-in Supabase defaults for store users.
+- Configure `Supabase URL` and `Supabase Anon Key` in the extension preferences before first use.
+- The extension reads from your configured Supabase project and bucket.
 - Search metadata is cached for 24 hours in Raycast LocalStorage.
 - Copied images are cached locally in Raycast support storage after first download.
 - Project maintenance scripts like scraping and Supabase migration are for repository maintenance only.
