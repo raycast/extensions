@@ -1,6 +1,6 @@
 # Game Scout Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-05-18
 
 ### Added
 
