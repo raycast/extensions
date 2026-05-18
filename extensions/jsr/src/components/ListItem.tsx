@@ -7,7 +7,7 @@ import { jsrUrls } from "@/lib/jsrUrls";
 
 import CopyActions from "@/components/CopyActions";
 import ItemDetails from "@/components/ItemDetails";
-import { VersionList } from "@/components/VersionList";
+import VersionList from "@/components/VersionList";
 import { useSearchContext } from "@/context/SearchContext";
 
 type ListItemProps = {

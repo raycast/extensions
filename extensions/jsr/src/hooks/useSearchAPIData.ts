@@ -4,6 +4,7 @@ import { useCallback, useRef } from "react";
 import { captureException, environment } from "@raycast/api";
 import { useFetch, useLocalStorage } from "@raycast/utils";
 
+import { onErrorCapture } from "@/lib/errors";
 import { jsrUrls } from "@/lib/jsrUrls";
 
 type SearchAPIData = {
@@ -118,9 +119,7 @@ export const useSearchAPIData = () => {
         void setValue({ ...data, cachedAt: Date.now() });
       }
     },
-    onError: (err) => {
-      captureException(err);
-    },
+    onError: onErrorCapture,
   });
 
   const refresh = useCallback(async () => {

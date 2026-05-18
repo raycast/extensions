@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 
-import { Action, ActionPanel, List, captureException, useNavigation } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Action, ActionPanel, List, useNavigation } from "@raycast/api";
 
 import { useStats } from "@/hooks/jsrApi";
 import { useJSRSearch } from "@/hooks/useJSRSearch";
@@ -20,10 +19,10 @@ const Search = ({ scope }: SearchProps) => {
   const [searchText, setSearchText] = useState("");
   const [isShowingDetails, setIsShowingDetails] = useState(false);
   const { push } = useNavigation();
-  const { data, isLoading, error, searchQueryURL } = useJSRSearch(searchText, scope);
+  const { data, isLoading, searchQueryURL } = useJSRSearch(searchText, scope);
   const { data: statsData, isLoading: statsIsLoading } = useStats(scope === null);
-  const { selectedPackageData, selectedPackageError, selectedPageLoading, setSelectedId } = useSelectedPackage();
-  const addExtraActions = !(selectedPageLoading || selectedPackageError || !selectedPackageData);
+  const { selectedPackageData, selectedPackageError, selectedPackageLoading, setSelectedId } = useSelectedPackage();
+  const addExtraActions = !(selectedPackageLoading || selectedPackageError || !selectedPackageData);
 
   const openScope = useCallback(
     (nextScope: string) => {
@@ -35,16 +34,6 @@ const Search = ({ scope }: SearchProps) => {
   const toggleDetails = useCallback(() => {
     setIsShowingDetails((state) => !state);
   }, []);
-
-  useEffect(() => {
-    if (error) {
-      captureException(error);
-      showFailureToast({
-        title: "Error fetching JSR search results",
-        message: error.message,
-      });
-    }
-  }, [error]);
 
   return (
     <SearchProvider

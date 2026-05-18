@@ -1,9 +1,8 @@
 import { formatDistanceToNow } from "date-fns";
-import { useEffect } from "react";
 
 import type { Color } from "@raycast/api";
-import { Detail, Icon, List, captureException, open } from "@raycast/api";
-import { getProgressIcon, showFailureToast } from "@raycast/utils";
+import { Detail, Icon, List, open } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
 
 import type { SearchResultDocument } from "@/types";
 
@@ -25,7 +24,7 @@ const ItemDetails = ({
 }) => {
   const ctx = useSearchContext();
   const icons = compatIcons(item);
-  const { data, isLoading, error } = usePackage(item);
+  const { data, isLoading } = usePackage(item);
 
   const { data: scopePackages, isLoading: scopePackagesIsLoading } = usePackages(item.scope);
   const { data: dependentsData, isLoading: dependentsIsLoading } = useDependents(isLoading ? null : (data ?? null));
@@ -33,16 +32,6 @@ const ItemDetails = ({
     isLoading ? null : (data ?? null),
     data?.latestVersion ?? null,
   );
-
-  useEffect(() => {
-    if (error) {
-      captureException(error);
-      showFailureToast({
-        title: "Error fetching JSR item details",
-        message: error.message,
-      });
-    }
-  }, [error]);
 
   return (
     <List.Item.Detail

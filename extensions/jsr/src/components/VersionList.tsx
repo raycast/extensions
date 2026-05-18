@@ -1,8 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
-import { useEffect } from "react";
 
-import { Action, ActionPanel, Color, Icon, List, captureException } from "@raycast/api";
-import { showFailureToast } from "@raycast/utils";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
 import type { NameAndScope } from "@/types";
 
@@ -10,18 +8,8 @@ import { jsrUrls } from "@/lib/jsrUrls";
 
 import { useVersions } from "@/hooks/jsrApi";
 
-export const VersionList = (props: NameAndScope) => {
-  const { error, data, isLoading } = useVersions(props);
-
-  useEffect(() => {
-    if (error) {
-      captureException(error);
-      showFailureToast({
-        title: "Error fetching JSR version data",
-        message: error.message,
-      });
-    }
-  }, [error]);
+const VersionList = (props: NameAndScope) => {
+  const { data, isLoading } = useVersions(props);
 
   return (
     <List isLoading={isLoading}>
@@ -67,3 +55,5 @@ export const VersionList = (props: NameAndScope) => {
     </List>
   );
 };
+
+export default VersionList;

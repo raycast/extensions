@@ -15,6 +15,7 @@ import type {
   WithKey,
 } from "@/types";
 
+import { onErrorCapture } from "@/lib/errors";
 import { jsrUrls } from "@/lib/jsrUrls";
 
 /**
@@ -79,7 +80,12 @@ export const useStats = (enabled = true) => {
  */
 export const usePackage = (item: NameAndScope | null) => {
   const url = item ? jsrUrls.api.package(item.scope, item.name) : "";
-  return useFetch<Package>(url, { execute: !!item });
+  return useFetch<Package>(url, {
+    execute: !!item,
+    keepPreviousData: true,
+    onError: onErrorCapture,
+    failureToastOptions: { title: "Error fetching JSR package details" },
+  });
 };
 
 /**
@@ -91,7 +97,10 @@ export const useVersions = (item: NameAndScope | null) => {
   const url = item ? jsrUrls.api.versions(item.scope, item.name) : "";
   return useFetch<ApiResults<VersionPackage> | VersionPackage[], VersionPackage[], VersionPackage[]>(url, {
     execute: !!item,
+    keepPreviousData: true,
     initialData: [] as VersionPackage[],
+    onError: onErrorCapture,
+    failureToastOptions: { title: "Error fetching JSR version data" },
     mapResult: (result) => {
       const items = Array.isArray(result) ? result : (result?.items ?? []);
       return { data: items };
@@ -106,7 +115,12 @@ export const useVersions = (item: NameAndScope | null) => {
  */
 export const useScore = (item: NameAndScope | null) => {
   const url = item ? jsrUrls.api.score(item.scope, item.name) : "";
-  return useFetch<PackageScore>(url, { execute: !!item });
+  return useFetch<PackageScore>(url, {
+    execute: !!item,
+    keepPreviousData: true,
+    onError: onErrorCapture,
+    failureToastOptions: { title: "Error fetching JSR package score" },
+  });
 };
 
 /**
@@ -118,9 +132,8 @@ export const useDependents = (item: NameAndScope | null) => {
   const url = item ? jsrUrls.api.dependents(item.scope, item.name) : "";
   return useFetch<ApiResults<WithKey<Dependent>>>(url, {
     execute: !!item,
-    onError(err) {
-      captureException(err);
-    },
+    keepPreviousData: true,
+    onError: onErrorCapture,
     mapResult: (result) => {
       return {
         data: {
@@ -149,9 +162,8 @@ export const useDependencies = (item: NameAndScope | null, version: string | nul
   const url = item && version ? jsrUrls.api.dependencies(item.scope, item.name, version) : "";
   return useFetch<Dependency[]>(url, {
     execute: !!item && !!version,
-    onError(err) {
-      captureException(err);
-    },
+    keepPreviousData: true,
+    onError: onErrorCapture,
     mapResult: (result) => {
       return {
         data: result.filter(
@@ -170,5 +182,9 @@ export const useDependencies = (item: NameAndScope | null, version: string | nul
  */
 export const usePackages = (scope: string) => {
   const url = jsrUrls.api.scopePackages(scope);
-  return useFetch<ApiResults<Package>>(url);
+  return useFetch<ApiResults<Package>>(url, {
+    keepPreviousData: true,
+    onError: onErrorCapture,
+    failureToastOptions: { title: "Error fetching JSR scope packages" },
+  });
 };

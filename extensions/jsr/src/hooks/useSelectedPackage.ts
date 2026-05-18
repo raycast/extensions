@@ -24,14 +24,14 @@ export const useSelectedPackage = () => {
   const {
     data: selectedPackageData,
     error: selectedPackageError,
-    isLoading: selectedPageLoading,
+    isLoading: selectedPackageLoading,
   } = usePackage(selectedPackage);
 
   return {
     selectedPackage,
     selectedPackageData,
     selectedPackageError,
-    selectedPageLoading,
+    selectedPackageLoading,
     setSelectedId,
   };
 };

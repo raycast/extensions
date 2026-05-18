@@ -5,6 +5,7 @@ import { useFetch } from "@raycast/utils";
 
 import type { ErrorResult, SearchResult, SearchResults } from "@/types";
 
+import { onErrorCapture } from "@/lib/errors";
 import { generateSearchBody } from "@/lib/searchBody";
 
 import { useQueryParser } from "@/hooks/useQueryParser";
@@ -32,6 +33,8 @@ export const useJSRSearch = (queryString: string, scoped: string | null) => {
     execute: !!apiData && !!triggerQuery && !!searchURL,
     keepPreviousData: true,
     initialData: [] as SearchResult[],
+    onError: onErrorCapture,
+    failureToastOptions: { title: "Error fetching JSR search results" },
     parseResponse: async (response) => {
       if (response.status === 401) {
         void refresh();
