@@ -6,7 +6,12 @@ import {
   listRepoMilestones,
   searchIssues,
 } from "./issues";
-import { listNotifications, readAllNotificationStatus, updateNotificationStatus } from "./notifications";
+import {
+  getUnreadNotificationCount,
+  listNotifications,
+  readAllNotificationStatus,
+  updateNotificationStatus,
+} from "./notifications";
 import { listRepositories, listUserRepositories } from "./repositories";
 
 export const api = {
@@ -19,6 +24,7 @@ export const api = {
     search: searchIssues,
   },
   notifications: {
+    countUnread: getUnreadNotificationCount,
     list: listNotifications,
     readAll: readAllNotificationStatus,
     updateStatus: updateNotificationStatus,

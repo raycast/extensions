@@ -20,6 +20,13 @@ export async function listNotifications(params: ListNotificationParams = {}): Pr
   return data ?? [];
 }
 
+export async function getUnreadNotificationCount(): Promise<number> {
+  const client = getClient();
+  const { data, error } = await client.GET("/notifications/new");
+  if (error) throw new Error("Failed to fetch unread notification count");
+  return data?.new ?? 0;
+}
+
 export type UpdateNotificationsParams = { id: string; toStatus: NotificationStatus };
 export async function updateNotificationStatus(params: UpdateNotificationsParams): Promise<void> {
   const client = getClient();

@@ -3,6 +3,7 @@ import { api } from "../api";
 import { NotificationStatus } from "../domain/notification";
 import type { NotificationThread } from "../types/api";
 import {
+  getUnreadNotificationCount,
   getNotifications,
   listUnreadNotifications,
   readAllNotifications,
@@ -13,6 +14,7 @@ vi.mock("../api", () => ({
   api: {
     notifications: {
       list: vi.fn(),
+      countUnread: vi.fn(),
       readAll: vi.fn(),
       updateStatus: vi.fn(),
     },
@@ -57,6 +59,13 @@ describe("notification services", () => {
 
     await expect(listUnreadNotifications()).resolves.toBe(items);
     expect(notificationApi.list).toHaveBeenCalledWith({ statusTypes: [NotificationStatus.Unread] });
+  });
+
+  it("gets the unread notification count", async () => {
+    notificationApi.countUnread.mockResolvedValue(37);
+
+    await expect(getUnreadNotificationCount()).resolves.toBe(37);
+    expect(notificationApi.countUnread).toHaveBeenCalledWith();
   });
 
   it("forwards notification status updates", async () => {

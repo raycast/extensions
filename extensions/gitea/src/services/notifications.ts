@@ -15,6 +15,10 @@ export async function listUnreadNotifications(): Promise<NotificationThread[]> {
   return api.notifications.list({ statusTypes: [NotificationStatus.Unread] });
 }
 
+export async function getUnreadNotificationCount(): Promise<number> {
+  return api.notifications.countUnread();
+}
+
 export async function updateNotificationStatus(params: UpdateNotificationsParams): Promise<void> {
   return api.notifications.updateStatus(params);
 }
