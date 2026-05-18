@@ -144,52 +144,9 @@ export const getZenSessionsPath = (): string => {
   return path.join(userDirectoryPath, getProfileName(userDirectoryPath), "zen-sessions.jsonlz4");
 };
 
-// Mozilla's mozLz40 format: 8-byte magic + 4-byte uncompressed size (LE) + LZ4 block data
-const MOZ_LZ4_MAGIC = Buffer.from([0x6d, 0x6f, 0x7a, 0x4c, 0x7a, 0x34, 0x30, 0x00]);
-
-function decompressMozLz4(data: Buffer): string {
-  if (!data.subarray(0, 8).equals(MOZ_LZ4_MAGIC)) {
-    throw new Error("Not a valid mozLz40 file");
-  }
-  const originalSize = data.readUInt32LE(8);
-  const output = Buffer.alloc(originalSize);
-  let sPos = 12;
-  let dPos = 0;
-  while (sPos < data.length) {
-    const token = data[sPos++];
-    let litLen = (token >>> 4) & 0xf;
-    if (litLen === 15) {
-      let extra: number;
-      do {
-        extra = data[sPos++];
-        litLen += extra;
-      } while (extra === 255);
-    }
-    data.copy(output, dPos, sPos, sPos + litLen);
-    dPos += litLen;
-    sPos += litLen;
-    if (sPos >= data.length) break;
-    const offset = data.readUInt16LE(sPos);
-    sPos += 2;
-    let matchLen = (token & 0xf) + 4;
-    if ((token & 0xf) === 15) {
-      let extra: number;
-      do {
-        extra = data[sPos++];
-        matchLen += extra;
-      } while (extra === 255);
-    }
-    let matchPos = dPos - offset;
-    for (let i = 0; i < matchLen; i++) {
-      output[dPos++] = output[matchPos++];
-    }
-  }
-  return output.toString("utf8");
-}
-
 export const readZenWorkspacesFromSession = (): WorkspaceModel[] => {
   const raw = fs.readFileSync(getZenSessionsPath());
-  const session: { spaces?: SessionSpace[] } = JSON.parse(decompressMozLz4(raw));
+  const session: { spaces?: SessionSpace[] } = decodeLZ4(raw);
   return (session.spaces ?? []).map((space, index) => ({
     uuid: space.uuid,
     name: space.name,
