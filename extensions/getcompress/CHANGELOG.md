@@ -1,6 +1,6 @@
 # GetCompress Changelog
 
-## Initial release - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Support opening files via GetCompress
 - Support quick compression
