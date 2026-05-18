@@ -7,14 +7,8 @@ import {
 import { compressSelectedFiles } from "./lib/run-command";
 import { readSharedData } from "./lib/shared-data";
 
-interface QuickCompressArguments {
-  preset?: string;
-  quality?: string;
-  outputFormat?: string;
-}
-
 export default async function Command(
-  props: LaunchProps<{ arguments: QuickCompressArguments }>,
+  props: LaunchProps<{ arguments: Arguments.QuickCompressFiles }>,
 ) {
   const { preset, quality, outputFormat } = props.arguments;
   const presetId = await resolvePresetId(preset);
