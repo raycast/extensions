@@ -32,6 +32,26 @@
       ]
     },
     {
+      "name": "search-code",
+      "title": "Search Code",
+      "description": "Search inside ServiceNow scripts (business rules, script includes, client scripts, UI scripts, etc.) using the Code Search API. Pass a term to jump straight to results, or open the form to enter one. Requires the sn_codesearch plugin in the instance.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "term",
+          "placeholder": "Term",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "instanceName",
+          "placeholder": "Instance URL or alias",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
       "name": "manage-instance-profiles",
       "title": "Manage Instance Profiles",
       "description": "Configure and manage profiles to connect to your ServiceNow instances.",

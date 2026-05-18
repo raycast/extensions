@@ -10,6 +10,7 @@ import InstanceForm from "./InstanceForm";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { useAuthHeader } from "../hooks/useAuthHeader";
+import { expandKeywords } from "../utils/expandKeywords";
 
 export default function Tables() {
   const {
@@ -114,7 +115,7 @@ export default function Tables() {
                 key={table.name}
                 title={table.label}
                 subtitle={table.name}
-                keywords={[table.super_class, ...table.name.split("_")]}
+                keywords={expandKeywords(table.super_class, table.name)}
                 accessories={accessories}
                 actions={
                   <ActionPanel>

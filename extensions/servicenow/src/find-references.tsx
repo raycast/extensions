@@ -23,6 +23,7 @@ import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { getURL } from "./utils/browserScripts";
 import { getInstanceBaseUrl, isServiceNowUrl } from "./utils/instanceUrl";
 import { extractRecordFromUrl } from "./utils/extractRecordFromUrl";
+import { expandKeywords } from "./utils/expandKeywords";
 
 type Reference = {
   table: string;
@@ -317,7 +318,7 @@ export default function FindReferences(props: LaunchProps) {
               key={`${ref.table}.${ref.column}.${idx}`}
               title={ref.table}
               subtitle={ref.column}
-              keywords={[ref.table, ref.column]}
+              keywords={expandKeywords(ref.table, ref.column)}
               accessories={[{ text: `${ref.count} record${ref.count === 1 ? "" : "s"}` }]}
               actions={
                 <ActionPanel>

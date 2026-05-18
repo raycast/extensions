@@ -15,6 +15,7 @@ import useFavorites from "../hooks/useFavorites";
 import { getSectionTitle } from "../utils/getSectionTitle";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { useAuthHeader } from "../hooks/useAuthHeader";
+import { expandKeywords } from "../utils/expandKeywords";
 
 export default function NavigationHistory() {
   const {
@@ -153,7 +154,7 @@ export default function NavigationHistory() {
                     icon={icon}
                     title={historyEntry.title}
                     subtitle={description}
-                    keywords={[historyEntry.title, description || "", ...table.split("_")]}
+                    keywords={expandKeywords(historyEntry.title, description, table)}
                     accessories={accessories}
                     actions={
                       <ActionPanel>
