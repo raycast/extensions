@@ -1,0 +1,69 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "wipet",
+  "title": "Wip.et",
+  "description": "Ship every day. Log done's and todos to your wip.et feed without leaving the keyboard. Pick projects with #-autocomplete, attach screenshots, post in one shortcut.",
+  "icon": "command-icon.png",
+  "author": "robimez",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "wip.et",
+    "todo",
+    "ship",
+    "shipped",
+    "streak",
+    "accountability",
+    "productivity",
+    "log",
+    "journal"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "post",
+      "title": "Ship It",
+      "subtitle": "wip.et",
+      "description": "Post a done or todo entry to your wip.et feed.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "Base URL of the wip.et API. Use https://s.wip.et unless you're self-hosting.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://s.wip.et"
+    },
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Generate one at https://wip.et/settings/api-keys (pick \"raycast\").",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^9.39.0",
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.39.0",
+    "react": "^19.0.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "develop": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
