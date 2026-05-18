@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-18
 
 - Fixed issue details failing to load when descriptions include absolute Jira attachment image URLs
 
