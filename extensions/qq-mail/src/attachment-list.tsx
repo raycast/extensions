@@ -109,7 +109,7 @@ export function AttachmentList({ folder, emailUid, emailSubject }: AttachmentLis
 
       for (const attachment of attachments) {
         const safeFilename = sanitizeFilename(attachment.filename);
-        const filePath = join(downloadsDir, safeFilename);
+        const filePath = await getUniqueFilename(downloadsDir, safeFilename);
         await writeFile(filePath, attachment.content);
       }
 
