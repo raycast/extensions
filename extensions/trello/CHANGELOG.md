@@ -1,6 +1,6 @@
 # Trello Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-18
 
 - Prevent the Create a Card form from crashing when board members cannot be loaded as a list.
 
