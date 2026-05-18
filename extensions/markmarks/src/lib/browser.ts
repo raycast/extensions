@@ -1,19 +1,45 @@
+import { getFrontmostApplication, open } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
 import { ActiveTab, SupportedBrowser } from "./types";
 
-const SUPPORTED_BROWSERS: SupportedBrowser[] = ["Safari", "Google Chrome", "Arc", "Dia"];
+const BROWSER_ALIASES: Record<string, SupportedBrowser> = {
+  Safari: "Safari",
+  "Google Chrome": "Google Chrome",
+  Arc: "Arc",
+  Dia: "Dia",
+  Zen: "Zen",
+  zen: "Zen",
+};
+
+const RAYCAST_APPS = new Set(["Raycast", "Raycast Beta"]);
 
 /**
  * Get the frontmost application name
  */
 async function getFrontmostApp(): Promise<string> {
+  const frontmostApplication = await getFrontmostApplication();
+  return frontmostApplication.name;
+}
+
+/**
+ * Get visible supported browsers, ordered by macOS process list order.
+ */
+async function getVisibleSupportedBrowsers(): Promise<SupportedBrowser[]> {
   const script = `
     tell application "System Events"
-      set frontApp to name of first application process whose frontmost is true
+      set visibleApps to name of every application process whose visible is true
     end tell
-    return frontApp
+    set AppleScript's text item delimiters to "|||"
+    set visibleAppsText to visibleApps as text
+    set AppleScript's text item delimiters to ""
+    return visibleAppsText
   `;
-  return await runAppleScript(script);
+  const result = await runAppleScript(script);
+
+  return result
+    .split("|||")
+    .map((appName) => getSupportedBrowser(appName.trim()))
+    .filter((browser): browser is SupportedBrowser => Boolean(browser));
 }
 
 /**
@@ -90,10 +116,78 @@ async function getDiaTab(): Promise<ActiveTab> {
 }
 
 /**
- * Check if the given app name is a supported browser
+ * Get the active tab from Zen
  */
-function isSupportedBrowser(appName: string): appName is SupportedBrowser {
-  return SUPPORTED_BROWSERS.includes(appName as SupportedBrowser);
+async function getZenTab(): Promise<ActiveTab> {
+  const script = `
+    tell application "System Events"
+      tell process "zen"
+        set tabTitle to value of attribute "AXTitle" of window 1
+        set tabURL to value of attribute "AXDocument" of window 1
+      end tell
+    end tell
+    return tabTitle & "|||" & tabURL
+  `;
+  const result = await runAppleScript(script);
+  const [title, url] = result.split("|||");
+  return { title: title.trim(), url: url.trim() };
+}
+
+/**
+ * Get the supported browser for the given app name
+ */
+function getSupportedBrowser(appName: string): SupportedBrowser | undefined {
+  return BROWSER_ALIASES[appName];
+}
+
+function isValidTab(tab: ActiveTab): boolean {
+  return Boolean(tab.title && tab.url);
+}
+
+async function getActiveTab(browser: SupportedBrowser): Promise<ActiveTab> {
+  switch (browser) {
+    case "Safari":
+      return await getSafariTab();
+    case "Google Chrome":
+      return await getChromeTab();
+    case "Arc":
+      return await getArcTab();
+    case "Dia":
+      return await getDiaTab();
+    case "Zen":
+      return await getZenTab();
+  }
+}
+
+async function getActiveTabIfAvailable(browser: SupportedBrowser): Promise<ActiveTab | undefined> {
+  try {
+    const tab = await getActiveTab(browser);
+    return isValidTab(tab) ? tab : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+export async function getActiveSupportedBrowser(): Promise<SupportedBrowser | undefined> {
+  const frontmostApp = await getFrontmostApp();
+  const frontmostBrowser = getSupportedBrowser(frontmostApp);
+
+  if (frontmostBrowser) {
+    return frontmostBrowser;
+  }
+
+  if (!RAYCAST_APPS.has(frontmostApp)) {
+    return undefined;
+  }
+
+  const visibleBrowsers = await getVisibleSupportedBrowsers().catch(() => []);
+  return visibleBrowsers.toReversed()[0];
+}
+
+export async function openUrlInActiveBrowser(url: string): Promise<SupportedBrowser | undefined> {
+  const browser = await getActiveSupportedBrowser();
+  await open(url, browser);
+  return browser;
 }
 
 /**
@@ -104,27 +198,26 @@ export async function getActiveTabFromFrontmostBrowser(): Promise<{
   browser: SupportedBrowser;
 } | null> {
   const frontmostApp = await getFrontmostApp();
+  const frontmostBrowser = getSupportedBrowser(frontmostApp);
 
-  if (!isSupportedBrowser(frontmostApp)) {
+  if (frontmostBrowser) {
+    const tab = await getActiveTabIfAvailable(frontmostBrowser);
+    return tab ? { tab, browser: frontmostBrowser } : null;
+  }
+
+  if (!RAYCAST_APPS.has(frontmostApp)) {
     return null;
   }
 
-  let tab: ActiveTab;
+  const visibleBrowsers = await getVisibleSupportedBrowsers().catch(() => []);
 
-  switch (frontmostApp) {
-    case "Safari":
-      tab = await getSafariTab();
-      break;
-    case "Google Chrome":
-      tab = await getChromeTab();
-      break;
-    case "Arc":
-      tab = await getArcTab();
-      break;
-    case "Dia":
-      tab = await getDiaTab();
-      break;
+  for (const browser of visibleBrowsers.toReversed()) {
+    const tab = await getActiveTabIfAvailable(browser);
+
+    if (tab) {
+      return { tab, browser };
+    }
   }
 
-  return { tab, browser: frontmostApp };
+  return null;
 }

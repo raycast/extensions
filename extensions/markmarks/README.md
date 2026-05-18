@@ -5,10 +5,10 @@ A Raycast extension that uses a markdown file as the persistence layer for your 
 ## Features
 
 - **Bookmarks** - Browse all your bookmarks organized by groups with website favicons
-- **New Bookmark** - Save the active tab from Safari, Chrome, Arc, or Dia
+- **New Bookmark** - Save the active tab from Safari, Chrome, Arc, Dia, or Zen
 - **Edit & Delete** - Modify or remove bookmarks directly from Raycast
 - **Move Between Groups** - Reorganize bookmarks by moving them to different groups
-- **Search** - Quick search across all bookmarks by title, URL, or description
+- **Search** - Quick fuzzy search across all bookmarks by title, URL, description, or group
 - **Hierarchical Groups** - Use markdown headings (h1-h6) to create nested groups
 
 ## Markdown File Format
@@ -49,7 +49,7 @@ Set the path to your markdown bookmarks file in the extension preferences:
 
 | Action | Shortcut |
 |--------|----------|
-| Open bookmark | Enter |
+| Open bookmark in active browser | Enter |
 | Copy URL | ⌘C |
 | Copy title | ⌘⇧C |
 | Edit bookmark | ⌘E |
@@ -66,8 +66,11 @@ The "New Bookmark" command can capture the active tab from:
 - Google Chrome
 - Arc
 - Dia
+- Zen
 
 The extension automatically detects which supported browser is frontmost.
+
+When opening a bookmark from the list, MarkMarks uses the detected active browser instead of the system default browser when possible.
 
 ## Development
 
