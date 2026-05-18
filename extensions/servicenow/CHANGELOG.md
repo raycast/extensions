@@ -9,9 +9,12 @@
 - Added one-click actions in the instance profile form to download the extension's update sets from ServiceNow Share: **ACLs for Non-Admin Users** (renamed from "Extension Update Set") and the new **Default OAuth Client**.
 - Renamed several commands to follow Raycast's `<verb> <noun>` convention: **Search** → **Search Text**, **Quick Search** → **Quick Search Text**, **Search Sys ID** → **Find Record by Sys ID**, **Search Resources** → **Search Developer Portal**, **Open Current Page in Instance** → **Open Current Page in Another Instance**. Command IDs are unchanged, so existing keyboard shortcuts keep working.
 - Removed the **Login to Instance** command. It passed Basic Auth credentials through the URL (visible in browser history and server logs)
+- Reworked **Search Code** to query the `sn_codesearch` endpoint once per table in the selected search group and render sections progressively as each response arrives, instead of one large request. This avoids the `ECONNRESET` errors that occurred against instances with many matching scripts.
 
 ### Fixes
 
+- Fix out-of-memory crash in **Explore Navigation Menu** on large instances by avoiding full-tree cloning per keystroke and throttling the search input.
+- Reduce peak memory usage in **Search Code** by no longer retaining the previous result set during revalidation.
 - Fix Edit Favorite form opening empty when invoked from search results, code search, navigation history, navigation menu and record details.
 - Strip paths from pasted **Instance URL** values (e.g. `https://acme.service-now.com/login.do` is now stored as `https://acme.service-now.com`) so generated links don't break.
 

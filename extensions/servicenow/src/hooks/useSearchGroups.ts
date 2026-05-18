@@ -5,6 +5,7 @@ import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { useAuthHeader } from "./useAuthHeader";
 
 export interface SearchGroupOption {
+  sysId: string;
   scope: string;
   label: string;
 }
@@ -42,7 +43,7 @@ export default function useSearchGroups(selectedInstance: Instance | undefined) 
             const dotIndex = g.name.indexOf(".");
             if (dotIndex <= 0) return null;
             const scope = g.name.slice(0, dotIndex);
-            return { scope, label: g.name };
+            return { sysId: g.sys_id, scope, label: g.name };
           })
           .filter((g): g is SearchGroupOption => g !== null);
         return { data: groups };

@@ -17,6 +17,29 @@ const compareInstances = (a: Instance, b: Instance): number => {
   return nameA.localeCompare(nameB);
 };
 
+const TRANSIENT_NETWORK_CODES = new Set([
+  "ECONNRESET",
+  "ETIMEDOUT",
+  "ECONNREFUSED",
+  "ENOTFOUND",
+  "EAI_AGAIN",
+  "ECONNABORTED",
+  "EHOSTUNREACH",
+  "ENETUNREACH",
+]);
+
+// True when the error is a network blip or a non-JSON body (e.g. HTML login/maintenance
+// page). These should surface as a toast but must NOT mark the instance as having a
+// credential failure — that state blocks the UI and requires the user to re-authenticate.
+const isTransientError = (error: unknown): boolean => {
+  if (error instanceof SyntaxError) return true;
+  if (typeof error === "object" && error !== null && "code" in error) {
+    const code = (error as { code: unknown }).code;
+    if (typeof code === "string" && TRANSIENT_NETWORK_CODES.has(code)) return true;
+  }
+  return false;
+};
+
 export default function useInstances() {
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
   const [userId, setUserId] = useCachedState<string>("user-id");
@@ -64,13 +87,27 @@ export default function useInstances() {
           method: "GET",
           headers: {
             Authorization: authorization,
+            Accept: "application/json",
           },
         });
 
-        const jsonData = (await response.json()) as {
+        let jsonData: {
           result?: { user_sys_id?: string; user_name?: string };
           error?: { message: string };
         };
+        try {
+          jsonData = (await response.json()) as typeof jsonData;
+        } catch (parseError) {
+          // Non-JSON body — usually an HTML login or maintenance page. Treat as
+          // transient (no persisted authError) so the instance isn't flagged as broken.
+          console.error(parseError);
+          showToast({
+            style: Toast.Style.Failure,
+            title: `Could not connect to ${instanceLabel}`,
+            message: `Unexpected response (HTTP ${response.status})`,
+          });
+          return undefined;
+        }
 
         if (!jsonData.result?.user_sys_id) {
           const message = jsonData.error?.message || `HTTP ${response.status}`;
@@ -79,8 +116,10 @@ export default function useInstances() {
             title: `Could not connect to ${instanceLabel}`,
             message,
           });
-          await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
-          await mutate();
+          if (response.status === 401 || response.status === 403) {
+            await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
+            await mutate();
+          }
           return undefined;
         }
 
@@ -99,8 +138,10 @@ export default function useInstances() {
           title: `Could not connect to ${instanceLabel}`,
           message,
         });
-        await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
-        await mutate();
+        if (!isTransientError(error)) {
+          await persistInstance({ ...selectedInstance, authError: message, authErrorAt: Date.now() });
+          await mutate();
+        }
       }
     };
     fetchUserId().then((result) => {

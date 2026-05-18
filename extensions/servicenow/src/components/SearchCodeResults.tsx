@@ -1,23 +1,37 @@
-import { useEffect, useState } from "react";
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
-import { useCachedState, useFetch } from "@raycast/utils";
-import { filter, sumBy } from "lodash";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 
 import Actions from "./Actions";
-import SearchCodeResultListItem from "./SearchCodeResultListItem";
+import SearchCodeTableSection from "./SearchCodeTableSection";
 import SearchGroupDropdown, { DEFAULT_SEARCH_GROUP_SCOPE } from "./SearchGroupDropdown";
 
 import useInstances from "../hooks/useInstances";
 import useSearchGroups from "../hooks/useSearchGroups";
+import useCodeSearchTables from "../hooks/useCodeSearchTables";
 import InstanceForm from "./InstanceForm";
-import { CodeSearchResponse, CodeSearchTableResult } from "../types";
 import useFavorites from "../hooks/useFavorites";
-import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function SearchCodeResults({ searchTerm }: { searchTerm: string }) {
-  const { isInFavorites, revalidateFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
+  const favorites = useFavorites();
+  // useFavorites returns fresh function references on every render (the inner
+  // functions aren't useCallback-wrapped). Stabilise them via a ref + stable
+  // callbacks so React.memo on SearchCodeTableSection actually skips re-renders.
+  const favoritesRef = useRef(favorites);
+  favoritesRef.current = favorites;
+  const isInFavorites = useCallback((path: string) => favoritesRef.current.isInFavorites(path), []);
+  const revalidateFavorites = useCallback(() => favoritesRef.current.revalidateFavorites(), []);
+  const addUrlToFavorites = useCallback<typeof favorites.addUrlToFavorites>(
+    (...args) => favoritesRef.current.addUrlToFavorites(...args),
+    [],
+  );
+  const removeFromFavorites = useCallback<typeof favorites.removeFromFavorites>(
+    (...args) => favoritesRef.current.removeFromFavorites(...args),
+    [],
+  );
+
   const { addInstance, mutate: mutateInstances, selectedInstance } = useInstances();
   const command = "Search Code";
 
@@ -30,59 +44,78 @@ export default function SearchCodeResults({ searchTerm }: { searchTerm: string }
   const [groupScope, setGroupScope] = useCachedState<string>("search-code-group-scope", DEFAULT_SEARCH_GROUP_SCOPE);
   const { isLoading: isLoadingGroups, groups: fetchedGroups } = useSearchGroups(selectedInstance);
 
-  const codeSearchParams = new URLSearchParams({
-    term: searchTerm,
-    search_all_scopes: "true",
-    current_app: groupScope,
-    limit: "500",
-  });
+  const selectedGroupSysId = fetchedGroups.find((g) => g.scope === groupScope)?.sysId ?? "";
+  const { isLoading: isLoadingTables, tables } = useCodeSearchTables(selectedInstance, selectedGroupSysId);
 
-  const { isLoading, data, error, revalidate } = useFetch(
-    `${instanceUrl}/api/sn_codesearch/code_search/search?${codeSearchParams.toString()}`,
-    {
-      headers: authHeader
-        ? {
-            Authorization: authHeader,
-            Accept: "application/json",
-          }
-        : undefined,
-      execute: !!selectedInstance && !!authHeader && !!searchTerm,
+  // The sn_codesearch API has no native pagination, so we fan out one request per
+  // table in the selected search group (mirroring SN-Utils) by rendering a child
+  // component per table. We cap concurrent in-flight requests with a sliding
+  // window — 21 simultaneous responses with full match context blew the Raycast
+  // worker's heap limit.
+  const CONCURRENCY = 3;
+  const [tablesCompleted, setTablesCompleted] = useState(0);
+  const [maxActiveIndex, setMaxActiveIndex] = useState(CONCURRENCY);
+  const ready =
+    !isLoadingGroups && !isLoadingTables && !!selectedInstance && !!authHeader && !!searchTerm && tables.length > 0;
 
-      onError: (error) => {
-        console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch code results", error.message);
-      },
+  // Reset the progress counter and the active window when the query changes so a
+  // new run starts at 0. Depend on `tables.length` rather than `tables` itself —
+  // useFetch reassigns the array reference whenever its cached state syncs, which
+  // would otherwise reset the counter on every render and freeze us at "1/N".
+  useEffect(() => {
+    setTablesCompleted(0);
+    setMaxActiveIndex(CONCURRENCY);
+  }, [searchTerm, groupScope, tables.length]);
 
-      mapResult(response: CodeSearchResponse) {
-        const data = filter(response.result ?? [], (r) => (r.hits?.length ?? 0) > 0);
-        return { data };
-      },
-      keepPreviousData: true,
-    },
-  );
+  const onTableComplete = useCallback(() => {
+    setTablesCompleted((prev) => prev + 1);
+    setMaxActiveIndex((prev) => prev + 1);
+  }, []);
+
+  const isSearching = isLoadingGroups || isLoadingTables || (ready && tablesCompleted < tables.length);
+  const displayProgress = Math.min(tablesCompleted + 1, tables.length);
 
   useEffect(() => {
-    if (!selectedInstance || error) {
+    if (!selectedInstance) {
       setNavigationTitle(command);
       return;
     }
 
     const aliasOrName = alias ? alias : instanceName;
 
-    if (isLoading) {
-      setNavigationTitle(`${command} > ${aliasOrName} > Loading results for ${searchTerm}...`);
+    if (isLoadingGroups || isLoadingTables) {
+      setNavigationTitle(`${command} > ${aliasOrName} > Discovering tables...`);
       return;
     }
-    const count = sumBy(data, (r) => r.hits.length);
-    if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for ${searchTerm}`);
-    else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for ${searchTerm}`);
-  }, [selectedInstance, error, isLoading, data, searchTerm, alias, instanceName]);
+
+    if (isSearching) {
+      const progress = tables.length > 0 ? ` ${displayProgress}/${tables.length}` : "";
+      setNavigationTitle(`${command} > ${aliasOrName} > Searching${progress} for ${searchTerm}...`);
+      return;
+    }
+    setNavigationTitle(`${command} > ${aliasOrName} > ${tablesCompleted} tables scanned for ${searchTerm}`);
+  }, [
+    selectedInstance,
+    isSearching,
+    isLoadingGroups,
+    isLoadingTables,
+    tablesCompleted,
+    tables.length,
+    displayProgress,
+    searchTerm,
+    alias,
+    instanceName,
+  ]);
+
+  // Used as React keys so children unmount/remount cleanly when the query changes,
+  // ensuring each useFetch fires fresh against the new term/group.
+  const runKey = `${searchTerm}|${groupScope}`;
 
   return (
     <List
       navigationTitle={navigationTitle}
       searchBarPlaceholder="Filter by script name or table..."
-      isLoading={isLoading}
+      isLoading={isSearching}
       searchBarAccessory={
         <SearchGroupDropdown
           groups={fetchedGroups}
@@ -93,72 +126,51 @@ export default function SearchCodeResults({ searchTerm }: { searchTerm: string }
       }
     >
       {selectedInstance ? (
-        error ? (
-          <List.EmptyView
-            icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
-            title="Could Not Fetch Results"
-            description="Check that the sn_codesearch plugin is enabled in the instance, then press ⏎ to refresh"
-            actions={
-              <ActionPanel>
-                <Actions revalidate={revalidate} />
-              </ActionPanel>
-            }
-          />
-        ) : data?.length && data.length > 0 ? (
-          data.map((tableResult: CodeSearchTableResult, index: number) => {
-            const className = tableResult.recordType || tableResult.hits[0]?.className || "";
-            const sysIds = tableResult.hits.map((h) => h.sysId).join(",");
-            const allResultsUrl = buildServiceNowUrl(
-              instanceName,
-              `${className}_list.do?sysparm_query=sys_idIN${sysIds}`,
-            );
-            return (
-              <List.Section
-                key={`${tableResult.tableLabel}_${index}`}
-                title={tableResult.tableLabel}
-                subtitle={`${tableResult.hits.length} ${tableResult.hits.length == 1 ? "hit" : "hits"}`}
-              >
-                {tableResult.hits.map((hit) => (
-                  <SearchCodeResultListItem
-                    key={hit.sysId}
-                    hit={hit}
-                    tableLabel={tableResult.tableLabel}
-                    revalidateSearchResults={revalidate}
-                    favoriteId={isInFavorites(`/${hit.className}.do?sys_id=${hit.sysId}`)}
-                    addUrlToFavorites={addUrlToFavorites}
-                    removeFromFavorites={removeFromFavorites}
-                    revalidateFavorites={revalidateFavorites}
-                  />
-                ))}
-                <List.Item
-                  key={`${tableResult.tableLabel}-all`}
-                  icon={{ source: Icon.MagnifyingGlass, tintColor: Color.SecondaryText }}
-                  title={`View all ${tableResult.tableLabel} matches`}
-                  actions={
-                    <ActionPanel>
-                      <ActionPanel.Section title={`View all ${tableResult.tableLabel} matches`}>
-                        <Action.OpenInBrowser
-                          title="Open in ServiceNow"
-                          url={allResultsUrl}
-                          icon={{ source: "servicenow.svg" }}
-                        />
-                        <Action.CopyToClipboard title="Copy URL" content={allResultsUrl} />
-                      </ActionPanel.Section>
-                      <Actions revalidate={revalidate} />
-                    </ActionPanel>
-                  }
-                />
-              </List.Section>
-            );
-          })
+        ready ? (
+          <>
+            {tables.map((table, i) => (
+              <SearchCodeTableSection
+                key={`${runKey}|${table}`}
+                active={i < maxActiveIndex}
+                instanceName={instanceName}
+                instanceUrl={instanceUrl}
+                authHeader={authHeader!}
+                searchTerm={searchTerm}
+                groupScope={groupScope}
+                table={table}
+                onComplete={onTableComplete}
+                isInFavorites={isInFavorites}
+                revalidateFavorites={revalidateFavorites}
+                addUrlToFavorites={addUrlToFavorites}
+                removeFromFavorites={removeFromFavorites}
+              />
+            ))}
+            {isSearching && tablesCompleted === 0 && (
+              <List.EmptyView
+                icon={{ source: Icon.MagnifyingGlass, tintColor: Color.SecondaryText }}
+                title="Searching..."
+                description={`Scanning ${displayProgress}/${tables.length} tables`}
+              />
+            )}
+            {!isSearching && tablesCompleted > 0 && (
+              // When the search has finished but no table produced hits, the List has
+              // no <List.Section> children. Render an empty-state placeholder so the
+              // user sees "No Results" instead of Raycast's default empty view.
+              <List.EmptyView
+                title="No Results"
+                actions={
+                  <ActionPanel>
+                    <Actions revalidate={() => undefined} />
+                  </ActionPanel>
+                }
+              />
+            )}
+          </>
         ) : (
           <List.EmptyView
-            title="No Results"
-            actions={
-              <ActionPanel>
-                <Actions revalidate={revalidate} />
-              </ActionPanel>
-            }
+            icon={{ source: Icon.MagnifyingGlass, tintColor: Color.SecondaryText }}
+            title="Searching..."
+            description="Discovering tables"
           />
         )
       ) : (

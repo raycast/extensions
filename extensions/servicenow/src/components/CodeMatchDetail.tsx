@@ -1,7 +1,6 @@
 import { Action, ActionPanel, Detail, Keyboard } from "@raycast/api";
 
 import { CodeSearchHit } from "../types";
-import useInstances from "../hooks/useInstances";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 
 function escapeBackticks(text: string): string {
@@ -10,8 +9,7 @@ function escapeBackticks(text: string): string {
 
 function fenceLanguage(field: string): string {
   const f = field.toLowerCase();
-  if (f.includes("html") || f.includes("template") || f === "body" || f === "message")
-    return "html";
+  if (f.includes("html") || f.includes("template") || f === "body" || f === "message") return "html";
   if (f.includes("css") || f.includes("style")) return "css";
   if (f.includes("xml")) return "xml";
   if (f.includes("json")) return "json";
@@ -52,10 +50,17 @@ function buildMarkdown(hit: CodeSearchHit, tableLabel: string): string {
   return lines.join("\n");
 }
 
-export default function CodeMatchDetail({ hit, tableLabel }: { hit: CodeSearchHit; tableLabel: string }) {
-  const { selectedInstance } = useInstances();
+export default function CodeMatchDetail({
+  hit,
+  tableLabel,
+  instanceName,
+}: {
+  hit: CodeSearchHit;
+  tableLabel: string;
+  instanceName: string;
+}) {
   const recordUrl = `/${hit.className}.do?sys_id=${hit.sysId}`;
-  const url = buildServiceNowUrl(selectedInstance?.name || "", recordUrl);
+  const url = buildServiceNowUrl(instanceName, recordUrl);
 
   return (
     <Detail

@@ -4,6 +4,18 @@ import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToa
 import { useFetch } from "@raycast/utils";
 
 import { NavigationMenuResponse, Instance, Module } from "../types";
+
+type IndexedModule = Module & { _titleLc: string; modules?: IndexedModule[] };
+
+const annotate = (modules?: Module[]): IndexedModule[] | undefined => {
+  if (!modules) return undefined;
+  const out: IndexedModule[] = new Array(modules.length);
+  for (let i = 0; i < modules.length; i++) {
+    const m = modules[i];
+    out[i] = { ...m, _titleLc: (m.title ?? "").toLowerCase(), modules: annotate(m.modules) };
+  }
+  return out;
+};
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
@@ -57,9 +69,8 @@ export default function NavigationMenu(props: { groupId?: string }) {
         if (response && response.result && response.result.length === 0) {
           throw new Error("Could not fetch menu entries");
         }
-        return { data: response.result };
+        return { data: annotate(response.result) ?? [] };
       },
-      keepPreviousData: true,
     },
   );
 
@@ -84,27 +95,54 @@ export default function NavigationMenu(props: { groupId?: string }) {
     return result;
   }, [data]);
 
-  const recursiveFilter = (modules: Module[], terms: string[], keywords: string[]): Module[] => {
-    return modules
-      .map((module) => {
-        const newKeywords = module.title ? [...keywords, module.title.toLowerCase()] : keywords;
-        const matches = terms.every((term) => newKeywords.some((string) => string.includes(term.toLowerCase())));
-
-        const filteredModules = module.modules ? recursiveFilter(module.modules, terms, newKeywords) : [];
-        if (matches || filteredModules.length > 0) {
-          return {
-            ...module,
-            modules: filteredModules,
-          };
-        }
-      })
-      .filter((favorite) => favorite != undefined);
-  };
-
   const filteredData = useMemo(() => {
-    if (searchTerm === "") return filterByGroup;
-    const terms = searchTerm.split(" ");
-    return filterByGroup ? recursiveFilter(filterByGroup, terms, []) : [];
+    if (!filterByGroup) return [];
+    const term = searchTerm.trim().toLowerCase();
+    if (term === "") return filterByGroup;
+    const terms = term.split(" ").filter(Boolean);
+
+    const walk = (modules: IndexedModule[], pathMatches: boolean[]): IndexedModule[] | null => {
+      let kept: IndexedModule[] | null = null;
+
+      for (let i = 0; i < modules.length; i++) {
+        const m = modules[i];
+        const nextPath = pathMatches.slice();
+        for (let t = 0; t < terms.length; t++) {
+          if (!nextPath[t] && m._titleLc.includes(terms[t])) nextPath[t] = true;
+        }
+        const selfFullMatch = nextPath.every(Boolean);
+
+        if (!m.modules || m.modules.length === 0) {
+          if (selfFullMatch) {
+            if (kept) kept.push(m);
+          } else if (!kept) {
+            kept = modules.slice(0, i);
+          }
+          continue;
+        }
+
+        if (selfFullMatch) {
+          if (kept) kept.push(m);
+          continue;
+        }
+
+        const childResult = walk(m.modules, nextPath);
+        if (childResult === null) {
+          if (!kept) kept = modules.slice(0, i);
+        } else if (childResult === m.modules) {
+          if (kept) kept.push(m);
+        } else {
+          if (!kept) kept = modules.slice(0, i);
+          kept.push({ ...m, modules: childResult });
+        }
+      }
+
+      if (kept === null) return modules;
+      return kept.length > 0 ? kept : null;
+    };
+
+    const result = walk(filterByGroup as IndexedModule[], new Array(terms.length).fill(false));
+    return result ?? [];
   }, [filterByGroup, searchTerm]);
 
   const onInstanceChange = (newValue: string) => {
@@ -339,12 +377,16 @@ function ModuleItem(props: {
       tooltip: "Favorite",
     });
   }
+  const keywords = useMemo(
+    () => `${group} ${section} ${module.title}`.split(" ").filter(Boolean),
+    [group, section, module.title],
+  );
   return (
     <List.Item
       icon={icon}
       title={module.title}
       accessories={accessories}
-      keywords={[...group.split(" "), ...section.split(" "), ...module.title.split(" ")]}
+      keywords={keywords}
       actions={
         <ActionPanel>
           <ActionPanel.Section title={module.title}>

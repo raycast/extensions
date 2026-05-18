@@ -25,7 +25,7 @@ const tableIconColorMap = {
   sys_ui_action: { icon: "Mouse", color: "Purple" },
   sys_ui_policy: { icon: "Shield", color: "Purple" },
   sys_ui_page: { icon: "Window", color: "Magenta" },
-  sys_ui_macro: { icon: "WindowList", color: "Magenta" },
+  sys_ui_macro: { icon: "AppWindowList", color: "Magenta" },
   sys_ui_style: { icon: "Brush", color: "Purple" },
   sys_script: { icon: "Code", color: "Yellow" },
   sysevent_in_email_action: { icon: "Envelope", color: "Green" },
