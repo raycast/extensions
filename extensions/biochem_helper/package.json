@@ -1,0 +1,45 @@
+{
+  "name": "biochem_helper",
+  "version": "1.0.0",
+  "private": false,
+  "icon": "extension-icon.png",
+  "description": "Amino acid lookup for biochemistry",
+  "main": "src/lookup.tsx",
+  "scripts": {
+      "dev": "npx @raycast/api@latest develop",
+      "build": "npx @raycast/api@latest build",
+      "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "1.103.8",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+
+  "title": "Biochem",
+  "icon": "extension-icon.png",
+  "author": "filippo135",
+  "platforms": ["macOS"],
+  "categories": ["Productivity"],
+  "license": "MIT",
+
+  "commands": [
+    {
+      "name": "lookup",
+      "title": "Amino Acid Lookup Tool",
+      "subtitle": "Search by name / code / codon",
+      "description": "Quick info on amino acids: codes, codons, pKa, pI.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "query",
+          "type": "text",
+          "placeholder": "1 or 3 letter code, codon, name..."
+        }
+      ]
+    }
+  ]
+}
