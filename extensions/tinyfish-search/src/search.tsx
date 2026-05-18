@@ -140,6 +140,7 @@ export default function Command(
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail
       searchBarPlaceholder="Search with TinyFish..."
       onSearchTextChange={setQuery}
       throttle
