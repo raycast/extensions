@@ -1,6 +1,6 @@
 # MarkMarks Changelog
 
-## [1.1.0] - 2026-01-20
+## [1.1.0] - {PR_MERGE_DATE}
 
 - Add Dia browser support
 - Add Zen browser support

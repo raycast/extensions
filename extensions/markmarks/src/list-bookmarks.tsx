@@ -109,7 +109,10 @@ export default function ListBookmarks() {
 
   const handleOpen = async (bookmark: BookmarkWithGroup) => {
     try {
-      await openUrlInActiveBrowser(bookmark.url);
+      const browser = await openUrlInActiveBrowser(bookmark.url);
+      if (!browser) {
+        showToast({ style: Toast.Style.Success, title: "Opened in system default browser" });
+      }
     } catch (error) {
       showToast({
         style: Toast.Style.Failure,

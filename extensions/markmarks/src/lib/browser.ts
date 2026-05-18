@@ -133,6 +133,10 @@ async function getZenTab(): Promise<ActiveTab> {
   return { title: title.trim(), url: url.trim() };
 }
 
+function isZenAccessibilityError(error: unknown): boolean {
+  return String(error).toLowerCase().includes("not allowed assistive access");
+}
+
 /**
  * Get the supported browser for the given app name
  */
@@ -159,11 +163,18 @@ async function getActiveTab(browser: SupportedBrowser): Promise<ActiveTab> {
   }
 }
 
-async function getActiveTabIfAvailable(browser: SupportedBrowser): Promise<ActiveTab | undefined> {
+async function getActiveTabIfAvailable(
+  browser: SupportedBrowser,
+  options: { showPermissionError?: boolean } = {},
+): Promise<ActiveTab | undefined> {
   try {
     const tab = await getActiveTab(browser);
     return isValidTab(tab) ? tab : undefined;
-  } catch {
+  } catch (error) {
+    if (browser === "Zen" && options.showPermissionError && isZenAccessibilityError(error)) {
+      throw new Error("Zen requires Accessibility access. Enable it for Raycast in System Settings.");
+    }
+
     return undefined;
   }
 }
@@ -201,7 +212,7 @@ export async function getActiveTabFromFrontmostBrowser(): Promise<{
   const frontmostBrowser = getSupportedBrowser(frontmostApp);
 
   if (frontmostBrowser) {
-    const tab = await getActiveTabIfAvailable(frontmostBrowser);
+    const tab = await getActiveTabIfAvailable(frontmostBrowser, { showPermissionError: true });
     return tab ? { tab, browser: frontmostBrowser } : null;
   }
 
@@ -212,7 +223,7 @@ export async function getActiveTabFromFrontmostBrowser(): Promise<{
   const visibleBrowsers = await getVisibleSupportedBrowsers().catch(() => []);
 
   for (const browser of visibleBrowsers.toReversed()) {
-    const tab = await getActiveTabIfAvailable(browser);
+    const tab = await getActiveTabIfAvailable(browser, { showPermissionError: true });
 
     if (tab) {
       return { tab, browser };
