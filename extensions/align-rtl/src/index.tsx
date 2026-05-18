@@ -1,4 +1,15 @@
-import { Clipboard, Toast, getSelectedText, showToast } from "@raycast/api";
+import {
+  Clipboard,
+  Toast,
+  closeMainWindow,
+  getSelectedText,
+  showToast,
+} from "@raycast/api";
+import { execFile } from "node:child_process";
+import { setTimeout } from "node:timers/promises";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 const RTL_EMBEDDING_START = "\u202B";
 const RTL_EMBEDDING_END = "\u202C";
@@ -44,6 +55,48 @@ async function getInputText(): Promise<string | undefined> {
   return undefined;
 }
 
+async function writeNativeHtmlClipboard(html: string, text: string) {
+  const { stdout } = await execFileAsync("/usr/bin/osascript", [
+    "-l",
+    "JavaScript",
+    "-e",
+    `
+ObjC.import("AppKit");
+
+function run(argv) {
+  const html = argv[0];
+  const text = argv[1];
+  const pasteboard = $.NSPasteboard.generalPasteboard;
+  const htmlData = $(html).dataUsingEncoding($.NSUTF8StringEncoding);
+
+  pasteboard.clearContents;
+  pasteboard.setDataForType(htmlData, $("public.html"));
+  pasteboard.setDataForType(htmlData, $("Apple HTML pasteboard type"));
+  pasteboard.setStringForType($(text), $("public.utf8-plain-text"));
+  pasteboard.setStringForType($(text), $("NSStringPboardType"));
+
+  return ObjC.deepUnwrap(pasteboard.types).join("\\n");
+}
+`,
+    "--",
+    html,
+    text,
+  ]);
+
+  if (!stdout.includes("public.html")) {
+    throw new Error("Unable to write HTML to the macOS pasteboard.");
+  }
+}
+
+async function pasteWithSystemShortcut() {
+  await closeMainWindow({ clearRootSearch: true });
+  await setTimeout(100);
+  await execFileAsync("/usr/bin/osascript", [
+    "-e",
+    'tell application "System Events" to keystroke "v" using command down',
+  ]);
+}
+
 export default async function Command() {
   try {
     const inputText = await getInputText();
@@ -57,10 +110,11 @@ export default async function Command() {
       return;
     }
 
-    await Clipboard.paste({
-      html: buildRtlHtml(inputText),
-      text: wrapWithRtlEmbedding(inputText),
-    });
+    await writeNativeHtmlClipboard(
+      buildRtlHtml(inputText),
+      wrapWithRtlEmbedding(inputText),
+    );
+    await pasteWithSystemShortcut();
 
     await showToast({
       style: Toast.Style.Success,
