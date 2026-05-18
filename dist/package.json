@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "ollama-mcp-chat",
+  "title": "Ollama + MCP Chat",
+  "description": "Chat with local Ollama models with MCP tool support",
+  "icon": "ollama-icon.png",
+  "author": "sgardner",
+  "categories": [
+    "AI"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "ollama-chat",
+      "title": "Ollama Chat",
+      "subtitle": "Local AI with MCP tools",
+      "description": "Chat with local Ollama models and MCP tool calling",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "ollamaUrl",
+      "title": "Ollama API URL",
+      "description": "The URL of your Ollama instance",
+      "type": "textfield",
+      "default": "http://localhost:11434",
+      "required": false
+    },
+    {
+      "name": "defaultModel",
+      "title": "Default Model",
+      "description": "Model to use (leave empty to pick each time)",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "mcpConfigPath",
+      "title": "MCP Config File",
+      "description": "Path to MCP config JSON file",
+      "type": "textfield",
+      "default": "/Users/scotgardner/Library/Application Support/memu-bot/mcp-config.json",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.0",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "typescript": "^5.8.0"
+  },
+  "scripts": {
+    "build": "ray build --skip-types -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint"
+  }
+}
