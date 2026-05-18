@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [OAuth authentication] - {PR_MERGE_DATE}
+## [OAuth authentication] - 2026-05-18
 
 - Add OAuth (PKCE) authentication as an alternative to Personal Access Tokens.
   Tokens are stored encrypted by Raycast, refreshed automatically when expired,
