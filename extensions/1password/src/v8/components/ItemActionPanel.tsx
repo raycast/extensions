@@ -1,8 +1,9 @@
-import { Action, ActionPanel, Icon } from "@raycast/api";
+import { Action, ActionPanel, Icon, open, showToast, Toast } from "@raycast/api";
+import { execFileSync } from "node:child_process";
 
 import resetCache from "../../reset-cache";
 import { Item, User } from "../types";
-import { ActionID, hrefToOpenInBrowser } from "../utils";
+import { ActionID, getCliPath, handleErrors, hrefToOpenInBrowser, windowsEnv } from "../utils";
 import { CopyToClipboard } from "./ActionCopyToClipboard";
 import { ShareItem } from "./ActionShareItem";
 import { SwitchAccount } from "./ActionSwitchAccount";
@@ -137,7 +138,51 @@ function OpenInBrowser(item: Item) {
     );
   }
 
-  return null;
+  if (item.category !== "LOGIN") {
+    return null;
+  }
+
+  return (
+    <Action
+      key="open-in-browser"
+      onAction={async () => {
+        const toast = await showToast({ style: Toast.Style.Animated, title: "Opening in browser..." });
+
+        try {
+          const stdout = execFileSync(
+            getCliPath(),
+            ["item", "get", item.id, "--vault", item.vault.id, "--format=json"],
+            windowsEnv ? { env: windowsEnv } : {},
+          );
+          const detailedItem = JSON.parse(stdout.toString()) as Item;
+          const detailedHref = hrefToOpenInBrowser(detailedItem);
+
+          if (!detailedHref) {
+            toast.style = Toast.Style.Failure;
+            toast.title = "No website URL found";
+            return;
+          }
+
+          await open(detailedHref);
+          toast.style = Toast.Style.Success;
+          toast.title = "Opened in browser";
+        } catch (error) {
+          toast.style = Toast.Style.Failure;
+          toast.title = "Failed to open in browser";
+
+          if (error instanceof Error) {
+            try {
+              handleErrors(error.message);
+            } catch (err) {
+              toast.message = err instanceof Error ? err.message : error.message;
+            }
+          }
+        }
+      }}
+      shortcut={{ key: "return", modifiers: ["opt"] }}
+      title="Open in Browser"
+    />
+  );
 }
 
 function PasteOneTimePassword(item: Item) {

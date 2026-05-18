@@ -42,7 +42,6 @@ function matchesSearch(item: Item, query: string): boolean {
 export function Items({ flags }: { flags?: string[] }) {
   const [category, setCategory] = useCachedState<string>("selected_category", DEFAULT_CATEGORY);
   const [searchText, setSearchText] = useState("");
-  const [passwords, setPasswords] = useState<Item[]>([]);
   const { data: account, error: accountError, isLoading: accountIsLoading } = useAccount();
   const {
     data: items,
@@ -50,13 +49,13 @@ export function Items({ flags }: { flags?: string[] }) {
     isLoading: itemsIsLoading,
   } = usePasswords2({ account: account?.account_uuid ?? "", execute: !accountError && !accountIsLoading, flags });
 
-  useMemo(() => {
-    if (!items) return;
+  const passwords = useMemo(() => {
+    if (!items) return [];
     const byCategory =
       category === DEFAULT_CATEGORY
         ? items
         : items.filter((item) => item.category === category.replaceAll(" ", "_").toUpperCase());
-    setPasswords(byCategory.filter((item) => matchesSearch(item, searchText)));
+    return byCategory.filter((item) => matchesSearch(item, searchText));
   }, [items, category, searchText]);
 
   const onCategoryChange = (newCategory: string) => {
@@ -90,8 +89,8 @@ export function Items({ flags }: { flags?: string[] }) {
         icon="1password-noview.png"
         title="No items found"
       />
-      <List.Section subtitle={`${passwords?.length}`} title="Items">
-        {passwords?.length
+      <List.Section subtitle={`${passwords.length}`} title="Items">
+        {passwords.length
           ? passwords.map((item) => (
               <List.Item
                 accessories={[

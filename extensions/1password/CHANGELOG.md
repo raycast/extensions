@@ -1,5 +1,9 @@
 # 1Password Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Reduce memory usage when loading large item lists.
+
 ## [Enhancements] - 2026-04-16
 
 - Improved search: queries now match across all item fields (title, username/email, URLs, vault name). For example, searching "m@ goo" now finds a Google login with email "m@example.com".

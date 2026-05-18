@@ -174,38 +174,34 @@ export const usePasswords2 = ({
   execute: boolean;
   flags?: string[];
 }) =>
-  useExec<Item[], ExtensionError>(
-    getCliPath(),
-    ["--account", account, "items", "list", "--long", "--format=json", ...flags],
-    {
-      env: windowsEnv,
-      execute,
-      onError: async (e) => {
-        await showToast({
-          style: Toast.Style.Failure,
-          title: e.message,
-        });
-      },
-      parseOutput: ({ error, exitCode, stderr, stdout }) => {
-        if (error) handleErrors(error.message);
-        if (stderr) handleErrors(stderr);
-        if (exitCode != 0) handleErrors(stdout);
-        const items = JSON.parse(stdout) as Item[];
-
-        return items.sort((a, b) => {
-          if (a.favorite && !b.favorite) {
-            return -1;
-          } else if (!a.favorite && b.favorite) {
-            return 1;
-          }
-
-          return a.title.localeCompare(b.title);
-        });
-      },
+  useExec<Item[], ExtensionError>(getCliPath(), ["--account", account, "items", "list", "--format=json", ...flags], {
+    env: windowsEnv,
+    execute,
+    onError: async (e) => {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: e.message,
+      });
     },
-  );
+    parseOutput: ({ error, exitCode, stderr, stdout }) => {
+      if (error) handleErrors(error.message);
+      if (stderr) handleErrors(stderr);
+      if (exitCode != 0) handleErrors(stdout);
+      const items = JSON.parse(stdout) as Item[];
+
+      return items.sort((a, b) => {
+        if (a.favorite && !b.favorite) {
+          return -1;
+        } else if (!a.favorite && b.favorite) {
+          return 1;
+        }
+
+        return a.title.localeCompare(b.title);
+      });
+    },
+  });
 export const usePasswords = (flags: string[] = []) =>
-  useOp<Item[], ExtensionError>(["items", "list", "--long", ...flags], (data) =>
+  useOp<Item[], ExtensionError>(["items", "list", ...flags], (data) =>
     data.sort((a, b) => a.title.localeCompare(b.title)),
   );
 export const useVaults = () =>
