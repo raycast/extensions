@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Pipeline triggers, My Pipelines & Job controls] - {PR_MERGE_DATE}
+## [Pipeline triggers, My Pipelines & Job controls] - 2026-05-18
 
 - Add top-level `My Pipelines` command listing your recent pipelines across projects
 - Add `Trigger New Pipeline` action with branch/tag selection and CI/CD variables
