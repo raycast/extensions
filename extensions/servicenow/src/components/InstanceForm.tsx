@@ -134,8 +134,7 @@ export default function InstanceForm({ onSubmit, onDelete, instance, initialName
             <Action.OpenInBrowser
               title="Download Default OAuth Client"
               icon={Icon.Download}
-              // TODO: replace placeholder with the real Share URL once the oauth_entity XML is published.
-              url="https://developer.servicenow.com/connect.do#!/share/contents/TODO_OAUTH_SHARE_ID"
+              url="https://developer.servicenow.com/connect.do#!/share/contents/3108109_raycast_extension_default_oauth_client"
             />
             <Action.OpenInBrowser
               title="Download ACLs for Non-Admin Users"
