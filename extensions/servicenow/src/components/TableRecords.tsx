@@ -1,17 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  Image,
-  Keyboard,
-  List,
-  LocalStorage,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Image, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { getAvatarIcon, useFetch } from "@raycast/utils";
 import { differenceInCalendarDays, format, isThisYear } from "date-fns";
 import { groupBy } from "lodash";
@@ -230,10 +219,7 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
     },
   });
 
-  const sysUserByName = useMemo(
-    () => Object.fromEntries(sysUsers.map((u) => [u.user_name, u] as const)),
-    [sysUsers],
-  );
+  const sysUserByName = useMemo(() => Object.fromEntries(sysUsers.map((u) => [u.user_name, u] as const)), [sysUsers]);
 
   // ServiceNow pagination can return the same record on two pages when records share
   // sys_updated_on at the boundary or are concurrently modified during paging.
