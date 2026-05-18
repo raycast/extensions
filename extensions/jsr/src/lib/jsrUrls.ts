@@ -40,6 +40,9 @@ export const jsrUrls = {
     /** Raw README served as a static asset (only for packages whose source is an actual README.md). */
     readme: (scope: string, name: string, version: string, readmePath = "/README.md") =>
       `${SITE_BASE}/@${scope}/${name}/${version}${readmePath}`,
+    /** Per-version manifest (file sizes/checksums + exports map) served as a static CDN asset. */
+    versionMeta: (scope: string, name: string, version: string) =>
+      `${SITE_BASE}/@${scope}/${name}/${version}_meta.json`,
     /** npm package page on npmjs.com (for npm-kind dependencies). */
     npmPackage: (name: string) => `https://www.npmjs.com/package/${name}`,
     /** GitHub repository page for the linked source. */

@@ -12,6 +12,7 @@ import type {
   Package,
   PackageScore,
   StatsData,
+  VersionMeta,
   VersionPackage,
   WithKey,
 } from "@/types";
@@ -189,6 +190,23 @@ export const useDownloads = (item: NameAndScope | null) => {
     keepPreviousData: true,
     onError: onErrorCapture,
     failureToastOptions: { title: "Error fetching JSR download stats" },
+  });
+};
+
+/**
+ * Fetch the per-version manifest from jsr.io (file sizes + checksums + exports map).
+ * Served as a static CDN asset — cheap to fetch.
+ */
+export const useVersionMeta = (
+  scope: string | undefined,
+  name: string | undefined,
+  version: string | null | undefined,
+) => {
+  const url = scope && name && version ? jsrUrls.site.versionMeta(scope, name, version) : "";
+  return useFetch<VersionMeta>(url, {
+    execute: !!scope && !!name && !!version,
+    keepPreviousData: true,
+    onError: onErrorCapture,
   });
 };
 

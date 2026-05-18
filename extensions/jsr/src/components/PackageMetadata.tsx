@@ -5,9 +5,17 @@ import type { SearchResultDocument } from "@/types";
 
 import { compatIcons } from "@/lib/compat";
 import { jsrUrls } from "@/lib/jsrUrls";
-import { formatRelative, scoreColor } from "@/lib/ui-helpers";
+import { formatBytes, formatRelative, scoreColor } from "@/lib/ui-helpers";
 
-import { useDependencies, useDependents, useDownloads, usePackage, usePackages, useVersions } from "@/hooks/jsrApi";
+import {
+  useDependencies,
+  useDependents,
+  useDownloads,
+  usePackage,
+  usePackages,
+  useVersionMeta,
+  useVersions,
+} from "@/hooks/jsrApi";
 
 import type { DepEntry } from "@/components/DepSection";
 import DepSection from "@/components/DepSection";
@@ -23,6 +31,11 @@ const PackageMetadata = ({ item }: { item: SearchResultDocument }) => {
   const { data: scopePackages } = usePackages(item.scope);
   const { data: versionsData, isLoading: versionsIsLoading } = useVersions(isLoading ? null : (data ?? null));
   const { data: downloadsData, isLoading: downloadsIsLoading } = useDownloads(isLoading ? null : (data ?? null));
+  const { data: versionMeta, isLoading: versionMetaLoading } = useVersionMeta(
+    item.scope,
+    item.name,
+    data?.latestVersion ?? null,
+  );
   const { data: dependentsData } = useDependents(isLoading ? null : (data ?? null));
   const { data: dependenciesData } = useDependencies(isLoading ? null : (data ?? null), data?.latestVersion ?? null);
 
@@ -34,6 +47,18 @@ const PackageMetadata = ({ item }: { item: SearchResultDocument }) => {
 
   const totalDownloads = downloadsData?.total.reduce((sum, d) => sum + d.count, 0) ?? 0;
   const totalDownloadsText = downloadsIsLoading ? "Loading…" : totalDownloads.toLocaleString();
+
+  const manifestEntries = versionMeta ? Object.values(versionMeta.manifest) : [];
+  const totalBytes = manifestEntries.reduce((sum, e) => sum + (e.size ?? 0), 0);
+  const fileCount = manifestEntries.length;
+  const sizeText = versionMetaLoading
+    ? "Loading…"
+    : fileCount > 0
+      ? `${formatBytes(totalBytes)} (${fileCount} files)`
+      : "unknown";
+
+  const entryPointCount = versionMeta ? Object.keys(versionMeta.exports).length : 0;
+  const entryPointsText = versionMetaLoading ? "Loading…" : `${entryPointCount}`;
 
   const dependencyCount = data?.dependencyCount ?? dependenciesData?.length ?? 0;
   const dependentCount = data?.dependentCount ?? dependentsData?.total ?? 0;
@@ -86,6 +111,8 @@ const PackageMetadata = ({ item }: { item: SearchResultDocument }) => {
             icon={Icon.ComputerChip}
           />
           <Detail.Metadata.Label title="Downloads (90d)" text={totalDownloadsText} icon={Icon.Download} />
+          <Detail.Metadata.Label title="Size" text={sizeText} icon={Icon.HardDrive} />
+          <Detail.Metadata.Label title="Entry Points" text={entryPointsText} icon={Icon.Plug} />
           <Detail.Metadata.Separator />
         </>
       ) : null}

@@ -76,6 +76,17 @@ export type VersionPackageBase = {
   createdAt: string;
 };
 
+export type VersionManifestEntry = {
+  size: number;
+  checksum: string;
+};
+
+export type VersionMeta = {
+  manifest: Record<string, VersionManifestEntry>;
+  exports: Record<string, string>;
+  moduleGraph2?: unknown;
+};
+
 export type DownloadKind = "jsr_meta" | "npm_tarball";
 
 export type DownloadDataPoint = {
