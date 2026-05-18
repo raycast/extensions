@@ -1,80 +1,15 @@
-import * as cheerio from "cheerio";
 import { useCallback, useRef } from "react";
 
-import { captureException, environment } from "@raycast/api";
+import { environment } from "@raycast/api";
 import { useFetch, useLocalStorage } from "@raycast/utils";
 
 import { onErrorCapture } from "@/lib/errors";
 import { jsrUrls } from "@/lib/jsrUrls";
+import { type CachedOramaCreds, ORAMA_CACHE_KEY, isCachedOramaCredsExpired } from "@/lib/oramaCache";
+import { type OramaCreds, parseBootPayload } from "@/lib/parseBootPayload";
 
-type SearchAPIData = {
-  projectId: string;
-  apiKey: string;
-};
-
-type CachedSearchAPIData = SearchAPIData & {
-  cachedAt: number;
-};
-
-const STORAGE_KEY = "jsr-orama-creds";
-const TTL_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_REFRESHES_PER_SESSION = 3;
 const MIN_REFRESH_INTERVAL_MS = 5_000;
-
-const isExpired = (entry: CachedSearchAPIData | undefined | null): boolean => {
-  if (!entry) return true;
-  return Date.now() - entry.cachedAt > TTL_MS;
-};
-
-/**
- * Parse the Fresh `boot(...)` payload to extract `{projectId, apiKey}`.
- *
- * jsr.io migrated from Next.js (Orama v1: apiKey + indexId) to Fresh
- * (Orama v2: projectId + apiKey). The boot payload encodes a JSON array
- * containing an object whose `projectId`/`apiKey` properties are numeric
- * indexes into the array, pointing at the string values.
- */
-const parseBootPayload = (html: string): SearchAPIData | null => {
-  const $ = cheerio.load(html);
-  let result: SearchAPIData | null = null;
-
-  $("script").each((_index, element) => {
-    if (result) return;
-    const script = $(element).html();
-    if (!script || !script.includes("apiKey")) return;
-
-    const match = script.match(/("\[\[(?:[^"\\]|\\.)*\]")/);
-    if (!match) return;
-
-    try {
-      const bootStr = JSON.parse(match[1]) as string;
-      const arr = JSON.parse(bootStr) as unknown[];
-      for (const item of arr) {
-        if (
-          item &&
-          typeof item === "object" &&
-          "projectId" in item &&
-          "apiKey" in item &&
-          typeof (item as Record<string, unknown>).projectId === "number" &&
-          typeof (item as Record<string, unknown>).apiKey === "number"
-        ) {
-          const pi = (item as Record<string, number>).projectId;
-          const ai = (item as Record<string, number>).apiKey;
-          const projectId = arr[pi];
-          const apiKey = arr[ai];
-          if (typeof projectId === "string" && typeof apiKey === "string") {
-            result = { projectId, apiKey };
-            return;
-          }
-        }
-      }
-    } catch (err) {
-      captureException(err);
-    }
-  });
-
-  return result;
-};
 
 /**
  * Download the jsr.io frontpage and extract the Orama Cloud `projectId` + `apiKey`.
@@ -90,12 +25,12 @@ export const useSearchAPIData = () => {
     setValue,
     removeValue,
     isLoading: isCacheLoading,
-  } = useLocalStorage<CachedSearchAPIData | null>(STORAGE_KEY, null);
+  } = useLocalStorage<CachedOramaCreds | null>(ORAMA_CACHE_KEY, null);
 
   const refreshCountRef = useRef(0);
   const lastRefreshAtRef = useRef(0);
 
-  const cacheValid = !!cached && !isExpired(cached);
+  const cacheValid = !!cached && !isCachedOramaCredsExpired(cached);
   const shouldScrape = !isCacheLoading && !cacheValid;
 
   const {
@@ -103,7 +38,7 @@ export const useSearchAPIData = () => {
     isLoading: isScraping,
     error,
     revalidate,
-  } = useFetch<SearchAPIData | null>(jsrUrls.site.home(), {
+  } = useFetch<OramaCreds | null>(jsrUrls.site.home(), {
     method: "GET",
     headers: {
       Agent: `Raycast/${environment.raycastVersion} ${environment.extensionName} (https://raycast.com)`,
@@ -131,7 +66,7 @@ export const useSearchAPIData = () => {
     revalidate();
   }, [removeValue, revalidate]);
 
-  const data: SearchAPIData | null = cacheValid
+  const data: OramaCreds | null = cacheValid
     ? { projectId: cached.projectId, apiKey: cached.apiKey }
     : (scraped ?? null);
 

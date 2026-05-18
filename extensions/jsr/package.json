@@ -21,6 +21,13 @@
       "mode": "view"
     }
   ],
+  "tools": [
+    {
+      "name": "search",
+      "title": "Search Packages",
+      "description": "Search for packages on JSR.io"
+    }
+  ],
   "preferences": [
     {
       "name": "openWebsiteByDefault",
