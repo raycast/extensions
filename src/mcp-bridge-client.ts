@@ -44,14 +44,17 @@ export async function getBridgeStatus(): Promise<{
     const toolsRes = await fetch(`${BRIDGE_URL}/tools`, {
       signal: AbortSignal.timeout(3000),
     });
-    const toolsData = (await toolsRes.json()) as {
-      tools?: unknown[];
-      [key: string]: unknown;
-    };
-    const toolList = toolsData.tools || toolsData;
+    const toolsRaw = (await toolsRes.json()) as
+      | { tools?: unknown[] }
+      | unknown[];
+    const toolList = Array.isArray(toolsRaw) ? toolsRaw : toolsRaw.tools || [];
 
     // Map tools back to servers
-    for (const tool of toolList) {
+    for (const tool of toolList as Array<{
+      server?: string;
+      name?: string;
+      description?: string;
+    }>) {
       const serverName =
         tool.server ||
         (tool.name?.includes("__") ? tool.name.split("__")[0] : "unknown");

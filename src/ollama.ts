@@ -4,7 +4,7 @@ import { Message, OllamaTool, OllamaToolCall, OllamaModel } from "./types";
 export async function fetchModels(url: string): Promise<OllamaModel[]> {
   const res = await fetch(`${url}/api/tags`);
   if (!res.ok) throw new Error(`Failed to fetch models: ${res.status}`);
-  const data = await res.json();
+  const data = (await res.json()) as { models?: OllamaModel[] };
   return data.models || [];
 }
 
