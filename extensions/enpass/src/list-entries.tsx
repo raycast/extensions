@@ -246,7 +246,6 @@ export default function Command() {
       searchBarAccessory={
         <List.Dropdown
           tooltip="Sort Credentials"
-          storeValue
           value={sortMode}
           onChange={handleSortChange}
         >
