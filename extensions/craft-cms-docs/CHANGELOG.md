@@ -1,5 +1,9 @@
 # Craft CMS Changelog
 
+## [Craft CMS 6.x Docs] - {PR_MERGE_DATE}
+
+- Craft CMS 6.x option now available for docs version
+
 ## [Add Plugin Store Search] - 2026-03-26
 
 ### Added
