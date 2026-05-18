@@ -216,7 +216,10 @@ function Command({ currentFolderPath = downloadsFolder }: { currentFolderPath?: 
         <Action.CopyToClipboard
           title="Copy Path"
           content={download.path}
-          shortcut={{ macOS: { modifiers: ["cmd", "shift"], key: "." }, Windows: { modifiers: ["ctrl", "shift"], key: "." } }}
+          shortcut={{
+            macOS: { modifiers: ["cmd", "shift"], key: "." },
+            Windows: { modifiers: ["ctrl", "shift"], key: "." },
+          }}
         />
         <Action
           title="Reload Downloads"
