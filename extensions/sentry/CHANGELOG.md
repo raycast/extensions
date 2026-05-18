@@ -1,5 +1,9 @@
 # Sentry Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Prevent issue details from crashing when the latest event has no stack frames.
+
 ## [List Latest Releases] - 2026-03-31
 
 - Added new command to list latest releases per project.
