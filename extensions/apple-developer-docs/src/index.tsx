@@ -59,7 +59,7 @@ export default function Command() {
   const onTypeChange = useCallback((type: string) => {
     setTypeFilter(type);
   }, []);
-  const results = useMemo(() => {
+  const apiResults = useMemo(() => {
     const { results } = data;
     if (typeFilter.toLowerCase() === "all") {
       return results;
@@ -84,6 +84,17 @@ export default function Command() {
     typeFilter,
     includeArchiveResults
   );
+  const results = useMemo(() => {
+    if (typeFilter === "archive") {
+      return archiveResults;
+    }
+
+    if (typeFilter !== "all" || archiveResults.length === 0) {
+      return apiResults;
+    }
+
+    return sortResultsByRelevance([...apiResults, ...archiveResults], query);
+  }, [apiResults, archiveResults, query, typeFilter]);
 
   return (
     <List
@@ -110,15 +121,47 @@ export default function Command() {
           <SearchListItem key={`${result.order}_${result.url}`} result={result} onVisit={markAsSearched} />
         ))}
       </List.Section>
-      {archiveResults.length > 0 && (
-        <List.Section title="Archive" subtitle={archiveResults.length + ""}>
-          {archiveResults.map((result) => (
-            <SearchListItem key={`archive_${result.order}_${result.url}`} result={result} onVisit={markAsSearched} />
-          ))}
-        </List.Section>
-      )}
     </List>
   );
+}
+
+function sortResultsByRelevance(results: SearchResult[], query: string) {
+  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) {
+    return results;
+  }
+
+  return results
+    .map((result, index) => ({ result, index, score: scoreResult(result, terms) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map(({ result }) => result);
+}
+
+function scoreResult(result: SearchResult, terms: string[]) {
+  const title = result.title.toLowerCase();
+  const searchableText = [result.title, result.description, result.platform.join(" "), result.breadcrumbs.join(" ")]
+    .join(" ")
+    .toLowerCase();
+
+  return terms.reduce((score, term) => {
+    if (title === term) {
+      return score + 100;
+    }
+
+    if (title.startsWith(term)) {
+      return score + 50;
+    }
+
+    if (title.includes(term)) {
+      return score + 20;
+    }
+
+    if (searchableText.includes(term)) {
+      return score + 5;
+    }
+
+    return score;
+  }, 0);
 }
 
 function normalizeResponse(payload: AppleSearchResponse): PayloadResponse {
