@@ -2,7 +2,7 @@
 
 ## [Bug Fix] - {PR_MERGE_DATE}
 
-- Reduce memory usage when loading large item lists while preserving list subtitles and search metadata.
+- Reduce memory usage when loading large item lists by avoiding the full item payload until it is needed.
 
 ## [Enhancements] - 2026-04-16
 
