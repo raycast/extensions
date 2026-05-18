@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Keep cached merge requests interactive] - {PR_MERGE_DATE}
+## [Keep cached merge requests interactive] - 2026-05-18
 
 - Keep cached list results actionable while stale data refreshes in the background
 
