@@ -1,6 +1,6 @@
 # Mattermost Changelog
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-05-18
 
 - Fix authentication when the Mattermost server preference is entered without a URL scheme.
 
