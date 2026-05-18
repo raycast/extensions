@@ -221,13 +221,29 @@ export async function getActiveTabFromFrontmostBrowser(): Promise<{
   }
 
   const visibleBrowsers = await getVisibleSupportedBrowsers().catch(() => []);
+  let zenAccessibilityError: Error | undefined;
 
   for (const browser of visibleBrowsers.toReversed()) {
-    const tab = await getActiveTabIfAvailable(browser, { showPermissionError: true });
+    let tab: ActiveTab | undefined;
+
+    try {
+      tab = await getActiveTabIfAvailable(browser, { showPermissionError: true });
+    } catch (error) {
+      if (browser === "Zen") {
+        zenAccessibilityError = error instanceof Error ? error : new Error(String(error));
+        continue;
+      }
+
+      throw error;
+    }
 
     if (tab) {
       return { tab, browser };
     }
+  }
+
+  if (zenAccessibilityError) {
+    throw zenAccessibilityError;
   }
 
   return null;
