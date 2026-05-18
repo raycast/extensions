@@ -104,7 +104,7 @@ export function AttachmentList({ folder, emailUid, emailSubject }: AttachmentLis
 
       // Multiple files go to a timestamped folder
       const folderName = getTimestampedFolderName();
-      const downloadsDir = join(homedir(), "Downloads", `qq-mail-attachments-${folderName}`);
+      const downloadsDir = join(homedir(), "Downloads", folderName);
       await mkdir(downloadsDir, { recursive: true });
 
       for (const attachment of attachments) {
