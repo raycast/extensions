@@ -1,3 +1,5 @@
+import type { DateRange } from "./types";
+
 export type PeriodKey = "today" | "week" | "month";
 
 export const periodLabels: Record<PeriodKey, string> = {
@@ -23,6 +25,18 @@ export function getPeriodRange(period: PeriodKey) {
   }
 
   return { start, end };
+}
+
+/** Load window for the dashboard: month plus any week days before the 1st. */
+export function getUsageLoadRange(): DateRange {
+  const monthRange = getPeriodRange("month");
+  const weekRange = getPeriodRange("week");
+  return {
+    start: new Date(
+      Math.min(monthRange.start.getTime(), weekRange.start.getTime()),
+    ),
+    end: monthRange.end,
+  };
 }
 
 export function formatTokens(tokens: number) {

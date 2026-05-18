@@ -13,7 +13,7 @@ import { loadUsage } from "./lib/usage";
 import {
   formatCurrencyMoney,
   formatTokens,
-  getPeriodRange,
+  getUsageLoadRange,
   periodLabels,
   type PeriodKey,
 } from "./lib/format";
@@ -186,7 +186,7 @@ export default function Command() {
 
   const { isLoading, data, revalidate } = useCachedPromise(
     async (provider: SourceProviderKey) =>
-      loadUsage(prefs, getPeriodRange("month"), provider),
+      loadUsage(prefs, getUsageLoadRange(), provider),
     [tab],
     { keepPreviousData: false },
   );
