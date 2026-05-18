@@ -20,6 +20,10 @@ function toArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? value : [];
 }
 
+function isArray<T>(value: unknown): value is T[] {
+  return Array.isArray(value);
+}
+
 export default function Command() {
   const [boardResults, setBoards] = useState<Board[]>([]);
   const [listResults, setLists] = useState<List[]>([]);
@@ -33,7 +37,13 @@ export default function Command() {
     async function fetchBoards() {
       try {
         setLoading(true);
-        const response = toArray<Board>(await trelloClient.getBoards(false));
+        const response = await trelloClient.getBoards(false);
+        if (!isArray<Board>(response)) {
+          showToast(Toast.Style.Failure, "Failed loading boards", "Unexpected Trello response.");
+          setBoards([]);
+          setLoading(false);
+          return;
+        }
         setBoards(response);
         if (response[0]?.id) {
           setSelectedBoard(response[0].id);
@@ -51,7 +61,14 @@ export default function Command() {
   async function loadListsAndMembers(boardId: string) {
     try {
       setLoading(true);
-      const listsResponse = toArray<List>(await trelloClient.getLists(boardId));
+      const listsResponse = await trelloClient.getLists(boardId);
+      if (!isArray<List>(listsResponse)) {
+        showToast(Toast.Style.Failure, "Failed loading lists", "Unexpected Trello response.");
+        setLists([]);
+        setMembers([]);
+        setLoading(false);
+        return;
+      }
       const membersResponse = toArray<Member>(await trelloClient.getBoardMembers(boardId));
       setLists(listsResponse);
       setMembers(membersResponse);
