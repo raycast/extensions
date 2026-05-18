@@ -17,6 +17,9 @@
 - Reduce peak memory usage in **Search Code** by no longer retaining the previous result set during revalidation.
 - Fix Edit Favorite form opening empty when invoked from search results, code search, navigation history, navigation menu and record details.
 - Strip paths from pasted **Instance URL** values (e.g. `https://acme.service-now.com/login.do` is now stored as `https://acme.service-now.com`) so generated links don't break.
+- Fix toast reading `containing undefined` when **Open Instance**, **Open Current Page in Another Instance**, or **Cancel My Transactions** is launched without an instance argument and no profile is selected.
+- Surface a toast (instead of crashing silently) in **Open All Instances** and **Open Current Page in Another Instance** when the stored instance list cannot be parsed.
+- Remove a duplicated query parameter in the **Explore Tables** request.
 
 ## [Fix] - 2025-05-14
 

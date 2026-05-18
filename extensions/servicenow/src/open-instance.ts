@@ -28,11 +28,19 @@ export default async (props: LaunchProps) => {
     }
 
     if (!instance) {
-      showToast(
-        Toast.Style.Failure,
-        "Instance not found",
-        `No instance found with URL or alias containing ${instanceName}`,
-      );
+      if (instanceName) {
+        showToast(
+          Toast.Style.Failure,
+          "Instance not found",
+          `No instance found with URL or alias containing "${instanceName}"`,
+        );
+      } else {
+        showToast(
+          Toast.Style.Failure,
+          "No instance selected",
+          "Pass an instance name as argument or select one in Manage Instance Profiles",
+        );
+      }
       return;
     }
 

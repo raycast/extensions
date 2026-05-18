@@ -32,7 +32,7 @@ export default function Tables() {
     (options) => {
       const terms = searchTerm.split(" ");
       const query = terms.map((t) => `^labelLIKE${t}^ORnameLIKE${t}^ORsuper_class.labelLIKE${t}`).join("");
-      return `${instanceUrl}/api/now/table/sys_db_object?sysparm_display_value=true&sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_query=${query}^ORDERBYlabel&sysparm_fields=name,label,super_class&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
+      return `${instanceUrl}/api/now/table/sys_db_object?sysparm_display_value=true&sysparm_exclude_reference_link=true&sysparm_query=${query}^ORDERBYlabel&sysparm_fields=name,label,super_class&sysparm_limit=100&sysparm_offset=${options.page * 100}`;
     },
     {
       headers: authHeader ? { Authorization: authHeader } : undefined,
