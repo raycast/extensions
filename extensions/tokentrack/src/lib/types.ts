@@ -15,6 +15,19 @@ export type UsageEvent = {
   estimatedCost: number;
   estimatedTokens: boolean;
   sourcePath?: string;
+  /** Stable key for grouping events into one chat/session (file path, composer id, etc.). */
+  conversationKey?: string;
+  /** Human-readable chat title when the source provides one. */
+  conversationTitle?: string;
+};
+
+export type ConversationUsageSummary = {
+  key: string;
+  title: string;
+  totalTokens: number;
+  estimatedCost: number;
+  eventCount: number;
+  lastActive: Date;
 };
 
 export type ModelSummary = {

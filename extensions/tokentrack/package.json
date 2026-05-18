@@ -62,7 +62,7 @@
       "title": "Claude Monthly Budget ($)",
       "description": "Monthly Anthropic spend cap. Shorter periods are prorated.",
       "type": "textfield",
-      "default": "200",
+      "default": "300",
       "required": false
     },
     {
@@ -70,7 +70,7 @@
       "title": "Codex Weekly Budget ($)",
       "description": "Weekly Codex spend cap. Month and today are derived from it.",
       "type": "textfield",
-      "default": "50",
+      "default": "100",
       "required": false
     },
     {
@@ -78,7 +78,7 @@
       "title": "Cursor Monthly Budget ($)",
       "description": "Monthly Cursor spend cap. Shorter periods are prorated.",
       "type": "textfield",
-      "default": "20",
+      "default": "300",
       "required": false
     },
     {
@@ -88,6 +88,28 @@
       "type": "textfield",
       "default": "USD",
       "required": true
+    },
+    {
+      "name": "defaultSource",
+      "title": "Default Source",
+      "description": "Provider shown first when opening the dashboard.",
+      "type": "dropdown",
+      "default": "claude",
+      "required": false,
+      "data": [
+        {
+          "title": "Claude Code",
+          "value": "claude"
+        },
+        {
+          "title": "Codex",
+          "value": "codex"
+        },
+        {
+          "title": "Cursor",
+          "value": "cursor"
+        }
+      ]
     }
   ],
   "title": "Token Track",

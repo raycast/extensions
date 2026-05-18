@@ -188,6 +188,14 @@ function postJson<T>(path: string, cookie: string, body: unknown): Promise<T> {
  * dashboard render only pulls what it needs. Pagination stops early once
  * we cross `range.start` (events are returned newest-first).
  */
+const CURSOR_TITLE_MAX = 80;
+
+function truncateCursorTitle(text: string): string {
+  const t = text.replace(/\s+/g, " ").trim();
+  if (!t) return "";
+  return t.length <= CURSOR_TITLE_MAX ? t : `${t.slice(0, CURSOR_TITLE_MAX - 1)}…`;
+}
+
 const PAGE_SIZE = 200;
 /** Hard cap to avoid runaway loops if the API ever stops ordering by ts desc. */
 const MAX_PAGES = 50;
@@ -289,6 +297,7 @@ type ComposerRow = {
   composerId: string;
   lastUpdatedAt: number | null;
   createdAt: number | null;
+  title: string | null;
 };
 
 type BubbleRow = {
@@ -326,7 +335,8 @@ async function readLocalUsage(
       select
         substr(key, instr(key, ':') + 1)                                   as composerId,
         json_extract(cast(value as text), '$.lastUpdatedAt')               as lastUpdatedAt,
-        json_extract(cast(value as text), '$.createdAt')                   as createdAt
+        json_extract(cast(value as text), '$.createdAt')                   as createdAt,
+        json_extract(cast(value as text), '$.text')                        as title
       from cursorDiskKV
       where key like 'composerData:%'
     `;
@@ -342,9 +352,12 @@ async function readLocalUsage(
   }
 
   const composerTs = new Map<string, number>();
+  const composerTitles = new Map<string, string>();
   for (const row of composerRows) {
     const ts = Number(row.lastUpdatedAt ?? row.createdAt ?? NaN);
     if (Number.isFinite(ts) && ts > 0) composerTs.set(row.composerId, ts);
+    const title = typeof row.title === "string" ? row.title.trim() : "";
+    if (title) composerTitles.set(row.composerId, truncateCursorTitle(title));
   }
 
   let bubbleRows: BubbleRow[] = [];
@@ -412,6 +425,8 @@ async function readLocalUsage(
       // Token counts are accurate but pricing is a local estimate.
       estimatedTokens: true,
       sourcePath: dbPath,
+      conversationKey: row.composerId,
+      conversationTitle: composerTitles.get(row.composerId),
     });
   }
 

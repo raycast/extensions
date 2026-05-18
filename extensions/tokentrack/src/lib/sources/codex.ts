@@ -32,8 +32,11 @@ type CodexRecord = {
   type?: string;
   payload?: {
     type?: string;
+    role?: string;
     model?: string;
     cwd?: string;
+    content?: { type?: string; text?: string }[];
+    git?: { branch?: string };
     info?: {
       total_token_usage?: CodexTokenUsage;
       last_token_usage?: CodexTokenUsage;
@@ -123,10 +126,36 @@ async function runWithConcurrency<T>(
 type FileState = {
   currentModel: string | undefined;
   previousTotals: CodexTokenUsage;
+  sessionTitle?: string;
 };
+
+const CODEX_TITLE_MAX = 80;
 
 function newFileState(): FileState {
   return { currentModel: undefined, previousTotals: {} };
+}
+
+function truncateCodexTitle(text: string): string {
+  const t = text.replace(/\s+/g, " ").trim();
+  if (!t) return "";
+  return t.length <= CODEX_TITLE_MAX ? t : `${t.slice(0, CODEX_TITLE_MAX - 1)}…`;
+}
+
+/** Regex-only title extraction — never JSON.parse session_meta (multi‑MB lines). */
+function noteCodexSessionTitleFromLine(line: string, state: FileState) {
+  if (state.sessionTitle) return;
+
+  const branch = /"branch"\s*:\s*"([^"]+)"/.exec(line)?.[1];
+  const cwd = /"cwd"\s*:\s*"([^"]+)"/.exec(line)?.[1];
+  const cwdBase = cwd ? cwd.split("/").filter(Boolean).pop() : undefined;
+
+  if (branch && cwdBase) {
+    state.sessionTitle = truncateCodexTitle(`${cwdBase} (${branch})`);
+  } else if (branch) {
+    state.sessionTitle = truncateCodexTitle(branch);
+  } else if (cwdBase) {
+    state.sessionTitle = truncateCodexTitle(cwdBase);
+  }
 }
 
 async function readCodexFile(
@@ -170,9 +199,11 @@ function pushCodexLine(
   events: UsageEvent[],
   state: FileState,
 ) {
-  // Cheap pre-filter: skip irrelevant rows (assistant content, function calls,
-  // session_meta payload bodies). We only need turn_context to track the model
-  // and token_count to bill on.
+  if (line.includes('"session_meta"') && !state.sessionTitle) {
+    noteCodexSessionTitleFromLine(line, state);
+  }
+
+  // Never JSON.parse huge transcript lines — only turn_context + token_count.
   if (!line.includes('"token_count"') && !line.includes('"turn_context"'))
     return;
 
@@ -181,7 +212,9 @@ function pushCodexLine(
   const timestamp = new Date(tsMatch[1]);
 
   const record = parseLine(line);
-  const payload = record?.payload;
+  if (!record) return;
+
+  const payload = record.payload;
   if (!payload) return;
 
   // Track model name from turn_context so subsequent token_count events have
@@ -253,6 +286,8 @@ function pushCodexLine(
     }),
     estimatedTokens: false,
     sourcePath: file,
+    conversationKey: file,
+    conversationTitle: state.sessionTitle,
   });
 }
 

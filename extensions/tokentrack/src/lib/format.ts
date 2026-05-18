@@ -66,6 +66,19 @@ export function formatDateTime(value: Date) {
   }).format(value);
 }
 
+/** Calendar date for list rows (no relative phrasing like “Yesterday”). */
+export function formatShortDate(value: Date) {
+  const now = new Date();
+  const opts: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+  };
+  if (value.getFullYear() !== now.getFullYear()) {
+    opts.year = "numeric";
+  }
+  return new Intl.DateTimeFormat(undefined, opts).format(value);
+}
+
 export function renderBudgetBar(
   spend: number,
   budget: number,

@@ -17,7 +17,16 @@ import {
   periodLabels,
   type PeriodKey,
 } from "./lib/format";
-import type { SourceProviderKey, UsageEvent, UsageSummary } from "./lib/types";
+import {
+  renderTokenUsageChartMarkdown,
+  type UsageBucket,
+} from "./lib/token-chart";
+import {
+  deserializeConversation,
+  supportsConversationDetailsFromSnapshot,
+} from "./lib/usage-snapshot";
+import type { SourceProviderKey } from "./lib/types";
+import { UsageDetailsView } from "./usage-details";
 
 /* ------------------------------------------------------------------ */
 /*  Preferences                                                       */
@@ -31,6 +40,7 @@ type Preferences = {
   codexBudget: string;
   cursorBudget: string;
   currency: string;
+  defaultSource: SourceProviderKey;
 };
 
 /* ------------------------------------------------------------------ */
@@ -87,7 +97,8 @@ const periodListTitles: Record<PeriodKey, string> = {
   month: "Month",
 };
 
-const REFRESH_INTERVAL = 60_000; // 1 minute
+/** Auto-refresh interval — full corpus rescans are expensive; 5 min keeps heap stable. */
+const REFRESH_INTERVAL = 5 * 60_000;
 
 /** Raycast list rows clip long titles; keep a single line with full detail on hover. */
 const WARN_TITLE_MAX = 42;
@@ -181,25 +192,19 @@ function formatBudgetPercent(pct: number): string {
 export default function Command() {
   const prefs = getPreferenceValues<Preferences>();
   const currency = prefs.currency || "USD";
-  const [tab, setTab] = useState<SourceProviderKey>("claude");
+  const defaultSource: SourceProviderKey = providersMeta.some(
+    (p) => p.key === prefs.defaultSource,
+  )
+    ? prefs.defaultSource
+    : "claude";
+  const [tab, setTab] = useState<SourceProviderKey>(defaultSource);
 
   const { isLoading, data, revalidate } = useCachedPromise(
-    async () => {
-      const range = getPeriodRange("month");
-      const result = await loadUsage(prefs, range);
-      return {
-        events: result.events.map((e) => ({
-          ...e,
-          timestamp: e.timestamp.toISOString(),
-        })),
-        errors: result.errors,
-      };
-    },
-    [],
-    { keepPreviousData: true },
+    async () => loadUsage(prefs, getPeriodRange("month"), tab),
+    [tab],
+    { keepPreviousData: false },
   );
 
-  // Auto-refresh every minute
   const intervalRef = useRef<ReturnType<typeof setInterval>>();
   useEffect(() => {
     intervalRef.current = setInterval(() => revalidate(), REFRESH_INTERVAL);
@@ -208,28 +213,9 @@ export default function Command() {
     };
   }, [revalidate]);
 
-  // Re-hydrate timestamps
-  const events: UsageEvent[] = (data?.events ?? []).map((e) => ({
-    ...e,
-    timestamp: new Date(e.timestamp),
-  }));
   const errors = data?.errors ?? [];
-
-  const filtered = events.filter((e) => e.provider === tab);
   const activeProvider = providersMeta.find((p) => p.key === tab)!;
-
   const budgets = budgetsForProvider(prefs, tab);
-
-  const periodRows = periods.map((period) => {
-    const range = getPeriodRange(period);
-    const periodEvents = filtered.filter((e) => {
-      const t = e.timestamp.getTime();
-      return t >= range.start.getTime() && t <= range.end.getTime();
-    });
-    const summary = buildSummary(periodEvents);
-    const budget = budgets ? budgets[period] : undefined;
-    return { period, summary, budget };
-  });
 
   const refreshAction = (
     <ActionPanel>
@@ -265,8 +251,29 @@ export default function Command() {
       }
     >
       <List.Section title="Usage">
-        {periodRows.map(({ period, summary, budget }) => {
-          const pct = budget && budget > 0 ? summary.estimatedCost / budget : 0;
+        {periods.map((period) => {
+          const snapshot = data?.periods[period];
+          const summary = snapshot ?? {
+            totalTokens: 0,
+            estimatedCost: 0,
+            hasEstimatedTokens: false,
+            hasEstimatedCost: false,
+            buckets: [] as UsageBucket[],
+            conversations: [],
+          };
+          const budget = budgets ? budgets[period] : undefined;
+          const chartMarkdown = renderTokenUsageChartMarkdown(
+            period,
+            summary.buckets,
+            activeProvider.brandColor,
+          );
+          const detailsAvailable = snapshot
+            ? supportsConversationDetailsFromSnapshot(tab, snapshot)
+            : false;
+          const conversations = summary.conversations.map(deserializeConversation);
+
+          const pct =
+            budget && budget > 0 ? summary.estimatedCost / budget : 0;
           const hasBudget = budget !== undefined && budget > 0;
 
           const spendStr = formatCurrencyMoney(summary.estimatedCost, currency);
@@ -316,6 +323,7 @@ export default function Command() {
               }
               detail={
                 <List.Item.Detail
+                  markdown={chartMarkdown}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label
@@ -326,35 +334,6 @@ export default function Command() {
                           tintColor: activeProvider.brandColor,
                         }}
                       />
-                      {hasBudget ? (
-                        <>
-                          <List.Item.Detail.Metadata.Label
-                            title="Budget"
-                            text={`${spendStr} / ${budgetStr}`}
-                            icon={{
-                              source: Icon.Coins,
-                              tintColor: activeProvider.brandColor,
-                            }}
-                          />
-                          <List.Item.Detail.Metadata.TagList title="Usage">
-                            <List.Item.Detail.Metadata.TagList.Item
-                              icon={{
-                                source: budgetProgressIcon(pct),
-                                tintColor: usageAccentColor(
-                                  pct,
-                                  activeProvider.brandColor,
-                                ),
-                              }}
-                              text={formatBudgetPercent(pct)}
-                              color={usageAccentColor(
-                                pct,
-                                activeProvider.brandColor,
-                              )}
-                            />
-                          </List.Item.Detail.Metadata.TagList>
-                        </>
-                      ) : null}
-                      <List.Item.Detail.Metadata.Separator />
                       <List.Item.Detail.Metadata.Label
                         title="Total Tokens"
                         text={formatTokens(summary.totalTokens)}
@@ -371,17 +350,62 @@ export default function Command() {
                           tintColor: activeProvider.brandColor,
                         }}
                       />
+                      {hasBudget ? (
+                        <List.Item.Detail.Metadata.TagList title="Usage">
+                          <List.Item.Detail.Metadata.TagList.Item
+                            icon={{
+                              source: budgetProgressIcon(pct),
+                              tintColor: usageAccentColor(
+                                pct,
+                                activeProvider.brandColor,
+                              ),
+                            }}
+                            text={formatBudgetPercent(pct)}
+                            color={usageAccentColor(
+                              pct,
+                              activeProvider.brandColor,
+                            )}
+                          />
+                        </List.Item.Detail.Metadata.TagList>
+                      ) : null}
                     </List.Item.Detail.Metadata>
                   }
                 />
               }
-              actions={refreshAction}
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Details"
+                    icon={Icon.List}
+                    target={
+                      <UsageDetailsView
+                        period={period}
+                        providerTitle={activeProvider.title}
+                        brandColor={activeProvider.brandColor}
+                        currency={currency}
+                        conversations={conversations}
+                        unavailableReason={
+                          detailsAvailable
+                            ? undefined
+                            : tab === "cursor"
+                              ? "Not available for Cursor."
+                              : "No per-chat breakdown is available for this period."
+                        }
+                      />
+                    }
+                  />
+                  <Action
+                    title="Refresh Data"
+                    icon={Icon.ArrowClockwise}
+                    onAction={() => revalidate()}
+                  />
+                </ActionPanel>
+              }
             />
           );
         })}
       </List.Section>
 
-      {/* ---- Warnings ---- */}
       {errors.length > 0 ? (
         <List.Section title="Warnings">
           {errors.map((err, i) => (
@@ -401,50 +425,4 @@ export default function Command() {
       ) : null}
     </List>
   );
-}
-
-/* ------------------------------------------------------------------ */
-/*  Helpers                                                           */
-/* ------------------------------------------------------------------ */
-
-function buildSummary(events: UsageEvent[]): UsageSummary {
-  const summary: UsageSummary = {
-    events: [],
-    inputTokens: 0,
-    outputTokens: 0,
-    cacheReadTokens: 0,
-    cacheWriteTokens: 0,
-    totalTokens: 0,
-    estimatedCost: 0,
-    hasEstimatedTokens: false,
-    hasEstimatedCost: false,
-    byModel: new Map(),
-  };
-
-  for (const event of events) {
-    summary.events.push(event);
-    summary.inputTokens += event.inputTokens;
-    summary.outputTokens += event.outputTokens;
-    summary.cacheReadTokens += event.cacheReadTokens;
-    summary.cacheWriteTokens += event.cacheWriteTokens;
-    summary.totalTokens += event.totalTokens;
-    summary.estimatedCost += event.estimatedCost;
-    summary.hasEstimatedTokens ||= event.estimatedTokens;
-    summary.hasEstimatedCost ||= event.estimatedCost > 0;
-
-    const model = event.model || "unknown";
-    const cur = summary.byModel.get(model) ?? {
-      model,
-      totalTokens: 0,
-      estimatedCost: 0,
-      count: 0,
-      estimated: false,
-    };
-    cur.totalTokens += event.totalTokens;
-    cur.estimatedCost += event.estimatedCost;
-    cur.count += 1;
-    cur.estimated ||= event.estimatedTokens || event.estimatedCost > 0;
-    summary.byModel.set(model, cur);
-  }
-  return summary;
 }
