@@ -15,7 +15,7 @@ export const useWorkspaces = () => {
 
   const workspaceEntries = workspaces
     .map((ws) => {
-      const sc = shortcuts.find((s) => s.id === `zen-workspace-switch-${ws.position / 1000}`);
+      const sc = shortcuts.find((s) => s.id === `zen-workspace-switch-${ws.position / 1000 + 1}`);
 
       return {
         ...ws,
