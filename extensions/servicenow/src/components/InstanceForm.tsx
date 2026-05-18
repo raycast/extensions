@@ -3,6 +3,7 @@ import { ActionPanel, Action, Form, Icon, useNavigation, Color, Keyboard, confir
 import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
 import crypto from "crypto";
 import { AuthMode, Instance } from "../types";
+import { normalizeInstanceName } from "../utils/instanceUrl";
 import { authorizeInstance } from "../utils/oauth";
 
 type InstanceFormValues = Omit<Instance, "id" | "authMode" | "accessToken" | "refreshToken" | "tokenExpiresAt"> & {
@@ -25,7 +26,7 @@ export default function InstanceForm({ onSubmit, onDelete, instance, initialName
     async onSubmit(values) {
       const normalized = {
         ...values,
-        name: values.name.trim().replace(/\/+$/, ""),
+        name: normalizeInstanceName(values.name),
         authMode: values.authMode as AuthMode,
       };
       let next: Instance = instance ? { ...instance, ...normalized } : { ...normalized, id: crypto.randomUUID() };

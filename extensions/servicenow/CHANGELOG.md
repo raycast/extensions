@@ -13,6 +13,7 @@
 ### Fixes
 
 - Fix Edit Favorite form opening empty when invoked from search results, code search, navigation history, navigation menu and record details.
+- Strip paths from pasted **Instance URL** values (e.g. `https://acme.service-now.com/login.do` is now stored as `https://acme.service-now.com`) so generated links don't break.
 
 ## [Fix] - 2025-05-14
 
