@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix repository search for many organizations] - {PR_MERGE_DATE}
+
+- Split My Repositories loading into smaller owner-specific searches to avoid GitHub 502 errors for users in many organizations.
+
 ## [Fix null pull request nodes crash] - 2026-05-15
 
 - Fixed `TypeError: Cannot read properties of null (reading 'id')` in **My Pull Requests** when the GitHub search API returns edges with a null `node` (e.g. PRs from repositories the user can no longer access).
