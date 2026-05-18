@@ -1,6 +1,6 @@
 # Craft CMS Changelog
 
-## [Craft CMS 6.x Docs] - {PR_MERGE_DATE}
+## [Craft CMS 6.x Docs] - 2026-05-18
 
 - Craft CMS 6.x option now available for docs version
 
