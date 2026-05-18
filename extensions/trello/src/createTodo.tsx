@@ -16,6 +16,10 @@ type Values = {
   idMember?: string[];
 };
 
+function toArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? value : [];
+}
+
 export default function Command() {
   const [boardResults, setBoards] = useState<Board[]>([]);
   const [listResults, setLists] = useState<List[]>([]);
@@ -29,7 +33,7 @@ export default function Command() {
     async function fetchBoards() {
       try {
         setLoading(true);
-        const response = await trelloClient.getBoards(false);
+        const response = toArray<Board>(await trelloClient.getBoards(false));
         setBoards(response);
         if (response[0]?.id) {
           setSelectedBoard(response[0].id);
@@ -47,8 +51,8 @@ export default function Command() {
   async function loadListsAndMembers(boardId: string) {
     try {
       setLoading(true);
-      const listsResponse = await trelloClient.getLists(boardId);
-      const membersResponse = await trelloClient.getBoardMembers(boardId);
+      const listsResponse = toArray<List>(await trelloClient.getLists(boardId));
+      const membersResponse = toArray<Member>(await trelloClient.getBoardMembers(boardId));
       setLists(listsResponse);
       setMembers(membersResponse);
       if (listsResponse[0]?.id) setSelectedList(listsResponse[0].id);

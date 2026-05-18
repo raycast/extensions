@@ -1,5 +1,9 @@
 # Trello Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Prevent the Create a Card form from crashing when board members cannot be loaded as a list.
+
 ## [Update] - 2026-03-25
 
 - Rebuilt extension with Trello REST client
