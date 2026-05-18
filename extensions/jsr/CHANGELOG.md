@@ -11,6 +11,7 @@
 - Adapt to JSR API changes (stats/featured packages)
 - Cache search API key
 - Code refactoring, improved readability and maintainability
+- Add a bunch of AI tools that can be used with JSR
 
 ## [Security Fix] - 2026-03-17
 
