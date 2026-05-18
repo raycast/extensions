@@ -20,7 +20,13 @@ export function isOAuthExpired(instance: Instance, bufferMs = TOKEN_REFRESH_BUFF
 
 const refreshInFlight = new Map<string, Promise<Instance>>();
 
-export async function getAuthHeader(instance: Instance): Promise<string> {
+export type OnTokenRefresh = (updated: Instance) => void | Promise<void>;
+
+export type GetAuthHeaderOptions = {
+  onRefresh?: OnTokenRefresh;
+};
+
+export async function getAuthHeader(instance: Instance, options?: GetAuthHeaderOptions): Promise<string> {
   if (instance.authMode !== "oauth") {
     const username = instance.username ?? "";
     const password = instance.password ?? "";
@@ -33,15 +39,19 @@ export async function getAuthHeader(instance: Instance): Promise<string> {
 
   let current = instance;
   if (isOAuthExpired(instance)) {
-    current = await refreshAndPersist(instance);
+    current = await refreshAndPersist(instance, options?.onRefresh);
   }
 
   return `Bearer ${current.accessToken}`;
 }
 
-async function refreshAndPersist(instance: Instance): Promise<Instance> {
+async function refreshAndPersist(instance: Instance, onRefresh?: OnTokenRefresh): Promise<Instance> {
   const existing = refreshInFlight.get(instance.id);
-  if (existing) return existing;
+  if (existing) {
+    const result = await existing;
+    if (onRefresh) await onRefresh(result);
+    return result;
+  }
 
   const promise = (async () => {
     try {
@@ -59,7 +69,9 @@ async function refreshAndPersist(instance: Instance): Promise<Instance> {
   });
 
   refreshInFlight.set(instance.id, promise);
-  return promise;
+  const result = await promise;
+  if (onRefresh) await onRefresh(result);
+  return result;
 }
 
 export async function refreshOAuthToken(

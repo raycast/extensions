@@ -76,7 +76,12 @@ export default function useInstances() {
 
     const fetchUserId = async () => {
       try {
-        const authorization = await getAuthHeader(selectedInstance);
+        const authorization = await getAuthHeader(selectedInstance, {
+          onRefresh: async (updated) => {
+            setSelectedInstance(updated);
+            await mutate();
+          },
+        });
         const response = await fetch(`${getInstanceBaseUrl(selectedInstance)}/api/now/ui/user/current_user`, {
           method: "GET",
           headers: {
