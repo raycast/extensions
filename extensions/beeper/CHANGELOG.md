@@ -1,6 +1,6 @@
 # Beeper Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-18
 
 - Limited chat message loading to one page at a time to avoid memory pressure in large conversations
 
