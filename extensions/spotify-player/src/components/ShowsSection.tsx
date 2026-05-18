@@ -4,7 +4,7 @@ import { SimplifiedShowObject } from "../helpers/spotify.api";
 
 type ShowsSectionProps = {
   type: "list" | "grid";
-  shows: SimplifiedShowObject[] | undefined;
+  shows: (SimplifiedShowObject | null | undefined)[] | undefined;
   columns?: number;
   limit?: number;
 };
@@ -12,7 +12,9 @@ type ShowsSectionProps = {
 export function ShowsSection({ type, shows, columns, limit }: ShowsSectionProps) {
   if (!shows) return null;
 
-  const items = shows.slice(0, limit || shows.length);
+  const items = shows.filter((show): show is SimplifiedShowObject => Boolean(show?.id)).slice(0, limit || shows.length);
+
+  if (!items.length) return null;
 
   return (
     <ListOrGridSection type={type} title="Podcasts & Shows" columns={columns}>
