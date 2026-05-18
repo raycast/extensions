@@ -1,6 +1,6 @@
 # Battery Menu Bar Changelog
 
-## [Added Multi-Device Battery Support and Data Fallbacks] - {PR_MERGE_DATE}
+## [Added Multi-Device Battery Support and Data Fallbacks] - 2026-05-18
 
 - Added Bluetooth device battery section in the menu bar view for connected accessories.
 - Added parsing support for multiple Bluetooth battery fields (`device_batteryLevel`, `device_batteryLevelMain`, left/right/case values).
