@@ -1,6 +1,6 @@
 # raycast-ollama Changelog
 
-## [Improvement and Fix] - {PR_MERGE_DATE}
+## [Improvement and Fix] - 2026-05-18
 
 - [Improvement] The thinking process is now shown in a separate section.
 - [Improvement] You can now choose the level of thinking effort.
