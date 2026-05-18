@@ -1,7 +1,7 @@
 import { getPreferenceValues, updateCommandMetadata } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
-import { getGhCommand, getGhEnv } from "./preferences";
+import { getGhCommand, ghEnv } from "./preferences";
 import { RateLimitResponseSchema } from "./types";
 import { applyTemplate, buildSubstitutions } from "./useGHRateLimit";
 
@@ -14,7 +14,7 @@ export default async function GHUsageStats() {
     const { stdout } = await execFileAsync(
       getGhCommand(),
       ["api", "rate_limit"],
-      { env: getGhEnv() },
+      { env: ghEnv },
     );
     const data = RateLimitResponseSchema.parse(JSON.parse(stdout));
     updateCommandMetadata({
