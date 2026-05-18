@@ -1,6 +1,11 @@
 import type { RuntimeCompat } from "@/types";
 
-export const generateFormData = (query: string, scope: string | null, runtimes: RuntimeCompat): FormData => {
+export const generateSearchBody = (
+  query: string,
+  scope: string | null,
+  runtimes: RuntimeCompat,
+  limit = 50,
+): string => {
   const whereClauses = Array<{ [key: string]: unknown }>();
   if (scope) {
     whereClauses.push({ scope: scope });
@@ -14,12 +19,10 @@ export const generateFormData = (query: string, scope: string | null, runtimes: 
     whereClauses.length > 0 ? { where: whereClauses.reduce((acc, clause) => ({ ...acc, ...clause }), {}) } : {};
   const body = {
     term: query,
-    limit: 50,
+    limit,
     mode: "fulltext",
     boost: { id: 3, scope: 2, name: 1, description: 0.5 },
     ...whereClause,
   };
-  const formData = new FormData();
-  formData.append("q", JSON.stringify(body));
-  return formData;
+  return JSON.stringify(body);
 };
