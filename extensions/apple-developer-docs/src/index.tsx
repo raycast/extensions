@@ -1,11 +1,11 @@
-import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, Icon, List } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { capitalizeRecursively, getIcon, makeUrl, makeUrlMarkdown } from "./utils";
 import { config } from "./config";
 import { useFetch } from "@raycast/utils";
 import useSearchedResults from "./hooks/useSearchedResults";
 import DevOnlyActionPanel from "./DevOnlyActionPanel";
-import useArchiveResults from "./hooks/useArchiveResults";
+import useArchiveResults, { ArchiveIndexStatus } from "./hooks/useArchiveResults";
 
 type Preferences = {
   includeArchiveResults: boolean;
@@ -79,11 +79,11 @@ export default function Command() {
       (result) => searchText.trim() === "" || result.title.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [searchedResults, searchText, typeFilter]);
-  const { results: archiveResults, isLoading: isLoadingArchiveResults } = useArchiveResults(
-    query,
-    typeFilter,
-    includeArchiveResults
-  );
+  const {
+    results: archiveResults,
+    isLoading: isLoadingArchiveResults,
+    status: archiveIndexStatus,
+  } = useArchiveResults(query, typeFilter, includeArchiveResults);
   const results = useMemo(() => {
     if (typeFilter === "archive") {
       return archiveResults;
@@ -116,6 +116,9 @@ export default function Command() {
           <SearchListItem result={data.featuredResult} onVisit={markAsSearched} />
         </List.Section>
       )}
+      {archiveIndexStatus.isEnabled && archiveIndexStatus.phase !== "ready" && archiveIndexStatus.phase !== "idle" && (
+        <ArchiveIndexStatusItem status={archiveIndexStatus} />
+      )}
       <List.Section title={resultsTitle} subtitle={results.length + ""}>
         {results.map((result) => (
           <SearchListItem key={`${result.order}_${result.url}`} result={result} onVisit={markAsSearched} />
@@ -135,6 +138,47 @@ function sortResultsByRelevance(results: SearchResult[], query: string) {
     .map((result, index) => ({ result, index, score: scoreResult(result, terms) }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ result }) => result);
+}
+
+function ArchiveIndexStatusItem({ status }: { status: ArchiveIndexStatus }) {
+  const { title, subtitle, icon } = getArchiveIndexStatusDisplay(status);
+
+  return (
+    <List.Section title="Archive Index">
+      <List.Item title={title} subtitle={subtitle} icon={icon} />
+    </List.Section>
+  );
+}
+
+function getArchiveIndexStatusDisplay(status: ArchiveIndexStatus) {
+  switch (status.phase) {
+    case "loading-documents":
+      return {
+        title: "Downloading archive document index",
+        subtitle: "This runs once and will be cached locally.",
+        icon: Icon.Download,
+      };
+    case "building-toc":
+      return {
+        title: "Building archive chapter index",
+        subtitle: `${status.processedBooks} of ${status.totalBooks || "?"} books processed · ${
+          status.tocCount
+        } chapters indexed`,
+        icon: Icon.CircleProgress,
+      };
+    case "error":
+      return {
+        title: "Archive index failed",
+        subtitle: "Check your network connection, then run the search again.",
+        icon: Icon.ExclamationMark,
+      };
+    default:
+      return {
+        title: "Archive index enabled",
+        subtitle: `${status.documentCount} documents · ${status.tocCount} chapters cached`,
+        icon: Icon.Checkmark,
+      };
+  }
 }
 
 function scoreResult(result: SearchResult, terms: string[]) {
@@ -311,15 +355,39 @@ function SearchListItem({ result, onVisit }: { result: ResultLike } & Visitable)
   const icon = useMemo(() => {
     return result.type === "featured" ? makeUrl((result as FeaturedResult).icon) : getIcon(result.type);
   }, [result]);
+  const subtitle = useMemo(() => {
+    if (result.type === "featured") {
+      return undefined;
+    }
+
+    const searchResult = result as SearchResult;
+    return searchResult.type === "archive" ? searchResult.description : searchResult.platform.join(", ");
+  }, [result]);
+  const accessories = useMemo(() => {
+    if (result.type === "featured") {
+      return undefined;
+    }
+
+    return getResultAccessories(result as SearchResult);
+  }, [result]);
 
   return (
     <List.Item
       title={result.title}
       icon={icon}
-      subtitle={result.type !== "featured" ? (result as SearchResult).platform.join(", ") : undefined}
+      subtitle={subtitle}
+      accessories={accessories}
       actions={<ItemActionPanel result={result} onVisit={onVisit} />}
     />
   );
+}
+
+function getResultAccessories(result: SearchResult): List.Item.Accessory[] {
+  if (result.type === "archive") {
+    return [{ text: "Archive", icon: Icon.Box, tooltip: "Apple Documentation Archive" }];
+  }
+
+  return [{ text: capitalizeRecursively(result.type.replace("_", " ").toLowerCase()), icon: getIcon(result.type) }];
 }
 
 type TypeDropdownProps = {

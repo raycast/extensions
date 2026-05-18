@@ -9,6 +9,15 @@ const ARCHIVE_TOC_REQUEST_TIMEOUT_MS = 5000;
 const ARCHIVE_TOC_CONCURRENCY = 4;
 const cache = new Cache({ namespace: "apple-developer-docs-archive", capacity: 25 * 1024 * 1024 });
 
+export type ArchiveIndexStatus = {
+  isEnabled: boolean;
+  phase: "disabled" | "idle" | "loading-documents" | "building-toc" | "ready" | "error";
+  documentCount: number;
+  tocCount: number;
+  processedBooks: number;
+  totalBooks: number;
+};
+
 type ArchiveLibrary = {
   columns: {
     name: number;
@@ -59,6 +68,8 @@ export default function useArchiveResults(
   const [tocResults, setTocResults] = useState<SearchResult[]>(() => readCachedResults(ARCHIVE_TOC_CACHE_KEY));
   const [isLoadingDocuments, setIsLoadingDocuments] = useState(documentResults.length === 0);
   const [isBuildingToc, setIsBuildingToc] = useState(false);
+  const [hasArchiveError, setHasArchiveError] = useState(false);
+  const [tocProgress, setTocProgress] = useState({ processedBooks: 0, totalBooks: 0 });
   const shouldSearchArchive = includeArchiveResults && (typeFilter === "all" || typeFilter === "archive");
   const shouldLoadArchive = shouldSearchArchive && query.trim().length > 1;
 
@@ -70,6 +81,7 @@ export default function useArchiveResults(
 
     let isMounted = true;
     setIsLoadingDocuments(true);
+    setHasArchiveError(false);
 
     fetchArchiveDocumentResults()
       .then((results) => {
@@ -82,6 +94,7 @@ export default function useArchiveResults(
       })
       .catch(() => {
         if (isMounted) {
+          setHasArchiveError(true);
           setIsLoadingDocuments(false);
         }
       });
@@ -105,11 +118,19 @@ export default function useArchiveResults(
     let isMounted = true;
     setIsBuildingToc(true);
 
-    buildArchiveTocResults(documentResults, (results) => {
-      if (isMounted) {
-        setTocResults(results);
+    buildArchiveTocResults(
+      documentResults,
+      (results) => {
+        if (isMounted) {
+          setTocResults(results);
+        }
+      },
+      (progress) => {
+        if (isMounted) {
+          setTocProgress(progress);
+        }
       }
-    })
+    )
       .then((results) => {
         if (!isMounted) {
           return;
@@ -120,6 +141,7 @@ export default function useArchiveResults(
       })
       .catch(() => {
         if (isMounted) {
+          setHasArchiveError(true);
           setIsBuildingToc(false);
         }
       });
@@ -149,7 +171,81 @@ export default function useArchiveResults(
       .map(({ result }) => result);
   }, [archiveResults, query, shouldSearchArchive]);
 
-  return { results, isLoading: includeArchiveResults && isLoadingDocuments };
+  const status = useMemo<ArchiveIndexStatus>(() => {
+    if (!includeArchiveResults) {
+      return {
+        isEnabled: false,
+        phase: "disabled",
+        documentCount: 0,
+        tocCount: 0,
+        processedBooks: 0,
+        totalBooks: 0,
+      };
+    }
+
+    if (hasArchiveError) {
+      return {
+        isEnabled: true,
+        phase: "error",
+        documentCount: documentResults.length,
+        tocCount: tocResults.length,
+        processedBooks: tocProgress.processedBooks,
+        totalBooks: tocProgress.totalBooks,
+      };
+    }
+
+    if (isLoadingDocuments) {
+      return {
+        isEnabled: true,
+        phase: "loading-documents",
+        documentCount: documentResults.length,
+        tocCount: tocResults.length,
+        processedBooks: tocProgress.processedBooks,
+        totalBooks: tocProgress.totalBooks,
+      };
+    }
+
+    if (isBuildingToc) {
+      return {
+        isEnabled: true,
+        phase: "building-toc",
+        documentCount: documentResults.length,
+        tocCount: tocResults.length,
+        processedBooks: tocProgress.processedBooks,
+        totalBooks: tocProgress.totalBooks,
+      };
+    }
+
+    if (documentResults.length > 0 && tocResults.length > 0) {
+      return {
+        isEnabled: true,
+        phase: "ready",
+        documentCount: documentResults.length,
+        tocCount: tocResults.length,
+        processedBooks: tocProgress.processedBooks,
+        totalBooks: tocProgress.totalBooks,
+      };
+    }
+
+    return {
+      isEnabled: true,
+      phase: "idle",
+      documentCount: documentResults.length,
+      tocCount: tocResults.length,
+      processedBooks: tocProgress.processedBooks,
+      totalBooks: tocProgress.totalBooks,
+    };
+  }, [
+    documentResults.length,
+    hasArchiveError,
+    includeArchiveResults,
+    isBuildingToc,
+    isLoadingDocuments,
+    tocProgress,
+    tocResults.length,
+  ]);
+
+  return { results, isLoading: includeArchiveResults && isLoadingDocuments, status };
 }
 
 function readCachedResults(key: string) {
@@ -186,11 +282,16 @@ async function fetchArchiveDocumentResults() {
   }
 }
 
-async function buildArchiveTocResults(documentResults: SearchResult[], onProgress: (results: SearchResult[]) => void) {
+async function buildArchiveTocResults(
+  documentResults: SearchResult[],
+  onResultsProgress: (results: SearchResult[]) => void,
+  onIndexProgress: (progress: { processedBooks: number; totalBooks: number }) => void
+) {
   const bookCandidates = documentResults.filter(isBookCandidate);
   const results: SearchResult[] = [];
   let nextIndex = 0;
   let completedCount = 0;
+  onIndexProgress({ processedBooks: 0, totalBooks: bookCandidates.length });
 
   async function worker() {
     for (;;) {
@@ -204,15 +305,16 @@ async function buildArchiveTocResults(documentResults: SearchResult[], onProgres
       const tocResults = await fetchArchiveBookTocResults(document);
       results.push(...tocResults);
       completedCount += 1;
+      onIndexProgress({ processedBooks: completedCount, totalBooks: bookCandidates.length });
 
       if (tocResults.length > 0 && completedCount % 20 === 0) {
-        onProgress([...results]);
+        onResultsProgress([...results]);
       }
     }
   }
 
   await Promise.all(Array.from({ length: ARCHIVE_TOC_CONCURRENCY }, worker));
-  onProgress(results);
+  onResultsProgress(results);
   cache.set(ARCHIVE_TOC_CACHE_KEY, JSON.stringify(results));
 
   return results;
