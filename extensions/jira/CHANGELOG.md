@@ -1,5 +1,9 @@
 # Jira Changelog
 
+## [Bug Fix] - {PR_MERGE_DATE}
+
+- Loaded all saved filters in the My Filters command instead of stopping after the first 100 results
+
 ## [Open Issues sprint/backlog split config] - 2026-04-16
 
 - Added new `Open Issues` checkboxes to choose which sections to show: `Active Sprint`, `All Sprints`, and `Backlog`.
