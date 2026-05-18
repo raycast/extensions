@@ -21,7 +21,12 @@ export function BuildListItem({ build }: BuildListItemProps) {
         <ActionPanel>
           <Action.OpenInBrowser url={build.url} />
           <Action.CopyToClipboard content={build.url} title="Copy URL" />
-          <Action.Push title="Show Build Graph" icon={Icon.AppWindowGrid3x3} target={<BuildDetails build={build} />} />
+          <Action.Push
+            title="Show Build Graph"
+            icon={Icon.AppWindowGrid3x3}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "g" }}
+            target={<BuildDetails build={build} />}
+          />
         </ActionPanel>
       }
     />
