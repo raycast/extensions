@@ -30,10 +30,14 @@ function resolveAuthenticatedImageUri(uri: string, baseUrl: string) {
       return null;
     }
 
-    const restPathIndex = url.pathname.indexOf("/rest/");
+    if (baseUrl.includes("api.atlassian.com/ex/jira/")) {
+      if (url.hostname === "api.atlassian.com") {
+        return uri;
+      }
 
-    if (baseUrl.includes("api.atlassian.com/ex/jira/") && restPathIndex >= 0) {
-      return `${baseUrl}${url.pathname.slice(restPathIndex)}${url.search}`;
+      const restPathIndex = url.pathname.indexOf("/rest/");
+      const path = restPathIndex >= 0 ? url.pathname.slice(restPathIndex) : url.pathname;
+      return `${baseUrl}${path}${url.search}`;
     }
 
     return uri;
