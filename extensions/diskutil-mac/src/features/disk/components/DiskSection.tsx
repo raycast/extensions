@@ -35,6 +35,10 @@ export default class DiskSection {
     await Promise.allSettled(initPromises);
   }
 
+  /**
+   * Create DiskSection from section string
+   * Parses section name and disk strings, then creates Disk instances
+   */
   static createFromString(sectionString: string): DiskSection {
     const sectionNameMatches = sectionString.match(/(\/.+:)/gm);
     const sectionName = sectionNameMatches ? sectionNameMatches[0] : "";

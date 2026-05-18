@@ -3,6 +3,9 @@
 ## [1.3.0] - Performance Improvements - 2026-05-19
 
   
+## [Bugfix] - {PR_MERGE_DATE}
+
+- Limit concurrent disk detail loading so large disk lists do not all time out at once.
 
 ## [Bugfix] - 2026-05-17
 

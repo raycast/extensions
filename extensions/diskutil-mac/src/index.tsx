@@ -5,6 +5,8 @@ import { SizesView, cycleSizesView, loadSizesView, saveSizesView } from "./utils
 import { execDiskCommand } from "./utils/diskUtils";
 import DiskListItem from "./features/disk/components/DiskListItem";
 
+const DISK_INIT_CONCURRENCY = 4;
+
 export default function ListDisks(): JSX.Element {
   const [diskSections, setDisksSections] = useState<DiskSection[]>([]);
   const [showingDetail, setShowingDetail] = useState({ show: false, detail: 0 });
@@ -102,32 +104,57 @@ export default function ListDisks(): JSX.Element {
       completedInBatch = 0;
     };
 
-    const sectionInitPromises = sections.map((section) =>
-      section.initDisks(() => {
-        completedDisks++;
-        completedInBatch++;
+    const disks = sections.flatMap((section) => section.disks);
+    let nextDiskIndex = 0;
 
-        if (isProgressiveLoad) {
-          if (completedInBatch >= BATCH_SIZE) {
-            triggerBatchUpdate();
-            return;
-          }
+    const handleDiskInitialized = () => {
+      completedDisks++;
+      completedInBatch++;
 
-          if (completedDisks === totalDisks) {
-            triggerBatchUpdate();
-            return;
-          }
-
-          if (!updateTimer) {
-            updateTimer = setTimeout(() => {
-              triggerBatchUpdate();
-            }, BATCH_TIMEOUT_MS);
-          }
+      if (isProgressiveLoad) {
+        if (completedInBatch >= BATCH_SIZE) {
+          triggerBatchUpdate();
+          return;
         }
-      }),
-    );
 
-    await Promise.allSettled(sectionInitPromises);
+        if (completedDisks === totalDisks) {
+          triggerBatchUpdate();
+          return;
+        }
+
+        if (!updateTimer) {
+          updateTimer = setTimeout(() => {
+            triggerBatchUpdate();
+          }, BATCH_TIMEOUT_MS);
+        }
+      }
+    };
+
+    const initializeNextDisk = async () => {
+      while (nextDiskIndex < disks.length) {
+        const disk = disks[nextDiskIndex];
+        nextDiskIndex++;
+
+        try {
+          disk.startInit();
+          await disk.init();
+          disk.finishInit(true);
+        } catch (error) {
+          disk.finishInit(false);
+          console.error(`Failed to initialize ${disk.identifier}:`, error);
+        } finally {
+          handleDiskInitialized();
+        }
+      }
+    };
+
+    const workers = Array.from({ length: Math.min(DISK_INIT_CONCURRENCY, disks.length) }, initializeNextDisk);
+
+    await Promise.allSettled(workers);
+
+    if (totalDisks === 0 && isProgressiveLoad) {
+      setDiskUpdateTrigger((prev) => prev + 1);
+    }
 
     if (updateTimer) {
       clearTimeout(updateTimer);
