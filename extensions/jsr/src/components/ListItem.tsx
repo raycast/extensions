@@ -5,6 +5,7 @@ import { Action, ActionPanel, Color, Icon, List, getPreferenceValues } from "@ra
 import type { SearchResultDocument } from "@/types";
 
 import { compatIcons } from "@/lib/compat";
+import { jsrUrls } from "@/lib/jsrUrls";
 
 import CopyActions from "@/components/CopyActions";
 import ItemDetails from "@/components/ItemDetails";
@@ -43,7 +44,7 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQ
                 <Action.OpenInBrowser
                   title="Open Main Page (JSR)"
                   icon={{ source: "jsr.svg" }}
-                  url={`https://jsr.io/${item.id}`}
+                  url={jsrUrls.site.package(item.id)}
                 />
                 <Action title="Toggle Details" icon={Icon.AppWindowSidebarLeft} onAction={() => toggleDetails()} />
               </>
@@ -53,7 +54,7 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQ
                 <Action.OpenInBrowser
                   title="Open Main Page (JSR)"
                   icon={{ source: "jsr.svg" }}
-                  url={`https://jsr.io/${item.id}`}
+                  url={jsrUrls.site.package(item.id)}
                 />
               </>
             )}
@@ -62,7 +63,7 @@ const ListItem = ({ item, toggleDetails, isShowingDetails, extraActions, searchQ
             <Action.OpenInBrowser
               title="Open Docs (JSR)"
               icon={{ source: Icon.Document }}
-              url={`https://jsr.io/${item.id}/doc`}
+              url={jsrUrls.site.packageDocs(item.id)}
               shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
             />
             <Action.Push

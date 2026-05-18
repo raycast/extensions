@@ -1,3 +1,5 @@
+import { useRef } from "react";
+
 import { captureException } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
 
@@ -13,6 +15,8 @@ import type {
   WithKey,
 } from "@/types";
 
+import { jsrUrls } from "@/lib/jsrUrls";
+
 /**
  * Shape returned by the trimmed `/stats` endpoint (post-2025 migration). Each
  * `newest` / `featured` item is just `{scope, name}`; the full `Package` shape
@@ -23,15 +27,16 @@ type RawStatsData = {
   featured: NameAndScope[];
 };
 
-const fetchPackage = async (scope: string, name: string): Promise<Package | null> => {
+const fetchPackage = async (scope: string, name: string, signal?: AbortSignal): Promise<Package | null> => {
   try {
-    const res = await fetch(`https://api.jsr.io/scopes/${scope}/packages/${name}`);
+    const res = await fetch(jsrUrls.api.package(scope, name), { signal });
     if (!res.ok) {
       captureException(new Error(`Failed to fetch package @${scope}/${name}: ${res.status} ${res.statusText}`));
       return null;
     }
     return (await res.json()) as Package;
   } catch (err) {
+    if ((err as Error).name === "AbortError") return null;
     captureException(err);
     return null;
   }
@@ -46,13 +51,15 @@ const fetchPackage = async (scope: string, name: string): Promise<Package | null
  * @param {boolean} enabled - Whether to enable the stats data.
  */
 export const useStats = (enabled = true) => {
+  const abortable = useRef<AbortController | null>(null);
   return useCachedPromise(
     async (): Promise<StatsData> => {
-      const res = await fetch("https://api.jsr.io/stats");
+      const signal = abortable.current?.signal;
+      const res = await fetch(jsrUrls.api.stats(), { signal });
       const raw = (await res.json()) as RawStatsData;
 
       const enrich = async (items: NameAndScope[]): Promise<Package[]> => {
-        const results = await Promise.all(items.map((item) => fetchPackage(item.scope, item.name)));
+        const results = await Promise.all(items.map((item) => fetchPackage(item.scope, item.name, signal)));
         return results.filter((pkg): pkg is Package => pkg !== null);
       };
 
@@ -61,7 +68,7 @@ export const useStats = (enabled = true) => {
       return { newest, featured };
     },
     [],
-    { execute: enabled, keepPreviousData: true },
+    { execute: enabled, keepPreviousData: true, abortable },
   );
 };
 
@@ -71,7 +78,7 @@ export const useStats = (enabled = true) => {
  * @param {NameAndScope | null} item - The package name and scope.
  */
 export const usePackage = (item: NameAndScope | null) => {
-  const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}`;
+  const url = item ? jsrUrls.api.package(item.scope, item.name) : "";
   return useFetch<Package>(url, { execute: !!item });
 };
 
@@ -81,7 +88,7 @@ export const usePackage = (item: NameAndScope | null) => {
  * @param {NameAndScope | null} item - The package name and scope.
  */
 export const useVersions = (item: NameAndScope | null) => {
-  const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/versions`;
+  const url = item ? jsrUrls.api.versions(item.scope, item.name) : "";
   return useFetch<VersionPackage[]>(url, { execute: !!item });
 };
 
@@ -91,7 +98,7 @@ export const useVersions = (item: NameAndScope | null) => {
  * @param {NameAndScope | null} item - The package name and scope.
  */
 export const useScore = (item: NameAndScope | null) => {
-  const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/score`;
+  const url = item ? jsrUrls.api.score(item.scope, item.name) : "";
   return useFetch<PackageScore>(url, { execute: !!item });
 };
 
@@ -101,7 +108,7 @@ export const useScore = (item: NameAndScope | null) => {
  * @param {NameAndScope | null} item - The package name and scope.
  */
 export const useDependents = (item: NameAndScope | null) => {
-  const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/dependents?limit=100`;
+  const url = item ? jsrUrls.api.dependents(item.scope, item.name) : "";
   return useFetch<ApiResults<WithKey<Dependent>>>(url, {
     execute: !!item,
     onError(err) {
@@ -132,7 +139,7 @@ export const useDependents = (item: NameAndScope | null) => {
  * @param {string | null} version - The package version.
  */
 export const useDependencies = (item: NameAndScope | null, version: string | null) => {
-  const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/versions/${version}/dependencies?limit=100`;
+  const url = item && version ? jsrUrls.api.dependencies(item.scope, item.name, version) : "";
   return useFetch<Dependency[]>(url, {
     execute: !!item && !!version,
     onError(err) {
@@ -155,6 +162,6 @@ export const useDependencies = (item: NameAndScope | null, version: string | nul
  * @param {string} scope - The scope.
  */
 export const usePackages = (scope: string) => {
-  const url = `https://api.jsr.io/scopes/${scope}/packages?limit=100`;
+  const url = jsrUrls.api.scopePackages(scope);
   return useFetch<ApiResults<Package>>(url);
 };

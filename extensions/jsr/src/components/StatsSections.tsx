@@ -34,7 +34,7 @@ const StatsSections = ({
         {statsData.featured.map((result) => (
           <ListItem
             searchQueryURL={searchQueryURL}
-            key={`featured/${result.scope}/${result.name}`}
+            key={`featured/${result.scope ?? "unknown"}/${result.name ?? "unknown"}`}
             item={packageToSearchResultDocument(result)}
             toggleDetails={() => {
               setIsShowingDetails((state) => !state);
@@ -48,7 +48,7 @@ const StatsSections = ({
         {statsData.newest.map((result) => (
           <ListItem
             searchQueryURL={searchQueryURL}
-            key={`newest/${result.scope}/${result.name}`}
+            key={`newest/${result.scope ?? "unknown"}/${result.name ?? "unknown"}`}
             item={packageToSearchResultDocument(result)}
             toggleDetails={() => {
               setIsShowingDetails((state) => !state);

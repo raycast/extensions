@@ -1,10 +1,12 @@
 import { formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
 
-import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, captureException } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 
 import type { NameAndScope } from "@/types";
+
+import { jsrUrls } from "@/lib/jsrUrls";
 
 import { useVersions } from "@/hooks/jsrApi";
 
@@ -13,7 +15,7 @@ export const VersionList = (props: NameAndScope) => {
 
   useEffect(() => {
     if (error) {
-      console.error("Failed to fetch JSR version data", error);
+      captureException(error);
       showFailureToast({
         title: "Error fetching JSR version data",
         message: error.message,
@@ -43,7 +45,7 @@ export const VersionList = (props: NameAndScope) => {
                 <Action.OpenInBrowser
                   title="Open Specific Version (JSR)"
                   icon={{ source: "jsr.svg" }}
-                  url={`https://jsr.io/@${result.scope}/${result.package}@${result.version}`}
+                  url={jsrUrls.site.scopePackageVersion(result.scope, result.package, result.version)}
                 />
               </ActionPanel.Section>
               <ActionPanel.Section title="Import Command">

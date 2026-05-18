@@ -15,6 +15,9 @@ export const useSelectedPackage = () => {
     }
 
     const [scope, name] = selectedId.split("/");
+    if (!scope || !name) {
+      return null;
+    }
     return { scope, name };
   }, [selectedId]);
 

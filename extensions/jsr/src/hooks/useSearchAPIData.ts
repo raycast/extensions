@@ -4,6 +4,8 @@ import { useCallback, useRef } from "react";
 import { captureException, environment } from "@raycast/api";
 import { useFetch, useLocalStorage } from "@raycast/utils";
 
+import { jsrUrls } from "@/lib/jsrUrls";
+
 type SearchAPIData = {
   projectId: string;
   apiKey: string;
@@ -100,7 +102,7 @@ export const useSearchAPIData = () => {
     isLoading: isScraping,
     error,
     revalidate,
-  } = useFetch<SearchAPIData | null>("https://jsr.io", {
+  } = useFetch<SearchAPIData | null>(jsrUrls.site.home(), {
     method: "GET",
     headers: {
       Agent: `Raycast/${environment.raycastVersion} ${environment.extensionName} (https://raycast.com)`,

@@ -2,16 +2,17 @@ import { formatDistanceToNow } from "date-fns";
 import { useEffect } from "react";
 
 import type { Color } from "@raycast/api";
-import { Detail, Icon, List, open, useNavigation } from "@raycast/api";
+import { Detail, Icon, List, captureException, open } from "@raycast/api";
 import { getProgressIcon, showFailureToast } from "@raycast/utils";
 
 import type { SearchResultDocument } from "@/types";
 
 import { compatIcons } from "@/lib/compat";
+import { jsrUrls } from "@/lib/jsrUrls";
 
 import { useDependencies, useDependents, usePackage, usePackages } from "@/hooks/jsrApi";
 
-import Search from "@/components/Search";
+import { useNavigationContext } from "@/context/NavigationContext";
 
 const ItemDetails = ({
   item,
@@ -22,7 +23,7 @@ const ItemDetails = ({
   progress: number;
   iconColor: Color;
 }) => {
-  const { push } = useNavigation();
+  const nav = useNavigationContext();
   const icons = compatIcons(item);
   const { data, isLoading, error } = usePackage(item);
 
@@ -35,7 +36,7 @@ const ItemDetails = ({
 
   useEffect(() => {
     if (error) {
-      console.error("Failed to fetch JSR item details", error);
+      captureException(error);
       showFailureToast({
         title: "Error fetching JSR item details",
         message: error.message,
@@ -57,7 +58,7 @@ const ItemDetails = ({
                   <Detail.Metadata.TagList.Item
                     text={`${scopePackages?.items.length}`}
                     icon={Icon.Box}
-                    onAction={() => push(<Search scope={item.scope} />)}
+                    onAction={() => nav?.openScope(item.scope)}
                   />
                 ) : null}
               </Detail.Metadata.TagList>
@@ -93,9 +94,9 @@ const ItemDetails = ({
                     text={`${dep.kind}:${dep.name}${dep.path ? `/${dep.path}` : ""}`}
                     onAction={() => {
                       if (dep.kind === "jsr") {
-                        open(`https://jsr.io/${dep.name}`);
+                        open(jsrUrls.site.package(dep.name));
                       } else if (dep.kind === "npm") {
-                        open(`https://www.npmjs.com/package/${dep.name}`);
+                        open(jsrUrls.site.npmPackage(dep.name));
                       }
                     }}
                   />
@@ -113,7 +114,9 @@ const ItemDetails = ({
                     key={dep.key}
                     text={`jsr:@${dep.scope}/${dep.package}`}
                     onAction={() => {
-                      open(`https://jsr.io/@${dep.scope}/${dep.package}`);
+                      if (dep.package) {
+                        open(jsrUrls.site.scopePackage(dep.scope, dep.package));
+                      }
                     }}
                   />
                 ))}
@@ -121,12 +124,12 @@ const ItemDetails = ({
             </>
           ) : null}
           <Detail.Metadata.Separator />
-          <Detail.Metadata.Link title="JSR" text="View on jsr.io" target={`https://jsr.io/${item.id}`} />
+          <Detail.Metadata.Link title="JSR" text="View on jsr.io" target={jsrUrls.site.package(item.id)} />
           {data?.githubRepository?.owner && data?.githubRepository?.name ? (
             <Detail.Metadata.Link
               title="GitHub"
               text="View on GitHub"
-              target={`https://github.com/${data.githubRepository.owner}/${data.githubRepository.name}`}
+              target={jsrUrls.site.github(data.githubRepository.owner, data.githubRepository.name)}
             />
           ) : null}
         </Detail.Metadata>
