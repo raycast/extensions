@@ -5,7 +5,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 import type { ErrorResult, SearchResult, SearchResults } from "@/types";
 
-import { generateSearchBody } from "@/lib/formdata";
+import { generateSearchBody } from "@/lib/searchBody";
 
 import { useQueryParser } from "@/hooks/useQueryParser";
 import { useSearchAPIData } from "@/hooks/useSearchAPIData";
@@ -13,7 +13,7 @@ import { useSearchAPIData } from "@/hooks/useSearchAPIData";
 export const useJSRSearch = (queryString: string, scoped: string | null) => {
   const { query, scope, triggerQuery, runtimes, searchQueryURL } = useQueryParser(queryString, scoped);
   const { data: apiData, isLoading: isLoadingAPIData, error: apiDataError } = useSearchAPIData();
-  const abortable = useRef<AbortController>(null);
+  const abortable = useRef<AbortController | null>(null);
 
   const searchURL = useMemo(() => {
     if (!apiData || isLoadingAPIData) {

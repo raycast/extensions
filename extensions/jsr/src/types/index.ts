@@ -13,13 +13,12 @@ export type RuntimeCompat = {
 
 export type DescriptionAndRuntimeCompat = {
   description: string;
-  runtimeCompat: RuntimeCompat;
+  runtimeCompat?: RuntimeCompat;
 };
 
 export type SearchResultDocument = NameAndScope &
   DescriptionAndRuntimeCompat & {
     score?: number;
-    _omc: number;
     id: string;
   };
 
@@ -119,7 +118,6 @@ export type ApiResults<T> = {
 
 export type StatsData = {
   newest: Array<Package>;
-  updated: Array<VersionPackageBase>;
   featured: Array<Package>;
 };
 

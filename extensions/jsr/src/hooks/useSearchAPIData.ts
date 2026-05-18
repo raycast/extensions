@@ -1,6 +1,6 @@
 import * as cheerio from "cheerio";
 
-import { environment } from "@raycast/api";
+import { captureException, environment } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 type SearchAPIData = {
@@ -62,8 +62,9 @@ export const useSearchAPIData = () => {
               }
             }
           }
-          // eslint-disable-next-line no-empty
-        } catch {}
+        } catch (err) {
+          captureException(err);
+        }
       });
 
       return res;

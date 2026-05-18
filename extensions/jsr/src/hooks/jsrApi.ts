@@ -1,3 +1,4 @@
+import { captureException } from "@raycast/api";
 import { useCachedPromise, useFetch } from "@raycast/utils";
 
 import type {
@@ -9,7 +10,6 @@ import type {
   PackageScore,
   StatsData,
   VersionPackage,
-  VersionPackageBase,
   WithKey,
 } from "@/types";
 
@@ -20,7 +20,6 @@ import type {
  */
 type RawStatsData = {
   newest: NameAndScope[];
-  updated: VersionPackageBase[];
   featured: NameAndScope[];
 };
 
@@ -28,10 +27,12 @@ const fetchPackage = async (scope: string, name: string): Promise<Package | null
   try {
     const res = await fetch(`https://api.jsr.io/scopes/${scope}/packages/${name}`);
     if (!res.ok) {
+      captureException(new Error(`Failed to fetch package @${scope}/${name}: ${res.status} ${res.statusText}`));
       return null;
     }
     return (await res.json()) as Package;
-  } catch {
+  } catch (err) {
+    captureException(err);
     return null;
   }
 };
@@ -57,14 +58,10 @@ export const useStats = (enabled = true) => {
 
       const [newest, featured] = await Promise.all([enrich(raw.newest ?? []), enrich(raw.featured ?? [])]);
 
-      return {
-        newest,
-        featured,
-        updated: raw.updated ?? [],
-      };
+      return { newest, featured };
     },
     [],
-    { execute: enabled },
+    { execute: enabled, keepPreviousData: true },
   );
 };
 
@@ -107,7 +104,9 @@ export const useDependents = (item: NameAndScope | null) => {
   const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/dependents?limit=100`;
   return useFetch<ApiResults<WithKey<Dependent>>>(url, {
     execute: !!item,
-    onError() {},
+    onError(err) {
+      captureException(err);
+    },
     mapResult: (result) => {
       return {
         data: {
@@ -136,7 +135,9 @@ export const useDependencies = (item: NameAndScope | null, version: string | nul
   const url = `https://api.jsr.io/scopes/${item?.scope}/packages/${item?.name}/versions/${version}/dependencies?limit=100`;
   return useFetch<Dependency[]>(url, {
     execute: !!item && !!version,
-    onError() {},
+    onError(err) {
+      captureException(err);
+    },
     mapResult: (result) => {
       return {
         data: result.filter(
