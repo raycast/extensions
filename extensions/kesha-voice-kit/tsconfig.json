@@ -12,5 +12,5 @@
     "moduleResolution": "node",
     "skipLibCheck": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }
