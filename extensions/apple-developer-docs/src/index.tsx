@@ -1,4 +1,4 @@
-import { Action, ActionPanel, List } from "@raycast/api";
+import { Action, ActionPanel, getPreferenceValues, List } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { capitalizeRecursively, getIcon, makeUrl, makeUrlMarkdown } from "./utils";
 import { config } from "./config";
@@ -7,7 +7,13 @@ import useSearchedResults from "./hooks/useSearchedResults";
 import DevOnlyActionPanel from "./DevOnlyActionPanel";
 import useArchiveResults from "./hooks/useArchiveResults";
 
+type Preferences = {
+  includeArchiveResults: boolean;
+};
+
 export default function Command() {
+  const preferences = getPreferenceValues<Preferences>();
+  const includeArchiveResults = preferences.includeArchiveResults;
   const [searchText, setSearchText] = useState("");
   const query = searchText.length === 0 ? "SwiftUI" : searchText;
 
@@ -41,6 +47,15 @@ export default function Command() {
   }, [data.suggested_query]);
 
   const [typeFilter, setTypeFilter] = useState<AllResultType | ResultType>("all");
+  const resultTypes = useMemo<(AllResultType | ResultType)[]>(() => {
+    const types: (AllResultType | ResultType)[] = ["all", "general", "documentation", "sample_code", "video"];
+    return includeArchiveResults ? [...types, "archive"] : types;
+  }, [includeArchiveResults]);
+  useEffect(() => {
+    if (!includeArchiveResults && typeFilter === "archive") {
+      setTypeFilter("all");
+    }
+  }, [includeArchiveResults, typeFilter]);
   const onTypeChange = useCallback((type: string) => {
     setTypeFilter(type);
   }, []);
@@ -64,19 +79,18 @@ export default function Command() {
       (result) => searchText.trim() === "" || result.title.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [searchedResults, searchText, typeFilter]);
-  const { results: archiveResults, isLoading: isLoadingArchiveResults } = useArchiveResults(query, typeFilter);
+  const { results: archiveResults, isLoading: isLoadingArchiveResults } = useArchiveResults(
+    query,
+    typeFilter,
+    includeArchiveResults
+  );
 
   return (
     <List
       isLoading={isLoading || (typeFilter === "archive" && isLoadingArchiveResults)}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Apple Developer documentation..."
-      searchBarAccessory={
-        <TypeDropdown
-          types={["all", "general", "documentation", "sample_code", "video", "archive"]}
-          onTypeChange={onTypeChange}
-        />
-      }
+      searchBarAccessory={<TypeDropdown types={resultTypes} onTypeChange={onTypeChange} />}
       throttle
     >
       {filteredSearchedResults && filteredSearchedResults.length > 0 && (

@@ -18,7 +18,18 @@
       "title": "Search Documentation",
       "subtitle": "Apple Developer",
       "description": "Search from Apple Developer documentation results.",
-      "mode": "view"
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "includeArchiveResults",
+          "title": "Include Documentation Archive",
+          "label": "Search retired documentation archive",
+          "description": "Search Apple's retired Documentation Archive. When enabled, the extension downloads and caches extra archive indexes on first use; this can take a while and uses additional network and disk space.",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
     }
   ],
   "dependencies": {
