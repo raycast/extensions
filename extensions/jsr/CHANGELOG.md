@@ -1,6 +1,6 @@
 # JSR Changelog
 
-## [Improvements] - {PR_MERGE_DATE}
+## [Improvements] - 2026-05-18
 
 - Update dependencies
 - View package README from search results
