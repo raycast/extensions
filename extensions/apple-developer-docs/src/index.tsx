@@ -5,6 +5,7 @@ import { config } from "./config";
 import { useFetch } from "@raycast/utils";
 import useSearchedResults from "./hooks/useSearchedResults";
 import DevOnlyActionPanel from "./DevOnlyActionPanel";
+import useArchiveResults from "./hooks/useArchiveResults";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
@@ -63,14 +64,18 @@ export default function Command() {
       (result) => searchText.trim() === "" || result.title.toLowerCase().includes(searchText.toLowerCase())
     );
   }, [searchedResults, searchText, typeFilter]);
+  const { results: archiveResults, isLoading: isLoadingArchiveResults } = useArchiveResults(query, typeFilter);
 
   return (
     <List
-      isLoading={isLoading}
+      isLoading={isLoading || (typeFilter === "archive" && isLoadingArchiveResults)}
       onSearchTextChange={setSearchText}
       searchBarPlaceholder="Search Apple Developer documentation..."
       searchBarAccessory={
-        <TypeDropdown types={["all", "general", "documentation", "sample_code", "video"]} onTypeChange={onTypeChange} />
+        <TypeDropdown
+          types={["all", "general", "documentation", "sample_code", "video", "archive"]}
+          onTypeChange={onTypeChange}
+        />
       }
       throttle
     >
@@ -91,6 +96,13 @@ export default function Command() {
           <SearchListItem key={`${result.order}_${result.url}`} result={result} onVisit={markAsSearched} />
         ))}
       </List.Section>
+      {archiveResults.length > 0 && (
+        <List.Section title="Archive" subtitle={archiveResults.length + ""}>
+          {archiveResults.map((result) => (
+            <SearchListItem key={`archive_${result.order}_${result.url}`} result={result} onVisit={markAsSearched} />
+          ))}
+        </List.Section>
+      )}
     </List>
   );
 }

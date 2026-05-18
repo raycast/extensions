@@ -31,6 +31,8 @@ export const getIcon = (type: string): ImageLike => {
       return Icon.CodeBlock;
     case "video":
       return Icon.PlayFilled;
+    case "archive":
+      return Icon.Box;
     case "all":
       return "all-result-type.png";
     default:
