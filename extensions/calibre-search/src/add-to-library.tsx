@@ -10,35 +10,29 @@ import {
   Toast,
 } from "@raycast/api";
 import { execFile, spawn } from "child_process";
-import { promisify } from "util";
-
-const execFileAsync = promisify(execFile);
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  statSync,
-  writeFileSync,
-} from "fs";
-import { homedir, tmpdir } from "os";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { tmpdir } from "os";
 import { basename, extname, join } from "path";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
+import { promisify } from "util";
+import { runConcurrently } from "./concurrency";
 import {
-  isEbookFile,
   parseCalibredbOutput,
   buildCalibredbArgs,
   findOpfPathInContainer,
   findCoverHrefInOpf,
 } from "./ebooks";
+import { EbookFile, scanDirectories } from "./file-scanner";
 import { formatFileSize } from "./utils";
 
-interface EbookFile {
-  path: string;
-  name: string;
-  dir: string;
-  size: number;
-  modifiedAt: Date;
+interface Preferences {
+  libraryPath: string;
+  searchPath1?: string;
+  searchPath2?: string;
+  searchPath3?: string;
 }
+
+const execFileAsync = promisify(execFile);
 
 const FORMAT_COLORS: Record<string, Color> = {
   ".epub": Color.Blue,
@@ -56,43 +50,9 @@ const CALIBREDB = existsSync(
   ? "/Applications/calibre.app/Contents/MacOS/calibredb"
   : "calibredb";
 
-function resolveHome(p: string): string {
-  return p.startsWith("~/") ? join(homedir(), p.slice(2)) : p;
-}
-
 // Unique cache key derived from full path — prevents collisions between same-named files in different directories
 function thumbCacheKey(filePath: string): string {
   return filePath.replace(/[/\\:.~]/g, "_");
-}
-
-function scanDirectory(dirPath: string): EbookFile[] {
-  try {
-    return readdirSync(dirPath)
-      .filter(isEbookFile)
-      .map((name) => {
-        const full = join(dirPath, name);
-        const stat = statSync(full);
-        return {
-          path: full,
-          name,
-          dir: basename(dirPath),
-          size: stat.size,
-          modifiedAt: stat.mtime,
-        };
-      });
-  } catch {
-    return [];
-  }
-}
-
-function scanDirectories(paths: (string | undefined)[]): EbookFile[] {
-  const seen = new Set<string>();
-  return paths
-    .filter((p): p is string => Boolean(p))
-    .map(resolveHome)
-    .flatMap(scanDirectory)
-    .filter((f) => (seen.has(f.path) ? false : (seen.add(f.path), true)))
-    .sort((a, b) => b.modifiedAt.getTime() - a.modifiedAt.getTime());
 }
 
 function spawnUnzip(args: string[]): Promise<Buffer> {
@@ -151,14 +111,17 @@ async function extractEpubCover(epubPath: string): Promise<string | null> {
 function loadThumbnail(
   file: EbookFile,
   onReady: (path: string) => void,
+  onSettled: () => void,
 ): () => void {
   const fmt = extname(file.name).toLowerCase();
   let cancelled = false;
 
   if (fmt === ".epub") {
-    extractEpubCover(file.path).then((coverPath) => {
-      if (!cancelled && coverPath) onReady(coverPath);
-    });
+    extractEpubCover(file.path)
+      .then((coverPath) => {
+        if (!cancelled && coverPath) onReady(coverPath);
+      })
+      .finally(onSettled);
     return () => {
       cancelled = true;
     };
@@ -170,18 +133,26 @@ function loadThumbnail(
 
   if (existsSync(expectedThumb)) {
     onReady(expectedThumb);
+    queueMicrotask(onSettled);
     return () => {};
   }
 
   mkdirSync(qlDir, { recursive: true });
   const proc = spawn("qlmanage", ["-t", "-s", "256", "-o", qlDir, file.path]);
-  proc.on("error", () => {});
+  let settled = false;
+  const settle = () => {
+    if (settled) return;
+    settled = true;
+    onSettled();
+  };
+  proc.on("error", settle);
   proc.on("close", () => {
     if (!cancelled && existsSync(expectedThumb)) onReady(expectedThumb);
+    settle();
   });
   return () => {
     cancelled = true;
-    proc.kill();
+    if (!settled) proc.kill();
   };
 }
 
@@ -226,22 +197,40 @@ function EbookDetail({
 export default function Command() {
   const { libraryPath, searchPath1, searchPath2, searchPath3 } =
     getPreferenceValues<Preferences>();
-  const ebooks = useMemo(
-    () => scanDirectories([searchPath1, searchPath2, searchPath3]),
-    [searchPath1, searchPath2, searchPath3],
-  );
+  const [ebooks, setEbooks] = useState<EbookFile[]>([]);
+  const [isScanning, setIsScanning] = useState(true);
   const [thumbs, setThumbs] = useState<Record<string, string>>({});
 
   useEffect(() => {
+    let cancelled = false;
+
+    setIsScanning(true);
+    setThumbs({});
+    scanDirectories([searchPath1, searchPath2, searchPath3])
+      .then((files) => {
+        if (!cancelled) setEbooks(files);
+      })
+      .catch(() => {
+        if (!cancelled) setEbooks([]);
+      })
+      .finally(() => {
+        if (!cancelled) setIsScanning(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [searchPath1, searchPath2, searchPath3]);
+
+  useEffect(() => {
     mkdirSync(THUMB_DIR, { recursive: true });
-    const cleanups = ebooks.map((file) =>
-      loadThumbnail(file, (path) =>
-        setThumbs((prev) => ({ ...prev, [file.path]: path })),
+    return runConcurrently(ebooks, 4, (file, done) =>
+      loadThumbnail(
+        file,
+        (path) => setThumbs((prev) => ({ ...prev, [file.path]: path })),
+        done,
       ),
     );
-    return () => {
-      cleanups.forEach((fn) => fn());
-    };
   }, [ebooks]);
 
   async function handleAdd(file: EbookFile) {
@@ -278,6 +267,7 @@ export default function Command() {
 
   return (
     <List
+      isLoading={isScanning}
       isShowingDetail
       searchBarPlaceholder="Search ebooks…"
       navigationTitle="Add to Calibre Library"
