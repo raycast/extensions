@@ -1,0 +1,288 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "commafy",
+  "title": "Commafy",
+  "description": "Format numbers in any text selection: insert or remove thousand separators, normalize full-width digits, or render in Japanese 万/億 units — while skipping decimals, phone numbers, dates, and year tokens by default.",
+  "icon": "Commafy.png",
+  "author": "zaaaato",
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "commafy",
+      "title": "Commafy Selection",
+      "subtitle": "Format Numbers",
+      "description": "Insert thousand-separator commas into integers in the selected text.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "minDigits",
+          "title": "Minimum Digits",
+          "description": "Minimum integer-part digit count before commas are inserted.",
+          "type": "textfield",
+          "default": "4",
+          "placeholder": "4",
+          "required": false
+        },
+        {
+          "name": "separator",
+          "title": "Separator",
+          "description": "Character used as the thousands separator.",
+          "type": "dropdown",
+          "default": ",",
+          "required": false,
+          "data": [
+            {
+              "title": "Comma (1,234)",
+              "value": ","
+            },
+            {
+              "title": "Space (1 234)",
+              "value": " "
+            },
+            {
+              "title": "Underscore (1_234)",
+              "value": "_"
+            },
+            {
+              "title": "Period (1.234)",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "name": "includeDecimals",
+          "title": "Format Decimals",
+          "description": "Also format the integer portion of decimal numbers. When the separator is a period this is disabled to avoid ambiguity.",
+          "label": "Also commafy the integer portion of decimal numbers",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "excludeYears",
+          "title": "Exclude Years",
+          "description": "Skip Japanese year tokens (xxxx年). Years rarely benefit from thousand separators.",
+          "label": "Skip Japanese year tokens (xxxx年)",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "excludeHyphenated",
+          "title": "Exclude Hyphenated",
+          "description": "Skip hyphen- and slash-separated digit groups (phone numbers, yyyy-mm-dd, yyyy/mm/dd).",
+          "label": "Skip phone numbers and date-style numbers (yyyy-mm-dd, yyyy/mm/dd)",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "normalizeFullWidth",
+          "title": "Normalize Full-Width",
+          "description": "Convert full-width digits (０-９) and numeric punctuation (．，－) to half-width before formatting.",
+          "label": "Convert full-width digits (１２３) to half-width before formatting",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "decommafy",
+      "title": "Decommafy Selection",
+      "subtitle": "Remove Separators",
+      "description": "Strip thousand-separator commas from numbers in the selected text.",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "separator",
+          "title": "Separator to Remove",
+          "description": "The thousands separator character to strip. Period is intentionally excluded because it conflicts with decimal points.",
+          "type": "dropdown",
+          "default": ",",
+          "required": false,
+          "data": [
+            {
+              "title": "Comma (1,234 → 1234)",
+              "value": ","
+            },
+            {
+              "title": "Space (1 234 → 1234)",
+              "value": " "
+            },
+            {
+              "title": "Underscore (1_234 → 1234)",
+              "value": "_"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "normalize-digits",
+      "title": "Normalize Full-Width Digits",
+      "description": "Convert full-width digits (０-９) and numeric punctuation (．，－) in the selected text to half-width.",
+      "mode": "no-view"
+    },
+    {
+      "name": "commafy-japanese",
+      "title": "Commafy with 万/億",
+      "subtitle": "Japanese Units",
+      "description": "Format integers in the selected text using Japanese myriad units (万, 億, 兆).",
+      "mode": "no-view",
+      "preferences": [
+        {
+          "name": "withInternalCommas",
+          "title": "Internal Commas",
+          "description": "Place commas inside each 4-digit unit group for additional readability.",
+          "label": "Also place commas inside each 4-digit unit group (1,234万5,678)",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "excludeYears",
+          "title": "Exclude Years",
+          "description": "Skip Japanese year tokens (xxxx年).",
+          "label": "Skip Japanese year tokens (xxxx年)",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "excludeHyphenated",
+          "title": "Exclude Hyphenated",
+          "description": "Skip hyphen- and slash-separated digit groups (phone numbers, yyyy-mm-dd, yyyy/mm/dd).",
+          "label": "Skip phone numbers and date-style numbers (yyyy-mm-dd, yyyy/mm/dd)",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "normalizeFullWidth",
+          "title": "Normalize Full-Width",
+          "description": "Convert full-width digits (０-９) and numeric punctuation (．，－) to half-width before formatting.",
+          "label": "Convert full-width digits (１２３) to half-width before formatting",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "preview-commafy",
+      "title": "Preview Commafy",
+      "subtitle": "Before / After",
+      "description": "Show a before/after preview of the Commafy and 万/億 results before applying.",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "minDigits",
+          "title": "Minimum Digits",
+          "description": "Minimum integer-part digit count before commas are inserted.",
+          "type": "textfield",
+          "default": "4",
+          "placeholder": "4",
+          "required": false
+        },
+        {
+          "name": "separator",
+          "title": "Separator",
+          "description": "Character used as the thousands separator in the Commafy preview.",
+          "type": "dropdown",
+          "default": ",",
+          "required": false,
+          "data": [
+            {
+              "title": "Comma (1,234)",
+              "value": ","
+            },
+            {
+              "title": "Space (1 234)",
+              "value": " "
+            },
+            {
+              "title": "Underscore (1_234)",
+              "value": "_"
+            },
+            {
+              "title": "Period (1.234)",
+              "value": "."
+            }
+          ]
+        },
+        {
+          "name": "includeDecimals",
+          "title": "Format Decimals",
+          "description": "Also format the integer portion of decimal numbers in the Commafy preview.",
+          "label": "Also commafy the integer portion of decimal numbers",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "excludeYears",
+          "title": "Exclude Years",
+          "description": "Skip Japanese year tokens (xxxx年) in both previews.",
+          "label": "Skip Japanese year tokens (xxxx年)",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "excludeHyphenated",
+          "title": "Exclude Hyphenated",
+          "description": "Skip hyphen- and slash-separated digit groups (phone numbers, yyyy-mm-dd, yyyy/mm/dd).",
+          "label": "Skip phone numbers and date-style numbers (yyyy-mm-dd, yyyy/mm/dd)",
+          "type": "checkbox",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "normalizeFullWidth",
+          "title": "Normalize Full-Width",
+          "description": "Convert full-width digits (０-９) and numeric punctuation (．，－) to half-width before previewing.",
+          "label": "Convert full-width digits (１２３) to half-width before formatting",
+          "type": "checkbox",
+          "default": false,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "react": "^19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5",
+    "vitest": "^1.6.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit",
+    "audit": "npm audit --omit=dev",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "overrides": {
+    "minimatch": "^10.0.1",
+    "esbuild": "^0.25.0"
+  }
+}
