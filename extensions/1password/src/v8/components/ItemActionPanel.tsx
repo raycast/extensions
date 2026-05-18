@@ -1,5 +1,6 @@
 import { Action, ActionPanel, Icon, open, showToast, Toast } from "@raycast/api";
-import { execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 
 import resetCache from "../../reset-cache";
 import { Item, User } from "../types";
@@ -7,6 +8,8 @@ import { ActionID, getCliPath, handleErrors, hrefToOpenInBrowser, windowsEnv } f
 import { CopyToClipboard } from "./ActionCopyToClipboard";
 import { ShareItem } from "./ActionShareItem";
 import { SwitchAccount } from "./ActionSwitchAccount";
+
+const execFileAsync = promisify(execFile);
 
 export function ItemActionPanel({
   account,
@@ -149,7 +152,7 @@ function OpenInBrowser(account: undefined | User, item: Item) {
         const toast = await showToast({ style: Toast.Style.Animated, title: "Opening in browser..." });
 
         try {
-          const stdout = execFileSync(
+          const { stdout } = await execFileAsync(
             getCliPath(),
             [
               ...(account ? ["--account", account.account_uuid] : []),
@@ -160,9 +163,9 @@ function OpenInBrowser(account: undefined | User, item: Item) {
               item.vault.id,
               "--format=json",
             ],
-            { maxBuffer: 4096 * 1024, ...(windowsEnv ? { env: windowsEnv } : {}) },
+            { encoding: "utf8", maxBuffer: 4096 * 1024, ...(windowsEnv ? { env: windowsEnv } : {}) },
           );
-          const detailedItem = JSON.parse(stdout.toString()) as Item;
+          const detailedItem = JSON.parse(stdout) as Item;
           const detailedHref = hrefToOpenInBrowser(detailedItem);
 
           if (!detailedHref) {
