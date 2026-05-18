@@ -1,13 +1,17 @@
-import { Action, ActionPanel, Icon, Keyboard, List } from "@raycast/api";
-import { showFailureToast, useCachedPromise, useCachedState } from "@raycast/utils";
+import { Icon, List } from "@raycast/api";
+import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
-import { searchIssues } from "./api/issues";
-import type { Issue, Repository } from "./types/api";
-import CreateIssue from "./issue-create";
+import { getIssueItemKey, IssueItem, IssueKind } from "./components/issues";
+import { useSearchIssues } from "./hooks/useSearchIssues";
 import { getIssueIcon } from "./utils/icons";
 import { parseSearchQuery } from "./utils/search-query";
 
-type IssueSearchState = "open" | "closed" | "all";
+const IssueSearchState = {
+  Open: "open",
+  Closed: "closed",
+  All: "all",
+} as const;
+type IssueSearchState = (typeof IssueSearchState)[keyof typeof IssueSearchState];
 
 type IssueSearchOptions = {
   state: IssueSearchState;
@@ -17,7 +21,7 @@ type IssueSearchOptions = {
 };
 
 export default function Command() {
-  const [state, setState] = useCachedState<IssueSearchState>("issues-search-state", "open");
+  const [state, setState] = useCachedState<IssueSearchState>("issues-search-state", IssueSearchState.Open);
   const [searchText, setSearchText] = useState<string>("");
 
   const options = useMemo<IssueSearchOptions>(() => {
@@ -25,13 +29,14 @@ export default function Command() {
     return { state, owner, repo, query } as IssueSearchOptions & { query?: string };
   }, [searchText, state]);
 
-  const { items, isLoading } = useSearchIssues(options);
+  const { items, isLoading, pagination } = useSearchIssues(options);
 
   return (
     <List
       isLoading={isLoading}
       searchBarPlaceholder="Search issues"
       onSearchTextChange={setSearchText}
+      pagination={pagination}
       throttle
       searchBarAccessory={
         <List.Dropdown
@@ -53,91 +58,14 @@ export default function Command() {
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No issues found" />
       ) : (
         items.map((issue) => (
-          <List.Item
-            key={issue.id || issue.number || issue.title || "issue"}
-            title={issue.title || "[No Title]"}
-            subtitle={issue.repository?.full_name}
+          <IssueItem
+            key={getIssueItemKey(issue, IssueKind.Issue)}
+            item={issue}
+            kind={IssueKind.Issue}
             icon={getIssueIcon(issue.state)}
-            accessories={[{ text: `#${issue.number ?? ""}` }]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  {issue.html_url ? (
-                    <Action.OpenInBrowser
-                      title="Open Issue"
-                      url={issue.html_url}
-                      shortcut={Keyboard.Shortcut.Common.Open}
-                    />
-                  ) : null}
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Copy">
-                  {issue.html_url ? (
-                    <Action.CopyToClipboard
-                      title="Copy URL"
-                      content={issue.html_url}
-                      shortcut={Keyboard.Shortcut.Common.Copy}
-                    />
-                  ) : null}
-                  {issue.number != null ? (
-                    <Action.CopyToClipboard title="Copy Issue Number" content={`#${issue.number}`} />
-                  ) : null}
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  {issue.repository?.full_name ? (
-                    <Action.Push
-                      title="Create Issue"
-                      icon={Icon.Plus}
-                      shortcut={Keyboard.Shortcut.Common.New}
-                      target={<CreateIssue initialRepo={issue.repository as Repository} />}
-                    />
-                  ) : null}
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
           />
         ))
       )}
     </List>
   );
-}
-
-type UseSearchIssuesParams = {
-  query?: string;
-  state?: IssueSearchState;
-  owner?: string;
-  repo?: string;
-};
-
-function useSearchIssues(params: UseSearchIssuesParams) {
-  const { state, owner, repo, query } = params;
-  const [items, setItems] = useCachedState<Issue[]>("issues-search", []);
-
-  const { isLoading } = useCachedPromise(
-    async (s?: IssueSearchState, o?: string, r?: string, q?: string) => {
-      const data = await searchIssues({
-        type: "issues",
-        state: s,
-        q: q?.trim() ? q : undefined,
-        owner: o,
-        limit: 50,
-      });
-      return r ? data.filter((issue) => issue.repository?.full_name === r) : data;
-    },
-    [state, owner, repo, query] as [
-      IssueSearchState | undefined,
-      string | undefined,
-      string | undefined,
-      string | undefined,
-    ],
-    {
-      keepPreviousData: true,
-      initialData: items,
-      onData: (data) => setItems(data),
-      onError(error) {
-        showFailureToast(error, { title: "Couldn't search issues" });
-      },
-    },
-  );
-
-  return { items, isLoading };
 }

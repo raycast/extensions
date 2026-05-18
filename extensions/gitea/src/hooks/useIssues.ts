@@ -1,7 +1,7 @@
-import { getMyIssues } from "../api/issues";
+import { getMyIssues } from "../services/issues";
 
 import { CacheKey, DEFAULT_PAGE_SIZE } from "../constants";
-import { usePaginatedCachedPromise } from "./usePaginatedCachedPromise";
+import { usePaginatedResource } from "./usePaginatedResource";
 
 type UseIssuesOptions = {
   includeCreated: boolean;
@@ -12,26 +12,11 @@ type UseIssuesOptions = {
 };
 
 export function useIssues(options: UseIssuesOptions) {
-  return usePaginatedCachedPromise({
+  return usePaginatedResource({
     cacheKey: CacheKey.Issues,
     errorTitle: "Couldn't retrieve issues",
     pageSize: DEFAULT_PAGE_SIZE,
-    args: [
-      options.includeCreated,
-      options.includeAssigned,
-      options.includeMentioned,
-      options.includeRecentlyClosed,
-      options.query,
-    ] as [boolean, boolean, boolean, boolean, string | undefined],
-    fetchPage: (page, includeCreated, includeAssigned, includeMentioned, includeRecentlyClosed, query) =>
-      getMyIssues({
-        includeCreated,
-        includeAssigned,
-        includeMentioned,
-        includeRecentlyClosed,
-        query,
-        page,
-        limit: DEFAULT_PAGE_SIZE,
-      }),
+    params: options,
+    fetchPage: getMyIssues,
   });
 }

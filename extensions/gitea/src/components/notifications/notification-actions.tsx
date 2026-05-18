@@ -1,17 +1,19 @@
-import { Action, ActionPanel, Icon, Keyboard, showToast, Toast } from "@raycast/api";
-import { readAllNotificationStatus, updateNotificationStatus, StatusType } from "../../api/notifications";
-import type { PaginatedCachedPromiseMutate } from "../../hooks/usePaginatedCachedPromise";
-import { NotificationThread } from "../../types/api";
+import { Action, ActionPanel, Icon, Keyboard } from "@raycast/api";
+import { NotificationStatus } from "../../domain/notification";
+import type { PaginatedResourceMutate } from "../../hooks/usePaginatedResource";
+import { useNotificationActions } from "../../hooks/useNotificationActions";
+import type { NotificationThread } from "../../types/api";
 
 export default function NotificationActions(props: {
   item: NotificationThread;
-  mutate?: PaginatedCachedPromiseMutate<NotificationThread>;
+  mutate?: PaginatedResourceMutate<NotificationThread>;
 }) {
   const subjectUrl = props.item.subject?.html_url;
   const isPinned = Boolean(props.item.pinned);
+  const { readAll, runWithToast, updateStatus } = useNotificationActions();
 
-  const runUpdate = async (toStatus: StatusType) => {
-    const updatePromise = updateNotificationStatus({ id: String(props.item.id), toStatus });
+  const runUpdate = async (toStatus: NotificationStatus) => {
+    const updatePromise = updateStatus({ id: String(props.item.id), toStatus });
     if (props.mutate) {
       await props.mutate(updatePromise, { shouldRevalidateAfter: true });
       return;
@@ -20,51 +22,37 @@ export default function NotificationActions(props: {
   };
 
   const toggleReadStatus = async () => {
-    const toStatus: StatusType = props.item.unread || isPinned ? StatusType.Read : StatusType.Unread;
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
-
-    try {
-      await runUpdate(toStatus);
-      toast.style = Toast.Style.Success;
-      toast.title = `Marked as ${toStatus}`;
-    } catch (err: unknown) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Could not mark as ${toStatus}`;
-      toast.message = err instanceof Error ? err.message : String(err);
-    }
+    const toStatus: NotificationStatus = props.item.unread ? NotificationStatus.Read : NotificationStatus.Unread;
+    await runWithToast(runUpdate(toStatus), {
+      success: `Marked as ${toStatus}`,
+      failure: `Could not mark as ${toStatus}`,
+    });
   };
 
   const togglePinStatus = async () => {
-    const toStatus = isPinned ? StatusType.Unread : StatusType.Pinned;
+    const toStatus = isPinned ? NotificationStatus.Unread : NotificationStatus.Pinned;
 
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
-    try {
-      await runUpdate(toStatus);
-      toast.style = Toast.Style.Success;
-      toast.title = `${isPinned ? "Unpinned" : "Pinned"} notification`;
-    } catch (err: unknown) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Could not ${isPinned ? "unpin" : "pin"} notification`;
-      toast.message = err instanceof Error ? err.message : String(err);
-    }
+    await runWithToast(runUpdate(toStatus), {
+      success: `${isPinned ? "Unpinned" : "Pinned"} notification`,
+      failure: `Could not ${isPinned ? "unpin" : "pin"} notification`,
+    });
   };
 
   const markAllAsRead = async () => {
-    const toast = await showToast({ style: Toast.Style.Animated, title: "Updating..." });
-    try {
-      const updatePromise = readAllNotificationStatus();
-      if (props.mutate) {
-        await props.mutate(updatePromise, { shouldRevalidateAfter: true });
-      } else {
-        await updatePromise;
-      }
-      toast.style = Toast.Style.Success;
-      toast.title = `Marked all as read`;
-    } catch (err: unknown) {
-      toast.style = Toast.Style.Failure;
-      toast.title = `Could not mark as read`;
-      toast.message = err instanceof Error ? err.message : String(err);
-    }
+    await runWithToast(
+      (async () => {
+        const updatePromise = readAll();
+        if (props.mutate) {
+          await props.mutate(updatePromise, { shouldRevalidateAfter: true });
+        } else {
+          await updatePromise;
+        }
+      })(),
+      {
+        success: "Marked all as read",
+        failure: "Could not mark as read",
+      },
+    );
   };
 
   return (
@@ -82,8 +70,8 @@ export default function NotificationActions(props: {
       <ActionPanel.Section title="Actions">
         <Action title="Mark All as Read" icon={Icon.Eye} onAction={markAllAsRead} />
         <Action
-          title={props.item.unread || isPinned ? "Mark as Read" : "Mark as Unread"}
-          icon={props.item.unread || isPinned ? Icon.Eye : Icon.EyeDisabled}
+          title={props.item.unread ? "Mark as Read" : "Mark as Unread"}
+          icon={props.item.unread ? Icon.Eye : Icon.EyeDisabled}
           shortcut={{
             macOS: { modifiers: ["cmd", "shift"], key: "r" },
             Windows: { modifiers: ["ctrl", "shift"], key: "r" },

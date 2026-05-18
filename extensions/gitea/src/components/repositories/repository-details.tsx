@@ -1,14 +1,16 @@
-import { Color, Icon, List } from "@raycast/api";
+import { Color, getPreferenceValues, Icon, List } from "@raycast/api";
 import dayjs from "dayjs";
 
 import type { Repository } from "../../types/api";
 import { getLanguageColor } from "../../utils/languages";
 
 export default function RepositoryDetails({ repo }: { repo: Repository }) {
+  const prefs = getPreferenceValues<ExtensionPreferences>();
+
   const ownerName = repo.owner?.login || "Unknown";
-  const languageColor = getLanguageColor(repo.language ?? "");
-  const created = safeFormatDate(repo.created_at);
-  const updated = safeFormatDate(repo.updated_at);
+  const languageColor = getLanguageColor(repo.language ?? "", true);
+  const created = safeFormatDate(repo.created_at, prefs.dateFormat);
+  const updated = safeFormatDate(repo.updated_at, prefs.dateFormat);
   const description = repo.description || "No description provided.";
   const size = formatSize(repo.size);
   const hasStatusFlags = repo.private || repo.archived || repo.fork;
@@ -68,10 +70,10 @@ export default function RepositoryDetails({ repo }: { repo: Repository }) {
   );
 }
 
-function safeFormatDate(input?: string): string {
+function safeFormatDate(input: string | undefined, format: string): string {
   if (!input) return "-";
   const d = dayjs(input);
-  return d.isValid() ? d.format("DD.MM.YYYY") : "-";
+  return d.isValid() ? d.format(format) : "-";
 }
 
 function formatSize(kibibytes?: number): string {

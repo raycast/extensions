@@ -1,36 +1,15 @@
-import { Action, ActionPanel, Icon, Keyboard, List, getPreferenceValues } from "@raycast/api";
+import { Icon, List, getPreferenceValues } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { useMemo, useState } from "react";
+import { getIssueItemKey, IssueItem, IssueKind } from "./components/issues";
 import { usePullRequests } from "./hooks/usePullRequests";
 import { useCurrentUser } from "./hooks/useCurrentUser";
-import CreateIssue from "./issue-create";
 import { getPullRequestIcon } from "./utils/icons";
-import type { Repository } from "./types/api";
-
-const PullRequestCategory = {
-  All: "all",
-  Created: "created",
-  Assigned: "assigned",
-  Mentioned: "mentioned",
-  ReviewRequested: "review_requested",
-  Reviewed: "reviewed",
-  OwnedRepositories: "owned_repositories",
-} as const;
-type PullRequestCategory = (typeof PullRequestCategory)[keyof typeof PullRequestCategory];
-
-const categoryOptions = [
-  { title: "All", value: PullRequestCategory.All },
-  { title: "Created by you", value: PullRequestCategory.Created },
-  { title: "Assigned to you", value: PullRequestCategory.Assigned },
-  { title: "Mentioning you", value: PullRequestCategory.Mentioned },
-  { title: "Review requested", value: PullRequestCategory.ReviewRequested },
-  { title: "Reviewed by you", value: PullRequestCategory.Reviewed },
-  { title: "Repositories you own", value: PullRequestCategory.OwnedRepositories },
-];
+import { PullRequestCategory, PullRequestCategoryOptions } from "./domain/issue-category";
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.MyPullRequests>();
-  const [selectedCategory, setSelectedCategory] = useCachedState<string>(
+  const [selectedCategory, setSelectedCategory] = useCachedState<PullRequestCategory>(
     "pull-requests-category-filter",
     PullRequestCategory.All,
   );
@@ -85,10 +64,10 @@ export default function Command() {
         <List.Dropdown
           tooltip="Filter by category"
           value={selectedCategory}
-          onChange={(value) => setSelectedCategory(value)}
+          onChange={(value) => setSelectedCategory(value as PullRequestCategory)}
         >
-          {categoryOptions.map((option) => (
-            <List.Dropdown.Item key={option.value} title={option.title} value={option.value} />
+          {PullRequestCategoryOptions.map((option) => (
+            <List.Dropdown.Item key={option.value} title={option.name} value={option.value} />
           ))}
         </List.Dropdown>
       }
@@ -100,47 +79,11 @@ export default function Command() {
         <List.EmptyView icon={Icon.Code} title="No pull requests found" />
       ) : (
         sortedItems.map((pr) => (
-          <List.Item
-            key={pr.id || pr.number || pr.title || "pull-request"}
-            title={pr.title || "[No Title]"}
-            subtitle={pr.repository?.full_name || "[No Repository]"}
-            icon={getPullRequestIcon(pr.state, pr.title, pr.pull_request)}
-            accessories={[{ text: `#${pr.number ?? ""}` }]}
-            actions={
-              <ActionPanel>
-                <ActionPanel.Section>
-                  {pr.html_url && (
-                    <Action.OpenInBrowser
-                      title="Open Pull Request"
-                      url={pr.html_url}
-                      shortcut={Keyboard.Shortcut.Common.Open}
-                    />
-                  )}
-                </ActionPanel.Section>
-                <ActionPanel.Section title="Copy">
-                  {pr.html_url && (
-                    <Action.CopyToClipboard
-                      title="Copy URL"
-                      content={pr.html_url}
-                      shortcut={Keyboard.Shortcut.Common.Copy}
-                    />
-                  )}
-                  {pr.number != null && (
-                    <Action.CopyToClipboard title="Copy Pull Request Number" content={`#${pr.number}`} />
-                  )}
-                </ActionPanel.Section>
-                <ActionPanel.Section>
-                  {pr.repository?.full_name && (
-                    <Action.Push
-                      title="Create Issue"
-                      icon={Icon.Plus}
-                      shortcut={Keyboard.Shortcut.Common.New}
-                      target={<CreateIssue initialRepo={pr.repository as Repository} />}
-                    />
-                  )}
-                </ActionPanel.Section>
-              </ActionPanel>
-            }
+          <IssueItem
+            key={getIssueItemKey(pr, IssueKind.PullRequest)}
+            item={pr}
+            kind={IssueKind.PullRequest}
+            icon={getPullRequestIcon(pr.state, pr.pull_request)}
           />
         ))
       )}

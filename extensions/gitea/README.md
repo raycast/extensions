@@ -31,7 +31,6 @@ To use this extension to its fullest potential, you need to set following scopes
 | Scope        | Permissions    |
 | ------------ | -------------- |
 | issue        | read and write |
-| organization | read           |
 | notification | read and write |
 | repository   | read and write |
 | user         | read and write |
@@ -133,7 +132,7 @@ Shows your unread notification count in the menu bar with quick access to recent
 **Features:**
 
 - Displays unread count badge
-- Shows up to 20 most recent notifications
+- Shows most recent notifications
 - Click to open notification directly
 - Mark all as read from menu bar
 - Open full Notifications command
@@ -164,7 +163,7 @@ Browse your personal repositories.
   - Website link if available
 - **Actions**:
   - Open repository in browser (↵)
-  - Clone with editor (VS Code, Cursor, Zed, IntelliJ, WebStorm, PyCharm) - ⌘⇧C for first editor
+  - Clone with editor (VS Code, Cursor, Zed, IntelliJ) - ⌘⇧C for first editor
   - Copy repository URL (⌘C)
   - Copy SSH URL (⌘⇧S)
   - Create issue in repository (⌘N)
@@ -184,19 +183,6 @@ Discover public repositories on your Gitea instance.
 - Same details view and actions
 - Shows all public repositories you have access to browse
 - Pagination support for browsing large numbers of repositories
-
-### Search Organizations
-
-Browse organizations on your Gitea instance.
-
-**Features:**
-
-- Search organizations by name
-- Shows organization avatar, description, and visibility status
-- **Actions**:
-  - Open organization page in browser (↵)
-  - Copy organization URL
-  - Copy organization name
 
 ## Keyboard Shortcuts
 

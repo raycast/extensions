@@ -24,7 +24,7 @@ const pr_open: IconResult = { source: "icon/pr-open.svg", tintColor: Color.Green
 const pr_closed: IconResult = { source: "icon/pr-closed.svg", tintColor: Color.Red };
 const pr_draft: IconResult = { source: "icon/pr-draft.svg", tintColor: Color.SecondaryText };
 const pr_merged: IconResult = { source: "icon/pr-merged.svg", tintColor: Color.Purple };
-export function getPullRequestIcon(state?: string, title?: string, meta?: PullRequestMeta): IconResult {
+export function getPullRequestIcon(state?: string, meta?: PullRequestMeta): IconResult {
   const normalized = state?.toLowerCase();
 
   switch (normalized) {
@@ -50,7 +50,7 @@ export function getNotificationIcon(notification: NotificationThread): IconResul
     case NotificationSubjectType.Issue:
       return getIssueIcon(subjectState);
     case NotificationSubjectType.Pull:
-      return getPullRequestIcon(subjectState, subject.title, undefined);
+      return getPullRequestIcon(subjectState, undefined);
     default:
       return fallback;
   }

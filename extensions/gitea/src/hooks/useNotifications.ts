@@ -1,19 +1,19 @@
-import { getNotifications } from "../api/notifications";
+import { getNotifications } from "../services/notifications";
 import { CacheKey, DEFAULT_PAGE_SIZE } from "../constants";
-import { NotificationStatusFilter } from "../types/sorts/notification-search";
-import { usePaginatedCachedPromise } from "./usePaginatedCachedPromise";
+import { NotificationStatusFilter } from "../domain/notification";
+import { usePaginatedResource } from "./usePaginatedResource";
 
 export function useNotifications(filter: NotificationStatusFilter) {
-  return usePaginatedCachedPromise({
+  return usePaginatedResource({
     cacheKey: CacheKey.Notifications,
     errorTitle: "Couldn't retrieve notifications",
     pageSize: DEFAULT_PAGE_SIZE,
-    args: [filter] as [NotificationStatusFilter],
-    fetchPage: (page, f) =>
+    params: { filter },
+    fetchPage: ({ filter: f, page, limit }) =>
       getNotifications({
         all: f === NotificationStatusFilter.All,
         page,
-        limit: DEFAULT_PAGE_SIZE,
+        limit,
       }),
   });
 }

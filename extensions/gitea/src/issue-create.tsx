@@ -1,70 +1,18 @@
-import { Action, ActionPanel, Form, Icon, showToast, Toast } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { Action, ActionPanel, Color, Form, Icon, showToast, Toast } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
-import { createIssue, listRepoAssignees, listRepoLabels, listRepoMilestones } from "./api/issues";
+import { LabelPicker } from "./components/issues";
+import { useCreateIssueMetadata } from "./hooks/useCreateIssueMetadata";
+import { useCreateIssueMutation } from "./hooks/useCreateIssueMutation";
 import { useUserRepositories } from "./hooks/useUserRepositories";
-import type { Label, Milestone, Repository, User } from "./types/api";
-import { buildCreateIssueParams, groupLabels, parseRepo } from "./utils/create-issue";
-
-function LabelPicker({ labels, selectedRepo }: { labels: Label[]; selectedRepo: boolean }) {
-  const [regularLabels, setRegularLabels] = useState<string[]>([]);
-  const [exclusiveSelections, setExclusiveSelections] = useState<Record<string, string>>({});
-
-  const grouped = useMemo(() => {
-    return groupLabels(labels);
-  }, [labels]);
-
-  if (!selectedRepo || labels.length === 0) {
-    return null;
-  }
-
-  return (
-    <>
-      {grouped.regular.length > 0 && (
-        <Form.TagPicker
-          id="labels"
-          title="Labels"
-          placeholder="Select labels"
-          value={regularLabels.filter((id) => grouped.regular.some((l) => l.id === parseInt(id)))}
-          onChange={(selected) => setRegularLabels(selected)}
-        >
-          {grouped.regular.map((label) => (
-            <Form.TagPicker.Item
-              key={label.id}
-              value={String(label.id)}
-              title={label.name ?? ""}
-              icon={{ source: Icon.Circle, tintColor: `#${label.color}` }}
-            />
-          ))}
-        </Form.TagPicker>
-      )}
-      {Object.entries(grouped.exclusive).map(([prefix, exclusiveLabels]) => (
-        <Form.Dropdown
-          key={prefix}
-          id={`label.${prefix}`}
-          title={prefix}
-          value={exclusiveSelections[prefix] ?? ""}
-          onChange={(value) => setExclusiveSelections((prev) => ({ ...prev, [prefix]: value }))}
-        >
-          <Form.Dropdown.Item key="none" title="None" value="" />
-          {exclusiveLabels.map((label) => (
-            <Form.Dropdown.Item
-              key={label.id}
-              value={String(label.id)}
-              title={label.name?.replace(`${prefix}/`, "") ?? label.name ?? ""}
-              icon={{ source: Icon.Circle, tintColor: `#${label.color}` }}
-            />
-          ))}
-        </Form.Dropdown>
-      ))}
-    </>
-  );
-}
+import type { Repository } from "./types/api";
+import { buildCreateIssueParams, parseRepo, type CreateIssueFormValues } from "./utils/create-issue";
 
 export default function Command(props: { initialRepo?: Repository }) {
   const { items: repositories, isLoading, pagination } = useUserRepositories();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { createIssue, isSubmitting } = useCreateIssueMutation();
   const [selectedRepo, setSelectedRepo] = useState<string>(props.initialRepo?.full_name ?? "");
+  const [formKey, setFormKey] = useState(0);
 
   useEffect(() => {
     if (!isLoading && pagination.hasMore) {
@@ -79,54 +27,25 @@ export default function Command(props: { initialRepo?: Repository }) {
   }, [repositories]);
 
   const { owner, repo } = useMemo(() => parseRepo(selectedRepo), [selectedRepo]);
-
-  const { data: labels } = useCachedPromise(
-    async (o?: string, r?: string): Promise<Label[]> => {
-      if (!o || !r) return [];
-      return listRepoLabels({ owner: o, repo: r });
-    },
-    [owner, repo] as [string | undefined, string | undefined],
-    {
-      keepPreviousData: true,
-      initialData: [],
-    },
-  );
-
-  const { data: milestones } = useCachedPromise(
-    async (o?: string, r?: string): Promise<Milestone[]> => {
-      if (!o || !r) return [];
-      return listRepoMilestones({ owner: o, repo: r, state: "open" });
-    },
-    [owner, repo] as [string | undefined, string | undefined],
-    {
-      keepPreviousData: true,
-      initialData: [],
-    },
-  );
-
-  const { data: assignees } = useCachedPromise(
-    async (o?: string, r?: string): Promise<User[]> => {
-      if (!o || !r) return [];
-      return listRepoAssignees({ owner: o, repo: r });
-    },
-    [owner, repo] as [string | undefined, string | undefined],
-    {
-      keepPreviousData: true,
-      initialData: [],
-    },
-  );
+  const { labels, milestones, assignees } = useCreateIssueMetadata(owner, repo);
 
   const isRepoSelected = Boolean(selectedRepo);
 
   const initialRepo = props.initialRepo;
 
+  const resetForm = () => {
+    setFormKey((key) => key + 1);
+    setSelectedRepo(initialRepo?.full_name ?? "");
+  };
+
   return (
     <Form
+      key={formKey}
       isLoading={isLoading || isSubmitting}
       enableDrafts={initialRepo === undefined}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Issue" onSubmit={(values) => handleSubmit(values, setIsSubmitting)} />
+          <Action.SubmitForm title="Create Issue" onSubmit={(values) => handleSubmit(values, createIssue, resetForm)} />
         </ActionPanel>
       }
     >
@@ -143,9 +62,7 @@ export default function Command(props: { initialRepo?: Repository }) {
             <Form.Dropdown.Item
               key={initialRepo.id ?? initialRepo.full_name ?? initialRepo.name ?? "repo"}
               title={initialRepo.full_name ?? initialRepo.name ?? ""}
-              icon={{
-                source: initialRepo.avatar_url || initialRepo.owner?.avatar_url || "icon/repo.svg",
-              }}
+              icon={getRepositoryIcon(initialRepo)}
               value={initialRepo.full_name ?? ""}
             />
           </Form.Dropdown.Section>
@@ -156,7 +73,7 @@ export default function Command(props: { initialRepo?: Repository }) {
             <Form.Dropdown.Item
               key={repo.id ?? repo.full_name ?? repo.name ?? "repo"}
               title={repo.full_name ?? repo.name ?? ""}
-              icon={{ source: repo.avatar_url || repo.owner?.avatar_url || "" }}
+              icon={getRepositoryIcon(repo)}
               value={repo.full_name ?? ""}
             />
           ))}
@@ -169,7 +86,7 @@ export default function Command(props: { initialRepo?: Repository }) {
 
           <Form.Separator />
 
-          {!!labels?.length && (
+          {labels.length > 0 && (
             <>
               <LabelPicker labels={labels} selectedRepo={isRepoSelected} />
               <Form.Separator />
@@ -177,7 +94,7 @@ export default function Command(props: { initialRepo?: Repository }) {
           )}
 
           <Form.TagPicker id="assignees" title="Assignees" placeholder="Select assignees">
-            {(assignees ?? []).map((user) => (
+            {assignees.map((user) => (
               <Form.TagPicker.Item
                 key={user.login ?? user.id ?? "user"}
                 value={user.login ?? ""}
@@ -188,7 +105,7 @@ export default function Command(props: { initialRepo?: Repository }) {
           </Form.TagPicker>
           <Form.Dropdown id="milestone" title="Milestone" placeholder="Select a milestone">
             <Form.Dropdown.Item value="" title="No milestone" />
-            {(milestones ?? []).map((milestone) => (
+            {milestones.map((milestone) => (
               <Form.Dropdown.Item
                 key={milestone.id ?? milestone.title ?? "milestone"}
                 value={String(milestone.id ?? "")}
@@ -203,38 +120,32 @@ export default function Command(props: { initialRepo?: Repository }) {
   );
 }
 
-type FormValues = {
-  repository: string;
-  title: string;
-  body?: string;
-  labels?: string[];
-  assignees?: string[];
-  milestone?: string;
-  dueDate?: string;
-  [key: string]: unknown;
-};
+function getRepositoryIcon(repo: Repository) {
+  const avatarUrl = repo.avatar_url || repo.owner?.avatar_url;
+  return avatarUrl ? { source: avatarUrl } : { source: "icon/repo.svg", tintColor: Color.PrimaryText };
+}
 
-async function handleSubmit(values: Form.Values, setIsSubmitting: (v: boolean) => void) {
-  const formValues = values as unknown as FormValues;
+async function handleSubmit(
+  values: Form.Values,
+  createIssue: ReturnType<typeof useCreateIssueMutation>["createIssue"],
+  resetForm: () => void,
+) {
+  const formValues = values as CreateIssueFormValues;
   if (!formValues.repository || !formValues.title?.trim()) {
     await showToast({ style: Toast.Style.Failure, title: "Repository and title are required" });
     return;
   }
 
   const params = buildCreateIssueParams(formValues);
-  if (!params) {
-    await showToast({ style: Toast.Style.Failure, title: "Invalid repository selection" });
+  if (!params || "error" in params) {
+    await showFailureToast(params?.error, {
+      title: "Invalid form data",
+    });
     return;
   }
 
-  setIsSubmitting(true);
-  try {
-    await createIssue(params);
-
-    await showToast({ style: Toast.Style.Success, title: "Issue created" });
-  } catch (error) {
-    await showToast({ style: Toast.Style.Failure, title: "Failed to create issue", message: String(error) });
-  } finally {
-    setIsSubmitting(false);
+  const didCreate = await createIssue(params);
+  if (didCreate) {
+    resetForm();
   }
 }

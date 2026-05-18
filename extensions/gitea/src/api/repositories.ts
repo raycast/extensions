@@ -1,40 +1,43 @@
 import type { Repository } from "../types/api";
-import type { PaginatedResult } from "./common";
 import { getClient } from "./client";
+import type { GiteaRepositorySortKey } from "../domain/repository-sort";
+import type { SortOrder } from "../domain/options";
+import { DEFAULT_PAGE_SIZE } from "../constants";
 
-export type ListRepositoriesParams = { limit?: number; page?: number; sort?: string; order?: "asc" | "desc" };
-export type ListUserRepositoriesParams = { limit?: number; page?: number };
+/**
+ * Parameters for repoSearch endpoint - supports server-side sorting.
+ * Used by Explore Repositories command.
+ */
+export type ListRepositoriesParams = {
+  limit?: number;
+  page?: number;
+  sort?: GiteaRepositorySortKey;
+  order?: SortOrder;
+};
+
+/**
+ * Search repositories across all accessible repositories.
+ * Supports server-side sorting via sort/order parameters.
+ */
 export async function listRepositories(params: ListRepositoriesParams = {}): Promise<Repository[]> {
   const client = getClient();
-  const { limit = 20, page, sort, order } = params;
-  const { data } = await client.rest.repository.repoSearch({
-    limit,
-    ...(page ? { page } : {}),
-    ...(sort ? { sort } : {}),
-    ...(order ? { order } : {}),
+  const { limit = DEFAULT_PAGE_SIZE, page, sort, order } = params;
+  const { data, error } = await client.GET("/repos/search", {
+    params: { query: { limit, ...(page ? { page } : {}), ...(sort ? { sort } : {}), ...(order ? { order } : {}) } },
   });
+  if (error) throw new Error("Failed to fetch repositories");
   if (!data?.ok) throw new Error("Search failed for repositories");
   return data?.data ?? [];
 }
 
-export async function getRepositories(params: ListRepositoriesParams = {}): Promise<PaginatedResult<Repository>> {
-  const items = await listRepositories(params);
-  return { items, hasMore: typeof params.limit === "number" && items.length === params.limit };
-}
+export type ListUserRepositoriesParams = { limit?: number; page?: number };
 
 export async function listUserRepositories(params: ListUserRepositoriesParams = {}): Promise<Repository[]> {
   const client = getClient();
-  const { limit, page } = params;
-  const { data } = await client.rest.user.userCurrentListRepos({
-    ...(typeof limit === "number" ? { limit } : {}),
-    ...(typeof page === "number" ? { page } : {}),
+  const { limit = DEFAULT_PAGE_SIZE, page } = params;
+  const { data, error } = await client.GET("/user/repos", {
+    params: { query: { limit, ...(page ? { page } : {}) } },
   });
-  return data as Repository[];
-}
-
-export async function getUserRepositories(
-  params: ListUserRepositoriesParams = {},
-): Promise<PaginatedResult<Repository>> {
-  const items = await listUserRepositories(params);
-  return { items, hasMore: typeof params.limit === "number" && items.length === params.limit };
+  if (error) throw new Error("Failed to fetch user repositories");
+  return data ?? [];
 }

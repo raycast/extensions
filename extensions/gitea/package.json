@@ -31,6 +31,29 @@
       "required": true
     },
     {
+      "name": "dateFormat",
+      "title": "Date Format",
+      "description": "The date format to use in the UI.",
+      "type": "dropdown",
+      "label": "",
+      "default": "YYYY-MM-DD",
+      "required": false,
+      "data": [
+        {
+          "title": "YYYY-MM-DD",
+          "value": "YYYY-MM-DD"
+        },
+        {
+          "title": "MM/DD/YYYY",
+          "value": "MM/DD/YYYY"
+        },
+        {
+          "title": "DD.MM.YYYY",
+          "value": "DD.MM.YYYY"
+        }
+      ]
+    },
+    {
       "name": "editorVSCode",
       "title": "Clone Editors",
       "description": "Show Visual Studio Code in clone actions",
@@ -63,24 +86,6 @@
       "description": "Show IntelliJ IDEA in clone actions",
       "type": "checkbox",
       "label": "IntelliJ IDEA",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "editorWebStorm",
-      "title": "",
-      "description": "Show WebStorm in clone actions",
-      "type": "checkbox",
-      "label": "WebStorm",
-      "default": true,
-      "required": false
-    },
-    {
-      "name": "editorPyCharm",
-      "title": "",
-      "description": "Show PyCharm in clone actions",
-      "type": "checkbox",
-      "label": "PyCharm",
       "default": true,
       "required": false
     }
@@ -236,20 +241,13 @@
       "subtitle": "Gitea",
       "description": "Shows your repositories",
       "mode": "view"
-    },
-    {
-      "name": "organization-search",
-      "title": "Search Organizations",
-      "subtitle": "Gitea",
-      "description": "Browse organizations on your Gitea instance",
-      "mode": "view"
     }
   ],
   "dependencies": {
-    "@go-gitea/sdk.js": "^0.2.1",
     "@raycast/api": "^1.104.6",
     "@raycast/utils": "^2.2.2",
-    "dayjs": "^1.11.19"
+    "dayjs": "^1.11.19",
+    "openapi-fetch": "^0.17.0"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
@@ -258,7 +256,9 @@
     "@types/react": "19.2.14",
     "eslint": "^10.0.0",
     "js-yaml": "^4.1.1",
+    "openapi-typescript": "^7.13.0",
     "prettier": "^3.8.1",
+    "swagger2openapi": "^7.0.8",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "vitest": "^4.1.6"
@@ -273,6 +273,7 @@
     "check:type": "tsc --noEmit",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish",
-    "gen:langs": "tsx scripts/fetch-langs.ts"
+    "gen:langs": "tsx scripts/fetch-langs.ts",
+    "gen:types": "tsx scripts/generate-gitea-types.ts"
   }
 }

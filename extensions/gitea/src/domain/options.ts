@@ -1,7 +1,7 @@
-export type CommonOptionType = {
+export type Option<TValue extends string = string> = {
   id: string;
   name: string;
-  value: string;
+  value: TValue;
 };
 
 export const SortOrder = {

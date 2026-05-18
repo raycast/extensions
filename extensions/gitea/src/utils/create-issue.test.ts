@@ -47,9 +47,68 @@ describe("create issue helpers", () => {
     });
   });
 
-  it("returns null for invalid required fields", () => {
-    expect(buildCreateIssueParams({ repository: "", title: "Fix" })).toBeNull();
-    expect(buildCreateIssueParams({ repository: "owner/repo", title: "   " })).toBeNull();
-    expect(buildCreateIssueParams({ repository: "owner", title: "Fix" })).toBeNull();
+  it("combines regular and multiple exclusive labels while ignoring invalid label values", () => {
+    expect(
+      buildCreateIssueParams({
+        repository: "owner/repo",
+        title: "Fix labels",
+        labels: ["1", "bad", "3"],
+        "label.priority": "2",
+        "label.kind": "not-a-number",
+        "label.area": "",
+      }),
+    ).toMatchObject({
+      labels: [1, 3, 2],
+    });
+  });
+
+  it("omits optional fields when form values are blank", () => {
+    expect(
+      buildCreateIssueParams({
+        repository: "owner/repo",
+        title: "Fix",
+        body: "   ",
+        labels: [],
+        assignees: [" ", ""],
+        milestone: "",
+      }),
+    ).toEqual({
+      owner: "owner",
+      repo: "repo",
+      title: "Fix",
+      body: undefined,
+      labels: undefined,
+      milestone: undefined,
+      assignees: undefined,
+      due_date: undefined,
+    });
+  });
+
+  it("returns error for invalid required fields", () => {
+    expect(buildCreateIssueParams({ repository: "", title: "Fix" })).toEqual({
+      error: "Repository is required",
+    });
+    expect(buildCreateIssueParams({ repository: "owner/repo", title: "   " })).toEqual({
+      error: "Title is required",
+    });
+    expect(buildCreateIssueParams({ repository: "owner", title: "Fix" })).toEqual({
+      error: "Invalid repository format",
+    });
+  });
+
+  it("returns error for title exceeding 255 characters", () => {
+    const longTitle = "a".repeat(256);
+    expect(buildCreateIssueParams({ repository: "owner/repo", title: longTitle })).toEqual({
+      error: "Title must be 255 characters or less",
+    });
+  });
+
+  it("accepts title with exactly 255 characters", () => {
+    const result = buildCreateIssueParams({
+      repository: "owner/repo",
+      title: "a".repeat(255),
+    });
+    expect(result).not.toHaveProperty("error");
+    expect(result).toHaveProperty("owner", "owner");
   });
 });
