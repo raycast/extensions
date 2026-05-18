@@ -52,6 +52,13 @@ export default function SearchCode(props: LaunchProps) {
           `No instance found with URL or alias containing ${instanceName}`,
         );
       }
+      return;
+    }
+    // Self-heal a stale `selected-instance` (the cached profile was deleted by
+    // another command) so the Form.Dropdown's value matches one of its items.
+    if (selectedInstance && !instances.some((i) => i.id === selectedInstance.id)) {
+      setSelectedInstance(instances[0]);
+      LocalStorage.setItem("selected-instance", JSON.stringify(instances[0]));
     }
   }, [isLoadingInstances]);
 

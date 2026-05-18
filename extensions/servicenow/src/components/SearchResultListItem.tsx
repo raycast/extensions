@@ -6,9 +6,7 @@ import ResultActions from "./ResultActions";
 import Actions from "./Actions";
 
 import { Data, Field, Record } from "../types";
-import useInstances from "../hooks/useInstances";
 import FavoriteForm from "./FavoriteForm";
-import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { expandKeywords } from "../utils/expandKeywords";
 
 export default function SearchResultListItem({
@@ -16,6 +14,7 @@ export default function SearchResultListItem({
   icon,
   label,
   fields,
+  instanceUrl,
   favoriteId,
   revalidateSearchResults,
   addUrlToFavorites,
@@ -26,16 +25,13 @@ export default function SearchResultListItem({
   icon: Action.Props["icon"];
   label: string;
   fields: Field[];
+  instanceUrl: string;
   favoriteId: string;
   revalidateSearchResults: () => void;
   addUrlToFavorites: (title: string, url: string, groupId?: string, revalidate?: () => void) => void;
   removeFromFavorites: (id: string, title: string, isGroup: boolean, revalidate?: () => void) => Promise<void>;
   revalidateFavorites: () => void;
 }) {
-  const { selectedInstance } = useInstances();
-
-  const instanceUrl = getInstanceBaseUrl({ name: selectedInstance?.name ?? "" });
-
   const dataKeys = keys(result.data);
   const accessories: List.Item.Accessory[] = [];
   let keywords = expandKeywords(label, result.metadata.title, result.metadata.description);

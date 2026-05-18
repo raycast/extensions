@@ -116,6 +116,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
                     icon={icon}
                     label={result.label}
                     fields={result.fields}
+                    instanceUrl={instanceUrl}
                     revalidateSearchResults={revalidate}
                     favoriteId={isInFavorites(record.record_url)}
                     addUrlToFavorites={addUrlToFavorites}

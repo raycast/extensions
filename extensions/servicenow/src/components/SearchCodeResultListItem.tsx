@@ -62,12 +62,12 @@ export default function SearchCodeResultListItem({
       actions={
         <ActionPanel>
           <ActionPanel.Section title={hit.name}>
+            <Action.OpenInBrowser title="Open in ServiceNow" url={url} icon={{ source: "servicenow.svg" }} />
             <Action.Push
               title="Show Matches"
               icon={Icon.Sidebar}
               target={<CodeMatchDetail hit={hit} tableLabel={tableLabel} instanceName={instanceName} />}
             />
-            <Action.OpenInBrowser title="Open in ServiceNow" url={url} icon={{ source: "servicenow.svg" }} />
           </ActionPanel.Section>
           <ActionPanel.Section>
             <Action.CopyToClipboard title="Copy URL" content={url} shortcut={Keyboard.Shortcut.Common.CopyPath} />
