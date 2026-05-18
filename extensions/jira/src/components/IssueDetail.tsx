@@ -36,8 +36,11 @@ function resolveAuthenticatedImageUri(uri: string, baseUrl: string) {
       }
 
       const restPathIndex = url.pathname.indexOf("/rest/");
-      const path = restPathIndex >= 0 ? url.pathname.slice(restPathIndex) : url.pathname;
-      return `${baseUrl}${path}${url.search}`;
+      if (restPathIndex >= 0) {
+        return `${baseUrl}${url.pathname.slice(restPathIndex)}${url.search}`;
+      }
+
+      return null;
     }
 
     return uri;
