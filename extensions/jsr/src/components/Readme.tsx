@@ -4,16 +4,23 @@ import type { SearchResultDocument } from "@/types";
 
 import { jsrUrls } from "@/lib/jsrUrls";
 
-import { usePackage, useReadme } from "@/hooks/jsrApi";
+import { usePackage, useReadme, useVersions } from "@/hooks/jsrApi";
 
 import PackageMetadata from "@/components/PackageMetadata";
 
 const Readme = ({ item }: { item: SearchResultDocument }) => {
   const { data: pkg, isLoading: pkgLoading } = usePackage(item);
+  const hasReadmeFile = pkg?.readmeSource === "readme";
+
+  const { data: versionsData, isLoading: versionsLoading } = useVersions(
+    pkgLoading || !hasReadmeFile ? null : (pkg ?? null),
+  );
 
   const latestVersion = pkg?.latestVersion ?? null;
-  const hasReadmeFile = pkg?.readmeSource === "readme";
-  const readmePath = hasReadmeFile ? "/README.md" : null;
+  const readmePath =
+    hasReadmeFile && latestVersion
+      ? (versionsData?.find((v) => v.version === latestVersion)?.readmePath ?? "/README.md")
+      : null;
 
   const { data: readme, isLoading: readmeLoading } = useReadme(item.scope, item.name, latestVersion, readmePath);
 
@@ -23,7 +30,7 @@ const Readme = ({ item }: { item: SearchResultDocument }) => {
   return (
     <Detail
       navigationTitle={item.id}
-      isLoading={pkgLoading || readmeLoading}
+      isLoading={pkgLoading || versionsLoading || readmeLoading}
       markdown={markdown}
       metadata={<PackageMetadata item={item} />}
       actions={

@@ -59,6 +59,9 @@ export const useStats = (enabled = true) => {
     async (): Promise<StatsData> => {
       const signal = abortable.current?.signal;
       const res = await fetch(jsrUrls.api.stats(), { signal });
+      if (!res.ok) {
+        throw new Error(`Failed to fetch JSR stats: ${res.status} ${res.statusText}`);
+      }
       const raw = (await res.json()) as RawStatsData;
 
       const enrich = async (items: NameAndScope[]): Promise<Package[]> => {
@@ -71,7 +74,13 @@ export const useStats = (enabled = true) => {
       return { newest, featured };
     },
     [],
-    { execute: enabled, keepPreviousData: true, abortable },
+    {
+      execute: enabled,
+      keepPreviousData: true,
+      abortable,
+      onError: onErrorCapture,
+      failureToastOptions: { title: "Error fetching JSR stats" },
+    },
   );
 };
 

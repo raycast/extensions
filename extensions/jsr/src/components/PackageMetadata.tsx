@@ -94,7 +94,7 @@ const PackageMetadata = ({ item }: { item: SearchResultDocument }) => {
             <Detail.Metadata.TagList.Item text={`@${item.scope}`} />
             {typeof scopePackages?.total === "number" && scopePackages.total > 1 ? (
               <Detail.Metadata.TagList.Item
-                text={`${scopePackages.items.length}`}
+                text={`${scopePackages.total}`}
                 icon={Icon.Box}
                 onAction={() => ctx?.openScope(item.scope)}
               />
