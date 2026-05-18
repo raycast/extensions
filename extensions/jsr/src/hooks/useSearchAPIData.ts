@@ -4,19 +4,18 @@ import { environment } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 
 type SearchAPIData = {
+  projectId: string;
   apiKey: string;
-  indexId: string;
-};
-type SearchAPIDataResponse = {
-  v: Array<Array<object | SearchAPIData> | Array<never>>;
 };
 
 /**
- * This function will download the frontpage of jsr.io and extract the apiKey + indexId from the script tags.
+ * Download the jsr.io frontpage and extract the Orama Cloud `projectId` + `apiKey`
+ * from the Fresh `boot(...)` payload.
  *
- * It's a bit of a dirty trick, because we need the API key and indexId to use the Orama search (same as on the website)
- *
- * @returns {SearchAPIData | null} - The apiKey + indexId.
+ * jsr.io migrated from Next.js (Orama v1: apiKey + indexId) to Fresh
+ * (Orama v2: projectId + apiKey). The boot payload encodes a JSON array
+ * containing an object whose `projectId`/`apiKey` properties are numeric
+ * indexes into the array, pointing at the string values.
  */
 export const useSearchAPIData = () => {
   return useFetch<SearchAPIData | null>("https://jsr.io", {
@@ -30,37 +29,41 @@ export const useSearchAPIData = () => {
       const text = await response.text();
       const $ = cheerio.load(text);
 
-      const scriptElements = $("script");
-
-      scriptElements.each((_index, element) => {
+      $("script").each((_index, element) => {
         const script = $(element).html();
+        if (!script || !script.includes("apiKey")) {
+          return;
+        }
 
-        if (script?.includes(`apiKey`)) {
-          const start = script.indexOf(`"[[`) + 1;
-          const end = script.indexOf(`]"`) + 1;
-          const slice = script.slice(start, end).replace(/\\/g, "");
-          try {
-            const arr = JSON.parse(slice);
-            // find element that is string and starts with 'jsr-'
-            const indexIdPosition = arr.findIndex(
-              (item: unknown) => typeof item === "string" && item.startsWith("jsr-"),
-            );
-            if (indexIdPosition !== -1 && indexIdPosition > 0 && typeof arr[indexIdPosition - 1] === "string") {
-              res = { apiKey: arr[indexIdPosition - 1], indexId: arr[indexIdPosition] };
+        const match = script.match(/("\[\[(?:[^"\\]|\\.)*\]")/);
+        if (!match) {
+          return;
+        }
+
+        try {
+          const bootStr = JSON.parse(match[1]) as string;
+          const arr = JSON.parse(bootStr) as unknown[];
+          for (const item of arr) {
+            if (
+              item &&
+              typeof item === "object" &&
+              "projectId" in item &&
+              "apiKey" in item &&
+              typeof (item as Record<string, unknown>).projectId === "number" &&
+              typeof (item as Record<string, unknown>).apiKey === "number"
+            ) {
+              const pi = (item as Record<string, number>).projectId;
+              const ai = (item as Record<string, number>).apiKey;
+              const projectId = arr[pi];
+              const apiKey = arr[ai];
+              if (typeof projectId === "string" && typeof apiKey === "string") {
+                res = { projectId, apiKey };
+                return;
+              }
             }
-            // eslint-disable-next-line no-empty
-          } catch {}
-        }
-
-        if (script?.includes(`"apiKey"`)) {
-          const json = JSON.parse(script) as SearchAPIDataResponse;
-          const searchAPIData = json.v[0].find((item) => "apiKey" in item && "indexId" in item) as
-            | SearchAPIData
-            | undefined;
-          if (searchAPIData) {
-            res = searchAPIData;
           }
-        }
+          // eslint-disable-next-line no-empty
+        } catch {}
       });
 
       return res;

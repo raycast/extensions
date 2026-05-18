@@ -5,7 +5,7 @@ import { useCachedPromise } from "@raycast/utils";
 
 import type { ErrorResult, SearchResult, SearchResults } from "@/types";
 
-import { generateFormData } from "@/lib/formdata";
+import { generateSearchBody } from "@/lib/formdata";
 
 import { useQueryParser } from "@/hooks/useQueryParser";
 import { useSearchAPIData } from "@/hooks/useSearchAPIData";
@@ -19,11 +19,13 @@ export const useJSRSearch = (queryString: string, scoped: string | null) => {
     if (!apiData || isLoadingAPIData) {
       return null;
     }
-    return `https://cloud.orama.run/v1/indexes/${apiData.indexId}/search?api-key=${apiData.apiKey}`;
+    return `https://collections.orama.com/v1/collections/${apiData.projectId}/search`;
   }, [apiData, isLoadingAPIData]);
 
-  const formData = useMemo(() => {
-    return generateFormData(query, scope, runtimes);
+  const apiKey = apiData?.apiKey ?? null;
+
+  const body = useMemo(() => {
+    return generateSearchBody(query, scope, runtimes);
   }, [query, scope, runtimes]);
 
   const {
@@ -31,14 +33,18 @@ export const useJSRSearch = (queryString: string, scoped: string | null) => {
     error: dataError,
     ...rest
   } = useCachedPromise(
-    async (url: string | null, triggerQuery: string) => {
-      if (!url || !triggerQuery) {
+    async (url: string | null, key: string | null, triggerQuery: string) => {
+      if (!url || !key || !triggerQuery) {
         return [] as SearchResult[];
       }
       return fetch(url, {
         method: "POST",
         signal: abortable.current?.signal,
-        body: formData,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${key}`,
+        },
+        body,
       })
         .then((response) => response.json() as Promise<SearchResults | ErrorResult>)
         .then((data) => {
@@ -50,7 +56,7 @@ export const useJSRSearch = (queryString: string, scoped: string | null) => {
           return data.hits.filter((h) => !!h.id && !!h.document.id);
         });
     },
-    [searchURL, triggerQuery],
+    [searchURL, apiKey, triggerQuery],
     {
       abortable,
       initialData: [] as SearchResult[],

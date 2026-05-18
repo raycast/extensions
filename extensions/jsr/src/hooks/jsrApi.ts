@@ -1,4 +1,4 @@
-import { useFetch } from "@raycast/utils";
+import { useCachedPromise, useFetch } from "@raycast/utils";
 
 import type {
   ApiResults,
@@ -9,17 +9,63 @@ import type {
   PackageScore,
   StatsData,
   VersionPackage,
+  VersionPackageBase,
   WithKey,
 } from "@/types";
 
 /**
- * Stats data is used to display featured/newest packages on the main search table
+ * Shape returned by the trimmed `/stats` endpoint (post-2025 migration). Each
+ * `newest` / `featured` item is just `{scope, name}`; the full `Package` shape
+ * (with `runtimeCompat`, `description`, `score`, ...) must be fetched per item.
+ */
+type RawStatsData = {
+  newest: NameAndScope[];
+  updated: VersionPackageBase[];
+  featured: NameAndScope[];
+};
+
+const fetchPackage = async (scope: string, name: string): Promise<Package | null> => {
+  try {
+    const res = await fetch(`https://api.jsr.io/scopes/${scope}/packages/${name}`);
+    if (!res.ok) {
+      return null;
+    }
+    return (await res.json()) as Package;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Stats data is used to display featured/newest packages on the main search table.
+ *
+ * The `/stats` endpoint now returns minimal stubs for newest/featured, so we
+ * enrich each entry by fetching the full package metadata in parallel.
  *
  * @param {boolean} enabled - Whether to enable the stats data.
  */
 export const useStats = (enabled = true) => {
-  const url = `https://api.jsr.io/stats`;
-  return useFetch<StatsData>(url, { execute: enabled });
+  return useCachedPromise(
+    async (): Promise<StatsData> => {
+      const res = await fetch("https://api.jsr.io/stats");
+      const raw = (await res.json()) as RawStatsData;
+
+      const enrich = async (items: NameAndScope[]): Promise<Package[]> => {
+        const results = await Promise.all(items.map((item) => fetchPackage(item.scope, item.name)));
+        return results.filter((pkg): pkg is Package => pkg !== null);
+      };
+
+      const [newest, featured] = await Promise.all([enrich(raw.newest ?? []), enrich(raw.featured ?? [])]);
+
+      return {
+        newest,
+        featured,
+        updated: raw.updated ?? [],
+      };
+    },
+    [],
+    { execute: enabled },
+  );
 };
 
 /**
