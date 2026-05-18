@@ -1,0 +1,61 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "zyceh",
+  "title": "Zyceh",
+  "description": "Automatically switch keyboard layout when the active app changes",
+  "icon": "icon.png",
+  "author": "artemi",
+  "categories": ["System"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Zyceh",
+      "subtitle": "Language Switcher",
+      "description": "Monitor the active app and enforce a keyboard layout for non-allowlisted apps",
+      "mode": "menu-bar"
+    },
+    {
+      "name": "configure",
+      "title": "Configure Zyceh",
+      "description": "View allowlisted apps and available input source IDs",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "allowlist",
+      "title": "Ignored Apps",
+      "description": "App names (comma-separated) whose keyboard layout is never touched",
+      "type": "textfield",
+      "required": false,
+      "default": "Terminal,iTerm2,Warp,Alacritty,SSH,kitty"
+    },
+    {
+      "name": "targetLayout",
+      "title": "Enforced Layout ID",
+      "description": "Input source ID to switch to for all other apps — open Configure to see available IDs",
+      "type": "textfield",
+      "required": false,
+      "default": "com.apple.keylayout.Australian"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.95.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.13.14",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "build:swift": "swiftc scripts/input-source.swift -o assets/input-source && swiftc scripts/daemon.swift -o assets/daemon && chmod +x assets/input-source assets/daemon",
+    "postinstall": "npm run build:swift"
+  }
+}
