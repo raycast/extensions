@@ -45,6 +45,7 @@ export default function Command() {
   const prefs = getPreferenceValues<Preferences.DictateToClipboard>();
   const [state, setState] = useState<State>({ status: "starting" });
   const recorderRef = useRef<ReturnType<typeof spawnProcess> | null>(null);
+  const transcribeAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -83,7 +84,14 @@ export default function Command() {
           message: basename(audioPath),
         });
 
-        const { result, rawJson } = await transcribeAudio(kesha, audioPath);
+        const transcribeAbort = new AbortController();
+        transcribeAbortRef.current = transcribeAbort;
+        const { result, rawJson } = await transcribeAudio(
+          kesha,
+          audioPath,
+          transcribeAbort.signal,
+        );
+        transcribeAbortRef.current = null;
         if (cancelled) return;
 
         const transcript = result.text.trim();
@@ -109,6 +117,7 @@ export default function Command() {
         });
         setState({ status: "error", message });
       } finally {
+        transcribeAbortRef.current = null;
         recorderRef.current = null;
         if (tempDir) {
           await rm(tempDir, { recursive: true, force: true });
@@ -120,6 +129,7 @@ export default function Command() {
     return () => {
       cancelled = true;
       stopRecorder(recorderRef.current);
+      transcribeAbortRef.current?.abort();
     };
   }, []);
 
@@ -238,12 +248,14 @@ async function recordAudio(
 async function transcribeAudio(
   kesha: KeshaSpawn,
   audioPath: string,
+  signal?: AbortSignal,
 ): Promise<{ result: TranscribeResult; rawJson: string }> {
   const { stdout } = await execFileAsync(
     kesha.command,
     [...kesha.prefixArgs, "--json", audioPath],
     {
       maxBuffer: 16 * 1024 * 1024,
+      signal,
     },
   );
   const parsed = JSON.parse(stdout) as TranscribeResult[];
