@@ -1,0 +1,4 @@
+node_modules/
+dist/
+assets/input-source
+assets/daemon
