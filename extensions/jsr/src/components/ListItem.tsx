@@ -8,6 +8,7 @@ import { scoreColor } from "@/lib/ui-helpers";
 
 import CopyActions from "@/components/CopyActions";
 import ItemDetails from "@/components/ItemDetails";
+import Readme from "@/components/Readme";
 import VersionList from "@/components/VersionList";
 import { useSearchContext } from "@/context/SearchContext";
 
@@ -63,6 +64,12 @@ const ListItem = ({ item }: ListItemProps) => {
               icon={{ source: Icon.Document }}
               url={jsrUrls.site.packageDocs(item.id)}
               shortcut={{ key: "enter", modifiers: ["cmd", "shift"] }}
+            />
+            <Action.Push
+              title="Show Readme"
+              icon={Icon.Sidebar}
+              target={<Readme item={item} />}
+              shortcut={{ key: "d", modifiers: ["cmd", "shift"] }}
             />
             <Action.Push
               title="Show Versions"

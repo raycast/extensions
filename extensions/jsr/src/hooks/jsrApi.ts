@@ -193,6 +193,26 @@ export const useDownloads = (item: NameAndScope | null) => {
 };
 
 /**
+ * Fetch the raw README markdown for a package version from jsr.io. Only
+ * packages whose `readmeSource` is "readme" (i.e. ship an actual README.md)
+ * have content here; jsdoc-sourced packages return null.
+ */
+export const useReadme = (
+  scope: string | undefined,
+  name: string | undefined,
+  version: string | null | undefined,
+  readmePath: string | null | undefined,
+) => {
+  const url = scope && name && version && readmePath ? jsrUrls.site.readme(scope, name, version, readmePath) : "";
+  return useFetch<string>(url, {
+    execute: !!scope && !!name && !!version && !!readmePath,
+    keepPreviousData: true,
+    parseResponse: (r) => r.text(),
+    onError: onErrorCapture,
+  });
+};
+
+/**
  * This hook is used to get the packages for a scope.
  *
  * @param {string} scope - The scope.

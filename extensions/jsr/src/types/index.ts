@@ -61,6 +61,7 @@ export type Package = NameAndScope &
     latestVersion: string | null;
     whenFeatured: string | null;
     isArchived: boolean | null;
+    readmeSource: "readme" | "jsdoc" | null;
   };
 
 export type VersionPackageBase = {

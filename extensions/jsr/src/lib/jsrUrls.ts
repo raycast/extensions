@@ -37,6 +37,9 @@ export const jsrUrls = {
     scopePackage: (scope: string, name: string) => `${SITE_BASE}/@${scope}/${name}`,
     /** Public package page pinned to a specific version. */
     scopePackageVersion: (scope: string, name: string, version: string) => `${SITE_BASE}/@${scope}/${name}@${version}`,
+    /** Raw README served as a static asset (only for packages whose source is an actual README.md). */
+    readme: (scope: string, name: string, version: string, readmePath = "/README.md") =>
+      `${SITE_BASE}/@${scope}/${name}/${version}${readmePath}`,
     /** npm package page on npmjs.com (for npm-kind dependencies). */
     npmPackage: (name: string) => `https://www.npmjs.com/package/${name}`,
     /** GitHub repository page for the linked source. */
