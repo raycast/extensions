@@ -16,16 +16,19 @@ import * as path from "path";
 import { fetchGameLibrary } from "./gfn-api";
 import { getAccessToken } from "./auth";
 
+// error
+
 type ErrorType = "not_logged_in" | "no_games" | "gfn_not_installed" | "network_error" | "unknown_error";
 
-// error
 const ERROR_MESSAGES: Record<ErrorType, string> = {
-  not_logged_in: "No API key.",
+  not_logged_in: "No API key found. log in again",
   no_games: "No games found.",
   gfn_not_installed: "GeForce NOW not installed.",
   network_error: "Network error.",
   unknown_error: "Unknown error.",
 };
+
+// idk raycast weird, but this is how we get error messages to show up in the UI instead of just "Unknown error"
 
 function getErrorMessage(error: ErrorType): string {
   return ERROR_MESSAGES[error] || "Unknown error.";
@@ -108,7 +111,7 @@ function buildGameFromShortcut(fileName: string, directory: string): Game {
   };
 }
 
-// loads existing shortcuts
+// loads existing shortcuts 
 
 function loadGamesFromShortcuts(): Game[] {
   const games: Game[] = [];
@@ -156,13 +159,20 @@ async function createShortcut(game: Game): Promise<string> {
     throw new Error("GeForce NOW is not installed.");
   }
 
+  // Escape single quotes for safe insertion into PowerShell single-quoted literals
+  const escapeForPowerShell = (s: string) => s.replace(/'/g, "''");
+
   const urlRoute = `#?cmsId=${game.cmsId}&launchSource=External&shortName=${game.shortName || ""}&parentGameId=${game.parentGameId}`;
+  const urlRouteEsc = escapeForPowerShell(urlRoute);
+  const shortcutPathEsc = escapeForPowerShell(shortcutPath);
+  const streamerEsc = escapeForPowerShell(streamer);
+
   const psScript = `
 $WshShell = New-Object -ComObject WScript.Shell
-$shortcut = $WshShell.CreateShortCut('${shortcutPath}')
-$shortcut.TargetPath = '${streamer}'
-$shortcut.Arguments = '--url-route="${urlRoute}"'
-$shortcut.IconLocation = '${streamer}'
+$shortcut = $WshShell.CreateShortCut('${shortcutPathEsc}')
+$shortcut.TargetPath = '${streamerEsc}'
+$shortcut.Arguments = '--url-route="${urlRouteEsc}"'
+$shortcut.IconLocation = '${streamerEsc}'
 $shortcut.Save()
 `;
 
@@ -187,7 +197,7 @@ $shortcut.Save()
   return shortcutPath;
 }
 
-// lauunches w/ shortcut
+// lauunches w/ shortcut 
 
 async function launchGame(game: Game): Promise<void> {
   if (game.source === "api") {
@@ -204,7 +214,7 @@ async function launchGame(game: Game): Promise<void> {
   await open(game.shortcutPath!);
 }
 
-// merges api and shortcut
+// merges api and shortcut 
 
 async function loadGames(): Promise<LoadResult> {
   const gameMap = new Map<string, Game>();
@@ -253,7 +263,7 @@ async function loadGames(): Promise<LoadResult> {
   return { games, error: null };
 }
 
-// idk raycast weird
+// idk raycast weird 2 
 
 export default function Command() {
   const [games, setGames] = useState<Game[]>([]);
@@ -282,6 +292,8 @@ export default function Command() {
     return <Detail markdown={`## No games found\n\n${errorMessage}`} />;
   }
 
+  // main UI 
+  
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search your GeForce NOW games...">
       {games.map((game) => (
