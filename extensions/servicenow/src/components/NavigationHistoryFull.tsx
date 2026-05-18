@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 
-import { format } from "date-fns";
+import { format, differenceInCalendarDays, isThisYear } from "date-fns";
 
 import { Action, ActionPanel, Color, Icon, Keyboard, List, LocalStorage, showToast, Toast } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
@@ -136,10 +136,20 @@ export default function NavigationHistoryFull() {
                   source: Icon[iconName as keyof typeof Icon],
                   tintColor: Color[colorName as keyof typeof Color],
                 };
+                const createdDate = new Date(historyEntry.sys_created_on + " UTC");
+                const daysAgo = differenceInCalendarDays(new Date(), createdDate);
+                const dateLabel =
+                  daysAgo === 0
+                    ? format(createdDate, "HH:mm")
+                    : daysAgo <= 6
+                      ? format(createdDate, "EEE")
+                      : isThisYear(createdDate)
+                        ? format(createdDate, "d MMM")
+                        : format(createdDate, "d MMM yy");
                 const accessories: List.Item.Accessory[] = [
                   {
-                    icon: Icon.Calendar,
-                    tooltip: format(new Date(historyEntry.sys_created_on + " UTC"), "EEEE d MMMM yyyy 'at' HH:mm"),
+                    text: dateLabel,
+                    tooltip: format(createdDate, "EEEE d MMMM yyyy 'at' HH:mm"),
                   },
                   {
                     icon: Icon.Link,
