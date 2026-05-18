@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "lifeops-progress",
+  "title": "LifeOps Progress",
+  "description": "Menubar progress trackers for weight (Home Assistant) and savings (Firefly III).",
+  "icon": "icon.png",
+  "author": "andrehebben",
+  "license": "MIT",
+  "version": "0.0.1",
+  "private": true,
+  "commands": [
+    {
+      "name": "weight-menubar",
+      "title": "Weight Progress (Menu Bar)",
+      "description": "Shows weight progress from Home Assistant in the menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "haBaseUrl",
+          "type": "textfield",
+          "title": "Home Assistant Base URL",
+          "required": true
+        },
+        {
+          "name": "haToken",
+          "type": "password",
+          "title": "Home Assistant Long-Lived Token",
+          "required": true
+        },
+        {
+          "name": "haWeightEntityId",
+          "type": "textfield",
+          "title": "Weight Entity ID",
+          "required": true,
+          "default": "sensor.weight"
+        },
+        {
+          "name": "weightStartKg",
+          "type": "textfield",
+          "title": "Start (kg)",
+          "default": "113"
+        },
+        {
+          "name": "weightGoalKg",
+          "type": "textfield",
+          "title": "Goal (kg)",
+          "default": "85"
+        },
+        {
+          "name": "refreshSeconds",
+          "type": "textfield",
+          "title": "Refresh (seconds)",
+          "default": "900"
+        }
+      ]
+    },
+    {
+      "name": "savings-menubar",
+      "title": "Savings Progress (Menu Bar)",
+      "description": "Shows savings progress from Firefly III in the menu bar.",
+      "mode": "menu-bar",
+      "preferences": [
+        {
+          "name": "fireflyBaseUrl",
+          "type": "textfield",
+          "title": "Firefly Base URL",
+          "required": true
+        },
+        {
+          "name": "fireflyToken",
+          "type": "password",
+          "title": "Firefly Personal Access Token",
+          "required": true
+        },
+        {
+          "name": "fireflyAccountIdsCsv",
+          "type": "textfield",
+          "title": "Account IDs (CSV)",
+          "required": true,
+          "default": "805"
+        },
+        {
+          "name": "savingsStartEur",
+          "type": "textfield",
+          "title": "Start (€)",
+          "default": "0"
+        },
+        {
+          "name": "savingsGoalEur",
+          "type": "textfield",
+          "title": "Goal (€)",
+          "default": "20000"
+        },
+        {
+          "name": "refreshSeconds",
+          "type": "textfield",
+          "title": "Refresh (seconds)",
+          "default": "900"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "dev": "npx ray develop",
+    "build": "npx ray build",
+    "lint": "npx ray lint",
+    "lint:fix": "npx ray lint --fix",
+    "format": "prettier -w ."
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "react": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "prettier": "^3.2.5",
+    "typescript": "^5.6.3",
+    "eslint": "^8.57.0"
+  }
+}
