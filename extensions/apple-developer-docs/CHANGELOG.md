@@ -1,6 +1,6 @@
 # Apple Developer Docs Changelog
 
-## [Fix Search API] - {PR_MERGE_DATE}
+## [Fix Search API] - 2026-05-18
 - Updated the Apple Developer search request to use the current production endpoint.
 
 ## [Search History] - 2022-08-02
