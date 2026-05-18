@@ -1,5 +1,5 @@
-const SYS_ID_RE = /^[0-9a-f]{32}$/i;
-const TABLE_NAME_RE = /^[a-z][a-z0-9_]*$/i;
+export const SYS_ID_RE = /^[0-9a-f]{32}$/i;
+export const TABLE_NAME_RE = /^[a-z][a-z0-9_]*$/i;
 
 function isValid(table: string | undefined, sysId: string | undefined): { table: string; sysId: string } | null {
   if (!table || !sysId) return null;

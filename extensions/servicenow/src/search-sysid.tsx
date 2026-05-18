@@ -23,8 +23,13 @@ import { ServiceNowClient } from "./utils/serviceNowClient";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { instanceLabel } from "./utils/instanceLabel";
 import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
+import { SYS_ID_RE } from "./utils/extractRecordFromUrl";
 
-const SYS_ID_RE = /^[0-9a-f]{32}$/i;
+const INVALID_SYS_ID_TOAST = {
+  style: Toast.Style.Failure,
+  title: "Invalid Sys ID",
+  message: "Sys ID must be a 32-character hexadecimal string.",
+} as const;
 
 type SysIdSource = "arg" | "selection" | "form";
 
@@ -36,10 +41,16 @@ function sourceSuffix(source: SysIdSource | null): string {
 export default function SearchSysId(props: LaunchProps) {
   const { sys_id: argSysId, instanceName } = props.arguments;
   const { instances, selectedInstance, setSelectedInstance, isLoading: isLoadingInstances } = useInstances();
-  const argInitial = argSysId?.trim() || null;
+  const argTrimmed = argSysId?.trim() || null;
+  const argInitial = argTrimmed && SYS_ID_RE.test(argTrimmed) ? argTrimmed : null;
+  const argInvalid = argTrimmed !== null && argInitial === null;
   const [sysId, setSysId] = useState<string | null>(argInitial);
   const [sysIdSource, setSysIdSource] = useState<SysIdSource | null>(argInitial ? "arg" : null);
   const [detectionDone, setDetectionDone] = useState<boolean>(argInitial !== null);
+
+  useEffect(() => {
+    if (argInvalid) showToast(INVALID_SYS_ID_TOAST);
+  }, []);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const detectionStarted = useRef(false);
@@ -156,6 +167,10 @@ export default function SearchSysId(props: LaunchProps) {
                 const s = values.sysId?.trim();
                 if (!s) {
                   showToast({ style: Toast.Style.Failure, title: "Missing Sys ID", message: "Please enter a Sys ID" });
+                  return;
+                }
+                if (!SYS_ID_RE.test(s)) {
+                  showToast(INVALID_SYS_ID_TOAST);
                   return;
                 }
                 setSysId(s);

@@ -25,9 +25,15 @@ import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { getURL } from "./utils/browserScripts";
 import { getInstanceBaseUrl, isServiceNowUrl } from "./utils/instanceUrl";
 import { instanceLabel } from "./utils/instanceLabel";
-import { extractRecordFromUrl } from "./utils/extractRecordFromUrl";
+import { extractRecordFromUrl, SYS_ID_RE, TABLE_NAME_RE } from "./utils/extractRecordFromUrl";
 import { expandKeywords } from "./utils/expandKeywords";
 import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
+
+const INVALID_TARGET_TOAST = {
+  style: Toast.Style.Failure,
+  title: "Invalid input",
+  message: "Table must contain only letters, digits, or underscores; Sys ID must be 32 hex characters.",
+} as const;
 
 type Reference = {
   table: string;
@@ -58,7 +64,13 @@ export default function FindReferences(props: LaunchProps) {
   const { table: argTable, sysId: argSysId, instanceName } = props.arguments;
   const { instances, selectedInstance, setSelectedInstance, isLoading: isLoadingInstances } = useInstances();
   const hasAnyArg = !!(argTable || argSysId || instanceName);
-  const initialTarget: Target | null = argTable && argSysId ? { table: argTable, sysId: argSysId } : null;
+  const argTableTrimmed = argTable?.trim() || null;
+  const argSysIdTrimmed = argSysId?.trim() || null;
+  const argTableValid = argTableTrimmed !== null && TABLE_NAME_RE.test(argTableTrimmed);
+  const argSysIdValid = argSysIdTrimmed !== null && SYS_ID_RE.test(argSysIdTrimmed);
+  const initialTarget: Target | null =
+    argTableValid && argSysIdValid ? { table: argTableTrimmed!, sysId: argSysIdTrimmed! } : null;
+  const argsInvalid = (argTableTrimmed !== null && !argTableValid) || (argSysIdTrimmed !== null && !argSysIdValid);
   const [target, setTarget] = useState<Target | null>(initialTarget);
   const [targetSource, setTargetSource] = useState<TargetSource | null>(initialTarget ? "args" : null);
   const [detectionDone, setDetectionDone] = useState<boolean>(initialTarget !== null || hasAnyArg);
@@ -66,6 +78,10 @@ export default function FindReferences(props: LaunchProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [errorFetching, setErrorFetching] = useState(false);
   const detectionStarted = useRef(false);
+
+  useEffect(() => {
+    if (argsInvalid) showToast(INVALID_TARGET_TOAST);
+  }, []);
 
   useEffect(() => {
     if (isLoadingInstances) return;
@@ -227,6 +243,10 @@ export default function FindReferences(props: LaunchProps) {
                     title: "Missing fields",
                     message: "Please enter both a table and a sys_id",
                   });
+                  return;
+                }
+                if (!TABLE_NAME_RE.test(t) || !SYS_ID_RE.test(s)) {
+                  showToast(INVALID_TARGET_TOAST);
                   return;
                 }
                 setTarget({ table: t, sysId: s });
