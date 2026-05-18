@@ -13,7 +13,7 @@ import { serviceNowFetchRaw } from "../utils/serviceNowFetch";
 import { useAuthHeader } from "./useAuthHeader";
 
 const useFavorites = () => {
-  const { selectedInstance, userId } = useInstances();
+  const { selectedInstance, setSelectedInstance, userId } = useInstances();
 
   const authHeader = useAuthHeader(selectedInstance);
   const instanceUrl = getInstanceBaseUrl({ name: selectedInstance?.name ?? "" });
@@ -110,6 +110,9 @@ const useFavorites = () => {
           method: request.method,
           headers: { "Content-Type": "application/json" },
           body: request.body,
+          onRefresh: (updated) => {
+            if (selectedInstance.id === updated.id) setSelectedInstance(updated);
+          },
         }),
         {
           optimisticUpdate(data) {

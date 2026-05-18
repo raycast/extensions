@@ -1,13 +1,16 @@
 import { showToast, Toast } from "@raycast/api";
 import { Instance } from "../types";
+import { OnTokenRefresh } from "./auth";
 import { serviceNowFetchRaw } from "./serviceNowFetch";
 
 export class ServiceNowClient {
   private instance: Instance;
+  private onRefresh?: OnTokenRefresh;
   private sessionData: { ck: string; cookies: string } | null = null;
 
-  constructor(instance: Instance) {
+  constructor(instance: Instance, onRefresh?: OnTokenRefresh) {
     this.instance = instance;
+    this.onRefresh = onRefresh;
   }
 
   async init(): Promise<boolean> {
@@ -17,7 +20,9 @@ export class ServiceNowClient {
 
   async authenticate() {
     try {
-      const response = await serviceNowFetchRaw(this.instance, "/sn_devstudio_/v1/get_publish_info");
+      const response = await serviceNowFetchRaw(this.instance, "/sn_devstudio_/v1/get_publish_info", {
+        onRefresh: this.onRefresh,
+      });
       if (!response.ok) {
         throw new Error(`Authentication request failed (${response.status})`);
       }

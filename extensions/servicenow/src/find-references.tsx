@@ -173,7 +173,9 @@ export default function FindReferences(props: LaunchProps) {
     setReferences(null);
 
     (async () => {
-      const client = new ServiceNowClient(selectedInstance);
+      const client = new ServiceNowClient(selectedInstance, (updated) => {
+        if (selectedInstance.id === updated.id) setSelectedInstance(updated);
+      });
       const authed = await client.init();
       if (cancelled) return;
       if (!authed) {

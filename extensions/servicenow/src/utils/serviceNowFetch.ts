@@ -1,5 +1,5 @@
 import { Instance } from "../types";
-import { getAuthHeader } from "./auth";
+import { getAuthHeader, OnTokenRefresh } from "./auth";
 import { getInstanceBaseUrl } from "./instanceUrl";
 
 export class ServiceNowApiError extends Error {
@@ -16,13 +16,14 @@ export class ServiceNowApiError extends Error {
 export type ServiceNowFetchOptions = Omit<RequestInit, "headers"> & {
   headers?: Record<string, string>;
   noAuth?: boolean;
+  onRefresh?: OnTokenRefresh;
 };
 
 async function buildRequestInit(instance: Instance, options: ServiceNowFetchOptions | undefined): Promise<RequestInit> {
-  const { noAuth, headers: extraHeaders, ...rest } = options ?? {};
+  const { noAuth, onRefresh, headers: extraHeaders, ...rest } = options ?? {};
   const headers: Record<string, string> = { ...extraHeaders };
   if (!noAuth && !headers["Authorization"]) {
-    headers["Authorization"] = await getAuthHeader(instance);
+    headers["Authorization"] = await getAuthHeader(instance, { onRefresh });
   }
   return { ...rest, headers };
 }

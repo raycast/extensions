@@ -64,6 +64,9 @@ export default function SearchList() {
           method: request.method,
           headers: { "Content-Type": "application/json" },
           body: request.body,
+          onRefresh: (updated) => {
+            if (selectedInstance.id === updated.id) setSelectedInstance(updated);
+          },
         }),
         {
           optimisticUpdate(data) {
