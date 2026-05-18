@@ -17,7 +17,7 @@ export function useMyRepositories() {
 
   return useCachedPromise(
     async (ownerQueryKey) => {
-      const results = await Promise.all(
+      const results = await Promise.allSettled(
         ownerQueryKey.split(" ").map((ownerQuery: string) =>
           github.searchRepositories({
             query: `${ownerQuery} archived:false sort:updated-desc`,
@@ -26,8 +26,13 @@ export function useMyRepositories() {
         ),
       );
 
-      const repositories = results.flatMap((result) => result.search.nodes as ExtendedRepositoryFieldsFragment[]);
-      return [...new Map(repositories.map((repository) => [repository.id, repository])).values()];
+      const repositories = results.flatMap((result) =>
+        result.status === "fulfilled" ? (result.value.search.nodes as ExtendedRepositoryFieldsFragment[]) : [],
+      );
+
+      return [...new Map(repositories.map((repository) => [repository.id, repository])).values()].sort(
+        (left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
+      );
     },
     [ownerQueryKey],
   );
