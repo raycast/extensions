@@ -205,7 +205,17 @@ function parseMaxSeconds(value: string | undefined): number {
 
 function stopRecorder(proc: ReturnType<typeof spawnProcess> | null) {
   if (!proc || proc.killed) return;
-  proc.stdin?.end();
+  if (proc.stdin && !proc.stdin.destroyed) {
+    proc.stdin.write("\n", () => {
+      proc.stdin?.end();
+    });
+  }
+  const forceStop = setTimeout(() => {
+    if (proc.exitCode == null && !proc.killed) {
+      proc.kill("SIGTERM");
+    }
+  }, 3000);
+  forceStop.unref?.();
 }
 
 async function recordAudio(
