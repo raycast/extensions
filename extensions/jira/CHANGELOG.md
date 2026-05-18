@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-18
 
 - Kept Jira issue lists open when Jira returns an HTML error page while loading issue type icons.
 
