@@ -30,7 +30,7 @@ export function ItemActionPanel({
           case "open-in-1password":
             return OpenIn1Password(account, item);
           case "open-in-browser":
-            return OpenInBrowser(item);
+            return OpenInBrowser(account, item);
           case "paste-one-time-password":
             return PasteOneTimePassword(item);
           case "paste-password":
@@ -124,7 +124,7 @@ function OpenIn1Password(account: undefined | User, item: Item) {
   return null;
 }
 
-function OpenInBrowser(item: Item) {
+function OpenInBrowser(account: undefined | User, item: Item) {
   const href = hrefToOpenInBrowser(item);
 
   if (href) {
@@ -151,8 +151,16 @@ function OpenInBrowser(item: Item) {
         try {
           const stdout = execFileSync(
             getCliPath(),
-            ["item", "get", item.id, "--vault", item.vault.id, "--format=json"],
-            windowsEnv ? { env: windowsEnv } : {},
+            [
+              ...(account ? ["--account", account.account_uuid] : []),
+              "item",
+              "get",
+              item.id,
+              "--vault",
+              item.vault.id,
+              "--format=json",
+            ],
+            { maxBuffer: 4096 * 1024, ...(windowsEnv ? { env: windowsEnv } : {}) },
           );
           const detailedItem = JSON.parse(stdout.toString()) as Item;
           const detailedHref = hrefToOpenInBrowser(detailedItem);
