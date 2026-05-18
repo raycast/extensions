@@ -7,6 +7,7 @@ import { DBObjectsResponse, Instance } from "../types";
 import useInstances from "../hooks/useInstances";
 import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
+import TableRecords from "./TableRecords";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
 import { instanceLabel } from "../utils/instanceLabel";
@@ -65,6 +66,7 @@ export default function Tables() {
       isLoading={isLoading}
       pagination={pagination}
       throttle
+      searchBarPlaceholder="Filter by label, name, super class..."
       searchBarAccessory={
         <List.Dropdown
           isLoading={isLoadingInstances}
@@ -121,6 +123,11 @@ export default function Tables() {
                 actions={
                   <ActionPanel>
                     <ActionPanel.Section title={table.label}>
+                      <Action.Push
+                        title="Explore Records"
+                        icon={Icon.MagnifyingGlass}
+                        target={<TableRecords table={table} />}
+                      />
                       <Action.OpenInBrowser
                         title="Open in ServiceNow"
                         url={listUrl}

@@ -16,6 +16,7 @@ import {
 } from "@raycast/api";
 
 import Actions from "./components/Actions";
+import TableRecords from "./components/TableRecords";
 import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findReferences } from "./utils/snSnippets";
@@ -318,14 +319,24 @@ export default function FindReferences(props: LaunchProps) {
               keywords={expandKeywords(ref.table, ref.column)}
               accessories={[
                 {
-                  icon: Icon.Hashtag,
+                  icon: Icon.ArrowRightCircle,
                   text: ref.count.toString(),
-                  tooltip: `${ref.count} record${ref.count === 1 ? "" : "s"}`,
+                  tooltip: `Explore ${ref.count} record${ref.count === 1 ? "" : "s"}`,
                 },
               ]}
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title={`${ref.table}.${ref.column}`}>
+                    <Action.Push
+                      title="Explore Records"
+                      icon={Icon.MagnifyingGlass}
+                      target={
+                        <TableRecords
+                          table={{ name: ref.table, label: ref.table, super_class: "" }}
+                          extraQuery={`${ref.column}${ref.operator}${target.sysId}`}
+                        />
+                      }
+                    />
                     <Action.OpenInBrowser title="Open in ServiceNow" url={url} icon={{ source: "servicenow.svg" }} />
                     <Action.CopyToClipboard
                       title="Copy URL"

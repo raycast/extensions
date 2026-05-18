@@ -150,7 +150,7 @@ export default function NavigationHistoryFull() {
                       ? format(createdDate, "EEE")
                       : isThisYear(createdDate)
                         ? format(createdDate, "d MMM")
-                        : format(createdDate, "d MMM yy");
+                        : format(createdDate, "yyyy");
                 const accessories: List.Item.Accessory[] = [
                   {
                     text: dateLabel,
