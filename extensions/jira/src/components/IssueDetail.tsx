@@ -39,8 +39,6 @@ function resolveAuthenticatedImageUri(uri: string, baseUrl: string) {
       if (restPathIndex >= 0) {
         return `${baseUrl}${url.pathname.slice(restPathIndex)}${url.search}`;
       }
-
-      return null;
     }
 
     return uri;
@@ -71,8 +69,12 @@ export default function IssueDetail({ initialIssue, issueKey }: IssueDetailProps
           return `src="${uri}"`;
         }
 
-        const dataUri = await getAuthenticatedUri(authenticatedUri, "image/jpeg");
-        return `src="${dataUri}"`;
+        try {
+          const dataUri = await getAuthenticatedUri(authenticatedUri, "image/jpeg");
+          return `src="${dataUri}"`;
+        } catch {
+          return `src="${uri}"`;
+        }
       });
       issue.renderedFields.description = resolvedDescription;
 
