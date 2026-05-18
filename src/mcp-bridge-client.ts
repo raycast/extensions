@@ -44,7 +44,10 @@ export async function getBridgeStatus(): Promise<{
     const toolsRes = await fetch(`${BRIDGE_URL}/tools`, {
       signal: AbortSignal.timeout(3000),
     });
-    const toolsData = (await toolsRes.json()) as { tools?: unknown[]; [key: string]: unknown };
+    const toolsData = (await toolsRes.json()) as {
+      tools?: unknown[];
+      [key: string]: unknown;
+    };
     const toolList = toolsData.tools || toolsData;
 
     // Map tools back to servers
