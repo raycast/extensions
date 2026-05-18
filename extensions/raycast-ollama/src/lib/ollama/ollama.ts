@@ -656,7 +656,7 @@ export class Ollama {
         const decoder = new TextDecoder("utf-8");
         let part = "";
 
-        const THROTTE_MS = 40;
+        const THROTTLE_MS = 40;
         let lastEmitTime = Date.now();
         let textContentBuffer = "";
         let textThinkingBuffer = "";
@@ -698,7 +698,7 @@ export class Ollama {
                     if (content) textContentBuffer += content;
 
                     const now = Date.now();
-                    if (now - lastEmitTime >= THROTTE_MS) {
+                    if (now - lastEmitTime >= THROTTLE_MS) {
                       if (textThinkingBuffer !== "") {
                         e.emit("thinking", textThinkingBuffer);
                         textThinkingBuffer = "";

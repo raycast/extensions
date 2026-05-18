@@ -24,7 +24,7 @@ export function ValidationKeepAlive(CheckboxAdvanced: boolean, values?: string):
  * @returns string whit error message if `value` is invalid.
  */
 export function ValidationThinking(value?: string): string | undefined {
-  if (!value) return "This item is requied";
+  if (!value) return "This item is required";
   const thinkingAvailableValues: string[] = Object.values(ThinkingEffort);
   if (thinkingAvailableValues.includes(value)) return;
   return "Wrong value";

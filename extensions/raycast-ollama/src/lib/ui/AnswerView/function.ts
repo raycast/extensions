@@ -135,7 +135,7 @@ async function Inference(
       emiter.on("thinking", async (data) => {
         // showToast when thinking process started
         if (!thinkingStarted) {
-          thinkingStarted = false;
+          thinkingStarted = true;
           await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
         }
         setThinking((prevState) => prevState + data);
@@ -145,7 +145,7 @@ async function Inference(
       emiter.on("data", async (data) => {
         // showToast when  process started
         if (!responseStarted) {
-          responseStarted = false;
+          responseStarted = true;
           await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
         }
         setAnswer((prevState) => prevState + data);
