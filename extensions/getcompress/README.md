@@ -22,6 +22,7 @@ Quickly compress videos, images, GIFs, and PDFs in batches: enjoy up to 90% smal
 
 ## Screenshots
 
-<img alt="GetCompress main window screenshot" width="480" src="./metadata/screenshot-1.png"/>
+<img alt="GetCompress main window screenshot" width="480" src="https://cdn.getcompress.com/public/raycast/screenshot-1.png"/>
 <img alt="GetCompress quick compression command screenshot" width="480" src="./metadata/screenshot-2.png" />
 <img alt="GetCompress regular compression command screenshot" width="480" src="./metadata/screenshot-3.png" />
+
