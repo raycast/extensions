@@ -160,17 +160,23 @@ export default function Command() {
           }
         }
 
+        if (!overview && gameIds.length > 0 && cached) {
+          overview = JSON.parse(cached).overviewData || null;
+        }
+
         setSearchData(results);
         setOverviewData(overview);
 
-        searchCache.set(
-          cacheKey,
-          JSON.stringify({
-            timestamp: Date.now(),
-            searchData: results,
-            overviewData: overview,
-          }),
-        );
+        if (overview || gameIds.length === 0) {
+          searchCache.set(
+            cacheKey,
+            JSON.stringify({
+              timestamp: Date.now(),
+              searchData: results,
+              overviewData: overview,
+            }),
+          );
+        }
       } catch (error) {
         setSearchData([]);
         setOverviewData(null);
