@@ -1,6 +1,6 @@
 # ServiceNow Extension Changelog
 
-## [Unreleased] - {PR_MERGE_DATE}
+## [OAuth, Flexible Instance URLs & New Admin Commands] - {PR_MERGE_DATE}
 
 - Added OAuth 2.0 (PKCE) as an alternative to Basic Auth, selectable per instance profile. Tokens refresh automatically; a **Sign In / Re-authenticate** action recovers profiles whose refresh token has expired. Auth failures are surfaced as a red exclamation accessory in **Manage Instance Profiles**.
 - Added support for FedRAMP instances (`*.servicenowservices.com`) and on-prem deployments. The **Instance URL** field now accepts a subdomain or a full URL.
@@ -8,7 +8,11 @@
 - Added a new admin command, **Find Record References**, which lists every column across the instance that references a given record, with a one-click action to open the filtered list view.
 - Added one-click actions in the instance profile form to download the extension's update sets from ServiceNow Share: **ACLs for Non-Admin Users** (renamed from "Extension Update Set") and the new **Default OAuth Client**.
 - Renamed several commands to follow Raycast's `<verb> <noun>` convention: **Search** → **Search Text**, **Quick Search** → **Quick Search Text**, **Search Sys ID** → **Find Record by Sys ID**, **Search Resources** → **Search Developer Portal**, **Open Current Page in Instance** → **Open Current Page in Another Instance**. Command IDs are unchanged, so existing keyboard shortcuts keep working.
-- Removed the **Login to Instance** command. Basic Auth profiles can still be logged in via **Open Instance**; OAuth profiles use **Sign In / Re-authenticate** in **Manage Instance Profiles**.
+- Removed the **Login to Instance** command. It passed Basic Auth credentials through the URL (visible in browser history and server logs)
+
+### Fixes
+
+- Fix Edit Favorite form opening empty when invoked from search results, code search, navigation history, navigation menu and record details.
 
 ## [Fix] - 2025-05-14
 
