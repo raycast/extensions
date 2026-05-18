@@ -225,6 +225,8 @@ async function loadGames(): Promise<LoadResult> {
     return { games: [], error: "not_logged_in" };
   }
 
+  let apiFetchError: ErrorType | null = null;
+
   try {
     const apiGames = await fetchGameLibrary();
     for (const apiGame of apiGames) {
@@ -240,9 +242,16 @@ async function loadGames(): Promise<LoadResult> {
     }
   } catch (error) {
     const apiError = error instanceof Error ? error : new Error(String(error));
+
     if (!streamerExists && apiError.message.includes("404")) {
       return { games: [], error: "gfn_not_installed" };
     }
+
+    if (apiError.message === "auth") {
+      return { games: [], error: "not_logged_in" };
+    }
+
+    apiFetchError = apiError.message === "network" ? "network_error" : "unknown_error";
   }
 
   for (const shortcutGame of loadGamesFromShortcuts()) {
@@ -276,6 +285,14 @@ export default function Command() {
         const result = await loadGames();
         setGames(result.games);
         setLoadError(result.error ? getErrorMessage(result.error) : null);
+
+        if (result.error && result.games.length > 0) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Library load issue",
+            message: getErrorMessage(result.error),
+          });
+        }
       } catch (error) {
         setLoadError(error instanceof Error ? error.message : String(error));
         setGames([]);
