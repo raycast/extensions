@@ -1,10 +1,22 @@
-import { Action, ActionPanel, Form, Detail, showToast, Toast, popToRoot, Icon } from "@raycast/api";
+import { Action, ActionPanel, Form, Detail, showToast, Toast, popToRoot, Icon, AI, environment } from "@raycast/api";
 import { useState, useEffect, useMemo } from "react";
-import { startTask, getCurrentTask, stopCurrentTask, getRecentTaskSuggestions, TaskSuggestion } from "./storage";
-import { getCalendarsWithColors, exportToCalendar } from "./calendar";
-import { CalendarInfo } from "./types";
+import {
+  startTask,
+  getCurrentTask,
+  stopCurrentTask,
+  getRecentTaskSuggestions,
+  TaskSuggestion,
+  deleteTask,
+} from "./storage";
+import { getCalendarEvents, exportOrUpdateCalendarEvent } from "./calendar";
+import { CalendarInfo, Task } from "./types";
 import { formatDuration, getElapsedTime, formatDateTime } from "./utils";
-import { Task } from "./types";
+import {
+  getPreferredAIModel,
+  getRecentHistoryDays,
+  getVisibleCalendars,
+  resolveDefaultCalendarId,
+} from "./preferences";
 
 // Helper function to validate URL format
 function isValidUrl(string: string): boolean {
@@ -57,13 +69,16 @@ function StopTimerView({ task, onTaskStopped }: { task: Task; onTaskStopped: () 
 
   async function handleStopAndExport() {
     const stoppedTask = await stopCurrentTask();
-    if (stoppedTask && stoppedTask.calendarName) {
-      await exportToCalendar(stoppedTask);
+    if (stoppedTask && (stoppedTask.calendarName || stoppedTask.sourceCalendarEventId)) {
+      const exported = await exportOrUpdateCalendarEvent(stoppedTask);
+      if (exported) {
+        await deleteTask(stoppedTask.id);
+      }
     }
     onTaskStopped();
   }
 
-  const hasCalendar = !!task.calendarName;
+  const hasCalendar = !!(task.calendarName || task.sourceCalendarEventId);
 
   return (
     <Detail
@@ -93,6 +108,8 @@ function StopTimerView({ task, onTaskStopped }: { task: Task; onTaskStopped: () 
 
 // Form for starting new task
 function StartTimerForm() {
+  const canUseAI = environment.canAccess(AI);
+  const [quickAddText, setQuickAddText] = useState("");
   const [taskName, setTaskName] = useState("");
   const [selectedCalendarId, setSelectedCalendarId] = useState("");
   const [notes, setNotes] = useState("");
@@ -101,25 +118,31 @@ function StartTimerForm() {
   const [suggestions, setSuggestions] = useState<TaskSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const NO_EXPORT_VALUE = "__no_export__";
+
   useEffect(() => {
     let cancelled = false;
 
     async function loadDataAsync() {
-      const [calendarInfos, taskSuggestions] = await Promise.all([
-        getCalendarsWithColors(),
-        getRecentTaskSuggestions(),
-      ]);
+      const calendarInfos = await getVisibleCalendars();
+      if (cancelled) return;
 
-      if (!cancelled) {
-        setCalendars(calendarInfos);
-        setSuggestions(taskSuggestions);
-        if (calendarInfos.length > 0) {
-          setSelectedCalendarId(calendarInfos[0].id);
-        } else {
-          setSelectedCalendarId(NO_EXPORT_VALUE);
-        }
-        setIsLoading(false);
-      }
+      // Fetch recent calendar events for suggestions
+      const historyDays = getRecentHistoryDays();
+      const pastStart = new Date();
+      pastStart.setDate(pastStart.getDate() - historyDays);
+      const calendarIds = calendarInfos.map((c) => c.id);
+      const recentEvents = calendarIds.length > 0 ? await getCalendarEvents(calendarIds, pastStart, new Date()) : [];
+      if (cancelled) return;
+
+      const taskSuggestions = await getRecentTaskSuggestions(recentEvents);
+      if (cancelled) return;
+
+      setCalendars(calendarInfos);
+      setSuggestions(taskSuggestions);
+      const defaultCalId = await resolveDefaultCalendarId(calendarInfos);
+      setSelectedCalendarId(defaultCalId || NO_EXPORT_VALUE);
+      setIsLoading(false);
     }
 
     loadDataAsync();
@@ -128,8 +151,6 @@ function StartTimerForm() {
       cancelled = true;
     };
   }, []);
-
-  const NO_EXPORT_VALUE = "__no_export__";
 
   // Group calendars by account name
   const calendarsByAccount = useMemo(() => {
@@ -168,6 +189,75 @@ function StartTimerForm() {
     }
   }
 
+  async function handleQuickAdd() {
+    if (!quickAddText.trim() || !canUseAI) return;
+
+    try {
+      await showToast({
+        style: Toast.Style.Animated,
+        title: "Parsing with AI...",
+      });
+
+      const calendarNames = calendars.map((c) => c.name);
+      const prompt = [
+        "Parse this into a task name, calendar, notes, and URL.",
+        `Available calendars: ${JSON.stringify(calendarNames)}.`,
+        "Return ONLY valid JSON with fields:",
+        "taskName (string), calendarName (string or null),",
+        "notes (string or null), url (string or null).",
+        "Extract the task name and match the calendar",
+        "name if mentioned. If no calendar mentioned,",
+        "set calendarName to null.",
+        "If the user mentions notes/note, extract that text.",
+        "If the user mentions a URL/link, extract it.",
+        `Input: "${quickAddText}"`,
+      ].join(" ");
+
+      const response = await AI.ask(prompt, {
+        model: getPreferredAIModel(),
+        creativity: "none",
+      });
+
+      let jsonStr = response.trim();
+      const codeBlockMatch = jsonStr.match(/```(?:json)?\s*([\s\S]*?)```/);
+      if (codeBlockMatch) {
+        jsonStr = codeBlockMatch[1].trim();
+      }
+
+      const parsed = JSON.parse(jsonStr);
+
+      if (parsed.taskName) {
+        setTaskName(parsed.taskName);
+      }
+      if (parsed.calendarName) {
+        const matched = calendars.find((c) => c.name.toLowerCase() === parsed.calendarName.toLowerCase());
+        if (matched) {
+          setSelectedCalendarId(matched.id);
+        }
+      }
+      if (parsed.notes) {
+        setNotes(parsed.notes);
+      }
+      if (parsed.url) {
+        setUrl(parsed.url);
+      }
+
+      setQuickAddText("");
+
+      await showToast({
+        style: Toast.Style.Success,
+        title: "Fields populated from AI",
+      });
+    } catch (error) {
+      console.error("Quick Add AI parsing failed:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "AI Parsing Failed",
+        message: "Please fill in the fields manually",
+      });
+    }
+  }
+
   async function handleSubmit() {
     if (!taskName.trim()) {
       await showToast({
@@ -193,8 +283,11 @@ function StartTimerForm() {
     const currentTask = await getCurrentTask();
     if (currentTask && currentTask.isRunning) {
       const stoppedTask = await stopCurrentTask();
-      if (stoppedTask && stoppedTask.calendarName) {
-        await exportToCalendar(stoppedTask);
+      if (stoppedTask && (stoppedTask.calendarName || stoppedTask.sourceCalendarEventId)) {
+        const exported = await exportOrUpdateCalendarEvent(stoppedTask);
+        if (exported) {
+          await deleteTask(stoppedTask.id);
+        }
       }
     }
 
@@ -224,16 +317,38 @@ function StartTimerForm() {
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Start Timer" onSubmit={handleSubmit} />
+          {canUseAI && (
+            <Action
+              title="Parse with AI"
+              icon={Icon.Wand}
+              onAction={handleQuickAdd}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "p" }}
+            />
+          )}
         </ActionPanel>
       }
     >
+      {canUseAI && (
+        <Form.TextField
+          id="quickAdd"
+          title="Quick Add"
+          placeholder='e.g. "meeting on Work" or "code review"'
+          value={quickAddText}
+          onChange={setQuickAddText}
+          info="Type a task description and press ⌘⇧P to auto-fill"
+          autoFocus
+        />
+      )}
+
+      {canUseAI && <Form.Separator />}
+
       <Form.TextField
         id="taskName"
         title="Task Name"
         placeholder="Enter or search task name..."
         value={taskName}
         onChange={setTaskName}
-        autoFocus
+        autoFocus={!canUseAI}
       />
       {suggestions.length > 0 && (
         <Form.Dropdown
@@ -259,7 +374,15 @@ function StartTimerForm() {
         {Array.from(calendarsByAccount.entries()).map(([accountName, cals]) => (
           <Form.Dropdown.Section key={accountName} title={accountName}>
             {cals.map((cal) => (
-              <Form.Dropdown.Item key={cal.id} value={cal.id} title={cal.name} />
+              <Form.Dropdown.Item
+                key={cal.id}
+                value={cal.id}
+                title={cal.name}
+                icon={{
+                  source: Icon.Dot,
+                  tintColor: cal.color || undefined,
+                }}
+              />
             ))}
           </Form.Dropdown.Section>
         ))}

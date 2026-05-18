@@ -196,21 +196,21 @@
   "commands": [
     {
       "name": "bookmarks",
-      "title": "Search Bookmarks",
+      "title": "Bookmarks",
       "subtitle": "Karakeep",
       "description": "List all your bookmarks",
       "mode": "view"
     },
     {
       "name": "lists",
-      "title": "Search Lists",
+      "title": "Lists",
       "subtitle": "Karakeep",
       "description": "List all your lists",
       "mode": "view"
     },
     {
       "name": "tags",
-      "title": "Search Tags",
+      "title": "Tags",
       "subtitle": "Karakeep",
       "description": "List all your tags",
       "mode": "view"
@@ -238,14 +238,14 @@
     },
     {
       "name": "notes",
-      "title": "Search Notes",
+      "title": "Notes",
       "subtitle": "Karakeep",
       "description": "List all your notes",
       "mode": "view"
     },
     {
       "name": "highlights",
-      "title": "View Highlights",
+      "title": "Highlights",
       "subtitle": "Karakeep",
       "description": "View and manage your highlights",
       "mode": "view"
@@ -259,7 +259,7 @@
     },
     {
       "name": "backups",
-      "title": "List Backups",
+      "title": "Backups",
       "subtitle": "Karakeep",
       "description": "Create, download, and delete account backups",
       "mode": "view"

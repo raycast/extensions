@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "caaals",
+  "title": "Caaals Food Tracker",
+  "description": "Log food with AI and browse your diary",
+  "icon": "icon.png",
+  "author": "chuck-38",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "log-food",
+      "title": "Log Food",
+      "subtitle": "Caaals",
+      "description": "Log food to your diary using AI text analysis",
+      "mode": "view"
+    },
+    {
+      "name": "browse-diary",
+      "title": "Browse Diary",
+      "subtitle": "Caaals",
+      "description": "View and manage recent diary entries",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiUrl",
+      "title": "API URL",
+      "description": "The base URL of your Caaals API instance",
+      "type": "textfield",
+      "required": true,
+      "default": "https://caaals.onrender.com",
+      "placeholder": "https://caaals.onrender.com"
+    },
+    {
+      "name": "apiToken",
+      "title": "API Token",
+      "description": "Personal API token generated from Settings in the Caaals app",
+      "type": "password",
+      "required": true
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

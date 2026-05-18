@@ -11,7 +11,12 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { findKommandAppPath } from "./database";
 import type { KeyLabelLookup } from "./key-layout-helper";
-import { formatStep, keywordsForSteps, tooltipForStep } from "./keymap";
+import {
+  formatStep,
+  keywordsForSteps,
+  tokenizeForKeywords,
+  tooltipForStep,
+} from "./keymap";
 import { KommandShortcut } from "./types";
 
 export const APP_STORE_URL = "https://apps.apple.com/app/kommand/id6752623076";
@@ -39,10 +44,12 @@ export function ShortcutItem({
   shortcut,
   subtitle,
   keyLabels,
+  extraKeywords,
 }: {
   shortcut: KommandShortcut;
   subtitle?: string;
   keyLabels?: KeyLabelLookup;
+  extraKeywords?: string[];
 }) {
   const stepTags: List.Item.Accessory[] = shortcut.steps.map((step) => ({
     tag: { value: formatStep(step, keyLabels), color: Color.SecondaryText },
@@ -70,7 +77,13 @@ export function ShortcutItem({
     <List.Item
       title={shortcut.title}
       subtitle={subtitle}
-      keywords={keywordsForSteps(shortcut.steps, keyLabels)}
+      keywords={[
+        ...keywordsForSteps(shortcut.steps, keyLabels),
+        ...(shortcut.categoryIsDefault
+          ? []
+          : tokenizeForKeywords(shortcut.categoryName)),
+        ...(extraKeywords ?? []),
+      ]}
       accessories={accessories}
       actions={
         <ActionPanel>

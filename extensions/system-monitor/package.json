@@ -85,7 +85,8 @@
           "placeholder": "<PERCENT> %",
           "default": "<PERCENT> %"
         }
-      ]
+      ],
+      "interval": "10s"
     }
   ],
   "dependencies": {

@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useState } from "react";
 import { SyncFoldersForm } from "./components/SyncFoldersForm";
+import { DryRunView } from "./dry-run";
 import { useSyncFolders } from "./hooks";
 import { SyncFolders } from "./types";
 import { lastSyncDate } from "./utils";
@@ -56,7 +57,7 @@ export default function Command() {
 
       await showToast({
         style: Toast.Style.Success,
-        title: "Deleted Reminder",
+        title: "Deleted Sync Folder",
         message: sync_folders.name,
       });
     }
@@ -74,7 +75,7 @@ export default function Command() {
    * @returns {JSX.Element} The rendered dropdown component.
    */
   function SyncFoldersDropdown() {
-    const drinkTypes: SyncFoldersType[] = [
+    const filterTypes: SyncFoldersType[] = [
       { id: "all", name: "All" },
       { id: "never_sync", name: "Never Synchronize" },
       { id: "only_sync", name: "Only Synchronize" },
@@ -82,8 +83,8 @@ export default function Command() {
 
     return (
       <List.Dropdown tooltip="Filter Sync Folders" storeValue={true} onChange={setDropDownFilter}>
-        {drinkTypes.map((drinkType) => (
-          <List.Dropdown.Item key={drinkType.id} title={drinkType.name} value={drinkType.id} />
+        {filterTypes.map((filterType) => (
+          <List.Dropdown.Item key={filterType.id} title={filterType.name} value={filterType.id} />
         ))}
       </List.Dropdown>
     );
@@ -114,7 +115,7 @@ export default function Command() {
           return false;
         })
         ?.map((sync_folders) => {
-          const { id, icon, name, source_folder, dest_folder, delete_dest, last_sync } = sync_folders;
+          const { id, icon, name, source_folder, dest_folder, delete_dest, exclude_patterns, last_sync } = sync_folders;
 
           const accessories = [
             {
@@ -142,19 +143,14 @@ export default function Command() {
                     onSubmit={() => handleRunSyncFolders(id)}
                   />
                   <Action.Push
+                    title="Dry Run"
+                    icon={Icon.Eye}
+                    shortcut={{ modifiers: ["cmd"], key: "d" }}
+                    target={<DryRunView syncFolder={sync_folders} />}
+                  />
+                  <Action.Push
                     title="Edit"
-                    target={
-                      <SyncFoldersForm
-                        syncFolder={{
-                          icon,
-                          id,
-                          name,
-                          source_folder,
-                          dest_folder,
-                          delete_dest,
-                        }}
-                      />
-                    }
+                    target={<SyncFoldersForm syncFolder={sync_folders} />}
                     onPop={mutate}
                     icon={Icon.Pencil}
                   />
@@ -201,6 +197,8 @@ export default function Command() {
                           color={delete_dest ? Color.Orange : Color.Green}
                         />
                       </List.Item.Detail.Metadata.TagList>
+
+                      {exclude_patterns && <List.Item.Detail.Metadata.Label title="Exclude" text={exclude_patterns} />}
 
                       <List.Item.Detail.Metadata.TagList title="Last Sync">
                         <List.Item.Detail.Metadata.TagList.Item

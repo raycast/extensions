@@ -4,7 +4,7 @@ import { getConnectionConfig, readWorkingMemory } from "./api";
 
 export default function WorkingMemory() {
   const { isLoading, data } = useCachedPromise(readWorkingMemory);
-  const { baseUrl } = getConnectionConfig();
+  const { baseUrl, space } = getConnectionConfig();
 
   if (!data?.exists) {
     return (
@@ -38,6 +38,13 @@ The Working Memory API is the source of truth for this command.`
             text={baseUrl}
             icon={Icon.Network}
           />
+          {space && (
+            <Detail.Metadata.Label
+              title="Space"
+              text={space}
+              icon={Icon.Folder}
+            />
+          )}
           {data.date && (
             <Detail.Metadata.Label
               title="Date"

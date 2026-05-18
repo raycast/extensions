@@ -15,20 +15,23 @@ export const useSelectedPackage = () => {
     }
 
     const [scope, name] = selectedId.split("/");
+    if (!scope || !name) {
+      return null;
+    }
     return { scope, name };
   }, [selectedId]);
 
   const {
     data: selectedPackageData,
     error: selectedPackageError,
-    isLoading: selectedPageLoading,
+    isLoading: selectedPackageLoading,
   } = usePackage(selectedPackage);
 
   return {
     selectedPackage,
     selectedPackageData,
     selectedPackageError,
-    selectedPageLoading,
+    selectedPackageLoading,
     setSelectedId,
   };
 };

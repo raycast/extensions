@@ -8,6 +8,9 @@
     "macOS"
   ],
   "author": "shadeov",
+  "contributors": [
+    "ridemountainpig"
+  ],
   "license": "MIT",
   "repository": {
     "type": "git",

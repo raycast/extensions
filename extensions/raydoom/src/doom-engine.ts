@@ -12,8 +12,8 @@ import {
   KeyCard,
 } from "raydoom-core";
 import { GameConfig } from "./menu-config";
-import { environment } from "@raycast/api";
 import { getWadPath } from "./utils/wad-manager";
+import { getEngineAssetsPath } from "./utils/engine-manager";
 
 // Global callback handlers for WASM to call
 let currentFrameCallback: ((frame: string, width: number, height: number) => void) | null = null;
@@ -137,9 +137,9 @@ export class DoomEngine {
           // Store args globally for use in startGame()
           commandLineArgs = args;
 
-          // Load the engine from bundled assets (WASM files copied by prebuild script)
+          // Load the engine from supportPath (WASM files downloaded by engine-manager)
           this.module = await loadDoomEngine({
-            assetsPath: environment.assetsPath,
+            assetsPath: getEngineAssetsPath(),
             print: (text: string) => onLog(`[DOOM] ${text}`),
             printErr: (text: string) => onLog(`[DOOM ERROR] ${text}`),
             arguments: args,

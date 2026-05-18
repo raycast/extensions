@@ -1,5 +1,9 @@
 # Dia Changelog
 
+## [Fixed SQL query escaping] - 2026-03-27
+
+- Fixed single quote escaping in SQL queries to use proper SQL string literals instead of double quotes
+
 ## [Fix tab fetching and JSON parsing] - 2026-03-12
 
 - Fix unescaped quotes in JSON from AppleScript so tab data parses correctly

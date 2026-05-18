@@ -1,6 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import { resolveGeminiBinaryPath } from "./binary";
+import { cleanString } from "./utils";
 
 interface GeminiSettings {
   authType?: string;
@@ -28,11 +29,6 @@ const GEMINI_OAUTH2_RELATIVE_PATH = path.join(
   "code_assist",
   "oauth2.js",
 );
-
-function cleanString(value: string | undefined): string | null {
-  const trimmed = value?.trim();
-  return trimmed ? trimmed : null;
-}
 
 function findGeminiOauth2FilePath(binaryPath: string): string | null {
   try {

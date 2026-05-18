@@ -53,6 +53,12 @@
       "mode": "view"
     },
     {
+      "name": "play-song",
+      "title": "Play Song",
+      "description": "Search YouTube Music and play a song in Kaset",
+      "mode": "view"
+    },
+    {
       "name": "toggle-playback",
       "title": "Toggle Play/Pause",
       "description": "Toggle between play and pause",

@@ -1,5 +1,9 @@
 # TMDB Changelog
 
+## [Security Fix] - 2026-03-17
+
+- Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
+
 ## [Add Seasons, Episodes View for TV Shows] - 2024-06-27
 
 - Added new "Get Episode Info" command that can go into seasons and episodes for a show.

@@ -1,5 +1,10 @@
 # HackMD Changelog
 
+## [Add Action Panel and Keyboard Shortcuts] - 2026-05-06
+
+- Add copy shortcut for note links
+- Add action panel shortcuts to release notes
+
 ## [Add custom pin action and workspace grouping] - 2026-01-01
 
 - Add custom Pin/Unpin action for notes (`cmd + shift + p`)

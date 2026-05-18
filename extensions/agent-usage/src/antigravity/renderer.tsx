@@ -5,6 +5,7 @@ import {
   getLoadingAccessory,
   getNoDataAccessory,
   generatePieIcon,
+  generateAsciiBar,
 } from "../agents/ui";
 import { AntigravityError, AntigravityUsage } from "./types";
 import type { Accessory } from "../agents/types";
@@ -45,10 +46,28 @@ export function renderAntigravityDetail(
       <List.Item.Detail.Metadata.Label title="Plan" text={u.accountPlan || "Unknown"} />
       <List.Item.Detail.Metadata.Separator />
       {renderModelMetadata("Primary", u.primaryModel)}
-      <List.Item.Detail.Metadata.Separator />
-      {renderModelMetadata("Secondary", u.secondaryModel)}
-      <List.Item.Detail.Metadata.Separator />
-      {renderModelMetadata("Tertiary", u.tertiaryModel)}
+      {u.secondaryModel != null && (
+        <>
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Secondary Model" text={u.secondaryModel.label} />
+          <List.Item.Detail.Metadata.Label
+            title="Remaining"
+            text={`${generateAsciiBar(u.secondaryModel.percentLeft)} ${u.secondaryModel.percentLeft}% remaining`}
+          />
+          <List.Item.Detail.Metadata.Label title="Resets In" text={u.secondaryModel.resetsIn} />
+        </>
+      )}
+      {u.tertiaryModel != null && (
+        <>
+          <List.Item.Detail.Metadata.Separator />
+          <List.Item.Detail.Metadata.Label title="Tertiary Model" text={u.tertiaryModel.label} />
+          <List.Item.Detail.Metadata.Label
+            title="Remaining"
+            text={`${generateAsciiBar(u.tertiaryModel.percentLeft)} ${u.tertiaryModel.percentLeft}% remaining`}
+          />
+          <List.Item.Detail.Metadata.Label title="Resets In" text={u.tertiaryModel.resetsIn} />
+        </>
+      )}
     </List.Item.Detail.Metadata>
   );
 }
@@ -106,8 +125,11 @@ function renderModelMetadata(labelPrefix: string, model: AntigravityUsage["prima
   return (
     <>
       <List.Item.Detail.Metadata.Label title={`${labelPrefix} Model`} text={model.label} />
-      <List.Item.Detail.Metadata.Label title={`${labelPrefix} Remaining`} text={`${model.percentLeft}%`} />
-      <List.Item.Detail.Metadata.Label title={`${labelPrefix} Resets In`} text={model.resetsIn} />
+      <List.Item.Detail.Metadata.Label
+        title="Remaining"
+        text={`${generateAsciiBar(model.percentLeft)} ${model.percentLeft}% remaining`}
+      />
+      <List.Item.Detail.Metadata.Label title="Resets In" text={model.resetsIn} />
     </>
   );
 }
@@ -120,6 +142,7 @@ function appendModel(lines: string[], title: string, model: AntigravityUsage["pr
 
   lines.push("");
   lines.push(`${title}: ${model.label}`);
-  lines.push(`Remaining: ${model.percentLeft}%`);
+  lines.push(`Remaining: ${model.percentLeft}% remaining`);
+  lines.push(generateAsciiBar(model.percentLeft));
   lines.push(`Resets In: ${model.resetsIn}`);
 }

@@ -136,7 +136,8 @@ export function SearchView({ searchMode }: SearchViewProps) {
         args.push("--all");
       }
 
-      const result = await runQmd<QmdSearchResult[]>(args);
+      const timeout = isExpensiveSearch(searchMode) ? 120_000 : 30_000;
+      const result = await runQmd<QmdSearchResult[]>(args, { timeout });
 
       // Ignore stale results - only process if this is still the latest request
       if (currentRequestId !== searchRequestId.current) {
@@ -173,7 +174,27 @@ export function SearchView({ searchMode }: SearchViewProps) {
           error: result.error,
         });
         setResults([]);
-        if (result.error && !result.error.includes("No results")) {
+
+        if (result.hint?.type === "stale_index") {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Index is stale",
+            message: `Last updated ${result.hint.daysAgo} ago. Run the "Update Collections" command to refresh.`,
+          });
+        } else if (result.hint?.type === "needs_embeddings") {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Embeddings needed",
+            message: `${result.hint.count} document${result.hint.count === 1 ? "" : "s"} need embeddings. Run the "Generate Embeddings" command.`,
+          });
+        } else if (result.hint?.type === "sqlite_vec_unavailable") {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Vector search unavailable",
+            message:
+              "sqlite-vec failed to load. Reinstall qmd with npm (npm install -g @tobilu/qmd) for vector search support on macOS.",
+          });
+        } else if (result.error && !result.error.includes("No results")) {
           await showToast({
             style: Toast.Style.Failure,
             title: "Search failed",

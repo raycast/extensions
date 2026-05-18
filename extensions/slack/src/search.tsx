@@ -47,11 +47,18 @@ function searchItemAccessories(
   return searchMetadata;
 }
 
+function foldForSearch(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
 function matchesAllWords(text: string, searchText: string): boolean {
   if (!searchText.trim()) return true;
-  const words = searchText.toLowerCase().split(/\s+/).filter(Boolean);
-  const lowerText = text.toLowerCase();
-  return words.every((word) => lowerText.includes(word));
+  const words = foldForSearch(searchText).split(/\s+/).filter(Boolean);
+  const folded = foldForSearch(text);
+  return words.every((word) => folded.includes(word));
 }
 
 function CopyIdAction({ id }: { id: string }) {

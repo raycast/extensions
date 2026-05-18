@@ -12,7 +12,64 @@ on:
         required: true
 
 jobs:
+  require_admin_or_write_approval:
+    runs-on: ubuntu-latest
+    name: Require admin/write approval
+    env:
+      GITHUB_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+    steps:
+      - name: Verify PR has admin/write approval
+        id: check
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          pr_number="${{ inputs.pr_number }}"
+          repo="${{ github.repository }}"
+
+          echo "Checking reviews for PR #$pr_number in $repo"
+
+          reviews_json=$(gh api --paginate "repos/$repo/pulls/$pr_number/reviews" | jq -s 'add')
+
+          approved_users=$(echo "$reviews_json" | jq -r '
+            sort_by(.submitted_at)
+            | group_by(.user.login)
+            | map(last)
+            | map(select(.state == "APPROVED"))
+            | .[].user.login
+          ')
+
+          if [[ -z "$approved_users" ]]; then
+            echo "No effective approvals found."
+            exit 1
+          fi
+
+          qualified_approver=""
+          while IFS= read -r user; do
+            [[ -z "$user" ]] && continue
+
+            if ! permission=$(gh api "repos/$repo/collaborators/$user/permission" --jq '.permission' 2>/dev/null); then
+              echo "$user is not a collaborator, skipping"
+              continue
+            fi
+
+            echo "$user has permission: $permission"
+
+            if [[ "$permission" == "admin" || "$permission" == "write" ]]; then
+              qualified_approver="$user"
+              break
+            fi
+          done <<< "$approved_users"
+
+          if [[ -z "$qualified_approver" ]]; then
+            echo "PR must be approved by at least one user with admin or write access."
+            exit 1
+          fi
+
+          echo "Approval requirement satisfied by: $qualified_approver"
+
   merge:
+    needs: require_admin_or_write_approval
     runs-on: macos-14
     name: Merge PR
     env:
@@ -39,10 +96,9 @@ jobs:
             if [[ -f "$changelog" ]]; then
               pattern="{PR_MERGE_DATE}"
               replacement=$(date '+%Y-%m-%d')
-              if grep -q $pattern $changelog; then
+              if grep -q "$pattern" "$changelog"; then
                 echo "  pattern found"
-                sed -i "" "s/$pattern/$replacement/g" $changelog
-                # ubuntu: sed -i "s/$pattern/$replacement/g" $changelog
+                sed -i "" "s/$pattern/$replacement/g" "$changelog"
                 echo "  updated to $replacement"
                 updated_count=$((updated_count+1))
               else
@@ -70,10 +126,8 @@ jobs:
               package_json="$extension_path/package.json"
               echo "Checking: $package_json"
               if [[ -f "$package_json" ]]; then
-                # Check if platforms field exists
                 if ! jq -e '.platforms' "$package_json" > /dev/null 2>&1; then
                   echo "  Adding platforms field to $package_json"
-                  # Add platforms field with ["macOS"] as default
                   jq '. + {"platforms": ["macOS"]}' "$package_json" > "${package_json}.tmp" && mv "${package_json}.tmp" "$package_json"
                   modified_count=$((modified_count+1))
                 else
@@ -90,6 +144,7 @@ jobs:
             platforms_added=true
           fi
           echo "platforms_added=$platforms_added" >> $GITHUB_OUTPUT
+
       - name: Optimise images
         id: optimise_images
         run: |
@@ -108,7 +163,7 @@ jobs:
           echo "Found images: $count"
           if [ $count -gt 0 ]; then
             brew install oxipng jpegoptim
-            
+
             for image in "${images_array[@]}"; do
               echo "Processing: $image"
               if [[ "$image" == *.png ]]; then
@@ -118,10 +173,11 @@ jobs:
                 jpegoptim --max=85 --strip-all "$image"
               fi
             done
-            
+
             images_optimized=true
           fi
           echo "images_optimized=$images_optimized" >> $GITHUB_OUTPUT
+
       - name: Commit changes
         id: commit_changes
         run: |
@@ -141,7 +197,6 @@ jobs:
               exit 1
             fi
 
-            # Build a dynamic commit message based on previous steps
             parts=()
             if [[ "${{ steps.update_changelog.outputs.changelog_updated }}" == "true" ]]; then
               parts+=("Update CHANGELOG.md")
@@ -153,7 +208,6 @@ jobs:
               parts+=("optimise images")
             fi
 
-            # Join parts with commas and 'and' for the last item
             if [[ ${#parts[@]} -eq 0 ]]; then
               commit_msg="Automated maintenance updates"
             else
@@ -178,18 +232,30 @@ jobs:
             echo "No changes."
             echo "changes_pushed=false" >> $GITHUB_OUTPUT
           fi
+
       - name: Sleep for 30 seconds
         if: steps.commit_changes.outputs.changes_pushed == 'true'
-        run: sleep 30 # sleep 30s for ubuntu
+        run: sleep 30
         shell: bash
+
       - name: Merge
         run: gh pr merge ${{ github.event.inputs.pr_number }} --squash --delete-branch
+
+  notify_failure:
+    needs:
+      - require_admin_or_write_approval
+      - merge
+    if: always() && (needs.require_admin_or_write_approval.result == 'failure' || needs.merge.result == 'failure')
+    runs-on: ubuntu-latest
+    name: Notify Failure to Slack
+    steps:
       - name: Notify Failure to Slack
-        if: failure()
         uses: raycast/github-actions/slack-send@master
         with:
           webhook: ${{ secrets.SLACK_STREAM_ERRORS_STORE_PUBLIC }}
           color: "danger"
           text: |
-            PR ${{ github.event.inputs.pr_number }} merge failed. ${{ steps.commit_changes.outputs.error }}
+            PR ${{ github.event.inputs.pr_number }} merge failed.
+            Approval gate: ${{ needs.require_admin_or_write_approval.result }}
+            Merge job: ${{ needs.merge.result }}
             Check <${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}|action logs>

@@ -28,10 +28,10 @@ The extension works out-of-the-box with sensible defaults, but movement feel can
 
 Open Raycast → Extensions → RayDoom → Preferences to adjust:
 
-| Preference | Default | Description |
-|---|---|---|
-| **Forward/Backward Delay (ms)** | `200` | How long W and S keys stay pressed. Higher = smoother movement, less pressing needed. |
-| **Turn/Strafe Delay (ms)** | `150` | How long A, D, Q, E keys stay pressed. |
+| Preference                      | Default | Description                                                                           |
+| ------------------------------- | ------- | ------------------------------------------------------------------------------------- |
+| **Forward/Backward Delay (ms)** | `200`   | How long W and S keys stay pressed. Higher = smoother movement, less pressing needed. |
+| **Turn/Strafe Delay (ms)**      | `150`   | How long A, D, Q, E keys stay pressed.                                                |
 
 These settings apply to both **Play DOOM** and **Quick Launch** commands. Fire, weapon selection, and menu keys always use short fixed delays (50–100ms) for responsiveness.
 
@@ -55,6 +55,7 @@ These settings apply to both **Play DOOM** and **Quick Launch** commands. Fire, 
 ### Controls
 
 **Movement:**
+
 - `W` - Move forward
 - `S` - Move backward
 - `A` - Turn left
@@ -63,6 +64,7 @@ These settings apply to both **Play DOOM** and **Quick Launch** commands. Fire, 
 - `E` - Strafe right
 
 **Actions:**
+
 - `F` - Fire weapon
 - `R` - Use / Open doors
 - `1-7` - Select weapons
@@ -70,23 +72,27 @@ These settings apply to both **Play DOOM** and **Quick Launch** commands. Fire, 
 - `Cmd+M` - Open menu
 
 **Menu Navigation:**
+
 - `Return` - Select / Enter
 - `Y` - Yes
 - `N` - No
 - `Cmd+M` - Open DOOM in-game menu
 
 **Game Control:**
+
 - `Cmd+Shift+Q` - **Stop Game** (cleanly exits and releases memory)
 - `Cmd+Shift+R` - **Redownload WAD File** (delete and re-download on next launch)
 
 > **Note:** The ESC key opens DOOM's in-game pause menu (standard DOOM behavior). To fully stop the game and release WASM resources, use `Cmd+Shift+Q` or select "Stop Game" from the Action Panel.
 
 **Debugging:**
+
 - `Cmd+Shift+C` - Copy current frame to clipboard
 
 ### Navigation Title Stats
 
 While playing, the window title bar displays real-time stats:
+
 - **H:** Health percentage (0-200%)
 - **A:** Armor percentage (0-200%)
 - **B:** Bullets/ammo for current weapon (∞ for fist/chainsaw)
@@ -97,6 +103,7 @@ Example: `H:100% A:0% B:50 K:01`
 ### Event Toasts
 
 Animated notifications appear for:
+
 - **Key Pickups:** Blue, Yellow, Red keycards and skull keys
 - **Secrets Found:** When discovering secret areas
 - **Low Health:** Warning when health drops to 25% or below

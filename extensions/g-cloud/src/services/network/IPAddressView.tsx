@@ -211,7 +211,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
             shortcut={{ modifiers: ["cmd"], key: "r" }}
           />
           <Action
-            title="Create Ip Address"
+            title="Create IP Address"
             icon={Icon.Plus}
             shortcut={{ modifiers: ["cmd"], key: "n" }}
             onAction={() => {
@@ -245,7 +245,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
           actions={
             <ActionPanel>
               <Action
-                title="Create Ip Address"
+                title="Create IP Address"
                 icon={Icon.Plus}
                 onAction={() => {
                   if (regions.length === 0) {
@@ -356,7 +356,7 @@ export default function IPAddressView({ projectId, gcloudPath }: IPAddressViewPr
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                 />
                 <Action
-                  title="Create Ip Address"
+                  title="Create IP Address"
                   icon={Icon.Plus}
                   shortcut={{ modifiers: ["cmd"], key: "n" }}
                   onAction={() => {
@@ -551,7 +551,7 @@ function CreateIPForm({ gcloudPath, projectId, regions, onIPCreated }: CreateIPF
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Create Ip Address" onSubmit={handleSubmit} icon={Icon.Network} />
+          <Action.SubmitForm title="Create IP Address" onSubmit={handleSubmit} icon={Icon.Network} />
         </ActionPanel>
       }
     >

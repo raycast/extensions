@@ -10,8 +10,8 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { FormValidation, showFailureToast, useCachedPromise, useForm, usePromise } from "@raycast/utils";
-import fetch from "node-fetch";
 import { getProjects, getTasks, getTypesOfWork, task } from "./composables/FetchData";
+import { fetchWithTimeout } from "./composables/HttpClient";
 import { convertDurationsToSeconds, validateDuration } from "./composables/ValidateDuration";
 import { baseURI, getTokens } from "./composables/WebClient";
 
@@ -50,7 +50,7 @@ export const logTime = async (token: string, values: FormValues, tasks: task[] |
   });
 
   try {
-    const response = await fetch(`${baseURI}/timeentries`, {
+    const response = await fetchWithTimeout(`${baseURI}/timeentries`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

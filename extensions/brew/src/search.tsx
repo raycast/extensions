@@ -3,7 +3,7 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getPreferenceValues, showToast, Toast } from "@raycast/api";
+import { getPreferenceValues, LaunchProps, showToast, Toast } from "@raycast/api";
 import { useBrewInstalled } from "./hooks/useBrewInstalled";
 import { useBrewSearch, isInstalled } from "./hooks/useBrewSearch";
 import { InstallableFilterDropdown, InstallableFilterType, placeholder } from "./components/filter";
@@ -20,8 +20,8 @@ function formatNumber(num: number): string {
   return num.toLocaleString();
 }
 
-export default function SearchView() {
-  const [searchText, setSearchText] = useState("");
+export default function SearchView(props: LaunchProps<{ arguments: Arguments.Search }>) {
+  const [searchText, setSearchText] = useState(props.arguments.search ?? "");
   const [filter, setFilter] = useState(InstallableFilterType.all);
   const { showMetadataPanel } = getPreferenceValues<SearchPreferences>();
 
@@ -126,6 +126,7 @@ export default function SearchView() {
     <FormulaList
       formulae={formulae}
       casks={casks}
+      searchText={searchText}
       searchBarPlaceholder={placeholder(filter)}
       searchBarAccessory={<InstallableFilterDropdown onSelect={setFilter} />}
       isLoading={(isLoadingInstalled && !installed) || isLoadingSearch}

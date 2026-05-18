@@ -127,12 +127,7 @@ export default function Command() {
     let cancelled = false;
 
     async function loadHistoryThumbnails() {
-      if (urlHistory.length === 0) {
-        setHistoryThumbnailUrls({});
-        return;
-      }
-
-      const missingEntries = urlHistory.filter((entry) => !historyThumbnailUrls[entry.url]);
+      const missingEntries = urlHistory.filter((entry) => !(entry.url in historyThumbnailUrls));
       if (missingEntries.length === 0) {
         return;
       }
@@ -150,7 +145,7 @@ export default function Command() {
 
       setHistoryThumbnailUrls((currentUrls) => ({
         ...currentUrls,
-        ...Object.fromEntries(entries.filter((entry): entry is readonly [string, string] => entry[1].length > 0)),
+        ...Object.fromEntries(entries),
       }));
     }
 
@@ -526,6 +521,14 @@ export default function Command() {
           key={`${videoId}-${thumbnail.key}`}
           title={thumbnail.label}
           icon={getThumbnailVariantIcon(thumbnail.key)}
+          accessories={[
+            {
+              text: {
+                value: getThumbnailDimensions(thumbnail.key),
+                color: Color.SecondaryText,
+              },
+            },
+          ]}
           detail={<List.Item.Detail markdown={`![${thumbnail.label}](${thumbnail.url})`} />}
           actions={
             <ActionPanel>
@@ -560,6 +563,18 @@ function getThumbnailVariantIcon(variantKey: string) {
     source,
     tintColor: ICON_TINT_COLOR,
   };
+}
+
+function getThumbnailDimensions(variantKey: string) {
+  const dimensionMap: Record<string, string> = {
+    maxres: "1280 × 720",
+    sd: "640 × 480",
+    hq: "480 × 360",
+    mq: "320 × 180",
+    default: "120 × 90",
+  };
+
+  return dimensionMap[variantKey] ?? "Unknown size";
 }
 
 function getStatusMarkdown(params: {

@@ -1,7 +1,7 @@
 import { runPowerShellScript, showFailureToast } from "@raycast/utils";
 import { showToast, Toast } from "@raycast/api";
 
-async function isPowerToysRunning(): Promise<boolean> {
+export async function isPowerToysRunning(): Promise<boolean> {
   try {
     const psCommand = `(Get-Process -Name 'PowerToys' -ErrorAction SilentlyContinue) -ne $null`;
     const result = await runPowerShellScript(psCommand, {

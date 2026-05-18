@@ -121,6 +121,24 @@ export function getWeekday(date: string): string {
   return d.locale("en").format("dddd");
 }
 
+function formatRequestQuery(query: string | undefined): string | undefined {
+  if (!query) {
+    return undefined;
+  }
+  const match = query.match(/Lat\s+([-\d.]+)\s+and\s+Lon\s+([-\d.]+)/i);
+  if (!match) {
+    return query;
+  }
+  const lat = parseFloat(match[1]);
+  const lon = parseFloat(match[2]);
+  if (Number.isNaN(lat) || Number.isNaN(lon)) {
+    return query;
+  }
+  const latDir = lat >= 0 ? "N" : "S";
+  const lonDir = lon >= 0 ? "E" : "W";
+  return `${Math.abs(lat).toFixed(2)}°${latDir}, ${Math.abs(lon).toFixed(2)}°${lonDir}`;
+}
+
 export function getMetaData(data: Weather | undefined): {
   title: string;
   curcon: WeatherConditions | undefined;
@@ -130,15 +148,16 @@ export function getMetaData(data: Weather | undefined): {
   if (!data) {
     return { title: "?", curcon: undefined, weatherDesc: undefined, area: undefined };
   }
-  const area = data.nearest_area[0];
-  const curcon = data.current_condition[0];
+  const area = data.nearest_area?.[0];
+  const curcon = data.current_condition?.[0];
 
-  const names = [area.areaName[0].value, area.region[0].value, area.country[0].value];
-  const title = names
-    .filter((n) => n && n.trim().length > 0)
+  const names = [area?.areaName?.[0]?.value, area?.region?.[0]?.value, area?.country?.[0]?.value];
+  const areaTitle = names
+    .filter((n): n is string => n != null && n.trim().length > 0)
     .map((n) => n.trim())
     .join(", ");
-  const weatherDesc = curcon ? curcon.weatherDesc[0].value : undefined;
+  const title = areaTitle || formatRequestQuery(data.request?.[0]?.query) || "?";
+  const weatherDesc = curcon?.weatherDesc?.[0]?.value;
   return { title, curcon, weatherDesc, area };
 }
 

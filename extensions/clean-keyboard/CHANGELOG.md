@@ -1,5 +1,14 @@
 # Clean Keyboard Changelog
 
+## [Lock Fn Keys] - 2026-05-07
+
+- Added opt-in preference to also block the function row while cleaning (macOS Tahoe 26+ only)
+
+## [Windows Support] - 2026-03-18
+
+- Added Windows support using rust implementation
+- Updated dependencies
+
 ## [Maintenance] - 2025-12-04
 
 - Introduce the system level limitation in readme

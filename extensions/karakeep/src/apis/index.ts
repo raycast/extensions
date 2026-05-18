@@ -274,3 +274,13 @@ export async function fetchAttachTagsToBookmark(
     body: { tags },
   });
 }
+
+export async function fetchDetachTagsFromBookmark(
+  bookmarkId: string,
+  tags: Array<{ tagId: string }>,
+): Promise<unknown> {
+  return fetchWithAuth(`/api/v1/bookmarks/${bookmarkId}/tags`, {
+    method: "DELETE",
+    body: { tags },
+  });
+}

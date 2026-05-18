@@ -3,7 +3,7 @@
   "name": "qmd",
   "version": "1.0.0",
   "title": "QMD",
-  "description": "Search your markdown files with QMD (Quick Markdown Search) - fast BM25 keyword search, semantic vector search, and hybrid search with LLM reranking",
+  "description": "Search your markdown files with QMD (Query Markup Documents) - fast BM25 keyword search, semantic vector search, and hybrid search with LLM reranking",
   "icon": "icon.png",
   "author": "karelvuong",
   "categories": [

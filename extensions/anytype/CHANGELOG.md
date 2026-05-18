@@ -1,5 +1,10 @@
 # Anytype Changelog
 
+## [Dependency Updates] - 2026-04-06
+
+- Update dependencies to latest versions
+- Update metadata images
+
 ## [Windows Support] - 2026-02-23
 
 - Add support for Windows platform

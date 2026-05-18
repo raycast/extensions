@@ -15,6 +15,7 @@ import { Bookmark, Config } from "../types";
 import { getScreenshot } from "../utils/screenshot";
 import { BookmarkDetail } from "./BookmarkDetail";
 import { BookmarkEdit } from "./BookmarkEdit";
+import { NoteEdit } from "./NoteEdit";
 
 const log = logger.child("[BookmarkItem]");
 const { Metadata } = List.Item.Detail;
@@ -141,7 +142,11 @@ function useBookmarkHandlers({
   }, [fetchLatestBookmark]);
 
   const handleEdit = useCallback(() => {
-    push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    if (bookmark.content.type === "text") {
+      push(<NoteEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    } else {
+      push(<BookmarkEdit bookmark={bookmark} onRefresh={handleEditUpdate} />);
+    }
   }, [bookmark, handleEditUpdate, push]);
 
   const handleSummarize = useCallback(async () => {

@@ -37,7 +37,9 @@ function SearchPullRequests() {
         query: `is:pr archived:false ${sortTxt} ${searchFilter} ${searchText}`,
       });
 
-      return result.search.edges?.map((edge) => edge?.node as PullRequestFieldsFragment);
+      return result.search.edges
+        ?.map((edge) => edge?.node as PullRequestFieldsFragment | null | undefined)
+        .filter((node): node is PullRequestFieldsFragment => node != null);
     },
     [searchText, searchFilter, sortQuery],
     { keepPreviousData: true },
@@ -61,6 +63,7 @@ function SearchPullRequests() {
             return (
               <PullRequestListItem
                 key={pullRequest.id}
+                showAuthor
                 {...{ pullRequest, viewer, mutateList, sortQuery, setSortQuery }}
               />
             );

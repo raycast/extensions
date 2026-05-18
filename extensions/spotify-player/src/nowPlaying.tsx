@@ -35,6 +35,7 @@ import { PlayAction } from "./components/PlayAction";
 import { PauseAction } from "./components/PauseAction";
 import { getErrorMessage } from "./helpers/getError";
 import { triggerMenuBarRefresh } from "./helpers/triggerMenuBarRefresh";
+import { ConnectDevice, Dislike, Like, OpenLibrary, OpenSearch, ShowContent } from "./shortcuts/shortcuts";
 
 function NowPlayingCommand() {
   const { currentlyPlayingData, currentlyPlayingIsLoading, currentlyPlayingRevalidate } = useCurrentlyPlaying();
@@ -67,11 +68,13 @@ function NowPlayingCommand() {
                 icon={Icon.Book}
                 title="Your Library"
                 onAction={() => launchCommand({ name: "yourLibrary", type: LaunchType.UserInitiated })}
+                shortcut={OpenLibrary}
               />
               <Action
                 title="Search"
                 icon={Icon.MagnifyingGlass}
                 onAction={() => launchCommand({ name: "search", type: LaunchType.UserInitiated })}
+                shortcut={OpenSearch}
               />
               <Action
                 icon={Icon.Repeat}
@@ -158,6 +161,7 @@ function NowPlayingCommand() {
                 toast.message = error;
               }
             }}
+            shortcut={Dislike}
           />
         )}
 
@@ -194,6 +198,7 @@ function NowPlayingCommand() {
                 toast.message = error;
               }
             }}
+            shortcut={Like}
           />
         )}
         <Action
@@ -260,6 +265,7 @@ function NowPlayingCommand() {
           icon={Icon.AppWindowGrid3x3}
           title="Go to Album"
           target={<TracksList album={album} showGoToAlbum={false} />}
+          shortcut={ShowContent}
         />
       </>
     );
@@ -300,7 +306,7 @@ function NowPlayingCommand() {
           {myPlaylistsData?.items && meData && uri && (
             <AddToPlaylistAction playlists={myPlaylistsData.items} meData={meData} uri={uri} />
           )}
-          <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device">
+          <ActionPanel.Submenu icon={Icon.Mobile} title="Connect Device" shortcut={ConnectDevice}>
             {myDevicesData?.devices
               ?.filter((device) => !device.is_restricted)
               .map((device) => (

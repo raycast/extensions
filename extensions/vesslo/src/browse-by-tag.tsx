@@ -60,7 +60,13 @@ export default function BrowseByTag() {
   // Show tag list
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search tags...">
-      {tagGroups.length === 0 ? (
+      {!data ? (
+        <List.EmptyView
+          icon={Icon.Warning}
+          title="Vesslo data not found"
+          description="Please run Vesslo app to export data"
+        />
+      ) : tagGroups.length === 0 ? (
         <List.EmptyView
           icon={Icon.Tag}
           title="No tags found"

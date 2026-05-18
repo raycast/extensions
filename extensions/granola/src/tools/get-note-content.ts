@@ -76,10 +76,45 @@ function resolveEnhancedContent(panels: PanelsByDocId | undefined, documentId: s
   return "";
 }
 
+function sanitizeNoteContent(value?: string | null): string {
+  if (!value) {
+    return "";
+  }
+
+  const trimmed = value.trim();
+  if (!trimmed || trimmed.toLowerCase() === "undefined") {
+    return "";
+  }
+
+  return value;
+}
+
+function resolveOriginalContent(document: {
+  notes_markdown?: string | null;
+  notes_plain?: string | null;
+  notes?: DocumentStructure | null;
+}): string {
+  const notesMarkdown = sanitizeNoteContent(document.notes_markdown);
+  if (notesMarkdown) {
+    return notesMarkdown;
+  }
+
+  const structuredNotes = sanitizeNoteContent(convertDocumentToMarkdown(document.notes));
+  if (structuredNotes) {
+    return structuredNotes;
+  }
+
+  return sanitizeNoteContent(document.notes_plain);
+}
+
 /**
  * Retrieves the full content for a specific note by ID.
  */
 export default async function tool(input: Input): Promise<Output> {
+  return getNoteContent(input);
+}
+
+async function getNoteContent(input: Input): Promise<Output> {
   if (!input.noteId) {
     return {
       title: "Error: No note ID provided. Use list-meetings first to get a meeting ID.",
@@ -100,19 +135,13 @@ export default async function tool(input: Input): Promise<Output> {
     const requestedContentType = input.contentType || "auto";
 
     if (requestedContentType === "original") {
-      content = document.notes_markdown || "";
+      content = resolveOriginalContent(document);
     } else if (requestedContentType === "enhanced") {
-      content = resolveEnhancedContent(panelsForResolve, input.noteId);
-      if (!content && document.notes?.content) {
-        content = convertDocumentToMarkdown(document.notes as unknown as DocumentStructure);
-      }
+      content = sanitizeNoteContent(resolveEnhancedContent(panelsForResolve, input.noteId));
     } else {
-      content = resolveEnhancedContent(panelsForResolve, input.noteId);
-      if (!content && document.notes?.content) {
-        content = convertDocumentToMarkdown(document.notes as unknown as DocumentStructure);
-      }
-      if (!content && document.notes_markdown) {
-        content = document.notes_markdown;
+      content = sanitizeNoteContent(resolveEnhancedContent(panelsForResolve, input.noteId));
+      if (!content) {
+        content = resolveOriginalContent(document);
       }
     }
 

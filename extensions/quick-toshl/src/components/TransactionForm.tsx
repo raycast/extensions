@@ -4,7 +4,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { toshl } from "../utils/toshl";
 import { Transaction, TransactionInput } from "../utils/types";
 import { format } from "date-fns";
-import { CURRENCY_SYMBOLS } from "../utils/helpers";
+import { CURRENCY_SYMBOLS, parseExtraJsonForTool } from "../utils/helpers";
 
 interface TransactionFormProps {
   type: "expense" | "income";
@@ -49,6 +49,8 @@ export function TransactionForm({ type, transaction, onSubmit }: TransactionForm
     tags: string[];
     account: string;
     currency: string;
+    completed: boolean;
+    extraJson: string;
     isRecurring: boolean;
     frequency: string;
     interval: string;
@@ -77,6 +79,14 @@ export function TransactionForm({ type, transaction, onSubmit }: TransactionForm
       const isNewEntry = !transaction;
 
       if (isNewEntry) {
+        const extraResult = parseExtraJsonForTool(values.extraJson);
+        if (!extraResult.ok) {
+          showToast({ style: Toast.Style.Failure, title: "Invalid extra", message: extraResult.message });
+          setIsLoading(false);
+          return;
+        }
+        const extra = extraResult.value;
+
         // NEW ENTRY: Send full payload
         const payload: TransactionInput = {
           amount: newAmount,
@@ -88,6 +98,8 @@ export function TransactionForm({ type, transaction, onSubmit }: TransactionForm
         if (values.account) payload.account = values.account;
         if (values.category) payload.category = values.category;
         if (values.tags && values.tags.length > 0) payload.tags = values.tags;
+        if (values.completed) payload.completed = true;
+        if (extra) payload.extra = extra;
 
         // Add repeat for new recurring entries
         if (values.isRecurring && values.frequency) {
@@ -97,7 +109,8 @@ export function TransactionForm({ type, transaction, onSubmit }: TransactionForm
             start: entryDate,
           };
           if (values.endType === "count" && values.count) {
-            payload.repeat.count = parseInt(values.count);
+            const count = parseInt(values.count, 10);
+            if (!isNaN(count) && count > 0) payload.repeat.count = count;
           } else if (values.endType === "date" && values.endDate) {
             payload.repeat.end = format(values.endDate, "yyyy-MM-dd");
           }
@@ -107,6 +120,14 @@ export function TransactionForm({ type, transaction, onSubmit }: TransactionForm
         showToast({ style: Toast.Style.Success, title: "Transaction Added" });
         pop();
       } else {
+        const extraResult = parseExtraJsonForTool(values.extraJson);
+        if (!extraResult.ok) {
+          showToast({ style: Toast.Style.Failure, title: "Invalid extra", message: extraResult.message });
+          setIsLoading(false);
+          return;
+        }
+        const extra = extraResult.value;
+
         // UPDATE: All these fields are REQUIRED by Toshl API
         // amount*, currency.code*, date*, account*, category*, modified*
         const updatePayload: TransactionInput = {
@@ -122,9 +143,11 @@ export function TransactionForm({ type, transaction, onSubmit }: TransactionForm
           category: values.category && values.category !== "" ? values.category : transaction.category,
           tags: values.tags && values.tags.length > 0 ? values.tags : (transaction.tags ?? []),
           modified: transaction.modified,
+          completed: values.completed,
         };
-
-        console.log("Update payload:", JSON.stringify(updatePayload, null, 2));
+        if (extra !== undefined) {
+          updatePayload.extra = extra;
+        }
 
         if (onSubmit) {
           await onSubmit(updatePayload);
@@ -212,6 +235,20 @@ export function TransactionForm({ type, transaction, onSubmit }: TransactionForm
         title="Description"
         placeholder="Lunch, Taxi, etc."
         defaultValue={transaction?.desc}
+      />
+
+      <Form.Checkbox id="completed" label="Completed (e.g. bill paid)" defaultValue={transaction?.completed ?? false} />
+
+      <Form.TextArea
+        id="extraJson"
+        title="Extra (JSON)"
+        placeholder='Optional: {"myKey":"value"}'
+        defaultValue={
+          transaction?.extra && Object.keys(transaction.extra).length > 0
+            ? JSON.stringify(transaction.extra, null, 2)
+            : ""
+        }
+        info="Private metadata (Toshl `extra`). Use {} to clear. Leave empty to omit on create; on edit, omitting this field leaves server metadata unchanged."
       />
 
       <Form.Separator />

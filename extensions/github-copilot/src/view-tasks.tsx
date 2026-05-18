@@ -1,11 +1,40 @@
-import { ActionPanel, Action, Icon, List, launchCommand, LaunchType, Color } from "@raycast/api";
+import {
+  ActionPanel,
+  Action,
+  Icon,
+  List,
+  launchCommand,
+  LaunchType,
+  Color,
+  LaunchProps,
+  useNavigation,
+} from "@raycast/api";
 import { provider, reauthorize } from "./lib/oauth";
 import { showFailureToast, withAccessToken } from "@raycast/utils";
 import { useTasks } from "./hooks/useTasks";
 import { TaskItem } from "./components";
+import { TaskLogsList } from "./components/TaskLogsList";
+import { useEffect, useRef } from "react";
 
-function Command() {
+interface LaunchContext {
+  taskId?: string;
+}
+
+function Command(props: LaunchProps<{ launchContext: LaunchContext }>) {
   const { isLoading, tasks } = useTasks();
+  const { push } = useNavigation();
+  const hasNavigated = useRef(false);
+  const targetTaskId = props.launchContext?.taskId;
+
+  // Auto-navigate to the target task's logs when launched with context
+  useEffect(() => {
+    if (hasNavigated.current || isLoading || !targetTaskId) return;
+    const target = tasks.find((t) => t.task.id === targetTaskId);
+    if (target) {
+      hasNavigated.current = true;
+      push(<TaskLogsList taskWithPullRequest={target} />);
+    }
+  }, [isLoading, tasks, targetTaskId, push]);
 
   // Filter tasks by pull request state (if available)
   const openTasks = tasks.filter(

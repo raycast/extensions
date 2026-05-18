@@ -24,7 +24,7 @@ export type VaultContextType = VaultState & {
   updateState: (next: React.SetStateAction<VaultState>) => void;
 };
 
-const VaultContext = createContext<VaultContextType | null>(null);
+export const VaultContext = createContext<VaultContextType | null>(null);
 
 function getInitialState(): VaultState {
   return { items: [], folders: [], isLoading: true };

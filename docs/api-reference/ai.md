@@ -170,6 +170,8 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-4
 | OpenAI_GPT-5.3_Instant | OpenAI's fast, capable model for everyday work with improved info-seeking, how-tos, and technical writing. |
 | OpenAI_GPT-5.3_Codex | A version of GPT-5.3 optimized for agentic coding tasks in Codex or similar environments. |
 | OpenAI_GPT-5.4 | OpenAI's most capable model for professional work and long-running agents with state-of-the-art tool-calling. |
+| OpenAI_GPT-5.4_mini | OpenAI's strongest mini model yet for coding and agentic workflows. |
+| OpenAI_GPT-5.4_nano | OpenAI's cheapest GPT-5.4-class model for simpler tasks. |
 | OpenAI_o3 | Advanced model excelling in math, science, coding, and visual tasks. |
 | OpenAI_o4-mini | Fast, efficient model optimized for coding and visual tasks. |
 | OpenAI_o1 | Advanced reasoning model for complex STEM problems. |
@@ -182,6 +184,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-4
 | Anthropic_Claude_4.6_Sonnet | Anthropic's most intelligent model with the highest intelligence across most tasks. |
 | Anthropic_Claude_4.5_Opus | Anthropic's previous generation Opus model with enhanced capabilities. |
 | Anthropic_Claude_4.6_Opus | Anthropic's model for complex tasks with exceptional fluency. |
+| Anthropic_Claude_4.7_Opus | Anthropic's most powerful model with combined reasoning and non-reasoning capabilities. |
 | Perplexity_Sonar | Fast Perplexity model with integrated search capabilities. |
 | Perplexity_Sonar_Pro | Advanced Perplexity model for complex queries with search integration. |
 | Groq_Llama_4_Scout | Advanced 17B parameter multimodal model with 16 experts. |
@@ -192,7 +195,6 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-4
 | Mistral_Medium | A powerful, cost-effective, frontier-class multimodal model. |
 | Mistral_Small_3 | Latest enterprise-grade small model with improved reasoning. |
 | Mistral_Codestral | Specialized model for code-related tasks and testing. |
-| Groq_Kimi_K2_Instruct | Kimi K2 is a powerful and versatile AI model designed for a wide range of tasks. |
 | Groq_Qwen3-32B | The latest generation of large language models in the Qwen series. |
 | Google_Gemini_3.1_Flash_Lite | Ultra-fast, cost-effective model for high-volume tasks and lightweight agentic workflows. |
 | Google_Gemini_3_Flash | Fast thinking model with strong balance of speed, performance, and value. |
@@ -205,6 +207,7 @@ The AI model to use to answer to the prompt. Defaults to `AI.Model["OpenAI_GPT-4
 | Together_AI_DeepSeek-V3 | Advanced Mixture-of-Experts model. |
 | Together_AI_Kimi_K2.5 | Kimi K2.5 is an advanced multimodal AI model with improved reasoning and instruction-following capabilities. |
 | xAI_Grok-4.1_Fast | xAI's best agentic tool calling model that shines in real-world use cases like customer support and deep research. |
+| xAI_Grok-4.20 | xAI's advanced reasoning model with enhanced capabilities. |
 | xAI_Grok-4 | Advanced language model with enhanced reasoning and tool capabilities. |
 | xAI_Grok-4_Fast | xAI's latest advancement in cost-efficient reasoning models. |
 | xAI_Grok_Code_Fast_1 | Grok Code Fast 1 is xAI's Coding Agent focused model |
@@ -218,3 +221,11 @@ If a model isn't available to the user (or has been disabled by the user), Rayca
 #### Properties
 
 <InterfaceTableFromJSDoc name="AI.AskOptions" />
+
+## Rate Limit
+
+To prevent accidental programmatic over-usage of AI quota, Raycast enforces rate limits on AI requests made from extensions.
+
+| Limit per minute | Limit per hour |
+|---|---|
+| 10/minute | 100/hour |

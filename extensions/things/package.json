@@ -14,7 +14,9 @@
     "bendrucker",
     "vmrjnvc",
     "dinocosta",
-    "janosorcsik"
+    "janosorcsik",
+    "faridrashidi",
+    "pernielsentikaer"
   ],
   "pastContributors": [
     "thomaslombart"
@@ -71,6 +73,13 @@
       "title": "Add New Project",
       "subtitle": "Things",
       "description": "Create a new project",
+      "mode": "view"
+    },
+    {
+      "name": "quick-find",
+      "title": "Quick Find",
+      "subtitle": "Things",
+      "description": "Search across all areas, projects, and to-dos. Requires Full Disk Access granted to Raycast.",
       "mode": "view"
     },
     {
