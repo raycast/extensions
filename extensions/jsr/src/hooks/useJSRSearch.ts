@@ -12,7 +12,7 @@ import { useSearchAPIData } from "@/hooks/useSearchAPIData";
 
 export const useJSRSearch = (queryString: string, scoped: string | null) => {
   const { query, scope, triggerQuery, runtimes, searchQueryURL } = useQueryParser(queryString, scoped);
-  const { data: apiData, isLoading: isLoadingAPIData, error: apiDataError } = useSearchAPIData();
+  const { data: apiData, isLoading: isLoadingAPIData, error: apiDataError, refresh } = useSearchAPIData();
 
   const searchURL = apiData ? `https://collections.orama.com/v1/collections/${apiData.projectId}/search` : "";
 
@@ -32,6 +32,13 @@ export const useJSRSearch = (queryString: string, scoped: string | null) => {
     execute: !!apiData && !!triggerQuery && !!searchURL,
     keepPreviousData: true,
     initialData: [] as SearchResult[],
+    parseResponse: async (response) => {
+      if (response.status === 401) {
+        void refresh();
+        return { message: "401 Unauthorized — refreshing credentials" } as ErrorResult;
+      }
+      return (await response.json()) as SearchResults | ErrorResult;
+    },
     mapResult: (data) => {
       if ("message" in data) {
         captureException(data.message);
