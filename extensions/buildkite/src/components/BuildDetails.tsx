@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Color, confirmAlert, Icon, List, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { getBuildkiteClient } from "../api/withBuildkiteClient";
@@ -126,6 +126,9 @@ export function BuildDetails({ build }: BuildDetailsProps) {
     return deriveFromJobs(rawJobs);
   }, [data]);
 
+  const totalJobs = data?.jobs?.count ?? derived.jobs.length;
+  const truncated = data?.jobs?.pageInfo?.hasNextPage === true;
+
   const pipelineName = build.pipeline?.name;
   const title = pipelineName ? `${pipelineName} #${build.number}` : `Build #${build.number}`;
   const buildLabel = pipelineName ? `${pipelineName} #${build.number}` : `build #${build.number}`;
@@ -188,6 +191,20 @@ export function BuildDetails({ build }: BuildDetailsProps) {
 
   return (
     <List isLoading={isLoading} navigationTitle={title} searchBarPlaceholder="Filter steps…" isShowingDetail>
+      {truncated ? (
+        <List.Section title="Notice">
+          <List.Item
+            title={`Showing first ${derived.jobs.length} of ${totalJobs} steps`}
+            subtitle="Open this build in Buildkite to see the rest"
+            icon={{ source: Icon.ExclamationMark, tintColor: Color.Orange }}
+            actions={
+              <ActionPanel>
+                <Action.OpenInBrowser url={build.url} title="Open Build in Browser" />
+              </ActionPanel>
+            }
+          />
+        </List.Section>
+      ) : null}
       {Array.from(derived.byLevel.entries())
         .sort((a, b) => a[0] - b[0])
         .map(([level, levelJobs]) => (

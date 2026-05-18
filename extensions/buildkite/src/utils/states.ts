@@ -36,7 +36,7 @@ export function getJobStateIcon(state: JobStates | undefined): Image.ImageLike {
       return { source: Icon.XMarkCircle, tintColor: Color.Red };
     case "BLOCKED":
     case "BLOCKED_FAILED":
-      return { source: Icon.LockUnlocked, tintColor: Color.Orange };
+      return { source: Icon.Lock, tintColor: Color.Orange };
     case "RUNNING":
     case "ACCEPTED":
     case "ASSIGNED":

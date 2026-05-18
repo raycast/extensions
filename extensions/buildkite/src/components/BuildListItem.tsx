@@ -19,9 +19,9 @@ export function BuildListItem({ build }: BuildListItemProps) {
       accessories={[{ text: timeAgo(build.createdAt) }]}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Build Graph" icon={Icon.AppWindowGrid3x3} target={<BuildDetails build={build} />} />
           <Action.OpenInBrowser url={build.url} />
           <Action.CopyToClipboard content={build.url} title="Copy URL" />
+          <Action.Push title="Show Build Graph" icon={Icon.AppWindowGrid3x3} target={<BuildDetails build={build} />} />
         </ActionPanel>
       }
     />

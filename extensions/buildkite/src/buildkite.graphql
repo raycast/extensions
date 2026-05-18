@@ -81,6 +81,10 @@ query getBuild($uuid: ID!) {
       slug
     }
     jobs(first: 100) {
+      count
+      pageInfo {
+        hasNextPage
+      }
       edges {
         node {
           ...BuildJob

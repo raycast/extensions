@@ -6157,7 +6157,7 @@ export type GetBuildQueryVariables = Exact<{
 }>;
 
 
-export type GetBuildQuery = { build: { id: string, uuid: string, number: number, state: BuildStates, message: string | null, branch: string, url: string, createdAt: any | null, pipeline: { name: string, slug: string }, jobs: { edges: Array<{ node: { __typename: 'JobTypeBlock', id: string, uuid: string, label: string | null, state: JobStates, isUnblockable: boolean | null, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | { __typename: 'JobTypeCommand', id: string, uuid: string, label: string | null, state: JobStates, url: string, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | { __typename: 'JobTypeTrigger', id: string, uuid: string, label: string | null, state: JobStates, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | { __typename: 'JobTypeWait', id: string, uuid: string, label: string | null, state: JobStates, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | null } | null> | null } | null } | null };
+export type GetBuildQuery = { build: { id: string, uuid: string, number: number, state: BuildStates, message: string | null, branch: string, url: string, createdAt: any | null, pipeline: { name: string, slug: string }, jobs: { count: number, pageInfo: { hasNextPage: boolean } | null, edges: Array<{ node: { __typename: 'JobTypeBlock', id: string, uuid: string, label: string | null, state: JobStates, isUnblockable: boolean | null, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | { __typename: 'JobTypeCommand', id: string, uuid: string, label: string | null, state: JobStates, url: string, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | { __typename: 'JobTypeTrigger', id: string, uuid: string, label: string | null, state: JobStates, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | { __typename: 'JobTypeWait', id: string, uuid: string, label: string | null, state: JobStates, step: { key: string | null, dependencies: { edges: Array<{ node: { key: string | null } | null } | null> | null } | null } | null } | null } | null> | null } | null } | null };
 
 export type UnblockJobMutationVariables = Exact<{
   id: Scalars['ID']['input'];
@@ -6291,6 +6291,10 @@ export const GetBuildDocument = gql`
       slug
     }
     jobs(first: 100) {
+      count
+      pageInfo {
+        hasNextPage
+      }
       edges {
         node {
           ...BuildJob
