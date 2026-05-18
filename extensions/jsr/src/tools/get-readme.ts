@@ -1,4 +1,4 @@
-import type { Package } from "@/types";
+import type { ApiResults, Package, VersionPackage } from "@/types";
 
 import { fetchJsrJson, fetchJsrText } from "@/lib/jsrFetch";
 import { jsrUrls } from "@/lib/jsrUrls";
@@ -33,6 +33,12 @@ export default async function tool(
 
   if (!version) return { markdown: null, version: null, readmeSource };
 
-  const markdown = await fetchJsrText(jsrUrls.site.readme(input.scope, input.name, version));
+  const versionsData = await fetchJsrJson<ApiResults<VersionPackage> | VersionPackage[]>(
+    jsrUrls.api.versions(input.scope, input.name),
+  );
+  const versions = Array.isArray(versionsData) ? versionsData : (versionsData.items ?? []);
+  const readmePath = versions.find((v) => v.version === version)?.readmePath ?? "/README.md";
+
+  const markdown = await fetchJsrText(jsrUrls.site.readme(input.scope, input.name, version, readmePath));
   return { markdown, version, readmeSource };
 }
