@@ -1,6 +1,6 @@
 # Jira Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-18
 
 - Loaded all saved filters in the My Filters command instead of stopping after the first 100 results
 
