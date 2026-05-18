@@ -55,7 +55,7 @@ const providersMeta: readonly {
   title: string;
   /** Hex accent for healthy usage, charts, and icon tints (Raycast accepts hex strings). */
   brandColor: string;
-  dropdownIcon: Image.Image;
+  dropdownIcon: Image.ImageLike;
 }[] = [
   {
     key: "claude",
@@ -200,7 +200,8 @@ export default function Command() {
   const [tab, setTab] = useState<SourceProviderKey>(defaultSource);
 
   const { isLoading, data, revalidate } = useCachedPromise(
-    async () => loadUsage(prefs, getPeriodRange("month"), tab),
+    async (provider: SourceProviderKey) =>
+      loadUsage(prefs, getPeriodRange("month"), provider),
     [tab],
     { keepPreviousData: false },
   );
@@ -409,7 +410,7 @@ export default function Command() {
 
       {errors.length > 0 ? (
         <List.Section title="Warnings">
-          {errors.map((err, i) => (
+          {errors.map((err: string, i: number) => (
             <List.Item
               key={`err-${i}`}
               title={{ value: warningListTitle(err), tooltip: err }}

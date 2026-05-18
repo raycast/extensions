@@ -127,8 +127,8 @@ export function buildLivePricingIndex(
 
 async function readDiskCache(): Promise<StoredPayload | null> {
   try {
-    const raw = await LocalStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
+    const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
+    if (typeof raw !== "string" || !raw) return null;
     const parsed = JSON.parse(raw) as StoredPayload;
     if (
       typeof parsed.savedAt !== "number" ||

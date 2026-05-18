@@ -138,7 +138,8 @@ function ConversationListItem({
       title={chat.title}
       accessories={[
         {
-          text: { value: tokensStr, color: brandColor },
+          text: tokensStr,
+          icon: { source: Icon.Dot, tintColor: brandColor },
           tooltip: `${tokensStr} tokens`,
         },
         ...(costStr
