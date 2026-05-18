@@ -10,11 +10,17 @@ Starts recording from the default microphone, stops when you press **Stop and Tr
 
 ## Prerequisites
 
-Install Kesha Voice Kit 1.18.2 or newer and fetch the local engine + ASR models:
+Install a Kesha Voice Kit release whose engine supports `kesha record`, then fetch the local engine + ASR models:
 
 ```bash
 bun add -g @drakulavich/kesha-voice-kit@latest
 kesha install
+```
+
+Verify the installed engine before using the extension:
+
+```bash
+kesha record --help
 ```
 
 macOS may ask for microphone permission the first time the command records audio. Grant access to Raycast when prompted.
