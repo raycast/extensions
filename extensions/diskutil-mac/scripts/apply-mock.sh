@@ -22,6 +22,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BRIDGE_PATH="$ROOT/src/utils/mockBridge.ts"
 OVERRIDE_PATH="$ROOT/src/mocks/mockOverride.json"
+CONFIG_PATH="$ROOT/src/mocks/mockConfig.json"
 
 LAUNCH=0
 LOG=0
@@ -55,6 +56,11 @@ export const mockExec = async (command: string): Promise<string> => {
 };
 EOF
   printf '{}\n' > "$OVERRIDE_PATH"
+  # Restore mockConfig.json baseline from git HEAD so any local tweaks made
+  # during a mock session are wiped on `dev` / `mock off` / `build` / `publish`.
+  if command -v git >/dev/null 2>&1; then
+    git -C "$ROOT" checkout HEAD -- "$CONFIG_PATH" 2>/dev/null || true
+  fi
 }
 
 write_dev() {

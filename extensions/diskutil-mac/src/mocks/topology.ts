@@ -88,6 +88,7 @@ export function buildTopology(diskCount: number, sectionCount: number, seed: num
     const totalSize = kind === "synthesized" ? randInt(rng, 500, 2000) * GB : randInt(rng, 256, 4000) * GB;
     const isInternal = kind !== "external";
     const isRemovable = kind === "external";
+    const containerFree = Math.floor(totalSize * (0.05 + rng() * 0.45));
 
     const whole: SynthDisk = {
       identifier: wholeId,
@@ -100,6 +101,10 @@ export function buildTopology(diskCount: number, sectionCount: number, seed: num
       mountPoint: "",
       removable: isRemovable,
       internal: isInternal,
+      freeBytes: kind === "synthesized" ? containerFree : 0, // whole disks have no FS → 0
+      containerSizeBytes: 0,
+      containerFreeBytes: 0,
+      capacityInUseBytes: 0,
     };
 
     const disks: SynthDisk[] = [whole];
@@ -112,6 +117,8 @@ export function buildTopology(diskCount: number, sectionCount: number, seed: num
       const name =
         role === "volume" ? VOLUME_NAMES[randInt(rng, 0, VOLUME_NAMES.length - 1)] : c === 1 ? "EFI" : `Part ${c}`;
       const mounted = role === "volume" && rng() > 0.4;
+      // For APFS volumes: capacityInUse is a 10–90% slice of this volume's nominal size.
+      const capacityInUse = role === "volume" ? Math.floor(childSize * (0.1 + rng() * 0.8)) : 0;
       const child: SynthDisk = {
         identifier: childId,
         parentWhole: wholeId,
@@ -123,6 +130,10 @@ export function buildTopology(diskCount: number, sectionCount: number, seed: num
         mountPoint: mounted ? `/Volumes/${name}` : "",
         removable: isRemovable,
         internal: isInternal,
+        freeBytes: 0,
+        containerSizeBytes: role === "volume" ? totalSize : 0,
+        containerFreeBytes: role === "volume" ? containerFree : 0,
+        capacityInUseBytes: capacityInUse,
       };
       disks.push(child);
     }

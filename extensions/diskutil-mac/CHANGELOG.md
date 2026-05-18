@@ -2,9 +2,7 @@
 
 ## [1.3.0] - Performance Improvements - {PR_MERGE_DATE}
 
-- Fix initialization timeout on systems with many disks (70+) by introducing a concurrency cap and per-call timeout with minimal impact on typical systems. (Feedback on performance and any edge cases is appreciated)
-- Upgraded to the current Raycast API, utils, and TypeScript toolchain.
-- DEV: added a mock override feature for more consistent testing. Start with `npm run mock:ls` _(unbundled from prod)_
+  
 
 ## [Bugfix] - 2026-05-17
 

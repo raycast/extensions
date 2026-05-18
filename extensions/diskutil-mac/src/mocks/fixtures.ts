@@ -24,6 +24,13 @@ export interface SynthDisk {
   mountPoint: string; // "" when not mounted
   removable: boolean;
   internal: boolean;
+  // Capacity fields. For whole/container: freeBytes goes to FreeSpace.
+  // For APFS volumes: containerSize/containerFree go to APFSContainer* keys,
+  // capacityInUse to CapacityInUse.
+  freeBytes: number;
+  containerSizeBytes: number;
+  containerFreeBytes: number;
+  capacityInUseBytes: number;
 }
 
 const xmlBool = (v: boolean): string => (v ? "<true/>" : "<false/>");
@@ -46,11 +53,22 @@ export function buildPlist(d: SynthDisk): string {
           ? "41504653-0000-11AA-AA11-00306543ECAC"
           : "EFI";
 
+  const apfsKeys =
+    d.role === "volume"
+      ? `\t<key>APFSContainerFree</key>
+\t<integer>${d.containerFreeBytes}</integer>
+\t<key>APFSContainerSize</key>
+\t<integer>${d.containerSizeBytes}</integer>
+\t<key>CapacityInUse</key>
+\t<integer>${d.capacityInUseBytes}</integer>
+`
+      : "";
+
   return `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-\t<key>Bootable</key>
+${apfsKeys}\t<key>Bootable</key>
 \t${xmlBool(d.role !== "partition")}
 \t<key>BusProtocol</key>
 \t<string>${d.internal ? "Apple Fabric" : "USB"}</string>
@@ -69,7 +87,7 @@ export function buildPlist(d: SynthDisk): string {
 \t<key>FilesystemType</key>
 \t<string>${filesystemType}</string>
 \t<key>FreeSpace</key>
-\t<integer>0</integer>
+\t<integer>${d.freeBytes}</integer>
 \t<key>IOKitSize</key>
 \t<integer>${d.sizeBytes}</integer>
 \t<key>IORegistryEntryName</key>

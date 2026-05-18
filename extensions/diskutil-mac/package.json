@@ -42,7 +42,7 @@
     "build": "scripts/apply-mock.sh off && ray build -e dist",
     "build:local": "scripts/apply-mock.sh off && ray build -e dist -o ./build",
     "dev": "scripts/apply-mock.sh off --launch",
-    "dev:mock": "scripts/apply-mock.sh --launch --log",
+    "dev:mock": "scripts/apply-mock.sh 1 --launch --log",
     "mock": "scripts/apply-mock.sh",
     "mock:ls": "ts-node --transpile-only src/mocks/listScenarios.ts",
     "fix-lint": "ray lint --fix",

@@ -8,16 +8,18 @@ export class Semaphore {
   }
 
   async acquire(): Promise<() => void> {
-    if (this.slots === 0) {
+    if (this.slots > 0) {
+      this.slots--;
+    } else {
       await new Promise<void>((resolve) => this.queue.push(resolve));
     }
-    this.slots--;
     let released = false;
     return () => {
       if (released) return;
       released = true;
-      this.slots++;
-      this.queue.shift()?.();
+      const next = this.queue.shift();
+      if (next) next();
+      else this.slots++;
     };
   }
 }

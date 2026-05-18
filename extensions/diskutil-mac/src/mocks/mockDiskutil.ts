@@ -195,10 +195,8 @@ async function runWithLatency(
 function resolveConfig(): MockConfig {
   // Precedence (lowest to highest):
   //   1. mockConfig.json   — committed baseline
-  //   2. mockOverride.json — written by scripts/apply-mock.sh, bundled into
-  //                          the build so the change reaches the extension
-  //   3. env vars          — MOCK / MOCK_SCENARIO / MOCK_LOG (fallback for
-  //                          CI / headless harnesses that pass env through)
+  //   2. mockOverride.json — written by scripts/apply-mock.sh
+  //   3. env vars          — MOCK / MOCK_SCENARIO / MOCK_LOG (CI / harnesses)
   const base = { ...(rawConfig as object), ...(rawOverride as object) } as MockConfig;
 
   const envMock = (process.env.MOCK ?? "").trim();
