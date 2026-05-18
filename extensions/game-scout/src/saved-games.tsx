@@ -198,7 +198,8 @@ export default function SavedGames() {
           }
         }
       }
-      setBundleCounts(newBundleCounts);
+      const resolvedBundleCounts = oRes.ok ? newBundleCounts : bundleCounts;
+      setBundleCounts(resolvedBundleCounts);
       setRawPrices(priceMap);
 
       if (Object.keys(priceMap).length > 0) {
@@ -208,7 +209,7 @@ export default function SavedGames() {
             timestamp: Date.now(),
             requestedIds: gameIds.map(String),
             rawPrices: priceMap,
-            bundleCounts: newBundleCounts,
+            bundleCounts: resolvedBundleCounts,
           }),
         );
       }
