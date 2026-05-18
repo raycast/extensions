@@ -9,18 +9,18 @@ export function getClientId(instance: Instance): string {
   return instance.clientId?.trim() || DEFAULT_OAUTH_CLIENT_ID;
 }
 
-const client = new OAuth.PKCEClient({
-  redirectMethod: OAuth.RedirectMethod.Web,
-  providerName: "ServiceNow",
-  providerIcon: "servicenow.png",
-  description: "Connect your ServiceNow instance",
-});
-
 export async function authorizeInstance(
   instance: Instance,
 ): Promise<{ accessToken: string; refreshToken: string; tokenExpiresAt: number; oauthUserName?: string }> {
   const clientId = getClientId(instance);
   const baseUrl = getInstanceBaseUrl(instance);
+
+  const client = new OAuth.PKCEClient({
+    redirectMethod: OAuth.RedirectMethod.Web,
+    providerName: "ServiceNow",
+    providerIcon: "servicenow.png",
+    description: "Connect your ServiceNow instance",
+  });
 
   const authRequest = await client.authorizationRequest({
     endpoint: `${baseUrl}/oauth_auth.do`,
