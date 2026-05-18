@@ -2,9 +2,12 @@ import { Cache } from "@raycast/api";
 import { useEffect, useMemo, useState } from "react";
 import { config } from "../config";
 
-const ARCHIVE_RESULTS_CACHE_KEY = "archive-results-v1";
+const ARCHIVE_DOCUMENTS_CACHE_KEY = "archive-document-results-v1";
+const ARCHIVE_TOC_CACHE_KEY = "archive-toc-results-v1";
 const ARCHIVE_REQUEST_TIMEOUT_MS = 8000;
-const cache = new Cache({ namespace: "apple-developer-docs-archive" });
+const ARCHIVE_TOC_REQUEST_TIMEOUT_MS = 5000;
+const ARCHIVE_TOC_CONCURRENCY = 4;
+const cache = new Cache({ namespace: "apple-developer-docs-archive", capacity: 25 * 1024 * 1024 });
 
 type ArchiveLibrary = {
   columns: {
@@ -34,40 +37,90 @@ type ArchiveTopicContent = {
 
 type ArchiveDocument = (string | number)[];
 
+type ArchiveBook = {
+  title?: string;
+  sections?: ArchiveBookSection[];
+};
+
+type ArchiveBookSection = {
+  title?: string;
+  href?: string;
+  type?: string;
+  sections?: ArchiveBookSection[];
+};
+
 export default function useArchiveResults(query: string, typeFilter: AllResultType | ResultType) {
-  const [archiveResults, setArchiveResults] = useState<SearchResult[]>(() => readCachedResults());
-  const [isLoading, setIsLoading] = useState(archiveResults.length === 0);
+  const [documentResults, setDocumentResults] = useState<SearchResult[]>(() =>
+    readCachedResults(ARCHIVE_DOCUMENTS_CACHE_KEY)
+  );
+  const [tocResults, setTocResults] = useState<SearchResult[]>(() => readCachedResults(ARCHIVE_TOC_CACHE_KEY));
+  const [isLoadingDocuments, setIsLoadingDocuments] = useState(documentResults.length === 0);
+  const [isBuildingToc, setIsBuildingToc] = useState(false);
   const shouldSearchArchive = typeFilter === "all" || typeFilter === "archive";
   const shouldLoadArchive = shouldSearchArchive && query.trim().length > 1;
 
   useEffect(() => {
-    if (!shouldLoadArchive || archiveResults.length > 0) {
-      setIsLoading(false);
+    if (!shouldLoadArchive || documentResults.length > 0) {
+      setIsLoadingDocuments(false);
       return;
     }
 
     let isMounted = true;
-    setIsLoading(true);
+    setIsLoadingDocuments(true);
 
-    fetchArchiveResults()
+    fetchArchiveDocumentResults()
       .then((results) => {
         if (!isMounted) {
           return;
         }
 
-        setArchiveResults(results);
-        setIsLoading(false);
+        setDocumentResults(results);
+        setIsLoadingDocuments(false);
       })
       .catch(() => {
         if (isMounted) {
-          setIsLoading(false);
+          setIsLoadingDocuments(false);
         }
       });
 
     return () => {
       isMounted = false;
     };
-  }, [archiveResults.length, shouldLoadArchive]);
+  }, [documentResults.length, shouldLoadArchive]);
+
+  useEffect(() => {
+    if (!shouldLoadArchive || documentResults.length === 0 || tocResults.length > 0 || isBuildingToc) {
+      return;
+    }
+
+    let isMounted = true;
+    setIsBuildingToc(true);
+
+    buildArchiveTocResults(documentResults, (results) => {
+      if (isMounted) {
+        setTocResults(results);
+      }
+    })
+      .then((results) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setTocResults(results);
+        setIsBuildingToc(false);
+      })
+      .catch(() => {
+        if (isMounted) {
+          setIsBuildingToc(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [documentResults, isBuildingToc, shouldLoadArchive, tocResults.length]);
+
+  const archiveResults = useMemo(() => [...tocResults, ...documentResults], [documentResults, tocResults]);
 
   const results = useMemo(() => {
     if (!shouldSearchArchive) {
@@ -85,13 +138,13 @@ export default function useArchiveResults(query: string, typeFilter: AllResultTy
       .sort((a, b) => b.score - a.score || b.result.date.localeCompare(a.result.date))
       .slice(0, config.maxArchiveResults)
       .map(({ result }) => result);
-  }, [archiveResults, query, typeFilter]);
+  }, [archiveResults, query, shouldSearchArchive]);
 
-  return { results, isLoading };
+  return { results, isLoading: isLoadingDocuments };
 }
 
-function readCachedResults() {
-  const cached = cache.get(ARCHIVE_RESULTS_CACHE_KEY);
+function readCachedResults(key: string) {
+  const cached = cache.get(key);
   if (!cached) {
     return [];
   }
@@ -99,12 +152,12 @@ function readCachedResults() {
   try {
     return JSON.parse(cached) as SearchResult[];
   } catch {
-    cache.remove(ARCHIVE_RESULTS_CACHE_KEY);
+    cache.remove(key);
     return [];
   }
 }
 
-async function fetchArchiveResults() {
+async function fetchArchiveDocumentResults() {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), ARCHIVE_REQUEST_TIMEOUT_MS);
 
@@ -116,9 +169,65 @@ async function fetchArchiveResults() {
 
     const archive = parseArchiveLibrary(await response.text());
     const results = normalizeArchiveLibrary(archive);
-    cache.set(ARCHIVE_RESULTS_CACHE_KEY, JSON.stringify(results));
+    cache.set(ARCHIVE_DOCUMENTS_CACHE_KEY, JSON.stringify(results));
 
     return results;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function buildArchiveTocResults(documentResults: SearchResult[], onProgress: (results: SearchResult[]) => void) {
+  const bookCandidates = documentResults.filter(isBookCandidate);
+  const results: SearchResult[] = [];
+  let nextIndex = 0;
+  let completedCount = 0;
+
+  async function worker() {
+    for (;;) {
+      const document = bookCandidates[nextIndex];
+      nextIndex += 1;
+
+      if (!document) {
+        return;
+      }
+
+      const tocResults = await fetchArchiveBookTocResults(document);
+      results.push(...tocResults);
+      completedCount += 1;
+
+      if (tocResults.length > 0 && completedCount % 20 === 0) {
+        onProgress([...results]);
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: ARCHIVE_TOC_CONCURRENCY }, worker));
+  onProgress(results);
+  cache.set(ARCHIVE_TOC_CACHE_KEY, JSON.stringify(results));
+
+  return results;
+}
+
+async function fetchArchiveBookTocResults(document: SearchResult) {
+  const bookIndexUrl = getBookIndexUrl(document.url);
+  if (!bookIndexUrl) {
+    return [];
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), ARCHIVE_TOC_REQUEST_TIMEOUT_MS);
+
+  try {
+    const response = await fetch(bookIndexUrl, { signal: controller.signal });
+    if (!response.ok) {
+      return [];
+    }
+
+    const book = (await response.json()) as ArchiveBook;
+    return flattenBookSections(book.sections ?? [], document, bookIndexUrl);
+  } catch {
+    return [];
   } finally {
     clearTimeout(timeout);
   }
@@ -148,7 +257,7 @@ function normalizeArchiveLibrary(archive: ArchiveLibrary) {
       url: new URL(String(document[columns.url] ?? ""), config.archiveNavigationUrl).href,
       type: "archive",
       order,
-      platform: platform ? [platform] : [],
+      platform: platform ? platform.split("|") : [],
       breadcrumbs: [topic, technology].filter(Boolean),
       date,
       event_name: "",
@@ -162,9 +271,61 @@ function normalizeArchiveLibrary(archive: ArchiveLibrary) {
   });
 }
 
+function flattenBookSections(sections: ArchiveBookSection[], document: SearchResult, bookIndexUrl: string) {
+  const results: SearchResult[] = [];
+
+  function visit(sectionList: ArchiveBookSection[], parents: string[]) {
+    for (const section of sectionList) {
+      const title = decodeHTML(section.title ?? "");
+      const url = section.href ? new URL(section.href, bookIndexUrl).href : undefined;
+      const breadcrumbs = [document.title, ...parents];
+
+      if (title && url) {
+        results.push({
+          ...document,
+          title,
+          description: `${document.title} · Archive`,
+          url,
+          order: document.order,
+          breadcrumbs,
+          session_id: `${document.session_id}:${section.href}`,
+        });
+      }
+
+      visit(section.sections ?? [], title ? [...parents, title] : parents);
+    }
+  }
+
+  visit(sections, []);
+
+  return results;
+}
+
 function topicContentsByKey(topics: ArchiveTopic[], name: string) {
   const contents = topics.find((topic) => topic.name === name)?.contents ?? [];
   return new Map(contents.map((content) => [content.key, decodeHTML(content.name)]));
+}
+
+function isBookCandidate(result: SearchResult) {
+  const resourceType = result.description.split(" · ")[0];
+  return ["Articles", "Getting Started", "Guides"].includes(resourceType) && getBookIndexUrl(result.url) !== undefined;
+}
+
+function getBookIndexUrl(url: string) {
+  const parsedUrl = new URL(url);
+  const pathParts = parsedUrl.pathname.split("/").filter(Boolean);
+  const fileName = pathParts[pathParts.length - 1];
+
+  if (!fileName?.endsWith(".html") || pathParts.length < 2) {
+    return undefined;
+  }
+
+  pathParts.splice(pathParts.length - 2, 2, "book.json");
+  parsedUrl.pathname = `/${pathParts.join("/")}`;
+  parsedUrl.hash = "";
+  parsedUrl.search = "";
+
+  return parsedUrl.href;
 }
 
 function scoreArchiveResult(result: SearchResult, terms: string[]) {
