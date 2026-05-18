@@ -21,6 +21,21 @@
 - Surface a toast (instead of crashing silently) in **Open All Instances** and **Open Current Page in Another Instance** when the stored instance list cannot be parsed.
 - Remove a duplicated query parameter in the **Explore Tables** request.
 
+### Internals
+
+- Extracted the instance-lookup boilerplate shared by every no-view command into a single `resolveInstance` helper.
+
+### UI Consistency
+
+- Standardized every `showToast` call site on the object form and switched caught errors to `showFailureToast`.
+- Normalized error toast titles to Title Case (`Could Not Fetch ...`, `Could Not Search ...`).
+- Aligned action names in **Manage Instance Profiles** (`Open in ServiceNow`, `Add Instance Profile`) with the rest of the extension and added the standard `Copy URL` shortcut in **Search Text**.
+- Made the empty-state copy in **Manage Instance Profiles** match the other commands.
+- Replaced the generic `The item is required` form-validation messages with field-specific ones (`Missing instance URL`, `Missing username`, `Missing password`).
+- Renamed the hook field `userName` to `currentUserName` to disambiguate it from `Instance.username` (the stored Basic-Auth credential).
+- Introduced an `instanceLabel(instance)` helper so every dropdown, section title, and breadcrumb resolves the alias/name choice the same way.
+- Added the shared **Manage Instance Profiles** / **Select Instance Profile** actions to the **Search Code**, **Find Record by Sys ID**, and **Find Record References** form ActionPanels so the ⌘M and ⌘I shortcuts work consistently across commands.
+
 ## [Fix] - 2025-05-14
 
 Fixed an issue where the Search Sys ID command stopped working after publishing, due to function name minification during the build process.

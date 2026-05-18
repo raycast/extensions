@@ -22,6 +22,7 @@ import Actions from "./Actions";
 import InstanceForm from "./InstanceForm";
 import { filter } from "lodash";
 import { getIconForModules } from "../utils/getIconForModules";
+import { instanceLabel } from "../utils/instanceLabel";
 import useFavorites from "../hooks/useFavorites";
 import FavoriteForm from "./FavoriteForm";
 import FavoriteItem from "./FavoriteItem";
@@ -137,10 +138,10 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
   }, [filteredData]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((instance) => instance.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((instance) => instance.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -162,7 +163,7 @@ export default function Favorites(props: { groupId?: string; revalidate?: () => 
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,

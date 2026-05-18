@@ -96,7 +96,7 @@ export class ServiceNowClient {
       callback(data);
     } catch (error) {
       console.error("Could not run background script:", error);
-      showToast(Toast.Style.Failure, "Could not run background script");
+      showToast({ style: Toast.Style.Failure, title: "Could Not Run Background Script" });
     }
   }
 }

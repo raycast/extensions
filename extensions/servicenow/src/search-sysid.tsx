@@ -15,11 +15,14 @@ import {
   Toast,
 } from "@raycast/api";
 
+import Actions from "./components/Actions";
 import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findSysID } from "./utils/snSnippets";
 import { ServiceNowClient } from "./utils/serviceNowClient";
 import { getInstanceBaseUrl } from "./utils/instanceUrl";
+import { instanceLabel } from "./utils/instanceLabel";
+import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
 
 const SYS_ID_RE = /^[0-9a-f]{32}$/i;
 
@@ -43,25 +46,17 @@ export default function SearchSysId(props: LaunchProps) {
   useEffect(() => {
     if (isLoadingInstances) return;
     if (instances.length === 0) {
-      showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
+      showToast(NO_PROFILES_TOAST);
       popToRoot();
       return;
     }
     if (instanceName) {
-      const found = instances.find(
-        (i: Instance) =>
-          i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
-          i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
-      );
+      const found = matchInstance(instances, instanceName);
       if (found && found.id !== selectedInstance?.id) {
         setSelectedInstance(found);
         LocalStorage.setItem("selected-instance", JSON.stringify(found));
       } else if (!found) {
-        showToast(
-          Toast.Style.Failure,
-          "Instance not found",
-          `No instance found with URL or alias containing ${instanceName}`,
-        );
+        showToast(notFoundToast(instanceName));
       }
     }
   }, [isLoadingInstances]);
@@ -107,7 +102,11 @@ export default function SearchSysId(props: LaunchProps) {
         if (cancelled) return;
         const answer = response.match(/###(.*)###/);
         if (response.length === 0) {
-          showToast(Toast.Style.Failure, "Could not search for Sys ID", "Admin access is required.");
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Could Not Search for Sys ID",
+            message: "Admin access is required.",
+          });
           setErrorMessage("Admin access is required to run this lookup.");
           setIsLoading(false);
         } else if (answer != null && answer[1]) {
@@ -115,8 +114,8 @@ export default function SearchSysId(props: LaunchProps) {
           open(`${getInstanceBaseUrl(selectedInstance)}/${table}.do?sys_id=${sysId}`);
           popToRoot();
         } else {
-          const label = selectedInstance.alias || selectedInstance.name;
-          showToast(Toast.Style.Failure, `Sys ID not found on ${label}`);
+          const label = instanceLabel(selectedInstance);
+          showToast({ style: Toast.Style.Failure, title: `Sys ID not found on ${label}` });
           setErrorMessage(`Sys ID ${sysId} was not found on ${label}.`);
           setIsLoading(false);
         }
@@ -129,10 +128,10 @@ export default function SearchSysId(props: LaunchProps) {
   }, [selectedInstance?.id, sysId]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((i) => i.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((i) => i.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -160,13 +159,14 @@ export default function SearchSysId(props: LaunchProps) {
               onSubmit={(values: { sysId?: string }) => {
                 const s = values.sysId?.trim();
                 if (!s) {
-                  showToast(Toast.Style.Failure, "Missing Sys ID", "Please enter a Sys ID");
+                  showToast({ style: Toast.Style.Failure, title: "Missing Sys ID", message: "Please enter a Sys ID" });
                   return;
                 }
                 setSysId(s);
                 setSysIdSource("form");
               }}
             />
+            <Actions />
           </ActionPanel>
         }
       >
@@ -182,7 +182,7 @@ export default function SearchSysId(props: LaunchProps) {
           {instances.map((instance: Instance) => (
             <Form.Dropdown.Item
               key={instance.id}
-              title={instance.alias ? instance.alias : instance.name}
+              title={instanceLabel(instance)}
               value={instance.id}
               icon={{
                 source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
@@ -212,7 +212,7 @@ export default function SearchSysId(props: LaunchProps) {
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,

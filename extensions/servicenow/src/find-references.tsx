@@ -15,6 +15,7 @@ import {
   Toast,
 } from "@raycast/api";
 
+import Actions from "./components/Actions";
 import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findReferences } from "./utils/snSnippets";
@@ -22,8 +23,10 @@ import { ServiceNowClient } from "./utils/serviceNowClient";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { getURL } from "./utils/browserScripts";
 import { getInstanceBaseUrl, isServiceNowUrl } from "./utils/instanceUrl";
+import { instanceLabel } from "./utils/instanceLabel";
 import { extractRecordFromUrl } from "./utils/extractRecordFromUrl";
 import { expandKeywords } from "./utils/expandKeywords";
+import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
 
 type Reference = {
   table: string;
@@ -65,25 +68,17 @@ export default function FindReferences(props: LaunchProps) {
   useEffect(() => {
     if (isLoadingInstances) return;
     if (instances.length === 0) {
-      showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
+      showToast(NO_PROFILES_TOAST);
       popToRoot();
       return;
     }
     if (instanceName) {
-      const found = instances.find(
-        (i: Instance) =>
-          i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
-          i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
-      );
+      const found = matchInstance(instances, instanceName);
       if (found && found.id !== selectedInstance?.id) {
         setSelectedInstance(found);
         LocalStorage.setItem("selected-instance", JSON.stringify(found));
       } else if (!found) {
-        showToast(
-          Toast.Style.Failure,
-          "Instance not found",
-          `No instance found with URL or alias containing ${instanceName}`,
-        );
+        showToast(notFoundToast(instanceName));
       }
     }
   }, [isLoadingInstances]);
@@ -176,11 +171,11 @@ export default function FindReferences(props: LaunchProps) {
         if (cancelled) return;
         const match = response.match(/###([\s\S]*?)###/);
         if (!match || !match[1]) {
-          showToast(
-            Toast.Style.Failure,
-            "Could not search references",
-            "Check that you are an admin and the table name is correct.",
-          );
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Could Not Search References",
+            message: "Check that you are an admin and the table name is correct.",
+          });
           setErrorFetching(true);
           setIsLoading(false);
           return;
@@ -190,7 +185,7 @@ export default function FindReferences(props: LaunchProps) {
           setReferences(parsed);
           setIsLoading(false);
         } catch (err) {
-          showToast(Toast.Style.Failure, "Could not parse references", String(err));
+          showToast({ style: Toast.Style.Failure, title: "Could Not Parse References", message: String(err) });
           setErrorFetching(true);
           setIsLoading(false);
         }
@@ -203,10 +198,10 @@ export default function FindReferences(props: LaunchProps) {
   }, [selectedInstance?.id, target?.table, target?.sysId]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((i) => i.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((i) => i.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -229,13 +224,18 @@ export default function FindReferences(props: LaunchProps) {
                 const t = values.table?.trim();
                 const s = values.sysId?.trim();
                 if (!t || !s) {
-                  showToast(Toast.Style.Failure, "Missing fields", "Please enter both a table and a sys_id");
+                  showToast({
+                    style: Toast.Style.Failure,
+                    title: "Missing fields",
+                    message: "Please enter both a table and a sys_id",
+                  });
                   return;
                 }
                 setTarget({ table: t, sysId: s });
                 setTargetSource("form");
               }}
             />
+            <Actions />
           </ActionPanel>
         }
       >
@@ -252,7 +252,7 @@ export default function FindReferences(props: LaunchProps) {
           {instances.map((instance: Instance) => (
             <Form.Dropdown.Item
               key={instance.id}
-              title={instance.alias ? instance.alias : instance.name}
+              title={instanceLabel(instance)}
               value={instance.id}
               icon={{
                 source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
@@ -283,7 +283,7 @@ export default function FindReferences(props: LaunchProps) {
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,

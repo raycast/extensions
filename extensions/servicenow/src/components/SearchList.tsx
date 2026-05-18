@@ -12,6 +12,7 @@ import useInstances from "../hooks/useInstances";
 import { useAuthHeader } from "../hooks/useAuthHeader";
 import { HistoryResponse, HistoryResult, Instance } from "../types";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
 import { getAuthHeader } from "../utils/auth";
 
 export default function SearchList() {
@@ -22,16 +23,16 @@ export default function SearchList() {
     isLoading: isLoadingInstances,
     selectedInstance,
     setSelectedInstance,
-    userName,
+    currentUserName,
   } = useInstances();
 
   const [searchTerm, setSearchTerm] = useState<string>("");
   const [filteredTerms, setFilteredTerms] = useState<HistoryResult[]>([]);
-  const { id: instanceId = "", alias = "", name: instanceName = "", username, full } = selectedInstance || {};
+  const { id: instanceId = "", name: instanceName = "", username, full } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
   const authHeader = useAuthHeader(selectedInstance);
-  const effectiveUserName = username || userName || "";
+  const effectiveUserName = username || currentUserName || "";
 
   const { isLoading, data, error, mutate, revalidate } = useFetch(
     `${instanceUrl}/api/now/table/ts_query?sysparm_exclude_reference_link=true&sysparm_display_value=true&sysparm_query=sys_created_by=${effectiveUserName}^ORDERBYDESCsys_updated_on&sysparm_fields=sys_id,search_term`,
@@ -40,7 +41,7 @@ export default function SearchList() {
       execute: !!selectedInstance && full == "true" && !!authHeader && !!effectiveUserName,
       onError: (error) => {
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch history", error.message);
+        showToast({ style: Toast.Style.Failure, title: "Could Not Fetch History", message: error.message });
       },
 
       mapResult(response: HistoryResponse) {
@@ -171,16 +172,16 @@ export default function SearchList() {
   }, [data, searchTerm, full]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((instance) => instance.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((instance) => instance.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
   return (
     <List
-      navigationTitle={`Search${selectedInstance ? " > " + (alias ? alias : instanceName) : ""}${isLoading ? " > Loading history..." : ""}`}
+      navigationTitle={`Search${selectedInstance ? " > " + instanceLabel(selectedInstance) : ""}${isLoading ? " > Loading history..." : ""}`}
       searchText={searchTerm}
       isLoading={isLoading}
       onSearchTextChange={setSearchTerm}
@@ -197,7 +198,7 @@ export default function SearchList() {
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,

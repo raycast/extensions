@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Color, Icon, List, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, Keyboard, List, showToast, Toast } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { filter, flattenDeep, map, sumBy } from "lodash";
 
@@ -14,6 +14,7 @@ import { GlobalSearchResponse, Record, SearchResult } from "../types";
 import useFavorites from "../hooks/useFavorites";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
 import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function ({ searchTerm }: { searchTerm: string }) {
@@ -24,7 +25,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
   const [navigationTitle, setNavigationTitle] = useState<string>("");
   const [filteredResults, setFilteredResults] = useState<SearchResult[]>([]);
   const [table] = useCachedState<string>("table", "all");
-  const { alias = "", name: instanceName = "" } = selectedInstance || {};
+  const { name: instanceName = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
   const authHeader = useAuthHeader(selectedInstance);
@@ -37,7 +38,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
 
       onError: (error) => {
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch results", error.message);
+        showToast({ style: Toast.Style.Failure, title: "Could Not Fetch Results", message: error.message });
       },
 
       mapResult(response: GlobalSearchResponse) {
@@ -64,7 +65,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
       return;
     }
 
-    const aliasOrName = alias ? alias : instanceName;
+    const aliasOrName = selectedInstance ? instanceLabel(selectedInstance) : instanceName;
 
     if (isLoading) {
       setNavigationTitle(`${command} > ${aliasOrName} > Loading results for ${searchTerm}...`);
@@ -73,7 +74,7 @@ export default function ({ searchTerm }: { searchTerm: string }) {
     const count = sumBy(data, (r) => r.record_count);
     if (count == 0) setNavigationTitle(`${command} > ${aliasOrName} > No results found for ${searchTerm}`);
     else setNavigationTitle(`${command} > ${aliasOrName} > ${count} result${count > 1 ? "s" : ""} for ${searchTerm}`);
-  }, [command, selectedInstance, error, isLoading, data, searchTerm, alias, instanceName]);
+  }, [command, selectedInstance, error, isLoading, data, searchTerm, instanceName]);
 
   return (
     <List
@@ -141,7 +142,11 @@ export default function ({ searchTerm }: { searchTerm: string }) {
                           url={allResultsUrl}
                           icon={{ source: "servicenow.svg" }}
                         />
-                        <Action.CopyToClipboard title="Copy URL" content={allResultsUrl} />
+                        <Action.CopyToClipboard
+                          title="Copy URL"
+                          content={allResultsUrl}
+                          shortcut={Keyboard.Shortcut.Common.CopyPath}
+                        />
                       </List.Dropdown.Section>
                       <Actions revalidate={revalidate} />
                     </ActionPanel>

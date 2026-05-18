@@ -16,6 +16,7 @@ import FavoriteForm from "./FavoriteForm";
 import { getSectionTitle } from "../utils/getSectionTitle";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
 import { useAuthHeader } from "../hooks/useAuthHeader";
 import { expandKeywords } from "../utils/expandKeywords";
 
@@ -47,7 +48,11 @@ export default function NavigationHistoryFull() {
       execute: !!selectedInstance && !!authHeader,
       onError: (error) => {
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch navigation history", error.message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could Not Fetch Navigation History",
+          message: error.message,
+        });
       },
 
       mapResult(response: FullNavigationHistoryResponse) {
@@ -62,10 +67,10 @@ export default function NavigationHistoryFull() {
   }, [data]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((instance) => instance.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((instance) => instance.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -90,7 +95,7 @@ export default function NavigationHistoryFull() {
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,

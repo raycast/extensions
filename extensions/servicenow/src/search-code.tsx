@@ -13,11 +13,14 @@ import {
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 
+import Actions from "./components/Actions";
 import SearchCodeResults from "./components/SearchCodeResults";
 import { DEFAULT_SEARCH_GROUP_SCOPE, mergeGroupOptions } from "./components/SearchGroupDropdown";
 import useInstances from "./hooks/useInstances";
 import useSearchGroups from "./hooks/useSearchGroups";
 import { Instance } from "./types";
+import { instanceLabel } from "./utils/instanceLabel";
+import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
 
 export default function SearchCode(props: LaunchProps) {
   const { instanceName, term: argTerm } = props.arguments ?? {};
@@ -32,25 +35,17 @@ export default function SearchCode(props: LaunchProps) {
   useEffect(() => {
     if (isLoadingInstances) return;
     if (instances.length === 0) {
-      showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
+      showToast(NO_PROFILES_TOAST);
       popToRoot();
       return;
     }
     if (instanceName) {
-      const found = instances.find(
-        (i: Instance) =>
-          i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
-          i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
-      );
+      const found = matchInstance(instances, instanceName);
       if (found && found.id !== selectedInstance?.id) {
         setSelectedInstance(found);
         LocalStorage.setItem("selected-instance", JSON.stringify(found));
       } else if (!found) {
-        showToast(
-          Toast.Style.Failure,
-          "Instance not found",
-          `No instance found with URL or alias containing ${instanceName}`,
-        );
+        showToast(notFoundToast(instanceName));
       }
       return;
     }
@@ -63,10 +58,10 @@ export default function SearchCode(props: LaunchProps) {
   }, [isLoadingInstances]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((i) => i.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((i) => i.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -85,37 +80,23 @@ export default function SearchCode(props: LaunchProps) {
             onSubmit={(values: { term?: string; group?: string }) => {
               const t = values.term?.trim();
               if (!t) {
-                showToast(Toast.Style.Failure, "Missing search term", "Please enter a term to search");
+                showToast({
+                  style: Toast.Style.Failure,
+                  title: "Missing search term",
+                  message: "Please enter a term to search",
+                });
                 return;
               }
               if (values.group) setGroupScope(values.group);
               push(<SearchCodeResults searchTerm={t} />);
             }}
           />
+          <Actions />
         </ActionPanel>
       }
     >
       <Form.Description text="Search inside ServiceNow scripts (business rules, script includes, client scripts, UI scripts, etc.)." />
       <Form.TextField id="term" title="Term" placeholder="e.g. GlideRecord" defaultValue={argTerm ?? ""} />
-      <Form.Dropdown
-        id="instance"
-        title="Instance"
-        value={instanceId}
-        onChange={onInstanceChange}
-        isLoading={isLoadingInstances}
-      >
-        {instances.map((instance: Instance) => (
-          <Form.Dropdown.Item
-            key={instance.id}
-            title={instance.alias ? instance.alias : instance.name}
-            value={instance.id}
-            icon={{
-              source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
-              tintColor: instance.color,
-            }}
-          />
-        ))}
-      </Form.Dropdown>
       <Form.Dropdown
         id="group"
         title="Search Group"
@@ -129,6 +110,25 @@ export default function SearchCode(props: LaunchProps) {
             title={option.label}
             value={option.scope}
             icon={Icon.MagnifyingGlass}
+          />
+        ))}
+      </Form.Dropdown>
+      <Form.Dropdown
+        id="instance"
+        title="Instance"
+        value={instanceId}
+        onChange={onInstanceChange}
+        isLoading={isLoadingInstances}
+      >
+        {instances.map((instance: Instance) => (
+          <Form.Dropdown.Item
+            key={instance.id}
+            title={instanceLabel(instance)}
+            value={instance.id}
+            icon={{
+              source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
+              tintColor: instance.color,
+            }}
           />
         ))}
       </Form.Dropdown>

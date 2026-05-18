@@ -1,50 +1,13 @@
-import { open, LocalStorage, showToast, Toast, LaunchProps } from "@raycast/api";
-import { Instance } from "./types";
+import { open, LaunchProps } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
+import { resolveInstanceOrToast } from "./utils/instanceResolver";
 
 export default async (props: LaunchProps) => {
   try {
-    const { instanceName } = props.arguments;
-
-    const item = await LocalStorage.getItem<string>("saved-instances");
-
-    if (!item) {
-      showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
-      return;
-    }
-
-    let instance;
-    if (instanceName) {
-      const instanceProfiles = JSON.parse(item) as Instance[];
-      instance = instanceProfiles.find(
-        (i: Instance) =>
-          i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
-          i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
-      );
-    } else {
-      const selectedInstance = await LocalStorage.getItem<string>("selected-instance");
-      if (selectedInstance) instance = JSON.parse(selectedInstance) as Instance;
-    }
-
-    if (!instance) {
-      if (instanceName) {
-        showToast(
-          Toast.Style.Failure,
-          "Instance not found",
-          `No instance found with URL or alias containing "${instanceName}"`,
-        );
-      } else {
-        showToast(
-          Toast.Style.Failure,
-          "No instance selected",
-          "Pass an instance name as argument or select one in Manage Instance Profiles",
-        );
-      }
-      return;
-    }
-
-    await open(buildServiceNowUrl(instance.name, "cancel_my_transaction.do"));
+    const resolved = await resolveInstanceOrToast(props.arguments.instanceName);
+    if (!resolved) return;
+    await open(buildServiceNowUrl(resolved.instance.name, "cancel_my_transaction.do"));
   } catch (error) {
     showFailureToast(error);
   }

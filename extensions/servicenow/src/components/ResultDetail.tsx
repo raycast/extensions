@@ -8,6 +8,7 @@ import useInstances from "../hooks/useInstances";
 import useFavorites from "../hooks/useFavorites";
 import FavoriteForm from "./FavoriteForm";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
 
 export default function ResultDetail({ result, fields }: { result: Record; fields: Field[] }) {
   const { commandName } = environment;
@@ -15,7 +16,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
   const { selectedInstance } = useInstances();
   const { isInFavorites, addUrlToFavorites, removeFromFavorites } = useFavorites();
 
-  const { alias = "", name: instanceName = "" } = selectedInstance || {};
+  const { name: instanceName = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
 
@@ -29,7 +30,7 @@ export default function ResultDetail({ result, fields }: { result: Record; field
 
   return (
     <Detail
-      navigationTitle={`${commandName == "search" ? "Search" : "Quickly Search"} > ${alias ? alias : instanceName} > ${result.metadata.title}`}
+      navigationTitle={`${commandName == "search" ? "Search" : "Quickly Search"} > ${selectedInstance ? instanceLabel(selectedInstance) : instanceName} > ${result.metadata.title}`}
       markdown={markdown}
       metadata={
         <Detail.Metadata>

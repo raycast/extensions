@@ -66,11 +66,7 @@ function SearchCodeTableSection({
     mapResult(response: { result?: CodeSearchTableResult | CodeSearchTableResult[] }) {
       // When `&table=<name>` is passed the API returns a single object; without it,
       // an array of per-table results. Normalize to an array.
-      const resultArray = Array.isArray(response.result)
-        ? response.result
-        : response.result
-          ? [response.result]
-          : [];
+      const resultArray = Array.isArray(response.result) ? response.result : response.result ? [response.result] : [];
       // Strip fields we never render so 21 cached responses don't blow the worker's
       // heap — `escaped` is just an HTML-escaped duplicate of `context`, and the
       // top-level extras (modified, hit.tableLabel) aren't used by either the list
@@ -133,7 +129,11 @@ function SearchCodeTableSection({
               actions={
                 <ActionPanel>
                   <ActionPanel.Section title={`View all ${tableResult.tableLabel} matches`}>
-                    <Action.OpenInBrowser title="Open in ServiceNow" url={allResultsUrl} icon={{ source: "servicenow.svg" }} />
+                    <Action.OpenInBrowser
+                      title="Open in ServiceNow"
+                      url={allResultsUrl}
+                      icon={{ source: "servicenow.svg" }}
+                    />
                     <Action.CopyToClipboard title="Copy URL" content={allResultsUrl} />
                   </ActionPanel.Section>
                   <Actions revalidate={revalidate} />

@@ -34,7 +34,7 @@ const useFavorites = () => {
       execute: !!selectedInstance && !!authHeader,
       onError: (error) => {
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch favorites", error.message);
+        showToast({ style: Toast.Style.Failure, title: "Could Not Fetch Favorites", message: error.message });
       },
 
       mapResult(response: { result: FavoritesResponse }) {

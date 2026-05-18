@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { ActionPanel, Action, Form, Icon, useNavigation, Color, Keyboard, confirmAlert, Alert } from "@raycast/api";
-import { FormValidation, showFailureToast, useForm } from "@raycast/utils";
+import { showFailureToast, useForm } from "@raycast/utils";
 import crypto from "crypto";
 import { AuthMode, Instance } from "../types";
 import { normalizeInstanceName } from "../utils/instanceUrl";
@@ -75,12 +75,14 @@ export default function InstanceForm({ onSubmit, onDelete, instance, initialName
       full: instance?.full,
     },
     validation: {
-      name: FormValidation.Required,
+      name: (value) => {
+        if (!value?.trim()) return "Missing instance URL";
+      },
       username: (value) => {
-        if (authMode === "basic" && !value?.trim()) return "The item is required";
+        if (authMode === "basic" && !value?.trim()) return "Missing username";
       },
       password: (value) => {
-        if (authMode === "basic" && !value?.trim()) return "The item is required";
+        if (authMode === "basic" && !value?.trim()) return "Missing password";
       },
     },
   });

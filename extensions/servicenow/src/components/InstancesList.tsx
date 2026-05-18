@@ -18,6 +18,7 @@ import InstanceForm from "./InstanceForm";
 import useInstances from "../hooks/useInstances";
 import { useEffect, useState } from "react";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
 import { authorizeInstance } from "../utils/oauth";
 
 export default function InstancesList() {
@@ -48,8 +49,8 @@ export default function InstancesList() {
   return (
     <List searchBarPlaceholder="Filter by name, alias, username..." isLoading={isLoading} selectedItemId={selectedId}>
       {instances.map((instance) => {
-        const { id: instanceId, alias, name: instanceName, username, password, color } = instance;
-        const aliasOrName = alias ? alias : instanceName;
+        const { id: instanceId, alias, name: instanceName, username, color } = instance;
+        const aliasOrName = instanceLabel(instance);
         const isOAuth = instance.authMode === "oauth";
         const oauthSignedIn = isOAuth && !!instance.accessToken && !!instance.refreshToken;
 
@@ -134,25 +135,15 @@ export default function InstancesList() {
                 <List.Dropdown.Section>
                   <Action.OpenInBrowser
                     icon={{ source: "servicenow.svg" }}
-                    title={"Open Instance"}
+                    title="Open in ServiceNow"
                     shortcut={Keyboard.Shortcut.Common.Open}
                     url={getInstanceBaseUrl({ name: instanceName })}
-                  />
-                  <Action.OpenInBrowser
-                    icon={{ source: "servicenow.svg" }}
-                    title="Login to ServiceNow Instance"
-                    shortcut={{ modifiers: ["cmd"], key: "l" }}
-                    url={
-                      isOAuth
-                        ? `${getInstanceBaseUrl({ name: instanceName })}/login.do`
-                        : `${getInstanceBaseUrl({ name: instanceName })}/login.do?user_name=${username}&user_password=${password}&sys_action=sysverb_login`
-                    }
                   />
                 </List.Dropdown.Section>
                 <List.Dropdown.Section title="Instance Profiles">
                   <Action.Push
                     icon={Icon.Plus}
-                    title="Add"
+                    title="Add Instance Profile"
                     target={<InstanceForm onSubmit={addInstance} />}
                     shortcut={Keyboard.Shortcut.Common.New}
                     onPush={() => setSelectedId(instance.id)}
@@ -180,7 +171,7 @@ export default function InstancesList() {
       {instances.length === 0 ? (
         <List.EmptyView
           title="No Instance Profiles Found"
-          description="Press ⏎ to create your first instance profile"
+          description="Add an Instance Profile to get started"
           actions={
             <ActionPanel>
               <Action.Push

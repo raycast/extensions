@@ -9,12 +9,11 @@ import { useLocalStorage } from "./useLocalStorage";
 
 import { Instance } from "../types";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
 import { getAuthHeader, persistInstance } from "../utils/auth";
 
 const compareInstances = (a: Instance, b: Instance): number => {
-  const nameA = a.alias ? a.alias : a.name;
-  const nameB = b.alias ? b.alias : b.name;
-  return nameA.localeCompare(nameB);
+  return instanceLabel(a).localeCompare(instanceLabel(b));
 };
 
 const TRANSIENT_NETWORK_CODES = new Set([
@@ -43,7 +42,7 @@ const isTransientError = (error: unknown): boolean => {
 export default function useInstances() {
   const [selectedInstance, setSelectedInstance] = useCachedState<Instance>("instance");
   const [userId, setUserId] = useCachedState<string>("user-id");
-  const [userName, setUserName] = useCachedState<string>("user-name");
+  const [currentUserName, setCurrentUserName] = useCachedState<string>("user-name");
 
   const { value, setValue, mutate, isLoading } = useLocalStorage<Instance[]>("saved-instances", []);
 
@@ -78,9 +77,6 @@ export default function useInstances() {
     }
 
     const fetchUserId = async () => {
-      const { name = "", alias } = selectedInstance;
-      const instanceLabel = alias || name;
-
       try {
         const authorization = await getAuthHeader(selectedInstance);
         const response = await fetch(`${getInstanceBaseUrl(selectedInstance)}/api/now/ui/user/current_user`, {
@@ -103,7 +99,7 @@ export default function useInstances() {
           console.error(parseError);
           showToast({
             style: Toast.Style.Failure,
-            title: `Could not connect to ${instanceLabel}`,
+            title: `Could not connect to ${instanceLabel(selectedInstance)}`,
             message: `Unexpected response (HTTP ${response.status})`,
           });
           return undefined;
@@ -113,7 +109,7 @@ export default function useInstances() {
           const message = jsonData.error?.message || `HTTP ${response.status}`;
           showToast({
             style: Toast.Style.Failure,
-            title: `Could not connect to ${instanceLabel}`,
+            title: `Could not connect to ${instanceLabel(selectedInstance)}`,
             message,
           });
           if (response.status === 401 || response.status === 403) {
@@ -135,7 +131,7 @@ export default function useInstances() {
         const message = error instanceof Error ? error.message : String(error);
         showToast({
           style: Toast.Style.Failure,
-          title: `Could not connect to ${instanceLabel}`,
+          title: `Could not connect to ${instanceLabel(selectedInstance)}`,
           message,
         });
         if (!isTransientError(error)) {
@@ -147,7 +143,7 @@ export default function useInstances() {
     fetchUserId().then((result) => {
       if (result) {
         setUserId(result.sysId);
-        setUserName(result.userName);
+        setCurrentUserName(result.userName);
       }
     });
   }, [selectedInstance]);
@@ -162,6 +158,6 @@ export default function useInstances() {
     selectedInstance,
     setSelectedInstance,
     userId,
-    userName,
+    currentUserName,
   };
 }

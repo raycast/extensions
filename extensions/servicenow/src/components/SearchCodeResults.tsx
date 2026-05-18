@@ -12,6 +12,7 @@ import useCodeSearchTables from "../hooks/useCodeSearchTables";
 import InstanceForm from "./InstanceForm";
 import useFavorites from "../hooks/useFavorites";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
 import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function SearchCodeResults({ searchTerm }: { searchTerm: string }) {
@@ -36,7 +37,7 @@ export default function SearchCodeResults({ searchTerm }: { searchTerm: string }
   const command = "Search Code";
 
   const [navigationTitle, setNavigationTitle] = useState<string>("");
-  const { alias = "", name: instanceName = "" } = selectedInstance || {};
+  const { name: instanceName = "" } = selectedInstance || {};
 
   const instanceUrl = getInstanceBaseUrl({ name: instanceName });
   const authHeader = useAuthHeader(selectedInstance);
@@ -81,7 +82,7 @@ export default function SearchCodeResults({ searchTerm }: { searchTerm: string }
       return;
     }
 
-    const aliasOrName = alias ? alias : instanceName;
+    const aliasOrName = selectedInstance ? instanceLabel(selectedInstance) : instanceName;
 
     if (isLoadingGroups || isLoadingTables) {
       setNavigationTitle(`${command} > ${aliasOrName} > Discovering tables...`);
@@ -103,8 +104,8 @@ export default function SearchCodeResults({ searchTerm }: { searchTerm: string }
     tables.length,
     displayProgress,
     searchTerm,
-    alias,
     instanceName,
+    selectedInstance,
   ]);
 
   // Used as React keys so children unmount/remount cleanly when the query changes,

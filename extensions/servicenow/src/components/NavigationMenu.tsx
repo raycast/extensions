@@ -26,6 +26,7 @@ import { getIconForModules } from "../utils/getIconForModules";
 import FavoriteForm from "./FavoriteForm";
 import { buildServiceNowUrl } from "../utils/buildServiceNowUrl";
 import { getInstanceBaseUrl } from "../utils/instanceUrl";
+import { instanceLabel } from "../utils/instanceLabel";
 import { useAuthHeader } from "../hooks/useAuthHeader";
 
 export default function NavigationMenu(props: { groupId?: string }) {
@@ -62,7 +63,11 @@ export default function NavigationMenu(props: { groupId?: string }) {
       execute: !!selectedInstance && !groupId && !!authHeader,
       onError: (error) => {
         console.error(error);
-        showToast(Toast.Style.Failure, "Could not fetch menu entries", error.message);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Could Not Fetch Menu Entries",
+          message: error.message,
+        });
       },
 
       mapResult(response: NavigationMenuResponse) {
@@ -146,10 +151,10 @@ export default function NavigationMenu(props: { groupId?: string }) {
   }, [filterByGroup, searchTerm]);
 
   const onInstanceChange = (newValue: string) => {
-    const aux = instances.find((instance) => instance.id === newValue);
-    if (aux) {
-      setSelectedInstance(aux);
-      LocalStorage.setItem("selected-instance", JSON.stringify(aux));
+    const found = instances.find((instance) => instance.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
@@ -171,7 +176,7 @@ export default function NavigationMenu(props: { groupId?: string }) {
             {instances.map((instance: Instance) => (
               <List.Dropdown.Item
                 key={instance.id}
-                title={instance.alias ? instance.alias : instance.name}
+                title={instanceLabel(instance)}
                 value={instance.id}
                 icon={{
                   source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
