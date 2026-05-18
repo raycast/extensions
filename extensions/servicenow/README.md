@@ -76,3 +76,7 @@ To set your preferred mode:
 - Select your preferred option for _Open content using_.
 
 > 💡 By default, the extension uses Direct mode.
+
+### 5. Windows: Reading the Active Browser Tab
+
+Commands that read the URL of your active browser tab (**Open Current Page in Another Instance**, **Add Instance Profile**, **Find Record References**) use AppleScript on macOS and the [Raycast Browser Extension](https://www.raycast.com/browser-extension) on Windows. On Windows, install the Browser Extension in Chrome or Edge for these commands to detect the current tab automatically.

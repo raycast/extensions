@@ -9,6 +9,10 @@
     "Productivity",
     "Web"
   ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
   "license": "MIT",
   "commands": [
     {
