@@ -1,6 +1,6 @@
 # Launchd Monitor Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-18
 
 - Menu bar display showing launchd job status at a glance
 - Monitor multiple launchd jobs via comma-separated labels
