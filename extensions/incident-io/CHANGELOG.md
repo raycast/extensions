@@ -1,6 +1,6 @@
 # Incident.io Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-18
 
 - Prevent the on-call schedule list from crashing when a shift has no user details.
 
