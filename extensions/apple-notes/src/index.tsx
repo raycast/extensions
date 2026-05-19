@@ -16,7 +16,7 @@ export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
 
   const filteredNotes = useMemo(() => {
-    return [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? [])].filter((note) => {
+    return [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? []), ...(data?.deletedNotes ?? [])].filter((note) => {
       const chineseMatch = (text: string | null) =>
         text && /[\u4e00-\u9fa5]/.test(text) ? match(text, searchText) !== null : false;
       return (
