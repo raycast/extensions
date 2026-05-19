@@ -9,8 +9,7 @@ export async function fetchOwnedGames(
   steamId: string,
 ): Promise<Set<number>> {
   if (!apiKey || !steamId) {
-    ownedAppIds = new Set();
-    return ownedAppIds;
+    return new Set();
   }
   if (ownedAppIds !== null) return ownedAppIds;
   if (ownedFetchPromise !== null) return ownedFetchPromise;
@@ -28,8 +27,7 @@ export async function fetchOwnedGames(
       return ids;
     })
     .catch(() => {
-      ownedAppIds = new Set();
-      return ownedAppIds as Set<number>;
+      return new Set<number>();
     });
 
   return ownedFetchPromise;
