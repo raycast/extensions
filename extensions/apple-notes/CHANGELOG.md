@@ -1,5 +1,19 @@
 # Apple Notes Changelog
 
+## [Bug Fixes] - {PR_MERGE_DATE}
+
+- Fix tags not rendering in note detail view
+- Fix duplicate ⌘⇧M keyboard shortcut — Plain Text copy action now uses ⌘⇧T
+- Fix "Recently Deleted" section always appearing empty in search results
+- Fix menu bar icon showing incorrectly
+- Fix missing `await` on async calls (`showFailureToast`, `open`, `createNote`, `mutate`, `copyNoteContent`)
+- Remove unnecessary `await` on synchronous `pop()` navigation calls
+- Fix loose equality (`==`) comparisons for primary key matching replaced with strict (`===`)
+- Fix missing radix in `parseInt` calls
+- Remove deprecated AI model
+- Add missing menu bar preferences configuration
+- Update packages
+
 ## [Bug Fix Update] - 2026-02-26
 
 - Fix `get-note-content` and `update-note` timing out when Notes is not already running by using a longer AppleScript timeout.
