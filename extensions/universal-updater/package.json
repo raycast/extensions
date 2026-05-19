@@ -1,0 +1,368 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "universal-updater",
+  "title": "Universal Updater",
+  "description": "Check and upgrade outdated packages across Homebrew, npm, pip, pipx, cargo, gem, and Mac App Store — all from Raycast.",
+  "icon": "extension-icon.png",
+  "author": "BalajiTechLabs",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "check-updates",
+      "title": "Check for Updates",
+      "subtitle": "Universal Updater",
+      "description": "View outdated packages across all package managers and upgrade them safely.",
+      "mode": "view"
+    },
+    {
+      "name": "upgrade-all",
+      "title": "Upgrade All Packages",
+      "subtitle": "Universal Updater",
+      "description": "Run upgrade across all enabled package managers at once.",
+      "mode": "no-view",
+      "interval": "1d"
+    },
+    {
+      "name": "list-installed",
+      "title": "List Installed Packages",
+      "subtitle": "Universal Updater",
+      "description": "View all installed packages with versions across all package managers.",
+      "mode": "view"
+    },
+    {
+      "name": "detect-managers",
+      "title": "Detect Installed Managers",
+      "subtitle": "Universal Updater",
+      "description": "Show which package managers are installed on this system.",
+      "mode": "view"
+    },
+    {
+      "name": "export-backups",
+      "title": "Version Backups",
+      "subtitle": "Universal Updater",
+      "description": "Create and manage backups of installed package versions.",
+      "mode": "view"
+    },
+    {
+      "name": "search-packages",
+      "title": "Search Packages",
+      "subtitle": "Universal Updater",
+      "description": "Search and install new packages directly from registries.",
+      "mode": "view"
+    },
+    {
+      "name": "free-up-space",
+      "title": "Free up Space",
+      "subtitle": "Universal Updater",
+      "description": "Run cleanup commands for all enabled package managers to reclaim disk space.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "enableBrew",
+      "title": "Package Managers",
+      "label": "Homebrew",
+      "description": "Check and upgrade Homebrew formulae and casks",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableNpm",
+      "label": "npm (global packages)",
+      "description": "Check and upgrade globally installed npm packages",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "enableYarn",
+      "label": "yarn (global packages)",
+      "description": "Check and upgrade globally installed yarn packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enablePnpm",
+      "label": "pnpm (global packages)",
+      "description": "Check and upgrade globally installed pnpm packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enablePip",
+      "label": "pip (Python packages)",
+      "description": "Check and upgrade outdated pip packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enablePipx",
+      "label": "pipx (isolated Python apps)",
+      "description": "Check and upgrade pipx-installed applications",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableCargo",
+      "label": "cargo (Rust packages)",
+      "description": "Check and upgrade Rust crates (requires cargo-update)",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableGem",
+      "label": "gem (Ruby gems)",
+      "description": "Check and upgrade outdated Ruby gems",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableMas",
+      "label": "mas (Mac App Store)",
+      "description": "Check and upgrade Mac App Store apps (requires mas CLI)",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableGo",
+      "label": "go (Go tools)",
+      "description": "Check and upgrade Go module tools",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableBun",
+      "label": "bun (global packages)",
+      "description": "Check and upgrade globally installed bun packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableDeno",
+      "label": "deno (global executables)",
+      "description": "Check and upgrade globally installed deno executables",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableComposer",
+      "label": "composer (global packages)",
+      "description": "Check and upgrade globally installed composer packages",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "confirmBeforeUpgrade",
+      "title": "Upgrade Behavior",
+      "label": "Confirm before upgrades",
+      "description": "Ask for confirmation before upgrading one ecosystem or all ecosystems",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "showUpToDateEcosystems",
+      "label": "Show up-to-date ecosystems",
+      "description": "Keep ecosystems that are already up to date visible in the list",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "dryRunMode",
+      "label": "Dry-run mode",
+      "description": "Simulate upgrades without making actual changes (safe testing)",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "parallelUpgrade",
+      "label": "Parallel upgrades",
+      "description": "Upgrade multiple ecosystems simultaneously for faster completion",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "sortBy",
+      "title": "Sorting",
+      "label": "Sort packages by",
+      "description": "How to sort outdated packages within each ecosystem",
+      "type": "dropdown",
+      "default": "name",
+      "required": false,
+      "data": [
+        {
+          "title": "Name (A-Z)",
+          "value": "name"
+        },
+        {
+          "title": "Name (Z-A)",
+          "value": "nameDesc"
+        },
+        {
+          "title": "Update Size (Large First)",
+          "value": "updateSize"
+        }
+      ]
+    },
+    {
+      "name": "showUpdateDetails",
+      "label": "Show update details",
+      "description": "Display current and latest version numbers in the list view",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "autoRefreshInterval",
+      "title": "Auto-Refresh",
+      "label": "Auto-refresh interval",
+      "description": "Automatically refresh package status at set intervals",
+      "type": "dropdown",
+      "default": "never",
+      "required": false,
+      "data": [
+        {
+          "title": "Never",
+          "value": "never"
+        },
+        {
+          "title": "Every 5 minutes",
+          "value": "5"
+        },
+        {
+          "title": "Every 15 minutes",
+          "value": "15"
+        },
+        {
+          "title": "Every 30 minutes",
+          "value": "30"
+        },
+        {
+          "title": "Every hour",
+          "value": "60"
+        }
+      ]
+    },
+    {
+      "name": "notificationsEnabled",
+      "title": "Notifications",
+      "label": "Show notifications",
+      "description": "Display system notifications when updates are available",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoUpgradeTrusted",
+      "title": "Automation",
+      "label": "Auto-upgrade trusted ecosystems",
+      "description": "Silently upgrade trusted packages in the background",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "backupBeforeUpgrade",
+      "title": "Safety",
+      "label": "Backup before upgrade",
+      "description": "Create a backup list of current versions before upgrading",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "skipMajorVersions",
+      "label": "Skip major versions",
+      "description": "Avoid upgrading to new major versions (e.g., 2.x → 3.x) to prevent breaking changes",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "logLevel",
+      "title": "Logging",
+      "label": "Log level",
+      "description": "Control the verbosity of upgrade logs",
+      "type": "dropdown",
+      "default": "info",
+      "required": false,
+      "data": [
+        {
+          "title": "Silent",
+          "value": "silent"
+        },
+        {
+          "title": "Errors only",
+          "value": "error"
+        },
+        {
+          "title": "Warnings & Errors",
+          "value": "warn"
+        },
+        {
+          "title": "Info (Recommended)",
+          "value": "info"
+        },
+        {
+          "title": "Debug",
+          "value": "debug"
+        }
+      ]
+    },
+    {
+      "name": "compactMode",
+      "title": "Display",
+      "label": "Compact mode",
+      "description": "Reduce spacing and show more items on screen",
+      "type": "checkbox",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "showLastCheckTime",
+      "label": "Show last check time",
+      "description": "Display when the last update check was performed",
+      "type": "checkbox",
+      "default": true,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.70.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist -o dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
