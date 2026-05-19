@@ -4,8 +4,7 @@ export const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
 // platform may not exist in older API versions, fall back to ctrl
 export const mod =
-  "platform" in environment &&
-  (environment as Record<string, unknown>).platform === "mac"
+  (environment as unknown as Record<string, unknown>)["platform"] === "macos"
     ? "cmd"
     : "ctrl";
 

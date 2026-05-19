@@ -76,42 +76,49 @@ export function useAppDetails(
         fetch(
           `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=${region}`,
           { signal },
-        ).then(
-          (r) =>
-            r.json() as Promise<
-              Record<
-                number,
-                {
-                  data?: {
-                    is_free?: boolean;
-                    price_overview?: {
-                      final_formatted: string;
-                      discount_percent: number;
+        )
+          .then(
+            (r) =>
+              r.json() as Promise<
+                Record<
+                  number,
+                  {
+                    data?: {
+                      is_free?: boolean;
+                      price_overview?: {
+                        final_formatted: string;
+                        discount_percent: number;
+                      };
                     };
-                  };
-                }
-              >
-            >,
-        ),
+                  }
+                >
+              >,
+          )
+          .catch(() => null),
         fetch(
           `https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${appId}`,
           { signal },
-        ).then(
-          (r) => r.json() as Promise<{ response?: { player_count?: number } }>,
-        ),
+        )
+          .then(
+            (r) =>
+              r.json() as Promise<{ response?: { player_count?: number } }>,
+          )
+          .catch(() => null),
         fetch(
           `https://store.steampowered.com/appreviews/${appId}?json=1&language=all&purchase_type=all`,
           { signal },
-        ).then(
-          (r) =>
-            r.json() as Promise<{
-              query_summary?: {
-                total_reviews?: number;
-                total_positive?: number;
-              };
-            }>,
-        ),
-      ]).catch(() => [null, null, null]);
+        )
+          .then(
+            (r) =>
+              r.json() as Promise<{
+                query_summary?: {
+                  total_reviews?: number;
+                  total_positive?: number;
+                };
+              }>,
+          )
+          .catch(() => null),
+      ]);
 
       if (signal.aborted) return;
 
