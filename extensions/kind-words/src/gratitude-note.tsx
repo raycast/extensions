@@ -40,7 +40,7 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action title="Copy Prompt" onAction={() => copyText(p.text)} />
-              <Action title="Random" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={pickRandom} />
+              <Action title="Shuffle" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={pickRandom} />
             </ActionPanel>
           }
         />

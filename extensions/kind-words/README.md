@@ -5,12 +5,15 @@ A Raycast extension for picking up a small kindness — a compliment to send, or
 ## Commands
 
 ### Random Compliment
+
 Browse the full library of compliments with one preselected at random. Filter by tone (warm, playful, sincere, specific-skill). Press ⏎ to copy the focused compliment, or ⌘R to reshuffle.
 
 ### Quick Compliment
+
 A no-view command that copies a random compliment straight to your clipboard with a HUD confirmation. Use it when you don't need to browse — just need one to send.
 
 ### Gratitude Note
+
 Browse curated gratitude prompts with one preselected at random. Each prompt comes with a short note on when it works and two or three opener examples to start the conversation. Press ⏎ to copy the prompt, ⌘R to reshuffle.
 
 ## Why

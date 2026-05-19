@@ -35,7 +35,10 @@ export default function Command() {
 
   const pool = useMemo(() => poolFor(toneFilter), [toneFilter]);
 
-  const effectiveSelectedId = selectedId && pool.find((c) => c.id === selectedId) ? selectedId : pickRandomId(pool);
+  const effectiveSelectedId = useMemo(
+    () => (selectedId && pool.find((c) => c.id === selectedId) ? selectedId : pickRandomId(pool)),
+    [selectedId, pool],
+  );
 
   const pickRandom = () => {
     const next = pickRandomId(pool, selectedId);
@@ -64,8 +67,8 @@ export default function Command() {
           detail={<List.Item.Detail markdown={`# ${c.text}\n\n—\n*${c.tone}*`} />}
           actions={
             <ActionPanel>
-              <Action title="Copy" onAction={() => copyText(c.text)} />
-              <Action title="Random" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={pickRandom} />
+              <Action title="Copy Compliment" onAction={() => copyText(c.text)} />
+              <Action title="Shuffle" shortcut={{ modifiers: ["cmd"], key: "r" }} onAction={pickRandom} />
             </ActionPanel>
           }
         />
