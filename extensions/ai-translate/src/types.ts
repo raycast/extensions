@@ -23,54 +23,14 @@ export interface RuntimeSettings {
   customPromptInstructions: string;
 }
 
-export interface ExtensionPreferences {
-  defaultProvider: ProviderId;
-  targetLanguage: string;
-  translationStyle: TranslationStyle;
-  promptProfile?: PromptProfile;
-  customPromptInstructions?: string;
-  ocrEngine: OCREngine;
-  ocrTextLayout: OCRTextLayout;
-  autoCopyOcr?: boolean;
-  ocrFallbackToLocal?: boolean;
-  ocrTimeoutSeconds?: string;
-  tesseractPath?: string;
-  tesseractLanguages?: string;
-  baiduOcrAPIKey?: string;
-  baiduOcrSecretKey?: string;
-  baiduOcrEndpoint?: string;
-  baiduOcrLanguageType?: string;
-  baiduOcrParagraph?: boolean;
-  enableDeepSeek?: boolean;
-  enableMiMo?: boolean;
-  enableMiniMax?: boolean;
-  enableGemini?: boolean;
-  enableKimi?: boolean;
-  enableOpenAI?: boolean;
-  providerOrder?: string;
-  requestTimeoutSeconds?: string;
-  maxOutputTokens?: string;
-  deepseekAPIKey?: string;
-  deepseekBaseURL?: string;
-  deepseekModel?: string;
-  mimoAPIKey?: string;
-  mimoBaseURL?: string;
-  mimoModel?: string;
-  minimaxAPIKey?: string;
-  minimaxBaseURL?: string;
-  minimaxModel?: string;
-  geminiAPIKey?: string;
-  geminiBaseURL?: string;
-  geminiModel?: string;
-  geminiOcrModel?: string;
-  geminiTTSVoice?: string;
-  kimiAPIKey?: string;
-  kimiBaseURL?: string;
-  kimiModel?: string;
-  openAIAPIKey?: string;
-  openAIBaseURL?: string;
-  openAIModel?: string;
-}
+/**
+ * Single source of truth for preferences is Raycast's generated `Preferences`
+ * type (from `package.json`, emitted into `raycast-env.d.ts`). We re-export it
+ * under the existing name so the rest of the codebase keeps importing
+ * `ExtensionPreferences` from here, without hand-maintaining a duplicate that
+ * can drift from the manifest.
+ */
+export type ExtensionPreferences = Preferences;
 
 export interface ProviderConfig {
   id: ProviderId;

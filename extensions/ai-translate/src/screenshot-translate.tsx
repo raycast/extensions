@@ -67,7 +67,7 @@ const STYLE_LABELS: Record<TranslationStyle, string> = {
 export default function Command() {
   const preferences = useMemo(() => readPreferences(), []);
   const [sourceText, setSourceText] = useState("");
-  const [targetLanguage, setTargetLanguage] = useState(preferences.targetLanguage);
+  const [targetLanguage, setTargetLanguage] = useState<string>(preferences.targetLanguage);
   const [results, setResults] = useState<TranslationResult[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [ocrDone, setOcrDone] = useState(false);
