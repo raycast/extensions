@@ -6,6 +6,7 @@ import {
   showToast,
   Toast,
 } from "@raycast/api";
+import { showFailureToast } from "@raycast/utils";
 
 type TransactionResponse = {
   success: boolean;
@@ -17,13 +18,6 @@ function delay(ms: number): Promise<void> {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
-}
-
-function getErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return "Unknown error";
 }
 
 async function getResponseBody(
@@ -106,10 +100,9 @@ export default async function Command({
     await delay(SUCCESS_CLOSE_DELAY_MS);
     await closeMainWindow();
   } catch (error) {
-    const errorMessage = getErrorMessage(error);
-
-    loadingToast.style = Toast.Style.Failure;
-    loadingToast.title = "Unable to add transaction. Try again.";
-    loadingToast.message = errorMessage;
+    await showFailureToast(error, {
+      title: "Unable to add transaction. Try again.",
+    });
+    await loadingToast.hide();
   }
 }
