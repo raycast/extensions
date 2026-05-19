@@ -1,6 +1,6 @@
 # Universal Updater Changelog
 
-## [Initial Version] - 2026-05-19
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release of Universal Updater featuring unified update checking for Homebrew, npm, yarn, pnpm, bun, deno, composer, pip, pipx, cargo, RubyGems, Mac App Store, and Go.
 - Added "Free up Space" command to purge caches across all ecosystems.

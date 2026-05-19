@@ -38,7 +38,7 @@ type SearchResult = {
 };
 
 export default function Command() {
-  const prefs = getPreferenceValues() as Record<string, any>;
+  const prefs = getPreferenceValues<Preferences>();
   const enabledEcosystems = useMemo(
     () =>
       (Object.keys(ECOSYSTEM_NAMES) as EcosystemId[]).filter(

@@ -273,15 +273,6 @@
       "required": false
     },
     {
-      "name": "autoUpgradeTrusted",
-      "title": "Automation",
-      "label": "Auto-upgrade trusted ecosystems",
-      "description": "Silently upgrade trusted packages in the background",
-      "type": "checkbox",
-      "default": false,
-      "required": false
-    },
-    {
       "name": "backupBeforeUpgrade",
       "title": "Safety",
       "label": "Backup before upgrade",
@@ -297,37 +288,6 @@
       "type": "checkbox",
       "default": false,
       "required": false
-    },
-    {
-      "name": "logLevel",
-      "title": "Logging",
-      "label": "Log level",
-      "description": "Control the verbosity of upgrade logs",
-      "type": "dropdown",
-      "default": "info",
-      "required": false,
-      "data": [
-        {
-          "title": "Silent",
-          "value": "silent"
-        },
-        {
-          "title": "Errors only",
-          "value": "error"
-        },
-        {
-          "title": "Warnings & Errors",
-          "value": "warn"
-        },
-        {
-          "title": "Info (Recommended)",
-          "value": "info"
-        },
-        {
-          "title": "Debug",
-          "value": "debug"
-        }
-      ]
     },
     {
       "name": "compactMode",

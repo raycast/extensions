@@ -422,7 +422,7 @@ function sortPackages(
   }
 }
 
-function filterMajorUpdates(packages: OutdatedPackage[]): OutdatedPackage[] {
+function excludeMajorUpdates(packages: OutdatedPackage[]): OutdatedPackage[] {
   return packages.filter((pkg) => {
     const currentMajor = parseInt(pkg.current.split(".")[0], 10);
     const latestMajor = parseInt(pkg.latest.split(".")[0], 10);
@@ -448,7 +448,7 @@ function buildDetailMarkdown(
   let displayPackages = [...status.packages];
 
   if (skipMajorVersions) {
-    const filtered = filterMajorUpdates(displayPackages);
+    const filtered = excludeMajorUpdates(displayPackages);
     displayPackages = filtered;
   }
 
@@ -547,7 +547,7 @@ function PackageListView(
 ) {
   let displayPackages = [...props.status.packages];
   if (props.skipMajorVersions) {
-    displayPackages = filterMajorUpdates(displayPackages);
+    displayPackages = excludeMajorUpdates(displayPackages);
   }
   displayPackages = sortPackages(displayPackages, props.sortBy);
 
@@ -1063,7 +1063,7 @@ function formatTimeAgo(timestamp: number): string {
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues() as Record<string, any>;
+  const prefs = getPreferenceValues<Preferences>();
   const enabledDefs = useMemo(
     () => ECOSYSTEM_DEFS.filter((def) => prefs[def.preferenceKey]),
     [prefs],

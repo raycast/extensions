@@ -25,6 +25,9 @@ import {
   checkGem,
   checkMas,
   checkGo,
+  checkBun,
+  checkDeno,
+  checkComposer,
   upgradeBrew,
   upgradeNpm,
   upgradeYarn,
@@ -35,6 +38,9 @@ import {
   upgradeGem,
   upgradeMas,
   upgradeGo,
+  upgradeBun,
+  upgradeDeno,
+  upgradeComposer,
 } from "./ecosystems";
 import { createBackup } from "./export-backups";
 
@@ -46,7 +52,7 @@ type EcosystemJob = {
 };
 
 export default async function Command() {
-  const prefs = getPreferenceValues() as Record<string, any>;
+  const prefs = getPreferenceValues<Preferences>();
 
   const jobs: EcosystemJob[] = [
     {
@@ -108,6 +114,24 @@ export default async function Command() {
       enabled: prefs.enableGo,
       check: checkGo,
       upgrade: upgradeGo,
+    },
+    {
+      name: "bun",
+      enabled: prefs.enableBun,
+      check: checkBun,
+      upgrade: upgradeBun,
+    },
+    {
+      name: "deno",
+      enabled: prefs.enableDeno,
+      check: checkDeno,
+      upgrade: upgradeDeno,
+    },
+    {
+      name: "composer",
+      enabled: prefs.enableComposer,
+      check: checkComposer,
+      upgrade: upgradeComposer,
     },
   ];
 

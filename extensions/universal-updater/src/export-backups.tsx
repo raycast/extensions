@@ -20,7 +20,10 @@ import {
 } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
-import { execSync } from "node:child_process";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 import {
   EcosystemId,
@@ -43,7 +46,7 @@ export async function createBackup(): Promise<{
   desktopPath: string;
   hiddenPath: string;
 }> {
-  const prefs = getPreferenceValues() as Record<string, any>;
+  const prefs = getPreferenceValues<Preferences>();
 
   const enabledIds = (
     [
@@ -109,8 +112,7 @@ export async function createBackup(): Promise<{
   // Send macOS notification
   try {
     const notifScript = `display notification "Backup created with ${packageCount} packages" with title "Universal Updater" subtitle "${filename}"`;
-    const escaped = notifScript.replaceAll("'", "'\\''");
-    execSync(`osascript -e '${escaped}'`);
+    await execFileAsync("osascript", ["-e", notifScript]);
   } catch {
     // Notification not critical
   }
@@ -167,8 +169,7 @@ async function rollbackToBackup(filePath: string): Promise<string> {
   // Send success notification
   try {
     const notifScript = `display notification "${totalRestored} packages restored" with title "Universal Updater" subtitle "Restore completed"`;
-    const escaped = notifScript.replaceAll("'", "'\\''");
-    execSync(`osascript -e '${escaped}'`);
+    await execFileAsync("osascript", ["-e", notifScript]);
   } catch {
     // Notification not critical
   }
@@ -252,7 +253,7 @@ async function exportToShellScript(backup: BackupFile) {
   const shFilename = backup.filename.replace(".json", ".sh");
   const desktopPath = join(DESKTOP_DIR, shFilename);
   writeFileSync(desktopPath, script, "utf-8");
-  execSync(`chmod +x "${desktopPath}"`);
+  await execFileAsync("chmod", ["+x", desktopPath]);
   return desktopPath;
 }
 
@@ -422,10 +423,8 @@ export default function Command() {
       // Use macOS file picker via osascript
       const script = `set response to (choose file of type {"public.json", "com.apple.json"} with prompt "Select backup JSON file")
 return POSIX path of response`;
-      const escaped = script.replaceAll("'", "'\\''");
-      const result = execSync(`osascript -e '${escaped}'`, {
-        encoding: "utf-8",
-      }).trim();
+      const { stdout } = await execFileAsync("osascript", ["-e", script]);
+      const result = stdout.trim();
 
       if (!result) return;
 

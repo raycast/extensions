@@ -189,7 +189,7 @@ function EcosystemPackageList(
 }
 
 export default function Command() {
-  const prefs = getPreferenceValues() as Record<string, any>;
+  const prefs = getPreferenceValues<Preferences>();
   const enabledEcosystems = useMemo(
     () =>
       (
