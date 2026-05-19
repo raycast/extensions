@@ -71,12 +71,12 @@ export default function Command() {
         description="Create a new note by pressing ⏎"
         actions={
           <ActionPanel>
-            <Action icon={Icon.Plus} title="Create New Note" onAction={() => createNote(searchText)} />
+            <Action icon={Icon.Plus} title="Create New Note" onAction={async () => await createNote(searchText)} />
             <Action
               title="Refresh"
               icon={Icon.ArrowClockwise}
               shortcut={{ modifiers: ["cmd"], key: "r" }}
-              onAction={() => mutate()}
+              onAction={async () => await mutate()}
             />
           </ActionPanel>
         }

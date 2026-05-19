@@ -23,7 +23,7 @@ export default async (props: LaunchProps<{ arguments: Arguments.RandomNote }>) =
     }
 
     const randomNote = notes[Math.floor(Math.random() * notes.length)];
-    open(getOpenNoteURL(randomNote.UUID));
+    await open(getOpenNoteURL(randomNote.UUID));
   } catch (error) {
     await showFailureToast(error, { title: "Could not open a random note." });
   }

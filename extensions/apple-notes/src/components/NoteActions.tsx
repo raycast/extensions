@@ -197,12 +197,12 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
         >
           <Action
             title="Plain Text"
-            onAction={() => copyNoteContent(getNotePlainText)}
+            onAction={async () => await copyNoteContent(getNotePlainText)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
           />
           <Action
             title="HTML"
-            onAction={() => copyNoteContent(getNoteBody)}
+            onAction={async () => await copyNoteContent(getNoteBody)}
             shortcut={{ modifiers: ["cmd", "shift"], key: "h" }}
           />
           <Action

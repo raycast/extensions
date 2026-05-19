@@ -34,7 +34,7 @@ export default function Command() {
           title="New Note"
           icon={Icon.Plus}
           shortcut={{ modifiers: ["cmd"], key: "n" }}
-          onAction={() => createNote()}
+          onAction={async () => await createNote()}
         />
 
         <MenuBarExtra.Item
@@ -61,7 +61,7 @@ function NoteMenuBarItem({ note, openSeparately }: NoteMenuBarItemProps) {
       key={note.id}
       title={title}
       icon="notes-icon.png"
-      onAction={() => (openSeparately ? openNoteSeparately(note.id) : open(getOpenNoteURL(note.UUID)))}
+      onAction={async () => await (openSeparately ? openNoteSeparately(note.id) : open(getOpenNoteURL(note.UUID)))}
     />
   );
 }
