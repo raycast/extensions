@@ -104,15 +104,9 @@ export function buildSearchQuery(searchText?: string, statusFilter?: string): st
 
   if (searchText && searchText.trim()) {
     const trimmed = searchText.trim();
-    // Check if it looks like a workflow ID (contains specific characters)
-    // or a workflow type (typically PascalCase or camelCase)
-    if (trimmed.includes("-") || trimmed.includes("_") || /^\d/.test(trimmed)) {
-      // Could be workflow ID or snake_case/kebab-case type - search both
-      conditions.push(`(WorkflowId = '${escapeQueryValue(trimmed)}' OR WorkflowType = '${escapeQueryValue(trimmed)}')`);
-    } else {
-      // Likely workflow type (PascalCase/camelCase)
-      conditions.push(`WorkflowType = '${escapeQueryValue(trimmed)}'`);
-    }
+    // Always search both WorkflowId and WorkflowType so users can find workflows
+    // regardless of whether the search term looks like an ID or a type name
+    conditions.push(`(WorkflowId = '${escapeQueryValue(trimmed)}' OR WorkflowType = '${escapeQueryValue(trimmed)}')`);
   }
 
   if (statusFilter && statusFilter !== "all") {

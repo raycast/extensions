@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useState } from "react";
+import { useEffect, useCallback, useState, useRef } from "react";
 import { List, Icon, Color, ActionPanel, Action, showToast, Toast, Alert, confirmAlert } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import {
@@ -22,15 +22,17 @@ import { getSelectedCluster, setSelectedCluster, getSelectedNamespace, setSelect
 export default function Schedules() {
   const [selectedClusterName, setSelectedClusterName] = useState<string>("");
   const [selectedNamespaceState, setSelectedNamespaceState] = useState<string>("");
+  const isInitializedRef = useRef(false);
 
   // Load clusters from storage
   const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
     keepPreviousData: true,
   });
 
-  // Initialize cluster and namespace from storage
+  // Initialize cluster and namespace from storage (only once)
   useEffect(() => {
-    if (clusters.length === 0) return;
+    if (clusters.length === 0 || isInitializedRef.current) return;
+    isInitializedRef.current = true;
 
     async function init() {
       const storedCluster = await getSelectedCluster();

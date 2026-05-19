@@ -1,5 +1,5 @@
 import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon, LocalStorage } from "@raycast/api";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import {
   startWorkflow,
@@ -26,9 +26,9 @@ export default function StartWorkflow() {
   const [taskQueue, setTaskQueue] = useState("");
   const [input, setInput] = useState("");
   const [inputError, setInputError] = useState<string | undefined>();
-  const [initialized, setInitialized] = useState(false);
   const [selectedClusterName, setSelectedClusterName] = useState<string>("");
   const [selectedNamespaceState, setSelectedNamespaceState] = useState<string>("");
+  const isInitializedRef = useRef(false);
 
   // Load clusters from storage
   const { data: clusters = [], isLoading: clustersLoading } = useCachedPromise(getClusters, [], {
@@ -51,9 +51,10 @@ export default function StartWorkflow() {
     { keepPreviousData: true }
   );
 
-  // Initialize cluster and namespace, then load last config
+  // Initialize cluster and namespace, then load last config (only once)
   useEffect(() => {
-    if (clusters.length === 0) return;
+    if (clusters.length === 0 || isInitializedRef.current) return;
+    isInitializedRef.current = true;
 
     async function init() {
       // Initialize cluster
@@ -81,8 +82,6 @@ export default function StartWorkflow() {
           // Ignore parse errors
         }
       }
-
-      setInitialized(true);
     }
     init();
   }, [clusters]);
@@ -232,7 +231,7 @@ export default function StartWorkflow() {
 
   return (
     <Form
-      isLoading={isLoading || clustersLoading || namespacesLoading || !initialized}
+      isLoading={isLoading || clustersLoading || namespacesLoading || !isInitializedRef.current}
       navigationTitle="Start Workflow"
       actions={
         <ActionPanel>

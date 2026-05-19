@@ -344,8 +344,8 @@ export async function terminateWorkflow(workflowId: string, reason: string, runI
 export async function testConnectionForCluster(
   cluster: ClusterConfig
 ): Promise<{ success: boolean; namespace?: NamespaceInfo; error?: string }> {
-  // Temporarily set this cluster as current
-  const previousCluster = getCurrentCluster();
+  // Capture the current override state (may be null, meaning "no override")
+  const previousClusterOverride = currentClusterOverride;
   setCurrentCluster(cluster);
 
   try {
@@ -367,8 +367,9 @@ export async function testConnectionForCluster(
     const message = error instanceof Error ? error.message : String(error);
     return { success: false, error: message };
   } finally {
-    // Restore the previous cluster
-    setCurrentCluster(previousCluster);
+    // Restore the previous override state (null means "no override")
+    currentClusterOverride = previousClusterOverride;
+    invalidateClientCache();
   }
 }
 

@@ -7,6 +7,14 @@ import { getCurrentNamespace, getCurrentCluster } from "./temporal-client";
  */
 
 /**
+ * Escape a value for use in a double-quoted shell argument
+ */
+function escapeShellArg(value: string): string {
+  // Escape backslashes first, then double quotes
+  return value.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+}
+
+/**
  * Get the address flag if not using localhost
  */
 function getAddressFlag(): string {
@@ -19,17 +27,17 @@ function getAddressFlag(): string {
   }
 
   // Include address flag for remote servers (including Temporal Cloud)
-  return ` --address "${address}"`;
+  return ` --address "${escapeShellArg(address)}"`;
 }
 
 export function getDescribeCommand(workflowId: string, runId?: string): string {
   const namespace = getCurrentNamespace();
   const addressFlag = getAddressFlag();
-  let cmd = `temporal workflow describe --workflow-id "${workflowId}"`;
+  let cmd = `temporal workflow describe --workflow-id "${escapeShellArg(workflowId)}"`;
   if (runId) {
-    cmd += ` --run-id "${runId}"`;
+    cmd += ` --run-id "${escapeShellArg(runId)}"`;
   }
-  cmd += ` --namespace "${namespace}"`;
+  cmd += ` --namespace "${escapeShellArg(namespace)}"`;
   cmd += addressFlag;
   return cmd;
 }
@@ -37,11 +45,11 @@ export function getDescribeCommand(workflowId: string, runId?: string): string {
 export function getCancelCommand(workflowId: string, runId?: string): string {
   const namespace = getCurrentNamespace();
   const addressFlag = getAddressFlag();
-  let cmd = `temporal workflow cancel --workflow-id "${workflowId}"`;
+  let cmd = `temporal workflow cancel --workflow-id "${escapeShellArg(workflowId)}"`;
   if (runId) {
-    cmd += ` --run-id "${runId}"`;
+    cmd += ` --run-id "${escapeShellArg(runId)}"`;
   }
-  cmd += ` --namespace "${namespace}"`;
+  cmd += ` --namespace "${escapeShellArg(namespace)}"`;
   cmd += addressFlag;
   return cmd;
 }
@@ -49,14 +57,14 @@ export function getCancelCommand(workflowId: string, runId?: string): string {
 export function getTerminateCommand(workflowId: string, reason?: string, runId?: string): string {
   const namespace = getCurrentNamespace();
   const addressFlag = getAddressFlag();
-  let cmd = `temporal workflow terminate --workflow-id "${workflowId}"`;
+  let cmd = `temporal workflow terminate --workflow-id "${escapeShellArg(workflowId)}"`;
   if (runId) {
-    cmd += ` --run-id "${runId}"`;
+    cmd += ` --run-id "${escapeShellArg(runId)}"`;
   }
   if (reason) {
-    cmd += ` --reason "${reason}"`;
+    cmd += ` --reason "${escapeShellArg(reason)}"`;
   }
-  cmd += ` --namespace "${namespace}"`;
+  cmd += ` --namespace "${escapeShellArg(namespace)}"`;
   cmd += addressFlag;
   return cmd;
 }
@@ -64,12 +72,12 @@ export function getTerminateCommand(workflowId: string, reason?: string, runId?:
 export function getSignalCommand(workflowId: string, signalName?: string, runId?: string): string {
   const namespace = getCurrentNamespace();
   const addressFlag = getAddressFlag();
-  let cmd = `temporal workflow signal --workflow-id "${workflowId}"`;
+  let cmd = `temporal workflow signal --workflow-id "${escapeShellArg(workflowId)}"`;
   if (runId) {
-    cmd += ` --run-id "${runId}"`;
+    cmd += ` --run-id "${escapeShellArg(runId)}"`;
   }
-  cmd += ` --name "${signalName || "SIGNAL_NAME"}"`;
-  cmd += ` --namespace "${namespace}"`;
+  cmd += ` --name "${escapeShellArg(signalName || "SIGNAL_NAME")}"`;
+  cmd += ` --namespace "${escapeShellArg(namespace)}"`;
   cmd += addressFlag;
   // User can add: --input '{"key": "value"}'
   return cmd;
@@ -78,12 +86,12 @@ export function getSignalCommand(workflowId: string, signalName?: string, runId?
 export function getQueryCommand(workflowId: string, queryType?: string, runId?: string): string {
   const namespace = getCurrentNamespace();
   const addressFlag = getAddressFlag();
-  let cmd = `temporal workflow query --workflow-id "${workflowId}"`;
+  let cmd = `temporal workflow query --workflow-id "${escapeShellArg(workflowId)}"`;
   if (runId) {
-    cmd += ` --run-id "${runId}"`;
+    cmd += ` --run-id "${escapeShellArg(runId)}"`;
   }
-  cmd += ` --type "${queryType || "QUERY_TYPE"}"`;
-  cmd += ` --namespace "${namespace}"`;
+  cmd += ` --type "${escapeShellArg(queryType || "QUERY_TYPE")}"`;
+  cmd += ` --namespace "${escapeShellArg(namespace)}"`;
   cmd += addressFlag;
   return cmd;
 }
@@ -91,12 +99,12 @@ export function getQueryCommand(workflowId: string, queryType?: string, runId?: 
 export function getResetCommand(workflowId: string, eventId: number, runId?: string): string {
   const namespace = getCurrentNamespace();
   const addressFlag = getAddressFlag();
-  let cmd = `temporal workflow reset --workflow-id "${workflowId}"`;
+  let cmd = `temporal workflow reset --workflow-id "${escapeShellArg(workflowId)}"`;
   if (runId) {
-    cmd += ` --run-id "${runId}"`;
+    cmd += ` --run-id "${escapeShellArg(runId)}"`;
   }
   cmd += ` --event-id ${eventId}`;
-  cmd += ` --namespace "${namespace}"`;
+  cmd += ` --namespace "${escapeShellArg(namespace)}"`;
   cmd += addressFlag;
   return cmd;
 }
@@ -104,11 +112,11 @@ export function getResetCommand(workflowId: string, eventId: number, runId?: str
 export function getShowCommand(workflowId: string, runId?: string): string {
   const namespace = getCurrentNamespace();
   const addressFlag = getAddressFlag();
-  let cmd = `temporal workflow show --workflow-id "${workflowId}"`;
+  let cmd = `temporal workflow show --workflow-id "${escapeShellArg(workflowId)}"`;
   if (runId) {
-    cmd += ` --run-id "${runId}"`;
+    cmd += ` --run-id "${escapeShellArg(runId)}"`;
   }
-  cmd += ` --namespace "${namespace}"`;
+  cmd += ` --namespace "${escapeShellArg(namespace)}"`;
   cmd += addressFlag;
   return cmd;
 }
@@ -116,9 +124,9 @@ export function getShowCommand(workflowId: string, runId?: string): string {
 export function getListCommand(query?: string): string {
   const namespace = getCurrentNamespace();
   const addressFlag = getAddressFlag();
-  let cmd = `temporal workflow list --namespace "${namespace}"`;
+  let cmd = `temporal workflow list --namespace "${escapeShellArg(namespace)}"`;
   if (query) {
-    cmd += ` --query "${query}"`;
+    cmd += ` --query "${escapeShellArg(query)}"`;
   }
   cmd += addressFlag;
   return cmd;
