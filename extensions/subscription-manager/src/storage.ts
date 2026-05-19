@@ -24,7 +24,11 @@ export function useSubscriptions() {
 
     if (_cache === null) {
       LocalStorage.getItem<string>(STORAGE_KEY).then((raw) => {
-        _cache = raw ? (JSON.parse(raw) as Subscription[]) : [];
+        try {
+          _cache = raw ? (JSON.parse(raw) as Subscription[]) : [];
+        } catch {
+          _cache = [];
+        }
         setIsLoading(false);
         notify();
       });
