@@ -1,6 +1,6 @@
 # OWL Changelog
 
-## [Basic handling for missing keyboard layouts] - {PR_MERGE_DATE}
+## [Basic handling for missing keyboard layouts] - 2026-05-19
 
 - Added basic handling for missing keyboard layouts.
 
