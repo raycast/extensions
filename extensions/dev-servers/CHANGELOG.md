@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-19
 
 A keyboard-first dashboard for every dev server you have running. Auto-detects servers from any framework that uses `node_modules/.bin/` (Vite, Next.js, Astro, SvelteKit, Nuxt, Webpack, Parcel, Gatsby, Remix, Turbo, esbuild) plus the Bun runtime. Servers are grouped by project with favicons, uptime, framework, and runtime tags.
 
