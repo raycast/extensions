@@ -41,7 +41,8 @@ const METER_INTERVAL_MS = 500;
 const METER_WINDOW_SECONDS = 1;
 const WAV_HEADER_BYTES = 4096;
 const WAVE_FORMAT_EXTENSIBLE = 0xfffe;
-const TRANSCRIBE_TIMEOUT_MS = 15_000;
+const TRANSCRIBE_TIMEOUT_MS = 60_000;
+const TRANSCRIBE_TIMEOUT_SECONDS = TRANSCRIBE_TIMEOUT_MS / 1000;
 
 interface TranscribeResult {
   file: string;
@@ -693,7 +694,9 @@ async function runKeshaPlainTranscribe(
       proc.once("exit", (code) => resolve(code));
     });
     if (timedOut) {
-      throw new Error("kesha transcription timed out after 15 seconds.");
+      throw new Error(
+        `kesha transcription timed out after ${TRANSCRIBE_TIMEOUT_SECONDS} seconds.`,
+      );
     }
     if (signal?.aborted) {
       throw new Error("kesha transcription was cancelled.");
