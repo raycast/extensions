@@ -60,7 +60,7 @@ function NoteMenuBarItem({ note, openSeparately }: NoteMenuBarItemProps) {
     <MenuBarExtra.Item
       key={note.id}
       title={title}
-      icon="note"
+      icon="notes-icon.png"
       onAction={() => (openSeparately ? openNoteSeparately(note.id) : open(getOpenNoteURL(note.UUID)))}
     />
   );
