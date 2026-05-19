@@ -1,6 +1,6 @@
 # Gmail Changelog
 
-## [Fix Gmail browser URLs] - {PR_MERGE_DATE}
+## [Fix Gmail browser URLs] - 2026-05-19
 
 - Fixed Gmail browser links using an email address in the account selector.
 
