@@ -1,6 +1,6 @@
 # AI Provider Switch Changelog
 
-## [Hardened Provider Config Workflows] - {PR_MERGE_DATE}
+## [Hardened Provider Config Workflows] - 2026-05-19
 
 - Enhanced provider configuration workflow for better reliability
 - Improved error handling and validation

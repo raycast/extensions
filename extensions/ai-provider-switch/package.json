@@ -33,7 +33,6 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.15",
-    "@raycast/utils": "^2.2.4",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
@@ -41,7 +40,7 @@
     "@types/js-yaml": "^4.0.9",
     "@types/node": "22.14.1",
     "@types/react": "19.1.2",
-    "eslint": "^10.3.0",
+    "eslint": "^9.0.0",
     "prettier": "^3.5.3",
     "typescript": "^5.8.3"
   },

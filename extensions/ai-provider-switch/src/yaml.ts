@@ -35,7 +35,7 @@ function expandHome(filePath: string): string {
 }
 
 export function getProvidersPath(): string {
-  const prefs = getPreferenceValues<{ providersYamlPath?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const customPath = prefs.providersYamlPath?.trim();
   return expandHome(customPath || DEFAULT_PROVIDERS_PATH);
 }
