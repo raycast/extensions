@@ -75,12 +75,14 @@ export function GameItem({ app, isSelected }: Props) {
             />
           )}
           <Action.OpenInBrowser
-            title="View on Gg.deals"
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="View on GG.deals"
             url={`https://gg.deals/steam/app/${app.id}/`}
             shortcut={{ modifiers: [mod], key: "g" }}
           />
           <Action.OpenInBrowser
-            title="View on Steamdb"
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="View on SteamDB"
             url={`https://steamdb.info/app/${app.id}/charts/`}
             shortcut={{ modifiers: [mod], key: "d" }}
           />

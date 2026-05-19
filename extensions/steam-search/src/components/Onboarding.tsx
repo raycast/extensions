@@ -20,7 +20,8 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Get Steam Api Key"
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Get Steam API Key"
                 url="https://steamcommunity.com/dev/apikey"
               />
               <Action
@@ -39,7 +40,8 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Find My Steam Id"
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Find My Steam ID"
                 url="https://steamid.io"
               />
               <Action
@@ -58,7 +60,8 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser
-                title="Get Gg.deals Api Key"
+                // eslint-disable-next-line @raycast/prefer-title-case
+                title="Get Gg.deals API Key"
                 url="https://gg.deals/api/"
               />
               <Action
