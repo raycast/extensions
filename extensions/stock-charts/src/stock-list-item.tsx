@@ -31,13 +31,11 @@ export default function StockListItem({
     : undefined;
 
   const logoUrl = stockLogoUrl(quote.symbol);
-  const icon: Image.ImageLike = logoUrl
-    ? {
-        source: logoUrl,
-        mask: Image.Mask.RoundedRectangle,
-        fallback: arrow.source,
-      }
-    : arrow;
+  const icon: Image.ImageLike = {
+    source: logoUrl,
+    mask: Image.Mask.RoundedRectangle,
+    fallback: arrow.source,
+  };
 
   const accessories: List.Item.Accessory[] = [];
   if (stateAccessory) accessories.push(stateAccessory);

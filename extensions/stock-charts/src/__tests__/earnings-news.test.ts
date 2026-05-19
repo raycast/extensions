@@ -52,6 +52,10 @@ describe("generateIcs", () => {
     expect(ics).toContain("SUMMARY:AAPL Earnings Call");
     expect(ics).toContain("DESCRIPTION:Earnings announcement for Apple Inc.");
     expect(ics).toContain("DTSTART:");
+    expect(ics).toContain("UID:AAPL-earnings-1749744000@raycast-stock-charts");
+    expect(ics).toContain("DTSTAMP:");
+    expect(ics).toContain("DTEND:");
+    expect(ics.endsWith("\r\n")).toBe(true);
   });
 
   it("uses CRLF line endings per RFC 5545", () => {

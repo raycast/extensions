@@ -153,6 +153,10 @@ export async function buildChartUrl(
     }),
   });
 
+  if (!res.ok) {
+    throw new Error(`QuickChart POST failed: ${res.status}`);
+  }
+
   const body = (await res.json()) as { url: string };
   return body.url;
 }

@@ -117,18 +117,27 @@ export function generateIcs(
 ): string {
   const date = new Date(timestamp * 1000);
   const pad = (n: number) => String(n).padStart(2, "0");
-  const dtStart = `${date.getUTCFullYear()}${pad(date.getUTCMonth() + 1)}${pad(date.getUTCDate())}T${pad(date.getUTCHours())}${pad(date.getUTCMinutes())}${pad(date.getUTCSeconds())}Z`;
-  return [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//Raycast Stock Charts//EN",
-    "BEGIN:VEVENT",
-    `DTSTART:${dtStart}`,
-    `SUMMARY:${symbol} Earnings Call`,
-    `DESCRIPTION:Earnings announcement for ${companyName}`,
-    "END:VEVENT",
-    "END:VCALENDAR",
-  ].join("\r\n");
+  const toIcal = (d: Date) =>
+    `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
+  const dtStart = toIcal(date);
+  const dtstamp = toIcal(new Date());
+  const uid = `${symbol}-earnings-${timestamp}@raycast-stock-charts`;
+  return (
+    [
+      "BEGIN:VCALENDAR",
+      "VERSION:2.0",
+      "PRODID:-//Raycast Stock Charts//EN",
+      "BEGIN:VEVENT",
+      `UID:${uid}`,
+      `DTSTAMP:${dtstamp}`,
+      `DTSTART:${dtStart}`,
+      `DTEND:${dtStart}`,
+      `SUMMARY:${symbol} Earnings Call`,
+      `DESCRIPTION:Earnings announcement for ${companyName}`,
+      "END:VEVENT",
+      "END:VCALENDAR",
+    ].join("\r\n") + "\r\n"
+  );
 }
 
 export function stockLogoUrl(symbol: string): string {
