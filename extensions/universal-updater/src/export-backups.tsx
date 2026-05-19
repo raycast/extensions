@@ -90,7 +90,7 @@ export async function createBackup(): Promise<{
     }
   }
 
-  const timestamp = new Date().toISOString().replaceAll(/[:.]/, "-");
+  const timestamp = new Date().toISOString().replaceAll(/[:.]/g, "-");
   const filename = `universal-backup-${timestamp}.json`;
   const jsonContent = JSON.stringify(backup, null, 2);
 
