@@ -96,10 +96,6 @@ export default function RemoteModelList({
       new Set([...existingIds, ...importedModels.map((m) => m.id)]),
     );
     setSelected(new Set());
-    showToast({
-      style: Toast.Style.Success,
-      title: `Added ${importedModels.length} model(s)`,
-    });
     return true;
   }
 

@@ -1,11 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Form,
-  showToast,
-  Toast,
-  useNavigation,
-} from "@raycast/api";
+import { Action, ActionPanel, Form, useNavigation } from "@raycast/api";
 import { useState } from "react";
 import { Model, Abilities } from "./types";
 import { ABILITY_TEMPLATES, DEFAULT_CONTEXT } from "./constants";
@@ -123,10 +116,6 @@ export default function ModelForm({
     const saved = await onSave(result);
     if (!saved) return;
 
-    showToast({
-      style: Toast.Style.Success,
-      title: isEditing ? "Model Updated" : "Model Added",
-    });
     pop();
   }
 
