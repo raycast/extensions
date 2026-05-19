@@ -1,5 +1,5 @@
 import { LocalStorage } from "@raycast/api";
-import { execFile, spawn } from "node:child_process";
+import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 
@@ -73,37 +73,7 @@ export async function connectToWifi(network: WifiNetwork): Promise<void> {
     return;
   }
 
-  await runNetworkSetupWithPasswordFromStdin([...args, "-"], network.password);
-}
-
-async function runNetworkSetupWithPasswordFromStdin(
-  args: string[],
-  password: string,
-): Promise<void> {
-  await new Promise<void>((resolve, reject) => {
-    const proc = spawn("/usr/sbin/networksetup", args, {
-      stdio: ["pipe", "pipe", "pipe"],
-    });
-
-    let stderr = "";
-    proc.stderr?.on("data", (chunk: Buffer) => {
-      stderr += chunk.toString();
-    });
-
-    proc.on("error", reject);
-    proc.on("close", (code) => {
-      if (code === 0) {
-        resolve();
-        return;
-      }
-
-      reject(
-        new Error(stderr.trim() || `networksetup exited with code ${code}`),
-      );
-    });
-
-    proc.stdin.end(`${password}\n`);
-  });
+  await execFileAsync("/usr/sbin/networksetup", [...args, network.password]);
 }
 
 function classifyQrData(data: string): HistoryEntryType {
