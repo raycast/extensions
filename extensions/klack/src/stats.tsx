@@ -46,7 +46,16 @@ export default function Command() {
   const { data, isLoading, error, revalidate } = useCachedPromise(getStats, [], { keepPreviousData: true });
 
   useEffect(() => {
-    const id = setInterval(revalidate, POLL_INTERVAL_MS);
+    let inflight = false;
+    const id = setInterval(async () => {
+      if (inflight) return;
+      inflight = true;
+      try {
+        await revalidate();
+      } finally {
+        inflight = false;
+      }
+    }, POLL_INTERVAL_MS);
     return () => clearInterval(id);
   }, [revalidate]);
 

@@ -10,6 +10,6 @@ export default async function tool(input: Input): Promise<string> {
   if ((await klack.currentVolume()) === target) {
     return `Volume was already at ${target}%.`;
   }
-  const applied = await klack.setVolume(input.volume);
+  const applied = await klack.setVolume(target);
   return `Volume set to ${applied}%.`;
 }
