@@ -444,35 +444,46 @@ export async function upgradeMas(): Promise<string> {
 // ─── yarn (global) ────────────────────────────────────────────────────────────
 
 export async function checkYarn(): Promise<OutdatedPackage[]> {
-  try {
-    const raw = await run("yarn global outdated --json");
-    if (!raw) return [];
-    const lines = raw.split("\n");
-    const jsonLine = lines.find((line) => line.startsWith("{"));
-    if (!jsonLine) return [];
-    const json = JSON.parse(jsonLine);
-    return Object.entries(json).map(([name, info]: [string, any]) => ({
-      name,
-      current: info.current ?? "?",
-      latest: info.latest ?? "?",
-      website: getPackageUrl("npm", name),
-      changelog: getChangelogUrl("npm", name),
-    }));
-  } catch (err: any) {
-    const stdout = err?.stdout?.trim() ?? "";
-    if (!stdout) return [];
+  const parseYarn = (out: string): OutdatedPackage[] => {
+    if (!out) return [];
+    const tableLine = out
+      .split("\n")
+      .find((line) => line.includes('"type":"table"'));
+    if (!tableLine) return [];
     try {
-      const json = JSON.parse(stdout);
-      return Object.entries(json).map(([name, info]: [string, any]) => ({
-        name,
-        current: info.current ?? "?",
-        latest: info.latest ?? "?",
-        website: getPackageUrl("npm", name),
-        changelog: getChangelogUrl("npm", name),
-      }));
+      const json = JSON.parse(tableLine);
+      const head: string[] = json.data?.head || [];
+      const body: string[][] = json.data?.body || [];
+
+      const nameIdx = head.findIndex((h) => h.toLowerCase() === "package");
+      const currentIdx = head.findIndex((h) => h.toLowerCase() === "current");
+      const latestIdx = head.findIndex((h) => h.toLowerCase() === "latest");
+
+      if (nameIdx === -1) return [];
+
+      return body.map((row) => {
+        const name = row[nameIdx];
+        const current = currentIdx !== -1 ? row[currentIdx] : "?";
+        const latest = latestIdx !== -1 ? row[latestIdx] : "?";
+        return {
+          name,
+          current,
+          latest,
+          website: getPackageUrl("npm", name),
+          changelog: getChangelogUrl("npm", name),
+        };
+      });
     } catch {
       return [];
     }
+  };
+
+  try {
+    const raw = await run("yarn global outdated --json");
+    return parseYarn(raw);
+  } catch (err: any) {
+    const stdout = err?.stdout?.trim() ?? "";
+    return parseYarn(stdout);
   }
 }
 
