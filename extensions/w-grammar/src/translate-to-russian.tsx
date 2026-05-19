@@ -2,11 +2,11 @@ import { processSelectedText } from "./utils";
 
 export default async function Command() {
   await processSelectedText({
-    loadingTitle: "Перевожу на русский...",
-    successTitle: "Переведено на русский",
-    emptyTitle: "Gemini не вернул текст",
+    loadingTitle: "Translating to Russian...",
+    successTitle: "Translated to Russian",
+    emptyTitle: "Gemini did not return any text",
     temperature: 0,
     prompt:
-      "Переведи текст на русский язык. Сохрани смысл, тон, форматирование, абзацы и переносы строк. Если в тексте есть имена, названия брендов, термины, ссылки, email-адреса или код — не искажай их. Не добавляй объяснений, комментариев, примечаний, заголовков или markdown. Верни только перевод.",
+      "Translate the text into Russian. Preserve the meaning, tone, formatting, paragraphs, and line breaks. Do not distort names, brand names, terms, links, email addresses, numbers, or code. Do not add explanations, comments, notes, headings, labels, or markdown. Return only the Russian translation.",
   });
 }

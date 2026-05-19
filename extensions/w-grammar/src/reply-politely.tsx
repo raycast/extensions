@@ -52,8 +52,8 @@ export default function Command() {
     if (!selectedMessage.trim()) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Не удалось получить выделенное сообщение",
-        message: "Сначала выдели сообщение, на которое хочешь ответить",
+        title: "Could not get selected message",
+        message: "Select the message you want to reply to first",
       });
 
       return;
@@ -62,7 +62,7 @@ export default function Command() {
     if (!values.intent.trim()) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Напиши, что примерно хочешь ответить",
+        title: "Write your rough reply idea first",
       });
 
       return;
@@ -77,7 +77,7 @@ export default function Command() {
     try {
       await showToast({
         style: Toast.Style.Animated,
-        title: "Пишу ответ...",
+        title: "Writing reply...",
       });
 
       const prompt = `You are a polite reply writing assistant.
@@ -119,18 +119,18 @@ ${values.intent}
       if (!reply) {
         await showToast({
           style: Toast.Style.Failure,
-          title: "Gemini не вернул ответ",
+          title: "Gemini did not return a reply",
         });
 
         return;
       }
 
       await Clipboard.paste(reply);
-      await showHUD("Ответ вставлен");
+      await showHUD("Reply inserted");
     } catch (error) {
       await showToast({
         style: Toast.Style.Failure,
-        title: "Ошибка",
+        title: "Error",
         message: getErrorMessage(error),
       });
     }
@@ -147,19 +147,19 @@ ${values.intent}
     >
       <Form.TextArea
         id="intent"
-        title="Что ответить"
-        placeholder="Например: скажи, что я смогу отправить это завтра утром"
+        title="Reply Idea"
+        placeholder="For example: say that I can send it tomorrow morning"
       />
 
-      <Form.Dropdown id="tone" title="Тон" defaultValue="polite">
+      <Form.Dropdown id="tone" title="Tone" defaultValue="polite">
         <Form.Dropdown.Item value="polite" title="Polite" />
         <Form.Dropdown.Item value="friendly" title="Friendly" />
         <Form.Dropdown.Item value="professional" title="Professional" />
         <Form.Dropdown.Item value="warm" title="Warm" />
-        <Form.Dropdown.Item value="firm" title="Firm but polite" />
+        <Form.Dropdown.Item value="firm" title="Firm but Polite" />
       </Form.Dropdown>
 
-      <Form.Dropdown id="length" title="Длина" defaultValue="normal">
+      <Form.Dropdown id="length" title="Length" defaultValue="normal">
         <Form.Dropdown.Item value="very short" title="Very Short" />
         <Form.Dropdown.Item value="short" title="Short" />
         <Form.Dropdown.Item value="normal" title="Normal" />
@@ -169,13 +169,13 @@ ${values.intent}
       <Form.Separator />
 
       <Form.Description
-        title="Выделенное сообщение"
+        title="Selected Message"
         text={
           selectedMessage.trim()
             ? selectedMessage.length > 800
-              ? selectedMessage.slice(0, 800) + "..."
+              ? `${selectedMessage.slice(0, 800)}...`
               : selectedMessage
-            : "Сообщение не найдено. Сначала выдели текст, потом запусти команду."
+            : "No message found. Select text first, then run the command."
         }
       />
     </Form>

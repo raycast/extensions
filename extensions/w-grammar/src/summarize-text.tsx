@@ -2,11 +2,11 @@ import { processSelectedText } from "./utils";
 
 export default async function Command() {
   await processSelectedText({
-    loadingTitle: "Сокращаю текст...",
-    successTitle: "Текст сокращён",
-    emptyTitle: "Gemini не вернул текст",
+    loadingTitle: "Summarizing text...",
+    successTitle: "Text summarized",
+    emptyTitle: "Gemini did not return any text",
     temperature: 0,
     prompt:
-      "Сильно сократи текст. Оставь только главное, убери повторы, лишние детали и второстепенные формулировки. Сохрани исходный язык и основной смысл. Итоговый текст должен быть значительно короче исходного. Верни только сокращённый текст без объяснений.",
+      "Strongly summarize the text. Keep only the main points, remove repetition, unnecessary details, and secondary wording. Preserve the original language and main meaning. The final text must be significantly shorter than the original. Return only the summarized text without explanations.",
   });
 }

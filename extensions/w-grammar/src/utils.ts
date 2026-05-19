@@ -41,15 +41,15 @@ export async function processSelectedText(options: {
   } catch {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Не удалось получить выделенный текст",
-      message: "Проверь доступ Raycast в Privacy & Security → Accessibility",
+      title: "Could not get selected text",
+      message: "Check Raycast access in Privacy & Security → Accessibility",
     });
 
     return;
   }
 
   if (!selectedText.trim()) {
-    await showHUD("Сначала выдели текст");
+    await showHUD("Select some text first");
     return;
   }
 
@@ -90,7 +90,7 @@ ${selectedText}
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
-      title: "Ошибка",
+      title: "Error",
       message: getErrorMessage(error),
     });
   }
