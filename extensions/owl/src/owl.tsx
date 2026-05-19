@@ -48,7 +48,6 @@ async function alertLoadingError(keyboard: string) {
     title: "Could not load keyboards",
     message: `Couldn't find the keyboard for ${keyboard}, it may not be supported.`,
     icon: Icon.Warning,
-    rememberUserChoice: true,
   });
 }
 
