@@ -54,7 +54,11 @@ export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps)
                 const text = link.text;
                 if (url && text) {
                   return (
-                    <Detail.Metadata.TagList.Item key={link.id} text={truncate(text)} onAction={async () => await open(url)} />
+                    <Detail.Metadata.TagList.Item
+                      key={link.id}
+                      text={truncate(text)}
+                      onAction={async () => await open(url)}
+                    />
                   );
                 }
               })}

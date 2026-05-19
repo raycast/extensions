@@ -176,7 +176,10 @@ export const useNotes = () => {
     };
   });
 
-  const [activeNotes, deletedNotes] = partition(notesWithAdditionalFields, (note) => note.folder !== "Recently Deleted");
+  const [activeNotes, deletedNotes] = partition(
+    notesWithAdditionalFields,
+    (note) => note.folder !== "Recently Deleted",
+  );
   const [pinnedNotes, unpinnedNotes] = partition(activeNotes, (note) => note.pinned);
 
   return {

@@ -23,7 +23,8 @@ Follow these instructions:
 - Don't directly address the reader. Write the note from an objective point of view.
 - Use the same language as the original text.
 ${instructions ? `- ${instructions}` : ""}
-`);
+`,
+    );
     await createNote(result);
   } catch (error) {
     await showFailureToast(error, { title: "Could not create a new note." });

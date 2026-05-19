@@ -16,20 +16,22 @@ export default function Command() {
   const [searchText, setSearchText] = useState<string>("");
 
   const filteredNotes = useMemo(() => {
-    return [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? []), ...(data?.deletedNotes ?? [])].filter((note) => {
-      const chineseMatch = (text: string | null) =>
-        text && /[\u4e00-\u9fa5]/.test(text) ? match(text, searchText) !== null : false;
-      return (
-        chineseMatch(note.title) ||
-        chineseMatch(note.snippet) ||
-        chineseMatch(note.folder) ||
-        note.tags.some((tag) => chineseMatch(tag.text)) ||
-        note.title.toLowerCase().includes(searchText.toLowerCase()) ||
-        note.snippet?.toLowerCase().includes(searchText.toLowerCase()) ||
-        note.folder.toLowerCase().includes(searchText.toLowerCase()) ||
-        note.tags.some((tag) => tag.text?.toLowerCase().includes(searchText.toLowerCase()))
-      );
-    });
+    return [...(data?.pinnedNotes ?? []), ...(data?.unpinnedNotes ?? []), ...(data?.deletedNotes ?? [])].filter(
+      (note) => {
+        const chineseMatch = (text: string | null) =>
+          text && /[\u4e00-\u9fa5]/.test(text) ? match(text, searchText) !== null : false;
+        return (
+          chineseMatch(note.title) ||
+          chineseMatch(note.snippet) ||
+          chineseMatch(note.folder) ||
+          note.tags.some((tag) => chineseMatch(tag.text)) ||
+          note.title.toLowerCase().includes(searchText.toLowerCase()) ||
+          note.snippet?.toLowerCase().includes(searchText.toLowerCase()) ||
+          note.folder.toLowerCase().includes(searchText.toLowerCase()) ||
+          note.tags.some((tag) => tag.text?.toLowerCase().includes(searchText.toLowerCase()))
+        );
+      },
+    );
   }, [searchText, data]);
 
   if (permissionView) {
