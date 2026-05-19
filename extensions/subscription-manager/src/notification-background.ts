@@ -1,6 +1,6 @@
 import { LocalStorage, getPreferenceValues } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { Preferences, Subscription, SubscriptionStatus } from "./types";
+import { Subscription, SubscriptionStatus } from "./types";
 import { formatCurrency, getNextBillingDate } from "./utils";
 
 const STORAGE_KEY = "subscriptions-v1";

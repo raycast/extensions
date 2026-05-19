@@ -22,6 +22,7 @@ import {
   PRESET_SERVICES,
   formatCurrency,
   getFaviconUrl,
+  getNextBillingDate,
 } from "./utils";
 
 interface EditFormValues {
@@ -212,12 +213,10 @@ export function SubscriptionDetail({
   const prevId = currentIndex > 0 ? allIds[currentIndex - 1] : null;
   const nextId = currentIndex < allIds.length - 1 ? allIds[currentIndex + 1] : null;
 
-  const nextBilling = (() => {
-    const today = new Date();
-    const next = new Date(today.getFullYear(), today.getMonth(), sub.billingDay);
-    if (next <= today) next.setMonth(next.getMonth() + 1);
-    return next.toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" });
-  })();
+  const nextBillingDate = getNextBillingDate(sub);
+  const nextBilling = nextBillingDate
+    ? nextBillingDate.toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })
+    : "—";
 
   const markdown = `
 # ${sub.name}

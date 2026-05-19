@@ -5,7 +5,6 @@ import { AddSubscriptionForm } from "./add-subscription";
 import { SubscriptionDetail } from "./subscription-detail";
 import { SubscriptionList } from "./subscription-list";
 import { useSubscriptions } from "./storage";
-import { Preferences } from "./types";
 import { buildCalendarMarkdown, formatCurrency, formatCycle, getMonthSubscriptions, getMonthlyTotal } from "./utils";
 
 interface RatesResponse {

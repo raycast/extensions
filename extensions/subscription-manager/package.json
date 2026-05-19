@@ -50,7 +50,8 @@
       "title": "Subscription Notifications",
       "description": "Sends reminders before your subscriptions bill",
       "mode": "no-view",
-      "interval": "5m"
+      "interval": "5m",
+      "platforms": ["macOS"]
     },
     {
       "name": "menubar",

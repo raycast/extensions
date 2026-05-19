@@ -1,6 +1,6 @@
 import { getPreferenceValues } from "@raycast/api";
 import { randomUUID } from "crypto";
-import { BillingCycle, Preferences, Subscription } from "./types";
+import { BillingCycle, Subscription } from "./types";
 
 export function generateId(): string {
   return randomUUID();
@@ -14,7 +14,7 @@ export function getFaviconUrl(name: string): string {
 export function formatCurrency(amount: number, currency: string): string {
   const { roundingEnabled, abbreviateNumbers } = getPreferenceValues<Preferences>();
   const useCompact = abbreviateNumbers && amount >= 10000;
-  return new Intl.NumberFormat("en-IN", {
+  return new Intl.NumberFormat(undefined, {
     style: "currency",
     currency,
     maximumFractionDigits: roundingEnabled ? 0 : 2,

@@ -2,7 +2,7 @@ import { Action, ActionPanel, Color, Detail, Icon, getPreferenceValues } from "@
 import { useFetch } from "@raycast/utils";
 import { useState } from "react";
 import { useSubscriptions } from "./storage";
-import { Preferences, Subscription } from "./types";
+import { Subscription } from "./types";
 import { formatCurrency, getMonthlyEquivalent, getMonthlyTotal, getNextBillingDate } from "./utils";
 
 type GroupBy = "category" | "cycle" | "list";

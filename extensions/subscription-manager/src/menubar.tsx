@@ -1,7 +1,7 @@
 import { Icon, LaunchType, MenuBarExtra, getPreferenceValues, launchCommand } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useSubscriptions } from "./storage";
-import { Preferences, Subscription } from "./types";
+import { Subscription } from "./types";
 import { formatCurrency, formatCycle, getMonthlyTotal, getSubscriptionsForDay } from "./utils";
 
 interface RatesResponse {
@@ -10,7 +10,7 @@ interface RatesResponse {
 
 export default function MenubarCommand() {
   const { subscriptions, isLoading } = useSubscriptions();
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.Menubar>();
   const today = new Date();
   const month = today.getMonth();
   const year = today.getFullYear();

@@ -1,18 +1,6 @@
 export type BillingCycle = "monthly" | "yearly" | "weekly" | "quarterly" | "half-yearly";
 export type SubscriptionStatus = "active" | "paused";
 
-export interface Preferences {
-  primaryCurrency: string;
-  roundingEnabled: boolean;
-  abbreviateNumbers: boolean;
-  firstReminderDays: string;
-  firstReminderTime: string;
-  secondReminderDays: string;
-  secondReminderTime: string;
-  showTotalIn: "title" | "dropdown";
-  dropdownContent: "full-month" | "upcoming" | "minimal";
-}
-
 export interface CalendarDay {
   date: Date;
   dayNumber: number;
