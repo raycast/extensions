@@ -621,20 +621,29 @@ export async function upgradeComposer(): Promise<string> {
 export async function installPackage(
   ecosystem: EcosystemId,
   packageName: string,
+  options?: { userInstall?: boolean; globalInstall?: boolean },
 ): Promise<string> {
   const nameArg = quoteShellArg(packageName);
   switch (ecosystem) {
     case "brew":
       return run(`brew install ${nameArg}`);
     case "npm":
-      return run(`npm install -g ${nameArg}`);
+      return run(
+        `npm install ${options?.globalInstall !== false ? "-g " : ""}${nameArg}`,
+      );
     case "yarn":
-      return run(`yarn global add ${nameArg}`);
+      return run(
+        `yarn ${options?.globalInstall !== false ? "global " : ""}add ${nameArg}`,
+      );
     case "pnpm":
-      return run(`pnpm add -g ${nameArg}`);
+      return run(
+        `pnpm add ${options?.globalInstall !== false ? "-g " : ""}${nameArg}`,
+      );
     case "pip": {
       const pipCmd = await resolvePipCmd();
-      return run(`${pipCmd} install ${nameArg}`);
+      return run(
+        `${pipCmd} install ${options?.userInstall ? "--user " : ""}${nameArg}`,
+      );
     }
     case "pipx":
       return run(`pipx install ${nameArg}`);

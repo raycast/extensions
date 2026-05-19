@@ -641,18 +641,19 @@ function InstallForm(props: { def: EcosystemDef; onDone: () => void }) {
               const userInstall = (values as any).userInstall as
                 | boolean
                 | undefined;
+              const globalInstall = (values as any).globalInstall as
+                | boolean
+                | undefined;
 
               const toast = await showToast({
                 style: Toast.Style.Animated,
                 title: `Installing ${pkg}…`,
               });
               try {
-                // For pip with --user flag
-                if (showUserInstallOption && userInstall && def.id === "pip") {
-                  // Fallback: just install normally (extended install options in ecosystems.ts)
-                }
-
-                await installPackage(def.id, pkg);
+                await installPackage(def.id, pkg, {
+                  userInstall,
+                  globalInstall,
+                });
                 toast.style = Toast.Style.Success;
                 toast.title = `Installed ${pkg}`;
                 onDone();
