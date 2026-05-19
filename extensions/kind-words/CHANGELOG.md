@@ -1,6 +1,6 @@
 # Kind Words Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-19
 
 - Random Compliment: full-list browse with random preselect, tone filter, ⏎ to copy.
 - Quick Compliment: no-view command that copies a random compliment to the clipboard.
