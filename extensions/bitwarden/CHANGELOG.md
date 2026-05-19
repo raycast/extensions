@@ -1,6 +1,6 @@
 # Bitwarden Changelog
 
-## [Update Contributors] - {PR_MERGE_DATE}
+## [Update Contributors] - 2026-05-19
 
 - Update contributors
 
