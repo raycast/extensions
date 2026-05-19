@@ -516,34 +516,61 @@ export async function upgradePnpm(): Promise<string> {
 
 export async function checkGo(): Promise<OutdatedPackage[]> {
   try {
-    const raw = await run("go list -m -u -json all 2>/dev/null");
-    if (!raw) return [];
-    const modules: Array<{
-      Path: string;
-      Version?: string;
-      Update?: { Version: string };
-    }> = [];
-    const jsonBlocks = raw.match(/\{[^}]*\}/g);
-    if (!jsonBlocks) return [];
+    const gopathRaw = await run("go env GOPATH 2>/dev/null || true");
+    const gopath = gopathRaw.trim() || `${homedir()}/go`;
+    const binDir = `${gopath}/bin`;
 
-    for (const block of jsonBlocks) {
+    const rawFiles = await run(
+      `ls -1 ${quoteShellArg(binDir)} 2>/dev/null || true`,
+    );
+    const files = rawFiles.split("\n").filter(Boolean);
+    if (files.length === 0) return [];
+
+    const outdated: OutdatedPackage[] = [];
+
+    for (const file of files) {
       try {
-        const parsed = JSON.parse(block);
-        if (parsed.Update && parsed.Path && parsed.Version) {
-          modules.push(parsed);
+        const binPath = `${binDir}/${file}`;
+        const versionRaw = await run(
+          `go version -m ${quoteShellArg(binPath)} 2>/dev/null || true`,
+        );
+        const pathMatch = versionRaw.match(/^\s*path\s+([^\s]+)/m);
+        const modMatch = versionRaw.match(/^\s*mod\s+[^\s]+\s+([^\s]+)/m);
+
+        if (pathMatch && modMatch) {
+          const modPath = pathMatch[1];
+          const current = modMatch[1];
+
+          if (current === "(devel)") continue;
+
+          const latestRaw = await run(
+            `GO111MODULE=on go list -m -json ${quoteShellArg(`${modPath}@latest`)} 2>/dev/null || true`,
+          );
+          if (latestRaw) {
+            try {
+              const latestJson = JSON.parse(latestRaw);
+              const latest = latestJson.Version;
+
+              if (latest && current !== latest) {
+                outdated.push({
+                  name: modPath,
+                  current,
+                  latest,
+                  website: getPackageUrl("go", modPath),
+                  changelog: getChangelogUrl("go", modPath),
+                });
+              }
+            } catch {
+              continue;
+            }
+          }
         }
       } catch {
         continue;
       }
     }
 
-    return modules.map((mod) => ({
-      name: mod.Path,
-      current: mod.Version ?? "?",
-      latest: mod.Update?.Version ?? "?",
-      website: getPackageUrl("go", mod.Path),
-      changelog: getChangelogUrl("go", mod.Path),
-    }));
+    return outdated;
   } catch {
     throw new Error("go not installed. Run: brew install go");
   }
