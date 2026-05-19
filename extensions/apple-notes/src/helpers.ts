@@ -27,7 +27,7 @@ export function truncate(str: string, maxLength = 30): string {
 }
 
 export function getOpenNoteURL(uuid: string) {
-  const isSonomaOrLater = parseInt(os.release().split(".")[0]) >= 23;
+  const isSonomaOrLater = parseInt(os.release().split(".")[0], 10) >= 23;
   return `${isSonomaOrLater ? "applenotes" : "notes"}://showNote?identifier=${uuid}`;
 }
 
