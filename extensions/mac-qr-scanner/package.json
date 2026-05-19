@@ -49,8 +49,8 @@
   },
   "scripts": {
     "build-swift": "swiftc swift/CaptureFrame.swift -O -target arm64-apple-macosx12.0 -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreImage -framework ImageIO -o assets/capture-frame-arm64 && swiftc swift/CaptureFrame.swift -O -target x86_64-apple-macosx12.0 -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreImage -framework ImageIO -o assets/capture-frame-x86_64 && lipo -create -output assets/capture-frame assets/capture-frame-arm64 assets/capture-frame-x86_64 && rm assets/capture-frame-arm64 assets/capture-frame-x86_64",
-    "build": "npm run build-swift && ray build",
-    "dev": "npm run build-swift && ray develop",
+    "build": "ray build",
+    "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
     "test": "vitest run",
