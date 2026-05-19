@@ -1,0 +1,63 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rewrite",
+  "title": "Rewrite",
+  "description": "Select any text and transform it in-place using custom AI actions.",
+  "version": "1.0.0",
+  "icon": "icon.png",
+  "author": "binaryblitz10",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "configure-model",
+      "title": "Configure AI Model",
+      "subtitle": "Rewrite",
+      "description": "Fetch and select models for your provider",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "add-custom-action",
+      "title": "Add Custom Action",
+      "subtitle": "Rewrite",
+      "description": "Create a custom AI prompt action",
+      "mode": "view",
+      "icon": "icon.png"
+    },
+    {
+      "name": "run-action",
+      "title": "Run Action",
+      "subtitle": "Rewrite",
+      "description": "Run a saved custom AI action",
+      "mode": "view",
+      "icon": "icon.png"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^1.10.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.10.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^8.57.1",
+    "prettier": "^3.3.3",
+    "typescript": "^5.3.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray dev",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
