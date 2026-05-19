@@ -1,7 +1,9 @@
 import {
   Action,
   ActionPanel,
+  Alert,
   Clipboard,
+  confirmAlert,
   environment,
   getSelectedText,
   Icon,
@@ -33,17 +35,40 @@ type LaunchContext = {
   callbackLaunchOptions?: LaunchOptions;
 };
 
+function tryLoadMapping(keyboard: string): null | Mapping {
+  try {
+    return JSON.parse(readFileSync(`${environment.assetsPath}/keyboards/json/${keyboard}.json`, "utf-8"));
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    return null;
+  }
+}
+
+async function alertLoadingError(keyboard: string) {
+  return confirmAlert({
+    title: "Could not load keyboards",
+    message: `Couldn't find the keyboard for ${keyboard}, it may not be supported.`,
+    primaryAction: {
+      title: "OK",
+      style: Alert.ActionStyle.Default,
+    },
+    icon: Icon.Warning,
+    rememberUserChoice: true,
+  });
+}
+
 async function runOWL(
   owl: OWL,
   pushHistory: UseOWLs["pushHistory"],
   callbackLaunchOptions?: LaunchContext["callbackLaunchOptions"],
 ) {
-  const mappingFrom: Mapping = JSON.parse(
-    readFileSync(`${environment.assetsPath}/keyboards/json/${owl.from}.json`, "utf-8"),
-  );
-  const mappingTo: Mapping = JSON.parse(
-    readFileSync(`${environment.assetsPath}/keyboards/json/${owl.to}.json`, "utf-8"),
-  );
+  const mappingFrom = tryLoadMapping(owl.from);
+  const mappingTo = tryLoadMapping(owl.to);
+
+  if (mappingFrom === null || mappingTo === null) {
+    await alertLoadingError(mappingFrom === null ? owl.from : owl.to);
+    return;
+  }
 
   const characterToIndex: Record<string, string> = Object.entries(mappingFrom).reduce(
     (accumulator, [index, { lower, upper }]) => ({
