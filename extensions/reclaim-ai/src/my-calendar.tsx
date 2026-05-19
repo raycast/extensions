@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import { MyCalendarEventListSection } from "./components/MyCalendarEventListSection";
 import { withRAIErrorBoundary } from "./components/RAIErrorBoundary";
 import { useEvents } from "./hooks/useEvent";
+import { useUser } from "./hooks/useUser";
 import { Event } from "./types/event";
 
 type EventSection = { section: string; sectionTitle: string; events: Event[] };
@@ -13,6 +14,9 @@ type EventSection = { section: string; sectionTitle: string; events: Event[] };
 function Command() {
   const [searchText, setSearchText] = useState("");
   const now = new Date();
+
+  const { currentUser } = useUser();
+  const showDeclinedEvents = !!currentUser?.settings.showDeclinedEvents;
 
   const { events, isLoading } = useEvents({
     start: startOfDay(now),
@@ -25,11 +29,15 @@ function Command() {
     const today = startOfDay(now);
     const tomorrow = startOfDay(addDays(now, 1));
 
+    const visibleEvents = showDeclinedEvents
+      ? events
+      : events.filter((event) => event.rsvpStatus !== "Declined");
+
     const eventSectionsUnfiltered: EventSection[] = [
       {
         section: "NOW",
         sectionTitle: "Now",
-        events: events
+        events: visibleEvents
           .filter((event) => {
             const start = new Date(event.eventStart);
             const end = new Date(event.eventEnd);
@@ -42,7 +50,7 @@ function Command() {
       {
         section: "TODAY",
         sectionTitle: "Today",
-        events: events
+        events: visibleEvents
           .filter((event) => {
             const start = new Date(event.eventStart);
             return isAfter(start, now) && isBefore(start, endOfDay(now));
@@ -54,7 +62,7 @@ function Command() {
       {
         section: "EARLIER_TODAY",
         sectionTitle: "Earlier today",
-        events: events
+        events: visibleEvents
           .filter((event) => {
             const end = new Date(event.eventEnd);
             const start = new Date(event.eventStart);
@@ -67,7 +75,7 @@ function Command() {
       {
         section: "TOMORROW",
         sectionTitle: "Tomorrow",
-        events: events
+        events: visibleEvents
           .filter((event) => {
             const start = new Date(event.eventStart);
             return isWithinInterval(start, { start: tomorrow, end: endOfDay(tomorrow) });
@@ -79,7 +87,7 @@ function Command() {
     ];
 
     return eventSectionsUnfiltered.filter((event) => event.events.length > 0);
-  }, [events]);
+  }, [events, showDeclinedEvents]);
 
   return (
     <List

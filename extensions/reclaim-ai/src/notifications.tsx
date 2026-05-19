@@ -80,23 +80,27 @@ function Command() {
     return !!currentUser?.settings.showDeclinedEvents;
   }, [currentUser]);
 
+  const visibleEvents = useMemo(() => {
+    return showDeclinedEvents
+      ? events
+      : events?.filter((event) => event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded");
+  }, [events, showDeclinedEvents]);
+
   const eventSections = useMemo<EventSection[]>(() => {
-    if (!events) return [];
+    if (!visibleEvents) return [];
 
     const now = new Date();
     const today = startOfDay(now);
+
+    const nonBufferEvents = visibleEvents.filter((event) => {
+      return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
+    });
 
     const eventSectionsUnfiltered: EventSection[] = [
       {
         section: "NOW",
         sectionTitle: "Now",
-        events: events
-          .filter((event) => {
-            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
-          })
-          .filter((event) => {
-            return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
-          })
+        events: nonBufferEvents
           .filter((event) => {
             const start = new Date(event.eventStart);
             const end = new Date(event.eventEnd);
@@ -109,13 +113,7 @@ function Command() {
       {
         section: "TODAY",
         sectionTitle: "Upcoming events",
-        events: events
-          .filter((event) => {
-            return showDeclinedEvents ? true : event.rsvpStatus !== "Declined" && event.rsvpStatus !== "NotResponded";
-          })
-          .filter((event) => {
-            return event.reclaimEventType !== "CONF_BUFFER" && event.reclaimEventType !== "TRAVEL_BUFFER";
-          })
+        events: nonBufferEvents
           .filter((event) => {
             const start = new Date(event.eventStart);
             return isWithinInterval(start, { start: now, end: endOfDay(today) });
@@ -128,14 +126,14 @@ function Command() {
     ];
 
     return eventSectionsUnfiltered.filter((event) => event.events.length > 0);
-  }, [events, showDeclinedEvents]);
+  }, [visibleEvents]);
 
   const titleInfo = useMemo<TitleInfo>(() => {
     const now = new Date();
     let eventNextNow;
     const showNowEvent = getPreferenceValues()["showNowEvent"];
     if (showNowEvent) {
-      const nowEvent = events?.filter((event) => {
+      const nowEvent = visibleEvents?.filter((event) => {
         const start = new Date(event.eventStart);
         const end = new Date(event.eventEnd);
         return isWithinInterval(now, { start, end });
@@ -191,7 +189,7 @@ function Command() {
       nowOrNext: "NONE",
       event: null,
     };
-  }, [eventMoment, events]);
+  }, [eventMoment, visibleEvents]);
 
   /********************/
   /*    useCallback   */
