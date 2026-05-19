@@ -2,7 +2,6 @@ import { List, ActionPanel, Action, Icon, Color, open } from "@raycast/api";
 import { SteamApp } from "../types";
 import { useAppDetails } from "../hooks/useAppDetails";
 import { useIsOwned } from "../hooks/useIsOwned";
-import { mod } from "../constants";
 
 interface Props {
   app: SteamApp;
@@ -70,7 +69,10 @@ export function GameItem({ app, isSelected }: Props) {
             <Action
               title="Open in Library"
               icon={Icon.Book}
-              shortcut={{ modifiers: [mod], key: "return" }}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "return" },
+                Windows: { modifiers: ["ctrl"], key: "return" },
+              }}
               onAction={() => open(`steam://nav/games/details/${app.id}`)}
             />
           )}
@@ -78,13 +80,19 @@ export function GameItem({ app, isSelected }: Props) {
             // eslint-disable-next-line @raycast/prefer-title-case
             title="View on GG.deals"
             url={`https://gg.deals/steam/app/${app.id}/`}
-            shortcut={{ modifiers: [mod], key: "g" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "g" },
+              Windows: { modifiers: ["ctrl"], key: "g" },
+            }}
           />
           <Action.OpenInBrowser
             // eslint-disable-next-line @raycast/prefer-title-case
             title="View on SteamDB"
             url={`https://steamdb.info/app/${app.id}/charts/`}
-            shortcut={{ modifiers: [mod], key: "d" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "d" },
+              Windows: { modifiers: ["ctrl"], key: "d" },
+            }}
           />
           {details?.peakAllTime && (
             <ActionPanel.Section title="Player Stats">
@@ -99,7 +107,10 @@ export function GameItem({ app, isSelected }: Props) {
           <Action.CopyToClipboard
             title="Copy to Clipboard"
             content={`https://store.steampowered.com/app/${app.id}`}
-            shortcut={{ modifiers: [mod], key: "c" }}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "c" },
+              Windows: { modifiers: ["ctrl"], key: "c" },
+            }}
           />
         </ActionPanel>
       }

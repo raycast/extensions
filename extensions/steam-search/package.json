@@ -24,7 +24,7 @@
           "description": "Used for Steam prices and GG.deals keyshop prices.",
           "type": "dropdown",
           "required": false,
-          "default": "de",
+          "default": "us",
           "data": [
             {
               "title": "🇩🇪 Germany (EUR)",

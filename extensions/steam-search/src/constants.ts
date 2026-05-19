@@ -1,12 +1,4 @@
-import { environment } from "@raycast/api";
-
 export const CACHE_TTL = 60 * 60 * 1000; // 1 hour
-
-// platform may not exist in older API versions, fall back to ctrl
-export const mod =
-  (environment as unknown as Record<string, unknown>)["platform"] === "macos"
-    ? "cmd"
-    : "ctrl";
 
 export const STEAM_HEADERS = {
   "User-Agent":

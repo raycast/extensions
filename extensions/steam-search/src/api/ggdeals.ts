@@ -33,6 +33,6 @@ export async function batchFetchGGDeals(
       }
     }
   } catch {
-    for (const id of missing) ggDealsCache.set(`${id}-${region}`, null);
+    // Do not cache errors — let the per-item fallback in useAppDetails retry
   }
 }
