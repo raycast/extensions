@@ -9,7 +9,6 @@ import {
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
-import { existsSync } from "fs";
 import { SearchResponse } from "./types";
 import {
   getFindrPath,
@@ -23,13 +22,12 @@ export default function SearchFiles() {
   const [query, setQuery] = useState("");
   const findrPath = getFindrPath();
   const maxResults = getMaxResults();
-  const binaryExists = useMemo(() => existsSync(findrPath), [findrPath]);
 
   const { isLoading, data, error } = useExec(
     findrPath,
     ["search", query, "--json", "--limit", String(maxResults)],
     {
-      execute: query.length > 0 && binaryExists,
+      execute: query.length > 0,
       keepPreviousData: true,
       parseOutput: ({ stdout }) => {
         try {
@@ -45,7 +43,6 @@ export default function SearchFiles() {
   const elapsed = data?.elapsed_ms ?? 0;
   const isIndexing = data?.mode === "indexing";
 
-  // Show toast on error
   useEffect(() => {
     if (error && query.length > 0) {
       showToast({
@@ -56,7 +53,6 @@ export default function SearchFiles() {
     }
   }, [error]);
 
-  // Show toast when indexing starts
   useEffect(() => {
     if (isIndexing) {
       showToast({
@@ -66,19 +62,6 @@ export default function SearchFiles() {
       });
     }
   }, [isIndexing]);
-
-  // Binary not found
-  if (!binaryExists) {
-    return (
-      <List>
-        <List.EmptyView
-          icon={Icon.ExclamationMark}
-          title="Findr CLI not found"
-          description={`Binary not found at: ${findrPath}\n\nInstall it:\n1. Install Rust: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh\n2. Run: cargo install --git https://github.com/Roderick111/findr.git\n\nThen update the binary path in extension preferences if needed.`}
-        />
-      </List>
-    );
-  }
 
   return (
     <List

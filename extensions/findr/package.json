@@ -25,14 +25,6 @@
   ],
   "preferences": [
     {
-      "name": "findrPath",
-      "title": "Findr Binary Path",
-      "description": "Path to the findr CLI binary. Install via: cargo install --git https://github.com/Roderick111/findr.git",
-      "type": "textfield",
-      "default": "",
-      "required": true
-    },
-    {
       "name": "maxResults",
       "title": "Max Results",
       "description": "Maximum number of search results to display",
