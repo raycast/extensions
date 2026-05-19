@@ -8,12 +8,25 @@ import {
   Toast,
 } from "@raycast/api";
 import { spawn as spawnProcess } from "node:child_process";
-import { mkdtemp, readFile, rm } from "node:fs/promises";
+import {
+  mkdtemp,
+  open as openFile,
+  readFile,
+  rm,
+  stat,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
-import { useEffect, useRef, useState, type MutableRefObject } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type Dispatch,
+  type MutableRefObject,
+  type SetStateAction,
+} from "react";
 import {
   notFoundMessage,
   resolveKeshaBin,
@@ -24,6 +37,9 @@ const execFileAsync = promisify(execFile);
 const DEFAULT_MAX_SECONDS = 120;
 const MAX_ALLOWED_SECONDS = 3600;
 const SILENCE_PEAK_THRESHOLD = 0.0001;
+const METER_INTERVAL_MS = 500;
+const METER_WINDOW_SECONDS = 1;
+const WAV_HEADER_BYTES = 4096;
 
 interface TranscribeResult {
   file: string;
@@ -34,9 +50,28 @@ interface TranscribeResult {
   sttTimeMs?: number;
 }
 
+interface MicInfo {
+  name: string;
+  sampleRate?: number;
+  channels?: number;
+}
+
+interface SignalLevel {
+  rms: number;
+  peak: number;
+  percent: number;
+  status: string;
+}
+
 type State =
   | { status: "starting" }
-  | { status: "recording"; maxSeconds: number }
+  | {
+      status: "recording";
+      maxSeconds: number;
+      elapsedSeconds: number;
+      mic: MicInfo;
+      signal: SignalLevel;
+    }
   | { status: "stopping" }
   | { status: "transcribing" }
   | { status: "error"; message: string; hint?: string }
@@ -68,14 +103,30 @@ export default function Command() {
         tempDir = await mkdtemp(join(tmpdir(), "raycast-kesha-dictate-"));
         const audioPath = join(tempDir, "dictation.wav");
 
-        setState({ status: "recording", maxSeconds });
+        setState({
+          status: "recording",
+          maxSeconds,
+          elapsedSeconds: 0,
+          mic: { name: "Default input device" },
+          signal: {
+            rms: 0,
+            peak: 0,
+            percent: 0,
+            status: "Waiting for microphone audio...",
+          },
+        });
+        const stopMonitoring = startRecordingMonitor(audioPath, setState);
         await showToast({
           style: Toast.Style.Animated,
           title: "Recording",
           message: `Stops automatically after ${maxSeconds}s`,
         });
 
-        await recordAudio(kesha, audioPath, maxSeconds, recorderRef);
+        try {
+          await recordAudio(kesha, audioPath, maxSeconds, recorderRef);
+        } finally {
+          stopMonitoring();
+        }
         if (cancelled) return;
 
         if (await isSilentWav(audioPath)) {
@@ -147,7 +198,7 @@ export default function Command() {
   if (state.status === "recording") {
     return (
       <Detail
-        markdown={`# Recording\n\nSpeak now. Recording stops automatically after ${state.maxSeconds} seconds.`}
+        markdown={buildRecordingMarkdown(state)}
         actions={
           <ActionPanel>
             <Action
@@ -208,6 +259,234 @@ function parseMaxSeconds(value: string | undefined): number {
     );
   }
   return parsed;
+}
+
+function startRecordingMonitor(
+  audioPath: string,
+  setState: Dispatch<SetStateAction<State>>,
+): () => void {
+  const startedAt = Date.now();
+  let stopped = false;
+
+  function updateRecording(
+    patch: Partial<Extract<State, { status: "recording" }>>,
+  ) {
+    if (stopped) return;
+    setState((current) => {
+      if (current.status !== "recording") return current;
+      return { ...current, ...patch };
+    });
+  }
+
+  void resolveDefaultMicInfo().then((mic) => updateRecording({ mic }));
+
+  async function tick() {
+    const elapsedSeconds = Math.max(
+      0,
+      Math.floor((Date.now() - startedAt) / 1000),
+    );
+    try {
+      const signal = await readWavSignal(audioPath);
+      updateRecording({ elapsedSeconds, signal });
+    } catch {
+      updateRecording({
+        elapsedSeconds,
+        signal: {
+          rms: 0,
+          peak: 0,
+          percent: 0,
+          status: "Waiting for audio file...",
+        },
+      });
+    }
+  }
+
+  void tick();
+  const timer = setInterval(() => void tick(), METER_INTERVAL_MS);
+  return () => {
+    stopped = true;
+    clearInterval(timer);
+  };
+}
+
+async function resolveDefaultMicInfo(): Promise<MicInfo> {
+  try {
+    const { stdout } = await execFileAsync("/usr/sbin/system_profiler", [
+      "SPAudioDataType",
+      "-json",
+    ]);
+    const parsed = JSON.parse(stdout) as { SPAudioDataType?: unknown[] };
+    const devices = flattenSystemProfilerItems(parsed.SPAudioDataType);
+    const input = devices.find(isDefaultInputDevice);
+    if (!input) return { name: "Default input device" };
+    return {
+      name: stringValue(input._name) || "Default input device",
+      sampleRate: numberValue(input.coreaudio_device_srate),
+      channels: numberValue(input.coreaudio_device_input),
+    };
+  } catch {
+    return { name: "Default input device" };
+  }
+}
+
+function flattenSystemProfilerItems(items: unknown): Record<string, unknown>[] {
+  if (!Array.isArray(items)) return [];
+  const out: Record<string, unknown>[] = [];
+  for (const item of items) {
+    if (!item || typeof item !== "object") continue;
+    const record = item as Record<string, unknown>;
+    out.push(record);
+    out.push(...flattenSystemProfilerItems(record._items));
+  }
+  return out;
+}
+
+function isDefaultInputDevice(item: Record<string, unknown>): boolean {
+  const marker = item.coreaudio_default_audio_input_device;
+  return marker === "spaudio_yes" || marker === "Yes" || marker === true;
+}
+
+function stringValue(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function numberValue(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
+}
+
+async function readWavSignal(audioPath: string): Promise<SignalLevel> {
+  const fileStat = await stat(audioPath);
+  if (fileStat.size < 68) {
+    return emptySignal("Opening microphone stream...");
+  }
+
+  const file = await openFile(audioPath, "r");
+  try {
+    const headerLength = Math.min(WAV_HEADER_BYTES, fileStat.size);
+    const header = Buffer.alloc(headerLength);
+    await file.read(header, 0, header.length, 0);
+    const fmt = findWavChunk(header, "fmt ");
+    const data = findWavChunk(header, "data");
+    if (!fmt || !data || fmt.length < 16 || fileStat.size <= data.offset) {
+      return emptySignal("Opening microphone stream...");
+    }
+
+    const audioFormat = header.readUInt16LE(fmt.offset);
+    const bitsPerSample = header.readUInt16LE(fmt.offset + 14);
+    const blockAlign = Math.max(1, header.readUInt16LE(fmt.offset + 12));
+    const byteRate = Math.max(1, header.readUInt32LE(fmt.offset + 8));
+    const availableBytes = fileStat.size - data.offset;
+    const windowBytes = alignBytes(
+      Math.min(availableBytes, byteRate * METER_WINDOW_SECONDS),
+      blockAlign,
+    );
+    if (windowBytes <= 0) {
+      return emptySignal("Listening...");
+    }
+
+    const window = Buffer.alloc(windowBytes);
+    await file.read(
+      window,
+      0,
+      window.length,
+      data.offset + availableBytes - windowBytes,
+    );
+    const stats = measurePcmWindow(window, audioFormat, bitsPerSample);
+    if (!stats) {
+      return emptySignal("Listening...");
+    }
+    return {
+      ...stats,
+      percent: signalPercent(stats),
+      status:
+        stats.peak > SILENCE_PEAK_THRESHOLD
+          ? "Signal detected"
+          : "Listening...",
+    };
+  } finally {
+    await file.close();
+  }
+}
+
+function alignBytes(bytes: number, blockAlign: number): number {
+  return bytes - (bytes % blockAlign);
+}
+
+function emptySignal(status: string): SignalLevel {
+  return { rms: 0, peak: 0, percent: 0, status };
+}
+
+function signalPercent(signal: Pick<SignalLevel, "rms" | "peak">): number {
+  return Math.min(
+    100,
+    Math.round(Math.max(Math.sqrt(signal.peak) * 100, signal.rms * 600)),
+  );
+}
+
+function measurePcmWindow(
+  data: Buffer,
+  audioFormat: number,
+  bitsPerSample: number,
+): Pick<SignalLevel, "rms" | "peak"> | null {
+  let sum = 0;
+  let peak = 0;
+  let count = 0;
+
+  if (audioFormat === 3 && bitsPerSample === 32) {
+    for (let offset = 0; offset + 4 <= data.length; offset += 4) {
+      const sample = data.readFloatLE(offset);
+      if (!Number.isFinite(sample)) continue;
+      const abs = Math.abs(sample);
+      sum += sample * sample;
+      peak = Math.max(peak, abs);
+      count += 1;
+    }
+  } else if (audioFormat === 1 && bitsPerSample === 16) {
+    for (let offset = 0; offset + 2 <= data.length; offset += 2) {
+      const sample = data.readInt16LE(offset) / 32768;
+      const abs = Math.abs(sample);
+      sum += sample * sample;
+      peak = Math.max(peak, abs);
+      count += 1;
+    }
+  } else {
+    return null;
+  }
+
+  if (count === 0) return null;
+  return { rms: Math.sqrt(sum / count), peak };
+}
+
+function buildRecordingMarkdown(
+  state: Extract<State, { status: "recording" }>,
+): string {
+  const micDetails = [
+    state.mic.sampleRate ? `${state.mic.sampleRate} Hz` : null,
+    state.mic.channels
+      ? `${state.mic.channels} channel${state.mic.channels === 1 ? "" : "s"}`
+      : null,
+  ].filter(Boolean);
+  const meter = renderSignalMeter(state.signal.percent);
+  return [
+    "# Recording",
+    "",
+    `**Microphone:** ${state.mic.name}`,
+    micDetails.length ? `**Format:** ${micDetails.join(", ")}` : null,
+    `**Signal:** ${meter} ${state.signal.percent}%`,
+    `**Status:** ${state.signal.status}`,
+    `**Elapsed:** ${state.elapsedSeconds}s / ${state.maxSeconds}s`,
+    "",
+    "Speak now. Recording stops automatically at the max duration.",
+  ]
+    .filter((line): line is string => line != null)
+    .join("\n\n");
+}
+
+function renderSignalMeter(percent: number): string {
+  const filled = Math.max(0, Math.min(10, Math.round(percent / 10)));
+  return `[${"█".repeat(filled)}${"░".repeat(10 - filled)}]`;
 }
 
 async function isSilentWav(audioPath: string): Promise<boolean> {
