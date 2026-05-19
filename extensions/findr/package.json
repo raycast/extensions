@@ -1,0 +1,64 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "findr",
+  "title": "Findr",
+  "description": "The fastest local file search for macOS. Finds what Finder can't. Searches filenames and file contents including PDFs.",
+  "icon": "icon.png",
+  "author": "nex_mod_daniel",
+  "platforms": ["macOS"],
+  "categories": ["Productivity", "System"],
+  "keywords": ["search", "files", "finder", "spotlight", "pdf", "content", "fuzzy"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Files",
+      "description": "Search files by name and content with unified ranking",
+      "mode": "view"
+    },
+    {
+      "name": "reindex",
+      "title": "Rebuild Index",
+      "description": "Rebuild the findr file index",
+      "mode": "no-view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "findrPath",
+      "title": "Findr Binary Path",
+      "description": "Path to the findr CLI binary. Install via: cargo install --git https://github.com/Roderick111/findr.git",
+      "type": "textfield",
+      "default": "/usr/local/bin/findr",
+      "required": true
+    },
+    {
+      "name": "maxResults",
+      "title": "Max Results",
+      "description": "Maximum number of search results to display",
+      "type": "textfield",
+      "default": "30",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.98.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "22.15.21",
+    "@types/react": "19.1.4",
+    "eslint": "^8.57.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "prepublishOnly": "echo \"Error: no publish\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
