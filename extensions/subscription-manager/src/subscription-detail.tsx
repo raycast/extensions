@@ -225,7 +225,7 @@ export function SubscriptionDetail({
 |---|---|
 | Amount | **${formatCurrency(sub.amount, sub.currency)}** / ${sub.billingCycle} |
 | Next Billing | ${nextBilling} (day ${sub.billingDay}) |
-| Started | ${new Date(sub.startDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })} |
+| Started | ${new Date(sub.startDate).toLocaleDateString(undefined, { day: "numeric", month: "long", year: "numeric" })} |
 | Category | ${sub.category} |
 | List | ${sub.list} |
 ${sub.paymentMethod ? `| Paid With | ${sub.paymentMethod} |\n` : ""}| Status | ${sub.status.charAt(0).toUpperCase() + sub.status.slice(1)} |
