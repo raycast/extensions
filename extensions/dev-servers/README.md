@@ -35,3 +35,9 @@ A keyboard-first dashboard for every dev server you have running. See them group
 - **Terminal App** sets which terminal `⌘T` opens. Defaults to macOS Terminal if unset.
 - **Project Display** shows the full directory path in section headers instead of just the project folder name.
 - **Refresh Interval** sets how often to refresh the server list (2s, 5s, 10s, or 30s).
+
+## How it differs from Port Manager
+
+Port Manager is built around ports. Dev Servers is built around projects.
+
+Port Manager shows every listening process the same way (Postgres, Docker, SSH tunnels, dev servers). Dev Servers shows only the dev servers, groups them by project, identifies the framework, and restarts with the right package manager. The two are complementary.
