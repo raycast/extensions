@@ -1,6 +1,6 @@
 # Notion Changelog
 
-## [Add Pin Pages Action] - {PR_MERGE_DATE}
+## [Add Pin Pages Action] - 2026-05-19
 
 - Add a new action to pin a page in the `Search Page` command
 
