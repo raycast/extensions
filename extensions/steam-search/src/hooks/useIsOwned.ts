@@ -17,7 +17,7 @@ export function useIsOwned(appId: number): boolean | null {
     fetchOwnedGames(steamApiKey, steamId).then((ids) =>
       setOwned(ids.has(appId)),
     );
-  }, [appId]);
+  }, [appId, steamApiKey, steamId]);
 
   return owned;
 }
