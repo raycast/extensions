@@ -1,6 +1,6 @@
 # ServiceNow Extension Changelog
 
-## [OAuth, Windows Support & New Commands] - {PR_MERGE_DATE}
+## [OAuth, Windows Support & New Commands] - 2026-05-19
 
 - Added OAuth 2.0 (PKCE) as an alternative to Basic Auth, selectable per instance profile. Tokens refresh automatically and a **Sign In / Re-authenticate** action recovers expired profiles; auth failures are flagged in **Manage Instance Profiles**.
 - Added Windows support. On macOS the extension keeps reading the frontmost browser tab via AppleScript; on Windows it falls back to the Raycast Browser Extension's `getTabs()` API.
