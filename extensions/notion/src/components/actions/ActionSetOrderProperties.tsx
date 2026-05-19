@@ -35,7 +35,10 @@ export function ActionSetOrderProperties(props: {
     <ActionPanel.Submenu
       title="Change Properties Order"
       icon={Icon.ChevronUpDown}
-      shortcut={{ modifiers: ["cmd", "opt", "shift"], key: "o" }}
+      shortcut={{
+        macOS: { modifiers: ["cmd", "opt", "shift"], key: "o" },
+        Windows: { modifiers: ["ctrl", "opt", "shift"], key: "o" },
+      }}
     >
       {propertiesOrder.map((propertyId, index) => {
         const propertyName = propertiesNameById[propertyId];
