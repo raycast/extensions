@@ -176,6 +176,8 @@ function ResultDetail({ result }: { result: SearchResult }) {
 
   if (result.content_snippet) {
     const sanitized = result.content_snippet
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
       .replace(/[\\`*_{}[\]()#+\-.!]/g, "\\$&")
       .replace(/\n/g, "\n> ");
     markdown += `> ${sanitized}\n`;
