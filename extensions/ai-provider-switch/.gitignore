@@ -1,0 +1,17 @@
+node_modules/
+.DS_Store
+.env
+.env.local
+.env.*.local
+dist/
+build/
+.ray
+*.log
+.vscode/
+.idea/
+*.swp
+*.swo
+.eslintcache
+.next
+out/
+.turbo/
