@@ -87,7 +87,7 @@
         {
           "name": "steamApiKey",
           "title": "Steam API Key",
-          "description": "Used for: owned game detection + live player counts.\nGet yours at: steamcommunity.com/dev/apikey (domain field can be anything, e.g. localhost)",
+          "description": "Used for: owned game detection.\nGet yours at: steamcommunity.com/dev/apikey (domain field can be anything, e.g. localhost)",
           "type": "password",
           "required": false,
           "placeholder": "Optional — enables Owned badge and player counts"

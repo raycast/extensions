@@ -15,7 +15,7 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
         <List.Item
           icon={{ source: Icon.Key, tintColor: Color.Yellow }}
           title="Steam API Key"
-          subtitle="Required for Owned badge and player counts"
+          subtitle="Required for Owned badge"
           accessories={[{ text: "steamcommunity.com/dev/apikey" }]}
           actions={
             <ActionPanel>
