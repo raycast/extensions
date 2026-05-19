@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-19
 
 - Increased the Safari bookmark plist parser limit so large bookmark libraries no longer fail with `maxObjectCount exceeded`
 
