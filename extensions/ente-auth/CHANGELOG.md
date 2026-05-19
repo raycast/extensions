@@ -1,6 +1,6 @@
 # Ente Auth Changelog
 
-## [Upgrade Raycast deps] - {PR_MERGE_DATE}
+## [Upgrade Raycast deps] - 2026-05-19
 
 - Upgrade @raycast/api and @raycast/utils to make the extension more compatible with Raycast v2.
 
