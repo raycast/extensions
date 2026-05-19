@@ -4,7 +4,10 @@ import { CACHE_TTL } from "./constants";
 
 export const memoryCache = new Map<string, AppDetails>();
 
-export async function loadPersistedDetails(appId: number, region: string): Promise<AppDetails | null> {
+export async function loadPersistedDetails(
+  appId: number,
+  region: string,
+): Promise<AppDetails | null> {
   try {
     const raw = await LocalStorage.getItem<string>(`d-${appId}-${region}`);
     if (!raw) return null;
@@ -16,11 +19,17 @@ export async function loadPersistedDetails(appId: number, region: string): Promi
   }
 }
 
-export async function persistDetails(appId: number, region: string, details: AppDetails): Promise<void> {
+export async function persistDetails(
+  appId: number,
+  region: string,
+  details: AppDetails,
+): Promise<void> {
   try {
     await LocalStorage.setItem(
       `d-${appId}-${region}`,
-      JSON.stringify({ details, timestamp: Date.now() } as PersistedDetails)
+      JSON.stringify({ details, timestamp: Date.now() } as PersistedDetails),
     );
-  } catch {}
+  } catch (e) {
+    // Silently ignore persistence errors
+  }
 }

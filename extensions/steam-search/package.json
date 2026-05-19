@@ -6,9 +6,7 @@
   "icon": "icon.png",
   "author": "wvrnnr",
   "license": "MIT",
-  "platforms": [
-    "windows, macOS"
-  ],
+  "platforms": ["macOS", "Windows"],
   "categories": [
     "Media",
     "Applications"

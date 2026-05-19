@@ -1,14 +1,21 @@
-import { List, Icon, showToast, Toast, getPreferenceValues, LocalStorage } from "@raycast/api";
+import {
+  List,
+  Icon,
+  showToast,
+  Toast,
+  getPreferenceValues,
+  LocalStorage,
+} from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
-import { SteamSearchResponse, Preferences } from "./types";
+import { SteamSearchResponse } from "./types";
 import { fetchOwnedGames } from "./api/steam";
 import { batchFetchGGDeals } from "./api/ggdeals";
 import { GameItem } from "./components/GameItem";
 import { Onboarding } from "./components/Onboarding";
 
 export default function Command() {
-  const { steamApiKey, steamId, ggDealsApiKey, region } = getPreferenceValues<Preferences>();
+  const { steamApiKey, steamId, ggDealsApiKey, region } = getPreferenceValues();
   const [skipped, setSkipped] = useState<boolean | null>(null);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -37,19 +44,23 @@ export default function Command() {
           message: "Could not reach the Steam store API.",
         });
       },
-    }
+    },
   );
 
   // Batch-fetch GG.deals prices for all results as soon as they arrive
   useEffect(() => {
     if (!data?.items?.length || !ggDealsApiKey) return;
-    batchFetchGGDeals(data.items.map((a) => a.id), ggDealsApiKey, region);
+    batchFetchGGDeals(
+      data.items.map((a) => a.id),
+      ggDealsApiKey,
+      region,
+    );
   }, [data]);
 
   // All hooks done — now safe to conditionally return
   if (skipped === null) return <List isLoading />;
   if (!steamApiKey && !steamId && !ggDealsApiKey && !skipped) {
-  return <Onboarding onSkip={() => setSkipped(true)} />;
+    return <Onboarding onSkip={() => setSkipped(true)} />;
   }
 
   const results = data?.items ?? [];

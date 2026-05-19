@@ -1,4 +1,12 @@
-import { List, ActionPanel, Action, openExtensionPreferences, Icon, Color, LocalStorage } from "@raycast/api";
+import {
+  List,
+  ActionPanel,
+  Action,
+  openExtensionPreferences,
+  Icon,
+  Color,
+  LocalStorage,
+} from "@raycast/api";
 
 export function Onboarding({ onSkip }: { onSkip: () => void }) {
   return (
@@ -11,8 +19,15 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
           accessories={[{ text: "steamcommunity.com/dev/apikey" }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Get Steam API Key" url="https://steamcommunity.com/dev/apikey" />
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser
+                title="Get Steam Api Key"
+                url="https://steamcommunity.com/dev/apikey"
+              />
+              <Action
+                title="Open Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
             </ActionPanel>
           }
         />
@@ -23,8 +38,15 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
           accessories={[{ text: "steamid.io" }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Find My Steam ID" url="https://steamid.io" />
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser
+                title="Find My Steam Id"
+                url="https://steamid.io"
+              />
+              <Action
+                title="Open Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
             </ActionPanel>
           }
         />
@@ -35,8 +57,15 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
           accessories={[{ text: "gg.deals/api" }]}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser title="Get GG.deals API Key" url="https://gg.deals/api/" />
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action.OpenInBrowser
+                title="Get Gg.deals Api Key"
+                url="https://gg.deals/api/"
+              />
+              <Action
+                title="Open Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
             </ActionPanel>
           }
         />
@@ -47,7 +76,11 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
           title="All set? Open Preferences to enter your keys"
           actions={
             <ActionPanel>
-              <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
+              <Action
+                title="Open Preferences"
+                icon={Icon.Gear}
+                onAction={openExtensionPreferences}
+              />
             </ActionPanel>
           }
         />

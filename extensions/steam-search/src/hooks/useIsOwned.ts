@@ -1,12 +1,11 @@
 import { getPreferenceValues } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Preferences } from "../types";
 import { fetchOwnedGames, getOwnedAppIds } from "../api/steam";
 
 export function useIsOwned(appId: number): boolean | null {
-  const { steamApiKey, steamId } = getPreferenceValues<Preferences>();
+  const { steamApiKey, steamId } = getPreferenceValues();
   const [owned, setOwned] = useState<boolean | null>(
-    getOwnedAppIds() !== null ? getOwnedAppIds()!.has(appId) : null
+    getOwnedAppIds() !== null ? getOwnedAppIds()!.has(appId) : null,
   );
 
   useEffect(() => {
@@ -15,7 +14,9 @@ export function useIsOwned(appId: number): boolean | null {
       setOwned(current.has(appId));
       return;
     }
-    fetchOwnedGames(steamApiKey, steamId).then((ids) => setOwned(ids.has(appId)));
+    fetchOwnedGames(steamApiKey, steamId).then((ids) =>
+      setOwned(ids.has(appId)),
+    );
   }, [appId]);
 
   return owned;

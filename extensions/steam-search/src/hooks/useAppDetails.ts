@@ -1,16 +1,21 @@
 import { CURRENCY_SYMBOLS } from "../constants";
 import { getPreferenceValues, Color } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { AppDetails, Preferences } from "../types";
+import { AppDetails } from "../types";
 import { memoryCache, loadPersistedDetails, persistDetails } from "../cache";
 import { ggDealsCache } from "../api/ggdeals";
 import { fetchSteamChartsData, fetchAppIcon } from "../api/steam";
 import { getRatingColor, formatNum } from "../utils";
 
-export function useAppDetails(appId: number, enabled: boolean): AppDetails | null {
-  const { ggDealsApiKey, region } = getPreferenceValues<Preferences>();
+export function useAppDetails(
+  appId: number,
+  enabled: boolean,
+): AppDetails | null {
+  const { ggDealsApiKey, region } = getPreferenceValues();
   const cacheKey = `${appId}-${region}`;
-  const [details, setDetails] = useState<AppDetails | null>(() => memoryCache.get(cacheKey) ?? null);
+  const [details, setDetails] = useState<AppDetails | null>(
+    () => memoryCache.get(cacheKey) ?? null,
+  );
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -41,29 +46,71 @@ export function useAppDetails(appId: number, enabled: boolean): AppDetails | nul
       const ggPrice = !ggDealsApiKey
         ? null
         : ggDealsCache.has(`${appId}-${region}`)
-        ? ggDealsCache.get(`${appId}-${region}`) ?? null
-        : await fetch(
-            `https://api.gg.deals/v1/prices/by-steam-app-id/?key=${ggDealsApiKey}&ids=${appId}&region=${region}`,
-            { signal }
-          )
-            .then((r) => r.json())
-            .then((d: unknown) => {
-              const parsed = d as { data?: Record<string, { prices?: { currentKeyshops?: string } }> };
-              const game = parsed?.data?.[String(appId)];
-              if (game?.prices) {
-                const keyshop = parseFloat(game.prices.currentKeyshops ?? "");
-                return !isNaN(keyshop) ? `🔑 ${keyshop.toFixed(2).replace(".", ",")}${CURRENCY_SYMBOLS[region] ?? "€"}` : null;
-              }
-              return null;
-            })
+          ? (ggDealsCache.get(`${appId}-${region}`) ?? null)
+          : await fetch(
+              `https://api.gg.deals/v1/prices/by-steam-app-id/?key=${ggDealsApiKey}&ids=${appId}&region=${region}`,
+              { signal },
+            )
+              .then((r) => r.json())
+              .then((d: unknown) => {
+                const parsed = d as {
+                  data?: Record<
+                    string,
+                    { prices?: { currentKeyshops?: string } }
+                  >;
+                };
+                const game = parsed?.data?.[String(appId)];
+                if (game?.prices) {
+                  const keyshop = parseFloat(game.prices.currentKeyshops ?? "");
+                  return !isNaN(keyshop)
+                    ? `🔑 ${keyshop.toFixed(2)}${CURRENCY_SYMBOLS[region] ?? "€"}`
+                    : null;
+                }
+                return null;
+              });
 
       if (signal.aborted) return;
 
       // Fetch Steam data in parallel
       const [detailsData, playersData, reviewsData] = await Promise.all([
-        fetch(`https://store.steampowered.com/api/appdetails?appids=${appId}&cc=${region}`, { signal }).then((r) => r.json() as Promise<Record<number, { data?: { is_free?: boolean; price_overview?: { final_formatted: string; discount_percent: number } } }>>),
-        fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${appId}`, { signal }).then((r) => r.json() as Promise<{ response?: { player_count?: number } }>),
-        fetch(`https://store.steampowered.com/appreviews/${appId}?json=1&language=all&purchase_type=all`, { signal }).then((r) => r.json() as Promise<{ query_summary?: { total_reviews?: number; total_positive?: number } }>),
+        fetch(
+          `https://store.steampowered.com/api/appdetails?appids=${appId}&cc=${region}`,
+          { signal },
+        ).then(
+          (r) =>
+            r.json() as Promise<
+              Record<
+                number,
+                {
+                  data?: {
+                    is_free?: boolean;
+                    price_overview?: {
+                      final_formatted: string;
+                      discount_percent: number;
+                    };
+                  };
+                }
+              >
+            >,
+        ),
+        fetch(
+          `https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${appId}`,
+          { signal },
+        ).then(
+          (r) => r.json() as Promise<{ response?: { player_count?: number } }>,
+        ),
+        fetch(
+          `https://store.steampowered.com/appreviews/${appId}?json=1&language=all&purchase_type=all`,
+          { signal },
+        ).then(
+          (r) =>
+            r.json() as Promise<{
+              query_summary?: {
+                total_reviews?: number;
+                total_positive?: number;
+              };
+            }>,
+        ),
       ]).catch(() => [null, null, null]);
 
       if (signal.aborted) return;
@@ -75,9 +122,10 @@ export function useAppDetails(appId: number, enabled: boolean): AppDetails | nul
         price = "Free";
       } else if (appData?.price_overview) {
         const p = appData.price_overview;
-        price = p.discount_percent > 0
-          ? `${p.final_formatted} (−${p.discount_percent}%)`
-          : p.final_formatted;
+        price =
+          p.discount_percent > 0
+            ? `${p.final_formatted} (−${p.discount_percent}%)`
+            : p.final_formatted;
       }
 
       // Players
@@ -97,8 +145,14 @@ export function useAppDetails(appId: number, enabled: boolean): AppDetails | nul
       }
 
       const initial: AppDetails = {
-        price, ggPrice, rating, ratingColor, currentPlayers,
-        peakToday: null, peakAllTime: null, iconUrl: null,
+        price,
+        ggPrice,
+        rating,
+        ratingColor,
+        currentPlayers,
+        peakToday: null,
+        peakAllTime: null,
+        iconUrl: null,
       };
       memoryCache.set(cacheKey, initial);
       setDetails(initial);

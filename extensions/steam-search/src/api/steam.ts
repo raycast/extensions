@@ -4,7 +4,10 @@ import { formatNum } from "../utils";
 let ownedAppIds: Set<number> | null = null;
 let ownedFetchPromise: Promise<Set<number>> | null = null;
 
-export async function fetchOwnedGames(apiKey: string, steamId: string): Promise<Set<number>> {
+export async function fetchOwnedGames(
+  apiKey: string,
+  steamId: string,
+): Promise<Set<number>> {
   if (!apiKey || !steamId) {
     ownedAppIds = new Set();
     return ownedAppIds;
@@ -13,13 +16,13 @@ export async function fetchOwnedGames(apiKey: string, steamId: string): Promise<
   if (ownedFetchPromise !== null) return ownedFetchPromise;
 
   ownedFetchPromise = fetch(
-    `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}&format=json`
+    `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}&format=json`,
   )
     .then((r) => r.json())
     .then((data: unknown) => {
       const d = data as { response?: { games?: { appid: number }[] } };
       const ids = new Set<number>(
-        (d?.response?.games ?? []).map((g) => g.appid)
+        (d?.response?.games ?? []).map((g) => g.appid),
       );
       ownedAppIds = ids;
       return ids;
@@ -38,7 +41,7 @@ export function getOwnedAppIds(): Set<number> | null {
 
 export async function fetchSteamChartsData(
   appId: number,
-  signal: AbortSignal
+  signal: AbortSignal,
 ): Promise<{ peak24h: string; peakAllTime: string } | null> {
   try {
     const res = await fetch(`https://steamcharts.com/app/${appId}`, {
@@ -46,7 +49,9 @@ export async function fetchSteamChartsData(
       signal,
     });
     const html = await res.text();
-    const matches = html.match(/id="app-heading"[\s\S]*?<\/div>\s*<\/div>/)?.[0];
+    const matches = html.match(
+      /id="app-heading"[\s\S]*?<\/div>\s*<\/div>/,
+    )?.[0];
     const nums =
       matches
         ?.match(/<span class="num">(\d+)<\/span>/g)
@@ -60,7 +65,10 @@ export async function fetchSteamChartsData(
   }
 }
 
-export async function fetchAppIcon(appId: number, signal: AbortSignal): Promise<string | null> {
+export async function fetchAppIcon(
+  appId: number,
+  signal: AbortSignal,
+): Promise<string | null> {
   try {
     const res = await fetch(`https://store.steampowered.com/app/${appId}`, {
       headers: STEAM_HEADERS,
@@ -78,7 +86,9 @@ export async function fetchAppIcon(appId: number, signal: AbortSignal): Promise<
     }
 
     const hashMatch = html.match(
-      new RegExp(`steamcommunity/public/images/apps/${appId}/([a-f0-9]{40})\\.jpg`)
+      new RegExp(
+        `steamcommunity/public/images/apps/${appId}/([a-f0-9]{40})\\.jpg`,
+      ),
     );
     if (hashMatch?.[1]) {
       return `https://cdn.fastly.steamstatic.com/steamcommunity/public/images/apps/${appId}/${hashMatch[1]}.jpg`;

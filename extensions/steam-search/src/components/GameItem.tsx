@@ -23,19 +23,38 @@ export function GameItem({ app, isSelected }: Props) {
         ...(isSelected
           ? [
               {
-                text: { value: details?.currentPlayers ?? "…", color: Color.SecondaryText },
+                text: {
+                  value: details?.currentPlayers ?? "…",
+                  color: Color.SecondaryText,
+                },
                 tooltip: "Current players",
               },
               ...(details?.peakToday
-                ? [{ text: { value: `⬆ ${details.peakToday}`, color: Color.SecondaryText }, tooltip: "24h peak" }]
+                ? [
+                    {
+                      text: {
+                        value: `⬆ ${details.peakToday}`,
+                        color: Color.SecondaryText,
+                      },
+                      tooltip: "24h peak",
+                    },
+                  ]
                 : []),
               {
-                text: { value: details?.rating ?? "…", color: details?.ratingColor ?? Color.SecondaryText },
+                text: {
+                  value: details?.rating ?? "…",
+                  color: details?.ratingColor ?? Color.SecondaryText,
+                },
                 tooltip: "Review score",
               },
               { text: details?.price ?? "…", tooltip: "Steam price" },
               ...(details?.ggPrice
-                ? [{ text: { value: details.ggPrice, color: Color.Yellow }, tooltip: "Lowest keyshop price on GG.deals" }]
+                ? [
+                    {
+                      text: { value: details.ggPrice, color: Color.Yellow },
+                      tooltip: "Lowest keyshop price on GG.deals",
+                    },
+                  ]
                 : []),
             ]
           : []),
@@ -56,18 +75,19 @@ export function GameItem({ app, isSelected }: Props) {
             />
           )}
           <Action.OpenInBrowser
-            title="View on GG.deals"
+            title="View on Gg.deals"
             url={`https://gg.deals/steam/app/${app.id}/`}
             shortcut={{ modifiers: [mod], key: "g" }}
           />
           <Action.OpenInBrowser
-            title="View on SteamDB"
+            title="View on Steamdb"
             url={`https://steamdb.info/app/${app.id}/charts/`}
             shortcut={{ modifiers: [mod], key: "d" }}
           />
           {details?.peakAllTime && (
             <ActionPanel.Section title="Player Stats">
               <Action
+                // eslint-disable-next-line @raycast/prefer-title-case
                 title={`All-Time Peak: ${details.peakAllTime}`}
                 icon={Icon.BarChart}
                 onAction={() => open(`https://steamcharts.com/app/${app.id}`)}
@@ -75,7 +95,7 @@ export function GameItem({ app, isSelected }: Props) {
             </ActionPanel.Section>
           )}
           <Action.CopyToClipboard
-            title="Copy Store URL"
+            title="Copy to Clipboard"
             content={`https://store.steampowered.com/app/${app.id}`}
             shortcut={{ modifiers: [mod], key: "c" }}
           />

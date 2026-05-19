@@ -1,12 +1,5 @@
 import { Color } from "@raycast/api";
 
-export interface Preferences {
-  steamApiKey: string;
-  steamId: string;
-  ggDealsApiKey: string;
-  region: string;
-}
-
 export interface SteamApp {
   id: number;
   name: string;
