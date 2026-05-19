@@ -7,6 +7,7 @@ import {
   Form,
   Icon,
   List,
+  PopToRootType,
   Toast,
   showToast,
   showHUD,
@@ -2077,7 +2078,10 @@ async function copyLatestHistoryItem() {
   try {
     const item = await loadLatestHistoryItem();
     await Clipboard.copy(item.summary);
-    await showHUD("Latest history item copied");
+    await showHUD("Latest history item copied", {
+      clearRootSearch: true,
+      popToRootType: PopToRootType.Immediate,
+    });
   } catch (error) {
     await showToast({
       style: Toast.Style.Failure,
@@ -2142,7 +2146,10 @@ async function getGlobalLlmCleanupStatus() {
 async function pasteLatestHistoryItem() {
   try {
     const item = await loadLatestHistoryItem();
-    await closeMainWindow({ clearRootSearch: true });
+    await closeMainWindow({
+      clearRootSearch: true,
+      popToRootType: PopToRootType.Immediate,
+    });
     await Clipboard.paste(item.summary);
   } catch (error) {
     await showToast({
