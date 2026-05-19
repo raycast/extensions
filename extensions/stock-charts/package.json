@@ -1,0 +1,46 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "stock-charts",
+  "title": "Stock Charts",
+  "description": "Search stocks, view live prices, and see price evolution charts across multiple time intervals using Yahoo Finance.",
+  "icon": "extension-icon.png",
+  "author": "adrien",
+  "categories": [
+    "Finance"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "search-stocks",
+      "title": "Search Stocks",
+      "subtitle": "Yahoo Finance",
+      "description": "Search stocks, view live prices, and see price evolution charts with multiple time intervals.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.15",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.19.17",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.2.1"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}

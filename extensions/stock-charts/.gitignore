@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.DS_Store
+
+# Internal development docs (mockups, plan) — not for the Raycast Store
+docs/
+.cursor/

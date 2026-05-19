@@ -1,0 +1,27 @@
+{
+  "quoteResponse": {
+    "result": [
+      {
+        "symbol": "AAPL",
+        "currency": "USD",
+        "shortName": "Apple Inc.",
+        "displayName": "Apple",
+        "marketState": "REGULAR",
+        "typeDisp": "Equity",
+        "regularMarketPrice": 198.42,
+        "regularMarketPreviousClose": 197.19,
+        "regularMarketOpen": 197.1,
+        "regularMarketChange": 1.23,
+        "regularMarketChangePercent": 0.6237,
+        "marketCap": 3070000000000,
+        "fullExchangeName": "NasdaqGS",
+        "exchange": "NMS",
+        "fiftyTwoWeekHigh": 237.49,
+        "fiftyTwoWeekLow": 164.08,
+        "trailingPE": 32.5,
+        "dividendYield": 0.44,
+        "epsTrailingTwelveMonths": 6.13
+      }
+    ]
+  }
+}

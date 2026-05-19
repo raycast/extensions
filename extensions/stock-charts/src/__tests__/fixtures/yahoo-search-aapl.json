@@ -1,0 +1,18 @@
+{
+  "quotes": [
+    {
+      "symbol": "AAPL",
+      "shortname": "Apple Inc.",
+      "longname": "Apple Inc.",
+      "quoteType": "EQUITY",
+      "exchDisp": "NASDAQ"
+    },
+    {
+      "symbol": "APLE",
+      "shortname": "Apple Hospitality REIT",
+      "longname": "Apple Hospitality REIT, Inc.",
+      "quoteType": "EQUITY",
+      "exchDisp": "NYSE"
+    }
+  ]
+}
