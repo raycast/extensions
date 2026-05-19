@@ -15,7 +15,14 @@ export default async function NotificationBackground() {
   const raw = await LocalStorage.getItem<string>(STORAGE_KEY);
   if (!raw) return;
 
-  const subscriptions: Subscription[] = JSON.parse(raw).map((s: Record<string, unknown>) => {
+  let parsed: Record<string, unknown>[];
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return;
+  }
+
+  const subscriptions: Subscription[] = parsed.map((s: Record<string, unknown>) => {
     const rawStatus = s.status as string | undefined;
     const status: SubscriptionStatus =
       rawStatus === "active" || rawStatus === "paused"
