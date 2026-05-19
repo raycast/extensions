@@ -1,7 +1,6 @@
 import {
   Action,
   ActionPanel,
-  Alert,
   Clipboard,
   confirmAlert,
   environment,
@@ -48,10 +47,6 @@ async function alertLoadingError(keyboard: string) {
   return confirmAlert({
     title: "Could not load keyboards",
     message: `Couldn't find the keyboard for ${keyboard}, it may not be supported.`,
-    primaryAction: {
-      title: "OK",
-      style: Alert.ActionStyle.Default,
-    },
     icon: Icon.Warning,
     rememberUserChoice: true,
   });
