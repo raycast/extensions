@@ -23,9 +23,7 @@ Follow these instructions:
 - Don't directly address the reader. Write the note from an objective point of view.
 - Use the same language as the original text.
 ${instructions ? `- ${instructions}` : ""}
-`,
-      { model: AI.Model.OpenAI_GPT4o },
-    );
+`);
     await createNote(result);
   } catch (error) {
     showFailureToast(error, { title: "Could not create a new note." });
