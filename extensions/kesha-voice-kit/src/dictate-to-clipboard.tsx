@@ -110,7 +110,7 @@ export default function Command() {
             rms: 0,
             peak: 0,
             percent: 0,
-            status: "Waiting for microphone audio...",
+            status: "Recording active",
           },
         });
         const stopMonitoring = startRecordingMonitor(audioPath, setState);
@@ -291,7 +291,7 @@ function startRecordingMonitor(
           rms: 0,
           peak: 0,
           percent: 0,
-          status: "Waiting for audio file...",
+          status: "Recording active",
         },
       });
     }
@@ -355,7 +355,7 @@ function numberValue(value: unknown): number | undefined {
 async function readWavSignal(audioPath: string): Promise<SignalLevel> {
   const fileStat = await stat(audioPath);
   if (fileStat.size < 68) {
-    return emptySignal("Opening microphone stream...");
+    return emptySignal("Recording active");
   }
 
   const file = await openFile(audioPath, "r");
@@ -366,7 +366,7 @@ async function readWavSignal(audioPath: string): Promise<SignalLevel> {
     const fmt = findWavChunk(header, "fmt ");
     const data = findWavChunk(header, "data");
     if (!fmt || !data || fmt.length < 16 || fileStat.size <= data.offset) {
-      return emptySignal("Opening microphone stream...");
+      return emptySignal("Recording active");
     }
 
     const audioFormat = header.readUInt16LE(fmt.offset);
