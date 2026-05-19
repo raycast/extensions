@@ -1,6 +1,6 @@
 # Diskutil Changelog
 
-## [1.3.0] - Performance Improvements - {PR_MERGE_DATE}
+## [1.3.0] - Performance Improvements - 2026-05-19
 
   
 
