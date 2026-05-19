@@ -1,0 +1,147 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "rsvp-mode",
+  "title": "RSVP Mode",
+  "description": "Speed-read articles word-by-word (RSVP) with synced local text-to-speech.",
+  "icon": "extension-icon.png",
+  "author": "shemtovo",
+  "contributors": [
+    "chrismessina",
+    "heytommy",
+    "litomore"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "version": "0.1.0",
+  "categories": [
+    "Productivity",
+    "News",
+    "Web"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "open",
+      "title": "RSVP a URL",
+      "subtitle": "RSVP Mode",
+      "description": "Speed-read any URL with synced text-to-speech.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "url",
+          "placeholder": "https://example.com/article",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "open-clipboard",
+      "title": "RSVP Clipboard URL",
+      "subtitle": "RSVP Mode",
+      "description": "Speed-read the URL currently on your clipboard.",
+      "mode": "view"
+    },
+    {
+      "name": "open-current-tab",
+      "title": "RSVP Current Browser Tab",
+      "subtitle": "RSVP Mode",
+      "description": "Speed-read the active tab in your frontmost browser.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "wpm",
+      "title": "Reading Speed",
+      "description": "Words per minute. macOS pre-renders audio at this rate and the visual flash is timed to match.",
+      "type": "textfield",
+      "default": "320",
+      "required": false
+    },
+    {
+      "name": "voice",
+      "title": "Voice",
+      "description": "macOS TTS voice. Leave blank for the system default. List installed voices with `say -v ?` in Terminal. Premium voices (Ava, Zoe, Evan) can be downloaded in System Settings → Accessibility → Spoken Content → Manage Voices.",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "enableTTS",
+      "title": "Text-to-Speech",
+      "description": "Read each chunk aloud while flashing words. Disable for silent speed-reading.",
+      "type": "checkbox",
+      "label": "Speak aloud",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "paragraphPause",
+      "title": "Paragraph Pause",
+      "description": "Extra wait between paragraphs.",
+      "type": "dropdown",
+      "default": "short",
+      "required": false,
+      "data": [
+        { "title": "None", "value": "none" },
+        { "title": "Short", "value": "short" },
+        { "title": "Long", "value": "long" }
+      ]
+    },
+    {
+      "name": "enablePaywallHopper",
+      "title": "Paywall Hopper",
+      "description": "Try to retrieve paywalled content from archive services when the original page is blocked.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "skipPreCheck",
+      "title": "Skip Readability Check",
+      "description": "Skip readability detection and always attempt RSVP rendering.",
+      "type": "checkbox",
+      "label": "Skip",
+      "default": true,
+      "required": false
+    },
+    {
+      "name": "verboseLogging",
+      "title": "Debug Logging",
+      "description": "Print synthesis and playback diagnostics to the dev console.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@chrismessina/raycast-logger": "^1.2.2",
+    "@mozilla/readability": "^0.6.0",
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.2",
+    "linkedom": "^0.18.12",
+    "marked": "^17.0.1",
+    "turndown": "^7.2.2",
+    "turndown-plugin-gfm": "^1.0.2"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "@types/turndown": "^5.0.6",
+    "eslint": "^9.22.0",
+    "prettier": "^3.8.1",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
