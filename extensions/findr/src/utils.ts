@@ -19,6 +19,11 @@ export function getFindrPath(): string {
     if (!chmodApplied) {
       try {
         chmodSync(bundled, 0o755);
+        // findr-ocr is called as a subprocess by findr for Apple Vision OCR
+        const ocrBin = join(environment.assetsPath, "findr-ocr");
+        if (existsSync(ocrBin)) {
+          chmodSync(ocrBin, 0o755);
+        }
       } catch {
         // May already be executable
       }

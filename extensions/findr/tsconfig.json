@@ -14,5 +14,5 @@
     "moduleResolution": "node16",
     "jsx": "react-jsx"
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }
