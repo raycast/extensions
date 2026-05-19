@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "w-grammar",
+  "description": "Fix, improve, summarize, expand, translate, and reply to selected text using Gemini (API Key needed)",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@google/genai": "latest",
+    "@raycast/api": "^1.103.0",
+    "@raycast/utils": "^2.2.1"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+  {
+    "name": "fix-grammar",
+    "title": "Fix Grammar",
+    "description": "Fix grammar, spelling, punctuation and typography without rewriting",
+    "mode": "no-view"
+  },
+  {
+    "name": "improve-text",
+    "title": "Improve Text",
+    "description": "Carefully improve only weak or awkward parts of selected text",
+    "mode": "no-view"
+  },
+  {
+    "name": "summarize-text",
+    "title": "Summarize Text",
+    "description": "Make selected text much shorter",
+    "mode": "no-view"
+  },
+  {
+    "name": "expand-text",
+    "title": "Expand Text",
+    "description": "Make selected text longer and more detailed",
+    "mode": "no-view"
+  },
+  {
+    "name": "translate-to-russian",
+    "title": "Translate to Russian",
+    "description": "Translate selected text to Russian",
+    "mode": "no-view"
+  },
+  {
+    "name": "translate-to-english",
+    "title": "Translate to English",
+    "description": "Translate selected text to English",
+    "mode": "no-view"
+  },
+  {
+    "name": "reply-politely",
+    "title": "Reply Politely",
+    "description": "Generate a polite reply based on selected message and your rough idea",
+    "mode": "view"
+  }
+],
+  "preferences": [
+    {
+      "name": "geminiApiKey",
+      "title": "Gemini API Key",
+      "description": "Paste your Google Gemini API key here",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "model",
+      "title": "Model",
+      "description": "Gemini model to use",
+      "type": "dropdown",
+      "default": "gemini-2.5-flash",
+      "required": true,
+      "data": [
+        {
+          "title": "Gemini 2.5 Flash — balanced",
+          "value": "gemini-2.5-flash"
+        },
+        {
+          "title": "Gemini 2.5 Flash Lite — faster",
+          "value": "gemini-2.5-flash-lite"
+        },
+        {
+          "title": "Gemini 2.0 Flash — fast, different quota",
+          "value": "gemini-2.0-flash"
+        },
+        {
+          "title": "Gemini 1.5 Flash — older fallback",
+          "value": "gemini-1.5-flash"
+        }
+      ]
+    }
+  ],
+  "title": "W Grammar",
+  "author": "wlud",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity",
+    "Communication"
+  ]
+}
