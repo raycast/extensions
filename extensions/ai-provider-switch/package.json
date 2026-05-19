@@ -10,6 +10,18 @@
     "Developer Tools"
   ],
   "license": "MIT",
+  "files": [
+    "assets/",
+    "media/",
+    "metadata/",
+    "src/",
+    "dist/",
+    "README.md",
+    "CHANGELOG.md",
+    "package.json",
+    "tsconfig.json",
+    "eslint.config.js"
+  ],
   "engines": {
     "node": ">=22.22.2"
   },
