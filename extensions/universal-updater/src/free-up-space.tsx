@@ -44,7 +44,10 @@ export default function Command() {
   const enabledEcosystems = useMemo(
     () =>
       (Object.keys(ECOSYSTEM_NAMES) as EcosystemId[]).filter(
-        (id) => prefs[`enable${id.charAt(0).toUpperCase() + id.slice(1)}`],
+        (id) =>
+          prefs[
+            `enable${id.charAt(0).toUpperCase() + id.slice(1)}` as keyof Preferences
+          ],
       ),
     [],
   );

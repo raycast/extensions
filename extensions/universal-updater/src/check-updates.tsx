@@ -64,7 +64,7 @@ interface EcosystemDef {
   id: EcosystemId;
   name: string;
   icon: Icon;
-  preferenceKey: string;
+  preferenceKey: keyof Preferences;
   checker: () => Promise<OutdatedPackage[]>;
   upgrader: () => Promise<string>;
   checkCommand: string;

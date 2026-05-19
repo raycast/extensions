@@ -209,7 +209,10 @@ export default function Command() {
           "composer",
         ] as EcosystemId[]
       ).filter(
-        (id) => prefs[`enable${id.charAt(0).toUpperCase() + id.slice(1)}`],
+        (id) =>
+          prefs[
+            `enable${id.charAt(0).toUpperCase() + id.slice(1)}` as keyof Preferences
+          ],
       ),
     [],
   );
