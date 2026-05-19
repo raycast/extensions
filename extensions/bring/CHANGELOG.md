@@ -1,6 +1,6 @@
 # Bring Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-05-19
 
 - Updated dependencies to latest versions
 - Added Windows platform support
