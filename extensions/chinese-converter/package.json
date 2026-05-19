@@ -70,6 +70,15 @@
       ],
       "preferences": [
         {
+          "name": "autoReadClipboard",
+          "title": "Auto Read Clipboard",
+          "label": "Read clipboard content and fill the search box on launch",
+          "description": "When enabled, if no number is provided through the command argument, the command reads clipboard text on launch and converts it automatically.",
+          "type": "checkbox",
+          "required": false,
+          "default": false
+        },
+        {
           "name": "roundingMode",
           "title": "Rounding Mode",
           "description": "How to handle   extra decimal digits beyond the specified places.",

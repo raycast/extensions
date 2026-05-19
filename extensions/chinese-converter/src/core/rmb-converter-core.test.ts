@@ -63,6 +63,7 @@ describe("rmb-converter-core", () => {
   it("parsePreferences should parse and normalize all preferences", () => {
     expect(
       parsePreferences({
+        autoReadClipboard: false,
         roundingMode: "1",
         preferTraditionalYuan: true,
         preferSimpleZheng: true,
@@ -80,6 +81,7 @@ describe("rmb-converter-core", () => {
     });
     expect(
       parsePreferences({
+        autoReadClipboard: false,
         roundingMode: "4",
         unOmitYuan: false,
         preferTraditionalYuan: false,

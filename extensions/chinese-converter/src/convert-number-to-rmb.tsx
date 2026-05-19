@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Action, ActionPanel, getPreferenceValues, Icon, LaunchProps, List, open } from "@raycast/api";
+import { useEffect, useMemo, useState } from "react";
+import { Action, ActionPanel, Clipboard, getPreferenceValues, Icon, LaunchProps, List, open } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { convert2rmb, createNzh, parsePreferences } from "./core/rmb-converter-core";
 
@@ -14,6 +14,29 @@ export default function ConvertToRmb(props: LaunchProps<{ arguments: { number?: 
 
   const nzh = useMemo(() => createNzh({ moneyPrefix, yuanChar, zhengChar }), [moneyPrefix, yuanChar, zhengChar]);
   const trimmedInput = searchText.trim();
+
+  useEffect(() => {
+    if (!preferences.autoReadClipboard || props.arguments.number) {
+      return;
+    }
+
+    let isMounted = true;
+
+    async function readClipboardText() {
+      const clipboardText = (await Clipboard.readText())?.trim();
+      const clipboardNumber = Number.parseFloat(clipboardText ?? "");
+
+      if (isMounted && clipboardText && !Number.isNaN(clipboardNumber)) {
+        setSearchText(String(clipboardNumber));
+      }
+    }
+
+    readClipboardText();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [preferences.autoReadClipboard, props.arguments.number]);
 
   const parsed = useMemo(
     () => convert2rmb(trimmedInput, { decimalPlaces, roundingMode, moneyOptions, nzh }),
@@ -50,15 +73,6 @@ export default function ConvertToRmb(props: LaunchProps<{ arguments: { number?: 
                   }}
                 />
               )}
-              <Action.OpenInBrowser
-                title="Report an Issue"
-                url="https://github.com/tofrankie/raycast-chinese-converter/issues"
-              />
-              <Action
-                title="Contact Author"
-                icon={Icon.Envelope}
-                onAction={() => open("mailto:1426203851@qq.com?subject=RMB%20Converter%20Feedback")}
-              />
             </ActionPanel>
           }
         />
