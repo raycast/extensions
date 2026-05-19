@@ -185,7 +185,7 @@ export function useAppDetails(
     })();
 
     return () => controller.abort();
-  }, [appId, enabled]);
+  }, [appId, enabled, region, ggDealsApiKey]);
 
   return details;
 }
