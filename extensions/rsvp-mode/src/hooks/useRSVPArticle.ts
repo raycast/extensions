@@ -36,14 +36,9 @@ export interface RSVPArticleActions {
   handleUrlSubmit: (url: string) => Promise<void>;
 }
 
-interface Prefs {
-  skipPreCheck: boolean;
-  enablePaywallHopper: boolean;
-}
-
 export function useRSVPArticle(options: UseRSVPArticleOptions): RSVPArticleState & RSVPArticleActions {
   const { resolveUrl, onNoUrl, commandName } = options;
-  const preferences = getPreferenceValues<Prefs>();
+  const preferences = getPreferenceValues<Preferences>();
 
   const [article, setArticle] = useState<ArticleState | null>(null);
   const [isLoading, setIsLoading] = useState(true);

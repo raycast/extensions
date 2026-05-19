@@ -1,14 +1,10 @@
 import { getPreferenceValues } from "@raycast/api";
 
-interface Prefs {
-  verboseLogging?: boolean;
-}
-
 let cached: boolean | null = null;
 function isVerbose(): boolean {
   if (cached !== null) return cached;
   try {
-    cached = Boolean(getPreferenceValues<Prefs>().verboseLogging);
+    cached = Boolean(getPreferenceValues<Preferences>().verboseLogging);
   } catch {
     cached = false;
   }

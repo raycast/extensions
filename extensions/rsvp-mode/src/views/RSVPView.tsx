@@ -11,13 +11,6 @@ interface Props {
   article: ArticleState;
 }
 
-interface RSVPPrefs {
-  wpm?: string;
-  voice?: string;
-  enableTTS?: boolean;
-  paragraphPause?: ParagraphPause;
-}
-
 // H1 chars in Raycast Detail are roughly 1.7× the width of body chars. Bump up
 // if the focal letter sits left of the arrows, down if it sits right.
 const H1_TO_BODY_RATIO = 1.7;
@@ -59,7 +52,7 @@ function renderRSVPCenter(word: string): string {
 }
 
 export function RSVPView({ article }: Props) {
-  const prefs = getPreferenceValues<RSVPPrefs>();
+  const prefs = getPreferenceValues<Preferences>();
   const initialWpm = parseWpm(prefs.wpm);
   const paragraphPause = (prefs.paragraphPause ?? "short") as ParagraphPause;
   const ttsEnabledPref = prefs.enableTTS !== false;
