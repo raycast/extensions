@@ -65,7 +65,7 @@ export function getMonthlyTotal(
   return subscriptions
     .filter((s) => s.status === "active")
     .filter((s) => {
-      const start = new Date(s.startDate);
+      const start = new Date(s.startDate + "T00:00:00");
       const lastDayOfMonth = new Date(year, month + 1, 0);
       if (start > lastDayOfMonth) return false;
       if (s.billingCycle === "monthly") return true;
@@ -101,7 +101,7 @@ export function getSubscriptionsForDay(
 ): Subscription[] {
   return subscriptions.filter((s) => {
     if (s.status !== "active" || s.billingDay !== day) return false;
-    const start = new Date(s.startDate);
+    const start = new Date(s.startDate + "T00:00:00");
     const subStart = new Date(year, month, day);
     if (subStart < new Date(start.getFullYear(), start.getMonth(), start.getDate())) return false;
     switch (s.billingCycle) {
@@ -124,7 +124,7 @@ export function getMonthSubscriptions(month: number, year: number, subscriptions
     .filter((s) => s.status === "active")
     .filter((s) => {
       if (s.billingCycle === "monthly") return true;
-      const start = new Date(s.startDate);
+      const start = new Date(s.startDate + "T00:00:00");
       if (s.billingCycle === "yearly") return start.getMonth() === month;
       if (s.billingCycle === "quarterly") return (month - start.getMonth() + 12) % 3 === 0;
       if (s.billingCycle === "half-yearly") return (month - start.getMonth() + 12) % 6 === 0;
