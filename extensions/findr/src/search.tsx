@@ -10,7 +10,7 @@ import {
 import { useExec } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
 import { existsSync } from "fs";
-import { SearchResponse } from "./types";
+import { SearchResponse, SearchResult } from "./types";
 import {
   getFindrPath,
   getMaxResults,
@@ -77,9 +77,12 @@ export default function SearchFiles() {
     );
   }
 
+  const hasResults = results.length > 0;
+
   return (
     <List
       isLoading={isLoading && query.length > 0}
+      isShowingDetail={hasResults}
       searchBarPlaceholder="Search files and contents... (e.g. 'revolut', 'resume pdf')"
       onSearchTextChange={setQuery}
       throttle
@@ -112,18 +115,13 @@ export default function SearchFiles() {
               key={`${result.path}-${index}`}
               icon={getFileIcon(result.file_type)}
               title={result.filename}
-              subtitle={
-                result.content_snippet
-                  ? truncate(result.content_snippet, 60)
-                  : parentDir(result.path)
-              }
-              accessories={[
-                { text: formatFileSize(result.size_bytes) },
-                { text: formatRelativeDate(result.modified) },
-                { tag: result.file_type || "?" },
-              ]}
+              quickLook={{ path: result.path, name: result.filename }}
+              detail={<ResultDetail result={result} />}
               actions={
                 <ActionPanel>
+                  <Action.ToggleQuickLook
+                    shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
+                  />
                   <Action.Open title="Open File" target={result.path} />
                   <Action.ShowInFinder path={result.path} />
                   <Action.CopyToClipboard
@@ -146,12 +144,40 @@ export default function SearchFiles() {
   );
 }
 
-function truncate(text: string, max: number): string {
-  if (text.length <= max) return text;
-  return text.slice(0, max) + "...";
-}
+function ResultDetail({ result }: { result: SearchResult }) {
+  let markdown = "";
 
-function parentDir(filePath: string): string {
-  const lastSlash = filePath.lastIndexOf("/");
-  return lastSlash > 0 ? filePath.slice(0, lastSlash) : filePath;
+  if (result.content_snippet) {
+    markdown += `> ${result.content_snippet}\n`;
+  }
+
+  return (
+    <List.Item.Detail
+      markdown={markdown || undefined}
+      metadata={
+        <List.Item.Detail.Metadata>
+          <List.Item.Detail.Metadata.Label title="Path" text={result.path} />
+          <List.Item.Detail.Metadata.Separator />
+          {result.file_type && (
+            <List.Item.Detail.Metadata.Label
+              title="Type"
+              text={result.file_type.toUpperCase()}
+            />
+          )}
+          {result.size_bytes && (
+            <List.Item.Detail.Metadata.Label
+              title="Size"
+              text={formatFileSize(result.size_bytes)}
+            />
+          )}
+          {result.modified && (
+            <List.Item.Detail.Metadata.Label
+              title="Modified"
+              text={formatRelativeDate(result.modified)}
+            />
+          )}
+        </List.Item.Detail.Metadata>
+      }
+    />
+  );
 }
