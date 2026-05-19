@@ -1,6 +1,6 @@
 # IPInfo Changelog
 
-## [Upgrades] - {PR_MERGE_DATE}
+## [Upgrades] - 2026-05-19
 
 - Trim IP address input field.
 
