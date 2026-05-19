@@ -77,15 +77,21 @@ export async function fetchChart(
 
   const result = res.chart.result[0];
   const q = result.indicators.quote[0];
-  const timestamps = result.timestamp ?? [];
+  const allTimestamps = result.timestamp ?? [];
+
+  // Filter out null-close slots (intraday/weekend gaps) to avoid zero-spike
+  // artifacts in the chart renderer.
+  const validIdx = allTimestamps
+    .map((_, i) => i)
+    .filter((i) => q.close[i] != null);
 
   return {
-    timestamps,
-    closes: timestamps.map((_, i) => q.close[i] ?? 0),
-    opens: timestamps.map((_, i) => q.open[i] ?? 0),
-    highs: timestamps.map((_, i) => q.high[i] ?? 0),
-    lows: timestamps.map((_, i) => q.low[i] ?? 0),
-    volumes: timestamps.map((_, i) => q.volume[i] ?? 0),
+    timestamps: validIdx.map((i) => allTimestamps[i]),
+    closes: validIdx.map((i) => q.close[i] as number),
+    opens: validIdx.map((i) => q.open[i] ?? (q.close[i] as number)),
+    highs: validIdx.map((i) => q.high[i] ?? (q.close[i] as number)),
+    lows: validIdx.map((i) => q.low[i] ?? (q.close[i] as number)),
+    volumes: validIdx.map((i) => q.volume[i] ?? 0),
     meta: {
       regularMarketPrice: result.meta.regularMarketPrice,
       chartPreviousClose: result.meta.chartPreviousClose,
