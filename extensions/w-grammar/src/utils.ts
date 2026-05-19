@@ -8,11 +8,6 @@ import {
 } from "@raycast/api";
 import { GoogleGenAI } from "@google/genai";
 
-interface Preferences {
-  geminiApiKey: string;
-  model: string;
-}
-
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message;

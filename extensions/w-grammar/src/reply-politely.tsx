@@ -12,11 +12,6 @@ import {
 import { GoogleGenAI } from "@google/genai";
 import { useEffect, useState } from "react";
 
-interface Preferences {
-  geminiApiKey: string;
-  model: string;
-}
-
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message;
