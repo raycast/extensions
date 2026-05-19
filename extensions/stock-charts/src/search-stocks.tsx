@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, List, open } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, showToast, Toast } from "@raycast/api";
 import { useMemo, useState } from "react";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -106,7 +106,7 @@ export default function Command() {
     );
   }
 
-  function addEarningsToCalendar(quote: Quote) {
+  async function addEarningsToCalendar(quote: Quote) {
     const ts =
       quote.earningsTimestamp ??
       quote.earningsTimestampStart ??
@@ -115,8 +115,17 @@ export default function Command() {
     const name = quote.displayName || quote.shortName || quote.symbol;
     const icsContent = generateIcs(quote.symbol, name, ts);
     const filePath = join(tmpdir(), `${quote.symbol}-earnings.ics`);
-    writeFileSync(filePath, icsContent);
-    open(filePath);
+    try {
+      writeFileSync(filePath, icsContent);
+      await open(filePath);
+    } catch (e) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Calendar Error",
+        message:
+          e instanceof Error ? e.message : "Could not add earnings to calendar",
+      });
+    }
   }
 
   function renderSearchActions(quote: Quote) {

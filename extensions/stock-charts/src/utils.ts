@@ -120,6 +120,7 @@ export function generateIcs(
   const toIcal = (d: Date) =>
     `${d.getUTCFullYear()}${pad(d.getUTCMonth() + 1)}${pad(d.getUTCDate())}T${pad(d.getUTCHours())}${pad(d.getUTCMinutes())}${pad(d.getUTCSeconds())}Z`;
   const dtStart = toIcal(date);
+  const dtEnd = toIcal(new Date(date.getTime() + 60 * 60 * 1000));
   const dtstamp = toIcal(new Date());
   const uid = `${symbol}-earnings-${timestamp}@raycast-stock-charts`;
   return (
@@ -131,7 +132,7 @@ export function generateIcs(
       `UID:${uid}`,
       `DTSTAMP:${dtstamp}`,
       `DTSTART:${dtStart}`,
-      `DTEND:${dtStart}`,
+      `DTEND:${dtEnd}`,
       `SUMMARY:${symbol} Earnings Call`,
       `DESCRIPTION:Earnings announcement for ${companyName}`,
       "END:VEVENT",
