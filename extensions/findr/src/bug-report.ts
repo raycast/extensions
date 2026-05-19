@@ -10,9 +10,14 @@ export async function openBugReport(errorMessage?: string): Promise<void> {
   const doctorOutput = await new Promise<string>((resolve) => {
     try {
       const findrPath = getFindrPath();
-      execFile(findrPath, ["doctor", "--json"], { timeout: 5000 }, (err, stdout) => {
-        resolve(err ? "(findr doctor failed)" : stdout);
-      });
+      execFile(
+        findrPath,
+        ["doctor", "--json"],
+        { timeout: 5000 },
+        (err, stdout) => {
+          resolve(err ? "(findr doctor failed)" : stdout);
+        },
+      );
     } catch {
       resolve("(findr doctor failed)");
     }
@@ -46,5 +51,7 @@ ${errorMessage ? `## Error\n\n\`\`\`\n${errorMessage}\n\`\`\`` : ""}
     labels: "bug",
   });
 
-  await open(`https://github.com/Roderick111/findr/issues/new?${params.toString()}`);
+  await open(
+    `https://github.com/Roderick111/findr/issues/new?${params.toString()}`,
+  );
 }

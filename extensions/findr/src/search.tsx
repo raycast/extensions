@@ -185,8 +185,10 @@ function ResultDetail({ result }: { result: SearchResult }) {
   let markdown = "";
 
   if (result.content_snippet) {
-    const escaped = result.content_snippet.replace(/\n/g, "\n> ");
-    markdown += `> ${escaped}\n`;
+    const sanitized = result.content_snippet
+      .replace(/[\\`*_{}[\]()#+\-.!]/g, "\\$&")
+      .replace(/\n/g, "\n> ");
+    markdown += `> ${sanitized}\n`;
   }
 
   return (
