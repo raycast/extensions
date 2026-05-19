@@ -36,9 +36,6 @@ export default function Command() {
     return permissionView;
   }
 
-  // Limit the number of notes displayed (for example, to 100)
-  const limitedNotes = filteredNotes.slice(0, 100);
-
   return (
     <List
       onSearchTextChange={setSearchText}
@@ -46,7 +43,7 @@ export default function Command() {
       searchBarPlaceholder="Search notes by title, folder, description, tags, or accessories"
     >
       <List.Section title="Pinned">
-        {limitedNotes
+        {filteredNotes
           .filter((note) => note.pinned)
           .map((note) => (
             <NoteListItem key={note.id} note={note} mutate={mutate} />
@@ -54,7 +51,7 @@ export default function Command() {
       </List.Section>
 
       <List.Section title="Notes">
-        {limitedNotes
+        {filteredNotes
           .filter((note) => !note.pinned)
           .map((note) => (
             <NoteListItem key={note.id} note={note} mutate={mutate} />
@@ -62,7 +59,7 @@ export default function Command() {
       </List.Section>
 
       <List.Section title="Recently Deleted">
-        {limitedNotes
+        {filteredNotes
           .filter((note) => note.folder === "Recently Deleted")
           .map((note) => (
             <NoteListItem key={note.id} note={note} mutate={mutate} isDeleted />
