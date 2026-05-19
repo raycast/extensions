@@ -4,14 +4,12 @@
 
 # Quick Share
 
-**Share the active browser tab to Slack — comment, pick channels, send.
-All without leaving Raycast.**
+Share the active browser tab to Slack — comment, pick channels, send.
+All without leaving Raycast.
+
+<img src="assets/overview.png" alt="Overview of Quick Share" width="920"/>
 
 </div>
-
-## Why
-
-You're reading something in your browser and want to drop it in `#design-share` with a quick "look at this". Today that's: copy URL, switch to Slack, find the channel, paste, type, send. Quick Share collapses the loop into a single Raycast command. URL and title come in pre-filled. Add a comment if you want, pick one or many channels, and you're done.
 
 ## Features
 
@@ -24,11 +22,26 @@ You're reading something in your browser and want to drop it in `#design-share` 
 
 ## Commands
 
-| Command | What it does |
-|---|---|
-| **Share Active Browser Tab to Slack** | Share the active tab with a comment |
-| **Send Quick Note to Slack** | Comment-only note, no URL |
-| **Edit Message Template** | Customize the Slack message format |
+### Share Active Browser Tab to Slack
+
+Share the active tab with a comment
+
+### Send Quick Note to Slack
+
+Comment-only note, no URL
+
+### Edit Message Template
+
+Customize the Slack message format
+
+## Screenshots
+
+<p align="center">
+  <img src="metadata/quick-share-1.png" alt="Share Active Browser Tab to Slack form" width="720" />
+  <img src="metadata/quick-share-2.png" alt="Edit Message Template view" width="720" />
+  <img src="metadata/quick-share-3.png" alt="Action panel with Save as Quicklink Preset" width="720" />
+  <img src="metadata/quick-share-4.png" alt="Quick Share commands in Raycast" width="720" />
+</p>
 
 ## Setup
 
@@ -145,9 +158,9 @@ If you enjoy using Quick Share and/or want to support further development, feel 
 
 <a href="https://github.com/sponsors/peinan"><img src="https://img.shields.io/badge/GitHub_Sponsors-555555?style=for-the-badge&logo=github-sponsors&logoColor=EC6863" alt="GitHub Sponsors"></a>
 &nbsp;
-<a href="https://ko-fi.com/peinan"><img src="https://img.shields.io/badge/Ko--fi-FF5E5B?style=for-the-badge&logo=ko-fi&logoColor=white" alt="Ko-fi"></a>
+<a href="https://ko-fi.com/peinan"><img src="https://cdn.prod.website-files.com/5c14e387dab576fe667689cf/670f5a01c01ea9191809398c_support_me_on_kofi_blue.png" height="28" alt="Ko-fi"></a>
 &nbsp;
-<a href="https://buymeacoffee.com/peinan"><img src="https://img.shields.io/badge/Buy_Me_A_Coffee-FFDD00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black" alt="Buy Me A Coffee"></a>
+<a href="https://www.buymeacoffee.com/peinan" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" style="height: 28px !important;" ></a>
 
 </div>
 

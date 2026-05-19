@@ -1,6 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "quick-share",
+  "owner": "orcabrig",
   "title": "Quick Share",
   "description": "Quickly share the active browser tab or a note to one or more Slack channels.",
   "icon": "extension-icon.png",
