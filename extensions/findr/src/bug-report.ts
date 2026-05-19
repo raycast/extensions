@@ -1,18 +1,22 @@
-import { environment } from "@raycast/api";
-import { execFileSync } from "child_process";
+import { environment, open } from "@raycast/api";
+import { execFile } from "child_process";
 import { getFindrPath } from "./utils";
 
-export function buildBugReportUrl(errorMessage?: string): string {
-  let doctorOutput = "";
-  try {
-    const findrPath = getFindrPath();
-    doctorOutput = execFileSync(findrPath, ["doctor", "--json"], {
-      timeout: 5000,
-      encoding: "utf-8",
-    });
-  } catch {
-    doctorOutput = "(findr doctor failed)";
-  }
+/**
+ * Open a bug report URL. Runs findr doctor asynchronously (non-blocking)
+ * to collect diagnostics before opening the browser.
+ */
+export async function openBugReport(errorMessage?: string): Promise<void> {
+  const doctorOutput = await new Promise<string>((resolve) => {
+    try {
+      const findrPath = getFindrPath();
+      execFile(findrPath, ["doctor", "--json"], { timeout: 5000 }, (err, stdout) => {
+        resolve(err ? "(findr doctor failed)" : stdout);
+      });
+    } catch {
+      resolve("(findr doctor failed)");
+    }
+  });
 
   const title = errorMessage
     ? `Bug: ${errorMessage.slice(0, 80)}`
@@ -42,5 +46,5 @@ ${errorMessage ? `## Error\n\n\`\`\`\n${errorMessage}\n\`\`\`` : ""}
     labels: "bug",
   });
 
-  return `https://github.com/Roderick111/findr/issues/new?${params.toString()}`;
+  await open(`https://github.com/Roderick111/findr/issues/new?${params.toString()}`);
 }

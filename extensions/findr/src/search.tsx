@@ -18,7 +18,7 @@ import {
   formatRelativeDate,
   getFileIcon,
 } from "./utils";
-import { buildBugReportUrl } from "./bug-report";
+import { openBugReport } from "./bug-report";
 
 export default function SearchFiles() {
   const [query, setQuery] = useState("");
@@ -75,9 +75,9 @@ export default function SearchFiles() {
           description="The search engine binary is missing. Try reinstalling the extension."
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
+              <Action
                 title="Report Bug"
-                url={buildBugReportUrl("Findr engine binary not found")}
+                onAction={() => openBugReport("Findr engine binary not found")}
               />
             </ActionPanel>
           }
@@ -95,9 +95,9 @@ export default function SearchFiles() {
           description={error.message}
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
+              <Action
                 title="Report Bug with Diagnostics"
-                url={buildBugReportUrl(error.message)}
+                onAction={() => openBugReport(error.message)}
               />
             </ActionPanel>
           }
@@ -164,9 +164,10 @@ export default function SearchFiles() {
                     shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                   <ActionPanel.Section>
-                    <Action.OpenInBrowser
+                    <Action
                       title="Report Bug"
-                      url={buildBugReportUrl()}
+                      icon={Icon.Bug}
+                      onAction={() => openBugReport()}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "b" }}
                     />
                   </ActionPanel.Section>
