@@ -170,7 +170,7 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
         <Action.CopyToClipboard
           title="Copy Note URL"
           content={{
-            html: `<a href=${getOpenNoteURL(note.UUID)} title="${note.title}">${note.title}</a>`,
+            html: `<a href="${getOpenNoteURL(note.UUID)}" title="${note.title}">${note.title}</a>`,
             text: getOpenNoteURL(note.UUID),
           }}
           shortcut={Keyboard.Shortcut.Common.Copy}
