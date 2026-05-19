@@ -311,15 +311,6 @@ function requiredText(id: string, label: string, placeholder: string): Field {
   };
 }
 
-function optionalText(id: string, label: string, placeholder: string): Field {
-  return {
-    id,
-    label,
-    type: "text",
-    placeholder,
-  };
-}
-
 function optionalTextArea(
   id: string,
   label: string,
@@ -379,8 +370,4 @@ function requiredModeDropdown(id: string, label: string): Field {
 
 function requireText(key: string, message: string) {
   return (values: FormValues) => (textValue(values, key) ? undefined : message);
-}
-
-function capitalize(value: string) {
-  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }
