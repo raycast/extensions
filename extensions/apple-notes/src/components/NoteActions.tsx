@@ -51,7 +51,7 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
         await deleteNoteById(note.id);
         await mutate();
         if (isDetail) {
-          await pop();
+          pop();
         }
         await showToast({ title: "Deleted note", message: `"${note.title}" has been deleted` });
       }
@@ -65,7 +65,7 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
       await restoreNoteById(note.id);
       await mutate();
       if (isDetail) {
-        await pop();
+        pop();
       }
       await showToast({ title: "Restored note", message: `"${note.title}" has been restored` });
     } catch (error) {
