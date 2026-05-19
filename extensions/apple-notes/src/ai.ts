@@ -26,6 +26,6 @@ ${instructions ? `- ${instructions}` : ""}
 `);
     await createNote(result);
   } catch (error) {
-    showFailureToast(error, { title: "Could not create a new note." });
+    await showFailureToast(error, { title: "Could not create a new note." });
   }
 };

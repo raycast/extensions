@@ -315,8 +315,8 @@ Only return a minified JSON array that is parsable, nothing else. Try to find be
     [],
     {
       execute: load,
-      onError(error) {
-        showFailureToast(error, { title: "Could not find related notes" });
+      async onError(error) {
+        await showFailureToast(error, { title: "Could not find related notes" });
       },
     },
   );
