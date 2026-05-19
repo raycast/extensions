@@ -42,7 +42,7 @@ function Search() {
       onSearchTextChange={setSearchText}
       throttle
       pagination={pagination}
-      filtering
+      filtering={{ keepSectionOrder: true }}
     >
       {sections.map((section) => {
         return (

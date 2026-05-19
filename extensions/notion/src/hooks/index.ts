@@ -248,9 +248,8 @@ export function usePinnedPages() {
   });
 
   async function setPinnedPage(page: Page) {
-    if (!data) return;
-
-    const pinnedPages = [...data].map((p) => new PinnedPage(p));
+    const storageData = await LocalStorage.getItem("PINNED_PAGES");
+    const pinnedPages: PinnedPage[] = storageData && typeof storageData === "string" ? JSON.parse(storageData) : [];
 
     const existingIndex = pinnedPages.findIndex((x) => x.id === page.id);
     if (existingIndex > -1) {
@@ -264,9 +263,10 @@ export function usePinnedPages() {
   }
 
   async function removePinnedPage(id: string) {
-    if (!data) return;
+    const storageData = await LocalStorage.getItem("PINNED_PAGES");
+    const pinnedPages: PinnedPage[] = storageData && typeof storageData === "string" ? JSON.parse(storageData) : [];
 
-    const updatedPages = data.filter((page) => page.id !== id).map((p) => new PinnedPage(p));
+    const updatedPages = pinnedPages.filter((p) => p.id !== id);
 
     await LocalStorage.setItem("PINNED_PAGES", JSON.stringify(updatedPages));
     mutate();
