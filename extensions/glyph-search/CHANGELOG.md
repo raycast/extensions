@@ -2,7 +2,7 @@
 
 ## [Fix Circled and Squared glyph clipping] - {PR_MERGE_DATE}
 
-- Fixed standard Circled and Squared glyph previews being clipped while preserving bundled artwork for private-use glyphs.
+- Fixed Circled and Squared glyph previews being clipped by using padded local SVG assets.
 
 ## [Initial Version] - 2023-02-10
 

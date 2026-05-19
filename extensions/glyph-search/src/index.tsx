@@ -1,22 +1,13 @@
 import { ActionPanel, Action, Grid, Color } from "@raycast/api";
 import { arrows, circledAndSquared, Glyph, keys, others, pictograms } from "./data";
 
-function interSvgSource(name: string) {
+function remoteInterSvgSource(name: string) {
   return `https://raw.githubusercontent.com/gbougakov/inter-svgs/9fba6c5cac248ae9831b4e8cf45f3b6a334bc176/svg-${name}.svg`;
 }
 
-function isPrivateUseCodepoint(codepoint: string) {
-  const value = Number.parseInt(codepoint, 16);
-  return value >= 0xe000 && value <= 0xf8ff;
-}
-
-function glyphContent({ codepoint, glyph, name }: Glyph, renderNativeUnicodeGlyphs: boolean) {
-  if (renderNativeUnicodeGlyphs && !isPrivateUseCodepoint(codepoint)) {
-    return glyph;
-  }
-
+function glyphContent(name: string, usePaddedAsset: boolean) {
   return {
-    source: interSvgSource(name),
+    source: usePaddedAsset ? `glyphs/${name}.svg` : remoteInterSvgSource(name),
     tintColor: Color.PrimaryText,
   };
 }
@@ -24,11 +15,11 @@ function glyphContent({ codepoint, glyph, name }: Glyph, renderNativeUnicodeGlyp
 function GlyphSection({
   title,
   glyphs,
-  renderNativeUnicodeGlyphs = false,
+  usePaddedAssets = false,
 }: {
   title: string;
   glyphs: Glyph[];
-  renderNativeUnicodeGlyphs?: boolean;
+  usePaddedAssets?: boolean;
 }) {
   return (
     <Grid.Section title={title}>
@@ -37,7 +28,7 @@ function GlyphSection({
           key={item.name}
           content={{
             tooltip: item.name,
-            value: glyphContent(item, renderNativeUnicodeGlyphs),
+            value: glyphContent(item.name, usePaddedAssets),
           }}
           keywords={[item.name, item.unicodeDescription, ...item.unicodeDescription.split(" "), item.glyph, title]}
           actions={
@@ -61,7 +52,7 @@ export default function Command() {
       <GlyphSection title="Arrows" glyphs={arrows} />
       <GlyphSection title="Keys" glyphs={keys} />
       <GlyphSection title="Pictograms" glyphs={pictograms} />
-      <GlyphSection title="Circled and Squared" glyphs={circledAndSquared} renderNativeUnicodeGlyphs />
+      <GlyphSection title="Circled and Squared" glyphs={circledAndSquared} usePaddedAssets />
       <GlyphSection title="Others" glyphs={others} />
     </Grid>
   );
