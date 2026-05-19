@@ -46,14 +46,14 @@ export default function SearchFiles() {
   const isIndexing = data?.mode === "indexing";
 
   useEffect(() => {
-    if (error && query.length > 0) {
+    if (error) {
       showToast({
         style: Toast.Style.Failure,
         title: "Search failed",
         message: error.message,
       });
     }
-  }, [error, query]);
+  }, [error]);
 
   useEffect(() => {
     if (isIndexing) {
