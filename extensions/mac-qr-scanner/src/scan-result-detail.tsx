@@ -47,7 +47,7 @@ export function ScanResultDetail({ data }: { data: string }) {
                 } catch (error) {
                   await showToast({
                     style: Toast.Style.Failure,
-                    title: "Connection failed",
+                    title: "Connection Failed",
                     message:
                       error instanceof Error ? error.message : String(error),
                   });
@@ -63,7 +63,7 @@ export function ScanResultDetail({ data }: { data: string }) {
               onAction={() => setShowPassword((prev) => !prev)}
             />
           )}
-          {isUrl && <Action.OpenInBrowser url={data} />}
+          {isUrl && <Action.OpenInBrowser url={data} icon={Icon.Globe} />}
           {wifi && (
             <Action.CopyToClipboard
               title="Copy Network Name"
@@ -153,7 +153,7 @@ function buildMarkdown(
       ``,
       `Press \`↵\` to connect to **${wifi.ssid}**.`,
       ``,
-      `> When connecting, macOS may show a \`networksetup\` dialog asking to use the System keychain. This is a side-effect of how macOS allows external programs to establish a wifi-connection. You can safely click **Deny**.`,
+      `> When connecting, macOS may show a \`networksetup\` dialog asking to use the System keychain. This is a side effect of how macOS allows external programs to establish a Wi-Fi connection. You can safely click **Deny**.`,
     ].join("\n");
   }
 

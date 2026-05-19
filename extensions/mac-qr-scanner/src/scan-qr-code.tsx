@@ -157,13 +157,5 @@ export default function Command() {
     markdown = `**Error**\n\n${errorMessage}`;
   }
 
-  return (
-    <Detail
-      isLoading={status === "scanning"}
-      navigationTitle={
-        status === "scanning" ? "Point a QR code at your camera" : undefined
-      }
-      markdown={markdown}
-    />
-  );
+  return <Detail isLoading={status === "scanning"} markdown={markdown} />;
 }

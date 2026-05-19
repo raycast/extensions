@@ -88,7 +88,7 @@ export default function ScanHistory() {
   }
 
   return (
-    <List isLoading={isLoading}>
+    <List isLoading={isLoading} searchBarPlaceholder="Search scanned QR codes…">
       {history.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Clock}
