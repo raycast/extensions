@@ -1,4 +1,12 @@
-import { Action, ActionPanel, Icon, List, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Icon,
+  List,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useMemo, useState } from "react";
 import { tmpdir } from "os";
 import { join } from "path";
