@@ -1,6 +1,6 @@
 # Day One Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2026-05-19
 
 - Fixed CLI detection when Raycast does not inherit the terminal PATH.
 
