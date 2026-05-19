@@ -41,14 +41,11 @@ const METER_INTERVAL_MS = 500;
 const METER_WINDOW_SECONDS = 1;
 const WAV_HEADER_BYTES = 4096;
 const WAVE_FORMAT_EXTENSIBLE = 0xfffe;
+const TRANSCRIBE_TIMEOUT_MS = 15_000;
 
 interface TranscribeResult {
   file: string;
   text: string;
-  lang: string;
-  audioLanguage?: { code: string; confidence: number };
-  textLanguage?: { code: string; confidence: number };
-  sttTimeMs?: number;
 }
 
 interface MicInfo {
@@ -76,7 +73,7 @@ type State =
   | { status: "stopping" }
   | { status: "transcribing" }
   | { status: "error"; message: string; hint?: string }
-  | { status: "ok"; result: TranscribeResult; rawJson: string };
+  | { status: "ok"; result: TranscribeResult };
 
 export default function Command() {
   const prefs = getPreferenceValues<Preferences.DictateToClipboard>();
@@ -145,7 +142,7 @@ export default function Command() {
 
         const transcribeAbort = new AbortController();
         transcribeAbortRef.current = transcribeAbort;
-        const { result, rawJson } = await transcribeAudio(
+        const result = await transcribeAudio(
           kesha,
           audioPath,
           transcribeAbort.signal,
@@ -165,7 +162,6 @@ export default function Command() {
         setState({
           status: "ok",
           result: { ...result, text: transcript },
-          rawJson,
         });
       } catch (err: unknown) {
         if (cancelled) return;
@@ -230,7 +226,7 @@ export default function Command() {
     return <Detail markdown={`# Error\n\n${body}`} />;
   }
 
-  const { result, rawJson } = state;
+  const { result } = state;
   return (
     <Detail
       markdown={buildMarkdown(result)}
@@ -240,7 +236,6 @@ export default function Command() {
             title="Copy Transcript"
             content={result.text}
           />
-          <Action.CopyToClipboard title="Copy as JSON" content={rawJson} />
         </ActionPanel>
       }
     />
@@ -640,20 +635,78 @@ async function transcribeAudio(
   kesha: KeshaSpawn,
   audioPath: string,
   signal?: AbortSignal,
-): Promise<{ result: TranscribeResult; rawJson: string }> {
-  const { stdout } = await execFileAsync(
+): Promise<TranscribeResult> {
+  const stdout = await runKeshaPlainTranscribe(
     kesha.command,
-    [...kesha.prefixArgs, "--json", audioPath],
-    {
-      maxBuffer: 16 * 1024 * 1024,
-      signal,
-    },
+    [...kesha.prefixArgs, audioPath],
+    signal,
   );
-  const parsed = JSON.parse(stdout) as TranscribeResult[];
-  if (!parsed.length) {
+  const text = stdout.trim();
+  if (!text) {
     throw new Error("No transcript returned.");
   }
-  return { result: parsed[0], rawJson: stdout };
+  return { file: audioPath, text };
+}
+
+async function runKeshaPlainTranscribe(
+  command: string,
+  args: string[],
+  signal?: AbortSignal,
+): Promise<string> {
+  const proc = spawnProcess(command, args, {
+    stdio: ["ignore", "pipe", "pipe"],
+    detached: true,
+  });
+
+  let stdout = "";
+  let stderr = "";
+  let timedOut = false;
+  proc.stdout?.on("data", (chunk: Buffer) => {
+    stdout += chunk.toString("utf8");
+    if (stdout.length > 16 * 1024 * 1024)
+      stdout = stdout.slice(-16 * 1024 * 1024);
+  });
+  proc.stderr?.on("data", (chunk: Buffer) => {
+    stderr += chunk.toString("utf8");
+    if (stderr.length > 8000) stderr = stderr.slice(-8000);
+  });
+
+  const timeout = setTimeout(() => {
+    timedOut = true;
+    killRecorderProcess(proc, "SIGTERM");
+  }, TRANSCRIBE_TIMEOUT_MS);
+  timeout.unref?.();
+
+  const forceKill = setTimeout(() => {
+    if (proc.exitCode == null) {
+      killRecorderProcess(proc, "SIGKILL");
+    }
+  }, TRANSCRIBE_TIMEOUT_MS + 3000);
+  forceKill.unref?.();
+
+  const abort = () => killRecorderProcess(proc, "SIGTERM");
+  signal?.addEventListener("abort", abort, { once: true });
+
+  try {
+    const exitCode = await new Promise<number | null>((resolve, reject) => {
+      proc.once("error", reject);
+      proc.once("exit", (code) => resolve(code));
+    });
+    if (timedOut) {
+      throw new Error("kesha transcription timed out after 15 seconds.");
+    }
+    if (signal?.aborted) {
+      throw new Error("kesha transcription was cancelled.");
+    }
+    if (exitCode !== 0) {
+      throw new Error(stderr.trim() || `kesha exited with code ${exitCode}`);
+    }
+    return stdout;
+  } finally {
+    clearTimeout(timeout);
+    clearTimeout(forceKill);
+    signal?.removeEventListener("abort", abort);
+  }
 }
 
 function buildMarkdown(r: TranscribeResult): string {
@@ -661,21 +714,5 @@ function buildMarkdown(r: TranscribeResult): string {
   lines.push("# Dictation");
   lines.push("");
   lines.push(r.text);
-  lines.push("");
-  lines.push("---");
-  const meta: string[] = [];
-  const lang = r.textLanguage?.code ?? r.audioLanguage?.code ?? r.lang;
-  const conf = r.textLanguage?.confidence ?? r.audioLanguage?.confidence;
-  if (lang) {
-    meta.push(
-      conf != null
-        ? `**Language:** \`${lang}\` (confidence ${conf.toFixed(2)})`
-        : `**Language:** \`${lang}\``,
-    );
-  }
-  if (r.sttTimeMs != null) {
-    meta.push(`**STT time:** ${r.sttTimeMs} ms`);
-  }
-  lines.push(meta.join(" · "));
   return lines.join("\n");
 }
