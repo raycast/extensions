@@ -1,5 +1,9 @@
 # IP Tools Changelog
 
+## [Enhancements] - {PR_MERGE_DATE}
+
+- Added Windows support for the extension
+
 ## [Updated extension description] - 2024-01-02
 
 ## [New Features ] - 2023-12-15
