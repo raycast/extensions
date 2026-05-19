@@ -1,13 +1,36 @@
 import { getPreferenceValues } from "@raycast/api";
+import { existsSync } from "fs";
+import { homedir } from "os";
 
 interface Preferences {
   findrPath: string;
   maxResults: string;
 }
 
+const COMMON_PATHS = [
+  `${homedir()}/.cargo/bin/findr`,
+  `${homedir()}/.local/bin/findr`,
+  "/usr/local/bin/findr",
+  "/opt/homebrew/bin/findr",
+];
+
 export function getFindrPath(): string {
   const { findrPath } = getPreferenceValues<Preferences>();
-  return findrPath;
+
+  // If user-configured path exists, use it
+  if (findrPath && existsSync(findrPath)) {
+    return findrPath;
+  }
+
+  // Auto-detect from common install locations
+  for (const p of COMMON_PATHS) {
+    if (existsSync(p)) {
+      return p;
+    }
+  }
+
+  // Return configured path (will show "not found" error in UI)
+  return findrPath || COMMON_PATHS[0];
 }
 
 export function getMaxResults(): number {

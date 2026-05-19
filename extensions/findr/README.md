@@ -6,18 +6,15 @@ Searches both filenames and file contents (including PDFs) in a single query wit
 
 ## Prerequisites
 
-This extension requires the `findr` CLI binary. Install it:
+This extension requires the `findr` CLI binary. Install with one command:
 
 ```bash
-# Install Rust if needed
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-# Install findr
-cargo install --git https://github.com/Roderick111/findr.git
-
-# Build the index (first time only, ~25 seconds)
-findr index init
+curl -sL https://raw.githubusercontent.com/Roderick111/findr/main/install.sh | bash
 ```
+
+The binary path is auto-detected. No manual configuration needed.
+
+On first search, findr automatically builds an index of your files (~25 seconds). After that, the index updates itself on every search.
 
 ## How It Works
 
@@ -25,10 +22,10 @@ Type your query and findr searches both filenames and file contents simultaneous
 
 1. Files whose name starts with your query
 2. Files whose name contains your query
-3. Files containing your query in their content (PDFs, text, code)
-4. Fuzzy filename matches
+3. Files with a close typo match in the name
+4. Files containing your query in their content (PDFs, text, code)
 
-The index updates automatically on every search — new files in Downloads, Desktop, or Documents are found immediately. A full reindex runs weekly in the background.
+Documents (PDF, DOCX) rank above dev files. Recent files break ties within the same tier.
 
 ## Commands
 
@@ -44,5 +41,5 @@ Manually trigger a full reindex of all configured scan paths.
 
 | Preference | Description |
 |-----------|-------------|
-| Findr Binary Path | Path to the `findr` binary (default: `/usr/local/bin/findr`) |
-| Max Results | Maximum results per search (default: 20) |
+| Findr Binary Path | Path to the `findr` binary (auto-detected from ~/.cargo/bin, ~/.local/bin, /usr/local/bin) |
+| Max Results | Maximum results per search (default: 30) |

@@ -1,6 +1,15 @@
-import { Action, ActionPanel, List, Icon, Keyboard } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  List,
+  Icon,
+  Keyboard,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useExec } from "@raycast/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { existsSync } from "fs";
 import { SearchResponse } from "./types";
 import {
   getFindrPath,
@@ -14,12 +23,13 @@ export default function SearchFiles() {
   const [query, setQuery] = useState("");
   const findrPath = getFindrPath();
   const maxResults = getMaxResults();
+  const binaryExists = useMemo(() => existsSync(findrPath), [findrPath]);
 
-  const { isLoading, data } = useExec(
+  const { isLoading, data, error } = useExec(
     findrPath,
     ["search", query, "--json", "--limit", String(maxResults)],
     {
-      execute: query.length > 0,
+      execute: query.length > 0 && binaryExists,
       keepPreviousData: true,
       parseOutput: ({ stdout }) => {
         try {
@@ -33,6 +43,42 @@ export default function SearchFiles() {
 
   const results = useMemo(() => data?.results || [], [data]);
   const elapsed = data?.elapsed_ms ?? 0;
+  const isIndexing = data?.mode === "indexing";
+
+  // Show toast on error
+  useEffect(() => {
+    if (error && query.length > 0) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Search failed",
+        message: error.message,
+      });
+    }
+  }, [error]);
+
+  // Show toast when indexing starts
+  useEffect(() => {
+    if (isIndexing) {
+      showToast({
+        style: Toast.Style.Animated,
+        title: "Building index for the first time...",
+        message: "This takes ~25 seconds. Search again shortly.",
+      });
+    }
+  }, [isIndexing]);
+
+  // Binary not found
+  if (!binaryExists) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Findr CLI not found"
+          description={`Binary not found at: ${findrPath}\n\nInstall it:\n1. Install Rust: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh\n2. Run: cargo install --git https://github.com/Roderick111/findr.git\n\nThen update the binary path in extension preferences if needed.`}
+        />
+      </List>
+    );
+  }
 
   return (
     <List
@@ -47,11 +93,17 @@ export default function SearchFiles() {
           title="Type to search"
           description="Searches filenames and file contents. Append a type to filter (e.g. 'invoice pdf')"
         />
+      ) : isIndexing ? (
+        <List.EmptyView
+          icon={Icon.Clock}
+          title="Building index..."
+          description="First run: indexing your files (~25 seconds). Search again in a moment."
+        />
       ) : results.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.XMarkCircle}
           title="No results"
-          description={`Nothing found for "${query}". Try 'findr index init' to rebuild the index.`}
+          description={`Nothing found for "${query}".`}
         />
       ) : (
         <List.Section
