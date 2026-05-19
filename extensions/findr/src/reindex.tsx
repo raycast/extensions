@@ -1,5 +1,5 @@
 import { showToast, Toast } from "@raycast/api";
-import { exec } from "child_process";
+import { execFile } from "child_process";
 import { getFindrPath } from "./utils";
 
 export default async function Reindex() {
@@ -11,7 +11,7 @@ export default async function Reindex() {
   });
 
   return new Promise<void>((resolve) => {
-    exec(`"${findrPath}" index rebuild`, (error, _stdout, stderr) => {
+    execFile(findrPath, ["index", "rebuild"], (error, _stdout, stderr) => {
       if (error) {
         showToast({
           style: Toast.Style.Failure,

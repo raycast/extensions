@@ -9,6 +9,7 @@ import {
 } from "@raycast/api";
 import { useExec } from "@raycast/utils";
 import { useState, useMemo, useEffect } from "react";
+import { existsSync } from "fs";
 import { SearchResponse } from "./types";
 import {
   getFindrPath,
@@ -22,12 +23,13 @@ export default function SearchFiles() {
   const [query, setQuery] = useState("");
   const findrPath = getFindrPath();
   const maxResults = getMaxResults();
+  const binaryExists = useMemo(() => existsSync(findrPath), [findrPath]);
 
   const { isLoading, data, error } = useExec(
     findrPath,
     ["search", query, "--json", "--limit", String(maxResults)],
     {
-      execute: query.length > 0,
+      execute: query.length > 0 && binaryExists,
       keepPreviousData: true,
       parseOutput: ({ stdout }) => {
         try {
@@ -51,7 +53,7 @@ export default function SearchFiles() {
         message: error.message,
       });
     }
-  }, [error]);
+  }, [error, query]);
 
   useEffect(() => {
     if (isIndexing) {
@@ -62,6 +64,18 @@ export default function SearchFiles() {
       });
     }
   }, [isIndexing]);
+
+  if (!binaryExists) {
+    return (
+      <List>
+        <List.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Findr CLI Not Found"
+          description={`Install findr first:\n\ncurl -sL https://raw.githubusercontent.com/Roderick111/findr/main/install.sh | bash\n\nOr: cargo install --git https://github.com/Roderick111/findr.git\n\nThen restart Raycast. If installed to a custom path, set it in extension preferences.`}
+        />
+      </List>
+    );
+  }
 
   return (
     <List
@@ -101,7 +115,7 @@ export default function SearchFiles() {
               subtitle={
                 result.content_snippet
                   ? truncate(result.content_snippet, 60)
-                  : truncatePath(result.path, result.filename)
+                  : parentDir(result.path)
               }
               accessories={[
                 { text: formatFileSize(result.size_bytes) },
@@ -137,6 +151,7 @@ function truncate(text: string, max: number): string {
   return text.slice(0, max) + "...";
 }
 
-function truncatePath(path: string, filename: string): string {
-  return path.replace(filename, "").replace(/\/$/, "");
+function parentDir(filePath: string): string {
+  const lastSlash = filePath.lastIndexOf("/");
+  return lastSlash > 0 ? filePath.slice(0, lastSlash) : filePath;
 }

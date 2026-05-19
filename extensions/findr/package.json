@@ -25,6 +25,14 @@
   ],
   "preferences": [
     {
+      "name": "findrPath",
+      "title": "Findr Binary Path",
+      "description": "Path to the findr CLI binary. Leave empty for auto-detection.",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
       "name": "maxResults",
       "title": "Max Results",
       "description": "Maximum number of search results to display",

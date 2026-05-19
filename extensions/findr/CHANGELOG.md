@@ -1,6 +1,6 @@
 # Changelog
 
-## [Initial Release] - 2026-05-19
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Search Files command: unified filename + content search via findr CLI
 - Content snippets shown inline for content matches
