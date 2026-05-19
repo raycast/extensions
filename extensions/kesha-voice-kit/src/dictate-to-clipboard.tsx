@@ -8,13 +8,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { spawn as spawnProcess } from "node:child_process";
-import {
-  mkdtemp,
-  open as openFile,
-  readFile,
-  rm,
-  stat,
-} from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { execFile } from "node:child_process";
@@ -38,11 +32,57 @@ const DEFAULT_MAX_SECONDS = 120;
 const MAX_ALLOWED_SECONDS = 3600;
 const SILENCE_PEAK_THRESHOLD = 0.0001;
 const METER_INTERVAL_MS = 500;
-const METER_WINDOW_SECONDS = 1;
-const WAV_HEADER_BYTES = 4096;
 const WAVE_FORMAT_EXTENSIBLE = 0xfffe;
 const TRANSCRIBE_TIMEOUT_MS = 60_000;
 const TRANSCRIBE_TIMEOUT_SECONDS = TRANSCRIBE_TIMEOUT_MS / 1000;
+const SWIFT_MIC_METER_SCRIPT = `
+import AVFoundation
+import Foundation
+
+let engine = AVAudioEngine()
+let input = engine.inputNode
+let format = input.outputFormat(forBus: 0)
+
+if format.channelCount == 0 {
+  FileHandle.standardError.write(Data("No input channels\\n".utf8))
+  exit(1)
+}
+
+input.installTap(onBus: 0, bufferSize: 2048, format: format) { buffer, _ in
+  guard let channels = buffer.floatChannelData else { return }
+  let channelCount = Int(buffer.format.channelCount)
+  let frameCount = Int(buffer.frameLength)
+  if channelCount == 0 || frameCount == 0 { return }
+
+  var sum: Float = 0
+  var peak: Float = 0
+  var count = 0
+
+  for channel in 0..<channelCount {
+    let samples = channels[channel]
+    for frame in 0..<frameCount {
+      let sample = samples[frame]
+      let absolute = abs(sample)
+      sum += sample * sample
+      peak = max(peak, absolute)
+      count += 1
+    }
+  }
+
+  let rms = sqrt(sum / Float(max(count, 1)))
+  let percent = min(100, Int(max(sqrt(peak) * 100, rms * 600).rounded()))
+  print("{\\"rms\\":\\(rms),\\"peak\\":\\(peak),\\"percent\\":\\(percent)}")
+  fflush(stdout)
+}
+
+do {
+  try engine.start()
+  RunLoop.current.run()
+} catch {
+  FileHandle.standardError.write(Data("\\(error)\\n".utf8))
+  exit(1)
+}
+`;
 
 interface TranscribeResult {
   file: string;
@@ -111,10 +151,10 @@ export default function Command() {
             rms: 0,
             peak: 0,
             percent: 0,
-            status: "Recording active",
+            status: "Starting microphone meter...",
           },
         });
-        const stopMonitoring = startRecordingMonitor(audioPath, setState);
+        const stopMonitoring = startRecordingMonitor(setState);
         await showToast({
           style: Toast.Style.Animated,
           title: "Recording",
@@ -259,7 +299,6 @@ function parseMaxSeconds(value: string | undefined): number {
 }
 
 function startRecordingMonitor(
-  audioPath: string,
   setState: Dispatch<SetStateAction<State>>,
 ): () => void {
   const startedAt = Date.now();
@@ -276,26 +315,14 @@ function startRecordingMonitor(
   }
 
   void resolveDefaultMicInfo().then((mic) => updateRecording({ mic }));
+  const stopMeter = startLiveMicMeter((signal) => updateRecording({ signal }));
 
   async function tick() {
     const elapsedSeconds = Math.max(
       0,
       Math.floor((Date.now() - startedAt) / 1000),
     );
-    try {
-      const signal = await readWavSignal(audioPath);
-      updateRecording({ elapsedSeconds, signal });
-    } catch {
-      updateRecording({
-        elapsedSeconds,
-        signal: {
-          rms: 0,
-          peak: 0,
-          percent: 0,
-          status: "Recording active",
-        },
-      });
-    }
+    updateRecording({ elapsedSeconds });
   }
 
   void tick();
@@ -303,7 +330,67 @@ function startRecordingMonitor(
   return () => {
     stopped = true;
     clearInterval(timer);
+    stopMeter();
   };
+}
+
+function startLiveMicMeter(
+  onSignal: (signal: SignalLevel) => void,
+): () => void {
+  const proc = spawnProcess("/usr/bin/swift", ["-e", SWIFT_MIC_METER_SCRIPT], {
+    stdio: ["ignore", "pipe", "pipe"],
+    detached: true,
+  });
+  let stopped = false;
+  let stdout = "";
+  let sawSignal = false;
+
+  proc.stdout?.on("data", (chunk: Buffer) => {
+    stdout += chunk.toString("utf8");
+    const lines = stdout.split(/\r?\n/);
+    stdout = lines.pop() ?? "";
+    for (const line of lines) {
+      const signal = parseMeterLine(line);
+      if (!signal) continue;
+      sawSignal = true;
+      if (!stopped) onSignal(signal);
+    }
+  });
+
+  proc.once("error", () => {
+    if (!stopped) onSignal(emptySignal("Meter unavailable"));
+  });
+  proc.once("exit", () => {
+    if (!stopped && !sawSignal) onSignal(emptySignal("Meter unavailable"));
+  });
+
+  return () => {
+    stopped = true;
+    killRecorderProcess(proc, "SIGTERM");
+    setTimeout(() => {
+      if (proc.exitCode == null) killRecorderProcess(proc, "SIGKILL");
+    }, 1000).unref?.();
+  };
+}
+
+function parseMeterLine(line: string): SignalLevel | null {
+  try {
+    const parsed = JSON.parse(line) as Partial<SignalLevel>;
+    const rms = numberValue(parsed.rms) ?? 0;
+    const peak = numberValue(parsed.peak) ?? 0;
+    const percent = Math.max(0, Math.min(100, Math.round(parsed.percent ?? 0)));
+    return {
+      rms,
+      peak,
+      percent,
+      status:
+        peak > SILENCE_PEAK_THRESHOLD || percent > 0
+          ? "Signal detected"
+          : "Listening...",
+    };
+  } catch {
+    return null;
+  }
 }
 
 async function resolveDefaultMicInfo(): Promise<MicInfo> {
@@ -353,108 +440,8 @@ function numberValue(value: unknown): number | undefined {
     : undefined;
 }
 
-async function readWavSignal(audioPath: string): Promise<SignalLevel> {
-  const fileStat = await stat(audioPath);
-  if (fileStat.size < 68) {
-    return emptySignal("Recording active");
-  }
-
-  const file = await openFile(audioPath, "r");
-  try {
-    const headerLength = Math.min(WAV_HEADER_BYTES, fileStat.size);
-    const header = Buffer.alloc(headerLength);
-    await file.read(header, 0, header.length, 0);
-    const fmt = findWavChunk(header, "fmt ");
-    const data = findWavChunk(header, "data");
-    if (!fmt || !data || fmt.length < 16 || fileStat.size <= data.offset) {
-      return emptySignal("Recording active");
-    }
-
-    const audioFormat = header.readUInt16LE(fmt.offset);
-    const formatTag = wavPayloadFormat(header, fmt, audioFormat);
-    const bitsPerSample = header.readUInt16LE(fmt.offset + 14);
-    const blockAlign = Math.max(1, header.readUInt16LE(fmt.offset + 12));
-    const byteRate = Math.max(1, header.readUInt32LE(fmt.offset + 8));
-    const availableBytes = fileStat.size - data.offset;
-    const windowBytes = alignBytes(
-      Math.min(availableBytes, byteRate * METER_WINDOW_SECONDS),
-      blockAlign,
-    );
-    if (windowBytes <= 0) {
-      return emptySignal("Listening...");
-    }
-
-    const window = Buffer.alloc(windowBytes);
-    await file.read(
-      window,
-      0,
-      window.length,
-      data.offset + availableBytes - windowBytes,
-    );
-    const stats = measurePcmWindow(window, formatTag, bitsPerSample);
-    if (!stats) {
-      return emptySignal("Listening...");
-    }
-    return {
-      ...stats,
-      percent: signalPercent(stats),
-      status:
-        stats.peak > SILENCE_PEAK_THRESHOLD
-          ? "Signal detected"
-          : "Listening...",
-    };
-  } finally {
-    await file.close();
-  }
-}
-
-function alignBytes(bytes: number, blockAlign: number): number {
-  return bytes - (bytes % blockAlign);
-}
-
 function emptySignal(status: string): SignalLevel {
   return { rms: 0, peak: 0, percent: 0, status };
-}
-
-function signalPercent(signal: Pick<SignalLevel, "rms" | "peak">): number {
-  return Math.min(
-    100,
-    Math.round(Math.max(Math.sqrt(signal.peak) * 100, signal.rms * 600)),
-  );
-}
-
-function measurePcmWindow(
-  data: Buffer,
-  formatTag: number,
-  bitsPerSample: number,
-): Pick<SignalLevel, "rms" | "peak"> | null {
-  let sum = 0;
-  let peak = 0;
-  let count = 0;
-
-  if (formatTag === 3 && bitsPerSample === 32) {
-    for (let offset = 0; offset + 4 <= data.length; offset += 4) {
-      const sample = data.readFloatLE(offset);
-      if (!Number.isFinite(sample)) continue;
-      const abs = Math.abs(sample);
-      sum += sample * sample;
-      peak = Math.max(peak, abs);
-      count += 1;
-    }
-  } else if (formatTag === 1 && bitsPerSample === 16) {
-    for (let offset = 0; offset + 2 <= data.length; offset += 2) {
-      const sample = data.readInt16LE(offset) / 32768;
-      const abs = Math.abs(sample);
-      sum += sample * sample;
-      peak = Math.max(peak, abs);
-      count += 1;
-    }
-  } else {
-    return null;
-  }
-
-  if (count === 0) return null;
-  return { rms: Math.sqrt(sum / count), peak };
 }
 
 function buildRecordingMarkdown(
