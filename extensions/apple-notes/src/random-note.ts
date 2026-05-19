@@ -11,7 +11,7 @@ export default async (props: LaunchProps<{ arguments: Arguments.RandomNote }>) =
     const tags = props.arguments.tags?.trim() ? props.arguments.tags.split(/\s+/) : [];
 
     const { maxQueryResults } = getPreferenceValues();
-    const max = parseInt(maxQueryResults, 10) ?? 250;
+    const max = parseInt(maxQueryResults, 10) || 250;
 
     const notes = await getNotes(max, tags);
 
