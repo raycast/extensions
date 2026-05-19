@@ -63,6 +63,10 @@ export async function fetchSteamChartsData(
   }
 }
 
+// Steam does not expose a stable API endpoint for the small square app icon
+// without a per-game hash that must be scraped anyway. The store page scrape
+// is intentional — tiny_image from the search result is used as a fallback
+// if scraping fails, so the extension degrades gracefully.
 export async function fetchAppIcon(
   appId: number,
   signal: AbortSignal,

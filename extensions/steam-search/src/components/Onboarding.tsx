@@ -61,7 +61,7 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
             <ActionPanel>
               <Action.OpenInBrowser
                 // eslint-disable-next-line @raycast/prefer-title-case
-                title="Get Gg.deals API Key"
+                title="Get GG.deals API Key"
                 url="https://gg.deals/api/"
               />
               <Action
