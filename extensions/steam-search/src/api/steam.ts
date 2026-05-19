@@ -27,6 +27,7 @@ export async function fetchOwnedGames(
       return ids;
     })
     .catch(() => {
+      ownedFetchPromise = null;
       return new Set<number>();
     });
 
