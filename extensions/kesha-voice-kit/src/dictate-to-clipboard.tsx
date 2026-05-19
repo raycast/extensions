@@ -560,18 +560,28 @@ function wavPayloadFormat(
 }
 
 function stopRecorder(proc: ReturnType<typeof spawnProcess> | null) {
-  if (!proc || proc.killed) return;
+  if (!proc) return;
   if (proc.stdin && !proc.stdin.destroyed) {
-    proc.stdin.write("\n", () => {
-      proc.stdin?.end();
-    });
+    try {
+      proc.stdin.end("\n");
+    } catch {
+      // Fall through to the watchdog below.
+    }
   }
-  const forceStop = setTimeout(() => {
-    if (proc.exitCode == null && !proc.killed) {
+
+  const terminate = setTimeout(() => {
+    if (proc.exitCode == null) {
       killRecorderProcess(proc, "SIGTERM");
     }
-  }, 3000);
-  forceStop.unref?.();
+  }, 1500);
+  terminate.unref?.();
+
+  const forceKill = setTimeout(() => {
+    if (proc.exitCode == null) {
+      killRecorderProcess(proc, "SIGKILL");
+    }
+  }, 5000);
+  forceKill.unref?.();
 }
 
 function killRecorderProcess(
