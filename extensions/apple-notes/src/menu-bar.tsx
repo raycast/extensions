@@ -8,7 +8,7 @@ export default function Command() {
   const { data, isLoading } = useNotes();
 
   const { maxResults, openSeparately } = getPreferenceValues<Preferences.MenuBar>();
-  const max = parseInt(maxResults, 10) ?? 25;
+  const max = parseInt(maxResults, 10) || 25;
   const maxUnpinnedNotes = max - data.pinnedNotes.length;
 
   return (

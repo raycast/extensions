@@ -46,7 +46,7 @@ export default function Command() {
     >
       <List.Section title="Pinned">
         {filteredNotes
-          .filter((note) => note.pinned)
+          .filter((note) => note.pinned && note.folder !== "Recently Deleted")
           .map((note) => (
             <NoteListItem key={note.id} note={note} mutate={mutate} />
           ))}
@@ -54,7 +54,7 @@ export default function Command() {
 
       <List.Section title="Notes">
         {filteredNotes
-          .filter((note) => !note.pinned)
+          .filter((note) => !note.pinned && note.folder !== "Recently Deleted")
           .map((note) => (
             <NoteListItem key={note.id} note={note} mutate={mutate} />
           ))}
