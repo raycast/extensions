@@ -2,11 +2,14 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  Color,
   Detail,
   getPreferenceValues,
+  Icon,
   showToast,
   Toast,
 } from "@raycast/api";
+import { getProgressIcon } from "@raycast/utils";
 import { useEffect, useRef, useState } from "react";
 import {
   createDefaultDictationDeps,
@@ -20,6 +23,12 @@ import type {
 import {
   buildRecordingMarkdown,
   buildResultMarkdown,
+  buildTranscribingMarkdown,
+  formatElapsed,
+  formatInputFormat,
+  signalProgress,
+  signalStatusLabel,
+  signalStatusTone,
 } from "./lib/recording-view";
 
 export default function Command() {
@@ -53,10 +62,12 @@ export default function Command() {
     return (
       <Detail
         markdown={buildRecordingMarkdown(state)}
+        metadata={<RecordingMetadata state={state} />}
         actions={
           <ActionPanel>
             <Action
               title="Stop and Transcribe"
+              icon={Icon.Stop}
               onAction={() => sessionRef.current?.stopRecording()}
             />
           </ActionPanel>
@@ -70,7 +81,23 @@ export default function Command() {
   }
 
   if (state.status === "transcribing") {
-    return <Detail isLoading markdown="Transcribing..." />;
+    return (
+      <Detail
+        isLoading
+        markdown={buildTranscribingMarkdown(state)}
+        metadata={<TranscribingMetadata state={state} />}
+        actions={
+          <ActionPanel>
+            <Action
+              title="Cancel Transcription"
+              icon={Icon.XmarkCircle}
+              style={Action.Style.Destructive}
+              onAction={() => sessionRef.current?.cancelTranscription()}
+            />
+          </ActionPanel>
+        }
+      />
+    );
   }
 
   if (state.status === "error") {
@@ -93,6 +120,87 @@ export default function Command() {
       }
     />
   );
+}
+
+function RecordingMetadata({
+  state,
+}: {
+  state: Extract<DictationState, { status: "recording" }>;
+}) {
+  const inputFormat = formatInputFormat(state.mic);
+  return (
+    <Detail.Metadata>
+      <Detail.Metadata.Label
+        title="Microphone"
+        text={state.mic.name}
+        icon={Icon.Microphone}
+      />
+      {inputFormat ? (
+        <Detail.Metadata.Label
+          title="Input Format"
+          text={inputFormat}
+          icon={Icon.FullSignal}
+        />
+      ) : null}
+      <Detail.Metadata.Separator />
+      <Detail.Metadata.Label
+        title="Signal"
+        text={`${state.signal.percent}%`}
+        icon={getProgressIcon(signalProgress(state.signal), Color.Green)}
+      />
+      <Detail.Metadata.TagList title="Status">
+        <Detail.Metadata.TagList.Item
+          text={signalStatusLabel(state.signal.state)}
+          color={raycastToneColor(signalStatusTone(state.signal.state))}
+        />
+      </Detail.Metadata.TagList>
+      <Detail.Metadata.Label
+        title="Elapsed"
+        text={formatElapsed(state.elapsedSeconds, state.maxSeconds)}
+        icon={Icon.Clock}
+      />
+    </Detail.Metadata>
+  );
+}
+
+function TranscribingMetadata({
+  state,
+}: {
+  state: Extract<DictationState, { status: "transcribing" }>;
+}) {
+  return (
+    <Detail.Metadata>
+      <Detail.Metadata.Label
+        title="Elapsed"
+        text={formatElapsed(state.elapsedSeconds, state.timeoutSeconds)}
+        icon={getProgressIcon(
+          Math.min(1, state.elapsedSeconds / state.timeoutSeconds),
+          Color.Blue,
+        )}
+      />
+      <Detail.Metadata.TagList title="Status">
+        <Detail.Metadata.TagList.Item
+          text="Local Processing"
+          color={Color.Blue}
+        />
+      </Detail.Metadata.TagList>
+    </Detail.Metadata>
+  );
+}
+
+function raycastToneColor(
+  tone: ReturnType<typeof signalStatusTone>,
+): Color | undefined {
+  switch (tone) {
+    case "green":
+      return Color.Green;
+    case "blue":
+      return Color.Blue;
+    case "orange":
+      return Color.Orange;
+    case "secondary":
+      return undefined;
+  }
 }
 
 function showRaycastToast(toast: DictationToast): Promise<void> {

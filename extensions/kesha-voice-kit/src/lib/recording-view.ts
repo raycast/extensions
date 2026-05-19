@@ -1,4 +1,8 @@
-import type { DictationState, SignalLevel } from "./dictation-types";
+import type {
+  DictationState,
+  SignalLevel,
+  SignalState,
+} from "./dictation-types";
 
 export function emptySignal(
   status: string,
@@ -7,36 +11,76 @@ export function emptySignal(
   return { rms: 0, peak: 0, percent: 0, status, state };
 }
 
-export function renderSignalMeter(percent: number): string {
-  const filled = Math.max(0, Math.min(10, Math.round(percent / 10)));
-  return `[${"#".repeat(filled)}${"-".repeat(10 - filled)}]`;
-}
-
 export function buildRecordingMarkdown(
   state: Extract<DictationState, { status: "recording" }>,
 ): string {
-  const micDetails = [
-    state.mic.sampleRate ? `${state.mic.sampleRate} Hz` : null,
-    state.mic.channels
-      ? `${state.mic.channels} channel${state.mic.channels === 1 ? "" : "s"}`
-      : null,
-  ].filter(Boolean);
-  const meter = renderSignalMeter(state.signal.percent);
+  void state;
   return [
     "# Recording",
-    "",
-    `**Microphone:** ${state.mic.name}`,
-    micDetails.length ? `**Format:** ${micDetails.join(", ")}` : null,
-    `**Signal:** ${meter} ${state.signal.percent}%`,
-    `**Status:** ${state.signal.status}`,
-    `**Elapsed:** ${state.elapsedSeconds}s / ${state.maxSeconds}s`,
-    "",
-    "Speak now. Recording stops automatically at the max duration.",
-  ]
-    .filter((line): line is string => line != null)
-    .join("\n\n");
+    "Speak now. Kesha records locally from your default microphone.",
+  ].join("\n\n");
 }
 
 export function buildResultMarkdown(text: string): string {
   return ["# Dictation", "", text].join("\n");
+}
+
+export function buildTranscribingMarkdown(
+  state: Extract<DictationState, { status: "transcribing" }>,
+): string {
+  void state;
+  return ["# Transcribing", "Processing locally with Kesha Voice Kit."].join(
+    "\n\n",
+  );
+}
+
+export function formatInputFormat(
+  mic: Extract<DictationState, { status: "recording" }>["mic"],
+): string | null {
+  const details = [
+    mic.sampleRate ? `${mic.sampleRate} Hz` : null,
+    mic.channels
+      ? `${mic.channels} channel${mic.channels === 1 ? "" : "s"}`
+      : null,
+  ].filter(Boolean);
+  return details.length ? details.join(", ") : null;
+}
+
+export function formatElapsed(
+  elapsedSeconds: number,
+  maxSeconds: number,
+): string {
+  return `${elapsedSeconds}s / ${maxSeconds}s`;
+}
+
+export function signalProgress(signal: SignalLevel): number {
+  return Math.max(0, Math.min(1, signal.percent / 100));
+}
+
+export function signalStatusLabel(state: SignalState): string {
+  switch (state) {
+    case "signal":
+      return "Signal";
+    case "listening":
+      return "Listening";
+    case "unavailable":
+      return "Meter Unavailable";
+    case "starting":
+      return "Starting";
+  }
+}
+
+export function signalStatusTone(
+  state: SignalState,
+): "green" | "blue" | "orange" | "secondary" {
+  switch (state) {
+    case "signal":
+      return "green";
+    case "starting":
+      return "blue";
+    case "unavailable":
+      return "orange";
+    case "listening":
+      return "secondary";
+  }
 }

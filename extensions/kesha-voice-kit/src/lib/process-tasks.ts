@@ -60,6 +60,19 @@ export function stopProcessWithWatchdog(
   }, 5000).unref?.();
 }
 
+export function terminateProcessWithWatchdog(
+  proc: ChildProcess | null,
+  deps: ProcessTaskDeps = {},
+) {
+  if (!proc) return;
+  const kill = deps.kill ?? killProcessGroup;
+  const schedule = deps.setTimeout ?? setTimeout;
+  if (proc.exitCode == null) kill(proc, "SIGTERM");
+  schedule(() => {
+    if (proc.exitCode == null) kill(proc, "SIGKILL");
+  }, 3000).unref?.();
+}
+
 export function startKeshaRecorder(
   kesha: KeshaSpawn,
   audioPath: string,
@@ -132,7 +145,7 @@ export function startKeshaTranscriber(
   forceKill.unref?.();
 
   return {
-    stop: () => kill(proc, "SIGTERM"),
+    stop: () => terminateProcessWithWatchdog(proc, deps),
     done: waitForExit(proc)
       .then((exitCode) => {
         if (timedOut) {

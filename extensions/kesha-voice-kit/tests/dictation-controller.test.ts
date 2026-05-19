@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   normalizeTranscribeResult,
   startDictationSession,
+  startTranscribingTimer,
 } from "../src/lib/dictation-controller";
 import type {
   DictationControllerDeps,
@@ -147,6 +148,37 @@ describe("dictation controller", () => {
     await session.done;
     expect(deps.startTranscriber).toHaveBeenCalled();
   });
+
+  it("shows transcribing elapsed state and can cancel transcription", async () => {
+    const transcriber = deferred<string>();
+    const transcriberStop = vi.fn();
+    const deps = createDeps({
+      startTranscriber: vi.fn(() => ({
+        done: transcriber.promise,
+        stop: transcriberStop,
+      })),
+    });
+    const { states } = deps;
+
+    const session = startDictationSession({}, deps.setState, deps);
+    await vi.waitFor(() => expect(states.at(-1)?.status).toBe("transcribing"));
+
+    expect(states.at(-1)).toMatchObject({
+      status: "transcribing",
+      elapsedSeconds: 0,
+      timeoutSeconds: 60,
+    });
+
+    session.cancelTranscription();
+    expect(transcriberStop).toHaveBeenCalled();
+    expect(states.at(-1)).toEqual({
+      status: "error",
+      message: "Transcription cancelled.",
+    });
+
+    transcriber.resolve("ignored");
+    await session.done;
+  });
 });
 
 describe("normalizeTranscribeResult", () => {
@@ -158,6 +190,37 @@ describe("normalizeTranscribeResult", () => {
     expect(() => normalizeTranscribeResult("/tmp/a.wav", " \n")).toThrow(
       "No transcript returned.",
     );
+  });
+});
+
+describe("startTranscribingTimer", () => {
+  it("updates elapsed seconds only while state is transcribing", () => {
+    vi.useFakeTimers();
+    let now = 1_000;
+    let state: DictationState = {
+      status: "transcribing",
+      elapsedSeconds: 0,
+      timeoutSeconds: 60,
+    };
+    const states: DictationState[] = [];
+
+    const stop = startTranscribingTimer(
+      (next) => {
+        state = typeof next === "function" ? next(state) : next;
+        states.push(state);
+      },
+      { now: () => now },
+    );
+
+    now = 3_400;
+    vi.advanceTimersByTime(500);
+    stop();
+
+    expect(states.at(-1)).toMatchObject({
+      status: "transcribing",
+      elapsedSeconds: 2,
+    });
+    vi.useRealTimers();
   });
 });
 

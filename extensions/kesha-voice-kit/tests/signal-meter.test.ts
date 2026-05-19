@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   buildRecordingMarkdown,
-  renderSignalMeter,
+  buildTranscribingMarkdown,
+  formatElapsed,
+  formatInputFormat,
+  signalProgress,
+  signalStatusLabel,
+  signalStatusTone,
 } from "../src/lib/recording-view";
 import { parseMeterChunk, parseMeterLine } from "../src/lib/signal-meter";
 import type { DictationState } from "../src/lib/dictation-types";
@@ -51,7 +56,7 @@ describe("signal parsing", () => {
 });
 
 describe("recording markdown", () => {
-  it("renders microphone, format, signal, and elapsed time", () => {
+  it("keeps recording markdown calm and moves operational detail to metadata helpers", () => {
     const state: Extract<DictationState, { status: "recording" }> = {
       status: "recording",
       maxSeconds: 120,
@@ -66,34 +71,40 @@ describe("recording markdown", () => {
       },
     };
 
-    expect(buildRecordingMarkdown(state)).toContain(
-      "**Microphone:** Studio Mic",
+    expect(buildRecordingMarkdown(state)).toBe(
+      "# Recording\n\nSpeak now. Kesha records locally from your default microphone.",
     );
-    expect(buildRecordingMarkdown(state)).toContain(
-      "**Format:** 48000 Hz, 1 channel",
+    expect(formatInputFormat(state.mic)).toBe("48000 Hz, 1 channel");
+    expect(formatElapsed(state.elapsedSeconds, state.maxSeconds)).toBe(
+      "7s / 120s",
     );
-    expect(buildRecordingMarkdown(state)).toContain(
-      "**Signal:** [##--------] 24%",
-    );
-    expect(buildRecordingMarkdown(state)).toContain("**Elapsed:** 7s / 120s");
+    expect(signalProgress(state.signal)).toBe(0.24);
+    expect(signalStatusLabel(state.signal.state)).toBe("Signal");
+    expect(signalStatusTone(state.signal.state)).toBe("green");
   });
 
-  it("renders unavailable meter state honestly", () => {
-    expect(renderSignalMeter(0)).toBe("[----------]");
-    expect(
-      buildRecordingMarkdown({
-        status: "recording",
-        maxSeconds: 10,
-        elapsedSeconds: 1,
-        mic: { name: "Default input device" },
-        signal: {
-          rms: 0,
-          peak: 0,
-          percent: 0,
-          state: "unavailable",
-          status: "Meter unavailable",
-        },
-      }),
-    ).toContain("**Status:** Meter unavailable");
+  it("maps meter states to Apple-like metadata labels and tones", () => {
+    expect(formatInputFormat({ name: "Default input device" })).toBeNull();
+    expect(signalStatusLabel("unavailable")).toBe("Meter Unavailable");
+    expect(signalStatusTone("unavailable")).toBe("orange");
+    expect(signalStatusLabel("starting")).toBe("Starting");
+    expect(signalStatusTone("starting")).toBe("blue");
+    expect(signalStatusLabel("listening")).toBe("Listening");
+    expect(signalStatusTone("listening")).toBe("secondary");
+  });
+
+  it("keeps transcribing markdown minimal and exposes elapsed via helpers", () => {
+    const state: Extract<DictationState, { status: "transcribing" }> = {
+      status: "transcribing",
+      elapsedSeconds: 12,
+      timeoutSeconds: 60,
+    };
+
+    expect(buildTranscribingMarkdown(state)).toBe(
+      "# Transcribing\n\nProcessing locally with Kesha Voice Kit.",
+    );
+    expect(formatElapsed(state.elapsedSeconds, state.timeoutSeconds)).toBe(
+      "12s / 60s",
+    );
   });
 });

@@ -31,7 +31,7 @@ export type DictationState =
       signal: SignalLevel;
     }
   | { status: "stopping" }
-  | { status: "transcribing" }
+  | { status: "transcribing"; elapsedSeconds: number; timeoutSeconds: number }
   | { status: "error"; message: string; hint?: string }
   | { status: "ok"; result: TranscribeResult };
 
@@ -51,6 +51,7 @@ export interface DictationPrefs {
 
 export interface DictationSession {
   stopRecording: () => void;
+  cancelTranscription: () => void;
   cancel: () => void;
   done: Promise<void>;
 }

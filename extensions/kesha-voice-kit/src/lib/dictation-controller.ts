@@ -1,7 +1,10 @@
 import { join, basename } from "node:path";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { parseMaxSeconds } from "./dictation-config";
+import {
+  parseMaxSeconds,
+  TRANSCRIBE_TIMEOUT_SECONDS,
+} from "./dictation-config";
 import { notFoundMessage, resolveKeshaBin, type KeshaSpawn } from "./kesha-bin";
 import { startKeshaRecorder, startKeshaTranscriber } from "./process-tasks";
 import { startRecordingMonitor } from "./recording-monitor";
@@ -31,17 +34,25 @@ export function startDictationSession(
   let stopMonitoring: (() => void) | null = null;
   let recorder: RunningTask<void> | null = null;
   let transcriber: RunningTask<string> | null = null;
+  let stopTranscribeTimer: (() => void) | null = null;
 
   const session: DictationSession = {
     stopRecording: () => {
       setState({ status: "stopping" });
       recorder?.stop();
     },
+    cancelTranscription: () => {
+      cancelled = true;
+      transcriber?.stop();
+      stopTranscribeTimer?.();
+      setState({ status: "error", message: "Transcription cancelled." });
+    },
     cancel: () => {
       cancelled = true;
       recorder?.stop();
       transcriber?.stop();
       stopMonitoring?.();
+      stopTranscribeTimer?.();
     },
     done: Promise.resolve(),
   };
@@ -97,18 +108,25 @@ export function startDictationSession(
         );
       }
 
-      setState({ status: "transcribing" });
+      setState({
+        status: "transcribing",
+        elapsedSeconds: 0,
+        timeoutSeconds: TRANSCRIBE_TIMEOUT_SECONDS,
+      });
       await deps.showToast({
         style: "animated",
         title: "Transcribing",
         message: deps.audioBasename(audioPath),
       });
 
+      stopTranscribeTimer = startTranscribingTimer(setState);
       transcriber = deps.startTranscriber(kesha, audioPath);
       const result = normalizeTranscribeResult(
         audioPath,
         await transcriber.done,
       );
+      stopTranscribeTimer?.();
+      stopTranscribeTimer = null;
       transcriber = null;
       if (cancelled) return;
 
@@ -137,6 +155,8 @@ export function startDictationSession(
       transcriber = null;
       stopMonitoring?.();
       stopMonitoring = null;
+      stopTranscribeTimer?.();
+      stopTranscribeTimer = null;
       if (tempDir) await deps.cleanupTempDir(tempDir);
     }
   }
@@ -181,6 +201,31 @@ export function normalizeTranscribeResult(
     throw new Error("No transcript returned.");
   }
   return { file: audioPath, text };
+}
+
+export function startTranscribingTimer(
+  setState: DictationStateSetter,
+  deps: {
+    now?: () => number;
+    setInterval?: typeof setInterval;
+    clearInterval?: typeof clearInterval;
+  } = {},
+): () => void {
+  const now = deps.now ?? Date.now;
+  const schedule = deps.setInterval ?? setInterval;
+  const unschedule = deps.clearInterval ?? clearInterval;
+  const startedAt = now();
+  const tick = () => {
+    setState((current) => {
+      if (current.status !== "transcribing") return current;
+      return {
+        ...current,
+        elapsedSeconds: Math.max(0, Math.floor((now() - startedAt) / 1000)),
+      };
+    });
+  };
+  const timer = schedule(tick, 500);
+  return () => unschedule(timer);
 }
 
 export function startRecorderTask(
