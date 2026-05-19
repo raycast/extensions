@@ -213,7 +213,7 @@ export class LLMService {
     const headers = {
       Authorization: `Bearer ${key}`,
       "HTTP-Referer": "https://raycast.com",
-      "X-Title": "Raycast Stealth AI",
+      "X-Title": "Rewrite",
       "Content-Type": "application/json",
     };
     const response = await this.request(
@@ -250,27 +250,37 @@ export class LLMService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ): Promise<any> {
     return new Promise((resolve, reject) => {
-      const req = https.request(url, { method, headers }, (res) => {
-        let data = "";
-        res.on("data", (chunk) => (data += chunk));
-        res.on("end", () => {
-          try {
-            if (
-              res.statusCode &&
-              res.statusCode >= 200 &&
-              res.statusCode < 300
-            ) {
-              resolve(JSON.parse(data));
-            } else {
-              reject(new Error(`API Auth Error (${res.statusCode}): ${data}`));
+      const req = https.request(
+        url,
+        { method, headers, timeout: 30_000 },
+        (res) => {
+          let data = "";
+          res.on("data", (chunk) => (data += chunk));
+          res.on("end", () => {
+            try {
+              if (
+                res.statusCode &&
+                res.statusCode >= 200 &&
+                res.statusCode < 300
+              ) {
+                resolve(JSON.parse(data));
+              } else {
+                reject(
+                  new Error(`API Auth Error (${res.statusCode}): ${data}`),
+                );
+              }
+            } catch (_e) {
+              reject(new Error(`Failed to parse response: ${data}`));
             }
-          } catch (_e) {
-            reject(new Error(`Failed to parse response: ${data}`));
-          }
-        });
-      });
+          });
+        },
+      );
 
       req.on("error", (e) => reject(e));
+      req.on("timeout", () => {
+        req.destroy();
+        reject(new Error("Request timed out after 30 seconds"));
+      });
       if (body) req.write(JSON.stringify(body));
       req.end();
     });

@@ -140,9 +140,7 @@ export default function ConfigureModelCommand() {
     await LocalStorage.setItem(STORAGE_KEYS.provider, p);
 
     if (p !== "raycast") {
-      if (key) {
-        await LocalStorage.setItem(STORAGE_KEYS.apiKey(p), key);
-      }
+      await LocalStorage.setItem(STORAGE_KEYS.apiKey(p), key);
       if (!finalModel) {
         await showToast({
           style: Toast.Style.Failure,

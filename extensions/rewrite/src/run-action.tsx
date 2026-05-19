@@ -335,6 +335,19 @@ function ImportActionsForm({ onImport }: { onImport: () => void }) {
         return;
       }
 
+      const existing = await loadCustomActions();
+      if (existing.length > 0) {
+        const confirmed = await confirmAlert({
+          title: "Replace existing actions?",
+          message: `This will permanently overwrite your ${existing.length} existing action${existing.length === 1 ? "" : "s"} with ${parsed.length} from the file.`,
+          primaryAction: {
+            title: "Replace",
+            style: Alert.ActionStyle.Destructive,
+          },
+        });
+        if (!confirmed) return;
+      }
+
       await saveCustomActions(parsed as CustomAction[]);
       await showToast({
         style: Toast.Style.Success,
