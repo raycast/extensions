@@ -1,6 +1,6 @@
 # Ruler Changelog
 
-## [Windows Support] - {PR_MERGE_DATE}
+## [Windows Support] - 2026-05-19
 
 - Added Windows platform support via a native Rust implementation
 - Supports both click and drag measurement modes
