@@ -1,6 +1,6 @@
 # Team Time Changelog
 
-## [Fix Edit Label input] - {PR_MERGE_DATE}
+## [Fix Edit Label input] - 2026-05-19
 
 - Fixed the Edit Label command so custom flag fields accept typed input reliably.
 
