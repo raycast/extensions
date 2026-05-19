@@ -1,10 +1,5 @@
-import { AI, getPreferenceValues, LocalStorage } from "@raycast/api";
+import { AI, LocalStorage } from "@raycast/api";
 import https from "https";
-
-export interface AIPreferences {
-  aiProvider?: string;
-  apiKey?: string;
-}
 
 export interface Model {
   id: string;
@@ -25,19 +20,14 @@ interface GeminiModel {
 }
 
 export class LLMService {
-  public static get config(): AIPreferences {
-    return getPreferenceValues<AIPreferences>();
-  }
-
   public static async getProvider(): Promise<string> {
     const saved = await LocalStorage.getItem<string>("configured_provider");
-    return saved || this.config.aiProvider || "raycast";
+    return saved || "raycast";
   }
 
   public static async getApiKey(provider: string): Promise<string> {
     const saved = await LocalStorage.getItem<string>(`api_key_${provider}`);
-    if (saved) return saved;
-    return this.config.apiKey || "";
+    return saved || "";
   }
 
   public static async getSelectedModel(): Promise<string> {
@@ -104,10 +94,11 @@ export class LLMService {
   }
 
   public static async fetchModels(): Promise<Model[]> {
-    const { aiProvider, apiKey } = this.config;
+    const aiProvider = await this.getProvider();
+    const apiKey = await this.getApiKey(aiProvider);
     if (!apiKey && aiProvider !== "raycast")
       throw new Error("API Key required");
-    return this.fetchModelsWithKey(aiProvider || "raycast", apiKey || "");
+    return this.fetchModelsWithKey(aiProvider, apiKey);
   }
 
   public static async askAI(prompt: string): Promise<string> {

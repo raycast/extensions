@@ -5,6 +5,7 @@ import {
   closeMainWindow,
   confirmAlert,
   Detail,
+  Form,
   getSelectedText,
   Icon,
   List,
@@ -12,7 +13,10 @@ import {
   Toast,
   useNavigation,
 } from "@raycast/api";
-import React, { useEffect, useState } from "react";
+import { readFileSync, writeFileSync } from "fs";
+import { homedir } from "os";
+import { join } from "path";
+import { useEffect, useState } from "react";
 import {
   CustomAction,
   CustomActionForm,
@@ -75,6 +79,15 @@ export default function RunActionCommand() {
           title="No Custom Actions"
           description="Use 'Add Custom Action' to create one."
           icon={Icon.Plus}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Import Actions"
+                icon={Icon.Download}
+                onAction={() => push(<ImportActionsForm onImport={refresh} />)}
+              />
+            </ActionPanel>
+          }
         />
       )}
       {searchText.trim().length > 0 && (
@@ -199,6 +212,20 @@ export default function RunActionCommand() {
                   shortcut={{ modifiers: ["cmd"], key: "backspace" }}
                   onAction={() => handleDelete(action)}
                 />
+                <ActionPanel.Section title="Backup">
+                  <Action
+                    title="Export All Actions"
+                    icon={Icon.Upload}
+                    onAction={() => exportActions(actions)}
+                  />
+                  <Action
+                    title="Import Actions"
+                    icon={Icon.Download}
+                    onAction={() =>
+                      push(<ImportActionsForm onImport={refresh} />)
+                    }
+                  />
+                </ActionPanel.Section>
               </ActionPanel>
             }
           />
@@ -220,7 +247,7 @@ async function runCustomAction(action: CustomAction) {
 
 async function runAndShowResult(
   action: CustomAction,
-  push: (component: React.ReactNode) => void,
+  push: ReturnType<typeof useNavigation>["push"],
 ) {
   let selectedText = "";
   try {
@@ -257,7 +284,11 @@ async function runAndShowResult(
     toast.hide();
 
     push(
-      <ResultDetailView result={result.trim()} actionTitle={action.title} />,
+      <ResultDetailView
+        result={result.trim()}
+        originalText={selectedText}
+        actionTitle={action.title}
+      />,
     );
   } catch (error) {
     toast.style = Toast.Style.Failure;
@@ -266,21 +297,94 @@ async function runAndShowResult(
   }
 }
 
+async function exportActions(actions: CustomAction[]) {
+  const path = join(homedir(), "Downloads", "rewrite-actions.json");
+  writeFileSync(path, JSON.stringify(actions, null, 2), "utf-8");
+  await showToast({
+    style: Toast.Style.Success,
+    title: "Actions exported",
+    message: path,
+  });
+}
+
+function ImportActionsForm({ onImport }: { onImport: () => void }) {
+  const { pop } = useNavigation();
+
+  async function handleSubmit(values: { file: string[] }) {
+    const filePath = values.file?.[0];
+    if (!filePath) return;
+
+    try {
+      const raw = readFileSync(filePath, "utf-8");
+      const parsed = JSON.parse(raw);
+
+      if (
+        !Array.isArray(parsed) ||
+        parsed.some(
+          (a) =>
+            typeof a.id !== "string" ||
+            typeof a.title !== "string" ||
+            typeof a.prompt !== "string",
+        )
+      ) {
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Invalid file",
+          message: "File doesn't contain valid actions",
+        });
+        return;
+      }
+
+      await saveCustomActions(parsed as CustomAction[]);
+      await showToast({
+        style: Toast.Style.Success,
+        title: `Imported ${parsed.length} action${parsed.length === 1 ? "" : "s"}`,
+      });
+      onImport();
+      pop();
+    } catch (e) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Import failed",
+        message: (e as Error).message,
+      });
+    }
+  }
+
+  return (
+    <Form
+      actions={
+        <ActionPanel>
+          <Action.SubmitForm title="Import" onSubmit={handleSubmit} />
+        </ActionPanel>
+      }
+    >
+      <Form.FilePicker
+        id="file"
+        title="Actions JSON file"
+        allowMultipleSelection={false}
+      />
+    </Form>
+  );
+}
+
 function ResultDetailView({
   result,
+  originalText,
   actionTitle,
 }: {
   result: string;
+  originalText: string;
   actionTitle: string;
 }) {
   return (
     <Detail
-      markdown={`## Result\n\n${result}`}
+      markdown={`## Original\n\n${originalText}\n\n---\n\n## Result\n\n${result}`}
       navigationTitle={actionTitle}
       actions={
         <ActionPanel>
-          <Action.CopyToClipboard title="Copy Result" content={result} />
           <Action.Paste title="Paste Result" content={result} />
+          <Action.CopyToClipboard title="Copy Result" content={result} />
         </ActionPanel>
       }
     />

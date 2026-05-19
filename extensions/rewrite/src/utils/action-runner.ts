@@ -35,19 +35,21 @@ export async function runStealthAction(
   forceEditor?: boolean,
 ) {
   const now = Date.now();
-  console.log(`--- Starting runStealthAction: ${actionId} at ${now} ---`);
 
-  // Concurrency lock with time-based debounce
   if (isRunning) {
-    console.log("[LOCKED] Action already running. Aborting.");
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Action already running",
+    });
     return;
   }
 
   // Debounce: don't run if last run was less than 3 seconds ago
   if (now - lastRunTime < 3000) {
-    console.log(
-      `[DEBOUNCE] Last run was ${now - lastRunTime}ms ago. Aborting.`,
-    );
+    await showToast({
+      style: Toast.Style.Failure,
+      title: "Please wait a moment before running again",
+    });
     return;
   }
 
@@ -58,7 +60,6 @@ export async function runStealthAction(
     await runStealthActionInternal(actionId, forceEditor);
   } finally {
     isRunning = false;
-    console.log(`--- Finished runStealthAction: ${actionId} ---`);
   }
 }
 
@@ -106,16 +107,13 @@ async function runStealthActionInternal(
   } catch (e) {
     console.error("Failed to load configs", e);
   }
-  console.log(`Config: ${currentConfig.title}`);
 
   const isMac = process.platform === "darwin";
 
-  // Store original app info for re-activation (macOS only)
   let frontApp = "";
   let frontAppBundleId = "";
 
   if (isMac) {
-    // macOS: Get the PREVIOUS frontmost app (not Raycast)
     try {
       const previousAppResult = execSync(
         `osascript -e '
@@ -139,8 +137,6 @@ async function runStealthActionInternal(
         .toString()
         .trim();
 
-      console.log(`[DEBUG] Previous app result: ${previousAppResult}`);
-
       const match = previousAppResult.match(/^(.+?),\s*(.+)$/);
       if (match) {
         frontApp = match[1].trim();
@@ -148,8 +144,6 @@ async function runStealthActionInternal(
       } else {
         frontApp = previousAppResult;
       }
-
-      console.log(`[DEBUG] Target app: ${frontApp} (${frontAppBundleId})`);
 
       if (!frontApp || frontApp === "Raycast" || frontApp === "") {
         const fallbackResult = execSync(
@@ -167,10 +161,9 @@ async function runStealthActionInternal(
           .toString()
           .trim();
         frontApp = fallbackResult;
-        console.log(`[DEBUG] Fallback app: ${frontApp}`);
       }
     } catch (e) {
-      console.log(`[DEBUG] Could not get frontmost app: ${e}`);
+      // ignore — proceed without app reactivation
     }
 
     if (frontApp === "Raycast") {
@@ -179,45 +172,23 @@ async function runStealthActionInternal(
     }
   }
 
-  // 2. AI Access Debug (for troubleshooting "Model not supported")
   let canAccessAI = false;
   try {
     canAccessAI = environment.canAccess(AI);
-    console.log(`[DEBUG] environment.canAccess(AI): ${canAccessAI}`);
   } catch (e) {
-    console.log(`[DEBUG] environment.canAccess(AI) failed with error: ${e}`);
+    // ignore
   }
 
-  try {
-    console.log("AI.Model Keys: " + Object.keys(AI.Model).join(", "));
-    const mapping: Record<string, string> = {};
-    for (const key of Object.keys(AI.Model)) {
-      try {
-        mapping[key] = (AI.Model as Record<string, string>)[key];
-      } catch (_e) {
-        // ignore
-      }
-    }
-    console.log("[DEBUG] AI.Model Mapping:", JSON.stringify(mapping, null, 2));
-  } catch (e) {
-    console.log(`[DEBUG] AI.Model logging failed: ${e}`);
-  }
-
-  // 3. Get selected text using Raycast's native cross-platform API
+  // 2. Get selected text
   let selectedText = "";
   let hasRealSelection = false;
 
   try {
     if (!forceEditor) {
-      console.log("[DEBUG] Using Raycast getSelectedText API...");
       selectedText = await getSelectedText();
-      console.log(
-        `[DEBUG] Got selected text: "${selectedText.substring(0, 50)}..." (${selectedText.length} chars)`,
-      );
       hasRealSelection = selectedText.trim().length > 0;
     }
   } catch (e) {
-    console.log(`[DEBUG] getSelectedText failed (no selection): ${e}`);
     hasRealSelection = false;
   }
 
@@ -244,48 +215,37 @@ async function runStealthActionInternal(
     return;
   }
 
-  // 4. Show processing toast
+  // 3. Show processing toast
   const toast = await showToast({
     style: Toast.Style.Animated,
     title: `${currentConfig.title}...`,
   });
 
   try {
-    // 5. Final AI access check
     const currentProvider = await LLMService.getProvider();
     if (!canAccessAI && currentProvider === "raycast") {
       throw new Error("Raycast AI is required. Please upgrade to Raycast Pro.");
     }
 
-    // 6. Call AI (using new LLM Service)
     const prompt = `${currentConfig.prompt}\n\n---\nText to format:\n${selectedText}`;
-    console.log(`Calling AI via ${currentProvider}...`);
 
     let result = "";
     try {
       result = await LLMService.askAI(prompt);
-      console.log(`AI result: "${result?.substring(0, 50)}..."`);
     } catch (e) {
-      console.error(`AI Service failed: ${e}`);
-
       const errorMsg = (e as Error).message;
 
-      // Check for model-related errors
       if (/model/i.test(errorMsg)) {
         await showModelErrorToast(errorMsg);
         return;
       }
 
-      // Special handling for Raycast AI limitation
       if (errorMsg.includes("Raycast AI is not supported")) {
         await showModelErrorToast(errorMsg);
         return;
       }
 
-      // Clipboard Fallback
-      console.log("[DEBUG] AI Service failed. Using Clipboard Fallback.");
       await Clipboard.copy(prompt);
-
       await showToast({
         style: Toast.Style.Failure,
         title: "AI Call Failed",
@@ -298,12 +258,9 @@ async function runStealthActionInternal(
 
     const cleanResult = result.trim();
 
-    // 7. Insert text (for successful calls)
     toast.title = "Inserting...";
-    console.log(`Pasting ${cleanResult.length} chars to replace selection`);
 
     if (isMac) {
-      // ... existing macOS logic ...
       if (frontAppBundleId && frontAppBundleId !== "com.apple.finder") {
         try {
           execSync(
@@ -333,7 +290,6 @@ async function runStealthActionInternal(
     toast.style = Toast.Style.Success;
     toast.title = "Done!";
   } catch (error) {
-    console.error("Error:", error);
     const errorMsg = String(error);
     if (/model/i.test(errorMsg)) {
       await showModelErrorToast(errorMsg);
