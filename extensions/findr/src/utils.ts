@@ -2,15 +2,10 @@ import { environment, getPreferenceValues } from "@raycast/api";
 import { chmodSync, existsSync } from "fs";
 import { join } from "path";
 
-interface Preferences {
-  findrPath: string;
-  maxResults: string;
-}
-
 let chmodApplied = false;
 
 export function getFindrPath(): string {
-  const { findrPath } = getPreferenceValues<Preferences>();
+  const { findrPath } = getPreferenceValues<ExtensionPreferences>();
 
   // User override takes priority
   if (findrPath && existsSync(findrPath)) {
@@ -36,7 +31,7 @@ export function getFindrPath(): string {
 }
 
 export function getMaxResults(): number {
-  const { maxResults } = getPreferenceValues<Preferences>();
+  const { maxResults } = getPreferenceValues<ExtensionPreferences>();
   const parsed = parseInt(maxResults, 10);
   return parsed > 0 ? parsed : 30;
 }
