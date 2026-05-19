@@ -198,7 +198,7 @@ export default function NoteActions({ noteTitles, note, isDeleted, isDetail, mut
           <Action
             title="Plain Text"
             onAction={() => copyNoteContent(getNotePlainText)}
-            shortcut={{ modifiers: ["cmd", "shift"], key: "m" }}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "t" }}
           />
           <Action
             title="HTML"
