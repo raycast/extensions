@@ -102,6 +102,15 @@
           "default": "25",
           "description": "The maximum number of notes to display in the menu bar",
           "required": false
+        },
+        {
+          "name": "openSeparately",
+          "title": "Note actions",
+          "type": "checkbox",
+          "default": false,
+          "label": "Open notes in separate windows by default",
+          "description": "Pressing ⏎ will open notes in separate windows by default",
+          "required": false
         }
       ]
     },
