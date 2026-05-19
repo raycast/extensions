@@ -8,7 +8,7 @@ import {
   Toast,
 } from "@raycast/api";
 import { spawn as spawnProcess } from "node:child_process";
-import { mkdtemp, rm } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { basename, join } from "node:path";
 import { execFile } from "node:child_process";
@@ -23,6 +23,7 @@ import {
 const execFileAsync = promisify(execFile);
 const DEFAULT_MAX_SECONDS = 120;
 const MAX_ALLOWED_SECONDS = 3600;
+const SILENCE_PEAK_THRESHOLD = 0.0001;
 
 interface TranscribeResult {
   file: string;
@@ -76,6 +77,12 @@ export default function Command() {
 
         await recordAudio(kesha, audioPath, maxSeconds, recorderRef);
         if (cancelled) return;
+
+        if (await isSilentWav(audioPath)) {
+          throw new Error(
+            "Recorded audio is silent. Check macOS Microphone permission for Raycast and the selected input device.",
+          );
+        }
 
         setState({ status: "transcribing" });
         await showToast({
@@ -203,6 +210,58 @@ function parseMaxSeconds(value: string | undefined): number {
   return parsed;
 }
 
+async function isSilentWav(audioPath: string): Promise<boolean> {
+  const wav = await readFile(audioPath);
+  const fmt = findWavChunk(wav, "fmt ");
+  const data = findWavChunk(wav, "data");
+  if (!fmt || !data || fmt.length < 16 || data.length === 0) return false;
+
+  const audioFormat = wav.readUInt16LE(fmt.offset);
+  const bitsPerSample = wav.readUInt16LE(fmt.offset + 14);
+  let peak = 0;
+
+  if (audioFormat === 3 && bitsPerSample === 32) {
+    for (
+      let offset = data.offset;
+      offset + 4 <= data.offset + data.length;
+      offset += 4
+    ) {
+      peak = Math.max(peak, Math.abs(wav.readFloatLE(offset)));
+      if (peak > SILENCE_PEAK_THRESHOLD) return false;
+    }
+    return true;
+  }
+
+  if (audioFormat === 1 && bitsPerSample === 16) {
+    for (
+      let offset = data.offset;
+      offset + 2 <= data.offset + data.length;
+      offset += 2
+    ) {
+      peak = Math.max(peak, Math.abs(wav.readInt16LE(offset)) / 32768);
+      if (peak > SILENCE_PEAK_THRESHOLD) return false;
+    }
+    return true;
+  }
+
+  return false;
+}
+
+function findWavChunk(
+  wav: Buffer,
+  id: string,
+): { offset: number; length: number } | null {
+  for (let offset = 12; offset + 8 <= wav.length; ) {
+    const length = wav.readUInt32LE(offset + 4);
+    const dataOffset = offset + 8;
+    if (wav.toString("ascii", offset, offset + 4) === id) {
+      return { offset: dataOffset, length };
+    }
+    offset = dataOffset + length + (length % 2);
+  }
+  return null;
+}
+
 function stopRecorder(proc: ReturnType<typeof spawnProcess> | null) {
   if (!proc || proc.killed) return;
   if (proc.stdin && !proc.stdin.destroyed) {
@@ -212,10 +271,25 @@ function stopRecorder(proc: ReturnType<typeof spawnProcess> | null) {
   }
   const forceStop = setTimeout(() => {
     if (proc.exitCode == null && !proc.killed) {
-      proc.kill("SIGTERM");
+      killRecorderProcess(proc, "SIGTERM");
     }
   }, 3000);
   forceStop.unref?.();
+}
+
+function killRecorderProcess(
+  proc: ReturnType<typeof spawnProcess>,
+  signal: NodeJS.Signals,
+) {
+  if (proc.pid) {
+    try {
+      process.kill(-proc.pid, signal);
+      return;
+    } catch {
+      // Fall back to killing the wrapper if the process group is unavailable.
+    }
+  }
+  proc.kill(signal);
 }
 
 async function recordAudio(
@@ -234,7 +308,7 @@ async function recordAudio(
       "--max-seconds",
       String(maxSeconds),
     ],
-    { stdio: ["pipe", "ignore", "pipe"] },
+    { stdio: ["pipe", "ignore", "pipe"], detached: true },
   );
   recorderRef.current = proc;
   let stderr = "";
