@@ -29,7 +29,7 @@
     },
     {
       "name": "scan-history",
-      "title": "Scan History",
+      "title": "QR Scan History",
       "subtitle": "Webcam QR Scanner",
       "description": "View previously scanned QR codes.",
       "mode": "view"
@@ -44,7 +44,8 @@
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^25.9.0",
     "eslint": "^10.1.0",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.6"
   },
   "scripts": {
     "build-swift": "swiftc swift/CaptureFrame.swift -O -target arm64-apple-macosx12.0 -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreImage -framework ImageIO -o assets/capture-frame-arm64 && swiftc swift/CaptureFrame.swift -O -target x86_64-apple-macosx12.0 -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreImage -framework ImageIO -o assets/capture-frame-x86_64 && lipo -create -output assets/capture-frame assets/capture-frame-arm64 assets/capture-frame-x86_64 && rm assets/capture-frame-arm64 assets/capture-frame-x86_64",
@@ -52,6 +53,7 @@
     "dev": "npm run build-swift && ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "vitest run",
     "publish": "npx @raycast/api@latest publish"
   }
 }

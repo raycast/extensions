@@ -23,7 +23,7 @@ Webcam QR Scanner lets you scan physical QR codes with your Mac's webcam from in
 
 ### View QR Code History
 
-1. Run **Scan History** in Raycast.
+1. Run **QR Scan History** in Raycast.
 2. Select a previous scan to view its details.
 3. Use the actions to copy the content, open a link, delete one entry, clear all history, or start a new scan.
 
@@ -33,15 +33,11 @@ The first time you scan, macOS may ask for Camera permission for Raycast. Granti
 
 If scanning does not start, open **System Settings → Privacy & Security → Camera** and make sure Raycast is enabled.
 
-## Wi-Fi QR Codes and the Keychain Prompt
+## Wi-Fi QR Codes
 
 Wi-Fi QR codes can contain the network name, security type, password, and hidden-network flag. When you choose **Connect to Network**, the extension uses macOS' built-in `/usr/sbin/networksetup` tool to join the network.
 
-macOS may show a dialog that says `networksetup` wants to access the System keychain. This prompt comes from macOS' own networking tool, not from this extension.
-
-You can click **Deny** on that dialog. The extension passes the Wi-Fi password from the QR code directly to `networksetup`; it does not need Keychain access to read passwords, and denying the prompt does not grant the extension any extra access. If macOS still refuses to connect, you can use the **Copy Network Name** and **Copy Password** actions and join the network manually from System Settings.
-
-This extension does not use Raycast's Keychain API and does not ask Raycast for Keychain Access.
+If macOS refuses to connect, you can use the **Copy Network Name** and **Copy Password** actions and join the network manually from System Settings.
 
 ## Privacy
 
@@ -51,7 +47,7 @@ Scanning happens locally on your Mac:
 - QR contents are not sent to any external service.
 - Scan history is stored locally in Raycast's extension storage.
 
-Be aware that QR codes can contain sensitive data, including Wi-Fi passwords. If you scan sensitive codes, use **Delete** or **Clear All History** from the **Scan History** command when you no longer need them.
+Be aware that QR codes can contain sensitive data. If you scan sensitive codes, use **Delete** or **Clear All History** from the **QR Scan History** command when you no longer need them.
 
 ## Native Camera Helper
 

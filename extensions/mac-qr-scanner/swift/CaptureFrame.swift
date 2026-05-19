@@ -14,6 +14,7 @@ class FrameStreamer: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
     private let context = CIContext()
     private let interval: TimeInterval
     private var lastCaptureTime: CFAbsoluteTime = 0
+    private var observers: [NSObjectProtocol] = []
 
     init(interval: TimeInterval = 0.3) {
         self.interval = interval
@@ -33,6 +34,10 @@ class FrameStreamer: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
             exit(1)
         }
 
+        guard session.canAddInput(input) else {
+            fputs("Cannot add camera input to capture session.\n", stderr)
+            exit(1)
+        }
         session.addInput(input)
 
         let output = AVCaptureVideoDataOutput()
@@ -40,13 +45,43 @@ class FrameStreamer: NSObject, AVCaptureVideoDataOutputSampleBufferDelegate {
             kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_32BGRA
         ]
         output.setSampleBufferDelegate(self, queue: queue)
+        guard session.canAddOutput(output) else {
+            fputs("Cannot add video output to capture session.\n", stderr)
+            exit(1)
+        }
         session.addOutput(output)
+        observeSessionFailures()
 
         session.startRunning()
     }
 
     func stop() {
+        observers.forEach(NotificationCenter.default.removeObserver)
+        observers.removeAll()
         session.stopRunning()
+    }
+
+    private func observeSessionFailures() {
+        let center = NotificationCenter.default
+
+        observers.append(center.addObserver(
+            forName: .AVCaptureSessionRuntimeError,
+            object: session,
+            queue: .main
+        ) { notification in
+            let error = notification.userInfo?[AVCaptureSessionErrorKey] as? NSError
+            fputs("Camera runtime error: \(error?.localizedDescription ?? "unknown error")\n", stderr)
+            exit(1)
+        })
+
+        observers.append(center.addObserver(
+            forName: .AVCaptureSessionWasInterrupted,
+            object: session,
+            queue: .main
+        ) { _ in
+            fputs("Camera capture interrupted.\n", stderr)
+            exit(1)
+        })
     }
 
     func captureOutput(
@@ -93,15 +128,14 @@ func encodeJPEG(cgImage: CGImage, quality: CGFloat) -> Data? {
 
 let streamer = FrameStreamer(interval: 0.5)
 
-// Handle SIGTERM: stop capture session and exit cleanly
-signal(SIGTERM) { _ in
-    // Cannot call streamer.stop() directly from signal handler (not async-signal-safe),
-    // so schedule it on the main queue
-    DispatchQueue.main.async {
-        streamer.stop()
-        exit(0)
-    }
+// Handle SIGTERM through DispatchSourceSignal so cleanup runs outside the POSIX signal handler.
+signal(SIGTERM, SIG_IGN)
+let sigtermSource = DispatchSource.makeSignalSource(signal: SIGTERM, queue: .main)
+sigtermSource.setEventHandler {
+    streamer.stop()
+    exit(0)
 }
+sigtermSource.resume()
 
 // Monitor stdin for EOF (parent process died) — orphan protection
 DispatchQueue.global(qos: .utility).async {

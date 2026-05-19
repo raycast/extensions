@@ -11,6 +11,9 @@ import { saveToHistory } from "./utils";
 import { ScanResultDetail } from "./scan-result-detail";
 
 const STARTUP_TIMEOUT_MS = 5000;
+const MAX_FRAME_LINE_LENGTH = 20_000_000;
+const MAX_FRAME_BUFFER_BYTES = 15_000_000;
+const MAX_FRAME_PIXELS = 12_000_000;
 
 type ScanStatus = "scanning" | "found" | "error";
 
@@ -35,19 +38,33 @@ export default function Command() {
         // Ignore — may already be executable
       }
 
+      if (doneRef.current) return;
+
       const proc = spawn(binaryPath, [], {
         stdio: ["pipe", "pipe", "pipe"],
       });
       procRef.current = proc;
 
-      startupTimer = setTimeout(() => {
-        if (!doneRef.current) {
-          setStatus("error");
-          setErrorMessage(
-            "Camera did not produce frames. Check camera permissions in System Settings > Privacy & Security > Camera.",
-          );
-          proc.kill("SIGTERM");
+      function clearStartupTimer() {
+        if (startupTimer) {
+          clearTimeout(startupTimer);
+          startupTimer = null;
         }
+      }
+
+      function failCapture(message: string) {
+        if (doneRef.current) return;
+        doneRef.current = true;
+        clearStartupTimer();
+        setStatus("error");
+        setErrorMessage(message);
+        proc.kill("SIGTERM");
+      }
+
+      startupTimer = setTimeout(() => {
+        failCapture(
+          "Camera did not produce frames. Check camera permissions in System Settings > Privacy & Security > Camera.",
+        );
       }, STARTUP_TIMEOUT_MS);
 
       let stderrOutput = "";
@@ -58,17 +75,14 @@ export default function Command() {
       proc.on("close", (code) => {
         if (doneRef.current) return;
         if (code !== 0 && code !== null) {
-          setStatus("error");
-          setErrorMessage(
+          failCapture(
             stderrOutput.trim() || `Camera process exited with code ${code}`,
           );
         }
       });
 
       proc.on("error", (err) => {
-        if (doneRef.current) return;
-        setStatus("error");
-        setErrorMessage(err.message);
+        failCapture(err.message);
       });
 
       const rl = createInterface({ input: proc.stdout! });
@@ -82,9 +96,20 @@ export default function Command() {
         processing = true;
 
         try {
+          if (base64Line.length > MAX_FRAME_LINE_LENGTH) {
+            throw new Error("Frame line is too large");
+          }
+
           const buffer = Buffer.from(base64Line, "base64");
+          if (buffer.length > MAX_FRAME_BUFFER_BYTES) {
+            throw new Error("Frame buffer is too large");
+          }
+
           const image = await Jimp.read(buffer);
           const { data, width, height } = image.bitmap;
+          if (width * height > MAX_FRAME_PIXELS) {
+            throw new Error("Frame dimensions are too large");
+          }
           const imageData = new Uint8ClampedArray(
             data.buffer,
             data.byteOffset,
@@ -94,15 +119,18 @@ export default function Command() {
 
           if (result && !doneRef.current) {
             doneRef.current = true;
-            await saveToHistory(result.data);
+            clearStartupTimer();
             setDecoded(result.data);
             setStatus("found");
             rl.close();
             proc.kill("SIGTERM");
+            await saveToHistory(result.data).catch(() => {
+              // History persistence is best-effort; do not block displaying the scan result.
+            });
             return;
           }
         } catch {
-          // Corrupted frame — skip
+          // Corrupted or partial frame — skip and keep scanning.
         }
 
         processing = false;
@@ -117,10 +145,7 @@ export default function Command() {
       rl.on("line", (line) => {
         if (doneRef.current) return;
 
-        if (startupTimer) {
-          clearTimeout(startupTimer);
-          startupTimer = null;
-        }
+        clearStartupTimer();
         setCameraReady(true);
 
         // QR detection (every frame, with frame dropping)
