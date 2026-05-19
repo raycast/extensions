@@ -1,6 +1,6 @@
 # MUI Documentation Search Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-19
 
 - Updated the Algolia search index to restore documentation search results
 
