@@ -67,7 +67,8 @@ export function useAppDetails(
                     : null;
                 }
                 return null;
-              });
+              })
+              .catch(() => null);
 
       if (signal.aborted) return;
 
