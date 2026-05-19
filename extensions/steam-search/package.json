@@ -1,0 +1,131 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "steam-search",
+  "title": "Steam Search",
+  "description": "Search the Steam store, check prices, reviews and player counts, and open games directly in the Steam client or on GG.deals.",
+  "icon": "icon.png",
+  "author": "wvrnnr",
+  "license": "MIT",
+  "platforms": [
+    "windows, macOS"
+  ],
+  "categories": [
+    "Media",
+    "Applications"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "Steam Search",
+      "description": "Search for games on Steam and open them in the Steam client",
+      "mode": "view",
+      "preferences": [
+        {
+          "name": "region",
+          "title": "Region & Currency",
+          "description": "Used for Steam prices and GG.deals keyshop prices.",
+          "type": "dropdown",
+          "required": false,
+          "default": "de",
+          "data": [
+            {
+              "title": "🇩🇪 Germany (EUR)",
+              "value": "de"
+            },
+            {
+              "title": "🇺🇸 United States (USD)",
+              "value": "us"
+            },
+            {
+              "title": "🇬🇧 United Kingdom (GBP)",
+              "value": "gb"
+            },
+            {
+              "title": "🇫🇷 France (EUR)",
+              "value": "fr"
+            },
+            {
+              "title": "🇳🇱 Netherlands (EUR)",
+              "value": "nl"
+            },
+            {
+              "title": "🇵🇱 Poland (PLN)",
+              "value": "pl"
+            },
+            {
+              "title": "🇨🇿 Czech Republic (CZK)",
+              "value": "cz"
+            },
+            {
+              "title": "🇸🇪 Sweden (SEK)",
+              "value": "se"
+            },
+            {
+              "title": "🇳🇴 Norway (NOK)",
+              "value": "no"
+            },
+            {
+              "title": "🇦🇺 Australia (AUD)",
+              "value": "au"
+            },
+            {
+              "title": "🇨🇦 Canada (CAD)",
+              "value": "ca"
+            },
+            {
+              "title": "🇧🇷 Brazil (BRL)",
+              "value": "br"
+            },
+            {
+              "title": "🇹🇷 Turkey (TRY)",
+              "value": "tr"
+            },
+            {
+              "title": "🇷🇺 Russia (RUB)",
+              "value": "ru"
+            }
+          ]
+        },
+        {
+          "name": "steamApiKey",
+          "title": "Steam API Key",
+          "description": "Used for: owned game detection + live player counts.\nGet yours at: steamcommunity.com/dev/apikey (domain field can be anything, e.g. localhost)",
+          "type": "password",
+          "required": false,
+          "placeholder": "Optional — enables Owned badge and player counts"
+        },
+        {
+          "name": "steamId",
+          "title": "Steam ID (64-bit)",
+          "description": "Used for: owned game detection.\nFind yours at: steamid.io — look for the steamID64 field (17-digit number starting with 7656)",
+          "type": "textfield",
+          "required": false,
+          "placeholder": "Optional — enables Owned badge"
+        },
+        {
+          "name": "ggDealsApiKey",
+          "title": "GG.deals API Key",
+          "description": "Used for: keyshop prices (🔑).\nGet yours at: gg.deals/user/settings/ under the API section",
+          "type": "password",
+          "required": false,
+          "placeholder": "Optional — enables keyshop price display"
+        }
+      ]
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "npx eslint src --ext .ts,.tsx --fix",
+    "lint": "npx eslint src --ext .ts,.tsx",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "typescript": "^5.4.5"
+  }
+}

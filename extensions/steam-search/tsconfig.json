@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020"],
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "outDir": "dist"
+  },
+  "include": ["src"]
+}
