@@ -70,8 +70,8 @@ export default function SearchFiles() {
       <List>
         <List.EmptyView
           icon={Icon.ExclamationMark}
-          title="Findr CLI Not Found"
-          description={`Install findr first:\n\ncurl -sL https://raw.githubusercontent.com/Roderick111/findr/main/install.sh | bash\n\nOr: cargo install --git https://github.com/Roderick111/findr.git\n\nThen restart Raycast. If installed to a custom path, set it in extension preferences.`}
+          title="Findr Engine Not Found"
+          description="The search engine binary is missing. Try reinstalling the extension. If the issue persists, report it at github.com/Roderick111/findr."
         />
       </List>
     );

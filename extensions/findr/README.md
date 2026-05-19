@@ -4,23 +4,13 @@ The fastest local file search for macOS. Finds what Finder can't.
 
 Searches both filenames and file contents (including PDFs) in a single query with intelligent ranking.
 
-## Prerequisites
+## No Setup Required
 
-This extension requires the `findr` CLI. Install with one command:
-
-```bash
-curl -sL https://raw.githubusercontent.com/Roderick111/findr/main/install.sh | bash
-```
-
-Or build from source:
-
-```bash
-cargo install --git https://github.com/Roderick111/findr.git
-```
-
-The extension auto-detects the binary from common install paths (`~/.cargo/bin`, `~/.local/bin`, `/usr/local/bin`). No manual configuration needed.
+Install from the Raycast Store and start searching. The search engine is bundled with the extension.
 
 On first search, findr automatically builds an index of your files (~25 seconds). After that, the index updates itself on every search.
+
+The search engine is built from open source: [github.com/Roderick111/findr](https://github.com/Roderick111/findr) (MIT license).
 
 ## How It Works
 
@@ -47,5 +37,5 @@ Manually trigger a full reindex of all configured scan paths.
 
 | Preference | Description |
 |-----------|-------------|
-| Findr Binary Path | Override auto-detected path to the `findr` binary |
+| Findr Binary Path | Override the bundled engine with a custom binary |
 | Max Results | Maximum results per search (default: 30) |

@@ -27,7 +27,7 @@
     {
       "name": "findrPath",
       "title": "Findr Binary Path",
-      "description": "Path to the findr CLI binary. Leave empty for auto-detection.",
+      "description": "Override the bundled findr binary. Leave empty to use the built-in engine.",
       "type": "textfield",
       "default": "",
       "required": false

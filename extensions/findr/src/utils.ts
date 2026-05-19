@@ -1,36 +1,33 @@
-import { getPreferenceValues } from "@raycast/api";
-import { existsSync } from "fs";
-import { homedir } from "os";
+import { environment, getPreferenceValues } from "@raycast/api";
+import { chmodSync, existsSync } from "fs";
+import { join } from "path";
 
 interface Preferences {
   findrPath: string;
   maxResults: string;
 }
 
-const COMMON_PATHS = [
-  `${homedir()}/.cargo/bin/findr`,
-  `${homedir()}/.local/bin/findr`,
-  "/usr/local/bin/findr",
-  "/opt/homebrew/bin/findr",
-];
-
 export function getFindrPath(): string {
   const { findrPath } = getPreferenceValues<Preferences>();
 
-  // User-configured path takes priority
+  // User override takes priority
   if (findrPath && existsSync(findrPath)) {
     return findrPath;
   }
 
-  // Auto-detect from common install locations
-  for (const p of COMMON_PATHS) {
-    if (existsSync(p)) {
-      return p;
+  // Use bundled binary from assets (universal: arm64 + x86_64)
+  // Source: https://github.com/Roderick111/findr (MIT, fully auditable)
+  const bundled = join(environment.assetsPath, "findr");
+  if (existsSync(bundled)) {
+    try {
+      chmodSync(bundled, 0o755);
+    } catch {
+      // May already be executable
     }
+    return bundled;
   }
 
-  // Return user path or first common path (will trigger "not found" in UI)
-  return findrPath || COMMON_PATHS[0];
+  return bundled;
 }
 
 export function getMaxResults(): number {
