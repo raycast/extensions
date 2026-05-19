@@ -37,7 +37,7 @@ export default function MenubarCommand() {
   const allThisMonth = subscriptions
     .filter((s) => s.status === "active")
     .filter((s) => {
-      const start = new Date(s.startDate);
+      const start = new Date(s.startDate + "T00:00:00");
       switch (s.billingCycle) {
         case "monthly":
           return true;

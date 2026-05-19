@@ -45,7 +45,7 @@ export default function AnalyticsCommand() {
 
   const thisMonthTotal = getMonthlyTotal(subscriptions, month, year, prefs.primaryCurrency, rates);
   const lastMonthTotal = getMonthlyTotal(subscriptions, lastMonth, lastMonthYear, prefs.primaryCurrency, rates);
-  const yearlyForecast = thisMonthTotal * 12;
+  const yearlyForecast = active.reduce((sum, s) => sum + toMonthlyPrimary(s), 0) * 12;
 
   const groups: Record<string, Subscription[]> = {};
   for (const sub of active) {
