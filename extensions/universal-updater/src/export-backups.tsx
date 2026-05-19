@@ -240,20 +240,22 @@ async function exportToShellScript(backup: BackupFile) {
     if (Object.keys(packages).length === 0) continue;
     script += `echo "Installing ${ecosystem} packages..."\n`;
     for (const [name] of Object.entries(packages)) {
-      if (ecosystem === "brew") script += `brew install "${name}"\n`;
-      else if (ecosystem === "npm") script += `npm install -g "${name}"\n`;
-      else if (ecosystem === "yarn") script += `yarn global add "${name}"\n`;
-      else if (ecosystem === "pnpm") script += `pnpm add -g "${name}"\n`;
-      else if (ecosystem === "pip") script += `pip install "${name}"\n`;
-      else if (ecosystem === "pipx") script += `pipx install "${name}"\n`;
-      else if (ecosystem === "gem") script += `gem install "${name}"\n`;
-      else if (ecosystem === "cargo") script += `cargo install "${name}"\n`;
-      else if (ecosystem === "go") script += `go install "${name}@latest"\n`;
-      else if (ecosystem === "mas") script += `mas install "${name}"\n`;
-      else if (ecosystem === "bun") script += `bun install -g "${name}"\n`;
-      else if (ecosystem === "deno") script += `deno install -g "${name}"\n`;
+      const safeName = "'" + name.replaceAll("'", "'\\''") + "'";
+      if (ecosystem === "brew") script += `brew install ${safeName}\n`;
+      else if (ecosystem === "npm") script += `npm install -g ${safeName}\n`;
+      else if (ecosystem === "yarn") script += `yarn global add ${safeName}\n`;
+      else if (ecosystem === "pnpm") script += `pnpm add -g ${safeName}\n`;
+      else if (ecosystem === "pip") script += `pip install ${safeName}\n`;
+      else if (ecosystem === "pipx") script += `pipx install ${safeName}\n`;
+      else if (ecosystem === "gem") script += `gem install ${safeName}\n`;
+      else if (ecosystem === "cargo") script += `cargo install ${safeName}\n`;
+      else if (ecosystem === "go")
+        script += `go install '${name.replaceAll("'", "'\\''")}@latest'\n`;
+      else if (ecosystem === "mas") script += `mas install ${safeName}\n`;
+      else if (ecosystem === "bun") script += `bun install -g ${safeName}\n`;
+      else if (ecosystem === "deno") script += `deno install -g ${safeName}\n`;
       else if (ecosystem === "composer")
-        script += `composer global require "${name}"\n`;
+        script += `composer global require ${safeName}\n`;
     }
     script += "\n";
   }
