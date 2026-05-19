@@ -1,0 +1,57 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mac-qr-scanner",
+  "title": "Webcam QR Scanner",
+  "description": "Scan QR codes from the real world using your Mac's webcam.",
+  "icon": "command-icon.png",
+  "author": "daniel",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "qr",
+    "scanner",
+    "camera",
+    "webcam",
+    "wifi"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "scan-qr-code",
+      "title": "Scan QR Code",
+      "subtitle": "Webcam QR Scanner",
+      "description": "Capture a frame from your webcam and decode any QR code in it.",
+      "mode": "view"
+    },
+    {
+      "name": "scan-history",
+      "title": "Scan History",
+      "subtitle": "Webcam QR Scanner",
+      "description": "View previously scanned QR codes.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.17",
+    "jimp": "^1.6.0",
+    "jsqr": "^1.4.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.0",
+    "eslint": "^10.1.0",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build-swift": "swiftc swift/CaptureFrame.swift -O -target arm64-apple-macosx12.0 -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreImage -framework ImageIO -o assets/capture-frame-arm64 && swiftc swift/CaptureFrame.swift -O -target x86_64-apple-macosx12.0 -framework AVFoundation -framework CoreMedia -framework CoreVideo -framework CoreImage -framework ImageIO -o assets/capture-frame-x86_64 && lipo -create -output assets/capture-frame assets/capture-frame-arm64 assets/capture-frame-x86_64 && rm assets/capture-frame-arm64 assets/capture-frame-x86_64",
+    "build": "npm run build-swift && ray build",
+    "dev": "npm run build-swift && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
