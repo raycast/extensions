@@ -1,6 +1,6 @@
 # Apple Reminders Changelog
 
-## [Fix Create Reminder close shortcut] - {PR_MERGE_DATE}
+## [Fix Create Reminder close shortcut] - 2026-05-19
 
 - Restored the Shift+Command+Enter shortcut for creating a reminder and closing the window.
 
