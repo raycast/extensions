@@ -47,16 +47,6 @@ export default function SearchFiles() {
   const isIndexing = data?.mode === "indexing";
 
   useEffect(() => {
-    if (error) {
-      showToast({
-        style: Toast.Style.Failure,
-        title: "Search failed",
-        message: error.message,
-      });
-    }
-  }, [error]);
-
-  useEffect(() => {
     if (isIndexing) {
       showToast({
         style: Toast.Style.Animated,
@@ -148,10 +138,10 @@ export default function SearchFiles() {
               detail={<ResultDetail result={result} />}
               actions={
                 <ActionPanel>
+                  <Action.Open title="Open File" target={result.path} />
                   <Action.ToggleQuickLook
                     shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
                   />
-                  <Action.Open title="Open File" target={result.path} />
                   <Action.ShowInFinder path={result.path} />
                   <Action.CopyToClipboard
                     title="Copy Path"
