@@ -43,7 +43,7 @@ export default function NoteDetail({ note, isDeleted, mutate }: NoteDetailProps)
             <Detail.Metadata.TagList title="Tags">
               {note.tags.map((tag) => {
                 if (!tag.text) return null;
-                <Detail.Metadata.TagList.Item key={tag.id} text={tag.text} />;
+                return <Detail.Metadata.TagList.Item key={tag.id} text={tag.text} />;
               })}
             </Detail.Metadata.TagList>
           ) : null}
