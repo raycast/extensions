@@ -7,6 +7,8 @@ interface Preferences {
   maxResults: string;
 }
 
+let chmodApplied = false;
+
 export function getFindrPath(): string {
   const { findrPath } = getPreferenceValues<Preferences>();
 
@@ -19,10 +21,13 @@ export function getFindrPath(): string {
   // Source: https://github.com/Roderick111/findr (MIT, fully auditable)
   const bundled = join(environment.assetsPath, "findr");
   if (existsSync(bundled)) {
-    try {
-      chmodSync(bundled, 0o755);
-    } catch {
-      // May already be executable
+    if (!chmodApplied) {
+      try {
+        chmodSync(bundled, 0o755);
+      } catch {
+        // May already be executable
+      }
+      chmodApplied = true;
     }
     return bundled;
   }
@@ -32,7 +37,8 @@ export function getFindrPath(): string {
 
 export function getMaxResults(): number {
   const { maxResults } = getPreferenceValues<Preferences>();
-  return parseInt(maxResults, 10) || 30;
+  const parsed = parseInt(maxResults, 10);
+  return parsed > 0 ? parsed : 30;
 }
 
 export function formatFileSize(bytes: number | null): string {
