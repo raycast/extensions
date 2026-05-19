@@ -111,14 +111,6 @@ function validate(values: Values, template: EmailTemplate) {
     }
   }
 
-  if (
-    typeof values.postingUrl === "string" &&
-    values.postingUrl.trim() &&
-    !isValidUrl(values.postingUrl)
-  ) {
-    return "Use a valid URL.";
-  }
-
   return undefined;
 }
 
@@ -137,7 +129,7 @@ function TemplateField({ placeholder }: { placeholder: string }) {
   const title = getFieldTitle(placeholder);
   const fieldPlaceholder = getFieldPlaceholder(placeholder);
 
-  if (placeholder === "techStack") {
+  if (usesMultilineInput(placeholder)) {
     return (
       <Form.TextArea
         id={placeholder}
@@ -176,13 +168,19 @@ function getFieldTitle(placeholder: string) {
 
 function getFieldPlaceholder(placeholder: string) {
   const placeholders: Record<string, string> = {
-    role: "Product Manager",
-    company: "Acme",
-    postingUrl: "https://example.com/posting",
-    techStack: "TypeScript, PostgreSQL, and AWS",
+    name: "Alex",
+    day: "Friday",
+    restaurant: "Local Cafe",
+    time: "12:30 PM",
+    note: "Add any extra context here.",
+    senderName: "Your name",
   };
 
   return placeholders[placeholder] ?? `Value for {{${placeholder}}}`;
+}
+
+function usesMultilineInput(placeholder: string) {
+  return /note|message|details|description|comments?/i.test(placeholder);
 }
 
 function renderTemplate(template: string, values: Record<string, string>) {
@@ -210,13 +208,4 @@ function createGmailComposeUrl({
 
 function isValidEmail(value: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
-}
-
-function isValidUrl(value: string) {
-  try {
-    const url = new URL(value.trim());
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
 }

@@ -8,3 +8,13 @@ A Raycast extension that turns reusable templates into Gmail-ready messages in s
 - `Edit Email Template`: Edit the subject and body template with support for custom `{{placeholders}}`.
 
 Gmail compose links cannot add attachments or schedule send automatically, so ReachCast keeps those as manual Gmail steps.
+
+## Screenshots
+
+### Create Gmail Message
+
+![Create Gmail Message](./media/create-gmail-message.png)
+
+### Edit Email Template
+
+![Edit Email Template](./media/edit-email-template.png)

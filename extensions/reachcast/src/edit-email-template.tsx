@@ -20,6 +20,7 @@ type Values = EmailTemplate;
 
 export default function Command() {
   const [template, setTemplate] = useState<EmailTemplate>(DEFAULT_TEMPLATE);
+  const formKey = `${template.subject}:${template.body}`;
 
   useEffect(() => {
     async function loadTemplate() {
@@ -59,6 +60,7 @@ export default function Command() {
 
   return (
     <Form
+      key={formKey}
       actions={
         <ActionPanel>
           <Action.SubmitForm title="Save Template" onSubmit={handleSubmit} />
