@@ -40,6 +40,7 @@ const SILENCE_PEAK_THRESHOLD = 0.0001;
 const METER_INTERVAL_MS = 500;
 const METER_WINDOW_SECONDS = 1;
 const WAV_HEADER_BYTES = 4096;
+const WAVE_FORMAT_EXTENSIBLE = 0xfffe;
 
 interface TranscribeResult {
   file: string;
@@ -374,6 +375,7 @@ async function readWavSignal(audioPath: string): Promise<SignalLevel> {
     }
 
     const audioFormat = header.readUInt16LE(fmt.offset);
+    const formatTag = wavPayloadFormat(header, fmt, audioFormat);
     const bitsPerSample = header.readUInt16LE(fmt.offset + 14);
     const blockAlign = Math.max(1, header.readUInt16LE(fmt.offset + 12));
     const byteRate = Math.max(1, header.readUInt32LE(fmt.offset + 8));
@@ -393,7 +395,7 @@ async function readWavSignal(audioPath: string): Promise<SignalLevel> {
       window.length,
       data.offset + availableBytes - windowBytes,
     );
-    const stats = measurePcmWindow(window, audioFormat, bitsPerSample);
+    const stats = measurePcmWindow(window, formatTag, bitsPerSample);
     if (!stats) {
       return emptySignal("Listening...");
     }
@@ -427,14 +429,14 @@ function signalPercent(signal: Pick<SignalLevel, "rms" | "peak">): number {
 
 function measurePcmWindow(
   data: Buffer,
-  audioFormat: number,
+  formatTag: number,
   bitsPerSample: number,
 ): Pick<SignalLevel, "rms" | "peak"> | null {
   let sum = 0;
   let peak = 0;
   let count = 0;
 
-  if (audioFormat === 3 && bitsPerSample === 32) {
+  if (formatTag === 3 && bitsPerSample === 32) {
     for (let offset = 0; offset + 4 <= data.length; offset += 4) {
       const sample = data.readFloatLE(offset);
       if (!Number.isFinite(sample)) continue;
@@ -443,7 +445,7 @@ function measurePcmWindow(
       peak = Math.max(peak, abs);
       count += 1;
     }
-  } else if (audioFormat === 1 && bitsPerSample === 16) {
+  } else if (formatTag === 1 && bitsPerSample === 16) {
     for (let offset = 0; offset + 2 <= data.length; offset += 2) {
       const sample = data.readInt16LE(offset) / 32768;
       const abs = Math.abs(sample);
@@ -486,7 +488,7 @@ function buildRecordingMarkdown(
 
 function renderSignalMeter(percent: number): string {
   const filled = Math.max(0, Math.min(10, Math.round(percent / 10)));
-  return `[${"█".repeat(filled)}${"░".repeat(10 - filled)}]`;
+  return `[${"#".repeat(filled)}${"-".repeat(10 - filled)}]`;
 }
 
 async function isSilentWav(audioPath: string): Promise<boolean> {
@@ -496,10 +498,11 @@ async function isSilentWav(audioPath: string): Promise<boolean> {
   if (!fmt || !data || fmt.length < 16 || data.length === 0) return false;
 
   const audioFormat = wav.readUInt16LE(fmt.offset);
+  const formatTag = wavPayloadFormat(wav, fmt, audioFormat);
   const bitsPerSample = wav.readUInt16LE(fmt.offset + 14);
   let peak = 0;
 
-  if (audioFormat === 3 && bitsPerSample === 32) {
+  if (formatTag === 3 && bitsPerSample === 32) {
     for (
       let offset = data.offset;
       offset + 4 <= data.offset + data.length;
@@ -511,7 +514,7 @@ async function isSilentWav(audioPath: string): Promise<boolean> {
     return true;
   }
 
-  if (audioFormat === 1 && bitsPerSample === 16) {
+  if (formatTag === 1 && bitsPerSample === 16) {
     for (
       let offset = data.offset;
       offset + 2 <= data.offset + data.length;
@@ -539,6 +542,21 @@ function findWavChunk(
     offset = dataOffset + length + (length % 2);
   }
   return null;
+}
+
+function wavPayloadFormat(
+  wav: Buffer,
+  fmt: { offset: number; length: number },
+  audioFormat: number,
+): number {
+  if (audioFormat !== WAVE_FORMAT_EXTENSIBLE || fmt.length < 40) {
+    return audioFormat;
+  }
+  const subFormatOffset = fmt.offset + 24;
+  if (subFormatOffset + 4 > wav.length) {
+    return audioFormat;
+  }
+  return wav.readUInt32LE(subFormatOffset);
 }
 
 function stopRecorder(proc: ReturnType<typeof spawnProcess> | null) {
