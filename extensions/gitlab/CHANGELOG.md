@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Updates] - {PR_MERGE_DATE}
+## [Updates] - 2026-05-20
 
 - Contributor updates
 
