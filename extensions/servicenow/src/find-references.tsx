@@ -198,12 +198,12 @@ export default function FindReferences(props: LaunchProps) {
       await client.startBackgroundScript(findReferences(target.table, target.sysId), (response) => {
         if (cancelled) return;
         const match = response.match(/###([\s\S]*?)###/);
-        if (!match || !match[1]) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Could Not Search References",
-            message: "Check that you are an admin and the table name is correct.",
-          });
+        if (!match) {
+          // No marker means the background script never ran (missing admin access or SSO + basic auth).
+          showToast({ style: Toast.Style.Failure, title: "Could Not Search References" });
+          setErrorMessage(
+            `${backgroundScriptAuthErrorMessage(selectedInstance)} Also confirm the table name is correct.`,
+          );
           setErrorFetching(true);
           setIsLoading(false);
           return;

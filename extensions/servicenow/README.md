@@ -31,7 +31,7 @@ Before using the extension, you'll need to configure your ServiceNow instance pr
 
 OAuth uses a public OAuth client (PKCE) registered in your ServiceNow instance. Tokens are stored locally and refreshed automatically.
 
-> If your instance uses **SSO**, configure the profile with OAuth: basic auth may not establish a session, so the admin background-script commands (**Find Record by Sys ID**, **Find Record References**) can fail to authenticate.
+> If your instance uses **SSO**, configure the profile with OAuth: basic auth can sign in but can't run the background scripts that power the admin commands (**Find Record by Sys ID**, **Find Record References**), so those commands will fail with a basic-auth profile.
 
 #### Recommended: import the default Raycast OAuth client
 

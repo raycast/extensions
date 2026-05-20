@@ -62,6 +62,7 @@ export default function SearchSysId(props: LaunchProps) {
   }, []);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [canReconfigure, setCanReconfigure] = useState(false);
   const detectionStarted = useRef(false);
 
   useEffect(() => {
@@ -104,6 +105,7 @@ export default function SearchSysId(props: LaunchProps) {
     let cancelled = false;
     setIsLoading(true);
     setErrorMessage(null);
+    setCanReconfigure(false);
 
     (async () => {
       const client = new ServiceNowClient(selectedInstance, (updated) => {
@@ -113,21 +115,20 @@ export default function SearchSysId(props: LaunchProps) {
       if (cancelled) return;
       if (!authed) {
         setErrorMessage(backgroundScriptAuthErrorMessage(selectedInstance));
+        setCanReconfigure(true);
         setIsLoading(false);
         return;
       }
       await client.startBackgroundScript(findSysID(sysId), (response) => {
         if (cancelled) return;
         const answer = response.match(/###(.*)###/);
-        if (response.length === 0) {
-          showToast({
-            style: Toast.Style.Failure,
-            title: "Could Not Search for Sys ID",
-            message: "Admin access is required.",
-          });
-          setErrorMessage("Admin access is required to run this lookup.");
+        if (answer == null) {
+          // No marker means the background script never ran (missing admin access or SSO + basic auth).
+          showToast({ style: Toast.Style.Failure, title: "Could Not Run Lookup" });
+          setErrorMessage(backgroundScriptAuthErrorMessage(selectedInstance));
+          setCanReconfigure(true);
           setIsLoading(false);
-        } else if (answer != null && answer[1]) {
+        } else if (answer[1] && answer[1] !== "NOT_FOUND") {
           const table = answer[1].split("^")[0];
           open(buildServiceNowUrl(selectedInstance.name, `${table}.do?sys_id=${sysId}`));
           popToRoot();
@@ -253,8 +254,7 @@ export default function SearchSysId(props: LaunchProps) {
           description={errorMessage}
           actions={
             <ActionPanel>
-              <Action title="Try Another Sys ID" icon={Icon.MagnifyingGlass} onAction={resetToForm} />
-              {selectedInstance && (
+              {canReconfigure && selectedInstance && (
                 <Action.Push
                   title="Edit Profile"
                   icon={Icon.Pencil}
@@ -264,6 +264,7 @@ export default function SearchSysId(props: LaunchProps) {
                   onPop={mutate}
                 />
               )}
+              <Action title="Try Another Sys ID" icon={Icon.MagnifyingGlass} onAction={resetToForm} />
             </ActionPanel>
           }
         />
