@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Icon, Keyboard, List, closeMainWindow } from "@raycast/api";
+import { Action, ActionPanel, Icon, Keyboard, List, closeMainWindow, getPreferenceValues } from "@raycast/api";
 import { execFile } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
@@ -16,6 +16,10 @@ interface WindowsTerminalSettings {
   };
 }
 
+interface Preferences {
+  openProfilesInQuakeWindow: boolean;
+}
+
 const PROFILES = JSON.parse(
   fs.readFileSync(
     `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`,
@@ -23,14 +27,15 @@ const PROFILES = JSON.parse(
   ),
 ) as WindowsTerminalSettings;
 
-function Actions(props: { name: string }) {
+function Actions(props: { name: string; quake: boolean }) {
   return (
     <ActionPanel title={props.name}>
       <Action
         icon={Icon.PlusSquare}
-        title="Open in New Tab"
+        title={props.quake ? "Open in Quake Window" : "Open in New Tab"}
         onAction={async () => {
-          execFile("wt.exe", ["new-tab", "-p", props.name]);
+          const args = props.quake ? ["-w", "_quake", "new-tab", "-p", props.name] : ["new-tab", "-p", props.name];
+          execFile("wt.exe", args);
           await closeMainWindow();
         }}
       />
@@ -44,17 +49,11 @@ function Actions(props: { name: string }) {
       />
       <Action
         icon={Icon.Shield}
-        title="Open as Administrator"
+        title={props.quake ? "Open as Administrator (Quake)" : "Open as Administrator"}
         shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
         onAction={async () => {
-          execFile("powershell", [
-            "Start-Process",
-            "wt.exe",
-            "-ArgumentList",
-            `"-p","${props.name}"`,
-            "-Verb",
-            "RunAs",
-          ]);
+          const argumentList = props.quake ? `"-w","_quake","new-tab","-p","${props.name}"` : `"-p","${props.name}"`;
+          execFile("powershell", ["Start-Process", "wt.exe", "-ArgumentList", argumentList, "-Verb", "RunAs"]);
           await closeMainWindow();
         }}
       />
@@ -71,6 +70,7 @@ function Actions(props: { name: string }) {
 }
 
 export default function Command() {
+  const { openProfilesInQuakeWindow: quake } = getPreferenceValues<Preferences>();
   return (
     <List searchBarPlaceholder="Search all profiles...">
       <List.Section title="Profiles">
@@ -99,7 +99,7 @@ export default function Command() {
                     ? ["cmd"]
                     : []
               }
-              actions={<Actions name={item.name} />}
+              actions={<Actions name={item.name} quake={quake} />}
             />
           ))}
       </List.Section>
@@ -109,7 +109,12 @@ export default function Command() {
           {PROFILES.profiles.list
             .filter((item) => item.hidden !== true && item.source === "Windows.Terminal.SSH")
             .map((item) => (
-              <List.Item key={item.guid} icon={Icon.Network} title={item.name} actions={<Actions name={item.name} />} />
+              <List.Item
+                key={item.guid}
+                icon={Icon.Network}
+                title={item.name}
+                actions={<Actions name={item.name} quake={quake} />}
+              />
             ))}
         </List.Section>
       ) : null}
@@ -128,7 +133,7 @@ export default function Command() {
                 key={item.guid}
                 icon={Icon.HardDrive}
                 title={item.name}
-                actions={<Actions name={item.name} />}
+                actions={<Actions name={item.name} quake={quake} />}
               />
             ))}
         </List.Section>
