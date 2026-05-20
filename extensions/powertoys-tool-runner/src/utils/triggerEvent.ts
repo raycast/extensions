@@ -2,10 +2,6 @@ import { runPowerShellScript, showFailureToast } from "@raycast/utils";
 import { getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { getPowerToysInstallPath } from "./getPowerToysInstallPath";
 
-interface Preferences {
-  autoStartPowerToys: boolean;
-}
-
 export async function isPowerToysRunning(): Promise<boolean> {
   try {
     const psCommand = `(Get-Process -Name 'PowerToys' -ErrorAction SilentlyContinue) -ne $null`;
