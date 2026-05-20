@@ -398,32 +398,39 @@ function normalizeArchiveLibrary(archive: ArchiveLibrary) {
   const technologies = topicContentsByKey(archive.topics, "Technologies");
   const columns = archive.columns;
 
-  return archive.documents.map((document, order) => {
-    const title = decodeHTML(String(document[columns.name] ?? ""));
-    const resourceType = resourceTypes.get(String(document[columns.type])) ?? "Archive";
-    const topic = topics.get(String(document[columns.topic])) ?? "";
-    const technology = technologies.get(String(document[columns.framework])) ?? "";
-    const platform = String(document[columns.platform] ?? "");
-    const date = String(document[columns.displayDate] ?? document[columns.date] ?? "");
+  return archive.documents
+    .map((document, order) => {
+      const title = decodeHTML(String(document[columns.name] ?? ""));
+      const resourceType = resourceTypes.get(String(document[columns.type])) ?? "Archive";
+      const topic = topics.get(String(document[columns.topic])) ?? "";
+      const technology = technologies.get(String(document[columns.framework])) ?? "";
+      const platform = String(document[columns.platform] ?? "");
+      const date = String(document[columns.displayDate] ?? document[columns.date] ?? "");
+      const rawUrl = String(document[columns.url] ?? "");
 
-    return {
-      title,
-      description: [resourceType, topic, technology].filter(Boolean).join(" · "),
-      url: new URL(String(document[columns.url] ?? ""), config.archiveNavigationUrl).href,
-      type: "archive",
-      order,
-      platform: platform ? platform.split("|") : [],
-      breadcrumbs: [topic, technology].filter(Boolean),
-      date,
-      event_name: "",
-      session_id: String(document[columns.id] ?? ""),
-      tile_image: "",
-      relevance: 0,
-      is_beta: 0,
-      language: "",
-      lang_children: [],
-    } as SearchResult;
-  });
+      if (!rawUrl) {
+        return undefined;
+      }
+
+      return {
+        title,
+        description: [resourceType, topic, technology].filter(Boolean).join(" · "),
+        url: new URL(rawUrl, config.archiveNavigationUrl).href,
+        type: "archive",
+        order,
+        platform: platform ? platform.split("|") : [],
+        breadcrumbs: [topic, technology].filter(Boolean),
+        date,
+        event_name: "",
+        session_id: String(document[columns.id] ?? ""),
+        tile_image: "",
+        relevance: 0,
+        is_beta: 0,
+        language: "",
+        lang_children: [],
+      } as SearchResult;
+    })
+    .filter((result): result is SearchResult => result !== undefined);
 }
 
 function flattenBookSections(sections: ArchiveBookSection[], document: SearchResult, bookIndexUrl: string) {
