@@ -23,19 +23,26 @@ function createClient(): ImapFlow {
 
 async function withClient<T>(operation: (client: ImapFlow) => Promise<T>): Promise<T> {
   const client = createClient();
+  let connected = false;
   try {
-    await client.connect();
-    return await operation(client);
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    throw new Error(
-      `IMAP connection failed: ${errorMessage}\n\nPlease verify:\n- Your QQ email address is correct\n- The authorization code is correct (not your QQ password)\n- IMAP service is enabled in QQ Mail Settings`,
-    );
-  } finally {
     try {
-      await client.logout();
-    } catch {
-      // Ignore logout errors
+      await client.connect();
+      connected = true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(
+        `IMAP connection failed: ${errorMessage}\n\nPlease verify:\n- Your QQ email address is correct\n- The authorization code is correct (not your QQ password)\n- IMAP service is enabled in QQ Mail Settings`,
+      );
+    }
+
+    return await operation(client);
+  } finally {
+    if (connected) {
+      try {
+        await client.logout();
+      } catch {
+        // Ignore logout errors
+      }
     }
   }
 }
@@ -150,14 +157,9 @@ export async function fetchStarredEmails(limit: number = 50, offset: number = 0)
   const folders = await listFolders();
   const realFolders = folders.filter((f) => f.path !== "__starred__");
 
-  // Fetch all folders in parallel for speed
-  const results = await Promise.allSettled(realFolders.map((f) => fetchStarredEmailsFromFolder(f.path)));
-
   const allStarred: Email[] = [];
-  for (const result of results) {
-    if (result.status === "fulfilled") {
-      allStarred.push(...result.value);
-    }
+  for (const folder of realFolders) {
+    allStarred.push(...(await fetchStarredEmailsFromFolder(folder.path)));
   }
 
   return allStarred.sort((a, b) => b.date.getTime() - a.date.getTime()).slice(offset, offset + limit);
