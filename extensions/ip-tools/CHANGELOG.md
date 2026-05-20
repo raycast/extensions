@@ -1,6 +1,6 @@
 # IP Tools Changelog
 
-## [Enhancements] - {PR_MERGE_DATE}
+## [Enhancements] - 2026-05-20
 
 - Added Windows support for the extension
 
