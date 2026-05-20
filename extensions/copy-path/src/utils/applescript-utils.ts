@@ -2,6 +2,8 @@ import { runAppleScript } from "@raycast/utils";
 import * as os from "node:os";
 import { Application } from "@raycast/api";
 
+const APPLESCRIPT_TIMEOUT_MS = 5000;
+
 export const scriptFinderPath = `
 if application "Finder" is not running then
     return "Finder not running"
@@ -15,7 +17,7 @@ end tell
 // finder path, with / at the end
 export const getFocusFinderPath = async () => {
   try {
-    return await runAppleScript(scriptFinderPath);
+    return await runAppleScript(scriptFinderPath, { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return os.homedir();
   }
@@ -54,7 +56,7 @@ end tell
 
 export const getQSpacePathUrls = async () => {
   try {
-    return await runAppleScript(scriptQSpacePath);
+    return await runAppleScript(scriptQSpacePath, { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -78,7 +80,7 @@ return windowPath
 
 export const getFocusWindowPath = async (app: Application) => {
   try {
-    let path = await runAppleScript(scriptWindowPath(app));
+    let path = await runAppleScript(scriptWindowPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
     if (path == "missing value" || path == "") {
       return "";
     }
@@ -93,6 +95,49 @@ export const getFocusWindowPath = async (app: Application) => {
     } catch {
       return path;
     }
+  } catch (e) {
+    return "";
+  }
+};
+
+export const scriptVSCodeActiveFilePath = (app: Application) => `
+set previousClipboard to the clipboard
+set sentinelClipboard to "__raycast_copy_path_no_active_file__"
+set the clipboard to sentinelClipboard
+
+try
+  tell application id "${app.bundleId}" to activate
+  delay 0.1
+  tell application "System Events"
+    keystroke "c" using {option down, command down}
+  end tell
+  delay 0.2
+  set activeFilePath to the clipboard
+  if activeFilePath is sentinelClipboard then
+    set the clipboard to previousClipboard
+    return ""
+  end if
+  return activeFilePath
+on error
+  set the clipboard to previousClipboard
+  return ""
+end try
+`;
+
+export const getVSCodeActiveFilePath = async (app: Application) => {
+  if (!app.bundleId) {
+    return "";
+  }
+
+  try {
+    const path = (await runAppleScript(scriptVSCodeActiveFilePath(app), { timeout: APPLESCRIPT_TIMEOUT_MS })).trim();
+    if (path.startsWith("file://")) {
+      return decodeURIComponent(path.replace("file://", ""));
+    }
+    if (path.startsWith("/") || path.startsWith("~")) {
+      return path;
+    }
+    return "";
   } catch (e) {
     return "";
   }
@@ -117,7 +162,7 @@ return windowTitle
 
 export const getFocusWindowTitle = async (app: Application) => {
   try {
-    return await runAppleScript(scriptWindowTitle(app));
+    return await runAppleScript(scriptWindowTitle(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -132,7 +177,7 @@ return currentURL`;
 
 export const getWebkitBrowserPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptWebkitBrowserPath(app));
+    return await runAppleScript(scriptWebkitBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -147,7 +192,7 @@ return currentURL`;
 
 export const getChromiumBrowserPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptChromiumBrowserPath(app));
+    return await runAppleScript(scriptChromiumBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -172,7 +217,7 @@ end tell`;
 
 export const copyFirefoxBrowserPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptFirefoxBrowserPath(app));
+    return await runAppleScript(scriptFirefoxBrowserPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }
@@ -192,7 +237,7 @@ end tell`;
 
 export const copySafariWebAppPath = async (app: string) => {
   try {
-    return await runAppleScript(scriptSafariWebAppPath(app));
+    return await runAppleScript(scriptSafariWebAppPath(app), { timeout: APPLESCRIPT_TIMEOUT_MS });
   } catch (e) {
     return "";
   }

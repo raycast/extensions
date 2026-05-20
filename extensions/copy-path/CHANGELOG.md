@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Fix VS Code active file copy] - {PR_MERGE_DATE}
+
+- Fixed copying the active file path from VS Code when AppleScript document lookup stalls.
+
 ## [Support QSpace Pro] - 2026-05-11
 
 - Support copying selected item paths and the current location from QSpace Pro.
