@@ -17,7 +17,7 @@ import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
-import { Todo, List as TList, CommandListName, UpdateTodoParams } from '../types';
+import { Todo, List as TList, CommandListName, UpdateTodoParams, UpdateProjectParams } from '../types';
 
 // Match URLs with protocols, with optional //
 const URL_REGEX = /([a-zA-Z][a-zA-Z0-9.+-]+):(?:\/\/\S+|%\S+)/;
@@ -46,7 +46,7 @@ export default function TodoListItemActions({
 
   const notesURL = todo.notes.match(URL_REGEX)?.[0];
 
-  async function updateAction(args: UpdateTodoParams, successToastOptions: Toast.Options) {
+  async function updateAction(args: UpdateTodoParams | UpdateProjectParams, successToastOptions: Toast.Options) {
     try {
       if (todo.isProject) {
         await updateProject(todo.id, args);
@@ -128,7 +128,11 @@ New title:
   }
 
   async function moveTo(listId: string) {
-    await updateAction({ 'list-id': listId }, { title: 'Made to-do title actionable', message: 'Moved to-do' });
+    if (todo.isProject) {
+      await updateAction({ 'area-id': listId }, { title: 'Moved project' });
+    } else {
+      await updateAction({ 'list-id': listId }, { title: 'Moved to-do' });
+    }
   }
 
   async function addTag(tag: string) {
