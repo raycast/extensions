@@ -329,11 +329,14 @@ export default function useChromiumBookmarks(
     };
   }, [currentProfile, enabled, mutate, path]);
 
-  const toolbarBookmarks = data ? getBookmarks(data.roots.bookmark_bar) : [];
-  const toolbarFolders = data ? getFolders(data.roots.bookmark_bar) : [];
+  const toolbarRoot = data?.roots.bookmark_bar;
+  const otherRoot = data?.roots.other;
 
-  const otherBookmarks = data ? getBookmarks(data.roots.other) : [];
-  const otherFolders = data ? getFolders(data.roots.other) : [];
+  const toolbarBookmarks = toolbarRoot ? getBookmarks(toolbarRoot) : [];
+  const toolbarFolders = toolbarRoot ? getFolders(toolbarRoot) : [];
+
+  const otherBookmarks = otherRoot ? getBookmarks(otherRoot) : [];
+  const otherFolders = otherRoot ? getFolders(otherRoot) : [];
 
   const bookmarks = [...toolbarBookmarks, ...otherBookmarks].map((bookmark) => {
     return {
