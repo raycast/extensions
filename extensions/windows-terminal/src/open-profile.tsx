@@ -16,10 +16,6 @@ interface WindowsTerminalSettings {
   };
 }
 
-interface Preferences {
-  openProfilesInQuakeWindow: boolean;
-}
-
 const PROFILES = JSON.parse(
   fs.readFileSync(
     `C:\\Users\\${os.userInfo().username}\\AppData\\Local\\Packages\\Microsoft.WindowsTerminal_8wekyb3d8bbwe\\LocalState\\settings.json`,
