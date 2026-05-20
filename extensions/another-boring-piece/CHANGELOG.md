@@ -1,5 +1,13 @@
 # Changelog
 
+## [Add History Deletion] - {PR_MERGE_DATE}
+
+- New command **History**: browse wallpapers you selected or downloaded, including automatic wallpaper switches.
+- Record selected and downloaded wallpapers with artwork details, local file paths, and timestamps.
+- Keep wallpaper files in long-lived extension support storage so history items can be set or downloaded again later.
+- Add actions to delete a single wallpaper history item or clear all history from the History command.
+- Confirm destructive history deletion actions and refresh the history list after changes.
+
 ## [Slug Rename & Title Polish] - 2026-05-18
 
 - Renamed internal slug from `basalt-wallpapers` to `another-boring-piece` (the new brand). The Store listing remains continuous via Raycast-side redirect.

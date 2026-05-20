@@ -7,6 +7,7 @@ import {
   Icon,
   open,
   Image,
+  Keyboard,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
@@ -65,13 +66,14 @@ ${wallpaper.description || ""}
                 <Action
                   title="Set Desktop Wallpaper"
                   icon={Icon.Desktop}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
                   onAction={async () => {
                     const toast = await showToast({
                       style: Toast.Style.Animated,
                       title: "Setting wallpaper...",
                     });
                     try {
-                      await setDesktopWallpaper(wallpaper.url, wallpaper.id);
+                      await setDesktopWallpaper(wallpaper);
                       toast.style = Toast.Style.Success;
                       toast.title = "Wallpaper set successfully";
                     } catch (error) {
@@ -93,11 +95,7 @@ ${wallpaper.description || ""}
                         title: "Downloading...",
                       });
                       try {
-                        const path = await downloadWallpaper(
-                          wallpaper.url,
-                          wallpaper.name,
-                          wallpaper.id,
-                        );
+                        const path = await downloadWallpaper(wallpaper);
                         toast.style = Toast.Style.Success;
                         toast.title = "Wallpaper downloaded";
                         toast.message = `Saved to ${path}`;
@@ -117,6 +115,7 @@ ${wallpaper.description || ""}
                     onAction={() =>
                       open(`https://anotherboring.day/art/${wallpaper.id}`)
                     }
+                    shortcut={Keyboard.Shortcut.Common.Open}
                   />
                 </ActionPanel.Section>
               </ActionPanel>

@@ -28,6 +28,13 @@
       "icon": "basalt-icon.png"
     },
     {
+      "name": "history",
+      "title": "History",
+      "description": "View wallpapers you selected or downloaded",
+      "mode": "view",
+      "icon": "basalt-icon.png"
+    },
+    {
       "name": "auto-switch-wallpaper",
       "title": "Auto Switch Wallpaper",
       "description": "Switch wallpapers automatically on a schedule",

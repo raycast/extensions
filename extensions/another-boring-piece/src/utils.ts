@@ -3,6 +3,7 @@ import crypto from "crypto";
 import path from "path";
 import { environment } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
+import { recordWallpaperHistoryBestEffort } from "./history-store";
 
 export const API_TRIPLE_URL =
   "https://service.anotherboring.day/api/wallpapers/raycast-triple";
@@ -49,29 +50,48 @@ function sanitizeCacheKey(value: string) {
   return value.replace(/[^a-zA-Z0-9_-]/g, "_");
 }
 
-function getCachedWallpaperPath(url: string, id?: string) {
-  const extension = path.extname(new URL(url).pathname) || ".jpg";
+function getWallpaperCacheKey(url: string, id?: string) {
   const rawKey = id || crypto.createHash("sha1").update(url).digest("hex");
-  const cacheKey = sanitizeCacheKey(rawKey);
-  return path.join(environment.supportPath, `${cacheKey}${extension}`);
+  return sanitizeCacheKey(rawKey);
 }
 
-function pruneWallpaperCache(keepFilePath: string) {
-  const maxFiles = 20;
-  type CacheFile = { filePath: string; stat: fs.Stats };
-  const files = fs
-    .readdirSync(environment.supportPath)
-    .map((file): CacheFile => {
-      const filePath = path.join(environment.supportPath, file);
-      const stat = fs.statSync(filePath);
-      return { filePath, stat };
-    })
-    .filter(({ filePath, stat }) => filePath !== keepFilePath && stat.isFile())
-    .sort((a: CacheFile, b: CacheFile) => b.stat.mtimeMs - a.stat.mtimeMs)
-    .map(({ filePath }) => filePath);
+function getCachedWallpaperPath(url: string, extension: string, id?: string) {
+  const cacheKey = getWallpaperCacheKey(url, id);
+  return path.join(
+    environment.supportPath,
+    "history",
+    "wallpapers",
+    `${cacheKey}${extension}`,
+  );
+}
 
-  for (const filePath of files.slice(maxFiles - 1)) {
-    fs.unlinkSync(filePath);
+function getCachedWallpaperDirectory() {
+  return path.join(environment.supportPath, "history", "wallpapers");
+}
+
+function getExistingCachedWallpaperPath(url: string, id?: string) {
+  const cacheKey = getWallpaperCacheKey(url, id);
+  const dir = getCachedWallpaperDirectory();
+  if (!fs.existsSync(dir)) return undefined;
+  const fileName = fs
+    .readdirSync(dir)
+    .find((fileName) => path.parse(fileName).name === cacheKey);
+  return fileName ? path.join(dir, fileName) : undefined;
+}
+
+function getExtensionFromContentType(contentType: string | null) {
+  const normalized = contentType?.split(";")[0]?.trim().toLowerCase();
+  switch (normalized) {
+    case "image/jpeg":
+      return ".jpg";
+    case "image/png":
+      return ".png";
+    case "image/webp":
+      return ".webp";
+    case "image/gif":
+      return ".gif";
+    default:
+      return ".jpg";
   }
 }
 
@@ -96,60 +116,66 @@ function getAvailableDownloadPath(filePath: string) {
   return nextPath;
 }
 
-export async function setDesktopWallpaper(url: string, id?: string) {
-  const tempDir = environment.supportPath;
-  if (!fs.existsSync(tempDir)) {
-    fs.mkdirSync(tempDir, { recursive: true });
+export async function ensureWallpaperFile(url: string, id?: string) {
+  const urlExtension = path.extname(new URL(url).pathname);
+  const existingFilePath = urlExtension
+    ? getCachedWallpaperPath(url, urlExtension, id)
+    : getExistingCachedWallpaperPath(url, id);
+  if (existingFilePath && fs.existsSync(existingFilePath)) {
+    fs.utimesSync(existingFilePath, new Date(), new Date());
+    return existingFilePath;
   }
 
-  const filePath = getCachedWallpaperPath(url, id);
-
-  if (!fs.existsSync(filePath)) {
-    const response = await fetch(url);
-    if (!response.ok) throw new Error("Failed to download image");
-
-    const arrayBuffer = await response.arrayBuffer();
-    const buffer = new Uint8Array(arrayBuffer);
-    fs.writeFileSync(filePath, buffer);
+  const dir = getCachedWallpaperDirectory();
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
   }
 
-  fs.utimesSync(filePath, new Date(), new Date());
-  pruneWallpaperCache(filePath);
-
-  const escapedPath = filePath.replace(/[\\"]/g, "\\$&");
-  const script = `tell application "System Events" to tell every desktop to set picture to "${escapedPath}"`;
-  await runAppleScript(script);
-}
-
-export async function downloadWallpaper(
-  url: string,
-  name: string,
-  id?: string,
-) {
   const response = await fetch(url);
   if (!response.ok) throw new Error("Failed to download image");
 
+  const extension =
+    urlExtension ||
+    getExtensionFromContentType(response.headers.get("content-type"));
+  const filePath = getCachedWallpaperPath(url, extension, id);
   const arrayBuffer = await response.arrayBuffer();
   const buffer = new Uint8Array(arrayBuffer);
+  fs.writeFileSync(filePath, buffer);
 
+  fs.utimesSync(filePath, new Date(), new Date());
+  return filePath;
+}
+
+export async function setDesktopWallpaper(wallpaper: Wallpaper) {
+  const filePath = await ensureWallpaperFile(wallpaper.url, wallpaper.id);
+  const escapedPath = filePath.replace(/[\\"]/g, "\\$&");
+  const script = `tell application "System Events" to tell every desktop to set picture to "${escapedPath}"`;
+  await runAppleScript(script);
+  await recordWallpaperHistoryBestEffort({
+    eventType: "selected",
+    wallpaper,
+    localFilePath: filePath,
+  });
+  return filePath;
+}
+
+export async function downloadWallpaper(wallpaper: Wallpaper) {
+  const sourcePath = await ensureWallpaperFile(wallpaper.url, wallpaper.id);
   const downloadsDir = path.join(process.env.HOME || "", "Downloads");
+  const extension = path.extname(sourcePath) || ".jpg";
 
-  // Determine extension from URL or content-type
-  let extension = path.extname(new URL(url).pathname);
-  if (!extension) {
-    const contentType = response.headers.get("content-type");
-    if (contentType === "image/jpeg") extension = ".jpg";
-    else if (contentType === "image/png") extension = ".png";
-    else if (contentType === "image/webp") extension = ".webp";
-    else extension = ".jpg"; // Fallback
-  }
-
-  const safeName = name.replace(/[^a-z0-9]/gi, "_");
-  const fileName = id ? `${safeName}_${sanitizeCacheKey(id)}` : safeName;
+  const safeName = wallpaper.name.replace(/[^a-z0-9]/gi, "_");
+  const fileName = `${safeName}_${sanitizeCacheKey(wallpaper.id)}`;
   const filePath = getAvailableDownloadPath(
     path.join(downloadsDir, `${fileName}${extension}`),
   );
 
-  fs.writeFileSync(filePath, buffer);
+  fs.copyFileSync(sourcePath, filePath);
+  await recordWallpaperHistoryBestEffort({
+    eventType: "downloaded",
+    wallpaper,
+    localFilePath: sourcePath,
+    downloadPath: filePath,
+  });
   return filePath;
 }

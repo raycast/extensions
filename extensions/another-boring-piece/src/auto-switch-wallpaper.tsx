@@ -76,7 +76,7 @@ export default async function Command() {
 
   try {
     const wallpaper = await pickWallpaperAvoidingRecents();
-    await setDesktopWallpaper(wallpaper.url, wallpaper.id);
+    await setDesktopWallpaper(wallpaper);
 
     cache.set(CACHE_KEY_LAST_REFRESH_TIME, `${Math.floor(Date.now() / 1000)}`);
     pushRecentId(wallpaper.id);
