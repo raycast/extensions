@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add History Deletion] - {PR_MERGE_DATE}
+## [Add History Command and Shortcuts] - {PR_MERGE_DATE}
 
 - New command **History**: browse wallpapers you selected or downloaded, including automatic wallpaper switches.
 - Record selected and downloaded wallpapers with artwork details, local file paths, and timestamps.
