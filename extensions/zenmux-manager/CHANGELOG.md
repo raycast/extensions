@@ -1,6 +1,6 @@
 # ZenMux Manager Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Add ZenMux subscription quota dashboard.
 - Add PAYG credit balance display.
