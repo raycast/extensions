@@ -1,6 +1,6 @@
 # Tabbit Changelog
 
-## [Initial Version] - 2026-05-20
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Open new Tabbit tabs and incognito windows from Raycast.
 - Open new Tabbit windows from Raycast.

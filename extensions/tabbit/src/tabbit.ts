@@ -71,10 +71,6 @@ export type TabbitItem = {
   tabIndex?: number;
 };
 
-type TabbitPreferences = {
-  tabbitVersion?: TabbitVersionPreference;
-};
-
 export function resolveTabbitApp(
   preferredVersion: TabbitVersionPreference = "auto",
   appExists: (path: string) => boolean = existsSync,
@@ -98,7 +94,7 @@ export function resolveTabbitApp(
 }
 
 export function getSelectedTabbitApp() {
-  const preferences = getPreferenceValues<TabbitPreferences>();
+  const preferences = getPreferenceValues<Preferences>();
 
   return resolveTabbitApp(preferences.tabbitVersion || "auto");
 }

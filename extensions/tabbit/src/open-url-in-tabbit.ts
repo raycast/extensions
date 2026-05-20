@@ -6,26 +6,14 @@ import {
   open,
   showToast,
 } from "@raycast/api";
-import {
-  getSelectedTabbitApp,
-  normalizeUrlOrSearch,
-  type SearchEngine,
-} from "./tabbit";
-
-type Arguments = {
-  url?: string;
-};
-
-type Preferences = {
-  searchEngine: SearchEngine;
-};
+import { getSelectedTabbitApp, normalizeUrlOrSearch } from "./tabbit";
 
 export default async function Command(
-  props: LaunchProps<{ arguments: Arguments }>,
+  props: LaunchProps<{ arguments: Arguments.OpenUrlInTabbit }>,
 ) {
   try {
     const target = props.arguments.url?.trim();
-    const preferences = getPreferenceValues<Preferences>();
+    const preferences = getPreferenceValues<Preferences.OpenUrlInTabbit>();
 
     await closeMainWindow();
     await open(

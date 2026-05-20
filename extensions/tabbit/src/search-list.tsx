@@ -7,6 +7,7 @@ import {
   showToast,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { useEffect } from "react";
 import {
   getAllItems,
   getBookmarks,
@@ -43,13 +44,17 @@ export function SearchList({ source }: Props) {
   );
   const items = data || [];
 
-  if (error) {
+  useEffect(() => {
+    if (!error) {
+      return;
+    }
+
     showToast({
       style: Toast.Style.Failure,
       title: "Could not load Tabbit data",
       message: error.message,
     });
-  }
+  }, [error]);
 
   return (
     <List
