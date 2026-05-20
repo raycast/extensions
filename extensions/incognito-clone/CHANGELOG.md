@@ -1,6 +1,6 @@
 # Incognito Clone Changelog
 
-## [Add Dia support] - {PR_MERGE_DATE}
+## [Add Dia support] - 2026-05-20
 
 - Added Dia support when cloning tabs into a private window.
 
