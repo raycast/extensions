@@ -1,6 +1,6 @@
 # PostHog Changelog
 
-## [OAuth and Multiple Accounts] - 2026-05-20
+## [OAuth and Multiple Accounts] - {PR_MERGE_DATE}
 
 - Add OAuth account connection for US and EU PostHog accounts
 - Add account management for connected accounts

@@ -138,7 +138,7 @@ export function ProjectSelector() {
   };
 
   return (
-    <List.Dropdown tooltip="Switch Project" value={selectedValue ?? undefined} onChange={handleChange}>
+    <List.Dropdown tooltip="Switch Project" value={selectedValue ?? undefined} onChange={handleChange} storeValue>
       {projectGroups.map((group) => (
         <List.Dropdown.Section key={group.account.id} title={accountLabel(group.account)}>
           {group.projects.map((project) => (
@@ -156,12 +156,13 @@ export function ProjectSelector() {
 
 async function loadProjectGroups(): Promise<ProjectGroup[]> {
   const accounts = await getAuthenticatedAccounts();
-
-  return Promise.all(
+  const results = await Promise.allSettled(
     accounts.map(async (account) => {
       const data = await fetchPostHogApi<SearchResult>(account.baseUrl, account.accessToken, "projects");
 
       return { account, projects: data.results };
     })
   );
+
+  return results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
 }

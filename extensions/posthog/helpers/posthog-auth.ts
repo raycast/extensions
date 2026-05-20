@@ -94,13 +94,14 @@ export async function connectPostHogAccount(region: PostHogRegion): Promise<Post
 
 export async function getAuthenticatedAccounts(): Promise<AuthenticatedPostHogAccount[]> {
   const accounts = await getAccounts();
-
-  return Promise.all(
+  const results = await Promise.allSettled(
     accounts.map(async (account) => ({
       ...account,
       accessToken: await getAccessToken(account),
     }))
   );
+
+  return results.flatMap((result) => (result.status === "fulfilled" ? [result.value] : []));
 }
 
 export async function getAccessToken(account: PostHogAccount): Promise<string> {
