@@ -34,8 +34,11 @@ type TableRecord = {
   sys_updated_by?: string;
 } & Record<string, string | undefined>;
 
+// With sysparm_display_value=all every field arrives as { value, display_value }.
+type DisplayValuePair = { value: string; display_value: string };
+
 interface TableRecordsResponse {
-  result: TableRecord[];
+  result: Record<string, DisplayValuePair>[];
 }
 
 interface LiveProfile {
@@ -174,7 +177,7 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
   const { isLoading, data, error, revalidate, pagination } = useFetch(
     (options) => {
       const params = new URLSearchParams({
-        sysparm_display_value: "true",
+        sysparm_display_value: "all",
         sysparm_exclude_reference_link: "true",
         sysparm_limit: "100",
         sysparm_offset: String(options.page * 100),
@@ -199,7 +202,21 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
         showToast(Toast.Style.Failure, "Could not fetch records", err.message);
       },
       mapResult(response: TableRecordsResponse) {
-        return { data: response.result, hasMore: response.result.length > 0 };
+        // Flatten { value, display_value } pairs to the plain string shape the rest
+        // of the component expects. Use display_value everywhere except sys_updated_on,
+        // where we keep the raw value: it's the internal UTC timestamp
+        // (2026-05-20 17:49:24) that `new Date(... + " UTC")` can parse, whereas the
+        // display value is localized to the instance's format/timezone and isn't.
+        const flattened = response.result.map(
+          (rec) =>
+            Object.fromEntries(
+              Object.entries(rec).map(([key, pair]) => [
+                key,
+                key === "sys_updated_on" ? pair?.value : pair?.display_value,
+              ]),
+            ) as TableRecord,
+        );
+        return { data: flattened, hasMore: response.result.length > 0 };
       },
     },
   );
