@@ -122,7 +122,20 @@ export default function SearchFiles() {
         <List.EmptyView
           icon={Icon.XMarkCircle}
           title="No results"
-          description={`Nothing found for "${query}".`}
+          description={`Nothing found for "${query}". Try broader terms or append a file type (e.g. "report pdf").`}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Rebuild Index"
+                icon={Icon.ArrowClockwise}
+                onAction={() => {
+                  const { execFile } = require("child_process");
+                  execFile(findrPath, ["index", "rebuild"], () => {});
+                  showToast({ style: Toast.Style.Animated, title: "Rebuilding index..." });
+                }}
+              />
+            </ActionPanel>
+          }
         />
       ) : (
         <List.Section

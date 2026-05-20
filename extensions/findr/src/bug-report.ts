@@ -33,7 +33,7 @@ export async function openBugReport(errorMessage?: string): Promise<void> {
 
 ## Environment
 
-- Raycast extension version: ${environment.extensionName}
+- Raycast extension name: ${environment.extensionName}
 - macOS: ${process.platform} ${process.arch}
 
 ## Diagnostics
