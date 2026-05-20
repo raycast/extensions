@@ -12,13 +12,13 @@ Bash Commands is a Raycast extension that works as a quick-access cheat sheet fo
 
 ## Commands
 
-| Action | macOS | Windows |
-|--------|-------|---------|
-| Copy command | `↵` | `Enter` |
-| Paste command | `⌘ + ↵` | `Ctrl + Enter` |
-| Toggle detail panel | `⌘ + Y` | `Ctrl + Y` |
-| Pin / Unpin | `⌘ + ⇧ + P` | `Ctrl + Shift + P` |
-| Clear recent | `⌘ + ⇧ + R` | `Ctrl + Shift + R` |
+| Action              | macOS       | Windows            |
+| ------------------- | ----------- | ------------------ |
+| Copy command        | `↵`         | `Enter`            |
+| Paste command       | `⌘ + ↵`     | `Ctrl + Enter`     |
+| Toggle detail panel | `⌘ + Y`     | `Ctrl + Y`         |
+| Pin / Unpin         | `⌘ + ⇧ + P` | `Ctrl + Shift + P` |
+| Clear recent        | `⌘ + ⇧ + R` | `Ctrl + Shift + R` |
 
 ## Adding Commands
 
