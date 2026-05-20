@@ -1,6 +1,7 @@
 import { Cache } from "@raycast/api";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { config } from "../config";
+import { getSearchTerms, includesAllSearchTerms, scoreSearchResult } from "../scoring";
 
 const ARCHIVE_DOCUMENTS_CACHE_KEY = "archive-document-results-v1";
 const ARCHIVE_TOC_CACHE_KEY = "archive-toc-results-v1";
@@ -70,8 +71,14 @@ export default function useArchiveResults(
   const [isBuildingToc, setIsBuildingToc] = useState(false);
   const [hasArchiveError, setHasArchiveError] = useState(false);
   const [tocProgress, setTocProgress] = useState({ processedBooks: 0, totalBooks: 0 });
+  const isTocBuildRunningRef = useRef(false);
+  const tocResultsCountRef = useRef(tocResults.length);
   const shouldSearchArchive = includeArchiveResults && (typeFilter === "all" || typeFilter === "archive");
   const shouldLoadArchive = shouldSearchArchive && query.trim().length > 1;
+
+  useEffect(() => {
+    tocResultsCountRef.current = tocResults.length;
+  }, [tocResults.length]);
 
   useEffect(() => {
     if (!includeArchiveResults || !shouldLoadArchive || documentResults.length > 0) {
@@ -106,6 +113,7 @@ export default function useArchiveResults(
 
   useEffect(() => {
     if (!shouldLoadArchive) {
+      isTocBuildRunningRef.current = false;
       setIsBuildingToc(false);
     }
   }, [shouldLoadArchive]);
@@ -115,17 +123,20 @@ export default function useArchiveResults(
       !includeArchiveResults ||
       !shouldLoadArchive ||
       documentResults.length === 0 ||
-      tocResults.length > 0 ||
-      isBuildingToc
+      tocResultsCountRef.current > 0 ||
+      isTocBuildRunningRef.current
     ) {
       return;
     }
 
     let isMounted = true;
+    const controller = new AbortController();
+    isTocBuildRunningRef.current = true;
     setIsBuildingToc(true);
 
     buildArchiveTocResults(
       documentResults,
+      controller.signal,
       (results) => {
         if (isMounted) {
           setTocResults(results);
@@ -138,15 +149,17 @@ export default function useArchiveResults(
       }
     )
       .then((results) => {
-        if (!isMounted) {
+        if (!isMounted || controller.signal.aborted) {
           return;
         }
 
+        isTocBuildRunningRef.current = false;
         setTocResults(results);
         setIsBuildingToc(false);
       })
       .catch(() => {
         if (isMounted) {
+          isTocBuildRunningRef.current = false;
           setHasArchiveError(true);
           setIsBuildingToc(false);
         }
@@ -154,6 +167,9 @@ export default function useArchiveResults(
 
     return () => {
       isMounted = false;
+      controller.abort();
+      isTocBuildRunningRef.current = false;
+      setIsBuildingToc(false);
     };
     // Keep the archive TOC build running through progress updates instead of restarting on every tocResults change.
   }, [documentResults, includeArchiveResults, shouldLoadArchive]);
@@ -165,13 +181,14 @@ export default function useArchiveResults(
       return [];
     }
 
-    const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const terms = getSearchTerms(query);
     if (terms.length === 0) {
       return [];
     }
 
     return archiveResults
-      .map((result) => ({ result, score: scoreArchiveResult(result, terms) }))
+      .filter((result) => includesAllSearchTerms(result, terms))
+      .map((result) => ({ result, score: scoreSearchResult(result, terms) }))
       .filter(({ score }) => score > 0)
       .sort((a, b) => b.score - a.score || b.result.date.localeCompare(a.result.date))
       .slice(0, config.maxArchiveResults)
@@ -291,6 +308,7 @@ async function fetchArchiveDocumentResults() {
 
 async function buildArchiveTocResults(
   documentResults: SearchResult[],
+  signal: AbortSignal,
   onResultsProgress: (results: SearchResult[]) => void,
   onIndexProgress: (progress: { processedBooks: number; totalBooks: number }) => void
 ) {
@@ -302,6 +320,10 @@ async function buildArchiveTocResults(
 
   async function worker() {
     for (;;) {
+      if (signal.aborted) {
+        return;
+      }
+
       const document = bookCandidates[nextIndex];
       nextIndex += 1;
 
@@ -309,7 +331,11 @@ async function buildArchiveTocResults(
         return;
       }
 
-      const tocResults = await fetchArchiveBookTocResults(document);
+      const tocResults = await fetchArchiveBookTocResults(document, signal);
+      if (signal.aborted) {
+        return;
+      }
+
       results.push(...tocResults);
       completedCount += 1;
       onIndexProgress({ processedBooks: completedCount, totalBooks: bookCandidates.length });
@@ -321,13 +347,17 @@ async function buildArchiveTocResults(
   }
 
   await Promise.all(Array.from({ length: ARCHIVE_TOC_CONCURRENCY }, worker));
+  if (signal.aborted) {
+    return results;
+  }
+
   onResultsProgress(results);
   cache.set(ARCHIVE_TOC_CACHE_KEY, JSON.stringify(results));
 
   return results;
 }
 
-async function fetchArchiveBookTocResults(document: SearchResult) {
+async function fetchArchiveBookTocResults(document: SearchResult, signal: AbortSignal) {
   const bookIndexUrl = getBookIndexUrl(document.url);
   if (!bookIndexUrl) {
     return [];
@@ -335,8 +365,14 @@ async function fetchArchiveBookTocResults(document: SearchResult) {
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), ARCHIVE_TOC_REQUEST_TIMEOUT_MS);
+  const abort = () => controller.abort();
+  signal.addEventListener("abort", abort, { once: true });
 
   try {
+    if (signal.aborted) {
+      return [];
+    }
+
     const response = await fetch(bookIndexUrl, { signal: controller.signal });
     if (!response.ok) {
       return [];
@@ -348,6 +384,7 @@ async function fetchArchiveBookTocResults(document: SearchResult) {
     return [];
   } finally {
     clearTimeout(timeout);
+    signal.removeEventListener("abort", abort);
   }
 }
 
@@ -444,33 +481,6 @@ function getBookIndexUrl(url: string) {
   parsedUrl.search = "";
 
   return parsedUrl.href;
-}
-
-function scoreArchiveResult(result: SearchResult, terms: string[]) {
-  const title = result.title.toLowerCase();
-  const haystack = [result.title, result.description, result.platform.join(" "), result.breadcrumbs.join(" ")]
-    .join(" ")
-    .toLowerCase();
-
-  if (!terms.every((term) => haystack.includes(term))) {
-    return 0;
-  }
-
-  return terms.reduce((score, term) => {
-    if (title === term) {
-      return score + 100;
-    }
-
-    if (title.startsWith(term)) {
-      return score + 50;
-    }
-
-    if (title.includes(term)) {
-      return score + 20;
-    }
-
-    return score + 5;
-  }, 0);
 }
 
 function decodeHTML(value: string) {

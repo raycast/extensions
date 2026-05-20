@@ -6,6 +6,7 @@ import { useFetch } from "@raycast/utils";
 import useSearchedResults from "./hooks/useSearchedResults";
 import DevOnlyActionPanel from "./DevOnlyActionPanel";
 import useArchiveResults, { ArchiveIndexStatus } from "./hooks/useArchiveResults";
+import { getSearchTerms, scoreSearchResult } from "./scoring";
 
 export default function Command() {
   const preferences = getPreferenceValues<{ includeArchiveResults: boolean }>();
@@ -125,13 +126,13 @@ export default function Command() {
 }
 
 function sortResultsByRelevance(results: SearchResult[], query: string) {
-  const terms = query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  const terms = getSearchTerms(query);
   if (terms.length === 0) {
     return results;
   }
 
   return results
-    .map((result, index) => ({ result, index, score: scoreResult(result, terms) }))
+    .map((result, index) => ({ result, index, score: scoreSearchResult(result, terms) }))
     .sort((a, b) => b.score - a.score || a.index - b.index)
     .map(({ result }) => result);
 }
@@ -175,33 +176,6 @@ function getArchiveIndexStatusDisplay(status: ArchiveIndexStatus) {
         icon: Icon.Checkmark,
       };
   }
-}
-
-function scoreResult(result: SearchResult, terms: string[]) {
-  const title = result.title.toLowerCase();
-  const searchableText = [result.title, result.description, result.platform.join(" "), result.breadcrumbs.join(" ")]
-    .join(" ")
-    .toLowerCase();
-
-  return terms.reduce((score, term) => {
-    if (title === term) {
-      return score + 100;
-    }
-
-    if (title.startsWith(term)) {
-      return score + 50;
-    }
-
-    if (title.includes(term)) {
-      return score + 20;
-    }
-
-    if (searchableText.includes(term)) {
-      return score + 5;
-    }
-
-    return score;
-  }, 0);
 }
 
 function normalizeResponse(payload: AppleSearchResponse): PayloadResponse {
