@@ -521,13 +521,12 @@ export async function addProject(projectParams: AddProjectParams) {
   await silentlyOpenThingsURL(`things:///add-project?${generateQueryString(projectParams)}`);
 }
 
-export function handleError(error: unknown, title?: string) {
+export async function handleError(error: unknown, title?: string) {
   if (error instanceof Error && error.message === 'unauthorized') {
-    showToast({
+    await showToast({
       style: Toast.Style.Failure,
       title: 'This action needs an authentication token.',
-      message:
-        'Please set it in the extension preferences.\nYou can find your unique token in Things’ settings. go to Things → Settings → General → Enable Things URLs → Manage',
+      message: `Please set it in the extension preferences.\nYou can find your unique token in Things' settings. go to Things → Settings → General → Enable Things URLs → Manage`,
       primaryAction: {
         title: 'Open Extension Preferences',
         onAction(toast) {
@@ -539,7 +538,7 @@ export function handleError(error: unknown, title?: string) {
     return;
   }
 
-  showToast({
+  await showToast({
     style: Toast.Style.Failure,
     title: title ?? 'Something went wrong',
     message: error instanceof Error ? error.message : String(error),

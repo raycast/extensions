@@ -34,7 +34,7 @@ const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
 
 type TodoListItemProps = {
   todo: Todo;
-  refreshTodos: () => void;
+  refreshTodos: () => Promise<void>;
   commandListName: CommandListName;
   displayActivationDates?: boolean;
   tags?: string[];

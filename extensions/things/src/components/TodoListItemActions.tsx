@@ -27,7 +27,7 @@ type TodoListItemActionsProps = {
   commandListName: CommandListName;
   tags?: string[];
   lists?: TList[];
-  refreshTodos: () => void;
+  refreshTodos: () => Promise<void>;
 };
 
 export default function TodoListItemActions({
@@ -58,9 +58,9 @@ export default function TodoListItemActions({
         title: successToastOptions.title,
         message: successToastOptions.message ?? todo.name,
       });
-      refreshTodos();
+      await refreshTodos();
     } catch (error) {
-      handleError(error);
+      await handleError(error);
     }
   }
 
@@ -119,7 +119,7 @@ New title:
     ) {
       await updateAction({ title: newTitle }, { title: 'Made to-do title actionable', message: newTitle });
     } else {
-      toast.hide();
+      await toast.hide();
     }
   }
 
@@ -171,7 +171,7 @@ New title:
         title,
         message: todo.name,
       });
-      refreshTodos();
+      await refreshTodos();
     }
   }
 
@@ -208,7 +208,7 @@ New title:
                 title: 'Marked as Completed',
                 message: todo.name,
               });
-              refreshTodos();
+              await refreshTodos();
             }}
           />
         )}
@@ -225,7 +225,7 @@ New title:
                 title: 'Marked as Canceled',
                 message: todo.name,
               });
-              refreshTodos();
+              await refreshTodos();
             }}
           />
         )}

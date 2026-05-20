@@ -67,6 +67,6 @@ Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
       message: `Added "${json.title}" to 'Inbox'`,
     });
   } catch (error) {
-    handleError(error, 'Unable to add to-do');
+    await handleError(error, 'Unable to add to-do');
   }
 }
