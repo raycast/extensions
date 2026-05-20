@@ -25,10 +25,7 @@ type BookmarkFolder = {
 type BookmarkItem = BookmarkURL | BookmarkFolder;
 
 type BookmarksRoot = {
-  roots: {
-    bookmark_bar: BookmarkFolder;
-    other: BookmarkFolder;
-  };
+  roots: Record<string, BookmarkFolder | undefined>;
 };
 
 const CHROMIUM_BOOKMARK_FILE_NAMES = ["Bookmarks", "AccountBookmarks"] as const;
@@ -55,7 +52,7 @@ function getBookmarks(bookmark: BookmarkFolder | BookmarkItem, hierarchy = "") {
 }
 
 function getBookmarkCount(bookmarksRoot: BookmarksRoot) {
-  return getBookmarks(bookmarksRoot.roots.bookmark_bar).length + getBookmarks(bookmarksRoot.roots.other).length;
+  return Object.values(bookmarksRoot.roots).reduce((count, root) => count + (root ? getBookmarks(root).length : 0), 0);
 }
 
 function hasChromiumBookmarksFile(path: string, profile: string) {
