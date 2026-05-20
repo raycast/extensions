@@ -1,5 +1,14 @@
 # Messages Changelog
 
+## [Bug Fixes & Improvements] - {PR_MERGE_DATE}
+- Add `before` pagination cursor to load older messages in AI chat
+- Show contact name and photo when chat uses an email address instead of a phone number
+- Fix missing `await` on async calls (`showFailureToast`, `open`, `launchCommand`, `showToast`)
+- Fix AI instructions — skip message history fetch for simple sends
+- Remove deprecated AI model
+- Remove unused SQLite dependency from Swift package
+- Update packages
+
 ## [Performance Optimizations] - 2025-11-05
 
 - Added "Load Contact Photos" preference to disable contact photo loading
