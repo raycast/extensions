@@ -4,7 +4,7 @@ import { addTodo, handleError } from './api';
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddTodo }) {
   try {
     const { shouldCloseMainWindow, dontUseAI } = getPreferenceValues<Preferences.QuickAddTodo>();
-    let json, toastMsg;
+    let json;
 
     if (shouldCloseMainWindow) {
       await closeMainWindow();
@@ -15,7 +15,6 @@ export default async function Command(props: LaunchProps & { arguments: Argument
     if (dontUseAI || !environment.canAccess(AI)) {
       const { text } = props.arguments;
       json = { title: text };
-      toastMsg = `Added "${text}" to 'Inbox'`;
     } else {
       const result =
         await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object.
@@ -65,7 +64,7 @@ Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
     await showToast({
       style: Toast.Style.Success,
       title: 'Added to-do',
-      message: toastMsg,
+      message: `Added "${json.title}" to 'Inbox'`,
     });
   } catch (error) {
     handleError(error, 'Unable to add to-do');
