@@ -62,14 +62,11 @@ export type AccountSnapshot = {
 };
 
 export async function fetchAccountSnapshot(): Promise<AccountSnapshot> {
-  const { managementApiKey: platformApiKey } =
-    getPreferenceValues<Preferences>();
+  const { managementApiKey: platformApiKey } = getPreferenceValues<Preferences>();
   const apiKey = platformApiKey?.trim();
 
   if (!apiKey) {
-    throw new Error(
-      "Set your ZenMux Platform API key in extension preferences.",
-    );
+    throw new Error("Set your ZenMux Platform API key in extension preferences.");
   }
 
   const [subscriptionResult, paygResult] = await Promise.allSettled([
@@ -89,10 +86,7 @@ export async function fetchAccountSnapshot(): Promise<AccountSnapshot> {
     }
   } else {
     const message = getErrorMessage(subscriptionResult.reason);
-    if (
-      !isMissingSubscriptionError(message) ||
-      paygResult.status !== "fulfilled"
-    ) {
+    if (!isMissingSubscriptionError(message) || paygResult.status !== "fulfilled") {
       warnings.push({
         title: "Subscription",
         message,
@@ -110,11 +104,7 @@ export async function fetchAccountSnapshot(): Promise<AccountSnapshot> {
   }
 
   if (!snapshot.subscription && !snapshot.payg) {
-    throw new Error(
-      warnings
-        .map((warning) => `${warning.title}: ${warning.message}`)
-        .join("; "),
-    );
+    throw new Error(warnings.map((warning) => `${warning.title}: ${warning.message}`).join("; "));
   }
 
   return snapshot;
@@ -132,11 +122,7 @@ async function requestZenMux<T>(path: string, apiKey: string): Promise<T> {
   const payload = parseJson<ApiEnvelope<T>>(responseText);
 
   if (!response.ok || payload?.success === false) {
-    const message =
-      payload?.message ||
-      payload?.error ||
-      response.statusText ||
-      "Request failed";
+    const message = payload?.message || payload?.error || response.statusText || "Request failed";
     throw new Error(`${response.status} ${message}`.trim());
   }
 
@@ -213,9 +199,7 @@ export function formatAccountSnapshotForAI(snapshot?: AccountSnapshot): string {
     sections.push(
       "",
       "Partial data warnings:",
-      ...snapshot.warnings.map(
-        (warning) => `- ${warning.title}: ${warning.message}`,
-      ),
+      ...snapshot.warnings.map((warning) => `- ${warning.title}: ${warning.message}`),
     );
   }
 
@@ -231,20 +215,12 @@ export type StatusDisplay =
   | "payg-7d-used"
   | "payg-only";
 
-export function formatCommandSubtitle(
-  snapshot?: AccountSnapshot,
-  display: StatusDisplay = "payg-both-left",
-): string {
+export function formatCommandSubtitle(snapshot?: AccountSnapshot, display: StatusDisplay = "payg-both-left"): string {
   if (!snapshot) {
     return "ZenMux account data unavailable";
   }
 
-  const parts = [
-    `PAYG ${formatCurrency(
-      snapshot.payg?.total_credits,
-      snapshot.payg?.currency,
-    )}`,
-  ];
+  const parts = [`PAYG ${formatCurrency(snapshot.payg?.total_credits, snapshot.payg?.currency)}`];
 
   if (hasSubscriptionData(snapshot.subscription)) {
     parts.push(...buildQuotaSubtitleParts(snapshot.subscription, display));
@@ -257,9 +233,7 @@ export function formatCommandSubtitle(
   return parts.filter(Boolean).join(" · ");
 }
 
-export function hasSubscriptionData(
-  subscription?: SubscriptionDetail,
-): subscription is SubscriptionDetail {
+export function hasSubscriptionData(subscription?: SubscriptionDetail): subscription is SubscriptionDetail {
   return Boolean(
     subscription?.plan?.tier ||
     subscription?.account_status ||
@@ -270,9 +244,7 @@ export function hasSubscriptionData(
 }
 
 function isMissingSubscriptionError(message: string): boolean {
-  return /(?:404|not found|no subscription|without subscription|subscription.*missing)/i.test(
-    message,
-  );
+  return /(?:404|not found|no subscription|without subscription|subscription.*missing)/i.test(message);
 }
 
 function formatQuotaForAI(label: string, quota?: QuotaWindow): string {
@@ -297,21 +269,14 @@ export function getUsagePercentage(quota: QuotaWindow): number | undefined {
     return quota.usage_percentage;
   }
 
-  if (
-    typeof quota.used_flows === "number" &&
-    typeof quota.max_flows === "number" &&
-    quota.max_flows > 0
-  ) {
+  if (typeof quota.used_flows === "number" && typeof quota.max_flows === "number" && quota.max_flows > 0) {
     return quota.used_flows / quota.max_flows;
   }
 
   return undefined;
 }
 
-function buildQuotaSubtitleParts(
-  subscription: SubscriptionDetail,
-  display: StatusDisplay,
-): string[] {
+function buildQuotaSubtitleParts(subscription: SubscriptionDetail, display: StatusDisplay): string[] {
   switch (display) {
     case "payg-both-used":
       return [
@@ -319,13 +284,9 @@ function buildQuotaSubtitleParts(
         formatQuotaSubtitleValue("7d", subscription.quota_7_day, "used"),
       ];
     case "payg-5h-left":
-      return [
-        formatQuotaSubtitleValue("5h", subscription.quota_5_hour, "left"),
-      ];
+      return [formatQuotaSubtitleValue("5h", subscription.quota_5_hour, "left")];
     case "payg-5h-used":
-      return [
-        formatQuotaSubtitleValue("5h", subscription.quota_5_hour, "used"),
-      ];
+      return [formatQuotaSubtitleValue("5h", subscription.quota_5_hour, "used")];
     case "payg-7d-left":
       return [formatQuotaSubtitleValue("7d", subscription.quota_7_day, "left")];
     case "payg-7d-used":
@@ -341,14 +302,9 @@ function buildQuotaSubtitleParts(
   }
 }
 
-function formatQuotaSubtitleValue(
-  label: string,
-  quota: QuotaWindow | undefined,
-  mode: "left" | "used",
-): string {
+function formatQuotaSubtitleValue(label: string, quota: QuotaWindow | undefined, mode: "left" | "used"): string {
   const usage = quota ? getUsagePercentage(quota) : undefined;
-  const value =
-    mode === "left" && typeof usage === "number" ? 1 - usage : usage;
+  const value = mode === "left" && typeof usage === "number" ? 1 - usage : usage;
   return `${label} ${formatPercentage(value)} ${mode}`;
 }
 

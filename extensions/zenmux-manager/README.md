@@ -1,4 +1,4 @@
-# ZenMux Manager
+n# ZenMux Manager
 
 Manage your [ZenMux](https://zenmux.ai/) subscription quota, Pay As You Go credit balance, account links, and AI-assisted ZenMux questions from Raycast.
 

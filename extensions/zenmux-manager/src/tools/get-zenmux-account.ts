@@ -1,8 +1,4 @@
-import {
-  fetchAccountSnapshot,
-  formatAccountSnapshotForAI,
-  getErrorMessage,
-} from "../zenmux";
+import { fetchAccountSnapshot, formatAccountSnapshotForAI, getErrorMessage } from "../zenmux";
 
 type Input = {
   /**

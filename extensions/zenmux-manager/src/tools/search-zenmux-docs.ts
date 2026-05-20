@@ -1,9 +1,5 @@
 import { Cache } from "@raycast/api";
-import {
-  ZENMUX_DOC_MANIFEST,
-  ZenMuxDocManifestEntry,
-  routingMatches,
-} from "../zenmux-doc-routing";
+import { ZENMUX_DOC_MANIFEST, ZenMuxDocManifestEntry, routingMatches } from "../zenmux-doc-routing";
 import { getErrorMessage } from "../zenmux";
 import { ZENMUX_DOCS, ZenMuxDocEntry } from "../zenmux-docs";
 
@@ -61,9 +57,7 @@ export default async function searchZenMuxDocs(input: Input) {
     .slice(0, curatedLimit);
 
   const selectedDocs = scoreManifest(query, terms).slice(0, MAX_DOCS);
-  const runtimeDocs = await Promise.all(
-    selectedDocs.map(({ doc }) => fetchRuntimeDoc(doc)),
-  );
+  const runtimeDocs = await Promise.all(selectedDocs.map(({ doc }) => fetchRuntimeDoc(doc)));
 
   if (curatedMatches.length === 0 && runtimeDocs.length === 0) {
     return [
@@ -212,9 +206,7 @@ function scoreManifest(rawQuery: string, terms: string[]): ManifestMatch[] {
   return scored;
 }
 
-async function fetchRuntimeDoc(
-  doc: ZenMuxDocManifestEntry,
-): Promise<RuntimeDoc> {
+async function fetchRuntimeDoc(doc: ZenMuxDocManifestEntry): Promise<RuntimeDoc> {
   const cacheKey = `${DOC_CACHE_PREFIX}${doc.path}`;
 
   try {
@@ -228,10 +220,7 @@ async function fetchRuntimeDoc(
 
     const body = stripFrontmatter(await response.text()).trim();
     const fetchedAt = new Date().toISOString();
-    cache.set(
-      cacheKey,
-      JSON.stringify({ body, fetchedAt } satisfies CachedDoc),
-    );
+    cache.set(cacheKey, JSON.stringify({ body, fetchedAt } satisfies CachedDoc));
     return { ...doc, body, fetchedAt, source: "live" };
   } catch (error) {
     const cached = readCachedDoc(cacheKey);
@@ -276,15 +265,9 @@ function formatRuntimeDoc(doc: RuntimeDoc, index: number): string {
   ];
 
   if (doc.body) {
-    lines.push(
-      "   --- begin excerpt ---",
-      indent(excerptBody(doc.body), "   "),
-      "   --- end excerpt ---",
-    );
+    lines.push("   --- begin excerpt ---", indent(excerptBody(doc.body), "   "), "   --- end excerpt ---");
   } else {
-    lines.push(
-      "   No excerpt available. Use the Source URL only; do not guess content.",
-    );
+    lines.push("   No excerpt available. Use the Source URL only; do not guess content.");
   }
 
   return lines.join("\n");
@@ -313,8 +296,7 @@ function excerptBody(body: string): string {
   }
   const slice = body.slice(0, MAX_BODY_CHARS);
   const lastNewline = slice.lastIndexOf("\n");
-  const safeSlice =
-    lastNewline > MAX_BODY_CHARS - 400 ? slice.slice(0, lastNewline) : slice;
+  const safeSlice = lastNewline > MAX_BODY_CHARS - 400 ? slice.slice(0, lastNewline) : slice;
   return `${safeSlice}\n\n[... truncated; read full doc at the Source URL above ...]`;
 }
 

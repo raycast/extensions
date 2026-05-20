@@ -1,5 +1,4 @@
-const RAW_DOC_BASE_URL =
-  "https://raw.githubusercontent.com/ZenMux/zenmux-doc/main/docs_source/en";
+const RAW_DOC_BASE_URL = "https://raw.githubusercontent.com/ZenMux/zenmux-doc/main/docs_source/en";
 const PUBLIC_DOC_BASE_URL = "https://docs.zenmux.ai";
 
 export type DocRoutingRule = {
@@ -122,11 +121,7 @@ export const DOC_ROUTING_RULES: readonly DocRoutingRule[] = [
   },
   {
     triggers: ["invoice", "billing", "pricing", "cost"],
-    paths: [
-      "about/pricing-and-cost.md",
-      "guide/invoice.md",
-      "guide/observability/pricing.md",
-    ],
+    paths: ["about/pricing-and-cost.md", "guide/invoice.md", "guide/observability/pricing.md"],
   },
 
   // --- Observability ---
@@ -149,11 +144,7 @@ export const DOC_ROUTING_RULES: readonly DocRoutingRule[] = [
 
   // --- Advanced features ---
   {
-    triggers: [
-      "provider routing",
-      "model_slug:provider_slug",
-      "primary_factor",
-    ],
+    triggers: ["provider routing", "model_slug:provider_slug", "primary_factor"],
     paths: ["guide/advanced/provider-routing.md"],
   },
   {
@@ -190,10 +181,7 @@ export const DOC_ROUTING_RULES: readonly DocRoutingRule[] = [
   },
   {
     triggers: ["image generation", "openai image"],
-    paths: [
-      "guide/advanced/image-generation.md",
-      "guide/advanced/openai-image-generation.md",
-    ],
+    paths: ["guide/advanced/image-generation.md", "guide/advanced/openai-image-generation.md"],
   },
   {
     triggers: ["video generation"],
@@ -297,15 +285,16 @@ export const DOC_ROUTING_RULES: readonly DocRoutingRule[] = [
   },
 ];
 
-export const ZENMUX_DOC_MANIFEST: readonly ZenMuxDocManifestEntry[] =
-  Array.from(new Set(DOC_ROUTING_RULES.flatMap((rule) => rule.paths)))
-    .sort()
-    .map((docPath) => ({
-      path: docPath,
-      title: titleFromPath(docPath),
-      url: docsUrlForPath(docPath),
-      rawUrl: rawUrlForPath(docPath),
-    }));
+export const ZENMUX_DOC_MANIFEST: readonly ZenMuxDocManifestEntry[] = Array.from(
+  new Set(DOC_ROUTING_RULES.flatMap((rule) => rule.paths)),
+)
+  .sort()
+  .map((docPath) => ({
+    path: docPath,
+    title: titleFromPath(docPath),
+    url: docsUrlForPath(docPath),
+    rawUrl: rawUrlForPath(docPath),
+  }));
 
 /**
  * Return doc paths whose routing rules are triggered by the query.
@@ -324,9 +313,7 @@ export function routingMatches(query: string): string[] {
   return Array.from(new Set(hits));
 }
 
-export function manifestEntryForPath(
-  docPath: string,
-): ZenMuxDocManifestEntry | undefined {
+export function manifestEntryForPath(docPath: string): ZenMuxDocManifestEntry | undefined {
   return ZENMUX_DOC_MANIFEST.find((entry) => entry.path === docPath);
 }
 

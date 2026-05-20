@@ -31,14 +31,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "ZenMux Introduction",
     category: "Overview",
-    keywords: [
-      "what is zenmux",
-      "overview",
-      "architecture",
-      "llm aggregation",
-      "insurance",
-      "providers",
-    ],
+    keywords: ["what is zenmux", "overview", "architecture", "llm aggregation", "insurance", "providers"],
     summary:
       "ZenMux is an LLM API aggregation platform with unified access to models from providers such as OpenAI, Anthropic, Google, and more. It emphasizes dual-protocol support, intelligent routing, observability, and insurance-backed quality guarantees.",
     url: "https://docs.zenmux.ai/about/intro",
@@ -83,17 +76,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Pay As You Go",
     category: "Billing",
-    keywords: [
-      "payg",
-      "pay as you go",
-      "balance",
-      "credits",
-      "top up",
-      "bonus",
-      "production",
-      "billing",
-      "sk-ai-v1",
-    ],
+    keywords: ["payg", "pay as you go", "balance", "credits", "top up", "bonus", "production", "billing", "sk-ai-v1"],
     summary:
       "Pay As You Go is the production-oriented plan with prepaid USD credits, usage-based billing, no rate limits, and 20% bonus credits on top-ups. PAYG API keys use the `sk-ai-v1-...` format.",
     url: "https://docs.zenmux.ai/guide/pay-as-you-go",
@@ -142,16 +125,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Request Logs",
     category: "Observability",
-    keywords: [
-      "logs",
-      "request logs",
-      "tokens",
-      "cost",
-      "latency",
-      "throughput",
-      "request details",
-      "debug",
-    ],
+    keywords: ["logs", "request logs", "tokens", "cost", "latency", "throughput", "request details", "debug"],
     summary:
       "The ZenMux Logs console shows detailed API call records including timestamp, model, input/output tokens, cost, latency, throughput, finish reason, and request details.",
     url: "https://docs.zenmux.ai/guide/observability/logs",
@@ -159,16 +133,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Usage Analytics",
     category: "Observability",
-    keywords: [
-      "usage",
-      "analytics",
-      "statistics",
-      "tokens",
-      "cost trend",
-      "timeseries",
-      "leaderboard",
-      "market share",
-    ],
+    keywords: ["usage", "analytics", "statistics", "tokens", "cost trend", "timeseries", "leaderboard", "market share"],
     summary:
       "ZenMux usage analytics helps monitor token usage, cost trends, model leaderboards, provider market share, and other platform statistics.",
     url: "https://docs.zenmux.ai/guide/observability/usage",
@@ -204,14 +169,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Model Routing",
     category: "Advanced",
-    keywords: [
-      "model routing",
-      "routing",
-      "models",
-      "fallback route",
-      "multiple models",
-      "route",
-    ],
+    keywords: ["model routing", "routing", "models", "fallback route", "multiple models", "route"],
     summary:
       "Model routing controls how ZenMux chooses among models for a request, including multi-model routing and fallback-style behavior.",
     url: "https://docs.zenmux.ai/guide/advanced/model-routing",
@@ -219,14 +177,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Fallback Mechanism",
     category: "Advanced",
-    keywords: [
-      "fallback",
-      "failover",
-      "backup model",
-      "provider fallback",
-      "model failure",
-      "route fallback",
-    ],
+    keywords: ["fallback", "failover", "backup model", "provider fallback", "model failure", "route fallback"],
     summary:
       "Set a fallback model globally in the console or per request via `provider.fallback`. ZenMux retries with the fallback when the primary model returns 5xx, 401/403, 404, rate-limit, or timeout errors. Per-request configuration overrides the global setting.",
     url: "https://docs.zenmux.ai/guide/advanced/fallback",
@@ -253,13 +204,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Tool Calls",
     category: "Advanced",
-    keywords: [
-      "tools",
-      "tool calling",
-      "function calling",
-      "tool_use",
-      "functions",
-    ],
+    keywords: ["tools", "tool calling", "function calling", "tool_use", "functions"],
     summary:
       "ZenMux supports tool/function calling across compatible models and protocols, with transformations for providers that use different tool formats.",
     url: "https://docs.zenmux.ai/guide/advanced/tool-calls",
@@ -267,13 +212,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Structured Output",
     category: "Advanced",
-    keywords: [
-      "structured output",
-      "json",
-      "json schema",
-      "response format",
-      "json mode",
-    ],
+    keywords: ["structured output", "json", "json schema", "response format", "json mode"],
     summary:
       "Structured output helps force model responses into JSON or schema-like formats for application integration.",
     url: "https://docs.zenmux.ai/guide/advanced/structured-output",
@@ -281,13 +220,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Prompt Cache",
     category: "Advanced",
-    keywords: [
-      "prompt cache",
-      "cache",
-      "cached tokens",
-      "input_cache_read",
-      "input_cache_write",
-    ],
+    keywords: ["prompt cache", "cache", "cached tokens", "input_cache_read", "input_cache_write"],
     summary:
       "Prompt caching can reduce latency and cost by reusing repeated prompt context. Cache token details can be inspected in ZenMux logs.",
     url: "https://docs.zenmux.ai/guide/advanced/prompt-cache",
@@ -323,14 +256,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "OpenAI Chat Completions API",
     category: "API Reference",
-    keywords: [
-      "openai",
-      "chat completions",
-      "api/v1",
-      "messages",
-      "base_url",
-      "sdk",
-    ],
+    keywords: ["openai", "chat completions", "api/v1", "messages", "base_url", "sdk"],
     summary:
       'OpenAI-compatible Chat Completions endpoint. Use the OpenAI SDK with `base_url="https://zenmux.ai/api/v1"` and any ZenMux model slug.',
     url: "https://docs.zenmux.ai/api/openai/create-chat-completion",
@@ -348,13 +274,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "OpenAI Responses API",
     category: "API Reference",
-    keywords: [
-      "responses api",
-      "openai responses",
-      "input",
-      "response",
-      "api/v1",
-    ],
+    keywords: ["responses api", "openai responses", "input", "response", "api/v1"],
     summary:
       "ZenMux supports the OpenAI Responses protocol on the same base URL as Chat Completions. Used by Codex CLI and modern OpenAI SDKs.",
     url: "https://docs.zenmux.ai/api/openai/openai-responses",
@@ -368,14 +288,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Anthropic Messages API",
     category: "API Reference",
-    keywords: [
-      "anthropic",
-      "messages",
-      "claude",
-      "api/anthropic",
-      "anthropic sdk",
-      "x-api-key",
-    ],
+    keywords: ["anthropic", "messages", "claude", "api/anthropic", "anthropic sdk", "x-api-key"],
     summary:
       "Anthropic-compatible Messages endpoint at `https://zenmux.ai/api/anthropic`. Use the official Anthropic SDK with the ZenMux base URL.",
     url: "https://docs.zenmux.ai/api/anthropic/create-messages",
@@ -389,14 +302,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Vertex AI Generate Content API",
     category: "API Reference",
-    keywords: [
-      "vertex ai",
-      "gemini",
-      "generate content",
-      "google",
-      "api/vertex-ai",
-      "googlegenai",
-    ],
+    keywords: ["vertex ai", "gemini", "generate content", "google", "api/vertex-ai", "googlegenai"],
     summary:
       "Google Gemini protocol via Vertex AI compatibility at `https://zenmux.ai/api/vertex-ai`. Use the Google GenAI SDK with `vertexai=True`.",
     url: "https://docs.zenmux.ai/api/vertexai/generate-content",
@@ -441,16 +347,8 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Platform API: PAYG Balance",
     category: "Platform API",
-    keywords: [
-      "platform api",
-      "payg balance",
-      "credits",
-      "top up",
-      "bonus credits",
-      "wallet",
-    ],
-    summary:
-      "Returns the wallet balance for the Pay As You Go account. Requires the Platform API Key.",
+    keywords: ["platform api", "payg balance", "credits", "top up", "bonus credits", "wallet"],
+    summary: "Returns the wallet balance for the Pay As You Go account. Requires the Platform API Key.",
     url: "https://docs.zenmux.ai/api/platform/payg-balance",
     facts: [
       "Endpoint: `GET https://zenmux.ai/api/v1/management/payg/balance`.",
@@ -461,14 +359,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Platform API: Generation Detail",
     category: "Platform API",
-    keywords: [
-      "generation",
-      "generation id",
-      "cost",
-      "tokens",
-      "latency",
-      "request detail",
-    ],
+    keywords: ["generation", "generation id", "cost", "tokens", "latency", "request detail"],
     summary:
       "Look up token usage, latency, cost, finish reason, and provider for a single generation by ID. Requires the Platform API Key. Billing fields appear after a 3-5 minute delay.",
     url: "https://docs.zenmux.ai/api/platform/get-generation",
@@ -479,9 +370,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "Billing fields (`usage`, `ratingResponses`) have a 3-5 minute delay after the original request.",
       "Subscription-plan keys (`sk-ss-v1-...`) get metering data only; cost/billing fields are not populated for them.",
     ],
-    warnings: [
-      "The legacy `/api/v1/generation` URL is deprecated; use `/api/v1/management/generation`.",
-    ],
+    warnings: ["The legacy `/api/v1/generation` URL is deprecated; use `/api/v1/management/generation`."],
   },
   {
     title: "Cursor Integration",
@@ -568,15 +457,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Codex Integration",
     category: "Best Practices",
-    keywords: [
-      "codex",
-      "codex cli",
-      "config.toml",
-      "wire_api",
-      "responses",
-      "ZENMUX_API_KEY",
-      "model_provider",
-    ],
+    keywords: ["codex", "codex cli", "config.toml", "wire_api", "responses", "ZENMUX_API_KEY", "model_provider"],
     summary:
       "Codex CLI uses the OpenAI Responses protocol against `https://zenmux.ai/api/v1`. Configure it with a TOML file at `~/.codex/config.toml` plus the `ZENMUX_API_KEY` env var (PAYG `sk-ai-v1-...`).",
     url: "https://docs.zenmux.ai/best-practices/codex",
@@ -605,14 +486,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
   {
     title: "Cline Integration",
     category: "Best Practices",
-    keywords: [
-      "cline",
-      "vscode",
-      "openai compatible",
-      "base url",
-      "model id",
-      "api provider",
-    ],
+    keywords: ["cline", "vscode", "openai compatible", "base url", "model id", "api provider"],
     summary:
       "Cline connects to ZenMux through its `OpenAI Compatible` API Provider. Set the Base URL to `https://zenmux.ai/api/v1`, paste a ZenMux API key (`sk-ai-v1-...`), and use a ZenMux model slug as the Model ID.",
     url: "https://docs.zenmux.ai/best-practices/cline",
@@ -629,21 +503,12 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
       "Paste your ZenMux API key into `OpenAI Compatible API Key`.",
       "Enter a ZenMux model slug into `Model ID` and click `Done`.",
     ],
-    warnings: [
-      "Do not pick the generic `OpenAI` provider; that hits OpenAI directly. Use `OpenAI Compatible`.",
-    ],
+    warnings: ["Do not pick the generic `OpenAI` provider; that hits OpenAI directly. Use `OpenAI Compatible`."],
   },
   {
     title: "Open WebUI Integration",
     category: "Best Practices",
-    keywords: [
-      "open webui",
-      "open-webui",
-      "base url",
-      "openai compatible",
-      "external connection",
-      "admin panel",
-    ],
+    keywords: ["open webui", "open-webui", "base url", "openai compatible", "external connection", "admin panel"],
     summary:
       "Open WebUI talks to ZenMux through its OpenAI external connection list. URL is `https://zenmux.ai/api/v1` and the API Key is any ZenMux model API key. Open WebUI will auto-sync the model list.",
     url: "https://docs.zenmux.ai/best-practices/open-webui",
@@ -665,8 +530,7 @@ export const ZENMUX_DOCS: ZenMuxDocEntry[] = [
     title: "FAQ",
     category: "Help",
     keywords: ["faq", "help", "support", "question"],
-    summary:
-      "The FAQ covers common ZenMux questions and troubleshooting guidance.",
+    summary: "The FAQ covers common ZenMux questions and troubleshooting guidance.",
     url: "https://docs.zenmux.ai/help/faq",
   },
 ];

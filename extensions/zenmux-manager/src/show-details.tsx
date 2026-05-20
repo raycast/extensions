@@ -1,13 +1,4 @@
-import {
-  Action,
-  ActionPanel,
-  Color,
-  Icon,
-  List,
-  Toast,
-  openExtensionPreferences,
-  showToast,
-} from "@raycast/api";
+import { Action, ActionPanel, Color, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
 import { getProgressIcon } from "@raycast/utils";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -32,9 +23,7 @@ import {
 
 export default function Command() {
   const initialSnapshot = useMemo(() => readCachedSnapshot(), []);
-  const [snapshot, setSnapshot] = useState<AccountSnapshot | undefined>(
-    initialSnapshot,
-  );
+  const [snapshot, setSnapshot] = useState<AccountSnapshot | undefined>(initialSnapshot);
   const [failure, setFailure] = useState<string | undefined>();
   const [isLoading, setIsLoading] = useState(!initialSnapshot);
 
@@ -73,23 +62,14 @@ export default function Command() {
   const showSubscription = hasSubscriptionData(snapshot?.subscription);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder="Search ZenMux usage"
-      navigationTitle="ZenMux Usage"
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search ZenMux usage" navigationTitle="ZenMux Usage">
       {failure ? (
         <List.Section title="Refresh Error">
           <List.Item
             icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
             title="Could not refresh ZenMux usage"
             subtitle={failure}
-            actions={
-              <UsageActions
-                snapshot={snapshot}
-                onRefresh={() => void refresh(true)}
-              />
-            }
+            actions={<UsageActions snapshot={snapshot} onRefresh={() => void refresh(true)} />}
           />
         </List.Section>
       ) : null}
@@ -102,12 +82,7 @@ export default function Command() {
               icon={{ source: Icon.Exclamationmark, tintColor: Color.Yellow }}
               title={warning.title}
               subtitle={warning.message}
-              actions={
-                <UsageActions
-                  snapshot={snapshot}
-                  onRefresh={() => void refresh(true)}
-                />
-              }
+              actions={<UsageActions snapshot={snapshot} onRefresh={() => void refresh(true)} />}
             />
           ))}
         </List.Section>
@@ -127,12 +102,7 @@ export default function Command() {
                 },
               },
             ]}
-            actions={
-              <UsageActions
-                snapshot={snapshot}
-                onRefresh={() => void refresh(true)}
-              />
-            }
+            actions={<UsageActions snapshot={snapshot} onRefresh={() => void refresh(true)} />}
           />
         ) : null}
         <List.Item
@@ -145,20 +115,12 @@ export default function Command() {
           accessories={[
             {
               text: {
-                value: formatCurrency(
-                  snapshot?.payg?.total_credits,
-                  snapshot?.payg?.currency,
-                ),
+                value: formatCurrency(snapshot?.payg?.total_credits, snapshot?.payg?.currency),
                 color: Color.PrimaryText,
               },
             },
           ]}
-          actions={
-            <UsageActions
-              snapshot={snapshot}
-              onRefresh={() => void refresh(true)}
-            />
-          }
+          actions={<UsageActions snapshot={snapshot} onRefresh={() => void refresh(true)} />}
         />
         {showSubscription ? (
           <List.Item
@@ -170,39 +132,22 @@ export default function Command() {
                 text: `${formatCurrency(snapshot?.subscription?.effective_usd_per_flow, snapshot?.subscription?.currency)}/Flow`,
               },
             ]}
-            actions={
-              <UsageActions
-                snapshot={snapshot}
-                onRefresh={() => void refresh(true)}
-              />
-            }
+            actions={<UsageActions snapshot={snapshot} onRefresh={() => void refresh(true)} />}
           />
         ) : null}
       </List.Section>
 
       {showSubscription ? (
         <List.Section title="Subscription Quota">
-          {buildQuotaItem(
-            "5-hour Quota",
-            snapshot?.subscription?.quota_5_hour,
-            snapshot,
-            () => void refresh(true),
-          )}
-          {buildQuotaItem(
-            "7-day Quota",
-            snapshot?.subscription?.quota_7_day,
-            snapshot,
-            () => void refresh(true),
-          )}
+          {buildQuotaItem("5-hour Quota", snapshot?.subscription?.quota_5_hour, snapshot, () => void refresh(true))}
+          {buildQuotaItem("7-day Quota", snapshot?.subscription?.quota_7_day, snapshot, () => void refresh(true))}
           <List.Item
             icon={Icon.Calendar}
             title="Monthly Quota"
             subtitle="Billing cycle cap"
             accessories={[
               {
-                text: formatFlows(
-                  snapshot?.subscription?.quota_monthly?.max_flows,
-                ),
+                text: formatFlows(snapshot?.subscription?.quota_monthly?.max_flows),
               },
               {
                 text: formatCurrency(
@@ -211,12 +156,7 @@ export default function Command() {
                 ),
               },
             ]}
-            actions={
-              <UsageActions
-                snapshot={snapshot}
-                onRefresh={() => void refresh(true)}
-              />
-            }
+            actions={<UsageActions snapshot={snapshot} onRefresh={() => void refresh(true)} />}
           />
         </List.Section>
       ) : null}
@@ -227,24 +167,14 @@ export default function Command() {
             icon={Icon.Clock}
             title="Subscription Expires"
             subtitle={formatDateTime(snapshot?.subscription?.plan?.expires_at)}
-            actions={
-              <UsageActions
-                snapshot={snapshot}
-                onRefresh={() => void refresh(true)}
-              />
-            }
+            actions={<UsageActions snapshot={snapshot} onRefresh={() => void refresh(true)} />}
           />
         ) : null}
         <List.Item
           icon={Icon.ArrowClockwise}
           title="Last Updated"
           subtitle={snapshot ? formatDateTime(snapshot.fetchedAt) : "Never"}
-          actions={
-            <UsageActions
-              snapshot={snapshot}
-              onRefresh={() => void refresh(true)}
-            />
-          }
+          actions={<UsageActions snapshot={snapshot} onRefresh={() => void refresh(true)} />}
         />
       </List.Section>
 
@@ -352,18 +282,9 @@ function UsageActions(props: {
 }) {
   return (
     <ActionPanel>
-      {props.primaryUrl ? (
-        <Action.OpenInBrowser
-          title={props.primaryTitle}
-          url={props.primaryUrl}
-        />
-      ) : null}
+      {props.primaryUrl ? <Action.OpenInBrowser title={props.primaryTitle} url={props.primaryUrl} /> : null}
       <ActionPanel.Section title="Actions">
-        <Action
-          title="Refresh"
-          icon={Icon.ArrowClockwise}
-          onAction={props.onRefresh}
-        />
+        <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={props.onRefresh} />
         <Action.CopyToClipboard
           title="Copy Snapshot JSON"
           icon={Icon.CopyClipboard}
@@ -383,11 +304,7 @@ function UsageActions(props: {
           icon={Icon.Wallet}
           url="https://zenmux.ai/platform/pay-as-you-go"
         />
-        <Action.OpenInBrowser
-          title="Open Logs Console"
-          icon={Icon.List}
-          url="https://zenmux.ai/platform/logs"
-        />
+        <Action.OpenInBrowser title="Open Logs Console" icon={Icon.List} url="https://zenmux.ai/platform/logs" />
         <Action.OpenInBrowser
           title="Open Platform API Console"
           icon={Icon.Key}
@@ -395,11 +312,7 @@ function UsageActions(props: {
         />
       </ActionPanel.Section>
       <ActionPanel.Section title="Settings">
-        <Action
-          title="Configure Platform API Key"
-          icon={Icon.Gear}
-          onAction={() => void openExtensionPreferences()}
-        />
+        <Action title="Configure Platform API Key" icon={Icon.Gear} onAction={() => void openExtensionPreferences()} />
       </ActionPanel.Section>
     </ActionPanel>
   );

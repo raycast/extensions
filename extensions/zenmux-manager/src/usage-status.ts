@@ -1,17 +1,5 @@
-import {
-  LaunchType,
-  Toast,
-  environment,
-  getPreferenceValues,
-  showToast,
-  updateCommandMetadata,
-} from "@raycast/api";
-import {
-  cacheSnapshot,
-  fetchAccountSnapshot,
-  formatCommandSubtitle,
-  getErrorMessage,
-} from "./zenmux";
+import { LaunchType, Toast, environment, getPreferenceValues, showToast, updateCommandMetadata } from "@raycast/api";
+import { cacheSnapshot, fetchAccountSnapshot, formatCommandSubtitle, getErrorMessage } from "./zenmux";
 
 export default async function Command() {
   try {
