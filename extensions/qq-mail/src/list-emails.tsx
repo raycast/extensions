@@ -180,6 +180,7 @@ function EmailList(props: EmailListProps = {}) {
 
   const handleFolderChange = useCallback((newFolder: string) => {
     setSelectedFolder(newFolder);
+    setFilter("all");
     setSelectedEmailId(null);
   }, []);
 
