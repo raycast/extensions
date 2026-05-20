@@ -1,6 +1,6 @@
 # Reka UI Changelog
 
-## [1.1.1] - {PR_MERGE_DATE}
+## [1.1.1] - 2026-05-20
 
 - fix CDN URL pointing to non-existent `main` branch; use the `v2` default branch instead
 
