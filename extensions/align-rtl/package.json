@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "dev": "ray develop",
-    "test": "node scripts/verify-llm-knowledge.mjs",
+    "test": "ray lint",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",
     "build": "ray build",

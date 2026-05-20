@@ -71,7 +71,6 @@ function run(argv) {
 
   pasteboard.clearContents();
   pasteboard.setDataForType(htmlData, $("public.html"));
-  pasteboard.setDataForType(htmlData, $("Apple HTML pasteboard type"));
   pasteboard.setStringForType($(text), $("public.utf8-plain-text"));
   pasteboard.setStringForType($(text), $("NSStringPboardType"));
 
