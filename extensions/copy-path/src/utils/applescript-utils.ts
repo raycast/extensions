@@ -106,7 +106,9 @@ try
   tell application id "${app.bundleId}" to activate
   delay 0.1
   tell application "System Events"
-    keystroke "c" using {option down, command down}
+    tell process "${app.name}"
+      keystroke "c" using {option down, command down}
+    end tell
   end tell
   delay 0.2
   return the clipboard
