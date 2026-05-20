@@ -39,7 +39,13 @@ export function SkillListItem({
       : undefined;
   const icon = iconTooltip ? { value: iconValue, tooltip: iconTooltip } : iconValue;
 
-  const accessories: List.Item.Accessory[] = [{ text: formatInstalls(skill.installs), icon: Icon.Download }];
+  const accessories: List.Item.Accessory[] = [];
+  if (isInstalled) {
+    accessories.push({ tag: { value: "Installed", color: Color.Green } });
+  } else if (hasSourceConflict) {
+    accessories.push({ tag: { value: "Different Source", color: Color.Orange } });
+  }
+  accessories.push({ text: formatInstalls(skill.installs), icon: Icon.Download });
 
   return (
     <List.Item

@@ -1,5 +1,9 @@
 # Skills Changelog
 
+## [Show Installed Status in Search Results] - {PR_MERGE_DATE}
+
+- Add installed status indicators to search results
+
 ## [Ask Skills AI Extension] - 2026-05-12
 
 - Add `@skills` support in Raycast AI Chat with five tools: search the marketplace by query, read a skill's full instructions, list installed skills, install a skill for specific agents, and remove a skill
