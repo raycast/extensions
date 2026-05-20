@@ -254,9 +254,11 @@ New title:
             icon={Icon.ArrowRight}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
           >
-            {lists.map((list) => {
-              return <Action {...listItems.list(list)} key={list.id} onAction={() => moveTo(list.id)} />;
-            })}
+            {lists
+              .filter((list) => !todo.isProject || list.type === 'area')
+              .map((list) => {
+                return <Action {...listItems.list(list)} key={list.id} onAction={() => moveTo(list.id)} />;
+              })}
           </ActionPanel.Submenu>
         ) : null}
 
