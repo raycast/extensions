@@ -1,8 +1,9 @@
 import { runAppleScript } from "@raycast/utils";
 import * as os from "node:os";
-import { Application } from "@raycast/api";
+import { Application, Clipboard } from "@raycast/api";
 
 const APPLESCRIPT_TIMEOUT_MS = 5000;
+const VSCODE_SENTINEL_CLIPBOARD = "__raycast_copy_path_no_active_file__";
 
 export const scriptFinderPath = `
 if application "Finder" is not running then
@@ -101,10 +102,6 @@ export const getFocusWindowPath = async (app: Application) => {
 };
 
 export const scriptVSCodeActiveFilePath = (app: Application) => `
-set previousClipboard to the clipboard
-set sentinelClipboard to "__raycast_copy_path_no_active_file__"
-set the clipboard to sentinelClipboard
-
 try
   tell application id "${app.bundleId}" to activate
   delay 0.1
@@ -112,14 +109,8 @@ try
     keystroke "c" using {option down, command down}
   end tell
   delay 0.2
-  set activeFilePath to the clipboard
-  if activeFilePath is sentinelClipboard then
-    set the clipboard to previousClipboard
-    return ""
-  end if
-  return activeFilePath
+  return the clipboard
 on error
-  set the clipboard to previousClipboard
   return ""
 end try
 `;
@@ -129,8 +120,24 @@ export const getVSCodeActiveFilePath = async (app: Application) => {
     return "";
   }
 
+  const previousClipboard = await Clipboard.readText();
+  let path = "";
   try {
-    const path = (await runAppleScript(scriptVSCodeActiveFilePath(app), { timeout: APPLESCRIPT_TIMEOUT_MS })).trim();
+    await Clipboard.copy(VSCODE_SENTINEL_CLIPBOARD);
+    path = (await runAppleScript(scriptVSCodeActiveFilePath(app), { timeout: APPLESCRIPT_TIMEOUT_MS })).trim();
+  } catch (e) {
+    path = "";
+  } finally {
+    if (path === "" || path === VSCODE_SENTINEL_CLIPBOARD) {
+      if (previousClipboard === undefined) {
+        await Clipboard.clear();
+      } else {
+        await Clipboard.copy(previousClipboard);
+      }
+    }
+  }
+
+  try {
     if (path.startsWith("file://")) {
       return decodeURIComponent(path.replace("file://", ""));
     }
