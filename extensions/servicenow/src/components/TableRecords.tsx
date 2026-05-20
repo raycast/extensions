@@ -22,6 +22,7 @@ const SPECIAL_AVATARS: Record<string, Image.ImageLike> = {
   system: { source: Icon.ComputerChip, tintColor: Color.Purple },
   admin: { source: Icon.Shield, tintColor: Color.Orange },
   guest: { source: Icon.PersonCircle, tintColor: Color.SecondaryText },
+  maint: { source: Icon.Cog, tintColor: Color.Blue },
 };
 
 interface DictionaryResponse {
@@ -386,9 +387,14 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
                 const displayName = sysUser?.name ?? liveProfile?.["document.name"] ?? userName;
                 const photoPath = liveProfile?.photo || sysUser?.photo;
                 const special = SPECIAL_AVATARS[userName.toLowerCase()];
+                // Drop decorator tokens like "(Admin)" so initials come from the real name words.
+                const trimmed = displayName
+                  .trim()
+                  .split(/\s+/)
+                  .filter((word) => /^\p{L}/u.test(word))
+                  .join(" ");
                 // getAvatarIcon picks the first letter of the first and last words.
                 // Split a single-word name so it still produces two initials (e.g. "system" → "SY").
-                const trimmed = displayName.trim();
                 const nameForAvatar =
                   trimmed.includes(" ") || trimmed.length < 2 ? trimmed : `${trimmed[0]} ${trimmed.slice(1)}`;
                 accessories.push({
@@ -397,7 +403,10 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
                     (photoPath
                       ? { source: `${instanceUrl}/${photoPath}.iix?t=small`, mask: Image.Mask.Circle }
                       : getAvatarIcon(nameForAvatar)),
-                  tooltip: displayName === userName ? `Updated by: ${displayName}` : `Updated by: ${displayName} (${userName})`,
+                  tooltip:
+                    displayName === userName
+                      ? `Updated by: ${displayName}`
+                      : `Updated by: ${displayName} (${userName})`,
                 });
               }
               return (
