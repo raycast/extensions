@@ -6,7 +6,7 @@ Open the current HTTPS site as a Discussite Site from Raycast.
 
 | Command | Description |
 | --- | --- |
-| `DS` | Open the current HTTPS browser tab or a pasted HTTPS URL as a Discussite Site |
+| `Open in Discussite` | Open the current HTTPS browser tab or a pasted HTTPS URL as a Discussite Site |
 
 ## Current Behavior
 

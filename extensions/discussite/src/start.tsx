@@ -1,12 +1,12 @@
 /**
- * DS command — no-view mode.
+ * Open in Discussite command — no-view mode.
  *
  * Grabs the URL from the argument or active browser tab and
  * opens the matching Discussite Site immediately. No form, no extra steps.
  *
  * Usage:
- *   "DS"                     → uses active browser tab URL
- *   "DS https://example.com" → uses the provided URL
+ *   "Open in Discussite"                     → uses active browser tab URL
+ *   "Open in Discussite https://example.com" → uses the provided URL
  */
 
 import {

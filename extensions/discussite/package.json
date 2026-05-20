@@ -16,7 +16,7 @@
   "commands": [
     {
       "name": "start",
-      "title": "DS",
+      "title": "Open in Discussite",
       "description": "Open an HTTPS URL as a Discussite Site",
       "mode": "no-view",
       "arguments": [
