@@ -143,7 +143,7 @@ function EditForm({ sub, onSave }: { sub: Subscription; onSave: (updates: Partia
       <Form.DatePicker
         id="startDate"
         title="Start Date"
-        defaultValue={new Date(sub.startDate)}
+        defaultValue={new Date(sub.startDate + "T00:00:00")}
         type={Form.DatePicker.Type.Date}
       />
       <Form.Separator />

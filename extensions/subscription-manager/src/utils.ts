@@ -123,8 +123,10 @@ export function getMonthSubscriptions(month: number, year: number, subscriptions
   return subscriptions
     .filter((s) => s.status === "active")
     .filter((s) => {
-      if (s.billingCycle === "monthly") return true;
       const start = new Date(s.startDate + "T00:00:00");
+      const lastDayOfMonth = new Date(year, month + 1, 0);
+      if (start > lastDayOfMonth) return false;
+      if (s.billingCycle === "monthly") return true;
       if (s.billingCycle === "yearly") return start.getMonth() === month;
       if (s.billingCycle === "quarterly") return (month - start.getMonth() + 12) % 3 === 0;
       if (s.billingCycle === "half-yearly") return (month - start.getMonth() + 12) % 6 === 0;
