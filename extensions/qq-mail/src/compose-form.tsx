@@ -56,9 +56,7 @@ export function ComposeForm({ mode, originalEmail }: ComposeFormProps) {
     if (!originalEmail) return "";
     switch (mode) {
       case "replyAll":
-        return originalEmail.cc
-          .filter((addr) => addr.toLowerCase() !== prefs.username.toLowerCase())
-          .join(", ");
+        return originalEmail.cc.filter((addr) => addr.toLowerCase() !== prefs.username.toLowerCase()).join(", ");
       default:
         return "";
     }
