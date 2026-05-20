@@ -41,7 +41,10 @@ export function ComposeForm({ mode, originalEmail }: ComposeFormProps) {
       case "reply":
         return originalEmail.from;
       case "replyAll":
-        return [originalEmail.from, ...originalEmail.to].filter(Boolean).join(", ");
+        return [originalEmail.from, ...originalEmail.to]
+          .filter(Boolean)
+          .filter((addr) => addr.toLowerCase() !== prefs.username.toLowerCase())
+          .join(", ");
       case "forward":
         return "";
       default:
