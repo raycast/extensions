@@ -143,7 +143,8 @@ function PageDetail({ item }: { item: OneNoteItem }) {
     ONENOTE_MERGED_DB,
     `SELECT Content FROM Entities WHERE GOID = '${quoteSql(item.GOID)}' LIMIT 1;`
   );
-  const content = data?.[0]?.Content ?? item.Content;
+  const content =
+    data === undefined ? item.Content : (data[0]?.Content ?? (data.length > 0 ? item.Content : "*Full content could not be loaded.*"));
 
   return (
     <Detail
