@@ -10,10 +10,10 @@ Uses the [Fillerama API](http://chrisvalleskey.com/fillerama/) by Chris Valleske
 
 ## Commands
 
-| Command | Description |
-|---|---|
-| **Generate Filler Text** | Pick a show and sentence count, then paste the result into the active app. |
-| **Generate Filler Headline** | Pick a show, then paste a single headline into the active app. |
+| Command                      | Description                                                                |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| **Generate Filler Text**     | Pick a show and sentence count, then paste the result into the active app. |
+| **Generate Filler Headline** | Pick a show, then paste a single headline into the active app.             |
 
 ---
 

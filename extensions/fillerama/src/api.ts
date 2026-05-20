@@ -37,7 +37,7 @@ export async function fetchQuotes(show: ShowId): Promise<FilleramaResponse> {
 export function pickQuotes(
   response: FilleramaResponse,
   count: number,
-  type: "db" | "headers" = "db"
+  type: "db" | "headers" = "db",
 ): string[] {
   const pool =
     type === "db"

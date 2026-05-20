@@ -31,7 +31,8 @@ export default function GenerateHeadline() {
       const response = await fetchQuotes(values.show);
       const quotes = pickQuotes(response, 1, "headers");
 
-      if (!quotes.length) throw new Error("No headlines returned for this show.");
+      if (!quotes.length)
+        throw new Error("No headlines returned for this show.");
 
       const headline = buildText(quotes);
 
@@ -52,13 +53,21 @@ export default function GenerateHeadline() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Generate and Paste" icon={Icon.Play} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Generate and Paste"
+            icon={Icon.Play}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
       <Form.Dropdown id="show" title="Show" defaultValue="futurama">
         {SHOWS.map((show) => (
-          <Form.Dropdown.Item key={show.id} value={show.id} title={show.title} />
+          <Form.Dropdown.Item
+            key={show.id}
+            value={show.id}
+            title={show.title}
+          />
         ))}
       </Form.Dropdown>
     </Form>

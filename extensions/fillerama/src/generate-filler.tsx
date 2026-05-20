@@ -27,7 +27,10 @@ export default function GenerateFiller() {
   async function handleSubmit(values: { show: ShowId; count: string }) {
     const count = parseInt(values.count, 10);
     if (isNaN(count) || count < 1 || count > 30) {
-      await showToast({ style: Toast.Style.Failure, title: "Enter a number between 1 and 30." });
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Enter a number between 1 and 30.",
+      });
       return;
     }
 
@@ -58,13 +61,21 @@ export default function GenerateFiller() {
       isLoading={isLoading}
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Generate and Paste" icon={Icon.Play} onSubmit={handleSubmit} />
+          <Action.SubmitForm
+            title="Generate and Paste"
+            icon={Icon.Play}
+            onSubmit={handleSubmit}
+          />
         </ActionPanel>
       }
     >
       <Form.Dropdown id="show" title="Show" defaultValue="futurama">
         {SHOWS.map((show) => (
-          <Form.Dropdown.Item key={show.id} value={show.id} title={show.title} />
+          <Form.Dropdown.Item
+            key={show.id}
+            value={show.id}
+            title={show.title}
+          />
         ))}
       </Form.Dropdown>
       <Form.TextField
