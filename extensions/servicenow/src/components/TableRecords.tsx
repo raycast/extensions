@@ -108,8 +108,7 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
     return Array.from(set);
   }, [displayField]);
 
-  // Loaded before the records fetch so the URL builder can match search text
-  // against the updater's display name (live_profile.document.name).
+  // Maps each updater login to its photo/display name for the row avatar + tooltip.
   const { data: users = [] } = useFetch(
     `${instanceUrl}/api/now/table/live_profile?sysparm_query=type=user&sysparm_fields=sys_id,photo,document.user_name,document.name`,
     {
@@ -149,9 +148,9 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
     const terms = searchTerm.trim().split(/\s+/).filter(Boolean);
     const filters: string[] = [];
     if (extraQuery) filters.push(extraQuery);
-    // Each term gets its own (displayField OR sys_updated_by OR matching-users)
-    // group; groups are ANDed via the `^` join — so "importmate ruben" finds an
-    // "Importmate …" record updated by anyone named Ruben.
+    // Each term gets its own (displayField OR sys_updated_by) group; groups are
+    // ANDed via the `^` join — so "importmate ruben" finds an "Importmate …"
+    // record whose updater login contains "ruben".
     for (const term of terms) {
       const orParts: string[] = [];
       if (searchableFields.length > 0) {
@@ -160,19 +159,11 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
         orParts.push(`123TEXTQUERY321=${term}`);
       }
       orParts.push(`sys_updated_byLIKE${term}`);
-      const lower = term.toLowerCase();
-      const matchingUsernames = users
-        .filter((u) => u["document.name"]?.toLowerCase().includes(lower))
-        .map((u) => u["document.user_name"])
-        .filter(Boolean);
-      if (matchingUsernames.length > 0) {
-        orParts.push(`sys_updated_byIN${matchingUsernames.join(",")}`);
-      }
       filters.push(orParts.join("^OR"));
     }
     if (orderByUpdated) filters.push("ORDERBYDESCsys_updated_on");
     return filters.join("^");
-  }, [searchTerm, extraQuery, searchableFields, users, orderByUpdated]);
+  }, [searchTerm, extraQuery, searchableFields, orderByUpdated]);
 
   const { isLoading, data, error, revalidate, pagination } = useFetch(
     (options) => {
@@ -406,7 +397,7 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
                     (photoPath
                       ? { source: `${instanceUrl}/${photoPath}.iix?t=small`, mask: Image.Mask.Circle }
                       : getAvatarIcon(nameForAvatar)),
-                  tooltip: `Updated by: ${displayName}`,
+                  tooltip: displayName === userName ? `Updated by: ${displayName}` : `Updated by: ${displayName} (${userName})`,
                 });
               }
               return (
