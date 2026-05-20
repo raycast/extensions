@@ -1,6 +1,6 @@
 # Sonos Changelog
 
-## [Bug fix] - {PR_MERGE_DATE}
+## [Bug fix] - 2026-05-20
 
 - Fix an error when setting the active group while another Sonos command is using the event listener port
 
