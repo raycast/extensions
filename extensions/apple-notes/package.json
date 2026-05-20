@@ -462,13 +462,11 @@
     "@raycast/api": "^1.104.17",
     "@raycast/utils": "^2.2.5",
     "date-fns": "^4.2.1",
-    "lodash": "^4.18.1",
     "node-html-markdown": "^2.0.0",
     "pinyin-pro": "^3.28.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
-    "@types/lodash": "^4.17.24",
     "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "eslint": "^10.4.0",
@@ -476,7 +474,7 @@
     "typescript": "^6.0.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build -e dist -o dist",
     "dev": "ray develop",
     "lint": "ray lint",
     "fix-lint": "ray lint --fix",

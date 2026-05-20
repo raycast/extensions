@@ -2,7 +2,6 @@ import { homedir } from "os";
 import { resolve } from "path";
 
 import { useSQL } from "@raycast/utils";
-import { partition } from "lodash";
 
 import { getOpenNoteURL } from "../helpers";
 
@@ -175,6 +174,13 @@ export const useNotes = () => {
       tags: noteTags ?? [],
     };
   });
+
+  function partition<T>(array: T[], predicate: (item: T) => boolean): [T[], T[]] {
+    return array.reduce(([pass, fail], item) => (predicate(item) ? [[...pass, item], fail] : [pass, [...fail, item]]), [
+      [],
+      [],
+    ] as [T[], T[]]);
+  }
 
   const [activeNotes, deletedNotes] = partition(
     notesWithAdditionalFields,
