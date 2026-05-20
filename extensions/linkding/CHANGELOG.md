@@ -1,5 +1,9 @@
 # Linkding Changelog
 
+## [Fix Save Browser Tab] - {PR_MERGE_DATE}
+
+- Add Microsoft Edge support to Save Browser Tab.
+
 ## [Frecency + Refactor] - 2026-01-26
 
 - chore: npm audit fix
