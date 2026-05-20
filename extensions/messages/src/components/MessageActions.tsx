@@ -121,10 +121,8 @@ export default function MessageActions({ message, mutate, showDetails = true }: 
       <ActionPanel.Section>
         {otp ? (
           <>
-            {/* eslint-disable-next-line @raycast/prefer-title-case */}
             <Action.Paste title="Paste OTP Code" content={otp} shortcut={{ modifiers: ["cmd", "shift"], key: "p" }} />
             <Action.CopyToClipboard
-              // eslint-disable-next-line @raycast/prefer-title-case
               title="Copy OTP Code"
               content={otp}
               shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}

@@ -1,6 +1,5 @@
 import Contacts
 import RaycastSwiftMacros
-import SQLite
 
 struct PhoneNumber: Codable {
   let number: String
