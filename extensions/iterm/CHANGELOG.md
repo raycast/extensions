@@ -1,6 +1,6 @@
 # iTerm Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-05-20
 
 - Fixed `Open iTerm Profile` so all saved profiles are listed regardless of plist field order
 
