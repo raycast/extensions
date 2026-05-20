@@ -11,6 +11,14 @@ import { Message, SQLMessage } from "../hooks/useMessages";
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
 export async function getMessages(searchText?: string, chatIdentifier?: string, before?: string): Promise<Message[]> {
+  // Sanitize chatIdentifier: allow only the characters Apple uses in chat identifiers
+  const safeChatIdentifier = chatIdentifier?.replace(/'/g, "''") ?? null;
+  // Convert before to an Apple-epoch nanosecond integer — avoids any string interpolation
+  const beforeNs =
+    before && !isNaN(Date.parse(before))
+      ? Math.floor((new Date(before).getTime() / 1000 - 978307200) * 1_000_000_000)
+      : null;
+
   const rawData = await executeSQL<SQLMessage>(
     DB_PATH,
     `
@@ -55,8 +63,8 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
       LEFT JOIN attachment ON message_attachment_join.attachment_id = attachment."ROWID"
     WHERE
       message.attributedBody IS NOT NULL
-      ${chatIdentifier ? `AND chat.chat_identifier = '${chatIdentifier}'` : ""}
-      ${before ? `AND message.date < (strftime('%s', '${before}') - strftime('%s', '2001-01-01')) * 1000000000` : ""}
+      ${safeChatIdentifier !== null ? `AND chat.chat_identifier = '${safeChatIdentifier}'` : ""}
+      ${beforeNs !== null ? `AND message.date < ${beforeNs}` : ""}
     GROUP BY
       message.guid
     ORDER BY
