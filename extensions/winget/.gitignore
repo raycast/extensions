@@ -1,5 +1,6 @@
 node_modules/
 .build/
+raycast-env.d.ts
 .tmp-home
 .tmp-config
 .tmp-test

@@ -1,5 +1,10 @@
 # WinGet Changelog
 
+## [Simplify Package Actions] - {PR_MERGE_DATE}
+
+- Remove the `View Details` action from package action panels
+- Make `Install Package` and `Update Package` the primary actions in search and upgrade lists
+
 ## [Fix localized upgrade parsing] - 2026-04-23
 
 - Fix winget table parsing on localized outputs by mapping table columns by position

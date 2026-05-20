@@ -3,8 +3,11 @@
   "name": "winget",
   "title": "WinGet",
   "description": "Search, install, and upgrade Windows packages via winget",
-  "icon": "icon.png",
+  "icon": "winget-main.png",
   "author": "eray_ercan",
+  "contributors": [
+    "Netizen"
+  ],
   "platforms": [
     "Windows"
   ],
@@ -27,21 +30,24 @@
       "title": "Search Packages",
       "subtitle": "WinGet",
       "description": "Search for packages in the winget repository and install them",
-      "mode": "view"
+      "mode": "view",
+      "icon": "winget-search.png"
     },
     {
       "name": "installed",
       "title": "Installed Packages",
       "subtitle": "WinGet",
       "description": "List all installed packages with upgrade and uninstall actions",
-      "mode": "view"
+      "mode": "view",
+      "icon": "winget-installed.png"
     },
     {
       "name": "upgrade",
       "title": "Upgrade Packages",
       "subtitle": "WinGet",
       "description": "View and upgrade outdated packages",
-      "mode": "view"
+      "mode": "view",
+      "icon": "winget-upgrade.png"
     }
   ],
   "preferences": [
