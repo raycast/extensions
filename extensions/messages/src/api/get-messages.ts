@@ -17,12 +17,12 @@ export async function getMessages(searchText?: string, chatIdentifier?: string, 
     SELECT
       message.guid,
       strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-        message.date / 1000000000 + strftime("%s", "2001-01-01"),
-        "unixepoch"
+        message.date / 1000000000 + strftime('%s', '2001-01-01'),
+        'unixepoch'
       )) AS date,
       strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-        message.date_read / 1000000000 + strftime("%s", "2001-01-01"),
-        "unixepoch"
+        message.date_read / 1000000000 + strftime('%s', '2001-01-01'),
+        'unixepoch'
       )) AS date_read,
       message.is_from_me,
       message.is_audio_message,

@@ -72,8 +72,8 @@ export function useChats(searchText: string = "") {
       END as group_name,
         CASE WHEN chat.chat_identifier LIKE '%chat%' THEN 1 ELSE 0 END as is_group,
         strftime('%Y-%m-%dT%H:%M:%fZ', datetime(
-          MAX(message.date) / 1000000000 + strftime("%s", "2001-01-01"),
-          "unixepoch"
+          MAX(message.date) / 1000000000 + strftime('%s', '2001-01-01'),
+          'unixepoch'
         )) AS last_message_date,
         CASE
           WHEN chat.chat_identifier LIKE '%chat%' THEN GROUP_CONCAT(DISTINCT handle.id)
