@@ -3,6 +3,14 @@ import { Instance } from "../types";
 import { OnTokenRefresh } from "./auth";
 import { serviceNowFetchRaw } from "./serviceNowFetch";
 
+export function backgroundScriptAuthErrorMessage(instance: Instance): string {
+  const base = "Could not authenticate against /sys.scripts.do, which requires admin access.";
+  if (instance.authMode === "oauth") {
+    return `${base} Verify your OAuth user has the admin role on this instance.`;
+  }
+  return `${base} If this instance uses SSO, basic auth can't establish a session — edit this profile and switch Authentication to OAuth. Otherwise verify your username, password, and admin role.`;
+}
+
 export class ServiceNowClient {
   private instance: Instance;
   private onRefresh?: OnTokenRefresh;

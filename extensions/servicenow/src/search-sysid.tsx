@@ -16,10 +16,11 @@ import {
 } from "@raycast/api";
 
 import Actions from "./components/Actions";
+import InstanceForm from "./components/InstanceForm";
 import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findSysID } from "./utils/snSnippets";
-import { ServiceNowClient } from "./utils/serviceNowClient";
+import { backgroundScriptAuthErrorMessage, ServiceNowClient } from "./utils/serviceNowClient";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { instanceLabel } from "./utils/instanceLabel";
 import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
@@ -40,7 +41,15 @@ function sourceSuffix(source: SysIdSource | null): string {
 
 export default function SearchSysId(props: LaunchProps) {
   const { sys_id: argSysId, instanceName } = props.arguments;
-  const { instances, selectedInstance, setSelectedInstance, isLoading: isLoadingInstances } = useInstances();
+  const {
+    instances,
+    selectedInstance,
+    setSelectedInstance,
+    editInstance,
+    deleteInstance,
+    mutate,
+    isLoading: isLoadingInstances,
+  } = useInstances();
   const argTrimmed = argSysId?.trim() || null;
   const argInitial = argTrimmed && SYS_ID_RE.test(argTrimmed) ? argTrimmed : null;
   const argInvalid = argTrimmed !== null && argInitial === null;
@@ -103,7 +112,7 @@ export default function SearchSysId(props: LaunchProps) {
       const authed = await client.init();
       if (cancelled) return;
       if (!authed) {
-        setErrorMessage("Authentication failed");
+        setErrorMessage(backgroundScriptAuthErrorMessage(selectedInstance));
         setIsLoading(false);
         return;
       }
@@ -245,6 +254,16 @@ export default function SearchSysId(props: LaunchProps) {
           actions={
             <ActionPanel>
               <Action title="Try Another Sys ID" icon={Icon.MagnifyingGlass} onAction={resetToForm} />
+              {selectedInstance && (
+                <Action.Push
+                  title="Edit Profile"
+                  icon={Icon.Pencil}
+                  target={
+                    <InstanceForm onSubmit={editInstance} onDelete={deleteInstance} instance={selectedInstance} />
+                  }
+                  onPop={mutate}
+                />
+              )}
             </ActionPanel>
           }
         />

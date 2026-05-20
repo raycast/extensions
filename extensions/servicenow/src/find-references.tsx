@@ -16,11 +16,12 @@ import {
 } from "@raycast/api";
 
 import Actions from "./components/Actions";
+import InstanceForm from "./components/InstanceForm";
 import TableRecords from "./components/TableRecords";
 import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findReferences } from "./utils/snSnippets";
-import { ServiceNowClient } from "./utils/serviceNowClient";
+import { backgroundScriptAuthErrorMessage, ServiceNowClient } from "./utils/serviceNowClient";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { getURL } from "./utils/browserScripts";
 import { getInstanceBaseUrl, isServiceNowUrl } from "./utils/instanceUrl";
@@ -62,7 +63,15 @@ function decodeHtmlEntities(str: string): string {
 
 export default function FindReferences(props: LaunchProps) {
   const { table: argTable, sysId: argSysId, instanceName } = props.arguments;
-  const { instances, selectedInstance, setSelectedInstance, isLoading: isLoadingInstances } = useInstances();
+  const {
+    instances,
+    selectedInstance,
+    setSelectedInstance,
+    editInstance,
+    deleteInstance,
+    mutate,
+    isLoading: isLoadingInstances,
+  } = useInstances();
   const hasAnyArg = !!(argTable || argSysId || instanceName);
   const argTableTrimmed = argTable?.trim() || null;
   const argSysIdTrimmed = argSysId?.trim() || null;
@@ -77,6 +86,7 @@ export default function FindReferences(props: LaunchProps) {
   const [references, setReferences] = useState<Reference[] | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorFetching, setErrorFetching] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const detectionStarted = useRef(false);
 
   useEffect(() => {
@@ -170,6 +180,7 @@ export default function FindReferences(props: LaunchProps) {
     let cancelled = false;
     setIsLoading(true);
     setErrorFetching(false);
+    setErrorMessage(null);
     setReferences(null);
 
     (async () => {
@@ -179,6 +190,7 @@ export default function FindReferences(props: LaunchProps) {
       const authed = await client.init();
       if (cancelled) return;
       if (!authed) {
+        setErrorMessage(backgroundScriptAuthErrorMessage(selectedInstance));
         setErrorFetching(true);
         setIsLoading(false);
         return;
@@ -319,7 +331,23 @@ export default function FindReferences(props: LaunchProps) {
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Could Not Fetch References"
-          description="Check that you are an admin on this instance and that the table name is correct."
+          description={
+            errorMessage ?? "Check that you are an admin on this instance and that the table name is correct."
+          }
+          actions={
+            errorMessage && selectedInstance ? (
+              <ActionPanel>
+                <Action.Push
+                  title="Edit Profile"
+                  icon={Icon.Pencil}
+                  target={
+                    <InstanceForm onSubmit={editInstance} onDelete={deleteInstance} instance={selectedInstance} />
+                  }
+                  onPop={mutate}
+                />
+              </ActionPanel>
+            ) : undefined
+          }
         />
       ) : references && references.length === 0 ? (
         <List.EmptyView
