@@ -187,6 +187,11 @@ describe("Testing verification link extraction", () => {
     // This link has no keywords, so it should not be detected as verification/sign-in
     expect(result).toBeNull();
   });
+
+  test("Ignores verification anchors with unsupported href values", () => {
+    expect(extractVerificationLink(`<a href="/verify?token=abc123">Verify your email</a>`)).toBeNull();
+    expect(extractVerificationLink(`<a href="mailto:support@example.com">Verify your email</a>`)).toBeNull();
+  });
 });
 
 describe("Testing binary data extraction from iMessage", () => {

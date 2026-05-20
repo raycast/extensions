@@ -1,5 +1,9 @@
 # Messages 2FA Changelog
 
+## [Fix invalid verification links] - {PR_MERGE_DATE}
+
+- Ignore unsupported verification link URLs before rendering them in the list.
+
 ## [Update] - 2025-12-17
 
 - Add support for extracting text from binary data in iMessage messages
