@@ -1,0 +1,60 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "kofa",
+  "title": "Kofa",
+  "description": "Quickly capture tasks into Kofa, the minimalist todo and day planner.",
+  "icon": "icon.png",
+  "author": "petar_yovkov",
+  "license": "MIT",
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "add-task",
+      "title": "Add Task",
+      "description": "Add a task to Kofa",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiToken",
+      "title": "Personal Access Token",
+      "description": "Create one in the Kofa app: Settings → Personal access tokens. Format: kofa_pat_…",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "Override for local development. Leave default for production.",
+      "type": "textfield",
+      "required": false,
+      "default": "https://api.kofa.dev"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.18.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.0",
+    "@types/react": "^19.0.10",
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.3",
+    "react": "^19.0.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
