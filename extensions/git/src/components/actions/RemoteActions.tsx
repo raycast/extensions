@@ -12,12 +12,14 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { RemotesHosts } from "../../hooks/useGitRemotes";
-import { RemoteHostIcon } from "../icons/RemoteHostIcons";
+import { RemoteHostIcon, RemoteHostProviderIcon } from "../icons/RemoteHostIcons";
 import { NavigationContext, RepositoryContext } from "../../open-repository";
-import { Commit, Remote } from "../../types";
+import { Commit, Remote, RemoteProvider } from "../../types";
 import { useState } from "react";
 import { basename } from "path";
 import { validateGitUrl } from "../../utils/url-utils";
+import { usePromise } from "@raycast/utils";
+import { remoteHostParser } from "../../utils/remote-host-parser";
 
 /**
  * Global fetch action that can be reused across different views.
@@ -149,14 +151,46 @@ export function RemoteEditorForm(context: RemoteEditorFormProps) {
   const [name, setName] = useState(context.initialRemote?.name ?? context.defaultRemoteName ?? "");
   const [fetchUrl, setFetchUrl] = useState(context.initialRemote?.fetchUrl ?? context.defaultFetchUrl ?? "");
   const [pushUrl, setPushUrl] = useState(context.initialRemote?.pushUrl ?? context.defaultPushUrl ?? "");
+  const [manualProvider, setManualProvider] = useState<RemoteProvider | undefined>(context.initialRemote?.provider);
 
-  const handleSubmit = async (_values: { name: string; fetchUrl: string; pushUrl: string }) => {
+  const { data: needsManualProvider } = usePromise(
+    async (url: string) => {
+      if (context.initialRemote?.provider === undefined) {
+        return true;
+      }
+
+      if (!validateGitUrl(url)) {
+        return false;
+      }
+
+      const parsed = remoteHostParser(url);
+      return parsed.provider === undefined;
+    },
+    [fetchUrl.trim()],
+  );
+
+  const handleSubmit = async (values: {
+    name: string;
+    fetchUrl: string;
+    pushUrl: string;
+    hostProvider: RemoteProvider | undefined;
+  }) => {
     try {
       if (context.initialRemote) {
-        await context.gitManager.updateRemote(context.initialRemote.name, fetchUrl.trim(), pushUrl.trim(), name.trim());
+        await context.gitManager.updateRemote(
+          context.initialRemote.name,
+          values.fetchUrl.trim(),
+          values.pushUrl.trim(),
+          values.name.trim(),
+        );
       } else {
-        await context.gitManager.addRemote(name.trim(), fetchUrl.trim(), pushUrl.trim());
+        await context.gitManager.addRemote(values.name.trim(), values.fetchUrl.trim(), values.pushUrl.trim());
       }
+
+      if (values.hostProvider !== undefined) {
+        context.remotes.addProviderOverride(values.hostProvider, values.fetchUrl.trim());
+      }
+
       await context.remotes.revalidate();
       pop();
     } catch {
@@ -199,6 +233,29 @@ export function RemoteEditorForm(context: RemoteEditorFormProps) {
         info={"Optional"}
         onChange={setPushUrl}
       />
+
+      {needsManualProvider && (
+        <>
+          <Form.Separator />
+          <Form.Dropdown
+            id="hostProvider"
+            title="Host Provider"
+            info="The fetch URL does not match any known host provider; pick the provider manually to provide respective provider integrations."
+            value={manualProvider ?? ""}
+            onChange={(value) => setManualProvider(value ? (value as RemoteProvider) : undefined)}
+          >
+            <Form.Dropdown.Item value="" title="Select provider…" />
+            {Object.values(RemoteProvider).map((provider) => (
+              <Form.Dropdown.Item
+                key={provider}
+                value={provider}
+                title={provider}
+                icon={RemoteHostProviderIcon(provider)}
+              />
+            ))}
+          </Form.Dropdown>
+        </>
+      )}
     </Form>
   );
 }
