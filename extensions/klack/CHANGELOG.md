@@ -1,6 +1,6 @@
 # Klack Changelog
 
-## [Stats and Standalone Support] - {PR_MERGE_DATE}
+## [Stats and Standalone Support] - 2026-05-20
 
 - Added Klack Stats view with live updates, Markdown export, and tracking-since timestamp
 - Added Set Volume command with a 0–100 scrubber and custom input
