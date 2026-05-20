@@ -1,5 +1,5 @@
 # Fillerama Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-05-20
 
 Initial release — port of alfred-fillerama
