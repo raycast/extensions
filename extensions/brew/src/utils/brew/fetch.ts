@@ -499,7 +499,8 @@ async function ensureChunkedCache<T>(
         } catch (restoreErr) {
           brewLogger.warn("Chunked cache rebuild failed and stale cache could not be restored", {
             type: remote.chunkedConfig.type,
-            error: restoreErr instanceof Error ? restoreErr.message : String(restoreErr),
+            buildError: err instanceof Error ? err.message : String(err),
+            restoreError: restoreErr instanceof Error ? restoreErr.message : String(restoreErr),
           });
           throw restoreErr;
         }
