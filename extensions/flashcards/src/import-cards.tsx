@@ -4,19 +4,16 @@ import {
   Action,
   showToast,
   Toast,
-  getPreferenceValues,
   Icon,
   popToRoot,
 } from "@raycast/api";
 import { useState } from "react";
-import { Flashcard, Preferences } from "./types";
+import { Flashcard } from "./types";
 import { parseMultipleCards } from "./utils/parser";
 import { saveCard } from "./utils/storage";
-import { t } from "./utils/i18n";
 import { readFileSync } from "fs";
 
 export default function ImportCards() {
-  const { language } = getPreferenceValues<Preferences>();
   const [mode, setMode] = useState<string>("paste");
 
   async function handleSubmit(values: {
@@ -34,8 +31,8 @@ export default function ImportCards() {
       if (!path) {
         await showToast({
           style: Toast.Style.Failure,
-          title: t(language, "import.error"),
-          message: t(language, "import.empty"),
+          title: "Import Failed",
+          message: "No valid flashcards found to import.",
         });
         return;
       }
@@ -44,7 +41,7 @@ export default function ImportCards() {
       } catch (e) {
         await showToast({
           style: Toast.Style.Failure,
-          title: t(language, "import.error"),
+          title: "Import Failed",
           message: String(e),
         });
         return;
@@ -54,8 +51,8 @@ export default function ImportCards() {
     if (!input) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t(language, "import.error"),
-        message: t(language, "import.empty"),
+        title: "Import Failed",
+        message: "No valid flashcards found to import.",
       });
       return;
     }
@@ -66,8 +63,8 @@ export default function ImportCards() {
       if (parsed.length === 0) {
         await showToast({
           style: Toast.Style.Failure,
-          title: t(language, "import.error"),
-          message: t(language, "import.empty"),
+          title: "Import Failed",
+          message: "No valid flashcards found to import.",
         });
         return;
       }
@@ -90,15 +87,18 @@ export default function ImportCards() {
 
       await showToast({
         style: Toast.Style.Success,
-        title: t(language, "import.success"),
-        message: t(language, "import.count").replace("{n}", String(savedCount)),
+        title: "Import Successful",
+        message:
+          savedCount === 1
+            ? "1 flashcard imported successfully."
+            : `${savedCount} flashcards imported successfully.`,
       });
 
       await popToRoot();
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t(language, "import.error"),
+        title: "Import Failed",
         message: String(e),
       });
     }
@@ -109,7 +109,7 @@ export default function ImportCards() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t(language, "import.btn")}
+            title="Import Flashcards"
             icon={Icon.Download}
             onSubmit={handleSubmit}
           />
@@ -119,18 +119,18 @@ export default function ImportCards() {
       {/* Import-Modus Auswahl */}
       <Form.Dropdown
         id="mode"
-        title={t(language, "import.mode")}
+        title="Import Source"
         value={mode}
         onChange={setMode}
       >
         <Form.Dropdown.Item
           value="paste"
-          title={t(language, "import.mode.paste")}
+          title="Paste Markdown"
           icon={Icon.TextCursor}
         />
         <Form.Dropdown.Item
           value="file"
-          title={t(language, "import.mode.file")}
+          title="Select Markdown File"
           icon={Icon.Document}
         />
       </Form.Dropdown>
@@ -140,14 +140,14 @@ export default function ImportCards() {
       {mode === "paste" ? (
         <Form.TextArea
           id="markdown"
-          title={t(language, "import.paste.title")}
-          placeholder={t(language, "import.paste.placeholder")}
-          info={t(language, "import.paste.info")}
+          title="Markdown Text"
+          placeholder="Paste your flashcard markdown here..."
+          info="Paste the raw markdown content here. You can separate multiple cards with a line containing '---'."
         />
       ) : (
         <Form.FilePicker
           id="filePath"
-          title={t(language, "import.file.title")}
+          title="Markdown File"
           allowMultipleSelection={false}
           canChooseDirectories={false}
           canChooseFiles={true}
@@ -158,23 +158,23 @@ export default function ImportCards() {
 
       {/* Format-Referenz */}
       <Form.Description
-        title={t(language, "syntax.ref")}
+        title="Multiple Flashcards Syntax"
         text={[
-          `── ${t(language, "standard")} ──`,
-          `${t(language, "syntax.standard.example.title")}`,
+          "── Standard ──",
+          "What is the powerhouse of the cell?",
           "==",
-          `${t(language, "syntax.standard.example.back")}`,
+          "Mitochondria",
           "#biology #school",
           "---",
           "",
-          `── ${t(language, "mc")} ──`,
-          `${t(language, "syntax.mc.example.title")}`,
+          "── Multiple Choice ──",
+          "In which year was the Treaty of Rome signed?",
           "==<",
           "1: 1945",
           "2: 1957",
           "3: 1993",
           "--",
-          `${t(language, "syntax.mc.5").split(":")[0]}: 2`,
+          "correct: 2",
           "#history #politics",
         ].join("\n")}
       />

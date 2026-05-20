@@ -4,7 +4,6 @@ import {
   Action,
   Icon,
   Color,
-  getPreferenceValues,
   showToast,
   Toast,
   Alert,
@@ -12,14 +11,13 @@ import {
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
-import { Flashcard, Preferences } from "./types";
+import { Flashcard } from "./types";
 import { getAllCards, deleteCard, deleteAllCards } from "./utils/storage";
 import EditTags from "./edit-tags";
-import { t } from "./utils/i18n";
 
-function cardDetailMarkdown(card: Flashcard, language: string): string {
+function cardDetailMarkdown(card: Flashcard): string {
   if (card.type === "standard") {
-    return `## ${t(language, "answer")}\n\n${card.back || "—"}`;
+    return `## Answer\n\n${card.back || "—"}`;
   }
 
   const optionLines = (card.options ?? [])
@@ -29,32 +27,31 @@ function cardDetailMarkdown(card: Flashcard, language: string): string {
     })
     .join("\n\n");
 
-  return `## ${t(language, "options")}\n\n${optionLines}`;
+  return `## Options\n\n${optionLines}`;
 }
 
-function progressAccessory(card: Flashcard, language: string) {
+function progressAccessory(card: Flashcard) {
   if (card.progress === "correct") {
     return {
       tag: { value: "✓", color: Color.Green },
-      tooltip: t(language, "answered.correct"),
+      tooltip: "Answered Correctly",
     };
   }
   if (card.progress === "wrong") {
     return {
       tag: { value: "✗", color: Color.Red },
-      tooltip: t(language, "answered.wrong"),
+      tooltip: "Answered Wrongly",
     };
   }
   return {
     tag: { value: "·", color: Color.SecondaryText },
-    tooltip: t(language, "not.quizzed"),
+    tooltip: "Not quizzed yet",
   };
 }
 
 export default function ListCards() {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { language } = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
 
   const loadCards = useCallback(async () => {
@@ -69,10 +66,10 @@ export default function ListCards() {
 
   async function handleDelete(card: Flashcard) {
     const confirmed = await confirmAlert({
-      title: t(language, "delete.title"),
+      title: "Delete Flashcard",
       message: `"${card.front}"`,
       primaryAction: {
-        title: t(language, "delete.btn"),
+        title: "Delete",
         style: Alert.ActionStyle.Destructive,
       },
     });
@@ -80,7 +77,7 @@ export default function ListCards() {
       await deleteCard(card.id);
       await showToast({
         style: Toast.Style.Success,
-        title: t(language, "deleted"),
+        title: "Flashcard deleted",
       });
       loadCards();
     }
@@ -88,10 +85,11 @@ export default function ListCards() {
 
   async function handleDeleteAll() {
     const confirmed = await confirmAlert({
-      title: t(language, "delete.all.title"),
-      message: t(language, "delete.all.msg"),
+      title: "Delete All Flashcards",
+      message:
+        "Are you sure you want to delete all flashcards? This action cannot be undone.",
       primaryAction: {
-        title: t(language, "delete.all.btn"),
+        title: "Delete All",
         style: Alert.ActionStyle.Destructive,
       },
     });
@@ -99,7 +97,7 @@ export default function ListCards() {
       await deleteAllCards();
       await showToast({
         style: Toast.Style.Success,
-        title: t(language, "all.deleted"),
+        title: "All flashcards deleted",
       });
       loadCards();
     }
@@ -112,13 +110,13 @@ export default function ListCards() {
     <List
       isLoading={isLoading}
       isShowingDetail
-      searchBarPlaceholder={t(language, "search.cards")}
+      searchBarPlaceholder="Search flashcards..."
     >
       {cards.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Book}
-          title={t(language, "no.cards")}
-          description={t(language, "no.cards.desc")}
+          title="No Flashcards"
+          description="Create your first flashcard to get started!"
         />
       ) : (
         cards.map((card) => (
@@ -127,7 +125,7 @@ export default function ListCards() {
             icon={typeIcon(card)}
             title={card.front}
             accessories={[
-              progressAccessory(card, language),
+              progressAccessory(card),
               ...(card.tags.length > 0 ? [{ tag: `#${card.tags[0]}` }] : []),
               ...(card.tags.length > 1
                 ? [{ text: `+${card.tags.length - 1}` }]
@@ -135,25 +133,25 @@ export default function ListCards() {
             ]}
             detail={
               <List.Item.Detail
-                markdown={cardDetailMarkdown(card, language)}
+                markdown={cardDetailMarkdown(card)}
                 metadata={
                   <List.Item.Detail.Metadata>
                     <List.Item.Detail.Metadata.Label
-                      title={t(language, "type")}
+                      title="Type"
                       text={
                         card.type === "standard"
-                          ? t(language, "standard")
-                          : t(language, "mc")
+                          ? "Standard"
+                          : "Multiple Choice"
                       }
                     />
                     <List.Item.Detail.Metadata.Label
-                      title={t(language, "status")}
+                      title="Status"
                       text={
                         card.progress === "correct"
-                          ? t(language, "status.correct")
+                          ? "Correct"
                           : card.progress === "wrong"
-                            ? t(language, "status.wrong")
-                            : t(language, "status.new")
+                            ? "Wrong"
+                            : "New"
                       }
                     />
                     {card.tags.length > 0 && (
@@ -168,12 +166,8 @@ export default function ListCards() {
                     )}
                     <List.Item.Detail.Metadata.Separator />
                     <List.Item.Detail.Metadata.Label
-                      title={t(language, "created")}
-                      text={new Date(card.createdAt).toLocaleDateString(
-                        language === "en"
-                          ? "en-US"
-                          : language + "-" + language.toUpperCase(),
-                      )}
+                      title="Created"
+                      text={new Date(card.createdAt).toLocaleDateString()}
                     />
                   </List.Item.Detail.Metadata>
                 }
@@ -183,7 +177,7 @@ export default function ListCards() {
               <ActionPanel>
                 {/* Tags bearbeiten – öffnet dediziertes Formular */}
                 <Action
-                  title={t(language, "edit.tags")}
+                  title="Edit Tags"
                   icon={Icon.Tag}
                   shortcut={{ modifiers: ["cmd"], key: "t" }}
                   onAction={() =>
@@ -191,21 +185,21 @@ export default function ListCards() {
                   }
                 />
                 <Action
-                  title={t(language, "delete.btn")}
+                  title="Delete"
                   icon={Icon.Trash}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl"], key: "x" }}
                   onAction={() => handleDelete(card)}
                 />
                 <Action
-                  title={t(language, "delete.all.btn")}
+                  title="Delete All"
                   icon={Icon.XMarkCircle}
                   style={Action.Style.Destructive}
                   shortcut={{ modifiers: ["ctrl", "shift"], key: "x" }}
                   onAction={handleDeleteAll}
                 />
                 <Action
-                  title={t(language, "refresh")}
+                  title="Refresh List"
                   icon={Icon.RotateClockwise}
                   shortcut={{ modifiers: ["cmd"], key: "r" }}
                   onAction={loadCards}

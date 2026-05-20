@@ -2,17 +2,15 @@ import {
   Detail,
   ActionPanel,
   Action,
-  getPreferenceValues,
   showToast,
   Toast,
   Icon,
   Clipboard,
 } from "@raycast/api";
 import { useEffect, useState } from "react";
-import { Flashcard, Preferences } from "./types";
+import { Flashcard } from "./types";
 import { getAllCards } from "./utils/storage";
 import { cardsToMarkdown } from "./utils/serializer";
-import { t } from "./utils/i18n";
 import { writeFileSync } from "fs";
 import { join } from "path";
 import { homedir } from "os";
@@ -20,7 +18,6 @@ import { homedir } from "os";
 export default function ExportCards() {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { language } = getPreferenceValues<Preferences>();
 
   useEffect(() => {
     (async () => {
@@ -30,13 +27,13 @@ export default function ExportCards() {
   }, []);
 
   // Markdown-Export generieren
-  const markdown = cards.length > 0 ? cardsToMarkdown(cards, language) : "";
+  const markdown = cards.length > 0 ? cardsToMarkdown(cards) : "";
 
   // Vorschau-Text für die Detail-Ansicht
   const previewMarkdown =
     cards.length > 0
-      ? `## ${t(language, "export.title")}\n\n**${t(language, "export.count").replace("{n}", String(cards.length))}**\n\n---\n\n\`\`\`markdown\n${markdown}\n\`\`\``
-      : `## ${t(language, "export.title")}\n\n${t(language, "export.empty")}`;
+      ? `## Export Flashcards\n\n**${cards.length === 1 ? "1 flashcard ready for export:" : `${cards.length} flashcards ready for export:`}**\n\n---\n\n\`\`\`markdown\n${markdown}\n\`\`\``
+      : `## Export Flashcards\n\nYou don't have any flashcards to export yet. Go create some first!`;
 
   // Export-Dateiname mit Datum
   const dateStr = new Date().toISOString().slice(0, 10);
@@ -46,8 +43,8 @@ export default function ExportCards() {
     await Clipboard.copy(markdown);
     await showToast({
       style: Toast.Style.Success,
-      title: t(language, "export.success"),
-      message: t(language, "export.copied"),
+      title: "Export Successful",
+      message: "Markdown copied to clipboard",
     });
   }
 
@@ -60,8 +57,8 @@ export default function ExportCards() {
       writeFileSync(filePath, markdown, "utf-8");
       await showToast({
         style: Toast.Style.Success,
-        title: t(language, "export.success"),
-        message: `${t(language, "export.saved")}: ~/Downloads/${fileName}`,
+        title: "Export Successful",
+        message: `Saved to: ~/Downloads/${fileName}`,
       });
     } catch (e) {
       // Fallback: Desktop
@@ -72,13 +69,13 @@ export default function ExportCards() {
         writeFileSync(filePath, markdown, "utf-8");
         await showToast({
           style: Toast.Style.Success,
-          title: t(language, "export.success"),
-          message: `${t(language, "export.saved")}: ~/Desktop/${fileName}`,
+          title: "Export Successful",
+          message: `Saved to: ~/Desktop/${fileName}`,
         });
       } catch (err) {
         await showToast({
           style: Toast.Style.Failure,
-          title: t(language, "import.error"),
+          title: "Export failed",
           message: String(err),
         });
       }
@@ -93,12 +90,12 @@ export default function ExportCards() {
         cards.length > 0 ? (
           <ActionPanel>
             <Action
-              title={t(language, "export.clipboard")}
+              title="Copy to Clipboard"
               icon={Icon.Clipboard}
               onAction={handleCopyToClipboard}
             />
             <Action
-              title={t(language, "export.file")}
+              title="Save to Downloads Folder"
               icon={Icon.Download}
               shortcut={{ modifiers: ["cmd"], key: "s" }}
               onAction={handleSaveFile}

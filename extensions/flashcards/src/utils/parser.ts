@@ -1,8 +1,7 @@
-import { getPreferenceValues } from "@raycast/api";
-import { CardType, Flashcard, Option, Preferences } from "../types";
+import { CardType, Flashcard, Option } from "../types";
 
 /**
- * Parst die Markdown-Eingabe in eine Flashcard.
+ * Parst die Markdown-Eingabe in eine Karteikarte.
  *
  * Standard-Karte:
  *   Frage
@@ -17,7 +16,7 @@ import { CardType, Flashcard, Option, Preferences } from "../types";
  *   2: Option B
  *   3: Option C
  *   --
- *   richtig: 2   (DE) / true: 2  (EN)
+ *   correct: 2
  *   #tag1 #tag2
  *
  * Leerzeilen zwischen den Abschnitten sind optional.
@@ -26,21 +25,6 @@ import { CardType, Flashcard, Option, Preferences } from "../types";
 export function parseMarkdown(
   input: string,
 ): Omit<Flashcard, "id" | "progress" | "createdAt"> {
-  const { language } = getPreferenceValues<Preferences>();
-  const keywords: Record<string, string> = {
-    de: "richtig",
-    en: "true",
-    es: "correcto",
-    zh: "正确",
-    hi: "सही",
-    ru: "правильно",
-    ar: "صحيح",
-    pt: "correto",
-    it: "corretto",
-    tr: "doğru",
-  };
-  const correctKeyword = keywords[language] || "true";
-
   const lines = input.trim().split("\n");
 
   // Tags aus der letzten Zeile extrahieren (wenn die Zeile nur aus #tags besteht)
@@ -60,7 +44,7 @@ export function parseMarkdown(
 
   // Typ erkennen anhand des Trennzeichens
   if (/\n[\t ]*==</.test(content)) {
-    return parseMC(content, tags, correctKeyword);
+    return parseMC(content, tags);
   } else {
     return parseStandard(content, tags);
   }
@@ -86,7 +70,6 @@ function parseStandard(
 function parseMC(
   content: string,
   tags: string[],
-  correctKeyword: string,
 ): Omit<Flashcard, "id" | "progress" | "createdAt"> {
   // Teilen an ==< – mit oder ohne Leerzeilen darum
   const [frontPart, rest] = content.split(/\n[\t ]*==<[\t ]*\n/);
@@ -107,12 +90,14 @@ function parseMC(
       return acc;
     }, []);
 
-  // Richtige Antwort parsen: "richtig: 2" oder "true: 2"
+  // Richtige Antwort parsen: Unterstützt sprachenunabhängig verschiedene Schlüsselwörter für Abwärtskompatibilität
   const correctMatch = (correctPart ?? "")
     .trim()
-    .match(new RegExp(`^${correctKeyword}:\\s*(\\d+)`, "im"));
+    .match(
+      /^(correct|true|richtig|correcto|正确|सही|правильно|صحيح|correto|doğru):\s*(\d+)/im,
+    );
   const correctOption = correctMatch
-    ? parseInt(correctMatch[1], 10)
+    ? parseInt(correctMatch[2], 10)
     : undefined;
 
   return {

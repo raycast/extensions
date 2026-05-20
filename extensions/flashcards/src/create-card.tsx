@@ -4,26 +4,22 @@ import {
   Action,
   showToast,
   Toast,
-  getPreferenceValues,
   Icon,
   popToRoot,
 } from "@raycast/api";
 import { parseMarkdown } from "./utils/parser";
 import { saveCard } from "./utils/storage";
-import { Flashcard, Preferences } from "./types";
-import { t } from "./utils/i18n";
+import { Flashcard } from "./types";
 
 export default function CreateCard() {
-  const { language } = getPreferenceValues<Preferences>();
-
   async function handleSubmit(values: { markdown: string }) {
     const input = values.markdown?.trim();
 
     if (!input) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t(language, "input.missing.title"),
-        message: t(language, "input.missing.msg"),
+        title: "Markdown input is empty",
+        message: "Please provide some markdown content to create a flashcard.",
       });
       return;
     }
@@ -34,8 +30,9 @@ export default function CreateCard() {
       if (!parsed.front) {
         await showToast({
           style: Toast.Style.Failure,
-          title: t(language, "front.missing.title"),
-          message: t(language, "front.missing.msg"),
+          title: "Front side is empty",
+          message:
+            "The card front cannot be determined. Make sure to separate front and back or options with == or ==<.",
         });
         return;
       }
@@ -50,7 +47,7 @@ export default function CreateCard() {
       await saveCard(card);
       await showToast({
         style: Toast.Style.Success,
-        title: t(language, "save.success"),
+        title: "Flashcard saved successfully",
         message: `"${card.front}"`,
       });
       // Formular schließen und zurück zur Hauptansicht
@@ -58,7 +55,7 @@ export default function CreateCard() {
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t(language, "parse.error"),
+        title: "Failed to parse markdown",
         message: String(e),
       });
     }
@@ -69,7 +66,7 @@ export default function CreateCard() {
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t(language, "save.btn")}
+            title="Create Flashcard"
             icon={Icon.CheckCircle}
             onSubmit={handleSubmit}
           />
@@ -78,29 +75,29 @@ export default function CreateCard() {
     >
       <Form.TextArea
         id="markdown"
-        title={t(language, "card.title")}
-        placeholder={t(language, "card.placeholder")}
-        info={t(language, "card.info")}
+        title="Markdown Content"
+        placeholder="Write your flashcard here using the Markdown syntax below..."
+        info="Use markdown format to write standard or multiple-choice flashcards."
       />
       <Form.Separator />
 
       {/* ── Standard-Karte: Schritte ── */}
       <Form.Description
-        title={t(language, "syntax.ref")}
+        title="Standard Flashcard Syntax"
         text={[
-          t(language, "syntax.standard.title"),
-          t(language, "syntax.standard.1"),
-          t(language, "syntax.standard.2"),
-          t(language, "syntax.standard.3"),
-          t(language, "syntax.standard.4"),
+          "Standard Flashcard Syntax:",
+          "1. Write the question (front side) on the first line.",
+          "2. Add exactly '==' on a new line.",
+          "3. Write the answer (back side) below it.",
+          "4. Optionally, add tags at the very bottom (e.g., #biology #study).",
         ].join("\n")}
       />
       <Form.Description
-        title={t(language, "example")}
+        title="Example"
         text={[
-          t(language, "syntax.standard.example.title"),
+          "What is the powerhouse of the cell?",
           "==",
-          t(language, "syntax.standard.example.back"),
+          "Mitochondria",
           "#biology #school",
         ].join("\n")}
       />
@@ -111,25 +108,25 @@ export default function CreateCard() {
       <Form.Description
         title=""
         text={[
-          t(language, "syntax.mc.title"),
-          t(language, "syntax.mc.1"),
-          t(language, "syntax.mc.2"),
-          t(language, "syntax.mc.3"),
-          t(language, "syntax.mc.4"),
-          t(language, "syntax.mc.5"),
-          t(language, "syntax.mc.6"),
+          "Multiple Choice Syntax:",
+          "1. Write the question on the first line.",
+          "2. Add exactly '==<' on a new line.",
+          "3. List the options prefixed by numbers (e.g., '1: Option A').",
+          "4. Add exactly '--' on a new line.",
+          "5. Specify the correct answer (e.g., 'correct: 2').",
+          "6. Optionally, add tags at the very bottom (e.g., #history).",
         ].join("\n")}
       />
       <Form.Description
-        title={t(language, "example")}
+        title="Example"
         text={[
-          t(language, "syntax.mc.example.title"),
+          "In which year was the Treaty of Rome signed?",
           "==<",
           "1: 1945",
           "2: 1957",
           "3: 1993",
           "--",
-          `${t(language, "syntax.mc.5").split(":")[0]}: 2`,
+          "correct: 2",
           "#history #politics",
         ].join("\n")}
       />
@@ -138,8 +135,8 @@ export default function CreateCard() {
 
       {/* ── Tag-Kategorien ── */}
       <Form.Description
-        title={t(language, "tag.categories")}
-        text={t(language, "syntax.tags.info")}
+        title="Tags & Categories"
+        text="To assign tags to a card, write them space-separated at the very bottom of the card starting with a hash symbol (e.g. #tag1 #tag2). Standardize on lowercase alphanumeric characters."
       />
     </Form>
   );

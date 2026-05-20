@@ -9,7 +9,7 @@
     "macOS",
     "Windows"
   ],
-  "categories": ["Productivity", "Other"],
+  "categories": ["Productivity"],
   "license": "MIT",
   "commands": [
     {
@@ -55,28 +55,7 @@
       "mode": "view"
     }
   ],
-  "preferences": [
-    {
-      "name": "language",
-      "title": "Language",
-      "description": "Language of the extension (affects syntax for correct/true)",
-      "type": "dropdown",
-      "required": false,
-      "default": "de",
-      "data": [
-        { "title": "Deutsch", "value": "de" },
-        { "title": "English", "value": "en" },
-        { "title": "Español", "value": "es" },
-        { "title": "中文 (简体)", "value": "zh" },
-        { "title": "हिन्दी", "value": "hi" },
-        { "title": "Русский", "value": "ru" },
-        { "title": "العربية", "value": "ar" },
-        { "title": "Português", "value": "pt" },
-        { "title": "Italiano", "value": "it" },
-        { "title": "Türkçe", "value": "tr" }
-      ]
-    }
-  ],
+  "preferences": [],
   "overrides": {
     "minimatch": "^9.0.7"
   },

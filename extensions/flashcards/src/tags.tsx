@@ -4,46 +4,38 @@ import {
   Action,
   Icon,
   Color,
-  getPreferenceValues,
   useNavigation,
 } from "@raycast/api";
 import { useEffect, useState, useCallback } from "react";
-import { Flashcard, Preferences } from "./types";
+import { Flashcard } from "./types";
 import { getAllCards } from "./utils/storage";
-import { t } from "./utils/i18n";
 
 // ── Karten-Detail-Ansicht für einen Tag ──────────────────────────────────────
 
-function cardDetailMarkdown(card: Flashcard, language: string): string {
+// Erstellt die Detail-Markdown-Ansicht einer Karte
+function cardDetailMarkdown(card: Flashcard): string {
   if (card.type === "standard") {
-    return `## ${t(language, "answer")}\n\n${card.back || "—"}`;
+    return `## Answer\n\n${card.back || "—"}`;
   }
   const lines = (card.options ?? []).map((o) => {
     const correct = o.id === card.correctOption;
     return `${correct ? "✅" : "⬜"} **${o.id}.** ${o.text}`;
   });
-  return `## ${t(language, "options")}\n\n${lines.join("\n\n")}`;
+  return `## Options\n\n${lines.join("\n\n")}`;
 }
 
-function CardsForTag({
-  tag,
-  cards,
-  language,
-}: {
-  tag: string;
-  cards: Flashcard[];
-  language: string;
-}) {
+// Zeigt alle Karten für ein bestimmtes Tag an
+function CardsForTag({ tag, cards }: { tag: string; cards: Flashcard[] }) {
   const filtered = cards.filter((c) => c.tags.includes(tag));
 
   return (
     <List
       isShowingDetail
       navigationTitle={`#${tag}`}
-      searchBarPlaceholder={t(language, "search.cards")}
+      searchBarPlaceholder="Search cards..."
     >
       {filtered.length === 0 ? (
-        <List.EmptyView icon={Icon.Tag} title={t(language, "no.cards.tag")} />
+        <List.EmptyView icon={Icon.Tag} title="No cards found for this tag" />
       ) : (
         filtered.map((card) => (
           <List.Item
@@ -57,9 +49,7 @@ function CardsForTag({
                   ? { tag: { value: "✗", color: Color.Red } }
                   : { tag: { value: "·", color: Color.SecondaryText } },
             ]}
-            detail={
-              <List.Item.Detail markdown={cardDetailMarkdown(card, language)} />
-            }
+            detail={<List.Item.Detail markdown={cardDetailMarkdown(card)} />}
           />
         ))
       )}
@@ -69,10 +59,10 @@ function CardsForTag({
 
 // ── Haupt-Tag-Liste ───────────────────────────────────────────────────────────
 
+// Hauptkomponente zur Anzeige aller Tags
 export default function Tags() {
   const [cards, setCards] = useState<Flashcard[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const { language } = getPreferenceValues<Preferences>();
   const { push } = useNavigation();
 
   const loadCards = useCallback(async () => {
@@ -99,19 +89,16 @@ export default function Tags() {
   const untagged = cards.filter((c) => c.tags.length === 0);
 
   return (
-    <List
-      isLoading={isLoading}
-      searchBarPlaceholder={t(language, "search.tags")}
-    >
+    <List isLoading={isLoading} searchBarPlaceholder="Search tags...">
       {tags.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.Tag}
-          title={t(language, "no.tags.yet")}
-          description={t(language, "no.tags.desc")}
+          title="No tags created yet"
+          description="Create some flashcards with tags first."
         />
       ) : (
         <>
-          <List.Section title={t(language, "tags")}>
+          <List.Section title="Tags">
             {tags.map(([tag, count]) => (
               <List.Item
                 key={tag}
@@ -119,22 +106,16 @@ export default function Tags() {
                 title={`#${tag}`}
                 accessories={[
                   {
-                    text: `${count} ${t(language, "cards")}`,
+                    text: `${count} ${count === 1 ? "card" : "cards"}`,
                   },
                 ]}
                 actions={
                   <ActionPanel>
                     <Action
-                      title={t(language, "show.cards")}
+                      title="Show Cards"
                       icon={Icon.ArrowRight}
                       onAction={() =>
-                        push(
-                          <CardsForTag
-                            tag={tag}
-                            cards={cards}
-                            language={language}
-                          />,
-                        )
+                        push(<CardsForTag tag={tag} cards={cards} />)
                       }
                     />
                   </ActionPanel>
@@ -144,15 +125,15 @@ export default function Tags() {
           </List.Section>
 
           {untagged.length > 0 && (
-            <List.Section title={t(language, "untagged")}>
+            <List.Section title="Untagged">
               <List.Item
                 icon={Icon.QuestionMark}
-                title={t(language, "cards.untagged")}
+                title="Cards without tags"
                 accessories={[{ text: `${untagged.length}` }]}
                 actions={
                   <ActionPanel>
                     <Action
-                      title={t(language, "show")}
+                      title="Show"
                       icon={Icon.ArrowRight}
                       onAction={() =>
                         push(
@@ -163,7 +144,6 @@ export default function Tags() {
                                 ? { ...c, tags: ["__untagged__"] }
                                 : c,
                             )}
-                            language={language}
                           />,
                         )
                       }

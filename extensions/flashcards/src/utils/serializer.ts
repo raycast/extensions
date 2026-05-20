@@ -4,9 +4,9 @@ import { Flashcard } from "../types";
  * Konvertiert eine einzelne Karteikarte ins Markdown-Format.
  *
  * Standard:   Frage\n==\nAntwort\n#tags | -
- * MC:         Frage\n==<\n1: Opt\n…\n--\nrichtig: N\n#tags | -
+ * MC:         Frage\n==<\n1: Opt\n…\n--\ncorrect: N\n#tags | -
  */
-function cardToMarkdown(card: Flashcard, correctKeyword: string): string {
+function cardToMarkdown(card: Flashcard): string {
   const lines: string[] = [];
 
   // Frage / Vorderseite
@@ -24,9 +24,9 @@ function cardToMarkdown(card: Flashcard, correctKeyword: string): string {
     // Trenner zur korrekten Antwort
     lines.push("--");
 
-    // Korrekte Antwort
+    // Korrekte Antwort - standardmäßig immer englisch "correct" für robuste Round-Trips
     if (card.correctOption !== undefined) {
-      lines.push(`${correctKeyword}: ${card.correctOption}`);
+      lines.push(`correct: ${card.correctOption}`);
     }
   } else {
     // Standard-Trenner
@@ -50,21 +50,6 @@ function cardToMarkdown(card: Flashcard, correctKeyword: string): string {
  * Serialisiert ein Array von Karteikarten ins Markdown-Format.
  * Karten werden durch "---" getrennt.
  */
-export function cardsToMarkdown(cards: Flashcard[], language: string): string {
-  // Sprachabhängiges Keyword für "richtig"/"true" etc.
-  const keywords: Record<string, string> = {
-    de: "richtig",
-    en: "true",
-    es: "correcto",
-    zh: "正确",
-    hi: "सही",
-    ru: "правильно",
-    ar: "صحيح",
-    pt: "correto",
-    it: "corretto",
-    tr: "doğru",
-  };
-  const correctKeyword = keywords[language] || "true";
-
-  return cards.map((c) => cardToMarkdown(c, correctKeyword)).join("\n---\n");
+export function cardsToMarkdown(cards: Flashcard[]): string {
+  return cards.map((c) => cardToMarkdown(c)).join("\n---\n");
 }

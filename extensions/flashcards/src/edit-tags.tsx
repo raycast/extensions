@@ -4,14 +4,12 @@ import {
   Action,
   showToast,
   Toast,
-  getPreferenceValues,
   Icon,
   useNavigation,
 } from "@raycast/api";
 import { useState, useEffect } from "react";
-import { Flashcard, Preferences } from "./types";
+import { Flashcard } from "./types";
 import { saveCard, getAllTags } from "./utils/storage";
-import { t } from "./utils/i18n";
 
 interface Props {
   card: Flashcard;
@@ -20,7 +18,6 @@ interface Props {
 }
 
 export default function EditTags({ card, onSaved }: Props) {
-  const { language } = getPreferenceValues<Preferences>();
   const { pop } = useNavigation();
 
   // Tags mit # vorformatiert als Standardwert anzeigen
@@ -37,9 +34,8 @@ export default function EditTags({ card, onSaved }: Props) {
   // Hilfetext: bereits verwendete Tags anzeigen
   const suggestionsText =
     existingTags.length > 0
-      ? t(language, "already.used") +
-        existingTags.map((tg) => `#${tg}`).join("  ")
-      : t(language, "no.tags.created");
+      ? "Already used tags:\n" + existingTags.map((tg) => `#${tg}`).join("  ")
+      : "No tags created yet. Use `#tag1 #tag2` to get started.";
 
   async function handleSubmit(values: { tags: string }) {
     // Tags aus der Eingabe parsen – Leerzeichen- oder Komma-getrennt, mit oder ohne #
@@ -63,10 +59,10 @@ export default function EditTags({ card, onSaved }: Props) {
       await saveCard(updated);
       await showToast({
         style: Toast.Style.Success,
-        title: t(language, "tags.saved"),
+        title: "Tags saved!",
         message:
           parsed.length === 0
-            ? t(language, "all.tags.removed")
+            ? "All tags removed"
             : parsed.map((tg) => `#${tg}`).join(" "),
       });
       onSaved?.();
@@ -74,7 +70,7 @@ export default function EditTags({ card, onSaved }: Props) {
     } catch (e) {
       await showToast({
         style: Toast.Style.Failure,
-        title: t(language, "error.saving"),
+        title: "Failed to save tags",
         message: String(e),
       });
     }
@@ -82,16 +78,16 @@ export default function EditTags({ card, onSaved }: Props) {
 
   return (
     <Form
-      navigationTitle={t(language, "edit.tags") + ` – ${card.front}`}
+      navigationTitle={`Edit Tags – ${card.front}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm
-            title={t(language, "tags.saved").replace("!", "")}
+            title="Save Tags"
             icon={Icon.CheckCircle}
             onSubmit={handleSubmit}
           />
           <Action
-            title={t(language, "cancel")}
+            title="Cancel"
             icon={Icon.XMarkCircle}
             shortcut={{ modifiers: ["cmd"], key: "." }}
             onAction={pop}
@@ -100,31 +96,28 @@ export default function EditTags({ card, onSaved }: Props) {
       }
     >
       {/* Karten-Vorschau */}
-      <Form.Description title={t(language, "card.title")} text={card.front} />
+      <Form.Description title="Flashcard" text={card.front} />
       <Form.Separator />
 
       {/* Tag-Eingabe */}
       <Form.TextField
         id="tags"
-        title={t(language, "tags")}
+        title="Tags"
         placeholder="#vokabel #grammatik #unternehmen"
         value={tagInput}
         onChange={setTagInput}
-        info={t(language, "tags.input.info")}
+        info="Separate tags with spaces. Prepend a hash symbol (#) to format them nicely."
       />
 
       {/* Vorhandene Tags als Hilfe anzeigen */}
-      <Form.Description
-        title={t(language, "existing.tags")}
-        text={suggestionsText}
-      />
+      <Form.Description title="Existing Tags" text={suggestionsText} />
 
       <Form.Separator />
 
       {/* Hinweise zur Syntax */}
       <Form.Description
-        title={t(language, "tips")}
-        text={t(language, "tips.text")}
+        title="Tips"
+        text="Standardize on lowercase alphanumeric characters. Spaces and commas are used as separators. Already created tags can be clicked or typed to reuse."
       />
     </Form>
   );

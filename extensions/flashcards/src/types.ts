@@ -17,7 +17,3 @@ export interface Flashcard {
   progress: Progress;
   createdAt: number;
 }
-
-export interface Preferences {
-  language: "de" | "en" | "es" | "zh" | "hi" | "ru" | "ar" | "pt" | "it" | "tr";
-}
