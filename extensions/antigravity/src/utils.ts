@@ -1,4 +1,6 @@
 import { existsSync } from "fs";
+import { homedir } from "os";
+import path from "path";
 import { URL } from "url";
 import { isDeepStrictEqual } from "util";
 import {
@@ -12,6 +14,14 @@ import {
 } from "./types";
 import { open } from "@raycast/api";
 import * as fs from "fs";
+
+const ANTIGRAVITY_IDE_APP_NAME = "Antigravity IDE";
+const ANTIGRAVITY_APP_NAME = "Antigravity";
+const ANTIGRAVITY_IDE_APP_PATHS = [
+  "/Applications/Antigravity IDE.app",
+  path.join(homedir(), "Applications/Antigravity IDE.app"),
+];
+const ANTIGRAVITY_APP_PATHS = ["/Applications/Antigravity.app", path.join(homedir(), "Applications/Antigravity.app")];
 
 // Type Guards
 
@@ -148,6 +158,61 @@ export async function waitForFileExists(filename: string, timeoutMs = 2000) {
     }
   }
   return false;
+}
+
+export function getAntigravityApplicationName(): string {
+  if (
+    ANTIGRAVITY_IDE_APP_PATHS.some((appPath) => existsSync(appPath)) ||
+    existsSync(path.join(homedir(), "Library/Application Support/Antigravity IDE"))
+  ) {
+    return ANTIGRAVITY_IDE_APP_NAME;
+  }
+
+  return ANTIGRAVITY_APP_NAME;
+}
+
+export function getAntigravityProcessName(): string {
+  return getAntigravityApplicationName();
+}
+
+export async function openInAntigravity(target: string): Promise<void> {
+  await open(target, getAntigravityApplicationName());
+}
+
+export function getAntigravitySupportPath(): string {
+  const idePath = path.join(homedir(), "Library/Application Support/Antigravity IDE");
+  if (existsSync(idePath)) {
+    return idePath;
+  }
+
+  return path.join(homedir(), "Library/Application Support/Antigravity");
+}
+
+export function getAntigravityExtensionsPath(): string {
+  const idePath = path.join(homedir(), ".antigravity-ide/extensions");
+  if (existsSync(idePath)) {
+    return idePath;
+  }
+
+  return path.join(homedir(), ".antigravity/extensions");
+}
+
+export function getAntigravityCLIPath(): string {
+  for (const appPath of ANTIGRAVITY_IDE_APP_PATHS) {
+    const cliPath = path.join(appPath, "Contents/Resources/app/bin/antigravity");
+    if (existsSync(cliPath)) {
+      return cliPath;
+    }
+  }
+
+  for (const appPath of ANTIGRAVITY_APP_PATHS) {
+    const cliPath = path.join(appPath, "Contents/Resources/app/bin/antigravity");
+    if (existsSync(cliPath)) {
+      return cliPath;
+    }
+  }
+
+  return path.join(ANTIGRAVITY_APP_PATHS[0], "Contents/Resources/app/bin/antigravity");
 }
 
 export function raycastForAntigravityURI(uri: string) {

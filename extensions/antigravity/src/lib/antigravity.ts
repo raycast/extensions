@@ -1,6 +1,5 @@
-import { fileExists } from "../utils";
+import { fileExists, getAntigravityCLIPath, getAntigravityExtensionsPath } from "../utils";
 import * as afs from "fs/promises";
-import * as os from "os";
 import path from "path";
 import * as child_process from "child_process";
 
@@ -66,7 +65,7 @@ function getNLSVariable(text: string | undefined): string | undefined {
 }
 
 export function getAntigravityCLIFilename(): string {
-  return "/Applications/Antigravity.app/Contents/Resources/app/bin/antigravity";
+  return getAntigravityCLIPath();
 }
 
 export class AntigravityCLI {
@@ -128,7 +127,7 @@ async function getPackageJSONInfo(filename: string): Promise<PackageJSONInfo | u
 }
 
 export async function getLocalExtensions(): Promise<Extension[] | undefined> {
-  const extensionsRootFolder = path.join(os.homedir(), ".antigravity/extensions");
+  const extensionsRootFolder = getAntigravityExtensionsPath();
   const extensionsManifrestFilename = path.join(extensionsRootFolder, "extensions.json");
   if (await fileExists(extensionsManifrestFilename)) {
     const data = await afs.readFile(extensionsManifrestFilename, {
