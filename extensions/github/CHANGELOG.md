@@ -1,5 +1,9 @@
 # GitHub Changelog
 
+## [Fix opening GitHub URLs on Windows] - {PR_MERGE_DATE}
+
+- Updated the extension runtime dependencies so GitHub URLs open correctly in the default browser on Windows.
+
 ## [Fix repository search for many organizations] - 2026-05-18
 
 - Split My Repositories loading into smaller owner-specific searches to avoid GitHub 502 errors for users in many organizations.
