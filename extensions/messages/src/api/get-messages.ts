@@ -10,7 +10,10 @@ import { Message, SQLMessage } from "../hooks/useMessages";
 
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
 
-export async function getMessages(searchText?: string, chatIdentifier?: string): Promise<Message[]> {
+export async function getMessages(searchText?: string, chatIdentifier?: string, before?: string): Promise<Message[]> {
+  // Apple's timestamp epoch is 2001-01-01 00:00:00 UTC (Unix: 978307200), stored in nanoseconds
+  const beforeNs = before ? (new Date(before).getTime() / 1000 - 978307200) * 1_000_000_000 : null;
+
   const rawData = await executeSQL<SQLMessage>(
     DB_PATH,
     `
@@ -56,6 +59,7 @@ export async function getMessages(searchText?: string, chatIdentifier?: string):
     WHERE
       message.attributedBody IS NOT NULL
       ${chatIdentifier ? `AND chat.chat_identifier = '${chatIdentifier}'` : ""}
+      ${beforeNs !== null ? `AND message.date < ${beforeNs}` : ""}
     GROUP BY
       message.guid
     ORDER BY
