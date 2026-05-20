@@ -426,6 +426,18 @@ let formulaeChunkedBuildInProgress: Promise<void> | null = null;
 let casksChunkedBuildInProgress: Promise<void> | null = null;
 
 /**
+ * Drop the in-memory chunked index for both formulae and casks.
+ * Use after deleting on-disk cache so the next search rebuilds from scratch
+ * instead of reusing index entries that point to deleted chunk files.
+ */
+export function invalidateChunkedCacheMemory(): void {
+  formulaRemote.index = undefined;
+  formulaRemote.indexFetch = undefined;
+  caskRemote.index = undefined;
+  caskRemote.indexFetch = undefined;
+}
+
+/**
  * Ensure chunked cache exists and is valid.
  * Downloads source JSON to disk (without parsing) and builds chunks.
  */
@@ -451,21 +463,38 @@ async function ensureChunkedCache<T>(
   }
 
   try {
-    // Need to rebuild - download source JSON to disk WITHOUT parsing into memory
-    // This is critical to avoid heap exhaustion on initial load
     brewLogger.log("Building chunked cache", { type: remote.chunkedConfig.type });
 
-    // Download to disk only (no parsing)
+    // Download to disk only (no parsing). Critical to avoid heap exhaustion.
     await downloadRemoteToCache(remote.url, remote.cachePath, onProgress, signal);
 
-    // Now build the chunked cache from the downloaded file
-    // This streams through the file and writes chunks incrementally
+    // Stream the downloaded file into chunks + index + meta.
     await buildChunkedCache(remote.cachePath, remote.url, remote.chunkedConfig, extractIndex, onProgress, signal);
+    return;
   } catch (err) {
-    // Always re-throw abort errors - the caller handles these
     if (err instanceof Error && err.name === "AbortError") throw err;
 
-    // For other errors, fall back to stale cache if available
+    // If the build failed because the source JSON couldn't be parsed, the
+    // file on disk is corrupt (truncated by a killed process, or a chunked
+    // transfer that ended early without Content-Length). Delete it so the
+    // *next* attempt — whether via the toast action, reopening the command,
+    // or another search — downloads fresh rather than parsing the same bad
+    // bytes. We don't retry inline because doubling the wait on a flaky
+    // connection makes the failure look like a hang.
+    if (err instanceof Error && err.name === "ParseError") {
+      try {
+        await fs.unlink(remote.cachePath);
+        brewLogger.warn("Discarded corrupt source cache", {
+          type: remote.chunkedConfig.type,
+          path: remote.cachePath,
+          error: err.message,
+        });
+      } catch {
+        // Ignore — file may already be gone
+      }
+    }
+
+    // Fall back to stale cache if we still have a usable one.
     if (hasStaleCacheIndex) {
       brewLogger.warn("Chunked cache rebuild failed, using stale cache", {
         type: remote.chunkedConfig.type,
@@ -474,7 +503,6 @@ async function ensureChunkedCache<T>(
       return;
     }
 
-    // No stale cache to fall back to
     throw err;
   }
 }
