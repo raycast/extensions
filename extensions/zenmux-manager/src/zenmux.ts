@@ -414,11 +414,16 @@ export function formatCurrency(value?: number, currency = "usd"): string {
     return "-";
   }
 
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: currency.toUpperCase(),
-    maximumFractionDigits: value < 1 ? 4 : 2,
-  }).format(value);
+  const safeCode = currency.toUpperCase() || "USD";
+  try {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: safeCode,
+      maximumFractionDigits: value < 1 ? 4 : 2,
+    }).format(value);
+  } catch {
+    return `${safeCode} ${value.toFixed(value < 1 ? 4 : 2)}`;
+  }
 }
 
 export function formatPercentage(value?: number): string {

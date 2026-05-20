@@ -330,12 +330,12 @@ function stripFrontmatter(text: string): string {
     return text;
   }
 
-  const end = text.indexOf("\n---", 3);
+  const end = text.search(/\n---(\r?\n)/);
   if (end === -1) {
     return text;
   }
 
-  return text.slice(end + 4).replace(/^\r?\n/, "");
+  return text.slice(text.indexOf("\n", end + 1) + 1);
 }
 
 // ---------------- tokenization ----------------
