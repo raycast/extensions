@@ -49,7 +49,13 @@ export async function parsePackageJson(packageJsonPath: string): Promise<Extensi
 }
 
 export async function getPackageJsonFiles(): Promise<string[]> {
-  const extensionsDir = path.join(os.homedir(), ".config", isWindows ? "raycast-x" : "raycast", "extensions");
+  const configDirs = isWindows ? ["raycast-x"] : ["raycast", "raycast-x"];
+  const extensionDirs = configDirs.map((dir) => path.join(os.homedir(), ".config", dir, "extensions"));
+  const packageJsonFiles = await Promise.all(extensionDirs.map(getPackageJsonFilesFromDirectory));
+  return packageJsonFiles.flat();
+}
+
+async function getPackageJsonFilesFromDirectory(extensionsDir: string): Promise<string[]> {
   try {
     const extensions = await fs.readdir(extensionsDir);
     const packageJsonFiles = await Promise.all(
