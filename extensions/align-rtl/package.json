@@ -35,5 +35,8 @@
     "@raycast/eslint-config": "^2.1.1",
     "eslint": "^9.25.1",
     "typescript": "^5.8.3"
-  }
+  },
+  "platforms": [
+    "macOS"
+  ]
 }
