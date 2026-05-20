@@ -1,6 +1,6 @@
 # Todoist Changelog
 
-## [Include deadlines in Today] - {PR_MERGE_DATE}
+## [Include deadlines in Today] - 2026-05-20
 
 - Show tasks whose deadline is today or overdue in the Today view, even when they do not have a due date.
 
