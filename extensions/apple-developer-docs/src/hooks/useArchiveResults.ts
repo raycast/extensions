@@ -72,13 +72,9 @@ export default function useArchiveResults(
   const [hasArchiveError, setHasArchiveError] = useState(false);
   const [tocProgress, setTocProgress] = useState({ processedBooks: 0, totalBooks: 0 });
   const isTocBuildRunningRef = useRef(false);
-  const tocResultsCountRef = useRef(tocResults.length);
+  const hasCompleteTocIndexRef = useRef(tocResults.length > 0);
   const shouldSearchArchive = includeArchiveResults && (typeFilter === "all" || typeFilter === "archive");
   const shouldLoadArchive = shouldSearchArchive && query.trim().length > 1;
-
-  useEffect(() => {
-    tocResultsCountRef.current = tocResults.length;
-  }, [tocResults.length]);
 
   useEffect(() => {
     if (!includeArchiveResults || !shouldLoadArchive || documentResults.length > 0) {
@@ -123,7 +119,7 @@ export default function useArchiveResults(
       !includeArchiveResults ||
       !shouldLoadArchive ||
       documentResults.length === 0 ||
-      tocResultsCountRef.current > 0 ||
+      hasCompleteTocIndexRef.current ||
       isTocBuildRunningRef.current
     ) {
       return;
@@ -154,6 +150,7 @@ export default function useArchiveResults(
         }
 
         isTocBuildRunningRef.current = false;
+        hasCompleteTocIndexRef.current = true;
         setTocResults(results);
         setIsBuildingToc(false);
       })
