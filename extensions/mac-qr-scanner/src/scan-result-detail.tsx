@@ -147,13 +147,11 @@ function buildMarkdown(
     ].join("\n");
   }
 
-  const safeDecoded = escapeMarkdown(decoded);
-
   if (isUrl) {
     return [
       `**QR Code Found!**`,
       ``,
-      `\`${safeDecoded}\``,
+      `\`${decoded}\``,
       ``,
       `---`,
       ``,
@@ -164,7 +162,7 @@ function buildMarkdown(
   return [
     `**QR Code Found!**`,
     ``,
-    `\`${safeDecoded}\``,
+    `\`${decoded}\``,
     ``,
     `---`,
     ``,
