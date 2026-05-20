@@ -25,7 +25,7 @@ const SPECIAL_AVATARS: Record<string, Image.ImageLike> = {
 };
 
 interface DictionaryResponse {
-  result: { element: string }[];
+  result: { element: string; display: string }[];
 }
 
 type TableRecord = {
@@ -77,17 +77,27 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
     }
   };
 
-  const { data: displayField, isLoading: isLoadingDisplay } = useFetch(
-    `${instanceUrl}/api/now/table/sys_dictionary?sysparm_query=name=${table.name}^display=true&sysparm_fields=element&sysparm_limit=1&sysparm_exclude_reference_link=true`,
+  // Fetch the table's own columns (display flag included) before the records load.
+  // We derive both the display field and — for database views — whether the
+  // sys_updated_on column exists, so we can decide the order-by upfront.
+  const { data: tableMeta, isLoading: isLoadingDisplay } = useFetch(
+    `${instanceUrl}/api/now/table/sys_dictionary?sysparm_query=name=${table.name}^elementISNOTEMPTY&sysparm_fields=element,display&sysparm_limit=2000&sysparm_exclude_reference_link=true`,
     {
       headers,
       execute: !!authHeader,
       keepPreviousData: true,
       mapResult(response: DictionaryResponse) {
-        return { data: response.result[0]?.element ?? null };
+        const rows = response.result ?? [];
+        return {
+          data: {
+            displayField: rows.find((r) => r.display === "true")?.element ?? null,
+            hasUpdatedOn: rows.some((r) => r.element === "sys_updated_on"),
+          },
+        };
       },
     },
   );
+  const displayField = tableMeta?.displayField ?? null;
 
   const fields = useMemo(() => {
     const set = new Set<string>(["sys_id", "sys_updated_on", "sys_updated_by", ...FALLBACK_DISPLAY_FIELDS]);
@@ -120,6 +130,16 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
   // table (querying LIKE on a non-existent field would 400 the whole request).
   const [searchableFields, setSearchableFields] = useState<string[]>([]);
 
+  // Ordering by sys_updated_on 500s the whole request when the table lacks that
+  // column (database views). For views (v_*) the dictionary lists every column —
+  // no inheritance — so its absence there is authoritative and we skip the
+  // order-by upfront. For normal tables sys_updated_on is inherited and won't show
+  // in the table's own dictionary rows, so we keep ordering on and let the onError
+  // fallback below disable it for the rare non-view table that also lacks it.
+  const isDatabaseView = table.name.startsWith("v_");
+  const [orderByDisabled, setOrderByDisabled] = useState(false);
+  const orderByUpdated = !orderByDisabled && (!isDatabaseView || (tableMeta?.hasUpdatedOn ?? true));
+
   // Shared between the records fetch and the "Open <table> List" action so the
   // browser opens the same filtered view the user is looking at.
   const sysparmQuery = useMemo(() => {
@@ -147,9 +167,9 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
       }
       filters.push(orParts.join("^OR"));
     }
-    filters.push("ORDERBYDESCsys_updated_on");
+    if (orderByUpdated) filters.push("ORDERBYDESCsys_updated_on");
     return filters.join("^");
-  }, [searchTerm, extraQuery, searchableFields, users]);
+  }, [searchTerm, extraQuery, searchableFields, users, orderByUpdated]);
 
   const { isLoading, data, error, revalidate, pagination } = useFetch(
     (options) => {
@@ -168,6 +188,13 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
       execute: !!authHeader && !isLoadingDisplay,
       keepPreviousData: true,
       onError: (err) => {
+        // First failure while ordering by sys_updated_on: a non-view table that
+        // also lacks the column. Drop the order-by and let the query memo
+        // recompute, which retries the fetch automatically.
+        if (orderByUpdated) {
+          setOrderByDisabled(true);
+          return;
+        }
         console.error(err);
         showToast(Toast.Style.Failure, "Could not fetch records", err.message);
       },
@@ -297,7 +324,7 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
         </List.Dropdown>
       }
     >
-      {error ? (
+      {error && !isLoading ? (
         <List.EmptyView
           icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
           title="Could Not Fetch Records"
@@ -328,8 +355,8 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
                   tooltip: "Favorite",
                 });
               }
-              if (record.sys_updated_on) {
-                const updatedDate = new Date(record.sys_updated_on + " UTC");
+              const updatedDate = record.sys_updated_on ? new Date(record.sys_updated_on + " UTC") : null;
+              if (updatedDate && !isNaN(updatedDate.getTime())) {
                 const daysAgo = differenceInCalendarDays(new Date(), updatedDate);
                 const dateLabel =
                   daysAgo === 0
