@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-05-20
 
 - Fix due date accessory not showing for to-dos due in 8–14 days
 - Fix moving a project using the wrong URL scheme parameter (`list-id` instead of `area-id`)
