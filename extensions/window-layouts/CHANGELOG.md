@@ -1,6 +1,6 @@
 # Window Layouts Changelog
 
-## [Fix Raycast Beta windows] - {PR_MERGE_DATE}
+## [Fix Raycast Beta windows] - 2026-05-20
 
 - Fixed layout commands trying to tile Raycast's own windows on Raycast v2 beta.
 
