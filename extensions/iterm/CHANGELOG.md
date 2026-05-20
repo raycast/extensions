@@ -4,6 +4,10 @@
 
 - Added a preference to open `Edit in iTerm` in a new window or a new tab.
 
+## [Bug Fixes] - 2026-05-20
+
+- Fixed `Open iTerm Profile` so all saved profiles are listed regardless of plist field order
+
 ## [New Features & Improvements] - 2026-04-14
 
 - Added `Switch iTerm Session` command — unified session switcher listing all open panes grouped by tab, with a window filter dropdown (shown when multiple windows are open), persistent custom tags per session (Cmd+T to assign), and descriptive errors when the `iterm2` Python package is missing
