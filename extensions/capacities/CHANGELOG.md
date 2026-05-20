@@ -1,6 +1,6 @@
 # Capacities Changelog
 
-## [Fix space dropdown selection] - {PR_MERGE_DATE}
+## [Fix space dropdown selection] - 2026-05-20
 
 - Fixed space dropdown selection in the task, weblink, and daily note commands.
 
