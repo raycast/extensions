@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "flashcards",
+  "title": "Flashcards",
+  "description": "Create and study flashcards with Markdown syntax",
+  "icon": "extension-icon.png",
+  "author": "Paul12169",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": ["Productivity", "Other"],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "create-card",
+      "title": "Create",
+      "subtitle": "Flashcards",
+      "description": "Create a new flashcard with Markdown",
+      "mode": "view"
+    },
+    {
+      "name": "list-cards",
+      "title": "List",
+      "subtitle": "Flashcards",
+      "description": "Browse all your flashcards",
+      "mode": "view"
+    },
+    {
+      "name": "tags",
+      "title": "Tags",
+      "subtitle": "Flashcards",
+      "description": "Browse flashcards by tag",
+      "mode": "view"
+    },
+    {
+      "name": "quiz",
+      "title": "Quiz",
+      "subtitle": "Flashcards",
+      "description": "Study your flashcards with a quiz",
+      "mode": "view"
+    },
+    {
+      "name": "import-cards",
+      "title": "Import",
+      "subtitle": "Flashcards",
+      "description": "Import flashcards from a Markdown file or text",
+      "mode": "view"
+    },
+    {
+      "name": "export-cards",
+      "title": "Export",
+      "subtitle": "Flashcards",
+      "description": "Export flashcards as Markdown",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "language",
+      "title": "Language",
+      "description": "Language of the extension (affects syntax for correct/true)",
+      "type": "dropdown",
+      "required": false,
+      "default": "de",
+      "data": [
+        { "title": "Deutsch", "value": "de" },
+        { "title": "English", "value": "en" },
+        { "title": "Español", "value": "es" },
+        { "title": "中文 (简体)", "value": "zh" },
+        { "title": "हिन्दी", "value": "hi" },
+        { "title": "Русский", "value": "ru" },
+        { "title": "العربية", "value": "ar" },
+        { "title": "Português", "value": "pt" },
+        { "title": "Italiano", "value": "it" },
+        { "title": "Türkçe", "value": "tr" }
+      ]
+    }
+  ],
+  "overrides": {
+    "minimatch": "^9.0.7"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.70.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.8",
+    "@types/node": "^20.8.10",
+    "@types/react": "^18.2.27",
+    "eslint": "^8.51.0",
+    "prettier": "^3.0.3",
+    "typescript": "^5.2.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

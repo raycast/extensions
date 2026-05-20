@@ -1,0 +1,31 @@
+# Abhängigkeiten (werden über npm install wiederhergestellt)
+node_modules/
+
+# Build-Artefakte
+dist/
+build/
+.raycast/
+
+# macOS Systemdateien
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Editor & IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Umgebungsvariablen (können sensible Daten enthalten)
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript Compile-Cache
+*.tsbuildinfo
