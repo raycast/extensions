@@ -3,8 +3,11 @@
   "name": "winget",
   "title": "WinGet",
   "description": "Search, install, and upgrade Windows packages via winget",
-  "icon": "icon.png",
+  "icon": "winget-main.png",
   "author": "eray_ercan",
+  "contributors": [
+    "Netizen"
+  ],
   "platforms": [
     "Windows"
   ],
@@ -27,21 +30,24 @@
       "title": "Search Packages",
       "subtitle": "WinGet",
       "description": "Search for packages in the winget repository and install them",
-      "mode": "view"
+      "mode": "view",
+      "icon": "winget-search.png"
     },
     {
       "name": "installed",
       "title": "Installed Packages",
       "subtitle": "WinGet",
       "description": "List all installed packages with upgrade and uninstall actions",
-      "mode": "view"
+      "mode": "view",
+      "icon": "winget-installed.png"
     },
     {
       "name": "upgrade",
       "title": "Upgrade Packages",
       "subtitle": "WinGet",
       "description": "View and upgrade outdated packages",
-      "mode": "view"
+      "mode": "view",
+      "icon": "winget-upgrade.png"
     }
   ],
   "preferences": [
@@ -78,6 +84,7 @@
     "@raycast/utils": "^1.19.0"
   },
   "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "eslint": "^9.16.0",
@@ -90,6 +97,8 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
+    "test": "tsc --noEmit false --outDir .tmp-test --rootDir . --module commonjs && node .tmp-test/tests/winget-parser.test.js",
+    "typecheck": "tsc --noEmit",
     "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use the \\`@raycast/api\\` package's publishing command instead.\\n\\n\" && exit 1",
     "publish": "npx @raycast/api@latest publish"
   }

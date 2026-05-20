@@ -1,6 +1,36 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
-import { parseListOutput, parseSearchOutput, parseUpgradeOutput } from "../src/utils/winget-parser";
+import { parseTable } from "../src/utils/winget/parse";
+
+function parseListOutput(output: string) {
+  return parseTable(output).map((row) => ({
+    name: row["Name"] ?? "",
+    id: row["Id"] ?? "",
+    version: row["Version"] ?? "",
+    availableVersion: row["Available"] ?? undefined,
+    source: row["Source"] ?? undefined,
+  }));
+}
+
+function parseUpgradeOutput(output: string) {
+  return parseTable(output).map((row) => ({
+    name: row["Name"] ?? "",
+    id: row["Id"] ?? "",
+    version: row["Version"] ?? "",
+    availableVersion: row["Available"] ?? undefined,
+    source: row["Source"] ?? undefined,
+  }));
+}
+
+function parseSearchOutput(output: string) {
+  return parseTable(output).map((row) => ({
+    name: row["Name"] ?? "",
+    id: row["Id"] ?? "",
+    version: row["Version"] ?? "",
+    availableVersion: row["Available"] ?? undefined,
+    source: row["Source"] ?? undefined,
+  }));
+}
 
 describe("winget parser", () => {
   test("parses installed package list", () => {
@@ -13,8 +43,7 @@ describe("winget parser", () => {
 
     const result = parseListOutput(output);
 
-    assert.equal(result.error, undefined);
-    assert.deepEqual(result.packages, [
+    assert.deepEqual(result, [
       {
         name: "Visual Studio Code",
         id: "Microsoft.VisualStudioCode",
@@ -41,8 +70,27 @@ describe("winget parser", () => {
 
     const result = parseUpgradeOutput(output);
 
-    assert.equal(result.error, undefined);
-    assert.deepEqual(result.packages, [
+    assert.deepEqual(result, [
+      {
+        name: "Visual Studio Code",
+        id: "Microsoft.VisualStudioCode",
+        version: "1.85.0",
+        availableVersion: "1.86.0",
+        source: "winget",
+      },
+    ]);
+  });
+
+  test("parses localized headers by column position", () => {
+    const output = [
+      "Имя                  ИД                            Версия        Доступно     Источник",
+      "-----------------------------------------------------------------------------------",
+      "Visual Studio Code   Microsoft.VisualStudioCode    1.85.0        1.86.0       winget",
+    ].join("\n");
+
+    const result = parseUpgradeOutput(output);
+
+    assert.deepEqual(result, [
       {
         name: "Visual Studio Code",
         id: "Microsoft.VisualStudioCode",
@@ -56,8 +104,7 @@ describe("winget parser", () => {
   test("returns an empty result for no matches", () => {
     const result = parseSearchOutput("No package found matching input criteria.");
 
-    assert.equal(result.error, undefined);
-    assert.deepEqual(result.packages, []);
+    assert.deepEqual(result, []);
   });
 
   test("ignores carriage-return progress output", () => {
@@ -69,8 +116,7 @@ describe("winget parser", () => {
 
     const result = parseListOutput(output);
 
-    assert.equal(result.error, undefined);
-    assert.deepEqual(result.packages, [
+    assert.deepEqual(result, [
       {
         name: "Node.js",
         id: "OpenJS.NodeJS.LTS",
