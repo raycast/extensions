@@ -1,6 +1,6 @@
 # Klack Changelog
 
-## [Fix README Link] - {PR_MERGE_DATE}
+## [Fix README Link] - 2026-05-20
 
 - Fixed broken contributor GitHub link in the README
 
