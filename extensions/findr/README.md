@@ -48,3 +48,4 @@ Manually trigger a full reindex of all configured scan paths.
 |-----------|-------------|
 | Findr Binary Path | Override the bundled engine with a custom binary |
 | Max Results | Maximum results per search (default: 30) |
+| OpenRouter API Key | Enable semantic search. Get one at [openrouter.ai](https://openrouter.ai). Leave empty for keyword search only. |
