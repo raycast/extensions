@@ -3,11 +3,20 @@ import { Instance } from "../types";
 import { OnTokenRefresh } from "./auth";
 import { serviceNowFetchRaw } from "./serviceNowFetch";
 
-export function backgroundScriptAuthErrorMessage(instance: Instance): string {
+// Shown when /sn_devstudio_/v1/get_publish_info rejects the request — sign-in failed.
+export function authenticationFailedMessage(instance: Instance): string {
+  if (instance.authMode === "oauth") {
+    return "Could not authenticate. Re-sign in and verify your OAuth user has the admin role on this instance.";
+  }
+  return "Could not authenticate. Check your username and password, and that the account has the admin role. If this instance uses SSO, switch this profile to OAuth.";
+}
+
+// Shown when sign-in succeeded but the background script never ran (admin-only /sys.scripts.do).
+export function backgroundScriptBlockedMessage(instance: Instance): string {
   if (instance.authMode === "oauth") {
     return "The background script could not run. Verify your OAuth user has the admin role on this instance.";
   }
-  return "The background script could not run. If this instance uses SSO, basic auth can sign in but can't run background scripts — edit this profile and switch Authentication to OAuth. Otherwise verify your credentials and admin role.";
+  return "The background script could not run. Check that you have the admin role. If this instance uses SSO, switch this profile to OAuth.";
 }
 
 export class ServiceNowClient {

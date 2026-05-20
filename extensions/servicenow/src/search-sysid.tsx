@@ -20,7 +20,11 @@ import InstanceForm from "./components/InstanceForm";
 import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findSysID } from "./utils/snSnippets";
-import { backgroundScriptAuthErrorMessage, ServiceNowClient } from "./utils/serviceNowClient";
+import {
+  authenticationFailedMessage,
+  backgroundScriptBlockedMessage,
+  ServiceNowClient,
+} from "./utils/serviceNowClient";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { instanceLabel } from "./utils/instanceLabel";
 import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
@@ -63,6 +67,7 @@ export default function SearchSysId(props: LaunchProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [canReconfigure, setCanReconfigure] = useState(false);
+  const [retryCount, setRetryCount] = useState(0);
   const detectionStarted = useRef(false);
 
   useEffect(() => {
@@ -114,7 +119,7 @@ export default function SearchSysId(props: LaunchProps) {
       const authed = await client.init();
       if (cancelled) return;
       if (!authed) {
-        setErrorMessage(backgroundScriptAuthErrorMessage(selectedInstance));
+        setErrorMessage(authenticationFailedMessage(selectedInstance));
         setCanReconfigure(true);
         setIsLoading(false);
         return;
@@ -125,7 +130,7 @@ export default function SearchSysId(props: LaunchProps) {
         if (answer == null) {
           // No marker means the background script never ran (missing admin access or SSO + basic auth).
           showToast({ style: Toast.Style.Failure, title: "Could Not Run Lookup" });
-          setErrorMessage(backgroundScriptAuthErrorMessage(selectedInstance));
+          setErrorMessage(backgroundScriptBlockedMessage(selectedInstance));
           setCanReconfigure(true);
           setIsLoading(false);
         } else if (answer[1] && answer[1] !== "NOT_FOUND") {
@@ -144,7 +149,7 @@ export default function SearchSysId(props: LaunchProps) {
     return () => {
       cancelled = true;
     };
-  }, [selectedInstance?.id, sysId]);
+  }, [selectedInstance?.id, sysId, retryCount]);
 
   const onInstanceChange = (newValue: string) => {
     const found = instances.find((i) => i.id === newValue);
@@ -261,7 +266,10 @@ export default function SearchSysId(props: LaunchProps) {
                   target={
                     <InstanceForm onSubmit={editInstance} onDelete={deleteInstance} instance={selectedInstance} />
                   }
-                  onPop={mutate}
+                  onPop={() => {
+                    mutate();
+                    setRetryCount((c) => c + 1);
+                  }}
                 />
               )}
               <Action title="Try Another Sys ID" icon={Icon.MagnifyingGlass} onAction={resetToForm} />

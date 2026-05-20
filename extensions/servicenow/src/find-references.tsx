@@ -21,7 +21,11 @@ import TableRecords from "./components/TableRecords";
 import { Instance } from "./types";
 import useInstances from "./hooks/useInstances";
 import { findReferences } from "./utils/snSnippets";
-import { backgroundScriptAuthErrorMessage, ServiceNowClient } from "./utils/serviceNowClient";
+import {
+  authenticationFailedMessage,
+  backgroundScriptBlockedMessage,
+  ServiceNowClient,
+} from "./utils/serviceNowClient";
 import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
 import { getURL } from "./utils/browserScripts";
 import { getInstanceBaseUrl, isServiceNowUrl } from "./utils/instanceUrl";
@@ -87,6 +91,7 @@ export default function FindReferences(props: LaunchProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [errorFetching, setErrorFetching] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
   const detectionStarted = useRef(false);
 
   useEffect(() => {
@@ -190,7 +195,7 @@ export default function FindReferences(props: LaunchProps) {
       const authed = await client.init();
       if (cancelled) return;
       if (!authed) {
-        setErrorMessage(backgroundScriptAuthErrorMessage(selectedInstance));
+        setErrorMessage(authenticationFailedMessage(selectedInstance));
         setErrorFetching(true);
         setIsLoading(false);
         return;
@@ -202,7 +207,7 @@ export default function FindReferences(props: LaunchProps) {
           // No marker means the background script never ran (missing admin access or SSO + basic auth).
           showToast({ style: Toast.Style.Failure, title: "Could Not Search References" });
           setErrorMessage(
-            `${backgroundScriptAuthErrorMessage(selectedInstance)} Also confirm the table name is correct.`,
+            `${backgroundScriptBlockedMessage(selectedInstance)} Also confirm the table name is correct.`,
           );
           setErrorFetching(true);
           setIsLoading(false);
@@ -223,7 +228,7 @@ export default function FindReferences(props: LaunchProps) {
     return () => {
       cancelled = true;
     };
-  }, [selectedInstance?.id, target?.table, target?.sysId]);
+  }, [selectedInstance?.id, target?.table, target?.sysId, retryCount]);
 
   const onInstanceChange = (newValue: string) => {
     const found = instances.find((i) => i.id === newValue);
@@ -343,7 +348,10 @@ export default function FindReferences(props: LaunchProps) {
                   target={
                     <InstanceForm onSubmit={editInstance} onDelete={deleteInstance} instance={selectedInstance} />
                   }
-                  onPop={mutate}
+                  onPop={() => {
+                    mutate();
+                    setRetryCount((c) => c + 1);
+                  }}
                 />
               </ActionPanel>
             ) : undefined
