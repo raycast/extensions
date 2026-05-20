@@ -241,6 +241,10 @@ function normalizeResult(result: AppleSearchResult, order: number): SearchResult
     });
   }
 
+  if (!("developer" in result)) {
+    return createSearchResult({ type: "general", order });
+  }
+
   const metadata = result.developer.metadata;
   const itemType = first(metadata.itemTypes);
 
