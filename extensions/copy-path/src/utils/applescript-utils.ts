@@ -142,7 +142,7 @@ export const getVSCodeActiveFilePath = async (app: Application) => {
 const normalizeVSCodeFilePath = (path: string) => {
   try {
     if (path.startsWith("file://")) {
-      return decodeURIComponent(path.replace("file://", ""));
+      return decodeURIComponent(new URL(path).pathname);
     }
   } catch {
     return "";
