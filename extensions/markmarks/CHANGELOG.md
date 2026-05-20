@@ -1,5 +1,9 @@
 # MarkMarks Changelog
 
+## [Bug Fixes] - {PR_MERGE_DATE}
+
+- Fixed opening bookmarks from Safari so links target Safari directly
+
 ## [1.1.0] - 2026-05-19
 
 - Add Dia browser support

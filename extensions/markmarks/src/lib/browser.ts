@@ -13,6 +13,10 @@ const BROWSER_ALIASES: Record<string, SupportedBrowser> = {
 
 const RAYCAST_APPS = new Set(["Raycast", "Raycast Beta"]);
 
+const BROWSER_OPEN_TARGETS: Partial<Record<SupportedBrowser, string>> = {
+  Safari: "com.apple.Safari",
+};
+
 /**
  * Get the frontmost application name
  */
@@ -144,6 +148,10 @@ function getSupportedBrowser(appName: string): SupportedBrowser | undefined {
   return BROWSER_ALIASES[appName];
 }
 
+function getBrowserOpenTarget(browser: SupportedBrowser): string {
+  return BROWSER_OPEN_TARGETS[browser] ?? browser;
+}
+
 function isValidTab(tab: ActiveTab): boolean {
   return Boolean(tab.title && tab.url);
 }
@@ -197,7 +205,12 @@ export async function getActiveSupportedBrowser(): Promise<SupportedBrowser | un
 
 export async function openUrlInActiveBrowser(url: string): Promise<SupportedBrowser | undefined> {
   const browser = await getActiveSupportedBrowser();
-  await open(url, browser);
+  if (!browser) {
+    await open(url);
+    return undefined;
+  }
+
+  await open(url, getBrowserOpenTarget(browser));
   return browser;
 }
 
