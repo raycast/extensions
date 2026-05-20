@@ -1,5 +1,9 @@
 # Window Layouts Changelog
 
+## [Fix Raycast Beta windows] - {PR_MERGE_DATE}
+
+- Fixed layout commands trying to tile Raycast's own windows on Raycast v2 beta.
+
 ## [Improvements] - 2026-05-06
 
 - Improved the error message shown when the Raycast `WindowManagement` API is not available, clarifying that the extension requires both Raycast Pro and Accessibility permission
