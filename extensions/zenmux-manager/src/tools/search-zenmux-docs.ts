@@ -4,6 +4,7 @@ import {
   ZenMuxDocManifestEntry,
   routingMatches,
 } from "../zenmux-doc-routing";
+import { getErrorMessage } from "../zenmux";
 import { ZENMUX_DOCS, ZenMuxDocEntry } from "../zenmux-docs";
 
 type Input = {
@@ -335,10 +336,6 @@ function stripFrontmatter(text: string): string {
   }
 
   return text.slice(end + 4).replace(/^\r?\n/, "");
-}
-
-function getErrorMessage(error: unknown): string {
-  return error instanceof Error ? error.message : String(error);
 }
 
 // ---------------- tokenization ----------------

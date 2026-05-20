@@ -7,7 +7,7 @@ ZenMux is an LLM API aggregation platform that provides unified access to models
 ## Features
 
 - View your ZenMux plan, account status, Flow rate, and PAYG balance.
-- Track 5-hour, weekly, and monthly subscription quota.
+- Track 5-hour, 7-day rolling, and monthly subscription quota.
 - Ask Raycast AI about your current ZenMux account and quota status.
 - Open the ZenMux subscription, PAYG, logs, and Platform API consoles from Raycast.
 
@@ -32,12 +32,12 @@ This extension includes AI tools that let Raycast AI answer questions about your
 
 - `How much 5-hour quota do I have left?`
 - `What does PAYG balance mean?`
-- `When does my weekly quota reset?`
+- `When does my 7-day quota reset?`
 - `How do I configure Cursor with ZenMux?`
 - `How does provider routing work?`
 - `Which API endpoint should I use for Anthropic Messages?`
 
-Raycast AI features may require Raycast Pro access.
+Raycast AI features may require Raycast Pro access and are currently unavailable on Raycast for Windows. On Windows, use the account commands and links; AI chat tools are available on macOS only.
 
 ## Links
 

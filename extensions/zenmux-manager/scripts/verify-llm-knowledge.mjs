@@ -12,11 +12,11 @@ const docsIndex = fs.readFileSync(
   "utf8",
 );
 const accountTool = fs.readFileSync(
-  path.join(root, "src", "tools", "getZenMuxAccount.ts"),
+  path.join(root, "src", "tools", "get-zenmux-account.ts"),
   "utf8",
 );
 const searchTool = fs.readFileSync(
-  path.join(root, "src", "tools", "searchZenMuxDocs.ts"),
+  path.join(root, "src", "tools", "search-zenmux-docs.ts"),
   "utf8",
 );
 const accountSource = fs.readFileSync(
@@ -396,10 +396,17 @@ function runHermesRuntimeSmokeTest() {
       mockApiPath,
       [
         "const store = new Map();",
+        "export const Color = {",
+        '  Green: "green",',
+        '  Red: "red",',
+        '  SecondaryText: "secondaryText",',
+        '  Yellow: "yellow",',
+        "};",
         "export class Cache {",
         "  get(key) { return store.get(key); }",
         "  set(key, value) { store.set(key, value); }",
         "}",
+        "export function getPreferenceValues() { return {}; }",
       ].join("\n"),
     );
 
@@ -419,7 +426,7 @@ function runHermesRuntimeSmokeTest() {
       root,
       "src",
       "tools",
-      "searchZenMuxDocs.ts",
+      "search-zenmux-docs.ts",
     );
     fs.writeFileSync(
       smokePath,
