@@ -32,7 +32,7 @@ export default function SearchFiles() {
     findrPath,
     ["search", query, "--json", "--limit", String(maxResults)],
     {
-      env: findrEnv,
+      env: { ...process.env, ...findrEnv },
       execute: query.length > 0 && binaryExists,
       keepPreviousData: true,
       parseOutput: ({ stdout }) => {

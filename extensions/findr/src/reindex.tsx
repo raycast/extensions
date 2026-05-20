@@ -12,23 +12,28 @@ export default async function Reindex() {
   });
 
   return new Promise<void>((resolve) => {
-    execFile(findrPath, ["index", "rebuild"], { env: { ...process.env, ...findrEnv } }, (error, _stdout, stderr) => {
-      if (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "Index rebuild failed",
-          message: error.message,
-        });
-      } else {
-        const match = stderr.match(/(\d+) files indexed/);
-        const count = match ? match[1] : "?";
-        showToast({
-          style: Toast.Style.Success,
-          title: "Index rebuilt",
-          message: `${count} files indexed`,
-        });
-      }
-      resolve();
-    });
+    execFile(
+      findrPath,
+      ["index", "rebuild"],
+      { env: { ...process.env, ...findrEnv } },
+      (error, _stdout, stderr) => {
+        if (error) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Index rebuild failed",
+            message: error.message,
+          });
+        } else {
+          const match = stderr.match(/(\d+) files indexed/);
+          const count = match ? match[1] : "?";
+          showToast({
+            style: Toast.Style.Success,
+            title: "Index rebuilt",
+            message: `${count} files indexed`,
+          });
+        }
+        resolve();
+      },
+    );
   });
 }
