@@ -432,17 +432,6 @@ export function formatPercentage(value?: number): string {
   }).format(value);
 }
 
-export function formatProgressBar(value?: number): string {
-  if (!isFiniteNumber(value)) {
-    return "□□□□□□□□□□□□";
-  }
-
-  const width = 12;
-  const clamped = Math.min(1, Math.max(0, value));
-  const filled = Math.round(clamped * width);
-  return `${"▰".repeat(filled)}${"▱".repeat(width - filled)}`;
-}
-
 function formatNumber(value: number): string {
   return new Intl.NumberFormat("en-US", {
     maximumFractionDigits: value < 10 ? 2 : 1,
