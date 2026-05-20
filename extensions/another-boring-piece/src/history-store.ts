@@ -15,15 +15,12 @@ export type WallpaperHistoryEntry = {
   downloadPath?: string;
 };
 
-export type WallpaperHistoryInput = {
-  eventType: WallpaperHistoryEventType;
-  wallpaper: Wallpaper;
-  localFilePath: string;
-  downloadPath?: string;
-};
+export type WallpaperHistoryInput = Omit<
+  WallpaperHistoryEntry,
+  "eventId" | "timestamp"
+>;
 
-const HISTORY_DIR = path.join(environment.supportPath, "history");
-const EVENTS_DIR = path.join(HISTORY_DIR, "events");
+const EVENTS_DIR = path.join(environment.supportPath, "history", "events");
 
 function ensureHistoryDirectories() {
   fs.mkdirSync(EVENTS_DIR, { recursive: true });
@@ -59,6 +56,20 @@ function isHistoryEntry(value: unknown): value is WallpaperHistoryEntry {
   );
 }
 
+function getEventFiles() {
+  if (!fs.existsSync(EVENTS_DIR)) return [];
+  return fs.readdirSync(EVENTS_DIR).filter((file) => file.endsWith(".json"));
+}
+
+function readHistoryEntry(filePath: string) {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    return isHistoryEntry(parsed) ? parsed : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export async function recordWallpaperHistory(
   input: WallpaperHistoryInput,
 ): Promise<WallpaperHistoryEntry> {
@@ -88,48 +99,28 @@ export async function recordWallpaperHistory(
 export function readWallpaperHistory(
   options: { limit?: number } = {},
 ): WallpaperHistoryEntry[] {
-  if (!fs.existsSync(EVENTS_DIR)) return [];
-
   const entries: WallpaperHistoryEntry[] = [];
-  const files = fs
-    .readdirSync(EVENTS_DIR)
-    .filter((file) => file.endsWith(".json"))
-    .sort((a, b) => b.localeCompare(a));
+  const files = getEventFiles().sort((a, b) => b.localeCompare(a));
 
   for (const file of files) {
-    try {
-      const raw = fs.readFileSync(path.join(EVENTS_DIR, file), "utf8");
-      const parsed = JSON.parse(raw);
-      if (isHistoryEntry(parsed)) {
-        entries.push(parsed);
-        if (options.limit && entries.length >= options.limit) break;
-      }
-    } catch {
-      continue;
-    }
+    const entry = readHistoryEntry(path.join(EVENTS_DIR, file));
+    if (!entry) continue;
+
+    entries.push(entry);
+    if (options.limit && entries.length >= options.limit) break;
   }
 
   return entries.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
 }
 
 function findHistoryEventFilePath(eventId: string) {
-  if (!fs.existsSync(EVENTS_DIR)) return undefined;
-
-  const files = fs
-    .readdirSync(EVENTS_DIR)
-    .filter((file) => file.endsWith(".json"));
+  const files = getEventFiles();
   const fileNameMatch = files.find((file) => file.endsWith(`-${eventId}.json`));
   if (fileNameMatch) return path.join(EVENTS_DIR, fileNameMatch);
 
   for (const file of files) {
     const filePath = path.join(EVENTS_DIR, file);
-    try {
-      const raw = fs.readFileSync(filePath, "utf8");
-      const parsed = JSON.parse(raw);
-      if (isHistoryEntry(parsed) && parsed.eventId === eventId) return filePath;
-    } catch {
-      continue;
-    }
+    if (readHistoryEntry(filePath)?.eventId === eventId) return filePath;
   }
 
   return undefined;
@@ -143,18 +134,12 @@ export function deleteWallpaperHistoryEntry(eventId: string) {
 }
 
 export function clearWallpaperHistory() {
-  if (!fs.existsSync(EVENTS_DIR)) return 0;
-
-  let deletedCount = 0;
-  const files = fs
-    .readdirSync(EVENTS_DIR)
-    .filter((file) => file.endsWith(".json"));
+  const files = getEventFiles();
   for (const file of files) {
     fs.unlinkSync(path.join(EVENTS_DIR, file));
-    deletedCount += 1;
   }
 
-  return deletedCount;
+  return files.length;
 }
 
 export async function recordWallpaperHistoryBestEffort(

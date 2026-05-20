@@ -4,6 +4,7 @@ import {
   ActionPanel,
   Alert,
   confirmAlert,
+  environment,
   Icon,
   Image,
   Keyboard,
@@ -135,6 +136,11 @@ function HistoryActions(props: {
           title="Open Artwork Page"
           url={getArtworkUrl(entry)}
           shortcut={Keyboard.Shortcut.Common.Open}
+        />
+        <Action.Open
+          title="Open Extension Folder"
+          icon={Icon.Folder}
+          target={environment.supportPath}
         />
         {entry.localFileExists ? (
           <Action.ShowInFinder
