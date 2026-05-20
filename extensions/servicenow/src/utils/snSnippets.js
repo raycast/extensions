@@ -2,6 +2,82 @@
  * CREDIT: Snippets taken from the SN utils / arnoudkooi
  */
 
+export function findReferences(tableName, sysId) {
+  return `function findReferences(tableName, refRecordID) {
+    var results = [];
+    var refTable = new TableUtils(tableName).getTables();
+    gs.include("j2js");
+    refTable = j2js(refTable).join();
+
+    var dict = new GlideRecord("sys_dictionary");
+    dict
+      .addQuery("reference", "IN", refTable)
+      .addOrCondition("internal_type", "document_id")
+      .addOrCondition("internal_type", "conditions");
+    dict.addQuery("name", "DOES NOT CONTAIN", "var__m_");
+    dict.addQuery("name", "DOES NOT CONTAIN", "ecc_");
+    dict.addQuery("name", "DOES NOT CONTAIN", "ha_");
+    dict.addQuery("name", "DOES NOT CONTAIN", "syslog");
+    dict.addQuery("name", "DOES NOT CONTAIN", "sys_history");
+    dict.addQuery("name", "DOES NOT CONTAIN", "_log");
+    dict.addQuery("name", "DOES NOT CONTAIN", "text_search");
+    dict.addQuery("name", "DOES NOT CONTAIN", "ts_");
+    dict.addQuery("name", "DOES NOT CONTAIN", "sys_watermark");
+    dict.addQuery("name", "DOES NOT CONTAIN", "sys_audit");
+    dict.orderBy("name");
+    dict.orderBy("element");
+    dict.query();
+    while (dict.next()) {
+      var tblName = dict.name.toString();
+      var gr = new GlideRecord("sys_table_rotation_schedule");
+      gr.addQuery("name.name", "!=", tblName);
+      gr.addQuery("table_name", tblName);
+      gr.query();
+      if (!gr.hasNext() && gs.tableExists(tblName)) {
+        var operator = "=";
+        var refType = dict.internal_type.toString();
+        if (refType == "glide_list" || refType == "conditions") {
+          operator = "LIKE";
+        }
+
+        var element = dict.element.toString();
+        var rec = new GlideRecord(tblName);
+        if (refType == "glide_list" || refType == "conditions") {
+          rec.addQuery(element, "CONTAINS", refRecordID);
+        } else {
+          rec.addQuery(element, refRecordID);
+        }
+        rec.query();
+        var count = rec.getRowCount();
+        if (count > 0) {
+          results.push({
+            table: tblName,
+            column: element,
+            count: count,
+            operator: operator
+          });
+        }
+      }
+    }
+
+    var vVal = new GlideRecord("sys_variable_value");
+    vVal.addQuery("value", "CONTAINS", refRecordID);
+    vVal.query();
+    var vCount = vVal.getRowCount();
+    if (vCount > 0) {
+      results.push({
+        table: "sys_variable_value",
+        column: "value",
+        count: vCount,
+        operator: "LIKE"
+      });
+    }
+
+    gs.print("###" + JSON.stringify(results) + "###");
+  }
+  findReferences("${tableName}", "${sysId}");`;
+}
+
 export function findSysID(sys_id) {
   return `function findSysID(sys_id) {
     var commonTables = ["sys_metadata", "task", "cmdb_ci", "sys_user", "kb_knowledge"];

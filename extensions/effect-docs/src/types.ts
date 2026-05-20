@@ -1,6 +1,6 @@
 export type DocItem = {
 	title: string;
-	description: string;
+	description?: string;
 	url: string;
 	section?: string;
 };

@@ -59,7 +59,7 @@ export function McpServerFormConfig(props: props): React.JSX.Element {
     const currentNames = Object.keys(props.config.mcpServers);
     const newNames = Object.keys(config.mcpServers);
     const commonName = currentNames.find(
-      (currentName) => newNames.findIndex((newName) => currentName === newName && newName !== props.configName) !== -1
+      (currentName) => newNames.findIndex((newName) => currentName === newName && newName !== props.configName) !== -1,
     );
     if (commonName) return `Mcp Server "${commonName}" already configured.`;
   }

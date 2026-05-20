@@ -1,5 +1,10 @@
 # spanish-tv-guide Changelog
 
+## [Bug fixes and dependency updates] - 2026-05-17
+
+- Fix timezone issue
+- Fix icon for Raycast 2
+
 ## [Calculate if a program is live client side] - 2024-12-09
 
 - Calculate if a program is live in raycast extension to avoid timezone issues as data is cached now at origin

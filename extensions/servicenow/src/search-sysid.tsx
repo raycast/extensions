@@ -1,155 +1,256 @@
-import { LaunchProps, LocalStorage, showToast, Toast, open } from "@raycast/api";
+import { useEffect, useRef, useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Color,
+  Form,
+  getSelectedText,
+  Icon,
+  LaunchProps,
+  List,
+  LocalStorage,
+  open,
+  popToRoot,
+  showToast,
+  Toast,
+} from "@raycast/api";
+
+import Actions from "./components/Actions";
 import { Instance } from "./types";
+import useInstances from "./hooks/useInstances";
 import { findSysID } from "./utils/snSnippets";
+import { ServiceNowClient } from "./utils/serviceNowClient";
+import { buildServiceNowUrl } from "./utils/buildServiceNowUrl";
+import { instanceLabel } from "./utils/instanceLabel";
+import { matchInstance, notFoundToast, NO_PROFILES_TOAST } from "./utils/instanceResolver";
+import { SYS_ID_RE } from "./utils/extractRecordFromUrl";
 
-export default async (props: LaunchProps) => {
-  const { sys_id, instanceName } = props.arguments;
-  const item = await LocalStorage.getItem<string>("saved-instances");
+const INVALID_SYS_ID_TOAST = {
+  style: Toast.Style.Failure,
+  title: "Invalid Sys ID",
+  message: "Sys ID must be a 32-character hexadecimal string.",
+} as const;
 
-  if (!item) {
-    showToast(Toast.Style.Failure, "No instances found", "Please create an instance profile first");
-    return;
-  }
+type SysIdSource = "arg" | "selection" | "form";
 
-  let instance;
-  if (instanceName) {
-    const instanceProfiles = JSON.parse(item) as Instance[];
-    instance = instanceProfiles.find(
-      (i: Instance) =>
-        i.name.toLowerCase().includes(instanceName.toLowerCase()) ||
-        i.alias?.toLowerCase().includes(instanceName.toLowerCase()),
-    );
-  } else {
-    const selectedInstance = await LocalStorage.getItem<string>("selected-instance");
-    if (selectedInstance) instance = JSON.parse(selectedInstance) as Instance;
-  }
+function sourceSuffix(source: SysIdSource | null): string {
+  if (source === "selection") return " — from selection";
+  return "";
+}
 
-  if (!instance) {
-    showToast(
-      Toast.Style.Failure,
-      "Instance not found",
-      `No instance found with name or alias containing ${instanceName}`,
-    );
-    return;
-  }
+export default function SearchSysId(props: LaunchProps) {
+  const { sys_id: argSysId, instanceName } = props.arguments;
+  const { instances, selectedInstance, setSelectedInstance, isLoading: isLoadingInstances } = useInstances();
+  const argTrimmed = argSysId?.trim() || null;
+  const argInitial = argTrimmed && SYS_ID_RE.test(argTrimmed) ? argTrimmed : null;
+  const argInvalid = argTrimmed !== null && argInitial === null;
+  const [sysId, setSysId] = useState<string | null>(argInitial);
+  const [sysIdSource, setSysIdSource] = useState<SysIdSource | null>(argInitial ? "arg" : null);
+  const [detectionDone, setDetectionDone] = useState<boolean>(argInitial !== null);
 
-  showToast(Toast.Style.Animated, `Searching sys_id in ${instance.alias}...`);
+  useEffect(() => {
+    if (argInvalid) showToast(INVALID_SYS_ID_TOAST);
+  }, []);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const detectionStarted = useRef(false);
 
-  const client = new ServiceNowClient(instance);
-  const isAuthenticated = await client.init();
+  useEffect(() => {
+    if (isLoadingInstances) return;
+    if (instances.length === 0) {
+      showToast(NO_PROFILES_TOAST);
+      popToRoot();
+      return;
+    }
+    if (instanceName) {
+      const found = matchInstance(instances, instanceName);
+      if (found && found.id !== selectedInstance?.id) {
+        setSelectedInstance(found);
+        LocalStorage.setItem("selected-instance", JSON.stringify(found));
+      } else if (!found) {
+        showToast(notFoundToast(instanceName));
+      }
+    }
+  }, [isLoadingInstances]);
 
-  if (!isAuthenticated) {
-    return;
-  }
+  useEffect(() => {
+    if (detectionStarted.current || detectionDone || sysId) return;
+    detectionStarted.current = true;
+    (async () => {
+      try {
+        const selection = (await getSelectedText())?.trim();
+        if (selection && SYS_ID_RE.test(selection)) {
+          setSysId(selection);
+          setSysIdSource("selection");
+        }
+      } catch {
+        // ignore selection errors (no selection / no permission)
+      }
+      setDetectionDone(true);
+    })();
+  }, []);
 
-  const callBack = (response: string) => {
-    const answer = response.match(/###(.*)###/);
-    if (response.length === 0) showToast(Toast.Style.Failure, "Could not search for sys_id. (are you an Admin?)");
-    else if (answer != null && answer[1]) {
-      const table = answer[1].split("^")[0];
-      const path = table + ".do?sys_id=" + sys_id;
-      open(`https://${instance.name}.service-now.com/${path}`);
-    } else {
-      showToast(Toast.Style.Failure, `sys_id not found on ${instance.alias}`);
+  useEffect(() => {
+    if (!selectedInstance || !sysId) return;
+    let cancelled = false;
+    setIsLoading(true);
+    setErrorMessage(null);
+
+    (async () => {
+      const client = new ServiceNowClient(selectedInstance, (updated) => {
+        if (selectedInstance.id === updated.id) setSelectedInstance(updated);
+      });
+      const authed = await client.init();
+      if (cancelled) return;
+      if (!authed) {
+        setErrorMessage("Authentication failed");
+        setIsLoading(false);
+        return;
+      }
+      await client.startBackgroundScript(findSysID(sysId), (response) => {
+        if (cancelled) return;
+        const answer = response.match(/###(.*)###/);
+        if (response.length === 0) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Could Not Search for Sys ID",
+            message: "Admin access is required.",
+          });
+          setErrorMessage("Admin access is required to run this lookup.");
+          setIsLoading(false);
+        } else if (answer != null && answer[1]) {
+          const table = answer[1].split("^")[0];
+          open(buildServiceNowUrl(selectedInstance.name, `${table}.do?sys_id=${sysId}`));
+          popToRoot();
+        } else {
+          const label = instanceLabel(selectedInstance);
+          showToast({ style: Toast.Style.Failure, title: `Sys ID not found on ${label}` });
+          setErrorMessage(`Sys ID ${sysId} was not found on ${label}.`);
+          setIsLoading(false);
+        }
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedInstance?.id, sysId]);
+
+  const onInstanceChange = (newValue: string) => {
+    const found = instances.find((i) => i.id === newValue);
+    if (found) {
+      setSelectedInstance(found);
+      LocalStorage.setItem("selected-instance", JSON.stringify(found));
     }
   };
 
-  await client.startBackgroundScript(findSysID(sys_id), callBack);
-};
+  const resetToForm = () => {
+    setErrorMessage(null);
+    setSysId(null);
+    setSysIdSource(null);
+  };
 
-class ServiceNowClient {
-  private instance: Instance;
-  private sessionData: { ck: string; cookies: string } | null = null;
+  const instanceId = selectedInstance?.id ?? "";
 
-  constructor(instance: Instance) {
-    this.instance = instance;
+  if (!sysId && !detectionDone) {
+    return <List isLoading navigationTitle={`Find Record by Sys ID${sourceSuffix(sysIdSource)}`} />;
   }
 
-  async init(): Promise<boolean> {
-    this.sessionData = await this.authenticate();
-    return this.sessionData !== null;
+  if (!sysId) {
+    return (
+      <Form
+        navigationTitle={`Find Record by Sys ID${sourceSuffix(sysIdSource)}`}
+        actions={
+          <ActionPanel>
+            <Action.SubmitForm
+              title="Find Record"
+              icon={Icon.MagnifyingGlass}
+              onSubmit={(values: { sysId?: string }) => {
+                const s = values.sysId?.trim();
+                if (!s) {
+                  showToast({ style: Toast.Style.Failure, title: "Missing Sys ID", message: "Please enter a Sys ID" });
+                  return;
+                }
+                if (!SYS_ID_RE.test(s)) {
+                  showToast(INVALID_SYS_ID_TOAST);
+                  return;
+                }
+                setSysId(s);
+                setSysIdSource("form");
+              }}
+            />
+            <Actions />
+          </ActionPanel>
+        }
+      >
+        <Form.Description text="Enter the Sys ID of the record you want to open. Highlight a 32-character Sys ID before launching to skip this form." />
+        <Form.TextField id="sysId" title="Sys ID" placeholder="32-character sys_id" />
+        <Form.Dropdown
+          id="instance"
+          title="Instance"
+          value={instanceId}
+          onChange={onInstanceChange}
+          isLoading={isLoadingInstances}
+        >
+          {instances.map((instance: Instance) => (
+            <Form.Dropdown.Item
+              key={instance.id}
+              title={instanceLabel(instance)}
+              value={instance.id}
+              icon={{
+                source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
+                tintColor: instance.color,
+              }}
+            />
+          ))}
+        </Form.Dropdown>
+      </Form>
+    );
   }
 
-  async authenticate() {
-    const url = `https://${this.instance.name}.service-now.com/sn_devstudio_/v1/get_publish_info`;
-
-    try {
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Basic ${Buffer.from(this.instance.username + ":" + this.instance.password).toString("base64")}`,
-        },
-      });
-
-      const data = await response.json();
-      const cookies = response.headers.get("set-cookie");
-
-      //extract cookies from response
-      let jsessionid = "";
-      let glide_user_route = "";
-      let glide_session_store = "";
-      let BIGipServerpool = "";
-      const cookiesArray = ("" + cookies).split(";");
-      for (let i = 0; i < cookiesArray.length; i++) {
-        if (cookiesArray[i].indexOf("JSESSIONID") > -1) {
-          jsessionid = cookiesArray[i].substring(cookiesArray[i].indexOf("JSESSIONID"), cookiesArray[i].length);
-        }
-        if (cookiesArray[i].indexOf("glide_user_route") > -1) {
-          glide_user_route = cookiesArray[i].substring(
-            cookiesArray[i].indexOf("glide_user_route"),
-            cookiesArray[i].length,
-          );
-        }
-        if (cookiesArray[i].indexOf("glide_session_store") > -1) {
-          glide_session_store = cookiesArray[i].substring(
-            cookiesArray[i].indexOf("glide_session_store"),
-            cookiesArray[i].length,
-          );
-        }
-        if (cookiesArray[i].indexOf("BIGipServerpool") > -1) {
-          BIGipServerpool = cookiesArray[i].substring(
-            cookiesArray[i].indexOf("BIGipServerpool"),
-            cookiesArray[i].length,
-          );
-        }
+  return (
+    <List
+      isLoading={isLoading || isLoadingInstances}
+      navigationTitle={`Find Record by Sys ID${sourceSuffix(sysIdSource)}`}
+      searchBarAccessory={
+        <List.Dropdown
+          isLoading={isLoadingInstances}
+          value={instanceId}
+          tooltip="Select the instance to search in"
+          onChange={(newValue) => {
+            if (!isLoadingInstances) onInstanceChange(newValue);
+          }}
+        >
+          <List.Dropdown.Section title="Instance Profiles">
+            {instances.map((instance: Instance) => (
+              <List.Dropdown.Item
+                key={instance.id}
+                title={instanceLabel(instance)}
+                value={instance.id}
+                icon={{
+                  source: instanceId == instance.id ? Icon.CheckCircle : Icon.Circle,
+                  tintColor: instance.color,
+                }}
+              />
+            ))}
+          </List.Dropdown.Section>
+        </List.Dropdown>
       }
-
-      return {
-        ck: data.ck,
-        cookies: jsessionid + ";" + glide_user_route + ";" + glide_session_store + ";" + BIGipServerpool,
-      };
-    } catch (error) {
-      console.error("Authentication Failed:", error);
-      showToast(
-        Toast.Style.Failure,
-        "Authentication Failed",
-        "This command requires admin access in ServiceNow. Please verify your credentials and permissions.",
-      );
-      return null;
-    }
-  }
-
-  async startBackgroundScript(script: string, callback: (data: string) => void) {
-    if (!this.sessionData) throw new Error("Not authenticated");
-    const url = `https://${this.instance.name}.service-now.com/sys.scripts.do`;
-
-    const body = { script: script, runscript: "Run script" };
-
-    try {
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Cookie: this.sessionData.cookies,
-          "X-UserToken": this.sessionData.ck,
-        },
-        body: new URLSearchParams(body).toString(),
-      });
-
-      const data = await response.text();
-      callback(data);
-    } catch (error) {
-      console.error("Background Script failed:", error);
-      showToast(Toast.Style.Failure, "Background Script failed");
-    }
-  }
+    >
+      {errorMessage ? (
+        <List.EmptyView
+          icon={{ source: Icon.ExclamationMark, tintColor: Color.Red }}
+          title="Lookup Failed"
+          description={errorMessage}
+          actions={
+            <ActionPanel>
+              <Action title="Try Another Sys ID" icon={Icon.MagnifyingGlass} onAction={resetToForm} />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        <List.EmptyView icon={Icon.MagnifyingGlass} title={`Searching for ${sysId}...`} />
+      )}
+    </List>
+  );
 }

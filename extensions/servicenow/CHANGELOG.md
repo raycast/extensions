@@ -1,5 +1,23 @@
 # ServiceNow Extension Changelog
 
+## [OAuth, Windows Support & New Commands] - 2026-05-19
+
+- Added OAuth 2.0 (PKCE) as an alternative to Basic Auth, selectable per instance profile. Tokens refresh automatically and a **Sign In / Re-authenticate** action recovers expired profiles; auth failures are flagged in **Manage Instance Profiles**.
+- Added Windows support. On macOS the extension keeps reading the frontmost browser tab via AppleScript; on Windows it falls back to the Raycast Browser Extension's `getTabs()` API.
+- Added support for FedRAMP (`*.servicenowservices.com`) and on-prem instances. The **Instance URL** field now accepts a subdomain or a full URL.
+- Added new commands: **Cancel My Transactions** (stop a runaway transaction and unlock a stuck session), **Find Record References** (list every column across the instance that references a record), and **Explore Records** (browse any table with search, pagination, and favorites — reachable from **Explore Tables** and **Find Record References**).
+- Added one-click actions in the instance profile form to download the extension's update sets from ServiceNow Share: **ACLs for Non-Admin Users** and the new **Default OAuth Client**.
+- Renamed several commands to follow Raycast's `<verb> <noun>` convention (e.g. **Search Text**, **Find Record by Sys ID**, **Search Developer Portal**, **Open Current Page in Another Instance**). Command IDs are unchanged, so existing keyboard shortcuts keep working.
+- Removed the **Login to Instance** command — it passed Basic Auth credentials through the URL (visible in browser history and server logs).
+- Reworked **Search Code** to query `sn_codesearch` once per table and render sections progressively as responses arrive, avoiding `ECONNRESET` errors against instances with many matching scripts.
+
+### Fixes
+
+- Fix out-of-memory crash in **Explore Navigation Menu** on large instances and reduce peak memory in **Search Code** during revalidation.
+- Fix Edit Favorite form opening empty when invoked from search results, code search, navigation history, navigation menu and record details.
+- Strip paths from pasted **Instance URL** values so generated links don't break.
+- Surface a toast (instead of crashing silently) when an instance command is launched without a profile selected or the stored instance list cannot be parsed.
+
 ## [Fix] - 2025-05-14
 
 Fixed an issue where the Search by Sys_ID command stopped working after publishing, due to function name minification during the build process.

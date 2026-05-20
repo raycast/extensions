@@ -1,5 +1,13 @@
 # GitHub Changelog
 
+## [Fix starred repositories loading] - 2026-05-20
+
+- Load starred repositories in smaller GitHub GraphQL batches to avoid 502 errors with larger result preferences.
+
+## [Fix repository search for many organizations] - 2026-05-18
+
+- Split My Repositories loading into smaller owner-specific searches to avoid GitHub 502 errors for users in many organizations.
+
 ## [Fix null pull request nodes crash] - 2026-05-15
 
 - Fixed `TypeError: Cannot read properties of null (reading 'id')` in **My Pull Requests** when the GitHub search API returns edges with a null `node` (e.g. PRs from repositories the user can no longer access).

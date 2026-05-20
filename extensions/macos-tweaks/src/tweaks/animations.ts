@@ -95,4 +95,30 @@ export const animationsTweaks: TweakDefinition[] = [
     risk: "safe",
     tags: ["finder"],
   },
+  {
+    id: "animations-reduce-motion",
+    title: "Reduce Motion",
+    description:
+      "Cut back on UI motion effects system-wide (Space switching, opening apps, notifications). Improves perceived performance on older Macs",
+    category: "animations",
+    domain: "com.apple.universalaccess",
+    key: "reduceMotion",
+    type: "boolean",
+    defaultValue: false,
+    risk: "safe",
+    tags: ["accessibility", "performance", "motion"],
+  },
+  {
+    id: "animations-reduce-transparency",
+    title: "Reduce Transparency",
+    description:
+      "Replace blurred / translucent backgrounds with solid colors. Improves perceived performance and readability",
+    category: "animations",
+    domain: "com.apple.universalaccess",
+    key: "reduceTransparency",
+    type: "boolean",
+    defaultValue: false,
+    risk: "safe",
+    tags: ["accessibility", "performance", "transparency"],
+  },
 ];
