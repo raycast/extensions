@@ -444,7 +444,7 @@ export class Bitwarden {
       return { result: undefined };
     } catch (execError) {
       captureException("Failed to sync vault", execError);
-      const { error } = await this.handleCommonErrors(execError);
+      const { error } = await this.handleCommonErrors(execError, { skipInvalidSessionTokenLogout: true });
       if (!error) throw execError;
       return { error };
     }

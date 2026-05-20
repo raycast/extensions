@@ -96,9 +96,14 @@ export function VaultProvider(props: VaultProviderProps) {
       style: Toast.Style.Animated,
     });
     try {
-      await bitwarden.sync();
+      const { error } = await bitwarden.sync();
+      if (error) {
+        toast.style = Toast.Style.Failure;
+        toast.title = "Failed to sync vault";
+        toast.message = getDisplayableErrorMessage(error);
+      }
       await loadItems();
-      await toast.hide();
+      if (!error) await toast.hide();
     } catch (error) {
       await bitwarden.logout();
       toast.style = Toast.Style.Failure;
