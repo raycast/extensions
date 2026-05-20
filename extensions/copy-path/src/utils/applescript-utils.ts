@@ -124,30 +124,30 @@ export const getVSCodeActiveFilePath = async (app: Application) => {
   let path = "";
   try {
     await Clipboard.copy(VSCODE_SENTINEL_CLIPBOARD);
-    path = (await runAppleScript(scriptVSCodeActiveFilePath(app), { timeout: APPLESCRIPT_TIMEOUT_MS })).trim();
+    const clipboardPath = (
+      await runAppleScript(scriptVSCodeActiveFilePath(app), { timeout: APPLESCRIPT_TIMEOUT_MS })
+    ).trim();
+    path = normalizeVSCodeFilePath(clipboardPath);
   } catch (e) {
     path = "";
   } finally {
-    if (!isVSCodeFilePath(path)) {
+    if (path === "") {
       await restoreClipboard(previousClipboard);
     }
   }
 
+  return path;
+};
+
+const normalizeVSCodeFilePath = (path: string) => {
   try {
     if (path.startsWith("file://")) {
       return decodeURIComponent(path.replace("file://", ""));
     }
-    if (isVSCodeFilePath(path)) {
-      return path;
-    }
-    return "";
-  } catch (e) {
+  } catch {
     return "";
   }
-};
-
-const isVSCodeFilePath = (path: string) => {
-  return path.startsWith("file://") || path.startsWith("/") || path.startsWith("~");
+  return path.startsWith("/") || path.startsWith("~") ? path : "";
 };
 
 const restoreClipboard = async (content: Clipboard.ReadContent) => {
