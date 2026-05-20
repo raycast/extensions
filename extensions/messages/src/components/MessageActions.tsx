@@ -47,7 +47,7 @@ export default function MessageActions({ message, mutate, showDetails = true }: 
 
     prompt += `\n\nMessage: ${message.body}\n\nAnswer:`;
 
-    const reply = await AI.ask(prompt, { model: AI.Model["OpenAI_GPT4o-mini"] });
+    const reply = await AI.ask(prompt);
     toast.hide();
     return reply;
   }
