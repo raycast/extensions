@@ -1,6 +1,6 @@
 # Skills Changelog
 
-## [Show Installed Skill Audit Details] - {PR_MERGE_DATE}
+## [Show Installed Skill Audit Details] - 2026-05-20
 
 - Add an "Open on skills.sh" action and `skills.sh` detail link for published installed skills
 - Show security audit statuses, audit links, and audit actions in installed skill details
