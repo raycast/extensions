@@ -14,6 +14,7 @@ import { SearchResponse, SearchResult } from "./types";
 import {
   getFindrPath,
   getMaxResults,
+  getFindrEnv,
   formatFileSize,
   formatRelativeDate,
   getFileIcon,
@@ -24,12 +25,14 @@ export default function SearchFiles() {
   const [query, setQuery] = useState("");
   const findrPath = getFindrPath();
   const maxResults = getMaxResults();
+  const findrEnv = getFindrEnv();
   const binaryExists = useMemo(() => existsSync(findrPath), [findrPath]);
 
   const { isLoading, data, error } = useExec(
     findrPath,
     ["search", query, "--json", "--limit", String(maxResults)],
     {
+      env: findrEnv,
       execute: query.length > 0 && binaryExists,
       keepPreviousData: true,
       parseOutput: ({ stdout }) => {
@@ -45,6 +48,16 @@ export default function SearchFiles() {
   const results = useMemo(() => data?.results || [], [data]);
   const elapsed = data?.elapsed_ms ?? 0;
   const isIndexing = data?.mode === "indexing";
+
+  useEffect(() => {
+    if (error) {
+      showToast({
+        style: Toast.Style.Failure,
+        title: "Search failed",
+        message: error.message,
+      });
+    }
+  }, [error]);
 
   useEffect(() => {
     if (isIndexing) {
@@ -122,20 +135,7 @@ export default function SearchFiles() {
         <List.EmptyView
           icon={Icon.XMarkCircle}
           title="No results"
-          description={`Nothing found for "${query}". Try broader terms or append a file type (e.g. "report pdf").`}
-          actions={
-            <ActionPanel>
-              <Action
-                title="Rebuild Index"
-                icon={Icon.ArrowClockwise}
-                onAction={() => {
-                  const { execFile } = require("child_process");
-                  execFile(findrPath, ["index", "rebuild"], () => {});
-                  showToast({ style: Toast.Style.Animated, title: "Rebuilding index..." });
-                }}
-              />
-            </ActionPanel>
-          }
+          description={`Nothing found for "${query}".`}
         />
       ) : (
         <List.Section
@@ -152,19 +152,22 @@ export default function SearchFiles() {
               actions={
                 <ActionPanel>
                   <Action.Open title="Open File" target={result.path} />
+                  <Action.ShowInFinder
+                    path={result.path}
+                    shortcut={{ modifiers: ["cmd"], key: "return" }}
+                  />
                   <Action.ToggleQuickLook
                     shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
                   />
-                  <Action.ShowInFinder path={result.path} />
                   <Action.CopyToClipboard
                     title="Copy Path"
                     content={result.path}
-                    shortcut={Keyboard.Shortcut.Common.Copy}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   />
                   <Action.CopyToClipboard
                     title="Copy Filename"
                     content={result.filename}
-                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
                   />
                   <ActionPanel.Section>
                     <Action
@@ -189,8 +192,6 @@ function ResultDetail({ result }: { result: SearchResult }) {
 
   if (result.content_snippet) {
     const sanitized = result.content_snippet
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
       .replace(/[\\`*_{}[\]()#+\-.!]/g, "\\$&")
       .replace(/\n/g, "\n> ");
     markdown += `> ${sanitized}\n`;

@@ -19,11 +19,6 @@ export function getFindrPath(): string {
     if (!chmodApplied) {
       try {
         chmodSync(bundled, 0o755);
-        // findr-ocr is called as a subprocess by findr for Apple Vision OCR
-        const ocrBin = join(environment.assetsPath, "findr-ocr");
-        if (existsSync(ocrBin)) {
-          chmodSync(ocrBin, 0o755);
-        }
       } catch {
         // May already be executable
       }
@@ -39,6 +34,20 @@ export function getMaxResults(): number {
   const { maxResults } = getPreferenceValues<ExtensionPreferences>();
   const parsed = parseInt(maxResults, 10);
   return parsed > 0 ? parsed : 30;
+}
+
+export function getOpenRouterApiKey(): string {
+  const { openrouterApiKey } = getPreferenceValues<ExtensionPreferences>();
+  return openrouterApiKey?.trim() || "";
+}
+
+export function getFindrEnv(): Record<string, string> {
+  const env: Record<string, string> = {};
+  const key = getOpenRouterApiKey();
+  if (key) {
+    env.OPENROUTER_API_KEY = key;
+  }
+  return env;
 }
 
 export function formatFileSize(bytes: number | null): string {
@@ -57,7 +66,7 @@ export function formatRelativeDate(isoDate: string): string {
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-  if (diffDays <= 0) return "Today";
+  if (diffDays === 0) return "Today";
   if (diffDays === 1) return "Yesterday";
   if (diffDays < 7) return `${diffDays}d ago`;
   if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
