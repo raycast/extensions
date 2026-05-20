@@ -5,7 +5,7 @@ const QQ_SMTP_HOST = "smtp.qq.com";
 const QQ_SMTP_PORT = 465;
 
 function createTransporter(): nodemailer.Transporter {
-  const prefs = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
   return nodemailer.createTransport({
     host: QQ_SMTP_HOST,
     port: QQ_SMTP_PORT,
@@ -29,7 +29,7 @@ export interface SendEmailOptions {
 }
 
 export async function sendEmail(options: SendEmailOptions): Promise<void> {
-  const prefs = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
   const transporter = createTransporter();
 
   await transporter.sendMail({
@@ -42,43 +42,5 @@ export async function sendEmail(options: SendEmailOptions): Promise<void> {
     html: options.html,
     inReplyTo: options.inReplyTo,
     references: options.references,
-  });
-}
-
-export async function replyToEmail(
-  originalFrom: string,
-  originalSubject: string,
-  originalMessageId: string,
-  replyBody: string,
-  replyAll?: { cc?: string },
-): Promise<void> {
-  const subject = originalSubject.startsWith("Re:") ? originalSubject : `Re: ${originalSubject}`;
-
-  await sendEmail({
-    to: originalFrom,
-    cc: replyAll?.cc,
-    subject,
-    text: replyBody,
-    inReplyTo: originalMessageId,
-    references: originalMessageId,
-  });
-}
-
-export async function forwardEmail(
-  to: string,
-  originalSubject: string,
-  originalBody: string,
-  forwardNote?: string,
-): Promise<void> {
-  const subject = originalSubject.startsWith("Fwd:") ? originalSubject : `Fwd: ${originalSubject}`;
-
-  const body = forwardNote
-    ? `${forwardNote}\n\n---------- Forwarded message ----------\n\n${originalBody}`
-    : `---------- Forwarded message ----------\n\n${originalBody}`;
-
-  await sendEmail({
-    to,
-    subject,
-    text: body,
   });
 }

@@ -7,7 +7,7 @@ const QQ_IMAP_HOST = "imap.qq.com";
 const QQ_IMAP_PORT = 993;
 
 function createClient(): ImapFlow {
-  const prefs = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
 
   return new ImapFlow({
     host: QQ_IMAP_HOST,

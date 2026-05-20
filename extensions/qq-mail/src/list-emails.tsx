@@ -48,7 +48,7 @@ interface CommandArguments {
 }
 
 export default function Command(props?: LaunchProps<{ arguments: CommandArguments }>) {
-  const prefs = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
   const { folder, filter } = props?.arguments || {};
 
   // Check if preferences are configured
@@ -79,7 +79,7 @@ interface EmailListProps {
 
 function EmailList(props: EmailListProps = {}) {
   const { initialFolder, initialFilter } = props;
-  const prefs = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
   const pageSize = parseInt(prefs.emailsToLoad || "20", 10);
 
   const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder || "INBOX");
@@ -241,38 +241,53 @@ interface FilterDropdownsProps {
   onFilterChange: (filter: string) => void;
 }
 
+const FILTER_VALUE_PREFIX = "filter:";
+
+function filterDropdownValue(filter: EmailFilter): string {
+  return `${FILTER_VALUE_PREFIX}${filter}`;
+}
+
 function FilterDropdowns(props: FilterDropdownsProps) {
   const { folders, selectedFolder, onFolderChange, filter, onFilterChange } = props;
-  // Combine folder and filter into a single value for the dropdown
-  const combinedValue = `${selectedFolder}::${filter}`;
+  const dropdownValue = filter !== "all" ? filterDropdownValue(filter) : selectedFolder;
 
   // Filter out \Noselect folders (containers that can't hold messages)
   const selectableFolders = folders.filter((folder) => !hasFlag(folder.flags, "\\Noselect"));
 
   const handleChange = (value: string) => {
-    // Check if it's a filter value
-    if (["all", "unread", "read", "attachment"].includes(value)) {
-      onFilterChange(value);
+    if (value.startsWith(FILTER_VALUE_PREFIX)) {
+      onFilterChange(value.slice(FILTER_VALUE_PREFIX.length));
     } else {
-      // It's a folder path
       onFolderChange(value);
     }
   };
 
   return (
-    <List.Dropdown tooltip="Select Folder or Filter" value={combinedValue.split("::")[0]} onChange={handleChange}>
+    <List.Dropdown tooltip="Select Folder or Filter" value={dropdownValue} onChange={handleChange}>
       <List.Dropdown.Section title="Folders">
         {selectableFolders.map((folder) => (
           <List.Dropdown.Item key={folder.path} title={folder.name} value={folder.path} icon={getFolderIcon(folder)} />
         ))}
       </List.Dropdown.Section>
       <List.Dropdown.Section title="Filter">
-        <List.Dropdown.Item title={`All${filter === "all" ? " ✓" : ""}`} value="all" icon={Icon.List} />
-        <List.Dropdown.Item title={`Unread${filter === "unread" ? " ✓" : ""}`} value="unread" icon={Icon.Circle} />
-        <List.Dropdown.Item title={`Read${filter === "read" ? " ✓" : ""}`} value="read" icon={Icon.CheckCircle} />
+        <List.Dropdown.Item
+          title={`All${filter === "all" ? " ✓" : ""}`}
+          value={filterDropdownValue("all")}
+          icon={Icon.List}
+        />
+        <List.Dropdown.Item
+          title={`Unread${filter === "unread" ? " ✓" : ""}`}
+          value={filterDropdownValue("unread")}
+          icon={Icon.Circle}
+        />
+        <List.Dropdown.Item
+          title={`Read${filter === "read" ? " ✓" : ""}`}
+          value={filterDropdownValue("read")}
+          icon={Icon.CheckCircle}
+        />
         <List.Dropdown.Item
           title={`Has Attachment${filter === "attachment" ? " ✓" : ""}`}
-          value="attachment"
+          value={filterDropdownValue("attachment")}
           icon={Icon.Paperclip}
         />
       </List.Dropdown.Section>

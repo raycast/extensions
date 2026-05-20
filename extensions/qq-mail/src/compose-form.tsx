@@ -31,7 +31,7 @@ interface ComposeFormProps {
 
 export function ComposeForm({ mode, originalEmail }: ComposeFormProps) {
   const { pop } = useNavigation();
-  const prefs = getPreferenceValues();
+  const prefs = getPreferenceValues<Preferences>();
   const useMarkdown = prefs.composeFormat === "markdown";
 
   // Build initial values based on mode
