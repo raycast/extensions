@@ -17,7 +17,7 @@ const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
   } else if (diff === 0) {
     text = 'Due today';
     color = Color.Red;
-  } else if (diff > 0 && diff <= 7) {
+  } else if (diff > 0 && diff <= 14) {
     text = `${diff} day${diff === 1 ? '' : 's'} left`;
     color = Color.Orange;
   } else if (diff < 0) {
