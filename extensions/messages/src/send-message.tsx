@@ -77,12 +77,12 @@ export default function Command({
           style: Toast.Style.Success,
           title: `Sent Message to ${chat.displayName}`,
           message: values.text,
-          primaryAction: {
-            title: `Open Chat in Messages`,
-            onAction() {
-              open(getMessagesUrl(chat));
+            primaryAction: {
+              title: `Open Chat in Messages`,
+              async onAction() {
+                await open(getMessagesUrl(chat));
+              },
             },
-          },
         });
 
         reset({ text: "" });
