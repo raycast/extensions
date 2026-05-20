@@ -1,6 +1,6 @@
 # GitHub Changelog
 
-## [Fix starred repositories loading] - {PR_MERGE_DATE}
+## [Fix starred repositories loading] - 2026-05-20
 
 - Load starred repositories in smaller GitHub GraphQL batches to avoid 502 errors with larger result preferences.
 
