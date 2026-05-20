@@ -1,6 +1,6 @@
 # SteamGridDB
 
-## [Fix image type fallback] - {PR_MERGE_DATE}
+## [Fix image type fallback] - 2026-05-20
 
 - Prevent a crash when the selected image type is missing or unexpected.
 
