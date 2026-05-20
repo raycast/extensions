@@ -12,6 +12,8 @@ import { calculateLookBackMinutes, escapeSqlLikePattern } from "./utils";
 
 // Path to the iMessage database
 const DB_PATH = resolve(homedir(), "Library/Messages/chat.db");
+const MESSAGE_TEXT_EXPRESSION =
+  "trim(coalesce(message.text, '') || ' ' || coalesce(cast(message.attributedBody as text), ''))";
 
 /**
  * Options for message hook configuration
@@ -39,7 +41,7 @@ function getBaseQuery() {
       ifnull(handle.uncanonicalized_id, chat.chat_identifier) AS sender,
       message.service,
       datetime(message.date / 1000000000 + 978307200, 'unixepoch', 'localtime') AS message_date,
-      coalesce(message.text, message.attributedBody) AS text,
+      ${MESSAGE_TEXT_EXPRESSION} AS text,
       message.is_read
     from message
       left join chat_message_join on chat_message_join.message_id = message.ROWID
@@ -47,7 +49,7 @@ function getBaseQuery() {
       left join handle on message.handle_id = handle.ROWID
     where message.is_from_me = 0
       and (message.text is not null or message.attributedBody is not null)
-      and length(coalesce(message.text, message.attributedBody)) > 0
+      and length(${MESSAGE_TEXT_EXPRESSION}) > 0
       and datetime(message.date / 1000000000 + strftime('%s', '2001-01-01'), 'unixepoch', 'localtime') >= datetime('now', '-${lookBackMinutes} minutes', 'localtime')
 	`;
   if (preferences.ignoreRead) baseQuery += " and message.is_read = 0";
@@ -65,25 +67,25 @@ function getQuery(options: { searchText?: string; searchType: SearchType }) {
   if (options.searchType === "code") {
     baseQuery = `${baseQuery} \nand (
       -- Matches 3 alphanumeric (e.g., 'ABC')
-      coalesce(message.text, message.attributedBody) glob '*[0-9A-Z][0-9A-Z][0-9A-Z]*'
+      ${MESSAGE_TEXT_EXPRESSION} glob '*[0-9A-Z][0-9A-Z][0-9A-Z]*'
       -- Matches 4 alphanumeric (e.g., 'ABCD')
-      or coalesce(message.text, message.attributedBody) glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or ${MESSAGE_TEXT_EXPRESSION} glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
       -- Matches 5 alphanumeric (e.g., 'ABCDE')
-      or coalesce(message.text, message.attributedBody) glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or ${MESSAGE_TEXT_EXPRESSION} glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
       -- Matches 6 alphanumeric (e.g., 'ABCDEF')
-      or coalesce(message.text, message.attributedBody) glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or ${MESSAGE_TEXT_EXPRESSION} glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
       -- Matches format '123-456'
-      or coalesce(message.text, message.attributedBody) glob '*[0-9][0-9][0-9]-[0-9][0-9][0-9]*'
+      or ${MESSAGE_TEXT_EXPRESSION} glob '*[0-9][0-9][0-9]-[0-9][0-9][0-9]*'
       -- Matches 7 alphanumeric (e.g., 'ABCDEFG')
-      or coalesce(message.text, message.attributedBody) glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or ${MESSAGE_TEXT_EXPRESSION} glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
       -- Matches 8 alphanumeric (e.g., 'ABCDEFGH')
-      or coalesce(message.text, message.attributedBody) glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
+      or ${MESSAGE_TEXT_EXPRESSION} glob '*[0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z][0-9A-Z]*'
     )`;
   }
 
   if (options.searchText && options.searchText !== "") {
     const escapedSearchText = escapeSqlLikePattern(options.searchText);
-    baseQuery = `${baseQuery} \nand coalesce(message.text, message.attributedBody) like '%${escapedSearchText}%'`;
+    baseQuery = `${baseQuery} \nand ${MESSAGE_TEXT_EXPRESSION} like '%${escapedSearchText}%'`;
   }
 
   return `${baseQuery} \norder by message.date desc limit 100`.trim();
