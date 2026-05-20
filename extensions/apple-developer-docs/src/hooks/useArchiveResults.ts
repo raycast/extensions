@@ -105,6 +105,12 @@ export default function useArchiveResults(
   }, [documentResults.length, includeArchiveResults, shouldLoadArchive]);
 
   useEffect(() => {
+    if (!shouldLoadArchive) {
+      setIsBuildingToc(false);
+    }
+  }, [shouldLoadArchive]);
+
+  useEffect(() => {
     if (
       !includeArchiveResults ||
       !shouldLoadArchive ||
