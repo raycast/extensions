@@ -1,5 +1,9 @@
 # Brew Changelog
 
+## [Fix Search Cache Recovery] - {PR_MERGE_DATE}
+
+- Preserve the last working search cache while rebuilding package indexes.
+
 ## [Add Keyboard Shortcuts] - 2026-05-12
 
 - Added keyboard shortcuts to common Brew actions, including opening package pages, opening homepages, copying URLs, and running terminal commands.

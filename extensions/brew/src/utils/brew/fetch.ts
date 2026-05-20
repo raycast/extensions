@@ -450,6 +450,19 @@ async function ensureChunkedCache<T>(
     // No stale cache available
   }
 
+  const cacheBuildId = `${process.pid}-${Date.now()}`;
+  const nextBaseDir = `${remote.chunkedConfig.baseDir}.next-${cacheBuildId}`;
+  const previousBaseDir = `${remote.chunkedConfig.baseDir}.previous-${cacheBuildId}`;
+  const buildConfig = hasStaleCacheIndex
+    ? {
+        ...remote.chunkedConfig,
+        baseDir: nextBaseDir,
+        indexPath: `${nextBaseDir}/index.json`,
+        metaPath: `${nextBaseDir}/meta.json`,
+      }
+    : remote.chunkedConfig;
+  let previousCacheMoved = false;
+
   try {
     // Need to rebuild - download source JSON to disk WITHOUT parsing into memory
     // This is critical to avoid heap exhaustion on initial load
@@ -460,8 +473,39 @@ async function ensureChunkedCache<T>(
 
     // Now build the chunked cache from the downloaded file
     // This streams through the file and writes chunks incrementally
-    await buildChunkedCache(remote.cachePath, remote.url, remote.chunkedConfig, extractIndex, onProgress, signal);
+    await buildChunkedCache(remote.cachePath, remote.url, buildConfig, extractIndex, onProgress, signal);
+
+    if (buildConfig !== remote.chunkedConfig) {
+      await fs.rm(previousBaseDir, { recursive: true, force: true });
+      await fs.rename(remote.chunkedConfig.baseDir, previousBaseDir);
+      previousCacheMoved = true;
+      try {
+        await fs.rename(buildConfig.baseDir, remote.chunkedConfig.baseDir);
+        await fs.rm(previousBaseDir, { recursive: true, force: true }).catch(() => {});
+        previousCacheMoved = false;
+      } catch (err) {
+        await fs.rename(previousBaseDir, remote.chunkedConfig.baseDir);
+        previousCacheMoved = false;
+        throw err;
+      }
+    }
   } catch (err) {
+    if (buildConfig !== remote.chunkedConfig) {
+      await fs.rm(buildConfig.baseDir, { recursive: true, force: true }).catch(() => {});
+      if (previousCacheMoved) {
+        try {
+          await fs.rename(previousBaseDir, remote.chunkedConfig.baseDir);
+          previousCacheMoved = false;
+        } catch (restoreErr) {
+          brewLogger.warn("Chunked cache rebuild failed and stale cache could not be restored", {
+            type: remote.chunkedConfig.type,
+            error: restoreErr instanceof Error ? restoreErr.message : String(restoreErr),
+          });
+          throw restoreErr;
+        }
+      }
+    }
+
     // Always re-throw abort errors - the caller handles these
     if (err instanceof Error && err.name === "AbortError") throw err;
 
