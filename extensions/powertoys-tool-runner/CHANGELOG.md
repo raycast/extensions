@@ -1,6 +1,6 @@
 # PowerToys Tool Runner Changelog
 
-## [Added Auto-Start PowerToys functionality] - {PR_MERGE_DATE}
+## [Added Auto-Start PowerToys functionality] - 2026-05-20
 
 - Added functionality to automatically start PowerToys when a tool is triggered
 - Added auto-start setting to control the auto-start functionality
