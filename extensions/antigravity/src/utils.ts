@@ -161,10 +161,7 @@ export async function waitForFileExists(filename: string, timeoutMs = 2000) {
 }
 
 export function getAntigravityApplicationName(): string {
-  if (
-    ANTIGRAVITY_IDE_APP_PATHS.some((appPath) => existsSync(appPath)) ||
-    existsSync(path.join(homedir(), "Library/Application Support/Antigravity IDE"))
-  ) {
+  if (ANTIGRAVITY_IDE_APP_PATHS.some((appPath) => existsSync(appPath))) {
     return ANTIGRAVITY_IDE_APP_NAME;
   }
 
