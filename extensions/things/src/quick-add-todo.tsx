@@ -1,5 +1,6 @@
 import { AI, closeMainWindow, environment, getPreferenceValues, LaunchProps, showToast, Toast } from '@raycast/api';
 import { addTodo, handleError } from './api';
+import { capitalize } from './utils';
 
 export default async function Command(props: LaunchProps & { arguments: Arguments.QuickAddTodo }) {
   try {
@@ -17,7 +18,7 @@ export default async function Command(props: LaunchProps & { arguments: Argument
       json = { title: text };
     } else {
       const result =
-        await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object.
+        await AI.ask(`Act as a task manager. I'll give you a task in a natural language. Your job is to return me only a parsable and minified JSON object. Do not wrap it in a code block or add any other text.
 
 Here are the possible keys of the JSON object with their respective values:
 - title: The title of the to-do.
@@ -61,10 +62,11 @@ Here's the task: "${props.fallbackText ?? props.arguments.text}"`);
 
     await addTodo(json);
 
+    const destination = json.list ?? (json.when ? capitalize(json.when) : 'Inbox');
     await showToast({
       style: Toast.Style.Success,
       title: 'Added to-do',
-      message: `Added "${json.title}" to 'Inbox'`,
+      message: `Added "${json.title}" to '${destination}'`,
     });
   } catch (error) {
     await handleError(error, 'Unable to add to-do');
