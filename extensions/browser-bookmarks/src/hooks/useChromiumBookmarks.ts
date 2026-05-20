@@ -25,7 +25,10 @@ type BookmarkFolder = {
 type BookmarkItem = BookmarkURL | BookmarkFolder;
 
 type BookmarksRoot = {
-  roots: Record<string, BookmarkFolder | undefined>;
+  roots: {
+    bookmark_bar: BookmarkFolder;
+    other: BookmarkFolder;
+  } & Record<string, BookmarkFolder | undefined>;
 };
 
 const CHROMIUM_BOOKMARK_FILE_NAMES = ["Bookmarks", "AccountBookmarks"] as const;
