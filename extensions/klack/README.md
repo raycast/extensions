@@ -46,4 +46,4 @@ npm run dev
 ## Credits
 
 - [Henrik Ruscon](https://github.com/henrikruscon) — Klack.app and original extension
-- [Jace](https://github.com/jacepl) — rebuild
+- [Jace](https://github.com/JaceThings) — rebuild
