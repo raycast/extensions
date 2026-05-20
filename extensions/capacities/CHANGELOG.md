@@ -1,5 +1,9 @@
 # Capacities Changelog
 
+## [Fix space dropdown selection] - {PR_MERGE_DATE}
+
+- Fixed space dropdown selection in the task, weblink, and daily note commands.
+
 ## [Version 2.0.1] - 2026-01-09
 
 - Fix: Space selection for task, weblink and save to daily note.
