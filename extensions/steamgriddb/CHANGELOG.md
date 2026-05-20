@@ -1,5 +1,9 @@
 # SteamGridDB
 
+## [Fix image type fallback] - {PR_MERGE_DATE}
+
+- Prevent a crash when the selected image type is missing or unexpected.
+
 ## [Maintenance] - 2025-07-11
 
 - Change the default Enter key behavior to Download Image
