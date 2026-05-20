@@ -200,6 +200,7 @@ export type Contact = {
   givenName: string;
   familyName: string;
   phoneNumbers: { number: string; countryCode: string | null }[];
+  emails: string[];
   imageData: string | null;
 };
 
@@ -224,6 +225,10 @@ export function createContactMap(contacts: Contact[]): Map<string, Contact> {
       } catch (error) {
         console.error(`Error parsing phone number ${number}:`, error);
       }
+    });
+
+    contact.emails.forEach((email) => {
+      contactMap.set(email.toLowerCase(), contact);
     });
   });
 
