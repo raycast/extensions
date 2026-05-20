@@ -1,6 +1,6 @@
 # Browser Bookmarks Changelog
 
-## [Chrome Account Bookmarks] - {PR_MERGE_DATE}
+## [Chrome Account Bookmarks] - 2026-05-20
 
 - Added support for Chrome account-synced bookmarks stored in `AccountBookmarks`
 
