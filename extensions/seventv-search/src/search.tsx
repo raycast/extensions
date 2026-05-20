@@ -10,7 +10,7 @@ import {
   Clipboard,
   LocalStorage,
 } from "@raycast/api";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { writeFile } from "fs/promises";
 import { join } from "path";
 import { tmpdir } from "os";
@@ -44,6 +44,7 @@ export default function Command() {
   const [history, setHistory] = useState<Emote[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isGridView, setIsGridView] = useState(true);
+  const fetchIdRef = useRef(0);
 
   const [sortValue, setSortValue] = useState<string>("popularity");
   const [sortOrder, setSortOrder] = useState<string>("DESCENDING");
@@ -61,19 +62,21 @@ export default function Command() {
   }, []);
 
   useEffect(() => {
-    async function fetchEmotes() {
-      const query = searchText.trim();
-      if (
-        !query &&
-        !category.startsWith("TRENDING") &&
-        !category.startsWith("TOP")
-      ) {
-        setItems([]);
-        setIsLoading(false);
-        return;
-      }
+    const fetchId = fetchIdRef.current + 1;
+    fetchIdRef.current = fetchId;
+    const query = searchText.trim();
+    const shouldFetch =
+      query || category.startsWith("TRENDING") || category.startsWith("TOP");
 
-      setIsLoading(true);
+    if (!shouldFetch) {
+      setItems([]);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(true);
+
+    async function fetchEmotes() {
       try {
         const gqlQuery = {
           query: `
@@ -122,7 +125,7 @@ export default function Command() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "User-Agent": "Raycast/1.0.0 (Antigravity-Vault)",
+            "User-Agent": "Raycast/1.0.0 (7TV Emotes Search)",
           },
           body: JSON.stringify(gqlQuery),
         });
@@ -140,15 +143,21 @@ export default function Command() {
           throw new Error(resJson.errors[0]?.message || "GQL Error");
         }
 
-        setItems(resJson.data?.emotes?.items || []);
+        if (fetchId === fetchIdRef.current) {
+          setItems(resJson.data?.emotes?.items || []);
+        }
       } catch (error) {
-        showToast({
-          style: Toast.Style.Failure,
-          title: "7TV Error",
-          message: String(error),
-        });
+        if (fetchId === fetchIdRef.current) {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "7TV Error",
+            message: String(error),
+          });
+        }
       } finally {
-        setIsLoading(false);
+        if (fetchId === fetchIdRef.current) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -156,7 +165,9 @@ export default function Command() {
       fetchEmotes();
     }, 400);
 
-    return () => clearTimeout(delayDebounceFn);
+    return () => {
+      clearTimeout(delayDebounceFn);
+    };
   }, [searchText, sortValue, sortOrder, category]);
 
   const getEmoteUrl = (item: Emote, size: "1x" | "2x" | "4x" = "4x") => {
@@ -203,7 +214,7 @@ export default function Command() {
     const toast = await showToast({
       style: Toast.Style.Animated,
       title:
-        mode === "bruteforce" ? "🔥 Bruteforcing..." : "Processing Emote...",
+        mode === "bruteforce" ? "Dropping Emote..." : "Processing Emote...",
     });
     try {
       const res = await fetch(url);
@@ -230,8 +241,7 @@ export default function Command() {
         }
 
         toast.style = Toast.Style.Success;
-        toast.title =
-          mode === "bruteforce" ? "Emote Bruteforced!" : "Emote Dropped!";
+        toast.title = "Emote Dropped!";
       } catch (clipError) {
         console.error("Drop failed:", clipError);
         await Clipboard.paste(url);
@@ -260,7 +270,7 @@ export default function Command() {
             onAction={() => handleDropEmote(item, "smart")}
           />
           <Action
-            title="Bruteforce Drop"
+            title="Quick Drop"
             icon={Icon.Bolt}
             onAction={() => handleDropEmote(item, "bruteforce")}
             shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
@@ -278,7 +288,7 @@ export default function Command() {
             title="Force Paste URL"
             icon={Icon.Link}
             onAction={() => handleDropEmote(item, "url")}
-            shortcut={{ modifiers: ["cmd"], key: "enter" }}
+            shortcut={{ modifiers: ["cmd"], key: "u" }}
           />
           <Action.CopyToClipboard title="Copy Emote URL" content={highResUrl} />
           <Action.CopyToClipboard
@@ -317,7 +327,7 @@ export default function Command() {
         </ActionPanel.Section>
         <ActionPanel.Section>
           <Action.OpenInBrowser
-            title="View on 7tv"
+            title="View on 7TV"
             url={`https://7tv.app/emotes/${item.id}`}
           />
           <Action
@@ -327,7 +337,7 @@ export default function Command() {
             shortcut={{ modifiers: ["cmd", "shift"], key: "v" }}
           />
           <Action.CopyToClipboard
-            title="Copy Id"
+            title="Copy ID"
             content={item.id}
             shortcut={{ modifiers: ["cmd", "shift"], key: "i" }}
           />

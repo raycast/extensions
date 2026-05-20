@@ -2,8 +2,8 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "seventv-search",
   "version": "1.0.0",
-  "title": "7TV Emotes Search Pro",
-  "description": "High-fidelity 7TV discovery and direct drop.",
+  "title": "7TV Emotes Search",
+  "description": "Search, preview, copy, and paste 7TV emotes from Raycast.",
   "icon": "icon.png",
   "author": "Paranjayy",
   "categories": [
@@ -19,25 +19,29 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.6"
+    "@raycast/api": "^1.104.17"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^1.0.8",
-    "@types/node": "20.8.10",
-    "@types/react": "18.2.0",
-    "@types/react-dom": "18.2.0",
-    "eslint": "^8.51.0",
-    "prettier": "^3.0.3",
-    "typescript": "^5.2.2"
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^25.9.1",
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
   },
   "overrides": {
-    "@types/react": "18.2.0",
-    "@types/react-dom": "18.2.0"
+    "@types/react": "19.2.15",
+    "@types/react-dom": "19.2.3"
   },
   "scripts": {
     "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "eslint src --fix",
     "lint": "eslint src"
-  }
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
 }

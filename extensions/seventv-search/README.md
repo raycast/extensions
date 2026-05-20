@@ -1,23 +1,25 @@
-# 7TV Emotes Search Pro
+# 7TV Emotes Search
 
-Discover and use 7TV emotes directly from Raycast with a high-fidelity, iridescent interface.
+Search, preview, copy, and paste 7TV emotes directly from Raycast.
 
 ## Features
 
-- 🔍 **Universal Search**: Find any emote on 7TV with lightning speed.
-- 🌈 **Premium Branding**: Custom iridescent 7TV design optimized for dark and light modes.
-- 🔥 **Smart Filters**: Browse Popular (All Time), Trending Right Now, and Recently Created emotes.
-- 🖱️ **Direct Drop**: Use "Drop Emote" to instantly copy the emote file and paste it into Discord, Slack, or any messaging app.
-- ⭐ **Favorites & History**: Star your most-used emotes and access your recently used history instantly.
-- ⚡ **Bruteforce Drop**: A high-speed action for rapid-fire emote usage.
+- Search global 7TV emotes.
+- Browse Popular, Trending, Recently Created, and Alphabetical filters.
+- Switch between Grid and List views.
+- Drop an emote file into the active app, or paste the emote URL as a fallback.
+- Star frequently used emotes and revisit recently used emotes.
+- Copy an emote URL, Markdown image, ID, or file.
 
 ## How to Use
 
 1. Open the **Search Emotes** command.
 2. Toggle between **Grid** and **List** views using the Action Menu (`Cmd+K`).
-3. Select an emote and press `Enter` to **Drop** the file.
+3. Select an emote and press `Enter` to **Drop Emote**.
 4. Use `Cmd+S` to **Star** an emote for quick access later.
+5. Use **Force Paste URL** if the target app does not accept pasted image files.
 
----
+## Notes
 
-_Vibecoded by Paranjayy_
+- Starred and recently used emotes are stored locally in Raycast.
+- Emote data and images are loaded from 7TV.
