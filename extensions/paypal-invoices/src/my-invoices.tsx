@@ -1053,7 +1053,8 @@ export default function MyInvoicesCommand() {
                       onAction={() => handleCopyLink(invoice)}
                     />
                     {invoice.recipientEmail &&
-                      isValidEmail(invoice.recipientEmail) && (
+                      isValidEmail(invoice.recipientEmail) &&
+                      !PAYPAL_TERMINAL.has(invoice.status) && (
                         <Action
                           title={`Send to ${invoice.recipientEmail}`}
                           icon={Icon.Envelope}
@@ -1108,7 +1109,7 @@ export default function MyInvoicesCommand() {
 
                   <ActionPanel.Section title="View">
                     <ActionPanel.Submenu
-                      title="Group By…"
+                      title="Group by…"
                       icon={Icon.AppWindowGrid3x3}
                       shortcut={{
                         macOS: { modifiers: ["cmd", "shift"], key: "g" },
@@ -1149,7 +1150,7 @@ export default function MyInvoicesCommand() {
                       ))}
                     </ActionPanel.Submenu>
                     <ActionPanel.Submenu
-                      title="Sort By…"
+                      title="Sort by…"
                       icon={Icon.BulletPoints}
                       shortcut={{
                         macOS: { modifiers: ["cmd", "shift"], key: "s" },
