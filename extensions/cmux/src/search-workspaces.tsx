@@ -6,7 +6,9 @@ import { Surface, SurfaceList } from "./surfaces";
 interface Workspace {
   ref: string;
   name: string;
+  description?: string;
   isSelected: boolean;
+  keywords: string[];
 }
 
 interface Window {
@@ -15,8 +17,104 @@ interface Window {
   workspaces: Workspace[];
 }
 
-async function getTreeData(): Promise<{ windows: Window[]; surfaces: Surface[] }> {
-  const output = await execFileAsync("cmux", ["tree", "--all"]);
+interface CmuxTreeJson {
+  windows?: CmuxWindowJson[];
+}
+
+interface CmuxWindowJson {
+  ref?: string;
+  current?: boolean;
+  workspaces?: CmuxWorkspaceJson[];
+}
+
+interface CmuxWorkspaceJson {
+  ref?: string;
+  title?: string;
+  name?: string;
+  description?: string | null;
+  selected?: boolean;
+  panes?: CmuxPaneJson[];
+}
+
+interface CmuxPaneJson {
+  surfaces?: CmuxSurfaceJson[];
+}
+
+interface CmuxSurfaceJson {
+  ref?: string;
+  title?: string | null;
+  name?: string | null;
+  url?: string | null;
+  selected?: boolean;
+  selected_in_pane?: boolean;
+  active?: boolean;
+  focused?: boolean;
+}
+
+function compactKeywords(values: Array<string | null | undefined>) {
+  return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
+}
+
+function parseJsonTreeData(output: string): { windows: Window[]; surfaces: Surface[] } {
+  const tree = JSON.parse(output) as CmuxTreeJson;
+
+  const windows =
+    tree.windows?.map((window) => ({
+      ref: window.ref ?? "window",
+      isCurrent: Boolean(window.current),
+      workspaces: [] as Workspace[],
+    })) ?? [];
+
+  const surfaces: Surface[] = [];
+
+  tree.windows?.forEach((window, windowIndex) => {
+    const parsedWindow = windows[windowIndex];
+
+    window.workspaces?.forEach((workspace) => {
+      const ref = workspace.ref;
+      const name = workspace.title ?? workspace.name;
+
+      if (!ref || !name) {
+        return;
+      }
+
+      const workspaceSurfaces =
+        workspace.panes?.flatMap(
+          (pane) =>
+            pane.surfaces?.flatMap((surface) => {
+              if (!surface.ref) {
+                return [];
+              }
+
+              const surfaceName = surface.title ?? surface.name ?? surface.ref;
+              surfaces.push({
+                ref: surface.ref,
+                name: surfaceName,
+                workspaceRef: ref,
+                workspaceName: name,
+                isSelected: Boolean(surface.selected || surface.selected_in_pane),
+                isActive: Boolean(surface.active || surface.focused),
+                keywords: compactKeywords([workspace.description, surface.url]),
+              });
+
+              return [surfaceName, surface.url];
+            }) ?? [],
+        ) ?? [];
+
+      parsedWindow?.workspaces.push({
+        ref,
+        name,
+        description: workspace.description ?? undefined,
+        isSelected: Boolean(workspace.selected),
+        keywords: compactKeywords([workspace.description, ...workspaceSurfaces]),
+      });
+    });
+  });
+
+  return { windows, surfaces };
+}
+
+function parseTextTreeData(output: string): { windows: Window[]; surfaces: Surface[] } {
   const lines = output.split("\n");
 
   const windows: Window[] = [];
@@ -45,7 +143,7 @@ async function getTreeData(): Promise<{ windows: Window[]; surfaces: Surface[] }
       const isSelected = meta.includes("[selected]");
       currentWorkspaceRef = ref;
       currentWorkspaceName = name;
-      currentWindow.workspaces.push({ ref, name, isSelected });
+      currentWindow.workspaces.push({ ref, name, isSelected, keywords: [] });
       continue;
     }
 
@@ -68,6 +166,16 @@ async function getTreeData(): Promise<{ windows: Window[]; surfaces: Surface[] }
   }
 
   return { windows, surfaces };
+}
+
+async function getTreeData(): Promise<{ windows: Window[]; surfaces: Surface[] }> {
+  try {
+    const output = await execFileAsync("cmux", ["tree", "--all", "--json"]);
+    return parseJsonTreeData(output);
+  } catch {
+    const output = await execFileAsync("cmux", ["tree", "--all"]);
+    return parseTextTreeData(output);
+  }
 }
 
 async function selectWorkspace(ref: string) {
@@ -127,6 +235,7 @@ export default function Command() {
             <List.Item
               key={workspace.ref}
               title={workspace.name}
+              keywords={workspace.keywords}
               accessories={[...(workspace.isSelected ? [{ tag: { value: "active", color: Color.Green } }] : [])]}
               actions={
                 <ActionPanel>
