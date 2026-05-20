@@ -23,6 +23,10 @@ const ANTIGRAVITY_IDE_APP_PATHS = [
 ];
 const ANTIGRAVITY_APP_PATHS = ["/Applications/Antigravity.app", path.join(homedir(), "Applications/Antigravity.app")];
 
+function hasAntigravityIdeApp(): boolean {
+  return ANTIGRAVITY_IDE_APP_PATHS.some((appPath) => existsSync(appPath));
+}
+
 // Type Guards
 
 export function isFileEntry(entry: EntryLike): entry is FileEntry {
@@ -161,7 +165,7 @@ export async function waitForFileExists(filename: string, timeoutMs = 2000) {
 }
 
 export function getAntigravityApplicationName(): string {
-  if (ANTIGRAVITY_IDE_APP_PATHS.some((appPath) => existsSync(appPath))) {
+  if (hasAntigravityIdeApp()) {
     return ANTIGRAVITY_IDE_APP_NAME;
   }
 
@@ -177,18 +181,16 @@ export async function openInAntigravity(target: string): Promise<void> {
 }
 
 export function getAntigravitySupportPath(): string {
-  const idePath = path.join(homedir(), "Library/Application Support/Antigravity IDE");
-  if (existsSync(idePath)) {
-    return idePath;
+  if (hasAntigravityIdeApp()) {
+    return path.join(homedir(), "Library/Application Support/Antigravity IDE");
   }
 
   return path.join(homedir(), "Library/Application Support/Antigravity");
 }
 
 export function getAntigravityExtensionsPath(): string {
-  const idePath = path.join(homedir(), ".antigravity-ide/extensions");
-  if (existsSync(idePath)) {
-    return idePath;
+  if (hasAntigravityIdeApp()) {
+    return path.join(homedir(), ".antigravity-ide/extensions");
   }
 
   return path.join(homedir(), ".antigravity/extensions");
