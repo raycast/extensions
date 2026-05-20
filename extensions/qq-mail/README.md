@@ -37,7 +37,6 @@ View and manage your QQ Mail inbox directly in Raycast.
    - **QQ Email Address**: e.g. `123456@qq.com`
    - **Authorization Code**: the code generated in step 3 (NOT your QQ password)
    - **Emails to Load**: number of emails per page (20, 50, 100, or 200)
-   - - ![code](./get-auth-code.png)
 
 The extension connects to QQ Mail servers automatically:
 

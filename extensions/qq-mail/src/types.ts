@@ -1,4 +1,6 @@
 export interface Email {
+  /** Real IMAP mailbox path (required for UID-scoped operations). */
+  mailboxPath: string;
   uid: number;
   messageId: string;
   subject: string;

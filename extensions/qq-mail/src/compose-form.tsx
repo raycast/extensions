@@ -1,5 +1,16 @@
 import { useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, useNavigation, Icon, getPreferenceValues } from "@raycast/api";
+import {
+  Form,
+  ActionPanel,
+  Action,
+  showToast,
+  Toast,
+  useNavigation,
+  Icon,
+  getPreferenceValues,
+  confirmAlert,
+  Alert,
+} from "@raycast/api";
 import { sendEmail } from "./smtp-client";
 import { marked } from "marked";
 import { convert } from "html-to-text";
@@ -93,6 +104,19 @@ export function ComposeForm({ mode, originalEmail }: ComposeFormProps) {
 
     if (!subject.trim()) {
       showToast({ style: Toast.Style.Failure, title: "Please enter a subject" });
+      return;
+    }
+
+    const confirmed = await confirmAlert({
+      title: "Send Email",
+      message: `Send "${subject}" to ${to.trim()}?`,
+      primaryAction: {
+        title: "Send",
+        style: Alert.ActionStyle.Default,
+      },
+    });
+
+    if (!confirmed) {
       return;
     }
 

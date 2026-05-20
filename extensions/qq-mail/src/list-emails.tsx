@@ -17,11 +17,6 @@ import {
   Clipboard,
 } from "@raycast/api";
 import { useCachedPromise, usePromise } from "@raycast/utils";
-
-function formatDate(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
-}
 import {
   listFolders,
   fetchEmails,
@@ -37,6 +32,15 @@ import {
 import { Email, Folder, EmailFilter } from "./types";
 import { ComposeForm, ComposeMode } from "./compose-form";
 import { AttachmentList } from "./attachment-list";
+
+function formatDate(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+function emailListId(email: Email): string {
+  return `${email.mailboxPath}:${email.uid}`;
+}
 
 interface CommandArguments {
   folder?: string;
@@ -80,7 +84,7 @@ function EmailList(props: EmailListProps = {}) {
 
   const [selectedFolder, setSelectedFolder] = useState<string>(initialFolder || "INBOX");
   const [filter, setFilter] = useState<EmailFilter>(initialFilter || "all");
-  const [selectedEmailUid, setSelectedEmailUid] = useState<number | null>(null);
+  const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
   const [loadedEmails, setLoadedEmails] = useState<Email[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -168,15 +172,15 @@ function EmailList(props: EmailListProps = {}) {
     }
   }, [foldersError, emailsError]);
 
-  const updateEmailFlags = useCallback((uid: number, updater: (flags: string[]) => string[]) => {
+  const updateEmailFlags = useCallback((id: string, updater: (flags: string[]) => string[]) => {
     setLoadedEmails((prev) =>
-      prev.map((email) => (email.uid === uid ? { ...email, flags: updater([...email.flags]) } : email)),
+      prev.map((email) => (emailListId(email) === id ? { ...email, flags: updater([...email.flags]) } : email)),
     );
   }, []);
 
   const handleFolderChange = useCallback((newFolder: string) => {
     setSelectedFolder(newFolder);
-    setSelectedEmailUid(null);
+    setSelectedEmailId(null);
   }, []);
 
   const handleFilterChange = useCallback((newFilter: string) => {
@@ -184,11 +188,12 @@ function EmailList(props: EmailListProps = {}) {
   }, []);
 
   const isLoading = foldersLoading || emailsLoading;
+  const showEmptyView = !isLoading && loadedEmails.length === 0;
 
   return (
     <List
       isLoading={isLoading}
-      isShowingDetail={selectedEmailUid !== null}
+      isShowingDetail={selectedEmailId !== null}
       searchBarPlaceholder="Search emails..."
       searchBarAccessory={
         <FilterDropdowns
@@ -200,22 +205,16 @@ function EmailList(props: EmailListProps = {}) {
         />
       }
       onSelectionChange={(id) => {
-        if (id) {
-          const uid = parseInt(id, 10);
-          if (!isNaN(uid)) {
-            setSelectedEmailUid(uid);
-          }
-        }
+        setSelectedEmailId(id ?? null);
       }}
     >
-      {loadedEmails && loadedEmails.length > 0
+      {loadedEmails.length > 0
         ? loadedEmails.map((email) => (
             <EmailListItem
-              key={email.uid}
+              key={emailListId(email)}
               email={email}
-              folder={selectedFolder}
               filter={filter}
-              isSelected={selectedEmailUid === email.uid}
+              isSelected={selectedEmailId === emailListId(email)}
               onRefresh={revalidateEmails}
               onUpdateFlags={updateEmailFlags}
               onLoadMore={hasMore ? handleLoadMore : undefined}
@@ -223,7 +222,7 @@ function EmailList(props: EmailListProps = {}) {
               emailCount={loadedEmails.length}
             />
           ))
-        : !emailsLoading && (
+        : showEmptyView && (
             <List.EmptyView
               icon={Icon.Envelope}
               title="No Emails"
@@ -295,6 +294,8 @@ function getFolderIcon(folder: Folder): Icon {
       return Icon.ExclamationMark;
     case "\\Archive":
       return Icon.Box;
+    case "\\Flagged":
+      return Icon.Star;
     default:
       if (folder.path.toUpperCase() === "INBOX") return Icon.Envelope;
       return Icon.Folder;
@@ -303,11 +304,10 @@ function getFolderIcon(folder: Folder): Icon {
 
 interface EmailListItemProps {
   email: Email;
-  folder: string;
   filter: EmailFilter;
   isSelected: boolean;
   onRefresh: () => void;
-  onUpdateFlags: (uid: number, updater: (flags: string[]) => string[]) => void;
+  onUpdateFlags: (id: string, updater: (flags: string[]) => string[]) => void;
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
   emailCount?: number;
@@ -406,7 +406,8 @@ function cleanHtmlForDisplay(html: string, includeImages: boolean = true): strin
 }
 
 function EmailListItem(props: EmailListItemProps) {
-  const { email, folder, filter, isSelected, onRefresh, onUpdateFlags, onLoadMore, isLoadingMore, emailCount } = props;
+  const { email, filter, isSelected, onRefresh, onUpdateFlags, onLoadMore, isLoadingMore, emailCount } = props;
+  const emailId = emailListId(email);
   const isUnread = !hasFlag(email.flags, "\\Seen");
   const isStarred = hasFlag(email.flags, "\\Flagged");
   const fromDisplay = email.from[0]?.name || email.from[0]?.address || "Unknown";
@@ -425,16 +426,15 @@ function EmailListItem(props: EmailListItemProps) {
 
   return (
     <List.Item
-      id={email.uid.toString()}
+      id={emailId}
       title={email.subject}
       subtitle={fromDisplay}
       icon={readIcon}
       accessories={accessories}
-      detail={isSelected && <EmailDetail email={email} folder={folder} />}
+      detail={isSelected && <EmailDetail email={email} />}
       actions={
         <EmailActions
           email={email}
-          folder={folder}
           filter={filter}
           onRefresh={onRefresh}
           onUpdateFlags={onUpdateFlags}
@@ -449,14 +449,13 @@ function EmailListItem(props: EmailListItemProps) {
 
 interface EmailDetailProps {
   email: Email;
-  folder: string;
 }
 
 function EmailDetail(props: EmailDetailProps) {
-  const { email, folder } = props;
+  const { email } = props;
   const { data: body, isLoading } = useCachedPromise(
-    (f: string, uid: number) => fetchEmailBody(f, uid),
-    [folder, email.uid],
+    (mailboxPath: string, uid: number) => fetchEmailBody(mailboxPath, uid),
+    [email.mailboxPath, email.uid],
   );
 
   const isUnread = !hasFlag(email.flags, "\\Seen");
@@ -508,19 +507,19 @@ function EmailDetail(props: EmailDetailProps) {
 
 interface ExpandedEmailViewProps {
   email: Email;
-  folder: string;
   onRefresh?: () => void;
-  onUpdateFlags?: (uid: number, updater: (flags: string[]) => string[]) => void;
+  onUpdateFlags?: (id: string, updater: (flags: string[]) => string[]) => void;
 }
 
 function ExpandedEmailView(props: ExpandedEmailViewProps) {
-  const { email, folder, onRefresh, onUpdateFlags } = props;
+  const { email, onRefresh, onUpdateFlags } = props;
+  const emailId = emailListId(email);
   const { push } = useNavigation();
   const { data: body, isLoading } = useCachedPromise(
-    async (f: string, uid: number) => {
-      return await fetchEmailBody(f, uid);
+    async (mailboxPath: string, uid: number) => {
+      return await fetchEmailBody(mailboxPath, uid);
     },
-    [folder, email.uid],
+    [email.mailboxPath, email.uid],
   );
 
   const fromDisplay = email.from.map((a) => (a.name ? `${a.name} <${a.address}>` : a.address)).join(", ");
@@ -568,56 +567,56 @@ function ExpandedEmailView(props: ExpandedEmailViewProps) {
   const isStarred = hasFlag(email.flags, "\\Flagged");
 
   const handleStar = async () => {
-    onUpdateFlags?.(email.uid, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
+    onUpdateFlags?.(emailId, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
     try {
-      await starEmail(folder, email.uid);
+      await starEmail(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Starred" });
       onRefresh?.();
     } catch (error) {
-      onUpdateFlags?.(email.uid, (flags) => flags.filter((f) => f !== "\\Flagged"));
+      onUpdateFlags?.(emailId, (flags) => flags.filter((f) => f !== "\\Flagged"));
       showToast({ style: Toast.Style.Failure, title: "Failed to star", message: String(error) });
     }
   };
 
   const handleUnstar = async () => {
-    onUpdateFlags?.(email.uid, (flags) => flags.filter((f) => f !== "\\Flagged"));
+    onUpdateFlags?.(emailId, (flags) => flags.filter((f) => f !== "\\Flagged"));
     try {
-      await unstarEmail(folder, email.uid);
+      await unstarEmail(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Unstarred" });
       onRefresh?.();
     } catch (error) {
-      onUpdateFlags?.(email.uid, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
+      onUpdateFlags?.(emailId, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
       showToast({ style: Toast.Style.Failure, title: "Failed to unstar", message: String(error) });
     }
   };
 
   const handleMarkAsRead = async () => {
-    onUpdateFlags?.(email.uid, (flags) => (flags.includes("\\Seen") ? flags : [...flags, "\\Seen"]));
+    onUpdateFlags?.(emailId, (flags) => (flags.includes("\\Seen") ? flags : [...flags, "\\Seen"]));
     try {
-      await markAsRead(folder, email.uid);
+      await markAsRead(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Marked as read" });
       onRefresh?.();
     } catch (error) {
-      onUpdateFlags?.(email.uid, (flags) => flags.filter((f) => f !== "\\Seen"));
+      onUpdateFlags?.(emailId, (flags) => flags.filter((f) => f !== "\\Seen"));
       showToast({ style: Toast.Style.Failure, title: "Failed to mark as read", message: String(error) });
     }
   };
 
   const handleMarkAsUnread = async () => {
-    onUpdateFlags?.(email.uid, (flags) => flags.filter((f) => f !== "\\Seen"));
+    onUpdateFlags?.(emailId, (flags) => flags.filter((f) => f !== "\\Seen"));
     try {
-      await markAsUnread(folder, email.uid);
+      await markAsUnread(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Marked as unread" });
       onRefresh?.();
     } catch (error) {
-      onUpdateFlags?.(email.uid, (flags) => (flags.includes("\\Seen") ? flags : [...flags, "\\Seen"]));
+      onUpdateFlags?.(emailId, (flags) => (flags.includes("\\Seen") ? flags : [...flags, "\\Seen"]));
       showToast({ style: Toast.Style.Failure, title: "Failed to mark as unread", message: String(error) });
     }
   };
 
   const handleArchive = async () => {
     try {
-      await archiveEmail(folder, email.uid);
+      await archiveEmail(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Archived" });
       onRefresh?.();
     } catch (error) {
@@ -632,7 +631,7 @@ function ExpandedEmailView(props: ExpandedEmailViewProps) {
     });
     if (confirmed) {
       try {
-        await deleteEmail(folder, email.uid);
+        await deleteEmail(email.mailboxPath, email.uid);
         showToast({ style: Toast.Style.Success, title: "Deleted" });
         onRefresh?.();
       } catch (error) {
@@ -642,7 +641,7 @@ function ExpandedEmailView(props: ExpandedEmailViewProps) {
   };
 
   const handleDownloadAttachments = () => {
-    push(<AttachmentList folder={folder} emailUid={email.uid} emailSubject={email.subject} />);
+    push(<AttachmentList mailboxPath={email.mailboxPath} emailUid={email.uid} emailSubject={email.subject} />);
   };
 
   return (
@@ -771,17 +770,17 @@ function ExpandedEmailView(props: ExpandedEmailViewProps) {
 
 interface EmailActionsProps {
   email: Email;
-  folder: string;
   filter: EmailFilter;
   onRefresh: () => void;
-  onUpdateFlags: (uid: number, updater: (flags: string[]) => string[]) => void;
+  onUpdateFlags: (id: string, updater: (flags: string[]) => string[]) => void;
   onLoadMore?: () => void;
   isLoadingMore?: boolean;
   emailCount?: number;
 }
 
 function EmailActions(props: EmailActionsProps) {
-  const { email, folder, onRefresh, onUpdateFlags, onLoadMore, isLoadingMore, emailCount } = props;
+  const { email, onRefresh, onUpdateFlags, onLoadMore, isLoadingMore, emailCount } = props;
+  const emailId = emailListId(email);
   const { push } = useNavigation();
   const isUnread = !hasFlag(email.flags, "\\Seen");
   const fromAddress = email.from[0]?.address || "";
@@ -789,7 +788,7 @@ function EmailActions(props: EmailActionsProps) {
   // Fetch email body for compose form
   const getEmailBodyForCompose = async (): Promise<string> => {
     try {
-      const body = await fetchEmailBody(folder, email.uid);
+      const body = await fetchEmailBody(email.mailboxPath, email.uid);
       return body.text || body.html?.replace(/<[^>]*>/g, "") || email.preview || "";
     } catch {
       return email.preview || "";
@@ -803,7 +802,7 @@ function EmailActions(props: EmailActionsProps) {
 
   const handleCopyAsMarkdown = async () => {
     try {
-      const body = await fetchEmailBody(folder, email.uid);
+      const body = await fetchEmailBody(email.mailboxPath, email.uid);
       let bodyText = "";
       if (body?.text) {
         bodyText = cleanHtmlForDisplay(body.text);
@@ -841,28 +840,28 @@ function EmailActions(props: EmailActionsProps) {
 
   const handleMarkAsRead = async () => {
     // Optimistic update: immediately reflect the change in UI
-    onUpdateFlags(email.uid, (flags) => (flags.includes("\\Seen") ? flags : [...flags, "\\Seen"]));
+    onUpdateFlags(emailId, (flags) => (flags.includes("\\Seen") ? flags : [...flags, "\\Seen"]));
     try {
-      await markAsRead(folder, email.uid);
+      await markAsRead(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Marked as read" });
       onRefresh();
     } catch (error) {
       // Rollback on failure
-      onUpdateFlags(email.uid, (flags) => flags.filter((f) => f !== "\\Seen"));
+      onUpdateFlags(emailId, (flags) => flags.filter((f) => f !== "\\Seen"));
       showToast({ style: Toast.Style.Failure, title: "Failed to mark as read", message: String(error) });
     }
   };
 
   const handleMarkAsUnread = async () => {
     // Optimistic update: immediately reflect the change in UI
-    onUpdateFlags(email.uid, (flags) => flags.filter((f) => f !== "\\Seen"));
+    onUpdateFlags(emailId, (flags) => flags.filter((f) => f !== "\\Seen"));
     try {
-      await markAsUnread(folder, email.uid);
+      await markAsUnread(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Marked as unread" });
       onRefresh();
     } catch (error) {
       // Rollback on failure
-      onUpdateFlags(email.uid, (flags) => (flags.includes("\\Seen") ? flags : [...flags, "\\Seen"]));
+      onUpdateFlags(emailId, (flags) => (flags.includes("\\Seen") ? flags : [...flags, "\\Seen"]));
       showToast({ style: Toast.Style.Failure, title: "Failed to mark as unread", message: String(error) });
     }
   };
@@ -879,7 +878,7 @@ function EmailActions(props: EmailActionsProps) {
 
     if (confirmed) {
       try {
-        await deleteEmail(folder, email.uid);
+        await deleteEmail(email.mailboxPath, email.uid);
         showToast({ style: Toast.Style.Success, title: "Email deleted" });
         onRefresh();
       } catch (error) {
@@ -890,7 +889,7 @@ function EmailActions(props: EmailActionsProps) {
 
   const handleArchive = async () => {
     try {
-      await archiveEmail(folder, email.uid);
+      await archiveEmail(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Email archived" });
       onRefresh();
     } catch (error) {
@@ -901,25 +900,25 @@ function EmailActions(props: EmailActionsProps) {
   const isStarred = hasFlag(email.flags, "\\Flagged");
 
   const handleStar = async () => {
-    onUpdateFlags(email.uid, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
+    onUpdateFlags(emailId, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
     try {
-      await starEmail(folder, email.uid);
+      await starEmail(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Starred" });
       onRefresh();
     } catch (error) {
-      onUpdateFlags(email.uid, (flags) => flags.filter((f) => f !== "\\Flagged"));
+      onUpdateFlags(emailId, (flags) => flags.filter((f) => f !== "\\Flagged"));
       showToast({ style: Toast.Style.Failure, title: "Failed to star", message: String(error) });
     }
   };
 
   const handleUnstar = async () => {
-    onUpdateFlags(email.uid, (flags) => flags.filter((f) => f !== "\\Flagged"));
+    onUpdateFlags(emailId, (flags) => flags.filter((f) => f !== "\\Flagged"));
     try {
-      await unstarEmail(folder, email.uid);
+      await unstarEmail(email.mailboxPath, email.uid);
       showToast({ style: Toast.Style.Success, title: "Unstarred" });
       onRefresh();
     } catch (error) {
-      onUpdateFlags(email.uid, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
+      onUpdateFlags(emailId, (flags) => (flags.includes("\\Flagged") ? flags : [...flags, "\\Flagged"]));
       showToast({ style: Toast.Style.Failure, title: "Failed to unstar", message: String(error) });
     }
   };
@@ -937,11 +936,11 @@ function EmailActions(props: EmailActionsProps) {
   };
 
   const handleDownloadAttachments = () => {
-    push(<AttachmentList folder={folder} emailUid={email.uid} emailSubject={email.subject} />);
+    push(<AttachmentList mailboxPath={email.mailboxPath} emailUid={email.uid} emailSubject={email.subject} />);
   };
 
   const handleExpandEmail = () => {
-    push(<ExpandedEmailView email={email} folder={folder} onRefresh={onRefresh} onUpdateFlags={onUpdateFlags} />);
+    push(<ExpandedEmailView email={email} onRefresh={onRefresh} onUpdateFlags={onUpdateFlags} />);
   };
 
   const handleCompose = () => {

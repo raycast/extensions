@@ -42,12 +42,12 @@ async function getUniqueFilename(directory: string, filename: string): Promise<s
 }
 
 interface AttachmentListProps {
-  folder: string;
+  mailboxPath: string;
   emailUid: number;
   emailSubject: string;
 }
 
-export function AttachmentList({ folder, emailUid, emailSubject }: AttachmentListProps) {
+export function AttachmentList({ mailboxPath, emailUid, emailSubject }: AttachmentListProps) {
   const { pop } = useNavigation();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -55,7 +55,7 @@ export function AttachmentList({ folder, emailUid, emailSubject }: AttachmentLis
   useEffect(() => {
     const loadAttachments = async () => {
       try {
-        const atts = await fetchAttachments(folder, emailUid);
+        const atts = await fetchAttachments(mailboxPath, emailUid);
         setAttachments(atts);
       } catch (error) {
         showToast({ style: Toast.Style.Failure, title: "Failed to load attachments", message: String(error) });
@@ -64,7 +64,7 @@ export function AttachmentList({ folder, emailUid, emailSubject }: AttachmentLis
       }
     };
     loadAttachments();
-  }, [folder, emailUid]);
+  }, [mailboxPath, emailUid]);
 
   const getTimestampedFolderName = (): string => {
     const now = new Date();
