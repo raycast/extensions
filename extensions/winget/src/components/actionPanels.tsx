@@ -182,7 +182,7 @@ export function UpgradeActionPanel({ pkg, totalOutdated, onRefresh }: UpgradeAct
         />
         {totalOutdated > 1 && (
           <Action
-            title={`Upgrade All (${totalOutdated} packages)`}
+            title={`Upgrade All (${totalOutdated} Packages)`}
             icon={Icon.ArrowUp}
             onAction={async () => {
               const success = await wingetUpgrade();
