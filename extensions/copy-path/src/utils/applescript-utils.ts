@@ -128,7 +128,7 @@ export const getVSCodeActiveFilePath = async (app: Application) => {
   } catch (e) {
     path = "";
   } finally {
-    if (path === "" || path === VSCODE_SENTINEL_CLIPBOARD) {
+    if (!isVSCodeFilePath(path)) {
       await restoreClipboard(previousClipboard);
     }
   }
@@ -137,13 +137,17 @@ export const getVSCodeActiveFilePath = async (app: Application) => {
     if (path.startsWith("file://")) {
       return decodeURIComponent(path.replace("file://", ""));
     }
-    if (path.startsWith("/") || path.startsWith("~")) {
+    if (isVSCodeFilePath(path)) {
       return path;
     }
     return "";
   } catch (e) {
     return "";
   }
+};
+
+const isVSCodeFilePath = (path: string) => {
+  return path.startsWith("file://") || path.startsWith("/") || path.startsWith("~");
 };
 
 const restoreClipboard = async (content: Clipboard.ReadContent) => {
