@@ -1,6 +1,6 @@
 # Panasonic AC Control Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-20
 
 - Add device list and detailed controls for Panasonic MirAIe air conditioners
 - Add a menu bar command for quick control of powered-on devices
