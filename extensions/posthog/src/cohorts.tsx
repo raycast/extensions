@@ -25,8 +25,11 @@ type Cohort = {
 };
 
 function Cohorts() {
-  const { selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/cohorts");
+  const { selectedAccount, selectedId } = useContext(ProjectsContext);
+  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/cohorts", {
+    account: selectedAccount,
+    execute: selectedId !== null && selectedAccount !== null,
+  });
 
   return (
     <List
@@ -48,7 +51,8 @@ function Cohorts() {
 }
 
 const ResultsListSection = ({ cohort }: { cohort: Cohort }) => {
-  const appUrl = useUrl(`cohorts/${cohort.id}`);
+  const { selectedAccount } = useContext(ProjectsContext);
+  const appUrl = useUrl(`cohorts/${cohort.id}`, selectedAccount);
 
   return (
     <List.Item

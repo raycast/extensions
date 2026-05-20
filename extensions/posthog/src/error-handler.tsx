@@ -1,7 +1,7 @@
-import { Action, ActionPanel, Icon, List, Toast, openExtensionPreferences, showToast } from "@raycast/api";
-import { useEffect } from "react";
+import { Action, ActionPanel, Icon, LaunchType, List, Toast, launchCommand, showToast } from "@raycast/api";
+import { ReactNode, useEffect } from "react";
 
-const ErrorHandler = ({ error, children }: { error?: Error; children: JSX.Element }): JSX.Element => {
+const ErrorHandler = ({ error, children }: { error?: Error; children: ReactNode }) => {
   useEffect(() => {
     if (error) {
       showToast({
@@ -15,11 +15,15 @@ const ErrorHandler = ({ error, children }: { error?: Error; children: JSX.Elemen
   return error ? (
     <List>
       <List.EmptyView
-        title={"Make sure your API key and data region are correct"}
+        title={"Make sure your PostHog account is connected"}
         icon={Icon.Warning}
         actions={
           <ActionPanel>
-            <Action icon={Icon.Gear} title={"Open Extension Preferences"} onAction={openExtensionPreferences} />
+            <Action
+              icon={Icon.Person}
+              title={"Manage Accounts"}
+              onAction={() => launchCommand({ name: "accounts", type: LaunchType.UserInitiated })}
+            />
           </ActionPanel>
         }
       />

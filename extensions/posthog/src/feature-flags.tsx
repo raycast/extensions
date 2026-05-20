@@ -17,8 +17,11 @@ type FeatureFlag = {
 };
 
 function FeatureFlags() {
-  const { selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/feature_flags");
+  const { selectedAccount, selectedId } = useContext(ProjectsContext);
+  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/feature_flags", {
+    account: selectedAccount,
+    execute: selectedId !== null && selectedAccount !== null,
+  });
 
   return (
     <List
@@ -39,7 +42,8 @@ function FeatureFlags() {
 }
 
 const ResultsListSection = ({ featureFlag }: { featureFlag: FeatureFlag }) => {
-  const appUrl = useUrl(`feature_flags/${featureFlag.id}`);
+  const { selectedAccount } = useContext(ProjectsContext);
+  const appUrl = useUrl(`feature_flags/${featureFlag.id}`, selectedAccount);
 
   return (
     <List.Item

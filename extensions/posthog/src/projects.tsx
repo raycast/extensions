@@ -1,15 +1,10 @@
 import { List } from "@raycast/api";
 import { usePostHogClient } from "../helpers/usePostHogClient";
 import { useCachedState } from "@raycast/utils";
-import { useState } from "react";
-import ErrorHandler from "./error-handler";
-
-type SearchResult = {
-  count: number;
-  next: null;
-  previous: null;
-  results: Project[];
-};
+import { useContext, useState } from "react";
+import { ProjectsContext, WithProjects } from "../helpers/ProjectsContext";
+import { accountLabel, encodeProjectSelection } from "../helpers/account-model";
+import { AuthenticatedPostHogAccount } from "../helpers/posthog-auth";
 
 type Project = {
   id: number;
@@ -27,54 +22,73 @@ type ProjectDetail = {
   person_display_name_properties: string[];
 };
 
-export default function Command() {
-  const { data, isLoading, error } = usePostHogClient<SearchResult>("projects");
-  const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [projectDetail, setProjectDetail] = useCachedState<{ [id: number]: ProjectDetail }>("project-details", {});
+function Projects() {
+  const { projectGroups } = useContext(ProjectsContext);
+  const [selectedValue, setSelectedValue] = useState<string | null>(null);
+  const [projectDetail, setProjectDetail] = useCachedState<{ [selection: string]: ProjectDetail }>(
+    "project-details",
+    {}
+  );
 
-  const handleOnDetailUpdated = (detail: ProjectDetail) => {
-    setProjectDetail((prev) => ({ ...prev, [detail.id]: detail }));
+  const handleOnDetailUpdated = (selection: string, detail: ProjectDetail) => {
+    setProjectDetail((prev) => ({ ...prev, [selection]: detail }));
   };
 
   return (
-    <ErrorHandler error={error}>
-      <List
-        isLoading={isLoading}
-        searchBarPlaceholder="Search projects..."
-        onSelectionChange={setSelectedId}
-        isShowingDetail={true}
-        throttle
-      >
-        {data ? (
-          <List.Section>
-            {data.results.map((project) => (
+    <List
+      searchBarPlaceholder="Search projects..."
+      onSelectionChange={setSelectedValue}
+      isShowingDetail={true}
+      throttle
+    >
+      {projectGroups.map((group) => (
+        <List.Section key={group.account.id} title={accountLabel(group.account)}>
+          {group.projects.map((project) => {
+            const selection = encodeProjectSelection(group.account.id, project.id);
+
+            return (
               <Project
-                key={project.id}
+                key={selection}
+                account={group.account}
                 project={project}
-                detail={projectDetail[project.id]}
-                isSelected={selectedId === project.id.toString()}
-                onDetailUpdated={handleOnDetailUpdated}
+                selection={selection}
+                detail={projectDetail[selection]}
+                isSelected={selectedValue === selection}
+                onDetailUpdated={(detail) => handleOnDetailUpdated(selection, detail)}
               />
-            ))}
-          </List.Section>
-        ) : null}
-      </List>
-    </ErrorHandler>
+            );
+          })}
+        </List.Section>
+      ))}
+    </List>
+  );
+}
+
+export default function Command() {
+  return (
+    <WithProjects>
+      <Projects />
+    </WithProjects>
   );
 }
 
 const Project = ({
+  account,
   project,
+  selection,
   detail,
   isSelected,
   onDetailUpdated,
 }: {
+  account: AuthenticatedPostHogAccount;
   project: Project;
+  selection: string;
   detail: ProjectDetail;
   isSelected: boolean;
   onDetailUpdated: (data: ProjectDetail) => void;
 }) => {
   usePostHogClient<ProjectDetail>(`projects/${project.id}`, {
+    account,
     execute: !detail && isSelected,
     onData: onDetailUpdated,
   });
@@ -82,7 +96,7 @@ const Project = ({
   return (
     <List.Item
       title={project.name}
-      id={project.id.toString()}
+      id={selection}
       detail={
         <List.Item.Detail
           isLoading={!detail}

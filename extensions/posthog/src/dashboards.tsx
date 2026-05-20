@@ -25,8 +25,11 @@ type Dashboard = {
 };
 
 function Cohorts() {
-  const { selectedId } = useContext(ProjectsContext);
-  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/dashboards");
+  const { selectedAccount, selectedId } = useContext(ProjectsContext);
+  const { data, isLoading } = usePostHogClient<SearchResult>("projects/" + selectedId + "/dashboards", {
+    account: selectedAccount,
+    execute: selectedId !== null && selectedAccount !== null,
+  });
 
   return (
     <List
@@ -48,7 +51,8 @@ function Cohorts() {
 }
 
 const ResultsListSection = ({ dashboard }: { dashboard: Dashboard }) => {
-  const appUrl = useUrl(`dashboard/${dashboard.id}`);
+  const { selectedAccount } = useContext(ProjectsContext);
+  const appUrl = useUrl(`dashboard/${dashboard.id}`, selectedAccount);
 
   return (
     <List.Item

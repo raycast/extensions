@@ -23,9 +23,10 @@ export type PersonsArguments = {
 };
 
 function Persons({ searchTerm }: { searchTerm: string }) {
-  const { selectedId } = useContext(ProjectsContext);
+  const { selectedAccount, selectedId } = useContext(ProjectsContext);
   const { data, isLoading } = usePostHogClient<SearchResult>(
-    "projects/" + selectedId + "/persons?search=" + searchTerm
+    "projects/" + selectedId + "/persons?search=" + encodeURIComponent(searchTerm),
+    { account: selectedAccount, execute: selectedId !== null && selectedAccount !== null }
   );
 
   return (
@@ -47,8 +48,9 @@ function Persons({ searchTerm }: { searchTerm: string }) {
 }
 
 const ResultsListSection = ({ person }: { person: Person }) => {
+  const { selectedAccount } = useContext(ProjectsContext);
   const originalId = person.distinct_ids[person.distinct_ids.length - 1];
-  const appUrl = useUrl(`person/${originalId}`);
+  const appUrl = useUrl(`person/${originalId}`, selectedAccount);
 
   return (
     <List.Item
