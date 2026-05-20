@@ -13,7 +13,7 @@ ZenMux is an LLM API aggregation platform that provides unified access to models
 
 ## Setup
 
-1. Sign in to ZenMux, or [sign up with this referral link](https://zenmux.ai/invite/SEOW92) if you are new to ZenMux.
+1. Sign in to ZenMux, or [sign up](https://zenmux.ai/login) if you are new to ZenMux.
 2. Open the [ZenMux Platform API console](https://zenmux.ai/platform/management).
 3. Create a Platform API key.
 4. Open this extension's preferences in Raycast.
