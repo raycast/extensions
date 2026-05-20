@@ -1,5 +1,9 @@
 # Messages Changelog
 
+## [Fix chat list memory usage] - {PR_MERGE_DATE}
+
+- Limit the initial chat lookup to the 50 displayed conversations before loading contact details.
+
 ## [Performance Optimizations] - 2025-11-05
 
 - Added "Load Contact Photos" preference to disable contact photo loading
