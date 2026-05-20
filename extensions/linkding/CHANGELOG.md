@@ -1,6 +1,6 @@
 # Linkding Changelog
 
-## [Fix Save Browser Tab] - {PR_MERGE_DATE}
+## [Fix Save Browser Tab] - 2026-05-20
 
 - Add Microsoft Edge support to Save Browser Tab.
 
