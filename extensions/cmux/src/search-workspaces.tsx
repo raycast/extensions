@@ -6,7 +6,7 @@ import { Surface, SurfaceList } from "./surfaces";
 interface Workspace {
   ref: string;
   name: string;
-  description?: string;
+  description?: string | null;
   isSelected: boolean;
   keywords: string[];
 }
@@ -17,99 +17,110 @@ interface Window {
   workspaces: Workspace[];
 }
 
-interface CmuxTreeJson {
-  windows?: CmuxWindowJson[];
+interface CmuxTree {
+  windows?: CmuxWindow[];
 }
 
-interface CmuxWindowJson {
+interface CmuxWindow {
   ref?: string;
   current?: boolean;
-  workspaces?: CmuxWorkspaceJson[];
+  workspaces?: CmuxWorkspace[];
 }
 
-interface CmuxWorkspaceJson {
+interface CmuxWorkspace {
   ref?: string;
   title?: string;
   name?: string;
   description?: string | null;
   selected?: boolean;
-  panes?: CmuxPaneJson[];
+  panes?: CmuxPane[];
 }
 
-interface CmuxPaneJson {
-  surfaces?: CmuxSurfaceJson[];
+interface CmuxPane {
+  surfaces?: CmuxSurface[];
 }
 
-interface CmuxSurfaceJson {
+interface CmuxSurface {
   ref?: string;
   title?: string | null;
   name?: string | null;
-  url?: string | null;
   selected?: boolean;
   selected_in_pane?: boolean;
   active?: boolean;
+  here?: boolean;
   focused?: boolean;
+  type?: string;
+  tty?: string | null;
+  url?: string | null;
 }
 
 function compactKeywords(values: Array<string | null | undefined>) {
-  return [...new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value)))];
+  return [...new Set(values.map((value) => value?.replace(/\s+/g, " ").trim()).filter(Boolean))] as string[];
+}
+
+function getWorkspaceSurfaces(workspace: CmuxWorkspace, workspaceRef: string, workspaceName: string): Surface[] {
+  return (workspace.panes ?? []).flatMap((pane) =>
+    (pane.surfaces ?? []).flatMap((surface) => {
+      if (!surface.ref) {
+        return [];
+      }
+
+      const name = surface.title ?? surface.name ?? surface.ref;
+      return [
+        {
+          ref: surface.ref,
+          name,
+          workspaceRef,
+          workspaceName,
+          isSelected: Boolean(surface.selected ?? surface.selected_in_pane),
+          isActive: Boolean(surface.active ?? surface.here ?? surface.focused),
+          keywords: compactKeywords([workspace.description, surface.url]),
+        },
+      ];
+    }),
+  );
+}
+
+function getWorkspaceKeywords(workspace: CmuxWorkspace, surfaces: Surface[]) {
+  return compactKeywords([
+    workspace.description,
+    ...surfaces.flatMap((surface) => [surface.name, surface.ref, surface.workspaceName]),
+    ...(workspace.panes ?? []).flatMap((pane) =>
+      (pane.surfaces ?? []).flatMap((surface) => [surface.type, surface.tty, surface.url]),
+    ),
+  ]);
 }
 
 function parseJsonTreeData(output: string): { windows: Window[]; surfaces: Surface[] } {
-  const tree = JSON.parse(output) as CmuxTreeJson;
+  const tree = JSON.parse(output) as CmuxTree;
 
+  const surfaces: Surface[] = [];
   const windows =
     tree.windows?.map((window) => ({
       ref: window.ref ?? "window",
       isCurrent: Boolean(window.current),
-      workspaces: [] as Workspace[],
+      workspaces: (window.workspaces ?? []).flatMap((workspace) => {
+        const ref = workspace.ref;
+        const name = workspace.title ?? workspace.name;
+
+        if (!ref || !name) {
+          return [];
+        }
+
+        const workspaceSurfaces = getWorkspaceSurfaces(workspace, ref, name);
+        surfaces.push(...workspaceSurfaces);
+
+        return [
+          {
+            ref,
+            name,
+            description: workspace.description,
+            isSelected: Boolean(workspace.selected),
+            keywords: getWorkspaceKeywords(workspace, workspaceSurfaces),
+          },
+        ];
+      }),
     })) ?? [];
-
-  const surfaces: Surface[] = [];
-
-  tree.windows?.forEach((window, windowIndex) => {
-    const parsedWindow = windows[windowIndex];
-
-    window.workspaces?.forEach((workspace) => {
-      const ref = workspace.ref;
-      const name = workspace.title ?? workspace.name;
-
-      if (!ref || !name) {
-        return;
-      }
-
-      const workspaceSurfaces =
-        workspace.panes?.flatMap(
-          (pane) =>
-            pane.surfaces?.flatMap((surface) => {
-              if (!surface.ref) {
-                return [];
-              }
-
-              const surfaceName = surface.title ?? surface.name ?? surface.ref;
-              surfaces.push({
-                ref: surface.ref,
-                name: surfaceName,
-                workspaceRef: ref,
-                workspaceName: name,
-                isSelected: Boolean(surface.selected || surface.selected_in_pane),
-                isActive: Boolean(surface.active || surface.focused),
-                keywords: compactKeywords([workspace.description, surface.url]),
-              });
-
-              return [surfaceName, surface.url];
-            }) ?? [],
-        ) ?? [];
-
-      parsedWindow?.workspaces.push({
-        ref,
-        name,
-        description: workspace.description ?? undefined,
-        isSelected: Boolean(workspace.selected),
-        keywords: compactKeywords([workspace.description, ...workspaceSurfaces]),
-      });
-    });
-  });
 
   return { windows, surfaces };
 }
@@ -168,11 +179,27 @@ function parseTextTreeData(output: string): { windows: Window[]; surfaces: Surfa
   return { windows, surfaces };
 }
 
+function isJsonFlagUnsupported(error: unknown) {
+  const message = getErrorMessage(error).toLowerCase();
+  return (
+    message.includes("json") &&
+    (message.includes("unknown") ||
+      message.includes("unsupported") ||
+      message.includes("unrecognized") ||
+      message.includes("invalid option") ||
+      message.includes("no such option"))
+  );
+}
+
 async function getTreeData(): Promise<{ windows: Window[]; surfaces: Surface[] }> {
   try {
     const output = await execFileAsync("cmux", ["tree", "--all", "--json"]);
     return parseJsonTreeData(output);
-  } catch {
+  } catch (error) {
+    if (!isJsonFlagUnsupported(error)) {
+      throw error;
+    }
+
     const output = await execFileAsync("cmux", ["tree", "--all"]);
     return parseTextTreeData(output);
   }

@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execFileSync } from "child_process";
 import { homedir } from "os";
 import { join } from "path";
 
@@ -7,38 +7,44 @@ export interface ItermProfile {
   guid: string;
 }
 
+type ItermPreferences = {
+  "New Bookmarks"?: unknown;
+};
+
+type ItermProfileEntry = {
+  Name?: unknown;
+  Guid?: unknown;
+};
+
+function isItermProfileEntry(entry: unknown): entry is ItermProfileEntry {
+  return typeof entry === "object" && entry !== null;
+}
+
 export function getItermProfiles(): ItermProfile[] {
   const plistPath = join(homedir(), "Library/Preferences/com.googlecode.iterm2.plist");
 
   try {
-    // Get all profile names and GUIDs using PlistBuddy
-    const output = execSync(
-      `/usr/libexec/PlistBuddy -c "Print :New\\ Bookmarks" "${plistPath}" 2>/dev/null | grep -E "Name =|Guid ="`,
-      { encoding: "utf-8" },
-    );
+    const output = execFileSync("/usr/bin/plutil", ["-convert", "json", "-o", "-", plistPath], {
+      encoding: "utf-8",
+      maxBuffer: 10 * 1024 * 1024,
+    });
+    const preferences = JSON.parse(output) as ItermPreferences;
+    const bookmarks = preferences["New Bookmarks"];
 
-    const lines = output.trim().split("\n");
-    const profiles: ItermProfile[] = [];
-
-    // Lines come in pairs: Guid first, then Name. Guid for unique identification
-    for (let i = 0; i < lines.length; i += 2) {
-      const guidLine = lines[i];
-      const nameLine = lines[i + 1];
-
-      if (guidLine && nameLine) {
-        const guidMatch = guidLine.match(/Guid\s*=\s*(.+)/);
-        const nameMatch = nameLine.match(/Name\s*=\s*(.+)/);
-
-        if (nameMatch && guidMatch) {
-          profiles.push({
-            name: nameMatch[1].trim(),
-            guid: guidMatch[1].trim(),
-          });
-        }
-      }
+    if (!Array.isArray(bookmarks)) {
+      return [];
     }
 
-    return profiles;
+    return bookmarks.flatMap((entry) => {
+      if (!isItermProfileEntry(entry)) {
+        return [];
+      }
+
+      const name = typeof entry.Name === "string" ? entry.Name.trim() : "";
+      const guid = typeof entry.Guid === "string" ? entry.Guid.trim() : "";
+
+      return name && guid ? [{ name, guid }] : [];
+    });
   } catch (error) {
     console.error("Failed to read iTerm profiles:", error);
     return [];

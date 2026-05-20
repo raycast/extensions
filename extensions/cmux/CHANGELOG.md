@@ -1,8 +1,8 @@
 # cmux
 
-## [Improve workspace search] - 2026-05-20
+## [Improve workspace search] - {PR_MERGE_DATE}
 
-- Include workspace descriptions and surface titles when searching workspaces
+- Include workspace descriptions and open surface details when searching workspaces.
 
 ## [Fix PATH resolution] - 2026-04-24
 
