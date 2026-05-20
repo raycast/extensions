@@ -1,5 +1,9 @@
 # Todoist Changelog
 
+## [Include deadlines in Today] - 2026-05-20
+
+- Show tasks whose deadline is today or overdue in the Today view, even when they do not have a due date.
+
 ## [Menu bar priority sorting] - 2026-05-18
 
 - **Sort menu bar tasks by priority**: Tasks shown in the menu bar (Today, Upcoming, Inbox, and Filter views) are now ordered by priority first (highest first), then by their existing default order, so the most important tasks surface at the top.

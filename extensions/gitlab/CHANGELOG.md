@@ -4,6 +4,10 @@
 
 - Add preferences to hide issues and merge requests from archived projects in the menu bar commands.
 
+## [Updates] - 2026-05-20
+
+- Contributor updates
+
 ## [OAuth authentication] - 2026-05-18
 
 - Add OAuth (PKCE) authentication as an alternative to Personal Access Tokens.
