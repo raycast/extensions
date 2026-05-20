@@ -1,5 +1,9 @@
 # Klack Changelog
 
+## [Fix README Link] - {PR_MERGE_DATE}
+
+- Fixed broken contributor GitHub link in the README
+
 ## [Stats and Standalone Support] - 2026-05-20
 
 - Added Klack Stats view with live updates, Markdown export, and tracking-since timestamp
