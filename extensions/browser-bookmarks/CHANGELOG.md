@@ -1,5 +1,9 @@
 # Browser Bookmarks Changelog
 
+## [Chrome Account Bookmarks] - {PR_MERGE_DATE}
+
+- Added support for Chrome account-synced bookmarks stored in `AccountBookmarks`
+
 ## [Bug Fix] - 2026-05-19
 
 - Increased the Safari bookmark plist parser limit so large bookmark libraries no longer fail with `maxObjectCount exceeded`
