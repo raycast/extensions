@@ -2,6 +2,7 @@ import { Action, ActionPanel, Icon, List } from '@raycast/api';
 import { useCachedPromise } from '@raycast/utils';
 import { useMemo } from 'react';
 import { getQuickFindData } from './api';
+import { capitalize } from './utils';
 import ErrorView from './components/ErrorView';
 
 interface SearchItem {
@@ -99,8 +100,4 @@ function getIcon(item: SearchItem) {
     default:
       return Icon.Circle;
   }
-}
-
-function capitalize(s: string) {
-  return s.charAt(0).toUpperCase() + s.slice(1);
 }
