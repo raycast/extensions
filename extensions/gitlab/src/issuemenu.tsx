@@ -42,11 +42,13 @@ export default function MenuCommand() {
   const excludeLabels =
     preferences.excludeLabels && preferences.excludeLabels.trim().length > 0 ? preferences.excludeLabels : undefined;
   const showItemsCount = preferences.showtext as boolean;
+  const hideArchivedProjects = preferences.hideArchivedProjects as boolean;
   const maxIssues = getBoundedPreferenceNumber({ name: "maxitems" });
 
   const { issues, isLoading, error } = useMyIssues(IssueScope.assigned_to_me, IssueState.opened, undefined, {
     includeLabels,
     excludeLabels,
+    excludeArchivedProjects: hideArchivedProjects,
   });
   const assignedCount = issues?.length || 0;
 

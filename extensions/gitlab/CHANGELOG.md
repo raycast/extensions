@@ -1,5 +1,9 @@
 # GitLab Changelog
 
+## [Filter archived projects in menu bars] - {PR_MERGE_DATE}
+
+- Add preferences to hide issues and merge requests from archived projects in the menu bar commands.
+
 ## [OAuth authentication] - 2026-05-18
 
 - Add OAuth (PKCE) authentication as an alternative to Personal Access Tokens.

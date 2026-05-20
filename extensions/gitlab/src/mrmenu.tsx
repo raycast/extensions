@@ -52,6 +52,11 @@ function getShowItemsCountPreference(): boolean {
   return prefs.showtext as boolean;
 }
 
+function getHideArchivedProjectsPreference(): boolean {
+  const prefs = getPreferenceValues();
+  return prefs.hideArchivedProjects as boolean;
+}
+
 function getLabelFilterPreference(preferenceName: string): string[] {
   const prefs = getPreferenceValues();
   const labelsString = (prefs[preferenceName] as string) || "";
@@ -240,22 +245,29 @@ function useMenuMergeRequests(): {
   const assignedLabelsFilter = useMemo(() => getAssignedLabelsPreference(), []);
   const reviewLabelsFilter = useMemo(() => getReviewLabelsPreference(), []);
   const createdLabelsFilter = useMemo(() => getCreatedLabelsPreference(), []);
+  const hideArchivedProjects = useMemo(() => getHideArchivedProjectsPreference(), []);
 
   const {
     mrs: mrsAssigned,
     isLoading: isLoadingAssigned,
     error: errorAssigned,
-  } = useMyMergeRequests(MRScope.assigned_to_me, MRState.opened, undefined, assignedLabelsFilter);
+  } = useMyMergeRequests(MRScope.assigned_to_me, MRState.opened, undefined, assignedLabelsFilter, {
+    excludeArchivedProjects: hideArchivedProjects,
+  });
   const {
     mrs: mrsReview,
     isLoading: isLoadingReview,
     error: errorReview,
-  } = useMyReviews(undefined, reviewLabelsFilter);
+  } = useMyReviews(undefined, reviewLabelsFilter, {
+    excludeArchivedProjects: hideArchivedProjects,
+  });
   const {
     mrs: mrsCreated,
     isLoading: isLoadingCreated,
     error: errorCreated,
-  } = useMyMergeRequests(MRScope.created_by_me, MRState.opened, undefined, createdLabelsFilter);
+  } = useMyMergeRequests(MRScope.created_by_me, MRState.opened, undefined, createdLabelsFilter, {
+    excludeArchivedProjects: hideArchivedProjects,
+  });
   const isLoading = isLoadingAssigned || isLoadingReview || isLoadingCreated;
 
   return {

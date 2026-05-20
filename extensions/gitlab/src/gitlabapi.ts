@@ -419,6 +419,9 @@ async function toJsonOrError(response: Response): Promise<any> {
 
 type AuthType = "pat" | "oauth";
 type TokenResolver = () => Promise<string>;
+type ArchivedProjectCacheEntry = { archived: boolean; expiresAt: number };
+const ARCHIVED_PROJECT_CACHE_TTL_MS = 5 * 60 * 1000;
+
 export interface AuthConfig {
   authType: AuthType;
   resolve: TokenResolver;
@@ -429,6 +432,7 @@ export interface AuthConfig {
 export class GitLab {
   private readonly url: string;
   private readonly auth: AuthConfig;
+  private readonly archivedProjectCache = new Map<number, ArchivedProjectCacheEntry>();
 
   constructor(url: string, auth: string | AuthConfig) {
     this.url = url;
@@ -441,6 +445,14 @@ export class GitLab {
 
   private async resolveToken(force = false): Promise<string> {
     return force && this.auth.refresh ? this.auth.refresh() : this.auth.resolve();
+  }
+
+  private pruneArchivedProjectCache(now: number) {
+    for (const [projectID, cachedProject] of this.archivedProjectCache) {
+      if (cachedProject.expiresAt <= now) {
+        this.archivedProjectCache.delete(projectID);
+      }
+    }
   }
 
   private getFetcher() {
@@ -548,6 +560,38 @@ export class GitLab {
     }
   }
 
+  private async filterNonArchivedProjectItems<T extends { project_id: number }>(items: T[]): Promise<T[]> {
+    const projectIds = [...new Set(items.map((item) => item.project_id))];
+    const now = Date.now();
+    this.pruneArchivedProjectCache(now);
+    const missingProjectIds = projectIds.filter((projectID) => {
+      const cachedProject = this.archivedProjectCache.get(projectID);
+      if (!cachedProject) {
+        return true;
+      }
+      return false;
+    });
+
+    await Promise.all(
+      missingProjectIds.map(async (projectID) => {
+        try {
+          const project = await this.getProject(projectID);
+          this.archivedProjectCache.set(projectID, {
+            archived: project.archived,
+            expiresAt: Date.now() + ARCHIVED_PROJECT_CACHE_TTL_MS,
+          });
+        } catch {
+          this.archivedProjectCache.set(projectID, {
+            archived: false,
+            expiresAt: Date.now() + ARCHIVED_PROJECT_CACHE_TTL_MS,
+          });
+        }
+      }),
+    );
+
+    return items.filter((item) => !this.archivedProjectCache.get(item.project_id)?.archived);
+  }
+
   public async downloadFile(url: string, params: { localFilepath: string }): Promise<string> {
     logAPI(`download ${url}`);
     const fetcher = this.getFetcher();
@@ -648,37 +692,40 @@ export class GitLab {
    */
   async getIssues(params: Record<string, any>, project?: Project, all?: boolean): Promise<Issue[]> {
     const projectPrefix = project ? `projects/${project.id}/` : "";
+    const apiParams = { ...params };
+    const excludeArchivedProjects = apiParams.excludeArchivedProjects === true;
+    delete apiParams.excludeArchivedProjects;
 
     // Build correct label filter params for GitLab API
-    if (params.includeLabels) {
-      const includeArr = params.includeLabels
+    if (apiParams.includeLabels) {
+      const includeArr = apiParams.includeLabels
         .split(",")
         .map((l: string) => l.trim())
         .filter((l: string) => l.length > 0);
       if (includeArr.length > 0) {
-        params["labels[]"] = includeArr;
+        apiParams["labels[]"] = includeArr;
       }
-      delete params.includeLabels;
+      delete apiParams.includeLabels;
     }
-    if (params.excludeLabels) {
-      const excludeArr = params.excludeLabels
+    if (apiParams.excludeLabels) {
+      const excludeArr = apiParams.excludeLabels
         .split(",")
         .map((l: string) => l.trim())
         .filter((l: string) => l.length > 0);
       if (excludeArr.length > 0) {
-        params["not[labels][]"] = excludeArr;
+        apiParams["not[labels][]"] = excludeArr;
       }
-      delete params.excludeLabels;
+      delete apiParams.excludeLabels;
     }
 
-    if (!params.with_labels_details) {
-      params.with_labels_details = "true";
+    if (!apiParams.with_labels_details) {
+      apiParams.with_labels_details = "true";
     }
 
-    const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, params, all).then((issues) => {
+    const issueItems: Issue[] = await this.fetch(`${projectPrefix}issues`, apiParams, all).then((issues) => {
       return issues.map((issue: any) => jsonDataToIssue(issue));
     });
-    return issueItems;
+    return excludeArchivedProjects ? await this.filterNonArchivedProjectItems(issueItems) : issueItems;
   }
 
   async getIssue(projectID: number, issueID: number, params: Record<string, any>): Promise<Issue> {
@@ -852,14 +899,18 @@ export class GitLab {
   }
 
   async getMergeRequests(params: Record<string, any>, project?: Project): Promise<MergeRequest[]> {
-    if (!params.with_labels_details) {
-      params.with_labels_details = "true";
+    const apiParams = { ...params };
+    const excludeArchivedProjects = apiParams.excludeArchivedProjects === true;
+    delete apiParams.excludeArchivedProjects;
+
+    if (!apiParams.with_labels_details) {
+      apiParams.with_labels_details = "true";
     }
     const projectPrefix = project ? `projects/${project.id}/` : "";
-    const issueItems: MergeRequest[] = await this.fetch(`${projectPrefix}merge_requests`, params).then((issues) => {
+    const issueItems: MergeRequest[] = await this.fetch(`${projectPrefix}merge_requests`, apiParams).then((issues) => {
       return issues.map((issue: any) => jsonDataToMergeRequest(issue));
     });
-    return issueItems;
+    return excludeArchivedProjects ? await this.filterNonArchivedProjectItems(issueItems) : issueItems;
   }
 
   async getMergeRequestsApprovalsFromProjectMR({
