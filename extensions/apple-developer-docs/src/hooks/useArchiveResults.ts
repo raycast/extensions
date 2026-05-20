@@ -149,7 +149,8 @@ export default function useArchiveResults(
     return () => {
       isMounted = false;
     };
-  }, [documentResults, includeArchiveResults, isBuildingToc, shouldLoadArchive, tocResults.length]);
+    // Keep the archive TOC build running through progress updates instead of restarting on every tocResults change.
+  }, [documentResults, includeArchiveResults, shouldLoadArchive]);
 
   const archiveResults = useMemo(() => [...tocResults, ...documentResults], [documentResults, tocResults]);
 
