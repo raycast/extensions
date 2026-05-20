@@ -155,7 +155,7 @@ export function RemoteEditorForm(context: RemoteEditorFormProps) {
 
   const { data: needsManualProvider } = usePromise(
     async (url: string) => {
-      if (context.initialRemote?.provider === undefined) {
+      if (context.initialRemote?.provider === undefined || context.initialRemote?.isOverridedProvider) {
         return true;
       }
 

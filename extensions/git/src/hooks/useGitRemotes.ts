@@ -53,6 +53,7 @@ export function useGitRemotes(gitManager: GitManager): RepositoryContext["remote
           displayName: `${parser.organizationName}/${parser.repositoryName}`,
           repositoryName: parser.repositoryName,
           provider: parser.provider,
+          isOverridedProvider: providerOverrides[primaryUrl] !== undefined,
           avatarUrl: parser.avatarUrl,
           webPages: parser.webPages,
         };

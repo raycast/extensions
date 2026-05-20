@@ -237,6 +237,7 @@ export type Remote = {
   displayName: string;
   repositoryName?: string;
   provider?: RemoteProvider;
+  isOverridedProvider?: boolean;
   avatarUrl?: string;
   webPages: {
     fileRelated: (filePath: string, ref?: string) => RemoteWebPage[];
