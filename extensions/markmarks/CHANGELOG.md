@@ -1,6 +1,6 @@
 # MarkMarks Changelog
 
-## [Bug Fixes] - {PR_MERGE_DATE}
+## [Bug Fixes] - 2026-05-20
 
 - Fixed opening bookmarks from Safari so links target Safari directly
 
