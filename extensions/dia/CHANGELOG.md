@@ -1,5 +1,9 @@
 # Dia Changelog
 
+## [Configurable Search Engine] - {PR_MERGE_DATE}
+
+- Added a search engine preference for Search Dia suggestions and web search fallback actions.
+
 ## [Fixed SQL query escaping] - 2026-03-27
 
 - Fixed single quote escaping in SQL queries to use proper SQL string literals instead of double quotes

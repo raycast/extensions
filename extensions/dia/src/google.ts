@@ -1,5 +1,6 @@
 import { useFetch } from "@raycast/utils";
 import { nanoid } from "nanoid";
+import { getSearchUrl } from "./search-engines";
 
 export type Suggestion = {
   id: string;
@@ -22,14 +23,14 @@ type GoogleSuggestionParser = [
   },
 ];
 
-export function useGoogleSuggestions(searchText: string) {
+export function useGoogleSuggestions(searchText: string, enabled = true) {
   return useFetch<Suggestion[]>(
     `https://suggestqueries.google.com/complete/search?hl=en-us&output=chrome&q=${encodeURIComponent(searchText)}`,
     {
       headers: {
         "Content-Type": "text/plain; charset=UTF-8",
       },
-      execute: !!searchText && searchText.trim().length >= 2,
+      execute: enabled && !!searchText && searchText.trim().length >= 2,
       keepPreviousData: true,
       parseResponse: async (response) => {
         try {
@@ -42,7 +43,7 @@ export function useGoogleSuggestions(searchText: string) {
               {
                 id: nanoid(),
                 query: searchText,
-                url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
+                url: getSearchUrl(searchText),
               },
             ];
           }
@@ -52,7 +53,7 @@ export function useGoogleSuggestions(searchText: string) {
             {
               id: nanoid(),
               query: searchText,
-              url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
+              url: getSearchUrl(searchText),
             },
           ];
 
@@ -77,7 +78,7 @@ export function useGoogleSuggestions(searchText: string) {
               suggestions.push({
                 id: nanoid(),
                 query: item,
-                url: `https://www.google.com/search?q=${encodeURIComponent(item)}`,
+                url: getSearchUrl(item),
               });
             }
           });
@@ -90,7 +91,7 @@ export function useGoogleSuggestions(searchText: string) {
             {
               id: nanoid(),
               query: searchText,
-              url: `https://www.google.com/search?q=${encodeURIComponent(searchText)}`,
+              url: getSearchUrl(searchText),
             },
           ];
         }
