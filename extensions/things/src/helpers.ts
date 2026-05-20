@@ -1,5 +1,5 @@
 import { AI, Color, Icon, Image } from '@raycast/api';
-import { List } from './types';
+import { List, Todo } from './types';
 
 export const listItems = {
   inbox: { title: 'Inbox', icon: { source: Icon.Tray, tintColor: Color.Blue } },
@@ -32,6 +32,22 @@ export const menuBarStatusIcons: Record<'open' | 'completed' | 'canceled', Image
   completed: Icon.CheckCircle,
   canceled: Icon.XMarkCircle,
 };
+
+export function getTodoIcon(todo: Todo): Image.ImageLike {
+  if (todo.isProject) return { source: Icon.List, tintColor: Color.Blue };
+  return statusIcons[todo.status];
+}
+
+export function getTypeIcon(type: 'area' | 'project' | 'todo'): Image.ImageLike {
+  switch (type) {
+    case 'area':
+      return { source: Icon.Box, tintColor: Color.Green };
+    case 'project':
+      return { source: Icon.List, tintColor: Color.Blue };
+    case 'todo':
+      return Icon.Circle;
+  }
+}
 
 export function getChecklistItemsWithAI(name: string, notes: string) {
   return AI.ask(

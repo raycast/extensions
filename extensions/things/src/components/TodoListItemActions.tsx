@@ -13,7 +13,7 @@ import {
 
 import { AddNewTodo } from '../add-new-todo';
 import { setTodoProperty, deleteProject, deleteTodo, updateTodo, updateProject, handleError } from '../api';
-import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
+import { getChecklistItemsWithAI, getTypeIcon, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
@@ -261,7 +261,14 @@ New title:
             {lists
               .filter((list) => !todo.isProject || list.type === 'area')
               .map((list) => {
-                return <Action {...listItems.list(list)} key={list.id} onAction={() => moveTo(list.id)} />;
+                return (
+                  <Action
+                    title={list.name}
+                    icon={getTypeIcon(list.type)}
+                    key={list.id}
+                    onAction={() => moveTo(list.id)}
+                  />
+                );
               })}
           </ActionPanel.Submenu>
         ) : null}

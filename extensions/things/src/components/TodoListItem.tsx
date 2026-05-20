@@ -1,7 +1,7 @@
 import { List, Icon, Color } from '@raycast/api';
 import dayjs from 'dayjs';
 
-import { statusIcons } from '../helpers';
+import { getTodoIcon } from '../helpers';
 
 import TodoListItemActions from './TodoListItemActions';
 import { CommandListName, Todo, List as TList } from '../types';
@@ -83,7 +83,7 @@ export default function TodoListItem({
       key={todo.id}
       title={todo.name}
       subtitle={todo.notes}
-      icon={statusIcons[todo.status]}
+      icon={getTodoIcon(todo)}
       keywords={keywords}
       accessories={accessories}
       actions={
