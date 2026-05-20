@@ -11,6 +11,7 @@
     "jsx": "react-jsx",
     "resolveJsonModule": true,
     "moduleResolution": "node",
-    "noEmit": true
+    "noEmit": true,
+    "skipLibCheck": true
   }
 }
