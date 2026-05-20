@@ -7,12 +7,8 @@ import useSearchedResults from "./hooks/useSearchedResults";
 import DevOnlyActionPanel from "./DevOnlyActionPanel";
 import useArchiveResults, { ArchiveIndexStatus } from "./hooks/useArchiveResults";
 
-type Preferences = {
-  includeArchiveResults: boolean;
-};
-
 export default function Command() {
-  const preferences = getPreferenceValues<Preferences>();
+  const preferences = getPreferenceValues<{ includeArchiveResults: boolean }>();
   const includeArchiveResults = preferences.includeArchiveResults;
   const [searchText, setSearchText] = useState("");
   const query = searchText.length === 0 ? "SwiftUI" : searchText;
