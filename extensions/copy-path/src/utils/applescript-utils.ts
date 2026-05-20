@@ -120,7 +120,7 @@ export const getVSCodeActiveFilePath = async (app: Application) => {
     return "";
   }
 
-  const previousClipboard = await Clipboard.readText();
+  const previousClipboard = await Clipboard.read();
   let path = "";
   try {
     await Clipboard.copy(VSCODE_SENTINEL_CLIPBOARD);
@@ -129,11 +129,7 @@ export const getVSCodeActiveFilePath = async (app: Application) => {
     path = "";
   } finally {
     if (path === "" || path === VSCODE_SENTINEL_CLIPBOARD) {
-      if (previousClipboard === undefined) {
-        await Clipboard.clear();
-      } else {
-        await Clipboard.copy(previousClipboard);
-      }
+      await restoreClipboard(previousClipboard);
     }
   }
 
@@ -147,6 +143,18 @@ export const getVSCodeActiveFilePath = async (app: Application) => {
     return "";
   } catch (e) {
     return "";
+  }
+};
+
+const restoreClipboard = async (content: Clipboard.ReadContent) => {
+  if (content.file) {
+    await Clipboard.copy({ file: content.file });
+  } else if (content.html) {
+    await Clipboard.copy({ html: content.html, text: content.text });
+  } else if (content.text) {
+    await Clipboard.copy(content.text);
+  } else {
+    await Clipboard.clear();
   }
 };
 
