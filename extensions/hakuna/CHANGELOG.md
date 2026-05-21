@@ -1,9 +1,5 @@
 # Hakuna Timer Changelog
 
-## [Security Maintenance] - 2026-05-21
-
-- Updated the extension to address security advisories.
-
 ## [Menu Bar, Entries, Profiles, Absences, and More] - {PR_MERGE_DATE}
 
 ### New Commands
@@ -27,5 +23,9 @@
 ### Removed
 
 - **Get Worktime** and **Get Vacation Days** commands — this information is now available in the Profile command
+
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
 
 ## [Initial Version] - 2024-10-04
