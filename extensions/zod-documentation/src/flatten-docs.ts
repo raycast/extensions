@@ -1,17 +1,6 @@
-import { getDefaultStore } from "jotai";
-import { zodVersionAtom } from "./atoms";
 import { docsV3, DocsV3Item } from "./docs/zod-3";
 import { docsV4, DocsV4Item, DocsV4ItemHeading } from "./docs/zod-4";
-
-const defaultStore = getDefaultStore();
-const zodVersion = defaultStore.get(zodVersionAtom);
-
-function getFullUrl(slugOrId: string) {
-  const v3Subdomain = zodVersion === "3" ? "v3." : "";
-  const v3IdPath = zodVersion === "3" ? "?id=" : "";
-
-  return `https://${v3Subdomain}zod.dev/${v3IdPath}${slugOrId}`;
-}
+import { ZodVersion } from "./search-documentation";
 
 interface ListItem {
   id: string;
@@ -37,7 +26,7 @@ function flattenV4Heading(slug: string, headings: DocsV4ItemHeading[], parentTit
         {
           id: `${slug}#${encoded}`,
           title: heading,
-          url: `${getFullUrl(slug)}#${encoded}`,
+          url: `https://zod.dev/${slug}#${encoded}`,
           subtitle: parentTitle,
         },
       ];
@@ -51,7 +40,7 @@ function flattenV4Heading(slug: string, headings: DocsV4ItemHeading[], parentTit
       {
         id: `${slug}#${encoded}`,
         title,
-        url: `${getFullUrl(slug)}#${encoded}`,
+        url: `https://zod.dev/${slug}#${encoded}`,
         subtitle: parentTitle,
       },
       ...flattenV4Heading(slug, heading.headings ?? [], nextParentTitle),
@@ -59,12 +48,12 @@ function flattenV4Heading(slug: string, headings: DocsV4ItemHeading[], parentTit
   });
 }
 
-export function flattenV4Docs(docs: DocsV4Item[] = docsV4) {
+function flattenV4Docs(docs: DocsV4Item[] = docsV4) {
   return docs.flatMap((item) => {
     const rootItem: ListItem = {
       id: item.slug || item.title,
       title: item.title,
-      url: getFullUrl(item.slug),
+      url: `https://zod.dev/${item.slug}`,
       subtitle: "",
     };
 
@@ -72,13 +61,17 @@ export function flattenV4Docs(docs: DocsV4Item[] = docsV4) {
   });
 }
 
-export function flattenV3Docs(docs: DocsV3Item[] = docsV3, parentTitle = ""): ListItem[] {
+function flattenV3Docs(docs: DocsV3Item[] = docsV3, parentTitle = ""): ListItem[] {
   return docs.flatMap((item) => {
     if (item.children) {
       const nextParentTitle = parentTitle ? `${parentTitle} | ${item.title}` : item.title;
       return flattenV3Docs(item.children, nextParentTitle);
     }
 
-    return [{ id: item.id, title: item.title, url: getFullUrl(item.id), subtitle: parentTitle }];
+    return [{ id: item.id, title: item.title, url: `https://v3.zod.dev/?id=${item.id}`, subtitle: parentTitle }];
   });
+}
+
+export function flattenDocs(zodVersion: ZodVersion) {
+  return zodVersion === "4" ? flattenV4Docs() : flattenV3Docs();
 }

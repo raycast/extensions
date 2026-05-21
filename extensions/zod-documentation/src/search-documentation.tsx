@@ -1,7 +1,6 @@
 import { Action, ActionPanel, List } from "@raycast/api";
-import { useAtom } from "jotai";
-import { zodVersionAtom } from "./atoms";
-import { flattenV3Docs, flattenV4Docs } from "./flatten-docs";
+import { useState } from "react";
+import { flattenDocs } from "./flatten-docs";
 
 const zodVersions = [
   { id: "4", name: "Zod 4", icon: { source: "zod-4-logo.png" } },
@@ -23,7 +22,7 @@ function ZodVersionDropdown(props: { onZodVersionChange: (newValue: string) => v
 export type ZodVersion = (typeof zodVersions)[number]["id"];
 
 export default function Command() {
-  const [zodVersion, setZodVersion] = useAtom(zodVersionAtom);
+  const [zodVersion, setZodVersion] = useState<ZodVersion>("4");
 
   return (
     <List
@@ -31,7 +30,7 @@ export default function Command() {
         <ZodVersionDropdown onZodVersionChange={(newValue) => setZodVersion(newValue as ZodVersion)} />
       }
     >
-      {(zodVersion === "4" ? flattenV4Docs() : flattenV3Docs()).map((item) => (
+      {flattenDocs(zodVersion).map((item) => (
         <List.Item
           key={item.id}
           icon={{ source: zodVersion === "4" ? "zod-4-logo.png" : "zod-3-logo.png" }}

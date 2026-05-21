@@ -22,9 +22,7 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.18",
-    "@raycast/utils": "^2.2.5",
-    "jotai": "^2.20.0"
+    "@raycast/api": "^1.104.18"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
