@@ -12,15 +12,17 @@ import { useState, useEffect } from "react";
 import { google } from "./oauth";
 import { fetchTaskLists, createTask } from "./api";
 import { TaskList } from "./types";
+import { parseNaturalDate } from "./date-parser";
 
 function CreateTask() {
   const [lists, setLists] = useState<TaskList[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [dueInput, setDueInput] = useState("");
+  const [parsedDue, setParsedDue] = useState<Date | null>(null);
 
   const { handleSubmit, itemProps, setValue } = useForm<{
     title: string;
     notes: string;
-    due: Date | null;
     listId: string;
   }>({
     async onSubmit(values) {
@@ -28,7 +30,7 @@ function CreateTask() {
         await createTask(values.listId, {
           title: values.title,
           notes: values.notes || undefined,
-          due: values.due,
+          due: parsedDue,
         });
         showToast({
           style: Toast.Style.Success,
@@ -93,7 +95,27 @@ function CreateTask() {
         title="Notes"
         placeholder="Optional notes..."
       />
-      <Form.DatePicker {...itemProps.due} title="Due Date" />
+      <Form.TextField
+        id="due"
+        title="Due Date"
+        placeholder='e.g. "tomorrow", "next monday", "dans 3 jours"'
+        value={dueInput}
+        error={
+          dueInput.trim() !== "" && !parsedDue
+            ? "Date not recognized"
+            : undefined
+        }
+        onChange={(val) => {
+          setDueInput(val);
+          setParsedDue(parseNaturalDate(val));
+        }}
+      />
+      {parsedDue && (
+        <Form.Description
+          title=""
+          text={`Recognized: ${parsedDue.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}`}
+        />
+      )}
       <Form.Dropdown {...itemProps.listId} title="Task List">
         {lists.map((list) => (
           <Form.Dropdown.Item

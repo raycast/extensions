@@ -7,6 +7,7 @@ View, create, and manage your Google Tasks directly from Raycast.
 - Browse all your task lists and tasks
 - Filter tasks by status: Open, Completed, or All
 - Create tasks with title, notes, and due date
+- Natural language due dates in English and French ("tomorrow", "next monday", "dans 3 jours")
 - Complete and reopen tasks with a single keystroke
 - Edit task details inline
 - Delete tasks
@@ -65,7 +66,21 @@ Browse your task lists, then drill into any list to see its tasks. Use the dropd
 
 ### Create Task
 
-A standalone form to quickly create a task from anywhere in Raycast. Pick a title, add optional notes and a due date, then choose which task list it belongs to.
+A standalone form to quickly create a task from anywhere in Raycast. Type a title, add optional notes, set a due date using natural language, then choose which task list it belongs to.
+
+## Date Expressions
+
+The Due Date field accepts plain text in English and French. As you type, a preview appears confirming the recognized date.
+
+| English | French |
+|---------|--------|
+| `today`, `tomorrow` | `aujourd'hui`, `demain` |
+| `monday` … `sunday` | `lundi` … `dimanche` |
+| `jan 15`, `15 january` | `15 janvier` |
+| `in 3 days`, `in 2 weeks` | `dans 3 jours`, `dans 2 semaines` |
+| `next week`, `next month` | `la semaine prochaine`, `le mois prochain` |
+
+Leave the field blank to create a task with no due date.
 
 ## Troubleshooting
 

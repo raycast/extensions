@@ -1,5 +1,14 @@
 # Google Tasks Changelog
 
+## [Natural Language Date Input] - {PR_MERGE_DATE}
+
+- Replaced calendar date picker with a natural language text field in all task forms
+- Supports English expressions: "today", "tomorrow", "monday", "in 3 days", "next week", "jan 15"
+- Supports French expressions: "aujourd'hui", "demain", "lundi", "dans 3 jours", "la semaine prochaine", "15 janvier"
+- Live feedback: "Recognized: Thursday, May 28, 2026" appears below the field when a date is understood
+- Unrecognized input shows a red "Date not recognized" error directly under the field
+- Edit Task pre-populates the due date field with the existing date as readable text
+
 ## [Fix Timezone and Form Bugs] - {PR_MERGE_DATE}
 
 - Fixed off-by-one day error in due date display for UTC- timezones

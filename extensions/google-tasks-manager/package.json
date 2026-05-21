@@ -5,7 +5,9 @@
   "description": "A fast, lightweight way to manage your Google Tasks from Raycast.",
   "icon": "google-tasks.png",
   "author": "adrien",
-  "categories": ["Productivity"],
+  "categories": [
+    "Productivity"
+  ],
   "license": "MIT",
   "commands": [
     {
@@ -33,7 +35,8 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.103.4",
-    "@raycast/utils": "^2.2.1"
+    "@raycast/utils": "^2.2.1",
+    "chrono-node": "^2.9.1"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",

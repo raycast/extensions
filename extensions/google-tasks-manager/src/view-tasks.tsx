@@ -21,6 +21,7 @@ import {
   deleteTask,
 } from "./api";
 import { Task, TaskForm, TaskList, Filter } from "./types";
+import { parseNaturalDate } from "./date-parser";
 
 function getTaskIcon(task: Task): { source: Icon; tintColor?: Color } {
   if (task.status === "completed") {
@@ -59,20 +60,40 @@ function EditTaskForm(props: {
 }) {
   const { pop } = useNavigation();
   const existingDue = props.task.due ? new Date(props.task.due) : null;
+  const [dueInput, setDueInput] = useState(
+    existingDue
+      ? existingDue.toLocaleDateString("en-US", {
+          month: "long",
+          day: "numeric",
+          year: "numeric",
+          timeZone: "UTC",
+        })
+      : "",
+  );
+  const [parsedDue, setParsedDue] = useState<Date | null>(() =>
+    parseNaturalDate(
+      existingDue
+        ? existingDue.toLocaleDateString("en-US", {
+            month: "long",
+            day: "numeric",
+            year: "numeric",
+            timeZone: "UTC",
+          })
+        : "",
+    ),
+  );
 
   const { handleSubmit, itemProps } = useForm<{
     title: string;
     notes: string;
-    due: Date | null;
   }>({
     onSubmit(values) {
-      props.onEdit(values.title, values.notes, values.due);
+      props.onEdit(values.title, values.notes, parsedDue);
       pop();
     },
     initialValues: {
       title: props.task.title,
       notes: props.task.notes ?? "",
-      due: existingDue,
     },
     validation: {
       title: FormValidation.Required,
@@ -93,7 +114,27 @@ function EditTaskForm(props: {
     >
       <Form.TextField {...itemProps.title} title="Title" />
       <Form.TextArea {...itemProps.notes} title="Notes" />
-      <Form.DatePicker {...itemProps.due} title="Due Date" />
+      <Form.TextField
+        id="due"
+        title="Due Date"
+        placeholder='e.g. "tomorrow", "next monday", "dans 3 jours"'
+        value={dueInput}
+        error={
+          dueInput.trim() !== "" && !parsedDue
+            ? "Date not recognized"
+            : undefined
+        }
+        onChange={(val) => {
+          setDueInput(val);
+          setParsedDue(parseNaturalDate(val));
+        }}
+      />
+      {parsedDue && (
+        <Form.Description
+          title=""
+          text={`Recognized: ${parsedDue.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}`}
+        />
+      )}
     </Form>
   );
 }
@@ -105,17 +146,18 @@ function InlineCreateTaskForm(props: {
   onCreate: (task: TaskForm) => void;
 }) {
   const { pop } = useNavigation();
+  const [dueInput, setDueInput] = useState("");
+  const [parsedDue, setParsedDue] = useState<Date | null>(null);
 
   const { handleSubmit, itemProps } = useForm<{
     title: string;
     notes: string;
-    due: Date | null;
   }>({
     onSubmit(values) {
       props.onCreate({
         title: values.title,
         notes: values.notes,
-        due: values.due,
+        due: parsedDue,
       });
       pop();
     },
@@ -146,7 +188,27 @@ function InlineCreateTaskForm(props: {
         title="Notes"
         placeholder="Optional notes..."
       />
-      <Form.DatePicker {...itemProps.due} title="Due Date" />
+      <Form.TextField
+        id="due"
+        title="Due Date"
+        placeholder='e.g. "tomorrow", "next monday", "dans 3 jours"'
+        value={dueInput}
+        error={
+          dueInput.trim() !== "" && !parsedDue
+            ? "Date not recognized"
+            : undefined
+        }
+        onChange={(val) => {
+          setDueInput(val);
+          setParsedDue(parseNaturalDate(val));
+        }}
+      />
+      {parsedDue && (
+        <Form.Description
+          title=""
+          text={`Recognized: ${parsedDue.toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" })}`}
+        />
+      )}
     </Form>
   );
 }
