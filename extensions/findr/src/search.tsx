@@ -155,11 +155,13 @@ export default function SearchFiles() {
       setRecentLoading(false);
       return;
     }
-    execFile(
+    let cancelled = false;
+    const child = execFile(
       findrPath,
       ["search", "", "--json", "--limit", "20"],
       { env: { ...process.env, ...findrEnv } },
       (err, stdout) => {
+        if (cancelled) return;
         if (!err && stdout) {
           try {
             setRecentData(JSON.parse(stdout));
@@ -170,6 +172,10 @@ export default function SearchFiles() {
         setRecentLoading(false);
       },
     );
+    return () => {
+      cancelled = true;
+      child.kill();
+    };
   }, [findrPath, binaryExists]);
 
   const isTyping = query.length > 0;
@@ -213,12 +219,12 @@ export default function SearchFiles() {
         title: "Building index for the first time...",
         message: "This takes ~25 seconds. Search again shortly.",
       });
-    } else {
+    } else if (searchData !== null) {
       showToast({ style: Toast.Style.Success, title: "" }).then((t) =>
         t.hide(),
       );
     }
-  }, [isIndexing]);
+  }, [isIndexing, searchData]);
 
   if (!binaryExists) {
     return (
