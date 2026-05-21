@@ -11,6 +11,7 @@ import {
   mediaRepeat,
 } from "./lib/cli";
 import { ErrorView } from "./components/ErrorView";
+import { handleCLIError } from "./components/error-handler";
 
 function formatTime(seconds?: number | null): string {
   if (seconds == null || isNaN(seconds)) return "--:--";
@@ -68,6 +69,14 @@ export default function Command() {
 ${info?.volume != null ? `| **Volume** | ${Math.round(info.volume)}% |` : ""}
 `;
 
+  async function runAction(action: () => Promise<void>) {
+    try {
+      await action();
+    } catch (error) {
+      await handleCLIError(error);
+    }
+  }
+
   return (
     <Detail
       isLoading={isLoading}
@@ -77,64 +86,78 @@ ${info?.volume != null ? `| **Volume** | ${Math.round(info.volume)}% |` : ""}
           <Action
             title={info?.isPlaying ? "Pause" : "Play"}
             icon={info?.isPlaying ? Icon.Pause : Icon.Play}
-            onAction={async () => {
-              await mediaPlayPause();
-              revalidate();
-            }}
+            onAction={() =>
+              runAction(async () => {
+                await mediaPlayPause();
+                revalidate();
+              })
+            }
           />
           <Action
             title="Next Track"
             icon={Icon.Forward}
             shortcut={{ modifiers: ["cmd"], key: "arrowRight" }}
-            onAction={async () => {
-              await mediaNext();
-              revalidate();
-            }}
+            onAction={() =>
+              runAction(async () => {
+                await mediaNext();
+                revalidate();
+              })
+            }
           />
           <Action
             title="Previous Track"
             icon={Icon.Rewind}
             shortcut={{ modifiers: ["cmd"], key: "arrowLeft" }}
-            onAction={async () => {
-              await mediaPrevious();
-              revalidate();
-            }}
+            onAction={() =>
+              runAction(async () => {
+                await mediaPrevious();
+                revalidate();
+              })
+            }
           />
           <Action
             title="Skip Forward 15 Seconds"
             icon={Icon.Forward}
             shortcut={{ modifiers: ["cmd", "shift"], key: "arrowRight" }}
-            onAction={async () => {
-              await mediaForward(15);
-              revalidate();
-            }}
+            onAction={() =>
+              runAction(async () => {
+                await mediaForward(15);
+                revalidate();
+              })
+            }
           />
           <Action
             title="Skip Backward 15 Seconds"
             icon={Icon.Rewind}
             shortcut={{ modifiers: ["cmd", "shift"], key: "arrowLeft" }}
-            onAction={async () => {
-              await mediaBackward(15);
-              revalidate();
-            }}
+            onAction={() =>
+              runAction(async () => {
+                await mediaBackward(15);
+                revalidate();
+              })
+            }
           />
           <Action
             title="Toggle Shuffle"
             icon={Icon.Shuffle}
             shortcut={{ modifiers: ["cmd"], key: "s" }}
-            onAction={async () => {
-              await mediaShuffle();
-              await showHUD("🔀 Shuffle toggled");
-            }}
+            onAction={() =>
+              runAction(async () => {
+                await mediaShuffle();
+                await showHUD("🔀 Shuffle toggled");
+              })
+            }
           />
           <Action
             title="Toggle Repeat"
             icon={Icon.Repeat}
             shortcut={{ modifiers: ["cmd"], key: "r" }}
-            onAction={async () => {
-              await mediaRepeat();
-              await showHUD("🔁 Repeat toggled");
-            }}
+            onAction={() =>
+              runAction(async () => {
+                await mediaRepeat();
+                await showHUD("🔁 Repeat toggled");
+              })
+            }
           />
           <Action
             title="Refresh"

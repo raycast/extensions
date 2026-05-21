@@ -10,6 +10,7 @@ import {
 import { setVolume, getVolume } from "./lib/cli";
 import { VOLUME_STEPS } from "./lib/constants";
 import { ErrorView } from "./components/ErrorView";
+import { handleCLIError } from "./components/error-handler";
 import { useCachedPromise } from "@raycast/utils";
 
 export default function Command(
@@ -74,9 +75,13 @@ function VolumeList() {
                 title={`Set Volume to ${step}%`}
                 icon={Icon.SpeakerHigh}
                 onAction={async () => {
-                  const vol = await setVolume(step);
-                  await showHUD(`🔊 Volume: ${Math.round(vol)}%`);
-                  await popToRoot();
+                  try {
+                    const vol = await setVolume(step);
+                    await showHUD(`🔊 Volume: ${Math.round(vol)}%`);
+                    await popToRoot();
+                  } catch (error) {
+                    await handleCLIError(error);
+                  }
                 }}
               />
             </ActionPanel>
