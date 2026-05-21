@@ -1,0 +1,8 @@
+ERMHDR	15.2	2026-03-02	Project		Primavera Cloud	USD	en
+%T	PROJWBS
+%F	wbs_id	parent_wbs_id	wbs_short_name	wbs_name	guid
+%R	100		PRJ	Project Root	
+%R	101	100	W1	Work Package One	
+%T	TASK
+%F	task_id	task_code	task_name	task_type	status_code	target_start_date	target_end_date	act_start_date	act_end_date	early_start_date	early_end_date	late_start_date	late_end_date
+%R	1	T1	Finish milestone sample	TT_FinMile	CS_NotStrt	2025-01-01 08:00						
