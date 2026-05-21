@@ -48,8 +48,36 @@ export async function parsePackageJson(packageJsonPath: string): Promise<Extensi
   }
 }
 
+function storeExtensionIdFromPath(packageJsonPath: string): string | null {
+  const folderName = path.basename(path.dirname(packageJsonPath));
+  const match = folderName.match(LOCAL_EXTENSION_UUID_PATTERN);
+  return match ? match[0].toLowerCase() : null;
+}
+
+function dedupePackageJsonPaths(paths: string[]): string[] {
+  const seenStoreIds = new Set<string>();
+  const deduped: string[] = [];
+
+  for (const packageJsonPath of paths) {
+    const storeId = storeExtensionIdFromPath(packageJsonPath);
+    if (storeId) {
+      if (seenStoreIds.has(storeId)) continue;
+      seenStoreIds.add(storeId);
+    }
+    deduped.push(packageJsonPath);
+  }
+
+  return deduped;
+}
+
 export async function getPackageJsonFiles(): Promise<string[]> {
-  const extensionsDir = path.join(os.homedir(), ".config", isWindows ? "raycast-x" : "raycast", "extensions");
+  const configDirs = isWindows ? ["raycast-x"] : ["raycast", "raycast-x"];
+  const extensionDirs = configDirs.map((dir) => path.join(os.homedir(), ".config", dir, "extensions"));
+  const packageJsonFiles = await Promise.all(extensionDirs.map(getPackageJsonFilesFromDirectory));
+  return dedupePackageJsonPaths(packageJsonFiles.flat());
+}
+
+async function getPackageJsonFilesFromDirectory(extensionsDir: string): Promise<string[]> {
   try {
     const extensions = await fs.readdir(extensionsDir);
     const packageJsonFiles = await Promise.all(
