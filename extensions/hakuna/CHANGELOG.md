@@ -1,5 +1,9 @@
 # Hakuna Timer Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Menu Bar, Entries, Profiles, Absences, and More] - {PR_MERGE_DATE}
 
 ### New Commands

@@ -79,7 +79,6 @@ export default function TimerForm({
     (initialEndTime ? formatTime(initialEndTime) : null) ?? "",
   );
   const [note, setNote] = useState(initialNote ?? "");
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [date, setDate] = useState<Date | null>(
     parseDate(initialDate) ?? new Date(),
   );

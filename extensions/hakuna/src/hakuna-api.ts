@@ -105,15 +105,13 @@ export interface TimeEntryResponse {
   project?: ProjectStub;
 }
 
-export interface AbsenceStub {
+export interface AbsenceTypeResponse {
   id: number;
   name: string;
   archived: boolean;
   grants_work_time: boolean;
   is_vacation: boolean;
 }
-
-export interface AbsenceTypeResponse extends AbsenceStub {}
 
 export interface AbsenceResponse {
   id: number;
@@ -124,7 +122,7 @@ export interface AbsenceResponse {
   is_recurring: boolean;
   weekly_repeat_interval?: number;
   user: UserResponse;
-  absence_type: AbsenceStub;
+  absence_type: AbsenceTypeResponse;
 }
 
 export interface OverviewResponse {
@@ -255,8 +253,8 @@ export class HakunaClient {
     return this.cachedGet<TaskResponse[]>("/tasks", ONE_DAY_MS);
   }
 
-  async getAbsenceTypes(): Promise<AbsenceStub[]> {
-    return this.cachedGet<AbsenceStub[]>("/absence_types", ONE_WEEK_MS);
+  async getAbsenceTypes(): Promise<AbsenceTypeResponse[]> {
+    return this.cachedGet<AbsenceTypeResponse[]>("/absence_types", ONE_WEEK_MS);
   }
 
   static clearCache(): void {
