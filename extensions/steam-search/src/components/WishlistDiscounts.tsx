@@ -407,7 +407,9 @@ export function WishlistDiscounts() {
               Windows: { modifiers: ["ctrl"], key: "r" },
             }}
             onAction={async () => {
-              discountedGamesCacheMap.delete(`${steamId ?? ""}-${region}`);
+              discountedGamesCacheMap.delete(
+                `${steamId ?? ""}-${region}-${ggDealsApiKey ?? ""}`,
+              );
               await LocalStorage.removeItem(
                 `wishlist-discounts-${steamId ?? ""}-${region}`,
               );
