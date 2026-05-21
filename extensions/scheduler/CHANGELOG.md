@@ -1,6 +1,6 @@
 # Scheduler Changelog
 
-## [Fix Progress Parsing] - {PR_MERGE_DATE}
+## [Accept Raycast V2 Deeplink Protocol] - {PR_MERGE_DATE}
 
 - Fixed Raycast V2 Deeplink protocol `raycast-x` is recognized as invalid format.
 
