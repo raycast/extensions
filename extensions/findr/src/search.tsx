@@ -140,7 +140,10 @@ export default function SearchFiles() {
       },
     );
 
-    return () => { killed = true; child.kill(); };
+    return () => {
+      killed = true;
+      child.kill();
+    };
   }, [debouncedQuery, isSearchReady, binaryExists]);
 
   // Recent files: raw useEffect — no caching layer to return stale data
@@ -148,15 +151,24 @@ export default function SearchFiles() {
   const [recentLoading, setRecentLoading] = useState(true);
 
   useEffect(() => {
-    if (!binaryExists) { setRecentLoading(false); return; }
-    execFile(findrPath, ["search", "", "--json", "--limit", "20"],
+    if (!binaryExists) {
+      setRecentLoading(false);
+      return;
+    }
+    execFile(
+      findrPath,
+      ["search", "", "--json", "--limit", "20"],
       { env: { ...process.env, ...findrEnv } },
       (err, stdout) => {
         if (!err && stdout) {
-          try { setRecentData(JSON.parse(stdout)); } catch {}
+          try {
+            setRecentData(JSON.parse(stdout));
+          } catch {
+            /* ignore parse errors */
+          }
         }
         setRecentLoading(false);
-      }
+      },
     );
   }, [findrPath, binaryExists]);
 
@@ -245,10 +257,6 @@ export default function SearchFiles() {
     );
   }
 
-  // Determine what to display
-  const showingResults = isTyping ? hasSearchResults : showRecent;
-  const displayResults = isTyping ? searchResults : recentResults;
-
   return (
     <List
       isLoading={isLoading}
@@ -260,7 +268,10 @@ export default function SearchFiles() {
       {showRecent ? (
         <List.Section title="Recent Files">
           {recentResults.map((result, index) => (
-            <ResultItem key={`recent-${result.path}-${index}`} result={result} />
+            <ResultItem
+              key={`recent-${result.path}-${index}`}
+              result={result}
+            />
           ))}
         </List.Section>
       ) : !isTyping ? (
@@ -293,7 +304,10 @@ export default function SearchFiles() {
           subtitle={`${elapsed}ms`}
         >
           {searchResults.map((result, index) => (
-            <ResultItem key={`search-${result.path}-${index}`} result={result} />
+            <ResultItem
+              key={`search-${result.path}-${index}`}
+              result={result}
+            />
           ))}
         </List.Section>
       )}
@@ -307,7 +321,9 @@ function ResultItem({ result }: { result: SearchResult }) {
       icon={getResultIcon(result)}
       title={result.filename}
       accessories={result.is_dir ? [{ tag: "Folder" }] : []}
-      quickLook={result.is_dir ? undefined : { path: result.path, name: result.filename }}
+      quickLook={
+        result.is_dir ? undefined : { path: result.path, name: result.filename }
+      }
       detail={<ResultDetail result={result} />}
       actions={<ResultActions result={result} />}
     />

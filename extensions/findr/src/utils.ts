@@ -1,4 +1,10 @@
-import { Clipboard, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
+import {
+  Clipboard,
+  environment,
+  getPreferenceValues,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { chmodSync, existsSync } from "fs";
 import { join } from "path";
 
