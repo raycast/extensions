@@ -44,6 +44,7 @@ interface WishlistResult {
 }
 
 const discountedGamesCacheMap = new Map<string, WishlistResult>();
+const discountedGamesFetchPromises = new Map<string, Promise<WishlistResult>>();
 
 function formatWishlistPrice(cents: number, region: string): string {
   const symbol = CURRENCY_SYMBOLS[region] ?? "$";
@@ -144,68 +145,84 @@ async function saveCachedGames(
   }
 }
 
-export async function fetchDiscountedWishlistGames(
+export function fetchDiscountedWishlistGames(
   steamId: string,
   ggDealsApiKey: string,
   region: string,
 ): Promise<WishlistResult> {
   if (discountedGamesCacheMap.has(region))
-    return discountedGamesCacheMap.get(region)!;
+    return Promise.resolve(discountedGamesCacheMap.get(region)!);
+  if (discountedGamesFetchPromises.has(region))
+    return discountedGamesFetchPromises.get(region)!;
 
-  const cached = await loadCachedGames(region);
-  if (cached) {
-    discountedGamesCacheMap.set(region, cached);
-    return cached;
-  }
-
-  const { entries: wishlistData, unavailable } = await fetchAllWishlistData(
-    steamId,
-    region,
-  );
-  if (unavailable !== null) {
-    // Cache error results in memory only — not in LocalStorage — so the next
-    // session retries once the rate limit clears or privacy settings are fixed.
-    const errorResult: WishlistResult = { games: [], unavailable };
-    discountedGamesCacheMap.set(region, errorResult);
-    return errorResult;
-  }
-  if (!wishlistData.size) return { games: [], unavailable: null };
-
-  const allIds = Array.from(wishlistData.keys());
-  if (ggDealsApiKey) {
-    for (let i = 0; i < allIds.length; i += 50) {
-      await batchFetchGGDeals(allIds.slice(i, i + 50), ggDealsApiKey, region);
+  const promise = (async () => {
+    const cached = await loadCachedGames(region);
+    if (cached) {
+      discountedGamesCacheMap.set(region, cached);
+      discountedGamesFetchPromises.delete(region);
+      return cached;
     }
-  }
 
-  const games: WishlistGame[] = [];
-  for (const [appid, entry] of wishlistData.entries()) {
-    if (entry.is_free_game) continue;
-    const sub = entry.subs?.[0];
-    if (!sub || sub.discount_pct === 0) continue;
+    const { entries: wishlistData, unavailable } = await fetchAllWishlistData(
+      steamId,
+      region,
+    );
+    if (unavailable !== null) {
+      // Cache error results in memory only — not in LocalStorage — so the next
+      // session retries once the rate limit clears or privacy settings are fixed.
+      const errorResult: WishlistResult = { games: [], unavailable };
+      discountedGamesCacheMap.set(region, errorResult);
+      discountedGamesFetchPromises.delete(region);
+      return errorResult;
+    }
+    if (!wishlistData.size) {
+      discountedGamesFetchPromises.delete(region);
+      return { games: [], unavailable: null };
+    }
 
-    games.push({
-      appid,
-      name: entry.name,
-      iconUrl:
-        entry.capsule ||
-        `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_sm_120.jpg`,
-      steamPrice:
-        sub.price != null ? formatWishlistPrice(sub.price, region) : null,
-      steamOriginalPrice:
-        sub.original_price != null
-          ? formatWishlistPrice(sub.original_price, region)
-          : null,
-      discountPercent: sub.discount_pct,
-      ggPrice: ggDealsCache.get(`${appid}-${region}`) ?? null,
-    });
-  }
+    const allIds = Array.from(wishlistData.keys());
+    if (ggDealsApiKey) {
+      for (let i = 0; i < allIds.length; i += 50) {
+        await batchFetchGGDeals(allIds.slice(i, i + 50), ggDealsApiKey, region);
+      }
+    }
 
-  const sorted = games.sort((a, b) => b.discountPercent - a.discountPercent);
-  const result: WishlistResult = { games: sorted, unavailable: null };
-  discountedGamesCacheMap.set(region, result);
-  await saveCachedGames(sorted, region);
-  return result;
+    const games: WishlistGame[] = [];
+    for (const [appid, entry] of wishlistData.entries()) {
+      if (entry.is_free_game) continue;
+      const sub = entry.subs?.[0];
+      if (!sub || sub.discount_pct === 0) continue;
+
+      games.push({
+        appid,
+        name: entry.name,
+        iconUrl:
+          entry.capsule ||
+          `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_sm_120.jpg`,
+        steamPrice:
+          sub.price != null ? formatWishlistPrice(sub.price, region) : null,
+        steamOriginalPrice:
+          sub.original_price != null
+            ? formatWishlistPrice(sub.original_price, region)
+            : null,
+        discountPercent: sub.discount_pct,
+        ggPrice: ggDealsCache.get(`${appid}-${region}`) ?? null,
+      });
+    }
+
+    const sorted = games.sort((a, b) => b.discountPercent - a.discountPercent);
+    const result: WishlistResult = { games: sorted, unavailable: null };
+    discountedGamesCacheMap.set(region, result);
+    discountedGamesFetchPromises.delete(region);
+    await saveCachedGames(sorted, region);
+    return result;
+  })().catch((err) => {
+    discountedGamesFetchPromises.delete(region);
+    throw err;
+  });
+
+  discountedGamesFetchPromises.set(region, promise);
+  return promise;
 }
 
 function WishlistItem({ game }: { game: WishlistGame }) {
