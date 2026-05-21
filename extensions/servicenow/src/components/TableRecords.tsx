@@ -36,7 +36,8 @@ type TableRecord = {
 } & Record<string, string | undefined>;
 
 // With sysparm_display_value=all every field arrives as { value, display_value }.
-type DisplayValuePair = { value: string; display_value: string };
+// Null is returned by the API when a field has no value.
+type DisplayValuePair = { value: string | null; display_value: string | null } | null;
 
 interface TableRecordsResponse {
   result: Record<string, DisplayValuePair>[];
