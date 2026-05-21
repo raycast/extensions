@@ -73,6 +73,7 @@ export async function fetchTopSellers(region: string): Promise<SteamApp[]> {
 let ownedGames: Map<number, number> | null = null;
 let lastPlayedTimes: Map<number, number> | null = null;
 let ownedFetchPromise: Promise<Map<number, number>> | null = null;
+let ownedForSteamId: string | null = null;
 // Fallback last-played times read from GetRecentlyPlayedGames (which sometimes
 // includes rtime_last_played even though it isn't officially documented).
 // Also used for F2P games whose rtime_last_played is 0 in GetOwnedGames.
@@ -83,6 +84,12 @@ export async function fetchOwnedGames(
   steamId: string,
 ): Promise<Map<number, number>> {
   if (!apiKey || !steamId) return new Map();
+  if (ownedForSteamId !== steamId) {
+    ownedGames = null;
+    lastPlayedTimes = null;
+    ownedFetchPromise = null;
+    ownedForSteamId = steamId;
+  }
   if (ownedGames !== null) return ownedGames;
   if (ownedFetchPromise !== null) return ownedFetchPromise;
 

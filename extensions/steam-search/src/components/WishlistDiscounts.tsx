@@ -116,10 +116,13 @@ async function fetchAllWishlistData(
   return { entries: result, unavailable: null };
 }
 
-async function loadCachedGames(region: string): Promise<WishlistResult | null> {
+async function loadCachedGames(
+  steamId: string,
+  region: string,
+): Promise<WishlistResult | null> {
   try {
     const raw = await LocalStorage.getItem<string>(
-      `wishlist-discounts-${region}`,
+      `wishlist-discounts-${steamId}-${region}`,
     );
     if (!raw) return null;
     const { games, timestamp }: { games: WishlistGame[]; timestamp: number } =
@@ -133,11 +136,12 @@ async function loadCachedGames(region: string): Promise<WishlistResult | null> {
 
 async function saveCachedGames(
   games: WishlistGame[],
+  steamId: string,
   region: string,
 ): Promise<void> {
   try {
     await LocalStorage.setItem(
-      `wishlist-discounts-${region}`,
+      `wishlist-discounts-${steamId}-${region}`,
       JSON.stringify({ games, timestamp: Date.now() }),
     );
   } catch {
@@ -150,16 +154,17 @@ export function fetchDiscountedWishlistGames(
   ggDealsApiKey: string,
   region: string,
 ): Promise<WishlistResult> {
-  if (discountedGamesCacheMap.has(region))
-    return Promise.resolve(discountedGamesCacheMap.get(region)!);
-  if (discountedGamesFetchPromises.has(region))
-    return discountedGamesFetchPromises.get(region)!;
+  const cacheKey = `${steamId}-${region}`;
+  if (discountedGamesCacheMap.has(cacheKey))
+    return Promise.resolve(discountedGamesCacheMap.get(cacheKey)!);
+  if (discountedGamesFetchPromises.has(cacheKey))
+    return discountedGamesFetchPromises.get(cacheKey)!;
 
   const promise = (async () => {
-    const cached = await loadCachedGames(region);
+    const cached = await loadCachedGames(steamId, region);
     if (cached) {
-      discountedGamesCacheMap.set(region, cached);
-      discountedGamesFetchPromises.delete(region);
+      discountedGamesCacheMap.set(cacheKey, cached);
+      discountedGamesFetchPromises.delete(cacheKey);
       return cached;
     }
 
@@ -171,12 +176,12 @@ export function fetchDiscountedWishlistGames(
       // Cache error results in memory only — not in LocalStorage — so the next
       // session retries once the rate limit clears or privacy settings are fixed.
       const errorResult: WishlistResult = { games: [], unavailable };
-      discountedGamesCacheMap.set(region, errorResult);
-      discountedGamesFetchPromises.delete(region);
+      discountedGamesCacheMap.set(cacheKey, errorResult);
+      discountedGamesFetchPromises.delete(cacheKey);
       return errorResult;
     }
     if (!wishlistData.size) {
-      discountedGamesFetchPromises.delete(region);
+      discountedGamesFetchPromises.delete(cacheKey);
       return { games: [], unavailable: null };
     }
 
@@ -212,16 +217,16 @@ export function fetchDiscountedWishlistGames(
 
     const sorted = games.sort((a, b) => b.discountPercent - a.discountPercent);
     const result: WishlistResult = { games: sorted, unavailable: null };
-    discountedGamesCacheMap.set(region, result);
-    discountedGamesFetchPromises.delete(region);
-    await saveCachedGames(sorted, region);
+    discountedGamesCacheMap.set(cacheKey, result);
+    discountedGamesFetchPromises.delete(cacheKey);
+    await saveCachedGames(sorted, steamId, region);
     return result;
   })().catch((err) => {
-    discountedGamesFetchPromises.delete(region);
+    discountedGamesFetchPromises.delete(cacheKey);
     throw err;
   });
 
-  discountedGamesFetchPromises.set(region, promise);
+  discountedGamesFetchPromises.set(cacheKey, promise);
   return promise;
 }
 
@@ -405,8 +410,10 @@ export function WishlistDiscounts() {
               Windows: { modifiers: ["ctrl"], key: "r" },
             }}
             onAction={async () => {
-              discountedGamesCacheMap.delete(region);
-              await LocalStorage.removeItem(`wishlist-discounts-${region}`);
+              discountedGamesCacheMap.delete(`${steamId ?? ""}-${region}`);
+              await LocalStorage.removeItem(
+                `wishlist-discounts-${steamId ?? ""}-${region}`,
+              );
               setIsLoading(true);
               setGames([]);
               setUnavailable(null);
