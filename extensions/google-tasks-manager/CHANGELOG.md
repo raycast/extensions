@@ -3,11 +3,12 @@
 ## [Natural Language Date Input] - {PR_MERGE_DATE}
 
 - Replaced calendar date picker with a natural language text field in all task forms
-- Supports English expressions: "today", "tomorrow", "monday", "in 3 days", "next week", "jan 15"
-- Supports French expressions: "aujourd'hui", "demain", "lundi", "dans 3 jours", "la semaine prochaine", "15 janvier"
+- Supports 6 languages: English, French, German, Spanish, Portuguese, and Italian
 - Live feedback: "Recognized: Thursday, May 28, 2026" appears below the field when a date is understood
 - Unrecognized input shows a red "Date not recognized" error directly under the field
 - Edit Task pre-populates the due date field with the existing date as readable text
+- Added `src/date-parser.ts` utility module with `parseNaturalDate()` backed by chrono-node
+- Added Vitest test suite (36 tests) covering all 6 languages, edge cases, and guard cases
 
 ## [Fix Timezone and Form Bugs] - {PR_MERGE_DATE}
 
