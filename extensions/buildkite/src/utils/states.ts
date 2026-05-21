@@ -50,32 +50,3 @@ export function getJobStateIcon(state: JobStates | undefined): Image.ImageLike {
       return { source: Icon.Circle, tintColor: Color.SecondaryText };
   }
 }
-
-export function getJobStateGlyph(state: JobStates | undefined): string {
-  switch (state) {
-    case "FINISHED":
-    case "UNBLOCKED":
-      return "✅";
-    case "BROKEN":
-    case "TIMED_OUT":
-    case "TIMING_OUT":
-    case "EXPIRED":
-    case "UNBLOCKED_FAILED":
-    case "WAITING_FAILED":
-      return "❌";
-    case "BLOCKED":
-    case "BLOCKED_FAILED":
-      return "⏸️";
-    case "RUNNING":
-    case "ACCEPTED":
-    case "ASSIGNED":
-      return "🟡";
-    case "CANCELED":
-    case "CANCELING":
-      return "⊘";
-    case "SKIPPED":
-      return "⤳";
-    default:
-      return "⚪";
-  }
-}

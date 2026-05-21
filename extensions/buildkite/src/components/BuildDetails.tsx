@@ -3,7 +3,7 @@ import { useCachedPromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { getBuildkiteClient } from "../api/withBuildkiteClient";
 import { BuildFragment, BuildJobFragment } from "../generated/graphql";
-import { getJobStateGlyph, getJobStateIcon } from "../utils/states";
+import { getJobStateIcon } from "../utils/states";
 import { truthy } from "../utils/truthy";
 
 type JobNode = BuildJobFragment;
@@ -32,8 +32,6 @@ function jobDeps(job: JobNode): string[] {
 interface Derived {
   jobs: JobNode[];
   byLevel: Map<number, JobNode[]>;
-  baseGraphLines: string[];
-  lineIndexById: Map<string, number>;
   blockedJobs: { id: string; label: string }[];
 }
 
@@ -76,38 +74,12 @@ function deriveFromJobs(rawJobs: JobNode[]): Derived {
     if (bucket) bucket.push(job);
     else byLevel.set(d, [job]);
   }
-  const levels = Array.from(byLevel.keys()).sort((a, b) => a - b);
-  const maxLevel = levels.length ? levels[levels.length - 1] : 0;
-
-  const baseGraphLines: string[] = ["```", "Pipeline graph", ""];
-  const lineIndexById = new Map<string, number>();
-  for (const level of levels) {
-    const levelJobs = byLevel.get(level)!;
-    baseGraphLines.push(`Stage ${level + 1}`);
-    for (const job of levelJobs) {
-      const deps = jobDeps(job);
-      const depStr = deps.length ? `  ← ${deps.join(", ")}` : "";
-      lineIndexById.set(job.id, baseGraphLines.length);
-      baseGraphLines.push(`  ${getJobStateGlyph(job.state)} ${jobLabel(job)}${depStr}`);
-    }
-    if (level < maxLevel) baseGraphLines.push("  │");
-  }
-  baseGraphLines.push("```");
-
   const blockedJobs = jobs
     .filter((j): j is Extract<JobNode, { __typename: "JobTypeBlock" }> => j.__typename === "JobTypeBlock")
     .filter((j) => j.state === "BLOCKED" && j.isUnblockable !== false)
     .map((j) => ({ id: j.id, label: jobLabel(j) }));
 
-  return { jobs, byLevel, baseGraphLines, lineIndexById, blockedJobs };
-}
-
-function graphForJob(derived: Derived, highlightId: string): string {
-  const idx = derived.lineIndexById.get(highlightId);
-  if (idx === undefined) return derived.baseGraphLines.join("\n");
-  const lines = derived.baseGraphLines.slice();
-  lines[idx] = lines[idx].replace(/^ {2}/, "▶ ");
-  return lines.join("\n");
+  return { jobs, byLevel, blockedJobs };
 }
 
 export function BuildDetails({ build }: BuildDetailsProps) {
@@ -231,7 +203,6 @@ export function BuildDetails({ build }: BuildDetailsProps) {
                   ]}
                   detail={
                     <List.Item.Detail
-                      markdown={graphForJob(derived, job.id)}
                       metadata={
                         <List.Item.Detail.Metadata>
                           <List.Item.Detail.Metadata.Label title="Label" text={label} />
