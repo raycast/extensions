@@ -14,7 +14,7 @@ import {
 import { useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import { AbsenceResponse, HakunaClient, TimeEntryResponse } from "./hakuna-api";
-import { formatDuration } from "./duration";
+import { formatDuration, todayLocalDate } from "./duration";
 
 function absenceMenuIcon(absence: AbsenceResponse) {
   if (absence.absence_type.is_vacation) return Icon.AirplaneTakeoff;
@@ -55,8 +55,7 @@ export default function Command() {
     isLoading: isLoadingEntries,
     mutate: mutateEntries,
   } = useCachedPromise(async () => {
-    const today = new Date().toISOString().split("T")[0];
-    return await client.getTimeEntries(today);
+    return await client.getTimeEntries(todayLocalDate());
   });
 
   const { data: absences, isLoading: isLoadingAbsences } = useCachedPromise(
@@ -139,9 +138,8 @@ export default function Command() {
     }
   };
 
-  const today = new Date().toISOString().split("T")[0];
   const todaysAbsences = (absences ?? []).filter((a) =>
-    isTodayInAbsence(a, today),
+    isTodayInAbsence(a, todayLocalDate()),
   );
 
   const timeEntryItem = (entry: TimeEntryResponse) => (
