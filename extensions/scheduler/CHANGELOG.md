@@ -1,5 +1,9 @@
 # Scheduler Changelog
 
+## [Fix Progress Parsing] - {PR_MERGE_DATE}
+
+- Fixed Raycast V2 Deeplink protocol `raycast-x` is recognized as invalid format.
+
 ## [Fix interval schedule timing] - 2026-03-05
 
 - Fixed interval schedule calculations so `15mins` and `30mins` now run at their correct cadence instead of effectively using hourly timing in due-check logic.
