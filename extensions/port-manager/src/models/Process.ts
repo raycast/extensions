@@ -166,11 +166,11 @@ export default class Process implements ProcessInfo {
 
   private static getNetstatPidColumnIndex(lines: string[]) {
     const header = lines.find((line) => line.trim().startsWith("Proto "));
-    if (header === undefined) return 10;
+    if (header === undefined) return;
 
     const pidHeaderIndex = header.trim().split(/\s+/).indexOf("pid");
     const pidColumnIndex = pidHeaderIndex - 2;
-    return pidColumnIndex > 0 ? pidColumnIndex : 10;
+    return pidColumnIndex > 0 ? pidColumnIndex : undefined;
   }
 
   private static parseNetstat(stdout: string) {
@@ -178,6 +178,7 @@ export default class Process implements ProcessInfo {
     const valuesByPid = new Map<number, ProcessInfo>();
     const lines = stdout.split("\n");
     const pidColumnIndex = Process.getNetstatPidColumnIndex(lines);
+    if (pidColumnIndex === undefined) return [];
 
     for (const line of lines) {
       const columns = line.trim().split(/\s+/);
