@@ -1,0 +1,55 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "sotto-transcripts",
+  "title": "Sotto Transcripts",
+  "description": "Browse and re-copy transcripts from Sotto's recording history.",
+  "icon": "sotto-transcripts.png",
+  "author": "quaddepos",
+  "categories": [
+    "Productivity"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "search",
+      "title": "Search Transcripts",
+      "description": "Search past Sotto transcripts and copy them back to the clipboard.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "historyPath",
+      "title": "Recording History Path",
+      "description": "Override the path to Sotto's recording-history.json. Leave blank to use the default location under ~/Library/Containers/com.kitze.sotto.",
+      "type": "textfield",
+      "required": false,
+      "default": ""
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "20.8.10",
+    "@types/react": "19.0.10",
+    "eslint": "^8.57.0",
+    "knip": "^6.14.1",
+    "prettier": "^3.3.3",
+    "react": "19.0.0",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "knip": "knip",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
