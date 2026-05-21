@@ -180,7 +180,6 @@ export default function SearchFiles() {
   const elapsed = searchData?.elapsed_ms ?? 0;
   const isIndexing = searchData?.mode === "indexing";
 
-
   // Show loading only during active search, not during initial debounce
   const isLoading = isTyping
     ? searchLoading || (query !== debouncedQuery && isSearchReady)
