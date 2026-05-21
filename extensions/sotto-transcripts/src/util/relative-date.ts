@@ -1,7 +1,7 @@
-const TIME_FMT = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
-const WEEKDAY_FMT = new Intl.DateTimeFormat(undefined, { weekday: "long" });
-const SHORT_DATE_FMT = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
-const FULL_DATE_FMT = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric", year: "numeric" });
+const TIME_FMT = new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" });
+const WEEKDAY_FMT = new Intl.DateTimeFormat("en-US", { weekday: "long" });
+const SHORT_DATE_FMT = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" });
+const FULL_DATE_FMT = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" });
 
 const MS_PER_MINUTE = 60_000;
 const MS_PER_HOUR = 3_600_000;

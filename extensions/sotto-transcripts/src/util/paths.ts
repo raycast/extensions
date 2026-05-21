@@ -14,5 +14,9 @@ const DEFAULT_HISTORY_PATH = join(
 );
 
 export function resolveHistoryPath(override?: string): string {
-  return override?.trim() || DEFAULT_HISTORY_PATH;
+  const trimmed = override?.trim();
+  if (!trimmed) return DEFAULT_HISTORY_PATH;
+  if (trimmed.startsWith("~/")) return join(homedir(), trimmed.slice(2));
+  if (trimmed === "~") return homedir();
+  return trimmed;
 }

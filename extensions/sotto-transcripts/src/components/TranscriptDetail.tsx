@@ -19,7 +19,7 @@ export function TranscriptDetail({ entry }: TranscriptDetailProps) {
         <Detail.Metadata>
           <Detail.Metadata.Label title="Recorded" text={dateLabel} />
           <Detail.Metadata.Label title="Duration" text={formatDuration(entry.duration)} />
-          <Detail.Metadata.Label title="Words" text={entry.wordCount.toLocaleString()} />
+          <Detail.Metadata.Label title="Words" text={entry.wordCount.toLocaleString("en-US")} />
           <Detail.Metadata.Label title="Cost" text={formatCost(entry.costUSD)} />
           {entry.model ? <Detail.Metadata.Label title="Model" text={entry.model} /> : null}
           {entry.source ? <Detail.Metadata.Label title="Source" text={entry.source} /> : null}

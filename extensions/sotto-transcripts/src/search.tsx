@@ -6,10 +6,9 @@ import { describeLoadError } from "./util/describe-error";
 import { groupEntriesByRecency } from "./util/group-entries";
 import { loadEntries } from "./util/load-entries";
 import { resolveHistoryPath } from "./util/paths";
-import type { Preferences } from "./util/types";
 
 export default function Command() {
-  const { historyPath } = getPreferenceValues<Preferences>();
+  const { historyPath } = getPreferenceValues<Preferences.Search>();
   const resolvedPath = resolveHistoryPath(historyPath);
   const { data, isLoading, error, revalidate } = useCachedPromise(loadEntries, [resolvedPath], {
     keepPreviousData: true,

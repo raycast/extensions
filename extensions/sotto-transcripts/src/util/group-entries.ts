@@ -13,7 +13,7 @@ function groupLabel(d: Date | null, todayStart: number): string {
   if (diffDays === 1) return "Yesterday";
   if (diffDays < 7) return "Earlier This Week";
   if (diffDays < 30) return "Earlier This Month";
-  return d.toLocaleDateString(undefined, { year: "numeric", month: "long" });
+  return d.toLocaleDateString("en-US", { year: "numeric", month: "long" });
 }
 
 export function groupEntriesByRecency(entries: Entry[]): EntryGroup[] {

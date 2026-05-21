@@ -27,6 +27,7 @@
       "description": "Override the path to Sotto's recording-history.json. Leave blank to use the default location under ~/Library/Containers/com.kitze.sotto.",
       "type": "textfield",
       "required": false,
+      "placeholder": "~/Library/Containers/com.kitze.sotto/Data/Library/Application Support/com.kitze.sotto/recording-history.json",
       "default": ""
     }
   ],

@@ -1,7 +1,3 @@
-export interface Preferences {
-  historyPath?: string;
-}
-
 export interface RawEntry {
   id: string;
   transcript?: string;

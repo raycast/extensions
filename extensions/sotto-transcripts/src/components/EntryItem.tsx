@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Clipboard, Icon, List, Toast, closeMainWindow, showToast } from "@raycast/api";
+import { Action, ActionPanel, Clipboard, Icon, List, Toast, closeMainWindow, showHUD, showToast } from "@raycast/api";
 import { memo } from "react";
 import { formatCost } from "../util/format-cost";
 import { formatDuration } from "../util/format-duration";
@@ -31,7 +31,7 @@ function EntryItemView({ entry, onReload, onToggleDetail, showingDetail }: Entry
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Recorded" text={dateLabel} />
               <List.Item.Detail.Metadata.Label title="Duration" text={formatDuration(entry.duration)} />
-              <List.Item.Detail.Metadata.Label title="Words" text={entry.wordCount.toLocaleString()} />
+              <List.Item.Detail.Metadata.Label title="Words" text={entry.wordCount.toLocaleString("en-US")} />
               <List.Item.Detail.Metadata.Label title="Cost" text={formatCost(entry.costUSD)} />
               {entry.source ? <List.Item.Detail.Metadata.Label title="Source" text={entry.source} /> : null}
               {entry.model ? <List.Item.Detail.Metadata.Label title="Model" text={entry.model} /> : null}
@@ -57,6 +57,7 @@ function EntryItemView({ entry, onReload, onToggleDetail, showingDetail }: Entry
             onAction={async () => {
               await Clipboard.paste(entry.transcript);
               await closeMainWindow();
+              await showHUD("Pasted transcript");
             }}
           />
           <Action.Push
