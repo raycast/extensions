@@ -39,6 +39,23 @@ describe("isSilentWav", () => {
       false,
     );
   });
+
+  it("does not throw when the data chunk is truncated", () => {
+    const floatWav = makeWav({ formatTag: 3, bits: 32, samples: [0] });
+    const floatData = findWavChunk(floatWav, "data");
+    expect(floatData).not.toBeNull();
+    floatWav.writeUInt32LE(floatData!.length + 4, floatData!.offset - 4);
+
+    const intWav = makeWav({ formatTag: 1, bits: 16, samples: [0] });
+    const intData = findWavChunk(intWav, "data");
+    expect(intData).not.toBeNull();
+    intWav.writeUInt32LE(intData!.length + 2, intData!.offset - 4);
+
+    expect(() => isSilentWav(floatWav)).not.toThrow();
+    expect(() => isSilentWav(intWav)).not.toThrow();
+    expect(isSilentWav(floatWav)).toBe(true);
+    expect(isSilentWav(intWav)).toBe(true);
+  });
 });
 
 function makeWav(options: {

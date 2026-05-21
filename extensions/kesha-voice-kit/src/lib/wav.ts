@@ -65,7 +65,7 @@ function isFloat32Silent(
 ): boolean {
   for (
     let offset = data.offset;
-    offset + 4 <= data.offset + data.length;
+    offset + 4 <= data.offset + data.length && offset + 4 <= wav.length;
     offset += 4
   ) {
     if (Math.abs(wav.readFloatLE(offset)) > SILENCE_PEAK_THRESHOLD) {
@@ -81,7 +81,7 @@ function isInt16Silent(
 ): boolean {
   for (
     let offset = data.offset;
-    offset + 2 <= data.offset + data.length;
+    offset + 2 <= data.offset + data.length && offset + 2 <= wav.length;
     offset += 2
   ) {
     if (Math.abs(wav.readInt16LE(offset)) / 32768 > SILENCE_PEAK_THRESHOLD) {

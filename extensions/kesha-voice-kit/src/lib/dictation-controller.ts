@@ -5,7 +5,7 @@ import {
   parseMaxSeconds,
   TRANSCRIBE_TIMEOUT_SECONDS,
 } from "./dictation-config";
-import { notFoundMessage, resolveKeshaBin, type KeshaSpawn } from "./kesha-bin";
+import { notFoundMessage, resolveKeshaBin } from "./kesha-bin";
 import { startKeshaRecorder, startKeshaTranscriber } from "./process-tasks";
 import { startRecordingMonitor } from "./recording-monitor";
 import { emptySignal } from "./recording-view";
@@ -91,6 +91,7 @@ export function startDictationSession(
         title: "Recording",
         message: `Stops automatically after ${maxSeconds}s`,
       });
+      if (cancelled) return;
 
       recorder = deps.startRecorder(kesha, audioPath, maxSeconds);
       try {
@@ -226,12 +227,4 @@ export function startTranscribingTimer(
   };
   const timer = schedule(tick, 500);
   return () => unschedule(timer);
-}
-
-export function startRecorderTask(
-  kesha: KeshaSpawn,
-  audioPath: string,
-  maxSeconds: number,
-): RunningTask<void> {
-  return startKeshaRecorder(kesha, audioPath, maxSeconds);
 }

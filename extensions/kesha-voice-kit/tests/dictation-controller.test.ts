@@ -122,6 +122,28 @@ describe("dictation controller", () => {
     expect(transcriberStop).not.toHaveBeenCalled();
   });
 
+  it("does not start the recorder if unmounted before recorder creation", async () => {
+    const recordingToast = deferred<void>();
+    const deps = createDeps({
+      showToast: vi.fn(async (toast) => {
+        deps.toasts.push(toast);
+        if (toast.title === "Recording") {
+          await recordingToast.promise;
+        }
+      }),
+    });
+
+    const session = startDictationSession({}, deps.setState, deps);
+    await vi.waitFor(() => expect(deps.current().status).toBe("recording"));
+
+    session.cancel();
+    recordingToast.resolve();
+    await session.done;
+
+    expect(deps.startRecorder).not.toHaveBeenCalled();
+    expect(deps.cleanupTempDir).toHaveBeenCalledWith("/tmp/session");
+  });
+
   it("keeps recording when the meter is unavailable", async () => {
     const recorder = deferred<void>();
     const deps = createDeps({
