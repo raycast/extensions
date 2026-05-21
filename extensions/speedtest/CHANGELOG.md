@@ -1,6 +1,6 @@
 # Speedtest Changelog
 
-## [Fix Progress Parsing] - {PR_MERGE_DATE}
+## [Fix Progress Parsing] - 2026-05-21
 
 - Fixed Speedtest runs crashing when progress output arrives in combined chunks.
 
