@@ -208,37 +208,6 @@ export class HakunaClient {
     }
   }
 
-  async updateTimer(
-    taskId: string,
-    projectId?: string,
-    startTime?: string,
-    note?: string,
-  ): Promise<TimerResponse> {
-    await this.deleteTimer();
-
-    const payload: {
-      task_id: string;
-      project_id?: string;
-      start_time?: string;
-      note?: string;
-    } = {
-      task_id: taskId,
-      note: note ?? "",
-    };
-    if (projectId) payload.project_id = projectId;
-    if (startTime) payload.start_time = startTime;
-
-    try {
-      const response = await this.axiosInstance.post<TimerResponse>(
-        "/timer",
-        payload,
-      );
-      return response.data;
-    } catch (error) {
-      this.handleApiError(error);
-    }
-  }
-
   async stopTimer(): Promise<TimeEntryResponse> {
     try {
       const response =

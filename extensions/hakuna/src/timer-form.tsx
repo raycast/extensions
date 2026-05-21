@@ -40,6 +40,16 @@ interface Props {
   note?: string;
 }
 
+function isToday(date: Date | null | undefined): boolean {
+  if (!date) return false;
+  const today = new Date();
+  return (
+    date.getFullYear() === today.getFullYear() &&
+    date.getMonth() === today.getMonth() &&
+    date.getDate() === today.getDate()
+  );
+}
+
 export default function TimerForm({
   apiToken,
 
@@ -128,6 +138,12 @@ export default function TimerForm({
 
   const projectsEnabled = company?.projects_enabled ?? false;
   const durationFormat = company?.duration_format ?? "hhmm";
+
+  useEffect(() => {
+    if (!startTime && lastEntryEndTime) {
+      setStartTime(lastEntryEndTime);
+    }
+  }, [lastEntryEndTime]);
 
   useEffect(() => {
     const pStart = formatTime(startTime);
@@ -437,7 +453,7 @@ export default function TimerForm({
       await client.deleteTimer();
     }
 
-    if (startTime && date !== new Date()) {
+    if (startTime && !isToday(date)) {
       await client.createTimeEntry(
         Number(selectedTaskId),
         projectsEnabled ? Number(selectedProjectId) : undefined,
@@ -587,7 +603,7 @@ export default function TimerForm({
         id="startTime"
         title="Start Time"
         placeholder="HH:MM"
-        value={startTime || lastEntryEndTime || ""}
+        value={startTime}
         onChange={setStartTime}
         onBlur={() => {
           const normalized = formatTime(startTime);

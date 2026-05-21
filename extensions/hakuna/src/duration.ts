@@ -1,4 +1,4 @@
-export const FIVE_MINTES = 5 * 60 * 1000;
+export const FIVE_MINUTES = 5 * 60 * 1000;
 export const TEN_HOURS = 10 * 3600;
 export const FORTY_HOURS = 40 * 3600;
 
