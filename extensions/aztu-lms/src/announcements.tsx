@@ -12,11 +12,7 @@ export default function Command() {
   });
 
   return (
-    <List
-      isLoading={isLoading}
-      navigationTitle="Search Announcements"
-      searchBarPlaceholder="Search AzTU LMS Announcements"
-    >
+    <List isLoading={isLoading} navigationTitle="Search Announcements" searchBarPlaceholder="Search AzTU LMS Announcements">
       {announcements?.map((item) => (
         <List.Item
           key={item.id}
@@ -24,10 +20,7 @@ export default function Command() {
           subtitle={item.created_at}
           actions={
             <ActionPanel>
-              <Action.Push
-                title="View Announcement Details"
-                target={<AnnouncementDetail title={item.title} id={item.id} />}
-              />
+              <Action.Push title="View Announcement Details" target={<AnnouncementDetail title={item.title} id={item.id} />} />
             </ActionPanel>
           }
         />

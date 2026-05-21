@@ -106,11 +106,7 @@ export default function Command() {
       isLoading={isLoading}
       searchBarPlaceholder="Search classes and teachers..."
       searchBarAccessory={
-        <List.Dropdown
-          tooltip="Week Filter"
-          value={weekFilter}
-          onChange={(newValue) => setWeekFilter(newValue as WeekFilter)}
-        >
+        <List.Dropdown tooltip="Week Filter" value={weekFilter} onChange={(newValue) => setWeekFilter(newValue as WeekFilter)}>
           <List.Dropdown.Item
             value="current"
             title={`Current Week (${currentWeekType === "upper" ? "Upper" : "Lower"})`}

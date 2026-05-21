@@ -105,10 +105,7 @@ export function Materials({ lectureId }: { lectureId: string }) {
             icon={Icon.Document}
             title={material.title}
             subtitle={material.creator}
-            accessories={[
-              { text: formatDate(material.created_at) },
-              { icon: downloaded ? Icon.CheckCircle : Icon.Download },
-            ]}
+            accessories={[{ text: formatDate(material.created_at) }, { icon: downloaded ? Icon.CheckCircle : Icon.Download }]}
             actions={
               <ActionPanel>
                 {downloaded ? (

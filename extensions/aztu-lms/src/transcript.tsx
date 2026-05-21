@@ -40,10 +40,7 @@ export default function Command() {
             accessories={[{ text: `${totalScores.summary.t_require_score}` }]}
             actions={
               <ActionPanel>
-                <Action.CopyToClipboard
-                  title="Copy"
-                  content={"Total Credits: " + totalScores.summary.t_require_score}
-                />
+                <Action.CopyToClipboard title="Copy" content={"Total Credits: " + totalScores.summary.t_require_score} />
               </ActionPanel>
             }
           />
@@ -66,9 +63,7 @@ export default function Command() {
               <ActionPanel>
                 <Action.CopyToClipboard
                   title="Copy"
-                  content={
-                    "Attended Subjects: " + `${totalScores.summary.t_attend_cnt} / ${totalScores.summary.t_require_cnt}`
-                  }
+                  content={"Attended Subjects: " + `${totalScores.summary.t_attend_cnt} / ${totalScores.summary.t_require_cnt}`}
                 />
               </ActionPanel>
             }
@@ -76,11 +71,7 @@ export default function Command() {
         </List.Section>
       )}
 
-      <List.EmptyView
-        icon={Icon.ExclamationMark}
-        title="No Data Found"
-        description="Semester data could not be loaded."
-      />
+      <List.EmptyView icon={Icon.ExclamationMark} title="No Data Found" description="Semester data could not be loaded." />
     </List>
   );
 }

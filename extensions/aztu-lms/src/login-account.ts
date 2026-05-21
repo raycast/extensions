@@ -10,7 +10,8 @@ export default async function Command() {
     title: "Logging in...",
   });
 
-  const [data] = await Promise.all([getSSOUrl({ forLogin: true }), getJWTToken()]);
+  const data = await getSSOUrl({});
+  getJWTToken();
 
   if (data) {
     if (data.status === "new") await open(data.loginLink);
