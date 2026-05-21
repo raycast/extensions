@@ -56,9 +56,20 @@ export class CLICommandError extends Error {
 let resolvedPath: string | null = null;
 
 async function resolveCLIPath(): Promise<string> {
-  if (resolvedPath) return resolvedPath;
-
   const prefs = getPreferenceValues<Preferences>();
+  if (resolvedPath) {
+    if (prefs.cliPath && resolvedPath !== prefs.cliPath) {
+      resolvedPath = null;
+    } else {
+      try {
+        await access(resolvedPath, constants.X_OK);
+        return resolvedPath;
+      } catch {
+        resolvedPath = null;
+      }
+    }
+  }
+
   if (prefs.cliPath) {
     try {
       await access(prefs.cliPath, constants.X_OK);
@@ -93,12 +104,16 @@ export async function runCLI(args: string[]): Promise<CLIResponse> {
       (error: ExecFileException | null, stdout: string, stderr: string) => {
         if (error) {
           const msg = stderr?.trim() || error.message;
+          if (msg.includes("No such file or directory")) {
+            resolvedPath = null;
+            reject(new CLINotFoundError());
+            return;
+          }
 
           if (
             msg.includes("not running") ||
             msg.includes("Connection refused") ||
-            msg.includes("appNotRunning") ||
-            msg.includes("No such file or directory")
+            msg.includes("appNotRunning")
           ) {
             reject(new AppNotRunningError(msg));
             return;

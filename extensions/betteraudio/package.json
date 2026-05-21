@@ -48,7 +48,7 @@
     },
     {
       "name": "volume-up",
-      "title": "Volume up",
+      "title": "Volume Up",
       "subtitle": "BetterAudio",
       "description": "Increase system volume by one step.",
       "mode": "no-view",
