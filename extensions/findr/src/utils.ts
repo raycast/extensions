@@ -1,9 +1,4 @@
-import {
-  environment,
-  getPreferenceValues,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { environment, getPreferenceValues } from "@raycast/api";
 import { chmodSync, existsSync } from "fs";
 import { join } from "path";
 

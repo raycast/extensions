@@ -179,7 +179,7 @@ export default function SearchFiles() {
   const searchResults = searchData?.results || [];
   const elapsed = searchData?.elapsed_ms ?? 0;
   const isIndexing = searchData?.mode === "indexing";
-  const hasSearchResults = searchResults.length > 0;
+
 
   // Show loading only during active search, not during initial debounce
   const isLoading = isTyping
