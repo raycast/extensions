@@ -243,7 +243,11 @@ export function Attendance({ lectureId }: { lectureId: string }) {
                         content={`Lesson ${attendance.week_num}: ${getStatusText(status)}${dateInfo?.date ? `\nDate: ${dateInfo.date}` : ""}${dateInfo?.method ? `\nType: ${getMethodName(dateInfo.method)}` : ""}`}
                         icon={Icon.CopyClipboard}
                       />
-                      <Action.CopyToClipboard title="Copy Full Report" content={createAttendanceReport()} icon={Icon.Clipboard} />
+                      <Action.CopyToClipboard
+                        title="Copy Full Report"
+                        content={createAttendanceReport()}
+                        icon={Icon.Clipboard}
+                      />
                     </ActionPanel>
                   }
                 />

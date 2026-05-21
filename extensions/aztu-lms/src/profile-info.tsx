@@ -52,7 +52,11 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.CopyToClipboard title="Copy Student ID" content={basic?.userId || ""} icon={Icon.CopyClipboard} />
+                  <Action.CopyToClipboard
+                    title="Copy Student ID"
+                    content={basic?.userId || ""}
+                    icon={Icon.CopyClipboard}
+                  />
                 </ActionPanel>
               }
             />
@@ -90,7 +94,11 @@ export default function Command() {
               actions={
                 basic?.birthday && (
                   <ActionPanel>
-                    <Action.CopyToClipboard title="Copy Birthday" content={basic?.birthday || ""} icon={Icon.CopyClipboard} />
+                    <Action.CopyToClipboard
+                      title="Copy Birthday"
+                      content={basic?.birthday || ""}
+                      icon={Icon.CopyClipboard}
+                    />
                   </ActionPanel>
                 )
               }
@@ -131,7 +139,11 @@ export default function Command() {
               actions={
                 basic?.mobilePhone && (
                   <ActionPanel>
-                    <Action.CopyToClipboard title="Copy Mobile Number" content={basic.mobilePhone} icon={Icon.CopyClipboard} />
+                    <Action.CopyToClipboard
+                      title="Copy Mobile Number"
+                      content={basic.mobilePhone}
+                      icon={Icon.CopyClipboard}
+                    />
                   </ActionPanel>
                 )
               }
@@ -215,8 +227,16 @@ export default function Command() {
               ]}
               actions={
                 <ActionPanel>
-                  <Action.OpenInBrowser title="Open Oral Exam Portal" url={`${LMS_BASE_URL}/oralexams`} icon={Icon.Globe} />
-                  <Action.CopyToClipboard title="Copy Portal URL" content={`${LMS_BASE_URL}/oralexams`} icon={Icon.Link} />
+                  <Action.OpenInBrowser
+                    title="Open Oral Exam Portal"
+                    url={`${LMS_BASE_URL}/oralexams`}
+                    icon={Icon.Globe}
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Portal URL"
+                    content={`${LMS_BASE_URL}/oralexams`}
+                    icon={Icon.Link}
+                  />
                 </ActionPanel>
               }
             />

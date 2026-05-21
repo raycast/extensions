@@ -57,7 +57,11 @@ export default function Command() {
           ]}
           actions={
             <ActionPanel>
-              <Action.Push title="View Details" target={<Attendance lectureId={lecture.lecture_id} />} icon={Icon.Eye} />
+              <Action.Push
+                title="View Details"
+                target={<Attendance lectureId={lecture.lecture_id} />}
+                icon={Icon.Eye}
+              />
             </ActionPanel>
           }
         />
