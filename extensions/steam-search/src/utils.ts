@@ -11,3 +11,9 @@ export function formatNum(n: number): string {
   if (n >= 1_000) return `${(n / 1_000).toFixed(0)}k`;
   return `${n}`;
 }
+
+export function formatPlaytime(minutes: number): string {
+  const hours = minutes / 60;
+  if (hours < 0.1) return "0h";
+  return `${hours % 1 === 0 ? hours.toFixed(0) : hours.toFixed(1)}h`;
+}

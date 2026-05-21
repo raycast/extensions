@@ -1,41 +1,113 @@
 import { STEAM_HEADERS } from "../constants";
 import { formatNum } from "../utils";
 
-let ownedAppIds: Set<number> | null = null;
-let ownedFetchPromise: Promise<Set<number>> | null = null;
+let ownedGames: Map<number, number> | null = null;
+let ownedFetchPromise: Promise<Map<number, number>> | null = null;
 
 export async function fetchOwnedGames(
   apiKey: string,
   steamId: string,
-): Promise<Set<number>> {
-  if (!apiKey || !steamId) {
-    return new Set();
-  }
-  if (ownedAppIds !== null) return ownedAppIds;
+): Promise<Map<number, number>> {
+  if (!apiKey || !steamId) return new Map();
+  if (ownedGames !== null) return ownedGames;
   if (ownedFetchPromise !== null) return ownedFetchPromise;
 
   ownedFetchPromise = fetch(
-    `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}&format=json`,
+    `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}&include_played_free_games=1&include_play_time=1&format=json`,
   )
     .then((r) => r.json())
     .then((data: unknown) => {
-      const d = data as { response?: { games?: { appid: number }[] } };
-      const ids = new Set<number>(
-        (d?.response?.games ?? []).map((g) => g.appid),
+      const d = data as {
+        response?: { games?: { appid: number; playtime_forever: number }[] };
+      };
+      const map = new Map<number, number>(
+        (d?.response?.games ?? []).map((g) => [g.appid, g.playtime_forever]),
       );
-      ownedAppIds = ids;
-      return ids;
+      ownedGames = map;
+      return map;
     })
     .catch(() => {
       ownedFetchPromise = null;
-      return new Set<number>();
+      return new Map<number, number>();
     });
 
   return ownedFetchPromise;
 }
 
-export function getOwnedAppIds(): Set<number> | null {
-  return ownedAppIds;
+export function getOwnedGames(): Map<number, number> | null {
+  return ownedGames;
+}
+
+let wishlistAppIds: Set<number> | null = null;
+let wishlistFetchPromise: Promise<Set<number>> | null = null;
+
+export interface RecentlyPlayedGame {
+  appid: number;
+  name: string;
+  playtime_2weeks: number;
+  playtime_forever: number;
+  img_icon_url: string;
+}
+
+let recentlyPlayedCache: RecentlyPlayedGame[] | null = null;
+let recentlyPlayedPromise: Promise<RecentlyPlayedGame[]> | null = null;
+
+export async function fetchRecentlyPlayed(
+  apiKey: string,
+  steamId: string,
+): Promise<RecentlyPlayedGame[]> {
+  if (!apiKey || !steamId) return [];
+  if (recentlyPlayedCache !== null) return recentlyPlayedCache;
+  if (recentlyPlayedPromise !== null) return recentlyPlayedPromise;
+
+  recentlyPlayedPromise = fetch(
+    `https://api.steampowered.com/IPlayerService/GetRecentlyPlayedGames/v1/?key=${apiKey}&steamid=${steamId}&count=10&format=json`,
+  )
+    .then((r) => r.json())
+    .then((data: unknown) => {
+      const d = data as { response?: { games?: RecentlyPlayedGame[] } };
+      const games = d?.response?.games ?? [];
+      recentlyPlayedCache = games;
+      return games;
+    })
+    .catch(() => {
+      recentlyPlayedPromise = null;
+      return [];
+    });
+
+  return recentlyPlayedPromise;
+}
+
+export async function fetchWishlist(
+  apiKey: string,
+  steamId: string,
+): Promise<Set<number>> {
+  if (!apiKey || !steamId) return new Set();
+  if (wishlistAppIds !== null) return wishlistAppIds;
+  if (wishlistFetchPromise !== null) return wishlistFetchPromise;
+
+  wishlistFetchPromise = fetch(
+    `https://api.steampowered.com/IWishlistService/GetWishlist/v1/?key=${apiKey}&steamid=${steamId}`,
+  )
+    .then((r) => r.json())
+    .then((data: unknown) => {
+      const d = data as { response?: { items?: { appid: number }[] } };
+      const ids = new Set<number>(
+        (d?.response?.items ?? []).map((g) => g.appid),
+      );
+      wishlistAppIds = ids;
+      return ids;
+    })
+    .catch(() => {
+      wishlistFetchPromise = null;
+      return new Set<number>();
+    });
+
+  return wishlistFetchPromise;
+}
+
+export function getWishlist(): Set<number> | null {
+  return wishlistAppIds;
 }
 
 export async function fetchSteamChartsData(

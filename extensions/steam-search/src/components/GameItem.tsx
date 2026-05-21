@@ -1,7 +1,9 @@
 import { List, ActionPanel, Action, Icon, Color, open } from "@raycast/api";
 import { SteamApp } from "../types";
 import { useAppDetails } from "../hooks/useAppDetails";
-import { useIsOwned } from "../hooks/useIsOwned";
+import { usePlaytime } from "../hooks/usePlaytime";
+import { formatPlaytime } from "../utils";
+import { useIsWishlisted } from "../hooks/useWishlist";
 
 interface Props {
   app: SteamApp;
@@ -10,7 +12,9 @@ interface Props {
 
 export function GameItem({ app, isSelected }: Props) {
   const details = useAppDetails(app.id, isSelected);
-  const isOwned = useIsOwned(app.id);
+  const playtime = usePlaytime(app.id);
+  const isOwned = playtime !== null && playtime >= 0;
+  const isWishlisted = useIsWishlisted(app.id);
 
   return (
     <List.Item
@@ -18,27 +22,19 @@ export function GameItem({ app, isSelected }: Props) {
       icon={{ source: details?.iconUrl ?? app.tiny_image }}
       title={app.name}
       accessories={[
-        ...(isOwned ? [{ tag: { value: "Owned", color: Color.Green } }] : []),
         ...(isSelected
           ? [
               {
                 text: {
-                  value: details?.currentPlayers ?? "…",
+                  value: details
+                    ? details.peakToday
+                      ? `${details.currentPlayers} ⬆ ${details.peakToday}`
+                      : details.currentPlayers
+                    : "…",
                   color: Color.SecondaryText,
                 },
-                tooltip: "Current players",
+                tooltip: "Current players / 24h peak",
               },
-              ...(details?.peakToday
-                ? [
-                    {
-                      text: {
-                        value: `⬆ ${details.peakToday}`,
-                        color: Color.SecondaryText,
-                      },
-                      tooltip: "24h peak",
-                    },
-                  ]
-                : []),
               {
                 text: {
                   value: details?.rating ?? "…",
@@ -57,6 +53,17 @@ export function GameItem({ app, isSelected }: Props) {
                 : []),
             ]
           : []),
+        ...(isOwned
+          ? [
+              {
+                tag: { value: formatPlaytime(playtime!), color: Color.Green },
+                icon: Icon.GameController,
+                tooltip: "Playtime",
+              },
+            ]
+          : isWishlisted
+            ? [{ tag: { value: "Wishlisted", color: Color.Yellow } }]
+            : []),
       ]}
       actions={
         <ActionPanel>

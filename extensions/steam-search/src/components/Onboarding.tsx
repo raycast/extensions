@@ -15,7 +15,7 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
         <List.Item
           icon={{ source: Icon.Key, tintColor: Color.Yellow }}
           title="Steam API Key"
-          subtitle="Required for Owned badge"
+          subtitle="Owned badge · Recently Played · Wishlist Discounts · Friends Online"
           accessories={[{ text: "steamcommunity.com/dev/apikey" }]}
           actions={
             <ActionPanel>
@@ -35,7 +35,7 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
         <List.Item
           icon={{ source: Icon.Person, tintColor: Color.Blue }}
           title="Steam ID"
-          subtitle="Required for Owned badge — your 64-bit Steam ID"
+          subtitle="Required alongside API key — your 64-bit Steam ID"
           accessories={[{ text: "steamid.io" }]}
           actions={
             <ActionPanel>
@@ -55,7 +55,7 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
         <List.Item
           icon={{ source: Icon.Tag, tintColor: Color.Green }}
           title="GG.deals API Key"
-          subtitle="Required for keyshop prices (🔑)"
+          subtitle="Keyshop prices in search results and Wishlist Discounts (🔑)"
           accessories={[{ text: "gg.deals/api" }]}
           actions={
             <ActionPanel>

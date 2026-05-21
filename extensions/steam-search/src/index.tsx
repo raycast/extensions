@@ -5,14 +5,19 @@ import {
   Toast,
   getPreferenceValues,
   LocalStorage,
+  ActionPanel,
+  Action,
 } from "@raycast/api";
 import { useFetch } from "@raycast/utils";
 import { useState, useEffect } from "react";
 import { SteamSearchResponse } from "./types";
-import { fetchOwnedGames } from "./api/steam";
+import { fetchOwnedGames, fetchWishlist } from "./api/steam";
 import { batchFetchGGDeals } from "./api/ggdeals";
 import { GameItem } from "./components/GameItem";
 import { Onboarding } from "./components/Onboarding";
+import { RecentlyPlayed } from "./components/RecentlyPlayed";
+import { WishlistDiscounts } from "./components/WishlistDiscounts";
+import { FriendsOnline } from "./components/FriendsOnline";
 
 export default function Command() {
   const { steamApiKey, steamId, ggDealsApiKey, region } = getPreferenceValues();
@@ -31,7 +36,8 @@ export default function Command() {
   useEffect(() => {
     if (!steamApiKey || !steamId) return;
     fetchOwnedGames(steamApiKey, steamId);
-  }, []);
+    fetchWishlist(steamApiKey, steamId);
+  }, [steamApiKey, steamId]);
 
   const { data, isLoading } = useFetch<SteamSearchResponse>(
     `https://store.steampowered.com/api/storesearch/?term=${encodeURIComponent(query)}&cc=${region}&l=english`,
@@ -55,7 +61,7 @@ export default function Command() {
       ggDealsApiKey,
       region,
     );
-  }, [data]);
+  }, [data, ggDealsApiKey, region]);
 
   // All hooks done — now safe to conditionally return
   if (skipped === null) return <List isLoading />;
@@ -74,11 +80,50 @@ export default function Command() {
       throttle
     >
       {query.length <= 1 ? (
-        <List.EmptyView
-          icon={{ source: "icon.png" }}
-          title="Steam Search"
-          description="Type at least 2 characters to search for games"
-        />
+        <List.Section>
+          {steamApiKey && steamId && (
+            <List.Item
+              icon={Icon.Clock}
+              title="Recently Played"
+              subtitle="Your last 10 played games"
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Open Recently Played"
+                    target={<RecentlyPlayed />}
+                  />
+                </ActionPanel>
+              }
+            />
+          )}
+          {steamApiKey && steamId && (
+            <List.Item
+              icon={Icon.TwoPeople}
+              title="Friends Online"
+              subtitle="See which friends are online and what they're playing"
+              actions={
+                <ActionPanel>
+                  <Action.Push title="Open Friends Online" target={<FriendsOnline />} />
+                </ActionPanel>
+              }
+            />
+          )}
+          {steamApiKey && steamId && (
+            <List.Item
+              icon={Icon.Star}
+              title="Wishlist Discounts"
+              subtitle="View discounted games from your Steam wishlist"
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="Open Wishlist Discounts"
+                    target={<WishlistDiscounts />}
+                  />
+                </ActionPanel>
+              }
+            />
+          )}
+        </List.Section>
       ) : results.length === 0 && !isLoading ? (
         <List.EmptyView
           icon={Icon.MagnifyingGlass}
