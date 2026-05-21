@@ -1,6 +1,6 @@
 # AzTU LMS Extension Changelog
 
-## [Fix - Login in Browser] - {PR_MERGE_DATE}
+## [Fix - Login in Browser] - 2026-05-21
 
 - Fixed a problem where `Promise.all()` calls could cause cache loss
 
