@@ -10,7 +10,10 @@ type Props = {
 
 export function ManualDetail({ page }: Props) {
   const { data, isLoading, error } = useFetch<string>(page.url, {
-    parseResponse: (res) => res.text(),
+    parseResponse: async (res) => {
+      if (!res.ok) throw new Error(`Failed to load page (HTTP ${res.status})`);
+      return res.text();
+    },
   });
 
   const markdown = useMemo(() => {
