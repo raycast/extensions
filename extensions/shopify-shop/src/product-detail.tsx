@@ -30,7 +30,7 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
   const effectiveStoreRoute = baseUrl ?? storeUrl;
   const storeOrigin = buildStoreOrigin(effectiveStoreRoute);
 
-  const { data: storeMeta, isLoading: isLoadingStoreMeta } = useStoreMeta(effectiveStoreRoute);
+  const { data: storeMeta, isLoading: isLoadingStoreMeta, error: storeMetaError } = useStoreMeta(effectiveStoreRoute);
   const storeCurrency = storeMeta?.currency ?? "USD";
 
   const productJsonUrl = `${buildProductJsonUrl(effectiveStoreRoute, handle)}?currency=${storeCurrency}`;
@@ -74,6 +74,11 @@ export default function ProductDetail({ handle, baseUrl }: Props) {
   useEffect(() => {
     setImageIndex(0);
   }, [product?.id]);
+
+  if (storeMetaError) {
+    const message = storeMetaError instanceof Error ? storeMetaError.message : "Unknown error";
+    return <Detail markdown={`# Store unavailable\nCould not load store metadata: ${message}`} />;
+  }
 
   if (isLoadingStoreMeta || isLoadingJson || storeMeta === undefined) return <Detail isLoading />;
 

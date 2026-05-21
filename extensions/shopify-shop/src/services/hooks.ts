@@ -46,9 +46,8 @@ export function useSearchSuggest(
         if (wantsCollections && !hasCollections && query && query.trim().length > 0) {
           try {
             const collectionsUrl = `${baseUrl}/collections.json`;
-            const fetchFn = (globalThis as { fetch?: (input: string) => Promise<FetchResponse> }).fetch;
-            if (fetchFn) {
-              const collResp = await fetchFn(collectionsUrl);
+            if (typeof fetch !== "undefined") {
+              const collResp = await fetch(collectionsUrl);
               if (collResp.ok) {
                 const collJson = (await collResp.json()) as { collections?: unknown } | unknown;
                 type RawCollection = {

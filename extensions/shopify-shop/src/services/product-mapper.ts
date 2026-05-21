@@ -9,7 +9,7 @@ export function convertCentsToDollars(cents?: number | null): number | null {
 }
 
 export function formatPrice(price?: string | number | null, currency?: string) {
-  if (!price) return null;
+  if (price === null || price === undefined || price === "") return null;
 
   const amount = typeof price === "number" ? price : Number(price);
   if (Number.isNaN(amount)) return String(price);
