@@ -27,6 +27,7 @@ import { REWRITE_TONE_LABELS, RewriteResult, runRewrite } from "./rewrite";
 import { loadRuntimeSettings } from "./runtime-settings";
 import { speakText } from "./tts";
 import { ExtensionPreferences, ProviderId, RewriteTone } from "./types";
+import { normalizeInputText, quoted } from "./ui-constants";
 
 const TONE_ORDER: RewriteTone[] = ["natural", "casual", "formal", "concise"];
 
@@ -341,15 +342,4 @@ function buildMarkdown(state: {
   }
 
   return sections.join("\n");
-}
-
-function normalizeInputText(text: string | undefined): string {
-  return (text ?? "").replace(/\r\n/g, "\n").trim().slice(0, 12000);
-}
-
-function quoted(text: string): string {
-  return text
-    .split("\n")
-    .map((line) => `> ${line}`)
-    .join("\n");
 }

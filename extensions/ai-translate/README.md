@@ -64,6 +64,8 @@ Screenshot features can use several OCR paths:
 - **Local macOS Vision**: the default local OCR path.
 - **Tesseract Local**: optional local OCR, for users who have Tesseract installed.
 - **Baidu OCR API**: optional API OCR with language hints, general or accurate endpoint, and paragraph grouping.
+- **Google Gemini (multimodal)**: optional API OCR that reuses the configured Gemini key and multimodal model.
+- **OpenAI Vision (multimodal)**: optional API OCR that reuses the configured OpenAI key, with a separate OCR model override when needed.
 
 If an API OCR engine fails and fallback is enabled, the extension tries local macOS Vision on the same screenshot. OCR is still imperfect, so the screenshot translation flow lets you review and edit extracted text before translating.
 
@@ -112,7 +114,8 @@ Useful in-command shortcuts include:
 | `Cmd+S` | Read translation or rewritten text aloud. |
 | `Cmd+Opt+S` | Read aloud slowly. |
 | `Cmd+Shift+S` | Read source text aloud. |
-| `Cmd+R` | Retry translation or retake screenshot. |
+| `Cmd+R` | Retry translation, or retake in `Screenshot OCR`. |
+| `Cmd+Shift+R` | Retake in `Screenshot Translate`. |
 | `Cmd+L` | Strip line breaks in `Screenshot OCR`. |
 | `Cmd+Shift+P` | Auto paragraph in `Screenshot OCR`. |
 | `Cmd+Enter` | Paste translation or translate OCR text. |

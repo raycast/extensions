@@ -95,6 +95,22 @@
       ]
     },
     {
+      "name": "screenshot-ocr-copy",
+      "title": "Screenshot OCR Copy",
+      "subtitle": "AI Translate",
+      "description": "Capture a screen region, OCR the text, and copy it to the clipboard.",
+      "mode": "no-view",
+      "icon": "screenshot-translate.png",
+      "keywords": [
+        "ocr",
+        "screenshot",
+        "capture",
+        "copy",
+        "text",
+        "clipboard"
+      ]
+    },
+    {
       "name": "screenshot-ocr",
       "title": "Screenshot OCR",
       "subtitle": "AI Translate",
@@ -146,9 +162,7 @@
   ],
   "categories": [
     "Productivity",
-    "Applications",
-    "Developer Tools",
-    "Web"
+    "Applications"
   ],
   "preferences": [
     {
@@ -338,6 +352,10 @@
         {
           "title": "Google Gemini (multimodal)",
           "value": "gemini"
+        },
+        {
+          "title": "OpenAI Vision (multimodal)",
+          "value": "openai"
         }
       ]
     },
@@ -730,6 +748,14 @@
       "required": false,
       "description": "OpenAI model name.",
       "default": "gpt-4.1-mini"
+    },
+    {
+      "title": "OpenAI OCR Model",
+      "name": "openAIOcrModel",
+      "type": "textfield",
+      "required": false,
+      "description": "Vision-capable OpenAI model used when OCR Engine is OpenAI Vision. Leave blank to reuse the OpenAI Model above.",
+      "default": ""
     }
   ],
   "platforms": [

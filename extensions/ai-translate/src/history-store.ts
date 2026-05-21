@@ -72,7 +72,9 @@ export async function removeHistoryEntry(id: string): Promise<HistoryEntry[]> {
 }
 
 export async function clearHistory(): Promise<void> {
-  await LocalStorage.removeItem(STORAGE_KEY);
+  await enqueueWrite(async () => {
+    await LocalStorage.removeItem(STORAGE_KEY);
+  });
 }
 
 function isHistoryEntry(value: unknown): value is HistoryEntry {

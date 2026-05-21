@@ -2,16 +2,16 @@ import {
   Action,
   ActionPanel,
   Clipboard,
+  closeMainWindow,
   Form,
   Icon,
   LaunchType,
-  PopToRootType,
-  closeMainWindow,
   launchCommand,
   openExtensionPreferences,
   showToast,
   Toast,
 } from "@raycast/api";
+import { execFile } from "node:child_process";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { autoParagraph, recognizeScreenshotText, stripLineBreaks } from "./ocr-engines";
 import { openScreenRecordingSettings, reportOcrError } from "./ocr-errors";
@@ -29,21 +29,27 @@ export default function Command() {
 
   useEffect(() => {
     void capture();
+    return () => {
+      captureSequence.current += 1;
+    };
   }, []);
 
   async function capture() {
     const captureId = ++captureSequence.current;
     setIsLoading(true);
+    setText("");
     setNotice(undefined);
     setNeedsPermission(false);
     setAutoCopied(false);
 
+    await closeMainWindow({ clearRootSearch: false });
+
     try {
-      await closeMainWindow({ popToRootType: PopToRootType.Suspended });
       const result = await recognizeScreenshotText(preferences);
 
       if (captureId !== captureSequence.current) return;
 
+      activateRaycast();
       setIsLoading(false);
       if (!result) {
         setNotice("No text detected. Press ⌘R to retake.");
@@ -72,6 +78,7 @@ export default function Command() {
     } catch (error) {
       if (captureId !== captureSequence.current) return;
 
+      activateRaycast();
       setIsLoading(false);
       const description = await reportOcrError(error);
       setNeedsPermission(description.isPermission);
@@ -88,7 +95,7 @@ export default function Command() {
   return (
     <Form
       isLoading={isLoading}
-      navigationTitle={`Screenshot OCR · ${text.length} chars`}
+      navigationTitle={text.length > 0 ? `Screenshot OCR · ${text.length} chars` : "Screenshot OCR"}
       actions={
         <ActionPanel>
           {hasText && !isLoading && (
@@ -192,6 +199,10 @@ export default function Command() {
   );
 }
 
+function activateRaycast(): void {
+  execFile("/usr/bin/osascript", ["-e", 'tell application "Raycast" to activate'], { timeout: 3000 }, () => undefined);
+}
+
 function countWords(text: string): number {
   return text.trim().split(/\s+/).filter(Boolean).length;
 }
@@ -206,6 +217,8 @@ function ocrEngineTitle(engine: string): string {
       return "Baidu OCR";
     case "gemini":
       return "Google Gemini";
+    case "openai":
+      return "OpenAI Vision";
     default:
       return engine;
   }

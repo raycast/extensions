@@ -65,7 +65,7 @@ export function describeOcrError(error: unknown): OcrErrorDescription {
     return {
       title: "Couldn't read the screenshot",
       message: [
-        "Press ⌘R to retake.",
+        "Choose Retake Screenshot to try again.",
         "If it keeps failing, check Raycast under System Settings ▸ Privacy & Security ▸ Screen Recording (then fully quit and reopen Raycast).",
         detail ? `[${detail}]` : "",
       ]

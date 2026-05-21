@@ -36,32 +36,7 @@ import {
   TranslationResult,
   TranslationStyle,
 } from "./types";
-
-const providerIcons = {
-  deepseek: Icon.Waveform,
-  mimo: Icon.AppWindowGrid2x2,
-  minimax: Icon.Bolt,
-  gemini: Icon.Stars,
-  kimi: Icon.Moon,
-  openai: Icon.Message,
-} as const;
-
-const PROMPT_PROFILE_LABELS: Record<PromptProfile, string> = {
-  screenshot: "Screenshot OCR",
-  general: "General",
-  technical: "Technical",
-  academic: "Academic",
-  legal: "Legal",
-  subtitle: "Subtitle",
-  custom: "Custom",
-};
-
-const STYLE_LABELS: Record<TranslationStyle, string> = {
-  balanced: "Balanced",
-  faithful: "Faithful",
-  polished: "Polished",
-  academic: "Academic",
-};
+import { PROMPT_PROFILE_LABELS, PROVIDER_ICONS, STYLE_LABELS, normalizeInputText, quoted } from "./ui-constants";
 
 export default function Command(props: LaunchProps) {
   const preferences = useMemo(() => readPreferences(), []);
@@ -239,7 +214,7 @@ export default function Command(props: LaunchProps) {
         <List.Item
           key={result.providerId}
           id={result.providerId}
-          icon={{ source: providerIcons[result.providerId], tintColor: iconColor(result.status) }}
+          icon={{ source: PROVIDER_ICONS[result.providerId], tintColor: iconColor(result.status) }}
           title={result.providerTitle}
           subtitle={subtitle(result)}
           accessories={accessories(result, targetLanguageTitle)}
@@ -424,10 +399,6 @@ function ResultActions({
   );
 }
 
-function normalizeInputText(text: string | undefined): string {
-  return (text ?? "").replace(/\r\n/g, "\n").trim().slice(0, 12000);
-}
-
 async function readSelectedText(): Promise<string> {
   try {
     return normalizeInputText(await getSelectedText());
@@ -525,13 +496,6 @@ function detailMarkdown(result: TranslationResult, sourceText: string): string {
     "",
     quoted(sourceText),
   ].join("\n");
-}
-
-function quoted(text: string): string {
-  return text
-    .split("\n")
-    .map((line) => `> ${line}`)
-    .join("\n");
 }
 
 function singleLinePreview(text: string): string {

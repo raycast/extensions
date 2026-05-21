@@ -20,6 +20,7 @@
 - Hardened OCR retry state, auto-paragraph formatting, TTS playback, and provider configuration error handling.
 - Fixed Kimi Code defaults, OCR helper build portability, screenshot capture error reporting, and numeric preference fallbacks.
 - Added a Google Gemini multimodal OCR engine that reuses the configured Gemini key, with automatic fallback to local Vision.
+- Added an OpenAI Vision OCR engine that reuses the configured OpenAI key, with an optional OCR-specific model override.
 - Added Auto-Copy: the Screenshot OCR result is copied to the clipboard automatically, with a copied/word-count confirmation (toggle in preferences).
 - Added a Clear Text action to Screenshot OCR for discarding a result without further steps.
 - Rebuilt Auto Paragraph so wrapped OCR lines reflow into real paragraphs instead of one paragraph per line, with CJK-aware joining and de-hyphenation.
@@ -29,3 +30,4 @@
 - Fell back to clipboard text when nothing is selected in Translate and Rewrite & Coach, and clarified the no-selection guidance for the paste-in-place commands.
 - Expanded the target language list (Arabic, Hindi, Vietnamese, Thai, Indonesian, Turkish, Dutch, Polish).
 - Serialized history writes so rapid copies no longer drop entries, and cleaned up leftover TTS audio files.
+- Refreshed Store screenshots for the current Screenshot OCR, Translate, and Translation Settings commands.

@@ -41,12 +41,16 @@ export async function recognizeScreenshotText(preferences: ExtensionPreferences)
   try {
     try {
       const text = await recognizeImageWithEngine(imagePath, preferences.ocrEngine, preferences);
-      return formatOCRText(text, preferences) || undefined;
+      const formatted = formatOCRText(text, preferences);
+      if (formatted || preferences.ocrEngine === "local" || !preferences.ocrFallbackToLocal) {
+        return formatted || undefined;
+      }
+
+      return (await recognizeWithLocalFallback(imagePath, preferences)) || undefined;
     } catch (error) {
       const canFallBack = preferences.ocrEngine !== "local" && preferences.ocrFallbackToLocal;
       if (canFallBack && !(error instanceof ScreenRecordingPermissionError)) {
-        const text = await recognizeText(imagePath, getOCRTimeoutMs(preferences));
-        const formatted = formatOCRText(text ?? "", preferences);
+        const formatted = await recognizeWithLocalFallback(imagePath, preferences);
         if (formatted) {
           return formatted;
         }
@@ -56,6 +60,11 @@ export async function recognizeScreenshotText(preferences: ExtensionPreferences)
   } finally {
     await unlink(imagePath).catch(() => undefined);
   }
+}
+
+async function recognizeWithLocalFallback(imagePath: string, preferences: ExtensionPreferences): Promise<string> {
+  const text = await recognizeText(imagePath, getOCRTimeoutMs(preferences));
+  return formatOCRText(text ?? "", preferences);
 }
 
 async function captureScreenshotToFile(): Promise<string> {
@@ -177,10 +186,12 @@ async function recognizeImageWithEngine(
       return recognizeWithBaidu(imagePath, preferences);
     case "gemini":
       return recognizeWithGemini(imagePath, preferences);
+    case "openai":
+      return recognizeWithOpenAI(imagePath, preferences);
   }
 }
 
-const GEMINI_OCR_PROMPT =
+const VISION_OCR_PROMPT =
   "Extract all text from this image exactly as it appears. Preserve the original reading " +
   "order and line breaks. Output only the extracted text — no commentary, no explanations, " +
   "and no Markdown code fences. If the image contains no text, output nothing.";
@@ -189,6 +200,11 @@ interface GeminiOCRResponse {
   candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
   error?: { message?: string; status?: string };
   promptFeedback?: { blockReason?: string };
+}
+
+interface OpenAIVisionOCRResponse {
+  choices?: Array<{ message?: { content?: string | null }; finish_reason?: string }>;
+  error?: { message?: string; type?: string };
 }
 
 async function recognizeWithGemini(imagePath: string, preferences: ExtensionPreferences): Promise<string> {
@@ -208,7 +224,7 @@ async function recognizeWithGemini(imagePath: string, preferences: ExtensionPref
       contents: [
         {
           role: "user",
-          parts: [{ inline_data: { mime_type: "image/png", data: image } }, { text: GEMINI_OCR_PROMPT }],
+          parts: [{ inline_data: { mime_type: "image/png", data: image } }, { text: VISION_OCR_PROMPT }],
         },
       ],
       generationConfig: { temperature: 0 },
@@ -217,6 +233,9 @@ async function recognizeWithGemini(imagePath: string, preferences: ExtensionPref
 
   const body = await response.text();
   const data = safeParseJson(body) as GeminiOCRResponse;
+  if (isRawResponse(data)) {
+    throw new OcrError(`Gemini returned invalid JSON: ${data.raw.slice(0, 200)}`);
+  }
 
   if (!response.ok || data.error?.message) {
     const message = data.error?.message ?? `HTTP ${response.status}: ${body.slice(0, 200)}`;
@@ -241,6 +260,73 @@ function geminiOcrUrl(baseURL: string, model: string): string {
   const trimmed = baseURL.replace(/\/+$/, "");
   const name = model.replace(/^models\//, "");
   return `${trimmed}/models/${encodeURIComponent(name)}:generateContent`;
+}
+
+async function recognizeWithOpenAI(imagePath: string, preferences: ExtensionPreferences): Promise<string> {
+  const apiKey = preferences.openAIAPIKey?.trim();
+  if (!apiKey) {
+    throw new OcrError("OpenAI API key is not configured. Add it in Extension Preferences to use OpenAI Vision OCR.");
+  }
+
+  const baseURL = preferences.openAIBaseURL?.trim() || "https://api.openai.com/v1";
+  const model = preferences.openAIOcrModel?.trim() || preferences.openAIModel?.trim() || "gpt-4.1-mini";
+  const image = (await readFile(imagePath)).toString("base64");
+
+  const body: Record<string, unknown> = {
+    model,
+    messages: [
+      {
+        role: "user",
+        content: [
+          { type: "text", text: VISION_OCR_PROMPT },
+          { type: "image_url", image_url: { url: `data:image/png;base64,${image}` } },
+        ],
+      },
+    ],
+    stream: false,
+  };
+
+  if (/^(o\d|gpt-5)/i.test(model.trim())) {
+    body.max_completion_tokens = 4096;
+  } else {
+    body.max_tokens = 4096;
+    body.temperature = 0;
+  }
+
+  const url = openAIChatCompletionsUrl(baseURL);
+  const response = await fetchWithTimeout(url, getOCRTimeoutMs(preferences), {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const text = await response.text();
+  const data = safeParseJson(text) as OpenAIVisionOCRResponse;
+  if (isRawResponse(data)) {
+    throw new OcrError(`OpenAI returned invalid JSON: ${data.raw.slice(0, 200)}`);
+  }
+
+  if (!response.ok || data.error?.message) {
+    const message = data.error?.message ?? `HTTP ${response.status}: ${text.slice(0, 200)}`;
+    if (/model/i.test(message) && /(not found|not exist|unsupported|no access|not available)/i.test(message)) {
+      throw new OcrError(
+        `OpenAI rejected model "${model}". Set a valid vision model in Extension Preferences (OpenAI OCR Model).`,
+      );
+    }
+    throw new OcrError(message);
+  }
+
+  const choice = data.choices?.[0];
+  if (choice?.finish_reason === "content_filter") {
+    throw new OcrError("OpenAI blocked the image (content_filter). Try a different screenshot.");
+  }
+
+  return (choice?.message?.content ?? "").trim();
+}
+
+function openAIChatCompletionsUrl(baseURL: string): string {
+  const trimmed = baseURL.replace(/\/+$/, "");
+  return trimmed.endsWith("/chat/completions") ? trimmed : `${trimmed}/chat/completions`;
 }
 
 async function recognizeWithTesseract(imagePath: string, preferences: ExtensionPreferences): Promise<string> {

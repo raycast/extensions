@@ -2,6 +2,7 @@ import { Action, ActionPanel, Color, Icon, List, Toast, showToast } from "@rayca
 import { useEffect, useState } from "react";
 import { HistoryEntry, clearHistory, loadHistory, removeHistoryEntry } from "./history-store";
 import { speakText } from "./tts";
+import { quoted } from "./ui-constants";
 
 export default function Command() {
   const [entries, setEntries] = useState<HistoryEntry[]>();
@@ -109,11 +110,4 @@ function detailMarkdown(entry: HistoryEntry): string {
 function preview(text: string): string {
   const single = text.replace(/\s+/g, " ").trim();
   return single.length > 80 ? `${single.slice(0, 80)}...` : single;
-}
-
-function quoted(text: string): string {
-  return text
-    .split("\n")
-    .map((line) => `> ${line}`)
-    .join("\n");
 }
