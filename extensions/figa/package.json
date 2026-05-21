@@ -1,0 +1,64 @@
+{
+  "name": "figa",
+  "title": "Figa",
+  "description": "Access your Figa workspace from Raycast.",
+  "icon": "icon.png",
+  "author": "figa",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build -e dist",
+    "lint": "eslint . && prettier --check .",
+    "lint:store": "ray lint",
+    "fix-lint": "eslint . --fix && prettier --write .",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "Figa workspace API key. Create a dedicated key in workspace settings.",
+      "type": "password",
+      "required": true,
+      "placeholder": "et_live_..."
+    },
+    {
+      "name": "apiBaseUrl",
+      "title": "API Base URL",
+      "description": "Figa API origin. Keep production default unless testing against local or staging API.",
+      "type": "textfield",
+      "required": true,
+      "default": "https://api.figa.cc"
+    }
+  ],
+  "commands": [
+    {
+      "name": "show-workspace-context",
+      "title": "Show Workspace Context",
+      "description": "Validate the configured Figa API key and show workspace context.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
+    "react": "19.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.36.0",
+    "prettier": "^3.7.4",
+    "typescript": "^6.0.3"
+  }
+}
