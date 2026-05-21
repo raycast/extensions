@@ -36,7 +36,7 @@
     {
       "name": "steamApiKey",
       "title": "Steam API Key",
-      "description": "Used for: owned game detection, Recently Played, Wishlist Discounts, and Friends Online.\nGet yours at: steamcommunity.com/dev/apikey (domain field can be anything, e.g. localhost)",
+      "description": "steamcommunity.com/dev/apikey\nUsed for Recently Played, Friends Online & Wishlist Discounts tabs, as well as Playtime & Wishlisted badges on games",
       "type": "password",
       "required": false,
       "placeholder": "Optional — enables Owned, Recently Played, Wishlist Discounts, Friends Online"
@@ -44,7 +44,7 @@
     {
       "name": "steamId",
       "title": "Steam ID (64-bit)",
-      "description": "Used alongside your Steam API key for: owned game detection, Recently Played, Wishlist Discounts, and Friends Online.\nFind yours at: steamid.io — look for the steamID64 field (17-digit number starting with 7656)",
+      "description": "steamid.io\nUsed alongside your Steam API key for all features to work properly",
       "type": "textfield",
       "required": false,
       "placeholder": "Optional — enables Owned, Recently Played, Wishlist Discounts, Friends Online"
@@ -52,7 +52,7 @@
     {
       "name": "ggDealsApiKey",
       "title": "GG.deals API Key",
-      "description": "Used for: keyshop prices (🔑) in search results and Wishlist Discounts.\nGet yours at: gg.deals/settings/ under the API section",
+      "description": "gg.deals/api\nUsed for displaying the lowest keyshop price for (almost) every game",
       "type": "password",
       "required": false,
       "placeholder": "Optional — enables keyshop prices in search and Wishlist Discounts"

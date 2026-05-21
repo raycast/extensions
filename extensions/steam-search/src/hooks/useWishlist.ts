@@ -4,7 +4,7 @@ import { fetchWishlist, getWishlist } from "../api/steam";
 
 /** Returns true if wishlisted, false if not, null if still loading */
 export function useIsWishlisted(appId: number): boolean | null {
-  const { steamApiKey, steamId } = getPreferenceValues();
+  const { steamApiKey, steamId } = getPreferenceValues<Preferences>();
 
   const [wishlisted, setWishlisted] = useState<boolean | null>(() => {
     const current = getWishlist();
@@ -18,7 +18,7 @@ export function useIsWishlisted(appId: number): boolean | null {
       setWishlisted(current.has(appId));
       return;
     }
-    fetchWishlist(steamApiKey as string, steamId as string).then((ids) => {
+    fetchWishlist(steamApiKey ?? "", steamId ?? "").then((ids) => {
       setWishlisted(ids.has(appId));
     });
   }, [appId, steamApiKey, steamId]);

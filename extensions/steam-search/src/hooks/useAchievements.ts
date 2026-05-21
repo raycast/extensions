@@ -1,5 +1,5 @@
 import { getPreferenceValues } from "@raycast/api";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 interface AchievementStats {
   unlocked: number;
@@ -17,6 +17,7 @@ export function useAchievements(
   const [stats, setStats] = useState<AchievementStats | null>(
     () => achievementsCache.get(appId) ?? null,
   );
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (!enabled) return;
@@ -26,8 +27,13 @@ export function useAchievements(
       return;
     }
 
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     fetch(
       `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${steamApiKey}&steamid=${steamId}&appid=${appId}`,
+      { signal: controller.signal },
     )
       .then(
         (r) =>
@@ -36,6 +42,7 @@ export function useAchievements(
           }>,
       )
       .then((data) => {
+        if (controller.signal.aborted) return;
         const achievements = data?.playerstats?.achievements;
         if (!achievements?.length) {
           achievementsCache.set(appId, null);
@@ -48,9 +55,12 @@ export function useAchievements(
         setStats(result);
       })
       .catch(() => {
+        if (controller.signal.aborted) return;
         achievementsCache.set(appId, null);
         setStats(null);
       });
+
+    return () => controller.abort();
   }, [appId, enabled, steamApiKey, steamId]);
 
   return stats;

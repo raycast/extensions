@@ -9,6 +9,17 @@ export const STEAM_HEADERS = {
     "birthtime=631152001; lastagecheckage=1-January-1990; mature_content=1; wants_mature_content=1",
 };
 
+// Regions where the currency symbol follows the amount (e.g. "50.79 €")
+export const CURRENCY_SUFFIX_REGIONS = new Set([
+  "de",
+  "fr",
+  "nl",
+  "pl",
+  "cz",
+  "se",
+  "no",
+]);
+
 export const CURRENCY_SYMBOLS: Record<string, string> = {
   de: "€",
   fr: "€",

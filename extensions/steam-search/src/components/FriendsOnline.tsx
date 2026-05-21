@@ -9,8 +9,10 @@ import {
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
 import { fetchAppIcon } from "../api/steam";
+import { getIconUrl, setIconUrl } from "../cache";
+import { GameDetail } from "./GameDetail";
 
-interface FriendSummary {
+export interface FriendSummary {
   steamid: string;
   personaname: string;
   avatarmedium: string;
@@ -23,7 +25,7 @@ const STATE_LABEL: Record<number, string> = {
   1: "Online",
   2: "Busy",
   3: "Away",
-  4: "Snooze",
+  4: "Away",
   5: "Looking to Trade",
   6: "Looking to Play",
 };
@@ -37,12 +39,21 @@ const STATE_COLOR: Record<number, Color> = {
   6: Color.Green,
 };
 
-const gameIconCache = new Map<string, string>();
-
 let friendsCache: FriendSummary[] | null = null;
 let friendsFetchPromise: Promise<FriendSummary[]> | null = null;
+let friendsIsPrivate = false;
 
-async function fetchFriendsOnline(
+export function isFriendsListPrivate(): boolean {
+  return friendsIsPrivate;
+}
+
+export function clearFriendsCache(): void {
+  friendsCache = null;
+  friendsFetchPromise = null;
+  friendsIsPrivate = false;
+}
+
+export async function fetchFriendsOnline(
   apiKey: string,
   steamId: string,
 ): Promise<FriendSummary[]> {
@@ -53,6 +64,11 @@ async function fetchFriendsOnline(
     const listRes = await fetch(
       `https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=${apiKey}&steamid=${steamId}&relationship=friend`,
     );
+    if (!listRes.ok) {
+      friendsIsPrivate = true;
+      friendsCache = [];
+      return [];
+    }
     const listData = (await listRes.json()) as {
       friendslist?: { friends?: { steamid: string }[] };
     };
@@ -85,21 +101,28 @@ async function fetchFriendsOnline(
   return friendsFetchPromise;
 }
 
-function FriendItem({ friend }: { friend: FriendSummary }) {
+function FriendItem({
+  friend,
+  onRefresh,
+}: {
+  friend: FriendSummary;
+  onRefresh: () => void;
+}) {
   const inGame = !!friend.gameid;
-  const [gameIcon, setGameIcon] = useState<string | null>(
-    friend.gameid ? (gameIconCache.get(friend.gameid) ?? null) : null,
+  const [gameIcon, setGameIcon] = useState<string | null>(() =>
+    friend.gameid ? (getIconUrl(parseInt(friend.gameid, 10)) ?? null) : null,
   );
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (!friend.gameid || gameIconCache.has(friend.gameid)) return;
+    if (!friend.gameid || getIconUrl(parseInt(friend.gameid, 10))) return;
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    fetchAppIcon(parseInt(friend.gameid, 10), controller.signal).then((url) => {
+    const appId = parseInt(friend.gameid, 10);
+    fetchAppIcon(appId, controller.signal).then((url) => {
       if (url && !controller.signal.aborted) {
-        gameIconCache.set(friend.gameid!, url);
+        setIconUrl(appId, url);
         setGameIcon(url);
       }
     });
@@ -150,6 +173,22 @@ function FriendItem({ friend }: { friend: FriendSummary }) {
               onAction={() => open(`steam://store/${friend.gameid}`)}
             />
           )}
+          {inGame && friend.gameid && (
+            <Action.Push
+              title="View Game Details"
+              icon={Icon.Info}
+              target={
+                <GameDetail
+                  appId={parseInt(friend.gameid, 10)}
+                  name={friend.gameextrainfo ?? ""}
+                />
+              }
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "i" },
+                Windows: { modifiers: ["ctrl"], key: "i" },
+              }}
+            />
+          )}
           <Action
             title="View Profile"
             icon={Icon.Person}
@@ -166,6 +205,26 @@ function FriendItem({ friend }: { friend: FriendSummary }) {
               }}
             />
           )}
+          {inGame && friend.gameid && (
+            <Action.OpenInBrowser
+              // eslint-disable-next-line @raycast/prefer-title-case
+              title="View Game on ProtonDB"
+              url={`https://www.protondb.com/app/${friend.gameid}`}
+              shortcut={{
+                macOS: { modifiers: ["cmd"], key: "p" },
+                Windows: { modifiers: ["ctrl"], key: "p" },
+              }}
+            />
+          )}
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "r" },
+              Windows: { modifiers: ["ctrl"], key: "r" },
+            }}
+            onAction={onRefresh}
+          />
         </ActionPanel>
       }
     />
@@ -176,15 +235,29 @@ export function FriendsOnline() {
   const { steamApiKey, steamId } = getPreferenceValues<Preferences>();
   const [friends, setFriends] = useState<FriendSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isPrivate, setIsPrivate] = useState(false);
 
-  useEffect(() => {
-    fetchFriendsOnline(steamApiKey ?? "", steamId ?? "")
+  const load = (apiKey: string, steamId: string) => {
+    fetchFriendsOnline(apiKey, steamId)
       .then((f) => {
         setFriends(f);
+        setIsPrivate(isFriendsListPrivate());
         setIsLoading(false);
       })
       .catch(() => setIsLoading(false));
+  };
+
+  useEffect(() => {
+    load(steamApiKey ?? "", steamId ?? "");
   }, [steamApiKey, steamId]);
+
+  const refresh = () => {
+    clearFriendsCache();
+    setFriends([]);
+    setIsPrivate(false);
+    setIsLoading(true);
+    load(steamApiKey ?? "", steamId ?? "");
+  };
 
   const inGame = friends.filter((f) => f.gameid);
   const online = friends.filter(
@@ -196,7 +269,13 @@ export function FriendsOnline() {
 
   return (
     <List isLoading={isLoading}>
-      {!isLoading && friends.length === 0 ? (
+      {!isLoading && isPrivate ? (
+        <List.EmptyView
+          icon={Icon.Lock}
+          title="Friends list is private"
+          description="Go to Steam → Edit Profile → Privacy Settings and set Friends List to Public"
+        />
+      ) : !isLoading && friends.length === 0 ? (
         <List.EmptyView
           icon={Icon.TwoPeople}
           title="No friends online"
@@ -207,21 +286,21 @@ export function FriendsOnline() {
           {inGame.length > 0 && (
             <List.Section title="In-Game" subtitle={`${inGame.length}`}>
               {inGame.map((f) => (
-                <FriendItem key={f.steamid} friend={f} />
+                <FriendItem key={f.steamid} friend={f} onRefresh={refresh} />
               ))}
             </List.Section>
           )}
           {online.length > 0 && (
             <List.Section title="Online" subtitle={`${online.length}`}>
               {online.map((f) => (
-                <FriendItem key={f.steamid} friend={f} />
+                <FriendItem key={f.steamid} friend={f} onRefresh={refresh} />
               ))}
             </List.Section>
           )}
           {away.length > 0 && (
             <List.Section title="Away" subtitle={`${away.length}`}>
               {away.map((f) => (
-                <FriendItem key={f.steamid} friend={f} />
+                <FriendItem key={f.steamid} friend={f} onRefresh={refresh} />
               ))}
             </List.Section>
           )}

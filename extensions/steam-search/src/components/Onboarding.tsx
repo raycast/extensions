@@ -15,7 +15,7 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
         <List.Item
           icon={{ source: Icon.Key, tintColor: Color.Yellow }}
           title="Steam API Key"
-          subtitle="Owned badge · Recently Played · Wishlist Discounts · Friends Online"
+          subtitle="Owned games · Friendlist · Wishlist sales etc."
           accessories={[{ text: "steamcommunity.com/dev/apikey" }]}
           actions={
             <ActionPanel>
@@ -55,7 +55,7 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
         <List.Item
           icon={{ source: Icon.Tag, tintColor: Color.Green }}
           title="GG.deals API Key"
-          subtitle="Keyshop prices in search results and Wishlist Discounts (🔑)"
+          subtitle="Shows lowest keyshop price on (almost) every game"
           accessories={[{ text: "gg.deals/api" }]}
           actions={
             <ActionPanel>
@@ -90,7 +90,7 @@ export function Onboarding({ onSkip }: { onSkip: () => void }) {
         <List.Item
           icon={Icon.MagnifyingGlass}
           title="Skip for now — search without extra features"
-          subtitle="You can always add keys later via Tab → Open Extension Preferences"
+          subtitle="You can always add keys later in the Preferences"
           actions={
             <ActionPanel>
               <Action

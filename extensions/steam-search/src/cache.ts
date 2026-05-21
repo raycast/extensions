@@ -1,4 +1,32 @@
-import { LocalStorage } from "@raycast/api";
+import { LocalStorage, Cache } from "@raycast/api";
+
+const iconUrlCache = new Cache({ namespace: "icon-urls" });
+const homeCache = new Cache({ namespace: "home-subtitles" });
+
+export function getCachedSubtitle(key: string, ttl = CACHE_TTL): string | null {
+  const raw = homeCache.get(key);
+  if (!raw) return null;
+  try {
+    const { value, timestamp }: { value: string; timestamp: number } =
+      JSON.parse(raw);
+    if (Date.now() - timestamp > ttl) return null;
+    return value;
+  } catch {
+    return null;
+  }
+}
+
+export function setCachedSubtitle(key: string, value: string): void {
+  homeCache.set(key, JSON.stringify({ value, timestamp: Date.now() }));
+}
+
+export function getIconUrl(appId: number): string | undefined {
+  return iconUrlCache.get(String(appId));
+}
+
+export function setIconUrl(appId: number, url: string): void {
+  iconUrlCache.set(String(appId), url);
+}
 import { AppDetails, PersistedDetails } from "./types";
 import { CACHE_TTL } from "./constants";
 

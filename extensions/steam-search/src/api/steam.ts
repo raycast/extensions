@@ -1,8 +1,82 @@
-import { STEAM_HEADERS } from "../constants";
+import { LocalStorage } from "@raycast/api";
+import { STEAM_HEADERS, CACHE_TTL } from "../constants";
 import { formatNum } from "../utils";
+import { SteamApp } from "../types";
+
+const TOP_SELLERS_COUNT = 10;
+
+const topSellersCache = new Map<string, SteamApp[]>();
+const topSellersFetchPromises = new Map<string, Promise<SteamApp[]>>();
+
+export async function fetchTopSellers(region: string): Promise<SteamApp[]> {
+  if (topSellersCache.has(region)) return topSellersCache.get(region)!;
+  if (topSellersFetchPromises.has(region))
+    return topSellersFetchPromises.get(region)!;
+
+  const promise = (async () => {
+    try {
+      const raw = await LocalStorage.getItem<string>(`top-sellers-${region}`);
+      if (raw) {
+        const { items, timestamp } = JSON.parse(raw) as {
+          items: SteamApp[];
+          timestamp: number;
+        };
+        if (Date.now() - timestamp <= CACHE_TTL) {
+          topSellersCache.set(region, items);
+          topSellersFetchPromises.delete(region);
+          return items;
+        }
+      }
+    } catch {
+      // Fall through to network fetch
+    }
+
+    return fetch(
+      `https://store.steampowered.com/search/results/?filter=topsellers&json=1&count=${TOP_SELLERS_COUNT * 3}&cc=${region}&l=english`,
+    )
+      .then((r) => r.json())
+      .then((data: unknown) => {
+        const raw =
+          (data as { items?: { name: string; logo: string }[] })?.items ?? [];
+        const items: SteamApp[] = [];
+        const seen = new Set<number>();
+
+        for (const entry of raw) {
+          if (items.length >= TOP_SELLERS_COUNT) break;
+          const appId = parseInt(
+            entry.logo?.match(/steam\/apps\/(\d+)\//)?.[1] ?? "",
+            10,
+          );
+          if (!appId || seen.has(appId) || !entry.name) continue;
+          seen.add(appId);
+          items.push({ id: appId, name: entry.name, tiny_image: entry.logo });
+        }
+
+        topSellersCache.set(region, items);
+        topSellersFetchPromises.delete(region);
+        LocalStorage.setItem(
+          `top-sellers-${region}`,
+          JSON.stringify({ items, timestamp: Date.now() }),
+        ).catch(() => {});
+        return items;
+      })
+      .catch(() => {
+        topSellersFetchPromises.delete(region);
+        return [];
+      });
+  })();
+
+  topSellersFetchPromises.set(region, promise);
+  return promise;
+}
 
 let ownedGames: Map<number, number> | null = null;
+let lastPlayedTimes: Map<number, number> | null = null;
 let ownedFetchPromise: Promise<Map<number, number>> | null = null;
+// Fallback last-played times read from GetRecentlyPlayedGames (which sometimes
+// includes rtime_last_played even though it isn't officially documented).
+// Also used for F2P games whose rtime_last_played is 0 in GetOwnedGames.
+const recentlyPlayedTimes: Map<number, number> = new Map();
 
 export async function fetchOwnedGames(
   apiKey: string,
@@ -18,10 +92,22 @@ export async function fetchOwnedGames(
     .then((r) => r.json())
     .then((data: unknown) => {
       const d = data as {
-        response?: { games?: { appid: number; playtime_forever: number }[] };
+        response?: {
+          games?: {
+            appid: number;
+            playtime_forever: number;
+            rtime_last_played?: number;
+          }[];
+        };
       };
+      const games = d?.response?.games ?? [];
       const map = new Map<number, number>(
-        (d?.response?.games ?? []).map((g) => [g.appid, g.playtime_forever]),
+        games.map((g) => [g.appid, g.playtime_forever]),
+      );
+      lastPlayedTimes = new Map<number, number>(
+        games
+          .filter((g) => g.rtime_last_played)
+          .map((g) => [g.appid, g.rtime_last_played!]),
       );
       ownedGames = map;
       return map;
@@ -36,6 +122,10 @@ export async function fetchOwnedGames(
 
 export function getOwnedGames(): Map<number, number> | null {
   return ownedGames;
+}
+
+export function getLastPlayed(appid: number): number | null {
+  return lastPlayedTimes?.get(appid) ?? recentlyPlayedTimes.get(appid) ?? null;
 }
 
 let wishlistAppIds: Set<number> | null = null;
@@ -65,8 +155,20 @@ export async function fetchRecentlyPlayed(
   )
     .then((r) => r.json())
     .then((data: unknown) => {
-      const d = data as { response?: { games?: RecentlyPlayedGame[] } };
+      const d = data as {
+        response?: {
+          games?: (RecentlyPlayedGame & { rtime_last_played?: number })[];
+        };
+      };
       const games = d?.response?.games ?? [];
+      for (const g of games) {
+        // Only store a timestamp if the API actually returned one. Games like
+        // DDNet (F2P) often have rtime_last_played = 0 or missing — those are
+        // left out so getLastPlayed() returns null and no date is shown.
+        if (g.rtime_last_played && g.rtime_last_played > 0) {
+          recentlyPlayedTimes.set(g.appid, g.rtime_last_played);
+        }
+      }
       recentlyPlayedCache = games;
       return games;
     })
@@ -108,6 +210,11 @@ export async function fetchWishlist(
 
 export function getWishlist(): Set<number> | null {
   return wishlistAppIds;
+}
+
+export function clearRecentlyPlayedCache(): void {
+  recentlyPlayedCache = null;
+  recentlyPlayedPromise = null;
 }
 
 export async function fetchSteamChartsData(

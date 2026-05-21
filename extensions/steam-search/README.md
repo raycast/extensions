@@ -11,7 +11,8 @@ Search the Steam store directly from Raycast. View live prices, review scores, a
 - See lowest keyshop price from GG.deals (🔑)
 - Owned games show your playtime in a green badge
 - Wishlisted games are tagged in search results
-- Open games directly in the Steam client, on GG.deals, or on SteamDB
+- Open games directly in the Steam client, on GG.deals, SteamDB, or ProtonDB
+- View a full game detail page — description, genres, Metacritic score, release date, developer, and all stats
 - Localized prices — choose your region and currency in preferences
 - Results and prices are cached locally for fast repeat searches
 - All credentials are optional — use only the features you need
@@ -22,11 +23,15 @@ See your last 10 played games with total playtime, live player counts, 24h peak,
 
 ### Wishlist Discounts *(requires Steam API Key + Steam ID)*
 
-See which games on your Steam wishlist are currently on sale, sorted by discount percentage. Shows original and sale price, GG.deals keyshop price, and your playtime if you already own the game.
+See which games on your Steam wishlist are currently on sale, sorted by discount percentage. Shows original and sale price and GG.deals keyshop price.
+
+> **Requires public wishlist:** Steam → Edit Profile → Privacy Settings → set **Game Details** to Public. If your wishlist is private, the extension will show a message explaining this.
 
 ### Friends Online *(requires Steam API Key + Steam ID)*
 
 See which Steam friends are online or in-game, split into three sections: **In-Game**, **Online**, and **Away**. In-game friends show what they're playing with the game icon. Press Enter to open a chat window directly in Steam.
+
+> **Requires public friends list:** Steam → Edit Profile → Privacy Settings → set **Friends List** to Public. If your friends list is private, the extension will show a message explaining this.
 
 ## Setup
 
@@ -79,8 +84,10 @@ Controls the currency used for both Steam and GG.deals prices. Supported regions
 |---|---|---|
 | Open in Steam client | `↵` | `↵` |
 | Open in Library (owned games) | `Ctrl + ↵` | `Cmd + ↵` |
+| View Details | `Ctrl + I` | `Cmd + I` |
 | View on GG.deals | `Ctrl + G` | `Cmd + G` |
 | View on SteamDB | `Ctrl + D` | `Cmd + D` |
+| View on ProtonDB | `Ctrl + P` | `Cmd + P` |
 | Copy Store URL | `Ctrl + C` | `Cmd + C` |
 
 ### Recently Played
@@ -88,16 +95,21 @@ Controls the currency used for both Steam and GG.deals prices. Supported regions
 | Action | Shortcut (Windows) | Shortcut (macOS) |
 |---|---|---|
 | Open in Steam | `↵` | `↵` |
+| View Details | `Ctrl + I` | `Cmd + I` |
 | View on SteamDB | `Ctrl + D` | `Cmd + D` |
+| View on ProtonDB | `Ctrl + P` | `Cmd + P` |
 | Copy Store URL | `Ctrl + C` | `Cmd + C` |
+| Refresh | `Ctrl + R` | `Cmd + R` |
 
 ### Wishlist Discounts
 
 | Action | Shortcut (Windows) | Shortcut (macOS) |
 |---|---|---|
 | Open in Steam | `↵` | `↵` |
+| View Details | `Ctrl + I` | `Cmd + I` |
 | View on GG.deals | `Ctrl + G` | `Cmd + G` |
 | View on SteamDB | `Ctrl + D` | `Cmd + D` |
+| View on ProtonDB | `Ctrl + P` | `Cmd + P` |
 | Copy Store URL | `Ctrl + C` | `Cmd + C` |
 | Refresh | `Ctrl + R` | `Cmd + R` |
 
@@ -106,7 +118,11 @@ Controls the currency used for both Steam and GG.deals prices. Supported regions
 | Action | Shortcut (Windows) | Shortcut (macOS) |
 |---|---|---|
 | Message friend | `↵` | `↵` |
+| Open game in Steam (in-game) | — | — |
+| View game details (in-game) | `Ctrl + I` | `Cmd + I` |
 | View game on SteamDB | `Ctrl + D` | `Cmd + D` |
+| View game on ProtonDB | `Ctrl + P` | `Cmd + P` |
+| Refresh | `Ctrl + R` | `Cmd + R` |
 
 ## How It Works
 

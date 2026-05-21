@@ -10,11 +10,12 @@ import {
   Action,
   LocalStorage,
 } from "@raycast/api";
+import { GameDetail } from "./GameDetail";
 import { useEffect, useRef, useState } from "react";
-import { fetchWishlist, fetchAppIcon } from "../api/steam";
+import { fetchAppIcon } from "../api/steam";
 import { batchFetchGGDeals, ggDealsCache } from "../api/ggdeals";
-import { formatPlaytime } from "../utils";
-import { usePlaytime } from "../hooks/usePlaytime";
+import { CACHE_TTL, CURRENCY_SYMBOLS } from "../constants";
+import { getIconUrl, setIconUrl, setCachedSubtitle } from "../cache";
 
 interface WishlistGame {
   appid: number;
@@ -26,24 +27,88 @@ interface WishlistGame {
   ggPrice: string | null;
 }
 
-interface SteamAppDetailsResponse {
-  success: boolean;
-  data?: {
-    name?: string;
-    is_free?: boolean;
-    price_overview?: {
-      final_formatted: string;
-      initial_formatted: string;
-      discount_percent: number;
-    };
-  };
+interface WishlistDataEntry {
+  name: string;
+  capsule: string;
+  subs: { discount_pct: number; price?: number; original_price?: number }[];
+  is_free_game: boolean;
 }
 
-const CACHE_TTL = 60 * 60 * 1000; // 1 hour
-const discountedGamesCacheMap = new Map<string, WishlistGame[]>();
-const iconCache = new Map<number, string>();
+interface WishlistResult {
+  games: WishlistGame[];
+  unavailable: "private" | "rate-limited" | null;
+}
 
-async function loadCachedGames(region: string): Promise<WishlistGame[] | null> {
+const discountedGamesCacheMap = new Map<string, WishlistResult>();
+
+function formatWishlistPrice(cents: number, region: string): string {
+  const symbol = CURRENCY_SYMBOLS[region] ?? "$";
+  return `${symbol}${(cents / 100).toFixed(2)}`;
+}
+
+async function fetchAllWishlistData(
+  steamId: string,
+  region: string,
+): Promise<{
+  entries: Map<number, WishlistDataEntry>;
+  unavailable: "private" | "rate-limited" | null;
+}> {
+  const result = new Map<number, WishlistDataEntry>();
+  for (let page = 0; page < 100; page++) {
+    // Small delay between pages to avoid triggering Steam rate limits
+    if (page > 0) await new Promise((resolve) => setTimeout(resolve, 150));
+    const res = await fetch(
+      `https://store.steampowered.com/wishlist/profiles/${steamId}/wishlistdata/?p=${page}&cc=${region}&l=english`,
+    ).catch(() => null);
+    if (!res) break;
+    // 429 = explicit rate limit response
+    if (res.status === 429)
+      return { entries: result, unavailable: "rate-limited" };
+    if (res.status !== 200) break;
+
+    let text: string;
+    try {
+      text = await res.text();
+    } catch {
+      if (page === 0) return { entries: result, unavailable: "rate-limited" };
+      break;
+    }
+
+    // Non-JSON response on page 0 = Steam returned an error page
+    if (!text.trimStart().startsWith("{")) {
+      if (page === 0) {
+        const lower = text.toLowerCase();
+        // Only mark as private if the page explicitly says so;
+        // default to rate-limited for any other unexpected HTML
+        const unavailable =
+          lower.includes("private") ||
+          lower.includes("not authorized") ||
+          lower.includes("forbidden")
+            ? "private"
+            : "rate-limited";
+        return { entries: result, unavailable };
+      }
+      // Later pages returning non-JSON just means end of data
+      break;
+    }
+
+    let data: Record<string, WishlistDataEntry> | null = null;
+    try {
+      data = JSON.parse(text) as Record<string, WishlistDataEntry>;
+    } catch {
+      if (page === 0) return { entries: result, unavailable: "rate-limited" };
+      break;
+    }
+
+    if (!data || !Object.keys(data).length) break;
+    for (const [appidStr, entry] of Object.entries(data)) {
+      result.set(parseInt(appidStr, 10), entry);
+    }
+  }
+  return { entries: result, unavailable: null };
+}
+
+async function loadCachedGames(region: string): Promise<WishlistResult | null> {
   try {
     const raw = await LocalStorage.getItem<string>(
       `wishlist-discounts-${region}`,
@@ -52,7 +117,7 @@ async function loadCachedGames(region: string): Promise<WishlistGame[] | null> {
     const { games, timestamp }: { games: WishlistGame[]; timestamp: number } =
       JSON.parse(raw);
     if (Date.now() - timestamp > CACHE_TTL) return null;
-    return games;
+    return { games, unavailable: null };
   } catch {
     return null;
   }
@@ -67,17 +132,16 @@ async function saveCachedGames(
       `wishlist-discounts-${region}`,
       JSON.stringify({ games, timestamp: Date.now() }),
     );
-  } catch (e) {
+  } catch {
     // Silently ignore persistence errors
   }
 }
 
-async function fetchDiscountedWishlistGames(
-  apiKey: string,
+export async function fetchDiscountedWishlistGames(
   steamId: string,
   ggDealsApiKey: string,
   region: string,
-): Promise<WishlistGame[]> {
+): Promise<WishlistResult> {
   if (discountedGamesCacheMap.has(region))
     return discountedGamesCacheMap.get(region)!;
 
@@ -87,92 +151,71 @@ async function fetchDiscountedWishlistGames(
     return cached;
   }
 
-  const wishlistIds = await fetchWishlist(apiKey, steamId);
-  const ids = Array.from(wishlistIds);
-  if (!ids.length) return [];
+  const { entries: wishlistData, unavailable } = await fetchAllWishlistData(
+    steamId,
+    region,
+  );
+  if (unavailable !== null) {
+    // Cache error results in memory only — not in LocalStorage — so the next
+    // session retries once the rate limit clears or privacy settings are fixed.
+    const errorResult: WishlistResult = { games: [], unavailable };
+    discountedGamesCacheMap.set(region, errorResult);
+    return errorResult;
+  }
+  if (!wishlistData.size) return { games: [], unavailable: null };
 
+  const allIds = Array.from(wishlistData.keys());
   if (ggDealsApiKey) {
-    for (let i = 0; i < ids.length; i += 50) {
-      await batchFetchGGDeals(ids.slice(i, i + 50), ggDealsApiKey, region);
+    for (let i = 0; i < allIds.length; i += 50) {
+      await batchFetchGGDeals(allIds.slice(i, i + 50), ggDealsApiKey, region);
     }
   }
 
   const games: WishlistGame[] = [];
+  for (const [appid, entry] of wishlistData.entries()) {
+    if (entry.is_free_game) continue;
+    const sub = entry.subs?.[0];
+    if (!sub || sub.discount_pct === 0) continue;
 
-  const CONCURRENCY = 10;
-  const semaphore = {
-    count: 0,
-    async acquire() {
-      while (this.count >= CONCURRENCY) {
-        await new Promise((resolve) => setTimeout(resolve, 50));
-      }
-      this.count++;
-    },
-    release() {
-      this.count--;
-    },
-  };
-
-  await Promise.all(
-    ids.map(async (id) => {
-      await semaphore.acquire();
-      try {
-        const res = await fetch(
-          `https://store.steampowered.com/api/appdetails?appids=${id}&cc=${region}`,
-        ).catch(() => null);
-        if (!res || res.status !== 200) return;
-
-        const data = (await res.json()) as Record<
-          string,
-          SteamAppDetailsResponse
-        >;
-        const app = data?.[String(id)];
-        if (!app?.success || !app.data) return;
-        const d = app.data;
-
-        const discountPercent = d.price_overview?.discount_percent ?? 0;
-        if (discountPercent === 0) return;
-
-        const ggPrice = ggDealsCache.get(`${id}-${region}`) ?? null;
-
-        games.push({
-          appid: id,
-          name: d.name ?? `App ${id}`,
-          iconUrl: `https://cdn.cloudflare.steamstatic.com/steam/apps/${id}/capsule_sm_120.jpg`,
-          steamPrice: d.price_overview?.final_formatted ?? null,
-          steamOriginalPrice: d.price_overview?.initial_formatted ?? null,
-          discountPercent,
-          ggPrice,
-        });
-      } finally {
-        semaphore.release();
-      }
-    }),
-  );
+    games.push({
+      appid,
+      name: entry.name,
+      iconUrl:
+        entry.capsule ||
+        `https://cdn.cloudflare.steamstatic.com/steam/apps/${appid}/capsule_sm_120.jpg`,
+      steamPrice:
+        sub.price != null ? formatWishlistPrice(sub.price, region) : null,
+      steamOriginalPrice:
+        sub.original_price != null
+          ? formatWishlistPrice(sub.original_price, region)
+          : null,
+      discountPercent: sub.discount_pct,
+      ggPrice: ggDealsCache.get(`${appid}-${region}`) ?? null,
+    });
+  }
 
   const sorted = games.sort((a, b) => b.discountPercent - a.discountPercent);
-  discountedGamesCacheMap.set(region, sorted);
+  const result: WishlistResult = { games: sorted, unavailable: null };
+  discountedGamesCacheMap.set(region, result);
   await saveCachedGames(sorted, region);
-  return sorted;
+  return result;
 }
 
 function WishlistItem({ game }: { game: WishlistGame }) {
-  const playtime = usePlaytime(game.appid);
-  const isOwned = playtime !== null && playtime >= 0;
-  const [iconUrl, setIconUrl] = useState<string | null>(
-    () => iconCache.get(game.appid) ?? game.iconUrl,
+  const [iconUrl, setIconUrlState] = useState<string | null>(
+    () => getIconUrl(game.appid) ?? game.iconUrl,
   );
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    if (iconCache.has(game.appid)) return;
+    if (getIconUrl(game.appid)) return;
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
     fetchAppIcon(game.appid, controller.signal).then((url) => {
       if (url && !controller.signal.aborted) {
-        iconCache.set(game.appid, url);
-        setIconUrl(url);
+        setIconUrl(game.appid, url);
+        setIconUrlState(url);
       }
     });
     return () => controller.abort();
@@ -188,43 +231,32 @@ function WishlistItem({ game }: { game: WishlistGame }) {
           tag: { value: `-${game.discountPercent}%`, color: Color.Green },
           tooltip: "Steam discount",
         },
+        ...(game.steamPrice
+          ? [
+              {
+                text: { value: game.steamPrice, color: Color.Green },
+                tooltip: "Sale price",
+              },
+            ]
+          : []),
         ...(game.steamOriginalPrice
           ? [
               {
                 text: {
-                  value: game.steamOriginalPrice,
+                  value: `(${game.steamOriginalPrice})`,
                   color: Color.SecondaryText,
                 },
                 tooltip: "Original price",
               },
-              {
-                text: {
-                  value: `→ ${game.steamPrice ?? ""}`,
-                  color: Color.Green,
-                },
-                tooltip: "Sale price",
-              },
-            ]
-          : [
-              {
-                text: { value: game.steamPrice ?? "", color: Color.Green },
-                tooltip: "Sale price",
-              },
-            ]),
-        ...(game.ggPrice
-          ? [
-              {
-                text: { value: game.ggPrice, color: Color.Yellow },
-                tooltip: "Lowest keyshop price on GG.deals",
-              },
             ]
           : []),
-        ...(isOwned
+        ...(game.ggPrice
           ? [
+              { text: { value: "·", color: Color.SecondaryText } },
               {
-                tag: { value: formatPlaytime(playtime!), color: Color.Green },
-                icon: Icon.GameController,
-                tooltip: "Playtime — you already own this game",
+                icon: { source: "ggdeals.png" },
+                text: { value: game.ggPrice, color: Color.Green },
+                tooltip: "Lowest keyshop price on GG.deals",
               },
             ]
           : []),
@@ -235,6 +267,15 @@ function WishlistItem({ game }: { game: WishlistGame }) {
             title="Open in Steam"
             icon={Icon.Desktop}
             onAction={() => open(`steam://store/${game.appid}`)}
+          />
+          <Action.Push
+            title="View Details"
+            icon={Icon.Info}
+            target={<GameDetail appId={game.appid} name={game.name} />}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "i" },
+              Windows: { modifiers: ["ctrl"], key: "i" },
+            }}
           />
           <Action.OpenInBrowser
             // eslint-disable-next-line @raycast/prefer-title-case
@@ -252,6 +293,15 @@ function WishlistItem({ game }: { game: WishlistGame }) {
             shortcut={{
               macOS: { modifiers: ["cmd"], key: "d" },
               Windows: { modifiers: ["ctrl"], key: "d" },
+            }}
+          />
+          <Action.OpenInBrowser
+            // eslint-disable-next-line @raycast/prefer-title-case
+            title="View on ProtonDB"
+            url={`https://www.protondb.com/app/${game.appid}`}
+            shortcut={{
+              macOS: { modifiers: ["cmd"], key: "p" },
+              Windows: { modifiers: ["ctrl"], key: "p" },
             }}
           />
           <Action.CopyToClipboard
@@ -273,6 +323,9 @@ export function WishlistDiscounts() {
     getPreferenceValues<Preferences>();
   const [games, setGames] = useState<WishlistGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [unavailable, setUnavailable] = useState<
+    "private" | "rate-limited" | null
+  >(null);
 
   useEffect(() => {
     showToast({
@@ -280,19 +333,31 @@ export function WishlistDiscounts() {
       title: "Loading wishlist discounts…",
     });
 
-    fetchDiscountedWishlistGames(
-      steamApiKey ?? "",
-      steamId ?? "",
-      ggDealsApiKey ?? "",
-      region,
-    )
-      .then((g) => {
+    fetchDiscountedWishlistGames(steamId ?? "", ggDealsApiKey ?? "", region)
+      .then(({ games: g, unavailable: u }) => {
         setGames(g);
+        setUnavailable(u);
         setIsLoading(false);
-        showToast({
-          style: Toast.Style.Success,
-          title: `${g.length} discounted games found`,
-        });
+        if (u === "rate-limited") {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Steam rate limit reached",
+            message:
+              "Too many requests. Wait a few minutes, then press Cmd/Ctrl+R to refresh.",
+          });
+        } else if (u === "private") {
+          showToast({
+            style: Toast.Style.Failure,
+            title: "Wishlist unavailable",
+            message:
+              "Go to Steam → Edit Profile → Privacy Settings → set Game Details to Public",
+          });
+        } else {
+          showToast({
+            style: Toast.Style.Success,
+            title: `${g.length} discounted games found`,
+          });
+        }
       })
       .catch(() => {
         showToast({
@@ -320,15 +385,23 @@ export function WishlistDiscounts() {
               await LocalStorage.removeItem(`wishlist-discounts-${region}`);
               setIsLoading(true);
               setGames([]);
+              setUnavailable(null);
               fetchDiscountedWishlistGames(
-                steamApiKey ?? "",
                 steamId ?? "",
                 ggDealsApiKey ?? "",
                 region,
               )
-                .then((g) => {
+                .then(({ games: g, unavailable: u }) => {
                   setGames(g);
+                  setUnavailable(u);
                   setIsLoading(false);
+                  if (u === null) {
+                    const subtitle =
+                      g.length === 1
+                        ? "1 game discounted in your wishlist"
+                        : `${g.length} games discounted in your wishlist`;
+                    setCachedSubtitle("wishlist", subtitle);
+                  }
                 })
                 .catch(() => {
                   showToast({
@@ -342,7 +415,19 @@ export function WishlistDiscounts() {
         </ActionPanel>
       }
     >
-      {!isLoading && games.length === 0 ? (
+      {!isLoading && unavailable === "rate-limited" ? (
+        <List.EmptyView
+          icon={Icon.Clock}
+          title="Steam rate limit reached"
+          description="Too many requests were made recently. Wait a few minutes, then press Cmd/Ctrl+R to refresh."
+        />
+      ) : !isLoading && unavailable === "private" ? (
+        <List.EmptyView
+          icon={Icon.Lock}
+          title="Wishlist unavailable"
+          description="Go to Steam → Edit Profile → Privacy Settings → set Game Details to Public"
+        />
+      ) : !isLoading && games.length === 0 ? (
         <List.EmptyView
           icon={Icon.Star}
           title="No wishlist discounts"

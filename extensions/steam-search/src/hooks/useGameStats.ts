@@ -61,7 +61,7 @@ export function useGameStats(
       if (signal.aborted) return;
 
       const current = playersData?.response?.player_count ?? 0;
-      const currentPlayers = current > 0 ? `▶ ${formatNum(current)}` : "—";
+      const currentPlayers = current > 0 ? formatNum(current) : "—";
 
       const summary = reviewsData?.query_summary;
       const totalReviews: number = summary?.total_reviews ?? 0;

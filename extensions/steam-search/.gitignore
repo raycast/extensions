@@ -14,3 +14,7 @@ Thumbs.db
 
 # Logs
 npm-debug.log*
+
+# Workflow
+HANDOFF.md
+src/mock.ts

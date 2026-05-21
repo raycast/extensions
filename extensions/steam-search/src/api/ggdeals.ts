@@ -1,4 +1,4 @@
-import { CURRENCY_SYMBOLS } from "../constants";
+import { formatGGPrice } from "../utils";
 
 export const ggDealsCache = new Map<string, string | null>();
 
@@ -24,9 +24,7 @@ export async function batchFetchGGDeals(
         const keyshop = parseFloat(game.prices.currentKeyshops ?? "");
         ggDealsCache.set(
           `${id}-${region}`,
-          !isNaN(keyshop)
-            ? `🔑 ${keyshop.toFixed(2)}${CURRENCY_SYMBOLS[region] ?? "€"}`
-            : null,
+          !isNaN(keyshop) ? formatGGPrice(keyshop, region) : null,
         );
       } else {
         ggDealsCache.set(`${id}-${region}`, null);

@@ -1,4 +1,4 @@
-import { CURRENCY_SYMBOLS } from "../constants";
+import { formatGGPrice } from "../utils";
 import { getPreferenceValues, Color } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { AppDetails } from "../types";
@@ -63,7 +63,7 @@ export function useAppDetails(
                 if (game?.prices) {
                   const keyshop = parseFloat(game.prices.currentKeyshops ?? "");
                   return !isNaN(keyshop)
-                    ? `🔑 ${keyshop.toFixed(2)}${CURRENCY_SYMBOLS[region] ?? "€"}`
+                    ? formatGGPrice(keyshop, region)
                     : null;
                 }
                 return null;
@@ -138,7 +138,7 @@ export function useAppDetails(
 
       // Players
       const current = playersData?.response?.player_count ?? 0;
-      const currentPlayers = current > 0 ? `▶ ${formatNum(current)}` : "—";
+      const currentPlayers = current > 0 ? formatNum(current) : "—";
 
       // Reviews
       const summary = reviewsData?.query_summary;
