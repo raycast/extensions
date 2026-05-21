@@ -1,6 +1,6 @@
 # Installed Extensions Changelog
 
-## [Fix Beta Extension Folder] - {PR_MERGE_DATE}
+## [Fix Beta Extension Folder] - 2026-05-21
 
 - Include the Raycast beta extension folder on macOS when scanning installed extensions.
 
