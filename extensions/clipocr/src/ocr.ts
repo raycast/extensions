@@ -2,7 +2,6 @@ import { getPreferenceValues } from "@raycast/api";
 import util from "util";
 import { execFile } from "child_process";
 import utils from "./utils";
-import type { Preferences } from "./preferences";
 
 const execFilePromise = util.promisify(execFile);
 

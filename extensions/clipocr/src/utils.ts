@@ -4,7 +4,6 @@ import util from "util";
 import { execFile } from "child_process";
 import { languages } from "./lib/languages";
 import { normalizeChinesePunctuationText } from "./text";
-import type { Preferences } from "./preferences";
 
 const execFilePromise = util.promisify(execFile);
 

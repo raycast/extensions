@@ -13,7 +13,7 @@
         "Windows"
     ],
     "categories": [
-        "Productivity"
+        "Applications"
     ],
     "keywords": [
         "OCR",
@@ -131,7 +131,6 @@
     ],
     "dependencies": {
         "@raycast/api": "^1.104.17",
-        "@raycast/utils": "^2.2.5",
         "raycast-language-detector": "^0.2.3"
     },
     "devDependencies": {

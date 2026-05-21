@@ -3,7 +3,6 @@ import { unlink } from "fs/promises";
 import tesseractOcr from "./ocr";
 import utils from "./utils";
 import takeScreenshot, { isScreenshotCancelledError } from "./screenshot";
-import type { Preferences } from "./preferences";
 
 export default async function main() {
   await closeMainWindow();
