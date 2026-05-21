@@ -343,7 +343,7 @@ function ResultDetail({ result }: { result: SearchResult }) {
 
   if (result.content_snippet) {
     const sanitized = result.content_snippet
-      .replace(/[\\`*_{}[\]()#+\-.!]/g, "\\$&")
+      .replace(/[\\`*_{}[\]()#+\-.!|<>~]/g, "\\$&")
       .replace(/\n/g, "\n> ");
     markdown += `> ${sanitized}\n`;
   }

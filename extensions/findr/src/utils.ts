@@ -12,8 +12,9 @@ export function getFindrPath(): string {
     return findrPath;
   }
 
-  // Use bundled binary from assets (universal: arm64 + x86_64)
-  // Source: https://github.com/Roderick111/findr (MIT, fully auditable)
+  // Bundled universal binary (arm64 + x86_64), built via GitHub Actions CI:
+  // Source: https://github.com/Roderick111/findr (MIT license, fully auditable)
+  // CI workflow: .github/workflows/ci.yml — builds on tag push, attaches to GitHub Release
   const bundled = join(environment.assetsPath, "findr");
   if (existsSync(bundled)) {
     if (!chmodApplied) {
