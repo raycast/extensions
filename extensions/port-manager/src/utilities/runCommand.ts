@@ -73,8 +73,6 @@ export function runCommand(file: string, args: string[], options: RunCommandOpti
         sendSignal(-child.pid, signal);
       }
 
-      sendSignal(child.pid, signal);
-
       try {
         child.kill(signal);
       } catch {
@@ -128,10 +126,6 @@ export function runCommand(file: string, args: string[], options: RunCommandOpti
     child.on("close", (exitCode, signal) => {
       if (settled) return;
       settled = true;
-
-      if (failure !== undefined || timedOut) {
-        killChild("SIGKILL");
-      }
 
       cleanup();
 

@@ -218,7 +218,13 @@ export default class Process implements ProcessInfo {
   }
 
   private static async loadCurrent() {
-    let processes = await Process.loadFromNetstat();
+    let processes: ProcessInfo[] = [];
+
+    try {
+      processes = await Process.loadFromNetstat();
+    } catch {
+      processes = [];
+    }
 
     if (processes.length === 0) {
       processes = await Process.loadFromLsof();
