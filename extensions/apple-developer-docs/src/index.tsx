@@ -81,6 +81,7 @@ export default function Command() {
     isLoading: isLoadingArchiveResults,
     status: archiveIndexStatus,
   } = useArchiveResults(query, typeFilter, includeArchiveResults);
+  const shouldSearchArchive = typeFilter === "all" || typeFilter === "archive";
   const results = useMemo(() => {
     if (typeFilter === "archive") {
       return archiveResults;
@@ -113,9 +114,10 @@ export default function Command() {
           <SearchListItem result={data.featuredResult} onVisit={markAsSearched} />
         </List.Section>
       )}
-      {archiveIndexStatus.isEnabled && archiveIndexStatus.phase !== "ready" && archiveIndexStatus.phase !== "idle" && (
-        <ArchiveIndexStatusItem status={archiveIndexStatus} />
-      )}
+      {shouldSearchArchive &&
+        archiveIndexStatus.isEnabled &&
+        archiveIndexStatus.phase !== "ready" &&
+        archiveIndexStatus.phase !== "idle" && <ArchiveIndexStatusItem status={archiveIndexStatus} />}
       <List.Section title={resultsTitle} subtitle={results.length + ""}>
         {results.map((result) => (
           <SearchListItem key={`${result.order}_${result.url}`} result={result} onVisit={markAsSearched} />
