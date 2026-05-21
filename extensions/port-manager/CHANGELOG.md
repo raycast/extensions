@@ -1,6 +1,6 @@
 # Port Manager Changelog
 
-## [Fixed lsof Process Cleanup] - 2026-05-21
+## [Fixed lsof Process Cleanup] - {PR_MERGE_DATE}
 
 - Improved port refreshes to prevent long-running `lsof` processes from piling up when port detection stalls
 

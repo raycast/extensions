@@ -164,16 +164,27 @@ export default class Process implements ProcessInfo {
     return valuesByProcess.filter((process) => process.pid > 0);
   }
 
+  private static getNetstatPidColumnIndex(lines: string[]) {
+    const header = lines.find((line) => line.trim().startsWith("Proto "));
+    if (header === undefined) return 10;
+
+    const pidHeaderIndex = header.trim().split(/\s+/).indexOf("pid");
+    const pidColumnIndex = pidHeaderIndex - 2;
+    return pidColumnIndex > 0 ? pidColumnIndex : 10;
+  }
+
   private static parseNetstat(stdout: string) {
     const namedPorts = getNamedPorts();
     const valuesByPid = new Map<number, ProcessInfo>();
+    const lines = stdout.split("\n");
+    const pidColumnIndex = Process.getNetstatPidColumnIndex(lines);
 
-    for (const line of stdout.split("\n")) {
+    for (const line of lines) {
       const columns = line.trim().split(/\s+/);
-      if (columns.length < 11) continue;
+      if (columns.length <= pidColumnIndex) continue;
 
       const [protocol, , , localAddress, , state] = columns;
-      const pid = Number(columns[10]);
+      const pid = Number(columns[pidColumnIndex]);
       if (state !== "LISTEN" || Number.isNaN(pid) || pid <= 0) continue;
 
       const portInfo = Process.parseNetstatPortInfo(localAddress, namedPorts);
