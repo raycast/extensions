@@ -1,6 +1,6 @@
 # DEVONthink Changelog
 
-## [Fix missing property order preference] - {PR_MERGE_DATE}
+## [Fix missing property order preference] - 2026-05-21
 
 - Fixed search results crashing when the optional property order preference is missing.
 
