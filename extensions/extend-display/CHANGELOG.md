@@ -1,5 +1,11 @@
 # Extend Display Changelog
 
+## [Fix Sidecar Connection] - {PR_MERGE_DATE}
+
+- Connect to iPads through SidecarCore, since the System Settings menu no longer starts Sidecar on macOS 26
+- Keep the System Settings backend for non-Sidecar targets, with SidecarCore treated as optional
+- Fix the stale Displays settings URL and make the display menu lookup more reliable
+
 ## [Bugfix] - 2026-03-09
 
 Fixed display menu click failing on macOS Tahoe (26+).

@@ -1,6 +1,7 @@
 import { LocalStorage, environment } from "@raycast/api";
 import { execFile } from "child_process";
 import { promisify } from "util";
+import { listSidecarDevices, normalizeName } from "./sidecar";
 
 const execFileAsync = promisify(execFile);
 
@@ -18,7 +19,7 @@ const MIRROR_SECTION_NAME = "Mirror or extend to";
 const scanScript = `
 set mirrorSectionName to (system attribute "Mirror_Section_Name")
 
-do shell script "open -b com.apple.systempreferences /System/Library/PreferencePanes/Displays.prefPane"
+do shell script "open 'x-apple.systempreferences:com.apple.Displays-Settings.extension'"
 
 set deviceNames to {}
 
@@ -43,19 +44,21 @@ tell application "System Events"
   tell process "System Settings"
     set frontmost to true
     delay 0.5
-    
+
     set popUpButton to missing value
     set loopCount to 0
     set maxAttempts to 30
-    
+
     repeat until popUpButton is not missing value or loopCount >= maxAttempts
       try
-        -- Tahoe (macOS 26+)
+        -- Tahoe (macOS 26+); "get role" forces evaluation so a missing element errors
         set popUpButton to menu button 1 of group 1 of group 3 of splitter group 1 of group 1 of window 1
+        get role of popUpButton
       on error
         try
           -- Pre-Tahoe
           set popUpButton to pop up button 1 of group 1 of group 2 of splitter group 1 of group 1 of window 1
+          get role of popUpButton
         on error
           set popUpButton to missing value
         end try
@@ -63,7 +66,7 @@ tell application "System Events"
       delay 0.1
       set loopCount to loopCount + 1
     end repeat
-    
+
     if popUpButton is missing value then
       my cleanup()
       return ""
@@ -72,7 +75,7 @@ tell application "System Events"
     -- Click to open the menu
     click popUpButton
     delay 0.3
-    
+
     -- Use try-based check instead of "exists" which throws -1700 on AXMenuButton
     set menuWait to 0
     set menuReady to false
@@ -102,7 +105,7 @@ tell application "System Events"
             set end of deviceNames to itemName
           end if
         else
-          if itemName contains mirrorSectionName then
+          if itemName is not missing value and itemName contains mirrorSectionName then
             set mirrorFound to true
           end if
         end if
@@ -121,40 +124,65 @@ set AppleScript's text item delimiters to "|||"
 return deviceNames as string
 `;
 
-// Scan displays from System Settings dropdown
+// legacy scan: read every "Mirror or extend to" entry from the System
+// Settings dropdown; covers non-Sidecar targets (e.g. AirPlay Macs)
+async function scanViaSystemSettings(): Promise<string[]> {
+  const deeplink = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/connect-to-display`;
+  const { stdout } = await execFileAsync("osascript", ["-e", scanScript], {
+    timeout: 15000,
+    env: {
+      ...process.env,
+      Mirror_Section_Name: MIRROR_SECTION_NAME,
+      Raycast_Deeplink: deeplink,
+    },
+  });
+
+  if (!stdout || stdout.trim() === "") return [];
+
+  return stdout
+    .split("|||")
+    .map((name) => name.trim())
+    .filter((name) => name !== "");
+}
+
+// scan displays from both SidecarCore (iPads) and the System Settings
+// "Mirror or extend to" menu (other targets), de-duplicated by name
 export async function scanDisplaysFromSystem(): Promise<Display[]> {
-  try {
-    const deeplink = `raycast://extensions/${environment.ownerOrAuthorName}/${environment.extensionName}/connect-to-display`;
-    const { stdout } = await execFileAsync("osascript", ["-e", scanScript], {
-      timeout: 15000,
-      env: {
-        ...process.env,
-        Mirror_Section_Name: MIRROR_SECTION_NAME,
-        Raycast_Deeplink: deeplink,
-      },
-    });
+  const [sidecarResult, menuResult] = await Promise.allSettled([
+    listSidecarDevices(),
+    scanViaSystemSettings(),
+  ]);
 
-    if (!stdout || stdout.trim() === "") return [];
+  // de-dupe by normalized name; SidecarCore entries take precedence
+  const byKey = new Map<string, Display>();
 
-    const displays = stdout
-      .split("|||")
-      .filter((name) => name.trim() !== "")
-      .map((name) => ({
-        name: name.trim(),
-        type: "display" as const,
-        lastConnected: undefined,
-      }));
-
-    // Merge with stored displays to preserve lastConnected times
-    const stored = await getStoredDisplays();
-    return displays.map((d) => {
-      const existing = stored.find((s) => s.name === d.name);
-      return existing ? { ...d, lastConnected: existing.lastConnected } : d;
-    });
-  } catch (e) {
-    console.error("Failed to scan displays:", e);
-    return [];
+  if (sidecarResult.status === "fulfilled") {
+    for (const name of sidecarResult.value.devices) {
+      byKey.set(normalizeName(name), { name, type: "ipad" });
+    }
+  } else {
+    console.error("SidecarCore scan failed:", sidecarResult.reason);
   }
+
+  if (menuResult.status === "fulfilled") {
+    for (const name of menuResult.value) {
+      const key = normalizeName(name);
+      if (!byKey.has(key)) byKey.set(key, { name, type: "display" });
+    }
+  } else {
+    console.error("System Settings scan failed:", menuResult.reason);
+  }
+
+  const scanned = [...byKey.values()];
+
+  // merge with stored displays to preserve lastConnected times
+  const stored = await getStoredDisplays();
+  return scanned.map((d) => {
+    const existing = stored.find(
+      (s) => normalizeName(s.name) === normalizeName(d.name),
+    );
+    return existing ? { ...d, lastConnected: existing.lastConnected } : d;
+  });
 }
 
 // Get stored displays from local storage
