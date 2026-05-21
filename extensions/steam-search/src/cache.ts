@@ -56,7 +56,7 @@ export async function persistDetails(
       `d-${appId}-${region}`,
       JSON.stringify({ details, timestamp: Date.now() } as PersistedDetails),
     );
-  } catch (e) {
+  } catch {
     // Silently ignore persistence errors
   }
 }

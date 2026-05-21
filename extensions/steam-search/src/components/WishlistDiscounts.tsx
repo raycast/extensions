@@ -154,7 +154,7 @@ export function fetchDiscountedWishlistGames(
   ggDealsApiKey: string,
   region: string,
 ): Promise<WishlistResult> {
-  const cacheKey = `${steamId}-${region}`;
+  const cacheKey = `${steamId}-${region}-${ggDealsApiKey}`;
   if (discountedGamesCacheMap.has(cacheKey))
     return Promise.resolve(discountedGamesCacheMap.get(cacheKey)!);
   if (discountedGamesFetchPromises.has(cacheKey))
@@ -307,7 +307,6 @@ function WishlistItem({ game }: { game: WishlistGame }) {
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on GG.deals"
             url={`https://gg.deals/steam/app/${game.appid}/`}
             shortcut={{
@@ -316,7 +315,6 @@ function WishlistItem({ game }: { game: WishlistGame }) {
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on SteamDB"
             url={`https://steamdb.info/app/${game.appid}/charts/`}
             shortcut={{
@@ -325,7 +323,6 @@ function WishlistItem({ game }: { game: WishlistGame }) {
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on ProtonDB"
             url={`https://www.protondb.com/app/${game.appid}`}
             shortcut={{
