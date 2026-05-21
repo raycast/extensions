@@ -4,8 +4,6 @@ Browse and re-copy transcripts from [Sotto](https://sotto.to)'s recording histor
 
 Sotto's auto-paste sometimes misfires, the active app eats the keystroke, you forgot to focus the right field, or you just want yesterday's dictation back. This extension reads Sotto's local history file and gives you fuzzy search, fast copy/paste, and a detail view across every transcript you've ever recorded.
 
-![List with detail pane](metadata/sotto-transcripts-1.png)
-
 ## Features
 
 - 🔍 **Fuzzy search** every past transcript — searches the text, the source, the model, and the status
