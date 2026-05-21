@@ -6,6 +6,7 @@ export type { ManualPage };
 export function useManualPages() {
   return useCachedPromise(async () => {
     const res = await fetch(`${MANUAL_BASE}/`);
+    if (!res.ok) throw new Error(`Failed to fetch manual (HTTP ${res.status})`);
     return parseManualPages(await res.text());
   });
 }
