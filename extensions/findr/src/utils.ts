@@ -1,5 +1,4 @@
 import {
-  Clipboard,
   environment,
   getPreferenceValues,
   showToast,
@@ -142,25 +141,4 @@ const FILE_TYPE_ICONS: Record<string, string> = {
 export function getFileIcon(ext: string | null): string {
   if (!ext) return "📁";
   return FILE_TYPE_ICONS[ext] || "📁";
-}
-
-/** Debug toast with copy action. Use for any diagnostic message. */
-export function debugToast(
-  title: string,
-  message: string,
-  style: Toast.Style = Toast.Style.Success,
-) {
-  const full = `${title}: ${message}`;
-  showToast({
-    style,
-    title,
-    message,
-    primaryAction: {
-      title: "Copy",
-      onAction: async (toast) => {
-        await Clipboard.copy(full);
-        toast.hide();
-      },
-    },
-  });
 }
