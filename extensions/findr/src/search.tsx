@@ -83,7 +83,7 @@ function ResultActions({ result }: { result: SearchResult }) {
 /** Debounce hook — prevents useExec from firing on every keystroke */
 function useDebouncedValue(value: string, delayMs: number): string {
   const [debounced, setDebounced] = useState(value);
-  const timerRef = useRef<ReturnType<typeof setTimeout>>();
+  const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     timerRef.current = setTimeout(() => setDebounced(value), delayMs);
