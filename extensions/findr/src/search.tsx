@@ -112,6 +112,7 @@ export default function SearchFiles() {
   useEffect(() => {
     if (!isSearchReady || !binaryExists) {
       setSearchData(null);
+      setSearchError(null);
       setSearchLoading(false);
       return;
     }
