@@ -144,7 +144,10 @@ export function GameDetail({ appId, name }: { appId: number; name: string }) {
 
       setData({
         name: appData?.name ?? name,
-        shortDescription: appData?.short_description ?? "",
+        shortDescription: (appData?.short_description ?? "").replace(
+          /<[^>]*>/g,
+          "",
+        ),
         headerImage: appData?.header_image ?? "",
         releaseDate: appData?.release_date?.date ?? "",
         developers: appData?.developers ?? [],
@@ -166,7 +169,7 @@ export function GameDetail({ appId, name }: { appId: number; name: string }) {
   }, [appId, region, ggDealsApiKey]);
 
   const markdown = data
-    ? `![${data.name}](${data.headerImage})\n\n${data.shortDescription}`
+    ? `!["${data.name.replace(/"/g, "")}"](${data.headerImage})\n\n${data.shortDescription}`
     : "";
 
   return (
@@ -243,7 +246,6 @@ export function GameDetail({ appId, name }: { appId: number; name: string }) {
             onAction={() => open(`steam://store/${appId}`)}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on GG.deals"
             url={`https://gg.deals/steam/app/${appId}/`}
             shortcut={{
@@ -252,7 +254,6 @@ export function GameDetail({ appId, name }: { appId: number; name: string }) {
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on SteamDB"
             url={`https://steamdb.info/app/${appId}/`}
             shortcut={{
@@ -261,7 +262,6 @@ export function GameDetail({ appId, name }: { appId: number; name: string }) {
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on ProtonDB"
             url={`https://www.protondb.com/app/${appId}`}
             shortcut={{

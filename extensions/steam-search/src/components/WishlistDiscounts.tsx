@@ -57,16 +57,20 @@ function formatWishlistPrice(cents: number, region: string): string {
 async function fetchAllWishlistData(
   steamId: string,
   region: string,
+  signal?: AbortSignal,
 ): Promise<{
   entries: Map<number, WishlistDataEntry>;
   unavailable: "private" | "rate-limited" | null;
 }> {
   const result = new Map<number, WishlistDataEntry>();
   for (let page = 0; page < 100; page++) {
+    if (signal?.aborted) break;
     // Small delay between pages to avoid triggering Steam rate limits
     if (page > 0) await new Promise((resolve) => setTimeout(resolve, 150));
+    if (signal?.aborted) break;
     const res = await fetch(
       `https://store.steampowered.com/wishlist/profiles/${steamId}/wishlistdata/?p=${page}&cc=${region}&l=english`,
+      { signal },
     ).catch(() => null);
     if (!res) break;
     // 429 = explicit rate limit response
@@ -155,6 +159,7 @@ export function fetchDiscountedWishlistGames(
   steamId: string,
   ggDealsApiKey: string,
   region: string,
+  signal?: AbortSignal,
 ): Promise<WishlistResult> {
   const cacheKey = `${steamId}-${region}-${ggDealsApiKey}`;
   if (discountedGamesCacheMap.has(cacheKey))
@@ -173,7 +178,12 @@ export function fetchDiscountedWishlistGames(
     const { entries: wishlistData, unavailable } = await fetchAllWishlistData(
       steamId,
       region,
+      signal,
     );
+    if (signal?.aborted) {
+      discountedGamesFetchPromises.delete(cacheKey);
+      return { games: [], unavailable: null };
+    }
     if (unavailable !== null) {
       // Cache error results in memory only — not in LocalStorage — so the next
       // session retries once the rate limit clears or privacy settings are fixed.
@@ -354,14 +364,24 @@ export function WishlistDiscounts() {
   const [unavailable, setUnavailable] = useState<
     "private" | "rate-limited" | null
   >(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     showToast({
       style: Toast.Style.Animated,
       title: "Loading wishlist discounts…",
     });
 
-    fetchDiscountedWishlistGames(steamId ?? "", ggDealsApiKey ?? "", region)
+    fetchDiscountedWishlistGames(
+      steamId ?? "",
+      ggDealsApiKey ?? "",
+      region,
+      controller.signal,
+    )
       .then(({ games: g, unavailable: u }) => {
         setGames(g);
         setUnavailable(u);
@@ -388,12 +408,15 @@ export function WishlistDiscounts() {
         }
       })
       .catch(() => {
+        if (controller.signal.aborted) return;
         showToast({
           style: Toast.Style.Failure,
           title: "Failed to load wishlist",
         });
         setIsLoading(false);
       });
+
+    return () => controller.abort();
   }, [steamApiKey, steamId, ggDealsApiKey, region]);
 
   return (
@@ -409,6 +432,9 @@ export function WishlistDiscounts() {
               Windows: { modifiers: ["ctrl"], key: "r" },
             }}
             onAction={async () => {
+              abortRef.current?.abort();
+              const controller = new AbortController();
+              abortRef.current = controller;
               discountedGamesCacheMap.delete(
                 `${steamId ?? ""}-${region}-${ggDealsApiKey ?? ""}`,
               );
@@ -425,6 +451,7 @@ export function WishlistDiscounts() {
                 steamId ?? "",
                 ggDealsApiKey ?? "",
                 region,
+                controller.signal,
               )
                 .then(({ games: g, unavailable: u }) => {
                   setGames(g);
