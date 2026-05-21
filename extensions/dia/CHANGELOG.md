@@ -1,6 +1,6 @@
 # Dia Changelog
 
-## [Fix bookmark opening] - {PR_MERGE_DATE}
+## [Fix bookmark opening] - 2026-05-21
 
 - Fixed bookmark results failing to open in Dia on newer Dia versions.
 
