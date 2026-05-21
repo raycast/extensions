@@ -138,6 +138,7 @@ export function getLastPlayed(appid: number): number | null {
 
 let wishlistAppIds: Set<number> | null = null;
 let wishlistFetchPromise: Promise<Set<number>> | null = null;
+let wishlistForSteamId: string | null = null;
 
 export interface RecentlyPlayedGame {
   appid: number;
@@ -149,12 +150,19 @@ export interface RecentlyPlayedGame {
 
 let recentlyPlayedCache: RecentlyPlayedGame[] | null = null;
 let recentlyPlayedPromise: Promise<RecentlyPlayedGame[]> | null = null;
+let recentlyPlayedForSteamId: string | null = null;
 
 export async function fetchRecentlyPlayed(
   apiKey: string,
   steamId: string,
 ): Promise<RecentlyPlayedGame[]> {
   if (!apiKey || !steamId) return [];
+  if (recentlyPlayedForSteamId !== steamId) {
+    recentlyPlayedCache = null;
+    recentlyPlayedPromise = null;
+    recentlyPlayedTimes.clear();
+    recentlyPlayedForSteamId = steamId;
+  }
   if (recentlyPlayedCache !== null) return recentlyPlayedCache;
   if (recentlyPlayedPromise !== null) return recentlyPlayedPromise;
 
@@ -193,6 +201,11 @@ export async function fetchWishlist(
   steamId: string,
 ): Promise<Set<number>> {
   if (!apiKey || !steamId) return new Set();
+  if (wishlistForSteamId !== steamId) {
+    wishlistAppIds = null;
+    wishlistFetchPromise = null;
+    wishlistForSteamId = steamId;
+  }
   if (wishlistAppIds !== null) return wishlistAppIds;
   if (wishlistFetchPromise !== null) return wishlistFetchPromise;
 

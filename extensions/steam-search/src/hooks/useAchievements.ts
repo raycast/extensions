@@ -56,7 +56,6 @@ export function useAchievements(
       })
       .catch(() => {
         if (controller.signal.aborted) return;
-        achievementsCache.set(appId, null);
         setStats(null);
       });
 

@@ -42,6 +42,7 @@ const STATE_COLOR: Record<number, Color> = {
 let friendsCache: FriendSummary[] | null = null;
 let friendsFetchPromise: Promise<FriendSummary[]> | null = null;
 let friendsIsPrivate = false;
+let friendsForSteamId: string | null = null;
 
 export function isFriendsListPrivate(): boolean {
   return friendsIsPrivate;
@@ -57,6 +58,12 @@ export async function fetchFriendsOnline(
   apiKey: string,
   steamId: string,
 ): Promise<FriendSummary[]> {
+  if (friendsForSteamId !== steamId) {
+    friendsCache = null;
+    friendsFetchPromise = null;
+    friendsIsPrivate = false;
+    friendsForSteamId = steamId;
+  }
   if (friendsCache !== null) return friendsCache;
   if (friendsFetchPromise !== null) return friendsFetchPromise;
 
