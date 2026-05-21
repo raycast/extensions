@@ -111,9 +111,20 @@ try {
                 $methods = Get-CimInstance -Namespace root/WMI -ClassName WmiMonitorBrightnessMethods |
                     Where-Object { $_.InstanceName -eq $mon.InstanceName }
                 if ($methods) {
-                    $methods | ForEach-Object { $_.WmiSetBrightness(1, [byte]$newVal) }
+                    $setSucceeded = $false
+                    foreach ($method in $methods) {
+                        $invokeResult = Invoke-CimMethod -InputObject $method -MethodName WmiSetBrightness -Arguments @{
+                            Timeout = [uint32]1
+                            Brightness = [byte]$newVal
+                        } -ErrorAction Stop
+
+                        if ($null -eq $invokeResult.ReturnValue -or [int]$invokeResult.ReturnValue -eq 0) {
+                            $setSucceeded = $true
+                        }
+                    }
+
                     $entry['newBrightness'] = $newVal
-                    $entry['setResult'] = $true
+                    $entry['setResult'] = $setSucceeded
                 } else {
                     $entry['setResult'] = $false
                 }

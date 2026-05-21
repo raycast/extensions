@@ -1,10 +1,12 @@
 import { createClientFromPreferences } from "../create-client";
+import { DEFAULT_TTL_SECONDS, MIN_PASSPHRASE_LENGTH } from "../constants";
 
 type Input = {
   /** The secret to be sent */
   secret: string;
   /** Required. How long should the secret be available for?
    * Choose from the closest option:
+   *  value="60" title="1 minute"
    *  value="300" title="5 minutes"
    *  value="1800" title="30 minutes"
    *  value="3600" title="1 hour"
@@ -14,6 +16,7 @@ type Input = {
    *  value="259200" title="3 days"
    *  value="604800" title="7 days"
    *  value="1209600" title="14 days"
+   *  value="2592000" title="30 days"
    */
   lifetime: string;
   /** Optional. Encrypt the secret with this value (minimum 8 characters if provided). */
@@ -25,9 +28,9 @@ export default async function (input: Input) {
   const ttl = Number.parseInt(input.lifetime, 10);
   const trimmed = input.passphrase?.trim() ?? "";
   const passphrase = trimmed.length > 0 ? trimmed : null;
-  if (passphrase && passphrase.length < 8) {
-    throw new Error("Passphrase must be at least 8 characters.");
+  if (passphrase && passphrase.length < MIN_PASSPHRASE_LENGTH) {
+    throw new Error(`Passphrase must be at least ${MIN_PASSPHRASE_LENGTH} characters.`);
   }
-  const response = await client.concealSecret(input.secret, Number.isNaN(ttl) ? 3600 : ttl, passphrase);
+  const response = await client.concealSecret(input.secret, Number.isNaN(ttl) ? DEFAULT_TTL_SECONDS : ttl, passphrase);
   return client.getShareableUrl(response.secretIdentifier);
 }

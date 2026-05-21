@@ -12,7 +12,7 @@ if (!pref.certificate) process.env["NODE_TLS_REJECT_UNAUTHORIZED"] = "0";
 
 const cache = new Cache();
 
-export default function Command(): JSX.Element {
+export default function Command(): React.JSX.Element {
   const {
     data: ServerNames,
     revalidate: RevalidateServerNames,
@@ -21,7 +21,7 @@ export default function Command(): JSX.Element {
   const SelectedServerName = React.useRef<string>("");
 
   const [Networks, SetNetworks]: [Network[], React.Dispatch<React.SetStateAction<Network[]>>] = React.useState(
-    [] as Network[]
+    [] as Network[],
   );
   const [IsLoadingNetworks, SetIsLoadingNetworks]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] =
     React.useState(false);
@@ -164,7 +164,7 @@ export default function Command(): JSX.Element {
   /**
    * Search Bar Accessory
    */
-  function GetSearchBar(server: string[]): JSX.Element {
+  function GetSearchBar(server: string[]): React.JSX.Element {
     return (
       <List.Dropdown storeValue={true} tooltip="VMware Server" onChange={onChangeSelectedServerName}>
         {server.map((value) => (
@@ -187,9 +187,9 @@ export default function Command(): JSX.Element {
 
   /**
    * Host Action Menu.
-   * @returns {JSX.Element}
+   * @returns {React.JSX.Element}
    */
-  function GetHostAction(): JSX.Element {
+  function GetHostAction(): React.JSX.Element {
     return (
       <ActionPanel title="vCenter Network">
         {!IsLoadingNetworks && !IsLoadingServerNames && (

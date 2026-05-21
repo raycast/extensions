@@ -8,6 +8,9 @@
 ## [Update] - 2025-06-04
 - Update to the package.json description to include Outlook as a valid calendar provider.
 
+## [Fixes] - 2026-05-19
+- Fix error boundary fallback to use proper Raycast List component
+
 ## [Fixes] - 2025-04-02
 - Don't split surrogate pairs
 

@@ -1,6 +1,11 @@
 # Window Sizer Changelog
 
+## [Chore] - 2026-05-16
+
+- Updated screenshots to new Raycast
+
 ## [Chore] - 2025-09-30
+
 - Updated screenshots to macOS Tahoe
 
 ## [Chore] - 2025-06-03

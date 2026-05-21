@@ -28,6 +28,13 @@ export type FilterTransferPayload = {
   filter: Pick<DomainFilter, "domain" | "selector" | "coverSelector">;
 };
 
+export type FiltersTransferPayload = {
+  format: "send-to-kindle-skills";
+  version: 1;
+  exportedAt: string;
+  filters: Pick<DomainFilter, "domain" | "selector" | "coverSelector">[];
+};
+
 const STORAGE_KEY = "domain-filters";
 const MULTI_PART_TLDS = new Set([
   "co.uk",
@@ -398,6 +405,31 @@ export async function exportFilterToPath(
   await writeFile(filePath, JSON.stringify(payload, null, 2), "utf8");
 }
 
+export async function exportFiltersToPath(
+  filePath: string,
+  filters: Pick<DomainFilter, "domain" | "selector" | "coverSelector">[],
+): Promise<number> {
+  const sanitized = filters.map(sanitizeFilter).filter((filter): filter is DomainFilter => Boolean(filter));
+
+  if (sanitized.length === 0) {
+    throw new Error("No skills to export.");
+  }
+
+  const payload: FiltersTransferPayload = {
+    format: "send-to-kindle-skills",
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    filters: sanitized.map((filter) => ({
+      domain: filter.domain,
+      selector: filter.selector,
+      coverSelector: filter.coverSelector,
+    })),
+  };
+
+  await writeFile(filePath, JSON.stringify(payload, null, 2), "utf8");
+  return payload.filters.length;
+}
+
 export async function importFilterFromPath(
   filePath: string,
 ): Promise<Pick<DomainFilter, "domain" | "selector" | "coverSelector">> {
@@ -416,4 +448,38 @@ export async function importFilterFromPath(
     selector: sanitized.selector,
     coverSelector: sanitized.coverSelector,
   };
+}
+
+export async function importFiltersFromPath(
+  filePath: string,
+): Promise<Pick<DomainFilter, "domain" | "selector" | "coverSelector">[]> {
+  const raw = await readFile(filePath, "utf8");
+  const parsed = JSON.parse(raw) as { filter?: unknown; filters?: unknown } | unknown;
+
+  const maybeFilters =
+    parsed && typeof parsed === "object" && "filters" in parsed
+      ? (parsed as { filters?: unknown }).filters
+      : parsed && typeof parsed === "object" && "filter" in parsed
+        ? [(parsed as { filter?: unknown }).filter]
+        : parsed;
+
+  if (!Array.isArray(maybeFilters)) {
+    throw new Error("Invalid JSON format. Expected a list of skills.");
+  }
+
+  const sanitized = maybeFilters.map(sanitizeFilter).filter((filter): filter is DomainFilter => Boolean(filter));
+
+  if (sanitized.length === 0) {
+    throw new Error("Invalid JSON format. Expected at least one skill with domain and CSS fields.");
+  }
+
+  if (sanitized.length !== maybeFilters.length) {
+    throw new Error("Invalid JSON format. Every imported skill needs a domain and at least one CSS field.");
+  }
+
+  return sanitized.map((filter) => ({
+    domain: filter.domain,
+    selector: filter.selector,
+    coverSelector: filter.coverSelector,
+  }));
 }

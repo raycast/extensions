@@ -1,7 +1,7 @@
 import { List, Icon, Color } from '@raycast/api';
 import dayjs from 'dayjs';
 
-import { statusIcons } from '../helpers';
+import { getTodoIcon } from '../helpers';
 
 import TodoListItemActions from './TodoListItemActions';
 import { CommandListName, Todo, List as TList } from '../types';
@@ -17,7 +17,7 @@ const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
   } else if (diff === 0) {
     text = 'Due today';
     color = Color.Red;
-  } else if (diff > 0 && diff <= 7) {
+  } else if (diff > 0 && diff <= 14) {
     text = `${diff} day${diff === 1 ? '' : 's'} left`;
     color = Color.Orange;
   } else if (diff < 0) {
@@ -34,7 +34,7 @@ const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
 
 type TodoListItemProps = {
   todo: Todo;
-  refreshTodos: () => void;
+  refreshTodos: () => Promise<void>;
   commandListName: CommandListName;
   displayActivationDates?: boolean;
   tags?: string[];
@@ -83,7 +83,7 @@ export default function TodoListItem({
       key={todo.id}
       title={todo.name}
       subtitle={todo.notes}
-      icon={statusIcons[todo.status]}
+      icon={getTodoIcon(todo)}
       keywords={keywords}
       accessories={accessories}
       actions={

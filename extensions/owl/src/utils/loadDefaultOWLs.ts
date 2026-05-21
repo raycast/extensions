@@ -15,23 +15,27 @@ export async function loadDefaultOWLs({
   showAlert?: boolean;
 }): Promise<boolean> {
   const defaultMapping: OWLMapping = Object.fromEntries(
-    languages.map((language) => {
-      return [
-        language,
-        languages
-          .flatMap((destinationLanguage) => {
-            return keyboards.filter((keyboard) => keyboard === destinationLanguage && keyboard !== language);
-          })
-          .map(
-            (keyboard): OWL => ({
-              id: randomUUID(),
-              from: language,
-              to: keyboard,
-              history: [],
-            }),
-          ),
-      ];
-    }),
+    languages
+      .filter((language) => {
+        return keyboards.includes(language);
+      })
+      .map((language) => {
+        return [
+          language,
+          languages
+            .flatMap((destinationLanguage) => {
+              return keyboards.filter((keyboard) => keyboard === destinationLanguage && keyboard !== language);
+            })
+            .map(
+              (keyboard): OWL => ({
+                id: randomUUID(),
+                from: language,
+                to: keyboard,
+                history: [],
+              }),
+            ),
+        ];
+      }),
   );
 
   if (showAlert) {

@@ -8,13 +8,24 @@ import DevOnlyActionPanel from "./DevOnlyActionPanel";
 
 export default function Command() {
   const [searchText, setSearchText] = useState("");
+  const query = searchText.length === 0 ? "SwiftUI" : searchText;
 
-  const params = new URLSearchParams();
-  params.append("q", searchText.length === 0 ? "SwiftUI" : searchText);
-  params.append("results", config.maxResults.toString());
+  // Keep q in the URL so useFetch re-runs when the search text changes; the API reads text from the POST body.
+  const { data, isLoading } = useFetch(`${config.apiBaseUrl}?q=${encodeURIComponent(query)}`, {
+    method: "POST",
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+      "User-Agent": "Raycast Apple Developer Docs",
+    },
+    body: JSON.stringify({ text: query, targetResultLocale: "en", results: config.maxResults }),
+    parseResponse: async (response) => {
+      if (!response.ok) {
+        throw new Error(`Apple Developer search request failed with status ${response.status}`);
+      }
 
-  const { data, isLoading } = useFetch(config.apiBaseUrl + "?" + params.toString(), {
-    parseResponse: async (response) => (await response.json()) as PayloadResponse,
+      return normalizeResponse((await response.json()) as AppleSearchResponse);
+    },
     keepPreviousData: true,
     initialData: { results: [], featuredResult: "", suggested_query: "", uuid: "" },
   });
@@ -47,7 +58,7 @@ export default function Command() {
       return searchedResults;
     }
 
-    const filteredResults = searchedResults?.filter((result) => result.type === typeFilter.toLowerCase());
+    const filteredResults = searchedResults?.filter((result) => result.type.toLowerCase() === typeFilter.toLowerCase());
 
     return filteredResults?.filter(
       (result) => searchText.trim() === "" || result.title.toLowerCase().includes(searchText.toLowerCase())
@@ -83,6 +94,118 @@ export default function Command() {
       </List.Section>
     </List>
   );
+}
+
+function normalizeResponse(payload: AppleSearchResponse): PayloadResponse {
+  return {
+    results: (payload.results ?? []).slice(0, config.maxResults).map(normalizeResult),
+    featuredResult: "",
+    suggested_query: "",
+    uuid: "",
+  };
+}
+
+function normalizeResult(result: AppleSearchResult, order: number): SearchResult {
+  if ("documentation" in result) {
+    const metadata = result.documentation.metadata;
+    const type = metadata.kind === "sampleCode" ? "sample_code" : "documentation";
+
+    return createSearchResult({
+      title: metadata.title,
+      description: metadata.description,
+      url: metadata.permalink,
+      type,
+      order,
+      platform: platformsFromAvailability(metadata.availability),
+      breadcrumbs: breadcrumbsFromHierarchy(metadata.hierarchy),
+    });
+  }
+
+  if ("devsite" in result) {
+    const metadata = result.devsite.metadata;
+
+    return createSearchResult({
+      title: metadata.title,
+      description: metadata.description,
+      url: metadata.sourceURL,
+      type: "general",
+      order,
+    });
+  }
+
+  const metadata = result.developer.metadata;
+  const itemType = first(metadata.itemTypes);
+
+  return createSearchResult({
+    title: first(metadata.titles),
+    description: first(metadata.descriptions),
+    url: first(metadata.permalinks),
+    type: isVideoResult(itemType) ? "video" : "general",
+    order,
+    date: first(metadata.availabilityDates),
+    event_name: first(metadata.projectNames),
+    session_id: first(metadata.ids),
+    tile_image: first(metadata.thumbnailLinks),
+    language: first(metadata.deliveryLanguageCodes),
+    duration: metadata.mediaDurations?.[0]?.toString(),
+  });
+}
+
+function createSearchResult({
+  title,
+  description,
+  url,
+  type,
+  order,
+  platform = [],
+  breadcrumbs = [],
+  date = "",
+  event_name = "",
+  session_id = "",
+  tile_image = "",
+  language = "",
+  duration,
+}: Partial<SearchResult> & Pick<SearchResult, "type" | "order">): SearchResult {
+  return {
+    title: title ?? "Untitled",
+    description: description ?? "",
+    url: url ?? config.rootUrl,
+    type,
+    order,
+    platform,
+    breadcrumbs,
+    date,
+    event_name,
+    session_id,
+    tile_image,
+    relevance: 0,
+    is_beta: 0,
+    language,
+    lang_children: [],
+    duration,
+  };
+}
+
+function first(values?: string[]) {
+  return values?.[0] ?? undefined;
+}
+
+function isVideoResult(type?: string) {
+  return ["session", "video"].includes(type?.toLowerCase() ?? "");
+}
+
+function platformsFromAvailability(availability?: string) {
+  return (availability ?? "")
+    .split("|")
+    .map((platform) => platform.trim().split(" ")[0])
+    .filter(Boolean);
+}
+
+function breadcrumbsFromHierarchy(hierarchy?: string) {
+  return (hierarchy ?? "")
+    .split(">")
+    .map((breadcrumb) => breadcrumb.trim())
+    .filter(Boolean);
 }
 
 function ItemActionPanel({ result, onVisit }: { result: ResultLike } & Visitable) {

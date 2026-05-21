@@ -8,12 +8,15 @@ import { safariAppIdentifier } from "../utils";
 export const HISTORY_DB = `${resolve(homedir(), `Library/${safariAppIdentifier.replace(/ /g, "")}/`)}/History.db`;
 const LIMIT = 100;
 
+const escapeSQLStringLiteral = (value: string) => value.replace(/'/g, "''");
+
 export const getHistoryQuery = (searchText?: string) => {
   const whereClause = searchText
     ? _.chain(searchText)
         .split(" ")
         .filter((word) => word.length > 0)
-        .map((term) => `(url LIKE "%${term}%" OR title LIKE "%${term}%")`)
+        .map((term) => escapeSQLStringLiteral(term))
+        .map((term) => `(url LIKE '%${term}%' OR title LIKE '%${term}%')`)
         .join(" AND ")
         .value()
     : undefined;

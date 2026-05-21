@@ -7,10 +7,16 @@ export type DesktopContext = Readonly<{
   windows: WindowManagement.Window[];
 }>;
 
+function isRaycastWindow(window: WindowManagement.Window) {
+  const appName = window.application?.name?.toLowerCase();
+  return appName === "raycast" || appName === "raycast beta";
+}
+
 export async function getDesktopContext(): Promise<DesktopContext | null> {
   if (!environment.canAccess(WindowManagement)) {
-    await showFailureToast("Not Supported", {
-      message: "This command requires access to Raycast WindowManagement API.",
+    await showFailureToast("WindowManagement Not Available", {
+      message:
+        "Requires Raycast Pro and Accessibility permission. Grant access in System Settings → Privacy & Security → Accessibility, then restart Raycast.",
     });
     return null;
   }
@@ -32,6 +38,7 @@ export async function getDesktopContext(): Promise<DesktopContext | null> {
   const { excludedApps } = getUserPreferences();
 
   const resizableWindows = windows?.filter((window) => {
+    if (isRaycastWindow(window)) return false;
     if (!window.resizable || !window.positionable) return false;
     if (excludedApps.length > 0) {
       const appName = (window.application?.name ?? "").toLowerCase();

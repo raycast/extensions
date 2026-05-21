@@ -1,10 +1,15 @@
 # Brightness Control Changelog
 
+## [Fix WMI brightness on Windows] - 2026-04-29
+
+- Fixed brightness control failing on Windows by replacing the deprecated `WmiSetBrightness` call pattern with `Invoke-CimMethod`, which properly returns a result that can be checked for success.
+
 ## [Fix Brightness Down bug] - 2026-04-28
 
 - "Brightness Down" failed with "Error: Unknown option '-10'" since subprocess evaluates the "-10" as an argument. Added a leading "--" to prevent it.
 
 ## [Update] - 2026-04-28
+
 - Add windows support
 - Update packages
 
