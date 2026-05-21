@@ -20,10 +20,6 @@ import {
 } from "./api/steam";
 import { batchFetchGGDeals } from "./api/ggdeals";
 import { getCachedSubtitle, setCachedSubtitle } from "./cache";
-
-const FRIENDS_SUBTITLE_TTL = 2 * 60 * 1000; // 2 minutes
-const RECENT_SUBTITLE_TTL = 10 * 60 * 1000; // 10 minutes
-// Wishlist subtitle uses the default CACHE_TTL (1 hour) from getCachedSubtitle
 import { GameItem } from "./components/GameItem";
 import { Onboarding } from "./components/Onboarding";
 import { RecentlyPlayed } from "./components/RecentlyPlayed";
@@ -36,6 +32,10 @@ import {
   WishlistDiscounts,
   fetchDiscountedWishlistGames,
 } from "./components/WishlistDiscounts";
+
+const FRIENDS_SUBTITLE_TTL = 2 * 60 * 1000; // 2 minutes
+const RECENT_SUBTITLE_TTL = 10 * 60 * 1000; // 10 minutes
+// Wishlist subtitle uses the default CACHE_TTL (1 hour) from getCachedSubtitle
 
 export default function Command() {
   const { steamApiKey, steamId, ggDealsApiKey, region } =
