@@ -65,7 +65,9 @@ export async function fetchFriendsOnline(
       `https://api.steampowered.com/ISteamUser/GetFriendList/v1/?key=${apiKey}&steamid=${steamId}&relationship=friend`,
     );
     if (!listRes.ok) {
-      friendsIsPrivate = true;
+      if (listRes.status === 401 || listRes.status === 403) {
+        friendsIsPrivate = true;
+      }
       friendsCache = [];
       return [];
     }
