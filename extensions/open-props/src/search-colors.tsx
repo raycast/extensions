@@ -1,4 +1,4 @@
-import { Grid } from "@raycast/api";
+import { Action, ActionPanel, Grid, Icon } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 
 import { ActionPanelCssItem } from "./components/action-panel-css-item";
@@ -7,12 +7,15 @@ import { fetchVars } from "./lib/open-props";
 import { colorConfig } from "./lib/open-props/v1";
 
 export default function Command() {
-  const { version, isVersionLoading } = useLatestVersion("1");
+  const { version, isVersionLoading, versionError, revalidateVersion } = useLatestVersion("1");
   // For now only version 1 is supported, because version 2 is still in beta
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { isLoading, data } = useCachedPromise((_) => fetchVars(colorConfig), [version], {
-    execute: !!version,
-  });
+  const { isLoading, data, error, revalidate } = useCachedPromise(
+    (packageVersion: string) => fetchVars(colorConfig, packageVersion),
+    [version ?? ""],
+    { execute: !!version },
+  );
+
+  const loadError = versionError ?? error;
 
   return (
     <Grid
@@ -20,8 +23,28 @@ export default function Command() {
       searchBarPlaceholder="Search colors by name and shade..."
       columns={7}
     >
-      {data &&
-        data.map((section) => (
+      {loadError ? (
+        <Grid.EmptyView
+          icon={Icon.ExclamationMark}
+          title="Could not load colors"
+          description={loadError.message}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Retry"
+                onAction={() => {
+                  if (versionError) {
+                    void revalidateVersion();
+                  } else {
+                    void revalidate();
+                  }
+                }}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : (
+        data?.map((section) => (
           <Grid.Section key={section.name} title={section.name}>
             {section.vars.map((item) => {
               const shade = item.name.split("-").at(-1);
@@ -43,7 +66,8 @@ export default function Command() {
               );
             })}
           </Grid.Section>
-        ))}
+        ))
+      )}
     </Grid>
   );
 }

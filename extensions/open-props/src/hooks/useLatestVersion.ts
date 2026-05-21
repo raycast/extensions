@@ -8,7 +8,12 @@ const cachedFetchPackageVersion = withCache(async (version: SupportedVersion) =>
 });
 
 export function useLatestVersion(majorVersion: SupportedVersion) {
-  const { data: version, isLoading: isVersionLoading } = usePromise(() => cachedFetchPackageVersion(majorVersion));
+  const {
+    data: version,
+    isLoading: isVersionLoading,
+    error: versionError,
+    revalidate: revalidateVersion,
+  } = usePromise(() => cachedFetchPackageVersion(majorVersion));
 
-  return { version, isVersionLoading };
+  return { version, isVersionLoading, versionError, revalidateVersion };
 }

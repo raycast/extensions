@@ -16,14 +16,14 @@ Browse all Open Props color palettes in a visual grid. Colors are grouped by pal
 
 Every item supports the following actions:
 
-| Action | Description |
-|---|---|
-| **Paste Variable** | Pastes `--variable-name` at the cursor |
+| Action             | Description                                 |
+| ------------------ | ------------------------------------------- |
+| **Paste Variable** | Pastes `--variable-name` at the cursor      |
 | **Paste as var()** | Pastes `var(--variable-name)` at the cursor |
-| **Copy Variable** | Copies `--variable-name` to clipboard |
-| **Copy as var()** | Copies `var(--variable-name)` to clipboard |
-| **Paste Value** | Pastes the raw CSS value at the cursor |
-| **Copy Value** | Copies the raw CSS value to clipboard |
+| **Copy Variable**  | Copies `--variable-name` to clipboard       |
+| **Copy as var()**  | Copies `var(--variable-name)` to clipboard  |
+| **Paste Value**    | Pastes the raw CSS value at the cursor      |
+| **Copy Value**     | Copies the raw CSS value to clipboard       |
 
 ## Features
 
