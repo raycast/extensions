@@ -41,14 +41,14 @@
         {
           "name": "level",
           "type": "text",
-          "placeholder": "0-100",
+          "placeholder": "0-200",
           "required": false
         }
       ]
     },
     {
       "name": "volume-up",
-      "title": "Volume Up",
+      "title": "Volume up",
       "subtitle": "BetterAudio",
       "description": "Increase system volume by one step.",
       "mode": "no-view",

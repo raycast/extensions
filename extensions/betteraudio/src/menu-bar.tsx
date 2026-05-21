@@ -1,6 +1,7 @@
 import { Icon, MenuBarExtra, open, showHUD } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useRef } from "react";
+import { handleCLIError } from "./components/error-handler";
 import {
   getStatus,
   getMediaInfo,
@@ -85,6 +86,14 @@ export default function Command() {
     await Promise.all([revalidate(), revalidateMedia()]);
   }
 
+  async function runAction(action: () => Promise<void>) {
+    try {
+      await action();
+    } catch (error) {
+      await handleCLIError(error);
+    }
+  }
+
   useEffect(() => {
     if (!media) return;
 
@@ -123,31 +132,37 @@ export default function Command() {
               title="Volume Up"
               icon={Icon.Plus}
               shortcut={{ modifiers: ["cmd"], key: "arrowUp" }}
-              onAction={async () => {
-                const vol = await cliVolumeUp();
-                await showHUD(`🔊 ${Math.round(vol)}%`);
-                revalidate();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  const vol = await cliVolumeUp();
+                  await showHUD(`🔊 ${Math.round(vol)}%`);
+                  revalidate();
+                })
+              }
             />
             <MenuBarExtra.Item
               title="Volume Down"
               icon={Icon.Minus}
               shortcut={{ modifiers: ["cmd"], key: "arrowDown" }}
-              onAction={async () => {
-                const vol = await cliVolumeDown();
-                await showHUD(`🔉 ${Math.round(vol)}%`);
-                revalidate();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  const vol = await cliVolumeDown();
+                  await showHUD(`🔉 ${Math.round(vol)}%`);
+                  revalidate();
+                })
+              }
             />
             <MenuBarExtra.Item
               title={status.isMuted ? "Unmute" : "Mute"}
               icon={status.isMuted ? Icon.SpeakerHigh : Icon.SpeakerOff}
               shortcut={{ modifiers: ["cmd"], key: "m" }}
-              onAction={async () => {
-                const muted = await setMute("toggle");
-                await showHUD(muted ? "🔇 Muted" : "🔊 Unmuted");
-                revalidate();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  const muted = await setMute("toggle");
+                  await showHUD(muted ? "🔇 Muted" : "🔊 Unmuted");
+                  revalidate();
+                })
+              }
             />
           </MenuBarExtra.Section>
 
@@ -155,29 +170,35 @@ export default function Command() {
             <MenuBarExtra.Item
               title={`Silent Mode: ${status.isSilentMode ? "On" : "Off"}`}
               icon={Icon.BellDisabled}
-              onAction={async () => {
-                const silent = await cliToggleSilentMode();
-                await showHUD(
-                  silent ? "🤫 Silent Mode: On" : "🔊 Silent Mode: Off",
-                );
-                revalidate();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  const silent = await cliToggleSilentMode();
+                  await showHUD(
+                    silent ? "🤫 Silent Mode: On" : "🔊 Silent Mode: Off",
+                  );
+                  revalidate();
+                })
+              }
             />
             <MenuBarExtra.Item
               title="Cycle Output Device"
               icon={Icon.Switch}
-              onAction={async () => {
-                const msg = await cliCycleDevice();
-                await showHUD(`🔄 ${msg}`);
-                revalidate();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  const msg = await cliCycleDevice();
+                  await showHUD(`🔄 ${msg}`);
+                  revalidate();
+                })
+              }
             />
             <MenuBarExtra.Item
               title="Toggle Panel"
               icon={Icon.AppWindowList}
-              onAction={async () => {
-                await cliTogglePanel();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  await cliTogglePanel();
+                })
+              }
             />
           </MenuBarExtra.Section>
 
@@ -213,30 +234,34 @@ export default function Command() {
                     <MenuBarExtra.Item
                       title="Media Volume Up"
                       icon={Icon.Plus}
-                      onAction={async () => {
-                        const nextVolume = clamp(
-                          Math.round(media.volume ?? 0) + 10,
-                          0,
-                          100,
-                        );
-                        await cliSetMediaVolume(nextVolume);
-                        await showHUD(`🎚️ Media Volume ${nextVolume}%`);
-                        await refreshAll();
-                      }}
+                      onAction={() =>
+                        runAction(async () => {
+                          const nextVolume = clamp(
+                            Math.round(media.volume ?? 0) + 10,
+                            0,
+                            100,
+                          );
+                          await cliSetMediaVolume(nextVolume);
+                          await showHUD(`🎚️ Media Volume ${nextVolume}%`);
+                          await refreshAll();
+                        })
+                      }
                     />
                     <MenuBarExtra.Item
                       title="Media Volume Down"
                       icon={Icon.Minus}
-                      onAction={async () => {
-                        const nextVolume = clamp(
-                          Math.round(media.volume ?? 0) - 10,
-                          0,
-                          100,
-                        );
-                        await cliSetMediaVolume(nextVolume);
-                        await showHUD(`🎚️ Media Volume ${nextVolume}%`);
-                        await refreshAll();
-                      }}
+                      onAction={() =>
+                        runAction(async () => {
+                          const nextVolume = clamp(
+                            Math.round(media.volume ?? 0) - 10,
+                            0,
+                            100,
+                          );
+                          await cliSetMediaVolume(nextVolume);
+                          await showHUD(`🎚️ Media Volume ${nextVolume}%`);
+                          await refreshAll();
+                        })
+                      }
                     />
                   </>
                 )}
@@ -251,69 +276,83 @@ export default function Command() {
             <MenuBarExtra.Item
               title={displayedIsPlaying ? "Pause" : "Play / Pause"}
               icon={displayedIsPlaying ? Icon.Pause : Icon.Play}
-              onAction={async () => {
-                playbackOverrideRef.current = {
-                  value: !displayedIsPlaying,
-                  until: Date.now() + 6_000,
-                };
-                await cliMediaPlayPause();
-                await showHUD("⏯ Play / Pause");
-                await refreshAll();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  playbackOverrideRef.current = {
+                    value: !displayedIsPlaying,
+                    until: Date.now() + 6_000,
+                  };
+                  await cliMediaPlayPause();
+                  await showHUD("⏯ Play / Pause");
+                  await refreshAll();
+                })
+              }
             />
             <MenuBarExtra.Item
               title="Previous Track"
               icon={Icon.Rewind}
-              onAction={async () => {
-                await cliMediaPrevious();
-                await showHUD("⏮ Previous Track");
-                await refreshAll();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  await cliMediaPrevious();
+                  await showHUD("⏮ Previous Track");
+                  await refreshAll();
+                })
+              }
             />
             <MenuBarExtra.Item
               title="Next Track"
               icon={Icon.Forward}
-              onAction={async () => {
-                await cliMediaNext();
-                await showHUD("⏭ Next Track");
-                await refreshAll();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  await cliMediaNext();
+                  await showHUD("⏭ Next Track");
+                  await refreshAll();
+                })
+              }
             />
             <MenuBarExtra.Item
               title="Backward 15s"
               icon={Icon.Rewind}
-              onAction={async () => {
-                await cliMediaBackward(15);
-                await showHUD("⏪ Backward 15s");
-                await refreshAll();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  await cliMediaBackward(15);
+                  await showHUD("⏪ Backward 15s");
+                  await refreshAll();
+                })
+              }
             />
             <MenuBarExtra.Item
               title="Forward 15s"
               icon={Icon.Forward}
-              onAction={async () => {
-                await cliMediaForward(15);
-                await showHUD("⏩ Forward 15s");
-                await refreshAll();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  await cliMediaForward(15);
+                  await showHUD("⏩ Forward 15s");
+                  await refreshAll();
+                })
+              }
             />
             <MenuBarExtra.Item
               title="Toggle Shuffle"
               icon={Icon.Shuffle}
-              onAction={async () => {
-                await cliMediaShuffle();
-                await showHUD("🔀 Shuffle toggled");
-                await refreshAll();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  await cliMediaShuffle();
+                  await showHUD("🔀 Shuffle toggled");
+                  await refreshAll();
+                })
+              }
             />
             <MenuBarExtra.Item
               title="Toggle Repeat"
               icon={Icon.Repeat}
-              onAction={async () => {
-                await cliMediaRepeat();
-                await showHUD("🔁 Repeat toggled");
-                await refreshAll();
-              }}
+              onAction={() =>
+                runAction(async () => {
+                  await cliMediaRepeat();
+                  await showHUD("🔁 Repeat toggled");
+                  await refreshAll();
+                })
+              }
             />
           </MenuBarExtra.Section>
 
