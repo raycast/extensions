@@ -34,9 +34,12 @@ export const memoryCache = new Map<string, AppDetails>();
 export async function loadPersistedDetails(
   appId: number,
   region: string,
+  ggDealsEnabled: boolean,
 ): Promise<AppDetails | null> {
   try {
-    const raw = await LocalStorage.getItem<string>(`d-${appId}-${region}`);
+    const raw = await LocalStorage.getItem<string>(
+      `d-${appId}-${region}-${ggDealsEnabled}`,
+    );
     if (!raw) return null;
     const { details, timestamp }: PersistedDetails = JSON.parse(raw);
     if (Date.now() - timestamp > CACHE_TTL) return null;
@@ -49,11 +52,12 @@ export async function loadPersistedDetails(
 export async function persistDetails(
   appId: number,
   region: string,
+  ggDealsEnabled: boolean,
   details: AppDetails,
 ): Promise<void> {
   try {
     await LocalStorage.setItem(
-      `d-${appId}-${region}`,
+      `d-${appId}-${region}-${ggDealsEnabled}`,
       JSON.stringify({ details, timestamp: Date.now() } as PersistedDetails),
     );
   } catch {

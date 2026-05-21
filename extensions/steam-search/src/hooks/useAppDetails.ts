@@ -12,7 +12,8 @@ export function useAppDetails(
   enabled: boolean,
 ): AppDetails | null {
   const { ggDealsApiKey, region } = getPreferenceValues<Preferences>();
-  const cacheKey = `${appId}-${region}`;
+  const ggDealsEnabled = !!ggDealsApiKey;
+  const cacheKey = `${appId}-${region}-${ggDealsEnabled}`;
   const [details, setDetails] = useState<AppDetails | null>(
     () => memoryCache.get(cacheKey) ?? null,
   );
@@ -34,7 +35,11 @@ export function useAppDetails(
 
     (async () => {
       // Try persistent cache first
-      const persisted = await loadPersistedDetails(appId, region);
+      const persisted = await loadPersistedDetails(
+        appId,
+        region,
+        ggDealsEnabled,
+      );
       if (signal.aborted) return;
       if (persisted) {
         memoryCache.set(cacheKey, persisted);
@@ -164,7 +169,7 @@ export function useAppDetails(
       };
       memoryCache.set(cacheKey, initial);
       setDetails(initial);
-      persistDetails(appId, region, initial);
+      persistDetails(appId, region, ggDealsEnabled, initial);
 
       // Fetch slower secondary data (charts + icon)
       const [charts, iconUrl] = await Promise.all([
@@ -182,7 +187,7 @@ export function useAppDetails(
       };
       memoryCache.set(cacheKey, updated);
       setDetails(updated);
-      persistDetails(appId, region, updated);
+      persistDetails(appId, region, ggDealsEnabled, updated);
     })();
 
     return () => controller.abort();

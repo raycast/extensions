@@ -119,10 +119,11 @@ async function fetchAllWishlistData(
 async function loadCachedGames(
   steamId: string,
   region: string,
+  ggDealsApiKey: string,
 ): Promise<WishlistResult | null> {
   try {
     const raw = await LocalStorage.getItem<string>(
-      `wishlist-discounts-${steamId}-${region}`,
+      `wishlist-discounts-${steamId}-${region}-${ggDealsApiKey}`,
     );
     if (!raw) return null;
     const { games, timestamp }: { games: WishlistGame[]; timestamp: number } =
@@ -138,10 +139,11 @@ async function saveCachedGames(
   games: WishlistGame[],
   steamId: string,
   region: string,
+  ggDealsApiKey: string,
 ): Promise<void> {
   try {
     await LocalStorage.setItem(
-      `wishlist-discounts-${steamId}-${region}`,
+      `wishlist-discounts-${steamId}-${region}-${ggDealsApiKey}`,
       JSON.stringify({ games, timestamp: Date.now() }),
     );
   } catch {
@@ -161,7 +163,7 @@ export function fetchDiscountedWishlistGames(
     return discountedGamesFetchPromises.get(cacheKey)!;
 
   const promise = (async () => {
-    const cached = await loadCachedGames(steamId, region);
+    const cached = await loadCachedGames(steamId, region, ggDealsApiKey);
     if (cached) {
       discountedGamesCacheMap.set(cacheKey, cached);
       discountedGamesFetchPromises.delete(cacheKey);
@@ -219,7 +221,7 @@ export function fetchDiscountedWishlistGames(
     const result: WishlistResult = { games: sorted, unavailable: null };
     discountedGamesCacheMap.set(cacheKey, result);
     discountedGamesFetchPromises.delete(cacheKey);
-    await saveCachedGames(sorted, steamId, region);
+    await saveCachedGames(sorted, steamId, region, ggDealsApiKey);
     return result;
   })().catch((err) => {
     discountedGamesFetchPromises.delete(cacheKey);
@@ -411,7 +413,7 @@ export function WishlistDiscounts() {
                 `${steamId ?? ""}-${region}-${ggDealsApiKey ?? ""}`,
               );
               await LocalStorage.removeItem(
-                `wishlist-discounts-${steamId ?? ""}-${region}`,
+                `wishlist-discounts-${steamId ?? ""}-${region}-${ggDealsApiKey ?? ""}`,
               );
               setIsLoading(true);
               setGames([]);
