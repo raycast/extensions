@@ -67,8 +67,9 @@ export async function fetchFriendsOnline(
     if (!listRes.ok) {
       if (listRes.status === 401 || listRes.status === 403) {
         friendsIsPrivate = true;
+        friendsCache = [];
       }
-      friendsCache = [];
+      friendsFetchPromise = null;
       return [];
     }
     const listData = (await listRes.json()) as {

@@ -110,6 +110,7 @@ export async function fetchOwnedGames(
           .map((g) => [g.appid, g.rtime_last_played!]),
       );
       ownedGames = map;
+      ownedFetchPromise = null;
       return map;
     })
     .catch(() => {
