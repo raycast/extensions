@@ -1,5 +1,9 @@
 # Roblox Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Windows Support] - 2025-08-27
 
 - feat: Added Windows support.

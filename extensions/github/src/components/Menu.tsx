@@ -29,7 +29,6 @@ export function MenuBarRoot(props: {
 }): JSX.Element {
   const error = props.error;
   const reloadMenu = () => {
-    environment.commandName;
     launchCommand({ name: environment.commandName, type: LaunchType.UserInitiated });
   };
   return (
