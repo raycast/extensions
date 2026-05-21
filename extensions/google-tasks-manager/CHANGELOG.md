@@ -1,5 +1,10 @@
 # Google Tasks Changelog
 
+## [Fix Pagination and Prettier Formatting] - {PR_MERGE_DATE}
+
+- Fixed silent truncation of task lists with more than 100 items by implementing full pagination via `nextPageToken`
+- Fixed Prettier formatting in `src/date-parser.ts` (function signature wrapping)
+
 ## [Natural Language Date Input] - {PR_MERGE_DATE}
 
 - Replaced calendar date picker with a natural language text field in all task forms

@@ -16,7 +16,10 @@ import * as chrono from "chrono-node";
  * @param input   Raw text from the Due Date field.
  * @param refDate Reference point for relative dates (defaults to now; injectable for tests).
  */
-export function parseNaturalDate(input: string, refDate: Date = new Date()): Date | null {
+export function parseNaturalDate(
+  input: string,
+  refDate: Date = new Date(),
+): Date | null {
   const trimmed = input.trim();
   if (!trimmed) return null;
 

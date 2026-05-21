@@ -26,28 +26,43 @@ export async function fetchTasks(
   listId: string,
   showCompleted = false,
 ): Promise<Task[]> {
-  const params = new URLSearchParams({
-    showHidden: "true",
-    maxResults: "100",
-    showCompleted: showCompleted ? "true" : "false",
-  });
+  const allTasks: Task[] = [];
+  let pageToken: string | undefined;
 
-  const response = await fetch(`${BASE_URL}/lists/${listId}/tasks?${params}`, {
-    headers: await authHeaders(),
-  });
-  if (!response.ok) {
-    throw new Error(`Failed to fetch tasks: ${response.statusText}`);
-  }
-  const json = (await response.json()) as { items?: Task[] };
-  const tasks = (json.items ?? []).map((item) => ({
-    id: item.id,
-    title: item.title,
-    status: item.status,
-    due: item.due,
-    completed: item.completed,
-    parent: item.parent,
-    notes: item.notes,
-  }));
+  do {
+    const params = new URLSearchParams({
+      showHidden: "true",
+      maxResults: "100",
+      showCompleted: showCompleted ? "true" : "false",
+    });
+    if (pageToken) params.set("pageToken", pageToken);
+
+    const response = await fetch(
+      `${BASE_URL}/lists/${listId}/tasks?${params}`,
+      { headers: await authHeaders() },
+    );
+    if (!response.ok) {
+      throw new Error(`Failed to fetch tasks: ${response.statusText}`);
+    }
+    const json = (await response.json()) as {
+      items?: Task[];
+      nextPageToken?: string;
+    };
+
+    const page = (json.items ?? []).map((item) => ({
+      id: item.id,
+      title: item.title,
+      status: item.status,
+      due: item.due,
+      completed: item.completed,
+      parent: item.parent,
+      notes: item.notes,
+    }));
+    allTasks.push(...page);
+    pageToken = json.nextPageToken;
+  } while (pageToken);
+
+  const tasks = allTasks;
 
   return tasks.sort((a, b) => {
     if (a.status === "completed" && b.status === "completed") {
