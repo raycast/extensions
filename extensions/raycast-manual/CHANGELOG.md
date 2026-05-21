@@ -1,6 +1,6 @@
 # Raycast Manual Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-21
 
 - Browse all pages of the Raycast Manual, grouped by category.
 - Page list is fetched live from manual.raycast.com and cached locally, so new pages appear automatically without an extension update.
