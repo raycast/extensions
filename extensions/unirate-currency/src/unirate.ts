@@ -121,10 +121,6 @@ export async function fetchLatestRates(base: string, signal?: AbortSignal): Prom
   return get<RatesResponse>("/rates", { from: base.toUpperCase() }, signal);
 }
 
-export async function fetchHistoricalRates(base: string, date: Date, signal?: AbortSignal): Promise<RatesResponse> {
-  return get<RatesResponse>("/historical/rates", { from: base.toUpperCase(), date: isoDate(date) }, signal);
-}
-
 export async function convertCurrency(
   from: string,
   to: string,

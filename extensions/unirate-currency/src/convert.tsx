@@ -48,21 +48,21 @@ export default function Command() {
   const currencyCodes = useMemo(() => new Set(currencies.map((currency) => currency.code)), [currencies]);
 
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
     (async () => {
       try {
-        const list = await fetchCurrencies();
-        if (!cancelled) setCurrencies(list);
+        const list = await fetchCurrencies(controller.signal);
+        if (!controller.signal.aborted) setCurrencies(list);
       } catch (err) {
-        if (!cancelled) {
+        if (!controller.signal.aborted) {
           await showFailureToast(err, { title: "Could not load currency list" });
         }
       } finally {
-        if (!cancelled) setLoadingCurrencies(false);
+        if (!controller.signal.aborted) setLoadingCurrencies(false);
       }
     })();
     return () => {
-      cancelled = true;
+      controller.abort();
     };
   }, []);
 
