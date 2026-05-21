@@ -37,6 +37,7 @@ export default function Command() {
   const [resultDate, setResultDate] = useState<string | null>(null);
   const [converting, setConverting] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
+  const currencyCodes = useMemo(() => new Set(currencies.map((currency) => currency.code)), [currencies]);
 
   useEffect(() => {
     let cancelled = false;
@@ -56,6 +57,16 @@ export default function Command() {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => {
+    if (currencyCodes.size === 0) return;
+    if (!currencyCodes.has(from)) {
+      setFrom(defaultBase);
+    }
+    if (!currencyCodes.has(to)) {
+      setTo(defaultBase === "EUR" ? "USD" : "EUR");
+    }
+  }, [currencyCodes, defaultBase, from, to]);
 
   const amountNumber = Number.parseFloat(amount);
   const formValid =
@@ -119,12 +130,18 @@ export default function Command() {
       }
     >
       <Form.TextField id="amount" title="Amount" value={amount} onChange={setAmount} placeholder="1.00" />
-      <Form.Dropdown id="from" title="From" value={from} onChange={setFrom} storeValue>
+      <Form.Dropdown
+        id="from"
+        title="From"
+        value={currencyCodes.has(from) ? from : undefined}
+        onChange={setFrom}
+        storeValue
+      >
         {currencies.map((c) => (
           <Form.Dropdown.Item key={`from-${c.code}`} value={c.code} title={c.code} />
         ))}
       </Form.Dropdown>
-      <Form.Dropdown id="to" title="To" value={to} onChange={setTo} storeValue>
+      <Form.Dropdown id="to" title="To" value={currencyCodes.has(to) ? to : undefined} onChange={setTo} storeValue>
         {currencies.map((c) => (
           <Form.Dropdown.Item key={`to-${c.code}`} value={c.code} title={c.code} />
         ))}

@@ -4,7 +4,7 @@ Convert currencies and look up exchange rates for **any date back to 1999** from
 
 ## Why this extension
 
-Most currency extensions either need a paid plan for historical rates or stop at last year. UniRate Currency exposes the same `convert` and `rates` surface for both today's rates _and_ any historical date — same UI, no upsell.
+UniRate Currency brings UniRateAPI's forex tools into Raycast with fast access to live rates, conversions, and historical lookups (for supported plans), all through a consistent command UI.
 
 ## Commands
 
@@ -25,7 +25,12 @@ A list view of the latest rates against a base currency. Search by ISO code, cop
 1. Sign up for a free key at <https://unirateapi.com/dashboard>.
 2. Open the extension preferences and paste it under **UniRate API Key**.
 
-The free tier is enough for the **Latest Rates** command and for "today" conversions. Historical conversions and commodities require a Pro key (the extension surfaces a clear "Pro plan required" toast if you try them on a free key).
+### Plan limits (UniRateAPI)
+
+- **Free tier:** latest forex rates and "today" conversions, with request limits (currently 200/day, 6,000/month).
+- **Pro tier required:** all historical data access (including historical forex back to 4 January 1999) and commodities/precious-metals rates.
+
+If you try a Pro-only feature with a free key, the extension shows a clear "Pro plan required" toast.
 
 ## Preferences
 
