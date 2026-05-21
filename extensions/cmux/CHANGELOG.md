@@ -1,5 +1,9 @@
 # cmux
 
+## [Improve workspace search] - 2026-05-20
+
+- Include workspace descriptions and open surface details when searching workspaces.
+
 ## [Fix PATH resolution] - 2026-04-24
 
 - Fix `spawn cmux ENOENT` errors in Raycast by injecting Homebrew paths into the environment used for CLI calls (covers both Intel `/usr/local/bin` and Apple Silicon `/opt/homebrew/bin`)

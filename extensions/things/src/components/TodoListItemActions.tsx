@@ -13,11 +13,11 @@ import {
 
 import { AddNewTodo } from '../add-new-todo';
 import { setTodoProperty, deleteProject, deleteTodo, updateTodo, updateProject, handleError } from '../api';
-import { getChecklistItemsWithAI, listItems, statusIcons } from '../helpers';
+import { getChecklistItemsWithAI, getTypeIcon, listItems, statusIcons } from '../helpers';
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
-import { Todo, List as TList, CommandListName, UpdateTodoParams } from '../types';
+import { Todo, List as TList, CommandListName, UpdateTodoParams, UpdateProjectParams } from '../types';
 
 // Match URLs with protocols, with optional //
 const URL_REGEX = /([a-zA-Z][a-zA-Z0-9.+-]+):(?:\/\/\S+|%\S+)/;
@@ -27,7 +27,7 @@ type TodoListItemActionsProps = {
   commandListName: CommandListName;
   tags?: string[];
   lists?: TList[];
-  refreshTodos: () => void;
+  refreshTodos: () => Promise<void>;
 };
 
 export default function TodoListItemActions({
@@ -46,7 +46,7 @@ export default function TodoListItemActions({
 
   const notesURL = todo.notes.match(URL_REGEX)?.[0];
 
-  async function updateAction(args: UpdateTodoParams, successToastOptions: Toast.Options) {
+  async function updateAction(args: UpdateTodoParams | UpdateProjectParams, successToastOptions: Toast.Options) {
     try {
       if (todo.isProject) {
         await updateProject(todo.id, args);
@@ -58,9 +58,9 @@ export default function TodoListItemActions({
         title: successToastOptions.title,
         message: successToastOptions.message ?? todo.name,
       });
-      refreshTodos();
+      await refreshTodos();
     } catch (error) {
-      handleError(error);
+      await handleError(error);
     }
   }
 
@@ -119,7 +119,7 @@ New title:
     ) {
       await updateAction({ title: newTitle }, { title: 'Made to-do title actionable', message: newTitle });
     } else {
-      toast.hide();
+      await toast.hide();
     }
   }
 
@@ -128,7 +128,11 @@ New title:
   }
 
   async function moveTo(listId: string) {
-    await updateAction({ 'list-id': listId }, { title: 'Made to-do title actionable', message: 'Moved to-do' });
+    if (todo.isProject) {
+      await updateAction({ 'area-id': listId }, { title: 'Moved project' });
+    } else {
+      await updateAction({ 'list-id': listId }, { title: 'Moved to-do' });
+    }
   }
 
   async function addTag(tag: string) {
@@ -167,7 +171,7 @@ New title:
         title,
         message: todo.name,
       });
-      refreshTodos();
+      await refreshTodos();
     }
   }
 
@@ -204,7 +208,7 @@ New title:
                 title: 'Marked as Completed',
                 message: todo.name,
               });
-              refreshTodos();
+              await refreshTodos();
             }}
           />
         )}
@@ -221,7 +225,7 @@ New title:
                 title: 'Marked as Canceled',
                 message: todo.name,
               });
-              refreshTodos();
+              await refreshTodos();
             }}
           />
         )}
@@ -254,9 +258,18 @@ New title:
             icon={Icon.ArrowRight}
             shortcut={{ modifiers: ['cmd', 'shift'], key: 'm' }}
           >
-            {lists.map((list) => {
-              return <Action {...listItems.list(list)} key={list.id} onAction={() => moveTo(list.id)} />;
-            })}
+            {lists
+              .filter((list) => !todo.isProject || list.type === 'area')
+              .map((list) => {
+                return (
+                  <Action
+                    title={list.name}
+                    icon={getTypeIcon(list.type)}
+                    key={list.id}
+                    onAction={() => moveTo(list.id)}
+                  />
+                );
+              })}
           </ActionPanel.Submenu>
         ) : null}
 
