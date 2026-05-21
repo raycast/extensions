@@ -11,7 +11,7 @@ export default async function Command() {
   });
 
   const data = await getSSOUrl({});
-  getJWTToken();
+  getJWTToken().catch(console.error);
 
   if (data) {
     if (data.status === "new") await open(data.loginLink);
