@@ -58,7 +58,7 @@ let resolvedPath: string | null = null;
 async function resolveCLIPath(): Promise<string> {
   if (resolvedPath) return resolvedPath;
 
-  const prefs = getPreferenceValues<{ cliPath?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   if (prefs.cliPath) {
     try {
       await access(prefs.cliPath, constants.X_OK);

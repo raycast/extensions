@@ -3,6 +3,7 @@ import {
   ActionPanel,
   Clipboard,
   Color,
+  getApplications,
   Icon,
   List,
   showHUD,
@@ -30,6 +31,14 @@ export default function Command() {
     isLoading,
     revalidate,
   } = useCachedPromise(listApps);
+  const { data: appPaths } = useCachedPromise(async () => {
+    const applications = await getApplications();
+    return new Map(
+      applications
+        .filter((application) => application.bundleId)
+        .map((application) => [application.bundleId!, application.path]),
+    );
+  });
 
   if (error) return <ErrorView error={error} />;
 
@@ -48,7 +57,12 @@ export default function Command() {
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Search apps...">
       {apps?.map((app) => (
-        <AppItem key={app.id} app={app} revalidate={revalidate} />
+        <AppItem
+          key={app.id}
+          app={app}
+          appPaths={appPaths}
+          revalidate={revalidate}
+        />
       ))}
     </List>
   );
@@ -56,9 +70,11 @@ export default function Command() {
 
 function AppItem({
   app,
+  appPaths,
   revalidate,
 }: {
   app: CLIAppInfo;
+  appPaths?: Map<string, string>;
   revalidate: () => void;
 }) {
   const volumePercent = Math.round(app.volume);
@@ -82,8 +98,8 @@ function AppItem({
       title={app.name}
       subtitle={app.bundleID ?? app.id}
       icon={
-        app.bundleID
-          ? { fileIcon: `/Applications/${app.name}.app` }
+        app.bundleID && appPaths?.get(app.bundleID)
+          ? { fileIcon: appPaths.get(app.bundleID)! }
           : Icon.SpeakerHigh
       }
       accessories={accessories}

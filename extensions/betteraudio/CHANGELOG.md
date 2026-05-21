@@ -3,6 +3,7 @@
 ## [Initial Release] - {PR_MERGE_DATE}
 
 ### Added
+
 - Initial BetterAudio integration for Raycast via the `betteraudio` CLI.
 - 17 Raycast commands covering system volume, device switching, per-app audio control, media controls, Bluetooth device status, profiles, panel toggle, and extension status.
 - `Manage Apps` command for per-app volume, mute, EQ, and device routing.

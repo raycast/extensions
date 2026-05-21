@@ -49,7 +49,7 @@ function VolumeList() {
   if (error) return <ErrorView error={error} />;
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Set volume level (0–100)">
+    <List isLoading={isLoading} searchBarPlaceholder="Set volume level (0–200)">
       {VOLUME_STEPS.map((step) => (
         <List.Item
           key={step}

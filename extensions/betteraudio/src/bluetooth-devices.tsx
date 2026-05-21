@@ -37,7 +37,7 @@ export default function Command() {
 
         return (
           <List.Item
-            key={device.name}
+            key={`${device.name}-${String(device.isConnected)}`}
             title={device.name}
             icon="🎧"
             accessories={accessories}

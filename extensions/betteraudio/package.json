@@ -6,8 +6,13 @@
   "icon": "extension-icon.png",
   "author": "rokartur",
   "license": "MIT",
-  "platforms": ["macOS"],
-  "categories": ["Media", "System"],
+  "platforms": [
+    "macOS"
+  ],
+  "categories": [
+    "Media",
+    "System"
+  ],
   "commands": [
     {
       "name": "manage-apps",
@@ -172,8 +177,8 @@
   "devDependencies": {
     "@raycast/eslint-config": "^2.1.1",
     "@types/node": "25.5.0",
-    "eslint": "^9.23.0",
-    "typescript": "^6.0.2"
+    "eslint": "^9.39.4",
+    "typescript": "^5.9.3"
   },
   "scripts": {
     "build": "ray build",
