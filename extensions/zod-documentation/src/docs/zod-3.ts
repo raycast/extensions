@@ -1,4 +1,10 @@
-export const docs = [
+export interface DocsV3Item {
+  title: string;
+  id: string;
+  children?: DocsV3Item[];
+}
+
+export const docsV3 = [
   { title: "Introduction", id: "introduction" },
   {
     title: "Ecosystem",
@@ -180,4 +186,4 @@ export const docs = [
     ],
   },
   { id: "changelog", title: "Changelog" },
-];
+] satisfies DocsV3Item[];
