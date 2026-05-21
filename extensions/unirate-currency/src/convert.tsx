@@ -70,7 +70,11 @@ export default function Command() {
 
   const amountNumber = Number.parseFloat(amount);
   const formValid =
-    Number.isFinite(amountNumber) && amountNumber > 0 && /^[A-Z]{3,5}$/.test(from) && /^[A-Z]{3,5}$/.test(to);
+    Number.isFinite(amountNumber) &&
+    amountNumber > 0 &&
+    /^[A-Z]{3,5}$/.test(from) &&
+    /^[A-Z]{3,5}$/.test(to) &&
+    (!useHistorical || historicalDate !== null);
 
   async function handleSubmit() {
     if (!formValid) {
