@@ -1,5 +1,10 @@
 # Google Tasks Changelog
 
+## [Tab Navigation and Icon Refresh] - {PR_MERGE_DATE}
+
+- Added `autoFocus` to the Title field in all three forms (Create Task, Edit Task, Inline Create) so keyboard focus lands on the first field immediately and Tab navigates through subsequent fields
+- Refreshed extension icon from Google's CDN at 1024×1024 source resolution for a crisper render
+
 ## [Fix Pagination and Prettier Formatting] - {PR_MERGE_DATE}
 
 - Fixed silent truncation of task lists with more than 100 items by implementing full pagination via `nextPageToken`

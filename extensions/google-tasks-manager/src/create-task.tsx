@@ -89,6 +89,7 @@ function CreateTask() {
         {...itemProps.title}
         title="Title"
         placeholder="Task title"
+        autoFocus
       />
       <Form.TextArea
         {...itemProps.notes}

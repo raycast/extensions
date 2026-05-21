@@ -112,7 +112,7 @@ function EditTaskForm(props: {
         </ActionPanel>
       }
     >
-      <Form.TextField {...itemProps.title} title="Title" />
+      <Form.TextField {...itemProps.title} title="Title" autoFocus />
       <Form.TextArea {...itemProps.notes} title="Notes" />
       <Form.TextField
         id="due"
@@ -182,6 +182,7 @@ function InlineCreateTaskForm(props: {
         {...itemProps.title}
         title="Title"
         placeholder="Task title"
+        autoFocus
       />
       <Form.TextArea
         {...itemProps.notes}
