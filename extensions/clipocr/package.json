@@ -1,0 +1,153 @@
+{
+    "$schema": "https://www.raycast.com/schemas/extension.json",
+    "name": "clipocr",
+    "title": "ClipOCR",
+    "description": "Extract text from a selected Windows screen area with local Tesseract OCR",
+    "icon": "command-icon.png",
+    "author": "chswei",
+    "contributors": [
+        "Rafo94",
+        "quiknull"
+    ],
+    "platforms": [
+        "Windows"
+    ],
+    "categories": [
+        "Productivity"
+    ],
+    "keywords": [
+        "OCR",
+        "Tesseract",
+        "Screenshot",
+        "Screen Snip",
+        "Text Recognition",
+        "Chinese",
+        "Traditional Chinese",
+        "Windows"
+    ],
+    "license": "MIT",
+    "commands": [
+        {
+            "name": "index",
+            "title": "Area OCR",
+            "description": "Select a screen area and extract its text",
+            "mode": "no-view",
+            "keywords": [
+                "OCR",
+                "Screenshot",
+                "Screen Snip",
+                "Text Recognition"
+            ]
+        }
+    ],
+    "preferences": [
+        {
+            "name": "tesseract_path",
+            "type": "textfield",
+            "required": false,
+            "title": "Tesseract binary path",
+            "description": "Absolute path to your tesseract.exe. Leave the default if you installed Tesseract in Program Files.",
+            "placeholder": "Tesseract binary path",
+            "default": {
+                "macOS": "/opt/homebrew/bin/tesseract",
+                "Windows": "C:\\Program Files\\Tesseract-OCR\\tesseract.exe"
+            }
+        },
+        {
+            "name": "autodetect_lang",
+            "title": "Autodetect language",
+            "label": "Enable language autodetect",
+            "description": "Enable automatic language detection. Tesseract language will be used as a fallback if detection fails or doesn't find a suitable language.",
+            "type": "checkbox",
+            "required": true,
+            "default": false
+        },
+        {
+            "name": "tesseract_lang",
+            "type": "textfield",
+            "required": false,
+            "title": "Tesseract language",
+            "description": "Language used for OCR. Use + for mixed languages, such as chi_tra+eng. Run tesseract --list-langs for available languages.",
+            "placeholder": "Tesseract language",
+            "default": "eng"
+        },
+        {
+            "name": "newLine",
+            "type": "dropdown",
+            "required": false,
+            "title": "How to treat new lines",
+            "description": "Controls how OCR line breaks are copied to the clipboard.",
+            "data": [
+                {
+                    "title": "Replace with empty space",
+                    "value": "replaceSpace"
+                },
+                {
+                    "title": "Don't change anything",
+                    "value": "keep"
+                },
+                {
+                    "title": "Replace with <br>",
+                    "value": "replaceBreak"
+                }
+            ],
+            "default": "replaceSpace"
+        },
+        {
+            "name": "tesseract_psm",
+            "type": "dropdown",
+            "required": false,
+            "title": "Tesseract page segmentation mode",
+            "description": "Controls how Tesseract segments the selected area. Single block usually works best for selected text snippets.",
+            "data": [
+                {
+                    "title": "Single uniform block of text",
+                    "value": "6"
+                },
+                {
+                    "title": "Fully automatic page segmentation",
+                    "value": "3"
+                },
+                {
+                    "title": "Single text line",
+                    "value": "7"
+                },
+                {
+                    "title": "Sparse text",
+                    "value": "11"
+                }
+            ],
+            "default": "6"
+        },
+        {
+            "name": "chinesePunctuation",
+            "title": "Chinese punctuation cleanup",
+            "label": "Normalize punctuation around Chinese text",
+            "description": "Convert common half-width punctuation near Chinese characters into full-width Chinese punctuation.",
+            "type": "checkbox",
+            "required": false,
+            "default": true
+        }
+    ],
+    "dependencies": {
+        "@raycast/api": "^1.104.17",
+        "@raycast/utils": "^2.2.5",
+        "raycast-language-detector": "^0.2.3"
+    },
+    "devDependencies": {
+        "@raycast/eslint-config": "1.0.5",
+        "@types/node": "18.8.3",
+        "@types/react": "18.0.9",
+        "eslint": "^7.32.0",
+        "prettier": "^2.5.1",
+        "typescript": "^4.4.3"
+    },
+    "scripts": {
+        "build": "ray build -e dist",
+        "dev": "ray develop",
+        "fix-lint": "ray lint --fix",
+        "lint": "ray lint",
+        "test": "node --test scripts/test-text.js",
+        "publish": "npx @raycast/api@latest publish"
+    }
+}
