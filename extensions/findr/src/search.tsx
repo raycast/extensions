@@ -213,6 +213,10 @@ export default function SearchFiles() {
         title: "Building index for the first time...",
         message: "This takes ~25 seconds. Search again shortly.",
       });
+    } else {
+      showToast({ style: Toast.Style.Success, title: "" }).then((t) =>
+        t.hide(),
+      );
     }
   }, [isIndexing]);
 
@@ -262,7 +266,6 @@ export default function SearchFiles() {
       isShowingDetail={true}
       searchBarPlaceholder="Search files... (e.g. 'resume pdf', 'brainform folder')"
       onSearchTextChange={setQuery}
-      throttle
     >
       {showRecent ? (
         <List.Section title="Recent Files">
