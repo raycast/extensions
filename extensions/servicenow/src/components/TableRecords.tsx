@@ -182,11 +182,21 @@ export default function TableRecords({ table, extraQuery }: { table: DBObject; e
       headers,
       execute: !!authHeader && !isLoadingDisplay,
       keepPreviousData: true,
+      async parseResponse(response) {
+        if (!response.ok) {
+          // Tag the status so onError can tell a 500 (unknown ORDERBY column) from
+          // a 401/network error that shouldn't trigger the order-by fallback.
+          const err = new Error(response.statusText || `HTTP ${response.status}`);
+          (err as Error & { status?: number }).status = response.status;
+          throw err;
+        }
+        return response.json();
+      },
       onError: (err) => {
-        // First failure while ordering by sys_updated_on: a non-view table that
-        // also lacks the column. Drop the order-by and let the query memo
-        // recompute, which retries the fetch automatically.
-        if (orderByUpdated) {
+        // Only a 500 means the table lacks sys_updated_on (database views aside).
+        // Drop the order-by and let the query memo recompute, which retries the
+        // fetch automatically. Auth/network errors surface immediately instead.
+        if (orderByUpdated && (err as Error & { status?: number }).status === 500) {
           setOrderByDisabled(true);
           return;
         }
