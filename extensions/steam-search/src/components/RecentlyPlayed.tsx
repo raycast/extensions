@@ -8,7 +8,11 @@ import {
   Action,
 } from "@raycast/api";
 import { useEffect, useRef, useState } from "react";
-import { fetchRecentlyPlayed, fetchAppIcon, RecentlyPlayedGame } from "../api/steam";
+import {
+  fetchRecentlyPlayed,
+  fetchAppIcon,
+  RecentlyPlayedGame,
+} from "../api/steam";
 import { formatPlaytime } from "../utils";
 import { useGameStats } from "../hooks/useGameStats";
 import { useAchievements } from "../hooks/useAchievements";
@@ -25,7 +29,9 @@ function RecentlyPlayedItem({
   const fallbackUrl = game.img_icon_url
     ? `https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`
     : `https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appid}/capsule_sm_120.jpg`;
-  const [iconUrl, setIconUrl] = useState<string | null>(() => iconCache.get(game.appid) ?? null);
+  const [iconUrl, setIconUrl] = useState<string | null>(
+    () => iconCache.get(game.appid) ?? null,
+  );
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -55,14 +61,17 @@ function RecentlyPlayedItem({
                   value: details
                     ? details.peakToday
                       ? `${details.currentPlayers} ⬆ ${details.peakToday}`
-                      : details.currentPlayers ?? "…"
+                      : (details.currentPlayers ?? "…")
                     : "…",
                   color: Color.SecondaryText,
                 },
                 tooltip: "Current players / 24h peak",
               },
               {
-                text: { value: details?.rating ?? "…", color: details?.ratingColor ?? Color.SecondaryText },
+                text: {
+                  value: details?.rating ?? "…",
+                  color: details?.ratingColor ?? Color.SecondaryText,
+                },
                 tooltip: "Review score",
               },
               ...(achievements
@@ -70,7 +79,10 @@ function RecentlyPlayedItem({
                     {
                       text: {
                         value: `🏆 ${achievements.unlocked}/${achievements.total}`,
-                        color: achievements.unlocked === achievements.total ? Color.Yellow : Color.SecondaryText,
+                        color:
+                          achievements.unlocked === achievements.total
+                            ? Color.Yellow
+                            : Color.SecondaryText,
                       },
                       tooltip: "Achievements",
                     },
@@ -79,13 +91,19 @@ function RecentlyPlayedItem({
             ]
           : []),
         {
-          text: { value: formatPlaytime(game.playtime_forever), color: Color.SecondaryText },
+          text: {
+            value: formatPlaytime(game.playtime_forever),
+            color: Color.SecondaryText,
+          },
           tooltip: "Total playtime",
         },
         ...(game.playtime_2weeks > 0
           ? [
               {
-                tag: { value: `${formatPlaytime(game.playtime_2weeks)} lately`, color: Color.Green },
+                tag: {
+                  value: `${formatPlaytime(game.playtime_2weeks)} lately`,
+                  color: Color.Green,
+                },
                 tooltip: "Playtime in the last 2 weeks",
               },
             ]
@@ -113,7 +131,9 @@ function RecentlyPlayedItem({
                 // eslint-disable-next-line @raycast/prefer-title-case
                 title={`All-Time Peak: ${details.peakAllTime}`}
                 icon={Icon.BarChart}
-                onAction={() => open(`https://steamcharts.com/app/${game.appid}`)}
+                onAction={() =>
+                  open(`https://steamcharts.com/app/${game.appid}`)
+                }
               />
             </ActionPanel.Section>
           )}
@@ -159,7 +179,10 @@ export function RecentlyPlayed() {
           description="Play a game on Steam to see it here"
         />
       ) : (
-        <List.Section title="Recently Played" subtitle={`${games.length} games`}>
+        <List.Section
+          title="Recently Played"
+          subtitle={`${games.length} games`}
+        >
           {games.map((game) => (
             <RecentlyPlayedItem
               key={game.appid}

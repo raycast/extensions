@@ -5,7 +5,10 @@ import { fetchSteamChartsData } from "../api/steam";
 import { getRatingColor, formatNum } from "../utils";
 import { AppDetails } from "../types";
 
-export function useGameStats(appId: number, enabled: boolean): Partial<AppDetails> | null {
+export function useGameStats(
+  appId: number,
+  enabled: boolean,
+): Partial<AppDetails> | null {
   const cacheKey = `${appId}-stats`;
   const [stats, setStats] = useState<Partial<AppDetails> | null>(() => {
     const cached = memoryCache.get(cacheKey);
@@ -29,11 +32,28 @@ export function useGameStats(appId: number, enabled: boolean): Partial<AppDetail
 
     (async () => {
       const [playersData, reviewsData, charts] = await Promise.all([
-        fetch(`https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${appId}`, { signal })
-          .then((r) => r.json() as Promise<{ response?: { player_count?: number } }>)
+        fetch(
+          `https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?appid=${appId}`,
+          { signal },
+        )
+          .then(
+            (r) =>
+              r.json() as Promise<{ response?: { player_count?: number } }>,
+          )
           .catch(() => null),
-        fetch(`https://store.steampowered.com/appreviews/${appId}?json=1&language=all&purchase_type=all`, { signal })
-          .then((r) => r.json() as Promise<{ query_summary?: { total_reviews?: number; total_positive?: number } }>)
+        fetch(
+          `https://store.steampowered.com/appreviews/${appId}?json=1&language=all&purchase_type=all`,
+          { signal },
+        )
+          .then(
+            (r) =>
+              r.json() as Promise<{
+                query_summary?: {
+                  total_reviews?: number;
+                  total_positive?: number;
+                };
+              }>,
+          )
           .catch(() => null),
         fetchSteamChartsData(appId, signal),
       ]);

@@ -8,7 +8,10 @@ interface AchievementStats {
 
 const achievementsCache = new Map<number, AchievementStats | null>();
 
-export function useAchievements(appId: number, enabled: boolean): AchievementStats | null {
+export function useAchievements(
+  appId: number,
+  enabled: boolean,
+): AchievementStats | null {
   const { steamApiKey, steamId } = getPreferenceValues<Preferences>();
 
   const [stats, setStats] = useState<AchievementStats | null>(

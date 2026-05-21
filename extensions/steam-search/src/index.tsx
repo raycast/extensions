@@ -103,7 +103,10 @@ export default function Command() {
               subtitle="See which friends are online and what they're playing"
               actions={
                 <ActionPanel>
-                  <Action.Push title="Open Friends Online" target={<FriendsOnline />} />
+                  <Action.Push
+                    title="Open Friends Online"
+                    target={<FriendsOnline />}
+                  />
                 </ActionPanel>
               }
             />

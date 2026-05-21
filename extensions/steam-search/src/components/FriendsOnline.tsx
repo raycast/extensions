@@ -119,7 +119,12 @@ function FriendItem({ friend }: { friend: FriendSummary }) {
         ...(inGame && friend.gameextrainfo
           ? [
               { text: friend.gameextrainfo, tooltip: "Currently playing" },
-              { icon: { source: gameIcon ?? capsuleFallback ?? Icon.GameController }, tooltip: "Currently playing" },
+              {
+                icon: {
+                  source: gameIcon ?? capsuleFallback ?? Icon.GameController,
+                },
+                tooltip: "Currently playing",
+              },
             ]
           : []),
         inGame
@@ -182,8 +187,12 @@ export function FriendsOnline() {
   }, [steamApiKey, steamId]);
 
   const inGame = friends.filter((f) => f.gameid);
-  const online = friends.filter((f) => !f.gameid && f.personastate !== 3 && f.personastate !== 4);
-  const away = friends.filter((f) => !f.gameid && (f.personastate === 3 || f.personastate === 4));
+  const online = friends.filter(
+    (f) => !f.gameid && f.personastate !== 3 && f.personastate !== 4,
+  );
+  const away = friends.filter(
+    (f) => !f.gameid && (f.personastate === 3 || f.personastate === 4),
+  );
 
   return (
     <List isLoading={isLoading}>

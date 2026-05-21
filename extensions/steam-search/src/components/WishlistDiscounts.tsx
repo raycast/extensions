@@ -159,7 +159,9 @@ async function fetchDiscountedWishlistGames(
 function WishlistItem({ game }: { game: WishlistGame }) {
   const playtime = usePlaytime(game.appid);
   const isOwned = playtime !== null && playtime >= 0;
-  const [iconUrl, setIconUrl] = useState<string | null>(() => iconCache.get(game.appid) ?? game.iconUrl);
+  const [iconUrl, setIconUrl] = useState<string | null>(
+    () => iconCache.get(game.appid) ?? game.iconUrl,
+  );
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -188,11 +190,26 @@ function WishlistItem({ game }: { game: WishlistGame }) {
         },
         ...(game.steamOriginalPrice
           ? [
-              { text: { value: game.steamOriginalPrice, color: Color.SecondaryText }, tooltip: "Original price" },
-              { text: { value: `→ ${game.steamPrice ?? ""}`, color: Color.Green }, tooltip: "Sale price" },
+              {
+                text: {
+                  value: game.steamOriginalPrice,
+                  color: Color.SecondaryText,
+                },
+                tooltip: "Original price",
+              },
+              {
+                text: {
+                  value: `→ ${game.steamPrice ?? ""}`,
+                  color: Color.Green,
+                },
+                tooltip: "Sale price",
+              },
             ]
           : [
-              { text: { value: game.steamPrice ?? "", color: Color.Green }, tooltip: "Sale price" },
+              {
+                text: { value: game.steamPrice ?? "", color: Color.Green },
+                tooltip: "Sale price",
+              },
             ]),
         ...(game.ggPrice
           ? [
@@ -252,7 +269,8 @@ function WishlistItem({ game }: { game: WishlistGame }) {
 }
 
 export function WishlistDiscounts() {
-  const { steamApiKey, steamId, ggDealsApiKey, region } = getPreferenceValues<Preferences>();
+  const { steamApiKey, steamId, ggDealsApiKey, region } =
+    getPreferenceValues<Preferences>();
   const [games, setGames] = useState<WishlistGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -262,12 +280,20 @@ export function WishlistDiscounts() {
       title: "Loading wishlist discounts…",
     });
 
-fetchDiscountedWishlistGames(steamApiKey ?? "", steamId ?? "", ggDealsApiKey ?? "", region)
-  .then((g) => {
-    setGames(g);
-    setIsLoading(false);
-    showToast({ style: Toast.Style.Success, title: `${g.length} discounted games found` });
-  })
+    fetchDiscountedWishlistGames(
+      steamApiKey ?? "",
+      steamId ?? "",
+      ggDealsApiKey ?? "",
+      region,
+    )
+      .then((g) => {
+        setGames(g);
+        setIsLoading(false);
+        showToast({
+          style: Toast.Style.Success,
+          title: `${g.length} discounted games found`,
+        });
+      })
       .catch(() => {
         showToast({
           style: Toast.Style.Failure,
