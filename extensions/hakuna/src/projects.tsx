@@ -67,7 +67,7 @@ function ProjectDetail({ project }: { project: ProjectResponse }) {
           </List.Item.Detail.Metadata.TagList>
           <List.Item.Detail.Metadata.Label
             title="Budget"
-            text={project.budget === undefined ? String(project.budget) : "—"}
+            text={project.budget ?? "—"}
             icon={project.budget_is_monthly ? Icon.Repeat : undefined}
           />
           <List.Item.Detail.Metadata.Separator />
@@ -137,7 +137,7 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
   const filtered =
     selectedClient === ALL_CLIENTS
       ? projects
-      : projects.filter((p) => p.client === selectedClient);
+      : projects.filter((p) => clientName(p.client) === selectedClient);
 
   return (
     <List

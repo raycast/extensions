@@ -291,7 +291,7 @@ export class HakunaClient {
     startTime: string,
     endTime?: string,
     note?: string,
-  ): Promise<TimerResponse> {
+  ): Promise<TimeEntryResponse> {
     const payload: {
       task_id: number;
       project_id?: number;
@@ -304,7 +304,7 @@ export class HakunaClient {
     if (note) payload.note = note;
 
     try {
-      const response = await this.axiosInstance.patch<TimerResponse>(
+      const response = await this.axiosInstance.patch<TimeEntryResponse>(
         `/time_entries/${id}`,
         payload,
       );
