@@ -48,7 +48,11 @@ function Actions(props: { name: string; quake: boolean }) {
         title={props.quake ? "Open as Administrator (Quake)" : "Open as Administrator"}
         shortcut={{ modifiers: ["ctrl", "shift"], key: "enter" }}
         onAction={async () => {
-          const argumentList = props.quake ? `"-w","_quake","new-tab","-p","${props.name}"` : `"-p","${props.name}"`;
+          // Quote the profile name so names containing spaces (e.g. "Command Prompt") survive
+          // Start-Process -Verb RunAs, which joins ArgumentList tokens with spaces and does not
+          // re-quote them before invoking ShellExecute.
+          const escapedName = props.name.replace(/'/g, "''");
+          const argumentList = props.quake ? `'-w _quake new-tab -p "${escapedName}"'` : `'-p "${escapedName}"'`;
           execFile("powershell", ["Start-Process", "wt.exe", "-ArgumentList", argumentList, "-Verb", "RunAs"]);
           await closeMainWindow();
         }}
