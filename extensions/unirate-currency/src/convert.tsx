@@ -10,7 +10,7 @@ import {
   getDefaultDecimals,
 } from "./unirate";
 
-const HISTORICAL_FLOOR = new Date("1999-01-04");
+const HISTORICAL_FLOOR = new Date(1999, 0, 4);
 
 function formatNumber(value: number, decimals: number): string {
   return value.toLocaleString(undefined, {
@@ -34,6 +34,7 @@ export default function Command() {
   const [historicalDate, setHistoricalDate] = useState<Date | null>(today);
 
   const [result, setResult] = useState<string | null>(null);
+  const [rawResult, setRawResult] = useState<number | null>(null);
   const [resultDate, setResultDate] = useState<string | null>(null);
   const [converting, setConverting] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
@@ -88,11 +89,13 @@ export default function Command() {
     abortRef.current = controller;
     setConverting(true);
     setResult(null);
+    setRawResult(null);
     setResultDate(null);
     try {
       const date = useHistorical && historicalDate ? historicalDate : null;
       const data = await convertCurrency(from, to, amountNumber, date, controller.signal);
       setResult(formatNumber(data.result, decimals));
+      setRawResult(data.result);
       setResultDate(data.date ?? (date ? date.toISOString().split("T")[0] : "today"));
       await showToast({
         style: Toast.Style.Success,
@@ -117,7 +120,7 @@ export default function Command() {
           {result ? (
             <Action.CopyToClipboard
               title="Copy Result"
-              content={result.replace(/[^\d.-]/g, "")}
+              content={String(rawResult ?? "")}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
           ) : null}
