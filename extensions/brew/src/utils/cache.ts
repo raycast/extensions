@@ -88,9 +88,13 @@ export async function clearCache(): Promise<void> {
           // Ignore errors for files that don't exist
         }),
       ),
-      // Clear chunked cache directories
+      // Clear chunked cache directories — include sibling .partial dirs in
+      // case a build was in progress (self-healing on the next build either
+      // way, but keeps the cleared state consistent).
       rm(path.join(environment.supportPath, "formula"), { recursive: true, force: true }).catch(() => {}),
       rm(path.join(environment.supportPath, "cask"), { recursive: true, force: true }).catch(() => {}),
+      rm(path.join(environment.supportPath, "formula.partial"), { recursive: true, force: true }).catch(() => {}),
+      rm(path.join(environment.supportPath, "cask.partial"), { recursive: true, force: true }).catch(() => {}),
     ]);
 
     cacheLogger.log("Cache clear completed", {
@@ -244,9 +248,12 @@ export async function downloadRemoteToCache(
   // (e.g. server closed the connection cleanly after partial body). Leaving
   // a short file on disk causes every subsequent build to fail with a JSON
   // parse error since the cached file's mtime gets refreshed each download.
-  if (totalBytes > 0 && bytesDownloaded < totalBytes) {
+  // Use the write stream's own counter — bytesDownloaded is only updated when
+  // a progress callback is supplied, so it can't be trusted here.
+  const bytesWritten = writeStream.bytesWritten;
+  if (totalBytes > 0 && bytesWritten < totalBytes) {
     await unlink(cachePath).catch(() => {});
-    throw new NetworkError(`Truncated download: got ${bytesDownloaded} of ${totalBytes} bytes`, {
+    throw new NetworkError(`Truncated download: got ${bytesWritten} of ${totalBytes} bytes`, {
       url,
     });
   }
