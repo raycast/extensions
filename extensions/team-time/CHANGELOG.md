@@ -1,5 +1,9 @@
 # Team Time Changelog
 
+## [Fix Edit Label input] - 2026-05-19
+
+- Fixed the Edit Label command so custom flag fields accept typed input reliably.
+
 ## [Add China Special Administrative Regions as Cities in China Timezone] - 2026-04-30
 
 - Added two records (Hong Kong SAR, Macau SAR) to [src/world_cities_timezones.json].
