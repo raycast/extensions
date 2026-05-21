@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "Node16",
+    "jsx": "react",
+    "strict": false,
+    "esModuleInterop": true,
+    "moduleResolution": "node16",
+    "ignoreDeprecations": "6.0",
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "types": ["node"]
+  },
+  "include": ["src"]
+}

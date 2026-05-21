@@ -1,0 +1,4 @@
+node_modules
+.raycast
+.DS_Store
+dist
