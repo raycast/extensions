@@ -11,7 +11,7 @@ export function useAppDetails(
   appId: number,
   enabled: boolean,
 ): AppDetails | null {
-  const { ggDealsApiKey, region } = getPreferenceValues();
+  const { ggDealsApiKey, region } = getPreferenceValues<Preferences>();
   const cacheKey = `${appId}-${region}`;
   const [details, setDetails] = useState<AppDetails | null>(
     () => memoryCache.get(cacheKey) ?? null,

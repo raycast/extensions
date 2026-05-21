@@ -1,4 +1,6 @@
 import { LocalStorage, Cache } from "@raycast/api";
+import { AppDetails, PersistedDetails } from "./types";
+import { CACHE_TTL } from "./constants";
 
 const iconUrlCache = new Cache({ namespace: "icon-urls" });
 const homeCache = new Cache({ namespace: "home-subtitles" });
@@ -27,9 +29,6 @@ export function getIconUrl(appId: number): string | undefined {
 export function setIconUrl(appId: number, url: string): void {
   iconUrlCache.set(String(appId), url);
 }
-import { AppDetails, PersistedDetails } from "./types";
-import { CACHE_TTL } from "./constants";
-
 export const memoryCache = new Map<string, AppDetails>();
 
 export async function loadPersistedDetails(

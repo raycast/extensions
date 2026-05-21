@@ -38,7 +38,8 @@ import {
 } from "./components/WishlistDiscounts";
 
 export default function Command() {
-  const { steamApiKey, steamId, ggDealsApiKey, region } = getPreferenceValues();
+  const { steamApiKey, steamId, ggDealsApiKey, region } =
+    getPreferenceValues<Preferences>();
   const [skipped, setSkipped] = useState<boolean | null>(null);
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -88,7 +89,7 @@ export default function Command() {
       });
     }
     if (!getCachedSubtitle("wishlist")) {
-      fetchDiscountedWishlistGames(steamId, ggDealsApiKey, region)
+      fetchDiscountedWishlistGames(steamId ?? "", ggDealsApiKey ?? "", region)
         .then(({ games, unavailable }) => {
           if (unavailable !== null) return;
           const subtitle =

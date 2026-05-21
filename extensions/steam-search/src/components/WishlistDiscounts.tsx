@@ -14,7 +14,11 @@ import { GameDetail } from "./GameDetail";
 import { useEffect, useRef, useState } from "react";
 import { fetchAppIcon } from "../api/steam";
 import { batchFetchGGDeals, ggDealsCache } from "../api/ggdeals";
-import { CACHE_TTL, CURRENCY_SYMBOLS } from "../constants";
+import {
+  CACHE_TTL,
+  CURRENCY_SYMBOLS,
+  CURRENCY_SUFFIX_REGIONS,
+} from "../constants";
 import { getIconUrl, setIconUrl, setCachedSubtitle } from "../cache";
 
 interface WishlistGame {
@@ -43,7 +47,10 @@ const discountedGamesCacheMap = new Map<string, WishlistResult>();
 
 function formatWishlistPrice(cents: number, region: string): string {
   const symbol = CURRENCY_SYMBOLS[region] ?? "$";
-  return `${symbol}${(cents / 100).toFixed(2)}`;
+  const value = (cents / 100).toFixed(2);
+  return CURRENCY_SUFFIX_REGIONS.has(region)
+    ? `${value}${symbol}`
+    : `${symbol}${value}`;
 }
 
 async function fetchAllWishlistData(
