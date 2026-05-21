@@ -1,6 +1,6 @@
 # goodreads Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-21
 
 - Restore book search results.
 
