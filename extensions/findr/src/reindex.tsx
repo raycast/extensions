@@ -1,10 +1,11 @@
 import { showToast, Toast } from "@raycast/api";
 import { execFile } from "child_process";
-import { getFindrPath, getFindrEnv } from "./utils";
+import { getFindrPath, getFindrEnv, getScanArgs } from "./utils";
 
 export default async function Reindex() {
   const findrPath = getFindrPath();
   const findrEnv = getFindrEnv();
+  const scanArgs = getScanArgs();
 
   await showToast({
     style: Toast.Style.Animated,
@@ -14,7 +15,7 @@ export default async function Reindex() {
   return new Promise<void>((resolve) => {
     execFile(
       findrPath,
-      ["index", "rebuild"],
+      ["index", "rebuild", ...scanArgs],
       { env: { ...process.env, ...findrEnv } },
       (error, _stdout, stderr) => {
         if (error) {

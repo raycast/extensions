@@ -60,6 +60,27 @@
       "type": "password",
       "default": "",
       "required": false
+    },
+    {
+      "name": "scanScope",
+      "title": "Scan Scope",
+      "description": "Which directories to index. Requires Rebuild Index after changing.",
+      "type": "dropdown",
+      "default": "personal",
+      "required": false,
+      "data": [
+        { "title": "Personal (Documents, Desktop, Downloads, Pictures, Projects)", "value": "personal" },
+        { "title": "Full Home (~/ except Library)", "value": "full_home" },
+        { "title": "Everything (all volumes)", "value": "everything" }
+      ]
+    },
+    {
+      "name": "customPaths",
+      "title": "Additional Scan Paths",
+      "description": "Comma-separated extra paths to scan, merged with the selected scope. Duplicates ignored. Example: ~/Code,/Volumes/External",
+      "type": "textfield",
+      "default": "",
+      "required": false
     }
   ],
   "dependencies": {

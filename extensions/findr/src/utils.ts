@@ -1,4 +1,4 @@
-import { environment, getPreferenceValues } from "@raycast/api";
+import { Clipboard, environment, getPreferenceValues, showToast, Toast } from "@raycast/api";
 import { chmodSync, existsSync } from "fs";
 import { join } from "path";
 
@@ -39,6 +39,26 @@ export function getMaxResults(): number {
 export function getOpenRouterApiKey(): string {
   const { openrouterApiKey } = getPreferenceValues<ExtensionPreferences>();
   return openrouterApiKey?.trim() || "";
+}
+
+export function getScanScope(): string {
+  const { scanScope } = getPreferenceValues<ExtensionPreferences>();
+  return scanScope || "personal";
+}
+
+export function getCustomPaths(): string {
+  const { customPaths } = getPreferenceValues<ExtensionPreferences>();
+  return customPaths?.trim() || "";
+}
+
+export function getScanArgs(): string[] {
+  const scope = getScanScope();
+  const custom = getCustomPaths();
+  const args = ["--preset", scope];
+  if (custom) {
+    args.push("--paths", custom);
+  }
+  return args;
 }
 
 export function getFindrEnv(): Record<string, string> {
@@ -116,4 +136,25 @@ const FILE_TYPE_ICONS: Record<string, string> = {
 export function getFileIcon(ext: string | null): string {
   if (!ext) return "📁";
   return FILE_TYPE_ICONS[ext] || "📁";
+}
+
+/** Debug toast with copy action. Use for any diagnostic message. */
+export function debugToast(
+  title: string,
+  message: string,
+  style: Toast.Style = Toast.Style.Success,
+) {
+  const full = `${title}: ${message}`;
+  showToast({
+    style,
+    title,
+    message,
+    primaryAction: {
+      title: "Copy",
+      onAction: async (toast) => {
+        await Clipboard.copy(full);
+        toast.hide();
+      },
+    },
+  });
 }

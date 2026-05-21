@@ -7,6 +7,7 @@ export interface SearchResult {
   modified: string;
   file_type: string | null;
   content_snippet: string | null;
+  is_dir: boolean;
 }
 
 export interface SearchResponse {
