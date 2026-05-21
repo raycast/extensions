@@ -133,35 +133,14 @@ function RecentlyPlayedItem({
 
 const iconCache = new Map<number, string>();
 
-// Set to true to use mock data for screenshots, revert before pushing
-const MOCK = false;
-
-const MOCK_GAMES: RecentlyPlayedGame[] = [
-  { appid: 1245620, name: "ELDEN RING",           playtime_forever: 8742,  playtime_2weeks: 214, img_icon_url: "" },
-  { appid: 1086940, name: "Baldur's Gate 3",      playtime_forever: 9361,  playtime_2weeks: 183, img_icon_url: "" },
-  { appid: 730,     name: "Counter-Strike 2",     playtime_forever: 17082, playtime_2weeks: 97,  img_icon_url: "" },
-  { appid: 548430,  name: "Deep Rock Galactic",   playtime_forever: 18743, playtime_2weeks: 67,  img_icon_url: "" },
-  { appid: 1091500, name: "Cyberpunk 2077",       playtime_forever: 8563,  playtime_2weeks: 0,   img_icon_url: "" },
-  { appid: 292030,  name: "The Witcher 3",        playtime_forever: 12041, playtime_2weeks: 0,   img_icon_url: "" },
-  { appid: 1145360, name: "Hades",                playtime_forever: 4382,  playtime_2weeks: 0,   img_icon_url: "" },
-  { appid: 367520,  name: "Hollow Knight",        playtime_forever: 2881,  playtime_2weeks: 0,   img_icon_url: "" },
-  { appid: 413150,  name: "Stardew Valley",       playtime_forever: 13082, playtime_2weeks: 0,   img_icon_url: "" },
-  { appid: 570,     name: "Dota 2",               playtime_forever: 72241, playtime_2weeks: 0,   img_icon_url: "" },
-];
-
 export function RecentlyPlayed() {
-  const { steamApiKey, steamId } = getPreferenceValues();
+  const { steamApiKey, steamId } = getPreferenceValues<Preferences>();
   const [games, setGames] = useState<RecentlyPlayedGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (MOCK) {
-      setGames(MOCK_GAMES);
-      setIsLoading(false);
-      return;
-    }
-    fetchRecentlyPlayed(steamApiKey as string, steamId as string)
+    fetchRecentlyPlayed(steamApiKey ?? "", steamId ?? "")
       .then((g) => {
         setGames(g);
         setIsLoading(false);

@@ -167,34 +167,13 @@ function FriendItem({ friend }: { friend: FriendSummary }) {
   );
 }
 
-// Set to true to use mock data for screenshots, revert before pushing
-const MOCK = false;
-
-const MOCK_FRIENDS: FriendSummary[] = [
-  { steamid: "1", personaname: "Kolbeinn",      avatarmedium: "https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg", personastate: 1, gameid: "730",     gameextrainfo: "Counter-Strike 2" },
-  { steamid: "2", personaname: "SpeedrunGod",   avatarmedium: "https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg", personastate: 1, gameid: "1245620", gameextrainfo: "ELDEN RING" },
-  { steamid: "3", personaname: "xXDarkHunterXx",avatarmedium: "https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg", personastate: 1, gameid: "1086940", gameextrainfo: "Baldur's Gate 3" },
-  { steamid: "4", personaname: "TechWizard99",  avatarmedium: "https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg", personastate: 1 },
-  { steamid: "5", personaname: "CasualGamer",   avatarmedium: "https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg", personastate: 2 },
-  { steamid: "6", personaname: "NightOwl_EU",   avatarmedium: "https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg", personastate: 3 },
-  { steamid: "7", personaname: "ArcticFox",     avatarmedium: "https://avatars.steamstatic.com/fef49e7fa7e1997310d705b2a6158ff8dc1cdfeb_medium.jpg", personastate: 4 },
-];
-
 export function FriendsOnline() {
-  const { steamApiKey, steamId } = getPreferenceValues<{
-    steamApiKey: string;
-    steamId: string;
-  }>();
+  const { steamApiKey, steamId } = getPreferenceValues<Preferences>();
   const [friends, setFriends] = useState<FriendSummary[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (MOCK) {
-      setFriends(MOCK_FRIENDS);
-      setIsLoading(false);
-      return;
-    }
-    fetchFriendsOnline(steamApiKey, steamId)
+    fetchFriendsOnline(steamApiKey ?? "", steamId ?? "")
       .then((f) => {
         setFriends(f);
         setIsLoading(false);

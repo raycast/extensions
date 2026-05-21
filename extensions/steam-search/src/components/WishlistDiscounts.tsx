@@ -251,38 +251,18 @@ function WishlistItem({ game }: { game: WishlistGame }) {
   );
 }
 
-// Set to true to use mock data for screenshots, revert before pushing
-const MOCK = false;
-
-const MOCK_WISHLIST_GAMES: WishlistGame[] = [
-  { appid: 1086940, name: "Baldur's Gate 3",       iconUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/capsule_sm_120.jpg", steamPrice: "$39.99", steamOriginalPrice: "$59.99", discountPercent: 33, ggPrice: "🔑 $34.50" },
-  { appid: 1091500, name: "Cyberpunk 2077",        iconUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/1091500/capsule_sm_120.jpg", steamPrice: "$29.99", steamOriginalPrice: "$59.99", discountPercent: 50, ggPrice: "🔑 $21.99" },
-  { appid: 1174180, name: "Red Dead Redemption 2", iconUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/1174180/capsule_sm_120.jpg", steamPrice: "$23.99", steamOriginalPrice: "$59.99", discountPercent: 60, ggPrice: "🔑 $17.50" },
-  { appid: 990080,  name: "Hogwarts Legacy",       iconUrl: "https://cdn.cloudflare.steamstatic.com/steam/apps/990080/capsule_sm_120.jpg",  steamPrice: "$35.99", steamOriginalPrice: "$59.99", discountPercent: 40, ggPrice: "🔑 $29.00" },
-];
-
 export function WishlistDiscounts() {
-  const { steamApiKey, steamId, ggDealsApiKey, region } = getPreferenceValues<{
-    steamApiKey: string;
-    steamId: string;
-    ggDealsApiKey: string;
-    region: string;
-  }>();
+  const { steamApiKey, steamId, ggDealsApiKey, region } = getPreferenceValues<Preferences>();
   const [games, setGames] = useState<WishlistGame[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    if (MOCK) {
-      setGames(MOCK_WISHLIST_GAMES);
-      setIsLoading(false);
-      return;
-    }
     showToast({
       style: Toast.Style.Animated,
       title: "Loading wishlist discounts…",
     });
 
-fetchDiscountedWishlistGames(steamApiKey, steamId, ggDealsApiKey, region)
+fetchDiscountedWishlistGames(steamApiKey ?? "", steamId ?? "", ggDealsApiKey ?? "", region)
   .then((g) => {
     setGames(g);
     setIsLoading(false);
@@ -315,9 +295,9 @@ fetchDiscountedWishlistGames(steamApiKey, steamId, ggDealsApiKey, region)
               setIsLoading(true);
               setGames([]);
               fetchDiscountedWishlistGames(
-                steamApiKey,
-                steamId,
-                ggDealsApiKey,
+                steamApiKey ?? "",
+                steamId ?? "",
+                ggDealsApiKey ?? "",
                 region,
               )
                 .then((g) => {
