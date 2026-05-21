@@ -13,10 +13,17 @@ import {
 const HISTORICAL_FLOOR = new Date(1999, 0, 4);
 
 function formatNumber(value: number, decimals: number): string {
-  return value.toLocaleString(undefined, {
+  return value.toLocaleString("en-US", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
   });
+}
+
+function localIsoDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 export default function Command() {
@@ -96,7 +103,7 @@ export default function Command() {
       const data = await convertCurrency(from, to, amountNumber, date, controller.signal);
       setResult(formatNumber(data.result, decimals));
       setRawResult(data.result);
-      setResultDate(data.date ?? (date ? date.toISOString().split("T")[0] : "today"));
+      setResultDate(data.date ?? (date ? localIsoDate(date) : "today"));
       await showToast({
         style: Toast.Style.Success,
         title: `${formatNumber(amountNumber, decimals)} ${from} = ${formatNumber(data.result, decimals)} ${to}`,

@@ -1,14 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import {
-  CurrencyEntry,
-  RatesResponse,
-  fetchCurrencies,
-  fetchLatestRates,
-  getDefaultBase,
-  getDefaultDecimals,
-} from "./unirate";
+import { CurrencyEntry, RatesResponse, fetchLatestRates, getDefaultBase, getDefaultDecimals } from "./unirate";
 
 export default function Command() {
   const defaultBase = useMemo(() => getDefaultBase(), []);
@@ -21,23 +14,6 @@ export default function Command() {
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const list = await fetchCurrencies();
-        if (!cancelled) setCurrencies(list);
-      } catch (err) {
-        if (!cancelled) {
-          await showFailureToast(err, { title: "Could not load currency list" });
-        }
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
-
-  useEffect(() => {
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
@@ -46,6 +22,14 @@ export default function Command() {
     fetchLatestRates(base, controller.signal)
       .then((res) => {
         setData(res);
+        const codes = new Set<string>([res.base, ...Object.keys(res.rates)]);
+        setCurrencies((prev) => {
+          const merged = new Set<string>(prev.map((c) => c.code));
+          codes.forEach((c) => merged.add(c));
+          return Array.from(merged)
+            .sort()
+            .map((code) => ({ code }));
+        });
         setLoading(false);
       })
       .catch(async (err) => {
@@ -83,7 +67,7 @@ export default function Command() {
           <List.Item
             key={entry.code}
             title={entry.code}
-            subtitle={`1 ${base} = ${entry.rate.toLocaleString(undefined, {
+            subtitle={`1 ${base} = ${entry.rate.toLocaleString("en-US", {
               minimumFractionDigits: decimals,
               maximumFractionDigits: decimals,
             })} ${entry.code}`}
