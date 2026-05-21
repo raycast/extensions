@@ -62,7 +62,7 @@ function RecentlyPlayedItem({
   onRefresh: () => void;
 }) {
   const details = useGameStats(game.appid, isSelected);
-  const achievements = useAchievements(game.appid, true);
+  const achievements = useAchievements(game.appid, isSelected);
   const fallbackUrl = game.img_icon_url
     ? `https://cdn.cloudflare.steamstatic.com/steamcommunity/public/images/apps/${game.appid}/${game.img_icon_url}.jpg`
     : `https://cdn.cloudflare.steamstatic.com/steam/apps/${game.appid}/capsule_sm_120.jpg`;
@@ -163,7 +163,6 @@ function RecentlyPlayedItem({
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on SteamDB"
             url={`https://steamdb.info/app/${game.appid}/`}
             shortcut={{
@@ -172,7 +171,6 @@ function RecentlyPlayedItem({
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on ProtonDB"
             url={`https://www.protondb.com/app/${game.appid}`}
             shortcut={{
@@ -186,7 +184,6 @@ function RecentlyPlayedItem({
             <ActionPanel.Section title="Player Stats">
               {details?.currentPlayers && (
                 <Action
-                  // eslint-disable-next-line @raycast/prefer-title-case
                   title={`Current Players: ${details.currentPlayers}`}
                   icon={{ source: Icon.Person, tintColor: Color.Red }}
                   onAction={() =>
@@ -206,7 +203,6 @@ function RecentlyPlayedItem({
               )}
               {details?.peakAllTime && (
                 <Action
-                  // eslint-disable-next-line @raycast/prefer-title-case
                   title={`All-Time Peak: ${details.peakAllTime}`}
                   icon={Icon.BarChart}
                   onAction={() =>

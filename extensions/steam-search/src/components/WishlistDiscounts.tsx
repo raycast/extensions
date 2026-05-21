@@ -412,6 +412,9 @@ export function WishlistDiscounts() {
               discountedGamesCacheMap.delete(
                 `${steamId ?? ""}-${region}-${ggDealsApiKey ?? ""}`,
               );
+              discountedGamesFetchPromises.delete(
+                `${steamId ?? ""}-${region}-${ggDealsApiKey ?? ""}`,
+              );
               await LocalStorage.removeItem(
                 `wishlist-discounts-${steamId ?? ""}-${region}-${ggDealsApiKey ?? ""}`,
               );

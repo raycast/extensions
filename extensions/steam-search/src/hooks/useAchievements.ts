@@ -7,6 +7,7 @@ interface AchievementStats {
 }
 
 const achievementsCache = new Map<number, AchievementStats | null>();
+let achievementsForSteamId: string | null = null;
 
 export function useAchievements(
   appId: number,
@@ -22,6 +23,10 @@ export function useAchievements(
   useEffect(() => {
     if (!enabled) return;
     if (!steamApiKey || !steamId) return;
+    if (achievementsForSteamId !== steamId) {
+      achievementsCache.clear();
+      achievementsForSteamId = steamId;
+    }
     if (achievementsCache.has(appId)) {
       setStats(achievementsCache.get(appId) ?? null);
       return;
