@@ -4,7 +4,7 @@ Convert currencies and look up exchange rates for **any date back to 1999** from
 
 ## Why this extension
 
-Most currency extensions either need a paid plan for historical rates or stop at last year. UniRate Currency exposes the same `convert` and `rates` surface for both today's rates *and* any historical date — same UI, no upsell.
+Most currency extensions either need a paid plan for historical rates or stop at last year. UniRate Currency exposes the same `convert` and `rates` surface for both today's rates _and_ any historical date — same UI, no upsell.
 
 ## Commands
 
@@ -29,11 +29,11 @@ The free tier is enough for the **Latest Rates** command and for "today" convers
 
 ## Preferences
 
-| Preference | What it does | Default |
-|---|---|---|
-| UniRate API Key | Your key from `unirateapi.com/dashboard` | — |
-| Default Base Currency | Three-letter ISO code used as the initial *From* | `USD` |
-| Decimals | Decimal places shown for converted amounts | `4` |
+| Preference            | What it does                                     | Default |
+| --------------------- | ------------------------------------------------ | ------- |
+| UniRate API Key       | Your key from `unirateapi.com/dashboard`         | —       |
+| Default Base Currency | Three-letter ISO code used as the initial _From_ | `USD`   |
+| Decimals              | Decimal places shown for converted amounts       | `4`     |
 
 ## Disclosure
 
