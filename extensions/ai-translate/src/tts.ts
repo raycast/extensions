@@ -1,8 +1,8 @@
 import { environment, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
-import { ChildProcess, execFile } from "child_process";
-import { unlink } from "fs";
-import { mkdir, readdir, stat, unlink as unlinkAsync, writeFile } from "fs/promises";
-import { join } from "path";
+import { ChildProcess, execFile } from "node:child_process";
+import { unlink } from "node:fs";
+import { mkdir, readdir, stat, unlink as unlinkAsync, writeFile } from "node:fs/promises";
+import { join } from "node:path";
 
 const STALE_AUDIO_MS = 10 * 60 * 1000;
 
