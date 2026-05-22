@@ -1,6 +1,6 @@
 # Safari Changelog
 
-## [Bugfix] - {PR_MERGE_DATE}
+## [Bugfix] - 2026-05-22
 
 - Clarify the Full Disk Access requirement when Safari history cannot be opened.
 
