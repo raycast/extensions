@@ -69,6 +69,9 @@ export default function Command(
         `$$\\color{gray}\\Large\\text{${result.formattedCurrency}} \\;\\rightarrow\\; \\color{white}\\Huge\\text{${result.shortUsd.replace("$", "\\$")}}$$`,
         ``,
         `---`,
+        `$$\\large\\text{Exchange} \\quad \\normalsize\\color{gray}\\text{${rate}} \\quad \\text{${exchangeInfo.replace("$", "\\$")}} \\quad \\scriptsize\\color{darkgray}\\text{Updated ${timeAgo(lastUpdated)}}$$`,
+        ``,
+        `---`,
         ``,
         `| | |`,
         `|:--|--:|`,
@@ -78,7 +81,6 @@ export default function Command(
         `| **INR (Short)** | ${result.inrShort} |`,
         `| **INR (Words)** | ${result.inrWords} |`,
         ``,
-        `$$\\large\\text{Exchange} \\quad \\normalsize\\color{gray}\\text{${rate}} \\quad \\text{${exchangeInfo.replace("$", "\\$")}} \\quad \\scriptsize\\color{darkgray}\\text{Updated ${timeAgo(lastUpdated)}}$$`,
       ].join("\n")}
       actions={
         <ActionPanel>
