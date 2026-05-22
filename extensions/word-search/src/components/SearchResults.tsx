@@ -73,7 +73,7 @@ export default function SearchResults(
       searchBarAccessory={useVocabulary ? <VocabularySwitch onChange={setVocabulary} /> : null}
       searchText={search}
     >
-      {data?.length === 0 && historyData.length === 0 ? (
+      {(!data || data.length === 0) && historyData.length === 0 ? (
         <List.EmptyView
           icon={"command-icon.png"}
           title={helperTitle ?? placeholder}
