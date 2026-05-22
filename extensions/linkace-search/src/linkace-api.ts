@@ -12,14 +12,7 @@ import {
   type LinkAcePaginatedResponse,
   type LinkAceTag,
   type SearchFilters,
-  type VisibilityFilter,
 } from "./types";
-
-const VISIBILITY_TO_API_VALUE: Record<Exclude<VisibilityFilter, "all">, string> = {
-  public: "1",
-  internal: "2",
-  private: "3",
-};
 
 const execFileAsync = promisify(execFile);
 const MACOS_PROXY_CACHE_TTL = 60_000;
@@ -184,8 +177,8 @@ export function buildLinkSearchUrl(baseUrl: string, query: string, filters: Sear
     url.searchParams.set("search_description", "1");
   }
 
-  if (filters.visibility !== "all") {
-    url.searchParams.set("visibility", VISIBILITY_TO_API_VALUE[filters.visibility]);
+  if (filters.visibility === "private") {
+    url.searchParams.set("private_only", "1");
   }
 
   if (filters.brokenOnly) {

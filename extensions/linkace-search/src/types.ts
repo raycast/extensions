@@ -1,6 +1,6 @@
 export type SortOrder = "title:asc" | "title:desc" | "url:asc" | "url:desc" | "created_at:asc" | "created_at:desc";
 
-export type VisibilityFilter = "all" | "public" | "internal" | "private";
+export type VisibilityFilter = "all" | "private";
 
 export type SearchFilters = {
   searchTitle: boolean;
@@ -84,7 +84,5 @@ export const SORT_ORDER_OPTIONS: Array<{ title: string; value: SortOrder }> = [
 
 export const VISIBILITY_OPTIONS: Array<{ title: string; value: VisibilityFilter }> = [
   { title: "All Visible Links", value: "all" },
-  { title: "Public", value: "public" },
-  { title: "Internal", value: "internal" },
-  { title: "Private", value: "private" },
+  { title: "Private Only", value: "private" },
 ];

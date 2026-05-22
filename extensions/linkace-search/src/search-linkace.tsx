@@ -235,8 +235,8 @@ function buildActiveFilterSummary(filters: SearchFilters) {
     parts.push(scopes.join("+"));
   }
 
-  if (filters.visibility !== "all") {
-    parts.push(`Visibility: ${capitalize(filters.visibility)}`);
+  if (filters.visibility === "private") {
+    parts.push("Visibility: Private Only");
   }
 
   if (filters.brokenOnly) {
@@ -260,8 +260,4 @@ function buildActiveFilterSummary(filters: SearchFilters) {
   }
 
   return parts.join(" · ");
-}
-
-function capitalize(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
 }
