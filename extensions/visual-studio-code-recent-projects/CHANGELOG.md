@@ -17,9 +17,9 @@
 
 - Added Shared Storage support for new version of VS Code
 
-## [Fix] - 2026-05-04
+## [Fix] - {PR_MERGE_DATE}
 
-- Fixed `Search Recent Projects` returning no results for VS Code Insiders users. Recent Insiders builds no longer write `history.recentlyOpenedPathsList` to `state.vscdb`; the extension now falls back to reading recent folders from `storage.json` (`lastKnownMenubarData`) when the DB key is absent. Stable VS Code builds are unaffected. (Fixes [#27440](https://github.com/raycast/extensions/issues/27440))
+- Fixed `Search Recent Projects` returning no results for VS Code Insiders users. Recent Insiders builds no longer write `history.recentlyOpenedPathsList` to `state.vscdb`; the extension now falls back to reading recent folders from `storage.json` (`lastKnownMenubarData`) when the DB key is absent. Stable VS Code builds are unaffected. (Fixes [#27440](https://github.com/raycast/extensions/issues/27440), originally shipped 2026-05-04)
 
 ## [Update] - 2026-04-07
 
