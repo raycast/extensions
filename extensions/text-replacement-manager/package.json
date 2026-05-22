@@ -29,8 +29,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@raycast/api": "^1.98.5",
-    "@raycast/utils": "^1.18.1",
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
     "react": "^19.0.0"
   },
   "devDependencies": {

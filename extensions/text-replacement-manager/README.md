@@ -4,7 +4,7 @@ Manage macOS Text Replacements from Raycast.
 
 Text Replacement Manager reads your system Text Replacement list, lets you create and update entries, and syncs changes back to macOS. It also keeps Raycast-only metadata for tags and tag colors so larger replacement lists are easier to scan.
 
-![Text Replacement Manager](assets/textReplacementManagerBanner@3x.png)
+![Text Replacement Manager](media/textReplacementManagerBanner@3x.png)
 
 ## Features
 

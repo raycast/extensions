@@ -10,6 +10,15 @@ export function createReplacement(
   existing: TextReplacement[],
   input: ReplacementInput,
 ): TextReplacement[] {
+  const trigger = input.trigger.trim();
+  const duplicate = existing.find((item) => item.trigger === trigger);
+  if (duplicate && duplicate.replacementText === input.replacementText) {
+    const tags = mergeTags(duplicate.tags, normalizeTags(input.tags));
+    return existing.map((item) =>
+      item.uuid === duplicate.uuid ? { ...item, tags } : item,
+    );
+  }
+
   ensureValid(input, existing);
   return [...existing, toReplacement(input)];
 }
@@ -61,6 +70,10 @@ function toReplacement(input: ReplacementInput): TextReplacement {
     tags: normalizeTags(input.tags),
     enabled: true,
   };
+}
+
+function mergeTags(existing: string[], incoming: string[]): string[] {
+  return [...new Set([...existing, ...incoming])];
 }
 
 function ensureValid(

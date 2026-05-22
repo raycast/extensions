@@ -521,7 +521,10 @@ function ReplacementForm(props: {
           }
           if (
             props.existing.some(
-              (item) => item.trigger === trigger && item.uuid !== editingUuid,
+              (item) =>
+                item.trigger === trigger &&
+                item.uuid !== editingUuid &&
+                item.replacementText !== values.replacementText,
             )
           ) {
             return "Trigger must be unique.";
