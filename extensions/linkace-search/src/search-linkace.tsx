@@ -20,13 +20,7 @@ import {
 import { SearchFiltersForm } from "./components/search-filters-form";
 import { DEFAULT_SEARCH_FILTERS, type LinkAceLink, type SearchFilters } from "./types";
 
-type CommandProps = {
-  arguments: {
-    searchTerm?: string;
-  };
-};
-
-export default function Command(props: CommandProps) {
+export default function Command(props: LaunchProps<{ arguments: Arguments.SearchLinkace }>) {
   const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState(props.arguments.searchTerm?.trim() ?? "");
   const [filters, setFilters] = useState<SearchFilters>(DEFAULT_SEARCH_FILTERS);
