@@ -17,6 +17,11 @@ import { useState, useEffect, useRef } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+interface ExtensionPreferences {
+  rememberSearchHistory: boolean;
+  useClipboardFallback: boolean;
+}
+
 interface SuggestItem {
   keyword: string;
   // raw title may contain <em> tags from B站 API
@@ -101,7 +106,7 @@ async function removeFromHistory(query: string): Promise<string[]> {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences.Index>();
+  const prefs = getPreferenceValues<ExtensionPreferences>();
 
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SuggestItem[]>([]);
