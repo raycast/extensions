@@ -8,6 +8,7 @@ import { useGameDetails } from "../hooks/game-details";
 import { useEffect, useReducer } from "react";
 import { useIPInfo } from "../hooks/ip-info";
 import { useServerRegion } from "../hooks/server-region";
+import { formatDatacenterLocation } from "../modules/rovalra-api";
 
 type PlaceResponse = {
   previousPageCursor: string | null;
@@ -115,14 +116,19 @@ function getSessionData(options?: GamePageOptions) {
 
   let serverLocationText: string | null = null;
   let serverLocationTitle: string | null = null;
+  let serverIPText: string | null = null;
 
   const { data: serverRegion, isLoading: serverRegionLoading } = useServerRegion(options?.dataCenterId);
 
   const serverLocation = getIPLocation(serverIP);
 
-  if (serverRegion?.locationText) {
-    serverLocationText = serverRegion.locationText;
+  if (serverRegion?.datacenter) {
+    serverLocationText = formatDatacenterLocation(serverRegion.datacenter);
     serverLocationTitle = "Server Location (Datacenter)";
+    if (serverIP) {
+      const { region } = serverRegion.datacenter;
+      serverIPText = region === "OTHER" ? serverIP : `${serverIP} (${region})`;
+    }
   } else if (serverLocation) {
     serverLocationText = `${serverLocation} (${serverIP})`;
     serverLocationTitle = "Server Location (Geolocation)";
@@ -140,6 +146,7 @@ function getSessionData(options?: GamePageOptions) {
     sessionPlayTimeText,
     serverLocationText,
     serverLocationTitle,
+    serverIPText,
     serverTypeText,
   };
 }
@@ -153,7 +160,7 @@ export function GamePage({ universeId, options }: RenderGamePageProps) {
 
   const { data: thumbnailUrls, isLoading: thumbnailDataLoading } = useGameThumbnails(universeId);
 
-  const { hasSessionData, sessionPlayTimeText, serverLocationText, serverLocationTitle, serverTypeText } =
+  const { hasSessionData, sessionPlayTimeText, serverLocationText, serverLocationTitle, serverIPText, serverTypeText } =
     getSessionData(options);
 
   const isLoading = gameDataLoading || thumbnailDataLoading;
@@ -229,6 +236,7 @@ ${thumbnailUrls.map((thumbnailUrl) => `![](${thumbnailUrl}?raycast-height=450)`)
           {serverLocationText && serverLocationTitle && (
             <Detail.Metadata.Label title={serverLocationTitle} text={serverLocationText} />
           )}
+          {serverIPText && <Detail.Metadata.Label title="Server IP" text={serverIPText} />}
           {sessionPlayTimeText && <Detail.Metadata.Label title="Session Time" text={sessionPlayTimeText} />}
           {serverTypeText && <Detail.Metadata.Label title="Server Type" text={serverTypeText} />}
 

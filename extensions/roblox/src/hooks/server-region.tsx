@@ -1,5 +1,5 @@
 import { useCachedPromise } from "@raycast/utils";
-import { getDatacenterById, formatServerLocation, type Datacenter } from "../modules/rovalra-api";
+import { getDatacenterById, formatDatacenterLocation, type Datacenter } from "../modules/rovalra-api";
 
 export interface ServerRegionInfo {
   dataCenterId: number;
@@ -16,7 +16,7 @@ async function resolveServerRegion(dataCenterId: number): Promise<ServerRegionIn
   return {
     dataCenterId,
     datacenter,
-    locationText: formatServerLocation(datacenter),
+    locationText: formatDatacenterLocation(datacenter),
   };
 }
 
