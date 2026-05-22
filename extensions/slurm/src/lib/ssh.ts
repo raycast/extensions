@@ -21,7 +21,7 @@ const CONTROL_PATH = path.join(CONTROL_DIR, "ssh-%C");
 
 function controlPersist(): string {
   const prefs = getPreferenceValues<Preferences>();
-  return prefs.controlPersist?.trim() || "10m";
+  return prefs.controlPersist?.trim() || "12h";
 }
 
 async function ensureControlDir(): Promise<void> {
