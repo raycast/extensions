@@ -26,7 +26,6 @@ export type FigaFriendlyErrorKind =
   | "rate-limited"
   | "validation-error"
   | "network-failure"
-  | "invalid-base-url"
   | "unexpected-response"
   | "request-failed"
   | "unexpected-error";

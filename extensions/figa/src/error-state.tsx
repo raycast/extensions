@@ -8,7 +8,6 @@ const ERROR_COLOR_BY_KIND: Partial<Record<FigaFriendlyError["kind"], Color>> = {
   "rate-limited": Color.Yellow,
   "paid-plan-required": Color.Orange,
   "network-failure": Color.Orange,
-  "invalid-base-url": Color.Orange,
 };
 
 export function FigaCommandErrorDetail({ error, onRetry }: { error: unknown; onRetry: () => void }) {
