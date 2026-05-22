@@ -44,6 +44,10 @@ export type CommandResult = {
 let resolvedBinaryPromise: Promise<string> | undefined;
 let resolvedPathPromise: Promise<string> | undefined;
 let resolvedModelsPromise: Promise<Option[]> | undefined;
+const binaryShellOutputStart = "__AIMEFLUX_BINARY_START__";
+const binaryShellOutputEnd = "__AIMEFLUX_BINARY_END__";
+const pathShellOutputStart = "__AIMEFLUX_PATH_START__";
+const pathShellOutputEnd = "__AIMEFLUX_PATH_END__";
 
 export function textValue(values: FormValues, key: string) {
   const value = values[key];
@@ -147,10 +151,13 @@ async function resolveAimefluxBinary() {
 async function resolveBinaryFromShell() {
   const result = await runProcess(
     "/bin/zsh",
-    ["-lc", "command -v aimeflux"],
+    [
+      "-lc",
+      `printf '${binaryShellOutputStart}'; command -v aimeflux; printf '${binaryShellOutputEnd}'`,
+    ],
     false,
   );
-  const binary = result.stdout.trim().split("\n").find(Boolean);
+  const binary = parseBinaryFromShellOutput(result.stdout);
 
   if (result.exitCode !== 0 || !binary) {
     throw new Error(
@@ -283,9 +290,16 @@ async function resolveShellPath() {
 
 async function resolvePathFromShell() {
   const result = await new Promise<CommandResult>((resolve, reject) => {
-    const child = spawn("/bin/zsh", ["-lc", 'printf %s "$PATH"'], {
-      stdio: "pipe",
-    });
+    const child = spawn(
+      "/bin/zsh",
+      [
+        "-lc",
+        `printf '${pathShellOutputStart}%s${pathShellOutputEnd}' "$PATH"`,
+      ],
+      {
+        stdio: "pipe",
+      },
+    );
 
     let stdout = "";
     let stderr = "";
@@ -304,7 +318,7 @@ async function resolvePathFromShell() {
 
     child.on("close", (exitCode) => {
       resolve({
-        commandLine: "/bin/zsh -lc 'printf %s \"$PATH\"'",
+        commandLine: `/bin/zsh -lc 'printf "${pathShellOutputStart}%s${pathShellOutputEnd}" "$PATH"'`,
         detached: false,
         exitCode: exitCode ?? 1,
         stdout: stdout.trim(),
@@ -312,15 +326,56 @@ async function resolvePathFromShell() {
       });
     });
   });
+  const shellPath = parsePathFromShellOutput(result.stdout);
 
-  if (result.exitCode !== 0 || !result.stdout.trim()) {
+  if (result.exitCode !== 0 || !shellPath) {
     return (
       process.env.PATH ||
       "/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
     );
   }
 
-  return result.stdout.trim();
+  return shellPath;
+}
+
+export function parseBinaryFromShellOutput(output: string) {
+  const value = extractTaggedShellValue(
+    output,
+    binaryShellOutputStart,
+    binaryShellOutputEnd,
+  );
+
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.startsWith("/"));
+}
+
+export function parsePathFromShellOutput(output: string) {
+  return extractTaggedShellValue(
+    output,
+    pathShellOutputStart,
+    pathShellOutputEnd,
+  ).trim();
+}
+
+function extractTaggedShellValue(
+  output: string,
+  startMarker: string,
+  endMarker: string,
+) {
+  const startIndex = output.lastIndexOf(startMarker);
+  if (startIndex < 0) {
+    return "";
+  }
+
+  const valueStart = startIndex + startMarker.length;
+  const endIndex = output.indexOf(endMarker, valueStart);
+  if (endIndex < 0) {
+    return "";
+  }
+
+  return output.slice(valueStart, endIndex);
 }
 
 function parseOptionList(output: string): Option[] {
