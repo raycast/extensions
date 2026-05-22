@@ -6,7 +6,8 @@
   "icon": "flighty.png",
   "author": "hrishabhn",
   "contributors": [
-    "damian_duchnowski"
+    "damian_duchnowski",
+    "effektsvk"
   ],
   "license": "MIT",
   "commands": [
