@@ -73,7 +73,7 @@ export default function SearchResults(
       searchBarAccessory={useVocabulary ? <VocabularySwitch onChange={setVocabulary} /> : null}
       searchText={search}
     >
-      {(!data && !historyData) || (data?.length === 0 && historyData?.length === 0) ? (
+      {data?.length === 0 && historyData.length === 0 ? (
         <List.EmptyView
           icon={"command-icon.png"}
           title={helperTitle ?? placeholder}
@@ -110,26 +110,28 @@ export default function SearchResults(
               ))}
             </List.Section>
           )}
-          <List.Section title="Results">
-            {data?.map((word) => (
-              <List.Item
-                icon={"command-icon.png"}
-                key={word.word}
-                title={word.word}
-                subtitle={word.defs !== undefined ? word.defs[0] : ""}
-                actions={
-                  <Actions word={word}>
-                    <Action
-                      title="Toggle Details"
-                      onAction={() => setShowDetails((d) => !d)}
-                      shortcut={{ key: "d", modifiers: ["cmd"] }}
-                    />
-                  </Actions>
-                }
-                detail={<List.Item.Detail markdown={getWordMarkdown(word)} />}
-              />
-            ))}
-          </List.Section>
+          {data && data.length > 0 && (
+            <List.Section title="Results">
+              {data.map((word) => (
+                <List.Item
+                  icon={"command-icon.png"}
+                  key={word.word}
+                  title={word.word}
+                  subtitle={word.defs !== undefined ? word.defs[0] : ""}
+                  actions={
+                    <Actions word={word}>
+                      <Action
+                        title="Toggle Details"
+                        onAction={() => setShowDetails((d) => !d)}
+                        shortcut={{ key: "d", modifiers: ["cmd"] }}
+                      />
+                    </Actions>
+                  }
+                  detail={<List.Item.Detail markdown={getWordMarkdown(word)} />}
+                />
+              ))}
+            </List.Section>
+          )}
         </>
       )}
     </List>
