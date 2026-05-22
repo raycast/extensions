@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.raycast/
+Support/
+.DS_Store
+coverage/
+.env
+.env.*
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
