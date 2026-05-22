@@ -3,6 +3,7 @@
 ## [More Precise Server Location] - {PR_MERGE_DATE}
 
 - Updated to show more precise server locations (uses a maintained server list endpoint, fallback to IP Geolocation)
+- Added 'Get Playing Game' support for Windows.
 - Update some small strings (`Place Id` -> `Place ID`, `Copy Root Place Id` -> `Copy Root Place ID`, etc...)
 
 ## [Security Maintenance] - 2026-05-21

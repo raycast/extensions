@@ -2,7 +2,7 @@ import BetterCache from "./better-cache";
 
 const ROVALRA_API_BASE = "https://apis.rovalra.com";
 const CACHE_KEY = "datacenters";
-const CACHE_TTL_SECONDS = 24 * 60 * 60;
+const CACHE_TTL_SECONDS = 60 * 60;
 
 export type DatacenterRegion =
   | "US-EAST"
@@ -108,7 +108,11 @@ export async function fetchDatacenterList(): Promise<DatacenterMap> {
     return cached;
   }
 
-  const response = await fetch(`${ROVALRA_API_BASE}/v1/datacenters/list`);
+  const response = await fetch(`${ROVALRA_API_BASE}/v1/datacenters/list`, {
+    headers: {
+      "User-Agent": "RobloxRaycastExtension",
+    },
+  });
   if (!response.ok) {
     if (cached) return cached;
     throw new Error(`Failed to fetch datacenters: ${response.status}`);

@@ -1,6 +1,13 @@
 import { readFileSync, statSync, readdirSync, existsSync, Stats } from "fs";
 import { join, extname } from "path";
-import { homedir } from "os";
+import { homedir, platform } from "os";
+
+export function getRobloxLogDirectory(): string {
+  if (platform() === "win32") {
+    return join(process.env.LOCALAPPDATA ?? homedir(), "Roblox", "logs");
+  }
+  return join(homedir(), "Library", "Logs", "Roblox");
+}
 
 export interface Message {
   Command: string;
@@ -55,6 +62,8 @@ export class LogMonitor {
   private static readonly LogLinePattern =
     /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z),[\d.]+,[0-9a-f]+,\d+(?:,(?:Info|Warning|Error|Debug))? (.*)$/;
 
+  private static readonly MacPlayerLogPattern = /^[0-9.]+_\d{8}T\d{6}Z_Player_[a-zA-Z0-9]+_last\.log$/;
+
   private inGame: boolean = false;
   private data: ActivityData = {
     PlaceId: 0,
@@ -70,7 +79,7 @@ export class LogMonitor {
   private reservedTeleportMarker: boolean = false;
 
   constructor(logFile?: string) {
-    this.logDirectory = join(homedir(), "Library", "Logs", "Roblox");
+    this.logDirectory = getRobloxLogDirectory();
 
     if (logFile && logFile.trim() !== "") {
       this.logLocation = logFile;
@@ -91,12 +100,13 @@ export class LogMonitor {
       return;
     }
 
+    const isWindows = platform() === "win32";
+
     const logFiles = files
       .filter((file: string) => extname(file).toLowerCase() === ".log")
-      .filter((file: string) => {
-        const pattern = /^[0-9.]+_\d{8}T\d{6}Z_Player_[a-zA-Z0-9]+_last\.log$/;
-        return pattern.test(file);
-      })
+      .filter((file: string) =>
+        isWindows ? file.toLowerCase().includes("player") : LogMonitor.MacPlayerLogPattern.test(file),
+      )
       .map((file: string) => {
         const fullPath: string = join(this.logDirectory, file);
         let stats: Stats;
