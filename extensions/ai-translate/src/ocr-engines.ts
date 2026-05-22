@@ -354,7 +354,7 @@ async function recognizeWithBaidu(imagePath: string, preferences: ExtensionPrefe
   const apiKey = preferences.baiduOcrAPIKey?.trim();
   const secretKey = preferences.baiduOcrSecretKey?.trim();
   if (!apiKey || !secretKey) {
-    throw new Error("Baidu OCR API Key or Secret Key is not configured.");
+    throw new OcrError("Baidu OCR API Key or Secret Key is not configured.");
   }
 
   const accessToken = await getBaiduAccessToken(apiKey, secretKey, getOCRTimeoutMs(preferences));
@@ -377,7 +377,7 @@ async function recognizeWithBaidu(imagePath: string, preferences: ExtensionPrefe
   );
 
   if (data.error_code) {
-    throw new Error(data.error_msg ?? `Baidu OCR error ${data.error_code}`);
+    throw new OcrError(data.error_msg ?? `Baidu OCR error ${data.error_code}`);
   }
 
   const words = (data.words_result ?? []).map((item) => item.words?.trim() ?? "");
