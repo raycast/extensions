@@ -13,6 +13,11 @@ const platformShortcut = (key: Keyboard.KeyEquivalent, modifiers: Keyboard.KeyMo
   },
 });
 
+const sharedShortcut = (key: Keyboard.KeyEquivalent, modifiers: Keyboard.KeyModifier[]): Keyboard.Shortcut => ({
+  macOS: { key, modifiers },
+  Windows: { key, modifiers },
+});
+
 /**
  * Shared action shortcuts for this extension.
  *
@@ -35,7 +40,7 @@ export const Shortcut = {
   OpenInTerminal: platformShortcut("o", ["cmd", "shift"]),
   RevealInFileManager: platformShortcut("f", ["cmd", "shift"]),
   Pin: platformShortcut("p", ["cmd", "shift"]),
-  UnpinAll: platformShortcut("x", ["cmd", "shift"]),
+  UnpinAll: sharedShortcut("x", ["ctrl", "shift"]),
   MoveLeft: platformShortcut("arrowLeft", ["cmd", "opt"]),
   MoveUp: platformShortcut("arrowUp", ["cmd", "opt"]),
   MoveRight: platformShortcut("arrowRight", ["cmd", "opt"]),

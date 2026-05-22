@@ -70,12 +70,7 @@ function getWindowsVSCodeInstallRoots(): string[] {
   return [...new Set(roots)];
 }
 
-function resolveWindowsVSCodeCLIPath(relativePath: string): string {
-  const candidates = getWindowsVSCodeInstallRoots().map((root) => path.join(root, relativePath));
-  return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
-}
-
-function resolveWindowsVSCodeInstallPath(relativePath: string): string {
+function resolveWindowsVSCodePath(relativePath: string): string {
   const candidates = getWindowsVSCodeInstallRoots().map((root) => path.join(root, relativePath));
   return candidates.find((candidate) => fs.existsSync(candidate)) ?? candidates[0];
 }
@@ -96,10 +91,8 @@ function cliPaths(): Record<string, string> {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     cliPaths = {
       Antigravity: path.join(programsFolder, "Antigravity", "bin", "antigravity.cmd"),
-      Code: resolveWindowsVSCodeCLIPath(path.join("Microsoft VS Code", "bin", "code.cmd")),
-      "Code - Insiders": resolveWindowsVSCodeCLIPath(
-        path.join("Microsoft VS Code Insiders", "bin", "code-insiders.cmd"),
-      ),
+      Code: resolveWindowsVSCodePath(path.join("Microsoft VS Code", "bin", "code.cmd")),
+      "Code - Insiders": resolveWindowsVSCodePath(path.join("Microsoft VS Code Insiders", "bin", "code-insiders.cmd")),
       Kiro: path.join(programsFolder, "Kiro", "bin", "kiro.cmd"),
       Cursor: path.join(programsFolder, "cursor", "resources", "app", "bin", "cursor.cmd"),
       Positron: path.join(programsFolder, "Positron", "bin", "positron.cmd"),
@@ -150,8 +143,8 @@ function programPaths(): Record<string, string> {
     const programsFolder = path.join(os.homedir(), "AppData", "Local", "Programs");
     programPaths = {
       Antigravity: path.join(programsFolder, "Antigravity"),
-      Code: resolveWindowsVSCodeInstallPath("Microsoft VS Code"),
-      "Code - Insiders": resolveWindowsVSCodeInstallPath("Microsoft VS Code Insiders"),
+      Code: resolveWindowsVSCodePath("Microsoft VS Code"),
+      "Code - Insiders": resolveWindowsVSCodePath("Microsoft VS Code Insiders"),
       Cursor: path.join(programsFolder, "cursor"),
       Kiro: path.join(programsFolder, "Kiro"),
       Positron: path.join(programsFolder, "Positron"),
