@@ -64,7 +64,6 @@ export default function Command(
   return result ? (
     <Detail
       isLoading={isLoading}
-      navigationTitle="INR to USD"
       markdown={[
         `&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`,
         `$$\\color{gray}\\Large\\text{${result.formattedCurrency}} \\;\\rightarrow\\; \\color{white}\\Huge\\text{${result.shortUsd.replace("$", "\\$")}}$$`,
@@ -108,9 +107,6 @@ export default function Command(
       }
     />
   ) : (
-    <Detail
-      navigationTitle="INR to USD"
-      markdown="## Currency Converter\n\nEnter an INR value"
-    />
+    <Detail markdown="## Currency Converter\n\nEnter an INR value" />
   );
 }

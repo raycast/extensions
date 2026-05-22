@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "inr-to-usd",
-  "description": "converts INR to USD",
+  "description": "Convert Indian Rupees to US Dollars using lakh, crore and other Indian number words",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",
@@ -28,9 +28,8 @@
     {
       "mode": "view",
       "name": "inr-usd",
-      "title": "INR to USD",
+      "title": "Convert INR to USD",
       "description": "Convert INR to USD with Indian number system support",
-      "subtitle": "Currency Converter",
       "arguments": [
         {
           "name": "inrValue",
@@ -41,7 +40,7 @@
       ]
     }
   ],
-  "title": "INR to USD",
+  "title": "INR to USD - Indian Number System",
   "author": "mohitkumardhiman0233",
   "platforms": [
     "macOS",
