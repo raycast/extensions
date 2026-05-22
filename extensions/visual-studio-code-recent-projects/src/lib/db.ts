@@ -72,7 +72,7 @@ async function warnRemoveNotSupported(title = "No removable recent entries found
  * them with `storage.json` metadata used by newer backup/profile flows.
  */
 export function useRecentEntries() {
-  const databasePath = getStateDatabasePath();
+  const databasePath = useMemo(() => getStateDatabasePath(), []);
   const fallbackEntries = useMemo(() => getFallbackEntries(), [databasePath]);
   const [suppressedStorageEntryKeys, setSuppressedStorageEntryKeys] = useState<Set<string>>(new Set());
   const storageEntryKeys = useMemo(
@@ -184,7 +184,8 @@ export function useRecentEntries() {
       if (isDatabaseEntry && parsedEntries) {
         await saveEntries(
           parsedEntries.filter((currentEntry) => !isSameEntry(currentEntry, entry)),
-          storageKey,
+          [storageKey],
+          databasePath,
         );
       }
 
@@ -257,7 +258,7 @@ export function useRecentEntries() {
           },
         })
       ) {
-        await saveEntries([], storageKey);
+        await saveEntries([], recentEntriesStorageKeys, databasePath);
         suppressStorageEntries(visibleStorageEntryKeys);
         await revalidate();
         showToast(
@@ -325,10 +326,16 @@ function getSharedDataFolderName() {
   return undefined;
 }
 
-async function saveEntries(entries: EntryLike[], storageKey: (typeof recentEntriesStorageKeys)[number]) {
+async function saveEntries(
+  entries: EntryLike[],
+  storageKeys: readonly (typeof recentEntriesStorageKeys)[number][],
+  databasePath: string,
+) {
   const data = JSON.stringify({ entries }).replace(/'/g, "''");
-  const query = `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('${storageKey}', '${data}');`;
-  await execFilePromise("sqlite3", [getStateDatabasePath(), query]);
+  const query = storageKeys
+    .map((storageKey) => `INSERT OR REPLACE INTO ItemTable (key, value) VALUES ('${storageKey}', '${data}');`)
+    .join("\n");
+  await execFilePromise("sqlite3", [databasePath, query]);
 }
 
 function getFallbackEntries(): EntryLike[] {

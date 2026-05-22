@@ -389,7 +389,7 @@ function getRemoteDisplay(entry: EntryLike, uri: string, subtitle?: string) {
   try {
     const remoteUri = new URL(uri);
     const remotePath = decodeURIComponent(remoteUri.pathname);
-    const remoteName = decodeURIComponent(basename(remotePath));
+    const remoteName = basename(remotePath);
     const remoteParentPath = dirname(remotePath);
 
     return {
