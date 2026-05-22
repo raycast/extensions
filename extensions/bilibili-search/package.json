@@ -12,8 +12,8 @@
   "commands": [
     {
       "name": "index",
-      "title": "Search Bilibili",
-      "subtitle": "Bilibili",
+      "title": "Bilibili Search",
+      "subtitle": "Bilibili Search",
       "description": "Search for videos, anime, live streams and users on Bilibili",
       "mode": "view",
       "icon": "command-icon.png",
