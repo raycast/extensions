@@ -1,6 +1,6 @@
 # Calibre Library Changelog
 
-## [Fix Search Reset] - {PR_MERGE_DATE}
+## [Fix Search Reset] - 2026-05-22
 
 ### Fixed
 
