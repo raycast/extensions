@@ -1,6 +1,6 @@
 # Scheduler Changelog
 
-## [Fix Raycast 2.0 Drafts] - {PR_MERGE_DATE}
+## [Fix Raycast 2.0 Drafts] - 2026-05-22
 
 - Fixed schedule form drafts in Raycast 2.0 by opening the create form as a top-level command so draft values are restored correctly.
 
