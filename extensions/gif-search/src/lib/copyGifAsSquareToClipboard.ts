@@ -1,10 +1,13 @@
 import path from "path";
 import { execFile } from "child_process";
+import { existsSync, mkdirSync } from "fs";
+import { writeFile, unlink } from "fs/promises";
 import { promisify } from "util";
-import { Clipboard } from "@raycast/api";
+import { Clipboard, environment } from "@raycast/api";
 import tempy from "tempy";
 
 const execFileAsync = promisify(execFile);
+const scriptFile = path.join(environment.supportPath, "copy-gif-as-square.swift");
 
 const MACOS_SQUARE_GIF_SCRIPT = `
 import CoreGraphics
@@ -120,17 +123,31 @@ export default async function copyGifAsSquareToClipboard(url: string, name: stri
 
   const response = await fetch(url);
 
-  if (response.status !== 200) {
+  if (!response.ok) {
     throw new Error(`GIF file download failed. Server responded with ${response.status}`);
   }
 
   const squareGifName = name || path.basename(url);
   const inputFile = await tempy.write(Buffer.from(await response.arrayBuffer()), { extension: "gif" });
   const file = tempy.file({ name: squareGifName });
-  const scriptFile = await tempy.write(MACOS_SQUARE_GIF_SCRIPT, { extension: "swift" });
 
-  await execFileAsync("/usr/bin/swift", [scriptFile, inputFile, file]);
-  await Clipboard.copy({ file });
+  try {
+    await ensureScriptFile();
+    await execFileAsync("/usr/bin/swift", [scriptFile, inputFile, file]);
+    await Clipboard.copy({ file });
+  } finally {
+    await unlink(inputFile).catch(() => undefined);
+  }
 
   return file;
+}
+
+async function ensureScriptFile() {
+  if (!existsSync(environment.supportPath)) {
+    mkdirSync(environment.supportPath, { recursive: true });
+  }
+
+  if (!existsSync(scriptFile)) {
+    await writeFile(scriptFile, MACOS_SQUARE_GIF_SCRIPT);
+  }
 }
