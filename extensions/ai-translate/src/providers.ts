@@ -84,9 +84,9 @@ export async function generateWithProvider(
       return await generateWithGeminiProtocol(config, prompt, timeoutMs, maxOutputTokens, options);
     }
     if (config.apiProtocol === "anthropic") {
-      return await generateWithAnthropicProtocol(config, prompt, timeoutMs, maxOutputTokens);
+      return await generateWithAnthropicProtocol(config, prompt, timeoutMs, maxOutputTokens, options);
     }
-    return await generateWithOpenAIProtocol(config, prompt, timeoutMs, maxOutputTokens);
+    return await generateWithOpenAIProtocol(config, prompt, timeoutMs, maxOutputTokens, options);
   } catch (error) {
     throw refineProviderError(error, config);
   }
@@ -137,7 +137,9 @@ async function generateWithAnthropicProtocol(
   prompt: { system: string; user: string },
   timeoutMs: number,
   maxOutputTokens: number,
+  options: GenerationOptions = {},
 ): Promise<string> {
+  const structuredPrompt = applyStructuredPromptOptions(prompt, options);
   const response = await postJson<AnthropicCompatibleResponse>(
     anthropicMessagesUrl(config.baseURL),
     timeoutMs,
@@ -150,8 +152,8 @@ async function generateWithAnthropicProtocol(
     },
     {
       model: config.model,
-      system: prompt.system,
-      messages: [{ role: "user", content: prompt.user }],
+      system: structuredPrompt.system,
+      messages: [{ role: "user", content: structuredPrompt.user }],
       max_tokens: maxOutputTokens,
       temperature: 0.3,
       stream: false,
@@ -175,6 +177,7 @@ async function generateWithOpenAIProtocol(
   prompt: { system: string; user: string },
   timeoutMs: number,
   maxOutputTokens: number,
+  options: GenerationOptions = {},
 ): Promise<string> {
   const body: Record<string, unknown> = {
     model: config.model,
@@ -185,6 +188,7 @@ async function generateWithOpenAIProtocol(
     stream: false,
   };
   applyOpenAIGenerationParams(body, config.model, maxOutputTokens, 0.3);
+  applyOpenAIResponseFormat(body, options);
 
   const response = await postJson<OpenAICompatibleResponse>(
     chatCompletionsUrl(config.baseURL),
@@ -421,6 +425,31 @@ function applyOpenAIGenerationParams(
 
   body.max_tokens = maxOutputTokens;
   body.temperature = temperature;
+}
+
+function applyOpenAIResponseFormat(body: Record<string, unknown>, options: GenerationOptions): void {
+  if (options.responseJsonSchema || options.responseMimeType === "application/json") {
+    body.response_format = { type: "json_object" };
+  }
+}
+
+function applyStructuredPromptOptions(
+  prompt: { system: string; user: string },
+  options: GenerationOptions,
+): { system: string; user: string } {
+  if (!options.responseJsonSchema && options.responseMimeType !== "application/json") {
+    return prompt;
+  }
+
+  const constraints = ["Return only a valid JSON object. Do not wrap it in Markdown or add commentary."];
+  if (options.responseJsonSchema) {
+    constraints.push(`JSON schema: ${JSON.stringify(options.responseJsonSchema)}`);
+  }
+
+  return {
+    system: `${prompt.system}\n\nStructured output requirements:\n${constraints.join("\n")}`,
+    user: prompt.user,
+  };
 }
 
 /**

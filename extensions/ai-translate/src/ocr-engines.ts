@@ -332,14 +332,19 @@ function openAIChatCompletionsUrl(baseURL: string): string {
 async function recognizeWithTesseract(imagePath: string, preferences: ExtensionPreferences): Promise<string> {
   const command = preferences.tesseractPath?.trim() || "tesseract";
   const languages = preferences.tesseractLanguages?.trim() || "eng";
-  const { stdout } = await execFileAsync(command, [imagePath, "stdout", "-l", languages], {
-    timeout: getOCRTimeoutMs(preferences),
-    maxBuffer: 10 * 1024 * 1024,
-  });
+  let stdout: string;
+  try {
+    ({ stdout } = await execFileAsync(command, [imagePath, "stdout", "-l", languages], {
+      timeout: getOCRTimeoutMs(preferences),
+      maxBuffer: 10 * 1024 * 1024,
+    }));
+  } catch (error) {
+    throw new OcrError(`Tesseract OCR failed: ${execErrorMessage(error)}`);
+  }
 
   const text = stdout.trim();
   if (!text) {
-    throw new Error("Tesseract returned no text.");
+    throw new OcrError("Tesseract returned no text.");
   }
 
   return text;

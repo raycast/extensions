@@ -1,7 +1,7 @@
 import { environment, getPreferenceValues, showHUD, showToast, Toast } from "@raycast/api";
 import { ChildProcess, execFile } from "child_process";
-import { mkdirSync, unlink, writeFileSync } from "fs";
-import { readdir, stat, unlink as unlinkAsync } from "fs/promises";
+import { unlink } from "fs";
+import { mkdir, readdir, stat, unlink as unlinkAsync, writeFile } from "fs/promises";
 import { join } from "path";
 
 const STALE_AUDIO_MS = 10 * 60 * 1000;
@@ -148,9 +148,9 @@ export async function speakText(text: string, options: SpeakOptions = {}): Promi
     const pcmData = Buffer.from(audioBase64, "base64");
     const wavData = wrapPCMInWAV(pcmData);
 
-    mkdirSync(environment.supportPath, { recursive: true });
+    await mkdir(environment.supportPath, { recursive: true });
     const audioPath = join(environment.supportPath, `tts-${Date.now()}-${Math.random().toString(16).slice(2)}.wav`);
-    writeFileSync(audioPath, wavData);
+    await writeFile(audioPath, wavData);
 
     const child = execFile("/usr/bin/afplay", [audioPath], (error) => {
       unlink(audioPath, () => undefined);
