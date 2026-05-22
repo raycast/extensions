@@ -1,14 +1,19 @@
 // fallow-ignore-next-line unresolved-import
 import { Action, ActionPanel, Color, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { getWorkspaceContext, toFriendlyError } from "./api/client";
+import { getWorkspaceContext } from "./api/client";
 import {
   FIGA_DEVELOPER_API_DOCS_URL,
   getFigaApiKeySettingsUrl,
-  getFigaBillingUrl,
   getFigaWorkspaceSettingsUrl,
 } from "./api/links";
-import type { FigaFriendlyError, FigaPlanTier, FigaWorkspaceContext } from "./api/types";
+import type {
+  FigaPlanTier,
+  FigaWorkspaceContext,
+  FigaWorkspaceContextCapabilities,
+} from "./api/types";
+import { FigaCommandErrorDetail } from "./error-state";
+import { escapeMarkdown } from "./format";
 
 export default function Command() {
   const { data, error, isLoading, revalidate } = usePromise(getWorkspaceContext);
@@ -21,15 +26,7 @@ export default function Command() {
 }
 
 function WorkspaceContextError({ error, onRetry }: { error: unknown; onRetry: () => void }) {
-  const friendlyError = toFriendlyError(error);
-
-  return (
-    <Detail
-      markdown={buildErrorMarkdown(friendlyError)}
-      metadata={<ErrorMetadata error={friendlyError} />}
-      actions={<ErrorActions error={friendlyError} onRetry={onRetry} />}
-    />
-  );
+  return <FigaCommandErrorDetail error={error} onRetry={onRetry} />;
 }
 
 function WorkspaceContextDetail({
@@ -94,38 +91,6 @@ function WorkspaceActions({
   );
 }
 
-function ErrorActions({ error, onRetry }: { error: FigaFriendlyError; onRetry: () => void }) {
-  return (
-    <ActionPanel>
-      <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
-      <Action
-        title="Open Extension Preferences"
-        icon={Icon.Cog}
-        onAction={openExtensionPreferences}
-      />
-      {shouldShowApiKeySettings(error) ? (
-        <Action.OpenInBrowser
-          title="Open API Key Settings"
-          icon={Icon.Key}
-          url={getFigaApiKeySettingsUrl()}
-        />
-      ) : null}
-      {error.kind === "paid-plan-required" ? (
-        <Action.OpenInBrowser
-          title="Open Billing Settings"
-          icon={Icon.CreditCard}
-          url={getFigaBillingUrl()}
-        />
-      ) : null}
-      <Action.OpenInBrowser
-        title="Open Developer API Docs"
-        icon={Icon.Book}
-        url={FIGA_DEVELOPER_API_DOCS_URL}
-      />
-    </ActionPanel>
-  );
-}
-
 function WorkspaceMetadata({ context }: { context: FigaWorkspaceContext }) {
   return (
     <Detail.Metadata>
@@ -139,6 +104,11 @@ function WorkspaceMetadata({ context }: { context: FigaWorkspaceContext }) {
         icon={Icon.Coins}
         text={context.workspace.baseCurrency}
       />
+      <Detail.Metadata.Label
+        title="Default Currency"
+        icon={Icon.Coins}
+        text={getDefaultBaseCurrency(context)}
+      />
       <Detail.Metadata.TagList title="Plan">
         <Detail.Metadata.TagList.Item
           text={formatPlanTier(context.plan.tier)}
@@ -151,6 +121,9 @@ function WorkspaceMetadata({ context }: { context: FigaWorkspaceContext }) {
         icon={Icon.Clock}
         text={formatUnixTime(context.generatedAt)}
       />
+      {context.schemaVersion === 2 ? (
+        <CapabilityMetadata capabilities={context.capabilities} />
+      ) : null}
       <Detail.Metadata.Separator />
       <Detail.Metadata.Link
         title="API Key Settings"
@@ -166,23 +139,57 @@ function WorkspaceMetadata({ context }: { context: FigaWorkspaceContext }) {
   );
 }
 
-function ErrorMetadata({ error }: { error: FigaFriendlyError }) {
+function CapabilityMetadata({ capabilities }: { capabilities: FigaWorkspaceContextCapabilities }) {
   return (
-    <Detail.Metadata>
-      <Detail.Metadata.TagList title="State">
-        <Detail.Metadata.TagList.Item text={formatErrorKind(error)} color={getErrorColor(error)} />
-      </Detail.Metadata.TagList>
-      {error.status !== undefined && error.status !== null ? (
-        <Detail.Metadata.Label title="HTTP Status" text={String(error.status)} />
-      ) : null}
-      {error.code ? <Detail.Metadata.Label title="Figa Error Code" text={error.code} /> : null}
+    <>
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Link
-        title="Developer API Docs"
-        text="Open docs"
-        target={FIGA_DEVELOPER_API_DOCS_URL}
-      />
-    </Detail.Metadata>
+      <Detail.Metadata.TagList title="Expenses">
+        <Detail.Metadata.TagList.Item
+          text="Read"
+          color={getCapabilityColor(capabilities.expenses.read)}
+        />
+        <Detail.Metadata.TagList.Item
+          text="Write"
+          color={getCapabilityColor(capabilities.expenses.write)}
+        />
+        <Detail.Metadata.TagList.Item
+          text="Delete"
+          color={getCapabilityColor(capabilities.expenses.delete)}
+        />
+        <Detail.Metadata.TagList.Item
+          text="Payments"
+          color={getCapabilityColor(capabilities.expenses.payments)}
+        />
+      </Detail.Metadata.TagList>
+      <Detail.Metadata.TagList title="Categories">
+        <Detail.Metadata.TagList.Item
+          text="Read"
+          color={getCapabilityColor(capabilities.categories.read)}
+        />
+        <Detail.Metadata.TagList.Item
+          text="Write"
+          color={getCapabilityColor(capabilities.categories.write)}
+        />
+        <Detail.Metadata.TagList.Item
+          text="Delete"
+          color={getCapabilityColor(capabilities.categories.delete)}
+        />
+      </Detail.Metadata.TagList>
+      <Detail.Metadata.TagList title="Recipients">
+        <Detail.Metadata.TagList.Item
+          text="Read"
+          color={getCapabilityColor(capabilities.recipients.read)}
+        />
+        <Detail.Metadata.TagList.Item
+          text="Write"
+          color={getCapabilityColor(capabilities.recipients.write)}
+        />
+        <Detail.Metadata.TagList.Item
+          text="Delete"
+          color={getCapabilityColor(capabilities.recipients.delete)}
+        />
+      </Detail.Metadata.TagList>
+    </>
   );
 }
 
@@ -203,6 +210,14 @@ function buildSuccessMarkdown(context: FigaWorkspaceContext): string {
     `| Monthly AI chat requests | ${formatLimit(limits.maxAiChatRequests)} |`,
     `| Monthly AI vision requests | ${formatLimit(limits.maxAiVisionRequests)} |`,
     "",
+    "## Defaults",
+    "",
+    "| Default | Value |",
+    "| --- | --- |",
+    `| Base currency | ${getDefaultBaseCurrency(context)} |`,
+    "",
+    buildCapabilitiesMarkdown(context),
+    "",
     "## API Contract",
     "",
     "- `GET /api/v1/context`",
@@ -210,22 +225,34 @@ function buildSuccessMarkdown(context: FigaWorkspaceContext): string {
   ].join("\n");
 }
 
-function buildErrorMarkdown(error: FigaFriendlyError): string {
+function buildCapabilitiesMarkdown(context: FigaWorkspaceContext): string {
+  if (context.schemaVersion !== 2) {
+    return [
+      "## Capabilities",
+      "",
+      "Capability discovery is not available from this API response.",
+    ].join("\n");
+  }
+
+  const capabilities = context.capabilities;
+
   return [
-    `# ${error.title}`,
+    "## Capabilities",
     "",
-    error.message,
-    "",
-    error.action ? `**Next step:** ${error.action}` : null,
-    error.kind === "paid-plan-required"
-      ? "API keys are checked against the current workspace plan at request time. A key created on Pro stops working after a downgrade to Free."
-      : null,
-    error.kind === "missing-api-key"
-      ? "Raycast stores the key in extension preferences as a password value. The raw key is never shown in this command."
-      : null,
-  ]
-    .filter(Boolean)
-    .join("\n\n");
+    "| Capability | State |",
+    "| --- | --- |",
+    `| expenses.read | ${formatCapability(capabilities.expenses.read)} |`,
+    `| expenses.write | ${formatCapability(capabilities.expenses.write)} |`,
+    `| expenses.delete | ${formatCapability(capabilities.expenses.delete)} |`,
+    `| expenses.payments | ${formatCapability(capabilities.expenses.payments)} |`,
+    `| categories.read | ${formatCapability(capabilities.categories.read)} |`,
+    `| categories.write | ${formatCapability(capabilities.categories.write)} |`,
+    `| categories.delete | ${formatCapability(capabilities.categories.delete)} |`,
+    `| recipients.read | ${formatCapability(capabilities.recipients.read)} |`,
+    `| recipients.write | ${formatCapability(capabilities.recipients.write)} |`,
+    `| recipients.delete | ${formatCapability(capabilities.recipients.delete)} |`,
+    `| workspaces.read | ${formatCapability(capabilities.workspaces.read)} |`,
+  ].join("\n");
 }
 
 function formatLimit(value: number | null): string {
@@ -244,33 +271,20 @@ function getPlanColor(tier: FigaPlanTier): Color {
   return Color.Yellow;
 }
 
+function getCapabilityColor(value: boolean): Color {
+  return value ? Color.Green : Color.SecondaryText;
+}
+
+function getDefaultBaseCurrency(context: FigaWorkspaceContext): string {
+  return context.schemaVersion === 2
+    ? context.defaults.baseCurrency
+    : context.workspace.baseCurrency;
+}
+
+function formatCapability(value: boolean): string {
+  return value ? "Available" : "Unavailable";
+}
+
 function formatUnixTime(value: number): string {
   return new Date(value * 1000).toLocaleString();
-}
-
-function shouldShowApiKeySettings(error: FigaFriendlyError): boolean {
-  return [
-    "invalid-api-key",
-    "paid-plan-required",
-    "insufficient-permissions",
-    "forbidden",
-    "validation-error",
-  ].includes(error.kind);
-}
-
-function formatErrorKind(error: FigaFriendlyError): string {
-  return error.kind
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function getErrorColor(error: FigaFriendlyError): Color {
-  if (error.kind === "rate-limited") return Color.Yellow;
-  if (error.kind === "network-failure" || error.kind === "invalid-base-url") return Color.Orange;
-  return Color.Red;
-}
-
-function escapeMarkdown(value: string): string {
-  return value.replace(/([\\`*_{}[\]()#+.!|-])/g, "\\$1");
 }

@@ -46,6 +46,56 @@
       "title": "Show Workspace Context",
       "description": "Validate the configured Figa API key and show workspace context.",
       "mode": "view"
+    },
+    {
+      "name": "search-expenses",
+      "title": "Search Expenses",
+      "description": "Search current-month Figa expenses and quick views.",
+      "mode": "view"
+    },
+    {
+      "name": "show-monthly-summary",
+      "title": "Show Monthly Summary",
+      "description": "Review recent monthly expense totals for the current workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "create-expense",
+      "title": "Create Expense",
+      "description": "Create a Figa expense in the current workspace.",
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "name",
+          "placeholder": "Expense name",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "amount",
+          "placeholder": "Amount",
+          "type": "text",
+          "required": false
+        },
+        {
+          "name": "date",
+          "placeholder": "YYYY-MM-DD",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "search-categories",
+      "title": "Search Categories",
+      "description": "Search Figa categories for the current workspace.",
+      "mode": "view"
+    },
+    {
+      "name": "search-recipients",
+      "title": "Search Recipients",
+      "description": "Search Figa recipients for the current workspace.",
+      "mode": "view"
     }
   ],
   "dependencies": {

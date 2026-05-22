@@ -1,8 +1,19 @@
 import { getFigaPreferences } from "./preferences";
 import type {
+  FigaCategoryListResponse,
+  FigaExpenseCreatePayload,
+  FigaExpenseCreateResponse,
+  FigaExpensePaymentListResponse,
+  FigaExpensePaymentPayload,
+  FigaExpensePaymentResponse,
+  FigaExpenseListQuery,
+  FigaExpenseListResponse,
   FigaApiFailure,
   FigaApiResponse,
   FigaFriendlyError,
+  FigaMonthlyTotalsQuery,
+  FigaMonthlyTotalsResponse,
+  FigaRecipientListResponse,
   FigaWorkspaceContext,
 } from "./types";
 
@@ -18,6 +29,8 @@ interface FriendlyErrorRule {
   matches: (status: number, code: string | null) => boolean;
   friendly: FigaFriendlyError | ((message: string) => FigaFriendlyError);
 }
+
+type QueryValue = string | number | boolean | undefined;
 
 const FRIENDLY_ERROR_RULES: FriendlyErrorRule[] = [
   {
@@ -102,6 +115,58 @@ class FigaApiError extends Error {
 
 export function getWorkspaceContext(): Promise<FigaWorkspaceContext> {
   return requestFiga<FigaWorkspaceContext>("/api/v1/context");
+}
+
+export function getCategories(): Promise<FigaCategoryListResponse> {
+  return requestFiga<FigaCategoryListResponse>("/api/v1/categories");
+}
+
+export function getRecipients(): Promise<FigaRecipientListResponse> {
+  return requestFiga<FigaRecipientListResponse>("/api/v1/recipients");
+}
+
+export function getExpenses(query: FigaExpenseListQuery): Promise<FigaExpenseListResponse> {
+  return requestFiga<FigaExpenseListResponse>(withQuery("/api/v1/expenses", query));
+}
+
+export function createExpense(
+  payload: FigaExpenseCreatePayload,
+  idempotencyKey: string,
+): Promise<FigaExpenseCreateResponse> {
+  return requestFiga<FigaExpenseCreateResponse>("/api/v1/expenses", {
+    method: "POST",
+    body: payload,
+    idempotencyKey,
+  });
+}
+
+export function getExpensePayments(expenseId: string): Promise<FigaExpensePaymentListResponse> {
+  return requestFiga<FigaExpensePaymentListResponse>(
+    `/api/v1/expenses/${encodeURIComponent(expenseId)}/payments`,
+  );
+}
+
+export function recordExpensePayment(
+  expenseId: string,
+  payload: FigaExpensePaymentPayload,
+  idempotencyKey: string,
+): Promise<FigaExpensePaymentResponse> {
+  return requestFiga<FigaExpensePaymentResponse>(
+    `/api/v1/expenses/${encodeURIComponent(expenseId)}/payments`,
+    {
+      method: "POST",
+      body: payload,
+      idempotencyKey,
+    },
+  );
+}
+
+export function getMonthlyTotals(
+  query: FigaMonthlyTotalsQuery,
+): Promise<FigaMonthlyTotalsResponse> {
+  return requestFiga<FigaMonthlyTotalsResponse>(
+    withQuery("/api/v1/expenses/monthly-totals", query),
+  );
 }
 
 async function requestFiga<T>(path: string, options: FigaRequestOptions = {}): Promise<T> {
@@ -206,6 +271,18 @@ function buildApiUrl(path: string, apiBaseUrl: string): URL {
   } catch {
     throw createInvalidBaseUrlError(apiBaseUrl);
   }
+}
+
+function withQuery(path: string, query: object): string {
+  const params = new URLSearchParams();
+
+  for (const [key, value] of Object.entries(query) as Array<[string, QueryValue]>) {
+    if (value === undefined) continue;
+    params.set(key, String(value));
+  }
+
+  const queryString = params.toString();
+  return queryString ? `${path}?${queryString}` : path;
 }
 
 function createMissingApiKeyError(): FigaApiError {
