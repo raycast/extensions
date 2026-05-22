@@ -140,38 +140,32 @@ end tell`,
       // Ghostty wraps --initial-command as `bash --noprofile --norc -c "exec -l <cmd>"`,
       // which loses the user's PATH because no rc files are sourced. Re-exec into an interactive
       // shell so ~/.zshrc (where nvm/claude/codex live) is loaded before running the resume command.
-      // No need to cd — Ghostty's --working-directory already moves us there.
-      const initialCmd = `${getUserShell()} -ic ${shellQuote(getResumeCommand(meta, prefs, { withCwd: false }))}`;
-      await runProcess("/usr/bin/open", [
-        "-na",
-        "Ghostty.app",
-        "--args",
-        `--working-directory=${meta.projectPath}`,
-        `--initial-command=${initialCmd}`,
-      ]);
+      // No need to cd inside the command when --working-directory does it for us.
+      const hasCwd = !!meta.projectPath;
+      const initialCmd = `${getUserShell()} -ic ${shellQuote(getResumeCommand(meta, prefs, { withCwd: !hasCwd }))}`;
+      const args = ["-na", "Ghostty.app", "--args"];
+      if (hasCwd) args.push(`--working-directory=${meta.projectPath}`);
+      args.push(`--initial-command=${initialCmd}`);
+      await runProcess("/usr/bin/open", args);
       break;
     }
 
-    case "WezTerm":
-      // WezTerm's --cwd already handles the cd.
-      await runProcess("/usr/bin/open", [
-        "-na",
-        "WezTerm.app",
-        "--args",
-        "start",
-        "--cwd",
-        meta.projectPath,
-        "--",
-        getUserShell(),
-        "-ic",
-        getResumeCommand(meta, prefs, { withCwd: false }),
-      ]);
+    case "WezTerm": {
+      // WezTerm's --cwd already handles the cd when we have a project path; otherwise let the
+      // resume command itself carry the cd (which it skips when projectPath is empty).
+      const hasCwd = !!meta.projectPath;
+      const args = ["-na", "WezTerm.app", "--args", "start"];
+      if (hasCwd) args.push("--cwd", meta.projectPath);
+      args.push("--", getUserShell(), "-ic", getResumeCommand(meta, prefs, { withCwd: !hasCwd }));
+      await runProcess("/usr/bin/open", args);
       break;
+    }
 
     case "Warp":
       // Warp has no native CLI for passing commands; just open the project directory and
       // let the user paste the resume command (available via the Copy Resume Command action).
-      await runProcess("/usr/bin/open", ["-a", "Warp", meta.projectPath]);
+      // Fall back to launching Warp without a path when projectPath is unknown.
+      await runProcess("/usr/bin/open", meta.projectPath ? ["-a", "Warp", meta.projectPath] : ["-a", "Warp"]);
       break;
 
     default:
