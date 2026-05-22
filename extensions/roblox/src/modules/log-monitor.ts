@@ -16,6 +16,7 @@ export interface ActivityData {
   PlaceId: number;
   JobId: string;
   MachineAddress: string;
+  DataCenterId?: number;
   AccessCode?: string;
   UniverseId?: number;
   UserId?: number;
@@ -38,6 +39,7 @@ export class LogMonitor {
   private static readonly GameJoiningUniverseEntry = "[FLog::GameJoinLoadTime] Report game_join_loadtime:";
   private static readonly GameJoiningUDMUXEntry = "[FLog::Network] UDMUX Address = ";
   private static readonly GameJoinedEntry = "[FLog::Network] serverId:";
+  private static readonly GameDatacenterEntry = "[DFLog::NetworkClient] Transport selection:";
   private static readonly GameDisconnectedEntry = "[FLog::Network] Time to disconnect replication data:";
   private static readonly GameLeavingEntry = "[FLog::SingleSurfaceApp] leaveUGCGameInternal";
 
@@ -48,8 +50,10 @@ export class LogMonitor {
   private static readonly GameJoiningUDMUXPattern =
     /UDMUX Address = ([0-9.]+), Port = [0-9]+ \| RCC Server Address = ([0-9.]+), Port = [0-9]+/;
   private static readonly GameJoinedEntryPattern = /serverId: ([0-9.]+)\|[0-9]+/;
+  private static readonly GameDatacenterEntryPattern = /DatacenterId=(\d+)/i;
   private static readonly GameMessageEntryPattern = /\[BloxstrapRPC\] (.*)/;
-  private static readonly LogLinePattern = /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z),[\d.]+,[0-9a-f]+,\d+ (.*)$/;
+  private static readonly LogLinePattern =
+    /^(\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z),[\d.]+,[0-9a-f]+,\d+(?:,(?:Info|Warning|Error|Debug))? (.*)$/;
 
   private inGame: boolean = false;
   private data: ActivityData = {
@@ -156,6 +160,14 @@ export class LogMonitor {
           JobId: "",
           MachineAddress: "",
         };
+      }
+      return;
+    }
+
+    if (lineContent.includes(LogMonitor.GameDatacenterEntry)) {
+      const match = lineContent.match(LogMonitor.GameDatacenterEntryPattern);
+      if (match?.[1] && this.data.PlaceId !== 0) {
+        this.data.DataCenterId = parseInt(match[1], 10);
       }
       return;
     }
