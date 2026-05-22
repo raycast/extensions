@@ -23,6 +23,7 @@ const VISIBILITY_TO_API_VALUE: Record<Exclude<VisibilityFilter, "all">, string> 
 
 const execFileAsync = promisify(execFile);
 const MACOS_PROXY_CACHE_TTL = 60_000;
+const MAX_PAGE_SIZE = 500;
 
 let quickJSPromise: Promise<QuickJS> | undefined;
 let macOsProxySettingsCache:
@@ -198,7 +199,7 @@ export function buildLinkSearchUrl(baseUrl: string, query: string, filters: Sear
   }
 
   url.searchParams.set("order_by", filters.sortOrder);
-  url.searchParams.set("per_page", "0");
+  url.searchParams.set("per_page", String(MAX_PAGE_SIZE));
 
   return url.toString();
 }
@@ -520,7 +521,7 @@ function parsePacProxyResult(result: string) {
   return undefined;
 }
 
-function buildTaxonomyUrl(baseUrl: string, type: "lists" | "tags", perPage = 0) {
+function buildTaxonomyUrl(baseUrl: string, type: "lists" | "tags", perPage = MAX_PAGE_SIZE) {
   const url = new URL(`${baseUrl}/api/v2/${type}`);
   url.searchParams.set("order_by", "name");
   url.searchParams.set("order_dir", "asc");

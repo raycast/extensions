@@ -55,11 +55,11 @@ export default function Command() {
         statusText: "In progress",
       });
 
-      try {
-        const proxyConfiguration = await resolveProxyConfiguration(searchUrl, preferredProxyUrl);
-        const resolvedProxyUrl = proxyConfiguration.proxyUrl;
-        const proxySource = formatProxySource(proxyConfiguration.source);
+      const proxyConfiguration = await resolveProxyConfiguration(searchUrl, preferredProxyUrl);
+      const resolvedProxyUrl = proxyConfiguration.proxyUrl;
+      const proxySource = formatProxySource(proxyConfiguration.source);
 
+      try {
         const result = await runConnectionTest({
           baseUrl: normalizedBaseUrl,
           apiKey: preferences.apiKey,
@@ -111,9 +111,6 @@ export default function Command() {
           return;
         }
 
-        const proxyConfiguration = await resolveProxyConfiguration(searchUrl, preferredProxyUrl);
-        const resolvedProxyUrl = proxyConfiguration.proxyUrl;
-        const proxySource = formatProxySource(proxyConfiguration.source);
         const message = getReadableErrorMessage(error, resolvedProxyUrl);
         const markdown = [
           "# LinkAce Connection Test",

@@ -55,18 +55,6 @@ export function LinkDetail({ link, baseUrl, apiKey, proxyUrl }: Props) {
   );
 }
 
-export function LinkListItemDetail({ link, baseUrl, apiKey, proxyUrl }: Props) {
-  const { error, isLoading, resolvedLink } = useResolvedLink({ link, baseUrl, apiKey, proxyUrl });
-
-  return (
-    <List.Item.Detail
-      isLoading={isLoading}
-      markdown={buildMarkdown(resolvedLink, error)}
-      metadata={buildListDetailMetadata(resolvedLink)}
-    />
-  );
-}
-
 export function getListItemIcon(link: LinkAceLink) {
   const hostname = getHostname(link.url);
 
@@ -189,34 +177,6 @@ function buildDetailMetadata(link: LinkAceLink) {
         {lists.length > 0 ? lists.map((list) => <Detail.Metadata.TagList.Item key={list.id} text={list.name} />) : null}
       </Detail.Metadata.TagList>
     </Detail.Metadata>
-  );
-}
-
-function buildListDetailMetadata(link: LinkAceLink) {
-  const tags = link.tags ?? [];
-  const lists = link.lists ?? [];
-
-  return (
-    <List.Item.Detail.Metadata>
-      <List.Item.Detail.Metadata.Link title="URL" target={link.url} text={link.url} />
-      <List.Item.Detail.Metadata.Label title="Domain" text={getHostname(link.url) ?? "-"} />
-      <List.Item.Detail.Metadata.Label title="Visibility" text={formatVisibility(link.visibility)} />
-      <List.Item.Detail.Metadata.Label title="Status" text={formatStatus(link.status)} />
-      <List.Item.Detail.Metadata.Separator />
-      <List.Item.Detail.Metadata.Label title="Created" text={formatDate(link.created_at)} />
-      <List.Item.Detail.Metadata.Label title="Updated" text={formatDate(link.updated_at)} />
-      <List.Item.Detail.Metadata.Separator />
-      <List.Item.Detail.Metadata.TagList title="Tags">
-        {tags.length > 0
-          ? tags.map((tag) => <List.Item.Detail.Metadata.TagList.Item key={tag.id} text={tag.name} />)
-          : null}
-      </List.Item.Detail.Metadata.TagList>
-      <List.Item.Detail.Metadata.TagList title="Lists">
-        {lists.length > 0
-          ? lists.map((list) => <List.Item.Detail.Metadata.TagList.Item key={list.id} text={list.name} />)
-          : null}
-      </List.Item.Detail.Metadata.TagList>
-    </List.Item.Detail.Metadata>
   );
 }
 
