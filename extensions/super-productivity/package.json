@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "super-productivity",
+  "description": "Browse and manage Super Productivity tasks from Raycast.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "ray develop",
+    "test": "vitest run",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "build": "ray build",
+    "publish": "npx @raycast/api@latest publish",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.13",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.19.17",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^4.1.6"
+  },
+  "icon": "extension-icon.png",
+  "commands": [
+    {
+      "name": "show-tags",
+      "title": "Show Tags",
+      "description": "Browse your tags and view tasks with those tags",
+      "mode": "view"
+    },
+    {
+      "name": "show-project",
+      "title": "Show Projects",
+      "description": "Browse your projects and view tasks within those projects",
+      "mode": "view"
+    },
+    {
+      "name": "show-tasks",
+      "title": "Show Tasks",
+      "description": "Browse active tasks and manage them from Raycast",
+      "mode": "view"
+    },
+    {
+      "name": "show-today-tasks",
+      "title": "Show Today Tasks",
+      "description": "Browse tasks scheduled for today in Super Productivity",
+      "mode": "view"
+    },
+    {
+      "name": "show-archived-tasks",
+      "title": "Show Archived Tasks",
+      "description": "Browse archived tasks and restore or delete them",
+      "mode": "view"
+    },
+    {
+      "name": "show-all-tasks",
+      "title": "Show All Tasks",
+      "description": "Browse active and archived tasks from Super Productivity",
+      "mode": "view"
+    },
+    {
+      "name": "show-current-task",
+      "title": "Show Current Task",
+      "description": "View and control the task currently tracked in Super Productivity",
+      "mode": "view"
+    },
+    {
+      "name": "create-new-task",
+      "title": "Create Task",
+      "description": "Create a task or subtask in Super Productivity",
+      "mode": "view"
+    },
+    {
+      "name": "quick-add-task",
+      "title": "Quick Add Task",
+      "description": "Quickly create a Super Productivity task",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "title",
+          "placeholder": "Task title",
+          "type": "text",
+          "required": true
+        },
+        {
+          "name": "notes",
+          "placeholder": "Notes",
+          "type": "text",
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "stop-current-task",
+      "title": "Stop Current Task",
+      "description": "Stop the task currently tracked in Super Productivity",
+      "mode": "no-view"
+    }
+  ],
+  "title": "Super Productivity",
+  "author": "yoav_cohen",
+  "platforms": [
+    "Windows",
+    "macOS"
+  ],
+  "categories": [
+    "Applications",
+    "Developer Tools",
+    "Productivity"
+  ]
+}
