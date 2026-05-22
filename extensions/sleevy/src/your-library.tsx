@@ -85,6 +85,16 @@ function YourLibrary() {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
+      async parseResponse(response) {
+        if (response.status === 401) {
+          await oauthClient.removeTokens();
+          throw new Error("Unauthorized. Run the command again to reconnect.");
+        }
+        if (!response.ok) {
+          throw new Error(`Request failed (HTTP ${response.status})`);
+        }
+        return (await response.json()) as SavedItemsResponse;
+      },
       async onError(error) {
         await showToast({
           style: Toast.Style.Failure,

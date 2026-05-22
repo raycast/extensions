@@ -64,7 +64,8 @@ async function sleeveIt() {
       const error = (await response.json()) as { url: string };
       await showHUD(`❌ Invalid URL: ${error.url}`);
     } else if (response.status === 401) {
-      await showHUD("❌ Unauthorized. Reconnect via the Sleevy web app.");
+      await oauthClient.removeTokens();
+      await showHUD("❌ Unauthorized. Run the command again to reconnect.");
     } else {
       await showHUD(`❌ Failed to save (HTTP ${response.status})`);
     }
