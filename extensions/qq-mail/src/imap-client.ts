@@ -1,7 +1,8 @@
 import { ImapFlow, MailboxObject, ListResponse } from "imapflow";
 import { simpleParser, ParsedMail } from "mailparser";
 import { getPreferenceValues } from "@raycast/api";
-import { Email, EmailAddress, Folder } from "./types";
+import { Email, Folder } from "./types";
+import { buildEmailFromMessage, checkHasAttachment, checkIsArchive } from "./utils";
 
 const QQ_IMAP_HOST = "imap.qq.com";
 const QQ_IMAP_PORT = 993;
@@ -45,10 +46,6 @@ async function withClient<T>(operation: (client: ImapFlow) => Promise<T>): Promi
       }
     }
   }
-}
-
-export async function disconnectClient(): Promise<void> {
-  // No-op now since we create fresh connections
 }
 
 export async function listFolders(): Promise<Folder[]> {
@@ -96,16 +93,6 @@ export async function listFolders(): Promise<Folder[]> {
   });
 }
 
-function parseAddresses(addresses: { name?: string; address?: string }[] | undefined): EmailAddress[] {
-  if (!addresses) return [];
-  return addresses
-    .filter((addr) => addr.address)
-    .map((addr) => ({
-      name: addr.name,
-      address: addr.address!,
-    }));
-}
-
 interface FetchEmailsOptions {
   folderPath: string;
   limit?: number;
@@ -126,25 +113,13 @@ async function fetchStarredEmailsFromFolder(folderPath: string): Promise<Email[]
       const uids = (searchResult as number[]).sort((a, b) => b - a);
       const folderEmails: Email[] = [];
 
-      for await (const message of client.fetch(
+      const msgList = client.fetch(
         uids,
         { uid: true, flags: true, envelope: true, bodyStructure: true, source: { maxLength: 10000 } },
         { uid: true },
-      )) {
-        const envelope = message.envelope;
-        folderEmails.push({
-          mailboxPath: folderPath,
-          uid: message.uid,
-          messageId: envelope?.messageId || "",
-          subject: envelope?.subject || "(No Subject)",
-          from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
-          to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
-          cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
-          date: envelope?.date || new Date(),
-          flags: message.flags instanceof Set ? [...message.flags] : Array.isArray(message.flags) ? message.flags : [],
-          hasAttachment: checkHasAttachment(message.bodyStructure),
-          preview: extractPreview(message.source),
-        });
+      );
+      for await (const message of msgList) {
+        folderEmails.push(buildEmailFromMessage(folderPath, message));
       }
       return folderEmails;
     } finally {
@@ -224,21 +199,7 @@ export async function fetchEmails(options: FetchEmailsOptions): Promise<Email[]>
             matched++;
             if (matched <= offset) continue; // skip emails before the current page offset
 
-            const envelope = message.envelope;
-            emails.push({
-              mailboxPath: folderPath,
-              uid: message.uid,
-              messageId: envelope?.messageId || "",
-              subject: envelope?.subject || "(No Subject)",
-              from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
-              to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
-              cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
-              date: envelope?.date || new Date(),
-              flags:
-                message.flags instanceof Set ? [...message.flags] : Array.isArray(message.flags) ? message.flags : [],
-              hasAttachment,
-              preview: extractPreview(message.source),
-            });
+            emails.push(buildEmailFromMessage(folderPath, message));
 
             if (emails.length >= limit) break;
           }
@@ -247,27 +208,13 @@ export async function fetchEmails(options: FetchEmailsOptions): Promise<Email[]>
         // For non-attachment filters: slice UIDs directly for O(1) pagination
         const limitedUids = sortedUids.slice(offset, offset + limit);
 
-        for await (const message of client.fetch(
+        const msgList = client.fetch(
           limitedUids,
           { uid: true, flags: true, envelope: true, bodyStructure: true, source: { maxLength: 10000 } },
           { uid: true },
-        )) {
-          const hasAttachment = checkHasAttachment(message.bodyStructure);
-          const envelope = message.envelope;
-          emails.push({
-            mailboxPath: folderPath,
-            uid: message.uid,
-            messageId: envelope?.messageId || "",
-            subject: envelope?.subject || "(No Subject)",
-            from: parseAddresses(envelope?.from as { name?: string; address?: string }[]),
-            to: parseAddresses(envelope?.to as { name?: string; address?: string }[]),
-            cc: parseAddresses(envelope?.cc as { name?: string; address?: string }[]),
-            date: envelope?.date || new Date(),
-            flags:
-              message.flags instanceof Set ? [...message.flags] : Array.isArray(message.flags) ? message.flags : [],
-            hasAttachment,
-            preview: extractPreview(message.source),
-          });
+        );
+        for await (const message of msgList) {
+          emails.push(buildEmailFromMessage(folderPath, message));
         }
       }
 
@@ -277,42 +224,6 @@ export async function fetchEmails(options: FetchEmailsOptions): Promise<Email[]>
       lock.release();
     }
   });
-}
-
-function checkHasAttachment(bodyStructure: { disposition?: string; childNodes?: unknown[] } | undefined): boolean {
-  if (!bodyStructure) return false;
-
-  if (bodyStructure.disposition === "attachment") {
-    return true;
-  }
-
-  if (bodyStructure.childNodes) {
-    for (const child of bodyStructure.childNodes) {
-      if (checkHasAttachment(child as { disposition?: string; childNodes?: unknown[] })) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-function extractPreview(source: Buffer | undefined): string {
-  if (!source) return "";
-
-  const text = source.toString("utf-8");
-  // Try to extract text after headers (double newline)
-  const parts = text.split(/\r?\n\r?\n/);
-  if (parts.length > 1) {
-    const body = parts.slice(1).join(" ");
-    // Clean up and truncate
-    return body
-      .replace(/<[^>]*>/g, "") // Remove HTML tags
-      .replace(/\s+/g, " ") // Normalize whitespace
-      .trim()
-      .substring(0, 200);
-  }
-  return "";
 }
 
 export async function fetchEmailBody(mailboxPath: string, uid: number): Promise<{ text?: string; html?: string }> {
@@ -403,18 +314,6 @@ export async function deleteEmail(mailboxPath: string, uid: number): Promise<voi
   });
 }
 
-export async function moveToFolder(mailboxPath: string, uid: number, targetFolder: string): Promise<void> {
-  return withClient(async (client) => {
-    const lock = await client.getMailboxLock(mailboxPath);
-
-    try {
-      await client.messageMove(uid, targetFolder, { uid: true });
-    } finally {
-      lock.release();
-    }
-  });
-}
-
 export interface Attachment {
   filename: string;
   contentType: string;
@@ -459,15 +358,20 @@ export async function fetchAttachments(mailboxPath: string, uid: number): Promis
 }
 
 export async function archiveEmail(mailboxPath: string, uid: number): Promise<void> {
-  // Try to find Archive folder
-  const folders = await listFolders();
-  const archiveFolder = folders.find(
-    (f) => f.specialUse === "\\Archive" || f.path.toLowerCase() === "archive" || f.name.toLowerCase() === "archive",
-  );
+  return withClient(async (client) => {
+    // Find archive folder within the same connection
+    const list = await client.list();
+    const archiveFolder = list.find((f) => checkIsArchive(f));
 
-  if (archiveFolder) {
-    await moveToFolder(mailboxPath, uid, archiveFolder.path);
-  } else {
-    throw new Error("Archive folder not found");
-  }
+    if (!archiveFolder) {
+      throw new Error("Archive folder not found");
+    }
+
+    const lock = await client.getMailboxLock(mailboxPath);
+    try {
+      await client.messageMove(uid, archiveFolder.path, { uid: true });
+    } finally {
+      lock.release();
+    }
+  });
 }
