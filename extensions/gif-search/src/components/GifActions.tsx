@@ -18,6 +18,7 @@ import { GifDetails } from "./GifDetails";
 import { IGif } from "../models/gif";
 
 import copyFileToClipboard from "../lib/copyFileToClipboard";
+import copyGifAsSquareToClipboard from "../lib/copyGifAsSquareToClipboard";
 import stripQParams from "../lib/stripQParams";
 import downloadFile from "../lib/downloadFile";
 import { removeGifFromCache } from "../lib/cachedGifs";
@@ -105,6 +106,18 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       await showToast({ style: Toast.Style.Success, title: `Copied GIF "${path.basename(file)}" to clipboard` });
     } catch (error) {
       await showFailureToast(error, { title: "Could not copy GIF" });
+    }
+  }
+
+  async function copyGifAsSquare() {
+    try {
+      await showToast({ style: Toast.Style.Animated, title: "Copying GIF as Square" });
+      const file = await copyGifAsSquareToClipboard(item.gif_url, item.download_name);
+      await trackUsage();
+      await closeMainWindow();
+      await showToast({ style: Toast.Style.Success, title: `Copied square GIF "${path.basename(file)}"` });
+    } catch (error) {
+      await showFailureToast(error, { title: "Could not copy GIF as square" });
     }
   }
 
@@ -274,6 +287,21 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
       onPush={trackUsage}
     />
   );
+  const copySquareGif =
+    process.platform === "darwin" ? (
+      <Action
+        icon={Icon.Crop}
+        key="copySquareGif"
+        title="Copy GIF as Square"
+        onAction={copyGifAsSquare}
+        shortcut={{
+          macOS: { modifiers: ["cmd", "shift"], key: "s" },
+          Windows: { modifiers: ["ctrl", "shift"], key: "s" },
+        }}
+      />
+    ) : (
+      <Action icon={Icon.Crop} key="copySquareGif" title="Copy GIF as Square (macOS Only)" />
+    );
 
   const copyPageUrl = url ? (
     <Action.CopyToClipboard
@@ -310,7 +338,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
 
   const actions: Array<(React.JSX.Element | undefined)[]> = [
     [copyFile, pasteFile, copyGifUrl, pasteGifUrl, copyGifMarkdown, pasteGifMarkdown],
-    [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined],
+    [toggleFav, removeRecent, showViewDetails ? viewDetails : undefined, copySquareGif],
     [copyPageUrl, openUrlInBrowser, downloadFileAction],
   ];
 
