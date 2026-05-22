@@ -1,6 +1,6 @@
 # Buildkite Changelog
 
-## [Build Graph & Unblock Steps] - {PR_MERGE_DATE}
+## [Build Graph & Unblock Steps] - 2026-05-22
 
 - Added a "Show Build Graph" action on each build that renders the build's steps grouped by dependency stage, with state icons and step dependencies.
 - Added an "Unblock Step" action for blocked manual steps so pipelines can be unblocked without leaving Raycast.
