@@ -68,14 +68,14 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.104.12",
-    "@raycast/utils": "^2.2.3",
-    "@vscode/ripgrep": "^1.17.1"
+    "@raycast/utils": "^2.2.3"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "22.13.14",
     "@types/react": "19.0.12",
     "@vitest/coverage-v8": "^4.1.4",
+    "@vscode/ripgrep": "^1.17.1",
     "eslint": "^8.57.1",
     "prettier": "^3.5.3",
     "typescript": "^5.8.2",

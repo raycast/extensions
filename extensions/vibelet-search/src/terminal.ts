@@ -2,19 +2,9 @@ import { execFile } from "child_process";
 import { getPreferenceValues } from "@raycast/api";
 import type { SessionMeta, SessionSource } from "./types";
 
-interface Prefs {
-  defaultTerminal: string;
-  claudeBinary: string;
-  codexBinary: string;
-}
-
-function getPrefs(): Prefs {
-  const p = getPreferenceValues<Partial<Prefs>>();
-  return {
-    defaultTerminal: p.defaultTerminal || "Terminal",
-    claudeBinary: p.claudeBinary || "claude",
-    codexBinary: p.codexBinary || "codex",
-  };
+function getPrefs(): Preferences {
+  // Defaults come from package.json's `preferences[].default` — Raycast guarantees these are populated.
+  return getPreferenceValues<Preferences>();
 }
 
 function getUserShell(): string {
@@ -41,7 +31,11 @@ export interface ResumeCommandOpts {
  * App-sourced sessions still resume via CLI: the conversation jsonl is shared with the CLI,
  * and the CLIs accept the same session id.
  */
-export function getResumeCommand(meta: SessionMeta, prefs: Prefs = getPrefs(), opts: ResumeCommandOpts = {}): string {
+export function getResumeCommand(
+  meta: SessionMeta,
+  prefs: Preferences = getPrefs(),
+  opts: ResumeCommandOpts = {},
+): string {
   const { withCwd = true, skipPermissions = false } = opts;
 
   let cmd: string;
@@ -78,7 +72,7 @@ export async function openInApp(meta: SessionMeta): Promise<void> {
  * Build a full shell command line: cd to project, then run resume.
  * Used by terminal apps that send a single string into an interactive shell.
  */
-function buildFullResumeShellCommand(meta: SessionMeta, prefs: Prefs): string {
+function buildFullResumeShellCommand(meta: SessionMeta, prefs: Preferences): string {
   return getResumeCommand(meta, prefs, { withCwd: true });
 }
 

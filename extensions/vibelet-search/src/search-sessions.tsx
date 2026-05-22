@@ -11,7 +11,7 @@ import {
   closeMainWindow,
 } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { loadAllSessionMetas, loadSessionMessages, searchSessionContent } from "./parsers";
 import { getResumeCommand, openInApp, openResumeInTerminal, sourceFamily } from "./terminal";
 import {
@@ -186,7 +186,6 @@ const CONTENT_SEARCH_LIMIT = 100;
 
 export default function SearchSessions() {
   const [searchText, setSearchText] = useState("");
-  const contentSearchCache = useRef(new Map<string, Map<string, string>>());
 
   const { data: allMetas, isLoading: isLoadingMetas } = useCachedPromise(
     async () => {
@@ -201,18 +200,16 @@ export default function SearchSessions() {
     { keepPreviousData: true },
   );
 
-  // Content search - only triggered when query is non-empty (keyed by filePath)
-  const contentMatches = useMemo(() => {
-    if (!searchText.trim() || !allMetas || searchText.length < 2) return new Map<string, string>();
-
-    const cacheKey = searchText.toLowerCase();
-    const cached = contentSearchCache.current.get(cacheKey);
-    if (cached) return cached;
-
-    const results = searchSessionContent(searchText, CONTENT_SEARCH_LIMIT);
-    contentSearchCache.current.set(cacheKey, results);
-    return results;
-  }, [searchText, allMetas]);
+  // Content search runs ripgrep asynchronously so the worker event loop stays free for IPC.
+  // useCachedPromise dedupes by args (searchText) — typing "abc" doesn't fan out into stale runs.
+  const { data: contentMatches } = useCachedPromise(
+    async (q: string, hasMetas: boolean) => {
+      if (!q.trim() || q.length < 2 || !hasMetas) return new Map<string, string>();
+      return searchSessionContent(q, CONTENT_SEARCH_LIMIT);
+    },
+    [searchText, !!allMetas],
+    { keepPreviousData: true },
+  );
 
   // O(1) filePath -> meta lookup, used for merging content-search results into the list
   const metaByFilePath = useMemo(() => {
@@ -241,11 +238,13 @@ export default function SearchSessions() {
     }
 
     // Then content matches (keyed by filePath, O(1) lookup via metaByFilePath)
-    for (const [filePath, snippet] of contentMatches) {
-      const meta = metaByFilePath.get(filePath);
-      if (meta && !seen.has(meta.id)) {
-        results.push({ ...meta, matchSnippet: snippet });
-        seen.add(meta.id);
+    if (contentMatches) {
+      for (const [filePath, snippet] of contentMatches) {
+        const meta = metaByFilePath.get(filePath);
+        if (meta && !seen.has(meta.id)) {
+          results.push({ ...meta, matchSnippet: snippet });
+          seen.add(meta.id);
+        }
       }
     }
 

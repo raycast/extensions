@@ -1,7 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as os from "os";
-import { execFileSync } from "child_process";
+import { execFile } from "child_process";
+import { promisify } from "util";
 import {
   claudeAdapter,
   codexAdapter,
@@ -588,10 +589,13 @@ function resolveRipgrepPath(): string | undefined {
  * Search content across all session files using ripgrep.
  * Returns a map of filePath -> snippet. Limited to `limit` matches.
  *
- * Ripgrep runs as a subprocess so we don't pull hundreds of MB of JSONL into the Raycast Worker
- * heap. We then parse each matched line through our adapters to extract a clean text snippet.
+ * Async so the Raycast extension worker stays responsive while ripgrep runs:
+ * a synchronous spawn here would stall the IPC channel to the host on every
+ * keystroke that triggers a content search.
  */
-export function searchSessionContent(query: string, limit: number): Map<string, string> {
+const execFileAsync = promisify(execFile);
+
+export async function searchSessionContent(query: string, limit: number): Promise<Map<string, string>> {
   const results = new Map<string, string>();
   if (!query.trim() || query.length < 2) return results;
 
@@ -609,7 +613,7 @@ export function searchSessionContent(query: string, limit: number): Map<string, 
 
   let output: string;
   try {
-    output = execFileSync(
+    const { stdout } = await execFileAsync(
       rgPath,
       [
         "--fixed-strings",
@@ -632,12 +636,14 @@ export function searchSessionContent(query: string, limit: number): Map<string, 
         timeout: 15000,
       },
     );
+    output = stdout;
   } catch (err) {
     // ripgrep exits with code 1 when there are no matches — that's not an error.
     // Anything else (timeouts, OOM, ENOENT, code >= 2) IS an error and should be surfaced.
-    const e = err as { status?: number; stderr?: Buffer; message?: string };
-    if (e.status === 1) return results;
-    warn(`ripgrep search failed (status=${e.status}):`, e.stderr?.toString() || e.message);
+    const e = err as { code?: number; stderr?: string | Buffer; message?: string };
+    if (e.code === 1) return results;
+    const stderrText = typeof e.stderr === "string" ? e.stderr : e.stderr?.toString();
+    warn(`ripgrep search failed (code=${e.code}):`, stderrText || e.message);
     return results;
   }
 
