@@ -112,7 +112,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   async function copyGifAsSquare() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Copying GIF Square" });
-      const file = await copyGifAsSquareToClipboard(item.gif_url, item.download_name);
+      const file = await copyGifAsSquareToClipboard(item.download_url, item.download_name);
       await trackUsage();
       await closeMainWindow();
       await showToast({ style: Toast.Style.Success, title: `Copied square GIF "${path.basename(file)}"` });
@@ -139,7 +139,7 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   async function pasteGifSquare() {
     try {
       await showToast({ style: Toast.Style.Animated, title: "Pasting GIF Square" });
-      const file = await copyGifAsSquareToClipboard(item.gif_url, item.download_name);
+      const file = await copyGifAsSquareToClipboard(item.download_url, item.download_name);
       await trackUsage();
       await closeMainWindow();
       await Clipboard.paste({ file });
@@ -241,15 +241,11 @@ export function GifActions({ item, showViewDetails, visitGifItem, mutate }: GifA
   const copySquareGif =
     process.platform === "darwin" ? (
       <Action icon={Icon.Clipboard} key="copySquareGif" title="Copy GIF Square" onAction={copyGifAsSquare} />
-    ) : (
-      <Action icon={Icon.Clipboard} key="copySquareGif" title="Copy GIF Square (macOS Only)" />
-    );
+    ) : undefined;
   const pasteSquareGif =
     process.platform === "darwin" ? (
       <Action icon={Icon.Clipboard} key="pasteSquareGif" title="Paste GIF Square" onAction={pasteGifSquare} />
-    ) : (
-      <Action icon={Icon.Clipboard} key="pasteSquareGif" title="Paste GIF Square (macOS Only)" />
-    );
+    ) : undefined;
   const pasteGifUrl = (
     <Action.Paste
       key="pasteGifUrl"
