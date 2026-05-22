@@ -1,6 +1,6 @@
 # TablePro Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Version] - 2026-05-22
 
 First release. Pair the extension with TablePro and drive the app from Raycast and Raycast AI.
 
