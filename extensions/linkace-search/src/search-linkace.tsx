@@ -18,7 +18,7 @@ import {
   getListItemSubtitle,
 } from "./components/link-detail";
 import { SearchFiltersForm } from "./components/search-filters-form";
-import { DEFAULT_SEARCH_FILTERS, type LinkAceLink, type LinkAcePreferences, type SearchFilters } from "./types";
+import { DEFAULT_SEARCH_FILTERS, type LinkAceLink, type SearchFilters } from "./types";
 
 type CommandProps = {
   arguments: {
@@ -27,7 +27,7 @@ type CommandProps = {
 };
 
 export default function Command(props: CommandProps) {
-  const preferences = getPreferenceValues<LinkAcePreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const [searchText, setSearchText] = useState(props.arguments.searchTerm?.trim() ?? "");
   const [filters, setFilters] = useState<SearchFilters>(DEFAULT_SEARCH_FILTERS);
   const [links, setLinks] = useState<LinkAceLink[]>([]);

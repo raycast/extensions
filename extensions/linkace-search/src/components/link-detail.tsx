@@ -1,4 +1,5 @@
 import { Action, ActionPanel, Color, Detail, Icon, List } from "@raycast/api";
+import { getFavicon } from "@raycast/utils";
 import { useEffect, useMemo, useState } from "react";
 import { buildLinkAceItemUrl, fetchLinkDetails, getReadableErrorMessage, isAbortError } from "../linkace-api";
 import { type LinkAceLink } from "../types";
@@ -70,7 +71,7 @@ export function getListItemIcon(link: LinkAceLink) {
   const hostname = getHostname(link.url);
 
   if (hostname) {
-    return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=64`;
+    return getFavicon(`https://${hostname}`, { fallback: Icon.Link });
   }
 
   return Icon.Link;

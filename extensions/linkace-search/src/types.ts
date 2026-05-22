@@ -61,12 +61,6 @@ export type LinkAcePaginatedResponse<T> = LinkAceApiError & {
   per_page?: number | string;
 };
 
-export type LinkAcePreferences = {
-  linkaceUrl: string;
-  apiKey: string;
-  proxyUrl?: string;
-};
-
 export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
   searchTitle: true,
   searchDescription: true,

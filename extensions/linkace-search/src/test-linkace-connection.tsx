@@ -17,7 +17,6 @@ import {
   resolveProxyConfiguration,
   runConnectionTest,
 } from "./linkace-api";
-import { type LinkAcePreferences } from "./types";
 
 type TestState = {
   isLoading: boolean;
@@ -29,7 +28,7 @@ type TestState = {
 };
 
 export default function Command() {
-  const preferences = getPreferenceValues<LinkAcePreferences>();
+  const preferences = getPreferenceValues<Preferences>();
   const normalizedBaseUrl = useMemo(() => normalizeBaseUrl(preferences.linkaceUrl), [preferences.linkaceUrl]);
   const preferredProxyUrl = preferences.proxyUrl?.trim();
   const [reloadToken, setReloadToken] = useState(0);

@@ -416,10 +416,15 @@ async function getMacOsProxySettings() {
     return await macOsProxySettingsCache.promise;
   }
 
-  const promise = (async () => {
-    const { stdout } = await execFileAsync("/usr/sbin/scutil", ["--proxy"]);
-    return parseMacOsProxySettings(stdout);
-  })();
+  const promise = execFileAsync("/usr/sbin/scutil", ["--proxy"])
+    .then(({ stdout }) => parseMacOsProxySettings(stdout))
+    .catch((error) => {
+      if (macOsProxySettingsCache?.promise === promise) {
+        macOsProxySettingsCache = undefined;
+      }
+
+      throw error;
+    });
 
   macOsProxySettingsCache = {
     expiresAt: Date.now() + MACOS_PROXY_CACHE_TTL,
