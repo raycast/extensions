@@ -89,10 +89,7 @@ async function saveToHistory(query: string, enabled: boolean): Promise<void> {
   if (!enabled || !query.trim()) return;
   try {
     const history = await loadHistory();
-    const deduped = [query, ...history.filter((h) => h !== query)].slice(
-      0,
-      MAX_HISTORY,
-    );
+    const deduped = [query, ...history.filter((h) => h !== query)].slice(0, MAX_HISTORY);
     await LocalStorage.setItem(HISTORY_KEY, JSON.stringify(deduped));
   } catch {
     // silently ignore storage errors
@@ -207,11 +204,7 @@ export default function Command() {
                 icon={{ source: Icon.Clock, tintColor: Color.SecondaryText }}
                 actions={
                   <ActionPanel>
-                    <Action.OpenInBrowser
-                      title="Search"
-                      url={buildSearchUrl(h)}
-                      onOpen={() => handleOpen(h)}
-                    />
+                    <Action.OpenInBrowser title="Search" url={buildSearchUrl(h)} onOpen={() => handleOpen(h)} />
                     <Action.CopyToClipboard
                       title="Copy Search URL"
                       content={buildSearchUrl(h)}
@@ -286,10 +279,7 @@ export default function Command() {
                 title="Open in Browser"
                 icon={Icon.Globe}
                 onAction={async () => {
-                  await saveToHistory(
-                    item.keyword,
-                    prefs.rememberSearchHistory,
-                  );
+                  await saveToHistory(item.keyword, prefs.rememberSearchHistory);
                   await open(buildSearchUrl(item.keyword));
                   await closeMainWindow();
                 }}
