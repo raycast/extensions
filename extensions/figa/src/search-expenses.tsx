@@ -12,12 +12,7 @@ import {
   toFriendlyError,
 } from "./api/client";
 import { FIGA_DEVELOPER_API_DOCS_URL, getFigaExpenseUrl, getFigaExpensesUrl } from "./api/links";
-import type {
-  FigaExpense,
-  FigaExpenseListQuery,
-  FigaExpenseListResponse,
-  FigaWorkspaceContext,
-} from "./api/types";
+import type { FigaExpense, FigaExpenseListQuery, FigaExpenseListResponse, FigaWorkspaceContext } from "./api/types";
 import { ExpensePaymentPermissionDetail, ReadCapabilityGate } from "./read-capability-gate";
 import {
   canRecordExpensePayments,
@@ -45,11 +40,7 @@ interface ExpenseCommandData {
 export default function Command() {
   const currentMonth = useMemo(getCurrentMonth, []);
   const [statusFilter, setStatusFilter] = useState<ExpenseStatusFilter>("all");
-  const state = usePromise(loadExpenseCommandData, [
-    currentMonth.year,
-    currentMonth.month,
-    statusFilter,
-  ]);
+  const state = usePromise(loadExpenseCommandData, [currentMonth.year, currentMonth.month, statusFilter]);
 
   return (
     <ExpenseCommandView
@@ -82,18 +73,11 @@ function ExpenseCommandView({
   const monthLabel = formatMonthLabel(currentMonth);
 
   return (
-    <ReadCapabilityGate
-      context={data?.context}
-      error={error}
-      onRetry={revalidate}
-      resource="expenses"
-    >
+    <ReadCapabilityGate context={data?.context} error={error} onRetry={revalidate} resource="expenses">
       <List
         isLoading={isLoading}
         searchBarPlaceholder={`Search ${monthLabel} expenses`}
-        searchBarAccessory={
-          <StatusFilterDropdown value={statusFilter} onChange={onStatusFilterChange} />
-        }
+        searchBarAccessory={<StatusFilterDropdown value={statusFilter} onChange={onStatusFilterChange} />}
       >
         <List.EmptyView
           icon={Icon.Receipt}
@@ -126,11 +110,7 @@ async function loadExpenseCommandData(
   return { context, expenses };
 }
 
-function buildExpenseListQuery(
-  year: number,
-  month: number,
-  statusFilter: ExpenseStatusFilter,
-): FigaExpenseListQuery {
+function buildExpenseListQuery(year: number, month: number, statusFilter: ExpenseStatusFilter): FigaExpenseListQuery {
   return {
     year,
     month,
@@ -253,26 +233,13 @@ function ExpenseActions({
   return (
     <ActionPanel>
       <Action.OpenInBrowser title="Open Expense in Figa" icon={Icon.Link} url={expenseUrl} />
-      <ExpensePaymentAction
-        context={context}
-        currency={currency}
-        expense={expense}
-        onRefresh={onRefresh}
-      />
-      <Action.CopyToClipboard
-        title="Copy Expense Name"
-        icon={Icon.CopyClipboard}
-        content={expense.name}
-      />
+      <ExpensePaymentAction context={context} currency={currency} expense={expense} onRefresh={onRefresh} />
+      <Action.CopyToClipboard title="Copy Expense Name" icon={Icon.CopyClipboard} content={expense.name} />
       <Action.Paste title="Paste Expense Name" icon={Icon.Clipboard} content={expense.name} />
       <Action.CopyToClipboard title="Copy Amount" icon={Icon.Coins} content={formattedAmount} />
       <Action.Paste title="Paste Amount" icon={Icon.Coins} content={formattedAmount} />
       <Action.CopyToClipboard title="Copy Expense ID" icon={Icon.Hashtag} content={expense.id} />
-      <Action.OpenInBrowser
-        title="Open Current Month Expenses"
-        icon={Icon.List}
-        url={expensesUrl}
-      />
+      <Action.OpenInBrowser title="Open Current Month Expenses" icon={Icon.List} url={expensesUrl} />
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
     </ActionPanel>
   );
@@ -375,18 +342,11 @@ async function markExpensePaid({
   }
 }
 
-function confirmPaymentAction(
-  expense: FigaExpense,
-  remainingAmount: number,
-  currency: string,
-): Promise<boolean> {
+function confirmPaymentAction(expense: FigaExpense, remainingAmount: number, currency: string): Promise<boolean> {
   return confirmAlert({
     icon: Icon.CheckCircle,
     title: "Mark Expense Paid?",
-    message: `${expense.name} will be paid with a ${formatMoney(
-      remainingAmount,
-      currency,
-    )} payment.`,
+    message: `${expense.name} will be paid with a ${formatMoney(remainingAmount, currency)} payment.`,
     primaryAction: {
       title: "Record Payment",
     },
@@ -397,13 +357,7 @@ function canOfferPaymentAction(expense: FigaExpense): boolean {
   return !expense.isPaid && !expense.isSkipped && expense.instanceType !== "template";
 }
 
-function ListLevelActions({
-  data,
-  onRefresh,
-}: {
-  data?: ExpenseCommandData;
-  onRefresh: () => void;
-}) {
+function ListLevelActions({ data, onRefresh }: { data?: ExpenseCommandData; onRefresh: () => void }) {
   return (
     <ActionPanel>
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
@@ -414,24 +368,14 @@ function ListLevelActions({
           url={getFigaExpensesUrl(data.context.workspace.id)}
         />
       ) : null}
-      <Action
-        title="Open Extension Preferences"
-        icon={Icon.Cog}
-        onAction={openExtensionPreferences}
-      />
-      <Action.OpenInBrowser
-        title="Open Developer API Docs"
-        icon={Icon.Book}
-        url={FIGA_DEVELOPER_API_DOCS_URL}
-      />
+      <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
+      <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
     </ActionPanel>
   );
 }
 
 function buildExpenseSubtitle(expense: FigaExpense): string {
-  return [expense.context.categoryName, expense.context.recipientName ?? "No recipient"]
-    .filter(Boolean)
-    .join(" · ");
+  return [expense.context.categoryName, expense.context.recipientName ?? "No recipient"].filter(Boolean).join(" · ");
 }
 
 function buildSectionTitle(
@@ -439,8 +383,7 @@ function buildSectionTitle(
   monthLabel: string,
   metadata?: FigaExpenseListResponse["metadata"],
 ): string {
-  const prefix =
-    STATUS_FILTERS.find((filter) => filter.value === statusFilter)?.title ?? "Expenses";
+  const prefix = STATUS_FILTERS.find((filter) => filter.value === statusFilter)?.title ?? "Expenses";
   if (!metadata) return `${prefix} · ${monthLabel}`;
   return `${prefix} · ${monthLabel} · ${metadata.totalCount} total`;
 }
@@ -472,8 +415,7 @@ function isPresentString(value: string | null | undefined): value is string {
 }
 
 function getExpenseStatus(expense: FigaExpense): { title: string; color: Color; icon: Icon } {
-  if (expense.isSkipped)
-    return { title: "Skipped", color: Color.SecondaryText, icon: Icon.MinusCircle };
+  if (expense.isSkipped) return { title: "Skipped", color: Color.SecondaryText, icon: Icon.MinusCircle };
   if (expense.isPaid) return { title: "Paid", color: Color.Green, icon: Icon.CheckCircle };
   return { title: "Unpaid", color: Color.Yellow, icon: Icon.Circle };
 }

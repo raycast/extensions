@@ -27,9 +27,7 @@ export function ReadCapabilityGate({
 }) {
   if (error) return <FigaCommandErrorDetail error={error} onRetry={onRetry} />;
   if (context && !canReadResource(context, resource)) {
-    return (
-      <ReadCapabilityPermissionDetail context={context} resource={resource} onRetry={onRetry} />
-    );
+    return <ReadCapabilityPermissionDetail context={context} resource={resource} onRetry={onRetry} />;
   }
 
   return <>{children}</>;
@@ -139,11 +137,7 @@ function CapabilityPermissionDetail({
       ].join("\n")}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Workspace"
-            icon={Icon.Building}
-            text={context.workspace.name}
-          />
+          <Detail.Metadata.Label title="Workspace" icon={Icon.Building} text={context.workspace.name} />
           <Detail.Metadata.Label title="Workspace ID" text={context.workspace.id} />
           <Detail.Metadata.TagList title="Required Capability">
             <Detail.Metadata.TagList.Item text={capability} color={Color.Red} />
@@ -163,11 +157,7 @@ function CapabilityPermissionDetail({
             icon={Icon.Key}
             url={getFigaApiKeySettingsUrl(context.workspace.id)}
           />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Cog}
-            onAction={openExtensionPreferences}
-          />
+          <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     />

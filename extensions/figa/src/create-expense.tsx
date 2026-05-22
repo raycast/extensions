@@ -2,13 +2,7 @@
 import * as Raycast from "@raycast/api";
 import { usePromise } from "@raycast/utils";
 import { useMemo, useRef, useState } from "react";
-import {
-  createExpense,
-  getCategories,
-  getRecipients,
-  getWorkspaceContext,
-  toFriendlyError,
-} from "./api/client";
+import { createExpense, getCategories, getRecipients, getWorkspaceContext, toFriendlyError } from "./api/client";
 import { FIGA_DEVELOPER_API_DOCS_URL, getFigaExpenseUrl, getFigaExpensesUrl } from "./api/links";
 import type {
   FigaCategory,
@@ -29,17 +23,7 @@ import {
 } from "./format";
 import { ExpenseWriteGate, ReadCapabilityGate } from "./read-capability-gate";
 
-const {
-  Action,
-  ActionPanel,
-  Color,
-  Detail,
-  Form,
-  Icon,
-  Toast,
-  openExtensionPreferences,
-  showToast,
-} = Raycast;
+const { Action, ActionPanel, Color, Detail, Form, Icon, Toast, openExtensionPreferences, showToast } = Raycast;
 const NO_RECIPIENT_VALUE = "__figa_no_recipient__";
 const NEW_CATEGORY_VALUE = "__figa_new_category__";
 const NEW_RECIPIENT_VALUE = "__figa_new_recipient__";
@@ -108,12 +92,7 @@ function CreateExpenseCommandView({
     <ExpenseWriteGate context={data?.context} error={error} onRetry={revalidate}>
       <ReadCapabilityGate context={data?.context} onRetry={revalidate} resource="categories">
         <ReadCapabilityGate context={data?.context} onRetry={revalidate} resource="recipients">
-          <CreateExpenseContent
-            args={args}
-            data={data}
-            isLoading={isLoading}
-            onRetry={revalidate}
-          />
+          <CreateExpenseContent args={args} data={data} isLoading={isLoading} onRetry={revalidate} />
         </ReadCapabilityGate>
       </ReadCapabilityGate>
     </ExpenseWriteGate>
@@ -176,10 +155,7 @@ function CreateExpenseForm({
   recipients: FigaRecipient[];
   onRefresh: () => void;
 }) {
-  const initialValues = useMemo(
-    () => buildInitialValues(args, context, categories),
-    [args, context, categories],
-  );
+  const initialValues = useMemo(() => buildInitialValues(args, context, categories), [args, context, categories]);
   const [values, setValues] = useState<CreateExpenseFormValues>(initialValues);
   const [errors, setErrors] = useState<CreateExpenseFormErrors>({});
   const [createdExpense, setCreatedExpense] = useState<FigaExpense | null>(null);
@@ -226,9 +202,7 @@ function CreateExpenseForm({
       ...current,
       categoryId: value,
       newCategoryName:
-        value === NEW_CATEGORY_VALUE && newCategorySearchName
-          ? newCategorySearchName
-          : current.newCategoryName,
+        value === NEW_CATEGORY_VALUE && newCategorySearchName ? newCategorySearchName : current.newCategoryName,
     }));
     setErrors((current) => ({ ...current, categoryId: undefined, newCategoryName: undefined }));
   }
@@ -239,9 +213,7 @@ function CreateExpenseForm({
       ...current,
       recipientId: value,
       newRecipientName:
-        value === NEW_RECIPIENT_VALUE && newRecipientSearchName
-          ? newRecipientSearchName
-          : current.newRecipientName,
+        value === NEW_RECIPIENT_VALUE && newRecipientSearchName ? newRecipientSearchName : current.newRecipientName,
     }));
     setErrors((current) => ({ ...current, recipientId: undefined, newRecipientName: undefined }));
   }
@@ -255,9 +227,7 @@ function CreateExpenseForm({
     return submitExpense(payload);
   }
 
-  async function validateAndToast(
-    input: CreateExpenseFormValues,
-  ): Promise<FigaExpenseCreatePayload | null> {
+  async function validateAndToast(input: CreateExpenseFormValues): Promise<FigaExpenseCreatePayload | null> {
     const validation = validateFormValues(input);
     setErrors(validation.errors);
 
@@ -312,16 +282,8 @@ function CreateExpenseForm({
             icon={Icon.List}
             url={getFigaExpensesUrl(context.workspace.id)}
           />
-          <Action.OpenInBrowser
-            title="Open Developer API Docs"
-            icon={Icon.Book}
-            url={FIGA_DEVELOPER_API_DOCS_URL}
-          />
-          <Action
-            title="Open Extension Preferences"
-            icon={Icon.Cog}
-            onAction={openExtensionPreferences}
-          />
+          <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
+          <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
         </ActionPanel>
       }
     >
@@ -466,24 +428,12 @@ function CreatedExpenseDetail({
       ].join("\n")}
       metadata={
         <Detail.Metadata>
-          <Detail.Metadata.Label
-            title="Workspace"
-            icon={Icon.Building}
-            text={context.workspace.name}
-          />
+          <Detail.Metadata.Label title="Workspace" icon={Icon.Building} text={context.workspace.name} />
           <Detail.Metadata.Label title="Expense ID" text={expense.id} />
           <Detail.Metadata.Label title="Amount" icon={Icon.Coins} text={formattedAmount} />
-          <Detail.Metadata.Label
-            title="Category"
-            icon={Icon.Folder}
-            text={expense.context.categoryName}
-          />
+          <Detail.Metadata.Label title="Category" icon={Icon.Folder} text={expense.context.categoryName} />
           {expense.context.recipientName ? (
-            <Detail.Metadata.Label
-              title="Recipient"
-              icon={Icon.Person}
-              text={expense.context.recipientName}
-            />
+            <Detail.Metadata.Label title="Recipient" icon={Icon.Person} text={expense.context.recipientName} />
           ) : null}
           <Detail.Metadata.Link title="Expense" text="Open in Figa" target={expenseUrl} />
         </Detail.Metadata>
@@ -497,16 +447,8 @@ function CreatedExpenseDetail({
             icon={Icon.List}
             url={getFigaExpensesUrl(context.workspace.id)}
           />
-          <Action.CopyToClipboard
-            title="Copy Expense Name"
-            icon={Icon.CopyClipboard}
-            content={expense.name}
-          />
-          <Action.CopyToClipboard
-            title="Copy Expense ID"
-            icon={Icon.Hashtag}
-            content={expense.id}
-          />
+          <Action.CopyToClipboard title="Copy Expense Name" icon={Icon.CopyClipboard} content={expense.name} />
+          <Action.CopyToClipboard title="Copy Expense ID" icon={Icon.Hashtag} content={expense.id} />
         </ActionPanel>
       }
     />
@@ -543,10 +485,7 @@ function validateFormValues(values: CreateExpenseFormValues): {
   return { errors, payload: buildCreatePayload(values, amount) };
 }
 
-function buildCreatePayload(
-  values: CreateExpenseFormValues,
-  amount: number,
-): FigaExpenseCreatePayload {
+function buildCreatePayload(values: CreateExpenseFormValues, amount: number): FigaExpenseCreatePayload {
   const payload: FigaExpenseCreatePayload = {
     name: values.name.trim(),
     amount,
@@ -562,10 +501,7 @@ function buildCreatePayload(
   return payload;
 }
 
-function getFormErrors(
-  values: CreateExpenseFormValues,
-  amount: number | null,
-): CreateExpenseFormErrors {
+function getFormErrors(values: CreateExpenseFormValues, amount: number | null): CreateExpenseFormErrors {
   return Object.fromEntries(
     [
       getNameError(values.name.trim()),
@@ -589,21 +525,15 @@ function getAmountError(amount: number | null): [keyof CreateExpenseFormValues, 
 }
 
 function getCategoryInput(values: CreateExpenseFormValues): string {
-  return values.categoryId === NEW_CATEGORY_VALUE
-    ? values.newCategoryName.trim()
-    : values.categoryId;
+  return values.categoryId === NEW_CATEGORY_VALUE ? values.newCategoryName.trim() : values.categoryId;
 }
 
 function getRecipientInput(values: CreateExpenseFormValues): string | null {
   if (values.recipientId === NO_RECIPIENT_VALUE) return null;
-  return values.recipientId === NEW_RECIPIENT_VALUE
-    ? values.newRecipientName.trim()
-    : values.recipientId;
+  return values.recipientId === NEW_RECIPIENT_VALUE ? values.newRecipientName.trim() : values.recipientId;
 }
 
-function getCategoryError(
-  values: CreateExpenseFormValues,
-): [keyof CreateExpenseFormValues, string] | null {
+function getCategoryError(values: CreateExpenseFormValues): [keyof CreateExpenseFormValues, string] | null {
   if (values.categoryId !== NEW_CATEGORY_VALUE) {
     return values.categoryId ? null : ["categoryId", "Choose a category."];
   }
@@ -614,9 +544,7 @@ function getCategoryError(
   return null;
 }
 
-function getRecipientError(
-  values: CreateExpenseFormValues,
-): [keyof CreateExpenseFormValues, string] | null {
+function getRecipientError(values: CreateExpenseFormValues): [keyof CreateExpenseFormValues, string] | null {
   if (values.recipientId !== NEW_RECIPIENT_VALUE) return null;
 
   const recipientName = values.newRecipientName.trim();
@@ -633,10 +561,7 @@ function getDescriptionError(description: string): [keyof CreateExpenseFormValue
   return description.length > 1000 ? ["description", "Use 1000 characters or fewer."] : null;
 }
 
-function hasBlockingValidationError(
-  errors: CreateExpenseFormErrors,
-  amount: number | null,
-): amount is null {
+function hasBlockingValidationError(errors: CreateExpenseFormErrors, amount: number | null): amount is null {
   return amount === null || Object.keys(errors).length > 0;
 }
 
@@ -673,8 +598,7 @@ function parseLooseArgumentDate(value: string): Date | null {
 
 function buildValidLocalDate(year: number, month: number, day: number): Date | null {
   const date = new Date(year, month - 1, day);
-  const isValid =
-    date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
+  const isValid = date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day;
 
   return isValid ? date : null;
 }
@@ -695,17 +619,12 @@ function getCreateOptionTitle(referenceType: "Category" | "Recipient", name: str
   return name ? `Create "${name}"` : `Create New ${referenceType}...`;
 }
 
-function getCreateReferenceName(
-  searchText: string,
-  references: Array<FigaCategory | FigaRecipient>,
-): string {
+function getCreateReferenceName(searchText: string, references: Array<FigaCategory | FigaRecipient>): string {
   const name = searchText.trim();
   if (!name) return "";
 
   const normalizedName = normalizeReferenceName(name);
-  const hasExactMatch = references.some(
-    (reference) => normalizeReferenceName(reference.name) === normalizedName,
-  );
+  const hasExactMatch = references.some((reference) => normalizeReferenceName(reference.name) === normalizedName);
 
   return hasExactMatch ? "" : name;
 }
@@ -715,7 +634,7 @@ function normalizeReferenceName(name: string): string {
 }
 
 function getReferenceKeywords(item: FigaCategory | FigaRecipient): string[] {
-  return [item.description, item.isGlobal ? "global" : "workspace"].filter(
-    (keyword): keyword is string => Boolean(keyword),
+  return [item.description, item.isGlobal ? "global" : "workspace"].filter((keyword): keyword is string =>
+    Boolean(keyword),
   );
 }

@@ -81,8 +81,7 @@ const FRIENDLY_ERROR_RULES: FriendlyErrorRule[] = [
     },
   },
   {
-    matches: (status, code) =>
-      status === 400 || code === "VALIDATION_ERROR" || code === "INVALID_INPUT",
+    matches: (status, code) => status === 400 || code === "VALIDATION_ERROR" || code === "INVALID_INPUT",
     friendly: (message) => ({
       kind: "validation-error",
       title: "Request not accepted",
@@ -142,9 +141,7 @@ export function createExpense(
 }
 
 export function getExpensePayments(expenseId: string): Promise<FigaExpensePaymentListResponse> {
-  return requestFiga<FigaExpensePaymentListResponse>(
-    `/api/v1/expenses/${encodeURIComponent(expenseId)}/payments`,
-  );
+  return requestFiga<FigaExpensePaymentListResponse>(`/api/v1/expenses/${encodeURIComponent(expenseId)}/payments`);
 }
 
 export function recordExpensePayment(
@@ -152,22 +149,15 @@ export function recordExpensePayment(
   payload: FigaExpensePaymentPayload,
   idempotencyKey: string,
 ): Promise<FigaExpensePaymentResponse> {
-  return requestFiga<FigaExpensePaymentResponse>(
-    `/api/v1/expenses/${encodeURIComponent(expenseId)}/payments`,
-    {
-      method: "POST",
-      body: payload,
-      idempotencyKey,
-    },
-  );
+  return requestFiga<FigaExpensePaymentResponse>(`/api/v1/expenses/${encodeURIComponent(expenseId)}/payments`, {
+    method: "POST",
+    body: payload,
+    idempotencyKey,
+  });
 }
 
-export function getMonthlyTotals(
-  query: FigaMonthlyTotalsQuery,
-): Promise<FigaMonthlyTotalsResponse> {
-  return requestFiga<FigaMonthlyTotalsResponse>(
-    withQuery("/api/v1/expenses/monthly-totals", query),
-  );
+export function getMonthlyTotals(query: FigaMonthlyTotalsQuery): Promise<FigaMonthlyTotalsResponse> {
+  return requestFiga<FigaMonthlyTotalsResponse>(withQuery("/api/v1/expenses/monthly-totals", query));
 }
 
 async function requestFiga<T>(path: string, options: FigaRequestOptions = {}): Promise<T> {
@@ -350,11 +340,7 @@ function createUnexpectedResponseError(status: number, payload: unknown): FigaAp
   });
 }
 
-function createFriendlyError(
-  status: number,
-  code: string | null,
-  message: string,
-): FigaFriendlyError {
+function createFriendlyError(status: number, code: string | null, message: string): FigaFriendlyError {
   const rule = FRIENDLY_ERROR_RULES.find((candidate) => candidate.matches(status, code));
   if (rule) return resolveFriendlyError(rule, message);
 

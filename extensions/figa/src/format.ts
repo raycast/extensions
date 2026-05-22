@@ -54,15 +54,10 @@ export function formatUnixDate(value: number | null | undefined): string {
 }
 
 export function getWorkspaceBaseCurrency(context: FigaWorkspaceContext): string {
-  return context.schemaVersion === 2
-    ? context.defaults.baseCurrency
-    : context.workspace.baseCurrency;
+  return context.schemaVersion === 2 ? context.defaults.baseCurrency : context.workspace.baseCurrency;
 }
 
-export function canReadResource(
-  context: FigaWorkspaceContext,
-  resource: ReadCapabilityResource,
-): boolean {
+export function canReadResource(context: FigaWorkspaceContext, resource: ReadCapabilityResource): boolean {
   return context.schemaVersion !== 2 || context.capabilities[resource].read;
 }
 
@@ -75,11 +70,7 @@ export function canWriteExpenses(context: FigaWorkspaceContext): boolean {
 }
 
 export function canRecordExpensePayments(context: FigaWorkspaceContext): boolean {
-  return (
-    context.schemaVersion !== 2 ||
-    context.capabilities.expenses.payments ||
-    context.capabilities.expenses.write
-  );
+  return context.schemaVersion !== 2 || context.capabilities.expenses.payments || context.capabilities.expenses.write;
 }
 
 export function escapeMarkdown(value: string): string {

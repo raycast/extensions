@@ -20,9 +20,7 @@ export function getFigaCategoriesUrl(workspaceId: string): string {
 }
 
 export function getFigaCategoryUrl(workspaceId: string, categoryId: string): string {
-  return getFigaAppUrl(
-    `/workspaces/${encodeURIComponent(workspaceId)}/categories/${encodeURIComponent(categoryId)}`,
-  );
+  return getFigaAppUrl(`/workspaces/${encodeURIComponent(workspaceId)}/categories/${encodeURIComponent(categoryId)}`);
 }
 
 export function getFigaRecipientsUrl(workspaceId: string): string {
@@ -30,9 +28,7 @@ export function getFigaRecipientsUrl(workspaceId: string): string {
 }
 
 export function getFigaRecipientUrl(workspaceId: string, recipientId: string): string {
-  return getFigaAppUrl(
-    `/workspaces/${encodeURIComponent(workspaceId)}/recipients/${encodeURIComponent(recipientId)}`,
-  );
+  return getFigaAppUrl(`/workspaces/${encodeURIComponent(workspaceId)}/recipients/${encodeURIComponent(recipientId)}`);
 }
 
 export function getFigaExpensesUrl(workspaceId: string, query?: object): string {
@@ -40,18 +36,14 @@ export function getFigaExpensesUrl(workspaceId: string, query?: object): string 
 }
 
 export function getFigaExpenseUrl(workspaceId: string, expenseId: string): string {
-  return getFigaAppUrl(
-    `/workspaces/${encodeURIComponent(workspaceId)}/expenses/${encodeURIComponent(expenseId)}`,
-  );
+  return getFigaAppUrl(`/workspaces/${encodeURIComponent(workspaceId)}/expenses/${encodeURIComponent(expenseId)}`);
 }
 
 function getFigaAppUrl(path: string, query?: object): string {
   const url = new URL(path, `${FIGA_APP_ORIGIN}/`);
 
   if (query) {
-    for (const [key, value] of Object.entries(query) as Array<
-      [string, string | number | boolean | undefined]
-    >) {
+    for (const [key, value] of Object.entries(query) as Array<[string, string | number | boolean | undefined]>) {
       if (value === undefined) continue;
       url.searchParams.set(key, String(value));
     }

@@ -13,10 +13,7 @@ interface ReferenceListResponse {
   pagination: FigaPaginationMeta;
 }
 
-export interface ReferenceCommandConfig<
-  TItem extends FigaReferenceItem,
-  TResponse extends ReferenceListResponse,
-> {
+export interface ReferenceCommandConfig<TItem extends FigaReferenceItem, TResponse extends ReferenceListResponse> {
   resource: ReferenceResource;
   title: string;
   itemName: string;
@@ -34,19 +31,19 @@ interface ReferenceCommandData<TResponse extends ReferenceListResponse> {
   response?: TResponse;
 }
 
-export function ReferenceListCommand<
-  TItem extends FigaReferenceItem,
-  TResponse extends ReferenceListResponse,
->({ config }: { config: ReferenceCommandConfig<TItem, TResponse> }) {
+export function ReferenceListCommand<TItem extends FigaReferenceItem, TResponse extends ReferenceListResponse>({
+  config,
+}: {
+  config: ReferenceCommandConfig<TItem, TResponse>;
+}) {
   const state = usePromise(() => loadReferenceCommandData(config));
 
   return <ReferenceCommandView config={config} {...state} />;
 }
 
-async function loadReferenceCommandData<
-  TItem extends FigaReferenceItem,
-  TResponse extends ReferenceListResponse,
->(config: ReferenceCommandConfig<TItem, TResponse>): Promise<ReferenceCommandData<TResponse>> {
+async function loadReferenceCommandData<TItem extends FigaReferenceItem, TResponse extends ReferenceListResponse>(
+  config: ReferenceCommandConfig<TItem, TResponse>,
+): Promise<ReferenceCommandData<TResponse>> {
   const context = await getWorkspaceContext();
   if (!canReadResource(context, config.resource)) return { context };
 
@@ -54,10 +51,7 @@ async function loadReferenceCommandData<
   return { context, response };
 }
 
-function ReferenceCommandView<
-  TItem extends FigaReferenceItem,
-  TResponse extends ReferenceListResponse,
->({
+function ReferenceCommandView<TItem extends FigaReferenceItem, TResponse extends ReferenceListResponse>({
   config,
   data,
   error,
@@ -71,12 +65,7 @@ function ReferenceCommandView<
   revalidate: () => void;
 }) {
   return (
-    <ReadCapabilityGate
-      context={data?.context}
-      error={error}
-      onRetry={revalidate}
-      resource={config.resource}
-    >
+    <ReadCapabilityGate context={data?.context} error={error} onRetry={revalidate} resource={config.resource}>
       <List
         isLoading={isLoading}
         navigationTitle={config.title}
@@ -94,10 +83,7 @@ function ReferenceCommandView<
   );
 }
 
-function ReferenceSection<
-  TItem extends FigaReferenceItem,
-  TResponse extends ReferenceListResponse,
->({
+function ReferenceSection<TItem extends FigaReferenceItem, TResponse extends ReferenceListResponse>({
   config,
   data,
   onRefresh,
@@ -113,22 +99,13 @@ function ReferenceSection<
   return (
     <List.Section title={`${config.pluralName} · ${data.response.pagination.total} total`}>
       {items.map((item) => (
-        <ReferenceListItem
-          key={item.id}
-          config={config}
-          context={data.context}
-          item={item}
-          onRefresh={onRefresh}
-        />
+        <ReferenceListItem key={item.id} config={config} context={data.context} item={item} onRefresh={onRefresh} />
       ))}
     </List.Section>
   );
 }
 
-function ReferenceListItem<
-  TItem extends FigaReferenceItem,
-  TResponse extends ReferenceListResponse,
->({
+function ReferenceListItem<TItem extends FigaReferenceItem, TResponse extends ReferenceListResponse>({
   config,
   context,
   item,
@@ -150,17 +127,12 @@ function ReferenceListItem<
         { tag: { value: getScopeLabel(item), color: getScopeColor(item) } },
         { text: formatExpenseCount(item.expenseCount), icon: Icon.Receipt },
       ]}
-      actions={
-        <ReferenceItemActions config={config} context={context} item={item} onRefresh={onRefresh} />
-      }
+      actions={<ReferenceItemActions config={config} context={context} item={item} onRefresh={onRefresh} />}
     />
   );
 }
 
-function ReferenceItemActions<
-  TItem extends FigaReferenceItem,
-  TResponse extends ReferenceListResponse,
->({
+function ReferenceItemActions<TItem extends FigaReferenceItem, TResponse extends ReferenceListResponse>({
   config,
   context,
   item,
@@ -178,21 +150,9 @@ function ReferenceItemActions<
         icon={Icon.Link}
         url={config.getItemUrl(context.workspace.id, item)}
       />
-      <Action.CopyToClipboard
-        title={`Copy ${config.itemName} Name`}
-        icon={Icon.CopyClipboard}
-        content={item.name}
-      />
-      <Action.Paste
-        title={`Paste ${config.itemName} Name`}
-        icon={Icon.Clipboard}
-        content={item.name}
-      />
-      <Action.CopyToClipboard
-        title={`Copy ${config.itemName} ID`}
-        icon={Icon.Hashtag}
-        content={item.id}
-      />
+      <Action.CopyToClipboard title={`Copy ${config.itemName} Name`} icon={Icon.CopyClipboard} content={item.name} />
+      <Action.Paste title={`Paste ${config.itemName} Name`} icon={Icon.Clipboard} content={item.name} />
+      <Action.CopyToClipboard title={`Copy ${config.itemName} ID`} icon={Icon.Hashtag} content={item.id} />
       <Action.Paste title={`Paste ${config.itemName} ID`} icon={Icon.Hashtag} content={item.id} />
       <Action.OpenInBrowser
         title={`Open ${config.pluralName} in Figa`}
@@ -204,10 +164,7 @@ function ReferenceItemActions<
   );
 }
 
-function ReferenceListActions<
-  TItem extends FigaReferenceItem,
-  TResponse extends ReferenceListResponse,
->({
+function ReferenceListActions<TItem extends FigaReferenceItem, TResponse extends ReferenceListResponse>({
   config,
   data,
   onRefresh,
@@ -226,16 +183,8 @@ function ReferenceListActions<
           url={config.getListUrl(data.context.workspace.id)}
         />
       ) : null}
-      <Action
-        title="Open Extension Preferences"
-        icon={Icon.Cog}
-        onAction={openExtensionPreferences}
-      />
-      <Action.OpenInBrowser
-        title="Open Developer API Docs"
-        icon={Icon.Book}
-        url={FIGA_DEVELOPER_API_DOCS_URL}
-      />
+      <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
+      <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
     </ActionPanel>
   );
 }

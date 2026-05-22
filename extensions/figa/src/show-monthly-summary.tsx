@@ -3,16 +3,8 @@ import { Action, ActionPanel, Detail, Icon, openExtensionPreferences } from "@ra
 import { usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { getMonthlyTotals, getWorkspaceContext } from "./api/client";
-import {
-  FIGA_DEVELOPER_API_DOCS_URL,
-  getFigaApiKeySettingsUrl,
-  getFigaExpensesUrl,
-} from "./api/links";
-import type {
-  FigaMonthlyTotalItem,
-  FigaMonthlyTotalsResponse,
-  FigaWorkspaceContext,
-} from "./api/types";
+import { FIGA_DEVELOPER_API_DOCS_URL, getFigaApiKeySettingsUrl, getFigaExpensesUrl } from "./api/links";
+import type { FigaMonthlyTotalItem, FigaMonthlyTotalsResponse, FigaWorkspaceContext } from "./api/types";
 import { ReadCapabilityGate } from "./read-capability-gate";
 import {
   canReadResource,
@@ -48,12 +40,7 @@ function MonthlySummaryView({
   revalidate: () => void;
 }) {
   return (
-    <ReadCapabilityGate
-      context={data?.context}
-      error={error}
-      onRetry={revalidate}
-      resource="expenses"
-    >
+    <ReadCapabilityGate context={data?.context} error={error} onRetry={revalidate} resource="expenses">
       <MonthlySummaryDetail data={data} isLoading={isLoading} onRefresh={revalidate} />
     </ReadCapabilityGate>
   );
@@ -71,13 +58,7 @@ async function loadMonthlySummaryCommandData(
   return { context, summary };
 }
 
-function MonthlySummaryActions({
-  data,
-  onRefresh,
-}: {
-  data: MonthlySummaryCommandData;
-  onRefresh: () => void;
-}) {
+function MonthlySummaryActions({ data, onRefresh }: { data: MonthlySummaryCommandData; onRefresh: () => void }) {
   const current = getCurrentMonth();
   const currentTotal = findMonth(data.summary?.totals ?? [], current);
   const currency = getWorkspaceBaseCurrency(data.context);
@@ -87,11 +68,7 @@ function MonthlySummaryActions({
 
   return (
     <ActionPanel>
-      <Action.CopyToClipboard
-        title="Copy Current Month Summary"
-        icon={Icon.CopyClipboard}
-        content={currentSummary}
-      />
+      <Action.CopyToClipboard title="Copy Current Month Summary" icon={Icon.CopyClipboard} content={currentSummary} />
       <Action.CopyToClipboard
         title="Copy Summary Table"
         icon={Icon.CopyClipboard}
@@ -103,16 +80,8 @@ function MonthlySummaryActions({
         url={getFigaExpensesUrl(data.context.workspace.id, current)}
       />
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} />
-      <Action
-        title="Open Extension Preferences"
-        icon={Icon.Cog}
-        onAction={openExtensionPreferences}
-      />
-      <Action.OpenInBrowser
-        title="Open Developer API Docs"
-        icon={Icon.Book}
-        url={FIGA_DEVELOPER_API_DOCS_URL}
-      />
+      <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
+      <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
     </ActionPanel>
   );
 }
@@ -148,11 +117,7 @@ function MonthlySummaryMetadata({ data }: { data: MonthlySummaryCommandData }) {
 
   return (
     <Detail.Metadata>
-      <Detail.Metadata.Label
-        title="Workspace"
-        icon={Icon.Building}
-        text={data.context.workspace.name}
-      />
+      <Detail.Metadata.Label title="Workspace" icon={Icon.Building} text={data.context.workspace.name} />
       <Detail.Metadata.Label title="Base Currency" icon={Icon.Coins} text={currency} />
       <Detail.Metadata.Label title="Range" icon={Icon.Calendar} text={rangeLabel} />
       <CurrentMonthMetadata current={current} currency={currency} />
@@ -166,13 +131,7 @@ function MonthlySummaryMetadata({ data }: { data: MonthlySummaryCommandData }) {
   );
 }
 
-function CurrentMonthMetadata({
-  current,
-  currency,
-}: {
-  current?: FigaMonthlyTotalItem;
-  currency: string;
-}) {
+function CurrentMonthMetadata({ current, currency }: { current?: FigaMonthlyTotalItem; currency: string }) {
   if (!current) return null;
 
   return (
@@ -233,9 +192,7 @@ function buildMonthlySummaryMarkdown(data: MonthlySummaryCommandData): string {
 function buildPlainTextSummary(data: MonthlySummaryCommandData): string {
   const currency = getWorkspaceBaseCurrency(data.context);
 
-  return (data.summary?.totals ?? [])
-    .map((item) => buildSingleMonthSummary(item, currency))
-    .join("\n");
+  return (data.summary?.totals ?? []).map((item) => buildSingleMonthSummary(item, currency)).join("\n");
 }
 
 function buildSingleMonthSummary(item: FigaMonthlyTotalItem, currency: string): string {

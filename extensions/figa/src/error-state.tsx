@@ -1,11 +1,7 @@
 // fallow-ignore-next-line unresolved-import
 import { Action, ActionPanel, Color, Detail, Icon, openExtensionPreferences } from "@raycast/api";
 import { toFriendlyError } from "./api/client";
-import {
-  FIGA_DEVELOPER_API_DOCS_URL,
-  getFigaApiKeySettingsUrl,
-  getFigaBillingUrl,
-} from "./api/links";
+import { FIGA_DEVELOPER_API_DOCS_URL, getFigaApiKeySettingsUrl, getFigaBillingUrl } from "./api/links";
 import type { FigaFriendlyError } from "./api/types";
 
 const ERROR_COLOR_BY_KIND: Partial<Record<FigaFriendlyError["kind"], Color>> = {
@@ -15,13 +11,7 @@ const ERROR_COLOR_BY_KIND: Partial<Record<FigaFriendlyError["kind"], Color>> = {
   "invalid-base-url": Color.Orange,
 };
 
-export function FigaCommandErrorDetail({
-  error,
-  onRetry,
-}: {
-  error: unknown;
-  onRetry: () => void;
-}) {
+export function FigaCommandErrorDetail({ error, onRetry }: { error: unknown; onRetry: () => void }) {
   const friendlyError = toFriendlyError(error);
 
   return (
@@ -37,30 +27,14 @@ function ErrorActions({ error, onRetry }: { error: FigaFriendlyError; onRetry: (
   return (
     <ActionPanel>
       <Action title="Retry" icon={Icon.ArrowClockwise} onAction={onRetry} />
-      <Action
-        title="Open Extension Preferences"
-        icon={Icon.Cog}
-        onAction={openExtensionPreferences}
-      />
+      <Action title="Open Extension Preferences" icon={Icon.Cog} onAction={openExtensionPreferences} />
       {shouldShowApiKeySettings(error) ? (
-        <Action.OpenInBrowser
-          title="Open API Key Settings"
-          icon={Icon.Key}
-          url={getFigaApiKeySettingsUrl()}
-        />
+        <Action.OpenInBrowser title="Open API Key Settings" icon={Icon.Key} url={getFigaApiKeySettingsUrl()} />
       ) : null}
       {error.kind === "paid-plan-required" ? (
-        <Action.OpenInBrowser
-          title="Open Billing Settings"
-          icon={Icon.CreditCard}
-          url={getFigaBillingUrl()}
-        />
+        <Action.OpenInBrowser title="Open Billing Settings" icon={Icon.CreditCard} url={getFigaBillingUrl()} />
       ) : null}
-      <Action.OpenInBrowser
-        title="Open Developer API Docs"
-        icon={Icon.Book}
-        url={FIGA_DEVELOPER_API_DOCS_URL}
-      />
+      <Action.OpenInBrowser title="Open Developer API Docs" icon={Icon.Book} url={FIGA_DEVELOPER_API_DOCS_URL} />
     </ActionPanel>
   );
 }
@@ -76,11 +50,7 @@ function ErrorMetadata({ error }: { error: FigaFriendlyError }) {
       ) : null}
       {error.code ? <Detail.Metadata.Label title="Figa Error Code" text={error.code} /> : null}
       <Detail.Metadata.Separator />
-      <Detail.Metadata.Link
-        title="Developer API Docs"
-        text="Open docs"
-        target={FIGA_DEVELOPER_API_DOCS_URL}
-      />
+      <Detail.Metadata.Link title="Developer API Docs" text="Open docs" target={FIGA_DEVELOPER_API_DOCS_URL} />
     </Detail.Metadata>
   );
 }
