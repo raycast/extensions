@@ -207,7 +207,13 @@ export default function Command() {
           <Grid.Item
             key={sanityIcon.name}
             title={sanityIcon.name}
-            content={BASE_URL + getDisplayFilename(sanityIcon) + ".svg"}
+            content={{
+              source: BASE_URL + getDisplayFilename(sanityIcon) + ".svg",
+              tintColor: {
+                light: "#000000",
+                dark: "#FFFFFF",
+              },
+            }}
             accessory={
               filled
                 ? {
@@ -234,7 +240,7 @@ export default function Command() {
                   content={getImportStatement(outline || sanityIcon.name)}
                 />
                 <Action.CopyToClipboard
-                  title="Copy React Component"
+                  title="Copy React Component Name"
                   content={getComponentName(outline || sanityIcon.name)}
                 />
                 {filled && <Action.CopyToClipboard title="Copy Filled Name" content={filled} />}
@@ -242,12 +248,18 @@ export default function Command() {
                   <Action.CopyToClipboard title="Copy Filled React Import" content={getImportStatement(filled)} />
                 )}
                 {filled && (
-                  <Action.CopyToClipboard title="Copy Filled React Component" content={getComponentName(filled)} />
+                  <Action.CopyToClipboard title="Copy Filled React Component Name" content={getComponentName(filled)} />
                 )}
                 {outline && (
                   <Action
                     title="Copy Outline SVG"
-                    icon={BASE_URL + outline + ".svg"}
+                    icon={{
+                      source: BASE_URL + outline + ".svg",
+                      tintColor: {
+                        light: Color.PrimaryText,
+                        dark: Color.PrimaryText,
+                      },
+                    }}
                     onAction={async () => {
                       try {
                         const svg = await fetchSvgContent(outline);
@@ -262,14 +274,26 @@ export default function Command() {
                 {outline && (
                   <Action
                     title="Download Outline SVG"
-                    icon={BASE_URL + outline + ".svg"}
+                    icon={{
+                      source: BASE_URL + outline + ".svg",
+                      tintColor: {
+                        light: Color.PrimaryText,
+                        dark: Color.PrimaryText,
+                      },
+                    }}
                     onAction={() => downloadSVG(outline)}
                   />
                 )}
                 {filled && (
                   <Action
                     title="Copy Filled SVG"
-                    icon={BASE_URL + filled + ".svg"}
+                    icon={{
+                      source: BASE_URL + filled + ".svg",
+                      tintColor: {
+                        light: Color.PrimaryText,
+                        dark: Color.PrimaryText,
+                      },
+                    }}
                     onAction={async () => {
                       try {
                         const svg = await fetchSvgContent(filled);
@@ -288,7 +312,13 @@ export default function Command() {
                 {filled && (
                   <Action
                     title="Download Filled SVG"
-                    icon={BASE_URL + filled + ".svg"}
+                    icon={{
+                      source: BASE_URL + filled + ".svg",
+                      tintColor: {
+                        light: Color.PrimaryText,
+                        dark: Color.PrimaryText,
+                      },
+                    }}
                     onAction={() => downloadSVG(filled)}
                     shortcut={{
                       macOS: { modifiers: ["cmd", "opt"], key: "return" },
@@ -299,7 +329,13 @@ export default function Command() {
                 {!outline && !filled && sanityIcon.svg && (
                   <Action
                     title="Copy SVG"
-                    icon={BASE_URL + sanityIcon.svg + ".svg"}
+                    icon={{
+                      source: BASE_URL + sanityIcon.svg + ".svg",
+                      tintColor: {
+                        light: Color.PrimaryText,
+                        dark: Color.PrimaryText,
+                      },
+                    }}
                     onAction={async () => {
                       try {
                         const svg = await fetchSvgContent(sanityIcon.svg!);
@@ -314,7 +350,13 @@ export default function Command() {
                 {!outline && !filled && sanityIcon.svg && (
                   <Action
                     title="Download SVG"
-                    icon={BASE_URL + sanityIcon.svg + ".svg"}
+                    icon={{
+                      source: BASE_URL + sanityIcon.svg + ".svg",
+                      tintColor: {
+                        light: Color.PrimaryText,
+                        dark: Color.PrimaryText,
+                      },
+                    }}
                     onAction={() => downloadSVG(sanityIcon.svg!)}
                   />
                 )}
