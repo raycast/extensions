@@ -11,9 +11,9 @@ import {
   Toast,
   Keyboard,
   open,
+  closeMainWindow,
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
-import { open, closeMainWindow } from "@raycast/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
