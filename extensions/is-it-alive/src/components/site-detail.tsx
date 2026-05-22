@@ -16,6 +16,12 @@ interface SiteDetailProps {
   snapshot: StatusSnapshot;
 }
 
+function buildIncidentMarkdown(
+  incident: StatusSnapshot["incidents"][number],
+): string {
+  return `### ${incident.name}\n\n${incident.body ?? incident.status}`;
+}
+
 function buildOverviewMarkdown(snapshot: StatusSnapshot): string {
   const overviewUptime =
     snapshot.uptimePercent ?? averageComponentUptime(snapshot.components);
@@ -25,12 +31,7 @@ function buildOverviewMarkdown(snapshot: StatusSnapshot): string {
   );
   const incidentsMarkdown =
     snapshot.incidents.length > 0
-      ? snapshot.incidents
-          .map(
-            (incident) =>
-              `### ${incident.name}\n\n${incident.body ?? incident.status}`,
-          )
-          .join("\n\n---\n\n")
+      ? snapshot.incidents.map(buildIncidentMarkdown).join("\n\n---\n\n")
       : "No active incidents.";
 
   if (!uptimeMarkdown) {
@@ -98,7 +99,7 @@ export function SiteDetail({ snapshot }: SiteDetailProps) {
               icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
               detail={
                 <List.Item.Detail
-                  markdown={incident.body ?? incident.status}
+                  markdown={buildIncidentMarkdown(incident)}
                   metadata={
                     <List.Item.Detail.Metadata>
                       <List.Item.Detail.Metadata.Label

@@ -61,7 +61,9 @@ function flattenComponents(
 }
 
 function getComponentDays(component: RailwayComponent): RailwayDay[] {
-  return (component.months ?? []).flatMap((month) => month.days ?? []);
+  return (component.months ?? [])
+    .flatMap((month) => month.days ?? [])
+    .sort((a, b) => a.date.localeCompare(b.date));
 }
 
 function getLatestDayStatus(component: RailwayComponent): RailwayDayStatus {

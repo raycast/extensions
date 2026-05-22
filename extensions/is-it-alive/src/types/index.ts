@@ -1,5 +1,3 @@
-import { Icon } from "@raycast/api";
-
 export type SiteProvider = "statuspage" | "railway" | "incidentio";
 
 export type StatusIndicator = "none" | "minor" | "major" | "critical";
@@ -10,12 +8,6 @@ export type ComponentStatusValue =
   | "partial_outage"
   | "major_outage"
   | "under_maintenance";
-
-export type StatusIcon =
-  | Icon.CheckCircle
-  | Icon.Warning
-  | Icon.XMarkCircle
-  | Icon.QuestionMark;
 
 export interface MonitoredSite {
   id: string;

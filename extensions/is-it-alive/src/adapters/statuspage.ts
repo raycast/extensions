@@ -14,25 +14,26 @@ import {
 } from "@/lib/uptime-chart";
 import { StatuspageSummary, StatuspageIncident } from "@/types/statuspage";
 
-function isActiveStatuspageIncident(incident: StatuspageIncident): boolean {
+function isActiveStatuspageIncident(incident: { status: string }): boolean {
   return incident.status !== "resolved" && incident.status !== "postmortem";
 }
 
 function resolveActiveIncidents(
   summaryIncidents: StatuspageSummary["incidents"],
   allIncidents: StatuspageIncident[],
-): NonNullable<StatuspageSummary["incidents"]> {
-  if (summaryIncidents !== undefined) {
-    return summaryIncidents;
-  }
-
-  return allIncidents.filter(isActiveStatuspageIncident);
+): Array<
+  StatuspageIncident | NonNullable<StatuspageSummary["incidents"]>[number]
+> {
+  const incidents = summaryIncidents ?? allIncidents;
+  return incidents.filter(isActiveStatuspageIncident);
 }
 
 function mapIncidents(
-  incidents: StatuspageSummary["incidents"] | undefined,
+  incidents: Array<
+    StatuspageIncident | NonNullable<StatuspageSummary["incidents"]>[number]
+  >,
 ): StatusIncident[] {
-  return (incidents ?? []).map((incident) => ({
+  return incidents.map((incident) => ({
     id: incident.id,
     name: incident.name,
     status: incident.status,

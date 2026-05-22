@@ -132,7 +132,7 @@ function componentImpactsUrl(proxy: string, days = 90): string {
 function parseComponentCatalog(html: string): Map<string, string> {
   const catalog = new Map<string, string>();
   const pattern =
-    /\\"id\\":\\"([A-Z0-9]+)\\",\\"name\\":\\"([^\\"]+)\\",\\"status_page_id\\"/g;
+    /\\"id\\":\\"([A-Za-z0-9_-]+)\\",\\"name\\":\\"([^\\"]+)\\",\\"status_page_id\\"/g;
 
   for (const match of html.matchAll(pattern)) {
     catalog.set(match[1], match[2]);

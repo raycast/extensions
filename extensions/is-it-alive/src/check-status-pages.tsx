@@ -27,6 +27,7 @@ export default function Command() {
   const {
     data: snapshots,
     isLoading: isLoadingSnapshots,
+    error: snapshotsError,
     revalidate,
   } = useCachedPromise(
     async (siteList: MonitoredSite[]) => {
@@ -73,14 +74,16 @@ export default function Command() {
 
       {sites.map((site) => {
         const snapshot = snapshots?.[site.id];
-        const hasError = Boolean(snapshot?.error);
+        const hasError = Boolean(snapshot?.error || snapshotsError);
         const icon = hasError
           ? { source: Icon.QuestionMark, tintColor: Color.SecondaryText }
           : indicatorListIcon(snapshot?.indicator ?? "unknown");
 
         const subtitle = snapshot?.error
           ? "Failed to fetch — retry"
-          : (snapshot?.overallDescription ?? "Loading...");
+          : snapshotsError
+            ? "Failed to load — retry"
+            : (snapshot?.overallDescription ?? "Loading...");
 
         return (
           <List.Item
