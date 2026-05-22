@@ -1,6 +1,6 @@
 # Flighty Changelog
 
-## {PR_MERGE_DATE}
+## [Copy Flight Number Action] - {PR_MERGE_DATE}
 
 - Add action to copy flight number
 
