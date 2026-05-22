@@ -26,6 +26,21 @@ export type PackageRecord = {
   raw: string;
 };
 
+export type InstalledModel = {
+  id: string;
+  name: string;
+  size: string;
+  current: boolean;
+  raw: string;
+};
+
+export type CurrentModeRecord = {
+  id: string;
+  name: string;
+  live: string;
+  raw: string;
+};
+
 export function parseHistoryItems(output: string): HistoryItem[] {
   const items: HistoryItem[] = [];
 
@@ -125,6 +140,71 @@ export function parsePackageRecord(output: string): PackageRecord {
   return record;
 }
 
+export function parseInstalledModels(output: string): InstalledModel[] {
+  return output
+    .split("\n")
+    .map((line) => line.trimEnd())
+    .filter((line) => line.trim())
+    .map((line) => {
+      const current = /^\s*\*/.test(line);
+      const normalized = line.replace(/^\s*\*\s*/, "").trim();
+      const columns = normalized.split("\t").map((column) => column.trim());
+      const label = columns[0] ?? normalized;
+      const size = columns[1] ?? "";
+      const match = label.match(/^(?<id>.+?)\s+\((?<name>.+)\)$/);
+
+      return {
+        id: match?.groups?.id?.trim() ?? label,
+        name: match?.groups?.name?.trim() ?? label,
+        size,
+        current:
+          current ||
+          columns.slice(2).some((column) => column.toLowerCase() === "current"),
+        raw: line,
+      };
+    });
+}
+
+export function parseCurrentModeRecord(output: string): CurrentModeRecord {
+  const record: CurrentModeRecord = {
+    id: "",
+    name: "",
+    live: "",
+    raw: output,
+  };
+
+  for (const rawLine of output.split("\n")) {
+    const line = rawLine.trim();
+    if (!line || /^\d{4}\//.test(line)) {
+      continue;
+    }
+
+    const match = line.match(/^([^:]+):\s*(.*)$/);
+    if (!match) {
+      continue;
+    }
+
+    const key = match[1].trim().toLowerCase();
+    const value = match[2].trim();
+
+    switch (key) {
+      case "id":
+        record.id = value;
+        break;
+      case "name":
+        record.name = value;
+        break;
+      case "live":
+        record.live = value;
+        break;
+      default:
+        break;
+    }
+  }
+
+  return record;
+}
+
 export function parseImportedHistoryId(text: string) {
   const patterns = [
     /\bhistory(?:\s+item)?(?:\s+id)?\s*[:=]?\s*#(?<id>\d+)\b/i,
@@ -142,6 +222,19 @@ export function parseImportedHistoryId(text: string) {
   }
 
   return undefined;
+}
+
+export function stripImportedHistoryHeader(text: string) {
+  const normalized = text.replace(/\r\n/g, "\n");
+  const match = normalized.match(
+    /^\s*Imported as transcript\s+#(?<id>\d+)\.\s*(?:\n+|$)/i,
+  );
+
+  if (!match) {
+    return text;
+  }
+
+  return normalized.slice(match[0].length).trim();
 }
 
 export function normalizeHistoryComparisonText(value: string) {

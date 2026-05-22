@@ -40,6 +40,15 @@ This extension is intentionally focused on regular usage instead of setup or mai
 - `Show Mode`
   Shows mode prompt, vocabulary, replacements, and core metadata such as language and translation behavior.
 
+- `Show Current Mode`
+  Shows the active manual mode and lets you jump into changing it.
+
+- `Set Current Mode`
+  Changes the active manual mode by name or ID.
+
+- `List Installed Models`
+  Browses installed Whisper models and allows deletion for models that are not the current model and are not referenced by watch folders.
+
 - `List Replacements`
   Browses configured replacements and supports in-context removal.
 

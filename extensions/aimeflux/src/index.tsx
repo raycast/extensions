@@ -36,11 +36,16 @@ import {
 } from "./cli";
 import { Operation, operations } from "./operations";
 import {
+  parseCurrentModeRecord,
   importedHistoryItemWasCreated,
   parseHistoryItems,
+  parseInstalledModels,
   parseImportedHistoryId,
   parsePackageRecord,
+  stripImportedHistoryHeader,
+  type CurrentModeRecord,
   type HistoryItem,
+  type InstalledModel,
   type PackageRecord,
 } from "./output-parsers";
 
@@ -114,6 +119,10 @@ type ModeRecord = {
   replacementEntries: Array<{ from: string; to: string }>;
   appBindings: string;
   raw: string;
+};
+
+type InstalledModelItem = InstalledModel & {
+  watchReferences: string[];
 };
 
 const defaultHistoryFilters: HistoryFilters = {
@@ -273,8 +282,7 @@ function AutoRunOperation({ operation }: { operation: Operation }) {
         }
 
         if (result?.exitCode === 0 && operation.closeOnSuccess) {
-          await closeMainWindow({ clearRootSearch: true });
-          await showHUD(`${operation.title} complete`);
+          await closeToRootAndShowHUD(`${operation.title} complete`);
           return;
         }
 
@@ -367,8 +375,7 @@ function OperationActions({ operation }: { operation: Operation }) {
           icon={operation.icon}
           onAction={async () => {
             const message = await toggleGlobalLlmCleanup();
-            await closeMainWindow({ clearRootSearch: true });
-            await showHUD(message);
+            await closeToRootAndShowHUD(message);
           }}
         />
       ) : operation.closeOnSuccess && request ? (
@@ -378,8 +385,7 @@ function OperationActions({ operation }: { operation: Operation }) {
           onAction={async () => {
             const result = await executeRequest(operation.title, request);
             if (result?.exitCode === 0) {
-              await closeMainWindow({ clearRootSearch: true });
-              await showHUD(`${operation.title} complete`);
+              await closeToRootAndShowHUD(`${operation.title} complete`);
             }
           }}
         />
@@ -402,6 +408,10 @@ function OperationActions({ operation }: { operation: Operation }) {
 
 function browserTargetFor(operation: Operation) {
   switch (operation.presentation) {
+    case "mode-current":
+      return <CurrentModeView />;
+    case "models":
+      return <ModelBrowser />;
     case "rule-packages":
       return <PackageBrowser kind="rule-package" />;
     case "mode-packages":
@@ -534,8 +544,7 @@ function OperationForm({ operation }: { operation: Operation }) {
     if (operation.closeOnSuccess) {
       const result = await executeRequest(operation.title, request);
       if (result?.exitCode === 0) {
-        await closeMainWindow({ clearRootSearch: true });
-        await showHUD(`${operation.title} complete`);
+        await closeToRootAndShowHUD(`${operation.title} complete`);
       }
       return;
     }
@@ -1289,6 +1298,24 @@ async function toggleWatchProcessing(
   });
 }
 
+async function removeInstalledModel(
+  item: InstalledModelItem,
+  setItems: Dispatch<SetStateAction<InstalledModelItem[]>>,
+) {
+  const result = await executeRequest("Delete Model", {
+    label: "Delete Model",
+    args: ["model", "remove", item.id],
+  });
+
+  if (result?.exitCode !== 0) {
+    return;
+  }
+
+  setItems((current) =>
+    current.filter((candidate) => candidate.id !== item.id),
+  );
+}
+
 async function deleteHistoryItem(
   item: HistoryItem,
   setItems: Dispatch<SetStateAction<HistoryItem[]>>,
@@ -1710,6 +1737,334 @@ function ModeDetailView({ modeId }: { modeId: string }) {
         </ActionPanel>
       }
     />
+  );
+}
+
+function CurrentModeView() {
+  const modeSetOperation = operations.find(
+    (candidate) => candidate.id === "mode-set",
+  );
+  const [record, setRecord] = useState<CurrentModeRecord>();
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+    setError("");
+
+    async function loadCurrentMode() {
+      try {
+        const result = await runAimeFlux({
+          label: "Show Current Mode",
+          args: ["mode", "current"],
+        });
+
+        if (!active) {
+          return;
+        }
+
+        if (result.exitCode !== 0) {
+          throw new Error(
+            result.stderr ||
+              result.stdout ||
+              "Failed to load the current mode.",
+          );
+        }
+
+        setRecord(parseCurrentModeRecord(result.stdout));
+      } catch (loadError) {
+        if (!active) {
+          return;
+        }
+
+        const message =
+          loadError instanceof Error ? loadError.message : String(loadError);
+        setError(message);
+        setRecord(undefined);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load current mode",
+          message,
+        });
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadCurrentMode();
+
+    return () => {
+      active = false;
+    };
+  }, [refreshToken]);
+
+  return (
+    <Detail
+      navigationTitle="Current Mode"
+      isLoading={isLoading}
+      markdown={
+        error
+          ? `# Current Mode Unavailable\n\n${error}`
+          : renderCurrentModeDetail(record)
+      }
+      metadata={
+        record ? (
+          <Detail.Metadata>
+            <Detail.Metadata.Label title="ID" text={record.id} />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.Label title="Name" text={record.name} />
+            <Detail.Metadata.Separator />
+            <Detail.Metadata.TagList title="Live Dictation Ready">
+              <Detail.Metadata.TagList.Item
+                text={record.live === "true" ? "Yes" : "No"}
+              />
+            </Detail.Metadata.TagList>
+          </Detail.Metadata>
+        ) : undefined
+      }
+      actions={
+        <ActionPanel>
+          {modeSetOperation ? (
+            <Action.Push
+              title="Set Current Mode"
+              icon={Icon.ArrowRight}
+              target={<OperationForm operation={modeSetOperation} />}
+            />
+          ) : null}
+          {record?.id ? (
+            <Action.Push
+              title="Inspect This Mode"
+              icon={Icon.Eye}
+              target={<ModeDetailView modeId={record.id} />}
+            />
+          ) : null}
+          {record?.id ? (
+            <Action.CopyToClipboard title="Copy Mode ID" content={record.id} />
+          ) : null}
+          <Action
+            title="Refresh"
+            icon={Icon.ArrowClockwise}
+            onAction={() => setRefreshToken((current) => current + 1)}
+          />
+        </ActionPanel>
+      }
+    />
+  );
+}
+
+function ModelBrowser() {
+  const [items, setItems] = useState<InstalledModelItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [searchText, setSearchText] = useState("");
+  const [refreshToken, setRefreshToken] = useState(0);
+
+  useEffect(() => {
+    let active = true;
+    setIsLoading(true);
+    setError("");
+
+    async function loadInstalledModels() {
+      try {
+        const [modelResult, watchResult] = await Promise.all([
+          runAimeFlux({
+            label: "List Installed Models",
+            args: ["model", "list"],
+          }),
+          runAimeFlux({
+            label: "List Watch Folders",
+            args: ["watch", "list"],
+          }),
+        ]);
+
+        if (!active) {
+          return;
+        }
+
+        if (modelResult.exitCode !== 0) {
+          throw new Error(
+            modelResult.stderr ||
+              modelResult.stdout ||
+              "Failed to load installed models.",
+          );
+        }
+
+        const watchReferences =
+          watchResult.exitCode === 0
+            ? buildWatchModelReferences(parseWatchItems(watchResult.stdout))
+            : new Map<string, string[]>();
+
+        setItems(
+          parseInstalledModels(modelResult.stdout).map((item) => ({
+            ...item,
+            watchReferences: watchReferences.get(item.id) ?? [],
+          })),
+        );
+      } catch (loadError) {
+        if (!active) {
+          return;
+        }
+
+        const message =
+          loadError instanceof Error ? loadError.message : String(loadError);
+        setError(message);
+        setItems([]);
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed to load installed models",
+          message,
+        });
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadInstalledModels();
+
+    return () => {
+      active = false;
+    };
+  }, [refreshToken]);
+
+  const visibleItems = useMemo(() => {
+    const query = searchText.trim().toLowerCase();
+    if (!query) {
+      return items;
+    }
+
+    return items.filter((item) =>
+      [item.id, item.name, item.size, item.watchReferences.join(" ")].some(
+        (value) => value.toLowerCase().includes(query),
+      ),
+    );
+  }, [items, searchText]);
+
+  return (
+    <List
+      isLoading={isLoading}
+      isShowingDetail
+      navigationTitle="Installed Models"
+      searchBarPlaceholder="Filter installed models..."
+      onSearchTextChange={setSearchText}
+    >
+      {error ? (
+        <List.Item
+          title="Installed Models Unavailable"
+          subtitle={error}
+          icon={Icon.ExclamationMark}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={() => setRefreshToken((current) => current + 1)}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
+      {!error && visibleItems.length === 0 && !isLoading ? (
+        <List.Item
+          title="No Installed Models"
+          subtitle="Install a Whisper model first."
+          icon={Icon.MagnifyingGlass}
+          actions={
+            <ActionPanel>
+              <Action
+                title="Refresh"
+                icon={Icon.ArrowClockwise}
+                onAction={() => setRefreshToken((current) => current + 1)}
+              />
+            </ActionPanel>
+          }
+        />
+      ) : null}
+      {visibleItems.map((item, index) => {
+        const canDelete = !item.current && item.watchReferences.length === 0;
+        const accessories: List.Item.Accessory[] = [];
+        if (item.current) {
+          accessories.push({ tag: "Current" });
+        }
+        if (item.watchReferences.length > 0) {
+          accessories.push({
+            tag:
+              item.watchReferences.length === 1
+                ? "Used by Watch"
+                : `Used by ${item.watchReferences.length} Watches`,
+          });
+        }
+
+        return (
+          <List.Item
+            key={`${item.id}-${index}`}
+            icon={item.current ? Icon.CheckCircle : Icon.Circle}
+            title={item.name}
+            subtitle={item.id}
+            accessories={accessories}
+            detail={
+              <List.Item.Detail
+                markdown={renderInstalledModelDetail(item)}
+                metadata={
+                  <List.Item.Detail.Metadata>
+                    <List.Item.Detail.Metadata.Label
+                      title="ID"
+                      text={item.id}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.Label
+                      title="Size"
+                      text={item.size || "Unknown"}
+                    />
+                    <List.Item.Detail.Metadata.Separator />
+                    <List.Item.Detail.Metadata.TagList title="Current">
+                      <List.Item.Detail.Metadata.TagList.Item
+                        text={item.current ? "Yes" : "No"}
+                      />
+                    </List.Item.Detail.Metadata.TagList>
+                    {item.watchReferences.length > 0 ? (
+                      <>
+                        <List.Item.Detail.Metadata.Separator />
+                        <List.Item.Detail.Metadata.Label
+                          title="Used by Watch Folders"
+                          text={item.watchReferences.join(", ")}
+                        />
+                      </>
+                    ) : null}
+                  </List.Item.Detail.Metadata>
+                }
+              />
+            }
+            actions={
+              <ActionPanel>
+                {canDelete ? (
+                  <Action
+                    title="Delete Model"
+                    icon={Icon.Trash}
+                    style={Action.Style.Destructive}
+                    onAction={() => removeInstalledModel(item, setItems)}
+                  />
+                ) : null}
+                <Action.CopyToClipboard
+                  title="Copy Model ID"
+                  content={item.id}
+                />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  onAction={() => setRefreshToken((current) => current + 1)}
+                />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
+    </List>
   );
 }
 
@@ -2160,6 +2515,17 @@ async function pasteLatestHistoryItem() {
   }
 }
 
+async function closeToRootAndShowHUD(message: string) {
+  await closeMainWindow({
+    clearRootSearch: true,
+    popToRootType: PopToRootType.Immediate,
+  });
+  await showHUD(message, {
+    clearRootSearch: true,
+    popToRootType: PopToRootType.Immediate,
+  });
+}
+
 function parseReplacementItems(output: string): ReplacementItem[] {
   const items: ReplacementItem[] = [];
   let scopeKey = "global";
@@ -2239,6 +2605,22 @@ function parseWatchItems(output: string): WatchItem[] {
         raw: line,
       };
     });
+}
+
+function buildWatchModelReferences(items: WatchItem[]) {
+  const references = new Map<string, string[]>();
+
+  for (const item of items) {
+    if (!item.model) {
+      continue;
+    }
+
+    const current = references.get(item.model) ?? [];
+    current.push(item.name || item.id);
+    references.set(item.model, current);
+  }
+
+  return references;
 }
 
 function parsePackageItems(kind: PackageKind, output: string): PackageItem[] {
@@ -2488,6 +2870,31 @@ function renderWatchDetail(item: WatchItem) {
   ].join("\n");
 }
 
+function renderInstalledModelDetail(item: InstalledModelItem) {
+  const parts = [`# ${item.name}`, ""];
+
+  parts.push(`- ID: \`${item.id}\``);
+  parts.push(`- Size: ${item.size || "Unknown"}`);
+  parts.push(`- Current: ${item.current ? "Yes" : "No"}`);
+
+  if (item.watchReferences.length > 0) {
+    parts.push("");
+    parts.push("## Watch Folder Usage", "");
+    for (const reference of item.watchReferences) {
+      parts.push(`- ${reference}`);
+    }
+  } else {
+    parts.push("");
+    parts.push(
+      item.current
+        ? "_This model is active now and should not be deleted._"
+        : "_No watch folder references detected._",
+    );
+  }
+
+  return parts.join("\n");
+}
+
 function renderPackageDetail(item: PackageItem) {
   const record = item.record;
   if (!record) {
@@ -2564,6 +2971,21 @@ function renderPackageDetail(item: PackageItem) {
   }
 
   return parts.join("\n");
+}
+
+function renderCurrentModeDetail(record?: CurrentModeRecord) {
+  if (!record) {
+    return "# Current Mode\n\n_Loading current mode..._";
+  }
+
+  return [
+    `# ${record.name || record.id || "Current Mode"}`,
+    "",
+    `- ID: \`${record.id || "unknown"}\``,
+    `- Live Dictation Ready: ${record.live === "true" ? "Yes" : "No"}`,
+    "",
+    "Use `Set Current Mode` to switch the active manual mode.",
+  ].join("\n");
 }
 
 function renderModeDetail(record?: ModeRecord) {
@@ -2745,6 +3167,13 @@ async function executeRequest(title: string, request: CommandRequest) {
         ...result,
         exitCode: 0,
         stderr: "",
+      };
+    }
+
+    if (result.exitCode === 0 && isImportTextRequest(request)) {
+      result = {
+        ...result,
+        stdout: stripImportedHistoryHeader(result.stdout),
       };
     }
 

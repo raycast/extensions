@@ -86,10 +86,34 @@
       "mode": "view"
     },
     {
+      "name": "show-current-mode",
+      "title": "Show Current Mode",
+      "subtitle": "AimeFlux",
+      "description": "Show the active manual mode and switch to another one.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "set-current-mode",
+      "title": "Set Current Mode",
+      "subtitle": "AimeFlux",
+      "description": "Change the active manual mode by name or ID.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
       "name": "show-mode",
       "title": "Show Mode",
       "subtitle": "AimeFlux",
       "description": "Inspect a mode with prompt, vocabulary, and replacement details.",
+      "icon": "command-icon.png",
+      "mode": "view"
+    },
+    {
+      "name": "list-installed-models",
+      "title": "List Installed Models",
+      "subtitle": "AimeFlux",
+      "description": "Browse installed Whisper models and remove models that are not in active use.",
       "icon": "command-icon.png",
       "mode": "view"
     },

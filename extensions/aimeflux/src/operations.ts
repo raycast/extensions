@@ -14,6 +14,8 @@ export type Operation = {
     | "watches"
     | "replacements"
     | "mode-detail"
+    | "mode-current"
+    | "models"
     | "rule-packages"
     | "mode-packages";
   fields?: Field[];
@@ -169,6 +171,34 @@ export const operations: Operation[] = [
     },
   },
   {
+    id: "mode-current",
+    title: "Show Current Mode",
+    section: "Modes & Models",
+    description: "Show the active manual mode and switch to another one.",
+    icon: Icon.Compass,
+    mode: "browser",
+    presentation: "mode-current",
+    buildRequest: () => ({
+      label: "Show Current Mode",
+      args: ["mode", "current"],
+    }),
+  },
+  {
+    id: "mode-set",
+    title: "Set Current Mode",
+    section: "Modes & Models",
+    description: "Change the active manual mode by name or id.",
+    icon: Icon.ArrowRight,
+    mode: "form",
+    closeOnSuccess: true,
+    fields: [requiredModeDropdown("modeId", "Mode")],
+    validate: requireText("modeId", "Mode name or id is required."),
+    buildRequest: (values) => ({
+      label: "Set Current Mode",
+      args: ["mode", "set", textValue(values, "modeId")],
+    }),
+  },
+  {
     id: "mode-show",
     title: "Show Mode",
     section: "Modes & Models",
@@ -181,6 +211,20 @@ export const operations: Operation[] = [
     buildRequest: (values) => ({
       label: "Show Mode",
       args: ["mode", "show", textValue(values, "modeId")],
+    }),
+  },
+  {
+    id: "model-list",
+    title: "List Installed Models",
+    section: "Modes & Models",
+    description:
+      "Browse installed Whisper models and remove models that are not in active use.",
+    icon: Icon.List,
+    mode: "browser",
+    presentation: "models",
+    buildRequest: () => ({
+      label: "List Installed Models",
+      args: ["model", "list"],
     }),
   },
   {
