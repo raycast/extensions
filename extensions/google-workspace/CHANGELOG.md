@@ -1,6 +1,6 @@
 # Google Workspace Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-22
 
 - Prevent Google Drive search from crashing when the Drive API response does not include a files list.
 
