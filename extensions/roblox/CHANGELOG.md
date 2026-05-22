@@ -1,6 +1,6 @@
 # Roblox Changelog
 
-## [More Precise Server Location] - {PR_MERGE_DATE}
+## [More Precise Server Location] - 2026-05-22
 
 - Updated to show more precise server locations (uses a maintained server list endpoint, fallback to IP Geolocation)
 - Added 'Get Playing Game' support for Windows.
