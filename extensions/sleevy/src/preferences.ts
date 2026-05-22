@@ -7,11 +7,7 @@ export type SleevyPreferences = {
 };
 
 export function getSleevyPreferences(): SleevyPreferences {
-  const preferences = getPreferenceValues<{
-    apiUrl: string;
-    webUrl?: string;
-    sourceName?: string;
-  }>();
+  const preferences = getPreferenceValues<Preferences>();
 
   return {
     apiUrl: preferences.apiUrl.trim().replace(/\/+$/, ""),

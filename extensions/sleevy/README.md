@@ -4,13 +4,7 @@ Save links to Sleevy from Raycast and browse your saved library without leaving 
 
 ## Setup
 
-This extension needs a Sleevy API Key before it can save or manage items.
-
-1. Open the Sleevy Web Companion.
-2. Go to API Key Settings.
-3. Create or copy your personal API Key.
-4. Open the Sleevy extension preferences in Raycast.
-5. Paste the API Key into the `API Key` field.
+The first time you run a Sleevy command, Raycast opens your browser to connect the extension to your Sleevy account. Approve the connection and you are returned to Raycast — no manual API key entry is required.
 
 The default `API URL` is `https://api.sleevy.app`. Change it only if you are using a self-hosted or development Sleevy API.
 
@@ -30,6 +24,6 @@ Shows your saved Sleevy items. From the list, you can open an item, copy its URL
 
 ## Troubleshooting
 
-If Raycast reports that configuration is required, open the extension preferences and make sure both `API URL` and `API Key` are set.
+If Raycast reports that configuration is required, open the extension preferences and make sure `API URL` is set.
 
-If requests are unauthorized, create a new API Key in the Sleevy Web Companion and update the Raycast preference.
+If requests are unauthorized, run any Sleevy command and re-approve the browser consent screen to reconnect your account.

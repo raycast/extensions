@@ -276,7 +276,7 @@ function YourLibrary() {
                 <Action
                   title="Copy URL"
                   icon={Icon.Clipboard}
-                  shortcut={{ modifiers: ["cmd"], key: "c" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
                   onAction={() => Clipboard.copy(item.originalUrl)}
                 />
                 <Action

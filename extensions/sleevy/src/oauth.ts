@@ -79,7 +79,7 @@ export const authorize = async (): Promise<string> => {
   const existing = await oauthClient.getTokens();
   if (existing?.accessToken) return existing.accessToken;
 
-  const prefs = getPreferenceValues<{ apiUrl: string; webUrl?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const apiUrl = prefs.apiUrl.trim().replace(/\/+$/, "");
   const webUrl =
     prefs.webUrl?.trim().replace(/\/+$/, "") || deriveWebUrl(apiUrl);
