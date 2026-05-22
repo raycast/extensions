@@ -1,5 +1,9 @@
 # Mail Changelog
 
+## [Improvement] - {PR_MERGE_DATE}
+
+- Add option to manually set the type of a mailbox (inbox, junk, etc.), useful for non-English mail accounts
+
 ## [Security Fix] - 2026-03-17
 
 - Bump lodash/lodash-es to fix prototype pollution vulnerability (CVE-2025-13465)
