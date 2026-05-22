@@ -1,5 +1,5 @@
 import { readFile } from "node:fs/promises";
-import { dirname, resolve, extname, basename } from "node:path";
+import { dirname, resolve, sep, extname, basename } from "node:path";
 
 export type InputKind = "html" | "markdown";
 
@@ -69,8 +69,10 @@ export async function inlineLocalAssets(html: string, htmlPath: string): Promise
     /<script\b([^>]*?)\bsrc=["']([^"']+)["']([^>]*)>\s*<\/script>/gi,
     async (m, pre, src, post) => {
       if (isRemote(src)) return m;
+      const resolved = resolve(baseDir, src);
+      if (!resolved.startsWith(baseDir + sep)) return m;
       try {
-        const content = await readFile(resolve(baseDir, src), "utf8");
+        const content = await readFile(resolved, "utf8");
         const attrs = stripTypeAttr(`${pre}${post}`).trim();
         return `<script${attrs ? " " + attrs : ""}>\n${content}\n</script>`;
       } catch {
@@ -83,8 +85,10 @@ export async function inlineLocalAssets(html: string, htmlPath: string): Promise
     const attrs = `${pre} ${post}`;
     if (!/rel=["']?stylesheet["']?/i.test(attrs)) return m;
     if (isRemote(href)) return m;
+    const resolved = resolve(baseDir, href);
+    if (!resolved.startsWith(baseDir + sep)) return m;
     try {
-      const content = await readFile(resolve(baseDir, href), "utf8");
+      const content = await readFile(resolved, "utf8");
       return `<style>\n${content}\n</style>`;
     } catch {
       return m;

@@ -98,7 +98,7 @@ function MyPages() {
                 <Action
                   title="Refresh"
                   icon={Icon.ArrowClockwise}
-                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "r" }}
                   onAction={revalidate}
                 />
               </ActionPanel.Section>
