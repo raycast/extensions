@@ -1,6 +1,6 @@
 # Flighty Changelog
 
-## [Copy Flight Number Action] - {PR_MERGE_DATE}
+## [Copy Flight Number Action] - 2026-05-22
 
 - Add action to copy flight number
 
