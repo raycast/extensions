@@ -3,7 +3,7 @@
   "name": "ai-translate",
   "title": "AI Translate",
   "description": "Fast screenshot OCR translation for text that cannot be selected, powered by BYOK AI providers.",
-  "icon": "icon.png",
+  "icon": "ai-translate-icon.png",
   "author": "xianwei_zhang",
   "license": "MIT",
   "commands": [
@@ -13,7 +13,7 @@
       "subtitle": "AI Translate",
       "description": "Translate selected text or type text to translate. Switch models, prompt profiles, and styles on the fly.",
       "mode": "view",
-      "icon": "icon.png",
+      "icon": "ai-translate-icon.png",
       "keywords": [
         "translate",
         "ai",
@@ -32,7 +32,7 @@
       "subtitle": "AI Translate",
       "description": "Translate the selected text with your default provider and paste the result in place — no window.",
       "mode": "no-view",
-      "icon": "icon.png",
+      "icon": "ai-translate-icon.png",
       "keywords": [
         "translate",
         "paste",
@@ -48,7 +48,7 @@
       "subtitle": "AI Translate",
       "description": "Rewrite selected text into natural, idiomatic English, learn why it sounds more natural, and hear it spoken aloud.",
       "mode": "view",
-      "icon": "icon.png",
+      "icon": "ai-translate-icon.png",
       "keywords": [
         "rewrite",
         "coach",
@@ -67,7 +67,7 @@
       "subtitle": "AI Translate",
       "description": "Rewrite the selected text into natural English with your default provider and paste it in place — no window.",
       "mode": "no-view",
-      "icon": "icon.png",
+      "icon": "ai-translate-icon.png",
       "keywords": [
         "rewrite",
         "replace",
@@ -85,7 +85,7 @@
       "subtitle": "AI Translate",
       "description": "Capture a screen region, OCR the text, review it, and translate with multiple providers. Switch models to compare.",
       "mode": "view",
-      "icon": "screenshot-translate.png",
+      "icon": "screenshot-translate-icon.png",
       "keywords": [
         "ocr",
         "screenshot",
@@ -100,7 +100,7 @@
       "subtitle": "AI Translate",
       "description": "Capture a screen region, OCR the text, and copy it to the clipboard.",
       "mode": "no-view",
-      "icon": "screenshot-translate.png",
+      "icon": "screenshot-translate-icon.png",
       "keywords": [
         "ocr",
         "screenshot",
@@ -116,7 +116,7 @@
       "subtitle": "AI Translate",
       "description": "Capture a screen region and extract text with OCR. Review, copy, or send to translate.",
       "mode": "view",
-      "icon": "screenshot-translate.png",
+      "icon": "screenshot-translate-icon.png",
       "keywords": [
         "ocr",
         "screenshot",
@@ -133,7 +133,7 @@
       "subtitle": "AI Translate",
       "description": "Browse recent translations and rewrites you copied or pasted. Replay copy, paste, or read aloud.",
       "mode": "view",
-      "icon": "icon.png",
+      "icon": "ai-translate-icon.png",
       "keywords": [
         "history",
         "recent",
@@ -149,7 +149,7 @@
       "subtitle": "AI Translate",
       "description": "Configure model tier, prompt profile, translation style, and custom instructions.",
       "mode": "view",
-      "icon": "icon.png",
+      "icon": "ai-translate-icon.png",
       "keywords": [
         "settings",
         "model",
@@ -809,8 +809,8 @@
   "scripts": {
     "generate-icons": "node scripts/generate-icons.mjs",
     "build-swift": "bash scripts/build-swift.sh",
-    "predev": "npm run generate-icons && npm run build-swift",
-    "prebuild": "npm run generate-icons && npm run build-swift",
+    "predev": "npm run build-swift",
+    "prebuild": "npm run build-swift",
     "dev": "ray develop",
     "build": "ray build -e dist",
     "lint": "ray lint",

@@ -2,6 +2,13 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import { deflateSync } from "node:zlib";
 
 const size = 512;
+const force = process.argv.includes("--force");
+
+if (!force) {
+  console.log("Skipping icon generation. The checked-in assets are the source of truth.");
+  console.log("Run `npm run generate-icons -- --force` to overwrite them with fallback generated icons.");
+  process.exit(0);
+}
 
 function makeCanvas() {
   return Buffer.alloc(size * size * 4);
@@ -212,5 +219,5 @@ function png(canvas) {
 }
 
 mkdirSync("assets", { recursive: true });
-writeFileSync("assets/icon.png", png(drawIcon()));
-writeFileSync("assets/screenshot-translate.png", png(drawIcon({ screenshot: true })));
+writeFileSync("assets/ai-translate-icon.png", png(drawIcon()));
+writeFileSync("assets/screenshot-translate-icon.png", png(drawIcon({ screenshot: true })));

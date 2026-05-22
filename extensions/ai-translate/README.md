@@ -127,4 +127,4 @@ npm install
 npm run dev
 ```
 
-`npm run dev` generates icons, builds the local OCR helper, and starts Raycast development mode. The first screenshot OCR run may require macOS Screen Recording permission for Raycast.
+`npm run dev` builds the local OCR helper and starts Raycast development mode. The checked-in icon assets are the source of truth. The first screenshot OCR run may require macOS Screen Recording permission for Raycast.
