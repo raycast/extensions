@@ -7,6 +7,9 @@ import {
   List,
   getPreferenceValues,
   openExtensionPreferences,
+  Clipboard,
+  AI,
+  environment,
 } from "@raycast/api";
 import { useEffect, useMemo, useState, useCallback } from "react";
 
@@ -85,6 +88,7 @@ function EcosystemPackageList(
 ) {
   const { ecosystem, onRefresh, onBack } = props;
   const [isLoading, setIsLoading] = useState(false);
+  const [aiDetails, setAiDetails] = useState<Record<string, string>>({});
 
   if (!ecosystem.available) {
     return (
@@ -115,6 +119,7 @@ function EcosystemPackageList(
   return (
     <List
       isLoading={isLoading}
+      isShowingDetail={Object.keys(aiDetails).length > 0}
       navigationTitle={`Installed Packages — ${ecosystem.name}`}
       searchBarPlaceholder="Search packages..."
     >
@@ -129,6 +134,13 @@ function EcosystemPackageList(
             subtitle={pkg.current}
             accessories={
               pkg.website ? [{ icon: Icon.Globe, tooltip: pkg.website }] : []
+            }
+            detail={
+              aiDetails[pkg.name] ? (
+                <List.Item.Detail
+                  markdown={`# 🤖 AI Summary: ${pkg.name}\n\n${aiDetails[pkg.name]}`}
+                />
+              ) : undefined
             }
             actions={
               <ActionPanel>
@@ -163,8 +175,60 @@ function EcosystemPackageList(
                       }
                     }}
                   />
-                  {pkg.website && <Action.OpenInBrowser url={pkg.website} />}
+                  {pkg.website && (
+                    <Action.OpenInBrowser
+                      title="Open Website"
+                      url={pkg.website}
+                    />
+                  )}
                 </ActionPanel.Section>
+
+                {environment.canAccess(AI) && (
+                  <ActionPanel.Section title="Intelligence">
+                    <Action
+                      title="What Is This? (ai)"
+                      icon={Icon.Stars}
+                      shortcut={{ modifiers: ["cmd"], key: "i" }}
+                      onAction={async () => {
+                        const toast = await showToast({
+                          style: Toast.Style.Animated,
+                          title: `Asking AI about ${pkg.name}...`,
+                        });
+                        try {
+                          const response = await AI.ask(
+                            `In one short paragraph, what does the ${ecosystem.name} package '${pkg.name}' do and why would a developer install it?`,
+                          );
+                          toast.style = Toast.Style.Success;
+                          toast.title = "AI Response";
+                          toast.message = "See detailed view (Cmd+Enter)";
+                          setAiDetails((prev) => ({
+                            ...prev,
+                            [pkg.name]: response,
+                          }));
+                        } catch (err: any) {
+                          toast.style = Toast.Style.Failure;
+                          toast.title = "AI Failed";
+                        }
+                      }}
+                    />
+                  </ActionPanel.Section>
+                )}
+
+                <ActionPanel.Section title="Clipboard">
+                  <Action
+                    title="Copy Package Name"
+                    icon={Icon.Clipboard}
+                    shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                    onAction={() => Clipboard.copy(pkg.name)}
+                  />
+                  <Action
+                    title="Copy Version"
+                    icon={Icon.Text}
+                    shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
+                    onAction={() => Clipboard.copy(pkg.current)}
+                  />
+                </ActionPanel.Section>
+
                 <ActionPanel.Section title="Navigation">
                   <Action
                     title="Back to Ecosystems"

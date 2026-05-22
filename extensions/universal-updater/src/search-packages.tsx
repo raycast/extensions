@@ -7,8 +7,17 @@ import {
   showToast,
   getPreferenceValues,
   popToRoot,
+  AI,
+  environment,
+  Detail,
 } from "@raycast/api";
 import { useState, useMemo, useEffect } from "react";
+import { exec } from "node:child_process";
+import { promisify } from "node:util";
+import fetch from "node-fetch";
+
+const execAsync = promisify(exec);
+
 import {
   EcosystemId,
   installPackage,
@@ -56,6 +65,40 @@ export default function Command() {
   const [searchText, setSearchText] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [aiRecommendation, setAiRecommendation] = useState<string>("");
+  const [brewCache, setBrewCache] = useState<{ name: string; desc: string }[]>(
+    [],
+  );
+
+  // Pre-fetch Homebrew JSON API in background for instant 0ms search
+  useEffect(() => {
+    if (enabledEcosystems.includes("brew")) {
+      (async () => {
+        try {
+          const [fRes, cRes] = await Promise.all([
+            fetch("https://formulae.brew.sh/api/formula.json"),
+            fetch("https://formulae.brew.sh/api/cask.json"),
+          ]);
+          const formulae = (await fRes.json()) as any[];
+          const casks = (await cRes.json()) as any[];
+
+          const combined = [
+            ...formulae.map((f) => ({
+              name: f.name,
+              desc: f.desc || "Homebrew Formula",
+            })),
+            ...casks.map((c) => ({
+              name: c.token,
+              desc: c.desc || "Homebrew Cask",
+            })),
+          ];
+          setBrewCache(combined);
+        } catch (e) {
+          console.error("Failed to fetch brew cache", e);
+        }
+      })();
+    }
+  }, [enabledEcosystems]);
 
   useEffect(() => {
     let active = true;
@@ -96,8 +139,49 @@ export default function Command() {
             name: r.name,
             description: r.description,
           }));
-        } else {
+        } else if (ecosystem === "brew") {
+          // Instant 0ms memory search from pre-fetched JSON
+          if (brewCache.length > 0) {
+            const query = searchText.toLowerCase().trim();
+            const filtered = brewCache
+              .filter(
+                (p) =>
+                  p.name.toLowerCase().includes(query) ||
+                  p.desc.toLowerCase().includes(query),
+              )
+              .slice(0, 30);
+            items = filtered.map((p) => ({
+              name: p.name,
+              description: p.desc,
+            }));
+          } else {
+            // Fallback to slow terminal search if API failed or hasn't loaded yet
+            try {
+              const { stdout } = await execAsync(
+                `brew search /${searchText.trim()}/ | head -n 20`,
+              );
+              const lines = stdout
+                .split("\n")
+                .filter(
+                  (l: string) => l.trim().length > 0 && !l.includes("==>"),
+                );
+              items = lines.map((name: string) => ({
+                name: name.trim(),
+                description: `Install via Homebrew`,
+              }));
+            } catch (err) {
+              items = [];
+            }
+          }
+        } else if (ecosystem === "pip" || ecosystem === "pipx") {
           // Fallback for others, just show the exact text as an option
+          items = [
+            {
+              name: searchText.trim(),
+              description: `Install ${searchText} via ${ECOSYSTEM_NAMES[ecosystem]} (Exact Match Only)`,
+            },
+          ];
+        } else {
           items = [
             {
               name: searchText.trim(),
@@ -126,7 +210,7 @@ export default function Command() {
 
     const timer = setTimeout(() => {
       void performSearch();
-    }, 400);
+    }, 150); // Lightning fast debounce
 
     return () => {
       active = false;
@@ -221,6 +305,70 @@ export default function Command() {
           />
         ))}
       </List.Section>
+
+      {searchText.trim().length > 2 && environment.canAccess(AI) && (
+        <List.Section title="AI Intelligence">
+          {aiRecommendation ? (
+            <List.Item
+              title="🤖 AI Recommendation"
+              subtitle="Press Enter to read full response"
+              icon={Icon.Stars}
+              detail={
+                <List.Item.Detail
+                  markdown={`# AI Recommendation\n\n${aiRecommendation}`}
+                />
+              }
+              actions={
+                <ActionPanel>
+                  <Action.Push
+                    title="View Full AI Response"
+                    icon={Icon.Eye}
+                    target={
+                      <Detail
+                        markdown={`# 🤖 AI Package Recommendation\n\n**Query:** ${searchText}\n\n${aiRecommendation}`}
+                      />
+                    }
+                  />
+                  <Action.CopyToClipboard
+                    title="Copy Response"
+                    content={aiRecommendation}
+                  />
+                </ActionPanel>
+              }
+            />
+          ) : (
+            <List.Item
+              title={`Ask AI to recommend a ${ECOSYSTEM_NAMES[ecosystem]} package for "${searchText}"...`}
+              icon={Icon.Stars}
+              actions={
+                <ActionPanel>
+                  <Action
+                    title="Ask AI"
+                    icon={Icon.Stars}
+                    onAction={async () => {
+                      const toast = await showToast({
+                        style: Toast.Style.Animated,
+                        title: "Asking AI...",
+                      });
+                      try {
+                        const response = await AI.ask(
+                          `What is the best and most popular ${ECOSYSTEM_NAMES[ecosystem]} package or tool for: ${searchText}? Give a brief recommendation and the exact install command.`,
+                        );
+                        setAiRecommendation(response);
+                        toast.style = Toast.Style.Success;
+                        toast.title = "AI Found Recommendations!";
+                      } catch (err: any) {
+                        toast.style = Toast.Style.Failure;
+                        toast.title = "AI Request Failed";
+                      }
+                    }}
+                  />
+                </ActionPanel>
+              }
+            />
+          )}
+        </List.Section>
+      )}
 
       {results.length === 0 && searchText.trim() === "" && (
         <List.EmptyView

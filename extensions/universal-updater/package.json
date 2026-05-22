@@ -60,6 +60,20 @@
       "subtitle": "Universal Updater",
       "description": "Run cleanup commands for all enabled package managers to reclaim disk space.",
       "mode": "view"
+    },
+    {
+      "name": "system-health",
+      "title": "System Diagnostics",
+      "subtitle": "Universal Updater",
+      "description": "Run deep diagnostics (like brew doctor, npm verify) to ensure your system is perfectly healthy.",
+      "mode": "view"
+    },
+    {
+      "name": "security-audit",
+      "title": "Security Audit Scanner",
+      "subtitle": "Universal Updater",
+      "description": "Scan globally installed packages for severe security vulnerabilities and CVEs.",
+      "mode": "view"
     }
   ],
   "preferences": [
@@ -308,11 +322,13 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.70.3"
+    "@raycast/api": "^1.70.3",
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@raycast/eslint-config": "^1.0.11",
     "@types/node": "^22.19.17",
+    "@types/node-fetch": "^2.6.13",
     "@types/react": "^19.0.10",
     "eslint": "^8.57.0",
     "prettier": "^3.3.3",

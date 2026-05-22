@@ -26,7 +26,7 @@ const SHELL_ENV = {
   FORCE_COLOR: "0",
 };
 
-async function run(cmd: string): Promise<string> {
+export async function run(cmd: string): Promise<string> {
   try {
     const { stdout } = await execFileAsync("/bin/zsh", ["-lc", cmd], {
       env: SHELL_ENV,
