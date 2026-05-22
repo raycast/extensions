@@ -1,5 +1,9 @@
 # Flighty Changelog
 
+## {PR_MERGE_DATE}
+
+- Add action to copy flight number
+
 ## [UI Improvements] - 2025-06-05
 
 - Flight details are now easier to read with a more compact layout
