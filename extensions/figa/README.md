@@ -6,7 +6,7 @@ Raycast extension foundation for Figa external API integrations.
 
 - Package location: `apps/raycast`.
 - MVP auth: manual Figa `x-api-key` stored in a required Raycast `password` preference.
-- Production API default: `https://api.figa.cc`.
+- Production API endpoint: `https://api.figa.cc`.
 - OAuth/pairing and Raycast AI tools are intentionally out of scope for this package skeleton.
 - The package is standalone for Raycast Store publishing and does not import private monorepo workspace packages at runtime.
 
@@ -40,7 +40,6 @@ pnpm -F figa lint
 Raycast preferences:
 
 - `API Key`: a dedicated Figa workspace API key. Use read preset for read commands and write preset for mutation commands.
-- `API Base URL`: keep `https://api.figa.cc` for production, or use a local API origin during development.
 
 ## Current Commands
 
@@ -57,7 +56,7 @@ Broader update/delete workflows are deferred until a dedicated low-risk Raycast 
 
 The client in `src/api/client.ts`:
 
-- trims trailing slashes from `apiBaseUrl`,
+- uses the production Figa API endpoint,
 - sends `x-api-key`,
 - sends `User-Agent: FigaRaycast/0.1.0 (Raycast)`,
 - expects Figa response envelopes,
@@ -90,7 +89,7 @@ Scenarios for #529/#540:
 - Free-plan blocked key: command shows a paid-plan-required state without raw key data and offers Billing, API key settings, and docs actions.
 - Insufficient permissions: command explains that `workspaces.read` is required and links to API key settings/docs.
 - Rate limiting: command asks the user to retry later and keeps the retry action available.
-- Network failure or invalid local API Base URL: command points users to extension preferences and keeps production/local base URL support isolated to the `apiBaseUrl` preference.
+- Network failure: command asks the user to retry without exposing internal API configuration.
 
 Scenarios for #530:
 
@@ -98,14 +97,14 @@ Scenarios for #530:
 - Valid Pro or Enterprise read key with no expenses: `Search Expenses` shows an empty state with refresh, Figa expenses, preferences, and docs actions.
 - Valid Pro or Enterprise read key: `Show Monthly Summary` shows recent monthly total/paid/unpaid values using the workspace base currency.
 - Context v2 response without `expenses.read`: both read commands stop before calling expense endpoints and show an API-key permission state.
-- Invalid or expired key, free-plan blocked key, insufficient permissions, rate limiting, network failure, and invalid local API Base URL use the shared Raycast error detail state without rendering raw key data.
+- Invalid or expired key, free-plan blocked key, insufficient permissions, rate limiting, and network failure use the shared Raycast error detail state without rendering raw key data.
 
 Scenarios for #542:
 
 - Valid Pro or Enterprise read key with categories/recipients: reference commands show global vs workspace scope, expense counts, copy/paste actions, and Figa detail/list links.
 - Valid Pro or Enterprise read key with no categories or recipients: commands show empty states with refresh, Figa list, preferences, and docs actions.
 - Context v2 response without `categories.read` or `recipients.read`: the relevant command stops before calling the reference endpoint and shows a permission state.
-- Invalid or expired key, free-plan blocked key, insufficient permissions, rate limiting, network failure, and invalid local API Base URL use the shared Raycast error detail state without rendering raw key data.
+- Invalid or expired key, free-plan blocked key, insufficient permissions, rate limiting, and network failure use the shared Raycast error detail state without rendering raw key data.
 
 Scenarios for #543:
 
@@ -113,7 +112,7 @@ Scenarios for #543:
 - Valid Pro or Enterprise read key without `expenses.write`: the command stops before calling reference or create endpoints and shows a write-permission state.
 - Invalid form input: the command highlights fixable fields before sending a request.
 - Retry after a submit failure reuses the same idempotency key until the form changes; duplicate in-flight submits are ignored.
-- Invalid or expired key, free-plan blocked key, insufficient permissions, rate limiting, network failure, and invalid local API Base URL use the shared Raycast error detail state without rendering raw key data.
+- Invalid or expired key, free-plan blocked key, insufficient permissions, rate limiting, and network failure use the shared Raycast error detail state without rendering raw key data.
 
 Scenarios for #531:
 

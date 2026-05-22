@@ -217,11 +217,6 @@ function buildSuccessMarkdown(context: FigaWorkspaceContext): string {
     `| Base currency | ${getDefaultBaseCurrency(context)} |`,
     "",
     buildCapabilitiesMarkdown(context),
-    "",
-    "## API Contract",
-    "",
-    "- `GET /api/v1/context`",
-    "- Permission: `workspaces.read`",
   ].join("\n");
 }
 

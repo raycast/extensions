@@ -1,13 +1,6 @@
-import { getFigaPreferences } from "./preferences";
-
 export const FIGA_DEVELOPER_API_DOCS_URL = "https://getfiga.com/help/developers/api";
 
-const DEFAULT_FIGA_APP_ORIGIN = "https://app.figa.cc";
-
-const APP_ORIGIN_BY_API_ORIGIN: Record<string, string> = {
-  "https://api.figa.cc": "https://app.figa.cc",
-  "https://dev-api.figa.cc": "https://dev-app.figa.cc",
-};
+const FIGA_APP_ORIGIN = "https://app.figa.cc";
 
 export function getFigaApiKeySettingsUrl(workspaceId?: string): string {
   if (!workspaceId) return getFigaAppUrl("/settings/workspace/api-keys");
@@ -53,8 +46,7 @@ export function getFigaExpenseUrl(workspaceId: string, expenseId: string): strin
 }
 
 function getFigaAppUrl(path: string, query?: object): string {
-  const origin = getConfiguredAppOrigin();
-  const url = new URL(path, `${origin}/`);
+  const url = new URL(path, `${FIGA_APP_ORIGIN}/`);
 
   if (query) {
     for (const [key, value] of Object.entries(query) as Array<
@@ -66,13 +58,4 @@ function getFigaAppUrl(path: string, query?: object): string {
   }
 
   return url.toString();
-}
-
-function getConfiguredAppOrigin(): string {
-  try {
-    const apiOrigin = new URL(getFigaPreferences().apiBaseUrl).origin;
-    return APP_ORIGIN_BY_API_ORIGIN[apiOrigin] ?? apiOrigin;
-  } catch {
-    return DEFAULT_FIGA_APP_ORIGIN;
-  }
 }

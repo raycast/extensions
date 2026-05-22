@@ -227,12 +227,6 @@ function buildMonthlySummaryMarkdown(data: MonthlySummaryCommandData): string {
         `${formatMoney(item.unpaidAmount, currency)} |`,
       ].join(" | "),
     ),
-    "",
-    "## API Contract",
-    "",
-    "- `GET /api/v1/expenses/monthly-totals`",
-    "- Query: `startYear`, `startMonth`, `months`",
-    "- Permission: `expenses.read`",
   ].join("\n");
 }
 

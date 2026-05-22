@@ -30,14 +30,6 @@
       "type": "password",
       "required": true,
       "placeholder": "et_live_..."
-    },
-    {
-      "name": "apiBaseUrl",
-      "title": "API Base URL",
-      "description": "Figa API origin. Keep production default unless testing against local or staging API.",
-      "type": "textfield",
-      "required": true,
-      "default": "https://api.figa.cc"
     }
   ],
   "commands": [

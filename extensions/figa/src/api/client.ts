@@ -18,6 +18,7 @@ import type {
 } from "./types";
 
 const USER_AGENT = "FigaRaycast/0.1.0 (Raycast)";
+const FIGA_API_BASE_URL = "https://api.figa.cc";
 
 interface FigaRequestOptions {
   method?: "GET" | "POST" | "PUT" | "DELETE";
@@ -173,14 +174,14 @@ async function requestFiga<T>(path: string, options: FigaRequestOptions = {}): P
   const preferences = getFigaPreferences();
   assertUsablePreferences(preferences);
 
-  const url = buildApiUrl(path, preferences.apiBaseUrl);
+  const url = buildApiUrl(path);
   const requestInit = buildRequestInit(preferences.apiKey, options);
 
   let response: Response;
   try {
     response = await fetch(url, requestInit);
   } catch (error) {
-    throw createNetworkError(preferences.apiBaseUrl, error);
+    throw createNetworkError(error);
   }
 
   const payload = await readFigaPayload(response);
@@ -262,15 +263,10 @@ function parseJsonText(text: string): unknown {
 
 function assertUsablePreferences(preferences: ReturnType<typeof getFigaPreferences>): void {
   if (!preferences.apiKey) throw createMissingApiKeyError();
-  if (!preferences.apiBaseUrl) throw createInvalidBaseUrlError(preferences.apiBaseUrl);
 }
 
-function buildApiUrl(path: string, apiBaseUrl: string): URL {
-  try {
-    return new URL(path, `${apiBaseUrl}/`);
-  } catch {
-    throw createInvalidBaseUrlError(apiBaseUrl);
-  }
+function buildApiUrl(path: string): URL {
+  return new URL(path, `${FIGA_API_BASE_URL}/`);
 }
 
 function withQuery(path: string, query: object): string {
@@ -299,21 +295,7 @@ function createMissingApiKeyError(): FigaApiError {
   });
 }
 
-function createInvalidBaseUrlError(apiBaseUrl: string): FigaApiError {
-  return new FigaApiError({
-    message: `Invalid Figa API Base URL: ${apiBaseUrl || "(empty)"}.`,
-    status: null,
-    code: "INVALID_API_BASE_URL",
-    friendly: {
-      kind: "invalid-base-url",
-      title: "Invalid API Base URL",
-      message: "The configured Figa API Base URL is not a valid URL.",
-      action: "Open extension preferences and use a full origin such as https://api.figa.cc.",
-    },
-  });
-}
-
-function createNetworkError(apiBaseUrl: string, cause: unknown): FigaApiError {
+function createNetworkError(cause: unknown): FigaApiError {
   const message = cause instanceof Error ? cause.message : "Network request failed.";
 
   return new FigaApiError({
@@ -322,8 +304,8 @@ function createNetworkError(apiBaseUrl: string, cause: unknown): FigaApiError {
     friendly: {
       kind: "network-failure",
       title: "Cannot reach Figa",
-      message: `Raycast could not connect to ${apiBaseUrl}. Check the API Base URL and try again.`,
-      action: "Open extension preferences.",
+      message: "Raycast could not connect to Figa. Check your connection and try again.",
+      action: "Try again.",
     },
   });
 }
@@ -363,7 +345,7 @@ function createUnexpectedResponseError(status: number, payload: unknown): FigaAp
       kind: "unexpected-response",
       title: "Unexpected Figa response",
       message: "The API responded, but Raycast could not read the response envelope.",
-      action: "Try again or check whether the API Base URL points to Figa.",
+      action: "Try again. If this keeps happening, contact Figa support.",
     },
   });
 }
