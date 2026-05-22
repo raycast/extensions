@@ -7,6 +7,8 @@ export interface MonthReference {
   month: number;
 }
 
+const RAYCAST_LOCALE = "en-US";
+
 export function getCurrentMonth(): MonthReference {
   const now = new Date();
   return { year: now.getFullYear(), month: now.getMonth() + 1 };
@@ -26,14 +28,14 @@ function shiftMonth(input: MonthReference, offset: number): MonthReference {
 }
 
 export function formatMonthLabel(input: MonthReference, style: "long" | "short" = "long"): string {
-  return new Intl.DateTimeFormat(undefined, { month: style, year: "numeric" }).format(
+  return new Intl.DateTimeFormat(RAYCAST_LOCALE, { month: style, year: "numeric" }).format(
     new Date(input.year, input.month - 1, 1),
   );
 }
 
 export function formatMoney(cents: number, currency: string): string {
   try {
-    return new Intl.NumberFormat(undefined, {
+    return new Intl.NumberFormat(RAYCAST_LOCALE, {
       style: "currency",
       currency,
       currencyDisplay: "narrowSymbol",
@@ -46,7 +48,7 @@ export function formatMoney(cents: number, currency: string): string {
 export function formatUnixDate(value: number | null | undefined): string {
   if (!value) return "No date";
 
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat(RAYCAST_LOCALE, {
     year: "numeric",
     month: "short",
     day: "numeric",
