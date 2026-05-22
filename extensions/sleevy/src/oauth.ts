@@ -1,6 +1,8 @@
-import { OAuth, getPreferenceValues } from "@raycast/api";
+import { OAuth } from "@raycast/api";
 import { execFileSync } from "node:child_process";
 import os from "node:os";
+
+import { getSleevyPreferences } from "./preferences";
 
 const SCOPES = [
   "saved-items:capture",
@@ -52,9 +54,12 @@ function platformLabel(): string {
   }
 }
 
+export function deviceName(): string {
+  return macComputerName() ?? hostnameFirstSegment() ?? platformLabel();
+}
+
 function deviceLabel(): string {
-  const name = macComputerName() ?? hostnameFirstSegment();
-  return `Raycast on ${name ?? platformLabel()}`;
+  return `Raycast on ${deviceName()}`;
 }
 
 function deriveWebUrl(apiUrl: string): string {
@@ -79,10 +84,9 @@ export const authorize = async (): Promise<string> => {
   const existing = await oauthClient.getTokens();
   if (existing?.accessToken) return existing.accessToken;
 
-  const prefs = getPreferenceValues<Preferences>();
-  const apiUrl = prefs.apiUrl.trim().replace(/\/+$/, "");
-  const webUrl =
-    prefs.webUrl?.trim().replace(/\/+$/, "") || deriveWebUrl(apiUrl);
+  const prefs = getSleevyPreferences();
+  const apiUrl = prefs.apiUrl;
+  const webUrl = prefs.webUrl || deriveWebUrl(apiUrl);
 
   const authRequest = await oauthClient.authorizationRequest({
     endpoint: `${webUrl}/connect`,

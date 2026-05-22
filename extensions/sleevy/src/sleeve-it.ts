@@ -1,20 +1,8 @@
 import { Clipboard, showHUD } from "@raycast/api";
 import { getAccessToken, withAccessToken } from "@raycast/utils";
-import os from "node:os";
 
-import { authorize, oauthClient } from "./oauth";
+import { authorize, deviceName, oauthClient } from "./oauth";
 import { getSleevyPreferences } from "./preferences";
-
-function prettyHostname(): string {
-  return (
-    os
-      .hostname()
-      .replace(/\.local$/, "")
-      .replace(/-/g, " ")
-      .replace(/\s+/g, " ")
-      .trim() || "Desktop"
-  );
-}
 
 function isValidUrl(string: string): boolean {
   try {
@@ -52,7 +40,7 @@ async function sleeveIt() {
       body: JSON.stringify({
         url: trimmedText,
         captureChannel: "raycast" as const,
-        sourceName: preferences.sourceName || prettyHostname(),
+        sourceName: preferences.sourceName || deviceName(),
       }),
     });
 
