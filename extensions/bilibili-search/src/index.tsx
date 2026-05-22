@@ -13,6 +13,7 @@ import {
   open,
 } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
+import { open, closeMainWindow } from "@raycast/api";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -290,6 +291,7 @@ export default function Command() {
                     prefs.rememberSearchHistory,
                   );
                   await open(buildSearchUrl(item.keyword));
+                  await closeMainWindow();
                 }}
               />
               <Action.CopyToClipboard
