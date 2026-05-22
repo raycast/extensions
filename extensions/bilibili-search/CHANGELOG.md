@@ -1,6 +1,6 @@
 # Bilibili Search Changelog
 
-## [Initial Version] - 2026-05-22
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Initial release
 - Search Bilibili videos with real-time autosuggestions
