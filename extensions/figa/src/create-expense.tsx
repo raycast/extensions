@@ -28,11 +28,7 @@ const NO_RECIPIENT_VALUE = "__figa_no_recipient__";
 const NEW_CATEGORY_VALUE = "__figa_new_category__";
 const NEW_RECIPIENT_VALUE = "__figa_new_recipient__";
 
-interface CreateExpenseArguments {
-  name?: string;
-  amount?: string;
-  date?: string;
-}
+type CreateExpenseArguments = Arguments.CreateExpense;
 
 interface CreateExpenseCommandData {
   context: FigaWorkspaceContext;
@@ -55,7 +51,7 @@ interface CreateExpenseFormValues {
 type CreateExpenseFormErrors = Partial<Record<keyof CreateExpenseFormValues, string>>;
 
 export default function Command(props: Raycast.LaunchProps<{ arguments: CreateExpenseArguments }>) {
-  const args = props.arguments ?? {};
+  const args = props.arguments ?? { name: "", amount: "", date: "" };
   const state = usePromise(loadCreateExpenseData);
 
   return <CreateExpenseCommandView args={args} {...state} />;

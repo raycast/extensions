@@ -3,7 +3,7 @@ import { Action, ActionPanel, Color, Icon, List, openExtensionPreferences } from
 // fallow-ignore-next-line unresolved-import
 import { Toast, confirmAlert, showToast } from "@raycast/api";
 import { usePromise } from "@raycast/utils";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import {
   getExpensePayments,
   getExpenses,
@@ -35,6 +35,12 @@ type ExpenseStatusFilter = (typeof STATUS_FILTERS)[number]["value"];
 interface ExpenseCommandData {
   context: FigaWorkspaceContext;
   expenses?: FigaExpenseListResponse;
+}
+
+interface PaymentAttempt {
+  amount: number;
+  idempotencyKey: string;
+  paymentDate: number;
 }
 
 export default function Command() {
@@ -257,6 +263,13 @@ function ExpensePaymentAction({
   onRefresh: () => void;
 }) {
   const [isRecordingPayment, setIsRecordingPayment] = useState(false);
+  const paymentAttemptRef = useRef<PaymentAttempt | null>(null);
+  const expenseIdRef = useRef(expense.id);
+
+  if (expenseIdRef.current !== expense.id) {
+    expenseIdRef.current = expense.id;
+    paymentAttemptRef.current = null;
+  }
 
   if (!canOfferPaymentAction(expense)) return null;
 
@@ -276,20 +289,42 @@ function ExpensePaymentAction({
       icon={Icon.CheckCircle}
       onAction={() => {
         if (isRecordingPayment) return;
-        void markExpensePaid({ currency, expense, onRefresh, setIsRecordingPayment });
+        void markExpensePaid({
+          clearPaymentAttempt: () => {
+            paymentAttemptRef.current = null;
+          },
+          currency,
+          expense,
+          getPaymentAttempt: (amount) => {
+            if (paymentAttemptRef.current?.amount !== amount) {
+              paymentAttemptRef.current = {
+                amount,
+                idempotencyKey: crypto.randomUUID(),
+                paymentDate: Math.floor(Date.now() / 1000),
+              };
+            }
+            return paymentAttemptRef.current;
+          },
+          onRefresh,
+          setIsRecordingPayment,
+        });
       }}
     />
   );
 }
 
 async function markExpensePaid({
+  clearPaymentAttempt,
   currency,
   expense,
+  getPaymentAttempt,
   onRefresh,
   setIsRecordingPayment,
 }: {
+  clearPaymentAttempt: () => void;
   currency: string;
   expense: FigaExpense;
+  getPaymentAttempt: (amount: number) => PaymentAttempt;
   onRefresh: () => void;
   setIsRecordingPayment: (value: boolean) => void;
 }) {
@@ -308,29 +343,33 @@ async function markExpensePaid({
       toast.style = Toast.Style.Success;
       toast.title = "Expense already paid";
       toast.message = expense.name;
+      clearPaymentAttempt();
       onRefresh();
       return;
     }
 
     const confirmed = await confirmPaymentAction(expense, remainingAmount, currency);
     if (!confirmed) {
+      clearPaymentAttempt();
       await toast.hide();
       return;
     }
 
     toast.title = "Recording payment";
+    const paymentAttempt = getPaymentAttempt(remainingAmount);
     const response = await recordExpensePayment(
       expense.id,
       {
-        amount: remainingAmount,
-        paymentDate: Math.floor(Date.now() / 1000),
+        amount: paymentAttempt.amount,
+        paymentDate: paymentAttempt.paymentDate,
       },
-      crypto.randomUUID(),
+      paymentAttempt.idempotencyKey,
     );
 
     toast.style = Toast.Style.Success;
     toast.title = "Payment recorded";
     toast.message = formatMoney(response.payment.amount, currency);
+    clearPaymentAttempt();
     onRefresh();
   } catch (error) {
     const friendlyError = toFriendlyError(error);
