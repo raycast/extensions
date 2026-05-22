@@ -96,6 +96,13 @@ export default function ReadWithVoice() {
       // Stop any prior playback before kicking off a new one.
       synthesisAbortRef.current?.abort();
       playerRef.current.stopPlayback();
+      // If we still hold a session lock from a prior read in this same
+      // view, release it before stopExternalPlayback's hasActiveSession()
+      // check runs — otherwise our own lock looks like an external holder
+      // and waitForSessionLockRelease below would time out waiting for
+      // us to release a lock we hold, surfacing as a "Stopping previous
+      // reading" toast that never clears.
+      releaseSessionLock();
       const stoppedExisting = stopExternalPlayback();
       if (stoppedExisting) {
         const released = await waitForSessionLockRelease();
@@ -245,6 +252,7 @@ export default function ReadWithVoice() {
         }
         setProgress((current) => (current?.voiceId === voice.id ? null : current));
         releaseSessionLock();
+        clearExternalStopRequest();
       }
     },
     [selectedText],

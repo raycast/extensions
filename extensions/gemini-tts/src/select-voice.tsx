@@ -107,6 +107,11 @@ export default function SelectVoice() {
   const handlePreviewVoice = useCallback(async (voice: VoiceConfig) => {
     synthesisAbortRef.current?.abort();
     playerRef.current.stopPlayback();
+    // Same fix as read-with-voice: release our own lock first so
+    // stopExternalPlayback's hasActiveSession() check doesn't mistake
+    // a prior preview's lock for an external holder and deadlock the
+    // waitForSessionLockRelease below.
+    releaseSessionLock();
     const stoppedExisting = stopExternalPlayback();
     if (stoppedExisting) {
       const released = await waitForSessionLockRelease();
@@ -211,6 +216,7 @@ export default function SelectVoice() {
       }
       setPreviewingVoiceId((current) => (current === voice.id ? null : current));
       releaseSessionLock();
+      clearExternalStopRequest();
     }
   }, []);
 

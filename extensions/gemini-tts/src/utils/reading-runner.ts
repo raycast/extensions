@@ -1,7 +1,7 @@
 import { LaunchType, launchCommand, showHUD } from "@raycast/api";
 import { isSynthesisCancelled, synthesizeSpeech } from "../api/gemini-tts";
 import type { SynthesisResult, TTSOptions } from "../api/types";
-import { AudioPlayer, hasExternalStopRequest } from "./audio-player";
+import { AudioPlayer, clearExternalStopRequest, hasExternalStopRequest } from "./audio-player";
 import { formatTextSource } from "./text-source";
 import { ReadingSession, saveReadingSession, updateReadingProgress } from "./reading-session";
 import {
@@ -178,6 +178,11 @@ export async function playReadingSession(session: ReadingSession, isResuming = f
     prefetchBuffer.clear();
     player.cleanup();
     releaseSessionLock();
+    // Always clear STOP_FILE on the way out. Without this, an externally
+    // triggered stop leaves STOP_FILE on disk; the next session that
+    // forgets to clear it would immediately see hasExternalStopRequest()
+    // true on its first iteration and exit without reading anything.
+    clearExternalStopRequest();
   }
 }
 
