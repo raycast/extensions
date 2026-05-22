@@ -8,7 +8,7 @@ import {
   getReadableErrorMessage,
   isAbortError,
   normalizeBaseUrl,
-  resolveProxyUrl,
+  resolveProxyConfiguration,
 } from "./linkace-api";
 import {
   LinkDetail,
@@ -28,6 +28,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [refreshToken, setRefreshToken] = useState(0);
+  const [resolvedProxyUrl, setResolvedProxyUrl] = useState<string | undefined>();
 
   const normalizedBaseUrl = useMemo(() => normalizeBaseUrl(preferences.linkaceUrl), [preferences.linkaceUrl]);
   const trimmedSearchText = searchText.trim();
@@ -36,10 +37,6 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
     () => buildLinkSearchUrl(normalizedBaseUrl, trimmedSearchText, filters),
     [filters, normalizedBaseUrl, trimmedSearchText],
   );
-  const resolvedProxyUrl = useMemo(
-    () => resolveProxyUrl(requestUrl, preferences.proxyUrl),
-    [preferences.proxyUrl, requestUrl],
-  );
   const activeFilterSummary = useMemo(() => buildActiveFilterSummary(filters), [filters]);
 
   useEffect(() => {
@@ -47,6 +44,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
       setLinks([]);
       setError(null);
       setIsLoading(false);
+      setResolvedProxyUrl(undefined);
       return;
     }
 
@@ -56,11 +54,20 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
       setIsLoading(true);
       setError(null);
 
+      let currentResolvedProxyUrl: string | undefined;
+
       try {
+        const proxyConfiguration = await resolveProxyConfiguration(requestUrl, preferences.proxyUrl);
+        currentResolvedProxyUrl = proxyConfiguration.proxyUrl;
+
+        if (!abortController.signal.aborted) {
+          setResolvedProxyUrl(currentResolvedProxyUrl);
+        }
+
         const payload = await fetchLinkSearchResults({
           baseUrl: normalizedBaseUrl,
           apiKey: preferences.apiKey,
-          proxyUrl: resolvedProxyUrl,
+          proxyUrl: currentResolvedProxyUrl,
           query: trimmedSearchText,
           filters,
           signal: abortController.signal,
@@ -78,7 +85,7 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
         }
 
         setLinks([]);
-        setError(getReadableErrorMessage(error, resolvedProxyUrl));
+        setError(getReadableErrorMessage(error, currentResolvedProxyUrl));
       } finally {
         if (!abortController.signal.aborted) {
           setIsLoading(false);
@@ -91,7 +98,16 @@ export default function Command(props: LaunchProps<{ arguments: Arguments.Search
     return () => {
       abortController.abort();
     };
-  }, [filters, normalizedBaseUrl, preferences.apiKey, refreshToken, resolvedProxyUrl, shouldSearch, trimmedSearchText]);
+  }, [
+    filters,
+    normalizedBaseUrl,
+    preferences.apiKey,
+    preferences.proxyUrl,
+    refreshToken,
+    requestUrl,
+    shouldSearch,
+    trimmedSearchText,
+  ]);
 
   return (
     <List
