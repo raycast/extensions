@@ -96,6 +96,19 @@ export function SiteDetail({ snapshot }: SiteDetailProps) {
               title={incident.name}
               subtitle={incident.status}
               icon={{ source: Icon.Warning, tintColor: Color.Yellow }}
+              detail={
+                <List.Item.Detail
+                  markdown={incident.body ?? incident.status}
+                  metadata={
+                    <List.Item.Detail.Metadata>
+                      <List.Item.Detail.Metadata.Label
+                        title="Status"
+                        text={incident.status}
+                      />
+                    </List.Item.Detail.Metadata>
+                  }
+                />
+              }
             />
           ))}
         </List.Section>

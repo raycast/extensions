@@ -1,7 +1,7 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "is-it-alive",
-  "description": "Shows info from status page based on provided links",
+  "description": "Monitor status pages and check if your favorite services are operational.",
   "license": "MIT",
   "scripts": {
     "dev": "ray develop",
@@ -27,10 +27,9 @@
   "commands": [
     {
       "mode": "view",
-      "name": "alive",
-      "title": "Is It Alive?",
-      "description": "Monitor status pages and check if services are operational",
-      "subtitle": "Status Pages"
+      "name": "check-status-pages",
+      "title": "Check Status Pages",
+      "description": "View live status, active incidents, and uptime history for monitored sites"
     }
   ],
   "title": "Is It Alive?",
