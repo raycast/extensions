@@ -1,0 +1,24 @@
+# Python dependencies for the MLX-Kokoro TTS server (kokoro_server.py).
+#
+# Requires an Apple Silicon Mac (M1 or newer) and Python 3.10-3.12.
+# The extension installs these for you when you run the "Copy Fix Command"
+# action on the missing-dependency toast. To install manually into a
+# virtualenv instead:
+#
+#   python3 -m venv ~/kokoro-tts-venv
+#   ~/kokoro-tts-venv/bin/pip install -r requirements.txt
+#
+# then set the extension's "Python Path" preference to that interpreter.
+#
+# Note: misaki is installed WITHOUT the [en] extra on purpose - that extra
+# pulls spacy-curated-transformers, which drags in PyTorch (~1 GB). The English
+# G2P only needs misaki + num2words + spacy + the small English spaCy model.
+mlx-audio>=0.4.3
+misaki>=0.9.4
+num2words>=0.5.14
+spacy>=3.8,<3.9
+en_core_web_sm @ https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl
+soundfile>=0.13.1
+numpy>=2.4.6
+fastapi>=0.136.1
+uvicorn>=0.47.0

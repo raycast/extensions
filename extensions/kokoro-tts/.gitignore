@@ -1,0 +1,22 @@
+# Build output
+build/
+dist/
+node_modules/
+raycast-env.d.ts
+
+# macOS
+.DS_Store
+
+# Python local development environment
+.venv/
+__pycache__/
+*.pyc
+
+# Internal development notes
+docs/
+
+# Editor / tooling
+.claude/
+
+# Raycast Store CI uses npm + package-lock.json
+bun.lock
