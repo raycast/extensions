@@ -7,7 +7,7 @@
 - Added proxy support for environments that require HTTP/HTTPS proxies
 - Added filters for visibility, broken links, lists, tags, and sorting
 - Added detail view and extra copy actions for search results
-- Added list and tag names directly in the search results list
+- Added tag names directly in the search results list, with full list and tag memberships in the detail view
 - Added a dedicated connection test command for LinkAce URL, API key, and proxy diagnostics
 - Added a new minimal paperclip extension icon
 - Added automatic proxy fallback via environment variables and macOS system proxy settings

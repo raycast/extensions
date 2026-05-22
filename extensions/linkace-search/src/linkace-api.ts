@@ -32,7 +32,13 @@ let macOsProxySettingsCache:
       promise: Promise<MacOSProxySettings>;
     }
   | undefined;
-const pacResolverCache = new Map<string, Promise<FindProxyForURL>>();
+const pacResolverCache = new Map<
+  string,
+  {
+    expiresAt: number;
+    promise: Promise<FindProxyForURL>;
+  }
+>();
 
 type ProxySource =
   | "preference"
@@ -461,8 +467,8 @@ async function resolvePacProxyUrl(pacUrl: string, requestUrl: string) {
 async function getPacResolver(pacUrl: string) {
   const cachedResolver = pacResolverCache.get(pacUrl);
 
-  if (cachedResolver) {
-    return await cachedResolver;
+  if (cachedResolver && cachedResolver.expiresAt > Date.now()) {
+    return await cachedResolver.promise;
   }
 
   const resolverPromise = (async () => {
@@ -475,9 +481,19 @@ async function getPacResolver(pacUrl: string) {
     const pacScript = await response.text();
     const vm = await getQuickJSInstance();
     return createPacResolver(vm, pacScript);
-  })();
+  })().catch((error) => {
+    if (pacResolverCache.get(pacUrl)?.promise === resolverPromise) {
+      pacResolverCache.delete(pacUrl);
+    }
 
-  pacResolverCache.set(pacUrl, resolverPromise);
+    throw error;
+  });
+
+  pacResolverCache.set(pacUrl, {
+    expiresAt: Date.now() + MACOS_PROXY_CACHE_TTL,
+    promise: resolverPromise,
+  });
+
   return await resolverPromise;
 }
 

@@ -6,7 +6,7 @@ Search, filter, inspect, and open links from your LinkAce instance directly in R
 
 - Search links by URL, title, and description
 - Filter by visibility, broken links, lists, tags, and sorting
-- Show list and tag names directly in the results list
+- Show tag names directly in the results list, with full list and tag memberships in the detail view
 - Open a detailed view for each result
 - Copy the URL, title, or Markdown link with shortcuts
 - Open entries directly in LinkAce

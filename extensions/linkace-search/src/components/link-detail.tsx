@@ -73,10 +73,11 @@ export function getListItemAccessories(link: LinkAceLink) {
   const accessories: List.Item.Accessory[] = [];
 
   if (Array.isArray(link.tags) && link.tags.length > 0) {
+    const { shortText, fullText } = summarizeNames(link.tags.map((tag) => tag.name));
     accessories.push({
       icon: Icon.Tag,
-      text: String(link.tags.length),
-      tooltip: `Tags: ${summarizeNames(link.tags.map((tag) => tag.name)).fullText}`,
+      text: shortText,
+      tooltip: `Tags: ${fullText}`,
     });
   }
 
