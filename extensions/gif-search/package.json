@@ -136,8 +136,12 @@
           "value": "viewDetails"
         },
         {
-          "title": "Copy GIF as Square",
+          "title": "Copy GIF Square",
           "value": "copySquareGif"
+        },
+        {
+          "title": "Paste GIF Square",
+          "value": "pasteSquareGif"
         },
         {
           "title": "Copy Page Link",
