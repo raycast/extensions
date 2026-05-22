@@ -17,11 +17,6 @@ import { useState, useEffect, useRef } from "react";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface Preferences {
-  rememberSearchHistory: boolean;
-  useClipboardFallback: boolean;
-}
-
 interface SuggestItem {
   keyword: string;
   // raw title may contain <em> tags from B站 API
@@ -106,7 +101,7 @@ async function removeFromHistory(query: string): Promise<string[]> {
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Command() {
-  const prefs = getPreferenceValues<Preferences>();
+  const prefs = getPreferenceValues<Preferences.Index>();
 
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState<SuggestItem[]>([]);
@@ -147,10 +142,13 @@ export default function Command() {
     }
 
     setIsLoading(true);
+    const currentQuery = query;
     debounceRef.current = setTimeout(async () => {
-      const results = await fetchSuggestions(query);
-      setSuggestions(results);
-      setIsLoading(false);
+      const results = await fetchSuggestions(currentQuery);
+      if (currentQuery === query) {
+        setSuggestions(results);
+        setIsLoading(false);
+      }
     }, 200);
 
     return () => {
