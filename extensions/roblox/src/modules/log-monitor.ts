@@ -4,7 +4,7 @@ import { homedir, platform } from "os";
 
 export function getRobloxLogDirectory(): string {
   if (platform() === "win32") {
-    return join(process.env.LOCALAPPDATA ?? homedir(), "Roblox", "logs");
+    return join(process.env.LOCALAPPDATA ?? join(homedir(), "AppData", "Local"), "Roblox", "logs");
   }
   return join(homedir(), "Library", "Logs", "Roblox");
 }
