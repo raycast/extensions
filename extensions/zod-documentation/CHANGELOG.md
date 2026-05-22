@@ -1,6 +1,6 @@
 # Zod Documentation Changelog
 
-## [Zod 4] - {PR_MERGE_DATE}
+## [Zod 4] - 2026-05-22
 
 - Add Zod 4 docs
 - Update ESLint config
