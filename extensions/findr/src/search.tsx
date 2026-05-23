@@ -12,7 +12,8 @@ import {
   showInFinder,
 } from "@raycast/api";
 import { useState, useMemo, useEffect, useRef } from "react";
-import { existsSync } from "fs";
+import { existsSync, openSync, readSync, closeSync, renameSync } from "fs";
+import { createHash } from "crypto";
 import { execFile, execFileSync } from "child_process";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -40,16 +41,25 @@ function ResultActions({ result }: { result: SearchResult }) {
       <ActionPanel>
         <Action
           title="Open in Finder"
-          onAction={() => { trackInteraction(result.path, "finder"); showInFinder(result.path); }}
+          onAction={() => {
+            trackInteraction(result.path, "finder");
+            showInFinder(result.path);
+          }}
         />
         <Action
           title="Open Folder"
-          onAction={() => { trackInteraction(result.path, "open"); open(result.path); }}
+          onAction={() => {
+            trackInteraction(result.path, "open");
+            open(result.path);
+          }}
         />
         <Action
           title="Copy Path"
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-          onAction={() => { trackInteraction(result.path, "copy"); Clipboard.copy(result.path); }}
+          onAction={() => {
+            trackInteraction(result.path, "copy");
+            Clipboard.copy(result.path);
+          }}
         />
         <ActionPanel.Section>
           <Action
@@ -66,12 +76,18 @@ function ResultActions({ result }: { result: SearchResult }) {
     <ActionPanel>
       <Action
         title="Open File"
-        onAction={() => { trackInteraction(result.path, "open"); open(result.path); }}
+        onAction={() => {
+          trackInteraction(result.path, "open");
+          open(result.path);
+        }}
       />
       <Action
         title="Show in Finder"
         shortcut={{ modifiers: ["cmd"], key: "return" }}
-        onAction={() => { trackInteraction(result.path, "finder"); showInFinder(result.path); }}
+        onAction={() => {
+          trackInteraction(result.path, "finder");
+          showInFinder(result.path);
+        }}
       />
       <Action.ToggleQuickLook
         shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
@@ -79,12 +95,18 @@ function ResultActions({ result }: { result: SearchResult }) {
       <Action
         title="Copy Path"
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
-        onAction={() => { trackInteraction(result.path, "copy"); Clipboard.copy(result.path); }}
+        onAction={() => {
+          trackInteraction(result.path, "copy");
+          Clipboard.copy(result.path);
+        }}
       />
       <Action
         title="Copy Filename"
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
-        onAction={() => { trackInteraction(result.path, "copy"); Clipboard.copy(result.filename); }}
+        onAction={() => {
+          trackInteraction(result.path, "copy");
+          Clipboard.copy(result.filename);
+        }}
       />
       <ActionPanel.Section>
         <Action
@@ -269,8 +291,16 @@ export default function SearchFiles() {
     let timer: ReturnType<typeof setTimeout> | undefined;
 
     LocalStorage.getItem<string>("findr_custom_paths").then((stored) => {
-      const storedSet = new Set((stored || "").split(",").map((p) => p.trim()).filter(Boolean));
-      const currentList = customPaths.split(",").map((p) => p.trim()).filter(Boolean);
+      const storedSet = new Set(
+        (stored || "")
+          .split(",")
+          .map((p) => p.trim())
+          .filter(Boolean),
+      );
+      const currentList = customPaths
+        .split(",")
+        .map((p) => p.trim())
+        .filter(Boolean);
       const newPaths = currentList.filter((p) => !storedSet.has(p));
 
       if (newPaths.length > 0) {
@@ -287,7 +317,9 @@ export default function SearchFiles() {
       }
     });
 
-    return () => { if (timer) clearTimeout(timer); };
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
   }, [customPaths, binaryExists]);
 
   const isTyping = query.length > 0;
@@ -503,9 +535,9 @@ const RENDER_AS_PLAIN = new Set(["txt", "md"]);
 function readTextPreview(path: string, ext: string): string {
   try {
     const buf = Buffer.alloc(MAX_PREVIEW_BYTES);
-    const fd = require("fs").openSync(path, "r");
-    const bytesRead = require("fs").readSync(fd, buf, 0, MAX_PREVIEW_BYTES, 0);
-    require("fs").closeSync(fd);
+    const fd = openSync(path, "r");
+    const bytesRead = readSync(fd, buf, 0, MAX_PREVIEW_BYTES, 0);
+    closeSync(fd);
     const raw = buf.slice(0, bytesRead).toString("utf-8");
     // Cut at last complete line to avoid mid-line truncation
     const lastNewline = raw.lastIndexOf("\n");
@@ -584,9 +616,7 @@ function ResultDetail({ result }: { result: SearchResult }) {
   // PDF thumbnail via qlmanage
   else if (result.file_type === "pdf") {
     try {
-      const crypto = require("crypto");
-      const hash = crypto
-        .createHash("md5")
+      const hash = createHash("md5")
         .update(result.path)
         .digest("hex")
         .slice(0, 16);
@@ -602,7 +632,7 @@ function ResultDetail({ result }: { result: SearchResult }) {
         const srcName = result.path.split("/").pop() + ".png";
         const qlPath = join(thumbDir, srcName);
         if (existsSync(qlPath)) {
-          require("fs").renameSync(qlPath, thumbPath);
+          renameSync(qlPath, thumbPath);
         }
       }
       if (existsSync(thumbPath)) {
