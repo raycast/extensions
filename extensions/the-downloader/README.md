@@ -2,7 +2,7 @@
 
 Download videos, audio, image galleries, Spotify music, and complete webpages from the web — straight from Raycast.
 
-![The Downloader — Download form](metadata/the-downloader-1.png)
+![The Downloader — Download form](media/the-downloader-1.png)
 
 ## Commands
 

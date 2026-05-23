@@ -7,5 +7,6 @@
 .DS_Store
 raycast-env.d.ts
 
-# superpowers brainstorming
+# superpowers brainstorming + planning docs (kept locally at ~/Documents/Personal/the-downloader-planning/)
 .superpowers/
+docs/superpowers/
