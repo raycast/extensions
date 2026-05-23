@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { fetchAppIcon } from "../api/steam";
 import { batchFetchGGDeals, ggDealsCache } from "../api/ggdeals";
 import {
-  CACHE_TTL,
+  WISHLIST_CACHE_TTL,
   CURRENCY_SYMBOLS,
   CURRENCY_SUFFIX_REGIONS,
 } from "../constants";
@@ -63,10 +63,10 @@ async function fetchAllWishlistData(
   unavailable: "private" | "rate-limited" | null;
 }> {
   const result = new Map<number, WishlistDataEntry>();
-  for (let page = 0; page < 100; page++) {
+  for (let page = 0; page < 30; page++) {
     if (signal?.aborted) break;
-    // Small delay between pages to avoid triggering Steam rate limits
-    if (page > 0) await new Promise((resolve) => setTimeout(resolve, 150));
+    // 1500ms between pages keeps us at ~1 req/1.5s — the community-confirmed safe floor for store.steampowered.com scraping
+    if (page > 0) await new Promise((resolve) => setTimeout(resolve, 1500));
     if (signal?.aborted) break;
     const res = await fetch(
       `https://store.steampowered.com/wishlist/profiles/${steamId}/wishlistdata/?p=${page}&cc=${region}&l=english`,
@@ -132,7 +132,7 @@ async function loadCachedGames(
     if (!raw) return null;
     const { games, timestamp }: { games: WishlistGame[]; timestamp: number } =
       JSON.parse(raw);
-    if (Date.now() - timestamp > CACHE_TTL) return null;
+    if (Date.now() - timestamp > WISHLIST_CACHE_TTL) return null;
     return { games, unavailable: null };
   } catch {
     return null;

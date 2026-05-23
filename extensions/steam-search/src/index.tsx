@@ -32,10 +32,10 @@ import {
   WishlistDiscounts,
   fetchDiscountedWishlistGames,
 } from "./components/WishlistDiscounts";
+import { WISHLIST_CACHE_TTL } from "./constants";
 
 const FRIENDS_SUBTITLE_TTL = 2 * 60 * 1000; // 2 minutes
 const RECENT_SUBTITLE_TTL = 10 * 60 * 1000; // 10 minutes
-// Wishlist subtitle uses the default CACHE_TTL (1 hour) from getCachedSubtitle
 
 export default function Command() {
   const { steamApiKey, steamId, ggDealsApiKey, region } =
@@ -51,7 +51,7 @@ export default function Command() {
     getCachedSubtitle("recent", RECENT_SUBTITLE_TTL),
   );
   const [wishlistSubtitle, setWishlistSubtitle] = useState<string | null>(() =>
-    getCachedSubtitle("wishlist"),
+    getCachedSubtitle("wishlist", WISHLIST_CACHE_TTL),
   );
   const [topSellers, setTopSellers] = useState<SteamApp[]>([]);
 
@@ -88,7 +88,7 @@ export default function Command() {
         setRecentSubtitle(subtitle);
       });
     }
-    if (!getCachedSubtitle("wishlist")) {
+    if (!getCachedSubtitle("wishlist", WISHLIST_CACHE_TTL)) {
       fetchDiscountedWishlistGames(steamId ?? "", ggDealsApiKey ?? "", region)
         .then(({ games, unavailable }) => {
           if (unavailable !== null) return;

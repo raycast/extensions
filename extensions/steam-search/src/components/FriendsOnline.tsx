@@ -206,7 +206,6 @@ function FriendItem({
           />
           {inGame && friend.gameid && (
             <Action.OpenInBrowser
-              // eslint-disable-next-line @raycast/prefer-title-case
               title="View Game on SteamDB"
               url={`https://steamdb.info/app/${friend.gameid}/`}
               shortcut={{
@@ -217,7 +216,6 @@ function FriendItem({
           )}
           {inGame && friend.gameid && (
             <Action.OpenInBrowser
-              // eslint-disable-next-line @raycast/prefer-title-case
               title="View Game on ProtonDB"
               url={`https://www.protondb.com/app/${friend.gameid}`}
               shortcut={{

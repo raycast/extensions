@@ -1,4 +1,5 @@
 export const CACHE_TTL = 60 * 60 * 1000; // 1 hour
+export const WISHLIST_CACHE_TTL = 6 * 60 * 60 * 1000; // 6 hours — wishlist pagination is slow; long TTL reduces re-fetches
 
 export const STEAM_HEADERS = {
   "User-Agent":

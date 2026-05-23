@@ -117,7 +117,6 @@ export function GameItem({ app, isSelected }: Props) {
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on GG.deals"
             url={`https://gg.deals/steam/app/${app.id}/`}
             shortcut={{
@@ -126,7 +125,6 @@ export function GameItem({ app, isSelected }: Props) {
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on SteamDB"
             url={`https://steamdb.info/app/${app.id}/charts/`}
             shortcut={{
@@ -135,7 +133,6 @@ export function GameItem({ app, isSelected }: Props) {
             }}
           />
           <Action.OpenInBrowser
-            // eslint-disable-next-line @raycast/prefer-title-case
             title="View on ProtonDB"
             url={`https://www.protondb.com/app/${app.id}`}
             shortcut={{
@@ -155,7 +152,6 @@ export function GameItem({ app, isSelected }: Props) {
               )}
               {details?.peakAllTime && (
                 <Action
-                  // eslint-disable-next-line @raycast/prefer-title-case
                   title={`All-Time Peak: ${details.peakAllTime}`}
                   icon={Icon.BarChart}
                   onAction={() => open(`https://steamcharts.com/app/${app.id}`)}
