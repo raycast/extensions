@@ -1,0 +1,11 @@
+# Visit https://soloterm.com to learn more
+name: api-keys-raycast
+icon: null
+processes:
+  pnpm:dev:
+    command: pnpm run dev
+    working_dir: null
+    auto_start: false
+    auto_restart: false
+    restart_when_changed: []
+    env: {}

@@ -1,0 +1,38 @@
+{
+  "name": "api-keys",
+  "title": "API Keys / Credentials",
+  "description": "Quick access to API key and credential dashboards",
+  "icon": "key.png",
+  "version": "1.0.0",
+  "author": "andrew",
+  "categories": [
+    "Developer Tools"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "API Keys / Credentials",
+      "subtitle": "Search and open credential dashboards",
+      "description": "Browse and search API key and credential dashboards",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.2",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "eslint": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "publish": "ray publish"
+  }
+}
