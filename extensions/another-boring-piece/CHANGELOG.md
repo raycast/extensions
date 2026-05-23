@@ -1,6 +1,6 @@
 # Changelog
 
-## [Add History Command and Shortcuts] - {PR_MERGE_DATE}
+## [Add History Command and Shortcuts] - 2026-05-23
 
 - New command **History**: browse wallpapers you selected or downloaded, including automatic wallpaper switches.
 - Record selected and downloaded wallpapers with artwork details and timestamps.
