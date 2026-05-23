@@ -186,5 +186,8 @@
       "label": "Open links in desktop app",
       "default": false
     }
+  ],
+  "platforms": [
+    "macOS"
   ]
 }
