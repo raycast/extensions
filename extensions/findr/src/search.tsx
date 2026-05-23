@@ -20,6 +20,7 @@ import { join } from "path";
 import { SearchResponse, SearchResult } from "./types";
 import {
   getFindrPath,
+  ensureFindrBinaries,
   getMaxResults,
   getFindrEnv,
   getCustomPaths,
@@ -135,10 +136,37 @@ function useDebouncedValue(value: string, delayMs: number): string {
 
 export default function SearchFiles() {
   const [query, setQuery] = useState("");
-  const findrPath = getFindrPath();
+  const [findrPath, setFindrPath] = useState(getFindrPath());
   const maxResults = getMaxResults();
   const findrEnv = getFindrEnv();
   const binaryExists = useMemo(() => existsSync(findrPath), [findrPath]);
+
+  // Auto-download findr binary from GitHub Releases if not present
+  useEffect(() => {
+    if (binaryExists) return;
+    let cancelled = false;
+    showToast({
+      style: Toast.Style.Animated,
+      title: "Downloading findr engine...",
+    });
+    ensureFindrBinaries()
+      .then((path) => {
+        if (cancelled) return;
+        setFindrPath(path);
+        showToast({ style: Toast.Style.Success, title: "findr ready" });
+      })
+      .catch((err) => {
+        if (cancelled) return;
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Download failed",
+          message: String(err),
+        });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [binaryExists]);
 
   // Debounce search input — prevents racing subprocesses on fast typing
   const debouncedQuery = useDebouncedValue(query, 300);

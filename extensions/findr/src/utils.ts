@@ -1,7 +1,103 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { chmodSync, existsSync } from "fs";
+import { chmodSync, existsSync, mkdirSync, createWriteStream } from "fs";
 import { execFile } from "child_process";
 import { join } from "path";
+import { get } from "https";
+
+const GITHUB_REPO = "Roderick111/findr";
+const FINDR_BINARY = "findr-macos-universal";
+const FINDR_OCR_BINARY = "findr-ocr-macos-universal";
+
+/** Directory for downloaded binaries (persists across extension updates). */
+function binDir(): string {
+  const dir = join(environment.supportPath, "bin");
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  return dir;
+}
+
+/** Download a file from a URL, following redirects. Returns a promise. */
+function downloadFile(url: string, dest: string): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const file = createWriteStream(dest);
+    const request = (u: string) => {
+      get(u, (res) => {
+        if (res.statusCode === 302 || res.statusCode === 301) {
+          const location = res.headers.location;
+          if (location) {
+            request(location);
+            return;
+          }
+        }
+        if (res.statusCode !== 200) {
+          reject(new Error(`Download failed: HTTP ${res.statusCode}`));
+          return;
+        }
+        res.pipe(file);
+        file.on("finish", () => {
+          file.close();
+          resolve();
+        });
+      }).on("error", reject);
+    };
+    request(url);
+  });
+}
+
+/** Download findr binaries from the latest GitHub Release. */
+export async function ensureFindrBinaries(): Promise<string> {
+  const dir = binDir();
+  const findrPath = join(dir, "findr");
+  const ocrPath = join(dir, "findr-ocr");
+
+  if (existsSync(findrPath)) {
+    return findrPath;
+  }
+
+  // Fetch latest release download URLs from GitHub API
+  const releaseUrl = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
+  const release: { assets: { name: string; browser_download_url: string }[] } =
+    await new Promise((resolve, reject) => {
+      get(
+        releaseUrl,
+        {
+          headers: {
+            "User-Agent": "findr-raycast",
+            Accept: "application/json",
+          },
+        },
+        (res) => {
+          let data = "";
+          res.on("data", (chunk: string) => (data += chunk));
+          res.on("end", () => {
+            try {
+              resolve(JSON.parse(data));
+            } catch {
+              reject(new Error("Failed to parse GitHub release"));
+            }
+          });
+        },
+      ).on("error", reject);
+    });
+
+  const findrAsset = release.assets?.find((a) => a.name === FINDR_BINARY);
+  const ocrAsset = release.assets?.find((a) => a.name === FINDR_OCR_BINARY);
+
+  if (!findrAsset) {
+    throw new Error("findr binary not found in latest GitHub release");
+  }
+
+  await downloadFile(findrAsset.browser_download_url, findrPath);
+  chmodSync(findrPath, 0o755);
+
+  if (ocrAsset) {
+    await downloadFile(ocrAsset.browser_download_url, ocrPath);
+    chmodSync(ocrPath, 0o755);
+  }
+
+  return findrPath;
+}
 
 let chmodApplied = false;
 
@@ -13,9 +109,21 @@ export function getFindrPath(): string {
     return findrPath;
   }
 
-  // Bundled universal binary (arm64 + x86_64), built via GitHub Actions CI:
-  // Source: https://github.com/Roderick111/findr (MIT license, fully auditable)
-  // CI workflow: .github/workflows/ci.yml — builds on tag push, attaches to GitHub Release
+  // Downloaded binary (from GitHub Releases)
+  const downloaded = join(binDir(), "findr");
+  if (existsSync(downloaded)) {
+    if (!chmodApplied) {
+      try {
+        chmodSync(downloaded, 0o755);
+      } catch {
+        // May already be executable
+      }
+      chmodApplied = true;
+    }
+    return downloaded;
+  }
+
+  // Fallback: bundled binary (for local development)
   const bundled = join(environment.assetsPath, "findr");
   if (existsSync(bundled)) {
     if (!chmodApplied) {
@@ -29,7 +137,7 @@ export function getFindrPath(): string {
     return bundled;
   }
 
-  return bundled;
+  return downloaded; // Will trigger "binary not found" in search.tsx
 }
 
 export function getMaxResults(): number {
