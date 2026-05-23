@@ -69,7 +69,7 @@ export function PortListItem({
             />
             <Action
               title="Kill All"
-              icon={Icon.Skull}
+              icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={onKillAll}
               shortcut={{ modifiers: ["cmd"], key: "k" }}

@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Icon, List, confirmAlert, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, Keyboard, List, confirmAlert, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PortListItem } from "./components/PortListItem";
@@ -8,9 +8,9 @@ import { killProcess, killProcesses } from "./lib/process-killer";
 import { PortScannerError, scanPorts } from "./lib/port-scanner";
 import type { PortProcess } from "./lib/types";
 
-const sharedShortcuts = {
-  refresh: { modifiers: ["cmd"] as const, key: "r" as const },
-  killAll: { modifiers: ["cmd"] as const, key: "k" as const },
+const sharedShortcuts: Record<"refresh" | "killAll", Keyboard.Shortcut> = {
+  refresh: { modifiers: ["cmd"], key: "r" },
+  killAll: { modifiers: ["cmd"], key: "k" },
 };
 
 function ListActions({
@@ -29,7 +29,7 @@ function ListActions({
       <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} shortcut={sharedShortcuts.refresh} />
       <Action
         title="Kill All"
-        icon={Icon.Skull}
+        icon={Icon.Trash}
         style={Action.Style.Destructive}
         onAction={onKillAll}
         shortcut={sharedShortcuts.killAll}
