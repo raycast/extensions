@@ -9,6 +9,7 @@ import {
   Clipboard,
   Form,
   LocalStorage,
+  Image,
 } from "@raycast/api";
 import {
   faviconUrl,
@@ -108,7 +109,10 @@ export default function Command() {
                   title={provider.name}
                   subtitle={getProviderSubtitle(provider, savedValues)}
                   accessories={getProviderAccessories(provider, savedValues)}
-                  icon={{ source: faviconUrl(provider.domain), mask: "auto" }}
+                  icon={{
+                    source: faviconUrl(provider.domain),
+                    mask: Image.Mask.RoundedRectangle,
+                  }}
                   actions={
                     <ActionPanel>
                       <ProviderActions
