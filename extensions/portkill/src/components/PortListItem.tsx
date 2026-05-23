@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
-import { localEndpoint, portDetailSubtitle } from "../lib/format";
-import { killAllShortcut, refreshShortcut, toggleDetailShortcut } from "../lib/shortcuts";
+import { localEndpoint, localhostUrl, portDetailSubtitle } from "../lib/format";
+import { killAllShortcut, openInBrowserShortcut, refreshShortcut, toggleDetailShortcut } from "../lib/shortcuts";
 import type { PortProcess } from "../lib/types";
 
 type PortListItemProps = {
@@ -22,6 +22,7 @@ export function PortListItem({
   onToggleDetail,
 }: PortListItemProps) {
   const endpoint = localEndpoint(entry.endpoint);
+  const browserUrl = localhostUrl(entry.port);
 
   return (
     <List.Item
@@ -29,10 +30,10 @@ export function PortListItem({
       title={entry.processName}
       subtitle={portDetailSubtitle(entry)}
       accessories={[{ tag: { value: `:${entry.port}`, color: Color.Blue } }]}
-      keywords={[String(entry.port), entry.processName, String(entry.pid), endpoint, entry.protocolName]}
+      keywords={[String(entry.port), entry.processName, String(entry.pid), endpoint, entry.protocolName, browserUrl]}
       detail={
         <List.Item.Detail
-          markdown={`### ${entry.processName}\n\nListening on **:${entry.port}**`}
+          markdown={`### ${entry.processName}\n\nListening on **:${entry.port}**\n\nOpen in browser: [${browserUrl}](${browserUrl})`}
           metadata={
             <List.Item.Detail.Metadata>
               <List.Item.Detail.Metadata.Label title="Port" text={String(entry.port)} />
@@ -43,6 +44,8 @@ export function PortListItem({
               {entry.endpoint.includes("->") ? (
                 <List.Item.Detail.Metadata.Label title="Connection" text={entry.endpoint} />
               ) : null}
+              <List.Item.Detail.Metadata.Separator />
+              <List.Item.Detail.Metadata.Link title="Open in Browser" target={browserUrl} text={browserUrl} />
             </List.Item.Detail.Metadata>
           }
         />
@@ -54,6 +57,12 @@ export function PortListItem({
             icon={Icon.XMarkCircle}
             style={Action.Style.Destructive}
             onAction={() => onKill(entry)}
+          />
+          <Action.OpenInBrowser
+            title="Open in Browser"
+            url={browserUrl}
+            icon={Icon.Globe}
+            shortcut={openInBrowserShortcut}
           />
           <ActionPanel.Section>
             <Action
@@ -69,6 +78,16 @@ export function PortListItem({
               style={Action.Style.Destructive}
               onAction={onKillAll}
               shortcut={killAllShortcut}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.CopyToClipboard
+              title="Copy URL"
+              content={browserUrl}
+              shortcut={{
+                macOS: { modifiers: ["cmd", "shift"], key: "c" },
+                Windows: { modifiers: ["ctrl", "shift"], key: "c" },
+              }}
             />
           </ActionPanel.Section>
         </ActionPanel>

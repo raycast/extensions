@@ -9,6 +9,13 @@ export function portDetailSubtitle(entry: PortProcess): string {
   return `:${entry.port} · PID ${entry.pid} · ${endpoint}`;
 }
 
+// Use http:// because virtually every local dev server speaks HTTP on its
+// listener port. Users running HTTPS locally can adjust the scheme in the
+// browser's address bar after the page opens.
+export function localhostUrl(port: number): string {
+  return `http://localhost:${port}`;
+}
+
 export function statusSummary(portCount: number, processCount: number, isLoading: boolean): string {
   if (isLoading && portCount === 0) {
     return "Scanning…";

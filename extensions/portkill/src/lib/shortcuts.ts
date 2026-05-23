@@ -29,3 +29,7 @@ export const toggleDetailShortcut: Keyboard.Shortcut = {
   macOS: { modifiers: ["cmd", "shift"], key: "d" },
   Windows: { modifiers: ["ctrl", "shift"], key: "d" },
 };
+
+// ⌘O / Ctrl+O is the platform-standard "Open" combo and is what Raycast
+// recommends via `Keyboard.Shortcut.Common.Open` for cross-platform binding.
+export const openInBrowserShortcut: Keyboard.Shortcut = Keyboard.Shortcut.Common.Open;
