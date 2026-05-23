@@ -3,7 +3,10 @@ import crypto from "crypto";
 import path from "path";
 import { environment } from "@raycast/api";
 import { runAppleScript } from "@raycast/utils";
-import { recordWallpaperHistoryBestEffort } from "./history-store";
+import {
+  recordWallpaperHistoryBestEffort,
+  type WallpaperHistoryEventType,
+} from "./history-store";
 
 export const API_TRIPLE_URL =
   "https://service.anotherboring.day/api/wallpapers/raycast-triple";
@@ -184,13 +187,16 @@ export async function ensureWallpaperFile(url: string, id?: string) {
   return filePath;
 }
 
-export async function setDesktopWallpaper(wallpaper: Wallpaper) {
+export async function setDesktopWallpaper(
+  wallpaper: Wallpaper,
+  eventType: WallpaperHistoryEventType = "selected",
+) {
   const filePath = await ensureWallpaperFile(wallpaper.url, wallpaper.id);
   const escapedPath = filePath.replace(/[\\"]/g, "\\$&");
   const script = `tell application "System Events" to tell every desktop to set picture to "${escapedPath}"`;
   await runAppleScript(script);
-  await recordWallpaperHistoryBestEffort({
-    eventType: "selected",
+  recordWallpaperHistoryBestEffort({
+    eventType,
     wallpaper,
   });
   return filePath;
@@ -208,7 +214,7 @@ export async function downloadWallpaper(wallpaper: Wallpaper) {
   );
 
   fs.copyFileSync(sourcePath, filePath);
-  await recordWallpaperHistoryBestEffort({
+  recordWallpaperHistoryBestEffort({
     eventType: "downloaded",
     wallpaper,
     downloadPath: filePath,

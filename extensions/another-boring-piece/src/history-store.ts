@@ -4,7 +4,10 @@ import path from "path";
 import { environment } from "@raycast/api";
 import type { Wallpaper } from "./utils";
 
-export type WallpaperHistoryEventType = "selected" | "downloaded";
+export type WallpaperHistoryEventType =
+  | "selected"
+  | "downloaded"
+  | "auto-switched";
 
 export type WallpaperHistoryEntry = {
   eventId: string;
@@ -47,7 +50,9 @@ function isHistoryEntry(value: unknown): value is WallpaperHistoryEntry {
   const entry = value as Record<string, unknown>;
   return (
     typeof entry.eventId === "string" &&
-    (entry.eventType === "selected" || entry.eventType === "downloaded") &&
+    (entry.eventType === "selected" ||
+      entry.eventType === "downloaded" ||
+      entry.eventType === "auto-switched") &&
     typeof entry.timestamp === "string" &&
     isWallpaper(entry.wallpaper) &&
     (entry.downloadPath === undefined || typeof entry.downloadPath === "string")

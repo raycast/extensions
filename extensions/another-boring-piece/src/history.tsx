@@ -52,7 +52,14 @@ function formatTimestamp(timestamp: string) {
 }
 
 function formatEventType(entry: WallpaperHistoryEntry) {
-  return entry.eventType === "selected" ? "Selected" : "Downloaded";
+  switch (entry.eventType) {
+    case "selected":
+      return "Selected";
+    case "downloaded":
+      return "Downloaded";
+    case "auto-switched":
+      return "Auto-switched";
+  }
 }
 
 function getArtworkUrl(entry: WallpaperHistoryEntry) {
