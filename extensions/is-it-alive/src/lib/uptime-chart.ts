@@ -151,6 +151,6 @@ export function buildUptimeDetailMarkdown(
 
   return [
     chart,
-    `${dayCount} days ago — **${uptime.toFixed(2)}% uptime**`,
+    `Past ${dayCount} days — **${uptime.toFixed(2)}% uptime**`,
   ].join("\n\n");
 }

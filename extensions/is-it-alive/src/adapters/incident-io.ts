@@ -150,6 +150,29 @@ function parsePageTitle(html: string, fallback: string): string {
   return match[1].replace(/\s*Status\s*$/i, "").trim() || fallback;
 }
 
+async function fetchPageMetadata(
+  siteUrl: string,
+  fallbackName: string,
+): Promise<{ catalog: Map<string, string>; pageName: string }> {
+  try {
+    const response = await fetch(siteUrl, {
+      headers: { Accept: "text/html" },
+    });
+
+    if (!response.ok) {
+      return { catalog: new Map(), pageName: fallbackName };
+    }
+
+    const pageHtml = await response.text();
+    return {
+      catalog: parseComponentCatalog(pageHtml),
+      pageName: parsePageTitle(pageHtml, fallbackName),
+    };
+  } catch {
+    return { catalog: new Map(), pageName: fallbackName };
+  }
+}
+
 function buildHistoryFromImpacts(
   impacts: IncidentIoComponentImpact[],
   componentId: string,
@@ -281,15 +304,13 @@ export const incidentIoAdapter: StatusAdapter = {
     const fetchedAt = new Date().toISOString();
 
     try {
-      const [incidentsData, impactsData, pageResponse] = await Promise.all([
+      const [incidentsData, impactsData, pageMetadata] = await Promise.all([
         fetchJson<{ incidents: IncidentIoIncident[] }>(`${proxy}/incidents`),
         fetchJson<ComponentImpactsResponse>(componentImpactsUrl(proxy)),
-        fetch(normalized, { headers: { Accept: "text/html" } }),
+        fetchPageMetadata(normalized, hostname),
       ]);
 
-      const pageHtml = await pageResponse.text();
-      const catalog = parseComponentCatalog(pageHtml);
-      const pageName = parsePageTitle(pageHtml, hostname);
+      const { catalog, pageName } = pageMetadata;
       const incidents = incidentsData.incidents ?? [];
       const componentImpacts = impactsData.component_impacts ?? [];
       const componentUptimes = impactsData.component_uptimes ?? [];
