@@ -4,5 +4,5 @@ import type { FormValues } from "./types";
 
 export default function CreateNewScheduledCommand(props: LaunchProps<{ draftValues: Partial<FormValues> }>) {
   const { draftValues } = props;
-  return <ManageScheduledCommand draftValues={draftValues} />;
+  return <ManageScheduledCommand draftValues={draftValues} enableDrafts />;
 }

@@ -1,5 +1,13 @@
 # GitHub Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Fix starred repositories loading] - 2026-05-20
+
+- Load starred repositories in smaller GitHub GraphQL batches to avoid 502 errors with larger result preferences.
+
 ## [Fix repository search for many organizations] - 2026-05-18
 
 - Split My Repositories loading into smaller owner-specific searches to avoid GitHub 502 errors for users in many organizations.

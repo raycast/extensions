@@ -1,5 +1,9 @@
 # Raynab Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Security: Refresh Lockfile] - 2026-03-27
 
 ### 🔧 Technical Updates

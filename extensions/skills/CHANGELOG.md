@@ -1,5 +1,10 @@
 # Skills Changelog
 
+## [Show Installed Skill Audit Details] - 2026-05-20
+
+- Add an "Open on skills.sh" action and `skills.sh` detail link for published installed skills
+- Show security audit statuses, audit links, and audit actions in installed skill details
+
 ## [Ask Skills AI Extension] - 2026-05-12
 
 - Add `@skills` support in Raycast AI Chat with five tools: search the marketplace by query, read a skill's full instructions, list installed skills, install a skill for specific agents, and remove a skill
