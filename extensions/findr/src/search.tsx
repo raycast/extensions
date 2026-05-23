@@ -12,7 +12,14 @@ import {
   showInFinder,
 } from "@raycast/api";
 import { useState, useMemo, useEffect, useRef } from "react";
-import { existsSync, openSync, readSync, closeSync, renameSync } from "fs";
+import {
+  existsSync,
+  mkdirSync,
+  openSync,
+  readSync,
+  closeSync,
+  renameSync,
+} from "fs";
 import { createHash } from "crypto";
 import { execFile, ChildProcess } from "child_process";
 import { tmpdir } from "os";
@@ -659,8 +666,8 @@ function ResultDetail({ result }: { result: SearchResult }) {
         setPreview(`![preview](file://${thumbPath})\n\n`);
       } else {
         const qlOutDir = join(thumbDir, hash);
-        execFile("mkdir", ["-p", qlOutDir], () => {
-          if (cancelled) return;
+        mkdirSync(qlOutDir, { recursive: true });
+        if (!cancelled) {
           qlChild = execFile(
             "qlmanage",
             ["-t", result.path, "-s", "600", "-o", qlOutDir],
@@ -677,7 +684,7 @@ function ResultDetail({ result }: { result: SearchResult }) {
               }
             },
           );
-        });
+        }
       }
     }
     // Text/code preview (async read via next tick)
