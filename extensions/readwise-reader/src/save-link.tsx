@@ -3,13 +3,7 @@ import { handleSave } from "./utils/handleSave";
 import { getArgumentOrCurrentTabUrl } from "./utils/getArgumentOrCurrentTabUrl";
 import handleError from "./utils/handleError";
 
-interface SaveArguments {
-  url?: string;
-  author?: string;
-  tags?: string;
-}
-
-export default async function Main(props: LaunchProps<{ arguments: SaveArguments }>) {
+export default async function Main(props: LaunchProps<{ arguments: Arguments.SaveLink }>) {
   const { url, author, tags } = props.arguments;
   try {
     const resolvedUrl = await getArgumentOrCurrentTabUrl(url);

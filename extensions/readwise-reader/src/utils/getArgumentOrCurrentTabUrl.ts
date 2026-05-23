@@ -19,7 +19,7 @@ export async function getArgumentOrCurrentTabUrl(value?: string): Promise<string
 
     return activeTab.url;
   } catch (error) {
-    if (error instanceof Error && error.message) {
+    if (error instanceof Error) {
       throw error;
     }
 
