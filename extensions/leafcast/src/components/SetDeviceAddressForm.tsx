@@ -56,6 +56,9 @@ export function SetDeviceAddressForm({ onSetDeviceAddress }: Props) {
       }
       await toast.hide();
       push(<DiscoveredDevicesList devices={devices} onSelect={applyAddress} />);
+    } catch {
+      toast.style = Toast.Style.Failure;
+      toast.title = "Scan failed. Enter the address manually.";
     } finally {
       setIsScanning(false);
     }
