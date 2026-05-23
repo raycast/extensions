@@ -603,17 +603,18 @@ function ResultDetail({ result }: { result: SearchResult }) {
   // Async file preview — avoids blocking the render thread with synchronous I/O
   useEffect(() => {
     let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    setPreview("");
 
     // Image: inline markdown (no I/O needed)
     if (result.file_type && IMAGE_TYPES.has(result.file_type)) {
       setPreview(
         `![preview](file://${encodeURI(result.path)}?raycast-height=250)`,
       );
-      return;
     }
-
     // PDF thumbnail via qlmanage (async)
-    if (result.file_type === "pdf") {
+    else if (result.file_type === "pdf") {
       const hash = createHash("md5")
         .update(result.path)
         .digest("hex")
@@ -623,51 +624,47 @@ function ResultDetail({ result }: { result: SearchResult }) {
 
       if (existsSync(thumbPath)) {
         setPreview(`![preview](file://${thumbPath})\n\n`);
-        return;
+      } else {
+        const qlOutDir = join(thumbDir, hash);
+        execFile("mkdir", ["-p", qlOutDir], () => {
+          if (cancelled) return;
+          execFile(
+            "qlmanage",
+            ["-t", result.path, "-s", "600", "-o", qlOutDir],
+            { timeout: 3000 },
+            () => {
+              if (cancelled) return;
+              const srcName = result.path.split("/").pop() + ".png";
+              const qlPath = join(qlOutDir, srcName);
+              if (existsSync(qlPath)) {
+                renameSync(qlPath, thumbPath);
+              }
+              if (existsSync(thumbPath)) {
+                setPreview(`![preview](file://${thumbPath})\n\n`);
+              }
+            },
+          );
+        });
       }
-
-      const qlOutDir = join(thumbDir, hash);
-      execFile("mkdir", ["-p", qlOutDir], () => {
-        if (cancelled) return;
-        execFile(
-          "qlmanage",
-          ["-t", result.path, "-s", "600", "-o", qlOutDir],
-          { timeout: 3000 },
-          () => {
-            if (cancelled) return;
-            const srcName = result.path.split("/").pop() + ".png";
-            const qlPath = join(qlOutDir, srcName);
-            if (existsSync(qlPath)) {
-              renameSync(qlPath, thumbPath);
-            }
-            if (existsSync(thumbPath)) {
-              setPreview(`![preview](file://${thumbPath})\n\n`);
-            }
-          },
-        );
-      });
-      return;
     }
-
-    // Text/code preview (async read)
-    if (
+    // Text/code preview (async read via next tick)
+    else if (
       result.file_type &&
       TEXT_PREVIEW_TYPES.has(result.file_type) &&
       !result.is_dir
     ) {
-      // Run in next tick to avoid blocking render
-      setTimeout(() => {
+      timer = setTimeout(() => {
         if (cancelled) return;
         const text = readTextPreview(result.path, result.file_type!);
         if (text && !cancelled) {
           setPreview(text + "\n\n");
         }
       }, 0);
-      return;
     }
 
     return () => {
       cancelled = true;
+      if (timer) clearTimeout(timer);
     };
   }, [result.path]);
 
