@@ -14,7 +14,7 @@ import {
 import { useState, useMemo, useEffect, useRef } from "react";
 import { existsSync, openSync, readSync, closeSync, renameSync } from "fs";
 import { createHash } from "crypto";
-import { execFile, execFileSync } from "child_process";
+import { execFile } from "child_process";
 import { tmpdir } from "os";
 import { join } from "path";
 import { SearchResponse, SearchResult } from "./types";
@@ -347,7 +347,6 @@ export default function SearchFiles() {
           title: "Copy Error",
           shortcut: { modifiers: ["cmd"], key: "t" },
           onAction: async (toast) => {
-            const { Clipboard } = await import("@raycast/api");
             await Clipboard.copy(error.message);
             toast.hide();
           },
@@ -599,6 +598,79 @@ function readTextPreview(path: string, ext: string): string {
 }
 
 function ResultDetail({ result }: { result: SearchResult }) {
+  const [preview, setPreview] = useState<string>("");
+
+  // Async file preview — avoids blocking the render thread with synchronous I/O
+  useEffect(() => {
+    let cancelled = false;
+
+    // Image: inline markdown (no I/O needed)
+    if (result.file_type && IMAGE_TYPES.has(result.file_type)) {
+      setPreview(
+        `![preview](file://${encodeURI(result.path)}?raycast-height=250)`,
+      );
+      return;
+    }
+
+    // PDF thumbnail via qlmanage (async)
+    if (result.file_type === "pdf") {
+      const hash = createHash("md5")
+        .update(result.path)
+        .digest("hex")
+        .slice(0, 16);
+      const thumbDir = join(tmpdir(), "findr-thumbs");
+      const thumbPath = join(thumbDir, `${hash}.png`);
+
+      if (existsSync(thumbPath)) {
+        setPreview(`![preview](file://${thumbPath})\n\n`);
+        return;
+      }
+
+      const qlOutDir = join(thumbDir, hash);
+      execFile("mkdir", ["-p", qlOutDir], () => {
+        if (cancelled) return;
+        execFile(
+          "qlmanage",
+          ["-t", result.path, "-s", "600", "-o", qlOutDir],
+          { timeout: 3000 },
+          () => {
+            if (cancelled) return;
+            const srcName = result.path.split("/").pop() + ".png";
+            const qlPath = join(qlOutDir, srcName);
+            if (existsSync(qlPath)) {
+              renameSync(qlPath, thumbPath);
+            }
+            if (existsSync(thumbPath)) {
+              setPreview(`![preview](file://${thumbPath})\n\n`);
+            }
+          },
+        );
+      });
+      return;
+    }
+
+    // Text/code preview (async read)
+    if (
+      result.file_type &&
+      TEXT_PREVIEW_TYPES.has(result.file_type) &&
+      !result.is_dir
+    ) {
+      // Run in next tick to avoid blocking render
+      setTimeout(() => {
+        if (cancelled) return;
+        const text = readTextPreview(result.path, result.file_type!);
+        if (text && !cancelled) {
+          setPreview(text + "\n\n");
+        }
+      }, 0);
+      return;
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, [result.path]);
+
   let markdown = "";
 
   // Content snippet first (most important when searching)
@@ -609,49 +681,7 @@ function ResultDetail({ result }: { result: SearchResult }) {
     markdown += `> ${sanitized}\n\n`;
   }
 
-  // Image preview (constrained to fit without scroll)
-  if (result.file_type && IMAGE_TYPES.has(result.file_type)) {
-    markdown += `![preview](file://${encodeURI(result.path)}?raycast-height=250)`;
-  }
-  // PDF thumbnail via qlmanage
-  else if (result.file_type === "pdf") {
-    try {
-      const hash = createHash("md5")
-        .update(result.path)
-        .digest("hex")
-        .slice(0, 16);
-      const thumbDir = join(tmpdir(), "findr-thumbs");
-      const thumbPath = join(thumbDir, `${hash}.png`);
-      if (!existsSync(thumbPath)) {
-        // Use per-file hash subdir to avoid basename collisions from qlmanage
-        const qlOutDir = join(thumbDir, hash);
-        execFileSync("mkdir", ["-p", qlOutDir]);
-        execFileSync(
-          "qlmanage",
-          ["-t", result.path, "-s", "600", "-o", qlOutDir],
-          { timeout: 3000, stdio: "ignore" },
-        );
-        const srcName = result.path.split("/").pop() + ".png";
-        const qlPath = join(qlOutDir, srcName);
-        if (existsSync(qlPath)) {
-          renameSync(qlPath, thumbPath);
-        }
-      }
-      if (existsSync(thumbPath)) {
-        markdown += `![preview](file://${thumbPath})\n\n`;
-      }
-    } catch {
-      /* skip thumbnail on failure */
-    }
-  }
-  // Text/code file preview
-  else if (
-    result.file_type &&
-    TEXT_PREVIEW_TYPES.has(result.file_type) &&
-    !result.is_dir
-  ) {
-    markdown += readTextPreview(result.path, result.file_type) + "\n\n";
-  }
+  markdown += preview;
 
   return (
     <List.Item.Detail
