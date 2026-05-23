@@ -11,7 +11,6 @@ export type WallpaperHistoryEntry = {
   eventType: WallpaperHistoryEventType;
   timestamp: string;
   wallpaper: Wallpaper;
-  localFilePath: string;
   downloadPath?: string;
 };
 
@@ -51,7 +50,6 @@ function isHistoryEntry(value: unknown): value is WallpaperHistoryEntry {
     (entry.eventType === "selected" || entry.eventType === "downloaded") &&
     typeof entry.timestamp === "string" &&
     isWallpaper(entry.wallpaper) &&
-    typeof entry.localFilePath === "string" &&
     (entry.downloadPath === undefined || typeof entry.downloadPath === "string")
   );
 }
@@ -64,15 +62,22 @@ function getEventFiles() {
 function readHistoryEntry(filePath: string) {
   try {
     const parsed = JSON.parse(fs.readFileSync(filePath, "utf8"));
-    return isHistoryEntry(parsed) ? parsed : undefined;
+    if (!isHistoryEntry(parsed)) return undefined;
+    return {
+      eventId: parsed.eventId,
+      eventType: parsed.eventType,
+      timestamp: parsed.timestamp,
+      wallpaper: parsed.wallpaper,
+      downloadPath: parsed.downloadPath,
+    };
   } catch {
     return undefined;
   }
 }
 
-export async function recordWallpaperHistory(
+export function recordWallpaperHistory(
   input: WallpaperHistoryInput,
-): Promise<WallpaperHistoryEntry> {
+): WallpaperHistoryEntry {
   ensureHistoryDirectories();
 
   const timestamp = new Date().toISOString();
@@ -82,7 +87,6 @@ export async function recordWallpaperHistory(
     eventType: input.eventType,
     timestamp,
     wallpaper: input.wallpaper,
-    localFilePath: input.localFilePath,
     downloadPath: input.downloadPath,
   };
 
@@ -110,7 +114,7 @@ export function readWallpaperHistory(
     if (options.limit && entries.length >= options.limit) break;
   }
 
-  return entries.sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  return entries;
 }
 
 function findHistoryEventFilePath(eventId: string) {
@@ -142,11 +146,9 @@ export function clearWallpaperHistory() {
   return files.length;
 }
 
-export async function recordWallpaperHistoryBestEffort(
-  input: WallpaperHistoryInput,
-) {
+export function recordWallpaperHistoryBestEffort(input: WallpaperHistoryInput) {
   try {
-    await recordWallpaperHistory(input);
+    recordWallpaperHistory(input);
   } catch (error) {
     console.error("Failed to record wallpaper history:", error);
   }

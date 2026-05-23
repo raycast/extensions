@@ -14,6 +14,7 @@ import {
 } from "@raycast/api";
 import { useEffect, useState } from "react";
 import {
+  buildWallpaperMarkdown,
   downloadWallpaper,
   getThumbnailUrl,
   setDesktopWallpaper,
@@ -28,7 +29,6 @@ import {
 const HISTORY_LIMIT = 500;
 
 type HistoryListEntry = WallpaperHistoryEntry & {
-  localFileExists: boolean;
   downloadFileExists: boolean;
 };
 
@@ -36,7 +36,6 @@ async function loadHistory() {
   await new Promise<void>((resolve) => setTimeout(resolve, 0));
   return readWallpaperHistory({ limit: HISTORY_LIMIT }).map((entry) => ({
     ...entry,
-    localFileExists: fs.existsSync(entry.localFilePath),
     downloadFileExists: entry.downloadPath
       ? fs.existsSync(entry.downloadPath)
       : false,
@@ -64,20 +63,14 @@ function getArtworkUrl(entry: WallpaperHistoryEntry) {
 }
 
 function buildHistoryMarkdown(entry: WallpaperHistoryEntry) {
-  const imageUrl = getThumbnailUrl(entry.wallpaper.url, { height: 280 });
-  return `
-<img src="${imageUrl}" alt="${entry.wallpaper.name}" height="280" />
-
-**${entry.wallpaper.name}**
-
-${entry.wallpaper.artist}, ${entry.wallpaper.creationDate}
-
-${entry.wallpaper.description || ""}
-
+  return buildWallpaperMarkdown(
+    entry.wallpaper,
+    `
 ---
 
 **${formatEventType(entry)}** on ${formatTimestamp(entry.timestamp)}
-`;
+`,
+  );
 }
 
 function HistoryActions(props: {
@@ -142,16 +135,6 @@ function HistoryActions(props: {
           icon={Icon.Folder}
           target={environment.supportPath}
         />
-        {entry.localFileExists ? (
-          <Action.ShowInFinder
-            title="Show Local File in Finder"
-            path={entry.localFilePath}
-            shortcut={{
-              macOS: { modifiers: ["cmd"], key: "f" },
-              Windows: { modifiers: ["ctrl"], key: "f" },
-            }}
-          />
-        ) : null}
         {entry.downloadFileExists && entry.downloadPath ? (
           <Action.ShowInFinder
             title="Show Download in Finder"

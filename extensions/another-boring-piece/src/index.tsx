@@ -12,6 +12,7 @@ import {
 import { useFetch } from "@raycast/utils";
 import { useMemo } from "react";
 import {
+  buildWallpaperMarkdown,
   setDesktopWallpaper,
   downloadWallpaper,
   getThumbnailUrl,
@@ -40,17 +41,6 @@ export default function Command() {
   return (
     <List isLoading={isLoading} isShowingDetail>
       {wallpapers?.map((wallpaper) => {
-        const imageUrl = getThumbnailUrl(wallpaper.url, { height: 280 });
-        const markdown = `
-<img src="${imageUrl}" alt="${wallpaper.name}" height="280" />
-
-**${wallpaper.name}**
-
-${wallpaper.artist}, ${wallpaper.creationDate}
-
-${wallpaper.description || ""}
-        `;
-
         return (
           <List.Item
             key={wallpaper.id}
@@ -60,7 +50,9 @@ ${wallpaper.description || ""}
               source: getThumbnailUrl(wallpaper.url, { width: 100 }),
               mask: Image.Mask.RoundedRectangle,
             }}
-            detail={<List.Item.Detail markdown={markdown} />}
+            detail={
+              <List.Item.Detail markdown={buildWallpaperMarkdown(wallpaper)} />
+            }
             actions={
               <ActionPanel>
                 <Action

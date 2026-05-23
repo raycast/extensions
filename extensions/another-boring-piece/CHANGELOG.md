@@ -3,8 +3,7 @@
 ## [Add History Command and Shortcuts] - {PR_MERGE_DATE}
 
 - New command **History**: browse wallpapers you selected or downloaded, including automatic wallpaper switches.
-- Record selected and downloaded wallpapers with artwork details, local file paths, and timestamps.
-- Keep wallpaper files in long-lived extension support storage so history items can be set or downloaded again later.
+- Record selected and downloaded wallpapers with artwork details and timestamps.
 - Add actions to delete a single wallpaper history item or clear all history from the History command.
 - Confirm destructive history deletion actions and refresh the history list after changes.
 

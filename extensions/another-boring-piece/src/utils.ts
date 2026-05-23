@@ -46,6 +46,19 @@ export function getThumbnailUrl(
   return url;
 }
 
+export function buildWallpaperMarkdown(wallpaper: Wallpaper, footer = "") {
+  const imageUrl = getThumbnailUrl(wallpaper.url, { height: 280 });
+  return `
+<img src="${imageUrl}" alt="${wallpaper.name}" height="280" />
+
+**${wallpaper.name}**
+
+${wallpaper.artist}, ${wallpaper.creationDate}
+
+${wallpaper.description || ""}${footer}
+`;
+}
+
 function sanitizeCacheKey(value: string) {
   return value.replace(/[^a-zA-Z0-9_-]/g, "_");
 }
@@ -67,6 +80,30 @@ function getCachedWallpaperPath(url: string, extension: string, id?: string) {
 
 function getCachedWallpaperDirectory() {
   return path.join(environment.supportPath, "history", "wallpapers");
+}
+
+function pruneWallpaperCache(keepFilePath: string) {
+  const maxFiles = 20;
+  const dir = getCachedWallpaperDirectory();
+  if (!fs.existsSync(dir)) return;
+
+  type CacheFile = { filePath: string; stat: fs.Stats };
+  const files = fs
+    .readdirSync(dir)
+    .map((file): CacheFile | undefined => {
+      const filePath = path.join(dir, file);
+      const stat = fs.statSync(filePath);
+      return stat.isFile() ? { filePath, stat } : undefined;
+    })
+    .filter(
+      (file): file is CacheFile => !!file && file.filePath !== keepFilePath,
+    )
+    .sort((a, b) => b.stat.mtimeMs - a.stat.mtimeMs)
+    .map(({ filePath }) => filePath);
+
+  for (const filePath of files.slice(maxFiles - 1)) {
+    fs.unlinkSync(filePath);
+  }
 }
 
 function getExistingCachedWallpaperPath(url: string, id?: string) {
@@ -143,6 +180,7 @@ export async function ensureWallpaperFile(url: string, id?: string) {
   fs.writeFileSync(filePath, buffer);
 
   fs.utimesSync(filePath, new Date(), new Date());
+  pruneWallpaperCache(filePath);
   return filePath;
 }
 
@@ -154,7 +192,6 @@ export async function setDesktopWallpaper(wallpaper: Wallpaper) {
   await recordWallpaperHistoryBestEffort({
     eventType: "selected",
     wallpaper,
-    localFilePath: filePath,
   });
   return filePath;
 }
@@ -174,7 +211,6 @@ export async function downloadWallpaper(wallpaper: Wallpaper) {
   await recordWallpaperHistoryBestEffort({
     eventType: "downloaded",
     wallpaper,
-    localFilePath: sourcePath,
     downloadPath: filePath,
   });
   return filePath;
