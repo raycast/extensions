@@ -73,6 +73,7 @@ function buildHistoryMarkdown(entry: WallpaperHistoryEntry) {
   return buildWallpaperMarkdown(
     entry.wallpaper,
     `
+
 ---
 
 **${formatEventType(entry)}** on ${formatTimestamp(entry.timestamp)}
