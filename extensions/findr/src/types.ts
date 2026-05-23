@@ -8,6 +8,7 @@ export interface SearchResult {
   file_type: string | null;
   content_snippet: string | null;
   is_dir: boolean;
+  interactions: number;
 }
 
 export interface SearchResponse {

@@ -1,5 +1,6 @@
 import { environment, getPreferenceValues } from "@raycast/api";
 import { chmodSync, existsSync } from "fs";
+import { execFile } from "child_process";
 import { join } from "path";
 
 let chmodApplied = false;
@@ -86,13 +87,14 @@ export function formatRelativeDate(isoDate: string): string {
   const now = new Date();
   const diffMs = now.getTime() - date.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const time = date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-  if (diffDays === 0) return "Today";
-  if (diffDays === 1) return "Yesterday";
-  if (diffDays < 7) return `${diffDays}d ago`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)}w ago`;
-  if (diffDays < 365) return `${Math.floor(diffDays / 30)}mo ago`;
-  return `${Math.floor(diffDays / 365)}y ago`;
+  if (diffDays === 0) return `Today at ${time}`;
+  if (diffDays === 1) return `Yesterday at ${time}`;
+  const day = date.getDate();
+  const month = date.toLocaleDateString([], { month: "long" });
+  const year = date.getFullYear();
+  return `${day} ${month}, ${year} at ${time}`;
 }
 
 const FILE_TYPE_ICONS: Record<string, string> = {
@@ -137,4 +139,9 @@ const FILE_TYPE_ICONS: Record<string, string> = {
 export function getFileIcon(ext: string | null): string {
   if (!ext) return "📁";
   return FILE_TYPE_ICONS[ext] || "📁";
+}
+
+/** Fire-and-forget interaction tracking for frequency-based ranking. */
+export function trackInteraction(path: string, action: string): void {
+  execFile(getFindrPath(), ["track", path, "--action", action], () => {});
 }

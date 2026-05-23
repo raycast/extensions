@@ -4,20 +4,28 @@ import {
   List,
   Icon,
   Keyboard,
+  Clipboard,
+  LocalStorage,
   showToast,
   Toast,
+  open,
+  showInFinder,
 } from "@raycast/api";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { existsSync } from "fs";
-import { execFile } from "child_process";
+import { execFile, execFileSync } from "child_process";
+import { tmpdir } from "os";
+import { join } from "path";
 import { SearchResponse, SearchResult } from "./types";
 import {
   getFindrPath,
   getMaxResults,
   getFindrEnv,
+  getCustomPaths,
   formatFileSize,
   formatRelativeDate,
   getFileIcon,
+  trackInteraction,
 } from "./utils";
 import { openBugReport } from "./bug-report";
 
@@ -30,12 +38,18 @@ function ResultActions({ result }: { result: SearchResult }) {
   if (result.is_dir) {
     return (
       <ActionPanel>
-        <Action.ShowInFinder path={result.path} title="Open in Finder" />
-        <Action.Open title="Open Folder" target={result.path} />
-        <Action.CopyToClipboard
+        <Action
+          title="Open in Finder"
+          onAction={() => { trackInteraction(result.path, "finder"); showInFinder(result.path); }}
+        />
+        <Action
+          title="Open Folder"
+          onAction={() => { trackInteraction(result.path, "open"); open(result.path); }}
+        />
+        <Action
           title="Copy Path"
-          content={result.path}
           shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+          onAction={() => { trackInteraction(result.path, "copy"); Clipboard.copy(result.path); }}
         />
         <ActionPanel.Section>
           <Action
@@ -50,23 +64,27 @@ function ResultActions({ result }: { result: SearchResult }) {
   }
   return (
     <ActionPanel>
-      <Action.Open title="Open File" target={result.path} />
-      <Action.ShowInFinder
-        path={result.path}
+      <Action
+        title="Open File"
+        onAction={() => { trackInteraction(result.path, "open"); open(result.path); }}
+      />
+      <Action
+        title="Show in Finder"
         shortcut={{ modifiers: ["cmd"], key: "return" }}
+        onAction={() => { trackInteraction(result.path, "finder"); showInFinder(result.path); }}
       />
       <Action.ToggleQuickLook
         shortcut={Keyboard.Shortcut.Common.ToggleQuickLook}
       />
-      <Action.CopyToClipboard
+      <Action
         title="Copy Path"
-        content={result.path}
         shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+        onAction={() => { trackInteraction(result.path, "copy"); Clipboard.copy(result.path); }}
       />
-      <Action.CopyToClipboard
+      <Action
         title="Copy Filename"
-        content={result.filename}
         shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+        onAction={() => { trackInteraction(result.path, "copy"); Clipboard.copy(result.filename); }}
       />
       <ActionPanel.Section>
         <Action
@@ -104,7 +122,7 @@ export default function SearchFiles() {
   const debouncedQuery = useDebouncedValue(query, 300);
   const isSearchReady = debouncedQuery.trim().length >= 2;
 
-  // Search: raw useEffect — re-executes reliably on query change
+  // Phase 1: Fast search (no semantic) — fires immediately on debounced query
   const [searchData, setSearchData] = useState<SearchResponse | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchError, setSearchError] = useState<Error | null>(null);
@@ -122,10 +140,17 @@ export default function SearchFiles() {
     let killed = false;
     const child = execFile(
       findrPath,
-      ["search", debouncedQuery, "--json", "--limit", String(maxResults)],
+      [
+        "search",
+        debouncedQuery,
+        "--json",
+        "--limit",
+        String(maxResults),
+        "--no-semantic",
+      ],
       { env: { ...process.env, ...findrEnv } },
       (err, stdout) => {
-        if (killed) return; // ignore callback from killed process
+        if (killed) return;
         if (err) {
           setSearchError(new Error(err.message));
           setSearchLoading(false);
@@ -147,7 +172,44 @@ export default function SearchFiles() {
     };
   }, [debouncedQuery, isSearchReady, binaryExists]);
 
-  // Recent files: raw useEffect — no caching layer to return stale data
+  // Phase 2: Semantic search — fires 1s after user stops typing, merges results
+  const debouncedSemantic = useDebouncedValue(query, 1300); // 300ms base + 1000ms extra
+  const isSemanticReady = debouncedSemantic.trim().length >= 2;
+
+  useEffect(() => {
+    if (!isSemanticReady || !binaryExists) return;
+    // Only fire if fast results already loaded (avoid double-loading on first render)
+    if (!searchData) return;
+
+    let killed = false;
+    const child = execFile(
+      findrPath,
+      ["search", debouncedSemantic, "--json", "--limit", String(maxResults)],
+      { env: { ...process.env, ...findrEnv }, timeout: 4000 },
+      (err, stdout) => {
+        if (killed) return;
+        if (err) return; // silently skip — fast results already showing
+        try {
+          const semanticData = JSON.parse(stdout) as SearchResponse;
+          // Only update if more results or higher scores
+          if (semanticData.total_results > 0) {
+            setSearchData(semanticData);
+          }
+        } catch {
+          // ignore — fast results stay
+        }
+      },
+    );
+
+    return () => {
+      killed = true;
+      child.kill();
+    };
+  }, [debouncedSemantic, isSemanticReady, binaryExists, searchData !== null]);
+
+  // Recent files: stale-then-refresh pattern
+  // 1. Instant: show cached results (--no-sync, <50ms)
+  // 2. Background: sync + fresh results, replace if different
   const [recentData, setRecentData] = useState<SearchResponse | null>(null);
   const [recentLoading, setRecentLoading] = useState(true);
 
@@ -157,9 +219,11 @@ export default function SearchFiles() {
       return;
     }
     let cancelled = false;
-    const child = execFile(
+
+    // Phase 1: instant cached results (no sync)
+    const staleChild = execFile(
       findrPath,
-      ["search", "", "--json", "--limit", "20"],
+      ["search", "", "--json", "--limit", String(maxResults), "--no-sync"],
       { env: { ...process.env, ...findrEnv } },
       (err, stdout) => {
         if (cancelled) return;
@@ -167,17 +231,64 @@ export default function SearchFiles() {
           try {
             setRecentData(JSON.parse(stdout));
           } catch {
-            /* ignore parse errors */
+            /* ignore */
           }
         }
         setRecentLoading(false);
       },
     );
+
+    // Phase 2: background sync + fresh results (replaces stale)
+    const freshChild = execFile(
+      findrPath,
+      ["search", "", "--json", "--limit", String(maxResults)],
+      { env: { ...process.env, ...findrEnv } },
+      (err, stdout) => {
+        if (cancelled) return;
+        if (!err && stdout) {
+          try {
+            setRecentData(JSON.parse(stdout));
+          } catch {
+            /* ignore */
+          }
+        }
+      },
+    );
+
     return () => {
       cancelled = true;
-      child.kill();
+      staleChild.kill();
+      freshChild.kill();
     };
   }, [findrPath, binaryExists]);
+
+  // Auto-index new custom paths: detect preference changes, debounce 10s, index only new paths
+  const customPaths = getCustomPaths();
+  useEffect(() => {
+    if (!binaryExists || !customPaths) return;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+
+    LocalStorage.getItem<string>("findr_custom_paths").then((stored) => {
+      const storedSet = new Set((stored || "").split(",").map((p) => p.trim()).filter(Boolean));
+      const currentList = customPaths.split(",").map((p) => p.trim()).filter(Boolean);
+      const newPaths = currentList.filter((p) => !storedSet.has(p));
+
+      if (newPaths.length > 0) {
+        // Debounce 10s to let user finish editing
+        timer = setTimeout(() => {
+          for (const p of newPaths) {
+            execFile(findrPath, ["index", "add-path", p], () => {});
+          }
+          LocalStorage.setItem("findr_custom_paths", currentList.join(","));
+        }, 10000);
+      } else if (currentList.length > 0 && !stored) {
+        // First time: store current paths without triggering index
+        LocalStorage.setItem("findr_custom_paths", currentList.join(","));
+      }
+    });
+
+    return () => { if (timer) clearTimeout(timer); };
+  }, [customPaths, binaryExists]);
 
   const isTyping = query.length > 0;
   const showRecent = !isTyping && recentData?.mode === "recent";
@@ -271,7 +382,7 @@ export default function SearchFiles() {
     <List
       isLoading={isLoading}
       isShowingDetail={true}
-      searchBarPlaceholder="Search files... (e.g. 'resume pdf', 'brainform folder')"
+      searchBarPlaceholder="Search files... (e.g. 'cv pdf', 'project folder', 'png in:downloads')"
       onSearchTextChange={setQuery}
     >
       {showRecent ? (
@@ -339,14 +450,175 @@ function ResultItem({ result }: { result: SearchResult }) {
   );
 }
 
+const IMAGE_TYPES = new Set([
+  "png",
+  "jpg",
+  "jpeg",
+  "gif",
+  "webp",
+  "svg",
+  "heic",
+  "tiff",
+  "bmp",
+  "ico",
+]);
+const TEXT_PREVIEW_TYPES = new Set([
+  "md",
+  "txt",
+  "csv",
+  "html",
+  "xml",
+  "json",
+  "yaml",
+  "yml",
+  "toml",
+  "ini",
+  "cfg",
+  "conf",
+  "log",
+  "sql",
+  "sh",
+  "zsh",
+  "bash",
+  "rs",
+  "ts",
+  "tsx",
+  "js",
+  "jsx",
+  "py",
+  "go",
+  "rb",
+  "java",
+  "c",
+  "cpp",
+  "h",
+  "css",
+  "scss",
+]);
+const MAX_PREVIEW_BYTES = 8192;
+const MAX_PREVIEW_LINES = 40;
+
+const RENDER_AS_PLAIN = new Set(["txt", "md"]);
+
+function readTextPreview(path: string, ext: string): string {
+  try {
+    const buf = Buffer.alloc(MAX_PREVIEW_BYTES);
+    const fd = require("fs").openSync(path, "r");
+    const bytesRead = require("fs").readSync(fd, buf, 0, MAX_PREVIEW_BYTES, 0);
+    require("fs").closeSync(fd);
+    const raw = buf.slice(0, bytesRead).toString("utf-8");
+    // Cut at last complete line to avoid mid-line truncation
+    const lastNewline = raw.lastIndexOf("\n");
+    const text = lastNewline > 0 ? raw.slice(0, lastNewline) : raw;
+    const allLines = text.split("\n");
+    const truncated =
+      allLines.length > MAX_PREVIEW_LINES || bytesRead >= MAX_PREVIEW_BYTES;
+    const lines = allLines.slice(0, MAX_PREVIEW_LINES);
+    const content = lines.join("\n");
+
+    const truncNote = truncated ? "\n\n---" : "";
+
+    // Plain text / markdown: render as-is (no code box)
+    if (RENDER_AS_PLAIN.has(ext)) {
+      return content + truncNote;
+    }
+    // CSV: render as markdown table (first 5 columns, 20 rows)
+    if (ext === "csv") {
+      const rows = lines.slice(0, 20);
+      if (rows.length >= 2) {
+        const parsed = rows.map((r) =>
+          r.split(",").map((c) => c.trim().replace(/^"|"$/g, "")),
+        );
+        const maxCols = Math.min(parsed[0].length, 5);
+        const trim = (s: string) => (s.length > 20 ? s.slice(0, 18) + ".." : s);
+        const header =
+          "| " + parsed[0].slice(0, maxCols).map(trim).join(" | ") + " |";
+        const sep = "| " + Array(maxCols).fill("---").join(" | ") + " |";
+        const body = parsed
+          .slice(1)
+          .map((r) => "| " + r.slice(0, maxCols).map(trim).join(" | ") + " |")
+          .join("\n");
+        const extra =
+          parsed[0].length > 5
+            ? `\n\n*+${parsed[0].length - 5} more columns*`
+            : "";
+        return header + "\n" + sep + "\n" + body + extra;
+      }
+    }
+    // Everything else: syntax-highlighted code block
+    const lang =
+      ext === "py"
+        ? "python"
+        : ext === "rs"
+          ? "rust"
+          : ext === "js" || ext === "jsx"
+            ? "javascript"
+            : ext === "ts" || ext === "tsx"
+              ? "typescript"
+              : ext === "rb"
+                ? "ruby"
+                : ext === "yml" || ext === "yaml"
+                  ? "yaml"
+                  : ext;
+    return "```" + lang + "\n" + content + "\n```" + truncNote;
+  } catch {
+    return "";
+  }
+}
+
 function ResultDetail({ result }: { result: SearchResult }) {
   let markdown = "";
 
+  // Content snippet first (most important when searching)
   if (result.content_snippet) {
     const sanitized = result.content_snippet
       .replace(/[\\`*_{}[\]()#+\-.!|<>~]/g, "\\$&")
       .replace(/\n/g, "\n> ");
-    markdown += `> ${sanitized}\n`;
+    markdown += `> ${sanitized}\n\n`;
+  }
+
+  // Image preview (constrained to fit without scroll)
+  if (result.file_type && IMAGE_TYPES.has(result.file_type)) {
+    markdown += `![preview](file://${encodeURI(result.path)}?raycast-height=250)`;
+  }
+  // PDF thumbnail via qlmanage
+  else if (result.file_type === "pdf") {
+    try {
+      const crypto = require("crypto");
+      const hash = crypto
+        .createHash("md5")
+        .update(result.path)
+        .digest("hex")
+        .slice(0, 16);
+      const thumbDir = join(tmpdir(), "findr-thumbs");
+      const thumbPath = join(thumbDir, `${hash}.png`);
+      if (!existsSync(thumbPath)) {
+        execFileSync("mkdir", ["-p", thumbDir]);
+        execFileSync(
+          "qlmanage",
+          ["-t", result.path, "-s", "600", "-o", thumbDir],
+          { timeout: 3000, stdio: "ignore" },
+        );
+        const srcName = result.path.split("/").pop() + ".png";
+        const qlPath = join(thumbDir, srcName);
+        if (existsSync(qlPath)) {
+          require("fs").renameSync(qlPath, thumbPath);
+        }
+      }
+      if (existsSync(thumbPath)) {
+        markdown += `![preview](file://${thumbPath})\n\n`;
+      }
+    } catch {
+      /* skip thumbnail on failure */
+    }
+  }
+  // Text/code file preview
+  else if (
+    result.file_type &&
+    TEXT_PREVIEW_TYPES.has(result.file_type) &&
+    !result.is_dir
+  ) {
+    markdown += readTextPreview(result.path, result.file_type) + "\n\n";
   }
 
   return (
@@ -376,6 +648,12 @@ function ResultDetail({ result }: { result: SearchResult }) {
             <List.Item.Detail.Metadata.Label
               title="Modified"
               text={formatRelativeDate(result.modified)}
+            />
+          )}
+          {result.interactions > 0 && (
+            <List.Item.Detail.Metadata.Label
+              title="Interactions"
+              text={String(result.interactions)}
             />
           )}
         </List.Item.Detail.Metadata>
