@@ -206,7 +206,16 @@ export function telexTransform(input, skipWords = []) {
       function findModIdx(str, c) {
         for (let i = str.length - 1; i >= 0; i--) {
           const v = str[i].toLowerCase();
-          if (MODS[v] && MODS[v][c]) return i;
+          if (!MODS[v] || !MODS[v][c]) continue;
+
+          // "w" targeting "a" → prefer "u" before it to form "ưa" diphthong
+          if (c === "w" && v === "a" && i > 0) {
+            const prev = str[i - 1].toLowerCase();
+            const notQu = i < 2 || str[i - 2].toLowerCase() !== "q";
+            if (prev === "u" && MODS["u"]["w"] && notQu) return i - 1;
+          }
+
+          return i;
         }
         return -1;
       }

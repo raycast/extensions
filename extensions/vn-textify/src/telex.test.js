@@ -30,6 +30,12 @@ const testCases = [
   ["nguoiwf",                   "người"],
   ["tuoiwf",                    "tười"],
 
+  // ua + w → ưa (w prefers u over a to form ưa diphthong)
+  ["cuawr",                     "cửa"],
+  ["cuaws",                     "cứa"],
+  ["cuawf",                     "cừa"],
+  ["muaws",                     "mứa"],
+
   // Jump-over semivowel modifier (ay + a → ây)
   ["vayaj",                     "vậy"],
   ["cayaj",                     "cậy"],
