@@ -1,6 +1,6 @@
 # FileZilla Changelog
 
-## [FileZilla Pro Support] - 2026-05-23
+## [FileZilla Pro Support] - {PR_MERGE_DATE}
 
 - Add support for FileZilla Pro (Mac App Store version) alongside standard FileZilla
 - Detect installed variant by bundle ID and use the corresponding app and config directory

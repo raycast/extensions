@@ -24,19 +24,24 @@ const VARIANTS: FileZillaVariant[] = [
   },
 ];
 
+let installedVariantPromise: Promise<FileZillaVariant | null> | null = null;
 /**
  * Finds the installed FileZilla variant (standard or Pro from the Mac App Store)
  * @returns The installed variant, or null if neither is installed
  */
 async function getInstalledVariant(): Promise<FileZillaVariant | null> {
-  try {
-    const applications = await getApplications();
-    const installedBundleIds = new Set(applications.map((app) => app.bundleId));
-    return VARIANTS.find((variant) => installedBundleIds.has(variant.bundleId)) ?? null;
-  } catch (error) {
-    handleError(error);
-    return null;
-  }
+  if (installedVariantPromise) return installedVariantPromise;
+  installedVariantPromise = (async () => {
+    try {
+      const applications = await getApplications();
+      const installedBundleIds = new Set(applications.map((app) => app.bundleId));
+      return VARIANTS.find((variant) => installedBundleIds.has(variant.bundleId)) ?? null;
+    } catch (error) {
+      handleError(error);
+      return null;
+    }
+  })();
+  return installedVariantPromise;
 }
 
 /**
