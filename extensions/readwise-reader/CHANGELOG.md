@@ -1,5 +1,10 @@
 # Readwise Reader Changelog
 
+## [Add Current Tab Fallback to Save Link Command] - {PR_MERGE_DATE}
+
+- Make the `Save Link` URL argument optional.
+- Fall back to the active browser tab URL when no URL is provided.
+
 ## Minor fixes - 2025-09-01
 
 - Use correct URL when opening an article.
