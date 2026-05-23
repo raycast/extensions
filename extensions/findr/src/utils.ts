@@ -44,6 +44,7 @@ function downloadFile(url: string, dest: string): Promise<void> {
       get(u, (res) => {
         if (res.statusCode === 302 || res.statusCode === 301) {
           const location = res.headers.location;
+          res.resume(); // drain redirect response to release socket
           if (location) {
             request(location);
             return;
