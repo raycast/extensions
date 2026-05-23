@@ -1,5 +1,12 @@
 import { environment, getPreferenceValues } from "@raycast/api";
-import { chmodSync, existsSync, mkdirSync, createWriteStream } from "fs";
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  createWriteStream,
+  renameSync,
+  unlinkSync,
+} from "fs";
 import { execFile } from "child_process";
 import { join } from "path";
 import { get } from "https";
@@ -17,10 +24,22 @@ function binDir(): string {
   return dir;
 }
 
-/** Download a file from a URL, following redirects. Returns a promise. */
+/** Download a file from a URL, following redirects. Downloads to a temp file
+ *  first, then renames on success. On failure the temp file is deleted so
+ *  a broken download never blocks future retries. */
 function downloadFile(url: string, dest: string): Promise<void> {
+  const tmp = dest + ".tmp";
   return new Promise((resolve, reject) => {
-    const file = createWriteStream(dest);
+    const file = createWriteStream(tmp);
+    const fail = (err: Error) => {
+      file.close();
+      try {
+        unlinkSync(tmp);
+      } catch {
+        /* already gone */
+      }
+      reject(err);
+    };
     const request = (u: string) => {
       get(u, (res) => {
         if (res.statusCode === 302 || res.statusCode === 301) {
@@ -31,15 +50,20 @@ function downloadFile(url: string, dest: string): Promise<void> {
           }
         }
         if (res.statusCode !== 200) {
-          reject(new Error(`Download failed: HTTP ${res.statusCode}`));
+          fail(new Error(`Download failed: HTTP ${res.statusCode}`));
           return;
         }
         res.pipe(file);
         file.on("finish", () => {
           file.close();
-          resolve();
+          try {
+            renameSync(tmp, dest);
+            resolve();
+          } catch (err) {
+            fail(err as Error);
+          }
         });
-      }).on("error", reject);
+      }).on("error", fail);
     };
     request(url);
   });

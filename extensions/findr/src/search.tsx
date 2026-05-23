@@ -14,7 +14,7 @@ import {
 import { useState, useMemo, useEffect, useRef } from "react";
 import { existsSync, openSync, readSync, closeSync, renameSync } from "fs";
 import { createHash } from "crypto";
-import { execFile } from "child_process";
+import { execFile, ChildProcess } from "child_process";
 import { tmpdir } from "os";
 import { join } from "path";
 import { SearchResponse, SearchResult } from "./types";
@@ -312,11 +312,14 @@ export default function SearchFiles() {
     };
   }, [findrPath, binaryExists]);
 
-  // Auto-index new custom paths: detect preference changes, debounce 10s, index only new paths
+  // Auto-index new custom paths: detect preference changes, debounce 10s, index only new paths.
+  // Timer ref used so cleanup can always reach it (timer is set inside async .then callback).
   const customPaths = getCustomPaths();
+  const indexTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   useEffect(() => {
     if (!binaryExists || !customPaths) return;
-    let timer: ReturnType<typeof setTimeout> | undefined;
 
     LocalStorage.getItem<string>("findr_custom_paths").then((stored) => {
       const storedSet = new Set(
@@ -333,7 +336,7 @@ export default function SearchFiles() {
 
       if (newPaths.length > 0) {
         // Debounce 10s to let user finish editing
-        timer = setTimeout(() => {
+        indexTimerRef.current = setTimeout(() => {
           for (const p of newPaths) {
             execFile(findrPath, ["index", "add-path", p], () => {});
           }
@@ -346,7 +349,7 @@ export default function SearchFiles() {
     });
 
     return () => {
-      if (timer) clearTimeout(timer);
+      if (indexTimerRef.current) clearTimeout(indexTimerRef.current);
     };
   }, [customPaths, binaryExists]);
 
@@ -628,10 +631,12 @@ function readTextPreview(path: string, ext: string): string {
 function ResultDetail({ result }: { result: SearchResult }) {
   const [preview, setPreview] = useState<string>("");
 
-  // Async file preview — avoids blocking the render thread with synchronous I/O
+  // Async file preview — avoids blocking the render thread with synchronous I/O.
+  // All branches fall through to a single cleanup that cancels pending work.
   useEffect(() => {
     let cancelled = false;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let qlChild: ChildProcess | undefined;
 
     setPreview("");
 
@@ -656,7 +661,7 @@ function ResultDetail({ result }: { result: SearchResult }) {
         const qlOutDir = join(thumbDir, hash);
         execFile("mkdir", ["-p", qlOutDir], () => {
           if (cancelled) return;
-          execFile(
+          qlChild = execFile(
             "qlmanage",
             ["-t", result.path, "-s", "600", "-o", qlOutDir],
             { timeout: 3000 },
@@ -693,6 +698,7 @@ function ResultDetail({ result }: { result: SearchResult }) {
     return () => {
       cancelled = true;
       if (timer) clearTimeout(timer);
+      if (qlChild) qlChild.kill();
     };
   }, [result.path]);
 
