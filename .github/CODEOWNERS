@@ -811,7 +811,7 @@
 /extensions/flaticon                                                @kudrykv
 /extensions/flibusta-search                                         @vladislav-yevtushenko
 /extensions/flight-miles-calculator                                 @DannySeidel @pernielsentikaer
-/extensions/flighty                                                 @hrishabhn @damian-duchnowski
+/extensions/flighty                                                 @hrishabhn @damian-duchnowski @effektsvk
 /extensions/floaty                                                  @fayecat
 /extensions/flow                                                    @vimtor @tyuichis
 /extensions/fluctuation                                             @zoffyzhang
@@ -1323,6 +1323,7 @@
 /extensions/link-cleaner                                            @haku-huang @xmok @ezzylan @cupcakearmy
 /extensions/link-transformer                                        @dangkhoipro
 /extensions/linkace                                                 @jaspermayone
+/extensions/linkace-search                                          @zisoft
 /extensions/linkding                                                @InteractiveNinja @xmok @jose-elias-alvarez
 /extensions/linkinize                                               @NaderIkladious @NaderIkladious
 /extensions/linkwarden                                              @leodbrs @xmok @trucke
@@ -2087,7 +2088,7 @@
 /extensions/reader-mode                                             @chrismessina @hetommy
 /extensions/reading-time                                            @fromsergio
 /extensions/readwise                                                @natterstefan
-/extensions/readwise-reader                                         @zach-fuller @birdmanmandbir @nicolas-marien @civ2boss
+/extensions/readwise-reader                                         @zach-fuller @birdmanmandbir @nicolas-marien @civ2boss @alexibuild
 /extensions/readwise-to-tana                                        @believer
 /extensions/readymetrics                                            @chadbutz
 /extensions/real-calc                                               @xilopaint
@@ -2475,6 +2476,7 @@
 /extensions/table-converter                                         @naserowaimer
 /extensions/tableau-navigator                                       @Endiruslan
 /extensions/tableplus                                               @pernielsentikaer @nagauta @xmok @MatteoGauthier
+/extensions/tablepro                                                @datlechin
 /extensions/tabler                                                  @zavbala @bensomething @bendrucker @alexibuild
 /extensions/tabletop-dice-roller                                    @sduemler
 /extensions/tabnews                                                 @juniorodilton
@@ -2822,7 +2824,7 @@
 /extensions/windows-default-wallpapers                              @MuhammadrizoDeveloper
 /extensions/windows-domain                                          @tonka3000
 /extensions/windows-environment-variables                           @devohmycode
-/extensions/windows-terminal                                        @theycallhermax
+/extensions/windows-terminal                                        @theycallhermax @artistro08
 /extensions/windows-to-linux-path                                   @Showtc
 /extensions/windsurf                                                @vikasbnsl
 /extensions/winget                                                  @ercaneray
@@ -2843,7 +2845,7 @@
 /extensions/woocommerce-quicker                                     @g-mai
 /extensions/word-count                                              @itsmingjie @koayon @chrismessina @LitoMore @aryan-thatte
 /extensions/word-research                                           @0xdhrv
-/extensions/word-search                                             @RishabSwift @thomaspaulmann @j3lte
+/extensions/word-search                                             @RishabSwift @thomaspaulmann @j3lte @raazi-muhammed
 /extensions/word4you                                                @gnehz972
 /extensions/wordle                                                  @chrisalxlng
 /extensions/wordpress-docs                                          @tillkruss @KevinBatdorf
@@ -2932,7 +2934,7 @@
 /extensions/zipper-run                                              @arielconti10 @pernielsentikaer
 /extensions/znotch                                                  @zkondor
 /extensions/zo-raycast                                              @skeletor-js
-/extensions/zod-documentation                                       @danieldeichfuss
+/extensions/zod-documentation                                       @danieldeichfuss @ezzylan
 /extensions/zodme                                                   @camib0b
 /extensions/zoo                                                     @ViGeng
 /extensions/zoom                                                    @thomaslombart @Visual-Studio-Coder @samuelkraft @jacpd
