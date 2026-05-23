@@ -1,0 +1,40 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "jeiskappa-skills",
+  "title": "Jeiskappa Skills",
+  "description": "Use any Jei-sKappa skill with any agent. Pick one, wrap it as an <instruction>, attach your prompt, and copy — skills stay opt-in instead of being auto-selected or bulk-installed.",
+  "icon": "icon.png",
+  "author": "Jei-sKappa",
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "categories": ["Productivity", "Developer Tools"],
+  "commands": [
+    {
+      "name": "select-skill",
+      "title": "Select Skill",
+      "subtitle": "Jeiskappa Skills",
+      "description": "Browse bundled skills, attach your prompt, and copy the wrapped output.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0",
+    "@raycast/utils": "^2.2.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.0",
+    "@types/node": "22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "sync": "node scripts/sync-skills-to-raycast.mjs",
+    "build": "npm run sync && ray build",
+    "dev": "npm run sync && ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npm run sync && npx @raycast/api@latest publish"
+  }
+}

@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+raycast-env.d.ts
+dist/
+build/
+*.log
+
+# Generated from ../skills/ via scripts/sync-skills-to-raycast.mjs
+assets/skills.json
