@@ -135,8 +135,8 @@ export default function FilterCommand() {
     await showToast({ title: "Copied URL" });
   }
 
-  // LD-P4-11 empty states.
-  if (!isLoading && (clipboard === null || clipboard.length === 0)) {
+  // LD-P4-11 empty states. (clipboard is narrowed to string here via !isLoading.)
+  if (!isLoading && clipboard.length === 0) {
     return (
       <List searchBarPlaceholder="Filter extracted links">
         <List.EmptyView
