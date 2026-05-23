@@ -136,7 +136,7 @@ function useDebouncedValue(value: string, delayMs: number): string {
 
 export default function SearchFiles() {
   const [query, setQuery] = useState("");
-  const [findrPath, setFindrPath] = useState(getFindrPath());
+  const [findrPath, setFindrPath] = useState(() => getFindrPath());
   const maxResults = getMaxResults();
   const findrEnv = getFindrEnv();
   const binaryExists = useMemo(() => existsSync(findrPath), [findrPath]);
@@ -643,7 +643,7 @@ function ResultDetail({ result }: { result: SearchResult }) {
     // Image: inline markdown (no I/O needed)
     if (result.file_type && IMAGE_TYPES.has(result.file_type)) {
       setPreview(
-        `![preview](file://${encodeURI(result.path)}?raycast-height=250)`,
+        `![preview](file://${result.path.split("/").map(encodeURIComponent).join("/")}?raycast-height=250)`,
       );
     }
     // PDF thumbnail via qlmanage (async)
