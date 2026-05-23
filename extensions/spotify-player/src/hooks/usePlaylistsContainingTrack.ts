@@ -28,7 +28,7 @@ async function getPlaylistsContainingTrack(playlists: SimplifiedPlaylistObject[]
 }
 
 export function usePlaylistsContainingTrack({ playlists, trackUri, options }: UsePlaylistsContainingTrackProps) {
-  const { data, isLoading } = useCachedPromise(
+  const { data, isLoading, revalidate } = useCachedPromise(
     (playlists: SimplifiedPlaylistObject[], trackUri: string) => getPlaylistsContainingTrack(playlists, trackUri),
     [playlists, trackUri ?? ""],
     {
@@ -39,5 +39,6 @@ export function usePlaylistsContainingTrack({ playlists, trackUri, options }: Us
   return {
     playlistsContainingTrack: data ?? [],
     playlistsContainingTrackIsLoading: isLoading,
+    playlistsContainingTrackRevalidate: revalidate,
   };
 }

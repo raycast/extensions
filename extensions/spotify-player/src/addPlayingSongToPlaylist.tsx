@@ -27,6 +27,7 @@ import { getError } from "./helpers/getError";
 import { CreateQuicklink } from "./components/CreateQuicklink";
 import getAllPlaylistItems from "./helpers/getAllPlaylistItems";
 import addTrackToPlaylistCache from "./helpers/addTrackToPlaylistCache";
+import removeTrackFromPlaylistCache from "./helpers/removeTrackFromPlaylistCache";
 import { Like, OpenLibrary, OpenSearch } from "./shortcuts/shortcuts";
 
 type LaunchContextData = {
@@ -169,6 +170,7 @@ function AddToPlaylistCommand(props: AddToPlaylistCommandProps) {
                             playlistId: playlist.id!,
                             trackUris: [{ uri: trackUri }],
                           });
+                          await removeTrackFromPlaylistCache(playlist.id!, trackUri);
                           await showHUD(`Removed from ${playlist.name}`);
                           await popToRoot();
                         } catch (err) {
