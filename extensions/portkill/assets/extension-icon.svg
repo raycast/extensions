@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="80" y1="48" x2="432" y2="464" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6384FF"/>
+      <stop offset="1" stop-color="#2B47B5"/>
+    </linearGradient>
+    <linearGradient id="socket" x1="168" y1="160" x2="344" y2="352" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#E8EEFF"/>
+    </linearGradient>
+    <filter id="shadow" x="128" y="128" width="256" height="256" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#142454" flood-opacity="0.28"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g filter="url(#shadow)">
+    <rect x="156" y="148" width="200" height="216" rx="48" fill="url(#socket)"/>
+    <rect x="198" y="208" width="22" height="96" rx="11" fill="#3B5CCC"/>
+    <rect x="245" y="192" width="22" height="128" rx="11" fill="#2F4DB8"/>
+    <rect x="292" y="208" width="22" height="96" rx="11" fill="#3B5CCC"/>
+  </g>
+  <circle cx="372" cy="372" r="40" fill="#FF5A67"/>
+  <path d="M356 372H388M372 356V388" stroke="white" stroke-width="10" stroke-linecap="round"/>
+</svg>
