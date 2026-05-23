@@ -34,14 +34,27 @@ export function parseNetstatOutput(output: string): PortProcess[] {
     }
 
     const parts = line.split(/\s+/);
-    const listeningIndex = parts.indexOf("LISTENING");
-    if (listeningIndex === -1 || listeningIndex + 1 >= parts.length) {
+    if (parts.length < 4) {
       continue;
     }
 
-    const pid = Number.parseInt(parts[listeningIndex + 1] ?? "", 10);
     const localAddress = parts[1];
-    if (!localAddress || Number.isNaN(pid) || pid <= 0) {
+    const foreignAddress = parts[2];
+    if (!localAddress || !foreignAddress) {
+      continue;
+    }
+
+    // The state column ("LISTENING") is localized on non-English Windows
+    // installs, so we detect LISTEN state from the wildcard foreign address
+    // (`0.0.0.0:0` or `[::]:0`) which is locale-independent.
+    const foreignPort = extractPortFromEndpoint(foreignAddress);
+    if (foreignPort !== 0) {
+      continue;
+    }
+
+    const pidText = parts[parts.length - 1] ?? "";
+    const pid = Number.parseInt(pidText, 10);
+    if (Number.isNaN(pid) || pid <= 0) {
       continue;
     }
 

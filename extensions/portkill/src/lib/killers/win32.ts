@@ -31,19 +31,28 @@ async function runTaskkill(pid: number, force: boolean): Promise<void> {
   try {
     await execFileAsync("taskkill", args, { windowsHide: true });
   } catch (error) {
-    const err = error as NodeJS.ErrnoException & { stdout?: string; stderr?: string };
-    const combined = `${err.stdout ?? ""} ${err.stderr ?? ""}`.toLowerCase();
-    if (combined.includes("not found") || combined.includes("no running instance")) {
+    // taskkill's stdout/stderr is localized on non-English Windows installs,
+    // so we cannot rely on substring matching. Instead, we verify the process
+    // is actually gone and treat it as a successful kill if so.
+    if (!(await processExistsWindows(pid))) {
       return;
     }
-    throw new ProcessKillerError(pid, err.message || "taskkill failed");
+
+    const err = error as NodeJS.ErrnoException & { stdout?: string; stderr?: string };
+    const detail = (err.stderr ?? err.stdout ?? "").trim();
+    throw new ProcessKillerError(pid, detail.length > 0 ? detail : err.message || "taskkill failed");
   }
 }
 
 async function processExistsWindows(pid: number): Promise<boolean> {
   try {
-    const { stdout } = await execFileAsync("tasklist", ["/FI", `PID eq ${pid}`, "/NH"], { windowsHide: true });
-    return !stdout.toLowerCase().includes("no tasks");
+    // `/FO CSV /NH` always emits a row per matching process as `"name","pid",…`
+    // when the process exists, regardless of system locale. An empty / "INFO:"
+    // body means it does not.
+    const { stdout } = await execFileAsync("tasklist", ["/FI", `PID eq ${pid}`, "/FO", "CSV", "/NH"], {
+      windowsHide: true,
+    });
+    return new RegExp(`"${pid}"`).test(stdout);
   } catch {
     return false;
   }

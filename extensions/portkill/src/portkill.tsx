@@ -1,4 +1,4 @@
-import { Action, ActionPanel, Alert, Icon, Keyboard, List, confirmAlert, showToast, Toast } from "@raycast/api";
+import { Action, ActionPanel, Alert, Icon, List, confirmAlert, showToast, Toast } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { PortListItem } from "./components/PortListItem";
@@ -6,12 +6,8 @@ import { statusSummary } from "./lib/format";
 import { getKillMethodDescription, getPlatformLabel } from "./lib/platform";
 import { killProcess, killProcesses } from "./lib/process-killer";
 import { PortScannerError, scanPorts } from "./lib/port-scanner";
+import { killAllShortcut, refreshShortcut, toggleDetailShortcut } from "./lib/shortcuts";
 import type { PortProcess } from "./lib/types";
-
-const sharedShortcuts: Record<"refresh" | "killAll", Keyboard.Shortcut> = {
-  refresh: { modifiers: ["cmd"], key: "r" },
-  killAll: { modifiers: ["cmd"], key: "k" },
-};
 
 function ListActions({
   onRefresh,
@@ -26,20 +22,20 @@ function ListActions({
 }) {
   return (
     <ActionPanel>
-      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} shortcut={sharedShortcuts.refresh} />
+      <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} shortcut={refreshShortcut} />
       <Action
         title="Kill All"
         icon={Icon.Trash}
         style={Action.Style.Destructive}
         onAction={onKillAll}
-        shortcut={sharedShortcuts.killAll}
+        shortcut={killAllShortcut}
       />
       <ActionPanel.Section>
         <Action
           title={isShowingDetail ? "Hide Details" : "Show Details"}
           icon={Icon.Sidebar}
           onAction={onToggleDetail}
-          shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+          shortcut={toggleDetailShortcut}
         />
       </ActionPanel.Section>
     </ActionPanel>
@@ -162,7 +158,7 @@ export default function Command() {
         description={emptyDescription}
         actions={
           <ActionPanel>
-            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} shortcut={sharedShortcuts.refresh} />
+            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={refresh} shortcut={refreshShortcut} />
           </ActionPanel>
         }
       />

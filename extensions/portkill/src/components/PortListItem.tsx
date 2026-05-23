@@ -1,6 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 
 import { localEndpoint, portDetailSubtitle } from "../lib/format";
+import { killAllShortcut, refreshShortcut, toggleDetailShortcut } from "../lib/shortcuts";
 import type { PortProcess } from "../lib/types";
 
 type PortListItemProps = {
@@ -59,20 +60,15 @@ export function PortListItem({
               title={isShowingDetail ? "Hide Details" : "Show Details"}
               icon={Icon.Sidebar}
               onAction={onToggleDetail}
-              shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+              shortcut={toggleDetailShortcut}
             />
-            <Action
-              title="Refresh"
-              icon={Icon.ArrowClockwise}
-              onAction={onRefresh}
-              shortcut={{ modifiers: ["cmd"], key: "r" }}
-            />
+            <Action title="Refresh" icon={Icon.ArrowClockwise} onAction={onRefresh} shortcut={refreshShortcut} />
             <Action
               title="Kill All"
               icon={Icon.Trash}
               style={Action.Style.Destructive}
               onAction={onKillAll}
-              shortcut={{ modifiers: ["cmd"], key: "k" }}
+              shortcut={killAllShortcut}
             />
           </ActionPanel.Section>
         </ActionPanel>

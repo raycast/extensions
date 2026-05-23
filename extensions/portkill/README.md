@@ -14,12 +14,17 @@ PortKill helps you answer “what is using port 3000?” inside Raycast. It scan
 
 Open Raycast and run **PortKill**.
 
-| Action | Shortcut | Description |
-| ------ | -------- | ----------- |
-| Refresh | `⌘R` | Rescan TCP listeners |
-| Kill All | `⌘K` | Stop every unique PID (confirmation) |
-| Kill Process | — | Stop the selected row’s PID |
-| Show/Hide Details | `⌘⇧D` | Toggle the detail pane |
+| Action | macOS | Windows | Description |
+| ------ | ----- | ------- | ----------- |
+| Refresh | `⌘R` | `Ctrl R` | Rescan TCP listeners |
+| Kill All | `⌘⇧K` | `Ctrl Shift K` | Stop every unique PID (confirmation) |
+| Kill Process | `↵` | `↵` | Stop the selected row’s PID |
+| Show/Hide Details | `⌘⇧D` | `Ctrl Shift D` | Toggle the detail pane |
+
+Shortcuts are declared with `Keyboard.Shortcut.Common` and the per-platform
+`{ macOS, Windows }` syntax described in the [Raycast keyboard
+docs](https://developers.raycast.com/api-reference/keyboard), so they map to
+the right modifier on each OS automatically.
 
 Use the detail pane for full endpoint and connection metadata.
 
@@ -33,7 +38,9 @@ Use the detail pane for full endpoint and connection metadata.
 
 On Linux, `ss -tlnp` may omit process names for listeners owned by other users unless you run Raycast with sufficient privileges. Install `lsof` if `ss` is unavailable.
 
-Raycast’s store manifest lists **macOS** and **Windows**. The extension code also supports Linux for local development and future Raycast platforms.
+The Windows scanner detects `LISTEN` state from the wildcard foreign address (`0.0.0.0:0` / `[::]:0`) rather than the literal `LISTENING` token, so it works on non-English Windows installs where `netstat` localizes the state column. Likewise, the Windows killer treats "process already gone" as a successful kill by re-querying `tasklist` instead of matching localized error strings.
+
+Raycast’s store manifest lists **macOS** and **Windows** in the [`platforms`](https://developers.raycast.com/information/manifest) field. The extension code also supports Linux for local development and future Raycast platforms.
 
 ## Development
 
