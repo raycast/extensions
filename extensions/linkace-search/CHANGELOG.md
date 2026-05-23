@@ -1,6 +1,6 @@
 # LinkAce Search Changelog
 
-## [Initial Release] - {PR_MERGE_DATE}
+## [Initial Release] - 2026-05-23
 
 - Added LinkAce Search command with configurable LinkAce URL and API key
 - Added LinkAce API search integration and browser opening for selected results
