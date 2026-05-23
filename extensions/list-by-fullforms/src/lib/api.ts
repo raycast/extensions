@@ -15,10 +15,13 @@
 
 import { getPreferenceValues } from "@raycast/api";
 
-interface Preferences {
-  apiToken: string;
-  apiBase: string;
-}
+// Preferences are typed via the ambient `ExtensionPreferences`
+// declaration that ray build auto-generates into raycast-env.d.ts
+// from package.json's preferences block. Reusing the generated type
+// (rather than redeclaring it here) keeps the manifest as the single
+// source of truth — adding / renaming a preference in package.json
+// auto-propagates to every getPreferenceValues<ExtensionPreferences>()
+// call site without a manual sync step that could silently drift.
 
 // Wire shapes for /api/v1/workspaces + /api/v1/lists, shared across
 // every command that picks a list to write to or filter by. Kept
@@ -74,7 +77,7 @@ export interface ListsResponse {
 const DEFAULT_BASE = "https://list.fullforms.com";
 
 export function apiBase(): string {
-  const { apiBase: configured } = getPreferenceValues<Preferences>();
+  const { apiBase: configured } = getPreferenceValues<ExtensionPreferences>();
   return (configured || DEFAULT_BASE).replace(/\/$/, "");
 }
 
@@ -95,7 +98,7 @@ export function apiHost(): string {
 }
 
 export function authHeaders(): Record<string, string> {
-  const { apiToken } = getPreferenceValues<Preferences>();
+  const { apiToken } = getPreferenceValues<ExtensionPreferences>();
   return {
     Authorization: `Bearer ${apiToken}`,
     "Content-Type": "application/json",
