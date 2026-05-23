@@ -1,5 +1,6 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
+  "type": "module",
   "name": "vn-textify",
   "title": "VN Textify",
   "description": "Transform Vietnam's Telex text to Vietnamese text",
