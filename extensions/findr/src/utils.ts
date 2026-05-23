@@ -96,6 +96,14 @@ export async function ensureFindrBinaries(): Promise<string> {
           let data = "";
           res.on("data", (chunk: string) => (data += chunk));
           res.on("end", () => {
+            if (res.statusCode !== 200) {
+              reject(
+                new Error(
+                  `GitHub API error: HTTP ${res.statusCode}${res.statusCode === 403 ? " (rate limit — try again later)" : ""}`,
+                ),
+              );
+              return;
+            }
             try {
               resolve(JSON.parse(data));
             } catch {
