@@ -89,10 +89,9 @@ export default function FilterCommand() {
   }, []);
 
   const isLoading = clipboard === null;
-  const items = clipboard && clipboard.length > 0 ? extractUrls(clipboard) : [];
-  const groups = orderedGroups(groupItems(items));
-
-  const allItems = useMemo(() => items, [items]);
+  // Memoize on the clipboard string so extraction only re-runs when it changes.
+  const allItems = useMemo(() => (clipboard && clipboard.length > 0 ? extractUrls(clipboard) : []), [clipboard]);
+  const groups = orderedGroups(groupItems(allItems));
   const selectedItemsList = useMemo(() => allItems.filter((i) => selected.has(itemId(i))), [allItems, selected]);
 
   function toggleSelect(id: string) {
@@ -149,7 +148,7 @@ export default function FilterCommand() {
     );
   }
 
-  if (!isLoading && items.length === 0) {
+  if (!isLoading && allItems.length === 0) {
     return (
       <List searchBarPlaceholder="Filter extracted links">
         <List.EmptyView

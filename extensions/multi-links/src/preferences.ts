@@ -1,12 +1,8 @@
 import type { Application } from "@raycast/api";
 
-export interface Preferences {
-  browser?: Application;
-  openDelayMs: string;
-  openAnyUriType: boolean;
-  confirmEnabled: boolean;
-  confirmThreshold: string;
-}
+// `Preferences` is the Raycast-auto-generated global type (raycast-env.d.ts,
+// = ExtensionPreferences). package.json's `preferences` array is the single
+// source of truth — do not hand-write a duplicate interface here.
 
 export interface ResolvedPrefs {
   browser?: Application;

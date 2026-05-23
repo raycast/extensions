@@ -13,8 +13,6 @@ import { usePromise } from "@raycast/utils";
 import { HistoryEntry, deleteEntry, loadHistory, togglePin } from "./historyStore";
 import { openItems } from "./openLinks";
 
-const MAX_DISPLAY = 20;
-
 function sortEntries(entries: HistoryEntry[]): HistoryEntry[] {
   // LD-P4-04: pinned first, then newest-first by timestamp.
   return [...entries].sort((a, b) => {
@@ -51,7 +49,7 @@ function sourceIcon(source: HistoryEntry["source"]): Icon {
 export default function HistoryCommand() {
   const { data, isLoading, mutate } = usePromise(loadHistory);
   const entries = data ?? [];
-  const display = sortEntries(entries).slice(0, MAX_DISPLAY);
+  const display = sortEntries(entries);
 
   async function openAllAgain(entry: HistoryEntry) {
     // LD-P4-06: openItems with skipRecording=true (avoid double-recording on replay).

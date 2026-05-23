@@ -2,7 +2,7 @@ import { Alert, Icon, confirmAlert, getPreferenceValues, open } from "@raycast/a
 import type { Application } from "@raycast/api";
 import { extractUrls, type ExtractedItem } from "./extractUrls";
 import { friendly } from "./errors";
-import { resolvePreferences, type Preferences } from "./preferences";
+import { resolvePreferences } from "./preferences";
 import { recordHistory } from "./historyStore";
 
 export type OpenSource = "selection" | "clipboard" | "history" | "filter";

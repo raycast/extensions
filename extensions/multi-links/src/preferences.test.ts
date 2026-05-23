@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { coerceNumber, resolvePreferences, type Preferences } from "./preferences";
+import { coerceNumber, resolvePreferences } from "./preferences";
 
 describe("coerceNumber", () => {
   it("passes through a valid integer string", () => {

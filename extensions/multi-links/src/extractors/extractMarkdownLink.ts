@@ -3,7 +3,10 @@ import type { ExtractedItem, ExtractedType } from "../extractUrls";
 import { TLD_ALLOWLIST } from "./tldAllowlist";
 
 // Inline markdown link: [text](url)
-const MD_LINK_REGEX = /\[[^\]]*\]\(([^)]+)\)/g;
+// Capture allows one level of balanced parentheses inside the URL so that
+// links like [C](https://en.wikipedia.org/wiki/C_(programming_language)) keep
+// their trailing paren instead of truncating at the first ")".
+const MD_LINK_REGEX = /\[[^\]]*\]\(((?:[^()]|\([^()]*\))*)\)/g;
 
 export interface MarkdownExtractResult {
   items: ExtractedItem[];

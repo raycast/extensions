@@ -48,4 +48,14 @@ describe("extractMarkdownLink (EXT-07)", () => {
     expect(items[0].type).toBe("web");
     expect(items[0].url).toBe("https://example.com");
   });
+
+  it("keeps balanced parentheses inside the URL (Wikipedia-style)", () => {
+    const { items } = extractMarkdownLink("[C](https://en.wikipedia.org/wiki/C_(programming_language))");
+    expect(items).toHaveLength(1);
+    expect(items[0]).toMatchObject({
+      raw: "[C](https://en.wikipedia.org/wiki/C_(programming_language))",
+      url: "https://en.wikipedia.org/wiki/C_(programming_language)",
+      type: "web",
+    });
+  });
 });
