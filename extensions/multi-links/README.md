@@ -2,8 +2,6 @@
 
 Bulk-open every URL hiding in a chunk of text — Slack threads, release notes, notes docs, share-sheet dumps — without clicking each one. Handles web URLs, local file paths, custom URI schemes (`obsidian://`, `vscode://`), `mailto:`, markdown links, and bare domains.
 
-![Hero](media/multi-links-hero.png)
-
 ## Commands
 
 ### Open Multiple Links
