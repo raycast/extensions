@@ -15,6 +15,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import {
   existsSync,
   mkdirSync,
+  rmSync,
   openSync,
   readSync,
   closeSync,
@@ -345,10 +346,20 @@ export default function SearchFiles() {
         // Debounce 10s to let user finish editing
         timer = setTimeout(() => {
           if (cancelled) return;
+          let completed = 0;
           for (const p of newPaths) {
-            execFile(findrPath, ["index", "add-path", p], () => {});
+            execFile(findrPath, ["index", "add-path", p], (err) => {
+              if (cancelled) return;
+              if (!err) completed++;
+              // Only mark as indexed after all subprocesses finish successfully
+              if (completed === newPaths.length) {
+                LocalStorage.setItem(
+                  "findr_custom_paths",
+                  currentList.join(","),
+                );
+              }
+            });
           }
-          LocalStorage.setItem("findr_custom_paths", currentList.join(","));
         }, 10000);
       } else if (currentList.length > 0 && !stored) {
         // First time: store current paths without triggering index
@@ -680,6 +691,12 @@ function ResultDetail({ result }: { result: SearchResult }) {
               const qlPath = join(qlOutDir, srcName);
               if (existsSync(qlPath)) {
                 renameSync(qlPath, thumbPath);
+              }
+              // Clean up per-file temp subdir
+              try {
+                rmSync(qlOutDir, { recursive: true });
+              } catch {
+                /* best effort */
               }
               if (existsSync(thumbPath)) {
                 setPreview(`![preview](file://${thumbPath})\n\n`);
