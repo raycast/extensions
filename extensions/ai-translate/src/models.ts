@@ -21,12 +21,11 @@ const MODEL_CATALOG: Record<ProviderId, ProviderModels> = {
     ],
   },
   mimo: {
-    fast: { id: "mimo-v2-flash", title: "V2 Flash" },
+    fast: { id: "mimo-v2.5", title: "V2.5" },
     pro: { id: "mimo-v2.5-pro", title: "V2.5 Pro" },
     all: [
-      { id: "mimo-v2-flash", title: "V2 Flash" },
-      { id: "mimo-v2.5", title: "V2.5" },
       { id: "mimo-v2.5-pro", title: "V2.5 Pro" },
+      { id: "mimo-v2.5", title: "V2.5" },
       { id: "mimo-v2-pro", title: "V2 Pro" },
       { id: "mimo-v2-omni", title: "V2 Omni" },
     ],

@@ -24,10 +24,15 @@ import {
 } from "./preferences";
 import { MissingAPIKeyError } from "./providers";
 import { REWRITE_TONE_LABELS, RewriteResult, runRewrite } from "./rewrite";
-import { loadRuntimeSettings } from "./runtime-settings";
+import { loadRuntimeSettings, updateRuntimeSetting } from "./runtime-settings";
 import { speakText } from "./tts";
-import { ExtensionPreferences, ProviderId, RewriteTone } from "./types";
+import { ExtensionPreferences, ProviderId, RewriteTone, TTSProvider } from "./types";
 import { normalizeInputText, quoted } from "./ui-constants";
+
+const TTS_PROVIDER_LABELS: Record<TTSProvider, string> = {
+  gemini: "Gemini",
+  mimo: "Xiaomi MiMo",
+};
 
 const TONE_ORDER: RewriteTone[] = ["natural", "casual", "formal", "concise"];
 
@@ -158,6 +163,7 @@ function CoachResult({
   const { push } = useNavigation();
   const [tone, setTone] = useState<RewriteTone>(initialTone);
   const [providerId, setProviderId] = useState<ProviderId>(initialProviderId ?? providerIds[0]);
+  const [ttsProvider, setTtsProvider] = useState<TTSProvider>("gemini");
   const [result, setResult] = useState<RewriteResult>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -165,13 +171,28 @@ function CoachResult({
   const requestSequence = useRef(0);
 
   useEffect(() => {
+    let isMounted = true;
+    void loadRuntimeSettings().then((settings) => {
+      if (isMounted) setTtsProvider(settings.ttsProvider);
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  async function switchTtsProvider(next: TTSProvider) {
+    const updated = await updateRuntimeSetting("ttsProvider", next);
+    setTtsProvider(updated.ttsProvider);
+    await showToast({ style: Toast.Style.Success, title: `Read Aloud: ${TTS_PROVIDER_LABELS[next]}` });
+  }
+
+  useEffect(() => {
     const sequence = ++requestSequence.current;
     setIsLoading(true);
     setError(undefined);
 
     async function run() {
-      const runtimeSettings = await loadRuntimeSettings();
-      const config = getProviderConfig(providerId, preferences, runtimeSettings.modelTier);
+      const config = getProviderConfig(providerId, preferences, "pro");
       try {
         const rewrite = await runRewrite(
           config,
@@ -206,7 +227,8 @@ function CoachResult({
 
   function recordHistory() {
     if (!rewritten) return;
-    void addHistoryEntry({ kind: "rewrite", source: text, output: rewritten, provider: providerTitle });
+    const model = getProviderConfig(providerId, preferences, "pro").model;
+    void addHistoryEntry({ kind: "rewrite", source: text, output: rewritten, provider: providerTitle, model });
   }
 
   return (
@@ -291,7 +313,7 @@ function CoachResult({
           <ActionPanel.Submenu
             icon={Icon.Bolt}
             shortcut={{ modifiers: ["cmd"], key: "m" }}
-            title={`Provider: ${providerTitle}`}
+            title={`Rewrite Provider: ${providerTitle}`}
           >
             {providerIds.map((id) => (
               <Action
@@ -299,6 +321,20 @@ function CoachResult({
                 icon={id === providerId ? Icon.Checkmark : Icon.Circle}
                 title={PROVIDER_TITLES[id]}
                 onAction={() => setProviderId(id)}
+              />
+            ))}
+          </ActionPanel.Submenu>
+          <ActionPanel.Submenu
+            icon={Icon.SpeakerOn}
+            shortcut={{ modifiers: ["cmd", "opt"], key: "m" }}
+            title={`Read Aloud: ${TTS_PROVIDER_LABELS[ttsProvider]}`}
+          >
+            {(["gemini", "mimo"] as TTSProvider[]).map((option) => (
+              <Action
+                key={option}
+                icon={option === ttsProvider ? Icon.Checkmark : Icon.Circle}
+                title={TTS_PROVIDER_LABELS[option]}
+                onAction={() => void switchTtsProvider(option)}
               />
             ))}
           </ActionPanel.Submenu>

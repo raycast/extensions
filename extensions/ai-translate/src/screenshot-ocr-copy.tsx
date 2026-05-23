@@ -1,5 +1,6 @@
 import { Clipboard, showHUD } from "@raycast/api";
 import { recognizeScreenshotText } from "./ocr-engines";
+import { OcrCancelledError } from "./ocr-errors";
 import { readPreferences } from "./preferences";
 
 export default async function Command() {
@@ -17,8 +18,8 @@ export default async function Command() {
     await Clipboard.copy(result);
     await showHUD(`Copied · ${result.length} chars`);
   } catch (error) {
+    if (error instanceof OcrCancelledError) return;
     const message = error instanceof Error ? error.message : String(error);
-    if (/cancel/i.test(message)) return;
     await showHUD(`OCR failed — ${message.slice(0, 80)}`);
   }
 }

@@ -26,6 +26,7 @@ export default function Command() {
       promptProfile: values.promptProfile as PromptProfile,
       translationStyle: values.translationStyle as TranslationStyle,
       customPromptInstructions: values.customPromptInstructions.trim().slice(0, 4000),
+      ttsProvider: settings?.ttsProvider ?? "gemini",
     };
 
     await saveRuntimeSettings(updated);
@@ -62,7 +63,12 @@ export default function Command() {
         </ActionPanel>
       }
     >
-      <Form.Dropdown id="modelTier" title="Model Tier" defaultValue={settings.modelTier}>
+      <Form.Dropdown
+        id="modelTier"
+        title="Model Tier"
+        defaultValue={settings.modelTier}
+        info="Applies to translation. Rewrite & Coach always uses the Pro tier."
+      >
         <Form.Dropdown.Item value="fast" title="Fast — Flash / Mini models, speed priority" icon={Icon.Bolt} />
         <Form.Dropdown.Item value="pro" title="Pro — Best models, quality priority" icon={Icon.Star} />
         <Form.Dropdown.Item value="custom" title="Custom — Use models set in Preferences" icon={Icon.Gear} />

@@ -31,3 +31,8 @@
 - Expanded the target language list (Arabic, Hindi, Vietnamese, Thai, Indonesian, Turkish, Dutch, Polish).
 - Serialized history writes so rapid copies no longer drop entries, and cleaned up leftover TTS audio files.
 - Refreshed Store screenshots for the current Screenshot OCR, Translate, and Translation Settings commands.
+- Added Xiaomi MiMo as a second Read Aloud engine, switchable per session in Rewrite & Coach (⌘⌥M), with a preset voice picker in preferences.
+- Locked Rewrite & Coach to the Pro tier so rewrite quality stays consistent regardless of the translation Model Tier setting.
+- Refreshed the Xiaomi MiMo model catalog: removed the deprecated mimo-v2-flash, kept mimo-v2.5 as Fast, and promoted mimo-v2.5-pro as Pro.
+- Hardened the Rewrite & Coach JSON parser with balanced-brace extraction and a more informative error message when a provider returns malformed JSON.
+- Switched Screenshot OCR Copy cancellation detection to use `instanceof OcrCancelledError` so unrelated errors aren't silently swallowed.

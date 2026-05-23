@@ -632,8 +632,8 @@
       "name": "mimoModel",
       "type": "textfield",
       "required": false,
-      "description": "Xiaomi MiMo model name. Text options include mimo-v2-flash, mimo-v2.5, mimo-v2.5-pro, mimo-v2-pro, and mimo-v2-omni.",
-      "default": "mimo-v2-flash"
+      "description": "Xiaomi MiMo model name. Text options include mimo-v2.5-pro, mimo-v2.5, mimo-v2-pro, and mimo-v2-omni.",
+      "default": "mimo-v2.5-pro"
     },
     {
       "title": "MiniMax API Key",
@@ -730,6 +730,60 @@
         {
           "title": "Aoede (smooth)",
           "value": "Aoede"
+        }
+      ]
+    },
+    {
+      "title": "MiMo TTS Base URL",
+      "name": "mimoTTSBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "OpenAI-compatible MiMo TTS base URL. Used when Read Aloud is set to MiMo TTS.",
+      "default": "https://token-plan-cn.xiaomimimo.com/v1"
+    },
+    {
+      "title": "MiMo TTS Voice",
+      "name": "mimoTTSVoice",
+      "type": "dropdown",
+      "required": false,
+      "description": "Preset voice used when Read Aloud is set to MiMo TTS.",
+      "default": "mimo_default",
+      "data": [
+        {
+          "title": "MiMo Default",
+          "value": "mimo_default"
+        },
+        {
+          "title": "冰糖 (中文 · 女)",
+          "value": "冰糖"
+        },
+        {
+          "title": "茉莉 (中文 · 女)",
+          "value": "茉莉"
+        },
+        {
+          "title": "苏打 (中文 · 男)",
+          "value": "苏打"
+        },
+        {
+          "title": "白桦 (中文 · 男)",
+          "value": "白桦"
+        },
+        {
+          "title": "Mia (English · Female)",
+          "value": "Mia"
+        },
+        {
+          "title": "Chloe (English · Female)",
+          "value": "Chloe"
+        },
+        {
+          "title": "Milo (English · Male)",
+          "value": "Milo"
+        },
+        {
+          "title": "Dean (English · Male)",
+          "value": "Dean"
         }
       ]
     },

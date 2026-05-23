@@ -1,5 +1,12 @@
 import { getPreferenceValues, LocalStorage } from "@raycast/api";
-import { ExtensionPreferences, ModelTier, PromptProfile, RuntimeSettings, TranslationStyle } from "./types";
+import {
+  ExtensionPreferences,
+  ModelTier,
+  PromptProfile,
+  RuntimeSettings,
+  TranslationStyle,
+  TTSProvider,
+} from "./types";
 
 const STORAGE_KEY = "runtime-settings";
 
@@ -11,6 +18,7 @@ function getDefaults(): RuntimeSettings {
       promptProfile: isPromptProfile(prefs.promptProfile) ? prefs.promptProfile : "general",
       translationStyle: isTranslationStyle(prefs.translationStyle) ? prefs.translationStyle : "balanced",
       customPromptInstructions: prefs.customPromptInstructions?.trim() ?? "",
+      ttsProvider: "gemini",
     };
   } catch {
     return {
@@ -18,6 +26,7 @@ function getDefaults(): RuntimeSettings {
       promptProfile: "general",
       translationStyle: "balanced",
       customPromptInstructions: "",
+      ttsProvider: "gemini",
     };
   }
 }
@@ -39,6 +48,7 @@ export async function loadRuntimeSettings(): Promise<RuntimeSettings> {
         typeof parsed.customPromptInstructions === "string"
           ? parsed.customPromptInstructions
           : defaults.customPromptInstructions,
+      ttsProvider: isTTSProvider(parsed.ttsProvider) ? parsed.ttsProvider : defaults.ttsProvider,
     };
   } catch {
     return defaults;
@@ -73,4 +83,8 @@ function isPromptProfile(value: unknown): value is PromptProfile {
 
 function isTranslationStyle(value: unknown): value is TranslationStyle {
   return ["balanced", "faithful", "polished", "academic"].includes(value as string);
+}
+
+function isTTSProvider(value: unknown): value is TTSProvider {
+  return value === "gemini" || value === "mimo";
 }

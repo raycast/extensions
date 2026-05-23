@@ -480,7 +480,7 @@ function isModelNotFoundError(message: string): boolean {
     return false;
   }
 
-  return /(not found|not exist|no such model|invalid model|unknown model|unsupported model|model_not_found|not available|do not have access|no access|cannot be found|is not supported)/.test(
+  return /(not found|not exist|no such model|invalid model|unknown model|unsupported model|not supported model|model_not_found|not available|do not have access|no access|cannot be found|is not supported)/.test(
     lower,
   );
 }

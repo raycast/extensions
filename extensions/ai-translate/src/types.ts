@@ -16,11 +16,14 @@ export type OCRTextLayout = "formatted" | "compact";
 
 export type ProviderAPIProtocol = "openai" | "anthropic";
 
+export type TTSProvider = "gemini" | "mimo";
+
 export interface RuntimeSettings {
   modelTier: ModelTier;
   promptProfile: PromptProfile;
   translationStyle: TranslationStyle;
   customPromptInstructions: string;
+  ttsProvider: TTSProvider;
 }
 
 /**

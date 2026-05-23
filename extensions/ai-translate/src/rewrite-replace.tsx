@@ -9,7 +9,6 @@ import {
 } from "./preferences";
 import { MissingAPIKeyError } from "./providers";
 import { runRewrite } from "./rewrite";
-import { loadRuntimeSettings } from "./runtime-settings";
 
 export default async function Command() {
   let source = "";
@@ -25,9 +24,8 @@ export default async function Command() {
   }
 
   const preferences = readPreferences();
-  const runtimeSettings = await loadRuntimeSettings();
   const providerId = getOrderedProviderIds(preferences)[0];
-  const config = getProviderConfig(providerId, preferences, runtimeSettings.modelTier);
+  const config = getProviderConfig(providerId, preferences, "pro");
 
   try {
     await showHUD(`Rewriting with ${config.title}...`);
