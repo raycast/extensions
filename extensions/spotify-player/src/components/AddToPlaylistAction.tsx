@@ -12,7 +12,9 @@ import {
 } from "@raycast/api";
 import { addToPlaylist } from "../api/addToPlaylist";
 import { removeFromPlaylist } from "../api/removeFromPlaylist";
+import addTrackToPlaylistCache from "../helpers/addTrackToPlaylistCache";
 import removeTrackFromPlaylistCache from "../helpers/removeTrackFromPlaylistCache";
+import { TrackObject } from "../helpers/spotify.api";
 import { getError } from "../helpers/getError";
 import { PrivateUserObject, SimplifiedPlaylistObject } from "../helpers/spotify.api";
 import { usePlaylistsContainingTrack } from "../hooks/usePlaylistsContainingTrack";
@@ -73,6 +75,7 @@ export function AddToPlaylistAction({ playlists, meData, uri }: AddToPlaylistAct
                     playlistId: playlist.id!,
                     trackUris: [uri],
                   });
+                  await addTrackToPlaylistCache(playlist.id!, { uri } as TrackObject);
                   if (closeWindowOnAction) {
                     await showHUD(`Added to ${playlist.name}`);
                     await popToRoot();
