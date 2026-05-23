@@ -6,35 +6,30 @@ A [Raycast](https://raycast.com) extension that translates words and short text 
 
 - **Translate words and text** — translate a single word with part of speech and example sentences, or translate short text directly
 - **Multi-sense word translations** — for ambiguous words, review up to 5 senses and save the one you want to keep
+- **Word pronunciation** — hear the source word or its translation spoken aloud via Gemini text-to-speech
 - **Typo correction** — misspelled word input is auto-corrected before translating, with a visual indicator showing the original input
-- **Translation History** — browse, search, and manage all your saved translations
-- **Flashcards** — review saved word translations with spaced repetition
-- **Configurable language pair** — pick source and target from 17 supported languages (defaults to English → Ukrainian)
+- **Translation History** — accepted translations are saved automatically; browse, search, and manage them anytime
+- **View Flashcards** — review saved word translations with spaced repetition
+- **Configurable language pair** — pick source and target from 17 supported languages (defaults to English → Ukrainian), switchable from a dropdown inside each command or via preferences
 - **Separate history per language pair** — switching languages gives you an independent history and flashcard deck
 - **Clipboard suggestion** — optionally prefill a safe single word from the clipboard when the command opens
 - **History export** — export saved history as JSON, Anki-ready TSV, or Quizlet-ready TSV
-- Saves accepted translations to local history automatically
 - Debounced word translation, with manual submit for text input
 - Graceful error handling for API issues
 
-## Setup
+## Getting Started
 
-1. Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com)
-2. Install the extension in Raycast dev mode:
-   ```bash
-   npm install
-   npm run dev
-   ```
-3. Open Raycast → search **"Translate"** → enter your API key when prompted
-4. (Optional) Open extension preferences to change source/target language or enable clipboard suggestions on open
+1. Get a free Gemini API key at [aistudio.google.com](https://aistudio.google.com).
+2. Run the **Translate** command and paste your API key when prompted.
+3. (Optional) Open the extension preferences to set default languages, override the Gemini translation/speech models, or enable clipboard suggestions on open.
 
 ## Commands
 
 | Command | Description |
 | --- | --- |
-| Translate | Translate a word or text to your target language |
-| Translation History | Browse saved translations |
-| View Flashcards | Review saved words with spaced repetition |
+| Translate | Translate a word or short text |
+| Translation History | Open your saved translations |
+| View Flashcards | Review words you've saved |
 
 ## Supported Languages
 
@@ -45,6 +40,8 @@ English, Ukrainian, Polish, German, French, Spanish, Italian, Portuguese, Dutch,
 | Shortcut | Action |
 | --- | --- |
 | `⌘ C` | Copy translation |
+| `⌘ O` | Pronounce source word |
+| `⌘ ⇧ O` | Pronounce translation |
 | `⌘ 1` → `⌘ 5` | Pick a word sense and save it to history |
 | `⌘ ⇧ H` | Open History (from Translate) |
 | `⌘ ⇧ T` | Toggle source and target languages |
@@ -54,13 +51,16 @@ English, Ukrainian, Polish, German, French, Spanish, Italian, Portuguese, Dutch,
 | `⌘ ⇧ A` | Export word history for Anki |
 | `⌘ ⇧ Q` | Export word history for Quizlet |
 
-## Stack
+## Development
 
-- [Raycast API](https://developers.raycast.com)
-- TypeScript + React
-- [Zod](https://zod.dev) for runtime validation
-- Gemini `gemini-2.5-flash-lite` model
-- npm
+Run the extension locally in Raycast dev mode:
+
+```bash
+npm install
+npm run dev
+```
+
+Built with the [Raycast API](https://developers.raycast.com), TypeScript + React, and [Zod](https://zod.dev) for runtime validation. Translations use Gemini — defaults `gemini-3-flash-preview` (text) and `gemini-3.1-flash-tts-preview` (speech), configurable in preferences.
 
 ## License
 
