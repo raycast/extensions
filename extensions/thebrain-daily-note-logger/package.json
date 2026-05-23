@@ -1,0 +1,61 @@
+{
+  "name": "thebrain-daily-note-logger",
+  "title": "TheBrain Daily Note Logger",
+  "description": "Append timestamped log entries to today's TheBrain daily note",
+  "icon": "icon.png",
+  "author": "jbaty",
+  "license": "MIT",
+  "version": "1.0.0",
+  "commands": [
+    {
+      "name": "log-to-daily-note",
+      "title": "Log to Daily Note",
+      "description": "Append a timestamped entry to today's TheBrain daily note",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "apiKey",
+      "title": "API Key",
+      "description": "TheBrain local API key (Settings → User → Local API Key)",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "baseUrl",
+      "title": "Base URL",
+      "description": "TheBrain API base URL",
+      "type": "textfield",
+      "required": false,
+      "default": "http://localhost:8001"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.0.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.0",
+    "@types/jest": "^29.0.0",
+    "@types/node": "20.8.10",
+    "@types/react": "18.2.43",
+    "eslint": "^8.0.0",
+    "jest": "^29.0.0",
+    "prettier": "^3.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "test": "jest"
+  },
+  "jest": {
+    "preset": "ts-jest",
+    "testEnvironment": "node",
+    "moduleNameMapper": {
+      "^@raycast/api$": "<rootDir>/src/__mocks__/@raycast/api.ts"
+    }
+  }
+}
