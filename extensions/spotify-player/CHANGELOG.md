@@ -1,5 +1,11 @@
 # Spotify Player Changelog
 
+## [See Which Playlists Contain the Current Song] - {PR_MERGE_DATE}
+
+- All "Add to Playlist" interactions now show a checkmark on playlists that already contain the song
+- Selecting a playlist that already has the song removes it instead of adding a duplicate
+- Now Playing detail view shows an "In Playlists" section with thumbnails of every playlist the song is in
+
 ## [Add Keyboard Shortcuts] - 2026-05-17
 
 - Added shortcuts for opening Your Library and Search from Now Playing and Add Playing Song to Playlist
