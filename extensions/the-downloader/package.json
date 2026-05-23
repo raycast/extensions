@@ -1,0 +1,397 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "the-downloader",
+  "title": "The Downloader",
+  "description": "Download videos, audio, image galleries, Spotify music, and complete webpages from YouTube, Reddit, Spotify and more",
+  "type": "module",
+  "icon": "icon.png",
+  "author": "Stheno",
+  "categories": [
+    "Applications",
+    "Data",
+    "Productivity"
+  ],
+  "keywords": [
+    "video",
+    "downloader",
+    "youtube",
+    "spotify",
+    "music",
+    "yt-dlp",
+    "webpage",
+    "monolith"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "index",
+      "title": "Download",
+      "subtitle": "The Downloader",
+      "description": "Download video, audio, galleries, webpages, or transcripts",
+      "mode": "view"
+    },
+    {
+      "name": "fast-download",
+      "title": "Fast Download",
+      "subtitle": "The Downloader",
+      "description": "Paste a URL and download it instantly using your saved defaults — no form.",
+      "mode": "no-view",
+      "keywords": ["quick", "instant", "paste"],
+      "arguments": [
+        { "name": "url", "type": "text", "placeholder": "URL", "required": true }
+      ]
+    }
+  ],
+  "tools": [
+    {
+      "name": "download-video",
+      "title": "Download Video",
+      "description": "Downloads a video from a given URL"
+    },
+    {
+      "name": "extract-transcript",
+      "title": "Extract Video Transcript",
+      "description": "Extracts the transcript/subtitles from a video URL as Markdown"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "downloadPath",
+      "title": "Download Folder",
+      "description": "Path to download video",
+      "type": "directory",
+      "default": "~/Downloads",
+      "required": true
+    },
+    {
+      "name": "videoMediaType",
+      "title": "Video: Media Type",
+      "description": "Default for video URLs: download the full video, or extract audio only.",
+      "type": "dropdown",
+      "default": "video",
+      "required": false,
+      "data": [
+        { "title": "Video", "value": "video" },
+        { "title": "Audio Only", "value": "audio" }
+      ]
+    },
+    {
+      "name": "videoQuality",
+      "title": "Video: Quality",
+      "description": "Default video resolution. Ignored when Media Type is Audio Only.",
+      "type": "dropdown",
+      "default": "best",
+      "required": false,
+      "data": [
+        { "title": "Best Available", "value": "best" },
+        { "title": "1080p", "value": "1080" },
+        { "title": "720p", "value": "720" },
+        { "title": "480p", "value": "480" },
+        { "title": "Smallest File", "value": "smallest" }
+      ]
+    },
+    {
+      "name": "videoContainer",
+      "title": "Video: Container",
+      "description": "Default container for downloaded video. Ignored when Media Type is Audio Only.",
+      "type": "dropdown",
+      "default": "mp4",
+      "required": false,
+      "data": [
+        { "title": "MP4", "value": "mp4" },
+        { "title": "MKV", "value": "mkv" },
+        { "title": "WebM", "value": "webm" }
+      ]
+    },
+    {
+      "name": "audioFormat",
+      "title": "Video: Audio Format",
+      "description": "Default audio format when Media Type is Audio Only.",
+      "type": "dropdown",
+      "default": "mp3",
+      "required": false,
+      "data": [
+        { "title": "MP3", "value": "mp3" },
+        { "title": "M4A", "value": "m4a" },
+        { "title": "Opus", "value": "opus" }
+      ]
+    },
+    {
+      "name": "exactFormatSelection",
+      "title": "Video: Exact Format Selection",
+      "description": "Show an Exact Format field in the Download form for video downloads — every concrete yt-dlp format with its file size. Leave off for simple Quality + Container choices.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "spotifyAudioFormat",
+      "title": "Spotify: Audio Format",
+      "description": "Default audio format for Spotify downloads.",
+      "type": "dropdown",
+      "default": "mp3",
+      "required": false,
+      "data": [
+        { "title": "MP3", "value": "mp3" },
+        { "title": "M4A", "value": "m4a" },
+        { "title": "Opus", "value": "opus" },
+        { "title": "FLAC", "value": "flac" }
+      ]
+    },
+    {
+      "name": "webpageSaveMode",
+      "title": "Webpage: Save Mode",
+      "description": "Default for saved webpages. Complete embeds everything; Lightweight strips JavaScript.",
+      "type": "dropdown",
+      "default": "complete",
+      "required": false,
+      "data": [
+        { "title": "Complete", "value": "complete" },
+        { "title": "Lightweight (no JavaScript)", "value": "lightweight" }
+      ]
+    },
+    {
+      "name": "autoLoadUrlFromClipboard",
+      "title": "Auto Load URL from Clipboard",
+      "description": "Automatically load the URL from the clipboard when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "autoLoadUrlFromSelectedText",
+      "title": "Auto Load URL from Selected Text",
+      "description": "Automatically load the URL from the selected text when the command is executed",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "enableBrowserExtensionSupport",
+      "title": "Enable Browser Extension Support",
+      "description": "Enable browser extension support for reading video URLs from the browser",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "cookiesFromBrowser",
+      "title": "Gallery: Cookies from Browser",
+      "description": "Browser to read cookies from for login-gated galleries.",
+      "type": "dropdown",
+      "default": "",
+      "required": false,
+      "data": [
+        { "title": "None", "value": "" },
+        { "title": "Chrome", "value": "chrome" },
+        { "title": "Chromium", "value": "chromium" },
+        { "title": "Firefox", "value": "firefox" },
+        { "title": "Safari", "value": "safari" },
+        { "title": "Edge", "value": "edge" },
+        { "title": "Brave", "value": "brave" },
+        { "title": "Opera", "value": "opera" },
+        { "title": "Vivaldi", "value": "vivaldi" },
+        { "title": "LibreWolf", "value": "librewolf" },
+        { "title": "Arc", "value": "arc" },
+        { "title": "Zen", "value": "zen" },
+        { "title": "Floorp", "value": "floorp" },
+        { "title": "Custom", "value": "custom" }
+      ]
+    },
+    {
+      "name": "cookiesFromBrowserCustom",
+      "title": "Gallery: Custom Browser Spec",
+      "description": "Used when 'Cookies from Browser' is set to Custom. Pass a gallery-dl --cookies-from-browser spec, e.g. `firefox:/path/to/profile` or `chromium:C:\\Users\\…\\User Data\\Default`.",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "spotifyClientId",
+      "title": "Spotify: Client ID",
+      "description": "Spotify Developer app Client ID. Required for reliable Spotify downloads — without it, spotDL's anonymous session frequently fails with 'Could not get session auth tokens'. See SPOTIFY.md for one-time setup.",
+      "type": "textfield",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "spotifyClientSecret",
+      "title": "Spotify: Client Secret",
+      "description": "Spotify Developer app Client Secret. Pairs with Client ID above. Stored as a password.",
+      "type": "password",
+      "default": "",
+      "required": false
+    },
+    {
+      "name": "spotifyUserAuth",
+      "title": "Spotify: User Authentication",
+      "description": "Enable browser-based OAuth so spotDL can read your private playlists and saved library. On the next Spotify download your browser opens once to authorize the Dev app on http://127.0.0.1:9900/, which must be registered as a Redirect URI on the app. See SPOTIFY.md.",
+      "type": "checkbox",
+      "label": "Use browser OAuth for private content",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "homebrewPath",
+      "title": "Homebrew Path",
+      "description": "Path to the Homebrew executable. You can enter `which brew` to terminal to find its path.",
+      "type": "textfield",
+      "default": "/opt/homebrew/bin/brew",
+      "required": false
+    },
+    {
+      "name": "ytdlPath",
+      "title": "yt-dlp Path",
+      "description": "Path to the yt-dlp executable. You can enter `which yt-dlp` to terminal to find its path.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ffmpegPath",
+      "title": "ffmpeg Path",
+      "description": "Path to the ffmpeg executable. You can enter `which ffmpeg` to terminal to find its path.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "ffprobePath",
+      "title": "ffprobe Path",
+      "description": "Path to the ffprobe executable. Usually installed along with ffmpeg. You can enter `which ffprobe` to terminal to find its path.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "denoPath",
+      "title": "Deno Path",
+      "description": "Path to the Deno executable — the JavaScript runtime yt-dlp uses for YouTube. Run `which deno` to find it.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "galleryDlPath",
+      "title": "gallery-dl Path",
+      "description": "Path to the gallery-dl executable. Run `which gallery-dl` to find it.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "spotDlPath",
+      "title": "spotDL Path",
+      "description": "Path to the spotDL executable. Leave blank to use the copy this extension downloads automatically.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "monolithPath",
+      "title": "monolith Path",
+      "description": "Path to the monolith executable. Run `which monolith` to find it.",
+      "type": "textfield",
+      "required": false
+    },
+    {
+      "name": "forceIpv4",
+      "title": "Force IPv4 (Experimental)",
+      "description": "Force IPv4 for network requests, this can be useful if you have some network issues. But this should be a temporary solution. We might remove this option in the future.",
+      "type": "checkbox",
+      "label": "Enable",
+      "default": false,
+      "required": false
+    },
+    {
+      "name": "networkIdleTimeoutSec",
+      "title": "Network: Idle Timeout",
+      "description": "Seconds of silence from a download before the extension assumes it is wedged and kills the child process. Real downloads emit progress every second, so 120 is plenty for fast networks; raise it on very slow links. Integer; default 120.",
+      "type": "textfield",
+      "default": "120",
+      "required": false
+    }
+  ],
+  "ai": {
+    "instructions": "After downloading the video, always link the video with [<video title>](<download path>), so the user can easily open it.",
+    "evals": [
+      {
+        "input": "@the-downloader download the video from https://www.youtube.com/watch?v=ykaj0pS4A1A",
+        "mocks": {
+          "download-video": {
+            "downloadedPath": "/Users/path/to/video.mp4",
+            "duration": 51,
+            "fileName": "video.mp4",
+            "title": "Raycast Focus: Enter Flow State"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=ykaj0pS4A1A"
+              },
+              "name": "download-video"
+            }
+          },
+          {
+            "includes": "/Users/path/to/video.mp4"
+          },
+          {
+            "includes": "Raycast Focus: Enter Flow State"
+          }
+        ]
+      },
+      {
+        "input": "@the-downloader what did they say about elon musk in https://www.youtube.com/watch?v=T_5zHExXN7o",
+        "mocks": {
+          "extract-transcript": {
+            "language": "en",
+            "title": "Nvidia Earnings are the Super Bowl of Business | Prof G Markets",
+            "transcript": "...",
+            "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
+          }
+        },
+        "expected": [
+          {
+            "callsTool": {
+              "arguments": {
+                "url": "https://www.youtube.com/watch?v=T_5zHExXN7o"
+              },
+              "name": "extract-transcript"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
+    "@types/validator": "^13.15.10",
+    "date-fns": "^4.1.0",
+    "execa": "^9.6.0",
+    "pretty-bytes": "^6.1.1",
+    "srt-parser-2": "^1.2.3",
+    "validator": "^13.15.23"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "22.13.9",
+    "@types/react": "^19.2.0",
+    "eslint": "^9.36.0",
+    "prettier": "^3.6.2",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.0"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run"
+  },
+  "platforms": [
+    "macOS",
+    "Windows"
+  ]
+}
