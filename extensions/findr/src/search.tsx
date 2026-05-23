@@ -623,14 +623,16 @@ function ResultDetail({ result }: { result: SearchResult }) {
       const thumbDir = join(tmpdir(), "findr-thumbs");
       const thumbPath = join(thumbDir, `${hash}.png`);
       if (!existsSync(thumbPath)) {
-        execFileSync("mkdir", ["-p", thumbDir]);
+        // Use per-file hash subdir to avoid basename collisions from qlmanage
+        const qlOutDir = join(thumbDir, hash);
+        execFileSync("mkdir", ["-p", qlOutDir]);
         execFileSync(
           "qlmanage",
-          ["-t", result.path, "-s", "600", "-o", thumbDir],
+          ["-t", result.path, "-s", "600", "-o", qlOutDir],
           { timeout: 3000, stdio: "ignore" },
         );
         const srcName = result.path.split("/").pop() + ".png";
-        const qlPath = join(thumbDir, srcName);
+        const qlPath = join(qlOutDir, srcName);
         if (existsSync(qlPath)) {
           renameSync(qlPath, thumbPath);
         }
