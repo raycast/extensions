@@ -91,7 +91,7 @@ export default function FilterCommand() {
   const isLoading = clipboard === null;
   // Memoize on the clipboard string so extraction only re-runs when it changes.
   const allItems = useMemo(() => (clipboard && clipboard.length > 0 ? extractUrls(clipboard) : []), [clipboard]);
-  const groups = orderedGroups(groupItems(allItems));
+  const groups = useMemo(() => orderedGroups(groupItems(allItems)), [allItems]);
   const selectedItemsList = useMemo(() => allItems.filter((i) => selected.has(itemId(i))), [allItems, selected]);
 
   function toggleSelect(id: string) {
