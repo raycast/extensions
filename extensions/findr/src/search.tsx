@@ -320,15 +320,15 @@ export default function SearchFiles() {
   }, [findrPath, binaryExists]);
 
   // Auto-index new custom paths: detect preference changes, debounce 10s, index only new paths.
-  // Timer ref used so cleanup can always reach it (timer is set inside async .then callback).
+  // cancelled flag prevents the async .then() callback from spawning work after unmount.
   const customPaths = getCustomPaths();
-  const indexTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
-    undefined,
-  );
   useEffect(() => {
     if (!binaryExists || !customPaths) return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     LocalStorage.getItem<string>("findr_custom_paths").then((stored) => {
+      if (cancelled) return;
       const storedSet = new Set(
         (stored || "")
           .split(",")
@@ -343,7 +343,8 @@ export default function SearchFiles() {
 
       if (newPaths.length > 0) {
         // Debounce 10s to let user finish editing
-        indexTimerRef.current = setTimeout(() => {
+        timer = setTimeout(() => {
+          if (cancelled) return;
           for (const p of newPaths) {
             execFile(findrPath, ["index", "add-path", p], () => {});
           }
@@ -356,7 +357,8 @@ export default function SearchFiles() {
     });
 
     return () => {
-      if (indexTimerRef.current) clearTimeout(indexTimerRef.current);
+      cancelled = true;
+      if (timer) clearTimeout(timer);
     };
   }, [customPaths, binaryExists]);
 
