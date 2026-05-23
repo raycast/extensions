@@ -4,9 +4,11 @@ import {
   existsSync,
   mkdirSync,
   createWriteStream,
+  readFileSync,
   renameSync,
   unlinkSync,
 } from "fs";
+import { createHash } from "crypto";
 import { execFile } from "child_process";
 import { join } from "path";
 import { get } from "https";
@@ -70,6 +72,80 @@ function downloadFile(url: string, dest: string): Promise<void> {
   });
 }
 
+/** Compute SHA-256 hex digest of a file. */
+function sha256File(filePath: string): string {
+  const data = readFileSync(filePath);
+  return createHash("sha256").update(data).digest("hex");
+}
+
+/** Fetch text content from a URL, following redirects. Returns null on any error. */
+function fetchText(url: string): Promise<string | null> {
+  return new Promise((resolve) => {
+    const request = (u: string) => {
+      get(u, (res) => {
+        if (res.statusCode === 302 || res.statusCode === 301) {
+          const location = res.headers.location;
+          res.resume();
+          if (location) {
+            request(location);
+            return;
+          }
+        }
+        if (res.statusCode !== 200) {
+          res.resume();
+          resolve(null);
+          return;
+        }
+        let data = "";
+        res.on("data", (chunk: string) => (data += chunk));
+        res.on("end", () => resolve(data));
+      }).on("error", () => resolve(null));
+    };
+    request(url);
+  });
+}
+
+/** Parse checksums.txt (format: "sha256  filename" per line) into a map. */
+function parseChecksums(content: string): Map<string, string> {
+  const map = new Map<string, string>();
+  for (const line of content.split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    // Format: hash followed by two spaces and filename
+    const match = trimmed.match(/^([a-f0-9]{64})\s+(.+)$/);
+    if (match) {
+      map.set(match[2], match[1]);
+    }
+  }
+  return map;
+}
+
+/** Verify a downloaded file against expected checksum. Deletes file on mismatch. */
+function verifyChecksum(
+  filePath: string,
+  filename: string,
+  checksums: Map<string, string> | null,
+): void {
+  if (!checksums) return;
+  const expected = checksums.get(filename);
+  if (!expected) {
+    console.warn(`No checksum entry for ${filename}, skipping verification`);
+    return;
+  }
+  const actual = sha256File(filePath);
+  if (actual !== expected) {
+    try {
+      unlinkSync(filePath);
+    } catch {
+      /* best effort */
+    }
+    throw new Error(
+      `Checksum mismatch for ${filename}: expected ${expected}, got ${actual}`,
+    );
+  }
+  console.log(`Checksum verified for ${filename}`);
+}
+
 /** Download findr binaries from the latest GitHub Release. */
 export async function ensureFindrBinaries(): Promise<string> {
   const dir = binDir();
@@ -116,16 +192,32 @@ export async function ensureFindrBinaries(): Promise<string> {
 
   const findrAsset = release.assets?.find((a) => a.name === FINDR_BINARY);
   const ocrAsset = release.assets?.find((a) => a.name === FINDR_OCR_BINARY);
+  const checksumAsset = release.assets?.find((a) => a.name === "checksums.txt");
 
   if (!findrAsset) {
     throw new Error("findr binary not found in latest GitHub release");
   }
 
+  // Try to fetch checksums.txt from the release (optional, backwards compatible)
+  let checksums: Map<string, string> | null = null;
+  if (checksumAsset) {
+    const content = await fetchText(checksumAsset.browser_download_url);
+    if (content) {
+      checksums = parseChecksums(content);
+    }
+  } else {
+    console.warn(
+      "No checksums.txt in release, skipping integrity verification",
+    );
+  }
+
   await downloadFile(findrAsset.browser_download_url, findrPath);
+  verifyChecksum(findrPath, FINDR_BINARY, checksums);
   chmodSync(findrPath, 0o755);
 
   if (ocrAsset) {
     await downloadFile(ocrAsset.browser_download_url, ocrPath);
+    verifyChecksum(ocrPath, FINDR_OCR_BINARY, checksums);
     chmodSync(ocrPath, 0o755);
   }
 
