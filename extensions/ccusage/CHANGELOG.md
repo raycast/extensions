@@ -2,6 +2,13 @@
 
 ## [ccusage v20] - {PR_MERGE_DATE}
 
+### Added
+
+- **Weekly usage view**: a "This Week" item in the main list and a matching menu bar section, with week-over-week cost and token deltas
+- **Active block burn rate and projection**: the menu bar now shows a "Current Block" section with the projected total cost, spend so far, $/hour burn rate, and time left in the 5-hour window
+- **Multi-agent visibility**: when `ccusage` reports usage from more than one coding agent (Claude, Codex, Gemini, etc.), the daily and weekly detail panels show the contributing agents
+- **Menu bar status options**: "Weekly Cost" and "Block Projection" added to the dropdown next to the icon
+
 ### Fixed
 
 - Compatibility with `ccusage` v20, which renamed per-row `date`/`month`/`sessionId` to `period`, moved `lastActivity` under `metadata`, and renamed the session command's top-level `sessions` array to `session`. Schemas now accept both shapes, restoring daily, monthly, session, and total usage views
