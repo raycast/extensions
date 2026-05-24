@@ -205,9 +205,9 @@ function xAxisTitleForPeriod(period: PeriodKey): string {
 }
 
 /** Raycast Detail only renders charts as markdown images, not inline SVG. */
-function wrapChartMarkdown(svg: string, height: number): string {
+function wrapChartMarkdown(svg: string, width: number, height: number): string {
   const b64 = Buffer.from(svg, "utf-8").toString("base64");
-  return `\n![](data:image/svg+xml;base64,${b64}?raycast-height=${height})\n`;
+  return `\n![](data:image/svg+xml;base64,${b64}?raycast-width=${width}&raycast-height=${height})\n`;
 }
 
 /** Markdown embedding an SVG bar chart (Raycast Detail). */
@@ -219,10 +219,10 @@ export function renderTokenUsageChartMarkdown(
   const total = buckets.reduce((a, b) => a + b.tokens, 0);
   if (total <= 0) {
     const emptyH = 96;
-    const emptySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="${emptyH}" viewBox="0 0 ${CHART_W} ${emptyH}" preserveAspectRatio="xMinYMid meet">
+    const emptySvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${CHART_W}" height="${emptyH}" viewBox="0 0 ${CHART_W} ${emptyH}" preserveAspectRatio="xMinYMid meet">
   <text x="0" y="${emptyH / 2 + 4}" fill="#636366" font-size="12" font-family="system-ui,-apple-system,sans-serif">No token usage in this period.</text>
 </svg>`;
-    return wrapChartMarkdown(emptySvg, emptyH);
+    return wrapChartMarkdown(emptySvg, CHART_W, emptyH);
   }
 
   const dataMax = Math.max(...buckets.map((b) => b.tokens), 1);
@@ -271,7 +271,7 @@ export function renderTokenUsageChartMarkdown(
 
   const viewW = CHART_W + CHART_SHIFT_LEFT;
   const parts: string[] = [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="${CHART_H}" viewBox="${-CHART_SHIFT_LEFT} 0 ${viewW} ${CHART_H}" preserveAspectRatio="xMinYMid meet">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${CHART_W}" height="${CHART_H}" viewBox="${-CHART_SHIFT_LEFT} 0 ${viewW} ${CHART_H}" preserveAspectRatio="xMinYMid meet">`,
     `<rect width="100%" height="100%" fill="transparent"/>`,
     `<g transform="translate(${-CHART_SHIFT_LEFT}, 0)">`,
     `<text transform="translate(${yTitleX.toFixed(1)} ${midY.toFixed(1)}) rotate(-90)" fill="#AEAEB2" font-size="${axisTitleSize}" font-family="system-ui,-apple-system,sans-serif" text-anchor="middle" dominant-baseline="middle">${Y_AXIS_TITLE}</text>`,
@@ -336,5 +336,5 @@ export function renderTokenUsageChartMarkdown(
   );
 
   parts.push(`</g>`, `</svg>`);
-  return wrapChartMarkdown(parts.join(""), CHART_H);
+  return wrapChartMarkdown(parts.join(""), CHART_W, CHART_H);
 }
