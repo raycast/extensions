@@ -75,7 +75,11 @@ export default async function tool(input: Input) {
     options.push("--merge-output-format", container);
   }
 
-  options.push("--print", "after_move:filepath");
+  // Sentinel-tag the after_move filepath so it can be picked out of yt-dlp's
+  // mixed stdout deterministically — without it the old `startsWith("/")`
+  // filter failed on Windows (paths start with a drive letter, not a slash).
+  const FILEPATH_TAG = "THE-DOWNLOADER-FILEPATH:";
+  options.push("--print", `after_move:${FILEPATH_TAG}%(filepath)s`);
 
   // Execute download
   const result = await execa(ytdlPath, [...options, input.url]);
@@ -84,8 +88,11 @@ export default async function tool(input: Input) {
     throw new Error(`Failed to download video: ${result.stderr}`);
   }
 
-  // Extract file path from output
-  const filePath = result.stdout.split("\n").find((line) => line.startsWith("/"));
+  const taggedLine = result.stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => line.startsWith(FILEPATH_TAG));
+  const filePath = taggedLine?.slice(FILEPATH_TAG.length).trim();
 
   if (!filePath) {
     throw new Error("Could not determine downloaded file path");

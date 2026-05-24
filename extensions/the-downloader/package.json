@@ -238,7 +238,7 @@
     {
       "name": "homebrewPath",
       "title": "Homebrew Path",
-      "description": "Path to the Homebrew executable. You can enter `which brew` to terminal to find its path.",
+      "description": "macOS only — ignored on Windows. Path to the Homebrew executable. Run `which brew` in Terminal to find it.",
       "type": "textfield",
       "default": "/opt/homebrew/bin/brew",
       "required": false

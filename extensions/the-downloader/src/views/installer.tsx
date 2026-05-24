@@ -15,6 +15,7 @@ import { ExecaError, execa } from "execa";
 import { getHomebrewPath, getWingetPath, isMac, isWindows } from "../utils.js";
 import { homebrewFormulaFor, isManagedTool, wingetIdFor } from "../lib/tools.js";
 import { downloadSpotdl, isAppleSilicon, isRosettaInstalled } from "../lib/managed-binary.js";
+import { resetWingetPackagesCache } from "../lib/binary.js";
 
 const macOSInstallGuide = (executable: string) => `
 # 🚨 Error: \`${executable}\` is not installed
@@ -306,6 +307,11 @@ function AutoInstall({ executable, onRefresh }: { executable: string; onRefresh:
                 "-e",
               ]);
               await installationToast.hide();
+              // Bust the winget Packages listing cache so the next
+              // resolveBinary sees the just-installed package — without
+              // this, a stale listing from before the install would still
+              // report the binary as missing until extension reload.
+              resetWingetPackagesCache();
               onRefresh();
             } catch (error) {
               installationToast.hide();
@@ -318,8 +324,19 @@ function AutoInstall({ executable, onRefresh }: { executable: string; onRefresh:
                 await showToast({
                   style: Toast.Style.Success,
                   title: `${executable} is already installed`,
-                  message: "Please configure the path in extension preferences",
+                  message: "If Raycast still can't find it, set the path in extension preferences.",
+                  primaryAction: {
+                    title: "Open Extension Preferences",
+                    onAction: () => openExtensionPreferences(),
+                  },
                 });
+                // "Already installed" can mean the package was installed
+                // between the cache being built and this click; same
+                // invalidation logic as the success branch above. Then
+                // treat as a completed install and close the Installer
+                // view so the user isn't stuck on it.
+                resetWingetPackagesCache();
+                onRefresh();
               } else {
                 await showToast({
                   style: Toast.Style.Failure,

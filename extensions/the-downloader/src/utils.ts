@@ -4,6 +4,7 @@ import { formatDuration, intervalToDuration } from "date-fns";
 import { Format, Video } from "./types.js";
 import { execSync } from "child_process";
 import { findHomebrewPath, resolveBinary, isWindows, isMac } from "./lib/binary.js";
+import { windowsWingetPath } from "./lib/platform-paths.js";
 import { DEFAULT_IDLE_MS } from "./lib/run.js";
 import { isValidUrl } from "./lib/url.js";
 
@@ -55,12 +56,21 @@ export function getHomebrewPath(): string {
 }
 
 export async function getWingetPath() {
+  // PATH lookup first — it's fast and authoritative when winget's directory
+  // is on PATH (the normal case in a shell).
   try {
     const wingetPath = sanitizeWindowsPath(execSync("where winget").toString().trim());
-    return wingetPath.split("\n")[0];
+    if (wingetPath) return wingetPath.split("\n")[0];
   } catch {
-    throw new Error("Winget not found. Please ensure winget is installed and available in your PATH.");
+    /* fall through to the canonical-install-location fallback */
   }
+  // Raycast's extension process on Windows often strips PATH, so `where`
+  // returns nothing even though winget is installed. winget ships via MSIX
+  // into a stable WindowsApps launcher dir regardless of which version is
+  // on PATH, so checking that dir directly recovers the common case.
+  const canonical = windowsWingetPath();
+  if (canonical && fs.existsSync(canonical)) return canonical;
+  throw new Error("Winget not found. Please ensure winget is installed and available in your PATH.");
 }
 
 export const getytdlPath = () => resolveBinary("yt-dlp", ytdlPathPreference);

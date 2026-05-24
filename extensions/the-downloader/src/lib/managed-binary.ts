@@ -2,11 +2,10 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { execa } from "execa";
 import { isMac, isWindows } from "./binary.js";
+import { ROSETTA_RUNTIME_PATH } from "./platform-paths.js";
 
 const RELEASE_API = "https://api.github.com/repos/spotDL/spotify-downloader/releases/latest";
 const USER_AGENT = "the-downloader-raycast";
-
-const ROSETTA_RUNTIME_PATH = "/Library/Apple/usr/share/rosetta/rosetta";
 
 export type ReleaseAsset = { name: string; url: string };
 export type SpotdlRelease = { version: string; assets: ReleaseAsset[] };

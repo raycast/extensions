@@ -5,6 +5,7 @@ import { execa } from "execa";
 import { getHomebrewPath, getSpotdlPath, getWingetPath, isMac, isWindows } from "../utils.js";
 import { downloadSpotdl, getInstalledVersion, getLatestRelease } from "../lib/managed-binary.js";
 import { friendlyNameFor, HOMEBREW_FORMULAE, WINGET_PACKAGES } from "../lib/tools.js";
+import { resetWingetPackagesCache } from "../lib/binary.js";
 
 type PackageIssue = { pkg: string; message: string };
 type CheckResult = { versions: Record<string, string>; outdated: Record<string, string>; checkIssues: PackageIssue[] };
@@ -295,6 +296,7 @@ async function upgrade(): Promise<{ issues: PackageIssue[] }> {
         }
       }
     }
+    resetWingetPackagesCache();
   }
   try {
     const spotdlPath = getSpotdlPath();

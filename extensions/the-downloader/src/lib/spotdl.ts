@@ -1,4 +1,3 @@
-import path from "node:path";
 import { DEFAULT_IDLE_MS, runWithWatchdog } from "./run.js";
 import { invalidateSpotipyCacheIfStale } from "./spotdl-cache.js";
 
@@ -48,16 +47,13 @@ const PLAYLIST_URL = /(?:\/|:)playlist(?:\/|:)/i;
 export function buildSpotdlArgs(o: SpotdlDownloadOptions): string[] {
   const isPlaylist = PLAYLIST_URL.test(o.url);
   const template = isPlaylist ? "{list-name}/{artists} - {title}.{output-ext}" : "{artists} - {title}.{output-ext}";
-  const args = [
-    "download",
-    o.url,
-    "--output",
-    path.join(o.destination, template),
-    "--format",
-    o.format,
-    "--ffmpeg",
-    o.ffmpegPath,
-  ];
+  // Join with a forward slash, not path.join: on Windows path.join would
+  // rewrite the `/` inside the template placeholders to `\`, mangling spotDL's
+  // template syntax. Python on Windows accepts forward slashes in real paths,
+  // so a destination like `C:\Users\me\Music` followed by `/{list-name}/...`
+  // works on both platforms.
+  const dest = o.destination.replace(/[/\\]+$/, "");
+  const args = ["download", o.url, "--output", `${dest}/${template}`, "--format", o.format, "--ffmpeg", o.ffmpegPath];
   const id = o.clientId?.trim();
   const secret = o.clientSecret?.trim();
   if (id && secret) {
