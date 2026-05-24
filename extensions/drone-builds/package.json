@@ -126,12 +126,17 @@
     "@raycast/utils": "^1.17.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.4",
     "@raycast/eslint-config": "^2.1.1",
+    "@raycast/eslint-plugin": "^2.1.1",
     "@types/node": "^22.13.0",
     "@types/react": "^19.0.0",
     "eslint": "^9.20.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^14.0.0",
     "prettier": "^3.4.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.59.4"
   },
   "scripts": {
     "build": "ray build",

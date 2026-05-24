@@ -10,7 +10,6 @@ import {
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { DroneCron, DroneRepo, listCrons, listRepos, runCron } from "./drone";
 
-const REPOS_PAGE_SIZE = 25;
 const MAX_REPO_PAGES = 20;
 
 async function fetchAllRepos(): Promise<DroneRepo[]> {
@@ -19,7 +18,6 @@ async function fetchAllRepos(): Promise<DroneRepo[]> {
     const batch = await listRepos(page);
     if (!batch || batch.length === 0) break;
     all.push(...batch);
-    if (batch.length < REPOS_PAGE_SIZE) break;
   }
   return all;
 }
