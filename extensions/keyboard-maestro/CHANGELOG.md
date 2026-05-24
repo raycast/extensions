@@ -1,7 +1,7 @@
 # Keyboard Maestro Changelog
 
 ## [Update] - {PR_MERGE_DATE}
-- Update @raycast/api
+- Update @raycast/api and @raycast/utils
 
 ## [Update] - 2024-08-23
 
