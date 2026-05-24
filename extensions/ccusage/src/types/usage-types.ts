@@ -46,14 +46,16 @@ const usageRowBase = {
   modelBreakdowns: z.array(modelBreakdownSchema),
 };
 
+const aggregateMetadata = z.object({ agents: z.array(z.string()) }).nullish();
+
 export const DailyUsageResponseSchema = z.preprocess(
   alias("period", "date"),
-  z.object({ date: z.string(), ...usageRowBase }),
+  z.object({ date: z.string(), ...usageRowBase, metadata: aggregateMetadata }),
 );
 
 export const MonthlyUsageResponseSchema = z.preprocess(
   alias("period", "month"),
-  z.object({ month: z.string(), ...usageRowBase }),
+  z.object({ month: z.string(), ...usageRowBase, metadata: aggregateMetadata }),
 );
 
 export const SessionResponseSchema = z.preprocess(

@@ -54,6 +54,13 @@ export function DailyUsage() {
     return (
       <List.Item.Detail.Metadata>
         <List.Item.Detail.Metadata.Label title="Date" text={dailyUsage.date} icon={Icon.Calendar} />
+        {dailyUsage.metadata?.agents && dailyUsage.metadata.agents.length > 1 && (
+          <List.Item.Detail.Metadata.Label
+            title="Agents"
+            text={dailyUsage.metadata.agents.join(", ")}
+            icon={Icon.PersonCircle}
+          />
+        )}
         <List.Item.Detail.Metadata.Separator />
 
         <List.Item.Detail.Metadata.Label title="Token Usage" />
