@@ -11,8 +11,8 @@
 
 ### Fixed
 
-- Compatibility with `ccusage` v20, which renamed per-row `date`/`month`/`sessionId` to `period`, moved `lastActivity` under `metadata`, and renamed the session command's top-level `sessions` array to `session`. Schemas now accept both shapes, restoring daily, monthly, session, and total usage views
-- Replaced the `||` separator in the Usage Limits detail panel's "Resets in" rows with `·` so it no longer reads like a JavaScript operator
+- Restored daily, monthly, session, and total views, which broke with `ccusage` v20's renamed row fields (`period`, nested `metadata`, `session` array)
+- "Resets in" rows in the Usage Limits detail panel use `·` instead of `||` so the separator no longer reads like a JavaScript operator
 
 ## [v2.3.2] - 2026-04-24
 
