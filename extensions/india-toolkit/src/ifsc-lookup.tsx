@@ -21,17 +21,17 @@ interface IFSCData {
 type FieldDef = { key: keyof IFSCData; label: string; icon: Icon };
 
 const FIELDS: FieldDef[] = [
-  { key: "BANK",     label: "Bank",     icon: Icon.Building },
-  { key: "BRANCH",   label: "Branch",   icon: Icon.Store },
-  { key: "IFSC",     label: "IFSC",     icon: Icon.Key },
-  { key: "MICR",     label: "MICR",     icon: Icon.Hashtag },
-  { key: "ADDRESS",  label: "Address",  icon: Icon.Map },
-  { key: "CITY",     label: "City",     icon: Icon.Map },
+  { key: "BANK", label: "Bank", icon: Icon.Building },
+  { key: "BRANCH", label: "Branch", icon: Icon.Store },
+  { key: "IFSC", label: "IFSC", icon: Icon.Key },
+  { key: "MICR", label: "MICR", icon: Icon.Hashtag },
+  { key: "ADDRESS", label: "Address", icon: Icon.Map },
+  { key: "CITY", label: "City", icon: Icon.Map },
   { key: "DISTRICT", label: "District", icon: Icon.Map },
-  { key: "STATE",    label: "State",    icon: Icon.Map },
-  { key: "CENTRE",   label: "Centre",   icon: Icon.Map },
-  { key: "CONTACT",  label: "Contact",  icon: Icon.Phone },
-  { key: "SWIFT",    label: "SWIFT",    icon: Icon.Globe },
+  { key: "STATE", label: "State", icon: Icon.Map },
+  { key: "CENTRE", label: "Centre", icon: Icon.Map },
+  { key: "CONTACT", label: "Contact", icon: Icon.Phone },
+  { key: "SWIFT", label: "SWIFT", icon: Icon.Globe },
 ];
 
 function formatAllAsText(data: IFSCData): string {
@@ -134,10 +134,7 @@ export default function Command() {
           const val = data![key];
           if (!val) return [];
 
-          const mapsUrl =
-            key === "ADDRESS"
-              ? `https://maps.apple.com/?q=${encodeURIComponent(val)}`
-              : null;
+          const mapsUrl = key === "ADDRESS" ? `https://maps.apple.com/?q=${encodeURIComponent(val)}` : null;
 
           return (
             <List.Item

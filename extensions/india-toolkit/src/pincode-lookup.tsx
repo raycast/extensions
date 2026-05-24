@@ -116,24 +116,9 @@ export default function Command() {
           icon={Icon.Pin}
         />
       )}
-      {tooLongPin && (
-        <List.EmptyView
-          title="PIN codes are exactly 6 digits"
-          icon={Icon.ExclamationMark}
-        />
-      )}
-      {shortAreaQuery && (
-        <List.EmptyView
-          title="Type at least 3 letters"
-          icon={Icon.MagnifyingGlass}
-        />
-      )}
-      {showNotFound && (
-        <List.EmptyView
-          title={`No post offices found for "${query}"`}
-          icon={Icon.Warning}
-        />
-      )}
+      {tooLongPin && <List.EmptyView title="PIN codes are exactly 6 digits" icon={Icon.ExclamationMark} />}
+      {shortAreaQuery && <List.EmptyView title="Type at least 3 letters" icon={Icon.MagnifyingGlass} />}
+      {showNotFound && <List.EmptyView title={`No post offices found for "${query}"`} icon={Icon.Warning} />}
 
       {showRecents && (
         <List.Section title="Recent Searches">
@@ -155,9 +140,7 @@ export default function Command() {
       {showResults && (
         <List.Section title={sectionTitle}>
           {data!.map((po, i) => {
-            const subtitle = isReadyPinMode
-              ? `${po.BranchType}, ${po.DeliveryStatus}`
-              : `${po.District}, ${po.State}`;
+            const subtitle = isReadyPinMode ? `${po.BranchType}, ${po.DeliveryStatus}` : `${po.District}, ${po.State}`;
             const accessories: List.Item.Accessory[] = isReadyPinMode
               ? [{ text: po.District }, { text: po.State }]
               : [{ text: po.Pincode }, { text: po.BranchType }];

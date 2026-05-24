@@ -46,9 +46,7 @@ export default function Command() {
   const parsedAmount = parseFloat(amount);
   const isValid = amount.trim() !== "" && !isNaN(parsedAmount) && parsedAmount >= 0;
 
-  const { base, gst, total } = isValid
-    ? calcGST(parsedAmount, effectiveRate, calcMode)
-    : { base: 0, gst: 0, total: 0 };
+  const { base, gst, total } = isValid ? calcGST(parsedAmount, effectiveRate, calcMode) : { base: 0, gst: 0, total: 0 };
 
   const cgst = gst / 2;
   const sgst = gst / 2;
@@ -109,12 +107,7 @@ export default function Command() {
           onChange={setCustomRate}
         />
       )}
-      <Form.Dropdown
-        id="calcMode"
-        title="Calculation Mode"
-        value={calcMode}
-        onChange={setCalcMode}
-      >
+      <Form.Dropdown id="calcMode" title="Calculation Mode" value={calcMode} onChange={setCalcMode}>
         <Form.Dropdown.Item value="exclusive" title="Add GST (exclusive)" />
         <Form.Dropdown.Item value="inclusive" title="Extract GST (inclusive)" />
       </Form.Dropdown>
