@@ -1,7 +1,7 @@
 import { closeMainWindow, getPreferenceValues, showHUD } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
 import { DroneFeed, getMe, listMyBuilds } from "./drone";
-import { isMine, repoMatches } from "./filter";
+import { isMine, makeRepoMatcher } from "./filter";
 import { doCancel } from "./actions";
 
 export default async function Command(): Promise<void> {
@@ -15,13 +15,14 @@ export default async function Command(): Promise<void> {
 
     const [me, feed] = await Promise.all([getMe(), listMyBuilds(1)]);
 
+    const matcher = makeRepoMatcher(prefs);
     const candidates = feed
       .filter(
         (f): f is DroneFeed & { build: NonNullable<DroneFeed["build"]> } =>
           f.build != null,
       )
       .filter((f) => prefs.filterMode === "all" || isMine(f.build, me))
-      .filter((f) => repoMatches(f.slug, prefs))
+      .filter((f) => matcher(f.slug))
       .filter((f) => f.build.status === "running")
       .sort((a, b) => (b.build.started || 0) - (a.build.started || 0));
 

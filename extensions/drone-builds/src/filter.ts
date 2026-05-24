@@ -31,13 +31,18 @@ export interface RepoFilterPrefs {
 }
 
 /**
- * Returns true when the repo slug (e.g. "octocat/hello") passes the include/
- * exclude rules. Empty include list = allow everything; exclude always wins.
+ * Pre-compile the include/exclude sets once per filter pass, then return a
+ * predicate that callers can apply across many slugs without re-allocating.
+ * Empty include list = allow everything; exclude always wins.
  */
-export function repoMatches(slug: string, prefs: RepoFilterPrefs): boolean {
+export function makeRepoMatcher(
+  prefs: RepoFilterPrefs,
+): (slug: string) => boolean {
   const exclude = parseSlugList(prefs.excludeRepos);
-  if (exclude.has(slug)) return false;
   const include = parseSlugList(prefs.includeRepos);
-  if (include.size === 0) return true;
-  return include.has(slug);
+  return (slug: string) => {
+    if (exclude.has(slug)) return false;
+    if (include.size === 0) return true;
+    return include.has(slug);
+  };
 }

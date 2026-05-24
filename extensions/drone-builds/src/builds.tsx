@@ -16,7 +16,7 @@ import {
   getMe,
   listMyBuilds,
 } from "./drone";
-import { isMine, repoMatches } from "./filter";
+import { isMine, makeRepoMatcher } from "./filter";
 import { doCancel, doRestart } from "./actions";
 import { BuildDetailView } from "./build-detail";
 
@@ -97,9 +97,10 @@ export default function Command() {
     const normalized: Item[] = data.feed
       .filter((f): f is DroneFeed & { build: DroneBuild } => f.build != null)
       .map((f) => ({ build: f.build, slug: f.slug }));
+    const matcher = makeRepoMatcher(prefs);
     return normalized
       .filter((it) => prefs.filterMode === "all" || isMine(it.build, data.me))
-      .filter((it) => repoMatches(it.slug, prefs));
+      .filter((it) => matcher(it.slug));
   }, [data, prefs.filterMode, prefs.includeRepos, prefs.excludeRepos]);
 
   const running = items.filter((it) => isRunningStatus(it.build.status));

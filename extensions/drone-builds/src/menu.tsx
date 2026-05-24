@@ -21,7 +21,7 @@ import {
   getMe,
   listMyBuilds,
 } from "./drone";
-import { isMine, repoMatches } from "./filter";
+import { isMine, makeRepoMatcher } from "./filter";
 import {
   failureStreak,
   findNewlyFinished,
@@ -111,9 +111,10 @@ export default async function Command(): Promise<void> {
       .filter((f): f is DroneFeed & { build: DroneBuild } => f.build != null)
       .map((f) => ({ build: f.build, slug: f.slug }));
 
+    const matcher = makeRepoMatcher(prefs);
     const filtered = normalized
       .filter((it) => prefs.filterMode === "all" || isMine(it.build, me))
-      .filter((it) => repoMatches(it.slug, prefs));
+      .filter((it) => matcher(it.slug));
 
     // ---------- Notification: terminal-state transitions ----------
     const seen = loadSeen();
