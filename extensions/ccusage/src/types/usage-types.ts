@@ -1,68 +1,87 @@
 import { z } from "zod";
 
-export const DailyUsageResponseSchema = z.object({
-  date: z.string(),
+// ccusage v20 renamed per-row `date`/`month`/`sessionId` to a single `period`
+// field and moved session `lastActivity` under a nested `metadata` object. The
+// session command's top-level array was also renamed `sessions` → `session`.
+// We preprocess each shape back into the original field names so that the rest
+// of the extension can keep using the stable property names.
+
+const aliasPeriodTo =
+  (key: "date" | "month" | "sessionId") =>
+  (raw: unknown): unknown => {
+    if (typeof raw !== "object" || raw === null) return raw;
+    const row = raw as Record<string, unknown>;
+    if (key in row || !("period" in row)) return row;
+    return { ...row, [key]: row.period };
+  };
+
+const liftSessionMetadata = (raw: unknown): unknown => {
+  if (typeof raw !== "object" || raw === null) return raw;
+  const row = raw as Record<string, unknown>;
+  if ("lastActivity" in row) return row;
+  const metadata = row.metadata;
+  if (typeof metadata !== "object" || metadata === null) return row;
+  const lastActivity = (metadata as Record<string, unknown>).lastActivity;
+  if (lastActivity === undefined) return row;
+  return { ...row, lastActivity };
+};
+
+const normalizeSessionRow = (raw: unknown): unknown => liftSessionMetadata(aliasPeriodTo("sessionId")(raw));
+
+const modelBreakdownSchema = z.object({
+  modelName: z.string(),
   inputTokens: z.number(),
   outputTokens: z.number(),
   cacheCreationTokens: z.number(),
   cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-  modelsUsed: z.array(z.string()),
-  modelBreakdowns: z.array(
-    z.object({
-      modelName: z.string(),
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      cost: z.number(),
-    }),
-  ),
+  cost: z.number(),
 });
 
-export const MonthlyUsageResponseSchema = z.object({
-  month: z.string(),
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  cacheCreationTokens: z.number(),
-  cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-  modelsUsed: z.array(z.string()),
-  modelBreakdowns: z.array(
-    z.object({
-      modelName: z.string(),
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      cost: z.number(),
-    }),
-  ),
-});
+export const DailyUsageResponseSchema = z.preprocess(
+  aliasPeriodTo("date"),
+  z.object({
+    date: z.string(),
+    inputTokens: z.number(),
+    outputTokens: z.number(),
+    cacheCreationTokens: z.number(),
+    cacheReadTokens: z.number(),
+    totalTokens: z.number(),
+    totalCost: z.number(),
+    modelsUsed: z.array(z.string()),
+    modelBreakdowns: z.array(modelBreakdownSchema),
+  }),
+);
 
-export const SessionResponseSchema = z.object({
-  sessionId: z.string(),
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  cacheCreationTokens: z.number(),
-  cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-  lastActivity: z.string(),
-  modelsUsed: z.array(z.string()),
-  modelBreakdowns: z.array(
-    z.object({
-      modelName: z.string(),
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      cost: z.number(),
-    }),
-  ),
-});
+export const MonthlyUsageResponseSchema = z.preprocess(
+  aliasPeriodTo("month"),
+  z.object({
+    month: z.string(),
+    inputTokens: z.number(),
+    outputTokens: z.number(),
+    cacheCreationTokens: z.number(),
+    cacheReadTokens: z.number(),
+    totalTokens: z.number(),
+    totalCost: z.number(),
+    modelsUsed: z.array(z.string()),
+    modelBreakdowns: z.array(modelBreakdownSchema),
+  }),
+);
+
+export const SessionResponseSchema = z.preprocess(
+  normalizeSessionRow,
+  z.object({
+    sessionId: z.string(),
+    inputTokens: z.number(),
+    outputTokens: z.number(),
+    cacheCreationTokens: z.number(),
+    cacheReadTokens: z.number(),
+    totalTokens: z.number(),
+    totalCost: z.number(),
+    lastActivity: z.string(),
+    modelsUsed: z.array(z.string()),
+    modelBreakdowns: z.array(modelBreakdownSchema),
+  }),
+);
 
 export const ModelUsageSchema = z.object({
   model: z.string(),
@@ -106,17 +125,25 @@ export const MonthlyUsageCommandResponseSchema = z.object({
   monthly: z.array(MonthlyUsageResponseSchema),
 });
 
-export const SessionUsageCommandResponseSchema = z.object({
-  sessions: z.array(SessionResponseSchema),
-  totals: z.object({
-    inputTokens: z.number(),
-    outputTokens: z.number(),
-    cacheCreationTokens: z.number(),
-    cacheReadTokens: z.number(),
-    totalCost: z.number(),
-    totalTokens: z.number(),
+export const SessionUsageCommandResponseSchema = z.preprocess(
+  (raw) => {
+    if (typeof raw !== "object" || raw === null) return raw;
+    const root = raw as Record<string, unknown>;
+    if ("sessions" in root || !("session" in root)) return root;
+    return { ...root, sessions: root.session };
+  },
+  z.object({
+    sessions: z.array(SessionResponseSchema),
+    totals: z.object({
+      inputTokens: z.number(),
+      outputTokens: z.number(),
+      cacheCreationTokens: z.number(),
+      cacheReadTokens: z.number(),
+      totalCost: z.number(),
+      totalTokens: z.number(),
+    }),
   }),
-});
+);
 
 export const LimitWindowSchema = z.object({
   utilization: z.number(),

@@ -1,5 +1,12 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Fix ccusage v20 schema mismatch] - {PR_MERGE_DATE}
+
+### Fixed
+
+- Compatibility with `ccusage` v20, which renamed per-row `date`/`month`/`sessionId` to `period`, moved `lastActivity` under `metadata`, and renamed the session command's top-level `sessions` array to `session`. Schemas now accept both shapes, restoring daily, monthly, session, and total usage views
+- Replaced the `||` separator in the Usage Limits detail panel's "Resets in" rows with `·` so it no longer reads like a JavaScript operator
+
 ## [v2.3.2] - 2026-04-24
 
 ### Added
