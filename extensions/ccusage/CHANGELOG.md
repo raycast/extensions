@@ -1,5 +1,11 @@
 # Claude Code Usage (ccusage) Changelog
 
+## [Fix Reset Time Separator] - {PR_MERGE_DATE}
+
+### Fixed
+
+- "Resets in" rows in the Usage Limits detail panel now use a middle dot (`·`) between the relative and absolute time instead of `||`, which read like a JavaScript logical OR operator
+
 ## [v2.3.2] - 2026-04-24
 
 ### Added

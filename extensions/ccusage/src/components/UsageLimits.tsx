@@ -115,7 +115,7 @@ export function UsageLimits() {
           title="Resets in"
           text={
             data.five_hour.resets_at
-              ? `${formatTimeRemaining(data.five_hour.resets_at)} || ${new Date(data.five_hour.resets_at).toLocaleString("en-US", { hour12: false })}`
+              ? `${formatTimeRemaining(data.five_hour.resets_at)} · ${new Date(data.five_hour.resets_at).toLocaleString("en-US", { hour12: false })}`
               : "N/A"
           }
           icon={Icon.ArrowClockwise}
@@ -147,7 +147,7 @@ export function UsageLimits() {
           title="Resets in"
           text={
             data.seven_day.resets_at
-              ? `${formatTimeRemaining(data.seven_day.resets_at)} || ${new Date(data.seven_day.resets_at).toLocaleString("en-US", { hour12: false })}`
+              ? `${formatTimeRemaining(data.seven_day.resets_at)} · ${new Date(data.seven_day.resets_at).toLocaleString("en-US", { hour12: false })}`
               : "N/A"
           }
           icon={Icon.ArrowClockwise}
