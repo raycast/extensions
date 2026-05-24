@@ -63,10 +63,12 @@ export async function readCodexUsage(basePath: string, range: DateRange) {
 
   if (!existsSync(sessionsRoot)) return { events, errors };
 
+  const sessionIndex = loadCodexSessionIndex(root);
+
   try {
     const files = await findRolloutsAsync(sessionsRoot, range);
     await runWithConcurrency(files, CODEX_READ_CONCURRENCY, (file) =>
-      readCodexFile(file, range, events),
+      readCodexFile(file, range, events, sessionIndex),
     );
   } catch {
     errors.push("Codex: read error");
@@ -83,9 +85,11 @@ export function readCodexUsageSync(basePath: string, range: DateRange) {
 
   if (!existsSync(sessionsRoot)) return { events, errors };
 
+  const sessionIndex = loadCodexSessionIndex(root);
+
   try {
     for (const file of findRolloutsSync(sessionsRoot, range)) {
-      readCodexFileSync(file, range, events);
+      readCodexFileSync(file, range, events, sessionIndex);
     }
   } catch {
     errors.push("Codex: read error");
@@ -131,6 +135,12 @@ type FileState = {
 
 const CODEX_TITLE_MAX = 80;
 
+/** rollout-…-<uuid>.jsonl — session id is the trailing UUID segment. */
+const CODEX_ROLLOUT_ID_RE =
+  /-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\.jsonl$/i;
+
+type CodexSessionIndex = Map<string, string>;
+
 function newFileState(): FileState {
   return { currentModel: undefined, previousTotals: {} };
 }
@@ -143,8 +153,58 @@ function truncateCodexTitle(text: string): string {
     : `${t.slice(0, CODEX_TITLE_MAX - 1)}…`;
 }
 
-/** Regex-only title extraction — never JSON.parse session_meta (multi‑MB lines). */
-function noteCodexSessionTitleFromLine(line: string, state: FileState) {
+/**
+ * Codex Desktop stores human-readable thread names in
+ * `$CODEX_HOME/session_index.jsonl` (`thread_name` keyed by session `id`).
+ */
+function loadCodexSessionIndex(root: string): CodexSessionIndex {
+  const indexPath = join(root, "session_index.jsonl");
+  const index: CodexSessionIndex = new Map();
+  if (!existsSync(indexPath)) return index;
+
+  try {
+    for (const line of readFileSync(indexPath, "utf8").split(/\r?\n/)) {
+      if (!line.trim()) continue;
+      try {
+        const row = JSON.parse(line) as {
+          id?: string;
+          thread_name?: string;
+        };
+        if (typeof row.id === "string" && typeof row.thread_name === "string") {
+          const title = truncateCodexTitle(row.thread_name);
+          if (title) index.set(row.id, title);
+        }
+      } catch {
+        // skip malformed index rows
+      }
+    }
+  } catch {
+    // index is optional
+  }
+
+  return index;
+}
+
+function sessionIdFromRolloutPath(file: string): string | undefined {
+  return CODEX_ROLLOUT_ID_RE.exec(file)?.[1];
+}
+
+function resolveCodexSessionTitle(
+  file: string,
+  sessionIndex: CodexSessionIndex,
+  state: FileState,
+) {
+  if (state.sessionTitle) return;
+
+  const sessionId = sessionIdFromRolloutPath(file);
+  if (!sessionId) return;
+
+  const threadName = sessionIndex.get(sessionId);
+  if (threadName) state.sessionTitle = threadName;
+}
+
+/** Fallback when session_index has no entry — never JSON.parse session_meta. */
+function noteCodexSessionTitleFallbackFromLine(line: string, state: FileState) {
   if (state.sessionTitle) return;
 
   const branch = /"branch"\s*:\s*"([^"]+)"/.exec(line)?.[1];
@@ -164,6 +224,7 @@ async function readCodexFile(
   file: string,
   range: DateRange,
   events: UsageEvent[],
+  sessionIndex: CodexSessionIndex,
 ) {
   const reader = createInterface({
     input: createReadStream(file, { encoding: "utf8" }),
@@ -171,9 +232,10 @@ async function readCodexFile(
   });
 
   const state = newFileState();
+  resolveCodexSessionTitle(file, sessionIndex, state);
   let offset = 0;
   for await (const line of reader) {
-    pushCodexLine(file, line, offset, range, events, state);
+    pushCodexLine(file, line, offset, range, events, state, sessionIndex);
     offset += 1;
   }
 }
@@ -182,12 +244,14 @@ function readCodexFileSync(
   file: string,
   range: DateRange,
   events: UsageEvent[],
+  sessionIndex: CodexSessionIndex,
 ) {
   const state = newFileState();
+  resolveCodexSessionTitle(file, sessionIndex, state);
   readFileSync(file, "utf8")
     .split(/\r?\n/)
     .forEach((line, index) =>
-      pushCodexLine(file, line, index, range, events, state),
+      pushCodexLine(file, line, index, range, events, state, sessionIndex),
     );
 }
 
@@ -200,9 +264,17 @@ function pushCodexLine(
   range: DateRange,
   events: UsageEvent[],
   state: FileState,
+  sessionIndex: CodexSessionIndex,
 ) {
   if (line.includes('"session_meta"') && !state.sessionTitle) {
-    noteCodexSessionTitleFromLine(line, state);
+    const sessionId = /"id"\s*:\s*"([^"]+)"/.exec(line)?.[1];
+    if (sessionId) {
+      const threadName = sessionIndex.get(sessionId);
+      if (threadName) state.sessionTitle = threadName;
+    }
+    if (!state.sessionTitle) {
+      noteCodexSessionTitleFallbackFromLine(line, state);
+    }
   }
 
   // Never JSON.parse huge transcript lines — only turn_context + token_count.
