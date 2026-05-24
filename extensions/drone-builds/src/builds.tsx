@@ -123,15 +123,17 @@ export default function Command() {
           ))}
         </List.Section>
       )}
-      <List.Section title={`Recent (${recent.length})`}>
-        {recent.map((it) => (
-          <BuildItem
-            key={`${it.slug}-${it.build.id}`}
-            item={it}
-            reload={revalidate}
-          />
-        ))}
-      </List.Section>
+      {recent.length > 0 && (
+        <List.Section title={`Recent (${recent.length})`}>
+          {recent.map((it) => (
+            <BuildItem
+              key={`${it.slug}-${it.build.id}`}
+              item={it}
+              reload={revalidate}
+            />
+          ))}
+        </List.Section>
+      )}
       {items.length === 0 && !isLoading && (
         <List.EmptyView
           title="No builds"

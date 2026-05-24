@@ -1,6 +1,6 @@
 # Drone Builds Changelog
 
-## [Initial Version] - {PR_MERGE_DATE}
+## [Initial Release] - {PR_MERGE_DATE}
 
 - Browse recent Drone CI builds in a List view with status, branch, author, duration and commit message metadata.
 - Push to a stages/steps view on any build to inspect pipeline progress, exit codes and per-step duration without leaving Raycast.
