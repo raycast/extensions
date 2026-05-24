@@ -14,13 +14,12 @@ import {
   showHUD,
   showToast,
 } from "@raycast/api";
-import { useCachedState, useFrecencySorting, useForm, useLocalStorage, withAccessToken } from "@raycast/utils";
+import { useCachedState, useFrecencySorting, useForm, useLocalStorage } from "@raycast/utils";
 import BeeperDesktop from "@beeper/desktop-api";
 import Fuse from "fuse.js";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   archiveChat,
-  createBeeperOAuth,
   createChatReminder,
   deleteChatReminder,
   focusApp,
@@ -32,6 +31,7 @@ import {
   updateMessage,
   getRaycastFocusLink,
   useBeeperDesktop,
+  withBeeperAuth,
 } from "./api";
 import { AccountServiceInfo, useAccountServiceCache } from "./utils/account-service-cache";
 import { parseDate, getErrorMessage, getMessageID } from "./utils/helpers";
@@ -1397,4 +1397,4 @@ function RecentChatsCommand() {
   );
 }
 
-export default withAccessToken(createBeeperOAuth())(RecentChatsCommand);
+export default withBeeperAuth(RecentChatsCommand);

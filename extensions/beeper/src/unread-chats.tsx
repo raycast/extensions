@@ -1,5 +1,4 @@
-import { withAccessToken } from "@raycast/utils";
-import { createBeeperOAuth } from "./api";
+import { withBeeperAuth } from "./api";
 import { ChatListView } from "./chat";
 
 function UnreadChatsCommand() {
@@ -18,4 +17,4 @@ function UnreadChatsCommand() {
   );
 }
 
-export default withAccessToken(createBeeperOAuth())(UnreadChatsCommand);
+export default withBeeperAuth(UnreadChatsCommand);

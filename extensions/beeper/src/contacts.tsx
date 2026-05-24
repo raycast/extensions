@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List, Toast, showToast, useNavigation } from "@raycast/api";
-import { useCachedPromise, withAccessToken } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { createBeeperOAuth, createChat, focusApp, listAccounts, retrieveChat, searchContacts } from "./api";
+import { createChat, focusApp, listAccounts, retrieveChat, searchContacts, withBeeperAuth } from "./api";
 import { ChatThread } from "./chat";
 import { getAccountServiceInfoList } from "./utils/account-service-cache";
 import { getBeeperAppPath } from "./utils/helpers";
@@ -224,4 +224,4 @@ export function ContactsView() {
   );
 }
 
-export default withAccessToken(createBeeperOAuth())(ContactsView);
+export default withBeeperAuth(ContactsView);

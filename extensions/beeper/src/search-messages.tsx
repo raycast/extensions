@@ -9,17 +9,10 @@ import {
   List,
   openExtensionPreferences,
 } from "@raycast/api";
-import { useCachedPromise, useCachedState, withAccessToken } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import BeeperDesktop from "@beeper/desktop-api";
 import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  createBeeperOAuth,
-  focusApp,
-  retrieveChat,
-  getRaycastFocusLink,
-  searchMessages,
-  useBeeperDesktop,
-} from "./api";
+import { focusApp, retrieveChat, getRaycastFocusLink, searchMessages, useBeeperDesktop, withBeeperAuth } from "./api";
 import { ChatThread, ComposeMessageForm, MessageDetail } from "./chat";
 import { parseDate, getMessageID, getBeeperAppPath } from "./utils/helpers";
 
@@ -384,4 +377,4 @@ function ComposeMessageById({ chatID, replyToMessageID }: { chatID: string; repl
   return <ComposeMessageForm chat={chat} replyToMessageID={replyToMessageID} />;
 }
 
-export default withAccessToken(createBeeperOAuth())(SearchMessagesCommand);
+export default withBeeperAuth(SearchMessagesCommand);
