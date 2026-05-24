@@ -103,9 +103,7 @@ export default function Command() {
 
   const viewInboxForAddress = async (address: string) => {
     try {
-      await LocalStorage.setItem("mail_address", address);
-      setActiveAddress(address);
-      await launchCommand({ name: "view-inbox", type: LaunchType.UserInitiated });
+      await launchCommand({ name: "view-inbox", type: LaunchType.UserInitiated, arguments: { address } });
     } catch (error) {
       await showFailureToast(error, { title: "Unable to open inbox" });
     }
@@ -145,17 +143,9 @@ export default function Command() {
               <ActionPanel>
                 <ActionPanel.Section>
                   {activeAddress !== address && (
-                    <Action
-                      title="Set as Active"
-                      icon={Icon.CheckCircle}
-                      onAction={() => setAsActive(address)}
-                    />
+                    <Action title="Set as Active" icon={Icon.CheckCircle} onAction={() => setAsActive(address)} />
                   )}
-                  <Action
-                    title="View Inbox"
-                    icon={Icon.Envelope}
-                    onAction={() => viewInboxForAddress(address)}
-                  />
+                  <Action title="View Inbox" icon={Icon.Envelope} onAction={() => viewInboxForAddress(address)} />
                   <Action.CopyToClipboard title="Copy Address" content={address} />
                 </ActionPanel.Section>
                 <ActionPanel.Section>

@@ -28,11 +28,7 @@ export default function Command() {
 
   const { handleSubmit, itemProps } = useForm<CreateMailFormValues>({
     async onSubmit(values) {
-      const trimmedUsername = values.mail_username?.trim() ?? "";
-      if (!trimmedUsername) {
-        await showToast({ style: Toast.Style.Failure, title: "Mail address is required" });
-        return;
-      }
+      const trimmedUsername = values.mail_username.trim();
 
       try {
         await setMailAddress({

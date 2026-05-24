@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Icon, LaunchType, List, LocalStorage, launchCommand } from "@raycast/api";
+import { Action, ActionPanel, Icon, LaunchProps, LaunchType, List, LocalStorage, launchCommand } from "@raycast/api";
 import TempMail from "temp-mail-plus-api";
 import { MailResponse } from "temp-mail-plus-api/dist/src/types";
 import TurndownService from "turndown";
@@ -13,7 +13,7 @@ interface MailItem {
   from_mail: string;
 }
 
-export default function Command() {
+export default function Command({ arguments: args }: LaunchProps<{ arguments: { address?: string } }>) {
   const [mailList, setMailList] = useState<MailItem[]>([]);
   const [mailDetails, setMailDetails] = useState<Record<number, MailResponse & { markdown: string }>>({});
   const [mailboxResults, setMailboxResults] = useState<MailItem[]>([]);
@@ -31,9 +31,9 @@ export default function Command() {
   const didEmailsFetched = useRef(false);
 
   const getCurrentMailAddress = async () => {
-    const storedAddress = await LocalStorage.getItem<string>("mail_address");
-    setMailAddress(storedAddress ?? null);
-    return storedAddress;
+    const address = args.address || (await LocalStorage.getItem<string>("mail_address"));
+    setMailAddress(address ?? null);
+    return address;
   };
 
   const getTempMailInstance = (address: string) => {
@@ -64,7 +64,7 @@ export default function Command() {
             const details = await tempMailInstance.fetchMailById(mail.mail_id);
             if (!details) return null;
 
-            const preparedMarkdown = turndownService.turndown(details.html as string);
+            const preparedMarkdown = turndownService.turndown(details.html ?? "");
             return {
               [mail.mail_id]: {
                 ...details,
@@ -142,6 +142,12 @@ export default function Command() {
               />
             </ActionPanel>
           }
+        />
+      ) : mailboxResults.length === 0 && !isLoading ? (
+        <List.EmptyView
+          icon={Icon.Envelope}
+          title="No messages yet"
+          description={`Inbox for ${mailAddress} is empty.`}
         />
       ) : (
         mailboxResults.map((mail: MailItem) => (

@@ -5,6 +5,7 @@
   "description": "Read & create temp mail addresses via Temp Mail Plus API",
   "icon": "extension-icon.png",
   "author": "halitsever",
+  "categories": ["Communication", "Productivity"],
   "license": "MIT",
   "commands": [
     {
@@ -19,7 +20,15 @@
       "title": "View Inbox",
       "subtitle": "Shows Mails From Selected Mail Address",
       "description": "View current emails from your configured temporary email address with search functionality and detailed mail content",
-      "mode": "view"
+      "mode": "view",
+      "arguments": [
+        {
+          "name": "address",
+          "placeholder": "Email address",
+          "type": "text",
+          "required": false
+        }
+      ]
     },
     {
       "name": "list-saved-addresses",
