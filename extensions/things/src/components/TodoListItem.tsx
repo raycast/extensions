@@ -1,7 +1,7 @@
-import { List, Icon, Color } from '@raycast/api';
+import { List, Icon } from '@raycast/api';
 import dayjs from 'dayjs';
 
-import { getTodoIcon } from '../helpers';
+import { getDeadlineColor, getTodoIcon } from '../helpers';
 
 import TodoListItemActions from './TodoListItemActions';
 import { CommandListName, Todo, List as TList } from '../types';
@@ -9,20 +9,17 @@ import { CommandListName, Todo, List as TList } from '../types';
 const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
   const today = dayjs(dayjs().format('YYYY-MM-DD')).toISOString();
   const diff = dayjs(dueDate).diff(today, 'day');
+  const color = getDeadlineColor(dueDate);
 
-  let text, color;
-
+  let text;
   if (Math.abs(diff) >= 15) {
     text = dayjs(dueDate).format('MMM D');
   } else if (diff === 0) {
     text = 'Due today';
-    color = Color.Red;
-  } else if (diff > 0 && diff <= 14) {
+  } else if (diff > 0) {
     text = `${diff} day${diff === 1 ? '' : 's'} left`;
-    color = Color.Orange;
-  } else if (diff < 0) {
+  } else {
     text = `${-diff} day${diff === -1 ? '' : 's'} ago`;
-    color = Color.Red;
   }
 
   return {

@@ -205,11 +205,20 @@ New title:
             icon={Icon.Sidebar}
             target={
               <TodoDetail
-                todo={todo}
-                refreshTodos={refreshTodos}
+                todoId={todo.id}
+                initialTodo={todo}
                 commandListName={commandListName}
-                lists={lists}
-                tags={tags}
+                parentRefresh={refreshTodos}
+                renderActions={(currentTodo, detailRefresh) => (
+                  <TodoListItemActions
+                    todo={currentTodo}
+                    refreshTodos={detailRefresh}
+                    commandListName={commandListName}
+                    lists={lists}
+                    tags={tags}
+                    fromDetail
+                  />
+                )}
               />
             }
           />

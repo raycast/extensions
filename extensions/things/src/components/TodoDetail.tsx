@@ -1,17 +1,18 @@
-import { Detail, Color, Icon } from '@raycast/api';
+import { Detail, Icon } from '@raycast/api';
+import { useCachedPromise } from '@raycast/utils';
 import dayjs from 'dayjs';
+import { type ReactNode } from 'react';
 
-import { statusIcons } from '../helpers';
-
-import TodoListItemActions from './TodoListItemActions';
-import { CommandListName, Todo, List as TList } from '../types';
+import { getListTodos } from '../api';
+import { statusIcons, getDeadlineColor } from '../helpers';
+import { CommandListName, Todo } from '../types';
 
 type TodoDetailProps = {
-  todo: Todo;
-  refreshTodos: () => Promise<void>;
+  todoId: string;
+  initialTodo: Todo;
   commandListName: CommandListName;
-  lists?: TList[];
-  tags?: string[];
+  parentRefresh: () => Promise<unknown>;
+  renderActions: (todo: Todo, refreshTodos: () => Promise<void>) => ReactNode;
 };
 
 const statusLabels: Record<Todo['status'], string> = {
@@ -22,15 +23,21 @@ const statusLabels: Record<Todo['status'], string> = {
 
 const formatDate = (iso: string) => dayjs(iso).format('MMM D, YYYY');
 
-function getDeadlineColor(deadline: string): Color | undefined {
-  const today = dayjs(dayjs().format('YYYY-MM-DD')).toISOString();
-  const diff = dayjs(deadline).diff(today, 'day');
-  if (Math.abs(diff) >= 15) return undefined;
-  if (diff <= 0) return Color.Red;
-  return Color.Orange;
-}
+export default function TodoDetail({
+  todoId,
+  initialTodo,
+  commandListName,
+  parentRefresh,
+  renderActions,
+}: TodoDetailProps) {
+  const { data: todos, mutate } = useCachedPromise((name) => getListTodos(name), [commandListName]);
+  const todo = todos?.find((t) => t.id === todoId) ?? initialTodo;
 
-export default function TodoDetail({ todo, refreshTodos, commandListName, lists, tags }: TodoDetailProps) {
+  async function refreshTodos() {
+    await parentRefresh();
+    await mutate();
+  }
+
   const area = todo.area || todo.project?.area;
   const tagList = todo.tags?.split(', ').filter(Boolean) ?? [];
 
@@ -83,16 +90,7 @@ export default function TodoDetail({ todo, refreshTodos, commandListName, lists,
           )}
         </Detail.Metadata>
       }
-      actions={
-        <TodoListItemActions
-          todo={todo}
-          refreshTodos={refreshTodos}
-          commandListName={commandListName}
-          lists={lists}
-          tags={tags}
-          fromDetail
-        />
-      }
+      actions={renderActions(todo, refreshTodos)}
     />
   );
 }
