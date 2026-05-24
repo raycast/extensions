@@ -199,7 +199,12 @@ function StepLogsView({
   const lines = data ?? [];
   const tail = lines.slice(-MAX_LOG_LINES);
   const truncated = lines.length > MAX_LOG_LINES;
-  const raw = tail.map((l) => l.out.replace(/\n$/, "")).join("\n");
+  // Break triple-backticks (which would close the fenced code block early and
+  // render the rest as markdown) by inserting a zero-width space between them.
+  const raw = tail
+    .map((l) => l.out.replace(/\n$/, ""))
+    .join("\n")
+    .replace(/`{3,}/g, (m) => m.split("").join("​"));
 
   const markdown = [
     `## ${slug} #${build}`,

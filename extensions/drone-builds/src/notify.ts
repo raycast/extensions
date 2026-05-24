@@ -55,7 +55,12 @@ async function notifyViaTerminalNotifier(
 }
 
 async function notifyViaOsascript(args: NotifyArgs): Promise<void> {
-  const esc = (s: string) => s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+  // AppleScript string literals can't span multiple lines, so collapse any
+  // newlines/CRs to spaces before escaping quotes/backslashes — otherwise a
+  // single \n in a Drone field would produce a syntax error and silently drop
+  // the notification.
+  const esc = (s: string) =>
+    s.replace(/\r?\n/g, " ").replace(/\\/g, "\\\\").replace(/"/g, '\\"');
   const parts: string[] = [`display notification "${esc(args.message)}"`];
   parts.push(`with title "${esc(args.title)}"`);
   if (args.subtitle) parts.push(`subtitle "${esc(args.subtitle)}"`);
