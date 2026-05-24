@@ -1,33 +1,26 @@
 import { z } from "zod";
 
-// ccusage emits a single `period` field per row that means different things
-// per command (date for daily, month for monthly, session id for sessions),
-// nests session `lastActivity` under `metadata`, and keys the session
-// command's top-level array as `session`. Preprocess maps these into
-// `date` / `month` / `sessionId` / `lastActivity` / `sessions` so consumers
-// see a consistent shape.
+// `ccusage` exposes row dates as a generic `period` field, nests session
+// `lastActivity` under `metadata`, and keys the session command's rows under
+// `session`. Preprocess normalizes these to the explicit names declared below.
 
-const aliasPeriodTo =
-  (key: "date" | "month" | "sessionId") =>
+const asObject = (raw: unknown): Record<string, unknown> | null =>
+  raw && typeof raw === "object" ? (raw as Record<string, unknown>) : null;
+
+const alias =
+  (from: string, to: string) =>
   (raw: unknown): unknown => {
-    if (typeof raw !== "object" || raw === null) return raw;
-    const row = raw as Record<string, unknown>;
-    if (key in row || !("period" in row)) return row;
-    return { ...row, [key]: row.period };
+    const obj = asObject(raw);
+    if (!obj || to in obj || !(from in obj)) return raw;
+    return { ...obj, [to]: obj[from] };
   };
 
-const liftSessionMetadata = (raw: unknown): unknown => {
-  if (typeof raw !== "object" || raw === null) return raw;
-  const row = raw as Record<string, unknown>;
-  if ("lastActivity" in row) return row;
-  const metadata = row.metadata;
-  if (typeof metadata !== "object" || metadata === null) return row;
-  const lastActivity = (metadata as Record<string, unknown>).lastActivity;
-  if (lastActivity === undefined) return row;
-  return { ...row, lastActivity };
+const liftLastActivity = (raw: unknown): unknown => {
+  const obj = asObject(raw);
+  if (!obj || "lastActivity" in obj) return raw;
+  const meta = asObject(obj.metadata);
+  return meta && "lastActivity" in meta ? { ...obj, lastActivity: meta.lastActivity } : raw;
 };
-
-const normalizeSessionRow = (raw: unknown): unknown => liftSessionMetadata(aliasPeriodTo("sessionId")(raw));
 
 const modelBreakdownSchema = z.object({
   modelName: z.string(),
@@ -38,50 +31,34 @@ const modelBreakdownSchema = z.object({
   cost: z.number(),
 });
 
+const tokenTotals = {
+  inputTokens: z.number(),
+  outputTokens: z.number(),
+  cacheCreationTokens: z.number(),
+  cacheReadTokens: z.number(),
+  totalTokens: z.number(),
+  totalCost: z.number(),
+};
+
+const usageRowBase = {
+  ...tokenTotals,
+  modelsUsed: z.array(z.string()),
+  modelBreakdowns: z.array(modelBreakdownSchema),
+};
+
 export const DailyUsageResponseSchema = z.preprocess(
-  aliasPeriodTo("date"),
-  z.object({
-    date: z.string(),
-    inputTokens: z.number(),
-    outputTokens: z.number(),
-    cacheCreationTokens: z.number(),
-    cacheReadTokens: z.number(),
-    totalTokens: z.number(),
-    totalCost: z.number(),
-    modelsUsed: z.array(z.string()),
-    modelBreakdowns: z.array(modelBreakdownSchema),
-  }),
+  alias("period", "date"),
+  z.object({ date: z.string(), ...usageRowBase }),
 );
 
 export const MonthlyUsageResponseSchema = z.preprocess(
-  aliasPeriodTo("month"),
-  z.object({
-    month: z.string(),
-    inputTokens: z.number(),
-    outputTokens: z.number(),
-    cacheCreationTokens: z.number(),
-    cacheReadTokens: z.number(),
-    totalTokens: z.number(),
-    totalCost: z.number(),
-    modelsUsed: z.array(z.string()),
-    modelBreakdowns: z.array(modelBreakdownSchema),
-  }),
+  alias("period", "month"),
+  z.object({ month: z.string(), ...usageRowBase }),
 );
 
 export const SessionResponseSchema = z.preprocess(
-  normalizeSessionRow,
-  z.object({
-    sessionId: z.string(),
-    inputTokens: z.number(),
-    outputTokens: z.number(),
-    cacheCreationTokens: z.number(),
-    cacheReadTokens: z.number(),
-    totalTokens: z.number(),
-    totalCost: z.number(),
-    lastActivity: z.string(),
-    modelsUsed: z.array(z.string()),
-    modelBreakdowns: z.array(modelBreakdownSchema),
-  }),
+  (raw) => liftLastActivity(alias("period", "sessionId")(raw)),
+  z.object({ sessionId: z.string(), lastActivity: z.string(), ...usageRowBase }),
 );
 
 export const ModelUsageSchema = z.object({
@@ -97,25 +74,11 @@ export const DailyUsageDataSchema = DailyUsageResponseSchema;
 export const MonthlyUsageDataSchema = MonthlyUsageResponseSchema;
 export const SessionDataSchema = SessionResponseSchema;
 
-export const TotalUsageDataSchema = z.object({
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  cacheCreationTokens: z.number(),
-  cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-});
+export const TotalUsageDataSchema = z.object(tokenTotals);
 
 export const TotalUsageResponseSchema = z.object({
   daily: z.array(DailyUsageResponseSchema),
-  totals: z.object({
-    inputTokens: z.number(),
-    outputTokens: z.number(),
-    cacheCreationTokens: z.number(),
-    cacheReadTokens: z.number(),
-    totalTokens: z.number(),
-    totalCost: z.number(),
-  }),
+  totals: z.object(tokenTotals),
 });
 
 export const DailyUsageCommandResponseSchema = z.object({
@@ -127,22 +90,10 @@ export const MonthlyUsageCommandResponseSchema = z.object({
 });
 
 export const SessionUsageCommandResponseSchema = z.preprocess(
-  (raw) => {
-    if (typeof raw !== "object" || raw === null) return raw;
-    const root = raw as Record<string, unknown>;
-    if ("sessions" in root || !("session" in root)) return root;
-    return { ...root, sessions: root.session };
-  },
+  alias("session", "sessions"),
   z.object({
     sessions: z.array(SessionResponseSchema),
-    totals: z.object({
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      totalCost: z.number(),
-      totalTokens: z.number(),
-    }),
+    totals: z.object(tokenTotals),
   }),
 );
 
