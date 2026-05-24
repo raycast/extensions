@@ -8,8 +8,9 @@ type FocusAppArguments = {
   draftAttachmentPath?: string;
 };
 
-async function FocusAppCommand(props: LaunchProps<{ arguments?: FocusAppArguments }>) {
-  await focusApp(props.arguments ?? {});
+function FocusAppCommand(props: LaunchProps<{ arguments?: FocusAppArguments }>) {
+  focusApp(props.arguments ?? {});
+  return null;
 }
 
 export default withBeeperAuth(FocusAppCommand);
