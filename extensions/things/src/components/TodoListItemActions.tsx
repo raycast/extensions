@@ -74,8 +74,8 @@ export default function TodoListItemActions({
     try {
       await mutation();
       await showToast({ style: Toast.Style.Success, title: successTitle, message: todo.name });
-      await refreshTodos();
       if (fromDetail) pop();
+      await refreshTodos();
     } catch (error) {
       await handleError(error);
     }
