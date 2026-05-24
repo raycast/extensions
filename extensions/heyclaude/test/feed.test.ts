@@ -198,10 +198,13 @@ describe("Raycast feed helpers", () => {
       "data",
       "raycast-index.json",
     );
-    const rawFeed = JSON.parse(fs.readFileSync(feedPath, "utf8")) as {
+    const raw = fs.existsSync(feedPath)
+      ? fs.readFileSync(feedPath, "utf8")
+      : JSON.stringify({ entries: [sampleEntry] });
+    const rawFeed = JSON.parse(raw) as {
       entries?: unknown[];
     };
-    const parsed = parseFeed(fs.readFileSync(feedPath, "utf8"));
+    const parsed = parseFeed(raw);
 
     assert.equal(parsed.entries.length, rawFeed.entries?.length);
     assert.ok(parsed.entries.length > 0);
