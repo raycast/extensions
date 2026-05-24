@@ -149,6 +149,11 @@ function BuildItem({ item, reload }: { item: Item; reload: () => void }) {
   const { push } = useNavigation();
 
   const headline = `${b.status.toUpperCase()} · ${b.event}${b.target ? ` → ${b.target}` : ""}`;
+  // Sanitize triple-backticks in the commit message so it can't close the
+  // fenced code block early (same fix as build-detail.tsx for step logs).
+  const safeMessage = (
+    (b.message || "").trim() || "(no commit message)"
+  ).replace(/`{3,}/g, (m) => m.split("").join("​"));
   const markdown = [
     `# ${item.slug} #${b.number}`,
     "",
@@ -157,7 +162,7 @@ function BuildItem({ item, reload }: { item: Item; reload: () => void }) {
     "---",
     "",
     "```",
-    (b.message || "").trim() || "(no commit message)",
+    safeMessage,
     "```",
   ].join("\n");
 
