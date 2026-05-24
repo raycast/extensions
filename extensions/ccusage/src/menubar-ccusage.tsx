@@ -124,6 +124,8 @@ export default function MenuBarccusage() {
       return highestUtilization !== null
         ? `${(preferRemaining ? 100 - highestUtilization : highestUtilization).toFixed(0)}%`
         : undefined;
+    if (menuBarTitlePref === "blockProjection")
+      return workingTime.activeBlock?.projection ? formatCost(workingTime.activeBlock.projection.totalCost) : undefined;
     return todayUsage
       ? `${formatCost(todayUsage.totalCost)} · ${formatTokensAsMTok(todayUsage.totalTokens)}`
       : undefined;
@@ -261,6 +263,31 @@ export default function MenuBarccusage() {
               onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
             />
           </MenuBarExtra.Section>
+
+          {workingTime.activeBlock && (
+            <MenuBarExtra.Section title="Current Block">
+              <MenuBarExtra.Item
+                title={
+                  workingTime.activeBlock.projection
+                    ? `${formatCost(workingTime.activeBlock.projection.totalCost)} projected`
+                    : formatCost(workingTime.activeBlock.costUSD)
+                }
+                subtitle={[
+                  workingTime.activeBlock.burnRate
+                    ? `${formatCost(workingTime.activeBlock.burnRate.costPerHour)}/hr`
+                    : null,
+                  `${formatCost(workingTime.activeBlock.costUSD)} so far`,
+                  workingTime.activeBlock.projection
+                    ? `${formatDuration(workingTime.activeBlock.projection.remainingMinutes * 60 * 1000)} left`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")}
+                icon={Icon.Gauge}
+                onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+              />
+            </MenuBarExtra.Section>
+          )}
 
           <MenuBarExtra.Section title="Working Time">
             <MenuBarExtra.Item

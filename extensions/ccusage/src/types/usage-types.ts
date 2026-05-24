@@ -126,6 +126,19 @@ export const BlockSchema = z.object({
   totalTokens: z.number(),
   costUSD: z.number(),
   models: z.array(z.string()),
+  burnRate: z
+    .object({
+      costPerHour: z.number(),
+      tokensPerMinute: z.number(),
+    })
+    .nullish(),
+  projection: z
+    .object({
+      remainingMinutes: z.number(),
+      totalCost: z.number(),
+      totalTokens: z.number(),
+    })
+    .nullish(),
 });
 
 export const BlocksCommandResponseSchema = z.object({

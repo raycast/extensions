@@ -70,6 +70,10 @@
               "value": "utilization"
             },
             {
+              "title": "Block Projection",
+              "value": "blockProjection"
+            },
+            {
               "title": "None",
               "value": "none"
             }
