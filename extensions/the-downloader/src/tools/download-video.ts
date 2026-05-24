@@ -58,8 +58,12 @@ export default async function tool(input: Input) {
     throw new Error("Live streams are not supported");
   }
 
-  // Set up download options
-  const options: string[] = ["-P", downloadPath];
+  // Set up download options. `--no-playlist` keeps the download phase in
+  // lock-step with fetchVideoInfo, which is also called with --no-playlist
+  // (see src/lib/ytdlp.ts): without it, pasting a playlist URL would dump
+  // every video in the playlist into the user's download folder, even
+  // though our live-stream and format checks only inspected the first one.
+  const options: string[] = ["-P", downloadPath, "--no-playlist"];
   if (deno) options.push("--js-runtimes", `deno:${deno}`);
 
   // Getet the best video+audio format
@@ -81,11 +85,18 @@ export default async function tool(input: Input) {
   const FILEPATH_TAG = "THE-DOWNLOADER-FILEPATH:";
   options.push("--print", `after_move:${FILEPATH_TAG}%(filepath)s`);
 
-  // Execute download
-  const result = await execa(ytdlPath, [...options, input.url]);
-
-  if (result.failed) {
-    throw new Error(`Failed to download video: ${result.stderr}`);
+  // Execute download. execa throws on non-zero exit by default, so we
+  // catch and re-throw with a clean "Failed to download video: <stderr>"
+  // message — the AI tool host surfaces the thrown message to the model,
+  // and the raw ExecaError dump isn't useful to it.
+  let result;
+  try {
+    result = await execa(ytdlPath, [...options, input.url]);
+  } catch (error) {
+    const stderr = error instanceof Error && "stderr" in error ? String(error.stderr) : "";
+    throw new Error(
+      `Failed to download video: ${stderr || (error instanceof Error ? error.message : "unknown error")}`,
+    );
   }
 
   const taggedLine = result.stdout
