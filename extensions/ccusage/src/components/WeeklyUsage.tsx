@@ -33,9 +33,7 @@ export function WeeklyUsage() {
     ? STANDARD_ACCESSORIES.ERROR
     : weeklyUsage === undefined
       ? STANDARD_ACCESSORIES.LOADING
-      : !weeklyUsage
-        ? STANDARD_ACCESSORIES.NO_DATA
-        : [{ text: formatCost(weeklyUsage.totalCost), icon: Icon.Coins }];
+      : [{ text: formatCost(weeklyUsage.totalCost), icon: Icon.Coins }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error || !weeklyUsage) {

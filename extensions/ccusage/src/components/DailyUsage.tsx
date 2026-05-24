@@ -36,9 +36,7 @@ export function DailyUsage() {
     ? STANDARD_ACCESSORIES.ERROR
     : dailyUsage === undefined
       ? STANDARD_ACCESSORIES.LOADING
-      : !dailyUsage
-        ? STANDARD_ACCESSORIES.NO_DATA
-        : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
+      : [{ text: formatCost(dailyUsage.totalCost), icon: Icon.Coins }];
 
   const renderDetailMetadata = (): ReactNode => {
     if (error || !dailyUsage) {
