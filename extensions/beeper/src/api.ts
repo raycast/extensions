@@ -29,25 +29,10 @@ const getManualToken = (): string | undefined => {
   const raw = (prefs as Record<string, unknown>).manualToken as string | undefined;
   const token = typeof raw === "string" ? raw.trim() : "";
   if (token.length > 0) {
-    console.log(
-      "[Beeper OAuth DEBUG] ✓ Manual token found in preferences (length:",
-      token.length,
-      ", first 6:",
-      token.slice(0, 6) + "...)",
-    );
     return token;
   }
   return undefined;
 };
-
-// Safe to call getManualToken() and getPreferences() now that they are defined
-console.log("[Beeper OAuth DEBUG] === api.ts module loaded (Raycast extension context) ===");
-
-const initialManual = getManualToken();
-console.log(
-  "[Beeper OAuth DEBUG] Initial auth mode at module load:",
-  initialManual ? "MANUAL TOKEN (OAuth completely disabled)" : "OAUTH flow enabled",
-);
 
 const createOAuthClient = () =>
   new OAuth.PKCEClient({
@@ -80,14 +65,9 @@ export const getRaycastFocusLink = (
 };
 
 export function createBeeperOAuth() {
-  console.log("[Beeper OAuth DEBUG] createBeeperOAuth() called (OAuth path)");
-
   const baseURL = getBaseURL();
 
-  // Force the magic client id that Beeper has historically recognized for Raycast
   const clientId = "raycast-beeper-extension";
-
-  console.log("[Beeper OAuth DEBUG] Using magic clientId (OAuth path)");
 
   const service = new OAuthService({
     client: createOAuthClient(),
@@ -102,7 +82,6 @@ export function createBeeperOAuth() {
       redirect_uri: "https://raycast.com/redirect?packageName=Extension",
     },
     onAuthorize: async ({ token }) => {
-      console.log("[Beeper OAuth DEBUG] onAuthorize success (magic id path)");
       clientInstance = null;
       lastAccessToken = token;
       await LocalStorage.setItem(TOKEN_STORAGE_KEY, token);
@@ -124,11 +103,9 @@ export function withBeeperAuth<T extends object>(Component: ComponentType<T>) {
   const manualToken = getManualToken();
 
   if (manualToken) {
-    console.log("[Beeper OAuth DEBUG] withBeeperAuth → MANUAL TOKEN MODE (OAuth gate completely skipped)");
     return Component;
   }
 
-  console.log("[Beeper OAuth DEBUG] withBeeperAuth → OAuth mode");
   return withAccessToken(createBeeperOAuth())(Component);
 }
 
@@ -143,23 +120,12 @@ export function getBeeperDesktop(): BeeperDesktop {
     try {
       oauthToken = getAccessToken().token;
     } catch {
-      console.log("[Beeper OAuth DEBUG] getAccessToken() not available (manual token mode or no OAuth context)");
+      // No OAuth context available (manual token mode or not yet authorized)
     }
   }
   const effectiveToken = manualToken || oauthToken;
 
-  const authMode = manualToken ? "MANUAL" : "OAUTH";
-
-  console.log("[Beeper OAuth DEBUG] getBeeperDesktop() called", {
-    baseURL,
-    authMode,
-    hasEffectiveToken: !!effectiveToken,
-    tokenPrefix: effectiveToken ? effectiveToken.substring(0, 8) + "..." : null,
-    clientInstanceExists: !!clientInstance,
-  });
-
   if (!clientInstance || lastBaseURL !== baseURL || lastAccessToken !== (effectiveToken ?? null)) {
-    console.log("[Beeper OAuth DEBUG] Creating new BeeperDesktop client (mode:", authMode, ")");
     clientInstance = new BeeperDesktop({
       accessToken: effectiveToken,
       baseURL: baseURL,
@@ -180,18 +146,13 @@ export function useBeeperDesktop<T>(fn: (client: BeeperDesktop) => Promise<T>) {
 
 export async function checkBeeperConnection(): Promise<{ connected: boolean; error?: string }> {
   const manualToken = getManualToken();
-  const authMode = manualToken ? "MANUAL" : "OAUTH";
-
-  console.log("[Beeper OAuth DEBUG] checkBeeperConnection() — auth mode:", authMode);
 
   try {
     const client = getBeeperDesktop();
     await client.accounts.list();
-    console.log("[Beeper OAuth DEBUG] Connection check SUCCESS (mode:", authMode, ")");
     return { connected: true };
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
-    console.log("[Beeper OAuth DEBUG] Connection check FAILED (mode:", authMode, ")", errorMessage);
 
     if (errorMessage.includes("ECONNREFUSED") || errorMessage.includes("fetch failed")) {
       return {
@@ -202,7 +163,6 @@ export async function checkBeeperConnection(): Promise<{ connected: boolean; err
     }
 
     if (errorMessage.includes("401") || errorMessage.includes("Unauthorized")) {
-      console.log("[Beeper OAuth DEBUG] 401/Unauthorized — token may be invalid or expired (mode:", authMode, ")");
       return {
         connected: false,
         error: manualToken
@@ -350,12 +310,9 @@ const normalizeUnknownCursorResponse = <T>(result: unknown): CursorResponse<T> =
 const getAccessTokenValue = () => {
   const manual = getManualToken();
   if (manual) {
-    console.log("[Beeper OAuth DEBUG] Using MANUAL token for request (OAuth completely bypassed)");
     return manual;
   }
-  const oauthToken = getAccessToken().token;
-  console.log("[Beeper OAuth DEBUG] Using OAuth token for request (manual token not set)");
-  return oauthToken;
+  return getAccessToken().token;
 };
 
 const getAuthHeaders = () => ({ Authorization: `Bearer ${getAccessTokenValue()}` });
