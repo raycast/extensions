@@ -144,7 +144,11 @@ export default function Command({ arguments: args }: LaunchProps<{ arguments: { 
           }
         />
       ) : mailList.length === 0 && !isLoading ? (
-        <List.EmptyView icon={Icon.Envelope} title="No messages yet" description={`Inbox for ${mailAddress} is empty.`} />
+        <List.EmptyView
+          icon={Icon.Envelope}
+          title="No messages yet"
+          description={`Inbox for ${mailAddress} is empty.`}
+        />
       ) : mailboxResults.length === 0 && !isLoading ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="No results" description="No messages match your search." />
       ) : (
