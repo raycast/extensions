@@ -8,7 +8,7 @@ const menuBarPreferences = getPreferenceValues<Preferences.MenubarCcusage>();
 
 export const showRemainingUsage = (): boolean => (menuBarPreferences.showRemainingUsage as string) !== "consumed";
 
-export type MenuBarTitleMode =
+type MenuBarTitleMode =
   | "todayUsage"
   | "todayCost"
   | "weeklyCost"
