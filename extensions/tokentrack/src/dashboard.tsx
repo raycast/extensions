@@ -150,7 +150,7 @@ function budgetProgressIcon(pct: number): Icon {
   if (p >= 0.75) return Icon.CircleProgress75;
   if (p >= 0.5) return Icon.CircleProgress50;
   if (p >= 0.25) return Icon.CircleProgress25;
-  return Icon.CircleProgress25;
+  return Icon.Circle;
 }
 
 function formatBudgetPercent(pct: number): string {
