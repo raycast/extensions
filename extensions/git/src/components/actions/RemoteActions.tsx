@@ -155,15 +155,13 @@ export function RemoteEditorForm(context: RemoteEditorFormProps) {
 
   const { data: needsManualProvider } = usePromise(
     async (url: string) => {
-      if (context.initialRemote?.provider === undefined || context.initialRemote?.isOverridedProvider) {
-        return true;
-      }
-
-      if (!validateGitUrl(url)) {
-        return false;
-      }
-
+      if (!validateGitUrl(url)) return false;
       const parsed = remoteHostParser(url);
+
+      if (context.initialRemote?.provider !== undefined && !context.initialRemote?.isOverridedProvider) {
+        return parsed.provider === undefined;
+      }
+
       return parsed.provider === undefined;
     },
     [fetchUrl.trim()],
@@ -262,12 +260,12 @@ export function RemoteEditorForm(context: RemoteEditorFormProps) {
 
 /**
  * Action submenu for opening the remote repository in github.dev or vscode.dev.
- * Only rendered when remote.provider is "GitHub".
+ * Only rendered when remote.provider is GitHub.
  */
 export function RemoteOpenInDevAction(context: { remote: Remote }) {
   const { remote } = context;
 
-  if (remote.provider !== "GitHub" || !remote.organizationName || !remote.repositoryName) {
+  if (remote.provider !== RemoteProvider.GitHub || !remote.organizationName || !remote.repositoryName) {
     return null;
   }
 

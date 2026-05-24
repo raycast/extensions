@@ -1,6 +1,12 @@
 # Changelog
 
-## [Update] - 2026-05-20
+## [Update] - {PR_MERGE_DATE}
+
+### Added
+- **Manage Repositories**: Add "Clear Cache" action for clearing the extension cache
+
+### Changed
+- **Storage**: Move stable data from `Cache` to `LocalStorage`
 
 ### Fixed
 - **Diff**: Show raw Git diff output without stripping leading whitespace from added/removed lines, so indented code changes display correctly
