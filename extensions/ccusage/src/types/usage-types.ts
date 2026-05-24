@@ -1,10 +1,11 @@
 import { z } from "zod";
 
-// ccusage v20 renamed per-row `date`/`month`/`sessionId` to a single `period`
-// field and moved session `lastActivity` under a nested `metadata` object. The
-// session command's top-level array was also renamed `sessions` → `session`.
-// We preprocess each shape back into the original field names so that the rest
-// of the extension can keep using the stable property names.
+// ccusage emits a single `period` field per row that means different things
+// per command (date for daily, month for monthly, session id for sessions),
+// nests session `lastActivity` under `metadata`, and keys the session
+// command's top-level array as `session`. Preprocess maps these into
+// `date` / `month` / `sessionId` / `lastActivity` / `sessions` so consumers
+// see a consistent shape.
 
 const aliasPeriodTo =
   (key: "date" | "month" | "sessionId") =>

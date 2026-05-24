@@ -1,6 +1,6 @@
 # Claude Code Usage (ccusage) Changelog
 
-## [Fix ccusage v20 schema mismatch] - {PR_MERGE_DATE}
+## [ccusage v20] - {PR_MERGE_DATE}
 
 ### Fixed
 
