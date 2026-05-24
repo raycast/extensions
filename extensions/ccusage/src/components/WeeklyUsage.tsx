@@ -79,10 +79,14 @@ export function WeeklyUsage() {
             <List.Item.Detail.Metadata.Label
               title="Cost Delta"
               text={formatCostDelta(weeklyUsage.totalCost, previousWeekData.totalCost)}
-              icon={{
-                source: weeklyUsage.totalCost >= previousWeekData.totalCost ? Icon.ArrowUp : Icon.ArrowDown,
-                tintColor: weeklyUsage.totalCost >= previousWeekData.totalCost ? Color.Red : Color.Green,
-              }}
+              icon={
+                weeklyUsage.totalCost === previousWeekData.totalCost
+                  ? undefined
+                  : {
+                      source: weeklyUsage.totalCost > previousWeekData.totalCost ? Icon.ArrowUp : Icon.ArrowDown,
+                      tintColor: weeklyUsage.totalCost > previousWeekData.totalCost ? Color.Red : Color.Green,
+                    }
+              }
             />
             <List.Item.Detail.Metadata.Label
               title="Token Delta"

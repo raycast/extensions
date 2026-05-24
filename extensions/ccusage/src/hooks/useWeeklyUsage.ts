@@ -1,6 +1,6 @@
 import { useCCUsageWeeklyCli } from "./useCCUsageWeeklyCli";
 import { WeeklyUsageData } from "../types/usage-types";
-import { getCurrentWeekStart, getPreviousWeekStart } from "../utils/date-formatter";
+import { getCurrentWeekStart } from "../utils/date-formatter";
 
 export const useWeeklyUsage = (): {
   data: WeeklyUsageData | undefined;
@@ -12,12 +12,8 @@ export const useWeeklyUsage = (): {
   const { data: rawData, isLoading, error, revalidate } = useCCUsageWeeklyCli();
 
   const weeks = rawData?.weekly ?? [];
-  const currentWeek = getCurrentWeekStart();
-  const previousWeek = getPreviousWeekStart();
-
-  const data = weeks.find((entry) => entry.week === currentWeek) ?? weeks.at(-1);
-  const previousWeekData =
-    weeks.find((entry) => entry.week === previousWeek) ?? weeks.filter((e) => e.week < currentWeek).at(-1);
+  const data = weeks.find((entry) => entry.week === getCurrentWeekStart()) ?? weeks.at(-1);
+  const previousWeekData = data ? weeks.filter((entry) => entry.week < data.week).at(-1) : undefined;
 
   return { data, previousWeekData, isLoading, error, revalidate };
 };

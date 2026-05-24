@@ -18,8 +18,8 @@ const alias =
 const liftLastActivity = (raw: unknown): unknown => {
   const obj = asObject(raw);
   if (!obj || "lastActivity" in obj) return raw;
-  const meta = asObject(obj.metadata);
-  return meta && "lastActivity" in meta ? { ...obj, lastActivity: meta.lastActivity } : raw;
+  const lastActivity = asObject(obj.metadata)?.lastActivity;
+  return typeof lastActivity === "string" ? { ...obj, lastActivity } : raw;
 };
 
 const modelBreakdownSchema = z.object({
@@ -46,7 +46,7 @@ const usageRowBase = {
   modelBreakdowns: z.array(modelBreakdownSchema),
 };
 
-const aggregateMetadata = z.object({ agents: z.array(z.string()) }).nullish();
+const aggregateMetadata = z.object({ agents: z.array(z.string()).optional() }).nullish();
 
 export const DailyUsageResponseSchema = z.preprocess(
   alias("period", "date"),

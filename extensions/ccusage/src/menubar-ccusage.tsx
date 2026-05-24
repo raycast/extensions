@@ -127,8 +127,10 @@ export default function MenuBarccusage() {
       return highestUtilization !== null
         ? `${(preferRemaining ? 100 - highestUtilization : highestUtilization).toFixed(0)}%`
         : undefined;
-    if (menuBarTitlePref === "blockProjection")
-      return workingTime.activeBlock?.projection ? formatCost(workingTime.activeBlock.projection.totalCost) : undefined;
+    if (menuBarTitlePref === "blockProjection") {
+      const block = workingTime.activeBlock;
+      return block ? formatCost(block.projection?.totalCost ?? block.costUSD) : undefined;
+    }
     return todayUsage
       ? `${formatCost(todayUsage.totalCost)} · ${formatTokensAsMTok(todayUsage.totalTokens)}`
       : undefined;
