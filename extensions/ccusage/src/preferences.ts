@@ -11,6 +11,7 @@ export const showRemainingUsage = (): boolean => (menuBarPreferences.showRemaini
 export type MenuBarTitleMode =
   | "todayUsage"
   | "todayCost"
+  | "weeklyCost"
   | "monthlyCost"
   | "todayTokens"
   | "fiveHour"

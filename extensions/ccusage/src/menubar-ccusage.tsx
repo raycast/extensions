@@ -1,6 +1,7 @@
 import { MenuBarExtra, Icon, open, openCommandPreferences } from "@raycast/api";
 import { useState, useEffect, useRef } from "react";
 import { useDailyUsage } from "./hooks/useDailyUsage";
+import { useWeeklyUsage } from "./hooks/useWeeklyUsage";
 import { useMonthlyUsage } from "./hooks/useMonthlyUsage";
 import { useTotalUsage } from "./hooks/useTotalUsage";
 import { useClaudeUsageLimits } from "./hooks/useClaudeUsageLimits";
@@ -24,6 +25,7 @@ const MOCK_LIMITS_DATA = {
 export default function MenuBarccusage() {
   const [, forceRender] = useState(0);
   const { data: todayUsage, previousDayData, isLoading: dailyLoading, error: dailyError } = useDailyUsage();
+  const { data: weeklyUsage, isLoading: weeklyLoading, error: weeklyError } = useWeeklyUsage();
   const { data: monthlyUsage, isLoading: monthlyLoading, error: monthlyError } = useMonthlyUsage();
   const { data: totalUsage, isLoading: totalLoading, error: totalError } = useTotalUsage();
   const {
@@ -46,9 +48,9 @@ export default function MenuBarccusage() {
 
   const effectiveLimitsData = MOCK_LIMITS_ENABLED ? MOCK_LIMITS_DATA : limitsData;
 
-  const hasData = todayUsage || monthlyUsage || totalUsage;
-  const hasError = !hasData && (dailyError || monthlyError || totalError);
-  const isLoading = dailyLoading || monthlyLoading || totalLoading;
+  const hasData = todayUsage || weeklyUsage || monthlyUsage || totalUsage;
+  const hasError = !hasData && (dailyError || weeklyError || monthlyError || totalError);
+  const isLoading = dailyLoading || weeklyLoading || monthlyLoading || totalLoading;
 
   if (isLoading) {
     return <MenuBarExtra icon={{ source: Icon.Clock }} tooltip="Loading Claude usage..." isLoading={true} />;
@@ -110,6 +112,7 @@ export default function MenuBarccusage() {
         ? `${formatCost(todayUsage.totalCost)} · ${formatTokensAsMTok(todayUsage.totalTokens)}`
         : undefined;
     if (menuBarTitlePref === "todayCost") return todayUsage ? formatCost(todayUsage.totalCost) : undefined;
+    if (menuBarTitlePref === "weeklyCost") return weeklyUsage ? formatCost(weeklyUsage.totalCost) : undefined;
     if (menuBarTitlePref === "monthlyCost") return monthlyUsage ? formatCost(monthlyUsage.totalCost) : undefined;
     if (menuBarTitlePref === "todayTokens") return todayUsage ? formatTokensAsMTok(todayUsage.totalTokens) : undefined;
     if (menuBarTitlePref === "fiveHour")
@@ -243,6 +246,14 @@ export default function MenuBarccusage() {
                   ? `vs yesterday: ${formatCostDelta(todayUsage.totalCost, previousDayData.totalCost)}`
                   : undefined
               }
+              icon={Icon.Calendar}
+              onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
+            />
+          </MenuBarExtra.Section>
+
+          <MenuBarExtra.Section title="This Week">
+            <MenuBarExtra.Item
+              title={formatUsageTitle(weeklyLoading, weeklyUsage, "No usage data available")}
               icon={Icon.Calendar}
               onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
             />

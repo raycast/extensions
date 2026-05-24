@@ -53,6 +53,11 @@ export const DailyUsageResponseSchema = z.preprocess(
   z.object({ date: z.string(), ...usageRowBase, metadata: aggregateMetadata }),
 );
 
+export const WeeklyUsageResponseSchema = z.preprocess(
+  alias("period", "week"),
+  z.object({ week: z.string(), ...usageRowBase, metadata: aggregateMetadata }),
+);
+
 export const MonthlyUsageResponseSchema = z.preprocess(
   alias("period", "month"),
   z.object({ month: z.string(), ...usageRowBase, metadata: aggregateMetadata }),
@@ -73,6 +78,7 @@ export const ModelUsageSchema = z.object({
 });
 
 export const DailyUsageDataSchema = DailyUsageResponseSchema;
+export const WeeklyUsageDataSchema = WeeklyUsageResponseSchema;
 export const MonthlyUsageDataSchema = MonthlyUsageResponseSchema;
 export const SessionDataSchema = SessionResponseSchema;
 
@@ -85,6 +91,10 @@ export const TotalUsageResponseSchema = z.object({
 
 export const DailyUsageCommandResponseSchema = z.object({
   daily: z.array(DailyUsageResponseSchema),
+});
+
+export const WeeklyUsageCommandResponseSchema = z.object({
+  weekly: z.array(WeeklyUsageResponseSchema),
 });
 
 export const MonthlyUsageCommandResponseSchema = z.object({
@@ -151,15 +161,18 @@ export type Block = z.infer<typeof BlockSchema>;
 export type BlocksCommandResponse = z.infer<typeof BlocksCommandResponseSchema>;
 
 export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
+export type WeeklyUsageData = z.infer<typeof WeeklyUsageDataSchema>;
 export type MonthlyUsageData = z.infer<typeof MonthlyUsageDataSchema>;
 export type SessionData = z.infer<typeof SessionDataSchema>;
 export type ModelUsage = z.infer<typeof ModelUsageSchema>;
 export type TotalUsageData = z.infer<typeof TotalUsageDataSchema>;
 export type TotalUsageResponse = z.infer<typeof TotalUsageResponseSchema>;
 export type DailyUsageResponse = z.infer<typeof DailyUsageResponseSchema>;
+export type WeeklyUsageResponse = z.infer<typeof WeeklyUsageResponseSchema>;
 export type MonthlyUsageResponse = z.infer<typeof MonthlyUsageResponseSchema>;
 export type SessionResponse = z.infer<typeof SessionResponseSchema>;
 export type DailyUsageCommandResponse = z.infer<typeof DailyUsageCommandResponseSchema>;
+export type WeeklyUsageCommandResponse = z.infer<typeof WeeklyUsageCommandResponseSchema>;
 export type MonthlyUsageCommandResponse = z.infer<typeof MonthlyUsageCommandResponseSchema>;
 export type SessionUsageCommandResponse = z.infer<typeof SessionUsageCommandResponseSchema>;
 export type LimitWindow = z.infer<typeof LimitWindowSchema>;

@@ -50,6 +50,10 @@
               "value": "todayCost"
             },
             {
+              "title": "Weekly Cost",
+              "value": "weeklyCost"
+            },
+            {
               "title": "Monthly Cost",
               "value": "monthlyCost"
             },
@@ -153,6 +157,10 @@
         {
           "title": "Today Usage",
           "value": "today"
+        },
+        {
+          "title": "This Week",
+          "value": "week"
         },
         {
           "title": "Session Usage",
