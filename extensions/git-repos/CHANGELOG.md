@@ -1,6 +1,6 @@
 # Git Repos Changelog
 
-## [Bug Fix] - {PR_MERGE_DATE}
+## [Bug Fix] - 2026-05-24
 
 - Reduce memory usage while scanning large directory trees for repositories.
 
