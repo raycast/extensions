@@ -128,8 +128,8 @@ function Command() {
                   title={worker.id}
                   accessories={[
                     {
-                      text: new Date(worker.modifiedOn).toLocaleDateString(),
-                      tooltip: `Modified: ${worker.modifiedOn}`,
+                      date: new Date(worker.modifiedOn),
+                      tooltip: `Modified: ${new Date(worker.modifiedOn).toLocaleString()}`,
                     },
                   ]}
                   actions={
