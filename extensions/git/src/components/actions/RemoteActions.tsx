@@ -185,7 +185,7 @@ export function RemoteEditorForm(context: RemoteEditorFormProps) {
         await context.gitManager.addRemote(values.name.trim(), values.fetchUrl.trim(), values.pushUrl.trim());
       }
 
-      if (values.hostProvider !== undefined) {
+      if (values.hostProvider) {
         context.remotes.addProviderOverride(values.hostProvider, values.fetchUrl.trim());
       }
 
