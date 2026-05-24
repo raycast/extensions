@@ -1,0 +1,143 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "drone-builds",
+  "title": "Drone Builds",
+  "description": "Browse, restart and cancel your Drone CI builds, trigger cron jobs, and get native macOS notifications when builds finish — without leaving Raycast.",
+  "icon": "icon.png",
+  "author": "spicyfalafel",
+  "categories": ["Developer Tools"],
+  "license": "MIT",
+  "platforms": ["macOS"],
+  "commands": [
+    {
+      "name": "menu",
+      "title": "Drone Build Notifier",
+      "description": "Background poller (every minute) that detects new build completions and fires native macOS notifications. Has no UI.",
+      "mode": "no-view",
+      "interval": "1m"
+    },
+    {
+      "name": "builds",
+      "title": "Drone Builds",
+      "description": "Browse, restart and cancel your recent Drone builds",
+      "mode": "view"
+    },
+    {
+      "name": "restart-last",
+      "title": "Restart My Last Failed Build",
+      "description": "Find your most recent failed/errored Drone build and restart it (honors the mine/all filter)",
+      "mode": "no-view"
+    },
+    {
+      "name": "cancel-running",
+      "title": "Cancel My Latest Running Build",
+      "description": "Find your most recent running Drone build and cancel it (with confirmation, honors the mine/all filter)",
+      "mode": "no-view"
+    },
+    {
+      "name": "open-drone-server",
+      "title": "Open Drone Server",
+      "description": "Open the configured Drone server URL in the default browser",
+      "mode": "no-view"
+    },
+    {
+      "name": "run-cron",
+      "title": "Run Drone Cron Job",
+      "description": "Pick a repo and one of its cron jobs to trigger immediately (equivalent to POST /api/repos/{slug}/cron/{name})",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "droneUrl",
+      "title": "Drone Server URL",
+      "description": "Base URL of your Drone server, e.g. https://drone.example.com",
+      "type": "textfield",
+      "required": true,
+      "placeholder": "https://drone.example.com"
+    },
+    {
+      "name": "droneToken",
+      "title": "Personal API Token",
+      "description": "Bearer token from Drone user settings",
+      "type": "password",
+      "required": true
+    },
+    {
+      "name": "filterMode",
+      "title": "Notify About",
+      "description": "Which builds to show and notify on",
+      "type": "dropdown",
+      "required": false,
+      "default": "mine",
+      "data": [
+        { "title": "Only my builds (sender or commit author)", "value": "mine" },
+        { "title": "All builds I can see", "value": "all" }
+      ]
+    },
+    {
+      "name": "useTerminalNotifier",
+      "title": "Notifier",
+      "description": "Use terminal-notifier (brew install terminal-notifier) for clickable banners. Falls back to osascript if not found.",
+      "type": "checkbox",
+      "required": false,
+      "default": true,
+      "label": "Use terminal-notifier when available"
+    },
+    {
+      "name": "includeRepos",
+      "title": "Include Repos",
+      "description": "Comma-separated list of owner/repo slugs to include (e.g. acme/api,acme/web). Empty = include all.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "acme/api,acme/web"
+    },
+    {
+      "name": "excludeRepos",
+      "title": "Exclude Repos",
+      "description": "Comma-separated owner/repo slugs to skip even if they pass the mine/include filters.",
+      "type": "textfield",
+      "required": false,
+      "default": "",
+      "placeholder": "acme/legacy"
+    },
+    {
+      "name": "demoMode",
+      "title": "Demo Mode",
+      "description": "Replace real repo slugs, authors, branches, commit messages and cron names with deterministic synthetic placeholders. Use when capturing screenshots — toggle off for normal use.",
+      "type": "checkbox",
+      "required": false,
+      "default": false,
+      "label": "Redact sensitive data in UI (for screenshots)"
+    },
+    {
+      "name": "longRunningMinutes",
+      "title": "Long-Running Alert",
+      "description": "Minutes a build can be running before firing a one-shot 'still running' notification. 0 disables.",
+      "type": "textfield",
+      "required": false,
+      "default": "15",
+      "placeholder": "15"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.83.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^22.13.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^9.20.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "ray publish"
+  }
+}
