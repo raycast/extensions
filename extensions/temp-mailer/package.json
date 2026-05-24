@@ -20,6 +20,13 @@
       "subtitle": "Shows Mails From Selected Mail Address",
       "description": "View current emails from your configured temporary email address with search functionality and detailed mail content",
       "mode": "view"
+    },
+    {
+      "name": "list-saved-addresses",
+      "title": "List Saved Addresses",
+      "subtitle": "Manage Your Temp Mail Addresses",
+      "description": "View, copy, and manage all your saved temporary email addresses",
+      "mode": "view"
     }
   ],
   "dependencies": {

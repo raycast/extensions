@@ -1,4 +1,4 @@
-import { ActionPanel, Form, Action, LocalStorage, showToast, popToRoot, Toast } from "@raycast/api";
+import { ActionPanel, Form, Action, LocalStorage, showToast, popToRoot, Toast, Clipboard } from "@raycast/api";
 import { useForm, FormValidation } from "@raycast/utils";
 import { TEMP_MAIL_DOMAINS } from "temp-mail-plus-api";
 
@@ -10,7 +10,20 @@ interface CreateMailFormValues {
 export default function Command() {
   const setMailAddress = async ({ mail_username, mail_domain }: { mail_username: string; mail_domain: string }) => {
     const mailAddress = `${mail_username}@${mail_domain}`;
+
+    // Set as active mail address
     await LocalStorage.setItem("mail_address", mailAddress);
+
+    // Add to saved addresses list (avoid duplicates)
+    const existingAddresses = await LocalStorage.getItem<string>("mail_addresses");
+    const addressList: string[] = existingAddresses ? JSON.parse(existingAddresses) : [];
+    if (!addressList.includes(mailAddress)) {
+      addressList.push(mailAddress);
+      await LocalStorage.setItem("mail_addresses", JSON.stringify(addressList));
+    }
+
+    // Copy to clipboard for convenience
+    await Clipboard.copy(mailAddress);
   };
 
   const { handleSubmit, itemProps } = useForm<CreateMailFormValues>({
