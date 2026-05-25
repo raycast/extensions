@@ -25,7 +25,7 @@ const MOCK_LIMITS_DATA = {
 export default function MenuBarccusage() {
   const [, forceRender] = useState(0);
   const { data: todayUsage, previousDayData, isLoading: dailyLoading, error: dailyError } = useDailyUsage();
-  const { data: weeklyUsage, isLoading: weeklyLoading, error: weeklyError } = useWeeklyUsage();
+  const { data: weeklyUsage, previousWeekData, isLoading: weeklyLoading, error: weeklyError } = useWeeklyUsage();
   const { data: monthlyUsage, isLoading: monthlyLoading, error: monthlyError } = useMonthlyUsage();
   const { data: totalUsage, isLoading: totalLoading, error: totalError } = useTotalUsage();
   const {
@@ -50,7 +50,7 @@ export default function MenuBarccusage() {
 
   const hasData = todayUsage || weeklyUsage || monthlyUsage || totalUsage;
   const hasError = !hasData && (dailyError || weeklyError || monthlyError || totalError);
-  const isLoading = dailyLoading || weeklyLoading || monthlyLoading || totalLoading;
+  const isLoading = dailyLoading || monthlyLoading || totalLoading;
 
   if (isLoading) {
     return <MenuBarExtra icon={{ source: Icon.Clock }} tooltip="Loading Claude usage..." isLoading={true} />;
@@ -256,6 +256,11 @@ export default function MenuBarccusage() {
           <MenuBarExtra.Section title="This Week">
             <MenuBarExtra.Item
               title={formatUsageTitle(weeklyLoading, weeklyUsage, "No usage data available")}
+              subtitle={
+                weeklyUsage && previousWeekData
+                  ? `vs last week: ${formatCostDelta(weeklyUsage.totalCost, previousWeekData.totalCost)}`
+                  : undefined
+              }
               icon={Icon.Calendar}
               onAction={() => open("raycast://extensions/nyatinte/ccusage/ccusage")}
             />
