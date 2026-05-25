@@ -125,7 +125,6 @@ function Command() {
               {accountWorkers.map((worker) => (
                 <List.Item
                   key={worker.id}
-                  icon={Icon.Code}
                   title={worker.id}
                   accessories={[
                     {
