@@ -53,7 +53,7 @@ function sumDurations(
   durationFormat: string,
 ): string {
   const entriesTotal = entries
-    .filter((e) => e.end_time !== null)
+    .filter((e) => e.end_time != null)
     .reduce((sum, e) => sum + parseDurationToSeconds(e.duration), 0);
   return formatDuration(entriesTotal + timerElapsed, durationFormat);
 }
