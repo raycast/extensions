@@ -43,3 +43,10 @@
 - Read Aloud labels the toast when a slow read request is dropped because the active Qwen model is not the Instruct variant, instead of silently reading at normal speed.
 - Defaulted the Read Aloud engine to Gemini when only the Gemini API key is configured, so first-time Read Aloud doesn't fail with a missing DashScope key for Gemini-only setups.
 - Cleared the "Auto-copied on capture" hint in Screenshot OCR after edits or reformatting, so the clipboard status no longer claims a stale copy.
+- Refreshed the model catalog against official provider docs (DeepSeek, Xiaomi MiMo, Gemini, Kimi, OpenAI, Qwen-TTS) and tightened every request path against the latest spec:
+  - Disabled DeepSeek and Xiaomi MiMo thinking mode on translation and Rewrite & Coach requests so temperature is honored and first-token latency drops on `deepseek-v4-*` and `mimo-v2.5-*` models.
+  - Switched the Gemini structured-output payload to the current `generationConfig.responseFormat.text.{mimeType,schema}` shape; promoted the new stable `gemini-3.5-flash` as the Gemini Fast tier and dropped the retired `gemini-3-pro-preview` entry while adding stable `gemini-3.1-flash-lite`.
+  - Upgraded OpenAI structured outputs to `response_format.type: "json_schema"` with `strict: true` (scrubbing Gemini-only schema keys) and sent `reasoning_effort: "minimal"` to GPT-5.x reasoning models so translation latency stays low.
+  - Fixed the Kimi base URL default to `https://api.kimi.com/coding/v1` and documented the Moonshot pay-as-you-go alternative (`moonshot-v1-8k` etc.) plus the `kimi-for-coding → K2.6` alias.
+  - Added `mimo-v2-flash` to the Xiaomi MiMo catalog and surfaced `gpt-5.5`, `gpt-5.5-pro`, and the GPT-5.4 family in the OpenAI catalog.
+  - Expanded Qwen-TTS Read Aloud to all 11 supported `language_type` values (added French / Italian / Japanese / Korean / Portuguese / Russian / Spanish) and added the multilingual Chelsie voice.

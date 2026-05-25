@@ -50,7 +50,32 @@ const PCM_CHANNELS = 1;
 const PCM_BITS_PER_SAMPLE = 16;
 
 type QwenTTSModel = typeof QWEN_TTS_DEFAULT_MODEL | typeof QWEN_TTS_INSTRUCT_MODEL;
-type QwenTTSLanguageType = "Auto" | "Chinese" | "English" | "German";
+type QwenTTSLanguageType =
+  | "Auto"
+  | "Chinese"
+  | "English"
+  | "French"
+  | "German"
+  | "Italian"
+  | "Japanese"
+  | "Korean"
+  | "Portuguese"
+  | "Russian"
+  | "Spanish";
+
+const QWEN_TTS_LANGUAGE_TYPES: ReadonlySet<QwenTTSLanguageType> = new Set([
+  "Auto",
+  "Chinese",
+  "English",
+  "French",
+  "German",
+  "Italian",
+  "Japanese",
+  "Korean",
+  "Portuguese",
+  "Russian",
+  "Spanish",
+]);
 
 interface SpeakOptions {
   slow?: boolean;
@@ -312,9 +337,10 @@ function normalizeQwenModel(model: string | undefined): QwenTTSModel {
 }
 
 function normalizeQwenLanguageType(languageType: string | undefined): QwenTTSLanguageType {
-  return languageType === "Chinese" || languageType === "English" || languageType === "German"
-    ? languageType
-    : QWEN_TTS_DEFAULT_LANGUAGE_TYPE;
+  if (languageType && QWEN_TTS_LANGUAGE_TYPES.has(languageType as QwenTTSLanguageType)) {
+    return languageType as QwenTTSLanguageType;
+  }
+  return QWEN_TTS_DEFAULT_LANGUAGE_TYPE;
 }
 
 function buildQwenInstructions(model: QwenTTSModel, preferenceInstructions: string | undefined, slow: boolean): string {

@@ -602,7 +602,7 @@
       "name": "deepseekModel",
       "type": "textfield",
       "required": false,
-      "description": "DeepSeek model name. Official current options include deepseek-v4-flash and deepseek-v4-pro.",
+      "description": "DeepSeek model name. Current options are deepseek-v4-flash (Fast) and deepseek-v4-pro (Pro). Thinking mode is disabled per request so translations stay low-latency and honor temperature.",
       "default": "deepseek-v4-flash"
     },
     {
@@ -626,7 +626,7 @@
       "name": "mimoModel",
       "type": "textfield",
       "required": false,
-      "description": "Xiaomi MiMo model name. Text options include mimo-v2.5-pro, mimo-v2.5, mimo-v2-pro, and mimo-v2-omni.",
+      "description": "Xiaomi MiMo model name. Text options include mimo-v2.5-pro, mimo-v2.5, mimo-v2-pro, mimo-v2-flash, and mimo-v2-omni.",
       "default": "mimo-v2.5-pro"
     },
     {
@@ -650,8 +650,8 @@
       "name": "geminiModel",
       "type": "textfield",
       "required": false,
-      "description": "Gemini model name. Options include gemini-3.1-flash-lite-preview, gemini-3.1-pro-preview, gemini-3-flash-preview, gemini-2.5-flash, and gemini-2.5-pro.",
-      "default": "gemini-3.1-flash-lite-preview"
+      "description": "Gemini model name. Stable options include gemini-3.5-flash, gemini-3.1-flash-lite, gemini-2.5-flash, gemini-2.5-pro; preview options include gemini-3.1-pro-preview and gemini-3.1-flash-lite-preview.",
+      "default": "gemini-3.5-flash"
     },
     {
       "title": "Gemini OCR Model",
@@ -742,20 +742,24 @@
       "name": "qwenTTSVoice",
       "type": "dropdown",
       "required": false,
-      "description": "Voice used by Qwen-TTS Read Aloud.",
+      "description": "Voice used by Qwen-TTS Read Aloud. The four listed voices are multilingual across all 11 supported languages.",
       "default": "Cherry",
       "data": [
         {
-          "title": "Cherry (Chinese / English / German)",
+          "title": "Cherry (multilingual, warm)",
           "value": "Cherry"
         },
         {
-          "title": "Serena (Chinese / English / German)",
+          "title": "Serena (multilingual, expressive)",
           "value": "Serena"
         },
         {
-          "title": "Ethan (Chinese / English / German)",
+          "title": "Ethan (multilingual, calm)",
           "value": "Ethan"
+        },
+        {
+          "title": "Chelsie (multilingual, bright)",
+          "value": "Chelsie"
         }
       ]
     },
@@ -767,22 +771,17 @@
       "description": "Sent as language_type. Auto is useful for mixed or uncertain text; a fixed language usually improves quality.",
       "default": "Auto",
       "data": [
-        {
-          "title": "Auto",
-          "value": "Auto"
-        },
-        {
-          "title": "Chinese",
-          "value": "Chinese"
-        },
-        {
-          "title": "English",
-          "value": "English"
-        },
-        {
-          "title": "German",
-          "value": "German"
-        }
+        { "title": "Auto", "value": "Auto" },
+        { "title": "Chinese", "value": "Chinese" },
+        { "title": "English", "value": "English" },
+        { "title": "French", "value": "French" },
+        { "title": "German", "value": "German" },
+        { "title": "Italian", "value": "Italian" },
+        { "title": "Japanese", "value": "Japanese" },
+        { "title": "Korean", "value": "Korean" },
+        { "title": "Portuguese", "value": "Portuguese" },
+        { "title": "Russian", "value": "Russian" },
+        { "title": "Spanish", "value": "Spanish" }
       ]
     },
     {
@@ -806,15 +805,15 @@
       "name": "kimiBaseURL",
       "type": "textfield",
       "required": false,
-      "description": "Kimi Anthropic-compatible coding entrypoint. Requests are sent to /v1/messages.",
-      "default": "https://api.kimi.com/coding/"
+      "description": "Kimi Anthropic-compatible coding entrypoint. Requests are sent to /v1/messages. Switch to https://api.moonshot.ai/v1 (or https://api.moonshot.cn/v1) and an OpenAI-compatible protocol to use Moonshot pay-as-you-go.",
+      "default": "https://api.kimi.com/coding/v1"
     },
     {
       "title": "Kimi Model",
       "name": "kimiModel",
       "type": "textfield",
       "required": false,
-      "description": "Kimi Code model name for the Anthropic-compatible coding endpoint. Use kimi-for-coding unless you also change the base URL/protocol.",
+      "description": "Kimi Code model name. kimi-for-coding is the Kimi Code Plan alias to the current K2 model. To call Moonshot pay-as-you-go directly, switch the base URL and use moonshot-v1-8k, moonshot-v1-32k, kimi-k2.6, or kimi-k2.5.",
       "default": "kimi-for-coding"
     },
     {
@@ -838,7 +837,7 @@
       "name": "openAIModel",
       "type": "textfield",
       "required": false,
-      "description": "OpenAI model name.",
+      "description": "OpenAI model name. Latency-tuned defaults are gpt-4.1-mini/gpt-4.1. GPT-5.x reasoning models (gpt-5.5, gpt-5.4, gpt-5.4-mini, gpt-5.4-nano) are sent with reasoning_effort=minimal for translation latency.",
       "default": "gpt-4.1-mini"
     },
     {

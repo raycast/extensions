@@ -100,12 +100,7 @@ async function generateWithGeminiProtocol(
   options: GenerationOptions = {},
 ): Promise<string> {
   const generationConfig: Record<string, unknown> = { temperature: 0.3, maxOutputTokens };
-  if (options.responseMimeType) {
-    generationConfig.responseMimeType = options.responseMimeType;
-  }
-  if (options.responseJsonSchema) {
-    generationConfig.responseJsonSchema = options.responseJsonSchema;
-  }
+  applyGeminiResponseFormat(generationConfig, options);
 
   const response = await postJson<GeminiResponse>(
     geminiGenerateContentUrl(config.baseURL, config.model),
@@ -143,21 +138,15 @@ async function generateWithAnthropicProtocol(
   const response = await postJson<AnthropicCompatibleResponse>(
     anthropicMessagesUrl(config.baseURL),
     timeoutMs,
-    {
-      Authorization: `Bearer ${config.apiKey}`,
-      "x-api-key": config.apiKey,
-      "api-key": config.apiKey,
-      "anthropic-version": "2023-06-01",
-      "Content-Type": "application/json",
-    },
-    {
+    anthropicCompatibleHeaders(config.apiKey),
+    withDisabledThinking({
       model: config.model,
       system: structuredPrompt.system,
       messages: [{ role: "user", content: structuredPrompt.user }],
       max_tokens: maxOutputTokens,
       temperature: 0.3,
       stream: false,
-    },
+    }),
   );
 
   const content = response.content
@@ -250,21 +239,15 @@ async function translateWithAnthropicCompatible(config: ProviderConfig, request:
   const response = await postJson<AnthropicCompatibleResponse>(
     anthropicMessagesUrl(config.baseURL),
     request.timeoutMs,
-    {
-      Authorization: `Bearer ${config.apiKey}`,
-      "x-api-key": config.apiKey,
-      "api-key": config.apiKey,
-      "anthropic-version": "2023-06-01",
-      "Content-Type": "application/json",
-    },
-    {
+    anthropicCompatibleHeaders(config.apiKey),
+    withDisabledThinking({
       model: config.model,
       system: prompt.system,
       messages: [{ role: "user", content: prompt.user }],
       max_tokens: request.maxOutputTokens,
       temperature: 0.2,
       stream: false,
-    },
+    }),
   );
 
   const content = response.content
@@ -420,6 +403,11 @@ function applyOpenAIGenerationParams(
 ): void {
   if (isReasoningModel(model)) {
     body.max_completion_tokens = maxOutputTokens;
+    // Translation is latency-sensitive and does not benefit from reasoning
+    // tokens. `minimal` (the lowest GPT-5.x setting that still works on every
+    // reasoning model) cuts first-token latency and per-call cost without
+    // changing output quality on short prompts.
+    body.reasoning_effort = "minimal";
     return;
   }
 
@@ -427,10 +415,92 @@ function applyOpenAIGenerationParams(
   body.temperature = temperature;
 }
 
+/**
+ * Modern OpenAI structured outputs use `response_format.type: "json_schema"`
+ * with `strict: true` so the model is constrained at decode time. Bare
+ * `json_object` mode only guarantees valid JSON, not adherence to the schema,
+ * so we always prefer json_schema when a schema is supplied.
+ */
 function applyOpenAIResponseFormat(body: Record<string, unknown>, options: GenerationOptions): void {
-  if (options.responseJsonSchema || options.responseMimeType === "application/json") {
+  if (options.responseJsonSchema) {
+    body.response_format = {
+      type: "json_schema",
+      json_schema: {
+        name: "structured_response",
+        strict: true,
+        schema: toOpenAIJsonSchema(options.responseJsonSchema),
+      },
+    };
+    return;
+  }
+
+  if (options.responseMimeType === "application/json") {
     body.response_format = { type: "json_object" };
   }
+}
+
+/**
+ * OpenAI's strict JSON Schema rejects Gemini-specific keys like
+ * `propertyOrdering` with `Unknown parameter`. Strip them so the same schema
+ * object works for both providers.
+ */
+function toOpenAIJsonSchema(schema: Record<string, unknown>): Record<string, unknown> {
+  const clone = JSON.parse(JSON.stringify(schema)) as Record<string, unknown>;
+  stripGeminiOnlyKeys(clone);
+  return clone;
+}
+
+function stripGeminiOnlyKeys(node: unknown): void {
+  if (Array.isArray(node)) {
+    node.forEach(stripGeminiOnlyKeys);
+    return;
+  }
+  if (!node || typeof node !== "object") {
+    return;
+  }
+  const record = node as Record<string, unknown>;
+  delete record.propertyOrdering;
+  for (const value of Object.values(record)) {
+    stripGeminiOnlyKeys(value);
+  }
+}
+
+/**
+ * Gemini moved structured output from `responseMimeType` + `responseJsonSchema`
+ * to `responseFormat.text.{mimeType,schema}` (current docs as of 2026). We
+ * write the new shape only — every shipping Gemini 2.5+/3.x model accepts it.
+ */
+function applyGeminiResponseFormat(generationConfig: Record<string, unknown>, options: GenerationOptions): void {
+  const mimeType = options.responseMimeType ?? (options.responseJsonSchema ? "application/json" : undefined);
+  if (!mimeType && !options.responseJsonSchema) {
+    return;
+  }
+
+  const text: Record<string, unknown> = {};
+  if (mimeType) text.mimeType = mimeType;
+  if (options.responseJsonSchema) text.schema = options.responseJsonSchema;
+  generationConfig.responseFormat = { text };
+}
+
+function anthropicCompatibleHeaders(apiKey: string): Record<string, string> {
+  return {
+    Authorization: `Bearer ${apiKey}`,
+    "x-api-key": apiKey,
+    "api-key": apiKey,
+    "anthropic-version": "2023-06-01",
+    "Content-Type": "application/json",
+  };
+}
+
+/**
+ * DeepSeek v4 and MiMo v2.5 default to `thinking: enabled`, which adds
+ * first-token latency and silently ignores `temperature`. Translation is
+ * latency-sensitive and benefits from temperature control, so we explicitly
+ * disable thinking for every Anthropic-compatible request. Providers that
+ * don't recognize the key (vanilla Anthropic) ignore it.
+ */
+function withDisabledThinking<T extends Record<string, unknown>>(body: T): T & { thinking: { type: "disabled" } } {
+  return { ...body, thinking: { type: "disabled" } };
 }
 
 function applyStructuredPromptOptions(
