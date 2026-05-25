@@ -184,17 +184,28 @@ function getBooleanTag(
   value?: boolean,
   enabledText = 'Enabled',
   disabledText = 'Disabled',
+  disabledColor: Color = Color.Red,
 ) {
   return {
-    color: value ? Color.Green : Color.Red,
+    color: value ? Color.Green : disabledColor,
     text: value ? enabledText : disabledText,
   };
 }
 
 function WorkerDetail(props: WorkerDetailProps) {
   const { worker } = props;
-  const hasModules = getBooleanTag(worker.hasModules, 'Yes', 'No');
-  const hasAssets = getBooleanTag(worker.hasAssets, 'Yes', 'No');
+  const hasModules = getBooleanTag(
+    worker.hasModules,
+    'Yes',
+    'No',
+    Color.SecondaryText,
+  );
+  const hasAssets = getBooleanTag(
+    worker.hasAssets,
+    'Yes',
+    'No',
+    Color.SecondaryText,
+  );
   const logpush = getBooleanTag(worker.logpush);
 
   return (
