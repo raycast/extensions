@@ -1,6 +1,13 @@
 import { getPreferenceValues } from "@raycast/api";
 import { resolveModel } from "./models";
-import { ExtensionPreferences, ModelTier, PROVIDER_IDS, ProviderConfig, ProviderId } from "./types";
+import {
+  ExtensionPreferences,
+  ModelTier,
+  PROVIDER_IDS,
+  ProviderAPIProtocol,
+  ProviderConfig,
+  ProviderId,
+} from "./types";
 
 export const PROVIDER_TITLES: Record<ProviderId, string> = {
   deepseek: "DeepSeek",
@@ -79,13 +86,14 @@ export function getProviderConfig(
   const keys = providerPreferenceKeys[id];
   const customModel = stringValue(preferences[keys.model]);
   const model = modelTier ? resolveModel(id, modelTier, customModel) : customModel;
+  const baseURL = stringValue(preferences[keys.baseURL]);
   return {
     id,
     title: PROVIDER_TITLES[id],
     apiKey: stringValue(preferences[keys.apiKey]),
-    baseURL: stringValue(preferences[keys.baseURL]),
+    baseURL,
     model,
-    apiProtocol: isAnthropicProvider(id) ? "anthropic" : "openai",
+    apiProtocol: detectProtocol(id, baseURL),
   };
 }
 
@@ -105,8 +113,19 @@ function isProviderId(value: string): value is ProviderId {
   return (PROVIDER_IDS as readonly string[]).includes(value);
 }
 
-function isAnthropicProvider(id: ProviderId): boolean {
-  return id === "deepseek" || id === "mimo" || id === "kimi";
+/**
+ * Pick the wire protocol from the configured base URL so users can flip
+ * providers between their Anthropic-compatible and OpenAI-compatible
+ * endpoints without a separate preference. For Kimi this matters because the
+ * Kimi Code Plan endpoint speaks Anthropic Messages while Moonshot's pay-
+ * as-you-go endpoint (api.moonshot.ai / api.moonshot.cn) speaks OpenAI Chat
+ * Completions.
+ */
+function detectProtocol(id: ProviderId, baseURL: string): ProviderAPIProtocol {
+  if (id === "gemini" || id === "openai") return "openai";
+  const lower = baseURL.toLowerCase();
+  if (lower.includes("moonshot.")) return "openai";
+  return "anthropic";
 }
 
 function uniqueProviderIds(ids: ProviderId[]): ProviderId[] {
