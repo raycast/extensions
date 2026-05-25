@@ -20,10 +20,10 @@ function getNumberFromCache(key: string, defaultValue: number) {
   return defaultValue;
 }
 
-type ModeListProps = { 
-  deviceId: string, 
-  devices: Device[],
-  setDevices: (devices: Device[] ) => void;
+type ModeListProps = {
+  deviceId: string;
+  devices: Device[];
+  setDevices: (devices: Device[]) => void;
   seam: Seam;
 };
 // Create a proper component for the mode list that shares state
@@ -63,8 +63,7 @@ const ModeList = ({ deviceId, devices, setDevices, seam }: ModeListProps) => {
       setDevices(newDevices);
       await showToast({
         style: Toast.Style.Success,
-        title:
-          targetStatus === DeviceStatus.OFF ? "Thermostat turned off" : `${targetStatus} to ${localTemperature}°F`,
+        title: targetStatus === DeviceStatus.OFF ? "Thermostat turned off" : `${targetStatus} to ${localTemperature}°F`,
       });
     } catch (error: any) {
       console.log("Error sending thermostat command:", error);
@@ -179,7 +178,10 @@ export default function Command() {
             subtitle={subtitle + ` (${temperature}°F)`}
             actions={
               <ActionPanel title="">
-                <Action.Push title="See Actions" target={<ModeList deviceId={id} devices={devices} setDevices={setDevices} seam={seam} />} />
+                <Action.Push
+                  title="See Actions"
+                  target={<ModeList deviceId={id} devices={devices} setDevices={setDevices} seam={seam} />}
+                />
                 <Action
                   title="Confirm Source"
                   onAction={() => showToast({ title: "Data loaded from " + deviceSource })}
