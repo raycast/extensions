@@ -1,0 +1,120 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "better-world-clock",
+  "title": "Better World Clock",
+  "description": "See the current time in your favorite cities and time zones.",
+  "icon": "icon.png",
+  "author": "madeyexz",
+  "license": "MIT",
+  "repository": "https://github.com/madeyexz/raycast-world-clock",
+  "bugs": "https://github.com/madeyexz/raycast-world-clock/issues",
+  "homepage": "https://github.com/madeyexz/raycast-world-clock#readme",
+  "categories": [
+    "Productivity"
+  ],
+  "keywords": [
+    "clock",
+    "timezone",
+    "time zones",
+    "world clock",
+    "raycast"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "commands": [
+    {
+      "name": "index",
+      "title": "World Clock",
+      "description": "Show favorite world clock time zones.",
+      "mode": "view",
+      "keywords": [
+        "time",
+        "timezone",
+        "clock"
+      ]
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timeZones",
+      "title": "Time Zones",
+      "description": "Type city names separated by commas, for example: San Francisco, New York, London, Tokyo. Advanced: IANA IDs like Europe/London also work.",
+      "type": "textfield",
+      "required": false,
+      "placeholder": "San Francisco, New York, London, Tokyo",
+      "default": "San Francisco, New York, London, Tokyo"
+    },
+    {
+      "name": "viewMode",
+      "title": "View",
+      "description": "Choose whether World Clock opens as a visual grid or compact list.",
+      "type": "dropdown",
+      "required": true,
+      "default": "grid",
+      "data": [
+        {
+          "title": "Grid",
+          "value": "grid"
+        },
+        {
+          "title": "List",
+          "value": "list"
+        }
+      ]
+    },
+    {
+      "name": "clockStyle",
+      "title": "Clock Style",
+      "description": "Choose digital or analog clock cards in grid view.",
+      "type": "dropdown",
+      "required": true,
+      "default": "digital",
+      "data": [
+        {
+          "title": "Digital",
+          "value": "digital"
+        },
+        {
+          "title": "Analog",
+          "value": "analog"
+        }
+      ]
+    },
+    {
+      "name": "use24HourTime",
+      "title": "Use 24-Hour Time",
+      "label": "Display times in 24-hour format",
+      "description": "Display times in 24-hour format instead of AM/PM.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    },
+    {
+      "name": "showSeconds",
+      "title": "Show Seconds",
+      "label": "Include seconds in displayed times",
+      "description": "Include seconds in displayed times.",
+      "type": "checkbox",
+      "required": false,
+      "default": false
+    }
+  ],
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@raycast/api": "^1.104.18"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "^24.0.0",
+    "@types/react": "^19.0.0",
+    "typescript": "^6.0.3"
+  }
+}
