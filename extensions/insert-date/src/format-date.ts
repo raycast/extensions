@@ -61,7 +61,7 @@ export function formatDate(fmt: string, now: Date = new Date()): string {
     .replace(/%A/g, DAYS_LONG[now.getDay()])
     .replace(/%a/g, DAYS_SHORT[now.getDay()])
     .replace(/%m/g, pad(now.getMonth() + 1))
-    .replace(/%-d/g, String(now.getDate())) // must precede %d to avoid partial match
+    .replace(/%-d/g, String(now.getDate())) // unpadded day (%-d); kept before %d for clarity
     .replace(/%d/g, pad(now.getDate()))
     .replace(/%H/g, pad(now.getHours()))
     .replace(/%M/g, pad(now.getMinutes()))
