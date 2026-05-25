@@ -1,6 +1,6 @@
 # Apple Developer Docs Changelog
 
-## [Fix Search History] - {PR_MERGE_DATE}
+## [Fix Search History] - 2026-05-25
 - Search history items are now filtered by the current search text, so they no longer push unrelated entries above live results.
 
 ## [Fix Search API] - 2026-05-18
