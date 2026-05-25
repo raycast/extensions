@@ -438,7 +438,7 @@ export default function Command() {
                 : getFavicon(`https://${entry.domain}`, { fallback: Icon.Building })
             }
             accessories={[
-              { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString("en-US") },
+              { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString() },
             ]}
             actions={
               <ActionPanel>
@@ -499,7 +499,7 @@ export default function Command() {
               entry.email
                 ? { text: entry.email, icon: Icon.Envelope }
                 : { text: entry.error ?? "Failed", icon: Icon.ExclamationMark },
-              { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString("en-US") },
+              { text: formatRelativeTime(entry.createdAt), tooltip: new Date(entry.createdAt).toLocaleString() },
             ]}
             actions={
               <ActionPanel>

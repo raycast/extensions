@@ -461,8 +461,13 @@ function EnrichedEmployeeView({
   const [enrichedData, setEnrichedData] = useState<EnrichedData | undefined>(undefined);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | undefined>(undefined);
+  const hasStartedRef = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate requests from React Strict Mode double-mounting
+    if (hasStartedRef.current) return;
+    hasStartedRef.current = true;
+
     let cancelled = false;
 
     async function fetchEnrichedData() {
