@@ -219,7 +219,12 @@ export async function enrichPerson(
     }),
   });
 
-  const data: unknown = await response.json();
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Invalid response from server");
+  }
 
   if (response.status === 402 && isInsufficientCreditsError(data)) {
     throw new Error(`Insufficient credits. You have ${data.balance} credits remaining.`);
@@ -310,7 +315,12 @@ export async function searchPerson(domain: string, page: number = 1): Promise<Se
     }),
   });
 
-  const data: unknown = await response.json();
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new Error("Invalid response from server");
+  }
 
   if (response.status === 402 && isInsufficientCreditsError(data)) {
     throw new Error(`Insufficient credits. You have ${data.balance} credits remaining.`);
