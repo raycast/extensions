@@ -1,5 +1,4 @@
 import { LaunchProps } from "@raycast/api";
-import { useEffect } from "react";
 import { focusApp, withBeeperAuth } from "./api";
 
 type FocusAppArguments = {
@@ -9,11 +8,8 @@ type FocusAppArguments = {
   draftAttachmentPath?: string;
 };
 
-function FocusAppCommand(props: LaunchProps<{ arguments?: FocusAppArguments }>) {
-  useEffect(() => {
-    focusApp(props.arguments ?? {});
-  }, []);
-  return null;
+async function FocusAppCommand(props: LaunchProps<{ arguments?: FocusAppArguments }>) {
+  await focusApp(props.arguments ?? {});
 }
 
 export default withBeeperAuth(FocusAppCommand);
