@@ -192,6 +192,10 @@ function CoachResult({
     setError(undefined);
 
     async function run() {
+      // Pro tier is intentional: Rewrite & Coach is locked here (and in
+      // rewrite-replace) so rewrite quality stays consistent regardless of
+      // the translation Model Tier the user picked. Free-tier keys should
+      // override the Pro model via the Custom tier in Extension Preferences.
       const config = getProviderConfig(providerId, preferences, "pro");
       try {
         const rewrite = await runRewrite(

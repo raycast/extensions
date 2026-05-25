@@ -25,6 +25,11 @@ export default async function Command() {
 
   const preferences = readPreferences();
   const providerId = getOrderedProviderIds(preferences)[0];
+  // Pro tier is intentional: Rewrite & Replace must produce consistent
+  // English-rewrite quality regardless of the translation Model Tier the
+  // user picked (see Rewrite & Coach for the same lock). If your provider
+  // key only covers the fast tier, set the Custom tier model in
+  // Extension Preferences to override.
   const config = getProviderConfig(providerId, preferences, "pro");
 
   try {
