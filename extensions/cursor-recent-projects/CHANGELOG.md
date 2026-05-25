@@ -1,5 +1,11 @@
 # Cursor Changelog
 
+## [Add Keyboard Shortcut and Missing Icon] - 2026-05-16
+
+- Add a dedicated Cursor icon asset for Raycast action icons
+- Use the shared icon asset for project open actions
+- Add the standard remove shortcut to uninstall extension actions
+
 ## [Update] - 2026-01-14
 
 - Update description

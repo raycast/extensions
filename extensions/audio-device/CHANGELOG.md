@@ -1,5 +1,11 @@
 # Audio Device Changelog
 
+## [Add Keyboard Shortcuts] - 2026-05-16
+
+- Add Save shortcut for creating device quicklinks
+- Add keyboard shortcuts for hiding and showing individual devices
+- Add keyboard shortcuts for toggling hidden devices visibility
+
 ## [Update] - 2026-05-05
 
 - Add volume control support for windows

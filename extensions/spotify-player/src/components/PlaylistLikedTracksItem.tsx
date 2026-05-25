@@ -5,6 +5,7 @@ import { FooterAction } from "./FooterAction";
 import { PlayAction } from "./PlayAction";
 import { TracksList } from "./TracksList";
 import { useYourLibrary } from "../hooks/useYourLibrary";
+import { ShowContent } from "../shortcuts/shortcuts";
 
 type PlaylistLikedTracksItemProps = {
   type: "grid" | "list";
@@ -33,10 +34,7 @@ export default function PlaylistLikedTracksItem({ type }: PlaylistLikedTracksIte
             <Action.Push
               title="Show Songs"
               icon={{ source: Icon.AppWindowList }}
-              shortcut={{
-                macOS: { modifiers: ["cmd", "shift"], key: "a" },
-                Windows: { modifiers: ["ctrl", "shift"], key: "a" },
-              }}
+              shortcut={ShowContent}
               target={<TracksList tracks={myLibraryData.tracks?.items} />}
             />
           )}

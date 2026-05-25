@@ -54,6 +54,8 @@ export default function Command() {
   // (e.g. legacy data with duplicate picks) get distinct selection keys.
   const getItemKey = useCallback((item: HistoryItem) => `${item.date}-${getFormattedColor(item.color)}`, []);
   const { selection } = useColorsSelection<HistoryItem>(history ?? [], getItemKey);
+  const favoriteHistory = history?.filter((item) => item.isFavorite) ?? [];
+  const regularHistory = history?.filter((item) => !item.isFavorite) ?? [];
 
   if (selectMode === "multi") {
     return (
@@ -79,24 +81,8 @@ export default function Command() {
             </ActionPanel>
           }
         />
-        {history?.map((historyItem) => {
-          const formattedColor = getFormattedColor(historyItem.color);
-          const previewColor = getPreviewColor(historyItem.color);
-          const isSelected = selection.helpers.getIsItemSelected(historyItem);
-
-          return (
-            <List.Item
-              key={`${historyItem.date}-${formattedColor}`}
-              icon={getIcon(previewColor)}
-              title={`${isSelected ? "✓ " : ""}${formattedColor}${historyItem.title ? ` ${historyItem.title}` : ""}`}
-              subtitle={new Date(historyItem.date).toLocaleString(undefined, {
-                dateStyle: "medium",
-                timeStyle: "short",
-              })}
-              actions={<Actions historyItem={historyItem} selectMode={selectMode} selection={selection} />}
-            />
-          );
-        })}
+        <ListHistorySection title="Favorites" history={favoriteHistory} selectMode={selectMode} selection={selection} />
+        <ListHistorySection title="History" history={regularHistory} selectMode={selectMode} selection={selection} />
       </List>
     );
   }
@@ -120,14 +106,34 @@ export default function Command() {
           </ActionPanel>
         }
       />
-      {history?.map((historyItem) => {
+      <GridHistorySection title="Favorites" history={favoriteHistory} selectMode={selectMode} selection={selection} />
+      <GridHistorySection title="History" history={regularHistory} selectMode={selectMode} selection={selection} />
+    </Grid>
+  );
+}
+
+type HistorySectionProps = {
+  title: string;
+  history: HistoryItem[];
+  selectMode: SelectMode;
+  selection: UseColorsSelectionObject<HistoryItem>;
+};
+
+function GridHistorySection({ title, history, selectMode, selection }: HistorySectionProps) {
+  if (history.length === 0) {
+    return null;
+  }
+
+  return (
+    <Grid.Section title={title} subtitle={String(history.length)}>
+      {history.map((historyItem) => {
         const formattedColor = getFormattedColor(historyItem.color);
         const previewColor = getPreviewColor(historyItem.color);
         const color = { light: previewColor, dark: previewColor, adjustContrast: false };
 
         return (
           <Grid.Item
-            key={`${historyItem.date}-${formattedColor}`}
+            key={`${title}-${historyItem.date}-${formattedColor}`}
             content={historyItem.title ? { value: { color }, tooltip: historyItem.title } : { color }}
             title={`${formattedColor} ${historyItem.title ?? ""}`}
             subtitle={new Date(historyItem.date).toLocaleString(undefined, {
@@ -138,7 +144,36 @@ export default function Command() {
           />
         );
       })}
-    </Grid>
+    </Grid.Section>
+  );
+}
+
+function ListHistorySection({ title, history, selectMode, selection }: HistorySectionProps) {
+  if (history.length === 0) {
+    return null;
+  }
+
+  return (
+    <List.Section title={title} subtitle={String(history.length)}>
+      {history.map((historyItem) => {
+        const formattedColor = getFormattedColor(historyItem.color);
+        const previewColor = getPreviewColor(historyItem.color);
+        const isSelected = selection.helpers.getIsItemSelected(historyItem);
+
+        return (
+          <List.Item
+            key={`${title}-${historyItem.date}-${formattedColor}`}
+            icon={getIcon(previewColor)}
+            title={`${isSelected ? "✓ " : ""}${formattedColor}${historyItem.title ? ` ${historyItem.title}` : ""}`}
+            subtitle={new Date(historyItem.date).toLocaleString(undefined, {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+            actions={<Actions historyItem={historyItem} selectMode={selectMode} selection={selection} />}
+          />
+        );
+      })}
+    </List.Section>
   );
 }
 
@@ -149,7 +184,7 @@ type ActionsProps = {
 };
 
 function Actions({ historyItem, selectMode, selection }: ActionsProps) {
-  const { remove, clear, edit } = useHistory();
+  const { history, remove, clear, edit, addToFavorites, removeFromFavorites, moveFavorite } = useHistory();
   const { data: frontmostApp } = usePromise(async () => {
     try {
       return await getFrontmostApplication();
@@ -164,6 +199,10 @@ function Actions({ historyItem, selectMode, selection }: ActionsProps) {
 
   const color = historyItem.color;
   const formattedColor = getFormattedColor(color);
+  const favoriteHistory = history?.filter((item) => item.isFavorite) ?? [];
+  const favoriteIndex = favoriteHistory.findIndex((item) => getFormattedColor(item.color) === formattedColor);
+  const canMoveFavoriteUp = favoriteIndex > 0;
+  const canMoveFavoriteDown = favoriteIndex !== -1 && favoriteIndex < favoriteHistory.length - 1;
 
   return (
     <ActionPanel>
@@ -194,6 +233,45 @@ function Actions({ historyItem, selectMode, selection }: ActionsProps) {
           icon={Icon.Pencil}
           shortcut={Keyboard.Shortcut.Common.Edit}
         />
+      </ActionPanel.Section>
+
+      <ActionPanel.Section title="Organize">
+        <Action
+          icon={historyItem.isFavorite ? Icon.StarDisabled : Icon.Star}
+          title={historyItem.isFavorite ? "Remove from Favorites" : "Add to Favorites"}
+          shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
+          onAction={async () => {
+            if (historyItem.isFavorite) {
+              removeFromFavorites(historyItem.color);
+              await showToast({ title: "Removed from favorites" });
+            } else {
+              addToFavorites(historyItem.color);
+              await showToast({ title: "Added to favorites" });
+            }
+          }}
+        />
+        {canMoveFavoriteUp && (
+          <Action
+            icon={Icon.ArrowUp}
+            title="Move Favorite up"
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowUp" }}
+            onAction={async () => {
+              moveFavorite(historyItem.color, "up");
+              await showToast({ title: "Moved favorite up" });
+            }}
+          />
+        )}
+        {canMoveFavoriteDown && (
+          <Action
+            icon={Icon.ArrowDown}
+            title="Move Favorite Down"
+            shortcut={{ modifiers: ["cmd", "opt"], key: "arrowDown" }}
+            onAction={async () => {
+              moveFavorite(historyItem.color, "down");
+              await showToast({ title: "Moved favorite down" });
+            }}
+          />
+        )}
       </ActionPanel.Section>
 
       {selectMode === "multi" && (

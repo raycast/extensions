@@ -100,7 +100,7 @@ export function deriveDocsCategoryFromUrl(url: string): string | undefined {
   }
 
   if (docsSegments.length === 0) return undefined;
-  if (/^[1-5]\.x$/i.test(docsSegments[0])) {
+  if (/^[1-6]\.x$/i.test(docsSegments[0])) {
     docsSegments = docsSegments.slice(1);
   }
 
@@ -257,17 +257,17 @@ function firstString(...values: Array<unknown>): string | undefined {
 }
 
 function inferCraftVersion(url: string, type?: string): DocsSearchResult["craftVersion"] | undefined {
-  const urlMatch = url.toLowerCase().match(/(?:^|\/)([1-5])\.x(?:\/|$)/);
+  const urlMatch = url.toLowerCase().match(/(?:^|\/)([1-6])\.x(?:\/|$)/);
   if (urlMatch && isVersionNumber(urlMatch[1])) return `${urlMatch[1]}.x`;
 
   if (!type) return undefined;
-  const typeMatch = type.toLowerCase().match(/(?:craft[\s-]*)?([1-5])(?:\b|\.|x)/);
+  const typeMatch = type.toLowerCase().match(/(?:craft[\s-]*)?([1-6])(?:\b|\.|x)/);
   if (typeMatch && isVersionNumber(typeMatch[1])) return `${typeMatch[1]}.x`;
   return undefined;
 }
 
-function isVersionNumber(value: string): value is "1" | "2" | "3" | "4" | "5" {
-  return value === "1" || value === "2" || value === "3" || value === "4" || value === "5";
+function isVersionNumber(value: string): value is "1" | "2" | "3" | "4" | "5" | "6" {
+  return value === "1" || value === "2" || value === "3" || value === "4" || value === "5" || value === "6";
 }
 
 function extractGlossarySlug(url: string): string | undefined {

@@ -1,0 +1,78 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "unirate-currency",
+  "title": "UniRate Currency",
+  "description": "Convert currencies and look up exchange rates for any date back to 1999, powered by UniRateAPI.",
+  "icon": "command-icon.png",
+  "author": "rob_brown96cc",
+  "categories": [
+    "Finance",
+    "Productivity"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "convert",
+      "title": "Convert Currency",
+      "subtitle": "UniRate",
+      "description": "Convert between currencies on today's rate or any historical date.",
+      "mode": "view"
+    },
+    {
+      "name": "rates",
+      "title": "Latest Rates",
+      "subtitle": "UniRate",
+      "description": "Browse latest exchange rates for a chosen base currency.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "api_key",
+      "type": "password",
+      "required": true,
+      "title": "UniRate API Key",
+      "description": "Free API key from https://unirateapi.com/dashboard. The free tier covers latest-rate endpoints; historical and commodities require a Pro key.",
+      "placeholder": "Your UniRate API key"
+    },
+    {
+      "name": "default_base",
+      "type": "textfield",
+      "required": false,
+      "title": "Default Base Currency",
+      "description": "Three-letter ISO code (e.g. USD, EUR, GBP). Used as the initial \"From\" currency.",
+      "default": "USD"
+    },
+    {
+      "name": "decimals",
+      "type": "textfield",
+      "required": false,
+      "title": "Decimals",
+      "description": "Number of decimal places to display in converted amounts.",
+      "default": "4"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.1.1",
+    "@types/node": "25.9.1",
+    "@types/react": "19.2.15",
+    "eslint": "^10.4.0",
+    "prettier": "^3.8.3",
+    "typescript": "^6.0.3"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "platforms": [
+    "Windows",
+    "macOS"
+  ]
+}

@@ -1,5 +1,9 @@
 # Copy Path Changelog
 
+## [Support QSpace Pro] - 2026-05-11
+
+- Support copying selected item paths and the current location from QSpace Pro.
+
 ## [Fix browser support] - 2025-08-28
 
 - Fix support for browsers.

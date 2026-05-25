@@ -1,6 +1,17 @@
 # Brew Changelog
 
-## [Bug Fix & Launch Argument] - {PR_MERGE_DATE}
+## [Bug fix] - {PR_MERGE_DATE}
+
+- Improves reliability of index cache
+- Improves toast error message if fetch fails
+- Adds a "Clear Cache & Retry" action to the error toast if fetch fails
+
+## [Add Keyboard Shortcuts] - 2026-05-12
+
+- Added keyboard shortcuts to common Brew actions, including opening package pages, opening homepages, copying URLs, and running terminal commands.
+- Standardized shortcut usage with Raycast common shortcuts where appropriate.
+
+## [Bug Fix & Launch Argument] - 2026-05-12
 
 - Added launch argument to Search command for pre-filling the search query before opening
 - Fixed search not working while the formulae/cask index is being downloaded on cold start

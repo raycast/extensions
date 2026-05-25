@@ -22,25 +22,32 @@ Manage your TV shows and movies with BetaSeries directly from Raycast.
 ## Commands
 
 ### Search Shows
+
 Search for TV shows on BetaSeries and add them to your library.
 
 ### Search Movies
+
 Search for movies on BetaSeries and add them to your collection.
 
 ### My Shows
+
 View all your TV shows with their unwatched episodes count. Press Enter to see unwatched episodes.
 You can enable or disable episode notifications per show from the Action Panel.
 
 ### My Movies
+
 Browse your movie collection and mark them as watched or rate them.
 
 ### Planning
+
 See your upcoming episodes for the week.
 
 ### New Episodes Menu Bar
+
 Get notified when you have new episodes to watch on active shows.
 
 Behavior:
+
 - The menu bar icon appears only when there are episodes to watch.
 - The title shows only the number of episodes.
 - Notifications are created only for episodes released in the last 7 days.
@@ -54,6 +61,7 @@ Behavior:
 ## Configuration
 
 The extension requires:
+
 - **API Key** : Your BetaSeries Developer API Key
 - **OAuth Token** : For accessing user-specific features like your library and planning (generated and saved automatically from the login form)
 

@@ -9,6 +9,7 @@ export function useDebouncedSearch(searchText: string, delay = 300) {
   const [error, setError] = useState<Error | undefined>();
   const abortRef = useRef<AbortController | null>(null);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestQueryRef = useRef("");
 
   const executeSearch = useCallback(async (query: string) => {
     abortRef.current?.abort();
@@ -17,23 +18,31 @@ export function useDebouncedSearch(searchText: string, delay = 300) {
     setIsLoading(true);
     try {
       const result = await fetchSkillsSearch(query, controller.signal);
-      if (!controller.signal.aborted) {
+      if (!controller.signal.aborted && latestQueryRef.current === query) {
         setData(result);
         setError(undefined);
       }
     } catch (e) {
-      if (!controller.signal.aborted && e instanceof Error && e.name !== "AbortError") {
+      if (
+        !controller.signal.aborted &&
+        latestQueryRef.current === query &&
+        e instanceof Error &&
+        e.name !== "AbortError"
+      ) {
+        setData(undefined);
         setError(e);
       }
     } finally {
-      if (!controller.signal.aborted) setIsLoading(false);
+      if (!controller.signal.aborted && latestQueryRef.current === query) setIsLoading(false);
     }
   }, []);
 
   useEffect(() => {
     if (timerRef.current) clearTimeout(timerRef.current);
+    latestQueryRef.current = searchText;
 
     if (searchText.length < 2) {
+      abortRef.current?.abort();
       setData(undefined);
       setIsLoading(false);
       setError(undefined);

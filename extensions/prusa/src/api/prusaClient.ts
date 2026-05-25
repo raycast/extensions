@@ -1,6 +1,6 @@
 import axios, { AxiosError, AxiosInstance } from "axios";
 import { withRetry } from "../utils/retry";
-import { PrusaApiError, ERROR_MESSAGES } from "./errors";
+import { PrusaApiError, ERROR_MESSAGES, classifyPrusaConnectionError } from "./errors";
 import { logger } from "../utils/logger";
 import type { PrinterInfo, PrinterStatus, FileList, JobDetails } from "./types";
 import type { PrusaClientConfig } from "./config";
@@ -82,10 +82,14 @@ export class PrusaClient {
     this.client.interceptors.response.use(
       (response) => response,
       (error: AxiosError) => {
-        logger.error("API Error:", error);
-
         if (!error.response) {
-          throw new PrusaApiError(ERROR_MESSAGES.NETWORK_ERROR, undefined, error.config?.url, true);
+          const { message, kind } = classifyPrusaConnectionError(error);
+          if (kind === "offline") {
+            logger.debug("Printer appears offline:", error.config?.url);
+          } else {
+            logger.error("API Error:", error);
+          }
+          throw new PrusaApiError(message, undefined, error.config?.url, kind !== "offline", kind);
         }
 
         const { status, config: reqConfig } = error.response;
@@ -105,14 +109,19 @@ export class PrusaClient {
             break;
           case 503:
             message = ERROR_MESSAGES.PRINTER_OFFLINE;
-            retryable = true;
             break;
           default:
             message = status >= 500 ? ERROR_MESSAGES.SERVER_ERROR : ERROR_MESSAGES.INVALID_RESPONSE;
             retryable = status >= 500;
         }
 
-        throw new PrusaApiError(message, status, reqConfig?.url, retryable);
+        if (status === 503) {
+          logger.debug("Printer reported offline:", reqConfig?.url);
+        } else {
+          logger.error("API Error:", error);
+        }
+
+        throw new PrusaApiError(message, status, reqConfig?.url, retryable, status === 503 ? "offline" : undefined);
       },
     );
   }
