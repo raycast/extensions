@@ -2,7 +2,18 @@ export type QwenTTSModel = "qwen3-tts-flash" | "qwen3-tts-instruct-flash" | "qwe
 
 export type QwenTTSFormat = "wav";
 
-export type QwenTTSLanguageType = "Auto" | "Chinese" | "English" | "German";
+export type QwenTTSLanguageType =
+  | "Auto"
+  | "Chinese"
+  | "English"
+  | "German"
+  | "Italian"
+  | "Portuguese"
+  | "Spanish"
+  | "Japanese"
+  | "Korean"
+  | "French"
+  | "Russian";
 
 export interface TTSOptions {
   model: QwenTTSModel;

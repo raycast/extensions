@@ -95,11 +95,11 @@ const openAISpeed = loadTs("src/utils/openai-playback-state.ts");
 
 assert(qwenChunker.chunkText("   ").length === 0, "Qwen-TTS chunker should ignore blank text");
 assert(
-  allChunksWithin(qwenChunker.chunkText("法".repeat(1600)), 550, codePointLength),
-  "Qwen-TTS chunks should stay under 550 code points",
+  allChunksWithin(qwenChunker.chunkText("法".repeat(1600)), 500, codePointLength),
+  "Qwen-TTS chunks should stay under 500 code points",
 );
 assert(
-  allChunksWithin(qwenChunker.chunkText("😀".repeat(800)), 550, codePointLength),
+  allChunksWithin(qwenChunker.chunkText("😀".repeat(800)), 500, codePointLength),
   "Qwen-TTS chunks should count emoji as code points",
 );
 
@@ -109,8 +109,9 @@ const qwenVoiceKeywords = new Map(
 assert(
   qwenVoiceKeywords.get("Cherry")?.includes("Chinese") &&
     qwenVoiceKeywords.get("Cherry")?.includes("English") &&
-    qwenVoiceKeywords.get("Cherry")?.includes("German"),
-  "Qwen-TTS recommended voices should be searchable by Chinese, English, and German language aliases",
+    qwenVoiceKeywords.get("Cherry")?.includes("German") &&
+    qwenVoiceKeywords.get("Cherry")?.includes("Japanese"),
+  "Qwen-TTS recommended voices should be searchable by official language aliases",
 );
 assert(
   qwenVoiceKeywords.get("Ethan")?.includes("qwen") && qwenVoiceKeywords.get("Ethan")?.includes("dashscope"),

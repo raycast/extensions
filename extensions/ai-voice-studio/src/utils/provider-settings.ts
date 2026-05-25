@@ -4,6 +4,7 @@ import {
   DEFAULT_LANGUAGE_TYPE as DEFAULT_QWEN_LANGUAGE_TYPE,
   DEFAULT_MODEL as DEFAULT_QWEN_MODEL,
   DEFAULT_VOICE as DEFAULT_QWEN_VOICE,
+  QWEN_LANGUAGE_TYPES,
 } from "../constants/qwen-tts-voices";
 import { DEFAULT_MODEL as DEFAULT_MIMO_MODEL, DEFAULT_VOICE as DEFAULT_MIMO_VOICE } from "../constants/mimo-voices";
 import { DEFAULT_FORMAT, DEFAULT_MODEL, DEFAULT_VOICE } from "../constants/openai-voices";
@@ -222,8 +223,8 @@ function normalizeQwenModel(model: string | undefined): QwenTTSModel {
 }
 
 function normalizeQwenLanguageType(languageType: string | undefined): QwenTTSLanguageType {
-  return languageType === "Chinese" || languageType === "English" || languageType === "German"
-    ? languageType
+  return QWEN_LANGUAGE_TYPES.includes(languageType as QwenTTSLanguageType)
+    ? (languageType as QwenTTSLanguageType)
     : DEFAULT_QWEN_LANGUAGE_TYPE;
 }
 

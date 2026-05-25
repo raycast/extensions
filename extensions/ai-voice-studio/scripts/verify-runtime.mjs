@@ -228,7 +228,7 @@ for (const file of ["src/openai-speed-up.tsx", "src/openai-speed-down.tsx"]) {
   check(source.includes("SPEED_NORMAL"), `${file} should use a stable normal-speed fallback`);
 }
 
-check(read("src/utils/qwen-text-chunker.ts").includes("const MAX_CHARS = 550"), "Qwen-TTS chunks should respect char budget");
+check(read("src/utils/qwen-text-chunker.ts").includes("const MAX_CHARS = 500"), "Qwen-TTS chunks should respect char budget");
 check(read("src/utils/mimo-text-chunker.ts").includes("const MAX_BYTES = 4096"), "MiMo chunks should respect byte budget");
 check(read("src/utils/openai-text-chunker.ts").includes("const MAX_CHARS = 1800"), "OpenAI chunks should respect char budget");
 

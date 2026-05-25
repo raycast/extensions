@@ -6,6 +6,7 @@ import {
   DEFAULT_MODEL,
   DEFAULT_VOICE,
   MODEL_LABELS,
+  QWEN_LANGUAGE_TYPES,
   getVoiceById,
   isVoiceAvailableForModel,
 } from "../constants/qwen-tts-voices";
@@ -260,8 +261,8 @@ function normalizeModel(model: string | undefined): QwenTTSModel {
 }
 
 function normalizeLanguageType(languageType: string | undefined): QwenTTSLanguageType {
-  return languageType === "Chinese" || languageType === "English" || languageType === "German"
-    ? languageType
+  return QWEN_LANGUAGE_TYPES.includes(languageType as QwenTTSLanguageType)
+    ? (languageType as QwenTTSLanguageType)
     : DEFAULT_LANGUAGE_TYPE;
 }
 

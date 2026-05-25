@@ -5,6 +5,22 @@ export const DEFAULT_VOICE = "Cherry";
 export const DEFAULT_FORMAT: QwenTTSFormat = "wav";
 export const DEFAULT_BASE_URL = "https://dashscope.aliyuncs.com/api/v1";
 export const DEFAULT_LANGUAGE_TYPE: QwenTTSLanguageType = "Auto";
+export const QWEN_LANGUAGE_TYPES: readonly QwenTTSLanguageType[] = [
+  "Auto",
+  "Chinese",
+  "English",
+  "German",
+  "Italian",
+  "Portuguese",
+  "Spanish",
+  "Japanese",
+  "Korean",
+  "French",
+  "Russian",
+];
+
+const SUPPORTED_LANGUAGE_DESCRIPTION =
+  "Chinese, English, French, German, Russian, Italian, Spanish, Portuguese, Japanese, Korean";
 
 export const MODEL_LABELS: Record<QwenTTSModel, string> = {
   "qwen3-tts-flash": "Qwen3 TTS Flash",
@@ -18,6 +34,13 @@ export const LANGUAGE_TYPE_LABELS: Record<QwenTTSLanguageType, string> = {
   Chinese: "Chinese",
   English: "English",
   German: "German",
+  Italian: "Italian",
+  Portuguese: "Portuguese",
+  Spanish: "Spanish",
+  Japanese: "Japanese",
+  Korean: "Korean",
+  French: "French",
+  Russian: "Russian",
 };
 
 const QWEN3_FLASH_MODELS: QwenTTSModel[] = ["qwen3-tts-flash", "qwen3-tts-instruct-flash"];
@@ -30,7 +53,7 @@ export const VOICES: VoiceConfig[] = [
     gender: "female",
     category: "Recommended",
     description: "芊悦: sunny, positive, friendly female voice.",
-    language: "Chinese, English, German, and more",
+    language: SUPPORTED_LANGUAGE_DESCRIPTION,
     models: ALL_QWEN_MODELS,
     recommended: true,
   },
@@ -40,7 +63,7 @@ export const VOICES: VoiceConfig[] = [
     gender: "female",
     category: "Recommended",
     description: "苏瑶: gentle female voice.",
-    language: "Chinese, English, German, and more",
+    language: SUPPORTED_LANGUAGE_DESCRIPTION,
     models: ALL_QWEN_MODELS,
     recommended: true,
   },
@@ -50,7 +73,7 @@ export const VOICES: VoiceConfig[] = [
     gender: "male",
     category: "Recommended",
     description: "晨煦: warm, energetic Mandarin male voice.",
-    language: "Chinese, English, German, and more",
+    language: SUPPORTED_LANGUAGE_DESCRIPTION,
     models: ALL_QWEN_MODELS,
     recommended: true,
   },
@@ -60,7 +83,7 @@ export const VOICES: VoiceConfig[] = [
     gender: "female",
     category: "Character",
     description: "千雪: anime-style virtual girlfriend voice.",
-    language: "Chinese, English, German, and more",
+    language: SUPPORTED_LANGUAGE_DESCRIPTION,
     models: ALL_QWEN_MODELS,
   },
   {
@@ -69,7 +92,7 @@ export const VOICES: VoiceConfig[] = [
     gender: "female",
     category: "Character",
     description: "茉兔: playful and cute female voice.",
-    language: "Chinese, English, German, and more",
+    language: SUPPORTED_LANGUAGE_DESCRIPTION,
     models: QWEN3_FLASH_MODELS,
   },
   {
@@ -78,7 +101,7 @@ export const VOICES: VoiceConfig[] = [
     gender: "female",
     category: "Character",
     description: "十三: cute, expressive female voice.",
-    language: "Chinese, English, German, and more",
+    language: SUPPORTED_LANGUAGE_DESCRIPTION,
     models: QWEN3_FLASH_MODELS,
   },
   {
@@ -87,7 +110,7 @@ export const VOICES: VoiceConfig[] = [
     gender: "male",
     category: "Narration",
     description: "月白: stylish male voice.",
-    language: "Chinese, English, German, and more",
+    language: SUPPORTED_LANGUAGE_DESCRIPTION,
     models: QWEN3_FLASH_MODELS,
   },
   {
@@ -96,7 +119,7 @@ export const VOICES: VoiceConfig[] = [
     gender: "female",
     category: "Narration",
     description: "四月: gentle and intellectual female voice.",
-    language: "Chinese, English, German, and more",
+    language: SUPPORTED_LANGUAGE_DESCRIPTION,
     models: QWEN3_FLASH_MODELS,
   },
 ];

@@ -1,4 +1,4 @@
-const MAX_CHARS = 550;
+const MAX_CHARS = 500;
 
 export function chunkText(text: string, maxChars: number = MAX_CHARS): string[] {
   const trimmed = text.trim();

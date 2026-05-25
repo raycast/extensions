@@ -180,7 +180,7 @@ async function verifyQuickSetupOverrides() {
     qwen: {
       model: "qwen3-tts-instruct-flash",
       voice: "Ethan",
-      languageType: "German",
+      languageType: "Spanish",
       playbackRate: "1.25",
       instructions: "Energetic but precise",
       baseUrl: "https://example.com/api/v1",
@@ -205,7 +205,7 @@ async function verifyQuickSetupOverrides() {
   assert(result.defaultProvider === "openai", "Quick setup should override default provider");
   assert(result.qwen.model === "qwen3-tts-instruct-flash", "Quick setup should override Qwen-TTS model");
   assert(result.qwen.voice === "Ethan", "Quick setup should override Qwen-TTS voice");
-  assert(result.qwen.languageType === "German", "Quick setup should override Qwen-TTS language");
+  assert(result.qwen.languageType === "Spanish", "Quick setup should override Qwen-TTS language");
   assert(result.qwen.playbackRate === "1.25", "Quick setup should override Qwen-TTS playback rate");
   assert(result.qwen.instructions === "Energetic but precise", "Quick setup should override Qwen-TTS instructions");
   assert(result.qwen.baseUrl === "https://example.com/api/v1", "Quick setup should override Qwen-TTS base URL");
