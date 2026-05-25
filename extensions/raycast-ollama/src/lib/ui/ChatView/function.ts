@@ -286,8 +286,7 @@ async function Inference(
                 /* Skip all value except last Assistant Message */
                 if (!isLastAssistant) return value;
 
-                if (value.tool_calls) value.tool_calls.push(...data);
-                return { ...value, tool_calls: data };
+                return { ...value, tool_calls: [...(value.tool_calls ?? []), ...data] };
               });
 
               return { ...group, messages: updatedMsg };
