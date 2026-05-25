@@ -1,5 +1,15 @@
 # Betaseries Changelog
 
+## [Episode Copy Action and Menu Bar Removal] - 2026-05-14
+
+- Added an action to copy the show title together with the season and episode number directly from an episode.
+- Removed the **New Episodes Menu Bar** command for now because its episode update behavior was not reliable enough.
+
+## [Menu Bar Background Refresh Fix] - 2026-03-12
+
+- Fixed an error when marking an episode as watched from **My Shows** while **New Episodes Menu Bar** had not been activated yet.
+- The menu bar refresh is now skipped when the command is unavailable in background mode, so the episode action still succeeds without showing a failure message.
+
 ## [New Episodes Menu Bar + Planning Fix] - 2026-02-26
 
 - Added **New Episodes Menu Bar** command to see newly released unwatched episodes directly from the macOS menu bar, with a badge showing how many are available.

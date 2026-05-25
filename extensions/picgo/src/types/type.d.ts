@@ -1,5 +1,4 @@
-import { IImgInfo } from "picgo";
-import usePicGoContext from "../util/context";
+import { type IImgInfo } from "picgo";
 
 export type ImgUrlExportFormat = {
     name: string;

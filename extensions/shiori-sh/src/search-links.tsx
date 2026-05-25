@@ -89,10 +89,12 @@ function EditLinkForm(props: { link: Link; onSave: (values: EditLinkValues) => P
 export default function SearchLinks() {
   const [filter, setFilter] = useState<ReadFilter>("all");
   const [showDetail, setShowDetail] = useState(true);
+  const [searchText, setSearchText] = useState("");
 
   const { data, isLoading, revalidate, mutate } = useCachedPromise(
-    (readFilter: ReadFilter) => fetchLinks({ limit: 100, read: readFilter, sort: "newest" }),
-    [filter],
+    (readFilter: ReadFilter, search: string) =>
+      fetchLinks({ limit: 100, read: readFilter, sort: "newest", search: search || undefined }),
+    [filter, searchText],
     { keepPreviousData: true },
   );
 
@@ -221,7 +223,11 @@ export default function SearchLinks() {
     <List
       isLoading={isLoading}
       isShowingDetail={showDetail}
-      searchBarPlaceholder="Filter links..."
+      filtering={false}
+      searchText={searchText}
+      onSearchTextChange={setSearchText}
+      throttle
+      searchBarPlaceholder="Search links..."
       searchBarAccessory={
         <List.Dropdown tooltip="Filter" value={filter} onChange={(val) => setFilter(val as ReadFilter)}>
           <List.Dropdown.Item title="All" value="all" />
@@ -262,6 +268,7 @@ export default function SearchLinks() {
                         : { source: Icon.Circle, tintColor: Color.Blue }
                     }
                   />
+                  {link.author ? <List.Item.Detail.Metadata.Label title="Author" text={link.author} /> : null}
                   {link.source ? <List.Item.Detail.Metadata.Label title="Source" text={link.source} /> : null}
                 </List.Item.Detail.Metadata>
               }

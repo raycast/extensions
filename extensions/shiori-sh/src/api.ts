@@ -44,6 +44,7 @@ export async function fetchLinks(params: FetchLinksParams = {}): Promise<LinksRe
   if (params.offset !== undefined) qs.set("offset", String(params.offset));
   if (params.read) qs.set("read", params.read);
   if (params.sort) qs.set("sort", params.sort);
+  if (params.search) qs.set("search", params.search);
 
   const query = qs.toString();
   return request<LinksResponse>(`/api/links${query ? `?${query}` : ""}`);

@@ -1,4 +1,4 @@
-import { showToast, Toast } from "@raycast/api";
+import { Clipboard, showToast, Toast } from "@raycast/api";
 
 export function toErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
@@ -24,9 +24,14 @@ export async function runWithToast<T>(options: {
     toast.message = options.success.message;
     return result;
   } catch (error) {
+    const errorMessage = options.failure.message ?? toErrorMessage(error);
     toast.style = Toast.Style.Failure;
     toast.title = options.failure.title;
-    toast.message = options.failure.message ?? toErrorMessage(error);
+    toast.message = errorMessage;
+    toast.primaryAction = {
+      title: "Copy Error",
+      onAction: () => Clipboard.copy(errorMessage),
+    };
     return undefined;
   }
 }

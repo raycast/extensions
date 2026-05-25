@@ -3,6 +3,8 @@ import { logger } from "@chrismessina/raycast-logger";
 import { fetchGetAllLists, fetchGetSingleListBookmarks } from "../apis";
 import { List } from "../types";
 
+const log = logger.child("[GetAllLists]");
+
 interface ListWithCount extends List {
   count: number;
 }
@@ -21,7 +23,7 @@ export function useGetAllLists() {
             count: details.bookmarks?.length || 0,
           };
         } catch (error) {
-          logger.log("Failed to fetch list bookmark count", { listId: list.id, listName: list.name, error });
+          log.log("Failed to fetch list bookmark count", { listId: list.id, listName: list.name, error });
           return { ...list, count: 0 } as ListWithCount;
         }
       }),

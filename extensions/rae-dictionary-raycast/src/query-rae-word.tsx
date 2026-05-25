@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { List, Icon } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import { ApiError, searchWord, searchSuggestions, WordEntry } from "./api/rae";
+import { ApiError, searchWord, WordEntry } from "./api/rae";
 import { WordEntryFC } from "./components/WordEntry";
-import { SuggestionItem } from "./components/SuggestionItem";
 
 export default function Command() {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +19,6 @@ export default function Command() {
     }
 
     setSuggestions([]);
-    setResults(null);
     setIsLoading(true);
     setError(null);
 
@@ -28,16 +26,8 @@ export default function Command() {
       const entry = await searchWord(text.trim());
       setResults(entry);
     } catch (e: ApiError | unknown) {
-      if (e instanceof ApiError && !!e.suggestions && e.suggestions.length > 0) {
+      if (e instanceof ApiError && e.suggestions.length > 0) {
         setSuggestions(e.suggestions);
-      } else if (e instanceof ApiError) {
-        // No suggestions from 404, try fuzzy search as fallback
-        const fallbackSuggestions = await searchSuggestions(text.trim());
-        if (fallbackSuggestions.length > 0) {
-          setSuggestions(fallbackSuggestions);
-        } else {
-          setError(String(e));
-        }
       } else {
         setError(String(e));
         showFailureToast(e, { title: "Could not load requested word" });
@@ -67,9 +57,9 @@ export default function Command() {
       ) : suggestions.length === 0 ? (
         <List.EmptyView icon={Icon.MagnifyingGlass} title="Search for a word" description="Type to search..." />
       ) : (
-        <List.Section title="Did you mean?">
+        <List.Section title="Suggestions">
           {suggestions.map((suggestion) => (
-            <SuggestionItem key={suggestion} word={suggestion} />
+            <WordEntryFC key={suggestion} wordEntry={{ word: suggestion, meanings: [], suggestions: [] }} />
           ))}
         </List.Section>
       )}

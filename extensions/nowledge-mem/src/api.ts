@@ -1,11 +1,138 @@
 import { getPreferenceValues } from "@raycast/api";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { homedir } from "os";
 import { join } from "path";
 
-function getBaseUrl(): string {
-  const { serverUrl } = getPreferenceValues<Preferences>();
-  return serverUrl || "http://127.0.0.1:14242";
+interface ConfigFile {
+  apiUrl?: string;
+  apiKey?: string;
+  space?: string;
+}
+
+export interface ConnectionConfig {
+  baseUrl: string;
+  apiKey?: string;
+  space?: string;
+}
+
+const DEFAULT_BASE_URL = "http://127.0.0.1:14242";
+const CONFIG_PATH = join(homedir(), ".nowledge-mem", "config.json");
+
+function normalizeUrl(url?: string): string | undefined {
+  const trimmed = url?.trim();
+  if (!trimmed) return undefined;
+  return trimmed.replace(/\/$/, "");
+}
+
+function readConfigFile(): ConfigFile {
+  try {
+    if (!existsSync(CONFIG_PATH)) return {};
+    const raw = JSON.parse(readFileSync(CONFIG_PATH, "utf-8")) as ConfigFile;
+    return {
+      apiUrl: normalizeUrl(raw.apiUrl),
+      apiKey: raw.apiKey?.trim() || undefined,
+      space: normalizeSpace(raw.space),
+    };
+  } catch {
+    return {};
+  }
+}
+
+function normalizeSpace(space?: string): string | undefined {
+  const trimmed = space?.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function resolveConfiguredSpacePreference(
+  preferenceSpace: string | undefined,
+  configSpace: string | undefined,
+): string | undefined {
+  const normalizedPreference = normalizeSpace(preferenceSpace);
+  if (normalizedPreference) {
+    return normalizedPreference;
+  }
+  return configSpace;
+}
+
+export function getConnectionConfig(): ConnectionConfig {
+  const { serverUrl, apiKey, space } = getPreferenceValues<Preferences>();
+  const config = readConfigFile();
+
+  return {
+    baseUrl: normalizeUrl(serverUrl) || config.apiUrl || DEFAULT_BASE_URL,
+    apiKey: apiKey?.trim() || config.apiKey,
+    space: resolveConfiguredSpacePreference(space, config.space),
+  };
+}
+
+export function isLocalConnection(): boolean {
+  const { baseUrl } = getConnectionConfig();
+  try {
+    const url = new URL(baseUrl);
+    return ["127.0.0.1", "localhost", "::1"].includes(url.hostname);
+  } catch {
+    return (
+      baseUrl.startsWith("http://127.0.0.1") ||
+      baseUrl.startsWith("http://localhost")
+    );
+  }
+}
+
+function buildHeaders(initHeaders?: Record<string, string>): Headers {
+  const headers = new Headers(initHeaders);
+  const { apiKey } = getConnectionConfig();
+
+  if (apiKey) {
+    headers.set("Authorization", `Bearer ${apiKey}`);
+    headers.set("X-NMEM-API-Key", apiKey);
+  }
+
+  return headers;
+}
+
+async function parseError(res: Response): Promise<string> {
+  try {
+    const data = (await res.json()) as { detail?: string; message?: string };
+    return data.detail || data.message || `${res.status} ${res.statusText}`;
+  } catch {
+    const text = await res.text();
+    return text || `${res.status} ${res.statusText}`;
+  }
+}
+
+async function apiFetch(path: string, init?: RequestInit): Promise<Response> {
+  const { baseUrl } = getConnectionConfig();
+  const res = await fetch(`${baseUrl}${path}`, {
+    ...init,
+    headers: buildHeaders(init?.headers as Record<string, string> | undefined),
+  });
+
+  if (!res.ok) {
+    throw new Error(await parseError(res));
+  }
+
+  return res;
+}
+
+function appendSpaceQuery(path: string, space?: string): string {
+  if (!space) {
+    return path;
+  }
+  const separator = path.includes("?") ? "&" : "?";
+  return `${path}${separator}space_id=${encodeURIComponent(space)}`;
+}
+
+function withOptionalSpaceId<T extends Record<string, unknown>>(
+  body: T,
+  space?: string,
+): T & { space_id?: string } {
+  if (!space) {
+    return body;
+  }
+  return {
+    ...body,
+    space_id: space,
+  };
 }
 
 /** Memory as returned by the search endpoint. */
@@ -38,32 +165,35 @@ export interface SearchResult {
   relevance_reason?: string;
 }
 
+export interface WorkingMemoryResponse {
+  exists: boolean;
+  content: string;
+  date: string;
+  file_path?: string;
+  parsed?: Record<string, unknown> | null;
+}
+
 export async function searchMemories(
   query: string,
   limit = 10,
 ): Promise<SearchResult[]> {
-  const url = `${getBaseUrl()}/memories/search`;
-  const res = await fetch(url, {
+  const { space } = getConnectionConfig();
+  const res = await apiFetch("/memories/search", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, limit, mode: "fast" }),
+    body: JSON.stringify(
+      withOptionalSpaceId({ query, limit, mode: "fast" }, space),
+    ),
   });
-
-  if (!res.ok) {
-    throw new Error(`Search failed: ${res.status} ${res.statusText}`);
-  }
 
   return (await res.json()) as SearchResult[];
 }
 
 export async function listMemories(limit = 20): Promise<ListMemory[]> {
-  const url = `${getBaseUrl()}/memories?limit=${limit}`;
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    throw new Error(`List failed: ${res.status} ${res.statusText}`);
-  }
-
+  const { space } = getConnectionConfig();
+  const res = await apiFetch(
+    appendSpaceQuery(`/memories?limit=${limit}`, space),
+  );
   const data = (await res.json()) as { memories: ListMemory[] };
   return data.memories;
 }
@@ -78,25 +208,18 @@ export interface CreateMemoryRequest {
 export async function createMemory(
   req: CreateMemoryRequest,
 ): Promise<SearchMemory> {
-  const url = `${getBaseUrl()}/memories`;
-  const res = await fetch(url, {
+  const { space } = getConnectionConfig();
+  const res = await apiFetch("/memories", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(req),
+    body: JSON.stringify(withOptionalSpaceId({ ...req }, space)),
   });
-
-  if (!res.ok) {
-    throw new Error(`Create failed: ${res.status} ${res.statusText}`);
-  }
 
   return (await res.json()) as SearchMemory;
 }
 
-export async function readWorkingMemory(): Promise<string> {
-  const filePath = join(homedir(), "ai-now", "memory.md");
-  try {
-    return readFileSync(filePath, "utf-8");
-  } catch {
-    return "";
-  }
+export async function readWorkingMemory(): Promise<WorkingMemoryResponse> {
+  const { space } = getConnectionConfig();
+  const res = await apiFetch(appendSpaceQuery("/agent/working-memory", space));
+  return (await res.json()) as WorkingMemoryResponse;
 }

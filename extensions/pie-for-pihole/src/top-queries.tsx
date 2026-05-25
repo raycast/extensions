@@ -1,92 +1,72 @@
-import { Color, Icon, getPreferenceValues, ActionPanel, List, Action } from "@raycast/api";
-import { useEffect, useState } from "react";
-import { TopQueries, domainDetails } from "./interfaces";
-import { AddToListAction, cleanPiholeURL, fetchRequestTimeout } from "./utils";
+import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
+import { useCachedPromise } from "@raycast/utils";
+import { useState } from "react";
+import { getPiholeAPI } from "./api/client";
+import { AddToListAction } from "./utils";
 
-export default function () {
-  const [topQueries, updateTopQueries] = useState<domainDetails[]>();
-  const [topAds, updateTopAds] = useState<domainDetails[]>();
-  const [timeoutInfo, updateTimeoutInfo] = useState<string>();
-  const { PIHOLE_URL, API_TOKEN } = getPreferenceValues();
-  useEffect(() => {
-    async function getQueryInfo() {
-      const response = await fetchRequestTimeout(
-        `http://${cleanPiholeURL(PIHOLE_URL)}/admin/api.php?topItems=25&auth=${API_TOKEN}`
-      );
-      if (response == "query-aborted" || response == undefined) {
-        updateTimeoutInfo("query-aborted");
-      } else {
-        const { top_queries, top_ads } = (await response!.json()) as TopQueries;
-        const top_queries_array: domainDetails[] = [];
-        const top_ads_array: domainDetails[] = [];
-        for (let i = 0; i < Object.keys(top_queries).length; i++) {
-          top_queries_array.push({
-            domainURL: Object.keys(top_queries)[i],
-            blockCount: Object.values(top_queries)[i].toString(),
-          } as domainDetails);
-        }
-        for (let i = 0; i < Object.keys(top_ads).length; i++) {
-          top_ads_array.push({
-            domainURL: Object.keys(top_ads)[i],
-            blockCount: Object.values(top_ads)[i].toString(),
-          } as domainDetails);
-        }
-        updateTopQueries(top_queries_array);
-        updateTopAds(top_ads_array);
-        updateTimeoutInfo("no-timeout");
-      }
-    }
-    getQueryInfo();
-  }, []);
+export default function TopQueries() {
+  const [count, setCount] = useState("25");
+
+  const { isLoading, data, revalidate } = useCachedPromise((n) => getPiholeAPI().getTopQueries(parseInt(n)), [count]);
 
   return (
     <List
-      isLoading={topQueries == undefined ? true : false}
+      isLoading={isLoading}
       navigationTitle="Top Queries"
       searchBarPlaceholder="Search for domains"
+      searchBarAccessory={
+        <List.Dropdown tooltip="Number of Results" value={count} onChange={setCount}>
+          <List.Dropdown.Item title="Top 25" value="25" />
+          <List.Dropdown.Item title="Top 50" value="50" />
+          <List.Dropdown.Item title="Top 100" value="100" />
+        </List.Dropdown>
+      }
     >
-      {timeoutInfo === "query-aborted" ? (
-        <List.Item
-          key={"validation error"}
-          title={`Invalid Pi-Hole URL or API token has been provided`}
-          accessories={[{ text: "Please check extensions -> Pie for Pi-hole " }]}
-        />
-      ) : (
-        <>
-          <List.Section title="Top Allowed Queries">
-            {topQueries?.map((item) => (
-              <List.Item
-                key={item.domainURL}
-                title={item.domainURL}
-                icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
-                accessories={[{ text: item.blockCount }]}
-                actions={
-                  <ActionPanel title="Actions">
-                    <AddToListAction domain={item.domainURL} listType="black" />
-                    <Action.CopyToClipboard content={item.domainURL} />
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-          <List.Section title="Top Blocked Queries">
-            {topAds?.map((item) => (
-              <List.Item
-                key={item.domainURL}
-                title={item.domainURL}
-                icon={{ source: Icon.XmarkCircle, tintColor: Color.Red }}
-                accessories={[{ text: item.blockCount }]}
-                actions={
-                  <ActionPanel title="Actions">
-                    <AddToListAction domain={item.domainURL} listType="white" />
-                    <Action.CopyToClipboard content={item.domainURL} />
-                  </ActionPanel>
-                }
-              />
-            ))}
-          </List.Section>
-        </>
-      )}
+      <List.EmptyView title="No query data available" />
+      <List.Section title="Top Allowed Queries">
+        {data?.topAllowed.map((item) => (
+          <List.Item
+            key={item.domainURL}
+            title={item.domainURL}
+            icon={{ source: Icon.Checkmark, tintColor: Color.Green }}
+            accessories={[{ text: item.blockCount }]}
+            actions={
+              <ActionPanel title="Actions">
+                <AddToListAction domain={item.domainURL} listType="black" />
+                <Action.CopyToClipboard content={item.domainURL} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={revalidate}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
+      <List.Section title="Top Blocked Queries">
+        {data?.topBlocked.map((item) => (
+          <List.Item
+            key={item.domainURL}
+            title={item.domainURL}
+            icon={{ source: Icon.XMarkCircle, tintColor: Color.Red }}
+            accessories={[{ text: item.blockCount }]}
+            actions={
+              <ActionPanel title="Actions">
+                <AddToListAction domain={item.domainURL} listType="white" />
+                <Action.CopyToClipboard content={item.domainURL} />
+                <Action
+                  title="Refresh"
+                  icon={Icon.ArrowClockwise}
+                  shortcut={{ modifiers: ["cmd"], key: "r" }}
+                  onAction={revalidate}
+                />
+              </ActionPanel>
+            }
+          />
+        ))}
+      </List.Section>
     </List>
   );
 }

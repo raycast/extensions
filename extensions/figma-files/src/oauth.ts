@@ -1,4 +1,4 @@
-import { OAuth, getPreferenceValues } from "@raycast/api";
+import { OAuth, getPreferenceValues, setUserInfo } from "@raycast/api";
 import { OAuthService } from "@raycast/utils";
 
 const client = new OAuth.PKCEClient({
@@ -21,4 +21,16 @@ export const figma = new OAuthService({
     "https://oauth.raycast.com/v1/refresh-token/qJfyXOqhjDouaj06_54vl2O3NoIfY36R_-OOExXZNAS073Bih0aeNaHLO9xEpW6lbooqWCpT6zO7zLvbTx1MtXF2dU5d4B_of5d05Yxh27JIAPHG0uBw7fINhej_ViQ-sbE",
   scope: "file_content:read,file_metadata:read,file_versions:read,projects:read",
   personalAccessToken: PERSONAL_ACCESS_TOKEN,
+  onAuthorize: async ({ token, type }) => {
+    try {
+      const headers =
+        type === "oauth" ? { Authorization: `Bearer ${token}` } : { "X-Figma-Token": token };
+      const response = await fetch("https://api.figma.com/v1/me", { headers });
+      if (!response.ok) return;
+      const user = (await response.json()) as { handle: string; img_url: string };
+      setUserInfo({ name: user.handle, icon: user.img_url });
+    } catch {
+      // Non-critical: a transient failure here doesn't affect the OAuth handshake
+    }
+  },
 });

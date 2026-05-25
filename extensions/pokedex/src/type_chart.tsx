@@ -3,15 +3,16 @@ import { usePromise } from "@raycast/utils";
 import { useMemo } from "react";
 import { fetchTypes } from "./api";
 import { TypeDetail } from "./components/type_detail";
+import { getLocalizedName } from "./utils";
 
 export default function TypeChart(props: { arguments: { search?: string } }) {
   const { search } = props.arguments;
-  const { data: types, isLoading } = usePromise(fetchTypes);
+  const { data: types = [], isLoading } = usePromise(fetchTypes);
 
   const filteredTypes = useMemo(() => {
     if (!search || !types) return types;
     return types.filter((t) => {
-      const typeName = t.typenames[0]?.name || t.name;
+      const typeName = getLocalizedName(t.typenames, t.name);
       return typeName.toLowerCase().includes(search.toLowerCase());
     });
   }, [search, types]);
@@ -22,8 +23,8 @@ export default function TypeChart(props: { arguments: { search?: string } }) {
       columns={8}
       searchBarPlaceholder="Search Pokémon type..."
     >
-      {filteredTypes?.map((type) => {
-        const typeName = type.typenames[0]?.name || type.name;
+      {filteredTypes.map((type) => {
+        const typeName = getLocalizedName(type.typenames, type.name);
 
         return (
           <Grid.Item

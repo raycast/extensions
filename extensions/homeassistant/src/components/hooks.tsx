@@ -1,3 +1,5 @@
+import { getHAAreas } from "@components/area/utils";
+import { getHADevices } from "@components/device/utils";
 import { State } from "@lib/haapi";
 import { useCachedState } from "@raycast/utils";
 import { Connection, entitiesColl, subscribeEntities } from "home-assistant-js-websocket";
@@ -5,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { getHAWSConnection } from "../lib/common";
 
 interface EntityRegistryEntry {
+  area_id?: string | null;
   device_id?: string | null;
   disabled_by?: string | null;
   entity_category?: string | null;
@@ -29,12 +32,44 @@ class EntityRegistry {
   }
 }
 
-async function getEntityRegistry(con: Connection): Promise<EntityRegistry> {
+async function getEntityRegistryEntries(con: Connection): Promise<EntityRegistryEntry[]> {
   console.log("fetch entity registry");
   const entries: EntityRegistryEntry[] | null | undefined = await con.sendMessagePromise({
     type: "config/entity_registry/list",
   });
-  return new EntityRegistry(entries);
+  return entries ?? [];
+}
+
+async function buildEntityAreaMap(entries: EntityRegistryEntry[]): Promise<Map<string, string>> {
+  const [devices, areas] = await Promise.all([getHADevices(), getHAAreas()]);
+
+  const areaNameById = new Map<string, string>();
+  for (const area of areas ?? []) {
+    if (area.name) {
+      areaNameById.set(area.area_id, area.name);
+    }
+  }
+
+  const deviceAreaById = new Map<string, string>();
+  for (const device of devices ?? []) {
+    if (device.area_id) {
+      deviceAreaById.set(device.id, device.area_id);
+    }
+  }
+
+  const entityAreaMap = new Map<string, string>();
+  for (const entry of entries) {
+    if (!entry.entity_id) continue;
+    const areaId = entry.area_id ?? (entry.device_id ? deviceAreaById.get(entry.device_id) : undefined);
+    if (areaId) {
+      const areaName = areaNameById.get(areaId);
+      if (areaName) {
+        entityAreaMap.set(entry.entity_id, areaName);
+      }
+    }
+  }
+
+  return entityAreaMap;
 }
 
 export function useHAStates(): {
@@ -56,7 +91,9 @@ export function useHAStates(): {
         if (!hawsRef.current) {
           const con = await getHAWSConnection();
 
-          const entityRegistry = await getEntityRegistry(con);
+          const entries = await getEntityRegistryEntries(con);
+          const entityRegistry = new EntityRegistry(entries);
+          const entityAreaMap = await buildEntityAreaMap(entries);
 
           subscribeEntities(con, (entities) => {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -64,6 +101,9 @@ export function useHAStates(): {
             if (haStates.length > 0) {
               // Home Assistant often send empty states array in the beginning of an connection. This cause empty state flickering in raycast.
               const filteredStates = haStates.filter((s) => entityRegistry.isUserVisible(s.entity_id));
+              for (const state of filteredStates) {
+                state.area_name = entityAreaMap.get(state.entity_id);
+              }
               setStates(filteredStates);
               setIsLoading(false);
             } else {

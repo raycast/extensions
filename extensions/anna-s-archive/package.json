@@ -20,21 +20,25 @@
       "name": "mirror",
       "title": "Mirror",
       "type": "dropdown",
-      "default": "https://annas-archive.li",
+      "default": "https://annas-archive.gl",
       "description": "Choose a mirror to use",
       "required": false,
       "data": [
         {
-          "value": "https://annas-archive.li",
-          "title": "https://annas-archive.li"
+          "value": "https://annas-archive.gl",
+          "title": "https://annas-archive.gl"
         },
         {
-          "value": "https://annas-archive.pm",
-          "title": "https://annas-archive.pm"
+          "value": "https://annas-archive.pk",
+          "title": "https://annas-archive.pk"
         },
         {
-          "value": "https://annas-archive.in",
-          "title": "https://annas-archive.in"
+          "value": "https://annas-archive.vg",
+          "title": "https://annas-archive.vg"
+        },
+        {
+          "value": "https://annas-archive.gd",
+          "title": "https://annas-archive.gd"
         }
       ]
     },

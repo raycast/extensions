@@ -1,25 +1,38 @@
 import { List } from "@raycast/api";
 import { ZaiUsage, ZaiError, ZaiLimitEntry } from "./types";
 import type { Accessory } from "../agents/types";
-import { formatResetTime } from "../agents/format";
+import { formatResetTime, getRemainingPercent } from "../agents/format";
 import {
   renderErrorOrNoData,
   formatErrorOrNoData,
   getLoadingAccessory,
   getNoDataAccessory,
   generatePieIcon,
+  generateAsciiBar,
 } from "../agents/ui";
 
 function getRemainingNumericPercent(entry: ZaiLimitEntry | undefined | null): number | undefined {
   if (!entry) return undefined;
-  if (entry.remaining != null && entry.usage != null && entry.usage > 0) {
-    return Math.round((entry.remaining / entry.usage) * 100);
+  // API percentage field is "percentage used", so remaining = 100 - percentage
+  if (entry.percentage != null) {
+    return 100 - entry.percentage;
   }
-  return 100 - entry.percentage;
+  // Fallback: calculate from remaining/usage if available
+  if (entry.remaining != null && entry.usage != null) {
+    const total = entry.remaining + entry.usage;
+    if (total > 0) {
+      return Math.round(getRemainingPercent(entry.remaining, total));
+    }
+    // If total is 0 but remaining is also 0, we're at 100% (full quota, no usage)
+    if (entry.remaining === 0 && entry.usage === 0) {
+      return 100;
+    }
+  }
+  return undefined;
 }
 
 function formatRemainingPercent(entry: ZaiLimitEntry): string {
-  return `${getRemainingNumericPercent(entry) ?? 0}%`;
+  return `${getRemainingNumericPercent(entry) ?? 0}% remaining`;
 }
 
 function formatRemainingText(entry: ZaiLimitEntry): string {
@@ -46,6 +59,7 @@ export function formatZaiUsageText(usage: ZaiUsage | null, error: ZaiError | nul
   if (u.tokenLimit) {
     text += `\n\nToken Limit (${u.tokenLimit.windowDescription}): ${formatRemainingText(u.tokenLimit)}`;
     text += `\n${formatRemainingPercent(u.tokenLimit)}`;
+    text += `\n${generateAsciiBar(getRemainingNumericPercent(u.tokenLimit) ?? 0)}`;
     if (u.tokenLimit.resetTime) {
       text += `\nResets In: ${formatResetTime(u.tokenLimit.resetTime)}`;
     }
@@ -60,6 +74,7 @@ export function formatZaiUsageText(usage: ZaiUsage | null, error: ZaiError | nul
   if (u.timeLimit) {
     text += `\n\nTime Limit (${u.timeLimit.windowDescription}): ${formatRemainingText(u.timeLimit)}`;
     text += `\n${formatRemainingPercent(u.timeLimit)}`;
+    text += `\n${generateAsciiBar(getRemainingNumericPercent(u.timeLimit) ?? 0)}`;
     if (u.timeLimit.resetTime) {
       text += `\nResets In: ${formatResetTime(u.timeLimit.resetTime)}`;
     }
@@ -88,9 +103,8 @@ export function renderZaiDetail(usage: ZaiUsage | null, error: ZaiError | null):
           {u.planName && <List.Item.Detail.Metadata.Separator />}
           <List.Item.Detail.Metadata.Label
             title={`Token Limit (${u.tokenLimit.windowDescription})`}
-            text={formatRemainingPercent(u.tokenLimit)}
+            text={`${generateAsciiBar(getRemainingNumericPercent(u.tokenLimit) ?? 0)} ${formatRemainingText(u.tokenLimit)} remaining`}
           />
-          <List.Item.Detail.Metadata.Label title="Remaining" text={formatRemainingText(u.tokenLimit)} />
           {u.tokenLimit.resetTime && (
             <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.tokenLimit.resetTime)} />
           )}
@@ -109,9 +123,8 @@ export function renderZaiDetail(usage: ZaiUsage | null, error: ZaiError | null):
           <List.Item.Detail.Metadata.Separator />
           <List.Item.Detail.Metadata.Label
             title={`Time Limit (${u.timeLimit.windowDescription})`}
-            text={formatRemainingPercent(u.timeLimit)}
+            text={`${generateAsciiBar(getRemainingNumericPercent(u.timeLimit) ?? 0)} ${formatRemainingText(u.timeLimit)} remaining`}
           />
-          <List.Item.Detail.Metadata.Label title="Remaining" text={formatRemainingText(u.timeLimit)} />
           {u.timeLimit.resetTime && (
             <List.Item.Detail.Metadata.Label title="Resets In" text={formatResetTime(u.timeLimit.resetTime)} />
           )}
@@ -153,13 +166,13 @@ export function getZaiAccessory(usage: ZaiUsage | null, error: ZaiError | null, 
   const parts: string[] = [];
 
   if (usage.tokenLimit) {
-    parts.push(`Tokens: ${formatRemainingPercent(usage.tokenLimit)}`);
+    parts.push(`Tokens: ${getRemainingNumericPercent(usage.tokenLimit) ?? 0}%`);
   }
   if (usage.timeLimit) {
-    parts.push(`Time: ${formatRemainingPercent(usage.timeLimit)}`);
+    parts.push(`Time: ${getRemainingNumericPercent(usage.timeLimit) ?? 0}%`);
   }
 
-  const tokenText = usage.tokenLimit ? formatRemainingPercent(usage.tokenLimit) : "—";
+  const tokenText = usage.tokenLimit ? `${getRemainingNumericPercent(usage.tokenLimit) ?? 0}%` : "—";
   const numericPercent = getRemainingNumericPercent(usage.tokenLimit ?? usage.timeLimit);
 
   return {

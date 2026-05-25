@@ -1,5 +1,14 @@
 # Raynab Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [Security: Refresh Lockfile] - 2026-03-27
+
+### 🔧 Technical Updates
+- Refreshed `package-lock.json` to update transitive `rollup` to `4.60.0` and address security advisories.
+
 ## [Fixed Invalid Date Error in Transaction Form] - 2026-01-19
 
 ### 🐞 Bug Fixes

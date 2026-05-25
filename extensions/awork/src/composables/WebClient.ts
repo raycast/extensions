@@ -1,6 +1,6 @@
 import { Alert, confirmAlert, getPreferenceValues, LocalStorage, OAuth } from "@raycast/api";
 import { showFailureToast } from "@raycast/utils";
-import fetch, { RequestInit } from "node-fetch";
+import { fetchWithTimeout } from "./HttpClient";
 
 interface workspace {
   id: string;
@@ -11,6 +11,10 @@ interface workspace {
 interface User {
   id: string;
   workspace: workspace;
+}
+
+interface TokenOptions {
+  allowUserInteraction?: boolean;
 }
 
 export const baseURI = "https://api.awork.com/api/v1";
@@ -33,6 +37,21 @@ const getRequestOptions = (body: URLSearchParams): RequestInit => ({
   redirect: "follow",
 });
 
+const showReauthorizeAlert = async () => {
+  await confirmAlert({
+    title: "Couldn't refresh token",
+    message: "To continue using this extension please re-authorize.",
+    primaryAction: {
+      title: "Authorize",
+      style: Alert.ActionStyle.Default,
+      onAction: async () => {
+        await client.removeTokens();
+        await authorizeClient();
+      },
+    },
+  });
+};
+
 const authorizeClient = async () => {
   if (await client.getTokens()) {
     console.log("Already logged in!");
@@ -47,12 +66,12 @@ const authorizeClient = async () => {
   });
   const { authorizationCode } = await client.authorize(authRequest);
   const body = new URLSearchParams();
-  body.append("redirect_uri", "https://raycast.com/redirect?packageName=Extension");
+  body.append("redirect_uri", authRequest.redirectURI);
   body.append("grant_type", "authorization_code");
   body.append("code", authorizationCode);
   body.append("code_verifier", authRequest.codeVerifier);
 
-  await fetch(`${baseURI}/accounts/token`, getRequestOptions(body))
+  await fetchWithTimeout(`${baseURI}/accounts/token`, getRequestOptions(body))
     .then(async (response) => {
       if (!response.ok) {
         throw new Error(`Unable to authorize: ${response.status} ${response.statusText}, ${await response.text()}`);
@@ -84,87 +103,67 @@ const authorizeClient = async () => {
   }
 };
 
-export const refreshToken = async () => {
+export const refreshToken = async (options: TokenOptions = {}) => {
+  const { allowUserInteraction = true } = options;
   const tokens = await client.getTokens();
+
   if (!tokens) {
+    if (!allowUserInteraction) {
+      return undefined;
+    }
     return await authorizeClient();
-  } else {
-    if (!tokens.refreshToken) {
-      confirmAlert({
-        title: "Couldn't refresh token",
-        message: "To continue using this extension please re-authorize.",
-        primaryAction: {
-          title: "Authorize",
-          style: Alert.ActionStyle.Default,
-          onAction: async () => {
-            await client.removeTokens();
-            await authorizeClient();
-          },
-        },
-      });
-      return;
-    }
-    console.log("Refreshing token...");
-
-    const body = new URLSearchParams();
-    body.append("grant_type", "refresh_token");
-    body.append("refresh_token", tokens.refreshToken);
-
-    await fetch(`${baseURI}/accounts/token`, getRequestOptions(body))
-      .then((response) => {
-        if (!response.ok) {
-          confirmAlert({
-            title: "Couldn't refresh token",
-            message: "To continue using this extension please re-authorize.",
-            primaryAction: {
-              title: "Authorize",
-              style: Alert.ActionStyle.Default,
-              onAction: async () => {
-                await client.removeTokens();
-                await authorizeClient();
-              },
-            },
-          });
-        }
-        return response.text();
-      })
-      .then(async (result) => {
-        const newTokens = <OAuth.TokenResponse>JSON.parse(result);
-        try {
-          await client.setTokens(newTokens);
-        } catch {
-          confirmAlert({
-            title: "Couldn't refresh token",
-            message: "To continue using this extension please re-authorize.",
-            primaryAction: {
-              title: "Authorize",
-              style: Alert.ActionStyle.Default,
-              onAction: async () => {
-                await client.removeTokens();
-                await authorizeClient();
-              },
-            },
-          });
-        }
-      })
-      .catch((error: Error) => console.error(error));
-
-    if (tokens.accessToken !== (await client.getTokens())?.accessToken) {
-      console.log("Refreshed Token");
-      await getUserData();
-
-      return await client.getTokens();
-    }
   }
+
+  if (!tokens.refreshToken) {
+    if (!allowUserInteraction) {
+      return undefined;
+    }
+    await showReauthorizeAlert();
+    return undefined;
+  }
+
+  console.log("Refreshing token...");
+
+  const body = new URLSearchParams();
+  body.append("grant_type", "refresh_token");
+  body.append("refresh_token", tokens.refreshToken);
+
+  try {
+    const response = await fetchWithTimeout(`${baseURI}/accounts/token`, getRequestOptions(body));
+    if (!response.ok) {
+      if (allowUserInteraction) {
+        await showReauthorizeAlert();
+        return undefined;
+      }
+      throw new Error(`Unable to refresh token: ${response.status} ${response.statusText}`);
+    }
+
+    const result = await response.text();
+    const newTokens = <OAuth.TokenResponse>JSON.parse(result);
+    await client.setTokens(newTokens);
+  } catch (error) {
+    if (allowUserInteraction) {
+      await showReauthorizeAlert();
+    }
+    console.error(error);
+    return undefined;
+  }
+
+  if (tokens.accessToken !== (await client.getTokens())?.accessToken) {
+    console.log("Refreshed Token");
+    await getUserData();
+  }
+
+  return await client.getTokens();
 };
 
 const getUserData = async () => {
   if (!(await client.getTokens())) await authorizeClient();
-  if ((await client.getTokens())?.isExpired()) await refreshToken();
+  if ((await client.getTokens())?.isExpired()) await refreshToken({ allowUserInteraction: true });
 
   let data: User;
 
-  await fetch(`${baseURI}/users/me`, {
+  await fetchWithTimeout(`${baseURI}/users/me`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${(await client.getTokens())?.accessToken}`,
@@ -186,14 +185,20 @@ const getUserData = async () => {
     });
 };
 
-export const getTokens = async () => {
-  if (!(await client.getTokens())) {
+export const getTokens = async (options: TokenOptions = {}) => {
+  const { allowUserInteraction = true } = options;
+  const tokens = await client.getTokens();
+
+  if (!tokens) {
+    if (!allowUserInteraction) {
+      return undefined;
+    }
     console.log("Authorize Client");
     return await authorizeClient();
-  } else if ((await client.getTokens())?.isExpired()) {
+  } else if (tokens.isExpired()) {
     console.log("Refresh token");
-    return await refreshToken();
+    return await refreshToken({ allowUserInteraction });
   } else {
-    return await client.getTokens();
+    return tokens;
   }
 };

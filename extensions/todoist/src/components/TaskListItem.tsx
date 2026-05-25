@@ -4,7 +4,7 @@ import removeMarkdown from "remove-markdown";
 import { SyncData, Task } from "../api";
 import { getCollaboratorIcon } from "../helpers/collaborators";
 import { getColorByKey } from "../helpers/colors";
-import { displayTime, displayDate, isExactTimeTask, isOverdue, isRecurring } from "../helpers/dates";
+import { displayIncomingDate, displayTime, isExactTimeTask, isOverdue, isRecurring } from "../helpers/dates";
 import { getPriorityIcon, priorities } from "../helpers/priorities";
 import { displayReminderName } from "../helpers/reminders";
 import { ViewMode } from "../helpers/tasks";
@@ -17,18 +17,27 @@ import TaskDetail from "./TaskDetail";
 type TaskListItemProps = {
   task: Task;
   mode?: ViewMode;
+  showProjectAccessory?: boolean;
   viewProps?: ViewProps;
   data?: SyncData;
   setData: React.Dispatch<React.SetStateAction<SyncData | undefined>>;
   quickLinkView?: QuickLinkView;
 };
 
-export default function TaskListItem({ task, mode, viewProps, data, setData, quickLinkView }: TaskListItemProps) {
+export default function TaskListItem({
+  task,
+  mode,
+  showProjectAccessory,
+  viewProps,
+  data,
+  setData,
+  quickLinkView,
+}: TaskListItemProps) {
   const taskComments = data?.notes.filter((note) => note.item_id === task.id);
   const accessories: List.Item.Accessory[] = [];
   const keywords: string[] = [];
 
-  if (mode !== ViewMode.project) {
+  if (showProjectAccessory ?? mode !== ViewMode.project) {
     const project = data?.projects.find((project) => project.id === task.project_id);
     const section = data?.sections.find((section) => section.id === task.section_id);
 
@@ -73,7 +82,7 @@ export default function TaskListItem({ task, mode, viewProps, data, setData, qui
   }
 
   if (task.deadline?.date) {
-    const text = displayDate(task.deadline.date);
+    const text = displayIncomingDate(task.deadline.date);
     const overdue = isOverdue(task.deadline.date);
 
     accessories.unshift({
@@ -92,7 +101,7 @@ export default function TaskListItem({ task, mode, viewProps, data, setData, qui
     const overdue = isOverdue(task.due.date);
     const use12HourFormat = data?.user?.time_format === 1;
 
-    const text = displayDate(task.due.date);
+    const text = displayIncomingDate(task.due.date);
 
     if (mode === ViewMode.date && recurring) {
       accessories.unshift({ icon: Icon.ArrowClockwise, tooltip: `Recurring task` });

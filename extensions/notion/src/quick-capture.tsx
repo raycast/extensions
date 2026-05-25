@@ -33,6 +33,7 @@ type QuickCaptureFormValues = {
   url: string;
   captureAs: string;
   page: string;
+  addDateDivider: boolean;
 };
 
 type LaunchContext = {
@@ -99,7 +100,10 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
       try {
         await closeMainWindow();
 
-        await showToast({ style: Toast.Style.Animated, title: "Capturing content to page" });
+        await showToast({
+          style: Toast.Style.Animated,
+          title: "Capturing content to page",
+        });
 
         const pageDetail = await getPageDetail(values.url);
         const pageLink = pageDetail ? `[${pageDetail.title}](${values.url})` : values.url;
@@ -142,25 +146,38 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         }
 
         if (!selectedPage) {
-          await showToast({ style: Toast.Style.Failure, title: "Could not find page" });
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Could not find page",
+          });
           return;
         }
 
         if (selectedPage.object === "page") {
-          await appendToPage(selectedPage.id, { content });
+          await appendToPage(selectedPage.id, {
+            content,
+            addDateDivider: values.addDateDivider,
+          });
         }
 
         if (selectedPage.object === "database") {
           await createDatabasePage({
             database: selectedPage.id,
             content,
+            addDateDivider: values.addDateDivider,
             "property::title::title": pageDetail?.title,
           });
         }
 
-        await showToast({ style: Toast.Style.Success, title: "Captured content to page" });
+        await showToast({
+          style: Toast.Style.Success,
+          title: "Captured content to page",
+        });
       } catch {
-        await showToast({ style: Toast.Style.Failure, title: "Failed capturing content to page" });
+        await showToast({
+          style: Toast.Style.Failure,
+          title: "Failed capturing content to page",
+        });
       }
     },
     validation: {
@@ -234,6 +251,13 @@ function QuickCapture({ launchContext }: QuickCaptureProps) {
         <Form.Dropdown.Item title="Full Page" value="full" icon={Icon.Paragraph} />
         <Form.Dropdown.Item title="Summarize Page with AI" value="ai" icon={Icon.Stars} />
       </Form.Dropdown>
+
+      <Form.Checkbox
+        {...itemProps.addDateDivider}
+        label="Append with a date divider"
+        info="Add a divider with the current date before the captured content"
+        storeValue
+      />
 
       {/*
         When a default page/database is specified in the LaunchContext, we will fetch it directly instead

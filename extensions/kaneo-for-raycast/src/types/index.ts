@@ -1,3 +1,23 @@
+interface Session {
+  session: {
+    id: string;
+    token: string;
+    userId: string;
+    createdAt: Date;
+    updatedAt: Date;
+    expiresAt: Date;
+  };
+  user?: {
+    id: string;
+    name: string;
+    image: string;
+    createdAt: Date;
+    updatedAt: Date;
+    isAnonymous: boolean;
+  };
+  expires?: string;
+}
+
 interface Project {
   id: number;
   name: string;
@@ -21,9 +41,22 @@ interface Task {
   position: number;
   createdAt: string;
   userId: string | null;
-  assigneeName: string | null;
   assigneeId: string | null;
+  assigneeName: string | null;
+  assigneeImage: string | null;
   projectId: string;
+  parentTasks?: Task[];
+  subTasks?: Task[];
+}
+
+interface TaskRelation {
+  id: string;
+  sourceTaskId: string;
+  targetTaskId: string;
+  relationType: string;
+  createdAt: string;
+  sourceTask: Task;
+  targetTask: Task;
 }
 
 interface Column {
@@ -34,7 +67,10 @@ interface Column {
 }
 
 interface ProjectDetail extends Project {
-  columns: Column[];
+  columns?: Column[];
+  data?: {
+    columns: Column[];
+  };
 }
 
 interface UserDetail {
@@ -85,8 +121,10 @@ interface CreateProjectFormValues {
 }
 
 export type {
+  Session,
   Project,
   Task,
+  TaskRelation,
   ProjectDetail,
   Users,
   Member,

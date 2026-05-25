@@ -151,7 +151,7 @@ function ConnectionItem({ connection }: { connection: ConnectionWithHistory }) {
           <ActionPanel.Section>
             <Action title="Connect in Terminal" icon={Icon.Terminal} onAction={connectInTerminal} />
             <Action.CopyToClipboard
-              title="Copy SSH Command"
+              title="Copy Ssh Command"
               content={sshCommand}
               shortcut={{ modifiers: ["cmd"], key: "c" }}
             />
@@ -164,7 +164,7 @@ function ConnectionItem({ connection }: { connection: ConnectionWithHistory }) {
             />
             {connection.user && (
               <Action.CopyToClipboard
-                title="Copy User@Host"
+                title="Copy User@host"
                 content={`${connection.user}@${connection.host}`}
                 shortcut={{ modifiers: ["cmd", "opt"], key: "c" }}
               />
@@ -250,8 +250,21 @@ function getAppleScript(terminal: string | undefined, command: string): string {
         end tell
       `;
 
+    case "Ghostty":
+      return `
+        tell application "Ghostty"
+          activate
+        end tell
+        delay 0.5
+        tell application "System Events"
+          tell process "Ghostty"
+            keystroke "${escapedCommand}"
+            key code 36
+          end tell
+        end tell
+      `;
+
     case "Terminal":
-    default:
       return `
         tell application "Terminal"
           activate
@@ -262,5 +275,28 @@ function getAppleScript(terminal: string | undefined, command: string): string {
           end if
         end tell
       `;
+
+    default: {
+      // Generic handler for custom terminals
+      // If terminal is undefined (e.g. "Other" selected but custom name left blank), bail out early
+      if (!terminal) {
+        throw new Error("No terminal specified. Please set a terminal in Preferences.");
+      }
+
+      const escapedTerminal = terminal.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+
+      return `
+        tell application "${escapedTerminal}"
+          activate
+        end tell
+        delay 0.5
+        tell application "System Events"
+          tell process "${escapedTerminal}"
+            keystroke "${escapedCommand}"
+            key code 36
+          end tell
+        end tell
+      `;
+    }
   }
 }

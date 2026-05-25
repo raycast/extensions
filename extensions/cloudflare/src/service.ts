@@ -312,6 +312,45 @@ class Service {
     return { success, errors, messages, result };
   }
 
+  async purgeByHostnames(
+    zoneId: string,
+    hosts: string[],
+  ): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        hosts,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeByTags(zoneId: string, tags: string[]): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        tags,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
+  async purgeByPrefixes(
+    zoneId: string,
+    prefixes: string[],
+  ): Promise<CachePurgeResult> {
+    const response = await this.client.post<CachePurgeResult>(
+      `zones/${zoneId}/purge_cache`,
+      {
+        prefixes,
+      },
+    );
+    const { success, errors, messages, result } = response.data;
+    return { success, errors, messages, result };
+  }
+
   async purgeEverything(zoneId: string): Promise<CachePurgeResult> {
     const response = await this.client.post<CachePurgeResult>(
       `zones/${zoneId}/purge_cache`,
@@ -464,6 +503,7 @@ function formatWorker(item: WorkerItem): Worker {
 export default Service;
 export type {
   Account,
+  CachePurgeResult,
   Deployment,
   DeploymentStatus,
   DnsRecord,

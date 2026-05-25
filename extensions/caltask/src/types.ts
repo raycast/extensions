@@ -9,6 +9,7 @@ export interface Task {
   startTime: string; // ISO string
   endTime?: string; // ISO string
   duration?: number; // milliseconds
+  sourceCalendarEventId?: string; // ID of calendar event this timer was started from
   isRunning: boolean;
   exportedToCalendar?: boolean;
 }
@@ -29,14 +30,38 @@ export interface CalendarInfo {
 export interface CalendarEvent {
   id: string;
   title: string;
-  calendarId: string; // Calendar identifier (stable across renames)
+  calendarId: string;
   calendarName: string;
-  calendarColor?: string; // Hex color like "#FF0000"
-  accountName?: string; // Account name (e.g., "iCloud", "work@gmail.com")
+  calendarColor?: string;
+  accountName?: string;
   startDate: string; // ISO string
   endDate: string; // ISO string
+  notes?: string;
   duration: number; // milliseconds
+  isAllDay?: boolean;
+  isRecurring?: boolean;
+  location?: string;
+  url?: string;
+  occurrenceDate?: number; // Unix timestamp of this occurrence's start
 }
+
+/** Data for creating or editing a calendar event */
+export interface EventFormData {
+  title: string;
+  calendarId: string;
+  startDate: Date;
+  endDate: Date;
+  isAllDay: boolean;
+  notes?: string;
+  url?: string;
+  location?: string;
+  recurrenceRule: "none" | "daily" | "weekly" | "monthly" | "yearly";
+  recurrenceEndDate?: Date;
+  alarmOffset?: number; // seconds (negative), e.g., -300 for 5min before
+}
+
+/** Span for recurring event operations */
+export type RecurringEventSpan = "this" | "future" | "all";
 
 export interface CalendarStats {
   calendarId: string; // Calendar identifier (stable across renames)

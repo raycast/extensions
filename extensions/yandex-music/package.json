@@ -5,6 +5,9 @@
   "description": "Control the Yandex Music tab in browser with your keyboard.",
   "icon": "extension-icon.png",
   "author": "alexstrnik",
+  "contributors": [
+    "olejech"
+  ],
   "categories": [
     "Media",
     "Applications"
@@ -89,7 +92,8 @@
     "build": "ray build -e dist",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
-    "lint": "ray lint"
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
   },
   "platforms": [
     "macOS"

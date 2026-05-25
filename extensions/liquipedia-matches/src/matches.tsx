@@ -1,72 +1,47 @@
-import { List, ActionPanel, Action, Icon } from "@raycast/api";
-import { getUpcomingMatches } from "./lib/getUpcomingMatches";
+import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
+import { getUpcomingMatches } from "./lib/getUpcomingMatches";
 
 export default function MatchesCommand() {
-  const getPlatformIcon = (platform: string) => {
-    switch (platform) {
-      case "Twitch":
-        return "https://static.twitchcdn.net/assets/favicon-32-e29e246c157142c94346.png";
-      case "YouTube":
-        return "https://www.youtube.com/favicon.ico";
-      case "Kick":
-        return "https://kick.com/favicon.ico";
-      default:
-        return Icon.Play;
-    }
-  };
+  const { isLoading, data, error } = useCachedPromise(getUpcomingMatches);
 
-  const { isLoading, data: matches } = useCachedPromise(getUpcomingMatches);
+  if (error) {
+    return (
+      <List isLoading={false} searchBarPlaceholder="Search matches...">
+        <List.EmptyView title="Failed to load matches" description={String(error?.message || error)} />
+      </List>
+    );
+  }
 
   return (
-    <List isLoading={isLoading} searchBarPlaceholder="Search upcoming matches...">
-      {matches?.map((match, idx) => (
-        <List.Item
-          key={idx}
-          title={`${match.team1} vs ${match.team2}`}
-          accessories={[{ icon: match.team1Icon }, { text: match.time }, { icon: match.team2Icon }]}
-          actions={
-            match.streams.length > 0 ? (
-              <ActionPanel>
-                {match.streams.map((url, i) => {
-                  const getPlatformName = (url: string) => {
-                    if (url.includes("twitch")) return "Twitch";
-                    if (url.includes("youtube")) return "YouTube";
-                    if (url.includes("kick")) return "Kick";
-                    return "Stream";
-                  };
-
-                  const platform = getPlatformName(url);
-
-                  return (
-                    <Action.OpenInBrowser
-                      key={i}
-                      url={url}
-                      title={`Watch on ${platform}`}
-                      icon={getPlatformIcon(platform)}
-                    />
-                  );
-                })}
-              </ActionPanel>
-            ) : undefined
-          }
-        />
-      ))}
-
-      {!isLoading && (
-        <List.Section title="Attribution">
+    <List isLoading={isLoading} searchBarPlaceholder="Search matches...">
+      {!isLoading && (!data || data.length === 0) ? (
+        <List.EmptyView title="No matches found" description="Try adjusting your search or check back later." />
+      ) : (
+        data?.map((match, idx) => (
           <List.Item
-            key="liquipedia-attribution"
-            title="Data provided by Liquipedia.net"
-            icon="https://liquipedia.net/favicon.ico"
-            accessories={[{ text: "CC-BY-SA 3.0" }]}
+            key={idx}
+            title={`${match.team1} vs ${match.team2}`}
+            subtitle={match.tournament}
+            accessories={[{ icon: match.team1Icon }, { text: match.time, icon: Icon.Clock }, { icon: match.team2Icon }]}
             actions={
-              <ActionPanel>
-                <Action.OpenInBrowser url="https://liquipedia.net" title="Visit Liquipedia" />
-              </ActionPanel>
+              match.streams && match.streams.length > 0 ? (
+                <ActionPanel>
+                  {match.streams.map((url, i) => {
+                    let title = `Open Stream ${i + 1}`;
+                    try {
+                      const host = new URL(url).hostname.replace(/^www\./, "");
+                      title = `Open ${host}`;
+                    } catch {
+                      // fall back to generic title
+                    }
+                    return <Action.OpenInBrowser key={`${url}-${i}`} title={title} url={url} />;
+                  })}
+                </ActionPanel>
+              ) : null
             }
           />
-        </List.Section>
+        ))
       )}
     </List>
   );

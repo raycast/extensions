@@ -19,7 +19,7 @@ export function createActionDeepLink(id: string) {
 }
 
 export function getPreference(key: keyof Preferences): string {
-  return getPreferenceValues<Preferences>()[key];
+  return getPreferenceValues<Preferences>()[key] ?? "";
 }
 
 interface StoreOptions<T> {

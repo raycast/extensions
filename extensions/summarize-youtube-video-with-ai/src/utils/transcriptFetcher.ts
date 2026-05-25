@@ -3,7 +3,6 @@ import ytdl from "ytdl-core";
 type CaptionTrack = {
   baseUrl: string;
   languageCode: string;
-  name?: { simpleText: string };
 };
 
 type PlayerResponse = {
@@ -17,24 +16,12 @@ type PlayerResponse = {
   };
 };
 
-const PLAYER_URL = "https://www.youtube.com/youtubei/v1/player?key=AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8";
-const USER_AGENT = "com.google.android.youtube/19.09.37 (Linux; U; Android 11) gzip";
+const PLAYER_URL = "https://www.youtube.com/youtubei/v1/player?prettyPrint=false";
+const CLIENT_VERSION = "20.10.38";
+const USER_AGENT = `com.google.android.youtube/${CLIENT_VERSION} (Linux; U; Android 14)`;
 
 export async function fetchTranscript(video: string): Promise<string> {
   const videoId = ytdl.getVideoID(video);
-
-  const playerPayload = {
-    context: {
-      client: {
-        clientName: "ANDROID",
-        clientVersion: "19.09.37",
-        androidSdkVersion: 30,
-        hl: "en",
-        gl: "US",
-      },
-    },
-    videoId: videoId,
-  };
 
   const playerResponse = await fetch(PLAYER_URL, {
     method: "POST",
@@ -42,7 +29,15 @@ export async function fetchTranscript(video: string): Promise<string> {
       "Content-Type": "application/json",
       "User-Agent": USER_AGENT,
     },
-    body: JSON.stringify(playerPayload),
+    body: JSON.stringify({
+      context: {
+        client: {
+          clientName: "ANDROID",
+          clientVersion: CLIENT_VERSION,
+        },
+      },
+      videoId,
+    }),
   });
 
   if (!playerResponse.ok) {
@@ -72,12 +67,25 @@ export async function fetchTranscript(video: string): Promise<string> {
     throw new Error("Empty caption response");
   }
 
-  // YouTube srv3 format uses <p> tags (may contain nested <s> tags)
-  const segments = xml.match(/<p[^>]*>[\s\S]*?<\/p>/g) || [];
+  const transcriptText = parseTranscriptXml(xml);
 
-  const transcriptText = segments
+  if (!transcriptText) {
+    throw new Error("Transcript text is empty after parsing");
+  }
+
+  return transcriptText;
+}
+
+function parseTranscriptXml(xml: string): string {
+  // Try srv3 format first (<p> tags with nested <s> tags)
+  const pSegments = xml.match(/<p[^>]*>[\s\S]*?<\/p>/g);
+  // Fall back to srv1 format (<text> tags)
+  const textSegments = xml.match(/<text[^>]*>[\s\S]*?<\/text>/g);
+
+  const segments = pSegments?.length ? pSegments : (textSegments ?? []);
+
+  return segments
     .map((segment: string) => {
-      // Strip tags to get text (handles nested elements like <s>)
       return segment
         .replace(/<[^>]+>/g, " ")
         .replace(/\s+/g, " ")
@@ -93,10 +101,4 @@ export async function fetchTranscript(video: string): Promise<string> {
     .replace(/&nbsp;/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-
-  if (!transcriptText) {
-    throw new Error("Transcript text is empty after parsing");
-  }
-
-  return transcriptText;
 }

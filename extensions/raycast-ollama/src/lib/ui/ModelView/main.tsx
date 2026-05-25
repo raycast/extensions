@@ -39,7 +39,7 @@ export function ModelView(): React.JSX.Element {
   } = usePromise(GetModels, [SelectedServer], { abortable: abort });
   const [Download, setDownload]: [
     Types.UiModelDownload[],
-    React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>
+    React.Dispatch<React.SetStateAction<Types.UiModelDownload[]>>,
   ] = React.useState([] as Types.UiModelDownload[]);
   const [showDetail, setShowDetail]: [boolean, React.Dispatch<React.SetStateAction<boolean>>] = React.useState(false);
 
@@ -159,7 +159,7 @@ export function ModelView(): React.JSX.Element {
           )}
           {prop.model.ps && (
             <Action
-              title="Unload Model From Memory"
+              title="Unload Model from Memory"
               icon={Icon.Eject}
               onAction={() => UnloadModel(prop.model, RevalidateModels)}
               shortcut={Shortcut.LoadUnloadModel}

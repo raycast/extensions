@@ -1,0 +1,49 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "blip-raycast",
+  "version": "0.1.0",
+  "description": "Send files and folders to Blip from Raycast.",
+  "author": "astroboii47",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "dev": "ray develop",
+    "build": "ray build",
+    "lint": "ray lint",
+    "fix-lint": "ray lint --fix",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "title": "Blip",
+  "icon": "blip-icon.png",
+  "dependencies": {
+    "@raycast/api": "^1.99.3"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.8",
+    "@types/node": "^22.13.10",
+    "@types/react": "^19.0.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "categories": [
+    "Productivity"
+  ],
+  "commands": [
+    {
+      "name": "send-to-blip",
+      "title": "Send to Blip",
+      "description": "Pick a file or folder and send it to Blip. Requires Raycast Accessibility permission.",
+      "mode": "view"
+    },
+    {
+      "name": "send-selected-finder-item",
+      "title": "Send Selected Finder Item to Blip",
+      "description": "Send the current Finder selection to Blip. Requires Raycast Accessibility permission.",
+      "mode": "no-view"
+    }
+  ],
+  "platforms": [
+    "macOS"
+  ]
+}

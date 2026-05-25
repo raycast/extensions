@@ -48,6 +48,10 @@ export async function brewSearch(
   let formulaeProgress: DownloadProgress | undefined;
 
   // Phase 1: Load indexes concurrently (small, ~600KB each)
+  // IMPORTANT: Do NOT pass the abort signal to index fetching.
+  // The index download is a shared resource that must complete regardless of
+  // search query changes. useCachedPromise aborts on every keystroke, which
+  // would repeatedly restart the (slow) initial index download.
   onProgress?.({ phase: "casks" });
 
   const [caskIndex, formulaIndex] = await Promise.all([
@@ -58,7 +62,7 @@ export async function brewSearch(
         casksProgress: progress,
         formulaeProgress,
       });
-    }, signal),
+    }),
     fetchFormulaIndex((progress) => {
       formulaeProgress = progress;
       onProgress?.({
@@ -66,9 +70,10 @@ export async function brewSearch(
         casksProgress,
         formulaeProgress: progress,
       });
-    }, signal),
+    }),
   ]);
 
+  // Check for abort after index load (search query may have changed)
   if (signal?.aborted) {
     const error = new Error("Aborted");
     error.name = "AbortError";

@@ -1,6 +1,6 @@
 # Anki Changelog
 
-## [Security Maintenance] - {PR_MERGE_DATE}
+## [Security Maintenance] - 2026-02-13
 
 - Removed unused `npm-check-updates` dependency.
 - Reduced transitive dependency surface (including removal of transitive `tar` usage) to address security advisories.

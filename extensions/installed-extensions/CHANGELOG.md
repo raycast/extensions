@@ -1,5 +1,21 @@
 # Installed Extensions Changelog
 
+## [Fix Beta Extension Folder] - 2026-05-21
+
+- Include the Raycast beta extension folder on macOS when scanning installed extensions.
+
+## [Fix Fresh Install Crash] - 2026-05-17
+
+- Treat a missing extensions directory (`~/.config/raycast/extensions` on macOS, `~/.config/raycast-x/extensions` on Windows) as an empty list instead of throwing `ENOENT` on fresh Raycast installs with no extensions yet
+
+## [Sort by Recently Updated] - 2026-04-24
+
+- Add `Sort By` preference with `Title (A–Z)` (default) and `Recently Updated` options to quickly spot extensions refreshed by "Check for Updates"
+- Add a `Just Updated` tag when an extension was updated in the last hour so you can find fresh updates at a glance even when sorting alphabetically
+- Add `Show in Finder` / `Show in Explorer` action to reveal the extension folder (useful for local extension development)
+- Persist the `Extension Type` filter across launches (`storeValue`)
+- Skip malformed or unreadable extension manifests gracefully instead of failing the entire list
+
 ## [Cross-plaform Keyboard Shortcuts] - 2026-01-05
 
 - Update `shortcut`s to be cross-platform

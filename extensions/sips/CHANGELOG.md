@@ -1,5 +1,14 @@
 # Image Modification Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
+## [1.11.3 - File Path Comma Fixes] - 2026-03-12
+
+- Fixed file selection breaking when filenames contain commas
+- Improved path delimiter handling in clipboard image parsing and temporary file tracking
+
 ## [1.11.2 — QSpace Bug Fixes] - 2026-03-01
 
 - Added support for regular QSpace (the Mac App Store version), not just QSpace Pro

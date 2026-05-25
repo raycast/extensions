@@ -1,6 +1,7 @@
 import { runAppleScript } from "@raycast/utils";
 import { closeMainWindow, Detail, popToRoot, showToast, showHUD, Toast } from "@raycast/api";
 import { isPermissionError, PermissionErrorScreen } from "./core/permission-error-screen";
+import { isIt2apiAvailable, warnIt2apiMissing } from "./core/it2api";
 import { useEffect, useState } from "react";
 
 const scriptToSplitHorizontally = `
@@ -29,6 +30,7 @@ export default function Command() {
   const [hasPermissionError, setHasPermissionError] = useState<boolean>(false);
 
   const loadNewTab = () => {
+    if (!isIt2apiAvailable()) warnIt2apiMissing();
     runAppleScript(scriptToSplitHorizontally)
       .then(async (status) => {
         if (status !== "true") {

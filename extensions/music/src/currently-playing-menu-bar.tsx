@@ -1,54 +1,50 @@
 import { getPreferenceValues, Icon, Keyboard, MenuBarExtra, open, openCommandPreferences } from "@raycast/api";
-import { usePromise } from "@raycast/utils";
+import { useCachedPromise } from "@raycast/utils";
 import { pipe } from "fp-ts/lib/function";
-import * as music from "./util/scripts";
 import * as TE from "fp-ts/TaskEither";
-import { handleTaskEitherError } from "./util/utils";
-import { PlayerState } from "./util/models";
-import { getPlayerState } from "./util/scripts/player-controls";
 import { useEffect, useState } from "react";
+
+import * as music from "./util/scripts";
+import { PlayerState } from "./util/models";
 import { formatTitle } from "./util/track";
+import { handleTaskEitherError } from "./util/utils";
 
 const { hideArtistName, maxTextLength, cleanupTitle, hideIconWhenIdle } =
   getPreferenceValues<Preferences.CurrentlyPlayingMenuBar>();
 
+function toMutationPromise<E extends Error, T>(taskEither: TE.TaskEither<E, T>, error: string, success: string) {
+  const handledTask = pipe(
+    taskEither,
+    handleTaskEitherError(error, success),
+    TE.getOrElseW((handledError) => async () => {
+      throw handledError;
+    }),
+  );
+
+  return Promise.resolve().then(() => handledTask());
+}
+
 export default function CurrentlyPlayingMenuBarCommand() {
   const {
-    isLoading: isLoadingCurrentTrack,
-    data: currentTrack,
-    mutate: mutateCurrentTrack,
-  } = usePromise(
+    isLoading,
+    data: snapshot,
+    mutate,
+  } = useCachedPromise(
     () =>
       pipe(
-        music.currentTrack.getCurrentTrack(),
+        music.currentTrack.getMenuBarSnapshot(),
         TE.matchW(
-          () => undefined,
-          (track) => track,
+          () => ({ kind: "not-running" }) as const,
+          (value) => value,
         ),
       )(),
     [],
-  );
-  const {
-    isLoading: isLoadingPlayerState,
-    data: playerState,
-    mutate: mutatePlayerState,
-  } = usePromise(
-    () =>
-      pipe(
-        getPlayerState,
-        TE.matchW(
-          () => PlayerState.STOPPED,
-          (state) => state,
-        ),
-      )(),
-    [],
+    { keepPreviousData: true },
   );
 
-  const isRunning = !isLoadingCurrentTrack && !!currentTrack;
-  const isLoading = isLoadingCurrentTrack || isLoadingPlayerState;
-
-  // Default to playing/not-favorited while data loads to avoid flicker on open
-  const isPlaying = playerState !== undefined ? playerState === PlayerState.PLAYING : true;
+  const currentTrack = snapshot?.kind === "ok" ? snapshot.track : undefined;
+  const playerState = snapshot?.kind === "ok" ? snapshot.playerState : undefined;
+  const isPlaying = playerState === PlayerState.PLAYING;
   const isFavorited = currentTrack?.favorited === "true";
 
   const title = currentTrack
@@ -83,9 +79,11 @@ export default function CurrentlyPlayingMenuBarCommand() {
 
   useEffect(() => {
     if (!needsScroll) return;
+
     const interval = setInterval(() => {
       setScrollOffset((prev) => (prev + 1) % paddedTitle.length);
     }, 200);
+
     return () => clearInterval(interval);
   }, [needsScroll, paddedTitle.length]);
 
@@ -93,11 +91,11 @@ export default function CurrentlyPlayingMenuBarCommand() {
     ? (paddedTitle + paddedTitle).substring(scrollOffset, scrollOffset + DROPDOWN_MAX)
     : fullTitle;
 
-  if (!isRunning) {
+  if (!snapshot || snapshot.kind === "not-running") {
     return <NothingPlaying title="Music needs to be opened" isLoading={isLoading} />;
   }
 
-  if (!currentTrack) {
+  if (snapshot.kind === "no-track" || !currentTrack) {
     return <NothingPlaying isLoading={isLoading} />;
   }
 
@@ -116,18 +114,13 @@ export default function CurrentlyPlayingMenuBarCommand() {
           icon={Icon.Pause}
           title="Pause"
           onAction={() =>
-            pipe(
-              music.player.pause,
-              handleTaskEitherError("Failed to pause playback", "Playback paused"),
-              TE.chainFirstTaskK(
-                () => () =>
-                  mutatePlayerState(undefined, {
-                    optimisticUpdate() {
-                      return PlayerState.PAUSED;
-                    },
-                  }),
-              ),
-            )()
+            mutate(toMutationPromise(music.player.pause, "Failed to pause playback", "Playback paused"), {
+              optimisticUpdate(data) {
+                if (!data || data.kind !== "ok") return data;
+
+                return { ...data, playerState: PlayerState.PAUSED };
+              },
+            })
           }
         />
       )}
@@ -136,32 +129,25 @@ export default function CurrentlyPlayingMenuBarCommand() {
           icon={Icon.Play}
           title="Play"
           onAction={() =>
-            pipe(
-              music.player.play,
-              handleTaskEitherError("Failed to start playback", "Playback started"),
-              TE.chainFirstTaskK(
-                () => () =>
-                  mutatePlayerState(undefined, {
-                    optimisticUpdate() {
-                      return PlayerState.PLAYING;
-                    },
-                  }),
-              ),
-            )()
+            mutate(toMutationPromise(music.player.play, "Failed to start playback", "Playback started"), {
+              optimisticUpdate(data) {
+                if (!data || data.kind !== "ok") return data;
+
+                return { ...data, playerState: PlayerState.PLAYING };
+              },
+            })
           }
         />
       )}
       <MenuBarExtra.Item
         icon={Icon.Forward}
         title="Next"
-        onAction={() => pipe(music.player.next, handleTaskEitherError("Failed to skip track", "Track skipped"))()}
+        onAction={() => mutate(toMutationPromise(music.player.next, "Failed to skip track", "Track skipped"))}
       />
       <MenuBarExtra.Item
         icon={Icon.Rewind}
         title="Previous"
-        onAction={() =>
-          pipe(music.player.previous, handleTaskEitherError("Failed to rewind track", "Track rewinded"))()
-        }
+        onAction={() => mutate(toMutationPromise(music.player.previous, "Failed to rewind track", "Track rewinded"))}
       />
       <MenuBarExtra.Item
         icon={isFavorited ? Icon.StarDisabled : Icon.Star}
@@ -170,22 +156,23 @@ export default function CurrentlyPlayingMenuBarCommand() {
           const nextFavoriteState = !isFavorited;
           const toggleFavoriteAction = nextFavoriteState ? music.currentTrack.favorite : music.currentTrack.unfavorite;
 
-          return pipe(
-            toggleFavoriteAction,
-            handleTaskEitherError(
+          return mutate(
+            toMutationPromise(
+              toggleFavoriteAction,
               nextFavoriteState ? "Failed to favorite the track" : "Failed to unfavorite the track",
               nextFavoriteState ? "Favorited" : "Unfavorited",
             ),
-            TE.chainFirstTaskK(
-              () => () =>
-                mutateCurrentTrack(undefined, {
-                  optimisticUpdate(data) {
-                    if (!data) return data;
-                    return { ...data, favorited: nextFavoriteState ? "true" : "false" };
-                  },
-                }),
-            ),
-          )();
+            {
+              optimisticUpdate(data) {
+                if (!data || data.kind !== "ok") return data;
+
+                return {
+                  ...data,
+                  track: { ...data.track, favorited: nextFavoriteState ? "true" : "false" },
+                };
+              },
+            },
+          );
         }}
       />
       <MenuBarExtra.Section>

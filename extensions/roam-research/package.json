@@ -13,6 +13,7 @@
     "Productivity"
   ],
   "license": "MIT",
+  "platforms": ["macOS", "Windows"],
   "commands": [
     {
       "name": "index",
@@ -45,10 +46,43 @@
       "mode": "view"
     },
     {
+      "name": "instant-capture-default-graph",
+      "title": "Instant Capture",
+      "description": "Zero-UI capture using your designated Instant Capture template",
+      "mode": "no-view",
+      "arguments": [
+        {
+          "name": "text",
+          "placeholder": "Note to capture",
+          "type": "text",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "manage-templates",
+      "title": "Manage Capture Templates",
+      "description": "Create, edit, and delete capture templates for your Roam graphs",
+      "mode": "view"
+    },
+    {
       "name": "create-graph-quicklink",
       "title": "Create Graph Quicklink",
       "description": "Create a Raycast Quicklink for a Roam graph or a specific page in that graph",
       "mode": "view"
+    },
+    {
+      "name": "outbox-view",
+      "title": "Capture Outbox",
+      "description": "View capture history and retry failed captures",
+      "mode": "view"
+    },
+    {
+      "name": "outbox-retry",
+      "title": "Sync Outbox",
+      "description": "Retry pending captures in the outbox queue",
+      "mode": "no-view",
+      "interval": "10m"
     }
   ],
   "preferences": [
@@ -82,10 +116,10 @@
     {
       "name": "quickCaptureTemplate",
       "type": "textfield",
-      "title": "Default template for Quick Capture",
-      "label": "Default template for Quick Capture",
+      "title": "(DEPRECATED) Default template for Quick Capture",
+      "label": "(DEPRECATED) Default template for Quick Capture",
       "required": false,
-      "default": "- from [[Raycast]] at {date} \n - {content}",
+      "default": "- from [[Raycast]] at {date} \n  - {content}",
       "description": "{date} supports {date: HH:mm:ss} (by default), \n                           {date: YYYY-MM-DD HH:mm:ss}, \n                           all formats in dayjs\nYou can have multiple lines for multiple blocks. For those, use a single space for indentation"
     },
     {
@@ -100,18 +134,15 @@
   ],
   "dependencies": {
     "@raycast/api": "^1.56.1",
-    "@raycast/utils": "^1.4.11",
-    "@roam-research/roam-api-sdk": "^0.10.0",
+    "@raycast/utils": "^1.19.1",
     "cross-fetch": "^4.0.0",
     "dayjs": "^1.11.6",
-    "debounce": "^1.2.1",
-    "querystring": "^0.2.1",
-    "raycast-toolkit": "^1.0.6"
+    "debounce": "^1.2.1"
   },
   "devDependencies": {
     "@types/debounce": "^1.2.1",
     "@types/node": "18.8.3",
-    "@types/react": "18.0.9",
+    "@types/react": "^18.3.18",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "eslint": "^7.32.0",

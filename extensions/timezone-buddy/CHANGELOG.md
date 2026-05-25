@@ -1,5 +1,9 @@
 # Timezone Buddy Changelog
 
+## [Windows Keyboard Shortcuts Support] - 2026-04-03
+
+- Added Windows-specific keyboard shortcuts (`Ctrl` equivalents) for all actions
+
 ## [Fix] - 2025-11-06
 
 - Toggled on windows support in package.json

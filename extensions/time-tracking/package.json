@@ -56,7 +56,7 @@
       "title": "Start Timer",
       "subtitle": "Start a project timer",
       "description": "Starts a new project timer and pauses the current timer",
-      "mode": "no-view",
+      "mode": "view",
       "icon": "start_command.png",
       "arguments": [
         {
@@ -77,6 +77,31 @@
           "type": "textfield",
           "required": false,
           "description": "Enter a default tag to apply to timers"
+        },
+        {
+          "name": "longSessionCheck",
+          "title": "Long Session Detection",
+          "type": "checkbox",
+          "required": false,
+          "default": false,
+          "label": "Prompt when switching from a long-running timer",
+          "description": "When starting a new timer, prompt if the previous timer exceeded the threshold"
+        },
+        {
+          "name": "longSessionThreshold",
+          "title": "Long Session Threshold",
+          "type": "dropdown",
+          "required": false,
+          "description": "Duration after which a session is considered long",
+          "default": "3600000",
+          "data": [
+            { "title": "1 hour", "value": "3600000" },
+            { "title": "2 hours", "value": "7200000" },
+            { "title": "3 hours", "value": "10800000" },
+            { "title": "4 hours", "value": "14400000" },
+            { "title": "6 hours", "value": "21600000" },
+            { "title": "8 hours", "value": "28800000" }
+          ]
         }
       ]
     },
@@ -95,6 +120,22 @@
       "description": "Overview of all timers",
       "mode": "view",
       "icon": "list_command.png"
+    },
+    {
+      "name": "summary",
+      "title": "Time Summary",
+      "subtitle": "View time summaries",
+      "description": "View project time summaries by day, week, month, or custom date range",
+      "mode": "view",
+      "icon": "list_command.png"
+    },
+    {
+      "name": "import-timers",
+      "title": "Import Timers",
+      "subtitle": "Import timers from CSV",
+      "description": "Import timer data from a previously exported CSV file",
+      "mode": "no-view",
+      "icon": "start_command.png"
     }
   ],
   "dependencies": {

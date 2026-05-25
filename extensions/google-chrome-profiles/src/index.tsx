@@ -6,7 +6,6 @@ import {
   getPreferenceValues,
   Icon,
   Image,
-  LaunchProps,
   List,
   showHUD,
   showToast,
@@ -17,12 +16,13 @@ import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import {
+  BrowserConfig,
   GoogleChromeBookmarkFile,
   GoogleChromeBookmarkFolder,
   GoogleChromeBookmarkURL,
   GoogleChromeInfoCache,
   GoogleChromeLocalState,
-  Preferences,
+  getSelectedBrowser,
   Profile,
 } from "./util/types";
 import {
@@ -36,8 +36,8 @@ import {
 } from "./util/util";
 import { getFavicon } from "@raycast/utils";
 
-const ProfileItem = (props: { index: number; profile: Profile }) => {
-  const { index, profile } = props;
+const ProfileItem = (props: { index: number; profile: Profile; browser: BrowserConfig }) => {
+  const { index, profile, browser } = props;
 
   return (
     <List.Item
@@ -48,15 +48,39 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
       keywords={profile.ga?.email ? [profile.ga.email, ...profile.ga.email.split("@")] : undefined}
       actions={
         <ActionPanel>
-          <Action.Push title="Show Bookmarks" icon={Icon.Link} target={<ListBookmarks profile={profile} />} />
+          <Action.Push
+            title="Show Bookmarks"
+            icon={Icon.Link}
+            target={<ListBookmarks profile={profile} browser={browser} />}
+          />
           <Action
             title="Bring to Front"
             icon={Icon.Window}
             shortcut={{ modifiers: ["cmd"], key: "return" }}
             onAction={async () => {
-              await openGoogleChrome(profile, ChromeAction.Focus, async () => {
-                await showHUD("Bringing to front...");
-              });
+              await openGoogleChrome(
+                profile,
+                ChromeAction.Focus,
+                async () => {
+                  await showHUD("Bringing to front...");
+                },
+                browser,
+              );
+            }}
+          />
+          <Action
+            title="New Window"
+            icon={Icon.AppWindow}
+            shortcut={{ modifiers: ["cmd", "shift"], key: "return" }}
+            onAction={async () => {
+              await openGoogleChrome(
+                profile,
+                ChromeAction.NewWindow,
+                async () => {
+                  await showHUD("Opening new window...");
+                },
+                browser,
+              );
             }}
           />
         </ActionPanel>
@@ -66,6 +90,7 @@ const ProfileItem = (props: { index: number; profile: Profile }) => {
 };
 
 export default function Command() {
+  const browser = getSelectedBrowser();
   const [localState, setLocalState] = useState<GoogleChromeLocalState>();
   const [error, setError] = useState<Error>();
 
@@ -74,7 +99,7 @@ export default function Command() {
       try {
         // for google-chrome-profiles-1.png:
         // 1. comment the code below:
-        const path = join(homedir(), "Library/Application Support/Google/Chrome/Local State");
+        const path = join(homedir(), browser.dataPath, "Local State");
         const localStateFileBuffer = await readFile(path);
         const localStateFileText = localStateFileBuffer.toString("utf-8");
         setLocalState(JSON.parse(localStateFileText));
@@ -82,7 +107,7 @@ export default function Command() {
         // 3. uncomment code below:
         // setLocalState(_createDataSetForScreenshot1());
       } catch (error) {
-        setError(Error("No profile found\nIs Google Chrome installed?"));
+        setError(Error(`No profile found\nIs ${browser.appName} installed?`));
       }
     }
 
@@ -101,7 +126,9 @@ export default function Command() {
       {profiles &&
         profiles
           .sort(sortAlphabetically)
-          .map((profile, index) => <ProfileItem key={profile.directory} index={index} profile={profile} />)}
+          .map((profile, index) => (
+            <ProfileItem key={profile.directory} index={index} profile={profile} browser={browser} />
+          ))}
     </List>
   );
 }
@@ -146,7 +173,7 @@ const extractBookmarksUrlRecursively = (folder: GoogleChromeBookmarkFolder): Goo
 // Components
 //-------------
 
-function ListBookmarks(props: { profile: Profile }) {
+function ListBookmarks(props: { profile: Profile; browser: BrowserConfig }) {
   const [bookmarkFile, setBookmarkFile] = useState<GoogleChromeBookmarkFile>();
   const [error, setError] = useState<Error>();
   const [searchText, setSearchText] = useState("");
@@ -156,7 +183,7 @@ function ListBookmarks(props: { profile: Profile }) {
     async function listBookmarks() {
       try {
         const dir = props.profile.directory;
-        const path = join(homedir(), "Library/Application Support/Google/Chrome", dir, "Bookmarks");
+        const path = join(homedir(), props.browser.dataPath, dir, "Bookmarks");
         const bookmarkFileBuffer = await readFile(path);
         const bookmarkFileText = bookmarkFileBuffer.toString("utf-8");
         setBookmarkFile(JSON.parse(bookmarkFileText));
@@ -255,7 +282,9 @@ function ListBookmarks(props: { profile: Profile }) {
           <List.Item
             title="Bring to Front"
             icon={Icon.Window}
-            actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.Focus} />}
+            actions={
+              <ActionPanelForTarget profile={props.profile} target={ChromeAction.Focus} browser={props.browser} />
+            }
           />
           {newTabItems.map((tab, index) => (
             <List.Item
@@ -263,15 +292,24 @@ function ListBookmarks(props: { profile: Profile }) {
               title={tab.title}
               subtitle={tab.subtitle}
               icon={tab.icon}
-              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} />}
+              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} browser={props.browser} />}
             />
           ))}
+          <List.Item
+            title="New Window"
+            icon={Icon.Duplicate}
+            actions={
+              <ActionPanelForTarget profile={props.profile} target={ChromeAction.NewWindow} browser={props.browser} />
+            }
+          />
           {clipboardItem && (
             <List.Item
               title={clipboardItem.title}
               subtitle={clipboardItem.subtitle}
               icon={clipboardItem.icon}
-              actions={<ActionPanelForTarget profile={props.profile} target={clipboardItem.target} />}
+              actions={
+                <ActionPanelForTarget profile={props.profile} target={clipboardItem.target} browser={props.browser} />
+              }
             />
           )}
         </List.Section>
@@ -284,7 +322,7 @@ function ListBookmarks(props: { profile: Profile }) {
               title={tab.title}
               subtitle={tab.subtitle}
               icon={tab.icon}
-              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} />}
+              actions={<ActionPanelForTarget profile={props.profile} target={tab.target} browser={props.browser} />}
             />
           ))}
         </List.Section>
@@ -297,7 +335,13 @@ function ListBookmarks(props: { profile: Profile }) {
               title={b.title}
               subtitle={b.subtitle}
               icon={getFavicon(b.iconURL, { fallback: Icon.Globe, mask: Image.Mask.Circle })}
-              actions={<ActionPanelForTarget profile={props.profile} target={ChromeAction.openUrl(b.url)} />}
+              actions={
+                <ActionPanelForTarget
+                  profile={props.profile}
+                  target={ChromeAction.openUrl(b.url)}
+                  browser={props.browser}
+                />
+              }
             />
           ))}
         </List.Section>
@@ -307,42 +351,54 @@ function ListBookmarks(props: { profile: Profile }) {
 }
 
 function newTabUrlWithQuery(searchText: string) {
-  return getPreferenceValues<Preferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
+  return getPreferenceValues<ExtensionPreferences>().newTabURL.replace("%query%", encodeURIComponent(searchText));
 }
 
-function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget }) {
+function ActionPanelForTarget(props: { profile: Profile; target: ChromeTarget; browser: BrowserConfig }) {
   const context = encodeURIComponent(
     JSON.stringify({ directory: props.profile.directory, name: props.profile.name, ...props.target }),
   );
   const deeplink = `raycast://extensions/frouo/${environment.extensionName}/open-profile?context=${context}`;
 
-  const action = props.target.action;
-  const hudMessage =
-    action === "focus" ? "Bringing to front..." : action === "newTab" ? "Opening new tab..." : "Opening...";
+  const targetUrl = props.target.action === "openUrl" ? props.target.url : "";
 
-  const quicklinkTitle =
-    action === "focus"
-      ? "Create Quicklink (Bring to Front)"
-      : action === "newTab"
-      ? "Create Quicklink (New Tab)"
-      : "Create Quicklink (Open the URL)";
-
-  const quicklinkName =
-    action === "focus"
-      ? `${props.profile.name} > Bring to Front`
-      : action === "newTab"
-      ? `${props.profile.name} > New Tab`
-      : `${props.profile.name} > Open ${props.target.url}`;
+  const { hudMessage, quicklinkTitle, quicklinkName } = {
+    focus: {
+      hudMessage: "Bringing to front...",
+      quicklinkTitle: "Create Quicklink (Bring to Front)",
+      quicklinkName: `${props.profile.name} > Bring to Front`,
+    },
+    newTab: {
+      hudMessage: "Opening new tab...",
+      quicklinkTitle: "Create Quicklink (New Tab)",
+      quicklinkName: `${props.profile.name} > New Tab`,
+    },
+    newWindow: {
+      hudMessage: "Opening new window...",
+      quicklinkTitle: "Create Quicklink (New Window)",
+      quicklinkName: `${props.profile.name} > New Window`,
+    },
+    openUrl: {
+      hudMessage: "Opening...",
+      quicklinkTitle: "Create Quicklink (Open the URL)",
+      quicklinkName: `${props.profile.name} > Open ${targetUrl}`,
+    },
+  }[props.target.action];
 
   return (
     <ActionPanel>
       <Action
-        title="Open in Google Chrome"
+        title={`Open in ${props.browser.appName}`}
         icon={Icon.Globe}
         onAction={() => {
-          openGoogleChrome(props.profile, props.target, async () => {
-            await showHUD(hudMessage);
-          });
+          openGoogleChrome(
+            props.profile,
+            props.target,
+            async () => {
+              await showHUD(hudMessage);
+            },
+            props.browser,
+          );
         }}
       />
       <Action.CreateQuicklink title={quicklinkTitle} quicklink={{ name: quicklinkName, link: deeplink }} />

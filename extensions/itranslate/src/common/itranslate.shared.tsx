@@ -1064,12 +1064,13 @@ function fetchSpaceOCR(image: string, provider: IOCRServiceProvider): Promise<st
   return new Promise<string>((resolve, reject) => {
     const formData = new FormData();
     formData.append("file", fs.createReadStream(image));
-    axios({
-      url: "https://api.ocr.space/parse/image",
-      method: "POST",
-      headers: { apikey: provider.appKey, ...formData.getHeaders() },
-      data: formData,
-    })
+    axios
+      .request({
+        url: "https://api.ocr.space/parse/image",
+        method: "POST",
+        headers: { apikey: provider.appKey, ...formData.getHeaders() },
+        data: formData,
+      })
       .then((res) => {
         const resDate: ISpaceOCRResult = res.data;
         if (resDate.OCRExitCode != 1 || resDate.IsErroredOnProcessing) {
@@ -1086,25 +1087,26 @@ function fetchSpaceOCR(image: string, provider: IOCRServiceProvider): Promise<st
 function fetchGoogleOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
   return new Promise<string>((resolve, reject) => {
     const APP_KEY = provider.appKey;
-    axios({
-      url: "https://vision.googleapis.com/v1/images:annotate?key=" + APP_KEY,
-      method: "POST",
-      headers: { "Content-Type": "application/json; charset=utf-8" },
-      data: {
-        requests: [
-          {
-            image: {
-              content: fs.readFileSync(image).toString("base64"),
-            },
-            features: [
-              {
-                type: "TEXT_DETECTION",
+    axios
+      .request({
+        url: "https://vision.googleapis.com/v1/images:annotate?key=" + APP_KEY,
+        method: "POST",
+        headers: { "Content-Type": "application/json; charset=utf-8" },
+        data: {
+          requests: [
+            {
+              image: {
+                content: fs.readFileSync(image).toString("base64"),
               },
-            ],
-          },
-        ],
-      },
-    })
+              features: [
+                {
+                  type: "TEXT_DETECTION",
+                },
+              ],
+            },
+          ],
+        },
+      })
       .then((res) => {
         const resDate: IGoogleOCRResult = res.data;
         resolve(resDate.responses.map((item) => item.fullTextAnnotation.text).join("\n"));
@@ -1121,16 +1123,17 @@ function fetchMicrosoftAzureOCR(image: string, provider: IOCRServiceProvider): P
     const APP_KEY = provider.appKey;
     const formData = new FormData();
     formData.append("file", fs.createReadStream(image));
-    axios({
-      url: `https://${RESOURCE_NAME}.cognitiveservices.azure.com/vision/v3.2/ocr`,
-      method: "POST",
-      headers: {
-        "Content-Type": "multipart/form-data",
-        "Ocp-Apim-Subscription-Key": APP_KEY,
-        ...formData.getHeaders(),
-      },
-      data: formData,
-    })
+    axios
+      .request({
+        url: `https://${RESOURCE_NAME}.cognitiveservices.azure.com/vision/v3.2/ocr`,
+        method: "POST",
+        headers: {
+          "Content-Type": "multipart/form-data",
+          "Ocp-Apim-Subscription-Key": APP_KEY,
+          ...formData.getHeaders(),
+        },
+        data: formData,
+      })
       .then((res) => {
         const resDate: IMicrosoftAzureOCRResult = res.data;
         resolve(
@@ -1148,15 +1151,16 @@ function fetchMicrosoftAzureOCR(image: string, provider: IOCRServiceProvider): P
 async function fetchBaiduOCR(image: string, provider: IOCRServiceProvider): Promise<string> {
   const token = await fetchBaiduOCRToken(provider);
   return new Promise<string>((resolve, reject) => {
-    axios({
-      url: "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=" + token,
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      data: querystring.stringify({
-        image: fs.readFileSync(image).toString("base64"),
-        language_type: "auto_detect",
-      }),
-    })
+    axios
+      .request({
+        url: "https://aip.baidubce.com/rest/2.0/ocr/v1/accurate_basic?access_token=" + token,
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        data: querystring.stringify({
+          image: fs.readFileSync(image).toString("base64"),
+          language_type: "auto_detect",
+        }),
+      })
       .then((res) => {
         const resDate: IBaiduOCRResult = res.data;
         if (resDate.error_code) {
@@ -1185,23 +1189,24 @@ function fetchYoudaoOCR(image: string, provider: IOCRServiceProvider): Promise<s
     const salt = timestamp;
     const sha256Content = APP_ID + truncate(imgBase64) + salt + timestamp + APP_KEY;
     const sign = sha256.update(sha256Content).digest("hex");
-    axios({
-      url: "https://openapi.youdao.com/ocrapi",
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      data: querystring.stringify({
-        img: imgBase64,
-        langType: "auto",
-        detectType: 10012,
-        imageType: 1,
-        appKey: APP_ID,
-        salt,
-        sign,
-        docType: "json",
-        signType: "v3",
-        curtime: timestamp,
-      }),
-    })
+    axios
+      .request({
+        url: "https://openapi.youdao.com/ocrapi",
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        data: querystring.stringify({
+          img: imgBase64,
+          langType: "auto",
+          detectType: 10012,
+          imageType: 1,
+          appKey: APP_ID,
+          salt,
+          sign,
+          docType: "json",
+          signType: "v3",
+          curtime: timestamp,
+        }),
+      })
       .then((res) => {
         const resDate: IYoudaoOCRResult = res.data;
         if (resDate.errorCode != "0") {

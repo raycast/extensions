@@ -25,6 +25,8 @@ export const getNoCollectionsText = () => getNoResourcesText("collections");
 
 export const getNoHistoryText = () => getNoResourcesText("history");
 
+export const getNoWorkspacesText = () => getNoResourcesText("workspaces");
+
 export const getUnknownErrorText = () => `
   # 🚨Error: Something went wrong!
     
@@ -34,3 +36,5 @@ export const getUnknownErrorText = () => `
 export const geNotInstalledMessage = () => `${getApplicationName()} is not installed`;
 
 export const getNoBookmarksMessage = () => `${getApplicationName()} has no bookmarks.`;
+
+export const getNoWorkspacesMessage = () => `${getApplicationName()} has no workspaces.`;

@@ -1,9 +1,19 @@
 import { useRef, useCallback } from "react";
-import { MenuBarExtra, Icon, getPreferenceValues, Image, LocalStorage, showHUD } from "@raycast/api";
+import {
+  Cache,
+  MenuBarExtra,
+  Icon,
+  getPreferenceValues,
+  Image,
+  LocalStorage,
+  showHUD,
+  environment,
+  LaunchType,
+} from "@raycast/api";
 import { usePromise, runAppleScript } from "@raycast/utils";
 import { useInterval } from "usehooks-ts";
+import { cpus } from "os";
 
-import { cpuUsage as osCpuUsage } from "os-utils";
 import { calculateDiskStorage, getOSInfo } from "./SystemInfo/SystemUtils";
 import { getMemoryUsage } from "./Memory/MemoryUtils";
 import { getNetworkData } from "./Network/NetworkUtils";
@@ -11,10 +21,28 @@ import { getBatteryData } from "./Power/PowerUtils";
 import { getTemperatureData, formatTemperature } from "./Temperature/TemperatureUtils";
 
 import { formatBytes, isObjectEmpty, openActivityMonitorAppleScript } from "./utils";
+import { DiskInterface } from "./Interfaces";
 
 type PinnedStat = "cpu" | "temperature" | "memory" | "battery" | "network" | "storage" | "none";
 
 const PINNED_STAT_KEY = "menubarPinnedStat";
+const cache = new Cache();
+const CACHE_KEY = "menubar-data";
+
+// CPU usage needs a previous snapshot to compute deltas.
+// Module-level so it survives across interval restarts within the same process.
+let prevCpuIdle = 0;
+let prevCpuTotal = 0;
+(() => {
+  for (const core of cpus()) {
+    const { user, nice, sys, irq, idle } = core.times;
+    prevCpuIdle += idle;
+    prevCpuTotal += user + nice + sys + irq + idle;
+  }
+})();
+
+// Network needs previous snapshot for delta calculation
+let prevNetProcess: { [key: string]: number[] } = {};
 
 export default function Command() {
   const { customIconUrl } = getPreferenceValues<Preferences.MenubarSystemMonitor>();
@@ -53,70 +81,115 @@ export default function Command() {
 
   const pinIcon = (stat: PinnedStat) => (pinnedStat === stat ? { source: Icon.Pin, tintColor: "#007AFF" } : undefined);
 
+  // Restore previous data from disk cache so the menubar title doesn't
+  // flicker to empty between interval restarts.
+  const cached = (() => {
+    try {
+      const raw = cache.get(CACHE_KEY);
+      return raw ? JSON.parse(raw) : undefined;
+    } catch {
+      return undefined;
+    }
+  })();
+
+  // Fetch all data in parallel. Raycast menu-bar commands are short-lived:
+  // they load, render, and unload once isLoading becomes false.
+  // Raycast's "interval": "10s" in package.json re-launches the command
+  // every 10 seconds for background updates — no in-process polling needed.
   const {
-    data: systemInfo,
-    revalidate: revalidateSystem,
+    data: freshData,
     isLoading,
+    revalidate,
   } = usePromise(async () => {
-    const osInfo = await getOSInfo();
-    const storage = await calculateDiskStorage();
+    const [osInfo, storage, memoryUsage, networkData, batteryData, temperatureData] = await Promise.all([
+      getOSInfo(),
+      calculateDiskStorage(),
+      getMemoryUsage(),
+      getNetworkData(),
+      getBatteryData(),
+      getTemperatureData(),
+    ]);
 
-    return { osInfo, storage };
-  });
+    // CPU usage from os.cpus() delta
+    let idle = 0;
+    let total = 0;
+    for (const core of cpus()) {
+      const { user, nice, sys, irq, idle: coreIdle } = core.times;
+      idle += coreIdle;
+      total += user + nice + sys + irq + coreIdle;
+    }
+    const dIdle = idle - prevCpuIdle;
+    const dTotal = total - prevCpuTotal;
+    prevCpuIdle = idle;
+    prevCpuTotal = total;
+    const cpuUsage = dTotal === 0 ? "0" : Math.round((1 - dIdle / dTotal) * 100).toString();
 
-  const { data: cpuUsage, revalidate: revalidateCpu } = usePromise(() => {
-    return new Promise((resolve) => {
-      osCpuUsage((v) => {
-        resolve(Math.round(v * 100).toString());
-      });
-    });
-  });
-
-  const { data: memoryUsage, revalidate: revalidateMemory } = usePromise(async () => {
-    const memoryUsage = await getMemoryUsage();
+    // Memory
     const memTotal = memoryUsage.memTotal;
     const memUsed = memoryUsage.memUsed;
     const freeMem = memTotal - memUsed;
-
-    return {
+    const memory = {
       totalMem: Math.round(memTotal / 1024).toString(),
       freeMemPercentage: Math.round((freeMem * 100) / memTotal).toString(),
       freeMem: Math.round(freeMem / 1024).toString(),
     };
-  });
 
-  const prevProcess = useRef<{ [key: string]: number[] }>({});
-  const { data: networkUsage, revalidate: revalidateNetwork } = usePromise(async () => {
-    const currProcess = await getNetworkData();
+    // Battery
+    const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
+
+    // Network delta
     let upload = 0;
     let download = 0;
-
-    if (!isObjectEmpty(prevProcess.current)) {
-      for (const key in currProcess) {
-        let down = currProcess[key][0] - (key in prevProcess.current ? prevProcess.current[key][0] : 0);
-
-        if (down < 0) {
-          down = 0;
-        }
-
-        let up = currProcess[key][1] - (key in prevProcess.current ? prevProcess.current[key][1] : 0);
-
-        if (up < 0) {
-          up = 0;
-        }
-
+    if (!isObjectEmpty(prevNetProcess)) {
+      for (const key in networkData) {
+        let down = networkData[key][0] - (key in prevNetProcess ? prevNetProcess[key][0] : 0);
+        if (down < 0) down = 0;
+        let up = networkData[key][1] - (key in prevNetProcess ? prevNetProcess[key][1] : 0);
+        if (up < 0) up = 0;
         download += down;
         upload += up;
       }
     }
-
-    prevProcess.current = currProcess;
+    prevNetProcess = networkData;
 
     return {
-      upload,
-      download,
+      osInfo,
+      storage,
+      cpuUsage,
+      memory,
+      networkUsage: { upload, download },
+      batteryData,
+      isOnAC,
+      temperatureData,
     };
-  });
+  }, []);
+
+  const data = freshData ?? cached;
+
+  // Persist to disk cache so next interval restart has instant data
+  if (freshData) {
+    try {
+      cache.set(CACHE_KEY, JSON.stringify(freshData));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  // When the user clicks the menubar icon, the command stays in memory
+  // while the menu is open. Poll for live updates only in that case.
+  // Background interval launches should finish fast and unload.
+  const isUserLaunch = environment.launchType === LaunchType.UserInitiated;
+  const isRevalidating = useRef(false);
+  useInterval(
+    () => {
+      if (!isUserLaunch || isRevalidating.current) return;
+      isRevalidating.current = true;
+      revalidate().finally(() => {
+        isRevalidating.current = false;
+      });
+    },
+    isUserLaunch ? 2000 : null,
+  );
 
   const formatTags = (
     formatString: string,
@@ -133,49 +206,24 @@ export default function Command() {
       .replace("<PERCENT>", percent);
   };
 
-  const { data: batteryData, revalidate: revalidateBattery } = usePromise(async () => {
-    const batteryData = await getBatteryData();
-    const isOnAC = !batteryData.isCharging && batteryData.fullyCharged;
-
-    return {
-      batteryData,
-      isOnAC,
-    };
-  });
-
-  const { data: temperatureData, revalidate: revalidateTemperature } = usePromise(getTemperatureData);
-
-  useInterval(() => {
-    revalidateSystem();
-    revalidateCpu();
-    revalidateMemory();
-    revalidateNetwork();
-    revalidateBattery();
-  }, 1000);
-
-  // Temperature reads from an external binary (IOKit HID sensors) which is
-  // slower than the in-process stats above. Polling it on its own 3s interval
-  // prevents revalidation calls from stacking up and producing stale readings.
-  useInterval(revalidateTemperature, 3000);
-
   const getPinnedTitle = (): string | undefined => {
     switch (pinnedStat) {
       case "cpu":
-        if (!cpuUsage) return undefined;
-        return displayModeCpu === "free" ? `${100 - +cpuUsage} %` : `${cpuUsage} %`;
+        if (!data?.cpuUsage) return undefined;
+        return displayModeCpu === "free" ? `${100 - +data.cpuUsage} %` : `${data.cpuUsage} %`;
       case "temperature":
-        if (!temperatureData?.sensorAvailable) return undefined;
-        return formatTemperature(temperatureData.cpuAverage);
+        if (!data?.temperatureData?.sensorAvailable) return undefined;
+        return formatTemperature(data.temperatureData.cpuAverage);
       case "memory":
-        if (!memoryUsage) return undefined;
+        if (!data?.memory) return undefined;
         return displayModeMemory === "free"
-          ? `${memoryUsage.freeMemPercentage} %`
-          : `${100 - +memoryUsage.freeMemPercentage} %`;
+          ? `${data.memory.freeMemPercentage} %`
+          : `${100 - +data.memory.freeMemPercentage} %`;
       case "battery":
-        if (!batteryData) return undefined;
-        return `${batteryData.batteryData.batteryLevel} %`;
+        if (!data?.batteryData) return undefined;
+        return `${data.batteryData.batteryLevel} %`;
       case "storage": {
-        const disk = systemInfo?.storage?.[0];
+        const disk = data?.storage?.[0];
         if (!disk) return undefined;
         const used = parseFloat(disk.usedStorage);
         const total = parseFloat(disk.totalSize);
@@ -184,8 +232,8 @@ export default function Command() {
         return displayModeDisk === "free" ? `${100 - pct} %` : `${pct} %`;
       }
       case "network":
-        if (!networkUsage) return undefined;
-        return `↓ ${formatBytes(networkUsage.download)}/s`;
+        if (!data?.networkUsage) return undefined;
+        return `↓ ${formatBytes(data.networkUsage.download)}/s`;
       default:
         return undefined;
     }
@@ -203,15 +251,11 @@ export default function Command() {
       isLoading={isLoading}
     >
       <MenuBarExtra.Section title="System Info">
-        <MenuBarExtra.Item
-          title="macOS"
-          subtitle={`${systemInfo?.osInfo.release}` || "Loading..."}
-          icon={Icon.Finder}
-        />
+        <MenuBarExtra.Item title="macOS" subtitle={`${data?.osInfo?.release}` || "Loading..."} icon={Icon.Finder} />
       </MenuBarExtra.Section>
 
       <MenuBarExtra.Section title="Storage">
-        {systemInfo?.storage.map((disk, index) => (
+        {data?.storage?.map((disk: DiskInterface, index: number) => (
           <MenuBarExtra.Item
             key={index}
             title={disk.diskName}
@@ -236,12 +280,12 @@ export default function Command() {
         <MenuBarExtra.Item
           title="CPU Usage"
           subtitle={
-            cpuUsage
+            data?.cpuUsage
               ? formatTags(
                   cpuMenubarFormat,
                   "",
                   "",
-                  `${displayModeCpu === "free" ? 100 - +cpuUsage : cpuUsage}`,
+                  `${displayModeCpu === "free" ? 100 - +data.cpuUsage : data.cpuUsage}`,
                   displayModeCpu,
                 )
               : "Loading..."
@@ -254,7 +298,7 @@ export default function Command() {
       <MenuBarExtra.Section title="Temperature">
         <MenuBarExtra.Item
           title="CPU Temperature"
-          subtitle={temperatureData?.sensorAvailable ? formatTemperature(temperatureData.cpuAverage) : "N/A"}
+          subtitle={data?.temperatureData?.sensorAvailable ? formatTemperature(data.temperatureData.cpuAverage) : "N/A"}
           icon={pinIcon("temperature") ?? Icon.Temperature}
           onAction={() => togglePin("temperature")}
         />
@@ -264,19 +308,19 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Memory Usage"
           subtitle={
-            memoryUsage
+            data?.memory
               ? displayModeMemory === "free"
                 ? formatTags(
                     memoryMenubarFormat,
-                    memoryUsage.freeMem,
-                    memoryUsage.totalMem,
-                    memoryUsage.freeMemPercentage,
+                    data.memory.freeMem,
+                    data.memory.totalMem,
+                    data.memory.freeMemPercentage,
                   )
                 : formatTags(
                     memoryMenubarFormat,
-                    (+memoryUsage.totalMem - +memoryUsage.freeMem).toString(),
-                    memoryUsage.totalMem,
-                    (100 - +memoryUsage.freeMemPercentage).toString(),
+                    (+data.memory.totalMem - +data.memory.freeMem).toString(),
+                    data.memory.totalMem,
+                    (100 - +data.memory.freeMemPercentage).toString(),
                   )
               : "Loading…"
           }
@@ -289,10 +333,10 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Network Usage"
           subtitle={
-            networkUsage
+            data?.networkUsage
               ? formatTags(networkMenubarFormat)
-                  .replace("<UP>", formatBytes(networkUsage.upload))
-                  .replace("<DOWN>", formatBytes(networkUsage.download))
+                  .replace("<UP>", formatBytes(data.networkUsage.upload))
+                  .replace("<DOWN>", formatBytes(data.networkUsage.download))
               : "Loading…"
           }
           icon={pinIcon("network") ?? Icon.Network}
@@ -304,14 +348,14 @@ export default function Command() {
         <MenuBarExtra.Item
           title="Battery"
           subtitle={
-            batteryData
+            data?.batteryData
               ? formatTags(
                   powerMenubarFormat,
                   "",
                   "",
                   displayModeBattery === "free"
-                    ? batteryData.batteryData.batteryLevel
-                    : (100 - +batteryData.batteryData.batteryLevel).toString(),
+                    ? data.batteryData.batteryLevel
+                    : (100 - +data.batteryData.batteryLevel).toString(),
                 )
               : "Loading…"
           }

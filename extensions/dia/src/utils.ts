@@ -12,11 +12,11 @@ export function escapeAppleScriptString(str: string): string {
 
 /**
  * Escapes special characters in SQL LIKE patterns to prevent SQL injection.
- * Escapes: %, _, \, and quotes
+ * Escapes: %, _, \, and single quotes
  * Note: Backslashes are doubled for SQL string literals, then special chars are escaped
  */
 export function escapeSQLLikePattern(pattern: string): string {
-  return pattern.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/"/g, '""');
+  return pattern.replace(/\\/g, "\\\\").replace(/%/g, "\\%").replace(/_/g, "\\_").replace(/'/g, "''");
 }
 
 export function getSafeFavicon(url: string): List.Item.Props["icon"] {
@@ -46,6 +46,18 @@ export function getAccessories(tab: Tab) {
     accessories.push({ icon: { source: Icon.Dot, tintColor: Color.Blue }, tooltip: "Focused tab" });
   }
   return accessories;
+}
+
+/**
+ * Detects if input looks like a URL (has TLD or protocol).
+ * Examples: "github.com", "https://foo.bar", "localhost:3000"
+ */
+export function isLikelyURL(str: string): boolean {
+  const trimmed = str.trim();
+  if (!trimmed || trimmed.includes(" ")) return false;
+  if (/^\S+:\/\//.test(trimmed)) return true;
+  if (/^localhost(:\d+)?/.test(trimmed)) return true;
+  return /^[\w-]+(\.[\w-]+)+/.test(trimmed);
 }
 
 export function filterTabs(tabs: Tab[] | undefined, query: string) {

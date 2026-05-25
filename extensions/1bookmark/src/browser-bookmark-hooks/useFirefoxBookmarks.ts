@@ -142,7 +142,11 @@ export default function useFirefoxBookmarks(enabled: boolean) {
       }
 
       const buffer = new Uint8Array(await read(`${FIREFOX_FOLDER}/${profile}/places.sqlite`));
-      const wasmBinary = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmFile = await read(path.join(environment.assetsPath, "sql-wasm.wasm"));
+      const wasmBinary = wasmFile.buffer.slice(
+        wasmFile.byteOffset,
+        wasmFile.byteOffset + wasmFile.byteLength,
+      ) as ArrayBuffer;
       const SQL = await initSqlJs({ wasmBinary });
       const db = new SQL.Database(buffer);
 

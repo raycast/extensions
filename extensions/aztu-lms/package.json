@@ -90,22 +90,22 @@
     }
   ],
   "dependencies": {
-    "@raycast/api": "^1.104.7",
-    "@raycast/utils": "^2.2.2",
-    "date-fns": "^4.1.0",
-    "fetch-cookie": "^3.2.0",
-    "tough-cookie": "^6.0.0"
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^2.2.5",
+    "date-fns": "^4.2.1",
+    "fetch-cookie": "3.2.0",
+    "tough-cookie": "^6.0.1"
   },
   "devDependencies": {
-    "@raycast/eslint-config": "^2.1.1",
-    "@types/node": "^22.18.3",
-    "@types/react": "^19.2.14",
-    "eslint": "^9.39.1",
-    "prettier": "^3.8.1",
-    "typescript": "^5.8.2"
+    "@raycast/eslint-config": "2.1.1",
+    "@types/node": "^24.12.4",
+    "@types/react": "^19.2.15",
+    "eslint": "^9.39.4",
+    "prettier": "^3.8.3",
+    "typescript": "^5.9.3"
   },
   "scripts": {
-    "build": "ray build -e dist",
+    "build": "ray build",
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",

@@ -1,12 +1,6 @@
-import {
-  LaunchType,
-  List,
-  launchCommand,
-  showToast,
-  Toast,
-} from "@raycast/api";
+import { List, showToast, Toast } from "@raycast/api";
 import { useMemo, useState } from "react";
-import { useFetch, useLocalStorage } from "@raycast/utils";
+import { useFetch } from "@raycast/utils";
 import {
   buildBetaSeriesUrl,
   getHeaders,
@@ -16,10 +10,6 @@ import { Show } from "./types/betaseries";
 import { ShowListItem } from "./components/ShowListItem";
 import { TokenRequiredView } from "./components/TokenRequiredView";
 import { useAuthToken } from "./hooks/useAuthToken";
-import {
-  DISABLED_SHOW_NOTIFICATIONS_KEY,
-  normalizeNumberIds,
-} from "./notifications";
 
 type ShowFilter = "to-watch" | "active" | "archived";
 const SHOW_FILTERS: ShowFilter[] = ["to-watch", "active", "archived"];
@@ -30,17 +20,6 @@ export default function Command() {
   const [filter, setFilter] = useState<ShowFilter>("to-watch");
   const { token, isLoading: isTokenLoading, setToken, logout } = useAuthToken();
   const tokenAvailable = Boolean(token);
-  const {
-    value: storedDisabledShowIds,
-    setValue: setStoredDisabledShowIds,
-    isLoading: isDisabledShowIdsLoading,
-  } = useLocalStorage<number[]>(DISABLED_SHOW_NOTIFICATIONS_KEY, []);
-
-  const disabledShowIds = normalizeNumberIds(storedDisabledShowIds);
-  const disabledShowIdsSet = useMemo(
-    () => new Set(disabledShowIds),
-    [disabledShowIds],
-  );
 
   const {
     data: rawItems = [],
@@ -101,7 +80,7 @@ export default function Command() {
 
   return (
     <List
-      isLoading={isLoading || isDisabledShowIdsLoading}
+      isLoading={isLoading}
       searchBarAccessory={
         <List.Dropdown
           tooltip="Filter"
@@ -129,31 +108,6 @@ export default function Command() {
           key={show.id}
           show={show}
           isMyShow
-          notificationsEnabled={
-            !show.user?.archived && !disabledShowIdsSet.has(show.id)
-          }
-          onToggleNotifications={(showId, enabled) => {
-            void (async () => {
-              const nextDisabledShowIds = enabled
-                ? disabledShowIds.filter((id) => id !== showId)
-                : [...disabledShowIds, showId];
-
-              await setStoredDisabledShowIds(
-                normalizeNumberIds(nextDisabledShowIds),
-              );
-              await showToast({
-                style: Toast.Style.Success,
-                title: enabled
-                  ? "Notifications enabled for this show"
-                  : "Notifications disabled for this show",
-              });
-
-              await launchCommand({
-                name: "new-episodes-menubar",
-                type: LaunchType.Background,
-              });
-            })();
-          }}
           onLogout={() => void handleLogout()}
           onArchiveChange={(showId, archived) => {
             void mutate(Promise.resolve(), {
@@ -174,10 +128,6 @@ export default function Command() {
                   }
                   return [updated];
                 }),
-            });
-            void launchCommand({
-              name: "new-episodes-menubar",
-              type: LaunchType.Background,
             });
           }}
         />

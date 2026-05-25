@@ -4,7 +4,7 @@ import { execFileSync } from "node:child_process";
 import { useEffect, useState } from "react";
 
 import { Item } from "../types";
-import { getCliPath } from "../utils";
+import { getCliPath, isWindows, windowsEnv } from "../utils";
 
 import Shortcut = Keyboard.Shortcut;
 import Style = Toast.Style;
@@ -35,16 +35,20 @@ export function RandomPassword() {
 
       try {
         // https://1password.community/discussion/139189/feature-request-generate-random-passwords-with-cli-via-dedicated-command-e-g-op-generate
-        const stdout = execFileSync(getCliPath(), [
-          "item",
-          "create",
-          "--dry-run",
-          "--category",
-          "Password",
-          `--generate-password=${args.join(",")}`,
-          "--format",
-          "json",
-        ]);
+        const stdout = execFileSync(
+          getCliPath(),
+          [
+            "item",
+            "create",
+            "--dry-run",
+            "--category",
+            "Password",
+            `--generate-password=${args.join(",")}`,
+            "--format",
+            "json",
+          ],
+          { ...(windowsEnv ? { env: windowsEnv } : {}), stdio: ["ignore", "pipe", "pipe"] },
+        );
         const item: Item = JSON.parse(stdout.toString());
         const password = item.fields
           ?.filter((field) => field.id === "password")
@@ -53,9 +57,12 @@ export function RandomPassword() {
           .at(0);
 
         setGeneratedPassword(password || "ERROR");
-        await Clipboard.copy(password || "", { concealed: true });
+        // Clipboard.copy closes main window on Windows: https://github.com/raycast/extensions/issues/26731
+        if (!isWindows) {
+          await Clipboard.copy(password || "", { concealed: true });
+        }
         toast.style = Style.Success;
-        toast.title = "Copied to clipboard!";
+        toast.title = isWindows ? "Password generated!" : "Copied to clipboard!";
         toast.message = "";
       } catch (e) {
         toast.style = Style.Failure;

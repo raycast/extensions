@@ -10,6 +10,8 @@ import {
   Move,
   Ability,
   Item,
+  Pokedex,
+  PokemonDex,
 } from "../types";
 
 const cache = new Cache();
@@ -692,4 +694,69 @@ export const fetchItem = async (item_id: number): Promise<Item | undefined> => {
   const variables = { language_id, item_id };
 
   return fetchDataWithCaching(query, variables, "item");
+};
+
+export const fetchPokedexes = async (): Promise<Pokedex[] | undefined> => {
+  // exclude national dex (id: 1) since it contains all pokemon and isn't a "regional" dex
+  const query = `query pokedexes($language_id: Int) {
+    pokedex(where: {id: {_neq: 1}, is_main_series: {_eq: true}}) {
+      id
+      name
+      is_main_series
+      pokedexnames(where: {language_id: {_eq: $language_id}}) {
+        name
+      }
+      pokedexversiongroups {
+        version_group_id
+        versiongroup {
+          name
+          generation {
+            name
+            generationnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+          versions {
+            name
+            versionnames(where: {language_id: {_eq: $language_id}}) {
+              name
+            }
+          }
+        }
+      }
+    }
+  }`;
+
+  const variables = { language_id };
+
+  return fetchDataWithCaching(query, variables, "pokedex", true);
+};
+
+export const fetchPokedexPokemon = async (
+  pokedexId: number,
+): Promise<PokemonDex[] | undefined> => {
+  const query = `query pokemondexnumber($dex_id: Int, $language_id: Int) {
+    pokemondexnumber(
+      where: {pokedex_id: {_eq: $dex_id}}
+      order_by: [{pokedex_number: asc}]
+    ) {
+      pokedex_number
+      pokemon_species_id
+      pokemonspecy {
+        is_baby
+        is_legendary
+        is_mythical
+        name
+        pokemonspeciesnames(where: {language_id: {_eq: $language_id}}) {
+          genus
+          name
+          language_id
+        }
+      }
+    }
+  }`;
+
+  const variables = { dex_id: pokedexId, language_id };
+
+  return fetchDataWithCaching(query, variables, "pokemondexnumber", true);
 };

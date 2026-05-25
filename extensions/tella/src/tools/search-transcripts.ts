@@ -1,5 +1,5 @@
 import { getTranscriptCache, addTranscriptsToCache } from "../cache";
-import { listVideos, getVideo } from "../api";
+import { listVideos, getVideo, MissingApiKeyError } from "../api";
 import type { Video, TranscriptSentence } from "../types";
 import { FETCH_CONCURRENCY, BATCH_DELAY_MS } from "../utils";
 
@@ -228,7 +228,23 @@ export default async function tool(input: Input): Promise<string> {
     !transcriptCache ||
     Object.keys(transcriptCache.transcripts).length === 0
   ) {
-    const transcripts = await fetchAndCacheTranscripts();
+    let transcripts: Record<
+      string,
+      { videoName: string; text: string; sentences?: TranscriptSentence[] }
+    >;
+    try {
+      transcripts = await fetchAndCacheTranscripts();
+    } catch (error) {
+      if (error instanceof MissingApiKeyError) {
+        return `Tella API key is required before using @tella.
+
+Set it in Raycast extension preferences:
+1. Open Tella extension preferences
+2. Paste your Tella API key from https://www.tella.tv/account
+3. Try your query again`;
+      }
+      throw error;
+    }
     if (Object.keys(transcripts).length === 0) {
       return "No video transcripts found. Make sure you have videos with transcripts in your Tella account.";
     }

@@ -1,0 +1,85 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "windows-environment-variables",
+  "type": "module",
+  "title": "Windows Environment Variables",
+  "description": "View, search, edit and manage Windows environment variables and PATH entries. A keyboard-first alternative to the Windows Environment Variables dialog.",
+  "icon": "icon.png",
+  "author": "ohmycodedev",
+  "categories": [
+    "Developer Tools",
+    "System"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "list-envvars",
+      "title": "List Environment Variables",
+      "subtitle": "Windows Environment Variables",
+      "description": "Browse, search, copy, edit and delete Windows environment variables",
+      "mode": "view",
+      "keywords": [
+        "env",
+        "environment",
+        "variable",
+        "path",
+        "system"
+      ]
+    },
+    {
+      "name": "edit-path",
+      "title": "Edit PATH Variable",
+      "subtitle": "Windows Environment Variables",
+      "description": "View, add, remove and reorder PATH entries with validation",
+      "mode": "view",
+      "keywords": [
+        "path",
+        "directory",
+        "folder",
+        "bin"
+      ]
+    },
+    {
+      "name": "add-envvar",
+      "title": "Add Environment Variable",
+      "subtitle": "Windows Environment Variables",
+      "description": "Create a new user or system environment variable",
+      "mode": "view",
+      "keywords": [
+        "add",
+        "create",
+        "new",
+        "env",
+        "variable"
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.93.0",
+    "@raycast/utils": "^1.19.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.4",
+    "@types/react": "^19.2.14",
+    "eslint": "^9.0.0",
+    "prettier": "^3.4.2",
+    "react": "^19.2.4",
+    "typescript": "^5.7.3"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

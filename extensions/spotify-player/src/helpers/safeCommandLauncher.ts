@@ -10,8 +10,7 @@ export async function safeLaunchCommandInBackground(commandName: string): Promis
         error.message.includes("No enabled command") ||
         error.message.includes("The operation couldn’t be completed")
       ) {
-        // Log the error silently without showing HUD
-        console.log("Silent Error:", error.message);
+        // Command not enabled by user — silently ignore
       } else {
         await showHUD(error.message.includes("Windows") ? error.message : "Error executing command");
       }

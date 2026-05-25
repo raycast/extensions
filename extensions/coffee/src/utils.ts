@@ -15,13 +15,8 @@ export async function startCaffeinate(updates: Updates, hudMessage?: string, add
   }
   await stopCaffeinate({ menubar: false, status: false });
 
-  // Use spawn with detached: true to properly detach the caffeinate process
-  // This prevents zombie processes when the extension helper exits
-  const args = generateArgs(additionalArgs).split(/\s+/).filter(Boolean);
-  const child = spawn("/usr/bin/caffeinate", args, {
-    detached: true,
-    stdio: "ignore",
-  });
+  const args = ["-u", ...generateArgs(additionalArgs).split(/\s+/).filter(Boolean)];
+  const child = spawn("/usr/bin/caffeinate", args, { detached: true, stdio: "ignore" });
   child.unref();
 
   await update(updates, true);

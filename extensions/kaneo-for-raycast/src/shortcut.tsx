@@ -25,4 +25,34 @@ const CopyProjectName: Keyboard.Shortcut = {
   key: "p",
 };
 
-export { ChangeStatus, ChangePriority, CopyTaskTitle, CopyTaskDescription, CopyProjectName };
+const AssignTask: Keyboard.Shortcut = {
+  Windows: { modifiers: ["ctrl", "shift"], key: "enter" },
+  macOS: { modifiers: ["cmd", "shift"], key: "enter" },
+};
+
+const Revalidate: Keyboard.Shortcut = {
+  Windows: { modifiers: ["ctrl", "shift"], key: "r" },
+  macOS: { modifiers: ["cmd", "shift"], key: "r" },
+};
+
+const SubTask: Keyboard.Shortcut = {
+  Windows: { modifiers: ["ctrl", "alt"], key: "s" },
+  macOS: { modifiers: ["cmd", "alt"], key: "s" },
+};
+
+const ParentTask: Keyboard.Shortcut = {
+  Windows: { modifiers: ["ctrl", "alt"], key: "p" },
+  macOS: { modifiers: ["cmd", "alt"], key: "p" },
+};
+
+export {
+  ChangeStatus,
+  ChangePriority,
+  CopyTaskTitle,
+  CopyTaskDescription,
+  CopyProjectName,
+  AssignTask,
+  Revalidate,
+  SubTask,
+  ParentTask,
+};
