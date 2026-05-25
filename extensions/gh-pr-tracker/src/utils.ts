@@ -147,7 +147,7 @@ export function buildThread(
   for (const c of allReviewComments) byId.set(c.id, c);
 
   // Find the root of the thread
-  let rootId = comment.id;
+  let rootId = comment.id as number;
   const visited = new Set<number>();
   while (true) {
     const current = byId.get(rootId);

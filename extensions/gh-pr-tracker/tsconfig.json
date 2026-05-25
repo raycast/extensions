@@ -12,5 +12,5 @@
     "rootDir": "src",
     "resolveJsonModule": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "raycast-env.d.ts"]
 }
