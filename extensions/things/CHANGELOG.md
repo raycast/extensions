@@ -1,6 +1,6 @@
 # Things Changelog
 
-## [Detail View for To-Dos] - {PR_MERGE_DATE}
+## [Detail View for To-Dos] - 2026-05-25
 
 - Added a Detail view, accessible from any list command by pressing Enter on a row. Renders the to-do's notes as markdown with a metadata sidebar (Status, Created, Start Date, color-coded Deadline, Tags, Project, Area).
 - "Open in Things" remains the secondary action (⌘O) on list rows and becomes the primary action inside the Detail view.
