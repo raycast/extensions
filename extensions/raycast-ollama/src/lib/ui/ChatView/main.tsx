@@ -295,7 +295,7 @@ export function ChatView(): React.JSX.Element {
         {props.message.eval_duration && (
           <Detail.Metadata.Label title="Eval Duration" text={`${(props.message.eval_duration / 1e9).toFixed(2)}s`} />
         )}
-        {toolCalls && (
+        {toolCalls.length > 0 && (
           <React.Fragment>
             <Detail.Metadata.Separator />
             {toolCalls.map((v) => (

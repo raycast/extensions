@@ -81,7 +81,7 @@ export function ToolOllamaWebFetch(): Tool {
         required: ["url"],
         url: {
           type: "string",
-          desciption:
+          description:
             "The exact, fully-qualified URL to fetch (e.g., 'https://developer.mozilla.org/en-US/'). Ensure it includes the protocol (http/https).",
         },
       },
