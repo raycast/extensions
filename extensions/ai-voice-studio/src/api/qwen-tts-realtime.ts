@@ -52,7 +52,7 @@ export async function streamRealtimeSpeech(
   // argument accepts a `headers` option — required for DashScope's Bearer
   // auth. The type from @types/node already exposes this on the global.
   const ws = new WebSocket(wsUrl, {
-    headers: { Authorization: `bearer ${apiKey}` },
+    headers: { Authorization: `Bearer ${apiKey}` },
   });
 
   let firstAudioFired = false;

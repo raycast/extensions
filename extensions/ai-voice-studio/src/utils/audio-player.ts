@@ -1,4 +1,4 @@
-import { spawn, execSync, ChildProcess } from "child_process";
+import { spawn, execFileSync, execSync, ChildProcess } from "child_process";
 import { writeFileSync, unlinkSync, existsSync, readFileSync } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
@@ -254,7 +254,7 @@ export class AudioPlayer {
   private convertOpusToWav(opusPath: string): string {
     const wavPath = opusPath.replace(/\.opus$/, ".wav");
     try {
-      execSync(`ffmpeg -y -i "${opusPath}" "${wavPath}"`, { stdio: "ignore" });
+      execFileSync("ffmpeg", ["-y", "-i", opusPath, wavPath], { stdio: "ignore" });
     } catch {
       throw new Error("Opus playback requires ffmpeg. Install it with: brew install ffmpeg");
     }

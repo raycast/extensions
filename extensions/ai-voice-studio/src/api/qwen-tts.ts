@@ -113,7 +113,7 @@ async function postWithTimeout(
       throw new TTSApiError(formatApiError(data, response.status, response.statusText), response.status);
     }
 
-    if (data.code || data.message) {
+    if (data.code !== undefined || data.message) {
       throw new TTSApiError(data.message || "Qwen-TTS request failed.", normalizeErrorCode(data.code));
     }
 
