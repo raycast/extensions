@@ -132,8 +132,8 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
   }
 
   const clients = [
-    ...new Set(projects.map((p) => p.client).filter(Boolean)),
-  ].sort();
+    ...new Set(projects.map((p) => clientName(p.client)).filter(Boolean)),
+  ].sort() as string[];
   const filtered =
     selectedClient === ALL_CLIENTS
       ? projects
@@ -157,14 +157,9 @@ export function ProjectsList({ initialClient }: { initialClient?: string }) {
                 ...(initialClient ? [initialClient] : []),
                 ...clients,
               ]),
-            ]
-              .map((client) => ({
-                key: (typeof client === "object" ? client.id : client)!,
-                value: clientName(client)!,
-              }))
-              .map(({ key, value }) => (
-                <List.Dropdown.Item key={key} title={value} value={value} />
-              ))}
+            ].map((client) => (
+              <List.Dropdown.Item key={client} title={client} value={client} />
+            ))}
           </List.Dropdown.Section>
         </List.Dropdown>
       }

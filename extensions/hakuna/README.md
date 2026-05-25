@@ -30,11 +30,12 @@ Get your API token from https://app.hakuna.ch/token.
 
 ## Development
 
-1. [`nvm use`][nvm] if you don't  have a recent (or too recent) Node installed.
+1. [`nvm use`][nvm] if you don't have a recent (or too recent) Node installed.
 1. `npm i`
 1. Start developing using `npm run dev`.
 1. Run `npm run fix-lint && npm run build` before a commit.
-  - Or use [lefthook][lefthook] to do this for you before every git commit.
+
+- Or use [lefthook][lefthook] to do this for you before every git commit.
 
 [nvm]: https://github.com/nvm-sh/nvm
 [lefthook]: https://lefthook.dev/

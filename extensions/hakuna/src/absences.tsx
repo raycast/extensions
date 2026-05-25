@@ -5,14 +5,14 @@ import { AbsenceResponse, HakunaClient } from "./hakuna-api";
 import { getSettings } from "./settings";
 
 function formatDate(date: string): string {
-  return new Date(date + "T00:00:00").toLocaleDateString(undefined, {
+  return new Date(date + "T00:00:00").toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
   });
 }
 
 function getMonthLabel(date: string): string {
-  return new Date(date + "T00:00:00").toLocaleDateString(undefined, {
+  return new Date(date + "T00:00:00").toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
   });

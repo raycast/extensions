@@ -38,6 +38,7 @@ interface Props {
   startTime?: string;
   endTime?: string;
   note?: string;
+  prefillFromLiveTimer?: boolean;
 }
 
 function isToday(date: Date | null | undefined): boolean {
@@ -60,6 +61,7 @@ export default function TimerForm({
   startTime: initialStartTime,
   endTime: initialEndTime,
   note: initialNote,
+  prefillFromLiveTimer = true,
 }: Props) {
   const client = new HakunaClient(apiToken);
 
@@ -93,6 +95,70 @@ export default function TimerForm({
   );
 
   const firstFieldRef = useRef<Form.ItemReference>(null);
+  const appliedLiveTimer = useRef(false);
+  const editingBaseline = useRef({
+    projectId: initialProjectId,
+    taskId: initialTaskId,
+    startTime: initialStartTime,
+  });
+
+  function applyLiveTimerPrefill(
+    activeProjects: ProjectResponse[],
+    activeTasks: TaskResponse[],
+    withProjects: boolean,
+  ) {
+    if (!timer) {
+      return;
+    }
+
+    appliedLiveTimer.current = true;
+    editingBaseline.current = {
+      projectId: timer.project?.id,
+      taskId: timer.task?.id,
+      startTime: timer.start_time,
+    };
+
+    if (timer.start_time) {
+      setStartTime(formatTime(timer.start_time) ?? "");
+    }
+    if (timer.note) {
+      setNote(timer.note);
+    }
+
+    if (withProjects) {
+      setProjects(activeProjects);
+      const selectedProject = timer.project?.id
+        ? activeProjects.find((p) => p.id === timer.project?.id)
+        : undefined;
+      if (!selectedProject) {
+        return;
+      }
+
+      setSelectedProjectId(String(selectedProject.id));
+      const activeProjectTasks = selectedProject.tasks.filter(
+        (t) => !t.archived,
+      );
+      setTasks(activeProjectTasks);
+
+      const taskId = timer.task?.id;
+      const task = taskId
+        ? activeProjectTasks.find((t) => t.id === taskId)
+        : activeProjectTasks[0];
+      if (task) {
+        setSelectedTaskId(String(task.id));
+      }
+      return;
+    }
+
+    setTasks(activeTasks);
+    const taskId = timer.task?.id;
+    const task = taskId
+      ? activeTasks.find((t) => t.id === taskId)
+      : activeTasks[0];
+    if (task) {
+      setSelectedTaskId(String(task.id));
+    }
+  }
 
   const {
     data: timer,
@@ -206,6 +272,12 @@ export default function TimerForm({
           projects: activeProjects,
           tasks: activeTasks,
         }) {
+          if (prefillFromLiveTimer && timer) {
+            applyLiveTimerPrefill(activeProjects, activeTasks, projectsEnabled);
+            firstFieldRef.current?.focus();
+            return;
+          }
+
           if (!projectsEnabled) {
             setTasks(activeTasks);
             const task =
@@ -266,6 +338,35 @@ export default function TimerForm({
         },
       },
     );
+
+  useEffect(() => {
+    if (!prefillFromLiveTimer || appliedLiveTimer.current) {
+      return;
+    }
+    if (isLoadingTimer || isLoadingCompany || isProjectsOrTasksLoading) {
+      return;
+    }
+
+    if (!timer) {
+      appliedLiveTimer.current = true;
+      return;
+    }
+
+    if (projectsEnabled && projects.length === 0) {
+      return;
+    }
+
+    applyLiveTimerPrefill(projects, tasks, projectsEnabled);
+  }, [
+    prefillFromLiveTimer,
+    timer,
+    isLoadingTimer,
+    isLoadingCompany,
+    isProjectsOrTasksLoading,
+    projects,
+    tasks,
+    projectsEnabled,
+  ]);
 
   const refreshAll = () => {
     mutateTimer();
@@ -342,11 +443,12 @@ export default function TimerForm({
   }, [endTime, initialEntryId, timer]);
 
   function editingCurrentTimer() {
+    const baseline = editingBaseline.current;
     return (
       timer &&
-      initialTaskId === timer.task?.id &&
-      initialStartTime === timer.start_time &&
-      (projectsEnabled ? timer.project?.id === initialProjectId : true)
+      baseline.taskId === timer.task?.id &&
+      baseline.startTime === timer.start_time &&
+      (projectsEnabled ? timer.project?.id === baseline.projectId : true)
     );
   }
 
@@ -405,6 +507,18 @@ export default function TimerForm({
       return;
     }
 
+    try {
+      await submitTimerForm();
+    } catch (error) {
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Failed to save",
+        message: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  }
+
+  async function submitTimerForm() {
     const formattedStartTime = formatTime(startTime)!;
     setStartTime(formattedStartTime);
     const formattedEndTime = formatTime(endTime) ?? "";
