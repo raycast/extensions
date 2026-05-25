@@ -1,5 +1,10 @@
 import { Clipboard, showHUD } from "@raycast/api";
 import { getAccessToken, withAccessToken } from "@raycast/utils";
+import type {
+  CapturePayload,
+  CaptureResponse,
+  InvalidUrlError,
+} from "./contract";
 
 import { authorize, deviceName, oauthClient } from "./oauth";
 import { getSleevyPreferences } from "./preferences";
@@ -31,28 +36,29 @@ async function sleeveIt() {
   try {
     await showHUD("📎 Saving to Sleevy...");
 
+    const payload: CapturePayload = {
+      url: trimmedText,
+      captureChannel: "raycast",
+      sourceName: preferences.sourceName || deviceName(),
+    };
     const response = await fetch(`${preferences.apiUrl}/v1/captures`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        url: trimmedText,
-        captureChannel: "raycast" as const,
-        sourceName: preferences.sourceName || deviceName(),
-      }),
+      body: JSON.stringify(payload),
     });
 
     if (response.status === 201) {
-      const data = (await response.json()) as { captureResult: string };
+      const data = (await response.json()) as CaptureResponse;
       if (data.captureResult === "created") {
         await showHUD("✅ Saved to Sleevy!");
       } else {
         await showHUD("✅ Already in Sleevy (moved to top)");
       }
     } else if (response.status === 200) {
-      const data = (await response.json()) as { captureResult: string };
+      const data = (await response.json()) as CaptureResponse;
       if (data.captureResult === "updated") {
         await showHUD("✅ Already in Sleevy (moved to top)");
       } else {
@@ -61,7 +67,7 @@ async function sleeveIt() {
         );
       }
     } else if (response.status === 400) {
-      const error = (await response.json()) as { url: string };
+      const error = (await response.json()) as InvalidUrlError;
       await showHUD(`❌ Invalid URL: ${error.url}`);
     } else if (response.status === 401) {
       await oauthClient.removeTokens();
