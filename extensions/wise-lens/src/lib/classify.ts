@@ -18,7 +18,7 @@ export function classifyDirection(act: WiseActivity): Direction {
   if (desc.includes("refund")) return "in";
   if (act.type === "CARD_PAYMENT") return "out";
   if (act.type === "TRANSFER") {
-    if (desc.includes("received") || desc.includes("top")) return "in";
+    if (desc.includes("received") || desc.includes("top up") || desc.includes("topped up")) return "in";
     return "out";
   }
   return "neutral";

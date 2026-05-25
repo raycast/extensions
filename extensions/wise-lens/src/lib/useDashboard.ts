@@ -2,7 +2,7 @@ import { openExtensionPreferences, showToast, Toast } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
 import { isAuthError, isScaError, WiseHttpError } from "./errors";
 import { getPrefs, prefsFingerprint } from "./preferences";
-import { clearCooldown, RateLimitCooldownError } from "./rate-limit";
+import { RateLimitCooldownError } from "./rate-limit";
 import { fetchDashboardSnapshot, loadCachedSnapshot } from "./wise-api";
 import { DashboardSnapshot } from "./types";
 
@@ -39,12 +39,6 @@ export function useDashboard() {
             style: Toast.Style.Failure,
             title: "Wise rate-limit cooldown",
             message: `Waiting ~${mins} min. Showing ${cached ? "cache" : "no data"}.`,
-            primaryAction: {
-              title: "Retry Now",
-              onAction: () => {
-                clearCooldown();
-              },
-            },
           });
           if (cached) return cached;
           throw e;
