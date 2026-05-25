@@ -1,0 +1,88 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mach-triage",
+  "title": "Mach Triage",
+  "description": "Triage Jira, Linear, and GitHub tickets without leaving Raycast. Search, check your Today board, change status, add comments, and log work — all routed through the Mach Triage desktop app on your local machine. No cloud. No latency. No context switching.",
+  "icon": "icon.png",
+  "author": "MikeWhob",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "categories": [
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "jira",
+    "linear",
+    "github",
+    "tickets",
+    "triage",
+    "issue-tracker",
+    "today",
+    "standup",
+    "time-tracking",
+    "worklog"
+  ],
+  "license": "MIT",
+  "preferences": [
+    {
+      "name": "bridgeUrl",
+      "type": "textfield",
+      "required": false,
+      "title": "Bridge URL",
+      "description": "Mach Triage local bridge URL (e.g. http://127.0.0.1:17847). Copy from Mach Triage Settings → Raycast.",
+      "default": "http://127.0.0.1:17847"
+    },
+    {
+      "name": "bridgeToken",
+      "type": "password",
+      "required": true,
+      "title": "Bridge Token",
+      "description": "Generated in Mach Triage Settings when Raycast integration is enabled."
+    }
+  ],
+  "commands": [
+    {
+      "name": "search-tickets",
+      "title": "Search Tickets",
+      "subtitle": "Mach Triage",
+      "description": "Full-text search across your active workspace. Finds by key, title, or description.",
+      "mode": "view"
+    },
+    {
+      "name": "today-board",
+      "title": "Today Board",
+      "subtitle": "Mach Triage",
+      "description": "Your Active / Stuck / Next / Done lanes — same board, keyboard-first.",
+      "mode": "view"
+    },
+    {
+      "name": "status",
+      "title": "Mach Triage Status",
+      "subtitle": "Mach Triage",
+      "description": "Health check. Confirms the desktop app bridge is running and authenticated.",
+      "mode": "view"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.18",
+    "@raycast/utils": "^1.19.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3.3.5",
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "eslint": "^9.22.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
