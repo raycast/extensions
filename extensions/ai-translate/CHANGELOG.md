@@ -5,8 +5,8 @@
 - Initial local Raycast extension with selected-text translation, screenshot OCR translation, and configurable AI providers.
 - Split screenshot OCR into an interactive extraction command and a screenshot translation command.
 - Removed MinerU OCR and kept API OCR focused on Baidu OCR, with local Vision and Tesseract options.
-- Added Xiaomi MiMo provider and refreshed DeepSeek, MiniMax, and Kimi defaults from provider docs.
-- Collapsed DeepSeek, Xiaomi MiMo, MiniMax, and Kimi to a single Anthropic-compatible API key/base URL/model entry each.
+- Added Xiaomi MiMo provider and refreshed DeepSeek and Kimi defaults from provider docs.
+- Collapsed DeepSeek, Xiaomi MiMo, and Kimi to a single Anthropic-compatible API key/base URL/model entry each.
 - Kept OpenAI and Gemini on their native API protocols.
 - Added prompt profiles and custom prompt instructions for reusable translation behavior.
 - Refined the default system prompt toward native, sense-for-sense translation instead of literal wording.
@@ -31,7 +31,7 @@
 - Expanded the target language list (Arabic, Hindi, Vietnamese, Thai, Indonesian, Turkish, Dutch, Polish).
 - Serialized history writes so rapid copies no longer drop entries, and cleaned up leftover TTS audio files.
 - Refreshed Store screenshots for the current Screenshot OCR, Translate, and Translation Settings commands.
-- Added Xiaomi MiMo as a second Read Aloud engine, switchable per session in Rewrite & Coach (⌘⌥M), with a preset voice picker in preferences.
+- Added Qwen-TTS as the default Read Aloud engine through DashScope, switchable per session in Rewrite & Coach (⌘⌥M), with model, voice, language_type, and instruct-only style instruction preferences.
 - Locked Rewrite & Coach to the Pro tier so rewrite quality stays consistent regardless of the translation Model Tier setting.
 - Refreshed the Xiaomi MiMo model catalog: removed the deprecated mimo-v2-flash, kept mimo-v2.5 as Fast, and promoted mimo-v2.5-pro as Pro.
 - Hardened the Rewrite & Coach JSON parser with balanced-brace extraction and a more informative error message when a provider returns malformed JSON.

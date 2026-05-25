@@ -5,7 +5,6 @@ import { ExtensionPreferences, ModelTier, PROVIDER_IDS, ProviderConfig, Provider
 export const PROVIDER_TITLES: Record<ProviderId, string> = {
   deepseek: "DeepSeek",
   mimo: "Xiaomi MiMo",
-  minimax: "MiniMax",
   gemini: "Gemini",
   kimi: "Kimi",
   openai: "OpenAI / ChatGPT",
@@ -31,12 +30,6 @@ const providerPreferenceKeys: Record<
     apiKey: "mimoAPIKey",
     baseURL: "mimoBaseURL",
     model: "mimoModel",
-  },
-  minimax: {
-    enabled: "enableMiniMax",
-    apiKey: "minimaxAPIKey",
-    baseURL: "minimaxBaseURL",
-    model: "minimaxModel",
   },
   gemini: {
     enabled: "enableGemini",
@@ -113,7 +106,7 @@ function isProviderId(value: string): value is ProviderId {
 }
 
 function isAnthropicProvider(id: ProviderId): boolean {
-  return id === "deepseek" || id === "mimo" || id === "minimax" || id === "kimi";
+  return id === "deepseek" || id === "mimo" || id === "kimi";
 }
 
 function uniqueProviderIds(ids: ProviderId[]): ProviderId[] {

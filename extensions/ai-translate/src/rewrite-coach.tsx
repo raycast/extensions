@@ -30,8 +30,8 @@ import { ExtensionPreferences, ProviderId, RewriteTone, TTSProvider } from "./ty
 import { normalizeInputText, quoted } from "./ui-constants";
 
 const TTS_PROVIDER_LABELS: Record<TTSProvider, string> = {
-  gemini: "Gemini",
-  mimo: "Xiaomi MiMo",
+  qwen: "Qwen-TTS",
+  gemini: "Gemini TTS",
 };
 
 const TONE_ORDER: RewriteTone[] = ["natural", "casual", "formal", "concise"];
@@ -163,7 +163,7 @@ function CoachResult({
   const { push } = useNavigation();
   const [tone, setTone] = useState<RewriteTone>(initialTone);
   const [providerId, setProviderId] = useState<ProviderId>(initialProviderId ?? providerIds[0]);
-  const [ttsProvider, setTtsProvider] = useState<TTSProvider>("gemini");
+  const [ttsProvider, setTtsProvider] = useState<TTSProvider>("qwen");
   const [result, setResult] = useState<RewriteResult>();
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string>();
@@ -329,7 +329,7 @@ function CoachResult({
             shortcut={{ modifiers: ["cmd", "opt"], key: "m" }}
             title={`Read Aloud: ${TTS_PROVIDER_LABELS[ttsProvider]}`}
           >
-            {(["gemini", "mimo"] as TTSProvider[]).map((option) => (
+            {(["qwen", "gemini"] as TTSProvider[]).map((option) => (
               <Action
                 key={option}
                 icon={option === ttsProvider ? Icon.Checkmark : Icon.Circle}

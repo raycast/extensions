@@ -207,6 +207,12 @@ interface OpenAIVisionOCRResponse {
   error?: { message?: string; type?: string };
 }
 
+interface TimedTextResponse {
+  ok: boolean;
+  status: number;
+  text: string;
+}
+
 async function recognizeWithGemini(imagePath: string, preferences: ExtensionPreferences): Promise<string> {
   const apiKey = preferences.geminiAPIKey?.trim();
   if (!apiKey) {
@@ -217,7 +223,7 @@ async function recognizeWithGemini(imagePath: string, preferences: ExtensionPref
   const model = preferences.geminiOcrModel?.trim() || preferences.geminiModel?.trim() || "gemini-2.5-flash";
   const image = (await readFile(imagePath)).toString("base64");
 
-  const response = await fetchWithTimeout(geminiOcrUrl(baseURL, model), getOCRTimeoutMs(preferences), {
+  const response = await fetchTextWithTimeout(geminiOcrUrl(baseURL, model), getOCRTimeoutMs(preferences), {
     method: "POST",
     headers: { "x-goog-api-key": apiKey, "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -231,7 +237,7 @@ async function recognizeWithGemini(imagePath: string, preferences: ExtensionPref
     }),
   });
 
-  const body = await response.text();
+  const body = response.text;
   const data = safeParseJson(body) as GeminiOCRResponse;
   if (isRawResponse(data)) {
     throw new OcrError(`Gemini returned invalid JSON: ${data.raw.slice(0, 200)}`);
@@ -294,13 +300,13 @@ async function recognizeWithOpenAI(imagePath: string, preferences: ExtensionPref
   }
 
   const url = openAIChatCompletionsUrl(baseURL);
-  const response = await fetchWithTimeout(url, getOCRTimeoutMs(preferences), {
+  const response = await fetchTextWithTimeout(url, getOCRTimeoutMs(preferences), {
     method: "POST",
     headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
     body: JSON.stringify(body),
   });
 
-  const text = await response.text();
+  const text = response.text;
   const data = safeParseJson(text) as OpenAIVisionOCRResponse;
   if (isRawResponse(data)) {
     throw new OcrError(`OpenAI returned invalid JSON: ${data.raw.slice(0, 200)}`);
@@ -436,7 +442,7 @@ async function postJson<T>(
   timeoutMs: number,
   headers: Record<string, string> = { "Content-Type": "application/json" },
 ): Promise<T> {
-  const response = await fetchWithTimeout(url, timeoutMs, {
+  const response = await fetchTextWithTimeout(url, timeoutMs, {
     method: "POST",
     headers,
     body: JSON.stringify(body),
@@ -445,7 +451,7 @@ async function postJson<T>(
 }
 
 async function postForm<T>(url: string, body: URLSearchParams, timeoutMs: number): Promise<T> {
-  const response = await fetchWithTimeout(url, timeoutMs, {
+  const response = await fetchTextWithTimeout(url, timeoutMs, {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body,
@@ -453,12 +459,17 @@ async function postForm<T>(url: string, body: URLSearchParams, timeoutMs: number
   return parseJSONResponse<T>(response);
 }
 
-async function fetchWithTimeout(url: string, timeoutMs: number, init?: RequestInit): Promise<Response> {
+async function fetchTextWithTimeout(url: string, timeoutMs: number, init?: RequestInit): Promise<TimedTextResponse> {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    const response = await fetch(url, { ...init, signal: controller.signal });
+    return {
+      ok: response.ok,
+      status: response.status,
+      text: await response.text(),
+    };
   } catch (error) {
     if (error instanceof Error && error.name === "AbortError") {
       throw new Error("OCR request timed out.");
@@ -469,11 +480,10 @@ async function fetchWithTimeout(url: string, timeoutMs: number, init?: RequestIn
   }
 }
 
-async function parseJSONResponse<T>(response: Response): Promise<T> {
-  const text = await response.text();
-  const data = safeParseJson(text);
+function parseJSONResponse<T>(response: TimedTextResponse): T {
+  const data = safeParseJson(response.text);
   if (!response.ok) {
-    throw new Error(extractAPIError(data) ?? `HTTP ${response.status}: ${text.slice(0, 240)}`);
+    throw new Error(extractAPIError(data) ?? `HTTP ${response.status}: ${response.text.slice(0, 240)}`);
   }
   if (isRawResponse(data)) {
     throw new Error(`Invalid JSON response: ${data.raw.slice(0, 240)}`);

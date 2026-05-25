@@ -20,7 +20,6 @@
         "selection",
         "deepseek",
         "mimo",
-        "minimax",
         "gemini",
         "kimi",
         "openai"
@@ -58,6 +57,8 @@
         "polish",
         "tts",
         "pronunciation",
+        "qwen",
+        "dashscope",
         "gemini"
       ]
     },
@@ -156,7 +157,10 @@
         "prompt",
         "profile",
         "style",
-        "configure"
+        "configure",
+        "tts",
+        "qwen",
+        "dashscope"
       ]
     }
   ],
@@ -180,10 +184,6 @@
         {
           "title": "Xiaomi MiMo",
           "value": "mimo"
-        },
-        {
-          "title": "MiniMax",
-          "value": "minimax"
         },
         {
           "title": "Gemini",
@@ -531,14 +531,6 @@
       "default": false
     },
     {
-      "name": "enableMiniMax",
-      "type": "checkbox",
-      "label": "MiniMax",
-      "required": false,
-      "description": "Show MiniMax translation result.",
-      "default": false
-    },
-    {
       "name": "enableGemini",
       "type": "checkbox",
       "label": "Gemini",
@@ -567,9 +559,9 @@
       "name": "providerOrder",
       "type": "textfield",
       "required": false,
-      "description": "Comma separated provider ids: deepseek,mimo,minimax,gemini,kimi,openai.",
-      "default": "deepseek,mimo,minimax,gemini,kimi,openai",
-      "placeholder": "deepseek,mimo,minimax,gemini,kimi,openai"
+      "description": "Comma separated provider ids: deepseek,mimo,gemini,kimi,openai.",
+      "default": "deepseek,mimo,gemini,kimi,openai",
+      "placeholder": "deepseek,mimo,gemini,kimi,openai"
     },
     {
       "title": "Request Timeout Seconds",
@@ -634,30 +626,6 @@
       "required": false,
       "description": "Xiaomi MiMo model name. Text options include mimo-v2.5-pro, mimo-v2.5, mimo-v2-pro, and mimo-v2-omni.",
       "default": "mimo-v2.5-pro"
-    },
-    {
-      "title": "MiniMax API Key",
-      "name": "minimaxAPIKey",
-      "type": "password",
-      "required": false,
-      "description": "Your MiniMax API key.",
-      "default": ""
-    },
-    {
-      "title": "MiniMax Base URL",
-      "name": "minimaxBaseURL",
-      "type": "textfield",
-      "required": false,
-      "description": "Anthropic-compatible MiniMax base URL.",
-      "default": "https://api.minimaxi.com/anthropic"
-    },
-    {
-      "title": "MiniMax Model",
-      "name": "minimaxModel",
-      "type": "textfield",
-      "required": false,
-      "description": "MiniMax model name. Anthropic-compatible options include MiniMax-M2.7 and MiniMax-M2.7-highspeed.",
-      "default": "MiniMax-M2.7"
     },
     {
       "title": "Gemini API Key",
@@ -734,58 +702,94 @@
       ]
     },
     {
-      "title": "MiMo TTS Base URL",
-      "name": "mimoTTSBaseURL",
-      "type": "textfield",
+      "title": "DashScope API Key",
+      "name": "dashscopeApiKey",
+      "type": "password",
       "required": false,
-      "description": "OpenAI-compatible MiMo TTS base URL. Used when Read Aloud is set to MiMo TTS.",
-      "default": "https://token-plan-cn.xiaomimimo.com/v1"
+      "description": "Alibaba Cloud Model Studio / DashScope API key for Qwen-TTS. You can also set DASHSCOPE_API_KEY.",
+      "default": ""
     },
     {
-      "title": "MiMo TTS Voice",
-      "name": "mimoTTSVoice",
+      "title": "Qwen-TTS Base URL",
+      "name": "qwenTTSBaseURL",
+      "type": "textfield",
+      "required": false,
+      "description": "DashScope API base URL. Use https://dashscope-intl.aliyuncs.com/api/v1 for the international region if needed.",
+      "default": "https://dashscope.aliyuncs.com/api/v1"
+    },
+    {
+      "title": "Qwen-TTS Model",
+      "name": "qwenTTSModel",
       "type": "dropdown",
       "required": false,
-      "description": "Preset voice used when Read Aloud is set to MiMo TTS.",
-      "default": "mimo_default",
+      "description": "Qwen-TTS model for Read Aloud. Instructions are sent only with Qwen3 TTS Instruct Flash.",
+      "default": "qwen3-tts-flash",
       "data": [
         {
-          "title": "MiMo Default",
-          "value": "mimo_default"
+          "title": "Qwen3 TTS Flash",
+          "value": "qwen3-tts-flash"
         },
         {
-          "title": "冰糖 (中文 · 女)",
-          "value": "冰糖"
-        },
-        {
-          "title": "茉莉 (中文 · 女)",
-          "value": "茉莉"
-        },
-        {
-          "title": "苏打 (中文 · 男)",
-          "value": "苏打"
-        },
-        {
-          "title": "白桦 (中文 · 男)",
-          "value": "白桦"
-        },
-        {
-          "title": "Mia (English · Female)",
-          "value": "Mia"
-        },
-        {
-          "title": "Chloe (English · Female)",
-          "value": "Chloe"
-        },
-        {
-          "title": "Milo (English · Male)",
-          "value": "Milo"
-        },
-        {
-          "title": "Dean (English · Male)",
-          "value": "Dean"
+          "title": "Qwen3 TTS Instruct Flash",
+          "value": "qwen3-tts-instruct-flash"
         }
       ]
+    },
+    {
+      "title": "Qwen-TTS Voice",
+      "name": "qwenTTSVoice",
+      "type": "dropdown",
+      "required": false,
+      "description": "Voice used by Qwen-TTS Read Aloud.",
+      "default": "Cherry",
+      "data": [
+        {
+          "title": "Cherry (Chinese / English / German)",
+          "value": "Cherry"
+        },
+        {
+          "title": "Serena (Chinese / English / German)",
+          "value": "Serena"
+        },
+        {
+          "title": "Ethan (Chinese / English / German)",
+          "value": "Ethan"
+        }
+      ]
+    },
+    {
+      "title": "Qwen-TTS Language",
+      "name": "qwenTTSLanguageType",
+      "type": "dropdown",
+      "required": false,
+      "description": "Sent as language_type. Auto is useful for mixed or uncertain text; a fixed language usually improves quality.",
+      "default": "Auto",
+      "data": [
+        {
+          "title": "Auto",
+          "value": "Auto"
+        },
+        {
+          "title": "Chinese",
+          "value": "Chinese"
+        },
+        {
+          "title": "English",
+          "value": "English"
+        },
+        {
+          "title": "German",
+          "value": "German"
+        }
+      ]
+    },
+    {
+      "title": "Qwen-TTS Instructions",
+      "name": "qwenTTSInstructions",
+      "type": "textfield",
+      "required": false,
+      "description": "Optional speaking style instructions. Sent only when Qwen-TTS Model is Qwen3 TTS Instruct Flash.",
+      "default": ""
     },
     {
       "title": "Kimi API Key",

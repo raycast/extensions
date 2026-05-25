@@ -18,7 +18,7 @@ function getDefaults(): RuntimeSettings {
       promptProfile: isPromptProfile(prefs.promptProfile) ? prefs.promptProfile : "general",
       translationStyle: isTranslationStyle(prefs.translationStyle) ? prefs.translationStyle : "balanced",
       customPromptInstructions: prefs.customPromptInstructions?.trim() ?? "",
-      ttsProvider: "gemini",
+      ttsProvider: "qwen",
     };
   } catch {
     return {
@@ -26,7 +26,7 @@ function getDefaults(): RuntimeSettings {
       promptProfile: "general",
       translationStyle: "balanced",
       customPromptInstructions: "",
-      ttsProvider: "gemini",
+      ttsProvider: "qwen",
     };
   }
 }
@@ -86,5 +86,5 @@ function isTranslationStyle(value: unknown): value is TranslationStyle {
 }
 
 function isTTSProvider(value: unknown): value is TTSProvider {
-  return value === "gemini" || value === "mimo";
+  return value === "qwen" || value === "gemini";
 }

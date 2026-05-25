@@ -30,16 +30,6 @@ const MODEL_CATALOG: Record<ProviderId, ProviderModels> = {
       { id: "mimo-v2-omni", title: "V2 Omni" },
     ],
   },
-  minimax: {
-    fast: { id: "MiniMax-M2.7-highspeed", title: "M2.7 Highspeed" },
-    pro: { id: "MiniMax-M2.7-highspeed", title: "M2.7 Highspeed" },
-    all: [
-      { id: "MiniMax-M2.7-highspeed", title: "M2.7 Highspeed" },
-      { id: "MiniMax-M2.7", title: "M2.7" },
-      { id: "MiniMax-M2.5-highspeed", title: "M2.5 Highspeed" },
-      { id: "MiniMax-M2.5", title: "M2.5" },
-    ],
-  },
   gemini: {
     fast: { id: "gemini-3.1-flash-lite-preview", title: "3.1 Flash Lite (Preview)" },
     pro: { id: "gemini-3.1-pro-preview", title: "3.1 Pro (Preview)" },

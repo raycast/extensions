@@ -36,13 +36,21 @@ const GEMINI_TTS_MODEL = "gemini-3.1-flash-tts-preview";
 const GEMINI_TTS_BASE_URL = "https://generativelanguage.googleapis.com/v1beta";
 const GEMINI_DEFAULT_VOICE = "Kore";
 
-const MIMO_TTS_MODEL = "mimo-v2.5-tts";
-const MIMO_TTS_DEFAULT_BASE_URL = "https://token-plan-cn.xiaomimimo.com/v1";
-const MIMO_TTS_DEFAULT_VOICE = "mimo_default";
+const QWEN_TTS_DEFAULT_MODEL = "qwen3-tts-flash";
+const QWEN_TTS_INSTRUCT_MODEL = "qwen3-tts-instruct-flash";
+const QWEN_TTS_DEFAULT_BASE_URL = "https://dashscope.aliyuncs.com/api/v1";
+const QWEN_TTS_DEFAULT_VOICE = "Cherry";
+const QWEN_TTS_DEFAULT_LANGUAGE_TYPE = "Auto";
+const QWEN_TTS_MAX_CHARS = 550;
+const QWEN_TTS_SOFT_CHARS = 420;
+const TTS_REQUEST_TIMEOUT_MS = 30_000;
 
 const GEMINI_SAMPLE_RATE = 24000;
 const PCM_CHANNELS = 1;
 const PCM_BITS_PER_SAMPLE = 16;
+
+type QwenTTSModel = typeof QWEN_TTS_DEFAULT_MODEL | typeof QWEN_TTS_INSTRUCT_MODEL;
+type QwenTTSLanguageType = "Auto" | "Chinese" | "English" | "German";
 
 interface SpeakOptions {
   slow?: boolean;
@@ -79,19 +87,19 @@ interface GeminiTTSResponse {
   };
 }
 
-interface MimoTTSResponse {
-  choices?: Array<{
-    message?: {
-      audio?: {
-        data?: string;
-        format?: string;
-      };
+interface QwenTTSResponse {
+  output?: {
+    audio?: {
+      data?: string;
+      url?: string;
+      id?: string;
+      expires_at?: number;
     };
-  }>;
-  error?: {
-    message?: string;
-    type?: string;
+    finish_reason?: string;
   };
+  code?: string | number;
+  message?: string;
+  request_id?: string;
 }
 
 export async function speakText(text: string, options: SpeakOptions = {}): Promise<void> {
@@ -101,26 +109,39 @@ export async function speakText(text: string, options: SpeakOptions = {}): Promi
   const preferences = getPreferenceValues<Preferences>();
   const { ttsProvider } = await loadRuntimeSettings();
   const slow = Boolean(options.slow);
+  const chunks = ttsProvider === "qwen" ? splitTextForQwen(trimmed) : [trimmed];
 
   stopSpeaking();
   void sweepStaleAudio();
 
+  const slowIsSupported =
+    !slow || ttsProvider !== "qwen" || normalizeQwenModel(preferences.qwenTTSModel) === QWEN_TTS_INSTRUCT_MODEL;
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: slow ? "Reading aloud (slow)..." : "Reading aloud...",
+    title: slow && slowIsSupported ? "Reading aloud (slow)..." : "Reading aloud...",
   });
   const controller = new AbortController();
   activeController = controller;
-  const timeout = setTimeout(() => controller.abort(), 30_000);
 
   try {
-    const wav =
-      ttsProvider === "mimo"
-        ? await synthesizeWithMimo(trimmed, slow, preferences, controller.signal)
-        : await synthesizeWithGemini(trimmed, slow, preferences, controller.signal);
-    toast.hide();
-    if (!wav) return;
-    await playWav(wav);
+    for (const chunk of chunks) {
+      if (controller.signal.aborted || activeController !== controller) return;
+
+      const timeout = setTimeout(() => controller.abort(), TTS_REQUEST_TIMEOUT_MS);
+      let wav: Buffer | undefined;
+      try {
+        wav =
+          ttsProvider === "qwen"
+            ? await synthesizeWithQwen(chunk, slow, preferences, controller.signal)
+            : await synthesizeWithGemini(chunk, slow, preferences, controller.signal);
+      } finally {
+        clearTimeout(timeout);
+      }
+
+      toast.hide();
+      if (!wav) return;
+      await playWav(wav, controller.signal);
+    }
   } catch (error) {
     toast.hide();
     if (error instanceof Error && error.name === "AbortError") {
@@ -131,7 +152,6 @@ export async function speakText(text: string, options: SpeakOptions = {}): Promi
     const msg = error instanceof Error ? error.message : String(error);
     await showToast({ style: Toast.Style.Failure, title: "TTS Failed", message: msg.slice(0, 100) });
   } finally {
-    clearTimeout(timeout);
     if (activeController === controller) {
       activeController = undefined;
     }
@@ -198,61 +218,62 @@ async function synthesizeWithGemini(
   return wrapPCMInWAV(Buffer.from(audioBase64, "base64"), GEMINI_SAMPLE_RATE);
 }
 
-async function synthesizeWithMimo(
+async function synthesizeWithQwen(
   text: string,
   slow: boolean,
   preferences: Preferences,
   signal: AbortSignal,
 ): Promise<Buffer | undefined> {
-  const apiKey = preferences.mimoAPIKey?.trim();
+  const apiKey = preferences.dashscopeApiKey?.trim() || process.env.DASHSCOPE_API_KEY?.trim();
   if (!apiKey) {
     await showToast({
       style: Toast.Style.Failure,
       title: "TTS Unavailable",
-      message: "Add a Xiaomi MiMo API key in preferences",
+      message: "Add a DashScope API key in preferences or DASHSCOPE_API_KEY",
     });
     return undefined;
   }
 
-  const baseURL = preferences.mimoTTSBaseURL?.trim() || MIMO_TTS_DEFAULT_BASE_URL;
-  const voice = preferences.mimoTTSVoice?.trim() || MIMO_TTS_DEFAULT_VOICE;
-  const url = `${baseURL.replace(/\/+$/, "")}/chat/completions`;
-
-  const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
-  if (slow) {
-    messages.push({ role: "user", content: "请放慢语速、咬字清晰地朗读，像语言老师帮助初学者那样。" });
-  }
-  messages.push({ role: "assistant", content: text });
+  const model = normalizeQwenModel(preferences.qwenTTSModel);
+  const voice = preferences.qwenTTSVoice?.trim() || QWEN_TTS_DEFAULT_VOICE;
+  const languageType = normalizeQwenLanguageType(preferences.qwenTTSLanguageType);
+  const instructions = buildQwenInstructions(model, preferences.qwenTTSInstructions, slow);
+  const url = qwenGenerationUrl(preferences.qwenTTSBaseURL);
 
   const response = await fetch(url, {
     method: "POST",
     headers: {
-      "api-key": apiKey,
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: MIMO_TTS_MODEL,
-      messages,
-      audio: { format: "wav", voice },
-      stream: false,
+      model,
+      input: {
+        text,
+        voice,
+        language_type: languageType,
+        ...(instructions ? { instructions } : {}),
+      },
     }),
     signal,
   });
 
   const responseText = await response.text();
-  const data = parseJson<MimoTTSResponse>(responseText);
+  const data = parseJson<QwenTTSResponse>(responseText);
 
-  if (!response.ok || data.error?.message) {
+  if (!response.ok || data.error?.message || data.message || data.code) {
     await showToast({
       style: Toast.Style.Failure,
       title: "TTS Error",
-      message: data.error?.message?.slice(0, 100) ?? `HTTP ${response.status}: ${responseText.slice(0, 100)}`,
+      message:
+        data.error?.message?.slice(0, 100) ??
+        data.message?.slice(0, 100) ??
+        `HTTP ${response.status}: ${responseText.slice(0, 100)}`,
     });
     return undefined;
   }
 
-  const audioBase64 = data.choices?.[0]?.message?.audio?.data;
+  const audioBase64 = data.output?.audio?.data || (await fetchQwenAudioUrlAsBase64(data.output?.audio?.url, signal));
   if (!audioBase64) {
     await showToast({ style: Toast.Style.Failure, title: "TTS Error", message: "No audio in response" });
     return undefined;
@@ -261,21 +282,116 @@ async function synthesizeWithMimo(
   return Buffer.from(audioBase64, "base64");
 }
 
-async function playWav(wavData: Buffer): Promise<void> {
+async function fetchQwenAudioUrlAsBase64(url: string | undefined, signal: AbortSignal): Promise<string | undefined> {
+  if (!url) return undefined;
+
+  const response = await fetch(url, { signal });
+  if (!response.ok) {
+    throw new Error(`Qwen-TTS audio download failed: HTTP ${response.status}`);
+  }
+
+  const buffer = Buffer.from(await response.arrayBuffer());
+  if (buffer.length === 0) {
+    throw new Error("Qwen-TTS returned an empty audio file");
+  }
+  return buffer.toString("base64");
+}
+
+function qwenGenerationUrl(baseURL: string | undefined): string {
+  const trimmed = (baseURL?.trim() || QWEN_TTS_DEFAULT_BASE_URL).replace(/\/+$/, "");
+  if (trimmed.endsWith("/services/aigc/multimodal-generation/generation")) {
+    return trimmed;
+  }
+  return `${trimmed}/services/aigc/multimodal-generation/generation`;
+}
+
+function normalizeQwenModel(model: string | undefined): QwenTTSModel {
+  return model === QWEN_TTS_INSTRUCT_MODEL ? QWEN_TTS_INSTRUCT_MODEL : QWEN_TTS_DEFAULT_MODEL;
+}
+
+function normalizeQwenLanguageType(languageType: string | undefined): QwenTTSLanguageType {
+  return languageType === "Chinese" || languageType === "English" || languageType === "German"
+    ? languageType
+    : QWEN_TTS_DEFAULT_LANGUAGE_TYPE;
+}
+
+function buildQwenInstructions(model: QwenTTSModel, preferenceInstructions: string | undefined, slow: boolean): string {
+  if (model !== QWEN_TTS_INSTRUCT_MODEL) {
+    return "";
+  }
+
+  return [
+    preferenceInstructions?.trim(),
+    slow ? "Read slowly and clearly, enunciating each word like a language teacher helping a learner." : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+function splitTextForQwen(text: string): string[] {
+  const chunks: string[] = [];
+  let current = "";
+  let count = 0;
+
+  for (const char of text) {
+    current += char;
+    count += 1;
+
+    if (count >= QWEN_TTS_MAX_CHARS || (count >= QWEN_TTS_SOFT_CHARS && isSentenceBoundary(char))) {
+      const chunk = current.trim();
+      if (chunk) chunks.push(chunk);
+      current = "";
+      count = 0;
+    }
+  }
+
+  const tail = current.trim();
+  if (tail) chunks.push(tail);
+  return chunks;
+}
+
+function isSentenceBoundary(char: string): boolean {
+  return "。！？.!?；;".includes(char);
+}
+
+async function playWav(wavData: Buffer, signal?: AbortSignal): Promise<void> {
   await mkdir(environment.supportPath, { recursive: true });
   const audioPath = join(environment.supportPath, `tts-${Date.now()}-${Math.random().toString(16).slice(2)}.wav`);
   await writeFile(audioPath, wavData);
 
-  const child = execFile("/usr/bin/afplay", [audioPath], (error) => {
+  if (signal?.aborted) {
     unlink(audioPath, () => undefined);
-    if (activePlayback === child) {
-      activePlayback = undefined;
+    throw abortError("Playback aborted");
+  }
+
+  await new Promise<void>((resolve, reject) => {
+    const child = execFile("/usr/bin/afplay", [audioPath], (error) => {
+      signal?.removeEventListener("abort", abortPlayback);
+      unlink(audioPath, () => undefined);
+      if (activePlayback === child) {
+        activePlayback = undefined;
+      }
+      if (error && !error.killed) {
+        void showHUD(`Playback error: ${error.message.slice(0, 60)}`);
+        reject(error);
+        return;
+      }
+      resolve();
+    });
+
+    function abortPlayback() {
+      child.kill();
     }
-    if (error && !error.killed) {
-      void showHUD(`Playback error: ${error.message.slice(0, 60)}`);
-    }
+
+    activePlayback = child;
+    signal?.addEventListener("abort", abortPlayback, { once: true });
   });
-  activePlayback = child;
+}
+
+function abortError(message: string): Error {
+  const error = new Error(message);
+  error.name = "AbortError";
+  return error;
 }
 
 function parseJson<T>(text: string): T & { error?: { message?: string } } {

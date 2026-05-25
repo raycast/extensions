@@ -26,7 +26,7 @@ export default function Command() {
       promptProfile: values.promptProfile as PromptProfile,
       translationStyle: values.translationStyle as TranslationStyle,
       customPromptInstructions: values.customPromptInstructions.trim().slice(0, 4000),
-      ttsProvider: settings?.ttsProvider ?? "gemini",
+      ttsProvider: settings?.ttsProvider ?? "qwen",
     };
 
     await saveRuntimeSettings(updated);
