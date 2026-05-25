@@ -13,10 +13,12 @@ import {
 import { useState, useEffect, useRef, useMemo } from "react";
 import { useCachedPromise } from "@raycast/utils";
 import {
+  ClientStub,
   HakunaClient,
   ProjectResponse,
   TaskResponse,
   CompanyResponse,
+  TimerResponse,
 } from "./hakuna-api";
 import {
   formatDate,
@@ -39,6 +41,14 @@ interface Props {
   endTime?: string;
   note?: string;
   prefillFromLiveTimer?: boolean;
+}
+
+function clientName(client?: string | ClientStub): string | undefined {
+  if (client === undefined || client === null) {
+    return undefined;
+  }
+
+  return typeof client === "object" ? client.name : client;
 }
 
 function isToday(date: Date | null | undefined): boolean {
@@ -543,8 +553,30 @@ export default function TimerForm({
       }
 
       if (timer) {
-        // "End Timer"
-        await client.deleteTimer();
+        // "End Timer" — stopTimer atomically creates an entry, then adjust times
+        const stopped = await client.stopTimer();
+        try {
+          await client.updateTimeEntry(
+            stopped.id,
+            Number(selectedTaskId),
+            projectsEnabled ? Number(selectedProjectId) : undefined,
+            formattedDate,
+            formattedStartTime,
+            formattedEndTime,
+            note,
+          );
+        } catch (error) {
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Timer stopped",
+            message: `${error instanceof Error ? error.message : "Unknown error"}. A time entry was created — adjust it in Hakuna.`,
+          });
+          popToRoot();
+          return;
+        }
+        await showToast({ style: Toast.Style.Success, title: "Entry Created" });
+        popToRoot();
+        return;
       }
 
       // "Create Entry"
@@ -561,30 +593,52 @@ export default function TimerForm({
       return;
     }
 
-    if (timer) {
-      // "Update Timer"
+    const previousTimer: TimerResponse | null | undefined = timer;
+    if (previousTimer) {
       await client.deleteTimer();
     }
 
-    if (startTime && !isToday(date)) {
-      await client.createTimeEntry(
-        Number(selectedTaskId),
-        projectsEnabled ? Number(selectedProjectId) : undefined,
-        formattedDate,
-        formattedStartTime,
-        null,
-        note,
-      );
-    } else {
-      await client.startTimer(
-        Number(selectedTaskId),
-        projectsEnabled ? Number(selectedProjectId) : undefined,
-        formattedStartTime,
-        note,
-      );
+    try {
+      if (startTime && !isToday(date)) {
+        await client.createTimeEntry(
+          Number(selectedTaskId),
+          projectsEnabled ? Number(selectedProjectId) : undefined,
+          formattedDate,
+          formattedStartTime,
+          null,
+          note,
+        );
+      } else {
+        await client.startTimer(
+          Number(selectedTaskId),
+          projectsEnabled ? Number(selectedProjectId) : undefined,
+          formattedStartTime,
+          note,
+        );
+      }
+    } catch (error) {
+      if (previousTimer?.task?.id) {
+        try {
+          await client.startTimer(
+            previousTimer.task.id,
+            previousTimer.project?.id,
+            formatTime(previousTimer.start_time) ?? previousTimer.start_time,
+            previousTimer.note,
+          );
+          await showToast({
+            style: Toast.Style.Failure,
+            title: "Failed to update timer",
+            message: `${error instanceof Error ? error.message : "Unknown error"}. Your previous timer was restored.`,
+          });
+          return;
+        } catch {
+          // fall through to generic error below
+        }
+      }
+      throw error;
     }
 
-    if (timer) {
+    if (previousTimer) {
       await showToast({ style: Toast.Style.Success, title: "Timer Updated" });
     } else {
       await showToast({ style: Toast.Style.Success, title: "Timer Started" });
@@ -677,7 +731,8 @@ export default function TimerForm({
         >
           {projects.map((p) => {
             const prefix = p.code ? `[${p.code}] ` : "";
-            const suffix = p.client ? ` (${p.client})` : "";
+            const name = clientName(p.client);
+            const suffix = name ? ` (${name})` : "";
             return (
               <Form.Dropdown.Item
                 key={p.id}
