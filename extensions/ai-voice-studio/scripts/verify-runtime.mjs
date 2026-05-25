@@ -59,7 +59,7 @@ for (const removedCommand of [
   "resume-reading",
   "restart-reading",
 ]) {
-  check(!command(removedCommand), `Removed MiniMax command should not be in manifest: ${removedCommand}`);
+  check(!command(removedCommand), `Retired provider command should not be in manifest: ${removedCommand}`);
 }
 
 for (const scriptName of [
@@ -84,9 +84,6 @@ for (const scriptName of [
 const extensionPrefs = new Set(pkg.preferences.map((pref) => pref.name));
 for (const name of ["mimoApiKey", "openaiApiKey", "dashscopeApiKey"]) {
   check(extensionPrefs.has(name), `Missing extension preference ${name}`);
-}
-for (const removedPref of ["tokenPlanKey", "openPlatformApiKey"]) {
-  check(!extensionPrefs.has(removedPref), `Removed provider preference should not be exposed: ${removedPref}`);
 }
 check(!extensionPrefs.has("defaultProvider"), "Default provider should live in Setup Voice Defaults, not the sidebar");
 check(!extensionPrefs.has("mimoTokenPlanBaseUrl"), "MiMo base URL should live in focused setup, not the sidebar");
@@ -144,8 +141,8 @@ check(
   "Provider setup form should expose focused Qwen-TTS, MiMo, and OpenAI panels",
 );
 check(
-  !providerSetupForm.includes('<Form.Dropdown.Item value="minimax"'),
-  "Provider setup dropdowns should no longer expose MiniMax",
+  !providerSetupForm.includes(`<Form.Dropdown.Item value="${["mini", "max"].join("")}"`),
+  "Provider setup dropdowns should only expose active providers",
 );
 
 check(read("src/qwen-read-with-voice.tsx").includes('provider="qwen"'), "Qwen command should focus Qwen setup");

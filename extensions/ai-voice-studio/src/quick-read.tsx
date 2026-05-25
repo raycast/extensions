@@ -5,7 +5,6 @@ const PROVIDER_COMMANDS = {
   qwen: "qwen-quick-read",
   mimo: "mimo-quick-read",
   openai: "openai-quick-read",
-  minimax: "qwen-quick-read",
 } as const;
 
 export default async function QuickRead() {

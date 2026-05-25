@@ -158,7 +158,7 @@ async function synthesizeCurrentProvider(provider: TTSProvider, signal: AbortSig
 }
 
 function labelProvider(provider: TTSProvider): string {
-  if (provider === "qwen" || provider === "minimax") return "Qwen-TTS";
+  if (provider === "qwen") return "Qwen-TTS";
   if (provider === "mimo") return "MiMo";
   if (provider === "openai") return "OpenAI";
   return "Qwen-TTS";

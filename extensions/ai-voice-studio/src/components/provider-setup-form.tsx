@@ -19,7 +19,6 @@ import type {
   OpenAIDelivery,
   OpenAIAccentFocus,
 } from "../api/openai-types";
-import { FALLBACK_VOICES, getVoiceSearchKeywords, groupVoicesByCategory } from "../constants/voices";
 import {
   LANGUAGE_TYPE_LABELS as QWEN_LANGUAGE_TYPE_LABELS,
   MODEL_LABELS as QWEN_MODEL_LABELS,
@@ -69,21 +68,6 @@ import { clearSpeedOverride as clearMimoSpeedOverride } from "../utils/mimo-play
 import { clearSpeedOverride as clearOpenAISpeedOverride } from "../utils/openai-playback-state";
 import { clearSpeedOverride as clearQwenSpeedOverride } from "../utils/qwen-playback-state";
 
-const MINIMAX_MODEL_OPTIONS = [
-  { value: "speech-2.8-hd", title: "Speech 2.8 HD" },
-  { value: "speech-2.8-turbo", title: "Speech 2.8 Turbo" },
-  { value: "speech-2.6-hd", title: "Speech 2.6 HD" },
-  { value: "speech-2.6-turbo", title: "Speech 2.6 Turbo" },
-  { value: "speech-02-hd", title: "Speech 02 HD" },
-  { value: "speech-02-turbo", title: "Speech 02 Turbo" },
-];
-
-const MINIMAX_AUTH_MODE_OPTIONS = [
-  { value: "auto", title: "Auto Detect" },
-  { value: "token-plan", title: "Token Plan Key" },
-  { value: "payg", title: "Open Platform API Key" },
-];
-
 const PLAYBACK_RATE_OPTIONS = [
   { value: "0.5", title: "0.5x" },
   { value: "0.75", title: "0.75x" },
@@ -92,15 +76,6 @@ const PLAYBACK_RATE_OPTIONS = [
   { value: "1.5", title: "1.5x" },
   { value: "1.75", title: "1.75x" },
   { value: "2", title: "2.0x" },
-];
-
-const LANGUAGE_BOOST_OPTIONS = [
-  { value: "auto", title: "Auto" },
-  { value: "Chinese", title: "Chinese" },
-  { value: "Chinese,Yue", title: "Cantonese" },
-  { value: "English", title: "English" },
-  { value: "Japanese", title: "Japanese" },
-  { value: "Korean", title: "Korean" },
 ];
 
 interface OpenProviderSetupActionProps {
@@ -166,13 +141,6 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
   const handleSetupProviderChange = useCallback((value: string) => {
     setSetupProvider(toProvider(value));
   }, []);
-
-  const updateMiniMax = useCallback(
-    (patch: Partial<ProviderSettings["minimax"]>) => {
-      updateSettings((current) => ({ ...current, minimax: { ...current.minimax, ...patch } }));
-    },
-    [updateSettings],
-  );
 
   const updateQwen = useCallback(
     (patch: Partial<ProviderSettings["qwen"]>) => {
@@ -331,63 +299,6 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
       </Form.Dropdown>
 
       <Form.Separator />
-      {activeProvider === "minimax" ? (
-        <>
-          <Form.Description title="MiniMax" text="Long reading, voice clone, and MiniMax voices." />
-          <Form.Dropdown
-            id="minimaxAuthMode"
-            title="Authentication"
-            value={settings.minimax.authMode}
-            onChange={(authMode) =>
-              updateMiniMax({ authMode: authMode === "token-plan" || authMode === "payg" ? authMode : "auto" })
-            }
-          >
-            {MINIMAX_AUTH_MODE_OPTIONS.map((option) => (
-              <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
-            ))}
-          </Form.Dropdown>
-          <Form.Dropdown
-            id="minimaxModel"
-            title="Model"
-            value={settings.minimax.model}
-            onChange={(model) => updateMiniMax({ model })}
-          >
-            {MINIMAX_MODEL_OPTIONS.map((option) => (
-              <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
-            ))}
-          </Form.Dropdown>
-          <Form.Dropdown
-            id="minimaxDefaultVoice"
-            title="Voice"
-            value={settings.minimax.defaultVoice}
-            onChange={(defaultVoice) => updateMiniMax({ defaultVoice })}
-          >
-            {groupVoicesByCategory(FALLBACK_VOICES).map(([category, voices]) => (
-              <Form.Dropdown.Section key={category} title={category}>
-                {voices.map((voice) => (
-                  <Form.Dropdown.Item
-                    key={voice.id}
-                    value={voice.id}
-                    title={voice.name}
-                    keywords={getVoiceSearchKeywords(voice)}
-                  />
-                ))}
-              </Form.Dropdown.Section>
-            ))}
-          </Form.Dropdown>
-          <Form.Dropdown
-            id="minimaxSpeechRate"
-            title="Speed"
-            value={settings.minimax.speechRate}
-            onChange={(speechRate) => updateMiniMax({ speechRate })}
-          >
-            {PLAYBACK_RATE_OPTIONS.map((option) => (
-              <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
-            ))}
-          </Form.Dropdown>
-        </>
-      ) : null}
-
       {activeProvider === "qwen" ? (
         <>
           <Form.Description title="Qwen-TTS" text="Alibaba Cloud Model Studio / DashScope Qwen-TTS synthesis." />
@@ -559,46 +470,6 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
 
       {showAdvanced ? (
         <>
-          {activeProvider === "minimax" ? (
-            <>
-              <Form.Separator />
-              <Form.Description title="MiniMax Advanced" text="Custom voices, language, and endpoint region." />
-              <Form.TextField
-                id="minimaxCustomDefaultVoice"
-                title="Custom Voice ID"
-                value={settings.minimax.customDefaultVoice}
-                placeholder="voice_id"
-                onChange={(customDefaultVoice) => updateMiniMax({ customDefaultVoice })}
-              />
-              <Form.TextField
-                id="minimaxCustomVoiceIds"
-                title="Extra Voice IDs"
-                value={settings.minimax.customVoiceIds}
-                placeholder="voice_id_1, voice_id_2"
-                onChange={(customVoiceIds) => updateMiniMax({ customVoiceIds })}
-              />
-              <Form.Dropdown
-                id="minimaxLanguageBoost"
-                title="Language"
-                value={settings.minimax.languageBoost}
-                onChange={(languageBoost) => updateMiniMax({ languageBoost })}
-              >
-                {LANGUAGE_BOOST_OPTIONS.map((option) => (
-                  <Form.Dropdown.Item key={option.value} value={option.value} title={option.title} />
-                ))}
-              </Form.Dropdown>
-              <Form.Dropdown
-                id="minimaxRegion"
-                title="Region"
-                value={settings.minimax.region}
-                onChange={(region) => updateMiniMax({ region: region === "global" ? "global" : "cn" })}
-              >
-                <Form.Dropdown.Item value="cn" title="China" />
-                <Form.Dropdown.Item value="global" title="Global" />
-              </Form.Dropdown>
-            </>
-          ) : null}
-
           {activeProvider === "mimo" ? (
             <>
               <Form.Separator />
@@ -681,7 +552,7 @@ function toProvider(value: string): TTSProvider {
 }
 
 function labelProvider(provider: TTSProvider): string {
-  if (provider === "qwen" || provider === "minimax") return "Qwen-TTS";
+  if (provider === "qwen") return "Qwen-TTS";
   if (provider === "mimo") return "MiMo";
   if (provider === "openai") return "OpenAI";
   return "Qwen-TTS";

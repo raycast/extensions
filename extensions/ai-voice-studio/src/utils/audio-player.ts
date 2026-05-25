@@ -9,6 +9,7 @@ const STOP_FILE = join(tmpdir(), "ai-voice-studio.stop");
 
 export class AudioPlayer {
   private currentProcess: ChildProcess | null = null;
+  private currentPid: number | undefined;
   private tempFiles: string[] = [];
   private stopped = false;
   private abortController = new AbortController();
@@ -34,11 +35,17 @@ export class AudioPlayer {
       const proc = spawn("afplay", buildAfplayArgs(tempPath, playbackRate));
       this.currentProcess = proc;
       const myPid = proc.pid;
+      this.currentPid = myPid;
 
       writePidFile(myPid);
 
       proc.on("close", (code, signal) => {
-        this.currentProcess = null;
+        if (this.currentProcess === proc) {
+          this.currentProcess = null;
+        }
+        if (this.currentPid === myPid) {
+          this.currentPid = undefined;
+        }
         removePidFileIfMatch(myPid);
         this.cleanupFile(tempPath);
 
@@ -55,7 +62,12 @@ export class AudioPlayer {
       });
 
       proc.on("error", (err) => {
-        this.currentProcess = null;
+        if (this.currentProcess === proc) {
+          this.currentProcess = null;
+        }
+        if (this.currentPid === myPid) {
+          this.currentPid = undefined;
+        }
         removePidFileIfMatch(myPid);
         this.cleanupFile(tempPath);
         reject(err);
@@ -78,16 +90,18 @@ export class AudioPlayer {
     if (!this.abortController.signal.aborted) {
       this.abortController.abort();
     }
+    const pid = this.currentPid;
     if (this.currentProcess) {
       const proc = this.currentProcess;
       this.currentProcess = null;
+      this.currentPid = undefined;
       try {
         proc.kill("SIGTERM");
       } catch {
         // Process may already be dead
       }
     }
-    removePidFile();
+    removePidFileIfMatch(pid);
   }
 
   /**

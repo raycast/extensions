@@ -40,7 +40,7 @@ export async function synthesizeSpeech(text: string, options: TTSOptions, signal
     throw new TTSApiError("TTS synthesis cancelled", -7);
   }
 
-  const prefs = getPreferenceValues<Preferences & { dashscopeApiKey?: string }>();
+  const prefs = getPreferenceValues<Preferences>();
   const apiKey = prefs.dashscopeApiKey?.trim();
   if (!apiKey) {
     throw new TTSApiError("DashScope API key is required for Qwen-TTS. Add it in extension preferences.", -1);

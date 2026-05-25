@@ -32,6 +32,7 @@ export interface PipelineProvider<O> {
 }
 
 type AudioOptions = { format: string; playbackRate: number };
+const STOP_POLL_INTERVAL_MS = 100;
 
 /**
  * Play chunks sequentially while synthesizing the next chunk during current
@@ -68,13 +69,7 @@ export async function playChunksWithLookahead<O extends AudioOptions>(
     stopCheckAfterAdvance: false,
     resolveOptions: () => options,
     optionsKey: () => "",
-    startJob: (index) => ({
-      outcome: provider.synthesize(chunks[index], options, player.signal).then(
-        (audio) => ({ kind: "audio", audio }) as const,
-        (cause) => ({ kind: "error", cause }) as const,
-      ),
-      cancel: () => undefined,
-    }),
+    startJob: (index) => startPipelineSynthesisJob(chunks[index], options, player, provider),
     errorIsStop: () => player.isStopped(),
     onError: (index, total, cause) => {
       throw new ChunkSynthesisError(index, total, cause);
@@ -87,4 +82,57 @@ export async function playChunksWithLookahead<O extends AudioOptions>(
     onFirstAudio: () => callbacks.onFirstAudioReady?.(),
     play: (audio) => player.playAudio(audio, options.format, options.playbackRate),
   });
+}
+
+function startPipelineSynthesisJob<O extends AudioOptions>(
+  text: string,
+  options: O,
+  player: AudioPlayer,
+  provider: PipelineProvider<O>,
+) {
+  const controller = new AbortController();
+  let stoppedByRequest = false;
+  let checkingStop = false;
+
+  const abortFromPlayer = () => controller.abort();
+  if (player.signal.aborted) {
+    controller.abort();
+  } else {
+    player.signal.addEventListener("abort", abortFromPlayer, { once: true });
+  }
+
+  const stopPoll = setInterval(() => {
+    if (checkingStop || controller.signal.aborted) return;
+    checkingStop = true;
+    provider
+      .hasStopRequest()
+      .then((stopRequested) => {
+        if (!stopRequested || controller.signal.aborted) return;
+        stoppedByRequest = true;
+        player.stopPlayback();
+        controller.abort();
+      })
+      .catch(() => undefined)
+      .finally(() => {
+        checkingStop = false;
+      });
+  }, STOP_POLL_INTERVAL_MS);
+  stopPoll.unref?.();
+
+  return {
+    outcome: provider
+      .synthesize(text, options, controller.signal)
+      .then(
+        (audio) => ({ kind: "audio", audio }) as const,
+        (cause) =>
+          controller.signal.aborted && (player.isStopped() || stoppedByRequest)
+            ? ({ kind: "stopped" } as const)
+            : ({ kind: "error", cause } as const),
+      )
+      .finally(() => {
+        clearInterval(stopPoll);
+        player.signal.removeEventListener("abort", abortFromPlayer);
+      }),
+    cancel: () => controller.abort(),
+  };
 }

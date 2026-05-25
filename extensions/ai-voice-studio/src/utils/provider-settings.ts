@@ -1,5 +1,4 @@
 import { LocalStorage } from "@raycast/api";
-import { DEFAULT_VOICE_ID } from "../constants/voices";
 import {
   DEFAULT_BASE_URL as DEFAULT_QWEN_BASE_URL,
   DEFAULT_LANGUAGE_TYPE as DEFAULT_QWEN_LANGUAGE_TYPE,
@@ -18,7 +17,6 @@ import {
   normalizeDelivery,
   normalizeAccentFocus,
 } from "../constants/openai-style";
-import type { MiniMaxRegion } from "../api/types";
 import type { MimoTTSModel } from "../api/mimo-types";
 import type {
   OpenAITTSModel,
@@ -43,19 +41,6 @@ export interface OpenAIProviderSettings {
   instructions?: string;
 }
 
-export type MiniMaxAuthMode = "auto" | "token-plan" | "payg";
-
-export interface MiniMaxProviderSettings {
-  authMode: MiniMaxAuthMode;
-  model: string;
-  defaultVoice: string;
-  customDefaultVoice?: string;
-  customVoiceIds?: string;
-  languageBoost: string;
-  speechRate: string;
-  region: MiniMaxRegion;
-}
-
 export interface MimoProviderSettings {
   model: MimoTTSModel;
   defaultVoice: string;
@@ -75,7 +60,6 @@ export interface QwenProviderSettings {
 
 export interface ProviderSettings {
   defaultProvider: TTSProvider;
-  minimax: MiniMaxProviderSettings;
   qwen: QwenProviderSettings;
   mimo: MimoProviderSettings;
   openai: OpenAIProviderSettings;
@@ -83,7 +67,6 @@ export interface ProviderSettings {
 
 export interface ProviderSettingsInput {
   defaultProvider?: string;
-  minimax?: Partial<MiniMaxProviderSettings>;
   qwen?: Partial<QwenProviderSettings>;
   mimo?: Partial<MimoProviderSettings>;
   openai?: Partial<OpenAIProviderSettings>;
@@ -93,16 +76,6 @@ export const QUICK_SETUP_OVERRIDES_KEY = "ai-voice-studio:quick-setup-overrides"
 
 export const DEFAULT_PROVIDER_SETTINGS: ProviderSettings = {
   defaultProvider: "qwen",
-  minimax: {
-    authMode: "auto",
-    model: "speech-2.8-hd",
-    defaultVoice: DEFAULT_VOICE_ID,
-    customDefaultVoice: "",
-    customVoiceIds: "",
-    languageBoost: "auto",
-    speechRate: "1",
-    region: "cn",
-  },
   qwen: {
     model: DEFAULT_QWEN_MODEL,
     voice: DEFAULT_QWEN_VOICE,
@@ -138,10 +111,6 @@ export async function getProviderSettings(): Promise<ProviderSettings> {
 
 export async function getDefaultProviderSetting(): Promise<TTSProvider> {
   return (await getProviderSettings()).defaultProvider;
-}
-
-export async function getMiniMaxSettings(): Promise<MiniMaxProviderSettings> {
-  return (await getProviderSettings()).minimax;
 }
 
 export async function getQwenSettings(): Promise<QwenProviderSettings> {
@@ -183,7 +152,6 @@ export async function clearProviderSettingsOverrides(): Promise<void> {
 function mergeSettings(base: ProviderSettings, overrides: ProviderSettingsInput): ProviderSettingsInput {
   return {
     defaultProvider: overrides.defaultProvider ?? base.defaultProvider,
-    minimax: { ...base.minimax, ...overrides.minimax },
     qwen: { ...base.qwen, ...overrides.qwen },
     mimo: { ...base.mimo, ...overrides.mimo },
     openai: { ...base.openai, ...overrides.openai },
@@ -193,7 +161,6 @@ function mergeSettings(base: ProviderSettings, overrides: ProviderSettingsInput)
 function normalizeSettings(settings: ProviderSettingsInput): ProviderSettings {
   return {
     defaultProvider: normalizeProvider(settings.defaultProvider),
-    minimax: normalizeMiniMaxSettings(settings.minimax),
     qwen: normalizeQwenSettings(settings.qwen),
     mimo: normalizeMimoSettings(settings.mimo),
     openai: normalizeOpenAISettings(settings.openai),
@@ -203,19 +170,6 @@ function normalizeSettings(settings: ProviderSettingsInput): ProviderSettings {
 function normalizeProvider(provider: string | undefined): TTSProvider {
   if (provider === "qwen" || provider === "mimo" || provider === "openai") return provider;
   return "qwen";
-}
-
-function normalizeMiniMaxSettings(settings: Partial<MiniMaxProviderSettings> | undefined): MiniMaxProviderSettings {
-  return {
-    authMode: normalizeMiniMaxAuthMode(settings?.authMode),
-    model: normalizeMiniMaxModel(settings?.model),
-    defaultVoice: settings?.defaultVoice?.trim() || DEFAULT_VOICE_ID,
-    customDefaultVoice: settings?.customDefaultVoice?.trim() || "",
-    customVoiceIds: settings?.customVoiceIds?.trim() || "",
-    languageBoost: normalizeLanguageBoost(settings?.languageBoost),
-    speechRate: normalizePlaybackRate(settings?.speechRate),
-    region: normalizeMiniMaxRegion(settings?.region),
-  };
 }
 
 function normalizeMimoSettings(settings: Partial<MimoProviderSettings> | undefined): MimoProviderSettings {
@@ -290,33 +244,6 @@ function normalizeOpenAIFormat(format: string | undefined): OpenAIResponseFormat
 
 function normalizePlaybackRate(rate: string | undefined): string {
   return ["0.5", "0.75", "1", "1.25", "1.5", "1.75", "2"].includes(rate ?? "") ? rate! : "1";
-}
-
-function normalizeMiniMaxModel(model: string | undefined): string {
-  return [
-    "speech-2.8-hd",
-    "speech-2.8-turbo",
-    "speech-2.6-hd",
-    "speech-2.6-turbo",
-    "speech-02-hd",
-    "speech-02-turbo",
-  ].includes(model ?? "")
-    ? model!
-    : "speech-2.8-hd";
-}
-
-function normalizeLanguageBoost(languageBoost: string | undefined): string {
-  return ["auto", "Chinese", "Chinese,Yue", "English", "Japanese", "Korean"].includes(languageBoost ?? "")
-    ? languageBoost!
-    : "auto";
-}
-
-function normalizeMiniMaxRegion(region: string | undefined): MiniMaxRegion {
-  return region === "global" ? "global" : "cn";
-}
-
-function normalizeMiniMaxAuthMode(authMode: string | undefined): MiniMaxAuthMode {
-  return authMode === "token-plan" || authMode === "payg" ? authMode : "auto";
 }
 
 function normalizeMimoSpeechRate(rate: string | undefined): string {

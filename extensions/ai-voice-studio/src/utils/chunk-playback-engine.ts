@@ -1,12 +1,8 @@
 import type { AudioPlayer } from "./audio-player";
 
-// Shared chunk playback loop for every provider. reading-runner (MiniMax,
-// resume + live speed) and pipelined-reading (OpenAI/MiMo) used to hand-roll
-// two near-identical loops that drifted apart. This engine is the single
-// implementation; each caller supplies hooks that reproduce its exact prior
-// behavior. Every divergence point below maps 1:1 to a documented difference
-// between the two original loops, so the merge is behavior-preserving by
-// construction.
+// Shared chunk playback loop for Qwen-TTS, MiMo, and OpenAI. Each provider
+// supplies hooks for its own stop and playback policies while reusing the same
+// prefetch/cancel sequencing.
 
 export type ChunkOutcome = { kind: "audio"; audio: string } | { kind: "stopped" } | { kind: "error"; cause: unknown };
 
@@ -22,16 +18,16 @@ export interface ChunkPlaybackHooks<O> {
 
   /** Primary stop signal, checked after synthesis and after playback. */
   shouldStop: () => boolean | Promise<boolean>;
-  /** reading-runner checks at the top of every iteration; pipeline does not. */
+  /** Whether to check the stop signal at the top of every iteration. */
   stopCheckAtLoopTop: boolean;
   /** pipeline checks stop before inspecting the synthesis outcome; runner does not. */
   stopCheckBeforeOutcome: boolean;
-  /** runner does an extra post-progress stop check; pipeline does not. */
+  /** Optional extra stop check after a chunk has advanced. */
   stopCheckAfterAdvance: boolean;
-  /** Stop signal for the post-advance check (runner: external-stop only). */
+  /** Stop signal for the post-advance check. */
   stopAfterAdvance?: () => boolean | Promise<boolean>;
 
-  /** Per-chunk options (runner recomputes live speed; pipeline is constant). */
+  /** Per-chunk options. */
   resolveOptions: (index: number) => O | Promise<O>;
   /** Prefetch reuse key: reuse the lookahead iff index and key match. */
   optionsKey: (options: O) => string;

@@ -36,6 +36,7 @@ try {
   await verifyEmptyAudioRejected();
   await verifyStaleStopMarkerDoesNotMaskFailure();
   await verifyFreshStopMarkerMasksFailure();
+  await verifyIdleCleanupDoesNotRemoveForeignPid();
 
   console.log(
     JSON.stringify(
@@ -47,6 +48,7 @@ try {
           "empty audio rejection",
           "stale stop marker rejection path",
           "fresh stop marker graceful stop path",
+          "idle player cleanup preserves foreign PID files",
         ],
       },
       null,
@@ -131,6 +133,18 @@ async function verifyFreshStopMarkerMasksFailure() {
 
   delete process.env.AI_VOICE_STUDIO_FAKE_AFPLAY_EXIT;
   delete process.env.AI_VOICE_STUDIO_FAKE_AFPLAY_SLEEP;
+}
+
+async function verifyIdleCleanupDoesNotRemoveForeignPid() {
+  fs.rmSync(stopFile, { force: true });
+  fs.writeFileSync(pidFile, "424242", "utf8");
+
+  const player = new AudioPlayer();
+  player.cleanup();
+
+  assert(fs.existsSync(pidFile), "Idle player cleanup should not remove another player's PID file");
+  assert(fs.readFileSync(pidFile, "utf8") === "424242", "Foreign PID file should remain unchanged");
+  fs.rmSync(pidFile, { force: true });
 }
 
 function readLastInvocation() {
