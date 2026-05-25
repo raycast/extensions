@@ -32,12 +32,13 @@
 
 ## Supported status pages
 
-The extension auto-detects the provider when you add a URL. Detection order: **Railway → incident.io → Statuspage**.
+The extension auto-detects the provider when you add a URL. Detection order: **Railway → incident.io → Better Stack → Statuspage**.
 
 | Provider | Examples | Detection |
 | --- | --- | --- |
 | **Railway** | [status.railway.com](https://status.railway.com) | Hostname match |
 | **incident.io** | [status.openai.com](https://status.openai.com) | `/proxy/{host}/component_impacts` API |
+| **Better Stack** | [status.yachtway.com](https://status.yachtway.com) | `/index.json` JSON:API |
 | **Statuspage.io** | [status.claude.com](https://status.claude.com), GitHub, Vercel | `/api/v2/summary.json` |
 
 incident.io is checked before Statuspage because some Statuspage hosts expose proxy-style URLs that look similar but lack incident.io-only endpoints like `component_impacts`.
@@ -58,13 +59,13 @@ incident.io is checked before Statuspage because some Statuspage hosts expose pr
 
 ## Development
 
-Requires [Raycast](https://raycast.com), Node.js, and pnpm.
+Requires [Raycast](https://raycast.com), Node.js, and npm.
 
 ```bash
-pnpm install
-pnpm dev      # run in Raycast dev mode
-pnpm lint     # lint + format check
-pnpm build    # production build
+npm install
+npm run dev      # run in Raycast dev mode
+npm run lint     # lint + format check
+npm run build    # production build
 ```
 
 ### Project structure
@@ -75,6 +76,7 @@ src/
   adapters/
     index.ts             # provider detection + registry
     statuspage.ts        # Statuspage.io v2 API
+    betterstack.ts       # Better Stack /index.json API
     incident-io.ts       # incident.io proxy API
     railway.ts           # Railway status API
   components/

@@ -1,4 +1,8 @@
-export type SiteProvider = "statuspage" | "railway" | "incidentio";
+export type SiteProvider =
+  | "statuspage"
+  | "railway"
+  | "incidentio"
+  | "betterstack";
 
 export type StatusIndicator = "none" | "minor" | "major" | "critical";
 
