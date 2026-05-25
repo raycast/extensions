@@ -1,5 +1,26 @@
 # Skills Changelog
 
+## [Show Installed Skill Audit Details] - 2026-05-20
+
+- Add an "Open on skills.sh" action and `skills.sh` detail link for published installed skills
+- Show security audit statuses, audit links, and audit actions in installed skill details
+
+## [Ask Skills AI Extension] - 2026-05-12
+
+- Add `@skills` support in Raycast AI Chat with five tools: search the marketplace by query, read a skill's full instructions, list installed skills, install a skill for specific agents, and remove a skill
+
+## [Fix Stale Search Results] - 2026-05-12
+
+- Clear stale search results when the current search fails or is superseded by a newer query
+
+## [Standardize Open Actions] - 2026-05-12
+
+- Standardize **Open on skills.sh** and **Open Repository** actions across Search Skills and Manage Skills
+
+## [Fix Support Directory Initialization] - 2026-05-11
+
+- Ensure the extension support directory exists before cached hooks run, preventing "Could not create extension support directory" errors on first launch
+
 ## [Add Newly Supported Agents] - 2026-05-05
 
 - Add 11 agents supported by the Skills CLI: AiderDesk, Code Studio, CodeArts Agent, Codemaker, Devin for Terminal, Dexto, ForgeCode, IBM Bob, Rovo Dev, Tabnine CLI, and Universal

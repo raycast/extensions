@@ -1,7 +1,7 @@
-import { List, Icon, Color } from '@raycast/api';
+import { List, Icon } from '@raycast/api';
 import dayjs from 'dayjs';
 
-import { statusIcons } from '../helpers';
+import { getDeadlineColor, getTodoIcon } from '../helpers';
 
 import TodoListItemActions from './TodoListItemActions';
 import { CommandListName, Todo, List as TList } from '../types';
@@ -9,32 +9,29 @@ import { CommandListName, Todo, List as TList } from '../types';
 const getDueDateAccessory = (dueDate: string): List.Item.Accessory => {
   const today = dayjs(dayjs().format('YYYY-MM-DD')).toISOString();
   const diff = dayjs(dueDate).diff(today, 'day');
+  const color = getDeadlineColor(dueDate);
 
-  let text, color;
-
+  let text;
   if (Math.abs(diff) >= 15) {
-    text = dayjs(dueDate).format('D MMM');
+    text = dayjs(dueDate).format('MMM D');
   } else if (diff === 0) {
     text = 'Due today';
-    color = Color.Red;
-  } else if (diff > 0 && diff <= 7) {
+  } else if (diff > 0) {
     text = `${diff} day${diff === 1 ? '' : 's'} left`;
-    color = Color.Orange;
-  } else if (diff < 0) {
+  } else {
     text = `${-diff} day${diff === -1 ? '' : 's'} ago`;
-    color = Color.Red;
   }
 
   return {
     text: { value: text, color },
     icon: { source: Icon.Flag, tintColor: color },
-    tooltip: `Due date: ${dayjs(dueDate).format('dddd DD MMMM YYYY')}`,
+    tooltip: `Due date: ${dayjs(dueDate).format('dddd, MMMM D, YYYY')}`,
   };
 };
 
 type TodoListItemProps = {
   todo: Todo;
-  refreshTodos: () => void;
+  refreshTodos: () => Promise<void>;
   commandListName: CommandListName;
   displayActivationDates?: boolean;
   tags?: string[];
@@ -70,7 +67,7 @@ export default function TodoListItem({
     accessories.push({
       icon: Icon.Calendar,
       date,
-      tooltip: `Start date: ${dayjs(todo.activationDate).format('dddd DD MMMM YYYY')}`,
+      tooltip: `Start date: ${dayjs(todo.activationDate).format('dddd, MMMM D, YYYY')}`,
     });
   }
 
@@ -83,7 +80,7 @@ export default function TodoListItem({
       key={todo.id}
       title={todo.name}
       subtitle={todo.notes}
-      icon={statusIcons[todo.status]}
+      icon={getTodoIcon(todo)}
       keywords={keywords}
       accessories={accessories}
       actions={

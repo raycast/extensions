@@ -1,5 +1,17 @@
 # Jira Changelog
 
+## [Bug Fix] - 2026-05-18
+
+- Kept Jira issue lists open when Jira returns an HTML error page while loading issue type icons.
+
+## [Bug Fix] - 2026-05-18
+
+- Fixed issue details failing to load when descriptions include absolute Jira attachment image URLs
+
+## [Bug Fix] - 2026-05-18
+
+- Loaded all saved filters in the My Filters command instead of stopping after the first 100 results
+
 ## [Open Issues sprint/backlog split config] - 2026-04-16
 
 - Added new `Open Issues` checkboxes to choose which sections to show: `Active Sprint`, `All Sprints`, and `Backlog`.

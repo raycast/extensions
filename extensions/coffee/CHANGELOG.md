@@ -1,5 +1,9 @@
 # Coffee Changelog
 
+## [Add Keyboard Shortcuts] - 2026-05-16
+
+- Added a Toggle shortcut for pausing and resuming caffeination schedules.
+
 ## [Fix] - 2026-03-24
 
 - Fixed zombie process accumulation by properly detaching the caffeinate process with spawn/unref

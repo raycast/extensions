@@ -102,7 +102,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
               // Update TTL for successfully fetched project
               await updateProjectTTLs([project.id]);
 
-              return { name: project.name, files: result.files ?? [] };
+              return { id: project.id, name: project.name, files: result.files ?? [] };
             }),
           );
           return projects;
@@ -143,7 +143,7 @@ async function fetchFiles(): Promise<ProjectFiles[][]> {
               // Update TTL for successfully fetched project
               await updateProjectTTLs([project.id]);
 
-              return { name: project.name, files: result.files ?? [] };
+              return { id: project.id, name: project.name, files: result.files ?? [] };
             }),
         );
         return projects;
@@ -164,22 +164,42 @@ export async function resolveAllFiles(): Promise<TeamFiles[]> {
   const teamFiles = await fetchFiles();
   const teams = ((await LocalStorage.getItem<string>("teamNames")) ?? "").split(",");
 
-  // If no files were fetched (using cached data), load cached files
+  const { loadFiles, storeFiles } = await import("./cache");
+  const cachedFiles = await loadFiles();
+
+  // If no files were fetched (all projects fresh), return cached data
   if (teamFiles.length === 0 || teamFiles.every((projectFiles) => projectFiles.length === 0)) {
-    const { loadFiles } = await import("./cache");
-    const cachedFiles = await loadFiles();
-    if (cachedFiles && cachedFiles.length > 0) {
-      return cachedFiles;
-    }
+    return cachedFiles ?? [];
   }
 
+  // Merge refreshed data with cached data at project level
   const fi = teamFiles.map((projectFiles, index) => {
-    return { name: teams[index], files: projectFiles } as TeamFiles;
+    const teamName = teams[index];
+    const cachedTeam = cachedFiles?.find((t) => t.name === teamName);
+
+    if (projectFiles.length === 0) {
+      // No projects refreshed for this team — use cached team data
+      return cachedTeam ?? ({ name: teamName, files: [] } as TeamFiles);
+    }
+
+    if (!cachedTeam) {
+      return { name: teamName, files: projectFiles } as TeamFiles;
+    }
+
+    // Keep refreshed projects + cached projects that weren't refreshed, deduplicating by ID when available
+    const refreshedProjectIds = new Set(projectFiles.map((p) => p.id).filter(Boolean));
+    const refreshedProjectNames = new Set(projectFiles.map((p) => p.name));
+    const mergedProjects = [
+      ...projectFiles,
+      ...cachedTeam.files.filter((p) =>
+        p.id ? !refreshedProjectIds.has(p.id) : !refreshedProjectNames.has(p.name),
+      ),
+    ];
+
+    return { name: teamName, files: mergedProjects } as TeamFiles;
   });
 
-  // Store the fetched files in cache
   if (fi.length > 0) {
-    const { storeFiles } = await import("./cache");
     await storeFiles(fi);
   }
 

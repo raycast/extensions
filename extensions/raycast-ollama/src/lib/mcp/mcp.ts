@@ -58,7 +58,7 @@ export class McpClientMultiServer {
    */
   private _restoreToolsFunctionName(
     server: string,
-    tools: OllamaApiChatMessageToolCall[]
+    tools: OllamaApiChatMessageToolCall[],
   ): OllamaApiChatMessageToolCall[] {
     return tools.map((tool) => {
       const name = tool.function.name.replace(new RegExp(`^${server}_`), "");
@@ -100,7 +100,7 @@ export class McpClientMultiServer {
 
         /* Return undefined if Mcp Server name is not configured */
         return undefined;
-      })
+      }),
     );
 
     // Concat all defined result.
@@ -134,7 +134,7 @@ export class McpClientMultiServer {
         }
 
         return undefined;
-      })
+      }),
     );
 
     /* Concat all defined result. */
@@ -210,7 +210,7 @@ export class McpClientMultiServer {
         }
 
         return undefined;
-      })
+      }),
     );
 
     /* Concat all defined result. */
@@ -245,7 +245,7 @@ export class McpClient {
       },
       {
         capabilities: {},
-      }
+      },
     );
 
     this._client.onclose = () => (this._connected = false);
@@ -349,7 +349,7 @@ export class McpClient {
         tools.map(async (tool): Promise<unknown> => {
           const result = await this._client.callTool(tool.function);
           return result.content;
-        })
+        }),
       );
     } finally {
       await this._client.close();

@@ -30,7 +30,7 @@ export async function getFoldersFromAPI(options: FolderServiceOptions = {}): Pro
     });
 
     return folders;
-  } catch (apiError) {
+  } catch {
     return [];
   }
 }

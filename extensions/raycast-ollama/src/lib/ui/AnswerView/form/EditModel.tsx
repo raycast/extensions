@@ -5,10 +5,12 @@ import { OllamaApiModelCapability } from "../../../ollama/enum";
 import { CommandAnswer } from "../../../settings/enum";
 import { GetOllamaServerByName, SetSettingsCommandAnswer } from "../../../settings/settings";
 import { SettingsCommandAnswer } from "../../../settings/types";
-import { GetModels } from "../../function";
+import { GetModels, isThinkingModel } from "../../function";
 import { InfoKeepAlive } from "../../info";
 import { UiModelDetails } from "../../types";
-import { ValidationKeepAlive } from "../../valitadion";
+import { ValidationKeepAlive, ValidationThinking } from "../../valitadion";
+import { ThinkingEffort } from "../../../enum";
+import { ThinkingEffort as ThinkingEffortOllama } from "../../../ollama/types";
 
 interface props {
   setShow: React.Dispatch<React.SetStateAction<boolean>>;
@@ -17,16 +19,20 @@ interface props {
   capabilities?: OllamaApiModelCapability[];
   server?: string;
   model?: string;
+  thinking?: ThinkingEffortOllama;
   keep_alive?: string;
 }
 
 interface FormData {
   server: string;
   model: string;
+  thinking: string;
   keep_alive: string;
 }
 
 export function EditModel(props: props): React.JSX.Element {
+  const InfoThinking = "Thinking Effort";
+
   const { data: Model, isLoading: IsLoadingModel } = usePromise(GetModels, [], {
     onData: (data) => {
       if (props.server === undefined || props.model === undefined) return;
@@ -39,13 +45,14 @@ export function EditModel(props: props): React.JSX.Element {
           if (
             props.capabilities.length !==
             model.capabilities.filter(
-              (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1
+              (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1,
             ).length
           )
             return false;
           return true;
         });
         if (models?.some((model) => model.name === props.model)) setValue("model", props.model);
+        setValue("thinking", props.thinking === false ? "false" : (props.thinking as string));
       }
     },
   });
@@ -59,6 +66,7 @@ export function EditModel(props: props): React.JSX.Element {
     validation: {
       server: FormValidation.Required,
       model: FormValidation.Required,
+      thinking: ValidationThinking,
       keep_alive: (value) => ValidationKeepAlive(CheckboxAdvanced, value),
     },
   });
@@ -81,6 +89,7 @@ export function EditModel(props: props): React.JSX.Element {
         main: {
           server: s,
           tag: values.model,
+          thinking: values.thinking === "false" ? false : (values.thinking as ThinkingEffortOllama),
           keep_alive: CheckboxAdvanced ? values.keep_alive : undefined,
         },
       },
@@ -109,7 +118,7 @@ export function EditModel(props: props): React.JSX.Element {
                 if (
                   props.capabilities.length !==
                   model.capabilities.filter(
-                    (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1
+                    (c) => props.capabilities && props.capabilities.findIndex((rc) => rc === c) !== -1,
                   ).length
                 )
                   return false;
@@ -119,6 +128,33 @@ export function EditModel(props: props): React.JSX.Element {
               ?.map((s) => <Form.Dropdown.Item title={s.name} value={s.name} key={s.name} />)}
         </Form.Dropdown>
       )}
+      <Form.Dropdown title="Thinking Effort" info={InfoThinking} {...itemProps.thinking}>
+        <Form.Dropdown.Item title="None" value={String(ThinkingEffort.None)} key={String(ThinkingEffort.None)} />
+        {isThinkingModel(Model, itemProps.server.value, itemProps.model.value) && (
+          <Form.Dropdown.Item
+            title="Low"
+            icon={Icon.StackedBars1}
+            value={String(ThinkingEffort.Low)}
+            key={String(ThinkingEffort.Low)}
+          />
+        )}
+        {isThinkingModel(Model, itemProps.server.value, itemProps.model.value) && (
+          <Form.Dropdown.Item
+            title="Medium"
+            icon={Icon.StackedBars2}
+            value={String(ThinkingEffort.Medium)}
+            key={String(ThinkingEffort.Medium)}
+          />
+        )}
+        {isThinkingModel(Model, itemProps.server.value, itemProps.model.value) && (
+          <Form.Dropdown.Item
+            title="High"
+            icon={Icon.StackedBars3}
+            value={String(ThinkingEffort.High)}
+            key={String(ThinkingEffort.High)}
+          />
+        )}
+      </Form.Dropdown>
       <Form.Checkbox
         id="advanced"
         label="Advanced Settings"

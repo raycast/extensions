@@ -1,7 +1,7 @@
 import * as Types from "./types";
 import * as React from "react";
 import { Ollama } from "../../ollama/ollama";
-import { OllamaApiGenerateRequestBody, OllamaApiGenerateResponse } from "../../ollama/types";
+import { OllamaApiGenerateRequestBody, OllamaApiGenerateResponse, ThinkingEffort } from "../../ollama/types";
 import { CommandAnswer } from "../../settings/enum";
 import { AddSettingsCommandChat, GetOllamaServerByName, GetSettingsCommandAnswer } from "../../settings/settings";
 import { launchCommand, LaunchType, showToast, Toast } from "@raycast/api";
@@ -34,6 +34,7 @@ export async function GetModel(command?: CommandAnswer, server?: string, model?:
       ollama: new Ollama(s),
     },
     tag: m[0],
+    thinking: settings?.model.main.thinking,
     keep_alive: settings?.model.main.keep_alive,
   };
 }
@@ -50,9 +51,11 @@ export async function convertAnswerToChat(
   model: Types.UiModel,
   query: string | undefined,
   images: RaycastImage[] | undefined,
+  thinking: string | undefined,
   answer: string,
   answerMeta: OllamaApiGenerateResponse,
-  openCommand = true
+  openCommand = true,
+  thinkingEffort?: ThinkingEffort,
 ): Promise<void> {
   const server = await GetOllamaServerByName(model.server.name);
   const chat: RaycastChat = {
@@ -63,6 +66,7 @@ export async function convertAnswerToChat(
         server_name: model.server.name,
         tag: model.tag.name,
         keep_alive: model.keep_alive,
+        thinking: thinkingEffort ? thinkingEffort : model.thinking,
       },
     },
     messages: [
@@ -75,6 +79,7 @@ export async function convertAnswerToChat(
           },
           {
             role: OllamaApiChatMessageRole.ASSISTANT,
+            thinking: thinking,
             content: answer,
           },
         ],
@@ -100,31 +105,55 @@ async function Inference(
   model: Types.UiModel,
   prompt: string,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
+  setThinking: React.Dispatch<React.SetStateAction<string>>,
   setAnswer: React.Dispatch<React.SetStateAction<string>>,
   setAnswerMetadata: React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>,
   images: string[] | undefined = undefined,
   creativity: Creativity = Creativity.Medium,
-  keep_alive?: string
+  thinking: ThinkingEffort = false,
+  keep_alive?: string,
 ): Promise<void> {
-  await showToast({ style: Toast.Style.Animated, title: "🧠 Inference." });
+  let thinkingStarted = false;
+  let responseStarted = false;
+
   const body: OllamaApiGenerateRequestBody = {
     model: model.tag.name,
     prompt: prompt,
     images: images,
+    think: thinking,
     options: {
       temperature: creativity,
     },
   };
   if (keep_alive) body.keep_alive = keep_alive;
+
+  await showToast({ style: Toast.Style.Animated, title: "💾 Loading..." });
   model.server.ollama
     .OllamaApiGenerate(body)
     .then(async (emiter) => {
-      emiter.on("data", (data) => {
+      // Get Thinking Text
+      emiter.on("thinking", async (data) => {
+        // showToast when thinking process started
+        if (!thinkingStarted) {
+          thinkingStarted = true;
+          await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
+        }
+        setThinking((prevState) => prevState + data);
+      });
+
+      // Get Response Text
+      emiter.on("data", async (data) => {
+        // showToast when  process started
+        if (!responseStarted) {
+          responseStarted = true;
+          await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
+        }
         setAnswer((prevState) => prevState + data);
       });
 
+      // Get Metadata
       emiter.on("done", async (data) => {
-        await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
+        await showToast({ style: Toast.Style.Success, title: "👍 Done." });
         setAnswerMetadata(data);
         setLoading(false);
       });
@@ -145,10 +174,12 @@ export async function Run(
   images: React.MutableRefObject<undefined | RaycastImage[]>,
   setLoading: React.Dispatch<React.SetStateAction<boolean>>,
   setImageView: React.Dispatch<React.SetStateAction<string>>,
+  setThinking: React.Dispatch<React.SetStateAction<string>>,
   setAnswer: React.Dispatch<React.SetStateAction<string>>,
   setAnswerMetadata: React.Dispatch<React.SetStateAction<OllamaApiGenerateResponse>>,
   creativity: Creativity = Creativity.Medium,
-  keep_alive?: string
+  thinking: ThinkingEffort = false,
+  keep_alive?: string,
 ): Promise<void> {
   setLoading(true);
 
@@ -170,14 +201,17 @@ export async function Run(
 
   // Start Inference
   setAnswer("");
+  setThinking("");
   await Inference(
     model,
     prompt,
     setLoading,
+    setThinking,
     setAnswer,
     setAnswerMetadata,
     imgs && imgs[1] ? imgs[1].map((i) => i.base64) : undefined,
     creativity,
-    keep_alive
+    thinking,
+    keep_alive,
   );
 }

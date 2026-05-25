@@ -1,5 +1,9 @@
 # Summarize YouTube Video Changelog
 
+## [Feature] - 2026-05-19
+
+- Add a Raycast AI tool to answer questions about YouTube videos from their transcript
+
 ## [Fix] - 2026-03-17
 
 - 🔧 Fix transcript fetching

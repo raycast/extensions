@@ -38,7 +38,7 @@ export function ChatView(): React.JSX.Element {
 
   const [Image, SetImage]: [
     RaycastImage[] | undefined,
-    React.Dispatch<React.SetStateAction<RaycastImage[] | undefined>>
+    React.Dispatch<React.SetStateAction<RaycastImage[] | undefined>>,
   ] = React.useState();
 
   // Save Chat To LocalStoarge on Inference Done.
@@ -127,7 +127,7 @@ export function ChatView(): React.JSX.Element {
             />
           )}
           {props.message && <Action.CopyToClipboard title="Copy Conversation" content={ClipboardConversation(Chat)} />}
-          {Chat && (
+          {Chat && Chat.name !== "New Chat" && (
             <Action
               title="New Chat"
               icon={Icon.NewDocument}
@@ -173,7 +173,7 @@ export function ChatView(): React.JSX.Element {
               shortcut={Shortcut.AttachBrowserTab}
             />
             <Action
-              title="Image From Clipboard"
+              title="Image from Clipboard"
               icon={Icon.Image}
               onAction={async () =>
                 GetImage()
@@ -302,7 +302,6 @@ export function ChatView(): React.JSX.Element {
       onSearchTextChange={(t) => {
         if (!IsLoading) SetQuery(t);
       }}
-      actions={!IsLoadingChatNames && <ActionMessage />}
       isShowingDetail={Chat && Chat.messages.length > 0}
       searchBarAccessory={
         !IsLoadingChatNames && ChatNames && !IsLoading ? (
@@ -328,16 +327,33 @@ export function ChatView(): React.JSX.Element {
             actions={<ActionMessage message={item} />}
             detail={
               <List.Item.Detail
-                markdown={`${item.images ? `${item.images.map((i) => i.html)}\n` : ""}${item.messages[1].content}`}
+                markdown={`${item.images ? `${item.images.map((i) => i.html)}\n` : ""}
+${
+  item.messages[1].thinking
+    ? `
+<details>
+<summary><b>💡 Thinking... (click to expand)</b></summary>
+
+${item.messages[1].thinking}
+
+</details>
+`
+    : ``
+}
+${item.messages[1].content}`}
                 metadata={item.done && ShowAnswerMetadata && <DetailMetadataMessage message={item} />}
               />
             }
           />
         ))
       ) : ChatModelsAvailable ? (
-        <List.EmptyView icon={Icon.Message} title="Start a Conversation with Ollama" />
+        <List.EmptyView icon={Icon.Message} title="Start a Conversation with Ollama" actions={<ActionMessage />} />
       ) : (
-        <List.EmptyView icon={Icon.Xmark} title="Ollama Server or Selected Model Unavailable." />
+        <List.EmptyView
+          icon={Icon.Xmark}
+          title="Ollama Server or Selected Model Unavailable."
+          actions={<ActionMessage />}
+        />
       )}
     </List>
   );
