@@ -805,8 +805,8 @@
       "name": "kimiBaseURL",
       "type": "textfield",
       "required": false,
-      "description": "Kimi Anthropic-compatible coding entrypoint. Requests are sent to /v1/messages. Switch to https://api.moonshot.ai/v1 (or https://api.moonshot.cn/v1) and an OpenAI-compatible protocol to use Moonshot pay-as-you-go.",
-      "default": "https://api.kimi.com/coding/v1"
+      "description": "Kimi Anthropic-compatible coding entrypoint. Requests are sent to /v1/messages (a trailing /v1 is also tolerated). Switch to https://api.moonshot.ai/v1 (or https://api.moonshot.cn/v1) and an OpenAI-compatible protocol to use Moonshot pay-as-you-go.",
+      "default": "https://api.kimi.com/coding"
     },
     {
       "title": "Kimi Model",

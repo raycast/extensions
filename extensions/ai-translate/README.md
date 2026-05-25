@@ -39,7 +39,7 @@ AI Translate is a bring-your-own-key extension. You decide which providers to en
 | DeepSeek | `deepseek-v4-flash` | `deepseek-v4-pro` | Anthropic-compatible `https://api.deepseek.com/anthropic` |
 | Xiaomi MiMo | `mimo-v2.5` | `mimo-v2.5-pro` | Anthropic-compatible `https://token-plan-cn.xiaomimimo.com/anthropic` (Token Plan) |
 | Gemini | `gemini-3.5-flash` | `gemini-3.1-pro-preview` | Google `https://generativelanguage.googleapis.com/v1beta` |
-| Kimi | `kimi-for-coding` | `kimi-for-coding` | Anthropic-compatible `https://api.kimi.com/coding/v1` (Kimi Code Plan); switch the base URL to `https://api.moonshot.ai/v1` for Moonshot pay-as-you-go with `moonshot-v1-*` or `kimi-k2.*` |
+| Kimi | `kimi-for-coding` | `kimi-for-coding` | Anthropic-compatible `https://api.kimi.com/coding` (Kimi Code Plan); switch the base URL to `https://api.moonshot.ai/v1` for Moonshot pay-as-you-go with `moonshot-v1-*` or `kimi-k2.*` |
 | OpenAI / ChatGPT | `gpt-4.1-mini` | `gpt-4.1` | OpenAI Chat Completions `https://api.openai.com/v1`; GPT-5.x reasoning models (`gpt-5.5`, `gpt-5.4`, `gpt-5.4-mini`, `gpt-5.4-nano`) are sent with `reasoning_effort: "minimal"` for translation latency |
 
 Most provider settings live in Raycast preferences: API key, base URL, model name, timeout, and provider order. You can also switch between **Fast**, **Pro**, and **Custom** model tiers from the extension UI. `Custom` uses the model IDs you enter in preferences, which is useful when providers add new models before the extension is updated.
