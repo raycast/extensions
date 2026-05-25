@@ -1,6 +1,6 @@
 # Open With App Changelog
 
-## [Fix default selection on Raycast 2] - {PR_MERGE_DATE}
+## [Fix default selection on Raycast 2] - 2026-05-25
 
 - Fix: default the highlighted row to the first Recommended Application instead of the first Other Application
 - Fix: prevent a one-row scroll the first time the user presses the down arrow
