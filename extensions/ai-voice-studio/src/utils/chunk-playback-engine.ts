@@ -84,7 +84,7 @@ export async function playChunkSequence<O>(hooks: ChunkPlaybackHooks<O>): Promis
       if (await hooks.shouldStop()) break;
 
       if (i + 1 < hooks.total) {
-        const nextOptions = options;
+        const nextOptions = await hooks.resolveOptions(i + 1);
         const nextJob = hooks.startJob(i + 1, nextOptions);
         nextJob.outcome.catch(() => undefined);
         prefetch = { index: i + 1, key: hooks.optionsKey(nextOptions), job: nextJob };

@@ -70,6 +70,7 @@ await verifyPipelineAbortsDuringSynthesis({
   statePath: "src/utils/openai-playback-state.ts",
   options: { format: "mp3", playbackRate: 1 },
 });
+await verifyChunkEnginePrefetchUsesNextChunkOptions();
 
 console.log(
   JSON.stringify(
@@ -84,6 +85,7 @@ console.log(
         "OpenAI lookahead starts next synthesis before playback",
         "OpenAI lookahead stops before playing the next chunk",
         "OpenAI stop requests abort in-flight synthesis",
+        "Shared chunk engine resolves next chunk options before prefetch",
       ],
     },
     null,
@@ -137,6 +139,48 @@ async function verifyPipeline({ label, modulePath, apiPath, statePath, options }
     events.filter((event) => event.startsWith("play:start:")).length === chunks.length,
     `${label} should play every synthesized chunk`,
   );
+}
+
+async function verifyChunkEnginePrefetchUsesNextChunkOptions() {
+  const events = [];
+  const mod = loadTs("src/utils/chunk-playback-engine.ts");
+  const optionsByIndex = [{ key: "one" }, { key: "two" }, { key: "three" }];
+
+  await mod.playChunkSequence({
+    total: optionsByIndex.length,
+    startIndex: 0,
+    player: {},
+    shouldStop: async () => false,
+    stopCheckAtLoopTop: false,
+    stopCheckBeforeOutcome: false,
+    stopCheckAfterAdvance: false,
+    resolveOptions: async (index) => {
+      const options = optionsByIndex[index];
+      events.push(`options:${index}:${options.key}`);
+      return options;
+    },
+    optionsKey: (options) => options.key,
+    startJob: (index, options) => {
+      events.push(`job:${index}:${options.key}`);
+      return {
+        outcome: Promise.resolve({ kind: "audio", audio: `audio:${index}:${options.key}` }),
+        cancel: () => events.push(`cancel:${index}:${options.key}`),
+      };
+    },
+    errorIsStop: () => false,
+    onError: (_index, _total, cause) => {
+      throw cause;
+    },
+    onPhase: (phase, index, _total, options) => events.push(`phase:${phase}:${index}:${options.key}`),
+    play: async (audio, options) => {
+      events.push(`play:${audio}:${options.key}`);
+    },
+  });
+
+  assert(events.includes("job:1:two"), "Prefetch for chunk 2 should use chunk 2 options");
+  assert(events.includes("job:2:three"), "Prefetch for chunk 3 should use chunk 3 options");
+  assert(!events.includes("job:1:one"), "Prefetch for chunk 2 should not reuse chunk 1 options");
+  assert(!events.includes("job:2:two"), "Prefetch for chunk 3 should not reuse chunk 2 options");
 }
 
 async function verifyPipelineStopsBeforeNextPlayback({ label, modulePath, apiPath, statePath, options }) {
