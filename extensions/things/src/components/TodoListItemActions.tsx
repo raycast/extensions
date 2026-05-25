@@ -9,6 +9,7 @@ import {
   Keyboard,
   AI,
   environment,
+  useNavigation,
 } from '@raycast/api';
 
 import { AddNewTodo } from '../add-new-todo';
@@ -17,6 +18,8 @@ import { getChecklistItemsWithAI, getTypeIcon, listItems, statusIcons } from '..
 import { capitalize } from '../utils';
 
 import EditTodo from './EditTodo';
+import OpenInThings from './OpenInThings';
+import TodoDetail from './TodoDetail';
 import { Todo, List as TList, CommandListName, UpdateTodoParams, UpdateProjectParams } from '../types';
 
 // Match URLs with protocols, with optional //
@@ -28,6 +31,7 @@ type TodoListItemActionsProps = {
   tags?: string[];
   lists?: TList[];
   refreshTodos: () => Promise<void>;
+  fromDetail?: boolean;
 };
 
 export default function TodoListItemActions({
@@ -36,7 +40,9 @@ export default function TodoListItemActions({
   commandListName,
   tags,
   lists,
+  fromDetail = false,
 }: TodoListItemActionsProps) {
+  const { pop } = useNavigation();
   const availableTags =
     tags?.filter((tag) => {
       return !todo.tags?.includes(tag);
@@ -58,6 +64,17 @@ export default function TodoListItemActions({
         title: successToastOptions.title,
         message: successToastOptions.message ?? todo.name,
       });
+      await refreshTodos();
+    } catch (error) {
+      await handleError(error);
+    }
+  }
+
+  async function terminalMutation(mutation: () => Promise<unknown>, successTitle: string) {
+    try {
+      await mutation();
+      await showToast({ style: Toast.Style.Success, title: successTitle, message: todo.name });
+      if (fromDetail) pop();
       await refreshTodos();
     } catch (error) {
       await handleError(error);
@@ -148,31 +165,17 @@ New title:
 
   async function deleteToDoOrProject() {
     const isProject = todo.isProject;
+    const confirmed = await confirmAlert({
+      title: isProject ? 'Delete Project' : 'Delete To-Do',
+      message: isProject
+        ? 'Are you sure you want to delete this project?'
+        : 'Are you sure you want to delete this to-do?',
+      icon: { source: Icon.Trash, tintColor: Color.Red },
+    });
+    if (!confirmed) return;
 
-    let title = isProject ? 'Delete Project' : 'Delete To-Do';
-    const message = isProject
-      ? 'Are you sure you want to delete this project?'
-      : 'Are you sure you want to delete this to-do?';
     const deleteFunction = isProject ? deleteProject : deleteTodo;
-
-    if (
-      await confirmAlert({
-        title,
-        message,
-        icon: { source: Icon.Trash, tintColor: Color.Red },
-      })
-    ) {
-      await deleteFunction(todo.id);
-
-      title = isProject ? 'Deleted project' : 'Deleted to-do';
-
-      await showToast({
-        style: Toast.Style.Success,
-        title,
-        message: todo.name,
-      });
-      await refreshTodos();
-    }
+    await terminalMutation(() => deleteFunction(todo.id), isProject ? 'Deleted project' : 'Deleted to-do');
   }
 
   function formatDateTime(date: Date): string {
@@ -196,20 +199,38 @@ New title:
   return (
     <ActionPanel>
       <ActionPanel.Section title={todo.name}>
-        <Action.Open title="Open in Things" icon="things-flat.png" target={`things:///show?id=${todo.id}`} />
+        {!fromDetail && (
+          <Action.Push
+            title="Show Details"
+            icon={Icon.Sidebar}
+            target={
+              <TodoDetail
+                todoId={todo.id}
+                initialTodo={todo}
+                commandListName={commandListName}
+                parentRefresh={refreshTodos}
+                renderActions={(currentTodo, detailRefresh) => (
+                  <TodoListItemActions
+                    todo={currentTodo}
+                    refreshTodos={detailRefresh}
+                    commandListName={commandListName}
+                    lists={lists}
+                    tags={tags}
+                    fromDetail
+                  />
+                )}
+              />
+            }
+          />
+        )}
+        <OpenInThings id={todo.id} title="Open in Things" />
         {todo.status !== 'completed' && (
           <Action
             title="Mark as Completed"
             icon={statusIcons.completed}
-            onAction={async () => {
-              await setTodoProperty(todo.id, 'status', 'completed');
-              await showToast({
-                style: Toast.Style.Success,
-                title: 'Marked as Completed',
-                message: todo.name,
-              });
-              await refreshTodos();
-            }}
+            onAction={() =>
+              terminalMutation(() => setTodoProperty(todo.id, 'status', 'completed'), 'Marked as Completed')
+            }
           />
         )}
 
@@ -218,15 +239,9 @@ New title:
             title="Mark as Canceled"
             icon={statusIcons.canceled}
             shortcut={{ modifiers: ['opt', 'cmd'], key: 'k' }}
-            onAction={async () => {
-              await setTodoProperty(todo.id, 'status', 'canceled');
-              await showToast({
-                style: Toast.Style.Success,
-                title: 'Marked as Canceled',
-                message: todo.name,
-              });
-              await refreshTodos();
-            }}
+            onAction={() =>
+              terminalMutation(() => setTodoProperty(todo.id, 'status', 'canceled'), 'Marked as Canceled')
+            }
           />
         )}
       </ActionPanel.Section>
@@ -358,7 +373,6 @@ New title:
           <Action.Open
             title="Open Project in Things"
             icon="things-flat.png"
-            shortcut={{ modifiers: ['cmd'], key: 'o' }}
             target={`things:///show?id=${todo.project.id}`}
           />
           <Action.CopyToClipboard title="Copy Project URL" content={`things:///show?id=${todo.project.id}`} />

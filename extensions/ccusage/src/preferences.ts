@@ -8,24 +8,20 @@ const menuBarPreferences = getPreferenceValues<Preferences.MenubarCcusage>();
 
 export const showRemainingUsage = (): boolean => (menuBarPreferences.showRemainingUsage as string) !== "consumed";
 
-export const getMenuBarTitle = ():
+type MenuBarTitleMode =
   | "todayUsage"
   | "todayCost"
+  | "weeklyCost"
   | "monthlyCost"
   | "todayTokens"
   | "fiveHour"
   | "sevenDay"
   | "utilization"
-  | "none" =>
-  (menuBarPreferences.menuBarTitle as
-    | "todayUsage"
-    | "todayCost"
-    | "monthlyCost"
-    | "todayTokens"
-    | "fiveHour"
-    | "sevenDay"
-    | "utilization"
-    | "none") ?? "todayUsage";
+  | "blockProjection"
+  | "none";
+
+export const getMenuBarTitle = (): MenuBarTitleMode =>
+  (menuBarPreferences.menuBarTitle as MenuBarTitleMode) ?? "todayUsage";
 
 export const getProgressBarStyle = (): ProgressBarStyle =>
   (menuBarPreferences.progressBarStyle as ProgressBarStyle) ?? "solid";

@@ -9,6 +9,10 @@
 - Added shared shortcut definitions based on Raycast common shortcuts where possible, with explicit Windows mappings for custom bindings.
 - Improved VS Code CLI path detection for both user and system installs on Windows.
 
+## [Fix: Recent projects on Windows] - 2026-05-17
+
+- Fixed shared storage lookup for recent projects on Windows.
+
 ## [Fix: Windows app path resolution] - 2026-05-11
 
 - Fixed `product.json` resolution for Windows builds that use VS Code's versioned resources layout.

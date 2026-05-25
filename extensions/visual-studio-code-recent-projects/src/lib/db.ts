@@ -6,7 +6,7 @@ import path from "path";
 import { useEffect, useMemo, useState } from "react";
 import { build } from "./preferences";
 import { EntryLike, RecentEntries } from "./types";
-import { isSameEntry, isWin } from "./utils";
+import { isMac, isSameEntry, isWin } from "./utils";
 import { execFilePromise } from "../utils/exec";
 import { getBuildNamePreference, getProductJSONPath } from "./vscode";
 
@@ -305,7 +305,25 @@ function getGlobalStorageDirectory() {
 function getSharedStateDatabasePath() {
   const sharedDataFolderName = getSharedDataFolderName();
 
-  return sharedDataFolderName ? path.join(homedir(), sharedDataFolderName, "sharedStorage", "state.vscdb") : undefined;
+  if (!sharedDataFolderName) return undefined;
+
+  if (isWin) {
+    return path.join(homedir(), "AppData", "Roaming", sharedDataFolderName, "User", "sharedStorage", "state.vscdb");
+  }
+
+  if (isMac) {
+    return path.join(
+      homedir(),
+      "Library",
+      "Application Support",
+      sharedDataFolderName,
+      "User",
+      "sharedStorage",
+      "state.vscdb",
+    );
+  }
+
+  return undefined;
 }
 
 function getSharedDataFolderName() {

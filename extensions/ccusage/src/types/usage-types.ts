@@ -1,68 +1,72 @@
 import { z } from "zod";
 
-export const DailyUsageResponseSchema = z.object({
-  date: z.string(),
+// `ccusage` exposes row dates as a generic `period` field, nests session
+// `lastActivity` under `metadata`, and keys the session command's rows under
+// `session`. Preprocess normalizes these to the explicit names declared below.
+
+const asObject = (raw: unknown): Record<string, unknown> | null =>
+  raw && typeof raw === "object" ? (raw as Record<string, unknown>) : null;
+
+const alias =
+  (from: string, to: string) =>
+  (raw: unknown): unknown => {
+    const obj = asObject(raw);
+    if (!obj || to in obj || !(from in obj)) return raw;
+    return { ...obj, [to]: obj[from] };
+  };
+
+const liftLastActivity = (raw: unknown): unknown => {
+  const obj = asObject(raw);
+  if (!obj || "lastActivity" in obj) return raw;
+  const lastActivity = asObject(obj.metadata)?.lastActivity;
+  return typeof lastActivity === "string" ? { ...obj, lastActivity } : raw;
+};
+
+const modelBreakdownSchema = z.object({
+  modelName: z.string(),
   inputTokens: z.number(),
   outputTokens: z.number(),
   cacheCreationTokens: z.number(),
   cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-  modelsUsed: z.array(z.string()),
-  modelBreakdowns: z.array(
-    z.object({
-      modelName: z.string(),
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      cost: z.number(),
-    }),
-  ),
+  cost: z.number(),
 });
 
-export const MonthlyUsageResponseSchema = z.object({
-  month: z.string(),
+const tokenTotals = {
   inputTokens: z.number(),
   outputTokens: z.number(),
   cacheCreationTokens: z.number(),
   cacheReadTokens: z.number(),
   totalTokens: z.number(),
   totalCost: z.number(),
-  modelsUsed: z.array(z.string()),
-  modelBreakdowns: z.array(
-    z.object({
-      modelName: z.string(),
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      cost: z.number(),
-    }),
-  ),
-});
+};
 
-export const SessionResponseSchema = z.object({
-  sessionId: z.string(),
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  cacheCreationTokens: z.number(),
-  cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-  lastActivity: z.string(),
+const usageRowBase = {
+  ...tokenTotals,
   modelsUsed: z.array(z.string()),
-  modelBreakdowns: z.array(
-    z.object({
-      modelName: z.string(),
-      inputTokens: z.number(),
-      outputTokens: z.number(),
-      cacheCreationTokens: z.number(),
-      cacheReadTokens: z.number(),
-      cost: z.number(),
-    }),
-  ),
-});
+  modelBreakdowns: z.array(modelBreakdownSchema),
+};
+
+const aggregateMetadata = z.object({ agents: z.array(z.string()).optional() }).nullish();
+
+export const DailyUsageResponseSchema = z.preprocess(
+  alias("period", "date"),
+  z.object({ date: z.string(), ...usageRowBase, metadata: aggregateMetadata }),
+);
+
+export const WeeklyUsageResponseSchema = z.preprocess(
+  alias("period", "week"),
+  z.object({ week: z.string(), ...usageRowBase, metadata: aggregateMetadata }),
+);
+
+export const MonthlyUsageResponseSchema = z.preprocess(
+  alias("period", "month"),
+  z.object({ month: z.string(), ...usageRowBase, metadata: aggregateMetadata }),
+);
+
+export const SessionResponseSchema = z.preprocess(
+  (raw) => liftLastActivity(alias("period", "sessionId")(raw)),
+  z.object({ sessionId: z.string(), lastActivity: z.string(), ...usageRowBase }),
+);
 
 export const ModelUsageSchema = z.object({
   model: z.string(),
@@ -74,49 +78,36 @@ export const ModelUsageSchema = z.object({
 });
 
 export const DailyUsageDataSchema = DailyUsageResponseSchema;
+export const WeeklyUsageDataSchema = WeeklyUsageResponseSchema;
 export const MonthlyUsageDataSchema = MonthlyUsageResponseSchema;
 export const SessionDataSchema = SessionResponseSchema;
 
-export const TotalUsageDataSchema = z.object({
-  inputTokens: z.number(),
-  outputTokens: z.number(),
-  cacheCreationTokens: z.number(),
-  cacheReadTokens: z.number(),
-  totalTokens: z.number(),
-  totalCost: z.number(),
-});
+export const TotalUsageDataSchema = z.object(tokenTotals);
 
 export const TotalUsageResponseSchema = z.object({
   daily: z.array(DailyUsageResponseSchema),
-  totals: z.object({
-    inputTokens: z.number(),
-    outputTokens: z.number(),
-    cacheCreationTokens: z.number(),
-    cacheReadTokens: z.number(),
-    totalTokens: z.number(),
-    totalCost: z.number(),
-  }),
+  totals: z.object(tokenTotals),
 });
 
 export const DailyUsageCommandResponseSchema = z.object({
   daily: z.array(DailyUsageResponseSchema),
 });
 
+export const WeeklyUsageCommandResponseSchema = z.object({
+  weekly: z.array(WeeklyUsageResponseSchema),
+});
+
 export const MonthlyUsageCommandResponseSchema = z.object({
   monthly: z.array(MonthlyUsageResponseSchema),
 });
 
-export const SessionUsageCommandResponseSchema = z.object({
-  sessions: z.array(SessionResponseSchema),
-  totals: z.object({
-    inputTokens: z.number(),
-    outputTokens: z.number(),
-    cacheCreationTokens: z.number(),
-    cacheReadTokens: z.number(),
-    totalCost: z.number(),
-    totalTokens: z.number(),
+export const SessionUsageCommandResponseSchema = z.preprocess(
+  alias("session", "sessions"),
+  z.object({
+    sessions: z.array(SessionResponseSchema),
+    totals: z.object(tokenTotals),
   }),
-});
+);
 
 export const LimitWindowSchema = z.object({
   utilization: z.number(),
@@ -147,6 +138,19 @@ export const BlockSchema = z.object({
   totalTokens: z.number(),
   costUSD: z.number(),
   models: z.array(z.string()),
+  burnRate: z
+    .object({
+      costPerHour: z.number(),
+      tokensPerMinute: z.number(),
+    })
+    .nullish(),
+  projection: z
+    .object({
+      remainingMinutes: z.number(),
+      totalCost: z.number(),
+      totalTokens: z.number(),
+    })
+    .nullish(),
 });
 
 export const BlocksCommandResponseSchema = z.object({
@@ -157,15 +161,18 @@ export type Block = z.infer<typeof BlockSchema>;
 export type BlocksCommandResponse = z.infer<typeof BlocksCommandResponseSchema>;
 
 export type DailyUsageData = z.infer<typeof DailyUsageDataSchema>;
+export type WeeklyUsageData = z.infer<typeof WeeklyUsageDataSchema>;
 export type MonthlyUsageData = z.infer<typeof MonthlyUsageDataSchema>;
 export type SessionData = z.infer<typeof SessionDataSchema>;
 export type ModelUsage = z.infer<typeof ModelUsageSchema>;
 export type TotalUsageData = z.infer<typeof TotalUsageDataSchema>;
 export type TotalUsageResponse = z.infer<typeof TotalUsageResponseSchema>;
 export type DailyUsageResponse = z.infer<typeof DailyUsageResponseSchema>;
+export type WeeklyUsageResponse = z.infer<typeof WeeklyUsageResponseSchema>;
 export type MonthlyUsageResponse = z.infer<typeof MonthlyUsageResponseSchema>;
 export type SessionResponse = z.infer<typeof SessionResponseSchema>;
 export type DailyUsageCommandResponse = z.infer<typeof DailyUsageCommandResponseSchema>;
+export type WeeklyUsageCommandResponse = z.infer<typeof WeeklyUsageCommandResponseSchema>;
 export type MonthlyUsageCommandResponse = z.infer<typeof MonthlyUsageCommandResponseSchema>;
 export type SessionUsageCommandResponse = z.infer<typeof SessionUsageCommandResponseSchema>;
 export type LimitWindow = z.infer<typeof LimitWindowSchema>;
