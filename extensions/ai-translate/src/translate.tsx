@@ -96,9 +96,10 @@ export default function Command(props: LaunchProps) {
     }
 
     setIsLoading(true);
-    // Only debounce typing — language/profile/style/tier switches and manual
-    // retries should fire immediately since the user has stopped editing.
-    const delayMs = isTextChange ? 350 : 0;
+    // Only debounce typing — language/profile/style/tier switches, manual
+    // retries, and the initial auto-fill from selection/clipboard should fire
+    // immediately since the user has not just hit a key.
+    const delayMs = userEditedInput.current && isTextChange ? 350 : 0;
     const timer = setTimeout(() => {
       void runTranslations(text, sequence);
     }, delayMs);
