@@ -1,0 +1,7 @@
+# Raycast
+.DS_Store
+node_modules
+.vscode
+dist
+.eslintcache
+*.log
