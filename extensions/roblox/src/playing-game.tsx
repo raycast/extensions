@@ -54,6 +54,7 @@ export default () => {
         timeJoined: currentGame.TimeJoined,
         serverIP,
         serverType: gameServerType,
+        dataCenterId: currentGame.DataCenterId,
       }}
     />
   );

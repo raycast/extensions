@@ -3,6 +3,7 @@ import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { AiDetail } from "./components/AiDetail";
 import { useApiSearch } from "./hooks/useApiSearch";
 import { useGuideSearch } from "./hooks/useGuideSearch";
+import type { DocItem } from "./types";
 import { searchApiItems } from "./utils/fetch-api";
 import { searchGuideItems } from "./utils/fetch-guides";
 
@@ -14,6 +15,14 @@ const PAGINATION_PLACEHOLDERS = 20;
 
 function getModuleImportStatement(module: string): string {
 	return `import * as ${module} from "effect/${module}"`;
+}
+
+function getGuideSubtitle(item: DocItem): string | undefined {
+	if (item.description) return item.description;
+	if (item.section) return item.section;
+
+	const pathname = new URL(item.url).pathname.replace(/^\/|\/$/g, "");
+	return pathname || undefined;
 }
 
 export default function Command() {
@@ -92,7 +101,7 @@ export default function Command() {
 								<List.Item
 									key={item.url}
 									title={item.title}
-									subtitle={item.description}
+									subtitle={getGuideSubtitle(item)}
 									keywords={item.section ? [item.section] : []}
 									icon={Icon.Book}
 									actions={

@@ -116,8 +116,12 @@ export default function TopDeals() {
       }
 
       try {
+        const lowerPricePercent =
+          parseFloat(minDiscount) > 0
+            ? `&lowerPricePercent=${minDiscount}`
+            : "";
         const response = await fetch(
-          `https://www.cheapshark.com/api/1.0/deals?upperPrice=${maxPrice}&onSale=1&sortBy=Deal%20Rating`,
+          `https://www.cheapshark.com/api/1.0/deals?upperPrice=${maxPrice}&onSale=1&sortBy=Deal%20Rating${lowerPricePercent}`,
         );
         const data = (await response.json()) as CheapSharkDeal[];
         data.sort((a, b) => {

@@ -1,5 +1,9 @@
 # Google Translate Changelog
 
+## [Security Maintenance] - 2026-05-21
+
+- Updated the extension to address security advisories.
+
 ## [Add Keyboard Shortcuts] - 2026-05-13
 
 - Added common Raycast keyboard shortcuts for language set management actions

@@ -10,12 +10,11 @@ import {
 } from "../../ollama/types";
 import { AddSettingsCommandChat, GetSettingsCommandChatByIndex } from "../../settings/settings";
 import { RaycastChat } from "../../settings/types";
-import { Preferences, RaycastImage } from "../../types";
+import { RaycastImage } from "../../types";
 import { GetAvailableModel, PromptTokenParser } from "../function";
 import { McpServerConfig, McpToolInfo } from "../../mcp/types";
 import { McpClientMultiServer } from "../../mcp/mcp";
 import { PromptContext } from "./type";
-import "../../polyfill/node-fetch";
 
 const preferences = getPreferenceValues<Preferences>();
 
@@ -32,7 +31,7 @@ export async function ChangeChat(
   i: number,
   setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
   setChatModelsAvailable: React.Dispatch<React.SetStateAction<boolean>>,
-  setShowFormModel: React.Dispatch<React.SetStateAction<boolean>>
+  setShowFormModel: React.Dispatch<React.SetStateAction<boolean>>,
 ): Promise<void> {
   const c = await GetSettingsCommandChatByIndex(i).catch(async (e) => {
     await showToast({ style: Toast.Style.Failure, title: "Error", message: e });
@@ -44,7 +43,7 @@ export async function ChangeChat(
     c.models.main.server_name,
     c.models.main.tag,
     c.models.vision?.server_name,
-    c.models.vision?.tag
+    c.models.vision?.tag,
   ).catch(async (e) => {
     await showToast({ style: Toast.Style.Failure, title: "Error", message: e });
     setChatModelsAvailable(false);
@@ -81,7 +80,7 @@ async function VerifyChatModelInstalled(ms: string, mt: string, vs?: string, vt?
 export async function NewChat(
   chat: RaycastChat,
   setChatNameIndex: React.Dispatch<React.SetStateAction<number>>,
-  revalidate: () => Promise<string[]>
+  revalidate: () => Promise<string[]>,
 ): Promise<void> {
   const cn: RaycastChat = {
     name: "New Chat",
@@ -100,7 +99,7 @@ export function ClipboardConversation(chat?: RaycastChat): string {
   let clipboard = "";
   if (chat) {
     chat.messages.map(
-      (value) => (clipboard += `Question:\n${value.messages[0].content}\n\nAnswer:${value.messages[1].content}\n\n`)
+      (value) => (clipboard += `Question:\n${value.messages[0].content}\n\nAnswer:${value.messages[1].content}\n\n`),
     );
   }
   return clipboard;
@@ -117,7 +116,7 @@ function GetMessagesForInference(
   chat: RaycastChat,
   query: string,
   image?: RaycastImage[],
-  context?: PromptContext
+  context?: PromptContext,
 ): OllamaApiChatMessage[] {
   const messages: OllamaApiChatMessage[] = [];
 
@@ -162,9 +161,9 @@ async function InitMcpClient(): Promise<void> {
 async function ToolsCall(
   query: string,
   chat: RaycastChat,
-  image?: RaycastImage[]
+  image?: RaycastImage[],
 ): Promise<[string | undefined, McpToolInfo[] | undefined]> {
-  await showToast({ style: Toast.Style.Animated, title: "🔧 Tool Calling..." });
+  await showToast({ style: Toast.Style.Animated, title: "🧰 Tool Calling..." });
 
   /* Initialize McpClient if undefined. */
   if (McpClient === undefined) {
@@ -217,9 +216,10 @@ async function Inference(
   context: PromptContext,
   chat: RaycastChat,
   setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ): Promise<void> {
-  await showToast({ style: Toast.Style.Animated, title: "🧠 Inference..." });
+  let thinkingStarted = false;
+  let responseStarted = false;
 
   let model = chat.models.main;
   if (image && chat.models.vision) model = chat.models.vision;
@@ -227,14 +227,69 @@ async function Inference(
   const body: OllamaApiChatRequestBody = {
     model: model.tag,
     messages: GetMessagesForInference(chat, query, image, context),
+    think: model.thinking,
     keep_alive: model.keep_alive,
   };
 
+  await showToast({ style: Toast.Style.Animated, title: "💾 Loading..." });
   const ml = chat.messages.length;
   const o = new Ollama(model.server);
   o.OllamaApiChat(body)
     .then(async (emiter) => {
-      emiter.on("data", (data: string) => {
+      // Get Thinking Text
+      emiter.on("thinking", async (data: string) => {
+        // showToast when thinking process started
+        if (!thinkingStarted) {
+          thinkingStarted = true;
+          await showToast({ style: Toast.Style.Animated, title: "🤔 Thinking..." });
+        }
+        setChat((prevState) => {
+          if (!prevState) return undefined;
+
+          if (prevState.messages.length === ml) {
+            return {
+              ...prevState,
+              messages: [
+                ...prevState.messages,
+                {
+                  model: chat.models.main.tag,
+                  created_at: "",
+                  images: image,
+                  messages: [
+                    { role: OllamaApiChatMessageRole.USER, content: query },
+                    { role: OllamaApiChatMessageRole.ASSISTANT, thinking: data, content: "" },
+                  ],
+                  done: false,
+                },
+              ],
+            };
+          } else {
+            const newMessages = [...prevState.messages];
+            const lastMsgIndex = newMessages.length - 1;
+            const lastMsg = { ...newMessages[lastMsgIndex] };
+            const lastMsgMessages = [...lastMsg.messages];
+            const assistantMsg = { ...lastMsgMessages[1] };
+
+            assistantMsg.thinking += data;
+            lastMsgMessages[1] = assistantMsg;
+            lastMsg.messages = lastMsgMessages;
+            newMessages[lastMsgIndex] = lastMsg;
+
+            return {
+              ...prevState,
+              messages: newMessages,
+            };
+          }
+        });
+      });
+
+      // Get Response Text
+      emiter.on("data", async (data: string) => {
+        // showToast when  process started
+        if (!responseStarted) {
+          responseStarted = true;
+          await showToast({ style: Toast.Style.Animated, title: "✍️ Typing..." });
+        }
         setChat((prevState) => {
           if (!prevState) return undefined;
 
@@ -274,8 +329,10 @@ async function Inference(
           }
         });
       });
+
+      // Get Metadata
       emiter.on("done", async (data: OllamaApiChatResponse) => {
-        await showToast({ style: Toast.Style.Success, title: "🧠 Inference Done." });
+        await showToast({ style: Toast.Style.Success, title: "👍 Done." });
         setChat((prevState) => {
           if (!prevState) return undefined;
 
@@ -306,7 +363,7 @@ export async function Run(
   image: RaycastImage[] | undefined,
   chat: RaycastChat,
   setChat: React.Dispatch<React.SetStateAction<RaycastChat | undefined>>,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>,
 ): Promise<void> {
   setLoading(true);
 
