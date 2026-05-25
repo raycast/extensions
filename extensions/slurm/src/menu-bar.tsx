@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Color, Icon, LaunchType, MenuBarExtra, launchCommand } from "@raycast/api";
 import { showFailureToast, useCachedPromise } from "@raycast/utils";
 import { listJobs, type Job } from "./lib/slurm";
@@ -10,7 +10,7 @@ export default function MenuBar() {
   const { hosts, isLoading: hostsLoading } = useActiveHosts();
   const { users, isLoading: usersLoading } = useSlurmUsers(hosts);
 
-  const usersKey = hosts.map((h) => `${h}=${users[h] ?? ""}`).join("|");
+  const usersKey = useMemo(() => JSON.stringify(hosts.map((h) => [h, users[h] ?? ""])), [hosts, users]);
   const ready = hosts.length > 0 && hosts.every((h) => !!users[h]);
 
   const {
@@ -19,10 +19,8 @@ export default function MenuBar() {
     revalidate,
   } = useCachedPromise(
     async (key: string) => {
-      const list = key
-        .split("|")
-        .map((pair) => pair.split("=")[0])
-        .filter(Boolean);
+      const pairs = JSON.parse(key) as Array<[string, string]>;
+      const list = pairs.map(([h]) => h).filter(Boolean);
       return fetchPerCluster<Job[]>(list, (h) => listJobs(h, users[h] ?? ""));
     },
     [usersKey],

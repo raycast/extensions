@@ -60,10 +60,10 @@ export function useSlurmUser(host: string | null) {
  * Detect the Slurm username on every active cluster in parallel.
  */
 export function useSlurmUsers(hosts: string[]) {
-  const key = useMemo(() => hosts.join("|"), [hosts]);
+  const key = useMemo(() => JSON.stringify(hosts), [hosts]);
   const result = useCachedPromise(
     async (k: string) => {
-      const list = k.split("|").filter(Boolean);
+      const list = (JSON.parse(k) as string[]).filter(Boolean);
       const settled = await Promise.allSettled(list.map((h) => detectUser(h)));
       const users: Record<string, string> = {};
       const errors: Record<string, Error | undefined> = {};

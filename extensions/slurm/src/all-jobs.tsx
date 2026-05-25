@@ -40,7 +40,7 @@ export default function AllJobs() {
   const { hosts, isLoading: hostsLoading } = useActiveHosts();
   const [filter, setFilter] = useState<string>(FILTER_ALL);
 
-  const hostsKey = hosts.join("|");
+  const hostsKey = useMemo(() => JSON.stringify(hosts), [hosts]);
 
   const {
     data: results,
@@ -48,7 +48,7 @@ export default function AllJobs() {
     revalidate,
   } = useCachedPromise(
     async (key: string) => {
-      const list = key.split("|").filter(Boolean);
+      const list = (JSON.parse(key) as string[]).filter(Boolean);
       return fetchPerCluster<Job[]>(list, (h) => listAllJobs(h));
     },
     [hostsKey],

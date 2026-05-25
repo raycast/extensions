@@ -42,7 +42,7 @@ export default function ManageJobs() {
   const { users, isLoading: usersLoading } = useSlurmUsers(hosts);
   const [filter, setFilter] = useState<string>(FILTER_ALL);
 
-  const usersKey = hosts.map((h) => `${h}=${users[h] ?? ""}`).join("|");
+  const usersKey = useMemo(() => JSON.stringify(hosts.map((h) => [h, users[h] ?? ""])), [hosts, users]);
   const ready = hosts.length > 0 && hosts.every((h) => !!users[h]);
 
   const {
@@ -51,10 +51,8 @@ export default function ManageJobs() {
     revalidate,
   } = useCachedPromise(
     async (key: string) => {
-      const list = key
-        .split("|")
-        .map((pair) => pair.split("=")[0])
-        .filter(Boolean);
+      const pairs = JSON.parse(key) as Array<[string, string]>;
+      const list = pairs.map(([h]) => h).filter(Boolean);
       return fetchPerCluster<Job[]>(list, (h) => listJobs(h, users[h] ?? ""));
     },
     [usersKey],

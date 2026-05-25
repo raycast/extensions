@@ -18,8 +18,8 @@ export default function NodeUtilization() {
   const { users } = useSlurmUsers(hosts);
   const [filter, setFilter] = useState<string>(FILTER_ALL);
 
-  const hostsKey = hosts.join("|");
-  const usersKey = hosts.map((h) => `${h}=${users[h] ?? ""}`).join("|");
+  const hostsKey = useMemo(() => JSON.stringify(hosts), [hosts]);
+  const usersKey = useMemo(() => JSON.stringify(hosts.map((h) => [h, users[h] ?? ""])), [hosts, users]);
 
   const {
     data: nodeResults,
@@ -27,7 +27,7 @@ export default function NodeUtilization() {
     revalidate: revalidateNodes,
   } = useCachedPromise(
     async (key: string) => {
-      const list = key.split("|").filter(Boolean);
+      const list = (JSON.parse(key) as string[]).filter(Boolean);
       return fetchPerCluster<SlurmNode[]>(list, (h) => listNodes(h));
     },
     [hostsKey],
@@ -36,10 +36,8 @@ export default function NodeUtilization() {
 
   const { data: jobResults } = useCachedPromise(
     async (key: string) => {
-      const list = key
-        .split("|")
-        .map((pair) => pair.split("=")[0])
-        .filter((h) => h && !!users[h]);
+      const pairs = JSON.parse(key) as Array<[string, string]>;
+      const list = pairs.map(([h]) => h).filter((h) => h && !!users[h]);
       return fetchPerCluster<Job[]>(list, (h) => listJobs(h, users[h] ?? ""));
     },
     [usersKey],

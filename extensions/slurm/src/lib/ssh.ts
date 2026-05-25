@@ -8,6 +8,7 @@ import { runAppleScript } from "@raycast/utils";
 import { listHosts } from "./ssh-config";
 import { SshError, makeHostNotInConfigError, toSshError } from "./errors";
 import { DEMO_MODE, isDemoHost, mockRunSsh } from "./demo";
+import { shellQuote } from "./shell";
 
 export { SshError, SshAuthError } from "./errors";
 
@@ -21,7 +22,7 @@ const CONTROL_PATH = path.join(CONTROL_DIR, "ssh-%C");
 
 function controlPersist(): string {
   const prefs = getPreferenceValues<Preferences>();
-  return prefs.controlPersist?.trim() || "12h";
+  return prefs.controlPersist?.trim() || "10m";
 }
 
 async function ensureControlDir(): Promise<void> {
@@ -139,7 +140,13 @@ export function spawnSsh(host: string, cmd: string): ChildProcess {
 export function interactiveOpenMasterCmd(host: string): string {
   // Shown to the user when BatchMode auth fails (e.g. requires 2FA).
   // BatchMode=yes is omitted so ssh can prompt for password / 2FA in the terminal.
-  return `ssh ${commonOpts().join(" ")} -fN ${host}`;
+  return `ssh ${commonOpts().join(" ")} -fN ${shellQuote(host)}`;
+}
+
+// AppleScript string literals interpret `\\` and `\"`; escape backslashes
+// first so we don't double-escape the slashes we just inserted.
+function escapeAppleScriptString(s: string): string {
+  return s.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 }
 
 export async function openMasterInTerminal(host: string): Promise<void> {
@@ -148,7 +155,7 @@ export async function openMasterInTerminal(host: string): Promise<void> {
   await runAppleScript(`
     tell application "Terminal"
       activate
-      do script "${cmd.replace(/"/g, '\\"')}"
+      do script "${escapeAppleScriptString(cmd)}"
     end tell
   `);
 }

@@ -1,5 +1,6 @@
 import { ChildProcess } from "node:child_process";
 import { runSsh, spawnSsh } from "./ssh";
+import { shellQuote } from "./shell";
 
 function splitOnSentinel(s: string, sentinel: string): [string, string] {
   const idx = s.indexOf(sentinel);
@@ -244,12 +245,4 @@ function tokenizeKv(line: string): Record<string, string> {
 
 export function tailFile(host: string, filePath: string): ChildProcess {
   return spawnSsh(host, `tail -n 200 -F ${shellQuote(filePath)}`);
-}
-
-// ---------- utilities ----------
-
-function shellQuote(s: string): string {
-  if (!s) return "''";
-  if (/^[A-Za-z0-9_./%:=,@+-]+$/.test(s)) return s;
-  return `'${s.replace(/'/g, "'\\''")}'`;
 }
