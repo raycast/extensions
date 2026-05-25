@@ -71,7 +71,7 @@ function AbsenceDetail({ absence }: { absence: AbsenceResponse }) {
             <>
               <List.Item.Detail.Metadata.Separator />
               <List.Item.Detail.Metadata.Label title="Recurring" text="Yes" />
-              {absence.weekly_repeat_interval !== null && (
+              {absence.weekly_repeat_interval != null && (
                 <List.Item.Detail.Metadata.Label
                   title="Interval"
                   text={`Every ${absence.weekly_repeat_interval} week${absence.weekly_repeat_interval !== 1 ? "s" : ""}`}
