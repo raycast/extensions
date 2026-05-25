@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Color, Icon, List } from "@raycast/api";
 import { useState } from "react";
 import { useCompanySearch } from "./hooks/useCompanySearch";
-import { CompanySearchResult } from "./backend";
+import type { CompanySearchResult } from "./api/clearout-client";
 
 interface CompanySearchProps {
   signOut: () => Promise<void>;

@@ -3,7 +3,8 @@ import { getFavicon } from "@raycast/utils";
 import { useState, useEffect, useRef } from "react";
 import { ResultsView } from "./mail-finder";
 import { AuthGate } from "./auth";
-import { searchPerson, enrichPerson, mapEnrichResponseToData, SearchPersonResponse } from "./backend";
+import { mapEnrichResponseToData } from "./backend";
+import { searchPerson, enrichPerson, type SearchPersonResponse } from "./api/mail-finder-client";
 import { fetchCredits, formatCredits } from "./credits";
 import { CompanySearch } from "./company-search";
 import {

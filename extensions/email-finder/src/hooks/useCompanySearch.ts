@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { searchCompanyByName, CompanySearchResult } from "../backend";
+import { searchCompanyByName, type CompanySearchResult } from "../api/clearout-client";
 
 interface UseCompanySearchResult {
   results: CompanySearchResult[];

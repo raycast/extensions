@@ -88,7 +88,7 @@ Set your API key in extension preferences before testing API calls.
 In addition to the Mail-Finder.org API, this extension makes unauthenticated calls to **Clearout** for company-name autocomplete:
 
 - **Endpoint:** `https://api.clearout.io/public/companies/autocomplete`
-- **Used by:** `searchCompanyByName` in `src/backend.ts`
+- **Used by:** `searchCompanyByName` in `src/api/clearout-client.ts`
 - **Purpose:** Resolve a typed company name to a domain (and logo) so users can search without knowing the exact domain.
 - **Auth / cost:** Public endpoint; no API key or credits required.
 - **Data sent:** The query string typed into the company field. No personal data or Mail-Finder API keys are transmitted.
