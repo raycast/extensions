@@ -14,6 +14,18 @@ export class AudioPlayer {
   private stopped = false;
   private abortController = new AbortController();
 
+  // Streaming PCM playback state
+  private pcmBuffer = Buffer.alloc(0);
+  private pcmQueue: string[] = [];
+  private pcmFirstChunk = true;
+  private pcmFinished = false;
+  private pcmFirstChunkBytes = 0;
+  private pcmChunkBytes = 0;
+  private pcmSampleRate = 24000;
+  private pcmPlaybackRate = 1;
+  private pcmCurrentProcess: ChildProcess | null = null;
+  private pcmCompletePromise: { resolve: () => void; reject: (error: Error) => void } | null = null;
+
   get signal(): AbortSignal {
     return this.abortController.signal;
   }
@@ -90,10 +102,20 @@ export class AudioPlayer {
     if (!this.abortController.signal.aborted) {
       this.abortController.abort();
     }
+    // Clear pending PCM queue so no further chunks spawn
+    for (const file of this.pcmQueue) {
+      this.cleanupFile(file);
+    }
+    this.pcmQueue = [];
+    if (this.pcmCompletePromise) {
+      this.pcmCompletePromise.resolve();
+      this.pcmCompletePromise = null;
+    }
     const pid = this.currentPid;
     if (this.currentProcess) {
       const proc = this.currentProcess;
       this.currentProcess = null;
+      this.pcmCurrentProcess = null;
       this.currentPid = undefined;
       try {
         proc.kill("SIGTERM");
@@ -102,6 +124,120 @@ export class AudioPlayer {
       }
     }
     removePidFileIfMatch(pid);
+  }
+
+  /**
+   * Start a streaming PCM playback session. Subsequent pushPcm() calls
+   * accumulate audio data; once the buffer reaches the chunk threshold, a
+   * small WAV file is written and afplay is spawned. Multiple chunks play
+   * sequentially in arrival order, with ~30-50ms gap between chunks at most.
+   */
+  startPcmStream(
+    opts: {
+      sampleRate?: number;
+      playbackRate?: number;
+      firstChunkMs?: number;
+      chunkMs?: number;
+    } = {},
+  ): void {
+    this.pcmBuffer = Buffer.alloc(0);
+    this.pcmQueue = [];
+    this.pcmFirstChunk = true;
+    this.pcmFinished = false;
+    this.pcmSampleRate = opts.sampleRate ?? 24000;
+    this.pcmPlaybackRate = Number.isFinite(opts.playbackRate) && opts.playbackRate! > 0 ? opts.playbackRate! : 1;
+    const bytesPerMs = (this.pcmSampleRate * 2) / 1000;
+    this.pcmFirstChunkBytes = Math.max(2400, Math.floor((opts.firstChunkMs ?? 120) * bytesPerMs));
+    this.pcmChunkBytes = Math.max(this.pcmFirstChunkBytes, Math.floor((opts.chunkMs ?? 500) * bytesPerMs));
+  }
+
+  /**
+   * Push a chunk of raw PCM bytes into the streaming player. The first chunk
+   * triggers playback once a small threshold is reached; later chunks queue up
+   * and play back-to-back.
+   */
+  pushPcm(pcm: Buffer): void {
+    if (this.stopped) return;
+    if (pcm.length === 0) return;
+    this.pcmBuffer = Buffer.concat([this.pcmBuffer, pcm]);
+    const threshold = this.pcmFirstChunk ? this.pcmFirstChunkBytes : this.pcmChunkBytes;
+    if (this.pcmBuffer.length >= threshold) {
+      this.flushPcmBufferToFile();
+    }
+  }
+
+  /**
+   * Signal that no more PCM chunks will arrive. Resolves when all queued
+   * chunks have finished playing (or when playback is stopped).
+   */
+  finishPcmStream(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.pcmCompletePromise = { resolve, reject };
+      if (this.pcmBuffer.length > 0) this.flushPcmBufferToFile();
+      this.pcmFinished = true;
+      this.maybePlayNextPcm();
+    });
+  }
+
+  private flushPcmBufferToFile(): void {
+    if (this.pcmBuffer.length === 0) return;
+    const data = this.pcmBuffer;
+    this.pcmBuffer = Buffer.alloc(0);
+    this.pcmFirstChunk = false;
+
+    const wav = wrapPcmAsWav(data, this.pcmSampleRate);
+    const fileName = `ai-voice-studio-pcm-${randomUUID()}.wav`;
+    const filePath = join(tmpdir(), fileName);
+    writeFileSync(filePath, new Uint8Array(wav));
+    this.tempFiles.push(filePath);
+    this.pcmQueue.push(filePath);
+    this.maybePlayNextPcm();
+  }
+
+  private maybePlayNextPcm(): void {
+    if (this.stopped) {
+      this.pcmQueue = [];
+      if (this.pcmCompletePromise) {
+        this.pcmCompletePromise.resolve();
+        this.pcmCompletePromise = null;
+      }
+      return;
+    }
+    if (this.pcmCurrentProcess) return;
+    if (this.pcmQueue.length === 0) {
+      if (this.pcmFinished && this.pcmCompletePromise) {
+        this.pcmCompletePromise.resolve();
+        this.pcmCompletePromise = null;
+      }
+      return;
+    }
+
+    const file = this.pcmQueue.shift()!;
+    const proc = spawn("afplay", buildAfplayArgs(file, this.pcmPlaybackRate));
+    this.pcmCurrentProcess = proc;
+    this.currentProcess = proc;
+    const myPid = proc.pid;
+    this.currentPid = myPid;
+    writePidFile(myPid);
+
+    proc.on("close", () => {
+      if (this.pcmCurrentProcess === proc) this.pcmCurrentProcess = null;
+      if (this.currentProcess === proc) this.currentProcess = null;
+      if (this.currentPid === myPid) this.currentPid = undefined;
+      removePidFileIfMatch(myPid);
+      this.cleanupFile(file);
+      this.maybePlayNextPcm();
+    });
+
+    proc.on("error", (err) => {
+      if (this.pcmCurrentProcess === proc) this.pcmCurrentProcess = null;
+      if (this.currentProcess === proc) this.currentProcess = null;
+      this.cleanupFile(file);
+      if (this.pcmCompletePromise) {
+        this.pcmCompletePromise.reject(err);
+        this.pcmCompletePromise = null;
+      }
+    });
   }
 
   /**
@@ -150,6 +286,29 @@ export class AudioPlayer {
     }
     this.tempFiles = this.tempFiles.filter((f) => f !== filePath);
   }
+}
+
+function wrapPcmAsWav(pcm: Buffer, sampleRate: number, bitDepth = 16, channels = 1): Buffer {
+  const dataSize = pcm.length;
+  const byteRate = (sampleRate * channels * bitDepth) / 8;
+  const blockAlign = (channels * bitDepth) / 8;
+
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0);
+  header.writeUInt32LE(36 + dataSize, 4);
+  header.write("WAVE", 8);
+  header.write("fmt ", 12);
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(channels, 22);
+  header.writeUInt32LE(sampleRate, 24);
+  header.writeUInt32LE(byteRate, 28);
+  header.writeUInt16LE(blockAlign, 32);
+  header.writeUInt16LE(bitDepth, 34);
+  header.write("data", 36);
+  header.writeUInt32LE(dataSize, 40);
+
+  return Buffer.concat([header, pcm]);
 }
 
 function buildAfplayArgs(filePath: string, playbackRate: number): string[] {
