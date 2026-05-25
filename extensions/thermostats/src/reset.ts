@@ -1,4 +1,4 @@
-import { Cache, closeMainWindow, LocalStorage, showToast, Toast } from "@raycast/api";
+import { Cache, closeMainWindow, showToast, Toast } from "@raycast/api";
 
 const cache = new Cache();
 

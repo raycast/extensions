@@ -3,7 +3,7 @@
     "name": "thermostats",
     "title": "Thermostats",
     "description": "Control your thermostats inside Raycast via Seam",
-    "icon": "assets/extension-icon.png",
+    "icon": "extension-icon.png",
     "author": "humanfriend22",
     "license": "MIT",
     "commands": [
@@ -33,7 +33,6 @@
     "categories": ["Productivity", "Other"],
     "dependencies": {
         "@raycast/api": "^1.102.3",
-        "@raycast/utils": "^1.17.0",
         "seam": "^1.82.0"
     },
     "devDependencies": {

@@ -22,8 +22,7 @@ export async function loadSeam(): Promise<[Seam, ""] | [null, string]> {
   if (!isValidSeamApiKey(seam_apikey)) {
     return [null, `Invalid API Key. Please set a valid Seam API key in your Raycast settings.`];
   }
-  process.env["SEAM_API_KEY"] = seam_apikey;
-  const seam = new Seam();
+  const seam = new Seam({ apiKey: seam_apikey });
   return [seam, ""];
 }
 

@@ -20,6 +20,95 @@ function getNumberFromCache(key: string, defaultValue: number) {
   return defaultValue;
 }
 
+type ModeListProps = { 
+  deviceId: string, 
+  devices: Device[],
+  setDevices: (devices: Device[] ) => void;
+  seam: Seam;
+};
+// Create a proper component for the mode list that shares state
+const ModeList = ({ deviceId, devices, setDevices, seam }: ModeListProps) => {
+  // Local temperature state for this component
+  const [localTemperature, setLocalTemperature] = useState(DEFAULT_TEMPERATURE_F);
+  const [localCool, setLocalCool] = useState("Cool to " + DEFAULT_TEMPERATURE_F);
+  const [localHeat, setLocalHeat] = useState("Heat to " + DEFAULT_TEMPERATURE_F);
+
+  // Update display strings when temperature changes
+  useEffect(() => {
+    setLocalCool(`Cool to ${localTemperature}°F`);
+    setLocalHeat(`Heat to ${localTemperature}°F`);
+  }, [localTemperature]);
+
+  const sendThermostatCommand = async (targetStatus: DeviceStatus) => {
+    closeMainWindow();
+    try {
+      console.debug("Attempting device action", targetStatus, localTemperature);
+      const newDevices = devices.map((d) => (d[0] === deviceId ? ([d[0], d[1], targetStatus, d[3]] as Device) : d));
+      if (targetStatus === DeviceStatus.COOL) {
+        await seam.thermostats.cool({
+          device_id: deviceId,
+          cooling_set_point_fahrenheit: localTemperature,
+        });
+      } else if (targetStatus === DeviceStatus.HEAT) {
+        await seam.thermostats.heat({
+          device_id: deviceId,
+          heating_set_point_fahrenheit: localTemperature,
+        });
+      } else {
+        await seam.thermostats.off({
+          device_id: deviceId,
+        });
+      }
+      cache.set("devices", JSON.stringify(newDevices));
+      setDevices(newDevices);
+      await showToast({
+        style: Toast.Style.Success,
+        title:
+          targetStatus === DeviceStatus.OFF ? "Thermostat turned off" : `${targetStatus} to ${localTemperature}°F`,
+      });
+    } catch (error: any) {
+      console.log("Error sending thermostat command:", error);
+      await showToast({
+        style: Toast.Style.Failure,
+        title: "Error",
+        message: "Failed to send thermostat command: " + (error.message || "Unknown error"),
+      });
+    }
+  };
+
+  const actions = (targetStatus: DeviceStatus) => (
+    <ActionPanel title="Thermostat Controls">
+      <Action title="Send Command" onAction={() => sendThermostatCommand(targetStatus)} />
+      <Action
+        title={`Lower Temperature (${localTemperature - 1}°F)`}
+        shortcut={{ modifiers: [], key: "[" }}
+        onAction={() => setLocalTemperature((prev) => prev - 1)}
+      />
+      <Action
+        title={`Raise Temperature (${localTemperature + 1}°F)`}
+        shortcut={{ modifiers: [], key: "]" }}
+        onAction={() => setLocalTemperature((prev) => prev + 1)}
+      />
+    </ActionPanel>
+  );
+
+  return (
+    <List>
+      <List.Item title="Cool" subtitle={localCool} actions={actions(DeviceStatus.COOL)} />
+      <List.Item title="Heat" subtitle={localHeat} actions={actions(DeviceStatus.HEAT)} />
+      <List.Item
+        title="Off"
+        subtitle="Turn off thermostat"
+        actions={
+          <ActionPanel title="Thermostat Controls">
+            <Action title="Send Command" onAction={() => sendThermostatCommand(DeviceStatus.OFF)} />
+          </ActionPanel>
+        }
+      />
+    </List>
+  );
+};
+
 export default function Command() {
   // Cache by default, set to 'api' if fetching
   const [deviceSource, setDeviceSource] = useState<"cache" | "api">("cache");
@@ -75,89 +164,6 @@ export default function Command() {
     main();
   }, []);
 
-  // Create a proper component for the mode list that shares state
-  const ModeList = ({ deviceId }: { deviceId: string }) => {
-    // Local temperature state for this component
-    const [localTemperature, setLocalTemperature] = useState(DEFAULT_TEMPERATURE_F);
-    const [localCool, setLocalCool] = useState("Cool to " + DEFAULT_TEMPERATURE_F);
-    const [localHeat, setLocalHeat] = useState("Heat to " + DEFAULT_TEMPERATURE_F);
-
-    // Update display strings when temperature changes
-    useEffect(() => {
-      setLocalCool(`Cool to ${localTemperature}°F`);
-      setLocalHeat(`Heat to ${localTemperature}°F`);
-    }, [localTemperature]);
-
-    const sendThermostatCommand = async (targetStatus: DeviceStatus) => {
-      closeMainWindow();
-      try {
-        console.debug("Attempting device action", targetStatus, localTemperature);
-        const newDevices = devices.map((d) => (d[0] === deviceId ? ([d[0], d[1], targetStatus, d[3]] as Device) : d));
-        if (targetStatus === DeviceStatus.COOL) {
-          await seam.thermostats.cool({
-            device_id: deviceId,
-            cooling_set_point_fahrenheit: localTemperature,
-          });
-        } else if (targetStatus === DeviceStatus.HEAT) {
-          await seam.thermostats.heat({
-            device_id: deviceId,
-            heating_set_point_fahrenheit: localTemperature,
-          });
-        } else {
-          await seam.thermostats.off({
-            device_id: deviceId,
-          });
-        }
-        cache.set("devices", JSON.stringify(newDevices));
-        setDevices(newDevices);
-        await showToast({
-          style: Toast.Style.Success,
-          title:
-            targetStatus === DeviceStatus.OFF ? "Thermostat turned off" : `${targetStatus} to ${localTemperature}°F`,
-        });
-      } catch (error: any) {
-        console.log("Error sending thermostat command:", error);
-        await showToast({
-          style: Toast.Style.Failure,
-          title: "Error",
-          message: "Failed to send thermostat command: " + (error.message || "Unknown error"),
-        });
-      }
-    };
-
-    const actions = (targetStatus: DeviceStatus) => (
-      <ActionPanel title="Thermostat Controls">
-        <Action title="Send Command" onAction={() => sendThermostatCommand(targetStatus)} />
-        <Action
-          title={`Lower Temperature (${localTemperature - 1}°F)`}
-          shortcut={{ modifiers: [], key: "[" }}
-          onAction={() => setLocalTemperature((prev) => prev - 1)}
-        />
-        <Action
-          title={`Raise Temperature (${localTemperature + 1}°F)`}
-          shortcut={{ modifiers: [], key: "]" }}
-          onAction={() => setLocalTemperature((prev) => prev + 1)}
-        />
-      </ActionPanel>
-    );
-
-    return (
-      <List>
-        <List.Item title="Cool" subtitle={localCool} actions={actions(DeviceStatus.COOL)} />
-        <List.Item title="Heat" subtitle={localHeat} actions={actions(DeviceStatus.HEAT)} />
-        <List.Item
-          title="Off"
-          subtitle="Turn off thermostat"
-          actions={
-            <ActionPanel title="Thermostat Controls">
-              <Action title="Send Command" onAction={() => sendThermostatCommand(DeviceStatus.OFF)} />
-            </ActionPanel>
-          }
-        />
-      </List>
-    );
-  };
-
   if (error) {
     return <Detail markdown={`# Error\n\n${error}`} />;
   }
@@ -173,7 +179,7 @@ export default function Command() {
             subtitle={subtitle + ` (${temperature}°F)`}
             actions={
               <ActionPanel title="">
-                <Action.Push title="See Actions" target={<ModeList deviceId={id} />} />
+                <Action.Push title="See Actions" target={<ModeList deviceId={id} devices={devices} setDevices={setDevices} seam={seam} />} />
                 <Action
                   title="Confirm Source"
                   onAction={() => showToast({ title: "Data loaded from " + deviceSource })}
