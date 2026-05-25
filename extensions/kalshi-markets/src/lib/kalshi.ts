@@ -2,17 +2,14 @@ import type {
   KalshiCandlestick,
   KalshiCandlesticksResponse,
   KalshiMarket,
-  KalshiMarketsResponse,
   KalshiOrderbookResponse,
   KalshiTrade,
   KalshiTradesResponse,
   MarketBundle,
-  MarketStatus,
 } from "../types/kalshi";
 
 const API_BASE = "https://api.elections.kalshi.com/trade-api/v2";
 const SEARCH_API_BASE = "https://api.elections.kalshi.com/v1";
-const MARKET_LIMIT = 200;
 
 export const DEFAULT_FILTERS = [
   "All",
@@ -26,40 +23,6 @@ export const DEFAULT_FILTERS = [
   "Entertainment",
   "Climate",
 ];
-
-export async function fetchMarkets(
-  status: MarketStatus,
-  cursor?: string,
-): Promise<KalshiMarketsResponse> {
-  const params = new URLSearchParams({
-    limit: String(MARKET_LIMIT),
-    status,
-  });
-
-  if (cursor) {
-    params.set("cursor", cursor);
-  }
-
-  return fetchJson<KalshiMarketsResponse>(`/markets?${params.toString()}`);
-}
-
-export async function fetchMarketsForFilter(
-  status: MarketStatus,
-  filter: string,
-): Promise<KalshiMarket[]> {
-  if (filter === "All" || filter === "Favorites") {
-    const firstPage = await fetchMarkets(status);
-    const secondPage = firstPage.cursor
-      ? await fetchMarkets(status, firstPage.cursor)
-      : undefined;
-    return rankMarkets([
-      ...(firstPage.markets ?? []),
-      ...(secondPage?.markets ?? []),
-    ]);
-  }
-
-  return fetchSearchMarkets(filter);
-}
 
 export async function fetchSearchMarkets(
   query: string,

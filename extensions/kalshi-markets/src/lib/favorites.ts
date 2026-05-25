@@ -18,13 +18,13 @@ export async function getFavorites(): Promise<FavoriteState> {
   const value = await LocalStorage.getItem<string>(STORAGE_KEY);
 
   if (!value) {
-    return emptyFavorites;
+    return { ...emptyFavorites };
   }
 
   try {
     return { ...emptyFavorites, ...JSON.parse(value) };
   } catch {
-    return emptyFavorites;
+    return { ...emptyFavorites };
   }
 }
 
