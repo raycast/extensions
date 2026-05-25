@@ -106,6 +106,7 @@ assert(
 const qwenVoiceKeywords = new Map(
   qwenVoices.VOICES.map((voice) => [voice.id, qwenVoices.getVoiceSearchKeywords(voice)]),
 );
+assert(qwenVoices.VOICES.length >= 48, "Qwen-TTS should expose the official system voice catalog");
 assert(
   qwenVoiceKeywords.get("Cherry")?.includes("Chinese") &&
     qwenVoiceKeywords.get("Cherry")?.includes("English") &&
@@ -121,6 +122,18 @@ assert(
   qwenVoices.getVoicesForModel("qwen3-tts-flash").some((voice) => voice.id === "Cherry") &&
     qwenVoices.getVoicesForModel("qwen-tts").some((voice) => voice.id === "Cherry"),
   "Qwen-TTS default voice should be available on current and latest aliases",
+);
+assert(
+  qwenVoices.getVoicesForModel("qwen3-tts-flash").some((voice) => voice.id === "Kiki") &&
+    !qwenVoices.getVoicesForModel("qwen3-tts-instruct-flash").some((voice) => voice.id === "Kiki") &&
+    !qwenVoices.getVoicesForModel("qwen-tts").some((voice) => voice.id === "Kiki"),
+  "Qwen-TTS voice catalog should respect model-specific voice availability",
+);
+assert(
+  qwenVoices.supportsInstructions("qwen3-tts-instruct-flash") &&
+    qwenVoices.supportsOptimizeInstructions("qwen3-tts-instruct-flash") &&
+    !qwenVoices.supportsInstructions("qwen3-tts-flash"),
+  "Qwen-TTS model capability registry should gate instruct-only features",
 );
 
 assert(

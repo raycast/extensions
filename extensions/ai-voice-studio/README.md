@@ -4,7 +4,7 @@ AI Voice Studio is a Raycast extension for reading selected text, clipboard text
 
 The current provider set is intentionally small:
 
-- **Qwen-TTS** through Alibaba Cloud Model Studio / DashScope.
+- **Qwen-TTS** through Alibaba Cloud Model Studio / DashScope, with region-aware endpoints, official language selection, instruct-model guidance, and the current system voice catalog.
 - **MiMo** through Xiaomi MiMo Token Plan.
 - **OpenAI** through the OpenAI Speech API.
 
@@ -45,6 +45,12 @@ Configure credentials in Raycast extension preferences:
 
 Provider defaults live in `Setup Voice Defaults` instead of command-level preferences, so the Raycast sidebar stays focused on credentials only.
 
+## Qwen-TTS
+
+The Qwen-TTS integration uses Alibaba Cloud's non-realtime HTTP generation endpoint. It downloads the returned 24-hour audio URL when DashScope returns a URL instead of inline audio data, then plays chunks through the shared lookahead playback engine.
+
+Qwen defaults to `qwen3-tts-flash` for low-latency everyday reading. `qwen3-tts-instruct-flash` is available when narration instructions are needed, including the optional DashScope `optimize_instructions` flag. Region presets cover Beijing and Singapore endpoints, while Custom Endpoint remains available for advanced DashScope-compatible routing.
+
 ## Development
 
 ```bash
@@ -70,7 +76,7 @@ AI Voice Studio 是一个 Raycast 语音朗读扩展，用于把选中文本、�
 
 当前只保留三条 provider 路线：
 
-- **Qwen-TTS**：通过 Alibaba Cloud Model Studio / DashScope。
+- **Qwen-TTS**：通过 Alibaba Cloud Model Studio / DashScope，支持 region-aware endpoint、官方语种选择、Instruct 模型指令控制和当前系统音色目录。
 - **MiMo**：通过 Xiaomi MiMo Token Plan。
 - **OpenAI**：通过 OpenAI Speech API。
 

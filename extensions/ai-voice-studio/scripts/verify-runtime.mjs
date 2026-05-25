@@ -125,15 +125,18 @@ check(
     providerSettings.includes("getQwenSettings") &&
     providerSettings.includes("getMimoSettings") &&
     providerSettings.includes("getOpenAISettings") &&
+    providerSettings.includes("normalizeQwenRegion") &&
     providerSettings.includes("normalizeQwenLanguageType"),
   "Provider settings should default to Qwen-TTS and expose all current provider setup blocks",
 );
 
 const providerSetupForm = read("src/components/provider-setup-form.tsx");
 check(
-  providerSetupForm.includes("activeProvider === \"qwen\"") &&
+    providerSetupForm.includes("activeProvider === \"qwen\"") &&
+    providerSetupForm.includes("qwenRegion") &&
     providerSetupForm.includes("qwenLanguageType") &&
     providerSetupForm.includes("qwenInstructions") &&
+    providerSetupForm.includes("qwenOptimizeInstructions") &&
     providerSetupForm.includes("Form.Description title=\"Qwen-TTS\"") &&
     providerSetupForm.includes("Form.Description title=\"MiMo\"") &&
     providerSetupForm.includes("Form.Description title=\"OpenAI\"") &&
@@ -172,8 +175,9 @@ check(audioPlayer.includes("hasStopRequestSince(playbackStartedAt)"), "playAudio
 
 const qwenApi = read("src/api/qwen-tts.ts");
 check(
-  qwenApi.includes("/services/aigc/multimodal-generation/generation") &&
+    qwenApi.includes("/services/aigc/multimodal-generation/generation") &&
     qwenApi.includes("language_type") &&
+    qwenApi.includes("optimize_instructions") &&
     qwenApi.includes("audio?.url") &&
     qwenApi.includes("Buffer.from(await response.arrayBuffer())") &&
     qwenApi.includes("dashscopeApiKey") &&
@@ -228,7 +232,10 @@ for (const file of ["src/openai-speed-up.tsx", "src/openai-speed-down.tsx"]) {
   check(source.includes("SPEED_NORMAL"), `${file} should use a stable normal-speed fallback`);
 }
 
-check(read("src/utils/qwen-text-chunker.ts").includes("const MAX_CHARS = 500"), "Qwen-TTS chunks should respect char budget");
+check(
+  read("src/utils/qwen-text-chunker.ts").includes("QWEN_TEXT_CHUNK_LIMIT"),
+  "Qwen-TTS chunks should respect char budget",
+);
 check(read("src/utils/mimo-text-chunker.ts").includes("const MAX_BYTES = 4096"), "MiMo chunks should respect byte budget");
 check(read("src/utils/openai-text-chunker.ts").includes("const MAX_CHARS = 1800"), "OpenAI chunks should respect char budget");
 

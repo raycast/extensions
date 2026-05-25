@@ -11,7 +11,7 @@ import {
 } from "@raycast/api";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { MimoTTSModel } from "../api/mimo-types";
-import type { QwenTTSLanguageType, QwenTTSModel } from "../api/qwen-tts-types";
+import type { QwenTTSLanguageType, QwenTTSModel, QwenTTSRegion } from "../api/qwen-tts-types";
 import type {
   OpenAIResponseFormat,
   OpenAITone,
@@ -22,9 +22,14 @@ import type {
 import {
   LANGUAGE_TYPE_LABELS as QWEN_LANGUAGE_TYPE_LABELS,
   MODEL_LABELS as QWEN_MODEL_LABELS,
+  QWEN_MODELS,
+  QWEN_REGION_BASE_URLS,
+  QWEN_REGION_LABELS,
+  QWEN_REGIONS,
   VOICE_CATEGORIES as QWEN_VOICE_CATEGORIES,
   getVoicesByCategory as getQwenVoicesByCategory,
   getVoicesForModel as getQwenVoicesForModel,
+  supportsInstructions as qwenSupportsInstructions,
 } from "../constants/qwen-tts-voices";
 import {
   MODEL_LABELS as MIMO_MODEL_LABELS,
@@ -191,6 +196,21 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
     [updateSettings],
   );
 
+  const handleQwenRegionChange = useCallback(
+    (value: string) => {
+      const region = value as QwenTTSRegion;
+      updateSettings((current) => ({
+        ...current,
+        qwen: {
+          ...current.qwen,
+          region,
+          baseUrl: region === "custom" ? current.qwen.baseUrl : QWEN_REGION_BASE_URLS[region],
+        },
+      }));
+    },
+    [updateSettings],
+  );
+
   const handleSubmit = useCallback(async () => {
     if (!settings) return;
     setIsSaving(true);
@@ -303,7 +323,7 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
         <>
           <Form.Description title="Qwen-TTS" text="Alibaba Cloud Model Studio / DashScope Qwen-TTS synthesis." />
           <Form.Dropdown id="qwenModel" title="Model" value={settings.qwen.model} onChange={handleQwenModelChange}>
-            {(Object.keys(QWEN_MODEL_LABELS) as QwenTTSModel[]).map((model) => (
+            {QWEN_MODELS.map((model) => (
               <Form.Dropdown.Item key={model} value={model} title={QWEN_MODEL_LABELS[model]} />
             ))}
           </Form.Dropdown>
@@ -496,7 +516,29 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
               <Form.Separator />
               <Form.Description
                 title="Qwen-TTS Advanced"
-                text="Optional speaking instructions and DashScope endpoint."
+                text="DashScope region, optional instruct-model guidance, and custom endpoint settings."
+              />
+              <Form.Dropdown
+                id="qwenRegion"
+                title="Region"
+                value={settings.qwen.region}
+                onChange={handleQwenRegionChange}
+              >
+                {QWEN_REGIONS.map((region) => (
+                  <Form.Dropdown.Item key={region} value={region} title={QWEN_REGION_LABELS[region]} />
+                ))}
+              </Form.Dropdown>
+              <Form.Checkbox
+                id="qwenOptimizeInstructions"
+                title="Optimize Instructions"
+                label="Let Qwen refine instruct-model guidance"
+                value={settings.qwen.optimizeInstructions}
+                onChange={(optimizeInstructions) => updateQwen({ optimizeInstructions })}
+                info={
+                  qwenSupportsInstructions(settings.qwen.model)
+                    ? "Only applies when instructions are set for Qwen3 TTS Instruct Flash."
+                    : "Select Qwen3 TTS Instruct Flash before this setting is sent."
+                }
               />
               <Form.TextArea
                 id="qwenInstructions"
@@ -509,8 +551,13 @@ export function ProviderSetupForm({ initialProvider }: ProviderSetupFormProps = 
                 id="qwenBaseUrl"
                 title="Base URL"
                 value={settings.qwen.baseUrl}
-                placeholder="https://dashscope.aliyuncs.com/api/v1"
+                placeholder={QWEN_REGION_BASE_URLS.beijing}
                 onChange={(baseUrl) => updateQwen({ baseUrl })}
+                info={
+                  settings.qwen.region === "custom"
+                    ? "Custom DashScope-compatible HTTP API base URL."
+                    : "Managed by the selected region; switch Region to Custom Endpoint before editing."
+                }
               />
             </>
           ) : null}

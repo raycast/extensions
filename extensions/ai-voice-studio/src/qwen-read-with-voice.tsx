@@ -428,6 +428,7 @@ function VoiceDetail({
         <List.Item.Detail.Metadata>
           <List.Item.Detail.Metadata.Label title="Voice ID" text={voice.id} />
           <List.Item.Detail.Metadata.Label title="Model" text={model} />
+          <List.Item.Detail.Metadata.Label title="Available On" text={formatVoiceModels(voice)} />
           <List.Item.Detail.Metadata.Label title="Language" text={languageLabel} />
           <List.Item.Detail.Metadata.Label title="Speed" text={speedLabel} />
           <List.Item.Detail.Metadata.Label
@@ -452,6 +453,10 @@ function voiceIcon(voice: VoiceConfig) {
   if (voice.gender === "female") return Icon.Female;
   if (voice.gender === "male") return Icon.Male;
   return Icon.SpeakerHigh;
+}
+
+function formatVoiceModels(voice: VoiceConfig): string {
+  return voice.models.map((model) => MODEL_LABELS[model]).join(", ");
 }
 
 function formatSource(source: SelectionSource): string {

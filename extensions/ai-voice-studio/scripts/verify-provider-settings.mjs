@@ -53,7 +53,7 @@ async function verifyInvalidFallbacks() {
     defaultProvider: "bad-provider",
     qwenModel: "bad-qwen",
     qwenVoice: "   ",
-    qwenLanguageType: "French",
+    qwenLanguageType: "Klingon",
     qwenPlaybackRate: "9",
     qwenInstructions: "   ",
     qwenBaseUrl: "   ",
@@ -73,9 +73,11 @@ async function verifyInvalidFallbacks() {
   assert(result.defaultProvider === "qwen", "Invalid default provider should fall back to Qwen-TTS");
   assert(result.qwen.model === "qwen3-tts-flash", "Invalid Qwen-TTS model should fall back safely");
   assert(result.qwen.voice === "Cherry", "Blank Qwen-TTS voice should fall back");
+  assert(result.qwen.region === "beijing", "Invalid Qwen-TTS region should fall back");
   assert(result.qwen.languageType === "Auto", "Invalid Qwen-TTS language should fall back");
   assert(result.qwen.playbackRate === "1", "Invalid Qwen-TTS playback rate should fall back");
   assert(result.qwen.instructions === "", "Blank Qwen-TTS instructions should clear");
+  assert(result.qwen.optimizeInstructions === false, "Invalid Qwen-TTS optimize flag should fall back");
   assert(
     result.qwen.baseUrl === "https://dashscope.aliyuncs.com/api/v1",
     "Blank Qwen-TTS base URL should fall back",
@@ -121,6 +123,7 @@ async function verifyLegacyPreferencesIgnored() {
   assert(result.defaultProvider === "qwen", "Legacy preference default provider should be ignored");
   assert(result.qwen.model === "qwen3-tts-flash", "Legacy preference Qwen-TTS model should be ignored");
   assert(result.qwen.voice === "Cherry", "Legacy preference Qwen-TTS voice should be ignored");
+  assert(result.qwen.region === "beijing", "Legacy preference Qwen-TTS region should be ignored");
   assert(result.qwen.languageType === "Auto", "Legacy preference Qwen-TTS language should be ignored");
   assert(result.qwen.playbackRate === "1", "Legacy preference Qwen-TTS rate should be ignored");
   assert(result.qwen.instructions === "", "Legacy preference Qwen-TTS instructions should be ignored");
@@ -165,6 +168,7 @@ async function verifyTrimmedOverrideFields() {
   const result = await settings.getProviderSettings();
   assert(result.defaultProvider === "mimo", "MiMo default provider should be preserved");
   assert(result.qwen.instructions === "German newsreader", "Qwen-TTS instructions should be trimmed");
+  assert(result.qwen.region === "beijing", "Qwen-TTS default endpoint should infer Beijing region");
   assert(result.qwen.baseUrl === "https://dashscope.aliyuncs.com/api/v1", "Qwen-TTS base URL should be trimmed");
   assert(result.mimo.stylePrompt === "natural", "MiMo style prompt should be trimmed");
   assert(result.mimo.tokenPlanBaseUrl === "https://example.com/v1", "MiMo base URL should be trimmed");
@@ -180,9 +184,11 @@ async function verifyQuickSetupOverrides() {
     qwen: {
       model: "qwen3-tts-instruct-flash",
       voice: "Ethan",
+      region: "custom",
       languageType: "Spanish",
       playbackRate: "1.25",
       instructions: "Energetic but precise",
+      optimizeInstructions: true,
       baseUrl: "https://example.com/api/v1",
     },
     mimo: {
@@ -205,9 +211,11 @@ async function verifyQuickSetupOverrides() {
   assert(result.defaultProvider === "openai", "Quick setup should override default provider");
   assert(result.qwen.model === "qwen3-tts-instruct-flash", "Quick setup should override Qwen-TTS model");
   assert(result.qwen.voice === "Ethan", "Quick setup should override Qwen-TTS voice");
+  assert(result.qwen.region === "custom", "Quick setup should override Qwen-TTS region");
   assert(result.qwen.languageType === "Spanish", "Quick setup should override Qwen-TTS language");
   assert(result.qwen.playbackRate === "1.25", "Quick setup should override Qwen-TTS playback rate");
   assert(result.qwen.instructions === "Energetic but precise", "Quick setup should override Qwen-TTS instructions");
+  assert(result.qwen.optimizeInstructions === true, "Quick setup should override Qwen-TTS optimize instructions");
   assert(result.qwen.baseUrl === "https://example.com/api/v1", "Quick setup should override Qwen-TTS base URL");
   assert(result.mimo.defaultVoice === "default_en", "Quick setup should override MiMo voice");
   assert(result.mimo.tokenPlanBaseUrl === "https://example.com/v1", "Quick setup should override MiMo base URL");

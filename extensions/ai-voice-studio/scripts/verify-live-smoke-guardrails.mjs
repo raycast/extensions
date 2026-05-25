@@ -114,6 +114,7 @@ try {
   assert(qwenFetch.body.input.voice === "Ethan", "Qwen-TTS should use setup voice");
   assert(qwenFetch.body.input.language_type === "German", "Qwen-TTS should use setup language_type");
   assert(qwenFetch.body.input.instructions.includes("Guardrail Qwen."), "Qwen-TTS should use setup instructions");
+  assert(qwenFetch.body.input.optimize_instructions === true, "Qwen-TTS should use optimize_instructions");
   assert(mimoFetch.url === "https://guardrail.mimo/v1/chat/completions", "MiMo should use setup base URL");
   assert(mimoFetch.apiKey === fakeKeys.mimo, "MiMo should send configured API key");
   assert(mimoFetch.body.model === "mimo-v2.5-tts", "MiMo live smoke should use setup model");
@@ -220,9 +221,11 @@ function runLiveSmoke({ providers, play, forceError = "", maxMs = "30000", afpla
       DASHSCOPE_API_KEY: fakeKeys.dashscope,
       QWEN_MODEL: "qwen3-tts-instruct-flash",
       QWEN_VOICE: "Ethan",
+      QWEN_REGION: "beijing",
       QWEN_LANGUAGE_TYPE: "German",
       QWEN_PLAYBACK_RATE: "1",
       QWEN_INSTRUCTIONS: "Guardrail Qwen.",
+      QWEN_OPTIMIZE_INSTRUCTIONS: "1",
       QWEN_BASE_URL: "https://dashscope.aliyuncs.com/api/v1",
       MIMO_API_KEY: fakeKeys.mimo,
       MIMO_TOKEN_PLAN_BASE_URL: "https://guardrail.mimo/v1",

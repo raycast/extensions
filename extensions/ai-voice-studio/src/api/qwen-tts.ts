@@ -7,6 +7,10 @@ import {
   DEFAULT_VOICE,
   MODEL_LABELS,
   QWEN_LANGUAGE_TYPES,
+  QWEN_MODELS,
+  normalizeQwenBaseUrl,
+  supportsInstructions,
+  supportsOptimizeInstructions,
   getVoiceById,
   isVoiceAvailableForModel,
 } from "../constants/qwen-tts-voices";
@@ -61,14 +65,22 @@ export async function synthesizeSpeech(text: string, options: TTSOptions, signal
 }
 
 function buildRequest(text: string, options: TTSOptions): Record<string, unknown> {
+  const input: Record<string, unknown> = {
+    text,
+    voice: options.voice,
+    language_type: options.languageType,
+  };
+
+  if (supportsInstructions(options.model) && options.instructions) {
+    input.instructions = options.instructions;
+    if (options.optimizeInstructions && supportsOptimizeInstructions(options.model)) {
+      input.optimize_instructions = true;
+    }
+  }
+
   return {
     model: options.model,
-    input: {
-      text,
-      voice: options.voice,
-      language_type: options.languageType,
-      ...(supportsInstructions(options.model) && options.instructions ? { instructions: options.instructions } : {}),
-    },
+    input,
   };
 }
 
@@ -178,9 +190,7 @@ function buildSpeechSynthesizerUrl(baseUrl: string | undefined): string {
 }
 
 function normalizeBaseUrl(baseUrl: string | undefined): string {
-  return (baseUrl?.trim() || DEFAULT_BASE_URL)
-    .replace(/\/+$/, "")
-    .replace(/\/services\/aigc\/multimodal-generation\/generation$/, "");
+  return normalizeQwenBaseUrl(baseUrl || DEFAULT_BASE_URL);
 }
 
 export function getActiveModel(): QwenTTSModel {
@@ -235,10 +245,12 @@ function buildOptionsFromSettings(
     model,
     voice,
     format: DEFAULT_FORMAT,
+    region: settings.region,
     languageType: overrides.languageType ?? normalizeLanguageType(settings.languageType),
     baseUrl: normalizeBaseUrl(settings.baseUrl),
     playbackRate: rate,
     instructions: settings.instructions?.trim() || undefined,
+    optimizeInstructions: settings.optimizeInstructions,
   };
 }
 
@@ -255,19 +267,13 @@ export async function validateOptions(voiceOverride?: string): Promise<TTSOption
 }
 
 function normalizeModel(model: string | undefined): QwenTTSModel {
-  return model === "qwen3-tts-instruct-flash" || model === "qwen-tts-latest" || model === "qwen-tts"
-    ? model
-    : DEFAULT_MODEL;
+  return QWEN_MODELS.includes(model as QwenTTSModel) ? (model as QwenTTSModel) : DEFAULT_MODEL;
 }
 
 function normalizeLanguageType(languageType: string | undefined): QwenTTSLanguageType {
   return QWEN_LANGUAGE_TYPES.includes(languageType as QwenTTSLanguageType)
     ? (languageType as QwenTTSLanguageType)
     : DEFAULT_LANGUAGE_TYPE;
-}
-
-function supportsInstructions(model: QwenTTSModel): boolean {
-  return model === "qwen3-tts-instruct-flash";
 }
 
 export class TTSApiError extends Error {

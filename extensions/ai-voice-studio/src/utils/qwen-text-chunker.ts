@@ -1,4 +1,6 @@
-const MAX_CHARS = 500;
+import { QWEN_TEXT_CHUNK_LIMIT } from "../constants/qwen-tts-voices";
+
+const MAX_CHARS = QWEN_TEXT_CHUNK_LIMIT;
 
 export function chunkText(text: string, maxChars: number = MAX_CHARS): string[] {
   const trimmed = text.trim();

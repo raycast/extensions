@@ -148,18 +148,22 @@ async function verifyFocusedSetupOptionBuilders() {
     qwen: {
       model: "qwen3-tts-instruct-flash",
       voice: "Ethan",
+      region: "beijing",
       languageType: "German",
       playbackRate: "1.25",
       instructions: "Warm base",
+      optimizeInstructions: true,
       baseUrl: "https://dashscope.aliyuncs.com/api/v1/services/aigc/multimodal-generation/generation",
     },
   });
   const qwenOptions = await qwen.buildOptionsFromPrefs();
   assert(qwenOptions.model === "qwen3-tts-instruct-flash", "Qwen-TTS options should use focused setup model");
   assert(qwenOptions.voice === "Ethan", "Qwen-TTS options should use focused setup voice");
+  assert(qwenOptions.region === "beijing", "Qwen-TTS options should use focused setup region");
   assert(qwenOptions.languageType === "German", "Qwen-TTS options should use focused setup language");
   assert(qwenOptions.playbackRate === 1.25, "Qwen-TTS options should parse focused setup playback rate");
   assert(qwenOptions.instructions?.includes("Warm base"), "Qwen-TTS options should include focused setup instructions");
+  assert(qwenOptions.optimizeInstructions === true, "Qwen-TTS options should include optimize instructions flag");
   assert(
     qwenOptions.baseUrl === "https://dashscope.aliyuncs.com/api/v1",
     "Qwen-TTS options should normalize focused setup base URL",
@@ -222,6 +226,7 @@ async function verifyQwen() {
     assert(call.body.input.voice === "Ethan", "Qwen-TTS should send voice");
     assert(call.body.input.language_type === "German", "Qwen-TTS should send language_type");
     assert(call.body.input.instructions === "Speak warmly.", "Qwen-TTS should send instruct-model instructions");
+    assert(call.body.input.optimize_instructions === true, "Qwen-TTS should send optimize_instructions");
     return jsonResponse({ output: { audio: { data: "cXdlbi1hdWRpbw==" } } });
   });
 
@@ -229,15 +234,22 @@ async function verifyQwen() {
     model: "qwen3-tts-instruct-flash",
     voice: "Ethan",
     format: "wav",
+    region: "beijing",
     languageType: "German",
     baseUrl: "https://dashscope.aliyuncs.com/api/v1",
     playbackRate: 1.25,
     instructions: "Speak warmly.",
+    optimizeInstructions: true,
   });
   assert(qwenAudio === "cXdlbi1hdWRpbw==", "Qwen-TTS should return base64 audio data");
 
   installFetch((call) => {
     if (call.url.endsWith("/generation")) {
+      assert(!("instructions" in call.body.input), "Qwen-TTS should omit instructions for non-instruct model");
+      assert(
+        !("optimize_instructions" in call.body.input),
+        "Qwen-TTS should omit optimize_instructions for non-instruct model",
+      );
       return jsonResponse({ output: { audio: { url: "https://example.com/qwen.wav" } } });
     }
     assert(call.url === "https://example.com/qwen.wav", "Qwen-TTS should download returned audio URL");
@@ -248,9 +260,12 @@ async function verifyQwen() {
     model: "qwen3-tts-flash",
     voice: "Cherry",
     format: "wav",
+    region: "beijing",
     languageType: "Chinese",
     baseUrl: "https://dashscope.aliyuncs.com/api/v1",
     playbackRate: 1,
+    instructions: "Should not be sent.",
+    optimizeInstructions: true,
   });
   assert(qwenUrlAudio === Buffer.from("qwen-url-audio").toString("base64"), "Qwen-TTS should download audio URL");
 
@@ -261,6 +276,7 @@ async function verifyQwen() {
         model: "qwen3-tts-flash",
         voice: "Cherry",
         format: "wav",
+        region: "beijing",
         languageType: "Chinese",
         baseUrl: "https://dashscope.aliyuncs.com/api/v1",
         playbackRate: 1,
@@ -279,6 +295,7 @@ async function verifyQwen() {
           model: "qwen3-tts-flash",
           voice: "Cherry",
           format: "wav",
+          region: "beijing",
           languageType: "Chinese",
           baseUrl: "https://dashscope.aliyuncs.com/api/v1",
           playbackRate: 1,

@@ -263,9 +263,11 @@ async function verifyQwen() {
     qwen: {
       model,
       voice,
+      region: process.env.QWEN_REGION || "beijing",
       languageType: process.env.QWEN_LANGUAGE_TYPE || "Auto",
       playbackRate: process.env.QWEN_PLAYBACK_RATE || "1",
       instructions: process.env.QWEN_INSTRUCTIONS || "",
+      optimizeInstructions: process.env.QWEN_OPTIMIZE_INSTRUCTIONS === "1",
       baseUrl: process.env.QWEN_BASE_URL || "https://dashscope.aliyuncs.com/api/v1",
     },
   });

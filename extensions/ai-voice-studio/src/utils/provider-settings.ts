@@ -3,8 +3,15 @@ import {
   DEFAULT_BASE_URL as DEFAULT_QWEN_BASE_URL,
   DEFAULT_LANGUAGE_TYPE as DEFAULT_QWEN_LANGUAGE_TYPE,
   DEFAULT_MODEL as DEFAULT_QWEN_MODEL,
+  DEFAULT_OPTIMIZE_INSTRUCTIONS as DEFAULT_QWEN_OPTIMIZE_INSTRUCTIONS,
+  DEFAULT_REGION as DEFAULT_QWEN_REGION,
   DEFAULT_VOICE as DEFAULT_QWEN_VOICE,
   QWEN_LANGUAGE_TYPES,
+  QWEN_MODELS,
+  QWEN_REGIONS,
+  getQwenRegionBaseUrl,
+  inferQwenRegion,
+  normalizeQwenBaseUrl,
 } from "../constants/qwen-tts-voices";
 import { DEFAULT_MODEL as DEFAULT_MIMO_MODEL, DEFAULT_VOICE as DEFAULT_MIMO_VOICE } from "../constants/mimo-voices";
 import { DEFAULT_FORMAT, DEFAULT_MODEL, DEFAULT_VOICE } from "../constants/openai-voices";
@@ -27,7 +34,7 @@ import type {
   OpenAIDelivery,
   OpenAIAccentFocus,
 } from "../api/openai-types";
-import type { QwenTTSLanguageType, QwenTTSModel } from "../api/qwen-tts-types";
+import type { QwenTTSLanguageType, QwenTTSModel, QwenTTSRegion } from "../api/qwen-tts-types";
 import type { TTSProvider } from "./provider";
 
 export interface OpenAIProviderSettings {
@@ -53,9 +60,11 @@ export interface MimoProviderSettings {
 export interface QwenProviderSettings {
   model: QwenTTSModel;
   voice: string;
+  region: QwenTTSRegion;
   languageType: QwenTTSLanguageType;
   playbackRate: string;
   instructions?: string;
+  optimizeInstructions: boolean;
   baseUrl: string;
 }
 
@@ -80,9 +89,11 @@ export const DEFAULT_PROVIDER_SETTINGS: ProviderSettings = {
   qwen: {
     model: DEFAULT_QWEN_MODEL,
     voice: DEFAULT_QWEN_VOICE,
+    region: DEFAULT_QWEN_REGION,
     languageType: DEFAULT_QWEN_LANGUAGE_TYPE,
     playbackRate: "1",
     instructions: "",
+    optimizeInstructions: DEFAULT_QWEN_OPTIMIZE_INSTRUCTIONS,
     baseUrl: DEFAULT_QWEN_BASE_URL,
   },
   mimo: {
@@ -188,13 +199,16 @@ function normalizeMimoSettings(settings: Partial<MimoProviderSettings> | undefin
 }
 
 function normalizeQwenSettings(settings: Partial<QwenProviderSettings> | undefined): QwenProviderSettings {
+  const region = normalizeQwenRegion(settings?.region, settings?.baseUrl);
   return {
     model: normalizeQwenModel(settings?.model),
     voice: settings?.voice?.trim() || DEFAULT_QWEN_VOICE,
+    region,
     languageType: normalizeQwenLanguageType(settings?.languageType),
     playbackRate: normalizePlaybackRate(settings?.playbackRate),
     instructions: settings?.instructions?.trim() || "",
-    baseUrl: normalizeQwenBaseUrl(settings?.baseUrl),
+    optimizeInstructions: normalizeBoolean(settings?.optimizeInstructions, DEFAULT_QWEN_OPTIMIZE_INSTRUCTIONS),
+    baseUrl: normalizeQwenBaseUrlForRegion(settings?.baseUrl, region),
   };
 }
 
@@ -217,9 +231,7 @@ function normalizeOpenAIModel(model: string | undefined): OpenAITTSModel {
 }
 
 function normalizeQwenModel(model: string | undefined): QwenTTSModel {
-  return model === "qwen3-tts-instruct-flash" || model === "qwen-tts-latest" || model === "qwen-tts"
-    ? model
-    : DEFAULT_QWEN_MODEL;
+  return QWEN_MODELS.includes(model as QwenTTSModel) ? (model as QwenTTSModel) : DEFAULT_QWEN_MODEL;
 }
 
 function normalizeQwenLanguageType(languageType: string | undefined): QwenTTSLanguageType {
@@ -228,13 +240,14 @@ function normalizeQwenLanguageType(languageType: string | undefined): QwenTTSLan
     : DEFAULT_QWEN_LANGUAGE_TYPE;
 }
 
-function normalizeQwenBaseUrl(baseUrl: string | undefined): string {
-  return (
-    baseUrl
-      ?.trim()
-      .replace(/\/+$/, "")
-      .replace(/\/services\/aigc\/multimodal-generation\/generation$/, "") || DEFAULT_QWEN_BASE_URL
-  );
+function normalizeQwenRegion(region: string | undefined, baseUrl: string | undefined): QwenTTSRegion {
+  if (QWEN_REGIONS.includes(region as QwenTTSRegion)) return region as QwenTTSRegion;
+  return inferQwenRegion(baseUrl);
+}
+
+function normalizeQwenBaseUrlForRegion(baseUrl: string | undefined, region: QwenTTSRegion): string {
+  if (region === "custom") return normalizeQwenBaseUrl(baseUrl);
+  return getQwenRegionBaseUrl(region);
 }
 
 const VALID_OPENAI_FORMATS: readonly string[] = ["mp3", "wav", "opus", "aac", "flac"];
@@ -249,6 +262,10 @@ function normalizePlaybackRate(rate: string | undefined): string {
 
 function normalizeMimoSpeechRate(rate: string | undefined): string {
   return ["-50", "-25", "0", "25", "50", "75", "100"].includes(rate ?? "") ? rate! : "0";
+}
+
+function normalizeBoolean(value: boolean | undefined, fallback: boolean): boolean {
+  return typeof value === "boolean" ? value : fallback;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {

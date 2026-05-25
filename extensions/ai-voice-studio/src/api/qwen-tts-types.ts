@@ -2,6 +2,8 @@ export type QwenTTSModel = "qwen3-tts-flash" | "qwen3-tts-instruct-flash" | "qwe
 
 export type QwenTTSFormat = "wav";
 
+export type QwenTTSRegion = "beijing" | "singapore" | "custom";
+
 export type QwenTTSLanguageType =
   | "Auto"
   | "Chinese"
@@ -19,10 +21,12 @@ export interface TTSOptions {
   model: QwenTTSModel;
   voice: string;
   format: QwenTTSFormat;
+  region: QwenTTSRegion;
   languageType: QwenTTSLanguageType;
   baseUrl: string;
   playbackRate: number;
   instructions?: string;
+  optimizeInstructions?: boolean;
 }
 
 export interface TTSOptionOverrides {
