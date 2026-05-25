@@ -134,7 +134,7 @@ export interface OverviewResponse {
   };
 }
 
-const rateLimiter = getLimiter({ maxRequests: 100, duration: "1m" });
+const rateLimiter = getLimiter({ maxRequests: 100, perMilliseconds: 60_000 });
 
 export class HakunaClient {
   private apiToken: string;
