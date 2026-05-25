@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Action, ActionPanel, Icon, List, open, Color, getLocalStorageItem } from "@raycast/api";
+import { Action, ActionPanel, Icon, List, open, Color } from "@raycast/api";
 import { useCachedState, useFetch } from "@raycast/utils";
 import { format, formatDistanceToNowStrict, isToday, startOfDay } from "date-fns";
 import groupBy from "lodash.groupby";
@@ -14,8 +14,8 @@ const LOCALE = Intl.DateTimeFormat().resolvedOptions().locale.split("-", 1)[0];
 // languages "lt" and "ru" are listed on fifa.com, but did not work when constructing URL
 const SUPPORTED_LANGUAGES = ["en", "es", "fr", "de", "ar", "ja"];
 const LANG = SUPPORTED_LANGUAGES.includes(LOCALE) ? LOCALE : `en`;
-const ID_SEASON = `255711`; // world cup qatar 2022
-const COUNT = 64; // limit to 64 (all matches)
+const ID_SEASON = `285023`; // world cup 2026 (2022 - 255711)
+const COUNT = 104; // all matches (2022 - 64)
 
 type Data = {
   [key: string]: Match[];
@@ -170,7 +170,7 @@ export default function Command() {
       isLoading={isLoading}
       searchBarAccessory={<FilterDropdown handleChange={onFilterChange} />}
     >
-      <List.EmptyView title="No Matches Found" icon="mascot.gif" />
+      <List.EmptyView title="No Matches Found" icon={{ source: { light: "logo-dark.png", dark: "logo-light.png" } }} />
       {Object.keys(matchesByDay).map((day) => {
         const dayString = format(startOfDay(new Date(day)), "E dd MMM");
 

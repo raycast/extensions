@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "name": "world-cup",
-  "title": "FIFA World Cup Qatar 2022™",
-  "description": "See all FIFA World Cup Qatar 2022™ matches",
+  "title": "FIFA World Cup 2026™",
+  "description": "See all FIFA World Cup 2026™ matches",
   "icon": "command-icon.png",
   "author": "isma",
   "contributors": [
@@ -46,6 +46,6 @@
     "dev": "ray develop",
     "fix-lint": "ray lint --fix",
     "lint": "ray lint",
-    "publish": "ray publish"
+    "publish": "npx @raycast/api@latest publish"
   }
 }
