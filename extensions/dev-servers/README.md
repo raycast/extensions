@@ -4,9 +4,9 @@ A keyboard-first dashboard for every dev server you have running. See them group
 
 ## Features
 
-- **Auto-detects** running dev servers including Vite, Next.js, Astro, SvelteKit, Nuxt, Webpack, Parcel, Gatsby, Remix, Turbo, esbuild, anything launched via `node_modules/.bin/`, plus servers running on the Bun runtime
+- **Auto-detects** running dev servers including Vite, Next.js, Astro, SvelteKit, Nuxt, Webpack, Parcel, Gatsby, Remix, Turbo, esbuild, serve, http-server, anything that runs out of `node_modules/`, plus servers running on the Bun runtime
 - **Grouped by project** so servers from the same directory appear under one section
-- **Favicons** are pulled from each site (with `/favicon.ico` fallback) and cached across refreshes
+- **Favicons** — PNG, ICO, or SVG — are pulled from each site (with `/favicon.ico` fallback), inlined so they render even when the dev server isn't CORS-friendly, and cached across refreshes
 - **Runtime tag** shows a yellow `bun` badge when the listening process is genuinely running on Bun
 - **Uptime tracking** shows how long each server has been running. Hover for the exact start time
 - **Smart restart** picks the right package manager (npm, pnpm, yarn, bun) from the project's lockfile, polls until the new server binds a port, and surfaces failures with a link to the log

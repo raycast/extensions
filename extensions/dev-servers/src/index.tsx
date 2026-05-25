@@ -87,46 +87,56 @@ async function fetchWithTimeout(
   }
 }
 
-// Verify a URL actually serves an image (HEAD 200). Skipping this check
-// would let us cache a 404'd favicon path, causing Raycast to render its
-// untinted grey-globe fallback instead of our nicer tinted placeholder.
-async function urlExists(url: string): Promise<boolean> {
-  const res = await fetchWithTimeout(url, { method: "HEAD" });
-  return !!res && res.ok;
+// Fetch a favicon and return it as an inline data URI, or undefined if the URL
+// doesn't serve an image. Inlining the bytes (rather than handing Raycast a
+// URL to fetch) sidesteps CORS — some dev servers (notably Astro) don't set
+// Access-Control-Allow-Origin on static assets, and Raycast's image loader
+// refuses those.
+//
+// SVG uses URL-encoded payload, raster uses base64. That split mirrors what
+// @raycast/utils does internally for its own SVG icons.
+async function fetchFaviconDataUri(url: string): Promise<string | undefined> {
+  const res = await fetchWithTimeout(url);
+  if (!res || !res.ok) return undefined;
+  const ct = (res.headers.get("content-type") ?? "")
+    .split(";")[0]
+    .trim()
+    .toLowerCase();
+  if (!ct.startsWith("image/")) return undefined;
+  if (ct.includes("svg")) {
+    const svg = await res.text();
+    return `data:image/svg+xml,${encodeURIComponent(svg)}`;
+  }
+  const buf = Buffer.from(await res.arrayBuffer());
+  return `data:${ct};base64,${buf.toString("base64")}`;
 }
 
-// Resolve the best favicon URL for a localhost dev server. Tries in order:
-//  1. <link rel="icon"> in the page HTML (HEAD-validated)
+// Resolve the best favicon for a localhost dev server. Tries in order:
+//  1. <link rel="icon"> in the page HTML
 //  2. /favicon.ico (the convention every framework starter ships with)
 //  3. undefined → caller renders a framework-tinted globe instead.
 async function detectFaviconUrl(port: string): Promise<string | undefined> {
   const origin = `http://localhost:${port}`;
 
-  // 1. Page <link rel="icon">
   const html = await fetchWithTimeout(`${origin}/`).then((r) =>
     r ? r.text() : null,
   );
   if (html) {
     const linkTags = html.match(/<link[^>]+>/gi) ?? [];
     for (const tag of linkTags) {
-      if (/rel=["'][^"']*icon[^"']*["']/i.test(tag)) {
-        const hrefMatch = tag.match(/href=["']([^"']+)["']/i);
-        if (hrefMatch) {
-          const href = hrefMatch[1];
-          const url = href.startsWith("http")
-            ? href
-            : `${origin}${href.startsWith("/") ? href : `/${href}`}`;
-          if (await urlExists(url)) return url;
-        }
-      }
+      if (!/rel=["'][^"']*icon[^"']*["']/i.test(tag)) continue;
+      const hrefMatch = tag.match(/href=["']([^"']+)["']/i);
+      if (!hrefMatch) continue;
+      const href = hrefMatch[1];
+      const url = href.startsWith("http")
+        ? href
+        : `${origin}${href.startsWith("/") ? href : `/${href}`}`;
+      const dataUri = await fetchFaviconDataUri(url);
+      if (dataUri) return dataUri;
     }
   }
 
-  // 2. /favicon.ico fallback
-  const icoUrl = `${origin}/favicon.ico`;
-  if (await urlExists(icoUrl)) return icoUrl;
-
-  return undefined;
+  return fetchFaviconDataUri(`${origin}/favicon.ico`);
 }
 
 interface ServerItemProps {
