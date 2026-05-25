@@ -1,0 +1,19 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# generated at build time by `ray build` / `ray develop`
+raycast-env.d.ts
+
+# editor / OS / agent metadata
+.DS_Store
+.claude/
+.vscode/
+.idea/
+
+# logs / local env
+*.log
+.env
+.env.local

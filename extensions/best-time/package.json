@@ -1,0 +1,166 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "best-time",
+  "title": "Next Best Time to Post",
+  "description": "Find the next best time to post on social media, based on Buffer's engagement data.",
+  "icon": "icon.png",
+  "author": "frederikdb",
+  "categories": [
+    "Communication"
+  ],
+  "license": "MIT",
+  "platforms": [
+    "macOS",
+    "Windows"
+  ],
+  "commands": [
+    {
+      "name": "next-best-time",
+      "title": "Next Best Time to Post",
+      "subtitle": "Social",
+      "description": "Show the next good or best posting slot per platform.",
+      "mode": "view"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "timeFormat",
+      "type": "dropdown",
+      "title": "Time format",
+      "description": "How hours are shown.",
+      "default": "ampm",
+      "required": false,
+      "data": [
+        {
+          "title": "12-hour (3 p.m.)",
+          "value": "ampm"
+        },
+        {
+          "title": "24-hour (15:00)",
+          "value": "24h"
+        }
+      ]
+    },
+    {
+      "name": "iconColorLight",
+      "type": "dropdown",
+      "title": "Icons in light mode",
+      "description": "How platform brand icons are tinted when the system is in light mode.",
+      "default": "color",
+      "required": false,
+      "data": [
+        {
+          "title": "Brand color",
+          "value": "color"
+        },
+        {
+          "title": "Monochrome",
+          "value": "monochrome"
+        }
+      ]
+    },
+    {
+      "name": "iconColorDark",
+      "type": "dropdown",
+      "title": "Icons in dark mode",
+      "description": "Monochrome is recommended here.",
+      "default": "monochrome",
+      "required": false,
+      "data": [
+        {
+          "title": "Brand color",
+          "value": "color"
+        },
+        {
+          "title": "Monochrome",
+          "value": "monochrome"
+        }
+      ]
+    },
+    {
+      "name": "postUrlFacebook",
+      "type": "textfield",
+      "title": "Facebook post URL",
+      "description": "Where the 'Post on Facebook' action opens. Leave blank to use the default.",
+      "default": "https://www.facebook.com/",
+      "required": false
+    },
+    {
+      "name": "postUrlInstagram",
+      "type": "textfield",
+      "title": "Instagram post URL",
+      "description": "Where the 'Post on Instagram' action opens. Leave blank to use the default.",
+      "default": "https://www.instagram.com/",
+      "required": false
+    },
+    {
+      "name": "postUrlLinkedin",
+      "type": "textfield",
+      "title": "LinkedIn post URL",
+      "description": "Where the 'Post on LinkedIn' action opens. Leave blank to use the default.",
+      "default": "https://www.linkedin.com/feed/?shareActive=true",
+      "required": false
+    },
+    {
+      "name": "postUrlTiktok",
+      "type": "textfield",
+      "title": "TikTok post URL",
+      "description": "Where the 'Post on TikTok' action opens. Leave blank to use the default.",
+      "default": "https://www.tiktok.com/upload",
+      "required": false
+    },
+    {
+      "name": "postUrlYoutubeShorts",
+      "type": "textfield",
+      "title": "YouTube Shorts post URL",
+      "description": "Where the 'Post on YouTube Shorts' action opens. Leave blank to use the default.",
+      "default": "https://www.youtube.com/upload",
+      "required": false
+    },
+    {
+      "name": "postUrlYoutubeLong",
+      "type": "textfield",
+      "title": "YouTube (long-form) post URL",
+      "description": "Where the 'Post on YouTube (Long-form)' action opens. Leave blank to use the default.",
+      "default": "https://studio.youtube.com/",
+      "required": false
+    },
+    {
+      "name": "postUrlX",
+      "type": "textfield",
+      "title": "X (Twitter) post URL",
+      "description": "Where the 'Post on X' action opens. Leave blank to use the default.",
+      "default": "https://x.com/compose/post",
+      "required": false
+    },
+    {
+      "name": "postUrlThreads",
+      "type": "textfield",
+      "title": "Threads post URL",
+      "description": "Where the 'Post on Threads' action opens. Leave blank to use the default.",
+      "default": "https://www.threads.net/",
+      "required": false
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.11.30",
+    "@types/react": "^19.2.15",
+    "eslint": "^8.57.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.4.3",
+    "vitest": "^3.2.4"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "publish": "ray publish",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  }
+}
