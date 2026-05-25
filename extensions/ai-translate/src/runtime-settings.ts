@@ -18,7 +18,7 @@ function getDefaults(): RuntimeSettings {
       promptProfile: isPromptProfile(prefs.promptProfile) ? prefs.promptProfile : "general",
       translationStyle: isTranslationStyle(prefs.translationStyle) ? prefs.translationStyle : "balanced",
       customPromptInstructions: prefs.customPromptInstructions?.trim() ?? "",
-      ttsProvider: "qwen",
+      ttsProvider: pickDefaultTTSProvider(prefs),
     };
   } catch {
     return {
@@ -29,6 +29,19 @@ function getDefaults(): RuntimeSettings {
       ttsProvider: "qwen",
     };
   }
+}
+
+/**
+ * Pick a TTS provider the user can actually use on first Read Aloud, so a
+ * Gemini-only setup doesn't hit a "DashScope key required" failure before
+ * they've ever opened Translation Settings. Falls back to Qwen when both or
+ * neither key is set (Qwen is the documented default).
+ */
+function pickDefaultTTSProvider(prefs: ExtensionPreferences): TTSProvider {
+  const hasQwenKey = Boolean(prefs.dashscopeApiKey?.trim() || process.env.DASHSCOPE_API_KEY?.trim());
+  const hasGeminiKey = Boolean(prefs.geminiAPIKey?.trim());
+  if (!hasQwenKey && hasGeminiKey) return "gemini";
+  return "qwen";
 }
 
 export async function loadRuntimeSettings(): Promise<RuntimeSettings> {

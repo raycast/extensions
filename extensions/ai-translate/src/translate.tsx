@@ -48,6 +48,7 @@ export default function Command(props: LaunchProps) {
   const [runtimeSettings, setRuntimeSettings] = useState<RuntimeSettings>();
   const requestSequence = useRef(0);
   const userEditedInput = useRef(false);
+  const previousInputText = useRef<string | undefined>(undefined);
 
   useEffect(() => {
     void loadRuntimeSettings().then(setRuntimeSettings);
@@ -82,6 +83,9 @@ export default function Command(props: LaunchProps) {
   useEffect(() => {
     if (inputText === undefined || !runtimeSettings) return;
 
+    const isTextChange = previousInputText.current !== inputText;
+    previousInputText.current = inputText;
+
     const sequence = ++requestSequence.current;
     const text = normalizeInputText(inputText);
 
@@ -92,9 +96,12 @@ export default function Command(props: LaunchProps) {
     }
 
     setIsLoading(true);
+    // Only debounce typing — language/profile/style/tier switches and manual
+    // retries should fire immediately since the user has stopped editing.
+    const delayMs = isTextChange ? 350 : 0;
     const timer = setTimeout(() => {
       void runTranslations(text, sequence);
-    }, 350);
+    }, delayMs);
 
     return () => clearTimeout(timer);
   }, [inputText, targetLanguage, manualRunId, runtimeSettings]);

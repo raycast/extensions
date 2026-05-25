@@ -36,3 +36,10 @@
 - Refreshed the Xiaomi MiMo model catalog: removed the deprecated mimo-v2-flash, kept mimo-v2.5 as Fast, and promoted mimo-v2.5-pro as Pro.
 - Hardened the Rewrite & Coach JSON parser with balanced-brace extraction and a more informative error message when a provider returns malformed JSON.
 - Switched Screenshot OCR Copy cancellation detection to use `instanceof OcrCancelledError` so unrelated errors aren't silently swallowed.
+- Restored the missing titles for the Fallback OCR and Baidu OCR Paragraphs preferences so they show up labelled in the Raycast preferences pane.
+- Surfaced combined diagnostics when both primary OCR and the local fallback fail, instead of masking the secondary error.
+- Routed an empty Tesseract result through the same "no text detected" path as the other engines instead of an error notice.
+- Translate now skips the 350 ms typing debounce on target language, prompt profile, translation style, and model tier switches, so picks fire immediately.
+- Read Aloud labels the toast when a slow read request is dropped because the active Qwen model is not the Instruct variant, instead of silently reading at normal speed.
+- Defaulted the Read Aloud engine to Gemini when only the Gemini API key is configured, so first-time Read Aloud doesn't fail with a missing DashScope key for Gemini-only setups.
+- Cleared the "Auto-copied on capture" hint in Screenshot OCR after edits or reformatting, so the clipboard status no longer claims a stale copy.

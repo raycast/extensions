@@ -114,11 +114,16 @@ export async function speakText(text: string, options: SpeakOptions = {}): Promi
   stopSpeaking();
   void sweepStaleAudio();
 
-  const slowIsSupported =
-    !slow || ttsProvider !== "qwen" || normalizeQwenModel(preferences.qwenTTSModel) === QWEN_TTS_INSTRUCT_MODEL;
+  // Slow is delivered as an extra instruction line: Gemini always honors it,
+  // but Qwen only does when the Instruct model is selected. We label the
+  // toast so the user can tell when a slow press was dropped.
+  const slowEffective =
+    slow && (ttsProvider !== "qwen" || normalizeQwenModel(preferences.qwenTTSModel) === QWEN_TTS_INSTRUCT_MODEL);
+  const slowDropped = slow && !slowEffective;
   const toast = await showToast({
     style: Toast.Style.Animated,
-    title: slow && slowIsSupported ? "Reading aloud (slow)..." : "Reading aloud...",
+    title: slowEffective ? "Reading aloud (slow)..." : "Reading aloud...",
+    message: slowDropped ? "Slow read needs Qwen3 TTS Instruct Flash (or Gemini)" : undefined,
   });
   const controller = new AbortController();
   activeController = controller;

@@ -179,7 +179,13 @@ export default function Command() {
         title="OCR Result"
         placeholder={isLoading ? "Capturing screenshot..." : (notice ?? "No text detected. Press ⌘R to retake.")}
         value={text}
-        onChange={setText}
+        onChange={(next) => {
+          setText(next);
+          // The "Auto-copied on capture" hint refers to the captured text. Once
+          // the user edits or reformats, the clipboard no longer matches what
+          // they see, so clear the hint to prompt a manual ⌘C.
+          if (autoCopied) setAutoCopied(false);
+        }}
       />
       <Form.Description title="Characters" text={String(text.length)} />
       {hasText && (

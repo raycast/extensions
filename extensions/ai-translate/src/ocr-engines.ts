@@ -362,12 +362,7 @@ async function recognizeWithTesseract(imagePath: string, preferences: ExtensionP
     throw new OcrError(`Tesseract OCR failed: ${execErrorMessage(error)}`);
   }
 
-  const text = stdout.trim();
-  if (!text) {
-    throw new OcrError("Tesseract returned no text.");
-  }
-
-  return text;
+  return stdout.trim();
 }
 
 async function recognizeWithBaidu(imagePath: string, preferences: ExtensionPreferences): Promise<string> {
