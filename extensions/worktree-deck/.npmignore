@@ -1,0 +1,17 @@
+AGENTS.md
+AGENTS.override.md
+docs/
+*.tgz
+assets/.env
+raycast-env.d.ts
+src/**/*.spec.ts
+src/test/
+node_modules/
+merged-rules/
+codex-merged/
+worktrees/
+.codex/
+.raycast-swift-build/
+.swiftpm/
+compiled_raycast_swift/
+compiled_raycast_rust/

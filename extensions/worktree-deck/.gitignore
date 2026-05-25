@@ -1,0 +1,16 @@
+node_modules
+merged-rules
+.env
+worktrees
+.codex
+AGENTS.override.md
+codex-merged
+.DS_Store
+store-screenshot-demo
+.store-screenshot-demo
+raycast-env.d.ts
+.raycast-swift-build
+.swiftpm
+compiled_raycast_swift
+compiled_raycast_rust
+assets/.env

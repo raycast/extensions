@@ -1,0 +1,16 @@
+{
+  "$schema": "https://unpkg.com/knip/schema.json",
+  "entry": [
+    "assets/auto_start_worker.js",
+    "assets/copy_untracked_worker.js",
+    "assets/remove_worktree_worker.js"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "assets/**/*.js",
+    "scripts/**/*.mjs",
+    "!src/**/*.spec.ts",
+    "!src/**/*.spec.tsx",
+    "!src/test/**"
+  ]
+}

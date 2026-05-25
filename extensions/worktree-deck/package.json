@@ -1,0 +1,101 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "worktree-deck",
+  "version": "0.1.0",
+  "title": "Worktree Deck",
+  "description": "Browse git worktrees and Codex session status from Raycast",
+  "icon": "worktree-deck-icon.png",
+  "author": "kazuhide",
+  "categories": [
+    "Developer Tools",
+    "Productivity"
+  ],
+  "keywords": [
+    "git",
+    "worktree",
+    "codex",
+    "session",
+    "zed"
+  ],
+  "platforms": [
+    "macOS"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "worktree-deck",
+      "title": "Worktree Deck",
+      "description": "Browse git worktrees, related Codex sessions, and repository actions",
+      "mode": "view"
+    },
+    {
+      "name": "worktree-status-menu-bar",
+      "title": "Worktree Status",
+      "description": "Monitor worktree session status counts in the menu bar",
+      "mode": "menu-bar",
+      "interval": "10s"
+    }
+  ],
+  "preferences": [
+    {
+      "name": "GIT_WORKTREE_PATH",
+      "title": "Worktree Directory (~/.worktree-deck/worktrees)",
+      "description": "Directory where Worktree Deck creates and scans git worktrees.",
+      "type": "directory",
+      "required": true,
+      "default": "~/.worktree-deck/worktrees"
+    },
+    {
+      "name": "CODEX_HOME",
+      "title": "Codex Home (~/.codex)",
+      "description": "Directory where Codex stores sessions and configuration.",
+      "type": "directory",
+      "required": true,
+      "default": "~/.codex"
+    },
+    {
+      "name": "WORKTREE_DECK_SEARCH_DAYS",
+      "title": "Session Search Days",
+      "description": "Number of days to search for Codex sessions.",
+      "type": "textfield",
+      "required": false,
+      "default": "30"
+    },
+    {
+      "name": "WORKTREE_DECK_DONE_THRESHOLD_DAYS",
+      "title": "Done Threshold Days",
+      "description": "Number of days after which a working session is treated as done.",
+      "type": "textfield",
+      "required": false,
+      "default": "1"
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.104.1",
+    "@raycast/utils": "^2.2.4"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^2.0.4",
+    "@types/node": "22.13.10",
+    "@types/react": "19.0.10",
+    "eslint": "^9.22.0",
+    "knip": "^5.70.1",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2",
+    "vitest": "^2.1.9"
+  },
+  "scripts": {
+    "build": "ray build",
+    "dev": "RAY_Target=x ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "screenshots:setup-demo": "node scripts/setup-store-screenshot-demo.mjs",
+    "screenshots:verify": "node scripts/verify-metadata-images.mjs",
+    "unused": "knip",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "check:all": "npm run build && npm run lint && npm run test:run",
+    "prepublishOnly": "echo \"\\n\\nIt seems like you are trying to publish the Raycast extension to npm.\\n\\nIf you did intend to publish it to npm, remove the \\`prepublishOnly\\` script and rerun \\`npm publish\\` again.\\nIf you wanted to publish it to the Raycast Store instead, use \\`npm run publish\\` instead.\\n\\n\" && exit 1",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}
