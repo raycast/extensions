@@ -261,14 +261,11 @@ async function synthesizeWithQwen(
   const responseText = await response.text();
   const data = parseJson<QwenTTSResponse>(responseText);
 
-  if (!response.ok || data.error?.message || data.message || data.code) {
+  if (!response.ok || data.message || data.code) {
     await showToast({
       style: Toast.Style.Failure,
       title: "TTS Error",
-      message:
-        data.error?.message?.slice(0, 100) ??
-        data.message?.slice(0, 100) ??
-        `HTTP ${response.status}: ${responseText.slice(0, 100)}`,
+      message: data.message?.slice(0, 100) ?? `HTTP ${response.status}: ${responseText.slice(0, 100)}`,
     });
     return undefined;
   }

@@ -50,9 +50,13 @@ export async function recognizeScreenshotText(preferences: ExtensionPreferences)
     } catch (error) {
       const canFallBack = preferences.ocrEngine !== "local" && preferences.ocrFallbackToLocal;
       if (canFallBack && !(error instanceof ScreenRecordingPermissionError)) {
-        const formatted = await recognizeWithLocalFallback(imagePath, preferences);
-        if (formatted) {
-          return formatted;
+        try {
+          const formatted = await recognizeWithLocalFallback(imagePath, preferences);
+          if (formatted) {
+            return formatted;
+          }
+        } catch (fallbackError) {
+          throw combineOcrFallbackErrors(error, fallbackError);
         }
       }
       throw error;
@@ -65,6 +69,16 @@ export async function recognizeScreenshotText(preferences: ExtensionPreferences)
 async function recognizeWithLocalFallback(imagePath: string, preferences: ExtensionPreferences): Promise<string> {
   const text = await recognizeText(imagePath, getOCRTimeoutMs(preferences));
   return formatOCRText(text ?? "", preferences);
+}
+
+function combineOcrFallbackErrors(primaryError: unknown, fallbackError: unknown): OcrError {
+  return new OcrError(
+    `Primary OCR failed: ${ocrErrorMessage(primaryError)} Local fallback also failed: ${ocrErrorMessage(fallbackError)}`,
+  );
+}
+
+function ocrErrorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 async function captureScreenshotToFile(): Promise<string> {

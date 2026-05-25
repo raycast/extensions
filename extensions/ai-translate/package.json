@@ -419,6 +419,7 @@
       "default": true
     },
     {
+      "title": "Fallback OCR",
       "name": "ocrFallbackToLocal",
       "type": "checkbox",
       "label": "Fallback to local OCR",
@@ -506,6 +507,7 @@
       ]
     },
     {
+      "title": "Baidu OCR Paragraphs",
       "name": "baiduOcrParagraph",
       "type": "checkbox",
       "label": "Auto paragraph detection",
