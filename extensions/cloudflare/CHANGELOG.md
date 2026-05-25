@@ -1,6 +1,7 @@
 # Cloudflare Changelog
 
 ## [Improve View Workers Command] - {PR_MERGE_DATE}
+
 - Improve `View Workers` command to show more fields in the detail view
 
 ## [Custom Cache Purge & Favorite Sites] - 2026-04-27
