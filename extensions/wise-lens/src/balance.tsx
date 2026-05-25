@@ -189,6 +189,11 @@ export default function Balance() {
           icon={Icon.Globe}
           onAction={() => open("https://wise.com/all-transactions")}
         />
+        <MenuBarExtra.Item
+          title="Community and Feedback"
+          icon={Icon.Bubble}
+          onAction={() => open("https://discord.gg/t6bwpWHrF7")}
+        />
         <MenuBarExtra.Item title="Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
       </MenuBarExtra.Section>
     </MenuBarExtra>

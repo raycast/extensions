@@ -76,6 +76,12 @@ export default function Dashboard() {
                   />
                 )}
                 <Action.OpenInBrowser title="Open Wise.com" url="https://wise.com/all-transactions" />
+                <Action.OpenInBrowser
+                  title="Community and Feedback"
+                  icon={Icon.Bubble}
+                  url="https://discord.gg/t6bwpWHrF7"
+                  shortcut={{ modifiers: ["cmd", "shift"], key: "c" }}
+                />
                 <Action title="Open Preferences" icon={Icon.Gear} onAction={openExtensionPreferences} />
               </ActionPanel>
             }
