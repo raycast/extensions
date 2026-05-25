@@ -254,12 +254,12 @@ async function synthesizeWithQwen(
   preferences: Preferences,
   signal: AbortSignal,
 ): Promise<Buffer | undefined> {
-  const apiKey = preferences.dashscopeApiKey?.trim() || process.env.DASHSCOPE_API_KEY?.trim();
+  const apiKey = preferences.dashscopeApiKey?.trim();
   if (!apiKey) {
     await showToast({
       style: Toast.Style.Failure,
       title: "TTS Unavailable",
-      message: "Add a DashScope API key in preferences or DASHSCOPE_API_KEY",
+      message: "Add a DashScope API key in preferences",
     });
     return undefined;
   }

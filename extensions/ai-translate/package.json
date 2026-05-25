@@ -708,7 +708,7 @@
       "name": "dashscopeApiKey",
       "type": "password",
       "required": false,
-      "description": "Alibaba Cloud Model Studio / DashScope API key for Qwen-TTS. You can also set DASHSCOPE_API_KEY.",
+      "description": "Alibaba Cloud Model Studio / DashScope API key for Qwen-TTS. Stored encrypted in Raycast's secure preference storage.",
       "default": ""
     },
     {

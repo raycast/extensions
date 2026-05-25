@@ -116,15 +116,20 @@ function isProviderId(value: string): value is ProviderId {
 /**
  * Pick the wire protocol from the configured base URL so users can flip
  * providers between their Anthropic-compatible and OpenAI-compatible
- * endpoints without a separate preference. For Kimi this matters because the
- * Kimi Code Plan endpoint speaks Anthropic Messages while Moonshot's pay-
- * as-you-go endpoint (api.moonshot.ai / api.moonshot.cn) speaks OpenAI Chat
- * Completions.
+ * endpoints without a separate preference. The heuristic:
+ *   1. Gemini and OpenAI always use their own routes.
+ *   2. URLs that explicitly carry an Anthropic-shaped path segment
+ *      (`/anthropic` or Kimi Code's `/coding`) are Anthropic Messages.
+ *   3. URLs that look like a generic OpenAI Chat Completions endpoint
+ *      (Moonshot host, `…/v1`, `…/v1/chat/completions`) are OpenAI.
+ *   4. Anything else falls back to Anthropic — the documented default for
+ *      DeepSeek, MiMo, and Kimi.
  */
 function detectProtocol(id: ProviderId, baseURL: string): ProviderAPIProtocol {
   if (id === "gemini" || id === "openai") return "openai";
   const lower = baseURL.toLowerCase();
-  if (lower.includes("moonshot.")) return "openai";
+  if (lower.includes("/anthropic") || lower.includes("/coding")) return "anthropic";
+  if (lower.includes("moonshot.") || /\/v1(\/chat\/completions)?\/?$/.test(lower)) return "openai";
   return "anthropic";
 }
 

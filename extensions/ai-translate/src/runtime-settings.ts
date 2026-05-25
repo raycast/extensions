@@ -38,7 +38,7 @@ function getDefaults(): RuntimeSettings {
  * neither key is set (Qwen is the documented default).
  */
 function pickDefaultTTSProvider(prefs: ExtensionPreferences): TTSProvider {
-  const hasQwenKey = Boolean(prefs.dashscopeApiKey?.trim() || process.env.DASHSCOPE_API_KEY?.trim());
+  const hasQwenKey = Boolean(prefs.dashscopeApiKey?.trim());
   const hasGeminiKey = Boolean(prefs.geminiAPIKey?.trim());
   if (!hasQwenKey && hasGeminiKey) return "gemini";
   return "qwen";
