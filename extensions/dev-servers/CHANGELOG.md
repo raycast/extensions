@@ -1,6 +1,6 @@
 # Dev Servers Changelog
 
-## [Detection and favicon improvements] - {PR_MERGE_DATE}
+## [Detection and favicon improvements] - 2026-05-25
 
 - Detect any Node tool that runs out of `node_modules/`, not just those launched via `node_modules/.bin/`. Surfaces tools like `serve` and `http-server` that were previously missed.
 - Render favicons inline so they display reliably for every framework, including SVG icons and dev servers (such as Astro) that don't expose static assets cross-origin.
