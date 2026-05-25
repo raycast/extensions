@@ -1,0 +1,116 @@
+{
+  "$schema": "https://www.raycast.com/schemas/extension.json",
+  "name": "mac-updater",
+  "title": "Mac Updater",
+  "description": "Find and apply every update on your Mac in one place — Homebrew, the Mac App Store, Sparkle, Electron apps, GitHub releases, npm, pip, and Ruby gems. Updates run in place, never silent unless you ask. Adopt unmanaged apps to Homebrew with one click.",
+  "icon": "extension-icon.png",
+  "author": "Ouseph",
+  "categories": [
+    "System",
+    "Productivity",
+    "Developer Tools"
+  ],
+  "keywords": [
+    "homebrew",
+    "brew",
+    "update",
+    "updater",
+    "app store",
+    "mas",
+    "sparkle",
+    "npm",
+    "pip",
+    "gem",
+    "macos",
+    "package manager"
+  ],
+  "license": "MIT",
+  "commands": [
+    {
+      "name": "mac-updater",
+      "title": "Mac Updater",
+      "subtitle": "Every app, one place",
+      "description": "Scan, review, and update every app and package on your Mac. Sources: Homebrew, App Store, Sparkle, Electron, GitHub, npm, pip, gems.",
+      "mode": "view"
+    },
+    {
+      "name": "update-everything",
+      "title": "Update Everything",
+      "subtitle": "Mac Updater",
+      "description": "Run every updater in one shot — Homebrew, App Store, npm, pip, gems.",
+      "mode": "view"
+    },
+    {
+      "name": "menu-bar",
+      "title": "Mac Updater Menu Bar",
+      "subtitle": "Mac Updater",
+      "description": "Show a passive update count in the menu bar.",
+      "mode": "menu-bar",
+      "interval": "1h"
+    },
+    {
+      "name": "auto-update",
+      "title": "Auto-Update in Background",
+      "subtitle": "Mac Updater",
+      "description": "Silently runs brew upgrade on a schedule. Configure in command preferences.",
+      "mode": "no-view",
+      "interval": "12h",
+      "preferences": [
+        {
+          "name": "enableBrew",
+          "type": "checkbox",
+          "label": "Auto-update Homebrew (casks + formulae)",
+          "description": "Runs brew upgrade --greedy quietly in the background.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "enableMas",
+          "type": "checkbox",
+          "label": "Auto-update Mac App Store apps",
+          "description": "Runs mas upgrade quietly. Requires mas to be installed and a signed-in App Store.",
+          "default": false,
+          "required": false
+        },
+        {
+          "name": "quietHours",
+          "type": "checkbox",
+          "label": "Skip between midnight and 7am",
+          "description": "Avoid running updates while you're asleep.",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "notifyOnSuccess",
+          "type": "checkbox",
+          "label": "Show a notification when something updates",
+          "description": "Quietly HUDs when the background run upgrades anything.",
+          "default": true,
+          "required": false
+        }
+      ]
+    }
+  ],
+  "dependencies": {
+    "@raycast/api": "^1.79.0",
+    "@raycast/utils": "^1.17.0"
+  },
+  "devDependencies": {
+    "@raycast/eslint-config": "^1.0.11",
+    "@types/node": "^20.8.10",
+    "@types/react": "^19.2.15",
+    "eslint": "^8.57.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "prettier": "^3.3.3",
+    "tsx": "^4.22.3",
+    "typescript": "^5.4.5"
+  },
+  "scripts": {
+    "build": "ray build -e dist",
+    "dev": "ray develop",
+    "fix-lint": "ray lint --fix",
+    "lint": "ray lint",
+    "test": "node --import tsx --test tests/*.test.ts",
+    "publish": "npx @raycast/api@latest publish"
+  }
+}

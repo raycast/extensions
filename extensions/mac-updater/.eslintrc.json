@@ -1,0 +1,9 @@
+{
+  "extends": ["@raycast"],
+  "plugins": ["react-hooks"],
+  "rules": {
+    "react-hooks/rules-of-hooks": "error",
+    "react-hooks/exhaustive-deps": "warn",
+    "@raycast/prefer-title-case": "off"
+  }
+}
