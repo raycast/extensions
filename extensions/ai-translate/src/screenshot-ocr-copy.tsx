@@ -7,7 +7,9 @@ export default async function Command() {
   const preferences = readPreferences();
 
   try {
-    await showHUD("Recognizing text…");
+    // No leading HUD: screencapture -i shows its own crosshair, and a "Recognizing
+    // text…" toast that fires before the user finishes dragging the selection is
+    // misleading (flagged by Greptile review).
     const result = await recognizeScreenshotText(preferences);
 
     if (!result) {
