@@ -130,7 +130,7 @@ function DomainEntryForm({ signOut }: { signOut: () => Promise<void> }) {
   useEffect(() => {
     fetchCredits()
       .then(setCredits)
-      .catch(() => setCredits(null));
+      .catch(() => setCredits(-1));
   }, []);
 
   return (
@@ -147,7 +147,10 @@ function DomainEntryForm({ signOut }: { signOut: () => Promise<void> }) {
         </ActionPanel>
       }
     >
-      <Form.Description title="Credits" text={credits !== null ? formatCredits(credits) : "Loading..."} />
+      <Form.Description
+        title="Credits"
+        text={credits === null ? "Loading..." : credits === -1 ? "Error loading credits" : formatCredits(credits)}
+      />
       <Form.Separator />
       <Form.TextField id="domain" title="Company Domain" placeholder="rebtel.com" autoFocus />
     </Form>

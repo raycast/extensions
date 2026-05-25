@@ -17,7 +17,7 @@ function getConfidenceColor(score: number): Color {
 
 export function CompanySearch({ signOut, renderSelectAction, renderManualAction }: CompanySearchProps) {
   const [searchText, setSearchText] = useState("");
-  const { results, isLoading } = useCompanySearch(searchText);
+  const { results, isLoading, error } = useCompanySearch(searchText);
 
   return (
     <List
@@ -32,6 +32,18 @@ export function CompanySearch({ signOut, renderSelectAction, renderManualAction 
           title="Type a Company Name"
           description="Type at least 2 characters to search for a company domain..."
           icon={Icon.Building}
+          actions={
+            <ActionPanel>
+              {renderManualAction()}
+              <Action title="Sign out" icon={Icon.Logout} onAction={signOut} />
+            </ActionPanel>
+          }
+        />
+      ) : error && !isLoading ? (
+        <List.EmptyView
+          title="Search Failed"
+          description={error}
+          icon={Icon.ExclamationMark}
           actions={
             <ActionPanel>
               {renderManualAction()}
