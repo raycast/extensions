@@ -12,4 +12,5 @@ async function FocusAppCommand(props: LaunchProps<{ arguments?: FocusAppArgument
   await focusApp(props.arguments ?? {});
 }
 
-export default withBeeperAuth(FocusAppCommand);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default withBeeperAuth(FocusAppCommand as any);
