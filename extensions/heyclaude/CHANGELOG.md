@@ -1,6 +1,6 @@
 # HeyClaude Changelog
 
-## [Initial Store Release] - {PR_MERGE_DATE}
+## [Initial Store Release] - 2026-05-25
 
 - Add the `Search HeyClaude` command.
 - Browse the public HeyClaude directory by category.
