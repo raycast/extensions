@@ -1,6 +1,6 @@
 # Changelog
 
-## [Update] - {PR_MERGE_DATE}
+## [Update] - 2026-05-25
 
 ### Added
 - **Manage Repositories**: Add "Clear Cache" action for clearing the extension cache
