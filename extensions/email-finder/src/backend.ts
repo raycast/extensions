@@ -219,17 +219,29 @@ export async function enrichPerson(
     }),
   });
 
-  const data = await response.json();
+  const data: unknown = await response.json();
 
   if (response.status === 402 && isInsufficientCreditsError(data)) {
     throw new Error(`Insufficient credits. You have ${data.balance} credits remaining.`);
   }
 
-  if (!response.ok || data.error) {
-    throw new Error(data.message || "Failed to enrich person");
+  const parsed = data as EnrichPersonResponse;
+
+  if (!response.ok || parsed.error) {
+    throw new Error(parsed.message || "Failed to enrich person");
   }
 
-  return data as EnrichPersonResponse;
+  return parsed;
+}
+
+interface ClearoutAutocompleteResponse {
+  status: string;
+  data: Array<{
+    name: string;
+    domain: string;
+    confidence_score: number;
+    logo_url: string;
+  }>;
 }
 
 // * Company Search Result (Clearout API)
@@ -256,13 +268,13 @@ export async function searchCompanyByName(query: string): Promise<CompanySearchR
       return [];
     }
 
-    const data = await response.json();
+    const data = (await response.json()) as ClearoutAutocompleteResponse;
 
     if (data.status !== "success" || !Array.isArray(data.data)) {
       return [];
     }
 
-    return data.data.map((item: { name: string; domain: string; confidence_score: number; logo_url: string }) => ({
+    return data.data.map((item) => ({
       name: item.name,
       domain: item.domain,
       confidence_score: item.confidence_score,
@@ -298,15 +310,17 @@ export async function searchPerson(domain: string, page: number = 1): Promise<Se
     }),
   });
 
-  const data = await response.json();
+  const data: unknown = await response.json();
 
   if (response.status === 402 && isInsufficientCreditsError(data)) {
     throw new Error(`Insufficient credits. You have ${data.balance} credits remaining.`);
   }
 
-  if (!response.ok || data.error) {
-    throw new Error(data.message || "Failed to search people");
+  const parsed = data as SearchPersonResponse;
+
+  if (!response.ok || parsed.error) {
+    throw new Error(parsed.message || "Failed to search people");
   }
 
-  return data as SearchPersonResponse;
+  return parsed;
 }
