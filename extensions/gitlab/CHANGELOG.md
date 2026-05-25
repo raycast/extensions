@@ -1,6 +1,6 @@
 # GitLab Changelog
 
-## [Add option to hide archived projects in Menu Bar Commands] - {PR_MERGE_DATE}
+## [Add option to hide archived projects in Menu Bar Commands] - 2026-05-25
 
 - Add "Hide Archived Projects" option to Issues Menu Bar settings
 - Add "Hide Archived Projects" option to Merge Requests Menu Bar settings
