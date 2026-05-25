@@ -38,6 +38,7 @@ export function useChartData(
           data.closes,
           interval,
           data.volumes,
+          signal,
         );
         setChartMarkdown(md);
       } catch (e) {

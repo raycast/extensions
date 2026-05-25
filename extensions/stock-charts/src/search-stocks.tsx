@@ -89,7 +89,7 @@ export default function Command() {
   );
   const { news } = useNews(selectedSymbol);
   const { changes: intervalChanges } = useIntervalChanges(
-    isSearching ? [] : allSymbols,
+    isSearching ? searchResults.map((q) => q.symbol) : allSymbols,
     interval,
   );
 
@@ -262,6 +262,9 @@ export default function Command() {
               key={quote.symbol}
               quote={quote}
               isFavorite={favorites.includes(quote.symbol)}
+              intervalChangePercent={
+                intervalChanges[quote.symbol]?.changePercent
+              }
               detail={renderDetail(quote)}
               actions={renderSearchActions(quote)}
             />

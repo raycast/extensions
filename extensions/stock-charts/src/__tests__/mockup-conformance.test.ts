@@ -324,8 +324,8 @@ describe("Cross-mockup — shared structural contracts", () => {
     }
   });
 
-  it("all 7 intervals are selectable", () => {
-    expect(INTERVALS).toEqual(["1D", "1W", "1M", "3M", "6M", "1Y", "5Y"]);
+  it("all 9 intervals are selectable", () => {
+    expect(INTERVALS).toEqual(["1D", "1W", "1M", "3M", "6M", "YTD", "1Y", "2Y", "5Y"]);
   });
 
   it("chart has zero pointRadius (clean line, no dots)", () => {

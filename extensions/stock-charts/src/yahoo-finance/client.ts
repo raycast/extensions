@@ -78,7 +78,7 @@ export async function get<T>(
 ): Promise<T> {
   let cc = await cookieCrumb();
 
-  for (let attempt = 0; attempt < 2; attempt++) {
+  const attempt = async (): Promise<T> => {
     const url = new URL(`${BASE_URL}${path}`);
     url.searchParams.set("crumb", cc.crumb);
     for (const [k, v] of Object.entries(params)) {
@@ -90,11 +90,6 @@ export async function get<T>(
       signal,
     });
 
-    if ((res.status === 401 || res.status === 403) && attempt === 0) {
-      cc = await refreshCookieCrumb();
-      continue;
-    }
-
     if (!res.ok) {
       throw new YahooFinanceError(
         `Yahoo Finance ${res.status}: ${path}`,
@@ -103,7 +98,18 @@ export async function get<T>(
     }
 
     return (await res.json()) as T;
-  }
+  };
 
-  throw new YahooFinanceError("Failed after retry", 0);
+  try {
+    return await attempt();
+  } catch (e) {
+    if (
+      e instanceof YahooFinanceError &&
+      (e.status === 401 || e.status === 403)
+    ) {
+      cc = await refreshCookieCrumb();
+      return await attempt();
+    }
+    throw e;
+  }
 }

@@ -62,9 +62,23 @@ export const INTERVAL_CONFIG: Record<Interval, IntervalConfig> = {
       return `${MONTHS[d.getMonth()]} ${d.getDate()}`;
     },
   },
+  YTD: {
+    label: "Year to Date",
+    formatLabel: (ts) => {
+      const d = new Date(ts * 1000);
+      return `${MONTHS[d.getMonth()]} ${d.getDate()}`;
+    },
+  },
   "1Y": {
     label: "1 Year",
     formatLabel: (ts) => MONTHS[new Date(ts * 1000).getMonth()],
+  },
+  "2Y": {
+    label: "2 Years",
+    formatLabel: (ts) => {
+      const d = new Date(ts * 1000);
+      return `${MONTHS[d.getMonth()]} '${d.getFullYear().toString().slice(2)}`;
+    },
   },
   "5Y": {
     label: "5 Years",

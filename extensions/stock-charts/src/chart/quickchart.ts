@@ -116,6 +116,7 @@ export async function buildChartUrl(
   prices: number[],
   interval: Interval,
   volumes?: number[],
+  signal?: AbortSignal,
 ): Promise<string> {
   const { formatLabel } = INTERVAL_CONFIG[interval];
 
@@ -151,6 +152,7 @@ export async function buildChartUrl(
       backgroundColor: "#000000",
       devicePixelRatio: 2,
     }),
+    signal,
   });
 
   if (!res.ok) {
@@ -166,7 +168,8 @@ export async function buildChartMarkdown(
   prices: number[],
   interval: Interval,
   volumes?: number[],
+  signal?: AbortSignal,
 ): Promise<string> {
-  const url = await buildChartUrl(timestamps, prices, interval, volumes);
+  const url = await buildChartUrl(timestamps, prices, interval, volumes, signal);
   return `![Stock Chart](${url}?raycast-width=600&raycast-height=300)`;
 }

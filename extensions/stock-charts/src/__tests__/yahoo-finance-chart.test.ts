@@ -18,10 +18,10 @@ import chart1d from "./fixtures/yahoo-chart-1d.json";
 import chart1y from "./fixtures/yahoo-chart-1y.json";
 
 describe("INTERVAL_MAP", () => {
-  it("contains all 7 intervals", () => {
+  it("contains all 9 intervals", () => {
     const keys = Object.keys(INTERVAL_MAP);
-    expect(keys).toHaveLength(7);
-    expect(keys).toEqual(["1D", "1W", "1M", "3M", "6M", "1Y", "5Y"]);
+    expect(keys).toHaveLength(9);
+    expect(keys).toEqual(["1D", "1W", "1M", "3M", "6M", "YTD", "1Y", "2Y", "5Y"]);
   });
 
   it("1D maps to range 1d and interval 5m", () => {
@@ -44,8 +44,16 @@ describe("INTERVAL_MAP", () => {
     expect(INTERVAL_MAP["6M"]).toEqual({ range: "6mo", interval: "1d" });
   });
 
+  it("YTD maps to range ytd and interval 1d", () => {
+    expect(INTERVAL_MAP["YTD"]).toEqual({ range: "ytd", interval: "1d" });
+  });
+
   it("1Y maps to range 1y and interval 1d", () => {
     expect(INTERVAL_MAP["1Y"]).toEqual({ range: "1y", interval: "1d" });
+  });
+
+  it("2Y maps to range 2y and interval 1wk", () => {
+    expect(INTERVAL_MAP["2Y"]).toEqual({ range: "2y", interval: "1wk" });
   });
 
   it("5Y maps to range 5y and interval 1wk", () => {
