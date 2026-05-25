@@ -1,6 +1,6 @@
 # Visual Studio Code Changelog
 
-## [Fix: Recent Projects on Windows] - {PR_MERGE_DATE}
+## [Fix: Recent Projects on Windows] - 2026-05-25
 
 - Fixed `Search Recent Projects` on Windows by reading the current VS Code state key `recently.opened` while keeping compatibility with the older `history.recentlyOpenedPathsList` key used by older VS Code internals.
 - Added support for VS Code shared storage and extended the `storage.json` fallback added in the 2026-05-04 fix by merging `backupWorkspaces` and `profileAssociations`, so local and remote recent entries still appear when the primary list is incomplete.
@@ -21,7 +21,7 @@
 
 - Added Shared Storage support for new version of VS Code
 
-## [Fix] - {PR_MERGE_DATE}
+## [Fix] - 2026-05-25
 
 - Fixed `Search Recent Projects` returning no results for VS Code Insiders users. Recent Insiders builds no longer write `history.recentlyOpenedPathsList` to `state.vscdb`; the extension now falls back to reading recent folders from `storage.json` (`lastKnownMenubarData`) when the DB key is absent. Stable VS Code builds are unaffected. (Fixes [#27440](https://github.com/raycast/extensions/issues/27440), originally shipped 2026-05-04)
 
